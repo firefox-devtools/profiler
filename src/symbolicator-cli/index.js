@@ -56,15 +56,13 @@ class InMemorySymbolDB {
   async close(): Promise<void> {}
 }
 
-const argv = require('minimist')(process.argv.slice(2));
-if (!('input' in argv && 'output' in argv && 'server' in argv)) {
-  console.error(
-    'Missing mandatory argument. Usage: symbolicator.js --input <path/to/input.json> --output <path/to/output.json> --server <URI of symbolication server>'
-  );
-  process.exit(1);
+interface CliOptions {
+  input: string;
+  output: string;
+  server: string;
 }
 
-async function run(options) {
+async function run(options: CliOptions) {
   console.log(`Loading profile from ${options.input}`);
   const serializedProfile = JSON.parse(fs.readFileSync(options.input, 'utf8'));
   const profile = await unserializeProfileOfArbitraryFormat(serializedProfile);
@@ -150,6 +148,40 @@ async function run(options) {
   console.log('Finished.');
 }
 
-run(argv).catch((err) => {
-  console.error(err);
-});
+function makeOptionsFromArgv(processArgv: string[]): CliOptions {
+  const argv = require('minimist')(processArgv.slice(2));
+
+  if (!('input' in argv && typeof argv.input === 'string')) {
+    throw new Error(
+      'Argument --input must be supplied with the path to the input profile'
+    );
+  }
+
+  if (!('output' in argv && typeof argv.output === 'string')) {
+    throw new Error(
+      'Argument --output must be supplied with the path to the output profile'
+    );
+  }
+
+  if (!('server' in argv && typeof argv.server === 'string')) {
+    throw new Error(
+      'Argument --server must be supplied with the URI of the symbol server endpoint'
+    );
+  }
+
+  return {
+    input: argv.input,
+    output: argv.output,
+    server: argv.server,
+  };
+}
+
+try {
+  const options = makeOptionsFromArgv(process.argv);
+  run(options).catch((err) => {
+    throw err;
+  });
+} catch (e) {
+  console.error(e);
+  process.exit(1);
+}
