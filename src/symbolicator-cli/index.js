@@ -19,7 +19,7 @@ import type { ThreadIndex } from '../types';
  * [debugName, breakpadId] is flattened to a string "debugName:breakpadId" to use as the
  * map key.
  */
-class InMemorySymbolDB {
+export class InMemorySymbolDB {
   _store: Map<string, SymbolTableAsTuple>;
 
   constructor() {
@@ -62,7 +62,7 @@ interface CliOptions {
   server: string;
 }
 
-async function run(options: CliOptions) {
+export async function run(options: CliOptions) {
   console.log(`Loading profile from ${options.input}`);
   const serializedProfile = JSON.parse(fs.readFileSync(options.input, 'utf8'));
   const profile = await unserializeProfileOfArbitraryFormat(serializedProfile);
@@ -148,7 +148,7 @@ async function run(options: CliOptions) {
   console.log('Finished.');
 }
 
-function makeOptionsFromArgv(processArgv: string[]): CliOptions {
+export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
   const argv = require('minimist')(processArgv.slice(2));
 
   if (!('input' in argv && typeof argv.input === 'string')) {
@@ -176,12 +176,14 @@ function makeOptionsFromArgv(processArgv: string[]): CliOptions {
   };
 }
 
-try {
-  const options = makeOptionsFromArgv(process.argv);
-  run(options).catch((err) => {
-    throw err;
-  });
-} catch (e) {
-  console.error(e);
-  process.exit(1);
+if (!module.parent) {
+  try {
+    const options = makeOptionsFromArgv(process.argv);
+    run(options).catch((err) => {
+      throw err;
+    });
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
+  }
 }
