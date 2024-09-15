@@ -1,96 +1,96 @@
 {
-    "results": [
-        {
-            "stacks": [
-                [
-                    {
-                        "frame": 0,
-                        "module_offset": "0x6153",
-                        "module": "dyld",
-                        "function": "start",
-                        "function_offset": "0x9ab",
-                        "function_size": "0xae4"
-                    }
-                ]
-            ],
-            "found_modules": {
-                "dyld/F635824E318B3F0C842CC369737F2B680": true
-            }
-        },
-        {
-            "stacks": [
-                [
-                    {
-                        "frame": 0,
-                        "module_offset": "0x3f47",
-                        "module": "a.out",
-                        "function": "main",
-                        "function_offset": "0x33",
-                        "function_size": "0x58"
-                    },
-                    {
-                        "frame": 1,
-                        "module_offset": "0x3ebf",
-                        "module": "a.out",
-                        "function": "fac",
-                        "function_offset": "0x17",
-                        "function_size": "0x6c"
-                    },
-                    {
-                        "frame": 2,
-                        "module_offset": "0x3ef3",
-                        "module": "a.out",
-                        "function": "fac",
-                        "function_offset": "0x4b",
-                        "function_size": "0x6c"
-                    }
-                ]
-            ],
-            "found_modules": {
-                "a.out/A73CF7551F273A1AAF734986A2E1914D0": true
-            }
-        },
-        {
-            "stacks": [
-                [
-                    {
-                        "frame": 0,
-                        "module_offset": "0x163fb",
-                        "module": "libsystem_c.dylib",
-                        "function": "sleep",
-                        "function_offset": "0x33",
-                        "function_size": "0x90"
-                    },
-                    {
-                        "frame": 1,
-                        "module_offset": "0xd567",
-                        "module": "libsystem_c.dylib",
-                        "function": "nanosleep",
-                        "function_offset": "0xdb",
-                        "function_size": "0x1d0"
-                    }
-                ]
-            ],
-            "found_modules": {
-                "libsystem_c.dylib/D30F183093D03D0B8CBA9544E84BFD5B0": true
-            }
-        },
-        {
-            "stacks": [
-                [
-                    {
-                        "frame": 0,
-                        "module_offset": "0x43e8",
-                        "module": "libsystem_kernel.dylib",
-                        "function": "__semwait_signal",
-                        "function_offset": "0x8",
-                        "function_size": "0x2c"
-                    }
-                ]
-            ],
-            "found_modules": {
-                "libsystem_kernel.dylib/71FF45B8F14E36669E966CF58315B91D0": true
-            }
-        }
-    ]
+  "results": [
+    {
+      "stacks": [
+        [
+          {
+            "frame": 0,
+            "module_offset": "0x6153",
+            "module": "dyld",
+            "function": "start",
+            "function_offset": "0x9ab",
+            "function_size": "0xae4"
+          }
+        ]
+      ],
+      "found_modules": {
+        "dyld/F635824E318B3F0C842CC369737F2B680": true
+      }
+    },
+    {
+      "stacks": [
+        [
+          {
+            "frame": 0,
+            "module_offset": "0x3f47",
+            "module": "a.out",
+            "function": "main",
+            "function_offset": "0x33",
+            "function_size": "0x58"
+          },
+          {
+            "frame": 1,
+            "module_offset": "0x3ebf",
+            "module": "a.out",
+            "function": "fac",
+            "function_offset": "0x17",
+            "function_size": "0x6c"
+          },
+          {
+            "frame": 2,
+            "module_offset": "0x3ef3",
+            "module": "a.out",
+            "function": "fac",
+            "function_offset": "0x4b",
+            "function_size": "0x6c"
+          }
+        ]
+      ],
+      "found_modules": {
+        "a.out/A73CF7551F273A1AAF734986A2E1914D0": true
+      }
+    },
+    {
+      "stacks": [
+        [
+          {
+            "frame": 0,
+            "module_offset": "0x163fb",
+            "module": "libsystem_c.dylib",
+            "function": "sleep",
+            "function_offset": "0x33",
+            "function_size": "0x90"
+          },
+          {
+            "frame": 1,
+            "module_offset": "0xd567",
+            "module": "libsystem_c.dylib",
+            "function": "nanosleep",
+            "function_offset": "0xdb",
+            "function_size": "0x1d0"
+          }
+        ]
+      ],
+      "found_modules": {
+        "libsystem_c.dylib/D30F183093D03D0B8CBA9544E84BFD5B0": true
+      }
+    },
+    {
+      "stacks": [
+        [
+          {
+            "frame": 0,
+            "module_offset": "0x43e8",
+            "module": "libsystem_kernel.dylib",
+            "function": "__semwait_signal",
+            "function_offset": "0x8",
+            "function_size": "0x2c"
+          }
+        ]
+      ],
+      "found_modules": {
+        "libsystem_kernel.dylib/71FF45B8F14E36669E966CF58315B91D0": true
+      }
+    }
+  ]
 }

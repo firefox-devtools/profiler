@@ -6,40 +6,43 @@
 const fs = require('fs');
 const path = require('path');
 import { run } from '../../../symbolicator-cli';
-import { completeSymbolTableAsTuple } from '../../fixtures/example-symbol-table';
-import { SymbolsNotFoundError } from '../../../profile-logic/errors';
 
-describe('symbolicator-cli tool', function(){
+describe('symbolicator-cli tool', function () {
+  async function runToTempFileAndReturnOutput(options) {
+    const tempFile = path.join(__dirname, 'temp.json');
+    options.output = tempFile;
 
-    async function runToTempFileAndReturnOutput(options)
-    {
-        const tempFile = path.join(__dirname, "temp.json");
-        options.output = tempFile;
-
-        try {
-            await run(options);
-            return JSON.parse(fs.readFileSync(tempFile));
-        }
-        finally {
-            if (fs.existsSync(tempFile)) {
-                fs.unlinkSync(tempFile);
-            }
-        }
+    try {
+      await run(options);
+      return JSON.parse(fs.readFileSync(tempFile, 'utf-8'));
+    } finally {
+      if (fs.existsSync(tempFile)) {
+        fs.unlinkSync(tempFile);
+      }
     }
+  }
 
-    it('is symbolicating a trace correctly', async function() {
-        const symbolsJson = fs.readFileSync('src/test/integration/symbolicator-cli/symbol-server-response.json');
-        const expected = JSON.parse(fs.readFileSync('src/test/integration/symbolicator-cli/symbolicated.json'));
+  it('is symbolicating a trace correctly', async function () {
+    const symbolsJson = fs.readFileSync(
+      'src/test/integration/symbolicator-cli/symbol-server-response.json'
+    );
+    const expected = JSON.parse(
+      fs.readFileSync(
+        'src/test/integration/symbolicator-cli/symbolicated.json',
+        'utf-8'
+      )
+    );
 
-        window.fetch.post('http://symbol.server/symbolicate/v5', symbolsJson);    
+    window.fetch.post('http://symbol.server/symbolicate/v5', symbolsJson);
 
-        const options = {
-            'input': 'src/test/integration/symbolicator-cli/unsymbolicated.json',
-            'server': 'http://symbol.server'
-        };
+    const options = {
+      input: 'src/test/integration/symbolicator-cli/unsymbolicated.json',
+      output: '',
+      server: 'http://symbol.server',
+    };
 
-        const result = await runToTempFileAndReturnOutput(options);
-    
-        expect(result).toEqual(expected);
-    });
-})
+    const result = await runToTempFileAndReturnOutput(options);
+
+    expect(result).toEqual(expected);
+  });
+});
