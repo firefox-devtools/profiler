@@ -324,7 +324,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
 
     if (rightClickedTrack === null) {
       throw new Error(
-        'Attempted to isolate the process with no right clicked track.'
+        'Attempted to get the track type with no right clicked track.'
       );
     }
 
@@ -345,30 +345,23 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     const {
       rightClickedTrack,
       globalTracks,
-      globalTrackNames,
       localTracksByPid,
-      localTrackNamesByPid,
-      threads,
       hideProvidedTracks,
     } = this.props;
-    const type = this._getRightClickedTrackType();
 
     if (rightClickedTrack === null) {
       throw new Error(
-        'Attempted to isolate the process with no right clicked track.'
+          'Attempted to hide tracks by type with no right clicked track.'
       );
     }
+    const type = this._getRightClickedTrackType();
 
     const typeFilteredGlobalTracks = getTypeFilteredGlobalTracks(
       globalTracks,
-      globalTrackNames,
-      threads,
       type
     );
     const typeFilteredLocalTracksByPid = getTypeFilteredLocalTracksByPid(
       localTracksByPid,
-      localTrackNamesByPid,
-      threads,
       type
     );
 

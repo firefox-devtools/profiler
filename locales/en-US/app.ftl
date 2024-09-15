@@ -828,7 +828,7 @@ TrackContextMenu--show-local-tracks-in-process = Show all tracks in this process
 
 # This is used as the context menu item to hide all tracks of the selected track's type.
 # Variables:
-#   $typr (String) - Name of the type of selected track to hide.
+#   $type (String) - Name of the type of selected track to hide.
 TrackContextMenu--hide-all-tracks-by-selected-track-type = Hide all tracks of type “{ $type }”
 
 # This is used in the tracks context menu as a button to show all the tracks
