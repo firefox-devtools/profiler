@@ -1271,7 +1271,6 @@ describe('timeline/TrackContextMenu', function () {
     it('on click a global track', () => {
       const { getState, dispatch, globalTrackWithTypeReference } =
         setupTracks();
-      console.log(getState().profileView.full.globalTracks);
       // First, check that the initial state is what we expect.
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [screenshots]',
