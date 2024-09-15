@@ -31,3 +31,4 @@ Flow type tests are a little different, because they do not use Jest. Instead, t
 | [store](./store)           | Testing the [Redux](http://redux.js.org/) store using actions and selectors.                                                                  |
 | [types](./types)           | Flow type tests.                                                                                                                              |
 | [unit](./unit)             | Unit testing                                                                                                                                  |
+| [integration](./integration)             | Integration testing                                                                                                                                  |
