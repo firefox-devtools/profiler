@@ -351,7 +351,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
 
     if (rightClickedTrack === null) {
       throw new Error(
-          'Attempted to hide tracks by type with no right clicked track.'
+        'Attempted to hide tracks by type with no right clicked track.'
       );
     }
     const type = this._getRightClickedTrackType();

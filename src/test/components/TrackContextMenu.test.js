@@ -25,7 +25,7 @@ import { TimelineTrackContextMenu } from '../../components/timeline/TrackContext
 import {
   getGlobalTracks,
   getLocalTracks,
-  getLocalTracksByPid
+  getLocalTracksByPid,
 } from '../../selectors/profile';
 import {
   getHiddenGlobalTracks,
@@ -1209,22 +1209,22 @@ describe('timeline/TrackContextMenu', function () {
 
       // add a couple local ipc tracks
       addIPCMarkerPairToThreads(
-          {
-            startTime: 1,
-            endTime: 10,
-            messageSeqno: 1,
-          },
-          profile.threads[1], // Parent process
-          profile.threads[6] // tab process
+        {
+          startTime: 1,
+          endTime: 10,
+          messageSeqno: 1,
+        },
+        profile.threads[1], // Parent process
+        profile.threads[6] // tab process
       );
       addIPCMarkerPairToThreads(
-          {
-            startTime: 11,
-            endTime: 20,
-            messageSeqno: 2,
-          },
-          profile.threads[1], // Parent process
-          profile.threads[7] // DOM Worker
+        {
+          startTime: 11,
+          endTime: 20,
+          messageSeqno: 2,
+        },
+        profile.threads[1], // Parent process
+        profile.threads[7] // DOM Worker
       );
 
       // add a couple of global screenshots tracks
@@ -1243,9 +1243,9 @@ describe('timeline/TrackContextMenu', function () {
       const localTracksByPid = getLocalTracksByPid(store.getState());
       for (const [pid, localTracks] of localTracksByPid) {
         for (
-            let trackIndex = 0;
-            trackIndex < localTracks.length;
-            trackIndex++
+          let trackIndex = 0;
+          trackIndex < localTracks.length;
+          trackIndex++
         ) {
           act(() => {
             store.dispatch(showLocalTrack(pid, trackIndex));
@@ -1253,7 +1253,11 @@ describe('timeline/TrackContextMenu', function () {
         }
       }
 
-      const localTrackWithTypeReference = { type: 'local', pid: '1001', trackIndex: 3 };
+      const localTrackWithTypeReference = {
+        type: 'local',
+        pid: '1001',
+        trackIndex: 3,
+      };
       const globalTrackWithTypeReference = { type: 'global', trackIndex: 4 };
 
       return {
@@ -1265,11 +1269,8 @@ describe('timeline/TrackContextMenu', function () {
     }
 
     it('on click a global track', () => {
-      const {
-        getState,
-        dispatch,
-        globalTrackWithTypeReference,
-      } = setupTracks();
+      const { getState, dispatch, globalTrackWithTypeReference } =
+        setupTracks();
       console.log(getState().profileView.full.globalTracks);
       // First, check that the initial state is what we expect.
       expect(getHumanReadableTracks(getState())).toEqual([
@@ -1293,7 +1294,7 @@ describe('timeline/TrackContextMenu', function () {
         '  - show [thread Renderer]',
         'hide [process]',
         '  - show [thread Empty]',
-        '  - show [thread Empty]'
+        '  - show [thread Empty]',
       ]);
 
       act(() => {
@@ -1301,7 +1302,9 @@ describe('timeline/TrackContextMenu', function () {
       });
 
       // Note: Fluent adds isolation characters \u2068 and \u2069 around variables.
-      const localIPCTrack = screen.getByText('Hide all tracks of type “\u2068screenshots\u2069”');
+      const localIPCTrack = screen.getByText(
+        'Hide all tracks of type “\u2068screenshots\u2069”'
+      );
 
       fireFullClick(localIPCTrack);
 
@@ -1326,16 +1329,12 @@ describe('timeline/TrackContextMenu', function () {
         '  - show [thread Renderer]',
         'hide [process]',
         '  - show [thread Empty]',
-        '  - show [thread Empty]'
+        '  - show [thread Empty]',
       ]);
     });
 
     it('hides a local track', () => {
-      const {
-        getState,
-        dispatch,
-        localTrackWithTypeReference,
-      } = setupTracks();
+      const { getState, dispatch, localTrackWithTypeReference } = setupTracks();
 
       // First, check that the initial state is what we expect.
       expect(getHumanReadableTracks(getState())).toEqual([
@@ -1359,14 +1358,16 @@ describe('timeline/TrackContextMenu', function () {
         '  - show [thread Renderer]',
         'hide [process]',
         '  - show [thread Empty]',
-        '  - show [thread Empty]'
+        '  - show [thread Empty]',
       ]);
       act(() => {
         dispatch(changeRightClickedTrack(localTrackWithTypeReference));
       });
 
       // Note: Fluent adds isolation characters \u2068 and \u2069 around variables.
-      const localIPCTrack = screen.getByText('Hide all tracks of type “\u2068ipc\u2069”');
+      const localIPCTrack = screen.getByText(
+        'Hide all tracks of type “\u2068ipc\u2069”'
+      );
 
       fireFullClick(localIPCTrack);
 
@@ -1391,7 +1392,7 @@ describe('timeline/TrackContextMenu', function () {
         '  - show [thread Renderer]',
         'hide [process]',
         '  - show [thread Empty]',
-        '  - show [thread Empty]'
+        '  - show [thread Empty]',
       ]);
     });
   });

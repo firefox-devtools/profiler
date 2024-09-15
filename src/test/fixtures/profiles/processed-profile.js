@@ -1332,21 +1332,24 @@ export function getIPCTrackProfile() {
   return getProfileWithMarkers([].concat(...arrayOfIPCMarkers));
 }
 
-export function getScreenshotMarkersForWindowId(windowID: string, count: number): TestDefinedMarkers {
+export function getScreenshotMarkersForWindowId(
+  windowID: string,
+  count: number
+): TestDefinedMarkers {
   return Array(count)
-      .fill()
-      .map((_, i) => [
-        'CompositorScreenshot',
-        i,
-        null,
-        {
-          type: 'CompositorScreenshot',
-          url: 0, // Some arbitrary string.
-          windowID,
-          windowWidth: 300,
-          windowHeight: 150,
-        },
-      ]);
+    .fill()
+    .map((_, i) => [
+      'CompositorScreenshot',
+      i,
+      null,
+      {
+        type: 'CompositorScreenshot',
+        url: 0, // Some arbitrary string.
+        windowID,
+        windowWidth: 300,
+        windowHeight: 150,
+      },
+    ]);
 }
 
 export function getScreenshotTrackProfile() {
