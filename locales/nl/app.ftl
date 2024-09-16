@@ -452,7 +452,7 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = Fout bij uploaden
 MenuButtons--index--revert = Terug naar origineel profiel
-MenuButtons--index--docs = Documenten
+MenuButtons--index--docs = Documentatie
 MenuButtons--permalink--button =
     .label = Permalink
 
