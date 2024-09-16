@@ -30,7 +30,6 @@ const MAX_STACKING_DEPTH = 300;
  *      start: [0, 23, 35, 65, 75],
  *      end: [1, 25, 37, 67, 77],
  *      index: [0, 2, 5, 6, 8],
- *      label: ["Aye", "Aye", "Aye", "Aye", "Aye"],
  *      bucket: "DOM",
  *      instantOnly: false,
  *      length: 5,
@@ -40,7 +39,6 @@ const MAX_STACKING_DEPTH = 300;
  *      start: [1, 28, 39, 69, 70],
  *      end: [2, 29, 49, 70, 77],
  *      index: [1, 3, 7, 9, 10],
- *      label: ["Bee", "Bee", "Bee", "Bee", "Bee"],
  *      bucket: "DOM",
  *      instantOnly: false,
  *      length: 5,
@@ -50,7 +48,6 @@ const MAX_STACKING_DEPTH = 300;
  *      start: [1, 28, 39, 69, 70],
  *      end: [2, 29, 49, 70, 77],
  *      index: [1, 3, 7, 9, 10],
- *      label: ["Bee", "Bee", "Bee", "Bee", "Bee"],
  *      bucket: "DOM",
  *      instantOnly: false,
  *      length: 5,
@@ -60,7 +57,6 @@ const MAX_STACKING_DEPTH = 300;
  *      start: [10, 33, 45, 75, 85],
  *      end: [11, 35, 47, 77, 87],
  *      index: [4, 11, 12, 13, 14],
- *      label: ["Sea", "Sea", "Sea", "Sea", "Sea"],
  *      bucket: "Other",
  *      instantOnly: false,
  *      length: 5,
@@ -110,7 +106,6 @@ export function getMarkerTiming(
         // The chart will then be responsible for drawing this differently.
         marker.end === null ? marker.start : marker.end
       );
-      markerTiming.label.push(() => getLabel(markerIndex));
       markerTiming.index.push(markerIndex);
       markerTiming.length++;
     };
@@ -129,7 +124,6 @@ export function getMarkerTiming(
       start: [],
       end: [],
       index: [],
-      label: [],
       name: markerLineName,
       bucket: bucketName,
       instantOnly,
@@ -254,7 +248,6 @@ export function getMarkerTiming(
  *      start: [0, 23, 35, 65, 75],
  *      end: [1, 25, 37, 67, 77],
  *      index: [0, 2, 5, 6, 8],
- *      label: ["Aye", "Aye", "Aye", "Aye", "Aye"],
  *      bucket: "DOM",
  *      instantOnly: false,
  *      length: 5,
@@ -264,7 +257,6 @@ export function getMarkerTiming(
  *      start: [1, 28, 39, 69, 70],
  *      end: [2, 29, 49, 70, 77],
  *      index: [1, 3, 7, 9, 10],
- *      label: ["Bee", "Bee", "Bee", "Bee", "Bee"],
  *      bucket: "DOM",
  *      instantOnly: false,
  *      length: 5,
@@ -274,7 +266,6 @@ export function getMarkerTiming(
  *      start: [1, 28, 39, 69, 70],
  *      end: [2, 29, 49, 70, 77],
  *      index: [1, 3, 7, 9, 10],
- *      label: ["Bee", "Bee", "Bee", "Bee", "Bee"],
  *      bucket: "DOM",
  *      instantOnly: false,
  *      length: 5,
@@ -285,7 +276,6 @@ export function getMarkerTiming(
  *      start: [10, 33, 45, 75, 85],
  *      end: [11, 35, 47, 77, 87],
  *      index: [4, 11, 12, 13, 14],
- *      label: ["Sea", "Sea", "Sea", "Sea", "Sea"],
  *      bucket: "Other",
  *      instantOnly: false,
  *      length: 5,

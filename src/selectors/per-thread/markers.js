@@ -452,7 +452,7 @@ export function getMarkerSelectorsPerThread(
   /**
    * This getter uses the marker schema to decide on the labels for the marker chart.
    */
-  const _getMarkerChartLabelGetter: Selector<(MarkerIndex) => string> =
+  const getMarkerChartLabelGetter: Selector<(MarkerIndex) => string> =
     createSelector(
       getMarkerGetter,
       ProfileSelectors.getMarkerSchema,
@@ -487,7 +487,7 @@ export function getMarkerSelectorsPerThread(
     createSelector(
       getMarkerGetter,
       getMarkerChartMarkerIndexes,
-      _getMarkerChartLabelGetter,
+      getMarkerChartLabelGetter,
       ProfileSelectors.getCategories,
       MarkerTimingLogic.getMarkerTimingAndBuckets
     );
@@ -541,7 +541,7 @@ export function getMarkerSelectorsPerThread(
   const getNetworkTrackTiming: Selector<MarkerTiming[]> = createSelector(
     getMarkerGetter,
     getNetworkMarkerIndexes,
-    _getMarkerChartLabelGetter,
+    getMarkerChartLabelGetter,
     MarkerTimingLogic.getMarkerTiming
   );
 
@@ -552,7 +552,7 @@ export function getMarkerSelectorsPerThread(
   const getUserTimingMarkerTiming: Selector<MarkerTiming[]> = createSelector(
     getMarkerGetter,
     getUserTimingMarkerIndexes,
-    _getMarkerChartLabelGetter,
+    getMarkerChartLabelGetter,
     MarkerTimingLogic.getMarkerTiming
   );
 
@@ -751,6 +751,7 @@ export function getMarkerSelectorsPerThread(
     getAreMarkerPanelsEmptyInFullRange,
     getMarkerTableMarkerIndexes,
     getMarkerChartMarkerIndexes,
+    getMarkerChartLabelGetter,
     getMarkerTooltipLabelGetter,
     getMarkerTableLabelGetter,
     getMarkerLabelToCopyGetter,
