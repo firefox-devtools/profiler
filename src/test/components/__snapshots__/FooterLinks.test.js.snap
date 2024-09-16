@@ -88,6 +88,11 @@ exports[`correctly renders the FooterLinks component 1`] = `
           Frysk
         </option>
         <option
+          value="fur"
+        >
+          Furlan
+        </option>
+        <option
           value="ia"
         >
           Interlingua
