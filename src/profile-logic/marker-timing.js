@@ -86,7 +86,6 @@ export function getMarkerTiming(
   markerIndexes: MarkerIndex[],
   // Categories can be null for things like Network Markers, where we don't care to
   // break things up by category.
-  getLabel: (MarkerIndex) => string,
   categories: ?CategoryList
 ): MarkerTiming[] {
   // Each marker type will have it's own timing information, later collapse these into
@@ -287,13 +286,11 @@ export function getMarkerTimingAndBuckets(
   markerIndexes: MarkerIndex[],
   // Categories can be null for things like Network Markers, where we don't care to
   // break things up by category.
-  getLabel: (MarkerIndex) => string,
   categories: ?CategoryList
 ): MarkerTimingAndBuckets {
   const allMarkerTimings = getMarkerTiming(
     getMarker,
     markerIndexes,
-    getLabel,
     categories
   );
 
