@@ -106,7 +106,7 @@ exports[`ActiveTabTimeline ActiveTabResourceTrack with a thread/sub-frame track 
         IFrame:
       </span>
        
-      Page #3
+      https://www.google.com/
     </div>
     <div
       class="timelineTrackTrack"
@@ -141,7 +141,7 @@ exports[`ActiveTabTimeline ActiveTabResourceTrack with a thread/sub-frame track 
             >
               <h2>
                 Activity Graph for 
-                Page #3
+                https://www.google.com/
               </h2>
               <p>
                 This graph shows a visual chart of thread activity.
@@ -285,7 +285,7 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
             IFrame:
           </span>
            
-          Page #2
+          https://www.youtube.com/
         </div>
         <div
           class="timelineTrackTrack"
@@ -320,7 +320,7 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
                 >
                   <h2>
                     Activity Graph for 
-                    Page #2
+                    https://www.youtube.com/
                   </h2>
                   <p>
                     This graph shows a visual chart of thread activity.
