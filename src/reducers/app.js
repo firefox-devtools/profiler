@@ -52,6 +52,7 @@ const view: Reducer<AppViewState> = (
     case 'VIEW_FULL_PROFILE':
     case 'VIEW_ORIGINS_PROFILE':
     case 'VIEW_ACTIVE_TAB_PROFILE':
+    case 'CHANGE_TAB_FILTER':
       return { phase: 'DATA_LOADED' };
     default:
       return state;
