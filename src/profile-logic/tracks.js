@@ -1008,6 +1008,41 @@ export function getLocalTrackName(
   }
 }
 
+// Return a Set of all possible track threads. We can't just rely on the
+// profile.threads, because some of them could be already filtered out by the
+// tab selector.
+function computeAllTrackThreads(
+  tracksWithOrder: TracksWithOrder
+): Set<ThreadIndex> {
+  const allTrackThreads = new Set();
+
+  for (const globalTrack of tracksWithOrder.globalTracks) {
+    switch (globalTrack.type) {
+      case 'process':
+        if (globalTrack.mainThreadIndex !== null) {
+          allTrackThreads.add(globalTrack.mainThreadIndex);
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  for (const [, localTracks] of tracksWithOrder.localTracksByPid) {
+    for (const localTrack of localTracks) {
+      switch (localTrack.type) {
+        case 'thread':
+          allTrackThreads.add(localTrack.threadIndex);
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  return allTrackThreads;
+}
+
 // Consider threads whose sample score is less than 5% of the maximum sample score to be idle.
 const IDLE_THRESHOLD_FRACTION = 0.05;
 
@@ -1029,32 +1064,7 @@ export function computeDefaultVisibleThreads(
     return new Set(profile.meta.initialVisibleThreads);
   }
 
-  const allTrackThreads = new Set();
-  for (const globalTrack of tracksWithOrder.globalTracks) {
-    switch (globalTrack.type) {
-      case 'process':
-        if (globalTrack.mainThreadIndex !== null) {
-          allTrackThreads.add(globalTrack.mainThreadIndex);
-        }
-        break;
-      default:
-        break;
-    }
-  }
-
-  // $FlowExpectError Flow doesn't know about Array.prototype.flat.
-  const localTracks = Array.from(
-    tracksWithOrder.localTracksByPid.values()
-  ).flat();
-  for (const localTrack of localTracks) {
-    switch (localTrack.type) {
-      case 'thread':
-        allTrackThreads.add(localTrack.threadIndex);
-        break;
-      default:
-        break;
-    }
-  }
+  const allTrackThreads = computeAllTrackThreads(tracksWithOrder);
 
   // First, compute a score for every thread.
   const maxCpuDeltaPerInterval = computeMaxCPUDeltaPerInterval(profile);

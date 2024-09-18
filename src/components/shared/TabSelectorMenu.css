@@ -15,5 +15,5 @@
     .react-contextmenu-item--disabled
   )::before {
   /* Move the checkmark to inline-start instead of right, as it's logically better. */
-  inset-inline-start: 8px;
+  inset-inline: 8px 0;
 }
