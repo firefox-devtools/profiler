@@ -217,7 +217,22 @@ export function mergeProfilesForDiffing(
 
     // We adjust the various times so that the 2 profiles are aligned at the
     // start and the data is consistent.
-    const startTimeAdjustment = -thread.samples.time[0];
+    let startTimeAdjustment = 0;
+    if (thread.samples.length !== 0) {
+      startTimeAdjustment = -thread.samples.time[0];
+    }
+    if (thread.markers.length !== 0) {
+      for (const startTime of thread.markers.startTime) {
+        if (startTime !== null) {
+          if (startTimeAdjustment === 0) {
+            startTimeAdjustment = startTime;
+          } else {
+            startTimeAdjustment = Math.min(startTime, startTimeAdjustment);
+          }
+        }
+      }
+    }
+
     thread.samples = adjustTableTimestamps(thread.samples, startTimeAdjustment);
     thread.markers = adjustMarkerTimestamps(
       thread.markers,
