@@ -90,6 +90,7 @@ export function mergeProfilesForDiffing(
   }
 
   const resultProfile = getEmptyProfile();
+  resultProfile.meta = { ...profiles[0].meta };
   resultProfile.meta.interval = Math.min(
     ...profiles.map((profile) => profile.meta.interval)
   );
