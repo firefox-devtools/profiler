@@ -662,6 +662,13 @@ TabBar--marker-table-tab = 標記表
 TabBar--network-tab = 網路
 TabBar--js-tracer-tab = JS 追蹤器
 
+## TabSelectorMenu
+## This component is a context menu that's opened when you click on the root
+## range at the top left corner for profiler analysis view. It's used to switch
+## between tabs that were captured in the profile.
+
+TabSelectorMenu--all-tabs-and-windows = 所有分頁與視窗
+
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
