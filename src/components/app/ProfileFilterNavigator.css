@@ -1,0 +1,31 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.profileFilterNavigator--tab-selector {
+  display: flex;
+  align-items: center;
+  column-gap: 5px;
+
+  /* Padding for the arrow on the left side and a bit on the other for hover. */
+  padding-inline: 20px 5px;
+}
+
+/* This is the dropdown arrow on the left of the button. */
+.profileFilterNavigator--tab-selector::before {
+  position: absolute;
+  border-top: 6px solid;
+  border-right: 4px solid transparent;
+  border-bottom: 0 solid transparent;
+  border-left: 4px solid transparent;
+  margin: 5px 5px 0;
+  color: var(--internal-selected-color);
+  content: '';
+  inset-block-start: 4px;
+  inset-inline-start: 4px;
+}
+
+span.profileFilterNavigator--tab-selector::before {
+  /* Disabled tab selector indicates this with a grayed out arrow. */
+  color: var(--grey-30);
+}

@@ -1,0 +1,19 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.TabSelectorMenu {
+  /* Make it scrollable if the tab list is too long. */
+  overflow-y: auto;
+}
+
+.tabSelectorMenuItem.checkable {
+  padding-inline: 20px 10px;
+}
+
+.react-contextmenu-item.tabSelectorMenuItem.checked:not(
+    .react-contextmenu-item--disabled
+  )::before {
+  /* Move the checkmark to inline-start instead of right, as it's logically better. */
+  inset-inline: 8px 0;
+}
