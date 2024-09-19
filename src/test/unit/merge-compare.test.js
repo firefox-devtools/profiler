@@ -14,7 +14,7 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
 import { ensureExists } from 'firefox-profiler/utils/flow';
-
+import { getTimeRangeIncludingAllThreads } from 'firefox-profiler/profile-logic/profile-data';
 import type { Thread } from 'firefox-profiler/types';
 
 describe('mergeProfilesForDiffing function', function () {
@@ -232,6 +232,38 @@ describe('mergeProfilesForDiffing function', function () {
     expect(mergedProfileThreadA.nativeSymbols.libIndex).toEqual([0, 0]);
     expect(mergedProfileThreadB.nativeSymbols.libIndex).toEqual([1, 1]);
     expect(mergedThread.nativeSymbols.libIndex).toEqual([0, 0, 1, 1]);
+  });
+
+  it('should use marker timing if there are no samples', () => {
+    const profiles = [
+      getProfileWithMarkers([
+        ['Thread1 Marker1', 2],
+        ['Thread1 Marker2', 3, 5],
+        ['Thread1 Marker3', 6, 7],
+      ]),
+
+      getProfileWithMarkers([
+        ['Thread1 Marker1', 5],
+        ['Thread1 Marker2', 6, 8],
+        ['Thread1 Marker3', 10, 15],
+      ]),
+    ];
+
+    const profileState = stateFromLocation({
+      pathname: '/public/fakehash1/',
+      search: '?thread=0&v=3',
+      hash: '',
+    });
+
+    const { profile } = mergeProfilesForDiffing(profiles, [
+      profileState,
+      profileState,
+    ]);
+
+    expect(getTimeRangeIncludingAllThreads(profile)).toEqual({
+      end: 21,
+      start: 4,
+    });
   });
 });
 
