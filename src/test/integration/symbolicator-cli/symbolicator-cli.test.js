@@ -3,26 +3,30 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import { run } from '../../../symbolicator-cli';
 
 describe('symbolicator-cli tool', function () {
   async function runToTempFileAndReturnOutput(options) {
-    const tempFile = path.join(__dirname, 'temp.json');
+    const tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'symbolicator-cli-test')
+    );
+    const tempFile = path.join(tempDir, 'temp.json');
     options.output = tempFile;
 
     try {
       await run(options);
       return JSON.parse(fs.readFileSync(tempFile, 'utf-8'));
     } finally {
-      if (fs.existsSync(tempFile)) {
-        fs.unlinkSync(tempFile);
-      }
+      // $FlowExpectError Flow doesn't know about the rmSync API despite it's been implemented in node v16. Sigh
+      fs.rmSync(tempDir, { recursive: true, force: true });
     }
   }
 
   it('is symbolicating a trace correctly', async function () {
+    jest.spyOn(console, 'log').mockImplementation(() => {});
     const symbolsJson = fs.readFileSync(
       'src/test/integration/symbolicator-cli/symbol-server-response.json'
     );

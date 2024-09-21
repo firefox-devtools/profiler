@@ -9,7 +9,7 @@ module.exports = {
   mode: process.env.NODE_ENV,
   output: {
     path: path.resolve(projectRoot, 'dist'),
-    filename: 'symbolicator.js',
+    filename: 'symbolicator-cli.js',
   },
   entry: './src/symbolicator-cli/index.js',
   module: {

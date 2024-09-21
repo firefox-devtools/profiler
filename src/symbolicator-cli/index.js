@@ -1,4 +1,20 @@
 // @flow
+
+/*
+ * This implements a simple CLI to symbolicate profiles captured by the profiler
+ * or by samply.
+ *
+ * To use it it first needs to be built:
+ *   yarn build-symbolicator-cli
+ *
+ * Then it can be run from the `dist` directory:
+ *   node dist/symbolicator-cli.js --input <input profile> --output <symbolicated profile> --server <symbol server URL>
+ *
+ * For example:
+ *   node dist/symbolicator-cli.js --input samply-profile.json --output profile-symbolicated.json --server http://localhost:3000
+ *
+ */
+
 const fs = require('fs');
 
 import { unserializeProfileOfArbitraryFormat } from '../profile-logic/process-profile';

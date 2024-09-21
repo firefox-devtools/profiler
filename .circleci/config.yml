@@ -54,6 +54,7 @@ jobs:
     steps:
       - checkout-and-dependencies
       - run: yarn build-prod:quiet
+      - run: yarn build-symbolicator-cli:quiet
 
   licence-check:
     executor: node
