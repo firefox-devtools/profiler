@@ -26,7 +26,9 @@ describe('symbolicator-cli tool', function () {
   }
 
   it('is symbolicating a trace correctly', async function () {
-    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'log').mockImplementation();
+    jest.spyOn(console, 'warn').mockImplementation();
+
     const symbolsJson = fs.readFileSync(
       'src/test/integration/symbolicator-cli/symbol-server-response.json'
     );
@@ -47,6 +49,7 @@ describe('symbolicator-cli tool', function () {
 
     const result = await runToTempFileAndReturnOutput(options);
 
+    expect(console.warn).not.toHaveBeenCalled();
     expect(result).toEqual(expected);
   });
 });
