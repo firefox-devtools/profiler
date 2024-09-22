@@ -39,7 +39,7 @@ describe('symbolicator-cli tool', function () {
       )
     );
 
-    window.fetch.post('http://symbol.server/symbolicate/v5', symbolsJson);
+    window.fetch.post('http://symbol.server/symbolicate/v5', new Response(symbolsJson));
 
     const options = {
       input: 'src/test/integration/symbolicator-cli/unsymbolicated.json',
