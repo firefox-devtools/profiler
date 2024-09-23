@@ -108,7 +108,8 @@
   color: var(--internal-selected-color);
 }
 
-.filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):hover {
+.filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):hover,
+.filterNavigatorBarItem:has(button.profileFilterNavigator--tab-selector):hover {
   background-color: rgb(0 0 0 / 0.1);
 }
 

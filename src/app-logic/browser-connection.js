@@ -183,8 +183,19 @@ class BrowserConnectionImpl implements BrowserConnection {
   }
 }
 
+// Should work with:
+// Firefox Desktop: "Mozilla/5.0 (X11; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0"
+// Thunderbird: "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Thunderbird/128.2.3"
+// Firefox Android: "Mozilla/5.0 (Android 12; Mobile; rv:132.0) Gecko/132.0 Firefox/132.0"
+// Should not work with:
+// Chrome: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+// Safari: 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Mobile/15E148 Safari/604.1'
+//
+// We could match for Gecko/ but do all Gecko-based browsers support the
+// WebChannel? Probably not. Therefore specifically Firefox and Thunderbird are
+// looked for, until we find that we need a broader net.
 function _isFirefox(userAgent: string): boolean {
-  return Boolean(userAgent.match(/Firefox\/\d+\.\d+/));
+  return userAgent.includes('Firefox/') || userAgent.includes('Thunderbird/');
 }
 
 class TimeoutError extends Error {
