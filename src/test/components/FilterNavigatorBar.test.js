@@ -159,6 +159,6 @@ describe('app/ProfileFilterNavigator', () => {
     });
     expect(queryByText(/Full Range/)).not.toBeInTheDocument();
     // Using regexp because searching for a partial text.
-    expect(getByText(/developer\.mozilla\.org/)).toBeInTheDocument();
+    expect(getByText(/developer\.mozilla\.org \(/)).toBeInTheDocument();
   });
 });

@@ -21,11 +21,7 @@ import {
   updateBottomBoxContentsAndMaybeOpen,
   closeBottomBox,
 } from '../actions/profile-view';
-import {
-  changeSelectedTab,
-  changeProfilesToCompare,
-  changeTabFilter,
-} from '../actions/app';
+import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
   stateFromLocation,
   getQueryStringFromUrlState,
@@ -38,6 +34,7 @@ import { blankStore } from './fixtures/stores';
 import {
   viewProfile,
   changeTimelineTrackOrganization,
+  changeTabFilter,
 } from '../actions/receive-profile';
 import type {
   Profile,
@@ -596,7 +593,7 @@ describe('ctxId', function () {
     const resourceTracks = getActiveTabResourceTracks(getState());
     expect(resourceTracks).toEqual([
       {
-        name: 'Page #2',
+        name: 'https://www.youtube.com/',
         type: 'sub-frame',
         threadIndex: 1,
       },
