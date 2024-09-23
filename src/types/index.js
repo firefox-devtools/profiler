@@ -11,6 +11,7 @@ export * from './profile-derived';
 export * from './profile';
 export * from './state';
 export * from './store';
+export * from './symbolication';
 export * from './transforms';
 export * from './units';
 export * from './utils';

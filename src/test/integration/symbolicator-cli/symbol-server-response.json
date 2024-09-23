@@ -1,0 +1,178 @@
+{
+  "results": [
+    {
+      "stacks": [
+        [
+          {
+            "frame": 0,
+            "module_offset": "0x6153",
+            "module": "dyld",
+            "function": "start",
+            "function_offset": "0x9ab",
+            "function_size": "0xae4"
+          }
+        ]
+      ],
+      "found_modules": {
+        "dyld/F635824E318B3F0C842CC369737F2B680": true
+      }
+    },
+    {
+      "stacks": [
+        [
+          {
+            "frame": 0,
+            "module_offset": "0x3ec3",
+            "module": "a.out",
+            "function": "main",
+            "function_offset": "0xef",
+            "function_size": "0x17c"
+          },
+          {
+            "frame": 1,
+            "module_offset": "0x3db3",
+            "module": "a.out",
+            "function": "threadfunc(void*)",
+            "function_offset": "0x2b",
+            "function_size": "0x4c"
+          },
+          {
+            "frame": 2,
+            "module_offset": "0x3d33",
+            "module": "a.out",
+            "function": "fac(unsigned long)",
+            "function_offset": "0x17",
+            "function_size": "0x6c"
+          },
+          {
+            "frame": 3,
+            "module_offset": "0x3d67",
+            "module": "a.out",
+            "function": "fac(unsigned long)",
+            "function_offset": "0x4b",
+            "function_size": "0x6c"
+          }
+        ]
+      ],
+      "found_modules": {
+        "a.out/F61DA4D57CBB38CA8BDF059C645834520": true
+      }
+    },
+    {
+      "stacks": [
+        [
+          {
+            "frame": 0,
+            "module_offset": "0x948b",
+            "module": "libsystem_pthread.dylib",
+            "function": "_pthread_join",
+            "function_offset": "0x25f",
+            "function_size": "0x404"
+          },
+          {
+            "frame": 1,
+            "module_offset": "0x6f93",
+            "module": "libsystem_pthread.dylib",
+            "function": "_pthread_start",
+            "function_offset": "0x87",
+            "function_size": "0x140"
+          },
+          {
+            "frame": 2,
+            "module_offset": "0x6f9f",
+            "module": "libsystem_pthread.dylib",
+            "function": "_pthread_start",
+            "function_offset": "0x93",
+            "function_size": "0x140"
+          },
+          {
+            "frame": 3,
+            "module_offset": "0x769f",
+            "module": "libsystem_pthread.dylib",
+            "function": "_pthread_exit",
+            "function_offset": "0x6f",
+            "function_size": "0x78"
+          },
+          {
+            "frame": 4,
+            "module_offset": "0x4983",
+            "module": "libsystem_pthread.dylib",
+            "function": "_pthread_terminate_invoke",
+            "function_offset": "0x4f",
+            "function_size": "0x5c"
+          }
+        ]
+      ],
+      "found_modules": {
+        "libsystem_pthread.dylib/E03E84786F5C3D21A79A58408F5140000": true
+      }
+    },
+    {
+      "stacks": [
+        [
+          {
+            "frame": 0,
+            "module_offset": "0x2bac",
+            "module": "libsystem_kernel.dylib",
+            "function": "__ulock_wait",
+            "function_offset": "0x8",
+            "function_size": "0x2c"
+          },
+          {
+            "frame": 1,
+            "module_offset": "0x43e8",
+            "module": "libsystem_kernel.dylib",
+            "function": "__semwait_signal",
+            "function_offset": "0x8",
+            "function_size": "0x2c"
+          }
+        ]
+      ],
+      "found_modules": {
+        "libsystem_kernel.dylib/71FF45B8F14E36669E966CF58315B91D0": true
+      }
+    },
+    {
+      "stacks": [
+        [
+          {
+            "frame": 0,
+            "module_offset": "0xd47f",
+            "module": "libsystem_c.dylib",
+            "function": "usleep",
+            "function_offset": "0x43",
+            "function_size": "0x50"
+          },
+          {
+            "frame": 1,
+            "module_offset": "0xd567",
+            "module": "libsystem_c.dylib",
+            "function": "nanosleep",
+            "function_offset": "0xdb",
+            "function_size": "0x1d0"
+          }
+        ]
+      ],
+      "found_modules": {
+        "libsystem_c.dylib/D30F183093D03D0B8CBA9544E84BFD5B0": true
+      }
+    },
+    {
+      "stacks": [
+        [
+          {
+            "frame": 0,
+            "module_offset": "0x3f3c",
+            "module": "libsystem_platform.dylib",
+            "function": "_platform_memset",
+            "function_offset": "0x6c",
+            "function_size": "0xd4"
+          }
+        ]
+      ],
+      "found_modules": {
+        "libsystem_platform.dylib/B4BF9F8931D737428CE7AB3554F9F5250": true
+      }
+    }
+  ]
+}

@@ -6,7 +6,7 @@
 import SymbolStoreDB from './symbol-store-db';
 import { SymbolsNotFoundError } from './errors';
 
-import type { RequestedLib } from 'firefox-profiler/types';
+import type { RequestedLib, ISymbolStoreDB } from 'firefox-profiler/types';
 import type { SymbolTableAsTuple } from './symbol-store-db';
 import { ensureExists } from '../utils/flow';
 
@@ -226,11 +226,18 @@ async function _getDemangleCallback(): Promise<DemangleFunction> {
  */
 export class SymbolStore {
   _symbolProvider: SymbolProvider;
-  _db: SymbolStoreDB;
+  _db: ISymbolStoreDB;
 
-  constructor(dbNamePrefix: string, symbolProvider: SymbolProvider) {
+  constructor(
+    dbNamePrefixOrDB: string | ISymbolStoreDB,
+    symbolProvider: SymbolProvider
+  ) {
     this._symbolProvider = symbolProvider;
-    this._db = new SymbolStoreDB(`${dbNamePrefix}-symbol-tables`);
+    if (typeof dbNamePrefixOrDB === 'string') {
+      this._db = new SymbolStoreDB(`${dbNamePrefixOrDB}-symbol-tables`);
+    } else {
+      this._db = dbNamePrefixOrDB;
+    }
   }
 
   async closeDb() {
