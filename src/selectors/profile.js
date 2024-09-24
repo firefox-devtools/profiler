@@ -79,6 +79,7 @@ import type {
   IndexIntoSamplesTable,
   ExtraProfileInfoSection,
   TableViewOptions,
+  ExtensionTable,
 } from 'firefox-profiler/types';
 
 export const getProfileView: Selector<ProfileViewState> = (state) =>
@@ -212,6 +213,10 @@ const getMarkerSchemaGecko: Selector<MarkerSchema[]> = (state) =>
 // See SampleUnits type definition for more information.
 export const getSampleUnits: Selector<SampleUnits | void> = (state) =>
   getMeta(state).sampleUnits;
+
+// Get all extensions in the profile metadata.
+export const getExtensionTable: Selector<ExtensionTable | void> = (state) =>
+  getMeta(state).extensions;
 
 /**
  * Firefox profiles will always have categories. However, imported profiles may not
@@ -869,6 +874,19 @@ export const getRelevantInnerWindowIDsForCurrentTab: Selector<
   }
 );
 
+export const getExtensionIdToNameMap: Selector<Map<string, string> | null> =
+  createSelector(getExtensionTable, (extensions) => {
+    if (!extensions) {
+      return null;
+    }
+
+    const extensionIDtoNameMap = new Map();
+    for (let i = 0; i < extensions.length; i++) {
+      extensionIDtoNameMap.set(extensions.baseURL[i], extensions.name[i]);
+    }
+    return extensionIDtoNameMap;
+  });
+
 /**
  * Extract the hostname and favicon from the last page if we are in single tab
  * Extract the hostname and favicon from the last page for all tab ids. we
@@ -879,7 +897,11 @@ export const getRelevantInnerWindowIDsForCurrentTab: Selector<
  */
 export const getProfileFilterPageDataByTabID: Selector<
   Map<TabID, ProfileFilterPageData>,
-> = createSelector(getPagesMap, extractProfileFilterPageData);
+> = createSelector(
+  getPagesMap,
+  getExtensionIdToNameMap,
+  extractProfileFilterPageData
+);
 
 /**
  * This returns the hostname and favicon information for the current tab id.
