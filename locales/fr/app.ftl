@@ -96,7 +96,7 @@ CallNodeContextMenu--copy-stack = Copier la pile
 CallTree--tracing-ms-total = Temps d’exécution (ms)
     .title = Le temps d’exécution « total » comprend un résumé de tout le temps où cette fonction a été observée sur la pile. Cela inclut le temps pendant lequel la fonction était réellement en cours d’exécution et le temps passé dans le code appelant cette fonction.
 CallTree--tracing-ms-self = Individuel (ms)
-    .title = Le temps « individuel » n’inclut que le temps où la fonction était en haut de la pile. Si cette fonction a fait appel à d’autres fonctions, alors le temps des « autres » fonctions n’est pas inclus. Le temps « individuel » est utile pour comprendre où le temps a été réellement passé dans un programme.
+    .title = Le temps « individuel » n’inclut que le temps où la fonction était en haut de la pile. Si cette fonction a fait appel à d’autres fonctions, alors le temps des « autres » fonctions n’est pas inclus. Le temps « individuel » est utile pour comprendre où le temps a été réellement passé dans un programme.
 CallTree--samples-total = Total (échantillons)
     .title = Le nombre d’échantillons « total » comprend un résumé de chaque échantillon où cette fonction a été observée sur la pile. Cela inclut le temps où la fonction était réellement en cours d’exécution et le temps passé dans le code appelant cette fonction.
 CallTree--samples-self = Individuel
@@ -649,6 +649,12 @@ TabBar--marker-chart-tab = Graphique des marqueurs
 TabBar--marker-table-tab = Tableau des marqueurs
 TabBar--network-tab = Réseau
 TabBar--js-tracer-tab = Traceur JS
+
+## TabSelectorMenu
+## This component is a context menu that's opened when you click on the root
+## range at the top left corner for profiler analysis view. It's used to switch
+## between tabs that were captured in the profile.
+
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the

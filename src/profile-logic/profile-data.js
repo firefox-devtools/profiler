@@ -2930,7 +2930,8 @@ export function filterToRetainedAllocations(
  * Returns null if we don't have information about pages (in older profiles).
  */
 export function extractProfileFilterPageData(
-  pagesMapByTabID: Map<TabID, PageList> | null
+  pagesMapByTabID: Map<TabID, PageList> | null,
+  extensionIDToNameMap: Map<string, string> | null
 ): Map<TabID, ProfileFilterPageData> {
   if (pagesMapByTabID === null) {
     // We don't have pages array (which is the case for older profiles). Return early.
@@ -2974,27 +2975,55 @@ export function extractProfileFilterPageData(
       continue;
     }
 
+    // Constructing the page data outside of the try-catch block, and adding it
+    // to the map outside of it as well. This is mostly because some favicon URL
+    // constructions might fail and we don't want to miss them still. We should
+    // always have at least a hostname, which is needed for displaying the tab
+    // name.
+    // The known failing case is when we try to construct a URL with a
+    // moz-extension:// protocol on platforms outside of Firefox. Only Firefox
+    // can parse it properly. Chrome and node will output a URL with no `origin`.
+    const pageData: ProfileFilterPageData = {
+      origin: '',
+      hostname: '',
+      favicon: null,
+    };
+
     try {
       const page = new URL(pageUrl);
+
+      pageData.hostname =
+        extensionIDToNameMap && pageUrl.startsWith('moz-extension://')
+          ? // Get the real extension name if it's an extension.
+            (extensionIDToNameMap.get(
+              'moz-extension://' +
+                // For non-Firefox browsers, we can't construct a URL object
+                // with the 'moz-extension://' protocol properly. So we have to
+                // have a fallback that uses simple string split.
+                (page.hostname ? page.hostname : pageUrl.split('/')[2]) +
+                '/'
+            ) ?? '')
+          : page.hostname;
+
       // FIXME(Bug 1620546): This is not ideal and we should get the favicon
       // either during profile capture or profile pre-process.
+      pageData.origin = page.origin;
       const favicon = new URL('/favicon.ico', page.origin);
       if (favicon.protocol === 'http:') {
         // Upgrade http requests.
         favicon.protocol = 'https:';
       }
-      pageDataByTabID.set(tabID, {
-        origin: page.origin,
-        hostname: page.hostname,
-        favicon: favicon.href,
-      });
+      pageData.favicon = favicon.href;
     } catch (e) {
-      console.error(
+      console.warn(
         'Error while extracing the hostname and favicon from the page url',
         pageUrl
       );
-      continue;
     }
+
+    // Adding it to the map outside of the try-catch block, just in case something
+    // might fail.
+    pageDataByTabID.set(tabID, pageData);
   }
 
   return pageDataByTabID;
