@@ -23,7 +23,10 @@ import {
   hideProvidedTracks,
 } from 'firefox-profiler/actions/profile-view';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import {
+  ensureExists,
+  assertExhaustiveCheck,
+} from 'firefox-profiler/utils/flow';
 import {
   getThreads,
   getRightClickedTrack,
@@ -329,13 +332,19 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     }
 
     let track;
-    if (rightClickedTrack.type === 'local') {
-      const localTracks = ensureExists(
-        localTracksByPid.get(rightClickedTrack.pid)
-      );
-      track = localTracks[rightClickedTrack.trackIndex];
-    } else {
-      track = globalTracks[rightClickedTrack.trackIndex];
+    switch (rightClickedTrack.type) {
+      case 'local': {
+        const localTracks = ensureExists(
+          localTracksByPid.get(rightClickedTrack.pid)
+        );
+        track = localTracks[rightClickedTrack.trackIndex];
+        break;
+      }
+      case 'global':
+        track = globalTracks[rightClickedTrack.trackIndex];
+        break;
+      default:
+        throw assertExhaustiveCheck(rightClickedTrack.type);
     }
 
     return track.type;
@@ -912,11 +921,12 @@ class TimelineTrackContextMenuImpl extends PureComponent<
       return null;
     }
 
-    //When adding more allowed types, we need to take care that we can't enter one of the following cases:
-    //1. Hiding a global track that still has visible local tracks
-    //2. No more visible tracks
-    //3. One global track without any data is displayed
-    //(all its local track are hidden + it doesn't have any data itself)
+    // When adding more allowed types, we need to take care that we can't enter
+    // one of the following cases:
+    // 1. Hiding a global track that still has visible local tracks
+    // 2. No more visible tracks
+    // 3. One global track without any data is displayed
+    // (all its local track are hidden + it doesn't have any data itself)
 
     const ALLOWED_TYPES = [
       'screenshots',
