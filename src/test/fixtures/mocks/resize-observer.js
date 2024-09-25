@@ -4,6 +4,8 @@
 
 // @flow
 
+import { act } from 'firefox-profiler/test/fixtures/testing-library';
+
 /**
  * Creating a mock resize observer type because Flow's ResizeObserver
  * type is a bit obsolete.
@@ -127,7 +129,9 @@ function triggerSingleObserver(
   }
 
   // Trigger the ResizeObserver callback with all the entries.
-  item.callback(entries, observer);
+  act(() => {
+    item.callback(entries, observer);
+  });
 }
 
 /**

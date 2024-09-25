@@ -12,6 +12,7 @@
  */
 
 import { stripIndent } from 'common-tags';
+import { act } from 'firefox-profiler/test/fixtures/testing-library';
 
 function stripThisFileFromErrorStack(error: Error): string[] {
   const stacks = error.stack.split('\n');
@@ -92,7 +93,9 @@ export function mockRaf() {
       while (oldrequests.length) {
         const request = oldrequests.shift();
         const arg = timestamps.shift();
-        request.func.call(null, arg);
+        act(() => {
+          request.func.call(null, arg);
+        });
       }
     }
 
