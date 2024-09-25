@@ -457,7 +457,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 49,
+    "preprocessedProfileVersion": 50,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -2007,9 +2007,6 @@ Array [
       3,
     ],
     "instantOnly": true,
-    "label": Array [
-      "",
-    ],
     "length": 1,
     "name": "D",
     "start": Array [
@@ -2025,9 +2022,6 @@ Array [
       4,
     ],
     "instantOnly": true,
-    "label": Array [
-      "",
-    ],
     "length": 1,
     "name": "E",
     "start": Array [
@@ -2043,9 +2037,6 @@ Array [
       5,
     ],
     "instantOnly": true,
-    "label": Array [
-      "",
-    ],
     "length": 1,
     "name": "F",
     "start": Array [
@@ -2063,10 +2054,6 @@ Array [
       7,
     ],
     "instantOnly": false,
-    "label": Array [
-      "https://mozilla.org",
-      "https://mozilla.org",
-    ],
     "length": 2,
     "name": "Network Requests",
     "start": Array [

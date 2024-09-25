@@ -1441,7 +1441,21 @@ exports[`MarkerChart with active tab renders the hovered marker properly 2`] = `
         Page
         :
       </div>
-      Page #1
+      <div
+        class="tooltipDetailsUrl"
+      >
+        <span
+          class="tooltipDetailsDim"
+        >
+          https://
+        </span>
+        www.cnn.com
+        <span
+          class="tooltipDetailsDim"
+        >
+          /
+        </span>
+      </div>
     </div>
   </div>
 </div>

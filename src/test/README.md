@@ -25,9 +25,10 @@ Flow type tests are a little different, because they do not use Jest. Instead, t
 
 ## The tests
 
-| Test type                  | Description                                                                                                                                   |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| [components](./components) | Tests for React components, utilizing Enzyme for full behavioral testing, and snapshot tests to ensure that components output correct markup. |
-| [store](./store)           | Testing the [Redux](http://redux.js.org/) store using actions and selectors.                                                                  |
-| [types](./types)           | Flow type tests.                                                                                                                              |
-| [unit](./unit)             | Unit testing                                                                                                                                  |
+| Test type                    | Description                                                                                                                                   |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| [components](./components)   | Tests for React components, utilizing Enzyme for full behavioral testing, and snapshot tests to ensure that components output correct markup. |
+| [store](./store)             | Testing the [Redux](http://redux.js.org/) store using actions and selectors.                                                                  |
+| [types](./types)             | Flow type tests.                                                                                                                              |
+| [unit](./unit)               | Unit testing                                                                                                                                  |
+| [integration](./integration) | Integration testing                                                                                                                           |

@@ -135,6 +135,12 @@ export function getMarkerSelectorsPerThread(
   );
 
   /**
+   * This returns the maximum marker index.
+   */
+  const getMarkerListLength: Selector<number> = (state) =>
+    getFullMarkerList(state).length;
+
+  /**
    * This selector returns a function that's used to retrieve a marker object
    * from its MarkerIndex:
    *
@@ -446,7 +452,7 @@ export function getMarkerSelectorsPerThread(
   /**
    * This getter uses the marker schema to decide on the labels for the marker chart.
    */
-  const _getMarkerChartLabelGetter: Selector<(MarkerIndex) => string> =
+  const getMarkerChartLabelGetter: Selector<(MarkerIndex) => string> =
     createSelector(
       getMarkerGetter,
       ProfileSelectors.getMarkerSchema,
@@ -481,7 +487,6 @@ export function getMarkerSelectorsPerThread(
     createSelector(
       getMarkerGetter,
       getMarkerChartMarkerIndexes,
-      _getMarkerChartLabelGetter,
       ProfileSelectors.getCategories,
       MarkerTimingLogic.getMarkerTimingAndBuckets
     );
@@ -535,7 +540,6 @@ export function getMarkerSelectorsPerThread(
   const getNetworkTrackTiming: Selector<MarkerTiming[]> = createSelector(
     getMarkerGetter,
     getNetworkMarkerIndexes,
-    _getMarkerChartLabelGetter,
     MarkerTimingLogic.getMarkerTiming
   );
 
@@ -546,7 +550,6 @@ export function getMarkerSelectorsPerThread(
   const getUserTimingMarkerTiming: Selector<MarkerTiming[]> = createSelector(
     getMarkerGetter,
     getUserTimingMarkerIndexes,
-    _getMarkerChartLabelGetter,
     MarkerTimingLogic.getMarkerTiming
   );
 
@@ -739,11 +742,13 @@ export function getMarkerSelectorsPerThread(
     getMarkerIndexToRawMarkerIndexes,
     getFullMarkerList,
     getFullMarkerListIndexes,
+    getMarkerListLength,
     getNetworkMarkerIndexes,
     getSearchFilteredNetworkMarkerIndexes,
     getAreMarkerPanelsEmptyInFullRange,
     getMarkerTableMarkerIndexes,
     getMarkerChartMarkerIndexes,
+    getMarkerChartLabelGetter,
     getMarkerTooltipLabelGetter,
     getMarkerTableLabelGetter,
     getMarkerLabelToCopyGetter,

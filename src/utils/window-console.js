@@ -61,6 +61,13 @@ export function addDataToWindowObject(
     },
   });
 
+  defineProperty(target, 'selectedMarker', {
+    enumerable: true,
+    get() {
+      return selectorsForConsole.selectedThread.getSelectedMarker(getState());
+    },
+  });
+
   target.experimental = {
     enableEventDelayTracks() {
       const areEventDelayTracksEnabled = dispatch(
@@ -203,6 +210,61 @@ export function addDataToWindowObject(
     URL.revokeObjectURL(blobUrl);
   };
 
+  // This function extracts MOZ_LOGs saved as markers in a Firefox profile,
+  // using the MOZ_LOG canonical format. All logs are saved as a debug log
+  // because the log level information isn't saved in these markers.
+  target.extractGeckoLogs = function () {
+    function pad(p, c) {
+      return String(p).padStart(c, '0');
+    }
+
+    // This transforms a timestamp to a string as output by mozlog usually.
+    function d2s(ts) {
+      const d = new Date(ts);
+      // new Date rounds down the timestamp (in milliseconds) to the lower integer,
+      // let's get the microseconds and nanoseconds differently.
+      // This will be imperfect because of float rounding errors but still better
+      // than not having them.
+      const ns = Math.trunc((ts - Math.trunc(ts)) * 10 ** 6);
+      return `${d.getFullYear()}-${pad(d.getUTCMonth() + 1, 2)}-${pad(d.getUTCDate(), 2)} ${pad(d.getUTCHours(), 2)}:${pad(d.getUTCMinutes(), 2)}:${pad(d.getUTCSeconds(), 2)}.${pad(d.getUTCMilliseconds(), 3)}${pad(ns, 6)} UTC`;
+    }
+
+    const logs = [];
+
+    // This algorithm loops over the raw marker table instead of using the
+    // selectors so that the full marker list isn't generated for all the
+    // threads in the profile.
+    const profile = selectorsForConsole.profile.getProfile(getState());
+    const range =
+      selectorsForConsole.profile.getPreviewSelectionRange(getState());
+
+    for (const thread of profile.threads) {
+      const { markers } = thread;
+      for (let i = 0; i < markers.length; i++) {
+        const startTime = markers.startTime[i];
+        // Note that Log markers are instant markers, so they only have a start time.
+        if (
+          startTime !== null &&
+          markers.data[i] &&
+          markers.data[i].type === 'Log' &&
+          startTime >= range.start &&
+          startTime <= range.end
+        ) {
+          const data = markers.data[i];
+          const strTimestamp = d2s(
+            profile.meta.startTime + markers.startTime[i]
+          );
+          const processName = thread.processName ?? 'Unknown Process';
+          // TODO: lying about the log level as it's not available yet in the markers
+          const statement = `${strTimestamp} - [${processName} ${thread.pid}: ${thread.name}]: D/${data.module} ${data.name.trim()}`;
+          logs.push(statement);
+        }
+      }
+    }
+
+    return logs.sort().join('\n');
+  };
+
   target.shortenUrl = shortenUrl;
   target.getState = getState;
   target.selectors = selectorsForConsole;
@@ -237,22 +299,23 @@ export function logFriendlyPreamble() {
       "    | \\     / |  | '_ \\| '__/ _ \\|  _| | |/ _ \\ '_|  ",
       '    |/ \\ _ / \\|  | |_) | | | (_) | | | | |  __/ |    ',
       '    |         |  | .__/|_|  \\___/|_| |_|_|\\___|_|    ',
-      '    /  -    - \\  |_|                                     ',
-      '  ,-    V__V   -.                                     ',
-      ' -=  __-  * - .,=-                                    ',
-      '  `\\_    -   _/                                       ',
-      "      `-----'                                         ",
+      '    /  -    - \\  |_|                                 ',
+      '  ,-    V__V   -.                                    ',
+      ' -=  __-  * - .,=-                                   ',
+      '  `\\_    -   _/                                      ',
+      "      `-----'                                        ",
     ].join('\n'),
     'font-family: Menlo, monospace;'
   );
 
   console.log(
     stripIndent`
-      %cThe following profiler information is available via the console:%c
+      %cThe following profiler information and tools are available via the console:%c
 
       %cwindow.profile%c - The currently loaded profile
       %cwindow.filteredThread%c - The current filtered thread
       %cwindow.filteredMarkers%c - The current filtered and processed markers
+      %cwindow.selectedMarker%c - The selected processed marker in the current thread
       %cwindow.callTree%c - The call tree of the current filtered thread
       %cwindow.getState%c - The function that returns the current Redux state.
       %cwindow.selectors%c - All the selectors that are used to get data from the Redux state.
@@ -261,8 +324,9 @@ export function logFriendlyPreamble() {
       %cwindow.experimental%c - The object that holds flags of all the experimental features.
       %cwindow.togglePseudoLocalization%c - Enable pseudo localizations by passing "accented" or "bidi" to this function, or disable using no parameters.
       %cwindow.toggleTimelineType%c - Toggle timeline graph type by passing "cpu-category", "category", or "stack".
-      %cwindow.retrieveRawProfileDataFromBrowser%c - Retrieve the profile attached to the current tab and returns it. Use "await" to call it.
-      %cwindow.saveToDisk%c - Saves to a file the parameter passed to it, with an optional filename parameter. You can use that to save the profile returned by "retrieveRawProfileDataFromBrowser".
+      %cwindow.retrieveRawProfileDataFromBrowser%c - Retrieve the profile attached to the current tab and returns it. Use "await" to call it, and use saveToDisk to save it.
+      %cwindow.extractGeckoLogs%c - Retrieve recorded logs in the current range, using the MOZ_LOG format. Use with "copy" or "saveToDisk".
+      %cwindow.saveToDisk%c - Saves to a file the parameter passed to it, with an optional filename parameter. You can use that to save the profile returned by "retrieveRawProfileDataFromBrowser" or the data returned by "extractGeckoLogs".
 
       The profile format is documented here:
       %chttps://github.com/firefox-devtools/profiler/blob/main/docs-developer/processed-profile-format.md%c
@@ -280,6 +344,9 @@ export function logFriendlyPreamble() {
     bold,
     reset,
     // "window.filteredMarkers"
+    bold,
+    reset,
+    // "window.selectedMarker"
     bold,
     reset,
     // "window.callTree"
@@ -304,6 +371,15 @@ export function logFriendlyPreamble() {
     bold,
     reset,
     // "window.toggleTimelineType"
+    bold,
+    reset,
+    // "window.retrieveRawProfileDataFromBrowser"
+    bold,
+    reset,
+    // "window.extractGeckoLogs"
+    bold,
+    reset,
+    // "window.saveToDisk"
     bold,
     reset,
     // "processed-profile-format.md"

@@ -2267,6 +2267,12 @@ const _upgraders = {
   [49]: (_) => {
     // The 'sanitized-string' marker schema format type has been added.
   },
+  [50]: (_) => {
+    // The serialized format can now optionally store sample and counter sample
+    // times as time deltas instead of absolute timestamps to reduce the JSON size.
+    // The unserialized version is unchanged, and because the upgraders run
+    // after unserialization they see no difference.
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };
