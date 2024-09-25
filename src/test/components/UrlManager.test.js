@@ -134,9 +134,7 @@ describe('UrlManager', function () {
     await waitUntilUrlSetupPhase('done');
     expect(getDataSource(getState())).toMatch('from-browser');
 
-    // This is called by React 18 until we move to the createRoot API.
-    //expect(console.error).not.toHaveBeenCalled();
-    expect(console.error).toHaveBeenCalledTimes(1);
+    expect(console.error).not.toHaveBeenCalled();
   });
 
   it('redirects from-file back to no data source', async function () {
