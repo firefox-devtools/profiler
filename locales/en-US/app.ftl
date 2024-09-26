@@ -66,6 +66,12 @@ CallNodeContextMenu--transform-merge-call-node = Merge node only
         function’s node that called it. It only removes the function from that
         specific part of the tree. Any other places the function was called from
         will remain in the profile.
+CallNodeContextMenu--transform-merge-unaccounted-native-functions = Merge unaccounted native frames
+    .title =
+        Removes stack frames such as unsymbolicated JIT frames from the call tree,
+        and make their callers absorb their cost.
+        Specifically, this transform merges any native stack frames which were
+        not accounted to a shared library.
 
 # This is used as the context menu item title for "Focus on function" and "Focus
 # on function (inverted)" transforms.
@@ -1082,6 +1088,12 @@ TransformNavigator--merge-call-node = Merge Node: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--merge-function = Merge: { $item }
+
+# "Merge unaccounted native frames" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Corresponds to the context menu item with the l10n ID
+# CallNodeContextMenu--transform-merge-unaccounted-native-functions
+TransformNavigator--merge-unaccounted-native-functions = Merge unaccounted native
 
 # "Drop function" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop

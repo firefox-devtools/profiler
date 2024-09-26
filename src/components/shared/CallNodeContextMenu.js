@@ -13,6 +13,7 @@ import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-p
 import {
   funcHasDirectRecursiveCall,
   funcHasRecursiveCall,
+  isUnaccountedNativeFunction,
 } from 'firefox-profiler/profile-logic/transforms';
 import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
 import {
@@ -333,6 +334,11 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
           funcIndex: selectedFunc,
         });
         break;
+      case 'merge-unaccounted-native-functions':
+        addTransformToStack(threadsKey, {
+          type: 'merge-unaccounted-native-functions',
+        });
+        break;
       case 'drop-function':
         addTransformToStack(threadsKey, {
           type: 'drop-function',
@@ -484,7 +490,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     const {
       callNodeIndex,
-      thread: { funcTable },
+      thread: { funcTable, stringTable },
       callNodeInfo,
     } = rightClickedCallNodeInfo;
 
@@ -504,6 +510,11 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const fileName =
       filePath &&
       parseFileNameFromSymbolication(filePath).path.match(/[^\\/]+$/)?.[0];
+    const isProbablyJIT = isUnaccountedNativeFunction(
+      funcIndex,
+      funcTable,
+      stringTable
+    );
     return (
       <>
         {fileName ? (
@@ -544,6 +555,19 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
               title: '',
               content: 'Merge node only',
             })}
+
+        {isProbablyJIT
+          ? this.renderTransformMenuItem({
+              l10nId:
+                'CallNodeContextMenu--transform-merge-unaccounted-native-functions',
+              shortcut: 'U',
+              icon: 'Merge',
+              onClick: this._handleClick,
+              transform: 'merge-unaccounted-native-functions',
+              title: '',
+              content: 'Merge unaccounted native frames',
+            })
+          : null}
 
         {this.renderTransformMenuItem({
           l10nId: inverted
