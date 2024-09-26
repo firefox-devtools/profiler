@@ -762,6 +762,10 @@ TrackContextMenu--hide-other-screenshots-tracks = Celar altere tracias de instan
 TrackContextMenu--hide-track = Celar “{ $trackName }”
 TrackContextMenu--show-all-tracks = Monstrar tote le tracias
 TrackContextMenu--show-local-tracks-in-process = Monstrar tote le tracias in iste processo
+# This is used as the context menu item to hide all tracks of the selected track's type.
+# Variables:
+#   $type (String) - Name of the type of selected track to hide.
+TrackContextMenu--hide-all-tracks-by-selected-track-type = Celar tote la tracias de typo “{ $type }”
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Monstrar tote le tracias concordante
