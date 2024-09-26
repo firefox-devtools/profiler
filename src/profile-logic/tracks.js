@@ -1445,6 +1445,60 @@ export function getSearchFilteredLocalTracksByPid(
 }
 
 /**
+ * Get the type and return the type filtered global tracks.
+ */
+export function getTypeFilteredGlobalTracks(
+  tracks: GlobalTrack[],
+  type: string
+): Set<TrackIndex> | null {
+  if (!type) {
+    return null;
+  }
+
+  const typeFilteredGlobalTracks = new Set();
+
+  for (let trackIndex = 0; trackIndex < tracks.length; trackIndex++) {
+    const globalTrack = tracks[trackIndex];
+
+    if (globalTrack.type === type) {
+      typeFilteredGlobalTracks.add(trackIndex);
+    }
+  }
+
+  return typeFilteredGlobalTracks;
+}
+
+/**
+ * Get the type and return the filtered by type local tracks by Pid.
+ */
+export function getTypeFilteredLocalTracksByPid(
+  localTracksByPid: Map<Pid, LocalTrack[]>,
+  type: string
+): Map<Pid, Set<TrackIndex>> | null {
+  if (!type) {
+    return null;
+  }
+
+  const typeFilteredLocalTracksByPid = new Map();
+  for (const [pid, tracks] of localTracksByPid) {
+    const typeFilteredLocalTracks = new Set();
+
+    for (let trackIndex = 0; trackIndex < tracks.length; trackIndex++) {
+      const localTrack = tracks[trackIndex];
+      if (localTrack.type === type) {
+        typeFilteredLocalTracks.add(trackIndex);
+      }
+    }
+    if (typeFilteredLocalTracks.size > 0) {
+      // Only add the global track when the are some type filtered local tracks.
+      typeFilteredLocalTracksByPid.set(pid, typeFilteredLocalTracks);
+    }
+  }
+
+  return typeFilteredLocalTracksByPid;
+}
+
+/**
  * Returns the track reference from tid.
  * Returns null if the given tid is not found.
  */

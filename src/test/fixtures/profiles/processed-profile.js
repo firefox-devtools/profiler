@@ -1332,26 +1332,31 @@ export function getIPCTrackProfile() {
   return getProfileWithMarkers([].concat(...arrayOfIPCMarkers));
 }
 
+export function getScreenshotMarkersForWindowId(
+  windowID: string,
+  count: number
+): TestDefinedMarkers {
+  return Array(count)
+    .fill()
+    .map((_, i) => [
+      'CompositorScreenshot',
+      i,
+      null,
+      {
+        type: 'CompositorScreenshot',
+        url: 0, // Some arbitrary string.
+        windowID,
+        windowWidth: 300,
+        windowHeight: 150,
+      },
+    ]);
+}
+
 export function getScreenshotTrackProfile() {
-  const screenshotMarkersForWindowId = (windowID, count) =>
-    Array(count)
-      .fill()
-      .map((_, i) => [
-        'CompositorScreenshot',
-        i,
-        null,
-        {
-          type: 'CompositorScreenshot',
-          url: 0, // Some arbitrary string.
-          windowID,
-          windowWidth: 300,
-          windowHeight: 150,
-        },
-      ]);
   return getProfileWithMarkers([
-    ...screenshotMarkersForWindowId('0', 5), // This window isn't closed, so we should repeat the last screenshot
-    ...screenshotMarkersForWindowId('1', 5), // This window is closed after screenshot 6.
-    ...screenshotMarkersForWindowId('2', 10), // This window isn't closed and define the profile length
+    ...getScreenshotMarkersForWindowId('0', 5), // This window isn't closed, so we should repeat the last screenshot
+    ...getScreenshotMarkersForWindowId('1', 5), // This window is closed after screenshot 6.
+    ...getScreenshotMarkersForWindowId('2', 10), // This window isn't closed and define the profile length
     [
       'CompositorScreenshotWindowDestroyed',
       6,
