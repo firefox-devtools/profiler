@@ -84,7 +84,7 @@ import type {
   SortedTabPageData,
 } from 'firefox-profiler/types';
 
-import type { DefaultVisibilityScore } from '../profile-logic/tracks';
+import type { ThreadActivityScore } from '../profile-logic/tracks';
 
 export const getProfileView: Selector<ProfileViewState> = (state) =>
   state.profileView;
@@ -721,7 +721,7 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
 export const getMaxCPUDeltaPerInterval: Selector<number | null> =
   createSelector(getProfile, CPU.computeMaxCPUDeltaPerInterval);
 
-export const getThreadActivityScores: Selector<Array<DefaultVisibilityScore>> =
+export const getThreadActivityScores: Selector<Array<ThreadActivityScore>> =
   createSelector(
     getProfile,
     getMaxCPUDeltaPerInterval,
@@ -729,7 +729,7 @@ export const getThreadActivityScores: Selector<Array<DefaultVisibilityScore>> =
       const { threads } = profile;
 
       return threads.map((thread) =>
-        Tracks.computeThreadDefaultVisibilityScore(
+        Tracks.computeThreadActivityScore(
           profile,
           thread,
           maxCpuDeltaPerInterval

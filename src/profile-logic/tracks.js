@@ -818,7 +818,7 @@ export function tryInitializeHiddenTracksFromUrl(
 export function computeDefaultHiddenTracks(
   tracksWithOrder: TracksWithOrder,
   profile: Profile,
-  threadActivityScores: Array<DefaultVisibilityScore>
+  threadActivityScores: Array<ThreadActivityScore>
 ): HiddenTracks {
   return _computeHiddenTracksForVisibleThreads(
     profile,
@@ -1054,7 +1054,7 @@ const IDLE_THRESHOLD_FRACTION = 0.05;
 export function computeDefaultVisibleThreads(
   profile: Profile,
   tracksWithOrder: TracksWithOrder,
-  threadActivityScores: Array<DefaultVisibilityScore>
+  threadActivityScores: Array<ThreadActivityScore>
 ): Set<ThreadIndex> {
   const threads = profile.threads;
   if (threads.length === 0) {
@@ -1116,7 +1116,7 @@ export function computeDefaultVisibleThreads(
   return new Set(finalList.map(({ threadIndex }) => threadIndex));
 }
 
-export type DefaultVisibilityScore = {|
+export type ThreadActivityScore = {|
   // Whether this thread is one of the essential threads that
   // should always be kept (unless there's too many of them).
   isEssentialFirefoxThread: boolean,
@@ -1140,11 +1140,11 @@ const AUDIO_THREAD_SAMPLE_SCORE_BOOST_FACTOR = 40;
 // See the DefaultVisibilityScore type for details.
 // If we have too many threads, we use this score to compare between
 // "interesting" threads to make sure we keep the most interesting ones.
-export function computeThreadDefaultVisibilityScore(
+export function computeThreadActivityScore(
   profile: Profile,
   thread: Thread,
   maxCpuDeltaPerInterval: number | null
-): DefaultVisibilityScore {
+): ThreadActivityScore {
   const isEssentialFirefoxThread = _isEssentialFirefoxThread(thread);
   const isInterestingEvenWithMinimalActivity =
     _isFirefoxMediaThreadWhichIsUsuallyIdle(thread);
