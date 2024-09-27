@@ -20,7 +20,6 @@ import type {
 } from 'firefox-profiler/types';
 
 import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
-import { computeMaxCPUDeltaPerInterval } from './cpu';
 import { intersectSets, subtractSets } from '../utils/set';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
@@ -818,11 +817,16 @@ export function tryInitializeHiddenTracksFromUrl(
 // The result is guaranteed to have a non-empty number of visible threads.
 export function computeDefaultHiddenTracks(
   tracksWithOrder: TracksWithOrder,
-  profile: Profile
+  profile: Profile,
+  threadActivityScores: Array<DefaultVisibilityScore>
 ): HiddenTracks {
   return _computeHiddenTracksForVisibleThreads(
     profile,
-    computeDefaultVisibleThreads(profile, tracksWithOrder),
+    computeDefaultVisibleThreads(
+      profile,
+      tracksWithOrder,
+      threadActivityScores
+    ),
     tracksWithOrder
   );
 }
@@ -1049,7 +1053,8 @@ const IDLE_THRESHOLD_FRACTION = 0.05;
 // Return a non-empty set of threads that should be shown by default.
 export function computeDefaultVisibleThreads(
   profile: Profile,
-  tracksWithOrder: TracksWithOrder
+  tracksWithOrder: TracksWithOrder,
+  threadActivityScores: Array<DefaultVisibilityScore>
 ): Set<ThreadIndex> {
   const threads = profile.threads;
   if (threads.length === 0) {
@@ -1067,15 +1072,10 @@ export function computeDefaultVisibleThreads(
   const allTrackThreads = computeAllTrackThreads(tracksWithOrder);
 
   // First, compute a score for every thread.
-  const maxCpuDeltaPerInterval = computeMaxCPUDeltaPerInterval(profile);
-  let scores = threads.map((thread, threadIndex) => {
-    const score = computeThreadDefaultVisibilityScore(
-      profile,
-      thread,
-      maxCpuDeltaPerInterval
-    );
-    return { threadIndex, score };
-  });
+  let scores = threadActivityScores.map((score, threadIndex) => ({
+    threadIndex,
+    score,
+  }));
 
   // Next, filter the tracks by the tab selector threads.
   scores = scores.filter(({ threadIndex }) => allTrackThreads.has(threadIndex));
