@@ -92,7 +92,9 @@ describe('app/ServiceWorkerManager', () => {
         dispatchEvent: (eventName) => {
           const listeners = listenersMap.get(eventName) ?? new Set();
           for (const listener of listeners) {
-            listener();
+            act(() => {
+              listener();
+            });
           }
         },
       };

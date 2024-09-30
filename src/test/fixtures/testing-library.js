@@ -15,26 +15,9 @@ function customRender(children: React$Element<any>, ...args: any) {
   const bundles = lazilyParsedBundles([['en-US', messages]]);
   const localization = new ReactLocalization(bundles);
 
-  // Silence React 18 errors as it's too noisy in the test output. Don't forget
-  // to remove it when removing legacyRoot below!
-  // Other files such as src/test/components/UrlManager.test.js also mock
-  // console.error and might need to be changed in the same time.
-  if (!console.error._isMockFunction) {
-    const originalConsoleError = console.error.bind(console);
-    jest.spyOn(console, 'error').mockImplementation((...args) => {
-      if (/ReactDOM.render is no longer supported in React 18/.test(args[0])) {
-        return;
-      }
-      originalConsoleError(...args);
-    });
-  }
-
   const renderResult = render(
     <LocalizationProvider l10n={localization}>{children}</LocalizationProvider>,
     {
-      // Stick to the React 17 behavior for now. Don't forget to remove the
-      // mock for console.error above when removing this!
-      legacyRoot: true,
       ...args,
     }
   );
