@@ -14,6 +14,7 @@ import {
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { Root } from '../../components/app/Root';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
+import { fireFullClick } from '../fixtures/utils';
 import { getProfileUrlForHash } from '../../actions/receive-profile';
 import { blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
@@ -130,7 +131,7 @@ describe('Root with history', function () {
       name: 'Marker Chart',
       selected: false,
     });
-    markerChart.click();
+    fireFullClick(markerChart);
 
     await waitForTab({ name: 'Call Tree', selected: false });
     await waitForTab({ name: 'Marker Chart', selected: true });
@@ -168,7 +169,7 @@ describe('Root with history', function () {
       name: 'Marker Chart',
       selected: false,
     });
-    markerChart.click();
+    fireFullClick(markerChart);
 
     await waitForTab({ name: 'Call Tree', selected: false });
     await waitForTab({ name: 'Marker Chart', selected: true });

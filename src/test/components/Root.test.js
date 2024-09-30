@@ -40,7 +40,7 @@ jest.mock('../../components/app/ListOfPublishedProfiles', () => ({
 import * as React from 'react';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import { AppViewRouter } from '../../components/app/AppViewRouter';
 import { ProfileLoader } from '../../components/app/ProfileLoader';
 import { updateUrlState, changeProfilesToCompare } from '../../actions/app';
@@ -190,13 +190,19 @@ function setup() {
     </Provider>
   );
 
+  function actAndDispatch(what) {
+    act(() => {
+      store.dispatch(what);
+    });
+  }
+
   function navigateToStoreLoadingPage() {
     const newUrlState = stateFromLocation({
       pathname: '/public/ThisIsAFakeHash/calltree',
       search: '',
       hash: '',
     });
-    store.dispatch(updateUrlState(newUrlState));
+    actAndDispatch(updateUrlState(newUrlState));
   }
 
   function navigateToFromBrowserProfileLoadingPage() {
@@ -205,7 +211,7 @@ function setup() {
       search: '',
       hash: '',
     });
-    store.dispatch(updateUrlState(newUrlState));
+    actAndDispatch(updateUrlState(newUrlState));
   }
 
   function navigateBackToHome() {
@@ -214,7 +220,7 @@ function setup() {
       hash: '',
       search: '',
     });
-    store.dispatch(updateUrlState(newUrlState));
+    actAndDispatch(updateUrlState(newUrlState));
   }
 
   function navigateToCompareHome() {
@@ -223,7 +229,7 @@ function setup() {
       hash: '',
       search: '',
     });
-    store.dispatch(updateUrlState(newUrlState));
+    actAndDispatch(updateUrlState(newUrlState));
   }
 
   function navigateToMyProfiles() {
@@ -232,12 +238,12 @@ function setup() {
       hash: '',
       search: '',
     });
-    store.dispatch(updateUrlState(newUrlState));
+    actAndDispatch(updateUrlState(newUrlState));
   }
 
   return {
     ...renderResult,
-    dispatch: store.dispatch,
+    dispatch: actAndDispatch,
     navigateToStoreLoadingPage,
     navigateToFromBrowserProfileLoadingPage,
     navigateBackToHome,

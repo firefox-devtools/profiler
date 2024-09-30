@@ -115,10 +115,12 @@ describe('timeline/TrackContextMenu', function () {
     };
 
     const showContextMenu = () => {
-      showMenu({
-        data: null,
-        id: 'TimelineTrackContextMenu',
-        position: { x: 0, y: 0 },
+      act(() => {
+        showMenu({
+          data: null,
+          id: 'TimelineTrackContextMenu',
+          position: { x: 0, y: 0 },
+        });
       });
     };
 

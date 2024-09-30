@@ -17,7 +17,7 @@ import '../res/css/network.css';
 import 'react-splitter-layout/lib/index.css';
 
 import React from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Root } from './components/app/Root';
 import createStore from './app-logic/create-store';
 import {
@@ -45,17 +45,13 @@ window.geckoProfilerPromise = new Promise(function (resolve) {
 });
 
 const store = createStore();
-
-// This uses the React 17 API despite that we use React 18. When moving to the
-// newer API, don't forget to update the tests in
-// src/test/fixtures/testing-library.js.
-render(
-  <Root store={store} />,
+const root = createRoot(
   ensureExists(
     document.getElementById('root'),
     'Unable to find the DOM element to attach the React element to.'
   )
 );
+root.render(<Root store={store} />);
 
 addDataToWindowObject(store.getState, store.dispatch);
 if (process.env.NODE_ENV === 'production') {
