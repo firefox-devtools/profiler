@@ -88,7 +88,7 @@ describe('FlameGraph', function () {
     expect(getTooltip()).toBeTruthy();
   });
 
-  it('persists the selected frame tooltips properly', () => {
+  it('should not persist the selected frame tooltips', () => {
     const { getTooltip, moveMouse, findFillTextPosition, leftClick } =
       setupFlameGraph();
     // No tooltip displayed yet.
@@ -102,51 +102,8 @@ describe('FlameGraph', function () {
     // Move the mouse outside of the frame.
     moveMouse({ x: 0, y: 0 });
 
-    // Make sure that we have the tooltip persisted.
-    expect(getTooltip()).toBeTruthy();
-
-    // Click outside of the marker.
-    leftClick({ x: 0, y: 0 });
-
-    // Now the tooltip should not be displayed.
+    // Make sure that we don't have a persisted tooltip.
     expect(getTooltip()).toBeFalsy();
-  });
-
-  it('tooltip should not persist if the flame graph gets changed', () => {
-    const {
-      getContentDiv,
-      getTooltip,
-      moveMouse,
-      findFillTextPosition,
-      leftClick,
-    } = setupFlameGraph();
-    const div = getContentDiv();
-    // No tooltip displayed yet.
-    expect(getTooltip()).toBe(null);
-
-    leftClick(findFillTextPosition('A'));
-
-    // The tooltip should be displayed.
-    expect(getTooltip()).toBeTruthy();
-
-    // Move the mouse outside of the frame.
-    moveMouse({ x: 0, y: 0 });
-
-    // Make sure that we have the tooltip persisted.
-    expect(getTooltip()).toBeTruthy();
-
-    // Flush the draw log to make sure we properly draw the graph later.
-    flushDrawLog();
-
-    // Do something that updates the flame graph component.
-    fireEvent.keyDown(div, { key: 'Enter' });
-
-    // Now the tooltip should not be displayed because it could show invalid data.
-    expect(getTooltip()).toBeFalsy();
-
-    // Make sure that the graph is rendered properly.
-    const drawCalls = flushDrawLog();
-    expect(drawCalls.length).toBeGreaterThan(0);
   });
 
   it('has a tooltip that matches the snapshot with categories', () => {
