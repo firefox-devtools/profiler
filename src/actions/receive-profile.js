@@ -1715,7 +1715,13 @@ export function retrieveProfileForRawUrl(
                 'Responding via postMessage that the profiler is ready.'
               );
               const otherWindow = event.source ?? window;
-              otherWindow.postMessage({ name: 'is-ready' }, '*');
+              if (otherWindow === window) {
+                // Avoid sending a message with the same name as it will create
+                // an infinite loop within this event listener.
+                otherWindow.postMessage({ name: 'ready' }, '*');
+              } else {
+                otherWindow.postMessage({ name: 'is-ready' }, '*');
+              }
               break;
             }
             default:
