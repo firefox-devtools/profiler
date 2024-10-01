@@ -939,6 +939,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         hitTest={this.hitTest}
         onMouseMove={this.onMouseMove}
         onMouseLeave={this.onMouseLeave}
+        stickyTooltips={true}
       />
     );
   }

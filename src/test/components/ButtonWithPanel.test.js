@@ -6,7 +6,11 @@
 import * as React from 'react';
 import { fireEvent } from '@testing-library/react';
 
-import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  screen,
+  act,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import { ButtonWithPanel } from '../../components/shared/ButtonWithPanel';
 import { ensureExists } from '../../utils/flow';
 import { fireFullClick } from '../fixtures/utils';
@@ -82,7 +86,9 @@ describe('shared/ButtonWithPanel', () => {
     const button = screen.getByText('My Button');
     expect(button.title).toBe('Click here to open the panel');
     fireFullClick(button);
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+    });
     expect(button.title).toBe('');
   });
 
@@ -90,7 +96,9 @@ describe('shared/ButtonWithPanel', () => {
     const { container } = setup();
 
     fireFullClick(screen.getByText('My Button'));
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+    });
     expect(container.firstChild).toMatchSnapshot();
 
     //it closes the panel when Esc key is pressed
@@ -99,7 +107,9 @@ describe('shared/ButtonWithPanel', () => {
       keyCode: 27,
       which: 27,
     });
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+    });
     expect(container.firstChild).toMatchSnapshot();
   });
 
@@ -107,7 +117,9 @@ describe('shared/ButtonWithPanel', () => {
     const { container } = setup();
 
     fireFullClick(screen.getByText('My Button'));
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+    });
     expect(container.firstChild).toMatchSnapshot();
 
     // it closes the panel when clicking outside the panel
@@ -116,7 +128,9 @@ describe('shared/ButtonWithPanel', () => {
     );
     fireFullClick(newDiv);
 
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+    });
     expect(container.firstChild).toMatchSnapshot();
   });
 
@@ -124,12 +138,16 @@ describe('shared/ButtonWithPanel', () => {
     const { container } = setup();
 
     fireFullClick(screen.getByText('My Button'));
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+    });
 
     ensureExists(container.querySelector('.arrowPanel.open'));
 
     fireFullClick(screen.getByText('My Button'));
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+    });
 
     expect(container.querySelector('.arrowPanel.open')).toBe(null);
   });
@@ -138,17 +156,23 @@ describe('shared/ButtonWithPanel', () => {
     const { container } = setup();
 
     fireFullClick(screen.getByText('My Button'));
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+    });
     ensureExists(container.querySelector('.arrowPanel.open'));
 
     // Clicking on the panel doesn't hide the popup.
     fireFullClick(screen.getByText('Panel content'));
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+    });
     ensureExists(container.querySelector('.arrowPanel.open'));
 
     // But clicking on the arrow area does.
     fireFullClick(ensureExists(container.querySelector('.arrowPanelArrow')));
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+    });
     expect(container.querySelector('.arrowPanel.open')).toBe(null);
   });
 });

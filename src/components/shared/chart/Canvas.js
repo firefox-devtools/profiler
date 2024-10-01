@@ -33,6 +33,8 @@ type Props<Item> = {|
 
   +onMouseMove?: (e: { nativeEvent: MouseEvent }) => mixed,
   +onMouseLeave?: (e: { nativeEvent: MouseEvent }) => mixed,
+  // Defaults to false. Set to true if the chart should persist the tooltips on click.
+  +stickyTooltips?: boolean,
 |};
 
 // The naming of the X and Y coordinates here correspond to the ones
@@ -224,11 +226,13 @@ export class ChartCanvas<Item> extends React.Component<
     const { onSelectItem } = this.props;
     if (e.button === 0 && onSelectItem) {
       // Left button is a selection action
-      this.setState((state) => ({
-        selectedItem: state.hoveredItem,
-        pageX: e.pageX,
-        pageY: e.pageY,
-      }));
+      if (this.props.stickyTooltips) {
+        this.setState((state) => ({
+          selectedItem: state.hoveredItem,
+          pageX: e.pageX,
+          pageY: e.pageY,
+        }));
+      }
 
       onSelectItem(this.state.hoveredItem);
     }
