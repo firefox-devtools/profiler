@@ -39,7 +39,6 @@ type RenderedComponentSettings = {|
   +rangeEnd: Milliseconds,
   +sampleIndexOffset: number,
   +xPixelsPerMs: number,
-  +enableCPUUsage: boolean,
   +maxThreadCPUDeltaPerMs: number,
   +treeOrderSampleComparator: ?(
     IndexIntoSamplesTable,
@@ -219,7 +218,6 @@ export class ActivityGraphFillComputer {
       rangeFilteredThread: { samples, stackTable },
       interval,
       greyCategoryIndex,
-      enableCPUUsage,
       sampleIndexOffset,
     } = this.renderedComponentSettings;
 
@@ -251,7 +249,7 @@ export class ActivityGraphFillComputer {
 
       let cpuBeforeSample = null;
       let cpuAfterSample = null;
-      if (enableCPUUsage && threadCPUDelta) {
+      if (threadCPUDelta !== undefined) {
         // It must be non-null because we are checking this in the processing
         // step and eliminating all the null values.
         cpuBeforeSample = ensureExists(threadCPUDelta[i]);
@@ -283,7 +281,7 @@ export class ActivityGraphFillComputer {
 
     let cpuBeforeSample = null;
     let cpuAfterSample = null;
-    if (enableCPUUsage && threadCPUDelta) {
+    if (threadCPUDelta !== undefined) {
       cpuBeforeSample = ensureExists(threadCPUDelta[lastIdx]);
 
       const nextIdxInFullThread = sampleIndexOffset + lastIdx + 1;
@@ -679,7 +677,6 @@ export class ActivityFillGraphQuerier {
   ): number {
     const {
       rangeFilteredThread: { samples },
-      enableCPUUsage,
       interval,
       sampleIndexOffset,
       fullThread,
@@ -703,7 +700,7 @@ export class ActivityFillGraphQuerier {
     let cpuDeltaBeforeSample = null;
     let cpuDeltaAfterSample = null;
     const { threadCPUDelta } = samples;
-    if (enableCPUUsage && threadCPUDelta) {
+    if (threadCPUDelta !== undefined) {
       // It must be non-null because we are checking this in the processing
       // step and eliminating all the null values.
       cpuDeltaBeforeSample = ensureExists(threadCPUDelta[sample]);
