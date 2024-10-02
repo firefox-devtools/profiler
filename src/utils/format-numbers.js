@@ -64,6 +64,9 @@ export function formatNumber(
     const numberFormat = _memoizedGetNumberFormat({ places: 0, style });
     return numberFormat.format(value);
   }
+  if (isNaN(value)) {
+    return '<invalid>';
+  }
 
   /*
    * Note that numDigitsOnLeft can be negative when the first non-zero digit

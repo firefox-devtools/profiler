@@ -10,4 +10,8 @@ describe('formatNumber', () => {
   it('return 0 without digits when called with 0', () => {
     expect(formatNumber(0)).toBe('0');
   });
+
+  it('does not fail when called with NaN', () => {
+    expect(formatNumber(NaN)).toBe('<invalid>');
+  });
 });
