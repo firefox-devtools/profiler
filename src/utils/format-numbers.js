@@ -60,6 +60,11 @@ export function formatNumber(
   maxFractionalDigits: number = 3,
   style: 'decimal' | 'percent' = 'decimal'
 ): string {
+  if (value === 0) {
+    const numberFormat = _memoizedGetNumberFormat({ places: 0, style });
+    return numberFormat.format(value);
+  }
+
   /*
    * Note that numDigitsOnLeft can be negative when the first non-zero digit
    * is on the right of the decimal point.  0.01 = -1
