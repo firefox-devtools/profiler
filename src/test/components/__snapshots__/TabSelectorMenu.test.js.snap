@@ -40,7 +40,7 @@ exports[`app/TabSelectorMenu should render properly 1`] = `
         role="menuitem"
         tabindex="-1"
       >
-        mozilla.org
+        profiler.firefox.com
       </div>
       <div
         aria-checked="true"
@@ -49,7 +49,7 @@ exports[`app/TabSelectorMenu should render properly 1`] = `
         role="menuitem"
         tabindex="-1"
       >
-        profiler.firefox.com
+        mozilla.org
       </div>
     </nav>
   </div>

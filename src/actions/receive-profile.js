@@ -44,7 +44,10 @@ import {
   getSelectedTab,
   getTabFilter,
 } from 'firefox-profiler/selectors/url-state';
-import { getTabToThreadIndexesMap } from 'firefox-profiler/selectors/profile';
+import {
+  getTabToThreadIndexesMap,
+  getThreadActivityScores,
+} from 'firefox-profiler/selectors/profile';
 import {
   withHistoryReplaceStateAsync,
   withHistoryReplaceStateSync,
@@ -348,7 +351,11 @@ export function finalizeFullProfileView(
       // This is the case for the initial profile load.
       // We also get here if the URL info was ignored, for example if
       // respecting it would have caused all threads to become hidden.
-      hiddenTracks = computeDefaultHiddenTracks(tracksWithOrder, profile);
+      hiddenTracks = computeDefaultHiddenTracks(
+        tracksWithOrder,
+        profile,
+        getThreadActivityScores(getState())
+      );
     }
 
     const selectedThreadIndexes = initializeSelectedThreadIndex(
@@ -1804,7 +1811,11 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
       // This is the case for the initial profile load.
       // We also get here if the URL info was ignored, for example if
       // respecting it would have caused all threads to become hidden.
-      hiddenTracks = computeDefaultHiddenTracks(tracksWithOrder, profile);
+      hiddenTracks = computeDefaultHiddenTracks(
+        tracksWithOrder,
+        profile,
+        getThreadActivityScores(getState())
+      );
     }
 
     const selectedThreadIndexes = initializeSelectedThreadIndex(
