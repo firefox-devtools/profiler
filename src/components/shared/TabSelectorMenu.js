@@ -12,14 +12,14 @@ import { ContextMenu } from './ContextMenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { changeTabFilter } from 'firefox-profiler/actions/receive-profile';
 import { getTabFilter } from '../../selectors/url-state';
-import { getProfileFilterPageDataByTabID } from 'firefox-profiler/selectors/profile';
+import { getProfileFilterSortedPageData } from 'firefox-profiler/selectors/profile';
 
-import type { TabID, ProfileFilterPageData } from 'firefox-profiler/types';
+import type { TabID, SortedTabPageData } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {|
   +tabFilter: TabID | null,
-  +pageDataByTabID: Map<TabID, ProfileFilterPageData> | null,
+  +sortedPageData: SortedTabPageData | null,
 |};
 
 type DispatchProps = {|
@@ -36,9 +36,8 @@ class TabSelectorMenuImpl extends React.PureComponent<Props> {
   };
 
   renderTabSelectorMenuContents() {
-    const { pageDataByTabID, tabFilter } = this.props;
-    if (!pageDataByTabID || pageDataByTabID.size === 0) {
-      // There is no page data, return early.
+    const { sortedPageData, tabFilter } = this.props;
+    if (!sortedPageData || sortedPageData.length === 0) {
       return null;
     }
 
@@ -59,7 +58,7 @@ class TabSelectorMenuImpl extends React.PureComponent<Props> {
             All tabs and windows
           </Localized>
         </MenuItem>
-        {[...pageDataByTabID].map(([tabID, pageData]) => (
+        {sortedPageData.map(({ tabID, pageData }) => (
           <MenuItem
             key={tabID}
             onClick={this._handleClick}
@@ -92,7 +91,7 @@ export const TabSelectorMenu = explicitConnect<{||}, StateProps, DispatchProps>(
   {
     mapStateToProps: (state) => ({
       tabFilter: getTabFilter(state),
-      pageDataByTabID: getProfileFilterPageDataByTabID(state),
+      sortedPageData: getProfileFilterSortedPageData(state),
     }),
     mapDispatchToProps: {
       changeTabFilter,
