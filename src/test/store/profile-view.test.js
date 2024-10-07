@@ -1248,6 +1248,7 @@ describe('actions/ProfileView', function () {
             entryType: 'measure',
           },
         ],
+        ['Navigation::Start', 1110, null],
       ]);
       // Set the category to DOM for the marker 'a'.
       profile.threads[0].markers.category[0] = ensureExists(
@@ -1264,11 +1265,11 @@ describe('actions/ProfileView', function () {
 
       expect(
         selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
-      ).toHaveLength(4);
+      ).toHaveLength(5);
 
       // Tests searching for the marker name or the name of usertiming markers.
       dispatch(ProfileView.changeMarkersSearchString('name:a'));
-      expect(filteredMarkerNames()).toEqual(['a', 'b']);
+      expect(filteredMarkerNames()).toEqual(['a', 'b', 'Navigation::Start']);
 
       // Tests searching for the DOMEvent type
       dispatch(ProfileView.changeMarkersSearchString('type:dom'));
@@ -1295,15 +1296,20 @@ describe('actions/ProfileView', function () {
 
       // Tests the basic negative filtering with "-timing".
       dispatch(ProfileView.changeMarkersSearchString('-name:mark'));
-      expect(filteredMarkerNames()).toEqual(['a', 'c', 'd']);
+      expect(filteredMarkerNames()).toEqual([
+        'a',
+        'c',
+        'd',
+        'Navigation::Start',
+      ]);
 
       // Tests multiple negative filtering with "-mark,-clic".
       dispatch(ProfileView.changeMarkersSearchString('-name:mark,-name:clic'));
-      expect(filteredMarkerNames()).toEqual(['a', 'c']);
+      expect(filteredMarkerNames()).toEqual(['a', 'c', 'Navigation::Start']);
 
       // Tests the negative filtering on a field with "-timing".
       dispatch(ProfileView.changeMarkersSearchString('-type:timing'));
-      expect(filteredMarkerNames()).toEqual(['a', 'c']);
+      expect(filteredMarkerNames()).toEqual(['a', 'c', 'Navigation::Start']);
 
       // Tests searching for the UserTiming type and negative search field.
       dispatch(ProfileView.changeMarkersSearchString('type:timing,-name:b'));
@@ -1319,7 +1325,20 @@ describe('actions/ProfileView', function () {
 
       // Tests searching for the mark-1 as a negative filter to make sure we exclude it.
       dispatch(ProfileView.changeMarkersSearchString('-name:-1'));
-      expect(filteredMarkerNames()).toEqual(['a', 'c', 'd']);
+      expect(filteredMarkerNames()).toEqual([
+        'a',
+        'c',
+        'd',
+        'Navigation::Start',
+      ]);
+
+      // Tests searching for Navigation:: should find Navigation::Start
+      dispatch(ProfileView.changeMarkersSearchString('Navigation::'));
+      expect(filteredMarkerNames()).toEqual(['Navigation::Start']);
+      dispatch(ProfileView.changeMarkersSearchString('name:Navigation::'));
+      expect(filteredMarkerNames()).toEqual(['Navigation::Start']);
+      dispatch(ProfileView.changeMarkersSearchString('-name:Navigation::'));
+      expect(filteredMarkerNames()).toEqual(['a', 'b', 'c', 'd']);
     });
   });
 
