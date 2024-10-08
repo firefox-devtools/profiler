@@ -240,11 +240,12 @@ describe('TrackPower', function () {
     expect(screen.getByText(/visible range:/).nextSibling).toHaveTextContent(
       '8.4\u2069 µWh'
     );
-    // Over the preview selection, we get 5 µWh which shows up as 5.0 µWh.
-    expect(
-      screen.getByText(/Energy used in the current selection:/).nextSibling
-    ).toHaveTextContent('0\u2069 Wh (\u20680\u2069 g CO₂e)');
 
+    // The preview selection being empty, these 2 lines are not useful and
+    // therefore not rendered.
+    expect(
+      screen.queryByText(/Energy used in the current selection:/)
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByText(/Average power in the current selection/)
     ).not.toBeInTheDocument();

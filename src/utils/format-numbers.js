@@ -49,6 +49,7 @@ const _memoizedGetNumberFormat = memoize(_getNumberFormat, {
  *
  * For example, using significantDigits = 2 (the default):
  *
+ * formatNumber(0      ) =   "0"
  * formatNumber(123    ) = "123"
  * formatNumber(12.3   ) =  "12"
  * formatNumber(1.23   ) =   "1.2"

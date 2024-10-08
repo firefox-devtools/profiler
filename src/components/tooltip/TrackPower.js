@@ -125,7 +125,7 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
     );
   }
 
-  renderForPreviewSelection(
+  maybeRenderForPreviewSelection(
     previewSelection
   ): React.ChildrenArray<React.Element<typeof TooltipDetail> | null> | null {
     if (!previewSelection.hasSelection) {
@@ -134,6 +134,11 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
 
     const { selectionStart, selectionEnd } = previewSelection;
     const selectionRange = selectionEnd - selectionStart;
+
+    if (selectionRange === 0) {
+      return null;
+    }
+
     const powerSumForPreviewRange = this._computePowerSumForRange(
       selectionStart,
       selectionEnd
@@ -149,17 +154,13 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
           'TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour',
           'TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour'
         )}
-        {selectionRange !== 0
-          ? this._formatPowerValue(
-              (1000 /* ms -> s */ *
-                3600 /* s -> h */ *
-                powerSumForPreviewRange) /
-                selectionRange,
-              'TrackPower--tooltip-average-power-kilowatt',
-              'TrackPower--tooltip-average-power-watt',
-              'TrackPower--tooltip-average-power-milliwatt'
-            )
-          : null}
+        {this._formatPowerValue(
+          (1000 /* ms -> s */ * 3600 /* s -> h */ * powerSumForPreviewRange) /
+            selectionRange,
+          'TrackPower--tooltip-average-power-kilowatt',
+          'TrackPower--tooltip-average-power-watt',
+          'TrackPower--tooltip-average-power-milliwatt'
+        )}
       </>
     );
   }
@@ -194,9 +195,7 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
             'TrackPower--tooltip-power-watt',
             'TrackPower--tooltip-power-milliwatt'
           )}
-          {previewSelection.hasSelection
-            ? this.renderForPreviewSelection(previewSelection)
-            : null}
+          {this.maybeRenderForPreviewSelection(previewSelection)}
           {this._formatPowerValue(
             this._computePowerSumForCommittedRange(committedRange),
             'TrackPower--tooltip-energy-carbon-used-in-range-kilowatthour',
