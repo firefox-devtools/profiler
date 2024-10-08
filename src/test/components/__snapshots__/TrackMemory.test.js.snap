@@ -17,7 +17,7 @@ exports[`TrackMemory has a tooltip that matches the snapshot 1`] = `
     <span
       class="timelineTrackMemoryTooltipNumber"
     >
-      0.000B
+      0B
     </span>
     relative memory at this time
   </div>
@@ -54,7 +54,7 @@ exports[`TrackMemory has a tooltip that matches the snapshot for counts equallin
     <span
       class="timelineTrackMemoryTooltipNumber"
     >
-      0.000B
+      0B
     </span>
     relative memory at this time
   </div>

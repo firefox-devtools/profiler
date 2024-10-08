@@ -230,9 +230,9 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 <span
                   class="treeViewRowColumn treeViewFixedColumn start"
                   style="width: 90px;"
-                  title="0.000s"
+                  title="0s"
                 >
-                  0.000s
+                  0s
                 </span>
                 <span
                   class="treeViewColumnDivider"
