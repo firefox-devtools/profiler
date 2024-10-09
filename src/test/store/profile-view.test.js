@@ -1237,7 +1237,7 @@ describe('actions/ProfileView', function () {
             entryType: 'mark',
           },
         ],
-        ['c', 2, null],
+        ['c', 1023, null],
         [
           'd',
           1050,
@@ -1248,6 +1248,7 @@ describe('actions/ProfileView', function () {
             entryType: 'measure',
           },
         ],
+        ['Navigation::Start', 1110, null],
       ]);
       // Set the category to DOM for the marker 'a'.
       profile.threads[0].markers.category[0] = ensureExists(
@@ -1255,127 +1256,89 @@ describe('actions/ProfileView', function () {
       ).findIndex((c) => c.name === 'DOM');
 
       const { dispatch, getState } = storeWithProfile(profile);
+      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      const filteredMarkerNames = () => {
+        const markerIndexes =
+          selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
+        return markerIndexes.map((i) => getMarker(i).name);
+      };
 
       expect(
         selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
-      ).toHaveLength(4);
+      ).toHaveLength(5);
 
       // Tests searching for the marker name or the name of usertiming markers.
       dispatch(ProfileView.changeMarkersSearchString('name:a'));
-
-      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-      let markerIndexes =
-        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
-      expect(markerIndexes).toHaveLength(2);
-      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
-      expect(getMarker(markerIndexes[1]).name.includes('b')).toBeTruthy();
+      expect(filteredMarkerNames()).toEqual(['a', 'b', 'Navigation::Start']);
 
       // Tests searching for the DOMEvent type
       dispatch(ProfileView.changeMarkersSearchString('type:dom'));
-
-      markerIndexes =
-        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
-      expect(markerIndexes).toHaveLength(1);
-      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
+      expect(filteredMarkerNames()).toEqual(['a']);
 
       // Tests searching for the UserTiming type, with a string that isn't a prefix
       dispatch(ProfileView.changeMarkersSearchString('type:timing'));
-
-      markerIndexes =
-        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
-      expect(markerIndexes).toHaveLength(2);
-      expect(getMarker(markerIndexes[0]).name.includes('b')).toBeTruthy();
-      expect(getMarker(markerIndexes[1]).name.includes('d')).toBeTruthy();
+      expect(filteredMarkerNames()).toEqual(['b', 'd']);
 
       // Tests searching in the category.
       dispatch(ProfileView.changeMarkersSearchString('cat:dom'));
-
-      markerIndexes =
-        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
-      expect(markerIndexes).toHaveLength(1);
-      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
+      expect(filteredMarkerNames()).toEqual(['a']);
 
       // This tests searching in all searchable field.
       // The 'c' in 'cat:' should not be matched.
       dispatch(ProfileView.changeMarkersSearchString('c'));
-
-      markerIndexes =
-        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
-      expect(markerIndexes).toHaveLength(2);
-      expect(getMarker(markerIndexes[0]).name.includes('c')).toBeTruthy();
-      expect(getMarker(markerIndexes[1]).name.includes('d')).toBeTruthy();
+      expect(filteredMarkerNames()).toEqual(['c', 'd']);
 
       // Search for a specific field or the data payload.
       dispatch(ProfileView.changeMarkersSearchString('eventtype:down'));
-
-      markerIndexes =
-        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
-      expect(markerIndexes).toHaveLength(1);
-      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
+      expect(filteredMarkerNames()).toEqual(['a']);
 
       // Testing the negative filtering
 
       // Tests the basic negative filtering with "-timing".
       dispatch(ProfileView.changeMarkersSearchString('-name:mark'));
-
-      markerIndexes =
-        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
-      expect(markerIndexes).toHaveLength(3);
-      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
-      expect(getMarker(markerIndexes[1]).name.includes('c')).toBeTruthy();
-      expect(getMarker(markerIndexes[2]).name.includes('d')).toBeTruthy();
+      expect(filteredMarkerNames()).toEqual([
+        'a',
+        'c',
+        'd',
+        'Navigation::Start',
+      ]);
 
       // Tests multiple negative filtering with "-mark,-clic".
       dispatch(ProfileView.changeMarkersSearchString('-name:mark,-name:clic'));
-
-      markerIndexes =
-        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
-      expect(markerIndexes).toHaveLength(2);
-      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
-      expect(getMarker(markerIndexes[1]).name.includes('c')).toBeTruthy();
+      expect(filteredMarkerNames()).toEqual(['a', 'c', 'Navigation::Start']);
 
       // Tests the negative filtering on a field with "-timing".
       dispatch(ProfileView.changeMarkersSearchString('-type:timing'));
-
-      markerIndexes =
-        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
-      expect(markerIndexes).toHaveLength(2);
-      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
-      expect(getMarker(markerIndexes[1]).name.includes('c')).toBeTruthy();
+      expect(filteredMarkerNames()).toEqual(['a', 'c', 'Navigation::Start']);
 
       // Tests searching for the UserTiming type and negative search field.
       dispatch(ProfileView.changeMarkersSearchString('type:timing,-name:b'));
-
-      markerIndexes =
-        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
-      expect(markerIndexes).toHaveLength(1);
-      expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
+      expect(filteredMarkerNames()).toEqual(['d']);
 
       // Tests searching for the mark-1 string making sure that it successfully gets it.
       dispatch(ProfileView.changeMarkersSearchString('-1'));
-
-      markerIndexes =
-        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
-      expect(markerIndexes).toHaveLength(1);
-      expect(getMarker(markerIndexes[0]).name.includes('b')).toBeTruthy();
+      expect(filteredMarkerNames()).toEqual(['b']);
 
       // Tests searching for the mark-1 as a field string making sure that it successfully gets it.
       dispatch(ProfileView.changeMarkersSearchString('name:-1'));
-
-      markerIndexes =
-        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
-      expect(markerIndexes).toHaveLength(1);
-      expect(getMarker(markerIndexes[0]).name.includes('b')).toBeTruthy();
+      expect(filteredMarkerNames()).toEqual(['b']);
 
       // Tests searching for the mark-1 as a negative filter to make sure we exclude it.
       dispatch(ProfileView.changeMarkersSearchString('-name:-1'));
+      expect(filteredMarkerNames()).toEqual([
+        'a',
+        'c',
+        'd',
+        'Navigation::Start',
+      ]);
 
-      markerIndexes =
-        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
-      expect(markerIndexes).toHaveLength(3);
-      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
-      expect(getMarker(markerIndexes[1]).name.includes('c')).toBeTruthy();
-      expect(getMarker(markerIndexes[2]).name.includes('d')).toBeTruthy();
+      // Tests searching for Navigation:: should find Navigation::Start
+      dispatch(ProfileView.changeMarkersSearchString('Navigation::'));
+      expect(filteredMarkerNames()).toEqual(['Navigation::Start']);
+      dispatch(ProfileView.changeMarkersSearchString('name:Navigation::'));
+      expect(filteredMarkerNames()).toEqual(['Navigation::Start']);
+      dispatch(ProfileView.changeMarkersSearchString('-name:Navigation::'));
+      expect(filteredMarkerNames()).toEqual(['a', 'b', 'c', 'd']);
     });
   });
 
