@@ -49,6 +49,7 @@ const _memoizedGetNumberFormat = memoize(_getNumberFormat, {
  *
  * For example, using significantDigits = 2 (the default):
  *
+ * formatNumber(0      ) =   "0"
  * formatNumber(123    ) = "123"
  * formatNumber(12.3   ) =  "12"
  * formatNumber(1.23   ) =   "1.2"
@@ -60,6 +61,14 @@ export function formatNumber(
   maxFractionalDigits: number = 3,
   style: 'decimal' | 'percent' = 'decimal'
 ): string {
+  if (value === 0) {
+    const numberFormat = _memoizedGetNumberFormat({ places: 0, style });
+    return numberFormat.format(value);
+  }
+  if (isNaN(value)) {
+    return '<invalid>';
+  }
+
   /*
    * Note that numDigitsOnLeft can be negative when the first non-zero digit
    * is on the right of the decimal point.  0.01 = -1
