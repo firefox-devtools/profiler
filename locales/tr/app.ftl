@@ -110,6 +110,8 @@ CallTreeSidebar--traced-running-time =
     .label = İzlenen çalışma süresi
 CallTreeSidebar--running-time =
     .label = Çalışma süresi
+CallTreeSidebar--running-samples =
+    .label = Çalışan örnekler
 CallTreeSidebar--running-size =
     .label = Çalışma boyutu
 CallTreeSidebar--categories = Kategoriler
@@ -577,6 +579,13 @@ TabBar--marker-chart-tab = İşaret Grafiği
 TabBar--marker-table-tab = İşaret Tablosu
 TabBar--network-tab = Ağ
 TabBar--js-tracer-tab = JS İzleyici
+
+## TabSelectorMenu
+## This component is a context menu that's opened when you click on the root
+## range at the top left corner for profiler analysis view. It's used to switch
+## between tabs that were captured in the profile.
+
+TabSelectorMenu--all-tabs-and-windows = Tüm sekmeler ve pencereler
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
