@@ -236,7 +236,7 @@ exports[`TooltipMarker renders properly network markers that were aborted 1`] = 
       :
     </div>
     <div
-      aria-label="Starting at 0.000 milliseconds, duration is 1,433 milliseconds"
+      aria-label="Starting at 0 milliseconds, duration is 1,433 milliseconds"
     >
       1,433ms
     </div>
@@ -338,7 +338,7 @@ exports[`TooltipMarker renders properly network markers where content type is bl
       :
     </div>
     <div
-      aria-label="Starting at 0.000 milliseconds, duration is 100 milliseconds"
+      aria-label="Starting at 0 milliseconds, duration is 100 milliseconds"
     >
       100ms
     </div>
@@ -359,7 +359,7 @@ exports[`TooltipMarker renders properly network markers where content type is bl
       :
     </div>
     <div
-      aria-label="Starting at 0.000 milliseconds, duration is 300 milliseconds"
+      aria-label="Starting at 0 milliseconds, duration is 300 milliseconds"
     >
       300ms
     </div>
@@ -524,7 +524,7 @@ exports[`TooltipMarker renders properly network markers where content type is mi
       :
     </div>
     <div
-      aria-label="Starting at 0.000 milliseconds, duration is 100 milliseconds"
+      aria-label="Starting at 0 milliseconds, duration is 100 milliseconds"
     >
       100ms
     </div>
@@ -545,7 +545,7 @@ exports[`TooltipMarker renders properly network markers where content type is mi
       :
     </div>
     <div
-      aria-label="Starting at 0.000 milliseconds, duration is 300 milliseconds"
+      aria-label="Starting at 0 milliseconds, duration is 300 milliseconds"
     >
       300ms
     </div>
@@ -720,7 +720,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part 2
       :
     </div>
     <div
-      aria-label="Starting at 0.000 milliseconds, duration is 100 milliseconds"
+      aria-label="Starting at 0 milliseconds, duration is 100 milliseconds"
     >
       100ms
     </div>
@@ -805,7 +805,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part 2
       :
     </div>
     <div
-      aria-label="Starting at 0.000 milliseconds, duration is 300 milliseconds"
+      aria-label="Starting at 0 milliseconds, duration is 300 milliseconds"
     >
       300ms
     </div>
@@ -980,7 +980,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part c
       :
     </div>
     <div
-      aria-label="Starting at 0.000 milliseconds, duration is 100 milliseconds"
+      aria-label="Starting at 0 milliseconds, duration is 100 milliseconds"
     >
       100ms
     </div>
@@ -1001,7 +1001,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part c
       :
     </div>
     <div
-      aria-label="Starting at 0.000 milliseconds, duration is 300 milliseconds"
+      aria-label="Starting at 0 milliseconds, duration is 300 milliseconds"
     >
       300ms
     </div>
@@ -1159,7 +1159,7 @@ exports[`TooltipMarker renders properly normal network markers 1`] = `
       :
     </div>
     <div
-      aria-label="Starting at 0.000 milliseconds, duration is 50 milliseconds"
+      aria-label="Starting at 0 milliseconds, duration is 50 milliseconds"
     >
       50ms
     </div>
@@ -1397,7 +1397,7 @@ exports[`TooltipMarker renders properly redirect network markers for a Internal 
       Requested bytes
       :
     </div>
-    0.000B
+    0B
     <div
       class="tooltipLabel"
     >
@@ -1416,7 +1416,7 @@ exports[`TooltipMarker renders properly redirect network markers for a Internal 
       :
     </div>
     <div
-      aria-label="Starting at 0.000 milliseconds, duration is 18,726 milliseconds"
+      aria-label="Starting at 0 milliseconds, duration is 18,726 milliseconds"
     >
       18,726ms
     </div>
@@ -1510,7 +1510,7 @@ exports[`TooltipMarker renders properly redirect network markers for a Permanent
       Requested bytes
       :
     </div>
-    0.000B
+    0B
     <div
       class="tooltipLabel"
     >
@@ -1529,7 +1529,7 @@ exports[`TooltipMarker renders properly redirect network markers for a Permanent
       :
     </div>
     <div
-      aria-label="Starting at 0.000 milliseconds, duration is 18,726 milliseconds"
+      aria-label="Starting at 0 milliseconds, duration is 18,726 milliseconds"
     >
       18,726ms
     </div>
@@ -1623,7 +1623,7 @@ exports[`TooltipMarker renders properly redirect network markers for a Temporary
       Requested bytes
       :
     </div>
-    0.000B
+    0B
     <div
       class="tooltipLabel"
     >
@@ -1642,7 +1642,7 @@ exports[`TooltipMarker renders properly redirect network markers for a Temporary
       :
     </div>
     <div
-      aria-label="Starting at 0.000 milliseconds, duration is 18,726 milliseconds"
+      aria-label="Starting at 0 milliseconds, duration is 18,726 milliseconds"
     >
       18,726ms
     </div>
@@ -1736,7 +1736,7 @@ exports[`TooltipMarker renders properly redirect network markers for an internal
       Requested bytes
       :
     </div>
-    0.000B
+    0B
     <div
       class="tooltipLabel"
     >
@@ -1755,7 +1755,7 @@ exports[`TooltipMarker renders properly redirect network markers for an internal
       :
     </div>
     <div
-      aria-label="Starting at 0.000 milliseconds, duration is 18,726 milliseconds"
+      aria-label="Starting at 0 milliseconds, duration is 18,726 milliseconds"
     >
       18,726ms
     </div>
@@ -1842,7 +1842,7 @@ exports[`TooltipMarker renders properly redirect network markers without additio
       Requested bytes
       :
     </div>
-    0.000B
+    0B
     <div
       class="tooltipLabel"
     >
@@ -1861,7 +1861,7 @@ exports[`TooltipMarker renders properly redirect network markers without additio
       :
     </div>
     <div
-      aria-label="Starting at 0.000 milliseconds, duration is 18,726 milliseconds"
+      aria-label="Starting at 0 milliseconds, duration is 18,726 milliseconds"
     >
       18,726ms
     </div>
@@ -2993,14 +2993,14 @@ exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = 
       MMU 20ms
       :
     </div>
-    0.0%
+    0%
     <div
       class="tooltipLabel"
     >
       MMU 50ms
       :
     </div>
-    0.0%
+    0%
     <div
       class="tooltipLabel"
     >
