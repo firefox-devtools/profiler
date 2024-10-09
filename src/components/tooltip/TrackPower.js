@@ -81,17 +81,6 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
       this._computePowerSumForRange(start, end)
   );
 
-  _computePowerSumForPreviewRange = memoize(
-    ({
-      selectionStart,
-      selectionEnd,
-    }: {
-      +hasSelection: true,
-      +selectionStart: number,
-      +selectionEnd: number,
-    }): number => this._computePowerSumForRange(selectionStart, selectionEnd)
-  );
-
   _formatPowerValue(
     power: number,
     l10nIdKiloUnit,
@@ -136,6 +125,46 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
     );
   }
 
+  maybeRenderForPreviewSelection(
+    previewSelection
+  ): React.ChildrenArray<React.Element<typeof TooltipDetail> | null> | null {
+    if (!previewSelection.hasSelection) {
+      return null;
+    }
+
+    const { selectionStart, selectionEnd } = previewSelection;
+    const selectionRange = selectionEnd - selectionStart;
+
+    if (selectionRange === 0) {
+      return null;
+    }
+
+    const powerSumForPreviewRange = this._computePowerSumForRange(
+      selectionStart,
+      selectionEnd
+    );
+
+    return (
+      // $FlowExpectError our version of Flow doesn't understand Fragments very well.
+      <>
+        {this._formatPowerValue(
+          powerSumForPreviewRange,
+          'TrackPower--tooltip-energy-carbon-used-in-preview-kilowatthour',
+          'TrackPower--tooltip-energy-carbon-used-in-preview-watthour',
+          'TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour',
+          'TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour'
+        )}
+        {this._formatPowerValue(
+          (1000 /* ms -> s */ * 3600 /* s -> h */ * powerSumForPreviewRange) /
+            selectionRange,
+          'TrackPower--tooltip-average-power-kilowatt',
+          'TrackPower--tooltip-average-power-watt',
+          'TrackPower--tooltip-average-power-milliwatt'
+        )}
+      </>
+    );
+  }
+
   render() {
     const {
       counter,
@@ -166,27 +195,7 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
             'TrackPower--tooltip-power-watt',
             'TrackPower--tooltip-power-milliwatt'
           )}
-          {previewSelection.hasSelection
-            ? this._formatPowerValue(
-                this._computePowerSumForPreviewRange(previewSelection),
-                'TrackPower--tooltip-energy-carbon-used-in-preview-kilowatthour',
-                'TrackPower--tooltip-energy-carbon-used-in-preview-watthour',
-                'TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour',
-                'TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour'
-              )
-            : null}
-          {previewSelection.hasSelection
-            ? this._formatPowerValue(
-                (1000 /* ms -> s */ *
-                  3600 /* s -> h */ *
-                  this._computePowerSumForPreviewRange(previewSelection)) /
-                  (previewSelection.selectionEnd -
-                    previewSelection.selectionStart),
-                'TrackPower--tooltip-average-power-kilowatt',
-                'TrackPower--tooltip-average-power-watt',
-                'TrackPower--tooltip-average-power-milliwatt'
-              )
-            : null}
+          {this.maybeRenderForPreviewSelection(previewSelection)}
           {this._formatPowerValue(
             this._computePowerSumForCommittedRange(committedRange),
             'TrackPower--tooltip-energy-carbon-used-in-range-kilowatthour',

@@ -691,6 +691,10 @@ TrackContextMenu--hide-other-screenshots-tracks = Nascondi altre tracce Screensh
 TrackContextMenu--hide-track = Nascondi “{ $trackName } ”
 TrackContextMenu--show-all-tracks = Mostra tutte le tracce
 TrackContextMenu--show-local-tracks-in-process = Mostra tutte le tracce in questo processo
+# This is used as the context menu item to hide all tracks of the selected track's type.
+# Variables:
+#   $type (String) - Name of the type of selected track to hide.
+TrackContextMenu--hide-all-tracks-by-selected-track-type = Nascondi tutte le tracce di tipo “{ $type }”
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Mostra tutte le tracce corrispondenti

@@ -124,7 +124,9 @@ describe('Viewport', function () {
       expect(isTimerVisible()).toBe(true);
 
       // Run the setTimeout, the menu should disappear.
-      jest.runAllTimers();
+      act(() => {
+        jest.runAllTimers();
+      });
       expect(isTimerVisible()).toBe(false);
     });
 

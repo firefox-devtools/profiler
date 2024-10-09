@@ -6,7 +6,11 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 
-import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  screen,
+  act,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import { MenuButtons } from '../../components/app/MenuButtons';
 import { storeWithProfile } from '../fixtures/stores';
 import { stateFromLocation } from '../../app-logic/url-handling';
@@ -45,7 +49,9 @@ describe('<Permalink>', function () {
     const queryInput = () => screen.queryByTestId('MenuButtonsPermalink-input');
     const clickAndRunTimers = (where) => {
       fireFullClick(where);
-      jest.runAllTimers();
+      act(() => {
+        jest.runAllTimers();
+      });
     };
 
     return {
@@ -75,7 +81,7 @@ describe('<Permalink>', function () {
       clickAndRunTimers,
     } = setup();
     clickAndRunTimers(getPermalinkButton());
-    await shortUrlPromise;
+    await act(() => shortUrlPromise);
     const input = ensureExists(
       queryInput(),
       'Unable to find the permalink input text field'

@@ -773,6 +773,10 @@ TrackContextMenu--hide-other-screenshots-tracks = Andere schermafdruktracks verb
 TrackContextMenu--hide-track = ‘{ $trackName }’ verbergen
 TrackContextMenu--show-all-tracks = Alle tracks tonen
 TrackContextMenu--show-local-tracks-in-process = Alle tracks in dit proces tonen
+# This is used as the context menu item to hide all tracks of the selected track's type.
+# Variables:
+#   $type (String) - Name of the type of selected track to hide.
+TrackContextMenu--hide-all-tracks-by-selected-track-type = Alle tracks van het type ‘{ $type }’ verbergen
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Alle overeenkomende tracks tonen

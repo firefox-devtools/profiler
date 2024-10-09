@@ -5,6 +5,7 @@
 // @flow
 import { createSelector } from 'reselect';
 import * as Tracks from '../profile-logic/tracks';
+import * as CPU from '../profile-logic/cpu';
 import * as UrlState from './url-state';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
@@ -79,7 +80,11 @@ import type {
   IndexIntoSamplesTable,
   ExtraProfileInfoSection,
   TableViewOptions,
+  ExtensionTable,
+  SortedTabPageData,
 } from 'firefox-profiler/types';
+
+import type { ThreadActivityScore } from '../profile-logic/tracks';
 
 export const getProfileView: Selector<ProfileViewState> = (state) =>
   state.profileView;
@@ -212,6 +217,10 @@ const getMarkerSchemaGecko: Selector<MarkerSchema[]> = (state) =>
 // See SampleUnits type definition for more information.
 export const getSampleUnits: Selector<SampleUnits | void> = (state) =>
   getMeta(state).sampleUnits;
+
+// Get all extensions in the profile metadata.
+export const getExtensionTable: Selector<ExtensionTable | void> = (state) =>
+  getMeta(state).extensions;
 
 /**
  * Firefox profiles will always have categories. However, imported profiles may not
@@ -709,6 +718,26 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
   }
 );
 
+export const getMaxCPUDeltaPerInterval: Selector<number | null> =
+  createSelector(getProfile, CPU.computeMaxCPUDeltaPerInterval);
+
+export const getThreadActivityScores: Selector<Array<ThreadActivityScore>> =
+  createSelector(
+    getProfile,
+    getMaxCPUDeltaPerInterval,
+    (profile, maxCpuDeltaPerInterval) => {
+      const { threads } = profile;
+
+      return threads.map((thread) =>
+        Tracks.computeThreadActivityScore(
+          profile,
+          thread,
+          maxCpuDeltaPerInterval
+        )
+      );
+    }
+  );
+
 /**
  * Get the pages array and construct a Map of pages that we can use to get the
  * relationships of tabs. The constructed map is `Map<TabID,Page[]>`.
@@ -869,6 +898,19 @@ export const getRelevantInnerWindowIDsForCurrentTab: Selector<
   }
 );
 
+export const getExtensionIdToNameMap: Selector<Map<string, string> | null> =
+  createSelector(getExtensionTable, (extensions) => {
+    if (!extensions) {
+      return null;
+    }
+
+    const extensionIDtoNameMap = new Map();
+    for (let i = 0; i < extensions.length; i++) {
+      extensionIDtoNameMap.set(extensions.baseURL[i], extensions.name[i]);
+    }
+    return extensionIDtoNameMap;
+  });
+
 /**
  * Extract the hostname and favicon from the last page if we are in single tab
  * Extract the hostname and favicon from the last page for all tab ids. we
@@ -879,7 +921,51 @@ export const getRelevantInnerWindowIDsForCurrentTab: Selector<
  */
 export const getProfileFilterPageDataByTabID: Selector<
   Map<TabID, ProfileFilterPageData>,
-> = createSelector(getPagesMap, extractProfileFilterPageData);
+> = createSelector(
+  getPagesMap,
+  getExtensionIdToNameMap,
+  extractProfileFilterPageData
+);
+
+/**
+ * Get the profile filter page data for all the tabs and return a sorted array
+ * of tabs data with their score.
+ */
+export const getProfileFilterSortedPageData: Selector<SortedTabPageData> =
+  createSelector(
+    getProfileFilterPageDataByTabID,
+    getTabToThreadIndexesMap,
+    getThreadActivityScores,
+    (pageDataByTabID, tabToThreadIndexesMap, threadActivityScores) => {
+      const pageDataWithScore = [];
+      // Generate the pageDataWithScore array
+      for (const [tabID, pageData] of pageDataByTabID.entries()) {
+        let tabScore = 0;
+        const threadIndexes = tabToThreadIndexesMap.get(tabID);
+        if (!threadIndexes) {
+          // Couldn't find any thread indexes for the tab. Do not show it.
+          continue;
+        }
+        for (const threadIndex of threadIndexes.values()) {
+          const threadScore = threadActivityScores[threadIndex];
+          if (!threadScore) {
+            throw new Error('Failed to find the thread score!');
+          }
+
+          tabScore += threadScore.boostedSampleScore;
+        }
+        pageDataWithScore.push({
+          tabID,
+          tabScore,
+          pageData,
+        });
+      }
+
+      // Sort the tabs by their activity.
+      pageDataWithScore.sort((a, b) => b.tabScore - a.tabScore);
+      return pageDataWithScore;
+    }
+  );
 
 /**
  * This returns the hostname and favicon information for the current tab id.

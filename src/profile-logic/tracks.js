@@ -20,7 +20,6 @@ import type {
 } from 'firefox-profiler/types';
 
 import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
-import { computeMaxCPUDeltaPerInterval } from './cpu';
 import { intersectSets, subtractSets } from '../utils/set';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
@@ -818,11 +817,16 @@ export function tryInitializeHiddenTracksFromUrl(
 // The result is guaranteed to have a non-empty number of visible threads.
 export function computeDefaultHiddenTracks(
   tracksWithOrder: TracksWithOrder,
-  profile: Profile
+  profile: Profile,
+  threadActivityScores: Array<ThreadActivityScore>
 ): HiddenTracks {
   return _computeHiddenTracksForVisibleThreads(
     profile,
-    computeDefaultVisibleThreads(profile, tracksWithOrder),
+    computeDefaultVisibleThreads(
+      profile,
+      tracksWithOrder,
+      threadActivityScores
+    ),
     tracksWithOrder
   );
 }
@@ -1049,7 +1053,8 @@ const IDLE_THRESHOLD_FRACTION = 0.05;
 // Return a non-empty set of threads that should be shown by default.
 export function computeDefaultVisibleThreads(
   profile: Profile,
-  tracksWithOrder: TracksWithOrder
+  tracksWithOrder: TracksWithOrder,
+  threadActivityScores: Array<ThreadActivityScore>
 ): Set<ThreadIndex> {
   const threads = profile.threads;
   if (threads.length === 0) {
@@ -1067,15 +1072,10 @@ export function computeDefaultVisibleThreads(
   const allTrackThreads = computeAllTrackThreads(tracksWithOrder);
 
   // First, compute a score for every thread.
-  const maxCpuDeltaPerInterval = computeMaxCPUDeltaPerInterval(profile);
-  let scores = threads.map((thread, threadIndex) => {
-    const score = _computeThreadDefaultVisibilityScore(
-      profile,
-      thread,
-      maxCpuDeltaPerInterval
-    );
-    return { threadIndex, score };
-  });
+  let scores = threadActivityScores.map((score, threadIndex) => ({
+    threadIndex,
+    score,
+  }));
 
   // Next, filter the tracks by the tab selector threads.
   scores = scores.filter(({ threadIndex }) => allTrackThreads.has(threadIndex));
@@ -1116,7 +1116,7 @@ export function computeDefaultVisibleThreads(
   return new Set(finalList.map(({ threadIndex }) => threadIndex));
 }
 
-type DefaultVisibilityScore = {|
+export type ThreadActivityScore = {|
   // Whether this thread is one of the essential threads that
   // should always be kept (unless there's too many of them).
   isEssentialFirefoxThread: boolean,
@@ -1140,11 +1140,11 @@ const AUDIO_THREAD_SAMPLE_SCORE_BOOST_FACTOR = 40;
 // See the DefaultVisibilityScore type for details.
 // If we have too many threads, we use this score to compare between
 // "interesting" threads to make sure we keep the most interesting ones.
-function _computeThreadDefaultVisibilityScore(
+export function computeThreadActivityScore(
   profile: Profile,
   thread: Thread,
   maxCpuDeltaPerInterval: number | null
-): DefaultVisibilityScore {
+): ThreadActivityScore {
   const isEssentialFirefoxThread = _isEssentialFirefoxThread(thread);
   const isInterestingEvenWithMinimalActivity =
     _isFirefoxMediaThreadWhichIsUsuallyIdle(thread);
@@ -1442,6 +1442,60 @@ export function getSearchFilteredLocalTracksByPid(
   }
 
   return searchFilteredLocalTracksByPid;
+}
+
+/**
+ * Get the type and return the type filtered global tracks.
+ */
+export function getTypeFilteredGlobalTracks(
+  tracks: GlobalTrack[],
+  type: string
+): Set<TrackIndex> | null {
+  if (!type) {
+    return null;
+  }
+
+  const typeFilteredGlobalTracks = new Set();
+
+  for (let trackIndex = 0; trackIndex < tracks.length; trackIndex++) {
+    const globalTrack = tracks[trackIndex];
+
+    if (globalTrack.type === type) {
+      typeFilteredGlobalTracks.add(trackIndex);
+    }
+  }
+
+  return typeFilteredGlobalTracks;
+}
+
+/**
+ * Get the type and return the filtered by type local tracks by Pid.
+ */
+export function getTypeFilteredLocalTracksByPid(
+  localTracksByPid: Map<Pid, LocalTrack[]>,
+  type: string
+): Map<Pid, Set<TrackIndex>> | null {
+  if (!type) {
+    return null;
+  }
+
+  const typeFilteredLocalTracksByPid = new Map();
+  for (const [pid, tracks] of localTracksByPid) {
+    const typeFilteredLocalTracks = new Set();
+
+    for (let trackIndex = 0; trackIndex < tracks.length; trackIndex++) {
+      const localTrack = tracks[trackIndex];
+      if (localTrack.type === type) {
+        typeFilteredLocalTracks.add(trackIndex);
+      }
+    }
+    if (typeFilteredLocalTracks.size > 0) {
+      // Only add the global track when the are some type filtered local tracks.
+      typeFilteredLocalTracksByPid.set(pid, typeFilteredLocalTracks);
+    }
+  }
+
+  return typeFilteredLocalTracksByPid;
 }
 
 /**

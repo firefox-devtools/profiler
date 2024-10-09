@@ -25,6 +25,13 @@ describe('app/TabSelectorMenu', () => {
       getProfileWithNiceTracks()
     );
 
+    // This is needed for the thread activity score calculation.
+    profile.meta.sampleUnits = {
+      time: 'ms',
+      eventDelay: 'ms',
+      threadCPUDelta: 'ns',
+    };
+
     // Add some frames with innerWindowIDs now. Note that we only expand the
     // innerWindowID array and not the others as we don't check them at all.
     //
@@ -34,9 +41,15 @@ describe('app/TabSelectorMenu', () => {
       extraPageData.parentInnerWindowIDsWithChildren;
     profile.threads[0].frameTable.length++;
 
+    // Add a threadCPUDelta value for thread activity score.
+    profile.threads[0].samples.threadCPUDelta = [1];
+
     profile.threads[1].frameTable.innerWindowID[0] =
       extraPageData.secondTabInnerWindowIDs[0];
     profile.threads[1].frameTable.length++;
+    // Add a threadCPUDelta value for thread activity score. This thread
+    // should stay above the first thread.
+    profile.threads[0].samples.threadCPUDelta = [2];
 
     const store = storeWithProfile(profile);
     render(
@@ -148,5 +161,17 @@ describe('app/TabSelectorMenu', () => {
       '  - show [thread DOM Worker]',
       '  - show [thread Style]',
     ]);
+  });
+
+  it('should sort the tabs by their activity scores', () => {
+    setup();
+
+    const profilerTab = screen.getByText('profiler.firefox.com');
+    const mozillaTab = screen.getByText('mozilla.org');
+
+    // Make sure that profiler tab comes before the mozilla tab.
+    expect(profilerTab.compareDocumentPosition(mozillaTab)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
   });
 });
