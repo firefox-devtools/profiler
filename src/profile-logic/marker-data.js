@@ -1590,6 +1590,7 @@ export const stringsToMarkerRegExps = (
   // as we don't support negative generic filtering.
   const genericPositiveStrings = [];
   for (const string of strings) {
+    // Then try to match specific properties.
     // First capture group is used to determine if it has a "-" in front of the
     // field to understand if it's a negative filter.
     // Second capture group is used to get the field name.
@@ -1611,6 +1612,9 @@ export const stringsToMarkerRegExps = (
       // if it's a negative filtering.
       if (maybeNegative.length === 0) {
         fieldStrs.positive.push(value);
+
+        // Always try to match the full string as well.
+        genericPositiveStrings.push(string);
       } else {
         fieldStrs.negative.push(value);
       }

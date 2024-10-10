@@ -686,6 +686,10 @@ TrackContextMenu--hide-other-screenshots-tracks = 隐藏其他快照轨
 TrackContextMenu--hide-track = 隐藏“{ $trackName }”
 TrackContextMenu--show-all-tracks = 显示所有轨道
 TrackContextMenu--show-local-tracks-in-process = 显示此进程中的所有轨道
+# This is used as the context menu item to hide all tracks of the selected track's type.
+# Variables:
+#   $type (String) - Name of the type of selected track to hide.
+TrackContextMenu--hide-all-tracks-by-selected-track-type = 隐藏所有“{ $type }”类型的轨道
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = 显示所有匹配的轨道
