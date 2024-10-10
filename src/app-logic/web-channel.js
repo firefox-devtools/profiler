@@ -27,7 +27,8 @@ export type Request =
   | GetExternalMarkersRequest
   | GetExternalPowerTracksRequest
   | GetSymbolTableRequest
-  | QuerySymbolicationApiRequest;
+  | QuerySymbolicationApiRequest
+  | GetPageFaviconsRequest;
 
 type StatusQueryRequest = {| type: 'STATUS_QUERY' |};
 type EnableMenuButtonRequest = {| type: 'ENABLE_MENU_BUTTON' |};
@@ -51,6 +52,10 @@ type QuerySymbolicationApiRequest = {|
   type: 'QUERY_SYMBOLICATION_API',
   path: string,
   requestJson: string,
+|};
+type GetPageFaviconsRequest = {|
+  type: 'GET_PAGE_FAVICONS',
+  pageUrls: Array<string>,
 |};
 
 export type MessageFromBrowser<R: ResponseFromBrowser> =
@@ -82,7 +87,8 @@ export type ResponseFromBrowser =
   | GetExternalMarkersResponse
   | GetExternalPowerTracksResponse
   | GetSymbolTableResponse
-  | QuerySymbolicationApiResponse;
+  | QuerySymbolicationApiResponse
+  | GetPageFaviconsResponse;
 
 type StatusQueryResponse = {|
   menuButtonIsEnabled: boolean,
@@ -114,6 +120,7 @@ type GetExternalMarkersResponse = ExternalMarkersData;
 type GetExternalPowerTracksResponse = MixedObject[];
 type GetSymbolTableResponse = SymbolTableAsTuple;
 type QuerySymbolicationApiResponse = string;
+type GetPageFaviconsResponse = Array<string | null>;
 
 // Manually declare all pairs of request + response for Flow.
 /* eslint-disable no-redeclare */
@@ -138,6 +145,9 @@ declare function _sendMessageWithResponse(
 declare function _sendMessageWithResponse(
   QuerySymbolicationApiRequest
 ): Promise<QuerySymbolicationApiResponse>;
+declare function _sendMessageWithResponse(
+  GetPageFaviconsRequest
+): Promise<GetPageFaviconsResponse>;
 /* eslint-enable no-redeclare */
 
 /**
@@ -223,6 +233,15 @@ export async function querySymbolicationApiViaWebChannel(
     type: 'QUERY_SYMBOLICATION_API',
     path,
     requestJson,
+  });
+}
+
+export async function getPageFaviconsViaWebChannel(
+  pageUrls: Array<string>
+): Promise<GetPageFaviconsResponse> {
+  return _sendMessageWithResponse({
+    type: 'GET_PAGE_FAVICONS',
+    pageUrls,
   });
 }
 
