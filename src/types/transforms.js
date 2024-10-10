@@ -179,7 +179,7 @@ export type TransformDefinitions = {
   |},
 
   /**
-   * The MergeFunctions transform is similar to the MergeCallNode, except it merges a single
+   * The MergeFunction transform is similar to the MergeCallNode, except it merges a single
    * function across the entire call tree, regardless of its location in the tree. It is not
    * depended on any particular CallNodePath.
    *
@@ -200,6 +200,15 @@ export type TransformDefinitions = {
   'merge-function': {|
     +type: 'merge-function',
     +funcIndex: IndexIntoFuncTable,
+  |},
+
+  /**
+   * The MergeUnaccountedNativeFunctions transform is similar to the MergeFunction,
+   * except it merges all functions that look like unsymbolicated JIT functions:
+   * Functions which are of the form 0xhexadress and which don't have a resource.
+   */
+  'merge-unaccounted-native-functions': {|
+    +type: 'merge-unaccounted-native-functions',
   |},
 
   /**
