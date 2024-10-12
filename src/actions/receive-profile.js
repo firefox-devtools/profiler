@@ -1422,8 +1422,10 @@ export function retrieveProfileOrZipFromUrl(
       switch (response.responseType) {
         case 'PROFILE': {
           const serializedProfile = response.profile;
-          const profile =
-            await unserializeProfileOfArbitraryFormat(serializedProfile);
+          const profile = await unserializeProfileOfArbitraryFormat(
+            serializedProfile,
+            profileUrl
+          );
           if (profile === undefined) {
             throw new Error('Unable to parse the profile.');
           }
@@ -1513,7 +1515,10 @@ export function retrieveProfileFromFile(
           arrayBuffer = decompressedProfile.buffer;
         }
 
-        const profile = await unserializeProfileOfArbitraryFormat(arrayBuffer);
+        const profile = await unserializeProfileOfArbitraryFormat(
+          arrayBuffer,
+          file.name
+        );
         if (profile === undefined) {
           throw new Error('Unable to parse the profile.');
         }
