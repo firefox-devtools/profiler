@@ -13,6 +13,7 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import { changeTabFilter } from 'firefox-profiler/actions/receive-profile';
 import { getTabFilter } from '../../selectors/url-state';
 import { getProfileFilterSortedPageData } from 'firefox-profiler/selectors/profile';
+import { Icon } from 'firefox-profiler/components/shared/Icon';
 
 import type { TabID, SortedTabPageData } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -40,6 +41,10 @@ class TabSelectorMenuImpl extends React.PureComponent<Props> {
     if (!sortedPageData || sortedPageData.length === 0) {
       return null;
     }
+
+    const hasSomeIcons = sortedPageData.some(
+      ({ pageData }) => !!pageData.favicon
+    );
 
     return (
       <>
@@ -71,6 +76,7 @@ class TabSelectorMenuImpl extends React.PureComponent<Props> {
               'aria-checked': tabFilter === tabID ? 'false' : 'true',
             }}
           >
+            {hasSomeIcons ? <Icon iconUrl={pageData.favicon} /> : null}
             {pageData.hostname}
           </MenuItem>
         ))}
