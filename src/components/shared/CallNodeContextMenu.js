@@ -375,6 +375,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         addTransformToStack(threadsKey, {
           type: 'focus-category',
           category,
+          implementation,
         });
         break;
       }
