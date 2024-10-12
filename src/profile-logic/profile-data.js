@@ -2963,7 +2963,8 @@ export function extractProfileFilterPageData(
     }
 
     // The last page is the one we care about.
-    const pageUrl = topMostPages[topMostPages.length - 1].url;
+    const currentPage = topMostPages[topMostPages.length - 1];
+    const pageUrl = currentPage.url;
     if (pageUrl.startsWith('about:')) {
       // If we only have an `about:*` page, we should return early with a friendly
       // origin and hostname. Otherwise the try block will always fail.
@@ -2986,7 +2987,7 @@ export function extractProfileFilterPageData(
     const pageData: ProfileFilterPageData = {
       origin: '',
       hostname: '',
-      favicon: null,
+      favicon: currentPage.favicon ?? null,
     };
 
     try {
@@ -3005,15 +3006,8 @@ export function extractProfileFilterPageData(
             ) ?? '')
           : page.hostname;
 
-      // FIXME(Bug 1620546): This is not ideal and we should get the favicon
-      // either during profile capture or profile pre-process.
       pageData.origin = page.origin;
-      const favicon = new URL('/favicon.ico', page.origin);
-      if (favicon.protocol === 'http:') {
-        // Upgrade http requests.
-        favicon.protocol = 'https:';
-      }
-      pageData.favicon = favicon.href;
+      pageData.favicon = currentPage.favicon ?? null;
     } catch (e) {
       console.warn(
         'Error while extracing the hostname and favicon from the page url',
