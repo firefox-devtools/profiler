@@ -72,6 +72,16 @@ const profile: Reducer<Profile | null> = (state = null, action) => {
         },
       };
     }
+    case 'UPDATE_PAGES': {
+      if (state === null) {
+        throw new Error(
+          `Assumed that a profile would be loaded by the time for the pages update`
+        );
+      }
+
+      const { newPages } = action;
+      return { ...state, pages: newPages };
+    }
     default:
       return state;
   }
