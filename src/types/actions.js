@@ -13,6 +13,7 @@ import type {
   TabID,
   IndexIntoCategoryList,
   IndexIntoLibs,
+  PageList,
 } from './profile';
 import type {
   CallNodePath,
@@ -442,7 +443,11 @@ type ReceiveProfileAction =
   | {| +type: 'WAITING_FOR_PROFILE_FROM_BROWSER' |}
   | {| +type: 'WAITING_FOR_PROFILE_FROM_STORE' |}
   | {| +type: 'WAITING_FOR_PROFILE_FROM_URL', +profileUrl: ?string |}
-  | {| +type: 'TRIGGER_LOADING_FROM_URL', +profileUrl: string |};
+  | {| +type: 'TRIGGER_LOADING_FROM_URL', +profileUrl: string |}
+  | {|
+      +type: 'UPDATE_PAGES',
+      +newPages: PageList,
+    |};
 
 type UrlEnhancerAction =
   | {| +type: 'START_FETCHING_PROFILES' |}

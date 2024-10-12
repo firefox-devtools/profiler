@@ -90,6 +90,7 @@ import type {
   InnerWindowID,
   Pid,
   OriginsTimelineRoot,
+  PageList,
 } from 'firefox-profiler/types';
 
 import type {
@@ -278,6 +279,10 @@ export function finalizeProfileView(
         // have access to IndexedDB.
         await doSymbolicateProfile(dispatch, profile, symbolStore);
       }
+    }
+
+    if (browserConnection && pages && pages.length > 0) {
+      await retrievePageFaviconsFromBrowser(dispatch, pages, browserConnection);
     }
   };
 }
@@ -1015,6 +1020,36 @@ export async function doSymbolicateProfile(
   await Promise.all(completionPromises);
 
   dispatch(doneSymbolicating());
+}
+
+export async function retrievePageFaviconsFromBrowser(
+  dispatch: Dispatch,
+  pages: PageList,
+  browserConnection: BrowserConnection
+) {
+  const newPages = [...pages];
+
+  await browserConnection
+    .getPageFavicons(newPages.map((p) => p.url))
+    .then((favicons) => {
+      if (newPages.length !== favicons.length) {
+        // It appears that an error occurred since the pages and favicons arrays
+        // have different lengths. Return early without doing anything.
+        return;
+      }
+
+      for (let index = 0; index < favicons.length; index++) {
+        newPages[index] = {
+          ...newPages[index],
+          favicon: favicons[index],
+        };
+      }
+    });
+
+  dispatch({
+    type: 'UPDATE_PAGES',
+    newPages,
+  });
 }
 
 // From a BrowserConnectionStatus, this unwraps the included browserConnection
