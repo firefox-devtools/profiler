@@ -218,17 +218,14 @@ export function mergeProfilesForDiffing(
     // We adjust the various times so that the 2 profiles are aligned at the
     // start and the data is consistent.
     let startTimeAdjustment = 0;
-    if (thread.samples.length !== 0) {
+    if (thread.samples.length) {
       startTimeAdjustment = -thread.samples.time[0];
-    }
-    if (thread.markers.length !== 0) {
+    } else if (thread.markers.length) {
       for (const startTime of thread.markers.startTime) {
+        // Find the first marker startTime.
         if (startTime !== null) {
-          if (startTimeAdjustment === 0) {
-            startTimeAdjustment = startTime;
-          } else {
-            startTimeAdjustment = Math.min(startTime, startTimeAdjustment);
-          }
+          startTimeAdjustment = -startTime;
+          break;
         }
       }
     }

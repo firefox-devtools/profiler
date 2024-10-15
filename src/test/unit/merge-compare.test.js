@@ -261,8 +261,8 @@ describe('mergeProfilesForDiffing function', function () {
     ]);
 
     expect(getTimeRangeIncludingAllThreads(profile)).toEqual({
-      end: 21,
-      start: 4,
+      start: 0,
+      end: 11,
     });
   });
 });
