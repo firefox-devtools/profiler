@@ -448,6 +448,32 @@ describe('sanitizePII', function () {
     expect(includesChromeUrl).toBe(true);
   });
 
+  it('should sanitize the favicons in the pages information', function () {
+    const profile = processGeckoProfile(createGeckoProfile());
+    // Add some favicons to check later
+    ensureExists(profile.pages)[1].favicon =
+      'data:image/png;base64,mock-base64-image-data';
+
+    const { originalProfile, sanitizedProfile } = setup(
+      { shouldRemoveUrls: true },
+      profile
+    );
+
+    // Checking to make sure that we have favicons in the original profile pages array.
+    const pageUrl = ensureExists(originalProfile.pages).find(
+      (page) => page.favicon
+    );
+    if (pageUrl === undefined) {
+      throw new Error(
+        "There should be a favicon in the 'pages' array in this profile."
+      );
+    }
+
+    for (const page of ensureExists(sanitizedProfile.pages)) {
+      expect(page.favicon).toBe(null);
+    }
+  });
+
   it('should sanitize all the URLs inside network markers', function () {
     const { sanitizedProfile } = setup({
       shouldRemoveUrls: true,
