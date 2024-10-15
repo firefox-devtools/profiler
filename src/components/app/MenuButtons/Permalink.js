@@ -5,6 +5,7 @@
 // @flow
 
 import * as React from 'react';
+import { flushSync } from 'react-dom';
 import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
 import * as UrlUtils from 'firefox-profiler/utils/shorten-url';
 
@@ -43,12 +44,18 @@ export class MenuButtonsPermalink extends React.PureComponent<Props, State> {
       const shortenUrl = this.props.injectedUrlShortener || UrlUtils.shortenUrl;
       try {
         const shortUrl = await shortenUrl(currentFullUrl);
-        this.setState({ shortUrl, fullUrl: currentFullUrl });
+        // Synchronously update the view from this state change, so that the
+        // selection works later on.
+        flushSync(() => {
+          this.setState({ shortUrl, fullUrl: currentFullUrl });
+        });
       } catch (error) {
         console.warn('Unable to shorten the URL.', error);
         // Don't remember the fullUrl so that we will attempt to shorten the
         // URL again.
-        this.setState({ shortUrl: currentFullUrl, fullUrl: '' });
+        flushSync(() => {
+          this.setState({ shortUrl: currentFullUrl, fullUrl: '' });
+        });
       }
     }
 

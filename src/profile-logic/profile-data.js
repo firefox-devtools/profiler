@@ -3747,9 +3747,6 @@ export function computeTabToThreadIndexesMap(
       if (tabID === undefined) {
         // We couldn't find the tab of this innerWindowID, this should
         // never happen, it might indicate a bug in Firefox.
-        console.warn(
-          `Failed to find the tabID of innerWindowID ${innerWindowID}`
-        );
         continue;
       }
 
@@ -3780,9 +3777,6 @@ export function computeTabToThreadIndexesMap(
         if (tabID === undefined) {
           // We couldn't find the tab of this innerWindowID, this should
           // never happen, it might indicate a bug in Firefox.
-          console.warn(
-            `Failed to find the tabID of innerWindowID ${innerWindowID}`
-          );
           continue;
         }
 
