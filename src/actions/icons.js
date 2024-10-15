@@ -4,11 +4,12 @@
 
 // @flow
 import type { Action, ThunkAction } from 'firefox-profiler/types';
+import sha1 from 'firefox-profiler/utils/sha1';
 
-export function iconHasLoaded(icon: string): Action {
+export function iconHasLoaded(iconWithClassName: [string, string]): Action {
   return {
     type: 'ICON_HAS_LOADED',
-    icon,
+    iconWithClassName,
   };
 }
 
@@ -21,24 +22,27 @@ export function iconIsInError(icon: string): Action {
 
 const icons: Set<string> = new Set();
 
-type IconRequestResult = 'loaded' | 'error' | 'cached';
+type IconRequestResult =
+  | {| type: 'error' | 'cached' |}
+  | {| type: 'loaded', iconWithClassName: [string, string] |};
 
-function _getIcon(icon: string): Promise<IconRequestResult> {
+async function _getIcon(icon: string): Promise<IconRequestResult> {
   if (icons.has(icon)) {
-    return Promise.resolve('cached');
+    return Promise.resolve({ type: 'cached' });
   }
 
   icons.add(icon);
+  const className = await _classNameFromUrl(icon);
 
   const result = new Promise((resolve) => {
     const image = new Image();
     image.src = icon;
     image.referrerPolicy = 'no-referrer';
     image.onload = () => {
-      resolve('loaded');
+      resolve({ type: 'loaded', iconWithClassName: [icon, className] });
     };
     image.onerror = () => {
-      resolve('error');
+      resolve({ type: 'error' });
     };
   });
 
@@ -48,9 +52,9 @@ function _getIcon(icon: string): Promise<IconRequestResult> {
 export function iconStartLoading(icon: string): ThunkAction<Promise<void>> {
   return (dispatch) => {
     return _getIcon(icon).then((result) => {
-      switch (result) {
+      switch (result.type) {
         case 'loaded':
-          dispatch(iconHasLoaded(icon));
+          dispatch(iconHasLoaded(result.iconWithClassName));
           break;
         case 'error':
           dispatch(iconIsInError(icon));
@@ -59,8 +63,17 @@ export function iconStartLoading(icon: string): ThunkAction<Promise<void>> {
           // nothing to do
           break;
         default:
-          throw new Error(`Unknown icon load result ${result}`);
+          throw new Error(`Unknown icon load result ${result.type}`);
       }
     });
   };
+}
+
+/**
+ * Transforms a URL into a valid CSS class name.
+ */
+async function _classNameFromUrl(url): Promise<string> {
+  return url.startsWith('data:image/')
+    ? 'dataUrl' + (await sha1(url))
+    : url.replace(/[/:.+>< ~()#,]/g, '_');
 }

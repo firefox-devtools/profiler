@@ -577,7 +577,7 @@ type UrlStateAction =
     |};
 
 type IconsAction =
-  | {| +type: 'ICON_HAS_LOADED', +icon: string |}
+  | {| +type: 'ICON_HAS_LOADED', +iconWithClassName: [string, string] |}
   | {| +type: 'ICON_IN_ERROR', +icon: string |};
 
 type SidebarAction = {|

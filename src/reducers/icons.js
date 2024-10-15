@@ -5,10 +5,10 @@
 // @flow
 import type { Reducer } from 'firefox-profiler/types';
 
-const favicons: Reducer<Set<string>> = (state = new Set(), action) => {
+const favicons: Reducer<Map<string, string>> = (state = new Map(), action) => {
   switch (action.type) {
     case 'ICON_HAS_LOADED':
-      return new Set([...state, action.icon]);
+      return new Map([...state.entries(), action.iconWithClassName]);
     case 'ICON_IN_ERROR': // nothing to do
     default:
       return state;

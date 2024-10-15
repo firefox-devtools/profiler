@@ -56,9 +56,10 @@ describe('actions/icons', function () {
       return blankStore().getState();
     }
 
-    it('getIcons return an empty set', function () {
-      const initialState = iconsAccessors.getIcons(getInitialState());
-      expect(initialState).toBeInstanceOf(Set);
+    it('getIconsWithClassNames return an empty map', function () {
+      const initialState =
+        iconsAccessors.getIconsWithClassNames(getInitialState());
+      expect(initialState).toBeInstanceOf(Map);
       expect(initialState.size).toEqual(0);
     });
 
@@ -68,11 +69,6 @@ describe('actions/icons', function () {
         _createCallNodeWithIcon(validIcons[0]).icon
       );
       expect(subject).toBe('');
-    });
-
-    it('getIconsWithClassNames returns an empty array', function () {
-      const subject = iconsAccessors.getIconsWithClassNames(getInitialState());
-      expect(subject).toEqual([]);
     });
   });
 
@@ -87,6 +83,11 @@ describe('actions/icons', function () {
         dispatch(iconsActions.iconStartLoading(validIcons[1])),
       ];
 
+      // Let the event loop go around for iconStartLoading. Note that we don't
+      // want to await for the promises yet, since we would like to mock them.
+      // We will await them later.
+      await new Promise((res) => requestAnimationFrame(res));
+
       // Only 2 requests because only 2 different icons
       expect(imageInstances.length).toBe(2);
       imageInstances.forEach((instance, i) => {
@@ -97,12 +98,9 @@ describe('actions/icons', function () {
       await Promise.all(promises);
 
       const state = getState();
-      let subject = iconsAccessors.getIcons(state);
-      expect([...subject]).toEqual(validIcons);
-
-      subject = iconsAccessors.getIconsWithClassNames(state);
-      expect(subject).toEqual(
-        validIcons.map((icon, i) => ({ icon, className: expectedClasses[i] }))
+      let subject = iconsAccessors.getIconsWithClassNames(state);
+      expect([...subject]).toEqual(
+        validIcons.map((icon, i) => [icon, expectedClasses[i]])
       );
 
       validIcons.forEach((icon, i) => {
@@ -121,13 +119,17 @@ describe('actions/icons', function () {
       const actionPromise = dispatch(
         iconsActions.iconStartLoading(invalidIcon)
       );
+      // Let the event loop go around for iconStartLoading. Note that we don't
+      // want to await for the promises yet, since we would like to mock them.
+      // We will await them later.
+      await new Promise((res) => requestAnimationFrame(res));
       expect(imageInstances.length).toBe(1);
       (imageInstances[0]: any).onerror();
 
       await actionPromise;
 
       const state = getState();
-      let subject = iconsAccessors.getIcons(state);
+      let subject = iconsAccessors.getIconsWithClassNames(state);
       expect([...subject]).toEqual([]);
 
       subject = iconsAccessors.getIconClassName(
@@ -135,9 +137,6 @@ describe('actions/icons', function () {
         _createCallNodeWithIcon(invalidIcon).icon
       );
       expect(subject).toBe('');
-
-      subject = iconsAccessors.getIconsWithClassNames(state);
-      expect(subject).toEqual([]);
     });
   });
 });
