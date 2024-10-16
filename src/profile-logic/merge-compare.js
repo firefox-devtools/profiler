@@ -90,6 +90,18 @@ export function mergeProfilesForDiffing(
   }
 
   const resultProfile = getEmptyProfile();
+
+  // Copy over identical values for the ProfileMeta.
+  for (const [key, value] of Object.entries(profiles[0].meta)) {
+    if (profiles.every((profile) => profile.meta[key] === value)) {
+      resultProfile.meta[key] = value;
+    }
+  }
+  // Ensure it has a copy of the marker schema and categories, even though these could
+  // be different between the two profiles.
+  resultProfile.meta.markerSchema = profiles[0].meta.markerSchema;
+  resultProfile.meta.categories = profiles[0].meta.categories;
+
   resultProfile.meta.interval = Math.min(
     ...profiles.map((profile) => profile.meta.interval)
   );
