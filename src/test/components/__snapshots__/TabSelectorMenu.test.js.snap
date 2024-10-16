@@ -40,6 +40,9 @@ exports[`app/TabSelectorMenu should render properly 1`] = `
         role="menuitem"
         tabindex="-1"
       >
+        <div
+          class="nodeIcon "
+        />
         profiler.firefox.com
       </div>
       <div
@@ -49,6 +52,9 @@ exports[`app/TabSelectorMenu should render properly 1`] = `
         role="menuitem"
         tabindex="-1"
       >
+        <div
+          class="nodeIcon "
+        />
         mozilla.org
       </div>
     </nav>

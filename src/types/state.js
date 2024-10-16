@@ -423,7 +423,7 @@ export type L10nState = {|
   +direction: 'ltr' | 'rtl',
 |};
 
-export type IconState = Set<string>;
+export type IconState = Map<string, string>;
 
 export type CodeState = {|
   +sourceCodeCache: Map<string, SourceCodeStatus>,
@@ -441,7 +441,7 @@ export type State = {|
   +code: CodeState,
 |};
 
-export type IconWithClassName = {|
-  +icon: string,
-  +className: string,
-|};
+/**
+ * Map of icons to their class names
+ */
+export type IconsWithClassNames = Map<string, string>;

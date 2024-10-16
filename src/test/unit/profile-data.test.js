@@ -1137,18 +1137,22 @@ describe('extractProfileFilterPageData', function () {
       innerWindowID: 1,
       url: 'https://www.mozilla.org',
       embedderInnerWindowID: 0,
+      favicon: 'data:image/png;base64,test-png-favicon-data-for-mozilla.org',
     },
     aboutBlank: {
       tabID: 2222,
       innerWindowID: 2,
       url: 'about:blank',
       embedderInnerWindowID: 0,
+      favicon: null,
     },
     profiler: {
       tabID: 2222,
       innerWindowID: 3,
       url: 'https://profiler.firefox.com/public/xyz',
       embedderInnerWindowID: 0,
+      favicon:
+        'data:image/png;base64,test-png-favicon-data-for-profiler.firefox.com',
     },
     exampleSubFrame: {
       tabID: 2222,
@@ -1156,12 +1160,14 @@ describe('extractProfileFilterPageData', function () {
       url: 'https://example.com/subframe',
       // This is a subframe of the page above.
       embedderInnerWindowID: 3,
+      favicon: 'data:image/png;base64,test-png-favicon-data-for-example.com',
     },
     exampleTopFrame: {
       tabID: 2222,
       innerWindowID: 5,
       url: 'https://example.com',
       embedderInnerWindowID: 0,
+      favicon: 'data:image/png;base64,test-png-favicon-data-for-example.com',
     },
   };
 
@@ -1175,7 +1181,8 @@ describe('extractProfileFilterPageData', function () {
         {
           origin: 'https://www.mozilla.org',
           hostname: 'www.mozilla.org',
-          favicon: 'https://www.mozilla.org/favicon.ico',
+          favicon:
+            'data:image/png;base64,test-png-favicon-data-for-mozilla.org',
         },
       ],
     ]);
@@ -1193,7 +1200,8 @@ describe('extractProfileFilterPageData', function () {
         {
           origin: 'https://profiler.firefox.com',
           hostname: 'profiler.firefox.com',
-          favicon: 'https://profiler.firefox.com/favicon.ico',
+          favicon:
+            'data:image/png;base64,test-png-favicon-data-for-profiler.firefox.com',
         },
       ],
     ]);
@@ -1211,7 +1219,8 @@ describe('extractProfileFilterPageData', function () {
         {
           origin: 'https://profiler.firefox.com',
           hostname: 'profiler.firefox.com',
-          favicon: 'https://profiler.firefox.com/favicon.ico',
+          favicon:
+            'data:image/png;base64,test-png-favicon-data-for-profiler.firefox.com',
         },
       ],
     ]);
@@ -1257,7 +1266,8 @@ describe('extractProfileFilterPageData', function () {
         {
           origin: 'https://example.com',
           hostname: 'example.com',
-          favicon: 'https://example.com/favicon.ico',
+          favicon:
+            'data:image/png;base64,test-png-favicon-data-for-example.com',
         },
       ],
     ]);
@@ -1275,7 +1285,8 @@ describe('extractProfileFilterPageData', function () {
         {
           origin: 'https://www.mozilla.org',
           hostname: 'www.mozilla.org',
-          favicon: 'https://www.mozilla.org/favicon.ico',
+          favicon:
+            'data:image/png;base64,test-png-favicon-data-for-mozilla.org',
         },
       ],
       [
@@ -1283,7 +1294,8 @@ describe('extractProfileFilterPageData', function () {
         {
           origin: 'https://profiler.firefox.com',
           hostname: 'profiler.firefox.com',
-          favicon: 'https://profiler.firefox.com/favicon.ico',
+          favicon:
+            'data:image/png;base64,test-png-favicon-data-for-profiler.firefox.com',
         },
       ],
     ]);
