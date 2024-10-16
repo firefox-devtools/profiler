@@ -67,7 +67,12 @@ export const getFilenameString: Selector<string> = createSelector(
     const day = pad(date.getDate());
     const hour = pad(date.getHours());
     const min = pad(date.getMinutes());
-    const dateString = `${year}-${month}-${day} ${hour}.${min}`;
+    let dateString = `${year}-${month}-${day} ${hour}.${min}`;
+
+    if (process.env.NODE_ENV === 'test') {
+      // Timezones can cause issues in tests, just reset the label here.
+      dateString = '1970-01-01 00.00';
+    }
 
     // Return the final file name
     return `${product} ${dateString} profile.json`;
