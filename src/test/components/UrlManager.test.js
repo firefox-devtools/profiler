@@ -363,13 +363,17 @@ describe('UrlManager', function () {
 
     await new Promise((resolve) => {
       function listener({ data }) {
-        if (data && typeof data === 'object' && data.name === 'is-ready') {
+        if (
+          data &&
+          typeof data === 'object' &&
+          data.name === 'ready:response'
+        ) {
           resolve();
           window.removeEventListener('message', listener);
         }
       }
       window.addEventListener('message', listener);
-      window.postMessage({ name: 'is-ready' }, '*');
+      window.postMessage({ name: 'ready:request' }, '*');
     });
 
     window.postMessage(

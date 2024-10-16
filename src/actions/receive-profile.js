@@ -1712,17 +1712,17 @@ export function retrieveProfileForRawUrl(
             case 'inject-profile':
               dispatch(viewProfileFromPostMessage(data.profile));
               break;
-            case 'is-ready': {
+            case 'ready:request': {
               // The "inject-profile" event could be coming from a variety of locations.
               // It could come from a `window.open` call on another page. It could come
               // from an addon. It could come from being embedded in an iframe. In order
               // to generically support these cases allow the opener to poll for the
-              // "is-ready" message.
+              // "ready:response" message.
               console.log(
                 'Responding via postMessage that the profiler is ready.'
               );
               const otherWindow = event.source ?? window;
-              otherWindow.postMessage({ name: 'is-ready' }, '*');
+              otherWindow.postMessage({ name: 'ready:response' }, '*');
               break;
             }
             default:

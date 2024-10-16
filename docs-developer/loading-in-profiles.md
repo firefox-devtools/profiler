@@ -110,7 +110,7 @@ Firefox loads the profiles directly into the front-end through a WebChannel mech
 
 A profile can be injected via another website and the postMessage API.
 
-First wait for the page to be ready. This can be done by posting an `{ name: 'is-ready' }` message and waiting for the response of a similar `{ name: 'is-ready' }`.
+First wait for the page to be ready. This can be done by posting an `{ name: 'ready:request' }` message and waiting for the response of a similar `{ name: 'ready:response' }`.
 
 ```js
 /**
@@ -133,7 +133,7 @@ function openProfile(profile) {
    * @param {MessageEvent} event
    */
   const listener = ({ data }) => {
-    if (data?.name === 'is-ready') {
+    if (data?.name === 'ready:response') {
       console.log('The profiler is ready. Injecting the profile.');
       isReady = true;
       const message = {
@@ -148,7 +148,7 @@ function openProfile(profile) {
   window.addEventListener('message', listener);
   while (!isReady) {
     await new Promise((resolve) => setTimeout(resolve, 100));
-    profilerWindow.postMessage({ name: 'is-ready' }, origin);
+    profilerWindow.postMessage({ name: 'ready:request' }, origin);
   }
 
   window.removeEventListener('message', listener);
