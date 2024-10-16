@@ -58,15 +58,15 @@ adb shell am start -n org.mozilla.geckoview_example/.App \
 
 Fenix has a [different way](https://firefox-source-docs.mozilla.org/mobile/android/geckoview/consumer/automation.html#reading-configuration-from-a-file) to specify environment variables: it uses a yaml file.
 
-The easiest way to set up startup profiling is to run the `<fenix-repo>/tools/setup-startup-profiling.py` script. For example:
+The easiest way to set up startup profiling is to run the `<mozilla-central-repo>/mobile/android/fenix/tools/setup-startup-profiling.py` script. For example:
 ```bash
-./tools/setup-startup-profiling.py activate nightly  # To activate startup profiling on nightly.
-./tools/setup-startup-profiling.py deactivate beta  # To deactivate startup profiling on beta.
+./mobile/android/fenix/tools/setup-startup-profiling.py activate nightly  # To activate startup profiling on nightly.
+./mobile/android/fenix/tools/setup-startup-profiling.py deactivate beta  # To deactivate startup profiling on beta.
 ```
 
 If the app is uninstalled or the device is restarted, the `activate` command may need to be re-run. The script is hard-coded to use a default configuration file with default profiling arguments. If you wish to change these arguments or use a non-standard app ID, modify the script locally or read below.
 
-If you don't want to check out [the fenix repository](https://github.com/mozilla-mobile/fenix/), you should be able to download [the script standalone](https://raw.githubusercontent.com/mozilla-mobile/fenix/master/tools/setup-startup-profiling.py) and execute it.
+If you don't want to check out [mozilla-central](https://hg.mozilla.org/mozilla-central/), you should be able to download [the script standalone](https://hg.mozilla.org/mozilla-central/raw-file/tip/mobile/android/fenix/tools/setup-startup-profiling.py) and execute it.
 
 #### Manual configuration
 
