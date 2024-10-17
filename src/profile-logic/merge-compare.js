@@ -90,6 +90,18 @@ export function mergeProfilesForDiffing(
   }
 
   const resultProfile = getEmptyProfile();
+
+  // Copy over identical values for the ProfileMeta.
+  for (const [key, value] of Object.entries(profiles[0].meta)) {
+    if (profiles.every((profile) => profile.meta[key] === value)) {
+      resultProfile.meta[key] = value;
+    }
+  }
+  // Ensure it has a copy of the marker schema and categories, even though these could
+  // be different between the two profiles.
+  resultProfile.meta.markerSchema = profiles[0].meta.markerSchema;
+  resultProfile.meta.categories = profiles[0].meta.categories;
+
   resultProfile.meta.interval = Math.min(
     ...profiles.map((profile) => profile.meta.interval)
   );
@@ -217,7 +229,19 @@ export function mergeProfilesForDiffing(
 
     // We adjust the various times so that the 2 profiles are aligned at the
     // start and the data is consistent.
-    const startTimeAdjustment = -thread.samples.time[0];
+    let startTimeAdjustment = 0;
+    if (thread.samples.length) {
+      startTimeAdjustment = -thread.samples.time[0];
+    } else if (thread.markers.length) {
+      for (const startTime of thread.markers.startTime) {
+        // Find the first marker startTime.
+        if (startTime !== null) {
+          startTimeAdjustment = -startTime;
+          break;
+        }
+      }
+    }
+
     thread.samples = adjustTableTimestamps(thread.samples, startTimeAdjustment);
     thread.markers = adjustMarkerTimestamps(
       thread.markers,
