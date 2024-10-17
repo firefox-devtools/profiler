@@ -671,7 +671,7 @@ export function markerPayloadMatchesSearch(
   for (const payloadField of markerSchema.data) {
     if (payloadField.searchable) {
       let value = data[payloadField.key];
-      if (payloadField.format === 'unique-string') {
+      if (value && payloadField.format === 'unique-string') {
         value = stringTable.getString(value);
       }
       if (value === undefined || value === null || value === '') {
