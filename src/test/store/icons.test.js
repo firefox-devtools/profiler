@@ -8,6 +8,7 @@ import { blankStore } from '../fixtures/stores';
 import * as iconsAccessors from '../../selectors/icons';
 import * as iconsActions from '../../actions/icons';
 import type { CallNodeDisplayData } from 'firefox-profiler/types';
+import { waitFor } from 'firefox-profiler/test/fixtures/testing-library';
 
 describe('actions/icons', function () {
   const validIcons = [
@@ -56,7 +57,7 @@ describe('actions/icons', function () {
       return blankStore().getState();
     }
 
-    it('getIconsWithClassNames return an empty map', function () {
+    it('getIconsWithClassNames returns an empty map', function () {
       const initialState =
         iconsAccessors.getIconsWithClassNames(getInitialState());
       expect(initialState).toBeInstanceOf(Map);
@@ -83,10 +84,8 @@ describe('actions/icons', function () {
         dispatch(iconsActions.iconStartLoading(validIcons[1])),
       ];
 
-      // Let the event loop go around for iconStartLoading. Note that we don't
-      // want to await for the promises yet, since we would like to mock them.
-      // We will await them later.
-      await new Promise((res) => requestAnimationFrame(res));
+      // Wait until we have 2 image instances after calling iconStartLoading.
+      await waitFor(() => expect(imageInstances.length).toBe(2));
 
       // Only 2 requests because only 2 different icons
       expect(imageInstances.length).toBe(2);
@@ -119,10 +118,8 @@ describe('actions/icons', function () {
       const actionPromise = dispatch(
         iconsActions.iconStartLoading(invalidIcon)
       );
-      // Let the event loop go around for iconStartLoading. Note that we don't
-      // want to await for the promises yet, since we would like to mock them.
-      // We will await them later.
-      await new Promise((res) => requestAnimationFrame(res));
+      // Wait until we have 2 image instances after calling iconStartLoading.
+      await waitFor(() => expect(imageInstances.length).toBe(1));
       expect(imageInstances.length).toBe(1);
       (imageInstances[0]: any).onerror();
 
