@@ -1029,22 +1029,24 @@ export async function retrievePageFaviconsFromBrowser(
 ) {
   const newPages = [...pages];
 
-  await browserConnection
-    .getPageFavicons(newPages.map((p) => p.url))
-    .then((favicons) => {
-      if (newPages.length !== favicons.length) {
-        // It appears that an error occurred since the pages and favicons arrays
-        // have different lengths. Return early without doing anything.
-        return;
-      }
+  const favicons = await browserConnection.getPageFavicons(
+    newPages.map((p) => p.url)
+  );
 
-      for (let index = 0; index < favicons.length; index++) {
-        newPages[index] = {
-          ...newPages[index],
-          favicon: favicons[index],
-        };
-      }
-    });
+  if (newPages.length !== favicons.length) {
+    // It appears that an error occurred since the pages and favicons arrays
+    // have different lengths. Return early without doing anything.
+    return;
+  }
+
+  for (let index = 0; index < favicons.length; index++) {
+    if (favicons[index]) {
+      newPages[index] = {
+        ...newPages[index],
+        favicon: favicons[index],
+      };
+    }
+  }
 
   dispatch({
     type: 'UPDATE_PAGES',

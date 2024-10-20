@@ -3007,7 +3007,6 @@ export function extractProfileFilterPageData(
           : page.hostname;
 
       pageData.origin = page.origin;
-      pageData.favicon = currentPage.favicon ?? null;
     } catch (e) {
       console.warn(
         'Error while extracing the hostname and favicon from the page url',
