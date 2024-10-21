@@ -18,22 +18,9 @@ import {
 import { storeWithProfile } from '../fixtures/stores';
 import { fireFullClick } from '../fixtures/utils';
 import { getTabFilter } from '../../selectors/url-state';
-import { createImageMock } from '../fixtures/mocks/image';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 
 describe('app/TabSelectorMenu', () => {
-  beforeAll(() => {
-    const mock = createImageMock();
-    (window: any).Image = mock.Image;
-  });
-
-  afterAll(() => {
-    // Let all the async favicons finish creating the images.
-    requestAnimationFrame(() => {
-      delete (window: any).Image;
-    });
-  });
-
   function setup() {
     const { profile, ...extraPageData } = addActiveTabInformationToProfile(
       getProfileWithNiceTracks()
