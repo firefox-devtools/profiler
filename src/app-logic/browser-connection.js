@@ -13,7 +13,7 @@ import {
   querySymbolicationApiViaWebChannel,
   getPageFaviconsViaWebChannel,
 } from './web-channel';
-import type { Milliseconds } from 'firefox-profiler/types';
+import type { Milliseconds, FaviconData } from 'firefox-profiler/types';
 
 /**
  * This file manages the communication between the profiler and the browser.
@@ -70,7 +70,7 @@ export interface BrowserConnection {
     breakpadId: string
   ): Promise<SymbolTableAsTuple>;
 
-  getPageFavicons(pageUrls: Array<string>): Promise<Array<string | null>>;
+  getPageFavicons(pageUrls: Array<string>): Promise<Array<FaviconData | null>>;
 }
 
 /**
@@ -189,7 +189,7 @@ class BrowserConnectionImpl implements BrowserConnection {
 
   async getPageFavicons(
     pageUrls: Array<string>
-  ): Promise<Array<string | null>> {
+  ): Promise<Array<FaviconData | null>> {
     // This is added in Firefox 133.
     if (this._webChannelSupportsGetPageFavicons) {
       return getPageFaviconsViaWebChannel(pageUrls);

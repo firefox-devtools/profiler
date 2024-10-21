@@ -83,6 +83,37 @@ export function iconStartLoading(icon: string): ThunkAction<Promise<void>> {
 }
 
 /**
+ * Batch load the data url icons.
+ *
+ * We don't need to check if they are valid images or not, so we can omit doing
+ * this extra work for these icons. Just add them directly to our cache and state.
+ */
+export function batchLoadDataUrlIcons(
+  iconsToAdd: Array<string | null>
+): ThunkAction<void> {
+  return (dispatch) => {
+    const newIcons = [];
+    for (const icon of iconsToAdd) {
+      if (!icon || icons.has(icon)) {
+        continue;
+      }
+
+      icons.add(icon);
+
+      // New class name for an icon. They are guaranteed to be unique, that's why
+      // just increment the icon counter and return that string.
+      const className = `favicon-${++iconCounter}`;
+      newIcons.push({ icon, className });
+    }
+
+    dispatch({
+      type: 'ICON_BATCH_ADD',
+      icons: newIcons,
+    });
+  };
+}
+
+/**
  * Only use it in tests!
  */
 export function _resetIconCounter() {

@@ -582,7 +582,8 @@ type IconsAction =
       +type: 'ICON_HAS_LOADED',
       +iconWithClassName: IconWithClassName,
     |}
-  | {| +type: 'ICON_IN_ERROR', +icon: string |};
+  | {| +type: 'ICON_IN_ERROR', +icon: string |}
+  | {| +type: 'ICON_BATCH_ADD', icons: IconWithClassName[] |};
 
 type SidebarAction = {|
   +type: 'CHANGE_SIDEBAR_OPEN_STATE',

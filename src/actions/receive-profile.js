@@ -69,6 +69,7 @@ import {
 import { computeActiveTabTracks } from 'firefox-profiler/profile-logic/active-tab';
 import { setDataSource } from './profile-view';
 import { fatalError } from './errors';
+import { batchLoadDataUrlIcons } from './icons';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 import {
   determineTimelineType,
@@ -98,6 +99,7 @@ import type {
   SymbolicationStepInfo,
 } from '../profile-logic/symbolication';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
+import { bytesToBase64DataUrl } from 'firefox-profiler/utils/base64';
 import type {
   BrowserConnection,
   BrowserConnectionStatus,
@@ -1039,15 +1041,29 @@ export async function retrievePageFaviconsFromBrowser(
     return;
   }
 
+  // Convert binary favicon data into data urls.
+  const faviconDataStringPromises: Array<Promise<string | null>> = favicons.map(
+    (faviconData) => {
+      if (!faviconData) {
+        return Promise.resolve(null);
+      }
+      return bytesToBase64DataUrl(faviconData.data, faviconData.mimeType);
+    }
+  );
+
+  const faviconDataUrls = await Promise.all(faviconDataStringPromises);
+
   for (let index = 0; index < favicons.length; index++) {
-    if (favicons[index]) {
+    if (faviconDataUrls[index]) {
       newPages[index] = {
         ...newPages[index],
-        favicon: favicons[index],
+        favicon: faviconDataUrls[index],
       };
     }
   }
 
+  // Once we update the pages, we can also start loading the data urls.
+  dispatch(batchLoadDataUrlIcons(faviconDataUrls));
   dispatch({
     type: 'UPDATE_PAGES',
     newPages,

@@ -8,6 +8,7 @@ import type {
   Milliseconds,
   MixedObject,
   ExternalMarkersData,
+  FaviconData,
 } from 'firefox-profiler/types';
 
 /**
@@ -120,7 +121,7 @@ type GetExternalMarkersResponse = ExternalMarkersData;
 type GetExternalPowerTracksResponse = MixedObject[];
 type GetSymbolTableResponse = SymbolTableAsTuple;
 type QuerySymbolicationApiResponse = string;
-type GetPageFaviconsResponse = Array<string | null>;
+type GetPageFaviconsResponse = Array<FaviconData | null>;
 
 // Manually declare all pairs of request + response for Flow.
 /* eslint-disable no-redeclare */
