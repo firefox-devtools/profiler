@@ -8,7 +8,6 @@ import type {
   ThunkAction,
   IconWithClassName,
 } from 'firefox-profiler/types';
-import sha1 from 'firefox-profiler/utils/sha1';
 
 export function iconHasLoaded(iconWithClassName: {|
   +icon: string,
@@ -28,6 +27,7 @@ export function iconIsInError(icon: string): Action {
 }
 
 const icons: Set<string> = new Set();
+let iconCounter = 0;
 
 type IconRequestResult =
   | {| type: 'error' | 'cached' |}
@@ -42,7 +42,10 @@ async function _getIcon(icon: string): Promise<IconRequestResult> {
   }
 
   icons.add(icon);
-  const className = await _classNameFromUrl(icon);
+
+  // New class name for an icon. They are guaranteed to be unique, that's why
+  // just increment the icon counter and return that string.
+  const className = `favicon-${++iconCounter}`;
 
   const result = new Promise((resolve) => {
     const image = new Image();
@@ -80,10 +83,8 @@ export function iconStartLoading(icon: string): ThunkAction<Promise<void>> {
 }
 
 /**
- * Transforms a URL into a valid CSS class name.
+ * Only use it in tests!
  */
-async function _classNameFromUrl(url): Promise<string> {
-  return url.startsWith('data:image/')
-    ? 'dataUrl' + (await sha1(url))
-    : url.replace(/[/:.+>< ~()#,]/g, '_');
+export function _resetIconCounter() {
+  iconCounter = 0;
 }

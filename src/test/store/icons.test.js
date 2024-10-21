@@ -15,10 +15,7 @@ describe('actions/icons', function () {
     'https://valid.icon1.example.org/favicon.ico',
     'https://valid.icon2.example.org/favicon.ico',
   ];
-  const expectedClasses = [
-    'https___valid_icon1_example_org_favicon_ico',
-    'https___valid_icon2_example_org_favicon_ico',
-  ];
+  const expectedClasses = ['favicon-1', 'favicon-2'];
   const invalidIcon = 'https://invalid.icon.example.org/favicon.ico';
 
   let imageInstances: Image[] = [];
@@ -32,6 +29,7 @@ describe('actions/icons', function () {
   afterEach(() => {
     delete (window: any).Image;
     imageInstances = [];
+    iconsActions._resetIconCounter();
   });
 
   function _createCallNodeWithIcon(icon: string): CallNodeDisplayData {
