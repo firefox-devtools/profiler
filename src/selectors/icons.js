@@ -4,7 +4,7 @@
 
 // @flow
 import type {
-  IconState,
+  IconsWithClassNames,
   Selector,
   DangerousSelectorWithArguments,
 } from 'firefox-profiler/types';
@@ -13,7 +13,7 @@ import type {
  * A simple selector into the icon state.
  * It returns a map that matches icon to the icon class name.
  */
-export const getIconsWithClassNames: Selector<IconState> = (state) =>
+export const getIconsWithClassNames: Selector<IconsWithClassNames> = (state) =>
   state.icons;
 
 /**
