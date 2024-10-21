@@ -3,10 +3,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Action, ThunkAction } from 'firefox-profiler/types';
+import type {
+  Action,
+  ThunkAction,
+  IconWithClassName,
+} from 'firefox-profiler/types';
 import sha1 from 'firefox-profiler/utils/sha1';
 
-export function iconHasLoaded(iconWithClassName: [string, string]): Action {
+export function iconHasLoaded(iconWithClassName: {|
+  +icon: string,
+  +className: string,
+|}): Action {
   return {
     type: 'ICON_HAS_LOADED',
     iconWithClassName,
@@ -24,7 +31,10 @@ const icons: Set<string> = new Set();
 
 type IconRequestResult =
   | {| type: 'error' | 'cached' |}
-  | {| type: 'loaded', iconWithClassName: [string, string] |};
+  | {|
+      type: 'loaded',
+      iconWithClassName: IconWithClassName,
+    |};
 
 async function _getIcon(icon: string): Promise<IconRequestResult> {
   if (icons.has(icon)) {
@@ -39,7 +49,7 @@ async function _getIcon(icon: string): Promise<IconRequestResult> {
     image.src = icon;
     image.referrerPolicy = 'no-referrer';
     image.onload = () => {
-      resolve({ type: 'loaded', iconWithClassName: [icon, className] });
+      resolve({ type: 'loaded', iconWithClassName: { icon, className } });
     };
     image.onerror = () => {
       resolve({ type: 'error' });
