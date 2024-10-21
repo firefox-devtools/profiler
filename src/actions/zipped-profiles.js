@@ -59,7 +59,8 @@ export function viewProfileFromZip(
     try {
       // Attempt to unserialize the profile.
       const profile = await unserializeProfileOfArbitraryFormat(
-        await file.async('string')
+        await file.async('string'),
+        pathInZipFile
       );
 
       // Since this is an async function, there can be race conditions. Prevent this by
