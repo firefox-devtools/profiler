@@ -7,8 +7,10 @@ import type { Reducer, IconsWithClassNames } from 'firefox-profiler/types';
 
 const favicons: Reducer<IconsWithClassNames> = (state = new Map(), action) => {
   switch (action.type) {
-    case 'ICON_HAS_LOADED':
-      return new Map([...state.entries(), action.iconWithClassName]);
+    case 'ICON_HAS_LOADED': {
+      const { icon, className } = action.iconWithClassName;
+      return new Map([...state.entries(), [icon, className]]);
+    }
     case 'ICON_IN_ERROR': // nothing to do
     default:
       return state;

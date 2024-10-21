@@ -576,8 +576,12 @@ type UrlStateAction =
       +selectedTab: TabSlug,
     |};
 
+export type IconWithClassName = {| +icon: string, +className: string |};
 type IconsAction =
-  | {| +type: 'ICON_HAS_LOADED', +iconWithClassName: [string, string] |}
+  | {|
+      +type: 'ICON_HAS_LOADED',
+      +iconWithClassName: IconWithClassName,
+    |}
   | {| +type: 'ICON_IN_ERROR', +icon: string |};
 
 type SidebarAction = {|
