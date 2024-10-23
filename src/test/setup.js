@@ -17,6 +17,10 @@ import { autoMockResizeObserver } from './fixtures/mocks/resize-observer';
 
 autoMockResizeObserver();
 
+if (process.env.TZ !== 'UTC') {
+  throw new Error('Jest must be run from `yarn test`');
+}
+
 // Register TextDecoder and TextEncoder with the global scope.
 // These are now available globally in nodejs, but not when running with jsdom
 // in jest apparently.
