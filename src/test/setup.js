@@ -10,6 +10,7 @@ import '@testing-library/jest-dom';
 import fetchMock from 'fetch-mock-jest';
 import { Headers, Request, Response } from 'node-fetch';
 import { TextDecoder, TextEncoder } from 'util';
+import crypto from 'crypto';
 
 jest.mock('../utils/worker-factory');
 import * as WorkerFactory from '../utils/worker-factory';
@@ -85,5 +86,12 @@ expect.extend({
         `expected element to have class ${className}, current classes are ${received.className}`,
       pass: false,
     };
+  },
+});
+
+Object.defineProperty(global.self, 'crypto', {
+  value: {
+    // $FlowExpectError This flow version doesn't know about webcrypto
+    subtle: crypto.webcrypto.subtle,
   },
 });

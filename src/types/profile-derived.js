@@ -740,3 +740,11 @@ export type BottomBoxInfo = {|
   sourceFile: string | null,
   nativeSymbols: NativeSymbolInfo[],
 |};
+
+/**
+ * Favicon data that is retrieved from the browser connection.
+ */
+export type FaviconData = {|
+  +data: Uint8Array,
+  +mimeType: string,
+|};

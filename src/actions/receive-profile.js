@@ -69,6 +69,7 @@ import {
 import { computeActiveTabTracks } from 'firefox-profiler/profile-logic/active-tab';
 import { setDataSource } from './profile-view';
 import { fatalError } from './errors';
+import { batchLoadDataUrlIcons } from './icons';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 import {
   determineTimelineType,
@@ -90,6 +91,7 @@ import type {
   InnerWindowID,
   Pid,
   OriginsTimelineRoot,
+  PageList,
 } from 'firefox-profiler/types';
 
 import type {
@@ -97,6 +99,7 @@ import type {
   SymbolicationStepInfo,
 } from '../profile-logic/symbolication';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
+import { bytesToBase64DataUrl } from 'firefox-profiler/utils/base64';
 import type {
   BrowserConnection,
   BrowserConnectionStatus,
@@ -278,6 +281,10 @@ export function finalizeProfileView(
         // have access to IndexedDB.
         await doSymbolicateProfile(dispatch, profile, symbolStore);
       }
+    }
+
+    if (browserConnection && pages && pages.length > 0) {
+      await retrievePageFaviconsFromBrowser(dispatch, pages, browserConnection);
     }
   };
 }
@@ -1015,6 +1022,52 @@ export async function doSymbolicateProfile(
   await Promise.all(completionPromises);
 
   dispatch(doneSymbolicating());
+}
+
+export async function retrievePageFaviconsFromBrowser(
+  dispatch: Dispatch,
+  pages: PageList,
+  browserConnection: BrowserConnection
+) {
+  const newPages = [...pages];
+
+  const favicons = await browserConnection.getPageFavicons(
+    newPages.map((p) => p.url)
+  );
+
+  if (newPages.length !== favicons.length) {
+    // It appears that an error occurred since the pages and favicons arrays
+    // have different lengths. Return early without doing anything.
+    return;
+  }
+
+  // Convert binary favicon data into data urls.
+  const faviconDataStringPromises: Array<Promise<string | null>> = favicons.map(
+    (faviconData) => {
+      if (!faviconData) {
+        return Promise.resolve(null);
+      }
+      return bytesToBase64DataUrl(faviconData.data, faviconData.mimeType);
+    }
+  );
+
+  const faviconDataUrls = await Promise.all(faviconDataStringPromises);
+
+  for (let index = 0; index < favicons.length; index++) {
+    if (faviconDataUrls[index]) {
+      newPages[index] = {
+        ...newPages[index],
+        favicon: faviconDataUrls[index],
+      };
+    }
+  }
+
+  // Once we update the pages, we can also start loading the data urls.
+  dispatch(batchLoadDataUrlIcons(faviconDataUrls));
+  dispatch({
+    type: 'UPDATE_PAGES',
+    newPages,
+  });
 }
 
 // From a BrowserConnectionStatus, this unwraps the included browserConnection

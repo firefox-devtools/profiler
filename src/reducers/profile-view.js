@@ -72,6 +72,16 @@ const profile: Reducer<Profile | null> = (state = null, action) => {
         },
       };
     }
+    case 'UPDATE_PAGES': {
+      if (state === null) {
+        throw new Error(
+          `We tried to update the pages information for a non-existent profile.`
+        );
+      }
+
+      const { newPages } = action;
+      return { ...state, pages: newPages };
+    }
     default:
       return state;
   }

@@ -3,18 +3,18 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { createSelector } from 'reselect';
 import type {
-  IconWithClassName,
-  IconState,
+  IconsWithClassNames,
   Selector,
   DangerousSelectorWithArguments,
 } from 'firefox-profiler/types';
 
 /**
  * A simple selector into the icon state.
+ * It returns a map that matches icon to the icon class name.
  */
-export const getIcons: Selector<IconState> = (state) => state.icons;
+export const getIconsWithClassNames: Selector<IconsWithClassNames> = (state) =>
+  state.icons;
 
 /**
  * In order to load icons without multiple requests, icons are created through
@@ -26,21 +26,9 @@ export const getIconClassName: DangerousSelectorWithArguments<
   string,
   string | null,
 > = (state, icon) => {
-  const icons = getIcons(state);
-  return icon !== null && icons.has(icon) ? _classNameFromUrl(icon) : '';
+  if (icon === null) {
+    return '';
+  }
+  const icons = getIconsWithClassNames(state);
+  return icons.get(icon) ?? '';
 };
-
-/**
- * This functions returns an object with both the icon URL and the class name.
- */
-export const getIconsWithClassNames: Selector<IconWithClassName[]> =
-  createSelector(getIcons, (icons) =>
-    [...icons].map((icon) => ({ icon, className: _classNameFromUrl(icon) }))
-  );
-
-/**
- * Transforms a URL into a valid CSS class name.
- */
-function _classNameFromUrl(url): string {
-  return url.replace(/[/:.+>< ~()#,]/g, '_');
-}

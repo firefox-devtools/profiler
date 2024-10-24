@@ -120,6 +120,8 @@ export function sanitizePII(
       pages = pages.map((page, pageIndex) => ({
         ...page,
         url: removeURLs(page.url, `<Page #${pageIndex}>`),
+        // Remove the favicon data as it could reveal the url.
+        favicon: null,
       }));
     }
   }
