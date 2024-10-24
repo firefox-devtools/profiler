@@ -226,7 +226,7 @@ export function addDataToWindowObject(
       // This will be imperfect because of float rounding errors but still better
       // than not having them.
       const ns = Math.trunc((ts - Math.trunc(ts)) * 10 ** 6);
-      return `${d.getFullYear()}-${pad(d.getUTCMonth() + 1, 2)}-${pad(d.getUTCDate(), 2)} ${pad(d.getUTCHours(), 2)}:${pad(d.getUTCMinutes(), 2)}:${pad(d.getUTCSeconds(), 2)}.${pad(d.getUTCMilliseconds(), 3)}${pad(ns, 6)} UTC`;
+      return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1, 2)}-${pad(d.getUTCDate(), 2)} ${pad(d.getUTCHours(), 2)}:${pad(d.getUTCMinutes(), 2)}:${pad(d.getUTCSeconds(), 2)}.${pad(d.getUTCMilliseconds(), 3)}${pad(ns, 6)} UTC`;
     }
 
     const logs = [];
