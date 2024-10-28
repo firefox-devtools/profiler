@@ -113,6 +113,11 @@ type StatusQueryResponse = {|
   //   Shipped in Firefox 125.
   //   Adds support for the following message types:
   //    - GET_EXTERNAL_MARKERS
+  // Version 4:
+  //   Shipped in Firefox 134.
+  //   Adds support for the following message types:
+  //    - GET_PAGE_FAVICONS
+
   version?: number,
 |};
 type EnableMenuButtonResponse = void;
