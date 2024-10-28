@@ -267,9 +267,19 @@ export function finalizeProfileView(
         );
     }
 
+    let faviconsPromise = null;
+    if (browserConnection && pages && pages.length > 0) {
+      faviconsPromise = retrievePageFaviconsFromBrowser(
+        dispatch,
+        pages,
+        browserConnection
+      );
+    }
+
     // Note we kick off symbolication only for the profiles we know for sure
     // that they weren't symbolicated.
     // We can skip the symbolication in tests if needed.
+    let symbolicationPromise = null;
     if (!skipSymbolication && profile.meta.symbolicated === false) {
       const symbolStore = getSymbolStore(
         dispatch,
@@ -279,13 +289,15 @@ export function finalizeProfileView(
       if (symbolStore) {
         // Only symbolicate if a symbol store is available. In tests we may not
         // have access to IndexedDB.
-        await doSymbolicateProfile(dispatch, profile, symbolStore);
+        symbolicationPromise = doSymbolicateProfile(
+          dispatch,
+          profile,
+          symbolStore
+        );
       }
     }
 
-    if (browserConnection && pages && pages.length > 0) {
-      await retrievePageFaviconsFromBrowser(dispatch, pages, browserConnection);
-    }
+    await Promise.all([faviconsPromise, symbolicationPromise]);
   };
 }
 
