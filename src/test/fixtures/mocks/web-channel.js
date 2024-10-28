@@ -8,6 +8,7 @@ import type {
   MessageFromBrowser,
   MessageToBrowser,
 } from '../../../app-logic/web-channel';
+import type { FaviconData } from 'firefox-profiler/types';
 
 /**
  * Mock out the WebChannel, a Firefox internal mechanism that allows us to
@@ -144,7 +145,7 @@ export function simulateWebChannel(profileGetter: () => mixed) {
           requestId: message.requestId,
           response: {
             menuButtonIsEnabled: true,
-            version: 1,
+            version: 4,
           },
         });
         break;
@@ -176,6 +177,31 @@ export function simulateWebChannel(profileGetter: () => mixed) {
         });
         break;
       }
+      case 'GET_EXTERNAL_MARKERS': {
+        triggerResponse({
+          type: 'SUCCESS_RESPONSE',
+          requestId: message.requestId,
+          response: {},
+        });
+        break;
+      }
+      case 'GET_EXTERNAL_POWER_TRACKS': {
+        triggerResponse({
+          type: 'SUCCESS_RESPONSE',
+          requestId: message.requestId,
+          response: ([]: MixedObject[]),
+        });
+        break;
+      }
+      case 'GET_PAGE_FAVICONS': {
+        triggerResponse({
+          type: 'SUCCESS_RESPONSE',
+          requestId: message.requestId,
+          response: ([]: Array<FaviconData | null>),
+        });
+        break;
+      }
+
       default: {
         triggerResponse({
           type: 'ERROR_RESPONSE',
