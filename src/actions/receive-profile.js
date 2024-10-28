@@ -1037,7 +1037,8 @@ export async function retrievePageFaviconsFromBrowser(
 
   if (newPages.length !== favicons.length) {
     // It appears that an error occurred since the pages and favicons arrays
-    // have different lengths. Return early without doing anything.
+    // have different lengths. Return early without doing anything. The favicons
+    // array will be empty if Firefox doesn't support this webchannel request.
     return;
   }
 
