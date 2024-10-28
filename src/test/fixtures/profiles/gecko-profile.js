@@ -251,7 +251,7 @@ export function createGeckoProfile(): GeckoProfile {
     {
       tabID: tabID,
       innerWindowID: 111111,
-      url: 'URL',
+      url: 'https://mozilla.org/',
       embedderInnerWindowID: 0,
     },
   ];

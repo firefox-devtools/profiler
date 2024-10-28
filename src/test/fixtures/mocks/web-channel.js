@@ -133,7 +133,10 @@ export function simulateOldWebChannelAndFrameScript(
   return webChannel;
 }
 
-export function simulateWebChannel(profileGetter: () => mixed) {
+export function simulateWebChannel(
+  profileGetter: () => mixed,
+  faviconsGetter?: () => Promise<Array<FaviconData | null>>
+) {
   const webChannel = mockWebChannel();
 
   const { registerMessageToChromeListener, triggerResponse } = webChannel;
@@ -194,14 +197,16 @@ export function simulateWebChannel(profileGetter: () => mixed) {
         break;
       }
       case 'GET_PAGE_FAVICONS': {
+        const favicons: Array<FaviconData | null> = faviconsGetter
+          ? await faviconsGetter()
+          : [];
         triggerResponse({
           type: 'SUCCESS_RESPONSE',
           requestId: message.requestId,
-          response: ([]: Array<FaviconData | null>),
+          response: favicons,
         });
         break;
       }
-
       default: {
         triggerResponse({
           type: 'ERROR_RESPONSE',

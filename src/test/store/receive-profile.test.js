@@ -57,10 +57,11 @@ import {
   getProfileWithNiceTracks,
 } from '../fixtures/profiles/tracks';
 import { waitUntilState } from '../fixtures/utils';
+import { dataUrlToBytes } from 'firefox-profiler/utils/base64';
 
 import { compress } from '../../utils/gz';
 
-import type { Profile } from 'firefox-profiler/types';
+import type { Profile, FaviconData } from 'firefox-profiler/types';
 
 // Mocking SymbolStoreDB. By default the functions will return undefined, which
 // will make the symbolication move forward with some bogus information.
@@ -848,14 +849,27 @@ describe('actions/receive-profile', function () {
       };
     }
 
-    function setupWithWebChannel(profileAs: string = 'json') {
+    function setupWithWebChannel(
+      profileAs: string = 'json',
+      faviconsGetter?: () => Promise<Array<FaviconData | null>>
+    ) {
       const { store, profileGetter } = _setup(profileAs);
-      const webChannel = simulateWebChannel(profileGetter);
+      const webChannel = simulateWebChannel(profileGetter, faviconsGetter);
+
+      const waitUntilFavicons = () =>
+        waitUntilState(store, (state) => {
+          const pages = ProfileViewSelectors.getPageList(state);
+          if (!pages) {
+            return false;
+          }
+          return pages.some((page) => page.favicon);
+        });
 
       return {
         store,
         ...store,
         ...webChannel,
+        waitUntilFavicons,
       };
     }
 
@@ -927,6 +941,39 @@ describe('actions/receive-profile', function () {
           body: expect.stringMatching(/memoryMap.*firefox/),
         })
       );
+    });
+
+    it('gets the favicons for the received profile using webchannel', async () => {
+      // For some reason fetch-mock-jest removes the `data:` protocol.
+      const mockDataUrl = 'image/png,test';
+      window.fetch.get('image/png,test', {
+        arrayBuffer: () => {
+          return new Uint8Array([1, 2, 3, 4, 5, 6]).buffer;
+        },
+      });
+
+      // Create a simple urls getter for the pages.
+      const faviconsGetter = async (): Promise<Array<FaviconData | null>> => {
+        return [
+          {
+            data: await dataUrlToBytes('data:' + mockDataUrl),
+            mimeType: 'image/png',
+          },
+          null,
+          null,
+        ];
+      };
+      const { dispatch, waitUntilFavicons } = setupWithWebChannel(
+        'json',
+        faviconsGetter
+      );
+
+      const browserConnectionStatus =
+        await createBrowserConnection('Firefox/134.0');
+      await dispatch(retrieveProfileFromBrowser(browserConnectionStatus));
+
+      // It should successfully get the favicons the profiles that are loaded from the browser.
+      return expect(waitUntilFavicons()).resolves.toBe(undefined);
     });
   });
 
