@@ -1236,7 +1236,7 @@ describe('extractProfileFilterPageData', function () {
         {
           origin: 'about:blank',
           hostname: 'about:blank',
-          favicon: null,
+          favicon: 'test-file-stub',
         },
       ],
     ]);

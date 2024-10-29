@@ -31,6 +31,8 @@ import {
   ensureExists,
   getFirstItemFromSet,
 } from 'firefox-profiler/utils/flow';
+import ExtensionFavicon from '../../res/img/svg/extension-outline.svg';
+import DefaultLinkFavicon from '../../res/img/svg/globe.svg';
 
 import type {
   Profile,
@@ -2971,7 +2973,7 @@ export function extractProfileFilterPageData(
       pageDataByTabID.set(tabID, {
         origin: pageUrl,
         hostname: pageUrl,
-        favicon: null,
+        favicon: DefaultLinkFavicon,
       });
       continue;
     }
@@ -2984,17 +2986,19 @@ export function extractProfileFilterPageData(
     // The known failing case is when we try to construct a URL with a
     // moz-extension:// protocol on platforms outside of Firefox. Only Firefox
     // can parse it properly. Chrome and node will output a URL with no `origin`.
+    const isExtension = pageUrl.startsWith('moz-extension://');
+    const defaultFavicon = isExtension ? ExtensionFavicon : DefaultLinkFavicon;
     const pageData: ProfileFilterPageData = {
       origin: '',
       hostname: '',
-      favicon: currentPage.favicon ?? null,
+      favicon: currentPage.favicon ?? defaultFavicon,
     };
 
     try {
       const page = new URL(pageUrl);
 
       pageData.hostname =
-        extensionIDToNameMap && pageUrl.startsWith('moz-extension://')
+        extensionIDToNameMap && isExtension
           ? // Get the real extension name if it's an extension.
             (extensionIDToNameMap.get(
               'moz-extension://' +
