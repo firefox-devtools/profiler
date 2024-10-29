@@ -190,7 +190,7 @@ class BrowserConnectionImpl implements BrowserConnection {
   async getPageFavicons(
     pageUrls: Array<string>
   ): Promise<Array<FaviconData | null>> {
-    // This is added in Firefox 133.
+    // This is added in Firefox 134.
     if (this._webChannelSupportsGetPageFavicons) {
       return getPageFaviconsViaWebChannel(pageUrls);
     }

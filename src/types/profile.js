@@ -482,7 +482,7 @@ export type Page = {|
   // Favicon data of the page if it was successfully retrieved from Firefox.
   // It's a base64 encoded URI string when available.
   // It's null when Firefox can't get the favicon.
-  // This is added in Firefox 133, earlier profiles will not have it.
+  // This is added in Firefox 134, earlier profiles will not have it.
   favicon?: string | null,
 |};
 
