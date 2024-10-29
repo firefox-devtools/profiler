@@ -17,3 +17,7 @@
   /* Move the checkmark to inline-start instead of right, as it's logically better. */
   inset-inline: 8px 0;
 }
+
+.tabSelectorMenuItem .nodeIcon {
+  margin-inline-end: 10px;
+}
