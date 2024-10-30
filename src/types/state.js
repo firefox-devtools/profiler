@@ -423,7 +423,10 @@ export type L10nState = {|
   +direction: 'ltr' | 'rtl',
 |};
 
-export type IconState = Set<string>;
+/**
+ * Map of icons to their class names
+ */
+export type IconsWithClassNames = Map<string, string>;
 
 export type CodeState = {|
   +sourceCodeCache: Map<string, SourceCodeStatus>,
@@ -434,14 +437,9 @@ export type State = {|
   +app: AppState,
   +profileView: ProfileViewState,
   +urlState: UrlState,
-  +icons: IconState,
+  +icons: IconsWithClassNames,
   +zippedProfiles: ZippedProfilesState,
   +publish: PublishState,
   +l10n: L10nState,
   +code: CodeState,
-|};
-
-export type IconWithClassName = {|
-  +icon: string,
-  +className: string,
 |};
