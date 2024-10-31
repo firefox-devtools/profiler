@@ -6,6 +6,11 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 51
+
+Two new marker schema field format types have been added: `flow-id` and `terminating-flow-id`, with string index values (like `unique-string`).
+An optional `isStackBased` boolean field has been added to the marker schema.
+
 ### Version 50
 
 The serialized format can now optionally store sample and counter sample times as time deltas instead of absolute timestamps to reduce the JSON size. The unserialized version is unchanged.
@@ -77,6 +82,11 @@ We've also cleaned up the ResourceTable format:
 Older versions are not documented in this changelog but can be found in [processed-profile-versioning.js](../src/profile-logic/processed-profile-versioning.js).
 
 ## Gecko profile format
+
+### Version 31
+
+Two new marker schema field format types have been added: `flow-id` and `terminating-flow-id`, with string index values (like `unique-string`).
+An optional `isStackBased` boolean field has been added to the marker schema.
 
 ### Version 30
 
