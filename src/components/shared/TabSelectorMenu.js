@@ -42,10 +42,6 @@ class TabSelectorMenuImpl extends React.PureComponent<Props> {
       return null;
     }
 
-    const hasSomeIcons = sortedPageData.some(
-      ({ pageData }) => !!pageData.favicon
-    );
-
     return (
       <>
         <MenuItem
@@ -76,7 +72,7 @@ class TabSelectorMenuImpl extends React.PureComponent<Props> {
               'aria-checked': tabFilter === tabID ? 'false' : 'true',
             }}
           >
-            {hasSomeIcons ? <Icon iconUrl={pageData.favicon} /> : null}
+            <Icon iconUrl={pageData.favicon} />
             {pageData.hostname}
           </MenuItem>
         ))}
