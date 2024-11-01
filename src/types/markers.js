@@ -475,6 +475,7 @@ export type GCSliceMarkerPayload_Gecko = {|
  * that redirects are logged as well.
  */
 
+export type NetworkHttpVersion = 'h3' | 'h2' | 'http/1.1' | 'http/1.0';
 export type NetworkStatus =
   | 'STATUS_START'
   | 'STATUS_STOP'
@@ -520,6 +521,7 @@ export type NetworkPayload = {|
   // It's always absent in Firefox < 98 because we couldn't capture private
   // browsing data back then.
   isPrivateBrowsing?: boolean,
+  httpVersion?: NetworkHttpVersion,
 
   // NOTE: the following comments are valid for the merged markers. For the raw
   // markers, startTime and endTime have different meanings. Please look
