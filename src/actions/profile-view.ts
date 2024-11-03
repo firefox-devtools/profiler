@@ -903,6 +903,53 @@ export function showProvidedTracks(
   };
 }
 
+export function showProvidedThreads(
+  threadsToShow: Set<ThreadIndex>
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const globalTracks = getGlobalTracks(getState());
+    const localTracksByPid = getLocalTracksByPid(getState());
+
+    const globalTracksToShow: Set<TrackIndex> = new Set();
+    const localTracksByPidToShow: Map<Pid, Set<TrackIndex>> = new Map();
+
+    for (const [globalTrackIndex, globalTrack] of globalTracks.entries()) {
+      if (globalTrack.type !== 'process') {
+        continue;
+      }
+      const { mainThreadIndex, pid } = globalTrack;
+      if (mainThreadIndex !== null && threadsToShow.has(mainThreadIndex)) {
+        globalTracksToShow.add(globalTrackIndex);
+      }
+      const localTracks = localTracksByPid.get(pid);
+      if (localTracks === undefined) {
+        continue;
+      }
+
+      for (const [localTrackIndex, localTrack] of localTracks.entries()) {
+        if (localTrack.type !== 'thread') {
+          continue;
+        }
+        if (threadsToShow.has(localTrack.threadIndex)) {
+          const localTracksToShow = localTracksByPidToShow.get(pid);
+          if (localTracksToShow === undefined) {
+            localTracksByPidToShow.set(pid, new Set([localTrackIndex]));
+          } else {
+            localTracksToShow.add(localTrackIndex);
+          }
+          globalTracksToShow.add(globalTrackIndex);
+        }
+      }
+    }
+
+    dispatch({
+      type: 'SHOW_PROVIDED_TRACKS',
+      globalTracksToShow,
+      localTracksByPidToShow,
+    });
+  };
+}
+
 /**
  * This action makes the tracks that are provided hidden.
  */
