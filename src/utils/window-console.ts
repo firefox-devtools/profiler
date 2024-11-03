@@ -22,6 +22,10 @@ import {
   setThemePreference,
 } from 'firefox-profiler/utils/dark-mode';
 import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
+import {
+  printMarkerFlows,
+  printFlow,
+} from 'firefox-profiler/profile-logic/marker-data';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still
 // special-cases the `value` property: if it's missing it throws an error. Using
@@ -35,6 +39,9 @@ export type ExtraPropertiesOnWindowForConsole = {
   callTree: CallTree;
   filteredMarkers: Marker[];
   selectedMarker: Marker | null;
+  printFlows: () => void;
+  selectMarkerOnThread: (markerIndex: number, threadIndex: number) => void;
+  printFlow: (flowIndex: number) => void;
   experimental: {
     enableEventDelayTracks(): void;
     enableCPUGraphs(): void;
@@ -110,6 +117,44 @@ export function addDataToWindowObject(
       return selectorsForConsole.selectedThread.getSelectedMarker(getState());
     },
   });
+
+  target.printFlows = function () {
+    const threadIndex =
+      selectorsForConsole.urlState.getFirstSelectedThreadIndex(getState());
+    const markerIndex =
+      selectorsForConsole.selectedThread.getSelectedMarkerIndex(getState());
+    const profileFlowInfo =
+      selectorsForConsole.flow.getProfileFlowInfo(getState());
+    const threads = selectorsForConsole.profile.getThreads(getState());
+    const fullMarkerListPerThread =
+      selectorsForConsole.flow.getFullMarkerListPerThread(getState());
+    const stringTable = selectorsForConsole.profile.getStringTable(getState());
+    if (markerIndex === null) {
+      console.log('No marker is selected.');
+    } else {
+      printMarkerFlows(
+        threadIndex,
+        markerIndex,
+        profileFlowInfo,
+        threads,
+        fullMarkerListPerThread,
+        stringTable
+      );
+    }
+  };
+  target.selectMarkerOnThread = function (markerIndex, threadIndex) {
+    dispatch(actions.showProvidedThreads(new Set([threadIndex])));
+    dispatch(actions.changeSelectedThreads(new Set([threadIndex])));
+    dispatch(actions.changeSelectedMarker(threadIndex, markerIndex));
+  };
+  target.printFlow = function (flowIndex) {
+    const profileFlowInfo =
+      selectorsForConsole.flow.getProfileFlowInfo(getState());
+    const threads = selectorsForConsole.profile.getThreads(getState());
+    const fullMarkerListPerThread =
+      selectorsForConsole.flow.getFullMarkerListPerThread(getState());
+    printFlow(flowIndex, profileFlowInfo, threads, fullMarkerListPerThread);
+  };
 
   target.experimental = {
     enableEventDelayTracks() {
