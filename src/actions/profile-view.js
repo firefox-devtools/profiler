@@ -1689,6 +1689,22 @@ export function changeShowUserTimings(
   };
 }
 
+export function changeStackChartSameWidths(
+  stackChartSameWidths: boolean
+): ThunkAction<void> {
+  return (dispatch) => {
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: 'toggle stack chart same widths',
+    });
+    dispatch({
+      type: 'CHANGE_STACK_CHART_SAME_WIDTHS',
+      stackChartSameWidths,
+    });
+  };
+}
+
 /**
  * This action toggles changes between using a summary view that shows only self time
  * for the JS tracer data, and a stack-based view (similar to the stack chart) for the

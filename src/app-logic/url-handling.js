@@ -196,6 +196,7 @@ type StackChartQuery = {|
   search: string, // "js::RunScript"
   invertCallstack: null | void,
   showUserTimings: null | void,
+  sameWidths: null | void,
   ctSummary: string,
 |};
 
@@ -542,6 +543,7 @@ export function stateFromLocation(
       ),
       invertCallstack: query.invertCallstack === undefined ? false : true,
       showUserTimings: query.showUserTimings === undefined ? false : true,
+      stackChartSameWidths: query.sameWidths === undefined ? false : true,
       committedRanges: query.range ? parseCommittedRanges(query.range) : [],
       selectedThreads,
       callTreeSearchString: query.search || '',
