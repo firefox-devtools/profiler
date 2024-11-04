@@ -305,18 +305,16 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
   const selectedTab = urlState.selectedTab;
   switch (selectedTab) {
     case 'stack-chart':
+      // Stack chart uses all of the CallTree's query strings but also has an
+      // additional query string.
+      query = (baseQuery: StackChartQueryShape);
+      query.showUserTimings = urlState.profileSpecific.showUserTimings
+        ? null
+        : undefined;
+    /* fallsthrough */
     case 'flame-graph':
     case 'calltree': {
-      if (selectedTab === 'stack-chart') {
-        // Stack chart uses all of the CallTree's query strings but also has an
-        // additional query string.
-        query = (baseQuery: StackChartQueryShape);
-        query.showUserTimings = urlState.profileSpecific.showUserTimings
-          ? null
-          : undefined;
-      } else {
-        query = (baseQuery: CallTreeQueryShape);
-      }
+      query = (baseQuery: CallTreeQueryShape);
 
       query.search = urlState.profileSpecific.callTreeSearchString || undefined;
       query.invertCallstack = urlState.profileSpecific.invertCallstack
