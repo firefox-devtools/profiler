@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`CombinedChart renders combined stack chart 1`] = `
 <div
@@ -71,6 +71,15 @@ exports[`CombinedChart renders combined stack chart 1`] = `
             type="checkbox"
           />
           Show user timing
+        </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          Use the same width for each stack
         </label>
       </li>
     </ul>
@@ -559,6 +568,15 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
           />
           Show user timing
         </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          Use the same width for each stack
+        </label>
       </li>
     </ul>
     <div
@@ -1007,6 +1025,15 @@ exports[`StackChart matches the snapshot 1`] = `
             type="checkbox"
           />
           Show user timing
+        </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          Use the same width for each stack
         </label>
       </li>
     </ul>
@@ -1467,6 +1494,15 @@ exports[`StackChart works when the user selects the JS allocations option 1`] = 
                 type="checkbox"
               />
               Show user timing
+            </label>
+            <label
+              class="photon-label photon-label-micro photon-label-horiz-padding"
+            >
+              <input
+                class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+                type="checkbox"
+              />
+              Use the same width for each stack
             </label>
           </li>
         </ul>
