@@ -37,6 +37,58 @@ describe('WindowTitle', () => {
     expect(document.title).toBe('Firefox – Firefox Profiler');
   });
 
+  it('shows the profiler startTime in the window title if it is available', () => {
+    const profile = getEmptyProfile();
+    profile.threads.push(getEmptyThread());
+    Object.assign(profile.meta, {
+      startTime: new Date('5 Nov 2024 13:00 UTC').getTime(),
+    });
+    const store = storeWithProfile(profile);
+    store.dispatch(setDataSource('from-url'));
+    render(
+      <Provider store={store}>
+        <WindowTitle />
+      </Provider>
+    );
+
+    expect(document.title).toBe(
+      'Firefox – 11/5/2024, 1:00:00 PM UTC – Firefox Profiler'
+    );
+  });
+
+  it('shows the profiler startTime with public annotation in the window title if it is available', () => {
+    const profile = getEmptyProfile();
+    profile.threads.push(getEmptyThread());
+    Object.assign(profile.meta, {
+      startTime: new Date('5 Nov 2024 13:00 UTC').getTime(),
+    });
+    const store = storeWithProfile(profile);
+    store.dispatch(setDataSource('public'));
+    render(
+      <Provider store={store}>
+        <WindowTitle />
+      </Provider>
+    );
+
+    expect(document.title).toBe(
+      'Firefox – 11/5/2024, 1:00:00 PM UTC (public) – Firefox Profiler'
+    );
+  });
+
+  it('shows the public annotation without startTime in the window title', () => {
+    const profile = getEmptyProfile();
+    profile.threads.push(getEmptyThread());
+    const store = storeWithProfile(profile);
+    store.dispatch(setDataSource('public'));
+    render(
+      <Provider store={store}>
+        <WindowTitle />
+      </Provider>
+    );
+
+    expect(document.title).toBe('Firefox (public) – Firefox Profiler');
+  });
+
   it('shows platform details in the window title if it is available', () => {
     const profile = getEmptyProfile();
     profile.threads.push(getEmptyThread());
@@ -54,6 +106,28 @@ describe('WindowTitle', () => {
     );
 
     expect(document.title).toBe('Firefox – macOS 10.14 – Firefox Profiler');
+  });
+
+  it('shows platform details with the start time in the window title if it is available', () => {
+    const profile = getEmptyProfile();
+    profile.threads.push(getEmptyThread());
+    Object.assign(profile.meta, {
+      oscpu: 'Intel Mac OS X 10.14',
+      platform: 'Macintosh',
+      toolkit: 'cocoa',
+      startTime: new Date('5 Nov 2024 13:00 UTC').getTime(),
+    });
+    const store = storeWithProfile(profile);
+    store.dispatch(setDataSource('from-url'));
+    render(
+      <Provider store={store}>
+        <WindowTitle />
+      </Provider>
+    );
+
+    expect(document.title).toBe(
+      'Firefox – macOS 10.14 – 11/5/2024, 1:00:00 PM UTC – Firefox Profiler'
+    );
   });
 
   it('shows profile name in the window title if it is available', () => {
