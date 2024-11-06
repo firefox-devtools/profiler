@@ -24,7 +24,10 @@ import {
   INTERVAL_END,
 } from 'firefox-profiler/app-logic/constants';
 
-import { getOrCreateURIResource } from '../../profile-logic/profile-data';
+import {
+  getOrCreateURIResource,
+  getTimeRangeForThread,
+} from '../../profile-logic/profile-data';
 
 // Chrome Tracing Event Spec:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
@@ -41,7 +44,8 @@ export type TracingEventUnion =
   | ProcessSortIndexEvent
   | ThreadSortIndexEvent
   | ScreenshotEvent
-  | FallbackEndEvent;
+  | FallbackEndEvent
+  | TracingStartedInBrowserEvent;
 
 type TracingEvent<Event> = {|
   cat: string,
@@ -176,6 +180,11 @@ type ScreenshotEvent = TracingEvent<{|
   name: 'Screenshot',
   ph: 'O',
   args: { snapshot: string },
+|}>;
+
+type TracingStartedInBrowserEvent = TracingEvent<{|
+  name: 'TracingStartedInBrowser',
+  ph: 'I',
 |}>;
 
 function wrapCpuProfileInEvent(cpuProfile: CpuProfileData): CpuProfileEvent {
@@ -734,6 +743,37 @@ async function processTracingEvents(
     eventsByName,
     profile
   );
+
+  // Figure out the profiling start and end times if they haven't been found yet.
+  // CpuProfile traces would have already found and updated this, we should do
+  // it for the other tracing formats only.
+  if (
+    profile.meta.profilingStartTime === undefined &&
+    profile.meta.profilingEndTime === undefined &&
+    eventsByName.has('TracingStartedInBrowser')
+  ) {
+    const tracingStartedEvent = ensureExists(
+      eventsByName.get('TracingStartedInBrowser')
+    )[0];
+    if (
+      tracingStartedEvent.ts !== undefined &&
+      Number.isFinite(tracingStartedEvent.ts)
+    ) {
+      // We know the start easily, but we have to compute the end time.
+      let profilingEndTime = -Infinity;
+
+      profile.threads.forEach((thread) => {
+        const threadRange = getTimeRangeForThread(
+          thread,
+          profile.meta.interval
+        );
+        profilingEndTime = Math.max(profilingEndTime, threadRange.end);
+      });
+
+      profile.meta.profilingStartTime = tracingStartedEvent.ts / 1000;
+      profile.meta.profilingEndTime = profilingEndTime;
+    }
+  }
 
   profile.threads.sort((threadA, threadB) => {
     const threadInfoA = threadInfoByThread.get(threadA);

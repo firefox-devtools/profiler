@@ -70,16 +70,25 @@ class WindowTitleImpl extends PureComponent<Props> {
           const { meta } = profile;
           let title = '';
           if (formattedMetaInfoString) {
-            title += formattedMetaInfoString + SEPARATOR;
+            title += formattedMetaInfoString;
           }
-          title += _formatDateTime(
-            meta.startTime + (meta.profilingStartTime || 0)
-          );
+
+          // Print the startTime only if it's provided.
+          if (meta.startTime > 0) {
+            title +=
+              SEPARATOR +
+              _formatDateTime(meta.startTime + (meta.profilingStartTime || 0));
+          }
+
           if (dataSource === 'public') {
             title += ` (${dataSource})`;
           }
 
-          title += SEPARATOR + PRODUCT;
+          if (title !== '') {
+            // Add the separator only if we added some information before.
+            title += SEPARATOR;
+          }
+          title += PRODUCT;
 
           // Prepend the name of the file if from a zip file.
           if (fileNameInZipFilePath) {
