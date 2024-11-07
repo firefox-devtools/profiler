@@ -678,6 +678,14 @@ export function markerPayloadMatchesSearch(
         payloadField.format === 'flow-id' ||
         payloadField.format === 'terminating-flow-id'
       ) {
+        if (typeof value !== "number") {
+          console.error(`In marker ${marker.name}, the key ${payloadField} has an invalid value ${value} as a unique-string.`);
+          continue;
+        }
+        if (!stringTable.hasIndex(value)) {
+          console.error(`In marker ${marker.name}, the key ${payloadField} has an invalid index ${value} as a unique-string.`);
+          continue;
+        }
         value = stringTable.getString(value);
       }
       if (value === undefined || value === null || value === '') {
