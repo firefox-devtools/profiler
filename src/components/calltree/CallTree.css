@@ -18,6 +18,7 @@
 
 .treeViewFixedColumn.icon {
   display: flex;
+  overflow: visible;
   flex-flow: column nowrap;
   align-items: center;
 }

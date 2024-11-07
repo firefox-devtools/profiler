@@ -382,7 +382,14 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     }
 
     const stackTiming = flameGraphTiming[depth];
+    if (!stackTiming) {
+      return null;
+    }
     const callNodeIndex = stackTiming.callNode[flameGraphTimingIndex];
+    if (callNodeIndex === undefined) {
+      return null;
+    }
+
     const ratio =
       stackTiming.end[flameGraphTimingIndex] -
       stackTiming.start[flameGraphTimingIndex];

@@ -5,7 +5,7 @@
 
 import { getEmptyRawMarkerTable } from './data-structures';
 import { getFriendlyThreadName } from './profile-data';
-import { removeFilePath, removeURLs } from '../utils/string';
+import { removeFilePath, removeURLs, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
   INSTANT,
@@ -119,62 +119,195 @@ export function getSearchFilteredMarkerIndexes(
   getMarker: (MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   markerSchemaByName: MarkerSchemaByName,
-  searchRegExp: RegExp | null,
+  searchRegExps: MarkerRegExps | null,
+  stringTable: UniqueStringArray,
   categoryList: CategoryList
 ): MarkerIndex[] {
-  if (!searchRegExp) {
+  if (!searchRegExps) {
     return markerIndexes;
   }
-  // Need to assign it to a constant variable so Flow doesn't complain about
-  // passing it inside a function below.
-  const regExp = searchRegExp;
+
+  let hasPositiveRegexps = Boolean(searchRegExps.generic);
+  let hasNegativeRegexps = false;
+
+  for (const val of searchRegExps.fieldMap.values()) {
+    hasPositiveRegexps = hasPositiveRegexps || val.positive !== null;
+    hasNegativeRegexps = hasNegativeRegexps || val.negative !== null;
+  }
+
   const newMarkers: MarkerIndex[] = [];
   for (const markerIndex of markerIndexes) {
     const marker = getMarker(markerIndex);
-    const { data, name, category } = marker;
+    // Starting includeMarker with true in case `hasPositiveRegexps` is false.
+    // Otherwise it will be overwritten inside the next if branch.
+    let includeMarker = true;
+    // If there are positive RegExps, then check if the marker will be included.
+    if (hasPositiveRegexps) {
+      includeMarker = positiveFilterMarker(
+        marker,
+        markerSchemaByName,
+        searchRegExps,
+        stringTable,
+        categoryList
+      );
+    }
+
+    // If the marker marked as `included` so far by the positive regexps, check
+    // for negative RegExps and filter if there are any. If `includeMarker` is
+    // false here it means that it's already excluded so there is no point of
+    // checking it for negative filtering.
+    if (includeMarker && hasNegativeRegexps) {
+      includeMarker = negativeFilterMarker(
+        marker,
+        markerSchemaByName,
+        searchRegExps,
+        stringTable,
+        categoryList
+      );
+    }
+
+    if (includeMarker) {
+      newMarkers.push(markerIndex);
+    }
+  }
+
+  return newMarkers;
+}
+
+function positiveFilterMarker(
+  marker: Marker,
+  markerSchemaByName: MarkerSchemaByName,
+  searchRegExps: MarkerRegExps,
+  stringTable: UniqueStringArray,
+  categoryList: CategoryList
+): boolean {
+  // Need to assign it to a constant variable so Flow doesn't complain about
+  // passing it inside a function below.
+  const regExps = searchRegExps;
+
+  function test(value, key) {
+    key = key.toLowerCase();
+    const fieldRegexp = regExps.fieldMap.get(key);
+    const found =
+      (regExps.generic ? regExps.generic.test(value) : false) ||
+      (fieldRegexp && fieldRegexp.positive
+        ? fieldRegexp.positive.test(value)
+        : false);
 
     // Reset regexp for each iteration. Otherwise state from previous
     // iterations can cause matches to fail if the search is global or
     // sticky.
-
-    regExp.lastIndex = 0;
-
-    if (categoryList[category] !== undefined) {
-      const markerCategory = categoryList[category].name;
-      if (regExp.test(markerCategory)) {
-        newMarkers.push(markerIndex);
-        continue;
-      }
+    if (regExps.generic) {
+      regExps.generic.lastIndex = 0;
     }
-
-    if (regExp.test(name)) {
-      newMarkers.push(markerIndex);
-      continue;
+    if (fieldRegexp && fieldRegexp.positive) {
+      fieldRegexp.positive.lastIndex = 0;
     }
+    return found;
+  }
 
-    if (data && typeof data === 'object') {
-      if (regExp.test(data.type)) {
-        // Check the type of the marker payload first.
-        newMarkers.push(markerIndex);
-        continue;
-      }
+  const { data, name, category } = marker;
 
-      // Now check the schema for the marker payload for searchable
-      const markerSchema = getSchemaFromMarker(
-        markerSchemaByName,
-        marker.name,
-        marker.data
-      );
-      if (
-        markerSchema &&
-        markerPayloadMatchesSearch(markerSchema, marker, regExp)
-      ) {
-        newMarkers.push(markerIndex);
-        continue;
-      }
+  if (categoryList[category] !== undefined) {
+    const markerCategory = categoryList[category].name;
+    if (test(markerCategory, 'cat')) {
+      return true;
     }
   }
-  return newMarkers;
+
+  if (test(name, 'name')) {
+    return true;
+  }
+
+  if (data && typeof data === 'object') {
+    if (test(data.type, 'type')) {
+      // Check the type of the marker payload first.
+      return true;
+    }
+
+    // Now check the schema for the marker payload for searchable
+    const markerSchema = getSchemaFromMarker(
+      markerSchemaByName,
+      marker.name,
+      marker.data
+    );
+    if (
+      markerSchema &&
+      markerPayloadMatchesSearch(markerSchema, marker, stringTable, test)
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function negativeFilterMarker(
+  marker: Marker,
+  markerSchemaByName: MarkerSchemaByName,
+  searchRegExps: MarkerRegExps,
+  stringTable: UniqueStringArray,
+  categoryList: CategoryList
+): boolean {
+  // Need to assign it to a constant variable so Flow doesn't complain about
+  // passing it inside a function below.
+  const regExps = searchRegExps;
+
+  function test(value, key) {
+    key = key.toLowerCase();
+    const fieldRegexp = regExps.fieldMap.get(key);
+    const negativeRegexp = fieldRegexp?.negative;
+    if (!negativeRegexp) {
+      return false;
+    }
+
+    const found = negativeRegexp.test(value);
+
+    // Reset regexp for each iteration. Otherwise state from previous
+    // iterations can cause matches to fail if the search is global or
+    // sticky.
+    negativeRegexp.lastIndex = 0;
+    return found;
+  }
+
+  const { data, name, category } = marker;
+
+  if (categoryList[category] !== undefined) {
+    const markerCategory = categoryList[category].name;
+    if (test(markerCategory, 'cat')) {
+      // Found the category in the negative filters, do not include it.
+      return false;
+    }
+  }
+
+  if (test(name, 'name')) {
+    // Found the name in the negative filters, do not include it.
+    return false;
+  }
+
+  if (data && typeof data === 'object') {
+    if (test(data.type, 'type')) {
+      // Found the type of the payload in the negative filters, do not include it.
+      return false;
+    }
+
+    // Now check the schema for the marker payload for searchable
+    const markerSchema = getSchemaFromMarker(
+      markerSchemaByName,
+      marker.name,
+      marker.data
+    );
+
+    if (
+      markerSchema &&
+      markerPayloadMatchesSearch(markerSchema, marker, stringTable, test)
+    ) {
+      // Found the field in the negative filters, do not include it.
+      return false;
+    }
+  }
+
+  return true;
 }
 
 /**
@@ -1336,6 +1469,11 @@ export function sanitizeFromMarkerSchema(
           ...markerPayload,
           [key]: removeFilePath(markerPayload[key]),
         }: any);
+      } else if (format === 'sanitized-string') {
+        markerPayload = ({
+          ...markerPayload,
+          [key]: '<sanitized>',
+        }: any);
       }
     }
   }
@@ -1420,3 +1558,82 @@ export function computeScreenshotSize(
     height,
   };
 }
+
+export type MarkerSearchFieldMap = Map<
+  string,
+  {| positive: RegExp | null, negative: RegExp | null |},
+>;
+
+export type MarkerRegExps = $ReadOnly<{|
+  generic: RegExp | null,
+  fieldMap: MarkerSearchFieldMap,
+|}>;
+
+/**
+ * Concatenate an array of strings into multiple RegExps that match on all
+ * the marker strings which can include positive and negative field specific search.
+ */
+export const stringsToMarkerRegExps = (
+  strings: string[] | null
+): MarkerRegExps | null => {
+  if (!strings || !strings.length) {
+    return null;
+  }
+
+  // We create this map to group all the field specific search strings and then
+  // we aggregate them to create a single regexp for each field later.
+  const fieldStrings: Map<
+    string,
+    {| positive: string[], negative: string[] |},
+  > = new Map();
+  // These are the non-field specific search strings. They have to be positive
+  // as we don't support negative generic filtering.
+  const genericPositiveStrings = [];
+  for (const string of strings) {
+    // Then try to match specific properties.
+    // First capture group is used to determine if it has a "-" in front of the
+    // field to understand if it's a negative filter.
+    // Second capture group is used to get the field name.
+    // Third capture group is to get the filter value.
+    const prefixMatch = string.match(
+      /^(?<maybeNegative>-?)(?<key>\w+):(?<value>.+)/i
+    );
+    if (prefixMatch && prefixMatch.groups) {
+      // This is a key-value pair that will only be matched for a specific field.
+      const { maybeNegative, value } = prefixMatch.groups;
+      const key = prefixMatch.groups.key.toLowerCase();
+      let fieldStrs = fieldStrings.get(key);
+      if (!fieldStrs) {
+        fieldStrs = { positive: [], negative: [] };
+        fieldStrings.set(key, fieldStrs);
+      }
+
+      // First capture group checks if we have "-" in front of the string to see
+      // if it's a negative filtering.
+      if (maybeNegative.length === 0) {
+        fieldStrs.positive.push(value);
+
+        // Always try to match the full string as well.
+        genericPositiveStrings.push(string);
+      } else {
+        fieldStrs.negative.push(value);
+      }
+    } else {
+      genericPositiveStrings.push(string);
+    }
+  }
+
+  // Now we constructed the grouped arrays. Let's convert them into a map of RegExps.
+  const fieldMap: MarkerSearchFieldMap = new Map();
+  for (const [field, strings] of fieldStrings) {
+    fieldMap.set(field, {
+      positive: stringsToRegExp(strings.positive),
+      negative: stringsToRegExp(strings.negative),
+    });
+  }
+
+  return {
+    generic: stringsToRegExp(genericPositiveStrings),
+    fieldMap,
+  };
+};

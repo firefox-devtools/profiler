@@ -31,6 +31,8 @@ import {
   ensureExists,
   getFirstItemFromSet,
 } from 'firefox-profiler/utils/flow';
+import ExtensionFavicon from '../../res/img/svg/extension-outline.svg';
+import DefaultLinkFavicon from '../../res/img/svg/globe.svg';
 
 import type {
   Profile,
@@ -82,6 +84,7 @@ import type {
   BottomBoxInfo,
   Bytes,
   ThreadWithReservedFunctions,
+  TabID,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
@@ -2139,39 +2142,52 @@ function _computeThreadWithInvertedStackTable(
 export function updateThreadStacksByGeneratingNewStackColumns(
   thread: Thread,
   newStackTable: StackTable,
-  computeFilteredStackColumn: (
+  computeMappedStackColumn: (
     Array<IndexIntoStackTable | null>,
     Array<Milliseconds>
-  ) => Array<IndexIntoStackTable | null>
+  ) => Array<IndexIntoStackTable | null>,
+  computeMappedSyncBacktraceStackColumn: (
+    Array<IndexIntoStackTable | null>,
+    Array<Milliseconds>
+  ) => Array<IndexIntoStackTable | null>,
+  computeMappedMarkerDataColumn: (
+    Array<MarkerPayload | null>
+  ) => Array<MarkerPayload | null>
 ): Thread {
-  const { jsAllocations, nativeAllocations, samples } = thread;
+  const { jsAllocations, nativeAllocations, samples, markers } = thread;
 
   const newSamples = {
     ...samples,
-    stack: computeFilteredStackColumn(samples.stack, samples.time),
+    stack: computeMappedStackColumn(samples.stack, samples.time),
+  };
+
+  const newMarkers = {
+    ...markers,
+    data: computeMappedMarkerDataColumn(markers.data),
   };
 
   const newThread = {
     ...thread,
     samples: newSamples,
+    markers: newMarkers,
     stackTable: newStackTable,
   };
 
   if (jsAllocations) {
-    // Filter the JS allocations if there are any.
+    // Map the JS allocations stacks if there are any.
     newThread.jsAllocations = {
       ...jsAllocations,
-      stack: computeFilteredStackColumn(
+      stack: computeMappedSyncBacktraceStackColumn(
         jsAllocations.stack,
         jsAllocations.time
       ),
     };
   }
   if (nativeAllocations) {
-    // Filter the native allocations if there are any.
+    // Map the native allocations stacks if there are any.
     newThread.nativeAllocations = {
       ...nativeAllocations,
-      stack: computeFilteredStackColumn(
+      stack: computeMappedSyncBacktraceStackColumn(
         nativeAllocations.stack,
         nativeAllocations.time
       ),
@@ -2191,11 +2207,55 @@ export function updateThreadStacks(
   newStackTable: StackTable,
   convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null
 ): Thread {
+  return updateThreadStacksSeparate(
+    thread,
+    newStackTable,
+    convertStack,
+    convertStack
+  );
+}
+
+/**
+ * Like updateThreadStacks, but accepts separate functions for converting sample
+ * stacks and sync backtrace stacks. There is only one reason to treat the two
+ * differently: Sample stacks start with a frame address which was sampled from
+ * the instruction pointer, and sync backtrace stacks start with a frame address
+ * that was originally derived from a return address (because there were other
+ * frames on the native stack which have been stripped).
+ */
+export function updateThreadStacksSeparate(
+  thread: Thread,
+  newStackTable: StackTable,
+  convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null,
+  convertSyncBacktraceStack: (
+    IndexIntoStackTable | null
+  ) => IndexIntoStackTable | null
+): Thread {
+  function convertMarkerData(
+    oldData: MarkerPayload | null
+  ): MarkerPayload | null {
+    if (oldData && 'cause' in oldData && oldData.cause) {
+      // Replace the cause with the right stack index.
+      // $FlowExpectError Flow is failing to refine oldData.type based on the `cause` field check
+      return {
+        ...oldData,
+        cause: {
+          ...oldData.cause,
+          stack: convertSyncBacktraceStack(oldData.cause.stack),
+        },
+      };
+    }
+    return oldData;
+  }
+
   return updateThreadStacksByGeneratingNewStackColumns(
     thread,
     newStackTable,
     (stackColumn, _timeColumn) =>
-      stackColumn.map((oldStack) => convertStack(oldStack))
+      stackColumn.map((oldStack) => convertStack(oldStack)),
+    (stackColumn, _timeColumn) =>
+      stackColumn.map((oldStack) => convertSyncBacktraceStack(oldStack)),
+    (markerDataColumn) => markerDataColumn.map(convertMarkerData)
   );
 }
 
@@ -2437,7 +2497,9 @@ export function getOriginAnnotationForFunc(
   funcIndex: IndexIntoFuncTable,
   funcTable: FuncTable,
   resourceTable: ResourceTable,
-  stringTable: UniqueStringArray
+  stringTable: UniqueStringArray,
+  frameLineNumber: number | null = null,
+  frameColumnNumber: number | null = null
 ): string {
   let resourceType = null;
   let origin = null;
@@ -2459,12 +2521,19 @@ export function getOriginAnnotationForFunc(
     // strip it down to just the actual path.
     fileName = parseFileNameFromSymbolication(fileName).path;
 
-    const lineNumber = funcTable.lineNumber[funcIndex];
-    if (lineNumber !== null) {
-      fileName += ':' + lineNumber;
-      const columnNumber = funcTable.columnNumber[funcIndex];
-      if (columnNumber !== null) {
-        fileName += ':' + columnNumber;
+    if (frameLineNumber !== null) {
+      fileName += ':' + frameLineNumber;
+      if (frameColumnNumber !== null) {
+        fileName += ':' + frameColumnNumber;
+      }
+    } else {
+      const lineNumber = funcTable.lineNumber[funcIndex];
+      if (lineNumber !== null) {
+        fileName += ':' + lineNumber;
+        const columnNumber = funcTable.columnNumber[funcIndex];
+        if (columnNumber !== null) {
+          fileName += ':' + columnNumber;
+        }
       }
     }
   }
@@ -2858,76 +2927,103 @@ export function filterToRetainedAllocations(
 }
 
 /**
- * Extract the hostname and favicon from the first page if we are in single tab
- * view. Currently we assume that we don't change the origin of webpages while
- * profiling in web developer preset. That's why we are simply getting the first
- * page we find that belongs to the active tab. Returns null if profiler is not
- * in the single tab view at the moment.
+ * Extract the hostname and favicon from the last page for all tab ids. we
+ * assume that the user wants to know about the last loaded page in this tab.
+ * Returns null if we don't have information about pages (in older profiles).
  */
 export function extractProfileFilterPageData(
-  pages: PageList | null,
-  relevantPages: Set<InnerWindowID>
-): ProfileFilterPageData | null {
-  if (relevantPages.size === 0 || pages === null) {
-    // Either we are not in single tab view, or we don't have pages array(which
-    // is the case for older profiles). Return early.
-    return null;
+  pagesMapByTabID: Map<TabID, PageList> | null,
+  extensionIDToNameMap: Map<string, string> | null
+): Map<TabID, ProfileFilterPageData> {
+  if (pagesMapByTabID === null) {
+    // We don't have pages array (which is the case for older profiles). Return early.
+    return new Map();
   }
 
-  // Getting the pages that are relevant and a top-most frame.
-  let filteredPages = pages.filter(
-    (page) =>
-      // It's the top-most frame if `embedderInnerWindowID` is zero.
-      page.embedderInnerWindowID === 0 && relevantPages.has(page.innerWindowID)
-  );
-
-  if (filteredPages.length > 1) {
-    // If there are more than one top-most page, it's also good to filter out the
-    // `about:` pages so user can see their url they are actually profiling.
-    filteredPages = filteredPages.filter(
-      (page) => !page.url.startsWith('about:')
+  const pageDataByTabID = new Map();
+  for (const [tabID, pages] of pagesMapByTabID) {
+    let topMostPages = pages.filter(
+      (page) =>
+        // It's the top-most frame if `embedderInnerWindowID` is zero.
+        page.embedderInnerWindowID === 0
     );
-  }
 
-  if (filteredPages.length === 0) {
-    // There should be at least one relevant page.
-    console.error(`Expected a relevant page but couldn't find it.`);
-    return null;
-  }
-
-  const pageUrl = filteredPages[0].url;
-
-  if (pageUrl.startsWith('about:')) {
-    // If we only have an `about:*` page, we should return early with a friendly
-    // origin and hostname. Otherwise the try block will fail.
-    return {
-      origin: pageUrl,
-      hostname: pageUrl,
-      favicon: null,
-    };
-  }
-
-  try {
-    const page = new URL(pageUrl);
-    // FIXME(Bug 1620546): This is not ideal and we should get the favicon
-    // either during profile capture or profile pre-process.
-    const favicon = new URL('/favicon.ico', page.origin);
-    if (favicon.protocol === 'http:') {
-      // Upgrade http requests.
-      favicon.protocol = 'https:';
+    if (topMostPages.length > 1) {
+      // If there are more than one top-most page, it's also good to filter out the
+      // `about:` pages so user can see their url they are actually profiling.
+      topMostPages = topMostPages.filter(
+        (page) => !page.url.startsWith('about:')
+      );
     }
-    return {
-      origin: page.origin,
-      hostname: page.hostname,
-      favicon: favicon.href,
+
+    if (topMostPages.length === 0) {
+      // There should be at least one topmost page.
+      console.error(
+        `Expected at least one topmost page for tabID ${tabID} but couldn't find it.`
+      );
+      continue;
+    }
+
+    // The last page is the one we care about.
+    const currentPage = topMostPages[topMostPages.length - 1];
+    const pageUrl = currentPage.url;
+    if (pageUrl.startsWith('about:')) {
+      // If we only have an `about:*` page, we should return early with a friendly
+      // origin and hostname. Otherwise the try block will always fail.
+      pageDataByTabID.set(tabID, {
+        origin: pageUrl,
+        hostname: pageUrl,
+        favicon: DefaultLinkFavicon,
+      });
+      continue;
+    }
+
+    // Constructing the page data outside of the try-catch block, and adding it
+    // to the map outside of it as well. This is mostly because some favicon URL
+    // constructions might fail and we don't want to miss them still. We should
+    // always have at least a hostname, which is needed for displaying the tab
+    // name.
+    // The known failing case is when we try to construct a URL with a
+    // moz-extension:// protocol on platforms outside of Firefox. Only Firefox
+    // can parse it properly. Chrome and node will output a URL with no `origin`.
+    const isExtension = pageUrl.startsWith('moz-extension://');
+    const defaultFavicon = isExtension ? ExtensionFavicon : DefaultLinkFavicon;
+    const pageData: ProfileFilterPageData = {
+      origin: '',
+      hostname: '',
+      favicon: currentPage.favicon ?? defaultFavicon,
     };
-  } catch (e) {
-    console.error(
-      'Error while extracing the hostname and favicon from the page url',
-      pageUrl
-    );
-    return null;
+
+    try {
+      const page = new URL(pageUrl);
+
+      pageData.hostname =
+        extensionIDToNameMap && isExtension
+          ? // Get the real extension name if it's an extension.
+            (extensionIDToNameMap.get(
+              'moz-extension://' +
+                // For non-Firefox browsers, we can't construct a URL object
+                // with the 'moz-extension://' protocol properly. So we have to
+                // have a fallback that uses simple string split.
+                (page.hostname ? page.hostname : pageUrl.split('/')[2]) +
+                '/'
+            ) ?? '')
+          : page.hostname;
+
+      pageData.origin = page.origin;
+    } catch (e) {
+      console.warn(
+        'Error while extracing the hostname and favicon from the page url',
+        pageUrl
+      );
+    }
+
+    // Adding it to the map outside of the try-catch block, just in case something
+    // might fail.
+    pageDataByTabID.set(tabID, pageData);
   }
+
+  return pageDataByTabID;
 }
 
 // Returns the resource index for a "url" or "webhost" resource which is created
@@ -3081,107 +3177,6 @@ export function gatherStackReferences(thread: Thread): StackReferences {
   }
 
   return { samplingSelfStacks, syncBacktraceSelfStacks };
-}
-
-/**
- * Create a new thread with all stack references translated via the given
- * maps. The maps map IndexIntoOldStackTable -> IndexIntoNewStackTable.
- * Only a subset of entries are read from the map: The same stacks that
- * gatherStackReferences found in the thread. All other entries are ignored
- * and do not need to be present.
- * With the exception of the caller which does the initial return address
- * nudging, most callers will want to pass the same map to both map arguments.
- */
-export function replaceStackReferences(
-  thread: Thread,
-  mapForSamplingSelfStacks: Map<
-    IndexIntoStackTable,
-    IndexIntoStackTable | null,
-  >,
-  mapForBacktraceSelfStacks: Map<
-    IndexIntoStackTable,
-    IndexIntoStackTable | null,
-  >
-): Thread {
-  const {
-    samples: oldSamples,
-    markers: oldMarkers,
-    jsAllocations: oldJsAllocations,
-    nativeAllocations: oldNativeAllocations,
-  } = thread;
-
-  // Samples
-  const samples = {
-    ...oldSamples,
-    stack: oldSamples.stack.map((oldStackIndex) => {
-      if (oldStackIndex === null) {
-        return null;
-      }
-      const newStack = mapForSamplingSelfStacks.get(oldStackIndex);
-      if (newStack === undefined) {
-        throw new Error(
-          `Missing mapForSamplingSelfStacks entry for stack ${oldStackIndex}`
-        );
-      }
-      return newStack;
-    }),
-  };
-
-  function mapBacktraceSelfStack(oldStackIndex) {
-    if (oldStackIndex === null) {
-      return null;
-    }
-    const newStack = mapForBacktraceSelfStacks.get(oldStackIndex);
-    if (newStack === undefined) {
-      throw new Error(
-        `Missing mapForBacktraceSelfStacks entry for stack ${oldStackIndex}`
-      );
-    }
-    return newStack;
-  }
-
-  // Markers
-  function replaceStackReferenceInMarkerPayload(
-    oldData: MarkerPayload | null
-  ): MarkerPayload | null {
-    if (oldData && 'cause' in oldData && oldData.cause) {
-      // Replace the cause with the right stack index.
-      // Use (...: any) because our current version of Flow has trouble with
-      // the object spread operator.
-      return ({
-        ...oldData,
-        cause: {
-          ...oldData.cause,
-          stack: mapBacktraceSelfStack(oldData.cause.stack),
-        },
-      }: any);
-    }
-    return oldData;
-  }
-  const markers = {
-    ...oldMarkers,
-    data: oldMarkers.data.map(replaceStackReferenceInMarkerPayload),
-  };
-
-  // JS allocations
-  let jsAllocations;
-  if (oldJsAllocations !== undefined) {
-    jsAllocations = {
-      ...oldJsAllocations,
-      stack: oldJsAllocations.stack.map(mapBacktraceSelfStack),
-    };
-  }
-
-  // Native allocations
-  let nativeAllocations;
-  if (oldNativeAllocations !== undefined) {
-    nativeAllocations = {
-      ...oldNativeAllocations,
-      stack: oldNativeAllocations.stack.map(mapBacktraceSelfStack),
-    };
-  }
-
-  return { ...thread, samples, markers, jsAllocations, nativeAllocations };
 }
 
 /**
@@ -3444,13 +3439,13 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
   const newThread = {
     ...thread,
     frameTable: newFrameTable,
-    stackTable: newStackTable,
   };
 
-  return replaceStackReferences(
+  return updateThreadStacksSeparate(
     newThread,
-    mapForSamplingSelfStacks,
-    mapForBacktraceSelfStacks
+    newStackTable,
+    getMapStackUpdater(mapForSamplingSelfStacks),
+    getMapStackUpdater(mapForBacktraceSelfStacks)
   );
 }
 
@@ -3713,4 +3708,84 @@ export function determineTimelineType(profile: Profile): TimelineType {
 
   // Have both category and CPU usage information. Use 'cpu-category'.
   return 'cpu-category';
+}
+
+/**
+ * Compute a map of tab to thread indexes map. This is useful for learning which
+ * threads are involved for tabs. This is mainly used for the tab selector on
+ * the top left corner.
+ */
+export function computeTabToThreadIndexesMap(
+  threads: Thread[],
+  innerWindowIDToTabMap: Map<InnerWindowID, TabID> | null
+): Map<TabID, Set<ThreadIndex>> {
+  const tabToThreadIndexesMap = new Map();
+  if (!innerWindowIDToTabMap) {
+    // There is no pages information in the profile, return an empty map.
+    return tabToThreadIndexesMap;
+  }
+
+  // We need to iterate over all the samples and markers once to figure out
+  // which innerWindowIDs are present in each thread. This is probably not
+  // very cheap, but it'll allow us to not compute this information every
+  // time when we need it.
+  for (let threadIdx = 0; threadIdx < threads.length; threadIdx++) {
+    const thread = threads[threadIdx];
+
+    // First go over the innerWindowIDs of the samples.
+    for (let i = 0; i < thread.frameTable.length; i++) {
+      const innerWindowID = thread.frameTable.innerWindowID[i];
+      if (innerWindowID === null || innerWindowID === 0) {
+        // Zero value also means null for innerWindowID.
+        continue;
+      }
+
+      const tabID = innerWindowIDToTabMap.get(innerWindowID);
+      if (tabID === undefined) {
+        // We couldn't find the tab of this innerWindowID, this should
+        // never happen, it might indicate a bug in Firefox.
+        continue;
+      }
+
+      let threadIndexes = tabToThreadIndexesMap.get(tabID);
+      if (!threadIndexes) {
+        threadIndexes = new Set();
+        tabToThreadIndexesMap.set(tabID, threadIndexes);
+      }
+      threadIndexes.add(threadIdx);
+    }
+
+    // Then go over the markers to find their innerWindowIDs.
+    for (let i = 0; i < thread.markers.length; i++) {
+      const markerData = thread.markers.data[i];
+
+      if (!markerData) {
+        continue;
+      }
+
+      if (
+        markerData.innerWindowID !== null &&
+        markerData.innerWindowID !== undefined &&
+        // Zero value also means null for innerWindowID.
+        markerData.innerWindowID !== 0
+      ) {
+        const innerWindowID = markerData.innerWindowID;
+        const tabID = innerWindowIDToTabMap.get(innerWindowID);
+        if (tabID === undefined) {
+          // We couldn't find the tab of this innerWindowID, this should
+          // never happen, it might indicate a bug in Firefox.
+          continue;
+        }
+
+        let threadIndexes = tabToThreadIndexesMap.get(tabID);
+        if (!threadIndexes) {
+          threadIndexes = new Set();
+          tabToThreadIndexesMap.set(tabID, threadIndexes);
+        }
+        threadIndexes.add(threadIdx);
+      }
+    }
+  }
+
+  return tabToThreadIndexesMap;
 }

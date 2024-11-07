@@ -34,6 +34,7 @@ describe('sanitizePII', function () {
   ) {
     const defaultsPii = {
       shouldRemoveThreads: new Set(),
+      shouldRemoveCounters: new Set(),
       shouldRemoveThreadsWithScreenshots: new Set(),
       shouldRemoveUrls: false,
       shouldFilterToCommittedRange: null,
@@ -107,6 +108,27 @@ describe('sanitizePII', function () {
           },
         ],
       },
+      HostResolver: {
+        name: 'HostResolver',
+        tableLabel: '{marker.name} - {marker.data.host}',
+        display: ['marker-chart', 'marker-table'],
+        data: [
+          {
+            key: 'host',
+            format: 'sanitized-string',
+            searchable: true,
+          },
+          {
+            key: 'originSuffix',
+            format: 'sanitized-string',
+            searchable: true,
+          },
+          {
+            key: 'flags',
+            format: 'string',
+          },
+        ],
+      },
     };
 
     const sanitizedProfile = sanitizePII(
@@ -130,6 +152,24 @@ describe('sanitizePII', function () {
     expect(originalProfile.threads.length).toEqual(3);
     // First and last threads are removed and now there are only 1 thread.
     expect(sanitizedProfile.threads.length).toEqual(1);
+  });
+
+  it('should sanitize counters if they are provided', function () {
+    const { originalProfile, sanitizedProfile } = setup({
+      shouldRemoveCounters: new Set([0]),
+    });
+
+    expect(ensureExists(originalProfile.counters).length).toEqual(1);
+    // The counter should be deleted now.
+    expect(ensureExists(sanitizedProfile.counters).length).toEqual(0);
+  });
+
+  it('should not sanitize counters if shouldRemoveCounters is not provided', function () {
+    const { originalProfile, sanitizedProfile } = setup({});
+
+    expect(ensureExists(originalProfile.counters).length).toEqual(1);
+    // The counter should still be there.
+    expect(ensureExists(sanitizedProfile.counters).length).toEqual(1);
   });
 
   it('should sanitize counters if its thread is deleted', function () {
@@ -217,6 +257,99 @@ describe('sanitizePII', function () {
         sanitizedRange.end + 1
       );
     }
+  });
+
+  it('should remove threads starting after the range if range is filtered', function () {
+    const originalProfile = processGeckoProfile(createGeckoProfile());
+    const timeRangeForFirstThread = getTimeRangeForThread(
+      originalProfile.threads[0],
+      originalProfile.meta.interval
+    );
+
+    // Make sure that the original time range is 0-7.
+    expect(timeRangeForFirstThread).toEqual({ start: 0, end: 7 });
+
+    const { sanitizedProfile } = setup(
+      {
+        shouldFilterToCommittedRange: timeRangeForFirstThread,
+      },
+      originalProfile
+    );
+
+    function isInTimeRange(thread) {
+      return (
+        thread.registerTime < timeRangeForFirstThread.end &&
+        (!thread.unregisterTime ||
+          thread.unregisterTime > timeRangeForFirstThread.start)
+      );
+    }
+    const expectedThreadCount =
+      originalProfile.threads.filter(isInTimeRange).length;
+    expect(expectedThreadCount).toEqual(2);
+    expect(sanitizedProfile.threads.length).toEqual(expectedThreadCount);
+    expect(sanitizedProfile.threads.every(isInTimeRange)).toBeTruthy();
+  });
+
+  it('should remove threads ending before the range if range is filtered', function () {
+    const originalProfile = processGeckoProfile(createGeckoProfile());
+    const timeRangeForLastThread = getTimeRangeForThread(
+      originalProfile.threads[2],
+      originalProfile.meta.interval
+    );
+
+    // Make sure that the original time range is 0-7.
+    expect(timeRangeForLastThread).toEqual({ start: 1000, end: 1007 });
+
+    const { sanitizedProfile } = setup(
+      {
+        shouldFilterToCommittedRange: timeRangeForLastThread,
+      },
+      originalProfile
+    );
+
+    function isInTimeRange(thread) {
+      return (
+        thread.registerTime < timeRangeForLastThread.end &&
+        (!thread.unregisterTime ||
+          thread.unregisterTime > timeRangeForLastThread.start)
+      );
+    }
+    const expectedThreadCount =
+      originalProfile.threads.filter(isInTimeRange).length;
+    expect(expectedThreadCount).toEqual(1);
+    expect(sanitizedProfile.threads.length).toEqual(expectedThreadCount);
+    expect(sanitizedProfile.threads.every(isInTimeRange)).toBeTruthy();
+  });
+
+  it('should keep empty threads that were already empty', function () {
+    const originalProfile = processGeckoProfile(createGeckoProfile());
+
+    // Remove all the markers and samples from one thread of the original profile.
+    const { markers, samples } = originalProfile.threads[1];
+    markers.data = [];
+    markers.name = [];
+    markers.startTime = [];
+    markers.endTime = [];
+    markers.phase = [];
+    markers.category = [];
+    markers.length = 0;
+    samples.stack = [];
+    samples.time = [];
+    samples.threadCPUDelta = [];
+    samples.eventDelay = [];
+    samples.length = 0;
+
+    const { sanitizedProfile } = setup(
+      {
+        shouldRemoveUrls: true,
+      },
+      originalProfile
+    );
+
+    // Verify that the empty thread has not been sanitized out.
+    expect(sanitizedProfile.threads.length).toEqual(
+      originalProfile.threads.length
+    );
   });
 
   it('should sanitize profiler overhead if its thread is deleted', function () {
@@ -313,6 +446,32 @@ describe('sanitizePII', function () {
       }
     }
     expect(includesChromeUrl).toBe(true);
+  });
+
+  it('should sanitize the favicons in the pages information', function () {
+    const profile = processGeckoProfile(createGeckoProfile());
+    // Add some favicons to check later
+    ensureExists(profile.pages)[1].favicon =
+      'data:image/png;base64,mock-base64-image-data';
+
+    const { originalProfile, sanitizedProfile } = setup(
+      { shouldRemoveUrls: true },
+      profile
+    );
+
+    // Checking to make sure that we have favicons in the original profile pages array.
+    const pageUrl = ensureExists(originalProfile.pages).find(
+      (page) => page.favicon
+    );
+    if (pageUrl === undefined) {
+      throw new Error(
+        "There should be a favicon in the 'pages' array in this profile."
+      );
+    }
+
+    for (const page of ensureExists(sanitizedProfile.pages)) {
+      expect(page.favicon).toBe(null);
+    }
   });
 
   it('should sanitize all the URLs inside network markers', function () {
@@ -678,6 +837,42 @@ describe('sanitizePII', function () {
 
     // Now check the url fields and make sure they are sanitized.
     expect(marker.url).toBe('https://<URL>');
+  });
+
+  it('should sanitize the sanitized-string markers', function () {
+    const { sanitizedProfile } = setup(
+      {
+        shouldRemoveUrls: true,
+      },
+      getProfileWithMarkers([
+        [
+          'nsHostResolver::ResolveHost',
+          0,
+          1,
+          {
+            type: 'HostResolver',
+            host: 'domain.name',
+            originSuffix: '^other.domain',
+            flags: '0xf00ba4',
+          },
+        ],
+      ])
+    );
+    expect(sanitizedProfile.threads.length).toEqual(1);
+    const thread = sanitizedProfile.threads[0];
+    expect(thread.markers.length).toEqual(1);
+
+    const marker = thread.markers.data[0];
+
+    // The host fields should still be there
+    if (!marker || !marker.host) {
+      throw new Error('Failed to find host property in the payload');
+    }
+
+    // Now check the host fields and make sure they are sanitized.
+    expect(marker.host).toBe('<sanitized>');
+    expect(marker.originSuffix).toBe('<sanitized>');
+    expect(marker.flags).toBe('0xf00ba4');
   });
 
   it('should sanitize the eTLD+1 field if urls are supposed to be sanitized', function () {

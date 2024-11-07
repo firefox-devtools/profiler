@@ -28,6 +28,7 @@ import type {
   UnitIntervalOfProfileRange,
   ThreadsKey,
   Marker,
+  MarkerTiming,
   MarkerTimingAndBuckets,
   MarkerIndex,
   TimelineTrackOrganization,
@@ -47,7 +48,7 @@ type MarkerDrawingInformation = {|
   +w: CssPixels,
   +h: CssPixels,
   +isInstantMarker: boolean,
-  +text: string,
+  +markerIndex: MarkerIndex,
 |};
 
 // We can hover over multiple items with Marker chart when we are in the active
@@ -79,6 +80,8 @@ type OwnProps = {|
   +markerTimingAndBuckets: MarkerTimingAndBuckets,
   +rowHeight: CssPixels,
   +getMarker: (MarkerIndex) => Marker,
+  +getMarkerLabel: (MarkerIndex) => string,
+  +markerListLength: number,
   +threadsKey: ThreadsKey,
   +updatePreviewSelection: WrapFunctionInDispatch<UpdatePreviewSelection>,
   +changeMouseTimePosition: ChangeMouseTimePosition,
@@ -163,11 +166,11 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     const rightClickedRow: number | void =
       rightClickedMarkerIndex === null
         ? undefined
-        : markerIndexToTimingRow.get(rightClickedMarkerIndex);
+        : markerIndexToTimingRow[rightClickedMarkerIndex];
     let newRow: number | void =
       hoveredMarker === null
         ? undefined
-        : markerIndexToTimingRow.get(hoveredMarker);
+        : markerIndexToTimingRow[hoveredMarker];
     if (
       timelineTrackOrganization.type === 'active-tab' &&
       newRow === undefined &&
@@ -189,7 +192,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       let oldRow: number | void =
         prevHoveredMarker === null
           ? undefined
-          : markerIndexToTimingRow.get(prevHoveredMarker);
+          : markerIndexToTimingRow[prevHoveredMarker];
       if (
         timelineTrackOrganization.type === 'active-tab' &&
         oldRow === undefined &&
@@ -253,8 +256,10 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   _getMarkerIndexToTimingRow = memoize(
     (
       markerTimingAndBuckets: MarkerTimingAndBuckets
-    ): Map<MarkerIndex, number> => {
-      const markerIndexToTimingRow = new Map();
+    ): Uint32Array /* like Map<MarkerIndex, RowIndex> */ => {
+      const markerIndexToTimingRow = new Uint32Array(
+        this.props.markerListLength
+      );
       for (
         let rowIndex = 0;
         rowIndex < markerTimingAndBuckets.length;
@@ -269,7 +274,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
           timingIndex < markerTiming.length;
           timingIndex++
         ) {
-          markerIndexToTimingRow.set(markerTiming.index[timingIndex], rowIndex);
+          markerIndexToTimingRow[markerTiming.index[timingIndex]] = rowIndex;
         }
       }
       return markerIndexToTimingRow;
@@ -286,13 +291,13 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     w: CssPixels,
     h: CssPixels,
     isInstantMarker: boolean,
-    text: string,
+    markerIndex: MarkerIndex,
     isHighlighted: boolean = false
   ) {
     if (isInstantMarker) {
       this.drawOneInstantMarker(ctx, x, y, h, isHighlighted);
     } else {
-      this.drawOneIntervalMarker(ctx, x, y, w, h, text, isHighlighted);
+      this.drawOneIntervalMarker(ctx, x, y, w, h, markerIndex, isHighlighted);
     }
   }
 
@@ -302,10 +307,10 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     y: CssPixels,
     w: CssPixels,
     h: CssPixels,
-    text: string,
+    markerIndex: MarkerIndex,
     isHighlighted: boolean
   ) {
-    const { marginLeft } = this.props;
+    const { marginLeft, getMarkerLabel } = this.props;
 
     if (w <= 2) {
       // This is an interval marker small enough that if we drew it as a
@@ -350,7 +355,10 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       const w2: CssPixels = visibleWidth - 2 * TEXT_OFFSET_START;
 
       if (w2 > textMeasurement.minWidth) {
-        const fittedText = textMeasurement.getFittedText(text, w2);
+        const fittedText = textMeasurement.getFittedText(
+          getMarkerLabel(markerIndex),
+          w2
+        );
         if (fittedText) {
           ctx.fillStyle = isHighlighted ? 'white' : 'black';
           ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
@@ -473,7 +481,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
           x = Math.round(x * devicePixelRatio) / devicePixelRatio;
           w = Math.round(w * devicePixelRatio) / devicePixelRatio;
 
-          const text = markerTiming.label[i];
           const markerIndex = markerTiming.index[i];
 
           const isHighlighted =
@@ -482,7 +489,14 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
             selectedMarkerIndex === markerIndex;
 
           if (isHighlighted) {
-            highlightedMarkers.push({ x, y, w, h, isInstantMarker, text });
+            highlightedMarkers.push({
+              x,
+              y,
+              w,
+              h,
+              isInstantMarker,
+              markerIndex,
+            });
           } else if (
             // Always render non-dot markers and markers that are larger than
             // one pixel.
@@ -492,7 +506,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
             x !== previousMarkerDrawnAtX
           ) {
             previousMarkerDrawnAtX = x;
-            this.drawOneMarker(ctx, x, y, w, h, isInstantMarker, text);
+            this.drawOneMarker(ctx, x, y, w, h, isInstantMarker, markerIndex);
           }
         }
       }
@@ -508,7 +522,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         highlightedMarker.w,
         highlightedMarker.h,
         highlightedMarker.isInstantMarker,
-        highlightedMarker.text,
+        highlightedMarker.markerIndex,
         true /* isHighlighted */
       );
     });
@@ -543,22 +557,53 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   }
 
   countMarkersInBucketStartingAtRow(rowIndex: number): number {
-    const { markerTimingAndBuckets } = this.props;
+    const {
+      rangeStart,
+      rangeEnd,
+      markerTimingAndBuckets,
+      marginLeft,
+      marginRight,
+      viewport: { containerWidth, viewportLeft, viewportRight },
+    } = this.props;
+    // Decide the time range for which markers should be counted.
+    const markerContainerWidth = containerWidth - marginLeft - marginRight;
+    const rangeLength: Milliseconds = rangeEnd - rangeStart;
+    const viewportLength: UnitIntervalOfProfileRange =
+      viewportRight - viewportLeft;
+    const timeAtViewportLeft: Milliseconds =
+      rangeStart + rangeLength * viewportLeft;
+    const timeAtViewportRightPlusMargin: Milliseconds =
+      rangeStart +
+      rangeLength * viewportRight +
+      // This represents the amount of seconds in the right margin:
+      marginRight * ((viewportLength * rangeLength) / markerContainerWidth);
+
     const markerTiming = markerTimingAndBuckets[rowIndex];
     if (typeof markerTiming === 'string') {
       return 0;
     }
 
     const { name } = markerTiming;
-    let count = markerTiming.length;
+    function countMarkersInRange(markerTiming: MarkerTiming): number {
+      let count: number = 0;
+      for (let i = 0; i < markerTiming.length; i++) {
+        if (
+          markerTiming.end[i] >= timeAtViewportLeft &&
+          markerTiming.start[i] < timeAtViewportRightPlusMargin
+        ) {
+          ++count;
+        }
+      }
+
+      return count;
+    }
+    let count = countMarkersInRange(markerTiming);
     for (let row = rowIndex + 1; row < markerTimingAndBuckets.length; ++row) {
-      if (
-        typeof markerTimingAndBuckets[row] === 'string' ||
-        markerTimingAndBuckets[row].name !== name
-      ) {
+      const markerTiming = markerTimingAndBuckets[row];
+      if (typeof markerTiming === 'string' || markerTiming.name !== name) {
         break;
       }
-      count += markerTimingAndBuckets[row].length;
+      count += countMarkersInRange(markerTiming);
     }
     return count;
   }
@@ -894,6 +939,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         hitTest={this.hitTest}
         onMouseMove={this.onMouseMove}
         onMouseLeave={this.onMouseLeave}
+        stickyTooltips={true}
       />
     );
   }

@@ -19,9 +19,14 @@ import { ensureExists } from '../../utils/flow';
 import {
   changeSelectedThreads,
   changeRightClickedTrack,
+  showLocalTrack,
 } from '../../actions/profile-view';
 import { TimelineTrackContextMenu } from '../../components/timeline/TrackContextMenu';
-import { getGlobalTracks, getLocalTracks } from '../../selectors/profile';
+import {
+  getGlobalTracks,
+  getLocalTracks,
+  getLocalTracksByPid,
+} from '../../selectors/profile';
 import {
   getHiddenGlobalTracks,
   getHiddenLocalTracks,
@@ -34,6 +39,9 @@ import {
 import {
   getScreenshotTrackProfile,
   getNetworkTrackProfile,
+  addIPCMarkerPairToThreads,
+  getThreadWithMarkers,
+  getScreenshotMarkersForWindowId,
 } from '../fixtures/profiles/processed-profile';
 
 import { storeWithProfile } from '../fixtures/stores';
@@ -107,10 +115,12 @@ describe('timeline/TrackContextMenu', function () {
     };
 
     const showContextMenu = () => {
-      showMenu({
-        data: null,
-        id: 'TimelineTrackContextMenu',
-        position: { x: 0, y: 0 },
+      act(() => {
+        showMenu({
+          data: null,
+          id: 'TimelineTrackContextMenu',
+          position: { x: 0, y: 0 },
+        });
       });
     };
 
@@ -1192,6 +1202,199 @@ describe('timeline/TrackContextMenu', function () {
 
       // Make sure that the context menu is closed now.
       expect(isContextMenuVisible()).toBeFalsy();
+    });
+  });
+
+  describe('hide all tracks by type', function () {
+    function setupTracks() {
+      const profile = getProfileWithMoreNiceTracks();
+
+      // add a couple local ipc tracks
+      addIPCMarkerPairToThreads(
+        {
+          startTime: 1,
+          endTime: 10,
+          messageSeqno: 1,
+        },
+        profile.threads[1], // Parent process
+        profile.threads[6] // tab process
+      );
+      addIPCMarkerPairToThreads(
+        {
+          startTime: 11,
+          endTime: 20,
+          messageSeqno: 2,
+        },
+        profile.threads[1], // Parent process
+        profile.threads[7] // DOM Worker
+      );
+
+      // add a couple of global screenshots tracks
+      profile.threads.push({
+        ...getThreadWithMarkers(getScreenshotMarkersForWindowId('0', 5)),
+        tid: profile.threads.length,
+      });
+      profile.threads.push({
+        ...getThreadWithMarkers(getScreenshotMarkersForWindowId('1', 5)),
+        tid: profile.threads.length,
+      });
+
+      const { store } = setup(profile);
+
+      // show all tracks
+      const localTracksByPid = getLocalTracksByPid(store.getState());
+      for (const [pid, localTracks] of localTracksByPid) {
+        for (
+          let trackIndex = 0;
+          trackIndex < localTracks.length;
+          trackIndex++
+        ) {
+          act(() => {
+            store.dispatch(showLocalTrack(pid, trackIndex));
+          });
+        }
+      }
+
+      const localTrackWithTypeReference = {
+        type: 'local',
+        pid: '1001',
+        trackIndex: 3,
+      };
+      const globalTrackWithTypeReference = { type: 'global', trackIndex: 4 };
+
+      return {
+        ...store,
+        localTrackWithTypeReference,
+        globalTrackWithTypeReference,
+        profile,
+      };
+    }
+
+    it('on click a global track', () => {
+      const { getState, dispatch, globalTrackWithTypeReference } =
+        setupTracks();
+      // First, check that the initial state is what we expect.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [screenshots]',
+        'show [screenshots]',
+        'show [thread GeckoMain default]',
+        '  - show [thread ThreadPool#1]',
+        '  - show [ipc ThreadPool#1]',
+        '  - show [thread ThreadPool#2]',
+        '  - show [thread ThreadPool#3]',
+        '  - show [thread ThreadPool#4]',
+        '  - show [thread ThreadPool#5]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [ipc GeckoMain] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [ipc DOM Worker]',
+        '  - show [thread Style]',
+        'show [thread GeckoMain tab]',
+        '  - show [thread AudioPool#1]',
+        '  - show [thread AudioPool#2]',
+        '  - show [thread Renderer]',
+        'hide [process]',
+        '  - show [thread Empty]',
+        '  - show [thread Empty]',
+      ]);
+
+      act(() => {
+        dispatch(changeRightClickedTrack(globalTrackWithTypeReference));
+      });
+
+      // Note: Fluent adds isolation characters \u2068 and \u2069 around variables.
+      const localIPCTrack = screen.getByText(
+        'Hide all tracks of type “\u2068screenshots\u2069”'
+      );
+
+      fireFullClick(localIPCTrack);
+
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'hide [screenshots]',
+        'hide [screenshots]',
+        'show [thread GeckoMain default]',
+        '  - show [thread ThreadPool#1]',
+        '  - show [ipc ThreadPool#1]',
+        '  - show [thread ThreadPool#2]',
+        '  - show [thread ThreadPool#3]',
+        '  - show [thread ThreadPool#4]',
+        '  - show [thread ThreadPool#5]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [ipc GeckoMain] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [ipc DOM Worker]',
+        '  - show [thread Style]',
+        'show [thread GeckoMain tab]',
+        '  - show [thread AudioPool#1]',
+        '  - show [thread AudioPool#2]',
+        '  - show [thread Renderer]',
+        'hide [process]',
+        '  - show [thread Empty]',
+        '  - show [thread Empty]',
+      ]);
+    });
+
+    it('hides a local track', () => {
+      const { getState, dispatch, localTrackWithTypeReference } = setupTracks();
+
+      // First, check that the initial state is what we expect.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [screenshots]',
+        'show [screenshots]',
+        'show [thread GeckoMain default]',
+        '  - show [thread ThreadPool#1]',
+        '  - show [ipc ThreadPool#1]',
+        '  - show [thread ThreadPool#2]',
+        '  - show [thread ThreadPool#3]',
+        '  - show [thread ThreadPool#4]',
+        '  - show [thread ThreadPool#5]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [ipc GeckoMain] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [ipc DOM Worker]',
+        '  - show [thread Style]',
+        'show [thread GeckoMain tab]',
+        '  - show [thread AudioPool#1]',
+        '  - show [thread AudioPool#2]',
+        '  - show [thread Renderer]',
+        'hide [process]',
+        '  - show [thread Empty]',
+        '  - show [thread Empty]',
+      ]);
+      act(() => {
+        dispatch(changeRightClickedTrack(localTrackWithTypeReference));
+      });
+
+      // Note: Fluent adds isolation characters \u2068 and \u2069 around variables.
+      const localIPCTrack = screen.getByText(
+        'Hide all tracks of type “\u2068ipc\u2069”'
+      );
+
+      fireFullClick(localIPCTrack);
+
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [screenshots]',
+        'show [screenshots]',
+        'show [thread GeckoMain default]',
+        '  - show [thread ThreadPool#1]',
+        '  - hide [ipc ThreadPool#1]',
+        '  - show [thread ThreadPool#2]',
+        '  - show [thread ThreadPool#3]',
+        '  - show [thread ThreadPool#4]',
+        '  - show [thread ThreadPool#5]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - hide [ipc GeckoMain] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - hide [ipc DOM Worker]',
+        '  - show [thread Style]',
+        'show [thread GeckoMain tab]',
+        '  - show [thread AudioPool#1]',
+        '  - show [thread AudioPool#2]',
+        '  - show [thread Renderer]',
+        'hide [process]',
+        '  - show [thread Empty]',
+        '  - show [thread Empty]',
+      ]);
     });
   });
 });

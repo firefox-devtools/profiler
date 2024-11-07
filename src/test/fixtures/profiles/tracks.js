@@ -119,6 +119,10 @@ export function getHumanReadableTracks(state: State): string[] {
           trackName = profileViewSelectors
             .getCounterSelectors(track.counterIndex)
             .getCounter(state).name;
+        } else if (track.type === 'marker') {
+          trackName = threads[track.threadIndex].stringTable.getString(
+            track.markerName
+          );
         } else {
           trackName = threads[track.threadIndex].name;
         }

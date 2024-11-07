@@ -10,35 +10,38 @@ import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 
 import type { CssPixels, DevicePixels } from 'firefox-profiler/types';
 
-type Props<HoveredItem> = {|
+type Props<Item> = {|
   +containerWidth: CssPixels,
   +containerHeight: CssPixels,
   +className: string,
-  +onSelectItem?: (HoveredItem | null) => void,
-  +onRightClick?: (HoveredItem | null) => void,
-  +onDoubleClickItem: (HoveredItem | null) => void,
-  +getHoveredItemInfo: (HoveredItem) => React.Node,
+  +onSelectItem?: (Item | null) => void,
+  +onRightClick?: (Item | null) => void,
+  +onDoubleClickItem: (Item | null) => void,
+  +getHoveredItemInfo: (Item) => React.Node,
   +drawCanvas: (
     CanvasRenderingContext2D,
     ChartCanvasScale: ChartCanvasScale,
-    ChartCanvasHoverInfo: ChartCanvasHoverInfo<HoveredItem>
+    ChartCanvasHoverInfo: ChartCanvasHoverInfo<Item>
   ) => void,
   +isDragging: boolean,
   // Applies ctx.scale() to the canvas to draw using CssPixels rather than DevicePixels.
   +scaleCtxToCssPixels: boolean,
-  +hitTest: (x: CssPixels, y: CssPixels) => HoveredItem | null,
+  +hitTest: (x: CssPixels, y: CssPixels) => Item | null,
   // Default to true. Set to false if the chart should be redrawn right away after
   // rerender.
   +drawCanvasAfterRaf?: boolean,
 
   +onMouseMove?: (e: { nativeEvent: MouseEvent }) => mixed,
   +onMouseLeave?: (e: { nativeEvent: MouseEvent }) => mixed,
+  // Defaults to false. Set to true if the chart should persist the tooltips on click.
+  +stickyTooltips?: boolean,
 |};
 
 // The naming of the X and Y coordinates here correspond to the ones
 // found on the MouseEvent interface.
-type State<HoveredItem> = {
-  hoveredItem: HoveredItem | null,
+type State<Item> = {
+  hoveredItem: Item | null,
+  selectedItem: Item | null,
   pageX: CssPixels,
   pageY: CssPixels,
 };
@@ -50,9 +53,9 @@ export type ChartCanvasScale = {
   cssToUserScale: number,
 };
 
-export type ChartCanvasHoverInfo<HoveredItem> = {
-  hoveredItem: HoveredItem | null,
-  prevHoveredItem: HoveredItem | null,
+export type ChartCanvasHoverInfo<Item> = {
+  hoveredItem: Item | null,
+  prevHoveredItem: Item | null,
   isHoveredOnlyDifferent: boolean,
 };
 
@@ -71,9 +74,9 @@ const MOUSE_CLICK_MAX_MOVEMENT_DELTA: CssPixels = 5;
 
 // This isn't a PureComponent on purpose: we always want to update if the parent updates
 // But we still conditionally update the canvas itself, see componentDidUpdate.
-export class ChartCanvas<HoveredItem> extends React.Component<
-  Props<HoveredItem>,
-  State<HoveredItem>,
+export class ChartCanvas<Item> extends React.Component<
+  Props<Item>,
+  State<Item>,
 > {
   _devicePixelRatio: number = 1;
   // The current mouse position. Needs to be stored for tooltip
@@ -92,15 +95,16 @@ export class ChartCanvas<HoveredItem> extends React.Component<
   _canvas: HTMLCanvasElement | null = null;
   _isDrawScheduled: boolean = false;
 
-  state: State<HoveredItem> = {
+  state: State<Item> = {
     hoveredItem: null,
+    selectedItem: null,
     pageX: 0,
     pageY: 0,
   };
 
   _scheduleDraw(
     isHoveredOnlyDifferent: boolean = false,
-    prevHoveredItem: HoveredItem | null = null
+    prevHoveredItem: Item | null = null
   ) {
     const { drawCanvasAfterRaf } = this.props;
     if (drawCanvasAfterRaf === false) {
@@ -173,7 +177,7 @@ export class ChartCanvas<HoveredItem> extends React.Component<
 
   _doDrawCanvas(
     isHoveredOnlyDifferent: boolean = false,
-    prevHoveredItem: HoveredItem | null = null
+    prevHoveredItem: Item | null = null
   ) {
     const { className, drawCanvas, scaleCtxToCssPixels } = this.props;
     const { hoveredItem } = this.state;
@@ -219,10 +223,18 @@ export class ChartCanvas<HoveredItem> extends React.Component<
     if (this._mouseMovedWhileClicked) {
       return;
     }
-
-    if (e.button === 0 && this.props.onSelectItem) {
+    const { onSelectItem } = this.props;
+    if (e.button === 0 && onSelectItem) {
       // Left button is a selection action
-      this.props.onSelectItem(this.state.hoveredItem);
+      if (this.props.stickyTooltips) {
+        this.setState((state) => ({
+          selectedItem: state.hoveredItem,
+          pageX: e.pageX,
+          pageY: e.pageY,
+        }));
+      }
+
+      onSelectItem(this.state.hoveredItem);
     }
   };
 
@@ -269,11 +281,25 @@ export class ChartCanvas<HoveredItem> extends React.Component<
 
     const maybeHoveredItem = this.props.hitTest(this._offsetX, this._offsetY);
     if (maybeHoveredItem !== null) {
-      this.setState({
-        hoveredItem: maybeHoveredItem,
-        pageX: event.pageX,
-        pageY: event.pageY,
-      });
+      if (this.state.selectedItem === null) {
+        // Update both the hovered item and the pageX and pageY values. The
+        // pageX and pageY values are used to change the position of the tooltip
+        // and if there is no selected item, it means that we can update this
+        // position freely.
+        this.setState({
+          hoveredItem: maybeHoveredItem,
+          pageX: event.pageX,
+          pageY: event.pageY,
+        });
+      } else {
+        // If there is a selected item, only update the hoveredItem and not the
+        // pageX and pageY values which is used for the position of the tooltip.
+        // By keeping the x and y values the same, we make sure that the tooltip
+        // stays in its initial position where it's clicked.
+        this.setState({
+          hoveredItem: maybeHoveredItem,
+        });
+      }
     } else if (
       this.state.hoveredItem !== null &&
       // This persistTooltips property is part of the web console API. It helps
@@ -302,7 +328,14 @@ export class ChartCanvas<HoveredItem> extends React.Component<
   };
 
   _getHoveredItemInfo = (): React.Node => {
-    const { hoveredItem } = this.state;
+    const { hoveredItem, selectedItem } = this.state;
+    if (selectedItem !== null) {
+      // If we have a selected item, persist that one instead of returning
+      // the hovered items.
+      return this.props.getHoveredItemInfo(selectedItem);
+    }
+
+    // Return the hovered item if we don't have a selected item.
     if (hoveredItem === null) {
       return null;
     }
@@ -329,11 +362,20 @@ export class ChartCanvas<HoveredItem> extends React.Component<
     }
   }
 
-  componentDidUpdate(
-    prevProps: Props<HoveredItem>,
-    prevState: State<HoveredItem>
-  ) {
+  componentDidUpdate(prevProps: Props<Item>, prevState: State<Item>) {
     if (prevProps !== this.props) {
+      if (
+        this.state.selectedItem !== null &&
+        prevState.selectedItem === this.state.selectedItem
+      ) {
+        // The props have changed but not the selectedItem. This mean that the
+        // selected item can get out of sync. Invalidate it to make sure that
+        // it's always fresh. This setState will cause a rerender, but we have
+        // to do it to prevent any crashes or incorrect tooltip positions.
+        // This is okay to do it because the main `prevProps !== this.props`
+        // check above will return false and will not schedule additional drawing.
+        this.setState({ selectedItem: null });
+      }
       this._scheduleDraw();
     } else if (
       !hoveredItemsAreEqual(prevState.hoveredItem, this.state.hoveredItem)
@@ -368,7 +410,13 @@ export class ChartCanvas<HoveredItem> extends React.Component<
           onDoubleClick={this._onDoubleClick}
         />
         {!isDragging && tooltipContents ? (
-          <Tooltip mouseX={pageX} mouseY={pageY}>
+          <Tooltip
+            mouseX={pageX}
+            mouseY={pageY}
+            className={classNames({
+              clickable: this.state.selectedItem !== null,
+            })}
+          >
             {tooltipContents}
           </Tooltip>
         ) : null}

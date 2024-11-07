@@ -70,16 +70,25 @@ class WindowTitleImpl extends PureComponent<Props> {
           const { meta } = profile;
           let title = '';
           if (formattedMetaInfoString) {
-            title += formattedMetaInfoString + SEPARATOR;
+            title += formattedMetaInfoString;
           }
-          title += _formatDateTime(
-            meta.startTime + (meta.profilingStartTime || 0)
-          );
+
+          // Print the startTime only if it's provided.
+          if (meta.startTime > 0) {
+            title +=
+              SEPARATOR +
+              _formatDateTime(meta.startTime + (meta.profilingStartTime || 0));
+          }
+
           if (dataSource === 'public') {
             title += ` (${dataSource})`;
           }
 
-          title += SEPARATOR + PRODUCT;
+          if (title !== '') {
+            // Add the separator only if we added some information before.
+            title += SEPARATOR;
+          }
+          title += PRODUCT;
 
           // Prepend the name of the file if from a zip file.
           if (fileNameInZipFilePath) {
@@ -89,7 +98,7 @@ class WindowTitleImpl extends PureComponent<Props> {
           document.title = title;
         } else if (listingZipFile) {
           /* We're looking at the zip file contents. */
-          document.title = 'Zip File Contents' + SEPARATOR + PRODUCT;
+          document.title = 'Archive Contents' + SEPARATOR + PRODUCT;
         } else {
           /* There's no profile yet, but we're not looking at a zip file.
            * Let's use a sensible default, but do not throw because we forgot a

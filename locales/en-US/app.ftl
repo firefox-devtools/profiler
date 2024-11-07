@@ -189,6 +189,49 @@ CallTree--inlining-badge = (inlined)
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Select a node to display information about it.
+CallTreeSidebar--call-node-details = Call node details
+
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
+CallTreeSidebar--traced-running-time =
+    .label = Traced running time
+CallTreeSidebar--traced-self-time =
+    .label = Traced self time
+CallTreeSidebar--running-time =
+    .label = Running time
+CallTreeSidebar--self-time =
+    .label = Self time
+CallTreeSidebar--running-samples =
+    .label = Running samples
+CallTreeSidebar--self-samples =
+    .label = Self samples
+CallTreeSidebar--running-size =
+    .label = Running size
+CallTreeSidebar--self-size =
+    .label = Self size
+
+CallTreeSidebar--categories = Categories
+CallTreeSidebar--implementation = Implementation
+
+CallTreeSidebar--running-milliseconds = Running milliseconds
+CallTreeSidebar--running-sample-count = Running sample count
+CallTreeSidebar--running-bytes = Running bytes
+
+CallTreeSidebar--self-milliseconds = Self milliseconds
+CallTreeSidebar--self-sample-count = Self sample count
+CallTreeSidebar--self-bytes = Self bytes
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -764,6 +807,13 @@ TabBar--marker-table-tab = Marker Table
 TabBar--network-tab = Network
 TabBar--js-tracer-tab = JS Tracer
 
+## TabSelectorMenu
+## This component is a context menu that's opened when you click on the root
+## range at the top left corner for profiler analysis view. It's used to switch
+## between tabs that were captured in the profile.
+
+TabSelectorMenu--all-tabs-and-windows = All tabs and windows
+
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
@@ -782,6 +832,11 @@ TrackContextMenu--hide-other-screenshots-tracks = Hide other Screenshots tracks
 TrackContextMenu--hide-track = Hide “{ $trackName }”
 TrackContextMenu--show-all-tracks = Show all tracks
 TrackContextMenu--show-local-tracks-in-process = Show all tracks in this process
+
+# This is used as the context menu item to hide all tracks of the selected track's type.
+# Variables:
+#   $type (String) - Name of the type of selected track to hide.
+TrackContextMenu--hide-all-tracks-by-selected-track-type = Hide all tracks of type “{ $type }”
 
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
@@ -840,6 +895,24 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
   .label = Power
+
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-kilowatt = { $value } kW
+  .label = Average power in the current selection
+
+# This is used in the tooltip when the power value uses the watt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-watt = { $value } W
+  .label = Average power in the current selection
+
+# This is used in the tooltip when the instant power value uses the milliwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-milliwatt = { $value } mW
+  .label = Average power in the current selection
 
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.

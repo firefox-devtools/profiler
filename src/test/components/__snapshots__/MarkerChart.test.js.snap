@@ -158,6 +158,84 @@ exports[`MarkerChart context menus displays when right clicking on a marker 1`] 
 </nav>
 `;
 
+exports[`MarkerChart persists the selected marker tooltips properly 1`] = `
+<div
+  class="tooltip clickable"
+  data-testid="tooltip"
+  style="left: 186px; top: 150px;"
+>
+  <div
+    class="tooltipMarker"
+  >
+    <div
+      class="tooltipHeader"
+    >
+      <div
+        class="tooltipOneLine"
+      >
+        <div
+          class="tooltipTiming"
+        >
+          6ms
+        </div>
+        <div
+          class="tooltipTitle"
+        >
+          Marker B
+        </div>
+      </div>
+    </div>
+    <div
+      class="tooltipDetails"
+    >
+      <div
+        class="tooltipLabel"
+      >
+        Name
+        :
+      </div>
+      Marker B
+      <div
+        class="tooltipLabel"
+      >
+        Marker
+        :
+      </div>
+      <div
+        class="tooltipDetailsDescription"
+      >
+        UserTiming
+      </div>
+      <div
+        class="tooltipLabel"
+      >
+        Entry Type
+        :
+      </div>
+      measure
+      <div
+        class="tooltipLabel"
+      >
+        Description
+        :
+      </div>
+      <div
+        class="tooltipDetailsDescription"
+      >
+        UserTiming is created using the DOM APIs performance.mark() and performance.measure().
+      </div>
+      <div
+        class="tooltipLabel"
+      >
+        Track
+        :
+      </div>
+      Empty
+    </div>
+  </div>
+</div>
+`;
+
 exports[`MarkerChart renders the hoveredItem markers properly 1`] = `
 Array [
   Array [
@@ -343,7 +421,7 @@ exports[`MarkerChart renders the hoveredItem markers properly 2`] = `
       <div
         class="tooltipLabel"
       >
-        Thread
+        Track
         :
       </div>
       Empty
@@ -1353,7 +1431,7 @@ exports[`MarkerChart with active tab renders the hovered marker properly 2`] = `
       <div
         class="tooltipLabel"
       >
-        Thread
+        Track
         :
       </div>
       Empty
@@ -1363,7 +1441,21 @@ exports[`MarkerChart with active tab renders the hovered marker properly 2`] = `
         Page
         :
       </div>
-      Page #1
+      <div
+        class="tooltipDetailsUrl"
+      >
+        <span
+          class="tooltipDetailsDim"
+        >
+          https://
+        </span>
+        www.cnn.com
+        <span
+          class="tooltipDetailsDim"
+        >
+          /
+        </span>
+      </div>
     </div>
   </div>
 </div>

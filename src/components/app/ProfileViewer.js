@@ -38,7 +38,7 @@ import { BackgroundImageStyleDef } from 'firefox-profiler/components/shared/Styl
 import classNames from 'classnames';
 import { DebugWarning } from 'firefox-profiler/components/app/DebugWarning';
 
-import type { CssPixels, IconWithClassName } from 'firefox-profiler/types';
+import type { CssPixels, IconsWithClassNames } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './ProfileViewer.css';
@@ -50,7 +50,7 @@ type StateProps = {|
   +isUploading: boolean,
   +isHidingStaleProfile: boolean,
   +hasSanitizedProfile: boolean,
-  +icons: IconWithClassName[],
+  +icons: IconsWithClassNames,
   +isBottomBoxOpen: boolean,
 |};
 
@@ -83,7 +83,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
           profileViewerWrapperBackground: hasSanitizedProfile,
         })}
       >
-        {icons.map(({ className, icon }) => (
+        {[...icons].map(([icon, className]) => (
           <BackgroundImageStyleDef
             className={className}
             url={icon}
@@ -110,7 +110,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
               <button
                 type="button"
                 className="profileViewerZipButton"
-                title="View all files in the zip file"
+                title="View all files in the archive"
                 onClick={returnToZipFileList}
               />
             ) : null}

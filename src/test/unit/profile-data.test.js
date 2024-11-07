@@ -859,213 +859,446 @@ describe('convertStackToCallNodeAndCategoryPath', function () {
 });
 
 describe('getSamplesSelectedStates', function () {
-  const {
-    profile,
-    funcNamesDictPerThread: [{ A, B, D, E, F }],
-  } = getProfileFromTextSamples(`
-     A  A  A  A  A
-     B  D  B  D  D
-     C  E  F  G
-  `);
-  const thread = profile.threads[0];
-  const callNodeInfo = getCallNodeInfo(
-    thread.stackTable,
-    thread.frameTable,
-    thread.funcTable,
-    0
-  );
-  const stackIndexToCallNodeIndex =
-    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
-  const sampleCallNodes = getSampleIndexToCallNodeIndex(
-    thread.samples.stack,
-    stackIndexToCallNodeIndex
-  );
+  function setup(textSamples) {
+    const {
+      profile,
+      funcNamesDictPerThread: [funcNamesDict],
+    } = getProfileFromTextSamples(textSamples);
+    const thread = profile.threads[0];
+    const callNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      0
+    );
+    const stackIndexToCallNodeIndex =
+      callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
+    const sampleCallNodes = getSampleIndexToCallNodeIndex(
+      thread.samples.stack,
+      stackIndexToCallNodeIndex
+    );
 
-  const A_B = callNodeInfo.getCallNodeIndexFromPath([A, B]);
-  const A_B_F = callNodeInfo.getCallNodeIndexFromPath([A, B, F]);
-  const A_D = callNodeInfo.getCallNodeIndexFromPath([A, D]);
-  const A_D_E = callNodeInfo.getCallNodeIndexFromPath([A, D, E]);
+    const categories = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    );
+    const defaultCategory = categories.findIndex((c) => c.name === 'Other');
+    const callNodeInfoInverted = getInvertedCallNodeInfo(
+      thread,
+      callNodeInfo.getNonInvertedCallNodeTable(),
+      stackIndexToCallNodeIndex,
+      defaultCategory
+    );
+    const stackIndexToInvertedCallNodeIndex =
+      callNodeInfoInverted.getStackIndexToCallNodeIndex();
+    const sampleInvertedCallNodes = getSampleIndexToCallNodeIndex(
+      thread.samples.stack,
+      stackIndexToInvertedCallNodeIndex
+    );
 
-  it('determines the selection status of all the samples', function () {
-    expect(
-      getSamplesSelectedStates(
-        callNodeInfo,
-        sampleCallNodes,
-        sampleCallNodes,
-        A_B
-      )
-    ).toEqual([
-      'SELECTED',
-      'UNSELECTED_ORDERED_AFTER_SELECTED',
-      'SELECTED',
-      'UNSELECTED_ORDERED_AFTER_SELECTED',
-      'UNSELECTED_ORDERED_AFTER_SELECTED',
-    ]);
-    expect(
-      getSamplesSelectedStates(
-        callNodeInfo,
-        sampleCallNodes,
-        sampleCallNodes,
-        A_D
-      )
-    ).toEqual([
-      'UNSELECTED_ORDERED_BEFORE_SELECTED',
-      'SELECTED',
-      'UNSELECTED_ORDERED_BEFORE_SELECTED',
-      'SELECTED',
-      'SELECTED',
-    ]);
-    expect(
-      getSamplesSelectedStates(
-        callNodeInfo,
-        sampleCallNodes,
-        sampleCallNodes,
-        A_B_F
-      )
-    ).toEqual([
-      'UNSELECTED_ORDERED_BEFORE_SELECTED',
-      'UNSELECTED_ORDERED_AFTER_SELECTED',
-      'SELECTED',
-      'UNSELECTED_ORDERED_AFTER_SELECTED',
-      'UNSELECTED_ORDERED_AFTER_SELECTED',
-    ]);
-    expect(
-      getSamplesSelectedStates(
-        callNodeInfo,
-        sampleCallNodes,
-        sampleCallNodes,
-        A_D_E
-      )
-    ).toEqual([
-      'UNSELECTED_ORDERED_BEFORE_SELECTED',
-      'SELECTED',
-      'UNSELECTED_ORDERED_BEFORE_SELECTED',
-      'UNSELECTED_ORDERED_AFTER_SELECTED',
-      'UNSELECTED_ORDERED_BEFORE_SELECTED',
-    ]);
+    return {
+      callNodeInfo,
+      callNodeInfoInverted,
+      sampleInvertedCallNodes,
+      sampleCallNodes,
+      funcNamesDict,
+    };
+  }
+
+  describe('non-inverted', function () {
+    const {
+      callNodeInfo,
+      sampleCallNodes,
+      funcNamesDict: { A, B, D, E, F },
+    } = setup(`
+      A  A  A  A  A
+      B  D  B  D  D
+      C  E  F  G
+    `);
+
+    const A_B = callNodeInfo.getCallNodeIndexFromPath([A, B]);
+    const A_B_F = callNodeInfo.getCallNodeIndexFromPath([A, B, F]);
+    const A_D = callNodeInfo.getCallNodeIndexFromPath([A, D]);
+    const A_D_E = callNodeInfo.getCallNodeIndexFromPath([A, D, E]);
+
+    it('determines the selection status of all the samples', function () {
+      expect(
+        getSamplesSelectedStates(
+          callNodeInfo,
+          sampleCallNodes,
+          sampleCallNodes,
+          A_B
+        )
+      ).toEqual([
+        'SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+      ]);
+      expect(
+        getSamplesSelectedStates(
+          callNodeInfo,
+          sampleCallNodes,
+          sampleCallNodes,
+          A_D
+        )
+      ).toEqual([
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'SELECTED',
+        'SELECTED',
+      ]);
+      expect(
+        getSamplesSelectedStates(
+          callNodeInfo,
+          sampleCallNodes,
+          sampleCallNodes,
+          A_B_F
+        )
+      ).toEqual([
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+      ]);
+      expect(
+        getSamplesSelectedStates(
+          callNodeInfo,
+          sampleCallNodes,
+          sampleCallNodes,
+          A_D_E
+        )
+      ).toEqual([
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+      ]);
+    });
+
+    it('can sort the samples based on their selection status', function () {
+      const comparator = getTreeOrderComparator(sampleCallNodes);
+      const samples = [4, 1, 3, 0, 2]; // some random order
+      samples.sort(comparator);
+      expect(samples).toEqual([0, 2, 4, 1, 3]);
+      expect(comparator(0, 0)).toBe(0);
+      expect(comparator(1, 1)).toBe(0);
+      expect(comparator(4, 4)).toBe(0);
+      expect(comparator(0, 2)).toBeLessThan(0);
+      expect(comparator(2, 0)).toBeGreaterThan(0);
+    });
   });
 
-  it('can sort the samples based on their selection status', function () {
-    const comparator = getTreeOrderComparator(sampleCallNodes);
-    const samples = [4, 1, 3, 0, 2]; // some random order
-    samples.sort(comparator);
-    expect(samples).toEqual([0, 2, 4, 1, 3]);
-    expect(comparator(0, 0)).toBe(0);
-    expect(comparator(1, 1)).toBe(0);
-    expect(comparator(4, 4)).toBe(0);
-    expect(comparator(0, 2)).toBeLessThan(0);
-    expect(comparator(2, 0)).toBeGreaterThan(0);
+  describe('inverted', function () {
+    /**
+     * - [cn0] A      =  A
+     *   - [cn1] B    =  A -> B
+     *     - [cn2] A  =  A -> B -> A
+     *     - [cn3] C  =  A -> B -> C
+     *   - [cn4] A    =  A -> A
+     *     - [cn5] B  =  A -> A -> B
+     *   - [cn6] C    =  A -> C
+     *
+     *
+     * - [in0] A
+     *   - [in1] A
+     *   - [in2] B
+     *     - [in3] A
+     *  - [in4] B
+     *    - [in5] A
+     *      - [in6] A
+     *  - [in7] C
+     *    - [in8] A
+     *    - [in9] B
+     *      - [in10] A
+     *  */
+    const {
+      callNodeInfoInverted,
+      sampleInvertedCallNodes,
+      funcNamesDict: { A, B, C },
+    } = setup(`
+      A  A  A  A  A  A  A
+         A  B  B  C  B  A
+               A     C  B
+    `);
+
+    const inBA = callNodeInfoInverted.getCallNodeIndexFromPath([B, A]);
+    const inCBA = callNodeInfoInverted.getCallNodeIndexFromPath([C, B, A]);
+    const inB = callNodeInfoInverted.getCallNodeIndexFromPath([B]);
+
+    //   0  1  2  3  4  5  6
+    //   A  A  A  A  A  A  A
+    //      A  B  B  C  B  A
+    //            A     C  B
+
+    it('determines the selection status of all the samples', function () {
+      // Test B <- A <- ...
+      // Only samples 2 and 6 have stacks ending in ... -> A -> B
+      expect(
+        getSamplesSelectedStates(
+          callNodeInfoInverted,
+          sampleInvertedCallNodes,
+          sampleInvertedCallNodes,
+          inBA
+        )
+      ).toEqual([
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'SELECTED',
+      ]);
+      // Test C <- B <- A <- ...
+      // Only sample 5 has a stack ending in ... -> A -> B -> C
+      expect(
+        getSamplesSelectedStates(
+          callNodeInfoInverted,
+          sampleInvertedCallNodes,
+          sampleInvertedCallNodes,
+          inCBA
+        )
+      ).toEqual([
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+      ]);
+      // Test B <- ...
+      // Only samples 2 and 6 have stacks ending in ... -> B
+      expect(
+        getSamplesSelectedStates(
+          callNodeInfoInverted,
+          sampleInvertedCallNodes,
+          sampleInvertedCallNodes,
+          inB
+        )
+      ).toEqual([
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'SELECTED',
+      ]);
+    });
+
+    it('can sort the samples based on their selection status', function () {
+      const comparator = getTreeOrderComparator(sampleInvertedCallNodes);
+
+      /**
+       * original order (non-inverted):
+       *   0  1  2  3  4  5  6
+       *   A  A  A  A  A  A  A
+       *      A  B  B  C  B  A
+       *            A     C  B
+       *
+       * sorted order ("inverted" if you read from bottom to top):
+       *         A     A     A
+       *      A  B  A  A  A  B
+       *   A  A  A  B  B  C  C
+       *   0  1  3  2  6  4  5
+       */
+
+      // A should come before A <- B.
+      expect(comparator(0, 2)).toBeLessThan(0);
+      expect(comparator(2, 0)).toBeGreaterThan(0);
+
+      // A <- A should come before A <- B.
+      expect(comparator(1, 2)).toBeLessThan(0);
+      expect(comparator(2, 1)).toBeGreaterThan(0);
+
+      // Sort a random order of samples, make sure it's correct.
+      const samples = [5, 6, 0, 1, 2, 3, 4];
+      samples.sort(comparator);
+      expect(samples).toEqual([0, 1, 3, 2, 6, 4, 5]);
+
+      // The same sample index should always compare equally.
+      expect(comparator(0, 0)).toBe(0);
+      expect(comparator(1, 1)).toBe(0);
+      expect(comparator(4, 4)).toBe(0);
+    });
   });
 });
 
 describe('extractProfileFilterPageData', function () {
-  const innerWindowIds = {
-    mozilla: 1,
-    aboutBlank: 2,
-    profiler: 3,
-    exampleSubFrame: 4,
-    unknown: 5,
-  };
-  // This is the `profile.pages` array.
-  const pages = [
-    {
+  const pages = {
+    mozilla: {
       tabID: 1111,
-      innerWindowID: innerWindowIds.mozilla,
+      innerWindowID: 1,
       url: 'https://www.mozilla.org',
       embedderInnerWindowID: 0,
+      favicon: 'data:image/png;base64,test-png-favicon-data-for-mozilla.org',
     },
-    {
+    aboutBlank: {
       tabID: 2222,
-      innerWindowID: innerWindowIds.aboutBlank,
+      innerWindowID: 2,
       url: 'about:blank',
       embedderInnerWindowID: 0,
+      favicon: null,
     },
-    {
+    profiler: {
       tabID: 2222,
-      innerWindowID: innerWindowIds.profiler,
+      innerWindowID: 3,
       url: 'https://profiler.firefox.com/public/xyz',
       embedderInnerWindowID: 0,
+      favicon:
+        'data:image/png;base64,test-png-favicon-data-for-profiler.firefox.com',
     },
-    {
+    exampleSubFrame: {
       tabID: 2222,
-      innerWindowID: innerWindowIds.exampleSubFrame,
+      innerWindowID: 4,
       url: 'https://example.com/subframe',
       // This is a subframe of the page above.
-      embedderInnerWindowID: innerWindowIds.profiler,
+      embedderInnerWindowID: 3,
+      favicon: 'data:image/png;base64,test-png-favicon-data-for-example.com',
     },
-  ];
+    exampleTopFrame: {
+      tabID: 2222,
+      innerWindowID: 5,
+      url: 'https://example.com',
+      embedderInnerWindowID: 0,
+      favicon: 'data:image/png;base64,test-png-favicon-data-for-example.com',
+    },
+  };
 
   it('extracts the page data when there is only one relevant page', function () {
     // Adding only the https://www.mozilla.org page.
-    const relevantPages = new Set([innerWindowIds.mozilla]);
-
-    const pageData = extractProfileFilterPageData(pages, relevantPages);
-    expect(pageData).toEqual({
-      origin: 'https://www.mozilla.org',
-      hostname: 'www.mozilla.org',
-      favicon: 'https://www.mozilla.org/favicon.ico',
-    });
+    const pagesMap = new Map([[pages.mozilla.tabID, [pages.mozilla]]]);
+    const pageData = extractProfileFilterPageData(pagesMap, null);
+    expect([...pageData]).toEqual([
+      [
+        pages.mozilla.tabID,
+        {
+          origin: 'https://www.mozilla.org',
+          hostname: 'www.mozilla.org',
+          favicon:
+            'data:image/png;base64,test-png-favicon-data-for-mozilla.org',
+        },
+      ],
+    ]);
   });
 
   it('extracts the page data when there are multiple relevant page', function () {
-    const relevantPages = new Set([
-      innerWindowIds.profiler,
-      innerWindowIds.exampleSubFrame,
+    const pagesMap = new Map([
+      [pages.profiler.tabID, [pages.profiler, pages.exampleSubFrame]],
     ]);
 
-    const pageData = extractProfileFilterPageData(pages, relevantPages);
-    expect(pageData).toEqual({
-      origin: 'https://profiler.firefox.com',
-      hostname: 'profiler.firefox.com',
-      favicon: 'https://profiler.firefox.com/favicon.ico',
-    });
+    const pageData = extractProfileFilterPageData(pagesMap, null);
+    expect([...pageData]).toEqual([
+      [
+        pages.profiler.tabID,
+        {
+          origin: 'https://profiler.firefox.com',
+          hostname: 'profiler.firefox.com',
+          favicon:
+            'data:image/png;base64,test-png-favicon-data-for-profiler.firefox.com',
+        },
+      ],
+    ]);
   });
 
   it('extracts the page data when there are multiple relevant page with about:blank', function () {
-    const relevantPages = new Set([
-      innerWindowIds.aboutBlank,
-      innerWindowIds.profiler,
+    const pagesMap = new Map([
+      [pages.profiler.tabID, [pages.aboutBlank, pages.profiler]],
     ]);
 
-    const pageData = extractProfileFilterPageData(pages, relevantPages);
-    expect(pageData).toEqual({
-      origin: 'https://profiler.firefox.com',
-      hostname: 'profiler.firefox.com',
-      favicon: 'https://profiler.firefox.com/favicon.ico',
-    });
+    const pageData = extractProfileFilterPageData(pagesMap, null);
+    expect([...pageData]).toEqual([
+      [
+        pages.profiler.tabID,
+        {
+          origin: 'https://profiler.firefox.com',
+          hostname: 'profiler.firefox.com',
+          favicon:
+            'data:image/png;base64,test-png-favicon-data-for-profiler.firefox.com',
+        },
+      ],
+    ]);
   });
 
   it('extracts the page data when there is only about:blank as relevant page', function () {
-    const relevantPages = new Set([innerWindowIds.aboutBlank]);
+    const pagesMap = new Map([[pages.aboutBlank.tabID, [pages.aboutBlank]]]);
 
-    const pageData = extractProfileFilterPageData(pages, relevantPages);
-    expect(pageData).toEqual({
-      origin: 'about:blank',
-      hostname: 'about:blank',
-      favicon: null,
-    });
-  });
-
-  it('fails to extract the page data when there is no profile data in common', function () {
-    // Ignore the error we output when it fails.
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    const relevantPages = new Set([innerWindowIds.unknown]);
-
-    const pageData = extractProfileFilterPageData(pages, relevantPages);
-
-    expect(pageData).toEqual(null);
-    expect(console.error).toHaveBeenCalled();
+    const pageData = extractProfileFilterPageData(pagesMap, null);
+    expect([...pageData]).toEqual([
+      [
+        pages.aboutBlank.tabID,
+        {
+          origin: 'about:blank',
+          hostname: 'about:blank',
+          favicon: 'test-file-stub',
+        },
+      ],
+    ]);
   });
 
   it('fails to extract the page data when there is only a sub frame', function () {
     // Ignore the error we output when it fails.
     jest.spyOn(console, 'error').mockImplementation(() => {});
-    const relevantPages = new Set([innerWindowIds.exampleSubFrame]);
+    const pagesMap = new Map([
+      [pages.exampleSubFrame.tabID, [pages.exampleSubFrame]],
+    ]);
 
-    const pageData = extractProfileFilterPageData(pages, relevantPages);
-
-    expect(pageData).toEqual(null);
+    const pageData = extractProfileFilterPageData(pagesMap, null);
+    expect([...pageData]).toEqual([]);
     expect(console.error).toHaveBeenCalled();
+  });
+
+  it('extracts the page data of the last frame when there are multiple relevant pages', function () {
+    const pagesMap = new Map([
+      [pages.profiler.tabID, [pages.profiler, pages.exampleTopFrame]],
+    ]);
+
+    const pageData = extractProfileFilterPageData(pagesMap, null);
+    expect([...pageData]).toEqual([
+      [
+        pages.profiler.tabID,
+        {
+          origin: 'https://example.com',
+          hostname: 'example.com',
+          favicon:
+            'data:image/png;base64,test-png-favicon-data-for-example.com',
+        },
+      ],
+    ]);
+  });
+
+  it('can extract the data of several tabs', function () {
+    const pagesMap = new Map([
+      [pages.mozilla.tabID, [pages.mozilla]],
+      [pages.profiler.tabID, [pages.profiler, pages.exampleSubFrame]],
+    ]);
+    const pageData = extractProfileFilterPageData(pagesMap, null);
+    expect([...pageData]).toEqual([
+      [
+        pages.mozilla.tabID,
+        {
+          origin: 'https://www.mozilla.org',
+          hostname: 'www.mozilla.org',
+          favicon:
+            'data:image/png;base64,test-png-favicon-data-for-mozilla.org',
+        },
+      ],
+      [
+        pages.profiler.tabID,
+        {
+          origin: 'https://profiler.firefox.com',
+          hostname: 'profiler.firefox.com',
+          favicon:
+            'data:image/png;base64,test-png-favicon-data-for-profiler.firefox.com',
+        },
+      ],
+    ]);
   });
 });
 

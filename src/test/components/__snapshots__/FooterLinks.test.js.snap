@@ -63,6 +63,11 @@ exports[`correctly renders the FooterLinks component 1`] = `
           English (GB)
         </option>
         <option
+          value="en-CA"
+        >
+          English (CA)
+        </option>
+        <option
           value="en-US"
         >
           English (US)
@@ -83,6 +88,11 @@ exports[`correctly renders the FooterLinks component 1`] = `
           Frysk
         </option>
         <option
+          value="fur"
+        >
+          Furlan
+        </option>
+        <option
           value="ia"
         >
           Interlingua
@@ -101,6 +111,11 @@ exports[`correctly renders the FooterLinks component 1`] = `
           value="pt-BR"
         >
           Português (BR)
+        </option>
+        <option
+          value="ru"
+        >
+          Русский
         </option>
         <option
           value="sv-SE"

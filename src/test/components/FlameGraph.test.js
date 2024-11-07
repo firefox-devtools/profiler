@@ -88,6 +88,24 @@ describe('FlameGraph', function () {
     expect(getTooltip()).toBeTruthy();
   });
 
+  it('should not persist the selected frame tooltips', () => {
+    const { getTooltip, moveMouse, findFillTextPosition, leftClick } =
+      setupFlameGraph();
+    // No tooltip displayed yet.
+    expect(getTooltip()).toBe(null);
+
+    leftClick(findFillTextPosition('A'));
+
+    // The tooltip should be displayed.
+    expect(getTooltip()).toBeTruthy();
+
+    // Move the mouse outside of the frame.
+    moveMouse({ x: 0, y: 0 });
+
+    // Make sure that we don't have a persisted tooltip.
+    expect(getTooltip()).toBeFalsy();
+  });
+
   it('has a tooltip that matches the snapshot with categories', () => {
     const { getTooltip, moveMouse, findFillTextPosition } = setupFlameGraph();
     moveMouse(findFillTextPosition('A'));
@@ -350,6 +368,14 @@ function setupFlameGraph(addImplementationData: boolean = true) {
     fireEvent(canvas, getMouseEvent(eventName, options));
   }
 
+  function leftClick({ x, y }: { x: CssPixels, y: CssPixels }) {
+    const positioningOptions = getPositioningOptions(x, y);
+
+    fireMouseEvent('mousemove', positioningOptions);
+    fireFullClick(canvas, positioningOptions);
+    flushRafCalls();
+  }
+
   // You can use findFillTextPosition to derive the x, y positioning from the
   // draw log.
   function rightClick({ x, y }: { x: CssPixels, y: CssPixels }) {
@@ -401,6 +427,7 @@ function setupFlameGraph(addImplementationData: boolean = true) {
     ...renderResult,
     funcNames,
     moveMouse,
+    leftClick,
     rightClick,
     getTooltip,
     getContentDiv,

@@ -125,6 +125,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
 
       // Find all of the thread indexes that are hidden.
       const shouldRemoveThreads = new Set();
+      const shouldRemoveCounters = new Set();
       if (
         timelineTrackOrganization.type === 'full' &&
         !checkedSharingOptions.includeHiddenThreads
@@ -160,6 +161,8 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
             const localTrack = localTracks[hiddenLocalTrackIndex];
             if (localTrack.type === 'thread') {
               shouldRemoveThreads.add(localTrack.threadIndex);
+            } else if (typeof localTrack.counterIndex === 'number') {
+              shouldRemoveCounters.add(localTrack.counterIndex);
             }
           }
         }
@@ -182,6 +185,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
             : profile.threads.map((_, threadIndex) => threadIndex)
         ),
         shouldRemoveThreads,
+        shouldRemoveCounters,
         shouldRemoveExtensions: !checkedSharingOptions.includeExtension,
         shouldRemovePreferenceValues:
           !checkedSharingOptions.includePreferenceValues,

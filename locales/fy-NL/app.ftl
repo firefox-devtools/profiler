@@ -182,6 +182,46 @@ CallTree--inlining-badge = (inline pleatst)
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Selektearje in node om ynformaasje oer te toanen.
+CallTreeSidebar--call-node-details = Details oanropnode
+
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
+CallTreeSidebar--traced-running-time =
+    .label = Folge rintiid
+CallTreeSidebar--traced-self-time =
+    .label = Folge eigen tiid
+CallTreeSidebar--running-time =
+    .label = Rintiid
+CallTreeSidebar--self-time =
+    .label = Eigen tiid
+CallTreeSidebar--running-samples =
+    .label = Rinnende samples
+CallTreeSidebar--self-samples =
+    .label = Eigen samples
+CallTreeSidebar--running-size =
+    .label = Omfang rinnend
+CallTreeSidebar--self-size =
+    .label = Eigen omfang
+CallTreeSidebar--categories = Kategoryen
+CallTreeSidebar--implementation = Ymplemintaasje
+CallTreeSidebar--running-milliseconds = Rinnend yn millisekonden
+CallTreeSidebar--running-sample-count = Tal samples rinnend
+CallTreeSidebar--running-bytes = Rinnend yn bytes
+CallTreeSidebar--self-milliseconds = Eigen yn milisekonden
+CallTreeSidebar--self-sample-count = Tal samples eigen
+CallTreeSidebar--self-bytes = Eigen yn bytes
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -710,6 +750,13 @@ TabBar--marker-table-tab = Markearingstabel
 TabBar--network-tab = Netwurk
 TabBar--js-tracer-tab = JS-tracer
 
+## TabSelectorMenu
+## This component is a context menu that's opened when you click on the root
+## range at the top left corner for profiler analysis view. It's used to switch
+## between tabs that were captured in the profile.
+
+TabSelectorMenu--all-tabs-and-windows = Alle ljepblêden en finsters
+
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
@@ -726,6 +773,10 @@ TrackContextMenu--hide-other-screenshots-tracks = Oare skermôfdruktracks fersto
 TrackContextMenu--hide-track = ‘{ $trackName }’ ferstopje
 TrackContextMenu--show-all-tracks = Alle tracks toane
 TrackContextMenu--show-local-tracks-in-process = Alle tracks yn dit proses toane
+# This is used as the context menu item to hide all tracks of the selected track's type.
+# Variables:
+#   $type (String) - Name of the type of selected track to hide.
+TrackContextMenu--hide-all-tracks-by-selected-track-type = Alle tracks fan it type ‘{ $type }’ ferstopje
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Alle oerienkommende tracks toane
@@ -778,6 +829,21 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Fermogen
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-kilowatt = { $value } kW
+    .label = Gemiddeld fermogen yn de aktuele seleksje
+# This is used in the tooltip when the power value uses the watt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-watt = { $value } W
+    .label = Gemiddeld fermogen yn de aktuele seleksje
+# This is used in the tooltip when the instant power value uses the milliwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-milliwatt = { $value } mW
+    .label = Gemiddeld fermogen yn de aktuele seleksje
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.
 # Variables:
@@ -834,6 +900,46 @@ TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } mWh
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
     .label = Enerzjy brûkt yn de aktuele seleksje
+
+## TrackBandwidth
+## This is used to show how much data was transfered over time.
+## For the strings in this group, the carbon dioxide equivalent is estimated
+## from the amount of data transfered.
+## The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
+
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the value for the data transfer speed.
+#                     Will contain the unit (eg. B, KB, MB)
+TrackBandwidthGraph--speed = { $value } per sekonde
+    .label = Oersetsnelheid foar dizze opname
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - how many read or write operations were performed since the previous sample
+TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value }
+    .label = lês/skriuw-útfieringen sûnt de lêste opname
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data until the hovered time.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--cumulative-bandwidth-at-this-time = { $value } ({ $carbonValue } g CO₂e)
+    .label = Oersette gegevens oant no ta
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data during the visible time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-graph = { $value } ({ $carbonValue } g CO₂e)
+    .label = Oersette gegevens yn it sichtbere berik
+# This is used in the tooltip of the bandwidth track when a range is selected.
+# Variables:
+#   $value (String) - the total of transfered data during the selected time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-range = { $value } ({ $carbonValue } g CO₂e)
+    .label = Oersette gegevens yn de aktuele seleksje
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

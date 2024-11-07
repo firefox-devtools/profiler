@@ -24,6 +24,8 @@ export type MarkerFormatType =
   | 'url'
   // Show the file path, and handle PII sanitization.
   | 'file-path'
+  // Show regular string, and handle PII sanitization.
+  | 'sanitized-string'
   // Important, do not put URL or file path information here, as it will not be
   // sanitized. Please be careful with including other types of PII here as well.
   // e.g. "Label: Some String"
@@ -62,6 +64,8 @@ export type MarkerFormatType =
   // use it for time information.
   // "Label: 52.23, 0.0054, 123,456.78"
   | 'decimal'
+  | 'pid'
+  | 'tid'
   | 'list'
   | {| type: 'table', columns: TableColumnFormat[] |};
 
@@ -759,6 +763,13 @@ export type UrlMarkerPayload = {|
   url: string,
 |};
 
+export type HostResolverPayload = {|
+  type: 'HostResolver',
+  host: string,
+  originSuffix: string,
+  flags: string,
+|};
+
 /**
  * The union of all the different marker payloads that profiler.firefox.com knows about,
  * this is not guaranteed to be all the payloads that we actually get from the Gecko
@@ -789,7 +800,8 @@ export type MarkerPayload =
   | JankPayload
   | BrowsertimeMarkerPayload
   | NoPayloadUserData
-  | UrlMarkerPayload;
+  | UrlMarkerPayload
+  | HostResolverPayload;
 
 export type MarkerPayload_Gecko =
   | GPUMarkerPayload

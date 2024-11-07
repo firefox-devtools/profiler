@@ -7,6 +7,7 @@ import { oneLine } from 'common-tags';
 import queryString from 'query-string';
 import JSZip from 'jszip';
 import {
+  insertExternalMarkersIntoProfile,
   insertExternalPowerCountersIntoProfile,
   processGeckoProfile,
   unserializeProfileOfArbitraryFormat,
@@ -39,7 +40,14 @@ import {
   getActiveTabID,
   getMarkerSchemaByName,
 } from 'firefox-profiler/selectors';
-import { getSelectedTab } from 'firefox-profiler/selectors/url-state';
+import {
+  getSelectedTab,
+  getTabFilter,
+} from 'firefox-profiler/selectors/url-state';
+import {
+  getTabToThreadIndexesMap,
+  getThreadActivityScores,
+} from 'firefox-profiler/selectors/profile';
 import {
   withHistoryReplaceStateAsync,
   withHistoryReplaceStateSync,
@@ -61,6 +69,7 @@ import {
 import { computeActiveTabTracks } from 'firefox-profiler/profile-logic/active-tab';
 import { setDataSource } from './profile-view';
 import { fatalError } from './errors';
+import { batchLoadDataUrlIcons } from './icons';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 import {
   determineTimelineType,
@@ -82,6 +91,7 @@ import type {
   InnerWindowID,
   Pid,
   OriginsTimelineRoot,
+  PageList,
 } from 'firefox-profiler/types';
 
 import type {
@@ -89,6 +99,7 @@ import type {
   SymbolicationStepInfo,
 } from '../profile-logic/symbolication';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
+import { bytesToBase64DataUrl } from 'firefox-profiler/utils/base64';
 import type {
   BrowserConnection,
   BrowserConnectionStatus,
@@ -256,9 +267,19 @@ export function finalizeProfileView(
         );
     }
 
+    let faviconsPromise = null;
+    if (browserConnection && pages && pages.length > 0) {
+      faviconsPromise = retrievePageFaviconsFromBrowser(
+        dispatch,
+        pages,
+        browserConnection
+      );
+    }
+
     // Note we kick off symbolication only for the profiles we know for sure
     // that they weren't symbolicated.
     // We can skip the symbolication in tests if needed.
+    let symbolicationPromise = null;
     if (!skipSymbolication && profile.meta.symbolicated === false) {
       const symbolStore = getSymbolStore(
         dispatch,
@@ -268,9 +289,15 @@ export function finalizeProfileView(
       if (symbolStore) {
         // Only symbolicate if a symbol store is available. In tests we may not
         // have access to IndexedDB.
-        await doSymbolicateProfile(dispatch, profile, symbolStore);
+        symbolicationPromise = doSymbolicateProfile(
+          dispatch,
+          profile,
+          symbolStore
+        );
       }
     }
+
+    await Promise.all([faviconsPromise, symbolicationPromise]);
   };
 }
 
@@ -287,9 +314,15 @@ export function finalizeFullProfileView(
   return (dispatch, getState) => {
     const hasUrlInfo = maybeSelectedThreadIndexes !== null;
 
-    const globalTracks = computeGlobalTracks(profile);
+    const tabToThreadIndexesMap = getTabToThreadIndexesMap(getState());
+    const globalTracks = computeGlobalTracks(
+      profile,
+      hasUrlInfo ? getTabFilter(getState()) : null,
+      tabToThreadIndexesMap
+    );
     const localTracksByPid = computeLocalTracksByPid(
       profile,
+      globalTracks,
       getMarkerSchemaByName(getState())
     );
 
@@ -337,7 +370,11 @@ export function finalizeFullProfileView(
       // This is the case for the initial profile load.
       // We also get here if the URL info was ignored, for example if
       // respecting it would have caused all threads to become hidden.
-      hiddenTracks = computeDefaultHiddenTracks(tracksWithOrder, profile);
+      hiddenTracks = computeDefaultHiddenTracks(
+        tracksWithOrder,
+        profile,
+        getThreadActivityScores(getState())
+      );
     }
 
     const selectedThreadIndexes = initializeSelectedThreadIndex(
@@ -913,6 +950,11 @@ function getSymbolStore(
             body: json,
             method: 'POST',
             mode: 'cors',
+            // Use a profiler-specific user agent, so that the symbolication server knows
+            // what's making this request.
+            headers: new Headers({
+              'User-Agent': `FirefoxProfiler/1.0 (+${location.origin})`,
+            }),
           });
           return response.json();
         }
@@ -994,39 +1036,94 @@ export async function doSymbolicateProfile(
   dispatch(doneSymbolicating());
 }
 
+export async function retrievePageFaviconsFromBrowser(
+  dispatch: Dispatch,
+  pages: PageList,
+  browserConnection: BrowserConnection
+) {
+  const newPages = [...pages];
+
+  const favicons = await browserConnection.getPageFavicons(
+    newPages.map((p) => p.url)
+  );
+
+  if (newPages.length !== favicons.length) {
+    // It appears that an error occurred since the pages and favicons arrays
+    // have different lengths. Return early without doing anything. The favicons
+    // array will be empty if Firefox doesn't support this webchannel request.
+    return;
+  }
+
+  // Convert binary favicon data into data urls.
+  const faviconDataStringPromises: Array<Promise<string | null>> = favicons.map(
+    (faviconData) => {
+      if (!faviconData) {
+        return Promise.resolve(null);
+      }
+      return bytesToBase64DataUrl(faviconData.data, faviconData.mimeType);
+    }
+  );
+
+  const faviconDataUrls = await Promise.all(faviconDataStringPromises);
+
+  for (let index = 0; index < favicons.length; index++) {
+    if (faviconDataUrls[index]) {
+      newPages[index] = {
+        ...newPages[index],
+        favicon: faviconDataUrls[index],
+      };
+    }
+  }
+
+  // Once we update the pages, we can also start loading the data urls.
+  dispatch(batchLoadDataUrlIcons(faviconDataUrls));
+  dispatch({
+    type: 'UPDATE_PAGES',
+    newPages,
+  });
+}
+
+// From a BrowserConnectionStatus, this unwraps the included browserConnection
+// when possible.
+export function unwrapBrowserConnection(
+  browserConnectionStatus: BrowserConnectionStatus
+): BrowserConnection {
+  switch (browserConnectionStatus.status) {
+    case 'ESTABLISHED':
+      // Good. This is the normal case.
+      break;
+    // The other cases are error cases.
+    case 'NOT_FIREFOX':
+      throw new Error('/from-browser only works in Firefox browsers');
+    case 'NO_ATTEMPT':
+      throw new Error(
+        'retrieveProfileFromBrowser should never be called while browserConnectionStatus is NO_ATTEMPT'
+      );
+    case 'WAITING':
+      throw new Error(
+        'retrieveProfileFromBrowser should never be called while browserConnectionStatus is WAITING'
+      );
+    case 'DENIED':
+      throw browserConnectionStatus.error;
+    case 'TIMED_OUT':
+      throw new Error('Timed out when waiting for reply to WebChannel message');
+    default:
+      throw assertExhaustiveCheck(browserConnectionStatus.status);
+  }
+
+  // Now we know that browserConnectionStatus.status === 'ESTABLISHED'.
+  return browserConnectionStatus.browserConnection;
+}
+
 export function retrieveProfileFromBrowser(
   browserConnectionStatus: BrowserConnectionStatus,
   initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
   return async (dispatch) => {
     try {
-      switch (browserConnectionStatus.status) {
-        case 'ESTABLISHED':
-          // Good. This is the normal case.
-          break;
-        // The other cases are error cases.
-        case 'NOT_FIREFOX':
-          throw new Error('/from-browser only works in Firefox browsers');
-        case 'NO_ATTEMPT':
-          throw new Error(
-            'retrieveProfileFromBrowser should never be called while browserConnectionStatus is NO_ATTEMPT'
-          );
-        case 'WAITING':
-          throw new Error(
-            'retrieveProfileFromBrowser should never be called while browserConnectionStatus is WAITING'
-          );
-        case 'DENIED':
-          throw browserConnectionStatus.error;
-        case 'TIMED_OUT':
-          throw new Error(
-            'Timed out when waiting for reply to WebChannel message'
-          );
-        default:
-          throw assertExhaustiveCheck(browserConnectionStatus.status);
-      }
-
-      // Now we know that browserConnectionStatus.status === 'ESTABLISHED'.
-      const browserConnection = browserConnectionStatus.browserConnection;
+      const browserConnection = unwrapBrowserConnection(
+        browserConnectionStatus
+      );
 
       // XXX update state to show that we're connected to the browser
 
@@ -1049,11 +1146,29 @@ export function retrieveProfileFromBrowser(
         await _unpackGeckoProfileFromBrowser(rawGeckoProfile);
       const meta = unpackedProfile.meta;
       if (meta.configuration && meta.configuration.features.includes('power')) {
-        const tracks = await browserConnection.getExternalPowerTracks(
-          meta.startTime + meta.profilingStartTime,
-          meta.startTime + meta.profilingEndTime
-        );
-        insertExternalPowerCountersIntoProfile(tracks, unpackedProfile);
+        try {
+          await Promise.all([
+            browserConnection
+              .getExternalPowerTracks(
+                meta.startTime + meta.profilingStartTime,
+                meta.startTime + meta.profilingEndTime
+              )
+              .then((tracks) =>
+                insertExternalPowerCountersIntoProfile(tracks, unpackedProfile)
+              ),
+            browserConnection
+              .getExternalMarkers(
+                meta.startTime + meta.profilingStartTime,
+                meta.startTime + meta.profilingEndTime
+              )
+              .then((markers) =>
+                insertExternalMarkersIntoProfile(markers, unpackedProfile)
+              ),
+          ]);
+        } catch (error) {
+          // Make failures in adding external data non-fatal.
+          console.error(error);
+        }
       }
       const profile = processGeckoProfile(unpackedProfile);
       await dispatch(loadProfile(profile, { browserConnection }, initialLoad));
@@ -1264,7 +1379,7 @@ async function _extractZipFromResponse(
     // Catch the error if unable to load the zip.
     return zip;
   } catch (error) {
-    const message = 'Unable to unzip the zip file.';
+    const message = 'Unable to open the archive file.';
     reportError(message);
     reportError('Error:', error);
     reportError('Fetch response:', response);
@@ -1392,7 +1507,7 @@ export function retrieveProfileOrZipFromUrl(
         default:
           throw assertExhaustiveCheck(
             response.responseType,
-            'Expected to receive a zip file or profile from _fetchProfile.'
+            'Expected to receive an archive or profile from _fetchProfile.'
           );
       }
     } catch (error) {
@@ -1668,17 +1783,17 @@ export function retrieveProfileForRawUrl(
             case 'inject-profile':
               dispatch(viewProfileFromPostMessage(data.profile));
               break;
-            case 'is-ready': {
+            case 'ready:request': {
               // The "inject-profile" event could be coming from a variety of locations.
               // It could come from a `window.open` call on another page. It could come
               // from an addon. It could come from being embedded in an iframe. In order
               // to generically support these cases allow the opener to poll for the
-              // "is-ready" message.
+              // "ready:response" message.
               console.log(
                 'Responding via postMessage that the profiler is ready.'
               );
               const otherWindow = event.source ?? window;
-              otherWindow.postMessage({ name: 'is-ready' }, '*');
+              otherWindow.postMessage({ name: 'ready:response' }, '*');
               break;
             }
             default:
@@ -1704,5 +1819,113 @@ export function retrieveProfileForRawUrl(
 
     // Profile may be null if the response was a zip file.
     return getProfileOrNull(getState());
+  };
+}
+
+/**
+ * Change the selected browser tab filter for the profile.
+ * TabID here means the unique ID for a give browser tab and corresponds to
+ * multiple pages in the `profile.pages` array.
+ * If it's null it will undo the filter and will show the full profile.
+ */
+export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const profile = getProfile(getState());
+    const tabToThreadIndexesMap = getTabToThreadIndexesMap(getState());
+    // Compute the global tracks, they will be filtered by tabID if it's
+    // non-null and will not filter if it's null.
+    const globalTracks = computeGlobalTracks(
+      profile,
+      tabID,
+      tabToThreadIndexesMap
+    );
+    const localTracksByPid = computeLocalTracksByPid(
+      profile,
+      globalTracks,
+      getMarkerSchemaByName(getState())
+    );
+
+    const legacyThreadOrder = getLegacyThreadOrder(getState());
+    const globalTrackOrder = initializeGlobalTrackOrder(
+      globalTracks,
+      null, // Passing null to urlGlobalTrackOrder to reinitilize it.
+      legacyThreadOrder
+    );
+    const localTrackOrderByPid = initializeLocalTrackOrderByPid(
+      null, // Passing null to urlTrackOrderByPid to reinitilize it.
+      localTracksByPid,
+      legacyThreadOrder,
+      profile
+    );
+
+    const tracksWithOrder = {
+      globalTracks,
+      globalTrackOrder,
+      localTracksByPid,
+      localTrackOrderByPid,
+    };
+
+    let hiddenTracks = null;
+
+    // For non-initial profile loads, initialize the set of hidden tracks from
+    // information in the URL.
+    const legacyHiddenThreads = getLegacyHiddenThreads(getState());
+    if (legacyHiddenThreads !== null) {
+      hiddenTracks = tryInitializeHiddenTracksLegacy(
+        tracksWithOrder,
+        legacyHiddenThreads,
+        profile
+      );
+    }
+    if (hiddenTracks === null) {
+      // Compute a default set of hidden tracks.
+      // This is the case for the initial profile load.
+      // We also get here if the URL info was ignored, for example if
+      // respecting it would have caused all threads to become hidden.
+      hiddenTracks = computeDefaultHiddenTracks(
+        tracksWithOrder,
+        profile,
+        getThreadActivityScores(getState())
+      );
+    }
+
+    const selectedThreadIndexes = initializeSelectedThreadIndex(
+      null, // maybeSelectedThreadIndexes
+      getVisibleThreads(tracksWithOrder, hiddenTracks),
+      profile
+    );
+
+    // If the currently selected tab is only visible when the selected track
+    // has samples, verify that the selected track has samples, and if not
+    // select the marker chart.
+    let selectedTab = getSelectedTab(getState());
+    if (tabsShowingSampleData.includes(selectedTab)) {
+      let hasSamples = false;
+      for (const threadIndex of selectedThreadIndexes) {
+        const thread = profile.threads[threadIndex];
+        const { samples, jsAllocations, nativeAllocations } = thread;
+        hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
+          hasUsefulSamples(table, thread)
+        );
+        if (hasSamples) {
+          break;
+        }
+      }
+      if (!hasSamples) {
+        selectedTab = 'marker-chart';
+      }
+    }
+
+    dispatch({
+      type: 'CHANGE_TAB_FILTER',
+      tabID,
+      selectedThreadIndexes,
+      selectedTab,
+      globalTracks,
+      globalTrackOrder,
+      localTracksByPid,
+      localTrackOrderByPid,
+      ...hiddenTracks,
+    });
   };
 }

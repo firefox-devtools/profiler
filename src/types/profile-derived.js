@@ -401,7 +401,6 @@ export type MarkerTiming = {|
   // End time in milliseconds. It will equals start for instant markers.
   end: number[],
   index: MarkerIndex[],
-  label: string[],
   name: string,
   bucket: string,
   // True if this marker timing contains only instant markers.
@@ -611,6 +610,8 @@ export type ActiveTabTrack = ActiveTabGlobalTrack | ActiveTabResourceTrack;
 export type RemoveProfileInformation = {|
   // Remove the given hidden threads if they are provided.
   +shouldRemoveThreads: Set<ThreadIndex>,
+  // Remove the given counters if they are provided.
+  +shouldRemoveCounters: Set<CounterIndex>,
   // Remove the screenshots if they are provided.
   +shouldRemoveThreadsWithScreenshots: Set<ThreadIndex>,
   // Remove the full time range if StartEndRange is provided.
@@ -659,8 +660,18 @@ export type InitialSelectedTrackReference = HTMLElement;
 export type ProfileFilterPageData = {|
   origin: string,
   hostname: string,
-  favicon: string | null,
+  favicon: string,
 |};
+
+/**
+ * Information about the Tab selector state that is sorted by their tab activity
+ * scores.
+ */
+export type SortedTabPageData = Array<{|
+  tabID: TabID,
+  tabScore: number,
+  pageData: ProfileFilterPageData,
+|}>;
 
 export type CallNodeLeafAndSummary = {|
   // This property stores the amount of unit (time, bytes, count, etc.) spent in the
@@ -728,4 +739,12 @@ export type BottomBoxInfo = {|
   libIndex: IndexIntoLibs | null,
   sourceFile: string | null,
   nativeSymbols: NativeSymbolInfo[],
+|};
+
+/**
+ * Favicon data that is retrieved from the browser connection.
+ */
+export type FaviconData = {|
+  +data: ArrayBuffer,
+  +mimeType: string,
 |};

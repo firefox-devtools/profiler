@@ -40,7 +40,7 @@ If you have compiled GeckoView-example locally, you can launch it with `./mach r
 ```bash
 ./mach run --setenv MOZ_PROFILER_STARTUP=1 \
            --setenv MOZ_PROFILER_STARTUP_INTERVAL=5 \
-           --setenv MOZ_PROFILER_STARTUP_FEATURES=threads,js,stackwalk,leaf,screenshots,ipcmessages,java \
+           --setenv MOZ_PROFILER_STARTUP_FEATURES=js,stackwalk,screenshots,ipcmessages,java,processcpu,cpu \
            --setenv MOZ_PROFILER_STARTUP_FILTERS="GeckoMain,Compositor,Renderer,IPDL Background"
 ```
 
@@ -50,7 +50,7 @@ Alternatively, if you have installed GeckoView-example from another source, you 
 adb shell am start -n org.mozilla.geckoview_example/.App \
     --es env0 MOZ_PROFILER_STARTUP=1 \
     --es env1 MOZ_PROFILER_STARTUP_INTERVAL=5 \
-    --es env2 MOZ_PROFILER_STARTUP_FEATURES=threads,js,stackwalk,leaf,screenshots,ipcmessages,java \
+    --es env2 MOZ_PROFILER_STARTUP_FEATURES=js,stackwalk,screenshots,ipcmessages,java,processcpu,cpu \
     --es env3 MOZ_PROFILER_STARTUP_FILTERS="GeckoMain,Compositor,Renderer,IPDL Background"
 ```
 
@@ -58,15 +58,15 @@ adb shell am start -n org.mozilla.geckoview_example/.App \
 
 Fenix has a [different way](https://firefox-source-docs.mozilla.org/mobile/android/geckoview/consumer/automation.html#reading-configuration-from-a-file) to specify environment variables: it uses a yaml file.
 
-The easiest way to set up startup profiling is to run the `<fenix-repo>/tools/setup-startup-profiling.py` script. For example:
+The easiest way to set up startup profiling is to run the `<mozilla-central-repo>/mobile/android/fenix/tools/setup-startup-profiling.py` script. For example:
 ```bash
-./tools/setup-startup-profiling.py activate nightly  # To activate startup profiling on nightly.
-./tools/setup-startup-profiling.py deactivate beta  # To deactivate startup profiling on beta.
+./mobile/android/fenix/tools/setup-startup-profiling.py activate nightly  # To activate startup profiling on nightly.
+./mobile/android/fenix/tools/setup-startup-profiling.py deactivate beta  # To deactivate startup profiling on beta.
 ```
 
 If the app is uninstalled or the device is restarted, the `activate` command may need to be re-run. The script is hard-coded to use a default configuration file with default profiling arguments. If you wish to change these arguments or use a non-standard app ID, modify the script locally or read below.
 
-If you don't want to check out [the fenix repository](https://github.com/mozilla-mobile/fenix/), you should be able to download [the script standalone](https://raw.githubusercontent.com/mozilla-mobile/fenix/master/tools/setup-startup-profiling.py) and execute it.
+If you don't want to check out [mozilla-central](https://hg.mozilla.org/mozilla-central/), you should be able to download [the script standalone](https://hg.mozilla.org/mozilla-central/raw-file/tip/mobile/android/fenix/tools/setup-startup-profiling.py) and execute it.
 
 #### Manual configuration
 
@@ -78,7 +78,7 @@ The filename of the YAML file mentioned above depends on the bundle ID of your F
     env:
       MOZ_PROFILER_STARTUP: 1
       MOZ_PROFILER_STARTUP_INTERVAL: 5
-      MOZ_PROFILER_STARTUP_FEATURES: threads,js,stackwalk,leaf,screenshots,ipcmessages,java
+      MOZ_PROFILER_STARTUP_FEATURES: js,stackwalk,screenshots,ipcmessages,java,processcpu,cpu
       MOZ_PROFILER_STARTUP_FILTERS: GeckoMain,Compositor,Renderer,IPDL Background
     ```
  2. Push this file to the device with `adb push org.mozilla.fenix-geckoview-config.yaml /data/local/tmp/`.

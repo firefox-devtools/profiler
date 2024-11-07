@@ -52,6 +52,7 @@ const view: Reducer<AppViewState> = (
     case 'VIEW_FULL_PROFILE':
     case 'VIEW_ORIGINS_PROFILE':
     case 'VIEW_ACTIVE_TAB_PROFILE':
+    case 'CHANGE_TAB_FILTER':
       return { phase: 'DATA_LOADED' };
     default:
       return state;
@@ -140,6 +141,7 @@ const panelLayoutGeneration: Reducer<number> = (state = 0, action) => {
     case 'TOGGLE_RESOURCES_PANEL':
     case 'ENABLE_EXPERIMENTAL_CPU_GRAPHS':
     case 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS':
+    case 'CHANGE_TAB_FILTER':
     // Committed range changes: (fallthrough)
     case 'COMMIT_RANGE':
     case 'POP_COMMITTED_RANGES':

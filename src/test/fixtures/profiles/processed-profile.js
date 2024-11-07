@@ -46,6 +46,7 @@ import type {
   Bytes,
   CallNodePath,
   Pid,
+  MarkerSchema,
 } from 'firefox-profiler/types';
 import {
   deriveMarkersFromRawMarkerTable,
@@ -59,7 +60,6 @@ import { getVisualMetrics } from './gecko-profile';
 // Array<[MarkerName, Milliseconds, Data]>
 type MarkerName = string;
 type MarkerTime = Milliseconds;
-type MockPayload = {| startTime: Milliseconds, endTime: Milliseconds |};
 
 // These markers can create an Instant or a complete Interval marker, depending
 // on if an end time is passed in. The definition uses a union, becaus as far
@@ -77,7 +77,7 @@ export type TestDefinedMarkers = Array<
       MarkerName,
       MarkerTime, // start time
       MarkerTime | null, // end time
-      MarkerPayload | MockPayload | null,
+      MixedObject | null, // data payload
     ],
 >;
 
@@ -120,6 +120,34 @@ export function addRawMarkersToThread(
   }
 }
 
+function _replaceUniqueStringFieldValuesWithStringIndexesInMarkerPayload(
+  payload: MixedObject | null,
+  markerSchemas: MarkerSchema[],
+  stringTable: UniqueStringArray
+) {
+  if (payload === null) {
+    return;
+  }
+  const markerType = payload.type;
+  if (markerType === undefined) {
+    return;
+  }
+  const schema = markerSchemas.find((schema) => schema.name === markerType);
+  if (schema === undefined) {
+    return;
+  }
+  for (const fieldSchema of schema.data) {
+    if (!fieldSchema.format || fieldSchema.format !== 'unique-string') {
+      continue;
+    }
+    const { key } = fieldSchema;
+    if (typeof payload[key] === 'string') {
+      // Replace string with string index
+      payload[key] = stringTable.indexForString(payload[key]);
+    }
+  }
+}
+
 export function addMarkersToThreadWithCorrespondingSamples(
   thread: Thread,
   markers: TestDefinedMarkers
@@ -147,6 +175,11 @@ export function addMarkersToThreadWithCorrespondingSamples(
       allTimes.add(maybeEndTime);
     }
     allTimes.add(startTime);
+    _replaceUniqueStringFieldValuesWithStringIndexesInMarkerPayload(
+      payload,
+      markerSchemaForTests,
+      stringTable
+    );
     markersTable.data.push(payload);
     markersTable.category.push(0);
     markersTable.length++;
@@ -1299,26 +1332,31 @@ export function getIPCTrackProfile() {
   return getProfileWithMarkers([].concat(...arrayOfIPCMarkers));
 }
 
+export function getScreenshotMarkersForWindowId(
+  windowID: string,
+  count: number
+): TestDefinedMarkers {
+  return Array(count)
+    .fill()
+    .map((_, i) => [
+      'CompositorScreenshot',
+      i,
+      null,
+      {
+        type: 'CompositorScreenshot',
+        url: 0, // Some arbitrary string.
+        windowID,
+        windowWidth: 300,
+        windowHeight: 150,
+      },
+    ]);
+}
+
 export function getScreenshotTrackProfile() {
-  const screenshotMarkersForWindowId = (windowID, count) =>
-    Array(count)
-      .fill()
-      .map((_, i) => [
-        'CompositorScreenshot',
-        i,
-        null,
-        {
-          type: 'CompositorScreenshot',
-          url: 0, // Some arbitrary string.
-          windowID,
-          windowWidth: 300,
-          windowHeight: 150,
-        },
-      ]);
   return getProfileWithMarkers([
-    ...screenshotMarkersForWindowId('0', 5), // This window isn't closed, so we should repeat the last screenshot
-    ...screenshotMarkersForWindowId('1', 5), // This window is closed after screenshot 6.
-    ...screenshotMarkersForWindowId('2', 10), // This window isn't closed and define the profile length
+    ...getScreenshotMarkersForWindowId('0', 5), // This window isn't closed, so we should repeat the last screenshot
+    ...getScreenshotMarkersForWindowId('1', 5), // This window is closed after screenshot 6.
+    ...getScreenshotMarkersForWindowId('2', 10), // This window isn't closed and define the profile length
     [
       'CompositorScreenshotWindowDestroyed',
       6,
@@ -1795,11 +1833,11 @@ export function getProfileWithBalancedNativeAllocations() {
  * Pages array has the following relationship:
  * Tab #1                           Tab #2
  * --------------                --------------
- * Page #1                        Page #4
- * |- Page #2                     |
- * |  |- Page #3                  Page #6
+ * cnn.com                        profiler.firefox.com
+ * |- youtube.com                 |
+ * |  |- google.com               google.com
  * |
- * Page #5
+ * mozilla.org
  */
 export function addActiveTabInformationToProfile(
   profile: Profile,
@@ -1826,28 +1864,28 @@ export function addActiveTabInformationToProfile(
     {
       tabID: firstTabTabID,
       innerWindowID: parentInnerWindowIDsWithChildren,
-      url: 'Page #1',
+      url: 'https://www.cnn.com/',
       embedderInnerWindowID: 0,
     },
     // An iframe page inside the previous page
     {
       tabID: firstTabTabID,
       innerWindowID: iframeInnerWindowIDsWithChild,
-      url: 'Page #2',
+      url: 'https://www.youtube.com/',
       embedderInnerWindowID: parentInnerWindowIDsWithChildren,
     },
     // Another iframe page inside the previous iframe
     {
       tabID: firstTabTabID,
       innerWindowID: firstTabInnerWindowIDs[2],
-      url: 'Page #3',
+      url: 'https://www.google.com/',
       embedderInnerWindowID: iframeInnerWindowIDsWithChild,
     },
     // A top most frame from the second tab
     {
       tabID: secondTabTabID,
       innerWindowID: secondTabInnerWindowIDs[0],
-      url: 'Page #4',
+      url: 'https://profiler.firefox.com/',
       embedderInnerWindowID: 0,
     },
     // Another top most frame from the first tab
@@ -1855,15 +1893,15 @@ export function addActiveTabInformationToProfile(
     {
       tabID: firstTabTabID,
       innerWindowID: firstTabInnerWindowIDs[3],
-      url: 'Page #5',
+      url: 'https://mozilla.org/',
       embedderInnerWindowID: 0,
     },
     // Another top most frame from the second tab
     {
       tabID: secondTabTabID,
       innerWindowID: secondTabInnerWindowIDs[1],
-      url: 'Page #4',
-      embedderInnerWindowID: 0,
+      url: 'https://www.google.com/',
+      embedderInnerWindowID: secondTabInnerWindowIDs[0],
     },
   ];
 

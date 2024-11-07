@@ -90,6 +90,18 @@ export function mergeProfilesForDiffing(
   }
 
   const resultProfile = getEmptyProfile();
+
+  // Copy over identical values for the ProfileMeta.
+  for (const [key, value] of Object.entries(profiles[0].meta)) {
+    if (profiles.every((profile) => profile.meta[key] === value)) {
+      resultProfile.meta[key] = value;
+    }
+  }
+  // Ensure it has a copy of the marker schema and categories, even though these could
+  // be different between the two profiles.
+  resultProfile.meta.markerSchema = profiles[0].meta.markerSchema;
+  resultProfile.meta.categories = profiles[0].meta.categories;
+
   resultProfile.meta.interval = Math.min(
     ...profiles.map((profile) => profile.meta.interval)
   );
@@ -217,7 +229,19 @@ export function mergeProfilesForDiffing(
 
     // We adjust the various times so that the 2 profiles are aligned at the
     // start and the data is consistent.
-    const startTimeAdjustment = -thread.samples.time[0];
+    let startTimeAdjustment = 0;
+    if (thread.samples.length) {
+      startTimeAdjustment = -thread.samples.time[0];
+    } else if (thread.markers.length) {
+      for (const startTime of thread.markers.startTime) {
+        // Find the first marker startTime.
+        if (startTime !== null) {
+          startTimeAdjustment = -startTime;
+          break;
+        }
+      }
+    }
+
     thread.samples = adjustTableTimestamps(thread.samples, startTimeAdjustment);
     thread.markers = adjustMarkerTimestamps(
       thread.markers,
@@ -252,7 +276,7 @@ export function mergeProfilesForDiffing(
   // really makes sense when there's only 2 profiles.
   if (profiles.length === 2) {
     resultProfile.threads.push(
-      getComparisonThread(translationMapsForCategories, [
+      getComparisonThread([
         {
           thread: resultProfile.threads[0],
           weightMultiplier:
@@ -680,7 +704,6 @@ function combineFuncTables(
  * that's not needed to get a diffing call tree.
  */
 function combineFrameTables(
-  translationMapsForCategories: TranslationMapForCategories[] | null,
   translationMapsForFuncs: TranslationMapForFuncs[],
   translationMapsForNativeSymbols: TranslationMapForNativeSymbols[],
   newStringTable: UniqueStringArray,
@@ -693,27 +716,10 @@ function combineFrameTables(
     const { frameTable, stringTable } = thread;
     const translationMap = new Map();
     const funcTranslationMap = translationMapsForFuncs[threadIndex];
-    const getNewCategory = (category) => {
-      if (translationMapsForCategories === null) {
-        // Translation map is not provided, return the category itself.
-        return category;
-      }
-      const categoryTranslationMap = translationMapsForCategories[threadIndex];
-      return categoryTranslationMap.get(category);
-    };
     const nativeSymbolTranslationMap =
       translationMapsForNativeSymbols[threadIndex];
 
     for (let i = 0; i < frameTable.length; i++) {
-      const category = frameTable.category[i];
-      const newCategory = category === null ? null : getNewCategory(category);
-      if (newCategory === undefined) {
-        throw new Error(stripIndent`
-          We couldn't find the category of frame ${i} in the translation map.
-          This is a programming error.
-        `);
-      }
-
       const newFunc = funcTranslationMap.get(frameTable.func[i]);
       if (newFunc === undefined) {
         throw new Error(stripIndent`
@@ -742,10 +748,7 @@ function combineFrameTables(
 
       newFrameTable.address.push(frameTable.address[i]);
       newFrameTable.inlineDepth.push(frameTable.inlineDepth[i]);
-      newFrameTable.category.push(newCategory);
-      // TODO issue #2151: we assume that subcategory strings are the same if
-      // the category is the same, and have no translation maps. But we should
-      // really implement one.
+      newFrameTable.category.push(frameTable.category[i]);
       newFrameTable.subcategory.push(frameTable.subcategory[i]);
       newFrameTable.nativeSymbol.push(newNativeSymbol);
       newFrameTable.func.push(newFunc);
@@ -776,7 +779,6 @@ function combineFrameTables(
  * that's not needed to get a diffing call tree.
  */
 function combineStackTables(
-  translationMapsForCategories: TranslationMapForCategories[] | null,
   translationMapsForFrames: TranslationMapForFrames[],
   threads: $ReadOnlyArray<Thread>
 ): { stackTable: StackTable, translationMaps: TranslationMapForStacks[] } {
@@ -787,27 +789,12 @@ function combineStackTables(
     const { stackTable } = thread;
     const translationMap = new Map();
     const frameTranslationMap = translationMapsForFrames[threadIndex];
-    const getNewCategory = (category) => {
-      if (translationMapsForCategories === null) {
-        // Translation map is not provided, return the category itself.
-        return category;
-      }
-      const categoryTranslationMap = translationMapsForCategories[threadIndex];
-      return categoryTranslationMap.get(category);
-    };
 
     for (let i = 0; i < stackTable.length; i++) {
       const newFrameIndex = frameTranslationMap.get(stackTable.frame[i]);
       if (newFrameIndex === undefined) {
         throw new Error(stripIndent`
           We couldn't find the frame of stack ${i} in the translation map.
-          This is a programming error.
-        `);
-      }
-      const newCategory = getNewCategory(stackTable.category[i]);
-      if (newCategory === undefined) {
-        throw new Error(stripIndent`
-          We couldn't find the category of stack ${i} in the translation map.
           This is a programming error.
         `);
       }
@@ -822,10 +809,7 @@ function combineStackTables(
       }
 
       newStackTable.frame.push(newFrameIndex);
-      newStackTable.category.push(newCategory);
-      // TODO issue #2151: we assume that subcategory strings are the same if
-      // the category is the same, and have no translation maps. But we should
-      // really implement one.
+      newStackTable.category.push(stackTable.category[i]);
       newStackTable.subcategory.push(stackTable.subcategory[i]);
       newStackTable.prefix.push(newPrefix);
 
@@ -956,10 +940,11 @@ type ThreadAndWeightMultiplier = {|
 
 /**
  * This function will compute a diffing thread from 2 different threads, using
- * all the previous functions.
+ * all the previous functions. The threads have already been adjusted in such a
+ * way that they can live inside the same profile, for example their category
+ * indexes have been adjusted to point into the shared profile's category list.
  */
 function getComparisonThread(
-  translationMapsForCategories: TranslationMapForCategories[],
   threadsAndWeightMultipliers: [
     ThreadAndWeightMultiplier,
     ThreadAndWeightMultiplier,
@@ -983,7 +968,6 @@ function getComparisonThread(
     frameTable: newFrameTable,
     translationMaps: translationMapsForFrames,
   } = combineFrameTables(
-    translationMapsForCategories,
     translationMapsForFuncs,
     translationMapsForNativeSymbols,
     newStringTable,
@@ -992,11 +976,7 @@ function getComparisonThread(
   const {
     stackTable: newStackTable,
     translationMaps: translationMapsForStacks,
-  } = combineStackTables(
-    translationMapsForCategories,
-    translationMapsForFrames,
-    threads
-  );
+  } = combineStackTables(translationMapsForFrames, threads);
   const { samples: newSamples } = combineSamplesDiffing(
     translationMapsForStacks,
     threadsAndWeightMultipliers
@@ -1061,7 +1041,6 @@ export function mergeThreads(threads: Thread[]): Thread {
     frameTable: newFrameTable,
     translationMaps: translationMapsForFrames,
   } = combineFrameTables(
-    null,
     translationMapsForFuncs,
     translationMapsForNativeSymbols,
     newStringTable,
@@ -1070,7 +1049,7 @@ export function mergeThreads(threads: Thread[]): Thread {
   const {
     stackTable: newStackTable,
     translationMaps: translationMapsForStacks,
-  } = combineStackTables(null, translationMapsForFrames, threads);
+  } = combineStackTables(translationMapsForFrames, threads);
 
   // Combine the samples for merging.
   const newSamples = combineSamplesForMerging(

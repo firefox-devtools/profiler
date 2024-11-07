@@ -6,6 +6,7 @@ import {
   getScreenshotTrackProfile,
   getNetworkTrackProfile,
   addIPCMarkerPairToThreads,
+  getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { getEmptyThread } from '../../profile-logic/data-structures';
 import { storeWithProfile } from '../fixtures/stores';
@@ -58,9 +59,6 @@ describe('ordering and hiding', function () {
     const tabTrackIndex = globalTracks.findIndex(
       (track) =>
         track.type === 'process' && track.mainThreadIndex === tabThreadIndex
-    );
-    profile.threads.findIndex(
-      (thread) => thread.name === 'GeckoMain' && thread.processType === 'tab'
     );
     let styleTrackIndex, workerTrackIndex;
     for (const [, tracks] of ProfileViewSelectors.getLocalTracksByPid(
@@ -124,6 +122,41 @@ describe('ordering and hiding', function () {
     profile.threads = profile.threads.filter(
       (thread) => !(thread.name === 'GeckoMain' && thread.processType === 'tab')
     );
+    return profile;
+  }
+
+  function getProfileWithCustomMarkerTracks() {
+    const profile = getProfileWithMarkers([
+      ['Marker', 1, 2, { type: 'Marker', first: 5 }],
+      ['NoGraphMarker', 3, 4, { type: 'NoGraphMarker', first: 6 }],
+    ]);
+
+    const extraMarkerSchemas = [
+      {
+        name: 'Marker',
+        display: ['marker-chart', 'marker-table', 'timeline-memory'],
+        data: [
+          { key: 'first', label: 'first', format: 'integer', searchable: true },
+        ],
+        graphs: [
+          {
+            key: 'first',
+            type: 'line',
+          },
+        ],
+      },
+      {
+        name: 'NoGraphMarker',
+        display: ['marker-chart', 'marker-table'],
+        data: [
+          { key: 'first', label: 'first', format: 'integer', searchable: true },
+        ],
+        // An empty array should behave just as if the property isn't present.
+        graphs: [],
+      },
+    ];
+    profile.meta.markerSchema.push(...extraMarkerSchemas);
+
     return profile;
   }
 
@@ -366,6 +399,15 @@ describe('ordering and hiding', function () {
   });
 
   describe('local tracks', function () {
+    it('can define custom local tracks from marker graphs', function () {
+      const { getState } = storeWithProfile(getProfileWithCustomMarkerTracks());
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [process]',
+        '  - show [thread Empty] SELECTED',
+        '  - show [marker Marker] SELECTED',
+      ]);
+    });
+
     it('can hide a local track', function () {
       const { getState, dispatch, workerTrackIndex, tabPid } = init();
       withAnalyticsMock(() => {

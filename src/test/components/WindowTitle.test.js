@@ -34,9 +34,59 @@ describe('WindowTitle', () => {
       </Provider>
     );
 
-    expect(document.title).toBe(
-      'Firefox – 1/1/1970, 12:00:00 AM UTC – Firefox Profiler'
+    expect(document.title).toBe('Firefox – Firefox Profiler');
+  });
+
+  it('shows the profiler startTime in the window title if it is available', () => {
+    const profile = getEmptyProfile();
+    profile.threads.push(getEmptyThread());
+    Object.assign(profile.meta, {
+      startTime: new Date('5 Nov 2024 13:00 UTC').getTime(),
+    });
+    const store = storeWithProfile(profile);
+    store.dispatch(setDataSource('from-url'));
+    render(
+      <Provider store={store}>
+        <WindowTitle />
+      </Provider>
     );
+
+    expect(document.title).toBe(
+      'Firefox – 11/5/2024, 1:00:00 PM UTC – Firefox Profiler'
+    );
+  });
+
+  it('shows the profiler startTime with public annotation in the window title if it is available', () => {
+    const profile = getEmptyProfile();
+    profile.threads.push(getEmptyThread());
+    Object.assign(profile.meta, {
+      startTime: new Date('5 Nov 2024 13:00 UTC').getTime(),
+    });
+    const store = storeWithProfile(profile);
+    store.dispatch(setDataSource('public'));
+    render(
+      <Provider store={store}>
+        <WindowTitle />
+      </Provider>
+    );
+
+    expect(document.title).toBe(
+      'Firefox – 11/5/2024, 1:00:00 PM UTC (public) – Firefox Profiler'
+    );
+  });
+
+  it('shows the public annotation without startTime in the window title', () => {
+    const profile = getEmptyProfile();
+    profile.threads.push(getEmptyThread());
+    const store = storeWithProfile(profile);
+    store.dispatch(setDataSource('public'));
+    render(
+      <Provider store={store}>
+        <WindowTitle />
+      </Provider>
+    );
+
+    expect(document.title).toBe('Firefox (public) – Firefox Profiler');
   });
 
   it('shows platform details in the window title if it is available', () => {
@@ -55,8 +105,28 @@ describe('WindowTitle', () => {
       </Provider>
     );
 
+    expect(document.title).toBe('Firefox – macOS 10.14 – Firefox Profiler');
+  });
+
+  it('shows platform details with the start time in the window title if it is available', () => {
+    const profile = getEmptyProfile();
+    profile.threads.push(getEmptyThread());
+    Object.assign(profile.meta, {
+      oscpu: 'Intel Mac OS X 10.14',
+      platform: 'Macintosh',
+      toolkit: 'cocoa',
+      startTime: new Date('5 Nov 2024 13:00 UTC').getTime(),
+    });
+    const store = storeWithProfile(profile);
+    store.dispatch(setDataSource('from-url'));
+    render(
+      <Provider store={store}>
+        <WindowTitle />
+      </Provider>
+    );
+
     expect(document.title).toBe(
-      'Firefox – macOS 10.14 – 1/1/1970, 12:00:00 AM UTC – Firefox Profiler'
+      'Firefox – macOS 10.14 – 11/5/2024, 1:00:00 PM UTC – Firefox Profiler'
     );
   });
 
@@ -102,7 +172,7 @@ describe('WindowTitle', () => {
       </Provider>
     );
 
-    expect(document.title).toBe('1/1/1970, 12:00:00 AM UTC – Firefox Profiler');
+    expect(document.title).toBe('Firefox Profiler');
   });
 
   it('shows the correct title for uploaded recordings', () => {
@@ -162,7 +232,7 @@ describe('WindowTitle', () => {
       </Provider>
     );
 
-    expect(document.title).toBe('Zip File Contents – Firefox Profiler');
+    expect(document.title).toBe('Archive Contents – Firefox Profiler');
 
     await act(() =>
       store.dispatch(
@@ -173,7 +243,7 @@ describe('WindowTitle', () => {
     );
 
     expect(document.title).toBe(
-      'bar/profile1.json – Firefox – 1/1/1970, 12:00:00 AM UTC – Firefox Profiler'
+      'bar/profile1.json – Firefox – Firefox Profiler'
     );
   });
 });

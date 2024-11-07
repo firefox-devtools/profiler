@@ -112,7 +112,7 @@ class UrlManagerImpl extends React.PureComponent<Props> {
       )
     ) {
       updateBrowserConnectionStatus({ status: 'WAITING' });
-      browserConnectionStatus = await createBrowserConnection('Firefox/123.0');
+      browserConnectionStatus = await createBrowserConnection();
       updateBrowserConnectionStatus(browserConnectionStatus);
     }
 

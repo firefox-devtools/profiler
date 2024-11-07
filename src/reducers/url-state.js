@@ -24,6 +24,7 @@ import type {
   SourceViewState,
   AssemblyViewState,
   IsOpenPerPanelState,
+  TabID,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -96,6 +97,7 @@ const selectedTab: Reducer<TabSlug> = (state = 'calltree', action) => {
     case 'CHANGE_SELECTED_TAB':
     case 'SELECT_TRACK':
     case 'VIEW_FULL_PROFILE':
+    case 'CHANGE_TAB_FILTER':
       return action.selectedTab;
     case 'FOCUS_CALL_TREE':
       return 'calltree';
@@ -137,6 +139,7 @@ const selectedThreads: Reducer<Set<ThreadIndex> | null> = (
     case 'HIDE_PROVIDED_TRACKS':
     case 'ISOLATE_LOCAL_TRACK':
     case 'TOGGLE_RESOURCES_PANEL':
+    case 'CHANGE_TAB_FILTER':
       // Only switch to non-null selected threads.
       return (action.selectedThreadIndexes: Set<ThreadIndex>);
     case 'SANITIZED_PROFILE_PUBLISHED': {
@@ -324,6 +327,7 @@ const globalTrackOrder: Reducer<TrackIndex[]> = (state = [], action) => {
   switch (action.type) {
     case 'VIEW_FULL_PROFILE':
     case 'CHANGE_GLOBAL_TRACK_ORDER':
+    case 'CHANGE_TAB_FILTER':
       return action.globalTrackOrder;
     case 'SANITIZED_PROFILE_PUBLISHED':
       // If some threads were removed, do not even attempt to figure this out. It's
@@ -344,6 +348,7 @@ const hiddenGlobalTracks: Reducer<Set<TrackIndex>> = (
     case 'ISOLATE_PROCESS':
     case 'ISOLATE_PROCESS_MAIN_THREAD':
     case 'ISOLATE_SCREENSHOT_TRACK':
+    case 'CHANGE_TAB_FILTER':
       return action.hiddenGlobalTracks;
     case 'HIDE_GLOBAL_TRACK': {
       const hiddenGlobalTracks = new Set(state);
@@ -388,6 +393,7 @@ const hiddenLocalTracksByPid: Reducer<Map<Pid, Set<TrackIndex>>> = (
 ) => {
   switch (action.type) {
     case 'VIEW_FULL_PROFILE':
+    case 'CHANGE_TAB_FILTER':
       return action.hiddenLocalTracksByPid;
     case 'HIDE_LOCAL_TRACK': {
       const hiddenLocalTracksByPid = new Map(state);
@@ -474,6 +480,7 @@ const localTrackOrderByPid: Reducer<Map<Pid, TrackIndex[]>> = (
     case 'VIEW_FULL_PROFILE':
     case 'ENABLE_EVENT_DELAY_TRACKS':
     case 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS':
+    case 'CHANGE_TAB_FILTER':
       return action.localTrackOrderByPid;
     case 'CHANGE_LOCAL_TRACK_ORDER': {
       const localTrackOrderByPid = new Map(state);
@@ -503,6 +510,19 @@ const localTrackOrderChangedPids: Reducer<Set<Pid>> = (
       // In localTrackOrderByPid above the state is reset in this case,
       // let's reset it here as well.
       return action.oldThreadIndexToNew ? new Set() : state;
+    default:
+      return state;
+  }
+};
+
+/**
+ * This state controls whether or not we are filtering the full view for a
+ * specific Firefox tab.
+ */
+const tabFilter: Reducer<TabID | null> = (state = null, action) => {
+  switch (action.type) {
+    case 'CHANGE_TAB_FILTER':
+      return action.tabID;
     default:
       return state;
   }
@@ -671,6 +691,7 @@ const fullProfileSpecific = combineReducers({
   localTrackOrderByPid,
   localTrackOrderChangedPids,
   showJsTracerSummary,
+  tabFilter,
   // The timeline tracks used to be hidden and sorted by thread indexes, rather than
   // track indexes. The only way to migrate this information to tracks-based data is to
   // first retrieve the profile, so they can't be upgraded by the normal url upgrading

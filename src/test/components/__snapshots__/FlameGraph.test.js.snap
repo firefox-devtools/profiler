@@ -25,7 +25,6 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
 >
   <div
     class="tooltipCallNode"
-    style="--graph-width: 150px; --graph-height: 10px;"
   >
     <div
       class="tooltipOneLine tooltipHeader"
@@ -47,84 +46,6 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
     <div
       class="tooltipCallNodeDetails"
     >
-      <div
-        class="tooltipCallNodeImplementation"
-      >
-        <div />
-        <div
-          class="tooltipCallNodeHeader"
-        />
-        <div
-          class="tooltipCallNodeHeader"
-        >
-          <span
-            class="tooltipCallNodeHeaderSwatchRunning"
-          />
-          Running
-        </div>
-        <div
-          class="tooltipCallNodeHeader"
-        >
-          <span
-            class="tooltipCallNodeHeaderSwatchSelf"
-          />
-          Self
-        </div>
-        <div
-          class="tooltipLabel"
-        >
-          Overall
-        </div>
-        <div
-          class="tooltipCallNodeGraph"
-        >
-          <div
-            class="tooltipCallNodeGraphRunning"
-            style="width: 150px;"
-          />
-          <div
-            class="tooltipCallNodeGraphSelf"
-            style="width: 0px;"
-          />
-        </div>
-        <div
-          class="tooltipCallNodeTiming"
-        >
-          3 samples
-        </div>
-        <div
-          class="tooltipCallNodeTiming"
-        >
-          —
-        </div>
-        <div
-          class="tooltipCallNodeName tooltipLabel"
-        >
-          Native code
-        </div>
-        <div
-          class="tooltipCallNodeGraph"
-        >
-          <div
-            class="tooltipCallNodeGraphRunning"
-            style="width: 150px;"
-          />
-          <div
-            class="tooltipCallNodeGraphSelf"
-            style="width: 0px;"
-          />
-        </div>
-        <div
-          class="tooltipCallNodeTiming"
-        >
-          3 samples
-        </div>
-        <div
-          class="tooltipCallNodeTiming"
-        >
-          —
-        </div>
-      </div>
       <div
         class="tooltipDetails tooltipCallNodeDetailsLeft"
       >
@@ -156,6 +77,150 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
           class="tooltipDetailsUrl"
         >
           path/to/file:10:100
+        </div>
+      </div>
+      <div
+        class="tooltipCallNodeCategory"
+      >
+        <div />
+        <div
+          class="tooltipCallNodeHeader"
+        />
+        <div
+          class="tooltipCallNodeHeader"
+        >
+          <span
+            class="tooltipCallNodeHeaderSwatchRunning"
+          />
+          Running
+        </div>
+        <div
+          class="tooltipCallNodeHeader"
+        >
+          <span
+            class="tooltipCallNodeHeaderSwatchSelf"
+          />
+          Self
+        </div>
+        <div
+          class="tooltipLabel tooltipCategoryLabel tooltipCategoryRowHeader"
+        >
+          Overall
+        </div>
+        <div
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
+        >
+          <div
+            aria-label="Total samples overall"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="3"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
+          <div
+            aria-label="Self samples overall"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="0"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
+          />
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
+        >
+          3 samples
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
+        >
+          —
+        </div>
+        <div
+          class="tooltipCallNodeName tooltipLabel tooltipCategoryRowHeader"
+        >
+          Network
+        </div>
+        <div
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
+        >
+          <div
+            aria-label="Total samples for Network"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="1"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 33.33333333333333%;"
+            />
+          </div>
+          <div
+            aria-label="Self samples for Network"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="0"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
+          />
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          1 sample
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          —
+        </div>
+        <div
+          class="tooltipCallNodeName tooltipLabel tooltipCategoryRowHeader"
+        >
+          Graphics
+        </div>
+        <div
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
+        >
+          <div
+            aria-label="Total samples for Graphics"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="2"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 66.66666666666666%;"
+            />
+          </div>
+          <div
+            aria-label="Self samples for Graphics"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="0"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
+          />
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          2 samples
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          —
         </div>
       </div>
     </div>
@@ -171,7 +236,6 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
 >
   <div
     class="tooltipCallNode"
-    style="--graph-width: 150px; --graph-height: 10px;"
   >
     <div
       class="tooltipOneLine tooltipHeader"
@@ -193,84 +257,6 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
     <div
       class="tooltipCallNodeDetails"
     >
-      <div
-        class="tooltipCallNodeImplementation"
-      >
-        <div />
-        <div
-          class="tooltipCallNodeHeader"
-        />
-        <div
-          class="tooltipCallNodeHeader"
-        >
-          <span
-            class="tooltipCallNodeHeaderSwatchRunning"
-          />
-          Running
-        </div>
-        <div
-          class="tooltipCallNodeHeader"
-        >
-          <span
-            class="tooltipCallNodeHeaderSwatchSelf"
-          />
-          Self
-        </div>
-        <div
-          class="tooltipLabel"
-        >
-          Overall
-        </div>
-        <div
-          class="tooltipCallNodeGraph"
-        >
-          <div
-            class="tooltipCallNodeGraphRunning"
-            style="width: 150px;"
-          />
-          <div
-            class="tooltipCallNodeGraphSelf"
-            style="width: 0px;"
-          />
-        </div>
-        <div
-          class="tooltipCallNodeTiming"
-        >
-          3 samples
-        </div>
-        <div
-          class="tooltipCallNodeTiming"
-        >
-          —
-        </div>
-        <div
-          class="tooltipCallNodeName tooltipLabel"
-        >
-          Native code
-        </div>
-        <div
-          class="tooltipCallNodeGraph"
-        >
-          <div
-            class="tooltipCallNodeGraphRunning"
-            style="width: 150px;"
-          />
-          <div
-            class="tooltipCallNodeGraphSelf"
-            style="width: 0px;"
-          />
-        </div>
-        <div
-          class="tooltipCallNodeTiming"
-        >
-          3 samples
-        </div>
-        <div
-          class="tooltipCallNodeTiming"
-        >
-          —
-        </div>
-      </div>
       <div
         class="tooltipDetails tooltipCallNodeDetailsLeft"
       >
@@ -302,6 +288,150 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
           class="tooltipDetailsUrl"
         >
           path/to/file:10:100
+        </div>
+      </div>
+      <div
+        class="tooltipCallNodeCategory"
+      >
+        <div />
+        <div
+          class="tooltipCallNodeHeader"
+        />
+        <div
+          class="tooltipCallNodeHeader"
+        >
+          <span
+            class="tooltipCallNodeHeaderSwatchRunning"
+          />
+          Running
+        </div>
+        <div
+          class="tooltipCallNodeHeader"
+        >
+          <span
+            class="tooltipCallNodeHeaderSwatchSelf"
+          />
+          Self
+        </div>
+        <div
+          class="tooltipLabel tooltipCategoryLabel tooltipCategoryRowHeader"
+        >
+          Overall
+        </div>
+        <div
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
+        >
+          <div
+            aria-label="Total samples overall"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="3"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
+          <div
+            aria-label="Self samples overall"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="0"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
+          />
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
+        >
+          3 samples
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
+        >
+          —
+        </div>
+        <div
+          class="tooltipCallNodeName tooltipLabel tooltipCategoryRowHeader"
+        >
+          Network
+        </div>
+        <div
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
+        >
+          <div
+            aria-label="Total samples for Network"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="1"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 33.33333333333333%;"
+            />
+          </div>
+          <div
+            aria-label="Self samples for Network"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="0"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
+          />
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          1 sample
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          —
+        </div>
+        <div
+          class="tooltipCallNodeName tooltipLabel tooltipCategoryRowHeader"
+        >
+          Graphics
+        </div>
+        <div
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
+        >
+          <div
+            aria-label="Total samples for Graphics"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="2"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 66.66666666666666%;"
+            />
+          </div>
+          <div
+            aria-label="Self samples for Graphics"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="0"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
+          />
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          2 samples
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          —
         </div>
       </div>
     </div>
@@ -742,7 +872,6 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
 >
   <div
     class="tooltipCallNode"
-    style="--graph-width: 150px; --graph-height: 10px;"
   >
     <div
       class="tooltipOneLine tooltipHeader"
@@ -764,84 +893,6 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
     <div
       class="tooltipCallNodeDetails"
     >
-      <div
-        class="tooltipCallNodeImplementation"
-      >
-        <div />
-        <div
-          class="tooltipCallNodeHeader"
-        />
-        <div
-          class="tooltipCallNodeHeader"
-        >
-          <span
-            class="tooltipCallNodeHeaderSwatchRunning"
-          />
-          Running
-        </div>
-        <div
-          class="tooltipCallNodeHeader"
-        >
-          <span
-            class="tooltipCallNodeHeaderSwatchSelf"
-          />
-          Self
-        </div>
-        <div
-          class="tooltipLabel"
-        >
-          Overall
-        </div>
-        <div
-          class="tooltipCallNodeGraph"
-        >
-          <div
-            class="tooltipCallNodeGraphRunning"
-            style="width: 150px;"
-          />
-          <div
-            class="tooltipCallNodeGraphSelf"
-            style="width: 150px;"
-          />
-        </div>
-        <div
-          class="tooltipCallNodeTiming"
-        >
-          1 sample
-        </div>
-        <div
-          class="tooltipCallNodeTiming"
-        >
-          1 sample
-        </div>
-        <div
-          class="tooltipCallNodeName tooltipLabel"
-        >
-          Native code
-        </div>
-        <div
-          class="tooltipCallNodeGraph"
-        >
-          <div
-            class="tooltipCallNodeGraphRunning"
-            style="width: 150px;"
-          />
-          <div
-            class="tooltipCallNodeGraphSelf"
-            style="width: 150px;"
-          />
-        </div>
-        <div
-          class="tooltipCallNodeTiming"
-        >
-          1 sample
-        </div>
-        <div
-          class="tooltipCallNodeTiming"
-        >
-          1 sample
-        </div>
-      </div>
       <div
         class="tooltipDetails tooltipCallNodeDetailsLeft"
       >
@@ -880,6 +931,120 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
           Resource:
         </div>
         libxul.so
+      </div>
+      <div
+        class="tooltipCallNodeCategory"
+      >
+        <div />
+        <div
+          class="tooltipCallNodeHeader"
+        />
+        <div
+          class="tooltipCallNodeHeader"
+        >
+          <span
+            class="tooltipCallNodeHeaderSwatchRunning"
+          />
+          Running
+        </div>
+        <div
+          class="tooltipCallNodeHeader"
+        >
+          <span
+            class="tooltipCallNodeHeaderSwatchSelf"
+          />
+          Self
+        </div>
+        <div
+          class="tooltipLabel tooltipCategoryLabel tooltipCategoryRowHeader"
+        >
+          Overall
+        </div>
+        <div
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
+        >
+          <div
+            aria-label="Total samples overall"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
+          <div
+            aria-label="Self samples overall"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
+        >
+          1 sample
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
+        >
+          1 sample
+        </div>
+        <div
+          class="tooltipCallNodeName tooltipLabel tooltipCategoryRowHeader"
+        >
+          Graphics
+        </div>
+        <div
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
+        >
+          <div
+            aria-label="Total samples for Graphics"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
+          <div
+            aria-label="Self samples for Graphics"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          1 sample
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          1 sample
+        </div>
       </div>
     </div>
   </div>
@@ -894,7 +1059,6 @@ exports[`FlameGraph shows a tooltip with the resource information with implement
 >
   <div
     class="tooltipCallNode"
-    style="--graph-width: 150px; --graph-height: 10px;"
   >
     <div
       class="tooltipOneLine tooltipHeader"
@@ -916,84 +1080,6 @@ exports[`FlameGraph shows a tooltip with the resource information with implement
     <div
       class="tooltipCallNodeDetails"
     >
-      <div
-        class="tooltipCallNodeImplementation"
-      >
-        <div />
-        <div
-          class="tooltipCallNodeHeader"
-        />
-        <div
-          class="tooltipCallNodeHeader"
-        >
-          <span
-            class="tooltipCallNodeHeaderSwatchRunning"
-          />
-          Running
-        </div>
-        <div
-          class="tooltipCallNodeHeader"
-        >
-          <span
-            class="tooltipCallNodeHeaderSwatchSelf"
-          />
-          Self
-        </div>
-        <div
-          class="tooltipLabel"
-        >
-          Overall
-        </div>
-        <div
-          class="tooltipCallNodeGraph"
-        >
-          <div
-            class="tooltipCallNodeGraphRunning"
-            style="width: 150px;"
-          />
-          <div
-            class="tooltipCallNodeGraphSelf"
-            style="width: 150px;"
-          />
-        </div>
-        <div
-          class="tooltipCallNodeTiming"
-        >
-          1 sample
-        </div>
-        <div
-          class="tooltipCallNodeTiming"
-        >
-          1 sample
-        </div>
-        <div
-          class="tooltipCallNodeName tooltipLabel"
-        >
-          Native code
-        </div>
-        <div
-          class="tooltipCallNodeGraph"
-        >
-          <div
-            class="tooltipCallNodeGraphRunning"
-            style="width: 150px;"
-          />
-          <div
-            class="tooltipCallNodeGraphSelf"
-            style="width: 150px;"
-          />
-        </div>
-        <div
-          class="tooltipCallNodeTiming"
-        >
-          1 sample
-        </div>
-        <div
-          class="tooltipCallNodeTiming"
-        >
-          1 sample
-        </div>
-      </div>
       <div
         class="tooltipDetails tooltipCallNodeDetailsLeft"
       >
@@ -1032,6 +1118,120 @@ exports[`FlameGraph shows a tooltip with the resource information with implement
           Resource:
         </div>
         libxul.so
+      </div>
+      <div
+        class="tooltipCallNodeCategory"
+      >
+        <div />
+        <div
+          class="tooltipCallNodeHeader"
+        />
+        <div
+          class="tooltipCallNodeHeader"
+        >
+          <span
+            class="tooltipCallNodeHeaderSwatchRunning"
+          />
+          Running
+        </div>
+        <div
+          class="tooltipCallNodeHeader"
+        >
+          <span
+            class="tooltipCallNodeHeaderSwatchSelf"
+          />
+          Self
+        </div>
+        <div
+          class="tooltipLabel tooltipCategoryLabel tooltipCategoryRowHeader"
+        >
+          Overall
+        </div>
+        <div
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
+        >
+          <div
+            aria-label="Total samples overall"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
+          <div
+            aria-label="Self samples overall"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
+        >
+          1 sample
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
+        >
+          1 sample
+        </div>
+        <div
+          class="tooltipCallNodeName tooltipLabel tooltipCategoryRowHeader"
+        >
+          Graphics
+        </div>
+        <div
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
+        >
+          <div
+            aria-label="Total samples for Graphics"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
+          <div
+            aria-label="Self samples for Graphics"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          1 sample
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          1 sample
+        </div>
       </div>
     </div>
   </div>

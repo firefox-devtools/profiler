@@ -6,6 +6,7 @@
 import { oneLine } from 'common-tags';
 import { getLastVisibleThreadTabSlug } from 'firefox-profiler/selectors/app';
 import {
+  getCommittedRange,
   getCounterSelectors,
   getGlobalTracks,
   getGlobalTrackAndIndexByPid,
@@ -25,6 +26,7 @@ import {
   selectedThreadSelectors,
 } from 'firefox-profiler/selectors/per-thread';
 import {
+  getAllCommittedRanges,
   getImplementationFilter,
   getSelectedThreadIndexes,
   getSelectedThreadsKey,
@@ -1360,7 +1362,7 @@ function _findOtherVisibleThread(
     const localTrackOrder = getLocalTrackOrder(getState(), globalTrack.pid);
     const hiddenLocalTracks = getHiddenLocalTracks(getState(), globalTrack.pid);
     const localTrackIndexesToIgnore = localTrackIndexesToIgnoreByPid
-      ? localTrackIndexesToIgnoreByPid.get(globalTrack.pid) ?? new Set()
+      ? (localTrackIndexesToIgnoreByPid.get(globalTrack.pid) ?? new Set())
       : new Set();
 
     for (const trackIndex of localTrackOrder) {
@@ -1844,10 +1846,19 @@ export function commitRange(start: number, end: number): Action {
   };
 }
 
-export function popCommittedRanges(firstPoppedFilterIndex: number): Action {
-  return {
-    type: 'POP_COMMITTED_RANGES',
-    firstPoppedFilterIndex,
+export function popCommittedRanges(
+  firstPoppedFilterIndex: number
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    dispatch({
+      type: 'POP_COMMITTED_RANGES',
+      firstPoppedFilterIndex,
+      // If the clicked range is not the last one, make the current committed
+      // range the new preview selection, otherwise clear the selection.
+      committedRange:
+        getAllCommittedRanges(getState()).length !== firstPoppedFilterIndex &&
+        getCommittedRange(getState()),
+    });
   };
 }
 

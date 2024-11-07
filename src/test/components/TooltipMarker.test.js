@@ -673,7 +673,7 @@ describe('TooltipMarker', function () {
       })
     );
 
-    expect(getValueForProperty('Page')).toBe('Page #1');
+    expect(getValueForProperty('Page')).toBe('https://www.cnn.com/');
   });
 
   it('renders page information for private pages in network markers', () => {
@@ -696,7 +696,7 @@ describe('TooltipMarker', function () {
     );
 
     expect(getValueForProperty('Page')).toBe(
-      'Page #4 (id: 11111111114) (private)'
+      'https://profiler.firefox.com/ (private)'
     );
     expect(getValueForProperty('Private Browsing')).toBe('Yes');
   });
@@ -1097,8 +1097,8 @@ describe('TooltipMarker', function () {
         />
       </Provider>
     );
-    const threadTitle = screen.getByText('Thread:');
-    const threadInfo = threadTitle.nextSibling;
-    expect(threadInfo).toHaveTextContent(tab2Domain);
+    const trackTitle = screen.getByText('Track:');
+    const trackInfo = trackTitle.nextSibling;
+    expect(trackInfo).toHaveTextContent(tab2Domain);
   });
 });

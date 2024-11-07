@@ -13,19 +13,20 @@ Array [
     | \\\\     / |  | '_ \\\\| '__/ _ \\\\|  _| | |/ _ \\\\ '_|  
     |/ \\\\ _ / \\\\|  | |_) | | | (_) | | | | |  __/ |    
     |         |  | .__/|_|  \\\\___/|_| |_|_|\\\\___|_|    
-    /  -    - \\\\  |_|                                     
-  ,-    V__V   -.                                     
- -=  __-  * - .,=-                                    
-  \`\\\\_    -   _/                                       
-      \`-----'                                         ",
+    /  -    - \\\\  |_|                                 
+  ,-    V__V   -.                                    
+ -=  __-  * - .,=-                                   
+  \`\\\\_    -   _/                                      
+      \`-----'                                        ",
     "font-family: Menlo, monospace;",
   ],
   Array [
-    "%cThe following profiler information is available via the console:%c
+    "%cThe following profiler information and tools are available via the console:%c
 
 %cwindow.profile%c - The currently loaded profile
 %cwindow.filteredThread%c - The current filtered thread
 %cwindow.filteredMarkers%c - The current filtered and processed markers
+%cwindow.selectedMarker%c - The selected processed marker in the current thread
 %cwindow.callTree%c - The call tree of the current filtered thread
 %cwindow.getState%c - The function that returns the current Redux state.
 %cwindow.selectors%c - All the selectors that are used to get data from the Redux state.
@@ -34,6 +35,9 @@ Array [
 %cwindow.experimental%c - The object that holds flags of all the experimental features.
 %cwindow.togglePseudoLocalization%c - Enable pseudo localizations by passing \\"accented\\" or \\"bidi\\" to this function, or disable using no parameters.
 %cwindow.toggleTimelineType%c - Toggle timeline graph type by passing \\"cpu-category\\", \\"category\\", or \\"stack\\".
+%cwindow.retrieveRawProfileDataFromBrowser%c - Retrieve the profile attached to the current tab and returns it. Use \\"await\\" to call it, and use saveToDisk to save it.
+%cwindow.extractGeckoLogs%c - Retrieve recorded logs in the current range, using the MOZ_LOG format. Use with \\"copy\\" or \\"saveToDisk\\".
+%cwindow.saveToDisk%c - Saves to a file the parameter passed to it, with an optional filename parameter. You can use that to save the profile returned by \\"retrieveRawProfileDataFromBrowser\\" or the data returned by \\"extractGeckoLogs\\".
 
 The profile format is documented here:
 %chttps://github.com/firefox-devtools/profiler/blob/main/docs-developer/processed-profile-format.md%c
@@ -41,6 +45,14 @@ The profile format is documented here:
 The CallTree class's source code is available here:
 %chttps://github.com/firefox-devtools/profiler/blob/main/src/profile-logic/call-tree.js%c",
     "font-size: 130%;",
+    "",
+    "font-weight: bold;",
+    "",
+    "font-weight: bold;",
+    "",
+    "font-weight: bold;",
+    "",
+    "font-weight: bold;",
     "",
     "font-weight: bold;",
     "",

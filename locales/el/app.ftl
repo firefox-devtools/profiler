@@ -178,6 +178,46 @@ CallTree--inlining-badge = (ενσωματωμένη)
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Επιλέξτε κόμβο για προβολή πληροφοριών σχετικά με αυτόν.
+CallTreeSidebar--call-node-details = Λεπτομέρειες κόμβου κλήσης
+
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
+CallTreeSidebar--traced-running-time =
+    .label = Ιχνηλατημένος χρόνος εκτέλεσης
+CallTreeSidebar--traced-self-time =
+    .label = Ιχνηλατημένος ιδιοχρόνος
+CallTreeSidebar--running-time =
+    .label = Χρόνος εκτέλεσης
+CallTreeSidebar--self-time =
+    .label = Iδιοχρόνος
+CallTreeSidebar--running-samples =
+    .label = Εκτελούμενα δείγματα
+CallTreeSidebar--self-samples =
+    .label = Ιδιοδείγματα
+CallTreeSidebar--running-size =
+    .label = Μέγεθος εκτέλεσης
+CallTreeSidebar--self-size =
+    .label = Ιδιομέγεθος
+CallTreeSidebar--categories = Κατηγορίες
+CallTreeSidebar--implementation = Υλοποίηση
+CallTreeSidebar--running-milliseconds = Χιλιοστά δευτερολέπτου εκτέλεσης
+CallTreeSidebar--running-sample-count = Εκτελούμενος αριθμός δειγμάτων
+CallTreeSidebar--running-bytes = Bytes εκτέλεσης
+CallTreeSidebar--self-milliseconds = Χιλιοστά δευτερολέπτου συνάρτησης
+CallTreeSidebar--self-sample-count = Αριθμός ιδιοδειγμάτων
+CallTreeSidebar--self-bytes = Ιδιο-bytes
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -705,6 +745,13 @@ TabBar--marker-table-tab = Πίνακας δεικτών
 TabBar--network-tab = Δίκτυο
 TabBar--js-tracer-tab = JS Tracer
 
+## TabSelectorMenu
+## This component is a context menu that's opened when you click on the root
+## range at the top left corner for profiler analysis view. It's used to switch
+## between tabs that were captured in the profile.
+
+TabSelectorMenu--all-tabs-and-windows = Όλες οι καρτέλες και τα παράθυρα
+
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
@@ -721,6 +768,10 @@ TrackContextMenu--hide-other-screenshots-tracks = Απόκρυψη άλλων κ
 TrackContextMenu--hide-track = Απόκρυψη του “{ $trackName }”
 TrackContextMenu--show-all-tracks = Εμφάνιση όλων των κομματιών
 TrackContextMenu--show-local-tracks-in-process = Εμφάνιση όλων των κομματιών σε αυτήν τη διεργασία
+# This is used as the context menu item to hide all tracks of the selected track's type.
+# Variables:
+#   $type (String) - Name of the type of selected track to hide.
+TrackContextMenu--hide-all-tracks-by-selected-track-type = Απόκρυψη όλων των ιχνών του τύπου «{ $type }»
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Εμφάνιση όλων των αντίστοιχων κομματιών
@@ -773,6 +824,21 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Ισχύς
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-kilowatt = { $value } kW
+    .label = Μέση ισχύς στην τρέχουσα επιλογή
+# This is used in the tooltip when the power value uses the watt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-watt = { $value } W
+    .label = Μέση ισχύς στην τρέχουσα επιλογή
+# This is used in the tooltip when the instant power value uses the milliwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-milliwatt = { $value } mW
+    .label = Μέση ισχύς στην τρέχουσα επιλογή
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.
 # Variables:
@@ -829,6 +895,46 @@ TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } mWh
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
     .label = Η ενέργεια που χρησιμοποιείται στην τρέχουσα επιλογή
+
+## TrackBandwidth
+## This is used to show how much data was transfered over time.
+## For the strings in this group, the carbon dioxide equivalent is estimated
+## from the amount of data transfered.
+## The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
+
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the value for the data transfer speed.
+#                     Will contain the unit (eg. B, KB, MB)
+TrackBandwidthGraph--speed = { $value } ανά δευτερόλεπτο
+    .label = Ταχύτητα μεταφοράς για αυτό το δείγμα
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - how many read or write operations were performed since the previous sample
+TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value }
+    .label = λειτουργίες ανάγνωσης/εγγραφής από το προηγούμενο δείγμα
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data until the hovered time.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--cumulative-bandwidth-at-this-time = { $value } ({ $carbonValue } g CO₂e)
+    .label = Δεδομένα που μεταφέρθηκαν μέχρι αυτήν τη στιγμή
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data during the visible time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-graph = { $value } ({ $carbonValue } g CO₂e)
+    .label = Δεδομένα που μεταφέρθηκαν στο ορατό εύρος
+# This is used in the tooltip of the bandwidth track when a range is selected.
+# Variables:
+#   $value (String) - the total of transfered data during the selected time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-range = { $value } ({ $carbonValue } g CO₂e)
+    .label = Δεδομένα που μεταφέρθηκαν στην τρέχουσα επιλογή
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

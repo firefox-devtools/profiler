@@ -118,7 +118,6 @@ describe('selectors/getMarkerChartTimingAndBuckets', function () {
           start: [1],
           end: [1],
           index: [0],
-          label: [''],
           bucket: 'Other',
           instantOnly: true,
           length: 1,
@@ -169,10 +168,6 @@ describe('selectors/getMarkerChartTimingAndBuckets', function () {
           start: [1, 6],
           end: [5, 9],
           index: [0, 1],
-          label: [
-            'https://www.mozilla.org/',
-            'https://www.mozilla.org/image.jpg',
-          ],
           instantOnly: false,
           length: 2,
         },
@@ -192,7 +187,6 @@ describe('selectors/getMarkerChartTimingAndBuckets', function () {
           start: [3],
           end: [3],
           index: [1],
-          label: [''],
           instantOnly: true,
           length: 1,
         },
@@ -202,7 +196,6 @@ describe('selectors/getMarkerChartTimingAndBuckets', function () {
           start: [0],
           end: [1],
           index: [0],
-          label: ['https://mozilla.org'],
           instantOnly: false,
           length: 1,
         },
@@ -284,7 +277,6 @@ describe('selectors/getUserTimingMarkerTiming', function () {
         start: [6],
         end: [6],
         index: [3],
-        label: ['pointInTime'],
         name: 'UserTiming',
         bucket: 'None',
         instantOnly: true,
@@ -294,7 +286,6 @@ describe('selectors/getUserTimingMarkerTiming', function () {
         start: [0],
         end: [10],
         index: [0],
-        label: ['renderFunction'],
         name: 'UserTiming',
         bucket: 'None',
         instantOnly: false,
@@ -304,7 +295,6 @@ describe('selectors/getUserTimingMarkerTiming', function () {
         start: [1],
         end: [9],
         index: [1],
-        label: ['componentA'],
         name: 'UserTiming',
         bucket: 'None',
         instantOnly: false,
@@ -314,7 +304,6 @@ describe('selectors/getUserTimingMarkerTiming', function () {
         start: [2, 7],
         end: [5, 9],
         index: [2, 4],
-        label: ['componentB', 'componentC'],
         name: 'UserTiming',
         bucket: 'None',
         instantOnly: false,
@@ -429,13 +418,11 @@ describe('Marker schema filtering', function () {
     // prettier-ignore
     const profile = getProfileWithMarkers([
       ['no payload',        0, null, null],
-      // $FlowExpectError - Invalid payload by our type system.
       ['payload no schema', 0, null, { type: 'no schema marker' }],
       ['RefreshDriverTick', 0, null, { type: 'Text', name: 'RefreshDriverTick' }],
       ['UserTiming',        5, 6,    { type: 'UserTiming', name: 'name', entryType: 'mark' }],
       // The following is a tracing marker without a schema attached, this was a
       // regression reported in Bug 1678698.
-      // $FlowExpectError - Invalid payload by our type system.
       ['RandomTracingMarker', 7, 8,  { type: 'tracing', category: 'RandomTracingMarker' }],
       ...getNetworkMarkers(),
     ]);

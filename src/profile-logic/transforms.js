@@ -16,10 +16,13 @@ import {
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
 import { canonicalizeRangeSet } from '../utils/range-set';
-import { getSearchFilteredMarkerIndexes } from '../profile-logic/marker-data';
+import {
+  getSearchFilteredMarkerIndexes,
+  stringsToMarkerRegExps,
+} from '../profile-logic/marker-data';
 import { shallowCloneFrameTable, getEmptyStackTable } from './data-structures';
 import { getFunctionName } from './function-info';
-import { splitSearchString, stringsToRegExp } from '../utils/string';
+import { splitSearchString } from '../utils/string';
 
 import type {
   Thread,
@@ -46,6 +49,7 @@ import type {
   CategoryList,
   Milliseconds,
 } from 'firefox-profiler/types';
+import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
 /**
  * This file contains the functions and logic for working with and applying transforms
@@ -1630,17 +1634,19 @@ function _findRangesByMarkerFilter(
   getMarker: (MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   markerSchemaByName: MarkerSchemaByName,
+  stringTable: UniqueStringArray,
   categoryList: CategoryList,
   filter: string
 ): StartEndRange[] {
   const ranges = [];
 
-  const searchRegExp = stringsToRegExp(splitSearchString(filter));
+  const searchRegExps = stringsToMarkerRegExps(splitSearchString(filter));
   const searchFilteredMarkerIndexes = getSearchFilteredMarkerIndexes(
     getMarker,
     markerIndexes,
     markerSchemaByName,
-    searchRegExp,
+    searchRegExps,
+    stringTable,
     categoryList
   );
 
@@ -1679,6 +1685,7 @@ export function filterSamples(
             getMarker,
             markerIndexes,
             markerSchemaByName,
+            thread.stringTable,
             categoryList,
             filter
           );
@@ -1730,7 +1737,9 @@ export function filterSamples(
     return updateThreadStacksByGeneratingNewStackColumns(
       thread,
       thread.stackTable,
-      computeFilteredStackColumn
+      computeFilteredStackColumn,
+      computeFilteredStackColumn,
+      (markerData) => markerData
     );
   });
 }

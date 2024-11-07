@@ -105,6 +105,7 @@ export const stringsToRegExp = (strings: string[] | null): RegExp | null => {
   if (!strings || !strings.length) {
     return null;
   }
+
   const regexpStr = strings.map(escapeStringRegexp).join('|');
   return new RegExp(regexpStr, 'gi');
 };

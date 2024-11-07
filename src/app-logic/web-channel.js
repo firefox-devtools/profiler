@@ -4,7 +4,12 @@
 // @flow
 
 import type { SymbolTableAsTuple } from '../profile-logic/symbol-store-db';
-import type { Milliseconds, MixedObject } from 'firefox-profiler/types';
+import type {
+  Milliseconds,
+  MixedObject,
+  ExternalMarkersData,
+  FaviconData,
+} from 'firefox-profiler/types';
 
 /**
  * This file is in charge of handling the message managing between profiler.firefox.com
@@ -20,13 +25,20 @@ export type Request =
   | StatusQueryRequest
   | EnableMenuButtonRequest
   | GetProfileRequest
+  | GetExternalMarkersRequest
   | GetExternalPowerTracksRequest
   | GetSymbolTableRequest
-  | QuerySymbolicationApiRequest;
+  | QuerySymbolicationApiRequest
+  | GetPageFaviconsRequest;
 
 type StatusQueryRequest = {| type: 'STATUS_QUERY' |};
 type EnableMenuButtonRequest = {| type: 'ENABLE_MENU_BUTTON' |};
 type GetProfileRequest = {| type: 'GET_PROFILE' |};
+type GetExternalMarkersRequest = {|
+  type: 'GET_EXTERNAL_MARKERS',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+|};
 type GetExternalPowerTracksRequest = {|
   type: 'GET_EXTERNAL_POWER_TRACKS',
   startTime: Milliseconds,
@@ -41,6 +53,10 @@ type QuerySymbolicationApiRequest = {|
   type: 'QUERY_SYMBOLICATION_API',
   path: string,
   requestJson: string,
+|};
+type GetPageFaviconsRequest = {|
+  type: 'GET_PAGE_FAVICONS',
+  pageUrls: Array<string>,
 |};
 
 export type MessageFromBrowser<R: ResponseFromBrowser> =
@@ -69,9 +85,11 @@ export type ResponseFromBrowser =
   | StatusQueryResponse
   | EnableMenuButtonResponse
   | GetProfileResponse
+  | GetExternalMarkersResponse
   | GetExternalPowerTracksResponse
   | GetSymbolTableResponse
-  | QuerySymbolicationApiResponse;
+  | QuerySymbolicationApiResponse
+  | GetPageFaviconsResponse;
 
 type StatusQueryResponse = {|
   menuButtonIsEnabled: boolean,
@@ -91,13 +109,24 @@ type StatusQueryResponse = {|
   //   Shipped in Firefox 121.
   //   Adds support for the following message types:
   //    - GET_EXTERNAL_POWER_TRACKS
+  // Version 3:
+  //   Shipped in Firefox 125.
+  //   Adds support for the following message types:
+  //    - GET_EXTERNAL_MARKERS
+  // Version 4:
+  //   Shipped in Firefox 134.
+  //   Adds support for the following message types:
+  //    - GET_PAGE_FAVICONS
+
   version?: number,
 |};
 type EnableMenuButtonResponse = void;
 type GetProfileResponse = ArrayBuffer | MixedObject;
+type GetExternalMarkersResponse = ExternalMarkersData;
 type GetExternalPowerTracksResponse = MixedObject[];
 type GetSymbolTableResponse = SymbolTableAsTuple;
 type QuerySymbolicationApiResponse = string;
+type GetPageFaviconsResponse = Array<FaviconData | null>;
 
 // Manually declare all pairs of request + response for Flow.
 /* eslint-disable no-redeclare */
@@ -111,6 +140,9 @@ declare function _sendMessageWithResponse(
   GetProfileRequest
 ): Promise<GetProfileResponse>;
 declare function _sendMessageWithResponse(
+  GetExternalMarkersRequest
+): Promise<GetExternalMarkersResponse>;
+declare function _sendMessageWithResponse(
   GetExternalPowerTracksRequest
 ): Promise<GetExternalPowerTracksResponse>;
 declare function _sendMessageWithResponse(
@@ -119,6 +151,9 @@ declare function _sendMessageWithResponse(
 declare function _sendMessageWithResponse(
   QuerySymbolicationApiRequest
 ): Promise<QuerySymbolicationApiResponse>;
+declare function _sendMessageWithResponse(
+  GetPageFaviconsRequest
+): Promise<GetPageFaviconsResponse>;
 /* eslint-enable no-redeclare */
 
 /**
@@ -174,6 +209,17 @@ export async function getProfileViaWebChannel(): Promise<
   });
 }
 
+export async function getExternalMarkersViaWebChannel(
+  startTime: Milliseconds,
+  endTime: Milliseconds
+): Promise<ExternalMarkersData> {
+  return _sendMessageWithResponse({
+    type: 'GET_EXTERNAL_MARKERS',
+    startTime,
+    endTime,
+  });
+}
+
 export async function getExternalPowerTracksViaWebChannel(
   startTime: Milliseconds,
   endTime: Milliseconds
@@ -193,6 +239,15 @@ export async function querySymbolicationApiViaWebChannel(
     type: 'QUERY_SYMBOLICATION_API',
     path,
     requestJson,
+  });
+}
+
+export async function getPageFaviconsViaWebChannel(
+  pageUrls: Array<string>
+): Promise<GetPageFaviconsResponse> {
+  return _sendMessageWithResponse({
+    type: 'GET_PAGE_FAVICONS',
+    pageUrls,
   });
 }
 

@@ -1983,7 +1983,7 @@ const _upgraders = {
       samples.stack = samples.stack.map((oldStackIndex) =>
         oldStackIndex === null
           ? null
-          : mapForSamplingSelfStacks.get(oldStackIndex) ?? null
+          : (mapForSamplingSelfStacks.get(oldStackIndex) ?? null)
       );
       markers.data.forEach((data) => {
         if (data && 'cause' in data && data.cause) {
@@ -1994,7 +1994,7 @@ const _upgraders = {
         jsAllocations.stack = jsAllocations.stack.map((oldStackIndex) =>
           oldStackIndex === null
             ? null
-            : mapForSyncBacktraces.get(oldStackIndex) ?? null
+            : (mapForSyncBacktraces.get(oldStackIndex) ?? null)
         );
       }
       if (nativeAllocations !== undefined) {
@@ -2002,7 +2002,7 @@ const _upgraders = {
           (oldStackIndex) =>
             oldStackIndex === null
               ? null
-              : mapForSyncBacktraces.get(oldStackIndex) ?? null
+              : (mapForSyncBacktraces.get(oldStackIndex) ?? null)
         );
       }
     }
@@ -2263,6 +2263,15 @@ const _upgraders = {
         delete counter.sampleGroups;
       }
     }
+  },
+  [49]: (_) => {
+    // The 'sanitized-string' marker schema format type has been added.
+  },
+  [50]: (_) => {
+    // The serialized format can now optionally store sample and counter sample
+    // times as time deltas instead of absolute timestamps to reduce the JSON size.
+    // The unserialized version is unchanged, and because the upgraders run
+    // after unserialization they see no difference.
   },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
