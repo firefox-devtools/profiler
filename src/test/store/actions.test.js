@@ -36,6 +36,7 @@ describe('selectors/getStackTimingByDepth', function () {
    *
    *            Unfiltered             ->             JS Only
    *   0-10-20-30-40-50-60-70-80-90-91      0-10-20-30-40-50-60-70-80-90-91 <- Timing (ms)
+   * 0--1-----2--3--4--5--6--7--8--9      0-----------------1--2--3--4--5   <- same width indexes
    *  ================================     ================================
    *  0P 0P 0P 0P 0P 0P 0P 0P 0P 0P  |     0P 0P 0P 0P 0P 0P 0P 0P 0P 0P  |
    *  1P 1P 1P 1P    1P 1P 1P 1P 1P  |                       1J 1J 1J 1J  |
@@ -44,6 +45,13 @@ describe('selectors/getStackTimingByDepth', function () {
    *                          6P     |                             4J     |
    *                          7P     |
    *                          8J     |
+   *
+   * Note that stacks 10 and 20 in the unfiltered tree are the same, therefore
+   * they'll form just one "same width" stack.
+   * Similarly in the JS Only tree, stacks 0 to 50 are the same one and will form
+   * one "same width" stack.
+   * It's easier to think of the "same widths" indexes as the space between each
+   * new stack.
    */
 
   it('computes unfiltered stack timing by depth', function () {
@@ -52,18 +60,62 @@ describe('selectors/getStackTimingByDepth', function () {
       store.getState()
     );
     expect(stackTimingByDepth).toEqual([
-      { start: [0], end: [91], callNode: [0], length: 1 },
-      { start: [0, 50], end: [40, 91], callNode: [1, 1], length: 2 },
+      {
+        start: [0],
+        end: [91],
+        sameWidthsStart: [0],
+        sameWidthsEnd: [9],
+        callNode: [0],
+        length: 1,
+      },
+      {
+        start: [0, 50],
+        end: [40, 91],
+        sameWidthsStart: [0, 4],
+        sameWidthsEnd: [3, 9],
+        callNode: [1, 1],
+        length: 2,
+      },
       {
         start: [10, 30, 60],
         end: [30, 40, 91],
+        sameWidthsStart: [1, 2, 5],
+        sameWidthsEnd: [2, 3, 9],
         callNode: [2, 3, 4],
         length: 3,
       },
-      { start: [70], end: [90], callNode: [5], length: 1 },
-      { start: [80], end: [90], callNode: [6], length: 1 },
-      { start: [80], end: [90], callNode: [7], length: 1 },
-      { start: [80], end: [90], callNode: [8], length: 1 },
+      {
+        start: [70],
+        end: [90],
+        sameWidthsStart: [6],
+        sameWidthsEnd: [8],
+        callNode: [5],
+        length: 1,
+      },
+      {
+        start: [80],
+        end: [90],
+        sameWidthsStart: [7],
+        sameWidthsEnd: [8],
+        callNode: [6],
+        length: 1,
+      },
+      {
+        start: [80],
+        end: [90],
+        sameWidthsStart: [7],
+        sameWidthsEnd: [8],
+        callNode: [7],
+        length: 1,
+      },
+      {
+        start: [80],
+        end: [90],
+        sameWidthsStart: [7],
+        sameWidthsEnd: [8],
+        callNode: [8],
+        length: 1,
+      },
     ]);
   });
 
@@ -74,13 +126,62 @@ describe('selectors/getStackTimingByDepth', function () {
       store.getState()
     );
     expect(stackTimingByDepth).toEqual([
-      { start: [60], end: [91], callNode: [0], length: 1 },
-      { start: [60], end: [91], callNode: [1], length: 1 },
-      { start: [60], end: [91], callNode: [4], length: 1 },
-      { start: [70], end: [90], callNode: [5], length: 1 },
-      { start: [80], end: [90], callNode: [6], length: 1 },
-      { start: [80], end: [90], callNode: [7], length: 1 },
-      { start: [80], end: [90], callNode: [8], length: 1 },
+      {
+        start: [60],
+        end: [91],
+        sameWidthsStart: [0],
+        sameWidthsEnd: [4],
+        callNode: [0],
+        length: 1,
+      },
+      {
+        start: [60],
+        end: [91],
+        sameWidthsStart: [0],
+        sameWidthsEnd: [4],
+        callNode: [1],
+        length: 1,
+      },
+      {
+        start: [60],
+        end: [91],
+        sameWidthsStart: [0],
+        sameWidthsEnd: [4],
+        callNode: [4],
+        length: 1,
+      },
+      {
+        start: [70],
+        end: [90],
+        sameWidthsStart: [1],
+        sameWidthsEnd: [3],
+        callNode: [5],
+        length: 1,
+      },
+      {
+        start: [80],
+        end: [90],
+        sameWidthsStart: [2],
+        sameWidthsEnd: [3],
+        callNode: [6],
+        length: 1,
+      },
+      {
+        start: [80],
+        end: [90],
+        sameWidthsStart: [2],
+        sameWidthsEnd: [3],
+        callNode: [7],
+        length: 1,
+      },
+      {
+        start: [80],
+        end: [90],
+        sameWidthsStart: [2],
+        sameWidthsEnd: [3],
+        callNode: [8],
+        length: 1,
+      },
     ]);
   });
 });
@@ -534,11 +635,48 @@ describe('selectors/getCombinedTimingRows', function () {
         start: [3],
         instantOnly: false,
       },
-      { start: [0], end: [3], callNode: [0], length: 1 },
-      { start: [0], end: [3], callNode: [1], length: 1 },
-      { start: [0, 2], end: [2, 3], callNode: [2, 7], length: 2 },
-      { start: [0, 1, 2], end: [1, 2, 3], callNode: [3, 5, 8], length: 3 },
-      { start: [0, 1], end: [1, 2], callNode: [4, 6], length: 2 },
+      // Note that every sample has a different stack, therefore `sameWidthsStart`
+      // and `sameWidthsEnd` have the same data as `start` and `end`.
+      {
+        start: [0],
+        end: [3],
+        sameWidthsStart: [0],
+        sameWidthsEnd: [3],
+        callNode: [0],
+        length: 1,
+      },
+      {
+        start: [0],
+        end: [3],
+        sameWidthsStart: [0],
+        sameWidthsEnd: [3],
+        callNode: [1],
+        length: 1,
+      },
+      {
+        start: [0, 2],
+        end: [2, 3],
+        sameWidthsStart: [0, 2],
+        sameWidthsEnd: [2, 3],
+        callNode: [2, 7],
+        length: 2,
+      },
+      {
+        start: [0, 1, 2],
+        end: [1, 2, 3],
+        sameWidthsStart: [0, 1, 2],
+        sameWidthsEnd: [1, 2, 3],
+        callNode: [3, 5, 8],
+        length: 3,
+      },
+      {
+        start: [0, 1],
+        end: [1, 2],
+        sameWidthsStart: [0, 1],
+        sameWidthsEnd: [1, 2],
+        callNode: [4, 6],
+        length: 2,
+      },
     ]);
   });
 });
