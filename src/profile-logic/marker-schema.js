@@ -477,6 +477,8 @@ export function formatFromMarkerSchema(
       // Make sure a non-empty string is returned here.
       return String(value) || '(empty)';
     case 'unique-string':
+    case 'flow-id':
+    case 'terminating-flow-id':
       return stringTable.getString(value, '(empty)');
     case 'duration':
     case 'time':
@@ -671,7 +673,11 @@ export function markerPayloadMatchesSearch(
   for (const payloadField of markerSchema.data) {
     if (payloadField.searchable) {
       let value = data[payloadField.key];
-      if (payloadField.format === 'unique-string') {
+      if (
+        payloadField.format === 'unique-string' ||
+        payloadField.format === 'flow-id' ||
+        payloadField.format === 'terminating-flow-id'
+      ) {
         value = stringTable.getString(value);
       }
       if (value === undefined || value === null || value === '') {
