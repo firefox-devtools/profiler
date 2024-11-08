@@ -15,6 +15,7 @@ import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
 import { formatMilliseconds } from '../../utils/format-numbers';
+import { bisectionLeft, bisectionRight } from '../../utils/bisect';
 import {
   updatePreviewSelection,
   typeof changeMouseTimePosition as ChangeMouseTimePosition,
@@ -50,6 +51,7 @@ import type {
 import type {
   StackTimingDepth,
   IndexIntoStackTiming,
+  SameWidthsIndexToTimestampMap,
 } from '../../profile-logic/stack-timing';
 import type { WrapFunctionInDispatch } from '../../utils/connect';
 
@@ -62,6 +64,7 @@ type OwnProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +combinedTimingRows: CombinedTimingRows,
+  +sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap,
   +stackFrameHeight: CssPixels,
   +updatePreviewSelection: WrapFunctionInDispatch<
     typeof updatePreviewSelection,
@@ -77,6 +80,7 @@ type OwnProps = {|
   +scrollToSelectionGeneration: number,
   +marginLeft: CssPixels,
   +displayStackType: boolean,
+  +useStackChartSameWidths: boolean,
 |};
 
 type Props = $ReadOnly<{|
@@ -160,12 +164,14 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       rangeStart,
       rangeEnd,
       combinedTimingRows,
+      sameWidthsIndexToTimestampMap,
       stackFrameHeight,
       selectedCallNodeIndex,
       categories,
       callNodeInfo,
       getMarker,
       marginLeft,
+      useStackChartSameWidths,
       viewport: {
         containerWidth,
         containerHeight,
@@ -240,6 +246,18 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     const timeAtEnd: Milliseconds =
       timeAtViewportEnd + TIMELINE_MARGIN_RIGHT * timePerCssPixel;
 
+    // Compute the range for the "same width" drawing as well.
+    const sameWidthsIndexAtStart = Math.max(
+      0,
+      bisectionRight(sameWidthsIndexToTimestampMap, timeAtViewportStart) - 1
+    );
+    const sameWidthsIndexAtEnd = Math.min(
+      sameWidthsIndexToTimestampMap.length - 1,
+      bisectionLeft(sameWidthsIndexToTimestampMap, timeAtViewportEnd)
+    );
+
+    const sameWidthsRangeLength = sameWidthsIndexAtEnd - sameWidthsIndexAtStart;
+
     const pixelAtViewportPosition = (
       viewportPosition: UnitIntervalOfProfileRange
     ): DevicePixels =>
@@ -297,16 +315,37 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
           // CSS Pixels     |   |   |   |   |   |   |   |   |   |   |   |   |
 
           // First compute the left and right sides of the box.
-          const viewportAtStartTime: UnitIntervalOfProfileRange =
-            (stackTiming.start[i] - rangeStart) / rangeLength;
-          const viewportAtEndTime: UnitIntervalOfProfileRange =
-            (stackTiming.end[i] - rangeStart) / rangeLength;
-          const floatX = pixelAtViewportPosition(viewportAtStartTime);
-          const floatW: DevicePixels =
-            ((viewportAtEndTime - viewportAtStartTime) *
-              innerDevicePixelsWidth) /
-              viewportLength -
-            1;
+          let floatX: DevicePixels;
+          let floatW: DevicePixels;
+          if (
+            useStackChartSameWidths &&
+            stackTiming.sameWidthsStart &&
+            stackTiming.sameWidthsEnd
+          ) {
+            floatX =
+              cssToDeviceScale *
+              (marginLeft +
+                (innerContainerWidth *
+                  (stackTiming.sameWidthsStart[i] - sameWidthsIndexAtStart)) /
+                  sameWidthsRangeLength);
+            floatW =
+              (innerDevicePixelsWidth *
+                (stackTiming.sameWidthsEnd[i] -
+                  stackTiming.sameWidthsStart[i])) /
+                sameWidthsRangeLength -
+              1;
+          } else {
+            const viewportAtStartTime: UnitIntervalOfProfileRange =
+              (stackTiming.start[i] - rangeStart) / rangeLength;
+            const viewportAtEndTime: UnitIntervalOfProfileRange =
+              (stackTiming.end[i] - rangeStart) / rangeLength;
+            floatX = pixelAtViewportPosition(viewportAtStartTime);
+            floatW =
+              ((viewportAtEndTime - viewportAtStartTime) *
+                innerDevicePixelsWidth) /
+                viewportLength -
+              1;
+          }
 
           // Determine if there is enough pixel space to draw this box, and snap the
           // box to the pixels.
@@ -588,6 +627,65 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     return null;
   };
 
+  _hitTestForSameWidths = (
+    x: CssPixels,
+    y: CssPixels
+  ): HoveredStackTiming | null => {
+    const {
+      rangeStart,
+      rangeEnd,
+      combinedTimingRows,
+      sameWidthsIndexToTimestampMap,
+      marginLeft,
+      viewport: { containerWidth, viewportLeft, viewportRight, viewportTop },
+    } = this.props;
+
+    const depth = Math.floor((y + viewportTop) / ROW_CSS_PIXELS_HEIGHT);
+    const stackTiming = combinedTimingRows[depth];
+
+    if (!stackTiming) {
+      return null;
+    }
+
+    if (!stackTiming.sameWidthsStart || !stackTiming.sameWidthsEnd) {
+      // Probably a user timing marker
+      return this._hitTest(x, y);
+    }
+
+    const rangeLength = rangeEnd - rangeStart;
+    const innerContainerWidth =
+      containerWidth - marginLeft - TIMELINE_MARGIN_RIGHT;
+    const timeAtViewportStart: Milliseconds =
+      rangeStart + rangeLength * viewportLeft;
+    const timeAtViewportEnd: Milliseconds =
+      rangeStart + rangeLength * viewportRight;
+    const sameWidthsIndexAtStart = Math.max(
+      0,
+      bisectionRight(sameWidthsIndexToTimestampMap, timeAtViewportStart) - 1
+    );
+    const sameWidthsIndexAtEnd = Math.min(
+      sameWidthsIndexToTimestampMap.length - 1,
+      bisectionLeft(sameWidthsIndexToTimestampMap, timeAtViewportEnd)
+    );
+
+    const sameWidthsRangeLength = sameWidthsIndexAtEnd - sameWidthsIndexAtStart;
+
+    const xMinusMargin = x - marginLeft;
+    const hoveredBox =
+      (xMinusMargin / innerContainerWidth) * sameWidthsRangeLength +
+      sameWidthsIndexAtStart;
+
+    for (let i = 0; i < stackTiming.length; i++) {
+      const start = stackTiming.sameWidthsStart[i];
+      const end = stackTiming.sameWidthsEnd[i];
+      if (start < hoveredBox && end > hoveredBox) {
+        return { depth, stackTimingIndex: i };
+      }
+    }
+
+    return null;
+  };
+
   onMouseMove = (event: { nativeEvent: MouseEvent }) => {
     const {
       changeMouseTimePosition,
@@ -620,6 +718,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
   render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
+    const { useStackChartSameWidths } = this.props;
 
     return (
       <ChartCanvas
@@ -631,7 +730,9 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         onDoubleClickItem={this._onDoubleClickStack}
         getHoveredItemInfo={this._getHoveredStackInfo}
         drawCanvas={this._drawCanvas}
-        hitTest={this._hitTest}
+        hitTest={
+          useStackChartSameWidths ? this._hitTestForSameWidths : this._hitTest
+        }
         onMouseMove={this.onMouseMove}
         onMouseLeave={this.onMouseLeave}
         onSelectItem={this._onSelectItem}
