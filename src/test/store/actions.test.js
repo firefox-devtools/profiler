@@ -117,6 +117,11 @@ describe('selectors/getStackTimingByDepth', function () {
         length: 1,
       },
     ]);
+
+    const timingMap = selectedThreadSelectors.getSameWidthsIndexToTimestampMap(
+      store.getState()
+    );
+    expect(timingMap).toEqual([0, 10, 30, 40, 50, 60, 70, 80, 90, 91]);
   });
 
   it('uses search strings', function () {

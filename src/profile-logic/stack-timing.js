@@ -66,6 +66,13 @@ import type { CallNodeInfo } from './call-node-info';
  *   {start: [70], end: [90], sameWidthsStart: [5], sameWidthsEnd: [7], stack: [5], length: 1},
  *   ...
  * ]
+ *
+ * As a result of the computation, getStackTimingByDepth also returns a mapping
+ * between the same widths indexes and the corresponding times. This is a normal
+ * array. In the previous example, it would have 8 elements and look like this:
+ *    0   1   2   3   4   5   6   7   8   <- indexes
+ *   [10, 30, 40, 50, 60, 70, 80, 90, 91] <- timings
+ * This array makes it easy to find the boxes to draw for a preview selection.
  */
 
 export type StackTimingDepth = number;
@@ -85,6 +92,11 @@ export type StackTiming = {|
 |};
 
 export type StackTimingByDepth = Array<StackTiming>;
+export type SameWidthsIndexToTimestampMap = number[];
+export type StackTimingByDepthWithMap = {|
+  timings: StackTimingByDepth,
+  sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap,
+|};
 
 /**
  * Build a StackTimingByDepth table from a given thread.
@@ -95,7 +107,7 @@ export function getStackTimingByDepth(
   callNodeInfo: CallNodeInfo,
   maxDepthPlusOne: number,
   interval: Milliseconds
-): StackTimingByDepth {
+): StackTimingByDepthWithMap {
   const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
   const {
     prefix: callNodeTablePrefixColumn,
@@ -111,8 +123,10 @@ export function getStackTimingByDepth(
     length: 0,
   }));
 
+  const sameWidthsIndexToTimestampMap = [];
+
   if (samples.length === 0) {
-    return stackTimingByDepth;
+    return { timings: stackTimingByDepth, sameWidthsIndexToTimestampMap };
   }
 
   // Overview of the algorithm:
@@ -196,6 +210,7 @@ export function getStackTimingByDepth(
     }
 
     deepestOpenBoxCallNodeIndex = thisCallNodeIndex;
+    sameWidthsIndexToTimestampMap[currentStackTick] = sampleTime;
     currentStackTick++;
   }
 
@@ -216,6 +231,7 @@ export function getStackTimingByDepth(
       callNodeTablePrefixColumn[deepestOpenBoxCallNodeIndex];
     deepestOpenBoxDepth--;
   }
+  sameWidthsIndexToTimestampMap[currentStackTick] = endTime;
 
-  return stackTimingByDepth;
+  return { timings: stackTimingByDepth, sameWidthsIndexToTimestampMap };
 }
