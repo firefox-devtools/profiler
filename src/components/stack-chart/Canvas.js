@@ -229,13 +229,16 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     const timePerCssPixel = viewportRangeLength / innerContainerWidth;
 
     // Compute the time range that's displayed on the canvas, including in the
-    // margins around the viewport.
+    // margins around the viewport. This means we're displaying more than the
+    // range when doing a preview selection.
+    const timeAtViewportStart: Milliseconds =
+      rangeStart + rangeLength * viewportLeft;
     const timeAtStart: Milliseconds =
-      rangeStart + rangeLength * viewportLeft - timePerCssPixel * marginLeft;
+      timeAtViewportStart - marginLeft * timePerCssPixel;
+    const timeAtViewportEnd: Milliseconds =
+      rangeStart + rangeLength * viewportRight;
     const timeAtEnd: Milliseconds =
-      rangeStart +
-      rangeLength * viewportRight +
-      timePerCssPixel * TIMELINE_MARGIN_RIGHT;
+      timeAtViewportEnd + TIMELINE_MARGIN_RIGHT * timePerCssPixel;
 
     const pixelAtViewportPosition = (
       viewportPosition: UnitIntervalOfProfileRange
@@ -559,14 +562,13 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       viewport: { viewportLeft, viewportRight, viewportTop, containerWidth },
     } = this.props;
 
-    const innerDevicePixelsWidth =
+    const innerContainerWidth =
       containerWidth - marginLeft - TIMELINE_MARGIN_RIGHT;
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
     const unitIntervalTime: UnitIntervalOfProfileRange =
-      viewportLeft +
-      viewportLength * ((x - marginLeft) / innerDevicePixelsWidth);
+      viewportLeft + viewportLength * ((x - marginLeft) / innerContainerWidth);
     const time: Milliseconds = rangeStart + unitIntervalTime * rangeLength;
     const depth = Math.floor((y + viewportTop) / ROW_CSS_PIXELS_HEIGHT);
     const stackTiming = combinedTimingRows[depth];
