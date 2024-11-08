@@ -1480,6 +1480,15 @@ const _upgraders = {
     // marker data with sanitized-string typed data, and no modification is needed in the
     // frontend to display older formats.
   },
+  [31]: (_) => {
+    // This version bump added two new form types for new marker schema field:
+    // "flow-id" and "terminating-flow-id".
+    // Older frontends will not be able to display these fields.
+    // Furthermore, the marker schema itself has an optional isStackBased field.
+    // No upgrade is needed, as older versions of firefox would not generate
+    // marker data with the new field types data, and no modification is needed in the
+    // frontend to display older formats.
+  },
 
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.

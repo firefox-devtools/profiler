@@ -120,6 +120,9 @@ export function addRawMarkersToThread(
   }
 }
 
+// This function is called with test-defined payloads. For convenience, we allow
+// providing payload values as strings, and then this function makes it so that,
+// for fields of type 'unique-string', the values become string indexes.
 function _replaceUniqueStringFieldValuesWithStringIndexesInMarkerPayload(
   payload: MixedObject | null,
   markerSchemas: MarkerSchema[],
@@ -148,6 +151,7 @@ function _replaceUniqueStringFieldValuesWithStringIndexesInMarkerPayload(
   }
 }
 
+// This is used in tests, with TestDefinedMarkers.
 export function addMarkersToThreadWithCorrespondingSamples(
   thread: Thread,
   markers: TestDefinedMarkers
