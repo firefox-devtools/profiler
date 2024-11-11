@@ -1911,6 +1911,9 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
       }
     }
 
+    // Change the implementation filter to 'js' if a new tab filter is selected.
+    const implementationFilter = tabID !== null ? 'js' : 'combined';
+
     dispatch({
       type: 'CHANGE_TAB_FILTER',
       tabID,
@@ -1921,6 +1924,7 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
       localTracksByPid,
       localTrackOrderByPid,
       ...hiddenTracks,
+      implementationFilter,
     });
   };
 }

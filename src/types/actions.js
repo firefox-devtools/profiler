@@ -574,6 +574,7 @@ type UrlStateAction =
       +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
       +selectedTab: TabSlug,
+      +implementationFilter: ImplementationFilter,
     |};
 
 export type IconWithClassName = {| +icon: string, +className: string |};

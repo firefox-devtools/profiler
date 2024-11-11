@@ -267,6 +267,8 @@ const implementation: Reducer<ImplementationFilter> = (
       return action.implementationFilter || state;
     case 'CHANGE_IMPLEMENTATION_FILTER':
       return action.implementation;
+    case 'CHANGE_TAB_FILTER':
+      return action.implementationFilter;
     default:
       return state;
   }
