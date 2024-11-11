@@ -134,7 +134,7 @@ describe('app/TabSelectorMenu', () => {
     // Note that the first thread will be visible too, because it's the parent
     // process which we always include.
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain default]',
+      'hide [thread GeckoMain default]',
       'show [thread GeckoMain tab] SELECTED',
       '  - show [thread DOM Worker]',
       '  - show [thread Style]',
