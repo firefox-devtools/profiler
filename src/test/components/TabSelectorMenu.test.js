@@ -17,7 +17,10 @@ import {
 } from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';
 import { fireFullClick } from '../fixtures/utils';
-import { getTabFilter } from '../../selectors/url-state';
+import {
+  getTabFilter,
+  getImplementationFilter,
+} from '../../selectors/url-state';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 
 describe('app/TabSelectorMenu', () => {
@@ -176,5 +179,32 @@ describe('app/TabSelectorMenu', () => {
     expect(profilerTab.compareDocumentPosition(mozillaTab)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING
     );
+  });
+
+  it('should change the implementation filter to js after a tab switch', () => {
+    const { getState, secondTabTabID } = setup();
+
+    // Check that there is no tab filter at first.
+    expect(getTabFilter(getState())).toBe(null);
+    // Also make sure that the implementation filter is 'combined' right now.j
+    expect(getImplementationFilter(getState())).toEqual('combined');
+
+    // Change the tab filter by clicking on the menu item.
+    const profilerTab = screen.getByText('profiler.firefox.com');
+    fireFullClick(profilerTab);
+
+    // Check the tab filter again, it should match the second tab in the profile.
+    expect(getTabFilter(getState())).toBe(secondTabTabID);
+    // Make sure that the implementation filter is switched to 'js'.
+    expect(getImplementationFilter(getState())).toEqual('js');
+
+    // Change the tab filter back to full profile.
+    const allTabs = screen.getByText('All tabs and windows');
+    fireFullClick(allTabs);
+
+    // Check the tab filter again, it should match the first tab in the profile.
+    expect(getTabFilter(getState())).toBe(null);
+    // Make sure that the implementation filter is switched to 'combined' again.
+    expect(getImplementationFilter(getState())).toEqual('combined');
   });
 });
