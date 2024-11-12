@@ -31,6 +31,8 @@ import {
   ensureExists,
   getFirstItemFromSet,
 } from 'firefox-profiler/utils/flow';
+import ExtensionFavicon from '../../res/img/svg/extension-outline.svg';
+import DefaultLinkFavicon from '../../res/img/svg/globe.svg';
 
 import type {
   Profile,
@@ -2963,14 +2965,15 @@ export function extractProfileFilterPageData(
     }
 
     // The last page is the one we care about.
-    const pageUrl = topMostPages[topMostPages.length - 1].url;
+    const currentPage = topMostPages[topMostPages.length - 1];
+    const pageUrl = currentPage.url;
     if (pageUrl.startsWith('about:')) {
       // If we only have an `about:*` page, we should return early with a friendly
       // origin and hostname. Otherwise the try block will always fail.
       pageDataByTabID.set(tabID, {
         origin: pageUrl,
         hostname: pageUrl,
-        favicon: null,
+        favicon: DefaultLinkFavicon,
       });
       continue;
     }
@@ -2983,17 +2986,19 @@ export function extractProfileFilterPageData(
     // The known failing case is when we try to construct a URL with a
     // moz-extension:// protocol on platforms outside of Firefox. Only Firefox
     // can parse it properly. Chrome and node will output a URL with no `origin`.
+    const isExtension = pageUrl.startsWith('moz-extension://');
+    const defaultFavicon = isExtension ? ExtensionFavicon : DefaultLinkFavicon;
     const pageData: ProfileFilterPageData = {
       origin: '',
       hostname: '',
-      favicon: null,
+      favicon: currentPage.favicon ?? defaultFavicon,
     };
 
     try {
       const page = new URL(pageUrl);
 
       pageData.hostname =
-        extensionIDToNameMap && pageUrl.startsWith('moz-extension://')
+        extensionIDToNameMap && isExtension
           ? // Get the real extension name if it's an extension.
             (extensionIDToNameMap.get(
               'moz-extension://' +
@@ -3005,15 +3010,7 @@ export function extractProfileFilterPageData(
             ) ?? '')
           : page.hostname;
 
-      // FIXME(Bug 1620546): This is not ideal and we should get the favicon
-      // either during profile capture or profile pre-process.
       pageData.origin = page.origin;
-      const favicon = new URL('/favicon.ico', page.origin);
-      if (favicon.protocol === 'http:') {
-        // Upgrade http requests.
-        favicon.protocol = 'https:';
-      }
-      pageData.favicon = favicon.href;
     } catch (e) {
       console.warn(
         'Error while extracing the hostname and favicon from the page url',

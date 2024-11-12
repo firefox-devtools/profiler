@@ -18,12 +18,15 @@ import {
 import { storeWithProfile } from '../fixtures/stores';
 import { fireFullClick } from '../fixtures/utils';
 import { getTabFilter } from '../../selectors/url-state';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 
 describe('app/TabSelectorMenu', () => {
   function setup() {
     const { profile, ...extraPageData } = addActiveTabInformationToProfile(
       getProfileWithNiceTracks()
     );
+    ensureExists(profile.pages)[3].favicon =
+      'data:image/png;base64,test-png-favicon-data-for-profiler.firefox.com';
 
     // This is needed for the thread activity score calculation.
     profile.meta.sampleUnits = {
@@ -131,7 +134,7 @@ describe('app/TabSelectorMenu', () => {
     // Note that the first thread will be visible too, because it's the parent
     // process which we always include.
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain default]',
+      'hide [thread GeckoMain default]',
       'show [thread GeckoMain tab] SELECTED',
       '  - show [thread DOM Worker]',
       '  - show [thread Style]',

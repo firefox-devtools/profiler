@@ -660,7 +660,7 @@ export type InitialSelectedTrackReference = HTMLElement;
 export type ProfileFilterPageData = {|
   origin: string,
   hostname: string,
-  favicon: string | null,
+  favicon: string,
 |};
 
 /**
@@ -739,4 +739,12 @@ export type BottomBoxInfo = {|
   libIndex: IndexIntoLibs | null,
   sourceFile: string | null,
   nativeSymbols: NativeSymbolInfo[],
+|};
+
+/**
+ * Favicon data that is retrieved from the browser connection.
+ */
+export type FaviconData = {|
+  +data: ArrayBuffer,
+  +mimeType: string,
 |};

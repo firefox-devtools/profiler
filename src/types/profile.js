@@ -479,6 +479,11 @@ export type Page = {|
   // capturing was disabled when a private browsing window was open.
   // The property is always present in Firefox 98+.
   isPrivateBrowsing?: boolean,
+  // Favicon data of the page if it was successfully retrieved from Firefox.
+  // It's a base64 encoded URI string when available.
+  // It's null when Firefox can't get the favicon.
+  // This is added in Firefox 134, earlier profiles will not have it.
+  favicon?: string | null,
 |};
 
 export type PageList = Array<Page>;
