@@ -184,9 +184,11 @@ export function getProfileWithNiceTracks(): Profile {
 
   thread3.name = 'DOM Worker';
   thread3.pid = '222';
+  thread3.processType = 'tab';
   thread3.tid = 33;
 
   thread4.name = 'Style';
+  thread4.processType = 'tab';
   thread4.pid = '222';
   thread4.tid = 44;
   return profile;
