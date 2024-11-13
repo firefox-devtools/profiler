@@ -818,14 +818,16 @@ export function tryInitializeHiddenTracksFromUrl(
 export function computeDefaultHiddenTracks(
   tracksWithOrder: TracksWithOrder,
   profile: Profile,
-  threadActivityScores: Array<ThreadActivityScore>
+  threadActivityScores: Array<ThreadActivityScore>,
+  includeParentProcessThreads: boolean
 ): HiddenTracks {
   return _computeHiddenTracksForVisibleThreads(
     profile,
     computeDefaultVisibleThreads(
       profile,
       tracksWithOrder,
-      threadActivityScores
+      threadActivityScores,
+      includeParentProcessThreads
     ),
     tracksWithOrder
   );
@@ -1054,7 +1056,8 @@ const IDLE_THRESHOLD_FRACTION = 0.05;
 export function computeDefaultVisibleThreads(
   profile: Profile,
   tracksWithOrder: TracksWithOrder,
-  threadActivityScores: Array<ThreadActivityScore>
+  threadActivityScores: Array<ThreadActivityScore>,
+  includeParentProcessThreads: boolean
 ): Set<ThreadIndex> {
   const threads = profile.threads;
   if (threads.length === 0) {
@@ -1099,11 +1102,33 @@ export function computeDefaultVisibleThreads(
   // to the thread with the most "sampleScore" activity.
   // We keep all threads whose sampleScore is at least 5% of the highest
   // sampleScore, and also any threads which are otherwise essential.
+  // We also remove the parent process if that was requested. That's why we
+  // have to ignore their scores while computing the highest score.
   const highestSampleScore = Math.max(
-    ...scores.map(({ score }) => score.sampleScore)
+    ...scores.map(({ score }) => {
+      if (score.isInParentProcess && !includeParentProcessThreads) {
+        // Do not account for the parent process threads if we do not want to
+        // include them for the visible threads by default.
+        return 0;
+      }
+      return score.sampleScore;
+    })
   );
   const thresholdSampleScore = highestSampleScore * IDLE_THRESHOLD_FRACTION;
-  const finalList = top15.filter(({ score }) => {
+  const tryToHideList = [];
+  let finalList = top15.filter((activityScore) => {
+    const { score } = activityScore;
+    if (score.isInParentProcess && !includeParentProcessThreads) {
+      // We try to hide this thread that belongs to the parent process.
+      // But when we hide all the threads we might encounter that all the
+      // threads are hidden now. For cases like this we would like to keep a
+      // tryToHideList, so we can add them back if the track is completely empty.
+      if (score.sampleScore >= thresholdSampleScore) {
+        tryToHideList.push(activityScore);
+      }
+      return false;
+    }
+
     if (score.isEssentialFirefoxThread) {
       return true; // keep.
     }
@@ -1113,6 +1138,12 @@ export function computeDefaultVisibleThreads(
     return score.sampleScore >= thresholdSampleScore;
   });
 
+  if (finalList.length === 0) {
+    // We tried to hide the main process threads, but this resulted us to have
+    // an empty list. Put them back.
+    finalList = tryToHideList;
+  }
+
   return new Set(finalList.map(({ threadIndex }) => threadIndex));
 }
 
@@ -1120,6 +1151,9 @@ export type ThreadActivityScore = {|
   // Whether this thread is one of the essential threads that
   // should always be kept (unless there's too many of them).
   isEssentialFirefoxThread: boolean,
+  // Whether this thread belongs to the parent process. We do not want to show
+  // them by default if the tab selector is used.
+  isInParentProcess: boolean,
   // Whether this thread should be kept even if it looks very idle,
   // as long as there's a single sample with non-zero activity.
   isInterestingEvenWithMinimalActivity: boolean,
@@ -1146,6 +1180,7 @@ export function computeThreadActivityScore(
   maxCpuDeltaPerInterval: number | null
 ): ThreadActivityScore {
   const isEssentialFirefoxThread = _isEssentialFirefoxThread(thread);
+  const isInParentProcess = thread.processType === 'default';
   const isInterestingEvenWithMinimalActivity =
     _isFirefoxMediaThreadWhichIsUsuallyIdle(thread);
   const sampleScore = _computeThreadSampleScore(
@@ -1158,6 +1193,7 @@ export function computeThreadActivityScore(
     : sampleScore;
   return {
     isEssentialFirefoxThread,
+    isInParentProcess,
     isInterestingEvenWithMinimalActivity,
     sampleScore,
     boostedSampleScore,

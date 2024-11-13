@@ -315,9 +315,10 @@ export function finalizeFullProfileView(
     const hasUrlInfo = maybeSelectedThreadIndexes !== null;
 
     const tabToThreadIndexesMap = getTabToThreadIndexesMap(getState());
+    const tabFilter = hasUrlInfo ? getTabFilter(getState()) : null;
     const globalTracks = computeGlobalTracks(
       profile,
-      hasUrlInfo ? getTabFilter(getState()) : null,
+      tabFilter,
       tabToThreadIndexesMap
     );
     const localTracksByPid = computeLocalTracksByPid(
@@ -370,10 +371,13 @@ export function finalizeFullProfileView(
       // This is the case for the initial profile load.
       // We also get here if the URL info was ignored, for example if
       // respecting it would have caused all threads to become hidden.
+      const includeParentProcessThreads = tabFilter === null;
       hiddenTracks = computeDefaultHiddenTracks(
         tracksWithOrder,
         profile,
-        getThreadActivityScores(getState())
+        getThreadActivityScores(getState()),
+        // Only include the parent process if there is no tab filter applied.
+        includeParentProcessThreads
       );
     }
 
@@ -1877,10 +1881,13 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
       // This is the case for the initial profile load.
       // We also get here if the URL info was ignored, for example if
       // respecting it would have caused all threads to become hidden.
+      const includeParentProcessThreads = tabID === null;
       hiddenTracks = computeDefaultHiddenTracks(
         tracksWithOrder,
         profile,
-        getThreadActivityScores(getState())
+        getThreadActivityScores(getState()),
+        // Only include the parent process if there is no tab filter applied.
+        includeParentProcessThreads
       );
     }
 
