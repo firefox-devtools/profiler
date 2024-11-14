@@ -14,6 +14,7 @@ import {
   getPreviewSelection,
   getLocalTracksByPid,
   getThreads,
+  getStringTable,
   getLastNonShiftClick,
   getReservedFunctionsForResources,
 } from 'firefox-profiler/selectors/profile';
@@ -22,6 +23,10 @@ import {
   getThreadSelectorsFromThreadsKey,
   selectedThreadSelectors,
 } from 'firefox-profiler/selectors/per-thread';
+import {
+  getProfileFlowInfo,
+  getFullMarkerListPerThread,
+} from 'firefox-profiler/selectors/flow';
 import {
   getAllCommittedRanges,
   getImplementationFilter,
@@ -74,11 +79,13 @@ import type {
   TableViewOptions,
   SelectionContext,
   BottomBoxInfo,
+  IndexIntoFlowTable,
 } from 'firefox-profiler/types';
 import {
   funcHasDirectRecursiveCall,
   funcHasRecursiveCall,
 } from '../profile-logic/transforms';
+import { computeMarkerFlows } from '../profile-logic/marker-data';
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { CallNodeInfo } from '../profile-logic/call-node-info';
@@ -1640,6 +1647,37 @@ export function changeHoveredMarker(
     type: 'CHANGE_HOVERED_MARKER',
     markerIndex: hoveredNetworkMarker,
     threadsKey,
+  };
+}
+
+export function changeActiveFlows(activeFlows: IndexIntoFlowTable[]): Action {
+  return {
+    type: 'CHANGE_ACTIVE_FLOWS',
+    activeFlows,
+  };
+}
+
+export function activateFlowsForMarker(
+  threadIndex: ThreadIndex,
+  markerIndex: MarkerIndex
+): ThunkAction<void> {
+  console.log('yo');
+  return (dispatch, getState) => {
+    console.log('aha');
+    const profileFlowInfo = getProfileFlowInfo(getState());
+    const fullMarkerListPerThread = getFullMarkerListPerThread(getState());
+    const stringTable = getStringTable(getState());
+    console.log('aha2');
+    const flows =
+      computeMarkerFlows(
+        threadIndex,
+        markerIndex,
+        profileFlowInfo,
+        fullMarkerListPerThread,
+        stringTable
+      ) ?? [];
+    console.log({ flows });
+    dispatch(changeActiveFlows(flows));
   };
 }
 
