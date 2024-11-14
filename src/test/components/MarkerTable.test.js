@@ -225,7 +225,7 @@ describe('MarkerTable', function () {
     // We are using `getAllByText` here because marker table puts the same text
     // to both `type` and `name` columns. But right clicking on either of them
     // results in the same menu item.
-    fireFullContextMenu(screen.getAllByText('Navigation::Start')[0]);
+    fireFullContextMenu(screen.getAllByText('FirstContentfulPaint')[0]);
     expect(screen.queryByText('Copy page URL')).not.toBeInTheDocument();
 
     // Make sure that a marker with innerWindowID has this context menu item and
