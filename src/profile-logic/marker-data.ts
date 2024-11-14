@@ -43,6 +43,17 @@ import type {
   MarkerDisplayLocation,
   Tid,
   Milliseconds,
+  ThreadIndex,
+  FlowMarker,
+  FlowSchemasByName,
+  ProfileFlowInfo,
+  FlowTiming,
+  IndexIntoFlowTable,
+  ConnectedFlowInfo,
+  FlowTimingRow,
+  FlowTimingRowType,
+  FlowTimingRowMarkerTable,
+  FlowTimingArrow,
 } from 'firefox-profiler/types';
 
 /**
@@ -1586,58 +1597,6 @@ export const stringsToMarkerRegExps = (
   };
 };
 
-export type GlobalFlowMarkerHandle = {
-  threadIndex: number,
-  flowMarkerIndex: number,
-};
-
-// An index into the global flow table.
-type IndexIntoFlowTable = number;
-
-export type Flow = {
-  id: string,
-  startTime: Milliseconds,
-  endTime: Milliseconds | null,
-  // All markers which mention this flow, ordered by start time.
-  flowMarkers: GlobalFlowMarkerHandle[],
-};
-
-export type ConnectedFlowInfo = {
-  // Flows whose marker set has a non-empty intersection with our marker set.
-  directlyConnectedFlows: IndexIntoFlowTable[],
-  // Flows which have at least one marker in their marker set was a stack-based
-  // marker which was already running higher up on the stack when at least one
-  // of our stack-based or instant markers was running on the same thread.
-  // All flows in our incomingContextFlows set have this flow in their
-  // outgoingContextFlows set.
-  incomingContextFlows: IndexIntoFlowTable[],
-  // Flows which have at least one stack-based or instant marker in their marker
-  // set which was running when one of the stack-based markers in our set was
-  // running higher up on the same thread's stack.
-  // All flows in our outgoingContextFlows set have this flow in their
-  // incomingContextFlows set.
-  outgoingContextFlows: IndexIntoFlowTable[],
-};
-
-type FlowIDAndTerminating = {
-  flowID: string,
-  isTerminating: boolean,
-};
-
-export type FlowMarker = {
-  markerIndex: number,
-  time: Milliseconds,
-  // The index of the closest stack-based interval flow marker that encompasses
-  // this marker. ("Closest" means "with the most recent start time".)
-  // If non-null, parentContextFlowMarker is lower the index of this flow marker,
-  // i.e. this can only point "backwards" within the thread's flow markers array.
-  parentContextFlowMarker: number | null,
-  // The indexes of flow markers which have this flow marker as their parentContextFlowMarker.
-  // All indexes in this array after the index of this flow marker.
-  childContextFlowMarkers: number[],
-  flowIDs: FlowIDAndTerminating[],
-};
-
 class MinHeap<V> {
   _keys: number[] = [];
   _values: V[] = [];
@@ -1676,18 +1635,6 @@ class MinHeap<V> {
     this._keys[handle] = newKey;
   }
 }
-
-export type FlowFieldDescriptor = {
-  key: string,
-  isTerminating: boolean,
-};
-
-export type FlowSchema = {
-  flowFields: FlowFieldDescriptor[],
-  isStackBased: boolean,
-};
-
-export type FlowSchemasByName = Map<string, FlowSchema>;
 
 export function computeFlowSchemasByName(
   markerSchemas: MarkerSchema[]
@@ -1740,11 +1687,12 @@ export function computeFlowMarkers(
       continue;
     }
 
-    const time = marker.start;
+    const startTime = marker.start;
+    const endTime = marker.end;
 
     while (
       currentContextEndTimes.length !== 0 &&
-      currentContextEndTimes[currentContextEndTimes.length - 1] < time
+      currentContextEndTimes[currentContextEndTimes.length - 1] < startTime
     ) {
       currentContextEndTimes.pop();
       currentContextFlowMarkers.pop();
@@ -1771,7 +1719,8 @@ export function computeFlowMarkers(
       parentContextFlowMarker,
       childContextFlowMarkers: [],
       flowIDs,
-      time,
+      startTime,
+      endTime,
       markerIndex,
     });
     if (flowSchema.isStackBased || marker.end === null) {
@@ -1789,19 +1738,11 @@ export function computeFlowMarkers(
   return flowMarkers;
 }
 
-export type ProfileFlowInfo = {
-  flowTable: Flow[],
-  flowsByID: Map<string, IndexIntoFlowTable[]>,
-  flowMarkersPerThread: FlowMarker[][],
-  flowMarkerFlowsPerThread: IndexIntoFlowTable[][][],
-  flowSchemasByName: FlowSchemasByName,
-};
-
 export function computeProfileFlowInfo(
   fullMarkerListPerThread: Marker[][],
   threads: RawThread[],
   markerSchemas: MarkerSchema[],
-  shared: RawProfileSharedData,
+  shared: RawProfileSharedData
 ): ProfileFlowInfo {
   const flowSchemasByName = computeFlowSchemasByName(markerSchemas);
   const { stringArray } = shared;
@@ -1813,18 +1754,22 @@ export function computeProfileFlowInfo(
   );
 
   const threadCount = flowMarkersPerThread.length;
-  const nextEntryHeap = new MinHeap<{threadIndex: number, nextIndex: number}>();
+  const nextEntryHeap = new MinHeap<{
+    threadIndex: number;
+    nextIndex: number;
+  }>();
   for (let threadIndex = 0; threadIndex < threadCount; threadIndex++) {
     const flowMarkers = flowMarkersPerThread[threadIndex];
     if (flowMarkers.length !== 0) {
-      nextEntryHeap.insert(flowMarkers[0].time, {
+      nextEntryHeap.insert(flowMarkers[0].startTime, {
         threadIndex,
         nextIndex: 0,
       });
     }
   }
 
-  const flowMarkerFlowsPerThread: IndexIntoFlowTable[][][] = flowMarkersPerThread.map(() => []);
+  const flowMarkerFlowsPerThread: IndexIntoFlowTable[][][] =
+    flowMarkersPerThread.map(() => []);
 
   const flowTable = [];
   const currentActiveFlows = new Map<string, IndexIntoFlowTable>();
@@ -1840,9 +1785,10 @@ export function computeProfileFlowInfo(
     const { threadIndex, nextIndex } = nextEntry;
     const flowMarkerIndex = nextIndex;
     const flowMarkers = flowMarkersPerThread[threadIndex];
-    const flowReference = flowMarkers[nextIndex];
+    const flowMarker = flowMarkers[nextIndex];
 
-    const { flowIDs, time } = flowReference;
+    const { markerIndex, flowIDs } = flowMarker;
+    const { start, end } = fullMarkerListPerThread[threadIndex][markerIndex];
     const flowMarkerHandle = { threadIndex, flowMarkerIndex };
     const flowsForThisFlowMarker = [];
     for (const { flowID, isTerminating } of flowIDs) {
@@ -1851,8 +1797,8 @@ export function computeProfileFlowInfo(
         flowIndex = flowTable.length;
         flowTable.push({
           id: flowID,
-          startTime: time,
-          endTime: time,
+          startTime: start,
+          endTime: end ?? start,
           flowMarkers: [flowMarkerHandle],
         });
         if (!isTerminating) {
@@ -1867,7 +1813,7 @@ export function computeProfileFlowInfo(
       } else {
         const flow = flowTable[flowIndex];
         flow.flowMarkers.push(flowMarkerHandle);
-        flow.endTime = time;
+        flow.endTime = end ?? start;
         if (isTerminating) {
           currentActiveFlows.delete(flowID);
         }
@@ -1881,7 +1827,7 @@ export function computeProfileFlowInfo(
     const newNextIndex = nextIndex + 1;
     if (newNextIndex < flowMarkers.length) {
       nextEntry.nextIndex = newNextIndex;
-      nextEntryHeap.reorder(handle, flowMarkers[newNextIndex].time);
+      nextEntryHeap.reorder(handle, flowMarkers[newNextIndex].startTime);
     } else {
       nextEntryHeap.delete(handle);
     }
@@ -1972,11 +1918,10 @@ export function lookupFlow(
   return candidateFlows[index];
 }
 
-export function computeMarkerFlowsForConsole(
+export function computeMarkerFlows(
   threadIndex: number,
   markerIndex: MarkerIndex,
   profileFlowInfo: ProfileFlowInfo,
-  threads: RawThread[],
   fullMarkerListPerThread: Marker[][],
   stringTable: StringTable
 ): IndexIntoFlowTable[] | null {
@@ -2044,11 +1989,10 @@ export function printMarkerFlows(
   fullMarkerListPerThread: Marker[][],
   stringTable: StringTable
 ) {
-  const markerFlows = computeMarkerFlowsForConsole(
+  const markerFlows = computeMarkerFlows(
     markerThreadIndex,
     markerIndex,
     profileFlowInfo,
-    threads,
     fullMarkerListPerThread,
     stringTable
   );
@@ -2094,7 +2038,7 @@ export function printFlow(
     const thread = threads[threadIndex];
     const marker = fullMarkerListPerThread[threadIndex][otherMarkerIndex];
     console.log(
-      ` - marker ${otherMarkerIndex} (thread index: ${threadIndex}) at time ${flowMarker.time} on thread ${thread.name} (pid: ${thread.pid}, tid: ${thread.tid}):`,
+      ` - marker ${otherMarkerIndex} (thread index: ${threadIndex}) at time ${flowMarker.startTime} on thread ${thread.name} (pid: ${thread.pid}, tid: ${thread.tid}):`,
       marker
     );
     const directlyConnectedFlows = flowMarkerFlowsPerThread[threadIndex][
@@ -2150,4 +2094,243 @@ export function printFlow(
   //     `Outgoing context flows: ${connections.outgoingContextFlows.join(', ')}`
   //   );
   // }
+}
+
+export function computeFlowTiming(
+  profileFlowInfo: ProfileFlowInfo,
+  activeFlows: IndexIntoFlowTable[]
+): FlowTiming {
+  let incomingContextFlows = [];
+  let directlyConnectedFlows = [];
+  let outgoingContextFlows = [];
+
+  for (const flow of activeFlows) {
+    const connectedFlows = getConnectedFlowInfo(flow, profileFlowInfo);
+    incomingContextFlows.push(...connectedFlows.incomingContextFlows);
+    directlyConnectedFlows.push(...connectedFlows.directlyConnectedFlows);
+    outgoingContextFlows.push(...connectedFlows.outgoingContextFlows);
+  }
+  sortAndDedup(incomingContextFlows);
+  sortAndDedup(directlyConnectedFlows);
+  sortAndDedup(outgoingContextFlows);
+
+  directlyConnectedFlows = directlyConnectedFlows.filter(
+    (icf) => activeFlows.indexOf(icf) === -1
+  );
+  incomingContextFlows = incomingContextFlows.filter(
+    (icf) =>
+      activeFlows.indexOf(icf) === -1 &&
+      directlyConnectedFlows.indexOf(icf) === -1
+  );
+  outgoingContextFlows = outgoingContextFlows.filter(
+    (icf) =>
+      activeFlows.indexOf(icf) === -1 &&
+      directlyConnectedFlows.indexOf(icf) === -1 &&
+      incomingContextFlows.indexOf(icf) === -1
+  );
+
+  const rawRows: Array<[FlowTimingRowType, IndexIntoFlowTable]> = [
+    ...incomingContextFlows.map<[FlowTimingRowType, IndexIntoFlowTable]>(
+      (flowIndex) => ['INCOMING_CONTEXT', flowIndex]
+    ),
+    ...activeFlows.map<[FlowTimingRowType, IndexIntoFlowTable]>((flowIndex) => [
+      'ACTIVE',
+      flowIndex,
+    ]),
+    ...directlyConnectedFlows.map<[FlowTimingRowType, IndexIntoFlowTable]>(
+      (flowIndex) => ['DIRECTLY_CONNECTED', flowIndex]
+    ),
+    ...outgoingContextFlows.map<[FlowTimingRowType, IndexIntoFlowTable]>(
+      (flowIndex) => ['OUTGOING_CONTEXT', flowIndex]
+    ),
+  ];
+
+  const rows: FlowTimingRow[] = [];
+
+  const { flowTable, flowMarkersPerThread } = profileFlowInfo;
+
+  const flowIndexToRowIndex = new Map();
+
+  for (let rowIndex = 0; rowIndex < rawRows.length; rowIndex++) {
+    const [rowType, flowIndex] = rawRows[rowIndex];
+    flowIndexToRowIndex.set(flowIndex, rowIndex);
+
+    const flow = flowTable[flowIndex];
+    const { flowMarkers, startTime, endTime } = flow;
+    const flowMarkerCount = flowMarkers.length;
+
+    const markers: FlowTimingRowMarkerTable = {
+      length: flowMarkerCount,
+      threadIndex: new Int32Array(flowMarkerCount),
+      markerIndex: new Int32Array(flowMarkerCount),
+      flowMarkerIndex: new Int32Array(flowMarkerCount),
+      startTime: new Float64Array(flowMarkerCount),
+      endTime: new Float64Array(flowMarkerCount),
+      isInstant: new Uint8Array(flowMarkerCount),
+    };
+
+    for (let i = 0; i < flowMarkerCount; i++) {
+      const { threadIndex, flowMarkerIndex } = flowMarkers[i];
+      const flowMarker = flowMarkersPerThread[threadIndex][flowMarkerIndex];
+      const { markerIndex, startTime, endTime } = flowMarker;
+      markers.threadIndex[i] = threadIndex;
+      markers.markerIndex[i] = markerIndex;
+      markers.flowMarkerIndex[i] = flowMarkerIndex;
+      markers.startTime[i] = startTime;
+      if (endTime === null) {
+        markers.endTime[i] = startTime;
+        markers.isInstant[i] = 1;
+      } else {
+        markers.endTime[i] = endTime;
+      }
+    }
+
+    rows.push({
+      label: `Flow ${flowIndex}`,
+      rowType,
+      flowIndex,
+      flowStart: startTime,
+      flowEnd: ensureExists(endTime),
+      markers,
+    });
+  }
+
+  return { rows, flowIndexToRowIndex, profileFlowInfo };
+}
+
+function _arrowForMarker(
+  flowMarkerIndex: number,
+  flowIndexToRowIndex: Map<IndexIntoFlowTable, number>,
+  flowMarkers: FlowMarker[],
+  flowMarkerFlows: IndexIntoFlowTable[][]
+): FlowTimingArrow | null {
+  const { startTime, parentContextFlowMarker } = flowMarkers[flowMarkerIndex];
+
+  const rowIndexesFrom = [];
+  const rowIndexesTo = [];
+  let minRowIndex = -1;
+  let maxRowIndex = -1;
+  if (parentContextFlowMarker !== null) {
+    for (const flowIndex of flowMarkerFlows[parentContextFlowMarker]) {
+      const rowIndex = flowIndexToRowIndex.get(flowIndex);
+      if (rowIndex !== undefined) {
+        rowIndexesFrom.push(rowIndex);
+        if (minRowIndex === -1) {
+          minRowIndex = rowIndex;
+          maxRowIndex = rowIndex;
+        } else {
+          if (rowIndex < minRowIndex) {
+            minRowIndex = rowIndex;
+          }
+          if (rowIndex > maxRowIndex) {
+            maxRowIndex = rowIndex;
+          }
+        }
+      }
+    }
+  }
+  for (const flowIndex of flowMarkerFlows[flowMarkerIndex]) {
+    const rowIndex = flowIndexToRowIndex.get(flowIndex);
+    if (rowIndex !== undefined) {
+      rowIndexesTo.push(rowIndex);
+      if (minRowIndex === -1) {
+        minRowIndex = rowIndex;
+        maxRowIndex = rowIndex;
+      } else {
+        if (rowIndex < minRowIndex) {
+          minRowIndex = rowIndex;
+        }
+        if (rowIndex > maxRowIndex) {
+          maxRowIndex = rowIndex;
+        }
+      }
+    }
+  }
+  if (minRowIndex === maxRowIndex) {
+    return null;
+  }
+  return {
+    time: startTime,
+    rowIndexesFrom,
+    rowIndexesTo,
+    minRowIndex,
+    maxRowIndex,
+  };
+}
+
+export function computeArrowsRelatedToMarker(
+  threadIndex: ThreadIndex,
+  flowMarkerIndex: number,
+  flowTiming: FlowTiming
+  // flowIndexToRowIndex: Map<IndexIntoFlowTable, number>,
+  // profileFlowInfo: ProfileFlowInfo
+): FlowTimingArrow[] {
+  // We have marker-shared-between-flows "arrows" (or actually connections)
+  // And we have marker-has-this-parent arrows.
+
+  // For shared-between-flows marker, as we iterate over a flow's flow markers, we find (threadIndex, flowMarkerIndex) pairs.
+  // From the flow marekr, we can get its "flow marker flows", which has the flow indexes for all the flows it is part of.
+  // In this function, we make it so that we add the arrows for the shared flows only when we encounter the marker in the first flow of the set.
+  // We also only do it for the activeFlows and not for the context flows. For the context flows we might not have all the directly-connected flows present in the rows, specifically we may not have the flow with the minimum index.
+
+  const { flowIndexToRowIndex, profileFlowInfo } = flowTiming;
+  const { flowMarkersPerThread, flowMarkerFlowsPerThread } = profileFlowInfo;
+  const flowMarkers = flowMarkersPerThread[threadIndex];
+  const flowMarkerFlows = flowMarkerFlowsPerThread[threadIndex];
+
+  const arrows: FlowTimingArrow[] = [];
+
+  const flowMarker = flowMarkersPerThread[threadIndex][flowMarkerIndex];
+  let incomingFlowMarkerIndex = flowMarkerIndex;
+  let incomingFlowMarker = flowMarker;
+  while (true) {
+    const { parentContextFlowMarker } = incomingFlowMarker;
+    const arrow = _arrowForMarker(
+      incomingFlowMarkerIndex,
+      flowIndexToRowIndex,
+      flowMarkers,
+      flowMarkerFlows
+    );
+    if (arrow === null) {
+      break;
+    }
+    arrows.push(arrow);
+    if (parentContextFlowMarker === null) {
+      break;
+    }
+    incomingFlowMarkerIndex = parentContextFlowMarker;
+    incomingFlowMarker = flowMarkers[incomingFlowMarkerIndex];
+  }
+
+  const stack = [
+    {
+      childMarkers: flowMarker.childContextFlowMarkers,
+      currentIndex: 0,
+    },
+  ];
+  while (stack.length > 0) {
+    const stackTop = stack[stack.length - 1];
+    const { currentIndex, childMarkers } = stackTop;
+    if (currentIndex >= childMarkers.length) {
+      stack.pop();
+      continue;
+    }
+    const currentFlowMarkerIndex = childMarkers[currentIndex];
+    stackTop.currentIndex = currentIndex + 1;
+    const arrow = _arrowForMarker(
+      currentFlowMarkerIndex,
+      flowIndexToRowIndex,
+      flowMarkers,
+      flowMarkerFlows
+    );
+    if (arrow !== null) {
+      arrows.push(arrow);
+      const children =
+        flowMarkers[currentFlowMarkerIndex].childContextFlowMarkers;
+      if (children.length !== 0) {
+        stack.push({ childMarkers: children, currentIndex: 0 });
+      }
+    }
+  }
+  return arrows;
 }
