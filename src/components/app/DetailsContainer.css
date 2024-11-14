@@ -2,7 +2,6 @@
   position: relative;
   z-index: 0;
   display: flex;
-  box-sizing: border-box;
   flex: 1;
   flex-flow: row nowrap;
   contain: size;
