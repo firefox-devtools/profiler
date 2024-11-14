@@ -5,13 +5,24 @@
 // @flow
 import { createSelector } from 'reselect';
 
-import { computeProfileFlowInfo } from '../profile-logic/marker-data';
-import type { ProfileFlowInfo } from '../profile-logic/marker-data';
+import {
+  computeProfileFlowInfo,
+  computeFlowTiming,
+} from '../profile-logic/marker-data';
 import { getThreadSelectors } from './per-thread';
+import { getActiveFlows } from './url-state';
 import type { ThreadSelectors } from './per-thread';
 import { getThreads, getMarkerSchema } from './profile';
 
-import type { Selector, State, Marker } from 'firefox-profiler/types';
+import type {
+  Selector,
+  State,
+  MarkerIndex,
+  Marker,
+  ProfileFlowInfo,
+  FlowTiming,
+} from 'firefox-profiler/types';
+import { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
 function _arraysShallowEqual(arr1: any[], arr2: any[]): boolean {
   return arr1.length === arr2.length && arr1.every((val, i) => val === arr2[i]);
@@ -40,9 +51,26 @@ export const getFullMarkerListPerThread: Selector<Marker[][]> =
     getFullMarkerList(state)
   );
 
+export const getMarkerChartLabelGetterPerThread: Selector<
+  Array<(MarkerIndex) => string>,
+> = _createSelectorForAllThreads(({ getMarkerChartLabelGetter }, state) =>
+  getMarkerChartLabelGetter(state)
+);
+
+export const getStringTablePerThread: Selector<UniqueStringArray[]> =
+  _createSelectorForAllThreads(({ getStringTable }, state) =>
+    getStringTable(state)
+  );
+
 export const getProfileFlowInfo: Selector<ProfileFlowInfo> = createSelector(
   getFullMarkerListPerThread,
   getThreads,
   getMarkerSchema,
   computeProfileFlowInfo
+);
+
+export const getFlowTiming: Selector<FlowTiming> = createSelector(
+  getProfileFlowInfo,
+  getActiveFlows,
+  computeFlowTiming
 );
