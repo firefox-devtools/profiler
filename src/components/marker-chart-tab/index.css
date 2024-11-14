@@ -1,0 +1,9 @@
+.markerChartTabContainer {
+  position: relative;
+  min-height: 0;
+  flex: 1;
+}
+
+.markerChartTabSplitter > .layout-pane {
+  display: flex;
+}

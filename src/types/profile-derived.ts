@@ -521,6 +521,120 @@ export type ThreadWithReservedFunctions = {
   >;
 };
 
+export type GlobalFlowMarkerHandle = {
+  threadIndex: number;
+  flowMarkerIndex: number;
+};
+
+// An index into the global flow table.
+export type IndexIntoFlowTable = number;
+
+export type Flow = {
+  id: string;
+  startTime: Milliseconds;
+  endTime: Milliseconds | null;
+  // All markers which mention this flow, ordered by start time.
+  flowMarkers: GlobalFlowMarkerHandle[];
+};
+
+export type ConnectedFlowInfo = {
+  // Flows whose marker set has a non-empty intersection with our marker set.
+  directlyConnectedFlows: IndexIntoFlowTable[];
+  // Flows which have at least one marker in their marker set was a stack-based
+  // marker which was already running higher up on the stack when at least one
+  // of our stack-based or instant markers was running on the same thread.
+  // All flows in our incomingContextFlows set have this flow in their
+  // outgoingContextFlows set.
+  incomingContextFlows: IndexIntoFlowTable[];
+  // Flows which have at least one stack-based or instant marker in their marker
+  // set which was running when one of the stack-based markers in our set was
+  // running higher up on the same thread's stack.
+  // All flows in our outgoingContextFlows set have this flow in their
+  // incomingContextFlows set.
+  outgoingContextFlows: IndexIntoFlowTable[];
+};
+
+type FlowIDAndTerminating = {
+  flowID: string;
+  isTerminating: boolean;
+};
+
+export type FlowMarker = {
+  markerIndex: number;
+  startTime: Milliseconds;
+  endTime: Milliseconds | null;
+  // The index of the closest stack-based interval flow marker that encompasses
+  // this marker. ("Closest" means "with the most recent start time".)
+  // If non-null, parentContextFlowMarker is lower the index of this flow marker,
+  // i.e. this can only point "backwards" within the thread's flow markers array.
+  parentContextFlowMarker: number | null;
+  // The indexes of flow markers which have this flow marker as their parentContextFlowMarker.
+  // All indexes in this array after the index of this flow marker.
+  childContextFlowMarkers: number[];
+  flowIDs: FlowIDAndTerminating[];
+};
+
+export type FlowFieldDescriptor = {
+  key: string;
+  isTerminating: boolean;
+};
+
+export type FlowSchema = {
+  flowFields: FlowFieldDescriptor[];
+  isStackBased: boolean;
+};
+
+export type FlowSchemasByName = Map<string, FlowSchema>;
+
+export type ProfileFlowInfo = {
+  flowTable: Flow[];
+  flowsByID: Map<string, IndexIntoFlowTable[]>;
+  flowMarkersPerThread: FlowMarker[][];
+  // For each (threadIndex, flowMarkerIndex), the indexes of the flows (in
+  // ascending order) this marker is part of.
+  flowMarkerFlowsPerThread: IndexIntoFlowTable[][][];
+  flowSchemasByName: FlowSchemasByName;
+};
+
+export type FlowTiming = {
+  rows: FlowTimingRow[];
+  flowIndexToRowIndex: Map<IndexIntoFlowTable, number>;
+  profileFlowInfo: ProfileFlowInfo;
+};
+
+export type FlowTimingRowType =
+  | 'INCOMING_CONTEXT'
+  | 'ACTIVE'
+  | 'DIRECTLY_CONNECTED'
+  | 'OUTGOING_CONTEXT';
+
+export type FlowTimingRow = {
+  rowType: FlowTimingRowType;
+  label: string;
+  flowIndex: IndexIntoFlowTable;
+  flowStart: Milliseconds;
+  flowEnd: Milliseconds;
+  markers: FlowTimingRowMarkerTable;
+};
+
+export type FlowTimingRowMarkerTable = {
+  length: number;
+  threadIndex: Int32Array; // ThreadIndex[],
+  markerIndex: Int32Array; // MarkerIndex[],
+  flowMarkerIndex: Int32Array; // FlowMarkerIndex[],
+  startTime: Float64Array; // Milliseconds[],
+  endTime: Float64Array; // Milliseconds[],
+  isInstant: Uint8Array; // boolean[],
+};
+
+export type FlowTimingArrow = {
+  time: Milliseconds;
+  rowIndexesFrom: number[];
+  rowIndexesTo: number[];
+  minRowIndex: number;
+  maxRowIndex: number;
+};
+
 /**
  * The marker timing contains the necessary information to draw markers very quickly
  * in the marker chart. It represents a single row of markers in the chart.
