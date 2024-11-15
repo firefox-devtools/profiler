@@ -37,7 +37,11 @@ Array [
   },
   Object {
     "category": 0,
-    "data": null,
+    "data": Object {
+      "category": "Navigation",
+      "innerWindowID": 1,
+      "type": "tracing",
+    },
     "end": null,
     "name": "Navigation::Start",
     "start": 7,
