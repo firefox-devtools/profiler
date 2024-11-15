@@ -11,6 +11,11 @@ import { getSampleIndexClosestToCenteredTime } from 'firefox-profiler/profile-lo
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
+import {
+  Tooltip,
+  MOUSE_OFFSET,
+} from 'firefox-profiler/components/tooltip/Tooltip';
+import { SampleTooltipContents } from 'firefox-profiler/components/shared/SampleTooltipContents';
 
 import './SampleGraph.css';
 
@@ -20,8 +25,17 @@ import type {
   IndexIntoSamplesTable,
   Milliseconds,
   SelectedState,
+  CssPixels,
+  TimelineType,
+  ImplementationFilter,
 } from 'firefox-profiler/types';
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { CpuRatioInTimeRange } from './ActivityGraphFills';
+
+export type HoveredPixelState = {|
+  +sample: IndexIntoSamplesTable | null,
+  +cpuRatioInTimeRange: CpuRatioInTimeRange | null,
+|};
 
 type Props = {|
   +className: string,
@@ -33,19 +47,32 @@ type Props = {|
   +categories: CategoryList,
   +onSampleClick: (
     event: SyntheticMouseEvent<>,
-    sampleIndex: IndexIntoSamplesTable
+    sampleIndex: IndexIntoSamplesTable | null
   ) => void,
   +trackName: string,
+  +timelineType: TimelineType,
+  implementationFilter: ImplementationFilter,
   ...SizeProps,
 |};
 
-export class ThreadSampleGraphImpl extends PureComponent<Props> {
+type State = {
+  hoveredPixelState: null | HoveredPixelState,
+  mouseX: CssPixels,
+  mouseY: CssPixels,
+};
+
+export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
   _canvas: null | HTMLCanvasElement = null;
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) =>
     (this._canvas = canvas);
   _canvasState: {| renderScheduled: boolean, inView: boolean |} = {
     renderScheduled: false,
     inView: false,
+  };
+  state = {
+    hoveredPixelState: null,
+    mouseX: 0,
+    mouseY: 0,
   };
 
   _renderCanvas() {
@@ -185,35 +212,79 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
     drawSamples(idleSamples, lighterBlue);
   }
 
-  _onClick = (event: SyntheticMouseEvent<>) => {
-    const canvas = this._canvas;
-    if (canvas) {
-      const { rangeStart, rangeEnd, thread } = this.props;
-      const r = canvas.getBoundingClientRect();
-
-      const x = event.pageX - r.left;
-      const time = rangeStart + (x / r.width) * (rangeEnd - rangeStart);
-
-      const sampleIndex = getSampleIndexClosestToCenteredTime(
-        thread.samples,
-        time
-      );
-
-      if (thread.samples.stack[sampleIndex] === null) {
-        // If the sample index refers to a null sample, that sample
-        // has been filtered out and means that there was no stack bar
-        // drawn at the place where the user clicked. Do nothing here.
-        return;
-      }
-
-      this.props.onSampleClick(event, sampleIndex);
-    }
+  _onClick = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
+    const hoveredSample = this._getSampleAtMouseEvent(event);
+    this.props.onSampleClick(event, hoveredSample?.sample ?? null);
   };
 
+  _onMouseLeave = () => {
+    this.setState({ hoveredPixelState: null });
+  };
+
+  _onMouseMove = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
+    const canvas = event.currentTarget;
+    if (!canvas) {
+      return;
+    }
+
+    const rect = canvas.getBoundingClientRect();
+    this.setState({
+      hoveredPixelState: this._getSampleAtMouseEvent(event),
+      mouseX: event.pageX,
+      // Have the tooltip align to the bottom of the track.
+      mouseY: rect.bottom - MOUSE_OFFSET,
+    });
+  };
+
+  _getSampleAtMouseEvent(
+    event: SyntheticMouseEvent<HTMLCanvasElement>
+  ): null | HoveredPixelState {
+    const canvas = this._canvas;
+    if (!canvas) {
+      return null;
+    }
+
+    const { rangeStart, rangeEnd, thread } = this.props;
+    const r = canvas.getBoundingClientRect();
+
+    const x = event.pageX - r.left;
+    const time = rangeStart + (x / r.width) * (rangeEnd - rangeStart);
+
+    const sampleIndex = getSampleIndexClosestToCenteredTime(
+      thread.samples,
+      time
+    );
+
+    if (thread.samples.stack[sampleIndex] === null) {
+      // If the sample index refers to a null sample, that sample
+      // has been filtered out and means that there was no stack bar
+      // drawn at the place where the user clicked. Do nothing here.
+      return null;
+    }
+
+    return {
+      sample: sampleIndex,
+      cpuRatioInTimeRange: null,
+    };
+  }
+
   render() {
-    const { className, trackName } = this.props;
+    const {
+      className,
+      trackName,
+      timelineType,
+      categories,
+      implementationFilter,
+      thread,
+    } = this.props;
+    const { hoveredPixelState, mouseX, mouseY } = this.state;
+
     return (
-      <div className={className}>
+      <div
+        className={className}
+        onMouseMove={this._onMouseMove}
+        onMouseLeave={this._onMouseLeave}
+      >
         <InView onChange={this._observerCallback}>
           <canvas
             className={classNames(
@@ -226,6 +297,21 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
             <h2>Stack Graph for {trackName}</h2>
             <p>This graph charts the stack height of each sample.</p>
           </canvas>
+          {hoveredPixelState === null ? null : (
+            <Tooltip mouseX={mouseX} mouseY={mouseY}>
+              <SampleTooltipContents
+                sampleIndex={hoveredPixelState.sample}
+                cpuRatioInTimeRange={
+                  timelineType === 'cpu-category'
+                    ? hoveredPixelState.cpuRatioInTimeRange
+                    : null
+                }
+                rangeFilteredThread={thread}
+                categories={categories}
+                implementationFilter={implementationFilter}
+              />
+            </Tooltip>
+          )}
         </InView>
       </div>
     );
