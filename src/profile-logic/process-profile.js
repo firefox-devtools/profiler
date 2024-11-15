@@ -25,6 +25,7 @@ import {
   convertPerfScriptProfile,
 } from './import/linux-perf';
 import { isArtTraceFormat, convertArtTraceProfile } from './import/art-trace';
+import { isSimpleperfTraceFormat, convertSimpleperfTraceProfile } from './import/simpleperf';
 import {
   PROCESSED_PROFILE_VERSION,
   INTERVAL,
@@ -1882,6 +1883,8 @@ export async function unserializeProfileOfArbitraryFormat(
       const arrayBuffer: ArrayBuffer = (arbitraryFormat: any);
       if (isArtTraceFormat(arrayBuffer)) {
         arbitraryFormat = convertArtTraceProfile(arrayBuffer);
+      } else if (isSimpleperfTraceFormat(arrayBuffer)) {
+        arbitraryFormat = convertSimpleperfTraceProfile(arrayBuffer);
       } else {
         try {
           const textDecoder = new TextDecoder('utf-8', { fatal: true });
