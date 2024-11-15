@@ -25,7 +25,10 @@ import {
   convertPerfScriptProfile,
 } from './import/linux-perf';
 import { isArtTraceFormat, convertArtTraceProfile } from './import/art-trace';
-import { isSimpleperfTraceFormat, convertSimpleperfTraceProfile } from './import/simpleperf';
+import {
+  isSimpleperfTraceFormat,
+  convertSimpleperfTraceProfile,
+} from './import/simpleperf';
 import {
   PROCESSED_PROFILE_VERSION,
   INTERVAL,
