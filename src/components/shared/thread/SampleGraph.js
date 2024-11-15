@@ -244,16 +244,37 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
       return null;
     }
 
-    const { rangeStart, rangeEnd, thread } = this.props;
+    const { rangeStart, rangeEnd, thread, interval } = this.props;
     const r = canvas.getBoundingClientRect();
 
     const x = event.pageX - r.left;
     const time = rangeStart + (x / r.width) * (rangeEnd - rangeStart);
 
+    const range = [rangeStart, rangeEnd];
+    const rangeLength = range[1] - range[0];
+    const xPixelsPerMs = canvas.width / rangeLength;
+    const trueIntervalPixelWidth = interval * xPixelsPerMs;
+    const multiplier = trueIntervalPixelWidth < 2.0 ? 1.2 : 1.0;
+    const drawnIntervalWidth = Math.max(
+      0.8,
+      trueIntervalPixelWidth * multiplier
+    );
+    const drawnSampleWidth = Math.min(drawnIntervalWidth, 10) / 2;
+
+    const maxTimeDistance =
+      (drawnSampleWidth / 2 / r.width) * (rangeEnd - rangeStart);
+
     const sampleIndex = getSampleIndexClosestToCenteredTime(
       thread.samples,
-      time
+      time,
+      maxTimeDistance
     );
+
+    if (sampleIndex === null) {
+      // No sample that is close enough found. Mouse doesn't hover any of the
+      // sample boxes in the sample graph.
+      return null;
+    }
 
     if (thread.samples.stack[sampleIndex] === null) {
       // If the sample index refers to a null sample, that sample
