@@ -467,8 +467,8 @@ class FirefoxProfile {
               value: this.lostCount,
             },
             {
-              label: "Sampled events",
-              format: "list",
+              label: 'Sampled events',
+              format: 'list',
               value: this.eventTypes,
             },
           ],
