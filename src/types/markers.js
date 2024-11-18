@@ -34,6 +34,17 @@ export type MarkerFormatType =
   /// This is effectively an integer, so wherever we need to display this value, we
   /// must first perform a lookup into the appropriate string table.
   | 'unique-string'
+
+  // ----------------------------------------------------
+  // Flow types.
+  // A flow ID is a u64 identifier that's unique across processes. In the current
+  // implementation, we represent them as hex strings, as string table indexes.
+  // A terminating flow ID is a flow ID that, when used in a marker with timestamp T,
+  // makes it so that if the same flow ID is used in a marker whose timestamp is
+  // after T, that flow ID is considered to refer to a different flow.
+  | 'flow-id'
+  | 'terminating-flow-id'
+
   // ----------------------------------------------------
   // Numeric types
 
@@ -144,6 +155,17 @@ export type MarkerSchema = {|
 
   // if present, give the marker its own local track
   graphs?: Array<MarkerGraph>,
+
+  // If set to true, markers of this type are assumed to be well-nested with all
+  // other stack-based markers on the same thread. Stack-based markers may
+  // be displayed in a different part of the marker chart than non-stack-based
+  // markers.
+  // Instant markers are always well-nested.
+  // For interval markers, or for intervals defined by a start and an end marker,
+  // well-nested means that, for all marker-defined timestamp intervals A and B,
+  // A either fully encompasses B or is fully encompassed by B - there is no
+  // partial overlap.
+  isStackBased?: boolean,
 |};
 
 export type MarkerSchemaByName = ObjectMap<MarkerSchema>;

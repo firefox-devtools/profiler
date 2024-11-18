@@ -10,12 +10,17 @@ import '@testing-library/jest-dom';
 import fetchMock from 'fetch-mock-jest';
 import { Headers, Request, Response } from 'node-fetch';
 import { TextDecoder, TextEncoder } from 'util';
+import crypto from 'crypto';
 
 jest.mock('../utils/worker-factory');
 import * as WorkerFactory from '../utils/worker-factory';
 import { autoMockResizeObserver } from './fixtures/mocks/resize-observer';
 
 autoMockResizeObserver();
+
+if (process.env.TZ !== 'UTC') {
+  throw new Error('Jest must be run from `yarn test`');
+}
 
 // Register TextDecoder and TextEncoder with the global scope.
 // These are now available globally in nodejs, but not when running with jsdom
@@ -81,5 +86,12 @@ expect.extend({
         `expected element to have class ${className}, current classes are ${received.className}`,
       pass: false,
     };
+  },
+});
+
+Object.defineProperty(global.self, 'crypto', {
+  value: {
+    // $FlowExpectError This flow version doesn't know about webcrypto
+    subtle: crypto.webcrypto.subtle,
   },
 });

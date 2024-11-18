@@ -8,16 +8,14 @@ import { blankStore } from '../fixtures/stores';
 import * as iconsAccessors from '../../selectors/icons';
 import * as iconsActions from '../../actions/icons';
 import type { CallNodeDisplayData } from 'firefox-profiler/types';
+import { waitFor } from 'firefox-profiler/test/fixtures/testing-library';
 
 describe('actions/icons', function () {
   const validIcons = [
     'https://valid.icon1.example.org/favicon.ico',
     'https://valid.icon2.example.org/favicon.ico',
   ];
-  const expectedClasses = [
-    'https___valid_icon1_example_org_favicon_ico',
-    'https___valid_icon2_example_org_favicon_ico',
-  ];
+  const expectedClasses = ['favicon-1', 'favicon-2'];
   const invalidIcon = 'https://invalid.icon.example.org/favicon.ico';
 
   let imageInstances: Image[] = [];
@@ -31,6 +29,7 @@ describe('actions/icons', function () {
   afterEach(() => {
     delete (window: any).Image;
     imageInstances = [];
+    iconsActions._resetIconCounter();
   });
 
   function _createCallNodeWithIcon(icon: string): CallNodeDisplayData {
@@ -56,9 +55,10 @@ describe('actions/icons', function () {
       return blankStore().getState();
     }
 
-    it('getIcons return an empty set', function () {
-      const initialState = iconsAccessors.getIcons(getInitialState());
-      expect(initialState).toBeInstanceOf(Set);
+    it('getIconsWithClassNames returns an empty map', function () {
+      const initialState =
+        iconsAccessors.getIconsWithClassNames(getInitialState());
+      expect(initialState).toBeInstanceOf(Map);
       expect(initialState.size).toEqual(0);
     });
 
@@ -68,11 +68,6 @@ describe('actions/icons', function () {
         _createCallNodeWithIcon(validIcons[0]).icon
       );
       expect(subject).toBe('');
-    });
-
-    it('getIconsWithClassNames returns an empty array', function () {
-      const subject = iconsAccessors.getIconsWithClassNames(getInitialState());
-      expect(subject).toEqual([]);
     });
   });
 
@@ -87,6 +82,9 @@ describe('actions/icons', function () {
         dispatch(iconsActions.iconStartLoading(validIcons[1])),
       ];
 
+      // Wait until we have 2 image instances after calling iconStartLoading.
+      await waitFor(() => expect(imageInstances.length).toBe(2));
+
       // Only 2 requests because only 2 different icons
       expect(imageInstances.length).toBe(2);
       imageInstances.forEach((instance, i) => {
@@ -97,12 +95,9 @@ describe('actions/icons', function () {
       await Promise.all(promises);
 
       const state = getState();
-      let subject = iconsAccessors.getIcons(state);
-      expect([...subject]).toEqual(validIcons);
-
-      subject = iconsAccessors.getIconsWithClassNames(state);
-      expect(subject).toEqual(
-        validIcons.map((icon, i) => ({ icon, className: expectedClasses[i] }))
+      let subject = iconsAccessors.getIconsWithClassNames(state);
+      expect([...subject]).toEqual(
+        validIcons.map((icon, i) => [icon, expectedClasses[i]])
       );
 
       validIcons.forEach((icon, i) => {
@@ -121,13 +116,15 @@ describe('actions/icons', function () {
       const actionPromise = dispatch(
         iconsActions.iconStartLoading(invalidIcon)
       );
+      // Wait until we have 2 image instances after calling iconStartLoading.
+      await waitFor(() => expect(imageInstances.length).toBe(1));
       expect(imageInstances.length).toBe(1);
       (imageInstances[0]: any).onerror();
 
       await actionPromise;
 
       const state = getState();
-      let subject = iconsAccessors.getIcons(state);
+      let subject = iconsAccessors.getIconsWithClassNames(state);
       expect([...subject]).toEqual([]);
 
       subject = iconsAccessors.getIconClassName(
@@ -135,9 +132,6 @@ describe('actions/icons', function () {
         _createCallNodeWithIcon(invalidIcon).icon
       );
       expect(subject).toBe('');
-
-      subject = iconsAccessors.getIconsWithClassNames(state);
-      expect(subject).toEqual([]);
     });
   });
 });

@@ -8,6 +8,7 @@ import type {
   Milliseconds,
   MixedObject,
   ExternalMarkersData,
+  FaviconData,
 } from 'firefox-profiler/types';
 
 /**
@@ -27,7 +28,8 @@ export type Request =
   | GetExternalMarkersRequest
   | GetExternalPowerTracksRequest
   | GetSymbolTableRequest
-  | QuerySymbolicationApiRequest;
+  | QuerySymbolicationApiRequest
+  | GetPageFaviconsRequest;
 
 type StatusQueryRequest = {| type: 'STATUS_QUERY' |};
 type EnableMenuButtonRequest = {| type: 'ENABLE_MENU_BUTTON' |};
@@ -51,6 +53,10 @@ type QuerySymbolicationApiRequest = {|
   type: 'QUERY_SYMBOLICATION_API',
   path: string,
   requestJson: string,
+|};
+type GetPageFaviconsRequest = {|
+  type: 'GET_PAGE_FAVICONS',
+  pageUrls: Array<string>,
 |};
 
 export type MessageFromBrowser<R: ResponseFromBrowser> =
@@ -82,7 +88,8 @@ export type ResponseFromBrowser =
   | GetExternalMarkersResponse
   | GetExternalPowerTracksResponse
   | GetSymbolTableResponse
-  | QuerySymbolicationApiResponse;
+  | QuerySymbolicationApiResponse
+  | GetPageFaviconsResponse;
 
 type StatusQueryResponse = {|
   menuButtonIsEnabled: boolean,
@@ -106,6 +113,11 @@ type StatusQueryResponse = {|
   //   Shipped in Firefox 125.
   //   Adds support for the following message types:
   //    - GET_EXTERNAL_MARKERS
+  // Version 4:
+  //   Shipped in Firefox 134.
+  //   Adds support for the following message types:
+  //    - GET_PAGE_FAVICONS
+
   version?: number,
 |};
 type EnableMenuButtonResponse = void;
@@ -114,6 +126,7 @@ type GetExternalMarkersResponse = ExternalMarkersData;
 type GetExternalPowerTracksResponse = MixedObject[];
 type GetSymbolTableResponse = SymbolTableAsTuple;
 type QuerySymbolicationApiResponse = string;
+type GetPageFaviconsResponse = Array<FaviconData | null>;
 
 // Manually declare all pairs of request + response for Flow.
 /* eslint-disable no-redeclare */
@@ -138,6 +151,9 @@ declare function _sendMessageWithResponse(
 declare function _sendMessageWithResponse(
   QuerySymbolicationApiRequest
 ): Promise<QuerySymbolicationApiResponse>;
+declare function _sendMessageWithResponse(
+  GetPageFaviconsRequest
+): Promise<GetPageFaviconsResponse>;
 /* eslint-enable no-redeclare */
 
 /**
@@ -223,6 +239,15 @@ export async function querySymbolicationApiViaWebChannel(
     type: 'QUERY_SYMBOLICATION_API',
     path,
     requestJson,
+  });
+}
+
+export async function getPageFaviconsViaWebChannel(
+  pageUrls: Array<string>
+): Promise<GetPageFaviconsResponse> {
+  return _sendMessageWithResponse({
+    type: 'GET_PAGE_FAVICONS',
+    pageUrls,
   });
 }
 
