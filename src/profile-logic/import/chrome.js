@@ -553,11 +553,10 @@ async function processTracingEvents(
       );
     } else if (profileEvent.name === 'CpuProfile') {
       // Assume profiling starts exactly on profile start time.
-      threadInfo.lastSeenTime = profile.meta.profilingStartTime = 0;
+      threadInfo.lastSeenTime = profile.meta.profilingStartTime =
+        profileEvent.args.data.cpuProfile.startTime / 1000;
       profile.meta.profilingEndTime =
-        (profileEvent.args.data.cpuProfile.endTime -
-          profileEvent.args.data.cpuProfile.startTime) /
-        1000;
+        profileEvent.args.data.cpuProfile.endTime / 1000;
 
       profileChunks = [profileEvent];
     }
@@ -792,7 +791,8 @@ async function processTracingEvents(
       const [, year, month, day, hour, minute, second] = match;
       const dateTimeString = `${year}-${month}-${day}T${hour}:${minute}:${second}`;
       const startTime = new Date(dateTimeString);
-      profile.meta.startTime = startTime.getTime();
+      profile.meta.startTime =
+        startTime.getTime() - (profile.meta.profilingStartTime ?? 0);
     } else {
       profile.meta.startTime = 0;
     }
