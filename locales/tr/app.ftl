@@ -30,6 +30,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = Profil içe aktarılamadı.
 AppViewRouter--error-unpublished = { -firefox-brand-name } tarayıcısından profil alınamadı.
 AppViewRouter--error-from-file = Dosya okunamadı veya içindeki profil ayrıştırılamadı.
 AppViewRouter--error-local = Henüz hazır değil.
@@ -521,6 +522,7 @@ ProfileFilterNavigator--full-range-with-duration = Tam aralık ({ $fullRangeDura
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-from-post-message = Profil içe aktarılıyor ve işleniyor…
 ProfileLoaderAnimation--loading-unpublished = Profil doğrudan { -firefox-brand-name } tarayıcısından içe aktarılıyor…
 ProfileLoaderAnimation--loading-from-file = Dosya okunuyor ve profil işleniyor…
 ProfileLoaderAnimation--loading-local = Henüz hazır değil.
