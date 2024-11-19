@@ -793,8 +793,6 @@ async function processTracingEvents(
       const startTime = new Date(dateTimeString);
       profile.meta.startTime =
         startTime.getTime() - (profile.meta.profilingStartTime ?? 0);
-    } else {
-      profile.meta.startTime = 0;
     }
   }
 
