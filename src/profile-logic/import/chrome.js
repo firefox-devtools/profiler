@@ -563,6 +563,7 @@ async function processTracingEvents(
       const timeStampRe = /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/g;
       let match;
       let curMatch;
+      // Find the last match in case there are more timestamps in the path.
       while ((curMatch = timeStampRe.exec(profileUrl ?? '')) !== null) {
         match = curMatch;
       }
