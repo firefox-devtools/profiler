@@ -42,7 +42,7 @@ import type {
   Counter,
   Thread,
   ThreadIndex,
-  AccumulatedCounterSamples,
+  CounterSummary,
   Milliseconds,
   PreviewSelection,
   CssPixels,
@@ -63,7 +63,7 @@ type CanvasProps = {|
   +rangeEnd: Milliseconds,
   +counter: Counter,
   +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
-  +accumulatedSamples: AccumulatedCounterSamples,
+  +counterSummary: CounterSummary,
   +maxCounterSampleCountPerMs: number,
   +interval: Milliseconds,
   +width: CssPixels,
@@ -309,7 +309,7 @@ type StateProps = {|
   +rangeEnd: Milliseconds,
   +counter: Counter,
   +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
-  +accumulatedSamples: AccumulatedCounterSamples,
+  +counterSummary: CounterSummary,
   +maxCounterSampleCountPerMs: number,
   +interval: Milliseconds,
   +filteredThread: Thread,
@@ -472,7 +472,7 @@ class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
 
   _renderTooltip(counterIndex: number): React.Node {
     const {
-      accumulatedSamples,
+      counterSummary,
       counter,
       rangeStart,
       rangeEnd,
@@ -496,8 +496,10 @@ class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
       return null;
     }
 
-    const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
-    const bytes = accumulatedCounts[counterIndex] - minCount;
+    const { minCount, countRange, accumulatedCounts } = counterSummary;
+    const bytes = accumulatedCounts
+      ? accumulatedCounts[counterIndex] - minCount
+      : null;
     const operations =
       samples.number !== undefined ? samples.number[counterIndex] : null;
 
@@ -547,10 +549,12 @@ class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
               </Localized>
             ) : null}
             <TooltipDetailSeparator />
-            {this._formatDataTransferValue(
-              bytes,
-              'TrackBandwidthGraph--cumulative-bandwidth-at-this-time'
-            )}
+            {bytes
+              ? this._formatDataTransferValue(
+                  bytes,
+                  'TrackBandwidthGraph--cumulative-bandwidth-at-this-time'
+                )
+              : null}
             {this._formatDataTransferValue(
               countRange,
               'TrackBandwidthGraph--total-bandwidth-in-graph'
@@ -637,7 +641,7 @@ class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
       graphHeight,
       width,
       lineWidth,
-      accumulatedSamples,
+      counterSummary,
       maxCounterSampleCountPerMs,
     } = this.props;
 
@@ -656,7 +660,7 @@ class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
           width={width}
           lineWidth={lineWidth}
           interval={interval}
-          accumulatedSamples={accumulatedSamples}
+          counterSummary={counterSummary}
           maxCounterSampleCountPerMs={maxCounterSampleCountPerMs}
         />
         {hoveredCounter === null ? null : (
@@ -695,7 +699,7 @@ export const TrackBandwidthGraph = explicitConnect<
       threadIndex: counter.mainThreadIndex,
       maxCounterSampleCountPerMs:
         counterSelectors.getMaxRangeCounterSampleCountPerMs(state),
-      accumulatedSamples: counterSelectors.getAccumulateCounterSamples(state),
+      counterSummary: counterSelectors.getCounterSummary(state),
       rangeStart: start,
       rangeEnd: end,
       counterSampleRange,

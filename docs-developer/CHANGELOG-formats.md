@@ -6,6 +6,12 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 52
+
+Counters contain a new boolean field `relative`. It is true of the samples
+in the counter are relative measuments to the previous count, the first
+sample is 0, the absolute value is unknown.
+
 ### Version 51
 
 Two new marker schema field format types have been added: `flow-id` and `terminating-flow-id`, with string index values (like `unique-string`).
@@ -82,6 +88,11 @@ We've also cleaned up the ResourceTable format:
 Older versions are not documented in this changelog but can be found in [processed-profile-versioning.js](../src/profile-logic/processed-profile-versioning.js).
 
 ## Gecko profile format
+
+### Version 32
+
+The memory counters are now named "malloc-relative" or "malloc-absolute"
+rather than "malloc" (which were all previously relative)
 
 ### Version 31
 

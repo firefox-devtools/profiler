@@ -442,17 +442,18 @@ export type JsTracerTiming = {
 };
 
 /**
- * The memory counter contains relative offsets of memory. This type provides a data
- * structure that can be used to see the total range of change over all the samples.
+ * The memory counter sometimes contains relative offsets of memory. This type provides a data
+ * structure that can be used to see the total range of change over all the samples,
  */
-export type AccumulatedCounterSamples = {|
+export type CounterSummary = {|
   +minCount: number,
   +maxCount: number,
   +countRange: number,
-  // This value holds the accumulation of all the previous counts in the Counter samples.
-  // For a memory counter, this gives the relative offset of bytes in that range
-  // selection. The array will share the indexes of the range filtered counter samples.
-  +accumulatedCounts: number[],
+  // If present this value holds the accumulation of all the previous counts
+  // in the Counter samples.  For a relative memory counter, this gives the
+  // relative offset of bytes in that range selection. The array will share
+  // the indexes of the range filtered counter samples.
+  +accumulatedCounts: ?(number[]),
 |};
 
 /**

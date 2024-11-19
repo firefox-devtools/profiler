@@ -7,7 +7,7 @@
     "debug": false,
     "extensions": { "baseURL": [], "id": [], "length": 0, "name": [] },
     "interval": 1,
-    "preprocessedProfileVersion": 51,
+    "preprocessedProfileVersion": 52,
     "processType": 0,
     "product": "a.out",
     "oscpu": "macOS 14.6.1",
