@@ -568,7 +568,8 @@ async function processTracingEvents(
         match = curMatch;
       }
       if (match) {
-        const dateTimeString = `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}`;
+        const [, year, month, day, hour, minute, second] = match;
+        const dateTimeString = `${year}-${month}-${day}T${hour}:${minute}:${second}`;
         const startTime = new Date(dateTimeString);
         profile.meta.startTime = startTime.getTime();
       } else {
