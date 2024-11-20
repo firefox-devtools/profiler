@@ -3222,9 +3222,7 @@ describe('counter selectors', function () {
   it('can summarise absolute samples', function () {
     const { getState, counterA } = setup();
     counterA.relative = false;
-    counterA.samples.count = [
-      100, 125, 90, 111, 112, 113, 120, 98, 99, 100,
-    ];
+    counterA.samples.count = [100, 125, 90, 111, 112, 113, 120, 98, 99, 100];
     expect(getCounterSelectors(0).getCounterSummary(getState())).toEqual({
       accumulatedCounts: undefined,
       countRange: 35,

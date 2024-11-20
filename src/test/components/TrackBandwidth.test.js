@@ -77,8 +77,8 @@ describe('TrackBandwidth', function () {
           time: thread.samples.time.slice(),
           // Bandwidth usage numbers. They are bytes.
           count: [
-            0, 40000, 50000, 100000, 2000000, 5000000, 30000, 1000000,
-            20000, 1, 12000, 100000,
+            0, 40000, 50000, 100000, 2000000, 5000000, 30000, 1000000, 20000, 1,
+            12000, 100000,
           ],
           length: SAMPLE_COUNT,
         },

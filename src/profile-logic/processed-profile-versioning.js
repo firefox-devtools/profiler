@@ -2285,8 +2285,8 @@ const _upgraders = {
   [52]: (profile) => {
     if (profile.counters && profile.counters.length > 0) {
       for (const counter of profile.counters) {
-        counter.relative = counter.name in ['malloc', "bandwidth"];
-        if (counter.name === "malloc") {
+        counter.relative = counter.name in ['malloc', 'bandwidth'];
+        if (counter.name === 'malloc') {
           counter.name = 'malloc.relative';
         }
       }

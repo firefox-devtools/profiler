@@ -1736,8 +1736,8 @@ export function summariseCounterSamples(
   const startSampleIndex = sampleRange ? sampleRange[0] : 0;
   const endSampleIndex = sampleRange ? sampleRange[1] : samples.length;
   const numSamples = endSampleIndex - startSampleIndex;
-  var accumulatedCounts;
-  var getSample;
+  let accumulatedCounts;
+  let getSample;
 
   if (relative) {
     accumulatedCounts = Array(numSamples);

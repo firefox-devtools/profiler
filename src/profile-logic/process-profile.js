@@ -1065,8 +1065,8 @@ function _processCounters(
       // Absolute memory counter samples are relative to the previous one,
       // it's just that the first sample is absolute.  To make this more
       // consistent with other counters we transform it to absolute here.
-      var accumulated = count[0];
-      for (var i = 1; i < count.length; i++) {
+      let accumulated = count[0];
+      for (let i = 1; i < count.length; i++) {
         accumulated += count[i];
         count[i] = accumulated;
       }

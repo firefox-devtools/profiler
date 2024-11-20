@@ -72,7 +72,7 @@ describe('TrackMemory', function () {
 
     // Relative samples,
     const samplesA = makeSamples(
-      (i) => i == 0 ? 0 : Math.sin(i),
+      (i) => (i === 0 ? 0 : Math.sin(i)),
       thread,
       counterConfig
     );
@@ -83,10 +83,8 @@ describe('TrackMemory', function () {
       counterConfig
     );
     profile.counters = [
-      getCounterForThreadWithSamples(thread, threadIndex,
-        samplesA, true),
-      getCounterForThreadWithSamples(thread, threadIndex,
-        samplesB, false),
+      getCounterForThreadWithSamples(thread, threadIndex, samplesA, true),
+      getCounterForThreadWithSamples(thread, threadIndex, samplesB, false),
     ];
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;

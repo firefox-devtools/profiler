@@ -1566,19 +1566,21 @@ export function getCounterForThreadWithSamples(
  * Given a function to generate the counts make a samples
  * structure.
  */
-export function makeSamples(fn: (number) => number,
+export function makeSamples(
+  fn: (number) => number,
   thread: Thread,
   config: { hasCountNumber: boolean } = {}
 ) {
-  return {time: thread.samples.time.slice(),
-      // Create some arbitrary (positive integer) values for the number.
-      number: config.hasCountNumber
-        ? thread.samples.time.map((_, i) => Math.floor(50 * Math.sin(i) + 50))
-        : undefined,
-      // Create some arbitrary values for the count.
-      count: thread.samples.time.map((_, i) => fn(i)),
-      length: thread.samples.length,
-    };
+  return {
+    time: thread.samples.time.slice(),
+    // Create some arbitrary (positive integer) values for the number.
+    number: config.hasCountNumber
+      ? thread.samples.time.map((_, i) => Math.floor(50 * Math.sin(i) + 50))
+      : undefined,
+    // Create some arbitrary values for the count.
+    count: thread.samples.time.map((_, i) => fn(i)),
+    length: thread.samples.length,
+  };
 }
 
 /**
