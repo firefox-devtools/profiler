@@ -809,6 +809,11 @@ TransformNavigator--focus-function = Odak: { $item }
 # Variables:
 #   $item (String) - Name of the category that transform applied to.
 TransformNavigator--focus-category = Odak kategorisi: { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Düğümü birleştir: { $item }
 # "Merge function" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
