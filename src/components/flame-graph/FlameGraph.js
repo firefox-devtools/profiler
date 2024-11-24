@@ -40,7 +40,6 @@ import type {
   SamplesLikeTable,
   PreviewSelection,
   CallTreeSummaryStrategy,
-  CallNodeInfo,
   IndexIntoCallNodeTable,
   ThreadsKey,
   InnerWindowID,
@@ -48,6 +47,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { FlameGraphTiming } from 'firefox-profiler/profile-logic/flame-graph';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import type {
   CallTree,

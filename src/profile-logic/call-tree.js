@@ -21,8 +21,6 @@ import type {
   CallNodeTable,
   CallNodePath,
   IndexIntoCallNodeTable,
-  CallNodeInfo,
-  CallNodeInfoInverted,
   CallNodeData,
   CallNodeDisplayData,
   Milliseconds,
@@ -37,6 +35,7 @@ import { formatCallNodeNumber, formatPercent } from '../utils/format-numbers';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import * as ProfileData from './profile-data';
 import type { CallTreeSummaryStrategy } from '../types/actions';
+import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 

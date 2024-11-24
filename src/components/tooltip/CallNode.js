@@ -16,7 +16,6 @@ import type {
   CategoryList,
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
-  CallNodeInfo,
   WeightType,
   Milliseconds,
   CallTreeSummaryStrategy,
@@ -31,6 +30,7 @@ import type {
   ItemTimings,
   OneCategoryBreakdown,
 } from 'firefox-profiler/profile-logic/profile-data';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import './CallNode.css';
 import classNames from 'classnames';
