@@ -15,8 +15,8 @@ import {
   shallowCloneFuncTable,
 } from './data-structures';
 import {
-  CallNodeInfoNonInvertedImpl,
-  CallNodeInfoInvertedImpl,
+  CallNodeInfoNonInverted,
+  CallNodeInfoInverted,
 } from './call-node-info';
 import { computeThreadCPURatio } from './cpu';
 import {
@@ -73,8 +73,6 @@ import type {
   BalancedNativeAllocationsTable,
   IndexIntoFrameTable,
   PageList,
-  CallNodeInfo,
-  CallNodeInfoInverted,
   CallNodeTable,
   CallNodePath,
   CallNodeAndCategoryPath,
@@ -99,8 +97,8 @@ import type {
   Bytes,
   ThreadWithReservedFunctions,
   TabID,
-  SuffixOrderIndex,
 } from 'firefox-profiler/types';
+import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -122,10 +120,7 @@ export function getCallNodeInfo(
     funcTable,
     defaultCategory
   );
-  return new CallNodeInfoNonInvertedImpl(
-    callNodeTable,
-    stackIndexToCallNodeIndex
-  );
+  return new CallNodeInfoNonInverted(callNodeTable, stackIndexToCallNodeIndex);
 }
 
 type CallNodeTableAndStackMap = {
@@ -447,7 +442,7 @@ export function getInvertedCallNodeInfo(
   defaultCategory: IndexIntoCategoryList,
   funcCount: number
 ): CallNodeInfoInverted {
-  return new CallNodeInfoInvertedImpl(
+  return new CallNodeInfoInverted(
     nonInvertedCallNodeTable,
     stackIndexToNonInvertedCallNodeIndex,
     defaultCategory,

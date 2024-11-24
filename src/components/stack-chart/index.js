@@ -43,7 +43,6 @@ import { getBottomBoxInfoForCallNode } from '../../profile-logic/profile-data';
 import type {
   Thread,
   CategoryList,
-  CallNodeInfo,
   IndexIntoCallNodeTable,
   CombinedTimingRows,
   MarkerIndex,
@@ -58,6 +57,7 @@ import type {
   InnerWindowID,
   Page,
 } from 'firefox-profiler/types';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import type { ConnectedProps } from '../../utils/connect';
 

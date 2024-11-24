@@ -65,7 +65,6 @@ import type {
   Pid,
   IndexIntoSamplesTable,
   CallNodePath,
-  CallNodeInfo,
   IndexIntoCallNodeTable,
   IndexIntoResourceTable,
   TrackIndex,
@@ -86,6 +85,7 @@ import {
 } from '../profile-logic/transforms';
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import type { TabSlug } from '../app-logic/tabs-handling';
+import type { CallNodeInfo } from '../profile-logic/call-node-info';
 import { intersectSets } from 'firefox-profiler/utils/set';
 
 /**

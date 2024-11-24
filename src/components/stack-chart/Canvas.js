@@ -29,7 +29,6 @@ import type {
   ThreadsKey,
   UserTimingMarkerPayload,
   WeightType,
-  CallNodeInfo,
   IndexIntoCallNodeTable,
   CombinedTimingRows,
   Milliseconds,
@@ -41,6 +40,7 @@ import type {
   InnerWindowID,
   Page,
 } from 'firefox-profiler/types';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import type {
   ChartCanvasScale,

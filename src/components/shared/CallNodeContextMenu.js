@@ -49,7 +49,6 @@ import type {
   TransformType,
   ImplementationFilter,
   IndexIntoCallNodeTable,
-  CallNodeInfo,
   CallNodePath,
   Thread,
   ThreadsKey,
@@ -58,6 +57,7 @@ import type {
 
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 type StateProps = {|
   +thread: Thread | null,

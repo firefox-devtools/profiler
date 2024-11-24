@@ -30,7 +30,6 @@ import type {
   ThreadIndex,
   IndexIntoSamplesTable,
   WeightType,
-  CallNodeInfo,
   CallNodePath,
   StackLineInfo,
   StackAddressInfo,
@@ -46,6 +45,7 @@ import type {
   SelfAndTotal,
   CallNodeSelfAndSummary,
 } from 'firefox-profiler/types';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import type { ThreadSelectorsPerThread } from './thread';
 import type { MarkerSelectorsPerThread } from './markers';
