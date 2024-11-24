@@ -438,29 +438,9 @@ export function getInvertedCallNodeInfo(
   defaultCategory: IndexIntoCategoryList,
   funcCount: number
 ): CallNodeInfoInverted {
-  const callNodeCount = nonInvertedCallNodeTable.length;
-  const suffixOrderedCallNodes = new Uint32Array(callNodeCount);
-  const suffixOrderIndexes = new Uint32Array(callNodeCount);
-
-  // TEMPORARY: Compute a suffix order for the entire non-inverted call node table.
-  // See the CallNodeInfoInverted interface for more details about the suffix order.
-  // By the end of this commit stack, the suffix order will be computed incrementally
-  // as inverted nodes are created; we won't compute the entire order upfront.
-  for (let i = 0; i < callNodeCount; i++) {
-    suffixOrderedCallNodes[i] = i;
-  }
-  suffixOrderedCallNodes.sort((a, b) =>
-    _compareNonInvertedCallNodesInSuffixOrder(a, b, nonInvertedCallNodeTable)
-  );
-  for (let i = 0; i < suffixOrderedCallNodes.length; i++) {
-    suffixOrderIndexes[suffixOrderedCallNodes[i]] = i;
-  }
-
   return new CallNodeInfoInvertedImpl(
     nonInvertedCallNodeTable,
     stackIndexToNonInvertedCallNodeIndex,
-    suffixOrderedCallNodes,
-    suffixOrderIndexes,
     defaultCategory,
     funcCount
   );

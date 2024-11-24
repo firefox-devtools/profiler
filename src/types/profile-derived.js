@@ -316,6 +316,24 @@ export type SuffixOrderIndex = number;
  *
  * Suffix ordered call nodes: [0, 4, 2, 1, 5, 6, 3] (soX -> cnY)
  * Suffix order indexes:      [0, 3, 2, 6, 1, 4, 5] (cnX -> soY)
+ *
+ * ## Incremental order refinement
+ *
+ * Sorting all non-inverted nodes upfront would take a long time on large profiles.
+ * So we don't do that. Instead, we refine the order as new inverted tree nodes
+ * are materialized on demand.
+ *
+ * The ground rules are:
+ *  - For any inverted call node X, getSuffixOrderIndexRangeForCallNode(X) must
+ *    always return the same range.
+ *  - For any inverted call node X, the *set* of suffix ordered call nodes in the
+ *    range returned by getSuffixOrderIndexRangeForCallNode(X) must always be the
+ *    same. Notably, the order in the range does *not* necessarily need to remain
+ *    the same.
+ *
+ * This means that, whenever you have a handle X of an inverted call node, you
+ * can be confident that your checks of the form "is non-inverted call node Y
+ * part of X's range" will work correctly.
  */
 export interface CallNodeInfoInverted extends CallNodeInfo {
   // Get the number of functions. There is one root per function.
@@ -326,10 +344,18 @@ export interface CallNodeInfoInverted extends CallNodeInfo {
   // Get a mapping SuffixOrderIndex -> IndexIntoNonInvertedCallNodeTable.
   // This array contains all non-inverted call node indexes, ordered by
   // call path suffix. See "suffix order" in the documentation above.
+  // Note that the contents of this array will be mutated by CallNodeInfoInverted
+  // when new inverted nodes are created on demand (e.g. during a call to
+  // getChildren or to getCallNodeIndexFromPath). So callers should not hold on
+  // to this array across calls which can create new inverted call nodes.
   getSuffixOrderedCallNodes(): Uint32Array;
 
   // Returns the inverse of getSuffixOrderedCallNodes(), i.e. a mapping
   // IndexIntoNonInvertedCallNodeTable -> SuffixOrderIndex.
+  // Note that the contents of this array will be mutated by CallNodeInfoInverted
+  // when new inverted nodes are created on demand (e.g. during a call to
+  // getChildren or to getCallNodeIndexFromPath). So callers should not hold on
+  // to this array across calls which can create new inverted call nodes.
   getSuffixOrderIndexes(): Uint32Array;
 
   // Get the [start, exclusiveEnd] range of suffix order indexes for this
