@@ -74,8 +74,6 @@ import type {
   FuncTable,
   StackTable,
   SamplesLikeTable,
-  CallNodeInfo,
-  CallNodeInfoInverted,
   IndexIntoCallNodeTable,
   IndexIntoNativeSymbolTable,
   StackAddressInfo,
@@ -84,6 +82,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import { getMatchingAncestorStackForInvertedCallNode } from './profile-data';
+import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
 
 /**
  * For each stack in `stackTable`, and one specific native symbol, compute the

@@ -28,7 +28,6 @@ import type {
   CssPixels,
   DevicePixels,
   Milliseconds,
-  CallNodeInfo,
   IndexIntoCallNodeTable,
   CallTreeSummaryStrategy,
   WeightType,
@@ -42,6 +41,7 @@ import type {
   FlameGraphDepth,
   IndexIntoFlameGraphTiming,
 } from 'firefox-profiler/profile-logic/flame-graph';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import type {
   ChartCanvasScale,

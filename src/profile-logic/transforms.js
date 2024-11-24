@@ -34,7 +34,6 @@ import type {
   CallNodePath,
   CallNodeAndCategoryPath,
   CallNodeTable,
-  CallNodeInfo,
   StackType,
   ImplementationFilter,
   Transform,
@@ -49,6 +48,7 @@ import type {
   CategoryList,
   Milliseconds,
 } from 'firefox-profiler/types';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 import type { StringTable } from 'firefox-profiler/utils/string-table';
 
 /**

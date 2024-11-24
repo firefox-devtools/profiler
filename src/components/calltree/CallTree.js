@@ -38,7 +38,6 @@ import type {
   State,
   ImplementationFilter,
   ThreadsKey,
-  CallNodeInfo,
   CategoryList,
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
@@ -47,6 +46,7 @@ import type {
   SelectionContext,
 } from 'firefox-profiler/types';
 import type { CallTree as CallTreeType } from 'firefox-profiler/profile-logic/call-tree';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import type {
   Column,
