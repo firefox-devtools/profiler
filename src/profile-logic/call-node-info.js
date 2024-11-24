@@ -314,46 +314,6 @@ type InvertedNonRootCallNodeTable = {|
   length: number,
 |};
 
-// Compute the "suffix order index range" for each root of the inverted call
-// node info, i.e. the range of suffix order indexes so that all non-inverted
-// call nodes in that range have a call path which ends with the root's func.
-// The returned array `rangeEnd` has just the (exclusive) end of those ranges;
-// the start of each range is the end of the previous range, or zero.
-//
-// More explicitly, the suffix order index range for the inverted root for func X is:
-// (X == 0 ? 0 : rangeEnd[X - 1]) .. rangeEnd[X]
-function _computeInvertedRootSuffixOrderIndexRanges(
-  callNodeTable: CallNodeTable,
-  suffixOrderedCallNodes: Uint32Array,
-  funcCount: number
-): Uint32Array {
-  const rootSuffixOrderIndexRangeEndCol = new Uint32Array(funcCount);
-  const callNodeCount = suffixOrderedCallNodes.length;
-
-  // suffixOrderedCallNodes is ordered by callNodeTable.func[callNodeIndex].
-  // Walk it from front to back and terminate the index ranges whenever the
-  // func changes.
-  let currentFunc = 0;
-  for (let i = 0; i < callNodeCount; i++) {
-    const callNodeIndex = suffixOrderedCallNodes[i];
-    const callNodeFunc = callNodeTable.func[callNodeIndex];
-    // assert(currentFunc <= callNodeFunc, "guaranteed by suffix order")
-    // If the current node has a different func from currentFunc, this means
-    // that the range for currentFunc ends at i.
-    // There may also be funcs with empty ranges between currentFunc and callNodeFunc.
-    for (; currentFunc < callNodeFunc; currentFunc++) {
-      rootSuffixOrderIndexRangeEndCol[currentFunc] = i;
-    }
-  }
-  // Terminate the current func, and any remaining funcs in the funcTable for
-  // which there is no non-inverted call node whose call path ends in that func.
-  for (; currentFunc < funcCount; currentFunc++) {
-    rootSuffixOrderIndexRangeEndCol[currentFunc] = callNodeCount;
-  }
-
-  return rootSuffixOrderIndexRangeEndCol;
-}
-
 // Compute the InvertedRootCallNodeTable.
 // We compute this information upfront for all roots. The root count is fixed -
 // the number of roots is the same as the number of functions in the funcTable.
@@ -482,14 +442,93 @@ function _createEmptyInvertedNonRootCallNodeTable(): InvertedNonRootCallNodeTabl
   };
 }
 
+// The return type of _computeSuffixOrderForInvertedRoots.
+//
+// This is not the fully-refined suffix order; you could say that it's
+// refined up to depth zero. It is refined enough so that every root has a
+// contiguous range in the suffix order, where each range contains the root's
+// corresponding non-inverted nodes.
+type SuffixOrderForInvertedRoots = {|
+  suffixOrderedCallNodes: Uint32Array,
+  suffixOrderIndexes: Uint32Array,
+  rootSuffixOrderIndexRangeEndCol: Uint32Array,
+|};
+
+/**
+ * Computes an ordering for the non-inverted call node table where all
+ * non-inverted call nodes are ordered by their self func.
+ *
+ * This function is very performance sensitive. The number of non-inverted call
+ * nodes can be very high, e.g. ~3 million for https://share.firefox.dev/3N56qMu
+ */
+function _computeSuffixOrderForInvertedRoots(
+  nonInvertedCallNodeTable: CallNodeTable,
+  funcCount: number
+): SuffixOrderForInvertedRoots {
+  // Rather than using Array.prototype.sort, this function uses the technique
+  // used by "radix sort":
+  //
+  //  1. Count the occurrences per key, i.e. the number of call nodes per func.
+  //  2. Reserve slices in the sorted space, by accumulating the counts into a
+  //     start index per partition.
+  //  3. Put the unsorted values into their sorted spots, incrementing the
+  //     per-partition next index as we go.
+  //
+  // This is much faster, and it also makes it easier to compute the inverse
+  // mapping (suffixOrderIndexes) and the rootSuffixOrderIndexRangeEndCol.
+
+  // Pass 1: Compute, per func, how many non-inverted call nodes end in this func.
+  const nodeCountPerFunc = new Uint32Array(funcCount);
+  const callNodeCount = nonInvertedCallNodeTable.length;
+  const callNodeTableFuncCol = nonInvertedCallNodeTable.func;
+  for (let i = 0; i < callNodeCount; i++) {
+    const func = callNodeTableFuncCol[i];
+    nodeCountPerFunc[func]++;
+  }
+
+  // Pass 2: Compute cumulative start index based on the counts.
+  const startIndexPerFunc = nodeCountPerFunc; // Warning: we are reusing the same array
+  let nextFuncStartIndex = 0;
+  for (let func = 0; func < startIndexPerFunc.length; func++) {
+    const count = nodeCountPerFunc[func];
+    startIndexPerFunc[func] = nextFuncStartIndex;
+    nextFuncStartIndex += count;
+  }
+
+  // Pass 3: Compute the new ordering based on the reserved slices in startIndexPerFunc.
+  const nextIndexPerFunc = startIndexPerFunc;
+  const suffixOrderedCallNodes = new Uint32Array(callNodeCount);
+  const suffixOrderIndexes = new Uint32Array(callNodeCount);
+  for (let callNode = 0; callNode < callNodeCount; callNode++) {
+    const func = callNodeTableFuncCol[callNode];
+    const orderIndex = nextIndexPerFunc[func]++;
+    suffixOrderedCallNodes[orderIndex] = callNode;
+    suffixOrderIndexes[callNode] = orderIndex;
+  }
+
+  // The indexes in nextIndexPerFunc have now been advanced such that they point
+  // at the end of each partition.
+  const rootSuffixOrderIndexRangeEndCol = startIndexPerFunc;
+
+  return {
+    suffixOrderedCallNodes,
+    suffixOrderIndexes,
+    rootSuffixOrderIndexRangeEndCol,
+  };
+}
+
 // Information used to create the children of a node in the inverted tree.
 type ChildrenInfo = {|
   // The func for each child. Duplicate-free and sorted by func.
-  funcPerChild: IndexIntoFuncTable[],
+  funcPerChild: Uint32Array, // IndexIntoFuncTable[]
   // The number of deep nodes for each child. Every entry is non-zero.
-  deepNodeCountPerChild: number[],
-  // The deep nodes of all children, concatenated into a single array.
-  // The length of this array is the sum of the values in deepNodeCountPerChild.
+  deepNodeCountPerChild: Uint32Array,
+  // The subset of the parent's self nodes which are not part of childrenSelfNodes.
+  selfNodesWhichEndAtParent: IndexIntoCallNodeTable[],
+  // The self nodes and their corresponding deep nodes for all children, each
+  // flattened into a single array.
+  // The length of these arrays is the sum of the values in deepNodeCountPerChild.
+  childrenSelfNodes: Uint32Array,
   childrenDeepNodes: Uint32Array,
   // The suffixOrderIndexRangeStart of the first child.
   childrenSuffixOrderIndexRangeStart: number,
@@ -707,25 +746,24 @@ export class CallNodeInfoInvertedImpl implements CallNodeInfoInverted {
   constructor(
     callNodeTable: CallNodeTable,
     stackIndexToNonInvertedCallNodeIndex: Int32Array,
-    suffixOrderedCallNodes: Uint32Array, // IndexIntoCallNodeTable[],
-    suffixOrderIndexes: Uint32Array, // Map<IndexIntoCallNodeTable, SuffixOrderIndex>,
     defaultCategory: IndexIntoCategoryList,
     funcCount: number
   ) {
     this._callNodeTable = callNodeTable;
     this._stackIndexToNonInvertedCallNodeIndex =
       stackIndexToNonInvertedCallNodeIndex;
+
+    const {
+      suffixOrderedCallNodes,
+      suffixOrderIndexes,
+      rootSuffixOrderIndexRangeEndCol,
+    } = _computeSuffixOrderForInvertedRoots(callNodeTable, funcCount);
+
     this._suffixOrderedCallNodes = suffixOrderedCallNodes;
     this._suffixOrderIndexes = suffixOrderIndexes;
     this._defaultCategory = defaultCategory;
     this._rootCount = funcCount;
 
-    const rootSuffixOrderIndexRangeEndCol =
-      _computeInvertedRootSuffixOrderIndexRanges(
-        callNodeTable,
-        suffixOrderedCallNodes,
-        funcCount
-      );
     const invertedRootCallNodeTable = _createInvertedRootCallNodeTable(
       callNodeTable,
       rootSuffixOrderIndexRangeEndCol,
@@ -816,11 +854,19 @@ export class CallNodeInfoInvertedImpl implements CallNodeInfoInverted {
       return [];
     }
 
+    this._applyRefinedSuffixOrderForNode(
+      parentNodeHandle,
+      childrenInfo.selfNodesWhichEndAtParent,
+      childrenInfo.childrenSelfNodes
+    );
+
     return this._createChildrenForInfo(childrenInfo, parentNodeHandle);
   }
 
   /**
-   * Compute the information needed to create the children of parentNodeHandle.
+   * Compute the information needed to create the children of parentNodeHandle,
+   * and the information needed to refine the suffix order for the parent's
+   * suffix order index range.
    *
    * As we go deeper into the inverted tree, we go higher up in the non-inverted
    * tree: To create the children of an inverted node, we need to look at the
@@ -835,67 +881,132 @@ export class CallNodeInfoInvertedImpl implements CallNodeInfoInverted {
     const parentDeepNodeCount = parentDeepNodes.length;
     const [parentIndexRangeStart, parentIndexRangeEnd] =
       this.getSuffixOrderIndexRangeForCallNode(parentNodeHandle);
-    if (parentIndexRangeStart + parentDeepNodeCount !== parentIndexRangeEnd) {
+    const parentSelfNodes = this._suffixOrderedCallNodes.subarray(
+      parentIndexRangeStart,
+      parentIndexRangeEnd
+    );
+
+    if (parentSelfNodes.length !== parentDeepNodes.length) {
       throw new Error('indexes out of sync');
     }
 
-    const callNodeTable = this._callNodeTable;
+    // We have the parent's self nodes and their corresponding deep nodes.
+    // These nodes are currently only sorted up to the parent's depth:
+    // we know that every parentDeepNode has the parent's func.
+    // But if we look at the prefix of each parentDoopNode, we'll encounter
+    // funcs in an arbitrary order.
+    //
+    // It is this function's responsibility to come up with a re-arranged order
+    // such that each of the newly-created child nodes can have a contiguous
+    // range of suffix ordered call nodes.
+    //
+    // To compute the new order, we do the following:
+    //
+    //  1. We iterate over all the deep nodes in the parent's range, and count
+    //     how many there are, per deep node func.
+    //  2. We reserve space based on those counts, by computing a start index
+    //     for each collection of deep nodes (one partition per func).
+    //  3. We create ordered arrays, by taking the unordered nodes and putting
+    //     them in the right spot based on the computed start indexes.
+    //
+    // The parent may also have deep nodes which don't have a prefix. We track
+    // those separately. Once the suffix order is updated, the corresponding
+    // self nodes for these deep nodes will come *before* the ordered-by-func
+    // nodes.
 
-    // Count how many of the parent's deep nodes end at the parent. If there
-    // are any, they will all be at the start of the parentDeepNodes array by
-    // construction of the suffix order.
-    let nodesWhichEndHereCount = 0;
-    while (nodesWhichEndHereCount < parentDeepNodeCount) {
-      const deepNode = parentDeepNodes[nodesWhichEndHereCount];
-      if (callNodeTable.prefix[deepNode] !== -1) {
-        break;
+    // These three columns write down { selfNode, deepNode, func } per
+    // non-inverted call node in the parent's range, but only for the nodes
+    // where the deep node has a parent. If the deep node does not have a
+    // parent, then it's not relevant for the inverted node's children, and its
+    // corresponding self node is stored in `selfNodesWhichEndHere`.
+    const unsortedCallNodesSelfNodeCol = [];
+    const unsortedCallNodesDeepNodeCol = [];
+    const unsortedCallNodesFuncCol = [];
+
+    const selfNodesWhichEndHere = [];
+
+    // Pass 1: Count the deep nodes per func, and build up a list of funcs.
+    // We will need to create a child for each deep node func, and each child will
+    // need to know how many deep nodes it has.
+    const deepNodeCountPerFunc = new Map();
+    const callNodeTable = this._callNodeTable;
+    for (let i = 0; i < parentDeepNodeCount; i++) {
+      const selfNode = parentSelfNodes[i];
+      const parentDeepNode = parentDeepNodes[i];
+      const deepNode = callNodeTable.prefix[parentDeepNode];
+      if (deepNode !== -1) {
+        const func = callNodeTable.func[deepNode];
+        const previousCountForThisFunc = deepNodeCountPerFunc.get(func);
+        if (previousCountForThisFunc === undefined) {
+          deepNodeCountPerFunc.set(func, 1);
+        } else {
+          deepNodeCountPerFunc.set(func, previousCountForThisFunc + 1);
+        }
+
+        unsortedCallNodesSelfNodeCol.push(selfNode);
+        unsortedCallNodesDeepNodeCol.push(deepNode);
+        unsortedCallNodesFuncCol.push(func);
+      } else {
+        selfNodesWhichEndHere.push(selfNode);
       }
-      nodesWhichEndHereCount++;
+    }
+
+    const nodesWhichEndHereCount = selfNodesWhichEndHere.length;
+    const childrenDeepNodeCount = unsortedCallNodesDeepNodeCol.length;
+    if (
+      nodesWhichEndHereCount + childrenDeepNodeCount !==
+      parentDeepNodeCount
+    ) {
+      throw new Error('indexes out of sync');
     }
 
     if (nodesWhichEndHereCount === parentDeepNodeCount) {
       // All deep nodes ended at the parent's depth. The parent has no children.
+      // Also, the suffix order is already fully refined for the parent's range.
       return null;
     }
 
-    const childrenDeepNodeCount = parentDeepNodeCount - nodesWhichEndHereCount;
-    const childrenDeepNodes = new Uint32Array(childrenDeepNodeCount);
-    // assert(childrenDeepNodeCount > 0);
+    // We create one child for each distinct func we found. The children need to
+    // be ordered by func.
+    const funcPerChild = new Uint32Array(deepNodeCountPerFunc.keys());
+    funcPerChild.sort(); // Fast typed-array sort
+    const childCount = funcPerChild.length;
 
-    // Iterate over the remaining deep nodes, get each deep node's prefix,
-    // and build up our list of children. For each child, compute its func and
-    // its number of deep nodes.
+    // Pass 2: Using the counts in deepNodeCountPerFunc, reserve the right amount
+    // of slots in the sorted arrays, by computing accumulated start indexes in
+    // startIndexPerChild.
+    // These start indexes slice the range 0..childrenDeepNodeCount into
+    // partitions; one partition per child, in the right order.
+    const startIndexPerChild = new Uint32Array(childCount);
+    const deepNodeCountPerChild = new Uint32Array(childCount);
+    const funcToChildIndex = new Map();
 
-    const firstChildFirstParentDeepNode =
-      parentDeepNodes[nodesWhichEndHereCount];
-    const firstChildFirstDeepNode =
-      callNodeTable.prefix[firstChildFirstParentDeepNode];
-    childrenDeepNodes[0] = firstChildFirstDeepNode;
-    const firstChildFunc = callNodeTable.func[firstChildFirstDeepNode];
+    let nextChildStartIndex = 0;
+    for (let childIndex = 0; childIndex < childCount; childIndex++) {
+      const func = funcPerChild[childIndex];
+      funcToChildIndex.set(func, childIndex);
 
-    const deepNodeCountPerChild = [];
-    const funcPerChild = [];
-
-    let currentChildFunc = firstChildFunc;
-    let currentChildDeepNodeCount = 1;
-    for (let j = 1; j < childrenDeepNodeCount; j++) {
-      const parentDeepNode = parentDeepNodes[nodesWhichEndHereCount + j];
-      const deepNode = callNodeTable.prefix[parentDeepNode];
-      childrenDeepNodes[j] = deepNode;
-      // assert(deepNode !== -1, "parentDeepNodes is sorted so that all call paths which end at this depth come first (by definition of the suffix order), and we already skipped those");
-      const deepNodeFunc = callNodeTable.func[deepNode];
-      // assert(currentChildFunc <= deepNodeFunc, "parentDeepNodes is sorted by prefix func, by definition of the suffix order (at least in this range, because the rest of the call path is identical for all nodes in parentDeepNodes)");
-
-      if (deepNodeFunc !== currentChildFunc) {
-        funcPerChild.push(currentChildFunc);
-        deepNodeCountPerChild.push(currentChildDeepNodeCount);
-        currentChildFunc = deepNodeFunc;
-        currentChildDeepNodeCount = 0;
-      }
-      currentChildDeepNodeCount++;
+      const deepNodeCount = ensureExists(deepNodeCountPerFunc.get(func));
+      deepNodeCountPerChild[childIndex] = deepNodeCount;
+      startIndexPerChild[childIndex] = nextChildStartIndex;
+      nextChildStartIndex += deepNodeCount;
     }
-    funcPerChild.push(currentChildFunc);
-    deepNodeCountPerChild.push(currentChildDeepNodeCount);
+
+    // Pass 3: Compute the ordered selfNode and deepNode arrays.
+    const nextIndexPerChild = startIndexPerChild;
+    const childrenDeepNodes = new Uint32Array(childrenDeepNodeCount);
+    const childrenSelfNodes = new Uint32Array(childrenDeepNodeCount);
+    for (let i = 0; i < childrenDeepNodeCount; i++) {
+      const func = unsortedCallNodesFuncCol[i];
+      const childIndex = ensureExists(funcToChildIndex.get(func));
+
+      const selfNode = unsortedCallNodesSelfNodeCol[i];
+      const deepNode = unsortedCallNodesDeepNodeCol[i];
+
+      const newIndex = nextIndexPerChild[childIndex]++;
+      childrenDeepNodes[newIndex] = deepNode;
+      childrenSelfNodes[newIndex] = selfNode;
+    }
 
     const childrenSuffixOrderIndexRangeStart =
       parentIndexRangeStart + nodesWhichEndHereCount;
@@ -904,8 +1015,61 @@ export class CallNodeInfoInvertedImpl implements CallNodeInfoInverted {
       funcPerChild,
       deepNodeCountPerChild,
       childrenSuffixOrderIndexRangeStart,
+      selfNodesWhichEndAtParent: selfNodesWhichEndHere,
+      childrenSelfNodes,
       childrenDeepNodes,
     };
+  }
+
+  /**
+   * Within the suffix order index range of the given inverted node call node,
+   * replace the current suffixOrderedCallNodes with
+   * [...selfNodesWhichEndHere, ...selfNodesOrderedByDeepFunc].
+   * Those must be the same nodes, just in a different order.
+   *
+   * This updates both this._suffixOrderedCallNodes and this._suffixOrderIndexes
+   * so that the two remain in sync.
+   *
+   * After this call, the suffix order will be accurate up to depth k + 1 for
+   * the given range, k being the depth of the inverted call node identified by
+   * nodeHandle.
+   *
+   * Preconditions:
+   *  - All call nodes in the range must share the call path suffix which is
+   *    represented by the inverted node `nodeHandle`; the length of this suffix
+   *    is k + 1 (because nodeHandle's depth in the inverted tree is k).
+   *  - selfNodesWhichEndHere must be the subset of call nodes in that range
+   *    which do not have a (k + 1)'th parent.
+   *  - selfNodesOrderedByDeepFunc must be the subset of call nodes which *do*
+   *    have a (k + 1)'th parent, and they must be ordered by that parent's func.
+   */
+  _applyRefinedSuffixOrderForNode(
+    nodeHandle: InvertedCallNodeHandle,
+    selfNodesWhichEndHere: IndexIntoCallNodeTable[],
+    selfNodesOrderedByDeepFunc: Uint32Array
+  ) {
+    const [suffixOrderIndexRangeStart, suffixOrderIndexRangeEnd] =
+      this.getSuffixOrderIndexRangeForCallNode(nodeHandle);
+    const suffixOrderIndexes = this._suffixOrderIndexes;
+    const suffixOrderedCallNodes = this._suffixOrderedCallNodes;
+
+    let nextSuffixOrderIndex = suffixOrderIndexRangeStart;
+    for (let i = 0; i < selfNodesWhichEndHere.length; i++) {
+      const selfNode = selfNodesWhichEndHere[i];
+      const orderIndex = nextSuffixOrderIndex++;
+      suffixOrderIndexes[selfNode] = orderIndex;
+      suffixOrderedCallNodes[orderIndex] = selfNode;
+    }
+    for (let i = 0; i < selfNodesOrderedByDeepFunc.length; i++) {
+      const selfNode = selfNodesOrderedByDeepFunc[i];
+      const orderIndex = nextSuffixOrderIndex++;
+      suffixOrderIndexes[selfNode] = orderIndex;
+      suffixOrderedCallNodes[orderIndex] = selfNode;
+    }
+
+    if (nextSuffixOrderIndex !== suffixOrderIndexRangeEnd) {
+      throw new Error('Indexes out of sync');
+    }
   }
 
   /**
@@ -1125,7 +1289,8 @@ export class CallNodeInfoInvertedImpl implements CallNodeInfoInverted {
       this._invertedNonRootCallNodeTable.deepNodes[nonRootIndex],
       '_takeDeepNodesForInvertedNode should only be called once for each node, and only after its parent created its children.'
     );
-    // Null it out the stored deep nodes, because we won't need them after this.
+    // Null it out the stored deep nodes, because we won't need them after this,
+    // and because their order may become out of sync after refinement.
     this._invertedNonRootCallNodeTable.deepNodes[nonRootIndex] = null;
     return deepNodes;
   }
