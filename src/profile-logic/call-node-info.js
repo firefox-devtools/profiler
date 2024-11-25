@@ -66,12 +66,6 @@ export interface CallNodeInfo {
     func: IndexIntoFuncTable
   ): IndexIntoCallNodeTable | null;
 
-  // Returns whether the given node is a root node.
-  isRoot(callNodeIndex: IndexIntoCallNodeTable): boolean;
-
-  // Returns the list of children of a node.
-  getChildren(callNodeIndex: IndexIntoCallNodeTable): IndexIntoCallNodeTable[];
-
   // These functions return various properties about each node. You could also
   // get these properties from the call node table, but that only works if the
   // call node is a non-inverted call node (because we only have a non-inverted
@@ -258,30 +252,6 @@ export class CallNodeInfoNonInverted implements CallNodeInfo {
     }
 
     return null;
-  }
-
-  isRoot(callNodeIndex: IndexIntoCallNodeTable): boolean {
-    return this._callNodeTable.prefix[callNodeIndex] === -1;
-  }
-
-  getChildren(callNodeIndex: IndexIntoCallNodeTable): IndexIntoCallNodeTable[] {
-    if (
-      this._callNodeTable.subtreeRangeEnd[callNodeIndex] ===
-      callNodeIndex + 1
-    ) {
-      return [];
-    }
-
-    const children = [];
-    const firstChild = callNodeIndex + 1;
-    for (
-      let childCallNodeIndex = firstChild;
-      childCallNodeIndex !== -1;
-      childCallNodeIndex = this._callNodeTable.nextSibling[childCallNodeIndex]
-    ) {
-      children.push(childCallNodeIndex);
-    }
-    return children;
   }
 
   prefixForNode(
@@ -1022,6 +992,7 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     return this._rootCount;
   }
 
+  // Returns whether the given node is a root node.
   isRoot(nodeHandle: InvertedCallNodeHandle): boolean {
     return nodeHandle < this._rootCount;
   }
