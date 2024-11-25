@@ -18,6 +18,7 @@ import {
   getEmptyNativeSymbolTable,
 } from './data-structures';
 import { immutableUpdate, ensureExists, coerce } from '../utils/flow';
+import { verifyMagic, SIMPLEPERF as SIMPLEPERF_MAGIC } from '../utils/magic';
 import { attemptToUpgradeProcessedProfileThroughMutation } from './processed-profile-versioning';
 import { upgradeGeckoProfileToCurrentVersion } from './gecko-profile-versioning';
 import {
@@ -25,10 +26,6 @@ import {
   convertPerfScriptProfile,
 } from './import/linux-perf';
 import { isArtTraceFormat, convertArtTraceProfile } from './import/art-trace';
-import {
-  isSimpleperfTraceFormat,
-  convertSimpleperfTraceProfile,
-} from './import/simpleperf';
 import {
   PROCESSED_PROFILE_VERSION,
   INTERVAL,
@@ -1886,7 +1883,10 @@ export async function unserializeProfileOfArbitraryFormat(
       const arrayBuffer: ArrayBuffer = (arbitraryFormat: any);
       if (isArtTraceFormat(arrayBuffer)) {
         arbitraryFormat = convertArtTraceProfile(arrayBuffer);
-      } else if (isSimpleperfTraceFormat(arrayBuffer)) {
+      } else if (verifyMagic(SIMPLEPERF_MAGIC, arrayBuffer)) {
+        const { convertSimpleperfTraceProfile } = await import(
+          './import/simpleperf'
+        );
         arbitraryFormat = convertSimpleperfTraceProfile(arrayBuffer);
       } else {
         try {

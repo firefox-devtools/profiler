@@ -14,16 +14,27 @@ import type {
   IndexIntoStackTable,
   ProfileMeta,
   ResourceTable,
-  SerializableSamplesTable,
-  SerializableProfile,
-  SerializableThread,
+  SamplesTable,
+  Profile,
+  Thread,
   StackTable,
 } from 'firefox-profiler/types/profile';
+import {
+  getEmptyFuncTable,
+  getEmptyResourceTable,
+  getEmptyFrameTable,
+  getEmptyStackTable,
+  getEmptySamplesTable,
+  getEmptyRawMarkerTable,
+  getEmptyNativeSymbolTable,
+} from 'firefox-profiler/profile-logic/data-structures';
 import { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
+import {
+  verifyMagic,
+  SIMPLEPERF as SIMPLEPERF_MAGIC,
+} from 'firefox-profiler/utils/magic';
 
 import Long from 'long';
-
-const $NotNull = <T>(val: T): $NonMaybeType<T> => val;
 
 function toNumber(value: Long | number): number {
   if (Long.isLong(value)) {
@@ -62,13 +73,7 @@ class Categories {
 class FirefoxResourceTable {
   strings: UniqueStringArray;
 
-  resourceTable: ResourceTable = {
-    length: 0,
-    lib: [],
-    name: [],
-    host: [],
-    type: [],
-  };
+  resourceTable: ResourceTable = getEmptyResourceTable();
   resourcesMap: Map<number, IndexIntoResourceTable> = new Map();
 
   constructor(strings: UniqueStringArray) {
@@ -80,38 +85,25 @@ class FirefoxResourceTable {
   }
 
   findOrAddResource(file: report.IFile): IndexIntoResourceTable {
-    if (!this.resourcesMap.has(file.id)) {
-      this.resourcesMap.set(file.id, this.resourceTable.length);
-
+    let resourceIndex = this.resourcesMap.get(file.id);
+    if (!resourceIndex) {
       this.resourceTable.lib.push(null);
       this.resourceTable.name.push(this.strings.indexForString(file.path));
       this.resourceTable.host.push(null);
       this.resourceTable.type.push(1); // Library
 
-      this.resourceTable.length++;
+      resourceIndex = this.resourceTable.length++;
+      this.resourcesMap.set(file.id, resourceIndex);
     }
 
-    return $NotNull(this.resourcesMap.get(file.id));
+    return resourceIndex;
   }
 }
 
 class FirefoxFuncTable {
   strings: UniqueStringArray;
 
-  funcTable: FuncTable = {
-    name: [],
-
-    isJS: [],
-    relevantForJS: [],
-
-    resource: [],
-
-    fileName: [],
-    lineNumber: [],
-    columnNumber: [],
-
-    length: 0,
-  };
+  funcTable: FuncTable = getEmptyFuncTable();
   funcMap: Map<string, IndexIntoFuncTable> = new Map();
 
   constructor(strings: UniqueStringArray) {
@@ -126,9 +118,9 @@ class FirefoxFuncTable {
     const nameIndex = this.strings.indexForString(name);
 
     const mapKey = `${nameIndex}-${resourceIndex}`;
-    if (!this.funcMap.has(mapKey)) {
-      this.funcMap.set(mapKey, this.funcTable.length);
 
+    let funcIndex = this.funcMap.get(mapKey);
+    if (!funcIndex) {
       this.funcTable.name.push(nameIndex);
       this.funcTable.isJS.push(false);
       this.funcTable.relevantForJS.push(false);
@@ -137,34 +129,18 @@ class FirefoxFuncTable {
       this.funcTable.lineNumber.push(null);
       this.funcTable.columnNumber.push(null);
 
-      this.funcTable.length++;
+      funcIndex = this.funcTable.length++;
+      this.funcMap.set(mapKey, funcIndex);
     }
 
-    return $NotNull(this.funcMap.get(mapKey));
+    return funcIndex;
   }
 }
 
 class FirefoxFrameTable {
   strings: UniqueStringArray;
 
-  frameTable: FrameTable = {
-    address: [],
-    inlineDepth: [],
-
-    category: [],
-    subcategory: [],
-    func: [],
-
-    nativeSymbol: [],
-
-    innerWindowID: [],
-
-    implementation: [],
-    line: [],
-    column: [],
-
-    length: 0,
-  };
+  frameTable: FrameTable = getEmptyFrameTable();
   frameMap: Map<string, IndexIntoFrameTable> = new Map();
 
   constructor(strings: UniqueStringArray) {
@@ -181,9 +157,8 @@ class FirefoxFrameTable {
   ): IndexIntoFrameTable {
     const mapKey = `${funcIndex}-${category}`;
 
-    if (!this.frameMap.has(mapKey)) {
-      this.frameMap.set(mapKey, this.frameTable.length);
-
+    let frameIndex = this.frameMap.get(mapKey);
+    if (!frameIndex) {
       this.frameTable.address.push(-1);
       this.frameTable.inlineDepth.push(0);
       this.frameTable.category.push(category);
@@ -195,24 +170,18 @@ class FirefoxFrameTable {
       this.frameTable.line.push(null);
       this.frameTable.column.push(null);
 
-      this.frameTable.length++;
+      frameIndex = this.frameTable.length++;
+      this.frameMap.set(mapKey, frameIndex);
     }
 
-    return $NotNull(this.frameMap.get(mapKey));
+    return frameIndex;
   }
 }
 
 class FirefoxSampleTable {
   strings: UniqueStringArray;
 
-  stackTable: StackTable = {
-    frame: [],
-    category: [],
-    subcategory: [],
-    prefix: [],
-
-    length: 0,
-  };
+  stackTable: StackTable = getEmptyStackTable();
   stackMap: Map<string, IndexIntoStackTable> = new Map();
 
   constructor(strings: UniqueStringArray) {
@@ -230,18 +199,18 @@ class FirefoxSampleTable {
   ): IndexIntoStackTable {
     const mapKey = `${frameIndex}-${prefix ?? 'null'}`;
 
-    if (!this.stackMap.has(mapKey)) {
-      this.stackMap.set(mapKey, this.stackTable.length);
-
+    let stackIndex = this.stackMap.get(mapKey);
+    if (!stackIndex) {
       this.stackTable.frame.push(frameIndex);
       this.stackTable.category.push(category);
       this.stackTable.subcategory.push(0);
       this.stackTable.prefix.push(prefix);
 
-      this.stackTable.length++;
+      stackIndex = this.stackTable.length++;
+      this.stackMap.set(mapKey, stackIndex);
     }
 
-    return $NotNull(this.stackMap.get(mapKey));
+    return stackIndex;
   }
 }
 
@@ -254,13 +223,7 @@ class FirefoxThread {
 
   strings = new UniqueStringArray();
 
-  sampleTable: SerializableSamplesTable = {
-    stack: [],
-    time: [],
-    weight: null,
-    weightType: 'samples',
-    length: 0,
-  };
+  sampleTable: SamplesTable = getEmptySamplesTable();
 
   stackTable: FirefoxSampleTable = new FirefoxSampleTable(this.strings);
   frameTable: FirefoxFrameTable = new FirefoxFrameTable(this.strings);
@@ -277,7 +240,7 @@ class FirefoxThread {
     this.name = thread.threadName ?? '';
   }
 
-  toJson(): SerializableThread {
+  toJson(): Thread {
     return {
       processType: 'default',
       processStartupTime: 0,
@@ -287,34 +250,16 @@ class FirefoxThread {
       pausedRanges: [],
       name: this.name,
       isMainThread: this.isMainThread,
-      // processName?: string,
-      // isJsTracer?: boolean,
       pid: this.pid.toString(),
       tid: this.tid,
       samples: this.sampleTable,
-      markers: {
-        data: [],
-        name: [],
-        startTime: [],
-        endTime: [],
-        phase: [],
-        category: [],
-        length: 0,
-      },
+      markers: getEmptyRawMarkerTable(),
       stackTable: this.stackTable.toJson(),
       frameTable: this.frameTable.toJson(),
-      // Strings for profiles are collected into a single table, and are referred to by
-      // their index by other tables.
-      stringArray: this.strings.serializeToArray(),
+      stringTable: this.strings,
       funcTable: this.funcTable.toJson(),
       resourceTable: this.resourceTable.toJson(),
-      nativeSymbols: {
-        libIndex: [],
-        address: [],
-        name: [],
-        functionSize: [],
-        length: 0,
-      },
+      nativeSymbols: getEmptyNativeSymbolTable(),
     };
   }
 
@@ -387,7 +332,7 @@ class FirefoxThread {
     }
 
     this.sampleTable.stack.push(prefixStackId);
-    $NotNull(this.sampleTable.time).push(toMilliseconds(sample.time ?? 0));
+    this.sampleTable.time.push(toMilliseconds(sample.time ?? 0));
 
     if (this.sampleTable.weight) {
       const weight =
@@ -414,7 +359,7 @@ class FirefoxProfile {
   sampleCount: number = 0;
   lostCount: number = 0;
 
-  toJson(): SerializableProfile {
+  toJson(): Profile {
     return {
       meta: this.getProfileMeta(),
       libs: [],
@@ -440,8 +385,6 @@ class FirefoxProfile {
       symbolicationNotSupported: true,
       markerSchema: [],
 
-      // platform: "Android",
-      // device?: string,
       importedFrom: 'Simpleperf',
 
       // Do not distinguish between different stack types?
@@ -512,7 +455,7 @@ class FirefoxProfile {
     const thread = this.threadMap.get(sample.threadId);
 
     if (!thread) {
-      // logger.warn(`Thread not found for sample: ${sample.threadId}`);
+      console.warn(`Thread not found for sample: ${sample.threadId}`);
       return;
     }
 
@@ -521,19 +464,9 @@ class FirefoxProfile {
 }
 
 export class SimpleperfReportConverter {
-  static magic = 'SIMPLEPERF';
-
   buffer: ArrayBuffer;
   bufferView: DataView;
   bufferOffset: number = 0;
-
-  static verifyMagic(traceBuffer: ArrayBuffer): boolean {
-    return (
-      new TextDecoder('utf8').decode(
-        traceBuffer.slice(0, this.magic.length)
-      ) === this.magic
-    );
-  }
 
   constructor(buffer: ArrayBuffer) {
     this.buffer = buffer;
@@ -559,10 +492,10 @@ export class SimpleperfReportConverter {
   }
 
   readMagic() {
-    if (!SimpleperfReportConverter.verifyMagic(this.buffer)) {
+    if (!verifyMagic(SIMPLEPERF_MAGIC, this.buffer)) {
       throw new Error('Invalid simpleperf file');
     }
-    this.bufferOffset += SimpleperfReportConverter.magic.length;
+    this.bufferOffset += SIMPLEPERF_MAGIC.length;
   }
 
   readRecord(recordSize: number): report.Record {
@@ -576,7 +509,7 @@ export class SimpleperfReportConverter {
     return report.Record.decode(recordArray);
   }
 
-  process(): SerializableProfile {
+  process(): Profile {
     this.readMagic();
 
     // Parse version
@@ -633,12 +566,8 @@ export class SimpleperfReportConverter {
   }
 }
 
-export function isSimpleperfTraceFormat(traceBuffer: ArrayBuffer): boolean {
-  return SimpleperfReportConverter.verifyMagic(traceBuffer);
-}
-
 export function convertSimpleperfTraceProfile(
   traceBuffer: ArrayBuffer
-): SerializableProfile {
+): Profile {
   return new SimpleperfReportConverter(traceBuffer).process();
 }
