@@ -548,7 +548,7 @@ export class SimpleperfReportConverter {
           // Not handled
           break;
         default:
-          // logger.warn(`Unknown record type: ${record.recordData}`);
+          console.warn(`Unknown record type: ${record.recordData}`);
           break;
       }
 
