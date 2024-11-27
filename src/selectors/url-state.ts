@@ -120,6 +120,8 @@ export const getMarkersSearchString: Selector<string> = (state) =>
   getProfileSpecificState(state).markersSearchString;
 export const getMarkerTableSort: Selector<SingleColumnSortState[]> = (state) =>
   getProfileSpecificState(state).markerTableSort;
+export const getFunctionListSort: Selector<SingleColumnSortState[]> = (state) =>
+  getProfileSpecificState(state).functionListSort;
 export const getNetworkSearchString: Selector<string> = (state) =>
   getProfileSpecificState(state).networkSearchString;
 export const getSelectedTab: Selector<TabSlug> = (state) =>

@@ -23,6 +23,7 @@ import type {
   TabID,
   IndexIntoLibs,
   IndexIntoSourceTable,
+  IndexIntoFuncTable,
 } from './profile';
 
 import type {
@@ -61,6 +62,7 @@ export type ThreadViewOptions = {
   readonly selectedInvertedCallNodePath: CallNodePath;
   readonly expandedNonInvertedCallNodePaths: PathSet;
   readonly expandedInvertedCallNodePaths: PathSet;
+  readonly selectedFunctionIndex: IndexIntoFuncTable | null;
   readonly selectedNetworkMarker: MarkerIndex | null;
   // Track the number of transforms to detect when they change via browser
   // navigation. This helps us know when to reset paths that may be invalid
@@ -81,6 +83,11 @@ export type TableViewOptionsPerTab = { [K in TabSlug]: TableViewOptions };
 export type RightClickedCallNode = {
   readonly threadsKey: ThreadsKey;
   readonly callNodePath: CallNodePath;
+};
+
+export type RightClickedFunction = {
+  readonly threadsKey: ThreadsKey;
+  readonly functionIndex: IndexIntoFuncTable;
 };
 
 export type MarkerReference = {
@@ -108,6 +115,7 @@ export type ProfileViewState = {
     lastNonShiftClick: LastNonShiftClickInformation | null;
     rightClickedTrack: TrackReference | null;
     rightClickedCallNode: RightClickedCallNode | null;
+    rightClickedFunction: RightClickedFunction | null;
     rightClickedMarker: MarkerReference | null;
     hoveredMarker: MarkerReference | null;
     mouseTimePosition: Milliseconds | null;
@@ -385,6 +393,7 @@ export type ProfileSpecificUrlState = {
   legacyHiddenThreads: ThreadIndex[] | null;
   selectedMarkers: SelectedMarkersPerThread;
   markerTableSort: SingleColumnSortState[];
+  functionListSort: SingleColumnSortState[];
 };
 
 export type UrlState = {

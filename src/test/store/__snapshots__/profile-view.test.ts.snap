@@ -4429,6 +4429,7 @@ Object {
     },
   },
   "lastSeenTransformCount": 1,
+  "selectedFunctionIndex": null,
   "selectedInvertedCallNodePath": Array [],
   "selectedNetworkMarker": null,
   "selectedNonInvertedCallNodePath": Array [
