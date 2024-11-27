@@ -796,7 +796,7 @@ export function computeCallTreeTimingsNonInverted(
   const { callNodeSelf, rootTotalSummary } = callNodeSelfAndSummary;
 
   // Compute the following variables:
-  const callNodeTotalSummary = new Float64Array(callNodeTable.length);
+  const callNodeTotal = new Float64Array(callNodeTable.length);
   const callNodeHasChildren = new Uint8Array(callNodeTable.length);
 
   // We loop the call node table in reverse, so that we find the children
@@ -807,9 +807,13 @@ export function computeCallTreeTimingsNonInverted(
     callNodeIndex >= 0;
     callNodeIndex--
   ) {
-    callNodeTotalSummary[callNodeIndex] += callNodeSelf[callNodeIndex];
+    // callNodeTotal[callNodeIndex] is the sum of our children's totals.
+    // Compute this node's total by adding this node's self.
+    const total = callNodeTotal[callNodeIndex] + callNodeSelf[callNodeIndex];
     const hasChildren = callNodeHasChildren[callNodeIndex] !== 0;
-    const hasTotalValue = callNodeTotalSummary[callNodeIndex] !== 0;
+    const hasTotalValue = total !== 0;
+
+    callNodeTotal[callNodeIndex] = total;
 
     if (!hasChildren && !hasTotalValue) {
       continue;
@@ -817,15 +821,14 @@ export function computeCallTreeTimingsNonInverted(
 
     const prefixCallNode = callNodeTable.prefix[callNodeIndex];
     if (prefixCallNode !== -1) {
-      callNodeTotalSummary[prefixCallNode] +=
-        callNodeTotalSummary[callNodeIndex];
+      callNodeTotal[prefixCallNode] += total;
       callNodeHasChildren[prefixCallNode] = 1;
     }
   }
 
   return {
     self: callNodeSelf,
-    total: callNodeTotalSummary,
+    total: callNodeTotal,
     callNodeHasChildren,
     rootTotalSummary,
   };
