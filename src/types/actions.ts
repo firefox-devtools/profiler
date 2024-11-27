@@ -14,6 +14,7 @@ import type {
   IndexIntoLibs,
   PageList,
   IndexIntoSourceTable,
+  IndexIntoFuncTable,
 } from './profile';
 import type {
   Thread,
@@ -189,6 +190,12 @@ type ProfileAction =
       readonly context: SelectionContext;
     }
   | {
+      readonly type: 'CHANGE_SELECTED_FUNCTION';
+      readonly threadsKey: ThreadsKey;
+      readonly selectedFunctionIndex: IndexIntoFuncTable | null;
+      readonly context: SelectionContext;
+    }
+  | {
       readonly type: 'UPDATE_TRACK_THREAD_HEIGHT';
       readonly height: CssPixels;
       readonly threadsKey: ThreadsKey;
@@ -197,6 +204,11 @@ type ProfileAction =
       readonly type: 'CHANGE_RIGHT_CLICKED_CALL_NODE';
       readonly threadsKey: ThreadsKey;
       readonly callNodePath: CallNodePath | null;
+    }
+  | {
+      readonly type: 'CHANGE_RIGHT_CLICKED_FUNCTION';
+      readonly threadsKey: ThreadsKey;
+      readonly functionIndex: IndexIntoFuncTable | null;
     }
   | {
       readonly type: 'FOCUS_CALL_TREE';
@@ -545,6 +557,10 @@ type UrlStateAction =
     }
   | {
       readonly type: 'CHANGE_MARKER_TABLE_SORT';
+      readonly sort: SingleColumnSortState[];
+    }
+  | {
+      readonly type: 'CHANGE_FUNCTION_LIST_SORT';
       readonly sort: SingleColumnSortState[];
     }
   | {
