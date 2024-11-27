@@ -764,7 +764,7 @@ export function computeCallTreeTimingsInverted(
 
 export function computeCallTreeTimings(
   callNodeInfo: CallNodeInfo,
-  CallNodeSelfAndSummary: CallNodeSelfAndSummary
+  callNodeSelfAndSummary: CallNodeSelfAndSummary
 ): CallTreeTimings {
   const callNodeInfoInverted = callNodeInfo.asInverted();
   if (callNodeInfoInverted !== null) {
@@ -772,7 +772,7 @@ export function computeCallTreeTimings(
       type: 'INVERTED',
       timings: computeCallTreeTimingsInverted(
         callNodeInfoInverted,
-        CallNodeSelfAndSummary
+        callNodeSelfAndSummary
       ),
     };
   }
@@ -780,7 +780,7 @@ export function computeCallTreeTimings(
     type: 'NON_INVERTED',
     timings: computeCallTreeTimingsNonInverted(
       callNodeInfo,
-      CallNodeSelfAndSummary
+      callNodeSelfAndSummary
     ),
   };
 }
@@ -791,10 +791,10 @@ export function computeCallTreeTimings(
  */
 export function computeCallTreeTimingsNonInverted(
   callNodeInfo: CallNodeInfo,
-  CallNodeSelfAndSummary: CallNodeSelfAndSummary
+  callNodeSelfAndSummary: CallNodeSelfAndSummary
 ): CallTreeTimingsNonInverted {
   const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
-  const { callNodeSelf, rootTotalSummary } = CallNodeSelfAndSummary;
+  const { callNodeSelf, rootTotalSummary } = callNodeSelfAndSummary;
 
   // Compute the following variables:
   const callNodeTotalSummary = new Float64Array(callNodeTable.length);
