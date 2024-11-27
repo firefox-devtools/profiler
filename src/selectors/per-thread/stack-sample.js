@@ -43,9 +43,14 @@ import type {
   $ReturnType,
   ThreadsKey,
   SelfAndTotal,
+  CallNodeTable,
   CallNodeSelfAndSummary,
+  CallNodeTableBitSet,
 } from 'firefox-profiler/types';
-import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
+import type {
+  CallNodeInfo,
+  CallNodeInfoInverted,
+} from 'firefox-profiler/profile-logic/call-node-info';
 
 import type { ThreadSelectorsPerThread } from './thread';
 import type { MarkerSelectorsPerThread } from './markers';
@@ -113,7 +118,7 @@ export function getStackAndSampleSelectorsPerThread(
       ProfileData.getCallNodeInfo
     );
 
-  const _getInvertedCallNodeInfo: Selector<CallNodeInfo> =
+  const _getInvertedCallNodeInfo: Selector<CallNodeInfoInverted> =
     createSelectorWithTwoCacheSlots(
       _getNonInvertedCallNodeInfo,
       ProfileSelectors.getDefaultCategory,
@@ -127,6 +132,15 @@ export function getStackAndSampleSelectorsPerThread(
     }
     return _getNonInvertedCallNodeInfo(state);
   };
+
+  const _getCallNodeTable: Selector<CallNodeTable> = (state) =>
+    _getNonInvertedCallNodeInfo(state).getCallNodeTable();
+
+  const _getCallNodeFuncIsDuplicate: Selector<CallNodeTableBitSet> =
+    createSelector(
+      _getCallNodeTable,
+      ProfileData.computeCallNodeFuncIsDuplicate
+    );
 
   const getSourceViewStackLineInfo: Selector<StackLineInfo | null> =
     createSelector(
@@ -315,6 +329,15 @@ export function getStackAndSampleSelectorsPerThread(
       CallTree.computeCallTreeTimingsNonInverted
     );
 
+  const getFunctionListTimings: Selector<CallTree.CallTreeTimingsFunctionList> =
+    createSelector(
+      _getCallNodeTable,
+      _getCallNodeFuncIsDuplicate,
+      getCallNodeSelfAndSummary,
+      (state) => threadSelectors.getFilteredThread(state).funcTable.length,
+      CallTree.computeFunctionListTimings
+    );
+
   const getCallTree: Selector<CallTree.CallTree> = createSelector(
     threadSelectors.getFilteredThread,
     getCallNodeInfo,
@@ -322,6 +345,28 @@ export function getStackAndSampleSelectorsPerThread(
     getCallTreeTimings,
     getWeightTypeForCallTree,
     CallTree.getCallTree
+  );
+
+  const getFunctionListTree: Selector<CallTree.CallTree> = createSelector(
+    threadSelectors.getFilteredThread,
+    _getInvertedCallNodeInfo,
+    ProfileSelectors.getCategories,
+    getFunctionListTimings,
+    getWeightTypeForCallTree,
+    (
+      thread,
+      callNodeInfoInverted,
+      categories,
+      functionListTimings,
+      weightType
+    ) =>
+      CallTree.getCallTree(
+        thread,
+        callNodeInfoInverted,
+        categories,
+        { type: 'FUNCTION_LIST', timings: functionListTimings },
+        weightType
+      )
   );
 
   const getSourceViewLineTimings: Selector<LineTimings> = createSelector(
@@ -443,6 +488,7 @@ export function getStackAndSampleSelectorsPerThread(
     getSamplesSelectedStatesInFilteredThread,
     getTreeOrderComparatorInFilteredThread,
     getCallTree,
+    getFunctionListTree,
     getSourceViewLineTimings,
     getAssemblyViewAddressTimings,
     getTracedTiming,
