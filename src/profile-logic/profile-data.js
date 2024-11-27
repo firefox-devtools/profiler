@@ -27,6 +27,7 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
+import { makeBitSet } from 'firefox-profiler/utils/bitset';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 import {
@@ -62,6 +63,7 @@ import type {
   IndexIntoStackTable,
   IndexIntoResourceTable,
   IndexIntoNativeSymbolTable,
+  CallNodeTableBitSet,
   ThreadIndex,
   Category,
   RawCounter,
@@ -802,6 +804,74 @@ export function getSamplesSelectedStates(
 }
 
 /**
+ * Go through the samples, and determine their current state.
+ *
+ * For samples that are neither 'FILTERED_OUT_*' nor 'SELECTED',
+ * this function uses 'UNSELECTED_ORDERED_AFTER_SELECTED'. It uses the same
+ * ordering as the function compareCallNodes in getTreeOrderComparator.
+ */
+export function getSamplesSelectedStatesForFunction(
+  sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
+  activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>,
+  selectedFunctionIndex: IndexIntoFuncTable | null,
+  callNodeTable: CallNodeTable
+): SelectedState[] {
+  if (selectedFunctionIndex === null) {
+    return _getSamplesSelectedStatesForNoSelection(
+      sampleCallNodes,
+      activeTabFilteredCallNodes
+    );
+  }
+
+  const sampleCount = sampleCallNodes.length;
+
+  // Go through each call node, and label it as containing the function or not.
+  // callNodeContainsFunc is a callNodeIndex => bool map, implemented as a U8 typed
+  // array for better performance. 0 means false, 1 means true.
+  const callNodeCount = callNodeTable.length;
+  const callNodeContainsFunc = new Uint8Array(callNodeCount);
+  for (let callNodeIndex = 0; callNodeIndex < callNodeCount; callNodeIndex++) {
+    const prefix = callNodeTable.prefix[callNodeIndex];
+    const funcIndex = callNodeTable.func[callNodeIndex];
+    if (
+      funcIndex === selectedFunctionIndex ||
+      // The parent of this stack contained the function.
+      (prefix !== -1 && callNodeContainsFunc[prefix] === 1)
+    ) {
+      callNodeContainsFunc[callNodeIndex] = 1;
+    }
+  }
+
+  // Go through each sample, and label its state.
+  const samplesSelectedStates = new Array(sampleCount);
+  for (
+    let sampleIndex = 0;
+    sampleIndex < sampleCallNodes.length;
+    sampleIndex++
+  ) {
+    let sampleSelectedState: SelectedState = 'SELECTED';
+    const callNodeIndex = sampleCallNodes[sampleIndex];
+    if (callNodeIndex !== null) {
+      if (callNodeContainsFunc[callNodeIndex] === 1) {
+        sampleSelectedState = 'SELECTED';
+      } else {
+        sampleSelectedState = 'UNSELECTED_ORDERED_AFTER_SELECTED';
+      }
+    } else {
+      // This sample was filtered out.
+      sampleSelectedState =
+        activeTabFilteredCallNodes[sampleIndex] === null
+          ? // This sample was not part of the active tab.
+            'FILTERED_OUT_BY_ACTIVE_TAB'
+          : // This sample was filtered out in the transform pipeline.
+            'FILTERED_OUT_BY_TRANSFORM';
+    }
+    samplesSelectedStates[sampleIndex] = sampleSelectedState;
+  }
+  return samplesSelectedStates;
+}
+
+/**
  * This function returns the function index for a specific call node path. This
  * is the last element of this path, or the leaf element of the path.
  */
@@ -1151,6 +1221,93 @@ export function getTimingsForCallNodeIndex(
   }
 
   return { forPath: pathTimings, rootTime };
+}
+
+export function computeCallNodeFuncIsDuplicate(
+  callNodeTable: CallNodeTable
+): CallNodeTableBitSet {
+  const callNodeCount = callNodeTable.length;
+  const maxDepth = callNodeTable.maxDepth;
+  const depthCol = callNodeTable.depth;
+  const funcCol = callNodeTable.func;
+
+  const nodeFuncIsDuplicateBitSet = makeBitSet(callNodeCount);
+
+  const depthToDedupDepth = new Int32Array(maxDepth + 1);
+  const funcsOnStack = new Int32Array(maxDepth + 1);
+  outer: for (
+    let callNodeIndex = 0;
+    callNodeIndex < callNodeCount;
+    callNodeIndex++
+  ) {
+    const depth = depthCol[callNodeIndex];
+    const func = funcCol[callNodeIndex];
+
+    if (depth === 0) {
+      funcsOnStack[0] = func;
+      continue;
+    }
+
+    // Check if `func` is already on the stack.
+    const prefixDepth = depth - 1;
+    const dedupPrefixDepth = depthToDedupDepth[prefixDepth];
+    for (let ancDepth = dedupPrefixDepth; ancDepth >= 0; ancDepth--) {
+      if (funcsOnStack[ancDepth] === func) {
+        depthToDedupDepth[depth] = dedupPrefixDepth;
+
+        // Mark this call node as having a duplicate func.
+        // Equivalent to setBit(nodeFuncIsDuplicateBitSet, callNodeIndex);
+        // Inlined manually for a 1.55x perf improvement in Firefox.
+        const q = callNodeIndex >> 5;
+        const r = callNodeIndex & 0b11111;
+        nodeFuncIsDuplicateBitSet[q] |= 1 << r;
+        continue outer;
+      }
+    }
+
+    const dedupDepth = dedupPrefixDepth + 1;
+    funcsOnStack[dedupDepth] = func;
+    depthToDedupDepth[depth] = dedupDepth;
+  }
+
+  return nodeFuncIsDuplicateBitSet;
+}
+
+/**
+ * This function returns the timings for a specific function.
+ *
+ * Note that the unfilteredThread should be the original thread before any filtering
+ * (by range or other) happens. Also sampleIndexOffset needs to be properly
+ * specified and is the offset to be applied on thread's indexes to access
+ * the same samples in unfilteredThread.
+ */
+export function getTimingsForFunction(
+  _funcIndex: IndexIntoFuncTable | null,
+  _interval: Milliseconds,
+  _thread: Thread,
+  _unfilteredThread: Thread,
+  _sampleIndexOffset: number,
+  _categories: CategoryList,
+  _samples: SamplesLikeTable,
+  _unfilteredSamples: SamplesLikeTable,
+  _displayImplementation: boolean
+): TimingsForPath {
+  // TODO
+  return {
+    forPath: {
+      selfTime: {
+        value: 0,
+        breakdownByImplementation: null,
+        breakdownByCategory: null,
+      },
+      totalTime: {
+        value: 0,
+        breakdownByImplementation: null,
+        breakdownByCategory: null,
+      },
+    },
+    rootTime: 1,
+  };
 }
 
 // This function computes the time range for a thread, using both its samples

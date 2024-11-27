@@ -26,6 +26,7 @@ import type {
   ThreadViewOptionsPerThreads,
   TableViewOptionsPerTab,
   RightClickedCallNode,
+  RightClickedFunction,
   MarkerReference,
   ActiveTabTimeline,
   CallNodePath,
@@ -157,6 +158,7 @@ export const defaultThreadViewOptions: ThreadViewOptions = {
   selectedInvertedCallNodePath: [],
   expandedNonInvertedCallNodePaths: new PathSet(),
   expandedInvertedCallNodePaths: new PathSet(),
+  selectedFunctionIndex: null,
   selectedMarker: null,
   selectedNetworkMarker: null,
 };
@@ -301,6 +303,23 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
               expandedNonInvertedCallNodePaths: expandedCallNodePaths,
             }
       );
+    }
+    case 'CHANGE_SELECTED_FUNCTION': {
+      const { selectedFunctionIndex, threadsKey } = action;
+
+      const threadState = _getThreadViewOptions(state, threadsKey);
+
+      const previousSelectedFunction = threadState.selectedFunctionIndex;
+
+      // If the selected function doesn't actually change, let's return the previous
+      // state to avoid rerenders.
+      if (selectedFunctionIndex === previousSelectedFunction) {
+        return state;
+      }
+
+      return _updateThreadViewOptions(state, threadsKey, {
+        selectedFunctionIndex,
+      });
     }
     case 'CHANGE_INVERT_CALLSTACK': {
       const {
@@ -592,6 +611,7 @@ const scrollToSelectionGeneration: Reducer<number> = (state = 0, action) => {
     case 'CHANGE_NETWORK_SEARCH_STRING':
       return state + 1;
     case 'CHANGE_SELECTED_CALL_NODE':
+    case 'CHANGE_SELECTED_FUNCTION':
     case 'CHANGE_SELECTED_MARKER':
     case 'CHANGE_SELECTED_NETWORK_MARKER':
       if (action.context.source === 'pointer') {
@@ -744,6 +764,59 @@ const rightClickedCallNode: Reducer<RightClickedCallNode | null> = (
   }
 };
 
+const rightClickedFunction: Reducer<RightClickedFunction | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'BULK_SYMBOLICATION': {
+      if (state === null) {
+        return null;
+      }
+
+      const { oldFuncToNewFuncsMaps } = action;
+      // This doesn't support a ThreadsKey with multiple threads.
+      const oldFuncToNewFuncsMap = oldFuncToNewFuncsMaps.get(+state.threadsKey);
+      if (oldFuncToNewFuncsMap === undefined) {
+        return state;
+      }
+      const functionIndexes = oldFuncToNewFuncsMap.get(state.functionIndex);
+      if (functionIndexes === undefined || functionIndexes.length === 0) {
+        return null;
+      }
+
+      return {
+        ...state,
+        functionIndex: functionIndexes[0],
+      };
+    }
+    case 'CHANGE_RIGHT_CLICKED_FUNCTION':
+      if (action.functionIndex !== null) {
+        return {
+          threadsKey: action.threadsKey,
+          functionIndex: action.functionIndex,
+        };
+      }
+
+      return null;
+    case 'SET_CONTEXT_MENU_VISIBILITY':
+      // We want to change the state only when the menu is hidden.
+      if (action.isVisible) {
+        return state;
+      }
+
+      return null;
+    case 'PROFILE_LOADED':
+    case 'CHANGE_INVERT_CALLSTACK':
+    case 'ADD_TRANSFORM_TO_STACK':
+    case 'POP_TRANSFORMS_FROM_STACK':
+    case 'CHANGE_IMPLEMENTATION_FILTER':
+      return null;
+    default:
+      return state;
+  }
+};
+
 const rightClickedMarker: Reducer<MarkerReference | null> = (
   state = null,
   action
@@ -857,6 +930,7 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       lastNonShiftClick,
       rightClickedTrack,
       rightClickedCallNode,
+      rightClickedFunction,
       rightClickedMarker,
       hoveredMarker,
       mouseTimePosition,

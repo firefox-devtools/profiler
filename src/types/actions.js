@@ -46,6 +46,7 @@ import type {
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
+import type { IndexIntoFuncTable } from '../types';
 
 export type DataSource =
   | 'none'
@@ -194,6 +195,12 @@ type ProfileAction =
   | {|
       +type: 'ROUTE_NOT_FOUND',
       +url: string,
+    |}
+  | {|
+      +type: 'CHANGE_SELECTED_FUNCTION',
+      +threadsKey: ThreadsKey,
+      +selectedFunctionIndex: IndexIntoFuncTable | null,
+      +context: SelectionContext,
     |}
   | {|
       +type: 'ASSIGN_TASK_TRACER_NAMES',

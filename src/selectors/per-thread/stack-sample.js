@@ -35,6 +35,7 @@ import type {
   StackAddressInfo,
   LineTimings,
   AddressTimings,
+  IndexIntoFuncTable,
   IndexIntoCallNodeTable,
   IndexIntoNativeSymbolTable,
   SelectedState,
@@ -44,8 +45,12 @@ import type {
   ThreadsKey,
   SelfAndTotal,
   CallNodeSelfAndSummary,
+  CallNodeTableBitSet,
 } from 'firefox-profiler/types';
-import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
+import type {
+  CallNodeInfo,
+  CallNodeInfoInverted,
+} from 'firefox-profiler/profile-logic/call-node-info';
 
 import type { ThreadSelectorsPerThread } from './thread';
 import type { MarkerSelectorsPerThread } from './markers';
@@ -114,7 +119,7 @@ export function getStackAndSampleSelectorsPerThread(
       ProfileData.getCallNodeInfo
     );
 
-  const _getInvertedCallNodeInfo: Selector<CallNodeInfo> =
+  const _getInvertedCallNodeInfo: Selector<CallNodeInfoInverted> =
     createSelectorWithTwoCacheSlots(
       _getNonInvertedCallNodeInfo,
       ProfileSelectors.getDefaultCategory,
@@ -135,6 +140,15 @@ export function getStackAndSampleSelectorsPerThread(
     }
     return _getNonInvertedCallNodeInfo(state);
   };
+
+  const _getCallNodeFuncIsDuplicate: Selector<CallNodeTableBitSet> =
+    createSelector(
+      getCallNodeInfo,
+      (callNodeInfo) => {
+        const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+        return ProfileData.computeCallNodeFuncIsDuplicate(callNodeTable);
+      }
+    );
 
   const getSourceViewStackLineInfo: Selector<StackLineInfo | null> =
     createSelector(
@@ -201,6 +215,14 @@ export function getStackAndSampleSelectorsPerThread(
         ? threadViewOptions.selectedInvertedCallNodePath
         : threadViewOptions.selectedNonInvertedCallNodePath
   );
+
+  const getSelectedFunctionIndex: Selector<IndexIntoFuncTable | null> =
+    createSelector(
+      threadSelectors.getViewOptions,
+      (threadViewOptions): IndexIntoFuncTable | null => {
+        return threadViewOptions.selectedFunctionIndex;
+      }
+    );
 
   const getSelectedCallNodeIndex: Selector<IndexIntoCallNodeTable | null> =
     createSelector(
@@ -338,6 +360,22 @@ export function getStackAndSampleSelectorsPerThread(
       CallTree.computeCallTreeTimingsNonInverted
     );
 
+  // const _getCallTreeTimingsInverted: Selector<CallTree.CallTreeTimingsInverted> =
+  //   createSelector(
+  //     _getInvertedCallNodeInfo,
+  //     getCallNodeSelfAndSummary,
+  //     CallTree.computeCallTreeTimingsInverted
+  //   );
+
+  const getFunctionListTimings: Selector<CallTree.FunctionListTimings> =
+    createSelector(
+      getCallNodeInfo,
+      _getCallNodeFuncIsDuplicate,
+      getCallNodeSelfAndSummary,
+      (state) => threadSelectors.getFilteredThread(state).funcTable.length,
+      CallTree.computeFunctionListTimings
+    );
+
   const getCallTree: Selector<CallTree.CallTree> = createSelector(
     threadSelectors.getFilteredThread,
     getCallNodeInfo,
@@ -346,6 +384,16 @@ export function getStackAndSampleSelectorsPerThread(
     getWeightTypeForCallTree,
     CallTree.getCallTree
   );
+
+  const getFunctionListTree: Selector<CallTree.FunctionListTree> =
+    createSelector(
+      threadSelectors.getPreviewFilteredThread,
+      _getInvertedCallNodeInfo,
+      ProfileSelectors.getCategories,
+      getFunctionListTimings,
+      getWeightTypeForCallTree,
+      CallTree.getFunctionListTree
+    );
 
   const getSourceViewLineTimings: Selector<LineTimings> = createSelector(
     getSourceViewStackLineInfo,
@@ -444,6 +492,23 @@ export function getStackAndSampleSelectorsPerThread(
       }
     );
 
+  const getRightClickedFunctionIndex: Selector<null | IndexIntoFuncTable> =
+    createSelector(
+      ProfileSelectors.getProfileViewOptions,
+      (profileViewOptions) => {
+        const rightClickedFunctionInfo =
+          profileViewOptions.rightClickedFunction;
+        if (
+          rightClickedFunctionInfo !== null &&
+          threadsKey === rightClickedFunctionInfo.threadsKey
+        ) {
+          return rightClickedFunctionInfo.functionIndex;
+        }
+
+        return null;
+      }
+    );
+
   return {
     unfilteredSamplesRange,
     getWeightTypeForCallTree,
@@ -453,12 +518,14 @@ export function getStackAndSampleSelectorsPerThread(
     getAssemblyViewStackAddressInfo,
     getSelectedCallNodePath,
     getSelectedCallNodeIndex,
+    getSelectedFunctionIndex,
     getExpandedCallNodePaths,
     getExpandedCallNodeIndexes,
     getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
     getSamplesSelectedStatesInFilteredThread,
     getTreeOrderComparatorInFilteredThread,
     getCallTree,
+    getFunctionListTree,
     getSourceViewLineTimings,
     getAssemblyViewAddressTimings,
     getTracedTiming,
@@ -467,5 +534,6 @@ export function getStackAndSampleSelectorsPerThread(
     getFilteredCallNodeMaxDepthPlusOne,
     getFlameGraphTiming,
     getRightClickedCallNodeIndex,
+    getRightClickedFunctionIndex,
   };
 }

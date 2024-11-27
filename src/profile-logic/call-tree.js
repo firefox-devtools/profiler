@@ -19,6 +19,7 @@ import type {
   SamplesLikeTable,
   WeightType,
   CallNodeTable,
+  CallNodeTableBitSet,
   CallNodePath,
   IndexIntoCallNodeTable,
   CallNodeData,
@@ -33,6 +34,7 @@ import type {
 import ExtensionIcon from '../../res/img/svg/extension.svg';
 import { formatCallNodeNumber, formatPercent } from '../utils/format-numbers';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
+import { checkBit } from '../utils/bitset';
 import * as ProfileData from './profile-data';
 import type { CallTreeSummaryStrategy } from '../types/actions';
 import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
@@ -59,6 +61,13 @@ export type CallTreeTimingsInverted = {|
   sortedRoots: IndexIntoFuncTable[],
   totalPerRootFunc: Float32Array,
   hasChildrenPerRootFunc: Uint8Array,
+|};
+
+export type FunctionListTimings = {|
+  funcSelf: Float32Array,
+  funcTotal: Float32Array,
+  sortedFuncs: IndexIntoFuncTable[],
+  rootTotalSummary: number,
 |};
 
 export type CallTreeTimings =
@@ -594,6 +603,254 @@ export class CallTree {
   }
 }
 
+export class FunctionListTree {
+  _categories: CategoryList;
+  _thread: Thread;
+  _callNodeInfoInverted: CallNodeInfoInverted;
+  _timings: FunctionListTimings;
+  _rootTotalSummary: number;
+  _displayDataByIndex: Map<IndexIntoCallNodeTable, CallNodeDisplayData>;
+  // _children is indexed by IndexIntoCallNodeTable. Since they are
+  // integers, using an array directly is faster than going through a Map.
+  _children: Array<CallNodeChildren>;
+  _roots: IndexIntoCallNodeTable[];
+  _isHighPrecision: boolean;
+  _weightType: WeightType;
+
+  constructor(
+    thread: Thread,
+    categories: CategoryList,
+    timings: FunctionListTimings,
+    callNodeInfoInverted: CallNodeInfoInverted,
+    isHighPrecision: boolean,
+    weightType: WeightType
+  ) {
+    this._categories = categories;
+    this._timings = timings;
+    this._callNodeInfoInverted = callNodeInfoInverted;
+    this._thread = thread;
+    this._rootTotalSummary = timings.rootTotalSummary;
+    this._displayDataByIndex = new Map();
+    this._roots = timings.sortedFuncs;
+    this._isHighPrecision = isHighPrecision;
+    this._weightType = weightType;
+  }
+
+  _getSelfAndTotal(funcIndex: IndexIntoFuncTable): SelfAndTotal {
+    return {
+      self: this._timings.funcSelf[funcIndex],
+      total: this._timings.funcTotal[funcIndex],
+    };
+  }
+
+  getRoots() {
+    return this._roots;
+  }
+
+  getChildren(_funcIndex: IndexIntoFuncTable): CallNodeChildren {
+    return [];
+  }
+
+  hasChildren(_funcIndex: IndexIntoFuncTable): boolean {
+    return false;
+  }
+
+  _addDescendantsToSet(
+    _funcIndex: IndexIntoFuncTable,
+    _set: Set<IndexIntoCallNodeTable>
+  ): void {}
+
+  getAllDescendants(
+    _funcIndex: IndexIntoFuncTable
+  ): Set<IndexIntoCallNodeTable> {
+    return new Set();
+  }
+
+  getParent(_funcIndex: IndexIntoFuncTable): IndexIntoCallNodeTable | -1 {
+    return -1;
+  }
+
+  getDepth(_funcIndex: IndexIntoFuncTable): number {
+    return 0;
+  }
+
+  getNodeData(funcIndex: IndexIntoFuncTable): CallNodeData {
+    const funcName = this._thread.stringTable.getString(
+      this._thread.funcTable.name[funcIndex]
+    );
+
+    const { self, total } = this._getSelfAndTotal(funcIndex);
+    const totalRelative = total / this._rootTotalSummary;
+    const selfRelative = self / this._rootTotalSummary;
+
+    return {
+      funcName,
+      total,
+      totalRelative,
+      self,
+      selfRelative,
+    };
+  }
+
+  _getInliningBadge(
+    funcIndex: IndexIntoFuncTable,
+    funcName: string
+  ): ExtraBadgeInfo | void {
+    const calledFunction = getFunctionName(funcName);
+    const inlinedIntoNativeSymbol =
+      this._callNodeInfoInverted.sourceFramesInlinedIntoSymbolForNode(
+        funcIndex
+      );
+    if (inlinedIntoNativeSymbol === -2) {
+      return undefined;
+    }
+
+    if (inlinedIntoNativeSymbol === -1) {
+      return {
+        name: 'divergent-inlining',
+        vars: { calledFunction },
+        localizationId: 'CallTree--divergent-inlining-badge',
+        contentFallback: '',
+        titleFallback: `Some calls to ${calledFunction} were inlined by the compiler.`,
+      };
+    }
+
+    const outerFunction = getFunctionName(
+      this._thread.stringTable.getString(
+        this._thread.nativeSymbols.name[inlinedIntoNativeSymbol]
+      )
+    );
+    return {
+      name: 'inlined',
+      vars: { calledFunction, outerFunction },
+      localizationId: 'CallTree--inlining-badge',
+      contentFallback: '(inlined)',
+      titleFallback: `Calls to ${calledFunction} were inlined into ${outerFunction} by the compiler.`,
+    };
+  }
+
+  getDisplayData(funcIndex: IndexIntoFuncTable): CallNodeDisplayData {
+    let displayData: CallNodeDisplayData | void =
+      this._displayDataByIndex.get(funcIndex);
+    if (displayData === undefined) {
+      const { funcName, total, totalRelative, self } =
+        this.getNodeData(funcIndex);
+      const categoryIndex =
+        this._callNodeInfoInverted.categoryForNode(funcIndex);
+      const subcategoryIndex =
+        this._callNodeInfoInverted.subcategoryForNode(funcIndex);
+      const badge = this._getInliningBadge(funcIndex, funcName);
+      const resourceIndex = this._thread.funcTable.resource[funcIndex];
+      const resourceType = this._thread.resourceTable.type[resourceIndex];
+      const isFrameLabel = resourceIndex === -1;
+      const libName = this._getOriginAnnotation(funcIndex);
+      const weightType = this._weightType;
+
+      let iconSrc = null;
+      let icon = null;
+
+      if (resourceType === resourceTypes.webhost) {
+        icon = iconSrc = extractFaviconFromLibname(libName);
+      } else if (resourceType === resourceTypes.addon) {
+        iconSrc = ExtensionIcon;
+
+        const resourceNameIndex =
+          this._thread.resourceTable.name[resourceIndex];
+        const iconText = this._thread.stringTable.getString(resourceNameIndex);
+        icon = iconText;
+      }
+
+      const formattedTotal = formatCallNodeNumber(
+        weightType,
+        this._isHighPrecision,
+        total
+      );
+      const formattedSelf = formatCallNodeNumber(
+        weightType,
+        this._isHighPrecision,
+        self
+      );
+      const totalPercent = `${formatPercent(totalRelative)}`;
+
+      let ariaLabel;
+      let totalWithUnit;
+      let selfWithUnit;
+      switch (weightType) {
+        case 'tracing-ms': {
+          totalWithUnit = `${formattedTotal}ms`;
+          selfWithUnit = `${formattedSelf}ms`;
+          ariaLabel = oneLine`
+              ${funcName},
+              running time is ${totalWithUnit} (${totalPercent}),
+              self time is ${selfWithUnit}
+            `;
+          break;
+        }
+        case 'samples': {
+          // TODO - L10N pluralization
+          totalWithUnit =
+            total === 1
+              ? `${formattedTotal} sample`
+              : `${formattedTotal} samples`;
+          selfWithUnit =
+            self === 1 ? `${formattedSelf} sample` : `${formattedSelf} samples`;
+          ariaLabel = oneLine`
+            ${funcName},
+            running count is ${totalWithUnit} (${totalPercent}),
+            self count is ${selfWithUnit}
+          `;
+          break;
+        }
+        case 'bytes': {
+          totalWithUnit = `${formattedTotal} bytes`;
+          selfWithUnit = `${formattedSelf} bytes`;
+          ariaLabel = oneLine`
+            ${funcName},
+            total size is ${totalWithUnit} (${totalPercent}),
+            self size is ${selfWithUnit}
+          `;
+          break;
+        }
+        default:
+          throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
+      }
+
+      displayData = {
+        total: total === 0 ? '—' : formattedTotal,
+        totalWithUnit: total === 0 ? '—' : totalWithUnit,
+        self: self === 0 ? '—' : formattedSelf,
+        selfWithUnit: self === 0 ? '—' : selfWithUnit,
+        totalPercent,
+        name: funcName,
+        lib: libName.slice(0, 1000),
+        // Dim platform pseudo-stacks.
+        isFrameLabel,
+        badge,
+        categoryName: getCategoryPairLabel(
+          this._categories,
+          categoryIndex,
+          subcategoryIndex
+        ),
+        categoryColor: this._categories[categoryIndex].color,
+        iconSrc,
+        icon,
+        ariaLabel,
+      };
+      this._displayDataByIndex.set(funcIndex, displayData);
+    }
+    return displayData;
+  }
+
+  _getOriginAnnotation(funcIndex: IndexIntoFuncTable): string {
+    return getOriginAnnotationForFunc(
+      funcIndex,
+      this._thread.funcTable,
+      this._thread.resourceTable,
+      this._thread.stringTable
+    );
+  }
+}
+
 /**
  * Compute the self time for each call node, and the sum of the absolute self
  * values.
@@ -750,9 +1007,100 @@ export function computeCallTreeTimingsInverted(
   };
 }
 
+function computeFuncSelf(
+  callNodeTable: CallNodeTable,
+  callNodeSelf: Float32Array,
+  funcCount: number
+): Float32Array {
+  const callNodeTableFuncCol = callNodeTable.func;
+  const callNodeCount = callNodeSelf.length;
+
+  const funcSelf = new Float32Array(funcCount);
+  for (let i = 0; i < callNodeCount; i++) {
+    const self = callNodeSelf[i];
+    if (self !== 0) {
+      const func = callNodeTableFuncCol[i];
+      funcSelf[func] += self;
+    }
+  }
+
+  return funcSelf;
+}
+
+export function computeFunctionListTimings(
+  callNodeInfo: CallNodeInfo,
+  callNodeFuncIsDuplicate: CallNodeTableBitSet,
+  { callNodeSelf, rootTotalSummary }: CallNodeSelfAndSummary,
+  funcCount: number
+): FunctionListTimings {
+  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+  const funcSelf = computeFuncSelf(callNodeTable, callNodeSelf, funcCount);
+
+  const callNodeTableFuncCol = callNodeTable.func;
+  const callNodeTablePrefixCol = callNodeTable.prefix;
+  const callNodeCount = callNodeTable.length;
+
+  const callNodeChildrenTotal = new Float32Array(callNodeCount);
+  const funcTotal = new Float32Array(funcCount);
+
+  const seenPerFunc = new Uint8Array(funcCount);
+  const sortedFuncs = [];
+
+  // We loop the call node table in reverse, so that we find the children
+  // before their parents, and the total is known at the time we reach a
+  // node.
+  for (
+    let callNodeIndex = callNodeCount - 1;
+    callNodeIndex >= 0;
+    callNodeIndex--
+  ) {
+    const self = callNodeSelf[callNodeIndex];
+    const childrenTotal = callNodeChildrenTotal[callNodeIndex];
+    const total = self + childrenTotal;
+
+    if (total === 0) {
+      continue;
+    }
+
+    const prefix = callNodeTablePrefixCol[callNodeIndex];
+    if (prefix !== -1) {
+      callNodeChildrenTotal[prefix] += total;
+
+      if (checkBit(callNodeFuncIsDuplicate, callNodeIndex)) {
+        // Will be picked up by ancestor.
+        continue;
+      }
+    }
+
+    const func = callNodeTableFuncCol[callNodeIndex];
+    funcTotal[func] += total;
+
+    if (seenPerFunc[func] === 0) {
+      seenPerFunc[func] = 1;
+      sortedFuncs.push(func);
+    }
+  }
+
+  const abs = Math.abs;
+  sortedFuncs.sort((a, b) => {
+    const absDiff = abs(funcTotal[b]) - abs(funcTotal[a]);
+    if (absDiff !== 0) {
+      return absDiff;
+    }
+    return a - b;
+  });
+
+  return {
+    funcSelf,
+    funcTotal,
+    sortedFuncs,
+    rootTotalSummary,
+  };
+}
+
 export function computeCallTreeTimings(
   callNodeInfo: CallNodeInfo,
-  CallNodeSelfAndSummary: CallNodeSelfAndSummary
+  callNodeSelfAndSummary: CallNodeSelfAndSummary
 ): CallTreeTimings {
   const callNodeInfoInverted = callNodeInfo.asInverted();
   if (callNodeInfoInverted !== null) {
@@ -760,7 +1108,7 @@ export function computeCallTreeTimings(
       type: 'INVERTED',
       timings: computeCallTreeTimingsInverted(
         callNodeInfoInverted,
-        CallNodeSelfAndSummary
+        callNodeSelfAndSummary
       ),
     };
   }
@@ -768,7 +1116,7 @@ export function computeCallTreeTimings(
     type: 'NON_INVERTED',
     timings: computeCallTreeTimingsNonInverted(
       callNodeInfo,
-      CallNodeSelfAndSummary
+      callNodeSelfAndSummary
     ),
   };
 }
@@ -779,10 +1127,10 @@ export function computeCallTreeTimings(
  */
 export function computeCallTreeTimingsNonInverted(
   callNodeInfo: CallNodeInfo,
-  CallNodeSelfAndSummary: CallNodeSelfAndSummary
+  callNodeSelfAndSummary: CallNodeSelfAndSummary
 ): CallTreeTimingsNonInverted {
   const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
-  const { callNodeSelf, rootTotalSummary } = CallNodeSelfAndSummary;
+  const { callNodeSelf, rootTotalSummary } = callNodeSelfAndSummary;
 
   // Compute the following variables:
   const callNodeTotalSummary = new Float32Array(callNodeTable.length);
@@ -866,6 +1214,23 @@ export function getCallTree(
         );
     }
   });
+}
+
+export function getFunctionListTree(
+  thread: Thread,
+  callNodeInfoInverted: CallNodeInfoInverted,
+  categories: CategoryList,
+  timings: FunctionListTimings,
+  weightType: WeightType
+): FunctionListTree {
+  return new FunctionListTree(
+    thread,
+    categories,
+    timings,
+    callNodeInfoInverted,
+    Boolean(thread.isJsTracer),
+    weightType
+  );
 }
 
 /**
