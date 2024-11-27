@@ -678,8 +678,27 @@ export function markerPayloadMatchesSearch(
         payloadField.format === 'flow-id' ||
         payloadField.format === 'terminating-flow-id'
       ) {
+        if (value === undefined) {
+          // The value is missing, but this is OK, values are optional.
+          continue;
+        }
+
+        if (typeof value !== 'number') {
+          console.warn(
+            `In marker ${marker.name}, the key ${payloadField.key} has an invalid value "${value}" as a unique string, it isn't a number.`
+          );
+          continue;
+        }
+
+        if (!stringTable.hasIndex(value)) {
+          console.warn(
+            `In marker ${marker.name}, the key ${payloadField.key} has an invalid index "${value}" as a unique string, as it's missing from the string table.`
+          );
+          continue;
+        }
         value = stringTable.getString(value);
       }
+
       if (value === undefined || value === null || value === '') {
         continue;
       }
