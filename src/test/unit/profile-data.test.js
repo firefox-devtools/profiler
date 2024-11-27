@@ -586,8 +586,7 @@ describe('getInvertedCallNodeInfo', function () {
     );
 
     const invertedCallNodeInfo = getInvertedCallNodeInfo(
-      nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
-      nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+      nonInvertedCallNodeInfo,
       defaultCategory,
       thread.funcTable.length
     );
@@ -962,16 +961,13 @@ describe('getSamplesSelectedStates', function () {
       thread.frameTable,
       0
     );
-    const stackIndexToCallNodeIndex =
-      callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
     const sampleCallNodes = getSampleIndexToCallNodeIndex(
       thread.samples.stack,
-      stackIndexToCallNodeIndex
+      callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
     );
 
     const callNodeInfoInverted = getInvertedCallNodeInfo(
-      callNodeInfo.getNonInvertedCallNodeTable(),
-      stackIndexToCallNodeIndex,
+      callNodeInfo,
       defaultCategory,
       thread.funcTable.length
     );
@@ -1479,8 +1475,7 @@ describe('getNativeSymbolsForCallNode', function () {
       defaultCategory
     );
     const callNodeInfo = getInvertedCallNodeInfo(
-      nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
-      nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+      nonInvertedCallNodeInfo,
       defaultCategory,
       thread.funcTable.length
     );
