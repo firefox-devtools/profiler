@@ -206,6 +206,18 @@ const markerTableSort: Reducer<SingleColumnSortState[]> = (
   }
 };
 
+const functionListSort: Reducer<SingleColumnSortState[]> = (
+  state = [],
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_FUNCTION_LIST_SORT':
+      return action.sort;
+    default:
+      return state;
+  }
+};
+
 const networkSearchString: Reducer<string> = (state = '', action) => {
   switch (action.type) {
     case 'CHANGE_NETWORK_SEARCH_STRING':
@@ -794,6 +806,7 @@ const profileSpecific = combineReducers({
   tabFilter,
   selectedMarkers,
   markerTableSort,
+  functionListSort,
   // The timeline tracks used to be hidden and sorted by thread indexes, rather than
   // track indexes. The only way to migrate this information to tracks-based data is to
   // first retrieve the profile, so they can't be upgraded by the normal url upgrading

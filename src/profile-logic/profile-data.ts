@@ -1133,6 +1133,65 @@ export function getSampleSelectedStates(
 }
 
 /**
+ * Go through the samples, and determine their current state.
+ *
+ * For samples that are neither 'FILTERED_OUT_*' nor 'SELECTED',
+ * this function uses 'UNSELECTED_ORDERED_AFTER_SELECTED'. It uses the same
+ * ordering as the function compareCallNodes in getTreeOrderComparator.
+ */
+export function getSamplesSelectedStatesForFunction(
+  sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
+  selectedFunctionIndex: IndexIntoFuncTable | null,
+  callNodeTable: CallNodeTable
+): Uint8Array {
+  if (selectedFunctionIndex === null) {
+    return _getSampleSelectedStatesForNoSelection(sampleCallNodes);
+  }
+
+  const sampleCount = sampleCallNodes.length;
+
+  // Go through each call node, and label it as containing the function or not.
+  // callNodeContainsFunc is a callNodeIndex => bool map, implemented as a U8 typed
+  // array for better performance. 0 means false, 1 means true.
+  const callNodeCount = callNodeTable.length;
+  const callNodeContainsFunc = new Uint8Array(callNodeCount);
+  for (let callNodeIndex = 0; callNodeIndex < callNodeCount; callNodeIndex++) {
+    const prefix = callNodeTable.prefix[callNodeIndex];
+    const funcIndex = callNodeTable.func[callNodeIndex];
+    if (
+      funcIndex === selectedFunctionIndex ||
+      // The parent of this stack contained the function.
+      (prefix !== -1 && callNodeContainsFunc[prefix] === 1)
+    ) {
+      callNodeContainsFunc[callNodeIndex] = 1;
+    }
+  }
+
+  // Go through each sample, and label its state.
+  const samplesSelectedStates = new Uint8Array(sampleCount);
+  for (
+    let sampleIndex = 0;
+    sampleIndex < sampleCallNodes.length;
+    sampleIndex++
+  ) {
+    let sampleSelectedState: SelectedState = SelectedState.Selected;
+    const callNodeIndex = sampleCallNodes[sampleIndex];
+    if (callNodeIndex !== null) {
+      if (callNodeContainsFunc[callNodeIndex] === 1) {
+        sampleSelectedState = SelectedState.Selected;
+      } else {
+        sampleSelectedState = SelectedState.UnselectedOrderedBeforeSelected;
+      }
+    } else {
+      // This sample was filtered out.
+      sampleSelectedState = SelectedState.FilteredOutByTransform;
+    }
+    samplesSelectedStates[sampleIndex] = sampleSelectedState;
+  }
+  return samplesSelectedStates;
+}
+
+/**
  * This function returns the function index for a specific call node path. This
  * is the last element of this path, or the leaf element of the path.
  */
@@ -1432,6 +1491,41 @@ export function computeCallNodeFuncIsDuplicate(
   }
 
   return nodeFuncIsDuplicateBitSet;
+}
+
+/**
+ * This function returns the timings for a specific function.
+ *
+ * Note that the unfilteredThread should be the original thread before any filtering
+ * (by range or other) happens. Also sampleIndexOffset needs to be properly
+ * specified and is the offset to be applied on thread's indexes to access
+ * the same samples in unfilteredThread.
+ */
+export function getTimingsForFunction(
+  _funcIndex: IndexIntoFuncTable | null,
+  _interval: Milliseconds,
+  _thread: Thread,
+  _unfilteredThread: Thread,
+  _sampleIndexOffset: number,
+  _categories: CategoryList,
+  _samples: SamplesLikeTable,
+  _unfilteredSamples: SamplesLikeTable,
+  _displayImplementation: boolean
+): TimingsForPath {
+  // TODO
+  return {
+    forPath: {
+      selfTime: {
+        value: 0,
+        breakdownByCategory: null,
+      },
+      totalTime: {
+        value: 0,
+        breakdownByCategory: null,
+      },
+    },
+    rootTime: 1,
+  };
 }
 
 // This function computes the time range for a thread, using both its samples
