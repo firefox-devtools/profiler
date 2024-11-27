@@ -471,8 +471,7 @@ describe('inverted call tree', function () {
 
     // Now compute the inverted tree and check it.
     const invertedCallNodeInfo = getInvertedCallNodeInfo(
-      callNodeInfo.getNonInvertedCallNodeTable(),
-      callNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+      callNodeInfo,
       defaultCategory,
       thread.funcTable.length
     );

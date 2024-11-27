@@ -574,14 +574,13 @@ function _computeCallNodeTableExtraColumns(
  * Generate the inverted CallNodeInfo for a thread.
  */
 export function getInvertedCallNodeInfo(
-  nonInvertedCallNodeTable: CallNodeTable,
-  stackIndexToNonInvertedCallNodeIndex: Int32Array,
+  callNodeInfo: CallNodeInfo,
   defaultCategory: IndexIntoCategoryList,
   funcCount: number
 ): CallNodeInfoInverted {
   return new CallNodeInfoInverted(
-    nonInvertedCallNodeTable,
-    stackIndexToNonInvertedCallNodeIndex,
+    callNodeInfo.getNonInvertedCallNodeTable(),
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
     defaultCategory,
     funcCount
   );
