@@ -1237,12 +1237,13 @@ export function isNavigationMarker({ name, data }: Marker) {
   }
 
   if (!data) {
-    // This marker has no payload, only consider the name.
-    if (name === 'Navigation::Start') {
-      return true;
-    }
     return false;
   }
+
+  if (data.innerWindowID && name === 'Navigation::Start') {
+    return true;
+  }
+
   if (data.category === 'Navigation') {
     // Filter by payloads.
     if (name === 'Load' || name === 'DOMContentLoaded') {

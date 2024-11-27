@@ -29,6 +29,7 @@ import { Localized } from '@fluent/react';
 
 const ERROR_MESSAGES_L10N_ID: { [string]: string } = Object.freeze({
   'from-browser': 'AppViewRouter--error-unpublished',
+  'from-post-message': 'AppViewRouter--error-from-post-message',
   unpublished: 'AppViewRouter--error-unpublished',
   'from-file': 'AppViewRouter--error-from-file',
   local: 'AppViewRouter--error-local',

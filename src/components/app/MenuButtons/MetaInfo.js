@@ -224,7 +224,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
     return (
       <>
         <div className="metaInfoSection">
-          {meta.profilingStartTime !== undefined ? (
+          {meta.profilingStartTime !== undefined && meta.startTime ? (
             <div className="metaInfoRow">
               <span className="metaInfoLabel">
                 <Localized id="MenuButtons--metaInfo--profiling-started">

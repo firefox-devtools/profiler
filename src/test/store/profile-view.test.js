@@ -917,12 +917,21 @@ describe('actions/ProfileView', function () {
             nonSearchableUniqueString: 'non-searchable onion',
           },
         ],
+        [
+          'b',
+          15,
+          20,
+          {
+            // Marker where all properties are missing.
+            type: 'StringTesting',
+          },
+        ],
       ]);
       const { dispatch, getState } = storeWithProfile(profile);
 
       expect(
         selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
-      ).toHaveLength(1);
+      ).toHaveLength(2);
 
       const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
       const markerPayload: MixedObject = (getMarker(0).data: any);
