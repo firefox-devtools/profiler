@@ -22,6 +22,7 @@ import {
 import { resourceTypes } from '../../profile-logic/data-structures';
 import {
   callTreeFromProfile,
+  functionListTreeFromProfile,
   formatTree,
   formatTreeIncludeCategories,
 } from '../fixtures/utils';
@@ -543,6 +544,28 @@ describe('inverted call tree', function () {
         '        - A [Other] (total: 1, self: —)',
       ]);
     });
+  });
+});
+
+describe('function list', function () {
+  it('computes an unfiltered function list', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A  A  A
+      B  E  B
+      C  C  A
+      B  F  G
+      D  E
+    `);
+    const callTree = functionListTreeFromProfile(profile);
+    expect(formatTree(callTree)).toEqual([
+      '- A (total: 3, self: —)',
+      '- B (total: 2, self: —)',
+      '- C (total: 2, self: —)',
+      '- D (total: 1, self: 1)',
+      '- E (total: 1, self: 1)',
+      '- F (total: 1, self: —)',
+      '- G (total: 1, self: 1)',
+    ]);
   });
 });
 

@@ -27,6 +27,7 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
+import { makeBitSet } from 'firefox-profiler/utils/bitset';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 import { ensureExists, getFirstItemFromSet } from 'firefox-profiler/utils/flow';
@@ -58,6 +59,7 @@ import type {
   IndexIntoStackTable,
   IndexIntoResourceTable,
   IndexIntoNativeSymbolTable,
+  CallNodeTableBitSet,
   ThreadIndex,
   Category,
   RawCounter,
@@ -1145,6 +1147,92 @@ export function getTimingsForCallNodeIndex(
   }
 
   return { forPath: pathTimings, rootTime };
+}
+
+/**
+ * For every call node in CallNodeTable, compute whether the node's function is
+ * already present in one of the node's ancestors.
+ *
+ * This is used in the function list timings, so that we don't double-count
+ * samples for recursive functions which are present in a sample's stack multiple
+ * times.
+ *
+ * Example:
+ *
+ * - A (no)
+ *   - B (no)
+ *     - A (yes)
+ *     - C (no)
+ *       - C (yes)
+ *         - C (yes)
+ *   - C (no)
+ *     - D (no)
+ */
+export function computeCallNodeFuncIsDuplicate(
+  callNodeTable: CallNodeTable
+): CallNodeTableBitSet {
+  const callNodeCount = callNodeTable.length;
+  const maxDepth = callNodeTable.maxDepth;
+  const depthCol = callNodeTable.depth;
+  const funcCol = callNodeTable.func;
+
+  const nodeFuncIsDuplicateBitSet = makeBitSet(callNodeCount);
+
+  // We take advantage of the fact that the callNodeTable is laid out in DFS order,
+  // specifically of the property that, if the current node's depth is d, for any
+  // lower depth ld < d, the last seen node at ld is an ancestor of the current node,
+  // specifically it's the ancestor at depth ld.
+
+  // funcsOnStack stores the deduplicated ancestors of the current call node.
+  // More precisely, the first `dd` items of funcsOnStack store the ancestor
+  // functions, with `dd` being the "depth of the deduplicated path". The rest
+  // of the array is meaningless. We use a typed array instead of a regular JS
+  // array for performance reasons.
+  const funcsOnStack = new Int32Array(maxDepth + 1);
+
+  // depthToDedupDepth stores, for each original depth `d` up to the current depth,
+  // the depth `dd` of the deduplicated path.
+  //
+  // depthToDedupDepth[0] == 0
+  // depthToDedupDepth[d] == depthToDedupDepth[d - 1]      if there's a duplicate at depth d in the current ancestor path
+  // depthToDedupDepth[d] == depthToDedupDepth[d - 1] + 1  otherwise
+  const depthToDedupDepth = new Int32Array(maxDepth + 1);
+
+  outer: for (
+    let callNodeIndex = 0;
+    callNodeIndex < callNodeCount;
+    callNodeIndex++
+  ) {
+    const depth = depthCol[callNodeIndex];
+    const func = funcCol[callNodeIndex];
+
+    if (depth === 0) {
+      funcsOnStack[0] = func;
+      continue;
+    }
+
+    // Check if `func` is already on the stack.
+    const dedupPrefixDepth = depthToDedupDepth[depth - 1];
+    for (let ancDepth = dedupPrefixDepth; ancDepth >= 0; ancDepth--) {
+      if (funcsOnStack[ancDepth] === func) {
+        depthToDedupDepth[depth] = dedupPrefixDepth;
+
+        // Mark this call node as having a duplicate func.
+        // Equivalent to setBit(nodeFuncIsDuplicateBitSet, callNodeIndex);
+        // Inlined manually for a 1.55x perf improvement in Firefox.
+        const q = callNodeIndex >> 5;
+        const r = callNodeIndex & 0b11111;
+        nodeFuncIsDuplicateBitSet[q] |= 1 << r;
+        continue outer;
+      }
+    }
+
+    const dedupDepth = dedupPrefixDepth + 1;
+    funcsOnStack[dedupDepth] = func;
+    depthToDedupDepth[depth] = dedupDepth;
+  }
+
+  return nodeFuncIsDuplicateBitSet;
 }
 
 // This function computes the time range for a thread, using both its samples

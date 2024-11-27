@@ -19,6 +19,7 @@ import type {
   SamplesLikeTable,
   WeightType,
   CallNodeTable,
+  CallNodeTableBitSet,
   CallNodePath,
   IndexIntoCallNodeTable,
   CallNodeData,
@@ -33,6 +34,7 @@ import type {
 import ExtensionIcon from '../../res/img/svg/extension.svg';
 import { formatCallNodeNumber, formatPercent } from '../utils/format-numbers';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
+import { checkBit } from '../utils/bitset';
 import * as ProfileData from './profile-data';
 import type { CallTreeSummaryStrategy } from '../types/actions';
 import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
@@ -61,8 +63,16 @@ export type CallTreeTimingsInverted = {|
   hasChildrenPerRootFunc: Uint8Array,
 |};
 
+export type CallTreeTimingsFunctionList = {|
+  funcSelf: Float64Array,
+  funcTotal: Float64Array,
+  sortedFuncs: IndexIntoFuncTable[],
+  rootTotalSummary: number,
+|};
+
 export type CallTreeTimings =
   | {| type: 'NON_INVERTED', timings: CallTreeTimingsNonInverted |}
+  | {| type: 'FUNCTION_LIST', timings: CallTreeTimingsFunctionList |}
   | {| type: 'INVERTED', timings: CallTreeTimingsInverted |};
 
 /**
@@ -187,6 +197,42 @@ export class CallTreeInternalNonInverted implements CallTreeInternal {
     }
 
     return this._callNodeInfo.getCallNodePathFromIndex(maxNode);
+  }
+}
+
+export class CallTreeInternalFunctionList implements CallTreeInternal {
+  _timings: CallTreeTimingsFunctionList;
+  _roots: IndexIntoCallNodeTable[];
+
+  constructor(timings: CallTreeTimingsFunctionList) {
+    this._timings = timings;
+  }
+
+  hasChildren(_callNodeIndex: IndexIntoCallNodeTable): boolean {
+    return false;
+  }
+
+  createChildren(_nodeIndex: IndexIntoCallNodeTable): CallNodeChildren {
+    return [];
+  }
+
+  createRoots(): CallNodeChildren {
+    return this._timings.sortedFuncs;
+  }
+
+  getSelfAndTotal(nodeIndex: IndexIntoCallNodeTable): SelfAndTotal {
+    return {
+      self: this._timings.funcSelf[nodeIndex],
+      total: this._timings.funcTotal[nodeIndex],
+    };
+  }
+
+  findHeaviestPathInSubtree(
+    _callNodeIndex: IndexIntoCallNodeTable
+  ): CallNodePath {
+    throw new Error(
+      'unexpected call to findHeaviestPathInSubtree in CallTreeInternalFunctionList'
+    );
   }
 }
 
@@ -651,6 +697,17 @@ export function getSelfAndTotalForCallNode(
       const total = timings.total[callNodeIndex];
       return { self, total };
     }
+    case 'FUNCTION_LIST': {
+      const callNodeInfoInverted = ensureExists(callNodeInfo.asInverted());
+      const { timings } = callTreeTimings;
+      const { funcSelf, funcTotal } = timings;
+      if (!callNodeInfoInverted.isRoot(callNodeIndex)) {
+        throw new Error(
+          'When using function list timings, callNodeIndex must always refer to a function (an inverted root)'
+        );
+      }
+      return { self: funcSelf[callNodeIndex], total: funcTotal[callNodeIndex] };
+    }
     case 'INVERTED': {
       const callNodeInfoInverted = ensureExists(callNodeInfo.asInverted());
       const { timings } = callTreeTimings;
@@ -835,6 +892,157 @@ export function computeCallTreeTimingsNonInverted(
 }
 
 /**
+ * For each function in the func table, compute the sum of the sample weights
+ * of the samples which have that function somewhere in their stack.
+ *
+ * Example:
+ *
+ * 1 A -> B -> A
+ * 1 A -> B
+ * 1 B -> B
+ *
+ * funcTotal[A]: 2 (only the first two samples have A in them)
+ * funcTotal[B]: 3 (all three samples have B in them)
+ *
+ * We compute these totals by propagating totals upwards in the non-inverted
+ * call tree, and then on each node, also sum that node's total to the funcTotal
+ * for its function, but *only if this function is not present in the node's
+ * ancestors*.
+ *
+ * For the ancestor check we use the pre-computed `callNodeFuncIsDuplicate` bitset.
+ *
+ * - A (total: 2, self: 0, duplicate: no)
+ *   - B (total: 2, self: 1, duplicate: no)
+ *     - A (total: 1, self: 1, duplicate: yes)
+ * - B (total: 1, self: 0, duplicate: no)
+ *   - B (total: 1, self: 1, duplicate: yes)
+ */
+function _computeFuncTotal(
+  callNodeTable: CallNodeTable,
+  callNodeFuncIsDuplicate: CallNodeTableBitSet,
+  callNodeSelf: Float64Array,
+  funcCount: number
+): { funcTotal: Float64Array, sortedFuncs: IndexIntoFuncTable[] } {
+  const callNodeTableFuncCol = callNodeTable.func;
+  const callNodeTablePrefixCol = callNodeTable.prefix;
+  const callNodeCount = callNodeTable.length;
+
+  const callNodeChildrenTotal = new Float64Array(callNodeCount);
+  const funcTotal = new Float64Array(funcCount);
+
+  // The set of "functions with potentially non-zero totals", stored as an array.
+  const seenFuncs = [];
+  // seenPerFunc[func] stores whether seenFuncs.includes(func).
+  const seenPerFunc = new Uint8Array(funcCount);
+
+  // We loop the call node table in reverse, so that we find the children
+  // before their parents, and the total is known at the time we reach a
+  // node.
+  for (
+    let callNodeIndex = callNodeCount - 1;
+    callNodeIndex >= 0;
+    callNodeIndex--
+  ) {
+    // callNodeChildrenTotal[callNodeIndex] is the sum of our children's totals.
+    // Compute this node's total by adding this node's self.
+    const total =
+      callNodeChildrenTotal[callNodeIndex] + callNodeSelf[callNodeIndex];
+
+    if (total === 0) {
+      continue;
+    }
+
+    const prefix = callNodeTablePrefixCol[callNodeIndex];
+    if (prefix !== -1) {
+      callNodeChildrenTotal[prefix] += total;
+    }
+
+    // Accumulate this node's total to the funcTotal for this node's func.
+    // But don't do it if this function is present in our ancestors! We don't
+    // want to count the sample twice if the function is present in the stack
+    // multiple times.
+    // We've already propagated this node's total to our parent node (via
+    // callNodeChildrenTotal[prefix]), so this node's total will keep propagating
+    // upwards. At some point it will hit the shallowest ancestor node
+    // with our function, where callNodeFuncIsDuplicate will be false, and we
+    // will accumulate our total into funcTotal there.
+    if (!checkBit(callNodeFuncIsDuplicate, callNodeIndex)) {
+      // We now know that func is not present in any of this node's ancestors.
+      const func = callNodeTableFuncCol[callNodeIndex];
+      funcTotal[func] += total;
+
+      // Add this func to the set of funcs with potentially non-zero totals.
+      if (seenPerFunc[func] === 0) {
+        seenPerFunc[func] = 1;
+        seenFuncs.push(func);
+      }
+    }
+  }
+
+  const abs = Math.abs;
+  seenFuncs.sort((a, b) => {
+    const absDiff = abs(funcTotal[b]) - abs(funcTotal[a]);
+    if (absDiff !== 0) {
+      return absDiff;
+    }
+    return a - b;
+  });
+
+  return {
+    funcTotal,
+    sortedFuncs: seenFuncs,
+  };
+}
+
+/**
+ * For each function in the funcTable, computes the self time spent in that function,
+ * i.e. the sum of sample weights of the samples whose call node's "self function" is that function.
+ */
+function _computeFuncSelf(
+  callNodeTable: CallNodeTable,
+  callNodeSelf: Float64Array,
+  funcCount: number
+): Float64Array {
+  const callNodeTableFuncCol = callNodeTable.func;
+  const callNodeCount = callNodeSelf.length;
+
+  const funcSelf = new Float64Array(funcCount);
+  for (let i = 0; i < callNodeCount; i++) {
+    const self = callNodeSelf[i];
+    if (self !== 0) {
+      const func = callNodeTableFuncCol[i];
+      funcSelf[func] += self;
+    }
+  }
+
+  return funcSelf;
+}
+
+/**
+ * Compute the timings for the function list.
+ */
+export function computeFunctionListTimings(
+  callNodeTable: CallNodeTable,
+  callNodeFuncIsDuplicate: CallNodeTableBitSet,
+  { callNodeSelf, rootTotalSummary }: CallNodeSelfAndSummary,
+  funcCount: number
+): CallTreeTimingsFunctionList {
+  const funcSelf = _computeFuncSelf(callNodeTable, callNodeSelf, funcCount);
+  const { funcTotal, sortedFuncs } = _computeFuncTotal(
+    callNodeTable,
+    callNodeFuncIsDuplicate,
+    callNodeSelf,
+    funcCount
+  );
+  return {
+    funcSelf,
+    funcTotal,
+    sortedFuncs,
+    rootTotalSummary,
+  };
+}
+
+/**
  * An exported interface to get an instance of the CallTree class.
  */
 export function getCallTree(
@@ -853,6 +1061,18 @@ export function getCallTree(
           categories,
           callNodeInfo,
           new CallTreeInternalNonInverted(callNodeInfo, timings),
+          timings.rootTotalSummary,
+          Boolean(thread.isJsTracer),
+          weightType
+        );
+      }
+      case 'FUNCTION_LIST': {
+        const { timings } = callTreeTimings;
+        return new CallTree(
+          thread,
+          categories,
+          callNodeInfo,
+          new CallTreeInternalFunctionList(timings),
           timings.rootTotalSummary,
           Boolean(thread.isJsTracer),
           weightType
