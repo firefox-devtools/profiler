@@ -1,4 +1,52 @@
 # Headers for the entire site. The /* represents matching all routes, NOT a comment.
+/from-post-message
+  # Do not try to guess the content-type for JS and CSS files served with a wrong mime-type.
+  X-Content-Type-Options: nosniff
+
+  # This is specific to Safari, Chrome and Internet Explorer, to provide some XSS
+  # Protection for versions that do not support CSP yet.
+  X-XSS-Protection: 1; mode=block
+
+  # Do not give the referrer for external navigations.
+  Referrer-Policy: same-origin
+
+  # 1. script-src
+  #   a. 'wasm-unsafe-eval' allows to execute wasm scripts without compromising the javascript CSP.
+  # 2. style-src
+  #   a. `unsafe-inline` is necessary to support favicons.
+  #   b. Google Fonts are used in the docs.
+  # 3. The domain in `font-src` allows the use of Google Fonts in the docs.
+  # 4. `img-src` defines rules to specifically allow http, https, and data URLs.
+  # 5. `object-src` is for plugins, we don't need them.
+  # 6. `connect-src` is `*` to support `from-url`. We also do requests to bitly to shorten URLs.
+  # 7. `form-action`prevents forms, we don't need this.`
+  # 8. `frame-src` allows the embedding of YouTube videos in the docs.
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src http: https: data:; object-src 'none'; connect-src *; form-action 'none'; frame-src www.youtube-nocookie.com
+
+/uploaded-recordings
+  # Do not try to guess the content-type for JS and CSS files served with a wrong mime-type.
+  X-Content-Type-Options: nosniff
+
+  # This is specific to Safari, Chrome and Internet Explorer, to provide some XSS
+  # Protection for versions that do not support CSP yet.
+  X-XSS-Protection: 1; mode=block
+
+  # Do not give the referrer for external navigations.
+  Referrer-Policy: same-origin
+
+  # 1. script-src
+  #   a. 'wasm-unsafe-eval' allows to execute wasm scripts without compromising the javascript CSP.
+  # 2. style-src
+  #   a. `unsafe-inline` is necessary to support favicons.
+  #   b. Google Fonts are used in the docs.
+  # 3. The domain in `font-src` allows the use of Google Fonts in the docs.
+  # 4. `img-src` defines rules to specifically allow http, https, and data URLs.
+  # 5. `object-src` is for plugins, we don't need them.
+  # 6. `connect-src` is `*` to support `from-url`. We also do requests to bitly to shorten URLs.
+  # 7. `form-action`prevents forms, we don't need this.`
+  # 8. `frame-src` allows the embedding of YouTube videos in the docs.
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src http: https: data:; object-src 'none'; connect-src *; form-action 'none'; frame-src www.youtube-nocookie.com
+
 /*
   # Do not try to guess the content-type for JS and CSS files served with a wrong mime-type.
   X-Content-Type-Options: nosniff
