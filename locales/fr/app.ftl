@@ -162,10 +162,10 @@ CallTreeSidebar--self-size =
 CallTreeSidebar--categories = Catégories
 CallTreeSidebar--implementation = Implémentation
 CallTreeSidebar--running-milliseconds = Millisecondes totales
-CallTreeSidebar--running-sample-count = Nombre d'échantillons total
+CallTreeSidebar--running-sample-count = Nombre d’échantillons total
 CallTreeSidebar--running-bytes = Octets totaux
 CallTreeSidebar--self-milliseconds = Millisecondes individuelles
-CallTreeSidebar--self-sample-count = Nombre d'échantillons individuels
+CallTreeSidebar--self-sample-count = Nombre d’échantillons individuels
 CallTreeSidebar--self-bytes = Octets individuels
 
 ## CompareHome
