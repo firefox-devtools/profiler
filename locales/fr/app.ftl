@@ -702,7 +702,7 @@ TrackContextMenu--show-local-tracks-in-process = Afficher toutes les pistes de c
 # This is used as the context menu item to hide all tracks of the selected track's type.
 # Variables:
 #   $type (String) - Name of the type of selected track to hide.
-TrackContextMenu--hide-all-tracks-by-selected-track-type = Masquer les pistes de type "{ $type }"
+TrackContextMenu--hide-all-tracks-by-selected-track-type = Masquer les pistes de type « { $type } »
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Afficher toutes les pistes correspondantes
@@ -758,17 +758,17 @@ TrackPower--tooltip-power-milliwatt = { $value } mW
 # This is used in the tooltip when the power value uses the kilowatt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPower--tooltip-average-power-kilowatt = { $value } kW
+TrackPower--tooltip-average-power-kilowatt = { $value } kW
     .label = Puissance moyenne pour la sélection actuelle
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPower--tooltip-average-power-watt = { $value } W
+TrackPower--tooltip-average-power-watt = { $value } W
     .label = Puissance moyenne pour la sélection actuelle
 # This is used in the tooltip when the instant power value uses the milliwatt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPower--tooltip-average-power-milliwatt = { $value } mW
+TrackPower--tooltip-average-power-milliwatt = { $value } mW
     .label = Puissance moyenne pour la sélection actuelle
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.
