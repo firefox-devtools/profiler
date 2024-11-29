@@ -456,5 +456,13 @@ export function getNetworkMarkerDetails(
     );
   }
 
+  if (payload.classOfService) {
+    details.push(
+      <TooltipDetail label="Class of Service" key="Network-Class of Service">
+        {payload.classOfService}
+      </TooltipDetail>
+    );
+  }
+
   return details;
 }
