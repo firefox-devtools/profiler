@@ -523,6 +523,13 @@ export type NetworkPayload = {|
   isPrivateBrowsing?: boolean,
   httpVersion?: NetworkHttpVersion,
 
+  // Used to express class dependencies and characteristics.
+  // Possible flags: Leader, Follower, Speculative, Background, Unblocked,
+  // Throttleable, UrgentStart, DontThrottle, Tail, TailAllowed, and
+  // TailForbidden. Multiple flags can be set, separated by '|',
+  // or we use 'Unset' if no flag is set.
+  classOfService?: string,
+
   // NOTE: the following comments are valid for the merged markers. For the raw
   // markers, startTime and endTime have different meanings. Please look
   // `src/profile-logic/marker-data.js` for more information.
