@@ -1098,6 +1098,59 @@ export function computeFunctionListTimings(
   };
 }
 
+function _computeLowerWingCallNodeSelf(
+  callNodeSelf: Float32Array,
+  callNodeTable: CallNodeTable,
+  selectedFuncIndex: IndexIntoFuncTable
+): Float32Array {
+  // There is an implicit mapping so that every call node in the non-inverted table is mapped to:
+  //  - either the root-most ancestor whose func is selectedFuncIndex, or
+  //  - -1 if no such ancestor exists
+  const callNodeCount = callNodeTable.length;
+  const funcCol = callNodeTable.func;
+  const subtreeEndCol = callNodeTable.subtreeRangeEnd;
+  const mappedSelf = new Float32Array(callNodeCount);
+  for (let i = 0; i < callNodeCount; i++) {
+    if (funcCol[i] !== selectedFuncIndex) {
+      continue;
+    }
+
+    // Call node i is the root of a subtree for the selected function.
+    const subtreeEnd = subtreeEndCol[i];
+    let subtreeTotal = 0;
+    for (let j = i; j < subtreeEnd; j++) {
+      subtreeTotal += callNodeSelf[j];
+    }
+    mappedSelf[i] = subtreeTotal;
+    i = subtreeEnd - 1;
+  }
+  return mappedSelf;
+}
+
+export function computeLowerWingTimings(
+  callNodeInfo: CallNodeInfoInverted,
+  { callNodeSelf, rootTotalSummary }: CallNodeSelfAndSummary,
+  selectedFuncIndex: IndexIntoFuncTable | null
+): CallTreeTimings {
+  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+  const mappedSelf =
+    selectedFuncIndex !== null
+      ? _computeLowerWingCallNodeSelf(
+          callNodeSelf,
+          callNodeTable,
+          selectedFuncIndex
+        )
+      : new Float32Array(callNodeSelf.length);
+
+  return {
+    type: 'INVERTED',
+    timings: computeCallTreeTimingsInverted(callNodeInfo, {
+      callNodeSelf: mappedSelf,
+      rootTotalSummary,
+    }),
+  };
+}
+
 export function computeCallTreeTimings(
   callNodeInfo: CallNodeInfo,
   callNodeSelfAndSummary: CallNodeSelfAndSummary

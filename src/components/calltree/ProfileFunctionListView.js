@@ -5,9 +5,13 @@
 // @flow
 
 import React from 'react';
+import SplitterLayout from 'react-splitter-layout';
 import { FunctionList } from './FunctionList';
+import { LowerWing } from './LowerWing';
 import { StackSettings } from 'firefox-profiler/components/shared/StackSettings';
 import { TransformNavigator } from 'firefox-profiler/components/shared/TransformNavigator';
+
+import './Butterfly.css';
 
 export const ProfileFunctionListView = () => (
   <div
@@ -18,6 +22,14 @@ export const ProfileFunctionListView = () => (
   >
     <StackSettings />
     <TransformNavigator />
-    <FunctionList />
+    <div className="butterflyWrapper">
+      <SplitterLayout percentage secondaryInitialSize={50}>
+        <FunctionList />
+        <SplitterLayout percentage vertical secondaryInitialSize={50}>
+          <LowerWing />
+          <LowerWing />
+        </SplitterLayout>
+      </SplitterLayout>
+    </div>
   </div>
 );

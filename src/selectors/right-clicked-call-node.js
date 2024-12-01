@@ -13,8 +13,11 @@ import type {
   Selector,
 } from 'firefox-profiler/types';
 
+import type { CallNodeArea } from '../types/state';
+
 export type RightClickedCallNodeInfo = {|
   +threadsKey: ThreadsKey,
+  +area: CallNodeArea,
   +callNodePath: CallNodePath,
 |};
 

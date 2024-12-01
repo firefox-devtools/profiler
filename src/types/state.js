@@ -62,6 +62,8 @@ export type ThreadViewOptions = {|
   +expandedNonInvertedCallNodePaths: PathSet,
   +expandedInvertedCallNodePaths: PathSet,
   +selectedFunctionIndex: IndexIntoFuncTable | null,
+  +selectedLowerWingCallNodePath: CallNodePath,
+  +expandedLowerWingCallNodePaths: PathSet,
   +selectedMarker: MarkerIndex | null,
   +selectedNetworkMarker: MarkerIndex | null,
 |};
@@ -74,8 +76,11 @@ export type TableViewOptions = {|
 
 export type TableViewOptionsPerTab = { [TabSlug]: TableViewOptions };
 
+export type CallNodeArea = 'NON_INVERTED_TREE' | 'INVERTED_TREE' | 'LOWER_WING';
+
 export type RightClickedCallNode = {|
   +threadsKey: ThreadsKey,
+  +area: CallNodeArea,
   +callNodePath: CallNodePath,
 |};
 
