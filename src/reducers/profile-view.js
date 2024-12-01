@@ -157,9 +157,11 @@ export const defaultThreadViewOptions: ThreadViewOptions = {
   selectedNonInvertedCallNodePath: [],
   selectedInvertedCallNodePath: [],
   selectedLowerWingCallNodePath: [],
+  selectedUpperWingCallNodePath: [],
   expandedNonInvertedCallNodePaths: new PathSet(),
   expandedInvertedCallNodePaths: new PathSet(),
   expandedLowerWingCallNodePaths: new PathSet(),
+  expandedUpperWingCallNodePaths: new PathSet(),
   selectedFunctionIndex: null,
   selectedMarker: null,
   selectedNetworkMarker: null,
@@ -257,6 +259,7 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         INVERTED_TREE: threadState.selectedInvertedCallNodePath,
         NON_INVERTED_TREE: threadState.selectedNonInvertedCallNodePath,
         LOWER_WING: threadState.selectedLowerWingCallNodePath,
+        UPPER_WING: threadState.selectedUpperWingCallNodePath,
       }[area];
 
       // If the selected node doesn't actually change, let's return the previous
@@ -272,6 +275,7 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         INVERTED_TREE: threadState.expandedInvertedCallNodePaths,
         NON_INVERTED_TREE: threadState.expandedNonInvertedCallNodePaths,
         LOWER_WING: threadState.expandedLowerWingCallNodePaths,
+        UPPER_WING: threadState.expandedUpperWingCallNodePaths,
       }[area];
 
       const expandToNode = optionalExpandedToCallNodePath
@@ -313,6 +317,11 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
             selectedLowerWingCallNodePath: selectedCallNodePath,
             expandedLowerWingCallNodePaths: expandedCallNodePaths,
           });
+        case 'UPPER_WING':
+          return _updateThreadViewOptions(state, threadsKey, {
+            selectedUpperWingCallNodePath: selectedCallNodePath,
+            expandedUpperWingCallNodePaths: expandedCallNodePaths,
+          });
         default:
           throw assertExhaustiveCheck(area, 'Unhandled case');
       }
@@ -328,6 +337,20 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
       // state to avoid rerenders.
       if (selectedFunctionIndex === previousSelectedFunction) {
         return state;
+      }
+
+      if (selectedFunctionIndex !== null) {
+        return _updateThreadViewOptions(state, threadsKey, {
+          selectedFunctionIndex,
+          selectedLowerWingCallNodePath: [selectedFunctionIndex],
+          expandedLowerWingCallNodePaths: new PathSet([
+            [selectedFunctionIndex],
+          ]),
+          selectedUpperWingCallNodePath: [selectedFunctionIndex],
+          expandedUpperWingCallNodePaths: new PathSet([
+            [selectedFunctionIndex],
+          ]),
+        });
       }
 
       return _updateThreadViewOptions(state, threadsKey, {
@@ -383,6 +406,10 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         case 'LOWER_WING':
           return _updateThreadViewOptions(state, threadsKey, {
             expandedLowerWingCallNodePaths: expandedCallNodePaths,
+          });
+        case 'UPPER_WING':
+          return _updateThreadViewOptions(state, threadsKey, {
+            expandedUpperWingCallNodePaths: expandedCallNodePaths,
           });
         default:
           throw assertExhaustiveCheck(area, 'Unhandled case');

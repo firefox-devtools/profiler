@@ -149,6 +149,21 @@ export function changeLowerWingSelectedCallNode(
   };
 }
 
+export function changeUpperWingSelectedCallNode(
+  threadsKey: ThreadsKey,
+  selectedCallNodePath: CallNodePath,
+  context: SelectionContext = { source: 'auto' }
+): Action {
+  return {
+    type: 'CHANGE_SELECTED_CALL_NODE',
+    area: 'UPPER_WING',
+    selectedCallNodePath,
+    optionalExpandedToCallNodePath: [],
+    threadsKey,
+    context,
+  };
+}
+
 /**
  * Select a function for a given thread in the function list.
  */
@@ -204,6 +219,18 @@ export function changeLowerWingRightClickedCallNode(
     type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
     threadsKey,
     area: 'LOWER_WING',
+    callNodePath,
+  };
+}
+
+export function changeUpperWingRightClickedCallNode(
+  threadsKey: ThreadsKey,
+  callNodePath: CallNodePath | null
+) {
+  return {
+    type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+    threadsKey,
+    area: 'UPPER_WING',
     callNodePath,
   };
 }
@@ -1705,6 +1732,18 @@ export function changeLowerWingExpandedCallNodes(
   return {
     type: 'CHANGE_EXPANDED_CALL_NODES',
     area: 'LOWER_WING',
+    threadsKey,
+    expandedCallNodePaths,
+  };
+}
+
+export function changeUpperWingExpandedCallNodes(
+  threadsKey: ThreadsKey,
+  expandedCallNodePaths: Array<CallNodePath>
+): Action {
+  return {
+    type: 'CHANGE_EXPANDED_CALL_NODES',
+    area: 'UPPER_WING',
     threadsKey,
     expandedCallNodePaths,
   };

@@ -7,6 +7,7 @@
 import React from 'react';
 import SplitterLayout from 'react-splitter-layout';
 import { FunctionList } from './FunctionList';
+import { UpperWing } from './UpperWing';
 import { LowerWing } from './LowerWing';
 import { StackSettings } from 'firefox-profiler/components/shared/StackSettings';
 import { TransformNavigator } from 'firefox-profiler/components/shared/TransformNavigator';
@@ -26,7 +27,7 @@ export const ProfileFunctionListView = () => (
       <SplitterLayout percentage secondaryInitialSize={50}>
         <FunctionList />
         <SplitterLayout percentage vertical secondaryInitialSize={50}>
-          <LowerWing />
+          <UpperWing />
           <LowerWing />
         </SplitterLayout>
       </SplitterLayout>
