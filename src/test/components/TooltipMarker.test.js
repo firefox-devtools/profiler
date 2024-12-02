@@ -785,6 +785,50 @@ describe('TooltipMarker', function () {
     expect(getValueForProperty('HTTP Version')).toBe('3');
   });
 
+  it('renders page information for pages with one class of service flag', () => {
+    setupWithPayload(
+      getNetworkMarkers({
+        id: 1235,
+        startTime: 19000,
+        fetchStart: 19200.2,
+        endTime: 20433.8,
+        uri: 'https://example.org/index.html',
+        payload: {
+          cache: 'Hit',
+          pri: 8,
+          count: 47027,
+          contentType: 'text/html',
+          classOfService: 'Leader',
+        },
+      })
+    );
+
+    expect(getValueForProperty('Class of Service')).toBe('Leader');
+  });
+
+  it('renders page information for pages with multiple class of service flags', () => {
+    setupWithPayload(
+      getNetworkMarkers({
+        id: 1235,
+        startTime: 19000,
+        fetchStart: 19200.2,
+        endTime: 20433.8,
+        uri: 'https://example.org/index.html',
+        payload: {
+          cache: 'Hit',
+          pri: 8,
+          count: 47027,
+          contentType: 'text/html',
+          classOfService: 'Unblocked | Throttleable | TailForbidden',
+        },
+      })
+    );
+
+    expect(getValueForProperty('Class of Service')).toBe(
+      'Unblocked | Throttleable | TailForbidden'
+    );
+  });
+
   it('renders properly network markers with a preconnect part', () => {
     const { container } = setupWithPayload(
       getNetworkMarkers({

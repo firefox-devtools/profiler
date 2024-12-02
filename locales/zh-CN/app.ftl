@@ -30,6 +30,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = 无法导入分析记录。
 AppViewRouter--error-unpublished = 无法从 { -firefox-brand-name } 检索到分析记录。
 AppViewRouter--error-from-file = 无法读取或解析其中的分析记录。
 AppViewRouter--error-local = 尚未实现。
@@ -587,6 +588,7 @@ ProfileFilterNavigator--full-range-with-duration = 完整范围（{ $fullRangeDu
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-from-post-message = 正在导入并处理分析记录…
 ProfileLoaderAnimation--loading-unpublished = 正在直接从 { -firefox-brand-name } 导入分析记录…
 ProfileLoaderAnimation--loading-from-file = 正在读取文件并处理分析记录…
 ProfileLoaderAnimation--loading-local = 尚未实现。

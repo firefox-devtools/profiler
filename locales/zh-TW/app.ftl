@@ -30,6 +30,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = 無法匯入效能檢測檔。
 AppViewRouter--error-unpublished = 無法從 { -firefox-brand-name } 取得效能檢測檔。
 AppViewRouter--error-from-file = 無法讀取檔案或剖析檔案當中的效能檢測資訊。
 AppViewRouter--error-local = 尚未實作。
@@ -586,6 +587,7 @@ ProfileFilterNavigator--full-range-with-duration = 完整範圍（{ $fullRangeDu
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-from-post-message = 正在匯入與處理效能檢測檔…
 ProfileLoaderAnimation--loading-unpublished = 直接從 { -firefox-brand-name } 匯入檢測檔…
 ProfileLoaderAnimation--loading-from-file = 正在讀取檔案並處理檢測檔…
 ProfileLoaderAnimation--loading-local = 尚未實作。

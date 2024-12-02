@@ -30,6 +30,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = Impossibile importare il profilo.
 AppViewRouter--error-unpublished = Impossibile recuperare il profilo da { -firefox-brand-name }.
 AppViewRouter--error-from-file = Impossibile leggere il file o analizzare il profilo in esso contenuto.
 AppViewRouter--error-local = Non ancora implementato.
@@ -595,6 +596,7 @@ ProfileFilterNavigator--full-range-with-duration = Intervallo completo ({ $fullR
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-from-post-message = Importazione ed elaborazione del profilo in corso…
 ProfileLoaderAnimation--loading-unpublished = Importazione del profilo direttamente da { -firefox-brand-name }…
 ProfileLoaderAnimation--loading-from-file = Lettura del file e analisi del profilo…
 ProfileLoaderAnimation--loading-local = Non ancora implementato.
