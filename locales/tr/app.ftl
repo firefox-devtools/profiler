@@ -30,6 +30,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = Profil içe aktarılamadı.
 AppViewRouter--error-unpublished = { -firefox-brand-name } tarayıcısından profil alınamadı.
 AppViewRouter--error-from-file = Dosya okunamadı veya içindeki profil ayrıştırılamadı.
 AppViewRouter--error-local = Henüz hazır değil.
@@ -521,6 +522,7 @@ ProfileFilterNavigator--full-range-with-duration = Tam aralık ({ $fullRangeDura
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-from-post-message = Profil içe aktarılıyor ve işleniyor…
 ProfileLoaderAnimation--loading-unpublished = Profil doğrudan { -firefox-brand-name } tarayıcısından içe aktarılıyor…
 ProfileLoaderAnimation--loading-from-file = Dosya okunuyor ve profil işleniyor…
 ProfileLoaderAnimation--loading-local = Henüz hazır değil.
@@ -603,6 +605,10 @@ TrackContextMenu--hide-other-screenshots-tracks = Diğer ekran görüntüsü yol
 TrackContextMenu--hide-track = “{ $trackName }” yolunu gizle
 TrackContextMenu--show-all-tracks = Tüm yolları göster
 TrackContextMenu--show-local-tracks-in-process = Bu işlemdeki tüm yolları göster
+# This is used as the context menu item to hide all tracks of the selected track's type.
+# Variables:
+#   $type (String) - Name of the type of selected track to hide.
+TrackContextMenu--hide-all-tracks-by-selected-track-type = “{ $type }” türündeki tüm yolları gizle
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Eşleşen tüm yolları göster
@@ -807,6 +813,11 @@ TransformNavigator--focus-function = Odak: { $item }
 # Variables:
 #   $item (String) - Name of the category that transform applied to.
 TransformNavigator--focus-category = Odak kategorisi: { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Düğümü birleştir: { $item }
 # "Merge function" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
@@ -875,6 +886,33 @@ SourceView--no-known-cors-url = Bu dosya için bilinen çapraz kökenli erişile
 #   $url (String) - The URL which we tried to get the source code from
 #   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
 SourceView--network-error-when-obtaining-source = { $url } adresi getirilirken bir ağ hatası oluştu: { $networkErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source = Tarayıcının sembolikleştirme API’si sorgulanamadı: { $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-error-when-obtaining-source = Tarayıcının sembolikleştirme API’si hata döndürdü: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-error-when-obtaining-source = Yerel sembol sunucusunun sembolikleştirme API’si hata döndürdü: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-malformed-response-when-obtaining-source = Tarayıcının sembolikleştirme API’si hasarlı bir yanıt döndürdü: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-malformed-response-when-obtaining-source = Yerel sembol sunucusunun sembolikleştirme API’si hasarlı bir yanıt döndürdü: { $apiErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:
