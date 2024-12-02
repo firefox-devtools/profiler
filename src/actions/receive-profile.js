@@ -1575,15 +1575,7 @@ export function retrieveProfileFromFile(
         // Profile files can have file names with uncommon extensions
         // (eg .profile). So we can't rely on the mime type to decide how to
         // handle them.
-        let arrayBuffer = await fileReader(file).asArrayBuffer();
-
-        // Check for the gzip magic number in the header. If we find it, decompress
-        // the data first.
-        const profileBytes = new Uint8Array(arrayBuffer);
-        if (isGzip(profileBytes)) {
-          const decompressedProfile = await decompress(profileBytes);
-          arrayBuffer = decompressedProfile.buffer;
-        }
+        const arrayBuffer = await fileReader(file).asArrayBuffer();
 
         const profile = await unserializeProfileOfArbitraryFormat(
           arrayBuffer,
