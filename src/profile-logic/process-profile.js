@@ -95,6 +95,7 @@ import type {
   MarkerPhase,
   Pid,
 } from 'firefox-profiler/types';
+import { decompress, isGzip } from 'firefox-profiler/utils/gz';
 
 type RegExpResult = null | string[];
 /**
@@ -1880,7 +1881,16 @@ export async function unserializeProfileOfArbitraryFormat(
     if (String(arbitraryFormat) === '[object ArrayBuffer]') {
       // Obviously Flow doesn't understand that this is correct, so let's help
       // Flow here.
-      const arrayBuffer: ArrayBuffer = (arbitraryFormat: any);
+      let arrayBuffer: ArrayBuffer = (arbitraryFormat: any);
+
+      // Check for the gzip magic number in the header. If we find it, decompress
+      // the data first.
+      const profileBytes = new Uint8Array(arrayBuffer);
+      if (isGzip(profileBytes)) {
+        const decompressedProfile = await decompress(profileBytes);
+        arrayBuffer = decompressedProfile.buffer;
+      }
+
       if (isArtTraceFormat(arrayBuffer)) {
         arbitraryFormat = convertArtTraceProfile(arrayBuffer);
       } else {
