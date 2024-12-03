@@ -330,9 +330,14 @@ type GCMajorCompleted_Shared = {|
   // 'None' as a reason.
   nonincremental_reason?: 'None' | string,
 
-  // The allocated space for the whole heap before the GC started.
+  // The total size of GC things before and after the GC.
   allocated_bytes: number,
   post_heap_size?: number,
+
+  // The total size of malloc data owned by GC things before and after the GC.
+  // Added in Firefox v135 (Bug 1933205).
+  pre_malloc_heap_size?: number,
+  post_malloc_heap_size?: number,
 
   // Only present if non-zero.
   added_chunks?: number,

@@ -210,6 +210,8 @@ describe('TooltipMarker', function () {
             added_chunks: 50,
             allocated_bytes: 48377856,
             post_heap_size: 38051840,
+            pre_malloc_heap_size: 24188928,
+            post_malloc_heap_size: 12683946,
             major_gc_number: 1,
             max_pause: 74.026,
             minor_gc_number: 16,
