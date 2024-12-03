@@ -1559,7 +1559,7 @@ describe('actions/receive-profile', function () {
 
       const { getState, view } = await setupTestWithFile({
         type: '',
-        payload: compress(serializeProfile(profile)),
+        payload: (await compress(serializeProfile(profile))).buffer,
       });
       expect(view.phase).toBe('DATA_LOADED');
       expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
@@ -1591,7 +1591,7 @@ describe('actions/receive-profile', function () {
 
       const { getState, view } = await setupTestWithFile({
         type: 'application/gzip',
-        payload: compress(serializeProfile(profile)),
+        payload: (await compress(serializeProfile(profile))).buffer,
       });
       expect(view.phase).toBe('DATA_LOADED');
       expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
@@ -1605,7 +1605,7 @@ describe('actions/receive-profile', function () {
 
       const { getState, view } = await setupTestWithFile({
         type: 'application/json',
-        payload: compress(serializeProfile(profile)),
+        payload: (await compress(serializeProfile(profile))).buffer,
       });
       expect(view.phase).toBe('DATA_LOADED');
       expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
@@ -1619,7 +1619,7 @@ describe('actions/receive-profile', function () {
         .mockImplementation(() => {});
       const { view } = await setupTestWithFile({
         type: 'application/gzip',
-        payload: compress('{}'),
+        payload: (await compress('{}')).buffer,
       });
       expect(view.phase).toBe('FATAL_ERROR');
 
