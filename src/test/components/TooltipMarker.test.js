@@ -210,6 +210,8 @@ describe('TooltipMarker', function () {
             added_chunks: 50,
             allocated_bytes: 48377856,
             post_heap_size: 38051840,
+            pre_malloc_heap_size: 24188928,
+            post_malloc_heap_size: 12683946,
             major_gc_number: 1,
             max_pause: 74.026,
             minor_gc_number: 16,
@@ -699,6 +701,134 @@ describe('TooltipMarker', function () {
       'https://profiler.firefox.com/ (private)'
     );
     expect(getValueForProperty('Private Browsing')).toBe('Yes');
+  });
+
+  it('renders page information for HTTP/1.0 pages in network markers', () => {
+    setupWithPayload(
+      getNetworkMarkers({
+        id: 1235,
+        startTime: 19000,
+        fetchStart: 19200.2,
+        endTime: 20433.8,
+        uri: 'https://example.org/index.html',
+        payload: {
+          cache: 'Hit',
+          pri: 8,
+          count: 47027,
+          contentType: 'text/html',
+          httpVersion: 'http/1.0',
+        },
+      })
+    );
+
+    expect(getValueForProperty('HTTP Version')).toBe('1.0');
+  });
+
+  it('renders page information for HTTP/1.1 pages in network markers', () => {
+    setupWithPayload(
+      getNetworkMarkers({
+        id: 1235,
+        startTime: 19000,
+        fetchStart: 19200.2,
+        endTime: 20433.8,
+        uri: 'https://example.org/index.html',
+        payload: {
+          cache: 'Hit',
+          pri: 8,
+          count: 47027,
+          contentType: 'text/html',
+          httpVersion: 'http/1.1',
+        },
+      })
+    );
+
+    expect(getValueForProperty('HTTP Version')).toBe('1.1');
+  });
+
+  it('renders page information for HTTP/2.0 pages in network markers', () => {
+    setupWithPayload(
+      getNetworkMarkers({
+        id: 1235,
+        startTime: 19000,
+        fetchStart: 19200.2,
+        endTime: 20433.8,
+        uri: 'https://example.org/index.html',
+        payload: {
+          cache: 'Hit',
+          pri: 8,
+          count: 47027,
+          contentType: 'text/html',
+          httpVersion: 'h2',
+        },
+      })
+    );
+
+    expect(getValueForProperty('HTTP Version')).toBe('2');
+  });
+
+  it('renders page information for HTTP/3.0 pages in network markers', () => {
+    setupWithPayload(
+      getNetworkMarkers({
+        id: 1235,
+        startTime: 19000,
+        fetchStart: 19200.2,
+        endTime: 20433.8,
+        uri: 'https://example.org/index.html',
+        payload: {
+          cache: 'Hit',
+          pri: 8,
+          count: 47027,
+          contentType: 'text/html',
+          httpVersion: 'h3',
+        },
+      })
+    );
+
+    expect(getValueForProperty('HTTP Version')).toBe('3');
+  });
+
+  it('renders page information for pages with one class of service flag', () => {
+    setupWithPayload(
+      getNetworkMarkers({
+        id: 1235,
+        startTime: 19000,
+        fetchStart: 19200.2,
+        endTime: 20433.8,
+        uri: 'https://example.org/index.html',
+        payload: {
+          cache: 'Hit',
+          pri: 8,
+          count: 47027,
+          contentType: 'text/html',
+          classOfService: 'Leader',
+        },
+      })
+    );
+
+    expect(getValueForProperty('Class of Service')).toBe('Leader');
+  });
+
+  it('renders page information for pages with multiple class of service flags', () => {
+    setupWithPayload(
+      getNetworkMarkers({
+        id: 1235,
+        startTime: 19000,
+        fetchStart: 19200.2,
+        endTime: 20433.8,
+        uri: 'https://example.org/index.html',
+        payload: {
+          cache: 'Hit',
+          pri: 8,
+          count: 47027,
+          contentType: 'text/html',
+          classOfService: 'Unblocked | Throttleable | TailForbidden',
+        },
+      })
+    );
+
+    expect(getValueForProperty('Class of Service')).toBe(
+      'Unblocked | Throttleable | TailForbidden'
+    );
   });
 
   it('renders properly network markers with a preconnect part', () => {

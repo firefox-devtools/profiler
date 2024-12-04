@@ -30,6 +30,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = Koe it profyl net ymportearje.
 AppViewRouter--error-unpublished = Kin it profyl net ophelje fan { -firefox-brand-name }.
 AppViewRouter--error-from-file = Kin it bestân net lêze of it profyl deryn ûntlede.
 AppViewRouter--error-local = Noch net ymplemintearre.
@@ -675,6 +676,7 @@ ProfileFilterNavigator--full-range-with-duration = Folslein berik ({ $fullRangeD
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-from-post-message = Profyl ymportearje en ferwurkje…
 ProfileLoaderAnimation--loading-unpublished = Profyl streekrjocht fan { -firefox-brand-name } út ymportearje…
 ProfileLoaderAnimation--loading-from-file = It bestân lêze en it profyl ferwurkje…
 ProfileLoaderAnimation--loading-local = Noch net ymplemintearre.
