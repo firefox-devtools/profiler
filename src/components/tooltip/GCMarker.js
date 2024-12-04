@@ -249,8 +249,8 @@ export function getGCMajorDetails(
       if (post_heap_size !== undefined) {
         gcsize = (
           <TooltipDetail
-            label="Heap size (pre - post)"
-            key="GMajor-Heap size (pre - post)"
+            label="GC heap size (pre - post)"
+            key="GMajor-GC heap size (pre - post)"
           >
             {formatBytes(timings.allocated_bytes) +
               ' - ' +
@@ -259,7 +259,10 @@ export function getGCMajorDetails(
         );
       } else {
         gcsize = (
-          <TooltipDetail label="Heap size (pre)" key="GMajor-Heap size (pre)">
+          <TooltipDetail
+            label="GC heap size (pre)"
+            key="GMajor-GC heap size (pre)"
+          >
             {formatBytes(timings.allocated_bytes)}
           </TooltipDetail>
         );
@@ -283,7 +286,26 @@ export function getGCMajorDetails(
             /* maxFractionalDigits */ 2
           )}
         </TooltipDetail>,
-        gcsize,
+        gcsize
+      );
+      const pre_malloc_heap_size = timings.pre_malloc_heap_size;
+      const post_malloc_heap_size = timings.post_malloc_heap_size;
+      if (
+        pre_malloc_heap_size !== undefined &&
+        post_malloc_heap_size !== undefined
+      ) {
+        details.push(
+          <TooltipDetail
+            label="Malloc heap size (pre - post)"
+            key="GMajor-Malloc heap size (pre - post)"
+          >
+            {formatBytes(pre_malloc_heap_size) +
+              ' - ' +
+              formatBytes(post_malloc_heap_size)}
+          </TooltipDetail>
+        );
+      }
+      details.push(
         <TooltipDetail label="MMU 20ms" key="GMajor-MMU 20ms">
           {formatPercent(timings.mmu_20ms)}
         </TooltipDetail>,
