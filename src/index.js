@@ -44,6 +44,53 @@ window.geckoProfilerPromise = new Promise(function (resolve) {
   window.connectToGeckoProfiler = resolve;
 });
 
+const svgFiltersElement = document.getElementById('svg-filters');
+if (svgFiltersElement) {
+  const defineSvgFiltersForColors = () => {
+    const colors = [
+      '--button-icon-color',
+      '--button-icon-hover-color',
+      '--button-icon-active-color',
+    ];
+    for (const cssVariable of colors) {
+      let filterEl = svgFiltersElement.getElementById(cssVariable);
+      let feColorMatrixEl;
+      if (!filterEl) {
+        const xmlns = 'http://www.w3.org/2000/svg';
+        filterEl = document.createElementNS(xmlns, 'filter');
+        filterEl.id = cssVariable;
+        filterEl.setAttribute('color-interpolation-filters', 'sRGB');
+        feColorMatrixEl = document.createElementNS(xmlns, 'feColorMatrix');
+        feColorMatrixEl.setAttribute('type', 'matrix');
+        filterEl.append(feColorMatrixEl);
+        svgFiltersElement.append(filterEl);
+      } else {
+        feColorMatrixEl = filterEl.querySelector('feColorMatrix');
+      }
+
+      // This should give us a normalized, comma separated, rgb(a) value that we can easily parse
+      const value = getComputedStyle(document.documentElement).getPropertyValue(
+        cssVariable
+      );
+      const reg =
+        /rgba?\((?<r>\d+(\.\d+)?),\s?(?<g>\d+(\.\d+)?),\s?(?<b>\d+(\.\d+)?)(,\s?(?<a>\d+(\.\d+)?))?\)/;
+      const { r = 1, g = 1, b = 1 } = reg.exec(value)?.groups || {};
+      console.log(cssVariable, value, r, g, b);
+
+      feColorMatrixEl.setAttribute(
+        'values',
+        `0 0 0 0 ${(r / 255).toFixed(2)}  0 0 0 0 ${(g / 255).toFixed(2)}  0 0 0 0 ${(b / 255).toFixed(2)}  0 0 0 1 0`
+      );
+    }
+  };
+  defineSvgFiltersForColors();
+
+  const forcedColorsMql = window.matchMedia('(forced-colors: active)');
+  const darkSchemeMql = window.matchMedia('(prefers-color-scheme: dark)');
+  forcedColorsMql.addEventListener('change', defineSvgFiltersForColors);
+  darkSchemeMql.addEventListener('change', defineSvgFiltersForColors);
+}
+
 const store = createStore();
 const root = createRoot(
   ensureExists(
