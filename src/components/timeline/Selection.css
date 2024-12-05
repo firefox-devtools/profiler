@@ -150,8 +150,7 @@
   border: 1px solid rgb(0 0 0 / 0.2);
   border-radius: 100%;
   margin: -15px;
-  background: url(../../../res/img/svg/zoom-icon.svg) center center no-repeat
-    rgb(255 255 255 / 0.6);
+  background-color: rgb(255 255 255 / 0.6);
   opacity: 0.5;
   pointer-events: auto;
   transition: opacity 200ms ease-in-out;
@@ -161,7 +160,7 @@
 .timelineSelectionOverlayZoomButton::before {
   position: absolute;
   display: grid;
-  content: url(../../../res/img/svg/zoom-icon.svg);
+  content: url(firefox-profiler-res/img/svg/zoom-icon.svg);
   inset: 0;
   place-content: center;
 }
@@ -216,12 +215,25 @@
     opacity: 1;
   }
 
+  .timelineSelectionOverlayZoomButton::before {
+    filter: url(#--button-icon-color);
+  }
+
   .timelineSelectionOverlayZoomButton:hover {
-    background-color: SelectedItem;
+    border-color: SelectedItem;
+    background-color: SelectedItemText;
+  }
+
+  .timelineSelectionOverlayZoomButton:hover::before {
+    filter: url(#--button-icon-hover-color);
   }
 
   .timelineSelectionOverlayZoomButton:active:hover {
-    border-color: SelectedItem;
+    border-color: ButtonText;
     background-color: ButtonFace;
+  }
+
+  .timelineSelectionOverlayZoomButton:hover:active::before {
+    filter: url(#--button-icon-active-color);
   }
 }

@@ -44,6 +44,57 @@ window.geckoProfilerPromise = new Promise(function (resolve) {
   window.connectToGeckoProfiler = resolve;
 });
 
+// We're using an <svg> element from the page to apply filter from CSS rules
+// to be able to dynamically change the color of SVG icons (e.g. to adapt
+// to light/dark/high contrast themes).
+const svgFiltersElement = document.getElementById('svg-filters');
+if (svgFiltersElement) {
+  const defineSvgFiltersForColors = () => {
+    const colors = [
+      '--button-icon-color',
+      '--button-icon-hover-color',
+      '--button-icon-active-color',
+    ];
+    for (const cssVariable of colors) {
+      let filterEl = document.getElementById(cssVariable);
+      if (!filterEl) {
+        svgFiltersElement.insertAdjacentHTML(
+          'beforeend',
+          `<filter id="${cssVariable}" color-interpolation-filters="sRGB">
+            <feFlood />
+            <feComposite operator="in" in2="SourceAlpha" />
+           </filter>`
+        );
+        filterEl = document.getElementById(cssVariable);
+      }
+
+      if (!filterEl) {
+        continue;
+      }
+
+      const feFloodEl = filterEl.querySelector('feFlood');
+
+      if (!feFloodEl) {
+        continue;
+      }
+
+      const color = document.documentElement
+        ? getComputedStyle(document.documentElement).getPropertyValue(
+            cssVariable
+          )
+        : '';
+
+      feFloodEl.setAttribute('flood-color', color);
+    }
+  };
+  defineSvgFiltersForColors();
+
+  const forcedColorsMql = window.matchMedia('(forced-colors: active)');
+  const darkSchemeMql = window.matchMedia('(prefers-color-scheme: dark)');
+  forcedColorsMql.addEventListener('change', defineSvgFiltersForColors);
+  darkSchemeMql.addEventListener('change', defineSvgFiltersForColors);
+}
+
 const store = createStore();
 const root = createRoot(
   ensureExists(
