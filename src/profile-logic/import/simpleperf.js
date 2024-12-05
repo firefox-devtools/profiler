@@ -385,6 +385,8 @@ class FirefoxProfile {
       symbolicationNotSupported: true,
       markerSchema: [],
 
+      platform: 'Android',
+      toolkit: 'android',
       importedFrom: 'Simpleperf',
 
       // Do not distinguish between different stack types?
