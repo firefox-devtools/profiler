@@ -374,7 +374,7 @@ function _createCallNodeTableFromUnorderedComponents(
     const subcategorySorted = new Int32Array(length);
     const innerWindowIDSorted = new Float64Array(length);
     const sourceFramesInlinedIntoSymbolSorted = new Int32Array(length);
-    const depthSorted = new Array(length);
+    const depthSorted = new Int32Array(length);
     let maxDepth = 0;
 
     // Traverse the entire tree, as follows:
