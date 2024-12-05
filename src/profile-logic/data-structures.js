@@ -428,8 +428,8 @@ export function getEmptyCallNodeTable(): CallNodeTable {
     category: new Int32Array(0),
     subcategory: new Int32Array(0),
     innerWindowID: new Float64Array(0),
-    sourceFramesInlinedIntoSymbol: [],
-    depth: [],
+    sourceFramesInlinedIntoSymbol: new Int32Array(0),
+    depth: new Int32Array(0),
     maxDepth: -1,
     length: 0,
   };

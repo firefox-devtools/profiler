@@ -6,9 +6,10 @@
 import type {
   SamplesLikeTable,
   Milliseconds,
-  CallNodeInfo,
   IndexIntoCallNodeTable,
 } from 'firefox-profiler/types';
+import type { CallNodeInfo } from './call-node-info';
+
 /**
  * The StackTimingByDepth data structure organizes stack frames by their depth, and start
  * and end times. This optimizes sample data for Stack Chart views. It
@@ -66,7 +67,7 @@ export function getStackTimingByDepth(
   maxDepthPlusOne: number,
   interval: Milliseconds
 ): StackTimingByDepth {
-  const callNodeTable = callNodeInfo.getCallNodeTable();
+  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
   const {
     prefix: callNodeTablePrefixColumn,
     subtreeRangeEnd: callNodeTableSubtreeRangeEndColumn,
