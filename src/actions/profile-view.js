@@ -65,7 +65,6 @@ import type {
   Pid,
   IndexIntoSamplesTable,
   CallNodePath,
-  CallNodeInfo,
   IndexIntoCallNodeTable,
   IndexIntoResourceTable,
   TrackIndex,
@@ -86,6 +85,7 @@ import {
 } from '../profile-logic/transforms';
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import type { TabSlug } from '../app-logic/tabs-handling';
+import type { CallNodeInfo } from '../profile-logic/call-node-info';
 import { intersectSets } from 'firefox-profiler/utils/set';
 
 /**
@@ -2035,12 +2035,13 @@ export function handleCallNodeTransformShortcut(
     const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const unfilteredThread = threadSelectors.getThread(getState());
     const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
-    const callNodeTable = callNodeInfo.getCallNodeTable();
     const implementation = getImplementationFilter(getState());
     const inverted = getInvertCallstack(getState());
     const callNodePath = callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
-    const funcIndex = callNodeTable.func[callNodeIndex];
-    const category = callNodeTable.category[callNodeIndex];
+    const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
+    const category = callNodeInfo.categoryForNode(callNodeIndex);
+
+    const nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
 
     switch (event.key) {
       case 'F':
@@ -2099,7 +2100,7 @@ export function handleCallNodeTransformShortcut(
         break;
       }
       case 'r': {
-        if (funcHasRecursiveCall(callNodeTable, funcIndex)) {
+        if (funcHasRecursiveCall(nonInvertedCallNodeTable, funcIndex)) {
           dispatch(
             addTransformToStack(threadsKey, {
               type: 'collapse-recursion',
@@ -2110,7 +2111,7 @@ export function handleCallNodeTransformShortcut(
         break;
       }
       case 'R': {
-        if (funcHasDirectRecursiveCall(callNodeTable, funcIndex)) {
+        if (funcHasDirectRecursiveCall(nonInvertedCallNodeTable, funcIndex)) {
           dispatch(
             addTransformToStack(threadsKey, {
               type: 'collapse-direct-recursion',

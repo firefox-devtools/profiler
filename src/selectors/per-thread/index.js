@@ -288,8 +288,7 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
         if (sourceViewFile === null || selectedCallNodeIndex === null) {
           return null;
         }
-        const callNodeTable = callNodeInfo.getCallNodeTable();
-        const selectedFunc = callNodeTable.func[selectedCallNodeIndex];
+        const selectedFunc = callNodeInfo.funcForNode(selectedCallNodeIndex);
         const selectedFuncFile = funcTable.fileName[selectedFunc];
         if (
           selectedFuncFile === null ||

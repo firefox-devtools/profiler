@@ -34,7 +34,6 @@ import type {
   CallNodePath,
   CallNodeAndCategoryPath,
   CallNodeTable,
-  CallNodeInfo,
   StackType,
   ImplementationFilter,
   Transform,
@@ -49,6 +48,7 @@ import type {
   CategoryList,
   Milliseconds,
 } from 'firefox-profiler/types';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
 /**
@@ -602,8 +602,6 @@ function _removeOtherCategoryFunctionsInNodePathWithFunction(
   callNodePath: CallNodePath,
   callNodeInfo: CallNodeInfo
 ): CallNodePath {
-  const callNodeTable = callNodeInfo.getCallNodeTable();
-
   const newCallNodePath = [];
 
   let prefix = -1;
@@ -618,7 +616,7 @@ function _removeOtherCategoryFunctionsInNodePathWithFunction(
       );
     }
 
-    if (callNodeTable.category[callNodeIndex] === category) {
+    if (callNodeInfo.categoryForNode(callNodeIndex) === category) {
       newCallNodePath.push(funcIndex);
     }
 
