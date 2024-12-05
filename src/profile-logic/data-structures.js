@@ -456,7 +456,7 @@ export function getEmptyCallNodeTable(): CallNodeTable {
     subcategory: new Int32Array(0),
     innerWindowID: new Float64Array(0),
     sourceFramesInlinedIntoSymbol: new Int32Array(0),
-    depth: [],
+    depth: new Int32Array(0),
     maxDepth: -1,
     length: 0,
   };
