@@ -78,6 +78,8 @@ export const getLastSelectedCallTreeSummaryStrategy: Selector<
   getProfileSpecificState(state).lastSelectedCallTreeSummaryStrategy;
 export const getShowUserTimings: Selector<boolean> = (state) =>
   getProfileSpecificState(state).showUserTimings;
+export const getStackChartEqualWidths: Selector<boolean> = (state) =>
+  getProfileSpecificState(state).stackChartEqualWidths;
 export const getSourceViewFile: Selector<string | null> = (state) =>
   getProfileSpecificState(state).sourceView.sourceFile;
 export const getSourceViewScrollGeneration: Selector<number> = (state) =>

@@ -523,6 +523,10 @@ type UrlStateAction =
       +showUserTimings: boolean,
     |}
   | {|
+      +type: 'CHANGE_STACK_CHART_EQUAL_WIDTHS',
+      +stackChartEqualWidths: boolean,
+    |}
+  | {|
       +type: 'CHANGE_SHOW_JS_TRACER_SUMMARY',
       +showSummary: boolean,
     |}

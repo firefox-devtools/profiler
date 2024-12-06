@@ -213,6 +213,7 @@ type StackChartQuery = {|
   search: string, // "js::RunScript"
   invertCallstack: null | void,
   showUserTimings: null | void,
+  equalWidths: null | void,
   ctSummary: string,
 |};
 
@@ -385,18 +386,16 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
   const selectedTab = urlState.selectedTab;
   switch (selectedTab) {
     case 'stack-chart':
+      // Stack chart uses all of the CallTree's query strings but also has an
+      // additional query string.
+      query = (baseQuery: StackChartQueryShape);
+      query.showUserTimings = urlState.profileSpecific.showUserTimings
+        ? null
+        : undefined;
+    /* fallsthrough */
     case 'flame-graph':
     case 'calltree': {
-      if (selectedTab === 'stack-chart') {
-        // Stack chart uses all of the CallTree's query strings but also has an
-        // additional query string.
-        query = (baseQuery: StackChartQueryShape);
-        query.showUserTimings = urlState.profileSpecific.showUserTimings
-          ? null
-          : undefined;
-      } else {
-        query = (baseQuery: CallTreeQueryShape);
-      }
+      query = (baseQuery: CallTreeQueryShape);
 
       query.search = urlState.profileSpecific.callTreeSearchString || undefined;
       query.invertCallstack = urlState.profileSpecific.invertCallstack
@@ -650,6 +649,7 @@ export function stateFromLocation(
       ),
       invertCallstack: query.invertCallstack === undefined ? false : true,
       showUserTimings: query.showUserTimings === undefined ? false : true,
+      stackChartEqualWidths: query.equalWidths === undefined ? false : true,
       committedRanges: query.range ? parseCommittedRanges(query.range) : [],
       selectedThreads,
       callTreeSearchString: query.search || '',
