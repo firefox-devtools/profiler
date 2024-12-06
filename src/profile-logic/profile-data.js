@@ -834,7 +834,7 @@ export function getTimingsForCallNodeIndex(
   /* ------------ Variables definitions ------------*/
 
   // This is the data from the filtered thread that we'll loop over.
-  const { stringTable } = thread;
+  const { stackTable, stringTable } = thread;
 
   // This is the data from the unfiltered thread that we'll use to gather
   // category and JS implementation information. Note that samples are offset by
@@ -984,12 +984,10 @@ export function getTimingsForCallNodeIndex(
 
     // step 4: find the category value for this stack. We want to use the
     // category of the unfilteredThread.
-    const unfilteredStackIndex =
-      unfilteredSamples.stack[sampleIndex + sampleIndexOffset];
-    if (unfilteredStackIndex !== null) {
-      const categoryIndex = unfilteredStackTable.category[unfilteredStackIndex];
-      const subcategoryIndex =
-        unfilteredStackTable.subcategory[unfilteredStackIndex];
+    const filteredStackIndex = samples.stack[sampleIndex];
+    if (filteredStackIndex !== null) {
+      const categoryIndex = stackTable.category[filteredStackIndex];
+      const subcategoryIndex = stackTable.subcategory[filteredStackIndex];
 
       // step 5: increment the right value in the category breakdown
       if (timings.breakdownByCategory === null) {

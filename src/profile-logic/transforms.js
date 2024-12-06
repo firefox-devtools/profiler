@@ -237,13 +237,14 @@ export function parseTransforms(transformString: string): TransformStack {
       }
       case 'focus-category': {
         // e.g. "fg-3"
-        const [, categoryRaw] = tuple;
+        const [, implementation, categoryRaw] = tuple;
         const category = parseInt(categoryRaw, 10);
         // Validate that the category makes sense.
         if (!isNaN(category) && category >= 0) {
           transforms.push({
             type: 'focus-category',
             category,
+            implementation: toValidImplementationFilter(implementation),
           });
         }
         break;
@@ -349,7 +350,7 @@ export function stringifyTransforms(transformStack: TransformStack): string {
         case 'focus-function':
           return `${shortKey}-${transform.funcIndex}`;
         case 'focus-category':
-          return `${shortKey}-${transform.category}`;
+          return `${shortKey}-${transform.implementation}-${transform.category}`;
         case 'collapse-resource':
           return `${shortKey}-${transform.implementation}-${transform.resourceIndex}-${transform.collapsedFuncIndex}`;
         case 'collapse-recursion':
@@ -1437,8 +1438,15 @@ export function focusFunction(
   });
 }
 
-export function focusCategory(thread: Thread, category: IndexIntoCategoryList) {
-  return timeCode('focusCategory', () => {
+// Remove from all stacks any frames whose category is different from the chosen
+// category. This is effectively a merge operation, because the self time of the
+// removed stack nodes is now attributed to the closest ancestor node with the
+// chosen category.
+export function focusCategoryOld(
+  thread: Thread,
+  category: IndexIntoCategoryList
+) {
+  return timeCode('focusCategoryOld', () => {
     const { stackTable } = thread;
     const oldStackToNewStack: Map<
       IndexIntoStackTable | null,
@@ -1475,6 +1483,38 @@ export function focusCategory(thread: Thread, category: IndexIntoCategoryList) {
       getMapStackUpdater(oldStackToNewStack)
     );
     return updated;
+  });
+}
+
+// Drop all samples whose self category is different from the chosen category.
+export function focusCategory(
+  thread: Thread,
+  category: IndexIntoCategoryList,
+  implementation: ImplementationFilter,
+  defaultCategory: IndexIntoCategoryList
+) {
+  return timeCode('focusCategory', () => {
+    const funcMatchesImplementation = FUNC_MATCHES[implementation];
+    const { stackTable, frameTable } = thread;
+    const keepStack = new Array(stackTable.length);
+    const implementationFilteredCategoryPerStack = new Array(stackTable.length);
+    for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+      const frameIndex = stackTable.frame[stackIndex];
+      let implementationFilteredCategory = stackTable.category[stackIndex];
+      if (!funcMatchesImplementation(thread, frameTable.func[frameIndex])) {
+        const prefix = stackTable.prefix[stackIndex];
+        implementationFilteredCategory =
+          prefix === null
+            ? defaultCategory
+            : implementationFilteredCategoryPerStack[prefix];
+      }
+      keepStack[stackIndex] = implementationFilteredCategory === category;
+      implementationFilteredCategoryPerStack[stackIndex] =
+        implementationFilteredCategory;
+    }
+    return updateThreadStacks(thread, stackTable, (stack) =>
+      stack !== null && keepStack[stack] ? stack : null
+    );
   });
 }
 
@@ -1779,7 +1819,12 @@ export function applyTransform(
     case 'focus-function':
       return focusFunction(thread, transform.funcIndex);
     case 'focus-category':
-      return focusCategory(thread, transform.category);
+      return focusCategory(
+        thread,
+        transform.category,
+        transform.implementation,
+        defaultCategory
+      );
     case 'collapse-resource':
       return collapseResource(
         thread,
