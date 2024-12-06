@@ -9,11 +9,10 @@ import * as CPU from '../profile-logic/cpu';
 import * as UrlState from './url-state';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
-  accumulateCounterSamples,
+  summariseCounterSamples,
   extractProfileFilterPageData,
   computeMaxCounterSampleCountPerMs,
   getFriendlyThreadName,
-  processCounter,
   getInclusiveSampleIndexRangeForSelection,
   computeTabToThreadIndexesMap,
 } from '../profile-logic/profile-data';
@@ -47,7 +46,7 @@ import type {
   LocalTrack,
   TrackIndex,
   GlobalTrack,
-  AccumulatedCounterSamples,
+  CounterSummary,
   ProfileFilterPageData,
   ActiveTabGlobalTrack,
   OriginsTimeline,
@@ -292,13 +291,13 @@ export const getCounterSelectors = (index: CounterIndex): CounterSelectors => {
  * type of the function.
  */
 function _createCounterSelectors(counterIndex: CounterIndex) {
-  const getCounter: Selector<Counter> = createSelector(getProfile, (profile) =>
-    processCounter(
+  const getCounter: Selector<Counter> = createSelector(
+    getProfile,
+    (profile) =>
       ensureExists(
         profile.counters,
         'Attempting to get a counter by index, but no counters exist.'
       )[counterIndex]
-    )
   );
 
   const getDescription: Selector<string> = (state) =>
@@ -316,13 +315,12 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
     )
   );
 
-  const getAccumulateCounterSamples: Selector<AccumulatedCounterSamples> =
-    createSelector(
-      getCounter,
-      getCommittedRangeCounterSampleRange,
-      (counter, sampleRange) =>
-        accumulateCounterSamples(counter.samples, sampleRange)
-    );
+  const getCounterSummary: Selector<CounterSummary> = createSelector(
+    getCounter,
+    getCommittedRangeCounterSampleRange,
+    (counter, sampleRange) =>
+      summariseCounterSamples(counter.samples, counter.relative, sampleRange)
+  );
 
   const getMaxCounterSampleCountPerMs: Selector<number> = createSelector(
     getCounter,
@@ -347,7 +345,7 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
     getCounter,
     getDescription,
     getPid,
-    getAccumulateCounterSamples,
+    getCounterSummary,
     getMaxCounterSampleCountPerMs,
     getMaxRangeCounterSampleCountPerMs,
     getCommittedRangeCounterSampleRange,

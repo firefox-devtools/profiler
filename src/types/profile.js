@@ -538,6 +538,7 @@ export type Counter = {|
   color?: GraphColor,
   pid: Pid,
   mainThreadIndex: ThreadIndex,
+  relative: boolean,
   samples: CounterSamplesTable,
 |};
 

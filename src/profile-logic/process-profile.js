@@ -1031,26 +1031,68 @@ function _processCounters(
     );
   }
 
-  return geckoCounters.reduce(
-    (result, { name, category, description, samples }) => {
-      if (samples.data.length === 0) {
-        // It's possible that no sample has been collected during our capture
-        // session, ignore this counter if that's the case.
-        return result;
-      }
+  /**
+   * Process the samples in the counter.
+   */
+  function processCounter(gecko_counter: GeckoCounter): Counter {
+    const { name, category, description } = gecko_counter;
 
-      result.push({
-        name,
-        category,
-        description,
-        pid: mainThreadPid,
-        mainThreadIndex,
-        samples: adjustTableTimestamps(_toStructOfArrays(samples), delta),
-      });
+    const relative = name === 'malloc-relative';
+    const samples = adjustTableTimestamps(
+      _toStructOfArrays(gecko_counter.samples),
+      delta
+    );
+
+    const count = samples.count.slice();
+    const number =
+      samples.number !== undefined ? samples.number.slice() : undefined;
+
+    if (relative) {
+      // These lines zero out the first values of the relative memory
+      // counters, as they are unreliable. In addition, there are probably
+      // some missed counts in the memory counters, so the first memory number
+      // slowly creeps up over time, and becomes very unrealistic.  In order
+      // to not be affected by these platform limitations, zero out the first
+      // counter values.
+      //
+      // "Memory counter in Gecko Profiler isn't cleared when starting a new
+      // capture"
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1520587
+      count[0] = 0;
+      if (number !== undefined) {
+        number[0] = 0;
+      }
+    } else if (name === 'malloc-absolute') {
+      // Absolute memory counter samples are relative to the previous one,
+      // it's just that the first sample is absolute.  To make this more
+      // consistent with other counters we transform it to absolute here.
+      let accumulated = count[0];
+      for (let i = 1; i < count.length; i++) {
+        accumulated += count[i];
+        count[i] = accumulated;
+      }
+    }
+
+    return {
+      name,
+      category,
+      description,
+      pid: mainThreadPid,
+      mainThreadIndex,
+      samples: { ...samples, number, count },
+      relative,
+    };
+  }
+
+  return geckoCounters.reduce((result, gecko_counter) => {
+    if (gecko_counter.samples.data.length === 0) {
+      // It's possible that no sample has been collected during our capture
+      // session, ignore this counter if that's the case.
       return result;
-    },
-    []
-  );
+    }
+    result.push(processCounter(gecko_counter));
+    return result;
+  }, []);
 }
 
 /**

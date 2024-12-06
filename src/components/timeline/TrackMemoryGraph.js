@@ -34,7 +34,7 @@ import type {
   Counter,
   Thread,
   ThreadIndex,
-  AccumulatedCounterSamples,
+  CounterSummary,
   Milliseconds,
   CssPixels,
   StartEndRange,
@@ -54,7 +54,7 @@ type CanvasProps = {|
   +rangeEnd: Milliseconds,
   +counter: Counter,
   +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
-  +accumulatedSamples: AccumulatedCounterSamples,
+  +counterSummary: CounterSummary,
   +interval: Milliseconds,
   +width: CssPixels,
   +height: CssPixels,
@@ -83,7 +83,7 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
       width,
       lineWidth,
       interval,
-      accumulatedSamples,
+      counterSummary,
       counterSampleRange,
     } = this.props;
     if (width === 0) {
@@ -116,7 +116,7 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
     // Take the sample information, and convert it into chart coordinates. Use a slightly
     // smaller space than the deviceHeight, so that the stroke will be fully visible
     // both at the top and bottom of the chart.
-    const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
+    const { minCount, countRange, accumulatedCounts } = counterSummary;
     const [sampleStart, sampleEnd] = counterSampleRange;
 
     {
@@ -148,7 +148,12 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
         x = (samples.time[i] - rangeStart) * millisecondWidth;
         // Add on half the stroke's line width so that it won't be cut off the edge
         // of the graph.
-        const unitGraphCount = (accumulatedCounts[i] - minCount) / countRange;
+        const unitGraphCount =
+          ((accumulatedCounts
+            ? accumulatedCounts[i - sampleStart]
+            : samples.count[i]) -
+            minCount) /
+          countRange;
         y =
           innerDeviceHeight -
           innerDeviceHeight * unitGraphCount +
@@ -254,7 +259,7 @@ type StateProps = {|
   +rangeEnd: Milliseconds,
   +counter: Counter,
   +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
-  +accumulatedSamples: AccumulatedCounterSamples,
+  +counterSummary: CounterSummary,
   +interval: Milliseconds,
   +filteredThread: Thread,
   +unfilteredSamplesRange: StartEndRange | null,
@@ -362,7 +367,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
   };
 
   _renderTooltip(counterIndex: number): React.Node {
-    const { accumulatedSamples, counter, rangeStart, rangeEnd } = this.props;
+    const { counterSummary, counter, rangeStart, rangeEnd } = this.props;
     const { mouseX, mouseY } = this.state;
     const { samples } = counter;
     if (samples.length === 0) {
@@ -380,8 +385,10 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
       return null;
     }
 
-    const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
-    const bytes = accumulatedCounts[counterIndex] - minCount;
+    const { minCount, countRange, accumulatedCounts } = counterSummary;
+    const bytes = accumulatedCounts
+      ? accumulatedCounts[counterIndex - rangeStart] - minCount
+      : samples.count[counterIndex];
     const operations =
       samples.number !== undefined ? samples.number[counterIndex] : null;
     return (
@@ -391,19 +398,27 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
             <span className="timelineTrackMemoryTooltipNumber">
               {formatBytes(bytes)}
             </span>
-            <Localized id="TrackMemoryGraph--relative-memory-at-this-time">
-              relative memory at this time
-            </Localized>
+            {counter.relative ? (
+              <Localized id="TrackMemoryGraph--relative-memory-at-this-time">
+                relative memory at this time
+              </Localized>
+            ) : (
+              <Localized id="TrackMemoryGraph--absolute-memory-at-this-time">
+                absolute memory at this time
+              </Localized>
+            )}
           </div>
 
-          <div className="timelineTrackMemoryTooltipLine">
-            <span className="timelineTrackMemoryTooltipNumber">
-              {formatBytes(countRange)}
-            </span>
-            <Localized id="TrackMemoryGraph--memory-range-in-graph">
-              memory range in graph
-            </Localized>
-          </div>
+          {counter.relative ? (
+            <div className="timelineTrackMemoryTooltipLine">
+              <span className="timelineTrackMemoryTooltipNumber">
+                {formatBytes(countRange)}
+              </span>
+              <Localized id="TrackMemoryGraph--memory-range-in-graph">
+                memory range in graph
+              </Localized>
+            </div>
+          ) : null}
           {operations !== null ? (
             <div className="timelineTrackMemoryTooltipLine">
               <span className="timelineTrackMemoryTooltipNumber">
@@ -431,7 +446,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
       graphHeight,
       width,
       lineWidth,
-      accumulatedSamples,
+      counterSummary,
     } = this.props;
 
     const { samples } = counter;
@@ -453,9 +468,11 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
 
     const left = (width * (sampleTime - rangeStart)) / rangeLength;
 
-    const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
+    const { minCount, countRange, accumulatedCounts } = counterSummary;
     const unitSampleCount =
-      (accumulatedCounts[counterIndex] - minCount) / countRange;
+      (accumulatedCounts
+        ? accumulatedCounts[counterIndex - rangeStart]
+        : samples.count[counterIndex] - minCount) / countRange;
     const innerTrackHeight = graphHeight - lineWidth / 2;
     const top =
       innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
@@ -487,7 +504,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
       graphHeight,
       width,
       lineWidth,
-      accumulatedSamples,
+      counterSummary,
     } = this.props;
 
     return (
@@ -505,7 +522,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
           width={width}
           lineWidth={lineWidth}
           interval={interval}
-          accumulatedSamples={accumulatedSamples}
+          counterSummary={counterSummary}
         />
         {hoveredCounter === null ? null : (
           <>
@@ -541,7 +558,7 @@ export const TrackMemoryGraph = explicitConnect<
     return {
       counter,
       threadIndex: counter.mainThreadIndex,
-      accumulatedSamples: counterSelectors.getAccumulateCounterSamples(state),
+      counterSummary: counterSelectors.getCounterSummary(state),
       rangeStart: start,
       rangeEnd: end,
       counterSampleRange,

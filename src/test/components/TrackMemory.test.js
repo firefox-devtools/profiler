@@ -28,6 +28,8 @@ import {
 import {
   getProfileFromTextSamples,
   getCounterForThread,
+  getCounterForThreadWithSamples,
+  makeSamples,
 } from '../fixtures/profiles/processed-profile';
 import {
   autoMockElementSize,
@@ -67,8 +69,22 @@ describe('TrackMemory', function () {
     );
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
+
+    // Relative samples,
+    const samplesA = makeSamples(
+      (i) => (i === 0 ? 0 : Math.sin(i)),
+      thread,
+      counterConfig
+    );
+    // Absolute samples,
+    const samplesB = makeSamples(
+      (i) => Math.sin(i) + 10,
+      thread,
+      counterConfig
+    );
     profile.counters = [
-      getCounterForThread(thread, threadIndex, counterConfig),
+      getCounterForThreadWithSamples(thread, threadIndex, samplesA, true),
+      getCounterForThreadWithSamples(thread, threadIndex, samplesB, false),
     ];
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;

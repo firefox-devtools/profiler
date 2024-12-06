@@ -40,7 +40,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 51,
+    "preprocessedProfileVersion": 52,
     "processType": 0,
     "product": "Firefox",
     "sampleUnits": undefined,
@@ -50,7 +50,7 @@ Object {
     "symbolicated": true,
     "toolkit": undefined,
     "updateChannel": undefined,
-    "version": 31,
+    "version": 32,
     "visualMetrics": undefined,
   },
   "pages": Array [],
@@ -7975,7 +7975,7 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 31,
+    "version": 32,
   },
   "pausedRanges": Array [],
   "processes": Array [
@@ -8936,7 +8936,7 @@ Object {
     Object {
       "category": "Memory",
       "description": "Amount of allocated memory",
-      "name": "malloc",
+      "name": "malloc-relative",
       "samples": Object {
         "data": Array [
           Array [
@@ -9431,7 +9431,7 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 31,
+    "version": 32,
   },
   "pages": Array [
     Object {
@@ -10971,7 +10971,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 51,
+    "preprocessedProfileVersion": 52,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -12625,7 +12625,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 51,
+    "preprocessedProfileVersion": 52,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -13958,8 +13958,9 @@ Object {
       "category": "Memory",
       "description": "Amount of allocated memory",
       "mainThreadIndex": 0,
-      "name": "malloc",
+      "name": "malloc.relative",
       "pid": "11111",
+      "relative": false,
       "samples": Object {
         "count": Array [
           1,
@@ -14422,7 +14423,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 51,
+    "preprocessedProfileVersion": 52,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,

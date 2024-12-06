@@ -64,8 +64,8 @@ import type {
   CallNodeTable,
   CallNodePath,
   CallNodeAndCategoryPath,
+  CounterSummary,
   IndexIntoCallNodeTable,
-  AccumulatedCounterSamples,
   SamplesLikeTable,
   SelectedState,
   ProfileFilterPageData,
@@ -1721,61 +1721,43 @@ export function filterCounterSamplesToRange(
 }
 
 /**
- * Process the samples in the counter.
+ * The memory counter sometimes contains relative offsets of memory. In
+ * order to draw an interesting graph, take the memory counts, and find the
+ * minimum and maximum values, accumulating them if necessary. Then, map
+ * those values to the accumulatedCounts array.
  */
-export function processCounter(counter: Counter): Counter {
-  const { samples } = counter;
-  const count = samples.count.slice();
-  const number =
-    samples.number !== undefined ? samples.number.slice() : undefined;
-
-  // These lines zero out the first values of the counters, as they are unreliable. In
-  // addition, there are probably some missed counts in the memory counters, so the
-  // first memory number slowly creeps up over time, and becomes very unrealistic.
-  // In order to not be affected by these platform limitations, zero out the first
-  // counter values.
-  //
-  // "Memory counter in Gecko Profiler isn't cleared when starting a new capture"
-  // https://bugzilla.mozilla.org/show_bug.cgi?id=1520587
-  count[0] = 0;
-  if (number !== undefined) {
-    number[0] = 0;
-  }
-
-  return {
-    ...counter,
-    samples: {
-      ...samples,
-      number,
-      count,
-    },
-  };
-}
-
-/**
- * The memory counter contains relative offsets of memory. In order to draw an interesting
- * graph, take the memory counts, and find the minimum and maximum values, by
- * accumulating them over the entire profile range. Then, map those values to the
- * accumulatedCounts array.
- */
-export function accumulateCounterSamples(
+export function summariseCounterSamples(
   samples: CounterSamplesTable,
+  relative: boolean,
   sampleRange?: [IndexIntoSamplesTable, IndexIntoSamplesTable]
-): AccumulatedCounterSamples {
-  let minCount = 0;
-  let maxCount = 0;
-  let accumulated = 0;
-  const accumulatedCounts = Array(samples.length).fill(0);
-  // If a range is provided, use it instead. This will also include the
-  // samples right before and after the range.
+): CounterSummary {
+  // If a range is provided, use it. This will also include the samples
+  // right before and after the range.
   const startSampleIndex = sampleRange ? sampleRange[0] : 0;
   const endSampleIndex = sampleRange ? sampleRange[1] : samples.length;
+  const numSamples = endSampleIndex - startSampleIndex;
+  let accumulatedCounts;
+  let getSample;
+
+  if (relative) {
+    accumulatedCounts = Array(numSamples);
+    let accumulated = 0;
+    for (let i = 0; i < numSamples; i++) {
+      accumulated += samples.count[startSampleIndex + i];
+      accumulatedCounts[i] = accumulated;
+    }
+
+    getSample = (i) => accumulatedCounts[i - startSampleIndex];
+  } else {
+    getSample = (i) => samples.count[i];
+  }
+
+  let minCount = getSample(startSampleIndex);
+  let maxCount = getSample(startSampleIndex);
 
   for (let i = startSampleIndex; i < endSampleIndex; i++) {
-    accumulated += samples.count[i];
-    minCount = Math.min(accumulated, minCount);
-    maxCount = Math.max(accumulated, maxCount);
-    accumulatedCounts[i] = accumulated;
+    minCount = Math.min(getSample(i), minCount);
+    maxCount = Math.max(getSample(i), maxCount);
   }
   const countRange = maxCount - minCount;
 
