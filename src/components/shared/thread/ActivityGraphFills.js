@@ -863,16 +863,15 @@ function _accumulateInBuffer(
     (sampleCategoryStartTime - bufferTimeRangeStart) * xPixelsPerMs;
   let sampleCategoryEndPixel =
     (sampleCategoryEndTime - bufferTimeRangeStart) * xPixelsPerMs;
-  if (sampleCategoryStartPixel < 0) {
-    sampleCategoryStartPixel = 0;
-  }
-  if (sampleCategoryEndPixel > percentageBuffer.length - 1) {
-    sampleCategoryEndPixel = percentageBuffer.length - 1;
-  }
+  sampleCategoryStartPixel = Math.max(0, sampleCategoryStartPixel);
+  sampleCategoryEndPixel = Math.min(
+    percentageBuffer.length - 1,
+    sampleCategoryEndPixel
+  );
   const samplePixel = (sampleTime - bufferTimeRangeStart) * xPixelsPerMs;
-  const intCategoryStartPixel = sampleCategoryStartPixel | 0;
-  const intCategoryEndPixel = sampleCategoryEndPixel | 0;
-  const intSamplePixel = samplePixel | 0;
+  const intCategoryStartPixel = Math.floor(sampleCategoryStartPixel);
+  const intCategoryEndPixel = Math.floor(sampleCategoryEndPixel);
+  const intSamplePixel = Math.floor(samplePixel);
   const sampleTimeDeltaBefore = sampleTime - prevSampleTime;
   const sampleTimeDeltaAfter = nextSampleTime - sampleTime;
 
