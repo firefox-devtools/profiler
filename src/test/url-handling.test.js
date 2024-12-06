@@ -1424,13 +1424,13 @@ describe('url upgrading', function () {
 
 describe('URL serialization of the transform stack', function () {
   const transformString =
-    'f-combined-0w2~mcn-combined-2w4~f-js-3w5-i~mf-6~ff-7~fg-42~cr-combined-8-9~' +
+    'f-combined-0w2~mcn-combined-2w4~f-js-3w5-i~mf-6~mu~ff-7~fg-42~cr-combined-8-9~' +
     'drec-combined-10~rec-11~df-12~cfs-13';
   const { getState } = _getStoreWithURL({
     search: '?transforms=' + transformString,
   });
 
-  it('deserializes focus subtree transforms', function () {
+  it('deserializes transforms', function () {
     const transformStack =
       selectedThreadSelectors.getTransformStack(getState());
 
@@ -1456,6 +1456,9 @@ describe('URL serialization of the transform stack', function () {
       {
         type: 'merge-function',
         funcIndex: 6,
+      },
+      {
+        type: 'merge-unaccounted-native-functions',
       },
       {
         type: 'focus-function',
@@ -1491,7 +1494,7 @@ describe('URL serialization of the transform stack', function () {
     ]);
   });
 
-  it('re-serializes the focus subtree transforms', function () {
+  it('re-serializes the transforms', function () {
     const queryString = getQueryStringFromState(getState());
     expect(queryString).toContain(`transforms=${transformString}`);
   });
