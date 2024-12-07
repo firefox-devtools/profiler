@@ -249,7 +249,7 @@ Home--enable-button-unavailable =
 Home--web-channel-unavailable = 此檢測器無法連線到 WebChannel。通常是因為執行檢測器的主機與 <code>devtools.performance.recording.ui-base-url</code> 偏好設定當中指定的主機不同。若您想要使用此檢測器捕捉新的效能檢測檔，並可程式化控制檢測器選單按鈕，可到 <code>about:config</code> 調整該偏好設定。
 Home--record-instructions = 請點擊檢測按鈕或按下鍵盤快速鍵即可開始進行檢測。進行效能紀錄時，此圖示將會顯示成藍色。按下<kbd>捕捉</kbd>即可將資料載入到 profiler.firefox.com。
 Home--instructions-content = 需要使用 <a>{ -firefox-brand-name }</a> 紀錄效能檢測檔。但可以使用任何現代瀏覽器檢視現有的檢測檔。
-Home--record-instructions-start-stop = 停止並開始檢測
+Home--record-instructions-start-stop = 停止或開始檢測
 Home--record-instructions-capture-load = 捕捉並載入檢測檔
 Home--profiler-motto = 捕捉效能檢測檔。分析、分享、讓網站運作更快。
 Home--additional-content-title = 載入現有檢測檔
@@ -425,8 +425,8 @@ MenuButtons--metaInfo--profiling-session = 紀錄長度：
 MenuButtons--metaInfo--main-process-started = 主處理程序開始：
 MenuButtons--metaInfo--main-process-ended = 主要處理程序結束於：
 MenuButtons--metaInfo--interval = 間隔：
-MenuButtons--metaInfo--buffer-capacity = 緩衝容量：
-MenuButtons--metaInfo--buffer-duration = 緩衝間隔：
+MenuButtons--metaInfo--buffer-capacity = 緩衝區容量：
+MenuButtons--metaInfo--buffer-duration = 緩衝區長度：
 # Buffer Duration in Seconds in Meta Info Panel
 # Variable:
 #   $configurationDuration (Number) - Configuration Duration in Seconds
@@ -716,7 +716,7 @@ TrackNameButton--hide-process =
 
 TrackMemoryGraph--relative-memory-at-this-time = 此時的相對記憶體用量
 TrackMemoryGraph--memory-range-in-graph = 圖表中的記憶體範圍
-TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = 上次取樣以來的分配予取消分配
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = 上次取樣以來的分配與取消分配
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
