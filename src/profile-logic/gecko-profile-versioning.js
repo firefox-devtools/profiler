@@ -1490,6 +1490,23 @@ const _upgraders = {
     // frontend to display older formats.
   },
 
+  [32]: (profile) => {
+    function convertToVersion32Recursive(p) {
+      if (p.counters) {
+        for (const c of p.counters) {
+          if (c.name === 'malloc') {
+            c.name = 'malloc-relative';
+          }
+        }
+      }
+
+      for (const subprocessProfile of p.processes) {
+        convertToVersion32Recursive(subprocessProfile);
+      }
+    }
+    convertToVersion32Recursive(profile);
+  },
+
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

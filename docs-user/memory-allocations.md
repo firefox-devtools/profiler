@@ -10,9 +10,9 @@ The Firefox Profiler supports three different types of memory profiling
 
 ![A screenshot showing the memory track in the timeline.](images/allocation-track.png)
 
-The memory track graphs overall allocation and deallocation numbers over time for a single process. It is enabled only in Nightly. It works by tracking every allocation and deallocation, and occasionally sampling what that summed number is. The track also collects the markers related to garbage collection and cycle collection. Mouse over the graph to see all of the numbers.
+The memory track graphs overall allocation and deallocation numbers over time for a single process. It counts every allocation and deallocation in Firefox's main memory allocator, mozjemalloc. It does not include the JS heap or other custom allocators such as LifoAlloc.  The total bytes allocated is sampled and plotted on the memory track.  The track also collects the markers related to garbage collection and cycle collection. Mouse over the graph to see all of the numbers.
 
-The graph visualization tracks the relative memory usage over the committed range of time. It's important to note that this is not absolute memory usage. The graph and numbers will change when committing a range selection.
+The graph visualization tracks the memory usage over the committed range of time. Depending on the version of Firefox used this may be either relative or absolute bytes allocated.  In either case the graph will change when committing a range selection so that small differences can be made clear.  If the memory counter is relative then the numbers will also change when committing to a range.
 
 ## Native Memory Allocations (experimental)
 

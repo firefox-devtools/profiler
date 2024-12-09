@@ -78,6 +78,7 @@ describe('TrackPower', function () {
           ],
           length: SAMPLE_COUNT,
         },
+        false,
         'SystemPower',
         'power'
       ),
