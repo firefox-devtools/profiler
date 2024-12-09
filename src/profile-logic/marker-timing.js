@@ -126,6 +126,7 @@ export function getMarkerTiming(
       name: markerLineName,
       bucket: bucketName,
       instantOnly,
+      isFirstRowOfName: false,
       length: 0,
     });
 
@@ -229,6 +230,20 @@ export function getMarkerTiming(
     // Sort by names second
     return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1;
   });
+
+  // Compute isFirstRowOfName for all rows.
+  let prevRowName = null;
+  for (let i = 0; i < allMarkerTimings.length; i++) {
+    const markerTiming = allMarkerTimings[i];
+    if (typeof markerTiming === 'string') {
+      prevRowName = null;
+      continue;
+    }
+
+    const rowName = markerTiming.name;
+    markerTiming.isFirstRowOfName = rowName !== prevRowName;
+    prevRowName = rowName;
+  }
 
   return allMarkerTimings;
 }
