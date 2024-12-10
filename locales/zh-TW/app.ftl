@@ -261,6 +261,8 @@ Home--your-recent-uploaded-recordings-title = 您近期上傳的紀錄
 Home--load-files-from-other-tools2 =
     { -profiler-brand-name } 也可以匯入其他效能檢測器，例如 <perf>Linux perf</perf>、<simpleperf>Android SimplePerf</simpleperf>、Chrome 效能面板、<androidstudio>Android Studio</androidstudio> 所產生的效能檢測檔、任何使用 <dhat>dhat 格式</dhat> 或 <traceevent>Google 的 Trace Event
     格式</traceevent>儲存的效能檢測檔。<write>點擊此處了解如何撰寫您自己的匯入程式</write>。
+Home--install-chrome-extension = 安裝 Chrome 擴充套件
+Home--chrome-extension-instructions = 可使用 <a>Chrome 的 { -profiler-brand-name } 擴充套件</a>，在 Chrome 當中捕捉效能紀錄檔，再使用 { -profiler-brand-name } 進行分析。請到 Chrome 線上應用程式安裝此套件。
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
