@@ -13,7 +13,6 @@ import type {
   IndexIntoJsTracerEvents,
   IndexIntoCategoryList,
   IndexIntoResourceTable,
-  IndexIntoNativeSymbolTable,
   IndexIntoLibs,
   CounterIndex,
   InnerWindowID,
@@ -24,6 +23,7 @@ import type {
   Tid,
 } from './profile';
 import type { IndexedArray } from './utils';
+import type { BitSet } from '../utils/bitset';
 import type { StackTiming } from '../profile-logic/stack-timing';
 export type IndexIntoCallNodeTable = number;
 
@@ -109,74 +109,21 @@ export type CallNodeTable = {
   category: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
   subcategory: Int32Array, // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
   innerWindowID: Float64Array, // IndexIntoCallNodeTable -> InnerWindowID
-  // null: no inlining
   // IndexIntoNativeSymbolTable: all frames that collapsed into this call node inlined into the same native symbol
   // -1: divergent: not all frames that collapsed into this call node were inlined, or they are from different symbols
-  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
+  // -2: no inlining
+  sourceFramesInlinedIntoSymbol: Int32Array,
   // The depth of the call node. Roots have depth 0.
-  depth: number[],
+  depth: Int32Array,
   // The maximum value in the depth column, or -1 if this table is empty.
   maxDepth: number,
   // The number of call nodes. All columns in this table have this length.
   length: number,
 };
 
-/**
- * Wraps the call node table and provides associated functionality.
- */
-export interface CallNodeInfo {
-  // If true, call node indexes describe nodes in the inverted call tree.
-  isInverted(): boolean;
-
-  // Returns the call node table. If isInverted() is true, this is an inverted
-  // call node table, otherwise this is the non-inverted call node table.
-  getCallNodeTable(): CallNodeTable;
-
-  // Returns the non-inverted call node table.
-  // This is always the non-inverted call node table, regardless of isInverted().
-  getNonInvertedCallNodeTable(): CallNodeTable;
-
-  // Returns a mapping from the stack table to the call node table.
-  // The Int32Array should be used as if it were a
-  // Map<IndexIntoStackTable, IndexIntoCallNodeTable | -1>.
-  //
-  // If this CallNodeInfo is for the non-inverted tree, this maps the stack index
-  // to its corresponding call node index, and all entries are >= 0.
-  // If this CallNodeInfo is for the inverted tree, this maps the non-inverted
-  // stack index to the inverted call node index. For example, the stack
-  // A -> B -> C -> D is mapped to the inverted call node describing the
-  // call path D <- C <- B <- A, i.e. the node with function A under the D root
-  // of the inverted tree. Stacks which are only used as prefixes are not mapped
-  // to an inverted call node; for those, the entry will be -1. In the example
-  // above, if the stack node A -> B -> C only exists so that it can be the prefix
-  // of the A -> B -> C -> D stack and no sample / marker / allocation has
-  // A -> B -> C as its stack, then there is no need to have a call node
-  // C <- B <- A in the inverted call node table.
-  getStackIndexToCallNodeIndex(): Int32Array;
-
-  // Returns a mapping from the stack table to the non-inverted call node table.
-  // This always maps to the non-inverted call node table, regardless of isInverted().
-  getStackIndexToNonInvertedCallNodeIndex(): Int32Array;
-
-  // Converts a call node index into a call node path.
-  getCallNodePathFromIndex(
-    callNodeIndex: IndexIntoCallNodeTable | null
-  ): CallNodePath;
-
-  // Converts a call node path into a call node index.
-  getCallNodeIndexFromPath(
-    callNodePath: CallNodePath
-  ): IndexIntoCallNodeTable | null;
-
-  // Returns the call node index that matches the function `func` and whose
-  // parent's index  is `parent`. If `parent` is -1, this returns the index of
-  // the root node with function `func`.
-  // Returns null if the described call node doesn't exist.
-  getCallNodeIndexFromParentAndFunc(
-    parent: IndexIntoCallNodeTable | -1,
-    func: IndexIntoFuncTable
-  ): IndexIntoCallNodeTable | null;
-}
+// A bitset which indicates something per call node. Use `checkBit` from
+// utils/bitset to check whether a call node is part of the set.
+export type CallNodeTableBitSet = BitSet;
 
 export type LineNumber = number;
 
@@ -673,11 +620,11 @@ export type SortedTabPageData = Array<{|
   pageData: ProfileFilterPageData,
 |}>;
 
-export type CallNodeLeafAndSummary = {|
-  // This property stores the amount of unit (time, bytes, count, etc.) spent in the
-  // stacks' leaf nodes.
-  callNodeLeaf: Float32Array,
-  // The sum of absolute values in callNodeLeaf.
+export type CallNodeSelfAndSummary = {|
+  // This property stores the amount of unit (time, bytes, count, etc.) spent in
+  // this call node and not in any of its descendant nodes.
+  callNodeSelf: Float32Array,
+  // The sum of absolute values in callNodeSelf.
   // This is used for computing the percentages displayed in the call tree.
   rootTotalSummary: number,
 |};
