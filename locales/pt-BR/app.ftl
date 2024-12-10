@@ -272,6 +272,7 @@ Home--your-recent-uploaded-recordings-title = Suas gravações enviadas recentem
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 = O { -profiler-brand-name } também pode importar profiles de outros criadores de profile, como o <perf>Linux perf</perf>, o <simpleperf>Android SimplePerf</simpleperf>, o painel de desempenho do Chrome, o <androidstudio>Android Studio</androidstudio>, ou qualquer arquivo nos formatos <dhat>dhat</dhat> ou <traceevent>Trace Event do Google</traceevent>. <write>Saiba como criar seu próprio importador</write>.
+Home--install-chrome-extension = Instale a extensão para Chrome
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
