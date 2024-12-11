@@ -32,11 +32,45 @@ body {
   /* background-color is defined in the HTML file to prevent flashing a white screen. */
 }
 
+/* The following property are retrieved in index.js to create SVG filters that
+   we can apply on icons to control their color. Using registered properties
+   allows us to get a normalized rgb value from the property computed value,
+   from which we can easily extract the r,g and b channel, which we need for the
+   SVG filter.
+   These variable can be declared in any rule, as long as their value is still
+   a valid color (which means we can use `light-dark()` or any other color functions).
+   The colors can be applied on SVG icons by adding a `filter: url(#--var-name)`.  */
+@property --button-icon-color {
+  inherits: true;
+  initial-value: black;
+  syntax: '<color>';
+}
+
+@property --button-icon-hover-color {
+  inherits: true;
+  initial-value: white;
+  syntax: '<color>';
+}
+
+@property --button-icon-active-color {
+  inherits: true;
+  initial-value: blue;
+  syntax: '<color>';
+}
+
 :root {
   /* Photon animation curve */
   --animation-curve: cubic-bezier(0.07, 0.95, 0, 1);
 
   color: var(--grey-90);
+}
+
+@media (forced-colors: active) {
+  :root {
+    --button-icon-color: ButtonText;
+    --button-icon-hover-color: SelectedItem;
+    --button-icon-active-color: SelectedItem;
+  }
 }
 
 .profileFilterNavigator {
@@ -48,4 +82,12 @@ body {
   display: flex;
   flex: 1;
   flex-flow: column nowrap;
+}
+
+#svg-filters {
+  position: absolute;
+  overflow: hidden;
+  width: 0;
+  height: 0;
+  inset-inline-start: -1000vw;
 }
