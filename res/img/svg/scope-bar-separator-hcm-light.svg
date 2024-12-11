@@ -1,0 +1,8 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<svg  xmlns="http://www.w3.org/2000/svg"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      width="48" height="48" viewBox="0 0 24 24">
+  <polyline points="4 0 6 0 18 12 6 24 4 24 16 12" stroke="black"/>
+</svg>
