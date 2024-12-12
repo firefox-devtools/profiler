@@ -334,6 +334,7 @@ Home--load-files-from-other-tools2 =
     ulle file que usa le <dhat>formato dhat</dhat> o <traceevent>le formato Trace Event
     de Google</traceevent>. <write>Apprende a scriber tu 
     proprie importator</write>.
+Home--install-chrome-extension = Installar le extension de Chrome
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
