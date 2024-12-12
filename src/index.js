@@ -44,6 +44,49 @@ window.geckoProfilerPromise = new Promise(function (resolve) {
   window.connectToGeckoProfiler = resolve;
 });
 
+const svgFiltersElement = document.getElementById('svg-filters');
+if (svgFiltersElement) {
+  const defineSvgFiltersForColors = () => {
+    const colors = [
+      '--button-icon-color',
+      '--button-icon-hover-color',
+      '--button-icon-active-color',
+    ];
+    for (const cssVariable of colors) {
+      let filterEl = svgFiltersElement.getElementById(cssVariable);
+      let feFloodEl;
+      if (!filterEl) {
+        const xmlns = 'http://www.w3.org/2000/svg';
+        filterEl = document.createElementNS(xmlns, 'filter');
+        filterEl.id = cssVariable;
+        filterEl.setAttribute('color-interpolation-filters', 'sRGB');
+
+        feFloodEl = document.createElementNS(xmlns, 'feFlood');
+        const feCompositeEl = document.createElementNS(xmlns, 'feComposite');
+        feCompositeEl.setAttribute('operator', 'in');
+        feCompositeEl.setAttribute('in2', 'SourceAlpha');
+
+        filterEl.append(feFloodEl, feCompositeEl);
+        svgFiltersElement.append(filterEl);
+      } else {
+        feFloodEl = filterEl.querySelector('feFlood');
+      }
+
+      // This should give us a normalized rgb(a) value that we use directly
+      feFloodEl.setAttribute(
+        'flood-color',
+        getComputedStyle(document.documentElement).getPropertyValue(cssVariable)
+      );
+    }
+  };
+  defineSvgFiltersForColors();
+
+  const forcedColorsMql = window.matchMedia('(forced-colors: active)');
+  const darkSchemeMql = window.matchMedia('(prefers-color-scheme: dark)');
+  forcedColorsMql.addEventListener('change', defineSvgFiltersForColors);
+  darkSchemeMql.addEventListener('change', defineSvgFiltersForColors);
+}
+
 const store = createStore();
 const root = createRoot(
   ensureExists(
