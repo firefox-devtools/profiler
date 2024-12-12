@@ -340,6 +340,15 @@ Home--load-files-from-other-tools2 =
     панель производительности Chrome, <androidstudio>Android Studio</androidstudio> или
     любой файл, использующий <dhat>формат dhat</dhat> или <traceevent>Формат отслеживания событий Google</traceevent>. <write>Узнайте, как написать
     собственный инструмент импорта</write>.
+Home--install-chrome-extension = Установите расширение Chrome
+Home--chrome-extension-instructions =
+    Используйте <a>расширение { -profiler-brand-name } для Chrome</a>
+    для сбора профилей производительности в Chrome и анализа их в
+    { -profiler-brand-name }. Установите расширение из интернет-магазина Chrome.
+Home--chrome-extension-recording-instructions =
+    После установки используйте значок
+    расширения на панели инструментов или сочетания клавиш для запуска и остановки профилирования. Вы также можете
+    экспортировать профили и загрузить их здесь для подробного анализа.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
