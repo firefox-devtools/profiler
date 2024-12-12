@@ -343,6 +343,15 @@ Home--load-files-from-other-tools2 =
     elk bestân mei it <dhat>dhat-formaat</dhat> of de <traceevent>Trace Event-yndieling
     fan Google</traceevent> brûkt. <write>Lês hoe’t jo jo
     eigen ymportearder skriuwe</write>.
+Home--install-chrome-extension = De Chrome-útwreiding ynstallearje
+Home--chrome-extension-instructions =
+    Brûk de <a>{ -profiler-brand-name }-útwreiding foar Chrome</a>
+    om prestaasjeprofilen yn Chrome fêst te lizzen en se yn de
+    { -profiler-brand-name } te analysearjen. Ynstallearje de útwreiding fan de Chrome Web Store út.
+Home--chrome-extension-recording-instructions =
+    Brûk nei ynstallaasje it arkbalkepiktogram fan de
+    útwreiding of de fluchkeppelingen om it profilearjen te starten en te stopjen. Jo kinne ek
+    profilen eksportearje en dizze hjir lade foar detaillearre analyze.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
