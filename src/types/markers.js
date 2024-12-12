@@ -330,9 +330,14 @@ type GCMajorCompleted_Shared = {|
   // 'None' as a reason.
   nonincremental_reason?: 'None' | string,
 
-  // The allocated space for the whole heap before the GC started.
+  // The total size of GC things before and after the GC.
   allocated_bytes: number,
   post_heap_size?: number,
+
+  // The total size of malloc data owned by GC things before and after the GC.
+  // Added in Firefox v135 (Bug 1933205).
+  pre_malloc_heap_size?: number,
+  post_malloc_heap_size?: number,
 
   // Only present if non-zero.
   added_chunks?: number,
@@ -522,6 +527,13 @@ export type NetworkPayload = {|
   // browsing data back then.
   isPrivateBrowsing?: boolean,
   httpVersion?: NetworkHttpVersion,
+
+  // Used to express class dependencies and characteristics.
+  // Possible flags: Leader, Follower, Speculative, Background, Unblocked,
+  // Throttleable, UrgentStart, DontThrottle, Tail, TailAllowed, and
+  // TailForbidden. Multiple flags can be set, separated by '|',
+  // or we use 'Unset' if no flag is set.
+  classOfService?: string,
 
   // NOTE: the following comments are valid for the merged markers. For the raw
   // markers, startTime and endTime have different meanings. Please look

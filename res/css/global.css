@@ -13,11 +13,17 @@
   box-sizing: border-box;
   border: 0.5px solid rgb(0 0 0 / 0.1);
   margin-right: 3px;
+
+  /* Opt-out of forced colors so the color is applied */
+  forced-color-adjust: none;
 }
 
 .colored-border {
   border: 2px solid rgb(0 0 0 / 0.1);
   margin-right: 3px;
+
+  /* Opt-out of forced colors so the color is applied */
+  forced-color-adjust: none;
 }
 
 .colored-border.ellipsis {

@@ -135,8 +135,8 @@
   display: block;
   width: 32px;
   height: 32px;
-  background: url(firefox-profiler-res/img/svg/cloud-dark-12.svg) no-repeat left /
-    32px;
+  background: url(firefox-profiler-res/img/svg/cloud-dark-12.svg) no-repeat
+    left / 32px;
   content: '';
   opacity: 0.5;
 }

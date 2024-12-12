@@ -343,6 +343,15 @@ Home--load-files-from-other-tools2 =
     elk bestand dat de <dhat>dhat-indeling</dhat> of de <traceevent>Trace Event-indeling
     van Google</traceevent> gebruikt. <write>Ontdek hoe u uw eigen
     importroutine schrijft</write>.
+Home--install-chrome-extension = De Chrome-extensie installeren
+Home--chrome-extension-instructions =
+    Gebruik de <a>{ -profiler-brand-name }-extensie voor Chrome</a>
+    om prestatieprofielen in Chrome vast te leggen en ze in de
+    { -profiler-brand-name } te analyseren. Installeer de extensie vanuit de Chrome Web Store.
+Home--chrome-extension-recording-instructions =
+    Gebruik na installatie het werkbalkpictogram van de
+    extensie of de snelkoppelingen om het profileren te starten en te stoppen. U kunt ook
+    profielen exporteren en deze hier laden voor gedetailleerde analyse.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
