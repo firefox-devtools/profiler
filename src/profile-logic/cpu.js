@@ -15,10 +15,14 @@ import type {
 } from 'firefox-profiler/types';
 
 /**
- * Compute the max CPU delta value per ms for that thread. It computes the
- * max value after the threadCPUDelta processing.
+ * Compute the max CPU cycles per ms for the thread. Should only be called when
+ * the cpu delta unit is 'variable CPU cycles'.
+ * This computes the max value before the threadCPUDelta processing -
+ * the threadCPUDelta processing wouldn't do anything other than remove nulls
+ * anyway, because if the unit is 'variable CPU cycles' then we don't do any
+ * clamping.
  */
-export function computeMaxThreadCPUDeltaPerMs(
+function _computeMaxVariableCPUCyclesPerMs(
   threads: Thread[],
   profileInterval: Milliseconds
 ): number {
@@ -87,7 +91,7 @@ export function computeMaxCPUDeltaPerInterval(profile: Profile): number | null {
       return cpuDeltaTimeUnitMultiplier * interval;
     }
     case 'variable CPU cycles': {
-      const maxThreadCPUDeltaPerMs = computeMaxThreadCPUDeltaPerMs(
+      const maxThreadCPUDeltaPerMs = _computeMaxVariableCPUCyclesPerMs(
         profile.threads,
         interval
       );
