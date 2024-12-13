@@ -5,14 +5,7 @@
 
 import { createSelector } from 'reselect';
 
-import {
-  getProfile,
-  getThreads,
-  getSampleUnits,
-  getMeta,
-  getCounter,
-} from './profile';
-import { computeMaxCPUDeltaPerInterval } from 'firefox-profiler/profile-logic/cpu';
+import { getThreads, getSampleUnits, getMeta, getCounter } from './profile';
 
 import type { Selector } from 'firefox-profiler/types';
 
@@ -43,9 +36,3 @@ export const getAreThereAnyProcessCPUCounters: Selector<boolean> =
       counters !== null &&
       counters.some((counter) => counter.category === 'CPU')
   );
-
-export const getMaxThreadCPUDeltaPerMs: Selector<number> = createSelector(
-  getProfile,
-  (profile) =>
-    (computeMaxCPUDeltaPerInterval(profile) ?? 0) * profile.meta.interval
-);
