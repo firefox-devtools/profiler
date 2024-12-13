@@ -123,6 +123,10 @@
     color: SelectedItem;
   }
 
+  .timelineSettingsHiddenTracks:hover:active {
+    border-color: ButtonText;
+  }
+
   .timelineSettingsHiddenTracks::before {
     color: currentcolor;
   }
