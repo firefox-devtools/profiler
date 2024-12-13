@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { GREY_30 } from 'photon-colors';
+import { GREY_30, BLUE_60 } from 'photon-colors';
 import * as React from 'react';
 import { TIMELINE_MARGIN_RIGHT } from '../../app-logic/constants';
 import {
@@ -77,6 +77,7 @@ type OwnProps = {|
   +scrollToSelectionGeneration: number,
   +marginLeft: CssPixels,
   +displayStackType: boolean,
+  +searchStringsRegExp: RegExp | null,
 |};
 
 type Props = $ReadOnly<{|
@@ -175,6 +176,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         viewportTop,
         viewportBottom,
       },
+      searchStringsRegExp,
     } = this.props;
     const { hoveredItem } = hoverInfo;
 
@@ -373,6 +375,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
               ? colorStyles.selectedFillStyle
               : colorStyles.unselectedFillStyle
           );
+
           ctx.fillRect(
             intX,
             intY,
@@ -383,6 +386,25 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
             intW + BORDER_OPACITY,
             intH
           );
+
+          if (searchStringsRegExp) {
+            // Reset the position of the search regexp so that previous
+            // invocations don't influence this one.
+            searchStringsRegExp.lastIndex = 0;
+
+            if (searchStringsRegExp.test(text)) {
+              ctx.strokeStyle = BLUE_60;
+              ctx.lineWidth = 1;
+              // By using these "+1" computations, this is drawing the
+              // highlight stroke inside the boxes.
+              if (intW <= 2) {
+                ctx.strokeRect(intX + 1, intY + 1, 1, intH - 1);
+              } else {
+                ctx.strokeRect(intX + 1, intY + 1, intW - 1, intH - 1);
+              }
+            }
+          }
+
           lastDrawnPixelX =
             intX +
             intW +
