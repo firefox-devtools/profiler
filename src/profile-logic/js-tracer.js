@@ -5,8 +5,8 @@
 
 import {
   getEmptyFrameTable,
-  getEmptyStackTable,
-  getEmptySamplesTableWithEventDelay,
+  getEmptyRawStackTable,
+  getEmptyRawSamplesTableWithEventDelay,
   getEmptyRawMarkerTable,
 } from './data-structures';
 import { ensureExists } from '../utils/flow';
@@ -15,9 +15,9 @@ import type {
   IndexIntoStringTable,
   IndexIntoJsTracerEvents,
   IndexIntoFuncTable,
-  Thread,
+  RawThread,
   IndexIntoStackTable,
-  SamplesTable,
+  RawSamplesTable,
   CategoryList,
   JsTracerTiming,
   Microseconds,
@@ -36,7 +36,7 @@ type ScriptLocationToFuncIndex = Map<string, IndexIntoFuncTable | null>;
  * tracer information was sampled.
  */
 function getScriptLocationToFuncIndex(
-  thread: Thread
+  thread: RawThread
 ): ScriptLocationToFuncIndex {
   const { funcTable, stringTable } = thread;
   const scriptLocationToFuncIndex = new Map();
@@ -78,7 +78,7 @@ function getScriptLocationToFuncIndex(
  */
 export function getJsTracerTiming(
   jsTracer: JsTracerTable,
-  thread: Thread
+  thread: RawThread
 ): JsTracerTiming[] {
   const jsTracerTiming: JsTracerTiming[] = [];
   const { stringTable, funcTable } = thread;
@@ -492,19 +492,19 @@ export function getJsTracerLeafTiming(
  * function, then the function information is used.
  */
 export function convertJsTracerToThreadWithoutSamples(
-  fromThread: Thread,
+  fromThread: RawThread,
   jsTracer: JsTracerFixed,
   categories: CategoryList
 ): {
-  thread: Thread,
+  thread: RawThread,
   stackMap: Map<IndexIntoJsTracerEvents, IndexIntoStackTable>,
 } {
   // Create a new thread, with empty information, but preserve some of the existing
   // thread information.
   const frameTable = getEmptyFrameTable();
-  const stackTable = getEmptyStackTable();
-  const samples: SamplesTable = {
-    ...getEmptySamplesTableWithEventDelay(),
+  const stackTable = getEmptyRawStackTable();
+  const samples: RawSamplesTable = {
+    ...getEmptyRawSamplesTableWithEventDelay(),
     weight: [],
     weightType: 'tracing-ms',
   };
@@ -512,7 +512,7 @@ export function convertJsTracerToThreadWithoutSamples(
   const funcTable = { ...fromThread.funcTable };
   const { stringTable } = fromThread;
 
-  const thread: Thread = {
+  const thread: RawThread = {
     ...fromThread,
     markers,
     funcTable,
@@ -644,7 +644,6 @@ export function convertJsTracerToThreadWithoutSamples(
     // Each event gets a stack table entry.
     const stackIndex = stackTable.length++;
     stackTable.frame.push(frameIndex);
-    stackTable.category.push(otherCategory);
     stackTable.prefix.push(prefixIndex);
     stackMap.set(tracerEventIndex, stackIndex);
 
@@ -763,10 +762,10 @@ export function getJsTracerFixed(jsTracer: JsTracerTable): JsTracerFixed {
  * what is going on.
  */
 export function convertJsTracerToThread(
-  fromThread: Thread,
+  fromThread: RawThread,
   jsTracer: JsTracerTable,
   categories: CategoryList
-): Thread {
+): RawThread {
   const jsTracerFixed = getJsTracerFixed(jsTracer);
   const { thread, stackMap } = convertJsTracerToThreadWithoutSamples(
     fromThread,
@@ -815,17 +814,17 @@ export function convertJsTracerToThread(
 
  */
 export function getSelfTimeSamplesFromJsTracer(
-  thread: Thread,
+  thread: RawThread,
   jsTracer: JsTracerFixed,
   stackMap: Map<IndexIntoJsTracerEvents, IndexIntoStackTable>
-): SamplesTable {
+): RawSamplesTable {
   // Give more leeway for floating number precision issues.
   const epsilon = 1e-5;
   const isNearlyEqual = (a, b) => Math.abs(a - b) < epsilon;
   // Each event type will have it's own timing information, later collapse these into
   // a single array.
   const { stringTable } = thread;
-  const samples = getEmptySamplesTableWithEventDelay();
+  const samples = getEmptyRawSamplesTableWithEventDelay();
   const sampleWeights = [];
   samples.weight = sampleWeights;
 

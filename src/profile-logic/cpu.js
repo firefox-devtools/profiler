@@ -7,11 +7,12 @@
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type {
-  Thread,
-  Milliseconds,
+  RawThread,
   SampleUnits,
   ThreadCPUDeltaUnit,
   Profile,
+  RawSamplesTable,
+  SamplesTable,
 } from 'firefox-profiler/types';
 
 /**
@@ -22,7 +23,7 @@ import type {
  * anyway, because if the unit is 'variable CPU cycles' then we don't do any
  * clamping.
  */
-function _computeMaxVariableCPUCyclesPerMs(threads: Thread[]): number {
+function _computeMaxVariableCPUCyclesPerMs(threads: RawThread[]): number {
   let maxThreadCPUDeltaPerMs = 0;
   for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
     const { samples } = threads[threadIndex];
@@ -101,7 +102,7 @@ export function computeMaxCPUDeltaPerMs(profile: Profile): number {
 /**
  * Clamp the CPU delta values of the given thread and make them non-null.
  *
- * This function throws an error if called on a thread without threadCPUDeltas.
+ * This function is a no-op if called on a thread without threadCPUDeltas.
  *
  * It does the following:
  *
@@ -111,48 +112,39 @@ export function computeMaxCPUDeltaPerMs(profile: Profile): number {
  *    'variable CPU cycles'). This gets rid of unexpected out-of-range values
  *    that we've observed on the macOS platform.
  */
-export function processThreadCPUDelta(
-  thread: Thread,
-  sampleUnits: SampleUnits,
-  profileInterval: Milliseconds
-): Thread {
-  const { samples } = thread;
+export function computeSamplesTableFromRawSamplesTable(
+  samples: RawSamplesTable,
+  sampleUnits: SampleUnits | void
+): SamplesTable {
   const { threadCPUDelta } = samples;
 
-  if (!threadCPUDelta) {
-    throw new Error(
-      "processThreadCPUDelta should not be called for the profiles that don't include threadCPUDelta."
-    );
-  }
-  // A helper function to shallow clone the thread with different threadCPUDelta values.
-  function _newThreadWithNewThreadCPUDelta(
-    threadCPUDelta: Array<number | null> | void
-  ): Thread {
-    const newSamples = {
-      ...samples,
-      threadCPUDelta,
+  if (!threadCPUDelta || !sampleUnits) {
+    return {
+      length: samples.length,
+      responsiveness: samples.responsiveness,
+      eventDelay: samples.eventDelay,
+      stack: samples.stack,
+      time: samples.time,
+      weight: samples.weight,
+      weightType: samples.weightType,
+      threadId: samples.threadId,
     };
-
-    const newThread = {
-      ...thread,
-      samples: newSamples,
-    };
-
-    return newThread;
   }
 
-  const newThreadCPUDelta: Array<number | null> = new Array(samples.length);
-  const cpuDeltaTimeUnitMultiplier = getCpuDeltaTimeUnitMultiplier(
-    sampleUnits.threadCPUDelta
-  );
+  const newThreadCPUDelta: Array<number> = new Array(samples.length);
+  const threadCPUDeltaUnit = sampleUnits.threadCPUDelta;
+  const cpuDeltaTimeUnitMultiplier =
+    getCpuDeltaTimeUnitMultiplier(threadCPUDeltaUnit);
 
+  let prevSampleTime = samples.length !== 0 ? samples.time[0] : 0;
   for (let i = 0; i < samples.length; i++) {
     // Replace nulls with zeros.
     const rawThreadCPUDeltaValue = threadCPUDelta[i];
     const threadCPUDeltaValue =
       rawThreadCPUDeltaValue !== null ? rawThreadCPUDeltaValue : 0;
 
-    const threadCPUDeltaUnit = sampleUnits.threadCPUDelta;
+    const sampleTime = samples.time[i];
+
     switch (threadCPUDeltaUnit) {
       // Check if the threadCPUDelta is more than the interval time and limit
       // that number to the interval if it's bigger than that. This is mostly
@@ -162,13 +154,11 @@ export function processThreadCPUDelta(
       // and this issue doesn't occur.
       case 'µs':
       case 'ns': {
-        const intervalInThreadCPUDeltaUnit =
-          i === 0
-            ? profileInterval * cpuDeltaTimeUnitMultiplier
-            : (samples.time[i] - samples.time[i - 1]) *
-              cpuDeltaTimeUnitMultiplier;
-        if (threadCPUDeltaValue > intervalInThreadCPUDeltaUnit) {
-          newThreadCPUDelta[i] = intervalInThreadCPUDeltaUnit;
+        const deltaUnitPerMs = cpuDeltaTimeUnitMultiplier;
+        const sampleDeltaMs = sampleTime - prevSampleTime;
+        const sampleDeltaInThreadCPUDeltaUnit = sampleDeltaMs * deltaUnitPerMs;
+        if (threadCPUDeltaValue > sampleDeltaInThreadCPUDeltaUnit) {
+          newThreadCPUDelta[i] = sampleDeltaInThreadCPUDeltaUnit;
         } else {
           newThreadCPUDelta[i] = threadCPUDeltaValue;
         }
@@ -183,9 +173,23 @@ export function processThreadCPUDelta(
           'Unhandled threadCPUDelta unit in the processing.'
         );
     }
+
+    prevSampleTime = sampleTime;
   }
 
-  return _newThreadWithNewThreadCPUDelta(newThreadCPUDelta);
+  const newSamples: SamplesTable = {
+    length: samples.length,
+    responsiveness: samples.responsiveness,
+    eventDelay: samples.eventDelay,
+    stack: samples.stack,
+    time: samples.time,
+    weight: samples.weight,
+    weightType: samples.weightType,
+    threadId: samples.threadId,
+    threadCPUDelta: newThreadCPUDelta,
+  };
+
+  return newSamples;
 }
 
 /**

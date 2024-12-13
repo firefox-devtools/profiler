@@ -6,7 +6,7 @@
 import type {
   ScreenshotPayload,
   Profile,
-  Thread,
+  RawThread,
   ThreadIndex,
   Pid,
   GlobalTrack,
@@ -19,7 +19,11 @@ import type {
   TabID,
 } from 'firefox-profiler/types';
 
-import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
+import {
+  defaultThreadOrder,
+  getFriendlyThreadName,
+  computeStackTableFromRawStackTable,
+} from './profile-data';
 import { intersectSets, subtractSets } from '../utils/set';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
@@ -400,7 +404,7 @@ export function computeLocalTracksByPid(
  * localTracksByPid map.
  */
 export function addEventDelayTracksForThreads(
-  threads: Thread[],
+  threads: RawThread[],
   localTracksByPid: Map<Pid, LocalTrack[]>
 ): Map<Pid, LocalTrack[]> {
   const newLocalTracksByPid = new Map();
@@ -929,7 +933,7 @@ export function getVisibleThreads(
 
 export function getGlobalTrackName(
   globalTrack: GlobalTrack,
-  threads: Thread[]
+  threads: RawThread[]
 ): string {
   switch (globalTrack.type) {
     case 'process': {
@@ -961,7 +965,7 @@ export function getGlobalTrackName(
       // scheme to fit the complete url in this limited space in the timeline.
       return getFriendlyThreadName(
         threads,
-        threads[globalTrack.mainThreadIndex]
+        globalTrack.mainThreadIndex
       ).replace(/^https?:\/\//i, '');
     }
     case 'screenshots':
@@ -979,12 +983,12 @@ export function getGlobalTrackName(
 
 export function getLocalTrackName(
   localTrack: LocalTrack,
-  threads: Thread[],
+  threads: RawThread[],
   counters: Counter[]
 ): string {
   switch (localTrack.type) {
     case 'thread':
-      return getFriendlyThreadName(threads, threads[localTrack.threadIndex]);
+      return getFriendlyThreadName(threads, localTrack.threadIndex);
     case 'network':
       return 'Network';
     case 'memory':
@@ -992,14 +996,10 @@ export function getLocalTrackName(
     case 'bandwidth':
       return 'Bandwidth';
     case 'ipc':
-      return `IPC — ${getFriendlyThreadName(
-        threads,
-        threads[localTrack.threadIndex]
-      )}`;
+      return `IPC — ${getFriendlyThreadName(threads, localTrack.threadIndex)}`;
     case 'event-delay':
       return (
-        getFriendlyThreadName(threads, threads[localTrack.threadIndex]) +
-        ' Event Delay'
+        getFriendlyThreadName(threads, localTrack.threadIndex) + ' Event Delay'
       );
     case 'process-cpu':
       return 'Process CPU';
@@ -1176,13 +1176,13 @@ const AUDIO_THREAD_SAMPLE_SCORE_BOOST_FACTOR = 40;
 // "interesting" threads to make sure we keep the most interesting ones.
 export function computeThreadActivityScore(
   profile: Profile,
-  thread: Thread,
+  thread: RawThread,
   maxCpuDeltaPerMs: number
 ): ThreadActivityScore {
   const isEssentialFirefoxThread = _isEssentialFirefoxThread(thread);
   const isInParentProcess = thread.processType === 'default';
   const isInterestingEvenWithMinimalActivity =
-    _isFirefoxMediaThreadWhichIsUsuallyIdle(thread);
+    _isFirefoxMediaThreadWhichIsUsuallyIdle(thread.name);
   const sampleScore = _computeThreadSampleScore(
     profile,
     thread,
@@ -1200,7 +1200,7 @@ export function computeThreadActivityScore(
   };
 }
 
-function _isEssentialFirefoxThread(thread: Thread): boolean {
+function _isEssentialFirefoxThread(thread: RawThread): boolean {
   return (
     // Don't hide the main thread of the parent process.
     (thread.name === 'GeckoMain' &&
@@ -1211,14 +1211,14 @@ function _isEssentialFirefoxThread(thread: Thread): boolean {
   );
 }
 
-function _isFirefoxMediaThreadWhichIsUsuallyIdle(thread: Thread): boolean {
+function _isFirefoxMediaThreadWhichIsUsuallyIdle(threadName: string): boolean {
   // Detect media threads: they are usually very idle, but are interesting
   // as soon as there's at least one sample. They're present with the media
   // preset, but not usually captured otherwise.
   // Matched thread names: AudioIPC, MediaPDecoder, MediaTimer, MediaPlayback,
   // MediaDecoderStateMachine, GraphRunner. They're enabled by the media
   // preset.
-  return /^(?:Audio|Media|GraphRunner|WebrtcWorker)/.test(thread.name);
+  return /^(?:Audio|Media|GraphRunner|WebrtcWorker)/.test(threadName);
 }
 
 // Compute the accumulated CPU delta for the entire thread.
@@ -1229,7 +1229,7 @@ function _isFirefoxMediaThreadWhichIsUsuallyIdle(thread: Thread): boolean {
 // number of non-idle samples.
 function _computeThreadSampleScore(
   { meta }: Profile,
-  { samples, stackTable }: Thread,
+  { samples, stackTable, frameTable }: RawThread,
   maxCpuDeltaPerMs: number
 ): number {
   if (meta.sampleUnits && samples.threadCPUDelta) {
@@ -1244,18 +1244,26 @@ function _computeThreadSampleScore(
   // This thread has no CPU delta information.
   // Compute a score based on non-idle samples, in the same
   // units as the cpu delta score.
+  const defaultCategory = meta.categories
+    ? meta.categories.findIndex((c) => c.color === 'grey')
+    : -1;
   const idleCategoryIndex = meta.categories
     ? meta.categories.findIndex((c) => c.name === 'Idle')
     : -1;
+  const derivedStackTable = computeStackTableFromRawStackTable(
+    stackTable,
+    frameTable,
+    defaultCategory
+  );
   const nonIdleSampleCount = samples.stack.filter(
     (stack) =>
-      stack !== null && stackTable.category[stack] !== idleCategoryIndex
+      stack !== null && derivedStackTable.category[stack] !== idleCategoryIndex
   ).length;
   const maxCpuDeltaPerInterval = maxCpuDeltaPerMs * meta.interval;
   return nonIdleSampleCount * maxCpuDeltaPerInterval;
 }
 
-function _findDefaultThread(threads: Thread[]): Thread | null {
+function _findDefaultThread(threads: RawThread[]): RawThread | null {
   if (threads.length === 0) {
     // Tests may have no threads.
     return null;
@@ -1289,7 +1297,7 @@ function _indexesAreValid(listLength: number, indexes: number[]) {
 export function getSearchFilteredGlobalTracks(
   tracks: GlobalTrack[],
   globalTrackNames: string[],
-  threads: Thread[],
+  threads: RawThread[],
   searchFilter: string
 ): Set<TrackIndex> | null {
   if (!searchFilter) {
@@ -1383,7 +1391,7 @@ export function getSearchFilteredGlobalTracks(
 export function getSearchFilteredLocalTracksByPid(
   localTracksByPid: Map<Pid, LocalTrack[]>,
   localTrackNamesByPid: Map<Pid, string[]>,
-  threads: Thread[],
+  threads: RawThread[],
   searchFilter: string
 ): Map<Pid, Set<TrackIndex>> | null {
   if (!searchFilter) {
@@ -1543,7 +1551,7 @@ export function getTrackReferenceFromTid(
   tid: Tid,
   globalTracks: GlobalTrack[],
   localTracksByPid: Map<Pid, LocalTrack[]>,
-  threads: Thread[]
+  threads: RawThread[]
 ): TrackReference | null {
   // First, check if it's a global track.
   for (

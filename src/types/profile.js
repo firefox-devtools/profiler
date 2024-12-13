@@ -55,6 +55,15 @@ export type Pid = string;
  * We take advantage of the fact that many call stacks in the profile have a
  * shared prefix; storing these stacks as a tree saves a lot of space compared
  * to storing them as actual lists of frames.
+ */
+export type RawStackTable = {|
+  frame: IndexIntoFrameTable[],
+  prefix: Array<IndexIntoStackTable | null>,
+  length: number,
+|};
+
+/**
+ * Like the RawStackTable, but with additional `category` and `subcategory` columns.
  *
  * The category of a stack node is always non-null and is derived from a stack's
  * frame and its prefix. Frames can have null categories, stacks cannot. If a
@@ -82,7 +91,6 @@ export type Pid = string;
  */
 export type StackTable = {|
   frame: IndexIntoFrameTable[],
-  // Imported profiles may not have categories. In this case fill the array with 0s.
   category: IndexIntoCategoryList[],
   subcategory: IndexIntoSubcategoryListForCategory[],
   prefix: Array<IndexIntoStackTable | null>,
@@ -149,7 +157,7 @@ export type SamplesLikeTable =
  * information that is needed to represent that sampled function. Most of the entries
  * are indices into other tables.
  */
-export type SamplesTable = {|
+export type RawSamplesTable = {|
   // Responsiveness is the older version of eventDelay. It injects events every 16ms.
   // This is optional because newer profiles don't have that field anymore.
   responsiveness?: Array<?Milliseconds>,
@@ -170,6 +178,32 @@ export type SamplesTable = {|
   // versions may not have it or that feature could be disabled. No upgrader was
   // written for this change because it's a completely new data source.
   threadCPUDelta?: Array<number | null>,
+  // This property isn't present in normal threads. However it's present for
+  // merged threads, so that we know the origin thread for these samples.
+  threadId?: Tid[],
+  length: number,
+|};
+
+export type SamplesTable = {|
+  // Responsiveness is the older version of eventDelay. It injects events every 16ms.
+  // This is optional because newer profiles don't have that field anymore.
+  responsiveness?: Array<?Milliseconds>,
+  // Event delay is the newer version of responsiveness. It allow us to get a finer-grained
+  // view of jank by inferring what would be the delay of a hypothetical input event at
+  // any point in time. It requires a pre-processing to be able to visualize properly.
+  // This is optional because older profiles didn't have that field.
+  eventDelay?: Array<?Milliseconds>,
+  stack: Array<IndexIntoStackTable | null>,
+  time: Milliseconds[],
+  // An optional weight array. If not present, then the weight is assumed to be 1.
+  // See the WeightType type for more information.
+  weight: null | number[],
+  weightType: WeightType,
+  // The elapsed CPU delta since the previous sample, in the unit given by
+  // profile.meta.sampleUnits.threadCPUDelta. Unlike the corresponding column
+  // in RawSamplesTable, this column is guaranteed to have no null values, and
+  // the values have been clamped to not exceed the wall clock time delta.
+  threadCPUDelta?: Array<number>,
   // This property isn't present in normal threads. However it's present for
   // merged threads, so that we know the origin thread for these samples.
   threadId?: Tid[],
@@ -617,26 +651,74 @@ export type ProfilerOverhead = {|
   mainThreadIndex: ThreadIndex,
 |};
 
+// This list of process types is defined here:
+// https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/xpcom/build/nsXULAppAPI.h#383
+export type ProcessType =
+  | 'default'
+  | 'plugin'
+  | 'tab'
+  | 'ipdlunittest'
+  | 'geckomediaplugin'
+  | 'gpu'
+  | 'pdfium'
+  | 'vr'
+  // Unknown process type:
+  // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/toolkit/xre/nsEmbedFunctions.cpp#232
+  | 'invalid'
+  | string;
+
 /**
  * Gecko has one or more processes. There can be multiple threads per processes. Each
  * thread has a unique set of tables for its data.
  */
+export type RawThread = {|
+  processType: ProcessType,
+  processStartupTime: Milliseconds,
+  processShutdownTime: Milliseconds | null,
+  registerTime: Milliseconds,
+  unregisterTime: Milliseconds | null,
+  pausedRanges: PausedRange[],
+  showMarkersInTimeline?: boolean,
+  name: string,
+  isMainThread: boolean,
+  // The eTLD+1 of the isolated content process if provided by the back-end.
+  // It will be undefined if:
+  // - Fission is not enabled.
+  // - It's not an isolated content process.
+  // - It's a sanitized profile.
+  // - It's a profile from an older Firefox which doesn't include this field (introduced in Firefox 80).
+  'eTLD+1'?: string,
+  processName?: string,
+  isJsTracer?: boolean,
+  pid: Pid,
+  tid: Tid,
+  samples: RawSamplesTable,
+  jsAllocations?: JsAllocationsTable,
+  nativeAllocations?: NativeAllocationsTable,
+  markers: RawMarkerTable,
+  stackTable: RawStackTable,
+  frameTable: FrameTable,
+  // Strings for profiles are collected into a single table, and are referred to by
+  // their index by other tables.
+  stringTable: UniqueStringArray,
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  nativeSymbols: NativeSymbolTable,
+  jsTracer?: JsTracerTable,
+  // If present and true, this thread was launched for a private browsing session only.
+  // When false, it can still contain private browsing data if the profile was
+  // captured in a non-fission browser.
+  // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
+  // had no extra attribute at all.
+  isPrivateBrowsing?: boolean,
+  // If present and non-0, the number represents the container this thread was loaded in.
+  // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
+  // had no extra attribute at all.
+  userContextId?: number,
+|};
+
 export type Thread = {|
-  // This list of process types is defined here:
-  // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/xpcom/build/nsXULAppAPI.h#383
-  processType:
-    | 'default'
-    | 'plugin'
-    | 'tab'
-    | 'ipdlunittest'
-    | 'geckomediaplugin'
-    | 'gpu'
-    | 'pdfium'
-    | 'vr'
-    // Unknown process type:
-    // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/toolkit/xre/nsEmbedFunctions.cpp#232
-    | 'invalid'
-    | string,
+  processType: ProcessType,
   processStartupTime: Milliseconds,
   processShutdownTime: Milliseconds | null,
   registerTime: Milliseconds,
@@ -941,13 +1023,16 @@ export type Profile = {|
   // have them. An upgrader could be written to make this non-optional.
   // This is list because there is a profiler overhead per process.
   profilerOverhead?: ProfilerOverhead[],
-  threads: Thread[],
+  threads: RawThread[],
   profilingLog?: ProfilingLog,
   profileGatheringLog?: ProfilingLog,
 |};
 
 type SerializableThread = {|
-  ...$Diff<Thread, { stringTable: UniqueStringArray, samples: SamplesTable }>,
+  ...$Diff<
+    RawThread,
+    { stringTable: UniqueStringArray, samples: RawSamplesTable },
+  >,
   stringArray: string[],
   samples: SerializableSamplesTable,
 |};
@@ -979,7 +1064,7 @@ export type SerializableCounter = {|
  * variant is able to be based into JSON.stringify.
  */
 export type SerializableProfile = {|
-  ...$Diff<Profile, { threads: Thread[], counters?: Counter[] }>,
+  ...$Diff<Profile, { threads: RawThread[], counters?: Counter[] }>,
   threads: SerializableThread[],
   counters?: SerializableCounter[],
 |};

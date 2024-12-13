@@ -30,7 +30,7 @@ import type {
   Profile,
   CategoryList,
   IndexIntoCategoryList,
-  Thread,
+  RawThread,
   ThreadIndex,
   Pid,
   Tid,
@@ -177,7 +177,7 @@ export const getPageList = (state: State): PageList | null =>
   getProfile(state).pages || null;
 export const getDefaultCategory: Selector<IndexIntoCategoryList> = (state) =>
   getCategories(state).findIndex((c) => c.color === 'grey');
-export const getThreads: Selector<Thread[]> = (state) =>
+export const getThreads: Selector<RawThread[]> = (state) =>
   getProfile(state).threads;
 export const getThreadNames: Selector<string[]> = (state) =>
   getProfile(state).threads.map((t) => t.name);
@@ -991,8 +991,12 @@ export const getThreadIdToNameMap: Selector<Map<Tid, string>> = createSelector(
   getThreads,
   (threads) => {
     const threadIdToNameMap = new Map();
-    for (const thread of threads) {
-      threadIdToNameMap.set(thread.tid, getFriendlyThreadName(threads, thread));
+    for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
+      const thread = threads[threadIndex];
+      threadIdToNameMap.set(
+        thread.tid,
+        getFriendlyThreadName(threads, threadIndex)
+      );
     }
     return threadIdToNameMap;
   }
@@ -1002,13 +1006,14 @@ export const getProcessIdToNameMap: Selector<Map<Pid, string>> = createSelector(
   getThreads,
   (threads) => {
     const processIdToNameMap = new Map();
-    for (const thread of threads) {
+    for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
+      const thread = threads[threadIndex];
       if (!thread.isMainThread || !thread.pid) {
         continue;
       }
       processIdToNameMap.set(
         thread.pid,
-        getFriendlyThreadName(threads, thread)
+        getFriendlyThreadName(threads, threadIndex)
       );
     }
     return processIdToNameMap;

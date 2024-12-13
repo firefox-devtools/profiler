@@ -20,8 +20,8 @@ import {
 } from './marker-schema';
 
 import type {
-  Thread,
   SamplesTable,
+  RawThread,
   RawMarkerTable,
   IndexIntoStringTable,
   IndexIntoRawMarkerTable,
@@ -409,7 +409,9 @@ export class IPCMarkerCorrelations {
  *        endpoint   (receiver or background thread)
  *                   (or main thread in receiver process if they are not profiled)
  */
-export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
+export function correlateIPCMarkers(
+  threads: RawThread[]
+): IPCMarkerCorrelations {
   // Create a unique ID constructed from the source PID, destination PID,
   // message seqno, and message type. Since the seqno is only unique for each
   // message channel pair, we use the PIDs and message type as a way of
@@ -482,7 +484,8 @@ export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
     Array<{ tid: number, index: number, data: IPCMarkerPayload } | void>,
   > = new Map();
   const threadNames: Map<number, string> = new Map();
-  for (const thread of threads) {
+  for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
+    const thread = threads[threadIndex];
     // Don't bother checking for IPC markers if this thread's string table
     // doesn't have the string "IPC". This lets us avoid looping over all the
     // markers when we don't have to.
@@ -491,7 +494,7 @@ export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
     }
     if (typeof thread.tid === 'number') {
       const tid: number = thread.tid;
-      threadNames.set(tid, getFriendlyThreadName(threads, thread));
+      threadNames.set(tid, getFriendlyThreadName(threads, threadIndex));
 
       for (let index = 0; index < thread.markers.length; index++) {
         const data = thread.markers.data[index];

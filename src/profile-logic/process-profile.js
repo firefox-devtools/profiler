@@ -40,13 +40,12 @@ import { convertJsTracerToThread } from '../profile-logic/js-tracer';
 
 import type {
   Profile,
-  Thread,
+  RawThread,
   Counter,
   ExtensionTable,
-  CategoryList,
   FrameTable,
-  SamplesTable,
-  StackTable,
+  RawSamplesTable,
+  RawStackTable,
   RawMarkerTable,
   Lib,
   LibMapping,
@@ -618,44 +617,9 @@ function _processFrameTable(
  * Explicitly recreate the stack table here to help enforce our assumptions about types.
  * Also add a category column.
  */
-function _processStackTable(
-  geckoStackTable: GeckoStackStruct,
-  frameTable: FrameTable,
-  categories: CategoryList
-): StackTable {
-  // Compute a non-null category for every stack
-  const defaultCategory = categories.findIndex((c) => c.color === 'grey') || 0;
-  const categoryColumn = new Array(geckoStackTable.length);
-  const subcategoryColumn = new Array(geckoStackTable.length);
-  for (let stackIndex = 0; stackIndex < geckoStackTable.length; stackIndex++) {
-    const frameIndex = geckoStackTable.frame[stackIndex];
-    const frameCategory = frameTable.category[frameIndex];
-    const frameSubcategory = frameTable.subcategory[frameIndex];
-    let stackCategory;
-    let stackSubcategory;
-    if (frameCategory !== null) {
-      stackCategory = frameCategory;
-      stackSubcategory = frameSubcategory || 0;
-    } else {
-      const prefix = geckoStackTable.prefix[stackIndex];
-      if (prefix !== null) {
-        // Because of the structure of the stack table, prefix < stackIndex.
-        // So we've already computed the category for the prefix.
-        stackCategory = categoryColumn[prefix];
-        stackSubcategory = subcategoryColumn[prefix];
-      } else {
-        stackCategory = defaultCategory;
-        stackSubcategory = 0;
-      }
-    }
-    categoryColumn[stackIndex] = stackCategory;
-    subcategoryColumn[stackIndex] = stackSubcategory;
-  }
-
+function _processStackTable(geckoStackTable: GeckoStackStruct): RawStackTable {
   return {
     frame: geckoStackTable.frame,
-    category: categoryColumn,
-    subcategory: subcategoryColumn,
     prefix: geckoStackTable.prefix,
     length: geckoStackTable.length,
   };
@@ -956,8 +920,8 @@ function _processMarkerPayload(
 /**
  * Explicitly recreate the markers here to help enforce our assumptions about types.
  */
-function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
-  const samples: SamplesTable = {
+function _processSamples(geckoSamples: GeckoSampleStruct): RawSamplesTable {
+  const samples: RawSamplesTable = {
     stack: geckoSamples.stack,
     time: geckoSamples.time,
     weightType: 'samples',
@@ -1001,7 +965,7 @@ function _processCounters(
   // references back into a stable list of threads. The threads list in the processing
   // step is built dynamically, so the "stableThreadList" variable is a hint that this
   // should be a stable and sorted list of threads.
-  stableThreadList: Thread[],
+  stableThreadList: RawThread[],
   // The timing across processes must be normalized, this is the timing delta between
   // various processes.
   delta: Milliseconds
@@ -1062,7 +1026,7 @@ function _processProfilerOverhead(
   // references back into a stable list of threads. The threads list in the processing
   // step is built dynamically, so the "stableThreadList" variable is a hint that this
   // should be a stable and sorted list of threads.
-  stableThreadList: Thread[],
+  stableThreadList: RawThread[],
   // The timing across processes must be normalized, this is the timing delta between
   // various processes.
   delta: Milliseconds
@@ -1113,7 +1077,7 @@ function _processThread(
   processProfile: GeckoProfile | GeckoSubprocessProfile,
   extensions: ExtensionTable,
   globalDataCollector: GlobalDataCollector
-): Thread {
+): RawThread {
   const geckoFrameStruct: GeckoFrameStruct = _toStructOfArrays(
     thread.frameTable
   );
@@ -1126,7 +1090,7 @@ function _processThread(
   );
 
   const { libs, pausedRanges, meta } = processProfile;
-  const { categories, shutdownTime } = meta;
+  const { shutdownTime } = meta;
 
   const stringTable = new UniqueStringArray(thread.stringTable);
   const { funcTable, resourceTable, frameFuncs, frameAddresses } =
@@ -1144,16 +1108,12 @@ function _processThread(
     frameFuncs,
     frameAddresses
   );
-  const stackTable = _processStackTable(
-    geckoStackTable,
-    frameTable,
-    categories
-  );
+  const stackTable = _processStackTable(geckoStackTable);
   const { markers, jsAllocations, nativeAllocations } =
     _processMarkers(geckoMarkers);
   const samples = _processSamples(geckoSamples);
 
-  const newThread: Thread = {
+  const newThread: RawThread = {
     name: thread.name,
     isMainThread: thread.name === 'GeckoMain',
     'eTLD+1': thread['eTLD+1'],
@@ -1531,7 +1491,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   // exception.
   upgradeGeckoProfileToCurrentVersion(geckoProfile);
 
-  let threads = [];
+  const threads: RawThread[] = [];
 
   const extensions: ExtensionTable = geckoProfile.meta.extensions
     ? _toStructOfArrays(geckoProfile.meta.extensions)
@@ -1552,51 +1512,49 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   for (const subprocessProfile of geckoProfile.processes) {
     const adjustTimestampsBy =
       subprocessProfile.meta.startTime - geckoProfile.meta.startTime;
-    threads = threads.concat(
-      subprocessProfile.threads.map((thread) => {
-        const newThread: Thread = _processThread(
-          thread,
-          subprocessProfile,
-          extensions,
-          globalDataCollector
-        );
-        newThread.samples = adjustTableTimestamps(
-          newThread.samples,
+    for (const thread of subprocessProfile.threads) {
+      const newThread: RawThread = _processThread(
+        thread,
+        subprocessProfile,
+        extensions,
+        globalDataCollector
+      );
+      newThread.samples = adjustTableTimestamps(
+        newThread.samples,
+        adjustTimestampsBy
+      );
+      newThread.markers = adjustMarkerTimestamps(
+        newThread.markers,
+        adjustTimestampsBy
+      );
+      if (newThread.jsTracer) {
+        newThread.jsTracer = _adjustJsTracerTimestamps(
+          newThread.jsTracer,
           adjustTimestampsBy
         );
-        newThread.markers = adjustMarkerTimestamps(
-          newThread.markers,
+      }
+      if (newThread.jsAllocations) {
+        newThread.jsAllocations = adjustTableTimestamps(
+          newThread.jsAllocations,
           adjustTimestampsBy
         );
-        if (newThread.jsTracer) {
-          newThread.jsTracer = _adjustJsTracerTimestamps(
-            newThread.jsTracer,
-            adjustTimestampsBy
-          );
-        }
-        if (newThread.jsAllocations) {
-          newThread.jsAllocations = adjustTableTimestamps(
-            newThread.jsAllocations,
-            adjustTimestampsBy
-          );
-        }
-        if (newThread.nativeAllocations) {
-          newThread.nativeAllocations = adjustTableTimestamps(
-            newThread.nativeAllocations,
-            adjustTimestampsBy
-          );
-        }
-        newThread.processStartupTime += adjustTimestampsBy;
-        if (newThread.processShutdownTime !== null) {
-          newThread.processShutdownTime += adjustTimestampsBy;
-        }
-        newThread.registerTime += adjustTimestampsBy;
-        if (newThread.unregisterTime !== null) {
-          newThread.unregisterTime += adjustTimestampsBy;
-        }
-        return newThread;
-      })
-    );
+      }
+      if (newThread.nativeAllocations) {
+        newThread.nativeAllocations = adjustTableTimestamps(
+          newThread.nativeAllocations,
+          adjustTimestampsBy
+        );
+      }
+      newThread.processStartupTime += adjustTimestampsBy;
+      if (newThread.processShutdownTime !== null) {
+        newThread.processShutdownTime += adjustTimestampsBy;
+      }
+      newThread.registerTime += adjustTimestampsBy;
+      if (newThread.unregisterTime !== null) {
+        newThread.unregisterTime += adjustTimestampsBy;
+      }
+      threads.push(newThread);
+    }
 
     counters.push(
       ..._processCounters(subprocessProfile, threads, adjustTimestampsBy)
@@ -1681,10 +1639,12 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
 
   // Convert JS tracer information into their own threads. This mutates
   // the threads array.
-  for (const thread of threads.slice()) {
+  const originalThreadCount = threads.length;
+  for (let threadIndex = 0; threadIndex < originalThreadCount; threadIndex++) {
+    const thread = threads[threadIndex];
     const { jsTracer } = thread;
     if (jsTracer) {
-      const friendlyThreadName = getFriendlyThreadName(threads, thread);
+      const friendlyThreadName = getFriendlyThreadName(threads, threadIndex);
       const jsTracerThread = convertJsTracerToThread(
         thread,
         jsTracer,
@@ -1954,7 +1914,7 @@ export async function unserializeProfileOfArbitraryFormat(
  * Mutates the markers inside parent process and tab process main threads.
  */
 export function processVisualMetrics(
-  threads: Thread[],
+  threads: RawThread[],
   meta: ProfileMeta,
   pages: PageList
 ) {
@@ -1989,7 +1949,7 @@ export function processVisualMetrics(
   );
 
   function maybeAddMetricMarker(
-    thread: Thread,
+    thread: RawThread,
     name: string,
     phase: MarkerPhase,
     startTime: number | null,
@@ -2101,7 +2061,7 @@ export function processVisualMetrics(
  * DO NOT use it for any other purpose than visual metrics as it's not going to be accurate.
  */
 function findTabMainThreadForVisualMetrics(
-  threads: Thread[],
+  threads: RawThread[],
   pages: PageList
 ): ThreadIndex | null {
   for (let threadIdx = 0; threadIdx < threads.length; threadIdx++) {

@@ -10,9 +10,11 @@ import {
 } from '../app-logic/constants';
 
 import type {
-  Thread,
+  RawThread,
+  RawSamplesTable,
   SamplesTable,
   FrameTable,
+  RawStackTable,
   StackTable,
   FuncTable,
   RawMarkerTable,
@@ -46,12 +48,24 @@ export function getEmptyStackTable(): StackTable {
   };
 }
 
+export function getEmptyRawStackTable(): RawStackTable {
+  return {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    frame: [],
+    prefix: [],
+    length: 0,
+  };
+}
+
 /**
  * Returns an empty samples table with eventDelay field instead of responsiveness.
  * eventDelay is a new field and it replaced responsiveness. We should still
  * account for older profiles and use both of the flavors if needed.
  */
-export function getEmptySamplesTableWithEventDelay(): SamplesTable {
+export function getEmptyRawSamplesTableWithEventDelay(): RawSamplesTable {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -355,8 +369,8 @@ export function getEmptyJsTracerTable(): JsTracerTable {
   };
 }
 
-export function getEmptyThread(overrides?: $Shape<Thread>): Thread {
-  const defaultThread: Thread = {
+export function getEmptyThread(overrides?: $Shape<RawThread>): RawThread {
+  const defaultThread: RawThread = {
     processType: 'default',
     processStartupTime: 0,
     processShutdownTime: null,
@@ -368,9 +382,9 @@ export function getEmptyThread(overrides?: $Shape<Thread>): Thread {
     pid: '0',
     tid: 0,
     // Creating samples with event delay since it's the new samples table.
-    samples: getEmptySamplesTableWithEventDelay(),
+    samples: getEmptyRawSamplesTableWithEventDelay(),
     markers: getEmptyRawMarkerTable(),
-    stackTable: getEmptyStackTable(),
+    stackTable: getEmptyRawStackTable(),
     frameTable: getEmptyFrameTable(),
     stringTable: new UniqueStringArray(),
     funcTable: getEmptyFuncTable(),

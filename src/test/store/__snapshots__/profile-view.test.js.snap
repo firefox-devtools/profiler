@@ -884,17 +884,6 @@ Object {
         "weightType": "samples",
       },
       "stackTable": Object {
-        "category": Array [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-        ],
         "frame": Array [
           0,
           1,
@@ -917,17 +906,6 @@ Object {
           5,
           1,
           7,
-        ],
-        "subcategory": Array [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
         ],
       },
       "stringTable": UniqueStringArray {
@@ -1121,11 +1099,9 @@ Object {
         "weightType": "samples",
       },
       "stackTable": Object {
-        "category": Array [],
         "frame": Array [],
         "length": 0,
         "prefix": Array [],
-        "subcategory": Array [],
       },
       "stringTable": UniqueStringArray {
         "_array": Array [
@@ -1566,17 +1542,6 @@ Array [
       "weightType": "samples",
     },
     "stackTable": Object {
-      "category": Array [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-      ],
       "frame": Array [
         0,
         1,
@@ -1599,17 +1564,6 @@ Array [
         5,
         1,
         7,
-      ],
-      "subcategory": Array [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
       ],
     },
     "stringTable": UniqueStringArray {
@@ -1803,11 +1757,9 @@ Array [
       "weightType": "samples",
     },
     "stackTable": Object {
-      "category": Array [],
       "frame": Array [],
       "length": 0,
       "prefix": Array [],
-      "subcategory": Array [],
     },
     "stringTable": UniqueStringArray {
       "_array": Array [
@@ -3235,6 +3187,7 @@ CallTree {
     0,
   ],
   "_thread": Object {
+    "eTLD+1": undefined,
     "frameTable": Object {
       "address": Array [
         -1,
@@ -3428,7 +3381,11 @@ CallTree {
         -1,
       ],
     },
+    "isJsTracer": undefined,
     "isMainThread": false,
+    "isPrivateBrowsing": undefined,
+    "jsAllocations": undefined,
+    "jsTracer": undefined,
     "markers": Object {
       "category": Array [],
       "data": Array [],
@@ -3439,6 +3396,7 @@ CallTree {
       "startTime": Array [],
     },
     "name": "Thread with samples",
+    "nativeAllocations": undefined,
     "nativeSymbols": Object {
       "address": Array [],
       "functionSize": Array [],
@@ -3448,6 +3406,7 @@ CallTree {
     },
     "pausedRanges": Array [],
     "pid": "0",
+    "processName": undefined,
     "processShutdownTime": null,
     "processStartupTime": 0,
     "processType": "default",
@@ -3476,6 +3435,7 @@ CallTree {
       "weight": null,
       "weightType": "samples",
     },
+    "showMarkersInTimeline": undefined,
     "stackTable": Object {
       "category": Array [
         0,
@@ -3549,6 +3509,7 @@ CallTree {
     },
     "tid": 0,
     "unregisterTime": null,
+    "userContextId": undefined,
   },
   "_weightType": "samples",
 }
@@ -3556,6 +3517,7 @@ CallTree {
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getFilteredThread 1`] = `
 Object {
+  "eTLD+1": undefined,
   "frameTable": Object {
     "address": Array [
       -1,
@@ -3749,7 +3711,11 @@ Object {
       -1,
     ],
   },
+  "isJsTracer": undefined,
   "isMainThread": false,
+  "isPrivateBrowsing": undefined,
+  "jsAllocations": undefined,
+  "jsTracer": undefined,
   "markers": Object {
     "category": Array [],
     "data": Array [],
@@ -3760,6 +3726,7 @@ Object {
     "startTime": Array [],
   },
   "name": "Thread with samples",
+  "nativeAllocations": undefined,
   "nativeSymbols": Object {
     "address": Array [],
     "functionSize": Array [],
@@ -3769,6 +3736,7 @@ Object {
   },
   "pausedRanges": Array [],
   "pid": "0",
+  "processName": undefined,
   "processShutdownTime": null,
   "processStartupTime": 0,
   "processType": "default",
@@ -3803,6 +3771,7 @@ Object {
     "weight": null,
     "weightType": "samples",
   },
+  "showMarkersInTimeline": undefined,
   "stackTable": Object {
     "category": Array [
       0,
@@ -3876,6 +3845,7 @@ Object {
   },
   "tid": 0,
   "unregisterTime": null,
+  "userContextId": undefined,
 }
 `;
 
@@ -3961,6 +3931,7 @@ Array [
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getPreviewFilteredThread 1`] = `
 Object {
+  "eTLD+1": undefined,
   "frameTable": Object {
     "address": Array [
       -1,
@@ -4154,7 +4125,11 @@ Object {
       -1,
     ],
   },
+  "isJsTracer": undefined,
   "isMainThread": false,
+  "isPrivateBrowsing": undefined,
+  "jsAllocations": undefined,
+  "jsTracer": undefined,
   "markers": Object {
     "category": Array [],
     "data": Array [],
@@ -4165,6 +4140,7 @@ Object {
     "startTime": Array [],
   },
   "name": "Thread with samples",
+  "nativeAllocations": undefined,
   "nativeSymbols": Object {
     "address": Array [],
     "functionSize": Array [],
@@ -4174,6 +4150,7 @@ Object {
   },
   "pausedRanges": Array [],
   "pid": "0",
+  "processName": undefined,
   "processShutdownTime": null,
   "processStartupTime": 0,
   "processType": "default",
@@ -4202,6 +4179,7 @@ Object {
     "weight": null,
     "weightType": "samples",
   },
+  "showMarkersInTimeline": undefined,
   "stackTable": Object {
     "category": Array [
       0,
@@ -4275,11 +4253,13 @@ Object {
   },
   "tid": 0,
   "unregisterTime": null,
+  "userContextId": undefined,
 }
 `;
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getRangeAndTransformFilteredThread 1`] = `
 Object {
+  "eTLD+1": undefined,
   "frameTable": Object {
     "address": Array [
       -1,
@@ -4473,7 +4453,11 @@ Object {
       -1,
     ],
   },
+  "isJsTracer": undefined,
   "isMainThread": false,
+  "isPrivateBrowsing": undefined,
+  "jsAllocations": undefined,
+  "jsTracer": undefined,
   "markers": Object {
     "category": Array [],
     "data": Array [],
@@ -4484,6 +4468,7 @@ Object {
     "startTime": Array [],
   },
   "name": "Thread with samples",
+  "nativeAllocations": undefined,
   "nativeSymbols": Object {
     "address": Array [],
     "functionSize": Array [],
@@ -4493,6 +4478,7 @@ Object {
   },
   "pausedRanges": Array [],
   "pid": "0",
+  "processName": undefined,
   "processShutdownTime": null,
   "processStartupTime": 0,
   "processType": "default",
@@ -4527,6 +4513,7 @@ Object {
     "weight": null,
     "weightType": "samples",
   },
+  "showMarkersInTimeline": undefined,
   "stackTable": Object {
     "category": Array [
       0,
@@ -4600,11 +4587,13 @@ Object {
   },
   "tid": 0,
   "unregisterTime": null,
+  "userContextId": undefined,
 }
 `;
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getRangeFilteredThread 1`] = `
 Object {
+  "eTLD+1": undefined,
   "frameTable": Object {
     "address": Array [
       -1,
@@ -4798,7 +4787,11 @@ Object {
       -1,
     ],
   },
+  "isJsTracer": undefined,
   "isMainThread": false,
+  "isPrivateBrowsing": undefined,
+  "jsAllocations": undefined,
+  "jsTracer": undefined,
   "markers": Object {
     "category": Array [],
     "data": Array [],
@@ -4809,6 +4802,7 @@ Object {
     "startTime": Array [],
   },
   "name": "Thread with samples",
+  "nativeAllocations": undefined,
   "nativeSymbols": Object {
     "address": Array [],
     "functionSize": Array [],
@@ -4818,6 +4812,7 @@ Object {
   },
   "pausedRanges": Array [],
   "pid": "0",
+  "processName": undefined,
   "processShutdownTime": null,
   "processStartupTime": 0,
   "processType": "default",
@@ -4852,6 +4847,7 @@ Object {
     "weight": null,
     "weightType": "samples",
   },
+  "showMarkersInTimeline": undefined,
   "stackTable": Object {
     "category": Array [
       0,
@@ -4925,11 +4921,13 @@ Object {
   },
   "tid": 0,
   "unregisterTime": null,
+  "userContextId": undefined,
 }
 `;
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getTabFilteredThread 1`] = `
 Object {
+  "eTLD+1": undefined,
   "frameTable": Object {
     "address": Array [
       -1,
@@ -5123,7 +5121,11 @@ Object {
       -1,
     ],
   },
+  "isJsTracer": undefined,
   "isMainThread": false,
+  "isPrivateBrowsing": undefined,
+  "jsAllocations": undefined,
+  "jsTracer": undefined,
   "markers": Object {
     "category": Array [],
     "data": Array [],
@@ -5134,6 +5136,7 @@ Object {
     "startTime": Array [],
   },
   "name": "Thread with samples",
+  "nativeAllocations": undefined,
   "nativeSymbols": Object {
     "address": Array [],
     "functionSize": Array [],
@@ -5143,6 +5146,7 @@ Object {
   },
   "pausedRanges": Array [],
   "pid": "0",
+  "processName": undefined,
   "processShutdownTime": null,
   "processStartupTime": 0,
   "processType": "default",
@@ -5215,6 +5219,7 @@ Object {
       0,
     ],
     "length": 57,
+    "responsiveness": undefined,
     "stack": Array [
       null,
       null,
@@ -5274,6 +5279,7 @@ Object {
       null,
       null,
     ],
+    "threadId": undefined,
     "time": Array [
       0,
       1,
@@ -5336,6 +5342,7 @@ Object {
     "weight": null,
     "weightType": "samples",
   },
+  "showMarkersInTimeline": undefined,
   "stackTable": Object {
     "category": Array [
       0,
@@ -5409,6 +5416,7 @@ Object {
   },
   "tid": 0,
   "unregisterTime": null,
+  "userContextId": undefined,
 }
 `;
 

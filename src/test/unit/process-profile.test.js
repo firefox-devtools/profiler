@@ -28,7 +28,7 @@ import type {
   GeckoProfilerOverhead,
   IndexIntoGeckoStackTable,
   Milliseconds,
-  Thread,
+  RawThread,
   Pid,
 } from 'firefox-profiler/types';
 
@@ -711,7 +711,7 @@ describe('profile meta processing', function () {
 
 describe('visualMetrics processing', function () {
   function checkVisualMetricsForThread(
-    thread: Thread,
+    thread: RawThread,
     metrics: Array<{|
       name: string,
       hasProgressMarker: boolean,

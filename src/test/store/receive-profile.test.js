@@ -181,7 +181,7 @@ describe('actions/receive-profile', function () {
 
       workThread.name = 'Work Thread';
       idleThread.name = 'Idle Thread';
-      idleThread.stackTable.category = idleThread.stackTable.category.map(
+      idleThread.frameTable.category = idleThread.frameTable.category.map(
         () => idleCategoryIndex
       );
       return { profile, idleThread, workThread };

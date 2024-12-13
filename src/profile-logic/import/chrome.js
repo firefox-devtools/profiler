@@ -4,8 +4,8 @@
 // @flow
 import type {
   Profile,
-  StackTable,
-  Thread,
+  RawStackTable,
+  RawThread,
   IndexIntoFuncTable,
   IndexIntoStackTable,
   IndexIntoResourceTable,
@@ -275,7 +275,7 @@ export function attemptToConvertChromeProfile(
 }
 
 type ThreadInfo = {
-  thread: Thread,
+  thread: RawThread,
   funcKeyToFuncId: Map<string, IndexIntoFuncTable>,
   nodeIdToStackId: Map<number | void, IndexIntoStackTable | null>,
   originToResourceIndex: Map<string, IndexIntoResourceTable>,
@@ -314,7 +314,7 @@ function findEvents<
 
 function getThreadInfo(
   threadInfoByPidAndTid: Map<string, ThreadInfo>,
-  threadInfoByThread: Map<Thread, ThreadInfo>,
+  threadInfoByThread: Map<RawThread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile,
   chunk: TracingEventUnion
@@ -685,8 +685,6 @@ async function processTracingEvents(
           frameTable.length = Math.max(frameTable.length, frameIndex + 1);
 
           stackTable.frame.push(frameIndex);
-          stackTable.category.push(category);
-          stackTable.subcategory.push(0);
           stackTable.prefix.push(prefixStackIndex);
           nodeIdToStackId.set(nodeIndex, stackTable.length++);
         }
@@ -820,7 +818,7 @@ async function processTracingEvents(
 
 async function extractScreenshots(
   threadInfoByPidAndTid: Map<string, ThreadInfo>,
-  threadInfoByThread: Map<Thread, ThreadInfo>,
+  threadInfoByThread: Map<RawThread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile,
   screenshots: ?(ScreenshotEvent[])
@@ -904,7 +902,7 @@ function getImageSize(
  * For sanity, check that stacks are ordered where the prefix stack
  * always preceeds the current stack index in the StackTable.
  */
-function assertStackOrdering(stackTable: StackTable) {
+function assertStackOrdering(stackTable: RawStackTable) {
   const visitedStacks = new Set([null]);
   for (let i = 0; i < stackTable.length; i++) {
     if (!visitedStacks.has(stackTable.prefix[i])) {
@@ -919,7 +917,7 @@ function assertStackOrdering(stackTable: StackTable) {
  */
 function extractMarkers(
   threadInfoByPidAndTid: Map<string, ThreadInfo>,
-  threadInfoByThread: Map<Thread, ThreadInfo>,
+  threadInfoByThread: Map<RawThread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile
 ) {
