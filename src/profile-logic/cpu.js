@@ -74,10 +74,10 @@ function _computeMaxVariableCPUCyclesPerMs(
  *    Returns 1234567 * 3, i.e. "3703701 cycles per sample if each sample ticks at
  *    the declared 3ms interval and the CPU usage is at the observed maximum".
  */
-export function computeMaxCPUDeltaPerInterval(profile: Profile): number | null {
+export function computeMaxCPUDeltaPerMs(profile: Profile): number {
   const sampleUnits = profile.meta.sampleUnits;
   if (!sampleUnits) {
-    return null;
+    return 1;
   }
 
   const interval = profile.meta.interval;
@@ -86,21 +86,20 @@ export function computeMaxCPUDeltaPerInterval(profile: Profile): number | null {
   switch (threadCPUDeltaUnit) {
     case 'µs':
     case 'ns': {
-      const cpuDeltaTimeUnitMultiplier =
-        getCpuDeltaTimeUnitMultiplier(threadCPUDeltaUnit);
-      return cpuDeltaTimeUnitMultiplier * interval;
+      const deltaUnitPerMs = getCpuDeltaTimeUnitMultiplier(threadCPUDeltaUnit);
+      return deltaUnitPerMs;
     }
     case 'variable CPU cycles': {
       const maxThreadCPUDeltaPerMs = _computeMaxVariableCPUCyclesPerMs(
         profile.threads,
         interval
       );
-      return maxThreadCPUDeltaPerMs * interval;
+      return maxThreadCPUDeltaPerMs;
     }
     default:
       throw assertExhaustiveCheck(
         threadCPUDeltaUnit,
-        'Unhandled threadCPUDelta unit in computeMaxCPUDeltaPerInterval.'
+        'Unhandled threadCPUDelta unit in computeMaxCPUDeltaPerMs.'
       );
   }
 }
