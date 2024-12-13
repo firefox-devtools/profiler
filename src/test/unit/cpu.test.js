@@ -38,15 +38,11 @@ describe('processThreadCPUDelta', function () {
     return { profile, thread, processedThread };
   }
 
-  it('throws if all of its values are null', function () {
-    expect(() => setup([null, null, null, null, null, null])).toThrow();
-  });
-
   it('throws if there are no threadCPUDelta values', function () {
     expect(() => setup(undefined)).toThrow();
   });
 
-  it('removes the null values by finding the closest non-null threadCPUDelta value', function () {
+  it('removes the null values and replaces them with zero', function () {
     // Testing the case where only the values in the middle are null.
     const { processedThread: processedThread1 } = setup([
       0.1,
@@ -57,21 +53,21 @@ describe('processThreadCPUDelta', function () {
       0.2,
     ]);
     expect(processedThread1.samples.threadCPUDelta).toEqual([
-      0.1, 0.1, 0.1, 0.2, 0.2, 0.2,
+      0.1, 0, 0, 0, 0, 0.2,
     ]);
 
     // Testing the case where the values at the start are null.
     const { processedThread: processedThread2 } = setup([null, null, 0.1]);
-    expect(processedThread2.samples.threadCPUDelta).toEqual([0.1, 0.1, 0.1]);
+    expect(processedThread2.samples.threadCPUDelta).toEqual([0, 0, 0.1]);
 
     // Testing the case where the values at the end are null.
     const { processedThread: processedThread3 } = setup([0.1, null, null]);
-    expect(processedThread3.samples.threadCPUDelta).toEqual([0.1, 0.1, 0.1]);
+    expect(processedThread3.samples.threadCPUDelta).toEqual([0.1, 0, 0]);
 
     // If there are values in either side of a null sample with the same distance,
     // pick the latter one.
     const { processedThread: processedThread4 } = setup([0.1, null, 0.2]);
-    expect(processedThread4.samples.threadCPUDelta).toEqual([0.1, 0.2, 0.2]);
+    expect(processedThread4.samples.threadCPUDelta).toEqual([0.1, 0, 0.2]);
   });
 
   it('processes Linux timing values and caps them to 100% if they are more than the interval values', function () {

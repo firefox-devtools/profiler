@@ -102,16 +102,17 @@ export function computeMaxCPUDeltaPerInterval(profile: Profile): number | null {
 }
 
 /**
- * Process the CPU delta values of that thread. It will throw an error if it
- * fails to find threadCPUDelta array.
- * It does two different processing:
+ * Clamp the CPU delta values of the given thread and make them non-null.
  *
- * 1. For the threadCPUDelta values with timing units, it limits these values
- * to the interval. This is mostly a bug on macOS platform (with µs values)
- * because we could only detect these values in that platform so far. But to be
- * safe, we are also doing this processing for Linux platform (ns values).
- * 2. We are checking for null values and converting them to non-null values if
- * there are any by getting the closest threadCPUDelta value.
+ * This function throws an error if called on a thread without threadCPUDeltas.
+ *
+ * It does the following:
+ *
+ * 1. We replace null values with zeros.
+ * 2. We clamp CPU delta values to the time delta between samples, if the CPU
+ *    delta unit is time-based (i.e. microseconds or nanoseconds rather than
+ *    'variable CPU cycles'). This gets rid of unexpected out-of-range values
+ *    that we've observed on the macOS platform.
  */
 export function processThreadCPUDelta(
   thread: Thread,
@@ -149,11 +150,10 @@ export function processThreadCPUDelta(
   );
 
   for (let i = 0; i < samples.length; i++) {
-    // Ideally there shouldn't be any null values but that can happen if the
-    // back-end fails to get the CPU usage numbers from the operation system.
-    // In that case, try to find the closest number and use it to mitigate the
-    // weird graph renderings.
-    const threadCPUDeltaValue = findClosestNonNullValueToIdx(threadCPUDelta, i);
+    // Replace nulls with zeros.
+    const rawThreadCPUDeltaValue = threadCPUDelta[i];
+    const threadCPUDeltaValue =
+      rawThreadCPUDeltaValue !== null ? rawThreadCPUDeltaValue : 0;
 
     const threadCPUDeltaUnit = sampleUnits.threadCPUDelta;
     switch (threadCPUDeltaUnit) {
@@ -212,34 +212,4 @@ function getCpuDeltaTimeUnitMultiplier(unit: ThreadCPUDeltaUnit): number {
         'Unhandled threadCPUDelta unit in the processing.'
       );
   }
-}
-
-/**
- * A helper function that finds the closest non-null item in an element to an index.
- * This is useful for finding the non-null threadCPUDelta number to a sample.
- */
-function findClosestNonNullValueToIdx(
-  array: Array<number | null>,
-  idx: number,
-  distance: number = 0
-): number {
-  if (distance >= array.length) {
-    throw new Error('Expected the distance to be less than the array length.');
-  }
-
-  if (idx + distance < array.length) {
-    const itemAfter = array[idx + distance];
-    if (itemAfter !== null) {
-      return itemAfter;
-    }
-  }
-
-  if (idx - distance >= 0) {
-    const itemBefore = array[idx - distance];
-    if (itemBefore !== null) {
-      return itemBefore;
-    }
-  }
-
-  return findClosestNonNullValueToIdx(array, idx, ++distance);
 }
