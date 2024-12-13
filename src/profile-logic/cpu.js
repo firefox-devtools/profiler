@@ -22,10 +22,7 @@ import type {
  * anyway, because if the unit is 'variable CPU cycles' then we don't do any
  * clamping.
  */
-function _computeMaxVariableCPUCyclesPerMs(
-  threads: Thread[],
-  profileInterval: Milliseconds
-): number {
+function _computeMaxVariableCPUCyclesPerMs(threads: Thread[]): number {
   let maxThreadCPUDeltaPerMs = 0;
   for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
     const { samples } = threads[threadIndex];
@@ -37,11 +34,10 @@ function _computeMaxVariableCPUCyclesPerMs(
       continue;
     }
 
-    // First element of CPU delta is always null because back-end doesn't know
-    // the delta since there is no previous sample.
+    // Ignore the first CPU delta value; it's meaningless because there is no
+    // previous sample.
     for (let i = 1; i < samples.length; i++) {
-      const sampleTimeDeltaInMs =
-        i === 0 ? profileInterval : samples.time[i] - samples.time[i - 1];
+      const sampleTimeDeltaInMs = samples.time[i] - samples.time[i - 1];
       if (sampleTimeDeltaInMs !== 0) {
         const cpuDeltaPerMs = (threadCPUDelta[i] || 0) / sampleTimeDeltaInMs;
         maxThreadCPUDeltaPerMs = Math.max(
@@ -80,7 +76,6 @@ export function computeMaxCPUDeltaPerMs(profile: Profile): number {
     return 1;
   }
 
-  const interval = profile.meta.interval;
   const threadCPUDeltaUnit = sampleUnits.threadCPUDelta;
 
   switch (threadCPUDeltaUnit) {
@@ -91,8 +86,7 @@ export function computeMaxCPUDeltaPerMs(profile: Profile): number {
     }
     case 'variable CPU cycles': {
       const maxThreadCPUDeltaPerMs = _computeMaxVariableCPUCyclesPerMs(
-        profile.threads,
-        interval
+        profile.threads
       );
       return maxThreadCPUDeltaPerMs;
     }
