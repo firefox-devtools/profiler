@@ -2282,6 +2282,17 @@ const _upgraders = {
     // marker data with the new field types data, and no modification is needed in the
     // frontend to display older formats.
   },
+  [52]: (profile) => {
+    if (profile.counters && profile.counters.length > 0) {
+      for (const counter of profile.counters) {
+        counter.relative = counter.name in ['malloc', 'bandwidth'];
+        if (counter.name === 'malloc') {
+          counter.name = 'malloc.relative';
+        }
+      }
+    }
+  },
+
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

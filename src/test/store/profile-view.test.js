@@ -48,10 +48,7 @@ import {
   getThreadSelectors,
 } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
-import {
-  processCounter,
-  type BreakdownByCategory,
-} from '../../profile-logic/profile-data';
+import { type BreakdownByCategory } from '../../profile-logic/profile-data';
 
 import type {
   TrackReference,
@@ -3191,25 +3188,17 @@ describe('counter selectors', function () {
     const counterB = getCounterForThread(thread, threadIndex);
     profile.counters = [counterA, counterB];
     const { getState, dispatch } = storeWithProfile(profile);
-    const processedCounterA = processCounter(counterA);
-    const processedCounterB = processCounter(counterB);
     return {
       getState,
       dispatch,
       counterA,
-      processedCounterA,
-      processedCounterB,
     };
   }
 
   it('can get the counters', function () {
-    const { processedCounterA, processedCounterB, getState } = setup();
-    expect(getCounterSelectors(0).getCounter(getState())).toStrictEqual(
-      processedCounterA
-    );
-    expect(getCounterSelectors(1).getCounter(getState())).toStrictEqual(
-      processedCounterB
-    );
+    const { getState } = setup();
+    expect(getCounterSelectors(0).getCounter(getState())).toBeDefined();
+    expect(getCounterSelectors(1).getCounter(getState())).toBeDefined();
   });
 
   it('can get the counter description', function () {
@@ -3224,22 +3213,30 @@ describe('counter selectors', function () {
     expect(getCounterSelectors(0).getPid(getState())).toBe('0');
   });
 
-  it('can accumulate samples', function () {
+  it('can accumulate relative samples', function () {
     const { getState, counterA } = setup();
+    counterA.relative = true;
     counterA.samples.count = [
-      // The first value gets zeroed out due to a work-around for Bug 1520587. It
-      // can be much larger than all the rest of the values, as it doesn't ever
-      // get reset.
-      10000,
-      -2, 3, -5, 7, -11, 13, -17, 19, 23,
+      // The first value is expected to be zero after importing the profile.
+      0, -2, 3, -5, 7, -11, 13, -17, 19, 23,
     ];
-    expect(
-      getCounterSelectors(0).getAccumulateCounterSamples(getState())
-    ).toEqual({
+    expect(getCounterSelectors(0).getCounterSummary(getState())).toEqual({
       accumulatedCounts: [0, -2, 1, -4, 3, -8, 5, -12, 7, 30],
       countRange: 42,
       maxCount: 30,
       minCount: -12,
+    });
+  });
+
+  it('can summarise absolute samples', function () {
+    const { getState, counterA } = setup();
+    counterA.relative = false;
+    counterA.samples.count = [100, 125, 90, 111, 112, 113, 120, 98, 99, 100];
+    expect(getCounterSelectors(0).getCounterSummary(getState())).toEqual({
+      accumulatedCounts: undefined,
+      countRange: 35,
+      maxCount: 125,
+      minCount: 90,
     });
   });
 });

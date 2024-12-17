@@ -68,6 +68,7 @@ describe('TrackProcessCPU', function () {
           count: [100, 400, 500, 1000, 200, 500, 300, 100],
           length: SAMPLE_COUNT,
         },
+        false,
         'processCPU',
         'CPU'
       ),

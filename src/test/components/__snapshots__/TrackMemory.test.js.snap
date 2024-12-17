@@ -3,7 +3,7 @@
 exports[`TrackMemory draws a dot that matches the snapshot 1`] = `
 <div
   class="timelineTrackMemoryGraphDot"
-  style="left: 20px; top: 2.697563250235465px; background-color: rgb(215, 110, 0);"
+  style="left: 20px; top: 3.9396262364054238px; background-color: rgb(215, 110, 0);"
 />
 `;
 
@@ -67,6 +67,16 @@ exports[`TrackMemory has a tooltip that matches the snapshot for counts equallin
       2B
     </span>
     memory range in graph
+  </div>
+  <div
+    class="timelineTrackMemoryTooltipLine"
+  >
+    <span
+      class="timelineTrackMemoryTooltipNumber"
+    >
+      0
+    </span>
+    allocations and deallocations since the previous sample
   </div>
 </div>
 `;

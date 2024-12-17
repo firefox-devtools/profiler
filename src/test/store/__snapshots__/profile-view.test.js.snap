@@ -457,7 +457,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 51,
+    "preprocessedProfileVersion": 52,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -465,7 +465,7 @@ Object {
     "startTime": 0,
     "symbolicated": true,
     "toolkit": "",
-    "version": 31,
+    "version": 32,
   },
   "pages": Array [
     Object {
