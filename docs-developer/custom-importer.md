@@ -1,6 +1,6 @@
 # Writing a Custom Profile Importer
 
-The Firefox Profiler supports a few [external profile formats](../src/profile-logic/import) that the profiler imports by converting them to either the [Gecko profile format](./gecko-profile-format.md) or the [processed profile format](./process-profile-format). The good news is that once an importer targets a specific profile version, the Firefox Profiler will always upgrade that profile to the currently supported format.
+The Firefox Profiler supports a few [external profile formats](../src/profile-logic/import) that the profiler imports by converting them to either the [Gecko profile format](./gecko-profile-format.md) or the [processed profile format](./processed-profile-format.md). The good news is that once an importer targets a specific profile version, the Firefox Profiler will always upgrade that profile to the currently supported format.
 
 ## Useful Docs
 
