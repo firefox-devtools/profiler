@@ -149,7 +149,6 @@ describe('process-profile', function () {
         expect('stackTable' in thread).toBeTruthy();
         expect('frameTable' in thread).toBeTruthy();
         expect('markers' in thread).toBeTruthy();
-        expect('stringArray' in thread).toBeTruthy();
         expect('funcTable' in thread).toBeTruthy();
         expect('resourceTable' in thread).toBeTruthy();
       }
@@ -214,7 +213,8 @@ describe('process-profile', function () {
     });
 
     it('should create one function per frame, except for extra frames from return address nudging', function () {
-      const thread = profile.threads[0];
+      const { shared, threads } = profile;
+      const thread = threads[0];
       expect(thread.frameTable.length).toEqual(9);
       expect('location' in thread.frameTable).toBeFalsy();
       expect('func' in thread.frameTable).toBeTruthy();
@@ -241,18 +241,19 @@ describe('process-profile', function () {
       // Here are the non-nudged addresses for when they were sampled directly.
       expect(thread.frameTable.address[7]).toEqual(0x1a45);
       expect(thread.frameTable.address[8]).toEqual(0xf84);
-      expect(thread.funcTable.name[0]).toEqual(0);
-      expect(thread.funcTable.name[1]).toEqual(1);
-      expect(thread.funcTable.name[2]).toEqual(2);
-      expect(thread.funcTable.name[3]).toEqual(3);
-      expect(thread.stringArray[thread.funcTable.name[4]]).toEqual(
-        'frobnicate'
+      const funcTableNames = thread.funcTable.name.map(
+        (nameIndex) => shared.stringArray[nameIndex]
       );
+      expect(funcTableNames[0]).toEqual('(root)');
+      expect(funcTableNames[1]).toEqual('0x100000f84');
+      expect(funcTableNames[2]).toEqual('0x100001a45');
+      expect(funcTableNames[3]).toEqual('Startup::XRE_Main');
+      expect(funcTableNames[4]).toEqual('frobnicate');
       const chromeStringIndex = thread.funcTable.fileName[4];
       if (typeof chromeStringIndex !== 'number') {
         throw new Error('chromeStringIndex must be a number');
       }
-      expect(thread.stringArray[chromeStringIndex]).toEqual('chrome://blargh');
+      expect(shared.stringArray[chromeStringIndex]).toEqual('chrome://blargh');
       expect(thread.funcTable.lineNumber[4]).toEqual(34);
       expect(thread.funcTable.columnNumber[4]).toEqual(35);
     });
@@ -279,7 +280,8 @@ describe('process-profile', function () {
     });
 
     it('should create no entries in nativeSymbols before symbolication', function () {
-      const thread = profile.threads[0];
+      const { threads } = profile;
+      const thread = threads[0];
       expect(thread.frameTable.length).toEqual(9);
       expect('nativeSymbol' in thread.frameTable).toBeTruthy();
       expect(thread.nativeSymbols.length).toEqual(0);
@@ -295,17 +297,18 @@ describe('process-profile', function () {
     });
 
     it('should create one resource per used library', function () {
-      const thread = profile.threads[0];
+      const { shared, threads } = profile;
+      const thread = threads[0];
       expect(thread.resourceTable.length).toEqual(3);
       expect(thread.resourceTable.type[0]).toEqual(resourceTypes.addon);
       expect(thread.resourceTable.type[1]).toEqual(resourceTypes.library);
       expect(thread.resourceTable.type[2]).toEqual(resourceTypes.url);
       const [name0, name1, name2] = thread.resourceTable.name;
-      expect(thread.stringArray[name0]).toEqual(
+      expect(shared.stringArray[name0]).toEqual(
         'Extension "Form Autofill" (ID: formautofill@mozilla.org)'
       );
-      expect(thread.stringArray[name1]).toEqual('firefox');
-      expect(thread.stringArray[name2]).toEqual('chrome://blargh');
+      expect(shared.stringArray[name1]).toEqual('firefox');
+      expect(shared.stringArray[name2]).toEqual('chrome://blargh');
     });
   });
 
@@ -356,7 +359,7 @@ describe('process-profile', function () {
       // Check that the values are correct from the test defined data.
       expect(
         processedJsTracer.events.map(
-          (index) => childProcessThread.stringArray[index]
+          (index) => processedProfile.shared.stringArray[index]
         )
       ).toEqual(['jsTracerA', 'jsTracerB', 'jsTracerC']);
       expect(processedJsTracer.durations).toEqual([10000, 8000, 6000]);
@@ -447,8 +450,13 @@ describe('profile-data', function () {
       profile.meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
-    const rawThread = profile.threads[0];
-    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
+    const { shared, threads } = profile;
+    const rawThread = threads[0];
+    const thread = computeThreadFromRawThread(
+      rawThread,
+      shared,
+      defaultCategory
+    );
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -498,13 +506,18 @@ describe('profile-data', function () {
   describe('getCallNodeInfo', function () {
     const {
       meta,
+      shared,
       threads: [rawThread],
     } = getCallNodeProfile();
     const defaultCategory = ensureExists(
       meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
-    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
+    const thread = computeThreadFromRawThread(
+      rawThread,
+      shared,
+      defaultCategory
+    );
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -681,6 +694,7 @@ describe('symbolication', function () {
           }
           const { thread } = applySymbolicationSteps(
             symbolicatedProfile.threads[threadIndex],
+            symbolicatedProfile.shared,
             [symbolicationStepInfo]
           );
           symbolicatedProfile.threads[threadIndex] = thread;
@@ -690,10 +704,10 @@ describe('symbolication', function () {
     });
 
     it('should assign correct symbols to frames', function () {
-      function functionNameForFrameInThread(thread, frameIndex) {
+      function functionNameForFrameInThread(thread, shared, frameIndex) {
         const funcIndex = thread.frameTable.func[frameIndex];
         const funcNameStringIndex = thread.funcTable.name[funcIndex];
-        return thread.stringArray[funcNameStringIndex];
+        return shared.stringArray[funcNameStringIndex];
       }
       if (!unsymbolicatedProfile || !symbolicatedProfile) {
         throw new Error('Profiles cannot be null');
@@ -701,18 +715,34 @@ describe('symbolication', function () {
       const symbolicatedThread = symbolicatedProfile.threads[0];
       const unsymbolicatedThread = unsymbolicatedProfile.threads[0];
 
-      expect(functionNameForFrameInThread(unsymbolicatedThread, 1)).toEqual(
-        '0x100000f84'
-      );
-      expect(functionNameForFrameInThread(symbolicatedThread, 1)).toEqual(
-        'second symbol'
-      );
-      expect(functionNameForFrameInThread(unsymbolicatedThread, 2)).toEqual(
-        '0x100001a45'
-      );
-      expect(functionNameForFrameInThread(symbolicatedThread, 2)).toEqual(
-        'third symbol'
-      );
+      expect(
+        functionNameForFrameInThread(
+          unsymbolicatedThread,
+          unsymbolicatedProfile.shared,
+          1
+        )
+      ).toEqual('0x100000f84');
+      expect(
+        functionNameForFrameInThread(
+          symbolicatedThread,
+          symbolicatedProfile.shared,
+          1
+        )
+      ).toEqual('second symbol');
+      expect(
+        functionNameForFrameInThread(
+          unsymbolicatedThread,
+          unsymbolicatedProfile.shared,
+          2
+        )
+      ).toEqual('0x100001a45');
+      expect(
+        functionNameForFrameInThread(
+          symbolicatedThread,
+          symbolicatedProfile.shared,
+          2
+        )
+      ).toEqual('third symbol');
     });
   });
   // TODO: check that functions are collapsed correctly
@@ -724,8 +754,9 @@ describe('filter-by-implementation', function () {
     profile.meta.categories,
     'Expected to find categories'
   ).findIndex((c) => c.name === 'Other');
-  const rawThread = profile.threads[0];
-  const thread = computeThreadFromRawThread(rawThread, defaultCategory);
+  const { shared, threads } = profile;
+  const rawThread = threads[0];
+  const thread = computeThreadFromRawThread(rawThread, shared, defaultCategory);
 
   function stackIsJS(filteredThread, stackIndex) {
     if (stackIndex === null) {
@@ -772,12 +803,17 @@ describe('get-sample-index-closest-to-time', function () {
     const { profile } = getProfileFromTextSamples(
       Array(10).fill('A').join('  ')
     );
-    const rawThread = profile.threads[0];
+    const { shared, threads } = profile;
+    const rawThread = threads[0];
     const defaultCategory = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
-    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
+    const thread = computeThreadFromRawThread(
+      rawThread,
+      shared,
+      defaultCategory
+    );
     const { samples } = filterThreadByImplementation(thread, 'js');
 
     const interval = profile.meta.interval;
@@ -796,12 +832,17 @@ describe('funcHasDirectRecursiveCall and funcHasRecursiveCall', function () {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(textSamples);
-    const [rawThread] = profile.threads;
+    const { shared, threads } = profile;
+    const rawThread = threads[0];
     const defaultCategory = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
-    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
+    const thread = computeThreadFromRawThread(
+      rawThread,
+      shared,
+      defaultCategory
+    );
     const callNodeTable = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -860,12 +901,17 @@ describe('funcHasDirectRecursiveCall and funcHasRecursiveCall', function () {
 describe('convertStackToCallNodeAndCategoryPath', function () {
   it('correctly returns a call node path for a stack', function () {
     const profile = getCallNodeProfile();
-    const rawThread = profile.threads[0];
+    const { shared, threads } = profile;
+    const rawThread = threads[0];
     const defaultCategory = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
-    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
+    const thread = computeThreadFromRawThread(
+      rawThread,
+      shared,
+      defaultCategory
+    );
     const stack1 = thread.samples.stack[0];
     const stack2 = thread.samples.stack[1];
     if (stack1 === null || stack2 === null) {
@@ -885,12 +931,17 @@ describe('getSamplesSelectedStates', function () {
       profile,
       funcNamesDictPerThread: [funcNamesDict],
     } = getProfileFromTextSamples(textSamples);
-    const rawThread = profile.threads[0];
+    const { shared, threads } = profile;
+    const rawThread = threads[0];
     const defaultCategory = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
-    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
+    const thread = computeThreadFromRawThread(
+      rawThread,
+      shared,
+      defaultCategory
+    );
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -1395,7 +1446,8 @@ describe('getNativeSymbolsForCallNode', function () {
         funC[lib:XUL][address:2007][sym:symB:2000:][inl:1]
       `);
 
-    const rawThread = profile.threads[0];
+    const { shared, threads } = profile;
+    const rawThread = threads[0];
     const { funA, funB, funC } = funcNamesDictPerThread[0];
     const { symB } = nativeSymbolsDictPerThread[0];
     const categories = ensureExists(
@@ -1403,7 +1455,11 @@ describe('getNativeSymbolsForCallNode', function () {
       'Expected to find categories'
     );
     const defaultCategory = categories.findIndex((c) => c.name === 'Other');
-    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
+    const thread = computeThreadFromRawThread(
+      rawThread,
+      shared,
+      defaultCategory
+    );
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -1443,7 +1499,8 @@ describe('getNativeSymbolsForCallNode', function () {
         funC[lib:XUL][address:2007][sym:symB:2000:][inl:1]  funC[lib:XUL][address:4007][sym:symD:4000:][inl:1]
       `);
 
-    const rawThread = profile.threads[0];
+    const { shared, threads } = profile;
+    const rawThread = threads[0];
     const { funC } = funcNamesDictPerThread[0];
     const { symB, symD } = nativeSymbolsDictPerThread[0];
     const categories = ensureExists(
@@ -1451,7 +1508,11 @@ describe('getNativeSymbolsForCallNode', function () {
       'Expected to find categories'
     );
     const defaultCategory = categories.findIndex((c) => c.name === 'Other');
-    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
+    const thread = computeThreadFromRawThread(
+      rawThread,
+      shared,
+      defaultCategory
+    );
     const nonInvertedCallNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -1493,9 +1554,10 @@ describe('getNativeSymbolInfo', function () {
       other_function[lib:XUL][file:hello.cpp][line:622][address:2007][sym:symOtherFunc:2000:1e]
     `);
 
-    const thread = profile.threads[0];
+    const { shared, threads } = profile;
+    const thread = threads[0];
     const stringTable = UniqueStringArray.cachedTableForArray(
-      thread.stringArray
+      shared.stringArray
     );
     const { symSomeFunc, symOtherFunc } = nativeSymbolsDictPerThread[0];
 

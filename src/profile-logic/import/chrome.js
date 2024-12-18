@@ -514,6 +514,10 @@ async function processTracingEvents(
   // new samples on our target interval of 500us.
   profile.meta.interval = 0.5;
 
+  const stringTable = UniqueStringArray.cachedTableForArray(
+    profile.shared.stringArray
+  );
+
   let profileEvents: (ProfileEvent | CpuProfileEvent)[] =
     (eventsByName.get('Profile'): any) || [];
 
@@ -579,12 +583,9 @@ async function processTracingEvents(
         funcTable,
         frameTable,
         stackTable,
-        stringArray,
         samples: samplesTable,
         resourceTable,
       } = thread;
-
-      const stringTable = UniqueStringArray.cachedTableForArray(stringArray);
 
       if (nodes) {
         const parentMap = new Map();
@@ -842,7 +843,9 @@ async function extractScreenshots(
     screenshots[0]
   );
 
-  const stringTable = UniqueStringArray.cachedTableForArray(thread.stringArray);
+  const stringTable = UniqueStringArray.cachedTableForArray(
+    profile.shared.stringArray
+  );
 
   const graphicsIndex = ensureExists(profile.meta.categories).findIndex(
     (category) => category.name === 'Graphics'
@@ -933,6 +936,8 @@ function extractMarkers(
     throw new Error('No "Other" category in empty profile category list');
   }
 
+  const stringTable = UniqueStringArray.cachedTableForArray(profile.shared.stringArray);
+
   profile.meta.markerSchema = [
     {
       name: 'EventDispatch',
@@ -999,8 +1004,7 @@ function extractMarkers(
           event
         );
         const { thread } = threadInfo;
-        const { markers, stringArray } = thread;
-        const stringTable = UniqueStringArray.cachedTableForArray(stringArray);
+        const { markers } = thread;
         let argData: MixedObject | null = null;
         if (event.args && typeof event.args === 'object') {
           argData = (event.args: any).data || null;

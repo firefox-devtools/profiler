@@ -51,6 +51,7 @@ import { INSTANT } from 'firefox-profiler/app-logic/constants';
  * Local Track naming - `[thread ThreadName]` | `[TrackType]`
  */
 export function getHumanReadableTracks(state: State): string[] {
+  const stringArray = profileViewSelectors.getStringArray(state);
   const threads = profileViewSelectors.getThreads(state);
   const globalTracks = profileViewSelectors.getGlobalTracks(state);
   const hiddenGlobalTracks = urlStateSelectors.getHiddenGlobalTracks(state);
@@ -121,7 +122,7 @@ export function getHumanReadableTracks(state: State): string[] {
             .getCounterSelectors(track.counterIndex)
             .getCounter(state).name;
         } else if (track.type === 'marker') {
-          trackName = threads[track.threadIndex].stringArray[track.markerName];
+          trackName = stringArray[track.markerName];
         } else {
           trackName = threads[track.threadIndex].name;
         }
@@ -155,7 +156,8 @@ export function getHumanReadableTracks(state: State): string[] {
  */
 export function getProfileWithNiceTracks(): Profile {
   const { profile } = getProfileFromTextSamples('A', 'B', 'C', 'D');
-  const [thread1, thread2, thread3, thread4] = profile.threads;
+  const { shared, threads } = profile;
+  const [thread1, thread2, thread3, thread4] = threads;
   thread1.name = 'GeckoMain';
   thread1.isMainThread = true;
   thread1.pid = '111';
@@ -174,7 +176,7 @@ export function getProfileWithNiceTracks(): Profile {
   });
   thread2.markers.category.push(0);
   const thread2StringTable = UniqueStringArray.cachedTableForArray(
-    thread2.stringArray
+    shared.stringArray
   );
   thread2.markers.name.push(
     thread2StringTable.indexForString('RefreshDriverTick')

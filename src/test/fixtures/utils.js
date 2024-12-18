@@ -22,6 +22,7 @@ import { computeSamplesTableFromRawSamplesTable } from 'firefox-profiler/profile
 
 import type {
   IndexIntoCallNodeTable,
+  RawProfileSharedData,
   Profile,
   Store,
   State,
@@ -120,7 +121,8 @@ export function getMouseEvent(
 
 export function computeThreadFromRawThread(
   rawThread: RawThread,
-  defaultCategory: IndexIntoCategoryList
+  shared: RawProfileSharedData,
+  defaultCategory: IndexIntoCategoryList,
 ): Thread {
   const stackTable = computeStackTableFromRawStackTable(
     rawThread.stackTable,
@@ -128,7 +130,7 @@ export function computeThreadFromRawThread(
     defaultCategory
   );
   const samples = computeSamplesTableFromRawSamplesTable(rawThread.samples);
-  const stringTable = UniqueStringArray.cachedTableForArray(rawThread.stringArray);
+  const stringTable = UniqueStringArray.cachedTableForArray(shared.stringArray);
   return createThreadFromDerivedColumns(rawThread, stackTable, samples, stringTable);
 }
 
@@ -147,7 +149,7 @@ export function callTreeFromProfile(
     'Expected to find categories'
   );
   const defaultCategory = categories.findIndex((c) => c.name === 'Other');
-  let thread = computeThreadFromRawThread(rawThread, defaultCategory);
+  let thread = computeThreadFromRawThread(rawThread, profile.shared, defaultCategory);
 
   if (transformThreadCallback) {
     thread = transformThreadCallback(thread);

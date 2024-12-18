@@ -17,7 +17,6 @@ import {
   getStackLineInfo,
   getLineTimings,
 } from 'firefox-profiler/profile-logic/line-timings';
-import { UniqueStringArray } from '../../utils/unique-string-array';
 
 import {
   addTransformToStack,
@@ -829,6 +828,7 @@ describe('"collapse-resource" transform', function () {
      */
     const {
       profile,
+      stringTable,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
       A               A
@@ -839,7 +839,6 @@ describe('"collapse-resource" transform', function () {
     const collapsedFuncNames = [...funcNames, 'firefox'];
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
-    const stringTable = UniqueStringArray.cachedTableForArray(thread.stringArray);
     const firefoxNameIndex = stringTable.indexForString('firefox');
     const firefoxResourceIndex = thread.resourceTable.name.findIndex(
       (stringIndex) => stringIndex === firefoxNameIndex
@@ -935,6 +934,7 @@ describe('"collapse-resource" transform', function () {
      */
     const {
       profile,
+      stringTable,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
       A.js                A.js
@@ -948,7 +948,6 @@ describe('"collapse-resource" transform', function () {
     const collapsedFuncNames = [...funcNames, 'firefox'];
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
-    const stringTable = UniqueStringArray.cachedTableForArray(thread.stringArray);
     const firefoxNameIndex = stringTable.indexForString('firefox');
     const firefoxResourceIndex = thread.resourceTable.name.findIndex(
       (stringIndex) => stringIndex === firefoxNameIndex
@@ -1836,7 +1835,7 @@ describe('"filter-samples" transform', function () {
          D
     `);
     const threadIndex = 0;
-    addMarkersToThreadWithCorrespondingSamples(profile.threads[threadIndex], [
+    addMarkersToThreadWithCorrespondingSamples(profile.threads[threadIndex], profile.shared, [
       [
         'DOMEvent',
         0,

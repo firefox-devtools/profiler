@@ -41,8 +41,8 @@ import { UniqueStringArray } from '../../../utils/unique-string-array';
  */
 export default function getProfile(): Profile {
   const profile = getEmptyProfile();
+  const stringTable = UniqueStringArray.cachedTableForArray(profile.shared.stringArray);
   let thread = getEmptyThread();
-  const stringTable = UniqueStringArray.cachedTableForArray(thread.stringArray);
   const funcNames = ['funcA', 'funcB', 'funcC', 'funcD', 'funcE', 'funcF'].map(
     (name) => stringTable.indexForString(name)
   );

@@ -93,7 +93,7 @@ describe('ActiveTab', function () {
       // markers of an iframe comes from the parent frame. Therefore, their
       // innerWindowID will be the parent window's innerWindowID.
       const profile = getProfileWithNiceTracks();
-      addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
+      addMarkersToThreadWithCorrespondingSamples(profile.threads[0], profile.shared, [
         [
           'Load 1 will be filtered',
           7,
@@ -207,7 +207,7 @@ describe('ActiveTab', function () {
           },
         ]
       );
-      addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
+      addMarkersToThreadWithCorrespondingSamples(profile.threads[1], profile.shared, [
         // All about:blank or about:newtab markers are ignored during the
         // track name computation because they don't provide the correct innerWindowID.
         // This thread SHOULD NOT be shown in the tracks.

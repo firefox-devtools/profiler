@@ -180,10 +180,10 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
   const profile = getEmptyProfile();
   profile.meta.product = dhat.cmd + ' (dhat)';
   profile.meta.importedFrom = `dhat`;
+  const stringTable = UniqueStringArray.cachedTableForArray(profile.shared.stringArray);
 
   const allocationsTable = getEmptyUnbalancedNativeAllocationsTable();
-  const { funcTable, stringArray, stackTable, frameTable } = getEmptyThread();
-  const stringTable = UniqueStringArray.cachedTableForArray(stringArray);
+  const { funcTable, stackTable, frameTable } = getEmptyThread();
 
   const funcKeyToFuncIndex = new Map<string, IndexIntoFuncTable>();
 
@@ -335,7 +335,6 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     thread.pid = dhat.pid;
     thread.tid = i;
     thread.name = name;
-    thread.stringArray = stringTable.serializeToArray();
 
     thread.funcTable.name = funcTable.name.slice();
     thread.funcTable.isJS = funcTable.isJS.slice();
