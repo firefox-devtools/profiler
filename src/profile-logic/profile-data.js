@@ -57,7 +57,9 @@ import type {
   IndexIntoNativeSymbolTable,
   ThreadIndex,
   Category,
+  RawCounter,
   Counter,
+  RawCounterSamplesTable,
   CounterSamplesTable,
   NativeAllocationsTable,
   InnerWindowID,
@@ -1521,7 +1523,9 @@ export function computeTimeColumnFromTimeDeltas(timeDelta: number[]): number[] {
   });
 }
 
-export function computeTimeColumnForRawSamplesTable(samples: RawSamplesTable): number[] {
+export function computeTimeColumnForRawSamplesTable(
+  samples: RawSamplesTable | RawCounterSamplesTable
+): number[] {
   const { time, timeDeltas } = samples;
   return time ?? computeTimeColumnFromTimeDeltas(ensureExists(timeDeltas));
 }
@@ -1535,7 +1539,11 @@ export function hasUsefulSamples(
   thread: RawThread
 ): boolean {
   const { stackTable, frameTable, funcTable, stringArray } = thread;
-  if (sampleStacks === undefined || sampleStacks.length === 0 || stackTable.length === 0) {
+  if (
+    sampleStacks === undefined ||
+    sampleStacks.length === 0 ||
+    stackTable.length === 0
+  ) {
     return false;
   }
   const stackIndex = sampleStacks.find((stack) => stack !== null);
@@ -1591,8 +1599,16 @@ export function getInclusiveSampleIndexRangeForSelection(
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
-  let [sampleStart, sampleEnd] = getSampleIndexRangeForSelection(
-    table,
+  return getInclusiveIndexRangeForSelection(table.time, rangeStart, rangeEnd);
+}
+
+export function getInclusiveIndexRangeForSelection(
+  times: Milliseconds[],
+  rangeStart: number,
+  rangeEnd: number
+): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
+  let [sampleStart, sampleEnd] = getIndexRangeForSelection(
+    times,
     rangeStart,
     rangeEnd
   );
@@ -1602,7 +1618,7 @@ export function getInclusiveSampleIndexRangeForSelection(
   if (sampleStart > 0) {
     sampleStart--;
   }
-  if (sampleEnd < table.length) {
+  if (sampleEnd < times.length) {
     sampleEnd++;
   }
 
@@ -1848,23 +1864,27 @@ export function filterRawThreadSamplesToRange(
  * Filter the counter samples to the given range by iterating all of their sample groups.
  */
 export function filterCounterSamplesToRange(
-  counter: Counter,
+  counter: RawCounter,
   rangeStart: number,
   rangeEnd: number
-): Counter {
+): RawCounter {
   const newCounter = { ...counter };
   const { samples } = newCounter;
+  const timeColumn = computeTimeColumnForRawSamplesTable(samples);
 
   // Intentionally get the inclusive sample indexes with this one instead of
   // getSampleIndexRangeForSelection because graphs like memory graph requires
   // one sample before and after to be in the sample range so the graph doesn't
   // look cut off.
-  const [beginSampleIndex, endSampleIndex] =
-    getInclusiveSampleIndexRangeForSelection(samples, rangeStart, rangeEnd);
+  const [beginSampleIndex, endSampleIndex] = getInclusiveIndexRangeForSelection(
+    timeColumn,
+    rangeStart,
+    rangeEnd
+  );
 
   newCounter.samples = {
     length: endSampleIndex - beginSampleIndex,
-    time: samples.time.slice(beginSampleIndex, endSampleIndex),
+    time: timeColumn.slice(beginSampleIndex, endSampleIndex),
     count: samples.count.slice(beginSampleIndex, endSampleIndex),
     number: samples.number
       ? samples.number.slice(beginSampleIndex, endSampleIndex)
@@ -1877,11 +1897,11 @@ export function filterCounterSamplesToRange(
 /**
  * Process the samples in the counter.
  */
-export function processCounter(counter: Counter): Counter {
-  const { samples } = counter;
-  const count = samples.count.slice();
+export function processCounter(rawCounter: RawCounter): Counter {
+  const { samples: rawSamples } = rawCounter;
+  const count = rawSamples.count.slice();
   const number =
-    samples.number !== undefined ? samples.number.slice() : undefined;
+    rawSamples.number !== undefined ? rawSamples.number.slice() : undefined;
 
   // These lines zero out the first values of the counters, as they are unreliable. In
   // addition, there are probably some missed counts in the memory counters, so the
@@ -1896,14 +1916,25 @@ export function processCounter(counter: Counter): Counter {
     number[0] = 0;
   }
 
-  return {
-    ...counter,
-    samples: {
-      ...samples,
-      number,
-      count,
-    },
+  const samples: CounterSamplesTable = {
+    time: computeTimeColumnForRawSamplesTable(rawSamples),
+    number,
+    count,
+    length: rawSamples.length,
   };
+
+  const counter: Counter = {
+    name: rawCounter.name,
+    category: rawCounter.category,
+    description: rawCounter.description,
+    color: rawCounter.color,
+    pid: rawCounter.pid,
+    mainThreadIndex: rawCounter.mainThreadIndex,
+
+    samples,
+  };
+
+  return counter;
 }
 
 /**
@@ -4117,7 +4148,7 @@ export function createThreadFromDerivedColumns(
   rawThread: RawThread,
   stackTable: StackTable,
   samples: SamplesTable,
-  stringTable: UniqueStringArray,
+  stringTable: UniqueStringArray
 ): Thread {
   return {
     // These properties are unchanged from the raw thread:

@@ -33,7 +33,7 @@ import type {
   IndexIntoStackTable,
   CategoryList,
   JsTracerTable,
-  Counter,
+  RawCounter,
   TabID,
   MarkerPayload,
   NetworkPayload,
@@ -1513,9 +1513,9 @@ export function getCounterForThread(
   thread: RawThread,
   mainThreadIndex: ThreadIndex,
   config: { hasCountNumber: boolean } = {}
-): Counter {
+): RawCounter {
   const sampleTimes = computeTimeColumnForRawSamplesTable(thread.samples);
-  const counter: Counter = {
+  const counter: RawCounter = {
     name: 'My Counter',
     category: 'My Category',
     description: 'My Description',
@@ -1549,7 +1549,7 @@ export function getCounterForThreadWithSamples(
   },
   name?: string,
   category?: string
-): Counter {
+): RawCounter {
   const newSamples = {
     time: samples.time
       ? samples.time
@@ -1561,7 +1561,7 @@ export function getCounterForThreadWithSamples(
     length: samples.length,
   };
 
-  const counter: Counter = {
+  const counter: RawCounter = {
     name: name ?? 'My Counter',
     category: category ?? 'My Category',
     description: 'My Description',

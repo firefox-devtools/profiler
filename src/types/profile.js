@@ -545,6 +545,17 @@ export type JsTracerTable = {|
   length: number,
 |};
 
+export type RawCounterSamplesTable = {|
+  time?: Milliseconds[],
+  timeDeltas?: Milliseconds[],
+  // The number of times the Counter's "number" was changed since the previous sample.
+  // This property was mandatory until the format version 42, it was made optional in 43.
+  number?: number[],
+  // The count of the data, for instance for memory this would be bytes.
+  count: number[],
+  length: number,
+|};
+
 export type CounterSamplesTable = {|
   time: Milliseconds[],
   // The number of times the Counter's "number" was changed since the previous sample.
@@ -566,6 +577,16 @@ export type GraphColor =
   | 'red'
   | 'teal'
   | 'yellow';
+
+export type RawCounter = {|
+  name: string,
+  category: string,
+  description: string,
+  color?: GraphColor,
+  pid: Pid,
+  mainThreadIndex: ThreadIndex,
+  samples: RawCounterSamplesTable,
+|};
 
 export type Counter = {|
   name: string,
@@ -1020,7 +1041,7 @@ export type Profile = {|
   pages?: PageList,
   // The counters list is optional only because old profilers may not have them.
   // An upgrader could be written to make this non-optional.
-  counters?: Counter[],
+  counters?: RawCounter[],
   // The profilerOverhead list is optional only because old profilers may not
   // have them. An upgrader could be written to make this non-optional.
   // This is list because there is a profiler overhead per process.
@@ -1028,29 +1049,4 @@ export type Profile = {|
   threads: RawThread[],
   profilingLog?: ProfilingLog,
   profileGatheringLog?: ProfilingLog,
-|};
-
-/**
- * Starting with version 50 of the processed format, the time column may
- * optionally be serialized as a timeDeltas column instead.
- * Both formats are supported for unserialization.
- */
-export type SerializableCounterSamplesTable = {|
-  ...$Diff<CounterSamplesTable, { time: Milliseconds[] }>,
-  time?: Milliseconds[],
-  timeDeltas?: Milliseconds[],
-|};
-
-export type SerializableCounter = {|
-  ...$Diff<Counter, { samples: CounterSamplesTable }>,
-  samples: SerializableCounterSamplesTable,
-|};
-
-/**
- * The UniqueStringArray is a class, and is not serializable to JSON. This profile
- * variant is able to be based into JSON.stringify.
- */
-export type SerializableProfile = {|
-  ...$Diff<Profile, { counters?: Counter[] }>,
-  counters?: SerializableCounter[],
 |};

@@ -12,7 +12,7 @@ import type {
   GlobalTrack,
   LocalTrack,
   TrackIndex,
-  Counter,
+  RawCounter,
   Tid,
   TrackReference,
   MarkerSchemaByName,
@@ -436,7 +436,7 @@ export function addEventDelayTracksForThreads(
  * localTracksByPid map.
  */
 export function addProcessCPUTracksForProcess(
-  counters: Counter[] | null,
+  counters: RawCounter[] | null,
   localTracksByPid: Map<Pid, LocalTrack[]>
 ): Map<Pid, LocalTrack[]> {
   if (counters === null) {
@@ -986,7 +986,7 @@ export function getGlobalTrackName(
 export function getLocalTrackName(
   localTrack: LocalTrack,
   threads: RawThread[],
-  counters: Counter[]
+  counters: RawCounter[]
 ): string {
   switch (localTrack.type) {
     case 'thread':

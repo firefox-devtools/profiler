@@ -318,7 +318,7 @@ Object {
           7,
           8,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           2574592839.818,
           0.018000125885009766,
           0.006000041961669922,
@@ -538,7 +538,7 @@ Object {
           2,
           2,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           2574592843.0039997,
           0.023000240325927734,
           0.007999897003173828,
@@ -729,7 +729,7 @@ Object {
           2,
           1,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           2574592868.3659997,
           0.024000167846679688,
           0.008000373840332031,
@@ -1125,7 +1125,7 @@ Object {
           8,
           13,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           2574592869.355,
           0.014999866485595703,
           0.008000373840332031,
@@ -1385,7 +1385,7 @@ Object {
           2,
           4,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           2574592877.46,
           0.01399993896484375,
           0.009000301361083984,
@@ -1668,7 +1668,7 @@ Object {
           7,
           8,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           2574592878.268,
           0.01399993896484375,
           0.006999969482421875,
@@ -1863,7 +1863,7 @@ Object {
           1,
           0,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           2574592938.803,
           0.024000167846679688,
           0.007999897003173828,
@@ -2049,7 +2049,7 @@ Object {
           2,
           1,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           2574592945.456,
           0.014999866485595703,
           0.008000373840332031,
@@ -2239,7 +2239,7 @@ Object {
           2,
           3,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           2574592945.7780004,
           0.01199960708618164,
           0.006999969482421875,
@@ -2431,7 +2431,7 @@ Object {
           2,
           1,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           2574592946.053,
           0.015999794006347656,
           0.007999897003173828,
@@ -2642,7 +2642,7 @@ Object {
           10,
           10,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           2574592948.093,
           0.034999847412109375,
           0.008000373840332031,
@@ -3352,7 +3352,7 @@ Object {
           33,
           32,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           2574592948.301,
           0.01900005340576172,
           0.009999752044677734,
@@ -4165,7 +4165,7 @@ Object {
           33,
           32,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           2574592948.3170004,
           0.009999275207519531,
           0.010000228881835938,
@@ -4978,7 +4978,7 @@ Object {
           33,
           34,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           2574592948.38,
           0.010999679565429688,
           0.006000041961669922,
@@ -5793,7 +5793,7 @@ Object {
           33,
           34,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           2574592948.3989997,
           0.011000633239746094,
           0.008999824523925781,
@@ -6390,7 +6390,7 @@ Object {
         "stack": Array [
           19,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           2574592949.428,
         ],
         "weight": null,
@@ -10270,7 +10270,7 @@ Object {
           3,
           7,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           0,
           1,
           1,
@@ -10653,7 +10653,7 @@ Object {
           3,
           7,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           0,
           1,
           1,
@@ -11036,7 +11036,7 @@ Object {
           3,
           7,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           1000,
           1,
           1,
@@ -11888,7 +11888,7 @@ Object {
           3,
           7,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           0,
           1,
           1,
@@ -12274,7 +12274,7 @@ Object {
           3,
           7,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           0,
           1,
           1,
@@ -12722,7 +12722,7 @@ Object {
           3,
           9,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           1000,
           1,
           1,
@@ -13659,7 +13659,7 @@ Object {
           3,
           7,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           0,
           1,
           1,
@@ -14048,7 +14048,7 @@ Object {
           3,
           7,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           0,
           1,
           1,
@@ -14498,7 +14498,7 @@ Object {
           3,
           9,
         ],
-        "timeDelta": Array [
+        "timeDeltas": Array [
           1000,
           1,
           1,
