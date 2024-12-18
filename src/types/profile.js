@@ -700,7 +700,7 @@ export type RawThread = {|
   frameTable: FrameTable,
   // Strings for profiles are collected into a single table, and are referred to by
   // their index by other tables.
-  stringTable: UniqueStringArray,
+  stringArray: string[],
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   nativeSymbols: NativeSymbolTable,
@@ -1031,9 +1031,8 @@ export type Profile = {|
 type SerializableThread = {|
   ...$Diff<
     RawThread,
-    { stringTable: UniqueStringArray, samples: RawSamplesTable },
+    { samples: RawSamplesTable },
   >,
-  stringArray: string[],
   samples: SerializableSamplesTable,
 |};
 

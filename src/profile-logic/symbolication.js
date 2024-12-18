@@ -31,6 +31,7 @@ import type {
   LibSymbolicationRequest,
 } from './symbol-store';
 import { PathSet } from '../utils/path';
+import { UniqueStringArray } from '../utils/unique-string-array';
 import { updateRawThreadStacks } from './profile-data';
 
 // Contains functions to symbolicate a profile.
@@ -539,8 +540,9 @@ function _partiallyApplySymbolicationStep(
     frameTable: oldFrameTable,
     funcTable: oldFuncTable,
     nativeSymbols: oldNativeSymbols,
-    stringTable,
+    stringArray,
   } = thread;
+  const stringTable = UniqueStringArray.cachedTableForArray(stringArray);
   const { threadLibSymbolicationInfo, resultsForLib } = symbolicationStepInfo;
   const {
     resourceIndex,
@@ -847,7 +849,6 @@ function _partiallyApplySymbolicationStep(
     frameTable,
     funcTable,
     nativeSymbols,
-    stringTable,
   };
 
   // We have the finished new frameTable and new funcTable.

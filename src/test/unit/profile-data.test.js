@@ -148,7 +148,7 @@ describe('process-profile', function () {
         expect('stackTable' in thread).toBeTruthy();
         expect('frameTable' in thread).toBeTruthy();
         expect('markers' in thread).toBeTruthy();
-        expect('stringTable' in thread).toBeTruthy();
+        expect('stringArray' in thread).toBeTruthy();
         expect('funcTable' in thread).toBeTruthy();
         expect('resourceTable' in thread).toBeTruthy();
       }
@@ -241,14 +241,14 @@ describe('process-profile', function () {
       expect(thread.funcTable.name[1]).toEqual(1);
       expect(thread.funcTable.name[2]).toEqual(2);
       expect(thread.funcTable.name[3]).toEqual(3);
-      expect(thread.stringTable.getString(thread.funcTable.name[4])).toEqual(
+      expect(thread.stringArray[thread.funcTable.name[4]]).toEqual(
         'frobnicate'
       );
       const chromeStringIndex = thread.funcTable.fileName[4];
       if (typeof chromeStringIndex !== 'number') {
         throw new Error('chromeStringIndex must be a number');
       }
-      expect(thread.stringTable.getString(chromeStringIndex)).toEqual(
+      expect(thread.stringArray[chromeStringIndex]).toEqual(
         'chrome://blargh'
       );
       expect(thread.funcTable.lineNumber[4]).toEqual(34);
@@ -299,11 +299,11 @@ describe('process-profile', function () {
       expect(thread.resourceTable.type[1]).toEqual(resourceTypes.library);
       expect(thread.resourceTable.type[2]).toEqual(resourceTypes.url);
       const [name0, name1, name2] = thread.resourceTable.name;
-      expect(thread.stringTable.getString(name0)).toEqual(
+      expect(thread.stringArray[name0]).toEqual(
         'Extension "Form Autofill" (ID: formautofill@mozilla.org)'
       );
-      expect(thread.stringTable.getString(name1)).toEqual('firefox');
-      expect(thread.stringTable.getString(name2)).toEqual('chrome://blargh');
+      expect(thread.stringArray[name1]).toEqual('firefox');
+      expect(thread.stringArray[name2]).toEqual('chrome://blargh');
     });
   });
 
@@ -322,14 +322,15 @@ describe('process-profile', function () {
         // from the parent process.
         const geckoSubprocess = createGeckoSubprocessProfile(geckoProfile);
         const childProcessThread = geckoSubprocess.threads[0];
-        const stringTable = new UniqueStringArray();
+        const jsTracerDictionary = [];
+        const stringTable = new UniqueStringArray(jsTracerDictionary);
         const jsTracer = getJsTracerTable(stringTable, [
           ['jsTracerA', 0, 10],
           ['jsTracerB', 1, 9],
           ['jsTracerC', 2, 8],
         ]);
         childProcessThread.jsTracerEvents = jsTracer;
-        geckoSubprocess.jsTracerDictionary = stringTable._array;
+        geckoSubprocess.jsTracerDictionary = jsTracerDictionary;
         geckoSubprocess.meta.startTime += timestampOffsetMs;
         // Update the timestampOffset taking into account the subprocess offset
         timestampOffsetMs =
@@ -353,7 +354,7 @@ describe('process-profile', function () {
       // Check that the values are correct from the test defined data.
       expect(
         processedJsTracer.events.map((index) =>
-          childProcessThread.stringTable.getString(index)
+          childProcessThread.stringArray[index]
         )
       ).toEqual(['jsTracerA', 'jsTracerB', 'jsTracerC']);
       expect(processedJsTracer.durations).toEqual([10000, 8000, 6000]);
@@ -690,7 +691,7 @@ describe('symbolication', function () {
       function functionNameForFrameInThread(thread, frameIndex) {
         const funcIndex = thread.frameTable.func[frameIndex];
         const funcNameStringIndex = thread.funcTable.name[funcIndex];
-        return thread.stringTable.getString(funcNameStringIndex);
+        return thread.stringArray[funcNameStringIndex];
       }
       if (!unsymbolicatedProfile || !symbolicatedProfile) {
         throw new Error('Profiles cannot be null');
@@ -1491,6 +1492,7 @@ describe('getNativeSymbolInfo', function () {
     `);
 
     const thread = profile.threads[0];
+    const stringTable = UniqueStringArray.cachedTableForArray(thread.stringArray);
     const { symSomeFunc, symOtherFunc } = nativeSymbolsDictPerThread[0];
 
     expect(
@@ -1498,7 +1500,7 @@ describe('getNativeSymbolInfo', function () {
         symSomeFunc,
         thread.nativeSymbols,
         thread.frameTable,
-        thread.stringTable
+        stringTable
       )
     ).toEqual({
       name: 'symSomeFunc',
@@ -1512,7 +1514,7 @@ describe('getNativeSymbolInfo', function () {
         symOtherFunc,
         thread.nativeSymbols,
         thread.frameTable,
-        thread.stringTable
+        stringTable
       )
     ).toEqual({
       name: 'symOtherFunc',

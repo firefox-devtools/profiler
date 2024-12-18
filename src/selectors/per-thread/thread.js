@@ -16,6 +16,7 @@ import * as CallTree from '../../profile-logic/call-tree';
 import * as ProfileSelectors from '../profile';
 import * as JsTracer from '../../profile-logic/js-tracer';
 import * as Cpu from '../../profile-logic/cpu';
+import { UniqueStringArray } from '../../utils/unique-string-array';
 import {
   assertExhaustiveCheck,
   ensureExists,
@@ -50,7 +51,6 @@ import type {
   IndexIntoFuncTable,
 } from 'firefox-profiler/types';
 
-import type { UniqueStringArray } from '../../utils/unique-string-array';
 import type { TransformLabeL10nIds } from 'firefox-profiler/profile-logic/transforms';
 import type { MarkerSelectorsPerThread } from './markers';
 
@@ -99,8 +99,8 @@ export function getBasicThreadSelectorsPerThread(
       ? ProfileSelectors.getProfile(state).threads[singleThreadIndex]
       : getMergedRawThread(state);
 
-  const getStringTable: Selector<UniqueStringArray> = (state) =>
-    getRawThread(state).stringTable;
+  const getStringArray: Selector<string[]> = (state) =>
+    getRawThread(state).stringArray;
   const getNativeAllocations: Selector<NativeAllocationsTable | void> = (
     state
   ) => getRawThread(state).nativeAllocations;
@@ -156,10 +156,16 @@ export function getBasicThreadSelectorsPerThread(
     ProfileData.computeStackTableFromRawStackTable
   );
 
+  const getStringTable: Selector<UniqueStringArray> = createSelector(
+    getStringArray,
+    (stringArray) => UniqueStringArray.cachedTableForArray(stringArray)
+  );
+
   const getThread: Selector<Thread> = createSelector(
     getRawThread,
     getStackTable,
     getSamplesTable,
+    getStringTable,
     ProfileData.createThreadFromDerivedColumns
   );
   const getThreadWithReservedFunctions: Selector<ThreadWithReservedFunctions> =
@@ -350,10 +356,10 @@ export function getBasicThreadSelectorsPerThread(
    * based timing, and the leaf timing, so that they memoize nicely.
    */
   const getExpensiveJsTracerTiming: Selector<JsTracerTiming[] | null> =
-    createSelector(getJsTracerTable, getRawThread, (jsTracerTable, thread) =>
+    createSelector(getJsTracerTable, getRawThread, getStringTable, (jsTracerTable, thread, stringTable) =>
       jsTracerTable === null
         ? null
-        : JsTracer.getJsTracerTiming(jsTracerTable, thread)
+        : JsTracer.getJsTracerTiming(jsTracerTable, thread, stringTable)
     );
 
   /**
@@ -389,6 +395,7 @@ export function getBasicThreadSelectorsPerThread(
 
   return {
     getRawThread,
+    getStringArray,
     getThread,
     getStringTable,
     getSamplesTable,

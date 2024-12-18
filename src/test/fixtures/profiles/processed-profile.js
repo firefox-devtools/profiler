@@ -106,7 +106,7 @@ export function addRawMarkersToThread(
   thread: RawThread,
   markers: TestDefinedRawMarker[]
 ) {
-  const stringTable = thread.stringTable;
+  const stringTable = UniqueStringArray.cachedTableForArray(thread.stringArray);
   const markersTable = thread.markers;
 
   for (const { name, startTime, endTime, phase, category, data } of markers) {
@@ -158,7 +158,7 @@ export function addMarkersToThreadWithCorrespondingSamples(
   thread: RawThread,
   markers: TestDefinedMarkers
 ) {
-  const stringTable = thread.stringTable;
+  const stringTable = UniqueStringArray.cachedTableForArray(thread.stringArray);
   const markersTable = thread.markers;
   const allTimes = new Set();
 
@@ -260,7 +260,7 @@ export function getThreadWithRawMarkers(markers: TestDefinedRawMarker[]) {
 export function getTestFriendlyDerivedMarkerInfo(thread: RawThread) {
   return deriveMarkersFromRawMarkerTable(
     thread.markers,
-    thread.stringTable,
+    thread.stringArray,
     thread.tid || 0,
     getTimeRangeForThread(thread, 1),
     new IPCMarkerCorrelations()
@@ -886,13 +886,14 @@ function _buildThreadFromTextOnlyStacks(
 
   const {
     funcTable,
-    stringTable,
+    stringArray,
     frameTable,
     stackTable,
     samples,
     resourceTable,
     nativeSymbols,
   } = thread;
+  const stringTable = UniqueStringArray.cachedTableForArray(stringArray);
 
   // Create the FuncTable.
   funcNames.forEach((funcName) => {
@@ -1460,7 +1461,8 @@ export function getThreadWithJsTracerEvents(
   events: TestDefinedJsTracerEvent[]
 ): RawThread {
   const thread = getEmptyThread();
-  thread.jsTracer = getJsTracerTable(thread.stringTable, events);
+  const stringTable = UniqueStringArray.cachedTableForArray(thread.stringArray);
+  thread.jsTracer = getJsTracerTable(stringTable, events);
 
   let endOfEvents = 0;
   for (const [, , end] of events) {

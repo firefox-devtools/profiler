@@ -15,6 +15,7 @@ import {
   getEmptyProfile,
   getEmptyRawStackTable,
 } from '../../../profile-logic/data-structures';
+import { UniqueStringArray } from '../../../utils/unique-string-array';
 
 /**
  * Create a profile with three identical threads, with the frame tree and call
@@ -41,8 +42,9 @@ import {
 export default function getProfile(): Profile {
   const profile = getEmptyProfile();
   let thread = getEmptyThread();
+  const stringTable = UniqueStringArray.cachedTableForArray(thread.stringArray);
   const funcNames = ['funcA', 'funcB', 'funcC', 'funcD', 'funcE', 'funcF'].map(
-    (name) => thread.stringTable.indexForString(name)
+    (name) => stringTable.indexForString(name)
   );
 
   // Be explicit about table creation so flow errors are really readable.
@@ -65,7 +67,7 @@ export default function getProfile(): Profile {
     'funcD', // 4 duplicate
     'funcE', // 5
     'funcF', // 6
-  ].map((name) => thread.stringTable.indexForString(name));
+  ].map((name) => stringTable.indexForString(name));
   // Name the indices
   const [
     funcAFrame,

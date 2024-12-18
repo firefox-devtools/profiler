@@ -4,7 +4,6 @@
 
 // @flow
 
-import { UniqueStringArray } from '../utils/unique-string-array';
 import {
   getEmptyExtensions,
   shallowCloneRawMarkerTable,
@@ -268,7 +267,7 @@ function sanitizeThreadPII(
   }
 
   // We need to update the stringTable. It's not possible with UniqueStringArray.
-  const stringArray = thread.stringTable.serializeToArray();
+  const stringArray = thread.stringArray.slice();
   let markerTable = shallowCloneRawMarkerTable(thread.markers);
 
   // We iterate all the markers and remove/change data depending on the PII
@@ -298,7 +297,7 @@ function sanitizeThreadPII(
       if (currentMarker && PIIToBeRemoved.shouldRemoveUrls) {
         // Use the schema to find some properties that need to be sanitized.
         const markerNameIndex = markerTable.name[i];
-        const markerName = thread.stringTable.getString(markerNameIndex);
+        const markerName = thread.stringArray[markerNameIndex];
         const markerSchema = getSchemaFromMarker(
           markerSchemaByName,
           markerName,
@@ -664,7 +663,7 @@ function sanitizeThreadPII(
 
   // Remove the old stringTable and markerTable and replace it
   // with new updated ones.
-  newThread.stringTable = new UniqueStringArray(stringArray);
+  newThread.stringArray = stringArray;
   newThread.markers = markerTable;
 
   // Have we removed everything from this thread?

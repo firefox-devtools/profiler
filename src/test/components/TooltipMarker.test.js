@@ -22,6 +22,7 @@ import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
 import { changeSelectedThreads } from 'firefox-profiler/actions/profile-view';
 import { getEmptyThread } from '../../profile-logic/data-structures';
+import { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import type { NetworkPayload } from 'firefox-profiler/types';
 
@@ -1051,9 +1052,12 @@ describe('TooltipMarker', function () {
   it('shows image of CompositorScreenshot markers', function () {
     const { profile } = getProfileFromTextSamples(`A`);
     const thread = profile.threads[0];
+    const stringTable = UniqueStringArray.cachedTableForArray(
+      thread.stringArray
+    );
 
     const screenshotUrl = 'Screenshot Url';
-    const screenshotUrlIndex = thread.stringTable.indexForString(screenshotUrl);
+    const screenshotUrlIndex = stringTable.indexForString(screenshotUrl);
     addMarkersToThreadWithCorrespondingSamples(thread, [
       [
         'CompositorScreenshot',
@@ -1155,8 +1159,10 @@ describe('TooltipMarker', function () {
     ]);
 
     const screenshotUrl = 'Screenshot Url';
-    const screenshotUrlIndex =
-      profile.threads[1].stringTable.indexForString(screenshotUrl);
+    const thread1StringTable = UniqueStringArray.cachedTableForArray(
+      profile.threads[1].stringArray
+    );
+    const screenshotUrlIndex = thread1StringTable.indexForString(screenshotUrl);
     addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
       [
         'DOMEvent',

@@ -26,6 +26,7 @@ import {
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
+import { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 import {
   assertExhaustiveCheck,
   ensureExists,
@@ -89,7 +90,6 @@ import type {
   ThreadWithReservedFunctions,
   TabID,
 } from 'firefox-profiler/types';
-import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -1509,7 +1509,7 @@ export function hasUsefulSamples(
   table?: SamplesLikeTable,
   thread: RawThread
 ): boolean {
-  const { stackTable, frameTable, funcTable, stringTable } = thread;
+  const { stackTable, frameTable, funcTable, stringArray } = thread;
   if (table === undefined || table.length === 0 || stackTable.length === 0) {
     return false;
   }
@@ -1526,7 +1526,7 @@ export function hasUsefulSamples(
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
     const stringIndex = funcTable.name[funcIndex];
-    if (stringTable.getString(stringIndex) === '(root)') {
+    if (stringArray[stringIndex] === '(root)') {
       // If the first sample's stack is only the root, check if any other
       // sample is different.
       return table.stack.some((s) => s !== null && s !== stackIndex);
@@ -3705,7 +3705,8 @@ export function findAddressProofForFile(
 ): AddressProof | null {
   const { libs } = profile;
   for (const thread of profile.threads) {
-    const { frameTable, funcTable, resourceTable, stringTable } = thread;
+    const { frameTable, funcTable, resourceTable, stringArray } = thread;
+    const stringTable = UniqueStringArray.cachedTableForArray(stringArray);
     const fileStringIndex = stringTable.indexForString(file);
     const func = funcTable.fileName.indexOf(fileStringIndex);
     if (func === -1) {
@@ -4081,7 +4082,8 @@ export function computeStackTableFromRawStackTable(
 export function createThreadFromDerivedColumns(
   rawThread: RawThread,
   stackTable: StackTable,
-  samples: SamplesTable
+  samples: SamplesTable,
+  stringTable: UniqueStringArray,
 ): Thread {
   return {
     // These properties are unchanged from the raw thread:
@@ -4103,7 +4105,6 @@ export function createThreadFromDerivedColumns(
     nativeAllocations: rawThread.nativeAllocations,
     markers: rawThread.markers,
     frameTable: rawThread.frameTable,
-    stringTable: rawThread.stringTable,
     funcTable: rawThread.funcTable,
     resourceTable: rawThread.resourceTable,
     nativeSymbols: rawThread.nativeSymbols,
@@ -4114,5 +4115,6 @@ export function createThreadFromDerivedColumns(
     // These properties are derived:
     stackTable: stackTable,
     samples: samples,
+    stringTable,
   };
 }

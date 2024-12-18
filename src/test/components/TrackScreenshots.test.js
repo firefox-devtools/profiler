@@ -21,6 +21,7 @@ import {
 import { commitRange } from '../../actions/profile-view';
 import { TimelineTrackScreenshots } from '../../components/timeline/TrackScreenshots';
 import { Timeline } from '../../components/timeline';
+import { UniqueStringArray } from '../../utils/unique-string-array';
 import { ensureExists } from '../../utils/flow';
 import { FULL_TRACK_SCREENSHOT_HEIGHT } from '../../app-logic/constants';
 
@@ -396,8 +397,9 @@ function _setScreenshotMarkersToUnknown(
   ...markerIndexes: IndexIntoRawMarkerTable[]
 ) {
   // Remove off the last few screenshot markers
-  const unknownStringIndex = thread.stringTable.indexForString('Unknown');
-  const screenshotStringIndex = thread.stringTable.indexForString(
+    const stringTable = UniqueStringArray.cachedTableForArray(thread.stringArray);
+  const unknownStringIndex = stringTable.indexForString('Unknown');
+  const screenshotStringIndex = stringTable.indexForString(
     'CompositorScreenshot'
   );
   for (const markerIndex of markerIndexes) {

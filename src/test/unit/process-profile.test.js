@@ -83,7 +83,7 @@ describe('extract functions and resource from location strings', function () {
       breakpadId: '',
     },
   ];
-  const stringTable = new UniqueStringArray();
+  const stringTable = new UniqueStringArray([]);
   const locationIndexes = locations.map((location) =>
     stringTable.indexForString(location)
   );
@@ -720,11 +720,9 @@ describe('visualMetrics processing', function () {
   ) {
     for (const { name, hasProgressMarker, changeMarkerLength } of metrics) {
       // Check the visual metric progress markers.
-      const metricProgressMarkerIndex = thread.stringTable.indexForString(
-        `${name} Progress`
-      );
+      const metricProgressMarkerName = `${name} Progress`;
       const metricProgressMarker = thread.markers.name.find(
-        (name) => name === metricProgressMarkerIndex
+        (name) => thread.stringArray[name] === metricProgressMarkerName
       );
 
       if (hasProgressMarker) {
@@ -734,11 +732,9 @@ describe('visualMetrics processing', function () {
       }
 
       // Check the visual metric change markers.
-      const metricChangeMarkerIndex = thread.stringTable.indexForString(
-        `${name} Change`
-      );
+      const metricChangeMarkerName = `${name} Change`;
       const metricChangeMarkers = thread.markers.name.filter(
-        (name) => name === metricChangeMarkerIndex
+        (name) => thread.stringArray[name] === metricChangeMarkerName
       );
       expect(metricChangeMarkers).toHaveLength(changeMarkerLength);
     }

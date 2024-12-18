@@ -5,16 +5,30 @@
 // @flow
 import type { IndexIntoStringTable } from 'firefox-profiler/types';
 
+const _cachedTables: WeakMap<string[], UniqueStringArray> = new WeakMap();
+
 export class UniqueStringArray {
   _array: string[];
   _stringToIndex: Map<string, IndexIntoStringTable>;
 
-  constructor(originalArray: string[] = []) {
-    this._array = originalArray.slice(0);
+  constructor(mutatedArray: string[]) {
+    this._array = mutatedArray;
     this._stringToIndex = new Map();
-    for (let i = 0; i < originalArray.length; i++) {
-      this._stringToIndex.set(originalArray[i], i);
+    for (let i = 0; i < mutatedArray.length; i++) {
+      this._stringToIndex.set(mutatedArray[i], i);
     }
+  }
+
+  // If cachedTableForArray() has been called before for the same stringArray
+  // object, then it must not have been mutated except by the table returned
+  // from that call.
+  static cachedTableForArray(stringArray: string[]): UniqueStringArray {
+    let table = _cachedTables.get(stringArray);
+    if (table === undefined) {
+      table = new UniqueStringArray(stringArray);
+      _cachedTables.set(stringArray, table);
+    }
+    return table;
   }
 
   getString(index: IndexIntoStringTable, els: ?string): string {

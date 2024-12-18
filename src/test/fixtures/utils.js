@@ -16,6 +16,7 @@ import {
   computeStackTableFromRawStackTable,
   createThreadFromDerivedColumns,
 } from 'firefox-profiler/profile-logic/profile-data';
+import { UniqueStringArray } from '../../utils/unique-string-array';
 
 import { computeSamplesTableFromRawSamplesTable } from 'firefox-profiler/profile-logic/cpu';
 
@@ -127,7 +128,8 @@ export function computeThreadFromRawThread(
     defaultCategory
   );
   const samples = computeSamplesTableFromRawSamplesTable(rawThread.samples);
-  return createThreadFromDerivedColumns(rawThread, stackTable, samples);
+  const stringTable = UniqueStringArray.cachedTableForArray(rawThread.stringArray);
+  return createThreadFromDerivedColumns(rawThread, stackTable, samples, stringTable);
 }
 
 /**

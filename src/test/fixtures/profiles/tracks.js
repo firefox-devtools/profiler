@@ -19,6 +19,7 @@ import type {
   Pid,
 } from 'firefox-profiler/types';
 
+import { UniqueStringArray } from '../../../utils/unique-string-array';
 import { assertExhaustiveCheck } from '../../../utils/flow';
 import {
   getFriendlyThreadName,
@@ -120,9 +121,7 @@ export function getHumanReadableTracks(state: State): string[] {
             .getCounterSelectors(track.counterIndex)
             .getCounter(state).name;
         } else if (track.type === 'marker') {
-          trackName = threads[track.threadIndex].stringTable.getString(
-            track.markerName
-          );
+          trackName = threads[track.threadIndex].stringArray[track.markerName];
         } else {
           trackName = threads[track.threadIndex].name;
         }
@@ -174,8 +173,11 @@ export function getProfileWithNiceTracks(): Profile {
     category: 'Paint',
   });
   thread2.markers.category.push(0);
+  const thread2StringTable = UniqueStringArray.cachedTableForArray(
+    thread2.stringArray
+  );
   thread2.markers.name.push(
-    thread2.stringTable.indexForString('RefreshDriverTick')
+    thread2StringTable.indexForString('RefreshDriverTick')
   );
   thread2.markers.startTime.push(0);
   thread2.markers.endTime.push(null);

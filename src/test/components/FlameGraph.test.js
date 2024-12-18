@@ -17,6 +17,7 @@ import {
   getInvertCallstack,
   getSourceViewFile,
 } from '../../selectors/url-state';
+import { UniqueStringArray } from '../../utils/unique-string-array';
 import { ensureExists } from '../../utils/flow';
 import {
   getEmptyThread,
@@ -301,7 +302,8 @@ function setupFlameGraph(addImplementationData: boolean = true) {
 
   // Add some file and line number to the profile so that tooltips generate
   // an interesting snapshot.
-  const { funcTable, stringTable, frameTable } = profile.threads[0];
+  const { funcTable, stringArray, frameTable } = profile.threads[0];
+  const stringTable = UniqueStringArray.cachedTableForArray(stringArray);
   for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
     funcTable.lineNumber[funcIndex] = funcIndex + 10;
     funcTable.columnNumber[funcIndex] = funcIndex + 100;

@@ -6,6 +6,7 @@
 import { getEmptyRawMarkerTable } from './data-structures';
 import { getFriendlyThreadName } from './profile-data';
 import { removeFilePath, removeURLs, stringsToRegExp } from '../utils/string';
+import { UniqueStringArray } from '../utils/unique-string-array';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
   INSTANT,
@@ -44,8 +45,6 @@ import type {
   MarkerDisplayLocation,
   Tid,
 } from 'firefox-profiler/types';
-
-import type { UniqueStringArray } from '../utils/unique-string-array';
 
 /**
  * Jank instances are created from responsiveness values. Responsiveness is a profiler
@@ -486,10 +485,11 @@ export function correlateIPCMarkers(
   const threadNames: Map<number, string> = new Map();
   for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
     const thread = threads[threadIndex];
+    const stringTable = UniqueStringArray.cachedTableForArray(thread.stringArray);
     // Don't bother checking for IPC markers if this thread's string table
     // doesn't have the string "IPC". This lets us avoid looping over all the
     // markers when we don't have to.
-    if (!thread.stringTable.hasString('IPC')) {
+    if (!stringTable.hasString('IPC')) {
       continue;
     }
     if (typeof thread.tid === 'number') {
@@ -603,7 +603,7 @@ export function correlateIPCMarkers(
  */
 export function deriveMarkersFromRawMarkerTable(
   rawMarkers: RawMarkerTable,
-  stringTable: UniqueStringArray,
+  stringArray: $ReadOnlyArray<string>,
   threadId: Tid,
   threadRange: StartEndRange,
   ipcCorrelations: IPCMarkerCorrelations
@@ -719,7 +719,7 @@ export function deriveMarkersFromRawMarkerTable(
               addMarker([startIndex, rawMarkerIndex], {
                 start: startStartTime,
                 end: endEndTime,
-                name: stringTable.getString(name),
+                name: stringArray[name],
                 category,
                 threadId: markerThreadId,
                 data: {
@@ -743,7 +743,7 @@ export function deriveMarkersFromRawMarkerTable(
               addMarker([rawMarkerIndex], {
                 start,
                 end,
-                name: stringTable.getString(name),
+                name: stringArray[name],
                 category,
                 threadId: markerThreadId,
                 data: {
@@ -793,7 +793,7 @@ export function deriveMarkersFromRawMarkerTable(
             });
           }
           if (
-            stringTable.getString(name) ===
+            stringArray[name] ===
             'CompositorScreenshotWindowDestroyed'
           ) {
             // This marker is added when a window is destroyed. In this case we
@@ -890,7 +890,7 @@ export function deriveMarkersFromRawMarkerTable(
             'An Instant marker did not have a startTime.'
           ),
           end: null,
-          name: stringTable.getString(name),
+          name: stringArray[name],
           category,
           threadId: markerThreadId,
           data,
@@ -910,7 +910,7 @@ export function deriveMarkersFromRawMarkerTable(
           addMarker([rawMarkerIndex], {
             start: startTime,
             end: endTime,
-            name: stringTable.getString(name),
+            name: stringArray[name],
             category,
             threadId: markerThreadId,
             data,
@@ -950,7 +950,7 @@ export function deriveMarkersFromRawMarkerTable(
             );
             addMarker([startIndex, rawMarkerIndex], {
               start,
-              name: stringTable.getString(name),
+              name: stringArray[name],
               end: endTime,
               category,
               threadId: markerThreadId,
@@ -972,7 +972,7 @@ export function deriveMarkersFromRawMarkerTable(
 
             addMarker([rawMarkerIndex], {
               start,
-              name: stringTable.getString(name),
+              name: stringArray[name],
               end: endTime,
               category,
               threadId: markerThreadId,
@@ -1000,7 +1000,7 @@ export function deriveMarkersFromRawMarkerTable(
       addMarker([startIndex], {
         start,
         end: Math.max(endOfThread, start),
-        name: stringTable.getString(rawMarkers.name[startIndex]),
+        name: stringArray[rawMarkers.name[startIndex]],
         data: rawMarkers.data[startIndex],
         category: rawMarkers.category[startIndex],
         threadId: rawMarkers.threadId ? rawMarkers.threadId[startIndex] : null,
@@ -1017,7 +1017,7 @@ export function deriveMarkersFromRawMarkerTable(
     addMarker([startIndex], {
       start: startTime,
       end: Math.max(endOfThread, startTime),
-      name: stringTable.getString(rawMarkers.name[startIndex]),
+      name: stringArray[rawMarkers.name[startIndex]],
       category: rawMarkers.category[startIndex],
       threadId: rawMarkers.threadId ? rawMarkers.threadId[startIndex] : null,
       data: rawMarkers.data[startIndex],

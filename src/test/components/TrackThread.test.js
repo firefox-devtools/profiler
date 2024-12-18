@@ -173,7 +173,7 @@ describe('timeline/TrackThread', function () {
       selectedThreadSelectors
         .getSelectedCallNodePath(getState())
         .map((funcIndex) =>
-          thread.stringTable.getString(thread.funcTable.name[funcIndex])
+          thread.stringArray[thread.funcTable.name[funcIndex]]
         );
 
     fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 0));
@@ -203,7 +203,7 @@ describe('timeline/TrackThread', function () {
       selectedThreadSelectors
         .getSelectedCallNodePath(getState())
         .map((funcIndex) =>
-          thread.stringTable.getString(thread.funcTable.name[funcIndex])
+          thread.stringArray[thread.funcTable.name[funcIndex]]
         );
 
     function changeInvertCallstackAndGetDrawLog(value) {
