@@ -946,7 +946,7 @@ export type Profile = {|
   profileGatheringLog?: ProfilingLog,
 |};
 
-type SerializableThread = {|
+export type SerializableThread = {|
   ...$Diff<Thread, { stringTable: UniqueStringArray, samples: SamplesTable }>,
   stringArray: string[],
   samples: SerializableSamplesTable,

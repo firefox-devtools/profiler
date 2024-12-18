@@ -46,6 +46,20 @@ export function getEmptyStackTable(): StackTable {
   };
 }
 
+export function getEmptySamplesTable(): SamplesTable {
+  return {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    weightType: 'samples',
+    weight: null,
+    stack: [],
+    time: [],
+    length: 0,
+  };
+}
+
 /**
  * Returns an empty samples table with eventDelay field instead of responsiveness.
  * eventDelay is a new field and it replaced responsiveness. We should still
