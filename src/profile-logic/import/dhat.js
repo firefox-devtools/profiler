@@ -191,6 +191,33 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
   const otherCategory = 0;
   const otherSubCategory = 0;
 
+  // Insert a root function that is the command that was run. Note that dhat-rs includes
+  // a [root] frame, while the Valgrind implementation does not.
+  funcTable.name.push(stringTable.indexForString(dhat.cmd));
+  funcTable.isJS.push(false);
+  funcTable.relevantForJS.push(false);
+  funcTable.resource.push(-1);
+  funcTable.fileName.push(null);
+  funcTable.lineNumber.push(null);
+  funcTable.columnNumber.push(null);
+  const rootFuncIndex = funcTable.length++;
+
+  frameTable.address.push(-1);
+  frameTable.line.push(null);
+  frameTable.column.push(null);
+  frameTable.category.push(otherCategory);
+  frameTable.subcategory.push(otherSubCategory);
+  frameTable.innerWindowID.push(null);
+  frameTable.implementation.push(null);
+  frameTable.func.push(rootFuncIndex);
+  const rootFrameIndex = frameTable.length++;
+
+  stackTable.frame.push(rootFrameIndex);
+  stackTable.category.push(otherCategory);
+  stackTable.category.push(otherSubCategory);
+  stackTable.prefix.push(null);
+  const rootStackIndex = stackTable.length++;
+
   // Convert the frame table.
   for (let funcName of dhat.ftbl) {
     let fileName = dhat.cmd;
@@ -199,26 +226,31 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     let column = null;
 
     const result = funcName.match(
-      /^0x([0-9a-f]+): (.+) \((.+):(\d+):(\d+)\)$/i
+      /^0x([0-9a-f]+): (.+) \((.+?)(?::(\d+))?(?::(\d+))?\)$/i
     );
-    // ^0x([0-9a-f]+): (.+) \((.+):(\d+):(\d+)\)$   Regex
-    //    (1        )  (2 )   (3 ) (4  ) (5  )      Capture groups
-    // ^                                        $   Start to end
-    //               :      \(                \)    Some raw characters
-    //    ([0-9a-f]+)                               Match the address, e.g. 10250148c
-    //                 (.+)                         Match the function name
-    //                        (.+)                  Match the filename
-    //                             (\d+)            Match the line number
-    //                                   (\d+)      Match the column number
+    // ^0x([0-9a-f]+): (.+) \((.+?)(?::(\d+))?(?::(\d+))?\)$ Regex
+    //    (1        )  (2 )   (3  )    (4  )      (5  )        Capture groups
+    // ^                                                   $   Start to end
+    //               :      \(                           \)    Some raw characters
+    //    ([0-9a-f]+)                                          Match the address, e.g. 10250148c
+    //                 (.+)                                    Match the function name
+    //                        (.+?)                            Match the filename
+    //                             (?:      )?                 Optionally include the line
+    //                                 (\d+)                   Match the line number
+    //                                        (?:      )?      Optionally include the column
+    //                                            (\d+)        Match the column number
 
     // Example input: "0x10250148c: alloc::vec::Vec<T,A>::append_elements (vec.rs:1469:9)"
     // Capture groups:   111111111  2222222222222222222222222222222222222  333333 4444 5
+
+    // Example input: "0x484DE30: memalign (in /usr/libexec/valgrind/vgpreload_dhat-amd64-linux.so)"
+    // Capture groups:   1111111  22222222  333333333333333333333333333333333333333333333333333333
     if (result) {
       address = parseInt(result[1], 16);
       funcName = result[2];
       fileName = result[3];
-      line = Number(result[4]);
-      column = Number(result[5]);
+      line = result[4] ? Number(result[4]) : null;
+      column = result[5] ? Number(result[5]) : null;
     }
     // If the above regex doesn't match, just use the raw funcName, without additional
     // information.
@@ -260,12 +292,13 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
 
   for (const pp of dhat.pps) {
     let stackIndex = 0;
-    let prefix = null;
+    let prefix = rootStackIndex;
 
     // Go from root to tip on the backtrace.
     for (let i = pp.fs.length - 1; i >= 0; i--) {
-      // The dhat frame indexes matches the process profile frame index.
-      const frameIndex = pp.fs[i];
+      // The dhat frame indexes matches match the processed profile indexes, but are
+      // offset by 1 to add a root function.
+      const frameIndex = pp.fs[i] + 1;
       const funcIndex = ensureExists(
         frameTable.func[frameIndex],
         'Expected to find a funcIndex from a frameIndex'
