@@ -921,9 +921,17 @@ function _processMarkerPayload(
  * Explicitly recreate the markers here to help enforce our assumptions about types.
  */
 function _processSamples(geckoSamples: GeckoSampleStruct): RawSamplesTable {
+  const timeDeltas = new Array(geckoSamples.length);
+  let prevTime = 0;
+  for (let i = 0; i < geckoSamples.time.length; i++) {
+    const currentTime = geckoSamples.time[i];
+    timeDeltas[i] = currentTime - prevTime;
+    prevTime = currentTime;
+  }
+
   const samples: RawSamplesTable = {
     stack: geckoSamples.stack,
-    time: geckoSamples.time,
+    timeDeltas,
     weightType: 'samples',
     weight: null,
     length: geckoSamples.length,
@@ -1211,6 +1219,26 @@ export function adjustTableTimestamps<Table: { time: Milliseconds[] }>(
   return {
     ...table,
     time: table.time.map((time) => time + delta),
+  };
+}
+
+export function adjustSampleTimestamps(
+  rawSamplesTable: RawSamplesTable,
+  delta: Milliseconds
+): RawSamplesTable {
+  const { time, timeDeltas } = rawSamplesTable;
+  if (time !== undefined) {
+    return {
+      ...rawSamplesTable,
+      time: time.map((t) => t + delta),
+    };
+  }
+
+  const newTimeDeltas = ensureExists(timeDeltas).slice();
+  newTimeDeltas[0] += delta;
+  return {
+    ...rawSamplesTable,
+    timeDeltas: newTimeDeltas,
   };
 }
 
@@ -1520,7 +1548,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
         extensions,
         globalDataCollector
       );
-      newThread.samples = adjustTableTimestamps(
+      newThread.samples = adjustSampleTimestamps(
         newThread.samples,
         adjustTimestampsBy
       );
@@ -1710,7 +1738,6 @@ function _unserializeSamples({ timeDeltas, time, ...restOfSamples }): any {
  * a profile into the serializable variant.
  */
 export function makeProfileSerializable({
-  threads,
   counters,
   ...restOfProfile
 }: Profile): SerializableProfile {
@@ -1724,12 +1751,6 @@ export function makeProfileSerializable({
           };
         })
       : counters,
-    threads: threads.map(({ samples, ...restOfThread }) => {
-      return {
-        ...restOfThread,
-        samples: _serializeSamples(samples),
-      };
-    }),
   };
 }
 
@@ -1746,7 +1767,6 @@ export function serializeProfile(profile: Profile): string {
  * any non-serializable classes.
  */
 function _unserializeProfile({
-  threads,
   counters,
   ...restOfProfile
 }: SerializableProfile): Profile {
@@ -1762,12 +1782,6 @@ function _unserializeProfile({
           }
         )
       : counters,
-    threads: threads.map(({ samples, ...restOfThread }) => {
-      return {
-        ...restOfThread,
-        samples: _unserializeSamples(samples),
-      };
-    }),
   };
 }
 

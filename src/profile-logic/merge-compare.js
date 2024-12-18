@@ -11,8 +11,8 @@
 import { stripIndent } from 'common-tags';
 
 import {
-  adjustTableTimestamps,
   adjustMarkerTimestamps,
+  adjustSampleTimestamps,
 } from './process-profile';
 import {
   getEmptyProfile,
@@ -28,6 +28,7 @@ import {
   filterRawThreadSamplesToRange,
   getTimeRangeForThread,
   getTimeRangeIncludingAllThreads,
+  computeTimeColumnForRawSamplesTable,
 } from './profile-data';
 import {
   filterRawMarkerTableToRange,
@@ -62,6 +63,7 @@ import type {
   DerivedMarkerInfo,
   RawMarkerTable,
   MarkerIndex,
+  Milliseconds,
 } from 'firefox-profiler/types';
 
 /**
@@ -226,7 +228,12 @@ export function mergeProfilesForDiffing(
     // start and the data is consistent.
     let startTimeAdjustment = 0;
     if (thread.samples.length) {
-      startTimeAdjustment = -thread.samples.time[0];
+      const { time, timeDeltas } = thread.samples;
+      if (time !== undefined) {
+        startTimeAdjustment = -time[0];
+      } else {
+        startTimeAdjustment = -ensureExists(timeDeltas)[0];
+      }
     } else if (thread.markers.length) {
       for (const startTime of thread.markers.startTime) {
         // Find the first marker startTime.
@@ -237,7 +244,10 @@ export function mergeProfilesForDiffing(
       }
     }
 
-    thread.samples = adjustTableTimestamps(thread.samples, startTimeAdjustment);
+    thread.samples = adjustSampleTimestamps(
+      thread.samples,
+      startTimeAdjustment
+    );
     thread.markers = adjustMarkerTimestamps(
       thread.markers,
       startTimeAdjustment
@@ -827,6 +837,9 @@ function combineSamplesDiffing(
     threadId: newThreadId,
   };
 
+  const samples1Time = computeTimeColumnForRawSamplesTable(samples1);
+  const samples2Time = computeTimeColumnForRawSamplesTable(samples2);
+
   let i = 0;
   let j = 0;
   while (i < samples1.length || j < samples2.length) {
@@ -838,7 +851,7 @@ function combineSamplesDiffing(
     // Otherwise we take the next samples from thread 2 until we run out of samples.
     const nextSampleIsFromThread1 =
       i < samples1.length &&
-      (j >= samples2.length || samples1.time[i] < samples2.time[j]);
+      (j >= samples2.length || samples1Time[i] < samples2Time[j]);
 
     if (nextSampleIsFromThread1) {
       // Next sample is from thread 1.
@@ -857,7 +870,7 @@ function combineSamplesDiffing(
       // Diffing event delay values doesn't make sense since interleaved values
       // of eventDelay/responsiveness don't mean anything.
       newSamples.eventDelay.push(null);
-      newSamples.time.push(samples1.time[i]);
+      newSamples.time.push(samples1Time[i]);
       newThreadId.push(samples1.threadId ? samples1.threadId[i] : tid1);
       // TODO (issue #3151): Figure out a way to diff CPU usage numbers.
       // We add the first thread with a negative weight, because this is the
@@ -885,7 +898,7 @@ function combineSamplesDiffing(
       // Diffing event delay values doesn't make sense since interleaved values
       // of eventDelay/responsiveness don't mean anything.
       newSamples.eventDelay.push(null);
-      newSamples.time.push(samples2.time[j]);
+      newSamples.time.push(samples2Time[j]);
       newThreadId.push(samples2.threadId ? samples2.threadId[j] : tid2);
       const sampleWeight = samples2.weight ? samples2.weight[j] : 1;
       newWeight.push(weightMultiplier2 * sampleWeight);
@@ -1092,10 +1105,17 @@ function combineSamplesForMerging(
   translationMapsForStacks: TranslationMapForStacks[],
   threads: RawThread[]
 ): RawSamplesTable {
-  const sampleTables = threads.map((thread) => thread.samples);
+  const samplesPerThread: RawSamplesTable[] = threads.map(
+    (thread) => thread.samples
+  );
+  const sampleTimesPerThread: Milliseconds[][] = samplesPerThread.map(
+    computeTimeColumnForRawSamplesTable
+  );
   // This is the array that holds the latest processed sample index for each
   // thread's samplesTable.
-  const sampleIndexes = Array(sampleTables.length).fill(0);
+  const nextSampleIndexPerThread: number[] = Array(
+    samplesPerThread.length
+  ).fill(0);
   // This array will contain the source thread ids. It will be added to the
   // samples table after the loop.
   const newThreadId = [];
@@ -1106,7 +1126,7 @@ function combineSamplesForMerging(
   };
 
   while (true) {
-    let selectedSamplesTableIndex: number | null = null;
+    let firstSampleThreadIndex: number | null = null;
     let time = Infinity;
     // 1. Find out which sample to consume.
     // Iterate over all the sample tables and pick the one with earliest sample.
@@ -1115,36 +1135,39 @@ function combineSamplesForMerging(
     // thread count to merge. Possibly we can try to make this faster by reducing
     // the complexity.
     for (
-      let sampleTablesIndex = 0;
-      sampleTablesIndex < sampleTables.length;
-      sampleTablesIndex++
+      let threadIndex = 0;
+      threadIndex < samplesPerThread.length;
+      threadIndex++
     ) {
-      const currentSamplesTable = sampleTables[sampleTablesIndex];
-      const currentSamplesIndex = sampleIndexes[sampleTablesIndex];
-      const currentSampleTime = currentSamplesTable.time[currentSamplesIndex];
-      if (
-        currentSamplesIndex < currentSamplesTable.length &&
-        currentSampleTime < time
-      ) {
-        selectedSamplesTableIndex = sampleTablesIndex;
+      const samples = samplesPerThread[threadIndex];
+      const sampleIndex = nextSampleIndexPerThread[threadIndex];
+      if (sampleIndex >= samples.length) {
+        continue;
+      }
+
+      const currentSampleTime = sampleTimesPerThread[threadIndex][sampleIndex];
+      if (currentSampleTime < time) {
+        firstSampleThreadIndex = threadIndex;
         time = currentSampleTime;
       }
     }
 
-    if (selectedSamplesTableIndex === null) {
+    if (firstSampleThreadIndex === null) {
       // All samples from every thread have been consumed.
       break;
     }
 
     // 2. Add the earliest sample to the new sample table.
-    const currentSamplesTable = sampleTables[selectedSamplesTableIndex];
-    const oldSampleIndex: number = sampleIndexes[selectedSamplesTableIndex];
+    const currentSamplesTable = samplesPerThread[firstSampleThreadIndex];
+    const currentSamplesTimeCol = sampleTimesPerThread[firstSampleThreadIndex];
+    const oldSampleIndex: number =
+      nextSampleIndexPerThread[firstSampleThreadIndex];
 
     const stackIndex: number | null = currentSamplesTable.stack[oldSampleIndex];
     const newStackIndex =
       stackIndex === null
         ? null
-        : translationMapsForStacks[selectedSamplesTableIndex].get(stackIndex);
+        : translationMapsForStacks[firstSampleThreadIndex].get(stackIndex);
     if (newStackIndex === undefined) {
       throw new Error(stripIndent`
           We couldn't find the stack of sample ${oldSampleIndex} in the translation map.
@@ -1155,15 +1178,15 @@ function combineSamplesForMerging(
     // It doesn't make sense to combine event delay values. We need to use jank markers
     // from independent threads instead.
     ensureExists(newSamples.eventDelay).push(null);
-    newSamples.time.push(currentSamplesTable.time[oldSampleIndex]);
+    newSamples.time.push(currentSamplesTimeCol[oldSampleIndex]);
     newThreadId.push(
       currentSamplesTable.threadId
         ? currentSamplesTable.threadId[oldSampleIndex]
-        : threads[selectedSamplesTableIndex].tid
+        : threads[firstSampleThreadIndex].tid
     );
 
     newSamples.length++;
-    sampleIndexes[selectedSamplesTableIndex]++;
+    nextSampleIndexPerThread[firstSampleThreadIndex]++;
   }
 
   return newSamples;

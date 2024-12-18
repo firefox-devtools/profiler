@@ -167,7 +167,9 @@ export type RawSamplesTable = {|
   // This is optional because older profiles didn't have that field.
   eventDelay?: Array<?Milliseconds>,
   stack: Array<IndexIntoStackTable | null>,
-  time: Milliseconds[],
+  time?: Milliseconds[],
+  // If the `time` column is not present, then the `timeDeltas` column must be present.
+  timeDeltas?: Milliseconds[],
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
   weight: null | number[],
@@ -1028,25 +1030,11 @@ export type Profile = {|
   profileGatheringLog?: ProfilingLog,
 |};
 
-type SerializableThread = {|
-  ...$Diff<
-    RawThread,
-    { samples: RawSamplesTable },
-  >,
-  samples: SerializableSamplesTable,
-|};
-
 /**
  * Starting with version 50 of the processed format, the time column may
  * optionally be serialized as a timeDeltas column instead.
  * Both formats are supported for unserialization.
  */
-export type SerializableSamplesTable = {|
-  ...$Diff<SamplesTable, { time: Milliseconds[] }>,
-  time?: Milliseconds[],
-  timeDeltas?: Milliseconds[],
-|};
-
 export type SerializableCounterSamplesTable = {|
   ...$Diff<CounterSamplesTable, { time: Milliseconds[] }>,
   time?: Milliseconds[],
@@ -1063,7 +1051,6 @@ export type SerializableCounter = {|
  * variant is able to be based into JSON.stringify.
  */
 export type SerializableProfile = {|
-  ...$Diff<Profile, { threads: RawThread[], counters?: Counter[] }>,
-  threads: SerializableThread[],
+  ...$Diff<Profile, { counters?: Counter[] }>,
   counters?: SerializableCounter[],
 |};

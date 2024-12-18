@@ -1083,9 +1083,21 @@ function _getTimeRangeForThread(
   const result = { start: Infinity, end: -Infinity };
 
   if (samples.length) {
-    const lastSampleIndex = samples.length - 1;
-    result.start = samples.time[0];
-    result.end = samples.time[lastSampleIndex] + interval;
+    const { time, timeDeltas: maybeTimeDeltas } = samples;
+    if (time !== undefined) {
+      const lastSampleIndex = samples.length - 1;
+      result.start = time[0];
+      result.end = time[lastSampleIndex] + interval;
+    } else {
+      const timeDeltas = ensureExists(maybeTimeDeltas);
+      result.start = timeDeltas[0];
+
+      let accumTime = 0;
+      for (let i = 0; i < samples.length; i++) {
+        accumTime += timeDeltas[i];
+      }
+      result.end = accumTime + interval;
+    }
   } else if (markers.length) {
     // Looking at the markers only if there are no samples in the profile.
     // We need to look at those because it can be a marker only profile(no-sampling mode).
@@ -1501,19 +1513,32 @@ export function filterThreadByTab(
   });
 }
 
+export function computeTimeColumnFromTimeDeltas(timeDelta: number[]): number[] {
+  let prevTime = 0;
+  return timeDelta.map((delta) => {
+    prevTime = prevTime + delta;
+    return prevTime;
+  });
+}
+
+export function computeTimeColumnForRawSamplesTable(samples: RawSamplesTable): number[] {
+  const { time, timeDeltas } = samples;
+  return time ?? computeTimeColumnFromTimeDeltas(ensureExists(timeDeltas));
+}
+
 /**
  * Checks if a sample table has any useful samples.
  * A useful sample being one that isn't a "(root)" sample.
  */
 export function hasUsefulSamples(
-  table?: SamplesLikeTable,
+  sampleStacks?: Array<IndexIntoStackTable | null>,
   thread: RawThread
 ): boolean {
   const { stackTable, frameTable, funcTable, stringArray } = thread;
-  if (table === undefined || table.length === 0 || stackTable.length === 0) {
+  if (sampleStacks === undefined || sampleStacks.length === 0 || stackTable.length === 0) {
     return false;
   }
-  const stackIndex = table.stack.find((stack) => stack !== null);
+  const stackIndex = sampleStacks.find((stack) => stack !== null);
   if (
     stackIndex === undefined ||
     stackIndex === null // We know that it can't be null at this point, but Flow doesn't.
@@ -1529,7 +1554,7 @@ export function hasUsefulSamples(
     if (stringArray[stringIndex] === '(root)') {
       // If the first sample's stack is only the root, check if any other
       // sample is different.
-      return table.stack.some((s) => s !== null && s !== stackIndex);
+      return sampleStacks.some((s) => s !== null && s !== stackIndex);
     }
   }
   return true;
@@ -1539,12 +1564,20 @@ export function hasUsefulSamples(
  * This function takes both a SamplesTable and can be used on CounterSamplesTable.
  */
 export function getSampleIndexRangeForSelection(
-  table: { time: Milliseconds[], length: number },
+  times: { time: Milliseconds[], length: number },
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
-  const sampleStart = bisectionLeft(table.time, rangeStart);
-  const sampleEnd = bisectionLeft(table.time, rangeEnd, sampleStart);
+  return getIndexRangeForSelection(times.time, rangeStart, rangeEnd);
+}
+
+export function getIndexRangeForSelection(
+  times: Milliseconds[],
+  rangeStart: number,
+  rangeEnd: number
+): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
+  const sampleStart = bisectionLeft(times, rangeStart);
+  const sampleEnd = bisectionLeft(times, rangeEnd, sampleStart);
   return [sampleStart, sampleEnd];
 }
 
@@ -1699,14 +1732,15 @@ export function filterRawThreadSamplesToRange(
   rangeEnd: number
 ): RawThread {
   const { samples, jsAllocations, nativeAllocations } = thread;
-  const [beginSampleIndex, endSampleIndex] = getSampleIndexRangeForSelection(
-    samples,
+  const sampleTimes = computeTimeColumnForRawSamplesTable(samples);
+  const [beginSampleIndex, endSampleIndex] = getIndexRangeForSelection(
+    sampleTimes,
     rangeStart,
     rangeEnd
   );
   const newSamples: RawSamplesTable = {
     length: endSampleIndex - beginSampleIndex,
-    time: samples.time.slice(beginSampleIndex, endSampleIndex),
+    time: sampleTimes.slice(beginSampleIndex, endSampleIndex),
     weight: samples.weight
       ? samples.weight.slice(beginSampleIndex, endSampleIndex)
       : null,
@@ -2322,7 +2356,7 @@ export function updateRawThreadStacksByGeneratingNewStackColumns(
   newStackTable: RawStackTable,
   computeMappedStackColumn: (
     Array<IndexIntoStackTable | null>,
-    Array<Milliseconds>
+    Array<Milliseconds> | void
   ) => Array<IndexIntoStackTable | null>,
   computeMappedSyncBacktraceStackColumn: (
     Array<IndexIntoStackTable | null>,

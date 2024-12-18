@@ -25,6 +25,7 @@ import {
   calculateFunctionSizeLowerBound,
   getNativeSymbolsForCallNode,
   getNativeSymbolInfo,
+  computeTimeColumnForRawSamplesTable,
 } from '../../profile-logic/profile-data';
 import { resourceTypes } from '../../profile-logic/data-structures';
 import {
@@ -177,13 +178,16 @@ describe('process-profile', function () {
       // Should be Content, but modified by workaround for bug 1322471.
       expect(thread2.name).toEqual('GeckoMain');
 
-      expect(thread0.samples.time[0]).toEqual(0);
-      expect(thread0.samples.time[1]).toEqual(1);
+      const sampleTimes0 = computeTimeColumnForRawSamplesTable(thread0.samples);
+      const sampleTimes2 = computeTimeColumnForRawSamplesTable(thread2.samples);
+
+      expect(sampleTimes0[0]).toEqual(0);
+      expect(sampleTimes0[1]).toEqual(1);
 
       // 1 second later than the same samples in the main process because the
       // content process' start time is 1s later.
-      expect(thread2.samples.time[0]).toEqual(1000);
-      expect(thread2.samples.time[1]).toEqual(1001);
+      expect(sampleTimes2[0]).toEqual(1000);
+      expect(sampleTimes2[1]).toEqual(1001);
 
       // Now about markers
       expect(thread0.markers.endTime[0]).toEqual(1);
@@ -248,9 +252,7 @@ describe('process-profile', function () {
       if (typeof chromeStringIndex !== 'number') {
         throw new Error('chromeStringIndex must be a number');
       }
-      expect(thread.stringArray[chromeStringIndex]).toEqual(
-        'chrome://blargh'
-      );
+      expect(thread.stringArray[chromeStringIndex]).toEqual('chrome://blargh');
       expect(thread.funcTable.lineNumber[4]).toEqual(34);
       expect(thread.funcTable.columnNumber[4]).toEqual(35);
     });
@@ -353,8 +355,8 @@ describe('process-profile', function () {
 
       // Check that the values are correct from the test defined data.
       expect(
-        processedJsTracer.events.map((index) =>
-          childProcessThread.stringArray[index]
+        processedJsTracer.events.map(
+          (index) => childProcessThread.stringArray[index]
         )
       ).toEqual(['jsTracerA', 'jsTracerB', 'jsTracerC']);
       expect(processedJsTracer.durations).toEqual([10000, 8000, 6000]);
@@ -1492,7 +1494,9 @@ describe('getNativeSymbolInfo', function () {
     `);
 
     const thread = profile.threads[0];
-    const stringTable = UniqueStringArray.cachedTableForArray(thread.stringArray);
+    const stringTable = UniqueStringArray.cachedTableForArray(
+      thread.stringArray
+    );
     const { symSomeFunc, symOtherFunc } = nativeSymbolsDictPerThread[0];
 
     expect(

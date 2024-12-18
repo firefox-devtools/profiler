@@ -2268,11 +2268,21 @@ const _upgraders = {
   [49]: (_) => {
     // The 'sanitized-string' marker schema format type has been added.
   },
-  [50]: (_) => {
+  [50]: (profile) => {
     // The serialized format can now optionally store sample and counter sample
     // times as time deltas instead of absolute timestamps to reduce the JSON size.
-    // The unserialized version is unchanged, and because the upgraders run
-    // after unserialization they see no difference.
+    for (const thread of profile.threads) {
+      const { time } = thread.samples;
+      const timeDelta = new Array(time.length);
+      let prevTime = 0;
+      for (let i = 0; i < time.length; i++) {
+        const currentTime = time[i];
+        timeDelta[i] = currentTime - prevTime;
+        prevTime = currentTime;
+      }
+      thread.samples.timeDelta = timeDelta;
+      delete thread.samples.time;
+    }
   },
   [51]: (_) => {
     // This version bump added two new form types for new marker schema field:

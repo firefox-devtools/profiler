@@ -849,7 +849,7 @@ export function getSelfTimeSamplesFromJsTracer(
       'The JS tracer event did not exist in the stack map.'
     );
     samples.stack.push(stackIndex);
-    samples.time.push(
+    ensureExists(samples.time).push(
       // Convert from microseconds.
       start / 1000
     );

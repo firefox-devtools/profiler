@@ -314,19 +314,22 @@ export function getBasicThreadSelectorsPerThread(
   const getHasUsefulTimingSamples: Selector<boolean> = createSelector(
     getSamplesTable,
     getRawThread,
-    ProfileData.hasUsefulSamples
+    (samples, rawThread) =>
+      ProfileData.hasUsefulSamples(samples.stack, rawThread)
   );
 
   const getHasUsefulJsAllocations: Selector<boolean> = createSelector(
     getJsAllocations,
     getRawThread,
-    ProfileData.hasUsefulSamples
+    (jsAllocations, rawThread) =>
+      ProfileData.hasUsefulSamples(jsAllocations?.stack, rawThread)
   );
 
   const getHasUsefulNativeAllocations: Selector<boolean> = createSelector(
     getNativeAllocations,
     getRawThread,
-    ProfileData.hasUsefulSamples
+    (nativeAllocations, rawThread) =>
+      ProfileData.hasUsefulSamples(nativeAllocations?.stack, rawThread)
   );
 
   /**
@@ -356,10 +359,14 @@ export function getBasicThreadSelectorsPerThread(
    * based timing, and the leaf timing, so that they memoize nicely.
    */
   const getExpensiveJsTracerTiming: Selector<JsTracerTiming[] | null> =
-    createSelector(getJsTracerTable, getRawThread, getStringTable, (jsTracerTable, thread, stringTable) =>
-      jsTracerTable === null
-        ? null
-        : JsTracer.getJsTracerTiming(jsTracerTable, thread, stringTable)
+    createSelector(
+      getJsTracerTable,
+      getRawThread,
+      getStringTable,
+      (jsTracerTable, thread, stringTable) =>
+        jsTracerTable === null
+          ? null
+          : JsTracer.getJsTracerTiming(jsTracerTable, thread, stringTable)
     );
 
   /**

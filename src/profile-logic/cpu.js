@@ -4,6 +4,7 @@
 
 // @flow
 
+import { computeTimeColumnForRawSamplesTable } from './profile-data';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type {
@@ -37,15 +38,33 @@ function _computeMaxVariableCPUCyclesPerMs(threads: RawThread[]): number {
 
     // Ignore the first CPU delta value; it's meaningless because there is no
     // previous sample.
-    for (let i = 1; i < samples.length; i++) {
-      const sampleTimeDeltaInMs = samples.time[i] - samples.time[i - 1];
-      if (sampleTimeDeltaInMs !== 0) {
-        const cpuDeltaPerMs = (threadCPUDelta[i] || 0) / sampleTimeDeltaInMs;
-        maxThreadCPUDeltaPerMs = Math.max(
-          maxThreadCPUDeltaPerMs,
-          cpuDeltaPerMs
-        );
+    const { time: samplesTimeCol, timeDeltas: samplesTimeDeltasCol } = samples;
+    if (samplesTimeCol !== undefined) {
+      for (let i = 1; i < samples.length; i++) {
+        const sampleTimeDeltaInMs = samplesTimeCol[i] - samplesTimeCol[i - 1];
+        if (sampleTimeDeltaInMs !== 0) {
+          const cpuDeltaPerMs = (threadCPUDelta[i] || 0) / sampleTimeDeltaInMs;
+          maxThreadCPUDeltaPerMs = Math.max(
+            maxThreadCPUDeltaPerMs,
+            cpuDeltaPerMs
+          );
+        }
       }
+    } else if (samplesTimeDeltasCol !== undefined) {
+      for (let i = 1; i < samples.length; i++) {
+        const sampleTimeDeltaInMs = samplesTimeDeltasCol[i];
+        if (sampleTimeDeltaInMs !== 0) {
+          const cpuDeltaPerMs = (threadCPUDelta[i] || 0) / sampleTimeDeltaInMs;
+          maxThreadCPUDeltaPerMs = Math.max(
+            maxThreadCPUDeltaPerMs,
+            cpuDeltaPerMs
+          );
+        }
+      }
+    } else {
+      throw new Error(
+        'samples table must always have a time or a timeDeltas column'
+      );
     }
   }
 
@@ -67,7 +86,7 @@ function _computeMaxVariableCPUCyclesPerMs(threads: RawThread[]): number {
  *    Returns 5000, i.e. "5000µs cpu delta per sample if each sample ticks at
  *    the declared 5ms interval and the CPU usage is at 100%".
  *  - interval: 3 (ms), sampleUnits.threadCPUDelta: "variable CPU cycles",
- *    max_{sample}(sample.cpuDelta / sample.timeDelta) == 1234567 cycles per ms
+ *    max_{sample}(sample.cpuDelta / sample.timeDeltas) == 1234567 cycles per ms
  *    Returns 1234567 * 3, i.e. "3703701 cycles per sample if each sample ticks at
  *    the declared 3ms interval and the CPU usage is at the observed maximum".
  */
@@ -118,13 +137,15 @@ export function computeSamplesTableFromRawSamplesTable(
 ): SamplesTable {
   const { threadCPUDelta } = samples;
 
+  const timeColumn = computeTimeColumnForRawSamplesTable(samples);
+
   if (!threadCPUDelta || !sampleUnits) {
     return {
       length: samples.length,
       responsiveness: samples.responsiveness,
       eventDelay: samples.eventDelay,
       stack: samples.stack,
-      time: samples.time,
+      time: timeColumn,
       weight: samples.weight,
       weightType: samples.weightType,
       threadId: samples.threadId,
@@ -136,14 +157,14 @@ export function computeSamplesTableFromRawSamplesTable(
   const cpuDeltaTimeUnitMultiplier =
     getCpuDeltaTimeUnitMultiplier(threadCPUDeltaUnit);
 
-  let prevSampleTime = samples.length !== 0 ? samples.time[0] : 0;
+  let prevSampleTime = samples.length !== 0 ? timeColumn[0] : 0;
   for (let i = 0; i < samples.length; i++) {
     // Replace nulls with zeros.
     const rawThreadCPUDeltaValue = threadCPUDelta[i];
     const threadCPUDeltaValue =
       rawThreadCPUDeltaValue !== null ? rawThreadCPUDeltaValue : 0;
 
-    const sampleTime = samples.time[i];
+    const sampleTime = timeColumn[i];
 
     switch (threadCPUDeltaUnit) {
       // Check if the threadCPUDelta is more than the interval time and limit
@@ -182,10 +203,10 @@ export function computeSamplesTableFromRawSamplesTable(
     responsiveness: samples.responsiveness,
     eventDelay: samples.eventDelay,
     stack: samples.stack,
-    time: samples.time,
     weight: samples.weight,
     weightType: samples.weightType,
     threadId: samples.threadId,
+    time: timeColumn,
     threadCPUDelta: newThreadCPUDelta,
   };
 
