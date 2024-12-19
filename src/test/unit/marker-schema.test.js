@@ -420,9 +420,14 @@ describe('marker schema formatting', function () {
           'none',
           format,
           value,
-          new UniqueStringArray()
+          new UniqueStringArray([])
         ),
-        formatFromMarkerSchema('none', format, value, new UniqueStringArray()),
+        formatFromMarkerSchema(
+          'none',
+          format,
+          value,
+          new UniqueStringArray([])
+        ),
       ])
     ).toMatchSnapshot();
   });

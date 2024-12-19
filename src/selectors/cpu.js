@@ -5,22 +5,14 @@
 
 import { createSelector } from 'reselect';
 
-import {
-  getThreads,
-  getProfileInterval,
-  getSampleUnits,
-  getMeta,
-  getCounter,
-} from './profile';
-import { getThreadSelectors } from './per-thread';
-import { computeMaxThreadCPUDeltaPerMs } from 'firefox-profiler/profile-logic/cpu';
+import { getThreads, getSampleUnits, getMeta, getCounters } from './profile';
 
-import type { Selector, State, Thread } from 'firefox-profiler/types';
+import type { Selector } from 'firefox-profiler/types';
 
 export const getIsCPUUtilizationProvided: Selector<boolean> = createSelector(
   getSampleUnits,
   getMeta,
-  getCPUProcessedThreads,
+  getThreads,
   (sampleUnits, meta, threads) => {
     return (
       sampleUnits !== undefined &&
@@ -39,37 +31,8 @@ export const getIsCPUUtilizationProvided: Selector<boolean> = createSelector(
  */
 export const getAreThereAnyProcessCPUCounters: Selector<boolean> =
   createSelector(
-    getCounter,
+    getCounters,
     (counters) =>
       counters !== null &&
       counters.some((counter) => counter.category === 'CPU')
   );
-
-/**
- * This function returns the list of all threads after the CPU values have been
- * processed. This uses a selector from the per-thread selectors. Because we'll
- * use this selector for every thread, and also need the full state for this call,
- * we can't use the simple memoization from `createSelector`, and instead we
- * need to implement our own simple memoization.
- */
-let _threads = null;
-let _cpuProcessedThreads = null;
-function getCPUProcessedThreads(state: State): Thread[] {
-  const threads = getThreads(state);
-
-  if (_threads !== threads || _cpuProcessedThreads === null) {
-    // Storing the threads makes it possible to invalidate the memoized value at
-    // the right moment.
-    _threads = threads;
-    _cpuProcessedThreads = threads.map((thread, threadIndex) =>
-      getThreadSelectors(threadIndex).getCPUProcessedThread(state)
-    );
-  }
-  return _cpuProcessedThreads;
-}
-
-export const getMaxThreadCPUDeltaPerMs: Selector<number> = createSelector(
-  getCPUProcessedThreads,
-  getProfileInterval,
-  computeMaxThreadCPUDeltaPerMs
-);

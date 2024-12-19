@@ -4,24 +4,27 @@
 
 // @flow
 
+import { computeTimeColumnForRawSamplesTable } from './profile-data';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type {
-  Thread,
-  Milliseconds,
+  RawThread,
   SampleUnits,
   ThreadCPUDeltaUnit,
   Profile,
+  RawSamplesTable,
+  SamplesTable,
 } from 'firefox-profiler/types';
 
 /**
- * Compute the max CPU delta value per ms for that thread. It computes the
- * max value after the threadCPUDelta processing.
+ * Compute the max CPU cycles per ms for the thread. Should only be called when
+ * the cpu delta unit is 'variable CPU cycles'.
+ * This computes the max value before the threadCPUDelta processing -
+ * the threadCPUDelta processing wouldn't do anything other than remove nulls
+ * anyway, because if the unit is 'variable CPU cycles' then we don't do any
+ * clamping.
  */
-export function computeMaxThreadCPUDeltaPerMs(
-  threads: Thread[],
-  profileInterval: Milliseconds
-): number {
+function _computeMaxVariableCPUCyclesPerMs(threads: RawThread[]): number {
   let maxThreadCPUDeltaPerMs = 0;
   for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
     const { samples } = threads[threadIndex];
@@ -33,18 +36,35 @@ export function computeMaxThreadCPUDeltaPerMs(
       continue;
     }
 
-    // First element of CPU delta is always null because back-end doesn't know
-    // the delta since there is no previous sample.
-    for (let i = 1; i < samples.length; i++) {
-      const sampleTimeDeltaInMs =
-        i === 0 ? profileInterval : samples.time[i] - samples.time[i - 1];
-      if (sampleTimeDeltaInMs !== 0) {
-        const cpuDeltaPerMs = (threadCPUDelta[i] || 0) / sampleTimeDeltaInMs;
-        maxThreadCPUDeltaPerMs = Math.max(
-          maxThreadCPUDeltaPerMs,
-          cpuDeltaPerMs
-        );
+    // Ignore the first CPU delta value; it's meaningless because there is no
+    // previous sample.
+    const { time: samplesTimeCol, timeDeltas: samplesTimeDeltasCol } = samples;
+    if (samplesTimeCol !== undefined) {
+      for (let i = 1; i < samples.length; i++) {
+        const sampleTimeDeltaInMs = samplesTimeCol[i] - samplesTimeCol[i - 1];
+        if (sampleTimeDeltaInMs !== 0) {
+          const cpuDeltaPerMs = (threadCPUDelta[i] || 0) / sampleTimeDeltaInMs;
+          maxThreadCPUDeltaPerMs = Math.max(
+            maxThreadCPUDeltaPerMs,
+            cpuDeltaPerMs
+          );
+        }
       }
+    } else if (samplesTimeDeltasCol !== undefined) {
+      for (let i = 1; i < samples.length; i++) {
+        const sampleTimeDeltaInMs = samplesTimeDeltasCol[i];
+        if (sampleTimeDeltaInMs !== 0) {
+          const cpuDeltaPerMs = (threadCPUDelta[i] || 0) / sampleTimeDeltaInMs;
+          maxThreadCPUDeltaPerMs = Math.max(
+            maxThreadCPUDeltaPerMs,
+            cpuDeltaPerMs
+          );
+        }
+      }
+    } else {
+      throw new Error(
+        'samples table must always have a time or a timeDeltas column'
+      );
     }
   }
 
@@ -66,96 +86,86 @@ export function computeMaxThreadCPUDeltaPerMs(
  *    Returns 5000, i.e. "5000µs cpu delta per sample if each sample ticks at
  *    the declared 5ms interval and the CPU usage is at 100%".
  *  - interval: 3 (ms), sampleUnits.threadCPUDelta: "variable CPU cycles",
- *    max_{sample}(sample.cpuDelta / sample.timeDelta) == 1234567 cycles per ms
+ *    max_{sample}(sample.cpuDelta / sample.timeDeltas) == 1234567 cycles per ms
  *    Returns 1234567 * 3, i.e. "3703701 cycles per sample if each sample ticks at
  *    the declared 3ms interval and the CPU usage is at the observed maximum".
  */
-export function computeMaxCPUDeltaPerInterval(profile: Profile): number | null {
+export function computeMaxCPUDeltaPerMs(profile: Profile): number {
   const sampleUnits = profile.meta.sampleUnits;
   if (!sampleUnits) {
-    return null;
+    return 1;
   }
 
-  const interval = profile.meta.interval;
   const threadCPUDeltaUnit = sampleUnits.threadCPUDelta;
 
   switch (threadCPUDeltaUnit) {
     case 'µs':
     case 'ns': {
-      const cpuDeltaTimeUnitMultiplier =
-        getCpuDeltaTimeUnitMultiplier(threadCPUDeltaUnit);
-      return cpuDeltaTimeUnitMultiplier * interval;
+      const deltaUnitPerMs = getCpuDeltaTimeUnitMultiplier(threadCPUDeltaUnit);
+      return deltaUnitPerMs;
     }
     case 'variable CPU cycles': {
-      const maxThreadCPUDeltaPerMs = computeMaxThreadCPUDeltaPerMs(
-        profile.threads,
-        interval
+      const maxThreadCPUDeltaPerMs = _computeMaxVariableCPUCyclesPerMs(
+        profile.threads
       );
-      return maxThreadCPUDeltaPerMs * interval;
+      return maxThreadCPUDeltaPerMs;
     }
     default:
       throw assertExhaustiveCheck(
         threadCPUDeltaUnit,
-        'Unhandled threadCPUDelta unit in computeMaxCPUDeltaPerInterval.'
+        'Unhandled threadCPUDelta unit in computeMaxCPUDeltaPerMs.'
       );
   }
 }
 
 /**
- * Process the CPU delta values of that thread. It will throw an error if it
- * fails to find threadCPUDelta array.
- * It does two different processing:
+ * Clamp the CPU delta values of the given thread and make them non-null.
  *
- * 1. For the threadCPUDelta values with timing units, it limits these values
- * to the interval. This is mostly a bug on macOS platform (with µs values)
- * because we could only detect these values in that platform so far. But to be
- * safe, we are also doing this processing for Linux platform (ns values).
- * 2. We are checking for null values and converting them to non-null values if
- * there are any by getting the closest threadCPUDelta value.
+ * This function is a no-op if called on a thread without threadCPUDeltas.
+ *
+ * It does the following:
+ *
+ * 1. We replace null values with zeros.
+ * 2. We clamp CPU delta values to the time delta between samples, if the CPU
+ *    delta unit is time-based (i.e. microseconds or nanoseconds rather than
+ *    'variable CPU cycles'). This gets rid of unexpected out-of-range values
+ *    that we've observed on the macOS platform.
  */
-export function processThreadCPUDelta(
-  thread: Thread,
-  sampleUnits: SampleUnits,
-  profileInterval: Milliseconds
-): Thread {
-  const { samples } = thread;
+export function computeSamplesTableFromRawSamplesTable(
+  samples: RawSamplesTable,
+  sampleUnits: SampleUnits | void
+): SamplesTable {
   const { threadCPUDelta } = samples;
 
-  if (!threadCPUDelta) {
-    throw new Error(
-      "processThreadCPUDelta should not be called for the profiles that don't include threadCPUDelta."
-    );
-  }
-  // A helper function to shallow clone the thread with different threadCPUDelta values.
-  function _newThreadWithNewThreadCPUDelta(
-    threadCPUDelta: Array<number | null> | void
-  ): Thread {
-    const newSamples = {
-      ...samples,
-      threadCPUDelta,
-    };
+  const timeColumn = computeTimeColumnForRawSamplesTable(samples);
 
-    const newThread = {
-      ...thread,
-      samples: newSamples,
+  if (!threadCPUDelta || !sampleUnits) {
+    return {
+      length: samples.length,
+      responsiveness: samples.responsiveness,
+      eventDelay: samples.eventDelay,
+      stack: samples.stack,
+      time: timeColumn,
+      weight: samples.weight,
+      weightType: samples.weightType,
+      threadId: samples.threadId,
     };
-
-    return newThread;
   }
 
-  const newThreadCPUDelta: Array<number | null> = new Array(samples.length);
-  const cpuDeltaTimeUnitMultiplier = getCpuDeltaTimeUnitMultiplier(
-    sampleUnits.threadCPUDelta
-  );
+  const newThreadCPUDelta: Array<number> = new Array(samples.length);
+  const threadCPUDeltaUnit = sampleUnits.threadCPUDelta;
+  const cpuDeltaTimeUnitMultiplier =
+    getCpuDeltaTimeUnitMultiplier(threadCPUDeltaUnit);
 
+  let prevSampleTime = samples.length !== 0 ? timeColumn[0] : 0;
   for (let i = 0; i < samples.length; i++) {
-    // Ideally there shouldn't be any null values but that can happen if the
-    // back-end fails to get the CPU usage numbers from the operation system.
-    // In that case, try to find the closest number and use it to mitigate the
-    // weird graph renderings.
-    const threadCPUDeltaValue = findClosestNonNullValueToIdx(threadCPUDelta, i);
+    // Replace nulls with zeros.
+    const rawThreadCPUDeltaValue = threadCPUDelta[i];
+    const threadCPUDeltaValue =
+      rawThreadCPUDeltaValue !== null ? rawThreadCPUDeltaValue : 0;
 
-    const threadCPUDeltaUnit = sampleUnits.threadCPUDelta;
+    const sampleTime = timeColumn[i];
+
     switch (threadCPUDeltaUnit) {
       // Check if the threadCPUDelta is more than the interval time and limit
       // that number to the interval if it's bigger than that. This is mostly
@@ -165,13 +175,11 @@ export function processThreadCPUDelta(
       // and this issue doesn't occur.
       case 'µs':
       case 'ns': {
-        const intervalInThreadCPUDeltaUnit =
-          i === 0
-            ? profileInterval * cpuDeltaTimeUnitMultiplier
-            : (samples.time[i] - samples.time[i - 1]) *
-              cpuDeltaTimeUnitMultiplier;
-        if (threadCPUDeltaValue > intervalInThreadCPUDeltaUnit) {
-          newThreadCPUDelta[i] = intervalInThreadCPUDeltaUnit;
+        const deltaUnitPerMs = cpuDeltaTimeUnitMultiplier;
+        const sampleDeltaMs = sampleTime - prevSampleTime;
+        const sampleDeltaInThreadCPUDeltaUnit = sampleDeltaMs * deltaUnitPerMs;
+        if (threadCPUDeltaValue > sampleDeltaInThreadCPUDeltaUnit) {
+          newThreadCPUDelta[i] = sampleDeltaInThreadCPUDeltaUnit;
         } else {
           newThreadCPUDelta[i] = threadCPUDeltaValue;
         }
@@ -186,9 +194,23 @@ export function processThreadCPUDelta(
           'Unhandled threadCPUDelta unit in the processing.'
         );
     }
+
+    prevSampleTime = sampleTime;
   }
 
-  return _newThreadWithNewThreadCPUDelta(newThreadCPUDelta);
+  const newSamples: SamplesTable = {
+    length: samples.length,
+    responsiveness: samples.responsiveness,
+    eventDelay: samples.eventDelay,
+    stack: samples.stack,
+    weight: samples.weight,
+    weightType: samples.weightType,
+    threadId: samples.threadId,
+    time: timeColumn,
+    threadCPUDelta: newThreadCPUDelta,
+  };
+
+  return newSamples;
 }
 
 /**
@@ -212,34 +234,4 @@ function getCpuDeltaTimeUnitMultiplier(unit: ThreadCPUDeltaUnit): number {
         'Unhandled threadCPUDelta unit in the processing.'
       );
   }
-}
-
-/**
- * A helper function that finds the closest non-null item in an element to an index.
- * This is useful for finding the non-null threadCPUDelta number to a sample.
- */
-function findClosestNonNullValueToIdx(
-  array: Array<number | null>,
-  idx: number,
-  distance: number = 0
-): number {
-  if (distance >= array.length) {
-    throw new Error('Expected the distance to be less than the array length.');
-  }
-
-  if (idx + distance < array.length) {
-    const itemAfter = array[idx + distance];
-    if (itemAfter !== null) {
-      return itemAfter;
-    }
-  }
-
-  if (idx - distance >= 0) {
-    const itemBefore = array[idx - distance];
-    if (itemBefore !== null) {
-      return itemBefore;
-    }
-  }
-
-  return findClosestNonNullValueToIdx(array, idx, ++distance);
 }

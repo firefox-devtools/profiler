@@ -91,6 +91,7 @@ describe('SampleGraph', function () {
       `Couldn't find the sample graph canvas, with selector .threadSampleGraphCanvas`
     );
     const thread = profile.threads[0];
+    const { stringArray } = profile.shared;
 
     // Perform a click on the sample graph.
     function clickSampleGraph(index: IndexIntoSamplesTable) {
@@ -105,7 +106,7 @@ describe('SampleGraph', function () {
       return selectedThreadSelectors
         .getSelectedCallNodePath(getState())
         .map((funcIndex) =>
-          thread.stringTable.getString(thread.funcTable.name[funcIndex])
+          stringArray[thread.funcTable.name[funcIndex]]
         );
     }
 

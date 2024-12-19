@@ -204,7 +204,9 @@ const _upgraders = {
     // The type field for DOMEventMarkerPayload was renamed to eventType.
     function convertToVersionSevenRecursive(p) {
       for (const thread of p.threads) {
-        const stringTable = new UniqueStringArray(thread.stringTable);
+        const stringTable = UniqueStringArray.cachedTableForArray(
+          thread.stringTable
+        );
         const nameIndex = thread.markers.schema.name;
         const dataIndex = thread.markers.schema.data;
         for (let i = 0; i < thread.markers.data.length; i++) {
@@ -328,7 +330,7 @@ const _upgraders = {
 
     function convertToVersionNineRecursive(p) {
       for (const thread of p.threads) {
-        //const stringTable = new UniqueStringArray(thread.stringTable);
+        //const stringTable = UniqueStringArray.cachedTableForArray(thread.stringTable);
         //const nameIndex = thread.markers.schema.name;
         const dataIndex = thread.markers.schema.data;
         for (let i = 0; i < thread.markers.data.length; i++) {
@@ -363,7 +365,9 @@ const _upgraders = {
     function convertToVersionTenRecursive(p) {
       for (const thread of p.threads) {
         const { markers } = thread;
-        const stringTable = new UniqueStringArray(thread.stringTable);
+        const stringTable = UniqueStringArray.cachedTableForArray(
+          thread.stringTable
+        );
         const nameIndex = markers.schema.name;
         const dataIndex = markers.schema.data;
         const timeIndex = markers.schema.time;
@@ -541,7 +545,9 @@ const _upgraders = {
     // a type field to Screenshot marker payload.
     function convertToVersionThirteenRecursive(p) {
       for (const thread of p.threads) {
-        const stringTable = new UniqueStringArray(thread.stringTable);
+        const stringTable = UniqueStringArray.cachedTableForArray(
+          thread.stringTable
+        );
         const nameIndex = thread.markers.schema.name;
         const dataIndex = thread.markers.schema.data;
         for (let i = 0; i < thread.markers.data.length; i++) {
@@ -594,7 +600,9 @@ const _upgraders = {
         };
         const locationIndex = thread.frameTable.schema.location;
         const relevantForJSIndex = thread.frameTable.schema.relevantForJS;
-        const stringTable = new UniqueStringArray(thread.stringTable);
+        const stringTable = UniqueStringArray.cachedTableForArray(
+          thread.stringTable
+        );
         for (let i = 0; i < thread.frameTable.data.length; i++) {
           const frameData = thread.frameTable.data[i];
           frameData.splice(relevantForJSIndex, 0, false);
@@ -609,7 +617,6 @@ const _upgraders = {
             frameData[relevantForJSIndex] = domCallRegex.test(location);
           }
         }
-        thread.stringTable = stringTable.serializeToArray();
       }
       for (const subprocessProfile of p.processes) {
         convertToVersionFourteenRecursive(subprocessProfile);
@@ -626,11 +633,10 @@ const _upgraders = {
           continue;
         }
 
-        let fileIoStringIndex = thread.stringTable.indexOf('FileIO');
-        if (fileIoStringIndex === -1) {
-          fileIoStringIndex = thread.stringTable.length;
-          thread.stringTable.push('FileIO');
-        }
+        const stringTable = UniqueStringArray.cachedTableForArray(
+          thread.stringTable
+        );
+        const fileIoStringIndex = stringTable.indexForString('FileIO');
 
         const nameIndex = thread.markers.schema.name;
         const dataIndex = thread.markers.schema.data;

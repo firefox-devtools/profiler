@@ -796,7 +796,7 @@ describe('MarkerChart', function () {
         capacity: 1000000,
         activeTabID: firstTabTabID,
       };
-      addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
+      addMarkersToThreadWithCorrespondingSamples(profile.threads[0], profile.shared, [
         [
           'Marker Navigation',
           3,

@@ -11,7 +11,7 @@ import {
   resourceTypes,
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyBalancedNativeAllocationsTable,
-  getEmptyStackTable,
+  getEmptyRawStackTable,
   getEmptyCallNodeTable,
   shallowCloneFrameTable,
   shallowCloneFuncTable,
@@ -26,6 +26,7 @@ import {
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
+import { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 import {
   assertExhaustiveCheck,
   ensureExists,
@@ -36,8 +37,12 @@ import DefaultLinkFavicon from '../../res/img/svg/globe.svg';
 
 import type {
   Profile,
+  RawProfileSharedData,
+  RawThread,
   Thread,
+  RawSamplesTable,
   SamplesTable,
+  RawStackTable,
   StackTable,
   FrameTable,
   FuncTable,
@@ -53,7 +58,9 @@ import type {
   IndexIntoNativeSymbolTable,
   ThreadIndex,
   Category,
+  RawCounter,
   Counter,
+  RawCounterSamplesTable,
   CounterSamplesTable,
   NativeAllocationsTable,
   InnerWindowID,
@@ -86,7 +93,6 @@ import type {
   ThreadWithReservedFunctions,
   TabID,
 } from 'firefox-profiler/types';
-import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -1074,15 +1080,27 @@ export function getTimingsForCallNodeIndex(
 // When changing the signature, please accordingly check that the map class used
 // for memoization is still the right one.
 function _getTimeRangeForThread(
-  { samples, markers, jsAllocations, nativeAllocations }: Thread,
+  { samples, markers, jsAllocations, nativeAllocations }: RawThread,
   interval: Milliseconds
 ): StartEndRange {
   const result = { start: Infinity, end: -Infinity };
 
   if (samples.length) {
-    const lastSampleIndex = samples.length - 1;
-    result.start = samples.time[0];
-    result.end = samples.time[lastSampleIndex] + interval;
+    const { time, timeDeltas: maybeTimeDeltas } = samples;
+    if (time !== undefined) {
+      const lastSampleIndex = samples.length - 1;
+      result.start = time[0];
+      result.end = time[lastSampleIndex] + interval;
+    } else {
+      const timeDeltas = ensureExists(maybeTimeDeltas);
+      result.start = timeDeltas[0];
+
+      let accumTime = 0;
+      for (let i = 0; i < samples.length; i++) {
+        accumTime += timeDeltas[i];
+      }
+      result.end = accumTime + interval;
+    }
   } else if (markers.length) {
     // Looking at the markers only if there are no samples in the profile.
     // We need to look at those because it can be a marker only profile(no-sampling mode).
@@ -1188,7 +1206,7 @@ export function getTimeRangeIncludingAllThreads(
   return completeRange;
 }
 
-export function defaultThreadOrder(threads: Thread[]): ThreadIndex[] {
+export function defaultThreadOrder(threads: RawThread[]): ThreadIndex[] {
   const threadOrder = threads.map((thread, i) => i);
 
   // Note: to have a consistent behavior independant of the sorting algorithm,
@@ -1498,19 +1516,40 @@ export function filterThreadByTab(
   });
 }
 
+export function computeTimeColumnFromTimeDeltas(timeDelta: number[]): number[] {
+  let prevTime = 0;
+  return timeDelta.map((delta) => {
+    prevTime = prevTime + delta;
+    return prevTime;
+  });
+}
+
+export function computeTimeColumnForRawSamplesTable(
+  samples: RawSamplesTable | RawCounterSamplesTable
+): number[] {
+  const { time, timeDeltas } = samples;
+  return time ?? computeTimeColumnFromTimeDeltas(ensureExists(timeDeltas));
+}
+
 /**
  * Checks if a sample table has any useful samples.
  * A useful sample being one that isn't a "(root)" sample.
  */
 export function hasUsefulSamples(
-  table?: SamplesLikeTable,
-  thread: Thread
+  sampleStacks?: Array<IndexIntoStackTable | null>,
+  thread: RawThread,
+  shared: RawProfileSharedData,
 ): boolean {
-  const { stackTable, frameTable, funcTable, stringTable } = thread;
-  if (table === undefined || table.length === 0 || stackTable.length === 0) {
+  const { stringArray } = shared;
+  const { stackTable, frameTable, funcTable } = thread;
+  if (
+    sampleStacks === undefined ||
+    sampleStacks.length === 0 ||
+    stackTable.length === 0
+  ) {
     return false;
   }
-  const stackIndex = table.stack.find((stack) => stack !== null);
+  const stackIndex = sampleStacks.find((stack) => stack !== null);
   if (
     stackIndex === undefined ||
     stackIndex === null // We know that it can't be null at this point, but Flow doesn't.
@@ -1523,10 +1562,10 @@ export function hasUsefulSamples(
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
     const stringIndex = funcTable.name[funcIndex];
-    if (stringTable.getString(stringIndex) === '(root)') {
+    if (stringArray[stringIndex] === '(root)') {
       // If the first sample's stack is only the root, check if any other
       // sample is different.
-      return table.stack.some((s) => s !== null && s !== stackIndex);
+      return sampleStacks.some((s) => s !== null && s !== stackIndex);
     }
   }
   return true;
@@ -1536,12 +1575,20 @@ export function hasUsefulSamples(
  * This function takes both a SamplesTable and can be used on CounterSamplesTable.
  */
 export function getSampleIndexRangeForSelection(
-  table: { time: Milliseconds[], length: number },
+  times: { time: Milliseconds[], length: number },
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
-  const sampleStart = bisectionLeft(table.time, rangeStart);
-  const sampleEnd = bisectionLeft(table.time, rangeEnd, sampleStart);
+  return getIndexRangeForSelection(times.time, rangeStart, rangeEnd);
+}
+
+export function getIndexRangeForSelection(
+  times: Milliseconds[],
+  rangeStart: number,
+  rangeEnd: number
+): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
+  const sampleStart = bisectionLeft(times, rangeStart);
+  const sampleEnd = bisectionLeft(times, rangeEnd, sampleStart);
   return [sampleStart, sampleEnd];
 }
 
@@ -1555,8 +1602,16 @@ export function getInclusiveSampleIndexRangeForSelection(
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
-  let [sampleStart, sampleEnd] = getSampleIndexRangeForSelection(
-    table,
+  return getInclusiveIndexRangeForSelection(table.time, rangeStart, rangeEnd);
+}
+
+export function getInclusiveIndexRangeForSelection(
+  times: Milliseconds[],
+  rangeStart: number,
+  rangeEnd: number
+): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
+  let [sampleStart, sampleEnd] = getIndexRangeForSelection(
+    times,
     rangeStart,
     rangeEnd
   );
@@ -1566,7 +1621,7 @@ export function getInclusiveSampleIndexRangeForSelection(
   if (sampleStart > 0) {
     sampleStart--;
   }
-  if (sampleEnd < table.length) {
+  if (sampleEnd < times.length) {
     sampleEnd++;
   }
 
@@ -1690,27 +1745,149 @@ export function filterThreadSamplesToRange(
   return newThread;
 }
 
+export function filterRawThreadSamplesToRange(
+  thread: RawThread,
+  rangeStart: number,
+  rangeEnd: number
+): RawThread {
+  const { samples, jsAllocations, nativeAllocations } = thread;
+  const sampleTimes = computeTimeColumnForRawSamplesTable(samples);
+  const [beginSampleIndex, endSampleIndex] = getIndexRangeForSelection(
+    sampleTimes,
+    rangeStart,
+    rangeEnd
+  );
+  const newSamples: RawSamplesTable = {
+    length: endSampleIndex - beginSampleIndex,
+    time: sampleTimes.slice(beginSampleIndex, endSampleIndex),
+    weight: samples.weight
+      ? samples.weight.slice(beginSampleIndex, endSampleIndex)
+      : null,
+    weightType: samples.weightType,
+    stack: samples.stack.slice(beginSampleIndex, endSampleIndex),
+  };
+
+  if (samples.eventDelay) {
+    newSamples.eventDelay = samples.eventDelay.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  } else if (samples.responsiveness) {
+    newSamples.responsiveness = samples.responsiveness.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  }
+
+  if (samples.threadCPUDelta) {
+    newSamples.threadCPUDelta = samples.threadCPUDelta.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  }
+
+  if (samples.threadId) {
+    newSamples.threadId = samples.threadId.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  }
+
+  const newThread: RawThread = {
+    ...thread,
+    samples: newSamples,
+  };
+
+  if (jsAllocations) {
+    const [startAllocIndex, endAllocIndex] = getSampleIndexRangeForSelection(
+      jsAllocations,
+      rangeStart,
+      rangeEnd
+    );
+    newThread.jsAllocations = {
+      time: jsAllocations.time.slice(startAllocIndex, endAllocIndex),
+      className: jsAllocations.className.slice(startAllocIndex, endAllocIndex),
+      typeName: jsAllocations.typeName.slice(startAllocIndex, endAllocIndex),
+      coarseType: jsAllocations.coarseType.slice(
+        startAllocIndex,
+        endAllocIndex
+      ),
+      weight: jsAllocations.weight.slice(startAllocIndex, endAllocIndex),
+      weightType: jsAllocations.weightType,
+      inNursery: jsAllocations.inNursery.slice(startAllocIndex, endAllocIndex),
+      stack: jsAllocations.stack.slice(startAllocIndex, endAllocIndex),
+      length: endAllocIndex - startAllocIndex,
+    };
+  }
+
+  if (nativeAllocations) {
+    const [startAllocIndex, endAllocIndex] = getSampleIndexRangeForSelection(
+      nativeAllocations,
+      rangeStart,
+      rangeEnd
+    );
+    const time = nativeAllocations.time.slice(startAllocIndex, endAllocIndex);
+    const weight = nativeAllocations.weight.slice(
+      startAllocIndex,
+      endAllocIndex
+    );
+    const stack = nativeAllocations.stack.slice(startAllocIndex, endAllocIndex);
+    const length = endAllocIndex - startAllocIndex;
+    if (nativeAllocations.memoryAddress) {
+      newThread.nativeAllocations = {
+        time,
+        weight,
+        weightType: nativeAllocations.weightType,
+        stack,
+        memoryAddress: nativeAllocations.memoryAddress.slice(
+          startAllocIndex,
+          endAllocIndex
+        ),
+        threadId: nativeAllocations.threadId.slice(
+          startAllocIndex,
+          endAllocIndex
+        ),
+        length,
+      };
+    } else {
+      newThread.nativeAllocations = {
+        time,
+        weight,
+        weightType: nativeAllocations.weightType,
+        stack,
+        length,
+      };
+    }
+  }
+
+  return newThread;
+}
+
 /**
  * Filter the counter samples to the given range by iterating all of their sample groups.
  */
 export function filterCounterSamplesToRange(
-  counter: Counter,
+  counter: RawCounter,
   rangeStart: number,
   rangeEnd: number
-): Counter {
+): RawCounter {
   const newCounter = { ...counter };
   const { samples } = newCounter;
+  const timeColumn = computeTimeColumnForRawSamplesTable(samples);
 
   // Intentionally get the inclusive sample indexes with this one instead of
   // getSampleIndexRangeForSelection because graphs like memory graph requires
   // one sample before and after to be in the sample range so the graph doesn't
   // look cut off.
-  const [beginSampleIndex, endSampleIndex] =
-    getInclusiveSampleIndexRangeForSelection(samples, rangeStart, rangeEnd);
+  const [beginSampleIndex, endSampleIndex] = getInclusiveIndexRangeForSelection(
+    timeColumn,
+    rangeStart,
+    rangeEnd
+  );
 
   newCounter.samples = {
     length: endSampleIndex - beginSampleIndex,
-    time: samples.time.slice(beginSampleIndex, endSampleIndex),
+    time: timeColumn.slice(beginSampleIndex, endSampleIndex),
     count: samples.count.slice(beginSampleIndex, endSampleIndex),
     number: samples.number
       ? samples.number.slice(beginSampleIndex, endSampleIndex)
@@ -1723,11 +1900,11 @@ export function filterCounterSamplesToRange(
 /**
  * Process the samples in the counter.
  */
-export function processCounter(counter: Counter): Counter {
-  const { samples } = counter;
-  const count = samples.count.slice();
+export function processCounter(rawCounter: RawCounter): Counter {
+  const { samples: rawSamples } = rawCounter;
+  const count = rawSamples.count.slice();
   const number =
-    samples.number !== undefined ? samples.number.slice() : undefined;
+    rawSamples.number !== undefined ? rawSamples.number.slice() : undefined;
 
   // These lines zero out the first values of the counters, as they are unreliable. In
   // addition, there are probably some missed counts in the memory counters, so the
@@ -1742,14 +1919,25 @@ export function processCounter(counter: Counter): Counter {
     number[0] = 0;
   }
 
-  return {
-    ...counter,
-    samples: {
-      ...samples,
-      number,
-      count,
-    },
+  const samples: CounterSamplesTable = {
+    time: computeTimeColumnForRawSamplesTable(rawSamples),
+    number,
+    count,
+    length: rawSamples.length,
   };
+
+  const counter: Counter = {
+    name: rawCounter.name,
+    category: rawCounter.category,
+    description: rawCounter.description,
+    color: rawCounter.color,
+    pid: rawCounter.pid,
+    mainThreadIndex: rawCounter.mainThreadIndex,
+
+    samples,
+  };
+
+  return counter;
 }
 
 /**
@@ -2197,6 +2385,64 @@ export function updateThreadStacksByGeneratingNewStackColumns(
   return newThread;
 }
 
+export function updateRawThreadStacksByGeneratingNewStackColumns(
+  thread: RawThread,
+  newStackTable: RawStackTable,
+  computeMappedStackColumn: (
+    Array<IndexIntoStackTable | null>,
+    Array<Milliseconds> | void
+  ) => Array<IndexIntoStackTable | null>,
+  computeMappedSyncBacktraceStackColumn: (
+    Array<IndexIntoStackTable | null>,
+    Array<Milliseconds>
+  ) => Array<IndexIntoStackTable | null>,
+  computeMappedMarkerDataColumn: (
+    Array<MarkerPayload | null>
+  ) => Array<MarkerPayload | null>
+): RawThread {
+  const { jsAllocations, nativeAllocations, samples, markers } = thread;
+
+  const newSamples = {
+    ...samples,
+    stack: computeMappedStackColumn(samples.stack, samples.time),
+  };
+
+  const newMarkers = {
+    ...markers,
+    data: computeMappedMarkerDataColumn(markers.data),
+  };
+
+  const newThread = {
+    ...thread,
+    samples: newSamples,
+    markers: newMarkers,
+    stackTable: newStackTable,
+  };
+
+  if (jsAllocations) {
+    // Map the JS allocations stacks if there are any.
+    newThread.jsAllocations = {
+      ...jsAllocations,
+      stack: computeMappedSyncBacktraceStackColumn(
+        jsAllocations.stack,
+        jsAllocations.time
+      ),
+    };
+  }
+  if (nativeAllocations) {
+    // Map the native allocations stacks if there are any.
+    newThread.nativeAllocations = {
+      ...nativeAllocations,
+      stack: computeMappedSyncBacktraceStackColumn(
+        nativeAllocations.stack,
+        nativeAllocations.time
+      ),
+    };
+  }
+
+  return newThread;
+}
+
 /**
  * A simpler variant of updateThreadStacksByGeneratingNewStackColumns which just
  * accepts a convertStack function. Use this when you don't need to filter by
@@ -2208,6 +2454,19 @@ export function updateThreadStacks(
   convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null
 ): Thread {
   return updateThreadStacksSeparate(
+    thread,
+    newStackTable,
+    convertStack,
+    convertStack
+  );
+}
+
+export function updateRawThreadStacks(
+  thread: RawThread,
+  newStackTable: RawStackTable,
+  convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null
+): RawThread {
+  return updateRawThreadStacksSeparate(
     thread,
     newStackTable,
     convertStack,
@@ -2249,6 +2508,42 @@ export function updateThreadStacksSeparate(
   }
 
   return updateThreadStacksByGeneratingNewStackColumns(
+    thread,
+    newStackTable,
+    (stackColumn, _timeColumn) =>
+      stackColumn.map((oldStack) => convertStack(oldStack)),
+    (stackColumn, _timeColumn) =>
+      stackColumn.map((oldStack) => convertSyncBacktraceStack(oldStack)),
+    (markerDataColumn) => markerDataColumn.map(convertMarkerData)
+  );
+}
+
+export function updateRawThreadStacksSeparate(
+  thread: RawThread,
+  newStackTable: RawStackTable,
+  convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null,
+  convertSyncBacktraceStack: (
+    IndexIntoStackTable | null
+  ) => IndexIntoStackTable | null
+): RawThread {
+  function convertMarkerData(
+    oldData: MarkerPayload | null
+  ): MarkerPayload | null {
+    if (oldData && 'cause' in oldData && oldData.cause) {
+      // Replace the cause with the right stack index.
+      // $FlowExpectError Flow is failing to refine oldData.type based on the `cause` field check
+      return {
+        ...oldData,
+        cause: {
+          ...oldData.cause,
+          stack: convertSyncBacktraceStack(oldData.cause.stack),
+        },
+      };
+    }
+    return oldData;
+  }
+
+  return updateRawThreadStacksByGeneratingNewStackColumns(
     thread,
     newStackTable,
     (stackColumn, _timeColumn) =>
@@ -2362,28 +2657,49 @@ export function getSampleIndexClosestToCenteredTime(
   return distanceToThis < distanceToLast ? index : index - 1;
 }
 
+function _filterMap<T, U>(
+  array: $ReadOnlyArray<T>,
+  mapOrNullCallback: (T, number) => U | null
+): U[] {
+  const result: U[] = [];
+  for (let i = 0; i < array.length; i++) {
+    const mappedValue = mapOrNullCallback(array[i], i);
+    if (mappedValue === null) {
+      continue;
+    }
+    result.push(mappedValue);
+  }
+  return result;
+}
+
 export function getFriendlyThreadName(
-  threads: Thread[],
-  thread: Thread
+  threads: RawThread[],
+  threadIndex: ThreadIndex
 ): string {
   let label;
-  let homonymThreads;
+  let homonymThreadIndexes;
+
+  const thread = threads[threadIndex];
 
   switch (thread.name) {
     case 'GeckoMain': {
       if (thread['eTLD+1']) {
         // Use the site name if it's provided by the back-end and it's not sanitized.
         label = thread['eTLD+1'];
-        homonymThreads = threads.filter((thread) => {
-          return thread.name === 'GeckoMain' && thread['eTLD+1'] === label;
+        homonymThreadIndexes = _filterMap(threads, (thread, threadIndex) => {
+          return thread.name === 'GeckoMain' && thread['eTLD+1'] === label
+            ? threadIndex
+            : null;
         });
       } else if (thread.processName) {
         // If processName is present, use that as it should contain a friendly name.
         // We want to use that for the GeckoMain thread because it is shown as the
         // root of other threads in each process group.
         label = thread.processName;
-        homonymThreads = threads.filter((thread) => {
-          return thread.name === 'GeckoMain' && thread.processName === label;
+        homonymThreadIndexes = _filterMap(threads, (thread, threadIndex) => {
+          return thread.name === 'GeckoMain' && thread.processName === label
+            ? threadIndex
+            : null;
         });
       } else {
         switch (thread.processType) {
@@ -2398,11 +2714,15 @@ export function getFriendlyThreadName(
             break;
           case 'tab': {
             label = 'Content Process';
-            homonymThreads = threads.filter((thread) => {
-              return (
-                thread.name === 'GeckoMain' && thread.processType === 'tab'
-              );
-            });
+            homonymThreadIndexes = _filterMap(
+              threads,
+              (thread, threadIndex) => {
+                return thread.name === 'GeckoMain' &&
+                  thread.processType === 'tab'
+                  ? threadIndex
+                  : null;
+              }
+            );
             break;
           }
           case 'plugin':
@@ -2426,9 +2746,9 @@ export function getFriendlyThreadName(
 
   // Check if homonymThreads are provided and append "(index/total)" numbers to
   // the label if that's the case.
-  if (homonymThreads && homonymThreads.length > 1) {
-    const index = 1 + homonymThreads.indexOf(thread);
-    label += ` (${index}/${homonymThreads.length})`;
+  if (homonymThreadIndexes && homonymThreadIndexes.length > 1) {
+    const index = 1 + homonymThreadIndexes.indexOf(threadIndex);
+    label += ` (${index}/${homonymThreadIndexes.length})`;
   }
 
   return label;
@@ -3131,7 +3451,7 @@ export type StackReferences = {|
  * samples, and stacks referenced by sync backtraces (e.g. marker causes).
  * The two have slightly different properties, see the type definition.
  */
-export function gatherStackReferences(thread: Thread): StackReferences {
+export function gatherStackReferences(thread: RawThread): StackReferences {
   const samplingSelfStacks = new Set();
   const syncBacktraceSelfStacks = new Set();
 
@@ -3302,7 +3622,7 @@ export function gatherStackReferences(thread: Thread): StackReferences {
  *     used in both contexts. If we detect that this happened, we need to duplicate
  *     the frame and the stack node and pick the right one depending on the use.
  */
-export function nudgeReturnAddresses(thread: Thread): Thread {
+export function nudgeReturnAddresses(thread: RawThread): RawThread {
   const { samplingSelfStacks, syncBacktraceSelfStacks } =
     gatherStackReferences(thread);
 
@@ -3397,14 +3717,12 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
   // Now the frame table contains adjusted / "nudged" addresses.
 
   // Make a new stack table which refers to the adjusted frames.
-  const newStackTable = getEmptyStackTable();
+  const newStackTable = getEmptyRawStackTable();
   const mapForSamplingSelfStacks = new Map();
   const mapForBacktraceSelfStacks = new Map();
   const prefixMap = new Uint32Array(stackTable.length);
   for (let stack = 0; stack < stackTable.length; stack++) {
     const frame = stackTable.frame[stack];
-    const category = stackTable.category[stack];
-    const subcategory = stackTable.subcategory[stack];
     const prefix = stackTable.prefix[stack];
 
     const newPrefix = prefix === null ? null : prefixMap[prefix];
@@ -3414,8 +3732,6 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
       // (which will have the nudged address if this is a return address stack).
       const newStackIndex = newStackTable.length;
       newStackTable.frame.push(frame);
-      newStackTable.category.push(category);
-      newStackTable.subcategory.push(subcategory);
       newStackTable.prefix.push(newPrefix);
       newStackTable.length++;
       prefixMap[stack] = newStackIndex;
@@ -3428,20 +3744,18 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
       const ipFrame = oldIpFrameToNewIpFrame[frame];
       const newStackIndex = newStackTable.length;
       newStackTable.frame.push(ipFrame);
-      newStackTable.category.push(category);
-      newStackTable.subcategory.push(subcategory);
       newStackTable.prefix.push(newPrefix);
       newStackTable.length++;
       mapForSamplingSelfStacks.set(stack, newStackIndex);
     }
   }
 
-  const newThread = {
+  const newThread: RawThread = {
     ...thread,
     frameTable: newFrameTable,
   };
 
-  return updateThreadStacksSeparate(
+  return updateRawThreadStacksSeparate(
     newThread,
     newStackTable,
     getMapStackUpdater(mapForSamplingSelfStacks),
@@ -3458,8 +3772,10 @@ export function findAddressProofForFile(
   file: string
 ): AddressProof | null {
   const { libs } = profile;
+  const { stringArray } = profile.shared;
+  const stringTable = UniqueStringArray.cachedTableForArray(stringArray);
   for (const thread of profile.threads) {
-    const { frameTable, funcTable, resourceTable, stringTable } = thread;
+    const { frameTable, funcTable, resourceTable } = thread;
     const fileStringIndex = stringTable.indexForString(file);
     const func = funcTable.fileName.indexOf(fileStringIndex);
     if (func === -1) {
@@ -3716,7 +4032,7 @@ export function determineTimelineType(profile: Profile): TimelineType {
  * the top left corner.
  */
 export function computeTabToThreadIndexesMap(
-  threads: Thread[],
+  threads: RawThread[],
   innerWindowIDToTabMap: Map<InnerWindowID, TabID> | null
 ): Map<TabID, Set<ThreadIndex>> {
   const tabToThreadIndexesMap = new Map();
@@ -3788,4 +4104,86 @@ export function computeTabToThreadIndexesMap(
   }
 
   return tabToThreadIndexesMap;
+}
+
+export function computeStackTableFromRawStackTable(
+  rawStackTable: RawStackTable,
+  frameTable: FrameTable,
+  defaultCategory: IndexIntoCategoryList
+): StackTable {
+  // Compute a non-null category for every stack
+  const categoryColumn = new Array(rawStackTable.length);
+  const subcategoryColumn = new Array(rawStackTable.length);
+  for (let stackIndex = 0; stackIndex < rawStackTable.length; stackIndex++) {
+    const frameIndex = rawStackTable.frame[stackIndex];
+    const frameCategory = frameTable.category[frameIndex];
+    const frameSubcategory = frameTable.subcategory[frameIndex];
+    let stackCategory;
+    let stackSubcategory;
+    if (frameCategory !== null) {
+      stackCategory = frameCategory;
+      stackSubcategory = frameSubcategory || 0;
+    } else {
+      const prefix = rawStackTable.prefix[stackIndex];
+      if (prefix !== null) {
+        // Because of the structure of the stack table, prefix < stackIndex.
+        // So we've already computed the category for the prefix.
+        stackCategory = categoryColumn[prefix];
+        stackSubcategory = subcategoryColumn[prefix];
+      } else {
+        stackCategory = defaultCategory;
+        stackSubcategory = 0;
+      }
+    }
+    categoryColumn[stackIndex] = stackCategory;
+    subcategoryColumn[stackIndex] = stackSubcategory;
+  }
+
+  return {
+    frame: rawStackTable.frame,
+    category: categoryColumn,
+    subcategory: subcategoryColumn,
+    prefix: rawStackTable.prefix,
+    length: rawStackTable.length,
+  };
+}
+
+export function createThreadFromDerivedColumns(
+  rawThread: RawThread,
+  stackTable: StackTable,
+  samples: SamplesTable,
+  stringTable: UniqueStringArray
+): Thread {
+  return {
+    // These properties are unchanged from the raw thread:
+    processType: rawThread.processType,
+    processStartupTime: rawThread.processStartupTime,
+    processShutdownTime: rawThread.processShutdownTime,
+    registerTime: rawThread.registerTime,
+    unregisterTime: rawThread.unregisterTime,
+    pausedRanges: rawThread.pausedRanges,
+    showMarkersInTimeline: rawThread.showMarkersInTimeline,
+    name: rawThread.name,
+    isMainThread: rawThread.isMainThread,
+    'eTLD+1': rawThread['eTLD+1'],
+    processName: rawThread.processName,
+    isJsTracer: rawThread.isJsTracer,
+    pid: rawThread.pid,
+    tid: rawThread.tid,
+    jsAllocations: rawThread.jsAllocations,
+    nativeAllocations: rawThread.nativeAllocations,
+    markers: rawThread.markers,
+    frameTable: rawThread.frameTable,
+    funcTable: rawThread.funcTable,
+    resourceTable: rawThread.resourceTable,
+    nativeSymbols: rawThread.nativeSymbols,
+    jsTracer: rawThread.jsTracer,
+    isPrivateBrowsing: rawThread.isPrivateBrowsing,
+    userContextId: rawThread.userContextId,
+
+    // These properties are derived:
+    stackTable: stackTable,
+    samples: samples,
+    stringTable,
+  };
 }

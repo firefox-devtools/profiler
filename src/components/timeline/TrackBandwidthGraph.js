@@ -40,7 +40,7 @@ import { co2 } from '@tgwf/co2';
 import type {
   CounterIndex,
   Counter,
-  Thread,
+  RawThread,
   ThreadIndex,
   AccumulatedCounterSamples,
   Milliseconds,
@@ -316,7 +316,7 @@ type StateProps = {|
   +accumulatedSamples: AccumulatedCounterSamples,
   +maxCounterSampleCountPerMs: number,
   +interval: Milliseconds,
-  +filteredThread: Thread,
+  +rawThread: RawThread,
   +unfilteredSamplesRange: StartEndRange | null,
   +previewSelection: PreviewSelection,
 |};
@@ -633,7 +633,7 @@ class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
   render() {
     const { hoveredCounter } = this.state;
     const {
-      filteredThread,
+      rawThread,
       interval,
       rangeStart,
       rangeEnd,
@@ -672,7 +672,7 @@ class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
           </>
         )}
         <EmptyThreadIndicator
-          thread={filteredThread}
+          thread={rawThread}
           interval={interval}
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
@@ -706,7 +706,7 @@ export const TrackBandwidthGraph = explicitConnect<
       rangeEnd: end,
       counterSampleRange,
       interval: getProfileInterval(state),
-      filteredThread: selectors.getFilteredThread(state),
+      rawThread: selectors.getRawThread(state),
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
       previewSelection: getPreviewSelection(state),
     };

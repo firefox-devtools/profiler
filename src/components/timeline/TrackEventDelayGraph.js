@@ -16,6 +16,7 @@ import { EmptyThreadIndicator } from './EmptyThreadIndicator';
 
 import type {
   Thread,
+  RawThread,
   ThreadIndex,
   Milliseconds,
   CssPixels,
@@ -180,7 +181,7 @@ type StateProps = {|
   +rangeEnd: Milliseconds,
   +interval: Milliseconds,
   +thread: Thread,
-  +filteredThread: Thread,
+  +rawThread: RawThread,
   +unfilteredSamplesRange: StartEndRange | null,
   +eventDelays: EventDelayInfo,
 |};
@@ -312,7 +313,6 @@ class TrackEventDelayGraphImpl extends React.PureComponent<Props, State> {
   render() {
     const { hoveredDelay, mouseX, mouseY } = this.state;
     const {
-      filteredThread,
       interval,
       rangeStart,
       rangeEnd,
@@ -322,6 +322,7 @@ class TrackEventDelayGraphImpl extends React.PureComponent<Props, State> {
       lineWidth,
       eventDelays,
       thread,
+      rawThread,
     } = this.props;
 
     return (
@@ -349,7 +350,7 @@ class TrackEventDelayGraphImpl extends React.PureComponent<Props, State> {
           </>
         )}
         <EmptyThreadIndicator
-          thread={filteredThread}
+          thread={rawThread}
           interval={interval}
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
@@ -375,7 +376,7 @@ export const TrackEventDelayGraph = explicitConnect<
       rangeEnd: end,
       interval: getProfileInterval(state),
       thread: selectors.getThread(state),
-      filteredThread: selectors.getFilteredThread(state),
+      rawThread: selectors.getRawThread(state),
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
       eventDelays: selectors.getProcessedEventDelays(state),
     };

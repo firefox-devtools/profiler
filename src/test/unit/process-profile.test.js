@@ -10,6 +10,7 @@ import {
   unserializeProfileOfArbitraryFormat,
   GlobalDataCollector,
 } from '../../profile-logic/process-profile';
+import { computeTimeColumnForRawSamplesTable } from '../../profile-logic/profile-data';
 import { UniqueStringArray } from '../../utils/unique-string-array';
 import {
   createGeckoProfile,
@@ -28,7 +29,8 @@ import type {
   GeckoProfilerOverhead,
   IndexIntoGeckoStackTable,
   Milliseconds,
-  Thread,
+  RawProfileSharedData,
+  RawThread,
   Pid,
 } from 'firefox-profiler/types';
 
@@ -83,9 +85,10 @@ describe('extract functions and resource from location strings', function () {
       breakpadId: '',
     },
   ];
-  const stringTable = new UniqueStringArray();
+  const geckoThreadStringArray = [];
+  const geckoThreadStringTable = new UniqueStringArray(geckoThreadStringArray);
   const locationIndexes = locations.map((location) =>
-    stringTable.indexForString(location)
+    geckoThreadStringTable.indexForString(location)
   );
   const extensions = {
     baseURL: [
@@ -103,11 +106,13 @@ describe('extract functions and resource from location strings', function () {
       extractFuncsAndResourcesFromFrameLocations(
         locationIndexes,
         locationIndexes.map(() => false),
-        stringTable,
+        geckoThreadStringArray,
         libs,
         extensions,
         globalDataCollector
       );
+
+    const stringTable = globalDataCollector.getStringTable();
 
     expect(
       frameFuncs.map((funcIndex, locationIndex) => {
@@ -588,7 +593,8 @@ describe('gecko samples table processing', function () {
     expect(processedSamples.stack.slice(0, 2)).toEqual(
       hardcodedStackAfterProcessing
     );
-    expect(processedSamples.time.slice(0, 2)).toEqual(hardcodedTime);
+    const sampleTimes = computeTimeColumnForRawSamplesTable(processedSamples);
+    expect(sampleTimes.slice(0, 2)).toEqual(hardcodedTime);
     expect(ensureExists(processedSamples.eventDelay).slice(0, 2)).toEqual(
       hardcodedEventDelay
     );
@@ -599,9 +605,10 @@ describe('gecko samples table processing', function () {
     // Check the processed profile samples array to see if we properly processed
     // the sample fields.
     for (const fieldName in geckoSamples.schema) {
-      if (fieldName === 'stack') {
+      if (fieldName === 'stack' || fieldName === 'time') {
         // Don't check the stack here because profile processing changes the shape
-        // of the stack table, so the value is expected to change.
+        // of the stack table and converts times to deltas, so the value is
+        // expected to change.
         continue;
       }
       const fieldIndex = geckoSamples.schema[fieldName];
@@ -711,7 +718,8 @@ describe('profile meta processing', function () {
 
 describe('visualMetrics processing', function () {
   function checkVisualMetricsForThread(
-    thread: Thread,
+    thread: RawThread,
+    shared: RawProfileSharedData,
     metrics: Array<{|
       name: string,
       hasProgressMarker: boolean,
@@ -720,11 +728,9 @@ describe('visualMetrics processing', function () {
   ) {
     for (const { name, hasProgressMarker, changeMarkerLength } of metrics) {
       // Check the visual metric progress markers.
-      const metricProgressMarkerIndex = thread.stringTable.indexForString(
-        `${name} Progress`
-      );
+      const metricProgressMarkerName = `${name} Progress`;
       const metricProgressMarker = thread.markers.name.find(
-        (name) => name === metricProgressMarkerIndex
+        (name) => shared.stringArray[name] === metricProgressMarkerName
       );
 
       if (hasProgressMarker) {
@@ -734,11 +740,9 @@ describe('visualMetrics processing', function () {
       }
 
       // Check the visual metric change markers.
-      const metricChangeMarkerIndex = thread.stringTable.indexForString(
-        `${name} Change`
-      );
+      const metricChangeMarkerName = `${name} Change`;
       const metricChangeMarkers = thread.markers.name.filter(
-        (name) => name === metricChangeMarkerIndex
+        (name) => shared.stringArray[name] === metricChangeMarkerName
       );
       expect(metricChangeMarkers).toHaveLength(changeMarkerLength);
     }
@@ -764,7 +768,7 @@ describe('visualMetrics processing', function () {
       throw new Error('Could not find the parent process main thread.');
     }
 
-    checkVisualMetricsForThread(parentProcessMainThread, [
+    checkVisualMetricsForThread(parentProcessMainThread, processedProfile.shared, [
       { name: 'Visual', hasProgressMarker: true, changeMarkerLength: 7 },
       {
         name: 'ContentfulSpeedIndex',
@@ -798,7 +802,7 @@ describe('visualMetrics processing', function () {
       throw new Error('Could not find the tab process main thread.');
     }
 
-    checkVisualMetricsForThread(tabProcessMainThread, [
+    checkVisualMetricsForThread(tabProcessMainThread, processedProfile.shared, [
       { name: 'Visual', hasProgressMarker: true, changeMarkerLength: 7 },
       {
         name: 'ContentfulSpeedIndex',
@@ -843,7 +847,7 @@ describe('visualMetrics processing', function () {
       throw new Error('Could not find the parent process main thread.');
     }
 
-    checkVisualMetricsForThread(parentProcessMainThread, [
+    checkVisualMetricsForThread(parentProcessMainThread, processedProfile.shared, [
       // Instead of 7, we should have 0 markers for Visual because we made all
       // the timestamps null.
       { name: 'Visual', hasProgressMarker: false, changeMarkerLength: 0 },

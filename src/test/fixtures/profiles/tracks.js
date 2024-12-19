@@ -19,6 +19,7 @@ import type {
   Pid,
 } from 'firefox-profiler/types';
 
+import { UniqueStringArray } from '../../../utils/unique-string-array';
 import { assertExhaustiveCheck } from '../../../utils/flow';
 import {
   getFriendlyThreadName,
@@ -50,6 +51,7 @@ import { INSTANT } from 'firefox-profiler/app-logic/constants';
  * Local Track naming - `[thread ThreadName]` | `[TrackType]`
  */
 export function getHumanReadableTracks(state: State): string[] {
+  const stringArray = profileViewSelectors.getStringArray(state);
   const threads = profileViewSelectors.getThreads(state);
   const globalTracks = profileViewSelectors.getGlobalTracks(state);
   const hiddenGlobalTracks = urlStateSelectors.getHiddenGlobalTracks(state);
@@ -120,9 +122,7 @@ export function getHumanReadableTracks(state: State): string[] {
             .getCounterSelectors(track.counterIndex)
             .getCounter(state).name;
         } else if (track.type === 'marker') {
-          trackName = threads[track.threadIndex].stringTable.getString(
-            track.markerName
-          );
+          trackName = stringArray[track.markerName];
         } else {
           trackName = threads[track.threadIndex].name;
         }
@@ -156,7 +156,8 @@ export function getHumanReadableTracks(state: State): string[] {
  */
 export function getProfileWithNiceTracks(): Profile {
   const { profile } = getProfileFromTextSamples('A', 'B', 'C', 'D');
-  const [thread1, thread2, thread3, thread4] = profile.threads;
+  const { shared, threads } = profile;
+  const [thread1, thread2, thread3, thread4] = threads;
   thread1.name = 'GeckoMain';
   thread1.isMainThread = true;
   thread1.pid = '111';
@@ -174,8 +175,11 @@ export function getProfileWithNiceTracks(): Profile {
     category: 'Paint',
   });
   thread2.markers.category.push(0);
+  const thread2StringTable = UniqueStringArray.cachedTableForArray(
+    shared.stringArray
+  );
   thread2.markers.name.push(
-    thread2.stringTable.indexForString('RefreshDriverTick')
+    thread2StringTable.indexForString('RefreshDriverTick')
   );
   thread2.markers.startTime.push(0);
   thread2.markers.endTime.push(null);
@@ -434,8 +438,9 @@ export function getHumanReadableOriginTracks(state: State): string[] {
         }
         break;
       case 'no-origin': {
-        const thread = threads[track.threadIndex];
-        results.push(prefix + getFriendlyThreadName(threads, thread));
+        results.push(
+          prefix + getFriendlyThreadName(threads, track.threadIndex)
+        );
         break;
       }
       case 'sub-origin': {

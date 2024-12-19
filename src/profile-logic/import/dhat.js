@@ -180,9 +180,10 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
   const profile = getEmptyProfile();
   profile.meta.product = dhat.cmd + ' (dhat)';
   profile.meta.importedFrom = `dhat`;
+  const stringTable = UniqueStringArray.cachedTableForArray(profile.shared.stringArray);
 
   const allocationsTable = getEmptyUnbalancedNativeAllocationsTable();
-  const { funcTable, stringTable, stackTable, frameTable } = getEmptyThread();
+  const { funcTable, stackTable, frameTable } = getEmptyThread();
 
   const funcKeyToFuncIndex = new Map<string, IndexIntoFuncTable>();
 
@@ -292,8 +293,6 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
       if (stackIndex === stackTable.length) {
         // No stack index was found, add on a new one.
         stackTable.frame.push(frameIndex);
-        stackTable.category.push(otherCategory);
-        stackTable.category.push(otherSubCategory);
         stackTable.prefix.push(prefix);
 
         if (candidateStackTables) {
@@ -336,7 +335,6 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     thread.pid = dhat.pid;
     thread.tid = i;
     thread.name = name;
-    thread.stringTable = new UniqueStringArray(stringTable.serializeToArray());
 
     thread.funcTable.name = funcTable.name.slice();
     thread.funcTable.isJS = funcTable.isJS.slice();
@@ -358,8 +356,6 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     thread.frameTable.length = frameTable.length;
 
     thread.stackTable.frame = stackTable.frame.slice();
-    thread.stackTable.category = stackTable.category.slice();
-    thread.stackTable.category = stackTable.category.slice();
     thread.stackTable.prefix = stackTable.prefix.slice();
     thread.stackTable.length = stackTable.length;
 

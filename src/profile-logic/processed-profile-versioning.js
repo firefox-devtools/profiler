@@ -21,7 +21,7 @@ import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 import { coerce } from '../utils/flow';
-import type { SerializableProfile } from 'firefox-profiler/types';
+import type { Profile } from 'firefox-profiler/types';
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -35,7 +35,7 @@ const UNANNOTATED_VERSION = 0;
  */
 export function attemptToUpgradeProcessedProfileThroughMutation(
   profile: mixed
-): SerializableProfile | null {
+): Profile | null {
   if (!profile || typeof profile !== 'object') {
     return null;
   }
@@ -70,7 +70,7 @@ export function attemptToUpgradeProcessedProfileThroughMutation(
       : UNANNOTATED_VERSION;
 
   if (profileVersion === PROCESSED_PROFILE_VERSION) {
-    return coerce<MixedObject, SerializableProfile>(profile);
+    return coerce<MixedObject, Profile>(profile);
   }
 
   if (profileVersion > PROCESSED_PROFILE_VERSION) {
@@ -92,7 +92,7 @@ export function attemptToUpgradeProcessedProfileThroughMutation(
     }
   }
 
-  const upgradedProfile = coerce<MixedObject, SerializableProfile>(profile);
+  const upgradedProfile = coerce<MixedObject, Profile>(profile);
   upgradedProfile.meta.preprocessedProfileVersion = PROCESSED_PROFILE_VERSION;
 
   return upgradedProfile;
@@ -305,7 +305,7 @@ const _upgraders = {
   [4]: (profile) => {
     profile.threads.forEach((thread) => {
       const { funcTable, stringArray, resourceTable } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
+      const stringTable = UniqueStringArray.cachedTableForArray(stringArray);
 
       // resourceTable gains a new field ("host") and a new resourceType:
       // "webhost". Resources from http and https URLs are now grouped by
@@ -439,7 +439,7 @@ const _upgraders = {
     // The type field for DOMEventMarkerPayload was renamed to eventType.
     for (const thread of profile.threads) {
       const { stringArray, markers } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
+      const stringTable = UniqueStringArray.cachedTableForArray(stringArray);
       const newDataArray = [];
       for (let i = 0; i < markers.length; i++) {
         const name = stringTable.getString(markers.name[i]);
@@ -499,7 +499,7 @@ const _upgraders = {
         continue;
       }
       const { stringArray, markers } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
+      const stringTable = UniqueStringArray.cachedTableForArray(stringArray);
       const newDataArray = [];
       for (let i = 0; i < markers.length; i++) {
         const name = stringTable.getString(markers.name[i]);
@@ -681,7 +681,7 @@ const _upgraders = {
         continue;
       }
 
-      const stringTable = new UniqueStringArray(stringArray);
+      const stringTable = UniqueStringArray.cachedTableForArray(stringArray);
       const extraMarkers = [];
       for (let i = 0; i < markers.length; i++) {
         const name = stringTable.getString(markers.name[i]);
@@ -906,7 +906,7 @@ const _upgraders = {
     // the categories by looking at the function names.
     for (const thread of profile.threads) {
       const { frameTable, funcTable, stringArray } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
+      const stringTable = UniqueStringArray.cachedTableForArray(stringArray);
       for (let i = 0; i < frameTable.length; i++) {
         const funcIndex = frameTable.func[i];
         const funcName = stringTable.getString(funcTable.name[funcIndex]);
@@ -992,7 +992,7 @@ const _upgraders = {
     // Old profiles might still have this property.
     for (const thread of profile.threads) {
       const { stringArray, markers } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
+      const stringTable = UniqueStringArray.cachedTableForArray(stringArray);
       const newDataArray = [];
       for (let i = 0; i < markers.length; i++) {
         const name = stringTable.getString(markers.name[i]);
@@ -1047,7 +1047,7 @@ const _upgraders = {
     const domCallRegex = /^(get |set )?\w+(\.\w+| constructor)$/;
     for (const thread of profile.threads) {
       const { funcTable, stringArray } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
+      const stringTable = UniqueStringArray.cachedTableForArray(stringArray);
       funcTable.relevantForJS = new Array(funcTable.length);
       for (let i = 0; i < funcTable.length; i++) {
         const location = stringTable.getString(funcTable.name[i]);
@@ -1071,7 +1071,7 @@ const _upgraders = {
     // We update the func table with right values of 'fileName', 'lineNumber' and 'columnNumber'.
     for (const thread of profile.threads) {
       const { funcTable, stringArray } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
+      const stringTable = UniqueStringArray.cachedTableForArray(stringArray);
       funcTable.columnNumber = [];
       for (
         let funcIndex = 0;
@@ -2062,8 +2062,9 @@ const _upgraders = {
         libs: threadLibs,
         resourceTable,
         nativeSymbols,
-        stringTable,
+        stringArray,
       } = thread;
+      const stringTable = UniqueStringArray.cachedTableForArray(stringArray);
       const threadLibIndexToGlobalLibIndex = new Map();
       delete thread.libs;
 
@@ -2267,11 +2268,32 @@ const _upgraders = {
   [49]: (_) => {
     // The 'sanitized-string' marker schema format type has been added.
   },
-  [50]: (_) => {
+  [50]: (profile) => {
     // The serialized format can now optionally store sample and counter sample
     // times as time deltas instead of absolute timestamps to reduce the JSON size.
-    // The unserialized version is unchanged, and because the upgraders run
-    // after unserialization they see no difference.
+    function makeSamplesUseTimeDeltas(samples) {
+      const { time } = samples;
+      const timeDeltas = new Array(time.length);
+      let prevTime = 0;
+      for (let i = 0; i < time.length; i++) {
+        const currentTime = time[i];
+        timeDeltas[i] = currentTime - prevTime;
+        prevTime = currentTime;
+      }
+      samples.timeDeltas = timeDeltas;
+      delete samples.time;
+    }
+
+    for (const thread of profile.threads) {
+      makeSamplesUseTimeDeltas(thread.samples);
+    }
+
+    const counters = profile.counters;
+    if (counters) {
+      for (const counter of counters) {
+        makeSamplesUseTimeDeltas(counter.samples);
+      }
+    }
   },
   [51]: (_) => {
     // This version bump added two new form types for new marker schema field:
@@ -2281,6 +2303,139 @@ const _upgraders = {
     // No upgrade is needed, as older versions of firefox would not generate
     // marker data with the new field types data, and no modification is needed in the
     // frontend to display older formats.
+  },
+  [52]: (profile) => {
+    for (const thread of profile.threads) {
+      const { frameTable, stackTable } = thread;
+
+      // Workaround for Lean profiles missing frameTable.category
+      if (!('category' in frameTable)) {
+        frameTable.category = [];
+        frameTable.subcategory = [];
+        for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
+          frameTable.category[frameIndex] = null;
+          frameTable.subcategory[frameIndex] = null;
+        }
+        for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+          const frameIndex = stackTable.frame[stackIndex];
+          frameTable.category[frameIndex] = stackTable.category[stackIndex];
+          frameTable.subcategory[frameIndex] =
+            stackTable.subcategory[stackIndex];
+        }
+      }
+
+      // Remove stackTable.category and stackTable.subcategory.
+      delete stackTable.category;
+      delete stackTable.subcategory;
+    }
+  },
+  [53]: (profile) => {
+    // The stringArray is now shared across all threads. It is stored at
+    // profile.shared.stringArray.
+    const stringArray = [];
+    const stringTable = UniqueStringArray.cachedTableForArray(stringArray);
+
+    // Precompute marker fields that need adjusting.
+    const stringIndexMarkerFieldsByDataType = new Map();
+    stringIndexMarkerFieldsByDataType.set('CompositorScreenshot', ['url']);
+    for (const schema of profile.meta.markerSchema) {
+      const { name, data } = schema;
+      const stringIndexFields = [];
+      for (const field of data) {
+        if (field.format === 'unique-string') {
+          stringIndexFields.push(field.key);
+        }
+      }
+      if (stringIndexFields.length !== 0) {
+        stringIndexMarkerFieldsByDataType.set(name, stringIndexFields);
+      }
+    }
+
+    // Adjust all data across all threads.
+    for (const thread of profile.threads) {
+      const {
+        markers,
+        frameTable,
+        funcTable,
+        nativeSymbols,
+        resourceTable,
+        jsTracer,
+        stringArray: threadStringArray,
+      } = thread;
+      for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+        const nameStr = threadStringArray[markers.name[markerIndex]];
+        markers.name[markerIndex] = stringTable.indexForString(nameStr);
+
+        // Adjust 'unique-str' marker fields
+        const data = markers.data[markerIndex];
+        if (!data || !data.type) {
+          continue;
+        }
+
+        const fieldsToAdjust = stringIndexMarkerFieldsByDataType.get(data.type);
+        if (fieldsToAdjust !== undefined) {
+          for (const fieldName of fieldsToAdjust) {
+            const fieldValue = data[fieldName];
+            const fieldStr = threadStringArray[fieldValue];
+            if (fieldStr !== undefined) {
+              data[fieldName] = stringTable.indexForString(fieldStr);
+            }
+          }
+        }
+      }
+      for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
+        const frameImpl = frameTable.implementation[frameIndex];
+        if (frameImpl !== null) {
+          frameTable.implementation[frameIndex] = stringTable.indexForString(
+            threadStringArray[frameImpl]
+          );
+        }
+      }
+      for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
+        funcTable.name[funcIndex] = stringTable.indexForString(
+          threadStringArray[funcTable.name[funcIndex]]
+        );
+        const funcFileName = funcTable.fileName[funcIndex];
+        if (funcFileName !== null) {
+          funcTable.fileName[funcIndex] = stringTable.indexForString(
+            threadStringArray[funcFileName]
+          );
+        }
+      }
+      for (let symIndex = 0; symIndex < nativeSymbols.length; symIndex++) {
+        nativeSymbols.name[symIndex] = stringTable.indexForString(
+          threadStringArray[nativeSymbols.name[symIndex]]
+        );
+      }
+      for (
+        let resourceIndex = 0;
+        resourceIndex < resourceTable.length;
+        resourceIndex++
+      ) {
+        resourceTable.name[resourceIndex] = stringTable.indexForString(
+          threadStringArray[resourceTable.name[resourceIndex]]
+        );
+        const resourceHost = resourceTable.host[resourceIndex];
+        if (resourceHost !== null) {
+          resourceTable.host[resourceIndex] = stringTable.indexForString(
+            threadStringArray[resourceHost]
+          );
+        }
+      }
+      if (jsTracer !== undefined) {
+        for (
+          let traceEventIndex = 0;
+          traceEventIndex < jsTracer.length;
+          traceEventIndex++
+        ) {
+          jsTracer.events[traceEventIndex] = stringTable.indexForString(
+            threadStringArray[jsTracer.events[traceEventIndex]]
+          );
+        }
+      }
+      delete thread.stringArray;
+    }
+    profile.shared = { stringArray };
   },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.

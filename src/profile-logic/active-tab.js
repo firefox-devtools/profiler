@@ -13,7 +13,7 @@ import type {
   Profile,
   InnerWindowID,
   Page,
-  Thread,
+  RawThread,
   ScreenshotPayload,
   ActiveTabTimeline,
   ActiveTabMainTrack,
@@ -66,6 +66,7 @@ export function computeActiveTabTracks(
   const screenshots = [];
   const topmostInnerWindowIDs = getTopmostInnerWindowIDs(relevantPages);
   const innerWindowIDToPageMap = _getInnerWindowIDToPageMap(relevantPages);
+  const { stringArray } = profile.shared;
 
   for (
     let threadIndex = 0;
@@ -73,7 +74,7 @@ export function computeActiveTabTracks(
     threadIndex++
   ) {
     const thread = profile.threads[threadIndex];
-    const { markers, stringTable } = thread;
+    const { markers } = thread;
 
     if (thread.isMainThread) {
       // This is a main thread, there is a possibility that it can be a global
@@ -118,10 +119,8 @@ export function computeActiveTabTracks(
 
     // Check for screenshots.
     const windowIDs: Set<string> = new Set();
-    if (stringTable.hasString('CompositorScreenshot')) {
-      const screenshotNameIndex = stringTable.indexForString(
-        'CompositorScreenshot'
-      );
+    const screenshotNameIndex = stringArray.indexOf('CompositorScreenshot');
+    if (screenshotNameIndex !== -1) {
       for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
         if (markers.name[markerIndex] === screenshotNameIndex) {
           // Coerce the payload to a screenshot one. Don't do a runtime check that
@@ -169,7 +168,7 @@ function getTopmostInnerWindowIDs(relevantPages: Page[]): Set<InnerWindowID> {
  * Topmost thread means the thread that belongs to the browser tab itself and not the iframe.
  */
 function isTopmostThread(
-  thread: Thread,
+  thread: RawThread,
   topmostInnerWindowIDs: Set<InnerWindowID>
 ): boolean {
   const { frameTable, markers } = thread;
@@ -204,7 +203,7 @@ function isTopmostThread(
  * If it fails to find a name, returns null.
  */
 function _getActiveTabResourceName(
-  thread: Thread,
+  thread: RawThread,
   innerWindowIDToPageMap: Map<InnerWindowID, Page>
 ): string | null {
   if (thread.isMainThread) {

@@ -24,7 +24,7 @@ import {
 import {
   getEmptyThread,
   getEmptyProfile,
-  getEmptySamplesTableWithEventDelay,
+  getEmptyRawSamplesTableWithEventDelay,
 } from '../../profile-logic/data-structures';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
@@ -57,7 +57,7 @@ import type {
   TrackReference,
   Milliseconds,
   TabID,
-  Thread,
+  RawThread,
   StartEndRange,
 } from 'firefox-profiler/types';
 
@@ -1817,9 +1817,7 @@ describe('snapshots of selectors/profile', function () {
     }
 
     // Add in a thread with markers
-    const {
-      threads: [markersThread],
-    } = getProfileWithMarkers([
+    const markersThread = getThreadWithMarkers(profile.shared, [
       ['A', 0, null],
       ['B', 1, null],
       ['C', 2, null],
@@ -1850,6 +1848,8 @@ describe('snapshots of selectors/profile', function () {
     samplesThread.samples.length = eventDelay.length;
 
     const { getState, dispatch } = storeWithProfile(profile);
+    const samplesDerivedThread = selectedThreadSelectors.getThread(getState());
+
     const mergeFunction = {
       type: 'merge-function',
       funcIndex: C,
@@ -1870,7 +1870,7 @@ describe('snapshots of selectors/profile', function () {
     return {
       getState,
       dispatch,
-      samplesThread,
+      samplesThread: samplesDerivedThread,
       mergeFunction,
       markerThreadSelectors: getThreadSelectors(1),
       getMarker: getThreadSelectors(1).getMarkerGetter(getState()),
@@ -3077,7 +3077,7 @@ describe('getTimingsForSidebar', () => {
 // Verify that getFriendlyThreadName gives the expected names for threads with or without processName.
 describe('getFriendlyThreadName', function () {
   // Setup a profile with threads based on the given overrides.
-  function setup(threadOverrides: Array<$Shape<Thread>>) {
+  function setup(threadOverrides: Array<$Shape<RawThread>>) {
     const profile = getEmptyProfile();
     for (const threadOverride of threadOverrides) {
       profile.threads.push(getEmptyThread(threadOverride));
@@ -3539,7 +3539,7 @@ describe('pages and active tab selectors', function () {
     // Thread 0 and 1 will be present in firstTabTabID.
     // Thread 1 and 2 will be present in secondTabTabID.
     profile.threads.push(
-      getThreadWithMarkers([
+      getThreadWithMarkers(profile.shared, [
         [
           'Test 1',
           1,
@@ -3553,7 +3553,7 @@ describe('pages and active tab selectors', function () {
       ])
     );
     profile.threads.push(
-      getThreadWithMarkers([
+      getThreadWithMarkers(profile.shared, [
         [
           'Test 2',
           1,
@@ -3577,7 +3577,7 @@ describe('pages and active tab selectors', function () {
       ])
     );
     profile.threads.push(
-      getThreadWithMarkers([
+      getThreadWithMarkers(profile.shared, [
         [
           'Test 4',
           1,
@@ -3716,7 +3716,7 @@ describe('traced timing', function () {
     // Create a weighted samples table.
     const [{ samples }] = profile.threads;
     samples.weightType = 'tracing-ms';
-    samples.weight = samples.time.map(() => 1);
+    samples.weight = samples.stack.map(() => 1);
 
     const { getState } = storeWithProfile(profile);
     expect(selectedThreadSelectors.getTracedTiming(getState())).toBe(null);
@@ -3760,7 +3760,7 @@ describe('getProcessedEventDelays', function () {
     const profile = getEmptyProfile();
 
     // Create event delay values.
-    const samples = getEmptySamplesTableWithEventDelay();
+    const samples = getEmptyRawSamplesTableWithEventDelay();
     if (eventDelay) {
       samples.eventDelay = eventDelay;
     } else {
