@@ -17,7 +17,9 @@ Array [
   },
   Object {
     "category": 0,
-    "data": null,
+    "data": Object {
+      "type": "TTI",
+    },
     "end": null,
     "name": "TTI",
     "start": 6,
@@ -49,7 +51,9 @@ Array [
   },
   Object {
     "category": 0,
-    "data": null,
+    "data": Object {
+      "type": "FirstContentfulPaint",
+    },
     "end": 8,
     "name": "FirstContentfulPaint",
     "start": 7,
