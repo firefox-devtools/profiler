@@ -288,7 +288,7 @@ Home--chrome-extension-recording-instructions = Una vez instalada, utiliza el ic
 ## The component that is used for all the search inputs in the application.
 
 IdleSearchField--search-input =
-    .placeholder = Ingrese términos de filtro
+    .placeholder = Ingresa los términos de filtro
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -883,7 +883,7 @@ TrackBandwidthGraph--total-bandwidth-in-range = { $value } ({ $carbonValue } g C
 ## The component that is used for the search input in the track context menu.
 
 TrackSearchField--search-input =
-    .placeholder = Ingrese términos de filtro
+    .placeholder = Ingresa los términos de filtro
     .title = Mostrar solo las pistas que coinciden con cierto texto
 
 ## TransformNavigator
