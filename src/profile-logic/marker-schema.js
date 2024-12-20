@@ -93,8 +93,8 @@ export function getMarkerSchemaName(
   markerData: MarkerPayload | null
 ): string | null {
   if (!markerData) {
-    // Fall back to using the name if no payload exists.
-    return markerName;
+    // No payload - no schema.
+    return null;
   }
 
   const { type } = markerData;
