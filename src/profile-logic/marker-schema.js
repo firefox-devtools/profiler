@@ -82,34 +82,16 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
   },
 ];
 
-export function getMarkerSchemaName(
-  markerSchemaByName: MarkerSchemaByName,
-  markerName: string,
-  markerData: MarkerPayload | null
-): string | null {
-  if (!markerData || !markerData.type) {
-    // No schema.
-    return null;
-  }
-
-  return markerData.type;
-}
-
 /**
  * This function takes the intended marker schema for a marker field, and applies
  * the appropriate formatting function.
  */
 export function getSchemaFromMarker(
   markerSchemaByName: MarkerSchemaByName,
-  markerName: string,
   markerData: MarkerPayload | null
 ): MarkerSchema | null {
-  const schemaName = getMarkerSchemaName(
-    markerSchemaByName,
-    markerName,
-    markerData
-  );
-  return schemaName !== null ? (markerSchemaByName[schemaName] ?? null) : null;
+  const schemaName = markerData ? markerData.type : null;
+  return schemaName ? (markerSchemaByName[schemaName] ?? null) : null;
 }
 
 /**
@@ -363,12 +345,8 @@ export function getLabelGetter(
     // No label exists, it will have to be generated for the first time.
     if (label === undefined) {
       const marker = getMarker(markerIndex);
-      const schemaName = getMarkerSchemaName(
-        markerSchemaByName,
-        marker.name,
-        marker.data
-      );
-      const applyLabel = schemaName !== null ? labelFns.get(schemaName) : null;
+      const schemaName = marker.data ? marker.data.type : null;
+      const applyLabel = schemaName ? labelFns.get(schemaName) : null;
 
       label = applyLabel
         ? // A label function is available, apply it.

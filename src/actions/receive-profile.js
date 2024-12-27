@@ -38,7 +38,6 @@ import {
   getRelevantPagesForActiveTab,
   getSymbolServerUrl,
   getActiveTabID,
-  getMarkerSchemaByName,
 } from 'firefox-profiler/selectors';
 import {
   getSelectedTab,
@@ -321,11 +320,7 @@ export function finalizeFullProfileView(
       tabFilter,
       tabToThreadIndexesMap
     );
-    const localTracksByPid = computeLocalTracksByPid(
-      profile,
-      globalTracks,
-      getMarkerSchemaByName(getState())
-    );
+    const localTracksByPid = computeLocalTracksByPid(profile, globalTracks);
 
     const legacyThreadOrder = getLegacyThreadOrder(getState());
     const globalTrackOrder = initializeGlobalTrackOrder(
@@ -1835,11 +1830,7 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
       tabID,
       tabToThreadIndexesMap
     );
-    const localTracksByPid = computeLocalTracksByPid(
-      profile,
-      globalTracks,
-      getMarkerSchemaByName(getState())
-    );
+    const localTracksByPid = computeLocalTracksByPid(profile, globalTracks);
 
     const legacyThreadOrder = getLegacyThreadOrder(getState());
     const globalTrackOrder = initializeGlobalTrackOrder(
