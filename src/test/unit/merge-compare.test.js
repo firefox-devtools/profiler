@@ -560,7 +560,7 @@ describe('mergeThreads function', function () {
     profile.meta.markerSchema.push({
       name: 'testSchemaWithUniqueUrlField',
       display: [],
-      data: [{ key: 'fieldWithUniqueString', format: 'unique-string' }],
+      fields: [{ key: 'fieldWithUniqueString', format: 'unique-string' }],
     });
     const thread1 = profile.threads[0];
     const thread2 = profile.threads[1];

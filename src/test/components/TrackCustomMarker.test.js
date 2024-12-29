@@ -63,7 +63,7 @@ function setup() {
   profile.meta.markerSchema.push({
     name: 'Marker',
     display: ['marker-chart', 'marker-table', 'timeline-memory'],
-    data: [
+    fields: [
       { key: 'first', label: 'first', format: 'integer', searchable: true },
       { key: 'second', label: 'second', format: 'integer', searchable: true },
     ],

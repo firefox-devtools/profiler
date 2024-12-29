@@ -6,6 +6,16 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 55
+
+Changes to the `MarkerSchema` type which is used for the elements of the array at `profile.meta.markerSchema`:
+
+- A new `description` field was added. This field is optional.
+- The `data` property was renamed to `fields`.
+- Every field must have a `key` and a `format` property now. There are no static fields any more.
+
+Concretely, this means that if you have a `{ "label": "Description", value: "..." }` entry in your marker schema's `data` array, this entry needs to be removed and the description needs to be put into the `description` field instead, and the `data` property needs to be renamed to `fields`. If you have any other static fields, i.e. fields with `label` and `value` properties rather than `key` and `format` properties, then they need to be removed without replacement.
+
 ### Version 54
 
 The `implementation` column was removed from the frameTable. Modern profiles from Firefox use subcategories to represent the information about the JIT type of a JS frame.
