@@ -1434,36 +1434,29 @@ export function sanitizeFromMarkerSchema(
   markerSchema: MarkerSchema,
   markerPayload: MarkerPayload
 ): MarkerPayload {
-  for (const propertyDescription of markerSchema.data) {
-    if (
-      propertyDescription.key !== undefined &&
-      propertyDescription.format !== undefined
-    ) {
-      const key = propertyDescription.key;
-      const format = propertyDescription.format;
-      if (!(key in markerPayload)) {
-        continue;
-      }
+  for (const { key, format } of markerSchema.fields) {
+    if (!(key in markerPayload)) {
+      continue;
+    }
 
-      // We're typing the result of the sanitization with `any` because Flow
-      // doesn't like much our enormous enum of non-exact objects that's used as
-      // MarkerPayload type, and this code is too generic for Flow in this context.
-      if (format === 'url') {
-        markerPayload = ({
-          ...markerPayload,
-          [key]: removeURLs(markerPayload[key]),
-        }: any);
-      } else if (format === 'file-path') {
-        markerPayload = ({
-          ...markerPayload,
-          [key]: removeFilePath(markerPayload[key]),
-        }: any);
-      } else if (format === 'sanitized-string') {
-        markerPayload = ({
-          ...markerPayload,
-          [key]: '<sanitized>',
-        }: any);
-      }
+    // We're typing the result of the sanitization with `any` because Flow
+    // doesn't like much our enormous enum of non-exact objects that's used as
+    // MarkerPayload type, and this code is too generic for Flow in this context.
+    if (format === 'url') {
+      markerPayload = ({
+        ...markerPayload,
+        [key]: removeURLs(markerPayload[key]),
+      }: any);
+    } else if (format === 'file-path') {
+      markerPayload = ({
+        ...markerPayload,
+        [key]: removeFilePath(markerPayload[key]),
+      }: any);
+    } else if (format === 'sanitized-string') {
+      markerPayload = ({
+        ...markerPayload,
+        [key]: '<sanitized>',
+      }: any);
     }
   }
 
