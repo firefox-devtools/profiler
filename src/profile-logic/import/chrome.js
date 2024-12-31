@@ -5,7 +5,7 @@
 import type {
   Profile,
   StackTable,
-  Thread,
+  RawThread,
   IndexIntoFuncTable,
   IndexIntoStackTable,
   IndexIntoResourceTable,
@@ -275,7 +275,7 @@ export function attemptToConvertChromeProfile(
 }
 
 type ThreadInfo = {
-  thread: Thread,
+  thread: RawThread,
   funcKeyToFuncId: Map<string, IndexIntoFuncTable>,
   nodeIdToStackId: Map<number | void, IndexIntoStackTable | null>,
   originToResourceIndex: Map<string, IndexIntoResourceTable>,
@@ -314,7 +314,7 @@ function findEvents<
 
 function getThreadInfo(
   threadInfoByPidAndTid: Map<string, ThreadInfo>,
-  threadInfoByThread: Map<Thread, ThreadInfo>,
+  threadInfoByThread: Map<RawThread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile,
   chunk: TracingEventUnion
@@ -820,7 +820,7 @@ async function processTracingEvents(
 
 async function extractScreenshots(
   threadInfoByPidAndTid: Map<string, ThreadInfo>,
-  threadInfoByThread: Map<Thread, ThreadInfo>,
+  threadInfoByThread: Map<RawThread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile,
   screenshots: ?(ScreenshotEvent[])
@@ -919,7 +919,7 @@ function assertStackOrdering(stackTable: StackTable) {
  */
 function extractMarkers(
   threadInfoByPidAndTid: Map<string, ThreadInfo>,
-  threadInfoByThread: Map<Thread, ThreadInfo>,
+  threadInfoByThread: Map<RawThread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile
 ) {

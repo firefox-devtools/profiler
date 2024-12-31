@@ -625,7 +625,7 @@ export type ProcessType =
  * Gecko has one or more processes. There can be multiple threads per processes. Each
  * thread has a unique set of tables for its data.
  */
-export type Thread = {|
+export type RawThread = {|
   processType: ProcessType,
   processStartupTime: Milliseconds,
   processShutdownTime: Milliseconds | null,
@@ -931,13 +931,13 @@ export type Profile = {|
   // have them. An upgrader could be written to make this non-optional.
   // This is list because there is a profiler overhead per process.
   profilerOverhead?: ProfilerOverhead[],
-  threads: Thread[],
+  threads: RawThread[],
   profilingLog?: ProfilingLog,
   profileGatheringLog?: ProfilingLog,
 |};
 
 export type SerializableThread = {|
-  ...$Diff<Thread, { stringTable: StringTable, samples: SamplesTable }>,
+  ...$Diff<RawThread, { stringTable: StringTable, samples: SamplesTable }>,
   stringArray: string[],
   samples: SerializableSamplesTable,
 |};
@@ -969,7 +969,7 @@ export type SerializableCounter = {|
  * variant is able to be based into JSON.stringify.
  */
 export type SerializableProfile = {|
-  ...$Diff<Profile, { threads: Thread[], counters?: Counter[] }>,
+  ...$Diff<Profile, { threads: RawThread[], counters?: Counter[] }>,
   threads: SerializableThread[],
   counters?: SerializableCounter[],
 |};

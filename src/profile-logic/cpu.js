@@ -7,6 +7,7 @@
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type {
+  RawThread,
   Thread,
   Milliseconds,
   SampleUnits,
@@ -22,7 +23,7 @@ import type {
  * anyway, because if the unit is 'variable CPU cycles' then we don't do any
  * clamping.
  */
-function _computeMaxVariableCPUCyclesPerMs(threads: Thread[]): number {
+function _computeMaxVariableCPUCyclesPerMs(threads: RawThread[]): number {
   let maxThreadCPUDeltaPerMs = 0;
   for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
     const { samples } = threads[threadIndex];

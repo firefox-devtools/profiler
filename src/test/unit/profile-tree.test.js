@@ -16,7 +16,7 @@ import {
   getCallNodeInfo,
   getInvertedCallNodeInfo,
   getOriginAnnotationForFunc,
-  filterThreadSamplesToRange,
+  filterRawThreadSamplesToRange,
   getSampleIndexToCallNodeIndex,
 } from '../../profile-logic/profile-data';
 import { resourceTypes } from '../../profile-logic/data-structures';
@@ -56,8 +56,8 @@ describe('unfiltered call tree', function () {
    * This test ensures that these generated values are correct.
    */
   describe('computed counts and timings', function () {
-    const { profile, defaultCategory } = getProfile();
-    const [thread] = profile.threads;
+    const { derivedThreads, defaultCategory } = getProfile();
+    const [thread] = derivedThreads;
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -92,7 +92,7 @@ describe('unfiltered call tree', function () {
       // On purpose, we build a profile where the call node indexes won't be in
       // the same order than the function names.
       const {
-        profile,
+        derivedThreads,
         funcNamesDictPerThread: [{ G, H, I, J, K, M, N, W, X, Y, Z }],
         defaultCategory,
       } = getProfileFromTextSamples(`
@@ -100,7 +100,7 @@ describe('unfiltered call tree', function () {
         X  X  H  H  M  N
         Y  W  I  J
       `);
-      const [thread] = profile.threads;
+      const [thread] = derivedThreads;
       const callNodeInfo = getCallNodeInfo(
         thread.stackTable,
         thread.frameTable,
@@ -358,8 +358,8 @@ describe('unfiltered call tree', function () {
    * to help navigate stacks through a list of functions.
    */
   describe('getCallNodeIndexFromPath', function () {
-    const { profile, defaultCategory } = getProfile();
-    const [thread] = profile.threads;
+    const { derivedThreads, defaultCategory } = getProfile();
+    const [thread] = derivedThreads;
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -399,7 +399,8 @@ describe('inverted call tree', function () {
    * Explicitly test the structure of the inverted call tree.
    */
   describe('computed structure', function () {
-    const { profile, defaultCategory } = getProfileFromTextSamples(`
+    const { profile, derivedThreads, defaultCategory } =
+      getProfileFromTextSamples(`
       A                A           A
       B[cat:DOM]       B[cat:DOM]  B[cat:DOM]
       C[cat:Graphics]  X           C[cat:Graphics]
@@ -409,7 +410,7 @@ describe('inverted call tree', function () {
     `);
 
     // Check the non-inverted tree first.
-    const thread = profile.threads[0];
+    const [thread] = derivedThreads;
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -571,9 +572,11 @@ describe('diffing trees', function () {
     const { profile } = getProfile();
     const rangeStart = 4;
     const rangeEnd = 5;
+
     profile.threads = profile.threads.map((thread) =>
-      filterThreadSamplesToRange(thread, rangeStart, rangeEnd)
+      filterRawThreadSamplesToRange(thread, rangeStart, rangeEnd)
     );
+
     const callTree = callTreeFromProfile(profile, /* threadIndex */ 2);
     const formattedTree = formatTree(callTree);
     expect(formattedTree).toEqual([
@@ -597,9 +600,9 @@ describe('diffing trees', function () {
   });
 
   it('computes a rootTotalSummary that is the absolute count of all intervals', () => {
-    const { profile, defaultCategory } = getProfile();
+    const { derivedThreads, defaultCategory } = getProfile();
 
-    const thread = profile.threads[2];
+    const thread = derivedThreads[2];
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
