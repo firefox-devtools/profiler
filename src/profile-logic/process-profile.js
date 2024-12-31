@@ -41,7 +41,7 @@ import { convertJsTracerToThread } from '../profile-logic/js-tracer';
 
 import type {
   Profile,
-  Thread,
+  RawThread,
   Counter,
   ExtensionTable,
   CategoryList,
@@ -1002,7 +1002,7 @@ function _processCounters(
   // references back into a stable list of threads. The threads list in the processing
   // step is built dynamically, so the "stableThreadList" variable is a hint that this
   // should be a stable and sorted list of threads.
-  stableThreadList: Thread[],
+  stableThreadList: RawThread[],
   // The timing across processes must be normalized, this is the timing delta between
   // various processes.
   delta: Milliseconds
@@ -1063,7 +1063,7 @@ function _processProfilerOverhead(
   // references back into a stable list of threads. The threads list in the processing
   // step is built dynamically, so the "stableThreadList" variable is a hint that this
   // should be a stable and sorted list of threads.
-  stableThreadList: Thread[],
+  stableThreadList: RawThread[],
   // The timing across processes must be normalized, this is the timing delta between
   // various processes.
   delta: Milliseconds
@@ -1114,7 +1114,7 @@ function _processThread(
   processProfile: GeckoProfile | GeckoSubprocessProfile,
   extensions: ExtensionTable,
   globalDataCollector: GlobalDataCollector
-): Thread {
+): RawThread {
   const geckoFrameStruct: GeckoFrameStruct = _toStructOfArrays(
     thread.frameTable
   );
@@ -1154,7 +1154,7 @@ function _processThread(
     _processMarkers(geckoMarkers);
   const samples = _processSamples(geckoSamples);
 
-  const newThread: Thread = {
+  const newThread: RawThread = {
     name: thread.name,
     isMainThread: thread.name === 'GeckoMain',
     'eTLD+1': thread['eTLD+1'],
@@ -1532,7 +1532,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   // exception.
   upgradeGeckoProfileToCurrentVersion(geckoProfile);
 
-  const threads = [];
+  const threads: RawThread[] = [];
 
   const extensions: ExtensionTable = geckoProfile.meta.extensions
     ? _toStructOfArrays(geckoProfile.meta.extensions)
@@ -1554,7 +1554,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     const adjustTimestampsBy =
       subprocessProfile.meta.startTime - geckoProfile.meta.startTime;
     for (const thread of subprocessProfile.threads) {
-      const newThread: Thread = _processThread(
+      const newThread: RawThread = _processThread(
         thread,
         subprocessProfile,
         extensions,
@@ -1958,7 +1958,7 @@ export async function unserializeProfileOfArbitraryFormat(
  * Mutates the markers inside parent process and tab process main threads.
  */
 export function processVisualMetrics(
-  threads: Thread[],
+  threads: RawThread[],
   meta: ProfileMeta,
   pages: PageList
 ) {
@@ -1993,7 +1993,7 @@ export function processVisualMetrics(
   );
 
   function maybeAddMetricMarker(
-    thread: Thread,
+    thread: RawThread,
     name: string,
     phase: MarkerPhase,
     startTime: number | null,
@@ -2105,7 +2105,7 @@ export function processVisualMetrics(
  * DO NOT use it for any other purpose than visual metrics as it's not going to be accurate.
  */
 function findTabMainThreadForVisualMetrics(
-  threads: Thread[],
+  threads: RawThread[],
   pages: PageList
 ): ThreadIndex | null {
   for (let threadIdx = 0; threadIdx < threads.length; threadIdx++) {

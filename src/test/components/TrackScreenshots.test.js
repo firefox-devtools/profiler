@@ -5,7 +5,7 @@
 // @flow
 import type {
   Profile,
-  Thread,
+  RawThread,
   IndexIntoRawMarkerTable,
 } from 'firefox-profiler/types';
 
@@ -392,7 +392,7 @@ function setup(
  * create gaps in a screenshot track.
  */
 function _setScreenshotMarkersToUnknown(
-  thread: Thread,
+  thread: RawThread,
   ...markerIndexes: IndexIntoRawMarkerTable[]
 ) {
   // Remove off the last few screenshot markers

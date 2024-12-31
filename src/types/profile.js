@@ -622,10 +622,16 @@ export type ProcessType =
   | string;
 
 /**
- * Gecko has one or more processes. There can be multiple threads per processes. Each
- * thread has a unique set of tables for its data.
+ * The thread type. Threads are stored in an array in profile.threads.
+ *
+ * If a profile contains threads from different OS-level processes, all threads
+ * are flattened into the single threads array, and per-process information is
+ * duplicated on each thread. In the UI, we recover the process separation based
+ * on thread.pid.
+ *
+ * There is also a derived `Thread` type, see profile-derived.js.
  */
-export type Thread = {|
+export type RawThread = {|
   processType: ProcessType,
   processStartupTime: Milliseconds,
   processShutdownTime: Milliseconds | null,
@@ -931,13 +937,13 @@ export type Profile = {|
   // have them. An upgrader could be written to make this non-optional.
   // This is list because there is a profiler overhead per process.
   profilerOverhead?: ProfilerOverhead[],
-  threads: Thread[],
+  threads: RawThread[],
   profilingLog?: ProfilingLog,
   profileGatheringLog?: ProfilingLog,
 |};
 
 export type SerializableThread = {|
-  ...$Diff<Thread, { stringTable: StringTable, samples: SamplesTable }>,
+  ...$Diff<RawThread, { stringTable: StringTable, samples: SamplesTable }>,
   stringArray: string[],
   samples: SerializableSamplesTable,
 |};
@@ -969,7 +975,7 @@ export type SerializableCounter = {|
  * variant is able to be based into JSON.stringify.
  */
 export type SerializableProfile = {|
-  ...$Diff<Profile, { threads: Thread[], counters?: Counter[] }>,
+  ...$Diff<Profile, { threads: RawThread[], counters?: Counter[] }>,
   threads: SerializableThread[],
   counters?: SerializableCounter[],
 |};
