@@ -5,7 +5,7 @@
 // @flow
 import type { IndexIntoStringTable } from 'firefox-profiler/types';
 
-export class UniqueStringArray {
+export class StringTable {
   _array: string[];
   _stringToIndex: Map<string, IndexIntoStringTable>;
 
@@ -20,10 +20,10 @@ export class UniqueStringArray {
   getString(index: IndexIntoStringTable, els: ?string): string {
     if (!this.hasIndex(index)) {
       if (els) {
-        console.warn(`index ${index} not in UniqueStringArray`);
+        console.warn(`index ${index} not in StringTable`);
         return els;
       }
-      throw new Error(`index ${index} not in UniqueStringArray`);
+      throw new Error(`index ${index} not in StringTable`);
     }
     return this._array[index];
   }

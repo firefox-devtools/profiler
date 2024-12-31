@@ -86,7 +86,7 @@ import type {
   ThreadWithReservedFunctions,
   TabID,
 } from 'firefox-profiler/types';
-import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
+import type { StringTable } from 'firefox-profiler/utils/string-table';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -2497,7 +2497,7 @@ export function getOriginAnnotationForFunc(
   funcIndex: IndexIntoFuncTable,
   funcTable: FuncTable,
   resourceTable: ResourceTable,
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   frameLineNumber: number | null = null,
   frameColumnNumber: number | null = null
 ): string {
@@ -3031,7 +3031,7 @@ export function extractProfileFilterPageData(
 export function getOrCreateURIResource(
   scriptURI: string,
   resourceTable: ResourceTable,
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   originToResourceIndex: Map<string, IndexIntoResourceTable>
 ): IndexIntoResourceTable {
   // Figure out the origin and host.
@@ -3608,7 +3608,7 @@ export function getNativeSymbolInfo(
   nativeSymbol: IndexIntoNativeSymbolTable,
   nativeSymbols: NativeSymbolTable,
   frameTable: FrameTable,
-  stringTable: UniqueStringArray
+  stringTable: StringTable
 ): NativeSymbolInfo {
   const functionSizeOrNull = nativeSymbols.functionSize[nativeSymbol];
   const functionSize =
