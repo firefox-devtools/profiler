@@ -18,6 +18,7 @@ import {
   getEmptyNativeSymbolTable,
 } from './data-structures';
 import { immutableUpdate, ensureExists, coerce } from '../utils/flow';
+import { verifyMagic, SIMPLEPERF as SIMPLEPERF_MAGIC } from '../utils/magic';
 import { attemptToUpgradeProcessedProfileThroughMutation } from './processed-profile-versioning';
 import { upgradeGeckoProfileToCurrentVersion } from './gecko-profile-versioning';
 import {
@@ -1893,6 +1894,11 @@ export async function unserializeProfileOfArbitraryFormat(
 
       if (isArtTraceFormat(arrayBuffer)) {
         arbitraryFormat = convertArtTraceProfile(arrayBuffer);
+      } else if (verifyMagic(SIMPLEPERF_MAGIC, arrayBuffer)) {
+        const { convertSimpleperfTraceProfile } = await import(
+          './import/simpleperf'
+        );
+        arbitraryFormat = convertSimpleperfTraceProfile(arrayBuffer);
       } else {
         try {
           const textDecoder = new TextDecoder('utf-8', { fatal: true });
