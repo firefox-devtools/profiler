@@ -13,7 +13,7 @@ import type {
   Profile,
   InnerWindowID,
   Page,
-  Thread,
+  RawThread,
   ScreenshotPayload,
   ActiveTabTimeline,
   ActiveTabMainTrack,
@@ -169,7 +169,7 @@ function getTopmostInnerWindowIDs(relevantPages: Page[]): Set<InnerWindowID> {
  * Topmost thread means the thread that belongs to the browser tab itself and not the iframe.
  */
 function isTopmostThread(
-  thread: Thread,
+  thread: RawThread,
   topmostInnerWindowIDs: Set<InnerWindowID>
 ): boolean {
   const { frameTable, markers } = thread;
@@ -204,7 +204,7 @@ function isTopmostThread(
  * If it fails to find a name, returns null.
  */
 function _getActiveTabResourceName(
-  thread: Thread,
+  thread: RawThread,
   innerWindowIDToPageMap: Map<InnerWindowID, Page>
 ): string | null {
   if (thread.isMainThread) {

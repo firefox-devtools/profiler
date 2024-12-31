@@ -23,13 +23,13 @@ import type {
 
 describe('getStackLineInfo', function () {
   it('computes results for all stacks', function () {
-    const { profile } = getProfileFromTextSamples(`
+    const { derivedThreads } = getProfileFromTextSamples(`
       A[file:one.js][line:20]  A[file:one.js][line:21]  A[file:one.js][line:20]
       B[file:one.js][line:30]  B[file:one.js][line:30]  B[file:one.js][line:30]
       C[file:two.js][line:10]  C[file:two.js][line:11]  D[file:two.js][line:40]
       B[file:one.js][line:30]                           D[file:two.js][line:40]
     `);
-    const [thread] = profile.threads;
+    const [thread] = derivedThreads;
     const { stackTable, frameTable, funcTable, stringTable } = thread;
 
     const fileOne = stringTable.indexForString('one.js');
@@ -63,11 +63,11 @@ describe('getLineTimings for getStackLineInfo', function () {
   it('passes a basic test', function () {
     // In this example, there's one self line hit in line 30.
     // Both line 20 and line 30 have one total time hit.
-    const { profile } = getProfileFromTextSamples(`
+    const { derivedThreads } = getProfileFromTextSamples(`
       A[file:file.js][line:20]
       B[file:file.js][line:30]
     `);
-    const [thread] = profile.threads;
+    const [thread] = derivedThreads;
     const lineTimings = getTimings(thread, 'file.js');
     expect(lineTimings.totalLineHits.get(20)).toBe(1);
     expect(lineTimings.totalLineHits.get(30)).toBe(1);
@@ -78,13 +78,13 @@ describe('getLineTimings for getStackLineInfo', function () {
   });
 
   it('passes a test with two files and recursion', function () {
-    const { profile } = getProfileFromTextSamples(`
+    const { derivedThreads } = getProfileFromTextSamples(`
       A[file:one.js][line:20]  A[file:one.js][line:21]  A[file:one.js][line:20]
       B[file:one.js][line:30]  B[file:one.js][line:30]  B[file:one.js][line:30]
       C[file:two.js][line:10]  C[file:two.js][line:11]  D[file:two.js][line:40]
       B[file:one.js][line:30]                           D[file:two.js][line:40]
     `);
-    const [thread] = profile.threads;
+    const [thread] = derivedThreads;
 
     const lineTimingsOne = getTimings(thread, 'one.js');
     expect(lineTimingsOne.totalLineHits.get(20)).toBe(2);
@@ -149,14 +149,14 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
   }
 
   it('passes a basic test', function () {
-    const { profile, funcNamesDictPerThread, defaultCategory } =
+    const { derivedThreads, funcNamesDictPerThread, defaultCategory } =
       getProfileFromTextSamples(`
       A[file:file.js][line:20]
       B[file:file.js][line:30]
     `);
 
     const [{ A, B }] = funcNamesDictPerThread;
-    const [thread] = profile.threads;
+    const [thread] = derivedThreads;
 
     // Compute the line timings for the root call node.
     // No self line hit, one total line hit in line 20.
@@ -175,7 +175,7 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
   });
 
   it('passes a basic test with recursion', function () {
-    const { profile, funcNamesDictPerThread, defaultCategory } =
+    const { derivedThreads, funcNamesDictPerThread, defaultCategory } =
       getProfileFromTextSamples(`
       A[file:file.js][line:20]
       B[file:file.js][line:30]
@@ -183,7 +183,7 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
     `);
 
     const [{ A, B }] = funcNamesDictPerThread;
-    const [thread] = profile.threads;
+    const [thread] = derivedThreads;
 
     // Compute the line timings for the root call node.
     // No self line hit, one total line hit in line 20.
@@ -209,7 +209,7 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
   });
 
   it('passes a test where the same function is called via different call paths', function () {
-    const { profile, funcNamesDictPerThread, defaultCategory } =
+    const { derivedThreads, funcNamesDictPerThread, defaultCategory } =
       getProfileFromTextSamples(`
       A[file:one.js][line:20]  A[file:one.js][line:21]  A[file:one.js][line:20]
       B[file:one.js][line:30]  D[file:one.js][line:50]  B[file:one.js][line:31]
@@ -218,7 +218,7 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
     `);
 
     const [{ A, B, C }] = funcNamesDictPerThread;
-    const [thread] = profile.threads;
+    const [thread] = derivedThreads;
 
     const lineTimingsABC = getTimings(
       thread,
@@ -234,7 +234,7 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
   });
 
   it('passes a test with an inverted thread', function () {
-    const { profile, funcNamesDictPerThread, defaultCategory } =
+    const { derivedThreads, funcNamesDictPerThread, defaultCategory } =
       getProfileFromTextSamples(`
       A[file:one.js][line:20]  A[file:one.js][line:21]  A[file:one.js][line:20]
       B[file:one.js][line:30]  D[file:one.js][line:50]  B[file:one.js][line:31]
@@ -243,7 +243,7 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
     `);
 
     const [{ A, B, C, D }] = funcNamesDictPerThread;
-    const [thread] = profile.threads;
+    const [thread] = derivedThreads;
 
     // For the root D of the inverted tree, we have 3 self line hits.
     const lineTimingsD = getTimings(thread, [D], defaultCategory, true);

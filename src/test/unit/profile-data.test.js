@@ -40,6 +40,7 @@ import getCallNodeProfile from '../fixtures/profiles/call-nodes';
 import {
   getProfileFromTextSamples,
   getJsTracerTable,
+  getProfileWithDicts,
 } from '../fixtures/profiles/processed-profile';
 import {
   funcHasDirectRecursiveCall,
@@ -439,11 +440,8 @@ describe('process-profile', function () {
 describe('profile-data', function () {
   describe('createCallNodeTableAndFixupSamples', function () {
     const profile = processGeckoProfile(createGeckoProfile());
-    const defaultCategory = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    ).findIndex((c) => c.name === 'Other');
-    const thread = profile.threads[0];
+    const { derivedThreads, defaultCategory } = getProfileWithDicts(profile);
+    const [thread] = derivedThreads;
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -491,14 +489,9 @@ describe('profile-data', function () {
   }
 
   describe('getCallNodeInfo', function () {
-    const {
-      meta,
-      threads: [thread],
-    } = getCallNodeProfile();
-    const defaultCategory = ensureExists(
-      meta.categories,
-      'Expected to find categories'
-    ).findIndex((c) => c.name === 'Other');
+    const profile = getCallNodeProfile();
+    const { derivedThreads, defaultCategory } = getProfileWithDicts(profile);
+    const [thread] = derivedThreads;
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -714,7 +707,8 @@ describe('symbolication', function () {
 
 describe('filter-by-implementation', function () {
   const profile = processGeckoProfile(createGeckoProfileWithJsTimings());
-  const thread = profile.threads[0];
+  const { derivedThreads } = getProfileWithDicts(profile);
+  const [thread] = derivedThreads;
 
   function stackIsJS(filteredThread, stackIndex) {
     if (stackIndex === null) {
@@ -758,10 +752,10 @@ describe('filter-by-implementation', function () {
 
 describe('get-sample-index-closest-to-time', function () {
   it('returns the correct sample index for a provided time', function () {
-    const { profile } = getProfileFromTextSamples(
+    const { profile, derivedThreads } = getProfileFromTextSamples(
       Array(10).fill('A').join('  ')
     );
-    const thread = profile.threads[0];
+    const [thread] = derivedThreads;
     const { samples } = filterThreadByImplementation(thread, 'js');
 
     const interval = profile.meta.interval;
@@ -777,14 +771,11 @@ describe('get-sample-index-closest-to-time', function () {
 describe('funcHasDirectRecursiveCall and funcHasRecursiveCall', function () {
   function setup(textSamples) {
     const {
-      profile,
+      derivedThreads,
       funcNamesPerThread: [funcNames],
+      defaultCategory,
     } = getProfileFromTextSamples(textSamples);
-    const [thread] = profile.threads;
-    const defaultCategory = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    ).findIndex((c) => c.name === 'Other');
+    const [thread] = derivedThreads;
     const callNodeTable = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -842,9 +833,9 @@ describe('funcHasDirectRecursiveCall and funcHasRecursiveCall', function () {
 
 describe('convertStackToCallNodeAndCategoryPath', function () {
   it('correctly returns a call node path for a stack', function () {
-    const {
-      threads: [thread],
-    } = getCallNodeProfile();
+    const profile = getCallNodeProfile();
+    const { derivedThreads } = getProfileWithDicts(profile);
+    const [thread] = derivedThreads;
     const stack1 = thread.samples.stack[0];
     const stack2 = thread.samples.stack[1];
     if (stack1 === null || stack2 === null) {
@@ -861,11 +852,11 @@ describe('convertStackToCallNodeAndCategoryPath', function () {
 describe('getSamplesSelectedStates', function () {
   function setup(textSamples) {
     const {
-      profile,
+      derivedThreads,
       funcNamesDictPerThread: [funcNamesDict],
       defaultCategory,
     } = getProfileFromTextSamples(textSamples);
-    const thread = profile.threads[0];
+    const [thread] = derivedThreads;
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -1364,7 +1355,7 @@ describe('calculateFunctionSizeLowerBound', function () {
 describe('getNativeSymbolsForCallNode', function () {
   it('finds a single symbol', function () {
     const {
-      profile,
+      derivedThreads,
       funcNamesDictPerThread,
       nativeSymbolsDictPerThread,
       defaultCategory,
@@ -1374,7 +1365,7 @@ describe('getNativeSymbolsForCallNode', function () {
         funC[lib:XUL][address:2007][sym:symB:2000:][inl:1]
       `);
 
-    const thread = profile.threads[0];
+    const [thread] = derivedThreads;
     const { funA, funB, funC } = funcNamesDictPerThread[0];
     const { symB } = nativeSymbolsDictPerThread[0];
     const callNodeInfo = getCallNodeInfo(
@@ -1410,7 +1401,7 @@ describe('getNativeSymbolsForCallNode', function () {
 
   it('finds multiple symbols', function () {
     const {
-      profile,
+      derivedThreads,
       funcNamesDictPerThread,
       nativeSymbolsDictPerThread,
       defaultCategory,
@@ -1420,7 +1411,7 @@ describe('getNativeSymbolsForCallNode', function () {
         funC[lib:XUL][address:2007][sym:symB:2000:][inl:1]  funC[lib:XUL][address:4007][sym:symD:4000:][inl:1]
       `);
 
-    const thread = profile.threads[0];
+    const [thread] = derivedThreads;
     const { funC } = funcNamesDictPerThread[0];
     const { symB, symD } = nativeSymbolsDictPerThread[0];
     const nonInvertedCallNodeInfo = getCallNodeInfo(

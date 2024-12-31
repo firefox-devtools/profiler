@@ -215,8 +215,7 @@ describe('doSymbolicateProfile', function () {
         '- second symbol (total: 1, self: 1)',
       ]);
 
-      const symbolicatedProfile = ProfileViewSelectors.getProfile(getState());
-      const thread = symbolicatedProfile.threads[0];
+      const thread = getThread(getState());
       const { frameTable, funcTable, stringTable } = thread;
       expect(funcTable.length).toBeGreaterThanOrEqual(4);
 

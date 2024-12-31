@@ -28,11 +28,11 @@ describe('EmptyThreadIndicator', function () {
       .mockImplementation(() => getElementWithFixedSize({ width, height }));
   });
 
-  const { profile } = getProfileFromTextSamples(`
+  const { derivedThreads } = getProfileFromTextSamples(`
     A  A  A
   `);
 
-  const thread = profile.threads[0];
+  const thread = derivedThreads[0];
   thread.processStartupTime = 2;
   thread.processShutdownTime = 10;
   thread.registerTime = 3;

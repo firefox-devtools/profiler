@@ -15,7 +15,7 @@ import type {
   IndexIntoStringTable,
   IndexIntoJsTracerEvents,
   IndexIntoFuncTable,
-  Thread,
+  RawThread,
   IndexIntoStackTable,
   SamplesTable,
   CategoryList,
@@ -36,7 +36,7 @@ type ScriptLocationToFuncIndex = Map<string, IndexIntoFuncTable | null>;
  * tracer information was sampled.
  */
 function getScriptLocationToFuncIndex(
-  thread: Thread
+  thread: RawThread
 ): ScriptLocationToFuncIndex {
   const { funcTable, stringTable } = thread;
   const scriptLocationToFuncIndex = new Map();
@@ -78,7 +78,7 @@ function getScriptLocationToFuncIndex(
  */
 export function getJsTracerTiming(
   jsTracer: JsTracerTable,
-  thread: Thread
+  thread: RawThread
 ): JsTracerTiming[] {
   const jsTracerTiming: JsTracerTiming[] = [];
   const { stringTable, funcTable } = thread;
@@ -492,11 +492,11 @@ export function getJsTracerLeafTiming(
  * function, then the function information is used.
  */
 export function convertJsTracerToThreadWithoutSamples(
-  fromThread: Thread,
+  fromThread: RawThread,
   jsTracer: JsTracerFixed,
   categories: CategoryList
 ): {
-  thread: Thread,
+  thread: RawThread,
   stackMap: Map<IndexIntoJsTracerEvents, IndexIntoStackTable>,
 } {
   // Create a new thread, with empty information, but preserve some of the existing
@@ -512,7 +512,7 @@ export function convertJsTracerToThreadWithoutSamples(
   const funcTable = { ...fromThread.funcTable };
   const { stringTable } = fromThread;
 
-  const thread: Thread = {
+  const thread: RawThread = {
     ...fromThread,
     markers,
     funcTable,
@@ -763,10 +763,10 @@ export function getJsTracerFixed(jsTracer: JsTracerTable): JsTracerFixed {
  * what is going on.
  */
 export function convertJsTracerToThread(
-  fromThread: Thread,
+  fromThread: RawThread,
   jsTracer: JsTracerTable,
   categories: CategoryList
-): Thread {
+): RawThread {
   const jsTracerFixed = getJsTracerFixed(jsTracer);
   const { thread, stackMap } = convertJsTracerToThreadWithoutSamples(
     fromThread,
@@ -815,7 +815,7 @@ export function convertJsTracerToThread(
 
  */
 export function getSelfTimeSamplesFromJsTracer(
-  thread: Thread,
+  thread: RawThread,
   jsTracer: JsTracerFixed,
   stackMap: Map<IndexIntoJsTracerEvents, IndexIntoStackTable>
 ): SamplesTable {

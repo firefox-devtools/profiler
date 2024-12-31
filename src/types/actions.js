@@ -7,7 +7,7 @@ import { ReactLocalization } from '@fluent/react';
 import type JSZip from 'jszip';
 import type {
   Profile,
-  Thread,
+  RawThread,
   ThreadIndex,
   Pid,
   TabID,
@@ -16,6 +16,7 @@ import type {
   PageList,
 } from './profile';
 import type {
+  Thread,
   CallNodePath,
   CallNodeInfo,
   GlobalTrack,
@@ -383,7 +384,7 @@ type ProfileAction =
 type ReceiveProfileAction =
   | {|
       +type: 'BULK_SYMBOLICATION',
-      +symbolicatedThreads: Thread[],
+      +symbolicatedThreads: RawThread[],
       +oldFuncToNewFuncsMaps: Map<ThreadIndex, FuncToFuncsMap>,
     |}
   | {|

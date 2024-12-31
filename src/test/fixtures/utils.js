@@ -14,6 +14,7 @@ import {
   getSampleIndexToCallNodeIndex,
   getOriginAnnotationForFunc,
 } from 'firefox-profiler/profile-logic/profile-data';
+import { getProfileWithDicts } from './profiles/processed-profile';
 
 import type {
   IndexIntoCallNodeTable,
@@ -119,12 +120,12 @@ export function callTreeFromProfile(
   profile: Profile,
   threadIndex: number = 0
 ): CallTree {
-  const thread = profile.threads[threadIndex] ?? getEmptyThread();
-  const categories = ensureExists(
-    profile.meta.categories,
-    'Expected to find categories'
-  );
-  const defaultCategory = categories.findIndex((c) => c.name === 'Other');
+  if (!profile.threads[threadIndex]) {
+    profile.threads[threadIndex] = getEmptyThread();
+  }
+  const { derivedThreads, defaultCategory } = getProfileWithDicts(profile);
+  const thread = derivedThreads[threadIndex];
+
   const callNodeInfo = getCallNodeInfo(
     thread.stackTable,
     thread.frameTable,
@@ -145,7 +146,7 @@ export function callTreeFromProfile(
   return getCallTree(
     thread,
     callNodeInfo,
-    categories,
+    ensureExists(profile.meta.categories),
     callTreeTimings,
     'samples'
   );

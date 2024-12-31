@@ -10,7 +10,7 @@ import {
 } from '../app-logic/constants';
 
 import type {
-  Thread,
+  RawThread,
   SamplesTable,
   FrameTable,
   StackTable,
@@ -369,8 +369,8 @@ export function getEmptyJsTracerTable(): JsTracerTable {
   };
 }
 
-export function getEmptyThread(overrides?: $Shape<Thread>): Thread {
-  const defaultThread: Thread = {
+export function getEmptyThread(overrides?: $Shape<RawThread>): RawThread {
+  const defaultThread: RawThread = {
     processType: 'default',
     processStartupTime: 0,
     processShutdownTime: null,

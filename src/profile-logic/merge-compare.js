@@ -25,7 +25,7 @@ import {
   getEmptySamplesTableWithEventDelay,
 } from './data-structures';
 import {
-  filterThreadSamplesToRange,
+  filterRawThreadSamplesToRange,
   getTimeRangeForThread,
   getTimeRangeIncludingAllThreads,
 } from './profile-data';
@@ -39,7 +39,7 @@ import { ensureExists, getFirstItemFromSet } from '../utils/flow';
 
 import type {
   Profile,
-  Thread,
+  RawThread,
   IndexIntoCategoryList,
   CategoryList,
   IndexIntoFrameTable,
@@ -211,7 +211,7 @@ export function mergeProfilesForDiffing(
         committedRange,
         ipcCorrelations
       );
-      thread = filterThreadToRange(
+      thread = _filterRawThreadToRange(
         thread,
         derivedMarkerInfo,
         committedRange.start + zeroAt,
@@ -305,13 +305,13 @@ export function mergeProfilesForDiffing(
  * completely (both raw markers and samples). This is not part of the normal
  * filtering pipeline, but is used with comparison profiles.
  */
-function filterThreadToRange(
-  thread: Thread,
+function _filterRawThreadToRange(
+  thread: RawThread,
   derivedMarkerInfo: DerivedMarkerInfo,
   rangeStart: number,
   rangeEnd: number
-): Thread {
-  thread = filterThreadSamplesToRange(thread, rangeStart, rangeEnd);
+): RawThread {
+  thread = filterRawThreadSamplesToRange(thread, rangeStart, rangeEnd);
   thread.markers = filterRawMarkerTableToRange(
     thread.markers,
     derivedMarkerInfo,
@@ -519,7 +519,7 @@ function mergeLibs(libsPerProfile: Lib[][]): {
  */
 function combineResourceTables(
   newStringTable: StringTable,
-  threads: $ReadOnlyArray<Thread>
+  threads: $ReadOnlyArray<RawThread>
 ): {
   resourceTable: ResourceTable,
   translationMaps: TranslationMapForResources[],
@@ -574,7 +574,7 @@ function combineResourceTables(
  */
 function combineNativeSymbolTables(
   newStringTable: StringTable,
-  threads: $ReadOnlyArray<Thread>
+  threads: $ReadOnlyArray<RawThread>
 ): {
   nativeSymbols: NativeSymbolTable,
   translationMaps: TranslationMapForNativeSymbols[],
@@ -629,7 +629,7 @@ function combineNativeSymbolTables(
 function combineFuncTables(
   translationMapsForResources: TranslationMapForResources[],
   newStringTable: StringTable,
-  threads: $ReadOnlyArray<Thread>
+  threads: $ReadOnlyArray<RawThread>
 ): { funcTable: FuncTable, translationMaps: TranslationMapForFuncs[] } {
   const mapOfInsertedFuncs: Map<string, IndexIntoFuncTable> = new Map();
   const translationMaps = [];
@@ -707,7 +707,7 @@ function combineFrameTables(
   translationMapsForFuncs: TranslationMapForFuncs[],
   translationMapsForNativeSymbols: TranslationMapForNativeSymbols[],
   newStringTable: StringTable,
-  threads: $ReadOnlyArray<Thread>
+  threads: $ReadOnlyArray<RawThread>
 ): { frameTable: FrameTable, translationMaps: TranslationMapForFrames[] } {
   const translationMaps = [];
   const newFrameTable = getEmptyFrameTable();
@@ -780,7 +780,7 @@ function combineFrameTables(
  */
 function combineStackTables(
   translationMapsForFrames: TranslationMapForFrames[],
-  threads: $ReadOnlyArray<Thread>
+  threads: $ReadOnlyArray<RawThread>
 ): { stackTable: StackTable, translationMaps: TranslationMapForStacks[] } {
   const translationMaps = [];
   const newStackTable = getEmptyStackTable();
@@ -934,7 +934,7 @@ function combineSamplesDiffing(
 }
 
 type ThreadAndWeightMultiplier = {|
-  thread: Thread,
+  thread: RawThread,
   weightMultiplier: number,
 |};
 
@@ -949,7 +949,7 @@ function getComparisonThread(
     ThreadAndWeightMultiplier,
     ThreadAndWeightMultiplier,
   ]
-): Thread {
+): RawThread {
   const newStringTable = StringTable.withBackingArray([]);
 
   const threads = threadsAndWeightMultipliers.map((item) => item.thread);
@@ -1023,7 +1023,7 @@ function getComparisonThread(
  * this does not merge the profile level information like metadata, categories etc.
  * TODO: Overlapping threads will not look great due to #2783.
  */
-export function mergeThreads(threads: Thread[]): Thread {
+export function mergeThreads(threads: RawThread[]): RawThread {
   const newStringTable = StringTable.withBackingArray([]);
 
   // Combine the table we would need.
@@ -1119,7 +1119,7 @@ export function mergeThreads(threads: Thread[]): Thread {
  */
 function combineSamplesForMerging(
   translationMapsForStacks: TranslationMapForStacks[],
-  threads: Thread[]
+  threads: RawThread[]
 ): SamplesTable {
   const samplesPerThread: SamplesTable[] = threads.map(
     (thread) => thread.samples
@@ -1214,7 +1214,7 @@ type TranslationMapForMarkers = Map<MarkerIndex, MarkerIndex>;
 function mergeMarkers(
   translationMapsForStacks: TranslationMapForStacks[],
   newStringTable: StringTable,
-  threads: Thread[]
+  threads: RawThread[]
 ): {
   markerTable: RawMarkerTable,
   translationMaps: TranslationMapForMarkers[],
@@ -1300,8 +1300,8 @@ function mergeMarkers(
  * Merge screenshot markers from different threads. And update the target threads string table while doing it.
  */
 function mergeScreenshotMarkers(
-  threads: Thread[],
-  targetThread: Thread
+  threads: RawThread[],
+  targetThread: RawThread
 ): {
   markerTable: RawMarkerTable,
   translationMaps: TranslationMapForMarkers[],

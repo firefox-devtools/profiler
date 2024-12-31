@@ -24,13 +24,14 @@ import type {
 
 describe('getStackAddressInfo', function () {
   it('computes results for all stacks', function () {
-    const { profile, nativeSymbolsDictPerThread } = getProfileFromTextSamples(`
+    const { derivedThreads, nativeSymbolsDictPerThread } =
+      getProfileFromTextSamples(`
       A[lib:one][address:20][sym:Asym:20:]  A[lib:one][address:21][sym:Asym:20:]  A[lib:one][address:20][sym:Asym:20:]
       B[lib:one][address:30][sym:Bsym:30:]  B[lib:one][address:30][sym:Bsym:30:]  B[lib:one][address:30][sym:Bsym:30:]
       C[lib:two][address:10][sym:Csym:10:]  C[lib:two][address:11][sym:Csym:10:]  D[lib:two][address:40][sym:Dsym:40:]
       B[lib:one][address:30][sym:Bsym:30:]                                        D[lib:two][address:40][sym:Dsym:40:]
     `);
-    const [thread] = profile.threads;
+    const [thread] = derivedThreads;
     const [{ Asym }] = nativeSymbolsDictPerThread;
     const { stackTable, frameTable, funcTable } = thread;
 
@@ -63,11 +64,12 @@ describe('getAddressTimings for getStackAddressInfo', function () {
   it('passes a basic test', function () {
     // In this example, there's one self address hit at address 0x30.
     // Both address 0x20 and address 0x30 have one total time hit.
-    const { profile, nativeSymbolsDictPerThread } = getProfileFromTextSamples(`
+    const { derivedThreads, nativeSymbolsDictPerThread } =
+      getProfileFromTextSamples(`
       A[lib:file][address:20][sym:Asym:20:]
       A[lib:file][address:30][sym:Asym:20:]
     `);
-    const [thread] = profile.threads;
+    const [thread] = derivedThreads;
     const [{ Asym }] = nativeSymbolsDictPerThread;
     const addressTimings = getTimings(thread, Asym);
     expect(addressTimings.totalAddressHits.get(0x20)).toBe(1);
@@ -81,13 +83,14 @@ describe('getAddressTimings for getStackAddressInfo', function () {
   it('passes a test with inlining', function () {
     // In this example, there's one self address hit at address 0x30.
     // Both address 0x20 and address 0x30 have one total time hit.
-    const { profile, nativeSymbolsDictPerThread } = getProfileFromTextSamples(`
+    const { derivedThreads, nativeSymbolsDictPerThread } =
+      getProfileFromTextSamples(`
       A[lib:file][address:20][sym:Asym:20:]
       B[lib:file][address:20][sym:Asym:20:][inl:1]
       C[lib:file][address:20][sym:Asym:20:][inl:2]
       A[lib:file][address:30][sym:Asym:20:]
     `);
-    const [thread] = profile.threads;
+    const [thread] = derivedThreads;
     const [{ Asym }] = nativeSymbolsDictPerThread;
     const addressTimings = getTimings(thread, Asym);
     expect(addressTimings.totalAddressHits.get(0x20)).toBe(1);
@@ -99,13 +102,14 @@ describe('getAddressTimings for getStackAddressInfo', function () {
   });
 
   it('passes a test with two files and recursion', function () {
-    const { profile, nativeSymbolsDictPerThread } = getProfileFromTextSamples(`
+    const { derivedThreads, nativeSymbolsDictPerThread } =
+      getProfileFromTextSamples(`
       A[lib:one][address:20][sym:Asym:20:]  A[lib:one][address:21][sym:Asym:20:]  A[lib:one][address:20][sym:Asym:20:]
       B[lib:one][address:30][sym:Bsym:30:]  B[lib:one][address:30][sym:Bsym:30:]  B[lib:one][address:30][sym:Bsym:30:]
       C[lib:two][address:10][sym:Csym:10:]  C[lib:two][address:11][sym:Csym:10:]  D[lib:two][address:40][sym:Dsym:40:]
       B[lib:one][address:30][sym:Bsym:30:]                                        D[lib:two][address:40][sym:Dsym:40:]
     `);
-    const [thread] = profile.threads;
+    const [thread] = derivedThreads;
     const [{ Asym, Bsym, Csym, Dsym }] = nativeSymbolsDictPerThread;
 
     const addressTimingsA = getTimings(thread, Asym);
@@ -188,7 +192,7 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
 
   it('passes a basic test', function () {
     const {
-      profile,
+      derivedThreads,
       funcNamesDictPerThread,
       nativeSymbolsDictPerThread,
       defaultCategory,
@@ -196,10 +200,9 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
         A[lib:file][address:20][sym:Asym:20:]
         B[lib:file][address:30][sym:Bsym:30:]
       `);
-
     const [{ A, B }] = funcNamesDictPerThread;
     const [{ Asym, Bsym }] = nativeSymbolsDictPerThread;
-    const [thread] = profile.threads;
+    const [thread] = derivedThreads;
 
     // Compute the address timings for the root call node.
     // No self address hit, one total address hit at address 0x20.
@@ -231,7 +234,7 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
 
   it('passes a basic test with recursion', function () {
     const {
-      profile,
+      derivedThreads,
       funcNamesDictPerThread,
       nativeSymbolsDictPerThread,
       defaultCategory,
@@ -243,7 +246,7 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
 
     const [{ A, B }] = funcNamesDictPerThread;
     const [{ Asym }] = nativeSymbolsDictPerThread;
-    const [thread] = profile.threads;
+    const [thread] = derivedThreads;
 
     // Compute the address timings for the root call node.
     // No self address hit, one total address hit at address 0x20.
@@ -277,7 +280,7 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
 
   it('passes a test where the same function is called via different call paths', function () {
     const {
-      profile,
+      derivedThreads,
       funcNamesDictPerThread,
       nativeSymbolsDictPerThread,
       defaultCategory,
@@ -290,7 +293,7 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
 
     const [{ A, B, C }] = funcNamesDictPerThread;
     const [{ Csym }] = nativeSymbolsDictPerThread;
-    const [thread] = profile.threads;
+    const [thread] = derivedThreads;
 
     const addressTimingsABC = getTimings(
       thread,
@@ -308,7 +311,7 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
 
   it('passes a test with an inverted thread', function () {
     const {
-      profile,
+      derivedThreads,
       funcNamesDictPerThread,
       nativeSymbolsDictPerThread,
       defaultCategory,
@@ -321,7 +324,7 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
 
     const [{ C, D }] = funcNamesDictPerThread;
     const [{ Csym, Dsym }] = nativeSymbolsDictPerThread;
-    const [thread] = profile.threads;
+    const [thread] = derivedThreads;
     // For the root D of the inverted tree, we have 3 self address hits.
     const addressTimingsD = getTimings(
       thread,
@@ -365,7 +368,7 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
     //
     // In this test, we compute the timings for native symbol Bsym.
     const {
-      profile,
+      derivedThreads,
       funcNamesDictPerThread,
       nativeSymbolsDictPerThread,
       defaultCategory,
@@ -378,7 +381,7 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
 
     const [{ A, B, C }] = funcNamesDictPerThread;
     const [{ Bsym }] = nativeSymbolsDictPerThread;
-    const [thread] = profile.threads;
+    const [thread] = derivedThreads;
 
     const addressTimingsABCForBsym = getTimings(
       thread,

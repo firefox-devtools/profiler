@@ -15,7 +15,7 @@ import {
 import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { getTimeRangeIncludingAllThreads } from 'firefox-profiler/profile-logic/profile-data';
-import type { Thread } from 'firefox-profiler/types';
+import type { RawThread } from 'firefox-profiler/types';
 
 describe('mergeProfilesForDiffing function', function () {
   it('merges the various tables properly in the diffing profile', function () {
@@ -268,7 +268,7 @@ describe('mergeProfilesForDiffing function', function () {
 });
 
 describe('mergeThreads function', function () {
-  function getFriendlyFuncLibResources(thread: Thread): string[] {
+  function getFriendlyFuncLibResources(thread: RawThread): string[] {
     const { funcTable, resourceTable, stringTable } = thread;
     const strings = [];
     for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {

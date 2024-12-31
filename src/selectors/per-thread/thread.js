@@ -24,6 +24,7 @@ import {
 
 import type {
   Thread,
+  RawThread,
   ThreadIndex,
   JsTracerTable,
   SamplesTable,
@@ -74,7 +75,12 @@ export function getBasicThreadSelectorsPerThread(
   threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
 ) {
-  const getMergedThread: Selector<Thread> = createSelector(
+  const singleThreadIndex =
+    threadIndexes.size === 1
+      ? ensureExists(getFirstItemFromSet(threadIndexes))
+      : null;
+
+  const getMergedRawThread: Selector<RawThread> = createSelector(
     ProfileSelectors.getProfile,
     (profile) =>
       mergeThreads(
@@ -85,26 +91,25 @@ export function getBasicThreadSelectorsPerThread(
    * Either return the raw thread from the profile, or merge several raw threads
    * together.
    */
-  const getThread: Selector<Thread> = (state) =>
-    threadIndexes.size === 1
-      ? ProfileSelectors.getProfile(state).threads[
-          ensureExists(getFirstItemFromSet(threadIndexes))
-        ]
-      : getMergedThread(state);
+  const getRawThread: Selector<RawThread> = (state) =>
+    singleThreadIndex !== null
+      ? ProfileSelectors.getProfile(state).threads[singleThreadIndex]
+      : getMergedRawThread(state);
+
   const getStringTable: Selector<StringTable> = (state) =>
-    getThread(state).stringTable;
+    getRawThread(state).stringTable;
   const getSamplesTable: Selector<SamplesTable> = (state) =>
-    getThread(state).samples;
+    getRawThread(state).samples;
   const getNativeAllocations: Selector<NativeAllocationsTable | void> = (
     state
-  ) => getThread(state).nativeAllocations;
+  ) => getRawThread(state).nativeAllocations;
   const getJsAllocations: Selector<JsAllocationsTable | void> = (state) =>
-    getThread(state).jsAllocations;
+    getRawThread(state).jsAllocations;
   const getThreadRange: Selector<StartEndRange> = (state) =>
     // This function is already memoized in profile-data.js, so we don't need to
     // memoize it here with `createSelector`.
     ProfileData.getTimeRangeForThread(
-      getThread(state),
+      getRawThread(state),
       ProfileSelectors.getProfileInterval(state)
     );
 
@@ -130,6 +135,11 @@ export function getBasicThreadSelectorsPerThread(
    * 8. Search - Exclude samples that don't include some text in the stack.
    * 9. Preview - Only include samples that are within a user's preview range selection.
    */
+
+  const getThread: Selector<Thread> = createSelector(
+    getRawThread,
+    ProfileData.computeThreadFromRawThread
+  );
 
   const getCPUProcessedThread: Selector<Thread> = createSelector(
     getThread,
@@ -293,7 +303,7 @@ export function getBasicThreadSelectorsPerThread(
 
   const getFriendlyThreadName: Selector<string> = createSelector(
     ProfileSelectors.getThreads,
-    getThread,
+    getRawThread,
     ProfileData.getFriendlyThreadName
   );
 
@@ -309,19 +319,19 @@ export function getBasicThreadSelectorsPerThread(
 
   const getHasUsefulTimingSamples: Selector<boolean> = createSelector(
     getSamplesTable,
-    getThread,
+    getRawThread,
     ProfileData.hasUsefulSamples
   );
 
   const getHasUsefulJsAllocations: Selector<boolean> = createSelector(
     getJsAllocations,
-    getThread,
+    getRawThread,
     ProfileData.hasUsefulSamples
   );
 
   const getHasUsefulNativeAllocations: Selector<boolean> = createSelector(
     getNativeAllocations,
-    getThread,
+    getRawThread,
     ProfileData.hasUsefulSamples
   );
 
@@ -352,7 +362,7 @@ export function getBasicThreadSelectorsPerThread(
    * based timing, and the leaf timing, so that they memoize nicely.
    */
   const getExpensiveJsTracerTiming: Selector<JsTracerTiming[] | null> =
-    createSelector(getJsTracerTable, getThread, (jsTracerTable, thread) =>
+    createSelector(getJsTracerTable, getRawThread, (jsTracerTable, thread) =>
       jsTracerTable === null
         ? null
         : JsTracer.getJsTracerTiming(jsTracerTable, thread)
@@ -390,6 +400,7 @@ export function getBasicThreadSelectorsPerThread(
     );
 
   return {
+    getRawThread,
     getThread,
     getStringTable,
     getSamplesTable,
