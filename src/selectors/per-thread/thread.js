@@ -74,6 +74,11 @@ export function getBasicThreadSelectorsPerThread(
   threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
 ) {
+  const singleThreadIndex =
+    threadIndexes.size === 1
+      ? ensureExists(getFirstItemFromSet(threadIndexes))
+      : null;
+
   const getMergedThread: Selector<Thread> = createSelector(
     ProfileSelectors.getProfile,
     (profile) =>
@@ -270,7 +275,10 @@ export function getBasicThreadSelectorsPerThread(
   const getFriendlyThreadName: Selector<string> = createSelector(
     ProfileSelectors.getThreads,
     getThread,
-    ProfileData.getFriendlyThreadName
+    (threads, thread) =>
+      singleThreadIndex !== null
+        ? ProfileData.getFriendlyThreadName(threads, singleThreadIndex)
+        : thread.name
   );
 
   const getThreadProcessDetails: Selector<string> = createSelector(

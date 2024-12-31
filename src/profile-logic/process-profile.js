@@ -1679,10 +1679,12 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
 
   // Convert JS tracer information into their own threads. This mutates
   // the threads array.
-  for (const thread of threads.slice()) {
+  const originalThreadCount = threads.length;
+  for (let threadIndex = 0; threadIndex < originalThreadCount; threadIndex++) {
+    const thread = threads[threadIndex];
     const { jsTracer } = thread;
     if (jsTracer) {
-      const friendlyThreadName = getFriendlyThreadName(threads, thread);
+      const friendlyThreadName = getFriendlyThreadName(threads, threadIndex);
       const jsTracerThread = convertJsTracerToThread(
         thread,
         jsTracer,

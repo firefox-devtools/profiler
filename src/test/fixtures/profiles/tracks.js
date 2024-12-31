@@ -434,8 +434,9 @@ export function getHumanReadableOriginTracks(state: State): string[] {
         }
         break;
       case 'no-origin': {
-        const thread = threads[track.threadIndex];
-        results.push(prefix + getFriendlyThreadName(threads, thread));
+        results.push(
+          prefix + getFriendlyThreadName(threads, track.threadIndex)
+        );
         break;
       }
       case 'sub-origin': {

@@ -2362,28 +2362,49 @@ export function getSampleIndexClosestToCenteredTime(
   return distanceToThis < distanceToLast ? index : index - 1;
 }
 
+function _filterMap<T, U>(
+  array: $ReadOnlyArray<T>,
+  mapOrNullCallback: (T, number) => U | null
+): U[] {
+  const result: U[] = [];
+  for (let i = 0; i < array.length; i++) {
+    const mappedValue = mapOrNullCallback(array[i], i);
+    if (mappedValue === null) {
+      continue;
+    }
+    result.push(mappedValue);
+  }
+  return result;
+}
+
 export function getFriendlyThreadName(
   threads: Thread[],
-  thread: Thread
+  threadIndex: ThreadIndex
 ): string {
   let label;
-  let homonymThreads;
+  let homonymThreadIndexes;
+
+  const thread = threads[threadIndex];
 
   switch (thread.name) {
     case 'GeckoMain': {
       if (thread['eTLD+1']) {
         // Use the site name if it's provided by the back-end and it's not sanitized.
         label = thread['eTLD+1'];
-        homonymThreads = threads.filter((thread) => {
-          return thread.name === 'GeckoMain' && thread['eTLD+1'] === label;
+        homonymThreadIndexes = _filterMap(threads, (thread, threadIndex) => {
+          return thread.name === 'GeckoMain' && thread['eTLD+1'] === label
+            ? threadIndex
+            : null;
         });
       } else if (thread.processName) {
         // If processName is present, use that as it should contain a friendly name.
         // We want to use that for the GeckoMain thread because it is shown as the
         // root of other threads in each process group.
         label = thread.processName;
-        homonymThreads = threads.filter((thread) => {
-          return thread.name === 'GeckoMain' && thread.processName === label;
+        homonymThreadIndexes = _filterMap(threads, (thread, threadIndex) => {
+          return thread.name === 'GeckoMain' && thread.processName === label
+            ? threadIndex
+            : null;
         });
       } else {
         switch (thread.processType) {
@@ -2398,11 +2419,15 @@ export function getFriendlyThreadName(
             break;
           case 'tab': {
             label = 'Content Process';
-            homonymThreads = threads.filter((thread) => {
-              return (
-                thread.name === 'GeckoMain' && thread.processType === 'tab'
-              );
-            });
+            homonymThreadIndexes = _filterMap(
+              threads,
+              (thread, threadIndex) => {
+                return thread.name === 'GeckoMain' &&
+                  thread.processType === 'tab'
+                  ? threadIndex
+                  : null;
+              }
+            );
             break;
           }
           case 'plugin':
@@ -2426,9 +2451,9 @@ export function getFriendlyThreadName(
 
   // Check if homonymThreads are provided and append "(index/total)" numbers to
   // the label if that's the case.
-  if (homonymThreads && homonymThreads.length > 1) {
-    const index = 1 + homonymThreads.indexOf(thread);
-    label += ` (${index}/${homonymThreads.length})`;
+  if (homonymThreadIndexes && homonymThreadIndexes.length > 1) {
+    const index = 1 + homonymThreadIndexes.indexOf(threadIndex);
+    label += ` (${index}/${homonymThreadIndexes.length})`;
   }
 
   return label;

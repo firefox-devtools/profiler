@@ -114,14 +114,13 @@ class OriginsTimelineView extends React.PureComponent<Props, State> {
           </li>
         );
       case 'no-origin': {
-        const thread = threads[track.threadIndex];
         return (
           <li
             key={track.threadIndex}
             className="originsTimelineTrack originsTimelineTrack-no-origin"
           >
             <a href="#" onClick={this.clickTrack(track.threadIndex)}>
-              {getFriendlyThreadName(threads, thread)}
+              {getFriendlyThreadName(threads, track.threadIndex)}
             </a>
           </li>
         );

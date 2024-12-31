@@ -961,7 +961,7 @@ export function getGlobalTrackName(
       // scheme to fit the complete url in this limited space in the timeline.
       return getFriendlyThreadName(
         threads,
-        threads[globalTrack.mainThreadIndex]
+        globalTrack.mainThreadIndex
       ).replace(/^https?:\/\//i, '');
     }
     case 'screenshots':
@@ -984,7 +984,7 @@ export function getLocalTrackName(
 ): string {
   switch (localTrack.type) {
     case 'thread':
-      return getFriendlyThreadName(threads, threads[localTrack.threadIndex]);
+      return getFriendlyThreadName(threads, localTrack.threadIndex);
     case 'network':
       return 'Network';
     case 'memory':
@@ -992,14 +992,10 @@ export function getLocalTrackName(
     case 'bandwidth':
       return 'Bandwidth';
     case 'ipc':
-      return `IPC — ${getFriendlyThreadName(
-        threads,
-        threads[localTrack.threadIndex]
-      )}`;
+      return `IPC — ${getFriendlyThreadName(threads, localTrack.threadIndex)}`;
     case 'event-delay':
       return (
-        getFriendlyThreadName(threads, threads[localTrack.threadIndex]) +
-        ' Event Delay'
+        getFriendlyThreadName(threads, localTrack.threadIndex) + ' Event Delay'
       );
     case 'process-cpu':
       return 'Process CPU';
