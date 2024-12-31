@@ -36,6 +36,7 @@ import DefaultLinkFavicon from '../../res/img/svg/globe.svg';
 
 import type {
   Profile,
+  RawThread,
   Thread,
   SamplesTable,
   StackTable,
@@ -1074,7 +1075,7 @@ export function getTimingsForCallNodeIndex(
 // When changing the signature, please accordingly check that the map class used
 // for memoization is still the right one.
 function _getTimeRangeForThread(
-  { samples, markers, jsAllocations, nativeAllocations }: Thread,
+  { samples, markers, jsAllocations, nativeAllocations }: RawThread,
   interval: Milliseconds
 ): StartEndRange {
   const result = { start: Infinity, end: -Infinity };
@@ -1188,7 +1189,7 @@ export function getTimeRangeIncludingAllThreads(
   return completeRange;
 }
 
-export function defaultThreadOrder(threads: Thread[]): ThreadIndex[] {
+export function defaultThreadOrder(threads: RawThread[]): ThreadIndex[] {
   const threadOrder = threads.map((thread, i) => i);
 
   // Note: to have a consistent behavior independant of the sorting algorithm,
@@ -1504,7 +1505,7 @@ export function filterThreadByTab(
  */
 export function hasUsefulSamples(
   table?: SamplesLikeTable,
-  thread: Thread
+  thread: RawThread
 ): boolean {
   const { stackTable, frameTable, funcTable, stringTable } = thread;
   if (table === undefined || table.length === 0 || stackTable.length === 0) {
@@ -1621,6 +1622,123 @@ export function filterThreadSamplesToRange(
   }
 
   const newThread: Thread = {
+    ...thread,
+    samples: newSamples,
+  };
+
+  if (jsAllocations) {
+    const [startAllocIndex, endAllocIndex] = getSampleIndexRangeForSelection(
+      jsAllocations,
+      rangeStart,
+      rangeEnd
+    );
+    newThread.jsAllocations = {
+      time: jsAllocations.time.slice(startAllocIndex, endAllocIndex),
+      className: jsAllocations.className.slice(startAllocIndex, endAllocIndex),
+      typeName: jsAllocations.typeName.slice(startAllocIndex, endAllocIndex),
+      coarseType: jsAllocations.coarseType.slice(
+        startAllocIndex,
+        endAllocIndex
+      ),
+      weight: jsAllocations.weight.slice(startAllocIndex, endAllocIndex),
+      weightType: jsAllocations.weightType,
+      inNursery: jsAllocations.inNursery.slice(startAllocIndex, endAllocIndex),
+      stack: jsAllocations.stack.slice(startAllocIndex, endAllocIndex),
+      length: endAllocIndex - startAllocIndex,
+    };
+  }
+
+  if (nativeAllocations) {
+    const [startAllocIndex, endAllocIndex] = getSampleIndexRangeForSelection(
+      nativeAllocations,
+      rangeStart,
+      rangeEnd
+    );
+    const time = nativeAllocations.time.slice(startAllocIndex, endAllocIndex);
+    const weight = nativeAllocations.weight.slice(
+      startAllocIndex,
+      endAllocIndex
+    );
+    const stack = nativeAllocations.stack.slice(startAllocIndex, endAllocIndex);
+    const length = endAllocIndex - startAllocIndex;
+    if (nativeAllocations.memoryAddress) {
+      newThread.nativeAllocations = {
+        time,
+        weight,
+        weightType: nativeAllocations.weightType,
+        stack,
+        memoryAddress: nativeAllocations.memoryAddress.slice(
+          startAllocIndex,
+          endAllocIndex
+        ),
+        threadId: nativeAllocations.threadId.slice(
+          startAllocIndex,
+          endAllocIndex
+        ),
+        length,
+      };
+    } else {
+      newThread.nativeAllocations = {
+        time,
+        weight,
+        weightType: nativeAllocations.weightType,
+        stack,
+        length,
+      };
+    }
+  }
+
+  return newThread;
+}
+
+export function filterRawThreadSamplesToRange(
+  thread: RawThread,
+  rangeStart: number,
+  rangeEnd: number
+): RawThread {
+  const { samples, jsAllocations, nativeAllocations } = thread;
+  const [beginSampleIndex, endSampleIndex] = getSampleIndexRangeForSelection(
+    samples,
+    rangeStart,
+    rangeEnd
+  );
+  const newSamples: SamplesTable = {
+    length: endSampleIndex - beginSampleIndex,
+    time: samples.time.slice(beginSampleIndex, endSampleIndex),
+    weight: samples.weight
+      ? samples.weight.slice(beginSampleIndex, endSampleIndex)
+      : null,
+    weightType: samples.weightType,
+    stack: samples.stack.slice(beginSampleIndex, endSampleIndex),
+  };
+
+  if (samples.eventDelay) {
+    newSamples.eventDelay = samples.eventDelay.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  } else if (samples.responsiveness) {
+    newSamples.responsiveness = samples.responsiveness.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  }
+
+  if (samples.threadCPUDelta) {
+    newSamples.threadCPUDelta = samples.threadCPUDelta.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  }
+
+  if (samples.threadId) {
+    newSamples.threadId = samples.threadId.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  }
+
+  const newThread: RawThread = {
     ...thread,
     samples: newSamples,
   };
@@ -2133,6 +2251,73 @@ function _computeThreadWithInvertedStackTable(
   });
 }
 
+export function createThreadFromDerivedTables(rawThread: RawThread): Thread {
+  const {
+    processType,
+    processStartupTime,
+    processShutdownTime,
+    registerTime,
+    unregisterTime,
+    pausedRanges,
+    showMarkersInTimeline,
+    name,
+    isMainThread,
+    'eTLD+1': eTldPlusOne,
+    processName,
+    isJsTracer,
+    pid,
+    tid,
+    samples,
+    jsAllocations,
+    nativeAllocations,
+    markers,
+    stackTable,
+    frameTable,
+    stringTable,
+    funcTable,
+    resourceTable,
+    nativeSymbols,
+    jsTracer,
+    isPrivateBrowsing,
+    userContextId,
+  } = rawThread;
+
+  const thread: Thread = {
+    // These fields are copied from the raw thread:
+    processType,
+    processStartupTime,
+    processShutdownTime,
+    registerTime,
+    unregisterTime,
+    pausedRanges,
+    showMarkersInTimeline,
+    name,
+    isMainThread,
+    'eTLD+1': eTldPlusOne,
+    processName,
+    isJsTracer,
+    pid,
+    tid,
+    samples,
+    jsAllocations,
+    nativeAllocations,
+    markers,
+    stackTable,
+    frameTable,
+    stringTable,
+    funcTable,
+    resourceTable,
+    nativeSymbols,
+    jsTracer,
+    isPrivateBrowsing,
+    userContextId,
+
+    // These fields are derived:
+    isDerivedThread: true,
+  };
+  return thread;
+}
+
 /**
  * Sometimes we want to update the stacks for a thread, for instance while searching
  * for a text string, or doing a call tree transformation. This function abstracts
@@ -2207,7 +2392,40 @@ export function updateThreadStacks(
   newStackTable: StackTable,
   convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null
 ): Thread {
-  return updateThreadStacksSeparate(
+  function convertMarkerData(
+    oldData: MarkerPayload | null
+  ): MarkerPayload | null {
+    if (oldData && 'cause' in oldData && oldData.cause) {
+      // Replace the cause with the right stack index.
+      // $FlowExpectError Flow is failing to refine oldData.type based on the `cause` field check
+      return {
+        ...oldData,
+        cause: {
+          ...oldData.cause,
+          stack: convertStack(oldData.cause.stack),
+        },
+      };
+    }
+    return oldData;
+  }
+
+  return updateThreadStacksByGeneratingNewStackColumns(
+    thread,
+    newStackTable,
+    (stackColumn, _timeColumn) =>
+      stackColumn.map((oldStack) => convertStack(oldStack)),
+    (stackColumn, _timeColumn) =>
+      stackColumn.map((oldStack) => convertStack(oldStack)),
+    (markerDataColumn) => markerDataColumn.map(convertMarkerData)
+  );
+}
+
+export function updateRawThreadStacks(
+  thread: RawThread,
+  newStackTable: StackTable,
+  convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null
+): RawThread {
+  return updateRawThreadStacksSeparate(
     thread,
     newStackTable,
     convertStack,
@@ -2216,21 +2434,21 @@ export function updateThreadStacks(
 }
 
 /**
- * Like updateThreadStacks, but accepts separate functions for converting sample
+ * Like updateRawThreadStacks, but accepts separate functions for converting sample
  * stacks and sync backtrace stacks. There is only one reason to treat the two
  * differently: Sample stacks start with a frame address which was sampled from
  * the instruction pointer, and sync backtrace stacks start with a frame address
  * that was originally derived from a return address (because there were other
  * frames on the native stack which have been stripped).
  */
-export function updateThreadStacksSeparate(
-  thread: Thread,
+export function updateRawThreadStacksSeparate(
+  thread: RawThread,
   newStackTable: StackTable,
   convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null,
   convertSyncBacktraceStack: (
     IndexIntoStackTable | null
   ) => IndexIntoStackTable | null
-): Thread {
+): RawThread {
   function convertMarkerData(
     oldData: MarkerPayload | null
   ): MarkerPayload | null {
@@ -2248,15 +2466,41 @@ export function updateThreadStacksSeparate(
     return oldData;
   }
 
-  return updateThreadStacksByGeneratingNewStackColumns(
-    thread,
-    newStackTable,
-    (stackColumn, _timeColumn) =>
-      stackColumn.map((oldStack) => convertStack(oldStack)),
-    (stackColumn, _timeColumn) =>
-      stackColumn.map((oldStack) => convertSyncBacktraceStack(oldStack)),
-    (markerDataColumn) => markerDataColumn.map(convertMarkerData)
-  );
+  const { jsAllocations, nativeAllocations, samples, markers } = thread;
+
+  const newSamples = {
+    ...samples,
+    stack: samples.stack.map(convertStack),
+  };
+
+  const newMarkers = {
+    ...markers,
+    data: markers.data.map(convertMarkerData),
+  };
+
+  const newThread = {
+    ...thread,
+    samples: newSamples,
+    markers: newMarkers,
+    stackTable: newStackTable,
+  };
+
+  if (jsAllocations) {
+    // Map the JS allocations stacks if there are any.
+    newThread.jsAllocations = {
+      ...jsAllocations,
+      stack: jsAllocations.stack.map(convertSyncBacktraceStack),
+    };
+  }
+  if (nativeAllocations) {
+    // Map the native allocations stacks if there are any.
+    newThread.nativeAllocations = {
+      ...nativeAllocations,
+      stack: nativeAllocations.stack.map(convertSyncBacktraceStack),
+    };
+  }
+
+  return newThread;
 }
 
 /**
@@ -2378,7 +2622,7 @@ function _filterMap<T, U>(
 }
 
 export function getFriendlyThreadName(
-  threads: Thread[],
+  threads: RawThread[],
   threadIndex: ThreadIndex
 ): string {
   let label;
@@ -3156,7 +3400,7 @@ export type StackReferences = {|
  * samples, and stacks referenced by sync backtraces (e.g. marker causes).
  * The two have slightly different properties, see the type definition.
  */
-export function gatherStackReferences(thread: Thread): StackReferences {
+export function gatherStackReferences(thread: RawThread): StackReferences {
   const samplingSelfStacks = new Set();
   const syncBacktraceSelfStacks = new Set();
 
@@ -3327,7 +3571,7 @@ export function gatherStackReferences(thread: Thread): StackReferences {
  *     used in both contexts. If we detect that this happened, we need to duplicate
  *     the frame and the stack node and pick the right one depending on the use.
  */
-export function nudgeReturnAddresses(thread: Thread): Thread {
+export function nudgeReturnAddresses(thread: RawThread): RawThread {
   const { samplingSelfStacks, syncBacktraceSelfStacks } =
     gatherStackReferences(thread);
 
@@ -3461,12 +3705,12 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
     }
   }
 
-  const newThread = {
+  const newThread: RawThread = {
     ...thread,
     frameTable: newFrameTable,
   };
 
-  return updateThreadStacksSeparate(
+  return updateRawThreadStacksSeparate(
     newThread,
     newStackTable,
     getMapStackUpdater(mapForSamplingSelfStacks),
@@ -3741,7 +3985,7 @@ export function determineTimelineType(profile: Profile): TimelineType {
  * the top left corner.
  */
 export function computeTabToThreadIndexesMap(
-  threads: Thread[],
+  threads: RawThread[],
   innerWindowIDToTabMap: Map<InnerWindowID, TabID> | null
 ): Map<TabID, Set<ThreadIndex>> {
   const tabToThreadIndexesMap = new Map();

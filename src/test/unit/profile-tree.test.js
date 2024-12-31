@@ -16,12 +16,13 @@ import {
   getCallNodeInfo,
   getInvertedCallNodeInfo,
   getOriginAnnotationForFunc,
-  filterThreadSamplesToRange,
+  filterRawThreadSamplesToRange,
   getSampleIndexToCallNodeIndex,
 } from '../../profile-logic/profile-data';
 import { resourceTypes } from '../../profile-logic/data-structures';
 import {
   callTreeFromProfile,
+  computeThreadFromRawThread,
   formatTree,
   formatTreeIncludeCategories,
 } from '../fixtures/utils';
@@ -57,11 +58,12 @@ describe('unfiltered call tree', function () {
    */
   describe('computed counts and timings', function () {
     const profile = getProfile();
-    const [thread] = profile.threads;
+    const [rawThread] = profile.threads;
     const defaultCategory = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
+    const thread = computeThreadFromRawThread(rawThread);
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -103,11 +105,12 @@ describe('unfiltered call tree', function () {
         X  X  H  H  M  N
         Y  W  I  J
       `);
-      const [thread] = profile.threads;
+      const [rawThread] = profile.threads;
       const defaultCategory = ensureExists(
         profile.meta.categories,
         'Expected to find categories'
       ).findIndex((c) => c.name === 'Other');
+      const thread = computeThreadFromRawThread(rawThread);
       const callNodeInfo = getCallNodeInfo(
         thread.stackTable,
         thread.frameTable,
@@ -366,11 +369,12 @@ describe('unfiltered call tree', function () {
    */
   describe('getCallNodeIndexFromPath', function () {
     const profile = getProfile();
-    const [thread] = profile.threads;
+    const [rawThread] = profile.threads;
     const defaultCategory = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
+    const thread = computeThreadFromRawThread(rawThread);
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -425,7 +429,8 @@ describe('inverted call tree', function () {
     const defaultCategory = categories.findIndex((c) => c.color === 'grey');
 
     // Check the non-inverted tree first.
-    const thread = profile.threads[0];
+    const rawThread = profile.threads[0];
+    const thread = computeThreadFromRawThread(rawThread);
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -587,9 +592,11 @@ describe('diffing trees', function () {
     const { profile } = getProfile();
     const rangeStart = 4;
     const rangeEnd = 5;
+
     profile.threads = profile.threads.map((thread) =>
-      filterThreadSamplesToRange(thread, rangeStart, rangeEnd)
+      filterRawThreadSamplesToRange(thread, rangeStart, rangeEnd)
     );
+
     const callTree = callTreeFromProfile(profile, /* threadIndex */ 2);
     const formattedTree = formatTree(callTree);
     expect(formattedTree).toEqual([
@@ -615,11 +622,12 @@ describe('diffing trees', function () {
   it('computes a rootTotalSummary that is the absolute count of all intervals', () => {
     const { profile } = getProfile();
 
-    const thread = profile.threads[2];
+    const rawThread = profile.threads[2];
     const defaultCategory = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
+    const thread = computeThreadFromRawThread(rawThread);
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,

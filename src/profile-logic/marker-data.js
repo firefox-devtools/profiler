@@ -20,8 +20,8 @@ import {
 } from './marker-schema';
 
 import type {
-  Thread,
   SamplesTable,
+  RawThread,
   RawMarkerTable,
   IndexIntoStringTable,
   IndexIntoRawMarkerTable,
@@ -409,7 +409,9 @@ export class IPCMarkerCorrelations {
  *        endpoint   (receiver or background thread)
  *                   (or main thread in receiver process if they are not profiled)
  */
-export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
+export function correlateIPCMarkers(
+  threads: RawThread[]
+): IPCMarkerCorrelations {
   // Create a unique ID constructed from the source PID, destination PID,
   // message seqno, and message type. Since the seqno is only unique for each
   // message channel pair, we use the PIDs and message type as a way of

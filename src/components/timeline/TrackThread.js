@@ -47,6 +47,7 @@ import './TrackThread.css';
 import type {
   TimelineType,
   Thread,
+  RawThread,
   ThreadIndex,
   CategoryList,
   IndexIntoSamplesTable,
@@ -73,6 +74,7 @@ type StateProps = {|
   +fullThread: Thread,
   +rangeFilteredThread: Thread,
   +filteredThread: Thread,
+  +rawThread: RawThread,
   +callNodeInfo: CallNodeInfo,
   +unfilteredSamplesRange: StartEndRange | null,
   +interval: Milliseconds,
@@ -175,6 +177,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       fullThread,
       filteredThread,
       rangeFilteredThread,
+      rawThread,
       threadsKey,
       interval,
       rangeStart,
@@ -312,7 +315,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
           />
         )}
         <EmptyThreadIndicator
-          thread={filteredThread}
+          thread={rawThread}
           interval={interval}
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
@@ -342,6 +345,7 @@ export const TimelineTrackThread = explicitConnect<
     return {
       fullThread,
       filteredThread: selectors.getFilteredThread(state),
+      rawThread: selectors.getRawThread(state),
       rangeFilteredThread: selectors.getRangeFilteredThread(state),
       callNodeInfo: selectors.getCallNodeInfo(state),
       sampleNonInvertedCallNodes:

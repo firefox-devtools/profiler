@@ -6,6 +6,7 @@
 
 import { processThreadCPUDelta } from 'firefox-profiler/profile-logic/cpu';
 import { getProfileWithThreadCPUDelta } from '../fixtures/profiles/processed-profile';
+import { computeThreadFromRawThread } from '../fixtures/utils';
 
 import type { ThreadCPUDeltaUnit, Milliseconds } from 'firefox-profiler/types';
 
@@ -23,7 +24,8 @@ describe('processThreadCPUDelta', function () {
       unit,
       interval
     );
-    const [thread] = profile.threads;
+    const [rawThread] = profile.threads;
+    const thread = computeThreadFromRawThread(rawThread);
 
     if (!profile.meta.sampleUnits) {
       throw new Error('SampleUnits object could not found in the profile.');

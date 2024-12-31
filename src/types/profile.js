@@ -82,7 +82,6 @@ export type Pid = string;
  */
 export type StackTable = {|
   frame: IndexIntoFrameTable[],
-  // Imported profiles may not have categories. In this case fill the array with 0s.
   category: IndexIntoCategoryList[],
   subcategory: IndexIntoSubcategoryListForCategory[],
   prefix: Array<IndexIntoStackTable | null>,
@@ -234,9 +233,6 @@ export type NativeAllocationsTable =
  */
 export type ProfilerMarkerPayload = {
   type: string,
-  startTime?: Milliseconds,
-  endTime?: Milliseconds,
-  stack?: Thread,
 };
 
 /**
@@ -637,7 +633,7 @@ export type ProcessType =
  * Gecko has one or more processes. There can be multiple threads per processes. Each
  * thread has a unique set of tables for its data.
  */
-export type Thread = {|
+export type RawThread = {|
   processType: ProcessType,
   processStartupTime: Milliseconds,
   processShutdownTime: Milliseconds | null,
@@ -943,13 +939,13 @@ export type Profile = {|
   // have them. An upgrader could be written to make this non-optional.
   // This is list because there is a profiler overhead per process.
   profilerOverhead?: ProfilerOverhead[],
-  threads: Thread[],
+  threads: RawThread[],
   profilingLog?: ProfilingLog,
   profileGatheringLog?: ProfilingLog,
 |};
 
 type SerializableThread = {|
-  ...$Diff<Thread, { stringTable: StringTable, samples: SamplesTable }>,
+  ...$Diff<RawThread, { stringTable: StringTable, samples: SamplesTable }>,
   stringArray: string[],
   samples: SerializableSamplesTable,
 |};
@@ -981,7 +977,7 @@ export type SerializableCounter = {|
  * variant is able to be based into JSON.stringify.
  */
 export type SerializableProfile = {|
-  ...$Diff<Profile, { threads: Thread[], counters?: Counter[] }>,
+  ...$Diff<Profile, { threads: RawThread[], counters?: Counter[] }>,
   threads: SerializableThread[],
   counters?: SerializableCounter[],
 |};

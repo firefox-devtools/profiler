@@ -8,6 +8,7 @@ import * as UrlStateSelectors from '../../selectors/url-state';
 import {
   selectedThreadSelectors,
   selectedNodeSelectors,
+  getThreadSelectors,
 } from '../../selectors/per-thread';
 import { emptyAddressTimings } from '../../profile-logic/address-timings';
 import { getBottomBoxInfoForCallNode } from '../../profile-logic/profile-data';
@@ -45,6 +46,7 @@ describe('bottom box', function () {
       nativeSymbolsDictPerThread,
     } = getProfileWithNiceAddresses();
     const { dispatch, getState } = storeWithProfile(profile);
+    const threadSelectors = getThreadSelectors(0);
 
     return {
       // Store:
@@ -52,7 +54,7 @@ describe('bottom box', function () {
       getState,
 
       // Other stuff:
-      thread: profile.threads[0],
+      thread: threadSelectors.getThread(getState()),
       funcNames: funcNamesPerThread[0],
       funcNamesDict: funcNamesDictPerThread[0],
       nativeSymbolsDict: nativeSymbolsDictPerThread[0],
