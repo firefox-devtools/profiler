@@ -17,7 +17,7 @@ import type {
   ResourceTable,
   SamplesTable,
   Profile,
-  Thread,
+  RawThread,
   StackTable,
 } from 'firefox-profiler/types/profile';
 import {
@@ -242,7 +242,7 @@ class FirefoxThread {
     this.name = thread.threadName ?? '';
   }
 
-  toJson(): Thread {
+  toJson(): RawThread {
     return {
       processType: 'default',
       processStartupTime: 0,

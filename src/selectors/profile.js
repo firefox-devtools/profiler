@@ -30,7 +30,7 @@ import type {
   Profile,
   CategoryList,
   IndexIntoCategoryList,
-  Thread,
+  RawThread,
   ThreadIndex,
   Pid,
   Tid,
@@ -177,7 +177,7 @@ export const getPageList = (state: State): PageList | null =>
   getProfile(state).pages || null;
 export const getDefaultCategory: Selector<IndexIntoCategoryList> = (state) =>
   getCategories(state).findIndex((c) => c.color === 'grey');
-export const getThreads: Selector<Thread[]> = (state) =>
+export const getThreads: Selector<RawThread[]> = (state) =>
   getProfile(state).threads;
 export const getThreadNames: Selector<string[]> = (state) =>
   getProfile(state).threads.map((t) => t.name);
