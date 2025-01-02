@@ -191,8 +191,7 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
   const otherCategory = 0;
   const otherSubCategory = 0;
 
-  // Insert a root function that is the command that was run. Note that dhat-rs includes
-  // a [root] frame, while the Valgrind implementation does not.
+  // Insert a root function that is the command that was run.
   funcTable.name.push(stringTable.indexForString(dhat.cmd));
   funcTable.isJS.push(false);
   funcTable.relevantForJS.push(false);
@@ -209,12 +208,14 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
   frameTable.subcategory.push(otherSubCategory);
   frameTable.innerWindowID.push(null);
   frameTable.implementation.push(null);
+  frameTable.nativeSymbol.push(null);
+  frameTable.inlineDepth.push(0);
   frameTable.func.push(rootFuncIndex);
   const rootFrameIndex = frameTable.length++;
 
   stackTable.frame.push(rootFrameIndex);
   stackTable.category.push(otherCategory);
-  stackTable.category.push(otherSubCategory);
+  stackTable.subcategory.push(otherSubCategory);
   stackTable.prefix.push(null);
   const rootStackIndex = stackTable.length++;
 
@@ -226,25 +227,29 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     let column = null;
 
     const result = funcName.match(
-      /^0x([0-9a-f]+): (.+) \((.+?)(?::(\d+))?(?::(\d+))?\)$/i
+      /^0x([0-9a-f]+): (.+) \((?:in )?(.+?)(?::(\d+))?(?::(\d+))?\)$/i
     );
-    // ^0x([0-9a-f]+): (.+) \((.+?)(?::(\d+))?(?::(\d+))?\)$ Regex
-    //    (1        )  (2 )   (3  )    (4  )      (5  )        Capture groups
-    // ^                                                   $   Start to end
-    //               :      \(                           \)    Some raw characters
-    //    ([0-9a-f]+)                                          Match the address, e.g. 10250148c
-    //                 (.+)                                    Match the function name
-    //                        (.+?)                            Match the filename
-    //                             (?:      )?                 Optionally include the line
-    //                                 (\d+)                   Match the line number
-    //                                        (?:      )?      Optionally include the column
-    //                                            (\d+)        Match the column number
+    // ^0x([0-9a-f]+): (.+) \((?:in )?(.+?)(?::(\d+))?(?::(\d+))?\)$ Regex
+    //    (1        )  (2 )           (3  )    (4  )      (5  )        Capture groups
+    // ^                                                           $   Start to end
+    //               :      \(                                   \)    Some raw characters
+    //    ([0-9a-f]+)                                                  Match the address, e.g. 10250148c
+    //                 (.+)                                            Match the function name
+    //                        (?:in )?                                 There can be an optional "in "
+    //                                (.+?)                            Match the filename
+    //                                     (?:      )?                 Optionally include the line
+    //                                         (\d+)                   Match the line number
+    //                                                (?:      )?      Optionally include the column
+    //                                                    (\d+)        Match the column number
 
     // Example input: "0x10250148c: alloc::vec::Vec<T,A>::append_elements (vec.rs:1469:9)"
     // Capture groups:   111111111  2222222222222222222222222222222222222  333333 4444 5
 
     // Example input: "0x484DE30: memalign (in /usr/libexec/valgrind/vgpreload_dhat-amd64-linux.so)"
-    // Capture groups:   1111111  22222222  333333333333333333333333333333333333333333333333333333
+    // Capture groups:   1111111  22222222     333333333333333333333333333333333333333333333333333
+
+    // Example input: "0x58E297: marian::io::binary::loadItems(void const*) (binary.cpp:74)"
+    // Capture groups:   111111  222222222222222222222222222222222222222222  3333333333 44
     if (result) {
       address = parseInt(result[1], 16);
       funcName = result[2];
@@ -277,6 +282,8 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     frameTable.subcategory.push(otherSubCategory);
     frameTable.innerWindowID.push(null);
     frameTable.implementation.push(null);
+    frameTable.nativeSymbol.push(null);
+    frameTable.inlineDepth.push(0);
     frameTable.func.push(funcIndex);
     frameTable.length++;
   }
@@ -326,7 +333,7 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
         // No stack index was found, add on a new one.
         stackTable.frame.push(frameIndex);
         stackTable.category.push(otherCategory);
-        stackTable.category.push(otherSubCategory);
+        stackTable.subcategory.push(otherSubCategory);
         stackTable.prefix.push(prefix);
 
         if (candidateStackTables) {
