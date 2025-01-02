@@ -397,7 +397,7 @@ export function finalizeFullProfileView(
         const thread = profile.threads[threadIndex];
         const { samples, jsAllocations, nativeAllocations } = thread;
         hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
-          hasUsefulSamples(table, thread)
+          hasUsefulSamples(table?.stack, thread)
         );
         if (hasSamples) {
           break;
@@ -1895,7 +1895,7 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
         const thread = profile.threads[threadIndex];
         const { samples, jsAllocations, nativeAllocations } = thread;
         hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
-          hasUsefulSamples(table, thread)
+          hasUsefulSamples(table?.stack, thread)
         );
         if (hasSamples) {
           break;

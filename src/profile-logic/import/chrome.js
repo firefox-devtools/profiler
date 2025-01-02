@@ -720,7 +720,7 @@ async function processTracingEvents(
             'Could not find the eventDelay in samplesTable inside the newly created Chrome profile thread.'
           ).push(null);
           samplesTable.stack.push(stackIndex);
-          samplesTable.time.push(threadInfo.lastSampledTime);
+          ensureExists(samplesTable.time).push(threadInfo.lastSampledTime);
           samplesTable.length++;
         }
       }

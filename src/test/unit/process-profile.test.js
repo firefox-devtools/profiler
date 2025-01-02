@@ -10,6 +10,7 @@ import {
   unserializeProfileOfArbitraryFormat,
   GlobalDataCollector,
 } from '../../profile-logic/process-profile';
+import { computeTimeColumnForRawSamplesTable } from '../../profile-logic/profile-data';
 import { StringTable } from '../../utils/string-table';
 import {
   createGeckoProfile,
@@ -588,7 +589,8 @@ describe('gecko samples table processing', function () {
     expect(processedSamples.stack.slice(0, 2)).toEqual(
       hardcodedStackAfterProcessing
     );
-    expect(processedSamples.time.slice(0, 2)).toEqual(hardcodedTime);
+    const sampleTimes = computeTimeColumnForRawSamplesTable(processedSamples);
+    expect(sampleTimes.slice(0, 2)).toEqual(hardcodedTime);
     expect(ensureExists(processedSamples.eventDelay).slice(0, 2)).toEqual(
       hardcodedEventDelay
     );
@@ -599,9 +601,10 @@ describe('gecko samples table processing', function () {
     // Check the processed profile samples array to see if we properly processed
     // the sample fields.
     for (const fieldName in geckoSamples.schema) {
-      if (fieldName === 'stack') {
+      if (fieldName === 'stack' || fieldName === 'time') {
         // Don't check the stack here because profile processing changes the shape
-        // of the stack table, so the value is expected to change.
+        // of the stack table and converts times to deltas, so the value is
+        // expected to change.
         continue;
       }
       const fieldIndex = geckoSamples.schema[fieldName];

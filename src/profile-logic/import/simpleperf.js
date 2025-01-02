@@ -15,7 +15,7 @@ import type {
   IndexIntoStackTable,
   ProfileMeta,
   ResourceTable,
-  SamplesTable,
+  RawSamplesTable,
   Profile,
   RawThread,
   StackTable,
@@ -30,6 +30,7 @@ import {
   getEmptyNativeSymbolTable,
 } from 'firefox-profiler/profile-logic/data-structures';
 import { StringTable } from 'firefox-profiler/utils/string-table';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 import {
   verifyMagic,
   SIMPLEPERF as SIMPLEPERF_MAGIC,
@@ -225,7 +226,7 @@ class FirefoxThread {
   stringArray = [];
   strings = StringTable.withBackingArray(this.stringArray);
 
-  sampleTable: SamplesTable = getEmptySamplesTable();
+  sampleTable: RawSamplesTable = getEmptySamplesTable();
 
   stackTable: FirefoxSampleTable = new FirefoxSampleTable(this.strings);
   frameTable: FirefoxFrameTable = new FirefoxFrameTable(this.strings);
@@ -334,7 +335,7 @@ class FirefoxThread {
     }
 
     this.sampleTable.stack.push(prefixStackId);
-    this.sampleTable.time.push(toMilliseconds(sample.time ?? 0));
+    ensureExists(this.sampleTable.time).push(toMilliseconds(sample.time ?? 0));
 
     if (this.sampleTable.weight) {
       const weight =
