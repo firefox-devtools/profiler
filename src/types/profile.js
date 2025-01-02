@@ -5,7 +5,6 @@
 // @flow
 
 import type { Milliseconds, Address, Microseconds, Bytes } from './units';
-import type { StringTable } from '../utils/string-table';
 import type { MarkerPayload, MarkerSchema, MarkerFormatType } from './markers';
 import type { MarkerPhase, ProfilingLog } from './gecko-profile';
 
@@ -662,7 +661,7 @@ export type RawThread = {|
   frameTable: FrameTable,
   // Strings for profiles are collected into a single table, and are referred to by
   // their index by other tables.
-  stringTable: StringTable,
+  stringArray: string[],
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   nativeSymbols: NativeSymbolTable,
@@ -945,8 +944,7 @@ export type Profile = {|
 |};
 
 type SerializableThread = {|
-  ...$Diff<RawThread, { stringTable: StringTable, samples: SamplesTable }>,
-  stringArray: string[],
+  ...$Diff<RawThread, { samples: SamplesTable }>,
   samples: SerializableSamplesTable,
 |};
 

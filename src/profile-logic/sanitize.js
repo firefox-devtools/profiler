@@ -4,7 +4,6 @@
 
 // @flow
 
-import { StringTable } from '../utils/string-table';
 import {
   getEmptyExtensions,
   shallowCloneRawMarkerTable,
@@ -267,10 +266,10 @@ function sanitizeThreadPII(
     return null;
   }
 
-  // We need to update the stringTable. StringTable doesn't allow mutating
+  // We need to update the stringArray. StringTable doesn't allow mutating
   // existing stored strings, so we create a copy of the underlying string array
   // and mutated it manually.
-  const stringArray = thread.stringTable.getBackingArray().slice();
+  const stringArray = thread.stringArray.slice();
   let markerTable = shallowCloneRawMarkerTable(thread.markers);
 
   // We iterate all the markers and remove/change data depending on the PII
@@ -300,7 +299,7 @@ function sanitizeThreadPII(
       if (currentMarker && PIIToBeRemoved.shouldRemoveUrls) {
         // Use the schema to find some properties that need to be sanitized.
         const markerNameIndex = markerTable.name[i];
-        const markerName = thread.stringTable.getString(markerNameIndex);
+        const markerName = thread.stringArray[markerNameIndex];
         const markerSchema = getSchemaFromMarker(
           markerSchemaByName,
           markerName,
@@ -664,11 +663,9 @@ function sanitizeThreadPII(
     }
   }
 
-  // Remove the old stringTable and markerTable and replace it
+  // Remove the old stringArray and markerTable and replace it
   // with new updated ones.
-  // We created a fresh stringArray object in this function, so we don't need
-  // to worry about StringTable having an invalid cached map.
-  newThread.stringTable = StringTable.withBackingArray(stringArray);
+  newThread.stringArray = stringArray;
   newThread.markers = markerTable;
 
   // Have we removed everything from this thread?

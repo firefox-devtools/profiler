@@ -16,6 +16,7 @@ import {
   getEmptyProfile,
   getEmptyThread,
 } from '../../profile-logic/data-structures';
+import { StringTable } from '../../utils/string-table';
 import { ensureExists, coerce } from '../../utils/flow';
 import {
   INSTANT,
@@ -578,10 +579,12 @@ async function processTracingEvents(
         funcTable,
         frameTable,
         stackTable,
-        stringTable,
+        stringArray,
         samples: samplesTable,
         resourceTable,
       } = thread;
+
+      const stringTable = StringTable.withBackingArray(stringArray);
 
       if (nodes) {
         const parentMap = new Map();
@@ -841,6 +844,8 @@ async function extractScreenshots(
     screenshots[0]
   );
 
+  const stringTable = StringTable.withBackingArray(thread.stringArray);
+
   const graphicsIndex = ensureExists(profile.meta.categories).findIndex(
     (category) => category.name === 'Graphics'
   );
@@ -860,13 +865,13 @@ async function extractScreenshots(
     }
     thread.markers.data.push({
       type: 'CompositorScreenshot',
-      url: thread.stringTable.indexForString(urlString),
+      url: stringTable.indexForString(urlString),
       windowID: 'id',
       windowWidth: size.width,
       windowHeight: size.height,
     });
     thread.markers.name.push(
-      thread.stringTable.indexForString('CompositorScreenshot')
+      stringTable.indexForString('CompositorScreenshot')
     );
     thread.markers.startTime.push(screenshot.ts / 1000);
     thread.markers.endTime.push(null);
@@ -996,7 +1001,8 @@ function extractMarkers(
           event
         );
         const { thread } = threadInfo;
-        const { markers, stringTable } = thread;
+        const { markers, stringArray } = thread;
+        const stringTable = StringTable.withBackingArray(stringArray);
         let argData: MixedObject | null = null;
         if (event.args && typeof event.args === 'object') {
           argData = (event.args: any).data || null;

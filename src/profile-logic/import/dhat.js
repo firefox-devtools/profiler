@@ -16,6 +16,7 @@ import {
   getEmptyUnbalancedNativeAllocationsTable,
 } from 'firefox-profiler/profile-logic/data-structures';
 
+import { StringTable } from 'firefox-profiler/utils/string-table';
 import { coerce, ensureExists } from 'firefox-profiler/utils/flow';
 
 /**
@@ -181,7 +182,8 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
   profile.meta.importedFrom = `dhat`;
 
   const allocationsTable = getEmptyUnbalancedNativeAllocationsTable();
-  const { funcTable, stringTable, stackTable, frameTable } = getEmptyThread();
+  const { funcTable, stringArray, stackTable, frameTable } = getEmptyThread();
+  const stringTable = StringTable.withBackingArray(stringArray);
 
   const funcKeyToFuncIndex = new Map<string, IndexIntoFuncTable>();
 
@@ -375,7 +377,7 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     thread.pid = dhat.pid;
     thread.tid = i;
     thread.name = name;
-    thread.stringTable = stringTable;
+    thread.stringArray = stringTable.getBackingArray();
 
     thread.funcTable.name = funcTable.name.slice();
     thread.funcTable.isJS = funcTable.isJS.slice();

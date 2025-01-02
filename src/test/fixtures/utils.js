@@ -15,6 +15,7 @@ import {
   getOriginAnnotationForFunc,
   createThreadFromDerivedTables,
 } from 'firefox-profiler/profile-logic/profile-data';
+import { StringTable } from '../../utils/string-table';
 
 import type {
   IndexIntoCallNodeTable,
@@ -114,7 +115,8 @@ export function getMouseEvent(
 }
 
 export function computeThreadFromRawThread(rawThread: RawThread): Thread {
-  return createThreadFromDerivedTables(rawThread);
+  const stringTable = StringTable.withBackingArray(rawThread.stringArray);
+  return createThreadFromDerivedTables(rawThread, stringTable);
 }
 
 /**
