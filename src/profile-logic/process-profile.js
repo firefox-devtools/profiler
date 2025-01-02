@@ -1129,7 +1129,8 @@ function _processThread(
   const { libs, pausedRanges, meta } = processProfile;
   const { categories, shutdownTime } = meta;
 
-  const stringTable = StringTable.withBackingArray(thread.stringTable);
+  const mutatedStringArray = thread.stringTable.slice();
+  const stringTable = StringTable.withBackingArray(mutatedStringArray);
   const { funcTable, resourceTable, frameFuncs, frameAddresses } =
     extractFuncsAndResourcesFromFrameLocations(
       geckoFrameStruct.location,
@@ -1174,7 +1175,7 @@ function _processThread(
     resourceTable,
     stackTable,
     markers,
-    stringTable,
+    stringArray: mutatedStringArray,
     samples,
   };
 
@@ -1212,7 +1213,7 @@ function _processThread(
         jsTracerDictionary.length
       );
       for (let i = 0; i < jsTracerDictionary.length; i++) {
-        geckoToProcessedStringIndex[i] = newThread.stringTable.indexForString(
+        geckoToProcessedStringIndex[i] = stringTable.indexForString(
           jsTracerDictionary[i]
         );
       }
@@ -1762,11 +1763,10 @@ export function makeProfileSerializable({
           };
         })
       : counters,
-    threads: threads.map(({ stringTable, samples, ...restOfThread }) => {
+    threads: threads.map(({ samples, ...restOfThread }) => {
       return {
         ...restOfThread,
         samples: _serializeSamples(samples),
-        stringArray: stringTable.getBackingArray(),
       };
     }),
   };
@@ -1801,11 +1801,10 @@ function _unserializeProfile({
           }
         )
       : counters,
-    threads: threads.map(({ stringArray, samples, ...restOfThread }) => {
+    threads: threads.map(({ samples, ...restOfThread }) => {
       return {
         ...restOfThread,
         samples: _unserializeSamples(samples),
-        stringTable: StringTable.withBackingArray(stringArray),
       };
     }),
   };
@@ -1981,6 +1980,10 @@ export function processVisualMetrics(
   const mainThread = threads[mainThreadIdx];
   const tabThread = threads[tabThreadIdx];
 
+  const tabThreadStringTable = StringTable.withBackingArray(
+    tabThread.stringArray
+  );
+
   // These metrics are currently present inside profile.meta.visualMetrics.
   const metrics = ['Visual', 'ContentfulSpeedIndex', 'PerceptualSpeedIndex'];
   // Find the Test category so we can add the visual metrics markers with it.
@@ -2012,7 +2015,8 @@ export function processVisualMetrics(
       return;
     }
     // Add the marker to the given thread.
-    thread.markers.name.push(thread.stringTable.indexForString(name));
+    const stringTable = StringTable.withBackingArray(thread.stringArray);
+    thread.markers.name.push(stringTable.indexForString(name));
     thread.markers.startTime.push(startTime);
     thread.markers.endTime.push(endTime);
     thread.markers.phase.push(phase);
@@ -2024,9 +2028,9 @@ export function processVisualMetrics(
   // Find the navigation start time in the tab thread for specifying the marker
   // start times.
   let navigationStartTime = null;
-  if (tabThread.stringTable.hasString('Navigation::Start')) {
+  if (tabThreadStringTable.hasString('Navigation::Start')) {
     const navigationStartStrIdx =
-      tabThread.stringTable.indexForString('Navigation::Start');
+      tabThreadStringTable.indexForString('Navigation::Start');
     const navigationStartMarkerIdx = tabThread.markers.name.findIndex(
       (m) => m === navigationStartStrIdx
     );
@@ -2126,12 +2130,13 @@ function findTabMainThreadForVisualMetrics(
         .map((page) => page.innerWindowID)
     );
 
-    if (!thread.stringTable.hasString('RefreshDriverTick')) {
+    const stringTable = StringTable.withBackingArray(thread.stringArray);
+    if (!stringTable.hasString('RefreshDriverTick')) {
       // No RefreshDriver tick marker, skip the thread.
       continue;
     }
     const refreshDriverTickStrIndex =
-      thread.stringTable.indexForString('RefreshDriverTick');
+      stringTable.indexForString('RefreshDriverTick');
 
     const { markers } = thread;
     for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {

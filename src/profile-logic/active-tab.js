@@ -73,7 +73,7 @@ export function computeActiveTabTracks(
     threadIndex++
   ) {
     const thread = profile.threads[threadIndex];
-    const { markers, stringTable } = thread;
+    const { markers, stringArray } = thread;
 
     if (thread.isMainThread) {
       // This is a main thread, there is a possibility that it can be a global
@@ -118,10 +118,8 @@ export function computeActiveTabTracks(
 
     // Check for screenshots.
     const windowIDs: Set<string> = new Set();
-    if (stringTable.hasString('CompositorScreenshot')) {
-      const screenshotNameIndex = stringTable.indexForString(
-        'CompositorScreenshot'
-      );
+    const screenshotNameIndex = stringArray.indexOf('CompositorScreenshot');
+    if (screenshotNameIndex !== -1) {
       for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
         if (markers.name[markerIndex] === screenshotNameIndex) {
           // Coerce the payload to a screenshot one. Don't do a runtime check that

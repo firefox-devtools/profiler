@@ -16,6 +16,7 @@ import {
   getEmptyProfile,
   getEmptyStackTable,
 } from '../../../profile-logic/data-structures';
+import { StringTable } from '../../../utils/string-table';
 
 /**
  * Create a profile with three identical threads, with the frame tree and call
@@ -42,8 +43,9 @@ import {
 export default function getProfile(): Profile {
   const profile = getEmptyProfile();
   let thread = getEmptyThread();
+  const stringTable = StringTable.withBackingArray(thread.stringArray);
   const funcNames = ['funcA', 'funcB', 'funcC', 'funcD', 'funcE', 'funcF'].map(
-    (name) => thread.stringTable.indexForString(name)
+    (name) => stringTable.indexForString(name)
   );
 
   const categoryOther = ensureExists(
@@ -71,7 +73,7 @@ export default function getProfile(): Profile {
     'funcD', // 4 duplicate
     'funcE', // 5
     'funcF', // 6
-  ].map((name) => thread.stringTable.indexForString(name));
+  ].map((name) => stringTable.indexForString(name));
   // Name the indices
   const [
     funcAFrame,
