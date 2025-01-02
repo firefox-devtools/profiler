@@ -66,6 +66,7 @@ export function computeActiveTabTracks(
   const screenshots = [];
   const topmostInnerWindowIDs = getTopmostInnerWindowIDs(relevantPages);
   const innerWindowIDToPageMap = _getInnerWindowIDToPageMap(relevantPages);
+  const { stringArray } = profile.shared;
 
   for (
     let threadIndex = 0;
@@ -73,7 +74,7 @@ export function computeActiveTabTracks(
     threadIndex++
   ) {
     const thread = profile.threads[threadIndex];
-    const { markers, stringArray } = thread;
+    const { markers } = thread;
 
     if (thread.isMainThread) {
       // This is a main thread, there is a possibility that it can be a global

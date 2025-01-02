@@ -24,10 +24,12 @@ import {
 import { markerSchemaFrontEndOnly } from '../profile-logic/marker-schema';
 import { getDefaultCategories } from 'firefox-profiler/profile-logic/data-structures';
 import { defaultTableViewOptions } from '../reducers/profile-view';
+import { StringTable } from '../utils/string-table';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
 import type {
   Profile,
+  RawProfileSharedData,
   CategoryList,
   IndexIntoCategoryList,
   RawThread,
@@ -172,6 +174,11 @@ export const getProfile: Selector<Profile> = (state) =>
     getProfileOrNull(state),
     'Tried to access the profile before it was loaded.'
   );
+export const getRawProfileSharedData: Selector<RawProfileSharedData> = (
+  state
+) => getProfile(state).shared;
+export const getStringArray: Selector<string[]> = (state) =>
+  getRawProfileSharedData(state).stringArray;
 export const getProfileInterval: Selector<Milliseconds> = (state) =>
   getProfile(state).meta.interval;
 export const getPageList = (state: State): PageList | null =>
@@ -233,6 +240,11 @@ export const getCategories: Selector<CategoryList> = createSelector(
     const { categories } = profile.meta;
     return categories ? categories : getDefaultCategories();
   }
+);
+
+export const getStringTable: Selector<StringTable> = createSelector(
+  getStringArray,
+  (stringArray) => StringTable.withBackingArray(stringArray)
 );
 
 // Combine the marker schema from Gecko and the front-end. This allows the front-end
@@ -356,7 +368,7 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
 }
 
 export const getIPCMarkerCorrelations: Selector<IPCMarkerCorrelations> =
-  createSelector(getThreads, correlateIPCMarkers);
+  createSelector([getThreads, getRawProfileSharedData], correlateIPCMarkers);
 
 /**
  * Returns an InnerWindowID -> Page map, so we can look up the page from inner
@@ -434,9 +446,10 @@ export const getGlobalTrackReferences: Selector<GlobalTrackReference[]> =
   );
 
 export const getHasPreferenceMarkers: Selector<boolean> = createSelector(
+  getStringArray,
   getThreads,
-  (threads) => {
-    return threads.some(({ stringArray, markers }) => {
+  (stringArray, threads) => {
+    return threads.some(({ markers }) => {
       /*
        * Does this particular thread have a Preference in it?
        */
@@ -570,14 +583,20 @@ export const getLocalTrackNamesByPid: Selector<Map<Pid, string[]>> =
   createSelector(
     getLocalTracksByPid,
     getThreads,
+    getRawProfileSharedData,
     getCounters,
-    (localTracksByPid, threads, counters) => {
+    (localTracksByPid, threads, shared, counters) => {
       const localTrackNamesByPid = new Map();
       for (const [pid, localTracks] of localTracksByPid) {
         localTrackNamesByPid.set(
           pid,
           localTracks.map((localTrack) =>
-            Tracks.getLocalTrackName(localTrack, threads, counters || [])
+            Tracks.getLocalTrackName(
+              localTrack,
+              threads,
+              shared,
+              counters || []
+            )
           )
         );
       }

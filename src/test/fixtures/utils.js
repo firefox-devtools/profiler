@@ -22,6 +22,7 @@ import { StringTable } from '../../utils/string-table';
 
 import type {
   IndexIntoCallNodeTable,
+  RawProfileSharedData,
   Profile,
   Store,
   State,
@@ -120,9 +121,10 @@ export function getMouseEvent(
 
 export function computeThreadFromRawThread(
   rawThread: RawThread,
+  shared: RawProfileSharedData,
   defaultCategory: IndexIntoCategoryList
 ): Thread {
-  const stringTable = StringTable.withBackingArray(rawThread.stringArray);
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
   const stackTable = computeStackTableFromRawStackTable(
     rawThread.stackTable,
     rawThread.frameTable,

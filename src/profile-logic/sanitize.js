@@ -6,9 +6,15 @@
 
 import {
   getEmptyExtensions,
+  getEmptyRawStackTable,
+  getEmptyFrameTable,
+  getEmptyFuncTable,
+  getEmptyResourceTable,
+  getEmptyNativeSymbolTable,
   shallowCloneRawMarkerTable,
   shallowCloneFuncTable,
 } from './data-structures';
+import { StringTable } from '../utils/string-table';
 import { removeURLs } from '../utils/string';
 import {
   removeNetworkMarkerURLs,
@@ -17,6 +23,7 @@ import {
   sanitizeExtensionTextMarker,
   sanitizeTextMarker,
   sanitizeFromMarkerSchema,
+  computeStringIndexMarkerFieldsByDataType,
 } from './marker-data';
 import { getSchemaFromMarker } from './marker-schema';
 import {
@@ -35,6 +42,15 @@ import type {
   InnerWindowID,
   MarkerSchemaByName,
   RawCounter,
+  RawProfileSharedData,
+  RawMarkerTable,
+  IndexIntoStackTable,
+  RawStackTable,
+  FrameTable,
+  FuncTable,
+  ResourceTable,
+  NativeSymbolTable,
+  Lib,
 } from 'firefox-profiler/types';
 
 export type SanitizeProfileResult = {|
@@ -125,6 +141,16 @@ export function sanitizePII(
     }
   }
 
+  // This is expensive but needs to be done somehow.
+  // Maybe we can find something better here.
+  const stringArray = profile.shared.stringArray.slice();
+  if (PIIToBeRemoved.shouldRemoveUrls) {
+    for (let i = 0; i < stringArray.length; i++) {
+      stringArray[i] = removeURLs(stringArray[i]);
+    }
+  }
+  const stringTable = StringTable.withBackingArray(stringArray);
+
   let removingCounters = false;
   const newProfile: Profile = {
     ...profile,
@@ -135,9 +161,13 @@ export function sanitizePII(
         : profile.meta.extensions,
     },
     pages: pages,
+    shared: {
+      stringArray,
+    },
     threads: profile.threads.reduce((acc, thread, threadIndex) => {
       const newThread: RawThread | null = sanitizeThreadPII(
         thread,
+        stringTable,
         derivedMarkerInfoForAllThreads[threadIndex],
         threadIndex,
         PIIToBeRemoved,
@@ -205,7 +235,7 @@ export function sanitizePII(
   }
 
   return {
-    profile: newProfile,
+    profile: computeCompactedProfile(newProfile),
     // Note that the profile was sanitized.
     isSanitized: true,
     // Provide a new empty committed range if needed.
@@ -217,6 +247,622 @@ export function sanitizePII(
         ? null
         : oldThreadIndexToNew,
   };
+}
+
+type ReferenceSets = {|
+  referencedStacks: Uint8Array,
+  referencedFrames: Uint8Array,
+  referencedFuncs: Uint8Array,
+  referencedResources: Uint8Array,
+  referencedNativeSymbols: Uint8Array,
+  referencedStrings: Uint8Array,
+  referencedLibs: Uint8Array,
+|};
+
+type ProfileTranslationMaps = {|
+  oldStringToNewStringPlusOne: Int32Array,
+  oldLibToNewLibPlusOne: Int32Array,
+|};
+
+type ThreadTranslationMaps = {|
+  oldStackToNewStackPlusOne: Int32Array,
+  oldFrameToNewFramePlusOne: Int32Array,
+  oldFuncToNewFuncPlusOne: Int32Array,
+  oldResourceToNewResourcePlusOne: Int32Array,
+  oldNativeSymbolToNewNativeSymbolPlusOne: Int32Array,
+  oldStringToNewStringPlusOne: Int32Array,
+  oldLibToNewLibPlusOne: Int32Array,
+|};
+
+function gcMarkStackCol(
+  stackCol: Array<IndexIntoStackTable | null>,
+  references: ReferenceSets
+) {
+  const { referencedStacks } = references;
+  for (let i = 0; i < stackCol.length; i++) {
+    const stack = stackCol[i];
+    if (stack !== null) {
+      referencedStacks[stack] = 1;
+    }
+  }
+}
+
+function translateStackCol(
+  stackCol: Array<IndexIntoStackTable | null>,
+  translationMaps: ThreadTranslationMaps
+): Array<IndexIntoStackTable | null> {
+  const { oldStackToNewStackPlusOne } = translationMaps;
+  const newStackCol = stackCol.slice();
+
+  for (let i = 0; i < stackCol.length; i++) {
+    const stack = stackCol[i];
+    newStackCol[i] =
+      stack !== null ? oldStackToNewStackPlusOne[stack] - 1 : null;
+  }
+
+  return newStackCol;
+}
+
+function gcMarkMarkers(
+  markers: RawMarkerTable,
+  stringIndexMarkerFieldsByDataType: Map<string, string[]>,
+  references: ReferenceSets
+) {
+  const { referencedStacks, referencedStrings } = references;
+  for (let i = 0; i < markers.length; i++) {
+    referencedStrings[markers.name[i]] = 1;
+
+    const data = markers.data[i];
+    if (!data) {
+      continue;
+    }
+
+    if (data.cause) {
+      const stack = data.cause.stack;
+      if (stack !== null) {
+        referencedStacks[stack] = 1;
+      }
+    }
+
+    if (data.type) {
+      const stringIndexMarkerFields = stringIndexMarkerFieldsByDataType.get(
+        data.type
+      );
+      if (stringIndexMarkerFields !== undefined) {
+        for (const fieldKey of stringIndexMarkerFields) {
+          const stringIndex = data[fieldKey];
+          if (typeof stringIndex === 'number') {
+            referencedStrings[stringIndex] = 1;
+          }
+        }
+      }
+    }
+  }
+}
+
+function translateMarkers(
+  markers: RawMarkerTable,
+  stringIndexMarkerFieldsByDataType: Map<string, string[]>,
+  translationMaps: ThreadTranslationMaps
+): RawMarkerTable {
+  const { oldStackToNewStackPlusOne, oldStringToNewStringPlusOne } =
+    translationMaps;
+  const newDataCol = markers.data.slice();
+  const newNameCol = markers.name.slice();
+  for (let i = 0; i < markers.length; i++) {
+    newNameCol[i] = oldStringToNewStringPlusOne[markers.name[i]] - 1;
+
+    const data = markers.data[i];
+    if (!data) {
+      continue;
+    }
+
+    let newData = data;
+    if (newData.cause) {
+      const stack = newData.cause.stack;
+      if (stack !== null) {
+        newData = {
+          ...newData,
+          cause: {
+            ...newData.cause,
+            stack: oldStackToNewStackPlusOne[stack] - 1,
+          },
+        };
+      }
+    }
+
+    if (data.type) {
+      const stringIndexMarkerFields = stringIndexMarkerFieldsByDataType.get(
+        data.type
+      );
+      if (stringIndexMarkerFields !== undefined) {
+        for (const fieldKey of stringIndexMarkerFields) {
+          const stringIndex = data[fieldKey];
+          if (typeof stringIndex === 'number') {
+            newData = {
+              ...newData,
+              [fieldKey]: oldStringToNewStringPlusOne[stringIndex] - 1,
+            };
+          }
+        }
+      }
+    }
+
+    newDataCol[i] = (newData: any);
+  }
+
+  return {
+    ...markers,
+    name: newNameCol,
+    data: newDataCol,
+  };
+}
+
+function gcMarkStackTable(
+  stackTable: RawStackTable,
+  references: ReferenceSets
+) {
+  const { referencedStacks, referencedFrames } = references;
+  for (let i = stackTable.length - 1; i >= 0; i--) {
+    if (referencedStacks[i] === 0) {
+      continue;
+    }
+
+    const prefix = stackTable.prefix[i];
+    if (prefix !== null) {
+      referencedStacks[prefix] = 1;
+    }
+    referencedFrames[stackTable.frame[i]] = 1;
+  }
+}
+
+function sweepAndCompactStackTable(
+  stackTable: RawStackTable,
+  referencedStacks: Uint8Array,
+  translationMaps: ThreadTranslationMaps
+): RawStackTable {
+  const { oldStackToNewStackPlusOne, oldFrameToNewFramePlusOne } =
+    translationMaps;
+  const newStackTable = getEmptyRawStackTable();
+  for (let i = 0; i < stackTable.length; i++) {
+    if (referencedStacks[i] === 0) {
+      continue;
+    }
+
+    const prefix = stackTable.prefix[i];
+
+    const newIndex = newStackTable.length++;
+    newStackTable.prefix[newIndex] =
+      prefix !== null ? oldStackToNewStackPlusOne[prefix] - 1 : null;
+    newStackTable.frame[newIndex] =
+      oldFrameToNewFramePlusOne[stackTable.frame[i]] - 1;
+
+    oldStackToNewStackPlusOne[i] = newIndex + 1;
+  }
+
+  return newStackTable;
+}
+
+function gcMarkFrameTable(frameTable: FrameTable, references: ReferenceSets) {
+  const {
+    referencedFrames,
+    referencedFuncs,
+    referencedNativeSymbols,
+    referencedStrings,
+  } = references;
+  for (let i = 0; i < frameTable.length; i++) {
+    if (referencedFrames[i] === 0) {
+      continue;
+    }
+
+    referencedFuncs[frameTable.func[i]] = 1;
+
+    const nativeSymbol = frameTable.nativeSymbol[i];
+    if (nativeSymbol !== null) {
+      referencedNativeSymbols[nativeSymbol] = 1;
+    }
+
+    const frameImpl = frameTable.implementation[i];
+    if (frameImpl !== null) {
+      referencedStrings[frameImpl] = 1;
+    }
+  }
+}
+
+function sweepAndCompactFrameTable(
+  frameTable: FrameTable,
+  referencedFrames: Uint8Array,
+  translationMaps: ThreadTranslationMaps
+): FrameTable {
+  const {
+    oldFrameToNewFramePlusOne,
+    oldFuncToNewFuncPlusOne,
+    oldNativeSymbolToNewNativeSymbolPlusOne,
+    oldStringToNewStringPlusOne,
+  } = translationMaps;
+  const newFrameTable = getEmptyFrameTable();
+  for (let i = 0; i < frameTable.length; i++) {
+    if (referencedFrames[i] === 0) {
+      continue;
+    }
+
+    const frameImpl = frameTable.implementation[i];
+    const nativeSymbol = frameTable.nativeSymbol[i];
+
+    const newIndex = newFrameTable.length++;
+    newFrameTable.address[newIndex] = frameTable.address[i];
+    newFrameTable.inlineDepth[newIndex] = frameTable.inlineDepth[i];
+    newFrameTable.category[newIndex] = frameTable.category[i];
+    newFrameTable.subcategory[newIndex] = frameTable.subcategory[i];
+    newFrameTable.func[newIndex] =
+      oldFuncToNewFuncPlusOne[frameTable.func[i]] - 1;
+    newFrameTable.nativeSymbol[newIndex] =
+      nativeSymbol !== null
+        ? oldNativeSymbolToNewNativeSymbolPlusOne[nativeSymbol] - 1
+        : null;
+    newFrameTable.innerWindowID[newIndex] = frameTable.innerWindowID[i];
+    newFrameTable.implementation[newIndex] =
+      frameImpl !== null ? oldStringToNewStringPlusOne[frameImpl] - 1 : null;
+    newFrameTable.line[newIndex] = frameTable.line[i];
+    newFrameTable.column[newIndex] = frameTable.column[i];
+
+    oldFrameToNewFramePlusOne[i] = newIndex + 1;
+  }
+
+  return newFrameTable;
+}
+
+function gcMarkFuncTable(funcTable: FuncTable, references: ReferenceSets) {
+  const { referencedFuncs, referencedStrings, referencedResources } =
+    references;
+  for (let i = 0; i < funcTable.length; i++) {
+    if (referencedFuncs[i] === 0) {
+      continue;
+    }
+
+    referencedStrings[funcTable.name[i]] = 1;
+
+    const fileNameIndex = funcTable.fileName[i];
+    if (fileNameIndex !== null) {
+      referencedStrings[fileNameIndex] = 1;
+    }
+
+    const resource = funcTable.resource[i];
+    if (resource !== -1) {
+      referencedResources[resource] = 1;
+    }
+  }
+}
+
+function sweepAndCompactFuncTable(
+  funcTable: FuncTable,
+  referencedFuncs: Uint8Array,
+  translationMaps: ThreadTranslationMaps
+): FuncTable {
+  const {
+    oldFuncToNewFuncPlusOne,
+    oldResourceToNewResourcePlusOne,
+    oldStringToNewStringPlusOne,
+  } = translationMaps;
+  const newFuncTable = getEmptyFuncTable();
+  for (let i = 0; i < funcTable.length; i++) {
+    if (referencedFuncs[i] === 0) {
+      continue;
+    }
+
+    const resource = funcTable.resource[i];
+    const fileName = funcTable.fileName[i];
+
+    const newIndex = newFuncTable.length++;
+    newFuncTable.name[newIndex] =
+      oldStringToNewStringPlusOne[funcTable.name[i]] - 1;
+    newFuncTable.isJS[newIndex] = funcTable.isJS[i];
+    newFuncTable.relevantForJS[newIndex] = funcTable.relevantForJS[i];
+    newFuncTable.resource[newIndex] =
+      resource !== -1 ? oldResourceToNewResourcePlusOne[resource] - 1 : -1;
+    newFuncTable.fileName[newIndex] =
+      fileName !== null ? oldStringToNewStringPlusOne[fileName] - 1 : null;
+    newFuncTable.lineNumber[newIndex] = funcTable.lineNumber[i];
+    newFuncTable.columnNumber[newIndex] = funcTable.columnNumber[i];
+
+    oldFuncToNewFuncPlusOne[i] = newIndex + 1;
+  }
+
+  return newFuncTable;
+}
+
+function gcMarkResourceTable(
+  resourceTable: ResourceTable,
+  references: ReferenceSets
+) {
+  const { referencedResources, referencedStrings, referencedLibs } = references;
+  for (let i = 0; i < resourceTable.length; i++) {
+    if (referencedResources[i] === 0) {
+      continue;
+    }
+
+    referencedStrings[resourceTable.name[i]] = 1;
+
+    const host = resourceTable.host[i];
+    if (host !== null) {
+      referencedStrings[host] = 1;
+    }
+
+    const lib = resourceTable.lib[i];
+    if (lib !== null) {
+      referencedLibs[lib] = 1;
+    }
+  }
+}
+
+function sweepAndCompactResourceTable(
+  resourceTable: ResourceTable,
+  referencedResources: Uint8Array,
+  translationMaps: ThreadTranslationMaps
+): ResourceTable {
+  const {
+    oldResourceToNewResourcePlusOne,
+    oldStringToNewStringPlusOne,
+    oldLibToNewLibPlusOne,
+  } = translationMaps;
+  const newResourceTable = getEmptyResourceTable();
+  for (let i = 0; i < resourceTable.length; i++) {
+    if (referencedResources[i] === 0) {
+      continue;
+    }
+
+    const host = resourceTable.host[i];
+    const lib = resourceTable.lib[i];
+
+    const newIndex = newResourceTable.length++;
+    newResourceTable.name[newIndex] =
+      oldStringToNewStringPlusOne[resourceTable.name[i]] - 1;
+    newResourceTable.host[newIndex] =
+      host !== null ? oldStringToNewStringPlusOne[host] - 1 : null;
+    newResourceTable.lib[newIndex] =
+      lib !== null ? oldLibToNewLibPlusOne[lib] - 1 : null;
+    newResourceTable.type[newIndex] = resourceTable.type[i];
+
+    oldResourceToNewResourcePlusOne[i] = newIndex + 1;
+  }
+
+  return newResourceTable;
+}
+
+function gcMarkNativeSymbols(
+  nativeSymbols: NativeSymbolTable,
+  references: ReferenceSets
+) {
+  const { referencedNativeSymbols, referencedStrings, referencedLibs } =
+    references;
+  for (let i = 0; i < nativeSymbols.length; i++) {
+    if (referencedNativeSymbols[i] === 0) {
+      continue;
+    }
+
+    referencedStrings[nativeSymbols.name[i]] = 1;
+    referencedLibs[nativeSymbols.libIndex[i]] = 1;
+  }
+}
+
+function sweepAndCompactNativeSymbols(
+  nativeSymbols: NativeSymbolTable,
+  referencedNativeSymbols: Uint8Array,
+  translationMaps: ThreadTranslationMaps
+): NativeSymbolTable {
+  const {
+    oldNativeSymbolToNewNativeSymbolPlusOne,
+    oldStringToNewStringPlusOne,
+    oldLibToNewLibPlusOne,
+  } = translationMaps;
+  const newNativeSymbols = getEmptyNativeSymbolTable();
+  for (let i = 0; i < nativeSymbols.length; i++) {
+    if (referencedNativeSymbols[i] === 0) {
+      continue;
+    }
+
+    const newIndex = newNativeSymbols.length++;
+    newNativeSymbols.name[newIndex] =
+      oldStringToNewStringPlusOne[nativeSymbols.name[i]] - 1;
+    newNativeSymbols.libIndex[newIndex] =
+      oldLibToNewLibPlusOne[nativeSymbols.libIndex[i]] - 1;
+    newNativeSymbols.address[newIndex] = nativeSymbols.address[i];
+    newNativeSymbols.functionSize[newIndex] = nativeSymbols.functionSize[i];
+
+    oldNativeSymbolToNewNativeSymbolPlusOne[i] = newIndex + 1;
+  }
+
+  return newNativeSymbols;
+}
+
+function sweepAndCompactStringArray(
+  stringArray: string[],
+  referencedStrings: Uint8Array,
+  translationMaps: ProfileTranslationMaps
+): string[] {
+  const { oldStringToNewStringPlusOne } = translationMaps;
+  let nextIndex = 0;
+  const newStringArray = [];
+  for (let i = 0; i < stringArray.length; i++) {
+    if (referencedStrings[i] === 0) {
+      continue;
+    }
+
+    const newIndex = nextIndex++;
+    newStringArray[newIndex] = stringArray[i];
+    oldStringToNewStringPlusOne[i] = newIndex + 1;
+  }
+
+  return newStringArray;
+}
+
+function sweepAndCompactLibs(
+  libs: Lib[],
+  referencedLibs: Uint8Array,
+  translationMaps: ProfileTranslationMaps
+): Lib[] {
+  const { oldLibToNewLibPlusOne } = translationMaps;
+  let nextIndex = 0;
+  const newLibs = [];
+  for (let i = 0; i < libs.length; i++) {
+    if (referencedLibs[i] === 0) {
+      continue;
+    }
+
+    const newIndex = nextIndex++;
+    newLibs[newIndex] = libs[i];
+    oldLibToNewLibPlusOne[i] = newIndex + 1;
+  }
+
+  return newLibs;
+}
+
+export function computeCompactedProfile(profile: Profile): Profile {
+  const stringIndexMarkerFieldsByDataType =
+    computeStringIndexMarkerFieldsByDataType(profile.meta.markerSchema);
+
+  // Make a new profile without unreferenced strings.
+  const referencedStrings = new Uint8Array(profile.shared.stringArray.length);
+  const referencedLibs = new Uint8Array(profile.libs.length);
+  const referencesPerThread = profile.threads.map((thread) => {
+    const references = {
+      referencedStacks: new Uint8Array(thread.stackTable.length),
+      referencedFrames: new Uint8Array(thread.frameTable.length),
+      referencedFuncs: new Uint8Array(thread.funcTable.length),
+      referencedResources: new Uint8Array(thread.resourceTable.length),
+      referencedNativeSymbols: new Uint8Array(thread.nativeSymbols.length),
+      referencedStrings,
+      referencedLibs,
+    };
+    gcMarkStackCol(thread.samples.stack, references);
+    if (thread.jsAllocations) {
+      gcMarkStackCol(thread.jsAllocations.stack, references);
+    }
+    if (thread.nativeAllocations) {
+      gcMarkStackCol(thread.nativeAllocations.stack, references);
+    }
+    gcMarkMarkers(
+      thread.markers,
+      stringIndexMarkerFieldsByDataType,
+      references
+    );
+    gcMarkStackTable(thread.stackTable, references);
+    gcMarkFrameTable(thread.frameTable, references);
+    gcMarkFuncTable(thread.funcTable, references);
+    gcMarkResourceTable(thread.resourceTable, references);
+    gcMarkNativeSymbols(thread.nativeSymbols, references);
+    return references;
+  });
+
+  const profileTranslationMaps = {
+    oldStringToNewStringPlusOne: new Int32Array(
+      profile.shared.stringArray.length
+    ),
+    oldLibToNewLibPlusOne: new Int32Array(profile.libs.length),
+  };
+
+  const newStringArray = sweepAndCompactStringArray(
+    profile.shared.stringArray,
+    referencedStrings,
+    profileTranslationMaps
+  );
+  const newLibs = sweepAndCompactLibs(
+    profile.libs,
+    referencedLibs,
+    profileTranslationMaps
+  );
+
+  const newThreads = profile.threads.map((thread, threadIndex): RawThread => {
+    const references = referencesPerThread[threadIndex];
+    const translationMaps = {
+      oldStackToNewStackPlusOne: new Int32Array(thread.stackTable.length),
+      oldFrameToNewFramePlusOne: new Int32Array(thread.frameTable.length),
+      oldFuncToNewFuncPlusOne: new Int32Array(thread.funcTable.length),
+      oldResourceToNewResourcePlusOne: new Int32Array(
+        thread.resourceTable.length
+      ),
+      oldNativeSymbolToNewNativeSymbolPlusOne: new Int32Array(
+        thread.nativeSymbols.length
+      ),
+      ...profileTranslationMaps,
+    };
+    const newNativeSymbols = sweepAndCompactNativeSymbols(
+      thread.nativeSymbols,
+      references.referencedNativeSymbols,
+      translationMaps
+    );
+    const newResourceTable = sweepAndCompactResourceTable(
+      thread.resourceTable,
+      references.referencedResources,
+      translationMaps
+    );
+    const newFuncTable = sweepAndCompactFuncTable(
+      thread.funcTable,
+      references.referencedFuncs,
+      translationMaps
+    );
+    const newFrameTable = sweepAndCompactFrameTable(
+      thread.frameTable,
+      references.referencedFrames,
+      translationMaps
+    );
+    const newStackTable = sweepAndCompactStackTable(
+      thread.stackTable,
+      references.referencedStacks,
+      translationMaps
+    );
+    const newSamples = {
+      ...thread.samples,
+      stack: translateStackCol(thread.samples.stack, translationMaps),
+    };
+    const newMarkers = translateMarkers(
+      thread.markers,
+      stringIndexMarkerFieldsByDataType,
+      translationMaps
+    );
+    const newThread: RawThread = {
+      ...thread,
+      nativeSymbols: newNativeSymbols,
+      resourceTable: newResourceTable,
+      funcTable: newFuncTable,
+      frameTable: newFrameTable,
+      stackTable: newStackTable,
+      samples: newSamples,
+      markers: newMarkers,
+    };
+
+    if (thread.jsAllocations) {
+      newThread.jsAllocations = {
+        ...thread.jsAllocations,
+        stack: translateStackCol(thread.jsAllocations.stack, translationMaps),
+      };
+    }
+
+    if (thread.nativeAllocations) {
+      newThread.nativeAllocations = {
+        ...thread.nativeAllocations,
+        stack: translateStackCol(
+          thread.nativeAllocations.stack,
+          translationMaps
+        ),
+      };
+    }
+
+    return newThread;
+  });
+
+  const newShared: RawProfileSharedData = {
+    stringArray: newStringArray,
+  };
+
+  const newProfile: Profile = {
+    ...profile,
+    libs: newLibs,
+    shared: newShared,
+    threads: newThreads,
+  };
+
+  return newProfile;
 }
 
 /**
@@ -242,6 +888,7 @@ export function getShouldSanitizeByDefault(profile: Profile): boolean {
  */
 function sanitizeThreadPII(
   thread: RawThread,
+  stringTable: StringTable,
   derivedMarkerInfo: DerivedMarkerInfo,
   threadIndex: number,
   PIIToBeRemoved: RemoveProfileInformation,
@@ -266,10 +913,6 @@ function sanitizeThreadPII(
     return null;
   }
 
-  // We need to update the stringArray. StringTable doesn't allow mutating
-  // existing stored strings, so we create a copy of the underlying string array
-  // and mutated it manually.
-  const stringArray = thread.stringArray.slice();
   let markerTable = shallowCloneRawMarkerTable(thread.markers);
 
   // We iterate all the markers and remove/change data depending on the PII
@@ -315,11 +958,9 @@ function sanitizeThreadPII(
           markerTable.data[i] = removeNetworkMarkerURLs(currentMarker);
 
           // Strip the URL from the marker name
-          const stringIndex = markerTable.name[i];
-          stringArray[stringIndex] = stringArray[stringIndex].replace(
-            /:.*/,
-            ''
-          );
+          const requestStr = stringTable.getString(markerTable.name[i]);
+          const sanitizedRequestStr = requestStr.replace(/:.*/, '');
+          markerTable.name[i] = stringTable.indexForString(sanitizedRequestStr);
         }
 
         if (currentMarker.type === 'Text') {
@@ -336,7 +977,7 @@ function sanitizeThreadPII(
         currentMarker &&
         currentMarker.type === 'Text'
       ) {
-        const markerName = stringArray[markerTable.name[i]];
+        const markerName = stringTable.getString(markerTable.name[i]);
         // Sanitize extension ids out of known extension markers.
         markerTable.data[i] = sanitizeExtensionTextMarker(
           markerName,
@@ -351,13 +992,6 @@ function sanitizeThreadPII(
         currentMarker &&
         currentMarker.type === 'CompositorScreenshot'
       ) {
-        const urlIndex = currentMarker.url;
-        // We are mutating the stringArray here but it's okay to mutate since
-        // we copied them at the beginning while converting the string table
-        // to string array.
-        if (urlIndex !== undefined) {
-          stringArray[urlIndex] = '';
-        }
         markersToDelete.add(i);
       }
 
@@ -439,14 +1073,6 @@ function sanitizeThreadPII(
     newThread = { ...thread };
   }
 
-  // This is expensive but needs to be done somehow.
-  // Maybe we can find something better here.
-  if (PIIToBeRemoved.shouldRemoveUrls) {
-    for (let i = 0; i < stringArray.length; i++) {
-      stringArray[i] = removeURLs(stringArray[i]);
-    }
-  }
-
   if (PIIToBeRemoved.shouldRemoveUrls && newThread['eTLD+1']) {
     // Remove the domain name of the isolated content process if it's provided
     // from the back-end.
@@ -524,8 +1150,10 @@ function sanitizeThreadPII(
           // This function is used by both private and non-private data, therefore
           // we split this function into 2 sanitized and unsanitized functions.
           const sanitizedFuncIndex = newFuncTable.length;
-          newFuncTable.name.push(stringArray.length);
-          stringArray.push(`<Func #${sanitizedFuncIndex}>`);
+          const name = stringTable.indexForString(
+            `<Func #${sanitizedFuncIndex}>`
+          );
+          newFuncTable.name.push(name);
           newFuncTable.isJS.push(funcTable.isJS[funcIndex]);
           newFuncTable.relevantForJS.push(funcTable.isJS[funcIndex]);
           newFuncTable.resource.push(-1);
@@ -541,8 +1169,8 @@ function sanitizeThreadPII(
         } else {
           // This function is used only by private data, so we can change it
           // directly.
-          newFuncTable.name[funcIndex] = stringArray.length;
-          stringArray.push(`<Func #${funcIndex}>`);
+          const name = stringTable.indexForString(`<Func #${funcIndex}>`);
+          newFuncTable.name[funcIndex] = name;
 
           newFuncTable.fileName[funcIndex] = null;
           if (newFuncTable.resource[funcIndex] >= 0) {
@@ -573,8 +1201,10 @@ function sanitizeThreadPII(
           if (!remainingResources.has(resourceIndex)) {
             // This resource was used only by sanitized functions. Sanitize it
             // as well.
-            newResourceTable.name[resourceIndex] = stringArray.length;
-            stringArray.push(`<Resource #${resourceIndex}>`);
+            const name = stringTable.indexForString(
+              `<Resource #${resourceIndex}>`
+            );
+            newResourceTable.name[resourceIndex] = name;
             newResourceTable.lib[resourceIndex] = null;
             newResourceTable.host[resourceIndex] = null;
           }
@@ -662,7 +1292,6 @@ function sanitizeThreadPII(
 
   // Remove the old stringArray and markerTable and replace it
   // with new updated ones.
-  newThread.stringArray = stringArray;
   newThread.markers = markerTable;
 
   // Have we removed everything from this thread?
