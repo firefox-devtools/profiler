@@ -16,7 +16,6 @@ import * as CallTree from '../../profile-logic/call-tree';
 import * as ProfileSelectors from '../profile';
 import * as JsTracer from '../../profile-logic/js-tracer';
 import * as Cpu from '../../profile-logic/cpu';
-import { StringTable } from '../../utils/string-table';
 import {
   assertExhaustiveCheck,
   ensureExists,
@@ -100,12 +99,6 @@ export function getBasicThreadSelectorsPerThread(
       ? ProfileSelectors.getProfile(state).threads[singleThreadIndex]
       : getMergedRawThread(state);
 
-  const getStringArray: Selector<string[]> = (state) =>
-    getRawThread(state).stringArray;
-  const getStringTable: Selector<StringTable> = createSelector(
-    getStringArray,
-    (stringArray) => StringTable.withBackingArray(stringArray)
-  );
   const getRawSamplesTable: Selector<RawSamplesTable> = (state) =>
     getRawThread(state).samples;
   const getSamplesTable: Selector<SamplesTable> = createSelector(
@@ -162,7 +155,7 @@ export function getBasicThreadSelectorsPerThread(
     getRawThread,
     getSamplesTable,
     getStackTable,
-    getStringTable,
+    ProfileSelectors.getStringTable,
     ProfileData.createThreadFromDerivedTables
   );
 
@@ -321,22 +314,25 @@ export function getBasicThreadSelectorsPerThread(
   const getHasUsefulTimingSamples: Selector<boolean> = createSelector(
     getSamplesTable,
     getRawThread,
-    (samples, rawThread) =>
-      ProfileData.hasUsefulSamples(samples.stack, rawThread)
+    ProfileSelectors.getRawProfileSharedData,
+    (samples, rawThread, shared) =>
+      ProfileData.hasUsefulSamples(samples.stack, rawThread, shared)
   );
 
   const getHasUsefulJsAllocations: Selector<boolean> = createSelector(
     getJsAllocations,
     getRawThread,
-    (jsAllocations, rawThread) =>
-      ProfileData.hasUsefulSamples(jsAllocations?.stack, rawThread)
+    ProfileSelectors.getRawProfileSharedData,
+    (jsAllocations, rawThread, shared) =>
+      ProfileData.hasUsefulSamples(jsAllocations?.stack, rawThread, shared)
   );
 
   const getHasUsefulNativeAllocations: Selector<boolean> = createSelector(
     getNativeAllocations,
     getRawThread,
-    (nativeAllocations, rawThread) =>
-      ProfileData.hasUsefulSamples(nativeAllocations?.stack, rawThread)
+    ProfileSelectors.getRawProfileSharedData,
+    (nativeAllocations, rawThread, shared) =>
+      ProfileData.hasUsefulSamples(nativeAllocations?.stack, rawThread, shared)
   );
 
   /**
@@ -369,7 +365,7 @@ export function getBasicThreadSelectorsPerThread(
     createSelector(
       getJsTracerTable,
       getRawThread,
-      getStringTable,
+      ProfileSelectors.getStringTable,
       (jsTracerTable, thread, stringTable) =>
         jsTracerTable === null
           ? null
@@ -384,7 +380,7 @@ export function getBasicThreadSelectorsPerThread(
   const getExpensiveJsTracerLeafTiming: Selector<JsTracerTiming[] | null> =
     createSelector(
       getJsTracerTable,
-      getStringTable,
+      ProfileSelectors.getStringTable,
       (jsTracerTable, stringTable) =>
         jsTracerTable === null
           ? null
@@ -409,9 +405,7 @@ export function getBasicThreadSelectorsPerThread(
 
   return {
     getRawThread,
-    getStringArray,
     getThread,
-    getStringTable,
     getSamplesTable,
     getSamplesWeightType,
     getNativeAllocations,

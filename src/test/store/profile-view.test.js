@@ -1817,9 +1817,7 @@ describe('snapshots of selectors/profile', function () {
     }
 
     // Add in a thread with markers
-    const {
-      threads: [markersThread],
-    } = getProfileWithMarkers([
+    const markersThread = getThreadWithMarkers(profile.shared, [
       ['A', 0, null],
       ['B', 1, null],
       ['C', 2, null],
@@ -3541,7 +3539,7 @@ describe('pages and active tab selectors', function () {
     // Thread 0 and 1 will be present in firstTabTabID.
     // Thread 1 and 2 will be present in secondTabTabID.
     profile.threads.push(
-      getThreadWithMarkers([
+      getThreadWithMarkers(profile.shared, [
         [
           'Test 1',
           1,
@@ -3555,7 +3553,7 @@ describe('pages and active tab selectors', function () {
       ])
     );
     profile.threads.push(
-      getThreadWithMarkers([
+      getThreadWithMarkers(profile.shared, [
         [
           'Test 2',
           1,
@@ -3579,7 +3577,7 @@ describe('pages and active tab selectors', function () {
       ])
     );
     profile.threads.push(
-      getThreadWithMarkers([
+      getThreadWithMarkers(profile.shared, [
         [
           'Test 4',
           1,

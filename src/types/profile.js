@@ -667,9 +667,6 @@ export type RawThread = {|
   markers: RawMarkerTable,
   stackTable: RawStackTable,
   frameTable: FrameTable,
-  // Strings for profiles are collected into a single table, and are referred to by
-  // their index by other tables.
-  stringArray: string[],
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   nativeSymbols: NativeSymbolTable,
@@ -932,6 +929,12 @@ export type ProfileMeta = {|
   gramsOfCO2ePerKWh?: number,
 |};
 
+export type RawProfileSharedData = {|
+  // Strings for profiles are collected into a single table, and are referred to by
+  // their index by other tables.
+  stringArray: string[],
+|};
+
 /**
  * All of the data for a processed profile.
  */
@@ -946,6 +949,7 @@ export type Profile = {|
   // have them. An upgrader could be written to make this non-optional.
   // This is list because there is a profiler overhead per process.
   profilerOverhead?: ProfilerOverhead[],
+  shared: RawProfileSharedData,
   threads: RawThread[],
   profilingLog?: ProfilingLog,
   profileGatheringLog?: ProfilingLog,
