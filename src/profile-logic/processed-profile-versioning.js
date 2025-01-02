@@ -2062,7 +2062,7 @@ const _upgraders = {
         libs: threadLibs,
         resourceTable,
         nativeSymbols,
-        stringTable,
+        stringArray,
       } = thread;
       const threadLibIndexToGlobalLibIndex = new Map();
       delete thread.libs;
@@ -2106,8 +2106,12 @@ const _upgraders = {
           nameStringIndex === undefined ||
           nameStringIndex === null
         ) {
-          resourceTable.name[resourceIndex] =
-            stringTable.indexForString('<unnamed resource>');
+          let stringIndex = stringArray.indexOf('<unnamed resource>');
+          if (stringIndex === -1) {
+            stringIndex = stringArray.length;
+            stringArray.push('<unnamed resource>');
+          }
+          resourceTable.name[resourceIndex] = stringIndex;
         }
         const hostStringIndex = resourceTable.host[resourceIndex];
         if (hostStringIndex === -1 || hostStringIndex === undefined) {
