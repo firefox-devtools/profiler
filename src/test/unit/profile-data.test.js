@@ -25,6 +25,7 @@ import {
   calculateFunctionSizeLowerBound,
   getNativeSymbolsForCallNode,
   getNativeSymbolInfo,
+  computeTimeColumnForRawSamplesTable,
 } from '../../profile-logic/profile-data';
 import { resourceTypes } from '../../profile-logic/data-structures';
 import {
@@ -177,13 +178,16 @@ describe('process-profile', function () {
       // Should be Content, but modified by workaround for bug 1322471.
       expect(thread2.name).toEqual('GeckoMain');
 
-      expect(thread0.samples.time[0]).toEqual(0);
-      expect(thread0.samples.time[1]).toEqual(1);
+      const sampleTimes0 = computeTimeColumnForRawSamplesTable(thread0.samples);
+      const sampleTimes2 = computeTimeColumnForRawSamplesTable(thread2.samples);
+
+      expect(sampleTimes0[0]).toEqual(0);
+      expect(sampleTimes0[1]).toEqual(1);
 
       // 1 second later than the same samples in the main process because the
       // content process' start time is 1s later.
-      expect(thread2.samples.time[0]).toEqual(1000);
-      expect(thread2.samples.time[1]).toEqual(1001);
+      expect(sampleTimes2[0]).toEqual(1000);
+      expect(sampleTimes2[1]).toEqual(1001);
 
       // Now about markers
       expect(thread0.markers.endTime[0]).toEqual(1);

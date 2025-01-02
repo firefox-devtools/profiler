@@ -3709,7 +3709,7 @@ describe('traced timing', function () {
     // Create a weighted samples table.
     const [{ samples }] = profile.threads;
     samples.weightType = 'tracing-ms';
-    samples.weight = samples.time.map(() => 1);
+    samples.weight = samples.stack.map(() => 1);
 
     const { getState } = storeWithProfile(profile);
     expect(selectedThreadSelectors.getTracedTiming(getState())).toBe(null);

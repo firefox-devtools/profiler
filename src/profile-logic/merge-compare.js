@@ -10,10 +10,7 @@
 
 import { stripIndent } from 'common-tags';
 
-import {
-  adjustTableTimestamps,
-  adjustMarkerTimestamps,
-} from './process-profile';
+import { adjustMarkerTimestamps } from './process-profile';
 import {
   getEmptyProfile,
   getEmptyResourceTable,
@@ -28,6 +25,7 @@ import {
   filterRawThreadSamplesToRange,
   getTimeRangeForThread,
   getTimeRangeIncludingAllThreads,
+  computeTimeColumnForRawSamplesTable,
 } from './profile-data';
 import {
   filterRawMarkerTableToRange,
@@ -55,13 +53,14 @@ import type {
   NativeSymbolTable,
   ResourceTable,
   StackTable,
-  SamplesTable,
+  RawSamplesTable,
   UrlState,
   ImplementationFilter,
   TransformStacksPerThread,
   DerivedMarkerInfo,
   RawMarkerTable,
   MarkerIndex,
+  Milliseconds,
 } from 'firefox-profiler/types';
 
 /**
@@ -232,7 +231,12 @@ export function mergeProfilesForDiffing(
     // start and the data is consistent.
     let startTimeAdjustment = 0;
     if (thread.samples.length) {
-      startTimeAdjustment = -thread.samples.time[0];
+      const { time, timeDeltas } = thread.samples;
+      if (time !== undefined) {
+        startTimeAdjustment = -time[0];
+      } else {
+        startTimeAdjustment = -ensureExists(timeDeltas)[0];
+      }
     } else if (thread.markers.length) {
       for (const startTime of thread.markers.startTime) {
         // Find the first marker startTime.
@@ -243,7 +247,10 @@ export function mergeProfilesForDiffing(
       }
     }
 
-    thread.samples = adjustTableTimestamps(thread.samples, startTimeAdjustment);
+    thread.samples = _adjustSampleTimestamps(
+      thread.samples,
+      startTimeAdjustment
+    );
     thread.markers = adjustMarkerTimestamps(
       thread.markers,
       startTimeAdjustment
@@ -322,6 +329,24 @@ function _filterRawThreadToRange(
   return thread;
 }
 
+function _adjustSampleTimestamps(
+  rawSamplesTable: RawSamplesTable,
+  delta: Milliseconds
+): RawSamplesTable {
+  const { time, timeDeltas } = rawSamplesTable;
+  if (time !== undefined) {
+    return {
+      ...rawSamplesTable,
+      time: time.map((t) => t + delta),
+    };
+  }
+  const newTimeDeltas = ensureExists(timeDeltas).slice();
+  newTimeDeltas[0] += delta;
+  return {
+    ...rawSamplesTable,
+    timeDeltas: newTimeDeltas,
+  };
+}
 type TranslationMapForCategories = Map<
   IndexIntoCategoryList,
   IndexIntoCategoryList,
@@ -835,7 +860,7 @@ function combineSamplesDiffing(
     ThreadAndWeightMultiplier,
     ThreadAndWeightMultiplier,
   ]
-): { samples: SamplesTable, translationMaps: TranslationMapForSamples[] } {
+): { samples: RawSamplesTable, translationMaps: TranslationMapForSamples[] } {
   const translationMaps = [new Map(), new Map()];
   const [
     {
@@ -856,6 +881,9 @@ function combineSamplesDiffing(
     threadId: newThreadId,
   };
 
+  const samples1Time = computeTimeColumnForRawSamplesTable(samples1);
+  const samples2Time = computeTimeColumnForRawSamplesTable(samples2);
+
   let i = 0;
   let j = 0;
   while (i < samples1.length || j < samples2.length) {
@@ -867,7 +895,7 @@ function combineSamplesDiffing(
     // Otherwise we take the next samples from thread 2 until we run out of samples.
     const nextSampleIsFromThread1 =
       i < samples1.length &&
-      (j >= samples2.length || samples1.time[i] < samples2.time[j]);
+      (j >= samples2.length || samples1Time[i] < samples2Time[j]);
 
     if (nextSampleIsFromThread1) {
       // Next sample is from thread 1.
@@ -886,7 +914,7 @@ function combineSamplesDiffing(
       // Diffing event delay values doesn't make sense since interleaved values
       // of eventDelay/responsiveness don't mean anything.
       newSamples.eventDelay.push(null);
-      newSamples.time.push(samples1.time[i]);
+      newSamples.time.push(samples1Time[i]);
       newThreadId.push(samples1.threadId ? samples1.threadId[i] : tid1);
       // TODO (issue #3151): Figure out a way to diff CPU usage numbers.
       // We add the first thread with a negative weight, because this is the
@@ -914,7 +942,7 @@ function combineSamplesDiffing(
       // Diffing event delay values doesn't make sense since interleaved values
       // of eventDelay/responsiveness don't mean anything.
       newSamples.eventDelay.push(null);
-      newSamples.time.push(samples2.time[j]);
+      newSamples.time.push(samples2Time[j]);
       newThreadId.push(samples2.threadId ? samples2.threadId[j] : tid2);
       const sampleWeight = samples2.weight ? samples2.weight[j] : 1;
       newWeight.push(weightMultiplier2 * sampleWeight);
@@ -1120,9 +1148,12 @@ export function mergeThreads(threads: RawThread[]): RawThread {
 function combineSamplesForMerging(
   translationMapsForStacks: TranslationMapForStacks[],
   threads: RawThread[]
-): SamplesTable {
-  const samplesPerThread: SamplesTable[] = threads.map(
+): RawSamplesTable {
+  const samplesPerThread: RawSamplesTable[] = threads.map(
     (thread) => thread.samples
+  );
+  const sampleTimesPerThread: Milliseconds[][] = samplesPerThread.map(
+    computeTimeColumnForRawSamplesTable
   );
   // This is the array that holds the latest processed sample index for each
   // thread's samplesTable.
@@ -1158,7 +1189,7 @@ function combineSamplesForMerging(
         continue;
       }
 
-      const currentSampleTime = samples.time[sampleIndex];
+      const currentSampleTime = sampleTimesPerThread[threadIndex][sampleIndex];
       if (currentSampleTime < earliestNextSampleTime) {
         earliestNextSampleThreadIndex = threadIndex;
         earliestNextSampleTime = currentSampleTime;
@@ -1173,6 +1204,7 @@ function combineSamplesForMerging(
     // 2. Add the earliest sample to the new sample table.
     const sourceThreadIndex = earliestNextSampleThreadIndex;
     const sourceThreadSamples = samplesPerThread[sourceThreadIndex];
+    const sourceThreadSamplesTimeCol = sampleTimesPerThread[sourceThreadIndex];
     const sourceThreadSampleIndex: number =
       nextSampleIndexPerThread[sourceThreadIndex];
 
@@ -1192,7 +1224,7 @@ function combineSamplesForMerging(
     // It doesn't make sense to combine event delay values. We need to use jank markers
     // from independent threads instead.
     ensureExists(newSamples.eventDelay).push(null);
-    newSamples.time.push(sourceThreadSamples.time[sourceThreadSampleIndex]);
+    newSamples.time.push(sourceThreadSamplesTimeCol[sourceThreadSampleIndex]);
     newThreadId.push(
       sourceThreadSamples.threadId
         ? sourceThreadSamples.threadId[sourceThreadSampleIndex]

@@ -10,6 +10,7 @@ import {
 
 import type {
   RawThread,
+  RawSamplesTable,
   SamplesTable,
   FrameTable,
   StackTable,
@@ -45,7 +46,7 @@ export function getEmptyStackTable(): StackTable {
   };
 }
 
-export function getEmptySamplesTable(): SamplesTable {
+export function getEmptySamplesTable(): RawSamplesTable {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -64,7 +65,7 @@ export function getEmptySamplesTable(): SamplesTable {
  * eventDelay is a new field and it replaced responsiveness. We should still
  * account for older profiles and use both of the flavors if needed.
  */
-export function getEmptySamplesTableWithEventDelay(): SamplesTable {
+export function getEmptySamplesTableWithEventDelay(): RawSamplesTable {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure

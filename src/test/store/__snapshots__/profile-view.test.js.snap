@@ -5248,6 +5248,7 @@ Object {
       0,
     ],
     "length": 57,
+    "responsiveness": undefined,
     "stack": Array [
       null,
       null,
@@ -5307,6 +5308,8 @@ Object {
       null,
       null,
     ],
+    "threadCPUDelta": undefined,
+    "threadId": undefined,
     "time": Array [
       0,
       1,
@@ -5428,6 +5431,7 @@ Object {
       "G",
       "H",
       "I",
+      "CompositorScreenshot",
     ],
     "_stringToIndex": Map {
       "A" => 0,
@@ -5439,6 +5443,7 @@ Object {
       "G" => 6,
       "H" => 7,
       "I" => 8,
+      "CompositorScreenshot" => 9,
     },
   },
   "tid": 0,

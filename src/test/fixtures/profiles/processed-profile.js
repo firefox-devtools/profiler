@@ -33,7 +33,7 @@ import type {
   IndexIntoStackTable,
   CategoryList,
   JsTracerTable,
-  Counter,
+  RawCounter,
   TabID,
   MarkerPayload,
   NetworkPayload,
@@ -54,7 +54,10 @@ import {
   deriveMarkersFromRawMarkerTable,
   IPCMarkerCorrelations,
 } from '../../../profile-logic/marker-data';
-import { getTimeRangeForThread } from '../../../profile-logic/profile-data';
+import {
+  getTimeRangeForThread,
+  computeTimeColumnForRawSamplesTable,
+} from '../../../profile-logic/profile-data';
 import { markerSchemaForTests } from './marker-schema';
 import { GlobalDataCollector } from 'firefox-profiler/profile-logic/process-profile';
 import { getVisualMetrics } from './gecko-profile';
@@ -207,17 +210,19 @@ export function addMarkersToThreadWithCorrespondingSamples(
     const firstMarkerTime = Math.min(...allTimes);
     const lastMarkerTime = Math.max(...allTimes);
 
+    const sampleTimes = ensureExists(samples.time);
+
     // The first marker time should be added if there's no sample before this time.
-    const shouldAddFirstMarkerTime = samples.time[0] > firstMarkerTime;
+    const shouldAddFirstMarkerTime = sampleTimes[0] > firstMarkerTime;
 
     // The last marker time should be added if there's no sample after this time,
     // but only if it's different than the other time.
     const shouldAddLastMarkerTime =
-      samples.time[samples.length - 1] < lastMarkerTime &&
+      sampleTimes[samples.length - 1] < lastMarkerTime &&
       firstMarkerTime !== lastMarkerTime;
 
     if (shouldAddFirstMarkerTime) {
-      samples.time.unshift(firstMarkerTime);
+      sampleTimes.unshift(firstMarkerTime);
       samples.stack.unshift(null);
       if (samples.responsiveness) {
         samples.responsiveness.unshift(null);
@@ -232,7 +237,7 @@ export function addMarkersToThreadWithCorrespondingSamples(
     }
 
     if (shouldAddLastMarkerTime) {
-      samples.time.push(lastMarkerTime);
+      sampleTimes.push(lastMarkerTime);
       samples.stack.push(null);
       if (samples.responsiveness) {
         samples.responsiveness.push(null);
@@ -1078,7 +1083,7 @@ function _buildThreadFromTextOnlyStacks(
     samples.length++;
     ensureExists(samples.eventDelay).push(0);
     samples.stack.push(prefix);
-    samples.time.push(columnIndex);
+    ensureExists(samples.time).push(columnIndex);
   });
 
   if (sampleTimes) {
@@ -1533,21 +1538,22 @@ export function getCounterForThread(
   thread: RawThread,
   mainThreadIndex: ThreadIndex,
   config: { hasCountNumber: boolean } = {}
-): Counter {
-  const counter: Counter = {
+): RawCounter {
+  const sampleTimes = computeTimeColumnForRawSamplesTable(thread.samples);
+  const counter: RawCounter = {
     name: 'My Counter',
     category: 'My Category',
     description: 'My Description',
     pid: thread.pid,
     mainThreadIndex,
     samples: {
-      time: thread.samples.time.slice(),
+      time: sampleTimes.slice(),
       // Create some arbitrary (positive integer) values for the number.
       number: config.hasCountNumber
-        ? thread.samples.time.map((_, i) => Math.floor(50 * Math.sin(i) + 50))
+        ? sampleTimes.map((_, i) => Math.floor(50 * Math.sin(i) + 50))
         : undefined,
       // Create some arbitrary values for the count.
-      count: thread.samples.time.map((_, i) => Math.sin(i)),
+      count: sampleTimes.map((_, i) => Math.sin(i)),
       length: thread.samples.length,
     },
   };
@@ -1568,7 +1574,7 @@ export function getCounterForThreadWithSamples(
   },
   name?: string,
   category?: string
-): Counter {
+): RawCounter {
   const newSamples = {
     time: samples.time
       ? samples.time
@@ -1580,7 +1586,7 @@ export function getCounterForThreadWithSamples(
     length: samples.length,
   };
 
-  const counter: Counter = {
+  const counter: RawCounter = {
     name: name ?? 'My Counter',
     category: category ?? 'My Category',
     description: 'My Description',
@@ -2102,6 +2108,7 @@ export function addInnerWindowIdToStacks(
       mapStackIndexToDupe.set(stackIndex, newStackIndex);
     }
 
+    const sampleTimes = ensureExists(samples.time);
     for (let sampleIndex = samples.length; sampleIndex >= 0; sampleIndex--) {
       // We're looping from the end because we'll push some samples to the end
       // and don't want to look at them.
@@ -2112,7 +2119,7 @@ export function addInnerWindowIdToStacks(
       }
 
       // Dupe the sample
-      samples.time.push(samples.time[samples.length - 1] + 1);
+      sampleTimes.push(sampleTimes[samples.length - 1] + 1);
       samples.stack.push(newStackIndex);
       if (samples.eventDelay) {
         samples.eventDelay.push(samples.eventDelay[sampleIndex]);

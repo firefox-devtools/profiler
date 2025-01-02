@@ -19,7 +19,7 @@ An optional `isStackBased` boolean field has been added to the marker schema.
 
 ### Version 50
 
-The serialized format can now optionally store sample and counter sample times as time deltas instead of absolute timestamps to reduce the JSON size. The unserialized version is unchanged.
+The format can now optionally store sample and counter sample times as time deltas instead of absolute timestamps to reduce the JSON size.
 
 ### Version 49
 

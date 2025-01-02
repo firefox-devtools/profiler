@@ -42,11 +42,12 @@ import { convertJsTracerToThread } from '../profile-logic/js-tracer';
 import type {
   Profile,
   RawThread,
-  Counter,
+  RawCounter,
   ExtensionTable,
   CategoryList,
   FrameTable,
-  SamplesTable,
+  RawCounterSamplesTable,
+  RawSamplesTable,
   StackTable,
   RawMarkerTable,
   Lib,
@@ -75,6 +76,7 @@ import type {
   GeckoFrameStruct,
   GeckoSampleStruct,
   GeckoStackStruct,
+  GeckoCounterSamplesStruct,
   GeckoProfilerOverhead,
   GCSliceMarkerPayload,
   GCMajorMarkerPayload,
@@ -85,8 +87,6 @@ import type {
   GCMajorCompleted_Gecko,
   GCMajorAborted,
   PhaseTimes,
-  SerializableProfile,
-  SerializableCounter,
   ExternalMarkersData,
   MarkerSchema,
   ProfileMeta,
@@ -954,13 +954,26 @@ function _processMarkerPayload(
   }
 }
 
+export function timeColumnToTimeDeltas(time: Milliseconds[]): Milliseconds[] {
+  const NS_PER_MS = 1000000;
+  const timeDeltas = new Array(time.length);
+  let prevTimeNs = 0;
+  for (let i = 0; i < time.length; i++) {
+    const currentTimeNs = Math.round(time[i] * NS_PER_MS);
+    timeDeltas[i] = (currentTimeNs - prevTimeNs) / NS_PER_MS;
+    prevTimeNs = currentTimeNs;
+  }
+  return timeDeltas;
+}
+
 /**
- * Explicitly recreate the markers here to help enforce our assumptions about types.
+ * Explicitly recreate the samples table here to help enforce our assumptions
+ * about types, and to convert timestamps to deltas.
  */
-function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
-  const samples: SamplesTable = {
+function _processSamples(geckoSamples: GeckoSampleStruct): RawSamplesTable {
+  const samples: RawSamplesTable = {
     stack: geckoSamples.stack,
-    time: geckoSamples.time,
+    timeDeltas: timeColumnToTimeDeltas(geckoSamples.time),
     weightType: 'samples',
     weight: null,
     length: geckoSamples.length,
@@ -1006,7 +1019,7 @@ function _processCounters(
   // The timing across processes must be normalized, this is the timing delta between
   // various processes.
   delta: Milliseconds
-): Counter[] {
+): RawCounter[] {
   const geckoCounters = geckoProfile.counters;
   const mainThread = geckoProfile.threads.find(
     (thread) => thread.name === 'GeckoMain'
@@ -1040,18 +1053,38 @@ function _processCounters(
         return result;
       }
 
+      const geckoCounterSamples: GeckoCounterSamplesStruct =
+        _toStructOfArrays(samples);
+      const processedCounterSamples =
+        _processCounterSamples(geckoCounterSamples);
+
       result.push({
         name,
         category,
         description,
         pid: mainThreadPid,
         mainThreadIndex,
-        samples: adjustTableTimestamps(_toStructOfArrays(samples), delta),
+        samples: adjustTableTimeDeltas(processedCounterSamples, delta),
       });
       return result;
     },
     []
   );
+}
+
+/**
+ * Explicitly recreate the counter samples table here to help enforce our
+ * assumptions about types, and to convert timestamps to deltas.
+ */
+function _processCounterSamples(
+  geckoCounterSamples: GeckoCounterSamplesStruct
+): RawCounterSamplesTable {
+  return {
+    timeDeltas: timeColumnToTimeDeltas(geckoCounterSamples.time),
+    number: geckoCounterSamples.number,
+    count: geckoCounterSamples.count,
+    length: geckoCounterSamples.length,
+  };
 }
 
 /**
@@ -1252,6 +1285,25 @@ export function adjustTableTimestamps<Table: { time: Milliseconds[] }>(
   return {
     ...table,
     time: table.time.map((time) => time + delta),
+  };
+}
+
+export function adjustTableTimeDeltas<Table: { timeDeltas?: Milliseconds[] }>(
+  table: Table,
+  delta: Milliseconds
+): Table {
+  const { timeDeltas } = table;
+  if (timeDeltas === undefined) {
+    throw new Error(
+      'Should only be called when a timeDeltas column is present'
+    );
+  }
+
+  const newTimeDeltas = timeDeltas.slice();
+  newTimeDeltas[0] += delta;
+  return {
+    ...table,
+    timeDeltas: newTimeDeltas,
   };
 }
 
@@ -1546,7 +1598,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
       _processThread(thread, geckoProfile, extensions, globalDataCollector)
     );
   }
-  const counters: Counter[] = _processCounters(geckoProfile, threads, 0);
+  const counters: RawCounter[] = _processCounters(geckoProfile, threads, 0);
   const nullableProfilerOverhead: Array<ProfilerOverhead | null> = [
     _processProfilerOverhead(geckoProfile, threads, 0),
   ];
@@ -1561,7 +1613,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
         extensions,
         globalDataCollector
       );
-      newThread.samples = adjustTableTimestamps(
+      newThread.samples = adjustTableTimeDeltas(
         newThread.samples,
         adjustTimestampsBy
       );
@@ -1719,103 +1771,20 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   return result;
 }
 
-function _serializeSamples({ time, ...restOfSamples }): any {
-  let lastTime = 0;
-  return {
-    timeDeltas: time.map((t) => {
-      const timeDelta = t - lastTime;
-      lastTime = t;
-      return timeDelta;
-    }),
-    ...restOfSamples,
-  };
-}
-
-function _unserializeSamples({ timeDeltas, time, ...restOfSamples }): any {
-  let lastTime = 0;
-  return {
-    time:
-      time ||
-      ensureExists(timeDeltas).map((delta) => {
-        lastTime = lastTime + delta;
-        return lastTime;
-      }),
-    ...restOfSamples,
-  };
-}
-
 /**
- * The StringTable is a class, and is not serializable. This function turns
- * a profile into the serializable variant.
- */
-export function makeProfileSerializable({
-  threads,
-  counters,
-  ...restOfProfile
-}: Profile): SerializableProfile {
-  return {
-    ...restOfProfile,
-    counters: counters
-      ? counters.map(({ samples, ...restOfCounter }) => {
-          return {
-            ...restOfCounter,
-            samples: _serializeSamples(samples),
-          };
-        })
-      : counters,
-    threads: threads.map(({ samples, ...restOfThread }) => {
-      return {
-        ...restOfThread,
-        samples: _serializeSamples(samples),
-      };
-    }),
-  };
-}
-
-/**
- * Take a processed profile and remove any non-serializable classes such as the
- * StringTable class.
+ * Take a processed profile and convert it to a string.
  */
 export function serializeProfile(profile: Profile): string {
-  return JSON.stringify(makeProfileSerializable(profile));
-}
-
-/**
- * Take a serialized processed profile from some saved source, and re-initialize
- * any non-serializable classes.
- */
-function _unserializeProfile({
-  threads,
-  counters,
-  ...restOfProfile
-}: SerializableProfile): Profile {
-  return {
-    ...restOfProfile,
-    counters: counters
-      ? ((counters: any[]): SerializableCounter[]).map(
-          ({ samples, ...restOfCounter }) => {
-            return {
-              ...restOfCounter,
-              samples: _unserializeSamples(samples),
-            };
-          }
-        )
-      : counters,
-    threads: threads.map(({ samples, ...restOfThread }) => {
-      return {
-        ...restOfThread,
-        samples: _unserializeSamples(samples),
-      };
-    }),
-  };
+  return JSON.stringify(profile);
 }
 
 // If applicable, this function will try to "fix" a processed profile that was
-// copied as is from the UI's console, without passing through the serialization
-// step.
+// copied from the console on an old version of the UI, where such a profile
+// would have a `stringTable` property rather than a `stringArray` property on
+// each thread.
 function attemptToFixProcessedProfileThroughMutation(
   profile: MixedObject
-): SerializableProfile | null {
+): MixedObject | null {
   if (!profile || typeof profile !== 'object') {
     return profile;
   }
@@ -1927,7 +1896,7 @@ export async function unserializeProfileOfArbitraryFormat(
     const processedProfile =
       attemptToUpgradeProcessedProfileThroughMutation(possiblyFixedProfile);
     if (processedProfile) {
-      return _unserializeProfile(processedProfile);
+      return processedProfile;
     }
 
     const processedChromeProfile = attemptToConvertChromeProfile(

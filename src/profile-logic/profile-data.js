@@ -37,6 +37,7 @@ import type {
   Profile,
   RawThread,
   Thread,
+  RawSamplesTable,
   SamplesTable,
   StackTable,
   FrameTable,
@@ -53,7 +54,9 @@ import type {
   IndexIntoNativeSymbolTable,
   ThreadIndex,
   Category,
+  RawCounter,
   Counter,
+  RawCounterSamplesTable,
   CounterSamplesTable,
   NativeAllocationsTable,
   InnerWindowID,
@@ -1074,9 +1077,23 @@ function _getTimeRangeForThread(
   const result = { start: Infinity, end: -Infinity };
 
   if (samples.length) {
-    const lastSampleIndex = samples.length - 1;
-    result.start = samples.time[0];
-    result.end = samples.time[lastSampleIndex] + interval;
+    // We're dealing with the RawThread here, so we need to be able to handle
+    // sample times in both formats: as times or as deltas.
+    const { time, timeDeltas: maybeTimeDeltas } = samples;
+    if (time !== undefined) {
+      const lastSampleIndex = samples.length - 1;
+      result.start = time[0];
+      result.end = time[lastSampleIndex] + interval;
+    } else {
+      const timeDeltas = ensureExists(maybeTimeDeltas);
+      result.start = timeDeltas[0];
+
+      let accumTime = 0;
+      for (let i = 0; i < samples.length; i++) {
+        accumTime += timeDeltas[i];
+      }
+      result.end = accumTime + interval;
+    }
   } else if (markers.length) {
     // Looking at the markers only if there are no samples in the profile.
     // We need to look at those because it can be a marker only profile(no-sampling mode).
@@ -1492,19 +1509,38 @@ export function filterThreadByTab(
   });
 }
 
+export function computeTimeColumnFromTimeDeltas(timeDelta: number[]): number[] {
+  let prevTime = 0;
+  return timeDelta.map((delta) => {
+    prevTime = prevTime + delta;
+    return prevTime;
+  });
+}
+
+export function computeTimeColumnForRawSamplesTable(
+  samples: RawSamplesTable | RawCounterSamplesTable
+): number[] {
+  const { time, timeDeltas } = samples;
+  return time ?? computeTimeColumnFromTimeDeltas(ensureExists(timeDeltas));
+}
+
 /**
  * Checks if a sample table has any useful samples.
  * A useful sample being one that isn't a "(root)" sample.
  */
 export function hasUsefulSamples(
-  table?: SamplesLikeTable,
+  sampleStacks?: Array<IndexIntoStackTable | null>,
   thread: RawThread
 ): boolean {
   const { stackTable, frameTable, funcTable, stringArray } = thread;
-  if (table === undefined || table.length === 0 || stackTable.length === 0) {
+  if (
+    sampleStacks === undefined ||
+    sampleStacks.length === 0 ||
+    stackTable.length === 0
+  ) {
     return false;
   }
-  const stackIndex = table.stack.find((stack) => stack !== null);
+  const stackIndex = sampleStacks.find((stack) => stack !== null);
   if (
     stackIndex === undefined ||
     stackIndex === null // We know that it can't be null at this point, but Flow doesn't.
@@ -1520,7 +1556,7 @@ export function hasUsefulSamples(
     if (stringArray[stringIndex] === '(root)') {
       // If the first sample's stack is only the root, check if any other
       // sample is different.
-      return table.stack.some((s) => s !== null && s !== stackIndex);
+      return sampleStacks.some((s) => s !== null && s !== stackIndex);
     }
   }
   return true;
@@ -1530,12 +1566,20 @@ export function hasUsefulSamples(
  * This function takes both a SamplesTable and can be used on CounterSamplesTable.
  */
 export function getSampleIndexRangeForSelection(
-  table: { time: Milliseconds[], length: number },
+  times: { time: Milliseconds[], length: number },
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
-  const sampleStart = bisectionLeft(table.time, rangeStart);
-  const sampleEnd = bisectionLeft(table.time, rangeEnd, sampleStart);
+  return getIndexRangeForSelection(times.time, rangeStart, rangeEnd);
+}
+
+export function getIndexRangeForSelection(
+  times: Milliseconds[],
+  rangeStart: number,
+  rangeEnd: number
+): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
+  const sampleStart = bisectionLeft(times, rangeStart);
+  const sampleEnd = bisectionLeft(times, rangeEnd, sampleStart);
   return [sampleStart, sampleEnd];
 }
 
@@ -1549,8 +1593,16 @@ export function getInclusiveSampleIndexRangeForSelection(
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
-  let [sampleStart, sampleEnd] = getSampleIndexRangeForSelection(
-    table,
+  return getInclusiveIndexRangeForSelection(table.time, rangeStart, rangeEnd);
+}
+
+export function getInclusiveIndexRangeForSelection(
+  times: Milliseconds[],
+  rangeStart: number,
+  rangeEnd: number
+): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
+  let [sampleStart, sampleEnd] = getIndexRangeForSelection(
+    times,
     rangeStart,
     rangeEnd
   );
@@ -1560,7 +1612,7 @@ export function getInclusiveSampleIndexRangeForSelection(
   if (sampleStart > 0) {
     sampleStart--;
   }
-  if (sampleEnd < table.length) {
+  if (sampleEnd < times.length) {
     sampleEnd++;
   }
 
@@ -1713,14 +1765,15 @@ export function filterRawThreadSamplesToRange(
   rangeEnd: number
 ): RawThread {
   const { samples, jsAllocations, nativeAllocations } = thread;
-  const [beginSampleIndex, endSampleIndex] = getSampleIndexRangeForSelection(
-    samples,
+  const sampleTimes = computeTimeColumnForRawSamplesTable(samples);
+  const [beginSampleIndex, endSampleIndex] = getIndexRangeForSelection(
+    sampleTimes,
     rangeStart,
     rangeEnd
   );
-  const newSamples: SamplesTable = {
+  const newSamples: RawSamplesTable = {
     length: endSampleIndex - beginSampleIndex,
-    time: samples.time.slice(beginSampleIndex, endSampleIndex),
+    time: sampleTimes.slice(beginSampleIndex, endSampleIndex),
     weight: samples.weight
       ? samples.weight.slice(beginSampleIndex, endSampleIndex)
       : null,
@@ -1828,23 +1881,27 @@ export function filterRawThreadSamplesToRange(
  * Filter the counter samples to the given range by iterating all of their sample groups.
  */
 export function filterCounterSamplesToRange(
-  counter: Counter,
+  counter: RawCounter,
   rangeStart: number,
   rangeEnd: number
-): Counter {
+): RawCounter {
   const newCounter = { ...counter };
   const { samples } = newCounter;
+  const timeColumn = computeTimeColumnForRawSamplesTable(samples);
 
   // Intentionally get the inclusive sample indexes with this one instead of
   // getSampleIndexRangeForSelection because graphs like memory graph requires
   // one sample before and after to be in the sample range so the graph doesn't
   // look cut off.
-  const [beginSampleIndex, endSampleIndex] =
-    getInclusiveSampleIndexRangeForSelection(samples, rangeStart, rangeEnd);
+  const [beginSampleIndex, endSampleIndex] = getInclusiveIndexRangeForSelection(
+    timeColumn,
+    rangeStart,
+    rangeEnd
+  );
 
   newCounter.samples = {
     length: endSampleIndex - beginSampleIndex,
-    time: samples.time.slice(beginSampleIndex, endSampleIndex),
+    time: timeColumn.slice(beginSampleIndex, endSampleIndex),
     count: samples.count.slice(beginSampleIndex, endSampleIndex),
     number: samples.number
       ? samples.number.slice(beginSampleIndex, endSampleIndex)
@@ -1857,11 +1914,11 @@ export function filterCounterSamplesToRange(
 /**
  * Process the samples in the counter.
  */
-export function processCounter(counter: Counter): Counter {
-  const { samples } = counter;
-  const count = samples.count.slice();
+export function processCounter(rawCounter: RawCounter): Counter {
+  const { samples: rawSamples } = rawCounter;
+  const count = rawSamples.count.slice();
   const number =
-    samples.number !== undefined ? samples.number.slice() : undefined;
+    rawSamples.number !== undefined ? rawSamples.number.slice() : undefined;
 
   // These lines zero out the first values of the counters, as they are unreliable. In
   // addition, there are probably some missed counts in the memory counters, so the
@@ -1876,14 +1933,25 @@ export function processCounter(counter: Counter): Counter {
     number[0] = 0;
   }
 
-  return {
-    ...counter,
-    samples: {
-      ...samples,
-      number,
-      count,
-    },
+  const samples: CounterSamplesTable = {
+    time: computeTimeColumnForRawSamplesTable(rawSamples),
+    number,
+    count,
+    length: rawSamples.length,
   };
+
+  const counter: Counter = {
+    name: rawCounter.name,
+    category: rawCounter.category,
+    description: rawCounter.description,
+    color: rawCounter.color,
+    pid: rawCounter.pid,
+    mainThreadIndex: rawCounter.mainThreadIndex,
+
+    samples,
+  };
+
+  return counter;
 }
 
 /**
@@ -2268,10 +2336,44 @@ function _computeThreadWithInvertedStackTable(
 }
 
 /**
+ * Compute the derived samples table.
+ */
+export function computeSamplesTableFromRawSamplesTable(
+  rawSamples: RawSamplesTable
+): SamplesTable {
+  const {
+    responsiveness,
+    eventDelay,
+    stack,
+    weight,
+    weightType,
+    threadCPUDelta,
+    threadId,
+    length,
+  } = rawSamples;
+  const time = computeTimeColumnForRawSamplesTable(rawSamples);
+  return {
+    // These fields are copied from the raw samples table:
+    responsiveness,
+    eventDelay,
+    stack,
+    weight,
+    weightType,
+    threadCPUDelta,
+    threadId,
+    length,
+
+    // This field is derived:
+    time,
+  };
+}
+
+/**
  * Create the derived Thread.
  */
 export function createThreadFromDerivedTables(
   rawThread: RawThread,
+  samples: SamplesTable,
   stringTable: StringTable
 ): Thread {
   const {
@@ -2289,7 +2391,6 @@ export function createThreadFromDerivedTables(
     isJsTracer,
     pid,
     tid,
-    samples,
     jsAllocations,
     nativeAllocations,
     markers,
@@ -2319,7 +2420,6 @@ export function createThreadFromDerivedTables(
     isJsTracer,
     pid,
     tid,
-    samples,
     jsAllocations,
     nativeAllocations,
     markers,
@@ -2333,6 +2433,7 @@ export function createThreadFromDerivedTables(
     userContextId,
 
     // These fields are derived:
+    samples,
     stringTable,
   };
   return thread;

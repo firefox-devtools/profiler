@@ -21,7 +21,10 @@ import {
   correlateIPCMarkers,
   deriveMarkersFromRawMarkerTable,
 } from '../../profile-logic/marker-data';
-import { getTimeRangeForThread } from '../../profile-logic/profile-data';
+import {
+  getTimeRangeForThread,
+  computeTimeColumnForRawSamplesTable,
+} from '../../profile-logic/profile-data';
 import {
   callTreeFromProfile,
   formatTree,
@@ -238,7 +241,9 @@ describe('sanitizePII', function () {
     const counterSamples = ensureExists(sanitizedProfile.counters)[0].samples;
 
     // Make sure that all the table fields are consistent.
-    expect(counterSamples.time).toHaveLength(counterSamples.length);
+    const counterSampleTimes =
+      computeTimeColumnForRawSamplesTable(counterSamples);
+    expect(counterSampleTimes).toHaveLength(counterSamples.length);
     expect(counterSamples.count).toHaveLength(counterSamples.length);
     expect(counterSamples.number).toHaveLength(counterSamples.length);
 
@@ -250,10 +255,10 @@ describe('sanitizePII', function () {
     ) {
       // We are using inclusive range, so we need to add 1 and subtract 1 to the
       // start and end ranges.
-      expect(counterSamples.time[sampleIndex]).toBeGreaterThanOrEqual(
+      expect(counterSampleTimes[sampleIndex]).toBeGreaterThanOrEqual(
         sanitizedRange.start - 1
       );
-      expect(counterSamples.time[sampleIndex]).toBeLessThanOrEqual(
+      expect(counterSampleTimes[sampleIndex]).toBeLessThanOrEqual(
         sanitizedRange.end + 1
       );
     }

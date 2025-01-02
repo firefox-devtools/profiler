@@ -41,7 +41,6 @@ import { SymbolsNotFoundError } from '../../profile-logic/errors';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { blankStore, storeWithProfile } from '../fixtures/stores';
 import {
-  makeProfileSerializable,
   processGeckoProfile,
   serializeProfile,
 } from '../../profile-logic/process-profile';
@@ -992,10 +991,7 @@ describe('actions/receive-profile', function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
 
-      window.fetch.get(
-        expectedUrl,
-        makeProfileSerializable(_getSimpleProfile())
-      );
+      window.fetch.get(expectedUrl, _getSimpleProfile());
 
       const store = blankStore();
       await store.dispatch(retrieveProfileFromStore(hash));
@@ -1017,7 +1013,7 @@ describe('actions/receive-profile', function () {
       window.fetch
         .get(
           'https://storage.googleapis.com/profile-store/FAKEHASH',
-          makeProfileSerializable(unsymbolicatedProfile)
+          unsymbolicatedProfile
         )
         .post('https://symbolication.services.mozilla.com/symbolicate/v5', {});
 
@@ -1052,7 +1048,7 @@ describe('actions/receive-profile', function () {
       const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
       window.fetch
         .getOnce(expectedUrl, 403)
-        .get(expectedUrl, makeProfileSerializable(_getSimpleProfile()), {
+        .get(expectedUrl, _getSimpleProfile(), {
           overwriteRoutes: false,
         });
 
@@ -1139,10 +1135,7 @@ describe('actions/receive-profile', function () {
 
     it('can retrieve a profile from the web and save it to state', async function () {
       const expectedUrl = 'https://profiles.club/shared.json';
-      window.fetch.get(
-        expectedUrl,
-        makeProfileSerializable(_getSimpleProfile())
-      );
+      window.fetch.get(expectedUrl, _getSimpleProfile());
 
       const store = blankStore();
       await store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl));
@@ -1180,7 +1173,7 @@ describe('actions/receive-profile', function () {
       // The first call will still be a 403 -- remember, it's the default return value.
       window.fetch
         .getOnce(expectedUrl, 403)
-        .get(expectedUrl, makeProfileSerializable(_getSimpleProfile()), {
+        .get(expectedUrl, _getSimpleProfile(), {
           overwriteRoutes: false,
         });
 
@@ -1827,11 +1820,9 @@ describe('actions/receive-profile', function () {
           ])
         );
       }
-      window.fetch
-        .getOnce('*', makeProfileSerializable(profile1))
-        .getOnce('*', makeProfileSerializable(profile2), {
-          overwriteRoutes: false,
-        });
+      window.fetch.getOnce('*', profile1).getOnce('*', profile2, {
+        overwriteRoutes: false,
+      });
 
       const { dispatch, getState } = blankStore();
       await dispatch(retrieveProfilesToCompare([url1, url2]));
@@ -2110,7 +2101,7 @@ describe('actions/receive-profile', function () {
       // Add mock fetch response for the required number of times.
       // Usually it's 1 but it can be also 2 for `compare` dataSource.
       for (let i = 0; i < requiredProfile; i++) {
-        window.fetch.getOnce('*', makeProfileSerializable(profile), {
+        window.fetch.getOnce('*', profile, {
           overwriteRoutes: false,
         });
       }

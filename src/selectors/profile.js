@@ -35,6 +35,7 @@ import type {
   ThreadIndex,
   Pid,
   Tid,
+  RawCounter,
   Counter,
   CounterIndex,
   PageList,
@@ -187,7 +188,7 @@ export const getLastNonShiftClick: Selector<
 > = (state) => getProfileViewOptions(state).lastNonShiftClick;
 export const getRightClickedTrack: Selector<TrackReference | null> = (state) =>
   getProfileViewOptions(state).rightClickedTrack;
-export const getCounters: Selector<Counter[] | null> = (state) =>
+export const getCounters: Selector<RawCounter[] | null> = (state) =>
   getProfile(state).counters || null;
 export const getMeta: Selector<ProfileMeta> = (state) => getProfile(state).meta;
 export const getVisualMetricsOrNull: Selector<VisualMetrics | null> = (state) =>

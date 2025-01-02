@@ -28,6 +28,7 @@ import type {
   RawThread,
   ThreadIndex,
   JsTracerTable,
+  RawSamplesTable,
   SamplesTable,
   NativeAllocationsTable,
   JsAllocationsTable,
@@ -100,8 +101,12 @@ export function getBasicThreadSelectorsPerThread(
     (state) => getRawThread(state).stringArray,
     (stringArray) => StringTable.withBackingArray(stringArray)
   );
-  const getSamplesTable: Selector<SamplesTable> = (state) =>
+  const getRawSamplesTable: Selector<RawSamplesTable> = (state) =>
     getRawThread(state).samples;
+  const getSamplesTable: Selector<SamplesTable> = createSelector(
+    getRawSamplesTable,
+    ProfileData.computeSamplesTableFromRawSamplesTable
+  );
   const getNativeAllocations: Selector<NativeAllocationsTable | void> = (
     state
   ) => getRawThread(state).nativeAllocations;
@@ -121,7 +126,7 @@ export function getBasicThreadSelectorsPerThread(
    * tree uses the getWeightTypeForCallTree selector.
    */
   const getSamplesWeightType: Selector<WeightType> = (state) =>
-    getSamplesTable(state).weightType || 'samples';
+    getRawSamplesTable(state).weightType || 'samples';
 
   /**
    * The first per-thread selectors filter out and transform a thread based on user's
@@ -140,6 +145,7 @@ export function getBasicThreadSelectorsPerThread(
 
   const getThread: Selector<Thread> = createSelector(
     getRawThread,
+    getSamplesTable,
     getStringTable,
     ProfileData.createThreadFromDerivedTables
   );
@@ -323,19 +329,22 @@ export function getBasicThreadSelectorsPerThread(
   const getHasUsefulTimingSamples: Selector<boolean> = createSelector(
     getSamplesTable,
     getRawThread,
-    ProfileData.hasUsefulSamples
+    (samples, rawThread) =>
+      ProfileData.hasUsefulSamples(samples.stack, rawThread)
   );
 
   const getHasUsefulJsAllocations: Selector<boolean> = createSelector(
     getJsAllocations,
     getRawThread,
-    ProfileData.hasUsefulSamples
+    (jsAllocations, rawThread) =>
+      ProfileData.hasUsefulSamples(jsAllocations?.stack, rawThread)
   );
 
   const getHasUsefulNativeAllocations: Selector<boolean> = createSelector(
     getNativeAllocations,
     getRawThread,
-    ProfileData.hasUsefulSamples
+    (nativeAllocations, rawThread) =>
+      ProfileData.hasUsefulSamples(nativeAllocations?.stack, rawThread)
   );
 
   /**

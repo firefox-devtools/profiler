@@ -18,7 +18,7 @@ import type {
   IndexIntoFuncTable,
   RawThread,
   IndexIntoStackTable,
-  SamplesTable,
+  RawSamplesTable,
   CategoryList,
   JsTracerTiming,
   Microseconds,
@@ -509,7 +509,7 @@ export function convertJsTracerToThreadWithoutSamples(
   // thread information.
   const frameTable = getEmptyFrameTable();
   const stackTable = getEmptyStackTable();
-  const samples: SamplesTable = {
+  const samples: RawSamplesTable = {
     ...getEmptySamplesTableWithEventDelay(),
     weight: [],
     weightType: 'tracing-ms',
@@ -828,7 +828,7 @@ export function getSelfTimeSamplesFromJsTracer(
   stringTable: StringTable,
   jsTracer: JsTracerFixed,
   stackMap: Map<IndexIntoJsTracerEvents, IndexIntoStackTable>
-): SamplesTable {
+): RawSamplesTable {
   // Give more leeway for floating number precision issues.
   const epsilon = 1e-5;
   const isNearlyEqual = (a, b) => Math.abs(a - b) < epsilon;
@@ -853,7 +853,7 @@ export function getSelfTimeSamplesFromJsTracer(
       'The JS tracer event did not exist in the stack map.'
     );
     samples.stack.push(stackIndex);
-    samples.time.push(
+    ensureExists(samples.time).push(
       // Convert from microseconds.
       start / 1000
     );
