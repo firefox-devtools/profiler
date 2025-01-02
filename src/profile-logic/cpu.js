@@ -37,15 +37,33 @@ function _computeMaxVariableCPUCyclesPerMs(threads: RawThread[]): number {
 
     // Ignore the first CPU delta value; it's meaningless because there is no
     // previous sample.
-    for (let i = 1; i < samples.length; i++) {
-      const sampleTimeDeltaInMs = samples.time[i] - samples.time[i - 1];
-      if (sampleTimeDeltaInMs !== 0) {
-        const cpuDeltaPerMs = (threadCPUDelta[i] || 0) / sampleTimeDeltaInMs;
-        maxThreadCPUDeltaPerMs = Math.max(
-          maxThreadCPUDeltaPerMs,
-          cpuDeltaPerMs
-        );
+    const { time: samplesTimeCol, timeDeltas: samplesTimeDeltasCol } = samples;
+    if (samplesTimeCol !== undefined) {
+      for (let i = 1; i < samples.length; i++) {
+        const sampleTimeDeltaInMs = samplesTimeCol[i] - samplesTimeCol[i - 1];
+        if (sampleTimeDeltaInMs !== 0) {
+          const cpuDeltaPerMs = (threadCPUDelta[i] || 0) / sampleTimeDeltaInMs;
+          maxThreadCPUDeltaPerMs = Math.max(
+            maxThreadCPUDeltaPerMs,
+            cpuDeltaPerMs
+          );
+        }
       }
+    } else if (samplesTimeDeltasCol !== undefined) {
+      for (let i = 1; i < samples.length; i++) {
+        const sampleTimeDeltaInMs = samplesTimeDeltasCol[i];
+        if (sampleTimeDeltaInMs !== 0) {
+          const cpuDeltaPerMs = (threadCPUDelta[i] || 0) / sampleTimeDeltaInMs;
+          maxThreadCPUDeltaPerMs = Math.max(
+            maxThreadCPUDeltaPerMs,
+            cpuDeltaPerMs
+          );
+        }
+      }
+    } else {
+      throw new Error(
+        'samples table must always have a time or a timeDeltas column'
+      );
     }
   }
 
@@ -67,7 +85,7 @@ function _computeMaxVariableCPUCyclesPerMs(threads: RawThread[]): number {
  *    Returns 5000, i.e. "5000µs cpu delta per sample if each sample ticks at
  *    the declared 5ms interval and the CPU usage is at 100%".
  *  - interval: 3 (ms), sampleUnits.threadCPUDelta: "variable CPU cycles",
- *    max_{sample}(sample.cpuDelta / sample.timeDelta) == 1234567 cycles per ms
+ *    max_{sample}(sample.cpuDelta / sample.timeDeltas) == 1234567 cycles per ms
  *    Returns 1234567 * 3, i.e. "3703701 cycles per sample if each sample ticks at
  *    the declared 3ms interval and the CPU usage is at the observed maximum".
  */

@@ -125,22 +125,6 @@ export type StackTable = {|
  */
 export type WeightType = 'samples' | 'tracing-ms' | 'bytes';
 
-type SamplesLikeTableShape = {
-  stack: Array<IndexIntoStackTable | null>,
-  time: Milliseconds[],
-  // An optional weight array. If not present, then the weight is assumed to be 1.
-  // See the WeightType type for more information.
-  weight: null | number[],
-  weightType: WeightType,
-  length: number,
-};
-
-export type SamplesLikeTable =
-  | SamplesLikeTableShape
-  | SamplesTable
-  | NativeAllocationsTable
-  | JsAllocationsTable;
-
 /**
  * The Gecko Profiler records samples of what function was currently being executed, and
  * the callstack that is associated with it. This is done at a fixed but configurable
@@ -148,7 +132,7 @@ export type SamplesLikeTable =
  * information that is needed to represent that sampled function. Most of the entries
  * are indices into other tables.
  */
-export type SamplesTable = {|
+export type RawSamplesTable = {|
   // Responsiveness is the older version of eventDelay. It injects events every 16ms.
   // This is optional because newer profiles don't have that field anymore.
   responsiveness?: Array<?Milliseconds>,
@@ -158,7 +142,9 @@ export type SamplesTable = {|
   // This is optional because older profiles didn't have that field.
   eventDelay?: Array<?Milliseconds>,
   stack: Array<IndexIntoStackTable | null>,
-  time: Milliseconds[],
+  time?: Milliseconds[],
+  // If the `time` column is not present, then the `timeDeltas` column must be present.
+  timeDeltas?: Milliseconds[],
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
   weight: null | number[],
@@ -496,6 +482,17 @@ export type JsTracerTable = {|
   length: number,
 |};
 
+export type RawCounterSamplesTable = {|
+  time?: Milliseconds[],
+  timeDeltas?: Milliseconds[],
+  // The number of times the Counter's "number" was changed since the previous sample.
+  // This property was mandatory until the format version 42, it was made optional in 43.
+  number?: number[],
+  // The count of the data, for instance for memory this would be bytes.
+  count: number[],
+  length: number,
+|};
+
 export type CounterSamplesTable = {|
   time: Milliseconds[],
   // The number of times the Counter's "number" was changed since the previous sample.
@@ -517,6 +514,16 @@ export type GraphColor =
   | 'red'
   | 'teal'
   | 'yellow';
+
+export type RawCounter = {|
+  name: string,
+  category: string,
+  description: string,
+  color?: GraphColor,
+  pid: Pid,
+  mainThreadIndex: ThreadIndex,
+  samples: RawCounterSamplesTable,
+|};
 
 export type Counter = {|
   name: string,
@@ -651,7 +658,7 @@ export type RawThread = {|
   isJsTracer?: boolean,
   pid: Pid,
   tid: Tid,
-  samples: SamplesTable,
+  samples: RawSamplesTable,
   jsAllocations?: JsAllocationsTable,
   nativeAllocations?: NativeAllocationsTable,
   markers: RawMarkerTable,
@@ -931,7 +938,7 @@ export type Profile = {|
   pages?: PageList,
   // The counters list is optional only because old profilers may not have them.
   // An upgrader could be written to make this non-optional.
-  counters?: Counter[],
+  counters?: RawCounter[],
   // The profilerOverhead list is optional only because old profilers may not
   // have them. An upgrader could be written to make this non-optional.
   // This is list because there is a profiler overhead per process.
@@ -939,41 +946,4 @@ export type Profile = {|
   threads: RawThread[],
   profilingLog?: ProfilingLog,
   profileGatheringLog?: ProfilingLog,
-|};
-
-export type SerializableThread = {|
-  ...$Diff<RawThread, { samples: SamplesTable }>,
-  samples: SerializableSamplesTable,
-|};
-
-/**
- * Starting with version 50 of the processed format, the time column may
- * optionally be serialized as a timeDeltas column instead.
- * Both formats are supported for unserialization.
- */
-export type SerializableSamplesTable = {|
-  ...$Diff<SamplesTable, { time: Milliseconds[] }>,
-  time?: Milliseconds[],
-  timeDeltas?: Milliseconds[],
-|};
-
-export type SerializableCounterSamplesTable = {|
-  ...$Diff<CounterSamplesTable, { time: Milliseconds[] }>,
-  time?: Milliseconds[],
-  timeDeltas?: Milliseconds[],
-|};
-
-export type SerializableCounter = {|
-  ...$Diff<Counter, { samples: CounterSamplesTable }>,
-  samples: SerializableCounterSamplesTable,
-|};
-
-/**
- * The StringTable is a class, and is not serializable to JSON. This profile
- * variant is able to be based into JSON.stringify.
- */
-export type SerializableProfile = {|
-  ...$Diff<Profile, { threads: RawThread[], counters?: Counter[] }>,
-  threads: SerializableThread[],
-  counters?: SerializableCounter[],
 |};
