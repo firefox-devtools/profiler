@@ -593,8 +593,8 @@ function _createUnsymbolicatedProfile() {
   const markerIndex = markers.length++;
   markers.data[markerIndex] = markerData;
   markers.name[markerIndex] = stringTable.indexForString('MarkerWithStack');
-  markers.startTime[markerIndex] = thread.samples.time[0];
-  markers.endTime[markerIndex] = thread.samples.time[1];
+  markers.startTime[markerIndex] = 0;
+  markers.endTime[markerIndex] = 3;
   markers.phase[markerIndex] = INTERVAL;
   markers.category[markerIndex] = 0;
 

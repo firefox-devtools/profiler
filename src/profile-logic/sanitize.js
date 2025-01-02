@@ -34,7 +34,7 @@ import type {
   IndexIntoFuncTable,
   InnerWindowID,
   MarkerSchemaByName,
-  Counter,
+  RawCounter,
 } from 'firefox-profiler/types';
 
 export type SanitizeProfileResult = {|
@@ -164,7 +164,7 @@ export function sanitizePII(
             return acc;
           }
 
-          const newCounter: Counter | null = sanitizeCounterPII(
+          const newCounter: RawCounter | null = sanitizeCounterPII(
             counter,
             PIIToBeRemoved,
             oldThreadIndexToNew
@@ -702,10 +702,10 @@ function isThreadNonEmpty(thread: RawThread): boolean {
  * - Update the thread index with the new thread index.
  */
 function sanitizeCounterPII(
-  counter: Counter,
+  counter: RawCounter,
   PIIToBeRemoved: RemoveProfileInformation,
   oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex>
-): Counter | null {
+): RawCounter | null {
   const newThreadIndex = oldThreadIndexToNew.get(counter.mainThreadIndex);
   if (newThreadIndex === undefined) {
     // Remove the counter completely if the thread that it belongs to is sanitized as well.

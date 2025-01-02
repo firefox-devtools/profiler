@@ -21,7 +21,7 @@ import { StringTable } from '../utils/string-table';
 import { timeCode } from '../utils/time-code';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 import { coerce } from '../utils/flow';
-import type { SerializableProfile } from 'firefox-profiler/types';
+import type { Profile } from 'firefox-profiler/types';
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -35,7 +35,7 @@ const UNANNOTATED_VERSION = 0;
  */
 export function attemptToUpgradeProcessedProfileThroughMutation(
   profile: mixed
-): SerializableProfile | null {
+): Profile | null {
   if (!profile || typeof profile !== 'object') {
     return null;
   }
@@ -70,7 +70,7 @@ export function attemptToUpgradeProcessedProfileThroughMutation(
       : UNANNOTATED_VERSION;
 
   if (profileVersion === PROCESSED_PROFILE_VERSION) {
-    return coerce<MixedObject, SerializableProfile>(profile);
+    return coerce<MixedObject, Profile>(profile);
   }
 
   if (profileVersion > PROCESSED_PROFILE_VERSION) {
@@ -92,7 +92,7 @@ export function attemptToUpgradeProcessedProfileThroughMutation(
     }
   }
 
-  const upgradedProfile = coerce<MixedObject, SerializableProfile>(profile);
+  const upgradedProfile = coerce<MixedObject, Profile>(profile);
   upgradedProfile.meta.preprocessedProfileVersion = PROCESSED_PROFILE_VERSION;
 
   return upgradedProfile;
@@ -2257,9 +2257,32 @@ const _upgraders = {
   [49]: (_) => {
     // The 'sanitized-string' marker schema format type has been added.
   },
-  [50]: (_) => {
+  [50]: (profile) => {
     // The serialized format can now optionally store sample and counter sample
     // times as time deltas instead of absolute timestamps to reduce the JSON size.
+    function makeSamplesUseTimeDeltas(samples) {
+      const { time } = samples;
+      const timeDeltas = new Array(time.length);
+      let prevTime = 0;
+      for (let i = 0; i < time.length; i++) {
+        const currentTime = time[i];
+        timeDeltas[i] = currentTime - prevTime;
+        prevTime = currentTime;
+      }
+      samples.timeDeltas = timeDeltas;
+      delete samples.time;
+    }
+
+    for (const thread of profile.threads) {
+      makeSamplesUseTimeDeltas(thread.samples);
+    }
+
+    const counters = profile.counters;
+    if (counters) {
+      for (const counter of counters) {
+        makeSamplesUseTimeDeltas(counter.samples);
+      }
+    }
   },
   [51]: (_) => {
     // This version bump added two new form types for new marker schema field:
