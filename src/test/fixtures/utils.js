@@ -21,6 +21,7 @@ import { StringTable } from '../../utils/string-table';
 
 import type {
   IndexIntoCallNodeTable,
+  RawProfileSharedData,
   Profile,
   Store,
   State,
@@ -119,9 +120,10 @@ export function getMouseEvent(
 
 export function computeThreadFromRawThread(
   rawThread: RawThread,
+  shared: RawProfileSharedData,
   defaultCategory: IndexIntoCategoryList
 ): Thread {
-  const stringTable = StringTable.withBackingArray(rawThread.stringArray);
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
   const stackTable = computeStackTableFromRawStackTable(
     rawThread.stackTable,
     rawThread.frameTable,
@@ -150,7 +152,11 @@ export function callTreeFromProfile(
     'Expected to find categories'
   );
   const defaultCategory = categories.findIndex((c) => c.name === 'Other');
-  const thread = computeThreadFromRawThread(rawThread, defaultCategory);
+  const thread = computeThreadFromRawThread(
+    rawThread,
+    profile.shared,
+    defaultCategory
+  );
 
   const callNodeInfo = getCallNodeInfo(
     thread.stackTable,

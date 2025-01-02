@@ -26,7 +26,6 @@ import {
   formatTree,
   formatTreeIncludeCategories,
 } from '../fixtures/utils';
-import { StringTable } from '../../utils/string-table';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 
 describe('unfiltered call tree', function () {
@@ -59,12 +58,17 @@ describe('unfiltered call tree', function () {
    */
   describe('computed counts and timings', function () {
     const profile = getProfile();
-    const [rawThread] = profile.threads;
+    const { shared, threads } = profile;
+    const [rawThread] = threads;
     const defaultCategory = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
-    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
+    const thread = computeThreadFromRawThread(
+      rawThread,
+      shared,
+      defaultCategory
+    );
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -106,12 +110,17 @@ describe('unfiltered call tree', function () {
         X  X  H  H  M  N
         Y  W  I  J
       `);
-      const [rawThread] = profile.threads;
+      const { shared, threads } = profile;
+      const [rawThread] = threads;
       const defaultCategory = ensureExists(
         profile.meta.categories,
         'Expected to find categories'
       ).findIndex((c) => c.name === 'Other');
-      const thread = computeThreadFromRawThread(rawThread, defaultCategory);
+      const thread = computeThreadFromRawThread(
+        rawThread,
+        shared,
+        defaultCategory
+      );
       const callNodeInfo = getCallNodeInfo(
         thread.stackTable,
         thread.frameTable,
@@ -344,12 +353,11 @@ describe('unfiltered call tree', function () {
 
     describe('icons from the call tree', function () {
       it('upgrades http to https', function () {
-        const { profile } = getProfileFromTextSamples(`
+        const { profile, stringTable } = getProfileFromTextSamples(`
           A[lib:examplecom.js]
         `);
         const callTree = callTreeFromProfile(profile);
         const [thread] = profile.threads;
-        const stringTable = StringTable.withBackingArray(thread.stringArray);
         const hostStringIndex = stringTable.indexForString('examplecom.js');
 
         thread.resourceTable.type[0] = resourceTypes.webhost;
@@ -370,12 +378,17 @@ describe('unfiltered call tree', function () {
    */
   describe('getCallNodeIndexFromPath', function () {
     const profile = getProfile();
-    const [rawThread] = profile.threads;
+    const { shared, threads } = profile;
+    const [rawThread] = threads;
     const defaultCategory = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
-    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
+    const thread = computeThreadFromRawThread(
+      rawThread,
+      shared,
+      defaultCategory
+    );
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -430,8 +443,13 @@ describe('inverted call tree', function () {
     const defaultCategory = categories.findIndex((c) => c.color === 'grey');
 
     // Check the non-inverted tree first.
-    const rawThread = profile.threads[0];
-    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
+    const { shared, threads } = profile;
+    const [rawThread] = threads;
+    const thread = computeThreadFromRawThread(
+      rawThread,
+      shared,
+      defaultCategory
+    );
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -623,12 +641,17 @@ describe('diffing trees', function () {
   it('computes a rootTotalSummary that is the absolute count of all intervals', () => {
     const { profile } = getProfile();
 
-    const rawThread = profile.threads[2];
+    const { shared, threads } = profile;
+    const rawThread = threads[2];
     const defaultCategory = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
-    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
+    const thread = computeThreadFromRawThread(
+      rawThread,
+      shared,
+      defaultCategory
+    );
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -655,6 +678,7 @@ describe('origin annotation', function () {
     profile: {
       threads: [thread],
     },
+    stringTable,
     funcNamesPerThread: [funcNames],
   } = getProfileFromTextSamples(`
     A
@@ -662,7 +686,6 @@ describe('origin annotation', function () {
     C
     D
   `);
-  const stringTable = StringTable.withBackingArray(thread.stringArray);
 
   function addResource(
     funcName: string,

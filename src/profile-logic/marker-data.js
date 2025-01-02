@@ -23,6 +23,7 @@ import {
 import type {
   SamplesTable,
   RawThread,
+  RawProfileSharedData,
   RawMarkerTable,
   IndexIntoStringTable,
   IndexIntoRawMarkerTable,
@@ -409,7 +410,8 @@ export class IPCMarkerCorrelations {
  *                   (or main thread in receiver process if they are not profiled)
  */
 export function correlateIPCMarkers(
-  threads: RawThread[]
+  threads: RawThread[],
+  shared: RawProfileSharedData
 ): IPCMarkerCorrelations {
   // Create a unique ID constructed from the source PID, destination PID,
   // message seqno, and message type. Since the seqno is only unique for each
@@ -474,6 +476,8 @@ export function correlateIPCMarkers(
     }
   }
 
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
+
   // First, construct a mapping of marker IDs to an array of markers with that
   // ID for faster lookup. We also collect the friendly thread names while we
   // have access to all the threads. It's considerably more difficult to do
@@ -485,7 +489,6 @@ export function correlateIPCMarkers(
   const threadNames: Map<number, string> = new Map();
   for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
     const thread = threads[threadIndex];
-    const stringTable = StringTable.withBackingArray(thread.stringArray);
     // Don't bother checking for IPC markers if this thread's string table
     // doesn't have the string "IPC". This lets us avoid looping over all the
     // markers when we don't have to.
@@ -1638,3 +1641,23 @@ export const stringsToMarkerRegExps = (
     fieldMap,
   };
 };
+
+export function computeStringIndexMarkerFieldsByDataType(
+  markerSchemas: MarkerSchema[]
+): Map<string, string[]> {
+  const stringIndexMarkerFieldsByDataType = new Map();
+  stringIndexMarkerFieldsByDataType.set('CompositorScreenshot', ['url']);
+  for (const schema of markerSchemas) {
+    const { name, data } = schema;
+    const stringIndexFields = [];
+    for (const field of data) {
+      if (field.format === 'unique-string' && field.key) {
+        stringIndexFields.push(field.key);
+      }
+    }
+    if (stringIndexFields.length !== 0) {
+      stringIndexMarkerFieldsByDataType.set(name, stringIndexFields);
+    }
+  }
+  return stringIndexMarkerFieldsByDataType;
+}

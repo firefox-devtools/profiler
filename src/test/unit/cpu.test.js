@@ -30,7 +30,11 @@ describe('processThreadCPUDelta', function () {
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
     const [rawThread] = profile.threads;
-    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
+    const thread = computeThreadFromRawThread(
+      rawThread,
+      profile.shared,
+      defaultCategory
+    );
 
     if (!profile.meta.sampleUnits) {
       throw new Error('SampleUnits object could not found in the profile.');
