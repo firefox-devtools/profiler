@@ -20,6 +20,7 @@ import type {
 
 import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
 import { intersectSets, subtractSets } from '../utils/set';
+import { StringTable } from '../utils/string-table';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 
@@ -477,7 +478,7 @@ export function computeGlobalTracks(
     threadIndex++
   ) {
     const thread = profile.threads[threadIndex];
-    const { pid, markers, stringTable } = thread;
+    const { pid, markers, stringArray } = thread;
     if (thread.isMainThread) {
       // This is a main thread, a global track needs to be created or updated with
       // the main thread info.
@@ -512,6 +513,7 @@ export function computeGlobalTracks(
 
     // Check for screenshots.
     const ids: Set<string> = new Set();
+    const stringTable = StringTable.withBackingArray(stringArray);
     if (stringTable.hasString('CompositorScreenshot')) {
       const screenshotNameIndex = stringTable.indexForString(
         'CompositorScreenshot'
@@ -999,9 +1001,7 @@ export function getLocalTrackName(
     case 'power':
       return counters[localTrack.counterIndex].name;
     case 'marker':
-      return threads[localTrack.threadIndex].stringTable.getString(
-        localTrack.markerName
-      );
+      return threads[localTrack.threadIndex].stringArray[localTrack.markerName];
     default:
       throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
   }

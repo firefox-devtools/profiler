@@ -98,11 +98,6 @@ export type Thread = {|
   // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
   // had no extra attribute at all.
   userContextId?: number,
-
-  // A field which allows Flow to catch places where we get confused between
-  // RawThread and Thread.
-  // This field will be removed once Thread diverges for RawThread.
-  isDerivedThread: true,
 |};
 
 /**
