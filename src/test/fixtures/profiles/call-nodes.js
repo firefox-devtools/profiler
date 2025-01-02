@@ -5,7 +5,7 @@
 
 import type {
   FuncTable,
-  SamplesTable,
+  RawSamplesTable,
   FrameTable,
   Profile,
 } from 'firefox-profiler/types';
@@ -124,7 +124,7 @@ export default function getProfile(): Profile {
 
   // Have the first sample pointing to the first branch, and the second sample to
   // the second branch of the stack.
-  const samples: SamplesTable = {
+  const samples: RawSamplesTable = {
     responsiveness: [0, 0],
     stack: [4, 6],
     time: [0, 0],
