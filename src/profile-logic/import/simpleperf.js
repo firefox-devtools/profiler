@@ -258,7 +258,7 @@ class FirefoxThread {
       markers: getEmptyRawMarkerTable(),
       stackTable: this.stackTable.toJson(),
       frameTable: this.frameTable.toJson(),
-      stringTable: this.strings,
+      stringArray: this.stringArray,
       funcTable: this.funcTable.toJson(),
       resourceTable: this.resourceTable.toJson(),
       nativeSymbols: getEmptyNativeSymbolTable(),

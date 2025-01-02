@@ -24,6 +24,7 @@ import {
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
+import { StringTable } from 'firefox-profiler/utils/string-table';
 import {
   assertExhaustiveCheck,
   ensureExists,
@@ -85,7 +86,6 @@ import type {
   ThreadWithReservedFunctions,
   TabID,
 } from 'firefox-profiler/types';
-import type { StringTable } from 'firefox-profiler/utils/string-table';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -1500,7 +1500,7 @@ export function hasUsefulSamples(
   table?: SamplesLikeTable,
   thread: RawThread
 ): boolean {
-  const { stackTable, frameTable, funcTable, stringTable } = thread;
+  const { stackTable, frameTable, funcTable, stringArray } = thread;
   if (table === undefined || table.length === 0 || stackTable.length === 0) {
     return false;
   }
@@ -1517,7 +1517,7 @@ export function hasUsefulSamples(
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
     const stringIndex = funcTable.name[funcIndex];
-    if (stringTable.getString(stringIndex) === '(root)') {
+    if (stringArray[stringIndex] === '(root)') {
       // If the first sample's stack is only the root, check if any other
       // sample is different.
       return table.stack.some((s) => s !== null && s !== stackIndex);
@@ -2268,9 +2268,12 @@ function _computeThreadWithInvertedStackTable(
 }
 
 /**
- * Compute a derived Thread from a RawThread.
+ * Create the derived Thread.
  */
-export function computeThreadFromRawThread(rawThread: RawThread): Thread {
+export function createThreadFromDerivedTables(
+  rawThread: RawThread,
+  stringTable: StringTable
+): Thread {
   const {
     processType,
     processStartupTime,
@@ -2292,7 +2295,6 @@ export function computeThreadFromRawThread(rawThread: RawThread): Thread {
     markers,
     stackTable,
     frameTable,
-    stringTable,
     funcTable,
     resourceTable,
     nativeSymbols,
@@ -2323,7 +2325,6 @@ export function computeThreadFromRawThread(rawThread: RawThread): Thread {
     markers,
     stackTable,
     frameTable,
-    stringTable,
     funcTable,
     resourceTable,
     nativeSymbols,
@@ -2332,7 +2333,7 @@ export function computeThreadFromRawThread(rawThread: RawThread): Thread {
     userContextId,
 
     // These fields are derived:
-    isDerivedThread: true,
+    stringTable,
   };
   return thread;
 }
@@ -3702,7 +3703,8 @@ export function findAddressProofForFile(
 ): AddressProof | null {
   const { libs } = profile;
   for (const thread of profile.threads) {
-    const { frameTable, funcTable, resourceTable, stringTable } = thread;
+    const { frameTable, funcTable, resourceTable, stringArray } = thread;
+    const stringTable = StringTable.withBackingArray(stringArray);
     const fileStringIndex = stringTable.indexForString(file);
     const func = funcTable.fileName.indexOf(fileStringIndex);
     if (func === -1) {

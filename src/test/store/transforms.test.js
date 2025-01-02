@@ -17,6 +17,7 @@ import {
   getStackLineInfo,
   getLineTimings,
 } from 'firefox-profiler/profile-logic/line-timings';
+import { StringTable } from '../../utils/string-table';
 
 import {
   addTransformToStack,
@@ -838,7 +839,8 @@ describe('"collapse-resource" transform', function () {
     const collapsedFuncNames = [...funcNames, 'firefox'];
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
-    const firefoxNameIndex = thread.stringTable.indexForString('firefox');
+    const stringTable = StringTable.withBackingArray(thread.stringArray);
+    const firefoxNameIndex = stringTable.indexForString('firefox');
     const firefoxResourceIndex = thread.resourceTable.name.findIndex(
       (stringIndex) => stringIndex === firefoxNameIndex
     );
@@ -946,7 +948,8 @@ describe('"collapse-resource" transform', function () {
     const collapsedFuncNames = [...funcNames, 'firefox'];
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
-    const firefoxNameIndex = thread.stringTable.indexForString('firefox');
+    const stringTable = StringTable.withBackingArray(thread.stringArray);
+    const firefoxNameIndex = stringTable.indexForString('firefox');
     const firefoxResourceIndex = thread.resourceTable.name.findIndex(
       (stringIndex) => stringIndex === firefoxNameIndex
     );

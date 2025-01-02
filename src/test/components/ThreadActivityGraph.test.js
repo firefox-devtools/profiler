@@ -112,8 +112,8 @@ describe('ThreadActivityGraph', function () {
     function getCallNodePath() {
       return selectedThreadSelectors
         .getSelectedCallNodePath(getState())
-        .map((funcIndex) =>
-          thread.stringTable.getString(thread.funcTable.name[funcIndex])
+        .map(
+          (funcIndex) => thread.stringArray[thread.funcTable.name[funcIndex]]
         );
     }
 

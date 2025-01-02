@@ -25,6 +25,7 @@ import {
 } from '../../actions/profile-view';
 import { formatTree, formatStack } from '../fixtures/utils';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
+import { StringTable } from '../../utils/string-table';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 
 // fake-indexeddb no longer includes a structuredClone polyfill, so we need to
@@ -562,11 +563,13 @@ function _createUnsymbolicatedProfile() {
     codeId: null,
   };
 
+  const stringTable = StringTable.withBackingArray(thread.stringArray);
+
   thread.resourceTable = {
     length: 1,
     lib: [libIndex],
-    name: [thread.stringTable.indexForString('example lib')],
-    host: [thread.stringTable.indexForString('example host')],
+    name: [stringTable.indexForString('example lib')],
+    host: [stringTable.indexForString('example host')],
     type: [resourceTypes.library],
   };
   for (let i = 0; i < thread.funcTable.length; i++) {
@@ -589,8 +592,7 @@ function _createUnsymbolicatedProfile() {
   const markers = getEmptyRawMarkerTable();
   const markerIndex = markers.length++;
   markers.data[markerIndex] = markerData;
-  markers.name[markerIndex] =
-    thread.stringTable.indexForString('MarkerWithStack');
+  markers.name[markerIndex] = stringTable.indexForString('MarkerWithStack');
   markers.startTime[markerIndex] = thread.samples.time[0];
   markers.endTime[markerIndex] = thread.samples.time[1];
   markers.phase[markerIndex] = INTERVAL;

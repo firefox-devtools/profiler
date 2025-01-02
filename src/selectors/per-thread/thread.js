@@ -16,6 +16,7 @@ import * as CallTree from '../../profile-logic/call-tree';
 import * as ProfileSelectors from '../profile';
 import * as JsTracer from '../../profile-logic/js-tracer';
 import * as Cpu from '../../profile-logic/cpu';
+import { StringTable } from '../../utils/string-table';
 import {
   assertExhaustiveCheck,
   ensureExists,
@@ -46,7 +47,6 @@ import type {
   IndexIntoFuncTable,
 } from 'firefox-profiler/types';
 
-import type { StringTable } from '../../utils/string-table';
 import type { TransformLabeL10nIds } from 'firefox-profiler/profile-logic/transforms';
 import type { MarkerSelectorsPerThread } from './markers';
 
@@ -96,8 +96,10 @@ export function getBasicThreadSelectorsPerThread(
       ? ProfileSelectors.getProfile(state).threads[singleThreadIndex]
       : getMergedRawThread(state);
 
-  const getStringTable: Selector<StringTable> = (state) =>
-    getRawThread(state).stringTable;
+  const getStringTable: Selector<StringTable> = createSelector(
+    (state) => getRawThread(state).stringArray,
+    (stringArray) => StringTable.withBackingArray(stringArray)
+  );
   const getSamplesTable: Selector<SamplesTable> = (state) =>
     getRawThread(state).samples;
   const getNativeAllocations: Selector<NativeAllocationsTable | void> = (
@@ -138,7 +140,8 @@ export function getBasicThreadSelectorsPerThread(
 
   const getThread: Selector<Thread> = createSelector(
     getRawThread,
-    ProfileData.computeThreadFromRawThread
+    getStringTable,
+    ProfileData.createThreadFromDerivedTables
   );
 
   const getCPUProcessedThread: Selector<Thread> = createSelector(
@@ -362,10 +365,14 @@ export function getBasicThreadSelectorsPerThread(
    * based timing, and the leaf timing, so that they memoize nicely.
    */
   const getExpensiveJsTracerTiming: Selector<JsTracerTiming[] | null> =
-    createSelector(getJsTracerTable, getRawThread, (jsTracerTable, thread) =>
-      jsTracerTable === null
-        ? null
-        : JsTracer.getJsTracerTiming(jsTracerTable, thread)
+    createSelector(
+      getJsTracerTable,
+      getRawThread,
+      getStringTable,
+      (jsTracerTable, thread, stringTable) =>
+        jsTracerTable === null
+          ? null
+          : JsTracer.getJsTracerTiming(jsTracerTable, thread, stringTable)
     );
 
   /**

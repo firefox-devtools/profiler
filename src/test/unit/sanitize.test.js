@@ -58,7 +58,7 @@ describe('sanitizePII', function () {
         );
         return deriveMarkersFromRawMarkerTable(
           thread.markers,
-          thread.stringTable,
+          thread.stringArray,
           thread.tid || 0,
           timeRangeForThread,
           ipcCorrelations
@@ -480,7 +480,7 @@ describe('sanitizePII', function () {
     });
 
     for (const thread of sanitizedProfile.threads) {
-      const stringArray = thread.stringTable.getBackingArray();
+      const stringArray = thread.stringArray;
       for (let i = 0; i < thread.markers.length; i++) {
         const currentMarker = thread.markers.data[i];
         if (
@@ -533,8 +533,7 @@ describe('sanitizePII', function () {
     });
 
     for (const thread of sanitizedProfile.threads) {
-      const stringArray = thread.stringTable.getBackingArray();
-      for (const string of stringArray) {
+      for (const string of thread.stringArray) {
         // We are keeping the http(s) and removing the rest.
         // That's why we can't test it with `includes('http')`.
         // Tested `.com` here since all of the test urls have .com in it
@@ -1346,21 +1345,23 @@ describe('sanitizePII', function () {
       );
 
       const indexForGCMinor =
-        originalProfile.threads[0].stringTable.indexForString('GCMinor');
+        originalProfile.threads[0].stringArray.indexOf('GCMinor');
+      expect(indexForGCMinor).not.toBe(-1);
       expect(originalProfile.threads[0].markers.name).toContain(
         indexForGCMinor
       );
 
-      const indexForScreenshot =
-        originalProfile.threads[0].stringTable.indexForString(
-          'CompositorScreenshot'
-        );
+      const indexForScreenshot = originalProfile.threads[0].stringArray.indexOf(
+        'CompositorScreenshot'
+      );
+      expect(indexForScreenshot).not.toBe(-1);
       expect(originalProfile.threads[0].markers.name).toContain(
         indexForScreenshot
       );
 
       const indexForTextOnlyMarker =
-        originalProfile.threads[0].stringTable.indexForString('TextOnlyMarker');
+        originalProfile.threads[0].stringArray.indexOf('TextOnlyMarker');
+      expect(indexForTextOnlyMarker).not.toBe(-1);
       expect(originalProfile.threads[0].markers.name).toContain(
         indexForTextOnlyMarker
       );

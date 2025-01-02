@@ -13,8 +13,10 @@ import {
   getCallNodeInfo,
   getSampleIndexToCallNodeIndex,
   getOriginAnnotationForFunc,
+  createThreadFromDerivedTables,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { getProfileWithDicts } from './profiles/processed-profile';
+import { StringTable } from '../../utils/string-table';
 
 import type {
   IndexIntoCallNodeTable,
@@ -23,6 +25,7 @@ import type {
   State,
   Thread,
   IndexIntoStackTable,
+  RawThread,
 } from 'firefox-profiler/types';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
@@ -110,6 +113,11 @@ export function getMouseEvent(
     ...values,
   };
   return new FakeMouseEvent(type, values);
+}
+
+export function computeThreadFromRawThread(rawThread: RawThread): Thread {
+  const stringTable = StringTable.withBackingArray(rawThread.stringArray);
+  return createThreadFromDerivedTables(rawThread, stringTable);
 }
 
 /**

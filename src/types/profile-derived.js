@@ -80,9 +80,6 @@ export type Thread = {|
   markers: RawMarkerTable,
   stackTable: StackTable,
   frameTable: FrameTable,
-  // Strings for profiles are collected into a single table, and are referred to by
-  // their index by other tables.
-  stringTable: StringTable,
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   nativeSymbols: NativeSymbolTable,
@@ -98,10 +95,12 @@ export type Thread = {|
   // had no extra attribute at all.
   userContextId?: number,
 
-  // A field which allows Flow to catch places where we get confused between
-  // RawThread and Thread.
-  // This field will be removed once Thread diverges for RawThread.
-  isDerivedThread: true,
+  // The fields below this comment are derived data, and not present on the RawThread
+  // in the same form.
+
+  // Strings for profiles are collected into a single table, and are referred to by
+  // their index by other tables.
+  stringTable: StringTable,
 |};
 
 /**

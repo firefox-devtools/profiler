@@ -153,6 +153,7 @@ export function mergeProfilesForDiffing(
     }
     const profile = profiles[i];
     let thread = { ...profile.threads[selectedThreadIndex] };
+
     transformStacks[i] = profileSpecific.transforms[selectedThreadIndex];
     implementationFilters.push(profileSpecific.implementation);
 
@@ -206,7 +207,7 @@ export function mergeProfilesForDiffing(
       }
       const derivedMarkerInfo = deriveMarkersFromRawMarkerTable(
         thread.markers,
-        thread.stringTable,
+        thread.stringArray,
         thread.tid || 0,
         committedRange,
         ipcCorrelations
@@ -530,16 +531,15 @@ function combineResourceTables(
 
   threads.forEach((thread) => {
     const translationMap = new Map();
-    const { resourceTable, stringTable } = thread;
+    const { resourceTable, stringArray } = thread;
 
     for (let i = 0; i < resourceTable.length; i++) {
       const libIndex = resourceTable.lib[i];
       const nameIndex = resourceTable.name[i];
-      const newName = stringTable.getString(nameIndex) ?? '';
+      const newName = stringArray[nameIndex] ?? '';
 
       const hostIndex = resourceTable.host[i];
-      const newHost =
-        hostIndex !== null ? stringTable.getString(hostIndex) : null;
+      const newHost = hostIndex !== null ? stringArray[hostIndex] : null;
 
       const type = resourceTable.type[i];
 
@@ -586,12 +586,12 @@ function combineNativeSymbolTables(
 
   threads.forEach((thread) => {
     const translationMap = new Map();
-    const { nativeSymbols, stringTable } = thread;
+    const { nativeSymbols, stringArray } = thread;
 
     for (let i = 0; i < nativeSymbols.length; i++) {
       const libIndex = nativeSymbols.libIndex[i];
       const nameIndex = nativeSymbols.name[i];
-      const newName = stringTable.getString(nameIndex);
+      const newName = stringArray[nameIndex];
       const address = nativeSymbols.address[i];
       const functionSize = nativeSymbols.functionSize[i];
 
@@ -636,16 +636,14 @@ function combineFuncTables(
   const newFuncTable = getEmptyFuncTable();
 
   threads.forEach((thread, threadIndex) => {
-    const { funcTable, stringTable } = thread;
+    const { funcTable, stringArray } = thread;
     const translationMap = new Map();
     const resourceTranslationMap = translationMapsForResources[threadIndex];
 
     for (let i = 0; i < funcTable.length; i++) {
       const fileNameIndex = funcTable.fileName[i];
       const fileName =
-        typeof fileNameIndex === 'number'
-          ? stringTable.getString(fileNameIndex)
-          : null;
+        typeof fileNameIndex === 'number' ? stringArray[fileNameIndex] : null;
       const resourceIndex = funcTable.resource[i];
       const newResourceIndex =
         resourceIndex >= 0
@@ -657,7 +655,7 @@ function combineFuncTables(
           This is a programming error.
         `);
       }
-      const name = stringTable.getString(funcTable.name[i]);
+      const name = stringArray[funcTable.name[i]];
       const lineNumber = funcTable.lineNumber[i];
 
       // Entries in this table can be either:
@@ -713,7 +711,7 @@ function combineFrameTables(
   const newFrameTable = getEmptyFrameTable();
 
   threads.forEach((thread, threadIndex) => {
-    const { frameTable, stringTable } = thread;
+    const { frameTable, stringArray } = thread;
     const translationMap = new Map();
     const funcTranslationMap = translationMapsForFuncs[threadIndex];
     const nativeSymbolTranslationMap =
@@ -731,7 +729,7 @@ function combineFrameTables(
       const implementationIndex = frameTable.implementation[i];
       const implementation =
         typeof implementationIndex === 'number'
-          ? stringTable.getString(implementationIndex)
+          ? stringArray[implementationIndex]
           : null;
 
       const nativeSymbol = frameTable.nativeSymbol[i];
@@ -950,7 +948,8 @@ function getComparisonThread(
     ThreadAndWeightMultiplier,
   ]
 ): RawThread {
-  const newStringTable = StringTable.withBackingArray([]);
+  const newStringArray = [];
+  const newStringTable = StringTable.withBackingArray(newStringArray);
 
   const threads = threadsAndWeightMultipliers.map((item) => item.thread);
 
@@ -1008,7 +1007,7 @@ function getComparisonThread(
     markers: getEmptyRawMarkerTable(),
     stackTable: newStackTable,
     frameTable: newFrameTable,
-    stringTable: newStringTable,
+    stringArray: newStringArray,
     funcTable: newFuncTable,
     resourceTable: newResourceTable,
     nativeSymbols: newNativeSymbols,
@@ -1024,7 +1023,8 @@ function getComparisonThread(
  * TODO: Overlapping threads will not look great due to #2783.
  */
 export function mergeThreads(threads: RawThread[]): RawThread {
-  const newStringTable = StringTable.withBackingArray([]);
+  const newStringArray = [];
+  const newStringTable = StringTable.withBackingArray(newStringArray);
 
   // Combine the table we would need.
   const {
@@ -1099,7 +1099,7 @@ export function mergeThreads(threads: RawThread[]): RawThread {
     markers: newMarkers,
     stackTable: newStackTable,
     frameTable: newFrameTable,
-    stringTable: newStringTable,
+    stringArray: newStringArray,
     funcTable: newFuncTable,
     nativeSymbols: newNativeSymbols,
     resourceTable: newResourceTable,
@@ -1227,12 +1227,12 @@ function mergeMarkers(
   threads.forEach((thread, threadIndex) => {
     const translationMapForStacks = translationMapsForStacks[threadIndex];
     const translationMap = new Map();
-    const { markers, stringTable } = thread;
+    const { markers, stringArray } = thread;
 
     for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
       // We need to move the name string to the new string table if doesn't exist.
       const nameIndex = markers.name[markerIndex];
-      const newName = nameIndex >= 0 ? stringTable.getString(nameIndex) : null;
+      const newName = nameIndex >= 0 ? stringArray[nameIndex] : null;
 
       // Move marker data to the new marker table
       const oldData = markers.data[markerIndex];
@@ -1259,9 +1259,7 @@ function mergeMarkers(
         });
       } else if (oldData && oldData.type === 'CompositorScreenshot') {
         const urlString =
-          oldData.url === undefined
-            ? undefined
-            : stringTable.getString(oldData.url);
+          oldData.url === undefined ? undefined : stringArray[oldData.url];
 
         newMarkerTable.data.push({
           ...oldData,
@@ -1308,11 +1306,15 @@ function mergeScreenshotMarkers(
 } {
   const targetMarkerTable = { ...targetThread.markers };
   const translationMaps = [];
+  const targetStringTable = StringTable.withBackingArray(
+    targetThread.stringArray
+  );
 
   threads.forEach((thread) => {
-    if (thread.stringTable.hasString('CompositorScreenshot')) {
+    const stringTable = StringTable.withBackingArray(thread.stringArray);
+    if (stringTable.hasString('CompositorScreenshot')) {
       const translationMap = new Map();
-      const { markers, stringTable } = thread;
+      const { markers } = thread;
 
       for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
         const data = markers.data[markerIndex];
@@ -1335,14 +1337,12 @@ function mergeScreenshotMarkers(
             url:
               urlString === undefined
                 ? undefined
-                : targetThread.stringTable.indexForString(urlString),
+                : targetStringTable.indexForString(urlString),
           };
 
           targetMarkerTable.data.push(compositorScreenshotMarkerData);
           targetMarkerTable.name.push(
-            newName === null
-              ? -1
-              : targetThread.stringTable.indexForString(newName)
+            newName === null ? -1 : targetStringTable.indexForString(newName)
           );
           targetMarkerTable.startTime.push(markers.startTime[markerIndex]);
           targetMarkerTable.endTime.push(markers.endTime[markerIndex]);

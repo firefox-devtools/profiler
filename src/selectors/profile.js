@@ -24,6 +24,7 @@ import {
 import { markerSchemaFrontEndOnly } from '../profile-logic/marker-schema';
 import { getDefaultCategories } from 'firefox-profiler/profile-logic/data-structures';
 import { defaultTableViewOptions } from '../reducers/profile-view';
+import { StringTable } from '../utils/string-table';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
 import type {
@@ -435,10 +436,11 @@ export const getGlobalTrackReferences: Selector<GlobalTrackReference[]> =
 export const getHasPreferenceMarkers: Selector<boolean> = createSelector(
   getThreads,
   (threads) => {
-    return threads.some(({ stringTable, markers }) => {
+    return threads.some(({ stringArray, markers }) => {
       /*
        * Does this particular thread have a Preference in it?
        */
+      const stringTable = StringTable.withBackingArray(stringArray);
       const indexForPreferenceString =
         stringTable.indexForString('PreferenceRead');
       return markers.name.some((name) => name === indexForPreferenceString);
