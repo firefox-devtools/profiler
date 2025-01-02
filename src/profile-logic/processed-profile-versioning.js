@@ -2270,8 +2270,6 @@ const _upgraders = {
   [50]: (_) => {
     // The serialized format can now optionally store sample and counter sample
     // times as time deltas instead of absolute timestamps to reduce the JSON size.
-    // The unserialized version is unchanged, and because the upgraders run
-    // after unserialization they see no difference.
   },
   [51]: (_) => {
     // This version bump added two new form types for new marker schema field:
