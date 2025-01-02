@@ -25,6 +25,7 @@ import {
   formatTree,
   formatTreeIncludeCategories,
 } from '../fixtures/utils';
+import { StringTable } from '../../utils/string-table';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 
 describe('unfiltered call tree', function () {
@@ -338,13 +339,13 @@ describe('unfiltered call tree', function () {
         `);
         const callTree = callTreeFromProfile(profile);
         const [thread] = profile.threads;
-        const hostStringIndex =
-          thread.stringTable.indexForString('examplecom.js');
+        const stringTable = StringTable.withBackingArray(thread.stringArray);
+        const hostStringIndex = stringTable.indexForString('examplecom.js');
 
         thread.resourceTable.type[0] = resourceTypes.webhost;
         thread.resourceTable.host[0] = hostStringIndex;
         // Hijack the string table to provide the proper host name
-        thread.stringTable._array[hostStringIndex] = 'http://example.com';
+        stringTable._array[hostStringIndex] = 'http://example.com';
 
         expect(callTree.getDisplayData(A).icon).toEqual(
           'https://example.com/favicon.ico'
@@ -636,6 +637,7 @@ describe('origin annotation', function () {
     C
     D
   `);
+  const stringTable = StringTable.withBackingArray(thread.stringArray);
 
   function addResource(
     funcName: string,
@@ -647,12 +649,12 @@ describe('origin annotation', function () {
     const funcIndex = funcNames.indexOf(funcName);
     thread.funcTable.resource[funcIndex] = resourceIndex;
     thread.funcTable.fileName[funcIndex] = location
-      ? thread.stringTable.indexForString(location)
+      ? stringTable.indexForString(location)
       : null;
     thread.resourceTable.lib.push(-1);
-    thread.resourceTable.name.push(thread.stringTable.indexForString(name));
+    thread.resourceTable.name.push(stringTable.indexForString(name));
     thread.resourceTable.host.push(
-      host ? thread.stringTable.indexForString(host) : null
+      host ? stringTable.indexForString(host) : null
     );
     thread.resourceTable.length++;
   }
@@ -680,7 +682,7 @@ describe('origin annotation', function () {
       funcNames.indexOf(funcName),
       thread.funcTable,
       thread.resourceTable,
-      thread.stringTable
+      stringTable
     );
   }
 
