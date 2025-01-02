@@ -127,6 +127,8 @@ export type RawSamplesTable = {|
   // It's landed in Firefox 86, and it is optional because older profile
   // versions may not have it or that feature could be disabled. No upgrader was
   // written for this change because it's a completely new data source.
+  // The first value is ignored - it's not meaningful because there is no previous
+  // sample.
   threadCPUDelta?: Array<number | null>,
   // This property isn't present in normal threads. However it's present for
   // merged threads, so that we know the origin thread for these samples.

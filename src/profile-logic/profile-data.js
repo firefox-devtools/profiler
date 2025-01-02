@@ -15,6 +15,7 @@ import {
   shallowCloneFuncTable,
 } from './data-structures';
 import { CallNodeInfoImpl } from './call-node-info';
+import { computeThreadCPURatio } from './cpu';
 import {
   INSTANT,
   INTERVAL,
@@ -30,7 +31,10 @@ import {
   ensureExists,
   getFirstItemFromSet,
 } from 'firefox-profiler/utils/flow';
-import { numberSeriesFromDeltas } from 'firefox-profiler/utils/number-series';
+import {
+  numberSeriesFromDeltas,
+  numberSeriesToDeltas,
+} from 'firefox-profiler/utils/number-series';
 import ExtensionFavicon from '../../res/img/svg/extension-outline.svg';
 import DefaultLinkFavicon from '../../res/img/svg/globe.svg';
 
@@ -41,6 +45,7 @@ import type {
   RawSamplesTable,
   SamplesTable,
   RawStackTable,
+  SampleUnits,
   StackTable,
   FrameTable,
   FuncTable,
@@ -1661,8 +1666,8 @@ export function filterThreadSamplesToRange(
     );
   }
 
-  if (samples.threadCPUDelta) {
-    newSamples.threadCPUDelta = samples.threadCPUDelta.slice(
+  if (samples.threadCPURatio) {
+    newSamples.threadCPURatio = samples.threadCPURatio.slice(
       beginSampleIndex,
       endSampleIndex
     );
@@ -2333,7 +2338,9 @@ function _computeThreadWithInvertedStackTable(
  * Compute the derived samples table.
  */
 export function computeSamplesTableFromRawSamplesTable(
-  rawSamples: RawSamplesTable
+  rawSamples: RawSamplesTable,
+  sampleUnits: SampleUnits | void,
+  maxThreadCPUDeltaPerMs: number
 ): SamplesTable {
   const {
     responsiveness,
@@ -2341,11 +2348,25 @@ export function computeSamplesTableFromRawSamplesTable(
     stack,
     weight,
     weightType,
-    threadCPUDelta,
     threadId,
     length,
   } = rawSamples;
+
+  const timeDeltas =
+    rawSamples.time !== undefined
+      ? numberSeriesToDeltas(rawSamples.time)
+      : ensureExists(rawSamples.timeDeltas);
+  const threadCPURatio =
+    sampleUnits !== undefined
+      ? computeThreadCPURatio(
+          rawSamples,
+          sampleUnits,
+          timeDeltas,
+          maxThreadCPUDeltaPerMs
+        )
+      : undefined;
   const time = computeTimeColumnForRawSamplesTable(rawSamples);
+
   return {
     // These fields are copied from the raw samples table:
     responsiveness,
@@ -2353,12 +2374,12 @@ export function computeSamplesTableFromRawSamplesTable(
     stack,
     weight,
     weightType,
-    threadCPUDelta,
     threadId,
     length,
 
-    // This field is derived:
+    // These fields are derived:
     time,
+    threadCPURatio,
   };
 }
 

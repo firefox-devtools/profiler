@@ -13,6 +13,7 @@ import {
   getEmptyBalancedNativeAllocationsTable,
 } from '../../../profile-logic/data-structures';
 import { mergeProfilesForDiffing } from '../../../profile-logic/merge-compare';
+import { computeMaxCPUDeltaPerMs } from '../../../profile-logic/cpu';
 import { stateFromLocation } from '../../../app-logic/url-handling';
 import { StringTable } from '../../../utils/string-table';
 import { computeThreadFromRawThread } from '../utils';
@@ -1111,8 +1112,14 @@ export function getProfileWithDicts(profile: Profile): ProfileWithDicts {
     'Expected to find categories'
   ).findIndex((c) => c.name === 'Other');
 
+  const maxThreadCPUDeltaPerMs = computeMaxCPUDeltaPerMs(profile);
   const derivedThreads = profile.threads.map((rawThread) =>
-    computeThreadFromRawThread(rawThread, defaultCategory)
+    computeThreadFromRawThread(
+      rawThread,
+      profile.meta.sampleUnits,
+      maxThreadCPUDeltaPerMs,
+      defaultCategory
+    )
   );
   const funcNameDicts = derivedThreads.map(getFuncNamesDictForThread);
   const funcNamesPerThread = funcNameDicts.map(({ funcNames }) => funcNames);

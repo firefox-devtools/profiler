@@ -29,6 +29,7 @@ import type {
   IndexIntoStackTable,
   RawThread,
   IndexIntoCategoryList,
+  SampleUnits,
 } from 'firefox-profiler/types';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
@@ -120,6 +121,8 @@ export function getMouseEvent(
 
 export function computeThreadFromRawThread(
   rawThread: RawThread,
+  sampleUnits: SampleUnits | void,
+  maxThreadCPUDeltaPerMs: number,
   defaultCategory: IndexIntoCategoryList
 ): Thread {
   const stringTable = StringTable.withBackingArray(rawThread.stringArray);
@@ -128,7 +131,11 @@ export function computeThreadFromRawThread(
     rawThread.frameTable,
     defaultCategory
   );
-  const samples = computeSamplesTableFromRawSamplesTable(rawThread.samples);
+  const samples = computeSamplesTableFromRawSamplesTable(
+    rawThread.samples,
+    sampleUnits,
+    maxThreadCPUDeltaPerMs
+  );
   return createThreadFromDerivedTables(
     rawThread,
     samples,
