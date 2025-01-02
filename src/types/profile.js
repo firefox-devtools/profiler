@@ -5,7 +5,7 @@
 // @flow
 
 import type { Milliseconds, Address, Microseconds, Bytes } from './units';
-import type { UniqueStringArray } from '../utils/unique-string-array';
+import type { StringTable } from '../utils/string-table';
 import type { MarkerPayload, MarkerSchema, MarkerFormatType } from './markers';
 import type { MarkerPhase, ProfilingLog } from './gecko-profile';
 
@@ -664,7 +664,7 @@ export type Thread = {|
   frameTable: FrameTable,
   // Strings for profiles are collected into a single table, and are referred to by
   // their index by other tables.
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   nativeSymbols: NativeSymbolTable,
@@ -947,7 +947,7 @@ export type Profile = {|
 |};
 
 type SerializableThread = {|
-  ...$Diff<Thread, { stringTable: UniqueStringArray, samples: SamplesTable }>,
+  ...$Diff<Thread, { stringTable: StringTable, samples: SamplesTable }>,
   stringArray: string[],
   samples: SerializableSamplesTable,
 |};
@@ -975,7 +975,7 @@ export type SerializableCounter = {|
 |};
 
 /**
- * The UniqueStringArray is a class, and is not serializable to JSON. This profile
+ * The StringTable is a class, and is not serializable to JSON. This profile
  * variant is able to be based into JSON.stringify.
  */
 export type SerializableProfile = {|

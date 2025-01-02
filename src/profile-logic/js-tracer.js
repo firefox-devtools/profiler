@@ -23,7 +23,7 @@ import type {
   Microseconds,
 } from 'firefox-profiler/types';
 
-import type { UniqueStringArray } from '../utils/unique-string-array';
+import type { StringTable } from '../utils/string-table';
 import type { JsImplementation } from '../profile-logic/profile-data';
 
 // See the function below for more information.
@@ -184,7 +184,7 @@ export function getJsTracerTiming(
  */
 export function getJsTracerLeafTiming(
   jsTracer: JsTracerTable,
-  stringTable: UniqueStringArray
+  stringTable: StringTable
 ): JsTracerTiming[] {
   // Each event type will have it's own timing information, later collapse these into
   // a single array.

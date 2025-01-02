@@ -380,7 +380,7 @@ Object {
           0,
         ],
       },
-      "stringTable": UniqueStringArray {
+      "stringTable": StringTable {
         "_array": Array [
           "_start (in /usr/lib64/ld-2.25.so)",
           "native_irq_return_iret (in [kernel.kallsyms])",
@@ -616,7 +616,7 @@ Object {
           0,
         ],
       },
-      "stringTable": UniqueStringArray {
+      "stringTable": StringTable {
         "_array": Array [
           "_dl_init (in /usr/lib64/ld-2.25.so)",
           "syscall (in /usr/lib64/libc-2.25.so)",
@@ -830,7 +830,7 @@ Object {
           0,
         ],
       },
-      "stringTable": UniqueStringArray {
+      "stringTable": StringTable {
         "_array": Array [
           "mozilla::TimeStamp::ComputeProcessUptime (in /home/jesup/src/mozilla/head/obj-opt2/dist/bin/firefox)",
           "__clone (in /usr/lib64/libc-2.25.so)",
@@ -1294,7 +1294,7 @@ Object {
           0,
         ],
       },
-      "stringTable": UniqueStringArray {
+      "stringTable": StringTable {
         "_array": Array [
           "__libc_start_main (in /usr/lib64/libc-2.25.so)",
           "main (in /home/jesup/src/mozilla/head/obj-opt2/dist/bin/firefox)",
@@ -1587,7 +1587,7 @@ Object {
           0,
         ],
       },
-      "stringTable": UniqueStringArray {
+      "stringTable": StringTable {
         "_array": Array [
           "[unknown] (in [unknown])",
           "__clone (in /usr/lib64/libc-2.25.so)",
@@ -1920,7 +1920,7 @@ Object {
           0,
         ],
       },
-      "stringTable": UniqueStringArray {
+      "stringTable": StringTable {
         "_array": Array [
           "[unknown] (in [unknown])",
           "[unknown] (in /usr/lib64/libgio-2.0.so.0.5200.3)",
@@ -2125,7 +2125,7 @@ Object {
           0,
         ],
       },
-      "stringTable": UniqueStringArray {
+      "stringTable": StringTable {
         "_array": Array [
           "__clone (in /usr/lib64/libc-2.25.so)",
           "native_irq_return_iret (in [kernel.kallsyms])",
@@ -2333,7 +2333,7 @@ Object {
           0,
         ],
       },
-      "stringTable": UniqueStringArray {
+      "stringTable": StringTable {
         "_array": Array [
           "[unknown] (in [unknown])",
           "__clone (in /usr/lib64/libc-2.25.so)",
@@ -2549,7 +2549,7 @@ Object {
           0,
         ],
       },
-      "stringTable": UniqueStringArray {
+      "stringTable": StringTable {
         "_array": Array [
           "[unknown] (in [unknown])",
           "__clone (in /usr/lib64/libc-2.25.so)",
@@ -2761,7 +2761,7 @@ Object {
           0,
         ],
       },
-      "stringTable": UniqueStringArray {
+      "stringTable": StringTable {
         "_array": Array [
           "[unknown] (in [unknown])",
           "__clone (in /usr/lib64/libc-2.25.so)",
@@ -3026,7 +3026,7 @@ Object {
           0,
         ],
       },
-      "stringTable": UniqueStringArray {
+      "stringTable": StringTable {
         "_array": Array [
           "[unknown] (in [unknown])",
           "__clone (in /usr/lib64/libc-2.25.so)",
@@ -3869,7 +3869,7 @@ Object {
           0,
         ],
       },
-      "stringTable": UniqueStringArray {
+      "stringTable": StringTable {
         "_array": Array [
           "[unknown] (in [unknown])",
           "__libc_start_main (in /usr/lib64/libc-2.25.so)",
@@ -4826,7 +4826,7 @@ Object {
           0,
         ],
       },
-      "stringTable": UniqueStringArray {
+      "stringTable": StringTable {
         "_array": Array [
           "[unknown] (in [unknown])",
           "__libc_start_main (in /usr/lib64/libc-2.25.so)",
@@ -5787,7 +5787,7 @@ Object {
           0,
         ],
       },
-      "stringTable": UniqueStringArray {
+      "stringTable": StringTable {
         "_array": Array [
           "[unknown] (in [unknown])",
           "__libc_start_main (in /usr/lib64/libc-2.25.so)",
@@ -6748,7 +6748,7 @@ Object {
           0,
         ],
       },
-      "stringTable": UniqueStringArray {
+      "stringTable": StringTable {
         "_array": Array [
           "[unknown] (in [unknown])",
           "__libc_start_main (in /usr/lib64/libc-2.25.so)",
@@ -7428,7 +7428,7 @@ Object {
           0,
         ],
       },
-      "stringTable": UniqueStringArray {
+      "stringTable": StringTable {
         "_array": Array [
           "[unknown] (in [unknown])",
           "__libc_recvmsg (in /lib/x86_64-linux-gnu/libpthread-2.27.so)",

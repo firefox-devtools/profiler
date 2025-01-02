@@ -26,7 +26,7 @@ import type {
   Tid,
   Pid,
 } from 'firefox-profiler/types';
-import type { UniqueStringArray } from '../utils/unique-string-array';
+import type { StringTable } from '../utils/string-table';
 
 /**
  * The marker schema comes from Gecko, and is embedded in the profile. However,
@@ -144,7 +144,7 @@ export function getSchemaFromMarker(
 export function parseLabel(
   markerSchema: MarkerSchema,
   categories: CategoryList,
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   label: string
 ): (Marker) => string {
   // Split the label on the "{key}" capture groups.
@@ -337,7 +337,7 @@ export function getLabelGetter(
   markerSchemaList: MarkerSchema[],
   markerSchemaByName: MarkerSchemaByName,
   categoryList: CategoryList,
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   labelKey: LabelKey
 ): (MarkerIndex) => string {
   // Build up a list of label functions, that are tied to the schema name.
@@ -415,7 +415,7 @@ export function formatFromMarkerSchema(
   markerType: string,
   format: MarkerFormatType,
   value: any,
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   threadIdToNameMap?: Map<Tid, string>,
   processIdToNameMap?: Map<Pid, string>
 ): string {
@@ -538,7 +538,7 @@ export function formatMarkupFromMarkerSchema(
   markerType: string,
   format: MarkerFormatType,
   value: any,
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   threadIdToNameMap?: Map<Tid, string>,
   processIdToNameMap?: Map<Pid, string>
 ): React.Element<any> | string {
@@ -661,7 +661,7 @@ export function formatMarkupFromMarkerSchema(
 export function markerPayloadMatchesSearch(
   markerSchema: MarkerSchema,
   marker: Marker,
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   testFun: (string, string) => boolean
 ): boolean {
   const { data } = marker;

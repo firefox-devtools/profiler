@@ -34,7 +34,7 @@ import {
   deriveMarkersFromRawMarkerTable,
   correlateIPCMarkers,
 } from './marker-data';
-import { UniqueStringArray } from '../utils/unique-string-array';
+import { StringTable } from '../utils/string-table';
 import { ensureExists, getFirstItemFromSet } from '../utils/flow';
 
 import type {
@@ -518,7 +518,7 @@ function mergeLibs(libsPerProfile: Lib[][]): {
  * functions.
  */
 function combineResourceTables(
-  newStringTable: UniqueStringArray,
+  newStringTable: StringTable,
   threads: $ReadOnlyArray<Thread>
 ): {
   resourceTable: ResourceTable,
@@ -573,7 +573,7 @@ function combineResourceTables(
  * This combines the nativeSymbols tables for the threads.
  */
 function combineNativeSymbolTables(
-  newStringTable: UniqueStringArray,
+  newStringTable: StringTable,
   threads: $ReadOnlyArray<Thread>
 ): {
   nativeSymbols: NativeSymbolTable,
@@ -628,7 +628,7 @@ function combineNativeSymbolTables(
  */
 function combineFuncTables(
   translationMapsForResources: TranslationMapForResources[],
-  newStringTable: UniqueStringArray,
+  newStringTable: StringTable,
   threads: $ReadOnlyArray<Thread>
 ): { funcTable: FuncTable, translationMaps: TranslationMapForFuncs[] } {
   const mapOfInsertedFuncs: Map<string, IndexIntoFuncTable> = new Map();
@@ -706,7 +706,7 @@ function combineFuncTables(
 function combineFrameTables(
   translationMapsForFuncs: TranslationMapForFuncs[],
   translationMapsForNativeSymbols: TranslationMapForNativeSymbols[],
-  newStringTable: UniqueStringArray,
+  newStringTable: StringTable,
   threads: $ReadOnlyArray<Thread>
 ): { frameTable: FrameTable, translationMaps: TranslationMapForFrames[] } {
   const translationMaps = [];
@@ -950,7 +950,7 @@ function getComparisonThread(
     ThreadAndWeightMultiplier,
   ]
 ): Thread {
-  const newStringTable = new UniqueStringArray();
+  const newStringTable = new StringTable();
 
   const threads = threadsAndWeightMultipliers.map((item) => item.thread);
 
@@ -1024,7 +1024,7 @@ function getComparisonThread(
  * TODO: Overlapping threads will not look great due to #2783.
  */
 export function mergeThreads(threads: Thread[]): Thread {
-  const newStringTable = new UniqueStringArray();
+  const newStringTable = new StringTable();
 
   // Combine the table we would need.
   const {
@@ -1205,7 +1205,7 @@ type TranslationMapForMarkers = Map<MarkerIndex, MarkerIndex>;
  */
 function mergeMarkers(
   translationMapsForStacks: TranslationMapForStacks[],
-  newStringTable: UniqueStringArray,
+  newStringTable: StringTable,
   threads: Thread[]
 ): {
   markerTable: RawMarkerTable,
