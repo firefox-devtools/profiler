@@ -336,7 +336,7 @@ export const TimelineTrackThread = explicitConnect<
     const selectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const selectedThreadIndexes = getSelectedThreadIndexes(state);
     const committedRange = getCommittedRange(state);
-    const fullThread = selectors.getCPUProcessedThread(state);
+    const fullThread = selectors.getThread(state);
     const timelineType = getTimelineType(state);
     const enableCPUUsage =
       timelineType === 'cpu-category' &&

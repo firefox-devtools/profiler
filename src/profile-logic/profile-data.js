@@ -17,6 +17,7 @@ import {
   shallowCloneFuncTable,
 } from './data-structures';
 import { CallNodeInfoImpl } from './call-node-info';
+import { processThreadCPUDelta } from './cpu';
 import {
   INSTANT,
   INTERVAL,
@@ -42,6 +43,7 @@ import type {
   Thread,
   RawSamplesTable,
   SamplesTable,
+  SampleUnits,
   RawStackTable,
   StackTable,
   FrameTable,
@@ -2322,7 +2324,8 @@ function _computeThreadWithInvertedStackTable(
 }
 
 export function computeSamplesTableFromRawSamplesTable(
-  rawSamples: RawSamplesTable
+  rawSamples: RawSamplesTable,
+  sampleUnits: SampleUnits | void
 ): SamplesTable {
   const {
     responsiveness,
@@ -2330,11 +2333,14 @@ export function computeSamplesTableFromRawSamplesTable(
     stack,
     weight,
     weightType,
-    threadCPUDelta,
     threadId,
     length,
   } = rawSamples;
   const time = computeTimeColumnForRawSamplesTable(rawSamples);
+  const threadCPUDelta =
+    sampleUnits !== undefined
+      ? processThreadCPUDelta(rawSamples, sampleUnits, time)
+      : undefined;
   return {
     // These fields are copied from the raw samples table:
     responsiveness,
@@ -2342,12 +2348,12 @@ export function computeSamplesTableFromRawSamplesTable(
     stack,
     weight,
     weightType,
-    threadCPUDelta,
     threadId,
     length,
 
-    // This field is derived:
+    // These fields are derived:
     time,
+    threadCPUDelta,
   };
 }
 

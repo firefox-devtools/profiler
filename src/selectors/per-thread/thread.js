@@ -15,7 +15,6 @@ import * as ProfileData from '../../profile-logic/profile-data';
 import * as CallTree from '../../profile-logic/call-tree';
 import * as ProfileSelectors from '../profile';
 import * as JsTracer from '../../profile-logic/js-tracer';
-import * as Cpu from '../../profile-logic/cpu';
 import {
   assertExhaustiveCheck,
   ensureExists,
@@ -102,6 +101,7 @@ export function getBasicThreadSelectorsPerThread(
     getRawThread(state).samples;
   const getSamplesTable: Selector<SamplesTable> = createSelector(
     getRawSamplesTable,
+    ProfileSelectors.getSampleUnits,
     ProfileData.computeSamplesTableFromRawSamplesTable
   );
   const getNativeAllocations: Selector<NativeAllocationsTable | void> = (
@@ -158,20 +158,8 @@ export function getBasicThreadSelectorsPerThread(
     ProfileData.createThreadFromDerivedTables
   );
 
-  const getCPUProcessedThread: Selector<Thread> = createSelector(
-    getThread,
-    ProfileSelectors.getSampleUnits,
-    ProfileSelectors.getProfileInterval,
-    (thread, sampleUnits, profileInterval) =>
-      thread.samples === null ||
-      thread.samples.threadCPUDelta === undefined ||
-      !sampleUnits
-        ? thread
-        : Cpu.processThreadCPUDelta(thread, sampleUnits, profileInterval)
-  );
-
   const getThreadWithReservedFunctions: Selector<ThreadWithReservedFunctions> =
-    createSelector(getCPUProcessedThread, ProfileData.reserveFunctionsInThread);
+    createSelector(getThread, ProfileData.reserveFunctionsInThread);
 
   const getFunctionsReservedThread: Selector<Thread> = (state) =>
     getThreadWithReservedFunctions(state).thread;
@@ -427,7 +415,6 @@ export function getBasicThreadSelectorsPerThread(
     getHasUsefulJsAllocations,
     getHasUsefulNativeAllocations,
     getCanShowRetainedMemory,
-    getCPUProcessedThread,
     getFunctionsReservedThread,
     getTabFilteredThread,
     getActiveTabFilteredThread,

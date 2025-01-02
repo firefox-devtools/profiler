@@ -8,11 +8,10 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type {
   RawThread,
-  Thread,
-  Milliseconds,
   SampleUnits,
   ThreadCPUDeltaUnit,
   Profile,
+  RawSamplesTable,
 } from 'firefox-profiler/types';
 
 /**
@@ -118,7 +117,7 @@ export function computeMaxCPUDeltaPerMs(profile: Profile): number {
 }
 
 /**
- * Process the CPU delta values of that thread. It will throw an error if it
+ * Process the CPU delta values of that thread. It will return undefined if it
  * fails to find threadCPUDelta array.
  * It does two different processing:
  *
@@ -130,41 +129,23 @@ export function computeMaxCPUDeltaPerMs(profile: Profile): number {
  * there are any by getting the closest threadCPUDelta value.
  */
 export function processThreadCPUDelta(
-  thread: Thread,
+  samples: RawSamplesTable,
   sampleUnits: SampleUnits,
-  profileInterval: Milliseconds
-): Thread {
-  const { samples } = thread;
+  timeColumn: number[]
+): number[] | void {
   const { threadCPUDelta } = samples;
 
   if (!threadCPUDelta) {
-    throw new Error(
-      "processThreadCPUDelta should not be called for the profiles that don't include threadCPUDelta."
-    );
-  }
-  // A helper function to shallow clone the thread with different threadCPUDelta values.
-  function _newThreadWithNewThreadCPUDelta(
-    threadCPUDelta: Array<number | null> | void
-  ): Thread {
-    const newSamples = {
-      ...samples,
-      threadCPUDelta,
-    };
-
-    const newThread = {
-      ...thread,
-      samples: newSamples,
-    };
-
-    return newThread;
+    return undefined;
   }
 
-  const newThreadCPUDelta: Array<number | null> = new Array(samples.length);
+  const newThreadCPUDelta: Array<number> = new Array(samples.length);
   const cpuDeltaTimeUnitMultiplier = getCpuDeltaTimeUnitMultiplier(
     sampleUnits.threadCPUDelta
   );
 
-  for (let i = 0; i < samples.length; i++) {
+  newThreadCPUDelta[0] = 0;
+  for (let i = 1; i < samples.length; i++) {
     // Ideally there shouldn't be any null values but that can happen if the
     // back-end fails to get the CPU usage numbers from the operation system.
     // In that case, try to find the closest number and use it to mitigate the
@@ -182,10 +163,7 @@ export function processThreadCPUDelta(
       case 'µs':
       case 'ns': {
         const intervalInThreadCPUDeltaUnit =
-          i === 0
-            ? profileInterval * cpuDeltaTimeUnitMultiplier
-            : (samples.time[i] - samples.time[i - 1]) *
-              cpuDeltaTimeUnitMultiplier;
+          (timeColumn[i] - timeColumn[i - 1]) * cpuDeltaTimeUnitMultiplier;
         if (threadCPUDeltaValue > intervalInThreadCPUDeltaUnit) {
           newThreadCPUDelta[i] = intervalInThreadCPUDeltaUnit;
         } else {
@@ -204,9 +182,8 @@ export function processThreadCPUDelta(
     }
   }
 
-  return _newThreadWithNewThreadCPUDelta(newThreadCPUDelta);
+  return newThreadCPUDelta;
 }
-
 /**
  * A helper function that is used to convert ms time units to threadCPUDelta units.
  * Returns 1 for 'variable CPU cycles' as it's not a time unit.

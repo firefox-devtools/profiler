@@ -455,6 +455,7 @@ describe('profile-data', function () {
     const thread = computeThreadFromRawThread(
       rawThread,
       shared,
+      profile.meta.sampleUnits,
       defaultCategory
     );
     const callNodeInfo = getCallNodeInfo(
@@ -516,6 +517,7 @@ describe('profile-data', function () {
     const thread = computeThreadFromRawThread(
       rawThread,
       shared,
+      meta.sampleUnits,
       defaultCategory
     );
     const callNodeInfo = getCallNodeInfo(
@@ -756,7 +758,12 @@ describe('filter-by-implementation', function () {
   ).findIndex((c) => c.name === 'Other');
   const { shared, threads } = profile;
   const rawThread = threads[0];
-  const thread = computeThreadFromRawThread(rawThread, shared, defaultCategory);
+  const thread = computeThreadFromRawThread(
+    rawThread,
+    shared,
+    profile.meta.sampleUnits,
+    defaultCategory
+  );
 
   function stackIsJS(filteredThread, stackIndex) {
     if (stackIndex === null) {
@@ -812,6 +819,7 @@ describe('get-sample-index-closest-to-time', function () {
     const thread = computeThreadFromRawThread(
       rawThread,
       shared,
+      profile.meta.sampleUnits,
       defaultCategory
     );
     const { samples } = filterThreadByImplementation(thread, 'js');
@@ -841,6 +849,7 @@ describe('funcHasDirectRecursiveCall and funcHasRecursiveCall', function () {
     const thread = computeThreadFromRawThread(
       rawThread,
       shared,
+      profile.meta.sampleUnits,
       defaultCategory
     );
     const callNodeTable = getCallNodeInfo(
@@ -910,6 +919,7 @@ describe('convertStackToCallNodeAndCategoryPath', function () {
     const thread = computeThreadFromRawThread(
       rawThread,
       shared,
+      profile.meta.sampleUnits,
       defaultCategory
     );
     const stack1 = thread.samples.stack[0];
@@ -940,6 +950,7 @@ describe('getSamplesSelectedStates', function () {
     const thread = computeThreadFromRawThread(
       rawThread,
       shared,
+      profile.meta.sampleUnits,
       defaultCategory
     );
     const callNodeInfo = getCallNodeInfo(
@@ -1458,6 +1469,7 @@ describe('getNativeSymbolsForCallNode', function () {
     const thread = computeThreadFromRawThread(
       rawThread,
       shared,
+      profile.meta.sampleUnits,
       defaultCategory
     );
     const callNodeInfo = getCallNodeInfo(
@@ -1511,6 +1523,7 @@ describe('getNativeSymbolsForCallNode', function () {
     const thread = computeThreadFromRawThread(
       rawThread,
       shared,
+      profile.meta.sampleUnits,
       defaultCategory
     );
     const nonInvertedCallNodeInfo = getCallNodeInfo(

@@ -1117,7 +1117,12 @@ export function getProfileWithDicts(profile: Profile): ProfileWithDicts {
   const { shared, threads } = profile;
   const stringTable = StringTable.withBackingArray(shared.stringArray);
   const derivedThreads = threads.map((rawThread) =>
-    computeThreadFromRawThread(rawThread, shared, defaultCategory)
+    computeThreadFromRawThread(
+      rawThread,
+      shared,
+      profile.meta.sampleUnits,
+      defaultCategory
+    )
   );
   const funcNameDicts = derivedThreads.map(getFuncNamesDictForThread);
   const funcNamesPerThread = funcNameDicts.map(({ funcNames }) => funcNames);

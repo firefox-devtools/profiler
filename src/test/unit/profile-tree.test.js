@@ -58,7 +58,7 @@ describe('unfiltered call tree', function () {
    */
   describe('computed counts and timings', function () {
     const profile = getProfile();
-    const { shared, threads } = profile;
+    const { meta, shared, threads } = profile;
     const [rawThread] = threads;
     const defaultCategory = ensureExists(
       profile.meta.categories,
@@ -67,6 +67,7 @@ describe('unfiltered call tree', function () {
     const thread = computeThreadFromRawThread(
       rawThread,
       shared,
+      meta.sampleUnits,
       defaultCategory
     );
     const callNodeInfo = getCallNodeInfo(
@@ -110,7 +111,7 @@ describe('unfiltered call tree', function () {
         X  X  H  H  M  N
         Y  W  I  J
       `);
-      const { shared, threads } = profile;
+      const { meta, shared, threads } = profile;
       const [rawThread] = threads;
       const defaultCategory = ensureExists(
         profile.meta.categories,
@@ -119,6 +120,7 @@ describe('unfiltered call tree', function () {
       const thread = computeThreadFromRawThread(
         rawThread,
         shared,
+        meta.sampleUnits,
         defaultCategory
       );
       const callNodeInfo = getCallNodeInfo(
@@ -378,7 +380,7 @@ describe('unfiltered call tree', function () {
    */
   describe('getCallNodeIndexFromPath', function () {
     const profile = getProfile();
-    const { shared, threads } = profile;
+    const { meta, shared, threads } = profile;
     const [rawThread] = threads;
     const defaultCategory = ensureExists(
       profile.meta.categories,
@@ -387,6 +389,7 @@ describe('unfiltered call tree', function () {
     const thread = computeThreadFromRawThread(
       rawThread,
       shared,
+      meta.sampleUnits,
       defaultCategory
     );
     const callNodeInfo = getCallNodeInfo(
@@ -443,11 +446,12 @@ describe('inverted call tree', function () {
     const defaultCategory = categories.findIndex((c) => c.color === 'grey');
 
     // Check the non-inverted tree first.
-    const { shared, threads } = profile;
+    const { meta, shared, threads } = profile;
     const [rawThread] = threads;
     const thread = computeThreadFromRawThread(
       rawThread,
       shared,
+      meta.sampleUnits,
       defaultCategory
     );
     const callNodeInfo = getCallNodeInfo(
@@ -641,7 +645,7 @@ describe('diffing trees', function () {
   it('computes a rootTotalSummary that is the absolute count of all intervals', () => {
     const { profile } = getProfile();
 
-    const { shared, threads } = profile;
+    const { meta, shared, threads } = profile;
     const rawThread = threads[2];
     const defaultCategory = ensureExists(
       profile.meta.categories,
@@ -650,6 +654,7 @@ describe('diffing trees', function () {
     const thread = computeThreadFromRawThread(
       rawThread,
       shared,
+      meta.sampleUnits,
       defaultCategory
     );
     const callNodeInfo = getCallNodeInfo(
