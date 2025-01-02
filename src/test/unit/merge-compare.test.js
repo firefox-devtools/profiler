@@ -368,7 +368,7 @@ describe('mergeThreads function', function () {
     const mergedMarkers = mergedThread.markers;
     const mergedStringTable = mergedThread.stringTable;
     expect(mergedMarkers).toHaveLength(6);
-    expect(mergedStringTable.serializeToArray()).toHaveLength(6);
+    expect(mergedStringTable.getBackingArray()).toHaveLength(6);
 
     const markerNames = [];
     const markerStartTimes = [];

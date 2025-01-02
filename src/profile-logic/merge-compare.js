@@ -950,7 +950,7 @@ function getComparisonThread(
     ThreadAndWeightMultiplier,
   ]
 ): Thread {
-  const newStringTable = new StringTable();
+  const newStringTable = StringTable.withBackingArray([]);
 
   const threads = threadsAndWeightMultipliers.map((item) => item.thread);
 
@@ -1024,7 +1024,7 @@ function getComparisonThread(
  * TODO: Overlapping threads will not look great due to #2783.
  */
 export function mergeThreads(threads: Thread[]): Thread {
-  const newStringTable = new StringTable();
+  const newStringTable = StringTable.withBackingArray([]);
 
   // Combine the table we would need.
   const {
