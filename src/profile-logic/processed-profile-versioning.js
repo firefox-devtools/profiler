@@ -2062,7 +2062,7 @@ const _upgraders = {
         libs: threadLibs,
         resourceTable,
         nativeSymbols,
-        stringTable,
+        stringArray,
       } = thread;
       const threadLibIndexToGlobalLibIndex = new Map();
       delete thread.libs;
@@ -2106,8 +2106,12 @@ const _upgraders = {
           nameStringIndex === undefined ||
           nameStringIndex === null
         ) {
-          resourceTable.name[resourceIndex] =
-            stringTable.indexForString('<unnamed resource>');
+          let stringIndex = stringArray.indexOf('<unnamed resource>');
+          if (stringIndex === -1) {
+            stringIndex = stringArray.length;
+            stringArray.push('<unnamed resource>');
+          }
+          resourceTable.name[resourceIndex] = stringIndex;
         }
         const hostStringIndex = resourceTable.host[resourceIndex];
         if (hostStringIndex === -1 || hostStringIndex === undefined) {
@@ -2270,8 +2274,6 @@ const _upgraders = {
   [50]: (_) => {
     // The serialized format can now optionally store sample and counter sample
     // times as time deltas instead of absolute timestamps to reduce the JSON size.
-    // The unserialized version is unchanged, and because the upgraders run
-    // after unserialization they see no difference.
   },
   [51]: (_) => {
     // This version bump added two new form types for new marker schema field:
