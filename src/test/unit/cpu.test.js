@@ -4,7 +4,6 @@
 
 // @flow
 
-import { processThreadCPUDelta } from 'firefox-profiler/profile-logic/cpu';
 import {
   getProfileWithThreadCPUDelta,
   getProfileWithDicts,
@@ -27,32 +26,15 @@ describe('processThreadCPUDelta', function () {
       interval
     );
     const { derivedThreads } = getProfileWithDicts(profile);
-    const [thread] = derivedThreads;
+    const [processedThread] = derivedThreads;
 
-    if (!profile.meta.sampleUnits) {
-      throw new Error('SampleUnits object could not found in the profile.');
-    }
-
-    const processedThread = processThreadCPUDelta(
-      thread,
-      profile.meta.sampleUnits,
-      profile.meta.interval
-    );
-
-    return { profile, thread, processedThread };
+    return { profile, processedThread };
   }
-
-  it('throws if all of its values are null', function () {
-    expect(() => setup([null, null, null, null, null, null])).toThrow();
-  });
-
-  it('throws if there are no threadCPUDelta values', function () {
-    expect(() => setup(undefined)).toThrow();
-  });
 
   it('removes the null values by finding the closest non-null threadCPUDelta value', function () {
     // Testing the case where only the values in the middle are null.
     const { processedThread: processedThread1 } = setup([
+      0,
       0.1,
       null,
       null,
@@ -61,21 +43,26 @@ describe('processThreadCPUDelta', function () {
       0.2,
     ]);
     expect(processedThread1.samples.threadCPUDelta).toEqual([
-      0.1, 0.1, 0.1, 0.2, 0.2, 0.2,
+      0, 0.1, 0.1, 0.1, 0.2, 0.2, 0.2,
     ]);
 
     // Testing the case where the values at the start are null.
-    const { processedThread: processedThread2 } = setup([null, null, 0.1]);
-    expect(processedThread2.samples.threadCPUDelta).toEqual([0.1, 0.1, 0.1]);
+    const { processedThread: processedThread2 } = setup([
+      null,
+      null,
+      null,
+      0.1,
+    ]);
+    expect(processedThread2.samples.threadCPUDelta).toEqual([0, 0.1, 0.1, 0.1]);
 
     // Testing the case where the values at the end are null.
-    const { processedThread: processedThread3 } = setup([0.1, null, null]);
-    expect(processedThread3.samples.threadCPUDelta).toEqual([0.1, 0.1, 0.1]);
+    const { processedThread: processedThread3 } = setup([0, 0.1, null, null]);
+    expect(processedThread3.samples.threadCPUDelta).toEqual([0, 0.1, 0.1, 0.1]);
 
     // If there are values in either side of a null sample with the same distance,
     // pick the latter one.
-    const { processedThread: processedThread4 } = setup([0.1, null, 0.2]);
-    expect(processedThread4.samples.threadCPUDelta).toEqual([0.1, 0.2, 0.2]);
+    const { processedThread: processedThread4 } = setup([0, 0.1, null, 0.2]);
+    expect(processedThread4.samples.threadCPUDelta).toEqual([0, 0.1, 0.2, 0.2]);
   });
 
   it('processes Linux timing values and caps them to 100% if they are more than the interval values', function () {
@@ -83,6 +70,7 @@ describe('processThreadCPUDelta', function () {
     const intervalMs = 1;
     const { processedThread: processedThread1 } = setup(
       [
+        0,
         0.5 * MS_TO_NS_MULTIPLIER, // <- Less than the interval
         0.7 * MS_TO_NS_MULTIPLIER, // <- Less than the interval
         1 * MS_TO_NS_MULTIPLIER, // <- Equal to the interval, should be fine
@@ -94,6 +82,7 @@ describe('processThreadCPUDelta', function () {
     );
 
     expect(processedThread1.samples.threadCPUDelta).toEqual([
+      0,
       0.5 * MS_TO_NS_MULTIPLIER, // <- not changed
       0.7 * MS_TO_NS_MULTIPLIER, // <- not changed
       1 * MS_TO_NS_MULTIPLIER, // <- not changed
@@ -107,6 +96,7 @@ describe('processThreadCPUDelta', function () {
     const intervalMs = 1;
     const { processedThread: processedThread1 } = setup(
       [
+        0,
         0.5 * MS_TO_US_MULTIPLIER, // <- Less than the interval
         0.7 * MS_TO_US_MULTIPLIER, // <- Less than the interval
         1 * MS_TO_US_MULTIPLIER, // <- Equal to the interval, should be fine
@@ -118,6 +108,7 @@ describe('processThreadCPUDelta', function () {
     );
 
     expect(processedThread1.samples.threadCPUDelta).toEqual([
+      0,
       0.5 * MS_TO_US_MULTIPLIER, // <- not changed
       0.7 * MS_TO_US_MULTIPLIER, // <- not changed
       1 * MS_TO_US_MULTIPLIER, // <- not changed
@@ -130,6 +121,7 @@ describe('processThreadCPUDelta', function () {
     // Use the ns conversion multiplier to imitate the worst case.
     const intervalMs = 1;
     const threadCPUDelta = [
+      0,
       0.5 * MS_TO_NS_MULTIPLIER,
       0.7 * MS_TO_NS_MULTIPLIER,
       1 * MS_TO_NS_MULTIPLIER,
@@ -145,20 +137,5 @@ describe('processThreadCPUDelta', function () {
 
     // It shouldn't change the values!
     expect(processedThread1.samples.threadCPUDelta).toEqual(threadCPUDelta);
-  });
-
-  it('processes the timing values and caps the first element correctly if it exceeds the interval', function () {
-    // Testing the case where only the values in the middle are null.
-    const interval = 1;
-    const { processedThread: processedThread1 } = setup(
-      [2 * MS_TO_NS_MULTIPLIER, 0.5 * MS_TO_NS_MULTIPLIER],
-      'ns',
-      interval
-    );
-
-    expect(processedThread1.samples.threadCPUDelta).toEqual([
-      interval * MS_TO_NS_MULTIPLIER,
-      0.5 * MS_TO_NS_MULTIPLIER,
-    ]);
   });
 });

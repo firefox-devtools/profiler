@@ -112,7 +112,7 @@ export type SamplesTable = {|
   // The elapsed CPU delta since the previous sample, in the unit given by
   // profile.meta.sampleUnits.threadCPUDelta. Absent in profiles without CPU
   // delta information.
-  threadCPUDelta?: Array<number | null>,
+  threadCPUDelta?: Array<number>,
   // This property isn't present in normal threads. However it's present for
   // merged threads, so that we know the origin thread for these samples.
   threadId?: Tid[],
