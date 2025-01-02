@@ -64,7 +64,7 @@ describe('unfiltered call tree', function () {
       profile.meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
-    const thread = computeThreadFromRawThread(rawThread);
+    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -111,7 +111,7 @@ describe('unfiltered call tree', function () {
         profile.meta.categories,
         'Expected to find categories'
       ).findIndex((c) => c.name === 'Other');
-      const thread = computeThreadFromRawThread(rawThread);
+      const thread = computeThreadFromRawThread(rawThread, defaultCategory);
       const callNodeInfo = getCallNodeInfo(
         thread.stackTable,
         thread.frameTable,
@@ -375,7 +375,7 @@ describe('unfiltered call tree', function () {
       profile.meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
-    const thread = computeThreadFromRawThread(rawThread);
+    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -431,7 +431,7 @@ describe('inverted call tree', function () {
 
     // Check the non-inverted tree first.
     const rawThread = profile.threads[0];
-    const thread = computeThreadFromRawThread(rawThread);
+    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -628,7 +628,7 @@ describe('diffing trees', function () {
       profile.meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
-    const thread = computeThreadFromRawThread(rawThread);
+    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,

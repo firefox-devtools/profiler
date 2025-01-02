@@ -448,7 +448,7 @@ describe('profile-data', function () {
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
     const rawThread = profile.threads[0];
-    const thread = computeThreadFromRawThread(rawThread);
+    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -504,7 +504,7 @@ describe('profile-data', function () {
       meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
-    const thread = computeThreadFromRawThread(rawThread);
+    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -720,8 +720,12 @@ describe('symbolication', function () {
 
 describe('filter-by-implementation', function () {
   const profile = processGeckoProfile(createGeckoProfileWithJsTimings());
+  const defaultCategory = ensureExists(
+    profile.meta.categories,
+    'Expected to find categories'
+  ).findIndex((c) => c.name === 'Other');
   const rawThread = profile.threads[0];
-  const thread = computeThreadFromRawThread(rawThread);
+  const thread = computeThreadFromRawThread(rawThread, defaultCategory);
 
   function stackIsJS(filteredThread, stackIndex) {
     if (stackIndex === null) {
@@ -769,7 +773,11 @@ describe('get-sample-index-closest-to-time', function () {
       Array(10).fill('A').join('  ')
     );
     const rawThread = profile.threads[0];
-    const thread = computeThreadFromRawThread(rawThread);
+    const defaultCategory = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    ).findIndex((c) => c.name === 'Other');
+    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
     const { samples } = filterThreadByImplementation(thread, 'js');
 
     const interval = profile.meta.interval;
@@ -793,7 +801,7 @@ describe('funcHasDirectRecursiveCall and funcHasRecursiveCall', function () {
       profile.meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
-    const thread = computeThreadFromRawThread(rawThread);
+    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
     const callNodeTable = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -853,7 +861,11 @@ describe('convertStackToCallNodeAndCategoryPath', function () {
   it('correctly returns a call node path for a stack', function () {
     const profile = getCallNodeProfile();
     const rawThread = profile.threads[0];
-    const thread = computeThreadFromRawThread(rawThread);
+    const defaultCategory = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    ).findIndex((c) => c.name === 'Other');
+    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
     const stack1 = thread.samples.stack[0];
     const stack2 = thread.samples.stack[1];
     if (stack1 === null || stack2 === null) {
@@ -878,7 +890,7 @@ describe('getSamplesSelectedStates', function () {
       profile.meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
-    const thread = computeThreadFromRawThread(rawThread);
+    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -1391,7 +1403,7 @@ describe('getNativeSymbolsForCallNode', function () {
       'Expected to find categories'
     );
     const defaultCategory = categories.findIndex((c) => c.name === 'Other');
-    const thread = computeThreadFromRawThread(rawThread);
+    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -1439,7 +1451,7 @@ describe('getNativeSymbolsForCallNode', function () {
       'Expected to find categories'
     );
     const defaultCategory = categories.findIndex((c) => c.name === 'Other');
-    const thread = computeThreadFromRawThread(rawThread);
+    const thread = computeThreadFromRawThread(rawThread, defaultCategory);
     const nonInvertedCallNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,

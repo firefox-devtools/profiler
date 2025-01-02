@@ -20,7 +20,7 @@ import {
   getEmptyNativeSymbolTable,
   getEmptyFrameTable,
   getEmptyFuncTable,
-  getEmptyStackTable,
+  getEmptyRawStackTable,
   getEmptyRawMarkerTable,
   getEmptySamplesTableWithEventDelay,
 } from './data-structures';
@@ -55,8 +55,8 @@ import type {
   Lib,
   NativeSymbolTable,
   ResourceTable,
-  StackTable,
   RawSamplesTable,
+  RawStackTable,
   UrlState,
   ImplementationFilter,
   TransformStacksPerThread,
@@ -162,13 +162,6 @@ export function mergeProfilesForDiffing(
 
     // We adjust the categories using the maps computed above.
     // TODO issue #2151: Also adjust subcategories.
-    thread.stackTable = {
-      ...thread.stackTable,
-      category: adjustCategories(
-        thread.stackTable.category,
-        translationMapsForCategories[i]
-      ),
-    };
     thread.frameTable = {
       ...thread.frameTable,
       category: adjustNullableCategories(
@@ -394,27 +387,6 @@ function mergeCategories(categoriesPerThread: Array<CategoryList | void>): {|
   });
 
   return { categories: newCategories, translationMaps };
-}
-
-/**
- * Adjusts the category indices in a category list using a translation map.
- */
-function adjustCategories(
-  categories: $ReadOnlyArray<IndexIntoCategoryList>,
-  translationMap: TranslationMapForCategories
-): Array<IndexIntoCategoryList> {
-  return categories.map((category) => {
-    const result = translationMap.get(category);
-    if (result === undefined) {
-      throw new Error(
-        stripIndent`
-          Category with index ${category} hasn't been found in the translation map.
-          This shouldn't happen and indicates a bug in the profiler's code.
-        `
-      );
-    }
-    return result;
-  });
 }
 
 /**
@@ -790,9 +762,9 @@ function combineFrameTables(
 function combineStackTables(
   translationMapsForFrames: TranslationMapForFrames[],
   threads: $ReadOnlyArray<RawThread>
-): { stackTable: StackTable, translationMaps: TranslationMapForStacks[] } {
+): { stackTable: RawStackTable, translationMaps: TranslationMapForStacks[] } {
   const translationMaps = [];
-  const newStackTable = getEmptyStackTable();
+  const newStackTable = getEmptyRawStackTable();
 
   threads.forEach((thread, threadIndex) => {
     const { stackTable } = thread;
@@ -818,8 +790,6 @@ function combineStackTables(
       }
 
       newStackTable.frame.push(newFrameIndex);
-      newStackTable.category.push(stackTable.category[i]);
-      newStackTable.subcategory.push(stackTable.subcategory[i]);
       newStackTable.prefix.push(newPrefix);
 
       translationMap.set(i, newStackTable.length);

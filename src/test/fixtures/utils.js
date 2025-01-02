@@ -14,6 +14,7 @@ import {
   getSampleIndexToCallNodeIndex,
   getOriginAnnotationForFunc,
   createThreadFromDerivedTables,
+  computeStackTableFromRawStackTable,
   computeSamplesTableFromRawSamplesTable,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { StringTable } from '../../utils/string-table';
@@ -26,6 +27,7 @@ import type {
   Thread,
   IndexIntoStackTable,
   RawThread,
+  IndexIntoCategoryList,
 } from 'firefox-profiler/types';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
@@ -115,10 +117,23 @@ export function getMouseEvent(
   return new FakeMouseEvent(type, values);
 }
 
-export function computeThreadFromRawThread(rawThread: RawThread): Thread {
+export function computeThreadFromRawThread(
+  rawThread: RawThread,
+  defaultCategory: IndexIntoCategoryList
+): Thread {
   const stringTable = StringTable.withBackingArray(rawThread.stringArray);
+  const stackTable = computeStackTableFromRawStackTable(
+    rawThread.stackTable,
+    rawThread.frameTable,
+    defaultCategory
+  );
   const samples = computeSamplesTableFromRawSamplesTable(rawThread.samples);
-  return createThreadFromDerivedTables(rawThread, samples, stringTable);
+  return createThreadFromDerivedTables(
+    rawThread,
+    samples,
+    stackTable,
+    stringTable
+  );
 }
 
 /**
@@ -135,7 +150,7 @@ export function callTreeFromProfile(
     'Expected to find categories'
   );
   const defaultCategory = categories.findIndex((c) => c.name === 'Other');
-  const thread = computeThreadFromRawThread(rawThread);
+  const thread = computeThreadFromRawThread(rawThread, defaultCategory);
 
   const callNodeInfo = getCallNodeInfo(
     thread.stackTable,

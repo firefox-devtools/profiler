@@ -913,8 +913,6 @@ function _buildThreadFromTextOnlyStacks(
     funcTable.length++;
   });
 
-  const categoryOther = categories.findIndex((c) => c.name === 'Other');
-
   // This map caches resource indexes for library names.
   const resourceIndexCache = {};
 
@@ -1051,21 +1049,8 @@ function _buildThreadFromTextOnlyStacks(
 
       // If we couldn't find a stack, go ahead and create it.
       if (stackIndex === undefined) {
-        const frameCategory = frameTable.category[frameIndex];
-        const frameSubcategory = frameTable.subcategory[frameIndex];
-        const prefixCategory =
-          prefix === null ? categoryOther : stackTable.category[prefix];
-        const prefixSubcategory =
-          prefix === null ? 0 : stackTable.subcategory[prefix];
-        const stackCategory =
-          frameCategory === null ? prefixCategory : frameCategory;
-        const stackSubcategory =
-          frameSubcategory === null ? prefixSubcategory : frameSubcategory;
-
         stackTable.frame.push(frameIndex);
         stackTable.prefix.push(prefix);
-        stackTable.category.push(stackCategory);
-        stackTable.subcategory.push(stackSubcategory);
         stackIndex = stackTable.length++;
       }
 
@@ -1120,7 +1105,7 @@ export function getProfileWithDicts(profile: Profile): ProfileWithDicts {
   ).findIndex((c) => c.name === 'Other');
 
   const derivedThreads = profile.threads.map((rawThread) =>
-    computeThreadFromRawThread(rawThread)
+    computeThreadFromRawThread(rawThread, defaultCategory)
   );
   const funcNameDicts = derivedThreads.map(getFuncNamesDictForThread);
   const funcNamesPerThread = funcNameDicts.map(({ funcNames }) => funcNames);
@@ -2093,8 +2078,6 @@ export function addInnerWindowIdToStacks(
       // Clone the stack
       const newStackIndex = stackTable.length++;
       stackTable.prefix.push(stackTable.prefix[stackIndex]);
-      stackTable.category.push(stackTable.category[stackIndex]);
-      stackTable.subcategory.push(stackTable.subcategory[stackIndex]);
       // Using the cloned frame index.
       stackTable.frame.push(newFrameIndex);
 

@@ -457,7 +457,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 51,
+    "preprocessedProfileVersion": 52,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -884,17 +884,6 @@ Object {
         "weightType": "samples",
       },
       "stackTable": Object {
-        "category": Array [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-        ],
         "frame": Array [
           0,
           1,
@@ -917,17 +906,6 @@ Object {
           5,
           1,
           7,
-        ],
-        "subcategory": Array [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
         ],
       },
       "stringArray": Array [
@@ -1108,11 +1086,9 @@ Object {
         "weightType": "samples",
       },
       "stackTable": Object {
-        "category": Array [],
         "frame": Array [],
         "length": 0,
         "prefix": Array [],
-        "subcategory": Array [],
       },
       "stringArray": Array [
         "A",
@@ -1541,17 +1517,6 @@ Array [
       "weightType": "samples",
     },
     "stackTable": Object {
-      "category": Array [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-      ],
       "frame": Array [
         0,
         1,
@@ -1574,17 +1539,6 @@ Array [
         5,
         1,
         7,
-      ],
-      "subcategory": Array [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
       ],
     },
     "stringArray": Array [
@@ -1765,11 +1719,9 @@ Array [
       "weightType": "samples",
     },
     "stackTable": Object {
-      "category": Array [],
       "frame": Array [],
       "length": 0,
       "prefix": Array [],
-      "subcategory": Array [],
     },
     "stringArray": Array [
       "A",

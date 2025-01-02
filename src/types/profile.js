@@ -54,6 +54,15 @@ export type Pid = string;
  * We take advantage of the fact that many call stacks in the profile have a
  * shared prefix; storing these stacks as a tree saves a lot of space compared
  * to storing them as actual lists of frames.
+ */
+export type RawStackTable = {|
+  frame: IndexIntoFrameTable[],
+  prefix: Array<IndexIntoStackTable | null>,
+  length: number,
+|};
+
+/**
+ * Like the RawStackTable, but with additional `category` and `subcategory` columns.
  *
  * The category of a stack node is always non-null and is derived from a stack's
  * frame and its prefix. Frames can have null categories, stacks cannot. If a
@@ -664,7 +673,7 @@ export type RawThread = {|
   jsAllocations?: JsAllocationsTable,
   nativeAllocations?: NativeAllocationsTable,
   markers: RawMarkerTable,
-  stackTable: StackTable,
+  stackTable: RawStackTable,
   frameTable: FrameTable,
   // Strings for profiles are collected into a single table, and are referred to by
   // their index by other tables.
