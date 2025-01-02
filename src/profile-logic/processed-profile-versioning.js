@@ -2371,6 +2371,31 @@ const _upgraders = {
       });
     }
   },
+  [53]: (profile) => {
+    for (const thread of profile.threads) {
+      const { frameTable, stackTable } = thread;
+
+      // Workaround for Lean profiles missing frameTable.category
+      if (!('category' in frameTable)) {
+        frameTable.category = [];
+        frameTable.subcategory = [];
+        for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
+          frameTable.category[frameIndex] = null;
+          frameTable.subcategory[frameIndex] = null;
+        }
+        for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+          const frameIndex = stackTable.frame[stackIndex];
+          frameTable.category[frameIndex] = stackTable.category[stackIndex];
+          frameTable.subcategory[frameIndex] =
+            stackTable.subcategory[stackIndex];
+        }
+      }
+
+      // Remove stackTable.category and stackTable.subcategory.
+      delete stackTable.category;
+      delete stackTable.subcategory;
+    }
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

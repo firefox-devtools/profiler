@@ -5,7 +5,7 @@
 
 import {
   resourceTypes,
-  getEmptyStackTable,
+  getEmptyRawStackTable,
   shallowCloneFuncTable,
   shallowCloneNativeSymbolTable,
   shallowCloneFrameTable,
@@ -429,7 +429,7 @@ function _computeThreadWithAddedExpansionStacks(
     return thread;
   }
   const { stackTable } = thread;
-  const newStackTable = getEmptyStackTable();
+  const newStackTable = getEmptyRawStackTable();
   const oldStackToNewStack = new Int32Array(stackTable.length);
   for (let stack = 0; stack < stackTable.length; stack++) {
     const oldFrame = stackTable.frame[stack];
@@ -442,8 +442,6 @@ function _computeThreadWithAddedExpansionStacks(
       oldStackToNewStack[stack] = newPrefixOrMinusOne;
       continue;
     }
-    const category = stackTable.category[stack];
-    const subcategory = stackTable.subcategory[stack];
     let expansionFrames = frameIndexToInlineExpansionFrames.get(oldFrame);
     if (expansionFrames === undefined) {
       expansionFrames = [oldFrame];
@@ -458,8 +456,6 @@ function _computeThreadWithAddedExpansionStacks(
       const newStack = newStackTable.length;
       newStackTable.frame.push(frame);
       newStackTable.prefix.push(prefix);
-      newStackTable.category.push(category);
-      newStackTable.subcategory.push(subcategory);
       newStackTable.length++;
       prefix = newStack;
     }

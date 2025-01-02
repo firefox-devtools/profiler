@@ -18,7 +18,11 @@ import type {
   TabID,
 } from 'firefox-profiler/types';
 
-import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
+import {
+  defaultThreadOrder,
+  getFriendlyThreadName,
+  computeStackTableFromRawStackTable,
+} from './profile-data';
 import { intersectSets, subtractSets } from '../utils/set';
 import { StringTable } from '../utils/string-table';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
@@ -1222,7 +1226,7 @@ function _isFirefoxMediaThreadWhichIsUsuallyIdle(thread: RawThread): boolean {
 // number of non-idle samples.
 function _computeThreadSampleScore(
   { meta }: Profile,
-  { samples, stackTable }: RawThread,
+  { samples, stackTable, frameTable }: RawThread,
   maxCpuDeltaPerMs: number
 ): number {
   if (meta.sampleUnits && samples.threadCPUDelta) {
@@ -1237,12 +1241,20 @@ function _computeThreadSampleScore(
   // This thread has no CPU delta information.
   // Compute a score based on non-idle samples, in the same
   // units as the cpu delta score.
+  const defaultCategory = meta.categories
+    ? meta.categories.findIndex((c) => c.color === 'grey')
+    : -1;
   const idleCategoryIndex = meta.categories
     ? meta.categories.findIndex((c) => c.name === 'Idle')
     : -1;
+  const derivedStackTable = computeStackTableFromRawStackTable(
+    stackTable,
+    frameTable,
+    defaultCategory
+  );
   const nonIdleSampleCount = samples.stack.filter(
     (stack) =>
-      stack !== null && stackTable.category[stack] !== idleCategoryIndex
+      stack !== null && derivedStackTable.category[stack] !== idleCategoryIndex
   ).length;
   const maxCpuDeltaPerInterval = maxCpuDeltaPerMs * meta.interval;
   return nonIdleSampleCount * maxCpuDeltaPerInterval;

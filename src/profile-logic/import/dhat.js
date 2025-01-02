@@ -215,8 +215,6 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
   const rootFrameIndex = frameTable.length++;
 
   stackTable.frame.push(rootFrameIndex);
-  stackTable.category.push(otherCategory);
-  stackTable.subcategory.push(otherSubCategory);
   stackTable.prefix.push(null);
   const rootStackIndex = stackTable.length++;
 
@@ -333,8 +331,6 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
       if (stackIndex === stackTable.length) {
         // No stack index was found, add on a new one.
         stackTable.frame.push(frameIndex);
-        stackTable.category.push(otherCategory);
-        stackTable.subcategory.push(otherSubCategory);
         stackTable.prefix.push(prefix);
 
         if (candidateStackTables) {
@@ -399,8 +395,6 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     thread.frameTable.length = frameTable.length;
 
     thread.stackTable.frame = stackTable.frame.slice();
-    thread.stackTable.category = stackTable.category.slice();
-    thread.stackTable.category = stackTable.category.slice();
     thread.stackTable.prefix = stackTable.prefix.slice();
     thread.stackTable.length = stackTable.length;
 

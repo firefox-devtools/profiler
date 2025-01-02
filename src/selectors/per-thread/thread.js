@@ -30,6 +30,9 @@ import type {
   JsTracerTable,
   RawSamplesTable,
   SamplesTable,
+  RawStackTable,
+  StackTable,
+  FrameTable,
   NativeAllocationsTable,
   JsAllocationsTable,
   SamplesLikeTable,
@@ -121,6 +124,16 @@ export function getBasicThreadSelectorsPerThread(
       getRawThread(state),
       ProfileSelectors.getProfileInterval(state)
     );
+  const getFrameTable: Selector<FrameTable> = (state) =>
+    getRawThread(state).frameTable;
+  const getRawStackTable: Selector<RawStackTable> = (state) =>
+    getRawThread(state).stackTable;
+  const getStackTable: Selector<StackTable> = createSelector(
+    getRawStackTable,
+    getFrameTable,
+    ProfileSelectors.getDefaultCategory,
+    ProfileData.computeStackTableFromRawStackTable
+  );
 
   /**
    * This selector gets the weight type from the thread.samples table, but
@@ -148,6 +161,7 @@ export function getBasicThreadSelectorsPerThread(
   const getThread: Selector<Thread> = createSelector(
     getRawThread,
     getSamplesTable,
+    getStackTable,
     getStringTable,
     ProfileData.createThreadFromDerivedTables
   );

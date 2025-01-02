@@ -11,7 +11,7 @@ import {
   resourceTypes,
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyBalancedNativeAllocationsTable,
-  getEmptyStackTable,
+  getEmptyRawStackTable,
   getEmptyCallNodeTable,
   shallowCloneFrameTable,
   shallowCloneFuncTable,
@@ -41,6 +41,7 @@ import type {
   Thread,
   RawSamplesTable,
   SamplesTable,
+  RawStackTable,
   StackTable,
   FrameTable,
   FuncTable,
@@ -2373,6 +2374,7 @@ export function computeSamplesTableFromRawSamplesTable(
 export function createThreadFromDerivedTables(
   rawThread: RawThread,
   samples: SamplesTable,
+  stackTable: StackTable,
   stringTable: StringTable
 ): Thread {
   const {
@@ -2393,7 +2395,6 @@ export function createThreadFromDerivedTables(
     jsAllocations,
     nativeAllocations,
     markers,
-    stackTable,
     frameTable,
     funcTable,
     resourceTable,
@@ -2422,7 +2423,6 @@ export function createThreadFromDerivedTables(
     jsAllocations,
     nativeAllocations,
     markers,
-    stackTable,
     frameTable,
     funcTable,
     resourceTable,
@@ -2433,6 +2433,7 @@ export function createThreadFromDerivedTables(
 
     // These fields are derived:
     samples,
+    stackTable,
     stringTable,
   };
   return thread;
@@ -2553,7 +2554,7 @@ export function updateThreadStacks(
  */
 export function updateRawThreadStacks(
   thread: RawThread,
-  newStackTable: StackTable,
+  newStackTable: RawStackTable,
   convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null
 ): RawThread {
   return updateRawThreadStacksSeparate(
@@ -2577,7 +2578,7 @@ export function updateRawThreadStacks(
  */
 export function updateRawThreadStacksSeparate(
   thread: RawThread,
-  newStackTable: StackTable,
+  newStackTable: RawStackTable,
   convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null,
   convertSyncBacktraceStack: (
     IndexIntoStackTable | null
@@ -3775,14 +3776,12 @@ export function nudgeReturnAddresses(thread: RawThread): RawThread {
   // Now the frame table contains adjusted / "nudged" addresses.
 
   // Make a new stack table which refers to the adjusted frames.
-  const newStackTable = getEmptyStackTable();
+  const newStackTable = getEmptyRawStackTable();
   const mapForSamplingSelfStacks = new Map();
   const mapForBacktraceSelfStacks = new Map();
   const prefixMap = new Uint32Array(stackTable.length);
   for (let stack = 0; stack < stackTable.length; stack++) {
     const frame = stackTable.frame[stack];
-    const category = stackTable.category[stack];
-    const subcategory = stackTable.subcategory[stack];
     const prefix = stackTable.prefix[stack];
 
     const newPrefix = prefix === null ? null : prefixMap[prefix];
@@ -3792,8 +3791,6 @@ export function nudgeReturnAddresses(thread: RawThread): RawThread {
       // (which will have the nudged address if this is a return address stack).
       const newStackIndex = newStackTable.length;
       newStackTable.frame.push(frame);
-      newStackTable.category.push(category);
-      newStackTable.subcategory.push(subcategory);
       newStackTable.prefix.push(newPrefix);
       newStackTable.length++;
       prefixMap[stack] = newStackIndex;
@@ -3806,8 +3803,6 @@ export function nudgeReturnAddresses(thread: RawThread): RawThread {
       const ipFrame = oldIpFrameToNewIpFrame[frame];
       const newStackIndex = newStackTable.length;
       newStackTable.frame.push(ipFrame);
-      newStackTable.category.push(category);
-      newStackTable.subcategory.push(subcategory);
       newStackTable.prefix.push(newPrefix);
       newStackTable.length++;
       mapForSamplingSelfStacks.set(stack, newStackIndex);
@@ -4167,4 +4162,46 @@ export function computeTabToThreadIndexesMap(
   }
 
   return tabToThreadIndexesMap;
+}
+
+export function computeStackTableFromRawStackTable(
+  rawStackTable: RawStackTable,
+  frameTable: FrameTable,
+  defaultCategory: IndexIntoCategoryList
+): StackTable {
+  // Compute a non-null category for every stack
+  const categoryColumn = new Array(rawStackTable.length);
+  const subcategoryColumn = new Array(rawStackTable.length);
+  for (let stackIndex = 0; stackIndex < rawStackTable.length; stackIndex++) {
+    const frameIndex = rawStackTable.frame[stackIndex];
+    const frameCategory = frameTable.category[frameIndex];
+    const frameSubcategory = frameTable.subcategory[frameIndex];
+    let stackCategory;
+    let stackSubcategory;
+    if (frameCategory !== null) {
+      stackCategory = frameCategory;
+      stackSubcategory = frameSubcategory || 0;
+    } else {
+      const prefix = rawStackTable.prefix[stackIndex];
+      if (prefix !== null) {
+        // Because of the structure of the stack table, prefix < stackIndex.
+        // So we've already computed the category for the prefix.
+        stackCategory = categoryColumn[prefix];
+        stackSubcategory = subcategoryColumn[prefix];
+      } else {
+        stackCategory = defaultCategory;
+        stackSubcategory = 0;
+      }
+    }
+    categoryColumn[stackIndex] = stackCategory;
+    subcategoryColumn[stackIndex] = stackSubcategory;
+  }
+
+  return {
+    frame: rawStackTable.frame,
+    category: categoryColumn,
+    subcategory: subcategoryColumn,
+    prefix: rawStackTable.prefix,
+    length: rawStackTable.length,
+  };
 }
