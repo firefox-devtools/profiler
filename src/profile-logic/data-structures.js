@@ -3,14 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { StringTable } from '../utils/string-table';
 import {
   GECKO_PROFILE_VERSION,
   PROCESSED_PROFILE_VERSION,
 } from '../app-logic/constants';
 
 import type {
-  Thread,
+  RawThread,
+  RawSamplesTable,
   SamplesTable,
   FrameTable,
   StackTable,
@@ -51,7 +51,7 @@ export function getEmptyStackTable(): StackTable {
  * eventDelay is a new field and it replaced responsiveness. We should still
  * account for older profiles and use both of the flavors if needed.
  */
-export function getEmptySamplesTableWithEventDelay(): SamplesTable {
+export function getEmptySamplesTableWithEventDelay(): RawSamplesTable {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -355,8 +355,8 @@ export function getEmptyJsTracerTable(): JsTracerTable {
   };
 }
 
-export function getEmptyThread(overrides?: $Shape<Thread>): Thread {
-  const defaultThread: Thread = {
+export function getEmptyThread(overrides?: $Shape<RawThread>): RawThread {
+  const defaultThread: RawThread = {
     processType: 'default',
     processStartupTime: 0,
     processShutdownTime: null,
@@ -372,7 +372,7 @@ export function getEmptyThread(overrides?: $Shape<Thread>): Thread {
     markers: getEmptyRawMarkerTable(),
     stackTable: getEmptyStackTable(),
     frameTable: getEmptyFrameTable(),
-    stringTable: new StringTable(),
+    stringArray: [],
     funcTable: getEmptyFuncTable(),
     resourceTable: getEmptyResourceTable(),
     nativeSymbols: getEmptyNativeSymbolTable(),

@@ -11,8 +11,8 @@
 import { stripIndent } from 'common-tags';
 
 import {
-  adjustTableTimestamps,
   adjustMarkerTimestamps,
+  adjustSampleTimestamps,
 } from './process-profile';
 import {
   getEmptyProfile,
@@ -25,9 +25,10 @@ import {
   getEmptySamplesTableWithEventDelay,
 } from './data-structures';
 import {
-  filterThreadSamplesToRange,
+  filterRawThreadSamplesToRange,
   getTimeRangeForThread,
   getTimeRangeIncludingAllThreads,
+  computeTimeColumnForRawSamplesTable,
 } from './profile-data';
 import {
   filterRawMarkerTableToRange,
@@ -39,7 +40,7 @@ import { ensureExists, getFirstItemFromSet } from '../utils/flow';
 
 import type {
   Profile,
-  Thread,
+  RawThread,
   IndexIntoCategoryList,
   CategoryList,
   IndexIntoFrameTable,
@@ -55,13 +56,14 @@ import type {
   NativeSymbolTable,
   ResourceTable,
   StackTable,
-  SamplesTable,
+  RawSamplesTable,
   UrlState,
   ImplementationFilter,
   TransformStacksPerThread,
   DerivedMarkerInfo,
   RawMarkerTable,
   MarkerIndex,
+  Milliseconds,
 } from 'firefox-profiler/types';
 
 /**
@@ -153,6 +155,8 @@ export function mergeProfilesForDiffing(
     }
     const profile = profiles[i];
     let thread = { ...profile.threads[selectedThreadIndex] };
+    thread.stringArray = thread.stringArray.slice();
+
     transformStacks[i] = profileSpecific.transforms[selectedThreadIndex];
     implementationFilters.push(profileSpecific.implementation);
 
@@ -206,12 +210,12 @@ export function mergeProfilesForDiffing(
       }
       const derivedMarkerInfo = deriveMarkersFromRawMarkerTable(
         thread.markers,
-        thread.stringTable,
+        thread.stringArray,
         thread.tid || 0,
         committedRange,
         ipcCorrelations
       );
-      thread = filterThreadToRange(
+      thread = _filterRawThreadToRange(
         thread,
         derivedMarkerInfo,
         committedRange.start + zeroAt,
@@ -231,7 +235,12 @@ export function mergeProfilesForDiffing(
     // start and the data is consistent.
     let startTimeAdjustment = 0;
     if (thread.samples.length) {
-      startTimeAdjustment = -thread.samples.time[0];
+      const { time, timeDeltas } = thread.samples;
+      if (time !== undefined) {
+        startTimeAdjustment = -time[0];
+      } else {
+        startTimeAdjustment = -ensureExists(timeDeltas)[0];
+      }
     } else if (thread.markers.length) {
       for (const startTime of thread.markers.startTime) {
         // Find the first marker startTime.
@@ -242,7 +251,10 @@ export function mergeProfilesForDiffing(
       }
     }
 
-    thread.samples = adjustTableTimestamps(thread.samples, startTimeAdjustment);
+    thread.samples = adjustSampleTimestamps(
+      thread.samples,
+      startTimeAdjustment
+    );
     thread.markers = adjustMarkerTimestamps(
       thread.markers,
       startTimeAdjustment
@@ -305,13 +317,13 @@ export function mergeProfilesForDiffing(
  * completely (both raw markers and samples). This is not part of the normal
  * filtering pipeline, but is used with comparison profiles.
  */
-function filterThreadToRange(
-  thread: Thread,
+function _filterRawThreadToRange(
+  thread: RawThread,
   derivedMarkerInfo: DerivedMarkerInfo,
   rangeStart: number,
   rangeEnd: number
-): Thread {
-  thread = filterThreadSamplesToRange(thread, rangeStart, rangeEnd);
+): RawThread {
+  thread = filterRawThreadSamplesToRange(thread, rangeStart, rangeEnd);
   thread.markers = filterRawMarkerTableToRange(
     thread.markers,
     derivedMarkerInfo,
@@ -519,7 +531,7 @@ function mergeLibs(libsPerProfile: Lib[][]): {
  */
 function combineResourceTables(
   newStringTable: StringTable,
-  threads: $ReadOnlyArray<Thread>
+  threads: $ReadOnlyArray<RawThread>
 ): {
   resourceTable: ResourceTable,
   translationMaps: TranslationMapForResources[],
@@ -530,16 +542,15 @@ function combineResourceTables(
 
   threads.forEach((thread) => {
     const translationMap = new Map();
-    const { resourceTable, stringTable } = thread;
+    const { resourceTable, stringArray } = thread;
 
     for (let i = 0; i < resourceTable.length; i++) {
       const libIndex = resourceTable.lib[i];
       const nameIndex = resourceTable.name[i];
-      const newName = stringTable.getString(nameIndex) ?? '';
+      const newName = stringArray[nameIndex] ?? '';
 
       const hostIndex = resourceTable.host[i];
-      const newHost =
-        hostIndex !== null ? stringTable.getString(hostIndex) : null;
+      const newHost = hostIndex !== null ? stringArray[hostIndex] : null;
 
       const type = resourceTable.type[i];
 
@@ -574,7 +585,7 @@ function combineResourceTables(
  */
 function combineNativeSymbolTables(
   newStringTable: StringTable,
-  threads: $ReadOnlyArray<Thread>
+  threads: $ReadOnlyArray<RawThread>
 ): {
   nativeSymbols: NativeSymbolTable,
   translationMaps: TranslationMapForNativeSymbols[],
@@ -586,12 +597,12 @@ function combineNativeSymbolTables(
 
   threads.forEach((thread) => {
     const translationMap = new Map();
-    const { nativeSymbols, stringTable } = thread;
+    const { nativeSymbols, stringArray } = thread;
 
     for (let i = 0; i < nativeSymbols.length; i++) {
       const libIndex = nativeSymbols.libIndex[i];
       const nameIndex = nativeSymbols.name[i];
-      const newName = stringTable.getString(nameIndex);
+      const newName = stringArray[nameIndex];
       const address = nativeSymbols.address[i];
       const functionSize = nativeSymbols.functionSize[i];
 
@@ -629,23 +640,21 @@ function combineNativeSymbolTables(
 function combineFuncTables(
   translationMapsForResources: TranslationMapForResources[],
   newStringTable: StringTable,
-  threads: $ReadOnlyArray<Thread>
+  threads: $ReadOnlyArray<RawThread>
 ): { funcTable: FuncTable, translationMaps: TranslationMapForFuncs[] } {
   const mapOfInsertedFuncs: Map<string, IndexIntoFuncTable> = new Map();
   const translationMaps = [];
   const newFuncTable = getEmptyFuncTable();
 
   threads.forEach((thread, threadIndex) => {
-    const { funcTable, stringTable } = thread;
+    const { funcTable, stringArray } = thread;
     const translationMap = new Map();
     const resourceTranslationMap = translationMapsForResources[threadIndex];
 
     for (let i = 0; i < funcTable.length; i++) {
       const fileNameIndex = funcTable.fileName[i];
       const fileName =
-        typeof fileNameIndex === 'number'
-          ? stringTable.getString(fileNameIndex)
-          : null;
+        typeof fileNameIndex === 'number' ? stringArray[fileNameIndex] : null;
       const resourceIndex = funcTable.resource[i];
       const newResourceIndex =
         resourceIndex >= 0
@@ -657,7 +666,7 @@ function combineFuncTables(
           This is a programming error.
         `);
       }
-      const name = stringTable.getString(funcTable.name[i]);
+      const name = stringArray[funcTable.name[i]];
       const lineNumber = funcTable.lineNumber[i];
 
       // Entries in this table can be either:
@@ -707,13 +716,13 @@ function combineFrameTables(
   translationMapsForFuncs: TranslationMapForFuncs[],
   translationMapsForNativeSymbols: TranslationMapForNativeSymbols[],
   newStringTable: StringTable,
-  threads: $ReadOnlyArray<Thread>
+  threads: $ReadOnlyArray<RawThread>
 ): { frameTable: FrameTable, translationMaps: TranslationMapForFrames[] } {
   const translationMaps = [];
   const newFrameTable = getEmptyFrameTable();
 
   threads.forEach((thread, threadIndex) => {
-    const { frameTable, stringTable } = thread;
+    const { frameTable, stringArray } = thread;
     const translationMap = new Map();
     const funcTranslationMap = translationMapsForFuncs[threadIndex];
     const nativeSymbolTranslationMap =
@@ -731,7 +740,7 @@ function combineFrameTables(
       const implementationIndex = frameTable.implementation[i];
       const implementation =
         typeof implementationIndex === 'number'
-          ? stringTable.getString(implementationIndex)
+          ? stringArray[implementationIndex]
           : null;
 
       const nativeSymbol = frameTable.nativeSymbol[i];
@@ -780,7 +789,7 @@ function combineFrameTables(
  */
 function combineStackTables(
   translationMapsForFrames: TranslationMapForFrames[],
-  threads: $ReadOnlyArray<Thread>
+  threads: $ReadOnlyArray<RawThread>
 ): { stackTable: StackTable, translationMaps: TranslationMapForStacks[] } {
   const translationMaps = [];
   const newStackTable = getEmptyStackTable();
@@ -837,7 +846,7 @@ function combineSamplesDiffing(
     ThreadAndWeightMultiplier,
     ThreadAndWeightMultiplier,
   ]
-): { samples: SamplesTable, translationMaps: TranslationMapForSamples[] } {
+): { samples: RawSamplesTable, translationMaps: TranslationMapForSamples[] } {
   const translationMaps = [new Map(), new Map()];
   const [
     {
@@ -858,6 +867,9 @@ function combineSamplesDiffing(
     threadId: newThreadId,
   };
 
+  const samples1Time = computeTimeColumnForRawSamplesTable(samples1);
+  const samples2Time = computeTimeColumnForRawSamplesTable(samples2);
+
   let i = 0;
   let j = 0;
   while (i < samples1.length || j < samples2.length) {
@@ -869,7 +881,7 @@ function combineSamplesDiffing(
     // Otherwise we take the next samples from thread 2 until we run out of samples.
     const nextSampleIsFromThread1 =
       i < samples1.length &&
-      (j >= samples2.length || samples1.time[i] < samples2.time[j]);
+      (j >= samples2.length || samples1Time[i] < samples2Time[j]);
 
     if (nextSampleIsFromThread1) {
       // Next sample is from thread 1.
@@ -888,7 +900,7 @@ function combineSamplesDiffing(
       // Diffing event delay values doesn't make sense since interleaved values
       // of eventDelay/responsiveness don't mean anything.
       newSamples.eventDelay.push(null);
-      newSamples.time.push(samples1.time[i]);
+      newSamples.time.push(samples1Time[i]);
       newThreadId.push(samples1.threadId ? samples1.threadId[i] : tid1);
       // TODO (issue #3151): Figure out a way to diff CPU usage numbers.
       // We add the first thread with a negative weight, because this is the
@@ -916,7 +928,7 @@ function combineSamplesDiffing(
       // Diffing event delay values doesn't make sense since interleaved values
       // of eventDelay/responsiveness don't mean anything.
       newSamples.eventDelay.push(null);
-      newSamples.time.push(samples2.time[j]);
+      newSamples.time.push(samples2Time[j]);
       newThreadId.push(samples2.threadId ? samples2.threadId[j] : tid2);
       const sampleWeight = samples2.weight ? samples2.weight[j] : 1;
       newWeight.push(weightMultiplier2 * sampleWeight);
@@ -934,7 +946,7 @@ function combineSamplesDiffing(
 }
 
 type ThreadAndWeightMultiplier = {|
-  thread: Thread,
+  thread: RawThread,
   weightMultiplier: number,
 |};
 
@@ -949,8 +961,9 @@ function getComparisonThread(
     ThreadAndWeightMultiplier,
     ThreadAndWeightMultiplier,
   ]
-): Thread {
-  const newStringTable = new StringTable();
+): RawThread {
+  const newStringArray = [];
+  const newStringTable = StringTable.withBackingArray(newStringArray);
 
   const threads = threadsAndWeightMultipliers.map((item) => item.thread);
 
@@ -1008,7 +1021,7 @@ function getComparisonThread(
     markers: getEmptyRawMarkerTable(),
     stackTable: newStackTable,
     frameTable: newFrameTable,
-    stringTable: newStringTable,
+    stringArray: newStringArray,
     funcTable: newFuncTable,
     resourceTable: newResourceTable,
     nativeSymbols: newNativeSymbols,
@@ -1023,8 +1036,9 @@ function getComparisonThread(
  * this does not merge the profile level information like metadata, categories etc.
  * TODO: Overlapping threads will not look great due to #2783.
  */
-export function mergeThreads(threads: Thread[]): Thread {
-  const newStringTable = new StringTable();
+export function mergeThreads(threads: RawThread[]): RawThread {
+  const newStringArray = [];
+  const newStringTable = StringTable.withBackingArray(newStringArray);
 
   // Combine the table we would need.
   const {
@@ -1099,7 +1113,7 @@ export function mergeThreads(threads: Thread[]): Thread {
     markers: newMarkers,
     stackTable: newStackTable,
     frameTable: newFrameTable,
-    stringTable: newStringTable,
+    stringArray: newStringArray,
     funcTable: newFuncTable,
     nativeSymbols: newNativeSymbols,
     resourceTable: newResourceTable,
@@ -1119,12 +1133,19 @@ export function mergeThreads(threads: Thread[]): Thread {
  */
 function combineSamplesForMerging(
   translationMapsForStacks: TranslationMapForStacks[],
-  threads: Thread[]
-): SamplesTable {
-  const sampleTables = threads.map((thread) => thread.samples);
+  threads: RawThread[]
+): RawSamplesTable {
+  const samplesPerThread: RawSamplesTable[] = threads.map(
+    (thread) => thread.samples
+  );
+  const sampleTimesPerThread: Milliseconds[][] = samplesPerThread.map(
+    computeTimeColumnForRawSamplesTable
+  );
   // This is the array that holds the latest processed sample index for each
   // thread's samplesTable.
-  const sampleIndexes = Array(sampleTables.length).fill(0);
+  const nextSampleIndexPerThread: number[] = Array(
+    samplesPerThread.length
+  ).fill(0);
   // This array will contain the source thread ids. It will be added to the
   // samples table after the loop.
   const newThreadId = [];
@@ -1135,7 +1156,7 @@ function combineSamplesForMerging(
   };
 
   while (true) {
-    let selectedSamplesTableIndex: number | null = null;
+    let firstSampleThreadIndex: number | null = null;
     let time = Infinity;
     // 1. Find out which sample to consume.
     // Iterate over all the sample tables and pick the one with earliest sample.
@@ -1144,36 +1165,39 @@ function combineSamplesForMerging(
     // thread count to merge. Possibly we can try to make this faster by reducing
     // the complexity.
     for (
-      let sampleTablesIndex = 0;
-      sampleTablesIndex < sampleTables.length;
-      sampleTablesIndex++
+      let threadIndex = 0;
+      threadIndex < samplesPerThread.length;
+      threadIndex++
     ) {
-      const currentSamplesTable = sampleTables[sampleTablesIndex];
-      const currentSamplesIndex = sampleIndexes[sampleTablesIndex];
-      const currentSampleTime = currentSamplesTable.time[currentSamplesIndex];
-      if (
-        currentSamplesIndex < currentSamplesTable.length &&
-        currentSampleTime < time
-      ) {
-        selectedSamplesTableIndex = sampleTablesIndex;
+      const samples = samplesPerThread[threadIndex];
+      const sampleIndex = nextSampleIndexPerThread[threadIndex];
+      if (sampleIndex >= samples.length) {
+        continue;
+      }
+
+      const currentSampleTime = sampleTimesPerThread[threadIndex][sampleIndex];
+      if (currentSampleTime < time) {
+        firstSampleThreadIndex = threadIndex;
         time = currentSampleTime;
       }
     }
 
-    if (selectedSamplesTableIndex === null) {
+    if (firstSampleThreadIndex === null) {
       // All samples from every thread have been consumed.
       break;
     }
 
     // 2. Add the earliest sample to the new sample table.
-    const currentSamplesTable = sampleTables[selectedSamplesTableIndex];
-    const oldSampleIndex: number = sampleIndexes[selectedSamplesTableIndex];
+    const currentSamplesTable = samplesPerThread[firstSampleThreadIndex];
+    const currentSamplesTimeCol = sampleTimesPerThread[firstSampleThreadIndex];
+    const oldSampleIndex: number =
+      nextSampleIndexPerThread[firstSampleThreadIndex];
 
     const stackIndex: number | null = currentSamplesTable.stack[oldSampleIndex];
     const newStackIndex =
       stackIndex === null
         ? null
-        : translationMapsForStacks[selectedSamplesTableIndex].get(stackIndex);
+        : translationMapsForStacks[firstSampleThreadIndex].get(stackIndex);
     if (newStackIndex === undefined) {
       throw new Error(stripIndent`
           We couldn't find the stack of sample ${oldSampleIndex} in the translation map.
@@ -1184,15 +1208,15 @@ function combineSamplesForMerging(
     // It doesn't make sense to combine event delay values. We need to use jank markers
     // from independent threads instead.
     ensureExists(newSamples.eventDelay).push(null);
-    newSamples.time.push(currentSamplesTable.time[oldSampleIndex]);
+    newSamples.time.push(currentSamplesTimeCol[oldSampleIndex]);
     newThreadId.push(
       currentSamplesTable.threadId
         ? currentSamplesTable.threadId[oldSampleIndex]
-        : threads[selectedSamplesTableIndex].tid
+        : threads[firstSampleThreadIndex].tid
     );
 
     newSamples.length++;
-    sampleIndexes[selectedSamplesTableIndex]++;
+    nextSampleIndexPerThread[firstSampleThreadIndex]++;
   }
 
   return newSamples;
@@ -1206,7 +1230,7 @@ type TranslationMapForMarkers = Map<MarkerIndex, MarkerIndex>;
 function mergeMarkers(
   translationMapsForStacks: TranslationMapForStacks[],
   newStringTable: StringTable,
-  threads: Thread[]
+  threads: RawThread[]
 ): {
   markerTable: RawMarkerTable,
   translationMaps: TranslationMapForMarkers[],
@@ -1219,12 +1243,12 @@ function mergeMarkers(
   threads.forEach((thread, threadIndex) => {
     const translationMapForStacks = translationMapsForStacks[threadIndex];
     const translationMap = new Map();
-    const { markers, stringTable } = thread;
+    const { markers, stringArray } = thread;
 
     for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
       // We need to move the name string to the new string table if doesn't exist.
       const nameIndex = markers.name[markerIndex];
-      const newName = nameIndex >= 0 ? stringTable.getString(nameIndex) : null;
+      const newName = nameIndex >= 0 ? stringArray[nameIndex] : null;
 
       // Move marker data to the new marker table
       const oldData = markers.data[markerIndex];
@@ -1251,9 +1275,7 @@ function mergeMarkers(
         });
       } else if (oldData && oldData.type === 'CompositorScreenshot') {
         const urlString =
-          oldData.url === undefined
-            ? undefined
-            : stringTable.getString(oldData.url);
+          oldData.url === undefined ? undefined : stringArray[oldData.url];
 
         newMarkerTable.data.push({
           ...oldData,
@@ -1292,19 +1314,23 @@ function mergeMarkers(
  * Merge screenshot markers from different threads. And update the target threads string table while doing it.
  */
 function mergeScreenshotMarkers(
-  threads: Thread[],
-  targetThread: Thread
+  threads: RawThread[],
+  targetThread: RawThread
 ): {
   markerTable: RawMarkerTable,
   translationMaps: TranslationMapForMarkers[],
 } {
   const targetMarkerTable = { ...targetThread.markers };
   const translationMaps = [];
+  const targetStringTable = StringTable.withBackingArray(
+    targetThread.stringArray
+  );
 
   threads.forEach((thread) => {
-    if (thread.stringTable.hasString('CompositorScreenshot')) {
+    const stringTable = StringTable.withBackingArray(thread.stringArray);
+    if (stringTable.hasString('CompositorScreenshot')) {
       const translationMap = new Map();
-      const { markers, stringTable } = thread;
+      const { markers } = thread;
 
       for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
         const data = markers.data[markerIndex];
@@ -1327,14 +1353,12 @@ function mergeScreenshotMarkers(
             url:
               urlString === undefined
                 ? undefined
-                : targetThread.stringTable.indexForString(urlString),
+                : targetStringTable.indexForString(urlString),
           };
 
           targetMarkerTable.data.push(compositorScreenshotMarkerData);
           targetMarkerTable.name.push(
-            newName === null
-              ? -1
-              : targetThread.stringTable.indexForString(newName)
+            newName === null ? -1 : targetStringTable.indexForString(newName)
           );
           targetMarkerTable.startTime.push(markers.startTime[markerIndex]);
           targetMarkerTable.endTime.push(markers.endTime[markerIndex]);
