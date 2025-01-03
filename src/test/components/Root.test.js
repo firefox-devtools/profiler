@@ -138,17 +138,30 @@ describe('app/AppViewRouter', function () {
     const {
       container,
       dispatch,
-      navigateToStoreLoadingPage,
+      navigateToFromFileProfileLoadingPage,
       navigateBackToHome,
     } = setup();
 
-    navigateToStoreLoadingPage();
+    navigateToFromFileProfileLoadingPage();
     dispatch(fatalError(new Error('Error while loading profile')));
     expect(container.firstChild).toMatchSnapshot();
     expect(console.error).toHaveBeenCalled();
 
     navigateBackToHome();
     expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('does not render back home link when not opened with from-file', function () {
+    const {
+      container,
+      dispatch,
+      navigateToStoreLoadingPage,
+    } = setup();
+
+    navigateToStoreLoadingPage();
+    dispatch(fatalError(new Error('Error while loading profile')));
+    expect(container.firstChild).toMatchSnapshot();
+    expect(console.error).toHaveBeenCalled();
   });
 
   it('renders a compare home when navigating to /compare/, then loads when changing profiles', () => {
@@ -214,6 +227,15 @@ function setup() {
     actAndDispatch(updateUrlState(newUrlState));
   }
 
+  function navigateToFromFileProfileLoadingPage() {
+    const newUrlState = stateFromLocation({
+      pathname: '/from-file/calltree',
+      search: '',
+      hash: '',
+    });
+    actAndDispatch(updateUrlState(newUrlState));
+  }
+
   function navigateBackToHome() {
     const newUrlState = stateFromLocation({
       pathname: '/',
@@ -246,6 +268,7 @@ function setup() {
     dispatch: actAndDispatch,
     navigateToStoreLoadingPage,
     navigateToFromBrowserProfileLoadingPage,
+    navigateToFromFileProfileLoadingPage,
     navigateBackToHome,
     navigateToCompareHome,
     navigateToMyProfiles,
