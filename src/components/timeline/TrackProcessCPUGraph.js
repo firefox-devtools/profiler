@@ -22,7 +22,7 @@ import { EmptyThreadIndicator } from './EmptyThreadIndicator';
 import type {
   CounterIndex,
   Counter,
-  Thread,
+  RawThread,
   ThreadIndex,
   Milliseconds,
   CssPixels,
@@ -211,7 +211,7 @@ type StateProps = {|
   +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
   +maxCounterSampleCountPerMs: number,
   +interval: Milliseconds,
-  +filteredThread: Thread,
+  +thread: RawThread,
   +unfilteredSamplesRange: StartEndRange | null,
 |};
 
@@ -404,7 +404,7 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
   render() {
     const { hoveredCounter } = this.state;
     const {
-      filteredThread,
+      thread,
       interval,
       rangeStart,
       rangeEnd,
@@ -441,7 +441,7 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
           </>
         )}
         <EmptyThreadIndicator
-          thread={filteredThread}
+          thread={thread}
           interval={interval}
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
@@ -474,7 +474,7 @@ export const TrackProcessCPUGraph = explicitConnect<
       rangeEnd: end,
       counterSampleRange,
       interval: getProfileInterval(state),
-      filteredThread: selectors.getFilteredThread(state),
+      thread: selectors.getRawThread(state),
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
     };
   },

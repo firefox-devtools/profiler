@@ -5,16 +5,60 @@
 // @flow
 import type { IndexIntoStringTable } from 'firefox-profiler/types';
 
+const _cachedTables: WeakMap<string[], StringTable> = new WeakMap();
+
+/**
+ * The string table manages the storing of strings. It's used to "intern" strings,
+ * i.e. to store only one copy of each string and to manage the mapping between
+ * strings and string indexes.
+ *
+ * Create a StringTable using `StringTable.withBackingArray(strArray)`.
+ * When strings are added, `strArray` is mutated.
+ * The StringTable is append-only - strings are never removed.
+ *
+ * Do not mutate the underlying array manually!
+ * Once you call `StringTable.withBackingArray`, only use
+ * `StringTable.indexForString` to add strings. Otherwise the cached table,
+ * specifically the string-to-index map, will not remain in-sync with the array
+ * ontents, and future callers of `StringTable.withBackingArray` might receive
+ * an out-of-sync cached StringTable.
+ *
+ * You can clone the underlying array if you want a new array to mutate manually.
+ */
 export class StringTable {
   _array: string[];
   _stringToIndex: Map<string, IndexIntoStringTable>;
 
-  constructor(originalArray: string[] = []) {
-    this._array = originalArray.slice(0);
+  /**
+   * This constructor should not be called directly (other than by
+   * withBackingArray) - call withBackingArray instead.
+   */
+  constructor(mutatedArray: string[]) {
+    this._array = mutatedArray;
     this._stringToIndex = new Map();
-    for (let i = 0; i < originalArray.length; i++) {
-      this._stringToIndex.set(originalArray[i], i);
+    for (let i = 0; i < mutatedArray.length; i++) {
+      this._stringToIndex.set(mutatedArray[i], i);
     }
+  }
+
+  /**
+   * Used to create a (new or cached) StringTable.
+   *
+   * When strings are added, the underlying array is mutated.
+   *
+   * Do not mutate the array manually! Once you call `StringTable.withBackingArray`,
+   * only use `StringTable.indexForString` to add strings. Otherwise the cached
+   * table (specifically the string-to-index map) will not remain in-sync with the
+   * array contents, and future callers of `StringTable.withBackingArray` might
+   * receive an out-of-sync StringTable.
+   */
+  static withBackingArray(stringArray: string[]): StringTable {
+    let table = _cachedTables.get(stringArray);
+    if (table === undefined) {
+      table = new StringTable(stringArray);
+      _cachedTables.set(stringArray, table);
+    }
+    return table;
   }
 
   getString(index: IndexIntoStringTable, els: ?string): string {
@@ -46,7 +90,10 @@ export class StringTable {
     return index;
   }
 
-  serializeToArray(): string[] {
-    return this._array.slice(0);
+  /**
+   * Exposes the underlying array. Do not mutate the contents.
+   */
+  getBackingArray(): string[] {
+    return this._array;
   }
 }

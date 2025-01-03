@@ -32,7 +32,7 @@ import { TRACK_MEMORY_DEFAULT_COLOR } from 'firefox-profiler/app-logic/constants
 import type {
   CounterIndex,
   Counter,
-  Thread,
+  RawThread,
   ThreadIndex,
   AccumulatedCounterSamples,
   Milliseconds,
@@ -256,7 +256,7 @@ type StateProps = {|
   +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
   +accumulatedSamples: AccumulatedCounterSamples,
   +interval: Milliseconds,
-  +filteredThread: Thread,
+  +thread: RawThread,
   +unfilteredSamplesRange: StartEndRange | null,
 |};
 
@@ -477,7 +477,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
   render() {
     const { hoveredCounter } = this.state;
     const {
-      filteredThread,
+      thread,
       interval,
       rangeStart,
       rangeEnd,
@@ -514,7 +514,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
           </>
         )}
         <EmptyThreadIndicator
-          thread={filteredThread}
+          thread={thread}
           interval={interval}
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
@@ -546,7 +546,7 @@ export const TrackMemoryGraph = explicitConnect<
       rangeEnd: end,
       counterSampleRange,
       interval: getProfileInterval(state),
-      filteredThread: selectors.getFilteredThread(state),
+      thread: selectors.getRawThread(state),
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
     };
   },

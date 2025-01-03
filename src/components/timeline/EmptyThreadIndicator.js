@@ -9,7 +9,7 @@ import { DivWithTooltip } from 'firefox-profiler/components/tooltip/DivWithToolt
 import { oneLine } from 'common-tags';
 
 import type {
-  Thread,
+  RawThread,
   Milliseconds,
   StartEndRange,
 } from 'firefox-profiler/types';
@@ -25,7 +25,7 @@ type SyntheticCssDeclarations = {
 type Props = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +thread: Thread,
+  +thread: RawThread,
   +interval: Milliseconds,
   +unfilteredSamplesRange: StartEndRange | null,
   ...SizeProps,

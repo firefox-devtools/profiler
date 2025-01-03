@@ -24,7 +24,7 @@ import { changeSelectedThreads } from 'firefox-profiler/actions/profile-view';
 
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type {
-  Thread,
+  RawThread,
   ThreadIndex,
   InitialSelectedTrackReference,
   OriginsTimeline,
@@ -47,7 +47,7 @@ type StateProps = {|
   +panelLayoutGeneration: number,
   +originsTimeline: OriginsTimeline,
   +zeroAt: Milliseconds,
-  +threads: Thread[],
+  +threads: RawThread[],
 |};
 
 type DispatchProps = {|
@@ -114,14 +114,13 @@ class OriginsTimelineView extends React.PureComponent<Props, State> {
           </li>
         );
       case 'no-origin': {
-        const thread = threads[track.threadIndex];
         return (
           <li
             key={track.threadIndex}
             className="originsTimelineTrack originsTimelineTrack-no-origin"
           >
             <a href="#" onClick={this.clickTrack(track.threadIndex)}>
-              {getFriendlyThreadName(threads, thread)}
+              {getFriendlyThreadName(threads, track.threadIndex)}
             </a>
           </li>
         );
