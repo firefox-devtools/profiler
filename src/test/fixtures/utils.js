@@ -13,15 +13,22 @@ import {
   getCallNodeInfo,
   getSampleIndexToCallNodeIndex,
   getOriginAnnotationForFunc,
+  createThreadFromDerivedTables,
+  computeStackTableFromRawStackTable,
+  computeSamplesTableFromRawSamplesTable,
 } from 'firefox-profiler/profile-logic/profile-data';
+import { StringTable } from '../../utils/string-table';
 
 import type {
   IndexIntoCallNodeTable,
+  RawProfileSharedData,
   Profile,
   Store,
   State,
   Thread,
   IndexIntoStackTable,
+  RawThread,
+  IndexIntoCategoryList,
 } from 'firefox-profiler/types';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
@@ -111,6 +118,26 @@ export function getMouseEvent(
   return new FakeMouseEvent(type, values);
 }
 
+export function computeThreadFromRawThread(
+  rawThread: RawThread,
+  shared: RawProfileSharedData,
+  defaultCategory: IndexIntoCategoryList
+): Thread {
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
+  const stackTable = computeStackTableFromRawStackTable(
+    rawThread.stackTable,
+    rawThread.frameTable,
+    defaultCategory
+  );
+  const samples = computeSamplesTableFromRawSamplesTable(rawThread.samples);
+  return createThreadFromDerivedTables(
+    rawThread,
+    samples,
+    stackTable,
+    stringTable
+  );
+}
+
 /**
  * This function retrieves a CallTree object from a profile.
  * It's convenient to use it with formatTree below.
@@ -119,12 +146,18 @@ export function callTreeFromProfile(
   profile: Profile,
   threadIndex: number = 0
 ): CallTree {
-  const thread = profile.threads[threadIndex] ?? getEmptyThread();
+  const rawThread = profile.threads[threadIndex] ?? getEmptyThread();
   const categories = ensureExists(
     profile.meta.categories,
     'Expected to find categories'
   );
   const defaultCategory = categories.findIndex((c) => c.name === 'Other');
+  const thread = computeThreadFromRawThread(
+    rawThread,
+    profile.shared,
+    defaultCategory
+  );
+
   const callNodeInfo = getCallNodeInfo(
     thread.stackTable,
     thread.frameTable,

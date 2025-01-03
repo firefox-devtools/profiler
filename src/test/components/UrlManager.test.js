@@ -7,7 +7,6 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 
 import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
-import { makeProfileSerializable } from '../../profile-logic/process-profile';
 import { getView, getUrlSetupPhase } from '../../selectors/app';
 import { UrlManager } from '../../components/app/UrlManager';
 import { blankStore } from '../fixtures/stores';
@@ -37,7 +36,7 @@ describe('UrlManager', function () {
   autoMockFullNavigation();
 
   function getSerializableProfile() {
-    return makeProfileSerializable(getProfileFromTextSamples('A').profile);
+    return getProfileFromTextSamples('A').profile;
   }
 
   function setup(urlPath: ?string) {
