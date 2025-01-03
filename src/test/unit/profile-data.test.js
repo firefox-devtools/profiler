@@ -32,7 +32,7 @@ import {
   createGeckoProfileWithJsTimings,
   createGeckoSubprocessProfile,
 } from '.././fixtures/profiles/gecko-profile';
-import { UniqueStringArray } from '../../utils/unique-string-array';
+import { StringTable } from '../../utils/string-table';
 import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
 import { sortDataTable } from '../../utils/data-table-utils';
 import { ensureExists } from '../../utils/flow';
@@ -48,8 +48,8 @@ import {
 
 import type { Thread, IndexIntoStackTable } from 'firefox-profiler/types';
 
-describe('unique-string-array', function () {
-  const u = new UniqueStringArray(['foo', 'bar', 'baz']);
+describe('string-table', function () {
+  const u = new StringTable(['foo', 'bar', 'baz']);
 
   it('should return the right strings', function () {
     expect(u.getString(0)).toEqual('foo');
@@ -321,7 +321,7 @@ describe('process-profile', function () {
         // from the parent process.
         const geckoSubprocess = createGeckoSubprocessProfile(geckoProfile);
         const childProcessThread = geckoSubprocess.threads[0];
-        const stringTable = new UniqueStringArray();
+        const stringTable = new StringTable();
         const jsTracer = getJsTracerTable(stringTable, [
           ['jsTracerA', 0, 10],
           ['jsTracerB', 1, 9],

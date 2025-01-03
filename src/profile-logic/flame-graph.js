@@ -9,7 +9,7 @@ import type {
   FuncTable,
   IndexIntoCallNodeTable,
 } from 'firefox-profiler/types';
-import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
+import type { StringTable } from 'firefox-profiler/utils/string-table';
 import type { CallTreeTimings } from './call-tree';
 
 import { bisectionRightByStrKey } from 'firefox-profiler/utils/bisect';
@@ -86,7 +86,7 @@ export type FlameGraphRows = IndexIntoCallNodeTable[][];
 export function computeFlameGraphRows(
   callNodeTable: CallNodeTable,
   funcTable: FuncTable,
-  stringTable: UniqueStringArray
+  stringTable: StringTable
 ): FlameGraphRows {
   if (callNodeTable.length === 0) {
     return [[]];
