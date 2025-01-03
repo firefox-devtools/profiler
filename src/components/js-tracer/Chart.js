@@ -21,7 +21,7 @@ import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
 import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 
-import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
+import type { StringTable } from 'firefox-profiler/utils/string-table';
 import type {
   JsTracerTable,
   ThreadsKey,
@@ -51,7 +51,7 @@ type DispatchProps = {|
 
 type StateProps = {|
   +jsTracerTimingRows: JsTracerTiming[],
-  +stringTable: UniqueStringArray,
+  +stringTable: StringTable,
   +timeRange: StartEndRange,
   +threadsKey: ThreadsKey,
   +previewSelection: PreviewSelection,

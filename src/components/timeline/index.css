@@ -70,6 +70,9 @@
   margin-left: 5px;
   color: var(--grey-60);
   content: '';
+
+  /* Opt-out of forced colors so arrow is visible in High Contrast Mode */
+  forced-color-adjust: none;
 }
 
 .timelineSettingsHiddenTracksNumber {
@@ -106,4 +109,25 @@
    * visible track's top border will be hidden as expected. */
   margin-top: -1px;
   margin-bottom: -1px;
+}
+
+@media (forced-colors: active) {
+  .timelineSettingsHiddenTracks {
+    border: 1px solid currentcolor;
+    background-color: ButtonFace;
+    color: ButtonText;
+  }
+
+  .timelineSettingsHiddenTracks:hover {
+    background-color: SelectedItemText;
+    color: SelectedItem;
+  }
+
+  .timelineSettingsHiddenTracks:hover:active {
+    border-color: ButtonText;
+  }
+
+  .timelineSettingsHiddenTracks::before {
+    color: currentcolor;
+  }
 }

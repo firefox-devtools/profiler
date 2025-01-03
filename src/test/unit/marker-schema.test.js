@@ -14,7 +14,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import { getMarkerSchema } from '../../selectors/profile';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
-import { UniqueStringArray } from '../../utils/unique-string-array';
+import { StringTable } from '../../utils/string-table';
 
 /**
  * Generally, higher level type of testing is preferred to detailed unit tests of
@@ -36,10 +36,7 @@ describe('marker schema labels', function () {
   function applyLabel(options: LabelOptions): string {
     const { schemaData, label, payload } = options;
     const categories = getDefaultCategories();
-    const stringTable = new UniqueStringArray([
-      'IPC Message',
-      'MouseDown Event',
-    ]);
+    const stringTable = new StringTable(['IPC Message', 'MouseDown Event']);
 
     const schema = {
       name: 'TestDefinedMarker',
@@ -290,7 +287,7 @@ describe('marker schema formatting', function () {
             'none',
             format,
             value,
-            new UniqueStringArray(['IPC Message', 'MouseDown Event'])
+            new StringTable(['IPC Message', 'MouseDown Event'])
           )
       )
     ).toMatchInlineSnapshot(`
@@ -416,13 +413,8 @@ describe('marker schema formatting', function () {
       entries.map(([format, value]) => [
         format,
         value,
-        formatMarkupFromMarkerSchema(
-          'none',
-          format,
-          value,
-          new UniqueStringArray()
-        ),
-        formatFromMarkerSchema('none', format, value, new UniqueStringArray()),
+        formatMarkupFromMarkerSchema('none', format, value, new StringTable()),
+        formatFromMarkerSchema('none', format, value, new StringTable()),
       ])
     ).toMatchSnapshot();
   });
