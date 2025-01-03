@@ -267,8 +267,10 @@ function sanitizeThreadPII(
     return null;
   }
 
-  // We need to update the stringTable. It's not possible with StringTable.
-  const stringArray = thread.stringTable.serializeToArray();
+  // We need to update the stringTable. StringTable doesn't allow mutating
+  // existing stored strings, so we create a copy of the underlying string array
+  // and mutated it manually.
+  const stringArray = thread.stringTable.getBackingArray().slice();
   let markerTable = shallowCloneRawMarkerTable(thread.markers);
 
   // We iterate all the markers and remove/change data depending on the PII
@@ -664,7 +666,9 @@ function sanitizeThreadPII(
 
   // Remove the old stringTable and markerTable and replace it
   // with new updated ones.
-  newThread.stringTable = new StringTable(stringArray);
+  // We created a fresh stringArray object in this function, so we don't need
+  // to worry about StringTable having an invalid cached map.
+  newThread.stringTable = StringTable.withBackingArray(stringArray);
   newThread.markers = markerTable;
 
   // Have we removed everything from this thread?

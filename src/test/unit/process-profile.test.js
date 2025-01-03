@@ -83,7 +83,7 @@ describe('extract functions and resource from location strings', function () {
       breakpadId: '',
     },
   ];
-  const stringTable = new StringTable();
+  const stringTable = StringTable.withBackingArray([]);
   const locationIndexes = locations.map((location) =>
     stringTable.indexForString(location)
   );

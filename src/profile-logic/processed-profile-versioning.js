@@ -305,7 +305,7 @@ const _upgraders = {
   [4]: (profile) => {
     profile.threads.forEach((thread) => {
       const { funcTable, stringArray, resourceTable } = thread;
-      const stringTable = new StringTable(stringArray);
+      const stringTable = StringTable.withBackingArray(stringArray);
 
       // resourceTable gains a new field ("host") and a new resourceType:
       // "webhost". Resources from http and https URLs are now grouped by
@@ -426,7 +426,6 @@ const _upgraders = {
       }
 
       thread.resourceTable = newResourceTable;
-      thread.stringArray = stringTable.serializeToArray();
     });
   },
   [5]: (profile) => {
@@ -439,10 +438,9 @@ const _upgraders = {
     // The type field for DOMEventMarkerPayload was renamed to eventType.
     for (const thread of profile.threads) {
       const { stringArray, markers } = thread;
-      const stringTable = new StringTable(stringArray);
       const newDataArray = [];
       for (let i = 0; i < markers.length; i++) {
-        const name = stringTable.getString(markers.name[i]);
+        const name = stringArray[markers.name[i]];
         const data = markers.data[i];
         if (name === 'DOMEvent') {
           newDataArray[i] = {
@@ -499,10 +497,9 @@ const _upgraders = {
         continue;
       }
       const { stringArray, markers } = thread;
-      const stringTable = new StringTable(stringArray);
       const newDataArray = [];
       for (let i = 0; i < markers.length; i++) {
-        const name = stringTable.getString(markers.name[i]);
+        const name = stringArray[markers.name[i]];
         const data = markers.data[i];
         if (name === 'DOMEvent' && data.timeStamp) {
           newDataArray[i] = {
@@ -681,10 +678,9 @@ const _upgraders = {
         continue;
       }
 
-      const stringTable = new StringTable(stringArray);
       const extraMarkers = [];
       for (let i = 0; i < markers.length; i++) {
-        const name = stringTable.getString(markers.name[i]);
+        const name = stringArray[markers.name[i]];
         const data = markers.data[i];
         if (name === 'DOMEvent') {
           markers.data[i] = {
@@ -906,10 +902,9 @@ const _upgraders = {
     // the categories by looking at the function names.
     for (const thread of profile.threads) {
       const { frameTable, funcTable, stringArray } = thread;
-      const stringTable = new StringTable(stringArray);
       for (let i = 0; i < frameTable.length; i++) {
         const funcIndex = frameTable.func[i];
-        const funcName = stringTable.getString(funcTable.name[funcIndex]);
+        const funcName = stringArray[funcTable.name[funcIndex]];
         const categoryBasedOnFuncName = getCategoryForFuncName(funcName);
         if (categoryBasedOnFuncName !== undefined) {
           frameTable.category[i] = categoryBasedOnFuncName;
@@ -992,10 +987,9 @@ const _upgraders = {
     // Old profiles might still have this property.
     for (const thread of profile.threads) {
       const { stringArray, markers } = thread;
-      const stringTable = new StringTable(stringArray);
       const newDataArray = [];
       for (let i = 0; i < markers.length; i++) {
-        const name = stringTable.getString(markers.name[i]);
+        const name = stringArray[markers.name[i]];
         const data = markers.data[i];
         switch (name) {
           case 'VsyncTimestamp':
@@ -1047,7 +1041,7 @@ const _upgraders = {
     const domCallRegex = /^(get |set )?\w+(\.\w+| constructor)$/;
     for (const thread of profile.threads) {
       const { funcTable, stringArray } = thread;
-      const stringTable = new StringTable(stringArray);
+      const stringTable = StringTable.withBackingArray(stringArray);
       funcTable.relevantForJS = new Array(funcTable.length);
       for (let i = 0; i < funcTable.length; i++) {
         const location = stringTable.getString(funcTable.name[i]);
@@ -1060,7 +1054,6 @@ const _upgraders = {
           funcTable.relevantForJS[i] = domCallRegex.test(location);
         }
       }
-      thread.stringArray = stringTable.serializeToArray();
     }
   },
   [18]: (profile) => {
@@ -1071,7 +1064,7 @@ const _upgraders = {
     // We update the func table with right values of 'fileName', 'lineNumber' and 'columnNumber'.
     for (const thread of profile.threads) {
       const { funcTable, stringArray } = thread;
-      const stringTable = new StringTable(stringArray);
+      const stringTable = StringTable.withBackingArray(stringArray);
       funcTable.columnNumber = [];
       for (
         let funcIndex = 0;
@@ -1097,7 +1090,6 @@ const _upgraders = {
           }
         }
       }
-      thread.stringArray = stringTable.serializeToArray();
     }
   },
   [19]: (profile) => {
@@ -1166,16 +1158,13 @@ const _upgraders = {
   [22]: (profile) => {
     // FileIO was originally called DiskIO. This profile upgrade performs the rename.
     for (const thread of profile.threads) {
-      if (thread.stringArray.indexOf('DiskIO') === -1) {
+      const { stringArray } = thread;
+      const stringTable = StringTable.withBackingArray(stringArray);
+      if (!stringTable.hasString('DiskIO')) {
         // There are no DiskIO markers.
         continue;
       }
-      let fileIoStringIndex = thread.stringArray.indexOf('FileIO');
-      if (fileIoStringIndex === -1) {
-        fileIoStringIndex = thread.stringArray.length;
-        thread.stringArray.push('FileIO');
-      }
-
+      const fileIoStringIndex = stringTable.indexForString('FileIO');
       for (let i = 0; i < thread.markers.length; i++) {
         const data = thread.markers.data[i];
         if (data && data.type === 'DiskIO') {
@@ -2064,6 +2053,7 @@ const _upgraders = {
         nativeSymbols,
         stringArray,
       } = thread;
+      const stringTable = StringTable.withBackingArray(stringArray);
       const threadLibIndexToGlobalLibIndex = new Map();
       delete thread.libs;
 
@@ -2106,12 +2096,8 @@ const _upgraders = {
           nameStringIndex === undefined ||
           nameStringIndex === null
         ) {
-          let stringIndex = stringArray.indexOf('<unnamed resource>');
-          if (stringIndex === -1) {
-            stringIndex = stringArray.length;
-            stringArray.push('<unnamed resource>');
-          }
-          resourceTable.name[resourceIndex] = stringIndex;
+          resourceTable.name[resourceIndex] =
+            stringTable.indexForString('<unnamed resource>');
         }
         const hostStringIndex = resourceTable.host[resourceIndex];
         if (hostStringIndex === -1 || hostStringIndex === undefined) {
