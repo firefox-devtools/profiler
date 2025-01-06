@@ -12,6 +12,7 @@ import {
   queryWebChannelVersionViaWebChannel,
   querySymbolicationApiViaWebChannel,
   getPageFaviconsViaWebChannel,
+  openDebuggerInTabViaWebChannel,
 } from './web-channel';
 import type { Milliseconds, FaviconData } from 'firefox-profiler/types';
 
@@ -71,6 +72,13 @@ export interface BrowserConnection {
   ): Promise<SymbolTableAsTuple>;
 
   getPageFavicons(pageUrls: Array<string>): Promise<Array<FaviconData | null>>;
+
+  openDebuggerInTab(
+    tabID: number,
+    scriptUrl: string,
+    line: number | null,
+    column: number | null
+  ): Promise<void>;
 }
 
 /**
@@ -85,6 +93,7 @@ class BrowserConnectionImpl implements BrowserConnection {
   _webChannelSupportsGetExternalPowerTracks: boolean;
   _webChannelSupportsGetExternalMarkers: boolean;
   _webChannelSupportsGetPageFavicons: boolean;
+  _webChannelSupportsOpenDebuggerInTab: boolean;
   _geckoProfiler: $GeckoProfiler | void;
 
   constructor(webChannelVersion: number) {
@@ -92,6 +101,7 @@ class BrowserConnectionImpl implements BrowserConnection {
     this._webChannelSupportsGetExternalPowerTracks = webChannelVersion >= 2;
     this._webChannelSupportsGetExternalMarkers = webChannelVersion >= 3;
     this._webChannelSupportsGetPageFavicons = webChannelVersion >= 4;
+    this._webChannelSupportsOpenDebuggerInTab = webChannelVersion >= 5;
   }
 
   // Only called when we must obtain the profile from the browser, i.e. if we
@@ -161,6 +171,21 @@ class BrowserConnectionImpl implements BrowserConnection {
     }
 
     return querySymbolicationApiViaWebChannel(path, requestJson);
+  }
+
+  async openDebuggerInTab(
+    tabID: number,
+    scriptUrl: string,
+    line: number | null,
+    column: number | null
+  ): Promise<void> {
+    if (!this._webChannelSupportsOpenDebuggerInTab) {
+      throw new Error(
+        "Can't use openDebuggerInTab in Firefox versions with the old WebChannel."
+      );
+    }
+
+    return openDebuggerInTabViaWebChannel(tabID, scriptUrl, line, column);
   }
 
   async getSymbolTable(

@@ -43,7 +43,11 @@ import {
   assertExhaustiveCheck,
 } from 'firefox-profiler/utils/flow';
 
-import { getShouldDisplaySearchfox } from 'firefox-profiler/selectors/profile';
+import {
+  getShouldDisplaySearchfox,
+  getInnerWindowIDToPageMap,
+} from 'firefox-profiler/selectors/profile';
+import { getBrowserConnectionStatus } from 'firefox-profiler/selectors/app';
 
 import type {
   TransformType,
@@ -54,10 +58,13 @@ import type {
   Thread,
   ThreadsKey,
   CategoryList,
+  InnerWindowID,
+  Page,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
 
 type StateProps = {|
   +thread: Thread | null,
@@ -70,6 +77,8 @@ type StateProps = {|
   +inverted: boolean,
   +selectedTab: TabSlug,
   +displaySearchfox: boolean,
+  +browserConnectionStatus: BrowserConnectionStatus,
+  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
 |};
 
 type DispatchProps = {|
@@ -185,6 +194,28 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     return stringTable.getString(stringIndex);
   }
 
+  _getFileLineColumn() {
+    const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
+
+    if (rightClickedCallNodeInfo === null) {
+      throw new Error(
+        "The context menu assumes there is a selected call node and there wasn't one."
+      );
+    }
+
+    const {
+      callNodeIndex,
+      thread: { funcTable },
+      callNodeInfo,
+    } = rightClickedCallNodeInfo;
+
+    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const funcIndex = callNodeTable.func[callNodeIndex];
+    const line = funcTable.lineNumber[funcIndex];
+    const column = funcTable.columnNumber[funcIndex];
+    return { line, column };
+  }
+
   showFile(): void {
     const { updateBottomBoxContentsAndMaybeOpen, selectedTab } = this.props;
 
@@ -279,6 +310,9 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         break;
       case 'expand-all':
         this.expandAll();
+        break;
+      case 'open-debugger':
+        this.openDebugger();
         break;
       default:
         throw new Error(`Unknown type ${type}`);
@@ -403,6 +437,55 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     expandAllCallNodeDescendants(threadsKey, callNodeIndex, callNodeInfo);
   }
 
+  _getTabID() {
+    const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
+    if (rightClickedCallNodeInfo === null) {
+      throw new Error(
+        "The context menu assumes there is a selected call node and there wasn't one."
+      );
+    }
+
+    const { callNodeInfo, callNodeIndex } = rightClickedCallNodeInfo;
+    const { innerWindowIDToPageMap } = this.props;
+
+    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const innerWindowID = callNodeTable.innerWindowID[callNodeIndex];
+
+    if (innerWindowID && innerWindowIDToPageMap) {
+      const page = innerWindowIDToPageMap.get(innerWindowID);
+      if (page) {
+        if (page.embedderInnerWindowID !== 0) {
+          const parentPage = innerWindowIDToPageMap.get(
+            page.embedderInnerWindowID
+          );
+          if (parentPage) {
+            return parentPage.tabID;
+          }
+        } else {
+          return page.tabID;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  openDebugger() {
+    const { browserConnectionStatus } = this.props;
+    if (browserConnectionStatus.status === 'ESTABLISHED') {
+      const tabID = this._getTabID();
+      const filePath = this._getFilePath();
+      const { line, column } = this._getFileLineColumn();
+
+      if (!tabID || !filePath) {
+        return;
+      }
+
+      const { browserConnection } = browserConnectionStatus;
+      browserConnection.openDebuggerInTab(tabID, filePath, line, column);
+    }
+  }
+
   getNameForSelectedResource(): string | null {
     const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
@@ -472,7 +555,13 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   }
 
   renderContextMenuContents() {
-    const { inverted, selectedTab, displaySearchfox, categories } = this.props;
+    const {
+      inverted,
+      selectedTab,
+      displaySearchfox,
+      categories,
+      browserConnectionStatus,
+    } = this.props;
     const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
@@ -687,6 +776,16 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             Copy stack
           </MenuItem>
         </Localized>
+        {browserConnectionStatus.status === 'ESTABLISHED' ? (
+          <Localized id="CallNodeContextMenu--open-in-debugger">
+            <MenuItem
+              onClick={this._handleClick}
+              data={{ type: 'open-debugger' }}
+            >
+              Switch to tab and open in DevTools debugger
+            </MenuItem>
+          </Localized>
+        ) : null}
       </>
     );
   }
@@ -798,6 +897,8 @@ export const CallNodeContextMenu = explicitConnect<
       inverted: getInvertCallstack(state),
       selectedTab: getSelectedTab(state),
       displaySearchfox: getShouldDisplaySearchfox(state),
+      browserConnectionStatus: getBrowserConnectionStatus(state),
+      innerWindowIDToPageMap: getInnerWindowIDToPageMap(state),
     };
   },
   mapDispatchToProps: {

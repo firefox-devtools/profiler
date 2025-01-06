@@ -29,7 +29,8 @@ export type Request =
   | GetExternalPowerTracksRequest
   | GetSymbolTableRequest
   | QuerySymbolicationApiRequest
-  | GetPageFaviconsRequest;
+  | GetPageFaviconsRequest
+  | OpenScriptInTabDebuggerRequest;
 
 type StatusQueryRequest = {| type: 'STATUS_QUERY' |};
 type EnableMenuButtonRequest = {| type: 'ENABLE_MENU_BUTTON' |};
@@ -57,6 +58,13 @@ type QuerySymbolicationApiRequest = {|
 type GetPageFaviconsRequest = {|
   type: 'GET_PAGE_FAVICONS',
   pageUrls: Array<string>,
+|};
+type OpenScriptInTabDebuggerRequest = {|
+  type: 'OPEN_SCRIPT_IN_DEBUGGER',
+  tabId: number,
+  scriptUrl: string,
+  line: number | null,
+  column: number | null,
 |};
 
 export type MessageFromBrowser<R: ResponseFromBrowser> =
@@ -89,7 +97,8 @@ export type ResponseFromBrowser =
   | GetExternalPowerTracksResponse
   | GetSymbolTableResponse
   | QuerySymbolicationApiResponse
-  | GetPageFaviconsResponse;
+  | GetPageFaviconsResponse
+  | OpenScriptInTabDebuggerResponse;
 
 type StatusQueryResponse = {|
   menuButtonIsEnabled: boolean,
@@ -127,6 +136,7 @@ type GetExternalPowerTracksResponse = MixedObject[];
 type GetSymbolTableResponse = SymbolTableAsTuple;
 type QuerySymbolicationApiResponse = string;
 type GetPageFaviconsResponse = Array<FaviconData | null>;
+type OpenScriptInTabDebuggerResponse = void;
 
 // Manually declare all pairs of request + response for Flow.
 /* eslint-disable no-redeclare */
@@ -154,6 +164,9 @@ declare function _sendMessageWithResponse(
 declare function _sendMessageWithResponse(
   GetPageFaviconsRequest
 ): Promise<GetPageFaviconsResponse>;
+declare function _sendMessageWithResponse(
+  OpenScriptInTabDebuggerRequest
+): Promise<OpenScriptInTabDebuggerResponse>;
 /* eslint-enable no-redeclare */
 
 /**
@@ -248,6 +261,21 @@ export async function getPageFaviconsViaWebChannel(
   return _sendMessageWithResponse({
     type: 'GET_PAGE_FAVICONS',
     pageUrls,
+  });
+}
+
+export async function openDebuggerInTabViaWebChannel(
+  tabId: number,
+  scriptUrl: string,
+  line: number | null,
+  column: number | null
+): Promise<void> {
+  return _sendMessageWithResponse({
+    type: 'OPEN_SCRIPT_IN_DEBUGGER',
+    tabId,
+    scriptUrl,
+    line,
+    column,
   });
 }
 
