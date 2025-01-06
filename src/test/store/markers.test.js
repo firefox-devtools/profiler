@@ -419,7 +419,8 @@ describe('Marker schema filtering', function () {
     const profile = getProfileWithMarkers([
       ['no payload',        0, null, null],
       ['payload no schema', 0, null, { type: 'no schema marker' }],
-      ['RefreshDriverTick', 0, null, { type: 'Text', name: 'RefreshDriverTick' }],
+      ['RefreshDriverTick', 0, null, { type: 'Text', name: 'Tick with 1 observer' }],
+      ['VisibleInTimelineOverview', 0, null],
       ['UserTiming',        5, 6,    { type: 'UserTiming', name: 'name', entryType: 'mark' }],
       // The following is a tracing marker without a schema attached, this was a
       // regression reported in Bug 1678698.
@@ -459,6 +460,7 @@ describe('Marker schema filtering', function () {
       'no payload',
       'payload no schema',
       'RefreshDriverTick',
+      'VisibleInTimelineOverview',
       'Load 0: https://mozilla.org',
       'UserTiming',
       'RandomTracingMarker',
@@ -473,6 +475,7 @@ describe('Marker schema filtering', function () {
       'no payload',
       'payload no schema',
       'RefreshDriverTick',
+      'VisibleInTimelineOverview',
       'Load 0: https://mozilla.org',
       'UserTiming',
       'RandomTracingMarker',
@@ -664,7 +667,7 @@ describe('Marker schema filtering', function () {
     const { getMarkerNames } = setup(getProfileForMarkerSchema());
     expect(
       getMarkerNames(selectedThreadSelectors.getTimelineOverviewMarkerIndexes)
-    ).toEqual(['RefreshDriverTick']);
+    ).toEqual(['VisibleInTimelineOverview']);
   });
 });
 

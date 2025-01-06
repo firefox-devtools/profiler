@@ -185,16 +185,9 @@ export const markerSchemaForTests: MarkerSchema[] = [
     ],
   },
   {
-    name: 'RefreshDriverTick',
+    name: 'VisibleInTimelineOverview',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [
-      {
-        key: 'name',
-        label: 'Tick Reasons',
-        format: 'string',
-        searchable: true,
-      },
-    ],
+    data: [],
   },
   {
     name: 'StringTesting',

@@ -403,20 +403,13 @@ Object {
         "tooltipLabel": "IPC — {marker.data.niceDirection}",
       },
       Object {
-        "data": Array [
-          Object {
-            "format": "string",
-            "key": "name",
-            "label": "Tick Reasons",
-            "searchable": true,
-          },
-        ],
+        "data": Array [],
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-overview",
         ],
-        "name": "RefreshDriverTick",
+        "name": "VisibleInTimelineOverview",
       },
       Object {
         "data": Array [
