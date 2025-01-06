@@ -335,23 +335,7 @@ Object {
           "marker-table",
           "timeline-overview",
         ],
-        "name": "Paint",
-      },
-      Object {
-        "data": Array [
-          Object {
-            "format": "string",
-            "key": "category",
-            "label": "Type",
-            "searchable": true,
-          },
-        ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
-        ],
-        "name": "Navigation",
+        "name": "tracing",
       },
       Object {
         "data": Array [
