@@ -89,7 +89,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 type State = $ReadOnly<{|
-  metaInfoPanelState: 'initial' | 'delete-confirmation' | 'profile-deleted',
+  metaInfoPanelState: 'initial' | 'delete-confirmation',
 |}>;
 
 class MenuButtonsImpl extends React.PureComponent<Props, State> {
@@ -129,9 +129,6 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
 
   _onProfileDeleted = () => {
     this.props.profileRemotelyDeleted();
-    this.setState({
-      metaInfoPanelState: 'profile-deleted',
-    });
   };
 
   _resetMetaInfoState = () => {
@@ -196,42 +193,37 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
         );
       }
 
-      case 'delete-confirmation': {
-        if (!currentProfileUploadedInformation) {
-          throw new Error(
-            `We're in the state "delete-confirmation" but there's no stored data for this profile, this should not happen.`
+      case 'delete-confirmation':
+        if (currentProfileUploadedInformation) {
+          const { name, profileToken, jwtToken } =
+            currentProfileUploadedInformation;
+
+          if (!jwtToken) {
+            throw new Error(
+              `We're in the state "delete-confirmation" but there's no JWT token for this profile, this should not happen.`
+            );
+          }
+
+          const slicedProfileToken = profileToken.slice(0, 6);
+          const profileName = name ? name : `Profile #${slicedProfileToken}`;
+          return (
+            <ProfileDeletePanel
+              profileName={profileName}
+              profileToken={profileToken}
+              jwtToken={jwtToken}
+              onProfileDeleted={this._onProfileDeleted}
+              onProfileDeleteCanceled={this._resetMetaInfoState}
+            />
           );
         }
 
-        const { name, profileToken, jwtToken } =
-          currentProfileUploadedInformation;
+        // The profile data has been deleted
 
-        if (!jwtToken) {
-          throw new Error(
-            `We're in the state "delete-confirmation" but there's no JWT token for this profile, this should not happen.`
-          );
-        }
-
-        const slicedProfileToken = profileToken.slice(0, 6);
-        const profileName = name ? name : `Profile #${slicedProfileToken}`;
-        return (
-          <ProfileDeletePanel
-            profileName={profileName}
-            profileToken={profileToken}
-            jwtToken={jwtToken}
-            onProfileDeleted={this._onProfileDeleted}
-            onProfileDeleteCanceled={this._resetMetaInfoState}
-          />
-        );
-      }
-
-      case 'profile-deleted':
         // Note that <ProfileDeletePanel> can also render <ProfileDeleteSuccess>
         // in some situations. However it's not suitable for this case, because
         // we still have to pass jwtToken / profileToken, and we don't have
         // these values anymore when we're in this state.
         return <ProfileDeleteSuccess />;
-
       default:
         throw assertExhaustiveCheck(metaInfoPanelState);
     }
