@@ -328,7 +328,7 @@ export function computeLocalTracksByPid(
           thread.stringTable.getString(markerNameIndex),
           markerData
         );
-        if (markerData && markerSchemaByName) {
+        if (markerData) {
           const mapEntry = markerTracksBySchemaName.get(markerSchemaName);
           if (mapEntry && mapEntry.keys.every((k) => k in markerData)) {
             mapEntry.markerNames.add(markerNameIndex);
