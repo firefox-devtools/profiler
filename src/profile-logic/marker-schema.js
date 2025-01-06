@@ -109,12 +109,6 @@ export function getMarkerSchemaName(
       : // If so, use the category as the schema name.
         markerData.category;
   }
-  if (type === 'Text') {
-    // Text markers are a cheap and easy way to create markers with
-    // a category. Check for schema if it exists, if not, fallback to
-    // a Text type marker.
-    return markerSchemaByName[markerName] === undefined ? 'Text' : markerName;
-  }
   return type;
 }
 
