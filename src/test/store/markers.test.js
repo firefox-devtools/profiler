@@ -2,10 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import {
-  selectedThreadSelectors,
-  getMarkerSchemaByName,
-} from 'firefox-profiler/selectors';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors';
 import { changeTimelineTrackOrganization } from 'firefox-profiler/actions/receive-profile';
 import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
 import { ensureExists } from 'firefox-profiler/utils/flow';
@@ -230,7 +227,7 @@ describe('memory markers', function () {
         ['DOMEvent', 0, null, { type: 'tracing', category: 'JS' }],
         ['Navigation', 1, null, { type: 'tracing', category: 'Navigation' }],
         ['Paint', 2, null, { type: 'tracing', category: 'Paint' }],
-        ['IdleForgetSkippable', 3, 4, { type: 'tracing', category: 'CC' }],
+        ['IdleForgetSkippable', 3, 4, { type: 'CC' }],
         ['GCMinor', 5, null, { type: 'GCMinor', nursery: any }],
         ['GCMajor', 6, null, { type: 'GCMajor', timings: any }],
         ['GCSlice', 7, null, { type: 'GCSlice', timings: any }],
@@ -433,15 +430,6 @@ describe('Marker schema filtering', function () {
   function setup(profile) {
     const { getState } = storeWithProfile(profile);
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-    const markerSchemaByName = getMarkerSchemaByName(getState());
-
-    if (markerSchemaByName.RandomTracingMarker) {
-      throw new Error(
-        'This test assumes that the RandomTracingMarker marker has no schema. If this ' +
-          'schema were added somewhere else, then rename RandomTracingMarker to ' +
-          'something else. '
-      );
-    }
 
     function getMarkerNames(selector): string[] {
       return selector(getState())

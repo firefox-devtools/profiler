@@ -1252,27 +1252,27 @@ const _upgraders = {
           // eventType is in the payload as well.
         ],
       },
+
+      // The following three schemas should have just been a single schema named
+      // "tracing". They are kept here for historical accuracy.
+      // There is a processed profile format upgrader (version 52) which adds the
+      // "tracing" schema for profiles which don't have it.
       {
-        // TODO - Note that this marker is a "tracing" marker currently.
-        // See issue #2749
         name: 'Paint',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'category', label: 'Type', format: 'string' }],
       },
       {
-        // TODO - Note that this marker is a "tracing" marker currently.
-        // See issue #2749
         name: 'Navigation',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'category', label: 'Type', format: 'string' }],
       },
       {
-        // TODO - Note that this marker is a "tracing" marker currently.
-        // See issue #2749
         name: 'Layout',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'category', label: 'Type', format: 'string' }],
       },
+
       {
         name: 'IPC',
         tooltipLabel: 'IPC — {marker.data.niceDirection}',

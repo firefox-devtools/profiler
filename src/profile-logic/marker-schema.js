@@ -82,34 +82,17 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
   },
 ];
 
-/**
- * For the most part, schema is matched up by the Payload's "type" field,
- * but for practical purposes, there are a few other options, see the
- * implementation of this function for details.
- */
 export function getMarkerSchemaName(
   markerSchemaByName: MarkerSchemaByName,
   markerName: string,
   markerData: MarkerPayload | null
 ): string | null {
-  if (!markerData) {
-    // No payload - no schema.
+  if (!markerData || !markerData.type) {
+    // No schema.
     return null;
   }
 
-  const { type } = markerData;
-  if (type === 'tracing' && markerData.category) {
-    // TODO - Tracing markers have a duplicate "category" field.
-    // See issue #2749
-
-    // Does a marker schema for the "category" exist?
-    return markerSchemaByName[markerData.category] === undefined
-      ? // If not, default back to tracing
-        'tracing'
-      : // If so, use the category as the schema name.
-        markerData.category;
-  }
-  return type;
+  return markerData.type;
 }
 
 /**
