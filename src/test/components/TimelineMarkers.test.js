@@ -186,7 +186,7 @@ describe('TimelineMarkers', function () {
       ['Navigation', 2, 6, { type: 'tracing', category: 'Navigation' }],
       ['Layout', 6, 8, { type: 'tracing', category: 'Layout' }],
       // These 2 will be ignored.
-      ['CC', 0, 5, { type: 'tracing', category: 'CC' }],
+      ['CC', 0, 5],
       ['GCMajor', 5, 10],
     ]);
 
@@ -206,7 +206,7 @@ describe('TimelineMarkers', function () {
       [
         // The first one will be ignored.
         ['DOMEvent', 0, 10, { type: 'tracing', category: 'JS' }],
-        ['CC', 0, 5, { type: 'tracing', category: 'CC' }],
+        ['CC', 0, 5],
         ['GCMajor', 5, 10],
       ]
     );
