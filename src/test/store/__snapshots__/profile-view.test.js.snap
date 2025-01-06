@@ -930,7 +930,7 @@ Object {
           0,
         ],
       },
-      "stringTable": UniqueStringArray {
+      "stringTable": StringTable {
         "_array": Array [
           "A",
           "B",
@@ -1127,7 +1127,7 @@ Object {
         "prefix": Array [],
         "subcategory": Array [],
       },
-      "stringTable": UniqueStringArray {
+      "stringTable": StringTable {
         "_array": Array [
           "A",
           "B",
@@ -1612,7 +1612,7 @@ Array [
         0,
       ],
     },
-    "stringTable": UniqueStringArray {
+    "stringTable": StringTable {
       "_array": Array [
         "A",
         "B",
@@ -1809,7 +1809,7 @@ Array [
       "prefix": Array [],
       "subcategory": Array [],
     },
-    "stringTable": UniqueStringArray {
+    "stringTable": StringTable {
       "_array": Array [
         "A",
         "B",
@@ -3523,7 +3523,7 @@ CallTree {
         0,
       ],
     },
-    "stringTable": UniqueStringArray {
+    "stringTable": StringTable {
       "_array": Array [
         "A",
         "B",
@@ -3850,7 +3850,7 @@ Object {
       0,
     ],
   },
-  "stringTable": UniqueStringArray {
+  "stringTable": StringTable {
     "_array": Array [
       "A",
       "B",
@@ -4249,7 +4249,7 @@ Object {
       0,
     ],
   },
-  "stringTable": UniqueStringArray {
+  "stringTable": StringTable {
     "_array": Array [
       "A",
       "B",
@@ -4574,7 +4574,7 @@ Object {
       0,
     ],
   },
-  "stringTable": UniqueStringArray {
+  "stringTable": StringTable {
     "_array": Array [
       "A",
       "B",
@@ -4899,7 +4899,7 @@ Object {
       0,
     ],
   },
-  "stringTable": UniqueStringArray {
+  "stringTable": StringTable {
     "_array": Array [
       "A",
       "B",
@@ -5383,7 +5383,7 @@ Object {
       0,
     ],
   },
-  "stringTable": UniqueStringArray {
+  "stringTable": StringTable {
     "_array": Array [
       "A",
       "B",

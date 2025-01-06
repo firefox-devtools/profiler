@@ -6,7 +6,7 @@
 import { attemptToConvertChromeProfile } from './import/chrome';
 import { attemptToConvertDhat } from './import/dhat';
 import { AddressLocator } from './address-locator';
-import { UniqueStringArray } from '../utils/unique-string-array';
+import { StringTable } from '../utils/string-table';
 import {
   resourceTypes,
   getEmptyExtensions,
@@ -217,7 +217,7 @@ export class GlobalDataCollector {
 type ExtractionInfo = {
   funcTable: FuncTable,
   resourceTable: ResourceTable,
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   addressLocator: AddressLocator,
   libToResourceIndex: Map<IndexIntoLibs, IndexIntoResourceTable>,
   originToResourceIndex: Map<string, IndexIntoResourceTable>,
@@ -240,7 +240,7 @@ type ExtractionInfo = {
 export function extractFuncsAndResourcesFromFrameLocations(
   frameLocations: IndexIntoStringTable[],
   relevantForJSPerFrame: boolean[],
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   libs: LibMapping[],
   extensions: ExtensionTable = getEmptyExtensions(),
   globalDataCollector: GlobalDataCollector
@@ -1128,7 +1128,7 @@ function _processThread(
   const { libs, pausedRanges, meta } = processProfile;
   const { categories, shutdownTime } = meta;
 
-  const stringTable = new UniqueStringArray(thread.stringTable);
+  const stringTable = new StringTable(thread.stringTable);
   const { funcTable, resourceTable, frameFuncs, frameAddresses } =
     extractFuncsAndResourcesFromFrameLocations(
       geckoFrameStruct.location,
@@ -1745,7 +1745,7 @@ function _unserializeSamples({ timeDeltas, time, ...restOfSamples }): any {
 }
 
 /**
- * The UniqueStringArray is a class, and is not serializable. This function turns
+ * The StringTable is a class, and is not serializable. This function turns
  * a profile into the serializable variant.
  */
 export function makeProfileSerializable({
@@ -1806,7 +1806,7 @@ function _unserializeProfile({
       return {
         ...restOfThread,
         samples: _unserializeSamples(samples),
-        stringTable: new UniqueStringArray(stringArray),
+        stringTable: new StringTable(stringArray),
       };
     }),
   };

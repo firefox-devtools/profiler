@@ -126,3 +126,27 @@
     animation: none;
   }
 }
+
+@media (forced-colors: active) {
+  .appKeyboardShortcutsBox {
+    border: 1px solid CanvasText;
+  }
+
+  .appKeyboardShortcutsHeaderClose {
+    border: 1px solid ButtonText;
+    background-color: ButtonFace;
+    color: ButtonText;
+  }
+
+  .appKeyboardShortcutsHeaderClose:hover {
+    border-color: SelectedItem;
+    background-color: SelectedItemText;
+    color: SelectedItem;
+  }
+
+  .appKeyboardShortcutsShortcut {
+    background: SelectedItemText;
+    color: SelectedItem;
+    outline: 1px solid CanvasText;
+  }
+}

@@ -45,7 +45,7 @@ import type {
   IndexIntoFuncTable,
 } from 'firefox-profiler/types';
 
-import type { UniqueStringArray } from '../../utils/unique-string-array';
+import type { StringTable } from '../../utils/string-table';
 import type { TransformLabeL10nIds } from 'firefox-profiler/profile-logic/transforms';
 import type { MarkerSelectorsPerThread } from './markers';
 
@@ -91,7 +91,7 @@ export function getBasicThreadSelectorsPerThread(
           ensureExists(getFirstItemFromSet(threadIndexes))
         ]
       : getMergedThread(state);
-  const getStringTable: Selector<UniqueStringArray> = (state) =>
+  const getStringTable: Selector<StringTable> = (state) =>
     getThread(state).stringTable;
   const getSamplesTable: Selector<SamplesTable> = (state) =>
     getThread(state).samples;

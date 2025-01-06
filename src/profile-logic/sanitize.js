@@ -4,7 +4,7 @@
 
 // @flow
 
-import { UniqueStringArray } from '../utils/unique-string-array';
+import { StringTable } from '../utils/string-table';
 import {
   getEmptyExtensions,
   shallowCloneRawMarkerTable,
@@ -267,7 +267,7 @@ function sanitizeThreadPII(
     return null;
   }
 
-  // We need to update the stringTable. It's not possible with UniqueStringArray.
+  // We need to update the stringTable. It's not possible with StringTable.
   const stringArray = thread.stringTable.serializeToArray();
   let markerTable = shallowCloneRawMarkerTable(thread.markers);
 
@@ -664,7 +664,7 @@ function sanitizeThreadPII(
 
   // Remove the old stringTable and markerTable and replace it
   // with new updated ones.
-  newThread.stringTable = new UniqueStringArray(stringArray);
+  newThread.stringTable = new StringTable(stringArray);
   newThread.markers = markerTable;
 
   // Have we removed everything from this thread?
