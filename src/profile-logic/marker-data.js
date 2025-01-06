@@ -1528,9 +1528,12 @@ export function filterMarkerByDisplayLocation(
       return additionalResult;
     }
 
-    return markerTypes.has(
-      getMarkerSchemaName(markerSchemaByName, marker.name, marker.data)
+    const schemaName = getMarkerSchemaName(
+      markerSchemaByName,
+      marker.name,
+      marker.data
     );
+    return schemaName !== null && markerTypes.has(schemaName);
   });
 }
 

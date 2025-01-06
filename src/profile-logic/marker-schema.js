@@ -91,7 +91,7 @@ export function getMarkerSchemaName(
   markerSchemaByName: MarkerSchemaByName,
   markerName: string,
   markerData: MarkerPayload | null
-): string {
+): string | null {
   if (!markerData) {
     // Fall back to using the name if no payload exists.
     return markerName;
@@ -127,11 +127,12 @@ export function getSchemaFromMarker(
   markerName: string,
   markerData: MarkerPayload | null
 ): MarkerSchema | null {
-  return (
-    markerSchemaByName[
-      getMarkerSchemaName(markerSchemaByName, markerName, markerData)
-    ] || null
+  const schemaName = getMarkerSchemaName(
+    markerSchemaByName,
+    markerName,
+    markerData
   );
+  return schemaName !== null ? (markerSchemaByName[schemaName] ?? null) : null;
 }
 
 /**
@@ -390,7 +391,7 @@ export function getLabelGetter(
         marker.name,
         marker.data
       );
-      const applyLabel = labelFns.get(schemaName);
+      const applyLabel = schemaName !== null ? labelFns.get(schemaName) : null;
 
       label = applyLabel
         ? // A label function is available, apply it.
