@@ -1288,6 +1288,14 @@ const _upgraders = {
         ],
       },
       {
+        // An unused schema for RefreshDriverTick markers.
+        // This schema is not consistent with what post-schema Firefox would
+        // output. Firefox (as of Jan 2026) is still using Text markers and does
+        // not have a RefreshDriverTick schema. Furthermore, upgraded profiles
+        // which get this schema do not have any { type: 'RefreshDriverTick' }
+        // markers - in the past they picked up this schema due to a compat hack,
+        // but this hack is now removed. So this schema is unused. It is kept
+        // here for historical accuracy.
         name: 'RefreshDriverTick',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'name', label: 'Tick Reasons', format: 'string' }],
