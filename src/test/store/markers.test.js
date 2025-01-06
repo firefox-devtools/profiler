@@ -227,9 +227,9 @@ describe('memory markers', function () {
 
     return storeWithProfile(
       getProfileWithMarkers([
-        ['DOMEvent', 0, null],
-        ['Navigation', 1, null],
-        ['Paint', 2, null],
+        ['DOMEvent', 0, null, { type: 'tracing', category: 'JS' }],
+        ['Navigation', 1, null, { type: 'tracing', category: 'Navigation' }],
+        ['Paint', 2, null, { type: 'tracing', category: 'Paint' }],
         ['IdleForgetSkippable', 3, 4, { type: 'tracing', category: 'CC' }],
         ['GCMinor', 5, null, { type: 'GCMinor', nursery: any }],
         ['GCMajor', 6, null, { type: 'GCMajor', timings: any }],
@@ -667,7 +667,7 @@ describe('Marker schema filtering', function () {
     const { getMarkerNames } = setup(getProfileForMarkerSchema());
     expect(
       getMarkerNames(selectedThreadSelectors.getTimelineOverviewMarkerIndexes)
-    ).toEqual(['VisibleInTimelineOverview']);
+    ).toEqual(['VisibleInTimelineOverview', 'RandomTracingMarker']);
   });
 });
 
