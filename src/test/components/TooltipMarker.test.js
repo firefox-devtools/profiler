@@ -831,6 +831,27 @@ describe('TooltipMarker', function () {
     );
   });
 
+  it('renders page information for pages with response status code', () => {
+    setupWithPayload(
+      getNetworkMarkers({
+        id: 1235,
+        startTime: 19000,
+        fetchStart: 19200.2,
+        endTime: 20433.8,
+        uri: 'https://example.org/index.html',
+        payload: {
+          cache: 'Hit',
+          pri: 8,
+          count: 47027,
+          contentType: 'text/html',
+          responseStatus: 403,
+        },
+      })
+    );
+
+    expect(getValueForProperty('Response Status Code')).toBe('403');
+  });
+
   it('renders properly network markers with a preconnect part', () => {
     const { container } = setupWithPayload(
       getNetworkMarkers({
