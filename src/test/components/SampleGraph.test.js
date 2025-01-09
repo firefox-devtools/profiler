@@ -8,6 +8,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { fireEvent } from '@testing-library/react';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { TimelineTrackThread } from 'firefox-profiler/components/timeline/TrackThread';
@@ -17,7 +18,12 @@ import {
 } from '../fixtures/mocks/canvas-context';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
-import { fireFullClick } from '../fixtures/utils';
+import {
+  fireFullClick,
+  getMouseEvent,
+  addRootOverlayElement,
+  removeRootOverlayElement,
+} from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
   autoMockElementSize,
@@ -67,6 +73,8 @@ describe('SampleGraph', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
   autoMockIntersectionObserver();
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
 
   function setup(profile: Profile = getSamplesProfile()) {
     const store = storeWithProfile(profile);
@@ -100,6 +108,17 @@ describe('SampleGraph', function () {
       });
     }
 
+    // Hover over the sample graph.
+    function hoverSampleGraph(index: IndexIntoSamplesTable) {
+      fireEvent(
+        sampleGraphCanvas,
+        getMouseEvent('mousemove', {
+          pageX: getSamplesPixelPosition(index),
+          pageY: GRAPH_HEIGHT / 2,
+        })
+      );
+    }
+
     // This function gets the selected call node path as a list of function names.
     function getCallNodePath() {
       return selectedThreadSelectors
@@ -126,6 +145,7 @@ describe('SampleGraph', function () {
       store,
       sampleGraphCanvas,
       clickSampleGraph,
+      hoverSampleGraph,
       getCallNodePath,
       getContextDrawCalls,
     };
@@ -158,6 +178,72 @@ describe('SampleGraph', function () {
       //  A -> B -> H -> I
       clickSampleGraph(2);
       expect(getCallNodePath()).toEqual(['A', 'B', 'H', 'I']);
+    });
+
+    it('clicking outside of any sample removes any selection', function () {
+      const { clickSampleGraph, getCallNodePath, sampleGraphCanvas } = setup();
+
+      // Starting while nothing is selected.
+      expect(getCallNodePath()).toEqual([]);
+
+      // Selecting the sample with index 1.
+      // The full call node at this sample is:
+      //  A -> B -> C -> F -> G
+      clickSampleGraph(1);
+      expect(getCallNodePath()).toEqual(['A', 'B', 'C', 'F', 'G']);
+
+      // Now we are selecting outside of the sample, which should remove the selection.
+      fireFullClick(sampleGraphCanvas, {
+        pageX: getSamplesPixelPosition(1) + PIXELS_PER_SAMPLE / 2,
+        pageY: GRAPH_HEIGHT / 2,
+      });
+      expect(getCallNodePath()).toEqual([]);
+    });
+
+    it('shows the correct tooltip when hovered', function () {
+      const { hoverSampleGraph, getCallNodePath } = setup();
+
+      // Hovering the sample with index 1.
+      // The full call node at this sample is:
+      //  A -> B -> C -> F -> G
+      hoverSampleGraph(1);
+
+      // We didn't click, so selection should not change in the selected node path.
+      expect(getCallNodePath()).toEqual([]);
+
+      // Make sure that we have a tooltip.
+      expect(
+        ensureExists(
+          document.querySelector('.tooltip'),
+          'A tooltip component must exist for this test.'
+        )
+      ).toMatchSnapshot();
+    });
+
+    it('does not show a tooltip when outside of a sample is hovered', function () {
+      const { hoverSampleGraph, getCallNodePath, sampleGraphCanvas } = setup();
+
+      // The full call node at this sample is:
+      //  A -> B -> C -> F -> G
+
+      hoverSampleGraph(1);
+      // We didn't click, so selection should not change.
+      expect(getCallNodePath()).toEqual([]);
+
+      // Make sure that we have a tooltip.
+      expect(document.querySelector('.tooltip')).toBeTruthy();
+
+      // Now we are hovering outside of the samples.
+      fireEvent(
+        sampleGraphCanvas,
+        getMouseEvent('mousemove', {
+          pageX: getSamplesPixelPosition(1) + PIXELS_PER_SAMPLE / 2,
+          pageY: GRAPH_HEIGHT / 2,
+        })
+      );
+
+      // There should be no tooltip this time
+      expect(document.querySelector('.tooltip')).toBeFalsy();
     });
   });
 });
