@@ -49,8 +49,8 @@ const GRAPH_HEIGHT = 10;
 function getSamplesPixelPosition(
   sampleIndex: IndexIntoSamplesTable
 ): CssPixels {
-  // Compute the pixel position of the center of a given sample.
-  return sampleIndex * PIXELS_PER_SAMPLE + PIXELS_PER_SAMPLE * 0.5;
+  // Compute the pixel position of the exact sample.
+  return sampleIndex * PIXELS_PER_SAMPLE;
 }
 
 function getSamplesProfile() {
