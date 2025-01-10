@@ -17,7 +17,7 @@
 
 import { sortDataTable } from '../utils/data-table-utils';
 import { resourceTypes } from './data-structures';
-import { UniqueStringArray } from '../utils/unique-string-array';
+import { StringTable } from '../utils/string-table';
 import { timeCode } from '../utils/time-code';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 import { coerce } from '../utils/flow';
@@ -305,7 +305,7 @@ const _upgraders = {
   [4]: (profile) => {
     profile.threads.forEach((thread) => {
       const { funcTable, stringArray, resourceTable } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
+      const stringTable = new StringTable(stringArray);
 
       // resourceTable gains a new field ("host") and a new resourceType:
       // "webhost". Resources from http and https URLs are now grouped by
@@ -439,7 +439,7 @@ const _upgraders = {
     // The type field for DOMEventMarkerPayload was renamed to eventType.
     for (const thread of profile.threads) {
       const { stringArray, markers } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
+      const stringTable = new StringTable(stringArray);
       const newDataArray = [];
       for (let i = 0; i < markers.length; i++) {
         const name = stringTable.getString(markers.name[i]);
@@ -499,7 +499,7 @@ const _upgraders = {
         continue;
       }
       const { stringArray, markers } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
+      const stringTable = new StringTable(stringArray);
       const newDataArray = [];
       for (let i = 0; i < markers.length; i++) {
         const name = stringTable.getString(markers.name[i]);
@@ -681,7 +681,7 @@ const _upgraders = {
         continue;
       }
 
-      const stringTable = new UniqueStringArray(stringArray);
+      const stringTable = new StringTable(stringArray);
       const extraMarkers = [];
       for (let i = 0; i < markers.length; i++) {
         const name = stringTable.getString(markers.name[i]);
@@ -906,7 +906,7 @@ const _upgraders = {
     // the categories by looking at the function names.
     for (const thread of profile.threads) {
       const { frameTable, funcTable, stringArray } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
+      const stringTable = new StringTable(stringArray);
       for (let i = 0; i < frameTable.length; i++) {
         const funcIndex = frameTable.func[i];
         const funcName = stringTable.getString(funcTable.name[funcIndex]);
@@ -992,7 +992,7 @@ const _upgraders = {
     // Old profiles might still have this property.
     for (const thread of profile.threads) {
       const { stringArray, markers } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
+      const stringTable = new StringTable(stringArray);
       const newDataArray = [];
       for (let i = 0; i < markers.length; i++) {
         const name = stringTable.getString(markers.name[i]);
@@ -1047,7 +1047,7 @@ const _upgraders = {
     const domCallRegex = /^(get |set )?\w+(\.\w+| constructor)$/;
     for (const thread of profile.threads) {
       const { funcTable, stringArray } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
+      const stringTable = new StringTable(stringArray);
       funcTable.relevantForJS = new Array(funcTable.length);
       for (let i = 0; i < funcTable.length; i++) {
         const location = stringTable.getString(funcTable.name[i]);
@@ -1071,7 +1071,7 @@ const _upgraders = {
     // We update the func table with right values of 'fileName', 'lineNumber' and 'columnNumber'.
     for (const thread of profile.threads) {
       const { funcTable, stringArray } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
+      const stringTable = new StringTable(stringArray);
       funcTable.columnNumber = [];
       for (
         let funcIndex = 0;
@@ -2062,7 +2062,7 @@ const _upgraders = {
         libs: threadLibs,
         resourceTable,
         nativeSymbols,
-        stringTable,
+        stringArray,
       } = thread;
       const threadLibIndexToGlobalLibIndex = new Map();
       delete thread.libs;
@@ -2106,8 +2106,12 @@ const _upgraders = {
           nameStringIndex === undefined ||
           nameStringIndex === null
         ) {
-          resourceTable.name[resourceIndex] =
-            stringTable.indexForString('<unnamed resource>');
+          let stringIndex = stringArray.indexOf('<unnamed resource>');
+          if (stringIndex === -1) {
+            stringIndex = stringArray.length;
+            stringArray.push('<unnamed resource>');
+          }
+          resourceTable.name[resourceIndex] = stringIndex;
         }
         const hostStringIndex = resourceTable.host[resourceIndex];
         if (hostStringIndex === -1 || hostStringIndex === undefined) {
@@ -2270,8 +2274,6 @@ const _upgraders = {
   [50]: (_) => {
     // The serialized format can now optionally store sample and counter sample
     // times as time deltas instead of absolute timestamps to reduce the JSON size.
-    // The unserialized version is unchanged, and because the upgraders run
-    // after unserialization they see no difference.
   },
   [51]: (_) => {
     // This version bump added two new form types for new marker schema field:

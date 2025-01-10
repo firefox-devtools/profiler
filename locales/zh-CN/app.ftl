@@ -30,6 +30,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = 无法导入分析记录。
 AppViewRouter--error-unpublished = 无法从 { -firefox-brand-name } 检索到分析记录。
 AppViewRouter--error-from-file = 无法读取或解析其中的分析记录。
 AppViewRouter--error-local = 尚未实现。
@@ -261,6 +262,9 @@ Home--your-recent-uploaded-recordings-title = 您最近上传的记录
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 = { -profiler-brand-name } 也可以从其他分析器导入记录，例如 <perf>Linux perf</perf>、<simpleperf>Android SimplePerf</simpleperf>、Chrome 性能面板、<androidstudio>Android Studio</androidstudio>，支持直接导入 <dhat>dhat</dhat>、<traceevent>Google 的 Trace Event</traceevent> 格式保存的分析记录。<write>点此了解如何编写您自己的导入程序</write>。
+Home--install-chrome-extension = 安装 Chrome 扩展
+Home--chrome-extension-instructions = 使用 <a>Chrome 版 { -profiler-brand-name } 扩展</a>，在 Chrome 中捕获性能分析记录，并通过 { -profiler-brand-name } 分析。可到 Chrome 应用商店安装扩展。
+Home--chrome-extension-recording-instructions = 安装后，即可使用扩展的工具栏图标和快捷键来开始或停止分析，也可以导出分析记录并在此处加载以进行详细分析。
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -587,6 +591,7 @@ ProfileFilterNavigator--full-range-with-duration = 完整范围（{ $fullRangeDu
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-from-post-message = 正在导入并处理分析记录…
 ProfileLoaderAnimation--loading-unpublished = 正在直接从 { -firefox-brand-name } 导入分析记录…
 ProfileLoaderAnimation--loading-from-file = 正在读取文件并处理分析记录…
 ProfileLoaderAnimation--loading-local = 尚未实现。

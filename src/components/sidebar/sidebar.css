@@ -176,6 +176,9 @@
   border-inline-start-color: currentcolor;
   border-inline-start-width: 8px;
   content: '';
+
+  /* Make sure the arrow is visible in High Contrast Mode */
+  forced-color-adjust: none;
   margin-inline-start: -11px;
 }
 
@@ -189,4 +192,16 @@
   border-color: currentcolor transparent transparent;
   margin-top: 3px;
   margin-inline-start: -12px;
+}
+
+@media (forced-colors: active) {
+  .sidebar-toggle,
+  .sidebar-toggle::before {
+    color: ButtonText;
+  }
+
+  .sidebar-label:hover .sidebar-toggle,
+  .sidebar-label:hover .sidebar-toggle::before {
+    color: SelectedItem;
+  }
 }

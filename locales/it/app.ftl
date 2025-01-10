@@ -30,6 +30,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = Impossibile importare il profilo.
 AppViewRouter--error-unpublished = Impossibile recuperare il profilo da { -firefox-brand-name }.
 AppViewRouter--error-from-file = Impossibile leggere il file o analizzare il profilo in esso contenuto.
 AppViewRouter--error-local = Non ancora implementato.
@@ -260,6 +261,9 @@ Home--your-recent-uploaded-recordings-title = Le tue registrazioni caricate di r
 Home--load-files-from-other-tools2 =
     { -profiler-brand-name } può anche importare profili da altri profiler, come <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, il
     pannello prestazioni di Chrome, <androidstudio>Android Studio</androidstudio> o qualsiasi file che utilizzi il <dhat>formato dhat</dhat> o <traceevent>Trace Event di Google</traceevent>. <write>Scopri come creare uno strumento di importazione</write>.
+Home--install-chrome-extension = Installa l’estensione per Chrome
+Home--chrome-extension-instructions = Utilizza l’estensione <a>{ -profiler-brand-name } per Chrome</a> per acquisire i profili delle prestazioni in Chrome e analizzarli in { -profiler-brand-name }. Installa l’estensione dal Chrome Web Store.
+Home--chrome-extension-recording-instructions = Una volta installata, utilizza l’icona dell’estensione nella barra degli strumenti o le scorciatoie per avviare e interrompere la profilazione. Puoi anche esportare i profili e caricarli qui per un’analisi dettagliata.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -595,6 +599,7 @@ ProfileFilterNavigator--full-range-with-duration = Intervallo completo ({ $fullR
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-from-post-message = Importazione ed elaborazione del profilo in corso…
 ProfileLoaderAnimation--loading-unpublished = Importazione del profilo direttamente da { -firefox-brand-name }…
 ProfileLoaderAnimation--loading-from-file = Lettura del file e analisi del profilo…
 ProfileLoaderAnimation--loading-local = Non ancora implementato.

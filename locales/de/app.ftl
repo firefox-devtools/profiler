@@ -30,6 +30,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = Das Profil konnte nicht importiert werden.
 AppViewRouter--error-unpublished = Das Profil von { -firefox-brand-name } konnte nicht abgerufen werden.
 AppViewRouter--error-from-file = Die Datei konnte nicht gelesen oder das darin enthaltene Profil nicht verarbeitet werden.
 AppViewRouter--error-local = Noch nicht implementiert.
@@ -318,6 +319,15 @@ Home--load-files-from-other-tools2 =
     <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, die
     Chrome Performance Panel, <androidstudio>Android Studio</androidstudio> oder
     eine Datei im <dhat>dhat-Format</dhat> oder <traceevent>Googles Trace-Event-Format</traceevent>. <write>Erfahren Sie, wie Sie Ihren eigenen Importeur schreiben</write>.
+Home--install-chrome-extension = Installieren Sie die Chrome-Erweiterung
+Home--chrome-extension-instructions =
+    Verwenden Sie die <a>{ -profiler-brand-name }-Erweiterung für Chrome</a>,
+    um Leistungsprofile in Chrome zu erfassen und im { -profiler-brand-name }
+    zu analysieren. Installieren Sie die Erweiterung aus dem Chrome Web Store.
+Home--chrome-extension-recording-instructions =
+    Verwenden Sie nach der Installation das Symbolleisten-Symbol der Erweiterung
+    oder die Tastenkombinationen zum Starten und Stoppen der Profilerstellung. Sie können auch
+    Profile exportieren und hier zur detaillierten Analyse laden.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -651,6 +661,7 @@ ProfileFilterNavigator--full-range-with-duration = Vollständiger Zeitraum ({ $f
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-from-post-message = Das Profil wird importiert und verarbeitet…
 ProfileLoaderAnimation--loading-unpublished = Das Profil wird direkt von { -firefox-brand-name } importiert…
 ProfileLoaderAnimation--loading-from-file = Datei lesen und Profil verarbeiten…
 ProfileLoaderAnimation--loading-local = Noch nicht implementiert.

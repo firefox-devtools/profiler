@@ -15,13 +15,14 @@ import type {
 } from 'firefox-profiler/types';
 
 /**
- * Compute the max CPU delta value per ms for that thread. It computes the
- * max value after the threadCPUDelta processing.
+ * Compute the max CPU cycles per ms for the thread. Should only be called when
+ * the cpu delta unit is 'variable CPU cycles'.
+ * This computes the max value before the threadCPUDelta processing -
+ * the threadCPUDelta processing wouldn't do anything other than remove nulls
+ * anyway, because if the unit is 'variable CPU cycles' then we don't do any
+ * clamping.
  */
-export function computeMaxThreadCPUDeltaPerMs(
-  threads: Thread[],
-  profileInterval: Milliseconds
-): number {
+function _computeMaxVariableCPUCyclesPerMs(threads: Thread[]): number {
   let maxThreadCPUDeltaPerMs = 0;
   for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
     const { samples } = threads[threadIndex];
@@ -33,11 +34,10 @@ export function computeMaxThreadCPUDeltaPerMs(
       continue;
     }
 
-    // First element of CPU delta is always null because back-end doesn't know
-    // the delta since there is no previous sample.
+    // Ignore the first CPU delta value; it's meaningless because there is no
+    // previous sample.
     for (let i = 1; i < samples.length; i++) {
-      const sampleTimeDeltaInMs =
-        i === 0 ? profileInterval : samples.time[i] - samples.time[i - 1];
+      const sampleTimeDeltaInMs = samples.time[i] - samples.time[i - 1];
       if (sampleTimeDeltaInMs !== 0) {
         const cpuDeltaPerMs = (threadCPUDelta[i] || 0) / sampleTimeDeltaInMs;
         maxThreadCPUDeltaPerMs = Math.max(
@@ -70,33 +70,30 @@ export function computeMaxThreadCPUDeltaPerMs(
  *    Returns 1234567 * 3, i.e. "3703701 cycles per sample if each sample ticks at
  *    the declared 3ms interval and the CPU usage is at the observed maximum".
  */
-export function computeMaxCPUDeltaPerInterval(profile: Profile): number | null {
+export function computeMaxCPUDeltaPerMs(profile: Profile): number {
   const sampleUnits = profile.meta.sampleUnits;
   if (!sampleUnits) {
-    return null;
+    return 1;
   }
 
-  const interval = profile.meta.interval;
   const threadCPUDeltaUnit = sampleUnits.threadCPUDelta;
 
   switch (threadCPUDeltaUnit) {
     case 'µs':
     case 'ns': {
-      const cpuDeltaTimeUnitMultiplier =
-        getCpuDeltaTimeUnitMultiplier(threadCPUDeltaUnit);
-      return cpuDeltaTimeUnitMultiplier * interval;
+      const deltaUnitPerMs = getCpuDeltaTimeUnitMultiplier(threadCPUDeltaUnit);
+      return deltaUnitPerMs;
     }
     case 'variable CPU cycles': {
-      const maxThreadCPUDeltaPerMs = computeMaxThreadCPUDeltaPerMs(
-        profile.threads,
-        interval
+      const maxThreadCPUDeltaPerMs = _computeMaxVariableCPUCyclesPerMs(
+        profile.threads
       );
-      return maxThreadCPUDeltaPerMs * interval;
+      return maxThreadCPUDeltaPerMs;
     }
     default:
       throw assertExhaustiveCheck(
         threadCPUDeltaUnit,
-        'Unhandled threadCPUDelta unit in computeMaxCPUDeltaPerInterval.'
+        'Unhandled threadCPUDelta unit in computeMaxCPUDeltaPerMs.'
       );
   }
 }

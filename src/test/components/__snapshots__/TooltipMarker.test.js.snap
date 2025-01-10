@@ -2983,10 +2983,17 @@ exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = 
     <div
       class="tooltipLabel"
     >
-      Heap size (pre - post)
+      GC heap size (pre - post)
       :
     </div>
     46.1MB - 36.3MB
+    <div
+      class="tooltipLabel"
+    >
+      Malloc heap size (pre - post)
+      :
+    </div>
+    23.1MB - 12.1MB
     <div
       class="tooltipLabel"
     >

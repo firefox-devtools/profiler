@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { UniqueStringArray } from '../utils/unique-string-array';
+import { StringTable } from '../utils/string-table';
 import {
   GECKO_PROFILE_VERSION,
   PROCESSED_PROFILE_VERSION,
@@ -386,7 +386,7 @@ export function getEmptyThread(overrides?: $Shape<Thread>): Thread {
     markers: getEmptyRawMarkerTable(),
     stackTable: getEmptyStackTable(),
     frameTable: getEmptyFrameTable(),
-    stringTable: new UniqueStringArray(),
+    stringTable: new StringTable(),
     funcTable: getEmptyFuncTable(),
     resourceTable: getEmptyResourceTable(),
     nativeSymbols: getEmptyNativeSymbolTable(),

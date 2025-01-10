@@ -718,22 +718,20 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
   }
 );
 
-export const getMaxCPUDeltaPerInterval: Selector<number | null> =
-  createSelector(getProfile, CPU.computeMaxCPUDeltaPerInterval);
+export const getMaxThreadCPUDeltaPerMs: Selector<number> = createSelector(
+  getProfile,
+  CPU.computeMaxCPUDeltaPerMs
+);
 
 export const getThreadActivityScores: Selector<Array<ThreadActivityScore>> =
   createSelector(
     getProfile,
-    getMaxCPUDeltaPerInterval,
-    (profile, maxCpuDeltaPerInterval) => {
+    getMaxThreadCPUDeltaPerMs,
+    (profile, maxCpuDeltaPerMs) => {
       const { threads } = profile;
 
       return threads.map((thread) =>
-        Tracks.computeThreadActivityScore(
-          profile,
-          thread,
-          maxCpuDeltaPerInterval
-        )
+        Tracks.computeThreadActivityScore(profile, thread, maxCpuDeltaPerMs)
       );
     }
   );

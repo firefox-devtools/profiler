@@ -30,6 +30,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = Could not import the profile.
 AppViewRouter--error-unpublished = Couldn’t retrieve the profile from { -firefox-brand-name }.
 AppViewRouter--error-from-file = Couldn’t read the file or parse the profile in it.
 AppViewRouter--error-local = Not implemented yet.
@@ -680,6 +681,7 @@ ProfileFilterNavigator--full-range-with-duration = Full Range ({ $fullRangeDurat
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-from-post-message = Importing and processing the profile…
 ProfileLoaderAnimation--loading-unpublished = Importing the profile directly from { -firefox-brand-name }…
 ProfileLoaderAnimation--loading-from-file = Reading the file and processing the profile…
 ProfileLoaderAnimation--loading-local = Not implemented yet.
@@ -778,6 +780,10 @@ TrackContextMenu--hide-other-screenshots-tracks = Hide other Screenshots tracks
 TrackContextMenu--hide-track = Hide “{ $trackName }”
 TrackContextMenu--show-all-tracks = Show all tracks
 TrackContextMenu--show-local-tracks-in-process = Show all tracks in this process
+# This is used as the context menu item to hide all tracks of the selected track's type.
+# Variables:
+#   $type (String) - Name of the type of selected track to hide.
+TrackContextMenu--hide-all-tracks-by-selected-track-type = Hide all tracks of type “{ $type }”
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Show all matching tracks

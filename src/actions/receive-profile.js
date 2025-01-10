@@ -1492,8 +1492,10 @@ export function retrieveProfileOrZipFromUrl(
       switch (response.responseType) {
         case 'PROFILE': {
           const serializedProfile = response.profile;
-          const profile =
-            await unserializeProfileOfArbitraryFormat(serializedProfile);
+          const profile = await unserializeProfileOfArbitraryFormat(
+            serializedProfile,
+            profileUrl
+          );
           if (profile === undefined) {
             throw new Error('Unable to parse the profile.');
           }
@@ -1573,17 +1575,12 @@ export function retrieveProfileFromFile(
         // Profile files can have file names with uncommon extensions
         // (eg .profile). So we can't rely on the mime type to decide how to
         // handle them.
-        let arrayBuffer = await fileReader(file).asArrayBuffer();
+        const arrayBuffer = await fileReader(file).asArrayBuffer();
 
-        // Check for the gzip magic number in the header. If we find it, decompress
-        // the data first.
-        const profileBytes = new Uint8Array(arrayBuffer);
-        if (isGzip(profileBytes)) {
-          const decompressedProfile = await decompress(profileBytes);
-          arrayBuffer = decompressedProfile.buffer;
-        }
-
-        const profile = await unserializeProfileOfArbitraryFormat(arrayBuffer);
+        const profile = await unserializeProfileOfArbitraryFormat(
+          arrayBuffer,
+          file.name
+        );
         if (profile === undefined) {
           throw new Error('Unable to parse the profile.');
         }

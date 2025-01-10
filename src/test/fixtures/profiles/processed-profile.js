@@ -14,7 +14,7 @@ import {
 } from '../../../profile-logic/data-structures';
 import { mergeProfilesForDiffing } from '../../../profile-logic/merge-compare';
 import { stateFromLocation } from '../../../app-logic/url-handling';
-import { UniqueStringArray } from '../../../utils/unique-string-array';
+import { StringTable } from '../../../utils/string-table';
 import { ensureExists } from '../../../utils/flow';
 import {
   INTERVAL,
@@ -126,7 +126,7 @@ export function addRawMarkersToThread(
 function _replaceUniqueStringFieldValuesWithStringIndexesInMarkerPayload(
   payload: MixedObject | null,
   markerSchemas: MarkerSchema[],
-  stringTable: UniqueStringArray
+  stringTable: StringTable
 ) {
   if (payload === null) {
     return;
@@ -1266,7 +1266,15 @@ export function getNetworkTrackProfile() {
       }: NavigationMarkerPayload),
     ],
     ['TTI', 6],
-    ['Navigation::Start', 7],
+    [
+      'Navigation::Start',
+      7,
+      null,
+      ({
+        ...domContentLoadedBase,
+      }: NavigationMarkerPayload),
+    ],
+    ['Navigation::Start', 8],
     ['FirstContentfulPaint', 7, 8],
     [
       'DOMContentLoaded',
@@ -1431,7 +1439,7 @@ export function getVisualProgressTrackProfile(profileString: string): Profile {
 }
 
 export function getJsTracerTable(
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   events: TestDefinedJsTracerEvent[]
 ): JsTracerTable {
   const jsTracer = getEmptyJsTracerTable();

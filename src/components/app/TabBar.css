@@ -80,3 +80,32 @@
   color: var(--blue-60);
   transition: none; /* Switch the background color instantly when a tab is selected */
 }
+
+@media (forced-colors: active) {
+  .tabBarTab {
+    transition: none; /* Transition of background color doesn't look nice with backplating, so disable it */
+  }
+
+  /* In High Contrast Mode, we have distinct background/foreground color, so we don't need the thin
+     line at the top to indicate which tab is selected */
+  .tabBarTab::before {
+    display: none;
+  }
+
+  .tabBarTab.selected {
+    background: SelectedItem;
+  }
+
+  .tabBarTab.selected button {
+    color: SelectedItemText;
+  }
+
+  .tabBarTab:not(.selected):hover {
+    border-color: SelectedItem;
+    background-color: SelectedItemText;
+  }
+
+  .tabBarTab:not(.selected):hover button {
+    color: SelectedItem;
+  }
+}

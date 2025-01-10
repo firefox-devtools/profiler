@@ -30,7 +30,7 @@ export type MarkerFormatType =
   // sanitized. Please be careful with including other types of PII here as well.
   // e.g. "Label: Some String"
   | 'string'
-  /// An index into a (currently) thread-local string table, aka UniqueStringArray
+  /// An index into a (currently) thread-local string table, aka StringTable
   /// This is effectively an integer, so wherever we need to display this value, we
   /// must first perform a lookup into the appropriate string table.
   | 'unique-string'
@@ -330,9 +330,14 @@ type GCMajorCompleted_Shared = {|
   // 'None' as a reason.
   nonincremental_reason?: 'None' | string,
 
-  // The allocated space for the whole heap before the GC started.
+  // The total size of GC things before and after the GC.
   allocated_bytes: number,
   post_heap_size?: number,
+
+  // The total size of malloc data owned by GC things before and after the GC.
+  // Added in Firefox v135 (Bug 1933205).
+  pre_malloc_heap_size?: number,
+  post_malloc_heap_size?: number,
 
   // Only present if non-zero.
   added_chunks?: number,
@@ -475,6 +480,7 @@ export type GCSliceMarkerPayload_Gecko = {|
  * that redirects are logged as well.
  */
 
+export type NetworkHttpVersion = 'h3' | 'h2' | 'http/1.1' | 'http/1.0';
 export type NetworkStatus =
   | 'STATUS_START'
   | 'STATUS_STOP'
@@ -520,6 +526,14 @@ export type NetworkPayload = {|
   // It's always absent in Firefox < 98 because we couldn't capture private
   // browsing data back then.
   isPrivateBrowsing?: boolean,
+  httpVersion?: NetworkHttpVersion,
+
+  // Used to express class dependencies and characteristics.
+  // Possible flags: Leader, Follower, Speculative, Background, Unblocked,
+  // Throttleable, UrgentStart, DontThrottle, Tail, TailAllowed, and
+  // TailForbidden. Multiple flags can be set, separated by '|',
+  // or we use 'Unset' if no flag is set.
+  classOfService?: string,
 
   // NOTE: the following comments are valid for the merged markers. For the raw
   // markers, startTime and endTime have different meanings. Please look

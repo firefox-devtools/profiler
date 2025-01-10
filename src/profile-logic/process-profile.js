@@ -6,7 +6,7 @@
 import { attemptToConvertChromeProfile } from './import/chrome';
 import { attemptToConvertDhat } from './import/dhat';
 import { AddressLocator } from './address-locator';
-import { UniqueStringArray } from '../utils/unique-string-array';
+import { StringTable } from '../utils/string-table';
 import {
   resourceTypes,
   getEmptyExtensions,
@@ -96,6 +96,7 @@ import type {
   MarkerPhase,
   Pid,
 } from 'firefox-profiler/types';
+import { decompress, isGzip } from 'firefox-profiler/utils/gz';
 
 type RegExpResult = null | string[];
 /**
@@ -217,7 +218,7 @@ export class GlobalDataCollector {
 type ExtractionInfo = {
   funcTable: FuncTable,
   resourceTable: ResourceTable,
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   addressLocator: AddressLocator,
   libToResourceIndex: Map<IndexIntoLibs, IndexIntoResourceTable>,
   originToResourceIndex: Map<string, IndexIntoResourceTable>,
@@ -240,7 +241,7 @@ type ExtractionInfo = {
 export function extractFuncsAndResourcesFromFrameLocations(
   frameLocations: IndexIntoStringTable[],
   relevantForJSPerFrame: boolean[],
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   libs: LibMapping[],
   extensions: ExtensionTable = getEmptyExtensions(),
   globalDataCollector: GlobalDataCollector
@@ -1128,7 +1129,7 @@ function _processThread(
   const { libs, pausedRanges, meta } = processProfile;
   const { categories, shutdownTime } = meta;
 
-  const stringTable = new UniqueStringArray(thread.stringTable);
+  const stringTable = new StringTable(thread.stringTable);
   const { funcTable, resourceTable, frameFuncs, frameAddresses } =
     extractFuncsAndResourcesFromFrameLocations(
       geckoFrameStruct.location,
@@ -1745,7 +1746,7 @@ function _unserializeSamples({ timeDeltas, time, ...restOfSamples }): any {
 }
 
 /**
- * The UniqueStringArray is a class, and is not serializable. This function turns
+ * The StringTable is a class, and is not serializable. This function turns
  * a profile into the serializable variant.
  */
 export function makeProfileSerializable({
@@ -1806,7 +1807,7 @@ function _unserializeProfile({
       return {
         ...restOfThread,
         samples: _unserializeSamples(samples),
-        stringTable: new UniqueStringArray(stringArray),
+        stringTable: new StringTable(stringArray),
       };
     }),
   };
@@ -1871,7 +1872,8 @@ function attemptToFixProcessedProfileThroughMutation(
  *  - ART trace: input must be ArrayBuffer
  */
 export async function unserializeProfileOfArbitraryFormat(
-  arbitraryFormat: mixed
+  arbitraryFormat: mixed,
+  profileUrl?: string
 ): Promise<Profile> {
   try {
     // We used to use `instanceof ArrayBuffer`, but this doesn't work when the
@@ -1880,7 +1882,16 @@ export async function unserializeProfileOfArbitraryFormat(
     if (String(arbitraryFormat) === '[object ArrayBuffer]') {
       // Obviously Flow doesn't understand that this is correct, so let's help
       // Flow here.
-      const arrayBuffer: ArrayBuffer = (arbitraryFormat: any);
+      let arrayBuffer: ArrayBuffer = (arbitraryFormat: any);
+
+      // Check for the gzip magic number in the header. If we find it, decompress
+      // the data first.
+      const profileBytes = new Uint8Array(arrayBuffer);
+      if (isGzip(profileBytes)) {
+        const decompressedProfile = await decompress(profileBytes);
+        arrayBuffer = decompressedProfile.buffer;
+      }
+
       if (isArtTraceFormat(arrayBuffer)) {
         arbitraryFormat = convertArtTraceProfile(arrayBuffer);
       } else if (verifyMagic(SIMPLEPERF_MAGIC, arrayBuffer)) {
@@ -1922,7 +1933,10 @@ export async function unserializeProfileOfArbitraryFormat(
       return _unserializeProfile(processedProfile);
     }
 
-    const processedChromeProfile = attemptToConvertChromeProfile(json);
+    const processedChromeProfile = attemptToConvertChromeProfile(
+      json,
+      profileUrl
+    );
     if (processedChromeProfile) {
       return processedChromeProfile;
     }
