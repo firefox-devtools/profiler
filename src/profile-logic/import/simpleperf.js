@@ -28,7 +28,7 @@ import {
   getEmptyRawMarkerTable,
   getEmptyNativeSymbolTable,
 } from 'firefox-profiler/profile-logic/data-structures';
-import { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
+import { StringTable } from 'firefox-profiler/utils/string-table';
 import {
   verifyMagic,
   SIMPLEPERF as SIMPLEPERF_MAGIC,
@@ -71,12 +71,12 @@ class Categories {
 }
 
 class FirefoxResourceTable {
-  strings: UniqueStringArray;
+  strings: StringTable;
 
   resourceTable: ResourceTable = getEmptyResourceTable();
   resourcesMap: Map<number, IndexIntoResourceTable> = new Map();
 
-  constructor(strings: UniqueStringArray) {
+  constructor(strings: StringTable) {
     this.strings = strings;
   }
 
@@ -101,12 +101,12 @@ class FirefoxResourceTable {
 }
 
 class FirefoxFuncTable {
-  strings: UniqueStringArray;
+  strings: StringTable;
 
   funcTable: FuncTable = getEmptyFuncTable();
   funcMap: Map<string, IndexIntoFuncTable> = new Map();
 
-  constructor(strings: UniqueStringArray) {
+  constructor(strings: StringTable) {
     this.strings = strings;
   }
 
@@ -138,12 +138,12 @@ class FirefoxFuncTable {
 }
 
 class FirefoxFrameTable {
-  strings: UniqueStringArray;
+  strings: StringTable;
 
   frameTable: FrameTable = getEmptyFrameTable();
   frameMap: Map<string, IndexIntoFrameTable> = new Map();
 
-  constructor(strings: UniqueStringArray) {
+  constructor(strings: StringTable) {
     this.strings = strings;
   }
 
@@ -179,12 +179,12 @@ class FirefoxFrameTable {
 }
 
 class FirefoxSampleTable {
-  strings: UniqueStringArray;
+  strings: StringTable;
 
   stackTable: StackTable = getEmptyStackTable();
   stackMap: Map<string, IndexIntoStackTable> = new Map();
 
-  constructor(strings: UniqueStringArray) {
+  constructor(strings: StringTable) {
     this.strings = strings;
   }
 
@@ -221,7 +221,7 @@ class FirefoxThread {
   tid: number;
   pid: number;
 
-  strings = new UniqueStringArray();
+  strings = new StringTable();
 
   sampleTable: SamplesTable = getEmptySamplesTable();
 
