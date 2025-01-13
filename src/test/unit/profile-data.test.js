@@ -49,7 +49,7 @@ import {
 import type { Thread, IndexIntoStackTable } from 'firefox-profiler/types';
 
 describe('string-table', function () {
-  const u = new StringTable(['foo', 'bar', 'baz']);
+  const u = StringTable.withBackingArray(['foo', 'bar', 'baz']);
 
   it('should return the right strings', function () {
     expect(u.getString(0)).toEqual('foo');
@@ -321,7 +321,7 @@ describe('process-profile', function () {
         // from the parent process.
         const geckoSubprocess = createGeckoSubprocessProfile(geckoProfile);
         const childProcessThread = geckoSubprocess.threads[0];
-        const stringTable = new StringTable();
+        const stringTable = StringTable.withBackingArray([]);
         const jsTracer = getJsTracerTable(stringTable, [
           ['jsTracerA', 0, 10],
           ['jsTracerB', 1, 9],
