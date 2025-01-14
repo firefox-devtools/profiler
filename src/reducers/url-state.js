@@ -310,6 +310,15 @@ const showUserTimings: Reducer<boolean> = (state = false, action) => {
   }
 };
 
+const stackChartEqualWidths: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'CHANGE_STACK_CHART_EQUAL_WIDTHS':
+      return action.stackChartEqualWidths;
+    default:
+      return state;
+  }
+};
+
 /**
  * This state controls whether or not to show a summary view of self time, or the full
  * stack-based view of the JS tracer data.
@@ -716,6 +725,7 @@ const profileSpecific = combineReducers({
   lastSelectedCallTreeSummaryStrategy,
   invertCallstack,
   showUserTimings,
+  stackChartEqualWidths,
   committedRanges,
   callTreeSearchString,
   markersSearchString,

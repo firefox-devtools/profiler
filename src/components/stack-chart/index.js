@@ -19,11 +19,13 @@ import {
   getInnerWindowIDToPageMap,
   getProfileUsesMultipleStackTypes,
 } from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
+  getStackChartEqualWidths,
   getShowUserTimings,
   getSelectedThreadsKey,
-} from '../../selectors/url-state';
+} from 'firefox-profiler/selectors/url-state';
+import type { StackTimingByDepth } from 'firefox-profiler/profile-logic/stack-timing';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getTimelineMarginLeft } from '../../selectors/app';
 import { StackChartEmptyReasons } from './StackChartEmptyReasons';
 import { ContextMenuTrigger } from '../shared/ContextMenuTrigger';
@@ -71,6 +73,7 @@ type StateProps = {|
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +maxStackDepthPlusOne: number,
   +combinedTimingRows: CombinedTimingRows,
+  +stackTimingRows: StackTimingByDepth,
   +timeRange: StartEndRange,
   +interval: Milliseconds,
   +previewSelection: PreviewSelection,
@@ -84,6 +87,7 @@ type StateProps = {|
   +userTimings: MarkerIndex[],
   +timelineMarginLeft: CssPixels,
   +displayStackType: boolean,
+  +stackChartEqualWidths: boolean,
 |};
 
 type DispatchProps = {|
@@ -206,6 +210,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       threadsKey,
       maxStackDepthPlusOne,
       combinedTimingRows,
+      stackTimingRows,
       timeRange,
       interval,
       previewSelection,
@@ -221,6 +226,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       weightType,
       timelineMarginLeft,
       displayStackType,
+      stackChartEqualWidths,
     } = this.props;
 
     const maxViewportHeight = maxStackDepthPlusOne * STACK_FRAME_HEIGHT;
@@ -262,6 +268,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   innerWindowIDToPageMap,
                   threadsKey,
                   combinedTimingRows,
+                  stackTimingRows,
                   getMarker,
                   // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                   updatePreviewSelection,
@@ -279,6 +286,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   scrollToSelectionGeneration,
                   marginLeft: timelineMarginLeft,
                   displayStackType: displayStackType,
+                  stackChartEqualWidths,
                 }}
               />
             </div>
@@ -292,9 +300,11 @@ class StackChartImpl extends React.PureComponent<Props> {
 export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state) => {
     const showUserTimings = getShowUserTimings(state);
+    const stackTimingRows =
+      selectedThreadSelectors.getStackTimingByDepth(state);
     const combinedTimingRows = showUserTimings
       ? selectedThreadSelectors.getCombinedTimingRows(state)
-      : selectedThreadSelectors.getStackTimingByDepth(state);
+      : stackTimingRows;
 
     return {
       thread: selectedThreadSelectors.getFilteredThread(state),
@@ -302,6 +312,7 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       weightType: selectedThreadSelectors.getSamplesWeightType(state),
       maxStackDepthPlusOne:
         selectedThreadSelectors.getFilteredCallNodeMaxDepthPlusOne(state),
+      stackTimingRows,
       combinedTimingRows,
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
@@ -319,6 +330,7 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       userTimings: selectedThreadSelectors.getUserTimingMarkerIndexes(state),
       timelineMarginLeft: getTimelineMarginLeft(state),
       displayStackType: getProfileUsesMultipleStackTypes(state),
+      stackChartEqualWidths: getStackChartEqualWidths(state),
     };
   },
   mapDispatchToProps: {

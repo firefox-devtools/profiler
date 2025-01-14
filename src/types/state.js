@@ -374,6 +374,7 @@ export type ProfileSpecificUrlState = {|
   lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy,
   invertCallstack: boolean,
   showUserTimings: boolean,
+  stackChartEqualWidths: boolean,
   committedRanges: StartEndRange[],
   callTreeSearchString: string,
   markersSearchString: string,
