@@ -863,6 +863,7 @@ describe('getSamplesSelectedStates', function () {
     const {
       profile,
       funcNamesDictPerThread: [funcNamesDict],
+      defaultCategory,
     } = getProfileFromTextSamples(textSamples);
     const thread = profile.threads[0];
     const callNodeInfo = getCallNodeInfo(
@@ -878,11 +879,6 @@ describe('getSamplesSelectedStates', function () {
       stackIndexToCallNodeIndex
     );
 
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-    const defaultCategory = categories.findIndex((c) => c.name === 'Other');
     const callNodeInfoInverted = getInvertedCallNodeInfo(
       thread,
       callNodeInfo.getNonInvertedCallNodeTable(),
@@ -1367,8 +1363,12 @@ describe('calculateFunctionSizeLowerBound', function () {
 
 describe('getNativeSymbolsForCallNode', function () {
   it('finds a single symbol', function () {
-    const { profile, funcNamesDictPerThread, nativeSymbolsDictPerThread } =
-      getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesDictPerThread,
+      nativeSymbolsDictPerThread,
+      defaultCategory,
+    } = getProfileFromTextSamples(`
         funA[lib:XUL][address:1005][sym:symA:1000:]
         funB[lib:XUL][address:2007][sym:symB:2000:]
         funC[lib:XUL][address:2007][sym:symB:2000:][inl:1]
@@ -1377,11 +1377,6 @@ describe('getNativeSymbolsForCallNode', function () {
     const thread = profile.threads[0];
     const { funA, funB, funC } = funcNamesDictPerThread[0];
     const { symB } = nativeSymbolsDictPerThread[0];
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-    const defaultCategory = categories.findIndex((c) => c.name === 'Other');
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -1414,8 +1409,12 @@ describe('getNativeSymbolsForCallNode', function () {
   });
 
   it('finds multiple symbols', function () {
-    const { profile, funcNamesDictPerThread, nativeSymbolsDictPerThread } =
-      getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesDictPerThread,
+      nativeSymbolsDictPerThread,
+      defaultCategory,
+    } = getProfileFromTextSamples(`
         funA[lib:XUL][address:1005][sym:symA:1000:]         funA[lib:XUL][address:1005][sym:symA:1000:]
         funB[lib:XUL][address:2007][sym:symB:2000:]         funD[lib:XUL][address:4007][sym:symD:4000:]
         funC[lib:XUL][address:2007][sym:symB:2000:][inl:1]  funC[lib:XUL][address:4007][sym:symD:4000:][inl:1]
@@ -1424,11 +1423,6 @@ describe('getNativeSymbolsForCallNode', function () {
     const thread = profile.threads[0];
     const { funC } = funcNamesDictPerThread[0];
     const { symB, symD } = nativeSymbolsDictPerThread[0];
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-    const defaultCategory = categories.findIndex((c) => c.name === 'Other');
     const nonInvertedCallNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,

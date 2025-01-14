@@ -149,15 +149,11 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
   }
 
   it('passes a basic test', function () {
-    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+    const { profile, funcNamesDictPerThread, defaultCategory } =
+      getProfileFromTextSamples(`
       A[file:file.js][line:20]
       B[file:file.js][line:30]
     `);
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-    const defaultCategory = categories.findIndex((c) => c.color === 'grey');
 
     const [{ A, B }] = funcNamesDictPerThread;
     const [thread] = profile.threads;
@@ -179,16 +175,12 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
   });
 
   it('passes a basic test with recursion', function () {
-    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+    const { profile, funcNamesDictPerThread, defaultCategory } =
+      getProfileFromTextSamples(`
       A[file:file.js][line:20]
       B[file:file.js][line:30]
       A[file:file.js][line:21]
     `);
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-    const defaultCategory = categories.findIndex((c) => c.color === 'grey');
 
     const [{ A, B }] = funcNamesDictPerThread;
     const [thread] = profile.threads;
@@ -217,17 +209,13 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
   });
 
   it('passes a test where the same function is called via different call paths', function () {
-    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+    const { profile, funcNamesDictPerThread, defaultCategory } =
+      getProfileFromTextSamples(`
       A[file:one.js][line:20]  A[file:one.js][line:21]  A[file:one.js][line:20]
       B[file:one.js][line:30]  D[file:one.js][line:50]  B[file:one.js][line:31]
       C[file:two.js][line:10]  C[file:two.js][line:11]  C[file:two.js][line:12]
                                                         D[file:one.js][line:51]
     `);
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-    const defaultCategory = categories.findIndex((c) => c.color === 'grey');
 
     const [{ A, B, C }] = funcNamesDictPerThread;
     const [thread] = profile.threads;
@@ -246,17 +234,13 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
   });
 
   it('passes a test with an inverted thread', function () {
-    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+    const { profile, funcNamesDictPerThread, defaultCategory } =
+      getProfileFromTextSamples(`
       A[file:one.js][line:20]  A[file:one.js][line:21]  A[file:one.js][line:20]
       B[file:one.js][line:30]  D[file:one.js][line:50]  B[file:one.js][line:31]
       D[file:one.js][line:51]  D[file:one.js][line:52]  C[file:two.js][line:12]
                                                         D[file:one.js][line:51]
     `);
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-    const defaultCategory = categories.findIndex((c) => c.color === 'grey');
 
     const [{ A, B, C, D }] = funcNamesDictPerThread;
     const [thread] = profile.threads;

@@ -48,7 +48,7 @@ describe('unfiltered call tree', function () {
       C  C  H
       D  F  I
       E  G
-    `).profile;
+    `);
   }
 
   /**
@@ -56,12 +56,8 @@ describe('unfiltered call tree', function () {
    * This test ensures that these generated values are correct.
    */
   describe('computed counts and timings', function () {
-    const profile = getProfile();
+    const { profile, defaultCategory } = getProfile();
     const [thread] = profile.threads;
-    const defaultCategory = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    ).findIndex((c) => c.name === 'Other');
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -98,16 +94,13 @@ describe('unfiltered call tree', function () {
       const {
         profile,
         funcNamesDictPerThread: [{ G, H, I, J, K, M, N, W, X, Y, Z }],
+        defaultCategory,
       } = getProfileFromTextSamples(`
         Z  Z  G  G  K  K
         X  X  H  H  M  N
         Y  W  I  J
       `);
       const [thread] = profile.threads;
-      const defaultCategory = ensureExists(
-        profile.meta.categories,
-        'Expected to find categories'
-      ).findIndex((c) => c.name === 'Other');
       const callNodeInfo = getCallNodeInfo(
         thread.stackTable,
         thread.frameTable,
@@ -365,12 +358,8 @@ describe('unfiltered call tree', function () {
    * to help navigate stacks through a list of functions.
    */
   describe('getCallNodeIndexFromPath', function () {
-    const profile = getProfile();
+    const { profile, defaultCategory } = getProfile();
     const [thread] = profile.threads;
-    const defaultCategory = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    ).findIndex((c) => c.name === 'Other');
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -410,19 +399,14 @@ describe('inverted call tree', function () {
    * Explicitly test the structure of the inverted call tree.
    */
   describe('computed structure', function () {
-    const profile = getProfileFromTextSamples(`
+    const { profile, defaultCategory } = getProfileFromTextSamples(`
       A                A           A
       B[cat:DOM]       B[cat:DOM]  B[cat:DOM]
       C[cat:Graphics]  X           C[cat:Graphics]
       D[cat:Other]     Y           X
       E                Z           Y
                                    Z
-    `).profile;
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-    const defaultCategory = categories.findIndex((c) => c.color === 'grey');
+    `);
 
     // Check the non-inverted tree first.
     const thread = profile.threads[0];
@@ -446,7 +430,7 @@ describe('inverted call tree', function () {
     const callTree = getCallTree(
       thread,
       callNodeInfo,
-      categories,
+      ensureExists(profile.meta.categories),
       callTreeTimings,
       'samples'
     );
@@ -488,7 +472,7 @@ describe('inverted call tree', function () {
     const invertedCallTree = getCallTree(
       thread,
       invertedCallNodeInfo,
-      categories,
+      ensureExists(profile.meta.categories),
       invertedCallTreeTimings,
       'samples'
     );
@@ -613,13 +597,9 @@ describe('diffing trees', function () {
   });
 
   it('computes a rootTotalSummary that is the absolute count of all intervals', () => {
-    const { profile } = getProfile();
+    const { profile, defaultCategory } = getProfile();
 
     const thread = profile.threads[2];
-    const defaultCategory = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    ).findIndex((c) => c.name === 'Other');
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
