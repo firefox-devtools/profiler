@@ -33,6 +33,7 @@ import type {
   LocalTrack,
   TrackIndex,
   MarkerIndex,
+  IndexIntoFlowTable,
   ActiveTabTimeline,
   OriginsTimeline,
   ThreadsKey,
@@ -385,6 +386,7 @@ export type ProfileSpecificUrlState = {|
   isBottomBoxOpenPerPanel: IsOpenPerPanelState,
   full: FullProfileSpecificUrlState,
   activeTab: ActiveTabSpecificProfileUrlState,
+  activeFlows: IndexIntoFlowTable[],
 |};
 
 /**

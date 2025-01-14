@@ -488,6 +488,7 @@ export function getMarkerSelectorsPerThread(
       getMarkerGetter,
       getMarkerChartMarkerIndexes,
       ProfileSelectors.getCategories,
+      ProfileSelectors.getMarkerSchemaByName,
       MarkerTimingLogic.getMarkerTimingAndBuckets
     );
 
