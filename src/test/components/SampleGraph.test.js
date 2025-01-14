@@ -104,6 +104,7 @@ describe('SampleGraph', function () {
     function clickSampleGraph(index: IndexIntoSamplesTable) {
       fireFullClick(sampleGraphCanvas, {
         pageX: getSamplesPixelPosition(index),
+        offsetX: getSamplesPixelPosition(index),
         pageY: GRAPH_HEIGHT / 2,
       });
     }
@@ -114,6 +115,7 @@ describe('SampleGraph', function () {
         sampleGraphCanvas,
         getMouseEvent('mousemove', {
           pageX: getSamplesPixelPosition(index),
+          offsetX: getSamplesPixelPosition(index),
           pageY: GRAPH_HEIGHT / 2,
         })
       );
@@ -195,6 +197,7 @@ describe('SampleGraph', function () {
       // Now we are selecting outside of the sample, which should remove the selection.
       fireFullClick(sampleGraphCanvas, {
         pageX: getSamplesPixelPosition(1) + PIXELS_PER_SAMPLE / 2,
+        offsetX: getSamplesPixelPosition(1) + PIXELS_PER_SAMPLE / 2,
         pageY: GRAPH_HEIGHT / 2,
       });
       expect(getCallNodePath()).toEqual([]);
@@ -238,6 +241,7 @@ describe('SampleGraph', function () {
         sampleGraphCanvas,
         getMouseEvent('mousemove', {
           pageX: getSamplesPixelPosition(1) + PIXELS_PER_SAMPLE / 2,
+          offsetX: getSamplesPixelPosition(1) + PIXELS_PER_SAMPLE / 2,
           pageY: GRAPH_HEIGHT / 2,
         })
       );
