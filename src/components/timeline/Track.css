@@ -7,6 +7,9 @@
  * into one file, as it is mostly shared style.
  */
 .timelineTrack {
+  --track-label-width: 150px;
+  --local-track-indent: 15px;
+
   padding: 0;
   margin: 0;
 }
@@ -20,29 +23,28 @@
    * This variable will be used every time we need to calculate some width that
    * depends on this value, from the intended perceived width. */
   --selected-left-border-width: 3px;
+  --selected-left-border-color: var(--blue-60);
 
   display: flex;
   flex-flow: row nowrap;
-
-  /* This padding is added to the button's padding as the perceived padding. For
-   * a global row, it will be replaced with a margin when it's selected. */
-  padding-left: var(--selected-left-border-width);
   border-top: 1px solid var(--grey-30);
   background-color: #fff;
 }
 
-.timelineTrackRow.selected {
-  /* We replace the padding by some margin. Indeed the box-shadow used to draw
-   * the blue selected left border is drawn outside of the border box, so the
-   * 3px margin makes this space available. */
-  padding-left: 0;
-  margin-left: var(--selected-left-border-width);
-  background-color: #edf6ff;
+/* We use a colored pseudo element the track row instead of using border, so
+  * that when we select adjacent tracks, we see just one line, without any
+  * border on top of it. */
+.timelineTrackRow::before {
+  width: var(--selected-left-border-width);
+  content: '';
+}
 
-  /* We use a box-shadow on the track row instead of using border, so
-   * that when we select adjacent tracks, we see just one line, without any
-   * border on top of it. */
-  box-shadow: calc(-1 * var(--selected-left-border-width)) 0 var(--blue-60);
+.timelineTrackRow.selected::before {
+  background-color: var(--selected-left-border-color);
+}
+
+.timelineTrackRow.selected {
+  background-color: #edf6ff;
 }
 
 /* In the active tab view, we don't want any margin or padding, because
@@ -72,8 +74,8 @@
 .timelineTrackLabel {
   display: flex;
 
-  /* We want the width to look like it's 150px, but need to substract the 3px padding/margin */
-  width: calc(150px - var(--selected-left-border-width));
+  /* We want the width to look like it's --track-label-width, but need to substract the ::before width */
+  width: calc(var(--track-label-width) - var(--selected-left-border-width));
   box-sizing: border-box;
   flex-flow: row nowrap;
   align-items: center;
@@ -147,17 +149,17 @@
 }
 
 /**
- * Local tracks are indented 15px. This rule adds an inset shadow overlay over the
- * entire local tracks area, including the indented space. This is why it is shifted
- * to the left, and slightly larger than 100%.
+ * Local tracks are indented (see --local-track-indent). This rule adds an inset
+ * shadow overlay over the entire local tracks area, including the indented space.
+ * This is why it is shifted to the left, and slightly larger than 100%.
  */
 .timelineTrackLocalTracks::before {
   position: absolute;
 
   /* Place it above the Reorderable component, which has a z-index of 2. */
   z-index: 3;
-  left: -15px;
-  width: calc(100% + 15px);
+  left: calc(var(--local-track-indent) * -1px);
+  width: calc(100% + var(--local-track-indent));
   height: 100%;
   box-shadow: inset 0 1px 5px rgb(0 0 0 / 0.2);
   content: '';
@@ -165,6 +167,58 @@
 }
 
 .timelineTrackLocalLabel {
-  /* We want the width to look like it's 150px, but need to substract the 3px padding/margin and the 1px border */
-  width: calc(135px - var(--selected-left-border-width) - 1px);
+  /* We want the element to align with its parent track, so we need to
+     substract the indent, the ::before width and the 1px border */
+  width: calc(
+    var(--track-label-width) - var(--local-track-indent) -
+      var(--selected-left-border-width) - 1px
+  );
+}
+
+@media (forced-colors: active) {
+  .timelineTrackRow {
+    --selected-left-border-color: CanvasText;
+  }
+
+  .timelineTrackRow.selected .timelineTrackLabel {
+    background-color: SelectedItem;
+    color: SelectedItemText;
+  }
+
+  .timelineTrackRow.selected .timelineTrackLabel button {
+    color: inherit;
+  }
+
+  .timelineTrackRow:not(.selected):hover,
+  .timelineTrackRow:not(.selected) .timelineTrackLabel:hover {
+    background-color: SelectedItemText;
+    color: SelectedItem;
+  }
+
+  .timelineTrackRow:not(.selected) .timelineTrackLabel:hover button {
+    color: inherit;
+  }
+
+  /* In regular mode, there's an inset box-shadow, which we don't see in HCM.
+     Add a solid border so we do have a separation between a parent and a local track */
+  .timelineTrackLocalTracks::before {
+    border-top: 1px solid;
+  }
+
+  .timelineTrackCloseButton {
+    border: 1px solid ButtonText;
+    background-color: ButtonFace;
+  }
+
+  .timelineTrackCloseButton:hover {
+    border-color: SelectedItem;
+    background-color: ButtonFace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    /* We need to adapt the cross icon in dark mode so it still visible */
+    .timelineTrackCloseButton {
+      background-image: url(../../../res/img/svg/close-light.svg);
+    }
+  }
 }
