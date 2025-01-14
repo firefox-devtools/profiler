@@ -187,16 +187,15 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
   }
 
   it('passes a basic test', function () {
-    const { profile, funcNamesDictPerThread, nativeSymbolsDictPerThread } =
-      getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesDictPerThread,
+      nativeSymbolsDictPerThread,
+      defaultCategory,
+    } = getProfileFromTextSamples(`
         A[lib:file][address:20][sym:Asym:20:]
         B[lib:file][address:30][sym:Bsym:30:]
       `);
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-    const defaultCategory = categories.findIndex((c) => c.color === 'grey');
 
     const [{ A, B }] = funcNamesDictPerThread;
     const [{ Asym, Bsym }] = nativeSymbolsDictPerThread;
@@ -231,17 +230,16 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
   });
 
   it('passes a basic test with recursion', function () {
-    const { profile, funcNamesDictPerThread, nativeSymbolsDictPerThread } =
-      getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesDictPerThread,
+      nativeSymbolsDictPerThread,
+      defaultCategory,
+    } = getProfileFromTextSamples(`
         A[lib:file][address:20][sym:Asym:20:]
         B[lib:file][address:30][sym:Bsym:30:]
         A[lib:file][address:21][sym:Asym:20:]
       `);
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-    const defaultCategory = categories.findIndex((c) => c.color === 'grey');
 
     const [{ A, B }] = funcNamesDictPerThread;
     const [{ Asym }] = nativeSymbolsDictPerThread;
@@ -278,18 +276,17 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
   });
 
   it('passes a test where the same function is called via different call paths', function () {
-    const { profile, funcNamesDictPerThread, nativeSymbolsDictPerThread } =
-      getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesDictPerThread,
+      nativeSymbolsDictPerThread,
+      defaultCategory,
+    } = getProfileFromTextSamples(`
         A[lib:one][address:20][sym:Asym:20:]  A[lib:one][address:21][sym:Asym:20:]  A[lib:one][address:20][sym:Asym:20:]
         B[lib:one][address:30][sym:Bsym:30:]  D[lib:one][address:50][sym:Dsym:40:]  B[lib:one][address:31][sym:Bsym:30:]
         C[lib:two][address:10][sym:Csym:10:]  C[lib:two][address:11][sym:Csym:10:]  C[lib:two][address:12][sym:Csym:10:]
                                                                                     D[lib:one][address:51][sym:Dsym:40:]
       `);
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-    const defaultCategory = categories.findIndex((c) => c.color === 'grey');
 
     const [{ A, B, C }] = funcNamesDictPerThread;
     const [{ Csym }] = nativeSymbolsDictPerThread;
@@ -310,18 +307,17 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
   });
 
   it('passes a test with an inverted thread', function () {
-    const { profile, funcNamesDictPerThread, nativeSymbolsDictPerThread } =
-      getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesDictPerThread,
+      nativeSymbolsDictPerThread,
+      defaultCategory,
+    } = getProfileFromTextSamples(`
         A[lib:one][address:20][sym:Asym:20:]  A[lib:one][address:21][sym:Asym:20:]  A[lib:one][address:20][sym:Asym:20:]
         B[lib:one][address:30][sym:Bsym:30:]  D[lib:one][address:50][sym:Dsym:40:]  B[lib:one][address:31][sym:Bsym:30:]
         D[lib:one][address:51][sym:Dsym:40:]  D[lib:one][address:52][sym:Dsym:40:]  C[lib:two][address:12][sym:Csym:10:]
                                                                                     D[lib:one][address:51][sym:Dsym:40:]
       `);
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-    const defaultCategory = categories.findIndex((c) => c.color === 'grey');
 
     const [{ C, D }] = funcNamesDictPerThread;
     const [{ Csym, Dsym }] = nativeSymbolsDictPerThread;
@@ -368,18 +364,17 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
     // call this function for a different native symbol.
     //
     // In this test, we compute the timings for native symbol Bsym.
-    const { profile, funcNamesDictPerThread, nativeSymbolsDictPerThread } =
-      getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesDictPerThread,
+      nativeSymbolsDictPerThread,
+      defaultCategory,
+    } = getProfileFromTextSamples(`
         A[lib:one][address:20][sym:Asym:20:]         A[lib:one][address:30][sym:Asym:20:]         A[lib:one][address:20][sym:Asym:20:]  A[lib:one][address:20][sym:Asym:20:]
         B[lib:one][address:40][sym:Bsym:30:]         B[lib:one][address:30][sym:Asym:20:][inl:1]  B[lib:one][address:45][sym:Bsym:30:]  E[lib:one][address:31][sym:Esym:30:]
         C[lib:one][address:40][sym:Bsym:30:][inl:1]  C[lib:one][address:30][sym:Asym:20:][inl:2]  C[lib:one][address:45][sym:Bsym:30:]
                                                                                                   D[lib:one][address:51][sym:Dsym:40:]
       `);
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-    const defaultCategory = categories.findIndex((c) => c.color === 'grey');
 
     const [{ A, B, C }] = funcNamesDictPerThread;
     const [{ Bsym }] = nativeSymbolsDictPerThread;
