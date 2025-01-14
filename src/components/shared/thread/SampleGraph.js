@@ -61,18 +61,30 @@ type State = {
   mouseY: CssPixels,
 };
 
-export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
+type CanvasProps = {|
+  +className: string,
+  +thread: Thread,
+  +samplesSelectedStates: null | SelectedState[],
+  +interval: Milliseconds,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +categories: CategoryList,
+  +trackName: string,
+  ...SizeProps,
+|};
+
+/**
+ * This component controls the rendering of the canvas. Every render call through
+ * React triggers a new canvas render. Because of this, it's important to only pass
+ * in the props that are needed for the canvas draw call.
+ */
+class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
   _canvas: null | HTMLCanvasElement = null;
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) =>
     (this._canvas = canvas);
   _canvasState: {| renderScheduled: boolean, inView: boolean |} = {
     renderScheduled: false,
     inView: false,
-  };
-  state = {
-    hoveredPixelState: null,
-    mouseX: 0,
-    mouseY: 0,
   };
 
   _renderCanvas() {
@@ -211,6 +223,33 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
     drawSamples(idleSamples, lighterBlue);
   }
 
+  render() {
+    const { trackName } = this.props;
+
+    return (
+      <InView onChange={this._observerCallback}>
+        <canvas
+          className={classNames(
+            `${this.props.className}Canvas`,
+            'threadSampleGraphCanvas'
+          )}
+          ref={this._takeCanvasRef}
+        >
+          <h2>Stack Graph for {trackName}</h2>
+          <p>This graph charts the stack height of each sample.</p>
+        </canvas>
+      </InView>
+    );
+  }
+}
+
+export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
+  state = {
+    hoveredPixelState: null,
+    mouseX: 0,
+    mouseY: 0,
+  };
+
   _onClick = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
     const hoveredSample = this._getSampleAtMouseEvent(event);
     this.props.onSampleClick(event, hoveredSample?.sample ?? null);
@@ -238,7 +277,7 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
   _getSampleAtMouseEvent(
     event: SyntheticMouseEvent<HTMLCanvasElement>
   ): null | HoveredPixelState {
-    const canvas = this._canvas;
+    const canvas = event.currentTarget;
     if (!canvas) {
       return null;
     }
@@ -250,7 +289,7 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
     const time = rangeStart + (x / r.width) * (rangeEnd - rangeStart);
 
     const rangeLength = rangeEnd - rangeStart;
-    const xPixelsPerMs = canvas.width / rangeLength;
+    const xPixelsPerMs = r.width / rangeLength;
     const trueIntervalPixelWidth = interval * xPixelsPerMs;
     const multiplier = trueIntervalPixelWidth < 2.0 ? 1.2 : 1.0;
     const drawnIntervalWidth = Math.max(
@@ -294,6 +333,12 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
       categories,
       implementationFilter,
       thread,
+      interval,
+      rangeStart,
+      rangeEnd,
+      samplesSelectedStates,
+      width,
+      height,
     } = this.props;
     const { hoveredPixelState, mouseX, mouseY } = this.state;
 
@@ -302,35 +347,36 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
         className={className}
         onMouseMove={this._onMouseMove}
         onMouseLeave={this._onMouseLeave}
+        onClick={this._onClick}
       >
-        <InView onChange={this._observerCallback}>
-          <canvas
-            className={classNames(
-              `${this.props.className}Canvas`,
-              'threadSampleGraphCanvas'
-            )}
-            ref={this._takeCanvasRef}
-            onClick={this._onClick}
-          >
-            <h2>Stack Graph for {trackName}</h2>
-            <p>This graph charts the stack height of each sample.</p>
-          </canvas>
-          {hoveredPixelState === null ? null : (
-            <Tooltip mouseX={mouseX} mouseY={mouseY}>
-              <SampleTooltipContents
-                sampleIndex={hoveredPixelState.sample}
-                cpuRatioInTimeRange={
-                  timelineType === 'cpu-category'
-                    ? hoveredPixelState.cpuRatioInTimeRange
-                    : null
-                }
-                rangeFilteredThread={thread}
-                categories={categories}
-                implementationFilter={implementationFilter}
-              />
-            </Tooltip>
-          )}
-        </InView>
+        <ThreadSampleGraphCanvas
+          className={className}
+          trackName={trackName}
+          interval={interval}
+          thread={thread}
+          rangeStart={rangeStart}
+          rangeEnd={rangeEnd}
+          samplesSelectedStates={samplesSelectedStates}
+          categories={categories}
+          width={width}
+          height={height}
+        />
+
+        {hoveredPixelState === null ? null : (
+          <Tooltip mouseX={mouseX} mouseY={mouseY}>
+            <SampleTooltipContents
+              sampleIndex={hoveredPixelState.sample}
+              cpuRatioInTimeRange={
+                timelineType === 'cpu-category'
+                  ? hoveredPixelState.cpuRatioInTimeRange
+                  : null
+              }
+              rangeFilteredThread={thread}
+              categories={categories}
+              implementationFilter={implementationFilter}
+            />
+          </Tooltip>
+        )}
       </div>
     );
   }
