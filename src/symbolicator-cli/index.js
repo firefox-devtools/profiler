@@ -153,7 +153,11 @@ export async function run(options: CliOptions) {
     if (symbolicationSteps === undefined) {
       return oldThread;
     }
-    const { thread } = applySymbolicationSteps(oldThread, symbolicationSteps);
+    const { thread } = applySymbolicationSteps(
+      oldThread,
+      profile.shared,
+      symbolicationSteps
+    );
     return thread;
   });
 
