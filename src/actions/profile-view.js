@@ -2078,6 +2078,13 @@ export function handleCallNodeTransformShortcut(
           })
         );
         break;
+      case 'U':
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'merge-unaccounted-native-functions',
+          })
+        );
+        break;
       case 'd':
         dispatch(
           addTransformToStack(threadsKey, {

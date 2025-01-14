@@ -65,6 +65,7 @@ const SHORT_KEY_TO_TRANSFORM: { [string]: TransformType } = {};
   'focus-category',
   'merge-call-node',
   'merge-function',
+  'merge-unaccounted-native-functions',
   'drop-function',
   'collapse-resource',
   'collapse-direct-recursion',
@@ -90,6 +91,9 @@ const SHORT_KEY_TO_TRANSFORM: { [string]: TransformType } = {};
       break;
     case 'merge-function':
       shortKey = 'mf';
+      break;
+    case 'merge-unaccounted-native-functions':
+      shortKey = 'mu';
       break;
     case 'drop-function':
       shortKey = 'df';
@@ -235,6 +239,12 @@ export function parseTransforms(transformString: string): TransformStack {
         }
         break;
       }
+      case 'merge-unaccounted-native-functions': {
+        transforms.push({
+          type: 'merge-unaccounted-native-functions',
+        });
+        break;
+      }
       case 'focus-category': {
         // e.g. "fg-3"
         const [, categoryRaw] = tuple;
@@ -348,6 +358,8 @@ export function stringifyTransforms(transformStack: TransformStack): string {
         case 'collapse-function-subtree':
         case 'focus-function':
           return `${shortKey}-${transform.funcIndex}`;
+        case 'merge-unaccounted-native-functions':
+          return shortKey;
         case 'focus-category':
           return `${shortKey}-${transform.category}`;
         case 'collapse-resource':
@@ -430,6 +442,13 @@ export function getTransformLabelL10nIds(
         default:
           throw assertExhaustiveCheck(transform.filterType);
       }
+    }
+
+    if (transform.type === 'merge-unaccounted-native-functions') {
+      return {
+        l10nId: 'TransformNavigator--merge-unaccounted-native-functions',
+        item: '',
+      };
     }
 
     // Lookup function name.
@@ -517,6 +536,12 @@ export function applyTransformToCallNodePath(
       return _mergeNodeInCallNodePath(transform.callNodePath, callNodePath);
     case 'merge-function':
       return _mergeFunctionInCallNodePath(transform.funcIndex, callNodePath);
+    case 'merge-unaccounted-native-functions':
+      return _mergeUnaccountedNativeFunctionsInCallNodePath(
+        callNodePath,
+        transformedThread.funcTable,
+        transformedThread.stringTable
+      );
     case 'drop-function':
       return _dropFunctionInCallNodePath(transform.funcIndex, callNodePath);
     case 'collapse-resource':
@@ -586,6 +611,38 @@ function _mergeFunctionInCallNodePath(
   callNodePath: CallNodePath
 ): CallNodePath {
   return callNodePath.filter((nodeFunc) => nodeFunc !== funcIndex);
+}
+
+function _mergeUnaccountedNativeFunctionsInCallNodePath(
+  callNodePath: CallNodePath,
+  funcTable: FuncTable,
+  stringTable: UniqueStringArray
+): CallNodePath {
+  return callNodePath.filter((nodeFunc) =>
+    isUnaccountedNativeFunction(nodeFunc, funcTable, stringTable)
+  );
+}
+
+// Returns true if funcIndex is probably a JIT frame outside of any known JIT
+// address mappings.
+export function isUnaccountedNativeFunction(
+  funcIndex: IndexIntoFuncTable,
+  funcTable: FuncTable,
+  stringTable: UniqueStringArray
+): boolean {
+  if (funcTable.resource[funcIndex] !== -1) {
+    // This function has a resource. That means it's not "unaccounted".
+    return false;
+  }
+  if (funcTable.isJS[funcIndex]) {
+    // This function is a JS function. That means it's not a "native" function.
+    return false;
+  }
+  // Ok, so now we either have a native function without a library (otherwise it
+  // would have a "lib" resource), or we have a label frame. Assume that label
+  // frames don't start with "0x".
+  const locationString = stringTable.getString(funcTable.name[funcIndex]);
+  return locationString.startsWith('0x');
 }
 
 function _dropFunctionInCallNodePath(
@@ -860,12 +917,91 @@ export function mergeFunction(
 }
 
 /**
+ * Returns a Uint8Array filled with zeros and ones.
+ * result[funcIndex] === 1 if and only if isUnaccountedNativeFunction(funcIndex)
+ */
+function getUnaccountedNativeFunctions(thread: Thread): Uint8Array {
+  const { funcTable, stringTable } = thread;
+  const funcCount = funcTable.length;
+  const isUnaccountedNativeFunctionArr = new Uint8Array(funcCount);
+  for (let i = 0; i < funcCount; i++) {
+    if (isUnaccountedNativeFunction(i, funcTable, stringTable)) {
+      isUnaccountedNativeFunctionArr[i] = 1;
+    }
+  }
+  return isUnaccountedNativeFunctionArr;
+}
+
+export function mergeUnaccountedNativeFunctions(thread: Thread): Thread {
+  const isUnaccountedNativeFunctionArr = getUnaccountedNativeFunctions(thread);
+  return mergeFunctions(thread, isUnaccountedNativeFunctionArr);
+}
+
+export function mergeFunctions(
+  thread: Thread,
+  shouldMergeFunction: Uint8Array
+): Thread {
+  const { stackTable, frameTable } = thread;
+
+  // A map oldStack -> newStack+1, implemented as a Uint32Array for performance.
+  // If newStack+1 is zero it means "null", i.e. this stack was filtered out.
+  // Typed arrays are initialized to zero, which we interpret as null.
+  //
+  // For each old stack, the new stack is computed as follows (with `oldStackFun`
+  // being the old stack's frame's function):
+  //  - If shouldMergeFunction[oldStackFun] === 0, then the new stack is the same
+  //    as the old stack.
+  //  - If shouldMergeFunction[oldStackFun] === 1, then the new stack is the closest
+  //    ancestor for which shouldMergeFunction[ancestorFunc] is 0, or null if no
+  //    such ancestor exists.
+  //
+  // We only compute a new prefix column; the other columns are copied from the
+  // old stack table. The skipped stacks are "orphaned"; they'll still be present
+  // in the new stack table but not referenced by samples or other stacks.
+  const oldStackToNewStackPlusOne = new Uint32Array(stackTable.length);
+
+  const stackTableFrameCol = stackTable.frame;
+  const frameTableFuncCol = frameTable.func;
+  const oldPrefixCol = stackTable.prefix;
+  const newPrefixCol = new Array(stackTable.length);
+
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const oldPrefix = oldPrefixCol[stackIndex];
+    const newPrefixPlusOne =
+      oldPrefix === null ? 0 : oldStackToNewStackPlusOne[oldPrefix];
+
+    const frameIndex = stackTableFrameCol[stackIndex];
+    const funcIndex = frameTableFuncCol[frameIndex];
+    if (shouldMergeFunction[funcIndex] === 1) {
+      oldStackToNewStackPlusOne[stackIndex] = newPrefixPlusOne;
+    } else {
+      oldStackToNewStackPlusOne[stackIndex] = stackIndex + 1;
+    }
+    const newPrefix = newPrefixPlusOne === 0 ? null : newPrefixPlusOne - 1;
+    newPrefixCol[stackIndex] = newPrefix;
+  }
+
+  const newStackTable = {
+    ...stackTable,
+    prefix: newPrefixCol,
+  };
+
+  return updateThreadStacks(thread, newStackTable, (oldStack) => {
+    if (oldStack === null) {
+      return null;
+    }
+    const newStackPlusOne = oldStackToNewStackPlusOne[oldStack];
+    return newStackPlusOne === 0 ? null : newStackPlusOne - 1;
+  });
+}
+
+/**
  * Drop any samples that contain the given function.
  */
 export function dropFunction(
   thread: Thread,
   funcIndexToDrop: IndexIntoFuncTable
-) {
+): Thread {
   const { stackTable, frameTable } = thread;
 
   // Go through each stack, and label it as containing the function or not.
@@ -1774,6 +1910,8 @@ export function applyTransform(
       );
     case 'merge-function':
       return mergeFunction(thread, transform.funcIndex);
+    case 'merge-unaccounted-native-functions':
+      return mergeUnaccountedNativeFunctions(thread);
     case 'drop-function':
       return dropFunction(thread, transform.funcIndex);
     case 'focus-function':

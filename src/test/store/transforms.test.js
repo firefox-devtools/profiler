@@ -497,6 +497,70 @@ describe('"merge-function" transform', function () {
   });
 });
 
+describe('"merge-unaccounted-native-functions" transform', function () {
+  describe('on a call tree', function () {
+    /**
+     * Assert this transformation:
+     *
+     *                     A:3,0                              A:3,0
+     *                       |                                  |
+     *                       v        merge 0xC,0xE             v
+     *                     B:3,0           -->                B:3,0
+     *                     /    \                           /   |   \
+     *                    v      v                         v    v    v
+     *                C:2,0     H:1,0                 D:1,0   F:1,0   H:1,1
+     *               /      \         \                         |
+     *              v        v         v                        v
+     *            D:1,0     F:1,0     C:1,1                   G:1,1
+     *            |           |
+     *            v           v
+     *          0xE:1,1       G:1,1
+     */
+    const { profile } = getProfileFromTextSamples(`
+      A[lib:one][address:20][sym:Asym:20:]  A[lib:one][address:21][sym:Asym:20:]  A[lib:one][address:20][sym:Asym:20:]
+      B                                     B                                     B
+      0xC                                   0xC                                   H.js
+      D.js                                  F[lib:two][address:11][sym:Fsym:10:]  0xC
+      0xE                                   G[lib:one][address:51][sym:Dsym:40:]
+    `);
+    const threadIndex = 0;
+
+    const { dispatch, getState } = storeWithProfile(profile);
+    const originalCallTree = selectedThreadSelectors.getCallTree(getState());
+
+    it('starts as an unfiltered call tree', function () {
+      expect(formatTree(originalCallTree)).toEqual([
+        '- A (total: 3, self: —)',
+        '  - B (total: 3, self: —)',
+        '    - 0xC (total: 2, self: —)',
+        '      - D.js (total: 1, self: —)',
+        '        - 0xE (total: 1, self: 1)',
+        '      - F (total: 1, self: —)',
+        '        - G (total: 1, self: 1)',
+        '    - H.js (total: 1, self: —)',
+        '      - 0xC (total: 1, self: 1)',
+      ]);
+    });
+
+    it('functions 0xC and 0xE are merged into callers', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'merge-unaccounted-native-functions',
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 3, self: —)',
+        '  - B (total: 3, self: —)',
+        '    - D.js (total: 1, self: 1)',
+        '    - F (total: 1, self: —)',
+        '      - G (total: 1, self: 1)',
+        '    - H.js (total: 1, self: 1)',
+      ]);
+    });
+  });
+});
+
 describe('"drop-function" transform', function () {
   describe('on a call tree', function () {
     const {
