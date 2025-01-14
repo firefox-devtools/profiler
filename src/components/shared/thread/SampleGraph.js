@@ -51,7 +51,7 @@ type Props = {|
   ) => void,
   +trackName: string,
   +timelineType: TimelineType,
-  implementationFilter: ImplementationFilter,
+  +implementationFilter: ImplementationFilter,
   ...SizeProps,
 |};
 
@@ -130,8 +130,7 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
     canvas.width = Math.round(width * devicePixelRatio);
     canvas.height = Math.round(height * devicePixelRatio);
     const ctx = canvas.getContext('2d');
-    const range = [rangeStart, rangeEnd];
-    const rangeLength = range[1] - range[0];
+    const rangeLength = rangeEnd - rangeStart;
     const xPixelsPerMs = canvas.width / rangeLength;
     const trueIntervalPixelWidth = interval * xPixelsPerMs;
     const multiplier = trueIntervalPixelWidth < 2.0 ? 1.2 : 1.0;
@@ -141,8 +140,8 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
     );
     const drawnSampleWidth = Math.min(drawnIntervalWidth, 10);
 
-    const firstDrawnSampleTime = range[0] - drawnIntervalWidth / xPixelsPerMs;
-    const lastDrawnSampleTime = range[1];
+    const firstDrawnSampleTime = rangeStart - drawnIntervalWidth / xPixelsPerMs;
+    const lastDrawnSampleTime = rangeEnd;
 
     const firstDrawnSampleIndex = bisectionRight(
       thread.samples.time,
@@ -172,7 +171,7 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
         continue;
       }
       const xPos =
-        (sampleTime - range[0]) * xPixelsPerMs - drawnSampleWidth / 2;
+        (sampleTime - rangeStart) * xPixelsPerMs - drawnSampleWidth / 2;
       let samplesBucket;
       if (
         samplesSelectedStates !== null &&
@@ -247,11 +246,10 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
     const { rangeStart, rangeEnd, thread, interval } = this.props;
     const r = canvas.getBoundingClientRect();
 
-    const x = event.pageX - r.left;
+    const x = event.nativeEvent.offsetX;
     const time = rangeStart + (x / r.width) * (rangeEnd - rangeStart);
 
-    const range = [rangeStart, rangeEnd];
-    const rangeLength = range[1] - range[0];
+    const rangeLength = rangeEnd - rangeStart;
     const xPixelsPerMs = canvas.width / rangeLength;
     const trueIntervalPixelWidth = interval * xPixelsPerMs;
     const multiplier = trueIntervalPixelWidth < 2.0 ? 1.2 : 1.0;
@@ -261,8 +259,7 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
     );
     const drawnSampleWidth = Math.min(drawnIntervalWidth, 10) / 2;
 
-    const maxTimeDistance =
-      (drawnSampleWidth / 2 / r.width) * (rangeEnd - rangeStart);
+    const maxTimeDistance = (drawnSampleWidth / 2 / r.width) * rangeLength;
 
     const sampleIndex = getSampleIndexClosestToCenteredTime(
       thread.samples,
