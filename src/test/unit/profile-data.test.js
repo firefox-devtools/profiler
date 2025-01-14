@@ -575,6 +575,111 @@ describe('profile-data', function () {
   });
 });
 
+describe('getInvertedCallNodeInfo', function () {
+  function setup(plaintextSamples) {
+    const { profile, funcNamesDictPerThread } =
+      getProfileFromTextSamples(plaintextSamples);
+
+    const thread = profile.threads[0];
+    const funcNamesDict = funcNamesDictPerThread[0];
+    const categories = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    );
+    const defaultCategory = categories.findIndex((c) => c.name === 'Other');
+    const nonInvertedCallNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      defaultCategory
+    );
+
+    const invertedCallNodeInfo = getInvertedCallNodeInfo(
+      nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
+      nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+      defaultCategory,
+      thread.funcTable.length
+    );
+
+    // This function is used to test `getSuffixOrderIndexRangeForCallNode` and
+    // `getSuffixOrderedCallNodes`. To find the non-inverted call nodes with
+    // a call path suffix, `nodesWithSuffix` gets the inverted node X for the
+    // given call path suffix, and lists non-inverted nodes in X's "suffix
+    // order index range".
+    // These are the nodes whose call paths, if inverted, would correspond to
+    // inverted call nodes that are descendants of X.
+    function nodesWithSuffix(callPathSuffix) {
+      const invertedNodeForSuffix = ensureExists(
+        invertedCallNodeInfo.getCallNodeIndexFromPath(
+          [...callPathSuffix].reverse()
+        )
+      );
+      const [rangeStart, rangeEnd] =
+        invertedCallNodeInfo.getSuffixOrderIndexRangeForCallNode(
+          invertedNodeForSuffix
+        );
+      const suffixOrderedCallNodes =
+        invertedCallNodeInfo.getSuffixOrderedCallNodes();
+      const nonInvertedCallNodes = new Set();
+      for (let i = rangeStart; i < rangeEnd; i++) {
+        nonInvertedCallNodes.add(suffixOrderedCallNodes[i]);
+      }
+      return nonInvertedCallNodes;
+    }
+
+    return {
+      funcNamesDict,
+      nonInvertedCallNodeInfo,
+      invertedCallNodeInfo,
+      nodesWithSuffix,
+    };
+  }
+
+  it('creates a correct suffix order for this example profile', function () {
+    const {
+      funcNamesDict: { A, B, C },
+      nonInvertedCallNodeInfo,
+      nodesWithSuffix,
+    } = setup(`
+      A  A  A  A  A  A  A
+         B  B  B  A  A  C
+            A  C     B
+    `);
+
+    const cnA = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A]);
+    const cnAB = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, B]);
+    const cnABA = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, B, A]);
+    const cnABC = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, B, C]);
+    const cnAA = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, A]);
+    const cnAAB = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, A, B]);
+    const cnAC = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, C]);
+
+    expect(nodesWithSuffix([A])).toEqual(new Set([cnA, cnABA, cnAA]));
+    expect(nodesWithSuffix([B])).toEqual(new Set([cnAB, cnAAB]));
+    expect(nodesWithSuffix([A, B])).toEqual(new Set([cnAB, cnAAB]));
+    expect(nodesWithSuffix([A, A, B])).toEqual(new Set([cnAAB]));
+    expect(nodesWithSuffix([C])).toEqual(new Set([cnABC, cnAC]));
+  });
+
+  it('creates a correct suffix order for a different example profile', function () {
+    const {
+      funcNamesDict: { A, B, C },
+      nonInvertedCallNodeInfo,
+      nodesWithSuffix,
+    } = setup(`
+      A  A  A  C
+         B  B
+            C
+    `);
+
+    const cnABC = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, B, C]);
+    const cnC = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([C]);
+
+    expect(nodesWithSuffix([B, C])).toEqual(new Set([cnABC]));
+    expect(nodesWithSuffix([C])).toEqual(new Set([cnABC, cnC]));
+  });
+});
+
 describe('symbolication', function () {
   describe('AddressLocator', function () {
     const libs = [
@@ -790,14 +895,14 @@ describe('funcHasDirectRecursiveCall and funcHasRecursiveCall', function () {
       thread.frameTable,
       thread.funcTable,
       defaultCategory
-    ).getCallNodeTable();
+    ).getNonInvertedCallNodeTable();
     const jsOnlyThread = filterThreadByImplementation(thread, 'js');
     const jsOnlyCallNodeTable = getCallNodeInfo(
       jsOnlyThread.stackTable,
       jsOnlyThread.frameTable,
       jsOnlyThread.funcTable,
       defaultCategory
-    ).getCallNodeTable();
+    ).getNonInvertedCallNodeTable();
     return { callNodeTable, jsOnlyCallNodeTable, funcNames };
   }
 
@@ -884,22 +989,15 @@ describe('getSamplesSelectedStates', function () {
     );
     const defaultCategory = categories.findIndex((c) => c.name === 'Other');
     const callNodeInfoInverted = getInvertedCallNodeInfo(
-      thread,
       callNodeInfo.getNonInvertedCallNodeTable(),
       stackIndexToCallNodeIndex,
-      defaultCategory
-    );
-    const stackIndexToInvertedCallNodeIndex =
-      callNodeInfoInverted.getStackIndexToCallNodeIndex();
-    const sampleInvertedCallNodes = getSampleIndexToCallNodeIndex(
-      thread.samples.stack,
-      stackIndexToInvertedCallNodeIndex
+      defaultCategory,
+      thread.funcTable.length
     );
 
     return {
       callNodeInfo,
       callNodeInfoInverted,
-      sampleInvertedCallNodes,
       sampleCallNodes,
       funcNamesDict,
     };
@@ -981,7 +1079,7 @@ describe('getSamplesSelectedStates', function () {
     });
 
     it('can sort the samples based on their selection status', function () {
-      const comparator = getTreeOrderComparator(sampleCallNodes);
+      const comparator = getTreeOrderComparator(sampleCallNodes, callNodeInfo);
       const samples = [4, 1, 3, 0, 2]; // some random order
       samples.sort(comparator);
       expect(samples).toEqual([0, 2, 4, 1, 3]);
@@ -995,30 +1093,30 @@ describe('getSamplesSelectedStates', function () {
 
   describe('inverted', function () {
     /**
-     * - [cn0] A      =  A
-     *   - [cn1] B    =  A -> B
-     *     - [cn2] A  =  A -> B -> A
-     *     - [cn3] C  =  A -> B -> C
-     *   - [cn4] A    =  A -> A
-     *     - [cn5] B  =  A -> A -> B
-     *   - [cn6] C    =  A -> C
+     * - [cn0] A      =  A            =            A [so0]    [so0] [cn0] A
+     *   - [cn1] B    =  A -> B       =       A -> B [so3]    [so1] [cn4] A <- A
+     *     - [cn2] A  =  A -> B -> A  =  A -> B -> A [so2] ↘↗ [so2] [cn2] A <- B <- A
+     *     - [cn3] C  =  A -> B -> C  =  A -> B -> C [so6] ↗↘ [so3] [cn1] B <- A
+     *   - [cn4] A    =  A -> A       =       A -> A [so1]    [so4] [cn5] B <- A <- A
+     *     - [cn5] B  =  A -> A -> B  =  A -> A -> B [so4]    [so5] [cn6] C <- A
+     *   - [cn6] C    =  A -> C       =       A -> C [so5]    [so6] [cn3] C <- B <- A
      *
-     *
-     * - [in0] A
-     *   - [in1] A
-     *   - [in2] B
-     *     - [in3] A
-     *  - [in4] B
-     *    - [in5] A
-     *      - [in6] A
-     *  - [in7] C
-     *    - [in8] A
-     *    - [in9] B
-     *      - [in10] A
+     *                                                 Represents call paths ending in
+     * - [in0] A  (so:0..3)        =  A             =            ... A (cn0, cn4, cn2)
+     *   - [in1] A  (so:1..2)      =  A <- A        =       ... A -> A (cn4)
+     *   - [in2] B  (so:2..3)      =  A <- B        =       ... B -> A (cn2)
+     *     - [in3] A  (so:2..3)    =  A <- B <- A   =  ... A -> B -> A (cn2)
+     *  - [in4] B  (so:3..5)       =  B             =            ... B (cn1, cn5)
+     *    - [in5] A  (so:3..5)     =  B <- A        =       ... A -> B (cn1, cn5)
+     *      - [in6] A  (so:4..5)   =  B <- A <- A   =  ... A -> A -> B (cn5)
+     *  - [in7] C  (so:5..7)       =  C             =            ... C (cn6, cn3)
+     *    - [in8] A  (so:5..6)     =  C <- A        =       ... A -> C (cn6)
+     *    - [in9] B  (so:6..7)     =  C <- B        =       ... B -> C (cn3)
+     *      - [in10] A  (so:6..7)  =  C <- B <- A   =  ... A -> B -> C (cn3)
      *  */
     const {
       callNodeInfoInverted,
-      sampleInvertedCallNodes,
+      sampleCallNodes,
       funcNamesDict: { A, B, C },
     } = setup(`
       A  A  A  A  A  A  A
@@ -1041,8 +1139,8 @@ describe('getSamplesSelectedStates', function () {
       expect(
         getSamplesSelectedStates(
           callNodeInfoInverted,
-          sampleInvertedCallNodes,
-          sampleInvertedCallNodes,
+          sampleCallNodes,
+          sampleCallNodes,
           inBA
         )
       ).toEqual([
@@ -1059,8 +1157,8 @@ describe('getSamplesSelectedStates', function () {
       expect(
         getSamplesSelectedStates(
           callNodeInfoInverted,
-          sampleInvertedCallNodes,
-          sampleInvertedCallNodes,
+          sampleCallNodes,
+          sampleCallNodes,
           inCBA
         )
       ).toEqual([
@@ -1077,8 +1175,8 @@ describe('getSamplesSelectedStates', function () {
       expect(
         getSamplesSelectedStates(
           callNodeInfoInverted,
-          sampleInvertedCallNodes,
-          sampleInvertedCallNodes,
+          sampleCallNodes,
+          sampleCallNodes,
           inB
         )
       ).toEqual([
@@ -1093,16 +1191,19 @@ describe('getSamplesSelectedStates', function () {
     });
 
     it('can sort the samples based on their selection status', function () {
-      const comparator = getTreeOrderComparator(sampleInvertedCallNodes);
+      const comparator = getTreeOrderComparator(
+        sampleCallNodes,
+        callNodeInfoInverted
+      );
 
       /**
-       * original order (non-inverted):
+       * in original order:
        *   0  1  2  3  4  5  6
        *   A  A  A  A  A  A  A
        *      A  B  B  C  B  A
        *            A     C  B
        *
-       * sorted order ("inverted" if you read from bottom to top):
+       * in suffix order:
        *         A     A     A
        *      A  B  A  A  A  B
        *   A  A  A  B  B  C  C
@@ -1436,10 +1537,10 @@ describe('getNativeSymbolsForCallNode', function () {
       defaultCategory
     );
     const callNodeInfo = getInvertedCallNodeInfo(
-      thread,
       nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
       nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
-      defaultCategory
+      defaultCategory,
+      thread.funcTable.length
     );
     const c = callNodeInfo.getCallNodeIndexFromPath([funC]);
     expect(c).not.toBeNull();
