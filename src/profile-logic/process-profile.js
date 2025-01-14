@@ -1129,7 +1129,7 @@ function _processThread(
   const { libs, pausedRanges, meta } = processProfile;
   const { categories, shutdownTime } = meta;
 
-  const stringTable = new StringTable(thread.stringTable);
+  const stringTable = StringTable.withBackingArray(thread.stringTable);
   const { funcTable, resourceTable, frameFuncs, frameAddresses } =
     extractFuncsAndResourcesFromFrameLocations(
       geckoFrameStruct.location,
@@ -1768,7 +1768,7 @@ export function makeProfileSerializable({
       return {
         ...restOfThread,
         samples: _serializeSamples(samples),
-        stringArray: stringTable.serializeToArray(),
+        stringArray: stringTable.getBackingArray(),
       };
     }),
   };
@@ -1807,7 +1807,7 @@ function _unserializeProfile({
       return {
         ...restOfThread,
         samples: _unserializeSamples(samples),
-        stringTable: new StringTable(stringArray),
+        stringTable: StringTable.withBackingArray(stringArray),
       };
     }),
   };

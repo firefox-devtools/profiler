@@ -153,7 +153,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
                     'moreInfo',
                     format,
                     value,
-                    new StringTable()
+                    StringTable.withBackingArray([])
                   )}
                 </div>
               </div>

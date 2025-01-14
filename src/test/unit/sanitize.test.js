@@ -480,7 +480,7 @@ describe('sanitizePII', function () {
     });
 
     for (const thread of sanitizedProfile.threads) {
-      const stringArray = thread.stringTable.serializeToArray();
+      const stringArray = thread.stringTable.getBackingArray();
       for (let i = 0; i < thread.markers.length; i++) {
         const currentMarker = thread.markers.data[i];
         if (
@@ -533,7 +533,7 @@ describe('sanitizePII', function () {
     });
 
     for (const thread of sanitizedProfile.threads) {
-      const stringArray = thread.stringTable.serializeToArray();
+      const stringArray = thread.stringTable.getBackingArray();
       for (const string of stringArray) {
         // We are keeping the http(s) and removing the rest.
         // That's why we can't test it with `includes('http')`.

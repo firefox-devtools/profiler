@@ -221,7 +221,8 @@ class FirefoxThread {
   tid: number;
   pid: number;
 
-  strings = new StringTable();
+  stringArray = [];
+  strings = StringTable.withBackingArray(this.stringArray);
 
   sampleTable: SamplesTable = getEmptySamplesTable();
 
