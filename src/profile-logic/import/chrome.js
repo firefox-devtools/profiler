@@ -5,7 +5,7 @@
 import type {
   Profile,
   StackTable,
-  Thread,
+  RawThread,
   IndexIntoFuncTable,
   IndexIntoStackTable,
   IndexIntoResourceTable,
@@ -16,6 +16,7 @@ import {
   getEmptyProfile,
   getEmptyThread,
 } from '../../profile-logic/data-structures';
+import { StringTable } from '../../utils/string-table';
 import { ensureExists, coerce } from '../../utils/flow';
 import {
   INSTANT,
@@ -275,7 +276,7 @@ export function attemptToConvertChromeProfile(
 }
 
 type ThreadInfo = {
-  thread: Thread,
+  thread: RawThread,
   funcKeyToFuncId: Map<string, IndexIntoFuncTable>,
   nodeIdToStackId: Map<number | void, IndexIntoStackTable | null>,
   originToResourceIndex: Map<string, IndexIntoResourceTable>,
@@ -314,7 +315,7 @@ function findEvents<
 
 function getThreadInfo(
   threadInfoByPidAndTid: Map<string, ThreadInfo>,
-  threadInfoByThread: Map<Thread, ThreadInfo>,
+  threadInfoByThread: Map<RawThread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile,
   chunk: TracingEventUnion
@@ -578,10 +579,12 @@ async function processTracingEvents(
         funcTable,
         frameTable,
         stackTable,
-        stringTable,
+        stringArray,
         samples: samplesTable,
         resourceTable,
       } = thread;
+
+      const stringTable = StringTable.withBackingArray(stringArray);
 
       if (nodes) {
         const parentMap = new Map();
@@ -717,7 +720,7 @@ async function processTracingEvents(
             'Could not find the eventDelay in samplesTable inside the newly created Chrome profile thread.'
           ).push(null);
           samplesTable.stack.push(stackIndex);
-          samplesTable.time.push(threadInfo.lastSampledTime);
+          ensureExists(samplesTable.time).push(threadInfo.lastSampledTime);
           samplesTable.length++;
         }
       }
@@ -820,7 +823,7 @@ async function processTracingEvents(
 
 async function extractScreenshots(
   threadInfoByPidAndTid: Map<string, ThreadInfo>,
-  threadInfoByThread: Map<Thread, ThreadInfo>,
+  threadInfoByThread: Map<RawThread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile,
   screenshots: ?(ScreenshotEvent[])
@@ -841,6 +844,8 @@ async function extractScreenshots(
     screenshots[0]
   );
 
+  const stringTable = StringTable.withBackingArray(thread.stringArray);
+
   const graphicsIndex = ensureExists(profile.meta.categories).findIndex(
     (category) => category.name === 'Graphics'
   );
@@ -860,13 +865,13 @@ async function extractScreenshots(
     }
     thread.markers.data.push({
       type: 'CompositorScreenshot',
-      url: thread.stringTable.indexForString(urlString),
+      url: stringTable.indexForString(urlString),
       windowID: 'id',
       windowWidth: size.width,
       windowHeight: size.height,
     });
     thread.markers.name.push(
-      thread.stringTable.indexForString('CompositorScreenshot')
+      stringTable.indexForString('CompositorScreenshot')
     );
     thread.markers.startTime.push(screenshot.ts / 1000);
     thread.markers.endTime.push(null);
@@ -919,7 +924,7 @@ function assertStackOrdering(stackTable: StackTable) {
  */
 function extractMarkers(
   threadInfoByPidAndTid: Map<string, ThreadInfo>,
-  threadInfoByThread: Map<Thread, ThreadInfo>,
+  threadInfoByThread: Map<RawThread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile
 ) {
@@ -996,7 +1001,8 @@ function extractMarkers(
           event
         );
         const { thread } = threadInfo;
-        const { markers, stringTable } = thread;
+        const { markers, stringArray } = thread;
+        const stringTable = StringTable.withBackingArray(stringArray);
         let argData: MixedObject | null = null;
         if (event.args && typeof event.args === 'object') {
           argData = (event.args: any).data || null;

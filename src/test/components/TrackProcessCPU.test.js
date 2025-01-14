@@ -56,14 +56,15 @@ describe('TrackProcessCPU', function () {
     );
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
+    const sampleTimes = ensureExists(thread.samples.time);
     // Changing one of the sample times, so we can test different intervals.
-    thread.samples.time[1] = 1.5; // It was 1 before.
+    sampleTimes[1] = 1.5; // It was 1 before.
     profile.counters = [
       getCounterForThreadWithSamples(
         thread,
         threadIndex,
         {
-          time: thread.samples.time.slice(),
+          time: sampleTimes.slice(),
           // CPU usage numbers for the per-process CPU.
           count: [100, 400, 500, 1000, 200, 500, 300, 100],
           length: SAMPLE_COUNT,
