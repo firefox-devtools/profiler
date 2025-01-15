@@ -288,6 +288,10 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
     const x = event.nativeEvent.offsetX;
     const time = rangeStart + (x / r.width) * (rangeEnd - rangeStart);
 
+    // These values are copied from the `drawCanvas` method to compute the
+    // `drawnSampleWidth` instead of extracting into a new function. Extracting
+    // into a new function is not really idea for performance reasons since we
+    // need these values for other values in `drawCanvas`.
     const rangeLength = rangeEnd - rangeStart;
     const xPixelsPerMs = r.width / rangeLength;
     const trueIntervalPixelWidth = interval * xPixelsPerMs;
