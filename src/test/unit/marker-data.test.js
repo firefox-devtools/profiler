@@ -782,8 +782,8 @@ describe('filterRawMarkerTableToRange', () => {
       start,
       end
     );
-    const rawMarkerNames = rawMarkerTable.name.map((i) =>
-      thread.stringTable.getString(i)
+    const rawMarkerNames = rawMarkerTable.name.map(
+      (i) => thread.stringArray[i]
     );
     const processedMarkers = getTestFriendlyDerivedMarkerInfo({
       ...thread,
@@ -1268,8 +1268,8 @@ describe('filterRawMarkerTableToRangeWithMarkersToDelete', () => {
       markersToDelete,
       timeRange
     );
-    const markerNames = rawMarkerTable.name.map((stringIndex) =>
-      thread.stringTable.getString(stringIndex)
+    const markerNames = rawMarkerTable.name.map(
+      (stringIndex) => thread.stringArray[stringIndex]
     );
 
     return {

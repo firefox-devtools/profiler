@@ -30,10 +30,11 @@ import type {
   Profile,
   CategoryList,
   IndexIntoCategoryList,
-  Thread,
+  RawThread,
   ThreadIndex,
   Pid,
   Tid,
+  RawCounter,
   Counter,
   CounterIndex,
   PageList,
@@ -177,7 +178,7 @@ export const getPageList = (state: State): PageList | null =>
   getProfile(state).pages || null;
 export const getDefaultCategory: Selector<IndexIntoCategoryList> = (state) =>
   getCategories(state).findIndex((c) => c.color === 'grey');
-export const getThreads: Selector<Thread[]> = (state) =>
+export const getThreads: Selector<RawThread[]> = (state) =>
   getProfile(state).threads;
 export const getThreadNames: Selector<string[]> = (state) =>
   getProfile(state).threads.map((t) => t.name);
@@ -186,7 +187,7 @@ export const getLastNonShiftClick: Selector<
 > = (state) => getProfileViewOptions(state).lastNonShiftClick;
 export const getRightClickedTrack: Selector<TrackReference | null> = (state) =>
   getProfileViewOptions(state).rightClickedTrack;
-export const getCounter: Selector<Counter[] | null> = (state) =>
+export const getCounters: Selector<RawCounter[] | null> = (state) =>
   getProfile(state).counters || null;
 export const getMeta: Selector<ProfileMeta> = (state) => getProfile(state).meta;
 export const getVisualMetricsOrNull: Selector<VisualMetrics | null> = (state) =>
@@ -435,13 +436,13 @@ export const getGlobalTrackReferences: Selector<GlobalTrackReference[]> =
 export const getHasPreferenceMarkers: Selector<boolean> = createSelector(
   getThreads,
   (threads) => {
-    return threads.some(({ stringTable, markers }) => {
+    return threads.some(({ stringArray, markers }) => {
       /*
        * Does this particular thread have a Preference in it?
        */
-      const indexForPreferenceString =
-        stringTable.indexForString('PreferenceRead');
-      return markers.name.some((name) => name === indexForPreferenceString);
+      return markers.name.some(
+        (name) => stringArray[name] === 'PreferenceRead'
+      );
     });
   }
 );
@@ -569,7 +570,7 @@ export const getLocalTrackNamesByPid: Selector<Map<Pid, string[]>> =
   createSelector(
     getLocalTracksByPid,
     getThreads,
-    getCounter,
+    getCounters,
     (localTracksByPid, threads, counters) => {
       const localTrackNamesByPid = new Map();
       for (const [pid, localTracks] of localTracksByPid) {
