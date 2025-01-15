@@ -277,6 +277,8 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
                 samplesSelectedStates={samplesSelectedStates}
                 categories={categories}
                 onSampleClick={this._onSampleClick}
+                timelineType={timelineType}
+                implementationFilter={implementationFilter}
               />
             ) : null}
             {isExperimentalCPUGraphsEnabled &&
