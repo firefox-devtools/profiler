@@ -21,6 +21,7 @@ import {
   ensureExists,
   getFirstItemFromSet,
 } from '../../utils/flow';
+import { base64StringToArrayBuffer } from '../../utils/value-summaries';
 
 import type {
   Thread,
@@ -103,6 +104,10 @@ export function getBasicThreadSelectorsPerThread(
     (state) => getRawThread(state).stringArray,
     (stringArray) => StringTable.withBackingArray(stringArray)
   );
+  const getValuesBuffer: Selector<ArrayBuffer | null> = createSelector(
+    (state) => getRawThread(state).valuesBuffer,
+    (valuesBuffer) => valuesBuffer ? base64StringToArrayBuffer(valuesBuffer) : null,
+   );
   const getRawSamplesTable: Selector<RawSamplesTable> = (state) =>
     getRawThread(state).samples;
   const getSamplesTable: Selector<SamplesTable> = createSelector(
@@ -158,6 +163,7 @@ export function getBasicThreadSelectorsPerThread(
     getSamplesTable,
     getStackTable,
     getStringTable,
+    getValuesBuffer,
     ProfileData.createThreadFromDerivedTables
   );
 
@@ -419,6 +425,7 @@ export function getBasicThreadSelectorsPerThread(
     getThread,
     getStringTable,
     getSamplesTable,
+    getValuesBuffer,
     getSamplesWeightType,
     getNativeAllocations,
     getJsAllocations,

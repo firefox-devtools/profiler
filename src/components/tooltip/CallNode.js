@@ -129,6 +129,7 @@ type Props = {|
   +timings?: TimingsForPath,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +displayStackType: boolean,
+  +args?: string | null,
 |};
 
 /**
@@ -358,6 +359,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       thread,
       durationText,
       categories,
+      args,
       displayData,
       timings,
       callTreeSummaryStrategy,
@@ -421,6 +423,18 @@ export class TooltipCallNode extends React.PureComponent<Props> {
         </div>,
         thread.stringTable.getString(resourceNameIndex),
       ];
+    }
+
+    let argsEl = null;
+    if (args) {
+      argsEl = [
+        <div className="tooltipLabel" key="resource">
+          args:
+        </div>,
+      ];
+      for (let line of args.split("\n")) {
+        argsEl.push(line);
+      }
     }
 
     // Finding current frame and parent frame URL(if there is).
@@ -537,6 +551,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             {pageAndParentPageURL}
             {fileName}
             {resource}
+            {argsEl}
           </div>
           {this._renderCategoryTimings(timings)}
         </div>

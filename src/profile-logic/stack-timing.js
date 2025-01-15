@@ -52,6 +52,7 @@ export type StackTiming = {|
   start: Milliseconds[],
   end: Milliseconds[],
   callNode: IndexIntoCallNodeTable[],
+  args?: number[],
   length: number,
 |};
 
@@ -73,12 +74,18 @@ export function getStackTimingByDepth(
     subtreeRangeEnd: callNodeTableSubtreeRangeEndColumn,
     depth: callNodeTableDepthColumn,
   } = callNodeTable;
-  const stackTimingByDepth = Array.from({ length: maxDepthPlusOne }, () => ({
-    start: [],
-    end: [],
-    callNode: [],
-    length: 0,
-  }));
+  const stackTimingByDepth = Array.from({ length: maxDepthPlusOne }, () => {
+    const shape: StackTiming = {
+      start: [],
+      end: [],
+      callNode: [],
+      length: 0,
+    };
+    if (samples.args) {
+      shape.args = [];
+    };
+    return shape;
+  });
 
   if (samples.length === 0) {
     return stackTimingByDepth;
@@ -106,9 +113,14 @@ export function getStackTimingByDepth(
   let deepestOpenBoxCallNodeIndex = -1;
   let deepestOpenBoxDepth = -1;
   const openBoxStartTimeByDepth = new Float64Array(maxDepthPlusOne);
+  const openBoxArgsByDepth = new Int32Array(maxDepthPlusOne);
 
   for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
     const sampleTime = samples.time[sampleIndex];
+    let sampleArgs : number = -1; 
+    if (samples.args) {
+      sampleArgs = samples.args[sampleIndex] !== null ? samples.args[sampleIndex] : -1;
+    }
     const thisCallNodeIndex = sampleCallNodes[sampleIndex] ?? -1;
     if (thisCallNodeIndex === deepestOpenBoxCallNodeIndex) {
       continue;
@@ -140,6 +152,9 @@ export function getStackTimingByDepth(
       stackTimingForThisDepth.start[index] = start;
       stackTimingForThisDepth.end[index] = sampleTime;
       stackTimingForThisDepth.callNode[index] = deepestOpenBoxCallNodeIndex;
+      if (stackTimingForThisDepth.args) {
+        stackTimingForThisDepth.args[index] = openBoxArgsByDepth[deepestOpenBoxDepth];
+      }
       deepestOpenBoxCallNodeIndex =
         callNodeTablePrefixColumn[deepestOpenBoxCallNodeIndex];
       deepestOpenBoxDepth--;
@@ -154,6 +169,9 @@ export function getStackTimingByDepth(
       while (deepestOpenBoxDepth < thisCallNodeDepth) {
         deepestOpenBoxDepth++;
         openBoxStartTimeByDepth[deepestOpenBoxDepth] = sampleTime;
+        if (samples.args) {
+          openBoxArgsByDepth[deepestOpenBoxDepth] = sampleArgs;
+        }
       }
     }
 
@@ -170,6 +188,9 @@ export function getStackTimingByDepth(
     stackTimingForThisDepth.start[index] = start;
     stackTimingForThisDepth.end[index] = endTime;
     stackTimingForThisDepth.callNode[index] = deepestOpenBoxCallNodeIndex;
+    if (stackTimingForThisDepth.args) {
+      stackTimingForThisDepth.args[index] = openBoxArgsByDepth[deepestOpenBoxDepth];
+    }
     deepestOpenBoxCallNodeIndex =
       callNodeTablePrefixColumn[deepestOpenBoxCallNodeIndex];
     deepestOpenBoxDepth--;
