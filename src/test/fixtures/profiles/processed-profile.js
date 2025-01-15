@@ -62,17 +62,23 @@ type MarkerName = string;
 type MarkerTime = Milliseconds;
 
 // These markers can create an Instant or a complete Interval marker, depending
-// on if an end time is passed in. The definition uses a union, becaus as far
+// on if an end time is passed in.
+//
+// If the data field is left out (undefined), a default value { type: MarkerName }
+// is used. If the data field is manually set to null, a null data is used.
+//
+// The definition uses a union, becaus as far
 // as I can tell, Flow doesn't support multiple arity tuples.
 export type TestDefinedMarkers = Array<
-  // Instant marker:
+  // Instant marker, payload defaulting to { type: MarkerName }:
   | [MarkerName, MarkerTime]
-  // No payload:
+  // Interval marker:
   | [
       MarkerName,
       MarkerTime, // start time
       MarkerTime | null, // end time
     ]
+  // Marker with manual payload:
   | [
       MarkerName,
       MarkerTime, // start time
@@ -165,7 +171,8 @@ export function addMarkersToThreadWithCorrespondingSamples(
     const startTime = tuple[1];
     // Flow doesn't support variadic tuple types.
     const maybeEndTime = (tuple: any)[2] || null;
-    const payload: MarkerPayload | null = (tuple: any)[3] || null;
+    const maybePayload: MarkerPayload | null | void = (tuple: any)[3];
+    const payload = maybePayload === undefined ? { type: name } : maybePayload;
 
     markersTable.name.push(stringTable.indexForString(name));
     if (maybeEndTime === null) {
@@ -184,7 +191,7 @@ export function addMarkersToThreadWithCorrespondingSamples(
       markerSchemaForTests,
       stringTable
     );
-    markersTable.data.push(payload);
+    markersTable.data.push((payload: any));
     markersTable.category.push(0);
     markersTable.length++;
   });
