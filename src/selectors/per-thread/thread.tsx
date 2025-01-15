@@ -18,6 +18,7 @@ import {
   ensureExists,
   getFirstItemFromSet,
 } from '../../utils/types';
+import { base64StringToBytes } from '../../utils/base64';
 
 import type {
   Thread,
@@ -92,6 +93,11 @@ export function getBasicThreadSelectorsPerThread(
       ? ProfileSelectors.getProfile(state).threads[singleThreadIndex]
       : getMergedRawThread(state);
 
+  const getTracedValuesBuffer: Selector<ArrayBuffer> = createSelector(
+    (state) => getRawThread(state).tracedValuesBuffer,
+    (tracedValuesBuffer) =>
+      tracedValuesBuffer ? base64StringToBytes(tracedValuesBuffer) : null
+  );
   const getRawSamplesTable: Selector<RawSamplesTable> = (state) =>
     getRawThread(state).samples;
   const getSamplesTable: Selector<SamplesTable> = createSelector(
@@ -147,6 +153,7 @@ export function getBasicThreadSelectorsPerThread(
     getStackTable,
     ProfileSelectors.getStringTable,
     ProfileSelectors.getSourceTable,
+    getTracedValuesBuffer,
     ProfileData.createThreadFromDerivedTables
   );
 
@@ -386,6 +393,7 @@ export function getBasicThreadSelectorsPerThread(
     getRawThread,
     getThread,
     getSamplesTable,
+    getTracedValuesBuffer,
     getSamplesWeightType,
     getNativeAllocations,
     getJsAllocations,
