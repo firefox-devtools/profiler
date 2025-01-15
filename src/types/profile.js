@@ -5,7 +5,7 @@
 // @flow
 
 import type { Milliseconds, Address, Microseconds, Bytes } from './units';
-import type { UniqueStringArray } from '../utils/unique-string-array';
+import type { StringTable } from '../utils/string-table';
 import type { MarkerPayload, MarkerSchema, MarkerFormatType } from './markers';
 import type { MarkerPhase, ProfilingLog } from './gecko-profile';
 
@@ -617,26 +617,28 @@ export type ProfilerOverhead = {|
   mainThreadIndex: ThreadIndex,
 |};
 
+// This list of process types is defined here:
+// https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/xpcom/build/nsXULAppAPI.h#383
+export type ProcessType =
+  | 'default'
+  | 'plugin'
+  | 'tab'
+  | 'ipdlunittest'
+  | 'geckomediaplugin'
+  | 'gpu'
+  | 'pdfium'
+  | 'vr'
+  // Unknown process type:
+  // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/toolkit/xre/nsEmbedFunctions.cpp#232
+  | 'invalid'
+  | string;
+
 /**
  * Gecko has one or more processes. There can be multiple threads per processes. Each
  * thread has a unique set of tables for its data.
  */
 export type Thread = {|
-  // This list of process types is defined here:
-  // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/xpcom/build/nsXULAppAPI.h#383
-  processType:
-    | 'default'
-    | 'plugin'
-    | 'tab'
-    | 'ipdlunittest'
-    | 'geckomediaplugin'
-    | 'gpu'
-    | 'pdfium'
-    | 'vr'
-    // Unknown process type:
-    // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/toolkit/xre/nsEmbedFunctions.cpp#232
-    | 'invalid'
-    | string,
+  processType: ProcessType,
   processStartupTime: Milliseconds,
   processShutdownTime: Milliseconds | null,
   registerTime: Milliseconds,
@@ -664,7 +666,7 @@ export type Thread = {|
   frameTable: FrameTable,
   // Strings for profiles are collected into a single table, and are referred to by
   // their index by other tables.
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   nativeSymbols: NativeSymbolTable,
@@ -946,8 +948,8 @@ export type Profile = {|
   profileGatheringLog?: ProfilingLog,
 |};
 
-type SerializableThread = {|
-  ...$Diff<Thread, { stringTable: UniqueStringArray, samples: SamplesTable }>,
+export type SerializableThread = {|
+  ...$Diff<Thread, { stringTable: StringTable, samples: SamplesTable }>,
   stringArray: string[],
   samples: SerializableSamplesTable,
 |};
@@ -975,7 +977,7 @@ export type SerializableCounter = {|
 |};
 
 /**
- * The UniqueStringArray is a class, and is not serializable to JSON. This profile
+ * The StringTable is a class, and is not serializable to JSON. This profile
  * variant is able to be based into JSON.stringify.
  */
 export type SerializableProfile = {|

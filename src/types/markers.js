@@ -30,7 +30,7 @@ export type MarkerFormatType =
   // sanitized. Please be careful with including other types of PII here as well.
   // e.g. "Label: Some String"
   | 'string'
-  /// An index into a (currently) thread-local string table, aka UniqueStringArray
+  /// An index into a (currently) thread-local string table, aka StringTable
   /// This is effectively an integer, so wherever we need to display this value, we
   /// must first perform a lookup into the appropriate string table.
   | 'unique-string'
@@ -534,6 +534,9 @@ export type NetworkPayload = {|
   // TailForbidden. Multiple flags can be set, separated by '|',
   // or we use 'Unset' if no flag is set.
   classOfService?: string,
+
+  // Used to show the HTTP response status code
+  responseStatus?: number,
 
   // NOTE: the following comments are valid for the merged markers. For the raw
   // markers, startTime and endTime have different meanings. Please look

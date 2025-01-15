@@ -45,7 +45,7 @@ import type {
   Tid,
 } from 'firefox-profiler/types';
 
-import type { UniqueStringArray } from '../utils/unique-string-array';
+import type { StringTable } from '../utils/string-table';
 
 /**
  * Jank instances are created from responsiveness values. Responsiveness is a profiler
@@ -120,7 +120,7 @@ export function getSearchFilteredMarkerIndexes(
   markerIndexes: MarkerIndex[],
   markerSchemaByName: MarkerSchemaByName,
   searchRegExps: MarkerRegExps | null,
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   categoryList: CategoryList
 ): MarkerIndex[] {
   if (!searchRegExps) {
@@ -178,7 +178,7 @@ function positiveFilterMarker(
   marker: Marker,
   markerSchemaByName: MarkerSchemaByName,
   searchRegExps: MarkerRegExps,
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   categoryList: CategoryList
 ): boolean {
   // Need to assign it to a constant variable so Flow doesn't complain about
@@ -246,7 +246,7 @@ function negativeFilterMarker(
   marker: Marker,
   markerSchemaByName: MarkerSchemaByName,
   searchRegExps: MarkerRegExps,
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   categoryList: CategoryList
 ): boolean {
   // Need to assign it to a constant variable so Flow doesn't complain about
@@ -600,7 +600,7 @@ export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
  */
 export function deriveMarkersFromRawMarkerTable(
   rawMarkers: RawMarkerTable,
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   threadId: Tid,
   threadRange: StartEndRange,
   ipcCorrelations: IPCMarkerCorrelations

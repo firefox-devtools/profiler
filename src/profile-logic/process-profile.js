@@ -6,7 +6,7 @@
 import { attemptToConvertChromeProfile } from './import/chrome';
 import { attemptToConvertDhat } from './import/dhat';
 import { AddressLocator } from './address-locator';
-import { UniqueStringArray } from '../utils/unique-string-array';
+import { StringTable } from '../utils/string-table';
 import {
   resourceTypes,
   getEmptyExtensions,
@@ -18,6 +18,7 @@ import {
   getEmptyNativeSymbolTable,
 } from './data-structures';
 import { immutableUpdate, ensureExists, coerce } from '../utils/flow';
+import { verifyMagic, SIMPLEPERF as SIMPLEPERF_MAGIC } from '../utils/magic';
 import { attemptToUpgradeProcessedProfileThroughMutation } from './processed-profile-versioning';
 import { upgradeGeckoProfileToCurrentVersion } from './gecko-profile-versioning';
 import {
@@ -217,7 +218,7 @@ export class GlobalDataCollector {
 type ExtractionInfo = {
   funcTable: FuncTable,
   resourceTable: ResourceTable,
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   addressLocator: AddressLocator,
   libToResourceIndex: Map<IndexIntoLibs, IndexIntoResourceTable>,
   originToResourceIndex: Map<string, IndexIntoResourceTable>,
@@ -240,7 +241,7 @@ type ExtractionInfo = {
 export function extractFuncsAndResourcesFromFrameLocations(
   frameLocations: IndexIntoStringTable[],
   relevantForJSPerFrame: boolean[],
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   libs: LibMapping[],
   extensions: ExtensionTable = getEmptyExtensions(),
   globalDataCollector: GlobalDataCollector
@@ -1128,7 +1129,7 @@ function _processThread(
   const { libs, pausedRanges, meta } = processProfile;
   const { categories, shutdownTime } = meta;
 
-  const stringTable = new UniqueStringArray(thread.stringTable);
+  const stringTable = StringTable.withBackingArray(thread.stringTable);
   const { funcTable, resourceTable, frameFuncs, frameAddresses } =
     extractFuncsAndResourcesFromFrameLocations(
       geckoFrameStruct.location,
@@ -1531,7 +1532,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   // exception.
   upgradeGeckoProfileToCurrentVersion(geckoProfile);
 
-  let threads = [];
+  const threads = [];
 
   const extensions: ExtensionTable = geckoProfile.meta.extensions
     ? _toStructOfArrays(geckoProfile.meta.extensions)
@@ -1552,51 +1553,49 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   for (const subprocessProfile of geckoProfile.processes) {
     const adjustTimestampsBy =
       subprocessProfile.meta.startTime - geckoProfile.meta.startTime;
-    threads = threads.concat(
-      subprocessProfile.threads.map((thread) => {
-        const newThread: Thread = _processThread(
-          thread,
-          subprocessProfile,
-          extensions,
-          globalDataCollector
-        );
-        newThread.samples = adjustTableTimestamps(
-          newThread.samples,
+    for (const thread of subprocessProfile.threads) {
+      const newThread: Thread = _processThread(
+        thread,
+        subprocessProfile,
+        extensions,
+        globalDataCollector
+      );
+      newThread.samples = adjustTableTimestamps(
+        newThread.samples,
+        adjustTimestampsBy
+      );
+      newThread.markers = adjustMarkerTimestamps(
+        newThread.markers,
+        adjustTimestampsBy
+      );
+      if (newThread.jsTracer) {
+        newThread.jsTracer = _adjustJsTracerTimestamps(
+          newThread.jsTracer,
           adjustTimestampsBy
         );
-        newThread.markers = adjustMarkerTimestamps(
-          newThread.markers,
+      }
+      if (newThread.jsAllocations) {
+        newThread.jsAllocations = adjustTableTimestamps(
+          newThread.jsAllocations,
           adjustTimestampsBy
         );
-        if (newThread.jsTracer) {
-          newThread.jsTracer = _adjustJsTracerTimestamps(
-            newThread.jsTracer,
-            adjustTimestampsBy
-          );
-        }
-        if (newThread.jsAllocations) {
-          newThread.jsAllocations = adjustTableTimestamps(
-            newThread.jsAllocations,
-            adjustTimestampsBy
-          );
-        }
-        if (newThread.nativeAllocations) {
-          newThread.nativeAllocations = adjustTableTimestamps(
-            newThread.nativeAllocations,
-            adjustTimestampsBy
-          );
-        }
-        newThread.processStartupTime += adjustTimestampsBy;
-        if (newThread.processShutdownTime !== null) {
-          newThread.processShutdownTime += adjustTimestampsBy;
-        }
-        newThread.registerTime += adjustTimestampsBy;
-        if (newThread.unregisterTime !== null) {
-          newThread.unregisterTime += adjustTimestampsBy;
-        }
-        return newThread;
-      })
-    );
+      }
+      if (newThread.nativeAllocations) {
+        newThread.nativeAllocations = adjustTableTimestamps(
+          newThread.nativeAllocations,
+          adjustTimestampsBy
+        );
+      }
+      newThread.processStartupTime += adjustTimestampsBy;
+      if (newThread.processShutdownTime !== null) {
+        newThread.processShutdownTime += adjustTimestampsBy;
+      }
+      newThread.registerTime += adjustTimestampsBy;
+      if (newThread.unregisterTime !== null) {
+        newThread.unregisterTime += adjustTimestampsBy;
+      }
+      threads.push(newThread);
+    }
 
     counters.push(
       ..._processCounters(subprocessProfile, threads, adjustTimestampsBy)
@@ -1745,7 +1744,7 @@ function _unserializeSamples({ timeDeltas, time, ...restOfSamples }): any {
 }
 
 /**
- * The UniqueStringArray is a class, and is not serializable. This function turns
+ * The StringTable is a class, and is not serializable. This function turns
  * a profile into the serializable variant.
  */
 export function makeProfileSerializable({
@@ -1767,7 +1766,7 @@ export function makeProfileSerializable({
       return {
         ...restOfThread,
         samples: _serializeSamples(samples),
-        stringArray: stringTable.serializeToArray(),
+        stringArray: stringTable.getBackingArray(),
       };
     }),
   };
@@ -1806,7 +1805,7 @@ function _unserializeProfile({
       return {
         ...restOfThread,
         samples: _unserializeSamples(samples),
-        stringTable: new UniqueStringArray(stringArray),
+        stringTable: StringTable.withBackingArray(stringArray),
       };
     }),
   };
@@ -1893,6 +1892,11 @@ export async function unserializeProfileOfArbitraryFormat(
 
       if (isArtTraceFormat(arrayBuffer)) {
         arbitraryFormat = convertArtTraceProfile(arrayBuffer);
+      } else if (verifyMagic(SIMPLEPERF_MAGIC, arrayBuffer)) {
+        const { convertSimpleperfTraceProfile } = await import(
+          './import/simpleperf'
+        );
+        arbitraryFormat = convertSimpleperfTraceProfile(arrayBuffer);
       } else {
         try {
           const textDecoder = new TextDecoder('utf-8', { fatal: true });

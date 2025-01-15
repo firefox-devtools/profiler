@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { UniqueStringArray } from '../utils/unique-string-array';
+import { StringTable } from '../utils/string-table';
 import {
   GECKO_PROFILE_VERSION,
   PROCESSED_PROFILE_VERSION,
@@ -42,6 +42,20 @@ export function getEmptyStackTable(): StackTable {
     prefix: [],
     category: [],
     subcategory: [],
+    length: 0,
+  };
+}
+
+export function getEmptySamplesTable(): SamplesTable {
+  return {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    weightType: 'samples',
+    weight: null,
+    stack: [],
+    time: [],
     length: 0,
   };
 }
@@ -372,7 +386,7 @@ export function getEmptyThread(overrides?: $Shape<Thread>): Thread {
     markers: getEmptyRawMarkerTable(),
     stackTable: getEmptyStackTable(),
     frameTable: getEmptyFrameTable(),
-    stringTable: new UniqueStringArray(),
+    stringTable: StringTable.withBackingArray([]),
     funcTable: getEmptyFuncTable(),
     resourceTable: getEmptyResourceTable(),
     nativeSymbols: getEmptyNativeSymbolTable(),

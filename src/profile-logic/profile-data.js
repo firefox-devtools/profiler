@@ -86,7 +86,7 @@ import type {
   ThreadWithReservedFunctions,
   TabID,
 } from 'firefox-profiler/types';
-import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
+import type { StringTable } from 'firefox-profiler/utils/string-table';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -2325,41 +2325,51 @@ export function getSampleIndexClosestToStartTime(
  * uses the adjusted time. In this context, adjusted time means that `time` array
  * represent the "center" of the sample, and raw values represent the "start" of
  * the sample.
+ *
+ * Additionally it also checks for a maxTimeDistance threshold. If the time to
+ * sample distance is higher than that, it just returns null, which indicates
+ * no sample found.
  */
 export function getSampleIndexClosestToCenteredTime(
   samples: SamplesTable,
-  time: number
-): IndexIntoSamplesTable {
+  time: number,
+  maxTimeDistance: number
+): IndexIntoSamplesTable | null {
+  // Helper function to compute the "center" of a sample
+  const getCenterTime = (index: number): number => {
+    if (samples.weight) {
+      return samples.time[index] + Math.abs(samples.weight[index]) / 2;
+    }
+    return samples.time[index];
+  };
+
   // Bisect to find the index of the first sample after the provided time.
   const index = bisectionRight(samples.time, time);
 
   if (index === 0) {
-    return 0;
+    // Time is before the first sample
+    return maxTimeDistance >= Math.abs(getCenterTime(0) - time) ? 0 : null;
   }
 
-  if (index === samples.length) {
-    return samples.length - 1;
+  if (index === samples.time.length) {
+    // Time is after the last sample
+    const lastIndex = samples.time.length - 1;
+    return maxTimeDistance >= Math.abs(getCenterTime(lastIndex) - time)
+      ? lastIndex
+      : null;
   }
 
-  // Check the distance between the provided time and the center of the bisected sample
-  // and its predecessor.
-  const previousIndex = index - 1;
-  let distanceToThis;
-  let distanceToLast;
+  // Calculate distances to the centered time for both the current and previous samples
+  const distanceToNext = Math.abs(getCenterTime(index) - time);
+  const distanceToPrevious = Math.abs(getCenterTime(index - 1) - time);
 
-  if (samples.weight) {
-    const samplesWeight = samples.weight;
-    const weight = Math.abs(samplesWeight[index]);
-    const previousWeight = Math.abs(samplesWeight[previousIndex]);
-
-    distanceToThis = samples.time[index] + weight / 2 - time;
-    distanceToLast = time - (samples.time[previousIndex] + previousWeight / 2);
-  } else {
-    distanceToThis = samples.time[index] - time;
-    distanceToLast = time - samples.time[previousIndex];
+  if (distanceToNext <= distanceToPrevious) {
+    // If `distanceToNext` is closer but exceeds `maxTimeDistance`, return null.
+    return distanceToNext <= maxTimeDistance ? index : null;
   }
 
-  return distanceToThis < distanceToLast ? index : index - 1;
+  // Otherwise, `distanceToPrevious` is closer. Again check if it exceeds `maxTimeDistance`.
+  return distanceToPrevious <= maxTimeDistance ? index - 1 : null;
 }
 
 export function getFriendlyThreadName(
@@ -2497,7 +2507,7 @@ export function getOriginAnnotationForFunc(
   funcIndex: IndexIntoFuncTable,
   funcTable: FuncTable,
   resourceTable: ResourceTable,
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   frameLineNumber: number | null = null,
   frameColumnNumber: number | null = null
 ): string {
@@ -3031,7 +3041,7 @@ export function extractProfileFilterPageData(
 export function getOrCreateURIResource(
   scriptURI: string,
   resourceTable: ResourceTable,
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   originToResourceIndex: Map<string, IndexIntoResourceTable>
 ): IndexIntoResourceTable {
   // Figure out the origin and host.
@@ -3608,7 +3618,7 @@ export function getNativeSymbolInfo(
   nativeSymbol: IndexIntoNativeSymbolTable,
   nativeSymbols: NativeSymbolTable,
   frameTable: FrameTable,
-  stringTable: UniqueStringArray
+  stringTable: StringTable
 ): NativeSymbolInfo {
   const functionSizeOrNull = nativeSymbols.functionSize[nativeSymbol];
   const functionSize =

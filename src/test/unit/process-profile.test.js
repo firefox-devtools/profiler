@@ -10,7 +10,7 @@ import {
   unserializeProfileOfArbitraryFormat,
   GlobalDataCollector,
 } from '../../profile-logic/process-profile';
-import { UniqueStringArray } from '../../utils/unique-string-array';
+import { StringTable } from '../../utils/string-table';
 import {
   createGeckoProfile,
   createGeckoCounter,
@@ -83,7 +83,7 @@ describe('extract functions and resource from location strings', function () {
       breakpadId: '',
     },
   ];
-  const stringTable = new UniqueStringArray();
+  const stringTable = StringTable.withBackingArray([]);
   const locationIndexes = locations.map((location) =>
     stringTable.indexForString(location)
   );

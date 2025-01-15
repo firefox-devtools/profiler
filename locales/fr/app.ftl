@@ -271,6 +271,12 @@ Home--load-files-from-other-tools2 =
     Panneau de performances Chrome, <androidstudio>Android Studio</androidstudio>, ou
     tout fichier utilisant les formats <dhat>dhat</dhat> ou <traceevent>Trace Event de Google</traceevent>. <write>Apprenez à écrire votre
     propre importateur</write>.
+Home--install-chrome-extension = Installer l’extension Chrome
+Home--chrome-extension-instructions =
+    Utilisez l’extension <a>{ -profiler-brand-name } pour Chrome</a>
+    pour capturer des profils de performance dans Chrome et les analyser dans le
+    { -profiler-brand-name }. Installez l’extension depuis le Chrome Web Store.
+Home--chrome-extension-recording-instructions = Une fois l’extension installée, utilisez l’icône de la barre d’outils ou les raccourcis pour démarrer et arrêter le profilage. Vous pouvez également exporter des profils et les charger ici pour une analyse détaillée.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
