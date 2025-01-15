@@ -48,13 +48,14 @@ describe('calltree/CallNodeContextMenu', function () {
     // Create a new profile that has JavaScript in it.
     const {
       profile,
+      stringTable,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
       A.js
       B.js
     `);
     const [thread] = profile.threads;
-    const fileNameIndex = thread.stringTable.indexForString(
+    const fileNameIndex = stringTable.indexForString(
       'https://example.com/script.js'
     );
 

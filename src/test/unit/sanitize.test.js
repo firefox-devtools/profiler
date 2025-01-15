@@ -21,7 +21,10 @@ import {
   correlateIPCMarkers,
   deriveMarkersFromRawMarkerTable,
 } from '../../profile-logic/marker-data';
-import { getTimeRangeForThread } from '../../profile-logic/profile-data';
+import {
+  getTimeRangeForThread,
+  computeTimeColumnForRawSamplesTable,
+} from '../../profile-logic/profile-data';
 import {
   callTreeFromProfile,
   formatTree,
@@ -51,14 +54,17 @@ describe('sanitizePII', function () {
 
     const derivedMarkerInfoForAllThreads = originalProfile.threads.map(
       (thread) => {
-        const ipcCorrelations = correlateIPCMarkers(originalProfile.threads);
+        const ipcCorrelations = correlateIPCMarkers(
+          originalProfile.threads,
+          originalProfile.shared
+        );
         const timeRangeForThread = getTimeRangeForThread(
           thread,
           originalProfile.meta.interval
         );
         return deriveMarkersFromRawMarkerTable(
           thread.markers,
-          thread.stringTable,
+          originalProfile.shared.stringArray,
           thread.tid || 0,
           timeRangeForThread,
           ipcCorrelations
@@ -238,7 +244,9 @@ describe('sanitizePII', function () {
     const counterSamples = ensureExists(sanitizedProfile.counters)[0].samples;
 
     // Make sure that all the table fields are consistent.
-    expect(counterSamples.time).toHaveLength(counterSamples.length);
+    const counterSampleTimes =
+      computeTimeColumnForRawSamplesTable(counterSamples);
+    expect(counterSampleTimes).toHaveLength(counterSamples.length);
     expect(counterSamples.count).toHaveLength(counterSamples.length);
     expect(counterSamples.number).toHaveLength(counterSamples.length);
 
@@ -250,10 +258,10 @@ describe('sanitizePII', function () {
     ) {
       // We are using inclusive range, so we need to add 1 and subtract 1 to the
       // start and end ranges.
-      expect(counterSamples.time[sampleIndex]).toBeGreaterThanOrEqual(
+      expect(counterSampleTimes[sampleIndex]).toBeGreaterThanOrEqual(
         sanitizedRange.start - 1
       );
-      expect(counterSamples.time[sampleIndex]).toBeLessThanOrEqual(
+      expect(counterSampleTimes[sampleIndex]).toBeLessThanOrEqual(
         sanitizedRange.end + 1
       );
     }
@@ -479,8 +487,8 @@ describe('sanitizePII', function () {
       shouldRemoveUrls: true,
     });
 
+    const stringArray = sanitizedProfile.shared.stringArray;
     for (const thread of sanitizedProfile.threads) {
-      const stringArray = thread.stringTable.getBackingArray();
       for (let i = 0; i < thread.markers.length; i++) {
         const currentMarker = thread.markers.data[i];
         if (
@@ -532,14 +540,12 @@ describe('sanitizePII', function () {
       shouldRemoveUrls: true,
     });
 
-    for (const thread of sanitizedProfile.threads) {
-      const stringArray = thread.stringTable.getBackingArray();
-      for (const string of stringArray) {
-        // We are keeping the http(s) and removing the rest.
-        // That's why we can't test it with `includes('http')`.
-        // Tested `.com` here since all of the test urls have .com in it
-        expect(string.includes('.com')).toBe(false);
-      }
+    const stringArray = sanitizedProfile.shared.stringArray;
+    for (const string of stringArray) {
+      // We are keeping the http(s) and removing the rest.
+      // That's why we can't test it with `includes('http')`.
+      // Tested `.com` here since all of the test urls have .com in it
+      expect(string.includes('.com')).toBe(false);
     }
   });
 
@@ -978,55 +984,59 @@ describe('sanitizePII', function () {
         secondTabInnerWindowIDs: nonPrivateTabInnerWindowIDs,
       } = addActiveTabInformationToProfile(originalProfile);
       markTabIdsAsPrivateBrowsing(originalProfile, [privateTabTabID]);
-      addMarkersToThreadWithCorrespondingSamples(originalProfile.threads[0], [
-        ...getNetworkMarkers({
-          id: 1235,
-          startTime: 19000,
-          fetchStart: 19200.2,
-          endTime: 20433.8,
-          uri: 'https://example.org/index.html',
-          payload: {
-            cache: 'Hit',
-            pri: 8,
-            count: 47027,
-            contentType: 'text/html',
-            isPrivateBrowsing: true,
-          },
-        }),
-        ...getNetworkMarkers({
-          id: 1236,
-          startTime: 19000,
-          fetchStart: 19200.2,
-          endTime: 20433.8,
-          uri: 'https://duckduckgo.com',
-          payload: {
-            cache: 'Hit',
-            pri: 8,
-            count: 47027,
-            contentType: 'text/html',
-          },
-        }),
+      addMarkersToThreadWithCorrespondingSamples(
+        originalProfile.threads[0],
+        originalProfile.shared,
         [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: privateTabInnerWindowIDs[0],
-          },
-        ],
-        [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: nonPrivateTabInnerWindowIDs[0],
-          },
-        ],
-      ]);
+          ...getNetworkMarkers({
+            id: 1235,
+            startTime: 19000,
+            fetchStart: 19200.2,
+            endTime: 20433.8,
+            uri: 'https://example.org/index.html',
+            payload: {
+              cache: 'Hit',
+              pri: 8,
+              count: 47027,
+              contentType: 'text/html',
+              isPrivateBrowsing: true,
+            },
+          }),
+          ...getNetworkMarkers({
+            id: 1236,
+            startTime: 19000,
+            fetchStart: 19200.2,
+            endTime: 20433.8,
+            uri: 'https://duckduckgo.com',
+            payload: {
+              cache: 'Hit',
+              pri: 8,
+              count: 47027,
+              contentType: 'text/html',
+            },
+          }),
+          [
+            'DOMEvent',
+            10.6,
+            11.1,
+            {
+              type: 'DOMEvent',
+              eventType: 'load',
+              innerWindowID: privateTabInnerWindowIDs[0],
+            },
+          ],
+          [
+            'DOMEvent',
+            10.6,
+            11.1,
+            {
+              type: 'DOMEvent',
+              eventType: 'load',
+              innerWindowID: nonPrivateTabInnerWindowIDs[0],
+            },
+          ],
+        ]
+      );
 
       const { sanitizedProfile } = setup(
         { shouldRemovePrivateBrowsingData: true },
@@ -1262,62 +1272,66 @@ describe('sanitizePII', function () {
       } = addActiveTabInformationToProfile(originalProfile);
       const unknownInnerWindowID = 555;
 
-      addMarkersToThreadWithCorrespondingSamples(originalProfile.threads[0], [
+      addMarkersToThreadWithCorrespondingSamples(
+        originalProfile.threads[0],
+        originalProfile.shared,
         [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: firstTabInnerWindowIDs[0],
-          },
-        ],
-        [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: secondTabInnerWindowIDs[0],
-          },
-        ],
-        [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: unknownInnerWindowID,
-          },
-        ],
-        [
-          'GCMinor',
-          10.7,
-          11.2,
-          {
-            type: 'GCMinor',
-            nursery: {
-              status: 'nursery empty',
+          [
+            'DOMEvent',
+            10.6,
+            11.1,
+            {
+              type: 'DOMEvent',
+              eventType: 'load',
+              innerWindowID: firstTabInnerWindowIDs[0],
             },
-          },
-        ],
-        [
-          'CompositorScreenshot',
-          20,
-          21,
-          {
-            type: 'CompositorScreenshot',
-            url: 0,
-            windowID: 'XXX',
-            windowWidth: 300,
-            windowHeight: 600,
-          },
-        ],
-        ['TextOnlyMarker', 22, 23, null],
-      ]);
+          ],
+          [
+            'DOMEvent',
+            10.6,
+            11.1,
+            {
+              type: 'DOMEvent',
+              eventType: 'load',
+              innerWindowID: secondTabInnerWindowIDs[0],
+            },
+          ],
+          [
+            'DOMEvent',
+            10.6,
+            11.1,
+            {
+              type: 'DOMEvent',
+              eventType: 'load',
+              innerWindowID: unknownInnerWindowID,
+            },
+          ],
+          [
+            'GCMinor',
+            10.7,
+            11.2,
+            {
+              type: 'GCMinor',
+              nursery: {
+                status: 'nursery empty',
+              },
+            },
+          ],
+          [
+            'CompositorScreenshot',
+            20,
+            21,
+            {
+              type: 'CompositorScreenshot',
+              url: 0,
+              windowID: 'XXX',
+              windowWidth: 300,
+              windowHeight: 600,
+            },
+          ],
+          ['TextOnlyMarker', 22, 23, null],
+        ]
+      );
 
       const { sanitizedProfile: unsanitizedProfile } = setup(
         {},
@@ -1345,25 +1359,25 @@ describe('sanitizePII', function () {
         })
       );
 
-      const indexForGCMinor =
-        originalProfile.threads[0].stringTable.indexForString('GCMinor');
-      expect(originalProfile.threads[0].markers.name).toContain(
-        indexForGCMinor
-      );
-
-      const indexForScreenshot =
-        originalProfile.threads[0].stringTable.indexForString(
-          'CompositorScreenshot'
-        );
-      expect(originalProfile.threads[0].markers.name).toContain(
-        indexForScreenshot
-      );
-
-      const indexForTextOnlyMarker =
-        originalProfile.threads[0].stringTable.indexForString('TextOnlyMarker');
-      expect(originalProfile.threads[0].markers.name).toContain(
-        indexForTextOnlyMarker
-      );
+      expect(
+        originalProfile.threads[0].markers.name.find(
+          (nameIndex) =>
+            originalProfile.shared.stringArray[nameIndex] === 'GCMinor'
+        )
+      ).not.toBe(undefined);
+      expect(
+        originalProfile.threads[0].markers.name.find(
+          (nameIndex) =>
+            originalProfile.shared.stringArray[nameIndex] ===
+            'CompositorScreenshot'
+        )
+      ).not.toBe(undefined);
+      expect(
+        originalProfile.threads[0].markers.name.find(
+          (nameIndex) =>
+            originalProfile.shared.stringArray[nameIndex] === 'TextOnlyMarker'
+        )
+      ).not.toBe(undefined);
 
       // 2. An unsanitized profile also has all the initial markers.
       expect(unsanitizedProfile.threads[0].markers.data).toContainEqual(
@@ -1381,15 +1395,26 @@ describe('sanitizePII', function () {
           innerWindowID: unknownInnerWindowID,
         })
       );
-      expect(unsanitizedProfile.threads[0].markers.name).toContain(
-        indexForGCMinor
-      );
-      expect(unsanitizedProfile.threads[0].markers.name).toContain(
-        indexForScreenshot
-      );
-      expect(unsanitizedProfile.threads[0].markers.name).toContain(
-        indexForTextOnlyMarker
-      );
+      expect(
+        unsanitizedProfile.threads[0].markers.name.find(
+          (nameIndex) =>
+            unsanitizedProfile.shared.stringArray[nameIndex] === 'GCMinor'
+        )
+      ).not.toBe(undefined);
+      expect(
+        unsanitizedProfile.threads[0].markers.name.find(
+          (nameIndex) =>
+            unsanitizedProfile.shared.stringArray[nameIndex] ===
+            'CompositorScreenshot'
+        )
+      ).not.toBe(undefined);
+      expect(
+        unsanitizedProfile.threads[0].markers.name.find(
+          (nameIndex) =>
+            unsanitizedProfile.shared.stringArray[nameIndex] ===
+            'TextOnlyMarker'
+        )
+      ).not.toBe(undefined);
 
       // 3. Finally check the innerWindowID property of remaining markers in the
       // sanitized profile.
@@ -1406,13 +1431,18 @@ describe('sanitizePII', function () {
       );
 
       // Nor the markers that aren't tied to a tab
-      expect(sanitizedProfile.threads[0].markers.name).not.toContain(
-        indexForGCMinor
-      );
-
-      expect(sanitizedProfile.threads[0].markers.name).not.toContain(
-        indexForTextOnlyMarker
-      );
+      expect(
+        sanitizedProfile.threads[0].markers.name.find(
+          (nameIndex) =>
+            sanitizedProfile.shared.stringArray[nameIndex] === 'GCMinor'
+        )
+      ).toBe(undefined);
+      expect(
+        sanitizedProfile.threads[0].markers.name.find(
+          (nameIndex) =>
+            sanitizedProfile.shared.stringArray[nameIndex] === 'TextOnlyMarker'
+        )
+      ).toBe(undefined);
 
       // But we still have the others.
       expect(sanitizedProfile.threads[0].markers.data).toContainEqual(
@@ -1422,9 +1452,13 @@ describe('sanitizePII', function () {
       );
 
       // Including the screenshots
-      expect(originalProfile.threads[0].markers.name).toContain(
-        indexForScreenshot
-      );
+      expect(
+        sanitizedProfile.threads[0].markers.name.find(
+          (nameIndex) =>
+            sanitizedProfile.shared.stringArray[nameIndex] ===
+            'CompositorScreenshot'
+        )
+      ).not.toBe(undefined);
     });
 
     it('removes samples coming from other tabs', () => {
@@ -1592,55 +1626,59 @@ describe('sanitizePII', function () {
         secondTabInnerWindowIDs: nonPrivateTabInnerWindowIDs,
       } = addActiveTabInformationToProfile(originalProfile);
       markTabIdsAsPrivateBrowsing(originalProfile, [privateTabTabID]);
-      addMarkersToThreadWithCorrespondingSamples(originalProfile.threads[0], [
-        ...getNetworkMarkers({
-          id: 1235,
-          startTime: 19000,
-          fetchStart: 19200.2,
-          endTime: 20433.8,
-          uri: 'https://example.org/index.html',
-          payload: {
-            cache: 'Hit',
-            pri: 8,
-            count: 47027,
-            contentType: 'text/html',
-            isPrivateBrowsing: true,
-          },
-        }),
-        ...getNetworkMarkers({
-          id: 1236,
-          startTime: 19000,
-          fetchStart: 19200.2,
-          endTime: 20433.8,
-          uri: 'https://duckduckgo.com',
-          payload: {
-            cache: 'Hit',
-            pri: 8,
-            count: 47027,
-            contentType: 'text/html',
-          },
-        }),
+      addMarkersToThreadWithCorrespondingSamples(
+        originalProfile.threads[0],
+        originalProfile.shared,
         [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: privateTabInnerWindowIDs[0],
-          },
-        ],
-        [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: nonPrivateTabInnerWindowIDs[0],
-          },
-        ],
-      ]);
+          ...getNetworkMarkers({
+            id: 1235,
+            startTime: 19000,
+            fetchStart: 19200.2,
+            endTime: 20433.8,
+            uri: 'https://example.org/index.html',
+            payload: {
+              cache: 'Hit',
+              pri: 8,
+              count: 47027,
+              contentType: 'text/html',
+              isPrivateBrowsing: true,
+            },
+          }),
+          ...getNetworkMarkers({
+            id: 1236,
+            startTime: 19000,
+            fetchStart: 19200.2,
+            endTime: 20433.8,
+            uri: 'https://duckduckgo.com',
+            payload: {
+              cache: 'Hit',
+              pri: 8,
+              count: 47027,
+              contentType: 'text/html',
+            },
+          }),
+          [
+            'DOMEvent',
+            10.6,
+            11.1,
+            {
+              type: 'DOMEvent',
+              eventType: 'load',
+              innerWindowID: privateTabInnerWindowIDs[0],
+            },
+          ],
+          [
+            'DOMEvent',
+            10.6,
+            11.1,
+            {
+              type: 'DOMEvent',
+              eventType: 'load',
+              innerWindowID: nonPrivateTabInnerWindowIDs[0],
+            },
+          ],
+        ]
+      );
 
       const { sanitizedProfile } = setup(
         {

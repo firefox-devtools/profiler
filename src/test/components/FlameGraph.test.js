@@ -288,6 +288,7 @@ function setupFlameGraph(addImplementationData: boolean = true) {
 
   const {
     profile,
+    stringTable,
     funcNamesPerThread: [funcNames],
     funcNamesDictPerThread: [funcNamesDict],
   } = getProfileFromTextSamples(`
@@ -301,7 +302,7 @@ function setupFlameGraph(addImplementationData: boolean = true) {
 
   // Add some file and line number to the profile so that tooltips generate
   // an interesting snapshot.
-  const { funcTable, stringTable, frameTable } = profile.threads[0];
+  const { funcTable, frameTable } = profile.threads[0];
   for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
     funcTable.lineNumber[funcIndex] = funcIndex + 10;
     funcTable.columnNumber[funcIndex] = funcIndex + 100;

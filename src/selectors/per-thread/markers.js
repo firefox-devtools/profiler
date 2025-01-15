@@ -11,10 +11,7 @@ import * as MarkerData from '../../profile-logic/marker-data';
 import * as MarkerTimingLogic from '../../profile-logic/marker-timing';
 import * as ProfileSelectors from '../profile';
 import { getRightClickedMarkerInfo } from '../right-clicked-marker';
-import {
-  getLabelGetter,
-  getMarkerSchemaName,
-} from '../../profile-logic/marker-schema';
+import { getLabelGetter } from '../../profile-logic/marker-schema';
 import { getInclusiveSampleIndexRangeForSelection } from '../../profile-logic/profile-data';
 
 import type { BasicThreadSelectorsPerThread } from './thread';
@@ -92,7 +89,7 @@ export function getMarkerSelectorsPerThread(
    * very start of our marker pipeline. */
   const getDerivedMarkerInfo: Selector<DerivedMarkerInfo> = createSelector(
     _getRawMarkerTable,
-    threadSelectors.getStringTable,
+    ProfileSelectors.getStringArray,
     _getThreadId,
     threadSelectors.getThreadRange,
     ProfileSelectors.getIPCMarkerCorrelations,
@@ -302,7 +299,7 @@ export function getMarkerSelectorsPerThread(
       getCommittedRangeAndTabFilteredMarkerIndexes,
       ProfileSelectors.getMarkerSchemaByName,
       UrlState.getMarkersSearchStringsAsRegExp,
-      threadSelectors.getStringTable,
+      ProfileSelectors.getStringTable,
       ProfileSelectors.getCategories,
       MarkerData.getSearchFilteredMarkerIndexes
     );
@@ -361,7 +358,7 @@ export function getMarkerSelectorsPerThread(
       getNetworkMarkerIndexes,
       ProfileSelectors.getMarkerSchemaByName,
       UrlState.getNetworkSearchStringsAsRegExp,
-      threadSelectors.getStringTable,
+      ProfileSelectors.getStringTable,
       ProfileSelectors.getCategories,
       MarkerData.getSearchFilteredMarkerIndexes
     );
@@ -430,7 +427,7 @@ export function getMarkerSelectorsPerThread(
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
       ProfileSelectors.getCategories,
-      threadSelectors.getStringTable,
+      ProfileSelectors.getStringTable,
       () => 'tooltipLabel',
       getLabelGetter
     );
@@ -444,7 +441,7 @@ export function getMarkerSelectorsPerThread(
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
       ProfileSelectors.getCategories,
-      threadSelectors.getStringTable,
+      ProfileSelectors.getStringTable,
       () => 'tableLabel',
       getLabelGetter
     );
@@ -458,7 +455,7 @@ export function getMarkerSelectorsPerThread(
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
       ProfileSelectors.getCategories,
-      threadSelectors.getStringTable,
+      ProfileSelectors.getStringTable,
       () => 'chartLabel',
       getLabelGetter
     );
@@ -474,7 +471,7 @@ export function getMarkerSelectorsPerThread(
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
       ProfileSelectors.getCategories,
-      threadSelectors.getStringTable,
+      ProfileSelectors.getStringTable,
       () => 'copyLabel',
       getLabelGetter
     );
@@ -660,7 +657,7 @@ export function getMarkerSelectorsPerThread(
     const getCollectedCustomMarkerSamples: Selector<CollectedCustomMarkerSamples> =
       createSelector(
         getFullMarkerList,
-        threadSelectors.getStringTable,
+        ProfileSelectors.getStringTable,
         (fullMarkerList, stringTable) => {
           if (markerSchema.graphs === undefined) {
             throw new Error(
@@ -682,11 +679,7 @@ export function getMarkerSelectorsPerThread(
             if (
               data &&
               marker.name === name &&
-              getMarkerSchemaName(
-                ProfileSelectors.getMarkerSchemaByName,
-                marker.name,
-                data
-              ) === schemaName &&
+              data.type === schemaName &&
               keys.every((key) => key in data)
             ) {
               markerIndexes.push(index);

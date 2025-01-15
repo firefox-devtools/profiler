@@ -252,10 +252,8 @@ export class ActivityGraphFillComputer {
       let cpuBeforeSample = null;
       let cpuAfterSample = null;
       if (enableCPUUsage && threadCPUDelta) {
-        // It must be non-null because we are checking this in the processing
-        // step and eliminating all the null values.
-        cpuBeforeSample = ensureExists(threadCPUDelta[i]);
-        cpuAfterSample = ensureExists(threadCPUDelta[i + 1]);
+        cpuBeforeSample = threadCPUDelta[i];
+        cpuAfterSample = threadCPUDelta[i + 1];
       }
 
       // Mutate the percentage buffers.
@@ -284,16 +282,16 @@ export class ActivityGraphFillComputer {
     let cpuBeforeSample = null;
     let cpuAfterSample = null;
     if (enableCPUUsage && threadCPUDelta) {
-      cpuBeforeSample = ensureExists(threadCPUDelta[lastIdx]);
+      cpuBeforeSample = threadCPUDelta[lastIdx];
 
       const nextIdxInFullThread = sampleIndexOffset + lastIdx + 1;
       if (nextIdxInFullThread < fullThread.samples.length) {
         // Since we are zoomed in the timeline, rangeFilteredThread will not
         // have the information of the next sample. So we need to get that
         // information from the full thread.
-        cpuAfterSample = ensureExists(
-          ensureExists(fullThread.samples.threadCPUDelta)[nextIdxInFullThread]
-        );
+        cpuAfterSample = ensureExists(fullThread.samples.threadCPUDelta)[
+          nextIdxInFullThread
+        ];
       } else {
         // If we don't have this information in the full thread, simply use the
         // previous CPU delta.
@@ -704,9 +702,7 @@ export class ActivityFillGraphQuerier {
     let cpuDeltaAfterSample = null;
     const { threadCPUDelta } = samples;
     if (enableCPUUsage && threadCPUDelta) {
-      // It must be non-null because we are checking this in the processing
-      // step and eliminating all the null values.
-      cpuDeltaBeforeSample = ensureExists(threadCPUDelta[sample]);
+      cpuDeltaBeforeSample = threadCPUDelta[sample];
       // Use the fullThread here to properly get the next in case zoomed in.
       cpuDeltaAfterSample = ensureExists(fullThread.samples.threadCPUDelta)[
         fullThreadSample + 1

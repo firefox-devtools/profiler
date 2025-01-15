@@ -37,17 +37,18 @@ import {
   getOrCreateURIResource,
   nudgeReturnAddresses,
 } from '../profile-logic/profile-data';
+import { computeStringIndexMarkerFieldsByDataType } from '../profile-logic/marker-data';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
 
 import type {
   Profile,
-  Thread,
-  Counter,
+  RawProfileSharedData,
+  RawThread,
+  RawCounter,
   ExtensionTable,
-  CategoryList,
   FrameTable,
-  SamplesTable,
-  StackTable,
+  RawSamplesTable,
+  RawStackTable,
   RawMarkerTable,
   Lib,
   LibMapping,
@@ -85,8 +86,6 @@ import type {
   GCMajorCompleted_Gecko,
   GCMajorAborted,
   PhaseTimes,
-  SerializableProfile,
-  SerializableCounter,
   ExternalMarkersData,
   MarkerSchema,
   ProfileMeta,
@@ -184,6 +183,8 @@ function _cleanFunctionName(functionName: string): string {
 export class GlobalDataCollector {
   _libs: Lib[] = [];
   _libKeyToLibIndex: Map<string, IndexIntoLibs> = new Map();
+  _stringArray: string[] = [];
+  _stringTable: StringTable = StringTable.withBackingArray(this._stringArray);
 
   // Return the global index for this library, adding it to the global list if
   // necessary.
@@ -208,16 +209,21 @@ export class GlobalDataCollector {
     return index;
   }
 
+  getStringTable(): StringTable {
+    return this._stringTable;
+  }
+
   // Package up all de-duplicated global tables so that they can be embedded in
   // the profile.
-  finish(): {| libs: Lib[] |} {
-    return { libs: this._libs };
+  finish(): {| libs: Lib[], shared: RawProfileSharedData |} {
+    return { libs: this._libs, shared: { stringArray: this._stringArray } };
   }
 }
 
 type ExtractionInfo = {
   funcTable: FuncTable,
   resourceTable: ResourceTable,
+  stringArray: string[],
   stringTable: StringTable,
   addressLocator: AddressLocator,
   libToResourceIndex: Map<IndexIntoLibs, IndexIntoResourceTable>,
@@ -241,7 +247,7 @@ type ExtractionInfo = {
 export function extractFuncsAndResourcesFromFrameLocations(
   frameLocations: IndexIntoStringTable[],
   relevantForJSPerFrame: boolean[],
-  stringTable: StringTable,
+  stringArray: string[],
   libs: LibMapping[],
   extensions: ExtensionTable = getEmptyExtensions(),
   globalDataCollector: GlobalDataCollector
@@ -259,10 +265,13 @@ export function extractFuncsAndResourcesFromFrameLocations(
   // in this file that start with the word "extract".
   const resourceTable = getEmptyResourceTable();
 
+  const stringTable = globalDataCollector.getStringTable();
+
   // Bundle all of the variables up into an object to pass them around to functions.
   const extractionInfo: ExtractionInfo = {
     funcTable,
     resourceTable,
+    stringArray,
     stringTable,
     addressLocator: new AddressLocator(libs),
     libToResourceIndex: new Map(),
@@ -281,8 +290,9 @@ export function extractFuncsAndResourcesFromFrameLocations(
   const frameFuncs = [];
   const frameAddresses = [];
   for (let frameIndex = 0; frameIndex < frameLocations.length; frameIndex++) {
-    const locationIndex = frameLocations[frameIndex];
-    const locationString = stringTable.getString(locationIndex);
+    const originalLocationIndex = frameLocations[frameIndex];
+    const locationString = ensureExists(stringArray[originalLocationIndex]);
+    const locationIndex = stringTable.indexForString(locationString);
     const relevantForJS = relevantForJSPerFrame[frameIndex];
     const info =
       extractionInfo.stringToNewFuncIndexAndFrameAddress.get(locationString);
@@ -598,8 +608,11 @@ function _extractUnknownFunctionType(
 function _processFrameTable(
   geckoFrameStruct: GeckoFrameStruct,
   frameFuncs: IndexIntoFuncTable[],
-  frameAddresses: (Address | null)[]
+  frameAddresses: (Address | null)[],
+  stringArray: string[],
+  globalDataCollector: GlobalDataCollector
 ): FrameTable {
+  const stringTable = globalDataCollector.getStringTable();
   return {
     address: frameAddresses.map((a) => a ?? -1),
     inlineDepth: Array(geckoFrameStruct.length).fill(0),
@@ -608,7 +621,9 @@ function _processFrameTable(
     func: frameFuncs,
     nativeSymbol: Array(geckoFrameStruct.length).fill(null),
     innerWindowID: geckoFrameStruct.innerWindowID,
-    implementation: geckoFrameStruct.implementation,
+    implementation: geckoFrameStruct.implementation.map((impl) =>
+      impl !== null ? stringTable.indexForString(stringArray[impl]) : null
+    ),
     line: geckoFrameStruct.line,
     column: geckoFrameStruct.column,
     length: geckoFrameStruct.length,
@@ -619,44 +634,9 @@ function _processFrameTable(
  * Explicitly recreate the stack table here to help enforce our assumptions about types.
  * Also add a category column.
  */
-function _processStackTable(
-  geckoStackTable: GeckoStackStruct,
-  frameTable: FrameTable,
-  categories: CategoryList
-): StackTable {
-  // Compute a non-null category for every stack
-  const defaultCategory = categories.findIndex((c) => c.color === 'grey') || 0;
-  const categoryColumn = new Array(geckoStackTable.length);
-  const subcategoryColumn = new Array(geckoStackTable.length);
-  for (let stackIndex = 0; stackIndex < geckoStackTable.length; stackIndex++) {
-    const frameIndex = geckoStackTable.frame[stackIndex];
-    const frameCategory = frameTable.category[frameIndex];
-    const frameSubcategory = frameTable.subcategory[frameIndex];
-    let stackCategory;
-    let stackSubcategory;
-    if (frameCategory !== null) {
-      stackCategory = frameCategory;
-      stackSubcategory = frameSubcategory || 0;
-    } else {
-      const prefix = geckoStackTable.prefix[stackIndex];
-      if (prefix !== null) {
-        // Because of the structure of the stack table, prefix < stackIndex.
-        // So we've already computed the category for the prefix.
-        stackCategory = categoryColumn[prefix];
-        stackSubcategory = subcategoryColumn[prefix];
-      } else {
-        stackCategory = defaultCategory;
-        stackSubcategory = 0;
-      }
-    }
-    categoryColumn[stackIndex] = stackCategory;
-    subcategoryColumn[stackIndex] = stackSubcategory;
-  }
-
+function _processStackTable(geckoStackTable: GeckoStackStruct): RawStackTable {
   return {
     frame: geckoStackTable.frame,
-    category: categoryColumn,
-    subcategory: subcategoryColumn,
     prefix: geckoStackTable.prefix,
     length: geckoStackTable.length,
   };
@@ -709,7 +689,12 @@ function _convertPayloadStackToIndex(
  *  Extract JS allocations into the JsAllocationsTable.
  *  Extract Native allocations into the NativeAllocationsTable.
  */
-function _processMarkers(geckoMarkers: GeckoMarkerStruct): {|
+function _processMarkers(
+  geckoMarkers: GeckoMarkerStruct,
+  stringArray: string[],
+  stringIndexMarkerFieldsByDataType: Map<string, string[]>,
+  globalDataCollector: GlobalDataCollector
+): {|
   markers: RawMarkerTable,
   jsAllocations: JsAllocationsTable | null,
   nativeAllocations: NativeAllocationsTable | null,
@@ -720,6 +705,8 @@ function _processMarkers(geckoMarkers: GeckoMarkerStruct): {|
     getEmptyUnbalancedNativeAllocationsTable();
   const memoryAddress: number[] = [];
   const threadId: number[] = [];
+
+  const stringTable = globalDataCollector.getStringTable();
 
   // Determine if native allocations have memory addresses.
   let hasMemoryAddresses;
@@ -790,8 +777,15 @@ function _processMarkers(geckoMarkers: GeckoMarkerStruct): {|
       }
     }
 
-    const payload = _processMarkerPayload(geckoPayload);
-    const name = geckoMarkers.name[markerIndex];
+    const payload = _processMarkerPayload(
+      geckoPayload,
+      stringArray,
+      stringTable,
+      stringIndexMarkerFieldsByDataType
+    );
+    const name = stringTable.indexForString(
+      stringArray[geckoMarkers.name[markerIndex]]
+    );
     const startTime = geckoMarkers.startTime[markerIndex];
     const endTime = geckoMarkers.endTime[markerIndex];
     const phase = geckoMarkers.phase[markerIndex];
@@ -855,7 +849,10 @@ function convertPhaseTimes(
  * the GC information.
  */
 function _processMarkerPayload(
-  geckoPayload: MarkerPayload_Gecko | null
+  geckoPayload: MarkerPayload_Gecko | null,
+  stringArray: string[],
+  stringTable: StringTable,
+  stringIndexMarkerFieldsByDataType: Map<string, string[]>
 ): MarkerPayload | null {
   if (!geckoPayload) {
     return null;
@@ -864,7 +861,7 @@ function _processMarkerPayload(
   // If there is a "stack" field, convert it to a "cause" field. This is
   // pre-emptively done for every single marker payload.
   //
-  // Warning: This function converts the payload into an any type
+  // Warning: This function converts the payload into an any type.
   const payload = _convertStackToCause(geckoPayload);
 
   switch (payload.type) {
@@ -943,24 +940,57 @@ function _processMarkerPayload(
       };
     }
     default:
-      // `payload` is currently typed as the result of _convertStackToCause, which
-      // is MarkerPayload_Gecko where `stack` has been replaced with `cause`. This
-      // should be reasonably close to `MarkerPayload`, but Flow doesn't work well
-      // with our MarkerPayload type. So we're coerce this return value to `any`
-      // here, and then to `MarkerPayload` as the return value for this function.
-      // This doesn't provide type safety but it shows the intent of going from an
-      // object without much type safety, to a specific type definition.
-      return (payload: any);
+      break;
   }
+
+  // `payload` is currently typed as the result of _convertStackToCause, which
+  // is MarkerPayload_Gecko where `stack` has been replaced with `cause`. This
+  // should be reasonably close to `MarkerPayload`, but Flow doesn't work well
+  // with our MarkerPayload type. So we coerce this return value to `any`
+  // here, and then to `MarkerPayload` as the return value for this function.
+  // This doesn't provide type safety but it shows the intent of going from an
+  // object without much type safety, to a specific type definition.
+  const data: MarkerPayload = (payload: any);
+
+  if (!data.type) {
+    return data;
+  }
+
+  const stringIndexMarkerFields = stringIndexMarkerFieldsByDataType.get(
+    data.type
+  );
+  if (stringIndexMarkerFields === undefined) {
+    return data;
+  }
+
+  let newData: MarkerPayload = data;
+  for (const fieldKey of stringIndexMarkerFields) {
+    const stringIndex = data[fieldKey];
+    if (typeof stringIndex === 'number') {
+      newData = ({
+        ...newData,
+        [fieldKey]: stringTable.indexForString(stringArray[stringIndex]),
+      }: any);
+    }
+  }
+  return newData;
 }
 
 /**
  * Explicitly recreate the markers here to help enforce our assumptions about types.
  */
-function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
-  const samples: SamplesTable = {
+function _processSamples(geckoSamples: GeckoSampleStruct): RawSamplesTable {
+  const timeDeltas = new Array(geckoSamples.length);
+  let prevTime = 0;
+  for (let i = 0; i < geckoSamples.time.length; i++) {
+    const currentTime = geckoSamples.time[i];
+    timeDeltas[i] = currentTime - prevTime;
+    prevTime = currentTime;
+  }
+
+  const samples: RawSamplesTable = {
     stack: geckoSamples.stack,
-    time: geckoSamples.time,
+    timeDeltas,
     weightType: 'samples',
     weight: null,
     length: geckoSamples.length,
@@ -1002,11 +1032,11 @@ function _processCounters(
   // references back into a stable list of threads. The threads list in the processing
   // step is built dynamically, so the "stableThreadList" variable is a hint that this
   // should be a stable and sorted list of threads.
-  stableThreadList: Thread[],
+  stableThreadList: RawThread[],
   // The timing across processes must be normalized, this is the timing delta between
   // various processes.
   delta: Milliseconds
-): Counter[] {
+): RawCounter[] {
   const geckoCounters = geckoProfile.counters;
   const mainThread = geckoProfile.threads.find(
     (thread) => thread.name === 'GeckoMain'
@@ -1063,7 +1093,7 @@ function _processProfilerOverhead(
   // references back into a stable list of threads. The threads list in the processing
   // step is built dynamically, so the "stableThreadList" variable is a hint that this
   // should be a stable and sorted list of threads.
-  stableThreadList: Thread[],
+  stableThreadList: RawThread[],
   // The timing across processes must be normalized, this is the timing delta between
   // various processes.
   delta: Milliseconds
@@ -1113,8 +1143,9 @@ function _processThread(
   thread: GeckoThread,
   processProfile: GeckoProfile | GeckoSubprocessProfile,
   extensions: ExtensionTable,
+  stringIndexMarkerFieldsByDataType: Map<string, string[]>,
   globalDataCollector: GlobalDataCollector
-): Thread {
+): RawThread {
   const geckoFrameStruct: GeckoFrameStruct = _toStructOfArrays(
     thread.frameTable
   );
@@ -1127,14 +1158,13 @@ function _processThread(
   );
 
   const { libs, pausedRanges, meta } = processProfile;
-  const { categories, shutdownTime } = meta;
+  const { shutdownTime } = meta;
 
-  const stringTable = StringTable.withBackingArray(thread.stringTable);
   const { funcTable, resourceTable, frameFuncs, frameAddresses } =
     extractFuncsAndResourcesFromFrameLocations(
       geckoFrameStruct.location,
       geckoFrameStruct.relevantForJS,
-      stringTable,
+      thread.stringTable,
       libs,
       extensions,
       globalDataCollector
@@ -1143,18 +1173,20 @@ function _processThread(
   const frameTable: FrameTable = _processFrameTable(
     geckoFrameStruct,
     frameFuncs,
-    frameAddresses
+    frameAddresses,
+    thread.stringTable,
+    globalDataCollector
   );
-  const stackTable = _processStackTable(
-    geckoStackTable,
-    frameTable,
-    categories
+  const stackTable = _processStackTable(geckoStackTable);
+  const { markers, jsAllocations, nativeAllocations } = _processMarkers(
+    geckoMarkers,
+    thread.stringTable,
+    stringIndexMarkerFieldsByDataType,
+    globalDataCollector
   );
-  const { markers, jsAllocations, nativeAllocations } =
-    _processMarkers(geckoMarkers);
   const samples = _processSamples(geckoSamples);
 
-  const newThread: Thread = {
+  const newThread: RawThread = {
     name: thread.name,
     isMainThread: thread.name === 'GeckoMain',
     'eTLD+1': thread['eTLD+1'],
@@ -1174,7 +1206,6 @@ function _processThread(
     resourceTable,
     stackTable,
     markers,
-    stringTable,
     samples,
   };
 
@@ -1204,6 +1235,7 @@ function _processThread(
     // Optionally extract the JS Tracer information, if they exist.
     const { jsTracerEvents } = thread;
     const { jsTracerDictionary } = processProfile;
+    const stringTable = globalDataCollector.getStringTable();
     if (jsTracerEvents && jsTracerDictionary) {
       // Add the JS tracer's strings to the thread's existing string table, and create
       // a mapping from the old string indexes to the new ones. Use an Array rather
@@ -1212,7 +1244,7 @@ function _processThread(
         jsTracerDictionary.length
       );
       for (let i = 0; i < jsTracerDictionary.length; i++) {
-        geckoToProcessedStringIndex[i] = newThread.stringTable.indexForString(
+        geckoToProcessedStringIndex[i] = stringTable.indexForString(
           jsTracerDictionary[i]
         );
       }
@@ -1251,6 +1283,26 @@ export function adjustTableTimestamps<Table: { time: Milliseconds[] }>(
   return {
     ...table,
     time: table.time.map((time) => time + delta),
+  };
+}
+
+export function adjustSampleTimestamps(
+  rawSamplesTable: RawSamplesTable,
+  delta: Milliseconds
+): RawSamplesTable {
+  const { time, timeDeltas } = rawSamplesTable;
+  if (time !== undefined) {
+    return {
+      ...rawSamplesTable,
+      time: time.map((t) => t + delta),
+    };
+  }
+
+  const newTimeDeltas = ensureExists(timeDeltas).slice();
+  newTimeDeltas[0] += delta;
+  return {
+    ...rawSamplesTable,
+    timeDeltas: newTimeDeltas,
   };
 }
 
@@ -1532,7 +1584,11 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   // exception.
   upgradeGeckoProfileToCurrentVersion(geckoProfile);
 
-  let threads = [];
+  const threads: RawThread[] = [];
+
+  const markerSchema = processMarkerSchema(geckoProfile);
+  const stringIndexMarkerFieldsByDataType =
+    computeStringIndexMarkerFieldsByDataType(markerSchema);
 
   const extensions: ExtensionTable = geckoProfile.meta.extensions
     ? _toStructOfArrays(geckoProfile.meta.extensions)
@@ -1542,10 +1598,16 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
 
   for (const thread of geckoProfile.threads) {
     threads.push(
-      _processThread(thread, geckoProfile, extensions, globalDataCollector)
+      _processThread(
+        thread,
+        geckoProfile,
+        extensions,
+        stringIndexMarkerFieldsByDataType,
+        globalDataCollector
+      )
     );
   }
-  const counters: Counter[] = _processCounters(geckoProfile, threads, 0);
+  const counters: RawCounter[] = _processCounters(geckoProfile, threads, 0);
   const nullableProfilerOverhead: Array<ProfilerOverhead | null> = [
     _processProfilerOverhead(geckoProfile, threads, 0),
   ];
@@ -1553,51 +1615,50 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   for (const subprocessProfile of geckoProfile.processes) {
     const adjustTimestampsBy =
       subprocessProfile.meta.startTime - geckoProfile.meta.startTime;
-    threads = threads.concat(
-      subprocessProfile.threads.map((thread) => {
-        const newThread: Thread = _processThread(
-          thread,
-          subprocessProfile,
-          extensions,
-          globalDataCollector
-        );
-        newThread.samples = adjustTableTimestamps(
-          newThread.samples,
+    for (const thread of subprocessProfile.threads) {
+      const newThread: RawThread = _processThread(
+        thread,
+        subprocessProfile,
+        extensions,
+        stringIndexMarkerFieldsByDataType,
+        globalDataCollector
+      );
+      newThread.samples = adjustSampleTimestamps(
+        newThread.samples,
+        adjustTimestampsBy
+      );
+      newThread.markers = adjustMarkerTimestamps(
+        newThread.markers,
+        adjustTimestampsBy
+      );
+      if (newThread.jsTracer) {
+        newThread.jsTracer = _adjustJsTracerTimestamps(
+          newThread.jsTracer,
           adjustTimestampsBy
         );
-        newThread.markers = adjustMarkerTimestamps(
-          newThread.markers,
+      }
+      if (newThread.jsAllocations) {
+        newThread.jsAllocations = adjustTableTimestamps(
+          newThread.jsAllocations,
           adjustTimestampsBy
         );
-        if (newThread.jsTracer) {
-          newThread.jsTracer = _adjustJsTracerTimestamps(
-            newThread.jsTracer,
-            adjustTimestampsBy
-          );
-        }
-        if (newThread.jsAllocations) {
-          newThread.jsAllocations = adjustTableTimestamps(
-            newThread.jsAllocations,
-            adjustTimestampsBy
-          );
-        }
-        if (newThread.nativeAllocations) {
-          newThread.nativeAllocations = adjustTableTimestamps(
-            newThread.nativeAllocations,
-            adjustTimestampsBy
-          );
-        }
-        newThread.processStartupTime += adjustTimestampsBy;
-        if (newThread.processShutdownTime !== null) {
-          newThread.processShutdownTime += adjustTimestampsBy;
-        }
-        newThread.registerTime += adjustTimestampsBy;
-        if (newThread.unregisterTime !== null) {
-          newThread.unregisterTime += adjustTimestampsBy;
-        }
-        return newThread;
-      })
-    );
+      }
+      if (newThread.nativeAllocations) {
+        newThread.nativeAllocations = adjustTableTimestamps(
+          newThread.nativeAllocations,
+          adjustTimestampsBy
+        );
+      }
+      newThread.processStartupTime += adjustTimestampsBy;
+      if (newThread.processShutdownTime !== null) {
+        newThread.processShutdownTime += adjustTimestampsBy;
+      }
+      newThread.registerTime += adjustTimestampsBy;
+      if (newThread.unregisterTime !== null) {
+        newThread.unregisterTime += adjustTimestampsBy;
+      }
+      threads.push(newThread);
+    }
 
     counters.push(
       ..._processCounters(subprocessProfile, threads, adjustTimestampsBy)
@@ -1645,7 +1706,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     // already symbolicated, otherwise we indicate it needs to be symbolicated.
     symbolicated: !!geckoProfile.meta.presymbolicated,
     updateChannel: geckoProfile.meta.updateChannel,
-    markerSchema: processMarkerSchema(geckoProfile),
+    markerSchema,
     sampleUnits: geckoProfile.meta.sampleUnits,
     device: geckoProfile.meta.device,
   };
@@ -1680,6 +1741,8 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   // sub-processes.
   const profileGatheringLog = { ...(geckoProfile.profileGatheringLog || {}) };
 
+  const stringTable = globalDataCollector.getStringTable();
+
   // Convert JS tracer information into their own threads. This mutates
   // the threads array.
   for (const thread of threads.slice()) {
@@ -1689,7 +1752,8 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
       const jsTracerThread = convertJsTracerToThread(
         thread,
         jsTracer,
-        geckoProfile.meta.categories
+        geckoProfile.meta.categories,
+        stringTable
       );
       jsTracerThread.isJsTracer = true;
       jsTracerThread.name = `JS Tracer of ${friendlyThreadName}`;
@@ -1702,10 +1766,10 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
 
   if (meta.visualMetrics) {
     // Process the visual metrics to add markers for them.
-    processVisualMetrics(threads, meta, pages);
+    processVisualMetrics(threads, meta, pages, stringTable);
   }
 
-  const { libs } = globalDataCollector.finish();
+  const { libs, shared } = globalDataCollector.finish();
 
   const result = {
     meta,
@@ -1713,6 +1777,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     pages,
     counters,
     profilerOverhead,
+    shared,
     threads,
     profilingLog,
     profileGatheringLog,
@@ -1720,97 +1785,12 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   return result;
 }
 
-function _serializeSamples({ time, ...restOfSamples }): any {
-  let lastTime = 0;
-  return {
-    timeDeltas: time.map((t) => {
-      const timeDelta = t - lastTime;
-      lastTime = t;
-      return timeDelta;
-    }),
-    ...restOfSamples,
-  };
-}
-
-function _unserializeSamples({ timeDeltas, time, ...restOfSamples }): any {
-  let lastTime = 0;
-  return {
-    time:
-      time ||
-      ensureExists(timeDeltas).map((delta) => {
-        lastTime = lastTime + delta;
-        return lastTime;
-      }),
-    ...restOfSamples,
-  };
-}
-
-/**
- * The StringTable is a class, and is not serializable. This function turns
- * a profile into the serializable variant.
- */
-export function makeProfileSerializable({
-  threads,
-  counters,
-  ...restOfProfile
-}: Profile): SerializableProfile {
-  return {
-    ...restOfProfile,
-    counters: counters
-      ? counters.map(({ samples, ...restOfCounter }) => {
-          return {
-            ...restOfCounter,
-            samples: _serializeSamples(samples),
-          };
-        })
-      : counters,
-    threads: threads.map(({ stringTable, samples, ...restOfThread }) => {
-      return {
-        ...restOfThread,
-        samples: _serializeSamples(samples),
-        stringArray: stringTable.getBackingArray(),
-      };
-    }),
-  };
-}
-
 /**
  * Take a processed profile and remove any non-serializable classes such as the
  * StringTable class.
  */
 export function serializeProfile(profile: Profile): string {
-  return JSON.stringify(makeProfileSerializable(profile));
-}
-
-/**
- * Take a serialized processed profile from some saved source, and re-initialize
- * any non-serializable classes.
- */
-function _unserializeProfile({
-  threads,
-  counters,
-  ...restOfProfile
-}: SerializableProfile): Profile {
-  return {
-    ...restOfProfile,
-    counters: counters
-      ? ((counters: any[]): SerializableCounter[]).map(
-          ({ samples, ...restOfCounter }) => {
-            return {
-              ...restOfCounter,
-              samples: _unserializeSamples(samples),
-            };
-          }
-        )
-      : counters,
-    threads: threads.map(({ stringArray, samples, ...restOfThread }) => {
-      return {
-        ...restOfThread,
-        samples: _unserializeSamples(samples),
-        stringTable: StringTable.withBackingArray(stringArray),
-      };
-    }),
-  };
+  return JSON.stringify(profile);
 }
 
 // If applicable, this function will try to "fix" a processed profile that was
@@ -1818,7 +1798,7 @@ function _unserializeProfile({
 // step.
 function attemptToFixProcessedProfileThroughMutation(
   profile: MixedObject
-): SerializableProfile | null {
+): MixedObject | null {
   if (!profile || typeof profile !== 'object') {
     return profile;
   }
@@ -1930,7 +1910,7 @@ export async function unserializeProfileOfArbitraryFormat(
     const processedProfile =
       attemptToUpgradeProcessedProfileThroughMutation(possiblyFixedProfile);
     if (processedProfile) {
-      return _unserializeProfile(processedProfile);
+      return processedProfile;
     }
 
     const processedChromeProfile = attemptToConvertChromeProfile(
@@ -1960,9 +1940,10 @@ export async function unserializeProfileOfArbitraryFormat(
  * Mutates the markers inside parent process and tab process main threads.
  */
 export function processVisualMetrics(
-  threads: Thread[],
+  threads: RawThread[],
   meta: ProfileMeta,
-  pages: PageList
+  pages: PageList,
+  stringTable: StringTable
 ) {
   const { visualMetrics } = meta;
   if (pages.length === 0 || !visualMetrics) {
@@ -1974,7 +1955,11 @@ export function processVisualMetrics(
   const mainThreadIdx = threads.findIndex(
     (thread) => thread.name === 'GeckoMain' && thread.processType === 'default'
   );
-  const tabThreadIdx = findTabMainThreadForVisualMetrics(threads, pages);
+  const tabThreadIdx = findTabMainThreadForVisualMetrics(
+    threads,
+    pages,
+    stringTable
+  );
 
   if (mainThreadIdx === -1 || !tabThreadIdx) {
     // Failed to find the parent process or tab process main threads. Return early.
@@ -1995,7 +1980,7 @@ export function processVisualMetrics(
   );
 
   function maybeAddMetricMarker(
-    thread: Thread,
+    thread: RawThread,
     name: string,
     phase: MarkerPhase,
     startTime: number | null,
@@ -2014,7 +1999,7 @@ export function processVisualMetrics(
       return;
     }
     // Add the marker to the given thread.
-    thread.markers.name.push(thread.stringTable.indexForString(name));
+    thread.markers.name.push(stringTable.indexForString(name));
     thread.markers.startTime.push(startTime);
     thread.markers.endTime.push(endTime);
     thread.markers.phase.push(phase);
@@ -2026,9 +2011,9 @@ export function processVisualMetrics(
   // Find the navigation start time in the tab thread for specifying the marker
   // start times.
   let navigationStartTime = null;
-  if (tabThread.stringTable.hasString('Navigation::Start')) {
+  if (stringTable.hasString('Navigation::Start')) {
     const navigationStartStrIdx =
-      tabThread.stringTable.indexForString('Navigation::Start');
+      stringTable.indexForString('Navigation::Start');
     const navigationStartMarkerIdx = tabThread.markers.name.findIndex(
       (m) => m === navigationStartStrIdx
     );
@@ -2107,8 +2092,9 @@ export function processVisualMetrics(
  * DO NOT use it for any other purpose than visual metrics as it's not going to be accurate.
  */
 function findTabMainThreadForVisualMetrics(
-  threads: Thread[],
-  pages: PageList
+  threads: RawThread[],
+  pages: PageList,
+  stringTable: StringTable
 ): ThreadIndex | null {
   for (let threadIdx = 0; threadIdx < threads.length; threadIdx++) {
     const thread = threads[threadIdx];
@@ -2128,12 +2114,12 @@ function findTabMainThreadForVisualMetrics(
         .map((page) => page.innerWindowID)
     );
 
-    if (!thread.stringTable.hasString('RefreshDriverTick')) {
+    if (!stringTable.hasString('RefreshDriverTick')) {
       // No RefreshDriver tick marker, skip the thread.
       continue;
     }
     const refreshDriverTickStrIndex =
-      thread.stringTable.indexForString('RefreshDriverTick');
+      stringTable.indexForString('RefreshDriverTick');
 
     const { markers } = thread;
     for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {

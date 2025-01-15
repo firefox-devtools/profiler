@@ -15,21 +15,22 @@ import type {
   IndexIntoStackTable,
   ProfileMeta,
   ResourceTable,
-  SamplesTable,
+  RawSamplesTable,
   Profile,
-  Thread,
-  StackTable,
+  RawThread,
+  RawStackTable,
 } from 'firefox-profiler/types/profile';
 import {
   getEmptyFuncTable,
   getEmptyResourceTable,
   getEmptyFrameTable,
-  getEmptyStackTable,
+  getEmptyRawStackTable,
   getEmptySamplesTable,
   getEmptyRawMarkerTable,
   getEmptyNativeSymbolTable,
 } from 'firefox-profiler/profile-logic/data-structures';
 import { StringTable } from 'firefox-profiler/utils/string-table';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 import {
   verifyMagic,
   SIMPLEPERF as SIMPLEPERF_MAGIC,
@@ -182,29 +183,26 @@ class FirefoxFrameTable {
 class FirefoxSampleTable {
   strings: StringTable;
 
-  stackTable: StackTable = getEmptyStackTable();
+  stackTable: RawStackTable = getEmptyRawStackTable();
   stackMap: Map<string, IndexIntoStackTable> = new Map();
 
   constructor(strings: StringTable) {
     this.strings = strings;
   }
 
-  toJson(): StackTable {
+  toJson(): RawStackTable {
     return this.stackTable;
   }
 
   findOrAddStack(
     frameIndex: IndexIntoFrameTable,
-    prefix: IndexIntoStackTable | null,
-    category: IndexIntoCategoryList
+    prefix: IndexIntoStackTable | null
   ): IndexIntoStackTable {
     const mapKey = `${frameIndex}-${prefix ?? 'null'}`;
 
     let stackIndex = this.stackMap.get(mapKey);
     if (!stackIndex) {
       this.stackTable.frame.push(frameIndex);
-      this.stackTable.category.push(category);
-      this.stackTable.subcategory.push(0);
       this.stackTable.prefix.push(prefix);
 
       stackIndex = this.stackTable.length++;
@@ -222,27 +220,33 @@ class FirefoxThread {
   tid: number;
   pid: number;
 
-  stringArray = [];
-  strings = StringTable.withBackingArray(this.stringArray);
+  strings: StringTable;
 
-  sampleTable: SamplesTable = getEmptySamplesTable();
+  sampleTable: RawSamplesTable = getEmptySamplesTable();
 
-  stackTable: FirefoxSampleTable = new FirefoxSampleTable(this.strings);
-  frameTable: FirefoxFrameTable = new FirefoxFrameTable(this.strings);
-  funcTable: FirefoxFuncTable = new FirefoxFuncTable(this.strings);
-  resourceTable: FirefoxResourceTable = new FirefoxResourceTable(this.strings);
+  stackTable: FirefoxSampleTable;
+  frameTable: FirefoxFrameTable;
+  funcTable: FirefoxFuncTable;
+  resourceTable: FirefoxResourceTable;
 
   cpuClockEventId: number = -1;
 
-  constructor(thread: report.IThread) {
+  constructor(thread: report.IThread, stringTable: StringTable) {
     this.tid = thread.threadId;
     this.pid = thread.processId;
 
     this.isMainThread = thread.threadId === thread.processId;
     this.name = thread.threadName ?? '';
+
+    this.strings = stringTable;
+
+    this.stackTable = new FirefoxSampleTable(this.strings);
+    this.frameTable = new FirefoxFrameTable(this.strings);
+    this.funcTable = new FirefoxFuncTable(this.strings);
+    this.resourceTable = new FirefoxResourceTable(this.strings);
   }
 
-  toJson(): Thread {
+  toJson(): RawThread {
     return {
       processType: 'default',
       processStartupTime: 0,
@@ -258,7 +262,6 @@ class FirefoxThread {
       markers: getEmptyRawMarkerTable(),
       stackTable: this.stackTable.toJson(),
       frameTable: this.frameTable.toJson(),
-      stringTable: this.strings,
       funcTable: this.funcTable.toJson(),
       resourceTable: this.resourceTable.toJson(),
       nativeSymbols: getEmptyNativeSymbolTable(),
@@ -326,15 +329,11 @@ class FirefoxThread {
 
       const frameIndex = this.frameTable.findOrAddFrame(funcIndex, category);
 
-      prefixStackId = this.stackTable.findOrAddStack(
-        frameIndex,
-        prefixStackId,
-        category
-      );
+      prefixStackId = this.stackTable.findOrAddStack(frameIndex, prefixStackId);
     }
 
     this.sampleTable.stack.push(prefixStackId);
-    this.sampleTable.time.push(toMilliseconds(sample.time ?? 0));
+    ensureExists(this.sampleTable.time).push(toMilliseconds(sample.time ?? 0));
 
     if (this.sampleTable.weight) {
       const weight =
@@ -361,10 +360,16 @@ class FirefoxProfile {
   sampleCount: number = 0;
   lostCount: number = 0;
 
+  stringArray = [];
+  stringTable = StringTable.withBackingArray(this.stringArray);
+
   toJson(): Profile {
     return {
       meta: this.getProfileMeta(),
       libs: [],
+      shared: {
+        stringArray: this.stringArray,
+      },
       threads: this.threads.map((thread) => thread.toJson()),
     };
   }
@@ -444,7 +449,7 @@ class FirefoxProfile {
   }
 
   addThread(thread: report.IThread) {
-    const firefoxThread = new FirefoxThread(thread);
+    const firefoxThread = new FirefoxThread(thread, this.stringTable);
     this.threads.push(firefoxThread);
     this.threadMap.set(thread.threadId, firefoxThread);
   }
