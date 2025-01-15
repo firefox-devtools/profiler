@@ -2952,6 +2952,8 @@ CallTree {
       },
     },
     "tid": 0,
+    "tracedObjectShapes": undefined,
+    "tracedValuesBuffer": undefined,
     "unregisterTime": null,
     "userContextId": undefined,
   },
@@ -3281,6 +3283,8 @@ Object {
     },
   },
   "tid": 0,
+  "tracedObjectShapes": undefined,
+  "tracedValuesBuffer": undefined,
   "unregisterTime": null,
   "userContextId": undefined,
 }
@@ -3682,6 +3686,8 @@ Object {
     },
   },
   "tid": 0,
+  "tracedObjectShapes": undefined,
+  "tracedValuesBuffer": undefined,
   "unregisterTime": null,
   "userContextId": undefined,
 }
@@ -4009,6 +4015,8 @@ Object {
     },
   },
   "tid": 0,
+  "tracedObjectShapes": undefined,
+  "tracedValuesBuffer": undefined,
   "unregisterTime": null,
   "userContextId": undefined,
 }
@@ -4336,6 +4344,8 @@ Object {
     },
   },
   "tid": 0,
+  "tracedObjectShapes": undefined,
+  "tracedValuesBuffer": undefined,
   "unregisterTime": null,
   "userContextId": undefined,
 }
