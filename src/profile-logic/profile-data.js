@@ -1757,6 +1757,13 @@ export function filterThreadSamplesToRange(
     );
   }
 
+  if (samples.argv) {
+    newSamples.argv = samples.argv.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  }
+
   if (samples.threadId) {
     newSamples.threadId = samples.threadId.slice(
       beginSampleIndex,
@@ -1883,6 +1890,13 @@ export function filterRawThreadSamplesToRange(
     );
   }
 
+  if (samples.argv) {
+    newSamples.argv = samples.argv.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  }
+
   if (samples.threadId) {
     newSamples.threadId = samples.threadId.slice(
       beginSampleIndex,
@@ -1988,6 +2002,9 @@ export function filterCounterSamplesToRange(
     count: samples.count.slice(beginSampleIndex, endSampleIndex),
     number: samples.number
       ? samples.number.slice(beginSampleIndex, endSampleIndex)
+      : undefined,
+    argv: samples.argv
+      ? samples.argv.slice(beginSampleIndex, endSampleIndex)
       : undefined,
   };
 
@@ -2337,6 +2354,7 @@ export function computeSamplesTableFromRawSamplesTable(
   const {
     responsiveness,
     eventDelay,
+    argv,
     stack,
     weight,
     weightType,
@@ -2363,6 +2381,7 @@ export function computeSamplesTableFromRawSamplesTable(
     // These fields are copied from the raw samples table:
     responsiveness,
     eventDelay,
+    argv,
     stack,
     weight,
     weightType,
@@ -2382,7 +2401,8 @@ export function createThreadFromDerivedTables(
   rawThread: RawThread,
   samples: SamplesTable,
   stackTable: StackTable,
-  stringTable: StringTable
+  stringTable: StringTable,
+  argvBuffer: ArrayBuffer | null,
 ): Thread {
   const {
     processType,
@@ -2409,6 +2429,7 @@ export function createThreadFromDerivedTables(
     jsTracer,
     isPrivateBrowsing,
     userContextId,
+    shapes,
   } = rawThread;
 
   const thread: Thread = {
@@ -2437,11 +2458,13 @@ export function createThreadFromDerivedTables(
     jsTracer,
     isPrivateBrowsing,
     userContextId,
+    shapes,
 
     // These fields are derived:
     samples,
     stackTable,
     stringTable,
+    argvBuffer: argvBuffer || undefined
   };
   return thread;
 }

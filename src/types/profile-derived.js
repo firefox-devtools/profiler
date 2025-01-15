@@ -85,6 +85,7 @@ export type Thread = {|
   resourceTable: ResourceTable,
   nativeSymbols: NativeSymbolTable,
   jsTracer?: JsTracerTable,
+
   // If present and true, this thread was launched for a private browsing session only.
   // When false, it can still contain private browsing data if the profile was
   // captured in a non-fission browser.
@@ -95,6 +96,7 @@ export type Thread = {|
   // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
   // had no extra attribute at all.
   userContextId?: number,
+  shapes?: Array<?Array<string>>,
 
   // The fields below this comment are derived data, and not present on the RawThread
   // in the same form.
@@ -105,6 +107,8 @@ export type Thread = {|
   // The stack samples collected for this thread. This field is different from
   // RawThread in that the `time` column is always present.
   samples: SamplesTable,
+
+  argvBuffer?: ArrayBuffer,
 |};
 
 /**
@@ -131,6 +135,7 @@ export type SamplesTable = {|
   // This property isn't present in normal threads. However it's present for
   // merged threads, so that we know the origin thread for these samples.
   threadId?: Tid[],
+  argv?: Array<number | null>,
   length: number,
 |};
 
@@ -141,6 +146,7 @@ type SamplesLikeTableShape = {
   // See the WeightType type for more information.
   weight: null | number[],
   weightType: WeightType,
+  argv?: Array<number | null>,
   length: number,
 };
 
@@ -157,6 +163,7 @@ export type CounterSamplesTable = {|
   number?: number[],
   // The count of the data, for instance for memory this would be bytes.
   count: number[],
+  argv?: Array<number | null>,
   length: number,
 |};
 
