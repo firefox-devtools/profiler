@@ -16,6 +16,7 @@ import {
   getEmptyUnbalancedNativeAllocationsTable,
 } from 'firefox-profiler/profile-logic/data-structures';
 
+import { StringTable } from 'firefox-profiler/utils/string-table';
 import { coerce, ensureExists } from 'firefox-profiler/utils/flow';
 
 /**
@@ -179,9 +180,10 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
   const profile = getEmptyProfile();
   profile.meta.product = dhat.cmd + ' (dhat)';
   profile.meta.importedFrom = `dhat`;
+  const stringTable = StringTable.withBackingArray(profile.shared.stringArray);
 
   const allocationsTable = getEmptyUnbalancedNativeAllocationsTable();
-  const { funcTable, stringTable, stackTable, frameTable } = getEmptyThread();
+  const { funcTable, stackTable, frameTable } = getEmptyThread();
 
   const funcKeyToFuncIndex = new Map<string, IndexIntoFuncTable>();
 
@@ -213,8 +215,6 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
   const rootFrameIndex = frameTable.length++;
 
   stackTable.frame.push(rootFrameIndex);
-  stackTable.category.push(otherCategory);
-  stackTable.subcategory.push(otherSubCategory);
   stackTable.prefix.push(null);
   const rootStackIndex = stackTable.length++;
 
@@ -331,8 +331,6 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
       if (stackIndex === stackTable.length) {
         // No stack index was found, add on a new one.
         stackTable.frame.push(frameIndex);
-        stackTable.category.push(otherCategory);
-        stackTable.subcategory.push(otherSubCategory);
         stackTable.prefix.push(prefix);
 
         if (candidateStackTables) {
@@ -375,7 +373,6 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     thread.pid = dhat.pid;
     thread.tid = i;
     thread.name = name;
-    thread.stringTable = stringTable;
 
     thread.funcTable.name = funcTable.name.slice();
     thread.funcTable.isJS = funcTable.isJS.slice();
@@ -397,8 +394,6 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     thread.frameTable.length = frameTable.length;
 
     thread.stackTable.frame = stackTable.frame.slice();
-    thread.stackTable.category = stackTable.category.slice();
-    thread.stackTable.category = stackTable.category.slice();
     thread.stackTable.prefix = stackTable.prefix.slice();
     thread.stackTable.length = stackTable.length;
 

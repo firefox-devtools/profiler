@@ -11,6 +11,7 @@ import {
   getJsTracerFixed,
 } from '../../profile-logic/js-tracer';
 import { getEmptyProfile } from '../../profile-logic/data-structures';
+import { StringTable } from '../../utils/string-table';
 import { formatTree } from '../fixtures/utils';
 import {
   getProfileFromTextSamples,
@@ -126,9 +127,18 @@ describe('convertJsTracerToThread', function () {
     );
 
     const profile = getEmptyProfile();
+    profile.shared.stringArray = existingProfile.shared.stringArray;
     const jsTracer = ensureExists(existingThread.jsTracer);
+    const stringTable = StringTable.withBackingArray(
+      profile.shared.stringArray
+    );
     profile.threads = [
-      convertJsTracerToThread(existingThread, jsTracer, categories),
+      convertJsTracerToThread(
+        existingThread,
+        jsTracer,
+        categories,
+        stringTable
+      ),
     ];
     const { getState } = storeWithProfile(profile);
     const callTree = selectedThreadSelectors.getCallTree(getState());
@@ -159,17 +169,19 @@ describe('convertJsTracerToThread', function () {
       existingProfile.meta.categories,
       'Expected to find categories'
     );
+    const stringTable = StringTable.withBackingArray(
+      existingProfile.shared.stringArray
+    );
     const jsTracer = ensureExists(existingThread.jsTracer);
     const thread = convertJsTracerToThread(
       existingThread,
       jsTracer,
-      categories
+      categories,
+      stringTable
     );
     const implementationNames = thread.frameTable.implementation.map(
       (implementation) =>
-        implementation === null
-          ? null
-          : thread.stringTable.getString(implementation)
+        implementation === null ? null : stringTable.getString(implementation)
     );
     expect(implementationNames).toEqual([
       null, // 'https://mozilla.org'
@@ -335,6 +347,7 @@ describe('selectors/getJsTracerTiming', function () {
       // Create a profile from text samples.
       const {
         profile,
+        stringTable,
         funcNamesDictPerThread: [funcNamesDict],
       } = getProfileFromTextSamples(`
         Foo.js
@@ -349,13 +362,14 @@ describe('selectors/getJsTracerTiming', function () {
         const thread = profile.threads[0];
 
         // Also create a JS tracer profile.
-        const { stringTable: tracerStringTable, jsTracer } =
-          getProfileWithJsTracerEvents([
-            ['Root', 0, 20],
-            ['Node', 1, 19],
-            ['https://mozilla.org', 2, 18],
-            ['https://mozilla.org', 3, 16],
-          ]).threads[0];
+        const jsTracerProfile = getProfileWithJsTracerEvents([
+          ['Root', 0, 20],
+          ['Node', 1, 19],
+          ['https://mozilla.org', 2, 18],
+          ['https://mozilla.org', 3, 16],
+        ]);
+        const { jsTracer } = jsTracerProfile.threads[0];
+        const tracerStringArray = jsTracerProfile.shared.stringArray;
 
         if (!jsTracer) {
           throw new Error('Unable to find a JS tracer table');
@@ -369,8 +383,8 @@ describe('selectors/getJsTracerTiming', function () {
           jsTracerIndex++
         ) {
           // Map the old string to the new string.
-          jsTracer.events[jsTracerIndex] = thread.stringTable.indexForString(
-            tracerStringTable.getString(jsTracer.events[jsTracerIndex])
+          jsTracer.events[jsTracerIndex] = stringTable.indexForString(
+            tracerStringArray[jsTracer.events[jsTracerIndex]]
           );
         }
 
@@ -379,7 +393,7 @@ describe('selectors/getJsTracerTiming', function () {
         const fooColumn = 5;
         thread.funcTable.lineNumber[foo] = fooLine;
         thread.funcTable.columnNumber[foo] = fooColumn;
-        thread.funcTable.fileName[foo] = thread.stringTable.indexForString(
+        thread.funcTable.fileName[foo] = stringTable.indexForString(
           'https://mozilla.org'
         );
 
@@ -388,7 +402,7 @@ describe('selectors/getJsTracerTiming', function () {
         const barColumn = 11;
         thread.funcTable.lineNumber[bar] = barLine;
         thread.funcTable.columnNumber[bar] = barColumn;
-        thread.funcTable.fileName[bar] = thread.stringTable.indexForString(
+        thread.funcTable.fileName[bar] = stringTable.indexForString(
           'https://mozilla.org'
         );
 
@@ -396,7 +410,7 @@ describe('selectors/getJsTracerTiming', function () {
         // Use bar's line and column information.
         thread.funcTable.lineNumber[baz] = barLine;
         thread.funcTable.columnNumber[baz] = barColumn;
-        thread.funcTable.fileName[baz] = thread.stringTable.indexForString(
+        thread.funcTable.fileName[baz] = stringTable.indexForString(
           'https://mozilla.org'
         );
 

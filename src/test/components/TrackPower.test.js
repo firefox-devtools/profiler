@@ -58,19 +58,20 @@ describe('TrackPower', function () {
     );
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
+    const sampleTimes = ensureExists(thread.samples.time);
     // Changing one of the sample times, so we can test different intervals.
-    thread.samples.time[1] = 1.5; // It was 1 before.
+    sampleTimes[1] = 1.5; // It was 1 before.
     // Ensure some samples are very close to each other, to exercise
     // the max min decimation algorithm.
-    for (let i = 7; i < thread.samples.time.length - 1; ++i) {
-      thread.samples.time[i] = 7 + i / 100;
+    for (let i = 7; i < sampleTimes.length - 1; ++i) {
+      sampleTimes[i] = 7 + i / 100;
     }
     profile.counters = [
       getCounterForThreadWithSamples(
         thread,
         threadIndex,
         {
-          time: thread.samples.time.slice(),
+          time: sampleTimes.slice(),
           // Power usage numbers. They are pWh so they are pretty big.
           count: [
             10000, 40000, 50000, 100000, 2000000, 5000000, 30000, 1000000,
