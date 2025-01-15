@@ -1121,10 +1121,14 @@ function combineSamplesForMerging(
   translationMapsForStacks: TranslationMapForStacks[],
   threads: Thread[]
 ): SamplesTable {
-  const sampleTables = threads.map((thread) => thread.samples);
+  const samplesPerThread: SamplesTable[] = threads.map(
+    (thread) => thread.samples
+  );
   // This is the array that holds the latest processed sample index for each
   // thread's samplesTable.
-  const sampleIndexes = Array(sampleTables.length).fill(0);
+  const nextSampleIndexPerThread: number[] = Array(
+    samplesPerThread.length
+  ).fill(0);
   // This array will contain the source thread ids. It will be added to the
   // samples table after the loop.
   const newThreadId = [];
@@ -1135,8 +1139,8 @@ function combineSamplesForMerging(
   };
 
   while (true) {
-    let selectedSamplesTableIndex: number | null = null;
-    let time = Infinity;
+    let earliestNextSampleThreadIndex: number | null = null;
+    let earliestNextSampleTime = Infinity;
     // 1. Find out which sample to consume.
     // Iterate over all the sample tables and pick the one with earliest sample.
     // TODO: We have this for loop inside the while loop which makes this
@@ -1144,39 +1148,43 @@ function combineSamplesForMerging(
     // thread count to merge. Possibly we can try to make this faster by reducing
     // the complexity.
     for (
-      let sampleTablesIndex = 0;
-      sampleTablesIndex < sampleTables.length;
-      sampleTablesIndex++
+      let threadIndex = 0;
+      threadIndex < samplesPerThread.length;
+      threadIndex++
     ) {
-      const currentSamplesTable = sampleTables[sampleTablesIndex];
-      const currentSamplesIndex = sampleIndexes[sampleTablesIndex];
-      const currentSampleTime = currentSamplesTable.time[currentSamplesIndex];
-      if (
-        currentSamplesIndex < currentSamplesTable.length &&
-        currentSampleTime < time
-      ) {
-        selectedSamplesTableIndex = sampleTablesIndex;
-        time = currentSampleTime;
+      const samples = samplesPerThread[threadIndex];
+      const sampleIndex = nextSampleIndexPerThread[threadIndex];
+      if (sampleIndex >= samples.length) {
+        continue;
+      }
+
+      const currentSampleTime = samples.time[sampleIndex];
+      if (currentSampleTime < earliestNextSampleTime) {
+        earliestNextSampleThreadIndex = threadIndex;
+        earliestNextSampleTime = currentSampleTime;
       }
     }
 
-    if (selectedSamplesTableIndex === null) {
+    if (earliestNextSampleThreadIndex === null) {
       // All samples from every thread have been consumed.
       break;
     }
 
     // 2. Add the earliest sample to the new sample table.
-    const currentSamplesTable = sampleTables[selectedSamplesTableIndex];
-    const oldSampleIndex: number = sampleIndexes[selectedSamplesTableIndex];
+    const sourceThreadIndex = earliestNextSampleThreadIndex;
+    const sourceThreadSamples = samplesPerThread[sourceThreadIndex];
+    const sourceThreadSampleIndex: number =
+      nextSampleIndexPerThread[sourceThreadIndex];
 
-    const stackIndex: number | null = currentSamplesTable.stack[oldSampleIndex];
+    const stackIndex: number | null =
+      sourceThreadSamples.stack[sourceThreadSampleIndex];
     const newStackIndex =
       stackIndex === null
         ? null
-        : translationMapsForStacks[selectedSamplesTableIndex].get(stackIndex);
+        : translationMapsForStacks[sourceThreadIndex].get(stackIndex);
     if (newStackIndex === undefined) {
       throw new Error(stripIndent`
-          We couldn't find the stack of sample ${oldSampleIndex} in the translation map.
+          We couldn't find the stack of sample ${sourceThreadSampleIndex} in the translation map.
           This is a programming error.
         `);
     }
@@ -1184,15 +1192,15 @@ function combineSamplesForMerging(
     // It doesn't make sense to combine event delay values. We need to use jank markers
     // from independent threads instead.
     ensureExists(newSamples.eventDelay).push(null);
-    newSamples.time.push(currentSamplesTable.time[oldSampleIndex]);
+    newSamples.time.push(sourceThreadSamples.time[sourceThreadSampleIndex]);
     newThreadId.push(
-      currentSamplesTable.threadId
-        ? currentSamplesTable.threadId[oldSampleIndex]
-        : threads[selectedSamplesTableIndex].tid
+      sourceThreadSamples.threadId
+        ? sourceThreadSamples.threadId[sourceThreadSampleIndex]
+        : threads[sourceThreadIndex].tid
     );
 
     newSamples.length++;
-    sampleIndexes[selectedSamplesTableIndex]++;
+    nextSampleIndexPerThread[sourceThreadIndex]++;
   }
 
   return newSamples;
