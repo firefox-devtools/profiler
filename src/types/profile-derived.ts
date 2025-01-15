@@ -95,6 +95,7 @@ export type Thread = {
   // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
   // had no extra attribute at all.
   userContextId?: number;
+  tracedObjectShapes?: Array<string[] | null>;
 
   // The fields below this comment are derived data, and not present on the RawThread
   // in the same form.
@@ -108,6 +109,7 @@ export type Thread = {
   // The stack samples collected for this thread. This field is different from
   // RawThread in that the `time` column is always present.
   samples: SamplesTable;
+  tracedValuesBuffer?: ArrayBuffer;
 };
 
 /**
@@ -134,6 +136,7 @@ export type SamplesTable = {
   // This property isn't present in normal threads. However it's present for
   // merged threads, so that we know the origin thread for these samples.
   threadId?: Tid[];
+  argumentValues?: Array<number | null>;
   length: number;
 };
 
@@ -144,6 +147,7 @@ type SamplesLikeTableShape = {
   // See the WeightType type for more information.
   weight: null | number[];
   weightType: WeightType;
+  argumentValues?: Array<number | null>;
   length: number;
 };
 
@@ -160,6 +164,7 @@ export type CounterSamplesTable = {
   number?: number[];
   // The count of the data, for instance for memory this would be bytes.
   count: number[];
+  argumentValues?: Array<number | null>;
   length: number;
 };
 

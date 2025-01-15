@@ -87,6 +87,7 @@ export type StackTiming = {
   sameWidthsStart: number[];
   sameWidthsEnd: number[];
   callNode: IndexIntoCallNodeTable[];
+  argumentValues?: number[];
   length: number;
 };
 
@@ -115,14 +116,20 @@ export function getStackTimingByDepth(
   } = callNodeTable;
   const stackTimingByDepth: StackTimingByDepth = Array.from(
     { length: maxDepthPlusOne },
-    (): StackTiming => ({
-      start: [],
-      end: [],
-      sameWidthsStart: [],
-      sameWidthsEnd: [],
-      callNode: [],
-      length: 0,
-    })
+    (): StackTiming => {
+      const shape: StackTiming = {
+        start: [],
+        end: [],
+        sameWidthsStart: [],
+        sameWidthsEnd: [],
+        callNode: [],
+        length: 0,
+      };
+      if ('argumentValues' in samples) {
+        shape.argumentValues = [];
+      }
+      return shape;
+    }
   );
 
   const sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap = [];
@@ -154,12 +161,21 @@ export function getStackTimingByDepth(
   let deepestOpenBoxDepth = -1;
   const openBoxStartTimeByDepth = new Float64Array(maxDepthPlusOne);
   const openBoxStartTickByDepth = new Float64Array(maxDepthPlusOne);
+  const openBoxArgsByDepth = new Int32Array(maxDepthPlusOne);
 
   let currentStackTick = 0;
   for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
     const thisCallNodeIndex = sampleCallNodes[sampleIndex] ?? -1;
     if (thisCallNodeIndex === deepestOpenBoxCallNodeIndex) {
       continue;
+    }
+
+    let sampleArgs: number = -1;
+    if ('argumentValues' in samples && samples.argumentValues !== undefined) {
+      const val = samples.argumentValues[sampleIndex];
+      if (val !== null) {
+        sampleArgs = val;
+      }
     }
 
     const sampleTime = samples.time[sampleIndex];
@@ -193,6 +209,10 @@ export function getStackTimingByDepth(
       stackTimingForThisDepth.sameWidthsStart[index] = startStackTick;
       stackTimingForThisDepth.sameWidthsEnd[index] = currentStackTick;
       stackTimingForThisDepth.callNode[index] = deepestOpenBoxCallNodeIndex;
+      if (stackTimingForThisDepth.argumentValues) {
+        stackTimingForThisDepth.argumentValues[index] =
+          openBoxArgsByDepth[deepestOpenBoxDepth];
+      }
       deepestOpenBoxCallNodeIndex =
         callNodeTablePrefixColumn[deepestOpenBoxCallNodeIndex];
       deepestOpenBoxDepth--;
@@ -208,6 +228,12 @@ export function getStackTimingByDepth(
         deepestOpenBoxDepth++;
         openBoxStartTimeByDepth[deepestOpenBoxDepth] = sampleTime;
         openBoxStartTickByDepth[deepestOpenBoxDepth] = currentStackTick;
+        if (
+          'argumentValues' in samples &&
+          samples.argumentValues !== undefined
+        ) {
+          openBoxArgsByDepth[deepestOpenBoxDepth] = sampleArgs;
+        }
       }
     }
 
@@ -229,6 +255,10 @@ export function getStackTimingByDepth(
     stackTimingForThisDepth.sameWidthsStart[index] = startStackTick;
     stackTimingForThisDepth.sameWidthsEnd[index] = currentStackTick;
     stackTimingForThisDepth.callNode[index] = deepestOpenBoxCallNodeIndex;
+    if (stackTimingForThisDepth.argumentValues) {
+      stackTimingForThisDepth.argumentValues[index] =
+        openBoxArgsByDepth[deepestOpenBoxDepth];
+    }
     deepestOpenBoxCallNodeIndex =
       callNodeTablePrefixColumn[deepestOpenBoxCallNodeIndex];
     deepestOpenBoxDepth--;

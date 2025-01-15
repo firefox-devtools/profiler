@@ -18,10 +18,14 @@ module.exports = {
     '!src/types/libdef/**',
   ],
 
+  transform: {
+    "\\.([jt]sx?|mjs)$": "babel-jest"
+  },
+
   // Transform ESM modules to CommonJS for Jest
   // These packages ship as pure ESM and need to be transformed by Babel
   transformIgnorePatterns: [
-    '/node_modules/(?!(query-string|decode-uri-component|iongraph-web|split-on-first|filter-obj|fetch-mock)/)',
+    '/node_modules/(?!(query-string|decode-uri-component|iongraph-web|split-on-first|filter-obj|fetch-mock|devtools-reps)/)',
   ],
 
   // Mock static assets (images, CSS, etc.)

@@ -124,6 +124,7 @@ export type GeckoSamples = {
         stack: 0;
         time: 1;
         eventDelay: 2;
+        argumentValues?: 3;
         threadCPUDelta?: 3;
       };
   data: Array<
@@ -141,8 +142,14 @@ export type GeckoSamples = {
         // thread's event loop at the time that the sample was taken
         Milliseconds,
         (
+          // Index into the values buffer containing a binary representation of the argumentValues
+          // It's present only when the JS Execution Tracing feature is enabled in Firefox
+          //   OR
           // CPU usage value of the current thread.
           // It's present only when the CPU Utilization feature is enabled in Firefox.
+          //
+          // NOTE: these two options are mutually exclusive since CPU Utilization is
+          // mutually exclusive with JS Execution Tracing
           number | null
         ),
       ]
@@ -160,6 +167,7 @@ export type GeckoSampleStructWithResponsiveness = {
   // versions may not have it or that feature could be disabled. No upgrader was
   // written for this change because it's a completely new data source.
   threadCPUDelta?: Array<number | null>;
+  argumentValues?: Array<number | null>;
   length: number;
 };
 
@@ -174,6 +182,7 @@ export type GeckoSampleStructWithEventDelay = {
   // versions may not have it or that feature could be disabled. No upgrader was
   // written for this change because it's a completely new data source.
   threadCPUDelta?: Array<number | null>;
+  argumentValues?: Array<number | null>;
   length: number;
 };
 
@@ -294,6 +303,8 @@ export type GeckoThread = {
   stackTable: GeckoStackTable;
   stringTable: string[];
   jsTracerEvents?: JsTracerTable;
+  tracedValues?: string;
+  tracedObjectShapes?: Array<Array<string>>;
 };
 
 export type GeckoExtensionMeta = {
