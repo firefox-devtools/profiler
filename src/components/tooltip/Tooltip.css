@@ -145,3 +145,12 @@
 .sidebar .tooltipDetailSeparator {
   display: none;
 }
+
+.argumentsLabel {
+  /* match tooltips label, without being aligned to the right */
+  color: var(--grey-50);
+}
+.arguments > span {
+  display: block;
+  border-bottom: 1px solid var(--grey-40);
+}
