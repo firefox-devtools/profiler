@@ -617,26 +617,28 @@ export type ProfilerOverhead = {|
   mainThreadIndex: ThreadIndex,
 |};
 
+// This list of process types is defined here:
+// https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/xpcom/build/nsXULAppAPI.h#383
+export type ProcessType =
+  | 'default'
+  | 'plugin'
+  | 'tab'
+  | 'ipdlunittest'
+  | 'geckomediaplugin'
+  | 'gpu'
+  | 'pdfium'
+  | 'vr'
+  // Unknown process type:
+  // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/toolkit/xre/nsEmbedFunctions.cpp#232
+  | 'invalid'
+  | string;
+
 /**
  * Gecko has one or more processes. There can be multiple threads per processes. Each
  * thread has a unique set of tables for its data.
  */
 export type Thread = {|
-  // This list of process types is defined here:
-  // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/xpcom/build/nsXULAppAPI.h#383
-  processType:
-    | 'default'
-    | 'plugin'
-    | 'tab'
-    | 'ipdlunittest'
-    | 'geckomediaplugin'
-    | 'gpu'
-    | 'pdfium'
-    | 'vr'
-    // Unknown process type:
-    // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/toolkit/xre/nsEmbedFunctions.cpp#232
-    | 'invalid'
-    | string,
+  processType: ProcessType,
   processStartupTime: Milliseconds,
   processShutdownTime: Milliseconds | null,
   registerTime: Milliseconds,
