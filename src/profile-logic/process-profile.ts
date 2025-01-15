@@ -1015,6 +1015,10 @@ function _processSamples(geckoSamples: GeckoSampleStruct): RawSamplesTable {
     }
   }
 
+  if ('argumentValues' in geckoSamples) {
+    samples.argumentValues = geckoSamples.argumentValues;
+  }
+
   if ('eventDelay' in geckoSamples) {
     samples.eventDelay = geckoSamples.eventDelay;
   } else if ('responsiveness' in geckoSamples) {
@@ -1253,6 +1257,14 @@ function _processThread(
   if (nativeAllocations) {
     // Only add the Native allocations if they exist.
     newThread.nativeAllocations = nativeAllocations;
+  }
+
+  if (thread.tracedValues) {
+    newThread.tracedValuesBuffer = thread.tracedValues;
+  }
+
+  if (thread.tracedObjectShapes) {
+    newThread.tracedObjectShapes = thread.tracedObjectShapes;
   }
 
   function processJsTracer() {

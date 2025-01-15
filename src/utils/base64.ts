@@ -25,3 +25,21 @@ export async function dataUrlToBytes(dataUrl: string): Promise<ArrayBuffer> {
   const res = await fetch(dataUrl);
   return res.arrayBuffer();
 }
+
+function base64StringToBytesFallback(base64: string): ArrayBuffer {
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+export function base64StringToBytes(base64: string): ArrayBuffer {
+  if ('fromBase64' in Uint8Array) {
+    // @ts-expect-error Uint8Array.fromBase64 is a relatively new API
+    return Uint8Array.fromBase64(base64).buffer;
+  }
+
+  return base64StringToBytesFallback(base64);
+}
