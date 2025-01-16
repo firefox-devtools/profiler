@@ -69,7 +69,6 @@ type StateProps = {|
   +thread: Thread,
   +weightType: WeightType,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-  +maxStackDepthPlusOne: number,
   +combinedTimingRows: CombinedTimingRows,
   +timeRange: StartEndRange,
   +interval: Milliseconds,
@@ -205,7 +204,6 @@ class StackChartImpl extends React.PureComponent<Props> {
     const {
       thread,
       threadsKey,
-      maxStackDepthPlusOne,
       combinedTimingRows,
       timeRange,
       interval,
@@ -225,7 +223,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       hasFilteredCtssSamples,
     } = this.props;
 
-    const maxViewportHeight = maxStackDepthPlusOne * STACK_FRAME_HEIGHT;
+    const maxViewportHeight = combinedTimingRows.length * STACK_FRAME_HEIGHT;
 
     return (
       <div
@@ -302,8 +300,6 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       thread: selectedThreadSelectors.getFilteredThread(state),
       // Use the raw WeightType here, as the stack chart does not use the call tree
       weightType: selectedThreadSelectors.getSamplesWeightType(state),
-      maxStackDepthPlusOne:
-        selectedThreadSelectors.getFilteredCallNodeMaxDepthPlusOne(state),
       combinedTimingRows,
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
