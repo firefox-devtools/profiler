@@ -339,7 +339,7 @@ export function getStackAndSampleSelectorsPerThread(
   );
 
   const getCallTree: Selector<CallTree.CallTree> = createSelector(
-    threadSelectors.getPreviewFilteredThread,
+    threadSelectors.getFilteredThread,
     getCallNodeInfo,
     ProfileSelectors.getCategories,
     getCallTreeTimings,
