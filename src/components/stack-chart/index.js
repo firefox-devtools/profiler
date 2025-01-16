@@ -84,6 +84,7 @@ type StateProps = {|
   +userTimings: MarkerIndex[],
   +timelineMarginLeft: CssPixels,
   +displayStackType: boolean,
+  +hasFilteredCtssSamples: boolean,
 |};
 
 type DispatchProps = {|
@@ -221,6 +222,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       weightType,
       timelineMarginLeft,
       displayStackType,
+      hasFilteredCtssSamples,
     } = this.props;
 
     const maxViewportHeight = maxStackDepthPlusOne * STACK_FRAME_HEIGHT;
@@ -234,7 +236,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       >
         <StackSettings hideInvertCallstack={true} />
         <TransformNavigator />
-        {maxStackDepthPlusOne === 0 && userTimings.length === 0 ? (
+        {!hasFilteredCtssSamples && userTimings.length === 0 ? (
           <StackChartEmptyReasons />
         ) : (
           <ContextMenuTrigger
@@ -319,6 +321,8 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       userTimings: selectedThreadSelectors.getUserTimingMarkerIndexes(state),
       timelineMarginLeft: getTimelineMarginLeft(state),
       displayStackType: getProfileUsesMultipleStackTypes(state),
+      hasFilteredCtssSamples:
+        selectedThreadSelectors.getHasFilteredCtssSamples(state),
     };
   },
   mapDispatchToProps: {

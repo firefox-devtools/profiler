@@ -256,6 +256,48 @@ describe('selectors/getCallNodeMaxDepthPlusOneForFlameGraph', function () {
   });
 });
 
+describe('selectors/getHasPreviewFilteredCtssSamples', function () {
+  it('returns true if there are samples', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A  A  A
+      B  B  B
+      C  C
+      D
+    `);
+
+    const store = storeWithProfile(profile);
+    const hasSamples = selectedThreadSelectors.getHasPreviewFilteredCtssSamples(
+      store.getState()
+    );
+    expect(hasSamples).toEqual(true);
+  });
+
+  it('returns false if the preview selection filters out all samples', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A  A  A
+      B  B  B
+      C  C
+      D
+    `);
+
+    const store = storeWithProfile(profile);
+
+    store.dispatch(
+      updatePreviewSelection({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 1.1,
+        selectionEnd: 1.7,
+      })
+    );
+
+    const hasSamples = selectedThreadSelectors.getHasPreviewFilteredCtssSamples(
+      store.getState()
+    );
+    expect(hasSamples).toEqual(false);
+  });
+});
+
 describe('actions/changeImplementationFilter', function () {
   const store = storeWithProfile();
 
