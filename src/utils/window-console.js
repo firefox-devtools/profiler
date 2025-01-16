@@ -8,6 +8,10 @@ import { selectorsForConsole } from 'firefox-profiler/selectors';
 import actions from 'firefox-profiler/actions';
 import { shortenUrl } from 'firefox-profiler/utils/shorten-url';
 import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
+import {
+  printMarkerFlows,
+  printFlow,
+} from 'firefox-profiler/profile-logic/marker-data';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still
 // special-cases the `value` property: if it's missing it throws an error. Using
@@ -67,6 +71,45 @@ export function addDataToWindowObject(
       return selectorsForConsole.selectedThread.getSelectedMarker(getState());
     },
   });
+
+  target.printFlows = function () {
+    const threadIndex =
+      selectorsForConsole.urlState.getFirstSelectedThreadIndex(getState());
+    const markerIndex =
+      selectorsForConsole.selectedThread.getSelectedMarkerIndex(getState());
+    const profileFlowInfo =
+      selectorsForConsole.flow.getProfileFlowInfo(getState());
+    const threads = selectorsForConsole.profile.getThreads(getState());
+    const stringTablePerThread =
+      selectorsForConsole.flow.getStringTablePerThread(getState());
+    const fullMarkerListPerThread =
+      selectorsForConsole.flow.getFullMarkerListPerThread(getState());
+    if (markerIndex === null) {
+      console.log('No marker is selected.');
+    } else {
+      printMarkerFlows(
+        threadIndex,
+        markerIndex,
+        profileFlowInfo,
+        threads,
+        stringTablePerThread,
+        fullMarkerListPerThread
+      );
+    }
+  };
+  target.selectMarkerOnThread = function (markerIndex, threadIndex) {
+    dispatch(actions.showProvidedThreads(new Set([threadIndex])));
+    dispatch(actions.changeSelectedThreads(new Set([threadIndex])));
+    dispatch(actions.changeSelectedMarker(threadIndex, markerIndex));
+  };
+  target.printFlow = function (flowIndex) {
+    const profileFlowInfo =
+      selectorsForConsole.flow.getProfileFlowInfo(getState());
+    const threads = selectorsForConsole.profile.getThreads(getState());
+    const fullMarkerListPerThread =
+      selectorsForConsole.flow.getFullMarkerListPerThread(getState());
+    printFlow(flowIndex, profileFlowInfo, threads, fullMarkerListPerThread);
+  };
 
   target.experimental = {
     enableEventDelayTracks() {

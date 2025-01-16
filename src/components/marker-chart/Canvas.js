@@ -20,6 +20,7 @@ import {
   typeof changeRightClickedMarker as ChangeRightClickedMarker,
   typeof changeMouseTimePosition as ChangeMouseTimePosition,
   typeof changeSelectedMarker as ChangeSelectedMarker,
+  typeof activateFlowsForMarker as ActivateFlowsForMarker,
 } from 'firefox-profiler/actions/profile-view';
 import { TIMELINE_MARGIN_LEFT } from 'firefox-profiler/app-logic/constants';
 import type {
@@ -87,6 +88,7 @@ type OwnProps = {|
   +changeMouseTimePosition: ChangeMouseTimePosition,
   +changeSelectedMarker: ChangeSelectedMarker,
   +changeRightClickedMarker: ChangeRightClickedMarker,
+  +activateFlowsForMarker: WrapFunctionInDispatch<ActivateFlowsForMarker>,
   +marginLeft: CssPixels,
   +marginRight: CssPixels,
   +selectedMarkerIndex: MarkerIndex | null,
@@ -295,7 +297,8 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     isHighlighted: boolean = false
   ) {
     if (isInstantMarker) {
-      this.drawOneInstantMarker(ctx, x, y, h, isHighlighted);
+      // this.drawOneInstantMarker(ctx, x, y, h, isHighlighted);
+      this.drawOneIntervalMarker(ctx, x, y, 1, h, markerIndex, isHighlighted);
     } else {
       this.drawOneIntervalMarker(ctx, x, y, w, h, markerIndex, isHighlighted);
     }
@@ -365,30 +368,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         }
       }
     }
-  }
-
-  // x indicates the center of this marker
-  // y indicates the top of the row
-  // h indicates the available height in the row
-  drawOneInstantMarker(
-    ctx: CanvasRenderingContext2D,
-    x: CssPixels,
-    y: CssPixels,
-    h: CssPixels,
-    isHighlighted: boolean
-  ) {
-    ctx.fillStyle = isHighlighted ? BLUE_60 : '#8ac4ff';
-    ctx.strokeStyle = isHighlighted ? BLUE_80 : MARKER_BORDER_COLOR;
-
-    // We're drawing a diamond shape, whose height is h - 2, and width is h / 2.
-    ctx.beginPath();
-    ctx.moveTo(x - h / 4, y + h / 2);
-    ctx.lineTo(x, y + 1.5);
-    ctx.lineTo(x + h / 4, y + h / 2);
-    ctx.lineTo(x, y + h - 1.5);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
   }
 
   drawMarkers(
@@ -893,8 +872,15 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
 
   onSelectItem = (hoveredItems: HoveredMarkerChartItems | null) => {
     const markerIndex = hoveredItems === null ? null : hoveredItems.markerIndex;
-    const { changeSelectedMarker, threadsKey } = this.props;
+    const { changeSelectedMarker, activateFlowsForMarker, threadsKey } =
+      this.props;
     changeSelectedMarker(threadsKey, markerIndex, { source: 'pointer' });
+    console.log({ threadsKey, markerIndex });
+    if (typeof threadsKey === 'number' && markerIndex !== null) {
+      console.log('hello');
+      const what = activateFlowsForMarker(threadsKey, markerIndex);
+      console.log({ what });
+    }
   };
 
   onRightClickMarker = (hoveredItems: HoveredMarkerChartItems | null) => {

@@ -26,6 +26,7 @@ import type {
   ActiveTabTimeline,
   ThreadsKey,
   NativeSymbolInfo,
+  IndexIntoFlowTable,
 } from './profile-derived';
 import type { FuncToFuncsMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
@@ -247,6 +248,10 @@ type ProfileAction =
       +type: 'CHANGE_HOVERED_MARKER',
       +threadsKey: ThreadsKey,
       +markerIndex: MarkerIndex | null,
+    |}
+  | {|
+      +type: 'CHANGE_ACTIVE_FLOWS',
+      +activeFlows: IndexIntoFlowTable[],
     |}
   | {|
       +type: 'UPDATE_PREVIEW_SELECTION',
