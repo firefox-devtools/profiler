@@ -480,6 +480,7 @@ export type ProfileWithDicts = {
   funcNamesPerThread: Array<string[]>,
   funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
   nativeSymbolsDictPerThread: Array<{ [nativeSymbolName: string]: number }>,
+  defaultCategory: IndexIntoCategoryList,
 };
 
 /**
@@ -1104,6 +1105,11 @@ export function getNativeSymbolsDictForThread(thread: Thread): {
 }
 
 export function getProfileWithDicts(profile: Profile): ProfileWithDicts {
+  const defaultCategory = ensureExists(
+    profile.meta.categories,
+    'Expected to find categories'
+  ).findIndex((c) => c.name === 'Other');
+
   const funcNameDicts = profile.threads.map(getFuncNamesDictForThread);
   const funcNamesPerThread = funcNameDicts.map(({ funcNames }) => funcNames);
   const funcNamesDictPerThread = funcNameDicts.map(
@@ -1118,6 +1124,7 @@ export function getProfileWithDicts(profile: Profile): ProfileWithDicts {
     funcNamesPerThread,
     funcNamesDictPerThread,
     nativeSymbolsDictPerThread,
+    defaultCategory,
   };
 }
 
