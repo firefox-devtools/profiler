@@ -12,6 +12,7 @@ import {
   getFuncNamesAndOriginsForPath,
   convertStackToCallNodeAndCategoryPath,
 } from 'firefox-profiler/profile-logic/profile-data';
+import { getFormattedTimeLength } from 'firefox-profiler/profile-logic/committed-ranges';
 import {
   formatMilliseconds,
   formatPercent,
@@ -22,6 +23,7 @@ import type {
   IndexIntoSamplesTable,
   CategoryList,
   Thread,
+  Milliseconds,
 } from 'firefox-profiler/types';
 import type { CpuRatioInTimeRange } from './thread/ActivityGraphFills';
 import { ensureExists } from '../../utils/flow';
@@ -39,6 +41,8 @@ type Props = {|
   ...RestProps,
   +cpuRatioInTimeRange: CPUProps | null,
   +sampleIndex: IndexIntoSamplesTable | null,
+  +zeroAt: Milliseconds,
+  +interval: Milliseconds,
 |};
 
 /**
@@ -121,11 +125,15 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
       rangeFilteredThread,
       categories,
       implementationFilter,
+      zeroAt,
+      interval,
     } = this.props;
 
     let hasStack = false;
+    let formattedSampleTime = null;
     if (sampleIndex !== null) {
       const { samples, stackTable } = rangeFilteredThread;
+      const sampleTime = samples.time[sampleIndex];
       const stackIndex = samples.stack[sampleIndex];
       const hasSamples = samples.length > 0 && stackTable.length > 1;
 
@@ -139,10 +147,22 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
         );
         hasStack = stack.length > 1 || stack[0].funcName !== '(root)';
       }
+
+      formattedSampleTime = getFormattedTimeLength(
+        sampleTime - zeroAt,
+        // Make sure that we show enough precision for the given sample interval.
+        interval / 10
+      );
     }
 
     return (
       <>
+        {formattedSampleTime !== null ? (
+          <div className="tooltipDetails">
+            <div className="tooltipLabel">Sampled at:</div>
+            <div>{formattedSampleTime}</div>
+          </div>
+        ) : null}
         {cpuRatioInTimeRange === null ? null : (
           <SampleTooltipCPUContents
             cpuRatio={cpuRatioInTimeRange.cpuRatio}
