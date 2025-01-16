@@ -239,7 +239,7 @@ describe('selectors/getCallNodeMaxDepthPlusOneForFlameGraph', function () {
 
     const store = storeWithProfile(profile);
     const allSamplesMaxDepth =
-      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepthPlusOne(
+      selectedThreadSelectors.getFilteredCallNodeMaxDepthPlusOne(
         store.getState()
       );
     expect(allSamplesMaxDepth).toEqual(4);
@@ -249,7 +249,7 @@ describe('selectors/getCallNodeMaxDepthPlusOneForFlameGraph', function () {
     const { profile } = getProfileFromTextSamples(` `);
     const store = storeWithProfile(profile);
     const allSamplesMaxDepth =
-      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepthPlusOne(
+      selectedThreadSelectors.getFilteredCallNodeMaxDepthPlusOne(
         store.getState()
       );
     expect(allSamplesMaxDepth).toEqual(0);
