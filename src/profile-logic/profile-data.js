@@ -789,7 +789,6 @@ export function getTimingsForPath(
   needlePath: CallNodePath,
   callNodeInfo: CallNodeInfo,
   interval: Milliseconds,
-  thread: Thread,
   unfilteredThread: Thread,
   sampleIndexOffset: number,
   categories: CategoryList,
@@ -801,7 +800,6 @@ export function getTimingsForPath(
     callNodeInfo.getCallNodeIndexFromPath(needlePath),
     callNodeInfo,
     interval,
-    thread,
     unfilteredThread,
     sampleIndexOffset,
     categories,
@@ -823,7 +821,6 @@ export function getTimingsForCallNodeIndex(
   needleNodeIndex: IndexIntoCallNodeTable | null,
   callNodeInfo: CallNodeInfo,
   interval: Milliseconds,
-  thread: Thread,
   unfilteredThread: Thread,
   sampleIndexOffset: number,
   categories: CategoryList,
@@ -833,9 +830,6 @@ export function getTimingsForCallNodeIndex(
 ): TimingsForPath {
   /* ------------ Variables definitions ------------*/
 
-  // This is the data from the filtered thread that we'll loop over.
-  const { stringTable } = thread;
-
   // This is the data from the unfiltered thread that we'll use to gather
   // category and JS implementation information. Note that samples are offset by
   // `sampleIndexOffset` because of range filtering.
@@ -843,6 +837,7 @@ export function getTimingsForCallNodeIndex(
     stackTable: unfilteredStackTable,
     funcTable: unfilteredFuncTable,
     frameTable: unfilteredFrameTable,
+    stringTable,
   } = unfilteredThread;
 
   // This holds the category index for the JavaScript category, so that we can

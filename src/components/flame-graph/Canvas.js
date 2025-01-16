@@ -432,7 +432,6 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
                 callNodeIndex,
                 callNodeInfo,
                 interval,
-                thread,
                 unfilteredThread,
                 sampleIndexOffset,
                 categories,
