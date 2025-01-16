@@ -128,6 +128,8 @@ CallNodeContextMenu--copy-function-name = Copy function name
 CallNodeContextMenu--copy-script-url = Copy script URL
 CallNodeContextMenu--copy-stack = Copy stack
 
+CallNodeContextMenu--open-in-debugger = Switch to tab and open in DevTools debugger
+
 ## CallTree
 ## This is the component for Call Tree panel.
 
