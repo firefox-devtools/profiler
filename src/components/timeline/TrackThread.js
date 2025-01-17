@@ -359,7 +359,7 @@ export const TimelineTrackThread = explicitConnect<
       interval: getProfileInterval(state),
       rangeStart: committedRange.start,
       rangeEnd: committedRange.end,
-      sampleIndexOffset: selectors.getFilteredCtssSampleIndexOffset(state), // Bug! #5326
+      sampleIndexOffset: selectors.getFilteredSampleIndexOffset(state),
       categories: getCategories(state),
       timelineType,
       hasFileIoMarkers:

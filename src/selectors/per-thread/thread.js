@@ -270,6 +270,27 @@ export function getBasicThreadSelectorsPerThread(
     }
   );
 
+  /**
+   * This selector returns the offset to add to sampleIndex when accessing
+   * unfilteredThread.samples based on an index into filteredThread.samples.
+   *
+   * In contrast to getFilteredCtssSampleIndexOffset, this function does not
+   * depend on the call tree summary strategy and always uses the timing-based
+   * samples.
+   */
+  const getFilteredSampleIndexOffset: Selector<number> = createSelector(
+    (state) => getSamplesTable(state),
+    ProfileSelectors.getCommittedRange,
+    (samples, { start, end }) => {
+      const [beginSampleIndex] = ProfileData.getSampleIndexRangeForSelection(
+        samples,
+        start,
+        end
+      );
+      return beginSampleIndex;
+    }
+  );
+
   const getFriendlyThreadName: Selector<string> = createSelector(
     ProfileSelectors.getThreads,
     getThread,
@@ -380,6 +401,7 @@ export function getBasicThreadSelectorsPerThread(
     getRangeFilteredThread,
     getUnfilteredCtssSamples,
     getFilteredCtssSampleIndexOffset,
+    getFilteredSampleIndexOffset,
     getFriendlyThreadName,
     getThreadProcessDetails,
     getViewOptions,
