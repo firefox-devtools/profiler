@@ -601,8 +601,17 @@ export function getCallTree(
 }
 
 /**
- * This function takes the call tree summary strategy, and finds the appropriate data
- * structure. This can then be used by the call tree and other UI to report on the data.
+ * Returns a table with the appropriate data for the call tree summary strategy,
+ * for use by the call tree or flame graph.
+ *
+ * If the strategy is one of the allocation strategies, the returned table will be
+ * based on thread.jsAllocations or thread.nativeAllocations, but with a modified
+ * stack column: Some samples will have a null stack, so that they are ignored.
+ * For example, the returned table for `native-allocations` will have null stacks
+ * for samples which are deallocations.
+ *
+ * The returned table has compatible indexes with the unfiltered table returned
+ * by extractUnfilteredSamplesLikeTable.
  */
 export function extractSamplesLikeTable(
   thread: Thread,
@@ -664,6 +673,39 @@ export function extractSamplesLikeTable(
         )
       );
     }
+    /* istanbul ignore next */
+    default:
+      throw assertExhaustiveCheck(strategy);
+  }
+}
+
+/**
+ * Returns the samples, jsAllocations or nativeAllocations table, without
+ * nulling out the stack for any of the samples.
+ *
+ * The stack column of the returned table can be used to look up sample
+ * categories.
+ */
+export function extractUnfilteredSamplesLikeTable(
+  thread: Thread,
+  strategy: CallTreeSummaryStrategy
+): SamplesLikeTable {
+  switch (strategy) {
+    case 'timing':
+      return thread.samples;
+    case 'js-allocations':
+      return ensureExists(
+        thread.jsAllocations,
+        'Expected the NativeAllocationTable to exist when using a "js-allocation" strategy'
+      );
+    case 'native-retained-allocations':
+    case 'native-allocations':
+    case 'native-deallocations-sites':
+    case 'native-deallocations-memory':
+      return ensureExists(
+        thread.nativeAllocations,
+        'Expected the NativeAllocationTable to exist when using a "native-allocation" strategy'
+      );
     /* istanbul ignore next */
     default:
       throw assertExhaustiveCheck(strategy);
