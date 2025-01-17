@@ -36,7 +36,10 @@ describe('marker schema labels', function () {
   function applyLabel(options: LabelOptions): string {
     const { schemaData, label, payload } = options;
     const categories = getDefaultCategories();
-    const stringTable = new StringTable(['IPC Message', 'MouseDown Event']);
+    const stringTable = StringTable.withBackingArray([
+      'IPC Message',
+      'MouseDown Event',
+    ]);
 
     const schema = {
       name: 'TestDefinedMarker',
@@ -287,7 +290,7 @@ describe('marker schema formatting', function () {
             'none',
             format,
             value,
-            new StringTable(['IPC Message', 'MouseDown Event'])
+            StringTable.withBackingArray(['IPC Message', 'MouseDown Event'])
           )
       )
     ).toMatchInlineSnapshot(`
@@ -409,12 +412,13 @@ describe('marker schema formatting', function () {
       ['list', []],
       ['list', ['a', 'b']],
     ];
+    const stringTable = StringTable.withBackingArray([]);
     expect(
       entries.map(([format, value]) => [
         format,
         value,
-        formatMarkupFromMarkerSchema('none', format, value, new StringTable()),
-        formatFromMarkerSchema('none', format, value, new StringTable()),
+        formatMarkupFromMarkerSchema('none', format, value, stringTable),
+        formatFromMarkerSchema('none', format, value, stringTable),
       ])
     ).toMatchSnapshot();
   });

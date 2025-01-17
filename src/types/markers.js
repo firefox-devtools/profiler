@@ -535,6 +535,9 @@ export type NetworkPayload = {|
   // or we use 'Unset' if no flag is set.
   classOfService?: string,
 
+  // Used to show the HTTP response status code
+  responseStatus?: number,
+
   // NOTE: the following comments are valid for the merged markers. For the raw
   // markers, startTime and endTime have different meanings. Please look
   // `src/profile-logic/marker-data.js` for more information.

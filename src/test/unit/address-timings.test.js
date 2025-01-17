@@ -153,7 +153,7 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
   function getTimings(
     thread: Thread,
     callNodePath: CallNodePath,
-    defaultCat: IndexIntoCategoryList,
+    defaultCategory: IndexIntoCategoryList,
     nativeSymbol: IndexIntoNativeSymbolTable,
     isInverted: boolean
   ) {
@@ -162,14 +162,14 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
       stackTable,
       frameTable,
       funcTable,
-      defaultCat
+      defaultCategory
     );
     const callNodeInfo = isInverted
       ? getInvertedCallNodeInfo(
           thread,
           nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
           nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
-          defaultCat
+          defaultCategory
         )
       : nonInvertedCallNodeInfo;
     const callNodeIndex = ensureExists(
@@ -187,16 +187,15 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
   }
 
   it('passes a basic test', function () {
-    const { profile, funcNamesDictPerThread, nativeSymbolsDictPerThread } =
-      getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesDictPerThread,
+      nativeSymbolsDictPerThread,
+      defaultCategory,
+    } = getProfileFromTextSamples(`
         A[lib:file][address:20][sym:Asym:20:]
         B[lib:file][address:30][sym:Bsym:30:]
       `);
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-    const defaultCat = categories.findIndex((c) => c.color === 'grey');
 
     const [{ A, B }] = funcNamesDictPerThread;
     const [{ Asym, Bsym }] = nativeSymbolsDictPerThread;
@@ -204,7 +203,13 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
 
     // Compute the address timings for the root call node.
     // No self address hit, one total address hit at address 0x20.
-    const addressTimingsRoot = getTimings(thread, [A], defaultCat, Asym, false);
+    const addressTimingsRoot = getTimings(
+      thread,
+      [A],
+      defaultCategory,
+      Asym,
+      false
+    );
     expect(addressTimingsRoot.totalAddressHits.get(0x20)).toBe(1);
     expect(addressTimingsRoot.totalAddressHits.size).toBe(1); // no other hits
     expect(addressTimingsRoot.selfAddressHits.size).toBe(0); // no self hits
@@ -214,7 +219,7 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
     const addressTimingsChild = getTimings(
       thread,
       [A, B],
-      defaultCat,
+      defaultCategory,
       Bsym,
       false
     );
@@ -225,17 +230,16 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
   });
 
   it('passes a basic test with recursion', function () {
-    const { profile, funcNamesDictPerThread, nativeSymbolsDictPerThread } =
-      getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesDictPerThread,
+      nativeSymbolsDictPerThread,
+      defaultCategory,
+    } = getProfileFromTextSamples(`
         A[lib:file][address:20][sym:Asym:20:]
         B[lib:file][address:30][sym:Bsym:30:]
         A[lib:file][address:21][sym:Asym:20:]
       `);
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-    const defaultCat = categories.findIndex((c) => c.color === 'grey');
 
     const [{ A, B }] = funcNamesDictPerThread;
     const [{ Asym }] = nativeSymbolsDictPerThread;
@@ -243,7 +247,13 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
 
     // Compute the address timings for the root call node.
     // No self address hit, one total address hit at address 0x20.
-    const addressTimingsRoot = getTimings(thread, [A], defaultCat, Asym, false);
+    const addressTimingsRoot = getTimings(
+      thread,
+      [A],
+      defaultCategory,
+      Asym,
+      false
+    );
     expect(addressTimingsRoot.totalAddressHits.get(0x20)).toBe(1);
     expect(addressTimingsRoot.totalAddressHits.size).toBe(1); // no other hits
     expect(addressTimingsRoot.selfAddressHits.size).toBe(0); // no self hits
@@ -255,7 +265,7 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
     const addressTimingsChild = getTimings(
       thread,
       [A, B, A],
-      defaultCat,
+      defaultCategory,
       Asym,
       false
     );
@@ -266,18 +276,17 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
   });
 
   it('passes a test where the same function is called via different call paths', function () {
-    const { profile, funcNamesDictPerThread, nativeSymbolsDictPerThread } =
-      getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesDictPerThread,
+      nativeSymbolsDictPerThread,
+      defaultCategory,
+    } = getProfileFromTextSamples(`
         A[lib:one][address:20][sym:Asym:20:]  A[lib:one][address:21][sym:Asym:20:]  A[lib:one][address:20][sym:Asym:20:]
         B[lib:one][address:30][sym:Bsym:30:]  D[lib:one][address:50][sym:Dsym:40:]  B[lib:one][address:31][sym:Bsym:30:]
         C[lib:two][address:10][sym:Csym:10:]  C[lib:two][address:11][sym:Csym:10:]  C[lib:two][address:12][sym:Csym:10:]
                                                                                     D[lib:one][address:51][sym:Dsym:40:]
       `);
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-    const defaultCat = categories.findIndex((c) => c.color === 'grey');
 
     const [{ A, B, C }] = funcNamesDictPerThread;
     const [{ Csym }] = nativeSymbolsDictPerThread;
@@ -286,7 +295,7 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
     const addressTimingsABC = getTimings(
       thread,
       [A, B, C],
-      defaultCat,
+      defaultCategory,
       Csym,
       false
     );
@@ -298,24 +307,29 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
   });
 
   it('passes a test with an inverted thread', function () {
-    const { profile, funcNamesDictPerThread, nativeSymbolsDictPerThread } =
-      getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesDictPerThread,
+      nativeSymbolsDictPerThread,
+      defaultCategory,
+    } = getProfileFromTextSamples(`
         A[lib:one][address:20][sym:Asym:20:]  A[lib:one][address:21][sym:Asym:20:]  A[lib:one][address:20][sym:Asym:20:]
         B[lib:one][address:30][sym:Bsym:30:]  D[lib:one][address:50][sym:Dsym:40:]  B[lib:one][address:31][sym:Bsym:30:]
         D[lib:one][address:51][sym:Dsym:40:]  D[lib:one][address:52][sym:Dsym:40:]  C[lib:two][address:12][sym:Csym:10:]
                                                                                     D[lib:one][address:51][sym:Dsym:40:]
       `);
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-    const defaultCat = categories.findIndex((c) => c.color === 'grey');
 
     const [{ C, D }] = funcNamesDictPerThread;
     const [{ Csym, Dsym }] = nativeSymbolsDictPerThread;
     const [thread] = profile.threads;
     // For the root D of the inverted tree, we have 3 self address hits.
-    const addressTimingsD = getTimings(thread, [D], defaultCat, Dsym, true);
+    const addressTimingsD = getTimings(
+      thread,
+      [D],
+      defaultCategory,
+      Dsym,
+      true
+    );
     expect(addressTimingsD.totalAddressHits.get(0x51)).toBe(2);
     expect(addressTimingsD.totalAddressHits.get(0x52)).toBe(1);
     expect(addressTimingsD.totalAddressHits.size).toBe(2); // no other hits
@@ -325,7 +339,13 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
 
     // For the C call node which is a child (direct caller) of D, we have
     // no self address hit and one hit at address 0x12.
-    const addressTimingsDC = getTimings(thread, [D, C], defaultCat, Csym, true);
+    const addressTimingsDC = getTimings(
+      thread,
+      [D, C],
+      defaultCategory,
+      Csym,
+      true
+    );
     expect(addressTimingsDC.totalAddressHits.get(0x12)).toBe(1);
     expect(addressTimingsDC.totalAddressHits.size).toBe(1); // no other hits
     expect(addressTimingsDC.selfAddressHits.size).toBe(0); // no self address hits
@@ -344,18 +364,17 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
     // call this function for a different native symbol.
     //
     // In this test, we compute the timings for native symbol Bsym.
-    const { profile, funcNamesDictPerThread, nativeSymbolsDictPerThread } =
-      getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesDictPerThread,
+      nativeSymbolsDictPerThread,
+      defaultCategory,
+    } = getProfileFromTextSamples(`
         A[lib:one][address:20][sym:Asym:20:]         A[lib:one][address:30][sym:Asym:20:]         A[lib:one][address:20][sym:Asym:20:]  A[lib:one][address:20][sym:Asym:20:]
         B[lib:one][address:40][sym:Bsym:30:]         B[lib:one][address:30][sym:Asym:20:][inl:1]  B[lib:one][address:45][sym:Bsym:30:]  E[lib:one][address:31][sym:Esym:30:]
         C[lib:one][address:40][sym:Bsym:30:][inl:1]  C[lib:one][address:30][sym:Asym:20:][inl:2]  C[lib:one][address:45][sym:Bsym:30:]
                                                                                                   D[lib:one][address:51][sym:Dsym:40:]
       `);
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-    const defaultCat = categories.findIndex((c) => c.color === 'grey');
 
     const [{ A, B, C }] = funcNamesDictPerThread;
     const [{ Bsym }] = nativeSymbolsDictPerThread;
@@ -364,7 +383,7 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
     const addressTimingsABCForBsym = getTimings(
       thread,
       [A, B, C],
-      defaultCat,
+      defaultCategory,
       Bsym,
       false
     );

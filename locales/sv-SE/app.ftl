@@ -338,6 +338,15 @@ Home--load-files-from-other-tools2 =
     vilken fil som helst som använder <dhat>dhat-formatet</dhat> eller <traceevent>Googles spårningshändelse
     Format</traceevent>. <write>Lär dig hur du skriver din
     egen importör</write>.
+Home--install-chrome-extension = Installera tillägget för Chrome
+Home--chrome-extension-instructions =
+    Använd tillägget <a>{ -profiler-brand-name } för Chrome</a>
+    för att fånga prestandaprofiler i Chrome och analysera dem i
+    { -profiler-brand-name }. Installera tillägget från Chrome Web Store.
+Home--chrome-extension-recording-instructions =
+    När det är installerat använder du tilläggets verktygsfältsikon
+    eller genvägarna för att starta och stoppa profilering.
+    Du kan också exportera profiler och ladda dem här för detaljerad analys.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.

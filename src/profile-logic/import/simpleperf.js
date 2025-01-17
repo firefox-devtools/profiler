@@ -2,6 +2,7 @@
 
 import { simpleperf_report_proto as report } from './proto/simpleperf_report';
 
+import { PROCESSED_PROFILE_VERSION } from 'firefox-profiler/app-logic/constants';
 import type { Milliseconds } from 'firefox-profiler/types/units';
 import type {
   CategoryList,
@@ -221,7 +222,8 @@ class FirefoxThread {
   tid: number;
   pid: number;
 
-  strings = new StringTable();
+  stringArray = [];
+  strings = StringTable.withBackingArray(this.stringArray);
 
   sampleTable: SamplesTable = getEmptySamplesTable();
 
@@ -380,7 +382,7 @@ class FirefoxProfile {
       // from the browser.)
       version: 30,
       // This is the processed profile format version.
-      preprocessedProfileVersion: 50,
+      preprocessedProfileVersion: PROCESSED_PROFILE_VERSION,
 
       symbolicationNotSupported: true,
       markerSchema: [],

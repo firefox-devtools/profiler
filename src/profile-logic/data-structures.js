@@ -386,7 +386,7 @@ export function getEmptyThread(overrides?: $Shape<Thread>): Thread {
     markers: getEmptyRawMarkerTable(),
     stackTable: getEmptyStackTable(),
     frameTable: getEmptyFrameTable(),
-    stringTable: new StringTable(),
+    stringTable: StringTable.withBackingArray([]),
     funcTable: getEmptyFuncTable(),
     resourceTable: getEmptyResourceTable(),
     nativeSymbols: getEmptyNativeSymbolTable(),

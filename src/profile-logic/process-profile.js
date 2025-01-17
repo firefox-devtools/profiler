@@ -1129,7 +1129,7 @@ function _processThread(
   const { libs, pausedRanges, meta } = processProfile;
   const { categories, shutdownTime } = meta;
 
-  const stringTable = new StringTable(thread.stringTable);
+  const stringTable = StringTable.withBackingArray(thread.stringTable);
   const { funcTable, resourceTable, frameFuncs, frameAddresses } =
     extractFuncsAndResourcesFromFrameLocations(
       geckoFrameStruct.location,
@@ -1532,7 +1532,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   // exception.
   upgradeGeckoProfileToCurrentVersion(geckoProfile);
 
-  let threads = [];
+  const threads = [];
 
   const extensions: ExtensionTable = geckoProfile.meta.extensions
     ? _toStructOfArrays(geckoProfile.meta.extensions)
@@ -1553,51 +1553,49 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   for (const subprocessProfile of geckoProfile.processes) {
     const adjustTimestampsBy =
       subprocessProfile.meta.startTime - geckoProfile.meta.startTime;
-    threads = threads.concat(
-      subprocessProfile.threads.map((thread) => {
-        const newThread: Thread = _processThread(
-          thread,
-          subprocessProfile,
-          extensions,
-          globalDataCollector
-        );
-        newThread.samples = adjustTableTimestamps(
-          newThread.samples,
+    for (const thread of subprocessProfile.threads) {
+      const newThread: Thread = _processThread(
+        thread,
+        subprocessProfile,
+        extensions,
+        globalDataCollector
+      );
+      newThread.samples = adjustTableTimestamps(
+        newThread.samples,
+        adjustTimestampsBy
+      );
+      newThread.markers = adjustMarkerTimestamps(
+        newThread.markers,
+        adjustTimestampsBy
+      );
+      if (newThread.jsTracer) {
+        newThread.jsTracer = _adjustJsTracerTimestamps(
+          newThread.jsTracer,
           adjustTimestampsBy
         );
-        newThread.markers = adjustMarkerTimestamps(
-          newThread.markers,
+      }
+      if (newThread.jsAllocations) {
+        newThread.jsAllocations = adjustTableTimestamps(
+          newThread.jsAllocations,
           adjustTimestampsBy
         );
-        if (newThread.jsTracer) {
-          newThread.jsTracer = _adjustJsTracerTimestamps(
-            newThread.jsTracer,
-            adjustTimestampsBy
-          );
-        }
-        if (newThread.jsAllocations) {
-          newThread.jsAllocations = adjustTableTimestamps(
-            newThread.jsAllocations,
-            adjustTimestampsBy
-          );
-        }
-        if (newThread.nativeAllocations) {
-          newThread.nativeAllocations = adjustTableTimestamps(
-            newThread.nativeAllocations,
-            adjustTimestampsBy
-          );
-        }
-        newThread.processStartupTime += adjustTimestampsBy;
-        if (newThread.processShutdownTime !== null) {
-          newThread.processShutdownTime += adjustTimestampsBy;
-        }
-        newThread.registerTime += adjustTimestampsBy;
-        if (newThread.unregisterTime !== null) {
-          newThread.unregisterTime += adjustTimestampsBy;
-        }
-        return newThread;
-      })
-    );
+      }
+      if (newThread.nativeAllocations) {
+        newThread.nativeAllocations = adjustTableTimestamps(
+          newThread.nativeAllocations,
+          adjustTimestampsBy
+        );
+      }
+      newThread.processStartupTime += adjustTimestampsBy;
+      if (newThread.processShutdownTime !== null) {
+        newThread.processShutdownTime += adjustTimestampsBy;
+      }
+      newThread.registerTime += adjustTimestampsBy;
+      if (newThread.unregisterTime !== null) {
+        newThread.unregisterTime += adjustTimestampsBy;
+      }
+      threads.push(newThread);
+    }
 
     counters.push(
       ..._processCounters(subprocessProfile, threads, adjustTimestampsBy)
@@ -1768,7 +1766,7 @@ export function makeProfileSerializable({
       return {
         ...restOfThread,
         samples: _serializeSamples(samples),
-        stringArray: stringTable.serializeToArray(),
+        stringArray: stringTable.getBackingArray(),
       };
     }),
   };
@@ -1807,7 +1805,7 @@ function _unserializeProfile({
       return {
         ...restOfThread,
         samples: _unserializeSamples(samples),
-        stringTable: new StringTable(stringArray),
+        stringTable: StringTable.withBackingArray(stringArray),
       };
     }),
   };

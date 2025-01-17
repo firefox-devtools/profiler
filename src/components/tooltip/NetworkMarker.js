@@ -464,5 +464,13 @@ export function getNetworkMarkerDetails(
     );
   }
 
+  if (payload.responseStatus) {
+    details.push(
+      <TooltipDetail label="Response Status Code" key="Network-Response Status">
+        {payload.responseStatus}
+      </TooltipDetail>
+    );
+  }
+
   return details;
 }

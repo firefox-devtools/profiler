@@ -419,7 +419,7 @@ export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
     unfilteredThread: selectedThreadSelectors.getThread(state),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
     sampleIndexOffset:
-      selectedThreadSelectors.getSampleIndexOffsetFromCommittedRange(state),
+      selectedThreadSelectors.getSampleIndexOffsetFromPreviewRange(state),
     // Use the filtered call node max depth, rather than the preview filtered one, so
     // that the viewport height is stable across preview selections.
     maxStackDepthPlusOne:
