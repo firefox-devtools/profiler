@@ -264,10 +264,10 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     selectedThreadSelectors.getCallNodeInfo,
     ProfileSelectors.getProfileInterval,
     selectedThreadSelectors.getThread,
-    selectedThreadSelectors.getSampleIndexOffsetFromPreviewRange,
+    selectedThreadSelectors.getPreviewFilteredCtssSampleIndexOffset,
     ProfileSelectors.getCategories,
-    selectedThreadSelectors.getPreviewFilteredSamplesForCallTree,
-    selectedThreadSelectors.getUnfilteredSamplesForCallTree,
+    selectedThreadSelectors.getPreviewFilteredCtssSamples,
+    selectedThreadSelectors.getUnfilteredCtssSamples,
     ProfileSelectors.getProfileUsesFrameImplementation,
     ProfileData.getTimingsForPath
   );
@@ -307,7 +307,7 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
 
   const getSourceViewLineTimings: Selector<LineTimings> = createSelector(
     getSourceViewStackLineInfo,
-    selectedThreadSelectors.getPreviewFilteredSamplesForCallTree,
+    selectedThreadSelectors.getPreviewFilteredCtssSamples,
     getLineTimings
   );
 
@@ -339,7 +339,7 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
   const getAssemblyViewAddressTimings: Selector<AddressTimings> =
     createSelector(
       getAssemblyViewStackAddressInfo,
-      selectedThreadSelectors.getPreviewFilteredSamplesForCallTree,
+      selectedThreadSelectors.getPreviewFilteredCtssSamples,
       getAddressTimings
     );
 

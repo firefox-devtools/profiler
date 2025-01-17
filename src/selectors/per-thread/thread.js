@@ -241,31 +241,34 @@ export function getBasicThreadSelectorsPerThread(
       }
     );
 
-  const getUnfilteredSamplesForCallTree: Selector<SamplesLikeTable> =
-    createSelector(
-      getThread,
-      getCallTreeSummaryStrategy,
-      CallTree.extractSamplesLikeTable
-    );
+  /**
+   * CTSS = Call tree summary strategy
+   *
+   * The samples returned by this function are different from threads.samples if
+   * some allocations-related call tree summary strategy is selected.
+   */
+  const getUnfilteredCtssSamples: Selector<SamplesLikeTable> = createSelector(
+    getThread,
+    getCallTreeSummaryStrategy,
+    CallTree.extractSamplesLikeTable
+  );
 
   /**
    * This selector returns the offset to add to a sampleIndex when accessing the
-   * base thread, if your thread is a range filtered thread (all but the base
-   * `getThread` or the last `getPreviewFilteredThread`).
+   * unfiltered ctss samples based on an index into the filtered ctss samples.
    */
-  const getSampleIndexOffsetFromCommittedRange: Selector<number> =
-    createSelector(
-      getUnfilteredSamplesForCallTree,
-      ProfileSelectors.getCommittedRange,
-      (samples, { start, end }) => {
-        const [beginSampleIndex] = ProfileData.getSampleIndexRangeForSelection(
-          samples,
-          start,
-          end
-        );
-        return beginSampleIndex;
-      }
-    );
+  const getFilteredCtssSampleIndexOffset: Selector<number> = createSelector(
+    getUnfilteredCtssSamples,
+    ProfileSelectors.getCommittedRange,
+    (samples, { start, end }) => {
+      const [beginSampleIndex] = ProfileData.getSampleIndexRangeForSelection(
+        samples,
+        start,
+        end
+      );
+      return beginSampleIndex;
+    }
+  );
 
   const getFriendlyThreadName: Selector<string> = createSelector(
     ProfileSelectors.getThreads,
@@ -375,8 +378,8 @@ export function getBasicThreadSelectorsPerThread(
     getThreadRange,
     getReservedFunctionsForResources,
     getRangeFilteredThread,
-    getUnfilteredSamplesForCallTree,
-    getSampleIndexOffsetFromCommittedRange,
+    getUnfilteredCtssSamples,
+    getFilteredCtssSampleIndexOffset,
     getFriendlyThreadName,
     getThreadProcessDetails,
     getViewOptions,
@@ -479,14 +482,13 @@ export function getThreadSelectorsWithMarkersPerThread(
     }
   );
 
-  const getFilteredSamplesForCallTree: Selector<SamplesLikeTable> =
-    createSelector(
-      getFilteredThread,
-      threadSelectors.getCallTreeSummaryStrategy,
-      CallTree.extractSamplesLikeTable
-    );
+  const getFilteredCtssSamples: Selector<SamplesLikeTable> = createSelector(
+    getFilteredThread,
+    threadSelectors.getCallTreeSummaryStrategy,
+    CallTree.extractSamplesLikeTable
+  );
 
-  const getPreviewFilteredSamplesForCallTree: Selector<SamplesLikeTable> =
+  const getPreviewFilteredCtssSamples: Selector<SamplesLikeTable> =
     createSelector(
       getPreviewFilteredThread,
       threadSelectors.getCallTreeSummaryStrategy,
@@ -495,26 +497,28 @@ export function getThreadSelectorsWithMarkersPerThread(
 
   /**
    * This selector returns the offset to add to a sampleIndex when accessing the
-   * base thread, if your thread is the preview filtered thread.
+   * unfiltered ctss samples based on an offset into the preview-filtered ctss
+   * samples.
    */
-  const getSampleIndexOffsetFromPreviewRange: Selector<number> = createSelector(
-    getFilteredSamplesForCallTree,
-    ProfileSelectors.getPreviewSelection,
-    threadSelectors.getSampleIndexOffsetFromCommittedRange,
-    (samples, previewSelection, sampleIndexFromCommittedRange) => {
-      if (!previewSelection.hasSelection) {
-        return sampleIndexFromCommittedRange;
+  const getPreviewFilteredCtssSampleIndexOffset: Selector<number> =
+    createSelector(
+      getFilteredCtssSamples,
+      ProfileSelectors.getPreviewSelection,
+      threadSelectors.getFilteredCtssSampleIndexOffset,
+      (samples, previewSelection, sampleIndexFromCommittedRange) => {
+        if (!previewSelection.hasSelection) {
+          return sampleIndexFromCommittedRange;
+        }
+
+        const [beginSampleIndex] = ProfileData.getSampleIndexRangeForSelection(
+          samples,
+          previewSelection.selectionStart,
+          previewSelection.selectionEnd
+        );
+
+        return sampleIndexFromCommittedRange + beginSampleIndex;
       }
-
-      const [beginSampleIndex] = ProfileData.getSampleIndexRangeForSelection(
-        samples,
-        previewSelection.selectionStart,
-        previewSelection.selectionEnd
-      );
-
-      return sampleIndexFromCommittedRange + beginSampleIndex;
-    }
-  );
+    );
 
   const getTransformLabelL10nIds: Selector<TransformLabeL10nIds[]> =
     createSelector(
@@ -542,9 +546,9 @@ export function getThreadSelectorsWithMarkersPerThread(
     getRangeAndTransformFilteredThread,
     getFilteredThread,
     getPreviewFilteredThread,
-    getFilteredSamplesForCallTree,
-    getPreviewFilteredSamplesForCallTree,
-    getSampleIndexOffsetFromPreviewRange,
+    getFilteredCtssSamples,
+    getPreviewFilteredCtssSamples,
+    getPreviewFilteredCtssSampleIndexOffset,
     getTransformLabelL10nIds,
     getLocalizedTransformLabels,
   };
