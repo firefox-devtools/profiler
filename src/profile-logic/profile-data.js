@@ -9,8 +9,6 @@ import MixedTupleMap from 'mixedtuplemap';
 import { oneLine } from 'common-tags';
 import {
   resourceTypes,
-  getEmptyUnbalancedNativeAllocationsTable,
-  getEmptyBalancedNativeAllocationsTable,
   getEmptyStackTable,
   getEmptyCallNodeTable,
   shallowCloneFrameTable,
@@ -2737,35 +2735,19 @@ export function getCategoryPairLabel(
 export function filterToAllocations(
   nativeAllocations: NativeAllocationsTable
 ): NativeAllocationsTable {
-  let newNativeAllocations;
-  if (nativeAllocations.memoryAddress) {
-    newNativeAllocations = getEmptyBalancedNativeAllocationsTable();
-    for (let i = 0; i < nativeAllocations.length; i++) {
-      const weight = nativeAllocations.weight[i];
-      if (weight > 0) {
-        newNativeAllocations.time.push(nativeAllocations.time[i]);
-        newNativeAllocations.stack.push(nativeAllocations.stack[i]);
-        newNativeAllocations.weight.push(weight);
-        newNativeAllocations.memoryAddress.push(
-          nativeAllocations.memoryAddress[i]
-        );
-        newNativeAllocations.threadId.push(nativeAllocations.threadId[i]);
-        newNativeAllocations.length++;
-      }
-    }
-  } else {
-    newNativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
-    for (let i = 0; i < nativeAllocations.length; i++) {
-      const weight = nativeAllocations.weight[i];
-      if (weight > 0) {
-        newNativeAllocations.time.push(nativeAllocations.time[i]);
-        newNativeAllocations.stack.push(nativeAllocations.stack[i]);
-        newNativeAllocations.weight.push(weight);
-        newNativeAllocations.length++;
-      }
+  const filteredStackCol = nativeAllocations.stack.slice();
+  for (let i = 0; i < nativeAllocations.length; i++) {
+    const weight = nativeAllocations.weight[i];
+    if (weight <= 0) {
+      // Not an allocation, null out the sample's stack.
+      filteredStackCol[i] = null;
     }
   }
-  return newNativeAllocations;
+
+  return {
+    ...nativeAllocations,
+    stack: filteredStackCol,
+  };
 }
 
 /**
@@ -2775,35 +2757,19 @@ export function filterToAllocations(
 export function filterToDeallocationsSites(
   nativeAllocations: NativeAllocationsTable
 ): NativeAllocationsTable {
-  let newNativeAllocations;
-  if (nativeAllocations.memoryAddress) {
-    newNativeAllocations = getEmptyBalancedNativeAllocationsTable();
-    for (let i = 0; i < nativeAllocations.length; i++) {
-      const weight = nativeAllocations.weight[i];
-      if (weight < 0) {
-        newNativeAllocations.time.push(nativeAllocations.time[i]);
-        newNativeAllocations.stack.push(nativeAllocations.stack[i]);
-        newNativeAllocations.weight.push(weight);
-        newNativeAllocations.memoryAddress.push(
-          nativeAllocations.memoryAddress[i]
-        );
-        newNativeAllocations.threadId.push(nativeAllocations.threadId[i]);
-        newNativeAllocations.length++;
-      }
-    }
-  } else {
-    newNativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
-    for (let i = 0; i < nativeAllocations.length; i++) {
-      const weight = nativeAllocations.weight[i];
-      if (weight < 0) {
-        newNativeAllocations.time.push(nativeAllocations.time[i]);
-        newNativeAllocations.stack.push(nativeAllocations.stack[i]);
-        newNativeAllocations.weight.push(weight);
-        newNativeAllocations.length++;
-      }
+  const filteredStackCol = nativeAllocations.stack.slice();
+  for (let i = 0; i < nativeAllocations.length; i++) {
+    const weight = nativeAllocations.weight[i];
+    if (weight >= 0) {
+      // Not a deallocation, null out the sample's stack.
+      filteredStackCol[i] = null;
     }
   }
-  return newNativeAllocations;
+
+  return {
+    ...nativeAllocations,
+    stack: filteredStackCol,
+  };
 }
 
 /**
@@ -2818,7 +2784,7 @@ export function filterToDeallocationsMemory(
 
   // This is like a Map<MemoryAddress, IndexIntoStackTable | null>;
   const memoryAddressToAllocationSite: Array<IndexIntoStackTable | null> = [];
-  const newDeallocations = getEmptyBalancedNativeAllocationsTable();
+  const filteredStackCol = nativeAllocations.stack.slice();
 
   for (
     let allocationIndex = 0;
@@ -2840,40 +2806,40 @@ export function filterToDeallocationsMemory(
       }
       memoryAddressToAllocationSite[memoryAddress] =
         nativeAllocations.stack[allocationIndex];
-      continue;
+      filteredStackCol[allocationIndex] = null;
+    } else {
+      // This is a deallocation.
+      // Lookup the previous allocation.
+      const allocationStackIndex = memoryAddressToAllocationSite[memoryAddress];
+      if (allocationStackIndex === undefined) {
+        // This deallocation doesn't match an allocation. Let's bail out.
+        filteredStackCol[allocationIndex] = null;
+      } else {
+        // This deallocation matches a previous allocation. Keep the sample and
+        // change the stack to the allocation stack.
+        filteredStackCol[allocationIndex] = allocationStackIndex;
+
+        // Remove the saved allocation
+        delete memoryAddressToAllocationSite[memoryAddress];
+      }
     }
-
-    // This is a deallocation.
-    // Lookup the previous allocation.
-    const allocationStackIndex = memoryAddressToAllocationSite[memoryAddress];
-    if (allocationStackIndex === undefined) {
-      // This deallocation doesn't match an allocation. Let's bail out.
-      continue;
-    }
-
-    // This deallocation matches a previous allocation.
-    newDeallocations.time.push(nativeAllocations.time[allocationIndex]);
-    newDeallocations.stack.push(allocationStackIndex);
-    newDeallocations.weight.push(bytes);
-    newDeallocations.memoryAddress.push(memoryAddress);
-    newDeallocations.threadId.push(nativeAllocations.threadId[allocationIndex]);
-    newDeallocations.length++;
-
-    // Remove the saved allocation
-    delete memoryAddressToAllocationSite[memoryAddress];
   }
 
-  return newDeallocations;
+  return {
+    ...nativeAllocations,
+    stack: filteredStackCol,
+  };
 }
 
 /**
- * Currently the native allocations naively collect allocations and deallocations.
- * There is no attempt to match up the sampled allocations with the deallocations.
- * Because of this, if a calltree were to combine both allocations and deallocations,
- * then the summary would most likely lie and not misreport leaked or retained memory.
- * For now, filter to only showing allocations or deallocations.
+ * Keeps the samples for any allocations of memory addresses for which we don't
+ * have a deallocation sample. Does not keep any deallocation samples.
  *
- * This function filters to only positive values.
+ * This is used when you want to know how much memory is still around at the
+ * end of the selected range, and where this memory was allocated.
+ *
+ * The returned table has the same length and indexes as the `nativeAllocations`
+ * argument.
  */
 export function filterToRetainedAllocations(
   nativeAllocations: BalancedNativeAllocationsTable
@@ -2883,7 +2849,7 @@ export function filterToRetainedAllocations(
   type IndexIntoAllocations = number;
   const memoryAddressToAllocation: Map<Address, IndexIntoAllocations> =
     new Map();
-  const retainedAllocation = [];
+  const filteredStackCol = nativeAllocations.stack.slice();
   for (
     let allocationIndex = 0;
     allocationIndex < nativeAllocations.length;
@@ -2896,39 +2862,27 @@ export function filterToRetainedAllocations(
 
       // Provide a map back to this index.
       memoryAddressToAllocation.set(memoryAddress, allocationIndex);
-      retainedAllocation[allocationIndex] = true;
     } else {
-      // Do not retain deallocations.
-      retainedAllocation[allocationIndex] = false;
+      // Null out the stack for deallocation samples.
+      filteredStackCol[allocationIndex] = null;
 
       // Lookup the previous allocation.
       const previousAllocationIndex =
         memoryAddressToAllocation.get(memoryAddress);
       if (previousAllocationIndex !== undefined) {
-        // This deallocation matches a previous allocation. Remove the allocation.
-        retainedAllocation[previousAllocationIndex] = false;
+        // This deallocation matches a previous allocation. Null out the
+        // corresponding allocation sample.
+        filteredStackCol[previousAllocationIndex] = null;
         // There is a match, so delete this old association.
         memoryAddressToAllocation.delete(memoryAddress);
       }
     }
   }
 
-  const newNativeAllocations = getEmptyBalancedNativeAllocationsTable();
-  for (let i = 0; i < nativeAllocations.length; i++) {
-    const weight = nativeAllocations.weight[i];
-    if (retainedAllocation[i]) {
-      newNativeAllocations.time.push(nativeAllocations.time[i]);
-      newNativeAllocations.stack.push(nativeAllocations.stack[i]);
-      newNativeAllocations.weight.push(weight);
-      newNativeAllocations.memoryAddress.push(
-        nativeAllocations.memoryAddress[i]
-      );
-      newNativeAllocations.threadId.push(nativeAllocations.threadId[i]);
-      newNativeAllocations.length++;
-    }
-  }
-
-  return newNativeAllocations;
+  return {
+    ...nativeAllocations,
+    stack: filteredStackCol,
+  };
 }
 
 /**
