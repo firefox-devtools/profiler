@@ -228,18 +228,6 @@ export type NativeAllocationsTable =
   | BalancedNativeAllocationsTable;
 
 /**
- * This is the base abstract class that marker payloads inherit from. This probably isn't
- * used directly in profiler.firefox.com, but is provided here for mainly documentation
- * purposes.
- */
-export type ProfilerMarkerPayload = {
-  type: string,
-  startTime?: Milliseconds,
-  endTime?: Milliseconds,
-  stack?: Thread,
-};
-
-/**
  * Markers represent arbitrary events that happen within the browser. They have a
  * name, time, and potentially a JSON data payload. These can come from all over the
  * system. For instance Paint markers instrument the rendering and layout process.

@@ -15,7 +15,6 @@ import type {
   Counter,
   Tid,
   TrackReference,
-  MarkerSchemaByName,
   TabID,
 } from 'firefox-profiler/types';
 
@@ -23,7 +22,6 @@ import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
 import { intersectSets, subtractSets } from '../utils/set';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
-import { getMarkerSchemaName } from './marker-schema';
 
 export type TracksWithOrder = {|
   +globalTracks: GlobalTrack[],
@@ -258,8 +256,7 @@ export function initializeLocalTrackOrderByPid(
  */
 export function computeLocalTracksByPid(
   profile: Profile,
-  availableGlobalTracks: GlobalTrack[],
-  markerSchemaByName: MarkerSchemaByName
+  availableGlobalTracks: GlobalTrack[]
 ): Map<Pid, LocalTrack[]> {
   const localTracksByPid = new Map();
 
@@ -323,12 +320,8 @@ export function computeLocalTracksByPid(
       for (let i = 0; i < markers.length; ++i) {
         const markerNameIndex = markers.name[i];
         const markerData = markers.data[i];
-        const markerSchemaName = getMarkerSchemaName(
-          markerSchemaByName,
-          thread.stringTable.getString(markerNameIndex),
-          markerData
-        );
-        if (markerData && markerSchemaByName) {
+        const markerSchemaName = markerData ? markerData.type : null;
+        if (markerData && markerSchemaName) {
           const mapEntry = markerTracksBySchemaName.get(markerSchemaName);
           if (mapEntry && mapEntry.keys.every((k) => k in markerData)) {
             mapEntry.markerNames.add(markerNameIndex);
