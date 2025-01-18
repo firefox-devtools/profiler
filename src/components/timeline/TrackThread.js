@@ -26,6 +26,7 @@ import {
   getMaxThreadCPUDeltaPerMs,
   getIsExperimentalCPUGraphsEnabled,
   getImplementationFilter,
+  getZeroAt,
 } from 'firefox-profiler/selectors';
 import {
   TimelineMarkersJank,
@@ -94,6 +95,7 @@ type StateProps = {|
   +maxThreadCPUDeltaPerMs: number,
   +implementationFilter: ImplementationFilter,
   +callTreeVisible: boolean,
+  +zeroAt: Milliseconds,
 |};
 
 type DispatchProps = {|
@@ -195,6 +197,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       maxThreadCPUDeltaPerMs,
       isExperimentalCPUGraphsEnabled,
       implementationFilter,
+      zeroAt,
     } = this.props;
 
     const processType = filteredThread.processType;
@@ -265,6 +268,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               maxThreadCPUDeltaPerMs={maxThreadCPUDeltaPerMs}
               implementationFilter={implementationFilter}
               timelineType={timelineType}
+              zeroAt={zeroAt}
             />
             {trackType === 'expanded' ? (
               <ThreadSampleGraph
@@ -279,6 +283,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
                 onSampleClick={this._onSampleClick}
                 timelineType={timelineType}
                 implementationFilter={implementationFilter}
+                zeroAt={zeroAt}
               />
             ) : null}
             {isExperimentalCPUGraphsEnabled &&
@@ -354,8 +359,7 @@ export const TimelineTrackThread = explicitConnect<
       interval: getProfileInterval(state),
       rangeStart: committedRange.start,
       rangeEnd: committedRange.end,
-      sampleIndexOffset:
-        selectors.getSampleIndexOffsetFromCommittedRange(state),
+      sampleIndexOffset: selectors.getFilteredSampleIndexOffset(state),
       categories: getCategories(state),
       timelineType,
       hasFileIoMarkers:
@@ -370,6 +374,7 @@ export const TimelineTrackThread = explicitConnect<
       maxThreadCPUDeltaPerMs: getMaxThreadCPUDeltaPerMs(state),
       implementationFilter: getImplementationFilter(state),
       callTreeVisible: selectors.getUsefulTabs(state).includes('calltree'),
+      zeroAt: getZeroAt(state),
     };
   },
   mapDispatchToProps: {

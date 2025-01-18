@@ -220,6 +220,24 @@ describe('FlameGraph', function () {
     expect(copy).toHaveBeenLastCalledWith('B');
   });
 
+  it('has a tooltip that matches the snapshot with categories when a preview selection is applied', () => {
+    const { getTooltip, moveMouse, findFillTextPosition, dispatch } =
+      setupFlameGraph();
+    flushDrawLog();
+    act(() => {
+      dispatch(
+        updatePreviewSelection({
+          hasSelection: true,
+          isModifying: false,
+          selectionStart: 1.3,
+          selectionEnd: 5,
+        })
+      );
+    });
+    moveMouse(findFillTextPosition('A'));
+    expect(getTooltip()).toMatchSnapshot();
+  });
+
   describe('EmptyReasons', () => {
     it('matches the snapshot when a profile has no samples', () => {
       const profile = getEmptyProfile();
