@@ -27,7 +27,6 @@ import type {
   JsAllocationsTable,
   NativeAllocationsTable,
   RawMarkerTable,
-  StackTable,
   FrameTable,
   FuncTable,
   ResourceTable,
@@ -35,6 +34,8 @@ import type {
   JsTracerTable,
   IndexIntoStackTable,
   WeightType,
+  IndexIntoFrameTable,
+  IndexIntoSubcategoryListForCategory,
 } from './profile';
 import type { IndexedArray } from './utils';
 import type { StackTiming } from '../profile-logic/stack-timing';
@@ -169,6 +170,45 @@ export type Counter = {|
   pid: Pid,
   mainThreadIndex: ThreadIndex,
   samples: CounterSamplesTable,
+|};
+
+/**
+ * The `StackTable` type of the derived thread.
+ *
+ * The only difference from the `RawStackTable` is that the `StackTable` has a
+ * `category` and a `subcategory` column.
+ *
+ * The category of a stack node is always non-null and is derived from a stack's
+ * frame and its prefix. Frames can have null categories, stacks cannot. If a
+ * stack's frame has a null category, the stack inherits the category of its
+ * prefix stack. Root stacks whose frame has a null stack have their category
+ * set to the "default category". (The default category is currently defined as
+ * the category in the profile's category list whose color is "grey", and such
+ * a category is required to be present.)
+ *
+ * We compute the category information at the start of the thread transform
+ * pipeline, not at the end. This allows us to preserve categories more accurately
+ * when transforms are applied. Example:
+ *
+ * In the call path
+ *   someJSFunction [JS] -> Node.insertBefore [DOM] -> nsAttrAndChildArray::InsertChildAt,
+ * the stack node for nsAttrAndChildArray::InsertChildAt should inherit the
+ * category DOM from its "Node.insertBefore" prefix stack. And it should keep
+ * the DOM category even if you apply the "Merge node into calling function"
+ * transform to Node.insertBefore. This transform removes the stack node
+ * "Node.insertBefore" from the stackTable, so the information about the DOM
+ * category would be lost if it wasn't inherited into the
+ * nsAttrAndChildArray::InsertChildAt stack before transforms are applied.
+ */
+export type StackTable = {|
+  // Same as in RawStackTable
+  frame: IndexIntoFrameTable[],
+  prefix: Array<IndexIntoStackTable | null>,
+  length: number,
+
+  // Derived from RawStackTable + FrameTable
+  category: IndexIntoCategoryList[],
+  subcategory: IndexIntoSubcategoryListForCategory[],
 |};
 
 /**

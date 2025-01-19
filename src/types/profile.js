@@ -54,36 +54,9 @@ export type Pid = string;
  * We take advantage of the fact that many call stacks in the profile have a
  * shared prefix; storing these stacks as a tree saves a lot of space compared
  * to storing them as actual lists of frames.
- *
- * The category of a stack node is always non-null and is derived from a stack's
- * frame and its prefix. Frames can have null categories, stacks cannot. If a
- * stack's frame has a null category, the stack inherits the category of its
- * prefix stack. Root stacks whose frame has a null stack have their category
- * set to the "default category". (The default category is currently defined as
- * the category in the profile's category list whose color is "grey", and such
- * a category is required to be present.)
- *
- * You could argue that the stack table's category column is derived data and as
- * such doesn't need to be stored in the profile itself. This is true, but
- * storing this information in the stack table makes it a lot easier to carry
- * it through various transforms that we apply to threads.
- * For example, here's a case where a stack's category is not recoverable from
- * any other information in the transformed thread:
- * In the call path
- *   someJSFunction [JS] -> Node.insertBefore [DOM] -> nsAttrAndChildArray::InsertChildAt,
- * the stack node for nsAttrAndChildArray::InsertChildAt should inherit the
- * category DOM from its "Node.insertBefore" prefix stack. And it should keep
- * the DOM category even if you apply the "Merge node into calling function"
- * transform to Node.insertBefore. This transform removes the stack node
- * "Node.insertBefore" from the stackTable, so the information about the DOM
- * category would be lost if it wasn't inherited into the
- * nsAttrAndChildArray::InsertChildAt stack before transforms are applied.
  */
-export type StackTable = {|
+export type RawStackTable = {|
   frame: IndexIntoFrameTable[],
-  // Imported profiles may not have categories. In this case fill the array with 0s.
-  category: IndexIntoCategoryList[],
-  subcategory: IndexIntoSubcategoryListForCategory[],
   prefix: Array<IndexIntoStackTable | null>,
   length: number,
 |};
@@ -642,7 +615,7 @@ export type RawThread = {|
   jsAllocations?: JsAllocationsTable,
   nativeAllocations?: NativeAllocationsTable,
   markers: RawMarkerTable,
-  stackTable: StackTable,
+  stackTable: RawStackTable,
   frameTable: FrameTable,
   // Strings for profiles are collected into a single table, and are referred to by
   // their index by other tables.

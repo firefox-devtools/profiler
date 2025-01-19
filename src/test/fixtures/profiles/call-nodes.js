@@ -9,12 +9,11 @@ import type {
   FrameTable,
   Profile,
 } from 'firefox-profiler/types';
-import { ensureExists } from 'firefox-profiler/utils/flow';
 
 import {
   getEmptyThread,
   getEmptyProfile,
-  getEmptyStackTable,
+  getEmptyRawStackTable,
 } from '../../../profile-logic/data-structures';
 import { StringTable } from '../../../utils/string-table';
 
@@ -47,11 +46,6 @@ export default function getProfile(): Profile {
   const funcNames = ['funcA', 'funcB', 'funcC', 'funcD', 'funcE', 'funcF'].map(
     (name) => stringTable.indexForString(name)
   );
-
-  const categoryOther = ensureExists(
-    profile.meta.categories,
-    'Expected to find categories'
-  ).findIndex((c) => c.name === 'Other');
 
   // Be explicit about table creation so flow errors are really readable.
   const funcTable: FuncTable = {
@@ -99,28 +93,26 @@ export default function getProfile(): Profile {
     length: frameFuncs.length,
   };
 
-  const stackTable = getEmptyStackTable();
+  const stackTable = getEmptyRawStackTable();
 
   // Provide a utility function for readability.
-  function addToStackTable(frame, prefix, category) {
+  function addToStackTable(frame, prefix) {
     stackTable.frame.push(frame);
     stackTable.prefix.push(prefix);
-    stackTable.category.push(category);
-    stackTable.subcategory.push(0);
     stackTable.length++;
   }
   // Shared root stacks.
-  addToStackTable(funcAFrame, null, categoryOther);
-  addToStackTable(funcBFrame, 0, categoryOther);
-  addToStackTable(funcCFrame, 1, categoryOther);
+  addToStackTable(funcAFrame, null);
+  addToStackTable(funcBFrame, 0);
+  addToStackTable(funcCFrame, 1);
 
   // Branch 1.
-  addToStackTable(funcDFrame, 2, categoryOther);
-  addToStackTable(funcEFrame, 3, categoryOther);
+  addToStackTable(funcDFrame, 2);
+  addToStackTable(funcEFrame, 3);
 
   // Branch 2.
-  addToStackTable(funcDFrameDuplicate, 2, categoryOther);
-  addToStackTable(funcFFrame, 5, categoryOther);
+  addToStackTable(funcDFrameDuplicate, 2);
+  addToStackTable(funcFFrame, 5);
 
   // Have the first sample pointing to the first branch, and the second sample to
   // the second branch of the stack.
