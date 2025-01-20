@@ -176,11 +176,12 @@ function isTopmostThread(
   thread: RawThread,
   topmostInnerWindowIDs: Set<InnerWindowID>
 ): boolean {
-  const { frameTable, markers } = thread;
-  for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
-    const innerWindowID = frameTable.innerWindowID[frameIndex];
-    if (innerWindowID !== null && topmostInnerWindowIDs.has(innerWindowID)) {
-      return true;
+  const { usedInnerWindowIDs, markers } = thread;
+  if (usedInnerWindowIDs !== undefined) {
+    for (const innerWindowID of usedInnerWindowIDs) {
+      if (innerWindowID !== null && topmostInnerWindowIDs.has(innerWindowID)) {
+        return true;
+      }
     }
   }
 
@@ -211,14 +212,13 @@ function _getActiveTabResourceName(
   thread: RawThread,
   innerWindowIDToPageMap: Map<InnerWindowID, Page>
 ): string | null {
-  if (thread.isMainThread) {
+  const { isMainThread, usedInnerWindowIDs } = thread;
+  if (isMainThread && usedInnerWindowIDs !== undefined) {
     // This is a sub-frame.
     // Get the first innerWindowID inside the thread that's also present of innerWindowIDToPageMap.
-    let firstInnerWindowID = ensureExists(thread.frameTable.innerWindowID).find(
+    let firstInnerWindowID = usedInnerWindowIDs.find(
       (innerWindowID) =>
-        innerWindowID &&
-        innerWindowID !== 0 &&
-        innerWindowIDToPageMap.has(innerWindowID)
+        innerWindowID !== 0 && innerWindowIDToPageMap.has(innerWindowID)
     );
     if (firstInnerWindowID === undefined || firstInnerWindowID === null) {
       const markerData = thread.markers.data.find((data) => {

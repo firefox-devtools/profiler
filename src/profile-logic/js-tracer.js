@@ -4,8 +4,9 @@
 // @flow
 
 import {
-  getEmptyFrameTable,
-  getEmptyRawStackTable,
+  shallowCloneFuncTable,
+  shallowCloneFrameTable,
+  shallowCloneRawStackTable,
   getEmptySamplesTableWithEventDelay,
   getEmptyRawMarkerTable,
 } from './data-structures';
@@ -16,6 +17,7 @@ import type {
   IndexIntoStringTable,
   IndexIntoJsTracerEvents,
   IndexIntoFuncTable,
+  RawProfileSharedData,
   RawThread,
   IndexIntoStackTable,
   RawSamplesTable,
@@ -35,9 +37,8 @@ type ScriptLocationToFuncIndex = Map<string, IndexIntoFuncTable | null>;
  */
 function getScriptLocationToFuncIndex(
   thread: RawThread,
-  stringTable: StringTable
+  { funcTable, stringArray }: RawProfileSharedData
 ): ScriptLocationToFuncIndex {
-  const { funcTable } = thread;
   const scriptLocationToFuncIndex = new Map();
   for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
     if (!funcTable.isJS[funcIndex]) {
@@ -47,7 +48,7 @@ function getScriptLocationToFuncIndex(
     const column = funcTable.columnNumber[funcIndex];
     const fileNameIndex = funcTable.fileName[funcIndex];
     if (column !== null && line !== null && fileNameIndex !== null) {
-      const fileName = stringTable.getString(fileNameIndex);
+      const fileName = stringArray[fileNameIndex];
       const key = `${fileName}:${line}:${column}`;
       if (scriptLocationToFuncIndex.has(key)) {
         // Multiple functions map to this script location.
@@ -78,18 +79,19 @@ function getScriptLocationToFuncIndex(
 export function getJsTracerTiming(
   jsTracer: JsTracerTable,
   thread: RawThread,
-  stringTable: StringTable
+  shared: RawProfileSharedData
 ): JsTracerTiming[] {
   const jsTracerTiming: JsTracerTiming[] = [];
-  const { funcTable } = thread;
 
   // This has already been computed by the conversion of the JS tracer structure to
   // a thread, but it's probably not worth the complexity of caching this object.
   // Just recompute it.
   const scriptLocationToFuncIndex = getScriptLocationToFuncIndex(
     thread,
-    stringTable
+    shared
   );
+
+  const { funcTable, stringArray } = shared;
 
   // Go through all of the events.
   for (
@@ -103,7 +105,7 @@ export function getJsTracerTiming(
 
     // By default we use the display name from JS tracer, but we may update it if
     // we can figure out more information about it.
-    let displayName = stringTable.getString(stringIndex);
+    let displayName = stringArray[stringIndex];
 
     // We may have deduced the funcIndex in the scriptLocationToFuncIndex Map.
     let funcIndex: null | IndexIntoFuncTable = null;
@@ -123,9 +125,9 @@ export function getJsTracerTiming(
         } else {
           // Update the information with the function that was found.
           funcIndex = funcIndexInMap;
-          displayName = `ƒ ${stringTable.getString(
-            funcTable.name[funcIndex]
-          )}  ${displayName}`;
+          displayName = `ƒ ${
+            stringArray[funcTable.name[funcIndex]]
+          }  ${displayName}`;
         }
       }
     }
@@ -496,31 +498,39 @@ export function getJsTracerLeafTiming(
  */
 export function convertJsTracerToThreadWithoutSamples(
   fromThread: RawThread,
+  fromShared: RawProfileSharedData,
   stringTable: StringTable,
   jsTracer: JsTracerFixed,
   categories: CategoryList
 ): {
   thread: RawThread,
+  shared: RawProfileSharedData,
   stackMap: Map<IndexIntoJsTracerEvents, IndexIntoStackTable>,
 } {
   // Create a new thread, with empty information, but preserve some of the existing
   // thread information.
-  const frameTable = getEmptyFrameTable();
-  const stackTable = getEmptyRawStackTable();
+
+  const funcTable = shallowCloneFuncTable(fromShared.funcTable);
+  const frameTable = shallowCloneFrameTable(fromShared.frameTable);
+  const stackTable = shallowCloneRawStackTable(fromShared.stackTable);
+
+  const shared: RawProfileSharedData = {
+    ...fromShared,
+    funcTable,
+    frameTable,
+    stackTable,
+  };
+
   const samples: RawSamplesTable = {
     ...getEmptySamplesTableWithEventDelay(),
     weight: [],
     weightType: 'tracing-ms',
   };
   const markers = getEmptyRawMarkerTable();
-  const funcTable = { ...fromThread.funcTable };
 
   const thread: RawThread = {
     ...fromThread,
     markers,
-    funcTable,
-    stackTable,
-    frameTable,
     samples,
   };
 
@@ -543,7 +553,7 @@ export function convertJsTracerToThreadWithoutSamples(
   }
   const scriptLocationToFuncIndex = getScriptLocationToFuncIndex(
     thread,
-    stringTable
+    fromShared
   );
 
   // Go through all of the JS tracer events, and build up the func, stack, and
@@ -631,7 +641,7 @@ export function convertJsTracerToThreadWithoutSamples(
     unmatchedEventEnds[unmatchedIndex] = end;
   }
 
-  return { thread, stackMap };
+  return { thread, shared, stackMap };
 }
 
 type JsTracerFixed = {|
@@ -737,13 +747,15 @@ export function getJsTracerFixed(jsTracer: JsTracerTable): JsTracerFixed {
  */
 export function convertJsTracerToThread(
   fromThread: RawThread,
+  fromShared: RawProfileSharedData,
   jsTracer: JsTracerTable,
-  categories: CategoryList,
-  stringTable: StringTable
-): RawThread {
+  categories: CategoryList
+): {| shared: RawProfileSharedData, thread: RawThread |} {
   const jsTracerFixed = getJsTracerFixed(jsTracer);
-  const { thread, stackMap } = convertJsTracerToThreadWithoutSamples(
+  const stringTable = StringTable.withBackingArray(fromShared.stringArray);
+  const { thread, shared, stackMap } = convertJsTracerToThreadWithoutSamples(
     fromThread,
+    fromShared,
     stringTable,
     jsTracerFixed,
     categories
@@ -753,7 +765,7 @@ export function convertJsTracerToThread(
     jsTracerFixed,
     stackMap
   );
-  return thread;
+  return { thread, shared };
 }
 
 /**

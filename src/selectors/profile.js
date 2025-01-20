@@ -16,6 +16,7 @@ import {
   processCounter,
   getInclusiveSampleIndexRangeForSelection,
   computeTabToThreadIndexesMap,
+  computeStackTableFromRawStackTable,
 } from '../profile-logic/profile-data';
 import {
   IPCMarkerCorrelations,
@@ -31,6 +32,7 @@ import type { TabSlug } from '../app-logic/tabs-handling';
 import type {
   Profile,
   RawProfileSharedData,
+  StackTable,
   CategoryList,
   IndexIntoCategoryList,
   RawThread,
@@ -259,6 +261,13 @@ export const getCategories: Selector<CategoryList> = createSelector(
 export const getStringTable: Selector<StringTable> = createSelector(
   (state) => getRawProfileSharedData(state).stringArray,
   (stringArray) => StringTable.withBackingArray(stringArray)
+);
+
+export const getStackTable: Selector<StackTable> = createSelector(
+  (state) => getRawProfileSharedData(state).stackTable,
+  (state) => getRawProfileSharedData(state).frameTable,
+  getDefaultCategory,
+  computeStackTableFromRawStackTable
 );
 
 // Combine the marker schema from Gecko and the front-end. This allows the front-end

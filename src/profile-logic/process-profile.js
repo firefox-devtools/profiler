@@ -1235,11 +1235,6 @@ function _processThread(
     tid: thread.tid,
     pid: `${thread.pid}`,
     pausedRanges: pausedRanges || [],
-    frameTable,
-    funcTable,
-    nativeSymbols,
-    resourceTable,
-    stackTable,
     markers,
     samples,
   };
@@ -1848,6 +1843,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
       const friendlyThreadName = getFriendlyThreadName(threads, thread);
       const jsTracerThread = convertJsTracerToThread(
         thread,
+        shared,
         jsTracer,
         geckoProfile.meta.categories,
         stringTable

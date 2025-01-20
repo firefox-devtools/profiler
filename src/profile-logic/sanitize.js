@@ -46,6 +46,10 @@ export type SanitizeProfileResult = {|
   +isSanitized: boolean,
 |};
 
+// Some constants to make it easier to read.
+const KEEP_TAB_ID_STACK = 1;
+const PRIVATE_BROWSING_STACK = 2;
+
 /**
  * Take a processed profile with PII that user wants to be removed and remove the
  * thread data depending on that PII status. Look at `RemoveProfileInformation`
@@ -137,6 +141,192 @@ export function sanitizePII(
   }
   const stringTable = StringTable.withBackingArray(stringArray);
 
+  const newShared = {
+    ...profile.shared,
+    stringArray,
+  };
+
+  let stackFlags = null;
+
+  if (
+    windowIdFromPrivateBrowsing.size > 0 ||
+    PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null
+  ) {
+    // In this block, we'll remove everything related to frame table entries
+    // that have a innerWindowID with a isPrivateBrowsing flag, or that come
+    // from other tabs than the one we want to keep.
+
+    // This map holds the information about the frame indexes that should be
+    // sanitized, with their functions as a key, so that we can easily change
+    // all frames if we need to.
+    const sanitizedFuncIndexesToFrameIndex: Map<
+      IndexIntoFuncTable,
+      IndexIntoFrameTable[],
+    > = new Map();
+    // This set holds all func indexes that shouldn't be sanitized. This will be
+    // intersected with the previous map's keys to know which functions need to
+    // be split in 2.
+    const funcIndexesToBeKept = new Set();
+
+    const { frameTable, funcTable, resourceTable, stackTable } = newShared;
+    for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
+      const innerWindowID = frameTable.innerWindowID[frameIndex];
+      const funcIndex = frameTable.func[frameIndex];
+
+      const isPrivateBrowsing =
+        innerWindowID && windowIdFromPrivateBrowsing.has(innerWindowID);
+      const isRemoveTabId =
+        innerWindowID &&
+        PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null &&
+        !windowIdFromActiveTab.has(innerWindowID);
+      if (isPrivateBrowsing || isRemoveTabId) {
+        // The function pointed by this frame should be sanitized.
+        let sanitizedFrameIndexes =
+          sanitizedFuncIndexesToFrameIndex.get(funcIndex);
+        if (!sanitizedFrameIndexes) {
+          sanitizedFrameIndexes = [];
+          sanitizedFuncIndexesToFrameIndex.set(
+            funcIndex,
+            sanitizedFrameIndexes
+          );
+        }
+        sanitizedFrameIndexes.push(frameIndex);
+      } else {
+        // The function pointed by this frame should be kept.
+        funcIndexesToBeKept.add(funcIndex);
+      }
+    }
+
+    if (sanitizedFuncIndexesToFrameIndex.size) {
+      const resourcesToBeSanitized = new Set();
+
+      const newFuncTable = (newShared.funcTable =
+        shallowCloneFuncTable(funcTable));
+      const newFrameTable = (newShared.frameTable = {
+        ...frameTable,
+        innerWindowID: frameTable.innerWindowID.slice(),
+        func: frameTable.func.slice(),
+        line: frameTable.line.slice(),
+        column: frameTable.column.slice(),
+      });
+
+      for (const [
+        funcIndex,
+        frameIndexes,
+      ] of sanitizedFuncIndexesToFrameIndex.entries()) {
+        if (funcIndexesToBeKept.has(funcIndex)) {
+          // This function is used by both private and non-private data, therefore
+          // we split this function into 2 sanitized and unsanitized functions.
+          const sanitizedFuncIndex = newFuncTable.length;
+          const name = stringTable.indexForString(
+            `<Func #${sanitizedFuncIndex}>`
+          );
+          newFuncTable.name.push(name);
+          newFuncTable.isJS.push(funcTable.isJS[funcIndex]);
+          newFuncTable.relevantForJS.push(funcTable.isJS[funcIndex]);
+          newFuncTable.resource.push(-1);
+          newFuncTable.fileName.push(null);
+          newFuncTable.lineNumber.push(null);
+          newFuncTable.columnNumber.push(null);
+          newFuncTable.length++;
+
+          frameIndexes.forEach(
+            (frameIndex) =>
+              (newFrameTable.func[frameIndex] = sanitizedFuncIndex)
+          );
+        } else {
+          // This function is used only by private data, so we can change it
+          // directly.
+          const name = stringTable.indexForString(`<Func #${funcIndex}>`);
+          newFuncTable.name[funcIndex] = name;
+
+          newFuncTable.fileName[funcIndex] = null;
+          if (newFuncTable.resource[funcIndex] >= 0) {
+            resourcesToBeSanitized.add(newFuncTable.resource[funcIndex]);
+          }
+          newFuncTable.resource[funcIndex] = -1;
+          newFuncTable.lineNumber[funcIndex] = null;
+          newFuncTable.columnNumber[funcIndex] = null;
+        }
+
+        // In both cases, nullify some information in all frames.
+        frameIndexes.forEach((frameIndex) => {
+          newFrameTable.line[frameIndex] = null;
+          newFrameTable.column[frameIndex] = null;
+          newFrameTable.innerWindowID[frameIndex] = null;
+        });
+      }
+
+      if (resourcesToBeSanitized.size) {
+        const newResourceTable = (newShared.resourceTable = {
+          ...resourceTable,
+          lib: resourceTable.lib.slice(),
+          name: resourceTable.name.slice(),
+          host: resourceTable.host.slice(),
+        });
+        const remainingResources = new Set(newFuncTable.resource);
+        for (const resourceIndex of resourcesToBeSanitized) {
+          if (!remainingResources.has(resourceIndex)) {
+            // This resource was used only by sanitized functions. Sanitize it
+            // as well.
+            const name = stringTable.indexForString(
+              `<Resource #${resourceIndex}>`
+            );
+            newResourceTable.name[resourceIndex] = name;
+            newResourceTable.lib[resourceIndex] = null;
+            newResourceTable.host[resourceIndex] = null;
+          }
+        }
+      }
+    }
+
+    // First we'll loop the stack table and populate a typed array with a value
+    // that is a flag that's inherited by children. This is possible because
+    // when iterating we visit parents before their children.
+    // There can be 3 values:
+    // - 0 is neutral, this means this stack isn't private browsing and isn't
+    //   the tab id we want to keep.
+    // - 1 means that this stack has at least one frame that's part of the tab
+    //   we want to keep (if any).
+    // - 2 means that this stack comes from private browsing. It always has
+    //   precedence on the active tab. This means that if the active tab comes
+    //   from a private browsing session and the user wants to sanitize it, it
+    //   will _still_ be removed.
+    // They won't be set if the related sanitization isn't set in PIIToBeRemoved.
+    // Also remember that one id can't be both in windowIdFromPrivateBrowsing
+    // and windowIdFromOtherTabs (windowIdFromPrivateBrowsing has precedence).
+    stackFlags = new Uint8Array(stackTable.length);
+
+    for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+      const prefix = stackTable.prefix[stackIndex];
+      if (prefix !== null) {
+        // Inherit the prefix value
+        stackFlags[stackIndex] = stackFlags[prefix];
+        if (stackFlags[stackIndex] === PRIVATE_BROWSING_STACK) {
+          // Because private browsing is the strongest value, we can skip
+          // the rest of the processing.
+          continue;
+        }
+      }
+
+      const frameIndex = stackTable.frame[stackIndex];
+      const innerWindowID = frameTable.innerWindowID[frameIndex];
+      if (!innerWindowID) {
+        continue;
+      }
+
+      const isPrivateBrowsing = windowIdFromPrivateBrowsing.has(innerWindowID);
+      const isKeepTabId =
+        PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null &&
+        windowIdFromActiveTab.has(innerWindowID);
+      if (isPrivateBrowsing) {
+        stackFlags[stackIndex] = PRIVATE_BROWSING_STACK;
+      } else if (isKeepTabId) {
+        stackFlags[stackIndex] = KEEP_TAB_ID_STACK;
+      }
+    }
+  }
+
   let removingCounters = false;
   const newProfile: Profile = {
     ...profile,
@@ -147,9 +337,7 @@ export function sanitizePII(
         : profile.meta.extensions,
     },
     pages: pages,
-    shared: {
-      stringArray,
-    },
+    shared: newShared,
     threads: profile.threads.reduce((acc, thread, threadIndex) => {
       const newThread: RawThread | null = sanitizeThreadPII(
         thread,
@@ -159,7 +347,8 @@ export function sanitizePII(
         PIIToBeRemoved,
         windowIdFromPrivateBrowsing,
         windowIdFromActiveTab,
-        markerSchemaByName
+        markerSchemaByName,
+        stackFlags
       );
 
       // Filtering out the current thread if it's null.
@@ -264,7 +453,8 @@ function sanitizeThreadPII(
   PIIToBeRemoved: RemoveProfileInformation,
   windowIdFromPrivateBrowsing: Set<InnerWindowID>,
   windowIdFromActiveTab: Set<InnerWindowID>,
-  markerSchemaByName: MarkerSchemaByName
+  markerSchemaByName: MarkerSchemaByName,
+  stackFlags: Uint8Array | null
 ): RawThread | null {
   if (PIIToBeRemoved.shouldRemoveThreads.has(threadIndex)) {
     // If this is a hidden thread, remove the thread immediately.
@@ -449,194 +639,18 @@ function sanitizeThreadPII(
     delete newThread['eTLD+1'];
   }
 
+  const { samples } = newThread;
+
   if (
-    windowIdFromPrivateBrowsing.size > 0 ||
-    PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null
+    stackFlags !== null &&
+    (windowIdFromPrivateBrowsing.size > 0 ||
+      PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null)
   ) {
-    // In this block, we'll remove everything related to frame table entries
-    // that have a innerWindowID with a isPrivateBrowsing flag, or that come
-    // from other tabs than the one we want to keep.
-
-    // This map holds the information about the frame indexes that should be
-    // sanitized, with their functions as a key, so that we can easily change
-    // all frames if we need to.
-    const sanitizedFuncIndexesToFrameIndex: Map<
-      IndexIntoFuncTable,
-      IndexIntoFrameTable[],
-    > = new Map();
-    // This set holds all func indexes that shouldn't be sanitized. This will be
-    // intersected with the previous map's keys to know which functions need to
-    // be split in 2.
-    const funcIndexesToBeKept = new Set();
-
-    const { frameTable, funcTable, resourceTable, stackTable, samples } =
-      newThread;
-    for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
-      const innerWindowID = frameTable.innerWindowID[frameIndex];
-      const funcIndex = frameTable.func[frameIndex];
-
-      const isPrivateBrowsing =
-        innerWindowID && windowIdFromPrivateBrowsing.has(innerWindowID);
-      const isRemoveTabId =
-        innerWindowID &&
-        PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null &&
-        !windowIdFromActiveTab.has(innerWindowID);
-      if (isPrivateBrowsing || isRemoveTabId) {
-        // The function pointed by this frame should be sanitized.
-        let sanitizedFrameIndexes =
-          sanitizedFuncIndexesToFrameIndex.get(funcIndex);
-        if (!sanitizedFrameIndexes) {
-          sanitizedFrameIndexes = [];
-          sanitizedFuncIndexesToFrameIndex.set(
-            funcIndex,
-            sanitizedFrameIndexes
-          );
-        }
-        sanitizedFrameIndexes.push(frameIndex);
-      } else {
-        // The function pointed by this frame should be kept.
-        funcIndexesToBeKept.add(funcIndex);
-      }
-    }
-
-    if (sanitizedFuncIndexesToFrameIndex.size) {
-      const resourcesToBeSanitized = new Set();
-
-      const newFuncTable = (newThread.funcTable =
-        shallowCloneFuncTable(funcTable));
-      const newFrameTable = (newThread.frameTable = {
-        ...frameTable,
-        innerWindowID: frameTable.innerWindowID.slice(),
-        func: frameTable.func.slice(),
-        line: frameTable.line.slice(),
-        column: frameTable.column.slice(),
-      });
-
-      for (const [
-        funcIndex,
-        frameIndexes,
-      ] of sanitizedFuncIndexesToFrameIndex.entries()) {
-        if (funcIndexesToBeKept.has(funcIndex)) {
-          // This function is used by both private and non-private data, therefore
-          // we split this function into 2 sanitized and unsanitized functions.
-          const sanitizedFuncIndex = newFuncTable.length;
-          const name = stringTable.indexForString(
-            `<Func #${sanitizedFuncIndex}>`
-          );
-          newFuncTable.name.push(name);
-          newFuncTable.isJS.push(funcTable.isJS[funcIndex]);
-          newFuncTable.relevantForJS.push(funcTable.isJS[funcIndex]);
-          newFuncTable.resource.push(-1);
-          newFuncTable.fileName.push(null);
-          newFuncTable.lineNumber.push(null);
-          newFuncTable.columnNumber.push(null);
-          newFuncTable.length++;
-
-          frameIndexes.forEach(
-            (frameIndex) =>
-              (newFrameTable.func[frameIndex] = sanitizedFuncIndex)
-          );
-        } else {
-          // This function is used only by private data, so we can change it
-          // directly.
-          const name = stringTable.indexForString(`<Func #${funcIndex}>`);
-          newFuncTable.name[funcIndex] = name;
-
-          newFuncTable.fileName[funcIndex] = null;
-          if (newFuncTable.resource[funcIndex] >= 0) {
-            resourcesToBeSanitized.add(newFuncTable.resource[funcIndex]);
-          }
-          newFuncTable.resource[funcIndex] = -1;
-          newFuncTable.lineNumber[funcIndex] = null;
-          newFuncTable.columnNumber[funcIndex] = null;
-        }
-
-        // In both cases, nullify some information in all frames.
-        frameIndexes.forEach((frameIndex) => {
-          newFrameTable.line[frameIndex] = null;
-          newFrameTable.column[frameIndex] = null;
-          newFrameTable.innerWindowID[frameIndex] = null;
-        });
-      }
-
-      if (resourcesToBeSanitized.size) {
-        const newResourceTable = (newThread.resourceTable = {
-          ...resourceTable,
-          lib: resourceTable.lib.slice(),
-          name: resourceTable.name.slice(),
-          host: resourceTable.host.slice(),
-        });
-        const remainingResources = new Set(newFuncTable.resource);
-        for (const resourceIndex of resourcesToBeSanitized) {
-          if (!remainingResources.has(resourceIndex)) {
-            // This resource was used only by sanitized functions. Sanitize it
-            // as well.
-            const name = stringTable.indexForString(
-              `<Resource #${resourceIndex}>`
-            );
-            newResourceTable.name[resourceIndex] = name;
-            newResourceTable.lib[resourceIndex] = null;
-            newResourceTable.host[resourceIndex] = null;
-          }
-        }
-      }
-    }
-
     // Now we'll remove samples related to the frames
     const newSamples = (newThread.samples = {
       ...samples,
       stack: samples.stack.slice(),
     });
-
-    // First we'll loop the stack table and populate a typed array with a value
-    // that is a flag that's inherited by children. This is possible because
-    // when iterating we visit parents before their children.
-    // There can be 3 values:
-    // - 0 is neutral, this means this stack isn't private browsing and isn't
-    //   the tab id we want to keep.
-    // - 1 means that this stack has at least one frame that's part of the tab
-    //   we want to keep (if any).
-    // - 2 means that this stack comes from private browsing. It always has
-    //   precedence on the active tab. This means that if the active tab comes
-    //   from a private browsing session and the user wants to sanitize it, it
-    //   will _still_ be removed.
-    // They won't be set if the related sanitization isn't set in PIIToBeRemoved.
-    // Also remember that one id can't be both in windowIdFromPrivateBrowsing
-    // and windowIdFromOtherTabs (windowIdFromPrivateBrowsing has precedence).
-    const stackFlags = new Uint8Array(stackTable.length);
-
-    // Some constants to make it easier to read.
-    const KEEP_TAB_ID_STACK = 1;
-    const PRIVATE_BROWSING_STACK = 2;
-
-    for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-      const prefix = stackTable.prefix[stackIndex];
-      if (prefix !== null) {
-        // Inherit the prefix value
-        stackFlags[stackIndex] = stackFlags[prefix];
-        if (stackFlags[stackIndex] === PRIVATE_BROWSING_STACK) {
-          // Because private browsing is the strongest value, we can skip
-          // the rest of the processing.
-          continue;
-        }
-      }
-
-      const frameIndex = stackTable.frame[stackIndex];
-      const innerWindowID = frameTable.innerWindowID[frameIndex];
-      if (!innerWindowID) {
-        continue;
-      }
-
-      const isPrivateBrowsing = windowIdFromPrivateBrowsing.has(innerWindowID);
-      const isKeepTabId =
-        PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null &&
-        windowIdFromActiveTab.has(innerWindowID);
-      if (isPrivateBrowsing) {
-        stackFlags[stackIndex] = PRIVATE_BROWSING_STACK;
-      } else if (isKeepTabId) {
-        stackFlags[stackIndex] = KEEP_TAB_ID_STACK;
-      }
-    }
 
     for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
       const stackIndex = samples.stack[sampleIndex];

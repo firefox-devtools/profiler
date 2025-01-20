@@ -512,7 +512,9 @@ async function processTracingEvents(
   // new samples on our target interval of 500us.
   profile.meta.interval = 0.5;
 
-  const stringTable = StringTable.withBackingArray(profile.shared.stringArray);
+  const { funcTable, frameTable, stackTable, resourceTable, stringArray } =
+    profile.shared;
+  const stringTable = StringTable.withBackingArray(stringArray);
 
   let profileEvents: (ProfileEvent | CpuProfileEvent)[] =
     (eventsByName.get('Profile'): any) || [];
@@ -575,13 +577,7 @@ async function processTracingEvents(
         continue;
       }
 
-      const {
-        funcTable,
-        frameTable,
-        stackTable,
-        samples: samplesTable,
-        resourceTable,
-      } = thread;
+      const { samples: samplesTable } = thread;
 
       if (nodes) {
         const parentMap = new Map();
@@ -721,9 +717,7 @@ async function processTracingEvents(
     }
   }
 
-  for (const thread of profile.threads) {
-    assertStackOrdering(thread.stackTable);
-  }
+  assertStackOrdering(stackTable);
 
   await extractScreenshots(
     threadInfoByPidAndTid,

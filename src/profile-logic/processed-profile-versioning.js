@@ -2594,6 +2594,218 @@ const _upgraders = {
     }
     profile.shared = { stringArray };
   },
+  [57]: (profile) => {
+    // The following tables are now shared across all threads:
+    // - stackTable
+    // - frameTable
+    // - funcTable
+    // - resourceTable
+    // - nativeSymbols
+    // They are now stored in profile.shared.
+    const stackTableMap = new Map();
+    const frameTableMap = new Map();
+    const funcTableMap = new Map();
+    const resourceTableMap = new Map();
+    const nativeSymbolsMap = new Map();
+    const newStackTable = {
+      frame: [],
+      prefix: [],
+      length: 0,
+    };
+    const newFrameTable = {
+      address: [],
+      inlineDepth: [],
+      category: [],
+      subcategory: [],
+      func: [],
+      nativeSymbol: [],
+      innerWindowID: [],
+      line: [],
+      column: [],
+      length: 0,
+    };
+    const newFuncTable = {
+      name: [],
+      isJS: [],
+      relevantForJS: [],
+      resource: [],
+      fileName: [],
+      lineNumber: [],
+      columnNumber: [],
+      length: 0,
+    };
+    const newResourceTable = {
+      type: [],
+      lib: [],
+      name: [],
+      host: [],
+      length: 0,
+    };
+    const newNativeSymbols = {
+      libIndex: [],
+      address: [],
+      name: [],
+      functionSize: [],
+      length: 0,
+    };
+    for (const thread of profile.threads) {
+      const {
+        stackTable,
+        frameTable,
+        funcTable,
+        resourceTable,
+        nativeSymbols,
+        samples,
+        markers,
+      } = thread;
+      const stackTableIndexMap = new Int32Array(stackTable.length);
+      const frameTableIndexMap = new Int32Array(frameTable.length);
+      const funcTableIndexMap = new Int32Array(funcTable.length);
+      const resourceTableIndexMap = new Int32Array(resourceTable.length);
+      const nativeSymbolsIndexMap = new Int32Array(nativeSymbols.length);
+      (function integrateIntoSharedNativeSymbols() {
+        for (let i = 0; i < nativeSymbols.length; i++) {
+          const libIndex = nativeSymbols.libIndex[i];
+          const address = nativeSymbols.address[i];
+          const key = `${libIndex}-${address}`;
+          let newIndex = nativeSymbolsMap.get(key);
+          if (newIndex === undefined) {
+            newIndex = newNativeSymbols.length++;
+            nativeSymbolsMap.set(key, newIndex);
+            newNativeSymbols.libIndex[newIndex] = libIndex;
+            newNativeSymbols.address[newIndex] = address;
+            newNativeSymbols.name[newIndex] = nativeSymbols.name[i];
+            newNativeSymbols.functionSize[newIndex] =
+              nativeSymbols.functionSize[i];
+          }
+          nativeSymbolsIndexMap[i] = newIndex;
+        }
+      })();
+      (function integrateIntoSharedResources() {
+        for (let i = 0; i < resourceTable.length; i++) {
+          const type = resourceTable.type[i];
+          const lib = resourceTable.lib[i];
+          const name = resourceTable.name[i];
+          const host = resourceTable.host[i];
+          const key = `${type}-${lib !== null ? lib : ''}-${name}-${host !== null ? host : ''}`;
+          let newIndex = resourceTableMap.get(key);
+          if (newIndex === undefined) {
+            newIndex = newResourceTable.length++;
+            resourceTableMap.set(key, newIndex);
+            newResourceTable.type[newIndex] = type;
+            newResourceTable.lib[newIndex] = lib;
+            newResourceTable.name[newIndex] = name;
+            newResourceTable.host[newIndex] = host;
+          }
+          resourceTableIndexMap[i] = newIndex;
+        }
+      })();
+      (function integrateIntoSharedFuncTable() {
+        for (let i = 0; i < funcTable.length; i++) {
+          const name = funcTable.name[i];
+          const isJS = funcTable.isJS[i];
+          const relevantForJS = funcTable.relevantForJS[i];
+          const oldResource = funcTable.resource[i];
+          const resource =
+            oldResource !== -1 ? resourceTableIndexMap[oldResource] : -1;
+          const fileName = funcTable.fileName[i];
+          const lineNumber = funcTable.lineNumber[i];
+          const columnNumber = funcTable.columnNumber[i];
+          const key = `${name}-${isJS}-${relevantForJS}-${resource}-${fileName !== null ? fileName : ''}-${lineNumber !== null ? lineNumber : ''}-${columnNumber !== null ? columnNumber : ''}`;
+          let newIndex = funcTableMap.get(key);
+          if (newIndex === undefined) {
+            newIndex = newFuncTable.length++;
+            funcTableMap.set(key, newIndex);
+            newFuncTable.name[newIndex] = name;
+            newFuncTable.isJS[newIndex] = isJS;
+            newFuncTable.relevantForJS[newIndex] = relevantForJS;
+            newFuncTable.resource[newIndex] = resource;
+            newFuncTable.fileName[newIndex] = fileName;
+            newFuncTable.lineNumber[newIndex] = lineNumber;
+            newFuncTable.columnNumber[newIndex] = columnNumber;
+          }
+          funcTableIndexMap[i] = newIndex;
+        }
+      })();
+      (function integrateIntoSharedFrameTable() {
+        for (let i = 0; i < frameTable.length; i++) {
+          const address = frameTable.address[i];
+          const inlineDepth = frameTable.inlineDepth[i];
+          const category = frameTable.category[i];
+          const subcategory = frameTable.subcategory[i];
+          const func = funcTableIndexMap[frameTable.func[i]];
+          const nativeSymbol = frameTable.nativeSymbol[i];
+          const innerWindowID = frameTable.innerWindowID[i];
+          const line = frameTable.line[i];
+          const column = frameTable.column[i];
+          const key = `${address !== null ? address : ''}-${inlineDepth !== null ? inlineDepth : ''}-${category !== null ? category : ''}-${subcategory !== null ? subcategory : ''}-${func}-${nativeSymbol !== null ? nativeSymbol : ''}-${innerWindowID !== null ? innerWindowID : ''}-${line !== null ? line : ''}-${column !== null ? column : ''}`;
+          let newIndex = frameTableMap.get(key);
+          if (newIndex === undefined) {
+            newIndex = newFrameTable.length++;
+            frameTableMap.set(key, newIndex);
+            newFrameTable.address[newIndex] = address;
+            newFrameTable.inlineDepth[newIndex] = inlineDepth;
+            newFrameTable.category[newIndex] = category;
+            newFrameTable.subcategory[newIndex] = subcategory;
+            newFrameTable.func[newIndex] = func;
+            newFrameTable.nativeSymbol[newIndex] = nativeSymbol;
+            newFrameTable.innerWindowID[newIndex] = innerWindowID;
+            newFrameTable.line[newIndex] = line;
+            newFrameTable.column[newIndex] = column;
+          }
+          frameTableIndexMap[i] = newIndex;
+        }
+      })();
+      (function integrateIntoSharedStackTable() {
+        for (let i = 0; i < stackTable.length; i++) {
+          const frame = frameTableIndexMap[stackTable.frame[i]];
+          const oldPrefix = stackTable.prefix[i];
+          const prefix =
+            oldPrefix !== null ? stackTableIndexMap[oldPrefix] : null;
+          const key = `${frame}-${prefix !== null ? prefix : ''}`;
+          let newIndex = stackTableMap.get(key);
+          if (newIndex === undefined) {
+            newIndex = newStackTable.length++;
+            stackTableMap.set(key, newIndex);
+            newStackTable.frame[newIndex] = frame;
+            newStackTable.prefix[newIndex] = prefix;
+          }
+          stackTableIndexMap[i] = newIndex;
+        }
+      })();
+      (function translateSamples() {
+        for (let i = 0; i < samples.length; i++) {
+          const oldStack = samples.stack[i];
+          const stack = oldStack !== null ? stackTableIndexMap[oldStack] : null;
+          samples.stack[i] = stack;
+        }
+      })();
+      (function translateMarkers() {
+        for (let i = 0; i < markers.length; i++) {
+          const data = markers.data[i];
+          if (!data || !data.cause) {
+            continue;
+          }
+          const oldStack = data.cause.stack;
+          const stack =
+            oldStack !== null && oldStack !== undefined
+              ? stackTableIndexMap[oldStack]
+              : null;
+          data.cause.stack = stack;
+        }
+      })();
+      delete thread.stackTable;
+      delete thread.frameTable;
+      delete thread.funcTable;
+      delete thread.resourceTable;
+      delete thread.nativeSymbols;
+    }
+    profile.shared.stackTable = newStackTable;
+    profile.shared.frameTable = newFrameTable;
+    profile.shared.funcTable = newFuncTable;
+    profile.shared.resourceTable = newResourceTable;
+    profile.shared.nativeSymbols = newNativeSymbols;
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };
