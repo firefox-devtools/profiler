@@ -604,8 +604,8 @@ export function getCallTree(
  * Returns a table with the appropriate data for the call tree summary strategy,
  * for use by the call tree or flame graph.
  *
- * If the strategy is one of the allocation strategies, the returned table will be
- * based on thread.jsAllocations or thread.nativeAllocations, but with a modified
+ * If the strategy is one of the native allocation strategies, the returned table
+ * will be based on thread.nativeAllocations, but with a modified
  * stack column: Some samples will have a null stack, so that they are ignored.
  * For example, the returned table for `native-allocations` will have null stacks
  * for samples which are deallocations.
