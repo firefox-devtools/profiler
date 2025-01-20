@@ -250,7 +250,7 @@ export function getBasicThreadSelectorsPerThread(
   const getUnfilteredCtssSamples: Selector<SamplesLikeTable> = createSelector(
     getThread,
     getCallTreeSummaryStrategy,
-    CallTree.extractSamplesLikeTable
+    CallTree.extractUnfilteredSamplesLikeTable
   );
 
   /**
