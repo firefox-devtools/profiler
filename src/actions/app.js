@@ -21,7 +21,7 @@ import {
   getActiveTabMainTrack,
   getLocalTracksByPid,
   getThreads,
-  getCounter,
+  getCounters,
 } from 'firefox-profiler/selectors/profile';
 import { sendAnalytics } from 'firefox-profiler/utils/analytics';
 import {
@@ -375,7 +375,7 @@ export function enableExperimentalProcessCPUTracks(): ThunkAction<boolean> {
 
     const oldLocalTracks = getLocalTracksByPid(getState());
     const localTracksByPid = addProcessCPUTracksForProcess(
-      getCounter(getState()),
+      getCounters(getState()),
       oldLocalTracks
     );
     const localTrackOrderByPid = initializeLocalTrackOrderByPid(
