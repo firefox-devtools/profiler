@@ -510,12 +510,24 @@ export function getThreadSelectorsWithMarkersPerThread(
     CallTree.extractSamplesLikeTable
   );
 
+  const getHasFilteredCtssSamples: Selector<boolean> = createSelector(
+    getFilteredCtssSamples,
+    (samples: SamplesLikeTable) =>
+      samples.length !== 0 && samples.stack.some((s) => s !== null)
+  );
+
   const getPreviewFilteredCtssSamples: Selector<SamplesLikeTable> =
     createSelector(
       getPreviewFilteredThread,
       threadSelectors.getCallTreeSummaryStrategy,
       CallTree.extractSamplesLikeTable
     );
+
+  const getHasPreviewFilteredCtssSamples: Selector<boolean> = createSelector(
+    getPreviewFilteredCtssSamples,
+    (samples: SamplesLikeTable) =>
+      samples.length !== 0 && samples.stack.some((s) => s !== null)
+  );
 
   /**
    * This selector returns the offset to add to a sampleIndex when accessing the
@@ -571,6 +583,8 @@ export function getThreadSelectorsWithMarkersPerThread(
     getFilteredCtssSamples,
     getPreviewFilteredCtssSamples,
     getPreviewFilteredCtssSampleIndexOffset,
+    getHasFilteredCtssSamples,
+    getHasPreviewFilteredCtssSamples,
     getTransformLabelL10nIds,
     getLocalizedTransformLabels,
   };

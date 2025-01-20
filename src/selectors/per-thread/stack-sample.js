@@ -309,13 +309,6 @@ export function getStackAndSampleSelectorsPerThread(
     ProfileData.computeCallNodeMaxDepthPlusOne
   );
 
-  const getPreviewFilteredCallNodeMaxDepthPlusOne: Selector<number> =
-    createSelector(
-      threadSelectors.getPreviewFilteredCtssSamples,
-      getCallNodeInfo,
-      ProfileData.computeCallNodeMaxDepthPlusOne
-    );
-
   /**
    * When computing the call tree, a "samples" table is used, which
    * can represent a variety of formats with different weight types.
@@ -346,7 +339,7 @@ export function getStackAndSampleSelectorsPerThread(
   );
 
   const getCallTree: Selector<CallTree.CallTree> = createSelector(
-    threadSelectors.getPreviewFilteredThread,
+    threadSelectors.getFilteredThread,
     getCallNodeInfo,
     ProfileSelectors.getCategories,
     getCallTreeTimings,
@@ -471,7 +464,6 @@ export function getStackAndSampleSelectorsPerThread(
     getTracedSelfAndTotalForSelectedCallNode,
     getStackTimingByDepth,
     getFilteredCallNodeMaxDepthPlusOne,
-    getPreviewFilteredCallNodeMaxDepthPlusOne,
     getFlameGraphTiming,
     getRightClickedCallNodeIndex,
   };
