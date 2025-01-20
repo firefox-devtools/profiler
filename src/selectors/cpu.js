@@ -5,7 +5,7 @@
 
 import { createSelector } from 'reselect';
 
-import { getThreads, getSampleUnits, getMeta, getCounter } from './profile';
+import { getThreads, getSampleUnits, getMeta, getCounters } from './profile';
 
 import type { Selector } from 'firefox-profiler/types';
 
@@ -31,7 +31,7 @@ export const getIsCPUUtilizationProvided: Selector<boolean> = createSelector(
  */
 export const getAreThereAnyProcessCPUCounters: Selector<boolean> =
   createSelector(
-    getCounter,
+    getCounters,
     (counters) =>
       counters !== null &&
       counters.some((counter) => counter.category === 'CPU')

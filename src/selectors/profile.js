@@ -186,7 +186,7 @@ export const getLastNonShiftClick: Selector<
 > = (state) => getProfileViewOptions(state).lastNonShiftClick;
 export const getRightClickedTrack: Selector<TrackReference | null> = (state) =>
   getProfileViewOptions(state).rightClickedTrack;
-export const getCounter: Selector<Counter[] | null> = (state) =>
+export const getCounters: Selector<Counter[] | null> = (state) =>
   getProfile(state).counters || null;
 export const getMeta: Selector<ProfileMeta> = (state) => getProfile(state).meta;
 export const getVisualMetricsOrNull: Selector<VisualMetrics | null> = (state) =>
@@ -569,7 +569,7 @@ export const getLocalTrackNamesByPid: Selector<Map<Pid, string[]>> =
   createSelector(
     getLocalTracksByPid,
     getThreads,
-    getCounter,
+    getCounters,
     (localTracksByPid, threads, counters) => {
       const localTrackNamesByPid = new Map();
       for (const [pid, localTracks] of localTracksByPid) {
