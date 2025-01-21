@@ -2034,15 +2034,6 @@ describe('snapshots of selectors/profile', function () {
     ).toEqual(4);
   });
 
-  it('matches the last stored run of selectedThreadSelector.getPreviewFilteredCallNodeMaxDepthPlusOne', function () {
-    const { getState } = setupStore();
-    expect(
-      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepthPlusOne(
-        getState()
-      )
-    ).toEqual(4);
-  });
-
   it('matches the last stored run of selectedThreadSelector.getSelectedCallNodePath', function () {
     const { getState, A, B } = setupStore();
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(

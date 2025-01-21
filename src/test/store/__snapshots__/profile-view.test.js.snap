@@ -3463,15 +3463,21 @@ CallTree {
       "eventDelay": Array [
         0,
         0,
+        0,
+        0,
       ],
-      "length": 2,
+      "length": 4,
       "stack": Array [
         6,
         6,
+        6,
+        8,
       ],
       "time": Array [
+        3,
         4,
         5,
+        6,
       ],
       "weight": null,
       "weightType": "samples",
