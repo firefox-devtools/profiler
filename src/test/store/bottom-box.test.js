@@ -20,10 +20,11 @@ import {
 } from '../../actions/profile-view';
 import { changeSelectedTab } from '../../actions/app';
 import { ensureExists } from '../../utils/flow';
-import type { Profile } from 'firefox-profiler/types';
+import type { Profile, Thread } from 'firefox-profiler/types';
 
 function getProfileWithNiceAddresses(): {
   profile: Profile,
+  derivedThreads: Thread[],
   funcNamesPerThread: Array<string[]>,
   funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
   nativeSymbolsDictPerThread: Array<{ [nativeSymbolName: string]: number }>,
@@ -40,6 +41,7 @@ describe('bottom box', function () {
   function setup() {
     const {
       profile,
+      derivedThreads,
       funcNamesPerThread,
       funcNamesDictPerThread,
       nativeSymbolsDictPerThread,
@@ -52,7 +54,7 @@ describe('bottom box', function () {
       getState,
 
       // Other stuff:
-      thread: profile.threads[0],
+      thread: derivedThreads[0],
       funcNames: funcNamesPerThread[0],
       funcNamesDict: funcNamesDictPerThread[0],
       nativeSymbolsDict: nativeSymbolsDictPerThread[0],

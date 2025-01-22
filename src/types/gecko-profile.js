@@ -301,6 +301,13 @@ export type GeckoCounter = {|
   |},
 |};
 
+export type GeckoCounterSamplesStruct = {|
+  time: Milliseconds[],
+  count: number[],
+  number?: number[],
+  length: number,
+|};
+
 export type GeckoProfilerOverhead = {|
   samples: {|
     schema: {|

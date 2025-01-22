@@ -21,7 +21,7 @@ import { StringTable } from '../utils/string-table';
 import { timeCode } from '../utils/time-code';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 import { coerce } from '../utils/flow';
-import type { SerializableProfile } from 'firefox-profiler/types';
+import type { Profile } from 'firefox-profiler/types';
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -30,12 +30,11 @@ const UNANNOTATED_VERSION = 0;
 /**
  * Upgrades the supplied profile to the current version, by mutating |profile|.
  * Throws an exception if the profile is too new. If the profile does not appear
- * to be a processed profile, then return null. The profile provided is the
- * "serialized" form of a processed profile, i.e. stringArray instead of stringTable.
+ * to be a processed profile, then return null.
  */
 export function attemptToUpgradeProcessedProfileThroughMutation(
   profile: mixed
-): SerializableProfile | null {
+): Profile | null {
   if (!profile || typeof profile !== 'object') {
     return null;
   }
@@ -70,7 +69,7 @@ export function attemptToUpgradeProcessedProfileThroughMutation(
       : UNANNOTATED_VERSION;
 
   if (profileVersion === PROCESSED_PROFILE_VERSION) {
-    return coerce<MixedObject, SerializableProfile>(profile);
+    return coerce<MixedObject, Profile>(profile);
   }
 
   if (profileVersion > PROCESSED_PROFILE_VERSION) {
@@ -92,7 +91,7 @@ export function attemptToUpgradeProcessedProfileThroughMutation(
     }
   }
 
-  const upgradedProfile = coerce<MixedObject, SerializableProfile>(profile);
+  const upgradedProfile = coerce<MixedObject, Profile>(profile);
   upgradedProfile.meta.preprocessedProfileVersion = PROCESSED_PROFILE_VERSION;
 
   return upgradedProfile;
@@ -2265,7 +2264,7 @@ const _upgraders = {
     // The 'sanitized-string' marker schema format type has been added.
   },
   [50]: (_) => {
-    // The serialized format can now optionally store sample and counter sample
+    // The format can now optionally store sample and counter sample
     // times as time deltas instead of absolute timestamps to reduce the JSON size.
   },
   [51]: (_) => {

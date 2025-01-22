@@ -18,6 +18,7 @@ import {
 } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSourceViewFile } from '../../selectors/url-state';
+import { StringTable } from '../../utils/string-table';
 import { ensureExists } from '../../utils/flow';
 import { fireFullClick } from '../fixtures/utils';
 
@@ -54,7 +55,8 @@ describe('calltree/CallNodeContextMenu', function () {
       B.js
     `);
     const [thread] = profile.threads;
-    const fileNameIndex = thread.stringTable.indexForString(
+    const stringTable = StringTable.withBackingArray(thread.stringArray);
+    const fileNameIndex = stringTable.indexForString(
       'https://example.com/script.js'
     );
 

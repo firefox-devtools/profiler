@@ -14,7 +14,7 @@ import {
 import type {
   Selector,
   $ReturnType,
-  Thread,
+  RawThread,
   JsTracerTable,
   MarkerTimingRows,
   CombinedTimingRows,
@@ -43,7 +43,7 @@ export type ComposedSelectorsPerThread = $ReturnType<
  * elements that we don't use here, and that's OK.
  */
 type NeededThreadSelectors = {
-  getThread: Selector<Thread>,
+  getRawThread: Selector<RawThread>,
   getIsNetworkChartEmptyInFullRange: Selector<boolean>,
   getJsTracerTable: Selector<JsTracerTable | null>,
   getUserTimingMarkerTiming: Selector<MarkerTimingRows>,
@@ -62,7 +62,7 @@ export function getComposedSelectorsPerThread(
    * when it's absurd.
    */
   const getUsefulTabs: Selector<$ReadOnlyArray<TabSlug>> = createSelector(
-    threadSelectors.getThread,
+    threadSelectors.getRawThread,
     threadSelectors.getIsNetworkChartEmptyInFullRange,
     threadSelectors.getJsTracerTable,
     (thread, isNetworkChartEmpty, jsTracerTable) => {
@@ -86,7 +86,7 @@ export function getComposedSelectorsPerThread(
 
       const { samples, jsAllocations, nativeAllocations } = thread;
       const hasSamples = [samples, jsAllocations, nativeAllocations].some(
-        (table) => hasUsefulSamples(table, thread)
+        (table) => hasUsefulSamples(table?.stack, thread)
       );
       if (!hasSamples) {
         visibleTabs = visibleTabs.filter(

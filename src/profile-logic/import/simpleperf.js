@@ -15,9 +15,9 @@ import type {
   IndexIntoStackTable,
   ProfileMeta,
   ResourceTable,
-  SamplesTable,
+  RawSamplesTable,
   Profile,
-  Thread,
+  RawThread,
   StackTable,
 } from 'firefox-profiler/types/profile';
 import {
@@ -30,6 +30,7 @@ import {
   getEmptyNativeSymbolTable,
 } from 'firefox-profiler/profile-logic/data-structures';
 import { StringTable } from 'firefox-profiler/utils/string-table';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 import {
   verifyMagic,
   SIMPLEPERF as SIMPLEPERF_MAGIC,
@@ -225,7 +226,7 @@ class FirefoxThread {
   stringArray = [];
   strings = StringTable.withBackingArray(this.stringArray);
 
-  sampleTable: SamplesTable = getEmptySamplesTable();
+  sampleTable: RawSamplesTable = getEmptySamplesTable();
 
   stackTable: FirefoxSampleTable = new FirefoxSampleTable(this.strings);
   frameTable: FirefoxFrameTable = new FirefoxFrameTable(this.strings);
@@ -242,7 +243,7 @@ class FirefoxThread {
     this.name = thread.threadName ?? '';
   }
 
-  toJson(): Thread {
+  toJson(): RawThread {
     return {
       processType: 'default',
       processStartupTime: 0,
@@ -258,7 +259,7 @@ class FirefoxThread {
       markers: getEmptyRawMarkerTable(),
       stackTable: this.stackTable.toJson(),
       frameTable: this.frameTable.toJson(),
-      stringTable: this.strings,
+      stringArray: this.stringArray,
       funcTable: this.funcTable.toJson(),
       resourceTable: this.resourceTable.toJson(),
       nativeSymbols: getEmptyNativeSymbolTable(),
@@ -334,7 +335,7 @@ class FirefoxThread {
     }
 
     this.sampleTable.stack.push(prefixStackId);
-    this.sampleTable.time.push(toMilliseconds(sample.time ?? 0));
+    ensureExists(this.sampleTable.time).push(toMilliseconds(sample.time ?? 0));
 
     if (this.sampleTable.weight) {
       const weight =

@@ -4,7 +4,6 @@
 
 // @flow
 
-import { StringTable } from '../utils/string-table';
 import {
   getEmptyExtensions,
   shallowCloneRawMarkerTable,
@@ -21,12 +20,12 @@ import {
 } from './marker-data';
 import { getSchemaFromMarker } from './marker-schema';
 import {
-  filterThreadSamplesToRange,
+  filterRawThreadSamplesToRange,
   filterCounterSamplesToRange,
 } from './profile-data';
 import type {
   Profile,
-  Thread,
+  RawThread,
   ThreadIndex,
   RemoveProfileInformation,
   StartEndRange,
@@ -35,7 +34,7 @@ import type {
   IndexIntoFuncTable,
   InnerWindowID,
   MarkerSchemaByName,
-  Counter,
+  RawCounter,
 } from 'firefox-profiler/types';
 
 export type SanitizeProfileResult = {|
@@ -127,7 +126,7 @@ export function sanitizePII(
   }
 
   let removingCounters = false;
-  const newProfile = {
+  const newProfile: Profile = {
     ...profile,
     meta: {
       ...profile.meta,
@@ -137,7 +136,7 @@ export function sanitizePII(
     },
     pages: pages,
     threads: profile.threads.reduce((acc, thread, threadIndex) => {
-      const newThread: Thread | null = sanitizeThreadPII(
+      const newThread: RawThread | null = sanitizeThreadPII(
         thread,
         derivedMarkerInfoForAllThreads[threadIndex],
         threadIndex,
@@ -165,7 +164,7 @@ export function sanitizePII(
             return acc;
           }
 
-          const newCounter: Counter | null = sanitizeCounterPII(
+          const newCounter: RawCounter | null = sanitizeCounterPII(
             counter,
             PIIToBeRemoved,
             oldThreadIndexToNew
@@ -242,14 +241,14 @@ export function getShouldSanitizeByDefault(profile: Profile): boolean {
  * data depending on that PII status.
  */
 function sanitizeThreadPII(
-  thread: Thread,
+  thread: RawThread,
   derivedMarkerInfo: DerivedMarkerInfo,
   threadIndex: number,
   PIIToBeRemoved: RemoveProfileInformation,
   windowIdFromPrivateBrowsing: Set<InnerWindowID>,
   windowIdFromActiveTab: Set<InnerWindowID>,
   markerSchemaByName: MarkerSchemaByName
-): Thread | null {
+): RawThread | null {
   if (PIIToBeRemoved.shouldRemoveThreads.has(threadIndex)) {
     // If this is a hidden thread, remove the thread immediately.
     // This will not remove the thread entry from the `threads` array right now
@@ -267,10 +266,10 @@ function sanitizeThreadPII(
     return null;
   }
 
-  // We need to update the stringTable. StringTable doesn't allow mutating
+  // We need to update the stringArray. StringTable doesn't allow mutating
   // existing stored strings, so we create a copy of the underlying string array
   // and mutated it manually.
-  const stringArray = thread.stringTable.getBackingArray().slice();
+  const stringArray = thread.stringArray.slice();
   let markerTable = shallowCloneRawMarkerTable(thread.markers);
 
   // We iterate all the markers and remove/change data depending on the PII
@@ -405,7 +404,7 @@ function sanitizeThreadPII(
   // markers we want to delete or user wants to delete the full time range,
   // reconstruct the marker table and samples table without unwanted information.
   // Creating a new thread variable since we are gonna mutate samples here.
-  let newThread: Thread;
+  let newThread: RawThread;
   if (
     markersToDelete.size > 0 ||
     PIIToBeRemoved.shouldFilterToCommittedRange !== null
@@ -428,7 +427,7 @@ function sanitizeThreadPII(
       ) {
         return null;
       }
-      newThread = filterThreadSamplesToRange(thread, start, end);
+      newThread = filterRawThreadSamplesToRange(thread, start, end);
     } else {
       // Copying the thread even if we don't filter samples because we are gonna
       // change some fields later.
@@ -661,11 +660,9 @@ function sanitizeThreadPII(
     }
   }
 
-  // Remove the old stringTable and markerTable and replace it
+  // Remove the old stringArray and markerTable and replace it
   // with new updated ones.
-  // We created a fresh stringArray object in this function, so we don't need
-  // to worry about StringTable having an invalid cached map.
-  newThread.stringTable = StringTable.withBackingArray(stringArray);
+  newThread.stringArray = stringArray;
   newThread.markers = markerTable;
 
   // Have we removed everything from this thread?
@@ -678,7 +675,7 @@ function sanitizeThreadPII(
 }
 
 // This returns true if the thread has at least a samples or a marker.
-function isThreadNonEmpty(thread: Thread): boolean {
+function isThreadNonEmpty(thread: RawThread): boolean {
   const hasMarkers = thread.markers.length > 0;
   if (hasMarkers) {
     // Return early so that we don't need to loop over samples.
@@ -702,10 +699,10 @@ function isThreadNonEmpty(thread: Thread): boolean {
  * - Update the thread index with the new thread index.
  */
 function sanitizeCounterPII(
-  counter: Counter,
+  counter: RawCounter,
   PIIToBeRemoved: RemoveProfileInformation,
   oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex>
-): Counter | null {
+): RawCounter | null {
   const newThreadIndex = oldThreadIndexToNew.get(counter.mainThreadIndex);
   if (newThreadIndex === undefined) {
     // Remove the counter completely if the thread that it belongs to is sanitized as well.
