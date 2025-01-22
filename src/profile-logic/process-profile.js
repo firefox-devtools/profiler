@@ -956,6 +956,16 @@ function _processMarkerPayload(
 
 export function timeColumnToTimeDeltas(time: Milliseconds[]): Milliseconds[] {
   const NS_PER_MS = 1000000;
+
+  // For each timestamp in the time series, compute the delta to the previous
+  // timestamp. The implicit initial timestamp is zero.
+  //
+  // Timestamps are in milliseconds. To compute the deltas, we first convert each
+  // timestamp to integer nanoseconds. Then we subtract those nanosecond timestamps
+  // and converting the delta to milliseconds again. We do this dance so that
+  // the deltas have a "compact" stringified representation. Otherwise,
+  // converting to deltas could easily increase the JSON size.
+  // For example, 252.728334 - 240.520375 === 12.207958999999988.
   const timeDeltas = new Array(time.length);
   let prevTimeNs = 0;
   for (let i = 0; i < time.length; i++) {
