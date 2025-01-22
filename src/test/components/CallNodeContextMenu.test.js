@@ -7,7 +7,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import copy from 'copy-to-clipboard';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
@@ -130,8 +130,8 @@ describe('calltree/CallNodeContextMenu', function () {
 
     fixtures.forEach(({ matcher, type }) => {
       it(`adds a transform for "${type}"`, function () {
-        const { getState, getByText } = setup();
-        fireFullClick(getByText(matcher));
+        const { getState } = setup();
+        fireFullClick(screen.getByText(matcher));
         expect(
           selectedThreadSelectors.getTransformStack(getState())[0].type
         ).toBe(type);
@@ -149,20 +149,20 @@ describe('calltree/CallNodeContextMenu', function () {
       } = getProfileFromTextSamples(`A[file:${sourceViewFile}]`);
       const store = storeWithProfile(profile);
       store.dispatch(changeRightClickedCallNode(0, [A]));
-      const { getByText, getState } = setup(store);
+      const { getState } = setup(store);
 
       expect(getSourceViewFile(getState())).toBeNull();
-      fireFullClick(getByText(/Show/));
+      fireFullClick(screen.getByText(/Show/));
       expect(getSourceViewFile(getState())).toBe(sourceViewFile);
     });
 
     it('can expand all call nodes in the call tree', function () {
-      const { getState, getByText } = setup();
+      const { getState } = setup();
       expect(
         selectedThreadSelectors.getExpandedCallNodeIndexes(getState())
       ).toHaveLength(1);
 
-      fireFullClick(getByText('Expand all'));
+      fireFullClick(screen.getByText('Expand all'));
 
       // This test only asserts that a bunch of call nodes were actually expanded.
       expect(
@@ -171,9 +171,9 @@ describe('calltree/CallNodeContextMenu', function () {
     });
 
     it('can look up functions on SearchFox', function () {
-      const { getByText } = setup();
+      setup();
       jest.spyOn(window, 'open').mockImplementation(() => {});
-      fireFullClick(getByText(/Searchfox/));
+      fireFullClick(screen.getByText(/Searchfox/));
       expect(window.open).toHaveBeenCalledWith(
         'https://searchfox.org/mozilla-central/search?q=B',
         '_blank'
@@ -181,23 +181,23 @@ describe('calltree/CallNodeContextMenu', function () {
     });
 
     it('can copy a function name', function () {
-      const { getByText } = setup();
+      setup();
       // Copy is a mocked module, clear it both before and after.
-      fireFullClick(getByText('Copy function name'));
+      fireFullClick(screen.getByText('Copy function name'));
       expect(copy).toHaveBeenCalledWith('B');
     });
 
     it('can copy a script URL', function () {
-      const { getByText } = setup(createStoreWithJsCallStack());
+      setup(createStoreWithJsCallStack());
       // Copy is a mocked module, clear it both before and after.
-      fireFullClick(getByText('Copy script URL'));
+      fireFullClick(screen.getByText('Copy script URL'));
       expect(copy).toHaveBeenCalledWith('https://example.com/script.js');
     });
 
     it('can copy a stack', function () {
-      const { getByText } = setup(createStoreWithJsCallStack());
+      setup(createStoreWithJsCallStack());
       // Copy is a mocked module, clear it both before and after.
-      fireFullClick(getByText('Copy stack'));
+      fireFullClick(screen.getByText('Copy stack'));
       expect(copy).toHaveBeenCalledWith(
         `B.js [https://example.com/script.js:2:222]\nA.js [https://example.com/script.js:1:111]`
       );
