@@ -62,23 +62,16 @@ function _computeMaxVariableCPUCyclesPerMs(threads: RawThread[]): number {
 }
 
 /**
- * Returns the expected cpu delta per sample if cpu is at 100% and
- * sampling happens at the declared interval.
+ * Returns the expected cpu delta per millisecond if cpu is at 100%.
  *
- * Returns null if the profile does not use cpu deltas.
- * Otherwise, returns a ratio that can be used to compare activity
- * between threads with cpu deltas and threads without cpu deltas.
+ * Returns 1 if the profile does not use cpu deltas.
  *
- * Examples:
- *  - interval: 2 (ms), sampleUnits: undefined
- *    Returns null.
- *  - interval: 5 (ms), sampleUnits.threadCPUDelta: "µs"
- *    Returns 5000, i.e. "5000µs cpu delta per sample if each sample ticks at
- *    the declared 5ms interval and the CPU usage is at 100%".
- *  - interval: 3 (ms), sampleUnits.threadCPUDelta: "variable CPU cycles",
- *    max_{sample}(sample.cpuDelta / sample.timeDelta) == 1234567 cycles per ms
- *    Returns 1234567 * 3, i.e. "3703701 cycles per sample if each sample ticks at
- *    the declared 3ms interval and the CPU usage is at the observed maximum".
+ * If the profile uses CPU deltas given in 'variable CPU cycles', then we check
+ * all threads and return the maximum observed cpu delta per millisecond value,
+ * which becomes the reference for 100% CPU.
+ *
+ * If the profile uses CPU deltas in microseconds or nanoseconds, the we return
+ * the conversion factor to milliseconds.
  */
 export function computeMaxCPUDeltaPerMs(profile: Profile): number {
   const sampleUnits = profile.meta.sampleUnits;
