@@ -26,7 +26,7 @@ import type {
  * clamping.
  */
 function _computeMaxVariableCPUCyclesPerMs(threads: RawThread[]): number {
-  let maxThreadCPUDeltaPerMs = 0;
+  let referenceCPUDeltaPerMs = 0;
   for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
     const { samples } = threads[threadIndex];
     const { threadCPUDelta } = samples;
@@ -48,15 +48,15 @@ function _computeMaxVariableCPUCyclesPerMs(threads: RawThread[]): number {
       const sampleTimeDeltaInMs = timeDeltas[i];
       if (sampleTimeDeltaInMs !== 0) {
         const cpuDeltaPerMs = (threadCPUDelta[i] || 0) / sampleTimeDeltaInMs;
-        maxThreadCPUDeltaPerMs = Math.max(
-          maxThreadCPUDeltaPerMs,
+        referenceCPUDeltaPerMs = Math.max(
+          referenceCPUDeltaPerMs,
           cpuDeltaPerMs
         );
       }
     }
   }
 
-  return maxThreadCPUDeltaPerMs;
+  return referenceCPUDeltaPerMs;
 }
 
 /**
@@ -71,7 +71,7 @@ function _computeMaxVariableCPUCyclesPerMs(threads: RawThread[]): number {
  * If the profile uses CPU deltas in microseconds or nanoseconds, the we return
  * the conversion factor to milliseconds.
  */
-export function computeMaxCPUDeltaPerMs(profile: Profile): number {
+export function computeReferenceCPUDeltaPerMs(profile: Profile): number {
   const sampleUnits = profile.meta.sampleUnits;
   if (!sampleUnits) {
     return 1;
@@ -90,7 +90,7 @@ export function computeMaxCPUDeltaPerMs(profile: Profile): number {
     default:
       throw assertExhaustiveCheck(
         threadCPUDeltaUnit,
-        'Unhandled threadCPUDelta unit in computeMaxCPUDeltaPerMs.'
+        'Unhandled threadCPUDelta unit in computeReferenceCPUDeltaPerMs.'
       );
   }
 }
@@ -109,7 +109,7 @@ export function computeThreadCPURatio(
   samples: RawSamplesTable,
   sampleUnits: SampleUnits,
   timeDeltas: number[],
-  maxThreadCPUDeltaPerMs: number
+  referenceCPUDeltaPerMs: number
 ): Float64Array | void {
   const { threadCPUDelta } = samples;
 
@@ -126,7 +126,7 @@ export function computeThreadCPURatio(
   // For the rest of the samples, compute the ratio based on the CPU delta and
   // on the elapsed time between samples (timeDeltas[i]).
   for (let i = 1; i < threadCPUDelta.length; i++) {
-    const referenceCpuDelta = maxThreadCPUDeltaPerMs * timeDeltas[i];
+    const referenceCpuDelta = referenceCPUDeltaPerMs * timeDeltas[i];
     const cpuDelta = threadCPUDelta[i];
     if (cpuDelta === null || referenceCpuDelta === 0) {
       // Default to 100% CPU if the CPU delta isn't known or if no time has

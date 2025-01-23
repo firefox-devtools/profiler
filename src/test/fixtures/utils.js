@@ -122,7 +122,7 @@ export function getMouseEvent(
 export function computeThreadFromRawThread(
   rawThread: RawThread,
   sampleUnits: SampleUnits | void,
-  maxThreadCPUDeltaPerMs: number,
+  referenceCPUDeltaPerMs: number,
   defaultCategory: IndexIntoCategoryList
 ): Thread {
   const stringTable = StringTable.withBackingArray(rawThread.stringArray);
@@ -134,7 +134,7 @@ export function computeThreadFromRawThread(
   const samples = computeSamplesTableFromRawSamplesTable(
     rawThread.samples,
     sampleUnits,
-    maxThreadCPUDeltaPerMs
+    referenceCPUDeltaPerMs
   );
   return createThreadFromDerivedTables(
     rawThread,

@@ -2340,7 +2340,7 @@ function _computeThreadWithInvertedStackTable(
 export function computeSamplesTableFromRawSamplesTable(
   rawSamples: RawSamplesTable,
   sampleUnits: SampleUnits | void,
-  maxThreadCPUDeltaPerMs: number
+  referenceCPUDeltaPerMs: number
 ): SamplesTable {
   const {
     responsiveness,
@@ -2362,7 +2362,7 @@ export function computeSamplesTableFromRawSamplesTable(
           rawSamples,
           sampleUnits,
           timeDeltas,
-          maxThreadCPUDeltaPerMs
+          referenceCPUDeltaPerMs
         )
       : undefined;
   const time = computeTimeColumnForRawSamplesTable(rawSamples);
