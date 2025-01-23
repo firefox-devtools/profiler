@@ -8,7 +8,7 @@ import {
   ensureExists,
   assertExhaustiveCheck,
 } from 'firefox-profiler/utils/flow';
-import { timeColumnToTimeDeltas } from 'firefox-profiler/profile-logic/process-profile';
+import { numberSeriesToDeltas } from 'firefox-profiler/utils/number-series';
 
 import type {
   RawThread,
@@ -41,7 +41,7 @@ function _computeMaxVariableCPUCyclesPerMs(threads: RawThread[]): number {
 
     const timeDeltas =
       samples.time !== undefined
-        ? timeColumnToTimeDeltas(samples.time)
+        ? numberSeriesToDeltas(samples.time)
         : ensureExists(samples.timeDeltas);
 
     // Ignore the first CPU delta value; it's meaningless because there is no

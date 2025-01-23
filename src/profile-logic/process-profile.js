@@ -918,7 +918,7 @@ function _processMarkerPayload(
   }
 }
 
-export function timeColumnToTimeDeltas(time: Milliseconds[]): Milliseconds[] {
+function _timeColumnToCompactTimeDeltas(time: Milliseconds[]): Milliseconds[] {
   const NS_PER_MS = 1000000;
 
   // For each timestamp in the time series, compute the delta to the previous
@@ -947,7 +947,7 @@ export function timeColumnToTimeDeltas(time: Milliseconds[]): Milliseconds[] {
 function _processSamples(geckoSamples: GeckoSampleStruct): RawSamplesTable {
   const samples: RawSamplesTable = {
     stack: geckoSamples.stack,
-    timeDeltas: timeColumnToTimeDeltas(geckoSamples.time),
+    timeDeltas: _timeColumnToCompactTimeDeltas(geckoSamples.time),
     weightType: 'samples',
     weight: null,
     length: geckoSamples.length,
@@ -1054,7 +1054,7 @@ function _processCounterSamples(
   geckoCounterSamples: GeckoCounterSamplesStruct
 ): RawCounterSamplesTable {
   return {
-    timeDeltas: timeColumnToTimeDeltas(geckoCounterSamples.time),
+    timeDeltas: _timeColumnToCompactTimeDeltas(geckoCounterSamples.time),
     number: geckoCounterSamples.number,
     count: geckoCounterSamples.count,
     length: geckoCounterSamples.length,

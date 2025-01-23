@@ -30,6 +30,7 @@ import {
   ensureExists,
   getFirstItemFromSet,
 } from 'firefox-profiler/utils/flow';
+import { numberSeriesFromDeltas } from 'firefox-profiler/utils/number-series';
 import ExtensionFavicon from '../../res/img/svg/extension-outline.svg';
 import DefaultLinkFavicon from '../../res/img/svg/globe.svg';
 
@@ -1510,19 +1511,11 @@ export function filterThreadByTab(
   });
 }
 
-export function computeTimeColumnFromTimeDeltas(timeDelta: number[]): number[] {
-  let prevTime = 0;
-  return timeDelta.map((delta) => {
-    prevTime = prevTime + delta;
-    return prevTime;
-  });
-}
-
 export function computeTimeColumnForRawSamplesTable(
   samples: RawSamplesTable | RawCounterSamplesTable
 ): number[] {
   const { time, timeDeltas } = samples;
-  return time ?? computeTimeColumnFromTimeDeltas(ensureExists(timeDeltas));
+  return time ?? numberSeriesFromDeltas(ensureExists(timeDeltas));
 }
 
 /**
