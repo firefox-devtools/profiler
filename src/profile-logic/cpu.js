@@ -13,7 +13,6 @@ import { numberSeriesToDeltas } from 'firefox-profiler/utils/number-series';
 import type {
   RawThread,
   SampleUnits,
-  ThreadCPUDeltaUnit,
   Profile,
   RawSamplesTable,
 } from 'firefox-profiler/types';
@@ -79,19 +78,15 @@ export function computeMaxCPUDeltaPerMs(profile: Profile): number {
   }
 
   const threadCPUDeltaUnit = sampleUnits.threadCPUDelta;
-
   switch (threadCPUDeltaUnit) {
     case 'µs':
-    case 'ns': {
-      const deltaUnitPerMs = getCpuDeltaTimeUnitMultiplier(threadCPUDeltaUnit);
-      return deltaUnitPerMs;
-    }
-    case 'variable CPU cycles': {
-      const maxThreadCPUDeltaPerMs = _computeMaxVariableCPUCyclesPerMs(
-        profile.threads
-      );
-      return maxThreadCPUDeltaPerMs;
-    }
+      // ms to µs multiplier
+      return 1000;
+    case 'ns':
+      // ms to ns multiplier
+      return 1000000;
+    case 'variable CPU cycles':
+      return _computeMaxVariableCPUCyclesPerMs(profile.threads);
     default:
       throw assertExhaustiveCheck(
         threadCPUDeltaUnit,
@@ -150,27 +145,4 @@ export function computeThreadCPURatio(
   }
 
   return threadCPURatio;
-}
-
-/**
- * A helper function that is used to convert ms time units to threadCPUDelta units.
- * Returns 1 for 'variable CPU cycles' as it's not a time unit.
- */
-function getCpuDeltaTimeUnitMultiplier(unit: ThreadCPUDeltaUnit): number {
-  switch (unit) {
-    case 'µs':
-      // ms to µs multiplier
-      return 1000;
-    case 'ns':
-      // ms to ns multiplier
-      return 1000000;
-    case 'variable CPU cycles':
-      // We can't convert the CPU cycle unit to any time units
-      return 1;
-    default:
-      throw assertExhaustiveCheck(
-        unit,
-        'Unhandled threadCPUDelta unit in the processing.'
-      );
-  }
 }
