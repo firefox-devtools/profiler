@@ -7,10 +7,15 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import copy from 'copy-to-clipboard';
 
-import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  screen,
+  act,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
-import { storeWithProfile } from '../fixtures/stores';
+import { storeWithProfile, blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import { createGeckoProfileWithJsTimings } from '../fixtures/profiles/gecko-profile';
 import {
   changeRightClickedCallNode,
   changeExpandedCallNodes,
@@ -21,6 +26,10 @@ import { getSourceViewFile } from '../../selectors/url-state';
 import { StringTable } from '../../utils/string-table';
 import { ensureExists } from '../../utils/flow';
 import { fireFullClick } from '../fixtures/utils';
+import { createBrowserConnection } from '../../app-logic/browser-connection';
+import { updateBrowserConnectionStatus } from 'firefox-profiler/actions/app';
+import { simulateWebChannel } from '../fixtures/mocks/web-channel';
+import { retrieveProfileFromBrowser } from '../../actions/receive-profile';
 
 describe('calltree/CallNodeContextMenu', function () {
   // Provide a store with a useful profile to assert context menu operations off of.
@@ -201,6 +210,107 @@ describe('calltree/CallNodeContextMenu', function () {
       expect(copy).toHaveBeenCalledWith(
         `B.js [https://example.com/script.js:2:222]\nA.js [https://example.com/script.js:1:111]`
       );
+    });
+
+    describe('Show the function in DevTools item', function () {
+      async function setupWithBrowserConnection(
+        profile = createGeckoProfileWithJsTimings()
+      ) {
+        simulateWebChannel(() => profile);
+        const browserConnectionStatus =
+          await createBrowserConnection('Firefox/136.0');
+        const store = blankStore();
+        store.dispatch(updateBrowserConnectionStatus(browserConnectionStatus));
+        await store.dispatch(
+          retrieveProfileFromBrowser(browserConnectionStatus)
+        );
+
+        setup(store);
+
+        return {
+          ...store,
+          profile,
+        };
+      }
+
+      it('does not show up when there is no browser connection', function () {
+        const {
+          profile,
+          funcNamesDictPerThread: [{ A }],
+        } = getProfileFromTextSamples(`A.js`);
+        const store = storeWithProfile(profile);
+        store.dispatch(changeRightClickedCallNode(0, [A]));
+        setup(store);
+
+        const contextMenuItem = screen.queryByText(
+          'Show the function in DevTools'
+        );
+        expect(contextMenuItem).not.toBeInTheDocument();
+      });
+
+      it('shows up when there is a browser connection', async function () {
+        const { dispatch } = await setupWithBrowserConnection();
+        const threadIndex = 0;
+        // This refers to the sample with "(root), 0x100000f84, javascriptOne"
+        const callNodePath = [0, 1, 4];
+
+        act(() => {
+          dispatch(changeRightClickedCallNode(threadIndex, callNodePath));
+        });
+
+        const contextMenuItem = screen.queryByText(
+          'Show the function in DevTools'
+        );
+        expect(contextMenuItem).toBeInTheDocument();
+      });
+
+      it('does not show up when it is not a JS frame', async function () {
+        const { dispatch } = await setupWithBrowserConnection();
+        const threadIndex = 0;
+        // This refers to the sample with "(root), 0x100000f84, Startup::XRE_Main"
+        const callNodePath = [0, 1, 3];
+
+        act(() => {
+          dispatch(changeRightClickedCallNode(threadIndex, callNodePath));
+        });
+
+        const contextMenuItem = screen.queryByText(
+          'Show the function in DevTools'
+        );
+        expect(contextMenuItem).not.toBeInTheDocument();
+      });
+
+      it('does not show up when the JS is self hosted', async function () {
+        const { dispatch } = await setupWithBrowserConnection();
+        const threadIndex = 0;
+        // This refers to the sample with "(root), 0x100000f84, javascriptOne javascriptTwo"
+        const callNodePath = [0, 1, 4, 5];
+
+        act(() => {
+          dispatch(changeRightClickedCallNode(threadIndex, callNodePath));
+        });
+
+        const contextMenuItem = screen.queryByText(
+          'Show the function in DevTools'
+        );
+        expect(contextMenuItem).not.toBeInTheDocument();
+      });
+
+      it('does not show up when there is no tabId', async function () {
+        const { dispatch } = await setupWithBrowserConnection();
+        const threadIndex = 0;
+        // This refers to the sample with 0x100000f84, javascriptOne, javascriptTwo, 0x10000f0f0, 0x100fefefe, javascriptThree
+        const callNodePath = [0, 1, 4, 5, 6, 7];
+
+        act(() => {
+          dispatch(changeRightClickedCallNode(threadIndex, callNodePath));
+        });
+
+        const contextMenuItem = screen.queryByText(
+          'Show the function in DevTools'
+        );
+        expect(contextMenuItem).not.toBeInTheDocument();
+      });
     });
   });
 });
