@@ -13,6 +13,7 @@ import {
   act,
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { Timeline } from '../../components/timeline';
+import { computeTimeColumnForRawSamplesTable } from 'firefox-profiler/profile-logic/profile-data';
 import {
   selectedThreadSelectors,
   getRightClickedTrack,
@@ -1207,14 +1208,15 @@ function _getProfileWithDroppedSamples(): Profile {
   );
 
   const [thread1, thread2] = profile.threads;
+  const sampleTimes2 = computeTimeColumnForRawSamplesTable(thread2.samples);
 
   // Manually choose the timings:
   const sampleStartIndex = 2;
   const sampleEndIndex = 7;
   Object.assign(thread2, {
-    processStartupTime: thread2.samples.time[sampleStartIndex],
-    registerTime: thread2.samples.time[sampleStartIndex],
-    processShutdownTime: thread2.samples.time[sampleEndIndex],
+    processStartupTime: sampleTimes2[sampleStartIndex],
+    registerTime: sampleTimes2[sampleStartIndex],
+    processShutdownTime: sampleTimes2[sampleEndIndex],
     unregisterTime: null,
   });
   thread1.name = 'Main Thread';
@@ -1234,7 +1236,7 @@ function _getProfileWithDroppedSamples(): Profile {
       }
     }
   }
-  thread2.samples.length = thread2.samples.time.length;
+  thread2.samples.length = sampleTimes2.length;
 
   profile.threads.push(thread2);
   return profile;

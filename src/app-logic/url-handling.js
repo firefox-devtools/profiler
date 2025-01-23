@@ -30,7 +30,7 @@ import type {
   DataSource,
   Pid,
   Profile,
-  Thread,
+  RawThread,
   IndexIntoStackTable,
   TabID,
   TrackIndex,
@@ -1268,7 +1268,7 @@ for (const destVersionStr of Object.keys(_upgraders)) {
 // This should only be used for the URL upgrader, typically this
 // operation would use a call node index rather than a stack.
 function getStackIndexFromVersion3JSCallNodePath(
-  thread: Thread,
+  thread: RawThread,
   oldCallNodePath: CallNodePath
 ): IndexIntoStackTable | null {
   const { stackTable, funcTable, frameTable } = thread;
@@ -1314,7 +1314,7 @@ function getStackIndexFromVersion3JSCallNodePath(
 // Constructs the new JS CallNodePath from given stackIndex and returns it.
 // This should only be used for the URL upgrader.
 function getVersion4JSCallNodePathFromStackIndex(
-  thread: Thread,
+  thread: RawThread,
   stackIndex: IndexIntoStackTable
 ): CallNodePath {
   const { funcTable, stackTable, frameTable } = thread;

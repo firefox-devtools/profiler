@@ -144,26 +144,13 @@ export const markerSchemaForTests: MarkerSchema[] = [
     ],
   },
   {
-    // TODO - Note that this marker is a "tracing" marker currently.
-    // See issue #2749
-    name: 'Paint',
+    name: 'tracing',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
     data: [
       { key: 'category', label: 'Type', format: 'string', searchable: true },
     ],
   },
   {
-    // TODO - Note that this marker is a "tracing" marker currently.
-    // See issue #2749
-    name: 'Navigation',
-    display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [
-      { key: 'category', label: 'Type', format: 'string', searchable: true },
-    ],
-  },
-  {
-    // TODO - Note that this marker is a "tracing" marker currently.
-    // See issue #2749
     name: 'Layout',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
     data: [
@@ -185,16 +172,9 @@ export const markerSchemaForTests: MarkerSchema[] = [
     ],
   },
   {
-    name: 'RefreshDriverTick',
+    name: 'VisibleInTimelineOverview',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [
-      {
-        key: 'name',
-        label: 'Tick Reasons',
-        format: 'string',
-        searchable: true,
-      },
-    ],
+    data: [],
   },
   {
     name: 'StringTesting',

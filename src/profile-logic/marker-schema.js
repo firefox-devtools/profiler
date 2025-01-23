@@ -83,55 +83,15 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
 ];
 
 /**
- * For the most part, schema is matched up by the Payload's "type" field,
- * but for practical purposes, there are a few other options, see the
- * implementation of this function for details.
- */
-export function getMarkerSchemaName(
-  markerSchemaByName: MarkerSchemaByName,
-  markerName: string,
-  markerData: MarkerPayload | null
-): string {
-  if (!markerData) {
-    // Fall back to using the name if no payload exists.
-    return markerName;
-  }
-
-  const { type } = markerData;
-  if (type === 'tracing' && markerData.category) {
-    // TODO - Tracing markers have a duplicate "category" field.
-    // See issue #2749
-
-    // Does a marker schema for the "category" exist?
-    return markerSchemaByName[markerData.category] === undefined
-      ? // If not, default back to tracing
-        'tracing'
-      : // If so, use the category as the schema name.
-        markerData.category;
-  }
-  if (type === 'Text') {
-    // Text markers are a cheap and easy way to create markers with
-    // a category. Check for schema if it exists, if not, fallback to
-    // a Text type marker.
-    return markerSchemaByName[markerName] === undefined ? 'Text' : markerName;
-  }
-  return type;
-}
-
-/**
  * This function takes the intended marker schema for a marker field, and applies
  * the appropriate formatting function.
  */
 export function getSchemaFromMarker(
   markerSchemaByName: MarkerSchemaByName,
-  markerName: string,
   markerData: MarkerPayload | null
 ): MarkerSchema | null {
-  return (
-    markerSchemaByName[
-      getMarkerSchemaName(markerSchemaByName, markerName, markerData)
-    ] || null
-  );
+  const schemaName = markerData ? markerData.type : null;
+  return schemaName ? (markerSchemaByName[schemaName] ?? null) : null;
 }
 
 /**
@@ -385,12 +345,8 @@ export function getLabelGetter(
     // No label exists, it will have to be generated for the first time.
     if (label === undefined) {
       const marker = getMarker(markerIndex);
-      const schemaName = getMarkerSchemaName(
-        markerSchemaByName,
-        marker.name,
-        marker.data
-      );
-      const applyLabel = labelFns.get(schemaName);
+      const schemaName = marker.data ? marker.data.type : null;
+      const applyLabel = schemaName ? labelFns.get(schemaName) : null;
 
       label = applyLabel
         ? // A label function is available, apply it.

@@ -6,6 +6,12 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 52
+
+No format changes, but a front-end behavior change: The schema for a marker is now looked up purely based on its `data.type`. In the past there were some special cases when `data` was `null`, or when `data.type` was `tracing` or `Text`. These special cases have been removed. The new behavior is simpler and more predictable, and was probably what you expected anyway.
+
+This change came with a new version because we needed to upgrade old profiles from Firefox which were relying on the more complex behavior.
+
 ### Version 51
 
 Two new marker schema field format types have been added: `flow-id` and `terminating-flow-id`, with string index values (like `unique-string`).
@@ -13,7 +19,7 @@ An optional `isStackBased` boolean field has been added to the marker schema.
 
 ### Version 50
 
-The serialized format can now optionally store sample and counter sample times as time deltas instead of absolute timestamps to reduce the JSON size. The unserialized version is unchanged.
+The format can now optionally store sample and counter sample times as time deltas instead of absolute timestamps to reduce the JSON size.
 
 ### Version 49
 

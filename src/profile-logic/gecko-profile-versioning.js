@@ -1252,27 +1252,27 @@ const _upgraders = {
           // eventType is in the payload as well.
         ],
       },
+
+      // The following three schemas should have just been a single schema named
+      // "tracing". They are kept here for historical accuracy.
+      // There is a processed profile format upgrader (version 52) which adds the
+      // "tracing" schema for profiles which don't have it.
       {
-        // TODO - Note that this marker is a "tracing" marker currently.
-        // See issue #2749
         name: 'Paint',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'category', label: 'Type', format: 'string' }],
       },
       {
-        // TODO - Note that this marker is a "tracing" marker currently.
-        // See issue #2749
         name: 'Navigation',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'category', label: 'Type', format: 'string' }],
       },
       {
-        // TODO - Note that this marker is a "tracing" marker currently.
-        // See issue #2749
         name: 'Layout',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'category', label: 'Type', format: 'string' }],
       },
+
       {
         name: 'IPC',
         tooltipLabel: 'IPC — {marker.data.niceDirection}',
@@ -1288,6 +1288,14 @@ const _upgraders = {
         ],
       },
       {
+        // An unused schema for RefreshDriverTick markers.
+        // This schema is not consistent with what post-schema Firefox would
+        // output. Firefox (as of Jan 2026) is still using Text markers and does
+        // not have a RefreshDriverTick schema. Furthermore, upgraded profiles
+        // which get this schema do not have any { type: 'RefreshDriverTick' }
+        // markers - in the past they picked up this schema due to a compat hack,
+        // but this hack is now removed. So this schema is unused. It is kept
+        // here for historical accuracy.
         name: 'RefreshDriverTick',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'name', label: 'Tick Reasons', format: 'string' }],

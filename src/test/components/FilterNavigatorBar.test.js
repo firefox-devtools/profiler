@@ -18,6 +18,7 @@ import * as ProfileView from '../../actions/profile-view';
 import * as ReceiveProfile from '../../actions/receive-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import { ensureExists } from '../../utils/flow';
 
 describe('shared/FilterNavigatorBar', () => {
   it(`pops the item unless the last one is clicked`, () => {
@@ -88,7 +89,7 @@ describe('app/ProfileFilterNavigator', () => {
 
     // Change the root range for testing.
     const samples = profile.threads[0].samples;
-    samples.time[samples.length - 1] = 50;
+    ensureExists(samples.time)[samples.length - 1] = 50;
 
     const store = storeWithProfile(profile);
     const renderResult = render(
