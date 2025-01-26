@@ -163,8 +163,13 @@ describe('timeline/TrackThread', function () {
   });
 
   it('can click a stack in the stack graph in normal call trees', function () {
-    const { getState, stackGraphCanvas, thread, getFillRectCenterByIndex } =
-      setup(getSamplesProfile());
+    const {
+      getState,
+      stackGraphCanvas,
+      profile,
+      thread,
+      getFillRectCenterByIndex,
+    } = setup(getSamplesProfile());
 
     const log = flushDrawLog();
 
@@ -173,7 +178,8 @@ describe('timeline/TrackThread', function () {
       selectedThreadSelectors
         .getSelectedCallNodePath(getState())
         .map(
-          (funcIndex) => thread.stringArray[thread.funcTable.name[funcIndex]]
+          (funcIndex) =>
+            profile.shared.stringArray[thread.funcTable.name[funcIndex]]
         );
 
     fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 0));
@@ -194,6 +200,7 @@ describe('timeline/TrackThread', function () {
       dispatch,
       getState,
       stackGraphCanvas,
+      profile,
       thread,
       getFillRectCenterByIndex,
     } = setup(getSamplesProfile());
@@ -203,7 +210,8 @@ describe('timeline/TrackThread', function () {
       selectedThreadSelectors
         .getSelectedCallNodePath(getState())
         .map(
-          (funcIndex) => thread.stringArray[thread.funcTable.name[funcIndex]]
+          (funcIndex) =>
+            profile.shared.stringArray[thread.funcTable.name[funcIndex]]
         );
 
     function changeInvertCallstackAndGetDrawLog(value) {
