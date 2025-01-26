@@ -9,6 +9,7 @@ import {
   shallowCloneRawMarkerTable,
   shallowCloneFuncTable,
 } from './data-structures';
+import { computeCompactedProfile } from './profile-compacting';
 import { removeURLs } from '../utils/string';
 import {
   removeNetworkMarkerURLs,
@@ -205,7 +206,7 @@ export function sanitizePII(
   }
 
   return {
-    profile: newProfile,
+    profile: computeCompactedProfile(newProfile).profile,
     // Note that the profile was sanitized.
     isSanitized: true,
     // Provide a new empty committed range if needed.
