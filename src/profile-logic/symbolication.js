@@ -805,11 +805,9 @@ function _partiallyApplySymbolicationStep(
         const category = frameTable.category[frameIndex];
         const subcategory = frameTable.subcategory[frameIndex];
         const innerWindowID = frameTable.innerWindowID[frameIndex];
-        const implementation = frameTable.implementation[frameIndex];
         frameTable.category[expansionFrameIndex] = category;
         frameTable.subcategory[expansionFrameIndex] = subcategory;
         frameTable.innerWindowID[expansionFrameIndex] = innerWindowID;
-        frameTable.implementation[expansionFrameIndex] = implementation;
         frameTable.address[expansionFrameIndex] = address;
         frameTable.nativeSymbol[expansionFrameIndex] = nativeSymbolIndex;
 

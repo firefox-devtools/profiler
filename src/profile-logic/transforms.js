@@ -964,9 +964,6 @@ export function collapseResource(
             newFrameTable.innerWindowID.push(
               frameTable.innerWindowID[frameIndex]
             );
-            newFrameTable.implementation.push(
-              frameTable.implementation[frameIndex]
-            );
           }
 
           // Add the new stack.

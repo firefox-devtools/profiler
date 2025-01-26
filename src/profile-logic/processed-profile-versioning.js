@@ -2385,6 +2385,19 @@ const _upgraders = {
       delete stackTable.subcategory;
     }
   },
+  [54]: (profile) => {
+    // The `implementation` column was removed from the frameTable. Modern
+    // profiles from Firefox use subcategories to represent the information
+    // about the JIT type of a JS frame.
+
+    // Delete the implementation column from the frameTable of every thread.
+    for (const thread of profile.threads) {
+      delete thread.frameTable.implementation;
+    }
+
+    // This field is no longer needed.
+    delete profile.meta.doesNotUseFrameImplementation;
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

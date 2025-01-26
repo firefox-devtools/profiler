@@ -6,6 +6,11 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 54
+
+The `implementation` column was removed from the frameTable. Modern profiles from Firefox use subcategories to represent the information about the JIT type of a JS frame.
+The optional `meta.doesNotUseFrameImplementation` field is no longer needed and was removed.
+
 ### Version 53
 
 The columns `category` and `subcategory` were removed from the `stackTable`, to reduce the file size of profiles. The information in these columns was fully redundant with the category information in the `frameTable`. A stack's category and subcategory are determined as follows: If the stack's frame has a non-null category, then that's the stack's category, and the frame's subcategory (or 0 if null) becomes the stack's subcategory. Otherwise, if the stack is not a root node, it inherits the category and subcategory of its prefix stack. Otherwise, it defaults to the defaultCategory, which is defined as the first category in `thread.meta.categories` whose color is `grey` - at least one such category is required to be present. And the subcategory defaults to zero - all categories are required to have a "default" subcategory as their first subcategory.
