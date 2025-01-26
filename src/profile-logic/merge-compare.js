@@ -61,6 +61,7 @@ import type {
   RawMarkerTable,
   MarkerIndex,
   Milliseconds,
+  MarkerPayload,
 } from 'firefox-profiler/types';
 
 /**
@@ -1050,7 +1051,10 @@ function getComparisonThread(
  * this does not merge the profile level information like metadata, categories etc.
  * TODO: Overlapping threads will not look great due to #2783.
  */
-export function mergeThreads(threads: RawThread[]): RawThread {
+export function mergeThreads(
+  threads: RawThread[],
+  stringIndexMarkerFieldsByDataType: Map<string, string[]>
+): RawThread {
   const newStringArray = [];
   const newStringTable = StringTable.withBackingArray(newStringArray);
 
@@ -1088,6 +1092,7 @@ export function mergeThreads(threads: RawThread[]): RawThread {
   const { markerTable: newMarkers } = mergeMarkers(
     translationMapsForStacks,
     newStringTable,
+    stringIndexMarkerFieldsByDataType,
     threads
   );
 
@@ -1246,6 +1251,7 @@ type TranslationMapForMarkers = Map<MarkerIndex, MarkerIndex>;
 function mergeMarkers(
   translationMapsForStacks: TranslationMapForStacks[],
   newStringTable: StringTable,
+  stringIndexMarkerFieldsByDataType: Map<string, string[]>,
   threads: RawThread[]
 ): {
   markerTable: RawMarkerTable,
@@ -1269,39 +1275,46 @@ function mergeMarkers(
       // Move marker data to the new marker table
       const oldData = markers.data[markerIndex];
 
-      if (oldData && 'cause' in oldData && oldData.cause) {
-        // The old data has a cause, we need to convert the stack.
-        const oldStack = oldData.cause.stack;
-        const newStack = translationMapForStacks.get(oldStack);
-        if (newStack === undefined) {
-          throw new Error(
-            `Missing old stack entry ${oldStack} in the translation map.`
-          );
+      let data: MarkerPayload | null = oldData;
+      if (data !== null && data.type) {
+        const markerType = data.type;
+
+        // Convert stacks in marker data.
+        if (data.cause) {
+          const oldStack = data.cause.stack;
+          const newStack = translationMapForStacks.get(oldStack);
+          if (newStack === undefined) {
+            throw new Error(
+              `Missing old stack entry ${oldStack} in the translation map.`
+            );
+          }
+
+          data = ({
+            ...data,
+            cause: {
+              ...data.cause,
+              stack: newStack,
+            },
+          }: any);
         }
 
-        // Flow doesn't know well how to handle the spread operator with our
-        // MarkerPayload type.
-        // $FlowExpectError
-        newMarkerTable.data.push({
-          ...oldData,
-          cause: {
-            ...oldData.cause,
-            stack: newStack,
-          },
-        });
-      } else if (oldData && oldData.type === 'CompositorScreenshot') {
-        const urlString =
-          oldData.url === undefined ? undefined : stringArray[oldData.url];
-
-        newMarkerTable.data.push({
-          ...oldData,
-          url:
-            urlString === undefined
-              ? undefined
-              : newStringTable.indexForString(urlString),
-        });
-      } else {
-        newMarkerTable.data.push(oldData);
+        // Convert string index fields in marker data.
+        const stringIndexMarkerFields =
+          stringIndexMarkerFieldsByDataType.get(markerType);
+        if (stringIndexMarkerFields !== undefined) {
+          for (const fieldKey of stringIndexMarkerFields) {
+            const stringIndex = data[fieldKey];
+            if (typeof stringIndex === 'number') {
+              const newStringIndex = newStringTable.indexForString(
+                stringArray[stringIndex]
+              );
+              data = ({
+                ...data,
+                [fieldKey]: newStringIndex,
+              }: any);
+            }
+          }
+        }
       }
 
       newMarkerTable.name.push(
@@ -1311,6 +1324,7 @@ function mergeMarkers(
       newMarkerTable.endTime.push(markers.endTime[markerIndex]);
       newMarkerTable.phase.push(markers.phase[markerIndex]);
       newMarkerTable.category.push(markers.category[markerIndex]);
+      newMarkerTable.data.push(data);
       newThreadId.push(
         markers.threadId ? markers.threadId[markerIndex] : thread.tid
       );
