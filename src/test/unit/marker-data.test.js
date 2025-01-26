@@ -38,6 +38,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import type {
   IndexIntoRawMarkerTable,
   Milliseconds,
+  RawProfileSharedData,
 } from 'firefox-profiler/types';
 
 describe('Derive markers from Gecko phase markers', function () {
@@ -344,7 +345,10 @@ describe('Derive markers from Gecko phase markers', function () {
       // the same window.
       {
         name: 'CompositorScreenshot',
-        data: payloadsForWindowA[0],
+        data: {
+          ...payloadsForWindowA[0],
+          url: expect.anything(),
+        },
         start: startTimesForWindowA[0],
         end: startTimesForWindowA[1],
         category: 0,
@@ -352,7 +356,10 @@ describe('Derive markers from Gecko phase markers', function () {
       },
       {
         name: 'CompositorScreenshot',
-        data: payloadsForWindowB[0],
+        data: {
+          ...payloadsForWindowB[0],
+          url: expect.anything(),
+        },
         start: startTimesForWindowB[0],
         end: startTimesForWindowB[1],
         category: 0,
@@ -362,7 +369,10 @@ describe('Derive markers from Gecko phase markers', function () {
       // The 2 lasts have a duration until the end of the thread range.
       {
         name: 'CompositorScreenshot',
-        data: payloadsForWindowA[1],
+        data: {
+          ...payloadsForWindowA[1],
+          url: expect.anything(),
+        },
         start: startTimesForWindowA[1],
         end: threadRange.end,
         category: 0,
@@ -370,7 +380,10 @@ describe('Derive markers from Gecko phase markers', function () {
       },
       {
         name: 'CompositorScreenshot',
-        data: payloadsForWindowB[1],
+        data: {
+          ...payloadsForWindowB[1],
+          url: expect.anything(),
+        },
         start: startTimesForWindowB[1],
         end: threadRange.end,
         category: 0,
@@ -753,7 +766,7 @@ describe('deriveMarkersFromRawMarkerTable', function () {
     expect(markers[12]).toMatchObject({
       data: {
         type: 'CompositorScreenshot',
-        url: 16,
+        url: expect.anything(),
         windowID: '0x136888400',
         windowWidth: 1280,
         windowHeight: 1000,
@@ -773,9 +786,12 @@ describe('filterRawMarkerTableToRange', () => {
   |};
 
   function setup({ start, end, markers }: TestConfig) {
-    const thread = getThreadWithRawMarkers(markers);
+    const shared: RawProfileSharedData = {
+      stringArray: [],
+    };
+    const thread = getThreadWithRawMarkers(shared, markers);
 
-    const derivedMarkerInfo = getTestFriendlyDerivedMarkerInfo(thread);
+    const derivedMarkerInfo = getTestFriendlyDerivedMarkerInfo(thread, shared);
     const rawMarkerTable = filterRawMarkerTableToRange(
       thread.markers,
       derivedMarkerInfo,
@@ -783,12 +799,15 @@ describe('filterRawMarkerTableToRange', () => {
       end
     );
     const rawMarkerNames = rawMarkerTable.name.map(
-      (i) => thread.stringArray[i]
+      (i) => shared.stringArray[i]
     );
-    const processedMarkers = getTestFriendlyDerivedMarkerInfo({
-      ...thread,
-      markers: rawMarkerTable,
-    }).markers;
+    const processedMarkers = getTestFriendlyDerivedMarkerInfo(
+      {
+        ...thread,
+        markers: rawMarkerTable,
+      },
+      shared
+    ).markers;
 
     const processedMarkerNames = processedMarkers.map(({ name }) => name);
 
@@ -1259,8 +1278,12 @@ describe('filterRawMarkerTableToRangeWithMarkersToDelete', () => {
   |};
 
   function setup({ timeRange, markersToDelete, markers }: TestConfig) {
-    const thread = getThreadWithRawMarkers(markers);
-    const derivedMarkerInfo = getTestFriendlyDerivedMarkerInfo(thread);
+    const shared: RawProfileSharedData = {
+      stringArray: [],
+    };
+
+    const thread = getThreadWithRawMarkers(shared, markers);
+    const derivedMarkerInfo = getTestFriendlyDerivedMarkerInfo(thread, shared);
 
     const { rawMarkerTable } = filterRawMarkerTableToRangeWithMarkersToDelete(
       thread.markers,
@@ -1269,7 +1292,7 @@ describe('filterRawMarkerTableToRangeWithMarkersToDelete', () => {
       timeRange
     );
     const markerNames = rawMarkerTable.name.map(
-      (stringIndex) => thread.stringArray[stringIndex]
+      (stringIndex) => shared.stringArray[stringIndex]
     );
 
     return {

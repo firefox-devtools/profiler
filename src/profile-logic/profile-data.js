@@ -39,6 +39,7 @@ import DefaultLinkFavicon from '../../res/img/svg/globe.svg';
 
 import type {
   Profile,
+  RawProfileSharedData,
   RawThread,
   Thread,
   RawSamplesTable,
@@ -1632,9 +1633,11 @@ export function computeTimeColumnForRawSamplesTable(
  */
 export function hasUsefulSamples(
   sampleStacks?: Array<IndexIntoStackTable | null>,
-  thread: RawThread
+  thread: RawThread,
+  shared: RawProfileSharedData
 ): boolean {
-  const { stackTable, frameTable, funcTable, stringArray } = thread;
+  const { stringArray } = shared;
+  const { stackTable, frameTable, funcTable } = thread;
   if (
     sampleStacks === undefined ||
     sampleStacks.length === 0 ||
@@ -3848,9 +3851,10 @@ export function findAddressProofForFile(
   file: string
 ): AddressProof | null {
   const { libs } = profile;
+  const { stringArray } = profile.shared;
+  const stringTable = StringTable.withBackingArray(stringArray);
   for (const thread of profile.threads) {
-    const { frameTable, funcTable, resourceTable, stringArray } = thread;
-    const stringTable = StringTable.withBackingArray(stringArray);
+    const { frameTable, funcTable, resourceTable } = thread;
     const fileStringIndex = stringTable.indexForString(file);
     const func = funcTable.fileName.indexOf(fileStringIndex);
     if (func === -1) {

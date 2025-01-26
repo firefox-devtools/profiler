@@ -54,14 +54,17 @@ describe('sanitizePII', function () {
 
     const derivedMarkerInfoForAllThreads = originalProfile.threads.map(
       (thread) => {
-        const ipcCorrelations = correlateIPCMarkers(originalProfile.threads);
+        const ipcCorrelations = correlateIPCMarkers(
+          originalProfile.threads,
+          originalProfile.shared
+        );
         const timeRangeForThread = getTimeRangeForThread(
           thread,
           originalProfile.meta.interval
         );
         return deriveMarkersFromRawMarkerTable(
           thread.markers,
-          thread.stringArray,
+          originalProfile.shared.stringArray,
           thread.tid || 0,
           timeRangeForThread,
           ipcCorrelations
@@ -484,8 +487,8 @@ describe('sanitizePII', function () {
       shouldRemoveUrls: true,
     });
 
+    const stringArray = sanitizedProfile.shared.stringArray;
     for (const thread of sanitizedProfile.threads) {
-      const stringArray = thread.stringArray;
       for (let i = 0; i < thread.markers.length; i++) {
         const currentMarker = thread.markers.data[i];
         if (
@@ -537,13 +540,12 @@ describe('sanitizePII', function () {
       shouldRemoveUrls: true,
     });
 
-    for (const thread of sanitizedProfile.threads) {
-      for (const string of thread.stringArray) {
-        // We are keeping the http(s) and removing the rest.
-        // That's why we can't test it with `includes('http')`.
-        // Tested `.com` here since all of the test urls have .com in it
-        expect(string.includes('.com')).toBe(false);
-      }
+    const stringArray = sanitizedProfile.shared.stringArray;
+    for (const string of stringArray) {
+      // We are keeping the http(s) and removing the rest.
+      // That's why we can't test it with `includes('http')`.
+      // Tested `.com` here since all of the test urls have .com in it
+      expect(string.includes('.com')).toBe(false);
     }
   });
 
@@ -982,55 +984,59 @@ describe('sanitizePII', function () {
         secondTabInnerWindowIDs: nonPrivateTabInnerWindowIDs,
       } = addActiveTabInformationToProfile(originalProfile);
       markTabIdsAsPrivateBrowsing(originalProfile, [privateTabTabID]);
-      addMarkersToThreadWithCorrespondingSamples(originalProfile.threads[0], [
-        ...getNetworkMarkers({
-          id: 1235,
-          startTime: 19000,
-          fetchStart: 19200.2,
-          endTime: 20433.8,
-          uri: 'https://example.org/index.html',
-          payload: {
-            cache: 'Hit',
-            pri: 8,
-            count: 47027,
-            contentType: 'text/html',
-            isPrivateBrowsing: true,
-          },
-        }),
-        ...getNetworkMarkers({
-          id: 1236,
-          startTime: 19000,
-          fetchStart: 19200.2,
-          endTime: 20433.8,
-          uri: 'https://duckduckgo.com',
-          payload: {
-            cache: 'Hit',
-            pri: 8,
-            count: 47027,
-            contentType: 'text/html',
-          },
-        }),
+      addMarkersToThreadWithCorrespondingSamples(
+        originalProfile.threads[0],
+        originalProfile.shared,
         [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: privateTabInnerWindowIDs[0],
-          },
-        ],
-        [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: nonPrivateTabInnerWindowIDs[0],
-          },
-        ],
-      ]);
+          ...getNetworkMarkers({
+            id: 1235,
+            startTime: 19000,
+            fetchStart: 19200.2,
+            endTime: 20433.8,
+            uri: 'https://example.org/index.html',
+            payload: {
+              cache: 'Hit',
+              pri: 8,
+              count: 47027,
+              contentType: 'text/html',
+              isPrivateBrowsing: true,
+            },
+          }),
+          ...getNetworkMarkers({
+            id: 1236,
+            startTime: 19000,
+            fetchStart: 19200.2,
+            endTime: 20433.8,
+            uri: 'https://duckduckgo.com',
+            payload: {
+              cache: 'Hit',
+              pri: 8,
+              count: 47027,
+              contentType: 'text/html',
+            },
+          }),
+          [
+            'DOMEvent',
+            10.6,
+            11.1,
+            {
+              type: 'DOMEvent',
+              eventType: 'load',
+              innerWindowID: privateTabInnerWindowIDs[0],
+            },
+          ],
+          [
+            'DOMEvent',
+            10.6,
+            11.1,
+            {
+              type: 'DOMEvent',
+              eventType: 'load',
+              innerWindowID: nonPrivateTabInnerWindowIDs[0],
+            },
+          ],
+        ]
+      );
 
       const { sanitizedProfile } = setup(
         { shouldRemovePrivateBrowsingData: true },
@@ -1266,62 +1272,66 @@ describe('sanitizePII', function () {
       } = addActiveTabInformationToProfile(originalProfile);
       const unknownInnerWindowID = 555;
 
-      addMarkersToThreadWithCorrespondingSamples(originalProfile.threads[0], [
+      addMarkersToThreadWithCorrespondingSamples(
+        originalProfile.threads[0],
+        originalProfile.shared,
         [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: firstTabInnerWindowIDs[0],
-          },
-        ],
-        [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: secondTabInnerWindowIDs[0],
-          },
-        ],
-        [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: unknownInnerWindowID,
-          },
-        ],
-        [
-          'GCMinor',
-          10.7,
-          11.2,
-          {
-            type: 'GCMinor',
-            nursery: {
-              status: 'nursery empty',
+          [
+            'DOMEvent',
+            10.6,
+            11.1,
+            {
+              type: 'DOMEvent',
+              eventType: 'load',
+              innerWindowID: firstTabInnerWindowIDs[0],
             },
-          },
-        ],
-        [
-          'CompositorScreenshot',
-          20,
-          21,
-          {
-            type: 'CompositorScreenshot',
-            url: 0,
-            windowID: 'XXX',
-            windowWidth: 300,
-            windowHeight: 600,
-          },
-        ],
-        ['TextOnlyMarker', 22, 23, null],
-      ]);
+          ],
+          [
+            'DOMEvent',
+            10.6,
+            11.1,
+            {
+              type: 'DOMEvent',
+              eventType: 'load',
+              innerWindowID: secondTabInnerWindowIDs[0],
+            },
+          ],
+          [
+            'DOMEvent',
+            10.6,
+            11.1,
+            {
+              type: 'DOMEvent',
+              eventType: 'load',
+              innerWindowID: unknownInnerWindowID,
+            },
+          ],
+          [
+            'GCMinor',
+            10.7,
+            11.2,
+            {
+              type: 'GCMinor',
+              nursery: {
+                status: 'nursery empty',
+              },
+            },
+          ],
+          [
+            'CompositorScreenshot',
+            20,
+            21,
+            {
+              type: 'CompositorScreenshot',
+              url: 0,
+              windowID: 'XXX',
+              windowWidth: 300,
+              windowHeight: 600,
+            },
+          ],
+          ['TextOnlyMarker', 22, 23, null],
+        ]
+      );
 
       const { sanitizedProfile: unsanitizedProfile } = setup(
         {},
@@ -1350,7 +1360,7 @@ describe('sanitizePII', function () {
       );
 
       const originalMarkerNames = originalProfile.threads[0].markers.name.map(
-        (stringIndex) => originalProfile.threads[0].stringArray[stringIndex]
+        (stringIndex) => originalProfile.shared.stringArray[stringIndex]
       );
 
       expect(originalMarkerNames).toContain('GCMinor');
@@ -1376,8 +1386,7 @@ describe('sanitizePII', function () {
 
       const unsanitizedMarkerNames =
         unsanitizedProfile.threads[0].markers.name.map(
-          (stringIndex) =>
-            unsanitizedProfile.threads[0].stringArray[stringIndex]
+          (stringIndex) => unsanitizedProfile.shared.stringArray[stringIndex]
         );
       expect(unsanitizedMarkerNames).toContain('GCMinor');
       expect(unsanitizedMarkerNames).toContain('CompositorScreenshot');
@@ -1387,7 +1396,7 @@ describe('sanitizePII', function () {
       // sanitized profile.
 
       const sanitizedMarkerNames = sanitizedProfile.threads[0].markers.name.map(
-        (stringIndex) => sanitizedProfile.threads[0].stringArray[stringIndex]
+        (stringIndex) => sanitizedProfile.shared.stringArray[stringIndex]
       );
 
       // We don't have the markers coming from the first tab.
@@ -1582,55 +1591,59 @@ describe('sanitizePII', function () {
         secondTabInnerWindowIDs: nonPrivateTabInnerWindowIDs,
       } = addActiveTabInformationToProfile(originalProfile);
       markTabIdsAsPrivateBrowsing(originalProfile, [privateTabTabID]);
-      addMarkersToThreadWithCorrespondingSamples(originalProfile.threads[0], [
-        ...getNetworkMarkers({
-          id: 1235,
-          startTime: 19000,
-          fetchStart: 19200.2,
-          endTime: 20433.8,
-          uri: 'https://example.org/index.html',
-          payload: {
-            cache: 'Hit',
-            pri: 8,
-            count: 47027,
-            contentType: 'text/html',
-            isPrivateBrowsing: true,
-          },
-        }),
-        ...getNetworkMarkers({
-          id: 1236,
-          startTime: 19000,
-          fetchStart: 19200.2,
-          endTime: 20433.8,
-          uri: 'https://duckduckgo.com',
-          payload: {
-            cache: 'Hit',
-            pri: 8,
-            count: 47027,
-            contentType: 'text/html',
-          },
-        }),
+      addMarkersToThreadWithCorrespondingSamples(
+        originalProfile.threads[0],
+        originalProfile.shared,
         [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: privateTabInnerWindowIDs[0],
-          },
-        ],
-        [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: nonPrivateTabInnerWindowIDs[0],
-          },
-        ],
-      ]);
+          ...getNetworkMarkers({
+            id: 1235,
+            startTime: 19000,
+            fetchStart: 19200.2,
+            endTime: 20433.8,
+            uri: 'https://example.org/index.html',
+            payload: {
+              cache: 'Hit',
+              pri: 8,
+              count: 47027,
+              contentType: 'text/html',
+              isPrivateBrowsing: true,
+            },
+          }),
+          ...getNetworkMarkers({
+            id: 1236,
+            startTime: 19000,
+            fetchStart: 19200.2,
+            endTime: 20433.8,
+            uri: 'https://duckduckgo.com',
+            payload: {
+              cache: 'Hit',
+              pri: 8,
+              count: 47027,
+              contentType: 'text/html',
+            },
+          }),
+          [
+            'DOMEvent',
+            10.6,
+            11.1,
+            {
+              type: 'DOMEvent',
+              eventType: 'load',
+              innerWindowID: privateTabInnerWindowIDs[0],
+            },
+          ],
+          [
+            'DOMEvent',
+            10.6,
+            11.1,
+            {
+              type: 'DOMEvent',
+              eventType: 'load',
+              innerWindowID: nonPrivateTabInnerWindowIDs[0],
+            },
+          ],
+        ]
+      );
 
       const { sanitizedProfile } = setup(
         {
