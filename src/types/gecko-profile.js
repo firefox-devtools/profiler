@@ -224,10 +224,12 @@ export type GeckoFrameTable = {|
   >,
 |};
 
+export type IndexIntoGeckoThreadStringTable = number;
+
 export type GeckoFrameStruct = {|
-  location: IndexIntoStringTable[],
+  location: IndexIntoGeckoThreadStringTable[],
   relevantForJS: Array<boolean>,
-  implementation: Array<null | IndexIntoStringTable>,
+  implementation: Array<null | IndexIntoGeckoThreadStringTable>,
   line: Array<null | number>,
   column: Array<null | number>,
   category: Array<null | number>,

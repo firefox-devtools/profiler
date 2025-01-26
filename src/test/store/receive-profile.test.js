@@ -1488,9 +1488,11 @@ describe('actions/receive-profile', function () {
       const profile = _getSimpleProfile();
       profile.meta.product = 'JSON Test';
       // Add a marker to be able to exercize the stringTable easily.
-      addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
-        ['A', 1, 3],
-      ]);
+      addMarkersToThreadWithCorrespondingSamples(
+        profile.threads[0],
+        profile.shared,
+        [['A', 1, 3]]
+      );
 
       const { getState, view } = await setupTestWithFile({
         type: 'application/json',
@@ -1801,7 +1803,7 @@ describe('actions/receive-profile', function () {
     ) {
       if (skipMarkers !== true) {
         profile1.threads.forEach((thread) =>
-          addMarkersToThreadWithCorrespondingSamples(thread, [
+          addMarkersToThreadWithCorrespondingSamples(thread, profile1.shared, [
             ['A', 1, 3],
             ['A', 1],
             ['B', 2],
@@ -1811,7 +1813,7 @@ describe('actions/receive-profile', function () {
           ])
         );
         profile2.threads.forEach((thread) =>
-          addMarkersToThreadWithCorrespondingSamples(thread, [
+          addMarkersToThreadWithCorrespondingSamples(thread, profile2.shared, [
             ['F', 1, 3],
             ['G', 2],
             ['H', 3],
@@ -1862,22 +1864,20 @@ describe('actions/receive-profile', function () {
         });
 
       const expectedThreads = [
-        {
-          ...profile1.threads[0],
+        expect.objectContaining({
           pid: '0 from profile 1',
           tid: '0 from profile 1',
           isMainThread: true,
           processName: 'name 1: Empty',
           unregisterTime: getTimeRangeForThread(profile1.threads[0], 1).end,
-        },
-        {
-          ...profile2.threads[1],
+        }),
+        expect.objectContaining({
           pid: '0 from profile 2',
           tid: '1 from profile 2',
           isMainThread: true,
           processName: 'Profile 2: Empty',
           unregisterTime: getTimeRangeForThread(profile2.threads[1], 1).end,
-        },
+        }),
         // comparison thread
         expect.objectContaining({
           processType: 'comparison',
@@ -1900,22 +1900,21 @@ describe('actions/receive-profile', function () {
         });
 
       const expectedThreads = [
-        {
+        expect.objectContaining({
           ...profile1.threads[0],
           pid: '0 from profile 1',
           tid: '0 from profile 1',
           isMainThread: true,
           processName: 'Profile 1: Empty',
           unregisterTime: getTimeRangeForThread(profile1.threads[0], 1).end,
-        },
-        {
-          ...profile2.threads[0],
+        }),
+        expect.objectContaining({
           pid: '0 from profile 2',
           tid: '0 from profile 2',
           isMainThread: true,
           processName: 'Profile 2: Empty',
           unregisterTime: getTimeRangeForThread(profile2.threads[0], 1).end,
-        },
+        }),
         // comparison thread
         expect.objectContaining({
           processType: 'comparison',

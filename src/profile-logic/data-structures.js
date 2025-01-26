@@ -397,7 +397,6 @@ export function getEmptyThread(overrides?: $Shape<RawThread>): RawThread {
     markers: getEmptyRawMarkerTable(),
     stackTable: getEmptyRawStackTable(),
     frameTable: getEmptyFrameTable(),
-    stringArray: [],
     funcTable: getEmptyFuncTable(),
     resourceTable: getEmptyResourceTable(),
     nativeSymbols: getEmptyNativeSymbolTable(),
@@ -436,6 +435,9 @@ export function getEmptyProfile(): Profile {
     },
     libs: [],
     pages: [],
+    shared: {
+      stringArray: [],
+    },
     threads: [],
   };
 }

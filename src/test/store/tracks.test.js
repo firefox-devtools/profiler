@@ -693,7 +693,8 @@ describe('ordering and hiding', function () {
           messageSeqno: 1,
         },
         profile.threads[1], // tab process
-        profile.threads[2] // DOM Worker
+        profile.threads[2], // DOM Worker
+        profile.shared
       );
       const { getState } = storeWithProfile(profile);
       const localTracks = ProfileViewSelectors.getLocalTracks(getState(), pid);

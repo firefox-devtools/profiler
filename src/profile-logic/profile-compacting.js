@@ -16,6 +16,7 @@ import { computeStringIndexMarkerFieldsByDataType } from './marker-schema';
 import type {
   Profile,
   RawThread,
+  RawProfileSharedData,
   RawMarkerTable,
   IndexIntoStackTable,
   RawStackTable,
@@ -46,6 +47,7 @@ type ReferencedProfileData = {|
 |};
 
 type ReferencedSharedData = {|
+  referencedStrings: Uint8Array,
   referencedLibs: Uint8Array,
 |};
 
@@ -60,6 +62,7 @@ type ReferencedThreadData = {|
 |};
 
 type SharedDataTranslationMaps = {|
+  oldStringToNewStringPlusOne: Int32Array,
   oldLibToNewLibPlusOne: Int32Array,
 |};
 
@@ -115,6 +118,7 @@ function _gatherReferencesInProfile(
 ): ReferencedProfileData {
   const referencedSharedData: ReferencedSharedData = {
     referencedLibs: new Uint8Array(profile.libs.length),
+    referencedStrings: new Uint8Array(profile.shared.stringArray.length),
   };
 
   const referencedThreadDataPerThread = profile.threads.map((thread) =>
@@ -133,10 +137,17 @@ function _createCompactedProfile(
   referencedData: ReferencedProfileData,
   stringIndexMarkerFieldsByDataType: Map<string, string[]>
 ): CompactedProfileWithTranslationMaps {
+  const { shared } = profile;
   const sharedDataTranslationMaps: SharedDataTranslationMaps = {
+    oldStringToNewStringPlusOne: new Int32Array(shared.stringArray.length),
     oldLibToNewLibPlusOne: new Int32Array(profile.libs.length),
   };
 
+  const newStringArray = _createCompactedStringArray(
+    profile.shared.stringArray,
+    referencedData.referencedSharedData,
+    sharedDataTranslationMaps
+  );
   const newLibs = _createCompactedLibs(
     profile.libs,
     referencedData.referencedSharedData,
@@ -155,9 +166,14 @@ function _createCompactedProfile(
     return compactedThread;
   });
 
+  const newShared: RawProfileSharedData = {
+    stringArray: newStringArray,
+  };
+
   const newProfile: Profile = {
     ...profile,
     libs: newLibs,
+    shared: newShared,
     threads: newThreads,
   };
 
@@ -179,7 +195,6 @@ function _gatherReferencesInThread(
     referencedFuncs: new Uint8Array(thread.funcTable.length),
     referencedResources: new Uint8Array(thread.resourceTable.length),
     referencedNativeSymbols: new Uint8Array(thread.nativeSymbols.length),
-    referencedStrings: new Uint8Array(thread.stringArray.length),
     ...referencedSharedData,
   };
   _gatherReferencesInSamples(thread.samples, referencedThreadData);
@@ -225,14 +240,8 @@ function _createCompactedThread(
     oldNativeSymbolToNewNativeSymbolPlusOne: new Int32Array(
       thread.nativeSymbols.length
     ),
-    oldStringToNewStringPlusOne: new Int32Array(thread.stringArray.length),
     ...sharedDataTranslationMaps,
   };
-  const newStringArray = _createCompactedStringArray(
-    thread.stringArray,
-    references,
-    translationMaps
-  );
   const newNativeSymbols = _createCompactedNativeSymbols(
     thread.nativeSymbols,
     references,
@@ -275,7 +284,6 @@ function _createCompactedThread(
   );
   const newThread: RawThread = {
     ...thread,
-    stringArray: newStringArray,
     nativeSymbols: newNativeSymbols,
     resourceTable: newResourceTable,
     funcTable: newFuncTable,
@@ -737,8 +745,8 @@ function _createCompactedNativeSymbols(
 
 function _createCompactedStringArray(
   stringArray: string[],
-  { referencedStrings }: ReferencedThreadData,
-  translationMaps: ThreadTranslationMaps
+  { referencedStrings }: ReferencedSharedData,
+  translationMaps: SharedDataTranslationMaps
 ): string[] {
   const { oldStringToNewStringPlusOne } = translationMaps;
   let nextIndex = 0;

@@ -223,24 +223,30 @@ class FirefoxThread {
   tid: number;
   pid: number;
 
-  stringArray = [];
-  strings = StringTable.withBackingArray(this.stringArray);
+  strings: StringTable;
 
   sampleTable: RawSamplesTable = getEmptySamplesTable();
 
-  stackTable: FirefoxSampleTable = new FirefoxSampleTable(this.strings);
-  frameTable: FirefoxFrameTable = new FirefoxFrameTable(this.strings);
-  funcTable: FirefoxFuncTable = new FirefoxFuncTable(this.strings);
-  resourceTable: FirefoxResourceTable = new FirefoxResourceTable(this.strings);
+  stackTable: FirefoxSampleTable;
+  frameTable: FirefoxFrameTable;
+  funcTable: FirefoxFuncTable;
+  resourceTable: FirefoxResourceTable;
 
   cpuClockEventId: number = -1;
 
-  constructor(thread: report.IThread) {
+  constructor(thread: report.IThread, stringTable: StringTable) {
     this.tid = thread.threadId;
     this.pid = thread.processId;
 
     this.isMainThread = thread.threadId === thread.processId;
     this.name = thread.threadName ?? '';
+
+    this.strings = stringTable;
+
+    this.stackTable = new FirefoxSampleTable(this.strings);
+    this.frameTable = new FirefoxFrameTable(this.strings);
+    this.funcTable = new FirefoxFuncTable(this.strings);
+    this.resourceTable = new FirefoxResourceTable(this.strings);
   }
 
   toJson(): RawThread {
@@ -259,7 +265,6 @@ class FirefoxThread {
       markers: getEmptyRawMarkerTable(),
       stackTable: this.stackTable.toJson(),
       frameTable: this.frameTable.toJson(),
-      stringArray: this.stringArray,
       funcTable: this.funcTable.toJson(),
       resourceTable: this.resourceTable.toJson(),
       nativeSymbols: getEmptyNativeSymbolTable(),
@@ -358,10 +363,16 @@ class FirefoxProfile {
   sampleCount: number = 0;
   lostCount: number = 0;
 
+  stringArray = [];
+  stringTable = StringTable.withBackingArray(this.stringArray);
+
   toJson(): Profile {
     return {
       meta: this.getProfileMeta(),
       libs: [],
+      shared: {
+        stringArray: this.stringArray,
+      },
       threads: this.threads.map((thread) => thread.toJson()),
     };
   }
@@ -439,7 +450,7 @@ class FirefoxProfile {
   }
 
   addThread(thread: report.IThread) {
-    const firefoxThread = new FirefoxThread(thread);
+    const firefoxThread = new FirefoxThread(thread, this.stringTable);
     this.threads.push(firefoxThread);
     this.threadMap.set(thread.threadId, firefoxThread);
   }

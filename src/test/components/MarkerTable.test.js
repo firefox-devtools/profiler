@@ -190,16 +190,20 @@ describe('MarkerTable', function () {
     // Add another thread with a known tid that we'll reuse in the marker's cause.
     profile.threads.push(getEmptyThread({ name: 'Another Thread', tid }));
     // Add the reflow marker to the first thread.
-    addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
-      getReflowMarker(3, 100, {
-        tid: tid,
-        // We're cheating a bit here: E is a funcIndex, but because of how
-        // getProfileFromTextSamples works internally, this will be the right
-        // stackIndex too.
-        stack: E,
-        time: 1,
-      }),
-    ]);
+    addMarkersToThreadWithCorrespondingSamples(
+      profile.threads[0],
+      profile.shared,
+      [
+        getReflowMarker(3, 100, {
+          tid: tid,
+          // We're cheating a bit here: E is a funcIndex, but because of how
+          // getProfileFromTextSamples works internally, this will be the right
+          // stackIndex too.
+          stack: E,
+          time: 1,
+        }),
+      ]
+    );
 
     const { getByText } = setup(profile);
     fireFullContextMenu(getByText(/Reflow/));
@@ -284,7 +288,8 @@ describe('MarkerTable', function () {
           messageSeqno: 1,
         },
         profile.threads[0], // Parent process
-        profile.threads[1] // tab process
+        profile.threads[1], // tab process
+        profile.shared
       );
 
       addIPCMarkerPairToThreads(
@@ -294,31 +299,36 @@ describe('MarkerTable', function () {
           messageSeqno: 2,
         },
         profile.threads[0], // Parent process
-        profile.threads[2] // DOM Worker
+        profile.threads[2], // DOM Worker
+        profile.shared
       );
 
       // Add an incomplete IPC marker to the Style thread.
       // We do not add the other marker pair to another thread on purpose.
-      addMarkersToThreadWithCorrespondingSamples(profile.threads[3], [
+      addMarkersToThreadWithCorrespondingSamples(
+        profile.threads[3],
+        profile.shared,
         [
-          'IPC',
-          20,
-          25,
-          {
-            type: 'IPC',
-            startTime: 20,
-            endTime: 25,
-            otherPid: '444',
-            messageSeqno: 3,
-            messageType: 'PContent::Msg_PreferenceUpdate',
-            side: 'parent',
-            direction: 'sending',
-            phase: 'endpoint',
-            sync: false,
-            niceDirection: `sending to 444`,
-          },
-        ],
-      ]);
+          [
+            'IPC',
+            20,
+            25,
+            {
+              type: 'IPC',
+              startTime: 20,
+              endTime: 25,
+              otherPid: '444',
+              messageSeqno: 3,
+              messageType: 'PContent::Msg_PreferenceUpdate',
+              side: 'parent',
+              direction: 'sending',
+              phase: 'endpoint',
+              sync: false,
+              niceDirection: `sending to 444`,
+            },
+          ],
+        ]
+      );
 
       return setup(profile);
     }

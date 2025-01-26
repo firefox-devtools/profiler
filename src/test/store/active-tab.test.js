@@ -93,22 +93,26 @@ describe('ActiveTab', function () {
       // markers of an iframe comes from the parent frame. Therefore, their
       // innerWindowID will be the parent window's innerWindowID.
       const profile = getProfileWithNiceTracks();
-      addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
+      addMarkersToThreadWithCorrespondingSamples(
+        profile.threads[0],
+        profile.shared,
         [
-          'Load 1 will be filtered',
-          7,
-          8,
-          {
-            type: 'Network',
-            URI: 'URI 1',
-            id: 5,
-            pri: 1,
-            status: 'STATUS_STOP',
-            startTime: 7,
-            endTime: 8,
-          },
-        ],
-      ]);
+          [
+            'Load 1 will be filtered',
+            7,
+            8,
+            {
+              type: 'Network',
+              URI: 'URI 1',
+              id: 5,
+              pri: 1,
+              status: 'STATUS_STOP',
+              startTime: 7,
+              endTime: 8,
+            },
+          ],
+        ]
+      );
       const { getState } = setup(profile, false);
 
       expect(getHumanReadableActiveTabTracks(getState()).length).toBe(0);
@@ -207,21 +211,25 @@ describe('ActiveTab', function () {
           },
         ]
       );
-      addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
-        // All about:blank or about:newtab markers are ignored during the
-        // track name computation because they don't provide the correct innerWindowID.
-        // This thread SHOULD NOT be shown in the tracks.
+      addMarkersToThreadWithCorrespondingSamples(
+        profile.threads[1],
+        profile.shared,
         [
-          'This marker will be filtered',
-          1,
-          2,
-          {
-            type: 'tracing',
-            category: 'Navigation',
-            innerWindowID: pageInfo.iframeInnerWindowIDsWithChild,
-          },
-        ],
-      ]);
+          // All about:blank or about:newtab markers are ignored during the
+          // track name computation because they don't provide the correct innerWindowID.
+          // This thread SHOULD NOT be shown in the tracks.
+          [
+            'This marker will be filtered',
+            1,
+            2,
+            {
+              type: 'tracing',
+              category: 'Navigation',
+              innerWindowID: pageInfo.iframeInnerWindowIDsWithChild,
+            },
+          ],
+        ]
+      );
 
       // Lastly, we need to put the iframe innerWindowID url to about:blank to test this case.
       ensureExists(profile.pages)[1].url = 'about:blank';
