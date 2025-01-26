@@ -709,7 +709,7 @@ function combineFrameTables(
   const newFrameTable = getEmptyFrameTable();
 
   threads.forEach((thread, threadIndex) => {
-    const { frameTable, stringArray } = thread;
+    const { frameTable } = thread;
     const translationMap = new Map();
     const funcTranslationMap = translationMapsForFuncs[threadIndex];
     const nativeSymbolTranslationMap =
@@ -723,12 +723,6 @@ function combineFrameTables(
           This is a programming error.
         `);
       }
-
-      const implementationIndex = frameTable.implementation[i];
-      const implementation =
-        typeof implementationIndex === 'number'
-          ? stringArray[implementationIndex]
-          : null;
 
       const nativeSymbol = frameTable.nativeSymbol[i];
       const newNativeSymbol =
@@ -749,11 +743,6 @@ function combineFrameTables(
       newFrameTable.nativeSymbol.push(newNativeSymbol);
       newFrameTable.func.push(newFunc);
       newFrameTable.innerWindowID.push(frameTable.innerWindowID[i]);
-      newFrameTable.implementation.push(
-        implementation === null
-          ? null
-          : newStringTable.indexForString(implementation)
-      );
       newFrameTable.line.push(frameTable.line[i]);
       newFrameTable.column.push(frameTable.column[i]);
 

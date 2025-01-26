@@ -168,7 +168,6 @@ class FirefoxFrameTable {
       this.frameTable.func.push(funcIndex);
       this.frameTable.nativeSymbol.push(null);
       this.frameTable.innerWindowID.push(null);
-      this.frameTable.implementation.push(null);
       this.frameTable.line.push(null);
       this.frameTable.column.push(null);
 
@@ -387,8 +386,6 @@ class FirefoxProfile {
 
       // Do not distinguish between different stack types?
       usesOnlyOneStackType: true,
-      // Hide the "implementation" information in the UI (see #3709)?
-      doesNotUseFrameImplementation: true,
       // Hide the "Look up the function name on Searchfox" menu entry?
       sourceCodeIsNotOnSearchfox: true,
       // Extra information about the profile, not shown in the "Profile Info" panel,

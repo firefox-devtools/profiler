@@ -276,7 +276,6 @@ export type FrameTable = {|
   // is being stored as `uint64_t` there.
   innerWindowID: (InnerWindowID | null)[],
 
-  implementation: (IndexIntoStringTable | null)[],
   line: (number | null)[],
   column: (number | null)[],
   length: number,
@@ -861,8 +860,6 @@ export type ProfileMeta = {|
 
   // Do not distinguish between different stack types?
   usesOnlyOneStackType?: boolean,
-  // Hide the "implementation" information in the UI (see #3709)?
-  doesNotUseFrameImplementation?: boolean,
   // Hide the "Look up the function name on Searchfox" menu entry?
   sourceCodeIsNotOnSearchfox?: boolean,
   // Extra information about the profile, not shown in the "Profile Info" panel,
