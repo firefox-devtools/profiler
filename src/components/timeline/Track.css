@@ -168,3 +168,55 @@
   /* We want the width to look like it's 150px, but need to substract the 3px padding/margin and the 1px border */
   width: calc(135px - var(--selected-left-border-width) - 1px);
 }
+
+@media (forced-colors: active) {
+  .timelineTrackRow {
+    /* In regular mode, the left border is drawn with a box-shadow which is not visible in HCM,
+       and would make the selected track look misaligned.
+       Since we're rendering the track with a completely different color, we can avoid setting this
+       border, setting it to 0px so the computation made to account for it handle everything fine */
+    --selected-left-border-width: 0px;
+  }
+
+  .timelineTrackRow.selected .timelineTrackLabel {
+    border-color: CanvasText;
+    background-color: SelectedItem;
+    color: SelectedItemText;
+  }
+
+  .timelineTrackRow.selected .timelineTrackLabel button {
+    color: inherit;
+  }
+
+  .timelineTrackRow:not(.selected):hover .timelineTrackLabel {
+    background-color: SelectedItemText;
+    color: SelectedItem;
+  }
+
+  .timelineTrackRow:not(.selected):hover .timelineTrackLabel button {
+    color: inherit;
+  }
+
+  /* In regular mode, there's an inset box-shadow, which we don't see in HCM.
+     Add a solid border so we do have a separation between a parent and a local track */
+  .timelineTrackLocalTracks::before {
+    border-top: 1px solid;
+  }
+
+  .timelineTrackCloseButton {
+    border: 1px solid ButtonText;
+    background-color: ButtonFace;
+  }
+
+  .timelineTrackCloseButton:hover {
+    border-color: SelectedItem;
+    background-color: ButtonFace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    /* We need to adapt the cross icon in dark mode so it still visible */
+    .timelineTrackCloseButton {
+      background-image: url(../../../res/img/svg/close-light.svg);
+    }
+  }
+}
