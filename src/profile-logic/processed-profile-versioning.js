@@ -2602,8 +2602,6 @@ const _upgraders = {
     // - resourceTable
     // - nativeSymbols
     // They are now stored in profile.shared.
-    const stackTableMap = new Map();
-    const frameTableMap = new Map();
     const funcTableMap = new Map();
     const resourceTableMap = new Map();
     const nativeSymbolsMap = new Map();
@@ -2728,48 +2726,38 @@ const _upgraders = {
         }
       })();
       (function integrateIntoSharedFrameTable() {
+        // Don't attempt to deduplicate; just copy over all frames.
+        // The call node table will do the deduplication for us.
         for (let i = 0; i < frameTable.length; i++) {
-          const address = frameTable.address[i];
-          const inlineDepth = frameTable.inlineDepth[i];
-          const category = frameTable.category[i];
-          const subcategory = frameTable.subcategory[i];
-          const func = funcTableIndexMap[frameTable.func[i]];
-          const nativeSymbol = frameTable.nativeSymbol[i];
-          const innerWindowID = frameTable.innerWindowID[i];
-          const line = frameTable.line[i];
-          const column = frameTable.column[i];
-          const key = `${address !== null ? address : ''}-${inlineDepth !== null ? inlineDepth : ''}-${category !== null ? category : ''}-${subcategory !== null ? subcategory : ''}-${func}-${nativeSymbol !== null ? nativeSymbol : ''}-${innerWindowID !== null ? innerWindowID : ''}-${line !== null ? line : ''}-${column !== null ? column : ''}`;
-          let newIndex = frameTableMap.get(key);
-          if (newIndex === undefined) {
-            newIndex = newFrameTable.length++;
-            frameTableMap.set(key, newIndex);
-            newFrameTable.address[newIndex] = address;
-            newFrameTable.inlineDepth[newIndex] = inlineDepth;
-            newFrameTable.category[newIndex] = category;
-            newFrameTable.subcategory[newIndex] = subcategory;
-            newFrameTable.func[newIndex] = func;
-            newFrameTable.nativeSymbol[newIndex] = nativeSymbol;
-            newFrameTable.innerWindowID[newIndex] = innerWindowID;
-            newFrameTable.line[newIndex] = line;
-            newFrameTable.column[newIndex] = column;
-          }
+          const newIndex = newFrameTable.length++;
+          newFrameTable.address[newIndex] = frameTable.address[i];
+          newFrameTable.inlineDepth[newIndex] = frameTable.inlineDepth[i];
+          newFrameTable.category[newIndex] = frameTable.category[i];
+          newFrameTable.subcategory[newIndex] = frameTable.subcategory[i];
+          newFrameTable.func[newIndex] = funcTableIndexMap[frameTable.func[i]];
+          const oldNativeSymbol = frameTable.nativeSymbol[i];
+          const nativeSymbol =
+            oldNativeSymbol !== null
+              ? nativeSymbolsIndexMap[oldNativeSymbol]
+              : null;
+          newFrameTable.nativeSymbol[newIndex] = nativeSymbol;
+          newFrameTable.innerWindowID[newIndex] = frameTable.innerWindowID[i];
+          newFrameTable.line[newIndex] = frameTable.line[i];
+          newFrameTable.column[newIndex] = frameTable.column[i];
           frameTableIndexMap[i] = newIndex;
         }
       })();
       (function integrateIntoSharedStackTable() {
+        // Don't attempt to deduplicate; just copy over all stacks.
+        // The call node table will do the deduplication for us.
         for (let i = 0; i < stackTable.length; i++) {
           const frame = frameTableIndexMap[stackTable.frame[i]];
           const oldPrefix = stackTable.prefix[i];
           const prefix =
             oldPrefix !== null ? stackTableIndexMap[oldPrefix] : null;
-          const key = `${frame}-${prefix !== null ? prefix : ''}`;
-          let newIndex = stackTableMap.get(key);
-          if (newIndex === undefined) {
-            newIndex = newStackTable.length++;
-            stackTableMap.set(key, newIndex);
-            newStackTable.frame[newIndex] = frame;
-            newStackTable.prefix[newIndex] = prefix;
-          }
+          const newIndex = newStackTable.length++;
+          newStackTable.frame[newIndex] = frame;
+          newStackTable.prefix[newIndex] = prefix;
           stackTableIndexMap[i] = newIndex;
         }
       })();
