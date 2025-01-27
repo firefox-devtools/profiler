@@ -57,7 +57,7 @@ import type {
   TrackReference,
   Milliseconds,
   TabID,
-  Thread,
+  RawThread,
   StartEndRange,
 } from 'firefox-profiler/types';
 
@@ -1850,6 +1850,8 @@ describe('snapshots of selectors/profile', function () {
     samplesThread.samples.length = eventDelay.length;
 
     const { getState, dispatch } = storeWithProfile(profile);
+    const samplesDerivedThread = selectedThreadSelectors.getThread(getState());
+
     const mergeFunction = {
       type: 'merge-function',
       funcIndex: C,
@@ -1870,7 +1872,7 @@ describe('snapshots of selectors/profile', function () {
     return {
       getState,
       dispatch,
-      samplesThread,
+      samplesThread: samplesDerivedThread,
       mergeFunction,
       markerThreadSelectors: getThreadSelectors(1),
       getMarker: getThreadSelectors(1).getMarkerGetter(getState()),
@@ -2031,15 +2033,6 @@ describe('snapshots of selectors/profile', function () {
     const { getState } = setupStore();
     expect(
       selectedThreadSelectors.getFilteredCallNodeMaxDepthPlusOne(getState())
-    ).toEqual(4);
-  });
-
-  it('matches the last stored run of selectedThreadSelector.getPreviewFilteredCallNodeMaxDepthPlusOne', function () {
-    const { getState } = setupStore();
-    expect(
-      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepthPlusOne(
-        getState()
-      )
     ).toEqual(4);
   });
 
@@ -3077,7 +3070,7 @@ describe('getTimingsForSidebar', () => {
 // Verify that getFriendlyThreadName gives the expected names for threads with or without processName.
 describe('getFriendlyThreadName', function () {
   // Setup a profile with threads based on the given overrides.
-  function setup(threadOverrides: Array<$Shape<Thread>>) {
+  function setup(threadOverrides: Array<$Shape<RawThread>>) {
     const profile = getEmptyProfile();
     for (const threadOverride of threadOverrides) {
       profile.threads.push(getEmptyThread(threadOverride));
@@ -3716,7 +3709,7 @@ describe('traced timing', function () {
     // Create a weighted samples table.
     const [{ samples }] = profile.threads;
     samples.weightType = 'tracing-ms';
-    samples.weight = samples.time.map(() => 1);
+    samples.weight = samples.stack.map(() => 1);
 
     const { getState } = storeWithProfile(profile);
     expect(selectedThreadSelectors.getTracedTiming(getState())).toBe(null);

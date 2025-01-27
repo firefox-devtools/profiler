@@ -76,9 +76,7 @@ export const MaybeFlameGraph = explicitConnect<{||}, StateProps, DispatchProps>(
       return {
         invertCallstack: getInvertCallstack(state),
         isPreviewSelectionEmpty:
-          selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepthPlusOne(
-            state
-          ) === 0,
+          !selectedThreadSelectors.getHasPreviewFilteredCtssSamples(state),
       };
     },
     mapDispatchToProps: {

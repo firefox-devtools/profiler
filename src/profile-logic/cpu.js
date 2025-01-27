@@ -4,9 +4,14 @@
 
 // @flow
 
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import {
+  ensureExists,
+  assertExhaustiveCheck,
+} from 'firefox-profiler/utils/flow';
+import { timeColumnToTimeDeltas } from 'firefox-profiler/profile-logic/process-profile';
 
 import type {
+  RawThread,
   Thread,
   Milliseconds,
   SampleUnits,
@@ -22,7 +27,7 @@ import type {
  * anyway, because if the unit is 'variable CPU cycles' then we don't do any
  * clamping.
  */
-function _computeMaxVariableCPUCyclesPerMs(threads: Thread[]): number {
+function _computeMaxVariableCPUCyclesPerMs(threads: RawThread[]): number {
   let maxThreadCPUDeltaPerMs = 0;
   for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
     const { samples } = threads[threadIndex];
@@ -34,10 +39,15 @@ function _computeMaxVariableCPUCyclesPerMs(threads: Thread[]): number {
       continue;
     }
 
+    const timeDeltas =
+      samples.time !== undefined
+        ? timeColumnToTimeDeltas(samples.time)
+        : ensureExists(samples.timeDeltas);
+
     // Ignore the first CPU delta value; it's meaningless because there is no
     // previous sample.
     for (let i = 1; i < samples.length; i++) {
-      const sampleTimeDeltaInMs = samples.time[i] - samples.time[i - 1];
+      const sampleTimeDeltaInMs = timeDeltas[i];
       if (sampleTimeDeltaInMs !== 0) {
         const cpuDeltaPerMs = (threadCPUDelta[i] || 0) / sampleTimeDeltaInMs;
         maxThreadCPUDeltaPerMs = Math.max(

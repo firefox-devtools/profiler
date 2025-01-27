@@ -7,7 +7,6 @@ import type { Milliseconds, StartEndRange, Address, Bytes } from './units';
 import type { MarkerPayload, MarkerSchema } from './markers';
 import type {
   ThreadIndex,
-  Thread,
   Pid,
   IndexIntoFuncTable,
   IndexIntoJsTracerEvents,
@@ -16,16 +15,161 @@ import type {
   IndexIntoNativeSymbolTable,
   IndexIntoLibs,
   CounterIndex,
+  GraphColor,
   InnerWindowID,
   Page,
   IndexIntoRawMarkerTable,
   IndexIntoStringTable,
   TabID,
   Tid,
+  ProcessType,
+  PausedRange,
+  JsAllocationsTable,
+  NativeAllocationsTable,
+  RawMarkerTable,
+  StackTable,
+  FrameTable,
+  FuncTable,
+  ResourceTable,
+  NativeSymbolTable,
+  JsTracerTable,
+  IndexIntoStackTable,
+  WeightType,
 } from './profile';
 import type { IndexedArray } from './utils';
 import type { StackTiming } from '../profile-logic/stack-timing';
+import type { StringTable } from '../utils/string-table';
 export type IndexIntoCallNodeTable = number;
+
+/**
+ * The derived Thread type.
+ *
+ * This type is more ergonomic than the RawThread type:
+ *
+ * - `RawThread` represents the data as it is stored in the profile file format,
+ *   so it needs to be JSON-compatible, and it is encouraged to use more compact
+ *   data representations, e.g. no duplication of shared data on each thread.
+ * - `Thread` is computed at runtime by selectors, and can store data in a way
+ *   that's most convenient for users of the derived state.
+ *
+ * The fields that differ from RawThread are collected at the end of this type
+ * definition.
+ */
+export type Thread = {|
+  processType: ProcessType,
+  processStartupTime: Milliseconds,
+  processShutdownTime: Milliseconds | null,
+  registerTime: Milliseconds,
+  unregisterTime: Milliseconds | null,
+  pausedRanges: PausedRange[],
+  showMarkersInTimeline?: boolean,
+  name: string,
+  isMainThread: boolean,
+  // The eTLD+1 of the isolated content process if provided by the back-end.
+  // It will be undefined if:
+  // - Fission is not enabled.
+  // - It's not an isolated content process.
+  // - It's a sanitized profile.
+  // - It's a profile from an older Firefox which doesn't include this field (introduced in Firefox 80).
+  'eTLD+1'?: string,
+  processName?: string,
+  isJsTracer?: boolean,
+  pid: Pid,
+  tid: Tid,
+  jsAllocations?: JsAllocationsTable,
+  nativeAllocations?: NativeAllocationsTable,
+  markers: RawMarkerTable,
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  nativeSymbols: NativeSymbolTable,
+  jsTracer?: JsTracerTable,
+  // If present and true, this thread was launched for a private browsing session only.
+  // When false, it can still contain private browsing data if the profile was
+  // captured in a non-fission browser.
+  // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
+  // had no extra attribute at all.
+  isPrivateBrowsing?: boolean,
+  // If present and non-0, the number represents the container this thread was loaded in.
+  // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
+  // had no extra attribute at all.
+  userContextId?: number,
+
+  // The fields below this comment are derived data, and not present on the RawThread
+  // in the same form.
+
+  // Strings for profiles are collected into a single table, and are referred to by
+  // their index by other tables.
+  stringTable: StringTable,
+  // The stack samples collected for this thread. This field is different from
+  // RawThread in that the `time` column is always present.
+  samples: SamplesTable,
+|};
+
+/**
+ * The derived samples table.
+ */
+export type SamplesTable = {|
+  // Responsiveness is the older version of eventDelay. It injects events every 16ms.
+  // This is optional because newer profiles don't have that field anymore.
+  responsiveness?: Array<?Milliseconds>,
+  // Event delay is the newer version of responsiveness. It allow us to get a finer-grained
+  // view of jank by inferring what would be the delay of a hypothetical input event at
+  // any point in time. It requires a pre-processing to be able to visualize properly.
+  // This is optional because older profiles didn't have that field.
+  eventDelay?: Array<?Milliseconds>,
+  stack: Array<IndexIntoStackTable | null>,
+  time: Milliseconds[],
+  // An optional weight array. If not present, then the weight is assumed to be 1.
+  // See the WeightType type for more information.
+  weight: null | number[],
+  weightType: WeightType,
+  // The elapsed CPU delta since the previous sample, in the unit given by
+  // profile.meta.sampleUnits.threadCPUDelta. Absent in profiles without CPU
+  // delta information.
+  threadCPUDelta?: Array<number | null>,
+  // This property isn't present in normal threads. However it's present for
+  // merged threads, so that we know the origin thread for these samples.
+  threadId?: Tid[],
+  length: number,
+|};
+
+type SamplesLikeTableShape = {
+  stack: Array<IndexIntoStackTable | null>,
+  time: Milliseconds[],
+  // An optional weight array. If not present, then the weight is assumed to be 1.
+  // See the WeightType type for more information.
+  weight: null | number[],
+  weightType: WeightType,
+  length: number,
+};
+
+export type SamplesLikeTable =
+  | SamplesLikeTableShape
+  | SamplesTable
+  | NativeAllocationsTable
+  | JsAllocationsTable;
+
+export type CounterSamplesTable = {|
+  time: Milliseconds[],
+  // The number of times the Counter's "number" was changed since the previous sample.
+  // This property was mandatory until the format version 42, it was made optional in 43.
+  number?: number[],
+  // The count of the data, for instance for memory this would be bytes.
+  count: number[],
+  length: number,
+|};
+
+export type Counter = {|
+  name: string,
+  category: string,
+  description: string,
+  color?: GraphColor,
+  pid: Pid,
+  mainThreadIndex: ThreadIndex,
+  samples: CounterSamplesTable,
+|};
 
 /**
  * Contains a table of function call information that represents the stacks of what
