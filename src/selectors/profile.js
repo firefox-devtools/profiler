@@ -21,7 +21,10 @@ import {
   IPCMarkerCorrelations,
   correlateIPCMarkers,
 } from '../profile-logic/marker-data';
-import { markerSchemaFrontEndOnly } from '../profile-logic/marker-schema';
+import {
+  markerSchemaFrontEndOnly,
+  computeStringIndexMarkerFieldsByDataType,
+} from '../profile-logic/marker-schema';
 import { getDefaultCategories } from 'firefox-profiler/profile-logic/data-structures';
 import { defaultTableViewOptions } from '../reducers/profile-view';
 import { StringTable } from '../utils/string-table';
@@ -250,6 +253,12 @@ export const getMarkerSchema: Selector<MarkerSchema[]> = createSelector(
       ...markerSchemaFrontEndOnly,
     ];
   }
+);
+
+export const getStringIndexMarkerFieldsByDataType: Selector<
+  Map<string, string[]>,
+> = createSelector(getMarkerSchema, (schemaList) =>
+  computeStringIndexMarkerFieldsByDataType(schemaList)
 );
 
 export const getMarkerSchemaByName: Selector<MarkerSchemaByName> =
