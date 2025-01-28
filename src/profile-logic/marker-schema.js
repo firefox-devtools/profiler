@@ -667,3 +667,32 @@ export function markerPayloadMatchesSearch(
 
   return false;
 }
+
+/**
+ * Returns a map of marker schema name -> array of field keys, listing any fields
+ * that contain indexes into the string table. If a marker schema has no such
+ * fields, then we don't put an entry for it in the returned map.
+ */
+export function computeStringIndexMarkerFieldsByDataType(
+  markerSchemas: MarkerSchema[]
+): Map<string, string[]> {
+  const stringIndexMarkerFieldsByDataType = new Map();
+
+  // 'CompositorScreenshot' markers currently don't have a schema (#5303),
+  // hardcode the url field (which is a string index) until they do.
+  stringIndexMarkerFieldsByDataType.set('CompositorScreenshot', ['url']);
+
+  for (const schema of markerSchemas) {
+    const { name, data } = schema;
+    const stringIndexFields = [];
+    for (const field of data) {
+      if (field.format === 'unique-string' && field.key) {
+        stringIndexFields.push(field.key);
+      }
+    }
+    if (stringIndexFields.length !== 0) {
+      stringIndexMarkerFieldsByDataType.set(name, stringIndexFields);
+    }
+  }
+  return stringIndexMarkerFieldsByDataType;
+}
