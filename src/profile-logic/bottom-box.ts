@@ -9,12 +9,15 @@ import type {
   IndexIntoStackTable,
   IndexIntoCallNodeTable,
   BottomBoxInfo,
+  SamplesLikeTable,
 } from 'firefox-profiler/types';
 import type { CallNodeInfo } from './call-node-info';
 import {
   getNativeSymbolInfo,
   getNativeSymbolsForCallNode,
 } from './profile-data';
+import { getLineTimings, getStackLineInfoForCallNode } from './line-timings';
+import { mapGetKeyWithMaxValue } from 'firefox-profiler/utils';
 
 /**
  * Calculate the BottomBoxInfo for a call node, i.e. information about which
@@ -27,7 +30,8 @@ import {
 export function getBottomBoxInfoForCallNode(
   callNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfo,
-  thread: Thread
+  thread: Thread,
+  samples: SamplesLikeTable
 ): BottomBoxInfo {
   const {
     stackTable,
@@ -61,10 +65,22 @@ export function getBottomBoxInfoForCallNode(
       )
   );
 
+  // Compute the hottest line, and ask the source view to scroll to it.
+  const stackLineInfo = getStackLineInfoForCallNode(
+    stackTable,
+    frameTable,
+    funcTable,
+    callNodeIndex,
+    callNodeInfo
+  );
+  const callNodeLineTimings = getLineTimings(stackLineInfo, samples);
+  const hottestLine = mapGetKeyWithMaxValue(callNodeLineTimings.totalLineHits);
+
   return {
     libIndex,
     sourceIndex,
     nativeSymbols: nativeSymbolInfosForCallNode,
+    scrollToLineNumber: hottestLine,
   };
 }
 

@@ -4,7 +4,6 @@
 import * as React from 'react';
 
 import { ensureExists } from 'firefox-profiler/utils/types';
-import { mapGetKeyWithMaxValue } from 'firefox-profiler/utils';
 import type { LineTimings } from 'firefox-profiler/types';
 
 import type { SourceViewEditor } from './SourceView-codemirror';
@@ -41,9 +40,8 @@ type SourceViewProps = {
   readonly timings: LineTimings;
   readonly sourceCode: string;
   readonly filePath: string | null;
-  readonly scrollToHotSpotGeneration: number;
+  readonly scrollGeneration: number;
   readonly scrollToLineNumber?: number;
-  readonly hotSpotTimings: LineTimings;
   readonly highlightedLine?: number;
 };
 
@@ -52,36 +50,6 @@ let editorModulePromise: Promise<any> | null = null;
 export class SourceView extends React.PureComponent<SourceViewProps> {
   _ref = React.createRef<HTMLDivElement>();
   _editor: SourceViewEditor | null = null;
-
-  /**
-   * Scroll to the line with the most hits, based on the timings in
-   * timingsForScrolling.
-   *
-   * How is timingsForScrolling different from this.props.timings?
-   * In the current implementation, this.props.timings are always the "global"
-   * timings, i.e. they show the line hits for all samples in the current view,
-   * regardless of the selected call node. However, when opening the source
-   * view from a specific call node, you really want to see the code that's
-   * relevant to that specific call node, or at least that specific function.
-   * So timingsForScrolling are the timings that indicate just the line hits
-   * in the selected call node. This means that the "hotspot" will be somewhere
-   * in the selected function, and it will even be in the line that's most
-   * relevant to that specific call node.
-   *
-   * Sometimes, timingsForScrolling can be completely empty. This happens, for
-   * example, when the source view is showing a different file than the
-   * selected call node's function's file, for example because we just loaded
-   * from a URL and ended up with an arbitrary selected call node.
-   * In that case, pick the hotspot from the global line timings.
-   */
-  _scrollToHotSpot(timingsForScrolling: LineTimings) {
-    const heaviestLine =
-      mapGetKeyWithMaxValue(timingsForScrolling.totalLineHits) ??
-      mapGetKeyWithMaxValue(this.props.timings.totalLineHits);
-    if (heaviestLine !== undefined) {
-      this._scrollToLine(heaviestLine - 5);
-    }
-  }
 
   _scrollToLine(lineNumber: number) {
     if (this._editor) {
@@ -148,8 +116,6 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
       // If an explicit line number is provided, scroll to it. Otherwise, scroll to the hotspot.
       if (this.props.scrollToLineNumber !== undefined) {
         this._scrollToLine(Math.max(1, this.props.scrollToLineNumber - 5));
-      } else {
-        this._scrollToHotSpot(this.props.hotSpotTimings);
       }
     })();
   }
@@ -178,14 +144,12 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
 
     if (
       contentsChanged ||
-      this.props.scrollToHotSpotGeneration !==
-        prevProps.scrollToHotSpotGeneration
+      this.props.scrollGeneration !==
+        prevProps.scrollGeneration
     ) {
       // If an explicit line number is provided, scroll to it. Otherwise, scroll to the hotspot.
       if (this.props.scrollToLineNumber !== undefined) {
         this._scrollToLine(Math.max(1, this.props.scrollToLineNumber - 5));
-      } else {
-        this._scrollToHotSpot(this.props.hotSpotTimings);
       }
     }
 
