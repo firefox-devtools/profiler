@@ -6,6 +6,7 @@ import {
   mergeProfilesForDiffing,
   mergeThreads,
 } from '../../profile-logic/merge-compare';
+import { computeStringIndexMarkerFieldsByDataType } from '../../profile-logic/marker-schema';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import {
   getProfileFromTextSamples,
@@ -294,7 +295,10 @@ describe('mergeThreads function', function () {
       'A[lib:libA]  A[lib:libB]  C[lib:libC]'
     );
 
-    const mergedThread = mergeThreads(profile.threads);
+    const mergedThread = mergeThreads(
+      profile.threads,
+      computeStringIndexMarkerFieldsByDataType(profile.meta.markerSchema)
+    );
 
     const mergedResources = mergedThread.resourceTable;
     const mergedFunctions = mergedThread.funcTable;
@@ -321,7 +325,10 @@ describe('mergeThreads function', function () {
       'A[lib:libA]  A[lib:libB]  D[lib:libD]'
     );
 
-    const mergedThread = mergeThreads(profile.threads);
+    const mergedThread = mergeThreads(
+      profile.threads,
+      computeStringIndexMarkerFieldsByDataType(profile.meta.markerSchema)
+    );
 
     const mergedResources = mergedThread.resourceTable;
     const mergedFunctions = mergedThread.funcTable;
@@ -366,7 +373,10 @@ describe('mergeThreads function', function () {
       ]
     );
 
-    const mergedThread = mergeThreads(profile.threads);
+    const mergedThread = mergeThreads(
+      profile.threads,
+      computeStringIndexMarkerFieldsByDataType(profile.meta.markerSchema)
+    );
 
     const mergedMarkers = mergedThread.markers;
     const mergedStringArray = mergedThread.stringArray;
@@ -452,7 +462,10 @@ describe('mergeThreads function', function () {
       ],
     ]);
 
-    const mergedThread = mergeThreads(profile.threads);
+    const mergedThread = mergeThreads(
+      profile.threads,
+      computeStringIndexMarkerFieldsByDataType(profile.meta.markerSchema)
+    );
     const mergedMarkers = mergedThread.markers;
     expect(mergedMarkers).toHaveLength(2);
 
@@ -518,7 +531,10 @@ describe('mergeThreads function', function () {
       ],
     ]);
 
-    const mergedThread = mergeThreads(profile.threads);
+    const mergedThread = mergeThreads(
+      profile.threads,
+      computeStringIndexMarkerFieldsByDataType(profile.meta.markerSchema)
+    );
     const mergedMarkers = mergedThread.markers;
 
     // Make sure that we have 2 markers in the merged thread.
@@ -537,5 +553,69 @@ describe('mergeThreads function', function () {
 
     expect(url1AfterMerge).toBe(screenshotUrl1);
     expect(url2AfterMerge).toBe(screenshotUrl2);
+  });
+
+  it('merges schema markers with unique-string fields properly', function () {
+    const { profile } = getProfileFromTextSamples(`A`, `B`);
+    profile.meta.markerSchema.push({
+      name: 'testSchemaWithUniqueUrlField',
+      display: [],
+      data: [{ key: 'fieldWithUniqueString', format: 'unique-string' }],
+    });
+    const thread1 = profile.threads[0];
+    const thread2 = profile.threads[1];
+    const stringTable1 = StringTable.withBackingArray(thread1.stringArray);
+    const stringTable2 = StringTable.withBackingArray(thread2.stringArray);
+
+    const uniqueString1 = 'Unique string value in thread 1';
+    const uniqueString1Index = stringTable1.indexForString(uniqueString1);
+    const uniqueString2 = 'A different unique string value in thread 2';
+    const uniqueString2Index = stringTable2.indexForString(uniqueString2);
+
+    addMarkersToThreadWithCorrespondingSamples(thread1, [
+      [
+        'Thread1Marker',
+        1,
+        2,
+        {
+          type: 'testSchemaWithUniqueUrlField',
+          fieldWithUniqueString: uniqueString1Index,
+        },
+      ],
+    ]);
+
+    addMarkersToThreadWithCorrespondingSamples(thread2, [
+      [
+        'Thread2Marker',
+        2,
+        3,
+        {
+          type: 'testSchemaWithUniqueUrlField',
+          fieldWithUniqueString: uniqueString2Index,
+        },
+      ],
+    ]);
+
+    const mergedThread = mergeThreads(
+      profile.threads,
+      computeStringIndexMarkerFieldsByDataType(profile.meta.markerSchema)
+    );
+    const mergedMarkers = mergedThread.markers;
+
+    // Make sure that we have 2 markers in the merged thread.
+    expect(mergedMarkers).toHaveLength(2);
+
+    // Check if we properly merged the string tables and have the correct fields.
+    const string1AfterMerge =
+      mergedThread.stringArray[
+        (ensureExists(mergedMarkers.data[0]): MixedObject).fieldWithUniqueString
+      ];
+    const string2AfterMerge =
+      mergedThread.stringArray[
+        (ensureExists(mergedMarkers.data[1]): MixedObject).fieldWithUniqueString
+      ];
+
+    expect(string1AfterMerge).toBe(uniqueString1);
+    expect(string2AfterMerge).toBe(uniqueString2);
   });
 });

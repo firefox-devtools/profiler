@@ -21,6 +21,9 @@
   margin: 5px 5px 0;
   color: var(--internal-selected-color);
   content: '';
+
+  /* opt-out of forced color so the arrow is visible */
+  forced-color-adjust: none;
   inset-block-start: 4px;
   inset-inline-start: 4px;
 }
@@ -28,4 +31,14 @@
 span.profileFilterNavigator--tab-selector::before {
   /* Disabled tab selector indicates this with a grayed out arrow. */
   color: var(--grey-30);
+}
+
+@media (forced-colors: active) {
+  .profileFilterNavigator--tab-selector::before {
+    color: currentcolor;
+  }
+
+  span.profileFilterNavigator--tab-selector::before {
+    color: GrayText;
+  }
 }

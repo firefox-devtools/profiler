@@ -83,9 +83,11 @@ export function getBasicThreadSelectorsPerThread(
 
   const getMergedRawThread: Selector<RawThread> = createSelector(
     ProfileSelectors.getProfile,
-    (profile) =>
+    ProfileSelectors.getStringIndexMarkerFieldsByDataType,
+    (profile, stringIndexMarkerFieldsByDataType) =>
       mergeThreads(
-        [...threadIndexes].map((threadIndex) => profile.threads[threadIndex])
+        [...threadIndexes].map((threadIndex) => profile.threads[threadIndex]),
+        stringIndexMarkerFieldsByDataType
       )
   );
   /**
