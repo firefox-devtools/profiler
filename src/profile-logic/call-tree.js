@@ -316,6 +316,7 @@ export class CallTree {
   _internal: CallTreeInternal;
   _callNodeInfo: CallNodeInfo;
   _thread: Thread;
+  _previewFilteredCtssSamples: SamplesLikeTable;
   _rootTotalSummary: number;
   _displayDataByIndex: Map<IndexIntoCallNodeTable, CallNodeDisplayData>;
   // _children is indexed by IndexIntoCallNodeTable. Since they are
@@ -329,6 +330,7 @@ export class CallTree {
     thread: Thread,
     categories: CategoryList,
     callNodeInfo: CallNodeInfo,
+    previewFilteredCtssSamples: SamplesLikeTable,
     internal: CallTreeInternal,
     rootTotalSummary: number,
     isHighPrecision: boolean,
@@ -338,12 +340,17 @@ export class CallTree {
     this._internal = internal;
     this._callNodeInfo = callNodeInfo;
     this._thread = thread;
+    this._previewFilteredCtssSamples = previewFilteredCtssSamples;
     this._rootTotalSummary = rootTotalSummary;
     this._displayDataByIndex = new Map();
     this._children = [];
     this._roots = internal.createRoots();
     this._isHighPrecision = isHighPrecision;
     this._weightType = weightType;
+  }
+
+  getPreviewFilteredCtssSamples(): SamplesLikeTable {
+    return this._previewFilteredCtssSamples;
   }
 
   getRoots() {
@@ -839,6 +846,7 @@ export function getCallTree(
   thread: Thread,
   callNodeInfo: CallNodeInfo,
   categories: CategoryList,
+  previewFilteredCtssSamples: SamplesLikeTable,
   callTreeTimings: CallTreeTimings,
   weightType: WeightType
 ): CallTree {
@@ -850,6 +858,7 @@ export function getCallTree(
           thread,
           categories,
           callNodeInfo,
+          previewFilteredCtssSamples,
           new CallTreeInternalNonInverted(callNodeInfo, timings),
           timings.rootTotalSummary,
           Boolean(thread.isJsTracer),
@@ -862,6 +871,7 @@ export function getCallTree(
           thread,
           categories,
           callNodeInfo,
+          previewFilteredCtssSamples,
           new CallTreeInternalInverted(
             ensureExists(callNodeInfo.asInverted()),
             timings
