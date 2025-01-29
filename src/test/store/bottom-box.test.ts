@@ -95,7 +95,8 @@ describe('bottom box', function () {
     const bottomBoxInfoD = getBottomBoxInfoForCallNode(
       abcd,
       callNodeInfo,
-      thread
+      thread,
+      thread.samples
     );
     expect(bottomBoxInfoD.nativeSymbols).toEqual([nativeSymbolInfoD]);
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfoD));
@@ -182,7 +183,8 @@ describe('bottom box', function () {
     const bottomBoxInfoF = getBottomBoxInfoForCallNode(
       aef,
       callNodeInfo,
-      thread
+      thread,
+      thread.samples
     );
     expect(bottomBoxInfoF.nativeSymbols).toEqual([nativeSymbolInfoF]);
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfoF));
@@ -232,7 +234,8 @@ describe('bottom box', function () {
     const bottomBoxInfoC = getBottomBoxInfoForCallNode(
       abc,
       callNodeInfo,
-      thread
+      thread,
+      thread.samples
     );
     expect(new Set(bottomBoxInfoC.nativeSymbols)).toEqual(
       new Set([nativeSymbolInfoA, nativeSymbolInfoB])
@@ -266,7 +269,8 @@ describe('bottom box', function () {
     const bottomBoxInfoABC = getBottomBoxInfoForCallNode(
       ensureExists(callNodeInfo.getCallNodeIndexFromPath([A, B, C, D])),
       callNodeInfo,
-      thread
+      thread,
+      thread.samples
     );
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfoABC));
 

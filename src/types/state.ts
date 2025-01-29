@@ -252,9 +252,8 @@ export type SourceViewState = {
   // source. Null if a function without a file path was double clicked.
   sourceIndex: IndexIntoSourceTable | null;
   // Optional line number to scroll to in the source view.
-  // If not specified, the source view will scroll to the hottest line.
   scrollToLineNumber?: number;
-  // Optional line number of the highlighted in the source view.
+  // Optional line number of the highlighted line in the source view.
   highlightedLine?: number;
 };
 
