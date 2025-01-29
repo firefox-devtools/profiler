@@ -33,7 +33,7 @@ function getProfileWithNiceAddresses(): {
   return getProfileFromTextSamples(`
     A[lib:one][address:20][sym:Asym:20:][file:ab.cpp][line:20]          A[lib:one][address:30][sym:Asym:20:][file:ab.cpp][line:22]          A[lib:one][address:20][sym:Asym:20:][file:ab.cpp][line:20]  A[lib:one][address:20][sym:Asym:20:][file:ab.cpp][line:20]
     B[lib:one][address:40][sym:Bsym:30:][file:ab.cpp][line:40]          B[lib:one][address:30][sym:Asym:20:][file:ab.cpp][line:40][inl:1]   B[lib:one][address:45][sym:Bsym:30:][file:ab.cpp][line:43]  E[lib:one][address:31][sym:Esym:30:][file:cde.cpp][line:90]
-    C[lib:one][address:40][sym:Bsym:30:][file:cde.cpp][line:60][inl:1]  C[lib:one][address:30][sym:Asym:20:][file:cde.cpp][line:62][inl:2]  C[lib:one][address:45][sym:Bsym:30:][file:cde.cpp][line:63] F[lib:two][address:15][sym:Fsym:12:]
+    C[lib:one][address:40][sym:Bsym:30:][file:cde.cpp][line:60][inl:1]  C[lib:one][address:30][sym:Asym:20:][file:cde.cpp][line:62][inl:2]  C[lib:one][address:45][sym:Bsym:30:][file:cde.cpp][line:62] F[lib:two][address:15][sym:Fsym:12:]
                                                                                                                                             D[lib:one][address:51][sym:Dsym:40:][file:cde.cpp][line:80]
   `);
 }
@@ -95,7 +95,8 @@ describe('bottom box', function () {
     const bottomBoxInfoD = getBottomBoxInfoForCallNode(
       abcd,
       callNodeInfo,
-      thread
+      thread,
+      thread.samples
     );
     expect(bottomBoxInfoD.nativeSymbols).toEqual([nativeSymbolInfoD]);
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfoD));
@@ -182,7 +183,8 @@ describe('bottom box', function () {
     const bottomBoxInfoF = getBottomBoxInfoForCallNode(
       aef,
       callNodeInfo,
-      thread
+      thread,
+      thread.samples
     );
     expect(bottomBoxInfoF.nativeSymbols).toEqual([nativeSymbolInfoF]);
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfoF));
@@ -232,7 +234,8 @@ describe('bottom box', function () {
     const bottomBoxInfoC = getBottomBoxInfoForCallNode(
       abc,
       callNodeInfo,
-      thread
+      thread,
+      thread.samples
     );
     expect(new Set(bottomBoxInfoC.nativeSymbols)).toEqual(
       new Set([nativeSymbolInfoA, nativeSymbolInfoB])
@@ -242,8 +245,12 @@ describe('bottom box', function () {
     // Now the source view should be displayed and the assembly view should be
     // initialized but closed. The assembly view should show one of the two
     // native symbols.
+    // The source view should scroll to line 62 because the call node [A, B, C]
+    // has 2 samples in line 62 and only 1 sample in line 60.
     expect(UrlStateSelectors.getIsBottomBoxOpen(getState())).toBeTrue();
     expect(ProfileSelectors.getSourceViewFile(getState())).toBe('cde.cpp');
+    expect(UrlStateSelectors.getSourceViewScrollToLineNumber(getState())).toBe(62);
+    expect(UrlStateSelectors.getSourceViewHighlightedLine(getState())).toBe(undefined);
     expect(UrlStateSelectors.getAssemblyViewIsOpen(getState())).toBeFalse();
     expect(
       ensureExists(UrlStateSelectors.getAssemblyViewNativeSymbol(getState()))
@@ -266,7 +273,8 @@ describe('bottom box', function () {
     const bottomBoxInfoABC = getBottomBoxInfoForCallNode(
       ensureExists(callNodeInfo.getCallNodeIndexFromPath([A, B, C, D])),
       callNodeInfo,
-      thread
+      thread,
+      thread.samples
     );
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfoABC));
 

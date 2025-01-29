@@ -56,7 +56,6 @@ type StateProps = {
   readonly sourceViewScrollToLineNumber?: number;
   readonly sourceViewHighlightedLine?: number;
   readonly globalLineTimings: LineTimings;
-  readonly selectedCallNodeLineTimings: LineTimings;
   readonly assemblyViewIsOpen: boolean;
   readonly assemblyViewNativeSymbol: NativeSymbolInfo | null;
   readonly assemblyViewCode: AssemblyCodeStatus | void;
@@ -159,7 +158,6 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       sourceViewCode,
       globalLineTimings,
       sourceViewScrollGeneration,
-      selectedCallNodeLineTimings,
       sourceViewScrollToLineNumber,
       sourceViewHighlightedLine,
       assemblyViewIsOpen,
@@ -221,7 +219,6 @@ class BottomBoxImpl extends React.PureComponent<Props> {
               {displayIonGraph ? (
                 <IonGraphView
                   timings={globalLineTimings}
-                  hotSpotTimings={selectedCallNodeLineTimings}
                   sourceCode={sourceCode}
                 />
               ) : null}
@@ -230,8 +227,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
                   timings={globalLineTimings}
                   sourceCode={sourceCode}
                   filePath={path}
-                  scrollToHotSpotGeneration={sourceViewScrollGeneration}
-                  hotSpotTimings={selectedCallNodeLineTimings}
+                  scrollGeneration={sourceViewScrollGeneration}
                   scrollToLineNumber={sourceViewScrollToLineNumber}
                   highlightedLine={sourceViewHighlightedLine}
                   ref={this._sourceView}
@@ -298,8 +294,6 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
     sourceViewFile: getSourceViewFile(state),
     sourceViewCode: getSourceViewCode(state),
     globalLineTimings: selectedThreadSelectors.getSourceViewLineTimings(state),
-    selectedCallNodeLineTimings:
-      selectedNodeSelectors.getSourceViewLineTimings(state),
     sourceViewScrollGeneration: getSourceViewScrollGeneration(state),
     sourceViewScrollToLineNumber: getSourceViewScrollToLineNumber(state),
     sourceViewHighlightedLine: getSourceViewHighlightedLine(state),

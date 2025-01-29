@@ -54,6 +54,7 @@ import type {
   CategoryList,
   InnerWindowID,
   Page,
+  SamplesLikeTable,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
@@ -64,6 +65,7 @@ import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser
 type StateProps = {
   readonly thread: Thread | null;
   readonly threadsKey: ThreadsKey | null;
+  readonly previewFilteredCtssSamples: SamplesLikeTable | null;
   readonly categories: CategoryList;
   readonly callNodeInfo: CallNodeInfo | null;
   readonly rightClickedCallNodeIndex: IndexIntoCallNodeTable | null;
@@ -222,11 +224,13 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       );
     }
 
-    const { callNodeIndex, thread, callNodeInfo } = rightClickedCallNodeInfo;
+    const { callNodeIndex, thread, callNodeInfo, previewFilteredCtssSamples } =
+      rightClickedCallNodeInfo;
     const bottomBoxInfo = getBottomBoxInfoForCallNode(
       callNodeIndex,
       callNodeInfo,
-      thread
+      thread,
+      previewFilteredCtssSamples
     );
     updateBottomBoxContentsAndMaybeOpen(selectedTab, bottomBoxInfo);
   }
@@ -531,21 +535,29 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   getRightClickedCallNodeInfo(): null | {
     readonly thread: Thread;
     readonly threadsKey: ThreadsKey;
+    readonly previewFilteredCtssSamples: SamplesLikeTable;
     readonly callNodeInfo: CallNodeInfo;
     readonly callNodeIndex: IndexIntoCallNodeTable;
   } {
-    const { thread, threadsKey, callNodeInfo, rightClickedCallNodeIndex } =
-      this.props;
+    const {
+      thread,
+      threadsKey,
+      previewFilteredCtssSamples,
+      callNodeInfo,
+      rightClickedCallNodeIndex,
+    } = this.props;
 
     if (
       thread &&
       threadsKey !== null &&
+      previewFilteredCtssSamples !== null &&
       callNodeInfo &&
       rightClickedCallNodeIndex !== null
     ) {
       return {
         thread,
         threadsKey,
+        previewFilteredCtssSamples,
         callNodeInfo,
         callNodeIndex: rightClickedCallNodeIndex,
       };
@@ -887,6 +899,7 @@ export const CallNodeContextMenu = explicitConnect<
 
     let thread = null;
     let threadsKey = null;
+    let previewFilteredCtssSamples = null;
     let callNodeInfo = null;
     let rightClickedCallNodeIndex = null;
 
@@ -897,6 +910,8 @@ export const CallNodeContextMenu = explicitConnect<
 
       thread = selectors.getFilteredThread(state);
       threadsKey = rightClickedCallNodeInfo.threadsKey;
+      previewFilteredCtssSamples =
+        selectors.getPreviewFilteredCtssSamples(state);
       callNodeInfo = selectors.getCallNodeInfo(state);
       rightClickedCallNodeIndex = selectors.getRightClickedCallNodeIndex(state);
     }
@@ -904,6 +919,7 @@ export const CallNodeContextMenu = explicitConnect<
     return {
       thread,
       threadsKey,
+      previewFilteredCtssSamples,
       categories: getCategories(state),
       callNodeInfo,
       rightClickedCallNodeIndex,

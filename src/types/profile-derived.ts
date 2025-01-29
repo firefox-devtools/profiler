@@ -776,7 +776,6 @@ export type BottomBoxInfo = {
   sourceIndex: IndexIntoSourceTable | null;
   nativeSymbols: NativeSymbolInfo[];
   // Optional line number to scroll to in the source view.
-  // If not specified, the source view will scroll to the hottest line.
   scrollToLineNumber?: number;
   highlightLineNumber?: number;
 };
