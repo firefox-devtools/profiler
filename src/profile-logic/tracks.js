@@ -1174,7 +1174,7 @@ const AUDIO_THREAD_SAMPLE_SCORE_BOOST_FACTOR = 40;
 export function computeThreadActivityScore(
   profile: Profile,
   thread: RawThread,
-  maxCpuDeltaPerMs: number
+  referenceCPUDeltaPerMs: number
 ): ThreadActivityScore {
   const isEssentialFirefoxThread = _isEssentialFirefoxThread(thread);
   const isInParentProcess = thread.processType === 'default';
@@ -1183,7 +1183,7 @@ export function computeThreadActivityScore(
   const sampleScore = _computeThreadSampleScore(
     profile,
     thread,
-    maxCpuDeltaPerMs
+    referenceCPUDeltaPerMs
   );
   const boostedSampleScore = isInterestingEvenWithMinimalActivity
     ? sampleScore * AUDIO_THREAD_SAMPLE_SCORE_BOOST_FACTOR
@@ -1227,7 +1227,7 @@ function _isFirefoxMediaThreadWhichIsUsuallyIdle(thread: RawThread): boolean {
 function _computeThreadSampleScore(
   { meta }: Profile,
   { samples, stackTable, frameTable }: RawThread,
-  maxCpuDeltaPerMs: number
+  referenceCPUDeltaPerMs: number
 ): number {
   if (meta.sampleUnits && samples.threadCPUDelta) {
     // Sum up all CPU deltas in this thread, to compute a total
@@ -1256,8 +1256,8 @@ function _computeThreadSampleScore(
     (stack) =>
       stack !== null && derivedStackTable.category[stack] !== idleCategoryIndex
   ).length;
-  const maxCpuDeltaPerInterval = maxCpuDeltaPerMs * meta.interval;
-  return nonIdleSampleCount * maxCpuDeltaPerInterval;
+  const referenceCPUDeltaPerInterval = referenceCPUDeltaPerMs * meta.interval;
+  return nonIdleSampleCount * referenceCPUDeltaPerInterval;
 }
 
 function _findDefaultThread(threads: RawThread[]): RawThread | null {

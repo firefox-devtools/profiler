@@ -5260,7 +5260,7 @@ Object {
       null,
       null,
     ],
-    "threadCPUDelta": undefined,
+    "threadCPURatio": undefined,
     "threadId": undefined,
     "time": Array [
       0,

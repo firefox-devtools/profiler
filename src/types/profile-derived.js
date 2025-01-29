@@ -126,10 +126,9 @@ export type SamplesTable = {|
   // See the WeightType type for more information.
   weight: null | number[],
   weightType: WeightType,
-  // The elapsed CPU delta since the previous sample, in the unit given by
-  // profile.meta.sampleUnits.threadCPUDelta. Absent in profiles without CPU
-  // delta information.
-  threadCPUDelta?: Array<number | null>,
+  // The CPU ratio, between 0 and 1, over the time between the previous sample
+  // and this sample.
+  threadCPURatio?: Float64Array,
   // This property isn't present in normal threads. However it's present for
   // merged threads, so that we know the origin thread for these samples.
   threadId?: Tid[],
