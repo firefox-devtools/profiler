@@ -2632,6 +2632,23 @@ CallTree {
     },
   },
   "_isHighPrecision": false,
+  "_previewFilteredCtssSamples": Object {
+    "eventDelay": Array [
+      0,
+      0,
+    ],
+    "length": 2,
+    "stack": Array [
+      6,
+      6,
+    ],
+    "time": Array [
+      4,
+      5,
+    ],
+    "weight": null,
+    "weightType": "samples",
+  },
   "_rootTotalSummary": 2,
   "_roots": Array [
     0,
