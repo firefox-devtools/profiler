@@ -349,10 +349,6 @@ export class CallTree {
     this._weightType = weightType;
   }
 
-  getPreviewFilteredCtssSamples(): SamplesLikeTable {
-    return this._previewFilteredCtssSamples;
-  }
-
   getRoots() {
     return this._roots;
   }
@@ -579,7 +575,8 @@ export class CallTree {
     return getBottomBoxInfoForCallNode(
       callNodeIndex,
       this._callNodeInfo,
-      this._thread
+      this._thread,
+      this._previewFilteredCtssSamples
     );
   }
 

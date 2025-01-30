@@ -595,26 +595,39 @@ const sourceView: Reducer<SourceViewState> = (
 const assemblyView: Reducer<AssemblyViewState> = (
   state = {
     scrollGeneration: 0,
-    nativeSymbol: null,
+    currentNativeSymbolEntryIndex: null,
     allNativeSymbolsForInitiatingCallNode: [],
+    allNativeSymbolWeightsForInitiatingCallNode: [],
     isOpen: false,
   },
   action
 ) => {
   switch (action.type) {
     case 'UPDATE_BOTTOM_BOX': {
+      const {
+        initialNativeSymbolEntryIndex,
+        allNativeSymbolsForInitiatingCallNode,
+        allNativeSymbolWeightsForInitiatingCallNode,
+        shouldOpenAssemblyView,
+      } = action;
       return {
         scrollGeneration: state.scrollGeneration + 1,
-        nativeSymbol: action.nativeSymbol,
-        allNativeSymbolsForInitiatingCallNode:
-          action.allNativeSymbolsForInitiatingCallNode,
-        isOpen: state.isOpen || action.shouldOpenAssemblyView,
+        currentNativeSymbolEntryIndex: initialNativeSymbolEntryIndex,
+        allNativeSymbolsForInitiatingCallNode,
+        allNativeSymbolWeightsForInitiatingCallNode,
+        isOpen: state.isOpen || shouldOpenAssemblyView,
       };
     }
     case 'OPEN_ASSEMBLY_VIEW': {
       return {
         ...state,
         isOpen: true,
+      };
+    }
+    case 'CHANGE_ASSEMBLY_VIEW_NATIVE_SYMBOL_ENTRY_INDEX': {
+      return {
+        ...state,
+        currentNativeSymbolEntryIndex: action.entryIndex,
       };
     }
     case 'CLOSE_ASSEMBLY_VIEW': {
