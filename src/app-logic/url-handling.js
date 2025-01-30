@@ -607,7 +607,9 @@ export function stateFromLocation(
     isOpen: false,
     scrollGeneration: 0,
     nativeSymbol: null,
+    currentNativeSymbolEntryIndex: null,
     allNativeSymbolsForInitiatingCallNode: [],
+    allNativeSymbolWeightsForInitiatingCallNode: [],
   };
   const isBottomBoxOpenPerPanel = {};
   tabSlugs.forEach((tabSlug) => (isBottomBoxOpenPerPanel[tabSlug] = false));

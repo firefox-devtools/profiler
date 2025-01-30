@@ -1981,23 +1981,49 @@ export function changeTableViewOptions(
   };
 }
 
+function _findIndexOfMaxValue(arr: number[]): number {
+  if (arr.length === 0) {
+    return -1;
+  }
+
+  let indexOfMaxValue = 0;
+  let maxValue = arr[0];
+  for (let i = 1; i < arr.length; i++) {
+    const val = arr[i];
+    if (val > maxValue) {
+      indexOfMaxValue = i;
+      maxValue = val;
+    }
+  }
+  return indexOfMaxValue;
+}
+
 export function updateBottomBoxContentsAndMaybeOpen(
   currentTab: TabSlug,
-  { libIndex, sourceFile, nativeSymbols }: BottomBoxInfo
+  bottomBoxInfo: BottomBoxInfo
 ): Action {
-  // TODO: If the set has more than one element, pick the native symbol with
-  // the highest total sample count
-  const nativeSymbol = nativeSymbols.length !== 0 ? nativeSymbols[0] : null;
+  const {
+    libIndex,
+    sourceFile,
+    nativeSymbols,
+    nativeSymbolWeightsAtOpeningTime,
+  } = bottomBoxInfo;
+  const haveSourceFile = sourceFile !== null;
+  const haveNativeSymbol = nativeSymbols.length !== 0;
 
   return {
     type: 'UPDATE_BOTTOM_BOX',
     libIndex,
     sourceFile,
-    nativeSymbol,
+    initialNativeSymbolEntryIndex: haveNativeSymbol
+      ? _findIndexOfMaxValue(nativeSymbolWeightsAtOpeningTime)
+      : null,
     allNativeSymbolsForInitiatingCallNode: nativeSymbols,
+    allNativeSymbolWeightsForInitiatingCallNode:
+      nativeSymbolWeightsAtOpeningTime,
     currentTab,
-    shouldOpenBottomBox: sourceFile !== null || nativeSymbol !== null,
-    shouldOpenAssemblyView: sourceFile === null && nativeSymbol !== null,
+    shouldOpenBottomBox: haveSourceFile || haveNativeSymbol,
+    shouldOpenAssemblyView: !haveSourceFile && haveNativeSymbol,
   };
 }
 
