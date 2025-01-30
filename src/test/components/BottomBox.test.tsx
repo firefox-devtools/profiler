@@ -85,7 +85,7 @@ describe('BottomBox', () => {
       );
 
     const { profile } = getProfileFromTextSamples(`
-      A[file:hg:hg.mozilla.org/mozilla-central:${filepath}:${revision}][line:4][address:30][sym:Asym:20:1a][lib:libA.so]
+      A[file:hg:hg.mozilla.org/mozilla-central:${filepath}:${revision}][line:4][address:30][sym:Asym:20:1a][lib:libA.so]                                                                                                 A[file:hg:hg.mozilla.org/mozilla-central:${filepath}:${revision}][line:4][address:70][sym:A2sym:60:1a][lib:libA.so]
       B[file:git:github.com/rust-lang/rust:library/std/src/sys/unix/thread.rs:53cb7b09b00cbea8754ffb78e7e3cb521cb8af4b]
       C[lib:libC.so][file:s3:gecko-generated-sources:a5d3747707d6877b0e5cb0a364e3cb9fea8aa4feb6ead138952c2ba46d41045297286385f0e0470146f49403e46bd266e654dfca986de48c230f3a71c2aafed4/ipc/ipdl/PBackgroundChild.cpp:]
       D[lib:libD.so]
@@ -179,5 +179,56 @@ describe('BottomBox', () => {
     fireFullClick(asmViewHideButton);
 
     expect(assemblyView()).not.toBeInTheDocument();
+  });
+
+  it('should navigate between symbols using prev/next buttons', async () => {
+    const { sourceView, assemblyView } = setup();
+
+    const frameElement = screen.getByRole('treeitem', { name: /^A/ });
+
+    fireFullClick(frameElement);
+    fireFullClick(frameElement, { detail: 2 });
+    expect(sourceView()).toBeInTheDocument();
+
+    const asmViewShowButton = ensureExists(
+      document.querySelector('.bottom-assembly-button')
+    ) as HTMLElement;
+    fireFullClick(asmViewShowButton);
+
+    expect(assemblyView()).toBeInTheDocument();
+
+    // Verify we're showing "1 of 2"
+    const titleTrailer = await screen.findByText('1 of 2');
+    expect(titleTrailer).toBeInTheDocument();
+
+    // Find the prev and next buttons
+    const prevButton = ensureExists(
+      document.querySelector('.bottom-prev-button')
+    ) as HTMLButtonElement;
+    const nextButton = ensureExists(
+      document.querySelector('.bottom-next-button')
+    ) as HTMLButtonElement;
+
+    // Initially, prev should be disabled and next should be enabled
+    expect(prevButton).toBeDisabled();
+    expect(nextButton).toBeEnabled();
+
+    // Click next to go to symbol 2
+    fireFullClick(nextButton);
+
+    // Now we should see "2 of 2"
+    expect(await screen.findByText('2 of 2')).toBeInTheDocument();
+
+    // Now prev should be enabled and next should be disabled
+    expect(prevButton).toBeEnabled();
+    expect(nextButton).toBeDisabled();
+
+    // Click prev to go back to symbol 1
+    fireFullClick(prevButton);
+
+    // We should be back to "1 of 2"
+    expect(await screen.findByText('1 of 2')).toBeInTheDocument();
+    expect(prevButton).toBeDisabled();
+    expect(nextButton).toBeEnabled();
   });
 });
