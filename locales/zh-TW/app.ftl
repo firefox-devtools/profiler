@@ -547,6 +547,11 @@ PanelSearch--search-field-hint = 您知道可以使用半形逗號（,）搜尋�
 
 ## Profile Name Button
 
+ProfileName--edit-profile-name-button =
+    .title = 編輯效能檢測檔名稱
+ProfileName--edit-profile-name-input =
+    .title = 編輯效能檢測檔名稱
+    .aria-label = 效能檢測檔名稱
 
 ## Profile Delete Button
 
