@@ -585,20 +585,21 @@ const sourceView: Reducer<SourceViewState> = (
 const assemblyView: Reducer<AssemblyViewState> = (
   state = {
     scrollGeneration: 0,
-    nativeSymbol: null,
-    allNativeSymbolsForInitiatingCallNode: [],
+    nativeSymbols: [],
+    currentNativeSymbol: null,
     isOpen: false,
   },
   action
 ) => {
   switch (action.type) {
     case 'UPDATE_BOTTOM_BOX': {
+      const { nativeSymbols, currentNativeSymbol, shouldOpenAssemblyView } =
+        action;
       return {
         scrollGeneration: state.scrollGeneration + 1,
-        nativeSymbol: action.nativeSymbol,
-        allNativeSymbolsForInitiatingCallNode:
-          action.allNativeSymbolsForInitiatingCallNode,
-        isOpen: state.isOpen || action.shouldOpenAssemblyView,
+        nativeSymbols,
+        currentNativeSymbol,
+        isOpen: state.isOpen || shouldOpenAssemblyView,
       };
     }
     case 'OPEN_ASSEMBLY_VIEW': {
