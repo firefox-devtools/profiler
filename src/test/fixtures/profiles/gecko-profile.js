@@ -250,7 +250,7 @@ export function createGeckoProfile(): GeckoProfile {
   const parentProcessPages = [
     {
       tabID: tabID,
-      innerWindowID: 111111,
+      innerWindowID: 1,
       url: 'https://mozilla.org/',
       embedderInnerWindowID: 0,
     },
@@ -994,8 +994,8 @@ function _createGeckoThreadWithJsTimings(name: string): GeckoThread {
         [1, false, 0, null, null, null, null, null], // 1: 0x100000f84
         [2, false, 0, null, null, null, null, null], // 2: 0x100001a45
         [3, false, 0, null, 4391, null, 0, 0], // 3: Startup::XRE_Main, line 4391, category 16
-        [7, false, 0, 6, 1, null, null, null], // 4: javascriptOne, implementation 'baseline', line 1
-        [8, false, 0, 6, 2, null, null, null], // 5: javascriptTwo, implementation 'baseline', line 2
+        [7, false, 1, 6, 1, null, null, null], // 4: javascriptOne, implementation 'baseline', line 1
+        [8, false, 1, 6, 2, null, null, null], // 5: javascriptTwo, implementation 'baseline', line 2
         [9, false, 0, null, null, null, null, null], // 6: 0x10000f0f0
         [10, false, 0, null, null, null, null, null], // 7: 0x100fefefe
         [11, false, 0, null, 3, null, null, null], // 8: javascriptThree, implementation null, line 3
@@ -1011,7 +1011,7 @@ function _createGeckoThreadWithJsTimings(name: string): GeckoThread {
       'Reflow', // 5
       'baseline', // 6
       'javascriptOne (http://js.com/foobar:1:1)', // 7
-      'javascriptTwo (http://js.com/foobar:2:2)', // 8
+      'javascriptTwo (self-hosted:2:2)', // 8
       '0x10000f0f0', // 9
       '0x100fefefe', // 10
       'javascriptThree (http://js.com/foobar:3:3)', // 11
