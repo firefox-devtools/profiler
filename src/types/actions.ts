@@ -352,6 +352,10 @@ type ProfileAction =
       readonly type: 'OPEN_ASSEMBLY_VIEW';
     }
   | {
+      readonly type: 'CHANGE_ASSEMBLY_VIEW_NATIVE_SYMBOL_ENTRY_INDEX';
+      readonly entryIndex: number;
+    }
+  | {
       readonly type: 'CLOSE_ASSEMBLY_VIEW';
     }
   | {
