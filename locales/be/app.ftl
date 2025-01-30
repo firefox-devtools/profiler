@@ -161,6 +161,21 @@ CallTree--inlining-badge = (убудаваны)
 
 CallTreeSidebar--select-a-node = Выберыце вузел, каб паказаць інфармацыю аб ім.
 
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
+
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
@@ -593,6 +608,9 @@ NumberFormat--short-date = { SHORTDATE($date) }
 
 PanelSearch--search-field-hint = Вы ведаеце, што для пошуку па некалькіх тэрмінах можна выкарыстоўваць коску (,)?
 
+## Profile Name Button
+
+
 ## Profile Delete Button
 
 # This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
@@ -712,6 +730,12 @@ TabBar--marker-chart-tab = Маркерная дыяграма
 TabBar--marker-table-tab = Маркерная табліца
 TabBar--network-tab = Сетка
 TabBar--js-tracer-tab = JS Tracer
+
+## TabSelectorMenu
+## This component is a context menu that's opened when you click on the root
+## range at the top left corner for profiler analysis view. It's used to switch
+## between tabs that were captured in the profile.
+
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
