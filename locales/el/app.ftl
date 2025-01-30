@@ -635,6 +635,11 @@ PanelSearch--search-field-hint = Ξέρατε ότι μπορείτε να χρ�
 
 ## Profile Name Button
 
+ProfileName--edit-profile-name-button =
+    .title = Επεξεργασία ονόματος προφίλ
+ProfileName--edit-profile-name-input =
+    .title = Επεξεργασία ονόματος προφίλ
+    .aria-label = Όνομα προφίλ
 
 ## Profile Delete Button
 
