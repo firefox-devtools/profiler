@@ -24,7 +24,7 @@ import { changeSelectedThreads } from 'firefox-profiler/actions/profile-view';
 
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type {
-  Thread,
+  RawThread,
   ThreadIndex,
   InitialSelectedTrackReference,
   OriginsTimeline,
@@ -47,7 +47,7 @@ type StateProps = {|
   +panelLayoutGeneration: number,
   +originsTimeline: OriginsTimeline,
   +zeroAt: Milliseconds,
-  +threads: Thread[],
+  +threads: RawThread[],
 |};
 
 type DispatchProps = {|

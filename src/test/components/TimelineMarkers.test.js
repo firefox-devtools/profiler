@@ -179,12 +179,12 @@ describe('TimelineMarkers', function () {
     window.devicePixelRatio = 1;
 
     const { container } = setupWithMarkers({ rangeStart: 0, rangeEnd: 15 }, [
-      ['DOMEvent', 0, 10],
-      ['DOMEvent', 0, 10],
-      ['DOMEvent', 5, 15],
-      ['Paint', 2, 13],
-      ['Navigation', 2, 6],
-      ['Layout', 6, 8],
+      ['DOMEvent', 0, 10, { type: 'tracing', category: 'JS' }],
+      ['DOMEvent', 0, 10, { type: 'tracing', category: 'JS' }],
+      ['DOMEvent', 5, 15, { type: 'DOMEvent', latency: 3.7, eventType: 'msg' }],
+      ['Paint', 2, 13, { type: 'tracing', category: 'Paint' }],
+      ['Navigation', 2, 6, { type: 'tracing', category: 'Navigation' }],
+      ['Layout', 6, 8, { type: 'tracing', category: 'Layout' }],
       // These 2 will be ignored.
       ['CC', 0, 5],
       ['GCMajor', 5, 10],
@@ -205,7 +205,7 @@ describe('TimelineMarkers', function () {
       { rangeStart: 0, rangeEnd: 15, component: TimelineMarkersMemory },
       [
         // The first one will be ignored.
-        ['DOMEvent', 0, 10],
+        ['DOMEvent', 0, 10, { type: 'tracing', category: 'JS' }],
         ['CC', 0, 5],
         ['GCMajor', 5, 10],
       ]
@@ -253,7 +253,7 @@ describe('TimelineMarkers', function () {
       { rangeStart: 0, rangeEnd: 10 },
       [
         ['DOMEvent', 0, 3],
-        ['Navigation', 6, 10],
+        ['Load', 6, 10, { type: 'tracing', category: 'Navigation' }],
       ]
     );
 
@@ -300,7 +300,7 @@ describe('TimelineMarkers', function () {
         { rangeStart: 0, rangeEnd: 10 },
         [
           ['DOMEvent', 0, 3],
-          ['Navigation', 6, 10],
+          ['Load', 6, 10, { type: 'tracing', category: 'Navigation' }],
         ]
       );
 
@@ -315,7 +315,7 @@ describe('TimelineMarkers', function () {
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
       clickOnMenuItem('Copy description');
-      expect(copy).toHaveBeenLastCalledWith('Navigation');
+      expect(copy).toHaveBeenLastCalledWith('Load');
 
       expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 

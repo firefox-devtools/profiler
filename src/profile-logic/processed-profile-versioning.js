@@ -21,7 +21,7 @@ import { StringTable } from '../utils/string-table';
 import { timeCode } from '../utils/time-code';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 import { coerce } from '../utils/flow';
-import type { SerializableProfile } from 'firefox-profiler/types';
+import type { Profile } from 'firefox-profiler/types';
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -30,12 +30,11 @@ const UNANNOTATED_VERSION = 0;
 /**
  * Upgrades the supplied profile to the current version, by mutating |profile|.
  * Throws an exception if the profile is too new. If the profile does not appear
- * to be a processed profile, then return null. The profile provided is the
- * "serialized" form of a processed profile, i.e. stringArray instead of stringTable.
+ * to be a processed profile, then return null.
  */
 export function attemptToUpgradeProcessedProfileThroughMutation(
   profile: mixed
-): SerializableProfile | null {
+): Profile | null {
   if (!profile || typeof profile !== 'object') {
     return null;
   }
@@ -70,7 +69,7 @@ export function attemptToUpgradeProcessedProfileThroughMutation(
       : UNANNOTATED_VERSION;
 
   if (profileVersion === PROCESSED_PROFILE_VERSION) {
-    return coerce<MixedObject, SerializableProfile>(profile);
+    return coerce<MixedObject, Profile>(profile);
   }
 
   if (profileVersion > PROCESSED_PROFILE_VERSION) {
@@ -92,7 +91,7 @@ export function attemptToUpgradeProcessedProfileThroughMutation(
     }
   }
 
-  const upgradedProfile = coerce<MixedObject, SerializableProfile>(profile);
+  const upgradedProfile = coerce<MixedObject, Profile>(profile);
   upgradedProfile.meta.preprocessedProfileVersion = PROCESSED_PROFILE_VERSION;
 
   return upgradedProfile;
@@ -1640,27 +1639,26 @@ const _upgraders = {
           // eventType is in the payload as well.
         ],
       },
+
+      // The following three schemas should have just been a single schema named
+      // "tracing". They are kept here for historical accuracy.
+      // The upgrader for version 52 adds the missing "tracing" schema.
       {
-        // TODO - Note that this marker is a "tracing" marker currently.
-        // See issue #2749
         name: 'Paint',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'category', label: 'Type', format: 'string' }],
       },
       {
-        // TODO - Note that this marker is a "tracing" marker currently.
-        // See issue #2749
         name: 'Navigation',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'category', label: 'Type', format: 'string' }],
       },
       {
-        // TODO - Note that this marker is a "tracing" marker currently.
-        // See issue #2749
         name: 'Layout',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'category', label: 'Type', format: 'string' }],
       },
+
       {
         name: 'IPC',
         tooltipLabel: 'IPC — {marker.data.niceDirection}',
@@ -1676,6 +1674,14 @@ const _upgraders = {
         ],
       },
       {
+        // An unused schema for RefreshDriverTick markers.
+        // This schema is not consistent with what post-schema Firefox would
+        // output. Firefox (as of Jan 2025) is still using Text markers and does
+        // not have a RefreshDriverTick schema. Furthermore, upgraded profiles
+        // which get this schema do not have any { type: 'RefreshDriverTick' }
+        // markers - in the past they picked up this schema due to a compat hack,
+        // but this hack is now removed. So this schema is unused. It is kept
+        // here for historical accuracy.
         name: 'RefreshDriverTick',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'name', label: 'Tick Reasons', format: 'string' }],
@@ -2258,7 +2264,7 @@ const _upgraders = {
     // The 'sanitized-string' marker schema format type has been added.
   },
   [50]: (_) => {
-    // The serialized format can now optionally store sample and counter sample
+    // The format can now optionally store sample and counter sample
     // times as time deltas instead of absolute timestamps to reduce the JSON size.
   },
   [51]: (_) => {
@@ -2269,6 +2275,102 @@ const _upgraders = {
     // No upgrade is needed, as older versions of firefox would not generate
     // marker data with the new field types data, and no modification is needed in the
     // frontend to display older formats.
+  },
+  [52]: (profile) => {
+    // This version simplifies how markers are mapped to their schema.
+    // The schema is now purely determined by data.type. The marker's name is ignored.
+    // If a marker has a null data, then it has no schema.
+    //
+    // In earlier versions, there were special cases for mapping markers with type
+    // "tracing" and "Text", and for markers with a null data property. These
+    // special cases have been removed.
+    //
+    // The upgrader for version 52 makes it so that existing profiles appear the
+    // same with the simplified logic. Specifically:
+    //  - Some old profiles have markers with data.type === 'tracing' but no schema
+    //    with the name 'tracing'. To ensure that the tracing markers from these
+    //    profile still show up in the 'timeline-overview' area, this upgrader adds
+    //    a schema to such profiles.
+    //  - Some old profiles have CC markers which only showed up in the memory track
+    //    because of special treatment of 'tracing' markers - the markers would have
+    //    data.type === 'tracing' and data.category === 'CC', and there would be a
+    //    'CC' schema with 'timeline-memory'. This upgrader moves these tracing CC
+    //    markers to a new 'tracingCCFrom52Upgrader' schema.
+    //
+    // Profiles from modern versions of Firefox already include a 'tracing' schema.
+    // And they don't use tracing markers for CC markers.
+
+    const schemaNames = new Set(profile.meta.markerSchema.map((s) => s.name));
+    const kTracingCCSchemaName = 'tracingCCFrom52Upgrader';
+    const shouldMigrateTracingCCMarkers = schemaNames.has('CC');
+    let hasTracingMarkers = false;
+    let hasMigratedTracingCCMarkers = false;
+    for (const thread of profile.threads) {
+      const { markers } = thread;
+      for (let i = 0; i < markers.length; i++) {
+        const data = markers.data[i];
+        if (data && data.type === 'tracing' && data.category) {
+          hasTracingMarkers = true;
+          if (shouldMigrateTracingCCMarkers && data.category === 'CC') {
+            data.type = kTracingCCSchemaName;
+            hasMigratedTracingCCMarkers = true;
+            if (data.interval) {
+              // Also delete the interval property. This is present on old
+              // profiles where marker phase information was represented in the
+              // payload, i.e. you'd have interval: "start" / "end" on the
+              // data object.
+              // Our kTracingCCSchemaName schema does not list the interval field,
+              // so we shouldn't have this field on the payload either.
+              delete data.interval;
+            }
+          }
+        }
+      }
+    }
+    if (hasTracingMarkers && !schemaNames.has('tracing')) {
+      // Make sure that tracing markers still show up in the timeline-overview area.
+      profile.meta.markerSchema.push({
+        name: 'tracing',
+        display: ['marker-chart', 'marker-table', 'timeline-overview'],
+        data: [{ key: 'category', label: 'Type', format: 'string' }],
+      });
+    }
+
+    if (hasMigratedTracingCCMarkers) {
+      // Add the kTracingCCSchemaName schema for migrated tracing CC markers, to
+      // make sure that these markers still show up in the timeline-memory area.
+      profile.meta.markerSchema.push({
+        name: kTracingCCSchemaName,
+        display: ['marker-chart', 'marker-table', 'timeline-memory'],
+        data: [{ key: 'category', label: 'Type', format: 'string' }],
+      });
+    }
+  },
+  [53]: (profile) => {
+    for (const thread of profile.threads) {
+      const { frameTable, stackTable } = thread;
+
+      // Best-effort fix for profiles missing frameTable.category, such as the
+      // ones generated by Lean before https://github.com/leanprover/lean4/pull/6363
+      if (!('category' in frameTable)) {
+        frameTable.category = [];
+        frameTable.subcategory = [];
+        for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
+          frameTable.category[frameIndex] = null;
+          frameTable.subcategory[frameIndex] = null;
+        }
+        for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+          const frameIndex = stackTable.frame[stackIndex];
+          frameTable.category[frameIndex] = stackTable.category[stackIndex];
+          frameTable.subcategory[frameIndex] =
+            stackTable.subcategory[stackIndex];
+        }
+      }
+
+      // Remove stackTable.category and stackTable.subcategory.
+      delete stackTable.category;
+      delete stackTable.subcategory;
+    }
   },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.

@@ -6,24 +6,27 @@
 import type {
   ScreenshotPayload,
   Profile,
-  Thread,
+  RawThread,
   ThreadIndex,
   Pid,
   GlobalTrack,
   LocalTrack,
   TrackIndex,
-  Counter,
+  RawCounter,
   Tid,
   TrackReference,
-  MarkerSchemaByName,
   TabID,
 } from 'firefox-profiler/types';
 
-import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
+import {
+  defaultThreadOrder,
+  getFriendlyThreadName,
+  computeStackTableFromRawStackTable,
+} from './profile-data';
 import { intersectSets, subtractSets } from '../utils/set';
+import { StringTable } from '../utils/string-table';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
-import { getMarkerSchemaName } from './marker-schema';
 
 export type TracksWithOrder = {|
   +globalTracks: GlobalTrack[],
@@ -258,8 +261,7 @@ export function initializeLocalTrackOrderByPid(
  */
 export function computeLocalTracksByPid(
   profile: Profile,
-  availableGlobalTracks: GlobalTrack[],
-  markerSchemaByName: MarkerSchemaByName
+  availableGlobalTracks: GlobalTrack[]
 ): Map<Pid, LocalTrack[]> {
   const localTracksByPid = new Map();
 
@@ -323,12 +325,8 @@ export function computeLocalTracksByPid(
       for (let i = 0; i < markers.length; ++i) {
         const markerNameIndex = markers.name[i];
         const markerData = markers.data[i];
-        const markerSchemaName = getMarkerSchemaName(
-          markerSchemaByName,
-          thread.stringTable.getString(markerNameIndex),
-          markerData
-        );
-        if (markerData && markerSchemaByName) {
+        const markerSchemaName = markerData ? markerData.type : null;
+        if (markerData && markerSchemaName) {
           const mapEntry = markerTracksBySchemaName.get(markerSchemaName);
           if (mapEntry && mapEntry.keys.every((k) => k in markerData)) {
             mapEntry.markerNames.add(markerNameIndex);
@@ -400,7 +398,7 @@ export function computeLocalTracksByPid(
  * localTracksByPid map.
  */
 export function addEventDelayTracksForThreads(
-  threads: Thread[],
+  threads: RawThread[],
   localTracksByPid: Map<Pid, LocalTrack[]>
 ): Map<Pid, LocalTrack[]> {
   const newLocalTracksByPid = new Map();
@@ -431,7 +429,7 @@ export function addEventDelayTracksForThreads(
  * localTracksByPid map.
  */
 export function addProcessCPUTracksForProcess(
-  counters: Counter[] | null,
+  counters: RawCounter[] | null,
   localTracksByPid: Map<Pid, LocalTrack[]>
 ): Map<Pid, LocalTrack[]> {
   if (counters === null) {
@@ -484,7 +482,7 @@ export function computeGlobalTracks(
     threadIndex++
   ) {
     const thread = profile.threads[threadIndex];
-    const { pid, markers, stringTable } = thread;
+    const { pid, markers, stringArray } = thread;
     if (thread.isMainThread) {
       // This is a main thread, a global track needs to be created or updated with
       // the main thread info.
@@ -519,6 +517,7 @@ export function computeGlobalTracks(
 
     // Check for screenshots.
     const ids: Set<string> = new Set();
+    const stringTable = StringTable.withBackingArray(stringArray);
     if (stringTable.hasString('CompositorScreenshot')) {
       const screenshotNameIndex = stringTable.indexForString(
         'CompositorScreenshot'
@@ -929,7 +928,7 @@ export function getVisibleThreads(
 
 export function getGlobalTrackName(
   globalTrack: GlobalTrack,
-  threads: Thread[]
+  threads: RawThread[]
 ): string {
   switch (globalTrack.type) {
     case 'process': {
@@ -979,8 +978,8 @@ export function getGlobalTrackName(
 
 export function getLocalTrackName(
   localTrack: LocalTrack,
-  threads: Thread[],
-  counters: Counter[]
+  threads: RawThread[],
+  counters: RawCounter[]
 ): string {
   switch (localTrack.type) {
     case 'thread':
@@ -1006,9 +1005,7 @@ export function getLocalTrackName(
     case 'power':
       return counters[localTrack.counterIndex].name;
     case 'marker':
-      return threads[localTrack.threadIndex].stringTable.getString(
-        localTrack.markerName
-      );
+      return threads[localTrack.threadIndex].stringArray[localTrack.markerName];
     default:
       throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
   }
@@ -1176,8 +1173,8 @@ const AUDIO_THREAD_SAMPLE_SCORE_BOOST_FACTOR = 40;
 // "interesting" threads to make sure we keep the most interesting ones.
 export function computeThreadActivityScore(
   profile: Profile,
-  thread: Thread,
-  maxCpuDeltaPerMs: number
+  thread: RawThread,
+  referenceCPUDeltaPerMs: number
 ): ThreadActivityScore {
   const isEssentialFirefoxThread = _isEssentialFirefoxThread(thread);
   const isInParentProcess = thread.processType === 'default';
@@ -1186,7 +1183,7 @@ export function computeThreadActivityScore(
   const sampleScore = _computeThreadSampleScore(
     profile,
     thread,
-    maxCpuDeltaPerMs
+    referenceCPUDeltaPerMs
   );
   const boostedSampleScore = isInterestingEvenWithMinimalActivity
     ? sampleScore * AUDIO_THREAD_SAMPLE_SCORE_BOOST_FACTOR
@@ -1200,7 +1197,7 @@ export function computeThreadActivityScore(
   };
 }
 
-function _isEssentialFirefoxThread(thread: Thread): boolean {
+function _isEssentialFirefoxThread(thread: RawThread): boolean {
   return (
     // Don't hide the main thread of the parent process.
     (thread.name === 'GeckoMain' &&
@@ -1211,7 +1208,7 @@ function _isEssentialFirefoxThread(thread: Thread): boolean {
   );
 }
 
-function _isFirefoxMediaThreadWhichIsUsuallyIdle(thread: Thread): boolean {
+function _isFirefoxMediaThreadWhichIsUsuallyIdle(thread: RawThread): boolean {
   // Detect media threads: they are usually very idle, but are interesting
   // as soon as there's at least one sample. They're present with the media
   // preset, but not usually captured otherwise.
@@ -1229,8 +1226,8 @@ function _isFirefoxMediaThreadWhichIsUsuallyIdle(thread: Thread): boolean {
 // number of non-idle samples.
 function _computeThreadSampleScore(
   { meta }: Profile,
-  { samples, stackTable }: Thread,
-  maxCpuDeltaPerMs: number
+  { samples, stackTable, frameTable }: RawThread,
+  referenceCPUDeltaPerMs: number
 ): number {
   if (meta.sampleUnits && samples.threadCPUDelta) {
     // Sum up all CPU deltas in this thread, to compute a total
@@ -1244,18 +1241,26 @@ function _computeThreadSampleScore(
   // This thread has no CPU delta information.
   // Compute a score based on non-idle samples, in the same
   // units as the cpu delta score.
+  const defaultCategory = meta.categories
+    ? meta.categories.findIndex((c) => c.color === 'grey')
+    : -1;
   const idleCategoryIndex = meta.categories
     ? meta.categories.findIndex((c) => c.name === 'Idle')
     : -1;
+  const derivedStackTable = computeStackTableFromRawStackTable(
+    stackTable,
+    frameTable,
+    defaultCategory
+  );
   const nonIdleSampleCount = samples.stack.filter(
     (stack) =>
-      stack !== null && stackTable.category[stack] !== idleCategoryIndex
+      stack !== null && derivedStackTable.category[stack] !== idleCategoryIndex
   ).length;
-  const maxCpuDeltaPerInterval = maxCpuDeltaPerMs * meta.interval;
-  return nonIdleSampleCount * maxCpuDeltaPerInterval;
+  const referenceCPUDeltaPerInterval = referenceCPUDeltaPerMs * meta.interval;
+  return nonIdleSampleCount * referenceCPUDeltaPerInterval;
 }
 
-function _findDefaultThread(threads: Thread[]): Thread | null {
+function _findDefaultThread(threads: RawThread[]): RawThread | null {
   if (threads.length === 0) {
     // Tests may have no threads.
     return null;
@@ -1289,7 +1294,7 @@ function _indexesAreValid(listLength: number, indexes: number[]) {
 export function getSearchFilteredGlobalTracks(
   tracks: GlobalTrack[],
   globalTrackNames: string[],
-  threads: Thread[],
+  threads: RawThread[],
   searchFilter: string
 ): Set<TrackIndex> | null {
   if (!searchFilter) {
@@ -1383,7 +1388,7 @@ export function getSearchFilteredGlobalTracks(
 export function getSearchFilteredLocalTracksByPid(
   localTracksByPid: Map<Pid, LocalTrack[]>,
   localTrackNamesByPid: Map<Pid, string[]>,
-  threads: Thread[],
+  threads: RawThread[],
   searchFilter: string
 ): Map<Pid, Set<TrackIndex>> | null {
   if (!searchFilter) {
@@ -1543,7 +1548,7 @@ export function getTrackReferenceFromTid(
   tid: Tid,
   globalTracks: GlobalTrack[],
   localTracksByPid: Map<Pid, LocalTrack[]>,
-  threads: Thread[]
+  threads: RawThread[]
 ): TrackReference | null {
   // First, check if it's a global track.
   for (

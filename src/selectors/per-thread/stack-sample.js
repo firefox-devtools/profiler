@@ -242,11 +242,10 @@ export function getStackAndSampleSelectorsPerThread(
       )
   );
 
-  const getSampleIndexToCallNodeIndexForPreviewFilteredThread: Selector<
+  const _getPreviewFilteredCtssSampleIndexToCallNodeIndex: Selector<
     Array<IndexIntoCallNodeTable | null>,
   > = createSelector(
-    (state) =>
-      threadSelectors.getPreviewFilteredSamplesForCallTree(state).stack,
+    (state) => threadSelectors.getPreviewFilteredCtssSamples(state).stack,
     (state) => getCallNodeInfo(state).getStackIndexToCallNodeIndex(),
     ProfileData.getSampleIndexToCallNodeIndex
   );
@@ -305,17 +304,10 @@ export function getStackAndSampleSelectorsPerThread(
   );
 
   const getFilteredCallNodeMaxDepthPlusOne: Selector<number> = createSelector(
-    threadSelectors.getFilteredSamplesForCallTree,
+    threadSelectors.getFilteredCtssSamples,
     getCallNodeInfo,
     ProfileData.computeCallNodeMaxDepthPlusOne
   );
-
-  const getPreviewFilteredCallNodeMaxDepthPlusOne: Selector<number> =
-    createSelector(
-      threadSelectors.getPreviewFilteredSamplesForCallTree,
-      getCallNodeInfo,
-      ProfileData.computeCallNodeMaxDepthPlusOne
-    );
 
   /**
    * When computing the call tree, a "samples" table is used, which
@@ -325,13 +317,13 @@ export function getStackAndSampleSelectorsPerThread(
    */
   const getWeightTypeForCallTree: Selector<WeightType> = createSelector(
     // The weight type is not changed by the filtering done on the profile.
-    threadSelectors.getUnfilteredSamplesForCallTree,
+    threadSelectors.getUnfilteredCtssSamples,
     (samples) => samples.weightType || 'samples'
   );
 
   const getCallTreeTimings: Selector<CallTree.CallTreeTimings> = createSelector(
-    threadSelectors.getPreviewFilteredSamplesForCallTree,
-    getSampleIndexToCallNodeIndexForPreviewFilteredThread,
+    threadSelectors.getPreviewFilteredCtssSamples,
+    _getPreviewFilteredCtssSampleIndexToCallNodeIndex,
     getCallNodeInfo,
     (samples, sampleIndexToCallNodeIndex, callNodeInfo) => {
       const callNodeLeafAndSummary = CallTree.computeCallNodeLeafAndSummary(
@@ -347,7 +339,7 @@ export function getStackAndSampleSelectorsPerThread(
   );
 
   const getCallTree: Selector<CallTree.CallTree> = createSelector(
-    threadSelectors.getPreviewFilteredThread,
+    threadSelectors.getFilteredThread,
     getCallNodeInfo,
     ProfileSelectors.getCategories,
     getCallTreeTimings,
@@ -357,21 +349,21 @@ export function getStackAndSampleSelectorsPerThread(
 
   const getSourceViewLineTimings: Selector<LineTimings> = createSelector(
     getSourceViewStackLineInfo,
-    threadSelectors.getPreviewFilteredSamplesForCallTree,
+    threadSelectors.getPreviewFilteredCtssSamples,
     getLineTimings
   );
 
   const getAssemblyViewAddressTimings: Selector<AddressTimings> =
     createSelector(
       getAssemblyViewStackAddressInfo,
-      threadSelectors.getPreviewFilteredSamplesForCallTree,
+      threadSelectors.getPreviewFilteredCtssSamples,
       getAddressTimings
     );
 
   const getTracedTiming: Selector<CallTree.CallTreeTimings | null> =
     createSelector(
-      threadSelectors.getPreviewFilteredSamplesForCallTree,
-      getSampleIndexToCallNodeIndexForPreviewFilteredThread,
+      threadSelectors.getPreviewFilteredCtssSamples,
+      _getPreviewFilteredCtssSampleIndexToCallNodeIndex,
       getCallNodeInfo,
       ProfileSelectors.getProfileInterval,
       (samples, sampleIndexToCallNodeIndex, callNodeInfo, interval) => {
@@ -408,8 +400,8 @@ export function getStackAndSampleSelectorsPerThread(
 
   const getStackTimingByDepth: Selector<StackTiming.StackTimingByDepth> =
     createSelector(
-      threadSelectors.getFilteredSamplesForCallTree,
-      getSampleIndexToCallNodeIndexForFilteredThread,
+      threadSelectors.getFilteredCtssSamples,
+      getSampleIndexToCallNodeIndexForFilteredThread, // Bug! #5327
       getCallNodeInfo,
       getFilteredCallNodeMaxDepthPlusOne,
       ProfileSelectors.getProfileInterval,
@@ -472,7 +464,6 @@ export function getStackAndSampleSelectorsPerThread(
     getTracedSelfAndTotalForSelectedCallNode,
     getStackTimingByDepth,
     getFilteredCallNodeMaxDepthPlusOne,
-    getPreviewFilteredCallNodeMaxDepthPlusOne,
     getFlameGraphTiming,
     getRightClickedCallNodeIndex,
   };

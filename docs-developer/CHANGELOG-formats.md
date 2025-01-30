@@ -6,6 +6,18 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 53
+
+The columns `category` and `subcategory` were removed from the `stackTable`, to reduce the file size of profiles. The information in these columns was fully redundant with the category information in the `frameTable`. A stack's category and subcategory are determined as follows: If the stack's frame has a non-null category, then that's the stack's category, and the frame's subcategory (or 0 if null) becomes the stack's subcategory. Otherwise, if the stack is not a root node, it inherits the category and subcategory of its prefix stack. Otherwise, it defaults to the defaultCategory, which is defined as the first category in `thread.meta.categories` whose color is `grey` - at least one such category is required to be present. And the subcategory defaults to zero - all categories are required to have a "default" subcategory as their first subcategory.
+
+The `frameTable`'s `category` column now becomes essential. It was already required in the previous profile version, but the UI would mostly work even if it wasn't present. There are some existing profiles in rotation which are missing this column in the `frameTable`. The 52->53 upgrader fixes such profiles up by inferring it from the information in the `stackTable`.
+
+### Version 52
+
+No format changes, but a front-end behavior change: The schema for a marker is now looked up purely based on its `data.type`. In the past there were some special cases when `data` was `null`, or when `data.type` was `tracing` or `Text`. These special cases have been removed. The new behavior is simpler and more predictable, and was probably what you expected anyway.
+
+This change came with a new version because we needed to upgrade old profiles from Firefox which were relying on the more complex behavior.
+
 ### Version 51
 
 Two new marker schema field format types have been added: `flow-id` and `terminating-flow-id`, with string index values (like `unique-string`).
@@ -13,7 +25,7 @@ An optional `isStackBased` boolean field has been added to the marker schema.
 
 ### Version 50
 
-The serialized format can now optionally store sample and counter sample times as time deltas instead of absolute timestamps to reduce the JSON size. The unserialized version is unchanged.
+The format can now optionally store sample and counter sample times as time deltas instead of absolute timestamps to reduce the JSON size.
 
 ### Version 49
 

@@ -5,7 +5,7 @@
 
 import {
   resourceTypes,
-  getEmptyStackTable,
+  getEmptyRawStackTable,
   shallowCloneFuncTable,
   shallowCloneNativeSymbolTable,
   shallowCloneFrameTable,
@@ -14,7 +14,7 @@ import { SymbolsNotFoundError } from './errors';
 
 import type {
   Profile,
-  Thread,
+  RawThread,
   ThreadIndex,
   IndexIntoFuncTable,
   IndexIntoFrameTable,
@@ -31,7 +31,8 @@ import type {
   LibSymbolicationRequest,
 } from './symbol-store';
 import { PathSet } from '../utils/path';
-import { updateThreadStacks } from './profile-data';
+import { StringTable } from '../utils/string-table';
+import { updateRawThreadStacks } from './profile-data';
 
 // Contains functions to symbolicate a profile.
 
@@ -265,7 +266,7 @@ function makeConsensusMap<K, V>(
  * Returns a map with one entry for each library resource.
  */
 function getThreadSymbolicationInfo(
-  thread: Thread,
+  thread: RawThread,
   libs: Lib[]
 ): ThreadSymbolicationInfo {
   const { frameTable, funcTable, nativeSymbols, resourceTable } = thread;
@@ -417,18 +418,18 @@ function finishSymbolicationForLib(
 //        - stack E' with frame 8
 //      - stack F with frame 5
 function _computeThreadWithAddedExpansionStacks(
-  thread: Thread,
+  thread: RawThread,
   shouldStacksWithThisOldFrameBeRemoved: Uint8Array,
   frameIndexToInlineExpansionFrames: Map<
     IndexIntoFrameTable,
     IndexIntoFrameTable[],
   >
-): Thread {
+): RawThread {
   if (frameIndexToInlineExpansionFrames.size === 0) {
     return thread;
   }
   const { stackTable } = thread;
-  const newStackTable = getEmptyStackTable();
+  const newStackTable = getEmptyRawStackTable();
   const oldStackToNewStack = new Int32Array(stackTable.length);
   for (let stack = 0; stack < stackTable.length; stack++) {
     const oldFrame = stackTable.frame[stack];
@@ -441,8 +442,6 @@ function _computeThreadWithAddedExpansionStacks(
       oldStackToNewStack[stack] = newPrefixOrMinusOne;
       continue;
     }
-    const category = stackTable.category[stack];
-    const subcategory = stackTable.subcategory[stack];
     let expansionFrames = frameIndexToInlineExpansionFrames.get(oldFrame);
     if (expansionFrames === undefined) {
       expansionFrames = [oldFrame];
@@ -457,14 +456,12 @@ function _computeThreadWithAddedExpansionStacks(
       const newStack = newStackTable.length;
       newStackTable.frame.push(frame);
       newStackTable.prefix.push(prefix);
-      newStackTable.category.push(category);
-      newStackTable.subcategory.push(subcategory);
       newStackTable.length++;
       prefix = newStack;
     }
     oldStackToNewStack[stack] = prefix ?? -1;
   }
-  return updateThreadStacks(thread, newStackTable, (oldStack) => {
+  return updateRawThreadStacks(thread, newStackTable, (oldStack) => {
     if (oldStack === null) {
       return null;
     }
@@ -478,9 +475,9 @@ function _computeThreadWithAddedExpansionStacks(
  * symbolicationSteps is used to create a new thread with the new symbols.
  */
 export function applySymbolicationSteps(
-  oldThread: Thread,
+  oldThread: RawThread,
   symbolicationSteps: SymbolicationStepInfo[]
-): { thread: Thread, oldFuncToNewFuncsMap: FuncToFuncsMap } {
+): { thread: RawThread, oldFuncToNewFuncsMap: FuncToFuncsMap } {
   const oldFuncToNewFuncsMap = new Map();
   const frameCount = oldThread.frameTable.length;
   const shouldStacksWithThisFrameBeRemoved = new Uint8Array(frameCount);
@@ -530,7 +527,7 @@ export function applySymbolicationSteps(
  * steps from multiple libraries have been processed. This can be much faster.
  */
 function _partiallyApplySymbolicationStep(
-  thread: Thread,
+  thread: RawThread,
   symbolicationStepInfo: SymbolicationStepInfo,
   oldFuncToNewFuncsMap: FuncToFuncsMap,
   shouldStacksWithThisFrameBeRemoved: Uint8Array,
@@ -538,13 +535,14 @@ function _partiallyApplySymbolicationStep(
     IndexIntoFrameTable,
     IndexIntoFrameTable[],
   >
-): Thread {
+): RawThread {
   const {
     frameTable: oldFrameTable,
     funcTable: oldFuncTable,
     nativeSymbols: oldNativeSymbols,
-    stringTable,
+    stringArray,
   } = thread;
+  const stringTable = StringTable.withBackingArray(stringArray);
   const { threadLibSymbolicationInfo, resultsForLib } = symbolicationStepInfo;
   const {
     resourceIndex,
@@ -851,7 +849,6 @@ function _partiallyApplySymbolicationStep(
     frameTable,
     funcTable,
     nativeSymbols,
-    stringTable,
   };
 
   // We have the finished new frameTable and new funcTable.

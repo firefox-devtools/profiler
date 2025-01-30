@@ -38,7 +38,6 @@ import {
   getRelevantPagesForActiveTab,
   getSymbolServerUrl,
   getActiveTabID,
-  getMarkerSchemaByName,
 } from 'firefox-profiler/selectors';
 import {
   getSelectedTab,
@@ -321,11 +320,7 @@ export function finalizeFullProfileView(
       tabFilter,
       tabToThreadIndexesMap
     );
-    const localTracksByPid = computeLocalTracksByPid(
-      profile,
-      globalTracks,
-      getMarkerSchemaByName(getState())
-    );
+    const localTracksByPid = computeLocalTracksByPid(profile, globalTracks);
 
     const legacyThreadOrder = getLegacyThreadOrder(getState());
     const globalTrackOrder = initializeGlobalTrackOrder(
@@ -402,7 +397,7 @@ export function finalizeFullProfileView(
         const thread = profile.threads[threadIndex];
         const { samples, jsAllocations, nativeAllocations } = thread;
         hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
-          hasUsefulSamples(table, thread)
+          hasUsefulSamples(table?.stack, thread)
         );
         if (hasSamples) {
           break;
@@ -1835,11 +1830,7 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
       tabID,
       tabToThreadIndexesMap
     );
-    const localTracksByPid = computeLocalTracksByPid(
-      profile,
-      globalTracks,
-      getMarkerSchemaByName(getState())
-    );
+    const localTracksByPid = computeLocalTracksByPid(profile, globalTracks);
 
     const legacyThreadOrder = getLegacyThreadOrder(getState());
     const globalTrackOrder = initializeGlobalTrackOrder(
@@ -1904,7 +1895,7 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
         const thread = profile.threads[threadIndex];
         const { samples, jsAllocations, nativeAllocations } = thread;
         hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
-          hasUsefulSamples(table, thread)
+          hasUsefulSamples(table?.stack, thread)
         );
         if (hasSamples) {
           break;

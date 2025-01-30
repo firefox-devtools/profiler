@@ -55,7 +55,7 @@ describe('CallTreeSidebar', function () {
       ).find((category) => category.name === 'Layout'),
       'Could not find Layout category.'
     );
-    const [{ frameTable, stackTable }] = profile.threads;
+    const [{ frameTable }] = profile.threads;
     const fakeC = layout.subcategories.length;
     layout.subcategories.push('FakeSubCategoryC');
     const fakeD = layout.subcategories.length;
@@ -65,8 +65,6 @@ describe('CallTreeSidebar', function () {
     // of the stacks.
     frameTable.subcategory[C] = fakeC;
     frameTable.subcategory[D] = fakeD;
-    stackTable.subcategory[C] = fakeC;
-    stackTable.subcategory[D] = fakeD;
 
     return result;
   }
@@ -135,7 +133,7 @@ describe('CallTreeSidebar', function () {
     // Create a weighted samples table with bytes.
     const [{ samples }] = profileWithDicts.profile.threads;
     samples.weightType = 'bytes';
-    samples.weight = samples.time.map((i) => i);
+    samples.weight = samples.stack.map((_stack, i) => i);
 
     const {
       selectNode,

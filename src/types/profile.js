@@ -5,7 +5,6 @@
 // @flow
 
 import type { Milliseconds, Address, Microseconds, Bytes } from './units';
-import type { StringTable } from '../utils/string-table';
 import type { MarkerPayload, MarkerSchema, MarkerFormatType } from './markers';
 import type { MarkerPhase, ProfilingLog } from './gecko-profile';
 
@@ -55,36 +54,9 @@ export type Pid = string;
  * We take advantage of the fact that many call stacks in the profile have a
  * shared prefix; storing these stacks as a tree saves a lot of space compared
  * to storing them as actual lists of frames.
- *
- * The category of a stack node is always non-null and is derived from a stack's
- * frame and its prefix. Frames can have null categories, stacks cannot. If a
- * stack's frame has a null category, the stack inherits the category of its
- * prefix stack. Root stacks whose frame has a null stack have their category
- * set to the "default category". (The default category is currently defined as
- * the category in the profile's category list whose color is "grey", and such
- * a category is required to be present.)
- *
- * You could argue that the stack table's category column is derived data and as
- * such doesn't need to be stored in the profile itself. This is true, but
- * storing this information in the stack table makes it a lot easier to carry
- * it through various transforms that we apply to threads.
- * For example, here's a case where a stack's category is not recoverable from
- * any other information in the transformed thread:
- * In the call path
- *   someJSFunction [JS] -> Node.insertBefore [DOM] -> nsAttrAndChildArray::InsertChildAt,
- * the stack node for nsAttrAndChildArray::InsertChildAt should inherit the
- * category DOM from its "Node.insertBefore" prefix stack. And it should keep
- * the DOM category even if you apply the "Merge node into calling function"
- * transform to Node.insertBefore. This transform removes the stack node
- * "Node.insertBefore" from the stackTable, so the information about the DOM
- * category would be lost if it wasn't inherited into the
- * nsAttrAndChildArray::InsertChildAt stack before transforms are applied.
  */
-export type StackTable = {|
+export type RawStackTable = {|
   frame: IndexIntoFrameTable[],
-  // Imported profiles may not have categories. In this case fill the array with 0s.
-  category: IndexIntoCategoryList[],
-  subcategory: IndexIntoSubcategoryListForCategory[],
   prefix: Array<IndexIntoStackTable | null>,
   length: number,
 |};
@@ -126,22 +98,6 @@ export type StackTable = {|
  */
 export type WeightType = 'samples' | 'tracing-ms' | 'bytes';
 
-type SamplesLikeTableShape = {
-  stack: Array<IndexIntoStackTable | null>,
-  time: Milliseconds[],
-  // An optional weight array. If not present, then the weight is assumed to be 1.
-  // See the WeightType type for more information.
-  weight: null | number[],
-  weightType: WeightType,
-  length: number,
-};
-
-export type SamplesLikeTable =
-  | SamplesLikeTableShape
-  | SamplesTable
-  | NativeAllocationsTable
-  | JsAllocationsTable;
-
 /**
  * The Gecko Profiler records samples of what function was currently being executed, and
  * the callstack that is associated with it. This is done at a fixed but configurable
@@ -149,7 +105,7 @@ export type SamplesLikeTable =
  * information that is needed to represent that sampled function. Most of the entries
  * are indices into other tables.
  */
-export type SamplesTable = {|
+export type RawSamplesTable = {|
   // Responsiveness is the older version of eventDelay. It injects events every 16ms.
   // This is optional because newer profiles don't have that field anymore.
   responsiveness?: Array<?Milliseconds>,
@@ -159,7 +115,9 @@ export type SamplesTable = {|
   // This is optional because older profiles didn't have that field.
   eventDelay?: Array<?Milliseconds>,
   stack: Array<IndexIntoStackTable | null>,
-  time: Milliseconds[],
+  time?: Milliseconds[],
+  // If the `time` column is not present, then the `timeDeltas` column must be present.
+  timeDeltas?: Milliseconds[],
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
   weight: null | number[],
@@ -169,6 +127,8 @@ export type SamplesTable = {|
   // It's landed in Firefox 86, and it is optional because older profile
   // versions may not have it or that feature could be disabled. No upgrader was
   // written for this change because it's a completely new data source.
+  // The first value is ignored - it's not meaningful because there is no previous
+  // sample.
   threadCPUDelta?: Array<number | null>,
   // This property isn't present in normal threads. However it's present for
   // merged threads, so that we know the origin thread for these samples.
@@ -226,18 +186,6 @@ export type BalancedNativeAllocationsTable = {|
 export type NativeAllocationsTable =
   | UnbalancedNativeAllocationsTable
   | BalancedNativeAllocationsTable;
-
-/**
- * This is the base abstract class that marker payloads inherit from. This probably isn't
- * used directly in profiler.firefox.com, but is provided here for mainly documentation
- * purposes.
- */
-export type ProfilerMarkerPayload = {
-  type: string,
-  startTime?: Milliseconds,
-  endTime?: Milliseconds,
-  stack?: Thread,
-};
 
 /**
  * Markers represent arbitrary events that happen within the browser. They have a
@@ -509,8 +457,9 @@ export type JsTracerTable = {|
   length: number,
 |};
 
-export type CounterSamplesTable = {|
-  time: Milliseconds[],
+export type RawCounterSamplesTable = {|
+  time?: Milliseconds[],
+  timeDeltas?: Milliseconds[],
   // The number of times the Counter's "number" was changed since the previous sample.
   // This property was mandatory until the format version 42, it was made optional in 43.
   number?: number[],
@@ -531,14 +480,14 @@ export type GraphColor =
   | 'teal'
   | 'yellow';
 
-export type Counter = {|
+export type RawCounter = {|
   name: string,
   category: string,
   description: string,
   color?: GraphColor,
   pid: Pid,
   mainThreadIndex: ThreadIndex,
-  samples: CounterSamplesTable,
+  samples: RawCounterSamplesTable,
 |};
 
 /**
@@ -634,10 +583,16 @@ export type ProcessType =
   | string;
 
 /**
- * Gecko has one or more processes. There can be multiple threads per processes. Each
- * thread has a unique set of tables for its data.
+ * The thread type. Threads are stored in an array in profile.threads.
+ *
+ * If a profile contains threads from different OS-level processes, all threads
+ * are flattened into the single threads array, and per-process information is
+ * duplicated on each thread. In the UI, we recover the process separation based
+ * on thread.pid.
+ *
+ * There is also a derived `Thread` type, see profile-derived.js.
  */
-export type Thread = {|
+export type RawThread = {|
   processType: ProcessType,
   processStartupTime: Milliseconds,
   processShutdownTime: Milliseconds | null,
@@ -658,15 +613,15 @@ export type Thread = {|
   isJsTracer?: boolean,
   pid: Pid,
   tid: Tid,
-  samples: SamplesTable,
+  samples: RawSamplesTable,
   jsAllocations?: JsAllocationsTable,
   nativeAllocations?: NativeAllocationsTable,
   markers: RawMarkerTable,
-  stackTable: StackTable,
+  stackTable: RawStackTable,
   frameTable: FrameTable,
   // Strings for profiles are collected into a single table, and are referred to by
   // their index by other tables.
-  stringTable: StringTable,
+  stringArray: string[],
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   nativeSymbols: NativeSymbolTable,
@@ -938,50 +893,12 @@ export type Profile = {|
   pages?: PageList,
   // The counters list is optional only because old profilers may not have them.
   // An upgrader could be written to make this non-optional.
-  counters?: Counter[],
+  counters?: RawCounter[],
   // The profilerOverhead list is optional only because old profilers may not
   // have them. An upgrader could be written to make this non-optional.
   // This is list because there is a profiler overhead per process.
   profilerOverhead?: ProfilerOverhead[],
-  threads: Thread[],
+  threads: RawThread[],
   profilingLog?: ProfilingLog,
   profileGatheringLog?: ProfilingLog,
-|};
-
-export type SerializableThread = {|
-  ...$Diff<Thread, { stringTable: StringTable, samples: SamplesTable }>,
-  stringArray: string[],
-  samples: SerializableSamplesTable,
-|};
-
-/**
- * Starting with version 50 of the processed format, the time column may
- * optionally be serialized as a timeDeltas column instead.
- * Both formats are supported for unserialization.
- */
-export type SerializableSamplesTable = {|
-  ...$Diff<SamplesTable, { time: Milliseconds[] }>,
-  time?: Milliseconds[],
-  timeDeltas?: Milliseconds[],
-|};
-
-export type SerializableCounterSamplesTable = {|
-  ...$Diff<CounterSamplesTable, { time: Milliseconds[] }>,
-  time?: Milliseconds[],
-  timeDeltas?: Milliseconds[],
-|};
-
-export type SerializableCounter = {|
-  ...$Diff<Counter, { samples: CounterSamplesTable }>,
-  samples: SerializableCounterSamplesTable,
-|};
-
-/**
- * The StringTable is a class, and is not serializable to JSON. This profile
- * variant is able to be based into JSON.stringify.
- */
-export type SerializableProfile = {|
-  ...$Diff<Profile, { threads: Thread[], counters?: Counter[] }>,
-  threads: SerializableThread[],
-  counters?: SerializableCounter[],
 |};
