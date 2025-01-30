@@ -44,11 +44,10 @@ import type {
   RawThread,
   RawCounter,
   ExtensionTable,
-  CategoryList,
   FrameTable,
   RawCounterSamplesTable,
   RawSamplesTable,
-  StackTable,
+  RawStackTable,
   RawMarkerTable,
   Lib,
   LibMapping,
@@ -619,44 +618,9 @@ function _processFrameTable(
  * Explicitly recreate the stack table here to help enforce our assumptions about types.
  * Also add a category column.
  */
-function _processStackTable(
-  geckoStackTable: GeckoStackStruct,
-  frameTable: FrameTable,
-  categories: CategoryList
-): StackTable {
-  // Compute a non-null category for every stack
-  const defaultCategory = categories.findIndex((c) => c.color === 'grey') || 0;
-  const categoryColumn = new Array(geckoStackTable.length);
-  const subcategoryColumn = new Array(geckoStackTable.length);
-  for (let stackIndex = 0; stackIndex < geckoStackTable.length; stackIndex++) {
-    const frameIndex = geckoStackTable.frame[stackIndex];
-    const frameCategory = frameTable.category[frameIndex];
-    const frameSubcategory = frameTable.subcategory[frameIndex];
-    let stackCategory;
-    let stackSubcategory;
-    if (frameCategory !== null) {
-      stackCategory = frameCategory;
-      stackSubcategory = frameSubcategory || 0;
-    } else {
-      const prefix = geckoStackTable.prefix[stackIndex];
-      if (prefix !== null) {
-        // Because of the structure of the stack table, prefix < stackIndex.
-        // So we've already computed the category for the prefix.
-        stackCategory = categoryColumn[prefix];
-        stackSubcategory = subcategoryColumn[prefix];
-      } else {
-        stackCategory = defaultCategory;
-        stackSubcategory = 0;
-      }
-    }
-    categoryColumn[stackIndex] = stackCategory;
-    subcategoryColumn[stackIndex] = stackSubcategory;
-  }
-
+function _processStackTable(geckoStackTable: GeckoStackStruct): RawStackTable {
   return {
     frame: geckoStackTable.frame,
-    category: categoryColumn,
-    subcategory: subcategoryColumn,
     prefix: geckoStackTable.prefix,
     length: geckoStackTable.length,
   };
@@ -954,7 +918,7 @@ function _processMarkerPayload(
   }
 }
 
-export function timeColumnToTimeDeltas(time: Milliseconds[]): Milliseconds[] {
+function _timeColumnToCompactTimeDeltas(time: Milliseconds[]): Milliseconds[] {
   const NS_PER_MS = 1000000;
 
   // For each timestamp in the time series, compute the delta to the previous
@@ -983,7 +947,7 @@ export function timeColumnToTimeDeltas(time: Milliseconds[]): Milliseconds[] {
 function _processSamples(geckoSamples: GeckoSampleStruct): RawSamplesTable {
   const samples: RawSamplesTable = {
     stack: geckoSamples.stack,
-    timeDeltas: timeColumnToTimeDeltas(geckoSamples.time),
+    timeDeltas: _timeColumnToCompactTimeDeltas(geckoSamples.time),
     weightType: 'samples',
     weight: null,
     length: geckoSamples.length,
@@ -1090,7 +1054,7 @@ function _processCounterSamples(
   geckoCounterSamples: GeckoCounterSamplesStruct
 ): RawCounterSamplesTable {
   return {
-    timeDeltas: timeColumnToTimeDeltas(geckoCounterSamples.time),
+    timeDeltas: _timeColumnToCompactTimeDeltas(geckoCounterSamples.time),
     number: geckoCounterSamples.number,
     count: geckoCounterSamples.count,
     length: geckoCounterSamples.length,
@@ -1170,7 +1134,7 @@ function _processThread(
   );
 
   const { libs, pausedRanges, meta } = processProfile;
-  const { categories, shutdownTime } = meta;
+  const { shutdownTime } = meta;
 
   const mutatedStringArray = thread.stringTable.slice();
   const stringTable = StringTable.withBackingArray(mutatedStringArray);
@@ -1189,11 +1153,7 @@ function _processThread(
     frameFuncs,
     frameAddresses
   );
-  const stackTable = _processStackTable(
-    geckoStackTable,
-    frameTable,
-    categories
-  );
+  const stackTable = _processStackTable(geckoStackTable);
   const { markers, jsAllocations, nativeAllocations } =
     _processMarkers(geckoMarkers);
   const samples = _processSamples(geckoSamples);

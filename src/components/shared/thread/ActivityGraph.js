@@ -53,7 +53,6 @@ export type Props = {|
     IndexIntoSamplesTable
   ) => number,
   +enableCPUUsage: boolean,
-  +maxThreadCPUDeltaPerMs: number,
   +implementationFilter: ImplementationFilter,
   +timelineType: TimelineType,
   +zeroAt: Milliseconds,
@@ -165,7 +164,6 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
       sampleIndexOffset,
       samplesSelectedStates,
       treeOrderSampleComparator,
-      maxThreadCPUDeltaPerMs,
       enableCPUUsage,
       implementationFilter,
       width,
@@ -199,7 +197,6 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
           passFillsQuerier={this._setFillsQuerier}
           onClick={this._onClick}
           enableCPUUsage={enableCPUUsage}
-          maxThreadCPUDeltaPerMs={maxThreadCPUDeltaPerMs}
           width={width}
           height={height}
         />

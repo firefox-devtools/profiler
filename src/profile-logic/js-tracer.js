@@ -5,7 +5,7 @@
 
 import {
   getEmptyFrameTable,
-  getEmptyStackTable,
+  getEmptyRawStackTable,
   getEmptySamplesTableWithEventDelay,
   getEmptyRawMarkerTable,
 } from './data-structures';
@@ -508,7 +508,7 @@ export function convertJsTracerToThreadWithoutSamples(
   // Create a new thread, with empty information, but preserve some of the existing
   // thread information.
   const frameTable = getEmptyFrameTable();
-  const stackTable = getEmptyStackTable();
+  const stackTable = getEmptyRawStackTable();
   const samples: RawSamplesTable = {
     ...getEmptySamplesTableWithEventDelay(),
     weight: [],
@@ -652,7 +652,6 @@ export function convertJsTracerToThreadWithoutSamples(
     // Each event gets a stack table entry.
     const stackIndex = stackTable.length++;
     stackTable.frame.push(frameIndex);
-    stackTable.category.push(otherCategory);
     stackTable.prefix.push(prefixIndex);
     stackMap.set(tracerEventIndex, stackIndex);
 

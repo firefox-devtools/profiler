@@ -90,6 +90,7 @@ declare class Window {
     platform: string,
   };
   postMessage: (message: any, targetOrigin: string) => void;
+  matchMedia: (matchMedia: string) => MediaQueryList;
 }
 
 declare var window: Window;

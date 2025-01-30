@@ -4,8 +4,8 @@
 // @flow
 import type {
   Profile,
-  StackTable,
   RawThread,
+  RawStackTable,
   IndexIntoFuncTable,
   IndexIntoStackTable,
   IndexIntoResourceTable,
@@ -688,8 +688,6 @@ async function processTracingEvents(
           frameTable.length = Math.max(frameTable.length, frameIndex + 1);
 
           stackTable.frame.push(frameIndex);
-          stackTable.category.push(category);
-          stackTable.subcategory.push(0);
           stackTable.prefix.push(prefixStackIndex);
           nodeIdToStackId.set(nodeIndex, stackTable.length++);
         }
@@ -909,7 +907,7 @@ function getImageSize(
  * For sanity, check that stacks are ordered where the prefix stack
  * always preceeds the current stack index in the StackTable.
  */
-function assertStackOrdering(stackTable: StackTable) {
+function assertStackOrdering(stackTable: RawStackTable) {
   const visitedStacks = new Set([null]);
   for (let i = 0; i < stackTable.length; i++) {
     if (!visitedStacks.has(stackTable.prefix[i])) {
