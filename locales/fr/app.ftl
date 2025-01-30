@@ -565,6 +565,11 @@ PanelSearch--search-field-hint = Saviez-vous que vous pouvez utiliser la virgule
 
 ## Profile Name Button
 
+ProfileName--edit-profile-name-button =
+    .title = Modifier le nom du profil
+ProfileName--edit-profile-name-input =
+    .title = Modifier le nom du profil
+    .aria-label = Nom du profil
 
 ## Profile Delete Button
 
