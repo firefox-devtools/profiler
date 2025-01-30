@@ -1473,22 +1473,24 @@ describe('getNativeSymbolsForCallNode', function () {
 
     // Both the call path [funA, funB] and the call path [funA, funB, funC] end
     // up at a call node with native symbol symB.
-    expect(
-      getNativeSymbolsForCallNode(
+    expect([
+      ...getNativeSymbolsForCallNode(
         ensureExists(ab),
         callNodeInfo,
         thread.stackTable,
-        thread.frameTable
-      )
-    ).toEqual([symB]);
-    expect(
-      getNativeSymbolsForCallNode(
+        thread.frameTable,
+        thread.samples
+      ).keys(),
+    ]).toEqual([symB]);
+    expect([
+      ...getNativeSymbolsForCallNode(
         ensureExists(abc),
         callNodeInfo,
         thread.stackTable,
-        thread.frameTable
-      )
-    ).toEqual([symB]);
+        thread.frameTable,
+        thread.samples
+      ).keys(),
+    ]).toEqual([symB]);
   });
 
   it('finds multiple symbols', function () {
@@ -1529,11 +1531,45 @@ describe('getNativeSymbolsForCallNode', function () {
           ensureExists(c),
           callNodeInfo,
           thread.stackTable,
-          thread.frameTable
-        )
+          thread.frameTable,
+          thread.samples
+        ).keys()
       )
     ).toEqual(new Set([symB, symD]));
   });
+
+  /*
+// todo: add tests with caller weight, non-inverted and inverted
+
+non-inverted, for A->B:
+A
+  B[sym1]
+  B[sym1]
+    C
+  B[sym2]
+    C
+      D
+  B[sym3]
+    E
+  B[sym1]
+    B[sym4]
+
+should get: sym1: 3, sym2: 1, sym3: 1, and no sym4
+
+inverted, for C<-B:
+A
+  B[sym1]
+    C
+  C
+    B[sym2]
+      C
+  B[sym3]
+  B[sym4]
+    B[sym1]
+      C
+
+should get: sym1: 1, sym2: 1, no sym3, and no sym4
+*/
 });
 
 describe('getNativeSymbolInfo', function () {

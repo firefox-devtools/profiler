@@ -8,20 +8,37 @@ import type {
   Thread,
   IndexIntoStackTable,
   IndexIntoCallNodeTable,
-  BottomBoxInfo,
   SamplesLikeTable,
+  BottomBoxInfo,
 } from 'firefox-profiler/types';
 import type { CallNodeInfo } from './call-node-info';
+import { getLineTimings, getStackLineInfoForCallNode } from './line-timings';
 import {
   getNativeSymbolInfo,
   getNativeSymbolsForCallNode,
 } from './profile-data';
-import { getLineTimings, getStackLineInfoForCallNode } from './line-timings';
 import { mapGetKeyWithMaxValue } from 'firefox-profiler/utils';
 import {
   getAddressTimings,
   getStackAddressInfoForCallNode,
 } from './address-timings';
+
+function _findIndexOfMaxValue(arr: number[]): number {
+  if (arr.length === 0) {
+    return -1;
+  }
+
+  let indexOfMaxValue = 0;
+  let maxValue = arr[0];
+  for (let i = 1; i < arr.length; i++) {
+    const val = arr[i];
+    if (val > maxValue) {
+      indexOfMaxValue = i;
+      maxValue = val;
+    }
+  }
+  return indexOfMaxValue;
+}
 
 /**
  * Calculate the BottomBoxInfo for a call node, i.e. information about which
@@ -37,14 +54,8 @@ export function getBottomBoxInfoForCallNode(
   thread: Thread,
   samples: SamplesLikeTable
 ): BottomBoxInfo {
-  const {
-    stackTable,
-    frameTable,
-    funcTable,
-    stringTable,
-    resourceTable,
-    nativeSymbols,
-  } = thread;
+  const { stackTable, frameTable, funcTable, stringTable, resourceTable } =
+    thread;
 
   const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
   const sourceIndex = funcTable.source[funcIndex];
@@ -53,27 +64,34 @@ export function getBottomBoxInfoForCallNode(
     resource !== -1 && resourceTable.type[resource] === resourceTypes.library
       ? resourceTable.lib[resource]
       : null;
-  const nativeSymbolsForCallNode = getNativeSymbolsForCallNode(
+  const nativeSymbolsWithWeight = getNativeSymbolsForCallNode(
     callNodeIndex,
     callNodeInfo,
     stackTable,
-    frameTable
+    frameTable,
+    samples
   );
 
-  // If we have at least one native symbol to show assembly for, pick
-  // the first one arbitrarily.
-  // TODO: If the we have more than one native symbol, pick the one
-  // with the highest total sample count.
-  const initialNativeSymbol = nativeSymbolsForCallNode.length !== 0 ? 0 : null;
+  // const nativeSymbols = [...getNativeSymbolsForFunc(funcIndex, frameTable)];
+  const nativeSymbols = [...nativeSymbolsWithWeight.keys()];
 
-  const nativeSymbolInfosForCallNode = nativeSymbolsForCallNode.map(
-    (nativeSymbolIndex) =>
-      getNativeSymbolInfo(
-        nativeSymbolIndex,
-        nativeSymbols,
-        frameTable,
-        stringTable
-      )
+  nativeSymbols.sort((a, b) => a - b);
+  const nativeSymbolWeights = nativeSymbols.map(
+    (nativeSymbolIndex) => nativeSymbolsWithWeight.get(nativeSymbolIndex) ?? 0
+  );
+
+  const initialNativeSymbol =
+    nativeSymbolWeights.length !== 0
+      ? _findIndexOfMaxValue(nativeSymbolWeights)
+      : null;
+
+  const nativeSymbolInfos = nativeSymbols.map((nativeSymbolIndex) =>
+    getNativeSymbolInfo(
+      nativeSymbolIndex,
+      thread.nativeSymbols,
+      frameTable,
+      stringTable
+    )
   );
 
   // Compute the hottest line, so we can ask the source view to scroll to it.
@@ -95,7 +113,7 @@ export function getBottomBoxInfoForCallNode(
       frameTable,
       callNodeIndex,
       callNodeInfo,
-      nativeSymbolsForCallNode[initialNativeSymbol]
+      nativeSymbols[initialNativeSymbol]
     );
     const callNodeAddressTimings = getAddressTimings(stackAddressInfo, samples);
     hottestInstructionAddress = mapGetKeyWithMaxValue(
@@ -106,7 +124,7 @@ export function getBottomBoxInfoForCallNode(
   return {
     libIndex,
     sourceIndex,
-    nativeSymbols: nativeSymbolInfosForCallNode,
+    nativeSymbols: nativeSymbolInfos,
     initialNativeSymbol,
     scrollToLineNumber: hottestLine,
     scrollToInstructionAddress: hottestInstructionAddress,
