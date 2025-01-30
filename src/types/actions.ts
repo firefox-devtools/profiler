@@ -338,8 +338,9 @@ type ProfileAction =
       readonly type: 'UPDATE_BOTTOM_BOX';
       readonly libIndex: IndexIntoLibs | null;
       readonly sourceIndex: IndexIntoSourceTable | null;
-      readonly nativeSymbol: NativeSymbolInfo | null;
+      readonly initialNativeSymbolEntryIndex: number | null;
       readonly allNativeSymbolsForInitiatingCallNode: NativeSymbolInfo[];
+      readonly allNativeSymbolWeightsForInitiatingCallNode: number[];
       readonly currentTab: TabSlug;
       readonly shouldOpenBottomBox: boolean;
       readonly shouldOpenAssemblyView: boolean;
@@ -347,6 +348,10 @@ type ProfileAction =
     }
   | {
       readonly type: 'OPEN_ASSEMBLY_VIEW';
+    }
+  | {
+      readonly type: 'CHANGE_ASSEMBLY_VIEW_NATIVE_SYMBOL_ENTRY_INDEX';
+      readonly entryIndex: number;
     }
   | {
       readonly type: 'CLOSE_ASSEMBLY_VIEW';

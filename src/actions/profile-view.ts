@@ -1916,23 +1916,50 @@ export function changeTableViewOptions(
   };
 }
 
+function _findIndexOfMaxValue(arr: number[]): number {
+  if (arr.length === 0) {
+    return -1;
+  }
+
+  let indexOfMaxValue = 0;
+  let maxValue = arr[0];
+  for (let i = 1; i < arr.length; i++) {
+    const val = arr[i];
+    if (val > maxValue) {
+      indexOfMaxValue = i;
+      maxValue = val;
+    }
+  }
+  return indexOfMaxValue;
+}
+
 export function updateBottomBoxContentsAndMaybeOpen(
   currentTab: TabSlug,
-  { libIndex, sourceIndex, nativeSymbols, lineNumber }: BottomBoxInfo
+  bottomBoxInfo: BottomBoxInfo
 ): Action {
-  // TODO: If the set has more than one element, pick the native symbol with
-  // the highest total sample count
-  const nativeSymbol = nativeSymbols.length !== 0 ? nativeSymbols[0] : null;
+  const {
+    libIndex,
+    sourceIndex,
+    lineNumber,
+    nativeSymbols,
+    nativeSymbolWeightsAtOpeningTime,
+  } = bottomBoxInfo;
+  const haveSourceFile = sourceIndex !== null;
+  const haveNativeSymbol = nativeSymbols.length !== 0;
 
   return {
     type: 'UPDATE_BOTTOM_BOX',
     libIndex,
     sourceIndex,
-    nativeSymbol,
+    initialNativeSymbolEntryIndex: haveNativeSymbol
+      ? _findIndexOfMaxValue(nativeSymbolWeightsAtOpeningTime)
+      : null,
     allNativeSymbolsForInitiatingCallNode: nativeSymbols,
+    allNativeSymbolWeightsForInitiatingCallNode:
+      nativeSymbolWeightsAtOpeningTime,
     currentTab,
-    shouldOpenBottomBox: sourceIndex !== null || nativeSymbol !== null,
-    shouldOpenAssemblyView: sourceIndex === null && nativeSymbol !== null,
+    shouldOpenBottomBox: haveSourceFile || haveNativeSymbol,
+    shouldOpenAssemblyView: !haveSourceFile && haveNativeSymbol,
     lineNumber,
   };
 }
@@ -1940,6 +1967,15 @@ export function updateBottomBoxContentsAndMaybeOpen(
 export function openAssemblyView(): Action {
   return {
     type: 'OPEN_ASSEMBLY_VIEW',
+  };
+}
+
+export function changeAssemblyViewNativeSymbolEntryIndex(
+  entryIndex: number
+): Action {
+  return {
+    type: 'CHANGE_ASSEMBLY_VIEW_NATIVE_SYMBOL_ENTRY_INDEX',
+    entryIndex,
   };
 }
 
