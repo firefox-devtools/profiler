@@ -595,7 +595,6 @@ const sourceView: Reducer<SourceViewState> = (
 const assemblyView: Reducer<AssemblyViewState> = (
   state = {
     scrollGeneration: 0,
-    nativeSymbol: null,
     currentNativeSymbolEntryIndex: null,
     allNativeSymbolsForInitiatingCallNode: [],
     allNativeSymbolWeightsForInitiatingCallNode: [],
@@ -613,17 +612,9 @@ const assemblyView: Reducer<AssemblyViewState> = (
       } = action;
       return {
         scrollGeneration: state.scrollGeneration + 1,
-        nativeSymbol:
-          initialNativeSymbolEntryIndex !== null
-            ? allNativeSymbolsForInitiatingCallNode[
-                initialNativeSymbolEntryIndex
-              ]
-            : null,
         currentNativeSymbolEntryIndex: initialNativeSymbolEntryIndex,
-        allNativeSymbolsForInitiatingCallNode:
-          allNativeSymbolsForInitiatingCallNode,
-        allNativeSymbolWeightsForInitiatingCallNode:
-          allNativeSymbolWeightsForInitiatingCallNode,
+        allNativeSymbolsForInitiatingCallNode,
+        allNativeSymbolWeightsForInitiatingCallNode,
         isOpen: state.isOpen || shouldOpenAssemblyView,
       };
     }
@@ -631,6 +622,12 @@ const assemblyView: Reducer<AssemblyViewState> = (
       return {
         ...state,
         isOpen: true,
+      };
+    }
+    case 'CHANGE_ASSEMBLY_VIEW_NATIVE_SYMBOL_ENTRY_INDEX': {
+      return {
+        ...state,
+        currentNativeSymbolEntryIndex: action.entryIndex,
       };
     }
     case 'CLOSE_ASSEMBLY_VIEW': {

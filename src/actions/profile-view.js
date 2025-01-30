@@ -2033,6 +2033,13 @@ export function openAssemblyView(): Action {
   };
 }
 
+export function changeAssemblyViewNativeSymbolEntryIndex(entryIndex: number): Action {
+  return {
+    type: 'CHANGE_ASSEMBLY_VIEW_NATIVE_SYMBOL_ENTRY_INDEX',
+    entryIndex,
+  }
+}
+
 export function closeAssemblyView(): Action {
   return {
     type: 'CLOSE_ASSEMBLY_VIEW',

@@ -10,6 +10,7 @@ import classNames from 'classnames';
 import { SourceView } from '../shared/SourceView';
 import { AssemblyView } from '../shared/AssemblyView';
 import { AssemblyViewToggleButton } from './AssemblyViewToggleButton';
+import { AssemblyViewNativeSymbolNavigator } from './AssemblyViewNativeSymbolNavigator';
 import { CodeLoadingOverlay } from './CodeLoadingOverlay';
 import { CodeErrorOverlay } from './CodeErrorOverlay';
 import {
@@ -187,6 +188,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     // These trailing header buttons go into the bottom-box-bar of the last pane.
     const trailingHeaderButtons = (
       <div className="bottom-box-header-trailing-buttons">
+        {assemblyViewIsOpen ? <AssemblyViewNativeSymbolNavigator /> : null}
         <AssemblyViewToggleButton />
         <Localized id="SourceView--close-button" attrs={{ title: true }}>
           <button

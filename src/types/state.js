@@ -269,8 +269,6 @@ export type AssemblyViewState = {|
   scrollGeneration: number,
   // The native symbol for which the assembly code is being shown at the moment.
   // Null if the initiating call node did not have a native symbol.
-  // Always equal to allNativeSymbolsForInitiatingCallNode[currentNativeSymbolEntryIndex]
-  nativeSymbol: NativeSymbolInfo | null,
   currentNativeSymbolEntryIndex: number | null,
   // The set of native symbols which contributed samples to the initiating call
   // node. Often, this will just be one element (the same as `nativeSymbol`),

@@ -375,6 +375,10 @@ type ProfileAction =
       +type: 'OPEN_ASSEMBLY_VIEW',
     |}
   | {|
+      +type: 'CHANGE_ASSEMBLY_VIEW_NATIVE_SYMBOL_ENTRY_INDEX',
+      +entryIndex: number,
+    |}
+  | {|
       +type: 'CLOSE_ASSEMBLY_VIEW',
     |}
   | {|
