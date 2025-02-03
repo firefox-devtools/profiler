@@ -15,7 +15,6 @@ import * as ProfileData from '../../profile-logic/profile-data';
 import * as CallTree from '../../profile-logic/call-tree';
 import * as ProfileSelectors from '../profile';
 import * as JsTracer from '../../profile-logic/js-tracer';
-import * as Cpu from '../../profile-logic/cpu';
 import { StringTable } from '../../utils/string-table';
 import {
   assertExhaustiveCheck,
@@ -30,6 +29,7 @@ import type {
   JsTracerTable,
   RawSamplesTable,
   SamplesTable,
+  StackTable,
   NativeAllocationsTable,
   JsAllocationsTable,
   SamplesLikeTable,
@@ -107,6 +107,8 @@ export function getBasicThreadSelectorsPerThread(
     getRawThread(state).samples;
   const getSamplesTable: Selector<SamplesTable> = createSelector(
     getRawSamplesTable,
+    ProfileSelectors.getSampleUnits,
+    ProfileSelectors.getReferenceCPUDeltaPerMs,
     ProfileData.computeSamplesTableFromRawSamplesTable
   );
   const getNativeAllocations: Selector<NativeAllocationsTable | void> = (
@@ -121,6 +123,12 @@ export function getBasicThreadSelectorsPerThread(
       getRawThread(state),
       ProfileSelectors.getProfileInterval(state)
     );
+  const getStackTable: Selector<StackTable> = createSelector(
+    (state) => getRawThread(state).stackTable,
+    (state) => getRawThread(state).frameTable,
+    ProfileSelectors.getDefaultCategory,
+    ProfileData.computeStackTableFromRawStackTable
+  );
 
   /**
    * This selector gets the weight type from the thread.samples table, but
@@ -148,24 +156,13 @@ export function getBasicThreadSelectorsPerThread(
   const getThread: Selector<Thread> = createSelector(
     getRawThread,
     getSamplesTable,
+    getStackTable,
     getStringTable,
     ProfileData.createThreadFromDerivedTables
   );
 
-  const getCPUProcessedThread: Selector<Thread> = createSelector(
-    getThread,
-    ProfileSelectors.getSampleUnits,
-    ProfileSelectors.getProfileInterval,
-    (thread, sampleUnits, profileInterval) =>
-      thread.samples === null ||
-      thread.samples.threadCPUDelta === undefined ||
-      !sampleUnits
-        ? thread
-        : Cpu.processThreadCPUDelta(thread, sampleUnits, profileInterval)
-  );
-
   const getThreadWithReservedFunctions: Selector<ThreadWithReservedFunctions> =
-    createSelector(getCPUProcessedThread, ProfileData.reserveFunctionsInThread);
+    createSelector(getThread, ProfileData.reserveFunctionsInThread);
 
   const getFunctionsReservedThread: Selector<Thread> = (state) =>
     getThreadWithReservedFunctions(state).thread;
@@ -441,7 +438,6 @@ export function getBasicThreadSelectorsPerThread(
     getHasUsefulJsAllocations,
     getHasUsefulNativeAllocations,
     getCanShowRetainedMemory,
-    getCPUProcessedThread,
     getFunctionsReservedThread,
     getTabFilteredThread,
     getActiveTabFilteredThread,

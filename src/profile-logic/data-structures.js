@@ -13,6 +13,7 @@ import type {
   RawSamplesTable,
   SamplesTable,
   FrameTable,
+  RawStackTable,
   StackTable,
   FuncTable,
   RawMarkerTable,
@@ -56,6 +57,18 @@ export function getEmptySamplesTable(): RawSamplesTable {
     weight: null,
     stack: [],
     time: [],
+    length: 0,
+  };
+}
+
+export function getEmptyRawStackTable(): RawStackTable {
+  return {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    frame: [],
+    prefix: [],
     length: 0,
   };
 }
@@ -384,7 +397,7 @@ export function getEmptyThread(overrides?: $Shape<RawThread>): RawThread {
     // Creating samples with event delay since it's the new samples table.
     samples: getEmptySamplesTableWithEventDelay(),
     markers: getEmptyRawMarkerTable(),
-    stackTable: getEmptyStackTable(),
+    stackTable: getEmptyRawStackTable(),
     frameTable: getEmptyFrameTable(),
     stringArray: [],
     funcTable: getEmptyFuncTable(),

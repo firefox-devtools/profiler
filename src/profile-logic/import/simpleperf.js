@@ -18,13 +18,13 @@ import type {
   RawSamplesTable,
   Profile,
   RawThread,
-  StackTable,
+  RawStackTable,
 } from 'firefox-profiler/types/profile';
 import {
   getEmptyFuncTable,
   getEmptyResourceTable,
   getEmptyFrameTable,
-  getEmptyStackTable,
+  getEmptyRawStackTable,
   getEmptySamplesTable,
   getEmptyRawMarkerTable,
   getEmptyNativeSymbolTable,
@@ -183,29 +183,26 @@ class FirefoxFrameTable {
 class FirefoxSampleTable {
   strings: StringTable;
 
-  stackTable: StackTable = getEmptyStackTable();
+  stackTable: RawStackTable = getEmptyRawStackTable();
   stackMap: Map<string, IndexIntoStackTable> = new Map();
 
   constructor(strings: StringTable) {
     this.strings = strings;
   }
 
-  toJson(): StackTable {
+  toJson(): RawStackTable {
     return this.stackTable;
   }
 
   findOrAddStack(
     frameIndex: IndexIntoFrameTable,
-    prefix: IndexIntoStackTable | null,
-    category: IndexIntoCategoryList
+    prefix: IndexIntoStackTable | null
   ): IndexIntoStackTable {
     const mapKey = `${frameIndex}-${prefix ?? 'null'}`;
 
     let stackIndex = this.stackMap.get(mapKey);
     if (!stackIndex) {
       this.stackTable.frame.push(frameIndex);
-      this.stackTable.category.push(category);
-      this.stackTable.subcategory.push(0);
       this.stackTable.prefix.push(prefix);
 
       stackIndex = this.stackTable.length++;
@@ -327,11 +324,7 @@ class FirefoxThread {
 
       const frameIndex = this.frameTable.findOrAddFrame(funcIndex, category);
 
-      prefixStackId = this.stackTable.findOrAddStack(
-        frameIndex,
-        prefixStackId,
-        category
-      );
+      prefixStackId = this.stackTable.findOrAddStack(frameIndex, prefixStackId);
     }
 
     this.sampleTable.stack.push(prefixStackId);

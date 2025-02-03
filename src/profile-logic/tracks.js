@@ -18,7 +18,11 @@ import type {
   TabID,
 } from 'firefox-profiler/types';
 
-import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
+import {
+  defaultThreadOrder,
+  getFriendlyThreadName,
+  computeStackTableFromRawStackTable,
+} from './profile-data';
 import { intersectSets, subtractSets } from '../utils/set';
 import { StringTable } from '../utils/string-table';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
@@ -1170,7 +1174,7 @@ const AUDIO_THREAD_SAMPLE_SCORE_BOOST_FACTOR = 40;
 export function computeThreadActivityScore(
   profile: Profile,
   thread: RawThread,
-  maxCpuDeltaPerMs: number
+  referenceCPUDeltaPerMs: number
 ): ThreadActivityScore {
   const isEssentialFirefoxThread = _isEssentialFirefoxThread(thread);
   const isInParentProcess = thread.processType === 'default';
@@ -1179,7 +1183,7 @@ export function computeThreadActivityScore(
   const sampleScore = _computeThreadSampleScore(
     profile,
     thread,
-    maxCpuDeltaPerMs
+    referenceCPUDeltaPerMs
   );
   const boostedSampleScore = isInterestingEvenWithMinimalActivity
     ? sampleScore * AUDIO_THREAD_SAMPLE_SCORE_BOOST_FACTOR
@@ -1222,8 +1226,8 @@ function _isFirefoxMediaThreadWhichIsUsuallyIdle(thread: RawThread): boolean {
 // number of non-idle samples.
 function _computeThreadSampleScore(
   { meta }: Profile,
-  { samples, stackTable }: RawThread,
-  maxCpuDeltaPerMs: number
+  { samples, stackTable, frameTable }: RawThread,
+  referenceCPUDeltaPerMs: number
 ): number {
   if (meta.sampleUnits && samples.threadCPUDelta) {
     // Sum up all CPU deltas in this thread, to compute a total
@@ -1237,15 +1241,23 @@ function _computeThreadSampleScore(
   // This thread has no CPU delta information.
   // Compute a score based on non-idle samples, in the same
   // units as the cpu delta score.
+  const defaultCategory = meta.categories
+    ? meta.categories.findIndex((c) => c.color === 'grey')
+    : -1;
   const idleCategoryIndex = meta.categories
     ? meta.categories.findIndex((c) => c.name === 'Idle')
     : -1;
+  const derivedStackTable = computeStackTableFromRawStackTable(
+    stackTable,
+    frameTable,
+    defaultCategory
+  );
   const nonIdleSampleCount = samples.stack.filter(
     (stack) =>
-      stack !== null && stackTable.category[stack] !== idleCategoryIndex
+      stack !== null && derivedStackTable.category[stack] !== idleCategoryIndex
   ).length;
-  const maxCpuDeltaPerInterval = maxCpuDeltaPerMs * meta.interval;
-  return nonIdleSampleCount * maxCpuDeltaPerInterval;
+  const referenceCPUDeltaPerInterval = referenceCPUDeltaPerMs * meta.interval;
+  return nonIdleSampleCount * referenceCPUDeltaPerInterval;
 }
 
 function _findDefaultThread(threads: RawThread[]): RawThread | null {
