@@ -50,3 +50,18 @@
   right: 0;
   padding-right: 5px;
 }
+
+@media (forced-colors: active) {
+  /* The background gradient we use to display the notch are not visible in HCM.
+     We need to use a plain color. */
+  .timelineRulerNotch {
+    background-color: CanvasText;
+  }
+
+  /* With the background-color, the span text get CanvasText backplating, which
+     makes the text disappear. Opt-out of forced-colors to remove the backplating */
+  .timelineRulerNotchText {
+    color: CanvasText;
+    forced-color-adjust: none;
+  }
+}
