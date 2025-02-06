@@ -30,6 +30,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = Impussibil impuartâ il profîl.
 AppViewRouter--error-unpublished = Impussibil recuperâ il profîl di { -firefox-brand-name }.
 AppViewRouter--error-from-file = Impussibil lei il file o analizâ il profîl che al à dentri.
 AppViewRouter--error-local = No ancjemò implementât.
