@@ -5,7 +5,12 @@
 Before starting, make sure the profiler's popup is already present. Otherwise
 please go to https://profiler.firefox.com to add it first to your Firefox.
 
-1. Start your Firefox with the environment variable `MOZ_PROFILER_STARTUP=1` set. This way, the profiler is started as early as possible during startup.
+1. Start your Firefox with the environment variable `MOZ_PROFILER_STARTUP=1` set. This way, the profiler is started as early as possible during startup. 
+
+    This can also be done inline when running Firefox [Mach](https://firefox-source-docs.mozilla.org/mach/): 
+   ```
+   $ MOZ_PROFILER_STARTUP=1 ./mach run
+    ```
 
 2. Then capture the profile using the popup, as usual.
 
