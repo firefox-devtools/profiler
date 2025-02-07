@@ -1,14 +1,15 @@
 # Case Study
+
 ## 2D canvas and worker messaging
 
 The following article is a case study in using the profiler to identify performance issues. The fixes made the code run four times faster and changed the frame rate from a fairly slow 15fps to a smooth 60fps. The process for this analysis follows a common pattern:
 
- * Profile the code
- * Identify slow areas
- * Form a hypothesis as to why it's slow
- * Act upon the hypothesis and change the code
- * Profile the code to measure the difference
- * Evaluate the effectiveness of the code change
+- Profile the code
+- Identify slow areas
+- Form a hypothesis as to why it's slow
+- Act upon the hypothesis and change the code
+- Profile the code to measure the difference
+- Evaluate the effectiveness of the code change
 
 ## The project description
 
@@ -41,7 +42,7 @@ self.postMessage({
 Then the iframe would draw the code using:
 
 ```js
-worker.addEventListener('message', message => {
+worker.addEventListener('message', (message) => {
   const { data } = message;
   for (let i = 0; i < data.color.length; i++) {
     ctx.fillStyle = data.color[i];
@@ -58,16 +59,16 @@ Baseline profile: https://perfht.ml/2IxTwqi
 
 This code ended up not scaling well for large sets of rectangles being drawn to the screen. There were lots of stutters and a slow frame rate. The user's impact for fixing this problem would be to have a smoother frame rate, plus the ability to draw many more rectangles to the screen without slowing things down. In order to validate fixes, the following steps were used to reproduce the issue.
 
- * Load the page with the bunny visualization.
- * Hit Ctrl Shift 1 to turn on the Gecko Profiler.
- * Wait around 5 seconds.
- * Hit Ctrl Shift 2 to capture the profile.
- * Set the range to 3.0 seconds of relatively stable frames that don't have stutters or GC pauses.
- * Hide idle stacks by right clicking `__psync_cvwait` and `mach_msg_trap` in the Flame Graph, and choosing **"Drop samples with this function"**.
- * Filter the threads to:
-   * The relevant content process
-   * The relevant DOM Worker
-   * The compositor
+- Load the page with the bunny visualization.
+- Hit Ctrl Shift 1 to turn on the Gecko Profiler.
+- Wait around 5 seconds.
+- Hit Ctrl Shift 2 to capture the profile.
+- Set the range to 3.0 seconds of relatively stable frames that don't have stutters or GC pauses.
+- Hide idle stacks by right clicking `__psync_cvwait` and `mach_msg_trap` in the Flame Graph, and choosing **"Drop samples with this function"**.
+- Filter the threads to:
+  - The relevant content process
+  - The relevant DOM Worker
+  - The compositor
 
 ### Getting oriented
 
@@ -124,10 +125,10 @@ The repeated calls to `set fillStyle` are unnecessary for the bunny, as there ar
 The fix for this would be of only setting the color when it's been changed.
 
 ```js
-worker.addEventListener('message', message => {
+worker.addEventListener('message', (message) => {
   const { data } = message;
   for (let i = 0; i < data.color.length; i++) {
-    const nextColor = data.color[i]
+    const nextColor = data.color[i];
     if (prevColor !== nextColor) {
       // Only update the color if it's changed.
       ctx.fillStyle = nextColor;
@@ -240,9 +241,11 @@ self.postMessage({
   h: hArray._array,
   w: wArray._array,
   length: colorArray.length,
-})
+});
 ```
+
 <!--alex ignore simple-->
+
 This makes the code much more complex and hard to maintain, but it could be the key to better performance. This is a common trade-off with fast code and simple code. It's important that any additional complexities are backed by an analysis that it actually affects user-perceived performance.
 
 ### The resulting structured clone profile:
@@ -273,9 +276,9 @@ In the analysis, only the functions that were taking the most time were consider
 
 A good follow-up would be to do more analysis on a variety of different test cases to ensure that these changes didn't regress performance on a different example.
 
-| Metric | Baseline | Fix 1 | Fix 2 | Magnitude Change |
-| --- | --- | --- | --- | --- |
-| Time per frame | ~65ms | ~40ms | ~16ms | 4x (faster) |
-| Frames per second | ~15fps | ~25fps | ~60fps | 4x (faster) |
-| non-idle time in `(root)` on the content process | 2107ms | 1613ms | 725ms | 2.9x (faster) |
-| non-idle time in `(root)` on the worker | 666ms | 814ms | 725ms | 0.9x (slower) |
+| Metric                                           | Baseline | Fix 1  | Fix 2  | Magnitude Change |
+| ------------------------------------------------ | -------- | ------ | ------ | ---------------- |
+| Time per frame                                   | ~65ms    | ~40ms  | ~16ms  | 4x (faster)      |
+| Frames per second                                | ~15fps   | ~25fps | ~60fps | 4x (faster)      |
+| non-idle time in `(root)` on the content process | 2107ms   | 1613ms | 725ms  | 2.9x (faster)    |
+| non-idle time in `(root)` on the worker          | 666ms    | 814ms  | 725ms  | 0.9x (slower)    |

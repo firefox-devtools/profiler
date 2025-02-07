@@ -20,12 +20,12 @@ Hovering over a marker for an IPC message will provide more details about it:
 Each IPC message has several durations associated with it, corresponding to the
 spans of time between consecutive IPC message phases as described above:
 
-* *Send thread latency*: the time between `SendXXX` being called and the first
+- _Send thread latency_: the time between `SendXXX` being called and the first
   byte sent over the IPC channel
-* *IPC send duration*: the time taken to send all the bytes over the IPC channel
-* *IPC recv latency*: the time between the last byte being sent over the IPC
-  channel and the last byte being *received*
-* *Recv thread latency*: the time between the last byte being received from the
+- _IPC send duration_: the time taken to send all the bytes over the IPC channel
+- _IPC recv latency_: the time between the last byte being sent over the IPC
+  channel and the last byte being _received_
+- _Recv thread latency_: the time between the last byte being received from the
   IPC channel and the `RecvXXX` function being called
 
 ## Enabling the Feature
@@ -38,7 +38,7 @@ In `about:profiling`, scroll down to the `Features` section and enable the
 ### Profiling the IO Threads
 
 By default, the sender's and recipient's IO threads aren't included in a
-profile. To include these, add `Gecko_IOThread` and  `Chrome_ChildThread` to the
+profile. To include these, add `Gecko_IOThread` and `Chrome_ChildThread` to the
 list of threads to be profiled.
 
 ![A screenshot of the UI to profile the IO threads](images/ipc-messages-io-threads.png)

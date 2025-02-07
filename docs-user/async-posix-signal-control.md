@@ -1,4 +1,3 @@
-
 # Profiler control using POSIX signals
 
 The Firefox profiler supports the use of asynchronous POSIX signals for a
@@ -72,21 +71,21 @@ needing to directly load the profile.
 The current implementation of POSIX signal support has a number of important
 limitations that potential users need to be aware of:
 
-* The profiler currently uses a set of "default"
+- The profiler currently uses a set of "default"
   [values](https://searchfox.org/mozilla-central/rev/7a8904165618818f73ab7fc692ace4a57ecd38c9/tools/profiler/core/platform.cpp#633)
   when started using signals. There are currently plans to support configuration
   (see [Bug 1866007](https://bugzilla.mozilla.org/show_bug.cgi?id=1866007) for
   further information).
-* Async signal handling is currently only supported and tested on POSIX native
+- Async signal handling is currently only supported and tested on POSIX native
   platforms, i.e. Linux and MacOS. Support for Windows is planned, but not yet
   implemented (see [Bug
   1867328](https://bugzilla.mozilla.org/show_bug.cgi?id=1867328) for further
   information).
-* The "stop" signal must be sent to Firefox's "main" process. This is due to
+- The "stop" signal must be sent to Firefox's "main" process. This is due to
   Firefox's sandboxing rules, which disallow non-main processes (in general)
   from opening file handles. Because of this, individual processes cannot dump
   their own data to disk, so cannot individually handle the stop signal.
-* Signal support in the Firefox profiler is incompatible with Firefox's [code
+- Signal support in the Firefox profiler is incompatible with Firefox's [code
   coverage](https://firefox-source-docs.mozilla.org/tools/code-coverage/index.html)
   tooling, as both rely on the same POSIX signals (`SIGUSR1` and `SIGUSR2`). In
   an ideal world we could use Linux's
@@ -95,7 +94,7 @@ limitations that potential users need to be aware of:
   not clash with the signals used by the code coverage tool. Unfortunately,
   MacOS does not support these signals, so we are limited to the smaller set of
   signals in order to support a wider set of platforms.
-* Although signals are used to start/stop the profiler, the aggregation of
+- Although signals are used to start/stop the profiler, the aggregation of
   content-process profiles is still done using "traditional" Firefox IPC calls.
   If, therefore, you are using signals to diagnose issues with a "stuck" main
   thread in the main process, Firefox may not be able to aggregate child content
