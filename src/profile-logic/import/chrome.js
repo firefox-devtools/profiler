@@ -951,6 +951,21 @@ function extractMarkers(
         },
       ],
     },
+    {
+      name: 'Text',
+      tooltipLabel: '{marker.name}',
+      tableLabel: '{marker.name} — {marker.data.text}',
+      chartLabel: '{marker.data.text}',
+      display: ['marker-chart', 'marker-table'],
+      data: [
+        {
+          key: 'text',
+          label: 'Description',
+          format: 'string',
+          searchable: true,
+        },
+      ],
+    },
   ];
 
   for (const [name, events] of eventsByName.entries()) {
@@ -1005,21 +1020,69 @@ function extractMarkers(
         if (event.args && typeof event.args === 'object') {
           argData = (event.args: any).data || null;
         }
-        markers.name.push(stringTable.indexForString(name));
+
         markers.category.push(otherCategoryIndex);
+        let newData = {};
+        const prefixes = [
+          'Apply build file',
+          'Apply initialization script',
+          'Apply plugin',
+          'Apply script',
+          'Apply settings file',
+          'Calculate build tree task graph',
+          'Calculate task graph',
+          'Configure build',
+          'Configure project',
+          'Compile build file',
+          'Compile script',
+          'Cross-configure project',
+          'Download',
+          'Evaluate settings',
+          'Execute countainer callback action',
+          'Execute',
+          'Executing',
+          'Finalize build cache configuration',
+          'Fingerprint transform inputs',
+          'Finish root build tree',
+          'Identifying work',
+          'Load build',
+          'Load projects',
+          'Notify afterEvaluate listeners',
+          'Notify beforeEvaluate listeners',
+          'Notify projectsEvaluated listeners',
+          'Notify projectsLoaded listeners',
+          'Notify task graph',
+          'Realize task',
+          'Register task',
+          'Resolve dependencies of',
+          'Resolve files of configuration',
+          'Resolve',
+          'Run init scripts',
+          'Run main tasks',
+          'Snapshot',
+          'Toolchain detection',
+        ];
+        const prefix = prefixes.find((p) => name.startsWith(p));
+        if (prefix) {
+          newData.type = 'Text';
+          newData.text = name.slice(prefix.length + 1);
+          markers.name.push(stringTable.indexForString(prefix));
+        } else {
+          markers.name.push(stringTable.indexForString(name));
 
-        if (argData && 'type' in argData) {
-          argData.type2 = argData.type;
-        }
-        if (argData && 'category' in argData) {
-          argData.category2 = argData.category;
-        }
+          if (argData && 'type' in argData) {
+            argData.type2 = argData.type;
+          }
+          if (argData && 'category' in argData) {
+            argData.category2 = argData.category;
+          }
 
-        const newData = {
-          ...argData,
-          type: name,
-          category: event.cat,
-        };
+          newData = {
+            ...argData,
+            type: name,
+            category: event.cat,
+          };
+        }
 
         // $FlowExpectError Opt out of Flow checking for this one.
         markers.data.push(newData);
