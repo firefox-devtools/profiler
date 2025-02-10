@@ -84,6 +84,7 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
         key: 'contentType',
         label: 'Content Type',
         searchable: true,
+        hidden: true,
       },
     ],
   },
