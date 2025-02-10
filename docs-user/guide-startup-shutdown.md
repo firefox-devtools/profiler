@@ -7,6 +7,11 @@ please go to https://profiler.firefox.com to add it first to your Firefox.
 
 1. Start your Firefox with the environment variable `MOZ_PROFILER_STARTUP=1` set. This way, the profiler is started as early as possible during startup.
 
+    This can also be done inline when running Firefox [Mach](https://firefox-source-docs.mozilla.org/mach/):
+   ```bash
+   $ MOZ_PROFILER_STARTUP=1 ./mach run
+    ```
+
 2. Then capture the profile using the popup, as usual.
 
 Startup profiling does not use the settings that you configured in the `about:profiling`. It uses settings that can be configured with the environment variables `MOZ_PROFILER_STARTUP_ENTRIES`, `MOZ_PROFILER_STARTUP_INTERVAL`, and more:
