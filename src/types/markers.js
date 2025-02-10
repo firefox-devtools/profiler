@@ -145,6 +145,10 @@ export type MarkerSchema = {|
         label?: string,
         format: MarkerFormatType,
         searchable?: boolean,
+        // If present and set to true, this field will not be shown in the list
+        // of fields in the tooltip or in the sidebar. Such fields can still be
+        // used inside labels and they can be searchable.
+        hidden?: boolean,
       |}
     | {|
         // This type is a static bit of text that will be displayed
