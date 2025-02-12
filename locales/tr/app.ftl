@@ -124,6 +124,10 @@ CallTreeSidebar--implementation = Yürütme
 ## See: https://profiler.firefox.com/compare/
 
 CompareHome--instruction-title = Karşılaştırmak istediğiniz profil URL’lerini girin
+CompareHome--instruction-content =
+    Araç, her profil için seçilen yol ve aralıktan verileri çıkaracak ve
+    karşılaştırmayı kolaylaştırmak için her ikisini de aynı görünüme
+    yerleştirecektir.
 CompareHome--form-label-profile1 = Profil 1:
 CompareHome--form-label-profile2 = Profil 2:
 CompareHome--submit-button =
