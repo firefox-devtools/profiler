@@ -1442,23 +1442,6 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     return newHandle;
   }
 
-  _getChildWithFunc(
-    childrenSortedByFunc: InvertedCallNodeHandle[],
-    func: IndexIntoFuncTable
-  ): InvertedCallNodeHandle | null {
-    const index = bisectionRightByKey(childrenSortedByFunc, func, (node) =>
-      this.funcForNode(node)
-    );
-    if (index === 0) {
-      return null;
-    }
-    const childNodeHandle = childrenSortedByFunc[index - 1];
-    if (this.funcForNode(childNodeHandle) !== func) {
-      return null;
-    }
-    return childNodeHandle;
-  }
-
   /**
    * Returns the array of child node handles for the given inverted call node.
    * The returned array of call node handles is sorted by func.
@@ -1608,6 +1591,32 @@ export class CallNodeInfoInverted implements CallNodeInfo {
       }
     }
     return bestNode;
+  }
+
+  // Return the element in `childrenSortedByFunc` whose func matches `func`, or
+  // null if no such element exist.
+  _getChildWithFunc(
+    childrenSortedByFunc: InvertedCallNodeHandle[],
+    func: IndexIntoFuncTable
+  ): InvertedCallNodeHandle | null {
+    // Use bisection to find the right child. This is valid because the caller
+    // promises that the array is sorted by func.
+    // As a reminder, the returned index is where the func would be inserted in
+    // the sorted array, at the right of potentially equal values.
+    const index = bisectionRightByKey(childrenSortedByFunc, func, (node) =>
+      this.funcForNode(node)
+    );
+    if (index === 0) {
+      return null;
+    }
+
+    // If a child with our func is present in the array, it'll be left of the
+    // "insertion position", i.e. at childrenSortedByFunc[index - 1].
+    const childNodeHandle = childrenSortedByFunc[index - 1];
+    if (this.funcForNode(childNodeHandle) !== func) {
+      return null;
+    }
+    return childNodeHandle;
   }
 
   // Returns the CallNodeIndex that matches the function `func` and whose parent's
