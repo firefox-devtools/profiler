@@ -1459,31 +1459,6 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     return childNodeHandle;
   }
 
-  _findDeepestKnownAncestor(callPath: CallNodePath): InvertedCallNodeHandle {
-    const completePathNode = this._cache.get(hashPath(callPath));
-    if (completePathNode !== undefined) {
-      return completePathNode;
-    }
-
-    let bestNode = callPath[0];
-    let remainingDepthRangeStart = 1;
-    let remainingDepthRangeEnd = callPath.length - 1;
-    while (remainingDepthRangeStart < remainingDepthRangeEnd) {
-      const currentDepth =
-        (remainingDepthRangeStart + remainingDepthRangeEnd) >> 1;
-      // assert(currentDepth < remainingDepthRangeEnd);
-      const currentPartialPath = callPath.slice(0, currentDepth + 1);
-      const currentNode = this._cache.get(hashPath(currentPartialPath));
-      if (currentNode !== undefined) {
-        bestNode = currentNode;
-        remainingDepthRangeStart = currentDepth + 1;
-      } else {
-        remainingDepthRangeEnd = currentDepth;
-      }
-    }
-    return bestNode;
-  }
-
   /**
    * Returns the array of child node handles for the given inverted call node.
    * The returned array of call node handles is sorted by func.
@@ -1565,12 +1540,18 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     }
 
     const pathDepth = callNodePath.length - 1;
-    let deepestKnownAncestor = this._findDeepestKnownAncestor(callNodePath);
-    let deepestKnownAncestorDepth = this.depthForNode(deepestKnownAncestor);
 
-    while (deepestKnownAncestorDepth < pathDepth) {
-      const currentChildFunc = callNodePath[deepestKnownAncestorDepth + 1];
-      const children = this.getChildren(deepestKnownAncestor);
+    // Get the deepest ancestor already present in the inverted table.
+    let deepestExistingInvertedAncestorNode =
+      this._findDeepestExistingInvertedAncestorNode(callNodePath);
+    let deepestExistingInvertedAncestorNodeDepth = this.depthForNode(
+      deepestExistingInvertedAncestorNode
+    );
+
+    while (deepestExistingInvertedAncestorNodeDepth < pathDepth) {
+      const currentChildFunc =
+        callNodePath[deepestExistingInvertedAncestorNodeDepth + 1];
+      const children = this.getChildren(deepestExistingInvertedAncestorNode);
       const childMatchingFunc = this._getChildWithFunc(
         children,
         currentChildFunc
@@ -1581,10 +1562,48 @@ export class CallNodeInfoInverted implements CallNodeInfo {
         // we return null.
         return null;
       }
-      deepestKnownAncestor = childMatchingFunc;
-      deepestKnownAncestorDepth++;
+      deepestExistingInvertedAncestorNode = childMatchingFunc;
+      deepestExistingInvertedAncestorNodeDepth++;
     }
-    return deepestKnownAncestor;
+    return deepestExistingInvertedAncestorNode;
+  }
+
+  // If the inverted call path `callPath` describes an existing inverted node,
+  // return its handle. Otherwise, the node for `callPath` doesn't exist yet, and
+  // we need to find an ancestor node for which we haven't called `_createChildren`
+  // yet. This ancestor is the "deepest existing" ancestor. That's the node which
+  // this function returns.
+  _findDeepestExistingInvertedAncestorNode(
+    callPath: CallNodePath
+  ): InvertedCallNodeHandle {
+    const completePathNode = this._cache.get(hashPath(callPath));
+    if (completePathNode !== undefined) {
+      return completePathNode;
+    }
+
+    // Find the depth of the deepest existing ancestor node using bisection.
+    // For each tested depth `currentDepth`, we create a partial inverted call
+    // path `callPath.slice(0, currentDepth + 1)` and check whether we have an
+    // inverted node for that partial call path. We find the largest value of
+    // `currentDepth` for which the partial call path refers to an existing node,
+    // and set `bestNode` to that node.
+    let bestNode = callPath[0];
+    let remainingDepthRangeStart = 1;
+    let remainingDepthRangeEnd = callPath.length - 1;
+    while (remainingDepthRangeStart < remainingDepthRangeEnd) {
+      const currentDepth =
+        (remainingDepthRangeStart + remainingDepthRangeEnd) >> 1;
+      // assert(currentDepth < remainingDepthRangeEnd);
+      const currentPartialPath = callPath.slice(0, currentDepth + 1);
+      const currentNode = this._cache.get(hashPath(currentPartialPath));
+      if (currentNode !== undefined) {
+        bestNode = currentNode;
+        remainingDepthRangeStart = currentDepth + 1;
+      } else {
+        remainingDepthRangeEnd = currentDepth;
+      }
+    }
+    return bestNode;
   }
 
   // Returns the CallNodeIndex that matches the function `func` and whose parent's
