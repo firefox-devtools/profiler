@@ -1365,7 +1365,7 @@ export class CallNodeInfoInverted implements CallNodeInfo {
    * All deepNodes have the same func, matching the func of this new inverted node.
    *
    * For all i in 0..deepNodes.length, deepNodes[i] is the k'th parent node
-   * of suffixOrderedCallNodes[suffixOrderIndexRangeStart + i],
+   * of suffixOrderedCallNodes[suffixOrderIndexRangeStart + i] in the non-inverted tree,
    * with k being the depth of the new inverted node.
    */
   _createNonRootNode(
