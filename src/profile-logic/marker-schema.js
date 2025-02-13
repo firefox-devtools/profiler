@@ -78,7 +78,15 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
     name: 'Network',
     display: ['marker-table', 'marker-chart'],
     chartLabel: '{marker.data.URI}',
-    data: [],
+    data: [
+      {
+        format: 'string',
+        key: 'contentType',
+        label: 'Content Type',
+        searchable: true,
+        hidden: true,
+      },
+    ],
   },
 ];
 
