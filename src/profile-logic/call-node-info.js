@@ -1528,6 +1528,9 @@ export class CallNodeInfoInverted implements CallNodeInfo {
   }
 
   // Returns a CallNodeIndex from an inverted CallNodePath.
+  //
+  // This method will lazily populate new items in the table on demand, when
+  // necessary.
   getCallNodeIndexFromPath(
     callNodePath: CallNodePath
   ): InvertedCallNodeHandle | null {
@@ -1548,6 +1551,7 @@ export class CallNodeInfoInverted implements CallNodeInfo {
       deepestExistingInvertedAncestorNode
     );
 
+    // Now create the necessary children until the end of the requested call node path.
     while (deepestExistingInvertedAncestorNodeDepth < pathDepth) {
       const currentChildFunc =
         callNodePath[deepestExistingInvertedAncestorNodeDepth + 1];
