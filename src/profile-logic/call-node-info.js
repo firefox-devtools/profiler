@@ -663,7 +663,9 @@ export type SuffixOrderIndex = number;
  *
  * Legend, continued:
  *
- * inX:     Inverted call node index X
+ * inX:     Inverted call node index X (this index is somewhat arbitrary because
+ *          it's based on the order in which callNodeInfoInverted.getChildren is
+ *          called)
  * so:X..Y: Suffix order index range soX..soY (soY excluded)
  *
  * ```
