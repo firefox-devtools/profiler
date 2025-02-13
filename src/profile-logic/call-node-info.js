@@ -1128,7 +1128,7 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     // We have the parent's self nodes and their corresponding deep nodes.
     // These nodes are currently only sorted up to the parent's depth:
     // we know that every parentDeepNode has the parent's func.
-    // But if we look at the prefix of each parentDoopNode, we'll encounter
+    // But if we look at the prefix of each parentDeepNode, we'll encounter
     // funcs in an arbitrary order.
     //
     // It is this function's responsibility to come up with a re-arranged order
