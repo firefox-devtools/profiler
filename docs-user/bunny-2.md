@@ -1,4 +1,5 @@
 # Case Study
+
 ## Harnessing parallelism
 
 Consider the [previous case study](bunny.md). The amount of work being done was reduced by some performance fixes, allowing for a much faster frame rate. However, there is still a problem with this code. It's not taking advantage of the parallelism of having a worker thread.
@@ -14,7 +15,7 @@ Looking at a zoomed-in view of the thread stack graph shows how the content proc
 In a simplified code example, the iframe that is drawing using the [`CanvasRenderingContext2D`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D API) runs code that looks something like this:
 
 ```js
-worker.addEventListener('message', message => {
+worker.addEventListener('message', (message) => {
   if (message.data.type === 'draw') {
     requestAnimationFrame(() => {
       // Draw the current set of rectangles.
@@ -29,7 +30,7 @@ worker.addEventListener('message', message => {
 In this example, the iframe draws to the canvas, and once it's done, it posts a message to the worker asking it to generate a new list of the draw calls. While this works, it's not harnessing the fact that the worker can run code in parallel. The fix luckily is clear. Swap the order of the `drawRect` and `worker.postMessage` calls.
 
 ```js
-worker.addEventListener('message', message => {
+worker.addEventListener('message', (message) => {
   if (message.data.type === 'draw') {
     requestAnimationFrame(() => {
       // Ask the worker to generate the new draw calls for the NEXT frame.

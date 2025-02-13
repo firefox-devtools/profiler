@@ -563,6 +563,14 @@ NumberFormat--short-date = { SHORTDATE($date) }
 
 PanelSearch--search-field-hint = Saviez-vous que vous pouvez utiliser la virgule (,) pour effectuer une recherche à l’aide de plusieurs termes ?
 
+## Profile Name Button
+
+ProfileName--edit-profile-name-button =
+    .title = Modifier le nom du profil
+ProfileName--edit-profile-name-input =
+    .title = Modifier le nom du profil
+    .aria-label = Nom du profil
+
 ## Profile Delete Button
 
 # This string is used on the tooltip of the published profile links delete button in uploaded recordings page.

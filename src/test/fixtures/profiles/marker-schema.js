@@ -206,4 +206,17 @@ export const markerSchemaForTests: MarkerSchema[] = [
       },
     ],
   },
+  {
+    name: 'MarkerWithHiddenField',
+    display: ['marker-chart', 'marker-table', 'timeline-overview'],
+    data: [
+      {
+        key: 'hiddenString',
+        label: 'Hidden string',
+        format: 'string',
+        searchable: true,
+        hidden: true,
+      },
+    ],
+  },
 ];

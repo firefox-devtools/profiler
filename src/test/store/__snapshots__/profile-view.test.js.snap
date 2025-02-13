@@ -429,6 +429,23 @@ Object {
         ],
         "name": "StringTesting",
       },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "hidden": true,
+            "key": "hiddenString",
+            "label": "Hidden string",
+            "searchable": true,
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "MarkerWithHiddenField",
+      },
     ],
     "misc": "",
     "oscpu": "",

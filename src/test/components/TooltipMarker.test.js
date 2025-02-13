@@ -809,6 +809,22 @@ describe('TooltipMarker', function () {
     expect(getValueForProperty('Class of Service')).toBe('Leader');
   });
 
+  it('does not render a hidden field in a marker', () => {
+    setupWithPayload([
+      [
+        'Marker with hidden string',
+        1,
+        2,
+        {
+          type: 'MarkerWithHiddenField',
+          hiddenString: 'test',
+        },
+      ],
+    ]);
+
+    expect(screen.queryByText('Hidden string')).not.toBeInTheDocument();
+  });
+
   it('renders page information for pages with multiple class of service flags', () => {
     setupWithPayload(
       getNetworkMarkers({

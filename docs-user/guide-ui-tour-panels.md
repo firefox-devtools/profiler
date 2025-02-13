@@ -32,10 +32,11 @@ inside the selected function.
 
 The Flame Graph provide a more visual view into the very same call tree
 structures:
-* Larger rectangles mean more running time.
-* The rectangles at the top are the stacks contributing to the self time, that
+
+- Larger rectangles mean more running time.
+- The rectangles at the top are the stacks contributing to the self time, that
   is the code where the program actually spends time.
-* The order is always the same, which makes it more convenient to compare
+- The order is always the same, which makes it more convenient to compare
   between different range selections, but also between different profiles.
 
 Some users will prefer using the flame graph over the call tree because it's
