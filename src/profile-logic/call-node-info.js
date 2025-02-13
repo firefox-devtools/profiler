@@ -1530,7 +1530,7 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     return deepNodes;
   }
 
-  // This function returns a CallNodePath from a InvertedCallNodeHandle.
+  // This function returns an inverted CallNodePath from a InvertedCallNodeHandle.
   getCallNodePathFromIndex(
     callNodeHandle: InvertedCallNodeHandle | null
   ): CallNodePath {
@@ -1552,7 +1552,7 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     return callNodePath;
   }
 
-  // Returns a CallNodeIndex from a CallNodePath.
+  // Returns a CallNodeIndex from an inverted CallNodePath.
   getCallNodeIndexFromPath(
     callNodePath: CallNodePath
   ): InvertedCallNodeHandle | null {
