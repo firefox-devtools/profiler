@@ -16,7 +16,6 @@ import type {
   CategoryList,
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
-  CallNodeInfo,
   WeightType,
   Milliseconds,
   CallTreeSummaryStrategy,
@@ -31,6 +30,7 @@ import type {
   ItemTimings,
   OneCategoryBreakdown,
 } from 'firefox-profiler/profile-logic/profile-data';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import './CallNode.css';
 import classNames from 'classnames';
@@ -365,12 +365,11 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       callNodeInfo,
       displayStackType,
     } = this.props;
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const categoryIndex = callNodeTable.category[callNodeIndex];
+    const categoryIndex = callNodeInfo.categoryForNode(callNodeIndex);
     const categoryColor = categories[categoryIndex].color;
-    const subcategoryIndex = callNodeTable.subcategory[callNodeIndex];
-    const funcIndex = callNodeTable.func[callNodeIndex];
-    const innerWindowID = callNodeTable.innerWindowID[callNodeIndex];
+    const subcategoryIndex = callNodeInfo.subcategoryForNode(callNodeIndex);
+    const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
+    const innerWindowID = callNodeInfo.innerWindowIDForNode(callNodeIndex);
     const funcStringIndex = thread.funcTable.name[funcIndex];
     const funcName = thread.stringTable.getString(funcStringIndex);
 

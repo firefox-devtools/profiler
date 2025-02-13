@@ -625,12 +625,11 @@ describe('"focus-function" transform', function () {
 });
 
 describe('"focus-category" transform', function () {
-  describe('on a tiny call tree', function () {
-    const { profile } = getProfileFromTextSamples(`
-      A[cat:Graphics]
-      B[cat:Layout]
-      C[cat:Graphics]
-    `);
+  function setup(textSamples: string) {
+    const {
+      profile,
+      funcNamesDictPerThread: [funcNamesDict],
+    } = getProfileFromTextSamples(textSamples);
     const threadIndex = 0;
     if (profile.meta.categories === undefined) {
       throw new Error('Expected profile to have categories');
@@ -639,7 +638,20 @@ describe('"focus-category" transform', function () {
       .map((c, i) => (c.name === 'Graphics' ? i : -1))
       .filter((i) => i !== -1)[0];
 
-    const { dispatch, getState } = storeWithProfile(profile);
+    return {
+      threadIndex,
+      categoryIndex,
+      funcNamesDict,
+      ...storeWithProfile(profile),
+    };
+  }
+
+  describe('on a tiny call tree', function () {
+    const { threadIndex, categoryIndex, getState, dispatch } = setup(`
+      A[cat:Graphics]
+      B[cat:Layout]
+      C[cat:Graphics]
+    `);
     const originalCallTree = selectedThreadSelectors.getCallTree(getState());
 
     it('starts as an unfiltered call tree', function () {
@@ -666,21 +678,12 @@ describe('"focus-category" transform', function () {
   });
 
   describe('on a slightly larger call tree', function () {
-    const { profile } = getProfileFromTextSamples(`
+    const { threadIndex, categoryIndex, getState, dispatch } = setup(`
       A[cat:Graphics]
       B[cat:Layout]
       D[cat:Layout]
       C[cat:Graphics]
     `);
-    const threadIndex = 0;
-    if (profile.meta.categories === undefined) {
-      throw new Error('Expected profile to have categories');
-    }
-    const categoryIndex = profile.meta.categories
-      .map((c, i) => (c.name === 'Graphics' ? i : -1))
-      .filter((i) => i !== -1)[0];
-
-    const { dispatch, getState } = storeWithProfile(profile);
 
     it('category Graphics can be focused', function () {
       dispatch(
@@ -698,19 +701,10 @@ describe('"focus-category" transform', function () {
   });
 
   describe('on a tinier call tree', function () {
-    const { profile } = getProfileFromTextSamples(`
+    const { threadIndex, categoryIndex, getState, dispatch } = setup(`
       A[cat:Graphics]
       B[cat:Layout]
     `);
-    const threadIndex = 0;
-    if (profile.meta.categories === undefined) {
-      throw new Error('Expected profile to have categories');
-    }
-    const categoryIndex = profile.meta.categories
-      .map((c, i) => (c.name === 'Graphics' ? i : -1))
-      .filter((i) => i !== -1)[0];
-
-    const { dispatch, getState } = storeWithProfile(profile);
 
     it('category Graphics can be focused', function () {
       dispatch(
@@ -725,19 +719,10 @@ describe('"focus-category" transform', function () {
   });
 
   describe('on a small call tree', function () {
-    const { profile } = getProfileFromTextSamples(`
+    const { threadIndex, categoryIndex, getState, dispatch } = setup(`
       A[cat:Graphics]  A[cat:Graphics]
       B[cat:Layout]
     `);
-    const threadIndex = 0;
-    if (profile.meta.categories === undefined) {
-      throw new Error('Expected profile to have categories');
-    }
-    const categoryIndex = profile.meta.categories
-      .map((c, i) => (c.name === 'Graphics' ? i : -1))
-      .filter((i) => i !== -1)[0];
-
-    const { dispatch, getState } = storeWithProfile(profile);
 
     it('category Graphics can be focused', function () {
       dispatch(
@@ -752,19 +737,10 @@ describe('"focus-category" transform', function () {
   });
 
   describe('on a small call tree 2', function () {
-    const { profile } = getProfileFromTextSamples(`
+    const { threadIndex, categoryIndex, getState, dispatch } = setup(`
       B[cat:Layout]  A[cat:Graphics]  
       A[cat:Graphics]
     `);
-    const threadIndex = 0;
-    if (profile.meta.categories === undefined) {
-      throw new Error('Expected profile to have categories');
-    }
-    const categoryIndex = profile.meta.categories
-      .map((c, i) => (c.name === 'Graphics' ? i : -1))
-      .filter((i) => i !== -1)[0];
-
-    const { dispatch, getState } = storeWithProfile(profile);
 
     it('category Graphics can be focused', function () {
       dispatch(
@@ -779,24 +755,18 @@ describe('"focus-category" transform', function () {
   });
 
   describe('on a longer larger call tree', function () {
-    const { profile } = getProfileFromTextSamples(`
-      A[cat:Graphics]
-      B[cat:Layout]
-      D[cat:Layout]
-      A[cat:Graphics]
-      D[cat:Layout]
-    `);
-    const threadIndex = 0;
-    if (profile.meta.categories === undefined) {
-      throw new Error('Expected profile to have categories');
-    }
-    const categoryIndex = profile.meta.categories
-      .map((c, i) => (c.name === 'Graphics' ? i : -1))
-      .filter((i) => i !== -1)[0];
-
-    const { dispatch, getState } = storeWithProfile(profile);
+    const { threadIndex, categoryIndex, getState, dispatch, funcNamesDict } =
+      setup(`
+        A[cat:Graphics]
+        B[cat:Layout]
+        D[cat:Layout]
+        A[cat:Graphics]
+        D[cat:Layout]
+      `);
 
     it('category Graphics can be focused', function () {
+      const { A, B, D } = funcNamesDict;
+      dispatch(changeSelectedCallNode(threadIndex, [A, B, D, A, D]));
       dispatch(
         addTransformToStack(threadIndex, {
           type: 'focus-category',
@@ -808,6 +778,48 @@ describe('"focus-category" transform', function () {
         '- A (total: 1, self: —)',
         '  - A (total: 1, self: 1)',
       ]);
+      const selectedCallNodePath =
+        selectedThreadSelectors.getSelectedCallNodePath(getState());
+      expect(selectedCallNodePath).toEqual([A, A]);
+    });
+  });
+
+  describe('on an inverted call tree', function () {
+    const { threadIndex, categoryIndex, getState, dispatch, funcNamesDict } =
+      setup(`
+        A[cat:Graphics]
+        B[cat:Layout]
+        D[cat:Layout]
+        A[cat:Graphics]
+        D[cat:Layout]
+      `);
+
+    it('category Graphics can be focused after inversion', function () {
+      dispatch(changeInvertCallstack(true));
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- D (total: 1, self: 1)',
+        '  - A (total: 1, self: —)',
+        '    - D (total: 1, self: —)',
+        '      - B (total: 1, self: —)',
+        '        - A (total: 1, self: —)',
+      ]);
+      const { A, B, D } = funcNamesDict;
+      dispatch(changeSelectedCallNode(threadIndex, [D, A, D, B, A]));
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'focus-category',
+          category: categoryIndex,
+        })
+      );
+      const callTree2 = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree2)).toEqual([
+        '- A (total: 1, self: 1)',
+        '  - A (total: 1, self: —)',
+      ]);
+      const selectedCallNodePath =
+        selectedThreadSelectors.getSelectedCallNodePath(getState());
+      expect(selectedCallNodePath).toEqual([A, A]);
     });
   });
 });
