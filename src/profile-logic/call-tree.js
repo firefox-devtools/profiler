@@ -65,6 +65,18 @@ export type CallTreeTimings =
   | {| type: 'NON_INVERTED', timings: CallTreeTimingsNonInverted |}
   | {| type: 'INVERTED', timings: CallTreeTimingsInverted |};
 
+/**
+ * Gets the CallTreeTimingsNonInverted out of a CallTreeTimings object.
+ */
+export function extractNonInvertedCallTreeTimings(
+  callTreeTimings: CallTreeTimings
+): CallTreeTimingsNonInverted | null {
+  if (callTreeTimings.type === 'NON_INVERTED') {
+    return callTreeTimings.timings;
+  }
+  return null;
+}
+
 function extractFaviconFromLibname(libname: string): string | null {
   try {
     const url = new URL('/favicon.ico', libname);

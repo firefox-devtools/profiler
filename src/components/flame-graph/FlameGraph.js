@@ -30,6 +30,8 @@ import {
   handleCallNodeTransformShortcut,
   updateBottomBoxContentsAndMaybeOpen,
 } from 'firefox-profiler/actions/profile-view';
+import { extractNonInvertedCallTreeTimings } from 'firefox-profiler/profile-logic/call-tree';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 
 import type {
   Thread,
@@ -350,8 +352,11 @@ class FlameGraphImpl extends React.PureComponent<Props> {
     // (CallTreeTimingsNonInverted and CallTreeTimingsInverted are very
     // different, and the flame graph is only used with non-inverted timings.)
     const tracedTimingNonInverted =
-      tracedTiming !== null && tracedTiming.type === 'NON_INVERTED'
-        ? tracedTiming.timings
+      tracedTiming !== null
+        ? ensureExists(
+            extractNonInvertedCallTreeTimings(tracedTiming),
+            'The flame graph should only ever see non-inverted timings, see UrlState.getInvertCallstack'
+          )
         : null;
 
     const maxViewportHeight = maxStackDepthPlusOne * STACK_FRAME_HEIGHT;
