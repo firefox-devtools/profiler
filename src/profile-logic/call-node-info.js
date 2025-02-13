@@ -1201,8 +1201,8 @@ export class CallNodeInfoInverted implements CallNodeInfo {
       return null;
     }
 
-    // We create one child for each distinct func we found. The children need to
-    // be ordered by func.
+    // We create one child for each distinct func we found. We order the children
+    // by func so that _getChildWithFunc can use bisection.
     const funcPerChild = new Uint32Array(deepNodeCountPerFunc.keys());
     funcPerChild.sort(); // Fast typed-array sort
     const childCount = funcPerChild.length;
