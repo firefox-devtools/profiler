@@ -340,10 +340,19 @@ type InvertedNonRootCallNodeTable = {|
   suffixOrderIndexRangeEnd: SuffixOrderIndex[], // IndexIntoInvertedNonRootCallNodeTable -> SuffixOrderIndex
 
   // Non-null for non-root nodes whose children haven't been created yet.
-  // For a non-root node x of the inverted tree, let k = depth[x] its depth in the inverted tree,
-  // and deepNodes = deepNodes[x] be its non-null deep nodes.
-  // Then, for every index i in suffixOrderIndexRangeStart[x]..suffixOrderIndexRangeEnd[x],
-  // the k'th prefix node of suffixOrderedCallNodes[i] is stored at deepNodes[x][i - suffixOrderIndexRangeStart[x]].
+  // The array at index x caches ancestors of the non-inverted nodes belonging
+  // to the inverted node x, specifically the ancestor "k steps up" from each
+  // non-inverted node, with k being the depth of the inverted node.
+  // This is useful to quickly compute the children for this inverted node.
+  // Afterwards it's set to null for that index, and the next level is passed on
+  // to the newly-created children.
+  // Please refer to 'Why do we keep a "deepNodes" property in the inverted table?'
+  // in the comment on CallNodeInvertedImpl below for a more detailed explanation.
+  //
+  // For every inverted non-root call node x with deepNodes[x] !== null:
+  //   For every suffix order index i in suffixOrderIndexRangeStart[x]..suffixOrderIndexRangeEnd[x],
+  //   the k'th parent node of suffixOrderedCallNodes[i] is stored at
+  //   deepNodes[x][i - suffixOrderIndexRangeStart[x]], with k = depth[x].
   deepNodes: Array<Uint32Array | null>, // IndexIntoInvertedNonRootCallNodeTable -> (Uint32Array | null)
 
   depth: number[], // IndexIntoInvertedNonRootCallNodeTable -> number
@@ -717,23 +726,15 @@ export type SuffixOrderIndex = number;
  *
  * # On-demand node creation
  *
+ * Inverted nodes are created in this order:
+ *
  * 1. All root nodes have been created upfront. There is one root per func.
  * 2. The first _createChildren call will be for a root node. We create non-root
  *    nodes for the root's children, and add them to _invertedNonRootCallNodeTable.
  * 3. The next call to _createChildren can be for a non-root node. Again we
  *    create nodes for the children and add them to _invertedNonRootCallNodeTable.
  *
- * For any inverted tree node inX, _invertedNonRootCallNodeTable either contains
- * none or all of inX's children.
- * For any inverted non-root node inQ whose parent node is inP,
- * _createChildren(inP) is called before _createChildren(inQ) is called. That's
- * somewhat obvious: inQ is *created* by the _createChildren(inP) call; without
- * _createChildren(inP) we would not have an inQ to pass to _createChildren(inQ).
- *
- * ## Computation of the children
- *
- * To know what the children of a node in the inverted tree are, we need to look
- * at the parents in the non-inverted tree.
+ * Example:
  *
  * ```
  * Non-inverted tree:
@@ -747,91 +748,125 @@ export type SuffixOrderIndex = number;
  *     - [cn5] B  =  A -> A -> B  =  A -> A -> B [so4]
  *   - [cn6] C    =  A -> C       =       A -> C [so5]
  *
- * Inverted roots:
+ * Inverted tree:
  *                                                 Represents call paths ending in
  * - [in0] A  (so:0..3)        =  A             =            ... A (cn0, cn4, cn2)
+ *   - [in3] A  (so:1..2)      =  A <- A        =       ... A -> A (cn4)
+ *   - [in4] B  (so:2..3)      =  A <- B        =       ... B -> A (cn2)
+ *     - [in6] A  (so:2..3)    =  A <- B <- A   =  ... A -> B -> A (cn2)
  * - [in1] B  (so:3..5)        =  B             =            ... B (cn1, cn5)
+ *   - [in5] A  (so:3..5)      =  B <- A        =       ... A -> B (cn1, cn5)
+ *     - [in10] A  (so:4..5)   =  B <- A <- A   =  ... A -> A -> B (cn5)
  * - [in2] C  (so:5..7)        =  C             =            ... C (cn6, cn3)
+ *   - [in7] A  (so:5..6)      =  C <- A        =       ... A -> C (cn6)
+ *   - [in8] B  (so:6..7)      =  C <- B        =       ... B -> C (cn3)
+ *     - [in9] A  (so:6..7)    =  C <- B <- A   =  ... A -> B -> C (cn3)
  * ```
  *
- * First, let's create the children for in0, which is the root for func A.
- * in0 has three "self nodes": cn0, cn4, and cn2.
+ * This inverted tree was built up as follows:
  *
- * in0's func is A.
- * cn0, cn4, and cn2 also have func A. Of course; that's what makes them in0's self funcs.
+ * Iteration 0: We create all roots.            New nodes: in0, in1, in2
+ * Iteration 1: _createChildren(in0) is called. New nodes: in3, in4
+ * Iteration 2: _createChildren(in1) is called. New nodes: in5
+ * Iteration 3: _createChildren(in4) is called. New nodes: in6
+ * Iteration 4: _createChildren(in2) is called. New nodes: in7, in8
+ * Iteration 5: _createChildren(in8) is called. New nodes: in9
+ * Iteration 6: _createChildren(in5) is called. New nodes: in10
+ *
+ * The order of the _createChildren calls depends on how the user interacts with the
+ * call tree. The user could uncollapse call tree nodes in a different order,
+ * which would cause _createChildren to be called in a different order, and the
+ * inverted nodes we create would have different indexes.
+ *
+ * There are two invariants about "which inverted nodes exist" at any given time:
+ *
+ * 1. For any inverted tree node inX, _invertedNonRootCallNodeTable either contains
+ *    all or none of inX's children.
+ * 2. For any inverted non-root node `inQ` with parent node `inP`,
+ *    _createChildren(inP) is called before _createChildren(inQ) is called. That's
+ *    somewhat obvious: inQ is *created* by the _createChildren(inP) call; without
+ *    _createChildren(inP) we would not have an inQ to pass to _createChildren(inQ).
+ *
+ * ## Computation of the children
+ *
+ * How do we know which children to create? We look at the parents in the
+ * *non-inverted* tree.
+ *
+ * First, let's create the children for the root `in0` (func: A, depth 0).
+ * in0 has three "self nodes": cn0 (func: A), cn4 (func: A), and cn2 (func: A).
  *
  * To create the children of in0, we need to look at the parents of cn0, cn4, and cn2.
  *
  * cn0 has no parent.
- * cn4's parent is cn0, whose func is A.
- * cn2's parent is cn1, whose func is B.
+ * cn4's parent is cn0 (func: A).
+ * cn2's parent is cn1 (func: B).
  *
  * This means that in0 has two children: One for func A and one for func B.
  *
  * Let's create the two children:
- *  - in3: func A, parent in0, self nodes [cn4]
- *  - in4: func B, parent in0, self nodes [cn2]
+ *  - in3: func A, parent in0, depth 1, self nodes [cn4]
+ *  - in4: func B, parent in0, depth 1, self nodes [cn2]
  *
- * Now we're done!
+ * ### Why do we keep a "deepNodes" property in the inverted table?
  *
- * ---
+ * In the next few paragraphs, we'll explain why we need to constantly iterate
+ * over the non-inverted parents, and that the "deepNodes" property is a cache
+ * to make it faster. Keep reading!
  *
- * Now let's create the children of a non-root node in the inverted tree.
- * We want to create the children for in4.
- * in4 describes the call path suffix "... -> B -> A".
+ * Let's create the children of the non-root node in4 (func: B, depth 1).
+ * in4 represents the call path suffix "... -> B -> A".
  *
- * in4 has one self node: cn2. This is the only non-inverted node whose call path
- * ends in "... -> B -> A".
+ * in4 has one self node: cn2 (func: A). cn2 is the only non-inverted node
+ * whose call path ends in "... -> B -> A".
  *
- * in4 has depth 1.
- *
- * in4's func is B.
- * cn2's func is A. (!)
- *
- * cn2's func still corresponds to the inverted root, i.e. in0's func.
- * But cn2's parent, cn1, has func B.
- *
- * And cn1's parent, cn0, has func A.
+ * cn2's 0th parent (i.e. itself) is cn2 (func: A).
+ * cn2's 1st parent is cn1 (func: B).
+ * cn2's 2nd parent (i.e. its grandparent) is cn0 (func: A). <-- func A
  *
  * So in4 has one child, with func A. Let's create it:
- *  - in5: func A, parent in4, self nodes [cn2]
+ *  - in6: func A, parent in4, depth 2, self nodes [cn2]
  *
- * What this example shows is that we need to look not at a self node's immediate
- * parent, but rather at its (k + 1)'th parent, where k is the depth of the
- * inverted node whose children we're creating.
+ * This example shows that, if we create inverted children of depth 2,
+ * we need to look at the grandparent ("2nd parent") of each self node.
  *
  * ---
  *
- * What are the children of in5?
+ * Let's try to go one level deeper and create the children of in6 (func A, depth 2):
  *
- * in5 has one self node: cn2.
- * in5 has depth 2.
+ * in6 has one self node: cn2.
+ * in6 has depth 2, its children would have depth 3.
  *
- * cn2's 0th parent is cn2.
- * cn2's 1st parent is cn1.
- * cn2's 2nd parent (i.e. its grandparent) is cn0.
+ * cn2's 0th parent is cn2 (func: A).
+ * cn2's 1st parent is cn1 (func: B).
+ * cn2's 2nd parent is cn0 (func: A).
  * cn2's 3rd parent is ... it does not have one!
  *
- * So in5 has no children.
+ * So in6 has no children.
  *
  * ---
  *
- * Now let's say we want to create the children of an inverted node with depth 20,
- * and it has 500 self nodes. We would need to look at each self node, find its
- * 21st parent node, and then check that node's func.
+ * More generically, we've shown that, in order to create inverted children of
+ * depth k, we need to look at the k'th parent of all self nodes for the inverted
+ * node whose children we're creating.
  *
- * Climbing up the parent chain 20 steps, for each of the 500 self nodes, would
- * be quite expensive. It would be better if we had stored the 20th parent for
- * each of the self nodes, so that we would only need to go up to the immediate
- * parent.
+ * If we had to get those k'th parent nodes from the self node all the time, we
+ * would spend a lot of time walking up the non-inverted tree! For example, if
+ * we wanted to create the children of an inverted node with depth 20, if that
+ * node had 500 self nodes, we would need to find the 21st parent node of each of
+ * those 500 self nodes!
  *
- * So that's what we do. On each inverted node, we don't only store its self
- * nodes, we also store its "deep nodes", i.e. the k'th parent of each self node.
+ * Walking up 21 steps is a bit silly, because we already walked up 20 steps for
+ * the same nodes when we created the inverted parent. Can we just store the result
+ * of the 20-step walk, and reuse it? Yes we can!
+ *
+ * So that's what why we have the "deepNodes" cache: On each inverted node, we
+ * don't only store its self nodes, we also store its "deep nodes", i.e. the k'th
+ * parent of each self node, with k being the depth of the inverted node.
  * Then we only need to look at the immediate parent of each deep node in order
  * to know which children to create for the inverted node.
  *
- * For in0, k is 0, and the deep node for each self node is just the self node
- * itself. (The 0'th parent of a node is that node itself.)
+ * For an inverted root such as in0, k is 0, and the deep node for each self node
+ * is just the self node itself. (The 0'th parent of a node is that node itself.)
  *
  * in0:
  * |-----------|-------------------------|
@@ -852,7 +887,7 @@ export type SuffixOrderIndex = number;
  * | cn2       | cn1                     |
  * |-----------|-------------------------|
  *
- * in5 (depth 2):
+ * in6 (depth 2):
  * |-----------|-------------------------|
  * | self node | corresponding deep node |
  * |-----------|-------------------------|
