@@ -109,7 +109,6 @@ export function getStackAndSampleSelectorsPerThread(
     createSelectorWithTwoCacheSlots(
       (state) => threadSelectors.getFilteredThread(state).stackTable,
       (state) => threadSelectors.getFilteredThread(state).frameTable,
-      (state) => threadSelectors.getFilteredThread(state).funcTable,
       ProfileSelectors.getDefaultCategory,
       ProfileData.getCallNodeInfo
     );
