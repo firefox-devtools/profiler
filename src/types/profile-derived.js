@@ -801,7 +801,7 @@ export type SortedTabPageData = Array<{|
 export type CallNodeSelfAndSummary = {|
   // This property stores the amount of unit (time, bytes, count, etc.) spent in
   // this call node and not in any of its descendant nodes.
-  callNodeSelf: Float32Array,
+  callNodeSelf: Float64Array,
   // The sum of absolute values in callNodeSelf.
   // This is used for computing the percentages displayed in the call tree.
   rootTotalSummary: number,

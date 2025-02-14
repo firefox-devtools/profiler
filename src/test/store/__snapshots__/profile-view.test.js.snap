@@ -2690,7 +2690,7 @@ CallTree {
         0,
       ],
       "rootTotalSummary": 2,
-      "self": Float32Array [
+      "self": Float64Array [
         0,
         0,
         0,
@@ -2701,7 +2701,7 @@ CallTree {
         0,
         0,
       ],
-      "total": Float32Array [
+      "total": Float64Array [
         2,
         2,
         0,
