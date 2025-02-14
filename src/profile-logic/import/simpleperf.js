@@ -6,6 +6,7 @@ import { PROCESSED_PROFILE_VERSION } from 'firefox-profiler/app-logic/constants'
 import type { Milliseconds } from 'firefox-profiler/types/units';
 import type {
   CategoryList,
+  CategoryColor,
   FrameTable,
   FuncTable,
   IndexIntoCategoryList,
@@ -64,7 +65,10 @@ class Categories {
     return this.categoryList;
   }
 
-  static createCategory(name: string, color: string): IndexIntoCategoryList {
+  static createCategory(
+    name: string,
+    color: CategoryColor
+  ): IndexIntoCategoryList {
     const index = this.categoryList.length;
     this.categoryList.push({ name, color, subcategories: ['Other'] });
 
