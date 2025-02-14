@@ -83,8 +83,8 @@ describe('unfiltered call tree', function () {
         timings: {
           rootTotalSummary: 3,
           callNodeHasChildren: new Uint8Array([1, 1, 1, 1, 0, 1, 0, 1, 0]),
-          self: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
-          total: new Float32Array([3, 3, 2, 1, 1, 1, 1, 1, 1]),
+          self: new Float64Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
+          total: new Float64Array([3, 3, 2, 1, 1, 1, 1, 1, 1]),
         },
       });
     });
@@ -195,6 +195,26 @@ describe('unfiltered call tree', function () {
         '      - I (total: 1, self: 1)',
       ]);
     });
+  });
+
+  it('computes correct numbers when using large weights', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A  A
+      B  C
+    `);
+
+    // Compute 485407757 + 1222 == 485408979.
+    // If the weights are stored as floats, this checks that we aren't using
+    // 32-bit floats - those wouldn't have enough precision.
+    const [rawThread] = profile.threads;
+    rawThread.samples.weightType = 'bytes';
+    rawThread.samples.weight = [485407757, 1222];
+    const callTree = callTreeFromProfile(profile);
+    expect(formatTree(callTree)).toEqual([
+      '- A (total: 485,408,979, self: —)',
+      '  - B (total: 485,407,757, self: 485,407,757)',
+      '  - C (total: 1,222, self: 1,222)',
+    ]);
   });
 
   /**
