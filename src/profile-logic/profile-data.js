@@ -110,13 +110,11 @@ import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
 export function getCallNodeInfo(
   stackTable: StackTable,
   frameTable: FrameTable,
-  funcTable: FuncTable,
   defaultCategory: IndexIntoCategoryList
 ): CallNodeInfo {
   const { callNodeTable, stackIndexToCallNodeIndex } = computeCallNodeTable(
     stackTable,
     frameTable,
-    funcTable,
     defaultCategory
   );
   return new CallNodeInfoNonInverted(callNodeTable, stackIndexToCallNodeIndex);
@@ -168,7 +166,6 @@ type CallNodeTableAndStackMap = {
 export function computeCallNodeTable(
   stackTable: StackTable,
   frameTable: FrameTable,
-  _funcTable: FuncTable,
   defaultCategory: IndexIntoCategoryList
 ): CallNodeTableAndStackMap {
   if (stackTable.length === 0) {
