@@ -53,7 +53,6 @@ import type {
   TransformType,
   ImplementationFilter,
   IndexIntoCallNodeTable,
-  CallNodeInfo,
   CallNodePath,
   Thread,
   ThreadsKey,
@@ -64,6 +63,7 @@ import type {
 
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
 
 type StateProps = {|
@@ -147,8 +147,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       callNodeInfo,
     } = rightClickedCallNodeInfo;
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const funcIndex = callNodeTable.func[callNodeIndex];
+    const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
     const isJS = funcTable.isJS[funcIndex];
     const stringIndex = funcTable.name[funcIndex];
     const functionCall = stringTable.getString(stringIndex);
@@ -185,8 +184,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       callNodeInfo,
     } = rightClickedCallNodeInfo;
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const funcIndex = callNodeTable.func[callNodeIndex];
+    const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
     const stringIndex = funcTable.fileName[funcIndex];
     if (stringIndex === null) {
       return null;
@@ -209,8 +207,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       callNodeInfo,
     } = rightClickedCallNodeInfo;
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const funcIndex = callNodeTable.func[callNodeIndex];
+    const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
     const line = funcTable.lineNumber[funcIndex];
     const column = funcTable.columnNumber[funcIndex];
     return { line, column };
@@ -337,8 +334,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const { threadsKey, callNodePath, thread, callNodeIndex, callNodeInfo } =
       rightClickedCallNodeInfo;
     const selectedFunc = callNodePath[callNodePath.length - 1];
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const category = callNodeTable.category[callNodeIndex];
+    const category = callNodeInfo.categoryForNode(callNodeIndex);
     switch (type) {
       case 'focus-subtree':
         addTransformToStack(threadsKey, {
@@ -451,8 +447,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const { callNodeInfo, callNodeIndex } = rightClickedCallNodeInfo;
     const { innerWindowIDToPageMap } = this.props;
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const innerWindowID = callNodeTable.innerWindowID[callNodeIndex];
+    const innerWindowID = callNodeInfo.innerWindowIDForNode(callNodeIndex);
 
     if (innerWindowID && innerWindowIDToPageMap) {
       const page = innerWindowIDToPageMap.get(innerWindowID);
@@ -583,9 +578,8 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       callNodeInfo,
     } = rightClickedCallNodeInfo;
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const categoryIndex = callNodeTable.category[callNodeIndex];
-    const funcIndex = callNodeTable.func[callNodeIndex];
+    const categoryIndex = callNodeInfo.categoryForNode(callNodeIndex);
+    const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
     const isJS = funcTable.isJS[funcIndex];
     const hasCategory = categoryIndex !== -1;
     // This could be the C++ library, or the JS filename.
@@ -599,6 +593,9 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const fileName =
       filePath &&
       parseFileNameFromSymbolication(filePath).path.match(/[^\\/]+$/)?.[0];
+
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+
     const showOpenDebuggerItem =
       isJS &&
       filePath &&
@@ -607,6 +604,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       filePath !== 'self-hosted' &&
       browserConnectionStatus.status === 'ESTABLISHED' &&
       this._getTabID();
+
     return (
       <>
         {fileName ? (

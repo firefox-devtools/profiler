@@ -38,7 +38,6 @@ import type {
   State,
   ImplementationFilter,
   ThreadsKey,
-  CallNodeInfo,
   CategoryList,
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
@@ -47,6 +46,7 @@ import type {
   SelectionContext,
 } from 'firefox-profiler/types';
 import type { CallTree as CallTreeType } from 'firefox-profiler/profile-logic/call-tree';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import type {
   Column,
@@ -320,7 +320,6 @@ class CallTreeImpl extends PureComponent<Props> {
       // This tree is empty.
       return;
     }
-    const callNodeTable = callNodeInfo.getCallNodeTable();
     newExpandedCallNodeIndexes.push(currentCallNodeIndex);
     for (let i = 0; i < maxInterestingDepth; i++) {
       const children = tree.getChildren(currentCallNodeIndex);
@@ -330,7 +329,8 @@ class CallTreeImpl extends PureComponent<Props> {
 
       // Let's find if there's a non idle children.
       const firstNonIdleNode = children.find(
-        (nodeIndex) => callNodeTable.category[nodeIndex] !== idleCategoryIndex
+        (nodeIndex) =>
+          callNodeInfo.categoryForNode(nodeIndex) !== idleCategoryIndex
       );
 
       // If there's a non idle children, use it; otherwise use the first
@@ -341,7 +341,7 @@ class CallTreeImpl extends PureComponent<Props> {
     }
     this._onExpandedCallNodesChange(newExpandedCallNodeIndexes);
 
-    const categoryIndex = callNodeTable.category[currentCallNodeIndex];
+    const categoryIndex = callNodeInfo.categoryForNode(currentCallNodeIndex);
     if (categoryIndex !== idleCategoryIndex) {
       // If we selected the call node with a "idle" category, we'd have a
       // completely dimmed activity graph because idle stacks are not drawn in
