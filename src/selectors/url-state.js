@@ -86,7 +86,24 @@ export const getAssemblyViewIsOpen: Selector<boolean> = (state) =>
   getProfileSpecificState(state).assemblyView.isOpen;
 export const getAssemblyViewNativeSymbol: Selector<NativeSymbolInfo | null> = (
   state
-) => getProfileSpecificState(state).assemblyView.nativeSymbol;
+) => {
+  const {
+    currentNativeSymbolEntryIndex,
+    allNativeSymbolsForInitiatingCallNode,
+  } = getProfileSpecificState(state).assemblyView;
+  return currentNativeSymbolEntryIndex !== null
+    ? allNativeSymbolsForInitiatingCallNode[currentNativeSymbolEntryIndex]
+    : null;
+};
+export const getAssemblyViewCurrentNativeSymbolEntryIndex: Selector<
+  number | null,
+> = (state) =>
+  getProfileSpecificState(state).assemblyView.currentNativeSymbolEntryIndex;
+export const getAssemblyViewNativeSymbolEntryCount: Selector<number> = (
+  state
+) =>
+  getProfileSpecificState(state).assemblyView
+    .allNativeSymbolsForInitiatingCallNode.length;
 export const getAssemblyViewScrollGeneration: Selector<number> = (state) =>
   getProfileSpecificState(state).assemblyView.scrollGeneration;
 export const getShowJsTracerSummary: Selector<boolean> = (state) =>

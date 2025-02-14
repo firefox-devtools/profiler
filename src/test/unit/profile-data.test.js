@@ -1485,7 +1485,8 @@ describe('getNativeSymbolsForCallNode', function () {
         ensureExists(ab),
         callNodeInfo,
         thread.stackTable,
-        thread.frameTable
+        thread.frameTable,
+        thread.samples
       )
     ).toEqual([symB]);
     expect(
@@ -1493,7 +1494,8 @@ describe('getNativeSymbolsForCallNode', function () {
         ensureExists(abc),
         callNodeInfo,
         thread.stackTable,
-        thread.frameTable
+        thread.frameTable,
+        thread.samples
       )
     ).toEqual([symB]);
   });
@@ -1538,7 +1540,8 @@ describe('getNativeSymbolsForCallNode', function () {
           ensureExists(c),
           callNodeInfo,
           thread.stackTable,
-          thread.frameTable
+          thread.frameTable,
+          thread.samples
         )
       )
     ).toEqual(new Set([symB, symD]));
