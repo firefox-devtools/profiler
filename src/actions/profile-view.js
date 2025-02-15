@@ -67,6 +67,7 @@ import type {
   CallNodePath,
   IndexIntoCallNodeTable,
   IndexIntoResourceTable,
+  IndexIntoFuncTable,
   TrackIndex,
   MarkerIndex,
   Transform,
@@ -124,12 +125,58 @@ export function changeSelectedCallNode(
     const isInverted = getInvertCallstack(getState());
     dispatch({
       type: 'CHANGE_SELECTED_CALL_NODE',
-      isInverted,
+      area: isInverted ? 'INVERTED_TREE' : 'NON_INVERTED_TREE',
       selectedCallNodePath,
       optionalExpandedToCallNodePath,
       threadsKey,
       context,
     });
+  };
+}
+
+export function changeLowerWingSelectedCallNode(
+  threadsKey: ThreadsKey,
+  selectedCallNodePath: CallNodePath,
+  context: SelectionContext = { source: 'auto' }
+): Action {
+  return {
+    type: 'CHANGE_SELECTED_CALL_NODE',
+    area: 'LOWER_WING',
+    selectedCallNodePath,
+    optionalExpandedToCallNodePath: [],
+    threadsKey,
+    context,
+  };
+}
+
+export function changeUpperWingSelectedCallNode(
+  threadsKey: ThreadsKey,
+  selectedCallNodePath: CallNodePath,
+  context: SelectionContext = { source: 'auto' }
+): Action {
+  return {
+    type: 'CHANGE_SELECTED_CALL_NODE',
+    area: 'UPPER_WING',
+    selectedCallNodePath,
+    optionalExpandedToCallNodePath: [],
+    threadsKey,
+    context,
+  };
+}
+
+/**
+ * Select a function for a given thread in the function list.
+ */
+export function changeSelectedFunctionIndex(
+  threadsKey: ThreadsKey,
+  selectedFunctionIndex: IndexIntoFuncTable | null,
+  context: SelectionContext = { source: 'auto' }
+): Action {
+  return {
+    type: 'CHANGE_SELECTED_FUNCTION',
+    selectedFunctionIndex,
+    threadsKey,
+    context,
   };
 }
 
@@ -141,10 +188,49 @@ export function changeSelectedCallNode(
 export function changeRightClickedCallNode(
   threadsKey: ThreadsKey,
   callNodePath: CallNodePath | null
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const isInverted = getInvertCallstack(getState());
+    dispatch({
+      type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+      threadsKey,
+      area: isInverted ? 'INVERTED_TREE' : 'NON_INVERTED_TREE',
+      callNodePath,
+    });
+  };
+}
+
+export function changeRightClickedFunctionIndex(
+  threadsKey: ThreadsKey,
+  functionIndex: IndexIntoFuncTable | null
+) {
+  return {
+    type: 'CHANGE_RIGHT_CLICKED_FUNCTION',
+    threadsKey,
+    functionIndex,
+  };
+}
+
+export function changeLowerWingRightClickedCallNode(
+  threadsKey: ThreadsKey,
+  callNodePath: CallNodePath | null
 ) {
   return {
     type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
     threadsKey,
+    area: 'LOWER_WING',
+    callNodePath,
+  };
+}
+
+export function changeUpperWingRightClickedCallNode(
+  threadsKey: ThreadsKey,
+  callNodePath: CallNodePath | null
+) {
+  return {
+    type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+    threadsKey,
+    area: 'UPPER_WING',
     callNodePath,
   };
 }
@@ -1632,12 +1718,37 @@ export function changeExpandedCallNodes(
     const isInverted = getInvertCallstack(getState());
     dispatch({
       type: 'CHANGE_EXPANDED_CALL_NODES',
-      isInverted,
+      area: isInverted ? 'INVERTED_TREE' : 'NON_INVERTED_TREE',
       threadsKey,
       expandedCallNodePaths,
     });
   };
 }
+
+export function changeLowerWingExpandedCallNodes(
+  threadsKey: ThreadsKey,
+  expandedCallNodePaths: Array<CallNodePath>
+): Action {
+  return {
+    type: 'CHANGE_EXPANDED_CALL_NODES',
+    area: 'LOWER_WING',
+    threadsKey,
+    expandedCallNodePaths,
+  };
+}
+
+export function changeUpperWingExpandedCallNodes(
+  threadsKey: ThreadsKey,
+  expandedCallNodePaths: Array<CallNodePath>
+): Action {
+  return {
+    type: 'CHANGE_EXPANDED_CALL_NODES',
+    area: 'UPPER_WING',
+    threadsKey,
+    expandedCallNodePaths,
+  };
+}
+
 export function changeSelectedMarker(
   threadsKey: ThreadsKey,
   selectedMarker: MarkerIndex | null,

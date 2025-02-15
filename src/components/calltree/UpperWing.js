@@ -14,22 +14,20 @@ import {
   treeColumnsForBytes,
 } from './columns';
 import {
-  getInvertCallstack,
   getSearchStringsAsRegExp,
   getSelectedThreadsKey,
 } from 'firefox-profiler/selectors/url-state';
 import {
   getScrollToSelectionGeneration,
-  getFocusCallTreeGeneration,
   getPreviewSelection,
   getCategories,
   getCurrentTableViewOptions,
 } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
-  changeSelectedCallNode,
-  changeRightClickedCallNode,
-  changeExpandedCallNodes,
+  changeUpperWingSelectedCallNode,
+  changeUpperWingRightClickedCallNode,
+  changeUpperWingExpandedCallNodes,
   addTransformToStack,
   handleCallNodeTransformShortcut,
   changeTableViewOptions,
@@ -61,7 +59,6 @@ import './CallTree.css';
 type StateProps = {|
   +threadsKey: ThreadsKey,
   +scrollToSelectionGeneration: number,
-  +focusCallTreeGeneration: number,
   +tree: CallTreeType,
   +callNodeInfo: CallNodeInfo,
   +categories: CategoryList,
@@ -70,16 +67,15 @@ type StateProps = {|
   +expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>,
   +searchStringsRegExp: RegExp | null,
   +disableOverscan: boolean,
-  +invertCallstack: boolean,
   +callNodeMaxDepthPlusOne: number,
   +weightType: WeightType,
   +tableViewOptions: TableViewOptions,
 |};
 
 type DispatchProps = {|
-  +changeSelectedCallNode: typeof changeSelectedCallNode,
-  +changeRightClickedCallNode: typeof changeRightClickedCallNode,
-  +changeExpandedCallNodes: typeof changeExpandedCallNodes,
+  +changeUpperWingSelectedCallNode: typeof changeUpperWingSelectedCallNode,
+  +changeUpperWingRightClickedCallNode: typeof changeUpperWingRightClickedCallNode,
+  +changeUpperWingExpandedCallNodes: typeof changeUpperWingExpandedCallNodes,
   +addTransformToStack: typeof addTransformToStack,
   +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
   +updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen,
@@ -88,7 +84,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class CallTreeImpl extends PureComponent<Props> {
+class UpperWingImpl extends PureComponent<Props> {
   _mainColumn: Column<CallNodeDisplayData> = {
     propName: 'name',
     titleL10nId: '',
@@ -131,12 +127,6 @@ class CallTreeImpl extends PureComponent<Props> {
   }
 
   componentDidUpdate(prevProps) {
-    if (
-      this.props.focusCallTreeGeneration > prevProps.focusCallTreeGeneration
-    ) {
-      this.focus();
-    }
-
     this.maybeProcureInterestingInitialSelection();
 
     if (
@@ -159,8 +149,9 @@ class CallTreeImpl extends PureComponent<Props> {
     newSelectedCallNode: IndexIntoCallNodeTable,
     context: SelectionContext
   ) => {
-    const { callNodeInfo, threadsKey, changeSelectedCallNode } = this.props;
-    changeSelectedCallNode(
+    const { callNodeInfo, threadsKey, changeUpperWingSelectedCallNode } =
+      this.props;
+    changeUpperWingSelectedCallNode(
       threadsKey,
       callNodeInfo.getCallNodePathFromIndex(newSelectedCallNode),
       context
@@ -168,8 +159,9 @@ class CallTreeImpl extends PureComponent<Props> {
   };
 
   _onRightClickSelection = (newSelectedCallNode: IndexIntoCallNodeTable) => {
-    const { callNodeInfo, threadsKey, changeRightClickedCallNode } = this.props;
-    changeRightClickedCallNode(
+    const { callNodeInfo, threadsKey, changeUpperWingRightClickedCallNode } =
+      this.props;
+    changeUpperWingRightClickedCallNode(
       threadsKey,
       callNodeInfo.getCallNodePathFromIndex(newSelectedCallNode)
     );
@@ -178,8 +170,9 @@ class CallTreeImpl extends PureComponent<Props> {
   _onExpandedCallNodesChange = (
     newExpandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>
   ) => {
-    const { callNodeInfo, threadsKey, changeExpandedCallNodes } = this.props;
-    changeExpandedCallNodes(
+    const { callNodeInfo, threadsKey, changeUpperWingExpandedCallNodes } =
+      this.props;
+    changeUpperWingExpandedCallNodes(
       threadsKey,
       newExpandedCallNodeIndexes.map((callNodeIndex) =>
         callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
@@ -313,23 +306,21 @@ class CallTreeImpl extends PureComponent<Props> {
   }
 }
 
-export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
+export const UpperWing = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => ({
     threadsKey: getSelectedThreadsKey(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
-    focusCallTreeGeneration: getFocusCallTreeGeneration(state),
-    tree: selectedThreadSelectors.getCallTree(state),
-    callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+    tree: selectedThreadSelectors.getUpperWingCallTree(state),
+    callNodeInfo: selectedThreadSelectors.getUpperWingCallNodeInfo(state),
     categories: getCategories(state),
     selectedCallNodeIndex:
-      selectedThreadSelectors.getSelectedCallNodeIndex(state),
+      selectedThreadSelectors.getUpperWingSelectedCallNodeIndex(state),
     rightClickedCallNodeIndex:
-      selectedThreadSelectors.getRightClickedCallNodeIndex(state),
+      selectedThreadSelectors.getUpperWingRightClickedCallNodeIndex(state),
     expandedCallNodeIndexes:
-      selectedThreadSelectors.getExpandedCallNodeIndexes(state),
+      selectedThreadSelectors.getUpperWingExpandedCallNodeIndexes(state),
     searchStringsRegExp: getSearchStringsAsRegExp(state),
     disableOverscan: getPreviewSelection(state).isModifying,
-    invertCallstack: getInvertCallstack(state),
     // Use the filtered call node max depth, rather than the preview filtered call node
     // max depth so that the width of the TreeView component is stable across preview
     // selections.
@@ -339,14 +330,14 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     tableViewOptions: getCurrentTableViewOptions(state),
   }),
   mapDispatchToProps: {
-    changeSelectedCallNode,
-    changeRightClickedCallNode,
-    changeExpandedCallNodes,
+    changeUpperWingSelectedCallNode,
+    changeUpperWingRightClickedCallNode,
+    changeUpperWingExpandedCallNodes,
     addTransformToStack,
     handleCallNodeTransformShortcut,
     updateBottomBoxContentsAndMaybeOpen,
     onTableViewOptionsChange: (options: TableViewOptions) =>
-      changeTableViewOptions('calltree', options),
+      changeTableViewOptions('function-list', options),
   },
-  component: CallTreeImpl,
+  component: UpperWingImpl,
 });

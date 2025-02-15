@@ -150,9 +150,9 @@ describe('TooltipCallNode', function () {
         iframeUrl,
       });
 
+      expect(container).toMatchSnapshot();
       expect(getByText(iframeUrl)).toBeInTheDocument();
       expect(getByText(pageUrl)).toBeInTheDocument();
-      expect(container.firstChild).toMatchSnapshot();
     });
 
     it('displays the private browsing information', () => {

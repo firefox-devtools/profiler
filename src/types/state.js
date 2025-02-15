@@ -45,6 +45,7 @@ import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { PathSet } from '../utils/path.js';
 import type { UploadedProfileInformation as ImportedUploadedProfileInformation } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
+import type { IndexIntoFuncTable } from 'firefox-profiler/types';
 
 export type Reducer<T> = (T | void, Action) => T;
 
@@ -60,6 +61,11 @@ export type ThreadViewOptions = {|
   +selectedInvertedCallNodePath: CallNodePath,
   +expandedNonInvertedCallNodePaths: PathSet,
   +expandedInvertedCallNodePaths: PathSet,
+  +selectedFunctionIndex: IndexIntoFuncTable | null,
+  +selectedLowerWingCallNodePath: CallNodePath,
+  +expandedLowerWingCallNodePaths: PathSet,
+  +selectedUpperWingCallNodePath: CallNodePath,
+  +expandedUpperWingCallNodePaths: PathSet,
   +selectedMarker: MarkerIndex | null,
   +selectedNetworkMarker: MarkerIndex | null,
 |};
@@ -72,9 +78,17 @@ export type TableViewOptions = {|
 
 export type TableViewOptionsPerTab = { [TabSlug]: TableViewOptions };
 
+export type CallNodeArea = 'NON_INVERTED_TREE' | 'INVERTED_TREE' | 'LOWER_WING' | 'UPPER_WING';
+
 export type RightClickedCallNode = {|
   +threadsKey: ThreadsKey,
+  +area: CallNodeArea,
   +callNodePath: CallNodePath,
+|};
+
+export type RightClickedFunction = {|
+  +threadsKey: ThreadsKey,
+  +functionIndex: IndexIntoFuncTable,
 |};
 
 export type MarkerReference = {|
@@ -120,6 +134,7 @@ export type ProfileViewState = {
     lastNonShiftClick: LastNonShiftClickInformation | null,
     rightClickedTrack: TrackReference | null,
     rightClickedCallNode: RightClickedCallNode | null,
+    rightClickedFunction: RightClickedFunction | null,
     rightClickedMarker: MarkerReference | null,
     hoveredMarker: MarkerReference | null,
     mouseTimePosition: Milliseconds | null,

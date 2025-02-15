@@ -43,9 +43,11 @@ import type {
   ApiQueryError,
   TableViewOptions,
   DecodedInstruction,
+  CallNodeArea,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
+import type { IndexIntoFuncTable } from '../types';
 
 export type DataSource =
   | 'none'
@@ -196,13 +198,19 @@ type ProfileAction =
       +url: string,
     |}
   | {|
+      +type: 'CHANGE_SELECTED_FUNCTION',
+      +threadsKey: ThreadsKey,
+      +selectedFunctionIndex: IndexIntoFuncTable | null,
+      +context: SelectionContext,
+    |}
+  | {|
       +type: 'ASSIGN_TASK_TRACER_NAMES',
       +addressIndices: number[],
       +symbolNames: string[],
     |}
   | {|
       +type: 'CHANGE_SELECTED_CALL_NODE',
-      +isInverted: boolean,
+      +area: CallNodeArea,
       +threadsKey: ThreadsKey,
       +selectedCallNodePath: CallNodePath,
       +optionalExpandedToCallNodePath: ?CallNodePath,
@@ -216,6 +224,7 @@ type ProfileAction =
   | {|
       +type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
       +threadsKey: ThreadsKey,
+      +area: CallNodeArea,
       +callNodePath: CallNodePath | null,
     |}
   | {|
@@ -224,7 +233,7 @@ type ProfileAction =
   | {|
       +type: 'CHANGE_EXPANDED_CALL_NODES',
       +threadsKey: ThreadsKey,
-      +isInverted: boolean,
+      +area: CallNodeArea,
       +expandedCallNodePaths: Array<CallNodePath>,
     |}
   | {|

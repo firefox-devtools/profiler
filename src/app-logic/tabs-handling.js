@@ -11,6 +11,7 @@
  */
 export const tabsWithTitleL10nId = {
   calltree: 'TabBar--calltree-tab',
+  'function-list': 'TabBar--function-list-tab',
   'flame-graph': 'TabBar--flame-graph-tab',
   'stack-chart': 'TabBar--stack-chart-tab',
   'marker-chart': 'TabBar--marker-chart-tab',
@@ -43,6 +44,7 @@ export const tabsWithTitleL10nIdArray: $ReadOnlyArray<TabsWithTitleL10nId> =
 
 export const tabsShowingSampleData: $ReadOnlyArray<TabSlug> = [
   'calltree',
+  'function-list',
   'flame-graph',
   'stack-chart',
 ];

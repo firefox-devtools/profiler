@@ -18,10 +18,12 @@ import {
   getAssemblyViewIsOpen,
   getAssemblyViewNativeSymbol,
   getAssemblyViewScrollGeneration,
+  // getSelectedTab,
 } from 'firefox-profiler/selectors/url-state';
 import {
   selectedThreadSelectors,
   selectedNodeSelectors,
+  // selectedFunctionTableNodeSelectors,
 } from 'firefox-profiler/selectors/per-thread';
 import { closeBottomBox } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
@@ -284,7 +286,10 @@ export const BottomBox = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     sourceViewFile: getSourceViewFile(state),
     sourceViewCode: getSourceViewCode(state),
-    globalLineTimings: selectedThreadSelectors.getSourceViewLineTimings(state),
+    globalLineTimings:
+      // getSelectedTab(state) === 'function-list'
+      //   ? selectedFunctionTableNodeSelectors.getSourceViewLineTimings(state) :
+      selectedNodeSelectors.getSourceViewLineTimings(state),
     selectedCallNodeLineTimings:
       selectedNodeSelectors.getSourceViewLineTimings(state),
     sourceViewScrollGeneration: getSourceViewScrollGeneration(state),

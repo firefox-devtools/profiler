@@ -37,6 +37,7 @@ import type {
   IndexIntoSubcategoryListForCategory,
 } from './profile';
 import type { IndexedArray } from './utils';
+import type { BitSet } from '../utils/bitset';
 import type { StackTiming } from '../profile-logic/stack-timing';
 import type { StringTable } from '../utils/string-table';
 export type IndexIntoCallNodeTable = number;
@@ -296,12 +297,16 @@ export type CallNodeTable = {
   // -2: no inlining
   sourceFramesInlinedIntoSymbol: Int32Array,
   // The depth of the call node. Roots have depth 0.
-  depth: number[],
+  depth: Int32Array,
   // The maximum value in the depth column, or -1 if this table is empty.
   maxDepth: number,
   // The number of call nodes. All columns in this table have this length.
   length: number,
 };
+
+// A bitset which indicates something per call node. Use `checkBit` from
+// utils/bitset to check whether a call node is part of the set.
+export type CallNodeTableBitSet = BitSet;
 
 export type LineNumber = number;
 
