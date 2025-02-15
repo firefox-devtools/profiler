@@ -52,18 +52,62 @@ describe('selectors/getStackTimingByDepth', function () {
       store.getState()
     );
     expect(stackTimingByDepth).toEqual([
-      { start: [0], end: [91], callNode: [0], length: 1 },
-      { start: [0, 50], end: [40, 91], callNode: [1, 1], length: 2 },
+      {
+        start: [0],
+        end: [91],
+        sameWidthsStart: [0],
+        sameWidthsEnd: [9],
+        callNode: [0],
+        length: 1,
+      },
+      {
+        start: [0, 50],
+        end: [40, 91],
+        sameWidthsStart: [0, 5],
+        sameWidthsEnd: [3, 9],
+        callNode: [1, 1],
+        length: 2,
+      },
       {
         start: [10, 30, 60],
         end: [30, 40, 91],
+        sameWidthsStart: [1, 3, 6],
+        sameWidthsEnd: [2, 3, 8],
         callNode: [2, 3, 4],
         length: 3,
       },
-      { start: [70], end: [90], callNode: [5], length: 1 },
-      { start: [80], end: [90], callNode: [6], length: 1 },
-      { start: [80], end: [90], callNode: [7], length: 1 },
-      { start: [80], end: [90], callNode: [8], length: 1 },
+      {
+        start: [70],
+        end: [90],
+        sameWidthsStart: [7],
+        sameWidthsEnd: [8],
+        callNode: [5],
+        length: 1,
+      },
+      {
+        start: [80],
+        end: [90],
+        sameWidthsStart: [8],
+        sameWidthsEnd: [8],
+        callNode: [6],
+        length: 1,
+      },
+      {
+        start: [80],
+        end: [90],
+        sameWidthsStart: [8],
+        sameWidthsEnd: [8],
+        callNode: [7],
+        length: 1,
+      },
+      {
+        start: [80],
+        end: [90],
+        sameWidthsStart: [8],
+        sameWidthsEnd: [8],
+        callNode: [8],
+        length: 1,
+      },
     ]);
   });
 
