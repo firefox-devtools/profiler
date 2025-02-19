@@ -17,9 +17,9 @@ body {
    * (used on Linux Gnome), because it lacks a glyph for the symbol µ.
    * Please keep it synced with res/photon/style.css.
    */
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    Oxygen-Sans, Ubuntu, 'Noto Sans', 'Liberation Sans', Cantarell,
-    'Helvetica Neue', sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu,
+    'Noto Sans', 'Liberation Sans', Cantarell, 'Helvetica Neue', sans-serif;
   font-size: 11px;
 
   /* equal size all numbers, so that longer numbers are larger */
