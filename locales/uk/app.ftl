@@ -121,6 +121,7 @@ CallNodeContextMenu--searchfox = Шукати назву функції у Searc
 CallNodeContextMenu--copy-function-name = Скопіювати назву функції
 CallNodeContextMenu--copy-script-url = Скопіювати URL-адресу скрипту
 CallNodeContextMenu--copy-stack = Копіювати стек
+CallNodeContextMenu--show-the-function-in-devtools = Показати функцію в інструментах розробника
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -641,6 +642,11 @@ PanelSearch--search-field-hint = Чи знаєте ви, що для пошук�
 
 ## Profile Name Button
 
+ProfileName--edit-profile-name-button =
+    .title = Змінити назву профілю
+ProfileName--edit-profile-name-input =
+    .title = Змінити назву профілю
+    .aria-label = Назва профілю
 
 ## Profile Delete Button
 

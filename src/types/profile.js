@@ -258,8 +258,21 @@ export type FrameTable = {|
   // nativeSymbol, but each has a different func and line.
   inlineDepth: number[],
 
+  // The category of the frame. This is used to calculate the category of the stack nodes
+  // which use this frame:
+  // - If the frame has a null category, the stack node inherits its parent node's category
+  //   and subcategory. If there is no parent node, we use the "default category" (see ProfileMeta.categories).
+  // - If the frame has a non-null category, this category and subcategory is used for the stack node.
   category: (IndexIntoCategoryList | null)[],
+
+  // The subcategory of a frame. This is used to calculate the subcategory of the stack nodes
+  // which use this frame.
+  // Must be non-null if the frame's category is non-null.
+  // Ignored if the frame's category is null.
+  // 0 is always a valid value and refers to the "Other" subcategory (see Category.subcategories).
   subcategory: (IndexIntoSubcategoryListForCategory | null)[],
+
+  // The frame's function.
   func: IndexIntoFuncTable[],
 
   // The symbol index (referring into this thread's nativeSymbols table) corresponding
@@ -391,9 +404,36 @@ export type Lib = {|
   codeId: string | null, // e.g. "6132B96B70fd000"
 |};
 
+// The list of available category colors.
+//
+// We don't accept just any CSS color so that the front-end has more freedom about
+// picking colors, for example to ensure contrast or to adjust to light/dark modes.
+export type CategoryColor =
+  | 'transparent' // used for "idle" frames / stacks
+  | 'purple'
+  | 'green'
+  | 'orange'
+  | 'yellow'
+  | 'lightblue'
+  | 'blue'
+  | 'brown'
+  | 'magenta'
+  | 'red'
+  | 'lightred'
+  | 'darkgrey'
+  | 'grey'; // <-- "grey" marks the default category
+
+// A category in profile.meta.categories, used for stack frames and call nodes.
 export type Category = {|
+  // The category name.
   name: string,
-  color: string,
+
+  // The category color. Must be picked from the CategoryColor list. At least one
+  // category with color "grey" must be present in the category list.
+  color: CategoryColor,
+
+  // The list of subcategories. Must always have at least one element; subcategory
+  // zero must be the "Other" subcategory and is used to refer to the category itself.
   subcategories: string[],
 |};
 
@@ -739,10 +779,10 @@ export type ProfileMeta = {|
   // The extensions property landed in Firefox 60, and is only optional because older
   // processed profile versions may not have it. No upgrader was written for this change.
   extensions?: ExtensionTable,
-  // The list of categories as provided by the platform. The categories are present for
-  // all Firefox profiles, but imported profiles may not include any category support.
-  // The front-end will provide a default list of categories, but the saved profile
-  // will not include them.
+  // The list of categories used in this profile. If present, it must contain at least the
+  // "default category" which is defined as the first category whose color is "grey" - this
+  // category usually has the name "Other".
+  // If meta.categories is not present, a default list is substituted.
   categories?: CategoryList,
   // The name of the product, most likely "Firefox".
   product: 'Firefox' | string,

@@ -8,7 +8,7 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import {
   getCallTree,
-  computeCallNodeLeafAndSummary,
+  computeCallNodeSelfAndSummary,
   computeCallTreeTimings,
 } from '../../profile-logic/call-tree';
 import { computeFlameGraphRows } from '../../profile-logic/flame-graph';
@@ -69,21 +69,23 @@ describe('unfiltered call tree', function () {
     it('yields expected results', function () {
       const callTreeTimings = computeCallTreeTimings(
         callNodeInfo,
-        computeCallNodeLeafAndSummary(
+        computeCallNodeSelfAndSummary(
           thread.samples,
           getSampleIndexToCallNodeIndex(
             thread.samples.stack,
-            callNodeInfo.getStackIndexToCallNodeIndex()
+            callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
           ),
-          callNodeInfo.getCallNodeTable().length
+          callNodeInfo.getNonInvertedCallNodeTable().length
         )
       );
       expect(callTreeTimings).toEqual({
-        rootTotalSummary: 3,
-        callNodeHasChildren: new Uint8Array([1, 1, 1, 1, 0, 1, 0, 1, 0]),
-        self: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
-        leaf: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
-        total: new Float32Array([3, 3, 2, 1, 1, 1, 1, 1, 1]),
+        type: 'NON_INVERTED',
+        timings: {
+          rootTotalSummary: 3,
+          callNodeHasChildren: new Uint8Array([1, 1, 1, 1, 0, 1, 0, 1, 0]),
+          self: new Float64Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
+          total: new Float64Array([3, 3, 2, 1, 1, 1, 1, 1, 1]),
+        },
       });
     });
   });
@@ -193,6 +195,26 @@ describe('unfiltered call tree', function () {
         '      - I (total: 1, self: 1)',
       ]);
     });
+  });
+
+  it('computes correct numbers when using large weights', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A  A
+      B  C
+    `);
+
+    // Compute 485407757 + 1222 == 485408979.
+    // If the weights are stored as floats, this checks that we aren't using
+    // 32-bit floats - those wouldn't have enough precision.
+    const [rawThread] = profile.threads;
+    rawThread.samples.weightType = 'bytes';
+    rawThread.samples.weight = [485407757, 1222];
+    const callTree = callTreeFromProfile(profile);
+    expect(formatTree(callTree)).toEqual([
+      '- A (total: 485,408,979, self: —)',
+      '  - B (total: 485,407,757, self: 485,407,757)',
+      '  - C (total: 1,222, self: 1,222)',
+    ]);
   });
 
   /**
@@ -420,13 +442,13 @@ describe('inverted call tree', function () {
     );
     const callTreeTimings = computeCallTreeTimings(
       callNodeInfo,
-      computeCallNodeLeafAndSummary(
+      computeCallNodeSelfAndSummary(
         thread.samples,
         getSampleIndexToCallNodeIndex(
           thread.samples.stack,
-          callNodeInfo.getStackIndexToCallNodeIndex()
+          callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
         ),
-        callNodeInfo.getCallNodeTable().length
+        callNodeInfo.getNonInvertedCallNodeTable().length
       )
     );
     const callTree = getCallTree(
@@ -455,20 +477,20 @@ describe('inverted call tree', function () {
 
     // Now compute the inverted tree and check it.
     const invertedCallNodeInfo = getInvertedCallNodeInfo(
-      thread,
       callNodeInfo.getNonInvertedCallNodeTable(),
       callNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
-      defaultCategory
+      defaultCategory,
+      thread.funcTable.length
     );
     const invertedCallTreeTimings = computeCallTreeTimings(
       invertedCallNodeInfo,
-      computeCallNodeLeafAndSummary(
+      computeCallNodeSelfAndSummary(
         thread.samples,
         getSampleIndexToCallNodeIndex(
           thread.samples.stack,
-          invertedCallNodeInfo.getStackIndexToCallNodeIndex()
+          invertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
         ),
-        invertedCallNodeInfo.getCallNodeTable().length
+        invertedCallNodeInfo.getNonInvertedCallNodeTable().length
       )
     );
     const invertedCallTree = getCallTree(
@@ -612,16 +634,16 @@ describe('diffing trees', function () {
     );
     const callTreeTimings = computeCallTreeTimings(
       callNodeInfo,
-      computeCallNodeLeafAndSummary(
+      computeCallNodeSelfAndSummary(
         thread.samples,
         getSampleIndexToCallNodeIndex(
           thread.samples.stack,
-          callNodeInfo.getStackIndexToCallNodeIndex()
+          callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
         ),
-        callNodeInfo.getCallNodeTable().length
+        callNodeInfo.getNonInvertedCallNodeTable().length
       )
     );
-    expect(callTreeTimings.rootTotalSummary).toBe(12);
+    expect(callTreeTimings.timings.rootTotalSummary).toBe(12);
   });
 });
 

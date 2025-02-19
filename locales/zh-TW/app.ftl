@@ -90,6 +90,7 @@ CallNodeContextMenu--searchfox = 用 Searchfox 搜尋函數名稱
 CallNodeContextMenu--copy-function-name = 複製函數名稱
 CallNodeContextMenu--copy-script-url = 複製指令碼網址
 CallNodeContextMenu--copy-stack = 複製堆疊
+CallNodeContextMenu--show-the-function-in-devtools = 於開發者工具中顯示函數
 
 ## CallTree
 ## This is the component for Call Tree panel.

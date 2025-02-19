@@ -278,7 +278,9 @@ class GlobalTrackComponent extends PureComponent<Props> {
                 //   2. The global track actually points to a real thread. A stub
                 //      process track is created
               }
-              {pid !== null && globalTrack.mainThreadIndex !== null ? (
+              {pid !== null &&
+              pid !== '0' &&
+              globalTrack.mainThreadIndex !== null ? (
                 <div className="timelineTrackNameButtonAdditionalDetails">
                   PID: {pid}
                 </div>

@@ -18,7 +18,6 @@ import type {
 import type {
   Thread,
   CallNodePath,
-  CallNodeInfo,
   GlobalTrack,
   LocalTrack,
   TrackIndex,
@@ -32,6 +31,7 @@ import type { FuncToFuncsMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
+import type { CallNodeInfo } from '../profile-logic/call-node-info';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type {
   PseudoStrategy,

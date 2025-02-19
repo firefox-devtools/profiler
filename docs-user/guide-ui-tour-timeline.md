@@ -47,6 +47,7 @@ Perhaps one of the most useful markers is the responsiveness marker—pictured h
 Only certain markers are broken out and colored in the timeline. A similar but more detailed view can be seen in the Marker Chart panel.
 
 ## Timeline's network activity
+
 ![A screenshot highlighting the timeline's network activity.](images/ui-tour-timeline-network.png)
 
 Network requests are displayed in the timeline, which can be useful to correlate
@@ -58,6 +59,7 @@ Hovering a network request will show interesting information about it, and
 clicking it will switch to the more detailed network panel.
 
 ## Timeline's memory usage change
+
 ![A screenshot highlighting the timeline's memory usage.](images/ui-tour-timeline-memory.png)
 
 The timeline also gives an overview of the memory usage change for a process.
@@ -66,6 +68,7 @@ difference between the lowest and highest memory usage during the profiling
 session.
 
 ## Track selection
+
 ![A screenshot showing the track selection button.](images/ui-tour-timeline-track-selection.png)
 
 With the button right above the tracks it's possible to either hide tracks and

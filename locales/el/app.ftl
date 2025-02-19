@@ -121,6 +121,7 @@ CallNodeContextMenu--searchfox = Αναζήτηση ονόματος συνάρ�
 CallNodeContextMenu--copy-function-name = Αντιγραφή ονόματος συνάρτησης
 CallNodeContextMenu--copy-script-url = Αντιγραφή URL σεναρίου
 CallNodeContextMenu--copy-stack = Αντιγραφή στοίβας
+CallNodeContextMenu--show-the-function-in-devtools = Εμφάνιση της συνάρτησης στα DevTools
 
 ## CallTree
 ## This is the component for Call Tree panel.
