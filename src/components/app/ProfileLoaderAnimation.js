@@ -61,7 +61,9 @@ class ProfileLoaderAnimationImpl extends PureComponent<ProfileLoaderAnimationPro
       : 'ProfileLoaderAnimation--loading-view-not-found';
     const showLoader = Boolean(loadingMessage);
     const showBackHomeLink = Boolean(
-      view.additionalData && view.additionalData.message
+      view.additionalData &&
+        view.additionalData.message &&
+        dataSource === 'from-file'
     );
 
     return (
