@@ -119,6 +119,7 @@ CallNodeContextMenu--searchfox = Leta upp funktionsnamnet på Searchfox
 CallNodeContextMenu--copy-function-name = Kopiera funktionsnamn
 CallNodeContextMenu--copy-script-url = Kopiera skript-URL
 CallNodeContextMenu--copy-stack = Kopiera stack
+CallNodeContextMenu--show-the-function-in-devtools = Visa funktionen i DevTools
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -635,6 +636,11 @@ PanelSearch--search-field-hint = Visste du att du kan använda komma (,) för at
 
 ## Profile Name Button
 
+ProfileName--edit-profile-name-button =
+    .title = Redigera profilnamn
+ProfileName--edit-profile-name-input =
+    .title = Redigera profilnamn
+    .aria-label = Profilnamn
 
 ## Profile Delete Button
 

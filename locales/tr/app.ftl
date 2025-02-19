@@ -71,6 +71,7 @@ CallNodeContextMenu--searchfox = Fonksiyon adını Searchfox’ta ara
 CallNodeContextMenu--copy-function-name = Fonksiyon adını kopyala
 CallNodeContextMenu--copy-script-url = Betik URL’sini kopyala
 CallNodeContextMenu--copy-stack = Yığını kopyala
+CallNodeContextMenu--show-the-function-in-devtools = Fonksiyonu geliştirici araçlarında göster
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -123,6 +124,10 @@ CallTreeSidebar--implementation = Yürütme
 ## See: https://profiler.firefox.com/compare/
 
 CompareHome--instruction-title = Karşılaştırmak istediğiniz profil URL’lerini girin
+CompareHome--instruction-content =
+    Araç, her profil için seçilen yol ve aralıktan verileri çıkaracak ve
+    karşılaştırmayı kolaylaştırmak için her ikisini de aynı görünüme
+    yerleştirecektir.
 CompareHome--form-label-profile1 = Profil 1:
 CompareHome--form-label-profile2 = Profil 2:
 CompareHome--submit-button =
@@ -201,6 +206,7 @@ Home--additional-content-title = Mevcut profilleri yükleyin
 Home--additional-content-content = Profil dosyasını buraya <strong>sürükleyip bırakarak</strong> yükleyebilirsiniz ya da:
 Home--compare-recordings-info = Ayrıca kayıtları karşılaştırabilirsiniz. <a>Karşılaştırma arayüzünü aç.</a>
 Home--your-recent-uploaded-recordings-title = Son yüklediğiniz kayıtlar
+Home--install-chrome-extension = Chrome uzantısını yükle
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.

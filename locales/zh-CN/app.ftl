@@ -90,6 +90,7 @@ CallNodeContextMenu--searchfox = 用 Searchfox 搜索函数名称
 CallNodeContextMenu--copy-function-name = 复制函数名称
 CallNodeContextMenu--copy-script-url = 复制脚本 URL
 CallNodeContextMenu--copy-stack = 复制栈
+CallNodeContextMenu--show-the-function-in-devtools = 在开发者工具中显示函数
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -548,6 +549,11 @@ PanelSearch--search-field-hint = 您知道可以使用半角逗号（,）搜索�
 
 ## Profile Name Button
 
+ProfileName--edit-profile-name-button =
+    .title = 编辑分析记录名
+ProfileName--edit-profile-name-input =
+    .title = 编辑分析记录名
+    .aria-label = 分析记录名
 
 ## Profile Delete Button
 

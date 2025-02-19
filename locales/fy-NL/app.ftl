@@ -121,6 +121,7 @@ CallNodeContextMenu--searchfox = De funksjenamme op Searchfox opsykje
 CallNodeContextMenu--copy-function-name = Funksjenamme kopiearje
 CallNodeContextMenu--copy-script-url = Script-URL kopiearje
 CallNodeContextMenu--copy-stack = Stack kopiearje
+CallNodeContextMenu--show-the-function-in-devtools = Funksje toane yn DevTools
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -640,6 +641,11 @@ PanelSearch--search-field-hint = Wisten jo dat jo de komma (,) brûke kinne om m
 
 ## Profile Name Button
 
+ProfileName--edit-profile-name-button =
+    .title = De profylnamme bewurkje
+ProfileName--edit-profile-name-input =
+    .title = De profylnamme bewurkje
+    .aria-label = Profylnamme
 
 ## Profile Delete Button
 

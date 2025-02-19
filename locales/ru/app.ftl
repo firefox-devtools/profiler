@@ -121,6 +121,7 @@ CallNodeContextMenu--searchfox = Найти название функции на
 CallNodeContextMenu--copy-function-name = Скопировать имя функции
 CallNodeContextMenu--copy-script-url = Скопировать URL сценария
 CallNodeContextMenu--copy-stack = Скопировать стек
+CallNodeContextMenu--show-the-function-in-devtools = Показать функцию в DevTools
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -654,6 +655,11 @@ PanelSearch--search-field-hint = Знаете ли вы, что можно ис�
 
 ## Profile Name Button
 
+ProfileName--edit-profile-name-button =
+    .title = Изменить имя профиля
+ProfileName--edit-profile-name-input =
+    .title = Изменить имя профиля
+    .aria-label = Имя профиля
 
 ## Profile Delete Button
 
