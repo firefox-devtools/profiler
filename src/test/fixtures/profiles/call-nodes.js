@@ -87,7 +87,6 @@ export default function getProfile(): Profile {
     category: Array(frameFuncs.length).fill(null),
     subcategory: Array(frameFuncs.length).fill(null),
     innerWindowID: Array(frameFuncs.length).fill(null),
-    implementation: Array(frameFuncs.length).fill(null),
     line: Array(frameFuncs.length).fill(null),
     column: Array(frameFuncs.length).fill(null),
     length: frameFuncs.length,

@@ -208,7 +208,6 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
   frameTable.category.push(otherCategory);
   frameTable.subcategory.push(otherSubCategory);
   frameTable.innerWindowID.push(null);
-  frameTable.implementation.push(null);
   frameTable.nativeSymbol.push(null);
   frameTable.inlineDepth.push(0);
   frameTable.func.push(rootFuncIndex);
@@ -280,7 +279,6 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     frameTable.category.push(otherCategory);
     frameTable.subcategory.push(otherSubCategory);
     frameTable.innerWindowID.push(null);
-    frameTable.implementation.push(null);
     frameTable.nativeSymbol.push(null);
     frameTable.inlineDepth.push(0);
     frameTable.func.push(funcIndex);
@@ -390,7 +388,6 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     thread.frameTable.category = frameTable.category.slice();
     thread.frameTable.subcategory = frameTable.subcategory.slice();
     thread.frameTable.innerWindowID = frameTable.innerWindowID.slice();
-    thread.frameTable.implementation = frameTable.implementation.slice();
     thread.frameTable.func = frameTable.func.slice();
     thread.frameTable.length = frameTable.length;
 

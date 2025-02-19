@@ -680,7 +680,6 @@ async function processTracingEvents(
           frameTable.func[frameIndex] = funcId;
           frameTable.nativeSymbol[frameIndex] = null;
           frameTable.innerWindowID[frameIndex] = 0;
-          frameTable.implementation[frameIndex] = null;
           frameTable.line[frameIndex] =
             lineNumber === undefined ? null : lineNumber;
           frameTable.column[frameIndex] =

@@ -268,7 +268,6 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     ProfileSelectors.getCategories,
     selectedThreadSelectors.getPreviewFilteredCtssSamples,
     selectedThreadSelectors.getUnfilteredCtssSamples,
-    ProfileSelectors.getProfileUsesFrameImplementation,
     ProfileData.getTimingsForPath
   );
 

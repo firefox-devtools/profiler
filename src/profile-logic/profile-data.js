@@ -29,11 +29,7 @@ import { timeCode } from 'firefox-profiler/utils/time-code';
 import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import { StringTable } from 'firefox-profiler/utils/string-table';
-import {
-  assertExhaustiveCheck,
-  ensureExists,
-  getFirstItemFromSet,
-} from 'firefox-profiler/utils/flow';
+import { ensureExists, getFirstItemFromSet } from 'firefox-profiler/utils/flow';
 import {
   numberSeriesFromDeltas,
   numberSeriesToDeltas,
@@ -813,14 +809,6 @@ export function getLeafFuncIndex(path: CallNodePath): IndexIntoFuncTable {
   return path[path.length - 1];
 }
 
-export type JsImplementation =
-  | 'interpreter'
-  | 'blinterp'
-  | 'baseline'
-  | 'ion'
-  | 'unknown';
-export type StackImplementation = 'native' | JsImplementation;
-export type BreakdownByImplementation = { [StackImplementation]: Milliseconds };
 export type OneCategoryBreakdown = {|
   entireCategoryValue: Milliseconds,
   subcategoryBreakdown: Milliseconds[], // { [IndexIntoSubcategoryList]: Milliseconds }
@@ -830,13 +818,11 @@ export type ItemTimings = {|
   selfTime: {|
     // time spent excluding children
     value: Milliseconds,
-    breakdownByImplementation: BreakdownByImplementation | null,
     breakdownByCategory: BreakdownByCategory | null,
   |},
   totalTime: {|
     // time spent including children
     value: Milliseconds,
-    breakdownByImplementation: BreakdownByImplementation | null,
     breakdownByCategory: BreakdownByCategory | null,
   |},
 |};
@@ -859,8 +845,7 @@ export function getTimingsForPath(
   sampleIndexOffset: number,
   categories: CategoryList,
   samples: SamplesLikeTable,
-  unfilteredSamples: SamplesLikeTable,
-  displayImplementation: boolean
+  unfilteredSamples: SamplesLikeTable
 ) {
   return getTimingsForCallNodeIndex(
     callNodeInfo.getCallNodeIndexFromPath(needlePath),
@@ -870,8 +855,7 @@ export function getTimingsForPath(
     sampleIndexOffset,
     categories,
     samples,
-    unfilteredSamples,
-    displayImplementation
+    unfilteredSamples
   );
 }
 
@@ -891,38 +875,24 @@ export function getTimingsForCallNodeIndex(
   sampleIndexOffset: number,
   categories: CategoryList,
   samples: SamplesLikeTable,
-  unfilteredSamples: SamplesLikeTable,
-  displayImplementation: boolean
+  unfilteredSamples: SamplesLikeTable
 ): TimingsForPath {
   /* ------------ Variables definitions ------------*/
 
   // This is the data from the unfiltered thread that we'll use to gather
   // category and JS implementation information. Note that samples are offset by
   // `sampleIndexOffset` because of range filtering.
-  const {
-    stackTable: unfilteredStackTable,
-    funcTable: unfilteredFuncTable,
-    frameTable: unfilteredFrameTable,
-    stringTable,
-  } = unfilteredThread;
-
-  // This holds the category index for the JavaScript category, so that we can
-  // use it to quickly check the category later on.
-  const javascriptCategoryIndex = categories.findIndex(
-    ({ name }) => name === 'JavaScript'
-  );
+  const { stackTable: unfilteredStackTable } = unfilteredThread;
 
   // This object holds the timings for the current call node path, specified by
   // needleNodeIndex.
   const pathTimings: ItemTimings = {
     selfTime: {
       value: 0,
-      breakdownByImplementation: null,
       breakdownByCategory: null,
     },
     totalTime: {
       value: 0,
-      breakdownByImplementation: null,
       breakdownByCategory: null,
     },
   };
@@ -938,86 +908,10 @@ export function getTimingsForCallNodeIndex(
    * the algorithm's parameters. */
 
   /**
-   * This function is called for native stacks. If the native stack has the
-   * 'JavaScript' category, then we move up the call tree to find the nearest
-   * ancestor that's JS and returns its JS implementation.
-   */
-  function getImplementationForNativeStack(
-    unfilteredStackIndex: IndexIntoStackTable
-  ): StackImplementation {
-    const category = unfilteredStackTable.category[unfilteredStackIndex];
-    if (category !== javascriptCategoryIndex) {
-      return 'native';
-    }
-
-    for (
-      let currentStackIndex = unfilteredStackIndex;
-      currentStackIndex !== null;
-      currentStackIndex = unfilteredStackTable.prefix[currentStackIndex]
-    ) {
-      const frameIndex = unfilteredStackTable.frame[currentStackIndex];
-      const funcIndex = unfilteredFrameTable.func[frameIndex];
-      const isJS = unfilteredFuncTable.isJS[funcIndex];
-      if (isJS) {
-        return getImplementationForJsStack(frameIndex);
-      }
-    }
-
-    // No JS frame was found in the ancestors, this is weird but why not?
-    return 'native';
-  }
-
-  /**
-   * This function Returns the JS implementation information for a specific JS stack.
-   */
-  function getImplementationForJsStack(
-    unfilteredFrameIndex: IndexIntoFrameTable
-  ): JsImplementation {
-    const jsImplementationStrIndex =
-      unfilteredFrameTable.implementation[unfilteredFrameIndex];
-
-    if (jsImplementationStrIndex === null) {
-      return 'interpreter';
-    }
-
-    const jsImplementation = stringTable.getString(jsImplementationStrIndex);
-
-    switch (jsImplementation) {
-      case 'baseline':
-      case 'blinterp':
-      case 'ion':
-        return jsImplementation;
-      default:
-        return 'unknown';
-    }
-  }
-
-  function getImplementationForStack(
-    thisSampleIndex: IndexIntoSamplesTable
-  ): StackImplementation {
-    const stackIndex =
-      unfilteredSamples.stack[thisSampleIndex + sampleIndexOffset];
-    if (stackIndex === null) {
-      // This should not happen in the unfiltered thread.
-      console.error('We got a null stack, this should not happen.');
-      return 'native';
-    }
-
-    const frameIndex = unfilteredStackTable.frame[stackIndex];
-    const funcIndex = unfilteredFrameTable.func[frameIndex];
-    const implementation = unfilteredFuncTable.isJS[funcIndex]
-      ? getImplementationForJsStack(frameIndex)
-      : getImplementationForNativeStack(stackIndex);
-
-    return implementation;
-  }
-
-  /**
    * This is a small utility function to more easily add data to breakdowns.
    */
   function accumulateDataToTimings(
     timings: {
-      breakdownByImplementation: BreakdownByImplementation | null,
       breakdownByCategory: BreakdownByCategory | null,
       value: number,
     },
@@ -1027,23 +921,7 @@ export function getTimingsForCallNodeIndex(
     // Step 1: increment the total value
     timings.value += duration;
 
-    if (displayImplementation) {
-      // Step 2: find the implementation value for this sample
-      const implementation = getImplementationForStack(sampleIndex);
-
-      // Step 3: increment the right value in the implementation breakdown
-      if (timings.breakdownByImplementation === null) {
-        timings.breakdownByImplementation = {};
-      }
-      if (timings.breakdownByImplementation[implementation] === undefined) {
-        timings.breakdownByImplementation[implementation] = 0;
-      }
-      timings.breakdownByImplementation[implementation] += duration;
-    } else {
-      timings.breakdownByImplementation = null;
-    }
-
-    // step 4: find the category value for this stack. We want to use the
+    // step 2: find the category value for this stack. We want to use the
     // category of the unfilteredThread.
     const unfilteredStackIndex =
       unfilteredSamples.stack[sampleIndex + sampleIndexOffset];
@@ -1052,7 +930,7 @@ export function getTimingsForCallNodeIndex(
       const subcategoryIndex =
         unfilteredStackTable.subcategory[unfilteredStackIndex];
 
-      // step 5: increment the right value in the category breakdown
+      // step 3: increment the right value in the category breakdown
       if (timings.breakdownByCategory === null) {
         timings.breakdownByCategory = categories.map((category) => ({
           entireCategoryValue: 0,
@@ -1087,7 +965,7 @@ export function getTimingsForCallNodeIndex(
       callNodeInfoInverted.getSuffixOrderIndexRangeForCallNode(needleNodeIndex);
 
     // Loop over each sample and accumulate the self time, running time, and
-    // the implementation breakdown.
+    // the category breakdown.
     for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
       // Get the call node for this sample.
       // TODO: Consider using sampleCallNodes for this, to save one indirection on
@@ -1123,7 +1001,7 @@ export function getTimingsForCallNodeIndex(
       callNodeTable.subtreeRangeEnd[needleNodeIndex];
 
     // Loop over each sample and accumulate the self time, running time, and
-    // the implementation breakdown.
+    // the category breakdown.
     for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
       // Get the call node for this sample.
       // TODO: Consider using sampleCallNodes for this, to save one indirection on
@@ -3126,25 +3004,6 @@ function _getTreeOrderComparatorInverted(
   };
 }
 
-export function getFriendlyStackTypeName(
-  implementation: StackImplementation
-): string {
-  switch (implementation) {
-    case 'interpreter':
-      return 'JS interpreter';
-    case 'blinterp':
-    case 'baseline':
-    case 'ion':
-      return `JS JIT (${implementation})`;
-    case 'native':
-      return 'Native code';
-    case 'unknown':
-      return implementation;
-    default:
-      throw assertExhaustiveCheck(implementation);
-  }
-}
-
 export function shouldDisplaySubcategoryInfoForCategory(
   category: Category
 ): boolean {
@@ -3770,7 +3629,6 @@ export function nudgeReturnAddresses(thread: RawThread): RawThread {
       newFrameTable.func.push(frameTable.func[frame]);
       newFrameTable.nativeSymbol.push(frameTable.nativeSymbol[frame]);
       newFrameTable.innerWindowID.push(frameTable.innerWindowID[frame]);
-      newFrameTable.implementation.push(frameTable.implementation[frame]);
       newFrameTable.line.push(frameTable.line[frame]);
       newFrameTable.column.push(frameTable.column[frame]);
       newFrameTable.length++;

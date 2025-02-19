@@ -16,7 +16,6 @@ import {
   getProfileInterval,
   getInnerWindowIDToPageMap,
   getProfileUsesMultipleStackTypes,
-  getProfileUsesFrameImplementation,
 } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
@@ -92,7 +91,6 @@ type StateProps = {|
   +ctssSamples: SamplesLikeTable,
   +unfilteredCtssSamples: SamplesLikeTable,
   +tracedTiming: CallTreeTimings | null,
-  +displayImplementation: boolean,
   +displayStackType: boolean,
 |};
 type DispatchProps = {|
@@ -342,7 +340,6 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       ctssSamples,
       unfilteredCtssSamples,
       tracedTiming,
-      displayImplementation,
       displayStackType,
     } = this.props;
 
@@ -410,7 +407,6 @@ class FlameGraphImpl extends React.PureComponent<Props> {
               ctssSamples,
               unfilteredCtssSamples,
               tracedTiming: tracedTimingNonInverted,
-              displayImplementation,
               displayStackType,
             }}
           />
@@ -460,7 +456,6 @@ export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
     unfilteredCtssSamples:
       selectedThreadSelectors.getUnfilteredCtssSamples(state),
     tracedTiming: selectedThreadSelectors.getTracedTiming(state),
-    displayImplementation: getProfileUsesFrameImplementation(state),
     displayStackType: getProfileUsesMultipleStackTypes(state),
   }),
   mapDispatchToProps: {
