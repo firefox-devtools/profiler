@@ -1,7 +1,16 @@
 {
   "private": true,
   "engines": {
-    "node": ">= 18.16 < 19"
+    "node": ">= 22 < 23"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">= 22 < 23"
+    },
+    "packageManager": {
+      "name": "yarn"
+    }
   },
   "scripts": {
     "build:clean": "rimraf dist && mkdirp dist",
