@@ -448,7 +448,6 @@ describe('profile-data', function () {
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable,
       defaultCategory
     );
     const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
@@ -498,7 +497,6 @@ describe('profile-data', function () {
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable,
       defaultCategory
     );
     const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
@@ -581,7 +579,6 @@ describe('getInvertedCallNodeInfo', function () {
     const nonInvertedCallNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable,
       defaultCategory
     );
 
@@ -882,14 +879,12 @@ describe('funcHasDirectRecursiveCall and funcHasRecursiveCall', function () {
     const callNodeTable = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable,
       defaultCategory
     ).getNonInvertedCallNodeTable();
     const jsOnlyThread = filterThreadByImplementation(thread, 'js');
     const jsOnlyCallNodeTable = getCallNodeInfo(
       jsOnlyThread.stackTable,
       jsOnlyThread.frameTable,
-      jsOnlyThread.funcTable,
       defaultCategory
     ).getNonInvertedCallNodeTable();
     return { callNodeTable, jsOnlyCallNodeTable, funcNames };
@@ -963,7 +958,6 @@ describe('getSamplesSelectedStates', function () {
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable,
       0
     );
     const stackIndexToCallNodeIndex =
@@ -1470,7 +1464,6 @@ describe('getNativeSymbolsForCallNode', function () {
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable,
       defaultCategory
     );
     const ab = callNodeInfo.getCallNodeIndexFromPath([funA, funB]);
@@ -1516,7 +1509,6 @@ describe('getNativeSymbolsForCallNode', function () {
     const nonInvertedCallNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable,
       defaultCategory
     );
     const callNodeInfo = getInvertedCallNodeInfo(

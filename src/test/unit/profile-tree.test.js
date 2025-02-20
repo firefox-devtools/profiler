@@ -62,7 +62,6 @@ describe('unfiltered call tree', function () {
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable,
       defaultCategory
     );
 
@@ -107,7 +106,6 @@ describe('unfiltered call tree', function () {
       const callNodeInfo = getCallNodeInfo(
         thread.stackTable,
         thread.frameTable,
-        thread.funcTable,
         defaultCategory
       );
       const cnZ = callNodeInfo.getCallNodeIndexFromPath([Z]);
@@ -386,7 +384,6 @@ describe('unfiltered call tree', function () {
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable,
       defaultCategory
     );
 
@@ -437,7 +434,6 @@ describe('inverted call tree', function () {
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable,
       defaultCategory
     );
     const callTreeTimings = computeCallTreeTimings(
@@ -629,7 +625,6 @@ describe('diffing trees', function () {
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable,
       defaultCategory
     );
     const callTreeTimings = computeCallTreeTimings(

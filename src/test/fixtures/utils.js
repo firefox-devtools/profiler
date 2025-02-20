@@ -160,7 +160,6 @@ export function callTreeFromProfile(
   const callNodeInfo = getCallNodeInfo(
     thread.stackTable,
     thread.frameTable,
-    thread.funcTable,
     defaultCategory
   );
   const callTreeTimings = computeCallTreeTimings(
