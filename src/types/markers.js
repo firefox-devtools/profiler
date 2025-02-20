@@ -539,6 +539,9 @@ export type NetworkPayload = {|
   // or we use 'Unset' if no flag is set.
   classOfService?: string,
 
+  // Used to show the request status (nsresult nsIRequest::status)
+  requestStatus?: string,
+
   // Used to show the HTTP response status code
   responseStatus?: number,
 
