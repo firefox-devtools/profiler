@@ -120,6 +120,7 @@ export type GeckoSamples = {|
         stack: 0,
         time: 1,
         eventDelay: 2,
+        argv?: 3,
         threadCPUDelta?: 3,
       |},
   data: Array<
@@ -154,6 +155,7 @@ export type GeckoSampleStructWithResponsiveness = {|
   // versions may not have it or that feature could be disabled. No upgrader was
   // written for this change because it's a completely new data source.
   threadCPUDelta?: Array<number | null>,
+  argv?: Array<number | null>,
   length: number,
 |};
 
@@ -168,6 +170,7 @@ export type GeckoSampleStructWithEventDelay = {|
   // versions may not have it or that feature could be disabled. No upgrader was
   // written for this change because it's a completely new data source.
   threadCPUDelta?: Array<number | null>,
+  argv?: Array<number | null>,
   length: number,
 |};
 
@@ -276,6 +279,8 @@ export type GeckoThread = {|
   stackTable: GeckoStackTable,
   stringTable: string[],
   jsTracerEvents?: JsTracerTable,
+  values?: string,
+  shapes?: Array<?Array<string>>,
 |};
 
 export type GeckoExtensionMeta = {|

@@ -2117,6 +2117,9 @@ export function addInnerWindowIdToStacks(
       if (samples.responsiveness) {
         samples.responsiveness.push(samples.responsiveness[sampleIndex]);
       }
+      if (samples.argv) {
+        samples.argv.push(samples.argv[sampleIndex]);
+      }
       if (samples.threadCPUDelta) {
         samples.threadCPUDelta.push(samples.threadCPUDelta[sampleIndex]);
       }

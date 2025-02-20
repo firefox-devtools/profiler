@@ -89,6 +89,7 @@ export function getEmptySamplesTableWithEventDelay(): RawSamplesTable {
     eventDelay: [],
     stack: [],
     time: [],
+    argv: [],
     length: 0,
   };
 }
@@ -109,6 +110,7 @@ export function getEmptySamplesTableWithResponsiveness(): SamplesTable {
     responsiveness: [],
     stack: [],
     time: [],
+    argv: [],
     length: 0,
   };
 }

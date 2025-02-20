@@ -20,6 +20,7 @@ import {
   typeof changeMouseTimePosition as ChangeMouseTimePosition,
 } from '../../actions/profile-view';
 import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
+import { getArgvSummaries } from '../../utils/value-summaries';
 import { TooltipCallNode } from '../tooltip/CallNode';
 import { TooltipMarker } from '../tooltip/Marker';
 
@@ -96,6 +97,7 @@ const TEXT_CSS_PIXELS_OFFSET_START = 3;
 const TEXT_CSS_PIXELS_OFFSET_TOP = 11;
 const FONT_SIZE = 10;
 const BORDER_OPACITY = 0.4;
+
 
 class StackChartCanvasImpl extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement;
@@ -466,12 +468,18 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       );
     }
 
+
     const callNodeIndex = timing.callNode[stackTimingIndex];
     if (callNodeIndex === undefined) {
       return null;
     }
     const duration =
       timing.end[stackTimingIndex] - timing.start[stackTimingIndex];
+    const argv = timing.argv[stackTimingIndex];
+    let argvSummaries = undefined;
+    if (argv != -1) {
+      argvSummaries = getArgvSummaries(thread, argv);
+    }
 
     return (
       <TooltipCallNode
@@ -486,6 +494,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         callTreeSummaryStrategy="timing"
         durationText={formatMilliseconds(duration)}
         displayStackType={displayStackType}
+        argv={JSON.stringify(argvSummaries, null, 2) || null}
       />
     );
   };
