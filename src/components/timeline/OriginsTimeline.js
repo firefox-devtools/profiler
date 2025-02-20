@@ -16,6 +16,7 @@ import {
   getPanelLayoutGeneration,
   getCommittedRange,
   getZeroAt,
+  getProfileTimelineUnit,
   getOriginsTimeline,
   getThreads,
 } from 'firefox-profiler/selectors';
@@ -47,6 +48,7 @@ type StateProps = {|
   +panelLayoutGeneration: number,
   +originsTimeline: OriginsTimeline,
   +zeroAt: Milliseconds,
+  +profileTimelineUnit: string,
   +threads: RawThread[],
 |};
 
@@ -147,6 +149,7 @@ class OriginsTimelineView extends React.PureComponent<Props, State> {
     const {
       committedRange,
       zeroAt,
+      profileTimelineUnit,
       width,
       panelLayoutGeneration,
       originsTimeline,
@@ -161,6 +164,7 @@ class OriginsTimelineView extends React.PureComponent<Props, State> {
             rangeStart={committedRange.start}
             rangeEnd={committedRange.end}
             width={width}
+            unit={profileTimelineUnit}
           />
           <OverflowEdgeIndicator
             className="tracksContainer timelineOverflowEdgeIndicator"
@@ -186,6 +190,7 @@ export const TimelineOrigins = explicitConnect<
     threads: getThreads(state),
     committedRange: getCommittedRange(state),
     zeroAt: getZeroAt(state),
+    profileTimelineUnit: getProfileTimelineUnit(state),
     panelLayoutGeneration: getPanelLayoutGeneration(state),
     originsTimeline: getOriginsTimeline(state),
   }),

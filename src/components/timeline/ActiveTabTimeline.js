@@ -15,6 +15,7 @@ import { getPanelLayoutGeneration } from 'firefox-profiler/selectors/app';
 import {
   getCommittedRange,
   getZeroAt,
+  getProfileTimelineUnit,
   getActiveTabGlobalTracks,
   getActiveTabGlobalTrackReferences,
 } from 'firefox-profiler/selectors/profile';
@@ -44,6 +45,7 @@ type StateProps = {|
   +globalTrackReferences: GlobalTrackReference[],
   +panelLayoutGeneration: number,
   +zeroAt: Milliseconds,
+  +profileTimelineUnit: string,
 |};
 
 type Props = {|
@@ -86,6 +88,7 @@ class ActiveTabTimelineImpl extends React.PureComponent<Props, State> {
     const {
       committedRange,
       zeroAt,
+      profileTimelineUnit,
       width,
       panelLayoutGeneration,
       globalTracks,
@@ -101,6 +104,7 @@ class ActiveTabTimelineImpl extends React.PureComponent<Props, State> {
             rangeStart={committedRange.start}
             rangeEnd={committedRange.end}
             width={width}
+            unit={profileTimelineUnit}
           />
           <OverflowEdgeIndicator
             className="tracksContainer timelineOverflowEdgeIndicator"
@@ -131,6 +135,7 @@ export const ActiveTabTimeline = explicitConnect<OwnProps, StateProps, {||}>({
     globalTrackReferences: getActiveTabGlobalTrackReferences(state),
     committedRange: getCommittedRange(state),
     zeroAt: getZeroAt(state),
+    profileTimelineUnit: getProfileTimelineUnit(state),
     panelLayoutGeneration: getPanelLayoutGeneration(state),
   }),
   component: withSize<Props>(ActiveTabTimelineImpl),

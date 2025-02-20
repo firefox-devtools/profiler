@@ -6,7 +6,10 @@
 
 import React, { PureComponent } from 'react';
 import { TIMELINE_RULER_HEIGHT } from 'firefox-profiler/app-logic/constants';
-import { formatTimestamp } from 'firefox-profiler/utils/format-numbers';
+import {
+  formatBytes,
+  formatTimestamp,
+} from 'firefox-profiler/utils/format-numbers';
 
 import './Ruler.css';
 
@@ -17,28 +20,42 @@ type Props = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +width: CssPixels,
+  +unit: string,
 |};
 
 export class TimelineRuler extends PureComponent<Props> {
-  _findNiceNumberGreaterOrEqualTo(uglyNumber: Milliseconds) {
-    // Special case numbers in the seconds, minutes or hour ranges.
-    if (uglyNumber > 10000 && uglyNumber <= 48 * 3600 * 1000) {
-      for (const seconds of [15, 20, 30]) {
-        const number = seconds * 1000;
-        if (uglyNumber <= number) {
-          return number;
+  _findNiceNumberGreaterOrEqualTo(unit: string, uglyNumber: Milliseconds) {
+    if (unit === 'bytes') {
+      // Special case KB, MB, GB.
+      if (uglyNumber > 1024 && uglyNumber <= 1024 ** 4) {
+        for (const power of [1, 2, 3]) {
+          for (const value of [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]) {
+            const number = value * 1024 ** power;
+            if (uglyNumber <= number) {
+              return number;
+            }
+          }
         }
       }
-      for (const minutes of [1, 2, 5, 10, 15, 20, 30]) {
-        const number = minutes * 60 * 1000;
-        if (uglyNumber <= number) {
-          return number;
+    } else {
+      if (uglyNumber > 10000 && uglyNumber <= 48 * 3600 * 1000) {
+        for (const seconds of [15, 20, 30]) {
+          const number = seconds * 1000;
+          if (uglyNumber <= number) {
+            return number;
+          }
         }
-      }
-      for (const hours of [1, 2, 3, 4, 6, 8, 12, 24, 48]) {
-        const number = hours * 3600 * 1000;
-        if (uglyNumber <= number) {
-          return number;
+        for (const minutes of [1, 2, 5, 10, 15, 20, 30]) {
+          const number = minutes * 60 * 1000;
+          if (uglyNumber <= number) {
+            return number;
+          }
+        }
+        for (const hours of [1, 2, 3, 4, 6, 8, 12, 24, 48]) {
+          const number = hours * 3600 * 1000;
+          if (uglyNumber <= number) {
+            return number;
+          }
         }
       }
     }
@@ -57,13 +74,14 @@ export class TimelineRuler extends PureComponent<Props> {
 
   _getNotches() {
     if (this.props.width === 0) {
-      return { notches: [], notchTime: 0 };
+      return { notches: [], notchTime: 0, unit: '' };
     }
 
-    const { zeroAt, rangeStart, rangeEnd, width } = this.props;
+    const { zeroAt, rangeStart, rangeEnd, width, unit } = this.props;
     const pixelsPerMilliSecond = width / (rangeEnd - rangeStart);
     const minimumNotchWidth = 55; // pixels
     const notchTime = this._findNiceNumberGreaterOrEqualTo(
+      unit,
       minimumNotchWidth / pixelsPerMilliSecond
     );
     const firstNotchIndex = Math.ceil((rangeStart - zeroAt) / notchTime);
@@ -75,11 +93,11 @@ export class TimelineRuler extends PureComponent<Props> {
         pos: (i * notchTime - (rangeStart - zeroAt)) * pixelsPerMilliSecond,
       });
     }
-    return { notches, notchTime };
+    return { notches, notchTime, unit };
   }
 
   render() {
-    const { notches, notchTime } = this._getNotches();
+    const { notches, notchTime, unit } = this._getNotches();
     return (
       <div
         className="timelineRuler"
@@ -93,7 +111,9 @@ export class TimelineRuler extends PureComponent<Props> {
               style={{ left: `${pos}px` }}
             >
               <span className="timelineRulerNotchText">
-                {formatTimestamp(time, 2, 2, notchTime)}
+                {unit === 'bytes'
+                  ? formatBytes(time, 3, 2, notchTime)
+                  : formatTimestamp(time, 2, 2, notchTime)}
               </span>
             </li>
           ))}

@@ -26,6 +26,7 @@ import {
   computeStringIndexMarkerFieldsByDataType,
 } from '../profile-logic/marker-schema';
 import { getDefaultCategories } from 'firefox-profiler/profile-logic/data-structures';
+import * as CommittedRanges from '../profile-logic/committed-ranges';
 import { defaultTableViewOptions } from '../reducers/profile-view';
 import { StringTable } from '../utils/string-table';
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -120,6 +121,10 @@ export const getFocusCallTreeGeneration: Selector<number> = (state) =>
   getProfileViewOptions(state).focusCallTreeGeneration;
 export const getZeroAt: Selector<Milliseconds> = (state) =>
   getProfileRootRange(state).start;
+export const getProfileTimelineUnit: Selector<string> = (state) => {
+  const { sampleUnits } = getProfile(state).meta;
+  return sampleUnits ? sampleUnits.time : '';
+};
 
 export const getCommittedRange: Selector<StartEndRange> = createSelector(
   getProfileRootRange,
@@ -134,6 +139,16 @@ export const getCommittedRange: Selector<StartEndRange> = createSelector(
     }
     return rootRange;
   }
+);
+
+/**
+ * This selector transforms the committed ranges into a list of labels that can
+ * be displayed in the UI.
+ */
+export const getCommittedRangeLabels: Selector<string[]> = createSelector(
+  UrlState.getAllCommittedRanges,
+  getProfileTimelineUnit,
+  CommittedRanges.getCommittedRangeLabels
 );
 
 export const getMouseTimePosition: Selector<Milliseconds | null> = (state) =>

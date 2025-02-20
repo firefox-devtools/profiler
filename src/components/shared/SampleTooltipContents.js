@@ -12,7 +12,7 @@ import {
   getFuncNamesAndOriginsForPath,
   convertStackToCallNodeAndCategoryPath,
 } from 'firefox-profiler/profile-logic/profile-data';
-import { getFormattedTimeLength } from 'firefox-profiler/profile-logic/committed-ranges';
+import { getFormattedLength } from 'firefox-profiler/profile-logic/committed-ranges';
 import {
   formatMilliseconds,
   formatPercent,
@@ -42,6 +42,7 @@ type Props = {|
   +cpuRatioInTimeRange: CPUProps | null,
   +sampleIndex: IndexIntoSamplesTable | null,
   +zeroAt: Milliseconds,
+  +profileTimelineUnit: string,
   +interval: Milliseconds,
 |};
 
@@ -126,6 +127,7 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
       categories,
       implementationFilter,
       zeroAt,
+      profileTimelineUnit,
       interval,
     } = this.props;
 
@@ -148,8 +150,9 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
         hasStack = stack.length > 1 || stack[0].funcName !== '(root)';
       }
 
-      formattedSampleTime = getFormattedTimeLength(
+      formattedSampleTime = getFormattedLength(
         sampleTime - zeroAt,
+        profileTimelineUnit,
         // Make sure that we show enough precision for the given sample interval.
         interval / 10
       );

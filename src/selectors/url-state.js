@@ -6,7 +6,6 @@
 import { createSelector } from 'reselect';
 import { ensureExists, getFirstItemFromSet } from '../utils/flow';
 import { urlFromState } from '../app-logic/url-handling';
-import * as CommittedRanges from '../profile-logic/committed-ranges';
 import { getThreadsKey } from '../profile-logic/profile-data';
 import { stringsToMarkerRegExps } from '../profile-logic/marker-data';
 import { getProfileNameFromZipPath } from 'firefox-profiler/profile-logic/zip-files';
@@ -328,15 +327,6 @@ export const getProfileNameForStorage: Selector<string> = createSelector(
     // Finally, return a blank string.
     return '';
   }
-);
-
-/**
- * This selector transforms the committed ranges into a list of labels that can
- * be displayed in the UI.
- */
-export const getCommittedRangeLabels: Selector<string[]> = createSelector(
-  getAllCommittedRanges,
-  CommittedRanges.getCommittedRangeLabels
 );
 
 function _shouldAllowSymbolServerUrl(symbolServerUrl) {

@@ -17,12 +17,11 @@ import {
   getProfileFilterPageData,
   getProfileFilterPageDataByTabID,
   getProfileRootRange,
-} from 'firefox-profiler/selectors/profile';
-import {
+  getProfileTimelineUnit,
   getCommittedRangeLabels,
-  getTabFilter,
-} from 'firefox-profiler/selectors/url-state';
-import { getFormattedTimeLength } from 'firefox-profiler/profile-logic/committed-ranges';
+} from 'firefox-profiler/selectors/profile';
+import { getTabFilter } from 'firefox-profiler/selectors/url-state';
+import { getFormattedLength } from 'firefox-profiler/profile-logic/committed-ranges';
 import { FilterNavigatorBar } from 'firefox-profiler/components/shared/FilterNavigatorBar';
 import { Icon } from 'firefox-profiler/components/shared/Icon';
 import { TabSelectorMenu } from '../shared/TabSelectorMenu';
@@ -41,6 +40,7 @@ type Props = {|
   +pageDataByTabID: Map<TabID, ProfileFilterPageData> | null,
   +tabFilter: TabID | null,
   +rootRange: StartEndRange,
+  +profileTimelineUnit: string,
   ...ElementProps<typeof FilterNavigatorBar>,
 |};
 
@@ -85,6 +85,7 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
       filterPageDataForActiveTab,
       pageDataByTabID,
       tabFilter,
+      profileTimelineUnit,
     } = this.props;
 
     let firstItem;
@@ -97,7 +98,11 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
           ) : null}
           <span title={filterPageDataForActiveTab.origin}>
             {filterPageDataForActiveTab.hostname} (
-            {getFormattedTimeLength(rootRange.end - rootRange.start)})
+            {getFormattedLength(
+              rootRange.end - rootRange.start,
+              profileTimelineUnit
+            )}
+            )
           </span>
         </>
       );
@@ -116,15 +121,20 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
             {pageData.favicon ? <Icon iconUrl={pageData.favicon} /> : null}
             <span title={pageData.origin}>
               {pageData.hostname} (
-              {getFormattedTimeLength(rootRange.end - rootRange.start)})
+              {getFormattedLength(
+                rootRange.end - rootRange.start,
+                profileTimelineUnit
+              )}
+              )
             </span>
           </>
         ) : (
           <Localized
             id="ProfileFilterNavigator--full-range-with-duration"
             vars={{
-              fullRangeDuration: getFormattedTimeLength(
-                rootRange.end - rootRange.start
+              fullRangeDuration: getFormattedLength(
+                rootRange.end - rootRange.start,
+                profileTimelineUnit
               ),
             }}
           >
@@ -165,8 +175,9 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
           <Localized
             id="ProfileFilterNavigator--full-range-with-duration"
             vars={{
-              fullRangeDuration: getFormattedTimeLength(
-                rootRange.end - rootRange.start
+              fullRangeDuration: getFormattedLength(
+                rootRange.end - rootRange.start,
+                profileTimelineUnit
               ),
             }}
           >
@@ -205,9 +216,11 @@ export const ProfileFilterNavigator = explicitConnect<
   mapStateToProps: (state) => {
     const items = getCommittedRangeLabels(state);
     const previewSelection = getPreviewSelection(state);
+    const profileTimelineUnit = getProfileTimelineUnit(state);
     const uncommittedItem = previewSelection.hasSelection
-      ? getFormattedTimeLength(
-          previewSelection.selectionEnd - previewSelection.selectionStart
+      ? getFormattedLength(
+          previewSelection.selectionEnd - previewSelection.selectionStart,
+          profileTimelineUnit
         )
       : undefined;
 
@@ -227,6 +240,7 @@ export const ProfileFilterNavigator = explicitConnect<
       pageDataByTabID,
       tabFilter,
       rootRange,
+      profileTimelineUnit,
     };
   },
   mapDispatchToProps: {

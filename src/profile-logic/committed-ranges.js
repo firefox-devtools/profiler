@@ -3,7 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { formatTimestamp } from 'firefox-profiler/utils/format-numbers';
+import {
+  formatBytes,
+  formatTimestamp,
+} from 'firefox-profiler/utils/format-numbers';
 import type { Milliseconds, StartEndRange } from 'firefox-profiler/types';
 
 /**
@@ -164,10 +167,19 @@ export function stringifyCommittedRanges(
   return arrayValue.map(stringifyStartEnd).join('~');
 }
 
-export function getFormattedTimeLength(
+export function getFormattedLength(
   length: Milliseconds,
+  unit: string,
   precision: Milliseconds = Infinity
 ): string {
+  if (unit === 'bytes') {
+    return formatBytes(
+      length,
+      /*significantdigits*/ 2,
+      /*maxFractionalDigits*/ 2,
+      precision
+    );
+  }
   return formatTimestamp(
     length,
     /*significantdigits*/ 2,
@@ -177,10 +189,11 @@ export function getFormattedTimeLength(
 }
 
 export function getCommittedRangeLabels(
-  committedRanges: StartEndRange[]
+  committedRanges: StartEndRange[],
+  unit: string
 ): string[] {
   const labels = committedRanges.map((range) =>
-    getFormattedTimeLength(range.end - range.start)
+    getFormattedLength(range.end - range.start, unit)
   );
   return labels;
 }
