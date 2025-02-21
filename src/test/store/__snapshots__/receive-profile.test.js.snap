@@ -9,7 +9,7 @@ Array [
   ],
   Array [
     "JSON parsing error:",
-    [SyntaxError: Unexpected token i in JSON at position 0],
+    [SyntaxError: Unexpected token 'i', "invalid" is not valid JSON],
   ],
   Array [
     "Fetch response:",
@@ -62,7 +62,7 @@ Array [
   ],
   Array [
     "JSON parsing error:",
-    [SyntaxError: Unexpected token i in JSON at position 0],
+    [SyntaxError: Unexpected token 'i', "invalid" is not valid JSON],
   ],
   Array [
     "Fetch response:",
