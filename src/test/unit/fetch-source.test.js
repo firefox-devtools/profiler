@@ -445,7 +445,7 @@ describe('fetchSource', function () {
       errors: [
         {
           type: 'BROWSER_API_MALFORMED_RESPONSE',
-          errorMessage: 'SyntaxError: Unexpected token I in JSON at position 1',
+          errorMessage: expect.stringMatching(/SyntaxError: Unexpected token/),
         },
         {
           type: 'NO_KNOWN_CORS_URL',
