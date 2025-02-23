@@ -483,6 +483,11 @@ PanelSearch--search-field-hint = Birden fazla terim kullanarak arama yapmak içi
 
 ## Profile Name Button
 
+ProfileName--edit-profile-name-button =
+    .title = Profil adını düzenle
+ProfileName--edit-profile-name-input =
+    .title = Profil adını düzenle
+    .aria-label = Profil adı
 
 ## Profile Delete Button
 
