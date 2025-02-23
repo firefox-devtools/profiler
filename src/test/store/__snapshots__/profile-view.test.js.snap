@@ -2161,7 +2161,7 @@ CallNodeInfoNonInverted {
       0,
       0,
     ],
-    "depth": Array [
+    "depth": Int32Array [
       0,
       1,
       2,
@@ -2282,7 +2282,7 @@ CallTree {
         0,
         0,
       ],
-      "depth": Array [
+      "depth": Int32Array [
         0,
         1,
         2,
@@ -2471,7 +2471,7 @@ CallTree {
           0,
           0,
         ],
-        "depth": Array [
+        "depth": Int32Array [
           0,
           1,
           2,
@@ -2586,7 +2586,7 @@ CallTree {
         0,
         0,
       ],
-      "depth": Array [
+      "depth": Int32Array [
         0,
         1,
         2,

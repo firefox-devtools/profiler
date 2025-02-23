@@ -165,7 +165,6 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
     const nonInvertedCallNodeInfo = getCallNodeInfo(
       stackTable,
       frameTable,
-      funcTable,
       defaultCategory
     );
     const callNodeInfo = isInverted
