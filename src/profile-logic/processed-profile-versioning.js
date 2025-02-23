@@ -2390,6 +2390,52 @@ const _upgraders = {
     // profiles from Firefox use subcategories to represent the information
     // about the JIT type of a JS frame.
 
+    // Very old Gecko profiles don't have JS subcategories. Convert the
+    // implementation information to subcategories.
+    function maybeConvertImplementationToSubcategories(profile) {
+      const { categories } = profile.meta;
+      if (!categories) {
+        return;
+      }
+
+      if (categories.some((c) => c.subcategories.length !== 1)) {
+        // This profile has subcategories.
+        return;
+      }
+
+      const jsCategoryIndex = categories.findIndex(
+        (c) => c.name === 'JavaScript'
+      );
+      if (jsCategoryIndex === -1) {
+        // This profile has no JavaScript category.
+        return;
+      }
+
+      const jsCategorySubcategories = categories[jsCategoryIndex].subcategories;
+      const subcategoryForImplStr = new Map();
+
+      for (const thread of profile.threads) {
+        const { frameTable, stringArray } = thread;
+        for (let i = 0; i < frameTable.length; i++) {
+          const implStrIndex = frameTable.implementation[i];
+          if (implStrIndex === null) {
+            continue;
+          }
+          const implStr = stringArray[implStrIndex];
+          let subcategory = subcategoryForImplStr.get(implStr);
+          if (subcategory === undefined) {
+            subcategory = jsCategorySubcategories.length;
+            jsCategorySubcategories[subcategory] = `JIT (${implStr})`;
+            subcategoryForImplStr.set(implStr, subcategory);
+          }
+          frameTable.category[i] = jsCategoryIndex;
+          frameTable.subcategory[i] = subcategory;
+        }
+      }
+    }
+
+    maybeConvertImplementationToSubcategories(profile);
+
     // Delete the implementation column from the frameTable of every thread.
     for (const thread of profile.threads) {
       delete thread.frameTable.implementation;
