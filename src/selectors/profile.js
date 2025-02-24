@@ -1068,15 +1068,6 @@ export const getProfiledThreadIds: Selector<Set<Tid>> = createSelector(
   }
 );
 
-/** Does the profile have implementation data? */
-export const getProfileUsesFrameImplementation: Selector<boolean> = (state) => {
-  const { profile } = state.profileView;
-  if (!profile) {
-    return true;
-  }
-  return profile.meta.doesNotUseFrameImplementation !== true;
-};
-
 /** Should the "Look up the function name on Searchfox" menu entry be hidden? */
 export const getShouldDisplaySearchfox: Selector<boolean> = (state) => {
   const { profile } = state.profileView;

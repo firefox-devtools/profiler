@@ -113,33 +113,8 @@ describe('FlameGraph', function () {
     expect(getTooltip()).toMatchSnapshot();
   });
 
-  it('has a tooltip that matches the snapshot with implementation', () => {
-    const { getTooltip, moveMouse, findFillTextPosition } =
-      setupFlameGraph(true);
-    moveMouse(findFillTextPosition('A'));
-    expect(getTooltip()).toMatchSnapshot();
-  });
-
   it('shows a tooltip with the resource information with categories', () => {
     const { getTooltip, moveMouse, findFillTextPosition } = setupFlameGraph();
-    moveMouse(findFillTextPosition('J'));
-    const tooltip = ensureExists(getTooltip());
-
-    // First, a targeted test.
-    const { getByText } = within(tooltip);
-    const resourceLabel = getByText('Resource:');
-    const valueElement = ensureExists(resourceLabel.nextSibling);
-
-    // See https://github.com/testing-library/jest-dom/issues/306
-    // eslint-disable-next-line jest-dom/prefer-to-have-text-content
-    expect(valueElement.textContent).toBe('libxul.so');
-    // But also do a good old snapshot.
-    expect(tooltip).toMatchSnapshot();
-  });
-
-  it('shows a tooltip with the resource information with implementation', () => {
-    const { getTooltip, moveMouse, findFillTextPosition } =
-      setupFlameGraph(true);
     moveMouse(findFillTextPosition('J'));
     const tooltip = ensureExists(getTooltip());
 
@@ -302,7 +277,7 @@ describe('FlameGraph', function () {
   });
 });
 
-function setupFlameGraph(addImplementationData: boolean = true) {
+function setupFlameGraph() {
   const flushRafCalls = mockRaf();
 
   const {
@@ -320,7 +295,7 @@ function setupFlameGraph(addImplementationData: boolean = true) {
 
   // Add some file and line number to the profile so that tooltips generate
   // an interesting snapshot.
-  const { funcTable, stringArray, frameTable } = profile.threads[0];
+  const { funcTable, stringArray } = profile.threads[0];
   const stringTable = StringTable.withBackingArray(stringArray);
   for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
     funcTable.lineNumber[funcIndex] = funcIndex + 10;
@@ -334,13 +309,6 @@ function setupFlameGraph(addImplementationData: boolean = true) {
   funcTable.fileName[funcNamesDict.J] = stringTable.indexForString(
     'hg:hg.mozilla.org/mozilla-central:widget/cocoa/nsAppShell.mm:997f00815e6bc28806b75448c8829f0259d2cb28'
   );
-
-  if (addImplementationData) {
-    // every category is 'js'
-    for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
-      frameTable.implementation[frameIndex] = stringTable.indexForString('js');
-    }
-  }
 
   const store = storeWithProfile(profile);
   store.dispatch(changeSelectedTab('flame-graph'));
