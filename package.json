@@ -7,9 +7,6 @@
     "runtime": {
       "name": "node",
       "version": ">= 22 < 23"
-    },
-    "packageManager": {
-      "name": "yarn"
     }
   },
   "scripts": {
