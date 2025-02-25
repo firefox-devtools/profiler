@@ -289,7 +289,6 @@ export type FrameTable = {|
   // is being stored as `uint64_t` there.
   innerWindowID: (InnerWindowID | null)[],
 
-  implementation: (IndexIntoStringTable | null)[],
   line: (number | null)[],
   column: (number | null)[],
   length: number,
@@ -737,11 +736,14 @@ export type VisualMetrics = {|
 // Units of ThreadCPUDelta values for different platforms.
 export type ThreadCPUDeltaUnit = 'ns' | 'µs' | 'variable CPU cycles';
 
+// Unit of the values in the timeline. Used to differentiate size-profiles.
+export type TimelineUnit = 'ms' | 'bytes';
+
 // Object that holds the units of samples table values. Some of the values can be
 // different depending on the platform, e.g. threadCPUDelta.
 // See https://searchfox.org/mozilla-central/rev/851bbbd9d9a38c2785a24c13b6412751be8d3253/tools/profiler/core/platform.cpp#2601-2606
 export type SampleUnits = {|
-  +time: 'ms',
+  +time: TimelineUnit,
   +eventDelay: 'ms',
   +threadCPUDelta: ThreadCPUDeltaUnit,
 |};
@@ -901,8 +903,6 @@ export type ProfileMeta = {|
 
   // Do not distinguish between different stack types?
   usesOnlyOneStackType?: boolean,
-  // Hide the "implementation" information in the UI (see #3709)?
-  doesNotUseFrameImplementation?: boolean,
   // Hide the "Look up the function name on Searchfox" menu entry?
   sourceCodeIsNotOnSearchfox?: boolean,
   // Extra information about the profile, not shown in the "Profile Info" panel,
