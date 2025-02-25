@@ -364,14 +364,19 @@ type ProfileAction =
       +type: 'UPDATE_BOTTOM_BOX',
       +libIndex: IndexIntoLibs | null,
       +sourceFile: string | null,
-      +nativeSymbol: NativeSymbolInfo | null,
+      +initialNativeSymbolEntryIndex: number | null,
       +allNativeSymbolsForInitiatingCallNode: NativeSymbolInfo[],
+      +allNativeSymbolWeightsForInitiatingCallNode: number[],
       +currentTab: TabSlug,
       +shouldOpenBottomBox: boolean,
       +shouldOpenAssemblyView: boolean,
     |}
   | {|
       +type: 'OPEN_ASSEMBLY_VIEW',
+    |}
+  | {|
+      +type: 'CHANGE_ASSEMBLY_VIEW_NATIVE_SYMBOL_ENTRY_INDEX',
+      +entryIndex: number,
     |}
   | {|
       +type: 'CLOSE_ASSEMBLY_VIEW',
