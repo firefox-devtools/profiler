@@ -524,6 +524,10 @@ type UrlStateAction =
       +showUserTimings: boolean,
     |}
   | {|
+      +type: 'CHANGE_STACK_CHART_SAME_WIDTHS',
+      +stackChartSameWidths: boolean,
+    |}
+  | {|
       +type: 'CHANGE_SHOW_JS_TRACER_SUMMARY',
       +showSummary: boolean,
     |}
