@@ -11,6 +11,10 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 The `implementation` column was removed from the frameTable. Modern profiles from Firefox use subcategories to represent the information about the JIT type of a JS frame.
 The optional `meta.doesNotUseFrameImplementation` field is no longer needed and was removed.
 
+Furthermore, marker schema fields now support a `hidden` attribute. When present and set to true, such fields will be omitted from the tooltip and the sidebar.
+
+And finally, `profile.meta.sampleUnits.time` now supports both `'ms'` (milliseconds) and `'bytes'`. When set to `'bytes'`, the time value of a sample will be interpreted as a bytes offset. This is useful for size profiles, where a sample's "time" describes the offset at which the piece is located within the entire file.
+
 ### Version 53
 
 The columns `category` and `subcategory` were removed from the `stackTable`, to reduce the file size of profiles. The information in these columns was fully redundant with the category information in the `frameTable`. A stack's category and subcategory are determined as follows: If the stack's frame has a non-null category, then that's the stack's category, and the frame's subcategory (or 0 if null) becomes the stack's subcategory. Otherwise, if the stack is not a root node, it inherits the category and subcategory of its prefix stack. Otherwise, it defaults to the defaultCategory, which is defined as the first category in `thread.meta.categories` whose color is `grey` - at least one such category is required to be present. And the subcategory defaults to zero - all categories are required to have a "default" subcategory as their first subcategory.
