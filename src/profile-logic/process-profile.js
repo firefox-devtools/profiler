@@ -607,7 +607,6 @@ function _processFrameTable(
     func: frameFuncs,
     nativeSymbol: Array(geckoFrameStruct.length).fill(null),
     innerWindowID: geckoFrameStruct.innerWindowID,
-    implementation: geckoFrameStruct.implementation,
     line: geckoFrameStruct.line,
     column: geckoFrameStruct.column,
     length: geckoFrameStruct.length,

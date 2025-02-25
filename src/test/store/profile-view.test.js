@@ -2206,7 +2206,7 @@ describe('getTimingsForSidebar', () => {
       B    B                  B             B             B              B
       Cjs  Cjs                Cjs           Cjs           H[cat:Layout]  H[cat:Layout]
       D    D                  D             F             I[cat:Idle]
-      E    Ejs[jit:baseline]  Ejs[jit:ion]  Ejs[jit:ion]
+      E    Ejs                Ejs           Ejs
     `;
   }
 
@@ -2248,7 +2248,6 @@ describe('getTimingsForSidebar', () => {
 
   const EMPTY_TIMING = {
     value: 0,
-    breakdownByImplementation: null,
     breakdownByCategory: null,
   };
 
@@ -2266,7 +2265,6 @@ describe('getTimingsForSidebar', () => {
         selfTime: EMPTY_TIMING,
         totalTime: {
           value: 5,
-          breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
           breakdownByCategory: withSingleSubcategory([
             0, // Other
             1, // Idle
@@ -2301,7 +2299,6 @@ describe('getTimingsForSidebar', () => {
         forPath: {
           selfTime: {
             value: 2,
-            breakdownByImplementation: { ion: 1, baseline: 1 },
             breakdownByCategory: withSingleSubcategory([
               0, // Idle
               0, // Other
@@ -2315,7 +2312,6 @@ describe('getTimingsForSidebar', () => {
           },
           totalTime: {
             value: 2,
-            breakdownByImplementation: { ion: 1, baseline: 1 },
             breakdownByCategory: withSingleSubcategory([
               0, // Idle
               0, // Other
@@ -2345,7 +2341,6 @@ describe('getTimingsForSidebar', () => {
       const expectedTiming = {
         selfTime: {
           value: 1,
-          breakdownByImplementation: { native: 1 },
           breakdownByCategory: withSingleSubcategory([
             0,
             0,
@@ -2359,7 +2354,6 @@ describe('getTimingsForSidebar', () => {
         },
         totalTime: {
           value: 2,
-          breakdownByImplementation: { native: 2 },
 
           breakdownByCategory: withSingleSubcategory([
             0, // Other
@@ -2403,7 +2397,6 @@ describe('getTimingsForSidebar', () => {
       expect(timings.rootTime).toEqual(2);
       expect(timings.forPath.totalTime).toEqual({
         value: 2,
-        breakdownByImplementation: { native: 1, ion: 1 },
         breakdownByCategory: withSingleSubcategory([
           0, // Other
           1, // Idle
@@ -2423,7 +2416,7 @@ describe('getTimingsForSidebar', () => {
         // range in the setup.
         return `
           A    A    A              A             A
-          Bjs  Bjs  Bjs            Bjs[jit:ion]  Bjs[jit:blinterp]
+          Bjs  Bjs  Bjs            Bjs           Bjs
           C    C    C              E
                     D[cat:Layout]
         `;
@@ -2442,12 +2435,6 @@ describe('getTimingsForSidebar', () => {
           selfTime: EMPTY_TIMING,
           totalTime: {
             value: 4,
-            breakdownByImplementation: {
-              interpreter: 1,
-              native: 1,
-              ion: 1,
-              blinterp: 1,
-            },
             breakdownByCategory: withSingleSubcategory([
               0,
               0,
@@ -2477,7 +2464,6 @@ describe('getTimingsForSidebar', () => {
         const expectedTiming = {
           selfTime: {
             value: 1,
-            breakdownByImplementation: { blinterp: 1 },
             breakdownByCategory: withSingleSubcategory([
               0,
               0,
@@ -2491,12 +2477,6 @@ describe('getTimingsForSidebar', () => {
           },
           totalTime: {
             value: 4,
-            breakdownByImplementation: {
-              ion: 1,
-              blinterp: 1,
-              interpreter: 1,
-              native: 1,
-            },
             breakdownByCategory: withSingleSubcategory([
               0,
               0,
@@ -2529,7 +2509,6 @@ describe('getTimingsForSidebar', () => {
         // We extract the expectations to make this a bit more readable.
         const expectedTiming = {
           value: 1,
-          breakdownByImplementation: { ion: 1 },
           breakdownByCategory: withSingleSubcategory([
             0,
             0,
@@ -2558,7 +2537,6 @@ describe('getTimingsForSidebar', () => {
         const expectedTiming = {
           selfTime: {
             value: 1,
-            breakdownByImplementation: { interpreter: 1 },
             breakdownByCategory: withSingleSubcategory([
               0,
               0,
@@ -2572,10 +2550,6 @@ describe('getTimingsForSidebar', () => {
           },
           totalTime: {
             value: 2,
-            breakdownByImplementation: {
-              interpreter: 1,
-              native: 1,
-            },
             breakdownByCategory: withSingleSubcategory([
               0,
               0,
@@ -2608,7 +2582,6 @@ describe('getTimingsForSidebar', () => {
         // We extract the expectations to make this a bit more readable.
         const expectedTiming = {
           value: 1,
-          breakdownByImplementation: { native: 1 },
           breakdownByCategory: withSingleSubcategory([
             0,
             0,
@@ -2655,7 +2628,6 @@ describe('getTimingsForSidebar', () => {
       // A root node will have the same values for total and selftime.
       const expectedTiming = {
         value: 3,
-        breakdownByImplementation: { ion: 2, baseline: 1 },
         breakdownByCategory: withSingleSubcategory([
           0, // Idle
           0, // Other
@@ -2693,7 +2665,6 @@ describe('getTimingsForSidebar', () => {
           selfTime: EMPTY_TIMING,
           totalTime: {
             value: 2,
-            breakdownByImplementation: { ion: 1, baseline: 1 },
             breakdownByCategory: withSingleSubcategory([
               0,
               0,
@@ -2726,7 +2697,6 @@ describe('getTimingsForSidebar', () => {
           },
           totalTime: {
             value: 1,
-            breakdownByImplementation: { native: 1 },
             breakdownByCategory: withSingleSubcategory([
               0,
               0,
@@ -2749,7 +2719,6 @@ describe('getTimingsForSidebar', () => {
           selfTime: EMPTY_TIMING,
           totalTime: {
             value: 1,
-            breakdownByImplementation: { native: 1 },
             breakdownByCategory: withSingleSubcategory([
               0,
               1, // Idle
@@ -2777,7 +2746,6 @@ describe('getTimingsForSidebar', () => {
           selfTime: EMPTY_TIMING,
           totalTime: {
             value: 1,
-            breakdownByImplementation: { native: 1 },
             breakdownByCategory: withSingleSubcategory([
               0,
               0,
@@ -2817,7 +2785,6 @@ describe('getTimingsForSidebar', () => {
       expect(timings.rootTime).toEqual(2);
       expect(timings.forPath.totalTime).toEqual({
         value: 1,
-        breakdownByImplementation: { ion: 1 },
         breakdownByCategory: withSingleSubcategory([
           0, // Other
           0, // Idle
@@ -2837,15 +2804,15 @@ describe('getTimingsForSidebar', () => {
         // range in the setup.
         return `
           A    A    A              A             A
-          Bjs  Bjs  Bjs            Bjs[jit:ion]  Bjs[jit:blinterp]
+          Bjs  Bjs  Bjs            Bjs           Bjs
           C    C    C              E
                     D[cat:Layout]
         `;
 
-        // This is how the inverted tree looks like:
+        // This is what the inverted tree looks like:
         //
-        // C    C    D[cat:Layout]  E             Bjs[jit:blinterp]
-        // Bjs  Bjs  C              Bjs[jit:ion]  A
+        // C    C    D[cat:Layout]  E             Bjs
+        // Bjs  Bjs  C              Bjs           A
         // A    A    Bjs            A
         //           A
       }
@@ -2864,7 +2831,6 @@ describe('getTimingsForSidebar', () => {
         // We extract the expectations to make this a bit more readable.
         const expectedTiming = {
           value: 1,
-          breakdownByImplementation: { native: 1 },
           breakdownByCategory: withSingleSubcategory([
             0,
             0,
@@ -2905,7 +2871,6 @@ describe('getTimingsForSidebar', () => {
         // We extract the expectations to make this a bit more readable.
         const expectedTiming = {
           value: 1,
-          breakdownByImplementation: { ion: 1 },
           breakdownByCategory: withSingleSubcategory([
             0,
             0,
@@ -2945,9 +2910,6 @@ describe('getTimingsForSidebar', () => {
             selfTime: EMPTY_TIMING,
             totalTime: {
               value: 1,
-              breakdownByImplementation: {
-                native: 1,
-              },
               breakdownByCategory: withSingleSubcategory([
                 0,
                 0,
@@ -3006,10 +2968,6 @@ describe('getTimingsForSidebar', () => {
         selfTime: EMPTY_TIMING,
         totalTime: {
           breakdownByCategory: withSingleSubcategory([0, 0, -1, 1, 0, 0, 0, 0]), // Other, Idle, Layout, JavaScript, etc.
-          breakdownByImplementation: {
-            interpreter: 1,
-            native: -1,
-          },
           value: 0,
         },
       });
@@ -3057,10 +3015,6 @@ describe('getTimingsForSidebar', () => {
         selfTime: EMPTY_TIMING,
         totalTime: {
           breakdownByCategory: withSingleSubcategory([0, 0, 7, 5, 0, 0, 0, 0]), // Other, Idle, Layout, JavaScript, etc
-          breakdownByImplementation: {
-            native: 7,
-            interpreter: 5,
-          },
           value: 12,
         },
       });

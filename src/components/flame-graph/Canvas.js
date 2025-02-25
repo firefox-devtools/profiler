@@ -78,7 +78,6 @@ export type OwnProps = {|
   +ctssSamples: SamplesLikeTable,
   +unfilteredCtssSamples: SamplesLikeTable,
   +tracedTiming: CallTreeTimingsNonInverted | null,
-  +displayImplementation: boolean,
   +displayStackType: boolean,
 |};
 
@@ -373,7 +372,6 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       ctssSamples,
       unfilteredCtssSamples,
       tracedTiming,
-      displayImplementation,
       displayStackType,
     } = this.props;
 
@@ -436,8 +434,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
                 ctssSampleIndexOffset,
                 categories,
                 ctssSamples,
-                unfilteredCtssSamples,
-                displayImplementation
+                unfilteredCtssSamples
               )
             : undefined
         }
