@@ -2389,6 +2389,14 @@ const _upgraders = {
     // The `implementation` column was removed from the frameTable. Modern
     // profiles from Firefox use subcategories to represent the information
     // about the JIT type of a JS frame.
+    // Furthermore, marker schema fields now support a `hidden` attribute. When
+    // present and set to true, such fields will be omitted from the tooltip and
+    // the sidebar.
+    // And finally, `profile.meta.sampleUnits.time` now supports both `'ms'`
+    // (milliseconds) and `'bytes'`. When set to `'bytes'`, the time value of a
+    // sample will be interpreted as a bytes offset. This is useful for size
+    // profiles, where a sample's "time" describes the offset at which the piece
+    // is located within the entire file.
 
     // Very old Gecko profiles don't have JS subcategories. Convert the
     // implementation information to subcategories.
