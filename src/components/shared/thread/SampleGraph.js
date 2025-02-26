@@ -53,6 +53,7 @@ type Props = {|
   +timelineType: TimelineType,
   +implementationFilter: ImplementationFilter,
   +zeroAt: Milliseconds,
+  +profileTimelineUnit: string,
   ...SizeProps,
 |};
 
@@ -345,6 +346,7 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
       width,
       height,
       zeroAt,
+      profileTimelineUnit,
     } = this.props;
     const { hoveredPixelState, mouseX, mouseY } = this.state;
 
@@ -381,6 +383,7 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
               categories={categories}
               implementationFilter={implementationFilter}
               zeroAt={zeroAt}
+              profileTimelineUnit={profileTimelineUnit}
               interval={interval}
             />
           </Tooltip>

@@ -18,6 +18,7 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getCommittedRange,
   getZeroAt,
+  getProfileTimelineUnit,
   getGlobalTracks,
   getGlobalTrackReferences,
   getHiddenTrackCount,
@@ -43,6 +44,7 @@ import type {
   HiddenTrackCount,
   Milliseconds,
   StartEndRange,
+  TimelineUnit,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -59,6 +61,7 @@ type StateProps = {|
   +globalTrackReferences: GlobalTrackReference[],
   +panelLayoutGeneration: number,
   +zeroAt: Milliseconds,
+  +profileTimelineUnit: TimelineUnit,
   +hiddenTrackCount: HiddenTrackCount,
 |};
 
@@ -144,6 +147,7 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
       changeGlobalTrackOrder,
       committedRange,
       zeroAt,
+      profileTimelineUnit,
       width,
       globalTrackReferences,
       panelLayoutGeneration,
@@ -165,6 +169,7 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
               rangeStart={committedRange.start}
               rangeEnd={committedRange.end}
               width={width}
+              unit={profileTimelineUnit}
             />
           </div>
           <OverflowEdgeIndicator
@@ -209,6 +214,7 @@ export const FullTimeline = explicitConnect<
     globalTrackReferences: getGlobalTrackReferences(state),
     committedRange: getCommittedRange(state),
     zeroAt: getZeroAt(state),
+    profileTimelineUnit: getProfileTimelineUnit(state),
     panelLayoutGeneration: getPanelLayoutGeneration(state),
     hiddenTrackCount: getHiddenTrackCount(state),
   }),
