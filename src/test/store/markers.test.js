@@ -15,7 +15,6 @@ import {
   getNetworkMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
-import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
 
 describe('selectors/getMarkerChartTimingAndBuckets', function () {
   function getMarkerChartTimingAndBuckets(testMarkers: TestDefinedMarkers) {
@@ -321,32 +320,20 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function () {
           'Dummy 1',
           10,
           null,
-          {
-            type: 'tracing',
-            category: 'Navigation',
-            innerWindowID,
-          },
+          { type: 'tracing', category: 'Navigation', innerWindowID },
         ],
         ['Dummy 2', 20, null],
         [
           'Dummy 3',
           30,
           null,
-          {
-            type: 'tracing',
-            category: 'Navigation',
-            innerWindowID: 111111,
-          },
+          { type: 'tracing', category: 'Navigation', innerWindowID: 111111 },
         ],
         [
           'Dummy 4',
           30,
           null,
-          {
-            type: 'tracing',
-            category: 'Navigation',
-            innerWindowID,
-          },
+          { type: 'tracing', category: 'Navigation', innerWindowID },
         ],
         ['Dummy 5', 40],
       ]
@@ -368,12 +355,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function () {
     const { getState, dispatch } = storeWithProfile(profile);
 
     if (ctxId) {
-      dispatch(
-        changeTimelineTrackOrganization({
-          type: 'active-tab',
-          tabID,
-        })
-      );
+      dispatch(changeTimelineTrackOrganization({ type: 'active-tab', tabID }));
     }
     const markerIndexes =
       selectedThreadSelectors.getCommittedRangeAndTabFilteredMarkerIndexes(
@@ -481,23 +463,10 @@ describe('Marker schema filtering', function () {
         oscpu: '',
         platform: '',
         processType: 0,
-        extensions: {
-          id: [],
-          name: [],
-          baseURL: [],
-          length: 0,
-        },
+        extensions: { id: [], name: [], baseURL: [], length: 0 },
         categories: [
-          {
-            name: 'Idle',
-            color: 'transparent',
-            subcategories: ['Other'],
-          },
-          {
-            name: 'Other',
-            color: 'grey',
-            subcategories: ['Other'],
-          },
+          { name: 'Idle', color: 'transparent', subcategories: ['Other'] },
+          { name: 'Other', color: 'grey', subcategories: ['Other'] },
         ],
         product: 'Firefox',
         stackwalk: 0,
@@ -538,22 +507,10 @@ describe('Marker schema filtering', function () {
             category: [0, 0, 0, 0, 0, 0, 0],
             data: [
               null,
-              {
-                type: 'no schema marker',
-              },
-              {
-                type: 'Text',
-                name: 'RefreshDriverTick',
-              },
-              {
-                type: 'UserTiming',
-                name: 'name',
-                entryType: 'mark',
-              },
-              {
-                type: 'tracing',
-                category: 'RandomTracingMarker',
-              },
+              { type: 'no schema marker' },
+              { type: 'Text', name: 'RefreshDriverTick' },
+              { type: 'UserTiming', name: 'name', entryType: 'mark' },
+              { type: 'tracing', category: 'RandomTracingMarker' },
               {
                 type: 'Network',
                 id: 0,
@@ -614,13 +571,7 @@ describe('Marker schema filtering', function () {
             columnNumber: [],
             length: 0,
           },
-          resourceTable: {
-            lib: [],
-            name: [],
-            host: [],
-            type: [],
-            length: 0,
-          },
+          resourceTable: { lib: [], name: [], host: [], type: [], length: 0 },
         },
       ],
     };
@@ -671,23 +622,10 @@ describe('profile upgrading and markers', () => {
         oscpu: '',
         platform: '',
         processType: 0,
-        extensions: {
-          id: [],
-          name: [],
-          baseURL: [],
-          length: 0,
-        },
+        extensions: { id: [], name: [], baseURL: [], length: 0 },
         categories: [
-          {
-            name: 'Idle',
-            color: 'transparent',
-            subcategories: ['Other'],
-          },
-          {
-            name: 'Other',
-            color: 'grey',
-            subcategories: ['Other'],
-          },
+          { name: 'Idle', color: 'transparent', subcategories: ['Other'] },
+          { name: 'Other', color: 'grey', subcategories: ['Other'] },
         ],
         product: 'Firefox',
         stackwalk: 0,
@@ -700,7 +638,187 @@ describe('profile upgrading and markers', () => {
         physicalCPUs: 0,
         logicalCPUs: 0,
         symbolicated: true,
-        markerSchema: markerSchemaForTests,
+        markerSchema: [
+          {
+            name: 'GCMajor',
+            display: ['marker-chart', 'marker-table', 'timeline-memory'],
+            data: [],
+          },
+          {
+            name: 'GCMinor',
+            display: ['marker-chart', 'marker-table', 'timeline-memory'],
+            data: [],
+          },
+          {
+            name: 'GCSlice',
+            display: ['marker-chart', 'marker-table', 'timeline-memory'],
+            data: [],
+          },
+          {
+            name: 'CC',
+            tooltipLabel: 'Cycle Collect',
+            display: ['marker-chart', 'marker-table', 'timeline-memory'],
+            data: [],
+          },
+          {
+            name: 'FileIO',
+            display: ['marker-chart', 'marker-table'],
+            data: [
+              {
+                key: 'operation',
+                label: 'Operation',
+                format: 'string',
+                searchable: true,
+              },
+              {
+                key: 'source',
+                label: 'Source',
+                format: 'string',
+                searchable: true,
+              },
+              {
+                key: 'filename',
+                label: 'Filename',
+                format: 'file-path',
+                searchable: true,
+              },
+            ],
+          },
+          {
+            name: 'MediaSample',
+            display: ['marker-chart', 'marker-table'],
+            data: [
+              {
+                key: 'sampleStartTimeUs',
+                label: 'Sample start time',
+                format: 'microseconds',
+              },
+              {
+                key: 'sampleEndTimeUs',
+                label: 'Sample end time',
+                format: 'microseconds',
+              },
+            ],
+          },
+          {
+            name: 'Styles',
+            display: ['marker-chart', 'marker-table', 'timeline-overview'],
+            data: [
+              {
+                key: 'elementsTraversed',
+                label: 'Elements traversed',
+                format: 'integer',
+              },
+              {
+                key: 'elementsStyled',
+                label: 'Elements styled',
+                format: 'integer',
+              },
+              {
+                key: 'elementsMatched',
+                label: 'Elements matched',
+                format: 'integer',
+              },
+              {
+                key: 'stylesShared',
+                label: 'Styles shared',
+                format: 'integer',
+              },
+              {
+                key: 'stylesReused',
+                label: 'Styles reused',
+                format: 'integer',
+              },
+            ],
+          },
+          {
+            name: 'PreferenceRead',
+            display: ['marker-chart', 'marker-table'],
+            data: [
+              { key: 'prefName', label: 'Name', format: 'string' },
+              { key: 'prefKind', label: 'Kind', format: 'string' },
+              { key: 'prefType', label: 'Type', format: 'string' },
+              { key: 'prefValue', label: 'Value', format: 'string' },
+            ],
+          },
+          {
+            name: 'UserTiming',
+            tooltipLabel: '{marker.data.name}',
+            chartLabel: '{marker.data.name}',
+            tableLabel: '{marker.data.name}',
+            display: ['marker-chart', 'marker-table'],
+            data: [
+              // name
+              { label: 'Marker', value: 'UserTiming' },
+              { key: 'entryType', label: 'Entry Type', format: 'string' },
+              {
+                label: 'Description',
+                value:
+                  'UserTiming is created using the DOM APIs performance.mark() and performance.measure().',
+              },
+            ],
+          },
+          {
+            name: 'Text',
+            tableLabel: '{marker.name} — {marker.data.name}',
+            chartLabel: '{marker.name} — {marker.data.name}',
+            display: ['marker-chart', 'marker-table'],
+            data: [{ key: 'name', label: 'Details', format: 'string' }],
+          },
+          {
+            name: 'Log',
+            display: ['marker-table'],
+            tableLabel: '({marker.data.module}) {marker.data.name}',
+            data: [
+              { key: 'module', label: 'Module', format: 'string' },
+              { key: 'name', label: 'Name', format: 'string' },
+            ],
+          },
+          {
+            name: 'DOMEvent',
+            tooltipLabel: '{marker.data.eventType} — DOMEvent',
+            tableLabel: '{marker.data.eventType}',
+            chartLabel: '{marker.data.eventType}',
+            display: ['marker-chart', 'marker-table', 'timeline-overview'],
+            data: [{ key: 'latency', label: 'Latency', format: 'duration' }],
+          },
+          {
+            name: 'Paint',
+            display: ['marker-chart', 'marker-table', 'timeline-overview'],
+            data: [{ key: 'category', label: 'Type', format: 'string' }],
+          },
+          {
+            name: 'Navigation',
+            display: ['marker-chart', 'marker-table', 'timeline-overview'],
+            data: [{ key: 'category', label: 'Type', format: 'string' }],
+          },
+          {
+            name: 'Layout',
+            display: ['marker-chart', 'marker-table', 'timeline-overview'],
+            data: [{ key: 'category', label: 'Type', format: 'string' }],
+          },
+
+          {
+            name: 'IPC',
+            tooltipLabel: 'IPC — {marker.data.niceDirection}',
+            tableLabel:
+              '{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}',
+            chartLabel: '{marker.data.messageType}',
+            display: ['marker-chart', 'marker-table', 'timeline-ipc'],
+            data: [
+              { key: 'messageType', label: 'Type', format: 'string' },
+              { key: 'sync', label: 'Sync', format: 'string' },
+              { key: 'sendThreadName', label: 'From', format: 'string' },
+              { key: 'recvThreadName', label: 'To', format: 'string' },
+            ],
+          },
+          {
+            name: 'RefreshDriverTick',
+            display: ['marker-chart', 'marker-table', 'timeline-overview'],
+            data: [{ key: 'name', label: 'Tick Reasons', format: 'string' }],
+          },
+          { name: 'Network', display: ['marker-table'], data: [] },
+        ],
       },
       pages: [],
       threads: [
@@ -735,11 +853,7 @@ describe('profile upgrading and markers', () => {
               // One marker without data
               null,
               // One marker without cause
-              {
-                type: 'UserTiming',
-                name: 'name',
-                entryType: 'mark',
-              },
+              { type: 'UserTiming', name: 'name', entryType: 'mark' },
               // One marker with a cause that was already processed in previous versions.
               {
                 type: 'tracing',
@@ -803,13 +917,7 @@ describe('profile upgrading and markers', () => {
             columnNumber: [null],
             length: 1,
           },
-          resourceTable: {
-            lib: [],
-            name: [],
-            host: [],
-            type: [],
-            length: 0,
-          },
+          resourceTable: { lib: [], name: [], host: [], type: [], length: 0 },
         },
       ],
     };

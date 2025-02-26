@@ -198,17 +198,6 @@ exports[`MarkerChart persists the selected marker tooltips properly 1`] = `
       <div
         class="tooltipLabel"
       >
-        Marker
-        :
-      </div>
-      <div
-        class="tooltipDetailsDescription"
-      >
-        UserTiming
-      </div>
-      <div
-        class="tooltipLabel"
-      >
         Entry Type
         :
       </div>
@@ -389,17 +378,6 @@ exports[`MarkerChart renders the hoveredItem markers properly 2`] = `
         :
       </div>
       Marker B
-      <div
-        class="tooltipLabel"
-      >
-        Marker
-        :
-      </div>
-      <div
-        class="tooltipDetailsDescription"
-      >
-        UserTiming
-      </div>
       <div
         class="tooltipLabel"
       >

@@ -939,7 +939,7 @@ function extractMarkers(
       tooltipLabel: '{marker.data.type2} - EventDispatch',
       tableLabel: '{marker.data.type2}',
       display: ['marker-chart', 'marker-table', 'timeline-overview'],
-      data: [
+      fields: [
         {
           // In the original chrome profile, the key is `type`, but we rename it
           // so that it doesn't clash with our internal `type` property.

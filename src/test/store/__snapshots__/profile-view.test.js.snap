@@ -81,44 +81,48 @@ Object {
     "logicalCPUs": 0,
     "markerSchema": Array [
       Object {
-        "data": Array [],
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-memory",
         ],
+        "fields": Array [],
         "name": "GCMajor",
       },
       Object {
-        "data": Array [],
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-memory",
         ],
+        "fields": Array [],
         "name": "GCMinor",
       },
       Object {
-        "data": Array [],
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-memory",
         ],
+        "fields": Array [],
         "name": "GCSlice",
       },
       Object {
-        "data": Array [],
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-memory",
         ],
+        "fields": Array [],
         "name": "CC",
         "tooltipLabel": "Cycle Collect",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "operation",
@@ -138,14 +142,14 @@ Object {
             "searchable": true,
           },
         ],
+        "name": "FileIO",
+      },
+      Object {
         "display": Array [
           "marker-chart",
           "marker-table",
         ],
-        "name": "FileIO",
-      },
-      Object {
-        "data": Array [
+        "fields": Array [
           Object {
             "format": "microseconds",
             "key": "sampleStartTimeUs",
@@ -157,14 +161,15 @@ Object {
             "label": "Sample end time",
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-        ],
         "name": "MediaSample",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "integer",
             "key": "elementsTraversed",
@@ -191,15 +196,14 @@ Object {
             "label": "Styles reused",
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
-        ],
         "name": "Styles",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "prefName",
@@ -222,15 +226,16 @@ Object {
             "label": "Value",
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-        ],
         "name": "PreferenceRead",
       },
       Object {
         "chartLabel": "{marker.data.name}",
-        "data": Array [
+        "description": "UserTiming is created using the DOM APIs performance.mark() and performance.measure().",
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "name",
@@ -238,22 +243,10 @@ Object {
             "searchable": true,
           },
           Object {
-            "label": "Marker",
-            "value": "UserTiming",
-          },
-          Object {
             "format": "string",
             "key": "entryType",
             "label": "Entry Type",
           },
-          Object {
-            "label": "Description",
-            "value": "UserTiming is created using the DOM APIs performance.mark() and performance.measure().",
-          },
-        ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
         ],
         "name": "UserTiming",
         "tableLabel": "{marker.data.name}",
@@ -261,7 +254,11 @@ Object {
       },
       Object {
         "chartLabel": "{marker.name} — {marker.data.name}",
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "name",
@@ -269,15 +266,14 @@ Object {
             "searchable": true,
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-        ],
         "name": "Text",
         "tableLabel": "{marker.name} — {marker.data.name}",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "module",
@@ -291,15 +287,17 @@ Object {
             "searchable": true,
           },
         ],
-        "display": Array [
-          "marker-table",
-        ],
         "name": "Log",
         "tableLabel": "({marker.data.module}) {marker.data.name}",
       },
       Object {
         "chartLabel": "{marker.data.eventType}",
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "duration",
             "key": "latency",
@@ -312,50 +310,50 @@ Object {
             "searchable": true,
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
-        ],
         "name": "DOMEvent",
         "tableLabel": "{marker.data.eventType}",
         "tooltipLabel": "{marker.data.eventType} — DOMEvent",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "category",
             "label": "Type",
             "searchable": true,
           },
-        ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
         ],
         "name": "tracing",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "category",
             "label": "Type",
             "searchable": true,
           },
-        ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
         ],
         "name": "Layout",
       },
       Object {
         "chartLabel": "{marker.data.messageType}",
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-ipc",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "messageType",
@@ -377,26 +375,26 @@ Object {
             "label": "To",
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-ipc",
-        ],
         "name": "IPC",
         "tableLabel": "{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}",
         "tooltipLabel": "IPC — {marker.data.niceDirection}",
       },
       Object {
-        "data": Array [],
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-overview",
         ],
+        "fields": Array [],
         "name": "VisibleInTimelineOverview",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "searchableString",
@@ -422,15 +420,15 @@ Object {
             "searchable": false,
           },
         ],
+        "name": "StringTesting",
+      },
+      Object {
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-overview",
         ],
-        "name": "StringTesting",
-      },
-      Object {
-        "data": Array [
+        "fields": Array [
           Object {
             "format": "string",
             "hidden": true,
@@ -439,11 +437,6 @@ Object {
             "searchable": true,
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
-        ],
         "name": "MarkerWithHiddenField",
       },
     ],
@@ -451,7 +444,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 54,
+    "preprocessedProfileVersion": 55,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
