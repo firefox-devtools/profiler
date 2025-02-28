@@ -837,6 +837,8 @@ exports[`MarkerChart shows a tooltip when hovering 1`] = `
           class="tooltipTiming"
         >
           4ms
+           @ 
+          2ms
         </div>
         <div
           class="tooltipTitle"
