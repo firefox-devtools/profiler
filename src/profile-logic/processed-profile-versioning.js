@@ -2452,6 +2452,45 @@ const _upgraders = {
     // This field is no longer needed.
     delete profile.meta.doesNotUseFrameImplementation;
   },
+  [55]: (profile) => {
+    for (const markerSchema of profile.meta.markerSchema) {
+      const staticFields = markerSchema.data.filter((f) => f.key === undefined);
+      const fields = markerSchema.data.filter((f) => f.value === undefined);
+
+      markerSchema.fields = fields;
+      delete markerSchema.data;
+
+      if (staticFields.length === 0) {
+        continue;
+      }
+
+      // Migrate one of the static fields to the new `description` property.
+      let staticDescriptionFieldIndex = staticFields.findIndex(
+        (f) => f.label === 'Description'
+      );
+      if (staticDescriptionFieldIndex === -1) {
+        staticDescriptionFieldIndex = 0;
+      }
+      const description = staticFields[staticDescriptionFieldIndex].value;
+      markerSchema.description = description;
+
+      // If there was more than one static field, we may be discarding useful data.
+      // Print a warning to the console if that's the case, unless this is the
+      // old { label: "Marker", value: "UserTiming" } field which never provided
+      // any value. (On the Gecko side, it was removed by D196332.)
+      const discardedFields = staticFields.filter(
+        (_f, i) => i !== staticDescriptionFieldIndex
+      );
+      const potentiallyUsefulDiscardedFields = discardedFields.filter(
+        (f) => f.label !== 'Marker' && f.value !== 'UserTiming'
+      );
+      if (potentiallyUsefulDiscardedFields.length !== 0) {
+        console.warn(
+          `Discarding the following static fields from marker schema "${markerSchema.name}": ${potentiallyUsefulDiscardedFields.map((f) => f.label + ': ' + f.value).join(', ')}`
+        );
+      }
+    }
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

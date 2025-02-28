@@ -4698,17 +4698,6 @@ exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`]
     <div
       class="tooltipLabel"
     >
-      Marker
-      :
-    </div>
-    <div
-      class="tooltipDetailsDescription"
-    >
-      UserTiming
-    </div>
-    <div
-      class="tooltipLabel"
-    >
       Entry Type
       :
     </div>
