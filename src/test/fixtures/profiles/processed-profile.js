@@ -151,8 +151,8 @@ function _replaceUniqueStringFieldValuesWithStringIndexesInMarkerPayload(
   if (schema === undefined) {
     return;
   }
-  for (const fieldSchema of schema.data) {
-    if (!fieldSchema.format || fieldSchema.format !== 'unique-string') {
+  for (const fieldSchema of schema.fields) {
+    if (fieldSchema.format !== 'unique-string') {
       continue;
     }
     const { key } = fieldSchema;

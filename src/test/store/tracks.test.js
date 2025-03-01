@@ -135,7 +135,7 @@ describe('ordering and hiding', function () {
       {
         name: 'Marker',
         display: ['marker-chart', 'marker-table', 'timeline-memory'],
-        data: [
+        fields: [
           { key: 'first', label: 'first', format: 'integer', searchable: true },
         ],
         graphs: [
@@ -148,7 +148,7 @@ describe('ordering and hiding', function () {
       {
         name: 'NoGraphMarker',
         display: ['marker-chart', 'marker-table'],
-        data: [
+        fields: [
           { key: 'first', label: 'first', format: 'integer', searchable: true },
         ],
         // An empty array should behave just as if the property isn't present.
