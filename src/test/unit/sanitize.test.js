@@ -1349,27 +1349,13 @@ describe('sanitizePII', function () {
         })
       );
 
-      const indexForGCMinor =
-        originalProfile.threads[0].stringArray.indexOf('GCMinor');
-      expect(indexForGCMinor).not.toBe(-1);
-      expect(originalProfile.threads[0].markers.name).toContain(
-        indexForGCMinor
+      const originalMarkerNames = originalProfile.threads[0].markers.name.map(
+        (stringIndex) => originalProfile.threads[0].stringArray[stringIndex]
       );
 
-      const indexForScreenshot = originalProfile.threads[0].stringArray.indexOf(
-        'CompositorScreenshot'
-      );
-      expect(indexForScreenshot).not.toBe(-1);
-      expect(originalProfile.threads[0].markers.name).toContain(
-        indexForScreenshot
-      );
-
-      const indexForTextOnlyMarker =
-        originalProfile.threads[0].stringArray.indexOf('TextOnlyMarker');
-      expect(indexForTextOnlyMarker).not.toBe(-1);
-      expect(originalProfile.threads[0].markers.name).toContain(
-        indexForTextOnlyMarker
-      );
+      expect(originalMarkerNames).toContain('GCMinor');
+      expect(originalMarkerNames).toContain('CompositorScreenshot');
+      expect(originalMarkerNames).toContain('TextOnlyMarker');
 
       // 2. An unsanitized profile also has all the initial markers.
       expect(unsanitizedProfile.threads[0].markers.data).toContainEqual(
@@ -1387,18 +1373,23 @@ describe('sanitizePII', function () {
           innerWindowID: unknownInnerWindowID,
         })
       );
-      expect(unsanitizedProfile.threads[0].markers.name).toContain(
-        indexForGCMinor
-      );
-      expect(unsanitizedProfile.threads[0].markers.name).toContain(
-        indexForScreenshot
-      );
-      expect(unsanitizedProfile.threads[0].markers.name).toContain(
-        indexForTextOnlyMarker
-      );
+
+      const unsanitizedMarkerNames =
+        unsanitizedProfile.threads[0].markers.name.map(
+          (stringIndex) =>
+            unsanitizedProfile.threads[0].stringArray[stringIndex]
+        );
+      expect(unsanitizedMarkerNames).toContain('GCMinor');
+      expect(unsanitizedMarkerNames).toContain('CompositorScreenshot');
+      expect(unsanitizedMarkerNames).toContain('TextOnlyMarker');
 
       // 3. Finally check the innerWindowID property of remaining markers in the
       // sanitized profile.
+
+      const sanitizedMarkerNames = sanitizedProfile.threads[0].markers.name.map(
+        (stringIndex) => sanitizedProfile.threads[0].stringArray[stringIndex]
+      );
+
       // We don't have the markers coming from the first tab.
       expect(sanitizedProfile.threads[0].markers.data).not.toContainEqual(
         expect.objectContaining({
@@ -1412,13 +1403,8 @@ describe('sanitizePII', function () {
       );
 
       // Nor the markers that aren't tied to a tab
-      expect(sanitizedProfile.threads[0].markers.name).not.toContain(
-        indexForGCMinor
-      );
-
-      expect(sanitizedProfile.threads[0].markers.name).not.toContain(
-        indexForTextOnlyMarker
-      );
+      expect(sanitizedMarkerNames).not.toContain('GCMinor');
+      expect(sanitizedMarkerNames).not.toContain('TextOnlyMarker');
 
       // But we still have the others.
       expect(sanitizedProfile.threads[0].markers.data).toContainEqual(
@@ -1428,9 +1414,7 @@ describe('sanitizePII', function () {
       );
 
       // Including the screenshots
-      expect(originalProfile.threads[0].markers.name).toContain(
-        indexForScreenshot
-      );
+      expect(sanitizedMarkerNames).toContain('CompositorScreenshot');
     });
 
     it('removes samples coming from other tabs', () => {
