@@ -40,7 +40,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 53,
+    "preprocessedProfileVersion": 55,
     "processType": 0,
     "product": "Firefox",
     "sampleUnits": undefined,
@@ -100,16 +100,6 @@ Object {
           5,
           6,
           7,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -406,11 +396,6 @@ Object {
           1,
           2,
         ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-        ],
         "inlineDepth": Array [
           0,
           0,
@@ -596,11 +581,6 @@ Object {
           0,
           1,
           2,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -831,22 +811,6 @@ Object {
           11,
           12,
           13,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -1236,12 +1200,6 @@ Object {
           2,
           3,
         ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-        ],
         "inlineDepth": Array [
           0,
           0,
@@ -1465,15 +1423,6 @@ Object {
           4,
           5,
           6,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -1748,10 +1697,6 @@ Object {
           0,
           1,
         ],
-        "implementation": Array [
-          null,
-          null,
-        ],
         "inlineDepth": Array [
           0,
           0,
@@ -1916,11 +1861,6 @@ Object {
           0,
           1,
           2,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -2106,11 +2046,6 @@ Object {
           0,
           1,
           2,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -2298,11 +2233,6 @@ Object {
           0,
           1,
           2,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -2492,12 +2422,6 @@ Object {
           1,
           2,
           3,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -2834,40 +2758,6 @@ Object {
           29,
           30,
           31,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -3648,40 +3538,6 @@ Object {
           30,
           31,
         ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-        ],
         "inlineDepth": Array [
           0,
           0,
@@ -4460,40 +4316,6 @@ Object {
           29,
           30,
           31,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -5276,40 +5098,6 @@ Object {
           30,
           31,
         ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-        ],
         "inlineDepth": Array [
           0,
           0,
@@ -6042,28 +5830,6 @@ Object {
           17,
           18,
           19,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -9552,6 +9318,7 @@ Object {
         "name": "JavaScript",
         "subcategories": Array [
           "Other",
+          "JIT (baseline)",
         ],
       },
       Object {
@@ -9593,44 +9360,48 @@ Object {
     "interval": 1,
     "markerSchema": Array [
       Object {
-        "data": Array [],
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-memory",
         ],
+        "fields": Array [],
         "name": "GCMajor",
       },
       Object {
-        "data": Array [],
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-memory",
         ],
+        "fields": Array [],
         "name": "GCMinor",
       },
       Object {
-        "data": Array [],
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-memory",
         ],
+        "fields": Array [],
         "name": "GCSlice",
       },
       Object {
-        "data": Array [],
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-memory",
         ],
+        "fields": Array [],
         "name": "CC",
         "tooltipLabel": "Cycle Collect",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "operation",
@@ -9656,14 +9427,14 @@ Object {
             "searchable": true,
           },
         ],
+        "name": "FileIO",
+      },
+      Object {
         "display": Array [
           "marker-chart",
           "marker-table",
         ],
-        "name": "FileIO",
-      },
-      Object {
-        "data": Array [
+        "fields": Array [
           Object {
             "format": "microseconds",
             "key": "sampleStartTimeUs",
@@ -9675,14 +9446,15 @@ Object {
             "label": "Sample end time",
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-        ],
         "name": "MediaSample",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "integer",
             "key": "elementsTraversed",
@@ -9709,15 +9481,14 @@ Object {
             "label": "Styles reused",
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
-        ],
         "name": "Styles",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "prefName",
@@ -9739,32 +9510,21 @@ Object {
             "label": "Value",
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-        ],
         "name": "PreferenceRead",
       },
       Object {
         "chartLabel": "{marker.data.name}",
-        "data": Array [
-          Object {
-            "label": "Marker",
-            "value": "UserTiming",
-          },
+        "description": "UserTiming is created using the DOM APIs performance.mark() and performance.measure().",
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "entryType",
             "label": "Entry Type",
           },
-          Object {
-            "label": "Description",
-            "value": "UserTiming is created using the DOM APIs performance.mark() and performance.measure().",
-          },
-        ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
         ],
         "name": "UserTiming",
         "tableLabel": "{marker.data.name}",
@@ -9772,7 +9532,11 @@ Object {
       },
       Object {
         "chartLabel": "{marker.name} — {marker.data.name}",
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "name",
@@ -9780,15 +9544,14 @@ Object {
             "searchable": true,
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-        ],
         "name": "Text",
         "tableLabel": "{marker.name} — {marker.data.name}",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "module",
@@ -9802,15 +9565,17 @@ Object {
             "searchable": true,
           },
         ],
-        "display": Array [
-          "marker-table",
-        ],
         "name": "Log",
         "tableLabel": "({marker.data.module}) {marker.data.name}",
       },
       Object {
         "chartLabel": "{marker.data.eventType}",
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "duration",
             "key": "latency",
@@ -9823,66 +9588,66 @@ Object {
             "searchable": true,
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
-        ],
         "name": "DOMEvent",
         "tableLabel": "{marker.data.eventType}",
         "tooltipLabel": "{marker.data.eventType} — DOMEvent",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "category",
             "label": "Type",
             "searchable": true,
           },
-        ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
         ],
         "name": "Paint",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "category",
             "label": "Type",
             "searchable": true,
           },
-        ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
         ],
         "name": "Navigation",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "category",
             "label": "Type",
             "searchable": true,
           },
-        ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
         ],
         "name": "Layout",
       },
       Object {
         "chartLabel": "{marker.data.messageType}",
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-ipc",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "messageType",
@@ -9904,17 +9669,17 @@ Object {
             "label": "To",
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-ipc",
-        ],
         "name": "IPC",
         "tableLabel": "{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}",
         "tooltipLabel": "IPC — {marker.data.niceDirection}",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "name",
@@ -9922,32 +9687,27 @@ Object {
             "searchable": true,
           },
         ],
+        "name": "RefreshDriverTick",
+      },
+      Object {
+        "display": Array [
+          "marker-table",
+        ],
+        "fields": Array [],
+        "name": "Network",
+      },
+      Object {
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-overview",
         ],
-        "name": "RefreshDriverTick",
-      },
-      Object {
-        "data": Array [],
-        "display": Array [
-          "marker-table",
-        ],
-        "name": "Network",
-      },
-      Object {
-        "data": Array [
+        "fields": Array [
           Object {
             "format": "string",
             "key": "category",
             "label": "Type",
           },
-        ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
         ],
         "name": "tracing",
       },
@@ -9955,7 +9715,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 53,
+    "preprocessedProfileVersion": 55,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -9980,7 +9740,7 @@ Object {
           null,
           null,
           1,
-          null,
+          2,
           null,
           null,
         ],
@@ -10001,15 +9761,6 @@ Object {
           4,
           2,
           1,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          6,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -10053,7 +9804,7 @@ Object {
           null,
           null,
           0,
-          null,
+          1,
           null,
           null,
         ],
@@ -10363,7 +10114,7 @@ Object {
           null,
           null,
           1,
-          null,
+          2,
           null,
           null,
         ],
@@ -10384,15 +10135,6 @@ Object {
           4,
           2,
           1,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          6,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -10436,7 +10178,7 @@ Object {
           null,
           null,
           0,
-          null,
+          1,
           null,
           null,
         ],
@@ -10746,7 +10488,7 @@ Object {
           null,
           null,
           1,
-          null,
+          2,
           null,
           null,
         ],
@@ -10767,15 +10509,6 @@ Object {
           4,
           2,
           1,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          6,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -10819,7 +10552,7 @@ Object {
           null,
           null,
           0,
-          null,
+          1,
           null,
           null,
         ],
@@ -11161,6 +10894,7 @@ Object {
         "name": "JavaScript",
         "subcategories": Array [
           "Other",
+          "JIT (baseline)",
         ],
       },
       Object {
@@ -11202,44 +10936,48 @@ Object {
     "interval": 1,
     "markerSchema": Array [
       Object {
-        "data": Array [],
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-memory",
         ],
+        "fields": Array [],
         "name": "GCMajor",
       },
       Object {
-        "data": Array [],
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-memory",
         ],
+        "fields": Array [],
         "name": "GCMinor",
       },
       Object {
-        "data": Array [],
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-memory",
         ],
+        "fields": Array [],
         "name": "GCSlice",
       },
       Object {
-        "data": Array [],
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-memory",
         ],
+        "fields": Array [],
         "name": "CC",
         "tooltipLabel": "Cycle Collect",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "operation",
@@ -11265,14 +11003,14 @@ Object {
             "searchable": true,
           },
         ],
+        "name": "FileIO",
+      },
+      Object {
         "display": Array [
           "marker-chart",
           "marker-table",
         ],
-        "name": "FileIO",
-      },
-      Object {
-        "data": Array [
+        "fields": Array [
           Object {
             "format": "microseconds",
             "key": "sampleStartTimeUs",
@@ -11284,14 +11022,15 @@ Object {
             "label": "Sample end time",
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-        ],
         "name": "MediaSample",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "integer",
             "key": "elementsTraversed",
@@ -11318,15 +11057,14 @@ Object {
             "label": "Styles reused",
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
-        ],
         "name": "Styles",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "prefName",
@@ -11348,32 +11086,21 @@ Object {
             "label": "Value",
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-        ],
         "name": "PreferenceRead",
       },
       Object {
         "chartLabel": "{marker.data.name}",
-        "data": Array [
-          Object {
-            "label": "Marker",
-            "value": "UserTiming",
-          },
+        "description": "UserTiming is created using the DOM APIs performance.mark() and performance.measure().",
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "entryType",
             "label": "Entry Type",
           },
-          Object {
-            "label": "Description",
-            "value": "UserTiming is created using the DOM APIs performance.mark() and performance.measure().",
-          },
-        ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
         ],
         "name": "UserTiming",
         "tableLabel": "{marker.data.name}",
@@ -11381,7 +11108,11 @@ Object {
       },
       Object {
         "chartLabel": "{marker.name} — {marker.data.name}",
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "name",
@@ -11389,15 +11120,14 @@ Object {
             "searchable": true,
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-        ],
         "name": "Text",
         "tableLabel": "{marker.name} — {marker.data.name}",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "module",
@@ -11411,15 +11141,17 @@ Object {
             "searchable": true,
           },
         ],
-        "display": Array [
-          "marker-table",
-        ],
         "name": "Log",
         "tableLabel": "({marker.data.module}) {marker.data.name}",
       },
       Object {
         "chartLabel": "{marker.data.eventType}",
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "duration",
             "key": "latency",
@@ -11432,66 +11164,66 @@ Object {
             "searchable": true,
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
-        ],
         "name": "DOMEvent",
         "tableLabel": "{marker.data.eventType}",
         "tooltipLabel": "{marker.data.eventType} — DOMEvent",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "category",
             "label": "Type",
             "searchable": true,
           },
-        ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
         ],
         "name": "Paint",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "category",
             "label": "Type",
             "searchable": true,
           },
-        ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
         ],
         "name": "Navigation",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "category",
             "label": "Type",
             "searchable": true,
           },
-        ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
         ],
         "name": "Layout",
       },
       Object {
         "chartLabel": "{marker.data.messageType}",
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-ipc",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "messageType",
@@ -11513,17 +11245,17 @@ Object {
             "label": "To",
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-ipc",
-        ],
         "name": "IPC",
         "tableLabel": "{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}",
         "tooltipLabel": "IPC — {marker.data.niceDirection}",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "name",
@@ -11531,32 +11263,27 @@ Object {
             "searchable": true,
           },
         ],
+        "name": "RefreshDriverTick",
+      },
+      Object {
+        "display": Array [
+          "marker-table",
+        ],
+        "fields": Array [],
+        "name": "Network",
+      },
+      Object {
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-overview",
         ],
-        "name": "RefreshDriverTick",
-      },
-      Object {
-        "data": Array [],
-        "display": Array [
-          "marker-table",
-        ],
-        "name": "Network",
-      },
-      Object {
-        "data": Array [
+        "fields": Array [
           Object {
             "format": "string",
             "key": "category",
             "label": "Type",
           },
-        ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
         ],
         "name": "tracing",
       },
@@ -11564,7 +11291,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 53,
+    "preprocessedProfileVersion": 55,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -11589,7 +11316,7 @@ Object {
           null,
           null,
           1,
-          null,
+          2,
           null,
           null,
         ],
@@ -11610,15 +11337,6 @@ Object {
           4,
           2,
           1,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          6,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -11662,7 +11380,7 @@ Object {
           null,
           null,
           0,
-          null,
+          1,
           null,
           null,
         ],
@@ -11999,7 +11717,7 @@ Object {
           null,
           null,
           1,
-          null,
+          2,
           null,
           null,
         ],
@@ -12020,15 +11738,6 @@ Object {
           4,
           2,
           1,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          6,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -12072,7 +11781,7 @@ Object {
           null,
           null,
           0,
-          null,
+          1,
           null,
           null,
         ],
@@ -12384,7 +12093,7 @@ Object {
           null,
           null,
           1,
-          null,
+          2,
           2,
           5,
           null,
@@ -12411,17 +12120,6 @@ Object {
           6,
           2,
           1,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          6,
-          null,
-          null,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -12473,7 +12171,7 @@ Object {
           null,
           null,
           0,
-          null,
+          1,
           0,
           0,
           null,
@@ -12909,6 +12607,7 @@ Object {
         "name": "JavaScript",
         "subcategories": Array [
           "Other",
+          "JIT (baseline)",
         ],
       },
       Object {
@@ -12950,44 +12649,48 @@ Object {
     "interval": 1,
     "markerSchema": Array [
       Object {
-        "data": Array [],
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-memory",
         ],
+        "fields": Array [],
         "name": "GCMajor",
       },
       Object {
-        "data": Array [],
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-memory",
         ],
+        "fields": Array [],
         "name": "GCMinor",
       },
       Object {
-        "data": Array [],
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-memory",
         ],
+        "fields": Array [],
         "name": "GCSlice",
       },
       Object {
-        "data": Array [],
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-memory",
         ],
+        "fields": Array [],
         "name": "CC",
         "tooltipLabel": "Cycle Collect",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "operation",
@@ -13013,14 +12716,14 @@ Object {
             "searchable": true,
           },
         ],
+        "name": "FileIO",
+      },
+      Object {
         "display": Array [
           "marker-chart",
           "marker-table",
         ],
-        "name": "FileIO",
-      },
-      Object {
-        "data": Array [
+        "fields": Array [
           Object {
             "format": "microseconds",
             "key": "sampleStartTimeUs",
@@ -13032,14 +12735,15 @@ Object {
             "label": "Sample end time",
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-        ],
         "name": "MediaSample",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "integer",
             "key": "elementsTraversed",
@@ -13066,15 +12770,14 @@ Object {
             "label": "Styles reused",
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
-        ],
         "name": "Styles",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "prefName",
@@ -13096,32 +12799,21 @@ Object {
             "label": "Value",
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-        ],
         "name": "PreferenceRead",
       },
       Object {
         "chartLabel": "{marker.data.name}",
-        "data": Array [
-          Object {
-            "label": "Marker",
-            "value": "UserTiming",
-          },
+        "description": "UserTiming is created using the DOM APIs performance.mark() and performance.measure().",
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "entryType",
             "label": "Entry Type",
           },
-          Object {
-            "label": "Description",
-            "value": "UserTiming is created using the DOM APIs performance.mark() and performance.measure().",
-          },
-        ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
         ],
         "name": "UserTiming",
         "tableLabel": "{marker.data.name}",
@@ -13129,7 +12821,11 @@ Object {
       },
       Object {
         "chartLabel": "{marker.name} — {marker.data.name}",
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "name",
@@ -13137,15 +12833,14 @@ Object {
             "searchable": true,
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-        ],
         "name": "Text",
         "tableLabel": "{marker.name} — {marker.data.name}",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-table",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "module",
@@ -13159,15 +12854,17 @@ Object {
             "searchable": true,
           },
         ],
-        "display": Array [
-          "marker-table",
-        ],
         "name": "Log",
         "tableLabel": "({marker.data.module}) {marker.data.name}",
       },
       Object {
         "chartLabel": "{marker.data.eventType}",
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "duration",
             "key": "latency",
@@ -13180,66 +12877,66 @@ Object {
             "searchable": true,
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
-        ],
         "name": "DOMEvent",
         "tableLabel": "{marker.data.eventType}",
         "tooltipLabel": "{marker.data.eventType} — DOMEvent",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "category",
             "label": "Type",
             "searchable": true,
           },
-        ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
         ],
         "name": "Paint",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "category",
             "label": "Type",
             "searchable": true,
           },
-        ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
         ],
         "name": "Navigation",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "category",
             "label": "Type",
             "searchable": true,
           },
-        ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
         ],
         "name": "Layout",
       },
       Object {
         "chartLabel": "{marker.data.messageType}",
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-ipc",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "messageType",
@@ -13261,17 +12958,17 @@ Object {
             "label": "To",
           },
         ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-ipc",
-        ],
         "name": "IPC",
         "tableLabel": "{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}",
         "tooltipLabel": "IPC — {marker.data.niceDirection}",
       },
       Object {
-        "data": Array [
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "fields": Array [
           Object {
             "format": "string",
             "key": "name",
@@ -13279,32 +12976,27 @@ Object {
             "searchable": true,
           },
         ],
+        "name": "RefreshDriverTick",
+      },
+      Object {
+        "display": Array [
+          "marker-table",
+        ],
+        "fields": Array [],
+        "name": "Network",
+      },
+      Object {
         "display": Array [
           "marker-chart",
           "marker-table",
           "timeline-overview",
         ],
-        "name": "RefreshDriverTick",
-      },
-      Object {
-        "data": Array [],
-        "display": Array [
-          "marker-table",
-        ],
-        "name": "Network",
-      },
-      Object {
-        "data": Array [
+        "fields": Array [
           Object {
             "format": "string",
             "key": "category",
             "label": "Type",
           },
-        ],
-        "display": Array [
-          "marker-chart",
-          "marker-table",
-          "timeline-overview",
         ],
         "name": "tracing",
       },
@@ -13312,7 +13004,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 53,
+    "preprocessedProfileVersion": 55,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -13363,7 +13055,7 @@ Object {
           null,
           null,
           1,
-          null,
+          2,
           null,
           null,
         ],
@@ -13384,15 +13076,6 @@ Object {
           4,
           2,
           1,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          6,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -13436,7 +13119,7 @@ Object {
           null,
           null,
           0,
-          null,
+          1,
           null,
           null,
         ],
@@ -13786,7 +13469,7 @@ Object {
           null,
           null,
           1,
-          null,
+          2,
           null,
           null,
         ],
@@ -13807,15 +13490,6 @@ Object {
           4,
           2,
           1,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          6,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -13859,7 +13533,7 @@ Object {
           null,
           null,
           0,
-          null,
+          1,
           null,
           null,
         ],
@@ -14173,7 +13847,7 @@ Object {
           null,
           null,
           1,
-          null,
+          2,
           2,
           5,
           null,
@@ -14200,17 +13874,6 @@ Object {
           6,
           2,
           1,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          6,
-          null,
-          null,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -14262,7 +13925,7 @@ Object {
           null,
           null,
           0,
-          null,
+          1,
           0,
           0,
           null,

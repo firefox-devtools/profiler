@@ -69,6 +69,9 @@ import type {
   GeckoProfile,
   GeckoSubprocessProfile,
   GeckoThread,
+  GeckoMetaMarkerSchema,
+  GeckoStaticFieldSchemaData,
+  GeckoDynamicFieldSchemaData,
   GeckoMarkers,
   GeckoMarkerStruct,
   GeckoMarkerTuple,
@@ -607,7 +610,6 @@ function _processFrameTable(
     func: frameFuncs,
     nativeSymbol: Array(geckoFrameStruct.length).fill(null),
     innerWindowID: geckoFrameStruct.innerWindowID,
-    implementation: geckoFrameStruct.implementation,
     line: geckoFrameStruct.line,
     column: geckoFrameStruct.column,
     length: geckoFrameStruct.length,
@@ -1383,6 +1385,63 @@ export function adjustMarkerTimestamps(
   };
 }
 
+function _convertGeckoMarkerSchema(
+  markerSchema: GeckoMetaMarkerSchema
+): MarkerSchema {
+  const {
+    name,
+    tooltipLabel,
+    tableLabel,
+    chartLabel,
+    display,
+    data,
+    graphs,
+    isStackBased,
+  } = markerSchema;
+
+  const fields: GeckoDynamicFieldSchemaData[] = [];
+  const staticFields: GeckoStaticFieldSchemaData[] = [];
+  for (const f of data) {
+    if (f.value === undefined) {
+      fields.push(f);
+    } else if (f.key === undefined) {
+      // extra check to placate Flow
+      staticFields.push(f);
+    }
+  }
+
+  let description = undefined;
+  if (staticFields.length !== 0) {
+    let staticDescriptionFieldIndex = staticFields.findIndex(
+      (f) => f.label === 'Description'
+    );
+    if (staticDescriptionFieldIndex === -1) {
+      staticDescriptionFieldIndex = 0;
+    }
+    const discardedFields = staticFields.filter(
+      (_f, i) => i !== staticDescriptionFieldIndex
+    );
+    if (discardedFields.length !== 0) {
+      console.warn(
+        `Discarding the following static fields from marker schema "${name}": ${discardedFields.join(', ')}`
+      );
+    }
+    description = staticFields[staticDescriptionFieldIndex].value;
+  }
+
+  return {
+    name,
+    tooltipLabel,
+    tableLabel,
+    chartLabel,
+    display,
+    fields,
+    description,
+    graphs,
+    isStackBased,
+  };
+}
+
 /**
  * Marker schemas are only emitted for markers that are used. Each subprocess
  * can have a different list, as the processes are not coordinating with each
@@ -1390,16 +1449,16 @@ export function adjustMarkerTimestamps(
  * primary list that is stored on the processed profile's meta object.
  */
 function processMarkerSchema(geckoProfile: GeckoProfile): MarkerSchema[] {
-  const combinedSchemas: MarkerSchema[] = geckoProfile.meta.markerSchema;
-  const names: Set<string> = new Set(
-    geckoProfile.meta.markerSchema.map(({ name }) => name)
+  const combinedSchemas: MarkerSchema[] = geckoProfile.meta.markerSchema.map(
+    _convertGeckoMarkerSchema
   );
+  const names: Set<string> = new Set(combinedSchemas.map(({ name }) => name));
 
   for (const subprocess of geckoProfile.processes) {
     for (const markerSchema of subprocess.meta.markerSchema) {
       if (!names.has(markerSchema.name)) {
         names.add(markerSchema.name);
-        combinedSchemas.push(markerSchema);
+        combinedSchemas.push(_convertGeckoMarkerSchema(markerSchema));
       }
     }
   }
@@ -1999,11 +2058,13 @@ export function processVisualMetrics(
     maybeAddMetricMarker(tabThread, markerName, INTERVAL, startTime, endTime);
 
     // Add progress markers for every visual progress change for more fine grained information.
-    const progressMarkerSchema = {
+    const progressMarkerSchema: MarkerSchema = {
       name: 'VisualMetricProgress',
       tableLabel: '{marker.name} — {marker.data.percentage}',
       display: ['marker-chart', 'marker-table'],
-      data: [{ key: 'percentage', label: 'Percentage', format: 'percentage' }],
+      fields: [
+        { key: 'percentage', label: 'Percentage', format: 'percentage' },
+      ],
     };
     meta.markerSchema.push(progressMarkerSchema);
 

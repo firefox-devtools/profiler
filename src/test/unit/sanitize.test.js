@@ -16,7 +16,6 @@ import {
   getNetworkMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { ensureExists } from '../../utils/flow';
-import type { RemoveProfileInformation } from 'firefox-profiler/types';
 import {
   correlateIPCMarkers,
   deriveMarkersFromRawMarkerTable,
@@ -29,6 +28,7 @@ import {
   callTreeFromProfile,
   formatTree,
 } from 'firefox-profiler/test/fixtures/utils';
+import type { RemoveProfileInformation } from 'firefox-profiler/types';
 
 describe('sanitizePII', function () {
   function setup(
@@ -73,7 +73,7 @@ describe('sanitizePII', function () {
       FileIO: {
         name: 'FileIO',
         display: ['marker-chart', 'marker-table', 'timeline-fileio'],
-        data: [
+        fields: [
           {
             key: 'operation',
             label: 'Operation',
@@ -104,7 +104,7 @@ describe('sanitizePII', function () {
         name: 'Url',
         tableLabel: '{marker.name} - {marker.data.url}',
         display: ['marker-chart', 'marker-table'],
-        data: [
+        fields: [
           {
             key: 'url',
             format: 'url',
@@ -115,7 +115,7 @@ describe('sanitizePII', function () {
         name: 'HostResolver',
         tableLabel: '{marker.name} - {marker.data.host}',
         display: ['marker-chart', 'marker-table'],
-        data: [
+        fields: [
           {
             key: 'host',
             format: 'sanitized-string',

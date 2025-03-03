@@ -77,7 +77,6 @@ Object {
       },
     ],
     "debug": false,
-    "doesNotUseFrameImplementation": true,
     "extensions": Object {
       "baseURL": Array [],
       "id": Array [],
@@ -88,7 +87,7 @@ Object {
     "markerSchema": Array [],
     "oscpu": "macOS 14.6.1",
     "pausedRanges": Array [],
-    "preprocessedProfileVersion": 53,
+    "preprocessedProfileVersion": 55,
     "processType": 0,
     "product": "a.out",
     "sampleUnits": Object {
@@ -130,12 +129,6 @@ Object {
           1,
           2,
           3,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -407,14 +400,6 @@ Object {
           3,
           4,
           5,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -694,15 +679,6 @@ Object {
           4,
           5,
           2,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -1013,15 +989,6 @@ Object {
           4,
           5,
           2,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -1366,19 +1333,6 @@ Object {
           7,
           8,
           10,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,
@@ -1809,15 +1763,6 @@ Object {
           4,
           5,
           2,
-        ],
-        "implementation": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
         ],
         "inlineDepth": Array [
           0,

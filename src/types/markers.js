@@ -118,6 +118,29 @@ export type MarkerGraph = {|
   color?: GraphColor,
 |};
 
+export type MarkerSchemaField = {|
+  // The property key of the marker data property that carries the field value.
+  key: string,
+
+  // An optional user-facing label.
+  // If no label is provided, the key is displayed instead.
+  label?: string,
+
+  // The format / type of this field. This affects how the field's value is
+  // displayed and determines which types of values are accepted for this field.
+  format: MarkerFormatType,
+
+  // If present and set to true, the marker search string will be matched
+  // against the values of this field when determining which markers match the
+  // search.
+  searchable?: boolean,
+
+  // If present and set to true, this field will not be shown in the list
+  // of fields in the tooltip or in the sidebar. Such fields can still be
+  // used inside labels and they can be searchable.
+  hidden?: boolean,
+|};
+
 export type MarkerSchema = {|
   // The unique identifier for this marker.
   name: string, // e.g. "CC"
@@ -138,24 +161,13 @@ export type MarkerSchema = {|
   // The locations to display
   display: MarkerDisplayLocation[],
 
-  data: Array<
-    | {|
-        key: string,
-        // If no label is provided, the key is displayed.
-        label?: string,
-        format: MarkerFormatType,
-        searchable?: boolean,
-        // If present and set to true, this field will not be shown in the list
-        // of fields in the tooltip or in the sidebar. Such fields can still be
-        // used inside labels and they can be searchable.
-        hidden?: boolean,
-      |}
-    | {|
-        // This type is a static bit of text that will be displayed
-        label: string,
-        value: string,
-      |},
-  >,
+  // The fields that can be present on markers of this type.
+  // Not all listed fields have to be present on every marker (they're all optional).
+  fields: MarkerSchemaField[],
+
+  // An optional description for markers of this type.
+  // Will be displayed to the user.
+  description?: string,
 
   // if present, give the marker its own local track
   graphs?: Array<MarkerGraph>,
@@ -538,6 +550,9 @@ export type NetworkPayload = {|
   // TailForbidden. Multiple flags can be set, separated by '|',
   // or we use 'Unset' if no flag is set.
   classOfService?: string,
+
+  // Used to show the request status (nsresult nsIRequest::status)
+  requestStatus?: string,
 
   // Used to show the HTTP response status code
   responseStatus?: number,

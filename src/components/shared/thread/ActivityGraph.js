@@ -56,6 +56,7 @@ export type Props = {|
   +implementationFilter: ImplementationFilter,
   +timelineType: TimelineType,
   +zeroAt: Milliseconds,
+  +profileTimelineUnit: string,
   ...SizeProps,
 |};
 
@@ -170,6 +171,7 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
       height,
       timelineType,
       zeroAt,
+      profileTimelineUnit,
     } = this.props;
     const { hoveredPixelState, mouseX, mouseY } = this.state;
     return (
@@ -213,6 +215,7 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
               categories={categories}
               implementationFilter={implementationFilter}
               zeroAt={zeroAt}
+              profileTimelineUnit={profileTimelineUnit}
               interval={interval}
             />
           </Tooltip>

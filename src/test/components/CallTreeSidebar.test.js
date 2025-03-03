@@ -12,14 +12,10 @@ import { CallTreeSidebar } from '../../components/sidebar/CallTreeSidebar';
 import {
   changeSelectedCallNode,
   changeInvertCallstack,
-  changeSelectedThreads,
 } from '../../actions/profile-view';
 
 import { storeWithProfile } from '../fixtures/stores';
-import {
-  getProfileFromTextSamples,
-  getMergedProfileFromTextSamples,
-} from '../fixtures/profiles/processed-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
 import type { CallNodePath } from 'firefox-profiler/types';
 import { ensureExists } from '../../utils/flow';
@@ -169,42 +165,6 @@ describe('CallTreeSidebar', function () {
 
     selectNode([H, B, A]);
     expect(container.firstChild).toMatchSnapshot();
-  });
-
-  it("doesn't show implementation breakdowns when self and total time in profile is zero", () => {
-    const {
-      dispatch,
-      queryByText,
-      getAllByText,
-      funcNamesDict: { A, B, D },
-    } = setup(
-      getMergedProfileFromTextSamples([
-        `
-          A  A  A
-          B  B  C
-          D  E  F
-        `,
-        `
-          A  A  A
-          B  B  B
-          G  I  E
-        `,
-      ])
-    );
-
-    act(() => {
-      dispatch(changeSelectedThreads(new Set([2])));
-    });
-    act(() => {
-      dispatch(changeSelectedCallNode(2, [A]));
-    });
-
-    expect(queryByText(/Implementation/)).not.toBeInTheDocument();
-
-    act(() => {
-      dispatch(changeSelectedCallNode(2, [A, B, D]));
-    });
-    expect(getAllByText(/Implementation/).length).toBeGreaterThan(0);
   });
 
   it('can expand subcategories', () => {
