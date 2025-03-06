@@ -497,7 +497,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         callTreeSummaryStrategy="timing"
         durationText={formatMilliseconds(duration)}
         displayStackType={displayStackType}
-        args={JSON.stringify(argumentSummaries, null, 2) || null}
+        args={argumentSummaries}
       />
     );
   };

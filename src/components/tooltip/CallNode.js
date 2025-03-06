@@ -32,6 +32,13 @@ import type {
 } from 'firefox-profiler/profile-logic/profile-data';
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
+import {
+  REPS,
+  MODE,
+} from 'devtools-reps'
+const { Rep } = REPS;
+
+
 import './CallNode.css';
 import classNames from 'classnames';
 
@@ -129,7 +136,7 @@ type Props = {|
   +timings?: TimingsForPath,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +displayStackType: boolean,
-  +args?: string | null,
+  +args?: Array<{...}>,
 |};
 
 /**
@@ -425,15 +432,22 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       ];
     }
 
-    let argsEl = null;
+    let argumentsElement = null;
     if (args) {
-      argsEl = [
-        <div className="tooltipLabel" key="resource">
-          args:
-        </div>,
-      ];
-      for (let line of args.split("\n")) {
-        argsEl.push(line);
+      if (args.length == 0) {
+        argumentsElement = <div className="arguments">No arguments.</div>;
+      } else {
+        let argsEl = [];
+        for(const previewObject of args) {
+          argsEl.push(Rep({
+            object: previewObject,
+            mode: MODE.LONG,
+          }));
+        }
+        argumentsElement = <div className="arguments">
+         <div className="argumentsLabel">Arguments</div>
+         {argsEl}
+        </div>;
       }
     }
 
@@ -551,9 +565,9 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             {pageAndParentPageURL}
             {fileName}
             {resource}
-            {argsEl}
           </div>
           {this._renderCategoryTimings(timings)}
+          {argumentsElement}
         </div>
       </div>
     );
