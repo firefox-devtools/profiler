@@ -32,6 +32,13 @@ import type {
 } from 'firefox-profiler/profile-logic/profile-data';
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
+import {
+  REPS,
+  MODE,
+} from 'firefox-profiler/components/shared/reps/index'
+const { Rep } = REPS;
+
+
 import './CallNode.css';
 import classNames from 'classnames';
 
@@ -425,15 +432,24 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       ];
     }
 
-    let argvEl = null;
+    let argumentsElement = null;
     if (argv) {
-      argvEl = [
-        <div className="tooltipLabel" key="resource">
-          Arguments:
-        </div>,
-      ];
-      for (let line of argv.split("\n")) {
-        argvEl.push(line);
+      const argPreviews = JSON.parse(argv);
+      if (argPreviews.length == 0) {
+        argumentsElement = <div className="arguments">No argument.</div>;
+      } else {
+        let argvEl = [];
+        for(const previewObject of argPreviews) {
+          argvEl.push(Rep({
+            object: previewObject,
+            mode: MODE.LONG,
+          }));
+        }
+        // Use .theme-light in order to apply css variables from DevTool's variables.css
+        argumentsElement = <div className="arguments theme-light">
+         <div className="argumentsLabel">Arguments</div>
+         {argvEl}
+        </div>;
       }
     }
 
@@ -551,9 +567,9 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             {pageAndParentPageURL}
             {fileName}
             {resource}
-            {argvEl}
           </div>
           {this._renderCategoryTimings(timings)}
+          {argumentsElement}
         </div>
       </div>
     );
