@@ -138,8 +138,9 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
       const sampleTime = samples.time[sampleIndex];
       const stackIndex = samples.stack[sampleIndex];
       const hasSamples = samples.length > 0 && stackTable.length > 1;
+      const hasValidStackIndex = (stackIndex !== null) ||  (stackIndex !== undefined);
 
-      if (hasSamples) {
+      if (hasSamples && hasValidStackIndex) {
         const stack = getFuncNamesAndOriginsForPath(
           convertStackToCallNodeAndCategoryPath(
             rangeFilteredThread,
