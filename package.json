@@ -19,6 +19,8 @@
     "build-l10n-prod:quiet": "yarn build:clean && yarn build-photon && cross-env NODE_ENV=production L10N=1 webpack",
     "build-l10n-prod": "yarn build-l10n-prod:quiet --progress",
     "build-photon": "webpack --config res/photon/webpack.config.js",
+    "build-batch-checker": "yarn build-batch-checker:quiet --progress",
+    "build-batch-checker:quiet": "yarn build:clean && cross-env NODE_ENV=production webpack --config src/batch-checker/webpack.config.js",
     "build-symbolicator-cli": "yarn build-symbolicator-cli:quiet --progress",
     "build-symbolicator-cli:quiet": "yarn build:clean && cross-env NODE_ENV=production webpack --config src/symbolicator-cli/webpack.config.js",
     "lint": "node bin/output-fixing-commands.js run-p lint-js lint-css prettier-run",
