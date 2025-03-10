@@ -46,6 +46,7 @@ import {
 import {
   funcHasDirectRecursiveCall,
   funcHasRecursiveCall,
+  getBacktraceItemsForStack,
 } from '../../profile-logic/transforms';
 
 import type { Thread, IndexIntoStackTable } from 'firefox-profiler/types';
@@ -1564,5 +1565,45 @@ describe('getNativeSymbolInfo', function () {
       functionSizeIsKnown: true,
       libIndex: profile.libs.findIndex((l) => l.name === 'XUL'),
     });
+  });
+});
+
+describe('getBacktraceItemsForStack', function () {
+  function getBacktraceString(thread, sampleIndex): string {
+    return getBacktraceItemsForStack(
+      ensureExists(thread.samples.stack[sampleIndex]),
+      'combined',
+      thread
+    )
+      .map(({ funcName, origin }) => `${funcName} ${origin}`)
+      .join('\n');
+  }
+
+  it('returns backtrace items in the right order and with frame line numbers', function () {
+    const { derivedThreads } = getProfileFromTextSamples(`
+      A[file:one.js][line:20]  A[file:one.js][line:21]  A[file:one.js][line:20]
+      B[file:one.js][line:30]  D[file:one.js][line:50]  B[file:one.js][line:31]
+      C[file:two.js][line:10]  C[file:two.js][line:11]  C[file:two.js][line:12]
+                                                        D[file:one.js][line:51]
+    `);
+
+    const [thread] = derivedThreads;
+
+    expect(getBacktraceString(thread, 0)).toMatchInlineSnapshot(`
+     "C two.js:10
+     B one.js:30
+     A one.js:20"
+    `);
+    expect(getBacktraceString(thread, 1)).toMatchInlineSnapshot(`
+     "C two.js:11
+     D one.js:50
+     A one.js:21"
+    `);
+    expect(getBacktraceString(thread, 2)).toMatchInlineSnapshot(`
+     "D one.js:51
+     C two.js:12
+     B one.js:31
+     A one.js:20"
+    `);
   });
 });
