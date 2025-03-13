@@ -123,7 +123,7 @@
     "alex": "^11.0.1",
     "autoprefixer": "^10.4.20",
     "babel-jest": "^29.7.0",
-    "babel-loader": "^9.2.1",
+    "babel-loader": "^10.0.0",
     "babel-plugin-module-resolver": "^5.0.2",
     "browserslist": "^4.24.4",
     "caniuse-lite": "^1.0.30001699",
