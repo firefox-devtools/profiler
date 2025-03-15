@@ -261,8 +261,8 @@ Details--error-boundary-message =
 
 # This message will always be displayed after another context-specific message.
 ErrorBoundary--report-error-to-developers-description =
-    Παρακαλώ αναφέρετε αυτό το ζήτημα στους προγραμματιστές, μαζί με το
-    πλήρες σφάλμα, όπως εμφανίζεται στην κονσόλα ιστού των εργαλείων ανάπτυξης.
+    Αναφέρετε αυτό το ζήτημα στους προγραμματιστές, μαζί με το πλήρες
+    σφάλμα, όπως εμφανίζεται στην κονσόλα ιστού των εργαλείων ανάπτυξης.
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Αναφορά σφάλματος στο GitHub
 
@@ -487,11 +487,16 @@ MenuButtons--index--hide-moreInfo-button = Εμφάνιση λιγότερων
 #   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
 MenuButtons--metaInfo--physical-and-logical-cpu =
     { $physicalCPUs ->
-        [one] { $physicalCPUs } φυσικός πυρήνας
-       *[other] { $physicalCPUs } φυσικοί πυρήνες
-    }, { $logicalCPUs ->
-        [one] { $logicalCPUs } λογικός πυρήνας
-       *[other] { $logicalCPUs } λογικοί πυρήνες
+        [one]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } φυσικός πυρήνας, { $logicalCPUs } λογικός πυρήνας
+               *[other] { $physicalCPUs } φυσικός πυρήνας, { $logicalCPUs } λογικοί πυρήνες
+            }
+       *[other]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } φυσικοί πυρήνες, { $logicalCPUs } λογικός πυρήνας
+               *[other] { $physicalCPUs } φυσικοί πυρήνες, { $logicalCPUs } λογικοί πυρήνες
+            }
     }
 # This string is used when we only have the information about the number of
 # physical CPU cores.
