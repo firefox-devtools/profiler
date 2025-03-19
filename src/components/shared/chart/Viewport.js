@@ -125,11 +125,19 @@ const CTRL_KEYMAP: { [string]: NavigationKey } = {
 // These viewport values (most of which are computed dynamically by
 // the HOC) are passed into the props of the wrapped component.
 export type Viewport = {|
+  // The outer width. marginLeft and marginRight are inside of the outer width.
   +containerWidth: CssPixels,
+  // The viewport height.
   +containerHeight: CssPixels,
+  // When fully zoomed out, this is 0.0.
+  // Corresponds to what's drawn at marginLeft from the left edge of containerWidth.
   +viewportLeft: UnitIntervalOfProfileRange,
+  // When fully zoomed out, this is 1.0.
+  // Corresponds to what's drawn at marginRight from the right edge of containerWidth.
   +viewportRight: UnitIntervalOfProfileRange,
+  // The vertical scroll position.
   +viewportTop: CssPixels,
+  // This is viewportTop + containerHeight.
   +viewportBottom: CssPixels,
   +isDragging: boolean,
   +moveViewport: (CssPixels, CssPixels) => void,
