@@ -25,7 +25,6 @@ import {
   formatTree,
   formatTreeIncludeCategories,
 } from '../fixtures/utils';
-import { StringTable } from '../../utils/string-table';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 
 describe('unfiltered call tree', function () {
@@ -354,12 +353,11 @@ describe('unfiltered call tree', function () {
 
     describe('icons from the call tree', function () {
       it('upgrades http to https', function () {
-        const { profile } = getProfileFromTextSamples(`
+        const { profile, stringTable } = getProfileFromTextSamples(`
           A[lib:examplecom.js]
         `);
         const callTree = callTreeFromProfile(profile);
         const [thread] = profile.threads;
-        const stringTable = StringTable.withBackingArray(thread.stringArray);
         const hostStringIndex = stringTable.indexForString('examplecom.js');
 
         thread.resourceTable.type[0] = resourceTypes.webhost;
@@ -647,6 +645,7 @@ describe('origin annotation', function () {
     profile: {
       threads: [thread],
     },
+    stringTable,
     funcNamesPerThread: [funcNames],
   } = getProfileFromTextSamples(`
     A
@@ -654,7 +653,6 @@ describe('origin annotation', function () {
     C
     D
   `);
-  const stringTable = StringTable.withBackingArray(thread.stringArray);
 
   function addResource(
     funcName: string,
