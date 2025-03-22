@@ -180,6 +180,28 @@ CallTreeSidebar--call-node-details = Падрабязнасці вузла вы�
 
 CallTreeSidebar--traced-running-time =
     .label = Асочаны час працы
+CallTreeSidebar--traced-self-time =
+    .label = Асочаны ўласны час
+CallTreeSidebar--running-time =
+    .label = Час працы
+CallTreeSidebar--self-time =
+    .label = Уласны час
+CallTreeSidebar--running-samples =
+    .label = Выкананыя ўзоры
+CallTreeSidebar--self-samples =
+    .label = Уласныя ўзоры
+CallTreeSidebar--running-size =
+    .label = Выкананы памер
+CallTreeSidebar--self-size =
+    .label = Уласны памер
+CallTreeSidebar--categories = Катэгорыі
+CallTreeSidebar--implementation = Рэалізацыя
+CallTreeSidebar--running-milliseconds = Выкананыя мілісекунды
+CallTreeSidebar--running-sample-count = Колькасць выкананых узораў
+CallTreeSidebar--running-bytes = Выкананыя байты
+CallTreeSidebar--self-milliseconds = Уласныя мілісекунды
+CallTreeSidebar--self-sample-count = Колькасць уласных узораў
+CallTreeSidebar--self-bytes = Уласныя байты
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -298,6 +320,7 @@ Home--load-files-from-other-tools2 =
     <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>,
     панэль прадукцыйнасці Chrome, <androidstudio>Android Studio</androidstudio> або
     любы файл, які выкарыстоўвае фарматы <dhat>dhat</dhat> або <traceevent>Google Trace Event</traceevent>. <write>Даведайцеся, як напісаць свой уласны імпарцёр</write>.
+Home--install-chrome-extension = Усталяваць пашырэнне Chrome
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
