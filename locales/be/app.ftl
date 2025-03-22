@@ -942,6 +942,27 @@ TrackBandwidthGraph--speed = { $value } у секунду
 #   $value (String) - how many read or write operations were performed since the previous sample
 TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value }
     .label = аперацый уводу/вываду з часу папярэдняй выбаркі
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data until the hovered time.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--cumulative-bandwidth-at-this-time = { $value } ({ $carbonValue } г CO₂e)
+    .label = Звесткі, перасланыя да гэтага часу
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data during the visible time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-graph = { $value } ({ $carbonValue } г CO₂e)
+    .label = Звесткі, перасланыя ў бачным прамежку
+# This is used in the tooltip of the bandwidth track when a range is selected.
+# Variables:
+#   $value (String) - the total of transfered data during the selected time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-range = { $value } ({ $carbonValue } г CO₂e)
+    .label = Звесткі, перасланыя ў бягучым вылучэнні
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
