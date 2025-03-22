@@ -30,6 +30,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = Немагчыма імпартаваць профіль.
 AppViewRouter--error-unpublished = Не ўдалося атрымаць профіль з { -firefox-brand-name }.
 AppViewRouter--error-from-file = Не ўдалося прачытаць файл або разабраць профіль у ім.
 AppViewRouter--error-local = Яшчэ не рэалізавана.
@@ -109,6 +110,7 @@ CallNodeContextMenu--searchfox = Шукаць назву функцыі у Searc
 CallNodeContextMenu--copy-function-name = Капіяваць назву функцыі
 CallNodeContextMenu--copy-script-url = Капіяваць URL-адрас скрыпту
 CallNodeContextMenu--copy-stack = Капіяваць стэк
+CallNodeContextMenu--show-the-function-in-devtools = Паказаць функцыю ў DevTools
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -160,6 +162,7 @@ CallTree--inlining-badge = (убудаваны)
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Выберыце вузел, каб паказаць інфармацыю аб ім.
+CallTreeSidebar--call-node-details = Падрабязнасці вузла выкліку
 
 ## CallTreeSidebar timing information
 ##
@@ -175,6 +178,8 @@ CallTreeSidebar--select-a-node = Выберыце вузел, каб паказ�
 ## in the functions it called. "Running time" is the time spent in the function
 ## itself, including the time spent in the functions it called.
 
+CallTreeSidebar--traced-running-time =
+    .label = Асочаны час працы
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
