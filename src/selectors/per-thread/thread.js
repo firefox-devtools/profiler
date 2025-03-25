@@ -316,7 +316,7 @@ export function getBasicThreadSelectorsPerThread(
   );
 
   const getThreadProcessDetails: Selector<string> = createSelector(
-    getThread,
+    getRawThread,
     getFriendlyThreadName,
     ProfileData.getThreadProcessDetails
   );

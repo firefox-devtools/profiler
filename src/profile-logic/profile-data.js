@@ -2850,7 +2850,7 @@ export function getFriendlyThreadName(
 }
 
 export function getThreadProcessDetails(
-  thread: Thread,
+  thread: RawThread,
   friendlyThreadName: string
 ): string {
   let label = `${friendlyThreadName}\n`;
