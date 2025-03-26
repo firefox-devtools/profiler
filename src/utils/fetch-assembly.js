@@ -76,7 +76,7 @@ export async function fetchAssembly(
 // official Mozilla symbolication server with requests it can't handle.
 // This check can be removed once it adds support for /asm/v1.
 function _serverMightSupportAssembly(symbolServerUrl: string): boolean {
-  return isLocalURL(symbolServerUrl);
+  return isLocalURL(symbolServerUrl) || symbolServerUrl.endsWith('appspot.com');
 }
 
 // Convert the response from the JSON format into our own DecodedInstruction
