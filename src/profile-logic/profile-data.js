@@ -3386,8 +3386,9 @@ export function extractProfileFilterPageData(
     const isExtension = pageUrl.startsWith('moz-extension://');
     const defaultFavicon = isExtension ? ExtensionFavicon : DefaultLinkFavicon;
     const pageData: ProfileFilterPageData = {
-      origin: '',
-      hostname: '',
+      // These will be used as a fallback if the urls have been sanitized.
+      origin: pageUrl,
+      hostname: pageUrl,
       favicon: currentPage.favicon ?? defaultFavicon,
     };
 
@@ -3409,10 +3410,9 @@ export function extractProfileFilterPageData(
 
       pageData.origin = page.origin;
     } catch (e) {
-      console.warn(
-        'Error while extracing the hostname and favicon from the page url',
-        pageUrl
-      );
+      // Error while extracting the hostname and favicon from the page url.
+      // It's likely that it's because sanitization removed the urls. Just
+      // ignore it and default to the initial sanitized url.
     }
 
     // Adding it to the map outside of the try-catch block, just in case something
