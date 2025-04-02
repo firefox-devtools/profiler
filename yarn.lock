@@ -1168,10 +1168,10 @@
     classnames "^2.5.1"
     object-assign "^4.1.0"
 
-"@fluent/bundle@^0.18.0":
-  version "0.18.0"
-  resolved "https://registry.yarnpkg.com/@fluent/bundle/-/bundle-0.18.0.tgz#bf67e306719a33baf3b66c88af5ac427d7800dbd"
-  integrity sha512-8Wfwu9q8F9g2FNnv82g6Ch/E1AW1wwljsUOolH5NEtdJdv0sZTuWvfCM7c3teB9dzNaJA8rn4khpidpozHWYEA==
+"@fluent/bundle@^0.19.0":
+  version "0.19.0"
+  resolved "https://registry.yarnpkg.com/@fluent/bundle/-/bundle-0.19.0.tgz#deac223a3a9c725ad288040d5faeffd3f6caddbd"
+  integrity sha512-Er3tlHttc5jnHrMKzUb3ajaCJa2mzS1dxZ+qb2I+BOgCLWvoYoT4jYXqVf3smZOLiR0W2yPM0TNV3yvPz5BJdA==
 
 "@fluent/langneg@^0.7.0":
   version "0.7.0"
