@@ -136,6 +136,34 @@ describe('utils/string', function () {
       expect(removeURLs(string)).toEqual(string);
     });
 
+    it('should not remove basic about URLs', () => {
+      let string = 'about:profiling';
+      expect(removeURLs(string)).toEqual(string);
+
+      string = 'about:config';
+      expect(removeURLs(string)).toEqual(string);
+
+      string = 'about:home';
+      expect(removeURLs(string)).toEqual(string);
+
+      string = 'Load: about:home';
+      expect(removeURLs(string)).toEqual(string);
+    });
+
+    it('should remove the query strings of about URLs', () => {
+      let string = 'about:config?u=foo=bar';
+      expect(removeURLs(string)).toEqual('about:config?<sanitized>');
+
+      string = 'about:home?u=https%3A//www.google.com/';
+      expect(removeURLs(string)).toEqual('about:home?<sanitized>');
+
+      string = 'about:profiling?foo=bar&u=https%3A//www.google.com/';
+      expect(removeURLs(string)).toEqual('about:profiling?<sanitized>');
+
+      string = 'Load: about:home?foo=bar';
+      expect(removeURLs(string)).toEqual('Load: about:home?<sanitized>');
+    });
+
     it('should remove page URLs from moz-page-thumb URLs', () => {
       const string =
         'Image Load - moz-page-thumb://thumbnails/?url=https%3A%2F%2Fprofiler.firefox.com%2F';
