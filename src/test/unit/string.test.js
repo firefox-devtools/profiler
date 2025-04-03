@@ -160,7 +160,19 @@ describe('utils/string', function () {
       string = 'about:profiling?foo=bar&u=https%3A//www.google.com/';
       expect(removeURLs(string)).toEqual('about:profiling?<sanitized>');
 
+      string = 'about:profiling#foo-bar';
+      expect(removeURLs(string)).toEqual('about:profiling#<sanitized>');
+
+      string = 'about:profiling?foo=bar#baz';
+      expect(removeURLs(string)).toEqual('about:profiling?<sanitized>');
+
       string = 'Load: about:home?foo=bar';
+      expect(removeURLs(string)).toEqual('Load: about:home?<sanitized>');
+
+      string = 'Load: about:home#foo-bar';
+      expect(removeURLs(string)).toEqual('Load: about:home#<sanitized>');
+
+      string = 'Load: about:home?foo=bar#baz';
       expect(removeURLs(string)).toEqual('Load: about:home?<sanitized>');
     });
 

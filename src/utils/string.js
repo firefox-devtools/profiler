@@ -32,13 +32,13 @@ const REMOVE_URLS_REGEXP = (function () {
   //                          Word boundary, ensures the protocol isn't part of a larger word.
 
   // Captures the base 'about:...' part (like "about:profiling") in group 2
-  const aboutQueryPattern = `\\b(about:[^?#\\s]+)\\?([^\\s]*)`;
+  const aboutQueryPattern = `\\b(about:[^?#\\s]+)([?#])[^\\s]*`;
   //                         ^  ^                ^  ^
-  //                         |  |                |  Captures the query string (Group 3):
+  //                         |  |                |  Captures the query string:
   //                         |  |                |  Zero or more non-whitespace characters.
-  //                         |  |                Matches the literal '?' separating path and query.
+  //                         |  |                Matches the literal '?' or '#' as a saparator (Group 3)
   //                         |  Captures the base 'about:' URI (Group 2):
-  //                         |  about:' followed by one or more non-?, non-#, non-whitespace chars.
+  //                         |  'about:' followed by one or more non-?, non-#, non-whitespace chars.
   //                         |
   //                         Word boundary, ensures the protocol isn't part of a larger word.
 
@@ -63,7 +63,7 @@ export function removeURLs(
 ): string {
   return string.replace(
     REMOVE_URLS_REGEXP,
-    (match, protoGroup, aboutBaseGroup) => {
+    (match, protoGroup, aboutBaseGroup, separator) => {
       if (protoGroup) {
         // Matched a standard URL (http, https, ftp, file, etc.).
         // Replace everything after the protocol part
@@ -71,7 +71,7 @@ export function removeURLs(
       } else if (aboutBaseGroup) {
         // Matched an `about:` URL with a query string.
         // Replace only the query string part (after '?')
-        return aboutBaseGroup + '?' + sanitizedQueryText;
+        return aboutBaseGroup + separator + sanitizedQueryText;
       }
       return match;
     }
