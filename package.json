@@ -68,7 +68,7 @@
     "@codemirror/language": "^6.11.0",
     "@codemirror/state": "^6.5.2",
     "@codemirror/view": "^6.36.4",
-    "@firefox-devtools/react-contextmenu": "^5.2.1",
+    "@firefox-devtools/react-contextmenu": "^5.2.2",
     "@fluent/bundle": "^0.18.0",
     "@fluent/langneg": "^0.7.0",
     "@fluent/react": "^0.15.2",
@@ -109,7 +109,7 @@
     "workbox-window": "^7.3.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.26.4",
+    "@babel/cli": "^7.27.0",
     "@babel/core": "^7.26.10",
     "@babel/eslint-parser": "^7.26.10",
     "@babel/eslint-plugin": "^7.26.10",
@@ -135,7 +135,7 @@
     "cssnano": "^7.0.6",
     "devtools-license-check": "^0.9.0",
     "eslint": "^8.57.1",
-    "eslint-config-prettier": "^10.0.2",
+    "eslint-config-prettier": "^10.1.1",
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-plugin-flowtype": "^8.0.3",
     "eslint-plugin-import": "^2.31.0",
