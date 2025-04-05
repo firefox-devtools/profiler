@@ -45,9 +45,17 @@ export function decodeJwtBase64Url(base64UrlEncodedValue: string): string {
   // most implementations do.
 
   // We do need to convert the string to a "normal" base64 encoding though.
-  const base64EncodedValue = base64UrlEncodedValue
-    .replace('-', '+')
-    .replace('_', '/');
+  const base64EncodedValue = base64UrlEncodedValue.replace(
+    /[-_]/g,
+    (matched) => {
+      // prettier-ignore
+      switch (matched) {
+        case '-': return '+';
+        case '_': return '/';
+        default: throw new Error(`Unexpected match ${matched}`);
+      }
+    }
+  );
 
   return atob(base64EncodedValue);
 }
