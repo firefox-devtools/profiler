@@ -39,15 +39,22 @@ export function isValidJwtToken(jwtToken: string): boolean {
   return JWT_TOKEN_RE.test(jwtToken);
 }
 
+const BASE64URL_REPLACEMENTS = {
+  '-': '+',
+  _: '/',
+};
+const BASE64URL_REPLACEMENT_RE = /[-_]/g;
+
 export function decodeJwtBase64Url(base64UrlEncodedValue: string): string {
   // In the base64url variant used in JWT, the padding "=" character is removed.
   // But atob doesn't mind, so we don't need to recover the missing padding like
   // most implementations do.
 
   // We do need to convert the string to a "normal" base64 encoding though.
-  const base64EncodedValue = base64UrlEncodedValue
-    .replace('-', '+')
-    .replace('_', '/');
+  const base64EncodedValue = base64UrlEncodedValue.replace(
+    BASE64URL_REPLACEMENT_RE,
+    (matched) => BASE64URL_REPLACEMENTS[matched] ?? matched
+  );
 
   return atob(base64EncodedValue);
 }
