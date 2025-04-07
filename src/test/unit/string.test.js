@@ -189,6 +189,11 @@ describe('utils/string', function () {
       expect(removeURLs(string)).toEqual(
         'Load: about:home?<sanitized> another text'
       );
+
+      string = '(about:home?foo=bar#baz) another text';
+      expect(removeURLs(string)).toEqual(
+        '(about:home?<sanitized>) another text'
+      );
     });
 
     it('should remove page URLs from moz-page-thumb URLs', () => {

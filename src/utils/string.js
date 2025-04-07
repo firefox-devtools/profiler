@@ -32,10 +32,10 @@ const REMOVE_URLS_REGEXP = (function () {
   //                          Word boundary, ensures the protocol isn't part of a larger word.
 
   // Captures the base 'about:...' part (like "about:profiling") in group 2
-  const aboutQueryPattern = `\\b(about:[^?#\\s]+)([?#])[^\\s]*`;
-  //                         ^  ^                ^  ^
-  //                         |  |                |  Captures the query string:
-  //                         |  |                |  Zero or more non-whitespace characters.
+  const aboutQueryPattern = `\\b(about:[^?#\\s]+)([?#])[^\\s)]*`;
+  //                         ^  ^                ^     ^
+  //                         |  |                |     Captures the query string:
+  //                         |  |                |     Zero or more non-whitespace characters except ')'.
   //                         |  |                Matches the literal '?' or '#' as a saparator (Group 3)
   //                         |  Captures the base 'about:' URI (Group 2):
   //                         |  'about:' followed by one or more non-?, non-#, non-whitespace chars.
