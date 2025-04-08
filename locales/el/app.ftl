@@ -41,9 +41,9 @@ AppViewRouter--error-compare = Δεν ήταν δυνατή η ανάκτηση 
 # Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
 # https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
 AppViewRouter--error-from-localhost-url-safari =
-    Λόγω ενός <a>συγκεκριμένου περιορισμού στο Safari</a>, το { -profiler-brand-name } δεν μπορεί να
-    εισαγάγει προφίλ από τη συσκευή σε αυτό το πρόγραμμα περιήγησης. Παρακαλούμε
-    ανοίξτε αυτήν τη σελίδα στο { -firefox-brand-name } ή το Chrome.
+    Λόγω ενός <a>συγκεκριμένου περιορισμού του Safari</a>, το { -profiler-brand-name } δεν μπορεί να
+    εισαγάγει προφίλ από τη συσκευή σε αυτό το πρόγραμμα περιήγησης.
+    Ανοίξτε αυτήν τη σελίδα στο { -firefox-brand-name } ή το Chrome.
     .title = Το Safari δεν μπορεί να εισαγάγει τοπικά προφίλ
 AppViewRouter--route-not-found--home =
     .specialMessage = Δεν αναγνωρίστηκε το URL που προσπαθήσατε να μεταβείτε.
@@ -261,8 +261,8 @@ Details--error-boundary-message =
 
 # This message will always be displayed after another context-specific message.
 ErrorBoundary--report-error-to-developers-description =
-    Παρακαλώ αναφέρετε αυτό το ζήτημα στους προγραμματιστές, μαζί με το
-    πλήρες σφάλμα, όπως εμφανίζεται στην κονσόλα ιστού των εργαλείων ανάπτυξης.
+    Αναφέρετε αυτό το ζήτημα στους προγραμματιστές, μαζί με το πλήρες
+    σφάλμα, όπως εμφανίζεται στην κονσόλα ιστού των εργαλείων ανάπτυξης.
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Αναφορά σφάλματος στο GitHub
 
@@ -302,7 +302,7 @@ Home--menu-button-instructions =
     επιδόσεων στο { -firefox-brand-name } και έπειτα, να το αναλύσετε και να το μοιραστείτε με το profiler.firefox.com.
 Home--profile-firefox-android-instructions =
     Μπορείτε επίσης να καταγράψετε προφίλ για το { -firefox-android-brand-name }.
-    Για περισσότερες πληροφορίες, παρακαλούμε συμβουλευτείτε την τεκμηρίωση:
+    Για περισσότερες πληροφορίες, συμβουλευτείτε την τεκμηρίωση:
     <a>Καταγραφή προφίλ του { -firefox-android-brand-name } απευθείας στη συσκευή</a>.
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
@@ -487,11 +487,16 @@ MenuButtons--index--hide-moreInfo-button = Εμφάνιση λιγότερων
 #   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
 MenuButtons--metaInfo--physical-and-logical-cpu =
     { $physicalCPUs ->
-        [one] { $physicalCPUs } φυσικός πυρήνας
-       *[other] { $physicalCPUs } φυσικοί πυρήνες
-    }, { $logicalCPUs ->
-        [one] { $logicalCPUs } λογικός πυρήνας
-       *[other] { $logicalCPUs } λογικοί πυρήνες
+        [one]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } φυσικός πυρήνας, { $logicalCPUs } λογικός πυρήνας
+               *[other] { $physicalCPUs } φυσικός πυρήνας, { $logicalCPUs } λογικοί πυρήνες
+            }
+       *[other]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } φυσικοί πυρήνες, { $logicalCPUs } λογικός πυρήνας
+               *[other] { $physicalCPUs } φυσικοί πυρήνες, { $logicalCPUs } λογικοί πυρήνες
+            }
     }
 # This string is used when we only have the information about the number of
 # physical CPU cores.
