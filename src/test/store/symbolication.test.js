@@ -619,6 +619,7 @@ function _createUnsymbolicatedProfile() {
     name: [stringTable.indexForString('example lib')],
     host: [stringTable.indexForString('example host')],
     type: [resourceTypes.library],
+    sourceId: [null],
   };
   for (let i = 0; i < thread.funcTable.length; i++) {
     thread.funcTable.resource[i] = 0;

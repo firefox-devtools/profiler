@@ -418,6 +418,7 @@ function _extractUnsymbolicatedFunction(
         );
         resourceTable.host[resourceIndex] = null;
         resourceTable.type[resourceIndex] = resourceTypes.library;
+        resourceTable.sourceId[resourceIndex] = null;
         libToResourceIndex.set(libIndex, resourceIndex);
       }
     }
@@ -486,6 +487,7 @@ function _extractCppFunction(
     resourceTable.name[resourceIndex] = libraryNameStringIndex;
     resourceTable.host[resourceIndex] = null;
     resourceTable.type[resourceIndex] = resourceTypes.library;
+    resourceTable.sourceId[resourceIndex] = null;
   }
 
   const newFuncIndex = funcTable.length++;
@@ -524,6 +526,7 @@ function _addExtensionOrigin(
     resourceTable.name[resourceIndex] = stringTable.indexForString(name);
     resourceTable.host[resourceIndex] = idIndex;
     resourceTable.type[resourceIndex] = resourceTypes.addon;
+    resourceTable.sourceId[resourceIndex] = null;
   }
 }
 
@@ -538,12 +541,14 @@ function _extractJsFunction(
 ): IndexIntoFuncTable | null {
   // Check for a JS location string.
   const jsMatch: RegExpResult =
-    // Given:   "functionName (http://script.url/:1234:1234)"
-    // Captures: 1^^^^^^^^^^  2^^^^^^^^^^^^^^^^^^ 3^^^ 4^^^
-    /^(.*) \((.+?):([0-9]+)(?::([0-9]+))?\)$/.exec(locationString) ||
-    // Given:   "http://script.url/:1234:1234"
-    // Captures: 2^^^^^^^^^^^^^^^^^ 3^^^ 4^^^
-    /^()(.+?):([0-9]+)(?::([0-9]+))?$/.exec(locationString);
+    // Given:   "functionName (http://script.url/:1234:1234)[1234]"
+    // Captures: 1^^^^^^^^^^  2^^^^^^^^^^^^^^^^^^ 3^^^ 4^^^ 5^^^
+    /^(.*) \((.+?):([0-9]+)(?::([0-9]+))?\)(?:\[(\d+)\])?$/.exec(
+      locationString
+    ) ||
+    // Given:   "http://script.url/:1234:1234[1234]"
+    // Captures: 2^^^^^^^^^^^^^^^^^ 3^^^ 4^^^ 5^^^
+    /^()(.+?):([0-9]+)(?::([0-9]+))?(?:\[(\d+)\])$/.exec(locationString);
 
   if (!jsMatch) {
     return null;
@@ -554,14 +559,15 @@ function _extractJsFunction(
 
   // Case 4: JS function - A match was found in the location string in the format
   // of a JS function.
-  const [, funcName, rawScriptURI] = jsMatch;
+  const [, funcName, rawScriptURI, , , sourceId] = jsMatch;
   const scriptURI = _getRealScriptURI(rawScriptURI);
 
   const resourceIndex = getOrCreateURIResource(
     scriptURI,
     resourceTable,
     stringTable,
-    originToResourceIndex
+    originToResourceIndex,
+    sourceId
   );
 
   let funcNameIndex;

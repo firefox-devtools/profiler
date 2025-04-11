@@ -373,6 +373,7 @@ export type ResourceTable = {|
   name: Array<IndexIntoStringTable>,
   host: Array<IndexIntoStringTable | null>,
   type: resourceTypeEnum[],
+  sourceId: Array<number | null>,
 |};
 
 /**
