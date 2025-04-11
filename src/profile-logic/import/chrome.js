@@ -647,7 +647,8 @@ async function processTracingEvents(
                     url || '<unknown>',
                     resourceTable,
                     stringTable,
-                    originToResourceIndex
+                    originToResourceIndex,
+                    null
                   )
                 : -1
             );
