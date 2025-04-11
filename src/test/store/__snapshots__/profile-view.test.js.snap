@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`snapshots of selectors/profile matches the last stored run of getProfile 1`] = `
 Object {
@@ -444,7 +444,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 56,
+    "preprocessedProfileVersion": 57,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -690,6 +690,7 @@ Object {
         "length": 0,
         "lib": Array [],
         "name": Array [],
+        "sourceId": Array [],
         "type": Array [],
       },
       "samples": Object {
@@ -1066,6 +1067,7 @@ Object {
         "length": 0,
         "lib": Array [],
         "name": Array [],
+        "sourceId": Array [],
         "type": Array [],
       },
       "samples": Object {
@@ -1302,6 +1304,7 @@ Array [
       "length": 0,
       "lib": Array [],
       "name": Array [],
+      "sourceId": Array [],
       "type": Array [],
     },
     "samples": Object {
@@ -1678,6 +1681,7 @@ Array [
       "length": 0,
       "lib": Array [],
       "name": Array [],
+      "sourceId": Array [],
       "type": Array [],
     },
     "samples": Object {
@@ -2876,6 +2880,7 @@ CallTree {
       "length": 0,
       "lib": Array [],
       "name": Array [],
+      "sourceId": Array [],
       "type": Array [],
     },
     "samples": Object {
@@ -3205,6 +3210,7 @@ Object {
     "length": 0,
     "lib": Array [],
     "name": Array [],
+    "sourceId": Array [],
     "type": Array [],
   },
   "samples": Object {
@@ -3612,6 +3618,7 @@ Object {
     "length": 0,
     "lib": Array [],
     "name": Array [],
+    "sourceId": Array [],
     "type": Array [],
   },
   "samples": Object {
@@ -3933,6 +3940,7 @@ Object {
     "length": 0,
     "lib": Array [],
     "name": Array [],
+    "sourceId": Array [],
     "type": Array [],
   },
   "samples": Object {
@@ -4260,6 +4268,7 @@ Object {
     "length": 0,
     "lib": Array [],
     "name": Array [],
+    "sourceId": Array [],
     "type": Array [],
   },
   "samples": Object {

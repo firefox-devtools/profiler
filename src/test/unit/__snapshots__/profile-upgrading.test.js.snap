@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`importing perf profile should import a perf profile 1`] = `
 Object {
@@ -40,7 +40,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 56,
+    "preprocessedProfileVersion": 57,
     "processType": 0,
     "product": "Firefox",
     "sampleUnits": undefined,
@@ -435,6 +435,13 @@ Object {
           14,
           17,
         ],
+        "sourceId": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
         "type": Array [
           1,
           1,
@@ -642,6 +649,11 @@ Object {
           22,
           5,
         ],
+        "sourceId": Array [
+          null,
+          null,
+          null,
+        ],
         "type": Array [
           1,
           1,
@@ -816,6 +828,11 @@ Object {
           25,
           22,
           5,
+        ],
+        "sourceId": Array [
+          null,
+          null,
+          null,
         ],
         "type": Array [
           1,
@@ -1180,6 +1197,15 @@ Object {
           47,
           2,
         ],
+        "sourceId": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
         "type": Array [
           1,
           1,
@@ -1402,6 +1428,12 @@ Object {
           22,
           5,
           56,
+        ],
+        "sourceId": Array [
+          null,
+          null,
+          null,
+          null,
         ],
         "type": Array [
           1,
@@ -1653,6 +1685,13 @@ Object {
           5,
           56,
         ],
+        "sourceId": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
         "type": Array [
           1,
           1,
@@ -1838,6 +1877,10 @@ Object {
           22,
           5,
         ],
+        "sourceId": Array [
+          null,
+          null,
+        ],
         "type": Array [
           1,
           1,
@@ -2009,6 +2052,11 @@ Object {
           7,
           22,
           5,
+        ],
+        "sourceId": Array [
+          null,
+          null,
+          null,
         ],
         "type": Array [
           1,
@@ -2184,6 +2232,11 @@ Object {
           7,
           22,
           5,
+        ],
+        "sourceId": Array [
+          null,
+          null,
+          null,
         ],
         "type": Array [
           1,
@@ -2361,6 +2414,11 @@ Object {
           7,
           22,
           5,
+        ],
+        "sourceId": Array [
+          null,
+          null,
+          null,
         ],
         "type": Array [
           1,
@@ -2555,6 +2613,12 @@ Object {
           22,
           5,
           36,
+        ],
+        "sourceId": Array [
+          null,
+          null,
+          null,
+          null,
         ],
         "type": Array [
           1,
@@ -3217,6 +3281,13 @@ Object {
           25,
           36,
           5,
+        ],
+        "sourceId": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
         ],
         "type": Array [
           1,
@@ -3927,6 +3998,13 @@ Object {
           36,
           5,
         ],
+        "sourceId": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
         "type": Array [
           1,
           1,
@@ -4635,6 +4713,13 @@ Object {
           25,
           36,
           5,
+        ],
+        "sourceId": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
         ],
         "type": Array [
           1,
@@ -5347,6 +5432,13 @@ Object {
           36,
           5,
         ],
+        "sourceId": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
         "type": Array [
           1,
           1,
@@ -5859,6 +5951,11 @@ Object {
           7,
           117,
           5,
+        ],
+        "sourceId": Array [
+          null,
+          null,
+          null,
         ],
         "type": Array [
           1,
@@ -9389,7 +9486,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 56,
+    "preprocessedProfileVersion": 57,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -9692,6 +9789,10 @@ Object {
         "name": Array [
           11,
           10,
+        ],
+        "sourceId": Array [
+          null,
+          null,
         ],
         "type": Array [
           1,
@@ -10051,6 +10152,10 @@ Object {
           11,
           10,
         ],
+        "sourceId": Array [
+          null,
+          null,
+        ],
         "type": Array [
           1,
           5,
@@ -10408,6 +10513,10 @@ Object {
         "name": Array [
           12,
           10,
+        ],
+        "sourceId": Array [
+          null,
+          null,
         ],
         "type": Array [
           1,
@@ -10934,7 +11043,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 56,
+    "preprocessedProfileVersion": 57,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -11264,6 +11373,10 @@ Object {
         "name": Array [
           12,
           11,
+        ],
+        "sourceId": Array [
+          null,
+          null,
         ],
         "type": Array [
           1,
@@ -11622,6 +11735,10 @@ Object {
         "name": Array [
           12,
           11,
+        ],
+        "sourceId": Array [
+          null,
+          null,
         ],
         "type": Array [
           1,
@@ -12043,6 +12160,10 @@ Object {
         "name": Array [
           13,
           11,
+        ],
+        "sourceId": Array [
+          null,
+          null,
         ],
         "type": Array [
           1,
@@ -12612,7 +12733,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 56,
+    "preprocessedProfileVersion": 57,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -12982,6 +13103,10 @@ Object {
           13,
           12,
         ],
+        "sourceId": Array [
+          null,
+          null,
+        ],
         "type": Array [
           1,
           5,
@@ -13341,6 +13466,10 @@ Object {
         "name": Array [
           13,
           12,
+        ],
+        "sourceId": Array [
+          null,
+          null,
         ],
         "type": Array [
           1,
@@ -13764,6 +13893,10 @@ Object {
         "name": Array [
           14,
           12,
+        ],
+        "sourceId": Array [
+          null,
+          null,
         ],
         "type": Array [
           1,
