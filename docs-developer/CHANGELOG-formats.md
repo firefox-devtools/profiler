@@ -6,6 +6,10 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 58
+
+A new `sourceId` column was added to `thread.resourceTable`. This is an identifier for the JS sources and they are used for source fetching from the from the browser.
+
 ### Version 57
 
 The `searchable` property in marker schemas, originally added in version 44, is now removed again. Now all marker fields are searchable.

@@ -2603,6 +2603,16 @@ const _upgraders = {
       }
     }
   },
+  [58]: (profile) => {
+    // The "sourceId" property is added to resourceTable which is an identifier
+    // for the JS sources and they are used for source fetching later.
+    // We don't have this information in the older profiles, so we are setting
+    // them null.
+    for (const thread of profile.threads) {
+      const { resourceTable } = thread;
+      resourceTable.sourceId = new Array(resourceTable.length).fill(null);
+    }
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };
