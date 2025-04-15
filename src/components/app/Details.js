@@ -67,6 +67,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
   render() {
     const { visibleTabs, selectedTab, isSidebarOpen } = this.props;
     const hasSidebar = selectSidebar(selectedTab) !== null;
+
     return (
       <div className="Details">
         <div className="Details-top-bar">
@@ -136,9 +137,6 @@ export const Details = explicitConnect<{||}, StateProps, DispatchProps>({
     selectedTab: getSelectedTab(state),
     isSidebarOpen: getIsSidebarOpen(state),
   }),
-  mapDispatchToProps: {
-    changeSelectedTab,
-    changeSidebarOpenState,
-  },
+  mapDispatchToProps: { changeSelectedTab, changeSidebarOpenState },
   component: ProfileViewerImpl,
 });
