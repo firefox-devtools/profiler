@@ -6,6 +6,10 @@
 
 .DetailsContainer .layout-pane:not(.layout-pane-primary) {
   max-width: 600px;
+
+  @media screen and (max-width: 768px) {
+    max-width: 80%;
+  }
 }
 
 /* overriding defaults from splitter-layout */
