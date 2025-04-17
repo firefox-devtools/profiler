@@ -142,6 +142,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
           >
             <Timeline />
             <SplitterLayout
+              customClassName="profileViewerSplitterSecondary"
               vertical
               percentage={true}
               // The DetailsContainer is primary.
@@ -177,9 +178,6 @@ export const ProfileViewer = explicitConnect<{||}, StateProps, DispatchProps>({
     icons: getIconsWithClassNames(state),
     isBottomBoxOpen: getIsBottomBoxOpen(state),
   }),
-  mapDispatchToProps: {
-    returnToZipFileList,
-    invalidatePanelLayout,
-  },
+  mapDispatchToProps: { returnToZipFileList, invalidatePanelLayout },
   component: ProfileViewerImpl,
 });
