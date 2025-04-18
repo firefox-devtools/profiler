@@ -7,7 +7,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import { Localized } from '@fluent/react';
-import { debounce } from 'lodash';
+import debounce from 'lodash.debounce';
 
 import {
   tabsWithTitleL10nId,
