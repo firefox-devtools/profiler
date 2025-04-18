@@ -15,7 +15,6 @@
   background: var(--grey-10);
 
   @media screen and (max-width: 768px) {
-    flex-flow: column-reverse;
     align-items: start;
   }
 }

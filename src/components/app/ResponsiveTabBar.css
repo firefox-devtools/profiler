@@ -1,0 +1,22 @@
+.tabBarTabWrapper--compact {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: start;
+}
+
+.tabBarDropdownLabel {
+  width: 100%;
+  padding: 0.5rem;
+}
+
+.tabBarDropdown {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #e0e0e0;
+  margin-left: 0.5rem;
+  background-color: #f9f9fa;
+  color: #000;
+  cursor: pointer;
+  font-size: 1rem;
+}
