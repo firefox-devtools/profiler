@@ -7,7 +7,6 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import { Localized } from '@fluent/react';
-import debounce from 'lodash.debounce';
 
 import {
   tabsWithTitleL10nId,
@@ -18,15 +17,15 @@ import './TabBar.css';
 import './ResponsiveTabBar.css';
 
 type Props = {|
+  +width: number,
   +selectedTabSlug: string,
   +visibleTabs: $ReadOnlyArray<TabSlug>,
   +onSelectTab: (string) => void,
 |};
 
-const SMALL_SCREEN_BREAKPOINT = 768;
+const SMALL_SCREEN_BREAKPOINT = 625;
 
 type State = { isSmallScreen: boolean };
-
 export class TabBar extends React.PureComponent<Props, State> {
   state: State = { isSmallScreen: false };
 
@@ -41,29 +40,23 @@ export class TabBar extends React.PureComponent<Props, State> {
     e.preventDefault();
   };
 
-  /* responsive tabBar methods */
-  // Using a debounce function to limit the number of times
-  // the resize event is triggered.
-  _componentResizeListener = debounce(() => {
-    const isSmall = window.innerWidth <= SMALL_SCREEN_BREAKPOINT;
-    if (isSmall !== this.state.isSmallScreen) {
-      this.setState({ isSmallScreen: isSmall });
-    }
-  }, 150);
-
   _onDropdownChange = (e: SyntheticEvent<HTMLSelectElement>) => {
     this.props.onSelectTab(e.currentTarget.value);
   };
 
-  componentDidMount() {
-    this.setState({
-      isSmallScreen: window.innerWidth <= SMALL_SCREEN_BREAKPOINT,
-    });
-    window.addEventListener('resize', this._componentResizeListener);
-  }
+  componentDidUpdate(prevProps: Props) {
+    const { width } = this.props;
+    if (width === 0) {
+      // If the width is 0, it means that the component is not mounted yet.
+      return;
+    }
 
-  componentWillUnmount() {
-    window.removeEventListener('resize', this._componentResizeListener);
+    if (prevProps.width !== width) {
+      const isSmall = width <= SMALL_SCREEN_BREAKPOINT;
+      if (isSmall !== this.state.isSmallScreen) {
+        this.setState({ isSmallScreen: isSmall });
+      }
+    }
   }
 
   render() {
@@ -72,27 +65,22 @@ export class TabBar extends React.PureComponent<Props, State> {
 
     if (isSmallScreen) {
       return (
-        <div className="tabBarTabWrapper--compact">
-          <Localized id="profiler-tabBar-dropdown">
-            <label
-              htmlFor="tabBarDropdownSelect"
-              className="tabBarDropdownLabel"
-            >
-              Select a tab
-            </label>
-          </Localized>
+        <div className='tabBarTabWrapper--compact'>
+          <label htmlFor='tabBarDropdownSelect' className='tabBarDropdownLabel'>
+            Select a tab
+          </label>
           <select
-            id="tabBarDropdownSelect"
+            id='tabBarDropdownSelect'
             value={selectedTabSlug}
             onChange={this._onDropdownChange}
-            className="tabBarDropdown"
+            className='tabBarDropdown'
           >
             {visibleTabs.map((tabSlug) => (
               <option
                 id={`${tabSlug}-tab-option`}
                 key={tabSlug}
                 value={tabSlug}
-                role="option"
+                role='option'
               >
                 <Localized id={tabsWithTitleL10nId[tabSlug]}>
                   {tabsWithTitleL10nId[tabSlug]}
@@ -106,9 +94,9 @@ export class TabBar extends React.PureComponent<Props, State> {
 
     return (
       <ol
-        className="tabBarTabWrapper"
-        role="tablist"
-        aria-label="Profiler tabs"
+        className='tabBarTabWrapper'
+        role='tablist'
+        aria-label='Profiler tabs'
       >
         {visibleTabs.map((tabSlug) => (
           <li
@@ -125,13 +113,13 @@ export class TabBar extends React.PureComponent<Props, State> {
               adding ARIA attributes for screen reader support.*/}
             <Localized id={tabsWithTitleL10nId[tabSlug]}>
               <button
-                className="tabBarTabButton"
-                type="button"
+                className='tabBarTabButton'
+                type='button'
                 // The tab's id attribute connects the tab to its tabpanel
                 // that has an aria-labelledby attribute of the same value.
                 // The id is not used for CSS styling.
                 id={`${tabSlug}-tab-button`}
-                role="tab"
+                role='tab'
                 aria-selected={tabSlug === selectedTabSlug}
                 // The control and content relationship is established
                 // with aria-controls attribute
