@@ -65,22 +65,22 @@ export class TabBar extends React.PureComponent<Props, State> {
 
     if (isSmallScreen) {
       return (
-        <div className='tabBarTabWrapper--compact'>
-          <label htmlFor='tabBarDropdownSelect' className='tabBarDropdownLabel'>
+        <div className="tabBarTabWrapper--compact">
+          <label htmlFor="tabBarDropdownSelect" className="tabBarDropdownLabel">
             Select a tab
           </label>
           <select
-            id='tabBarDropdownSelect'
+            id="tabBarDropdownSelect"
             value={selectedTabSlug}
             onChange={this._onDropdownChange}
-            className='tabBarDropdown'
+            className="tabBarDropdown"
           >
             {visibleTabs.map((tabSlug) => (
               <option
                 id={`${tabSlug}-tab-option`}
                 key={tabSlug}
                 value={tabSlug}
-                role='option'
+                role="option"
               >
                 <Localized id={tabsWithTitleL10nId[tabSlug]}>
                   {tabsWithTitleL10nId[tabSlug]}
@@ -94,9 +94,9 @@ export class TabBar extends React.PureComponent<Props, State> {
 
     return (
       <ol
-        className='tabBarTabWrapper'
-        role='tablist'
-        aria-label='Profiler tabs'
+        className="tabBarTabWrapper"
+        role="tablist"
+        aria-label="Profiler tabs"
       >
         {visibleTabs.map((tabSlug) => (
           <li
@@ -113,13 +113,13 @@ export class TabBar extends React.PureComponent<Props, State> {
               adding ARIA attributes for screen reader support.*/}
             <Localized id={tabsWithTitleL10nId[tabSlug]}>
               <button
-                className='tabBarTabButton'
-                type='button'
+                className="tabBarTabButton"
+                type="button"
                 // The tab's id attribute connects the tab to its tabpanel
                 // that has an aria-labelledby attribute of the same value.
                 // The id is not used for CSS styling.
                 id={`${tabSlug}-tab-button`}
-                role='tab'
+                role="tab"
                 aria-selected={tabSlug === selectedTabSlug}
                 // The control and content relationship is established
                 // with aria-controls attribute
