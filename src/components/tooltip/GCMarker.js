@@ -6,7 +6,6 @@
 
 import * as React from 'react';
 import {
-  formatNumber,
   formatPercent,
   formatBytes,
   formatSI,
@@ -168,16 +167,6 @@ export function getGCMinorDetails(
               key="GCMinor-Time spent allocating chunks in mutator"
             >
               {formatMicroseconds(nursery.chunk_alloc_us)}
-            </TooltipDetail>
-          );
-        }
-        if (nursery.groups_pretenured) {
-          details.push(
-            <TooltipDetail
-              label="Number of groups to pretenure"
-              key="GCMinor-Number of groups to pretenure"
-            >
-              {formatNumber(nursery.groups_pretenured, 2, 0)}
             </TooltipDetail>
           );
         }
