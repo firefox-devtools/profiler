@@ -3150,14 +3150,14 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
       Tenuring allocation rate
       :
     </div>
-    190MB/s
+    165MB/s
     <div
       class="tooltipLabel"
     >
       Tenuring allocation rate
       :
     </div>
-    23.1M/s
+    20.1M/s
     <div
       class="tooltipLabel"
     >
@@ -3175,10 +3175,17 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
     <div
       class="tooltipLabel"
     >
-      Phase CollectToFP
+      Phase CollectToObjFP
       :
     </div>
     3.0ms
+    <div
+      class="tooltipLabel"
+    >
+      Phase CollectToStrFP
+      :
+    </div>
+    1.0ms
     <div
       class="tooltipLabel"
     >

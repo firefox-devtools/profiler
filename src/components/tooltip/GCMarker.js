@@ -34,11 +34,11 @@ export function getGCMinorDetails(
     switch (nursery.status) {
       case 'complete': {
         // Don't bother adding up the eviction time without the
-        // CollectToFP phase since that's the main phase.  If it's
+        // CollectToObjFP phase since that's the main phase.  If it's
         // missing then there's something wrong with the profile and
         // we'd only get bogus data.  All these times are in
         // Milliseconds
-        const evictTimeMS = nursery.phase_times.CollectToFP
+        const evictTimeMS = nursery.phase_times.CollectToObjFP
           ? _sumMaybeEntries(nursery.phase_times, [
               'TraceValues',
               'TraceCells',
@@ -47,7 +47,8 @@ export function getGCMinorDetails(
               'TraceGenericEntries',
               'MarkRuntime',
               'MarkDebugger',
-              'CollectToFP',
+              'CollectToObjFP',
+              'CollectToStrFP',
             ])
           : undefined;
         details.push(
