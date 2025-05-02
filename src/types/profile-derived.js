@@ -530,6 +530,7 @@ export type MarkerTiming = {|
   bucket: string,
   // True if this marker timing contains only instant markers.
   instantOnly: boolean,
+  isFirstRowOfName: boolean,
   length: number,
 |};
 
