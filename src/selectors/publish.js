@@ -86,7 +86,6 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
     getHasPreferenceMarkers,
     getContainsPrivateBrowsingInformation,
     getTimelineTrackOrganization,
-    getActiveTabID,
     (
       checkedSharingOptions,
       profile,
@@ -97,8 +96,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
       localTracksByPid,
       hasPreferenceMarkers,
       containsPrivateBrowsingInformation,
-      timelineTrackOrganization,
-      activeTabID
+      timelineTrackOrganization
     ) => {
       let isIncludingEverything = true;
       for (const prop in checkedSharingOptions) {
@@ -168,12 +166,6 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
         }
       }
 
-      const shouldRemoveTabsExceptTabID =
-        timelineTrackOrganization.type === 'active-tab' &&
-        !checkedSharingOptions.includeAllTabs
-          ? activeTabID
-          : null;
-
       return {
         shouldFilterToCommittedRange: checkedSharingOptions.includeFullTimeRange
           ? null
@@ -191,7 +183,6 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
           !checkedSharingOptions.includePreferenceValues,
         shouldRemovePrivateBrowsingData:
           !checkedSharingOptions.includePrivateBrowsingData,
-        shouldRemoveTabsExceptTabID,
       };
     }
   );
