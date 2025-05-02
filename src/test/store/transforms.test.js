@@ -17,7 +17,6 @@ import {
   getStackLineInfo,
   getLineTimings,
 } from 'firefox-profiler/profile-logic/line-timings';
-import { StringTable } from '../../utils/string-table';
 
 import {
   addTransformToStack,
@@ -841,6 +840,7 @@ describe('"collapse-resource" transform', function () {
      */
     const {
       profile,
+      stringTable,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
       A               A
@@ -851,7 +851,6 @@ describe('"collapse-resource" transform', function () {
     const collapsedFuncNames = [...funcNames, 'firefox'];
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
-    const stringTable = StringTable.withBackingArray(thread.stringArray);
     const firefoxNameIndex = stringTable.indexForString('firefox');
     const firefoxResourceIndex = thread.resourceTable.name.findIndex(
       (stringIndex) => stringIndex === firefoxNameIndex
@@ -947,6 +946,7 @@ describe('"collapse-resource" transform', function () {
      */
     const {
       profile,
+      stringTable,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
       A.js                A.js
@@ -960,7 +960,6 @@ describe('"collapse-resource" transform', function () {
     const collapsedFuncNames = [...funcNames, 'firefox'];
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
-    const stringTable = StringTable.withBackingArray(thread.stringArray);
     const firefoxNameIndex = stringTable.indexForString('firefox');
     const firefoxResourceIndex = thread.resourceTable.name.findIndex(
       (stringIndex) => stringIndex === firefoxNameIndex
@@ -1848,48 +1847,52 @@ describe('"filter-samples" transform', function () {
          D
     `);
     const threadIndex = 0;
-    addMarkersToThreadWithCorrespondingSamples(profile.threads[threadIndex], [
+    addMarkersToThreadWithCorrespondingSamples(
+      profile.threads[threadIndex],
+      profile.shared,
       [
-        'DOMEvent',
-        0,
-        0.5,
-        {
-          type: 'DOMEvent',
-          latency: 7,
-          eventType: 'click',
-        },
-      ],
-      [
-        'Log',
-        0.5,
-        1.5,
-        {
-          type: 'Log',
-          name: 'Random log message',
-          module: 'RandomModule',
-        },
-      ],
-      [
-        'UserTiming',
-        1.5,
-        2.5,
-        {
-          type: 'UserTiming',
-          name: 'measure-2',
-          entryType: 'measure',
-        },
-      ],
-      [
-        'UserTiming',
-        2.5,
-        3.5,
-        {
-          type: 'UserTiming',
-          name: 'measure-2',
-          entryType: 'measure',
-        },
-      ],
-    ]);
+        [
+          'DOMEvent',
+          0,
+          0.5,
+          {
+            type: 'DOMEvent',
+            latency: 7,
+            eventType: 'click',
+          },
+        ],
+        [
+          'Log',
+          0.5,
+          1.5,
+          {
+            type: 'Log',
+            name: 'Random log message',
+            module: 'RandomModule',
+          },
+        ],
+        [
+          'UserTiming',
+          1.5,
+          2.5,
+          {
+            type: 'UserTiming',
+            name: 'measure-2',
+            entryType: 'measure',
+          },
+        ],
+        [
+          'UserTiming',
+          2.5,
+          3.5,
+          {
+            type: 'UserTiming',
+            name: 'measure-2',
+            entryType: 'measure',
+          },
+        ],
+      ]
+    );
 
     const { dispatch, getState } = storeWithProfile(profile);
     const originalCallTree = selectedThreadSelectors.getCallTree(getState());

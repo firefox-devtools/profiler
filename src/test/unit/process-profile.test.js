@@ -29,6 +29,7 @@ import type {
   GeckoProfilerOverhead,
   IndexIntoGeckoStackTable,
   Milliseconds,
+  RawProfileSharedData,
   RawThread,
   Pid,
 } from 'firefox-profiler/types';
@@ -84,9 +85,12 @@ describe('extract functions and resource from location strings', function () {
       breakpadId: '',
     },
   ];
-  const stringTable = StringTable.withBackingArray([]);
+  const geckoThreadStringArray = [];
+  const geckoThreadStringTable = StringTable.withBackingArray(
+    geckoThreadStringArray
+  );
   const locationIndexes = locations.map((location) =>
-    stringTable.indexForString(location)
+    geckoThreadStringTable.indexForString(location)
   );
   const extensions = {
     baseURL: [
@@ -104,11 +108,13 @@ describe('extract functions and resource from location strings', function () {
       extractFuncsAndResourcesFromFrameLocations(
         locationIndexes,
         locationIndexes.map(() => false),
-        stringTable,
+        geckoThreadStringArray,
         libs,
         extensions,
         globalDataCollector
       );
+
+    const stringTable = globalDataCollector.getStringTable();
 
     expect(
       frameFuncs.map((funcIndex, locationIndex) => {
@@ -720,6 +726,7 @@ describe('profile meta processing', function () {
 describe('visualMetrics processing', function () {
   function checkVisualMetricsForThread(
     thread: RawThread,
+    shared: RawProfileSharedData,
     metrics: Array<{|
       name: string,
       hasProgressMarker: boolean,
@@ -730,7 +737,7 @@ describe('visualMetrics processing', function () {
       // Check the visual metric progress markers.
       const metricProgressMarkerName = `${name} Progress`;
       const metricProgressMarker = thread.markers.name.find(
-        (name) => thread.stringArray[name] === metricProgressMarkerName
+        (name) => shared.stringArray[name] === metricProgressMarkerName
       );
 
       if (hasProgressMarker) {
@@ -742,7 +749,7 @@ describe('visualMetrics processing', function () {
       // Check the visual metric change markers.
       const metricChangeMarkerName = `${name} Change`;
       const metricChangeMarkers = thread.markers.name.filter(
-        (name) => thread.stringArray[name] === metricChangeMarkerName
+        (name) => shared.stringArray[name] === metricChangeMarkerName
       );
       expect(metricChangeMarkers).toHaveLength(changeMarkerLength);
     }
@@ -768,19 +775,23 @@ describe('visualMetrics processing', function () {
       throw new Error('Could not find the parent process main thread.');
     }
 
-    checkVisualMetricsForThread(parentProcessMainThread, [
-      { name: 'Visual', hasProgressMarker: true, changeMarkerLength: 7 },
-      {
-        name: 'ContentfulSpeedIndex',
-        hasProgressMarker: true,
-        changeMarkerLength: 6,
-      },
-      {
-        name: 'PerceptualSpeedIndex',
-        hasProgressMarker: true,
-        changeMarkerLength: 6,
-      },
-    ]);
+    checkVisualMetricsForThread(
+      parentProcessMainThread,
+      processedProfile.shared,
+      [
+        { name: 'Visual', hasProgressMarker: true, changeMarkerLength: 7 },
+        {
+          name: 'ContentfulSpeedIndex',
+          hasProgressMarker: true,
+          changeMarkerLength: 6,
+        },
+        {
+          name: 'PerceptualSpeedIndex',
+          hasProgressMarker: true,
+          changeMarkerLength: 6,
+        },
+      ]
+    );
   });
 
   it('adds markers to the tab process', function () {
@@ -802,7 +813,7 @@ describe('visualMetrics processing', function () {
       throw new Error('Could not find the tab process main thread.');
     }
 
-    checkVisualMetricsForThread(tabProcessMainThread, [
+    checkVisualMetricsForThread(tabProcessMainThread, processedProfile.shared, [
       { name: 'Visual', hasProgressMarker: true, changeMarkerLength: 7 },
       {
         name: 'ContentfulSpeedIndex',
@@ -847,22 +858,26 @@ describe('visualMetrics processing', function () {
       throw new Error('Could not find the parent process main thread.');
     }
 
-    checkVisualMetricsForThread(parentProcessMainThread, [
-      // Instead of 7, we should have 0 markers for Visual because we made all
-      // the timestamps null.
-      { name: 'Visual', hasProgressMarker: false, changeMarkerLength: 0 },
-      // Instead of 6, we should have 5 markers for ContentfulSpeedIndex.
-      {
-        name: 'ContentfulSpeedIndex',
-        hasProgressMarker: true,
-        changeMarkerLength: 5,
-      },
-      // We didn't change the PerceptualSpeedIndexProgress, so we should have 6.
-      {
-        name: 'PerceptualSpeedIndex',
-        hasProgressMarker: true,
-        changeMarkerLength: 6,
-      },
-    ]);
+    checkVisualMetricsForThread(
+      parentProcessMainThread,
+      processedProfile.shared,
+      [
+        // Instead of 7, we should have 0 markers for Visual because we made all
+        // the timestamps null.
+        { name: 'Visual', hasProgressMarker: false, changeMarkerLength: 0 },
+        // Instead of 6, we should have 5 markers for ContentfulSpeedIndex.
+        {
+          name: 'ContentfulSpeedIndex',
+          hasProgressMarker: true,
+          changeMarkerLength: 5,
+        },
+        // We didn't change the PerceptualSpeedIndexProgress, so we should have 6.
+        {
+          name: 'PerceptualSpeedIndex',
+          hasProgressMarker: true,
+          changeMarkerLength: 6,
+        },
+      ]
+    );
   });
 });

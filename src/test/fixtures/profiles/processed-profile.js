@@ -27,6 +27,7 @@ import {
 
 import type {
   Profile,
+  RawProfileSharedData,
   RawThread,
   Thread,
   ThreadIndex,
@@ -114,9 +115,10 @@ export type TestDefinedJsTracerEvent = [
 
 export function addRawMarkersToThread(
   thread: RawThread,
+  shared: RawProfileSharedData,
   markers: TestDefinedRawMarker[]
 ) {
-  const stringTable = StringTable.withBackingArray(thread.stringArray);
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
   const markersTable = thread.markers;
 
   for (const { name, startTime, endTime, phase, category, data } of markers) {
@@ -166,9 +168,10 @@ function _replaceUniqueStringFieldValuesWithStringIndexesInMarkerPayload(
 // This is used in tests, with TestDefinedMarkers.
 export function addMarkersToThreadWithCorrespondingSamples(
   thread: RawThread,
+  shared: RawProfileSharedData,
   markers: TestDefinedMarkers
 ) {
-  const stringTable = StringTable.withBackingArray(thread.stringArray);
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
   const markersTable = thread.markers;
   const allTimes = new Set();
 
@@ -254,15 +257,21 @@ export function addMarkersToThreadWithCorrespondingSamples(
   }
 }
 
-export function getThreadWithMarkers(markers: TestDefinedMarkers) {
+export function getThreadWithMarkers(
+  shared: RawProfileSharedData,
+  markers: TestDefinedMarkers
+) {
   const thread = getEmptyThread();
-  addMarkersToThreadWithCorrespondingSamples(thread, markers);
+  addMarkersToThreadWithCorrespondingSamples(thread, shared, markers);
   return thread;
 }
 
-export function getThreadWithRawMarkers(markers: TestDefinedRawMarker[]) {
+export function getThreadWithRawMarkers(
+  shared: RawProfileSharedData,
+  markers: TestDefinedRawMarker[]
+) {
   const thread = getEmptyThread();
-  addRawMarkersToThread(thread, markers);
+  addRawMarkersToThread(thread, shared, markers);
   return thread;
 }
 
@@ -270,10 +279,13 @@ export function getThreadWithRawMarkers(markers: TestDefinedRawMarker[]) {
  * This can be a little annoying to derive with all of the dependencies,
  * so provide an easy interface to do so here.
  */
-export function getTestFriendlyDerivedMarkerInfo(thread: RawThread) {
+export function getTestFriendlyDerivedMarkerInfo(
+  thread: RawThread,
+  shared: RawProfileSharedData
+) {
   return deriveMarkersFromRawMarkerTable(
     thread.markers,
-    thread.stringArray,
+    shared.stringArray,
     thread.tid || 0,
     getTimeRangeForThread(thread, 1),
     new IPCMarkerCorrelations()
@@ -391,7 +403,7 @@ export function getProfileWithMarkers(
     );
   }
   profile.threads = markersPerThread.map((testDefinedMarkers, i) => ({
-    ...getThreadWithMarkers(testDefinedMarkers),
+    ...getThreadWithMarkers(profile.shared, testDefinedMarkers),
     tid: i,
   }));
   return profile;
@@ -493,6 +505,7 @@ export function getProfileWithNamedThreads(threadNames: string[]): Profile {
 export type ProfileWithDicts = {
   profile: Profile,
   derivedThreads: Thread[],
+  stringTable: StringTable,
   funcNamesPerThread: Array<string[]>,
   funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
   nativeSymbolsDictPerThread: Array<{ [nativeSymbolName: string]: number }>,
@@ -875,14 +888,13 @@ function _buildThreadFromTextOnlyStacks(
 
   const {
     funcTable,
-    stringArray,
     frameTable,
     stackTable,
     samples,
     resourceTable,
     nativeSymbols,
   } = thread;
-  const stringTable = StringTable.withBackingArray(stringArray);
+  const stringTable = globalDataCollector.getStringTable();
 
   // Create the FuncTable.
   funcNames.forEach((funcName) => {
@@ -892,7 +904,6 @@ function _buildThreadFromTextOnlyStacks(
     funcTable.isJS.push(_isJsFunctionName(funcName));
     funcTable.lineNumber.push(null);
     funcTable.columnNumber.push(null);
-    // Ignore resources for now, this way funcNames have really nice string indexes.
     // The resource column will be filled in the loop below.
     funcTable.length++;
   });
@@ -905,10 +916,9 @@ function _buildThreadFromTextOnlyStacks(
     let prefix = null;
     column.forEach((funcNameWithModifier) => {
       const funcName = funcNameWithModifier.replace(/\[.*/, '');
-
-      // There is a one-to-one relationship between strings and funcIndexes here, so
-      // the indexes can double as both string indexes and func indexes.
-      const funcIndex = stringTable.indexForString(funcName);
+      const funcIndex = funcTable.name.indexOf(
+        stringTable.indexForString(funcName)
+      );
 
       // Find the library name from the function name and create an entry if needed.
       const libraryName = _findLibNameFromFuncName(funcNameWithModifier);
@@ -1084,9 +1094,12 @@ export function getProfileWithDicts(profile: Profile): ProfileWithDicts {
   ).findIndex((c) => c.name === 'Other');
 
   const referenceCPUDeltaPerMs = computeReferenceCPUDeltaPerMs(profile);
-  const derivedThreads = profile.threads.map((rawThread) =>
+  const { shared, threads } = profile;
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
+  const derivedThreads = threads.map((rawThread) =>
     computeThreadFromRawThread(
       rawThread,
+      shared,
       profile.meta.sampleUnits,
       referenceCPUDeltaPerMs,
       defaultCategory
@@ -1107,6 +1120,7 @@ export function getProfileWithDicts(profile: Profile): ProfileWithDicts {
     funcNamesPerThread,
     funcNamesDictPerThread,
     nativeSymbolsDictPerThread,
+    stringTable,
     defaultCategory,
   };
 }
@@ -1231,7 +1245,8 @@ export function getNetworkTrackProfile() {
     },
   ];
 
-  const thread = profile.threads[0];
+  const { shared, threads } = profile;
+  const thread = threads[0];
 
   const loadPayloadBase = {
     type: 'tracing',
@@ -1246,7 +1261,7 @@ export function getNetworkTrackProfile() {
     innerWindowID: innerWindowID,
   };
 
-  addMarkersToThreadWithCorrespondingSamples(thread, [
+  addMarkersToThreadWithCorrespondingSamples(thread, shared, [
     [
       'Load',
       4,
@@ -1379,7 +1394,8 @@ export function getScreenshotTrackProfile() {
 export function addIPCMarkerPairToThreads(
   payload: $Shape<IPCMarkerPayload>,
   senderThread: RawThread,
-  receiverThread: RawThread
+  receiverThread: RawThread,
+  shared: RawProfileSharedData
 ) {
   const ipcMarker = (
     direction: 'sending' | 'receiving',
@@ -1413,11 +1429,11 @@ export function addIPCMarkerPairToThreads(
     senderThread.name === 'GeckoMain' && senderThread.processType === 'default'
       ? true
       : false;
-  addMarkersToThreadWithCorrespondingSamples(senderThread, [
+  addMarkersToThreadWithCorrespondingSamples(senderThread, shared, [
     ipcMarker('sending', isSenderParent, receiverThread),
   ]);
 
-  addMarkersToThreadWithCorrespondingSamples(receiverThread, [
+  addMarkersToThreadWithCorrespondingSamples(receiverThread, shared, [
     ipcMarker('receiving', !isSenderParent, senderThread),
   ]);
 }
@@ -1448,10 +1464,11 @@ export function getJsTracerTable(
 }
 
 export function getThreadWithJsTracerEvents(
-  events: TestDefinedJsTracerEvent[]
+  events: TestDefinedJsTracerEvent[],
+  shared: RawProfileSharedData
 ): RawThread {
   const thread = getEmptyThread();
-  const stringTable = StringTable.withBackingArray(thread.stringArray);
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
   thread.jsTracer = getJsTracerTable(stringTable, events);
 
   let endOfEvents = 0;
@@ -1489,7 +1506,7 @@ export function getProfileWithJsTracerEvents(
 ): Profile {
   const profile = getEmptyProfile();
   profile.threads = eventsLists.map((events) =>
-    getThreadWithJsTracerEvents(events)
+    getThreadWithJsTracerEvents(events, profile.shared)
   );
   return profile;
 }
