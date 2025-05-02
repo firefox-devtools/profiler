@@ -15,7 +15,6 @@ import {
   getHasPreferenceMarkers,
   getContainsPrivateBrowsingInformation,
   getThreads,
-  getActiveTabID,
   getMarkerSchemaByName,
 } from './profile';
 import { compress } from '../utils/gz';

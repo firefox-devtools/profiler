@@ -11,7 +11,6 @@ import {
   revertToPrePublishedState,
 } from '../../actions/publish';
 import { changeSelectedTab } from '../../actions/app';
-import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
 import {
   viewProfileFromPathInZipFile,
   returnToZipFileList,
@@ -39,10 +38,7 @@ import {
 import { getHasPreferenceMarkers } from '../../selectors/profile';
 import { urlFromState } from '../../app-logic/url-handling';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
-import {
-  getProfileFromTextSamples,
-  addActiveTabInformationToProfile,
-} from '../fixtures/profiles/processed-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
   getProfileWithFakeGlobalTrack,
   getHumanReadableTracks,

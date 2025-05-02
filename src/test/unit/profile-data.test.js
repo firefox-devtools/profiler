@@ -1000,12 +1000,7 @@ describe('getSamplesSelectedStates', function () {
 
     it('determines the selection status of all the samples', function () {
       expect(
-        getSamplesSelectedStates(
-          callNodeInfo,
-          sampleCallNodes,
-          sampleCallNodes,
-          A_B
-        )
+        getSamplesSelectedStates(callNodeInfo, sampleCallNodes, A_B)
       ).toEqual([
         'SELECTED',
         'UNSELECTED_ORDERED_AFTER_SELECTED',
@@ -1014,12 +1009,7 @@ describe('getSamplesSelectedStates', function () {
         'UNSELECTED_ORDERED_AFTER_SELECTED',
       ]);
       expect(
-        getSamplesSelectedStates(
-          callNodeInfo,
-          sampleCallNodes,
-          sampleCallNodes,
-          A_D
-        )
+        getSamplesSelectedStates(callNodeInfo, sampleCallNodes, A_D)
       ).toEqual([
         'UNSELECTED_ORDERED_BEFORE_SELECTED',
         'SELECTED',
@@ -1028,12 +1018,7 @@ describe('getSamplesSelectedStates', function () {
         'SELECTED',
       ]);
       expect(
-        getSamplesSelectedStates(
-          callNodeInfo,
-          sampleCallNodes,
-          sampleCallNodes,
-          A_B_F
-        )
+        getSamplesSelectedStates(callNodeInfo, sampleCallNodes, A_B_F)
       ).toEqual([
         'UNSELECTED_ORDERED_BEFORE_SELECTED',
         'UNSELECTED_ORDERED_AFTER_SELECTED',
@@ -1042,12 +1027,7 @@ describe('getSamplesSelectedStates', function () {
         'UNSELECTED_ORDERED_AFTER_SELECTED',
       ]);
       expect(
-        getSamplesSelectedStates(
-          callNodeInfo,
-          sampleCallNodes,
-          sampleCallNodes,
-          A_D_E
-        )
+        getSamplesSelectedStates(callNodeInfo, sampleCallNodes, A_D_E)
       ).toEqual([
         'UNSELECTED_ORDERED_BEFORE_SELECTED',
         'SELECTED',
@@ -1116,12 +1096,7 @@ describe('getSamplesSelectedStates', function () {
       // Test B <- A <- ...
       // Only samples 2 and 6 have stacks ending in ... -> A -> B
       expect(
-        getSamplesSelectedStates(
-          callNodeInfoInverted,
-          sampleCallNodes,
-          sampleCallNodes,
-          inBA
-        )
+        getSamplesSelectedStates(callNodeInfoInverted, sampleCallNodes, inBA)
       ).toEqual([
         'UNSELECTED_ORDERED_BEFORE_SELECTED',
         'UNSELECTED_ORDERED_BEFORE_SELECTED',
@@ -1134,12 +1109,7 @@ describe('getSamplesSelectedStates', function () {
       // Test C <- B <- A <- ...
       // Only sample 5 has a stack ending in ... -> A -> B -> C
       expect(
-        getSamplesSelectedStates(
-          callNodeInfoInverted,
-          sampleCallNodes,
-          sampleCallNodes,
-          inCBA
-        )
+        getSamplesSelectedStates(callNodeInfoInverted, sampleCallNodes, inCBA)
       ).toEqual([
         'UNSELECTED_ORDERED_BEFORE_SELECTED',
         'UNSELECTED_ORDERED_BEFORE_SELECTED',
@@ -1152,12 +1122,7 @@ describe('getSamplesSelectedStates', function () {
       // Test B <- ...
       // Only samples 2 and 6 have stacks ending in ... -> B
       expect(
-        getSamplesSelectedStates(
-          callNodeInfoInverted,
-          sampleCallNodes,
-          sampleCallNodes,
-          inB
-        )
+        getSamplesSelectedStates(callNodeInfoInverted, sampleCallNodes, inB)
       ).toEqual([
         'UNSELECTED_ORDERED_BEFORE_SELECTED',
         'UNSELECTED_ORDERED_BEFORE_SELECTED',

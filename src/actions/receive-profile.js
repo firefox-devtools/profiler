@@ -35,9 +35,7 @@ import {
   getProfileOrNull,
   getProfile,
   getView,
-  getRelevantPagesForActiveTab,
   getSymbolServerUrl,
-  getActiveTabID,
   getBrowserConnection,
 } from 'firefox-profiler/selectors';
 import {
@@ -66,7 +64,6 @@ import {
   computeDefaultHiddenTracks,
   getVisibleThreads,
 } from 'firefox-profiler/profile-logic/tracks';
-import { computeActiveTabTracks } from 'firefox-profiler/profile-logic/active-tab';
 import { setDataSource } from './profile-view';
 import { fatalError } from './errors';
 import { batchLoadDataUrlIcons } from './icons';
@@ -225,29 +222,6 @@ export function finalizeProfileView(
         // the state relevant to that state.
         dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
         break;
-      case 'active-tab': {
-        const activeTabID = getActiveTabID(getState());
-        if (pages && activeTabID !== null) {
-          // Initialize the active tab view only if pages array is present and
-          // activeTabID is not null. Pages array might be missing on the older
-          // profiles. And activeTabID can be null when Firefox fails to get
-          // this information from the platform. For example, it will be null
-          // when users capture a startup profile.
-          dispatch(
-            finalizeActiveTabProfileView(
-              profile,
-              selectedThreadIndexes,
-              timelineTrackOrganization.tabID
-            )
-          );
-        } else {
-          // Don't fully trust the URL, this view doesn't support the active tab based
-          // view. Switch to fulll view.
-          dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
-        }
-
-        break;
-      }
       case 'origins': {
         if (pages) {
           dispatch(
@@ -607,63 +581,8 @@ export function finalizeOriginProfileView(
 }
 
 /**
- * Finalize the profile state for active tab view.
- * This function will take the view information from the URL, such as hiding and sorting
- * information, and it will validate it against the profile. If there is no pre-existing
- * view information, this function will compute the defaults.
- */
-export function finalizeActiveTabProfileView(
-  profile: Profile,
-  selectedThreadIndexes: Set<ThreadIndex> | null,
-  tabID: TabID | null
-): ThunkAction<void> {
-  return (dispatch, getState) => {
-    const hasUrlInfo = selectedThreadIndexes !== null;
-    const relevantPages = getRelevantPagesForActiveTab(getState());
-
-    if (relevantPages.length === 0) {
-      // If no relevant pages found, it doesn't make sense for us to continue
-      // with the active tab view anymore. No relevant page means empty view in
-      // the active tab view.
-      dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
-      return;
-    }
-
-    const activeTabTimeline = computeActiveTabTracks(
-      profile,
-      relevantPages,
-      getState()
-    );
-
-    if (selectedThreadIndexes === null) {
-      // Select the main track if there is no selected thread.
-      selectedThreadIndexes = new Set([
-        ...activeTabTimeline.mainTrack.threadIndexes,
-      ]);
-    }
-
-    // Check the profile to see if we have threadCPUDelta values and switch to
-    // the category view with CPU if we have. This is needed only while we are
-    // still experimenting with the new activity graph. We should remove this
-    // when we have this on by default.
-    let timelineType = null;
-    if (!hasUrlInfo) {
-      timelineType = determineTimelineType(profile);
-    }
-
-    dispatch({
-      type: 'VIEW_ACTIVE_TAB_PROFILE',
-      activeTabTimeline,
-      selectedThreadIndexes,
-      tabID,
-      timelineType,
-    });
-  };
-}
-
-/**
  * Re-compute the profile view data. That's used to be able to switch between
- * full and active tab view.
+ * full and origins view.
  */
 export function changeTimelineTrackOrganization(
   timelineTrackOrganization: TimelineTrackOrganization
@@ -682,17 +601,6 @@ export function changeTimelineTrackOrganization(
         // The url state says this is a full view. We should compute and initialize
         // the state relevant to that state.
         dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
-        break;
-      case 'active-tab':
-        // The url state says this is an active tab view. We should compute and
-        // initialize the state relevant to that state.
-        dispatch(
-          finalizeActiveTabProfileView(
-            profile,
-            selectedThreadIndexes,
-            timelineTrackOrganization.tabID
-          )
-        );
         break;
       case 'origins': {
         const pages = ensureExists(

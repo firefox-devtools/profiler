@@ -8,10 +8,7 @@ import JSZip from 'jszip';
 import { indexedDB } from 'fake-indexeddb';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
-import {
-  getEmptyProfile,
-  getEmptyThread,
-} from '../../profile-logic/data-structures';
+import { getEmptyProfile } from '../../profile-logic/data-structures';
 import { getTimeRangeForThread } from '../../profile-logic/profile-data';
 import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
 import * as ProfileViewSelectors from '../../selectors/profile';
@@ -34,7 +31,6 @@ import {
   retrieveProfilesToCompare,
   _fetchProfile,
   retrieveProfileForRawUrl,
-  changeTimelineTrackOrganization,
 } from '../../actions/receive-profile';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
 
@@ -51,10 +47,7 @@ import {
   getProfileWithMarkers,
   getProfileWithThreadCPUDelta,
 } from '../fixtures/profiles/processed-profile';
-import {
-  getHumanReadableTracks,
-  getProfileWithNiceTracks,
-} from '../fixtures/profiles/tracks';
+import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
 import { waitUntilState } from '../fixtures/utils';
 import { dataUrlToBytes } from 'firefox-profiler/utils/base64';
 
@@ -664,119 +657,6 @@ describe('actions/receive-profile', function () {
     //    sure that the active non-audio threads aren't hidden. (Hiding active
     //    non-audio threads could happen if the hiding was based on the
     //    boostedSampleScore rather than the sampleScore.)
-  });
-
-  describe('changeTimelineTrackOrganization', function () {
-    const tabID = 123;
-    const innerWindowID = 111111;
-    function setup({
-      profile,
-      initializeCtxId = false,
-    }: {
-      profile?: Profile,
-      initializeCtxId?: boolean,
-    }) {
-      const store = blankStore();
-
-      if (!profile) {
-        profile = getEmptyProfile();
-        profile.threads.push(
-          getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: '1' })
-        );
-      }
-
-      profile.meta.configuration = {
-        threads: [],
-        features: [],
-        capacity: 1000000,
-        activeTabID: tabID,
-      };
-      profile.pages = [
-        {
-          tabID: tabID,
-          innerWindowID: innerWindowID,
-          url: 'URL',
-          embedderInnerWindowID: 0,
-        },
-      ];
-
-      store.dispatch(viewProfile(profile));
-      if (initializeCtxId) {
-        store.dispatch(
-          changeTimelineTrackOrganization({
-            type: 'active-tab',
-            tabID,
-          })
-        );
-      }
-
-      return { ...store, profile };
-    }
-
-    it('should be able to switch to active tab view from the full view', function () {
-      const { dispatch, getState } = setup({ initializeCtxId: false });
-      expect(
-        UrlStateSelectors.getTimelineTrackOrganization(getState())
-      ).toEqual({
-        type: 'full',
-      });
-      dispatch(
-        changeTimelineTrackOrganization({
-          type: 'active-tab',
-          tabID,
-        })
-      );
-      expect(
-        UrlStateSelectors.getTimelineTrackOrganization(getState())
-      ).toEqual({
-        type: 'active-tab',
-        tabID,
-      });
-    });
-
-    it('should be able to switch to full view from the active tab', function () {
-      const { dispatch, getState } = setup({ initializeCtxId: true });
-      expect(
-        UrlStateSelectors.getTimelineTrackOrganization(getState())
-      ).toEqual({
-        type: 'active-tab',
-        tabID,
-      });
-      dispatch(changeTimelineTrackOrganization({ type: 'full' }));
-      expect(
-        UrlStateSelectors.getTimelineTrackOrganization(getState())
-      ).toEqual({
-        type: 'full',
-      });
-    });
-
-    it('should reset the url state while switching to the full view', function () {
-      // Get a profile with nice tracks, so we can test that it's not automatically
-      // select the first thread.
-      const profile = getProfileWithNiceTracks();
-      const { dispatch, getState } = setup({ profile, initializeCtxId: true });
-
-      // Make sure that we start with the active-tab view.
-      expect(
-        UrlStateSelectors.getTimelineTrackOrganization(getState())
-      ).toEqual({
-        type: 'active-tab',
-        tabID,
-      });
-
-      // Now switch to the full view and test that it will select the second track.
-      dispatch(changeTimelineTrackOrganization({ type: 'full' }));
-      expect(
-        UrlStateSelectors.getTimelineTrackOrganization(getState())
-      ).toEqual({
-        type: 'full',
-      });
-      // It should find the best non-idle thread instead of selecting the first
-      // one automatically.
-      expect(
-        UrlStateSelectors.getSelectedThreadIndexes(getState())
-      ).toMatchObject(new Set([1]));
-    });
   });
 
   describe('retrieveProfileFromBrowser', function () {

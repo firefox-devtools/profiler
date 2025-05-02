@@ -195,7 +195,6 @@ const isHidingStaleProfile: Reducer<boolean> = (state = false, action) => {
       return true;
     case 'VIEW_FULL_PROFILE':
     case 'VIEW_ORIGINS_PROFILE':
-    case 'VIEW_ACTIVE_TAB_PROFILE':
       return false;
     default:
       return state;

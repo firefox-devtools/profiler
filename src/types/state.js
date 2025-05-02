@@ -33,7 +33,6 @@ import type {
   LocalTrack,
   TrackIndex,
   MarkerIndex,
-  ActiveTabTimeline,
   OriginsTimeline,
   ThreadsKey,
   NativeSymbolInfo,
@@ -85,8 +84,6 @@ export type MarkerReference = {|
 /**
  * Full profile view state
  * They should not be used from the active tab view.
- * NOTE: This state is empty for now, but will be used later, do not remove.
- * globalTracks and localTracksByPid states will be here in the future.
  */
 export type FullProfileViewState = {|
   globalTracks: GlobalTrack[],
@@ -95,14 +92,6 @@ export type FullProfileViewState = {|
 
 export type OriginsViewState = {|
   originsTimeline: OriginsTimeline,
-|};
-
-/**
- * Active tab profile view state
- * They should not be used from the full view.
- */
-export type ActiveTabProfileViewState = {|
-  activeTabTimeline: ActiveTabTimeline,
 |};
 
 /**
@@ -127,7 +116,6 @@ export type ProfileViewState = {
   |},
   +profile: Profile | null,
   +full: FullProfileViewState,
-  +activeTab: ActiveTabProfileViewState,
   +origins: OriginsViewState,
 };
 
@@ -346,7 +334,6 @@ export type SourceCodeLoadingError =
 
 /**
  * Full profile specific url state
- * They should not be used from the active tab view.
  */
 export type FullProfileSpecificUrlState = {|
   globalTrackOrder: TrackIndex[],
@@ -358,14 +345,6 @@ export type FullProfileSpecificUrlState = {|
   tabFilter: TabID | null,
   legacyThreadOrder: ThreadIndex[] | null,
   legacyHiddenThreads: ThreadIndex[] | null,
-|};
-
-/**
- * Active tab profile specific url state
- * They should not be used from the full view.
- */
-export type ActiveTabSpecificProfileUrlState = {|
-  isResourcesPanelOpen: boolean,
 |};
 
 export type ProfileSpecificUrlState = {|
@@ -384,7 +363,6 @@ export type ProfileSpecificUrlState = {|
   assemblyView: AssemblyViewState,
   isBottomBoxOpenPerPanel: IsOpenPerPanelState,
   full: FullProfileSpecificUrlState,
-  activeTab: ActiveTabSpecificProfileUrlState,
 |};
 
 /**
@@ -392,7 +370,6 @@ export type ProfileSpecificUrlState = {|
  */
 export type TimelineTrackOrganization =
   | {| +type: 'full' |}
-  | {| +type: 'active-tab', +tabID: TabID | null |}
   | {| +type: 'origins' |};
 
 export type UrlState = {|

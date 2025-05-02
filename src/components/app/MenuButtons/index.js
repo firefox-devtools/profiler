@@ -46,7 +46,6 @@ import {
   getHasPrePublishedState,
 } from 'firefox-profiler/selectors/publish';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
-import { changeTimelineTrackOrganization } from 'firefox-profiler/actions/receive-profile';
 
 import type {
   StartEndRange,
@@ -83,7 +82,6 @@ type StateProps = {|
 type DispatchProps = {|
   +dismissNewlyPublished: typeof dismissNewlyPublished,
   +revertToPrePublishedState: typeof revertToPrePublishedState,
-  +changeTimelineTrackOrganization: typeof changeTimelineTrackOrganization,
   +profileRemotelyDeleted: typeof profileRemotelyDeleted,
 |};
 
@@ -247,27 +245,6 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
     );
   }
 
-  _changeTimelineTrackOrganizationToFull = () => {
-    this.props.changeTimelineTrackOrganization({ type: 'full' });
-  };
-
-  _renderFullViewButtonForActiveTab() {
-    const { timelineTrackOrganization } = this.props;
-    if (timelineTrackOrganization.type !== 'active-tab') {
-      return null;
-    }
-
-    return (
-      <button
-        type="button"
-        className="menuButtonsButton menuButtonsButton-hasIcon menuButtonsRevertToFullView"
-        onClick={this._changeTimelineTrackOrganizationToFull}
-      >
-        <Localized id="MenuButtons--index--full-view">Full View</Localized>
-      </button>
-    );
-  }
-
   _renderPublishPanel() {
     const { uploadPhase, dataSource, abortFunction, profileUrl } = this.props;
 
@@ -355,7 +332,6 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
   render() {
     return (
       <>
-        {this._renderFullViewButtonForActiveTab()}
         {this._renderRevertProfile()}
         {this._renderMetaInfoButton()}
         {this._renderPublishPanel()}
@@ -391,7 +367,6 @@ export const MenuButtons = explicitConnect<OwnProps, StateProps, DispatchProps>(
     mapDispatchToProps: {
       dismissNewlyPublished,
       revertToPrePublishedState,
-      changeTimelineTrackOrganization,
       profileRemotelyDeleted,
     },
     component: MenuButtonsImpl,

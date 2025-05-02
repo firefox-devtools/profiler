@@ -261,7 +261,7 @@ function sanitizeThreadPII(
     PIIToBeRemoved.shouldRemovePreferenceValues ||
     PIIToBeRemoved.shouldRemoveExtensions ||
     PIIToBeRemoved.shouldRemoveThreadsWithScreenshots.size > 0 ||
-    PIIToBeRemoved.shouldRemovePrivateBrowsingData ||
+    PIIToBeRemoved.shouldRemovePrivateBrowsingData
   ) {
     for (let i = 0; i < markerTable.length; i++) {
       let currentMarker = markerTable.data[i];

@@ -8,7 +8,6 @@ import * as React from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { getTimelineTrackOrganization } from 'firefox-profiler/selectors';
 import { FullTimeline } from 'firefox-profiler/components/timeline/FullTimeline';
-import { ActiveTabTimeline } from 'firefox-profiler/components/timeline/ActiveTabTimeline';
 import { TimelineOrigins } from 'firefox-profiler/components/timeline/OriginsTimeline';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
@@ -84,10 +83,6 @@ class TimelineImpl extends React.PureComponent<Props> {
     switch (timelineTrackOrganization.type) {
       case 'full':
         return <FullTimeline innerElementRef={this._onTimelineMountWithRef} />;
-      case 'active-tab':
-        return (
-          <ActiveTabTimeline innerElementRef={this._onTimelineMountWithRef} />
-        );
       case 'origins':
         return (
           <TimelineOrigins innerElementRef={this._onTimelineMountWithRef} />
