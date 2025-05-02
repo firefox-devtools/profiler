@@ -27,7 +27,6 @@ import type {
   TableViewOptionsPerTab,
   RightClickedCallNode,
   MarkerReference,
-  ActiveTabTimeline,
   CallNodePath,
   ThreadsKey,
   Milliseconds,
@@ -116,23 +115,6 @@ const localTracksByPid: Reducer<Map<Pid, LocalTrack[]>> = (
     case 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS':
     case 'CHANGE_TAB_FILTER':
       return action.localTracksByPid;
-    default:
-      return state;
-  }
-};
-
-/**
- * This information is stored, rather than derived via selectors, since the coalesced
- * function update would force it to be recomputed on every symbolication update
- * pass. It is valid for the lifetime of the profile.
- */
-const activeTabTimeline: Reducer<ActiveTabTimeline | null> = (
-  state = null,
-  action
-) => {
-  switch (action.type) {
-    case 'VIEW_ACTIVE_TAB_PROFILE':
-      return action.activeTabTimeline;
     default:
       return state;
   }
@@ -866,9 +848,6 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
     full: combineReducers({
       globalTracks,
       localTracksByPid,
-    }),
-    activeTab: combineReducers({
-      activeTabTimeline,
     }),
     origins: combineReducers({
       originsTimeline,

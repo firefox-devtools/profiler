@@ -161,12 +161,6 @@ type FullProfileSpecificBaseQuery = {|
   hiddenThreads: string, // "0-1"
 |};
 
-// Base query that only applies to active tab profile view.
-type ActiveTabProfileSpecificBaseQuery = {|
-  resources: null | void,
-  ctxId: TabID | void,
-|};
-
 // Base query that only applies to origins profile view.
 type OriginsProfileSpecificBaseQuery = {||};
 
@@ -187,7 +181,6 @@ type BaseQuery = {|
   sourceView: string,
   assemblyView: string,
   ...FullProfileSpecificBaseQuery,
-  ...ActiveTabProfileSpecificBaseQuery,
   ...OriginsProfileSpecificBaseQuery,
 |};
 
@@ -231,13 +224,8 @@ type Query =
 type $MakeOptional = <T>(T) => T | void;
 // Base query shape is needed for the typechecking during the URL query initialization.
 type BaseQueryShape = $Shape<$ObjMap<BaseQuery, $MakeOptional>>;
-// Full profile view and active tab profile view query shapes are for also
-// typechecking during the query object initialization.
 type FullProfileSpecificBaseQueryShape = $Shape<
   $ObjMap<FullProfileSpecificBaseQuery, $MakeOptional>,
->;
-type ActiveTabProfileSpecificBaseQueryShape = $Shape<
-  $ObjMap<ActiveTabProfileSpecificBaseQuery, $MakeOptional>,
 >;
 type OriginsProfileSpecificBaseQueryShape = $Shape<
   $ObjMap<OriginsProfileSpecificBaseQuery, $MakeOptional>,
@@ -289,16 +277,11 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
   const selectedThreadsKey =
     selectedThreads !== null ? getThreadsKey(selectedThreads) : null;
 
-  let ctxId;
   let view;
   const { timelineTrackOrganization } = urlState;
   switch (timelineTrackOrganization.type) {
     case 'full':
       // Dont URL-encode anything.
-      break;
-    case 'active-tab':
-      view = timelineTrackOrganization.type;
-      ctxId = timelineTrackOrganization.tabID;
       break;
     case 'origins':
       view = timelineTrackOrganization.type;
@@ -331,16 +314,6 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       );
       baseQuery.tabID = urlState.profileSpecific.full.tabFilter ?? undefined;
 
-      break;
-    }
-    case 'active-tab': {
-      baseQuery = ({}: ActiveTabProfileSpecificBaseQueryShape);
-
-      baseQuery.resources = urlState.profileSpecific.activeTab
-        .isResourcesPanelOpen
-        ? null
-        : undefined;
-      baseQuery.ctxId = ctxId || undefined;
       break;
     }
     case 'origins':
@@ -452,9 +425,6 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
           query.summary = urlState.profileSpecific.full.showJsTracerSummary
             ? null
             : undefined;
-          break;
-        case 'active-tab':
-          // JS Tracer isn't helpful for web developers.
           break;
         default:
           throw assertExhaustiveCheck(
@@ -583,13 +553,6 @@ export function stateFromLocation(
     transforms[selectedThreadsKey] = parseTransforms(query.transforms);
   }
 
-  // oldTabID is used for the old active tab view that we had. We will remove
-  // it in the end, but have to keep this while we have the view.
-  let oldTabID = null;
-  if (query.ctxId && Number.isInteger(Number(query.ctxId))) {
-    oldTabID = Number(query.ctxId);
-  }
-
   // tabID is used for the tab selector that we have in our full view.
   let tabID = null;
   if (query.tabID && Number.isInteger(Number(query.tabID))) {
@@ -639,10 +602,7 @@ export function stateFromLocation(
     pathInZipFile: query.file || null,
     profileName: query.profileName,
     symbolServerUrl: query.symbolServer || null,
-    timelineTrackOrganization: validateTimelineTrackOrganization(
-      query.view,
-      oldTabID
-    ),
+    timelineTrackOrganization: validateTimelineTrackOrganization(query.view),
     profileSpecific: {
       implementation,
       lastSelectedCallTreeSummaryStrategy: toValidCallTreeSummaryStrategy(
@@ -680,9 +640,6 @@ export function stateFromLocation(
         legacyHiddenThreads: query.hiddenThreads
           ? query.hiddenThreads.split('-').map((index) => Number(index))
           : null,
-      },
-      activeTab: {
-        isResourcesPanelOpen: query.resources !== undefined,
       },
     },
   };
@@ -1332,8 +1289,7 @@ function getVersion4JSCallNodePathFromStackIndex(
 }
 
 function validateTimelineTrackOrganization(
-  type: ?string,
-  tabID: number | null
+  type: ?string
 ): TimelineTrackOrganization {
   // Pretend this is a TimelineTrackOrganization so that we can exhaustively
   // go through each option.
@@ -1341,8 +1297,6 @@ function validateTimelineTrackOrganization(
   switch (timelineTrackOrganization.type) {
     case 'full':
       return { type: 'full' };
-    case 'active-tab':
-      return { type: 'active-tab', tabID };
     case 'origins':
       return { type: 'origins' };
     default:

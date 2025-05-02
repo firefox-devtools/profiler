@@ -14,7 +14,6 @@ import {
   getDataSource,
   getHash,
   getCurrentSearchString,
-  getTimelineTrackOrganization,
 } from '../../selectors/url-state';
 import { waitUntilState } from '../fixtures/utils';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
@@ -327,23 +326,6 @@ describe('UrlManager', function () {
     expect(getDataSource(getState())).toMatch('public');
     expect(getHash(getState())).toMatch('SOME_OTHER_HASH');
     expect(previousLocation).toEqual(window.location.href);
-  });
-
-  it('persists view query string for `from-browser` data source ', async function () {
-    // This setup function doesn't add any profile to the state, so that's why
-    // it logs an error that says we don't have innerWindowID in this profile.
-    // We can safely ignore that part because we don't test this part of the
-    // codebase here. We only care about the timeline track organization.
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    const { getState, waitUntilUrlSetupPhase, createUrlManager } = setup(
-      '/from-browser/?view=active-tab'
-    );
-    await createUrlManager();
-    await waitUntilUrlSetupPhase('done');
-
-    // It should successfully preserve the view query string and update the
-    // timeline track organization state.
-    expect(getTimelineTrackOrganization(getState()).type).toBe('active-tab');
   });
 
   it('can handle a from-post-message data source', async () => {

@@ -47,14 +47,6 @@
   pointer-events: none;
 }
 
-/* In the active tab view, we don't want any margin or padding, because
- * otherwise we lose the alignment with the other panels. Therefore we won't
- * have the blue left border when a track is selected in this view. */
-.timelineTrackRow.activeTab {
-  padding: 0;
-  margin: 0;
-}
-
 .timelineTrackLocalRow {
   border-left: 1px solid var(--grey-30);
 }

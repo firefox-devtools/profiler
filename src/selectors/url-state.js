@@ -31,7 +31,6 @@ import type {
   ThreadsKey,
   ProfileSpecificUrlState,
   FullProfileSpecificUrlState,
-  ActiveTabSpecificProfileUrlState,
   NativeSymbolInfo,
   TabID,
 } from 'firefox-profiler/types';
@@ -53,9 +52,6 @@ export const getProfileSpecificState: Selector<ProfileSpecificUrlState> = (
 export const getFullProfileSpecificState: Selector<
   FullProfileSpecificUrlState,
 > = (state) => getProfileSpecificState(state).full;
-export const getActiveTabProfileSpecificState: Selector<
-  ActiveTabSpecificProfileUrlState,
-> = (state) => getProfileSpecificState(state).activeTab;
 
 export const getDataSource: Selector<DataSource> = (state) =>
   getUrlState(state).dataSource;
@@ -93,12 +89,6 @@ export const getShowJsTracerSummary: Selector<boolean> = (state) =>
 export const getTimelineTrackOrganization: Selector<
   TimelineTrackOrganization,
 > = (state) => getUrlState(state).timelineTrackOrganization;
-
-/**
- * Active tab specific url state selectors
- */
-export const getIsActiveTabResourcesPanelOpen: Selector<boolean> = (state) =>
-  getActiveTabProfileSpecificState(state).isResourcesPanelOpen;
 
 /**
  * Raw search strings, before any splitting has been performed.

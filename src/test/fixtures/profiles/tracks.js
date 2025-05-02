@@ -21,10 +21,7 @@ import type {
 
 import { StringTable } from '../../../utils/string-table';
 import { assertExhaustiveCheck } from '../../../utils/flow';
-import {
-  getFriendlyThreadName,
-  hasThreadKeys,
-} from '../../../profile-logic/profile-data';
+import { getFriendlyThreadName } from '../../../profile-logic/profile-data';
 import { INSTANT } from 'firefox-profiler/app-logic/constants';
 
 /**
@@ -329,73 +326,6 @@ export function getStoreWithMemoryTrack(pid: Pid = '222') {
     throw new Error('Expected a memory track.');
   }
   return { store, ...store, profile, trackReference, localTrack, threadIndex };
-}
-
-/**
- * This function takes the current active tab timeline tracks, and generates a
- * human readable result that makes it easy to assert the shape and structure
- * of the tracks in tests.
- *
- * Usage:
- *
- * expect(getHumanReadableTracks(getState())).toEqual([
- *  'screenshots',
- *  'main track [tab]',
- * ]);
- *
- */
-export function getHumanReadableActiveTabTracks(state: State): string[] {
-  const globalTracks = profileViewSelectors.getActiveTabGlobalTracks(state);
-  const resourceTracks = profileViewSelectors.getActiveTabResourceTracks(state);
-  const selectedThreadIndexes =
-    urlStateSelectors.getSelectedThreadIndexes(state);
-  const text: string[] = [];
-
-  for (const globalTrack of globalTracks) {
-    switch (globalTrack.type) {
-      case 'tab': {
-        // Only print the main track if we actually managed to find it.
-        if (globalTrack.threadIndexes.size > 0) {
-          const selected = hasThreadKeys(
-            selectedThreadIndexes,
-            globalTrack.threadsKey
-          )
-            ? ' SELECTED'
-            : '';
-          text.push(`main track [tab]${selected}`);
-          // TODO: Add resource tracks
-        }
-        break;
-      }
-      case 'screenshots': {
-        text.push(`${globalTrack.type}`);
-        break;
-      }
-      default:
-        throw assertExhaustiveCheck(
-          globalTrack,
-          'Unhandled ActiveTabGlobalTrack.'
-        );
-    }
-  }
-
-  for (const resourceTrack of resourceTracks) {
-    switch (resourceTrack.type) {
-      case 'sub-frame':
-        text.push(`  - iframe: ${resourceTrack.name}`);
-        break;
-      case 'thread':
-        text.push(`  - ${resourceTrack.name}`);
-        break;
-      default:
-        throw assertExhaustiveCheck(
-          resourceTrack,
-          'Unhandled ActiveTabResourceTrack.'
-        );
-    }
-  }
-
-  return text;
 }
 
 /**

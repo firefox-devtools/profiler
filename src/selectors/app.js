@@ -11,18 +11,12 @@ import {
   getTimelineTrackOrganization,
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
-  getIsActiveTabResourcesPanelOpen,
 } from './url-state';
-import {
-  getGlobalTracks,
-  getLocalTracksByPid,
-  getActiveTabTimeline,
-} from './profile';
+import { getGlobalTracks, getLocalTracksByPid } from './profile';
 import { getZipFileState } from './zipped-profiles.js';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import {
   FULL_TRACK_SCREENSHOT_HEIGHT,
-  ACTIVE_TAB_TRACK_SCREENSHOT_HEIGHT,
   TRACK_NETWORK_HEIGHT,
   TRACK_MEMORY_HEIGHT,
   TRACK_BANDWIDTH_HEIGHT,
@@ -30,10 +24,8 @@ import {
   TRACK_PROCESS_BLANK_HEIGHT,
   TIMELINE_RULER_HEIGHT,
   TRACK_VISUAL_PROGRESS_HEIGHT,
-  ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT,
   TRACK_EVENT_DELAY_HEIGHT,
   TIMELINE_MARGIN_LEFT,
-  ACTIVE_TAB_TIMELINE_MARGIN_LEFT,
   TRACK_PROCESS_CPU_HEIGHT,
   TRACK_MARKER_HEIGHT,
 } from '../app-logic/constants';
@@ -108,8 +100,6 @@ export const getScreenshotTrackHeight: Selector<number> = createSelector(
   getTimelineTrackOrganization,
   (timelineTrackOrganization) => {
     switch (timelineTrackOrganization.type) {
-      case 'active-tab':
-        return ACTIVE_TAB_TRACK_SCREENSHOT_HEIGHT;
       case 'full':
       case 'origins':
         return FULL_TRACK_SCREENSHOT_HEIGHT;
@@ -139,8 +129,6 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
   getTrackThreadHeights,
-  getActiveTabTimeline,
-  getIsActiveTabResourcesPanelOpen,
   getScreenshotTrackHeight,
   (
     timelineTrackOrganization,
@@ -149,8 +137,6 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
     hiddenGlobalTracks,
     hiddenLocalTracksByPid,
     trackThreadHeights,
-    activeTabTimeline,
-    isActiveTabResourcesPanelOpen,
     screenshotTrackHeight
   ) => {
     let height = TIMELINE_RULER_HEIGHT;
@@ -158,61 +144,6 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
     switch (timelineTrackOrganization.type) {
       case 'origins': {
         return height + 500;
-      }
-      case 'active-tab': {
-        if (activeTabTimeline.resources.length > 0) {
-          // Active tab resources panel has a header and we should also add its
-          // height if there is a panel there.
-          height += ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT;
-        }
-
-        // Add the height of the main track.
-        // The thread tracks have enough complexity that it warrants measuring
-        // them rather than statically using a value like the other tracks.
-        const { threadsKey } = activeTabTimeline.mainTrack;
-        const trackThreadHeight = trackThreadHeights[threadsKey];
-        if (trackThreadHeight === undefined) {
-          // The height isn't computed yet, return.
-          return null;
-        }
-        height += trackThreadHeight + border;
-
-        // Add the height of screenshot tracks.
-        for (let i = 0; i < activeTabTimeline.screenshots.length; i++) {
-          height += screenshotTrackHeight + border;
-        }
-
-        if (isActiveTabResourcesPanelOpen) {
-          for (const resourceTrack of activeTabTimeline.resources) {
-            switch (resourceTrack.type) {
-              case 'sub-frame':
-              case 'thread':
-                {
-                  // The thread tracks have enough complexity that it warrants measuring
-                  // them rather than statically using a value like the other tracks.
-                  const { threadIndex } = resourceTrack;
-                  if (threadIndex === null) {
-                    height += TRACK_PROCESS_BLANK_HEIGHT + border;
-                  } else {
-                    const trackThreadHeight = trackThreadHeights[threadIndex];
-                    if (trackThreadHeight === undefined) {
-                      // The height isn't computed yet, return.
-                      return null;
-                    }
-                    height +=
-                      trackThreadHeight +
-                      ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT +
-                      border;
-                  }
-                }
-                break;
-              default:
-                throw assertExhaustiveCheck(resourceTrack);
-            }
-          }
-        }
-
-        return height;
       }
       case 'full': {
         for (const [trackIndex, globalTrack] of globalTracks.entries()) {
@@ -351,8 +282,6 @@ export const getTimelineMarginLeft: Selector<number> = createSelector(
   getTimelineTrackOrganization,
   (timelineTrackOrganization) => {
     switch (timelineTrackOrganization.type) {
-      case 'active-tab':
-        return ACTIVE_TAB_TIMELINE_MARGIN_LEFT;
       case 'full':
       case 'origins':
         return TIMELINE_MARGIN_LEFT;
