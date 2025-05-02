@@ -11,11 +11,13 @@ import {
   changeInvertCallstack,
   changeCallTreeSearchString,
   changeShowUserTimings,
+  changeStackChartSameWidths,
 } from 'firefox-profiler/actions/profile-view';
 import {
   getInvertCallstack,
   getSelectedTab,
   getShowUserTimings,
+  getStackChartSameWidths,
   getCurrentSearchString,
 } from 'firefox-profiler/selectors/url-state';
 import { getProfileUsesMultipleStackTypes } from 'firefox-profiler/selectors/profile';
@@ -40,6 +42,7 @@ type StateProps = {|
   +allowSwitchingStackType: boolean,
   +invertCallstack: boolean,
   +showUserTimings: boolean,
+  +stackChartSameWidths: boolean,
   +currentSearchString: string,
   +hasUsefulJsAllocations: boolean,
   +hasUsefulNativeAllocations: boolean,
@@ -49,6 +52,7 @@ type DispatchProps = {|
   +changeInvertCallstack: typeof changeInvertCallstack,
   +changeShowUserTimings: typeof changeShowUserTimings,
   +changeCallTreeSearchString: typeof changeCallTreeSearchString,
+  +changeStackChartSameWidths: typeof changeStackChartSameWidths,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -62,6 +66,10 @@ class StackSettingsImpl extends PureComponent<Props> {
     this.props.changeShowUserTimings(e.currentTarget.checked);
   };
 
+  _onUseStackChartSameWidths = (e: SyntheticEvent<HTMLInputElement>) => {
+    this.props.changeStackChartSameWidths(e.currentTarget.checked);
+  };
+
   _onSearch = (value: string) => {
     this.props.changeCallTreeSearchString(value);
   };
@@ -72,6 +80,7 @@ class StackSettingsImpl extends PureComponent<Props> {
       invertCallstack,
       selectedTab,
       showUserTimings,
+      stackChartSameWidths,
       hideInvertCallstack,
       currentSearchString,
       hasUsefulJsAllocations,
@@ -112,17 +121,30 @@ class StackSettingsImpl extends PureComponent<Props> {
                 </label>
               )}
               {selectedTab !== 'stack-chart' ? null : (
-                <label className="photon-label photon-label-micro photon-label-horiz-padding">
-                  <input
-                    type="checkbox"
-                    className="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-                    onChange={this._onShowUserTimingsClick}
-                    checked={showUserTimings}
-                  />
-                  <Localized id="StackSettings--show-user-timing">
-                    Show user timing
-                  </Localized>
-                </label>
+                <>
+                  <label className="photon-label photon-label-micro photon-label-horiz-padding">
+                    <input
+                      type="checkbox"
+                      className="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+                      onChange={this._onShowUserTimingsClick}
+                      checked={showUserTimings}
+                    />
+                    <Localized id="StackSettings--show-user-timing">
+                      Show user timing
+                    </Localized>
+                  </label>
+                  <label className="photon-label photon-label-micro photon-label-horiz-padding">
+                    <input
+                      type="checkbox"
+                      className="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+                      onChange={this._onUseStackChartSameWidths}
+                      checked={stackChartSameWidths}
+                    />
+                    <Localized id="StackSettings--use-stack-chart-same-widths">
+                      Use the same width for each stack
+                    </Localized>
+                  </label>
+                </>
               )}
             </li>
           )}
@@ -154,6 +176,7 @@ export const StackSettings = explicitConnect<
     invertCallstack: getInvertCallstack(state),
     selectedTab: getSelectedTab(state),
     showUserTimings: getShowUserTimings(state),
+    stackChartSameWidths: getStackChartSameWidths(state),
     currentSearchString: getCurrentSearchString(state),
     hasUsefulJsAllocations:
       selectedThreadSelectors.getHasUsefulJsAllocations(state),
@@ -164,6 +187,7 @@ export const StackSettings = explicitConnect<
     changeInvertCallstack,
     changeCallTreeSearchString,
     changeShowUserTimings,
+    changeStackChartSameWidths,
   },
   component: StackSettingsImpl,
 });

@@ -19,11 +19,13 @@ import {
   getInnerWindowIDToPageMap,
   getProfileUsesMultipleStackTypes,
 } from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
+  getStackChartSameWidths,
   getShowUserTimings,
   getSelectedThreadsKey,
-} from '../../selectors/url-state';
+} from 'firefox-profiler/selectors/url-state';
+import type { StackTimingByDepth } from 'firefox-profiler/profile-logic/stack-timing';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getTimelineMarginLeft } from '../../selectors/app';
 import { StackChartEmptyReasons } from './StackChartEmptyReasons';
 import { ContextMenuTrigger } from '../shared/ContextMenuTrigger';
@@ -70,6 +72,7 @@ type StateProps = {|
   +weightType: WeightType,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +combinedTimingRows: CombinedTimingRows,
+  +stackTimingRows: StackTimingByDepth,
   +timeRange: StartEndRange,
   +interval: Milliseconds,
   +previewSelection: PreviewSelection,
@@ -84,6 +87,7 @@ type StateProps = {|
   +timelineMarginLeft: CssPixels,
   +displayStackType: boolean,
   +hasFilteredCtssSamples: boolean,
+  +stackChartSameWidths: boolean,
 |};
 
 type DispatchProps = {|
@@ -204,6 +208,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       thread,
       threadsKey,
       combinedTimingRows,
+      stackTimingRows,
       timeRange,
       interval,
       previewSelection,
@@ -220,6 +225,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       timelineMarginLeft,
       displayStackType,
       hasFilteredCtssSamples,
+      stackChartSameWidths,
     } = this.props;
 
     const maxViewportHeight = combinedTimingRows.length * STACK_FRAME_HEIGHT;
@@ -261,6 +267,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   innerWindowIDToPageMap,
                   threadsKey,
                   combinedTimingRows,
+                  stackTimingRows,
                   getMarker,
                   // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                   updatePreviewSelection,
@@ -278,6 +285,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   scrollToSelectionGeneration,
                   marginLeft: timelineMarginLeft,
                   displayStackType: displayStackType,
+                  stackChartSameWidths,
                 }}
               />
             </div>
@@ -291,14 +299,17 @@ class StackChartImpl extends React.PureComponent<Props> {
 export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state) => {
     const showUserTimings = getShowUserTimings(state);
+    const stackTimingRows =
+      selectedThreadSelectors.getStackTimingByDepth(state);
     const combinedTimingRows = showUserTimings
       ? selectedThreadSelectors.getCombinedTimingRows(state)
-      : selectedThreadSelectors.getStackTimingByDepth(state);
+      : stackTimingRows;
 
     return {
       thread: selectedThreadSelectors.getFilteredThread(state),
       // Use the raw WeightType here, as the stack chart does not use the call tree
       weightType: selectedThreadSelectors.getSamplesWeightType(state),
+      stackTimingRows,
       combinedTimingRows,
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
@@ -318,6 +329,7 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       displayStackType: getProfileUsesMultipleStackTypes(state),
       hasFilteredCtssSamples:
         selectedThreadSelectors.getHasFilteredCtssSamples(state),
+      stackChartSameWidths: getStackChartSameWidths(state),
     };
   },
   mapDispatchToProps: {
