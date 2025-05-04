@@ -164,6 +164,7 @@ Home--additional-content-title = Sali imuɣna yellan
 Home--additional-content-content = Tzemreḍ <strong>ad tzuɣreḍ syen sers</strong> afaylu n umaɣnu da i usali-ines, neɣ:
 Home--compare-recordings-info = Tzemreḍ daɣen ad tsenmehleḍ iseklasen. <a>Ldi agrudem n usnemhel.</a>
 Home--your-recent-uploaded-recordings-title = Iseklasen-ik·im i d-yulin melmi kan
+Home--install-chrome-extension = Sbedd aseɣẓan  n Chrome
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -259,6 +260,7 @@ MenuButtons--index--profile-info-uploaded-label = Yuli-d:
 MenuButtons--index--profile-info-uploaded-actions = Kkes
 MenuButtons--index--metaInfo-subtitle = Talɣut n umaɣnu
 MenuButtons--metaInfo--symbols = Izamulen:
+MenuButtons--metaInfo--main-memory = Takatut tagejdant:
 MenuButtons--index--show-moreInfo-button = Sken ugar
 MenuButtons--index--hide-moreInfo-button = Sken drus
 MenuButtons--metaInfo--profiling-started = Asekles yebda:
@@ -360,6 +362,8 @@ NumberFormat--short-date = { SHORTDATE($date) }
 
 ## Profile Name Button
 
+ProfileName--edit-profile-name-button =
+    .title = Ẓreg isem n umaɣnu
 
 ## Profile Delete Button
 
