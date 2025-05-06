@@ -20,6 +20,7 @@ export default defineConfig(
       'src/types/libdef/npm/**',
       'res/**',
       'dist/**',
+      'node-tools-dist/**',
       'docs-user/**',
       'coverage/**',
     ],
