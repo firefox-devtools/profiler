@@ -25,6 +25,7 @@ import {
 import { oneLine } from 'common-tags';
 import type {
   UrlState,
+  BenchmarkBucketFilter,
   DataSource,
   Pid,
   Profile,
@@ -50,6 +51,7 @@ import {
   encodeUintSetForUrlComponent,
 } from '../utils/uintarray-encoding';
 import { tabSlugs } from '../app-logic/tabs-handling';
+import { DEFAULT_BENCHMARK_BUCKET_FILTER } from '../app-logic/constants';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 import type { ProfileUpgradeInfo } from 'firefox-profiler/profile-logic/processed-profile-versioning';
 import type { ProfileAndProfileUpgradeInfo } from 'firefox-profiler/actions/receive-profile';
@@ -133,6 +135,8 @@ function getPathParts(urlState: UrlState): string[] {
         return ['compare'];
       }
       return ['compare', urlState.selectedTab];
+    case 'compare-benchmark':
+      return ['compare-benchmark'];
     case 'uploaded-recordings':
       return ['uploaded-recordings'];
     case 'from-browser':
@@ -173,6 +177,12 @@ type BaseQuery = {
   file: string; // Path into a zip file.
   transforms: string;
   profiles: string[];
+  names: string[]; // Display names for `profiles`, e.g. ["Chrome", "Firefox"]
+  // The benchmark comparison's bucket filter. See BenchmarkBucketFilter.
+  buckets: string; // "significant"
+  show: string; // "slower"
+  subject: string; // "1"
+  than: string; // "2"
   profileName: string;
   symbolServer: string;
   view: string;
@@ -271,6 +281,18 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         return '';
       }
       break;
+    case 'compare-benchmark':
+      if (urlState.profilesToCompare === null) {
+        return '';
+      }
+      return queryString.stringify(
+        {
+          profiles: urlState.profilesToCompare,
+          names: urlState.profileNamesToCompare ?? undefined,
+          ...benchmarkBucketFilterToQuery(urlState.benchmarkBucketFilter),
+        },
+        { arrayFormat: 'bracket' }
+      );
     case 'public':
     case 'local':
     case 'from-browser':
@@ -464,6 +486,7 @@ export function ensureIsValidDataSource(
     case 'public':
     case 'from-url':
     case 'compare':
+    case 'compare-benchmark':
     case 'uploaded-recordings':
       return coercedDataSource;
     default:
@@ -602,6 +625,8 @@ export function stateFromLocation(
     hash: hasProfileHash ? pathParts[1] : '',
     profileUrl: hasProfileUrl ? decodeURIComponent(pathParts[1]) : '',
     profilesToCompare: query.profiles || null,
+    profileNamesToCompare: query.names || null,
+    benchmarkBucketFilter: parseBenchmarkBucketFilter(query),
     selectedTab,
     pathInZipFile: query.file || null,
     profileName: query.profileName,
@@ -1829,4 +1854,54 @@ function stringifyAssemblyViewSymbol(symbol: NativeSymbolInfo): string {
     functionSizeStr += '_';
   }
   return `${libIndex}~${addressStr}~${functionSizeStr}~${name}`;
+}
+
+/**
+ * The benchmark bucket filter's query parameters. Values that match the default
+ * are left out, so a comparison nobody has filtered keeps its short URL.
+ */
+function benchmarkBucketFilterToQuery(
+  filter: BenchmarkBucketFilter
+): Partial<Pick<BaseQuery, 'buckets' | 'show' | 'subject' | 'than'>> {
+  const defaults = DEFAULT_BENCHMARK_BUCKET_FILTER;
+  return {
+    buckets: filter.mode === defaults.mode ? undefined : filter.mode,
+    show: filter.show === defaults.show ? undefined : filter.show,
+    subject: filter.subject === null ? undefined : String(filter.subject),
+    than:
+      filter.comparand === defaults.comparand
+        ? undefined
+        : String(filter.comparand),
+  };
+}
+
+function parseProfileIndex(value: string | undefined): number | null {
+  if (value === undefined || !/^\d+$/.test(value)) {
+    return null;
+  }
+  return Number(value);
+}
+
+/**
+ * Read the benchmark bucket filter back out of the query. Anything unrecognised
+ * falls back to its default. An index past the end of the profile list is kept,
+ * because the list is parsed separately; the viewer ignores it.
+ */
+function parseBenchmarkBucketFilter(
+  query: Partial<BaseQuery>
+): BenchmarkBucketFilter {
+  const defaults = DEFAULT_BENCHMARK_BUCKET_FILTER;
+  const { buckets, show } = query;
+  return {
+    mode:
+      buckets === 'movers' || buckets === 'significant' || buckets === 'none'
+        ? buckets
+        : defaults.mode,
+    show:
+      show === 'all' || show === 'faster' || show === 'slower'
+        ? show
+        : defaults.show,
+    subject: parseProfileIndex(query.subject),
+    comparand: parseProfileIndex(query.than) ?? defaults.comparand,
+  };
 }
