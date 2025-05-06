@@ -5,6 +5,7 @@ import path from 'path';
 import {
   mainBundleConfig,
   sourceMapWorkerConfig,
+  benchmarkCompareWorkerConfig,
 } from './lib/esbuild-configs.mjs';
 import { startDevServer } from './lib/dev-server.mjs';
 import { serveAndOpenProfile } from './lib/profile-server.mjs';
@@ -27,7 +28,7 @@ startDevServer(mainBundleConfig, {
   host,
   distDir: 'dist',
   cleanDist: true,
-  extraWatchConfigs: [sourceMapWorkerConfig],
+  extraWatchConfigs: [sourceMapWorkerConfig, benchmarkCompareWorkerConfig],
   onServerStart: (profilerUrl) => {
     const barAscii =
       '------------------------------------------------------------------------------------------';
