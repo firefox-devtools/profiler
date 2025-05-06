@@ -131,6 +131,8 @@ function getPathParts(urlState: UrlState): string[] {
         return ['compare'];
       }
       return ['compare', urlState.selectedTab];
+    case 'compare-benchmark':
+      return ['compare-benchmark'];
     case 'uploaded-recordings':
       return ['uploaded-recordings'];
     case 'from-browser':
@@ -264,6 +266,14 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         return '';
       }
       break;
+    case 'compare-benchmark':
+      if (urlState.profilesToCompare === null) {
+        return '';
+      }
+      return queryString.stringify(
+        { profiles: urlState.profilesToCompare },
+        { arrayFormat: 'bracket' }
+      );
     case 'public':
     case 'local':
     case 'from-browser':
@@ -449,6 +459,7 @@ export function ensureIsValidDataSource(
     case 'public':
     case 'from-url':
     case 'compare':
+    case 'compare-benchmark':
     case 'uploaded-recordings':
       return coercedDataSource;
     default:

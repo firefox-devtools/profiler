@@ -1,0 +1,218 @@
+.benchmarkCompareViewer {
+  flex: 1;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100%;
+  padding: 2em 3em;
+  background: var(--base-background-color);
+}
+
+.benchmarkResults {
+  font-size: 14px;
+}
+
+.benchmarkTitle {
+  margin-bottom: 1em;
+}
+
+/* Loading */
+
+.benchmarkLoading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4em;
+  color: var(--grey-60);
+  gap: 1em;
+}
+
+.benchmarkSpinner {
+  width: 2em;
+  height: 2em;
+  border: 3px solid var(--grey-30);
+  border-radius: 50%;
+  border-top-color: var(--blue-50);
+  animation: benchmarkSpin 0.8s linear infinite;
+}
+
+@keyframes benchmarkSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error */
+
+.benchmarkError {
+  padding: 1em;
+  border: 1px solid var(--red-50, #ff0039);
+  border-radius: 4px;
+  background: var(--red-10, #ffe8e8);
+  color: var(--red-70, #a4000f);
+}
+
+/* Profile URLs */
+
+.benchmarkProfileUrls {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5em;
+  color: var(--grey-70);
+  font-size: 0.9em;
+  gap: 0.25em;
+  word-break: break-all;
+}
+
+/* Section headings */
+
+.benchmarkSectionTitle {
+  margin: 1.5em 0 0.5em;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+/* Suite details */
+
+.benchmarkSuiteDetails > .benchmarkSectionTitle {
+  cursor: pointer;
+  user-select: none;
+}
+
+.benchmarkSuiteDetails > .benchmarkSectionTitle::marker {
+  font-size: 0.8em;
+}
+
+.benchmarkNoChanges {
+  padding: 0.5em 0;
+  color: var(--grey-60);
+  font-style: italic;
+}
+
+/* Tables */
+
+.benchmarkTable {
+  width: 100%;
+  margin-bottom: 1em;
+  border-collapse: collapse;
+  font-size: 0.9em;
+
+  /* Fixed layout so the numeric column widths are honored exactly. With
+   * the same numeric widths in both the outer score table and the inner
+   * subtest tables, and zero right-padding on the expansion row, the
+   * numeric columns line up vertically across both tables. The first
+   * column (label / bucket name) flexes to fill the remaining space. */
+  table-layout: fixed;
+}
+
+.benchmarkTable th,
+.benchmarkTable td {
+  box-sizing: border-box;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--grey-20);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.benchmarkTable th {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  background: var(--grey-10);
+  font-weight: bold;
+}
+
+.benchmarkCell--number {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.benchmarkCell--colFixed {
+  width: 9rem;
+}
+
+.benchmarkCell--bucketName,
+.benchmarkCell--scoreLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.benchmarkRow--overall td {
+  border-bottom: 2px solid var(--grey-40);
+  font-weight: bold;
+}
+
+.benchmarkCell--indented {
+  padding-left: 1.5em;
+}
+
+/* Expandable subtest rows in the score table */
+
+.benchmarkRow--suite-expandable {
+  cursor: pointer;
+}
+
+.benchmarkRow--suite-expandable:hover {
+  background: var(--grey-10);
+}
+
+.benchmarkCell--suiteLabel {
+  position: relative;
+}
+
+.benchmarkDisclosure {
+  display: inline-block;
+  width: 1em;
+  margin-right: 0.25em;
+  color: var(--grey-60);
+  font-size: 0.75em;
+  text-align: center;
+  user-select: none;
+}
+
+.benchmarkRow--expansion > td {
+  padding: 0.5em 0 0.5em 2.5em;
+  background: var(--grey-10);
+}
+
+.benchmarkRow--expansion .benchmarkTable {
+  margin-bottom: 0;
+}
+
+/* Color coding.
+ *
+ * Confidence drives shading (background): HIGH = full, MEDIUM = muted,
+ * LOW = no shading. Effect size drives boldness: Large = bold,
+ * Moderate = semibold, Small/Negligible = normal.
+ */
+
+.benchmarkCell--regressed {
+  color: var(--red-70, #a4000f);
+}
+
+.benchmarkCell--improved {
+  color: var(--green-80, #006504);
+}
+
+.benchmarkCell--regressed.benchmarkCell--conf-high {
+  background: var(--red-10, #ffe8e8);
+}
+
+.benchmarkCell--regressed.benchmarkCell--conf-medium {
+  background: color-mix(in srgb, var(--red-10, #ffe8e8) 40%, transparent);
+}
+
+.benchmarkCell--improved.benchmarkCell--conf-high {
+  background: var(--green-10, #d3f3d8);
+}
+
+.benchmarkCell--improved.benchmarkCell--conf-medium {
+  background: color-mix(in srgb, var(--green-10, #d3f3d8) 40%, transparent);
+}
+
+.benchmarkCell--effect-large {
+  font-weight: bold;
+}
+
+.benchmarkCell--effect-moderate {
+  font-weight: 600;
+}

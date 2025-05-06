@@ -56,6 +56,8 @@ const dataSource: Reducer<DataSource> = (state = 'none', action) => {
       return 'unpublished';
     case 'SET_DATA_SOURCE':
       return action.dataSource;
+    case 'CHANGE_PROFILES_TO_COMPARE_BENCHMARK':
+      return 'compare-benchmark';
     default:
       return state;
   }
@@ -87,6 +89,7 @@ const profileUrl: Reducer<string> = (state = '', action) => {
 const profilesToCompare: Reducer<string[] | null> = (state = null, action) => {
   switch (action.type) {
     case 'CHANGE_PROFILES_TO_COMPARE':
+    case 'CHANGE_PROFILES_TO_COMPARE_BENCHMARK':
       return action.profiles;
     default:
       return state;
