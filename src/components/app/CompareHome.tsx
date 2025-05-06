@@ -6,13 +6,17 @@ import { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 
 import { AppHeader } from './AppHeader';
-import { changeProfilesToCompare } from 'firefox-profiler/actions/app';
+import {
+  changeProfilesToCompare,
+  changeProfilesToCompareBenchmark,
+} from 'firefox-profiler/actions/app';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './CompareHome.css';
 
 type DispatchProps = {
   readonly changeProfilesToCompare: typeof changeProfilesToCompare;
+  readonly changeProfilesToCompareBenchmark: typeof changeProfilesToCompareBenchmark;
 };
 
 type Props = ConnectedProps<{}, {}, DispatchProps>;
@@ -33,8 +37,17 @@ class CompareHomeImpl extends PureComponent<Props, State> {
   handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const { profile1, profile2 } = this.state;
-    const { changeProfilesToCompare } = this.props;
-    changeProfilesToCompare([profile1, profile2]);
+    const { changeProfilesToCompare, changeProfilesToCompareBenchmark } =
+      this.props;
+    const submitter = (e.nativeEvent as SubmitEvent).submitter;
+    if (
+      submitter instanceof HTMLButtonElement &&
+      submitter.name === 'benchmark'
+    ) {
+      changeProfilesToCompareBenchmark([profile1, profile2]);
+    } else {
+      changeProfilesToCompare([profile1, profile2]);
+    }
   };
 
   override render() {
@@ -86,13 +99,22 @@ class CompareHomeImpl extends PureComponent<Props, State> {
             onChange={this.handleInputChange}
             value={profile2}
           />
-          <Localized id="CompareHome--submit-button" attrs={{ value: true }}>
-            <input
-              className="compareHomeSubmitButton photon-button photon-button-primary"
+          <div className="compareHomeButtons">
+            <Localized id="CompareHome--submit-button" attrs={{ value: true }}>
+              <input
+                className="photon-button photon-button-primary"
+                type="submit"
+                value="Retrieve profiles"
+              />
+            </Localized>
+            <button
+              name="benchmark"
               type="submit"
-              value="Retrieve profiles"
-            />
-          </Localized>
+              className="photon-button photon-button-default"
+            >
+              Compare Benchmark Profiles
+            </button>
+          </div>
         </form>
       </main>
     );
@@ -100,6 +122,9 @@ class CompareHomeImpl extends PureComponent<Props, State> {
 }
 
 export const CompareHome = explicitConnect<{}, {}, DispatchProps>({
-  mapDispatchToProps: { changeProfilesToCompare },
+  mapDispatchToProps: {
+    changeProfilesToCompare,
+    changeProfilesToCompareBenchmark,
+  },
   component: CompareHomeImpl,
 });

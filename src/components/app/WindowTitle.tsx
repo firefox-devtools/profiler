@@ -55,6 +55,9 @@ class WindowTitleImpl extends PureComponent<Props> {
       case 'compare':
         document.title = 'Compare Profiles' + SEPARATOR + PRODUCT;
         break;
+      case 'compare-benchmark':
+        document.title = 'Benchmark Comparison' + SEPARATOR + PRODUCT;
+        break;
       case 'public':
       case 'local':
       case 'unpublished':
