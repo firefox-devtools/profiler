@@ -210,14 +210,13 @@ describe('auto_labels integration with insertStackLabels', function () {
       ['mozilla::dom::Element_Binding::querySelector(elem)']
     );
 
-    expect(
-      formatTree(callTreeFromProfile(insertStackLabels(profile, labels)))
-    ).toEqual([
-      '- Unaccounted (total: 1, self: —)',
-      '  - A (total: 1, self: —)',
-      '    - Element.querySelector (total: 1, self: —)',
-      '      - mozilla::dom::Element_Binding::querySelector(elem) (total: 1, self: 1)',
-    ]);
+    expect(formatTree(callTreeFromProfile(insertStackLabels(profile, labels))))
+      .toEqual([
+        '- Unaccounted (total: 1, self: —)',
+        '  - A (total: 1, self: —)',
+        '    - Element.querySelector (total: 1, self: —)',
+        '      - mozilla::dom::Element_Binding::querySelector(elem) (total: 1, self: 1)',
+      ]);
   });
 
   it('matches both anonymous-namespace forms for Blink', function () {
@@ -238,13 +237,12 @@ describe('auto_labels integration with insertStackLabels', function () {
       ]
     );
 
-    expect(
-      formatTree(callTreeFromProfile(insertStackLabels(profile, labels)))
-    ).toEqual([
-      '- Element.querySelector (total: 1, self: —)',
-      "  - blink::`anonymous namespace'::v8_element::QuerySelectorOperation (total: 1, self: —)",
-      '    - blink::(anonymous namespace)::v8_element::QuerySelectorOperation (total: 1, self: 1)',
-    ]);
+    expect(formatTree(callTreeFromProfile(insertStackLabels(profile, labels))))
+      .toEqual([
+        "- Element.querySelector (total: 1, self: —)",
+        "  - blink::`anonymous namespace'::v8_element::QuerySelectorOperation (total: 1, self: —)",
+        "    - blink::(anonymous namespace)::v8_element::QuerySelectorOperation (total: 1, self: 1)",
+      ]);
   });
 
   it('matches WebKit-style function names', function () {
@@ -264,14 +262,13 @@ describe('auto_labels integration with insertStackLabels', function () {
       ]
     );
 
-    expect(
-      formatTree(callTreeFromProfile(insertStackLabels(profile, labels)))
-    ).toEqual([
-      '- Unaccounted (total: 1, self: —)',
-      '  - A (total: 1, self: —)',
-      '    - Element.querySelector (total: 1, self: —)',
-      '      - WebCore::jsElementPrototypeFunction_querySelector(JSC::JSGlobalObject*) (total: 1, self: 1)',
-    ]);
+    expect(formatTree(callTreeFromProfile(insertStackLabels(profile, labels))))
+      .toEqual([
+        '- Unaccounted (total: 1, self: —)',
+        '  - A (total: 1, self: —)',
+        '    - Element.querySelector (total: 1, self: —)',
+        '      - WebCore::jsElementPrototypeFunction_querySelector(JSC::JSGlobalObject*) (total: 1, self: 1)',
+      ]);
   });
 
   it('canvas2d_operation matches Gecko, Offscreen, Blink, and WebKit variants', function () {
@@ -296,15 +293,14 @@ describe('auto_labels integration with insertStackLabels', function () {
       ]
     );
 
-    expect(
-      formatTree(callTreeFromProfile(insertStackLabels(profile, labels)))
-    ).toEqual([
-      '- CanvasRenderingContext2D.fillRect (total: 1, self: —)',
-      '  - mozilla::dom::CanvasRenderingContext2D_Binding::fillRect(args) (total: 1, self: —)',
-      '    - mozilla::dom::OffscreenCanvasRenderingContext2D_Binding::fillRect(args) (total: 1, self: —)',
-      '      - blink::(anonymous namespace)::v8_canvas_rendering_context_2d::FillRectOperation (total: 1, self: —)',
-      '        - WebCore::jsCanvasRenderingContext2DPrototypeFunction_fillRect(ctx) (total: 1, self: 1)',
-    ]);
+    expect(formatTree(callTreeFromProfile(insertStackLabels(profile, labels))))
+      .toEqual([
+        '- CanvasRenderingContext2D.fillRect (total: 1, self: —)',
+        '  - mozilla::dom::CanvasRenderingContext2D_Binding::fillRect(args) (total: 1, self: —)',
+        '    - mozilla::dom::OffscreenCanvasRenderingContext2D_Binding::fillRect(args) (total: 1, self: —)',
+        '      - blink::(anonymous namespace)::v8_canvas_rendering_context_2d::FillRectOperation (total: 1, self: —)',
+        '        - WebCore::jsCanvasRenderingContext2DPrototypeFunction_fillRect(ctx) (total: 1, self: 1)',
+      ]);
   });
 
   it('merges an explicit `[[labels]]` entry with the auto-discovered prefixes when names collide', function () {
@@ -338,13 +334,12 @@ describe('auto_labels integration with insertStackLabels', function () {
       ['mozilla::dom::Element_Binding::set_className(args)']
     );
 
-    expect(
-      formatTree(callTreeFromProfile(insertStackLabels(profile, labels)))
-    ).toEqual([
-      '- set Element.className (total: 1, self: —)',
-      '  - blink::bindings::PerformAttributeSetCEReactionsReflectTypeString (total: 1, self: —)',
-      '    - mozilla::dom::Element_Binding::set_className(args) (total: 1, self: 1)',
-    ]);
+    expect(formatTree(callTreeFromProfile(insertStackLabels(profile, labels))))
+      .toEqual([
+        '- set Element.className (total: 1, self: —)',
+        '  - blink::bindings::PerformAttributeSetCEReactionsReflectTypeString (total: 1, self: —)',
+        '    - mozilla::dom::Element_Binding::set_className(args) (total: 1, self: 1)',
+      ]);
   });
 });
 

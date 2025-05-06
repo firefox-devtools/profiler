@@ -1,0 +1,161 @@
+.benchmarkCompareViewer {
+  width: 95%;
+  max-width: 1400px;
+  box-sizing: border-box;
+  padding: 2em 3em;
+  border: 1px solid var(--home-border-color);
+  border-radius: 3px;
+  margin: auto;
+  background: var(--base-background-color);
+  box-shadow: 0 5px 25px var(--home-shadow-color);
+}
+
+.benchmarkTitle {
+  margin-bottom: 1em;
+}
+
+/* Loading */
+
+.benchmarkLoading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4em;
+  color: var(--grey-60);
+  gap: 1em;
+}
+
+.benchmarkSpinner {
+  width: 2em;
+  height: 2em;
+  border: 3px solid var(--grey-30);
+  border-radius: 50%;
+  border-top-color: var(--blue-50);
+  animation: benchmarkSpin 0.8s linear infinite;
+}
+
+@keyframes benchmarkSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error */
+
+.benchmarkError {
+  padding: 1em;
+  border: 1px solid var(--red-50, #ff0039);
+  border-radius: 4px;
+  background: var(--red-10, #ffe8e8);
+  color: var(--red-70, #a4000f);
+}
+
+/* Profile URLs */
+
+.benchmarkProfileUrls {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5em;
+  color: var(--grey-70);
+  font-size: 0.9em;
+  gap: 0.25em;
+  word-break: break-all;
+}
+
+/* Section headings */
+
+.benchmarkSectionTitle {
+  margin: 1.5em 0 0.5em;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+/* Suite details */
+
+.benchmarkSuiteDetails > .benchmarkSectionTitle {
+  cursor: pointer;
+  user-select: none;
+}
+
+.benchmarkSuiteDetails > .benchmarkSectionTitle::marker {
+  font-size: 0.8em;
+}
+
+.benchmarkNoChanges {
+  padding: 0.5em 0;
+  color: var(--grey-60);
+  font-style: italic;
+}
+
+/* Tables */
+
+.benchmarkTable {
+  width: 100%;
+  margin-bottom: 1em;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+
+.benchmarkTable th,
+.benchmarkTable td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--grey-20);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.benchmarkTable th {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  background: var(--grey-10);
+  font-weight: bold;
+}
+
+.benchmarkTable--buckets td {
+  max-width: 0;
+}
+
+.benchmarkCell--number {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.benchmarkCell--bucketName {
+  overflow: hidden;
+  max-width: 400px;
+  text-overflow: ellipsis;
+}
+
+.benchmarkRow--overall td {
+  border-bottom: 2px solid var(--grey-40);
+  font-weight: bold;
+}
+
+.benchmarkCell--indented {
+  padding-left: 1.5em;
+}
+
+/* Color coding — high confidence: colored background + bold */
+
+.benchmarkCell--regressed {
+  background: var(--red-10, #ffe8e8);
+  color: var(--red-70, #a4000f);
+  font-weight: bold;
+}
+
+.benchmarkCell--improved {
+  background: var(--green-10, #d3f3d8);
+  color: var(--green-80, #006504);
+  font-weight: bold;
+}
+
+/* Medium confidence: muted background only, no bold, no colored text */
+
+.benchmarkCell--regressed-medium {
+  background: color-mix(in srgb, var(--red-10, #ffe8e8) 40%, transparent);
+}
+
+.benchmarkCell--improved-medium {
+  background: color-mix(in srgb, var(--green-10, #d3f3d8) 40%, transparent);
+}
