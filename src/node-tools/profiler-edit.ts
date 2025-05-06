@@ -163,8 +163,15 @@ function canonicalizeJsLocations(profile: Profile): Profile {
 
   // The filename may contain colons (URLs), so we rely on greedy matching
   // to anchor `:line:col` at the very end of the string.
-  const parenRegex = /^(.+) \((.+):(\d+):(\d+)\)$/;
-  const plainRegex = /^(.+) (.+):(\d+):(\d+)$/;
+  //
+  // The function name is matched with `.*` (not `.+`) because V8 reports an
+  // empty name for anonymous functions: samply then formats them as
+  // ` filename:line:col` (leading space, empty name) or ` :line:col` (empty
+  // name and empty filename). Requiring at least one character for the name
+  // would leave those funcs uncanonicalized, with junk names like ` :1:20`.
+  // The filename is matched with `.*` for the same reason.
+  const parenRegex = /^(.*) \((.*):(\d+):(\d+)\)$/;
+  const plainRegex = /^(.*) (.*):(\d+):(\d+)$/;
 
   let canonicalized = 0;
   for (let i = 0; i < funcTable.length; i++) {
