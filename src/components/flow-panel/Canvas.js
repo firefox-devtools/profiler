@@ -13,6 +13,7 @@ import {
 } from 'firefox-profiler/components/shared/chart/Viewport';
 import { ChartCanvas } from 'firefox-profiler/components/shared/chart/Canvas';
 import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
+import { FlowGapTooltip } from 'firefox-profiler/components/tooltip/FlowGap';
 import TextMeasurement from 'firefox-profiler/utils/text-measurement';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import {
@@ -33,8 +34,10 @@ import type {
   FlowTimingRow,
   FlowTimingArrow,
 } from 'firefox-profiler/types';
-import { getStartEndRangeForMarker } from 'firefox-profiler/utils';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import {
+  ensureExists,
+  assertExhaustiveCheck,
+} from 'firefox-profiler/utils/flow';
 import { computeArrowsRelatedToMarker } from 'firefox-profiler/profile-logic/marker-data';
 
 import type {
@@ -44,13 +47,29 @@ import type {
 
 import type { WrapFunctionInDispatch } from 'firefox-profiler/utils/connect';
 
-type HoveredFlowPanelItems = {|
+type FlowPanelHoverInfo = {|
   rowIndex: number | null,
   flowIndex: IndexIntoFlowTable | null,
-  indexInFlowMarkers: number | null, // index into flows[flowIndex].flowMarkers
-  threadIndex: ThreadIndex | null,
-  markerIndex: MarkerIndex | null,
-  flowMarkerIndex: number | null,
+  hoveredItem: HoveredFlowPanelItem | null,
+|};
+
+type HoveredFlowPanelItem =
+  | {|
+      type: 'SINGLE_MARKER',
+      hoveredMarker: HoveredFlowMarker,
+    |}
+  | {|
+      type: 'BETWEEN_MARKERS',
+      markerBeforeHoveredGapAsIndexIntoFlowTimingRowMarkerTable: number,
+      markerBeforeHoveredGap: HoveredFlowMarker,
+      markerAfterHoveredGap: HoveredFlowMarker,
+    |};
+
+type HoveredFlowMarker = {|
+  indexInFlowMarkers: number, // index into flows[flowIndex].flowMarkers
+  threadIndex: ThreadIndex,
+  markerIndex: MarkerIndex,
+  flowMarkerIndex: number,
 |};
 
 type OwnProps = {|
@@ -90,7 +109,7 @@ class FlowPanelCanvasImpl extends React.PureComponent<Props> {
   drawCanvas = (
     ctx: CanvasRenderingContext2D,
     scale: ChartCanvasScale,
-    hoverInfo: ChartCanvasHoverInfo<HoveredFlowPanelItems>
+    hoverInfo: ChartCanvasHoverInfo<FlowPanelHoverInfo>
   ) => {
     const {
       rowHeight,
@@ -109,6 +128,8 @@ class FlowPanelCanvasImpl extends React.PureComponent<Props> {
       );
     }
 
+    const { hoveredItem } = hoverInfo;
+
     // Convert CssPixels to Stack Depth
     const rowCount = flowTiming.rows.length;
     const startRow = Math.floor(viewportTop / rowHeight);
@@ -120,19 +141,24 @@ class FlowPanelCanvasImpl extends React.PureComponent<Props> {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, containerWidth, containerHeight);
     this.drawRowHighlights(ctx, startRow, endRow);
-    this.drawRowContents(ctx, null, startRow, endRow);
+    this.drawRowContents(ctx, null, startRow, endRow, hoveredItem);
     this.drawSeparatorsAndLabels(ctx, startRow, endRow);
 
-    const { hoveredItem } = hoverInfo;
-    if (hoveredItem !== null) {
-      const { threadIndex, flowMarkerIndex } = hoveredItem;
+    const hoveredMarker =
+      hoveredItem !== null &&
+      hoveredItem.hoveredItem &&
+      hoveredItem.hoveredItem.type === 'SINGLE_MARKER'
+        ? hoveredItem.hoveredItem.hoveredMarker
+        : null;
+
+    if (hoveredMarker !== null) {
+      const { threadIndex, flowMarkerIndex } = hoveredMarker;
       if (threadIndex !== null && flowMarkerIndex !== null) {
         const arrows = this._memoizedGetArrows(
           threadIndex,
           flowMarkerIndex,
           flowTiming
         );
-        console.log({ arrows });
         this.drawArrows(ctx, arrows, startRow, endRow);
       }
     }
@@ -246,7 +272,7 @@ class FlowPanelCanvasImpl extends React.PureComponent<Props> {
     isInstantMarker: boolean,
     markerIndex: MarkerIndex,
     threadIndex: number,
-    isHighlighted: boolean = false
+    isHighlighted: boolean
   ) {
     if (isInstantMarker) {
       w = 1;
@@ -367,7 +393,8 @@ class FlowPanelCanvasImpl extends React.PureComponent<Props> {
     rowHeight: CssPixels,
     viewportTop: CssPixels,
     markerContainerWidth: CssPixels,
-    marginLeft: CssPixels
+    marginLeft: CssPixels,
+    hoveredMarker: HoveredFlowMarker | null
   ) {
     const { devicePixelRatio } = window;
 
@@ -405,6 +432,10 @@ class FlowPanelCanvasImpl extends React.PureComponent<Props> {
 
         const markerIndex = markers.markerIndex[i];
         const threadIndex = markers.threadIndex[i];
+        const isHovered =
+          hoveredMarker !== null &&
+          threadIndex === hoveredMarker.threadIndex &&
+          markerIndex === hoveredMarker.markerIndex;
 
         if (
           isInstantMarker ||
@@ -424,9 +455,68 @@ class FlowPanelCanvasImpl extends React.PureComponent<Props> {
             h,
             isInstantMarker,
             markerIndex,
-            threadIndex
+            threadIndex,
+            isHovered
           );
         }
+      }
+    }
+  }
+
+  drawHoveredGapIndicator(
+    ctx: CanvasRenderingContext2D,
+    rowIndex: number,
+    flowTimingRow: FlowTimingRow,
+    timeAtViewportLeft: number,
+    timeAtViewportRightPlusMargin: number,
+    rangeStart: Milliseconds,
+    rangeLength: Milliseconds,
+    viewportLeft: CssPixels,
+    viewportLength: CssPixels,
+    rowHeight: CssPixels,
+    viewportTop: CssPixels,
+    markerContainerWidth: CssPixels,
+    marginLeft: CssPixels,
+    markerBeforeHoveredGapAsIndexIntoFlowTimingRowMarkerTable: number
+  ) {
+    const { devicePixelRatio } = window;
+
+    const { markers } = flowTimingRow;
+
+    const y: CssPixels = rowIndex * rowHeight - viewportTop;
+    const h: CssPixels = rowHeight - 1;
+
+    const gapStart =
+      markers.endTime[
+        markerBeforeHoveredGapAsIndexIntoFlowTimingRowMarkerTable
+      ];
+    const gapEnd =
+      markers.startTime[
+        markerBeforeHoveredGapAsIndexIntoFlowTimingRowMarkerTable + 1
+      ];
+
+    // Only draw gap indicators that are in bounds.
+    if (
+      gapEnd >= timeAtViewportLeft &&
+      gapStart < timeAtViewportRightPlusMargin
+    ) {
+      const startTime: UnitIntervalOfProfileRange =
+        (gapStart - rangeStart) / rangeLength;
+      const endTime: UnitIntervalOfProfileRange =
+        (gapEnd - rangeStart) / rangeLength;
+
+      let x: CssPixels =
+        ((startTime - viewportLeft) * markerContainerWidth) / viewportLength +
+        marginLeft;
+      let w: CssPixels =
+        ((endTime - startTime) * markerContainerWidth) / viewportLength;
+
+      x = Math.round(x * devicePixelRatio) / devicePixelRatio;
+      w = Math.round(w * devicePixelRatio) / devicePixelRatio;
+
+      if (w > 1) {
+        ctx.fillStyle = '#666';
+        ctx.fillRect(x, y + 1 + 4, w, h - 2 - 4 * 2);
       }
     }
   }
@@ -435,7 +525,8 @@ class FlowPanelCanvasImpl extends React.PureComponent<Props> {
     ctx: CanvasRenderingContext2D,
     hoveredItem: MarkerIndex | null,
     startRow: number,
-    endRow: number
+    endRow: number,
+    hoverInfo: FlowPanelHoverInfo | null
   ) {
     const {
       rangeStart,
@@ -480,6 +571,7 @@ class FlowPanelCanvasImpl extends React.PureComponent<Props> {
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
       // Get the timing information for a row of stack frames.
       const flowTimingRow = flowTiming.rows[rowIndex];
+      const flowIndex = flowTimingRow.flowIndex;
       this.drawFlowRectangle(
         ctx,
         rowIndex,
@@ -492,6 +584,17 @@ class FlowPanelCanvasImpl extends React.PureComponent<Props> {
         viewportLength,
         marginLeft
       );
+      const hoveredItemInThisRow =
+        hoverInfo !== null &&
+        hoverInfo.flowIndex === flowIndex &&
+        hoverInfo.hoveredItem !== null
+          ? hoverInfo.hoveredItem
+          : null;
+      const hoveredMarkerInThisRow =
+        hoveredItemInThisRow !== null &&
+        hoveredItemInThisRow.type === 'SINGLE_MARKER'
+          ? hoveredItemInThisRow.hoveredMarker
+          : null;
       this.drawMarkersForRow(
         ctx,
         rowIndex,
@@ -505,8 +608,30 @@ class FlowPanelCanvasImpl extends React.PureComponent<Props> {
         rowHeight,
         viewportTop,
         markerContainerWidth,
-        marginLeft
+        marginLeft,
+        hoveredMarkerInThisRow
       );
+      if (
+        hoveredItemInThisRow !== null &&
+        hoveredItemInThisRow.type === 'BETWEEN_MARKERS'
+      ) {
+        this.drawHoveredGapIndicator(
+          ctx,
+          rowIndex,
+          flowTimingRow,
+          timeAtViewportLeft,
+          timeAtViewportRightPlusMargin,
+          rangeStart,
+          rangeLength,
+          viewportLeft,
+          viewportLength,
+          rowHeight,
+          viewportTop,
+          markerContainerWidth,
+          marginLeft,
+          hoveredItemInThisRow.markerBeforeHoveredGapAsIndexIntoFlowTimingRowMarkerTable
+        );
+      }
     }
 
     ctx.restore();
@@ -678,7 +803,7 @@ class FlowPanelCanvasImpl extends React.PureComponent<Props> {
     ctx.restore();
   }
 
-  hitTest = (x: CssPixels, y: CssPixels): HoveredFlowPanelItems | null => {
+  hitTest = (x: CssPixels, y: CssPixels): FlowPanelHoverInfo | null => {
     const {
       rangeStart,
       rangeEnd,
@@ -694,11 +819,6 @@ class FlowPanelCanvasImpl extends React.PureComponent<Props> {
     if (x < marginLeft - dotRadius) {
       return null;
     }
-
-    let markerIndex = null;
-    let flowMarkerIndex = null;
-    let threadIndex = null;
-    let indexInFlowMarkers = null;
 
     const markerContainerWidth = containerWidth - marginLeft - marginRight;
 
@@ -766,40 +886,87 @@ class FlowPanelCanvasImpl extends React.PureComponent<Props> {
       // 3. When we found the closest, we still have to check if it's in close
       // enough!
       if (isMarkerTimingInDotRadius(closest)) {
-        markerIndex = markerTiming.markerIndex[closest];
-        flowMarkerIndex = markerTiming.flowMarkerIndex[closest];
-        threadIndex = markerTiming.threadIndex[closest];
-        indexInFlowMarkers = closest;
+        return {
+          rowIndex,
+          flowIndex,
+          hoveredItem: {
+            type: 'SINGLE_MARKER',
+            hoveredMarker: {
+              markerIndex: markerTiming.markerIndex[closest],
+              flowMarkerIndex: markerTiming.flowMarkerIndex[closest],
+              threadIndex: markerTiming.threadIndex[closest],
+              indexInFlowMarkers: closest,
+            },
+          },
+        };
       }
+
+      // The cursor is between two markers.
+      return {
+        rowIndex,
+        flowIndex,
+        hoveredItem: {
+          type: 'BETWEEN_MARKERS',
+          markerBeforeHoveredGapAsIndexIntoFlowTimingRowMarkerTable:
+            prevStartIndex,
+          markerBeforeHoveredGap: {
+            markerIndex: markerTiming.markerIndex[prevStartIndex],
+            flowMarkerIndex: markerTiming.flowMarkerIndex[prevStartIndex],
+            threadIndex: markerTiming.threadIndex[prevStartIndex],
+            indexInFlowMarkers: prevStartIndex,
+          },
+          markerAfterHoveredGap: {
+            markerIndex: markerTiming.markerIndex[nextStartIndex],
+            flowMarkerIndex: markerTiming.flowMarkerIndex[nextStartIndex],
+            threadIndex: markerTiming.threadIndex[nextStartIndex],
+            indexInFlowMarkers: nextStartIndex,
+          },
+        },
+      };
     } else if (nextStartIndex === 0) {
       // 4. Special case 1: the mouse cursor is at the left of all markers in
       // this line. Then, we have only 1 candidate, we can check if it's inside
       // our hit test range right away.
       if (isMarkerTimingInDotRadius(nextStartIndex)) {
-        markerIndex = markerTiming.markerIndex[nextStartIndex];
-        flowMarkerIndex = markerTiming.flowMarkerIndex[nextStartIndex];
-        threadIndex = markerTiming.threadIndex[nextStartIndex];
-        indexInFlowMarkers = nextStartIndex;
+        return {
+          rowIndex,
+          flowIndex,
+          hoveredItem: {
+            type: 'SINGLE_MARKER',
+            hoveredMarker: {
+              markerIndex: markerTiming.markerIndex[nextStartIndex],
+              flowMarkerIndex: markerTiming.flowMarkerIndex[nextStartIndex],
+              threadIndex: markerTiming.threadIndex[nextStartIndex],
+              indexInFlowMarkers: nextStartIndex,
+            },
+          },
+        };
       }
     } else {
       // 5. Special case 2: the mouse cursor is at the right of all markers in
       // this line. Then we only have 1 candidate as well, let's check if it's
       // inside our hit test range.
       if (isMarkerTimingInDotRadius(nextStartIndex - 1)) {
-        markerIndex = markerTiming.markerIndex[nextStartIndex - 1];
-        flowMarkerIndex = markerTiming.flowMarkerIndex[nextStartIndex - 1];
-        threadIndex = markerTiming.threadIndex[nextStartIndex - 1];
-        indexInFlowMarkers = nextStartIndex - 1;
+        return {
+          rowIndex,
+          flowIndex,
+          hoveredItem: {
+            type: 'SINGLE_MARKER',
+            hoveredMarker: {
+              markerIndex: markerTiming.markerIndex[nextStartIndex - 1],
+              flowMarkerIndex: markerTiming.flowMarkerIndex[nextStartIndex - 1],
+              threadIndex: markerTiming.threadIndex[nextStartIndex - 1],
+              indexInFlowMarkers: nextStartIndex - 1,
+            },
+          },
+        };
       }
     }
 
     return {
       rowIndex,
       flowIndex,
-      indexInFlowMarkers,
-      markerIndex,
-      flowMarkerIndex,
-      threadIndex,
+      hoveredItem: null,
     };
   };
 
@@ -834,36 +1001,9 @@ class FlowPanelCanvasImpl extends React.PureComponent<Props> {
     this.props.changeMouseTimePosition(null);
   };
 
-  onDoubleClickMarker = (hoveredItems: HoveredFlowPanelItems | null) => {
-    const markerIndex = hoveredItems === null ? null : hoveredItems.markerIndex;
-    const threadIndex = hoveredItems === null ? null : hoveredItems.threadIndex;
-    if (markerIndex === null || threadIndex === null) {
-      return;
-    }
-    const {
-      fullMarkerListPerThread,
-      updatePreviewSelection,
-      rangeStart,
-      rangeEnd,
-    } = this.props;
-    const marker = ensureExists(
-      fullMarkerListPerThread[threadIndex][markerIndex]
-    );
-    const { start, end } = getStartEndRangeForMarker(
-      rangeStart,
-      rangeEnd,
-      marker
-    );
+  onDoubleClickMarker = (_hoveredItems: FlowPanelHoverInfo | null) => {};
 
-    updatePreviewSelection({
-      hasSelection: true,
-      isModifying: false,
-      selectionStart: start,
-      selectionEnd: end,
-    });
-  };
-
-  onSelectItem = (hoveredItems: HoveredFlowPanelItems | null) => {
+  onSelectItem = (hoveredItems: FlowPanelHoverInfo | null) => {
     const flowIndex = hoveredItems === null ? null : hoveredItems.flowIndex;
     if (flowIndex === null) {
       return;
@@ -873,35 +1013,65 @@ class FlowPanelCanvasImpl extends React.PureComponent<Props> {
     changeActiveFlows([flowIndex]);
   };
 
-  onRightClickMarker = (_hoveredItems: HoveredFlowPanelItems | null) => {
+  onRightClickMarker = (_hoveredItems: FlowPanelHoverInfo | null) => {
     // const markerIndex = hoveredItems === null ? null : hoveredItems.markerIndex;
     // const { changeRightClickedMarker, threadsKey } = this.props;
     // changeRightClickedMarker(threadsKey, markerIndex);
   };
 
-  getHoveredMarkerInfo = ({
-    threadIndex,
-    markerIndex,
-  }: HoveredFlowPanelItems): React.Node => {
-    if (
-      !this.props.shouldDisplayTooltips() ||
-      threadIndex === null ||
-      markerIndex === null
-    ) {
+  getHoveredMarkerInfo = (hoverInfo: FlowPanelHoverInfo): React.Node => {
+    if (!this.props.shouldDisplayTooltips() || hoverInfo.hoveredItem === null) {
       return null;
     }
 
-    const marker = ensureExists(
-      this.props.fullMarkerListPerThread[threadIndex][markerIndex]
-    );
-    return (
-      <TooltipMarker
-        markerIndex={markerIndex}
-        marker={marker}
-        threadsKey={threadIndex}
-        restrictHeightWidth={true}
-      />
-    );
+    const { hoveredItem } = hoverInfo;
+
+    switch (hoveredItem.type) {
+      case 'SINGLE_MARKER': {
+        const { threadIndex, markerIndex } = hoveredItem.hoveredMarker;
+
+        const marker = ensureExists(
+          this.props.fullMarkerListPerThread[threadIndex][markerIndex]
+        );
+        return (
+          <TooltipMarker
+            markerIndex={markerIndex}
+            marker={marker}
+            threadsKey={threadIndex}
+            restrictHeightWidth={true}
+          />
+        );
+      }
+      case 'BETWEEN_MARKERS': {
+        const { markerBeforeHoveredGap, markerAfterHoveredGap } = hoveredItem;
+        const beforeGapMarker = ensureExists(
+          this.props.fullMarkerListPerThread[
+            markerBeforeHoveredGap.threadIndex
+          ][markerBeforeHoveredGap.markerIndex]
+        );
+        const afterGapMarker = ensureExists(
+          this.props.fullMarkerListPerThread[markerAfterHoveredGap.threadIndex][
+            markerAfterHoveredGap.markerIndex
+          ]
+        );
+        return (
+          <FlowGapTooltip
+            beforeGapMarkerIndex={markerBeforeHoveredGap.markerIndex}
+            beforeGapMarker={beforeGapMarker}
+            beforeGapThreadIndex={markerBeforeHoveredGap.threadIndex}
+            afterGapMarkerIndex={markerAfterHoveredGap.markerIndex}
+            afterGapMarker={afterGapMarker}
+            afterGapThreadIndex={markerAfterHoveredGap.threadIndex}
+          />
+        );
+      }
+      default: {
+        throw assertExhaustiveCheck(
+          hoveredItem.type,
+          'Unhandled HoveredFlowPanelItem type.'
+        );
+      }
+    }
   };
 
   render() {
