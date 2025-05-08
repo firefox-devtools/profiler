@@ -423,6 +423,10 @@ export type GCMinorCompletedData = {|
   // (since https://bugzilla.mozilla.org/show_bug.cgi?id=1658866).
   strings_deduplicated?: number,
 
+  // The allocation rate when promoting live GC things in bytes per second
+  // (since https://bugzilla.mozilla.org/show_bug.cgi?id=1963597).
+  tenured_allocation_rate?: number,
+
   // The numbers of cells allocated since the previous minor GC.
   // These were added in
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1473213 and are only
