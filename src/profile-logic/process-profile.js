@@ -1697,6 +1697,12 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   const meta: ProfileMeta = {
     interval: geckoProfile.meta.interval,
     startTime: geckoProfile.meta.startTime,
+    startTimeAsClockMonotonicNanosecondsSinceBoot:
+      geckoProfile.meta.startTimeAsClockMonotonicNanosecondsSinceBoot,
+    startTimeAsMachAbsoluteTimeNanoseconds:
+      geckoProfile.meta.startTimeAsMachAbsoluteTimeNanoseconds,
+    startTimeAsQueryPerformanceCounterValue:
+      geckoProfile.meta.startTimeAsQueryPerformanceCounterValue,
     abi: geckoProfile.meta.abi,
     extensions: extensions,
     misc: geckoProfile.meta.misc,

@@ -679,7 +679,12 @@ export function computeStringIndexMarkerFieldsByDataType(
     const { name, fields } = schema;
     const stringIndexFields = [];
     for (const field of fields) {
-      if (field.format === 'unique-string' && field.key) {
+      if (
+        (field.format === 'unique-string' ||
+          field.format === 'flow-id' ||
+          field.format === 'terminating-flow-id') &&
+        field.key
+      ) {
         stringIndexFields.push(field.key);
       }
     }
