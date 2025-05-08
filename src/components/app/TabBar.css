@@ -24,6 +24,12 @@
   list-style: none;
 }
 
+.tabBarTabWrapperCompact {
+  overflow: scroll hidden;
+  width: calc(100vw - 15px);
+  border: 1px solid var(--grey-30);
+}
+
 .tabBarTab {
   position: relative;
   min-width: 8em;

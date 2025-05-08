@@ -19,6 +19,8 @@ import { NetworkChart } from 'firefox-profiler/components/network-chart/';
 import { FlameGraph } from 'firefox-profiler/components/flame-graph/';
 import { JsTracer } from 'firefox-profiler/components/js-tracer/';
 import { selectSidebar } from 'firefox-profiler/components/sidebar';
+import { withSize } from 'firefox-profiler/components/shared/WithSize';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 
 import {
   changeSelectedTab,
@@ -47,7 +49,9 @@ type DispatchProps = {|
   +changeSidebarOpenState: typeof changeSidebarOpenState,
 |};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{| ...SizeProps |}, StateProps, DispatchProps>;
+
+const SMALL_SCREEN_BREAKPOINT = 768;
 
 class ProfileViewerImpl extends PureComponent<Props> {
   _onSelectTab = (selectedTab: string) => {
@@ -64,13 +68,23 @@ class ProfileViewerImpl extends PureComponent<Props> {
     changeSidebarOpenState(selectedTab, !isSidebarOpen);
   };
 
+  componentDidMount() {
+    const width = window.innerWidth;
+    const { selectedTab, isSidebarOpen, changeSidebarOpenState } = this.props;
+    if (width <= SMALL_SCREEN_BREAKPOINT) {
+      changeSidebarOpenState(selectedTab, !isSidebarOpen);
+    }
+  }
+
   render() {
-    const { visibleTabs, selectedTab, isSidebarOpen } = this.props;
+    const { visibleTabs, selectedTab, isSidebarOpen, width } = this.props;
     const hasSidebar = selectSidebar(selectedTab) !== null;
+
     return (
       <div className="Details">
         <div className="Details-top-bar">
           <TabBar
+            width={width}
             selectedTabSlug={selectedTab}
             visibleTabs={visibleTabs}
             onSelectTab={this._onSelectTab}
@@ -136,9 +150,6 @@ export const Details = explicitConnect<{||}, StateProps, DispatchProps>({
     selectedTab: getSelectedTab(state),
     isSidebarOpen: getIsSidebarOpen(state),
   }),
-  mapDispatchToProps: {
-    changeSelectedTab,
-    changeSidebarOpenState,
-  },
-  component: ProfileViewerImpl,
+  mapDispatchToProps: { changeSelectedTab, changeSidebarOpenState },
+  component: withSize<Props>(ProfileViewerImpl),
 });

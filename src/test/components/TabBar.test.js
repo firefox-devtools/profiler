@@ -15,6 +15,7 @@ describe('app/TabBar', () => {
     const handleTabSelection = jest.fn();
     const { container } = render(
       <TabBar
+        width={1000}
         selectedTabSlug="flame-graph"
         visibleTabs={[
           'calltree',
