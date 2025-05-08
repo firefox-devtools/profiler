@@ -109,11 +109,10 @@ exports[`BottomBox should show the source view when a line in the tree view is d
     class="cm-line"
   >
     <span
-      class="tok-literal"
+      class="tok-typeName"
     >
-      line
+      line 
     </span>
-     
     <span
       class="tok-number"
     >
@@ -124,11 +123,10 @@ exports[`BottomBox should show the source view when a line in the tree view is d
     class="cm-nonZeroLine cm-line"
   >
     <span
-      class="tok-literal"
+      class="tok-variableName"
     >
-      line
+      line 
     </span>
-     
     <span
       class="tok-number"
     >
@@ -139,11 +137,10 @@ exports[`BottomBox should show the source view when a line in the tree view is d
     class="cm-line"
   >
     <span
-      class="tok-literal"
+      class="tok-typeName"
     >
-      line
+      line 
     </span>
-     
     <span
       class="tok-number"
     >
@@ -154,11 +151,10 @@ exports[`BottomBox should show the source view when a line in the tree view is d
     class="cm-line"
   >
     <span
-      class="tok-literal"
+      class="tok-variableName"
     >
-      line
+      line 
     </span>
-     
     <span
       class="tok-number"
     >
@@ -169,11 +165,10 @@ exports[`BottomBox should show the source view when a line in the tree view is d
     class="cm-line"
   >
     <span
-      class="tok-literal"
+      class="tok-variableName"
     >
-      line
+      line 
     </span>
-     
     <span
       class="tok-number"
     >

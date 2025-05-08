@@ -14,21 +14,15 @@ import {
 } from 'firefox-profiler/app-logic/tabs-handling';
 
 import './TabBar.css';
-import './ResponsiveTabBar.css';
 
 type Props = {|
-  +width: number,
   +selectedTabSlug: string,
   +visibleTabs: $ReadOnlyArray<TabSlug>,
   +onSelectTab: (string) => void,
 |};
 
-const SMALL_SCREEN_BREAKPOINT = 625;
-
 type State = { isSmallScreen: boolean };
 export class TabBar extends React.PureComponent<Props, State> {
-  state: State = { isSmallScreen: false };
-
   _onClickListener = (e: SyntheticMouseEvent<HTMLElement>) => {
     this.props.onSelectTab(e.currentTarget.dataset.name);
   };
@@ -40,63 +34,13 @@ export class TabBar extends React.PureComponent<Props, State> {
     e.preventDefault();
   };
 
-  _onDropdownChange = (e: SyntheticEvent<HTMLSelectElement>) => {
-    this.props.onSelectTab(e.currentTarget.value);
-  };
-
-  componentDidUpdate(prevProps: Props) {
-    const { width } = this.props;
-    if (width === 0) {
-      // If the width is 0, it means that the component is not mounted yet.
-      return;
-    }
-
-    if (prevProps.width !== width) {
-      const isSmall = width <= SMALL_SCREEN_BREAKPOINT;
-      if (isSmall !== this.state.isSmallScreen) {
-        this.setState({ isSmallScreen: isSmall });
-      }
-    }
-  }
-
   render() {
     const { selectedTabSlug, visibleTabs } = this.props;
-    const isSmallScreen = this.state.isSmallScreen;
-
-    if (isSmallScreen) {
-      return (
-        <div className="tabBarTabWrapper--compact">
-          <label htmlFor="tabBarDropdownSelect" className="tabBarDropdownLabel">
-            Select a tab
-          </label>
-          <select
-            id="tabBarDropdownSelect"
-            value={selectedTabSlug}
-            onChange={this._onDropdownChange}
-            className="tabBarDropdown"
-          >
-            {visibleTabs.map((tabSlug) => (
-              <option
-                id={`${tabSlug}-tab-option`}
-                key={tabSlug}
-                value={tabSlug}
-                role="option"
-              >
-                <Localized id={tabsWithTitleL10nId[tabSlug]}>
-                  {tabsWithTitleL10nId[tabSlug]}
-                </Localized>
-              </option>
-            ))}
-          </select>
-        </div>
-      );
-    }
-
     return (
       <ol
-        className="tabBarTabWrapper"
         role="tablist"
         aria-label="Profiler tabs"
+        className="tabBarTabWrapper"
       >
         {visibleTabs.map((tabSlug) => (
           <li

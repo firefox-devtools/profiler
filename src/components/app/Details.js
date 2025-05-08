@@ -67,14 +67,13 @@ class ProfileViewerImpl extends PureComponent<Props> {
   };
 
   render() {
-    const { visibleTabs, selectedTab, isSidebarOpen, width } = this.props;
+    const { visibleTabs, selectedTab, isSidebarOpen } = this.props;
     const hasSidebar = selectSidebar(selectedTab) !== null;
 
     return (
       <div className="Details">
         <div className="Details-top-bar">
           <TabBar
-            width={width}
             selectedTabSlug={selectedTab}
             visibleTabs={visibleTabs}
             onSelectTab={this._onSelectTab}
