@@ -25,9 +25,9 @@
 }
 
 .tabBarTabWrapperCompact {
+  overflow: scroll hidden;
   width: calc(100vw - 15px);
   border: 1px solid var(--grey-30);
-  overflow: scroll hidden;
 }
 
 .tabBarTab {
