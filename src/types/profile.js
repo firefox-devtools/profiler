@@ -768,6 +768,9 @@ export type ProfileMeta = {|
   // When the main process started. Timestamp expressed in milliseconds since
   // midnight January 1, 1970 GMT.
   startTime: Milliseconds,
+  startTimeAsClockMonotonicNanosecondsSinceBoot?: number,
+  startTimeAsMachAbsoluteTimeNanoseconds?: number,
+  startTimeAsQueryPerformanceCounterValue?: number,
   // The number of milliseconds since midnight January 1, 1970 GMT.
   endTime?: Milliseconds,
   // When the recording started (in milliseconds after startTime).
