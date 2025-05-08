@@ -13,10 +13,6 @@
   border: solid var(--grey-30);
   border-width: 1px 0;
   background: var(--grey-10);
-
-  @media screen and (max-width: 768px) {
-    align-items: start;
-  }
 }
 
 .sidebar-open-close-button {
@@ -26,10 +22,6 @@
   margin: 0 4px;
   background-position: center;
   background-repeat: no-repeat;
-
-  @media screen and (max-width: 768px) {
-    margin: 0 0 0 auto;
-  }
 }
 
 .sidebar-open-close-button-isopen {

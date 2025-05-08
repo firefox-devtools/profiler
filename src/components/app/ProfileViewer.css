@@ -52,10 +52,6 @@
   animation-duration: 200ms;
   animation-name: profileViewerFadeIn;
   background-color: #fff;
-
-  @media screen and (max-width: 768px) {
-    min-width: auto;
-  }
 }
 
 .profileViewerFadeOut {
@@ -110,10 +106,6 @@
 
 .profileViewerSplitterSecondary {
   position: absolute;
-
-  @media screen and (max-width: 768px) {
-    position: unset;
-  }
 }
 
 .profileViewerTopBar {

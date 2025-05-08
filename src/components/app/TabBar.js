@@ -14,7 +14,6 @@ import {
 } from 'firefox-profiler/app-logic/tabs-handling';
 
 import './TabBar.css';
-import './ResponsiveTabBar.css';
 
 type Props = {|
   +width: number,
@@ -23,7 +22,7 @@ type Props = {|
   +onSelectTab: (string) => void,
 |};
 
-const SMALL_SCREEN_BREAKPOINT = 625;
+const SMALL_SCREEN_BREAKPOINT = 768;
 
 type State = { isSmallScreen: boolean };
 export class TabBar extends React.PureComponent<Props, State> {
@@ -40,9 +39,16 @@ export class TabBar extends React.PureComponent<Props, State> {
     e.preventDefault();
   };
 
-  _onDropdownChange = (e: SyntheticEvent<HTMLSelectElement>) => {
-    this.props.onSelectTab(e.currentTarget.value);
-  };
+  componentDidMount() {
+    const { width } = this.props;
+    if (width === 0) {
+      // If the width is 0, it means that the component is not mounted yet.
+      return;
+    }
+
+    const isSmall = width <= SMALL_SCREEN_BREAKPOINT;
+    this.setState({ isSmallScreen: isSmall });
+  }
 
   componentDidUpdate(prevProps: Props) {
     const { width } = this.props;
@@ -61,42 +67,16 @@ export class TabBar extends React.PureComponent<Props, State> {
 
   render() {
     const { selectedTabSlug, visibleTabs } = this.props;
-    const isSmallScreen = this.state.isSmallScreen;
-
-    if (isSmallScreen) {
-      return (
-        <div className="tabBarTabWrapper--compact">
-          <label htmlFor="tabBarDropdownSelect" className="tabBarDropdownLabel">
-            Select a tab
-          </label>
-          <select
-            id="tabBarDropdownSelect"
-            value={selectedTabSlug}
-            onChange={this._onDropdownChange}
-            className="tabBarDropdown"
-          >
-            {visibleTabs.map((tabSlug) => (
-              <option
-                id={`${tabSlug}-tab-option`}
-                key={tabSlug}
-                value={tabSlug}
-                role="option"
-              >
-                <Localized id={tabsWithTitleL10nId[tabSlug]}>
-                  {tabsWithTitleL10nId[tabSlug]}
-                </Localized>
-              </option>
-            ))}
-          </select>
-        </div>
-      );
-    }
+    const { isSmallScreen } = this.state;
 
     return (
       <ol
-        className="tabBarTabWrapper"
         role="tablist"
         aria-label="Profiler tabs"
+        className={classNames({
+          tabBarTabWrapper: true,
+          tabBarTabWrapperCompact: isSmallScreen,
+        })}
       >
         {visibleTabs.map((tabSlug) => (
           <li
