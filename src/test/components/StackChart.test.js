@@ -31,6 +31,7 @@ import {
   changeSelectedCallNode,
   commitRange,
   changeImplementationFilter,
+  changeCallTreeSummaryStrategy,
 } from '../../actions/profile-view';
 import { changeSelectedTab } from '../../actions/app';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
@@ -55,10 +56,11 @@ import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
   getUserTiming,
+  getProfileWithJsAllocations,
 } from '../fixtures/profiles/processed-profile';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
-import type { Profile, CssPixels } from 'firefox-profiler/types';
+import type { CssPixels } from 'firefox-profiler/types';
 
 jest.useFakeTimers();
 
@@ -233,6 +235,13 @@ describe('StackChart', function () {
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
     });
   });
+
+  it('works when the user selects the JS allocations option', function () {
+    setupAllocations();
+    const drawCalls = flushDrawLog();
+    expect(document.body).toMatchSnapshot();
+    expect(drawCalls).toMatchSnapshot();
+  });
 });
 
 describe('MarkerChart', function () {
@@ -314,7 +323,7 @@ function setupCombinedTimings() {
   `);
 
   profile.threads[0].markers = userTimingsProfile.threads[0].markers;
-  const results = setup(profile);
+  const results = setup(storeWithProfile(profile));
   showUserTimings(results);
   return results;
 }
@@ -334,7 +343,7 @@ function setupUserTimings(config: {| isShowUserTimingsClicked: boolean |}) {
     getUserTiming('componentD', 7, 1),
   ]);
 
-  const results = setup(profile);
+  const results = setup(storeWithProfile(profile));
 
   if (config.isShowUserTimingsClicked) {
     showUserTimings(results);
@@ -361,16 +370,22 @@ function setupSamples(
     funcNamesPerThread: [funcNames],
   } = getProfileFromTextSamples(samples);
 
-  return setup(profile, funcNames);
+  return setup(storeWithProfile(profile), funcNames);
+}
+
+function setupAllocations() {
+  const { profile, funcNames } = getProfileWithJsAllocations();
+  const store = storeWithProfile(profile);
+  store.dispatch(changeCallTreeSummaryStrategy('js-allocations'));
+  return setup(store, funcNames);
 }
 
 /**
  * Setup the stack chart component with a profile.
  */
-function setup(profile: Profile, funcNames: string[] = []) {
+function setup(store, funcNames: string[] = []) {
   const flushRafCalls = mockRaf();
 
-  const store = storeWithProfile(profile);
   store.dispatch(changeSelectedTab('stack-chart'));
 
   const renderResult = render(
