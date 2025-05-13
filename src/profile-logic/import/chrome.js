@@ -215,14 +215,12 @@ export function attemptToConvertChromeProfile(
 
   if (Array.isArray(json)) {
     // Chrome profiles come as a list of events.
-    const event: mixed = json[0];
-    // Lightly check that some properties exist that are in the TracingEvent.
+    const firstEvents = json.slice(0, 5);
+    // Lightly check that the first items look like a TracingEvent.
     if (
-      event &&
-      typeof event === 'object' &&
-      'ph' in event &&
-      'cat' in event &&
-      'args' in event
+      firstEvents.every(
+        (event) => event && typeof event === 'object' && 'ph' in event
+      )
     ) {
       events = coerce<mixed[], TracingEventUnion[]>(json);
     }
