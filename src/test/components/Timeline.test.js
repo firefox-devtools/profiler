@@ -1236,7 +1236,7 @@ function _getProfileWithDroppedSamples(): Profile {
       }
     }
   }
-  thread2.samples.length = sampleTimes2.length;
+  thread2.samples.length = thread2.samples.stack.length;
 
   profile.threads.push(thread2);
   return profile;
