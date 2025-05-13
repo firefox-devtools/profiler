@@ -1902,7 +1902,7 @@ export async function unserializeProfileOfArbitraryFormat(
         arbitraryFormat = convertSimpleperfTraceProfile(arrayBuffer);
       } else {
         try {
-          const textDecoder = new TextDecoder('utf-8', { fatal: true });
+          const textDecoder = new TextDecoder();
           arbitraryFormat = await textDecoder.decode(arrayBuffer);
         } catch (e) {
           console.error('Source exception:', e);
