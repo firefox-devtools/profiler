@@ -405,6 +405,9 @@ export type GeckoProfileShortMeta = {|
   // When the main process started. Timestamp expressed in milliseconds since
   // midnight January 1, 1970 GMT.
   startTime: Milliseconds,
+  startTimeAsClockMonotonicNanosecondsSinceBoot?: number,
+  startTimeAsMachAbsoluteTimeNanoseconds?: number,
+  startTimeAsQueryPerformanceCounterValue?: number,
   shutdownTime: Milliseconds | null,
   categories: CategoryList,
   markerSchema: GeckoMetaMarkerSchema[],
