@@ -363,7 +363,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
                   Build ID:
                 </Localized>
               </span>
-              {meta.sourceURL ? (
+              {meta.sourceURL && /^https?:\/\//i.test(meta.sourceURL) ? (
                 <a
                   href={meta.sourceURL}
                   title={meta.sourceURL}
