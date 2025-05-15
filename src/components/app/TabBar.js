@@ -16,18 +16,13 @@ import {
 import './TabBar.css';
 
 type Props = {|
-  +width: number,
   +selectedTabSlug: string,
   +visibleTabs: $ReadOnlyArray<TabSlug>,
   +onSelectTab: (string) => void,
 |};
 
-const SMALL_SCREEN_BREAKPOINT = 768;
-
 type State = { isSmallScreen: boolean };
 export class TabBar extends React.PureComponent<Props, State> {
-  state: State = { isSmallScreen: false };
-
   _onClickListener = (e: SyntheticMouseEvent<HTMLElement>) => {
     this.props.onSelectTab(e.currentTarget.dataset.name);
   };
@@ -39,44 +34,13 @@ export class TabBar extends React.PureComponent<Props, State> {
     e.preventDefault();
   };
 
-  componentDidMount() {
-    const { width } = this.props;
-    if (width === 0) {
-      // If the width is 0, it means that the component is not mounted yet.
-      return;
-    }
-
-    const isSmall = width <= SMALL_SCREEN_BREAKPOINT;
-    this.setState({ isSmallScreen: isSmall });
-  }
-
-  componentDidUpdate(prevProps: Props) {
-    const { width } = this.props;
-    if (width === 0) {
-      // If the width is 0, it means that the component is not mounted yet.
-      return;
-    }
-
-    if (prevProps.width !== width) {
-      const isSmall = width <= SMALL_SCREEN_BREAKPOINT;
-      if (isSmall !== this.state.isSmallScreen) {
-        this.setState({ isSmallScreen: isSmall });
-      }
-    }
-  }
-
   render() {
     const { selectedTabSlug, visibleTabs } = this.props;
-    const { isSmallScreen } = this.state;
-
     return (
       <ol
         role="tablist"
         aria-label="Profiler tabs"
-        className={classNames({
-          tabBarTabWrapper: true,
-          tabBarTabWrapperCompact: isSmallScreen,
-        })}
+        className="tabBarTabWrapper"
       >
         {visibleTabs.map((tabSlug) => (
           <li
