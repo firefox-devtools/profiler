@@ -1623,6 +1623,7 @@ export function getProfileWithJsAllocations() {
   const {
     profile,
     funcNamesDictPerThread: [funcNamesDict],
+    funcNamesPerThread: [funcNames],
   } = getProfileFromTextSamples(`
     A  A     A
     B  B     B
@@ -1661,7 +1662,7 @@ export function getProfileWithJsAllocations() {
     jsAllocations.length++;
   }
 
-  return { profile, funcNamesDict };
+  return { profile, funcNamesDict, funcNames };
 }
 
 /**
