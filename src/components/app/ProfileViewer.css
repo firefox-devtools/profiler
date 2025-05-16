@@ -104,6 +104,10 @@
   flex-direction: column;
 }
 
+.profileViewerSplitterSecondary {
+  position: absolute;
+}
+
 .profileViewerTopBar {
   display: flex;
   height: 24px;

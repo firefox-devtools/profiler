@@ -21,7 +21,8 @@ type Props = {|
   +onSelectTab: (string) => void,
 |};
 
-export class TabBar extends React.PureComponent<Props> {
+type State = { isSmallScreen: boolean };
+export class TabBar extends React.PureComponent<Props, State> {
   _onClickListener = (e: SyntheticMouseEvent<HTMLElement>) => {
     this.props.onSelectTab(e.currentTarget.dataset.name);
   };
@@ -37,9 +38,9 @@ export class TabBar extends React.PureComponent<Props> {
     const { selectedTabSlug, visibleTabs } = this.props;
     return (
       <ol
-        className="tabBarTabWrapper"
         role="tablist"
         aria-label="Profiler tabs"
+        className="tabBarTabWrapper"
       >
         {visibleTabs.map((tabSlug) => (
           <li
