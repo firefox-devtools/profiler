@@ -20,6 +20,8 @@ exports[`MarkerSidebar matches the snapshots when displaying data about the curr
             class="tooltipTiming"
           >
             unknown duration
+             @ 
+            107.50ms
           </div>
           <div
             class="tooltipTitle"
