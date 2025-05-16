@@ -1697,6 +1697,12 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   const meta: ProfileMeta = {
     interval: geckoProfile.meta.interval,
     startTime: geckoProfile.meta.startTime,
+    startTimeAsClockMonotonicNanosecondsSinceBoot:
+      geckoProfile.meta.startTimeAsClockMonotonicNanosecondsSinceBoot,
+    startTimeAsMachAbsoluteTimeNanoseconds:
+      geckoProfile.meta.startTimeAsMachAbsoluteTimeNanoseconds,
+    startTimeAsQueryPerformanceCounterValue:
+      geckoProfile.meta.startTimeAsQueryPerformanceCounterValue,
     abi: geckoProfile.meta.abi,
     extensions: extensions,
     misc: geckoProfile.meta.misc,
@@ -1896,7 +1902,7 @@ export async function unserializeProfileOfArbitraryFormat(
         arbitraryFormat = convertSimpleperfTraceProfile(arrayBuffer);
       } else {
         try {
-          const textDecoder = new TextDecoder('utf-8', { fatal: true });
+          const textDecoder = new TextDecoder();
           arbitraryFormat = await textDecoder.decode(arrayBuffer);
         } catch (e) {
           console.error('Source exception:', e);

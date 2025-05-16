@@ -230,10 +230,18 @@ export function getStackAndSampleSelectorsPerThread(
       )
   );
 
-  const _getPreviewFilteredCtssSampleIndexToNonInvertedCallNodeIndex: Selector<
+  const _getSampleIndexToNonInvertedCallNodeIndexForPreviewFilteredCtssThread: Selector<
     Array<IndexIntoCallNodeTable | null>,
   > = createSelector(
     (state) => threadSelectors.getPreviewFilteredCtssSamples(state).stack,
+    (state) => getCallNodeInfo(state).getStackIndexToNonInvertedCallNodeIndex(),
+    ProfileData.getSampleIndexToCallNodeIndex
+  );
+
+  const _getSampleIndexToNonInvertedCallNodeIndexForFilteredCtssThread: Selector<
+    Array<IndexIntoCallNodeTable | null>,
+  > = createSelector(
+    (state) => threadSelectors.getFilteredCtssSamples(state).stack,
     (state) => getCallNodeInfo(state).getStackIndexToNonInvertedCallNodeIndex(),
     ProfileData.getSampleIndexToCallNodeIndex
   );
@@ -243,11 +251,7 @@ export function getStackAndSampleSelectorsPerThread(
   > = createSelector(
     (state) => threadSelectors.getFilteredThread(state).samples.stack,
     (state) => getCallNodeInfo(state).getStackIndexToNonInvertedCallNodeIndex(),
-    (filteredThreadSampleStacks, stackIndexToNonInvertedCallNodeIndex) =>
-      ProfileData.getSampleIndexToCallNodeIndex(
-        filteredThreadSampleStacks,
-        stackIndexToNonInvertedCallNodeIndex
-      )
+    ProfileData.getSampleIndexToCallNodeIndex
   );
 
   const _getSampleIndexToNonInvertedCallNodeIndexForTabFilteredThread: Selector<
@@ -255,11 +259,7 @@ export function getStackAndSampleSelectorsPerThread(
   > = createSelector(
     (state) => threadSelectors.getTabFilteredThread(state).samples.stack,
     (state) => getCallNodeInfo(state).getStackIndexToNonInvertedCallNodeIndex(),
-    (tabFilteredThreadSampleStacks, stackIndexToNonInvertedCallNodeIndex) =>
-      ProfileData.getSampleIndexToCallNodeIndex(
-        tabFilteredThreadSampleStacks,
-        stackIndexToNonInvertedCallNodeIndex
-      )
+    ProfileData.getSampleIndexToCallNodeIndex
   );
 
   const getSamplesSelectedStatesInFilteredThread: Selector<
@@ -313,7 +313,7 @@ export function getStackAndSampleSelectorsPerThread(
   const getCallNodeSelfAndSummary: Selector<CallNodeSelfAndSummary> =
     createSelector(
       threadSelectors.getPreviewFilteredCtssSamples,
-      _getPreviewFilteredCtssSampleIndexToNonInvertedCallNodeIndex,
+      _getSampleIndexToNonInvertedCallNodeIndexForPreviewFilteredCtssThread,
       getCallNodeInfo,
       (samples, sampleIndexToCallNodeIndex, callNodeInfo) => {
         return CallTree.computeCallNodeSelfAndSummary(
@@ -362,7 +362,7 @@ export function getStackAndSampleSelectorsPerThread(
   const getTracedTiming: Selector<CallTree.CallTreeTimings | null> =
     createSelector(
       threadSelectors.getPreviewFilteredCtssSamples,
-      _getPreviewFilteredCtssSampleIndexToNonInvertedCallNodeIndex,
+      _getSampleIndexToNonInvertedCallNodeIndexForPreviewFilteredCtssThread,
       getCallNodeInfo,
       ProfileSelectors.getProfileInterval,
       (samples, sampleIndexToCallNodeIndex, callNodeInfo, interval) => {
@@ -403,7 +403,7 @@ export function getStackAndSampleSelectorsPerThread(
   const getStackTimingByDepth: Selector<StackTiming.StackTimingByDepth> =
     createSelector(
       threadSelectors.getFilteredCtssSamples,
-      getSampleIndexToNonInvertedCallNodeIndexForFilteredThread, // Bug! #5327
+      _getSampleIndexToNonInvertedCallNodeIndexForFilteredCtssThread,
       getCallNodeInfo,
       getFilteredCallNodeMaxDepthPlusOne,
       ProfileSelectors.getProfileInterval,

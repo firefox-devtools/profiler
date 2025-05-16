@@ -17,7 +17,10 @@ import { MenuButtons } from 'firefox-profiler/components/app/MenuButtons';
 import { CurrentProfileUploadedInformationLoader } from 'firefox-profiler/components/app/CurrentProfileUploadedInformationLoader';
 
 import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
-import { processGeckoProfile } from 'firefox-profiler/profile-logic/process-profile';
+import {
+  processGeckoProfile,
+  unserializeProfileOfArbitraryFormat,
+} from 'firefox-profiler/profile-logic/process-profile';
 import {
   persistUploadedProfileInformationToDb,
   retrieveUploadedProfileInformationFromDb,
@@ -610,6 +613,45 @@ describe('app/MenuButtons', function () {
       fireFullClick(summary);
       const moreInfoPart = document.querySelector('.moreInfoPart');
       expect(moreInfoPart).toMatchSnapshot();
+    });
+
+    it('Does display a link for the build if there is a URL', async () => {
+      const { profile } = getProfileFromTextSamples('A');
+      profile.meta.sourceURL =
+        'https://hg.mozilla.org/mozilla-central/rev/6be6a06991d7a2123d4b51f4ce384c6bce92f859';
+      const buildID = '20250402094810';
+      profile.meta.appBuildID = buildID;
+
+      const unserializedProfile =
+        await unserializeProfileOfArbitraryFormat(profile);
+      const { displayMetaInfoPanel } =
+        await setupForMetaInfoPanel(unserializedProfile);
+      await displayMetaInfoPanel();
+
+      const buildIdElement = ensureExists(
+        screen.getByText(/Build ID:/).nextSibling
+      );
+      expect(buildIdElement).toBeInstanceOf(HTMLAnchorElement);
+      expect(buildIdElement).toHaveTextContent(buildID);
+      expect((buildIdElement: any).href).toBe(profile.meta.sourceURL);
+    });
+
+    it('does not display a link for the build ID if there is no URL', async () => {
+      const { profile } = getProfileFromTextSamples('A');
+      profile.meta.sourceURL = 'unknown';
+      const buildID = '20250402094810';
+      profile.meta.appBuildID = buildID;
+      const unserializedProfile =
+        await unserializeProfileOfArbitraryFormat(profile);
+      const { displayMetaInfoPanel } =
+        await setupForMetaInfoPanel(unserializedProfile);
+      await displayMetaInfoPanel();
+
+      const buildIdElement = ensureExists(
+        screen.getByText(/Build ID:/).nextSibling
+      );
+      expect(buildIdElement).toBeInstanceOf(Text);
+      expect(buildIdElement).toHaveTextContent(buildID);
     });
 
     describe('deleting a profile', () => {
