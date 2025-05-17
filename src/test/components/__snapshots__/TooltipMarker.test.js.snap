@@ -3147,24 +3147,17 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
     <div
       class="tooltipLabel"
     >
-      Tenuring allocation rate
-      :
-    </div>
-    190MB/s
-    <div
-      class="tooltipLabel"
-    >
-      Tenuring allocation rate
-      :
-    </div>
-    23.1M/s
-    <div
-      class="tooltipLabel"
-    >
       Strings deduplicated when tenuring
       :
     </div>
     1,234 / 11.2K (11%)
+    <div
+      class="tooltipLabel"
+    >
+      Tenured allocation rate
+      :
+    </div>
+    181MB/s
     <div
       class="tooltipLabel"
     >
