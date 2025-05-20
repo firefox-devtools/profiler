@@ -49,6 +49,8 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
+const SMALL_SCREEN_WIDTH = 768;
+
 class ProfileViewerImpl extends PureComponent<Props> {
   _onSelectTab = (selectedTab: string) => {
     const { changeSelectedTab } = this.props;
@@ -63,6 +65,15 @@ class ProfileViewerImpl extends PureComponent<Props> {
     const { selectedTab, isSidebarOpen, changeSidebarOpenState } = this.props;
     changeSidebarOpenState(selectedTab, !isSidebarOpen);
   };
+
+  componentDidMount() {
+    const width = window.innerWidth;
+    const { selectedTab, isSidebarOpen, changeSidebarOpenState } = this.props;
+
+    if (width <= SMALL_SCREEN_WIDTH && isSidebarOpen) {
+      changeSidebarOpenState(selectedTab, false);
+    }
+  }
 
   render() {
     const { visibleTabs, selectedTab, isSidebarOpen } = this.props;
