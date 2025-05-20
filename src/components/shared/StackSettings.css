@@ -9,6 +9,11 @@
   align-items: stretch;
   padding: 0;
   white-space: nowrap;
+
+  @media screen and (max-width: 768px) {
+    overflow: scroll hidden;
+    scrollbar-width: none;
+  }
 }
 
 .stackSettingsSelect {

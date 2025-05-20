@@ -22,6 +22,12 @@
   padding: 0;
   margin: 0 -0.5px; /* This combines with the -0.5px horizontal margin of .tabBarTab to clip off the first tab's 1px starting border */
   list-style: none;
+
+  @media screen and (max-width: 768px) {
+    overflow: scroll hidden;
+    border-right: 1px solid var(--grey-30);
+    scrollbar-width: none;
+  }
 }
 
 .tabBarTab {
