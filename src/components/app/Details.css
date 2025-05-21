@@ -7,7 +7,6 @@
 /* contains the tabbar and, if present, the sidebar button */
 .Details-top-bar {
   display: flex;
-  overflow: hidden;
   flex-flow: row nowrap;
   align-items: center;
   justify-content: space-between; /* This pushes the sidebar button to the right */
