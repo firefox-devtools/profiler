@@ -4,11 +4,11 @@
 
 .stackSettings {
   display: flex;
+  overflow: auto hidden;
   height: 25px;
   flex-flow: row nowrap;
   align-items: stretch;
   padding: 0;
-  overflow-x: auto;
   scrollbar-width: none;
   white-space: nowrap;
 }

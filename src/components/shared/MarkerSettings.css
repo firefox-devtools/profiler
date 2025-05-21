@@ -4,11 +4,11 @@
 
 .markerSettings {
   display: flex;
+  overflow: auto hidden;
   height: 25px;
   flex-flow: row nowrap;
   padding: 0;
   line-height: 25px;
-  overflow-x: auto;
   scrollbar-width: none;
   white-space: nowrap;
 }
