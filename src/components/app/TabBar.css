@@ -22,7 +22,7 @@
   flex: 1;
   flex-flow: row nowrap;
   padding: 0;
-  margin: 0 -0.5px -1px; /* This combines with the -0.5px horizontal margin of .tabBarTab to clip off the first tab's 1px starting border */
+  margin: 0 -0.5px -1px; /* The -0.5px horizontal margin combines with the -0.5px horizontal margin of .tabBarTab to clip off the first tab's 1px starting border. The -1px bottom margin makes our contents overlap the .Details-top-bar bottom border, so that the selected tab can cover that bottom border. */
   list-style: none;
   scrollbar-width: none;
 }
@@ -33,7 +33,7 @@
   padding: 6px 4px 5px;
   border: solid transparent;
   border-width: 0 1px;
-  margin: 0 -0.5px 1px; /* This makes the 1px border between adjacent tabs overlap */
+  margin: 0 -0.5px 1px; /* The -0.5px horizontal margin makes the 1px border between adjacent tabs overlap. The 1px bottom margin makes space for the .Details-top-bar bottom border. */
   background-clip: padding-box;
   cursor: default;
   font-size: 12px;
@@ -79,7 +79,7 @@
   z-index: 1;
   padding: 6px 4px;
   border-color: var(--grey-30);
-  margin: 0 -0.5px; /* Expand 1px towards the bottom to cover the tab bar bottom border. */
+  margin: 0 -0.5px; /* No bottom margin, so that this tab covers the .Details-top-bar bottom border. */
   background: #fff;
   color: var(--blue-60);
   transition: none; /* Switch the background color instantly when a tab is selected */
