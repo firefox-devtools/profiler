@@ -4,10 +4,13 @@
 
 .markerSettings {
   display: flex;
+  overflow: auto hidden;
   height: 25px;
   flex-flow: row nowrap;
   padding: 0;
   line-height: 25px;
+  scrollbar-width: none;
+  white-space: nowrap;
 }
 
 .filterMarkersButton {
