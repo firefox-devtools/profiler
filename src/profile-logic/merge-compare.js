@@ -93,6 +93,13 @@ export function mergeProfilesForDiffing(
 
   // Copy over identical values for the ProfileMeta.
   for (const [key, value] of Object.entries(profiles[0].meta)) {
+    // Do not copy over some properties though.
+    // profilingStartTime and profilingEndTime, if present, are used to define
+    // the root range directly. But because we adjust timestamps below in each
+    // threads, these values won't be correct anymore.
+    if (['profilingStartTime', 'profilingEndTime'].includes(key)) {
+      continue;
+    }
     if (profiles.every((profile) => profile.meta[key] === value)) {
       resultProfile.meta[key] = value;
     }
