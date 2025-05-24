@@ -30,11 +30,13 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = Yegguma ad d-ikter n umaɣnu.
 AppViewRouter--error-unpublished = Ur yezmir ara ad d-yaf amaɣnu seg { -firefox-brand-name }.
 AppViewRouter--error-from-file = Ur izmir ara ad d-iɣer afaylu neɣ ad yesleḍ amaɣnu  yellan deg-s.
 AppViewRouter--error-local = Ur yebdid ara yakan.
 AppViewRouter--error-public = Ur yezmir ara ad d-yader amaɣnu.
 AppViewRouter--error-from-url = Ur yezmir ara ad d-yessader amaɣnu.
+AppViewRouter--error-compare = Yegguma ad d-yerr imaɣunen.
 AppViewRouter--route-not-found--home =
     .specialMessage = URL wuɣur tettaɛraḍeḍ ad tawḍeḍ ur tettwassen ara.
 
@@ -63,6 +65,7 @@ CallNodeContextMenu--searchfox = Nadi isem n twuri ɣef Searchfox
 CallNodeContextMenu--copy-function-name = Nɣel isem n tmahalt
 CallNodeContextMenu--copy-script-url = Nɣel URL n usekript
 CallNodeContextMenu--copy-stack = Nqel tanebdant
+CallNodeContextMenu--show-the-function-in-devtools = Sken tawuri deg yifecka n usnefli
 
 ## CallTree
 ## This is the component for Call Tree panel.
