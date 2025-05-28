@@ -7,48 +7,6 @@ exports[`TrackBandwidth draws a dot that matches the snapshot 1`] = `
 />
 `;
 
-exports[`TrackBandwidth has a tooltip that matches the snapshot 1`] = `
-<div
-  class="timelineTrackBandwidthTooltip"
->
-  <div
-    class="tooltipDetails"
-  >
-    <div
-      class="tooltipLabel"
-    >
-      Transfer speed for this sample
-      :
-    </div>
-    ⁨4.66GB⁩ per second
-    <div
-      class="tooltipLabel"
-    >
-      read/write operations since the previous sample
-      :
-    </div>
-    0
-    <div
-      class="tooltipDetailSeparator"
-    />
-    <div
-      class="tooltipLabel"
-    >
-      Data transferred up to this time
-      :
-    </div>
-    ⁨6.86MB⁩ (⁨1.3⁩ g CO₂e)
-    <div
-      class="tooltipLabel"
-    >
-      Data transferred in the visible range
-      :
-    </div>
-    ⁨7.97MB⁩ (⁨1.5⁩ g CO₂e)
-  </div>
-</div>
-`;
-
 exports[`TrackBandwidth matches the 2d canvas draw snapshot 1`] = `
 Array [
   Array [
