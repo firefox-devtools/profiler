@@ -206,10 +206,10 @@ describe('TrackBandwidth', function () {
       '95.4MB\u2069 per second'
     );
     expect(screen.getByText(/visible range:/).nextSibling).toHaveTextContent(
-      '7.97MB\u2069 (\u20681.6\u2069 g CO₂e)'
+      '7.97MB\u2069 (\u20681.5\u2069 g CO₂e)'
     );
     expect(
       screen.getByText(/current selection:/).nextSibling
-    ).toHaveTextContent('4.77MB\u2069 (\u20680.94\u2069 g CO₂e)');
+    ).toHaveTextContent('4.77MB\u2069 (\u20680.92\u2069 g CO₂e)');
   });
 });
