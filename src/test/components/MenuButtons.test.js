@@ -662,7 +662,6 @@ describe('app/MenuButtons', function () {
         publishedDate: new Date('4 Jul 2020 13:00 GMT'),
         name: 'PROFILE',
         preset: null,
-        originHostname: 'https://mozilla.org',
         meta: {
           product: 'Firefox',
           platform: 'Macintosh',
