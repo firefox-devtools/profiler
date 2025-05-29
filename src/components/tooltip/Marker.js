@@ -398,17 +398,23 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
   }
 
   _maybeRenderMarkerDuration() {
-    const { marker } = this.props;
-    if (marker.end === null) {
-      return null;
+    const { marker, zeroAt } = this.props;
+
+    let duration = '';
+    if (marker.end !== null) {
+      // We only know the duration if it's complete.
+      duration = marker.incomplete
+        ? 'unknown duration'
+        : formatTimestamp(marker.end - marker.start, 3, 1);
     }
 
-    // We only know the duration if it's complete.
-    const duration = marker.incomplete
-      ? 'unknown duration'
-      : formatTimestamp(marker.end - marker.start, 3, 1);
+    const start = formatTimestamp(marker.start - zeroAt, undefined, 3);
 
-    return <div className="tooltipTiming">{duration}</div>;
+    return (
+      <div className="tooltipTiming">
+        {duration} @ {start}
+      </div>
+    );
   }
 
   _maybeRenderBacktrace() {
