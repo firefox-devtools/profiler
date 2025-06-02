@@ -60,6 +60,12 @@ CallNodeContextMenu--transform-merge-function = Fonksiyonu birleştir
         Bir fonksiyonun birleştirilmesi onu profilden kaldırıp
         süresini onu çağıran fonksiyona atar. Bu işlem, fonksiyonun
         ağaçta çağrıldığı her yerde gerçekleşir.
+CallNodeContextMenu--transform-merge-call-node = Yalnızca düğümü birleştir
+    .title =
+        Bir düğümü birleştirmek onu profilden kaldırır ve süresini onu çağıran
+        fonksiyonun düğümüne atar. Fonksiyonu yalnızca ağacın o belirli
+        bölümünden kaldırır. Fonksiyonun çağrıldığı diğer yerler
+        profilde kalacaktır.
 CallNodeContextMenu--transform-focus-function = Fonksiyona odaklan
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Fonksiyona odaklan (tersine)
