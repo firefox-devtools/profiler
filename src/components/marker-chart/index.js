@@ -4,7 +4,10 @@
 
 // @flow
 import * as React from 'react';
-import { TIMELINE_MARGIN_RIGHT } from 'firefox-profiler/app-logic/constants';
+import {
+  TIMELINE_MARGIN_RIGHT,
+  TIMELINE_MARGIN_LEFT,
+} from 'firefox-profiler/app-logic/constants';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { MarkerChartCanvas } from './Canvas';
 import { MarkerChartEmptyReasons } from './MarkerChartEmptyReasons';
@@ -16,7 +19,6 @@ import {
 } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
-import { getTimelineMarginLeft } from 'firefox-profiler/selectors/app';
 import {
   updatePreviewSelection,
   changeRightClickedMarker,
@@ -33,7 +35,6 @@ import type {
   StartEndRange,
   PreviewSelection,
   ThreadsKey,
-  CssPixels,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -60,7 +61,6 @@ type StateProps = {|
   +previewSelection: PreviewSelection,
   +rightClickedMarkerIndex: MarkerIndex | null,
   +selectedMarkerIndex: MarkerIndex | null,
-  +timelineMarginLeft: CssPixels,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -115,7 +115,6 @@ class MarkerChartImpl extends React.PureComponent<Props> {
       rightClickedMarkerIndex,
       selectedMarkerIndex,
       changeSelectedMarker,
-      timelineMarginLeft,
     } = this.props;
 
     // The viewport needs to know about the height of what it's drawing, calculate
@@ -147,7 +146,7 @@ class MarkerChartImpl extends React.PureComponent<Props> {
                 maxViewportHeight,
                 viewportNeedsUpdate,
                 maximumZoom: this.getMaximumZoom(),
-                marginLeft: timelineMarginLeft,
+                marginLeft: TIMELINE_MARGIN_LEFT,
                 marginRight: TIMELINE_MARGIN_RIGHT,
                 containerRef: this._takeViewportRef,
               }}
@@ -164,7 +163,7 @@ class MarkerChartImpl extends React.PureComponent<Props> {
                 rangeEnd: timeRange.end,
                 rowHeight: ROW_HEIGHT,
                 threadsKey,
-                marginLeft: timelineMarginLeft,
+                marginLeft: TIMELINE_MARGIN_LEFT,
                 marginRight: TIMELINE_MARGIN_RIGHT,
                 changeSelectedMarker,
                 selectedMarkerIndex,
@@ -204,7 +203,6 @@ export const MarkerChart = explicitConnect<{||}, StateProps, DispatchProps>({
         selectedThreadSelectors.getRightClickedMarkerIndex(state),
       selectedMarkerIndex:
         selectedThreadSelectors.getSelectedMarkerIndex(state),
-      timelineMarginLeft: getTimelineMarginLeft(state),
     };
   },
   mapDispatchToProps: {

@@ -359,11 +359,6 @@ export type ProfileSpecificUrlState = {|
   full: FullProfileSpecificUrlState,
 |};
 
-/**
- * Determines how the timeline's tracks are organized.
- */
-export type TimelineTrackOrganization = {| +type: 'full' |};
-
 export type UrlState = {|
   +dataSource: DataSource,
   // This is used for the "public" dataSource".
@@ -375,7 +370,6 @@ export type UrlState = {|
   +selectedTab: TabSlug,
   +pathInZipFile: string | null,
   +profileName: string | null,
-  +timelineTrackOrganization: TimelineTrackOrganization,
   +profileSpecific: ProfileSpecificUrlState,
   +symbolServerUrl: string | null,
 |};

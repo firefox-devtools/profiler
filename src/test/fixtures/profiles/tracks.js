@@ -48,13 +48,7 @@ export function getHumanReadableTracks(state: State): string[] {
   const hiddenGlobalTracks = urlStateSelectors.getHiddenGlobalTracks(state);
   const selectedThreadIndexes =
     urlStateSelectors.getSelectedThreadIndexes(state);
-  const timelineTrackOrganization =
-    urlStateSelectors.getTimelineTrackOrganization(state);
   const text: string[] = [];
-
-  if (timelineTrackOrganization.type !== 'full') {
-    throw new Error('Expected to have the full timeline track organization.');
-  }
 
   for (const globalTrackIndex of urlStateSelectors.getGlobalTrackOrder(state)) {
     const globalTrack = globalTracks[globalTrackIndex];

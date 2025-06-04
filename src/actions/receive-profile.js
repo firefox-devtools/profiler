@@ -31,7 +31,6 @@ import {
   getLocalTrackOrderByPid,
   getLegacyThreadOrder,
   getLegacyHiddenThreads,
-  getTimelineTrackOrganization,
   getProfileOrNull,
   getProfile,
   getView,
@@ -80,7 +79,6 @@ import type {
   Action,
   ThunkAction,
   Dispatch,
-  TimelineTrackOrganization,
   Profile,
   ThreadIndex,
   TabID,
@@ -124,7 +122,6 @@ export function waitingForProfileFromBrowser(): Action {
 export function loadProfile(
   profile: Profile,
   config: $Shape<{|
-    timelineTrackOrganization: TimelineTrackOrganization,
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
@@ -168,7 +165,6 @@ export function loadProfile(
       await dispatch(
         finalizeProfileView(
           config.browserConnection ?? null,
-          config.timelineTrackOrganization,
           config.skipSymbolication
         )
       );
@@ -187,7 +183,6 @@ export function loadProfile(
  */
 export function finalizeProfileView(
   browserConnection: BrowserConnection | null = null,
-  timelineTrackOrganization?: TimelineTrackOrganization,
   skipSymbolication?: boolean
 ): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
@@ -206,24 +201,8 @@ export function finalizeProfileView(
     // encoded into the URL.
     const selectedThreadIndexes = getSelectedThreadIndexesOrNull(getState());
     const pages = profile.pages;
-    if (!timelineTrackOrganization) {
-      // Most likely we'll need to load the timeline track organization, as requested
-      // by the URL, but tests can pass in a value.
-      timelineTrackOrganization = getTimelineTrackOrganization(getState());
-    }
 
-    switch (timelineTrackOrganization.type) {
-      case 'full':
-        // The url state says this is a full view. We should compute and initialize
-        // the state relevant to that state.
-        dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
-        break;
-      default:
-        throw assertExhaustiveCheck(
-          timelineTrackOrganization,
-          `Unhandled TimelineTrackOrganization type.`
-        );
-    }
+    dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
 
     let faviconsPromise = null;
     if (browserConnection && pages && pages.length > 0) {
@@ -384,37 +363,6 @@ export function finalizeFullProfileView(
 }
 
 /**
- * Re-compute the profile view data. That's used to be able to switch between
- * full and origins view.
- */
-export function changeTimelineTrackOrganization(
-  timelineTrackOrganization: TimelineTrackOrganization
-): ThunkAction<void> {
-  return (dispatch, getState) => {
-    const profile = getProfile(getState());
-    // We are resetting the selected thread index and the url state, because we
-    // are not sure if the selected thread will be availabe in the next view.
-    const selectedThreadIndexes = null;
-    dispatch({
-      type: 'DATA_RELOAD',
-    });
-
-    switch (timelineTrackOrganization.type) {
-      case 'full':
-        // The url state says this is a full view. We should compute and initialize
-        // the state relevant to that state.
-        dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
-        break;
-      default:
-        throw assertExhaustiveCheck(
-          timelineTrackOrganization,
-          `Unhandled TimelineTrackOrganization type.`
-        );
-    }
-  };
-}
-
-/**
  * Symbolication normally happens when a profile is first loaded. This function
  * provides the ability to kick off symbolication again after it has already been
  * attempted once.
@@ -450,7 +398,6 @@ export function resymbolicateProfile(): ThunkAction<Promise<void>> {
 export function viewProfile(
   profile: Profile,
   config: $Shape<{|
-    timelineTrackOrganization: TimelineTrackOrganization,
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,

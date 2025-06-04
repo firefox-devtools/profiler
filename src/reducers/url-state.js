@@ -20,7 +20,6 @@ import type {
   TimelineType,
   UrlState,
   Reducer,
-  TimelineTrackOrganization,
   SourceViewState,
   AssemblyViewState,
   IsOpenPerPanelState,
@@ -553,18 +552,6 @@ const profileName: Reducer<string | null> = (state = null, action) => {
   }
 };
 
-const timelineTrackOrganization: Reducer<TimelineTrackOrganization> = (
-  state = { type: 'full' },
-  action
-) => {
-  switch (action.type) {
-    case 'VIEW_FULL_PROFILE':
-      return { type: 'full' };
-    default:
-      return state;
-  }
-};
-
 const sourceView: Reducer<SourceViewState> = (
   state = { scrollGeneration: 0, libIndex: null, sourceFile: null },
   action
@@ -736,7 +723,6 @@ const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
     pathInZipFile,
     profileSpecific,
     profileName,
-    timelineTrackOrganization,
     symbolServerUrl,
   })
 );

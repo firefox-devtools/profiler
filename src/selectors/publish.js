@@ -26,11 +26,7 @@ import {
 } from '../profile-logic/sanitize';
 import { ensureExists } from '../utils/flow';
 import { formatNumber } from '../utils/format-numbers';
-import {
-  getHiddenGlobalTracks,
-  getHiddenLocalTracksByPid,
-  getTimelineTrackOrganization,
-} from './url-state';
+import { getHiddenGlobalTracks, getHiddenLocalTracksByPid } from './url-state';
 
 import type {
   PublishState,
@@ -84,7 +80,6 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
     getLocalTracksByPid,
     getHasPreferenceMarkers,
     getContainsPrivateBrowsingInformation,
-    getTimelineTrackOrganization,
     (
       checkedSharingOptions,
       profile,
@@ -94,8 +89,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
       globalTracks,
       localTracksByPid,
       hasPreferenceMarkers,
-      containsPrivateBrowsingInformation,
-      timelineTrackOrganization
+      containsPrivateBrowsingInformation
     ) => {
       let isIncludingEverything = true;
       for (const prop in checkedSharingOptions) {
@@ -123,10 +117,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
       // Find all of the thread indexes that are hidden.
       const shouldRemoveThreads = new Set();
       const shouldRemoveCounters = new Set();
-      if (
-        timelineTrackOrganization.type === 'full' &&
-        !checkedSharingOptions.includeHiddenThreads
-      ) {
+      if (!checkedSharingOptions.includeHiddenThreads) {
         for (const globalTrackIndex of hiddenGlobalTracks) {
           const globalTrack = globalTracks[globalTrackIndex];
           if (globalTrack.type === 'process') {

@@ -26,7 +26,6 @@ import {
 import { oneLine } from 'common-tags';
 import type {
   UrlState,
-  TimelineTrackOrganization,
   DataSource,
   Pid,
   Profile,
@@ -147,8 +146,10 @@ function getPathParts(urlState: UrlState): string[] {
   }
 }
 
-// Base query that only applies to full profile view.
-type FullProfileSpecificBaseQuery = {|
+// "null | void" in the query objects are flags which map to true for null, and false
+// for void. False flags do not show up the URL.
+type BaseQuery = {|
+  v: number,
   globalTrackOrder: string, // "3201"
   hiddenGlobalTracks: string, // "01"
   hiddenLocalTracksByPid: string, // "1549-0w8~1593-23~1598-01~1602-02~1607-1"
@@ -159,12 +160,6 @@ type FullProfileSpecificBaseQuery = {|
   // must be fetched to compute the tracks.
   threadOrder: string, // "3-2-0-1"
   hiddenThreads: string, // "0-1"
-|};
-
-// "null | void" in the query objects are flags which map to true for null, and false
-// for void. False flags do not show up the URL.
-type BaseQuery = {|
-  v: number,
   range: string, //
   thread: string, // "3"
   file: string, // Path into a zip file.
@@ -177,7 +172,6 @@ type BaseQuery = {|
   timelineType: string,
   sourceView: string,
   assemblyView: string,
-  ...FullProfileSpecificBaseQuery,
 |};
 
 type CallTreeQuery = {|
@@ -220,9 +214,6 @@ type Query =
 type $MakeOptional = <T>(T) => T | void;
 // Base query shape is needed for the typechecking during the URL query initialization.
 type BaseQueryShape = $Shape<$ObjMap<BaseQuery, $MakeOptional>>;
-type FullProfileSpecificBaseQueryShape = $Shape<
-  $ObjMap<FullProfileSpecificBaseQuery, $MakeOptional>,
->;
 
 // Query shapes for individual query paths. These are needed for QueryShape union type.
 type CallTreeQueryShape = $Shape<$ObjMap<CallTreeQuery, $MakeOptional>>;
@@ -270,51 +261,21 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
   const selectedThreadsKey =
     selectedThreads !== null ? getThreadsKey(selectedThreads) : null;
 
-  let view;
-  const { timelineTrackOrganization } = urlState;
-  switch (timelineTrackOrganization.type) {
-    case 'full':
-      // Dont URL-encode anything.
-      break;
-    default:
-      throw assertExhaustiveCheck(
-        timelineTrackOrganization,
-        'Unhandled TimelineTrackOrganization case'
-      );
-  }
-
-  // Start with the query parameters that are shown regardless of the active panel.
-  let baseQuery;
-  switch (timelineTrackOrganization.type) {
-    case 'full': {
-      // Add the full profile specific state query here.
-      baseQuery = ({}: FullProfileSpecificBaseQueryShape);
-      baseQuery.globalTrackOrder = convertGlobalTrackOrderToString(
-        urlState.profileSpecific.full.globalTrackOrder
-      );
-      baseQuery.hiddenGlobalTracks = convertHiddenGlobalTracksToString(
-        urlState.profileSpecific.full.hiddenGlobalTracks
-      );
-      baseQuery.hiddenLocalTracksByPid = convertHiddenLocalTracksByPidToString(
-        urlState.profileSpecific.full.hiddenLocalTracksByPid
-      );
-      baseQuery.localTrackOrderByPid = convertLocalTrackOrderByPidToString(
-        urlState.profileSpecific.full.localTrackOrderByPid,
-        urlState.profileSpecific.full.localTrackOrderChangedPids
-      );
-      baseQuery.tabID = urlState.profileSpecific.full.tabFilter ?? undefined;
-
-      break;
-    }
-    default:
-      throw assertExhaustiveCheck(
-        timelineTrackOrganization,
-        `Unhandled GlobalTrack type.`
-      );
-  }
-
-  baseQuery = ({
-    ...baseQuery,
+  const baseQuery = ({
+    globalTrackOrder: convertGlobalTrackOrderToString(
+      urlState.profileSpecific.full.globalTrackOrder
+    ),
+    hiddenGlobalTracks: convertHiddenGlobalTracksToString(
+      urlState.profileSpecific.full.hiddenGlobalTracks
+    ),
+    hiddenLocalTracksByPid: convertHiddenLocalTracksByPidToString(
+      urlState.profileSpecific.full.hiddenLocalTracksByPid
+    ),
+    localTrackOrderByPid: convertLocalTrackOrderByPidToString(
+      urlState.profileSpecific.full.localTrackOrderByPid,
+      urlState.profileSpecific.full.localTrackOrderChangedPids
+    ),
+    tabID: urlState.profileSpecific.full.tabFilter ?? undefined,
     range:
       stringifyCommittedRanges(urlState.profileSpecific.committedRanges) ||
       undefined,
@@ -324,7 +285,6 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         : encodeUintSetForUrlComponent(selectedThreads),
     file: urlState.pathInZipFile || undefined,
     profiles: urlState.profilesToCompare || undefined,
-    view,
     v: CURRENT_URL_VERSION,
     profileName: urlState.profileName || undefined,
     symbolServer: urlState.symbolServerUrl || undefined,
@@ -404,20 +364,9 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       break;
     case 'js-tracer': {
       query = (baseQuery: JsTracerQueryShape);
-      const { timelineTrackOrganization } = urlState;
-      switch (timelineTrackOrganization.type) {
-        case 'full':
-          // `null` adds the parameter to the query, while `undefined` doesn't.
-          query.summary = urlState.profileSpecific.full.showJsTracerSummary
-            ? null
-            : undefined;
-          break;
-        default:
-          throw assertExhaustiveCheck(
-            timelineTrackOrganization,
-            'Unhandled timelineTrackOrganization case'
-          );
-      }
+      query.summary = urlState.profileSpecific.full.showJsTracerSummary
+        ? null
+        : undefined;
       break;
     }
     default:
@@ -588,7 +537,6 @@ export function stateFromLocation(
     pathInZipFile: query.file || null,
     profileName: query.profileName,
     symbolServerUrl: query.symbolServer || null,
-    timelineTrackOrganization: validateTimelineTrackOrganization(query.view),
     profileSpecific: {
       implementation,
       lastSelectedCallTreeSummaryStrategy: toValidCallTreeSummaryStrategy(
@@ -1272,23 +1220,6 @@ function getVersion4JSCallNodePathFromStackIndex(
     nextStackIndex = stackTable.prefix[nextStackIndex];
   }
   return callNodePath;
-}
-
-function validateTimelineTrackOrganization(
-  type: ?string
-): TimelineTrackOrganization {
-  // Pretend this is a TimelineTrackOrganization so that we can exhaustively
-  // go through each option.
-  const timelineTrackOrganization: TimelineTrackOrganization = ({ type }: any);
-  switch (timelineTrackOrganization.type) {
-    case 'full':
-      return { type: 'full' };
-    default:
-      // Type assert we've checked everythign:
-      (timelineTrackOrganization: empty);
-
-      return { type: 'full' };
-  }
 }
 
 /**
