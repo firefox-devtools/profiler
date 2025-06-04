@@ -177,7 +177,7 @@ export default class SymbolStoreDB {
           this._maxCount - 1,
           () => {
             const lastUsedDate = new Date();
-            const addReq = store.add({
+            const addReq = store.put({
               debugName,
               breakpadId,
               addrs,

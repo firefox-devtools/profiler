@@ -38,6 +38,7 @@ import {
   getRelevantPagesForActiveTab,
   getSymbolServerUrl,
   getActiveTabID,
+  getBrowserConnection,
 } from 'firefox-profiler/selectors';
 import {
   getSelectedTab,
@@ -722,7 +723,7 @@ export function resymbolicateProfile(): ThunkAction<Promise<void>> {
     const symbolStore = getSymbolStore(
       dispatch,
       getSymbolServerUrl(getState()),
-      null
+      getBrowserConnection(getState())
     );
     const profile = getProfile(getState());
     if (!symbolStore) {
@@ -730,7 +731,12 @@ export function resymbolicateProfile(): ThunkAction<Promise<void>> {
         'There was no symbol store when attempting to re-symbolicate.'
       );
     }
-    await doSymbolicateProfile(dispatch, profile, symbolStore);
+    await doSymbolicateProfile(
+      dispatch,
+      profile,
+      symbolStore,
+      /* ignoreCache */ true
+    );
   };
 }
 
@@ -1004,7 +1010,8 @@ function getSymbolStore(
 export async function doSymbolicateProfile(
   dispatch: Dispatch,
   profile: Profile,
-  symbolStore: SymbolStore
+  symbolStore: SymbolStore,
+  ignoreCache?: boolean
 ) {
   dispatch(startSymbolicating());
 
@@ -1027,7 +1034,8 @@ export async function doSymbolicateProfile(
           );
         })
       );
-    }
+    },
+    ignoreCache
   );
 
   await Promise.all(completionPromises);
