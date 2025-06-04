@@ -31,7 +31,6 @@ import type {
   MarkerTiming,
   MarkerTimingAndBuckets,
   MarkerIndex,
-  TimelineTrackOrganization,
 } from 'firefox-profiler/types';
 import { getStartEndRangeForMarker } from 'firefox-profiler/utils';
 
@@ -49,30 +48,6 @@ type MarkerDrawingInformation = {|
   +h: CssPixels,
   +isInstantMarker: boolean,
   +markerIndex: MarkerIndex,
-|};
-
-// TODO: Change this comment.
-// We can hover over multiple items with Marker chart when we are in the active
-// tab view. Usually on other charts, we only have one selected item at a time.
-// But in here, we can hover over both markers and marker labels.
-// Also, they can be hovered at the same time. That's why we keep both of their
-// state in a two value tuple.
-// So if we take a look at all the possible states, we can have:
-//    [Hovered Marker Index, Hovered label row]
-// 1. [123                 , null             ]
-// 2. [null                , 12               ] (for active tab only)
-// 3. [123                 , 12               ] (for active tab only)
-// 4. [null                , null             ] (not used, we use primitive null
-//                                              to make shared canvas happy)
-// First state is the most common case, which is the only one available for the
-// full view. We have second and third cases for active tab view where we can
-// also see the hovered labels. 4th case is not used. We use primitive `null`
-// instead when both of the states are null, because that's what our shared
-// canvas component require.
-type IndexIntoHoveredLabelRow = number;
-type HoveredMarkerChartItems = {|
-  markerIndex: MarkerIndex | null,
-  rowIndexOfLabel: IndexIntoHoveredLabelRow | null,
 |};
 
 type OwnProps = {|
@@ -93,7 +68,6 @@ type OwnProps = {|
   +selectedMarkerIndex: MarkerIndex | null,
   +rightClickedMarkerIndex: MarkerIndex | null,
   +shouldDisplayTooltips: () => boolean,
-  +timelineTrackOrganization: TimelineTrackOrganization,
 |};
 
 type Props = {|
@@ -114,13 +88,12 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   drawCanvas = (
     ctx: CanvasRenderingContext2D,
     scale: ChartCanvasScale,
-    hoverInfo: ChartCanvasHoverInfo<HoveredMarkerChartItems>
+    hoverInfo: ChartCanvasHoverInfo<MarkerIndex>
   ) => {
     const {
       rowHeight,
       markerTimingAndBuckets,
       rightClickedMarkerIndex,
-      timelineTrackOrganization,
       viewport: {
         viewportTop,
         viewportBottom,
@@ -128,25 +101,11 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         containerHeight,
       },
     } = this.props;
-    let hoveredMarker = null;
-    let hoveredLabel = null;
-    let prevHoveredMarker = null;
-    let prevHoveredLabel = null;
-
     const {
-      hoveredItem: hoveredItems,
-      prevHoveredItem: prevHoveredItems,
+      hoveredItem: hoveredMarker,
+      prevHoveredItem: prevHoveredMarker,
       isHoveredOnlyDifferent,
     } = hoverInfo;
-
-    if (hoveredItems) {
-      hoveredMarker = hoveredItems.markerIndex;
-      hoveredLabel = hoveredItems.rowIndexOfLabel;
-    }
-    if (prevHoveredItems) {
-      prevHoveredMarker = prevHoveredItems.markerIndex;
-      prevHoveredLabel = prevHoveredItems.rowIndexOfLabel;
-    }
 
     const { cssToUserScale } = scale;
     if (cssToUserScale !== 1) {
@@ -188,9 +147,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         this.clearRow(ctx, newRow);
         this.highlightRow(ctx, newRow);
         this.drawMarkers(ctx, hoveredMarker, newRow, newRow + 1);
-        if (hoveredLabel === null) {
-          this.drawSeparatorsAndLabels(ctx, newRow, newRow + 1, true);
-        }
+        this.drawSeparatorsAndLabels(ctx, newRow, newRow + 1, true);
       }
       if (oldRow !== undefined && oldRow !== newRow) {
         if (oldRow !== rightClickedRow) {
@@ -598,7 +555,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       rowHeight,
       marginLeft,
       marginRight,
-      timelineTrackOrganization,
       viewport: { viewportTop, containerWidth, containerHeight },
     } = this.props;
 
@@ -669,7 +625,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     }
   }
 
-  hitTest = (x: CssPixels, y: CssPixels): HoveredMarkerChartItems | null => {
+  hitTest = (x: CssPixels, y: CssPixels): MarkerIndex | null => {
     const {
       rangeStart,
       rangeEnd,
@@ -677,7 +633,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       rowHeight,
       marginLeft,
       marginRight,
-      timelineTrackOrganization,
       viewport: { viewportLeft, viewportRight, viewportTop, containerWidth },
     } = this.props;
 
@@ -688,7 +643,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     }
 
     let markerIndex = null;
-    let rowIndexOfLabel = null;
     const markerContainerWidth = containerWidth - marginLeft - marginRight;
 
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
@@ -767,18 +721,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       }
     }
 
-    if (markerIndex === null && rowIndexOfLabel === null) {
-      // If both of them are null, return a null instead of `[null, null]`.
-      // That's because shared canvas component only understands that.
-      return null;
-    }
-
-    // Yes, we are returning a new object all the time when we do the hit testing.
-    // I can hear you say "How does equality check work for old and new hovered
-    // items then?". Well, on the shared canvas component we have a function
-    // called `hoveredItemsAreEqual` that shallowly checks for equality of
-    // objects and arrays. So it's safe to return a new object all the time.
-    return { markerIndex, rowIndexOfLabel };
+    return markerIndex;
   };
 
   onMouseMove = (event: { nativeEvent: MouseEvent }) => {
@@ -812,8 +755,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     this.props.changeMouseTimePosition(null);
   };
 
-  onDoubleClickMarker = (hoveredItems: HoveredMarkerChartItems | null) => {
-    const markerIndex = hoveredItems === null ? null : hoveredItems.markerIndex;
+  onDoubleClickMarker = (markerIndex: MarkerIndex | null) => {
     if (markerIndex === null) {
       return;
     }
@@ -834,21 +776,17 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     });
   };
 
-  onSelectItem = (hoveredItems: HoveredMarkerChartItems | null) => {
-    const markerIndex = hoveredItems === null ? null : hoveredItems.markerIndex;
+  onSelectItem = (markerIndex: MarkerIndex | null) => {
     const { changeSelectedMarker, threadsKey } = this.props;
     changeSelectedMarker(threadsKey, markerIndex, { source: 'pointer' });
   };
 
-  onRightClickMarker = (hoveredItems: HoveredMarkerChartItems | null) => {
-    const markerIndex = hoveredItems === null ? null : hoveredItems.markerIndex;
+  onRightClickMarker = (markerIndex: MarkerIndex | null) => {
     const { changeRightClickedMarker, threadsKey } = this.props;
     changeRightClickedMarker(threadsKey, markerIndex);
   };
 
-  getHoveredMarkerInfo = ({
-    markerIndex,
-  }: HoveredMarkerChartItems): React.Node => {
+  getHoveredMarkerInfo = (markerIndex: MarkerIndex): React.Node => {
     if (!this.props.shouldDisplayTooltips() || markerIndex === null) {
       return null;
     }
