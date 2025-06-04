@@ -66,7 +66,6 @@ import type {
   State,
   ProfileViewState,
   SymbolicationStatus,
-  FullProfileViewState,
   $ReturnType,
   MarkerSchema,
   MarkerSchemaByName,
@@ -83,8 +82,6 @@ import type { ThreadActivityScore } from '../profile-logic/tracks';
 
 export const getProfileView: Selector<ProfileViewState> = (state) =>
   state.profileView;
-export const getFullProfileView: Selector<FullProfileViewState> = (state) =>
-  getProfileView(state).full;
 
 /**
  * Profile View Options
@@ -416,7 +413,7 @@ export const getTabToThreadIndexesMap: Selector<Map<TabID, Set<ThreadIndex>>> =
  * They're uniquely referenced by a TrackReference.
  */
 export const getGlobalTracks: Selector<GlobalTrack[]> = (state) =>
-  getFullProfileView(state).globalTracks;
+  getProfileView(state).globalTracks;
 
 /**
  * This returns all TrackReferences for global tracks.
@@ -482,7 +479,7 @@ export const getGlobalTrackAndIndexByPid: DangerousSelectorWithArguments<
  * This returns a map of local tracks from a pid.
  */
 export const getLocalTracksByPid: Selector<Map<Pid, LocalTrack[]>> = (state) =>
-  getFullProfileView(state).localTracksByPid;
+  getProfileView(state).localTracksByPid;
 
 /**
  * This selectors performs a simple look up in a Map, throws an error if it doesn't exist,
@@ -494,7 +491,7 @@ export const getLocalTracks: DangerousSelectorWithArguments<
   Pid,
 > = (state, pid) =>
   ensureExists(
-    getFullProfileView(state).localTracksByPid.get(pid),
+    getProfileView(state).localTracksByPid.get(pid),
     'Unable to get the tracks for the given pid.'
   );
 

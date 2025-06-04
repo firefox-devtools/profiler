@@ -831,10 +831,8 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       perTab: tableViewOptionsPerTab,
     }),
     profile,
-    full: combineReducers({
-      globalTracks,
-      localTracksByPid,
-    }),
+    globalTracks,
+    localTracksByPid,
   })
 );
 

@@ -263,19 +263,19 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
 
   const baseQuery = ({
     globalTrackOrder: convertGlobalTrackOrderToString(
-      urlState.profileSpecific.full.globalTrackOrder
+      urlState.profileSpecific.globalTrackOrder
     ),
     hiddenGlobalTracks: convertHiddenGlobalTracksToString(
-      urlState.profileSpecific.full.hiddenGlobalTracks
+      urlState.profileSpecific.hiddenGlobalTracks
     ),
     hiddenLocalTracksByPid: convertHiddenLocalTracksByPidToString(
-      urlState.profileSpecific.full.hiddenLocalTracksByPid
+      urlState.profileSpecific.hiddenLocalTracksByPid
     ),
     localTrackOrderByPid: convertLocalTrackOrderByPidToString(
-      urlState.profileSpecific.full.localTrackOrderByPid,
-      urlState.profileSpecific.full.localTrackOrderChangedPids
+      urlState.profileSpecific.localTrackOrderByPid,
+      urlState.profileSpecific.localTrackOrderChangedPids
     ),
-    tabID: urlState.profileSpecific.full.tabFilter ?? undefined,
+    tabID: urlState.profileSpecific.tabFilter ?? undefined,
     range:
       stringifyCommittedRanges(urlState.profileSpecific.committedRanges) ||
       undefined,
@@ -364,7 +364,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       break;
     case 'js-tracer': {
       query = (baseQuery: JsTracerQueryShape);
-      query.summary = urlState.profileSpecific.full.showJsTracerSummary
+      query.summary = urlState.profileSpecific.showJsTracerSummary
         ? null
         : undefined;
       break;
@@ -554,27 +554,25 @@ export function stateFromLocation(
       assemblyView,
       isBottomBoxOpenPerPanel,
       timelineType: validateTimelineType(query.timelineType),
-      full: {
-        showJsTracerSummary: query.summary === undefined ? false : true,
-        globalTrackOrder: convertGlobalTrackOrderFromString(
-          query.globalTrackOrder
-        ),
-        hiddenGlobalTracks: convertHiddenGlobalTracksFromString(
-          query.hiddenGlobalTracks
-        ),
-        hiddenLocalTracksByPid: convertHiddenLocalTracksByPidFromString(
-          query.hiddenLocalTracksByPid
-        ),
-        localTrackOrderByPid,
-        localTrackOrderChangedPids,
-        tabFilter: tabID,
-        legacyThreadOrder: query.threadOrder
-          ? query.threadOrder.split('-').map((index) => Number(index))
-          : null,
-        legacyHiddenThreads: query.hiddenThreads
-          ? query.hiddenThreads.split('-').map((index) => Number(index))
-          : null,
-      },
+      showJsTracerSummary: query.summary === undefined ? false : true,
+      globalTrackOrder: convertGlobalTrackOrderFromString(
+        query.globalTrackOrder
+      ),
+      hiddenGlobalTracks: convertHiddenGlobalTracksFromString(
+        query.hiddenGlobalTracks
+      ),
+      hiddenLocalTracksByPid: convertHiddenLocalTracksByPidFromString(
+        query.hiddenLocalTracksByPid
+      ),
+      localTrackOrderByPid,
+      localTrackOrderChangedPids,
+      tabFilter: tabID,
+      legacyThreadOrder: query.threadOrder
+        ? query.threadOrder.split('-').map((index) => Number(index))
+        : null,
+      legacyHiddenThreads: query.hiddenThreads
+        ? query.hiddenThreads.split('-').map((index) => Number(index))
+        : null,
     },
   };
 }

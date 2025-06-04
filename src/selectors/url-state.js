@@ -29,7 +29,6 @@ import type {
   TrackIndex,
   ThreadsKey,
   ProfileSpecificUrlState,
-  FullProfileSpecificUrlState,
   NativeSymbolInfo,
   TabID,
 } from 'firefox-profiler/types';
@@ -48,9 +47,6 @@ export const getUrlState: Selector<UrlState> = (state): UrlState =>
 export const getProfileSpecificState: Selector<ProfileSpecificUrlState> = (
   state
 ) => getUrlState(state).profileSpecific;
-export const getFullProfileSpecificState: Selector<
-  FullProfileSpecificUrlState,
-> = (state) => getProfileSpecificState(state).full;
 
 export const getDataSource: Selector<DataSource> = (state) =>
   getUrlState(state).dataSource;
@@ -84,7 +80,7 @@ export const getAssemblyViewNativeSymbol: Selector<NativeSymbolInfo | null> = (
 export const getAssemblyViewScrollGeneration: Selector<number> = (state) =>
   getProfileSpecificState(state).assemblyView.scrollGeneration;
 export const getShowJsTracerSummary: Selector<boolean> = (state) =>
-  getFullProfileSpecificState(state).showJsTracerSummary;
+  getProfileSpecificState(state).showJsTracerSummary;
 
 /**
  * Raw search strings, before any splitting has been performed.
@@ -127,21 +123,21 @@ export const getTimelineType: Selector<TimelineType> = (state) =>
  * Simple selectors for tracks and track order.
  */
 export const getLegacyThreadOrder: Selector<ThreadIndex[] | null> = (state) =>
-  getFullProfileSpecificState(state).legacyThreadOrder;
+  getProfileSpecificState(state).legacyThreadOrder;
 export const getLegacyHiddenThreads: Selector<ThreadIndex[] | null> = (state) =>
-  getFullProfileSpecificState(state).legacyHiddenThreads;
+  getProfileSpecificState(state).legacyHiddenThreads;
 export const getGlobalTrackOrder: Selector<TrackIndex[]> = (state) =>
-  getFullProfileSpecificState(state).globalTrackOrder;
+  getProfileSpecificState(state).globalTrackOrder;
 export const getHiddenGlobalTracks: Selector<Set<TrackIndex>> = (state) =>
-  getFullProfileSpecificState(state).hiddenGlobalTracks;
+  getProfileSpecificState(state).hiddenGlobalTracks;
 export const getHiddenLocalTracksByPid: Selector<Map<Pid, Set<TrackIndex>>> = (
   state
-) => getFullProfileSpecificState(state).hiddenLocalTracksByPid;
+) => getProfileSpecificState(state).hiddenLocalTracksByPid;
 export const getLocalTrackOrderByPid: Selector<Map<Pid, TrackIndex[]>> = (
   state
-) => getFullProfileSpecificState(state).localTrackOrderByPid;
+) => getProfileSpecificState(state).localTrackOrderByPid;
 export const getTabFilter: Selector<TabID | null> = (state) =>
-  getFullProfileSpecificState(state).tabFilter;
+  getProfileSpecificState(state).tabFilter;
 export const hasTabFilter: Selector<boolean> = (state) =>
   getTabFilter(state) !== null;
 
