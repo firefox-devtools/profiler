@@ -49,8 +49,9 @@ import {
 } from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';
 import { ensureExists } from '../../utils/flow';
-import { waitUntilData, waitUntilState } from '../fixtures/utils';
+import { waitUntilData, waitUntilState, formatTree } from '../fixtures/utils';
 import { storeWithZipFile } from '../fixtures/profiles/zip-file';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
   addTransformToStack,
   hideGlobalTrack,
@@ -589,7 +590,7 @@ describe('attemptToPublish', function () {
     const {
       profile,
       funcNamesPerThread: [, funcNames],
-    } = getProfileFromTextSamples('A', 'B');
+    } = getProfileFromTextSamples('A', 'B  C  D');
 
     // This will cause the profile to be sanitized by default when uploading.
     profile.meta.updateChannel = 'release';
@@ -605,30 +606,42 @@ describe('attemptToPublish', function () {
     const { dispatch, getState, resolveUpload, assertUploadSuccess } =
       setupFakeUploadsWithStore(store);
 
-    // Add some transforms
-    const B = funcNames.indexOf('B');
+    // Add a committed range so that only samples C and D are in range.
+    dispatch(commitRange(0.5, 2.5));
+
+    // Add a focus-function transform for C.
+    const C = funcNames.indexOf('C');
     dispatch(
       addTransformToStack(1, {
         type: 'focus-function',
-        funcIndex: B,
+        funcIndex: C,
       })
     );
 
-    // Hide the first track
-    // Note that the includeHiddenTracks checkbox is already false, so we don't
-    // need to toggle that.
+    // Hide the first track.
     dispatch(hideGlobalTrack(0));
 
-    // Publish
+    // Verify that the call tree is as expected.
+    const callTreeBefore = selectedThreadSelectors.getCallTree(getState());
+    expect(formatTree(callTreeBefore)).toEqual(['- C (total: 1, self: 1)']);
+
+    // Publish. This will remove thread 0 and filter out samples outside of
+    // the committed range.
+    // We rely on the fact that all sharing options start out as false,
+    // specifically includeHiddenThreads and includeFullTimeRange.
     const publishAttempt = dispatch(attemptToPublish());
     resolveUpload(JWT_TOKEN);
     expect(getUploadGeneration(getState())).toEqual(0);
     await assertUploadSuccess(publishAttempt);
 
     // The transform still should be there.
-    // Also, now it should be index 0.
+    // Also, the remaining thread's index is now 0.
     const transforms = getTransformStack(getState(), 0);
     expect(transforms.length).toBe(1);
+
+    // Verify that the call tree structure is preserved after sanitization.
+    const callTreeAfter = selectedThreadSelectors.getCallTree(getState());
+    expect(formatTree(callTreeAfter)).toEqual(['- C (total: 1, self: 1)']);
   });
 
   describe('with zip files', function () {
