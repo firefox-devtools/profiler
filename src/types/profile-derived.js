@@ -15,8 +15,6 @@ import type {
   IndexIntoLibs,
   CounterIndex,
   GraphColor,
-  InnerWindowID,
-  Page,
   IndexIntoRawMarkerTable,
   IndexIntoStringTable,
   TabID,
@@ -626,53 +624,6 @@ export type Track = GlobalTrack | LocalTrack;
 // - for global tracks, this is the index in the global tracks array
 // - for local tracks, this is the index in the local tracks array for a specific pid.
 export type TrackIndex = number;
-
-/**
- * The origins timeline view is experimental. These data structures may need to be
- * adjusted to fit closer to the other track types, but they were easy to do for now.
- */
-
-/**
- * This origin was loaded as a sub-frame to another one. It will be nested in the view.
- */
-export type OriginsTimelineEntry = {|
-  type: 'sub-origin',
-  innerWindowID: InnerWindowID,
-  threadIndex: ThreadIndex,
-  page: Page,
-  origin: string,
-|};
-
-/**
- * This is a "root" origin, which is viewed at the top level in a tab.
- */
-export type OriginsTimelineRoot = {|
-  type: 'origin',
-  innerWindowID: InnerWindowID,
-  threadIndex: ThreadIndex,
-  page: Page,
-  origin: string,
-  children: Array<OriginsTimelineEntry | OriginsTimelineNoOrigin>,
-|};
-
-/**
- * This thread does not have any origin information associated with it. However
- * it may be listed as a child of another "root" timeline origin if it is in the
- * same process as that thread.
- */
-export type OriginsTimelineNoOrigin = {|
-  type: 'no-origin',
-  threadIndex: ThreadIndex,
-|};
-
-export type OriginsTimelineTrack =
-  | OriginsTimelineEntry
-  | OriginsTimelineRoot
-  | OriginsTimelineNoOrigin;
-
-export type OriginsTimeline = Array<
-  OriginsTimelineNoOrigin | OriginsTimelineRoot,
->;
 
 /**
  * Type that holds the values of personally identifiable information that user
