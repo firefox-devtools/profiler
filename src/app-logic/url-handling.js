@@ -47,7 +47,7 @@ import {
 } from '../utils/uintarray-encoding';
 import { tabSlugs } from '../app-logic/tabs-handling';
 
-export const CURRENT_URL_VERSION = 10;
+export const CURRENT_URL_VERSION = 11;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -1132,6 +1132,18 @@ const _upgraders: {|
 
     const transformStrings = query.transforms.split('~');
     query.transforms = transformStrings.map(upgradeTransformString).join('~');
+  },
+  [11]: (processedLocation: ProcessedLocationBeforeUpgrade) => {
+    // This version removes the active tab and origins views. The provided
+    // parameters are not relevant to the full view, so we remove them all.
+    // This will load the full view from scratch.
+    if (
+      processedLocation.query.view === 'active-tab' ||
+      processedLocation.query.view === 'origins'
+    ) {
+      // Clear EVERYTHING in the query. Let it compute everything for the full view.
+      processedLocation.query = {};
+    }
   },
 };
 
