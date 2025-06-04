@@ -643,25 +643,6 @@ const symbolServerUrl: Reducer<string | null> = (state = null) => {
 };
 
 /**
- * These values are specific to an individual full profile.
- */
-const fullProfileSpecific = combineReducers({
-  globalTrackOrder,
-  hiddenGlobalTracks,
-  hiddenLocalTracksByPid,
-  localTrackOrderByPid,
-  localTrackOrderChangedPids,
-  showJsTracerSummary,
-  tabFilter,
-  // The timeline tracks used to be hidden and sorted by thread indexes, rather than
-  // track indexes. The only way to migrate this information to tracks-based data is to
-  // first retrieve the profile, so they can't be upgraded by the normal url upgrading
-  // process. These value are only set by the locationToState function.
-  legacyThreadOrder: (state: ThreadIndex[] | null = null) => state,
-  legacyHiddenThreads: (state: ThreadIndex[] | null = null) => state,
-});
-
-/**
  * These values are specific to an individual profile.
  */
 const profileSpecific = combineReducers({
@@ -679,7 +660,19 @@ const profileSpecific = combineReducers({
   assemblyView,
   isBottomBoxOpenPerPanel,
   timelineType,
-  full: fullProfileSpecific,
+  globalTrackOrder,
+  hiddenGlobalTracks,
+  hiddenLocalTracksByPid,
+  localTrackOrderByPid,
+  localTrackOrderChangedPids,
+  showJsTracerSummary,
+  tabFilter,
+  // The timeline tracks used to be hidden and sorted by thread indexes, rather than
+  // track indexes. The only way to migrate this information to tracks-based data is to
+  // first retrieve the profile, so they can't be upgraded by the normal url upgrading
+  // process. These value are only set by the locationToState function.
+  legacyThreadOrder: (state: ThreadIndex[] | null = null) => state,
+  legacyHiddenThreads: (state: ThreadIndex[] | null = null) => state,
 });
 
 /**

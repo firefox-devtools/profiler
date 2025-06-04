@@ -81,15 +81,6 @@ export type MarkerReference = {|
 |};
 
 /**
- * Full profile view state
- * They should not be used from the active tab view.
- */
-export type FullProfileViewState = {|
-  globalTracks: GlobalTrack[],
-  localTracksByPid: Map<Pid, LocalTrack[]>,
-|};
-
-/**
  * Profile view state
  */
 export type ProfileViewState = {
@@ -110,7 +101,8 @@ export type ProfileViewState = {
     perTab: TableViewOptionsPerTab,
   |},
   +profile: Profile | null,
-  +full: FullProfileViewState,
+  globalTracks: GlobalTrack[],
+  localTracksByPid: Map<Pid, LocalTrack[]>,
 };
 
 export type AppViewState =
@@ -326,21 +318,6 @@ export type SourceCodeLoadingError =
       parsingErrorMessage: string,
     |};
 
-/**
- * Full profile specific url state
- */
-export type FullProfileSpecificUrlState = {|
-  globalTrackOrder: TrackIndex[],
-  hiddenGlobalTracks: Set<TrackIndex>,
-  hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
-  localTrackOrderByPid: Map<Pid, TrackIndex[]>,
-  localTrackOrderChangedPids: Set<Pid>,
-  showJsTracerSummary: boolean,
-  tabFilter: TabID | null,
-  legacyThreadOrder: ThreadIndex[] | null,
-  legacyHiddenThreads: ThreadIndex[] | null,
-|};
-
 export type ProfileSpecificUrlState = {|
   selectedThreads: Set<ThreadIndex> | null,
   implementation: ImplementationFilter,
@@ -356,7 +333,15 @@ export type ProfileSpecificUrlState = {|
   sourceView: SourceViewState,
   assemblyView: AssemblyViewState,
   isBottomBoxOpenPerPanel: IsOpenPerPanelState,
-  full: FullProfileSpecificUrlState,
+  globalTrackOrder: TrackIndex[],
+  hiddenGlobalTracks: Set<TrackIndex>,
+  hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
+  localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+  localTrackOrderChangedPids: Set<Pid>,
+  showJsTracerSummary: boolean,
+  tabFilter: TabID | null,
+  legacyThreadOrder: ThreadIndex[] | null,
+  legacyHiddenThreads: ThreadIndex[] | null,
 |};
 
 export type UrlState = {|
