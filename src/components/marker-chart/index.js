@@ -15,10 +15,7 @@ import {
   getPreviewSelection,
 } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import {
-  getSelectedThreadsKey,
-  getTimelineTrackOrganization,
-} from 'firefox-profiler/selectors/url-state';
+import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
 import { getTimelineMarginLeft } from 'firefox-profiler/selectors/app';
 import {
   updatePreviewSelection,
@@ -37,7 +34,6 @@ import type {
   PreviewSelection,
   ThreadsKey,
   CssPixels,
-  TimelineTrackOrganization,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -65,7 +61,6 @@ type StateProps = {|
   +rightClickedMarkerIndex: MarkerIndex | null,
   +selectedMarkerIndex: MarkerIndex | null,
   +timelineMarginLeft: CssPixels,
-  +timelineTrackOrganization: TimelineTrackOrganization,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -121,7 +116,6 @@ class MarkerChartImpl extends React.PureComponent<Props> {
       selectedMarkerIndex,
       changeSelectedMarker,
       timelineMarginLeft,
-      timelineTrackOrganization,
     } = this.props;
 
     // The viewport needs to know about the height of what it's drawing, calculate
@@ -176,7 +170,6 @@ class MarkerChartImpl extends React.PureComponent<Props> {
                 selectedMarkerIndex,
                 rightClickedMarkerIndex,
                 shouldDisplayTooltips: this._shouldDisplayTooltips,
-                timelineTrackOrganization,
               }}
             />
           </ContextMenuTrigger>
@@ -212,7 +205,6 @@ export const MarkerChart = explicitConnect<{||}, StateProps, DispatchProps>({
       selectedMarkerIndex:
         selectedThreadSelectors.getSelectedMarkerIndex(state),
       timelineMarginLeft: getTimelineMarginLeft(state),
-      timelineTrackOrganization: getTimelineTrackOrganization(state),
     };
   },
   mapDispatchToProps: {
