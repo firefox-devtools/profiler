@@ -8,7 +8,6 @@ import * as React from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { getTimelineTrackOrganization } from 'firefox-profiler/selectors';
 import { FullTimeline } from 'firefox-profiler/components/timeline/FullTimeline';
-import { TimelineOrigins } from 'firefox-profiler/components/timeline/OriginsTimeline';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -83,10 +82,6 @@ class TimelineImpl extends React.PureComponent<Props> {
     switch (timelineTrackOrganization.type) {
       case 'full':
         return <FullTimeline innerElementRef={this._onTimelineMountWithRef} />;
-      case 'origins':
-        return (
-          <TimelineOrigins innerElementRef={this._onTimelineMountWithRef} />
-        );
       default:
         throw assertExhaustiveCheck(
           timelineTrackOrganization,

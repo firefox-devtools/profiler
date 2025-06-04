@@ -101,7 +101,6 @@ export const getScreenshotTrackHeight: Selector<number> = createSelector(
   (timelineTrackOrganization) => {
     switch (timelineTrackOrganization.type) {
       case 'full':
-      case 'origins':
         return FULL_TRACK_SCREENSHOT_HEIGHT;
       default:
         throw assertExhaustiveCheck(
@@ -142,9 +141,6 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
     let height = TIMELINE_RULER_HEIGHT;
     const border = 1;
     switch (timelineTrackOrganization.type) {
-      case 'origins': {
-        return height + 500;
-      }
       case 'full': {
         for (const [trackIndex, globalTrack] of globalTracks.entries()) {
           if (!hiddenGlobalTracks.has(trackIndex)) {
@@ -283,7 +279,6 @@ export const getTimelineMarginLeft: Selector<number> = createSelector(
   (timelineTrackOrganization) => {
     switch (timelineTrackOrganization.type) {
       case 'full':
-      case 'origins':
         return TIMELINE_MARGIN_LEFT;
       default:
         throw assertExhaustiveCheck(

@@ -161,9 +161,6 @@ type FullProfileSpecificBaseQuery = {|
   hiddenThreads: string, // "0-1"
 |};
 
-// Base query that only applies to origins profile view.
-type OriginsProfileSpecificBaseQuery = {||};
-
 // "null | void" in the query objects are flags which map to true for null, and false
 // for void. False flags do not show up the URL.
 type BaseQuery = {|
@@ -181,7 +178,6 @@ type BaseQuery = {|
   sourceView: string,
   assemblyView: string,
   ...FullProfileSpecificBaseQuery,
-  ...OriginsProfileSpecificBaseQuery,
 |};
 
 type CallTreeQuery = {|
@@ -226,9 +222,6 @@ type $MakeOptional = <T>(T) => T | void;
 type BaseQueryShape = $Shape<$ObjMap<BaseQuery, $MakeOptional>>;
 type FullProfileSpecificBaseQueryShape = $Shape<
   $ObjMap<FullProfileSpecificBaseQuery, $MakeOptional>,
->;
-type OriginsProfileSpecificBaseQueryShape = $Shape<
-  $ObjMap<OriginsProfileSpecificBaseQuery, $MakeOptional>,
 >;
 
 // Query shapes for individual query paths. These are needed for QueryShape union type.
@@ -283,9 +276,6 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
     case 'full':
       // Dont URL-encode anything.
       break;
-    case 'origins':
-      view = timelineTrackOrganization.type;
-      break;
     default:
       throw assertExhaustiveCheck(
         timelineTrackOrganization,
@@ -316,9 +306,6 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
 
       break;
     }
-    case 'origins':
-      baseQuery = ({}: OriginsProfileSpecificBaseQueryShape);
-      break;
     default:
       throw assertExhaustiveCheck(
         timelineTrackOrganization,
@@ -420,7 +407,6 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       const { timelineTrackOrganization } = urlState;
       switch (timelineTrackOrganization.type) {
         case 'full':
-        case 'origins':
           // `null` adds the parameter to the query, while `undefined` doesn't.
           query.summary = urlState.profileSpecific.full.showJsTracerSummary
             ? null
@@ -1297,8 +1283,6 @@ function validateTimelineTrackOrganization(
   switch (timelineTrackOrganization.type) {
     case 'full':
       return { type: 'full' };
-    case 'origins':
-      return { type: 'origins' };
     default:
       // Type assert we've checked everythign:
       (timelineTrackOrganization: empty);

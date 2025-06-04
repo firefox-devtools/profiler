@@ -33,7 +33,6 @@ import type {
   LocalTrack,
   TrackIndex,
   MarkerIndex,
-  OriginsTimeline,
   ThreadsKey,
   NativeSymbolInfo,
 } from './profile-derived';
@@ -90,10 +89,6 @@ export type FullProfileViewState = {|
   localTracksByPid: Map<Pid, LocalTrack[]>,
 |};
 
-export type OriginsViewState = {|
-  originsTimeline: OriginsTimeline,
-|};
-
 /**
  * Profile view state
  */
@@ -116,7 +111,6 @@ export type ProfileViewState = {
   |},
   +profile: Profile | null,
   +full: FullProfileViewState,
-  +origins: OriginsViewState,
 };
 
 export type AppViewState =
@@ -368,9 +362,7 @@ export type ProfileSpecificUrlState = {|
 /**
  * Determines how the timeline's tracks are organized.
  */
-export type TimelineTrackOrganization =
-  | {| +type: 'full' |}
-  | {| +type: 'origins' |};
+export type TimelineTrackOrganization = {| +type: 'full' |};
 
 export type UrlState = {|
   +dataSource: DataSource,

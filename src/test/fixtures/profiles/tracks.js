@@ -12,16 +12,9 @@ import {
 import { storeWithProfile } from '../stores';
 import { oneLine } from 'common-tags';
 
-import type {
-  OriginsTimelineTrack,
-  Profile,
-  State,
-  Pid,
-} from 'firefox-profiler/types';
+import type { Profile, State, Pid } from 'firefox-profiler/types';
 
 import { StringTable } from '../../../utils/string-table';
-import { assertExhaustiveCheck } from '../../../utils/flow';
-import { getFriendlyThreadName } from '../../../profile-logic/profile-data';
 import { INSTANT } from 'firefox-profiler/app-logic/constants';
 
 /**
@@ -326,63 +319,4 @@ export function getStoreWithMemoryTrack(pid: Pid = '222') {
     throw new Error('Expected a memory track.');
   }
   return { store, ...store, profile, trackReference, localTrack, threadIndex };
-}
-
-/**
- * This function takes the current origins timeline tracks, and generates a
- * human readable result that makes it easy to assert the shape and structure
- * of the tracks in tests.
- *
- * Usage:
- *
- *  expect(getHumanReadableOriginTracks(getState())).toEqual([
- *    'Parent Process',
- *    'Compositor',
- *    'GeckoMain pid:(2)',
- *    'GeckoMain pid:(3)',
- *    'https://aaaa.example.com',
- *    '  - https://bbbb.example.com',
- *    '  - https://cccc.example.com',
- *    'https://dddd.example.com',
- *    '  - https://eeee.example.com',
- *    '  - https://ffff.example.com',
- *  ]);
- */
-export function getHumanReadableOriginTracks(state: State): string[] {
-  const threads = profileViewSelectors.getThreads(state);
-  const originsTimeline = profileViewSelectors.getOriginsTimeline(state);
-
-  const results: string[] = [];
-
-  function addHumanFriendlyTrack(
-    track: OriginsTimelineTrack,
-    nested: boolean = false
-  ) {
-    const prefix = nested ? '  - ' : '';
-    switch (track.type) {
-      case 'origin':
-        results.push(track.origin);
-        for (const child of track.children) {
-          addHumanFriendlyTrack(child, true);
-        }
-        break;
-      case 'no-origin': {
-        const thread = threads[track.threadIndex];
-        results.push(prefix + getFriendlyThreadName(threads, thread));
-        break;
-      }
-      case 'sub-origin': {
-        results.push(prefix + track.origin);
-        break;
-      }
-      default:
-        throw assertExhaustiveCheck(track, 'Unhandled OriginsTimelineTrack.');
-    }
-  }
-
-  for (const track of originsTimeline) {
-    addHumanFriendlyTrack(track);
-  }
-
-  return results;
 }

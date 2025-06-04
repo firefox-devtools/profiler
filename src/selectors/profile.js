@@ -53,7 +53,6 @@ import type {
   GlobalTrack,
   AccumulatedCounterSamples,
   ProfileFilterPageData,
-  OriginsTimeline,
   Milliseconds,
   StartEndRange,
   GlobalTrackReference,
@@ -68,7 +67,6 @@ import type {
   ProfileViewState,
   SymbolicationStatus,
   FullProfileViewState,
-  OriginsViewState,
   $ReturnType,
   MarkerSchema,
   MarkerSchemaByName,
@@ -87,8 +85,6 @@ export const getProfileView: Selector<ProfileViewState> = (state) =>
   state.profileView;
 export const getFullProfileView: Selector<FullProfileViewState> = (state) =>
   getProfileView(state).full;
-export const getOriginsProfileView: Selector<OriginsViewState> = (state) =>
-  getProfileView(state).origins;
 
 /**
  * Profile View Options
@@ -601,13 +597,6 @@ export const getLocalTrackName = (
     getLocalTrackNamesByPid(state).get(pid),
     'Could not find the track names from the given pid'
   )[trackIndex];
-
-/**
- * Origins profile view selectors.
- */
-
-export const getOriginsTimeline: Selector<OriginsTimeline> = (state) =>
-  getOriginsProfileView(state).originsTimeline;
 
 /**
  * It's a bit hard to deduce the total amount of hidden tracks, as there are both

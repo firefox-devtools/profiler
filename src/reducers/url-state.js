@@ -130,7 +130,6 @@ const selectedThreads: Reducer<Set<ThreadIndex> | null> = (
     case 'CHANGE_SELECTED_THREAD':
     case 'SELECT_TRACK':
     case 'VIEW_FULL_PROFILE':
-    case 'VIEW_ORIGINS_PROFILE':
     case 'ISOLATE_PROCESS':
     case 'ISOLATE_PROCESS_MAIN_THREAD':
     case 'HIDE_GLOBAL_TRACK':
@@ -561,8 +560,6 @@ const timelineTrackOrganization: Reducer<TimelineTrackOrganization> = (
   switch (action.type) {
     case 'VIEW_FULL_PROFILE':
       return { type: 'full' };
-    case 'VIEW_ORIGINS_PROFILE':
-      return { type: 'origins' };
     default:
       return state;
   }

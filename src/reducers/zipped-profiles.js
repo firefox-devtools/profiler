@@ -86,7 +86,6 @@ const zipFile: Reducer<ZipFileState> = (
             zip: ensureExists(state.zip),
             pathInZipFile: ensureExists(state.pathInZipFile),
           });
-    case 'VIEW_ORIGINS_PROFILE':
     case 'VIEW_FULL_PROFILE':
       // Only process this as a change if a zip file is actually loaded.
       return state.phase === 'NO_ZIP_FILE'

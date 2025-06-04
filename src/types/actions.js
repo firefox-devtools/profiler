@@ -22,7 +22,6 @@ import type {
   LocalTrack,
   TrackIndex,
   MarkerIndex,
-  OriginsTimeline,
   ThreadsKey,
   NativeSymbolInfo,
 } from './profile-derived';
@@ -398,11 +397,6 @@ type ReceiveProfileAction =
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
       +timelineType: TimelineType | null,
       +selectedTab: TabSlug,
-    |}
-  | {|
-      +type: 'VIEW_ORIGINS_PROFILE',
-      +selectedThreadIndexes: Set<ThreadIndex>,
-      +originsTimeline: OriginsTimeline,
     |}
   | {|
       +type: 'DATA_RELOAD',
