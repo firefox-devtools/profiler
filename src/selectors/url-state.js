@@ -23,7 +23,6 @@ import type {
   ImplementationFilter,
   CallTreeSummaryStrategy,
   UrlState,
-  TimelineTrackOrganization,
   Selector,
   DangerousSelectorWithArguments,
   StartEndRange,
@@ -86,9 +85,6 @@ export const getAssemblyViewScrollGeneration: Selector<number> = (state) =>
   getProfileSpecificState(state).assemblyView.scrollGeneration;
 export const getShowJsTracerSummary: Selector<boolean> = (state) =>
   getFullProfileSpecificState(state).showJsTracerSummary;
-export const getTimelineTrackOrganization: Selector<
-  TimelineTrackOrganization,
-> = (state) => getUrlState(state).timelineTrackOrganization;
 
 /**
  * Raw search strings, before any splitting has been performed.
