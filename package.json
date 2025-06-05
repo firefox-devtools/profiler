@@ -160,7 +160,7 @@
     "lockfile-lint": "^4.14.1",
     "mkdirp": "^3.0.1",
     "node-fetch": "^2.6.11",
-    "npm-run-all2": "^8.0.1",
+    "npm-run-all2": "^8.0.4",
     "open": "^10.1.2",
     "postcss": "^8.5.3",
     "postcss-loader": "^8.1.1",
@@ -171,11 +171,11 @@
     "stylelint": "^16.19.1",
     "stylelint-config-idiomatic-order": "^10.0.0",
     "stylelint-config-standard": "^38.0.0",
-    "webpack": "^5.99.8",
+    "webpack": "^5.99.9",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.1",
     "workbox-webpack-plugin": "^7.3.0",
-    "yargs": "^17.7.2"
+    "yargs": "^18.0.0"
   },
   "jest": {
     "collectCoverageFrom": [
