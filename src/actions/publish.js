@@ -23,7 +23,6 @@ import {
   getProfile,
   getZeroAt,
   getCommittedRange,
-  getProfileFilterPageData,
 } from 'firefox-profiler/selectors/profile';
 import { viewProfile } from './receive-profile';
 import { ensureExists } from 'firefox-profiler/utils/flow';
@@ -146,7 +145,6 @@ async function persistJustUploadedProfileInformationToDb(
   }
 
   const profileMeta = getProfile(prepublishedState).meta;
-  const profileFilterPageData = getProfileFilterPageData(prepublishedState);
 
   try {
     await persistUploadedProfileInformationToDb({
@@ -154,9 +152,6 @@ async function persistJustUploadedProfileInformationToDb(
       jwtToken,
       publishedDate: new Date(),
       name: profileName,
-      originHostname: profileFilterPageData
-        ? profileFilterPageData.hostname
-        : null,
       preset: null, // This is unused for now.
       meta: {
         // We don't put the full meta object, but only what we need, so that we

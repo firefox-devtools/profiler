@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { selectedThreadSelectors } from 'firefox-profiler/selectors';
-import { changeTimelineTrackOrganization } from 'firefox-profiler/actions/receive-profile';
 import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 
@@ -306,89 +305,6 @@ describe('selectors/getUserTimingMarkerTiming', function () {
         length: 2,
       },
     ]);
-  });
-});
-
-describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function () {
-  const tabID = 123123;
-  const innerWindowID = 2;
-
-  function setup(ctxId, markers: ?Array<any>) {
-    const profile = getProfileWithMarkers(
-      markers || [
-        [
-          'Dummy 1',
-          10,
-          null,
-          { type: 'tracing', category: 'Navigation', innerWindowID },
-        ],
-        ['Dummy 2', 20, null],
-        [
-          'Dummy 3',
-          30,
-          null,
-          { type: 'tracing', category: 'Navigation', innerWindowID: 111111 },
-        ],
-        [
-          'Dummy 4',
-          30,
-          null,
-          { type: 'tracing', category: 'Navigation', innerWindowID },
-        ],
-        ['Dummy 5', 40],
-      ]
-    );
-    profile.pages = [
-      {
-        tabID: tabID,
-        innerWindowID: innerWindowID,
-        url: 'https://developer.mozilla.org/en-US/',
-        embedderInnerWindowID: 0,
-      },
-    ];
-    profile.meta.configuration = {
-      threads: [],
-      features: [],
-      capacity: 1000000,
-      activeTabID: tabID,
-    };
-    const { getState, dispatch } = storeWithProfile(profile);
-
-    if (ctxId) {
-      dispatch(changeTimelineTrackOrganization({ type: 'active-tab', tabID }));
-    }
-    const markerIndexes =
-      selectedThreadSelectors.getCommittedRangeAndTabFilteredMarkerIndexes(
-        getState()
-      );
-
-    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-    return markerIndexes.map((markerIndex) => getMarker(markerIndex).name);
-  }
-
-  it('does not filter markers if we are not in the single tab view', function () {
-    const markers = setup(false);
-    expect(markers).toEqual([
-      'Dummy 1',
-      'Dummy 2',
-      'Dummy 3',
-      'Dummy 4',
-      'Dummy 5',
-    ]);
-  });
-
-  it('filters markers by their tab if we are in the single tab view', function () {
-    const markers = setup(true);
-    expect(markers).toEqual(['Dummy 1', 'Dummy 4']);
-  });
-
-  it('preserves global markers', function () {
-    const markers = setup(true, [
-      ['Dummy 1', 20, null],
-      ['Jank', 20, null],
-      ['Dummy 2', 20, null],
-    ]);
-    expect(markers).toEqual(['Jank']);
   });
 });
 

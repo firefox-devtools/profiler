@@ -79,7 +79,6 @@ describe('app/CurrentProfileUploadedInformationLoader', () => {
       publishedDate: new Date('5 Jul 2020 11:00'), // This is the future!
       name: 'MacOS X profile',
       preset: null,
-      originHostname: 'https://mozilla.org',
       meta: {
         product: 'Firefox',
         platform: 'Macintosh',

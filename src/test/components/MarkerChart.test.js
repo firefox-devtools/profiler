@@ -24,7 +24,6 @@ import {
 import { MarkerChart } from '../../components/marker-chart';
 import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import { changeSelectedTab } from '../../actions/app';
-import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
 import { getPreviewSelection } from '../../selectors/profile';
 import { ensureExists } from '../../utils/flow';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
@@ -35,8 +34,6 @@ import {
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getProfileWithMarkers,
-  addActiveTabInformationToProfile,
-  addMarkersToThreadWithCorrespondingSamples,
   getUserTiming,
   type TestDefinedMarkers,
 } from '../fixtures/profiles/processed-profile';
@@ -782,160 +779,6 @@ describe('MarkerChart', function () {
         dispatch(changeMarkersSearchString('MATCH_NOTHING'));
       });
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
-    });
-  });
-
-  describe('with active tab', () => {
-    function setupForActiveTab() {
-      // Setup the profile data for active tab.
-      const { profile, firstTabTabID, parentInnerWindowIDsWithChildren } =
-        addActiveTabInformationToProfile(getProfileWithMarkers([...MARKERS]));
-      profile.meta.configuration = {
-        threads: [],
-        features: [],
-        capacity: 1000000,
-        activeTabID: firstTabTabID,
-      };
-      addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
-        [
-          'Marker Navigation',
-          3,
-          null,
-          {
-            type: 'tracing',
-            category: 'Navigation',
-            innerWindowID: parentInnerWindowIDsWithChildren,
-          },
-        ],
-        [
-          'Marker DomEvent',
-          6,
-          13,
-          {
-            type: 'DOMEvent',
-            latency: 7,
-            eventType: 'click',
-            innerWindowID: parentInnerWindowIDsWithChildren,
-          },
-        ],
-      ]);
-
-      const setupResult = setupWithProfile(profile);
-      // Switch to active tab view.
-      act(() => {
-        setupResult.dispatch(
-          changeTimelineTrackOrganization({
-            type: 'active-tab',
-            tabID: firstTabTabID,
-          })
-        );
-      });
-
-      return {
-        ...setupResult,
-      };
-    }
-
-    it('renders the marker chart and matches the snapshot', () => {
-      window.devicePixelRatio = 2;
-      const { dispatch, flushRafCalls, container } = setupForActiveTab();
-
-      dispatch(changeSelectedTab('marker-chart'));
-      flushRafCalls();
-
-      const drawCalls = flushDrawLog();
-      expect(container.firstChild).toMatchSnapshot();
-      expect(drawCalls).toMatchSnapshot();
-
-      delete window.devicePixelRatio;
-    });
-
-    it('renders the hovered marker properly', () => {
-      window.devicePixelRatio = 1;
-
-      const { dispatch, flushRafCalls, fireMouseEvent } = setupForActiveTab();
-
-      dispatch(changeSelectedTab('marker-chart'));
-      flushRafCalls();
-      // No tooltip displayed yet
-      expect(document.querySelector('.tooltip')).toBeFalsy();
-
-      {
-        const drawLog = flushDrawLog();
-
-        // Find the DomEvent with the eventType 'click'.
-        const { x, y } = findFillTextPositionFromDrawLog(drawLog, 'click');
-
-        // Move the mouse on top of an item.
-        fireMouseEvent('mousemove', {
-          offsetX: x,
-          offsetY: y,
-          pageX: x,
-          pageY: y,
-        });
-      }
-
-      flushRafCalls();
-
-      const drawLog = flushDrawLog();
-      if (drawLog.length === 0) {
-        throw new Error('The mouse move produced no draw commands.');
-      }
-      expect(drawLog).toMatchSnapshot();
-
-      // The tooltip should be displayed
-      expect(
-        ensureExists(
-          document.querySelector('.tooltip'),
-          'A tooltip component must exist for this test.'
-        )
-      ).toMatchSnapshot();
-    });
-
-    it('does not render the hovered label', () => {
-      window.devicePixelRatio = 1;
-
-      const { dispatch, flushRafCalls, fireMouseEvent } = setupForActiveTab();
-
-      dispatch(changeSelectedTab('marker-chart'));
-      flushRafCalls();
-
-      const getLabelFromDrawLog = (drawLog, markerLabel) =>
-        drawLog.filter(
-          ([operation, text]) =>
-            operation === 'fillText' && text === markerLabel
-        );
-
-      {
-        // First make sure that the marker label is present.
-        const drawLog = flushDrawLog();
-        expect(getLabelFromDrawLog(drawLog, 'Marker DomEvent')).toHaveLength(1);
-
-        // Find the DomEvent label.
-        const { x, y } = findFillTextPositionFromDrawLog(
-          drawLog,
-          'Marker DomEvent'
-        );
-
-        // Move the mouse on top of the label.
-        fireMouseEvent('mousemove', {
-          offsetX: x,
-          offsetY: y,
-          pageX: x,
-          pageY: y,
-        });
-      }
-
-      flushRafCalls();
-
-      const drawLog = flushDrawLog();
-      if (drawLog.length === 0) {
-        throw new Error('The mouse move produced no draw commands.');
-      }
-
-      // Now, since we hovered over the label, it should not be rendered.
-      expect(getLabelFromDrawLog(drawLog, 'Marker DomEvent')).toHaveLength(0);
-      expect(drawLog).toMatchSnapshot();
     });
   });
 });

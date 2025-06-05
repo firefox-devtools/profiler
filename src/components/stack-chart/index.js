@@ -7,6 +7,7 @@ import * as React from 'react';
 import {
   TIMELINE_MARGIN_RIGHT,
   JS_TRACER_MAXIMUM_CHART_ZOOM,
+  TIMELINE_MARGIN_LEFT,
 } from '../../app-logic/constants';
 import explicitConnect from '../../utils/connect';
 import { StackChartCanvas } from './Canvas';
@@ -24,7 +25,6 @@ import {
   getShowUserTimings,
   getSelectedThreadsKey,
 } from '../../selectors/url-state';
-import { getTimelineMarginLeft } from '../../selectors/app';
 import { StackChartEmptyReasons } from './StackChartEmptyReasons';
 import { ContextMenuTrigger } from '../shared/ContextMenuTrigger';
 import { StackSettings } from '../shared/StackSettings';
@@ -53,7 +53,6 @@ import type {
   PreviewSelection,
   WeightType,
   ThreadsKey,
-  CssPixels,
   InnerWindowID,
   Page,
 } from 'firefox-profiler/types';
@@ -81,7 +80,6 @@ type StateProps = {|
   +scrollToSelectionGeneration: number,
   +getMarker: (MarkerIndex) => Marker,
   +userTimings: MarkerIndex[],
-  +timelineMarginLeft: CssPixels,
   +displayStackType: boolean,
   +hasFilteredCtssSamples: boolean,
 |};
@@ -217,7 +215,6 @@ class StackChartImpl extends React.PureComponent<Props> {
       getMarker,
       userTimings,
       weightType,
-      timelineMarginLeft,
       displayStackType,
       hasFilteredCtssSamples,
     } = this.props;
@@ -249,7 +246,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   timeRange,
                   maxViewportHeight,
                   viewportNeedsUpdate,
-                  marginLeft: timelineMarginLeft,
+                  marginLeft: TIMELINE_MARGIN_LEFT,
                   marginRight: TIMELINE_MARGIN_RIGHT,
                   maximumZoom: this.getMaximumZoom(),
                   containerRef: this._takeViewportRef,
@@ -276,7 +273,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   onRightClick: this._onRightClickedCallNodeChange,
                   shouldDisplayTooltips: this._shouldDisplayTooltips,
                   scrollToSelectionGeneration,
-                  marginLeft: timelineMarginLeft,
+                  marginLeft: TIMELINE_MARGIN_LEFT,
                   displayStackType: displayStackType,
                 }}
               />
@@ -314,7 +311,6 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       innerWindowIDToPageMap: getInnerWindowIDToPageMap(state),
       getMarker: selectedThreadSelectors.getMarkerGetter(state),
       userTimings: selectedThreadSelectors.getUserTimingMarkerIndexes(state),
-      timelineMarginLeft: getTimelineMarginLeft(state),
       displayStackType: getProfileUsesMultipleStackTypes(state),
       hasFilteredCtssSamples:
         selectedThreadSelectors.getHasFilteredCtssSamples(state),

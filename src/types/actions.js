@@ -22,8 +22,6 @@ import type {
   LocalTrack,
   TrackIndex,
   MarkerIndex,
-  OriginsTimeline,
-  ActiveTabTimeline,
   ThreadsKey,
   NativeSymbolInfo,
 } from './profile-derived';
@@ -128,23 +126,6 @@ export type LastNonShiftClickInformation = {|
   clickedTrack: TrackReference,
   selection: Set<ThreadIndex>,
 |};
-
-/**
- * Active tab track references
- * A TrackReference uniquely identifies a track.
- */
-export type ActiveTabGlobalTrackReference = {|
-  +type: 'global',
-  +trackIndex: TrackIndex,
-|};
-export type ActiveTabResourceTrackReference = {|
-  +type: 'resource',
-  +trackIndex: TrackIndex,
-|};
-
-export type ActiveTabTrackReference =
-  | ActiveTabGlobalTrackReference
-  | ActiveTabResourceTrackReference;
 
 export type RequestedLib = {|
   +debugName: string,
@@ -416,18 +397,6 @@ type ReceiveProfileAction =
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
       +timelineType: TimelineType | null,
       +selectedTab: TabSlug,
-    |}
-  | {|
-      +type: 'VIEW_ORIGINS_PROFILE',
-      +selectedThreadIndexes: Set<ThreadIndex>,
-      +originsTimeline: OriginsTimeline,
-    |}
-  | {|
-      +type: 'VIEW_ACTIVE_TAB_PROFILE',
-      +selectedThreadIndexes: Set<ThreadIndex>,
-      +activeTabTimeline: ActiveTabTimeline,
-      +tabID: TabID | null,
-      +timelineType: TimelineType | null,
     |}
   | {|
       +type: 'DATA_RELOAD',

@@ -43,10 +43,6 @@ type MarkerState = 'PRESSED' | 'HOVERED' | 'NONE';
 
 type MouseEventHandler = (SyntheticMouseEvent<HTMLCanvasElement>) => any;
 
-function _stopPropagation(e: TransitionEvent) {
-  e.stopPropagation();
-}
-
 /**
  * When adding properties to these props, please consider the comment above the component.
  */
@@ -321,7 +317,6 @@ type State = {
 };
 
 class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
-  _container: HTMLElement | null = null;
   state = {
     hoveredMarkerIndex: null,
     mouseDownMarker: null,
@@ -452,26 +447,6 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     }
   };
 
-  componentDidMount() {
-    const container = this._container;
-    if (container !== null) {
-      // Stop the propagation of transitionend so we won't fire multiple events
-      // on the active tab resource track `transitionend` event.
-      container.addEventListener('transitionend', _stopPropagation);
-    }
-  }
-
-  componentWillUnmount() {
-    const container = this._container;
-    if (container !== null) {
-      container.removeEventListener('transitionend', _stopPropagation);
-    }
-  }
-
-  _takeContainerRef = (el: HTMLElement | null) => {
-    this._container = el;
-  };
-
   render() {
     const {
       additionalClassName,
@@ -497,7 +472,6 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
           additionalClassName,
           isSelected ? 'selected' : null
         )}
-        ref={this._takeContainerRef}
       >
         <ContextMenuTrigger id="MarkerContextMenu">
           <TimelineMarkersCanvas

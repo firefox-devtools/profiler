@@ -31,11 +31,7 @@ import {
   UrlUpgradeError,
 } from '../app-logic/url-handling';
 import { blankStore } from './fixtures/stores';
-import {
-  viewProfile,
-  changeTimelineTrackOrganization,
-  changeTabFilter,
-} from '../actions/receive-profile';
+import { viewProfile, changeTabFilter } from '../actions/receive-profile';
 import type {
   Profile,
   StartEndRange,
@@ -48,21 +44,13 @@ import {
   getHumanReadableTracks,
   getProfileWithNiceTracks,
 } from './fixtures/profiles/tracks';
-import {
-  getProfileFromTextSamples,
-  addActiveTabInformationToProfile,
-} from './fixtures/profiles/processed-profile';
+import { getProfileFromTextSamples } from './fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../selectors/per-thread';
 import {
   encodeUintArrayForUrlComponent,
   encodeUintSetForUrlComponent,
 } from '../utils/uintarray-encoding';
-import {
-  getActiveTabGlobalTracks,
-  getActiveTabResourceTracks,
-  getProfile,
-} from '../selectors/profile';
-import { getView } from '../selectors/app';
+import { getProfile } from '../selectors/profile';
 import { SYMBOL_SERVER_URL } from '../app-logic/constants';
 import { getThreadsKey } from '../profile-logic/profile-data';
 
@@ -522,122 +510,6 @@ describe('profileName', function () {
     expect(urlStateSelectors.getProfileNameWithDefault(getState())).toBe(
       'Firefox'
     );
-  });
-});
-
-describe('ctxId', function () {
-  it('serializes the ctxId in the URL', function () {
-    const { profile } = addActiveTabInformationToProfile(
-      getProfileWithNiceTracks()
-    );
-    const { getState, dispatch } = _getStoreWithURL({}, profile);
-    const tabID = 123;
-
-    dispatch(changeTimelineTrackOrganization({ type: 'active-tab', tabID }));
-    const queryString = getQueryStringFromState(getState());
-    expect(queryString).toContain(`ctxId=${tabID}`);
-  });
-
-  it('reflects in the state from URL', function () {
-    const { profile } = addActiveTabInformationToProfile(
-      getProfileWithNiceTracks()
-    );
-    const { getState } = _getStoreWithURL(
-      {
-        search: '?ctxId=123&view=active-tab',
-      },
-      profile
-    );
-    expect(urlStateSelectors.getTimelineTrackOrganization(getState())).toEqual({
-      type: 'active-tab',
-      tabID: 123,
-    });
-  });
-
-  it('returns the full view when ctxId is not specified', function () {
-    const { profile } = addActiveTabInformationToProfile(
-      getProfileWithNiceTracks()
-    );
-    const { getState } = _getStoreWithURL({}, profile);
-    expect(urlStateSelectors.getTimelineTrackOrganization(getState())).toEqual({
-      type: 'full',
-    });
-  });
-
-  it('should use the finalizeActiveTabProfileView path and initialize active tab profile view state', function () {
-    const {
-      profile,
-      parentInnerWindowIDsWithChildren,
-      iframeInnerWindowIDsWithChild,
-    } = addActiveTabInformationToProfile(getProfileWithNiceTracks());
-    profile.threads[0].frameTable.innerWindowID[0] =
-      parentInnerWindowIDsWithChildren;
-    profile.threads[1].frameTable.innerWindowID[0] =
-      iframeInnerWindowIDsWithChild;
-    const { getState } = _getStoreWithURL(
-      {
-        search: '?view=active-tab&ctxId=123',
-      },
-      profile
-    );
-    const globalTracks = getActiveTabGlobalTracks(getState());
-    expect(globalTracks.length).toBe(1);
-    expect(globalTracks).toEqual([
-      {
-        type: 'tab',
-        threadIndexes: new Set([0]),
-        threadsKey: 0,
-      },
-    ]);
-    // TODO: Resource track type will be changed soon.
-    const resourceTracks = getActiveTabResourceTracks(getState());
-    expect(resourceTracks).toEqual([
-      {
-        name: 'https://www.youtube.com/',
-        type: 'sub-frame',
-        threadIndex: 1,
-      },
-    ]);
-  });
-
-  it('should remove other full view url states if present', function () {
-    const { profile } = addActiveTabInformationToProfile(
-      getProfileWithNiceTracks()
-    );
-    const { getState } = _getStoreWithURL(
-      {
-        search:
-          '?ctxId=123&view=active-tab&globalTrackOrder=3w0&hiddenGlobalTracks=45&hiddenLocalTracksByPid=111-1&thread=0',
-      },
-      profile
-    );
-
-    const newUrl = new URL(
-      urlFromState(urlStateSelectors.getUrlState(getState())),
-      'https://profiler.firefox.com'
-    );
-    // The url states that are relevant to full view should be stripped out.
-    expect(newUrl.search).toEqual(
-      `?ctxId=123&thread=0&v=${CURRENT_URL_VERSION}&view=active-tab`
-    );
-  });
-
-  it('if not present in the URL, still manages to load the active tab view', function () {
-    const { profile } = addActiveTabInformationToProfile(
-      getProfileWithNiceTracks()
-    );
-    const { getState } = _getStoreWithURL(
-      {
-        search: '?view=active-tab',
-      },
-      profile
-    );
-
-    expect(getView(getState()).phase).toEqual('DATA_LOADED');
-    expect(urlStateSelectors.getTimelineTrackOrganization(getState())).toEqual({
-      type: 'active-tab',
-      tabID: null,
-    });
   });
 });
 

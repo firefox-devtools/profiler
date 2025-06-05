@@ -8,21 +8,14 @@ import { createSelector } from 'reselect';
 import {
   getDataSource,
   getSelectedTab,
-  getTimelineTrackOrganization,
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
-  getIsActiveTabResourcesPanelOpen,
 } from './url-state';
-import {
-  getGlobalTracks,
-  getLocalTracksByPid,
-  getActiveTabTimeline,
-} from './profile';
+import { getGlobalTracks, getLocalTracksByPid } from './profile';
 import { getZipFileState } from './zipped-profiles.js';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import {
   FULL_TRACK_SCREENSHOT_HEIGHT,
-  ACTIVE_TAB_TRACK_SCREENSHOT_HEIGHT,
   TRACK_NETWORK_HEIGHT,
   TRACK_MEMORY_HEIGHT,
   TRACK_BANDWIDTH_HEIGHT,
@@ -30,10 +23,7 @@ import {
   TRACK_PROCESS_BLANK_HEIGHT,
   TIMELINE_RULER_HEIGHT,
   TRACK_VISUAL_PROGRESS_HEIGHT,
-  ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT,
   TRACK_EVENT_DELAY_HEIGHT,
-  TIMELINE_MARGIN_LEFT,
-  ACTIVE_TAB_TIMELINE_MARGIN_LEFT,
   TRACK_PROCESS_CPU_HEIGHT,
   TRACK_MARKER_HEIGHT,
 } from '../app-logic/constants';
@@ -102,27 +92,6 @@ export const getCurrentProfileUploadedInformation: Selector<
 > = (state) => getApp(state).currentProfileUploadedInformation;
 
 /**
- * Height of screenshot track is different depending on the view.
- */
-export const getScreenshotTrackHeight: Selector<number> = createSelector(
-  getTimelineTrackOrganization,
-  (timelineTrackOrganization) => {
-    switch (timelineTrackOrganization.type) {
-      case 'active-tab':
-        return ACTIVE_TAB_TRACK_SCREENSHOT_HEIGHT;
-      case 'full':
-      case 'origins':
-        return FULL_TRACK_SCREENSHOT_HEIGHT;
-      default:
-        throw assertExhaustiveCheck(
-          timelineTrackOrganization,
-          `Unhandled TimelineTrackOrganization`
-        );
-    }
-  }
-);
-
-/**
  * This selector takes all of the tracks, and deduces the height in CssPixels
  * of the timeline. This is here to calculate the max-height of the timeline
  * for the splitter component.
@@ -133,192 +102,117 @@ export const getScreenshotTrackHeight: Selector<number> = createSelector(
  * and get added in here.
  */
 export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
-  getTimelineTrackOrganization,
   getGlobalTracks,
   getLocalTracksByPid,
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
   getTrackThreadHeights,
-  getActiveTabTimeline,
-  getIsActiveTabResourcesPanelOpen,
-  getScreenshotTrackHeight,
   (
-    timelineTrackOrganization,
     globalTracks,
     localTracksByPid,
     hiddenGlobalTracks,
     hiddenLocalTracksByPid,
-    trackThreadHeights,
-    activeTabTimeline,
-    isActiveTabResourcesPanelOpen,
-    screenshotTrackHeight
+    trackThreadHeights
   ) => {
     let height = TIMELINE_RULER_HEIGHT;
     const border = 1;
-    switch (timelineTrackOrganization.type) {
-      case 'origins': {
-        return height + 500;
-      }
-      case 'active-tab': {
-        if (activeTabTimeline.resources.length > 0) {
-          // Active tab resources panel has a header and we should also add its
-          // height if there is a panel there.
-          height += ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT;
-        }
-
-        // Add the height of the main track.
-        // The thread tracks have enough complexity that it warrants measuring
-        // them rather than statically using a value like the other tracks.
-        const { threadsKey } = activeTabTimeline.mainTrack;
-        const trackThreadHeight = trackThreadHeights[threadsKey];
-        if (trackThreadHeight === undefined) {
-          // The height isn't computed yet, return.
-          return null;
-        }
-        height += trackThreadHeight + border;
-
-        // Add the height of screenshot tracks.
-        for (let i = 0; i < activeTabTimeline.screenshots.length; i++) {
-          height += screenshotTrackHeight + border;
-        }
-
-        if (isActiveTabResourcesPanelOpen) {
-          for (const resourceTrack of activeTabTimeline.resources) {
-            switch (resourceTrack.type) {
-              case 'sub-frame':
-              case 'thread':
-                {
-                  // The thread tracks have enough complexity that it warrants measuring
-                  // them rather than statically using a value like the other tracks.
-                  const { threadIndex } = resourceTrack;
-                  if (threadIndex === null) {
-                    height += TRACK_PROCESS_BLANK_HEIGHT + border;
-                  } else {
-                    const trackThreadHeight = trackThreadHeights[threadIndex];
-                    if (trackThreadHeight === undefined) {
-                      // The height isn't computed yet, return.
-                      return null;
-                    }
-                    height +=
-                      trackThreadHeight +
-                      ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT +
-                      border;
-                  }
-                }
-                break;
-              default:
-                throw assertExhaustiveCheck(resourceTrack);
+    for (const [trackIndex, globalTrack] of globalTracks.entries()) {
+      if (!hiddenGlobalTracks.has(trackIndex)) {
+        switch (globalTrack.type) {
+          case 'screenshots':
+            height += FULL_TRACK_SCREENSHOT_HEIGHT + border;
+            break;
+          case 'visual-progress':
+          case 'perceptual-visual-progress':
+          case 'contentful-visual-progress':
+            height += TRACK_VISUAL_PROGRESS_HEIGHT;
+            break;
+          case 'process': {
+            // The thread tracks have enough complexity that it warrants measuring
+            // them rather than statically using a value like the other tracks.
+            const { mainThreadIndex } = globalTrack;
+            if (mainThreadIndex === null) {
+              height += TRACK_PROCESS_BLANK_HEIGHT + border;
+            } else {
+              const trackThreadHeight = trackThreadHeights[mainThreadIndex];
+              if (trackThreadHeight === undefined) {
+                // The height isn't computed yet, return.
+                return null;
+              }
+              height += trackThreadHeight + border;
             }
+            break;
           }
+          default:
+            throw assertExhaustiveCheck(globalTrack);
         }
-
-        return height;
       }
-      case 'full': {
-        for (const [trackIndex, globalTrack] of globalTracks.entries()) {
-          if (!hiddenGlobalTracks.has(trackIndex)) {
-            switch (globalTrack.type) {
-              case 'screenshots':
-                height += screenshotTrackHeight + border;
-                break;
-              case 'visual-progress':
-              case 'perceptual-visual-progress':
-              case 'contentful-visual-progress':
-                height += TRACK_VISUAL_PROGRESS_HEIGHT;
-                break;
-              case 'process': {
+    }
+
+    // Figure out which PIDs are hidden.
+    const hiddenPids = new Set();
+    for (const trackIndex of hiddenGlobalTracks) {
+      const globalTrack = globalTracks[trackIndex];
+      if (globalTrack.type === 'process') {
+        hiddenPids.add(globalTrack.pid);
+      }
+    }
+
+    for (const [pid, localTracks] of localTracksByPid) {
+      if (hiddenPids.has(pid)) {
+        // This track is hidden already.
+        continue;
+      }
+      for (const [trackIndex, localTrack] of localTracks.entries()) {
+        const hiddenLocalTracks = ensureExists(
+          hiddenLocalTracksByPid.get(pid),
+          'Could not look up the hidden local tracks from the given PID'
+        );
+        if (!hiddenLocalTracks.has(trackIndex)) {
+          switch (localTrack.type) {
+            case 'thread':
+              {
                 // The thread tracks have enough complexity that it warrants measuring
                 // them rather than statically using a value like the other tracks.
-                const { mainThreadIndex } = globalTrack;
-                if (mainThreadIndex === null) {
-                  height += TRACK_PROCESS_BLANK_HEIGHT + border;
-                } else {
-                  const trackThreadHeight = trackThreadHeights[mainThreadIndex];
-                  if (trackThreadHeight === undefined) {
-                    // The height isn't computed yet, return.
-                    return null;
-                  }
-                  height += trackThreadHeight + border;
+                const trackThreadHeight =
+                  trackThreadHeights[localTrack.threadIndex];
+                if (trackThreadHeight === undefined) {
+                  // The height isn't computed yet, return.
+                  return null;
                 }
-                break;
+                height += trackThreadHeight + border;
               }
-              default:
-                throw assertExhaustiveCheck(globalTrack);
-            }
+
+              break;
+            case 'network':
+              height += TRACK_NETWORK_HEIGHT + border;
+              break;
+            case 'memory':
+              height += TRACK_MEMORY_HEIGHT + border;
+              break;
+            case 'bandwidth':
+              height += TRACK_BANDWIDTH_HEIGHT + border;
+              break;
+            case 'event-delay':
+              height += TRACK_EVENT_DELAY_HEIGHT + border;
+              break;
+            case 'ipc':
+              height += TRACK_IPC_HEIGHT + border;
+              break;
+            case 'process-cpu':
+            case 'power':
+              height += TRACK_PROCESS_CPU_HEIGHT + border;
+              break;
+            case 'marker':
+              height += TRACK_MARKER_HEIGHT + border;
+              break;
+            default:
+              throw assertExhaustiveCheck(localTrack);
           }
         }
-
-        // Figure out which PIDs are hidden.
-        const hiddenPids = new Set();
-        for (const trackIndex of hiddenGlobalTracks) {
-          const globalTrack = globalTracks[trackIndex];
-          if (globalTrack.type === 'process') {
-            hiddenPids.add(globalTrack.pid);
-          }
-        }
-
-        for (const [pid, localTracks] of localTracksByPid) {
-          if (hiddenPids.has(pid)) {
-            // This track is hidden already.
-            continue;
-          }
-          for (const [trackIndex, localTrack] of localTracks.entries()) {
-            const hiddenLocalTracks = ensureExists(
-              hiddenLocalTracksByPid.get(pid),
-              'Could not look up the hidden local tracks from the given PID'
-            );
-            if (!hiddenLocalTracks.has(trackIndex)) {
-              switch (localTrack.type) {
-                case 'thread':
-                  {
-                    // The thread tracks have enough complexity that it warrants measuring
-                    // them rather than statically using a value like the other tracks.
-                    const trackThreadHeight =
-                      trackThreadHeights[localTrack.threadIndex];
-                    if (trackThreadHeight === undefined) {
-                      // The height isn't computed yet, return.
-                      return null;
-                    }
-                    height += trackThreadHeight + border;
-                  }
-
-                  break;
-                case 'network':
-                  height += TRACK_NETWORK_HEIGHT + border;
-                  break;
-                case 'memory':
-                  height += TRACK_MEMORY_HEIGHT + border;
-                  break;
-                case 'bandwidth':
-                  height += TRACK_BANDWIDTH_HEIGHT + border;
-                  break;
-                case 'event-delay':
-                  height += TRACK_EVENT_DELAY_HEIGHT + border;
-                  break;
-                case 'ipc':
-                  height += TRACK_IPC_HEIGHT + border;
-                  break;
-                case 'process-cpu':
-                case 'power':
-                  height += TRACK_PROCESS_CPU_HEIGHT + border;
-                  break;
-                case 'marker':
-                  height += TRACK_MARKER_HEIGHT + border;
-                  break;
-                default:
-                  throw assertExhaustiveCheck(localTrack);
-              }
-            }
-          }
-        }
-        return height;
       }
-      default:
-        throw assertExhaustiveCheck(
-          timelineTrackOrganization,
-          `Unhandled TimelineTrackOrganization`
-        );
     }
+    return height;
   }
 );
 
@@ -341,27 +235,6 @@ export const getIsNewProfileLoadAllowed: Selector<boolean> = createSelector(
       (appPhase === 'INITIALIZING' && dataSource !== 'none') ||
       zipPhase === 'PROCESS_PROFILE_FROM_ZIP_FILE';
     return !isLoading;
-  }
-);
-
-/**
- * Height of screenshot track is different depending on the view.
- */
-export const getTimelineMarginLeft: Selector<number> = createSelector(
-  getTimelineTrackOrganization,
-  (timelineTrackOrganization) => {
-    switch (timelineTrackOrganization.type) {
-      case 'active-tab':
-        return ACTIVE_TAB_TIMELINE_MARGIN_LEFT;
-      case 'full':
-      case 'origins':
-        return TIMELINE_MARGIN_LEFT;
-      default:
-        throw assertExhaustiveCheck(
-          timelineTrackOrganization,
-          `Unhandled TimelineTrackOrganization`
-        );
-    }
   }
 );
 
