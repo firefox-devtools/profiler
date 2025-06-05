@@ -656,14 +656,6 @@ export type RawThread = {|
   jsAllocations?: JsAllocationsTable,
   nativeAllocations?: NativeAllocationsTable,
   markers: RawMarkerTable,
-  stackTable: RawStackTable,
-  frameTable: FrameTable,
-  // Strings for profiles are collected into a single table, and are referred to by
-  // their index by other tables.
-  stringArray: string[],
-  funcTable: FuncTable,
-  resourceTable: ResourceTable,
-  nativeSymbols: NativeSymbolTable,
   jsTracer?: JsTracerTable,
   // If present and true, this thread was launched for a private browsing session only.
   // When false, it can still contain private browsing data if the profile was
@@ -675,6 +667,7 @@ export type RawThread = {|
   // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
   // had no extra attribute at all.
   userContextId?: number,
+  usedInnerWindowIDs?: InnerWindowID[],
 |};
 
 export type ExtensionTable = {|
@@ -927,6 +920,17 @@ export type ProfileMeta = {|
   gramsOfCO2ePerKWh?: number,
 |};
 
+export type RawProfileSharedData = {|
+  stackTable: RawStackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  nativeSymbols: NativeSymbolTable,
+  // Strings for profiles are collected into a single table, and are referred to by
+  // their index by other tables.
+  stringArray: string[],
+|};
+
 /**
  * All of the data for a processed profile.
  */
@@ -941,6 +945,7 @@ export type Profile = {|
   // have them. An upgrader could be written to make this non-optional.
   // This is list because there is a profiler overhead per process.
   profilerOverhead?: ProfilerOverhead[],
+  shared: RawProfileSharedData,
   threads: RawThread[],
   profilingLog?: ProfilingLog,
   profileGatheringLog?: ProfilingLog,

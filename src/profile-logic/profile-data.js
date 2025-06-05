@@ -39,6 +39,7 @@ import DefaultLinkFavicon from '../../res/img/svg/globe.svg';
 
 import type {
   Profile,
+  RawProfileSharedData,
   RawThread,
   Thread,
   RawSamplesTable,
@@ -1632,9 +1633,10 @@ export function computeTimeColumnForRawSamplesTable(
  */
 export function hasUsefulSamples(
   sampleStacks?: Array<IndexIntoStackTable | null>,
-  thread: RawThread
+  thread: RawThread,
+  shared: RawProfileSharedData
 ): boolean {
-  const { stackTable, frameTable, funcTable, stringArray } = thread;
+  const { stackTable, frameTable, funcTable, stringArray } = shared;
   if (
     sampleStacks === undefined ||
     sampleStacks.length === 0 ||
@@ -2401,6 +2403,10 @@ export function createThreadFromDerivedTables(
   rawThread: RawThread,
   samples: SamplesTable,
   stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  nativeSymbols: NativeSymbolTable,
+  resourceTable: ResourceTable,
   stringTable: StringTable
 ): Thread {
   const {
@@ -2421,10 +2427,6 @@ export function createThreadFromDerivedTables(
     jsAllocations,
     nativeAllocations,
     markers,
-    frameTable,
-    funcTable,
-    resourceTable,
-    nativeSymbols,
     jsTracer,
     isPrivateBrowsing,
     userContextId,
@@ -2449,10 +2451,6 @@ export function createThreadFromDerivedTables(
     jsAllocations,
     nativeAllocations,
     markers,
-    frameTable,
-    funcTable,
-    resourceTable,
-    nativeSymbols,
     jsTracer,
     isPrivateBrowsing,
     userContextId,
@@ -2460,6 +2458,10 @@ export function createThreadFromDerivedTables(
     // These fields are derived:
     samples,
     stackTable,
+    frameTable,
+    funcTable,
+    resourceTable,
+    nativeSymbols,
     stringTable,
   };
   return thread;
@@ -2574,21 +2576,15 @@ export function updateThreadStacks(
 }
 
 /**
- * Updates the stackTable and all references to stacks in the raw thread.
+ * Updates all references to stacks in the raw threads.
  *
  * This function is used by symbolication, which acts on the raw thread.
  */
 export function updateRawThreadStacks(
-  thread: RawThread,
-  newStackTable: RawStackTable,
+  threads: RawThread[],
   convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null
-): RawThread {
-  return updateRawThreadStacksSeparate(
-    thread,
-    newStackTable,
-    convertStack,
-    convertStack
-  );
+): RawThread[] {
+  return updateRawThreadStacksSeparate(threads, convertStack, convertStack);
 }
 
 /**
@@ -2603,8 +2599,23 @@ export function updateRawThreadStacks(
  * which act on the raw thread.
  */
 export function updateRawThreadStacksSeparate(
+  threads: RawThread[],
+  convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null,
+  convertSyncBacktraceStack: (
+    IndexIntoStackTable | null
+  ) => IndexIntoStackTable | null
+): RawThread[] {
+  return threads.map((thread) =>
+    updateSingleRawThreadStacksSeparate(
+      thread,
+      convertStack,
+      convertSyncBacktraceStack
+    )
+  );
+}
+
+export function updateSingleRawThreadStacksSeparate(
   thread: RawThread,
-  newStackTable: RawStackTable,
   convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null,
   convertSyncBacktraceStack: (
     IndexIntoStackTable | null
@@ -2643,7 +2654,6 @@ export function updateRawThreadStacksSeparate(
     ...thread,
     samples: newSamples,
     markers: newMarkers,
-    stackTable: newStackTable,
   };
 
   if (jsAllocations) {
@@ -3528,47 +3538,49 @@ export type StackReferences = {|
  * samples, and stacks referenced by sync backtraces (e.g. marker causes).
  * The two have slightly different properties, see the type definition.
  */
-export function gatherStackReferences(thread: RawThread): StackReferences {
+export function gatherStackReferences(threads: RawThread[]): StackReferences {
   const samplingSelfStacks = new Set();
   const syncBacktraceSelfStacks = new Set();
 
-  const { samples, markers, jsAllocations, nativeAllocations } = thread;
+  for (const thread of threads) {
+    const { samples, markers, jsAllocations, nativeAllocations } = thread;
 
-  // Samples
-  for (let i = 0; i < samples.length; i++) {
-    const stack = samples.stack[i];
-    if (stack !== null) {
-      samplingSelfStacks.add(stack);
-    }
-  }
-
-  // Markers
-  for (let i = 0; i < markers.length; i++) {
-    const data = markers.data[i];
-    if (data && data.cause) {
-      const stack = data.cause.stack;
+    // Samples
+    for (let i = 0; i < samples.length; i++) {
+      const stack = samples.stack[i];
       if (stack !== null) {
-        syncBacktraceSelfStacks.add(stack);
+        samplingSelfStacks.add(stack);
       }
     }
-  }
 
-  // JS allocations
-  if (jsAllocations !== undefined) {
-    for (let i = 0; i < jsAllocations.length; i++) {
-      const stack = jsAllocations.stack[i];
-      if (stack !== null) {
-        syncBacktraceSelfStacks.add(stack);
+    // Markers
+    for (let i = 0; i < markers.length; i++) {
+      const data = markers.data[i];
+      if (data && data.cause) {
+        const stack = data.cause.stack;
+        if (stack !== null) {
+          syncBacktraceSelfStacks.add(stack);
+        }
       }
     }
-  }
 
-  // Native allocations
-  if (nativeAllocations !== undefined) {
-    for (let i = 0; i < nativeAllocations.length; i++) {
-      const stack = nativeAllocations.stack[i];
-      if (stack !== null) {
-        syncBacktraceSelfStacks.add(stack);
+    // JS allocations
+    if (jsAllocations !== undefined) {
+      for (let i = 0; i < jsAllocations.length; i++) {
+        const stack = jsAllocations.stack[i];
+        if (stack !== null) {
+          syncBacktraceSelfStacks.add(stack);
+        }
+      }
+    }
+
+    // Native allocations
+    if (nativeAllocations !== undefined) {
+      for (let i = 0; i < nativeAllocations.length; i++) {
+        const stack = nativeAllocations.stack[i];
+        if (stack !== null) {
+          syncBacktraceSelfStacks.add(stack);
+        }
       }
     }
   }
@@ -3699,11 +3711,12 @@ export function gatherStackReferences(thread: RawThread): StackReferences {
  *     used in both contexts. If we detect that this happened, we need to duplicate
  *     the frame and the stack node and pick the right one depending on the use.
  */
-export function nudgeReturnAddresses(thread: RawThread): RawThread {
-  const { samplingSelfStacks, syncBacktraceSelfStacks } =
-    gatherStackReferences(thread);
+export function nudgeReturnAddresses(profile: Profile): Profile {
+  const { samplingSelfStacks, syncBacktraceSelfStacks } = gatherStackReferences(
+    profile.threads
+  );
 
-  const { stackTable, frameTable } = thread;
+  const { stackTable, frameTable } = profile.shared;
 
   // Collect frames that were obtained from the instruction pointer.
   // These are the top ("self") frames of stacks from sampling.
@@ -3746,7 +3759,7 @@ export function nudgeReturnAddresses(thread: RawThread): RawThread {
 
   if (ipFrames.size === 0 && returnAddressFrames.size === 0) {
     // Nothing to do, use the original thread.
-    return thread;
+    return profile;
   }
 
   // Create the new frame table.
@@ -3826,17 +3839,25 @@ export function nudgeReturnAddresses(thread: RawThread): RawThread {
     }
   }
 
-  const newThread: RawThread = {
-    ...thread,
+  const newShared: RawProfileSharedData = {
+    ...profile.shared,
     frameTable: newFrameTable,
+    stackTable: newStackTable,
   };
 
-  return updateRawThreadStacksSeparate(
-    newThread,
-    newStackTable,
+  const newThreads = updateRawThreadStacksSeparate(
+    profile.threads,
     getMapStackUpdater(mapForSamplingSelfStacks),
     getMapStackUpdater(mapForBacktraceSelfStacks)
   );
+
+  const newProfile: Profile = {
+    ...profile,
+    shared: newShared,
+    threads: newThreads,
+  };
+
+  return newProfile;
 }
 
 /**
@@ -3848,39 +3869,37 @@ export function findAddressProofForFile(
   file: string
 ): AddressProof | null {
   const { libs } = profile;
-  for (const thread of profile.threads) {
-    const { frameTable, funcTable, resourceTable, stringArray } = thread;
-    const stringTable = StringTable.withBackingArray(stringArray);
-    const fileStringIndex = stringTable.indexForString(file);
-    const func = funcTable.fileName.indexOf(fileStringIndex);
-    if (func === -1) {
-      continue;
-    }
-    const frame = frameTable.func.indexOf(func);
-    if (frame === -1) {
-      continue;
-    }
-    const address = frameTable.address[frame];
-    if (address === null) {
-      continue;
-    }
-    const resource = funcTable.resource[func];
-    if (resourceTable.type[resource] !== resourceTypes.library) {
-      continue;
-    }
-    const libIndex = resourceTable.lib[resource];
-    if (libIndex === null) {
-      continue;
-    }
-    const lib = libs[libIndex];
-    const { debugName, breakpadId } = lib;
-    return {
-      debugName,
-      breakpadId,
-      address,
-    };
+  const { stringArray } = profile.shared;
+  const stringTable = StringTable.withBackingArray(stringArray);
+  const { frameTable, funcTable, resourceTable } = profile.shared;
+  const fileStringIndex = stringTable.indexForString(file);
+  const func = funcTable.fileName.indexOf(fileStringIndex);
+  if (func === -1) {
+    return null;
   }
-  return null;
+  const frame = frameTable.func.indexOf(func);
+  if (frame === -1) {
+    return null;
+  }
+  const address = frameTable.address[frame];
+  if (address === null) {
+    return null;
+  }
+  const resource = funcTable.resource[func];
+  if (resourceTable.type[resource] !== resourceTypes.library) {
+    return null;
+  }
+  const libIndex = resourceTable.lib[resource];
+  if (libIndex === null) {
+    return null;
+  }
+  const lib = libs[libIndex];
+  const { debugName, breakpadId } = lib;
+  return {
+    debugName,
+    breakpadId,
+    address,
+  };
 }
 
 /**
@@ -4123,12 +4142,14 @@ export function computeTabToThreadIndexesMap(
   // very cheap, but it'll allow us to not compute this information every
   // time when we need it.
   for (let threadIdx = 0; threadIdx < threads.length; threadIdx++) {
-    const thread = threads[threadIdx];
+    const { usedInnerWindowIDs } = threads[threadIdx];
+    if (usedInnerWindowIDs === undefined) {
+      continue;
+    }
 
     // First go over the innerWindowIDs of the samples.
-    for (let i = 0; i < thread.frameTable.length; i++) {
-      const innerWindowID = thread.frameTable.innerWindowID[i];
-      if (innerWindowID === null || innerWindowID === 0) {
+    for (const innerWindowID of usedInnerWindowIDs) {
+      if (innerWindowID === 0) {
         // Zero value also means null for innerWindowID.
         continue;
       }
@@ -4146,37 +4167,6 @@ export function computeTabToThreadIndexesMap(
         tabToThreadIndexesMap.set(tabID, threadIndexes);
       }
       threadIndexes.add(threadIdx);
-    }
-
-    // Then go over the markers to find their innerWindowIDs.
-    for (let i = 0; i < thread.markers.length; i++) {
-      const markerData = thread.markers.data[i];
-
-      if (!markerData) {
-        continue;
-      }
-
-      if (
-        markerData.innerWindowID !== null &&
-        markerData.innerWindowID !== undefined &&
-        // Zero value also means null for innerWindowID.
-        markerData.innerWindowID !== 0
-      ) {
-        const innerWindowID = markerData.innerWindowID;
-        const tabID = innerWindowIDToTabMap.get(innerWindowID);
-        if (tabID === undefined) {
-          // We couldn't find the tab of this innerWindowID, this should
-          // never happen, it might indicate a bug in Firefox.
-          continue;
-        }
-
-        let threadIndexes = tabToThreadIndexesMap.get(tabID);
-        if (!threadIndexes) {
-          threadIndexes = new Set();
-          tabToThreadIndexesMap.set(tabID, threadIndexes);
-        }
-        threadIndexes.add(threadIdx);
-      }
     }
   }
 

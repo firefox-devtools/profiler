@@ -22,6 +22,7 @@ import { StringTable } from '../../utils/string-table';
 
 import type {
   IndexIntoCallNodeTable,
+  RawProfileSharedData,
   Profile,
   Store,
   State,
@@ -121,14 +122,15 @@ export function getMouseEvent(
 
 export function computeThreadFromRawThread(
   rawThread: RawThread,
+  shared: RawProfileSharedData,
   sampleUnits: SampleUnits | void,
   referenceCPUDeltaPerMs: number,
   defaultCategory: IndexIntoCategoryList
 ): Thread {
-  const stringTable = StringTable.withBackingArray(rawThread.stringArray);
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
   const stackTable = computeStackTableFromRawStackTable(
-    rawThread.stackTable,
-    rawThread.frameTable,
+    shared.stackTable,
+    shared.frameTable,
     defaultCategory
   );
   const samples = computeSamplesTableFromRawSamplesTable(
@@ -140,6 +142,10 @@ export function computeThreadFromRawThread(
     rawThread,
     samples,
     stackTable,
+    shared.frameTable,
+    shared.funcTable,
+    shared.nativeSymbols,
+    shared.resourceTable,
     stringTable
   );
 }

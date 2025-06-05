@@ -27,7 +27,6 @@ import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
 import type { SymbolTableAsTuple } from '../profile-logic/symbol-store-db';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
 import { SymbolsNotFoundError } from '../profile-logic/errors';
-import type { ThreadIndex } from '../types';
 
 /**
  * Simple 'in-memory' symbol DB that conforms to the same interface as SymbolStoreDB but
@@ -128,35 +127,24 @@ export async function run(options: CliOptions) {
 
   console.log('Symbolicating...');
 
-  const symbolicationStepsPerThread: Map<ThreadIndex, SymbolicationStepInfo[]> =
-    new Map();
+  const symbolicationSteps: SymbolicationStepInfo[] = [];
   await symbolicateProfile(
     profile,
     symbolStore,
-    (
-      threadIndex: ThreadIndex,
-      symbolicationStepInfo: SymbolicationStepInfo
-    ) => {
-      let threadSteps = symbolicationStepsPerThread.get(threadIndex);
-      if (threadSteps === undefined) {
-        threadSteps = [];
-        symbolicationStepsPerThread.set(threadIndex, threadSteps);
-      }
-      threadSteps.push(symbolicationStepInfo);
+    (symbolicationStepInfo: SymbolicationStepInfo) => {
+      symbolicationSteps.push(symbolicationStepInfo);
     }
   );
 
   console.log('Applying collected symbolication steps...');
 
-  profile.threads = profile.threads.map((oldThread, threadIndex) => {
-    const symbolicationSteps = symbolicationStepsPerThread.get(threadIndex);
-    if (symbolicationSteps === undefined) {
-      return oldThread;
-    }
-    const { thread } = applySymbolicationSteps(oldThread, symbolicationSteps);
-    return thread;
-  });
-
+  const { shared, threads } = applySymbolicationSteps(
+    profile.threads,
+    profile.shared,
+    symbolicationSteps
+  );
+  profile.shared = shared;
+  profile.threads = threads;
   profile.meta.symbolicated = true;
 
   console.log(`Saving profile to ${options.output}`);

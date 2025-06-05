@@ -67,6 +67,12 @@ export function computeActiveTabTracks(
   const screenshots = [];
   const topmostInnerWindowIDs = getTopmostInnerWindowIDs(relevantPages);
   const innerWindowIDToPageMap = _getInnerWindowIDToPageMap(relevantPages);
+  const { stringArray } = profile.shared;
+  const stringTable = StringTable.withBackingArray(stringArray);
+
+  const screenshotNameIndex = stringTable.indexForString(
+    'CompositorScreenshot'
+  );
 
   for (
     let threadIndex = 0;
@@ -74,8 +80,7 @@ export function computeActiveTabTracks(
     threadIndex++
   ) {
     const thread = profile.threads[threadIndex];
-    const { markers, stringArray } = thread;
-    const stringTable = StringTable.withBackingArray(stringArray);
+    const { markers } = thread;
 
     if (thread.isMainThread) {
       // This is a main thread, there is a possibility that it can be a global
@@ -120,9 +125,6 @@ export function computeActiveTabTracks(
 
     // Check for screenshots.
     const windowIDs: Set<string> = new Set();
-    const screenshotNameIndex = stringTable.indexForString(
-      'CompositorScreenshot'
-    );
     if (screenshotNameIndex !== -1) {
       for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
         if (markers.name[markerIndex] === screenshotNameIndex) {
@@ -174,11 +176,12 @@ function isTopmostThread(
   thread: RawThread,
   topmostInnerWindowIDs: Set<InnerWindowID>
 ): boolean {
-  const { frameTable, markers } = thread;
-  for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
-    const innerWindowID = frameTable.innerWindowID[frameIndex];
-    if (innerWindowID !== null && topmostInnerWindowIDs.has(innerWindowID)) {
-      return true;
+  const { usedInnerWindowIDs, markers } = thread;
+  if (usedInnerWindowIDs !== undefined) {
+    for (const innerWindowID of usedInnerWindowIDs) {
+      if (innerWindowID !== null && topmostInnerWindowIDs.has(innerWindowID)) {
+        return true;
+      }
     }
   }
 
@@ -209,14 +212,13 @@ function _getActiveTabResourceName(
   thread: RawThread,
   innerWindowIDToPageMap: Map<InnerWindowID, Page>
 ): string | null {
-  if (thread.isMainThread) {
+  const { isMainThread, usedInnerWindowIDs } = thread;
+  if (isMainThread && usedInnerWindowIDs !== undefined) {
     // This is a sub-frame.
     // Get the first innerWindowID inside the thread that's also present of innerWindowIDToPageMap.
-    let firstInnerWindowID = ensureExists(thread.frameTable.innerWindowID).find(
+    let firstInnerWindowID = usedInnerWindowIDs.find(
       (innerWindowID) =>
-        innerWindowID &&
-        innerWindowID !== 0 &&
-        innerWindowIDToPageMap.has(innerWindowID)
+        innerWindowID !== 0 && innerWindowIDToPageMap.has(innerWindowID)
     );
     if (firstInnerWindowID === undefined || firstInnerWindowID === null) {
       const markerData = thread.markers.data.find((data) => {

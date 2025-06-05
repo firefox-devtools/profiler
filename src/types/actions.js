@@ -7,6 +7,7 @@ import { ReactLocalization } from '@fluent/react';
 import type JSZip from 'jszip';
 import type {
   Profile,
+  RawProfileSharedData,
   RawThread,
   ThreadIndex,
   Pid,
@@ -385,7 +386,8 @@ type ReceiveProfileAction =
   | {|
       +type: 'BULK_SYMBOLICATION',
       +symbolicatedThreads: RawThread[],
-      +oldFuncToNewFuncsMaps: Map<ThreadIndex, FuncToFuncsMap>,
+      +symbolicatedShared: RawProfileSharedData,
+      +oldFuncToNewFuncsMap: FuncToFuncsMap,
     |}
   | {|
       +type: 'DONE_SYMBOLICATING',

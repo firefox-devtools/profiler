@@ -14,8 +14,9 @@ import { SymbolsNotFoundError } from './errors';
 
 import type {
   Profile,
+  RawProfileSharedData,
   RawThread,
-  ThreadIndex,
+  RawStackTable,
   IndexIntoFuncTable,
   IndexIntoFrameTable,
   IndexIntoResourceTable,
@@ -197,11 +198,10 @@ import { updateRawThreadStacks } from './profile-data';
 type LibKey = string; // of the form ${debugName}/${breakpadId}
 
 export type SymbolicationStepCallback = (
-  threadIndex: ThreadIndex,
   symbolicationStepInfo: SymbolicationStepInfo
 ) => void;
 
-type ThreadLibSymbolicationInfo = {|
+type ProfileLibSymbolicationInfo = {|
   // The resourceIndex for this lib in this thread.
   resourceIndex: IndexIntoResourceTable,
   // The libIndex for this lib in this thread.
@@ -219,13 +219,13 @@ type ThreadLibSymbolicationInfo = {|
 // This type exists because we symbolicate the profile in steps in order to
 // provide a profile to the user faster. This type represents a single step.
 export type SymbolicationStepInfo = {|
-  threadLibSymbolicationInfo: ThreadLibSymbolicationInfo,
+  libSymbolicationInfo: ProfileLibSymbolicationInfo,
   resultsForLib: Map<Address, AddressResult>,
 |};
 
 export type FuncToFuncsMap = Map<IndexIntoFuncTable, IndexIntoFuncTable[]>;
 
-type ThreadSymbolicationInfo = Map<LibKey, ThreadLibSymbolicationInfo>;
+type ProfileSymbolicationInfo = Map<LibKey, ProfileLibSymbolicationInfo>;
 
 /**
  * Like `new Map(iterableOfEntryPairs)`: Creates a map from an iterable of
@@ -265,11 +265,11 @@ function makeConsensusMap<K, V>(
  * allows the symbol substitation step at the end to work efficiently.
  * Returns a map with one entry for each library resource.
  */
-function getThreadSymbolicationInfo(
-  thread: RawThread,
+function getSymbolicationInfo(
+  shared: RawProfileSharedData,
   libs: Lib[]
-): ThreadSymbolicationInfo {
-  const { frameTable, funcTable, nativeSymbols, resourceTable } = thread;
+): ProfileSymbolicationInfo {
+  const { frameTable, funcTable, nativeSymbols, resourceTable } = shared;
 
   const map = new Map();
   for (
@@ -342,19 +342,17 @@ function getThreadSymbolicationInfo(
 // Go through all the threads to gather up the addresses we need to symbolicate
 // for each library.
 function buildLibSymbolicationRequestsForAllThreads(
-  symbolicationInfo: ThreadSymbolicationInfo[]
+  symbolicationInfo: ProfileSymbolicationInfo
 ): LibSymbolicationRequest[] {
   const libKeyToAddressesMap = new Map();
-  for (const threadSymbolicationInfo of symbolicationInfo) {
-    for (const [libKey, { frameAddresses }] of threadSymbolicationInfo) {
-      let addressSet = libKeyToAddressesMap.get(libKey);
-      if (addressSet === undefined) {
-        addressSet = new Set();
-        libKeyToAddressesMap.set(libKey, addressSet);
-      }
-      for (const frameAddress of frameAddresses) {
-        addressSet.add(frameAddress);
-      }
+  for (const [libKey, { frameAddresses }] of symbolicationInfo) {
+    let addressSet = libKeyToAddressesMap.get(libKey);
+    if (addressSet === undefined) {
+      addressSet = new Set();
+      libKeyToAddressesMap.set(libKey, addressSet);
+    }
+    for (const frameAddress of frameAddresses) {
+      addressSet.add(frameAddress);
     }
   }
   return Array.from(libKeyToAddressesMap).map(([libKey, addresses]) => {
@@ -370,21 +368,17 @@ function buildLibSymbolicationRequestsForAllThreads(
 // This function leaves all the actual work to applySymbolicationSteps.
 function finishSymbolicationForLib(
   profile: Profile,
-  symbolicationInfo: ThreadSymbolicationInfo[],
+  symbolicationInfo: ProfileSymbolicationInfo,
   resultsForLib: Map<Address, AddressResult>,
   libKey: string,
   symbolicationStepCallback: SymbolicationStepCallback
 ): void {
-  const { threads } = profile;
-  for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
-    const threadSymbolicationInfo = symbolicationInfo[threadIndex];
-    const threadLibSymbolicationInfo = threadSymbolicationInfo.get(libKey);
-    if (threadLibSymbolicationInfo === undefined) {
-      continue;
-    }
-    const symbolicationStep = { threadLibSymbolicationInfo, resultsForLib };
-    symbolicationStepCallback(threadIndex, symbolicationStep);
+  const libSymbolicationInfo = symbolicationInfo.get(libKey);
+  if (libSymbolicationInfo === undefined) {
+    return;
   }
+  const symbolicationStep = { libSymbolicationInfo, resultsForLib };
+  symbolicationStepCallback(symbolicationStep);
 }
 
 // Create a new stack table where all stack nodes with frames in
@@ -417,18 +411,17 @@ function finishSymbolicationForLib(
 //      - stack E with frame 4
 //        - stack E' with frame 8
 //      - stack F with frame 5
-function _computeThreadWithAddedExpansionStacks(
-  thread: RawThread,
+function _computeStackTableWithAddedExpansionStacks(
+  stackTable: RawStackTable,
   shouldStacksWithThisOldFrameBeRemoved: Uint8Array,
   frameIndexToInlineExpansionFrames: Map<
     IndexIntoFrameTable,
     IndexIntoFrameTable[],
   >
-): RawThread {
+): {| newStackTable: RawStackTable, oldStackToNewStack: Int32Array |} | null {
   if (frameIndexToInlineExpansionFrames.size === 0) {
-    return thread;
+    return null;
   }
-  const { stackTable } = thread;
   const newStackTable = getEmptyRawStackTable();
   const oldStackToNewStack = new Int32Array(stackTable.length);
   for (let stack = 0; stack < stackTable.length; stack++) {
@@ -461,13 +454,7 @@ function _computeThreadWithAddedExpansionStacks(
     }
     oldStackToNewStack[stack] = prefix ?? -1;
   }
-  return updateRawThreadStacks(thread, newStackTable, (oldStack) => {
-    if (oldStack === null) {
-      return null;
-    }
-    const newStack = oldStackToNewStack[oldStack];
-    return newStack !== -1 ? newStack : null;
-  });
+  return { newStackTable, oldStackToNewStack };
 }
 
 /**
@@ -475,30 +462,54 @@ function _computeThreadWithAddedExpansionStacks(
  * symbolicationSteps is used to create a new thread with the new symbols.
  */
 export function applySymbolicationSteps(
-  oldThread: RawThread,
+  oldThreads: RawThread[],
+  oldShared: RawProfileSharedData,
   symbolicationSteps: SymbolicationStepInfo[]
-): { thread: RawThread, oldFuncToNewFuncsMap: FuncToFuncsMap } {
+): {|
+  threads: RawThread[],
+  shared: RawProfileSharedData,
+  oldFuncToNewFuncsMap: FuncToFuncsMap,
+|} {
   const oldFuncToNewFuncsMap = new Map();
-  const frameCount = oldThread.frameTable.length;
+  const frameCount = oldShared.frameTable.length;
   const shouldStacksWithThisFrameBeRemoved = new Uint8Array(frameCount);
   const frameIndexToInlineExpansionFrames = new Map();
-  let thread = oldThread;
+  let shared = oldShared;
   for (const symbolicationStep of symbolicationSteps) {
-    thread = _partiallyApplySymbolicationStep(
-      thread,
+    shared = _partiallyApplySymbolicationStep(
+      shared,
       symbolicationStep,
       oldFuncToNewFuncsMap,
       shouldStacksWithThisFrameBeRemoved,
       frameIndexToInlineExpansionFrames
     );
   }
-  thread = _computeThreadWithAddedExpansionStacks(
-    thread,
+
+  const newStackInfo = _computeStackTableWithAddedExpansionStacks(
+    shared.stackTable,
     shouldStacksWithThisFrameBeRemoved,
     frameIndexToInlineExpansionFrames
   );
 
-  return { thread, oldFuncToNewFuncsMap };
+  if (newStackInfo === null) {
+    return { threads: oldThreads, shared, oldFuncToNewFuncsMap };
+  }
+
+  const { newStackTable, oldStackToNewStack } = newStackInfo;
+  shared = {
+    ...shared,
+    stackTable: newStackTable,
+  };
+
+  const threads = updateRawThreadStacks(oldThreads, (oldStack) => {
+    if (oldStack === null) {
+      return null;
+    }
+    const newStack = oldStackToNewStack[oldStack];
+    return newStack !== -1 ? newStack : null;
+  });
+
+  return { threads, shared, oldFuncToNewFuncsMap };
 }
 
 /**
@@ -527,7 +538,7 @@ export function applySymbolicationSteps(
  * steps from multiple libraries have been processed. This can be much faster.
  */
 function _partiallyApplySymbolicationStep(
-  thread: RawThread,
+  shared: RawProfileSharedData,
   symbolicationStepInfo: SymbolicationStepInfo,
   oldFuncToNewFuncsMap: FuncToFuncsMap,
   shouldStacksWithThisFrameBeRemoved: Uint8Array,
@@ -535,22 +546,22 @@ function _partiallyApplySymbolicationStep(
     IndexIntoFrameTable,
     IndexIntoFrameTable[],
   >
-): RawThread {
+): RawProfileSharedData {
   const {
     frameTable: oldFrameTable,
     funcTable: oldFuncTable,
     nativeSymbols: oldNativeSymbols,
     stringArray,
-  } = thread;
+  } = shared;
   const stringTable = StringTable.withBackingArray(stringArray);
-  const { threadLibSymbolicationInfo, resultsForLib } = symbolicationStepInfo;
+  const { libSymbolicationInfo, resultsForLib } = symbolicationStepInfo;
   const {
     resourceIndex,
     allFramesForThisLib,
     allFuncsForThisLib,
     allNativeSymbolsForThisLib,
     libIndex,
-  } = threadLibSymbolicationInfo;
+  } = libSymbolicationInfo;
 
   const availableFuncs: Set<IndexIntoFuncTable> = new Set(allFuncsForThisLib);
   const availableNativeSymbols: Set<IndexIntoFuncTable> = new Set(
@@ -842,8 +853,8 @@ function _partiallyApplySymbolicationStep(
     );
   }
 
-  const newThread = {
-    ...thread,
+  const newShared = {
+    ...shared,
     frameTable,
     funcTable,
     nativeSymbols,
@@ -851,7 +862,7 @@ function _partiallyApplySymbolicationStep(
 
   // We have the finished new frameTable and new funcTable.
   // The new stackTable will be built by the caller.
-  return newThread;
+  return newShared;
 }
 
 /**
@@ -866,9 +877,7 @@ export async function symbolicateProfile(
   symbolicationStepCallback: SymbolicationStepCallback,
   ignoreCache?: boolean
 ): Promise<void> {
-  const symbolicationInfo = profile.threads.map((thread) =>
-    getThreadSymbolicationInfo(thread, profile.libs)
-  );
+  const symbolicationInfo = getSymbolicationInfo(profile.shared, profile.libs);
   const libSymbolicationRequests =
     buildLibSymbolicationRequestsForAllThreads(symbolicationInfo);
   await symbolStore.getSymbols(

@@ -512,6 +512,10 @@ async function processTracingEvents(
   // new samples on our target interval of 500us.
   profile.meta.interval = 0.5;
 
+  const { funcTable, frameTable, stackTable, resourceTable, stringArray } =
+    profile.shared;
+  const stringTable = StringTable.withBackingArray(stringArray);
+
   let profileEvents: (ProfileEvent | CpuProfileEvent)[] =
     (eventsByName.get('Profile'): any) || [];
 
@@ -573,16 +577,7 @@ async function processTracingEvents(
         continue;
       }
 
-      const {
-        funcTable,
-        frameTable,
-        stackTable,
-        stringArray,
-        samples: samplesTable,
-        resourceTable,
-      } = thread;
-
-      const stringTable = StringTable.withBackingArray(stringArray);
+      const { samples: samplesTable } = thread;
 
       if (nodes) {
         const parentMap = new Map();
@@ -722,9 +717,7 @@ async function processTracingEvents(
     }
   }
 
-  for (const thread of profile.threads) {
-    assertStackOrdering(thread.stackTable);
-  }
+  assertStackOrdering(stackTable);
 
   await extractScreenshots(
     threadInfoByPidAndTid,
@@ -839,7 +832,7 @@ async function extractScreenshots(
     screenshots[0]
   );
 
-  const stringTable = StringTable.withBackingArray(thread.stringArray);
+  const stringTable = StringTable.withBackingArray(profile.shared.stringArray);
 
   const graphicsIndex = ensureExists(profile.meta.categories).findIndex(
     (category) => category.name === 'Graphics'
@@ -930,6 +923,8 @@ function extractMarkers(
     throw new Error('No "Other" category in empty profile category list');
   }
 
+  const stringTable = StringTable.withBackingArray(profile.shared.stringArray);
+
   profile.meta.markerSchema = [
     {
       name: 'EventDispatch',
@@ -996,8 +991,7 @@ function extractMarkers(
           event
         );
         const { thread } = threadInfo;
-        const { markers, stringArray } = thread;
-        const stringTable = StringTable.withBackingArray(stringArray);
+        const { markers } = thread;
         let argData: MixedObject | null = null;
         if (event.args && typeof event.args === 'object') {
           argData = (event.args: any).data || null;
