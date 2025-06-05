@@ -863,7 +863,8 @@ function _partiallyApplySymbolicationStep(
 export async function symbolicateProfile(
   profile: Profile,
   symbolStore: AbstractSymbolStore,
-  symbolicationStepCallback: SymbolicationStepCallback
+  symbolicationStepCallback: SymbolicationStepCallback,
+  ignoreCache?: boolean
 ): Promise<void> {
   const symbolicationInfo = profile.threads.map((thread) =>
     getThreadSymbolicationInfo(thread, profile.libs)
@@ -890,7 +891,8 @@ export async function symbolicateProfile(
       }
       // We could not find symbols for this library.
       console.warn(error);
-    }
+    },
+    ignoreCache
   );
 }
 
