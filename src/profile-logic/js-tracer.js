@@ -738,10 +738,10 @@ export function getJsTracerFixed(jsTracer: JsTracerTable): JsTracerFixed {
 export function convertJsTracerToThread(
   fromThread: RawThread,
   jsTracer: JsTracerTable,
-  categories: CategoryList
+  categories: CategoryList,
+  stringTable: StringTable
 ): RawThread {
   const jsTracerFixed = getJsTracerFixed(jsTracer);
-  const stringTable = StringTable.withBackingArray(fromThread.stringArray);
   const { thread, stackMap } = convertJsTracerToThreadWithoutSamples(
     fromThread,
     stringTable,

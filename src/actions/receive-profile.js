@@ -398,7 +398,7 @@ export function finalizeFullProfileView(
         const thread = profile.threads[threadIndex];
         const { samples, jsAllocations, nativeAllocations } = thread;
         hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
-          hasUsefulSamples(table?.stack, thread)
+          hasUsefulSamples(table?.stack, thread, profile.shared)
         );
         if (hasSamples) {
           break;
@@ -799,7 +799,7 @@ export function bulkProcessSymbolicationSteps(
   symbolicationStepsPerThread: Map<ThreadIndex, SymbolicationStepInfo[]>
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const { threads } = getProfile(getState());
+    const { threads, shared } = getProfile(getState());
     const oldFuncToNewFuncsMaps: Map<ThreadIndex, FuncToFuncsMap> = new Map();
     const symbolicatedThreads = threads.map((oldThread, threadIndex) => {
       const symbolicationSteps = symbolicationStepsPerThread.get(threadIndex);
@@ -808,6 +808,7 @@ export function bulkProcessSymbolicationSteps(
       }
       const { thread, oldFuncToNewFuncsMap } = applySymbolicationSteps(
         oldThread,
+        shared,
         symbolicationSteps
       );
       oldFuncToNewFuncsMaps.set(threadIndex, oldFuncToNewFuncsMap);
@@ -1903,7 +1904,7 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
         const thread = profile.threads[threadIndex];
         const { samples, jsAllocations, nativeAllocations } = thread;
         hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
-          hasUsefulSamples(table?.stack, thread)
+          hasUsefulSamples(table?.stack, thread, profile.shared)
         );
         if (hasSamples) {
           break;

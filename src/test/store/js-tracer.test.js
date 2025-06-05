@@ -127,9 +127,18 @@ describe('convertJsTracerToThread', function () {
     );
 
     const profile = getEmptyProfile();
+    profile.shared.stringArray = existingProfile.shared.stringArray;
     const jsTracer = ensureExists(existingThread.jsTracer);
+    const stringTable = StringTable.withBackingArray(
+      profile.shared.stringArray
+    );
     profile.threads = [
-      convertJsTracerToThread(existingThread, jsTracer, categories),
+      convertJsTracerToThread(
+        existingThread,
+        jsTracer,
+        categories,
+        stringTable
+      ),
     ];
     const { getState } = storeWithProfile(profile);
     const callTree = selectedThreadSelectors.getCallTree(getState());
@@ -299,6 +308,7 @@ describe('selectors/getJsTracerTiming', function () {
       // Create a profile from text samples.
       const {
         profile,
+        stringTable,
         funcNamesDictPerThread: [funcNamesDict],
       } = getProfileFromTextSamples(`
         Foo.js
@@ -311,16 +321,16 @@ describe('selectors/getJsTracerTiming', function () {
         // has matching JS tracer information, such that we can deduce functions from
         // event names.
         const thread = profile.threads[0];
-        const stringTable = StringTable.withBackingArray(thread.stringArray);
 
         // Also create a JS tracer profile.
-        const { stringArray: tracerStringArray, jsTracer } =
-          getProfileWithJsTracerEvents([
-            ['Root', 0, 20],
-            ['Node', 1, 19],
-            ['https://mozilla.org', 2, 18],
-            ['https://mozilla.org', 3, 16],
-          ]).threads[0];
+        const jsTracerProfile = getProfileWithJsTracerEvents([
+          ['Root', 0, 20],
+          ['Node', 1, 19],
+          ['https://mozilla.org', 2, 18],
+          ['https://mozilla.org', 3, 16],
+        ]);
+        const { jsTracer } = jsTracerProfile.threads[0];
+        const tracerStringArray = jsTracerProfile.shared.stringArray;
 
         if (!jsTracer) {
           throw new Error('Unable to find a JS tracer table');
