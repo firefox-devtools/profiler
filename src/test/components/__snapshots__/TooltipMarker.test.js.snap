@@ -14,6 +14,8 @@ exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 
         class="tooltipTiming"
       >
         500μs
+         @ 
+        114.50ms
       </div>
       <div
         class="tooltipTitle"
@@ -160,6 +162,8 @@ exports[`TooltipMarker renders properly network markers that were aborted 1`] = 
         class="tooltipTiming"
       >
         1.4s
+         @ 
+        0s
       </div>
       <div
         class="tooltipTitle"
@@ -263,6 +267,8 @@ exports[`TooltipMarker renders properly network markers where content type is bl
         class="tooltipTiming"
       >
         1.4s
+         @ 
+        0s
       </div>
       <div
         class="tooltipTitle"
@@ -434,6 +440,8 @@ exports[`TooltipMarker renders properly network markers where content type is mi
         class="tooltipTiming"
       >
         1.4s
+         @ 
+        0s
       </div>
       <div
         class="tooltipTitle"
@@ -630,6 +638,8 @@ exports[`TooltipMarker renders properly network markers with a preconnect part 2
         class="tooltipTiming"
       >
         1.4s
+         @ 
+        0s
       </div>
       <div
         class="tooltipTitle"
@@ -890,6 +900,8 @@ exports[`TooltipMarker renders properly network markers with a preconnect part c
         class="tooltipTiming"
       >
         1.4s
+         @ 
+        0s
       </div>
       <div
         class="tooltipTitle"
@@ -1076,6 +1088,8 @@ exports[`TooltipMarker renders properly normal network markers 1`] = `
         class="tooltipTiming"
       >
         1.4s
+         @ 
+        0s
       </div>
       <div
         class="tooltipTitle"
@@ -1330,6 +1344,8 @@ exports[`TooltipMarker renders properly redirect network markers for a Internal 
         class="tooltipTiming"
       >
         18.7s
+         @ 
+        0s
       </div>
       <div
         class="tooltipTitle"
@@ -1443,6 +1459,8 @@ exports[`TooltipMarker renders properly redirect network markers for a Permanent
         class="tooltipTiming"
       >
         18.7s
+         @ 
+        0s
       </div>
       <div
         class="tooltipTitle"
@@ -1556,6 +1574,8 @@ exports[`TooltipMarker renders properly redirect network markers for a Temporary
         class="tooltipTiming"
       >
         18.7s
+         @ 
+        0s
       </div>
       <div
         class="tooltipTitle"
@@ -1669,6 +1689,8 @@ exports[`TooltipMarker renders properly redirect network markers for an internal
         class="tooltipTiming"
       >
         18.7s
+         @ 
+        0s
       </div>
       <div
         class="tooltipTitle"
@@ -1782,6 +1804,8 @@ exports[`TooltipMarker renders properly redirect network markers without additio
         class="tooltipTiming"
       >
         18.7s
+         @ 
+        0s
       </div>
       <div
         class="tooltipTitle"
@@ -1890,6 +1914,8 @@ exports[`TooltipMarker renders the tooltip of CompositorScreenshotWindowDestroye
             class="tooltipTiming"
           >
             1ms
+             @ 
+            0s
           </div>
           <div
             class="tooltipTitle"
@@ -1939,6 +1965,12 @@ exports[`TooltipMarker renders tooltips for various markers: Bailout_ShapeGuard 
       class="tooltipOneLine"
     >
       <div
+        class="tooltipTiming"
+      >
+         @ 
+        10ms
+      </div>
+      <div
         class="tooltipTitle"
       >
         Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -&gt; resource://bar.js:3662
@@ -1969,6 +2001,12 @@ exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
     <div
       class="tooltipOneLine"
     >
+      <div
+        class="tooltipTiming"
+      >
+         @ 
+        10ms
+      </div>
       <div
         class="tooltipTitle"
       >
@@ -2008,6 +2046,12 @@ exports[`TooltipMarker renders tooltips for various markers: BailoutKind::Argume
       class="tooltipOneLine"
     >
       <div
+        class="tooltipTiming"
+      >
+         @ 
+        10ms
+      </div>
+      <div
         class="tooltipTitle"
       >
         BailoutKind::ArgumentCheck at Uninitialized on line 388 of self-hosted:388
@@ -2042,6 +2086,8 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] =
         class="tooltipTiming"
       >
         800μs
+         @ 
+        10.500ms
       </div>
       <div
         class="tooltipTitle"
@@ -2106,6 +2152,8 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.6 1`] =
         class="tooltipTiming"
       >
         500μs
+         @ 
+        10.600ms
       </div>
       <div
         class="tooltipTitle"
@@ -2168,6 +2216,8 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.7 1`] =
         class="tooltipTiming"
       >
         500μs
+         @ 
+        10.700ms
       </div>
       <div
         class="tooltipTitle"
@@ -2230,6 +2280,8 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.8 1`] =
         class="tooltipTiming"
       >
         500μs
+         @ 
+        10.800ms
       </div>
       <div
         class="tooltipTitle"
@@ -2293,6 +2345,8 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         class="tooltipTiming"
       >
         500μs
+         @ 
+        114.50ms
       </div>
       <div
         class="tooltipTitle"
@@ -2623,6 +2677,8 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         class="tooltipTiming"
       >
         1ms
+         @ 
+        114ms
       </div>
       <div
         class="tooltipTitle"
@@ -2943,6 +2999,12 @@ exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = 
       class="tooltipOneLine"
     >
       <div
+        class="tooltipTiming"
+      >
+         @ 
+        16.500ms
+      </div>
+      <div
         class="tooltipTitle"
       >
         GCMajor
@@ -3100,6 +3162,12 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
       class="tooltipOneLine"
     >
       <div
+        class="tooltipTiming"
+      >
+         @ 
+        15.500ms
+      </div>
+      <div
         class="tooltipTitle"
       >
         GCMinor
@@ -3215,6 +3283,12 @@ exports[`TooltipMarker renders tooltips for various markers: GCSlice-17.5 1`] = 
       class="tooltipOneLine"
     >
       <div
+        class="tooltipTiming"
+      >
+         @ 
+        17.500ms
+      </div>
+      <div
         class="tooltipTitle"
       >
         GCSlice
@@ -3291,6 +3365,8 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-120 1`] = `
         class="tooltipTiming"
       >
         unknown duration
+         @ 
+        120ms
       </div>
       <div
         class="tooltipTitle"
@@ -3380,6 +3456,12 @@ exports[`TooltipMarker renders tooltips for various markers: Invalidate http://m
       class="tooltipOneLine"
     >
       <div
+        class="tooltipTiming"
+      >
+         @ 
+        10ms
+      </div>
+      <div
         class="tooltipTitle"
       >
         Invalidate http://mozilla.com/script.js:1234
@@ -3410,6 +3492,12 @@ exports[`TooltipMarker renders tooltips for various markers: Invalidate-10 1`] =
     <div
       class="tooltipOneLine"
     >
+      <div
+        class="tooltipTiming"
+      >
+         @ 
+        10ms
+      </div>
       <div
         class="tooltipTitle"
       >
@@ -3448,6 +3536,12 @@ exports[`TooltipMarker renders tooltips for various markers: Log-21.7 1`] = `
     <div
       class="tooltipOneLine"
     >
+      <div
+        class="tooltipTiming"
+      >
+         @ 
+        21.700ms
+      </div>
       <div
         class="tooltipTitle"
       >
@@ -3494,6 +3588,12 @@ exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-14.5
       class="tooltipOneLine"
     >
       <div
+        class="tooltipTiming"
+      >
+         @ 
+        14.500ms
+      </div>
+      <div
         class="tooltipTitle"
       >
         NotifyDidPaint
@@ -3535,6 +3635,8 @@ exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-112.
         class="tooltipTiming"
       >
         800μs
+         @ 
+        112.50ms
       </div>
       <div
         class="tooltipTitle"
@@ -3574,6 +3676,12 @@ exports[`TooltipMarker renders tooltips for various markers: PlayAudio-115 1`] =
     <div
       class="tooltipOneLine"
     >
+      <div
+        class="tooltipTiming"
+      >
+         @ 
+        115ms
+      </div>
       <div
         class="tooltipTitle"
       >
@@ -3619,6 +3727,12 @@ exports[`TooltipMarker renders tooltips for various markers: PreferenceRead-114.
     <div
       class="tooltipOneLine"
     >
+      <div
+        class="tooltipTiming"
+      >
+         @ 
+        114.90ms
+      </div>
       <div
         class="tooltipTitle"
       >
@@ -3682,6 +3796,8 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         class="tooltipTiming"
       >
         4ms
+         @ 
+        122ms
       </div>
       <div
         class="tooltipTitle"
@@ -3986,6 +4102,8 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         class="tooltipTiming"
       >
         500μs
+         @ 
+        18.500ms
       </div>
       <div
         class="tooltipTitle"
@@ -4295,6 +4413,8 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         class="tooltipTiming"
       >
         500μs
+         @ 
+        20ms
       </div>
       <div
         class="tooltipTitle"
@@ -4629,6 +4749,12 @@ exports[`TooltipMarker renders tooltips for various markers: TimeToFirstInteract
       class="tooltipOneLine"
     >
       <div
+        class="tooltipTiming"
+      >
+         @ 
+        21.400ms
+      </div>
+      <div
         class="tooltipTitle"
       >
         TimeToFirstInteractive (TTFI)
@@ -4670,6 +4796,8 @@ exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`]
         class="tooltipTiming"
       >
         0s
+         @ 
+        12.500ms
       </div>
       <div
         class="tooltipTitle"
@@ -4731,6 +4859,8 @@ exports[`TooltipMarker shows a tooltip for Jank markers 1`] = `
         class="tooltipTiming"
       >
         70ms
+         @ 
+        -16,000,000ns
       </div>
       <div
         class="tooltipTitle"
@@ -4778,6 +4908,8 @@ exports[`TooltipMarker shows image of CompositorScreenshot markers 1`] = `
         class="tooltipTiming"
       >
         2ms
+         @ 
+        1ms
       </div>
       <div
         class="tooltipTitle"
@@ -4851,6 +4983,8 @@ exports[`TooltipMarker shows the source thread for markers from a merged thread 
             class="tooltipTiming"
           >
             1ms
+             @ 
+            1ms
           </div>
           <div
             class="tooltipTitle"
@@ -4919,6 +5053,8 @@ exports[`TooltipMarker shows the source thread for markers from a merged thread 
             class="tooltipTiming"
           >
             1ms
+             @ 
+            2ms
           </div>
           <div
             class="tooltipTitle"
