@@ -23,7 +23,6 @@
 
   display: flex;
   flex-flow: row nowrap;
-  border-top: 1px solid var(--grey-30);
   background-color: #fff;
 }
 
@@ -81,6 +80,7 @@
   box-sizing: border-box;
   flex-flow: row nowrap;
   align-items: center;
+  border-top: 1px solid var(--grey-30);
   border-right: 1px solid var(--grey-30);
   cursor: default;
 }
@@ -138,6 +138,7 @@
   display: flex;
   flex: 1;
   flex-flow: column nowrap;
+  border-top: 1px solid var(--grey-30);
 }
 
 .timelineTrackLocalTracks {
