@@ -463,14 +463,14 @@ export const getHasPreferenceMarkers: Selector<boolean> = createSelector(
   getStringTable,
   getThreads,
   (stringTable, threads) => {
-    return threads.some(({ markers }) => {
-      /*
-       * Does this particular thread have a Preference in it?
-       */
-      const indexForPreferenceString =
-        stringTable.indexForString('PreferenceRead');
-      return markers.name.some((name) => name === indexForPreferenceString);
-    });
+    if (!stringTable.hasString('PreferenceRead')) {
+      return false;
+    }
+    const indexForPreferenceString =
+      stringTable.indexForString('PreferenceRead');
+    return threads.some(({ markers }) =>
+      markers.name.includes(indexForPreferenceString)
+    );
   }
 );
 
