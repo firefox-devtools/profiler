@@ -2114,9 +2114,7 @@ export function processVisualMetrics(
     const navigationStartMarkerIdx = tabThread.markers.name.findIndex(
       (m) => m === navigationStartStrIdx
     );
-    if (navigationStartMarkerIdx === -1) {
-      console.error('Failed to find the navigation start marker.');
-    } else {
+    if (navigationStartMarkerIdx !== -1) {
       navigationStartTime =
         tabThread.markers.startTime[navigationStartMarkerIdx];
     }
