@@ -478,6 +478,11 @@ export function computeGlobalTracks(
 
   // Create the global tracks.
   const { stringArray } = profile.shared;
+  const stringTable = StringTable.withBackingArray(stringArray);
+  const screenshotNameIndex = stringTable.hasString('CompositorScreenshot')
+    ? stringTable.indexForString('CompositorScreenshot')
+    : null;
+
   for (
     let threadIndex = 0;
     threadIndex < profile.threads.length;
@@ -519,11 +524,7 @@ export function computeGlobalTracks(
 
     // Check for screenshots.
     const ids: Set<string> = new Set();
-    const stringTable = StringTable.withBackingArray(stringArray);
-    if (stringTable.hasString('CompositorScreenshot')) {
-      const screenshotNameIndex = stringTable.indexForString(
-        'CompositorScreenshot'
-      );
+    if (screenshotNameIndex !== null) {
       for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
         if (markers.name[markerIndex] === screenshotNameIndex) {
           // Coerce the payload to a screenshot one. Don't do a runtime check that
