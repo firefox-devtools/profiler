@@ -2193,6 +2193,14 @@ function findTabMainThreadForVisualMetrics(
   pages: PageList,
   stringTable: StringTable
 ): ThreadIndex | null {
+  if (!stringTable.hasString('RefreshDriverTick')) {
+    // No RefreshDriver tick marker.
+    return null;
+  }
+
+  const refreshDriverTickStrIndex =
+    stringTable.indexForString('RefreshDriverTick');
+
   for (let threadIdx = 0; threadIdx < threads.length; threadIdx++) {
     const thread = threads[threadIdx];
 
@@ -2210,13 +2218,6 @@ function findTabMainThreadForVisualMetrics(
         .filter((page) => page.embedderInnerWindowID === 0)
         .map((page) => page.innerWindowID)
     );
-
-    if (!stringTable.hasString('RefreshDriverTick')) {
-      // No RefreshDriver tick marker, skip the thread.
-      continue;
-    }
-    const refreshDriverTickStrIndex =
-      stringTable.indexForString('RefreshDriverTick');
 
     const { markers } = thread;
     for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
