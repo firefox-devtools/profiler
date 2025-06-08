@@ -852,7 +852,7 @@ describe('url upgrading', function () {
         G.js
       `);
 
-      profile.threads[0].funcTable.relevantForJS[
+      profile.shared.funcTable.relevantForJS[
         funcNamesDictPerThread.DrelevantForJs
       ] = true;
 
@@ -904,7 +904,7 @@ describe('url upgrading', function () {
         E.js
       `);
 
-      profile.threads[0].funcTable.relevantForJS[
+      profile.shared.funcTable.relevantForJS[
         funcNamesDictPerThread.BrelevantForJs
       ] = true;
 
@@ -955,7 +955,7 @@ describe('url upgrading', function () {
         F.js
       `);
 
-      profile.threads[0].funcTable.relevantForJS[
+      profile.shared.funcTable.relevantForJS[
         funcNamesDictPerThread.BrelevantForJs
       ] = true;
 
@@ -1005,7 +1005,7 @@ describe('url upgrading', function () {
         G.js            E.js
       `);
 
-      profile.threads[0].funcTable.relevantForJS[
+      profile.shared.funcTable.relevantForJS[
         funcNamesDictPerThread.CrelevantForJs
       ] = true;
 
@@ -1055,7 +1055,7 @@ describe('url upgrading', function () {
         G.js            E.js
       `);
 
-      profile.threads[0].funcTable.relevantForJS[
+      profile.shared.funcTable.relevantForJS[
         funcNamesDictPerThread.BrelevantForJs
       ] = true;
 

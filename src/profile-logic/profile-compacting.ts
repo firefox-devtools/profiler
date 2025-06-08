@@ -66,10 +66,23 @@ function _gatherStringReferencesInProfile(
     _gatherStringReferencesInThread(
       thread,
       referencedStrings,
-      stringIndexMarkerFieldsByDataType,
-      profile.shared.sources ?? null
+      stringIndexMarkerFieldsByDataType
     );
   }
+
+  _gatherReferencesInFuncTable(
+    profile.shared.funcTable,
+    referencedStrings,
+    profile.shared.sources ?? null
+  );
+  _gatherReferencesInResourceTable(
+    profile.shared.resourceTable,
+    referencedStrings
+  );
+  _gatherReferencesInNativeSymbols(
+    profile.shared.nativeSymbols,
+    referencedStrings
+  );
 
   return referencedStrings;
 }
@@ -77,23 +90,14 @@ function _gatherStringReferencesInProfile(
 function _gatherSourceReferencesInProfile(profile: Profile): Uint8Array {
   const referencedSources = new Uint8Array(profile.shared.sources.length);
 
-  for (const thread of profile.threads) {
-    _gatherSourceReferencesInThread(thread, referencedSources);
-  }
-
-  return referencedSources;
-}
-
-function _gatherSourceReferencesInThread(
-  thread: RawThread,
-  referencedSources: Uint8Array
-) {
-  for (let i = 0; i < thread.funcTable.length; i++) {
-    const sourceIndex = thread.funcTable.source[i];
+  for (let i = 0; i < profile.shared.funcTable.length; i++) {
+    const sourceIndex = profile.shared.funcTable.source[i];
     if (sourceIndex !== null) {
       referencedSources[sourceIndex] = 1;
     }
   }
+
+  return referencedSources;
 }
 
 function _createProfileWithTranslatedIndexes(
@@ -112,19 +116,22 @@ function _createProfileWithTranslatedIndexes(
       oldStringToNewStringPlusOne
     );
 
+  const newShared: RawProfileSharedData =
+    _createdSharedDataWithTranslatedIndexes(
+      profile.shared,
+      newStringArray,
+      newSources,
+      oldStringToNewStringPlusOne,
+      oldSourceToNewSourcePlusOne
+    );
+
   const newThreads = profile.threads.map((thread) =>
     _createThreadWithTranslatedIndexes(
       thread,
       oldStringToNewStringPlusOne,
-      oldSourceToNewSourcePlusOne,
       stringIndexMarkerFieldsByDataType
     )
   );
-
-  const newShared: RawProfileSharedData = {
-    stringArray: newStringArray,
-    sources: newSources,
-  };
 
   const newProfile: Profile = {
     ...profile,
@@ -142,39 +149,20 @@ function _createProfileWithTranslatedIndexes(
 function _gatherStringReferencesInThread(
   thread: RawThread,
   referencedStrings: Uint8Array,
-  stringIndexMarkerFieldsByDataType: Map<string, string[]>,
-  sources: SourceTable
+  stringIndexMarkerFieldsByDataType: Map<string, string[]>
 ) {
   _gatherReferencesInMarkers(
     thread.markers,
     referencedStrings,
     stringIndexMarkerFieldsByDataType
   );
-
-  _gatherReferencesInFuncTable(thread.funcTable, referencedStrings, sources);
-  _gatherReferencesInResourceTable(thread.resourceTable, referencedStrings);
-  _gatherReferencesInNativeSymbols(thread.nativeSymbols, referencedStrings);
 }
 
 function _createThreadWithTranslatedIndexes(
   thread: RawThread,
   oldStringToNewStringPlusOne: Int32Array,
-  oldSourceToNewSourcePlusOne: Int32Array,
   stringIndexMarkerFieldsByDataType: Map<string, string[]>
 ): RawThread {
-  const newNativeSymbols = _createNativeSymbolsWithTranslatedStringIndexes(
-    thread.nativeSymbols,
-    oldStringToNewStringPlusOne
-  );
-  const newResourceTable = _createResourceTableWithTranslatedStringIndexes(
-    thread.resourceTable,
-    oldStringToNewStringPlusOne
-  );
-  const newFuncTable = _createFuncTableWithTranslatedIndexes(
-    thread.funcTable,
-    oldStringToNewStringPlusOne,
-    oldSourceToNewSourcePlusOne
-  );
   const newMarkers = _createMarkersWithTranslatedStringIndexes(
     thread.markers,
     oldStringToNewStringPlusOne,
@@ -182,13 +170,42 @@ function _createThreadWithTranslatedIndexes(
   );
   const newThread: RawThread = {
     ...thread,
-    nativeSymbols: newNativeSymbols,
-    resourceTable: newResourceTable,
-    funcTable: newFuncTable,
     markers: newMarkers,
   };
 
   return newThread;
+}
+
+function _createdSharedDataWithTranslatedIndexes(
+  oldShared: RawProfileSharedData,
+  newStringArray: string[],
+  newSources: SourceTable,
+  oldStringToNewStringPlusOne: Int32Array,
+  oldSourceToNewSourcePlusOne: Int32Array
+): RawProfileSharedData {
+  const newNativeSymbols = _createNativeSymbolsWithTranslatedStringIndexes(
+    oldShared.nativeSymbols,
+    oldStringToNewStringPlusOne
+  );
+  const newResourceTable = _createResourceTableWithTranslatedStringIndexes(
+    oldShared.resourceTable,
+    oldStringToNewStringPlusOne
+  );
+  const newFuncTable = _createFuncTableWithTranslatedIndexes(
+    oldShared.funcTable,
+    oldStringToNewStringPlusOne,
+    oldSourceToNewSourcePlusOne
+  );
+  const newShared: RawProfileSharedData = {
+    stringArray: newStringArray,
+    sources: newSources,
+    nativeSymbols: newNativeSymbols,
+    resourceTable: newResourceTable,
+    funcTable: newFuncTable,
+    frameTable: oldShared.frameTable,
+    stackTable: oldShared.stackTable,
+  };
+  return newShared;
 }
 
 function _gatherReferencesInMarkers(

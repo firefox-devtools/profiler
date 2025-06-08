@@ -14,6 +14,7 @@ import {
   processCounter,
   getInclusiveSampleIndexRangeForSelection,
   computeTabToThreadIndexesMap,
+  computeStackTableFromRawStackTable,
 } from '../profile-logic/profile-data';
 import type { IPCMarkerCorrelations } from '../profile-logic/marker-data';
 import { correlateIPCMarkers } from '../profile-logic/marker-data';
@@ -27,6 +28,7 @@ import type { TabSlug } from '../app-logic/tabs-handling';
 import type {
   Profile,
   RawProfileSharedData,
+  StackTable,
   CategoryList,
   IndexIntoCategoryList,
   RawThread,
@@ -246,6 +248,13 @@ export const getCategories: Selector<CategoryList> = createSelector(
 export const getStringTable: Selector<StringTable> = createSelector(
   (state: State) => getRawProfileSharedData(state).stringArray,
   (stringArray) => StringTable.withBackingArray(stringArray as string[])
+);
+
+export const getStackTable: Selector<StackTable> = createSelector(
+  (state: State) => getRawProfileSharedData(state).stackTable,
+  (state: State) => getRawProfileSharedData(state).frameTable,
+  getDefaultCategory,
+  computeStackTableFromRawStackTable
 );
 
 export const getSourceTable: Selector<SourceTable> = (state: State) =>

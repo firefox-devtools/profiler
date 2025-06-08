@@ -5,6 +5,7 @@
 import type JSZip from 'jszip';
 import type {
   Profile,
+  RawProfileSharedData,
   RawThread,
   ThreadIndex,
   Pid,
@@ -367,7 +368,8 @@ type ReceiveProfileAction =
   | {
       readonly type: 'BULK_SYMBOLICATION';
       readonly symbolicatedThreads: RawThread[];
-      readonly oldFuncToNewFuncsMaps: Map<ThreadIndex, FuncToFuncsMap>;
+      readonly symbolicatedShared: RawProfileSharedData;
+      readonly oldFuncToNewFuncsMap: FuncToFuncsMap;
     }
   | {
       readonly type: 'DONE_SYMBOLICATING';
