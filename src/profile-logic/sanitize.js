@@ -127,13 +127,11 @@ export function sanitizePII(
     }
   }
 
-  // This is expensive but needs to be done somehow.
-  // Maybe we can find something better here.
-  const stringArray = profile.shared.stringArray.slice();
+  let stringArray = profile.shared.stringArray;
   if (PIIToBeRemoved.shouldRemoveUrls) {
-    for (let i = 0; i < stringArray.length; i++) {
-      stringArray[i] = removeURLs(stringArray[i]);
-    }
+    // This is expensive but needs to be done somehow.
+    // Maybe we can find something better here.
+    stringArray = stringArray.map((s) => removeURLs(s));
   }
   const stringTable = StringTable.withBackingArray(stringArray);
 
