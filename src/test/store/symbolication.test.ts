@@ -512,7 +512,7 @@ describe('doSymbolicateProfile', function () {
     ]);
 
     const thread = profile.threads[0];
-    const { frameTable, funcTable, nativeSymbols } = thread;
+    const { frameTable, funcTable, nativeSymbols } = profile.shared;
     expect(funcTable.length).toBeGreaterThanOrEqual(2);
     expect(nativeSymbols.length).toBeGreaterThanOrEqual(2);
 
@@ -588,15 +588,15 @@ function _createUnsymbolicatedProfile() {
     codeId: null,
   };
 
-  thread.resourceTable = {
+  profile.shared.resourceTable = {
     length: 1,
     lib: [libIndex],
     name: [stringTable.indexForString('example lib')],
     host: [stringTable.indexForString('example host')],
     type: [resourceTypes.library],
   };
-  for (let i = 0; i < thread.funcTable.length; i++) {
-    thread.funcTable.resource[i] = 0;
+  for (let i = 0; i < profile.shared.funcTable.length; i++) {
+    profile.shared.funcTable.resource[i] = 0;
   }
 
   // Add a marker with a cause stack. We use the stack of the first sample.

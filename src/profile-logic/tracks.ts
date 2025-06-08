@@ -1358,8 +1358,8 @@ function _isFirefoxMediaThreadWhichIsUsuallyIdle(thread: RawThread): boolean {
 // If the profile has no cpu delta units, the return value is based on the
 // number of non-idle samples.
 function _computeThreadSampleScore(
-  { meta }: Profile,
-  { samples, stackTable, frameTable }: RawThread,
+  { meta, shared: { stackTable, frameTable } }: Profile,
+  { samples }: RawThread,
   referenceCPUDeltaPerMs: number
 ): number {
   if (meta.sampleUnits && samples.threadCPUDelta) {

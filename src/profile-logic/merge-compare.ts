@@ -26,6 +26,7 @@ import {
   getTimeRangeForThread,
   getTimeRangeIncludingAllThreads,
   computeTimeColumnForRawSamplesTable,
+  updateRawThreadStacks,
 } from './profile-data';
 import {
   filterRawMarkerTableToRange,
@@ -47,7 +48,6 @@ import type {
   IndexIntoLibs,
   IndexIntoNativeSymbolTable,
   IndexIntoStackTable,
-  IndexIntoSamplesTable,
   IndexIntoStringTable,
   IndexIntoSourceTable,
   FuncTable,
@@ -64,7 +64,6 @@ import type {
   DerivedMarkerInfo,
   RawMarkerTable,
   MarkerPayload,
-  MarkerIndex,
   Milliseconds,
   Tid,
   RawProfileSharedData,
@@ -140,10 +139,8 @@ export function mergeProfilesForDiffing(
     categories: newCategories,
     libs: newLibs,
     shared: newShared,
-    translationMapsForCategories,
-    translationMapsForLibs,
     translationMapsForStrings,
-    translationMapsForSources,
+    translationMapsForStacks,
   } = mergeSharedData(profiles);
   resultProfile.meta.categories = newCategories;
   resultProfile.libs = newLibs;
@@ -171,55 +168,10 @@ export function mergeProfilesForDiffing(
     const profile = profiles[i];
     let thread = { ...profile.threads[selectedThreadIndex] };
 
+    // TODO: Adjust func and resource indexes in these transforms
     transformStacks[i] = profileSpecific.transforms[selectedThreadIndex];
     implementationFilters.push(profileSpecific.implementation);
 
-    // We adjust the categories using the maps computed above.
-    // TODO issue #2151: Also adjust subcategories.
-    thread.frameTable = {
-      ...thread.frameTable,
-      category: adjustNullableCategories(
-        thread.frameTable.category,
-        translationMapsForCategories[i]
-      ),
-    };
-    thread.funcTable = {
-      ...thread.funcTable,
-      name: adjustStringIndexes(
-        thread.funcTable.name,
-        translationMapsForStrings[i]
-      ),
-      source: adjustNullableSourceIndexes(
-        thread.funcTable.source,
-        translationMapsForSources[i]
-      ),
-    };
-    thread.resourceTable = {
-      ...thread.resourceTable,
-      name: adjustStringIndexes(
-        thread.resourceTable.name,
-        translationMapsForStrings[i]
-      ),
-      host: adjustNullableStringIndexes(
-        thread.resourceTable.host,
-        translationMapsForStrings[i]
-      ),
-      lib: adjustResourceTableLibs(
-        thread.resourceTable.lib,
-        translationMapsForLibs[i]
-      ),
-    };
-    thread.nativeSymbols = {
-      ...thread.nativeSymbols,
-      name: adjustStringIndexes(
-        thread.nativeSymbols.name,
-        translationMapsForStrings[i]
-      ),
-      libIndex: adjustNativeSymbolLibs(
-        thread.nativeSymbols.libIndex,
-        translationMapsForLibs[i]
-      ),
-    };
     thread.markers = {
       ...thread.markers,
       name: adjustStringIndexes(
@@ -232,6 +184,11 @@ export function mergeProfilesForDiffing(
         stringIndexMarkerFieldsByDataType
       ),
     };
+
+    const translationMapForStacks = translationMapsForStacks[i];
+    [thread] = updateRawThreadStacks([thread], (stackIndex) =>
+      _mapNullableStack(stackIndex, translationMapForStacks)
+    );
 
     // Make sure that screenshot markers make it into the merged profile, even
     // if they're not on the selected thread.
@@ -412,10 +369,6 @@ type TranslationMapForStacks = Map<IndexIntoStackTable, IndexIntoStackTable>;
 type TranslationMapForLibs = Map<IndexIntoLibs, IndexIntoLibs>;
 type TranslationMapForStrings = Map<IndexIntoStringTable, IndexIntoStringTable>;
 type TranslationMapForSources = Map<IndexIntoSourceTable, IndexIntoSourceTable>;
-type TranslationMapForSamples = Map<
-  IndexIntoSamplesTable,
-  IndexIntoSamplesTable
->;
 
 /**
  * Merges several categories lists into one, resolving duplicates if necessary.
@@ -467,6 +420,11 @@ export function mergeSharedData(profiles: Profile[]): {
   translationMapsForLibs: TranslationMapForLibs[];
   translationMapsForStrings: TranslationMapForStrings[];
   translationMapsForSources: TranslationMapForSources[];
+  translationMapsForResources: TranslationMapForResources[];
+  translationMapsForNativeSymbols: TranslationMapForNativeSymbols[];
+  translationMapsForFuncs: TranslationMapForFuncs[];
+  translationMapsForFrames: TranslationMapForFrames[];
+  translationMapsForStacks: TranslationMapForStacks[];
 } {
   const {
     categories: newCategories,
@@ -487,7 +445,49 @@ export function mergeSharedData(profiles: Profile[]): {
       profiles.map((profile) => profile.shared.sources ?? null),
       translationMapsForStrings
     );
+  const {
+    resourceTable: newResourceTable,
+    translationMaps: translationMapsForResources,
+  } = mergeResourceTables(
+    profiles,
+    translationMapsForStrings,
+    translationMapsForLibs
+  );
+  const {
+    nativeSymbols: newNativeSymbols,
+    translationMaps: translationMapsForNativeSymbols,
+  } = mergeNativeSymbolTables(
+    profiles,
+    translationMapsForStrings,
+    translationMapsForLibs
+  );
+  const { funcTable: newFuncTable, translationMaps: translationMapsForFuncs } =
+    mergeFuncTables(
+      profiles,
+      translationMapsForResources,
+      translationMapsForSources,
+      translationMapsForStrings
+    );
+  const {
+    frameTable: newFrameTable,
+    translationMaps: translationMapsForFrames,
+  } = mergeFrameTables(
+    profiles,
+    translationMapsForFuncs,
+    translationMapsForNativeSymbols,
+    translationMapsForCategories
+  );
+  const {
+    stackTable: newStackTable,
+    translationMaps: translationMapsForStacks,
+  } = mergeStackTables(profiles, translationMapsForFrames);
+
   const newShared: RawProfileSharedData = {
+    stackTable: newStackTable,
+    frameTable: newFrameTable,
+    funcTable: newFuncTable,
+    nativeSymbols: newNativeSymbols,
+    resourceTable: newResourceTable,
     stringArray: newStringArray,
     sources: newSources,
   };
@@ -500,6 +500,11 @@ export function mergeSharedData(profiles: Profile[]): {
     translationMapsForLibs,
     translationMapsForStrings,
     translationMapsForSources,
+    translationMapsForResources,
+    translationMapsForNativeSymbols,
+    translationMapsForFuncs,
+    translationMapsForFrames,
+    translationMapsForStacks,
   };
 }
 
@@ -573,76 +578,6 @@ function mergeSources(
   };
 }
 
-/**
- * Adjusts the category indices in a category list using a translation map.
- */
-function adjustResourceTableLibs(
-  libs: Array<IndexIntoLibs | null>, // type of ResourceTable.libs
-  translationMap: TranslationMapForLibs
-): Array<IndexIntoLibs | null> {
-  return libs.map((lib) => {
-    if (lib === null) {
-      return lib;
-    }
-    const result = translationMap.get(lib);
-    if (result === undefined) {
-      throw new Error(
-        stripIndent`
-          Lib with index ${lib} hasn't been found in the translation map.
-          This shouldn't happen and indicates a bug in the profiler's code.
-        `
-      );
-    }
-    return result;
-  });
-}
-
-// Same as above, but without the " | null" in the type, to make flow happy.
-function adjustNativeSymbolLibs(
-  libs: Array<IndexIntoLibs>, // type of ResourceTable.libs
-  translationMap: TranslationMapForLibs
-): Array<IndexIntoLibs> {
-  return libs.map((lib) => {
-    const result = translationMap.get(lib);
-    if (result === undefined) {
-      throw new Error(
-        stripIndent`
-          Lib with index ${lib} hasn't been found in the translation map.
-          This shouldn't happen and indicates a bug in the profiler's code.
-        `
-      );
-    }
-    return result;
-  });
-}
-
-/**
- * Adjusts the category indices in a category list using a translation map.
- * This is just like the previous function, except the input and output arrays
- * can have null values. There are 2 different functions to keep our type
- * safety.
- */
-function adjustNullableCategories(
-  categories: ReadonlyArray<IndexIntoCategoryList | null>,
-  translationMap: TranslationMapForCategories
-): Array<IndexIntoCategoryList | null> {
-  return categories.map((category) => {
-    if (category === null) {
-      return null;
-    }
-    const result = translationMap.get(category);
-    if (result === undefined) {
-      throw new Error(
-        stripIndent`
-          Category with index ${category} hasn't been found in the translation map.
-          This shouldn't happen and indicates a bug in the profiler's code.
-        `
-      );
-    }
-    return result;
-  });
-}
-
 function adjustStringIndexes(
   stringIndexes: ReadonlyArray<IndexIntoStringTable>,
   translationMap: TranslationMapForStrings
@@ -701,48 +636,6 @@ function adjustMarkerDataStringIndexes(
   });
 }
 
-function adjustNullableStringIndexes(
-  stringIndexes: ReadonlyArray<IndexIntoStringTable | null>,
-  translationMap: TranslationMapForStrings
-): Array<IndexIntoStringTable | null> {
-  return stringIndexes.map((stringIndex) => {
-    if (stringIndex === null) {
-      return null;
-    }
-    const newStringIndex = translationMap.get(stringIndex);
-    if (newStringIndex === undefined) {
-      throw new Error(
-        stripIndent`
-          String with index ${stringIndex} hasn't been found in the translation map.
-          This shouldn't happen and indicates a bug in the profiler's code.
-        `
-      );
-    }
-    return newStringIndex;
-  });
-}
-
-function adjustNullableSourceIndexes(
-  sourceIndexes: ReadonlyArray<IndexIntoSourceTable | null>,
-  translationMap: TranslationMapForSources
-): Array<IndexIntoSourceTable | null> {
-  return sourceIndexes.map((sourceIndex) => {
-    if (sourceIndex === null) {
-      return null;
-    }
-    const newSourceIndex = translationMap.get(sourceIndex);
-    if (newSourceIndex === undefined) {
-      throw new Error(
-        stripIndent`
-          Source with index ${sourceIndex} hasn't been found in the translation map.
-          This shouldn't happen and indicates a bug in the profiler's code.
-        `
-      );
-    }
-    return newSourceIndex;
-  });
-}
-
 /**
  * This combines the library lists from multiple profiles. It returns a merged
  * Lib array, along with a translation maps that can be used in other functions
@@ -780,12 +673,200 @@ function mergeLibs(libsPerProfile: Lib[][]): {
   return { libs: newLibTable, translationMaps };
 }
 
+function _mapLib(
+  libIndex: IndexIntoLibs,
+  translationMap: TranslationMapForLibs
+): IndexIntoLibs {
+  const newLibIndex = translationMap.get(libIndex);
+  if (newLibIndex === undefined) {
+    throw new Error(
+      stripIndent`
+        Lib with index ${libIndex} hasn't been found in the translation map.
+        This shouldn't happen and indicates a bug in the profiler's code.
+      `
+    );
+  }
+  return newLibIndex;
+}
+
+function _mapNullableLib(
+  libIndex: IndexIntoLibs | null,
+  translationMap: TranslationMapForLibs
+): IndexIntoLibs | null {
+  return libIndex !== null ? _mapLib(libIndex, translationMap) : null;
+}
+
+function _mapString(
+  stringIndex: IndexIntoStringTable,
+  translationMap: TranslationMapForStrings
+): IndexIntoStringTable {
+  const newStringIndex = translationMap.get(stringIndex);
+  if (newStringIndex === undefined) {
+    throw new Error(
+      stripIndent`
+        String with index ${stringIndex} hasn't been found in the translation map.
+        This shouldn't happen and indicates a bug in the profiler's code.
+      `
+    );
+  }
+  return newStringIndex;
+}
+
+function _mapNullableString(
+  stringIndex: IndexIntoStringTable | null,
+  translationMap: TranslationMapForStrings
+): IndexIntoStringTable | null {
+  return stringIndex !== null ? _mapString(stringIndex, translationMap) : null;
+}
+
+function _mapNullableSource(
+  sourceIndex: IndexIntoSourceTable | null,
+  translationMap: TranslationMapForSources
+): IndexIntoStringTable | null {
+  return sourceIndex !== null ? _mapSource(sourceIndex, translationMap) : null;
+}
+
+function _mapSource(
+  sourceIndex: IndexIntoSourceTable,
+  translationMap: TranslationMapForStrings
+): IndexIntoStringTable {
+  const newSourceIndex = translationMap.get(sourceIndex);
+  if (newSourceIndex === undefined) {
+    throw new Error(
+      stripIndent`
+        Source with index ${sourceIndex} hasn't been found in the translation map.
+        This shouldn't happen and indicates a bug in the profiler's code.
+      `
+    );
+  }
+  return newSourceIndex;
+}
+
+function _mapFuncResource(
+  resourceIndex: IndexIntoResourceTable | -1,
+  translationMap: TranslationMapForResources
+): IndexIntoResourceTable | -1 {
+  if (resourceIndex === -1) {
+    return -1;
+  }
+
+  const newResourceIndex = translationMap.get(resourceIndex);
+  if (newResourceIndex === undefined) {
+    throw new Error(
+      stripIndent`
+        Resource with index ${resourceIndex} hasn't been found in the translation map.
+        This shouldn't happen and indicates a bug in the profiler's code.
+      `
+    );
+  }
+  return newResourceIndex;
+}
+
+function _mapFunc(
+  funcIndex: IndexIntoFuncTable,
+  translationMap: TranslationMapForFuncs
+): IndexIntoFuncTable {
+  const newFuncIndex = translationMap.get(funcIndex);
+  if (newFuncIndex === undefined) {
+    throw new Error(
+      stripIndent`
+        Func with index ${funcIndex} hasn't been found in the translation map.
+        This shouldn't happen and indicates a bug in the profiler's code.
+      `
+    );
+  }
+  return newFuncIndex;
+}
+
+function _mapFrame(
+  frameIndex: IndexIntoFrameTable,
+  translationMap: TranslationMapForFrames
+): IndexIntoFrameTable {
+  const newFrameIndex = translationMap.get(frameIndex);
+  if (newFrameIndex === undefined) {
+    throw new Error(
+      stripIndent`
+        Func with index ${frameIndex} hasn't been found in the translation map.
+        This shouldn't happen and indicates a bug in the profiler's code.
+      `
+    );
+  }
+  return newFrameIndex;
+}
+
+function _mapNullableNativeSymbol(
+  nativeSymbolIndex: IndexIntoLibs | null,
+  translationMap: TranslationMapForNativeSymbols
+): IndexIntoLibs | null {
+  if (nativeSymbolIndex === null) {
+    return null;
+  }
+
+  const newNativeSymbolIndex = translationMap.get(nativeSymbolIndex);
+  if (newNativeSymbolIndex === undefined) {
+    throw new Error(
+      stripIndent`
+        Native symbol with index ${nativeSymbolIndex} hasn't been found in the translation map.
+        This shouldn't happen and indicates a bug in the profiler's code.
+      `
+    );
+  }
+  return newNativeSymbolIndex;
+}
+
+function _mapNullableCategory(
+  categoryIndex: IndexIntoCategoryList | null,
+  translationMap: TranslationMapForCategories
+): IndexIntoCategoryList | null {
+  if (categoryIndex === null) {
+    return null;
+  }
+
+  const newCategoryIndex = translationMap.get(categoryIndex);
+  if (newCategoryIndex === undefined) {
+    throw new Error(
+      stripIndent`
+        Category with index ${categoryIndex} hasn't been found in the translation map.
+        This shouldn't happen and indicates a bug in the profiler's code.
+      `
+    );
+  }
+  return newCategoryIndex;
+}
+
+function _mapStack(
+  stackIndex: IndexIntoStackTable,
+  translationMap: TranslationMapForStacks
+): IndexIntoStackTable {
+  const newStackIndex = translationMap.get(stackIndex);
+  if (newStackIndex === undefined) {
+    throw new Error(
+      stripIndent`
+        Stack with index ${stackIndex} hasn't been found in the translation map.
+        This shouldn't happen and indicates a bug in the profiler's code.
+      `
+    );
+  }
+  return newStackIndex;
+}
+
+function _mapNullableStack(
+  stackIndex: IndexIntoStackTable | null,
+  translationMap: TranslationMapForStacks
+): IndexIntoStackTable | null {
+  return stackIndex !== null ? _mapStack(stackIndex, translationMap) : null;
+}
+
 /**
- * This combines the resource tables for a list of threads. It returns the new
+ * This combines the resource tables for a list of profiles. It returns the new
  * resource table with the translation maps to be used in subsequent merging
  * functions.
  */
-function combineResourceTables(threads: ReadonlyArray<RawThread>): {
+function mergeResourceTables(
+  profiles: ReadonlyArray<Profile>,
+  translationMapsForStrings: TranslationMapForStrings[],
+  translationMapsForLibs: TranslationMapForLibs[]
+): {
   resourceTable: ResourceTable;
   translationMaps: TranslationMapForResources[];
 } {
@@ -793,14 +874,25 @@ function combineResourceTables(threads: ReadonlyArray<RawThread>): {
   const translationMaps: TranslationMapForResources[] = [];
   const newResourceTable = getEmptyResourceTable();
 
-  threads.forEach((thread) => {
+  profiles.forEach((profile, profileIndex) => {
+    const translationMapForLibs = translationMapsForLibs[profileIndex];
+    const translationMapForStrings = translationMapsForStrings[profileIndex];
     const translationMap: TranslationMapForResources = new Map();
-    const { resourceTable } = thread;
+    const { resourceTable } = profile.shared;
 
     for (let i = 0; i < resourceTable.length; i++) {
-      const libIndex = resourceTable.lib[i];
-      const nameIndex = resourceTable.name[i];
-      const hostIndex = resourceTable.host[i];
+      const libIndex = _mapNullableLib(
+        resourceTable.lib[i],
+        translationMapForLibs
+      );
+      const nameIndex = _mapString(
+        resourceTable.name[i],
+        translationMapForStrings
+      );
+      const hostIndex = _mapNullableString(
+        resourceTable.host[i],
+        translationMapForStrings
+      );
       const type = resourceTable.type[i];
 
       // Duplicate search.
@@ -828,9 +920,13 @@ function combineResourceTables(threads: ReadonlyArray<RawThread>): {
 }
 
 /**
- * This combines the nativeSymbols tables for the threads.
+ * This combines the nativeSymbols tables for the profiles.
  */
-function combineNativeSymbolTables(threads: ReadonlyArray<RawThread>): {
+function mergeNativeSymbolTables(
+  profiles: ReadonlyArray<Profile>,
+  translationMapsForStrings: TranslationMapForStrings[],
+  translationMapsForLibs: TranslationMapForLibs[]
+): {
   nativeSymbols: NativeSymbolTable;
   translationMaps: TranslationMapForNativeSymbols[];
 } {
@@ -839,13 +935,21 @@ function combineNativeSymbolTables(threads: ReadonlyArray<RawThread>): {
   const translationMaps: TranslationMapForNativeSymbols[] = [];
   const newNativeSymbols = getEmptyNativeSymbolTable();
 
-  threads.forEach((thread) => {
+  profiles.forEach((profile, profileIndex) => {
+    const translationMapForLibs = translationMapsForLibs[profileIndex];
+    const translationMapForStrings = translationMapsForStrings[profileIndex];
     const translationMap: TranslationMapForNativeSymbols = new Map();
-    const { nativeSymbols } = thread;
+    const { nativeSymbols } = profile.shared;
 
     for (let i = 0; i < nativeSymbols.length; i++) {
-      const libIndex = nativeSymbols.libIndex[i];
-      const nameIndex = nativeSymbols.name[i];
+      const libIndex = _mapLib(
+        nativeSymbols.libIndex[i],
+        translationMapForLibs
+      );
+      const nameIndex = _mapString(
+        nativeSymbols.name[i],
+        translationMapForStrings
+      );
       const address = nativeSymbols.address[i];
       const functionSize = nativeSymbols.functionSize[i];
 
@@ -876,37 +980,38 @@ function combineNativeSymbolTables(threads: ReadonlyArray<RawThread>): {
 }
 
 /**
- * This combines the function tables for a list of threads. It returns the new
+ * This combines the function tables for a list of profiles. It returns the new
  * function table with the translation maps to be used in subsequent merging
  * functions.
  */
-function combineFuncTables(
+function mergeFuncTables(
+  profiles: ReadonlyArray<Profile>,
   translationMapsForResources: TranslationMapForResources[],
-  threads: ReadonlyArray<RawThread>
+  translationMapsForSources: TranslationMapForSources[],
+  translationMapsForStrings: TranslationMapForStrings[]
 ): { funcTable: FuncTable; translationMaps: TranslationMapForFuncs[] } {
   const mapOfInsertedFuncs = new Map<string, IndexIntoFuncTable>();
   const translationMaps: TranslationMapForFuncs[] = [];
   const newFuncTable = getEmptyFuncTable();
 
-  threads.forEach((thread, threadIndex) => {
-    const { funcTable } = thread;
+  profiles.forEach((profile, profileIndex) => {
+    const { funcTable } = profile.shared;
     const translationMap: TranslationMapForFuncs = new Map();
-    const resourceTranslationMap = translationMapsForResources[threadIndex];
+    const translationMapForResources =
+      translationMapsForResources[profileIndex];
+    const translationMapForStrings = translationMapsForStrings[profileIndex];
+    const translationMapForSources = translationMapsForSources[profileIndex];
 
     for (let i = 0; i < funcTable.length; i++) {
-      const sourceIndex = funcTable.source[i];
-      const resourceIndex = funcTable.resource[i];
-      const newResourceIndex =
-        resourceIndex >= 0
-          ? resourceTranslationMap.get(funcTable.resource[i])
-          : -1;
-      if (newResourceIndex === undefined) {
-        throw new Error(stripIndent`
-          We couldn't find the resource of func ${i} in the translation map.
-          This is a programming error.
-        `);
-      }
-      const nameIndex = funcTable.name[i];
+      const sourceIndex = _mapNullableSource(
+        funcTable.source[i],
+        translationMapForSources
+      );
+      const resourceIndex = _mapFuncResource(
+        funcTable.resource[i],
+        translationMapForResources
+      );
+      const nameIndex = _mapString(funcTable.name[i], translationMapForStrings);
       const lineNumber = funcTable.lineNumber[i];
 
       // Entries in this table can be either:
@@ -917,7 +1022,7 @@ function combineFuncTables(
       //    number as well.
       // 3. Label frames: they have no resource, only a name. So we can't do
       //    better than this.
-      const funcKey = [nameIndex, newResourceIndex, lineNumber].join('#');
+      const funcKey = [nameIndex, resourceIndex, lineNumber].join('#');
       const insertedFuncIndex = mapOfInsertedFuncs.get(funcKey);
       if (insertedFuncIndex !== undefined) {
         translationMap.set(i, insertedFuncIndex);
@@ -928,7 +1033,7 @@ function combineFuncTables(
 
       newFuncTable.isJS.push(funcTable.isJS[i]);
       newFuncTable.name.push(nameIndex);
-      newFuncTable.resource.push(newResourceIndex);
+      newFuncTable.resource.push(resourceIndex);
       newFuncTable.relevantForJS.push(funcTable.relevantForJS[i]);
       newFuncTable.source.push(sourceIndex);
       newFuncTable.lineNumber.push(lineNumber);
@@ -944,54 +1049,48 @@ function combineFuncTables(
 }
 
 /**
- * This combines the frame tables for a list of threads. It returns the new
+ * This combines the frame tables for a list of profiles. It returns the new
  * frame table with the translation maps to be used in subsequent merging
  * functions.
- * Note that we don't try to merge the frames of the source threads, because
+ * Note that we don't try to merge the frames of the source profiles, because
  * that's not needed to get a diffing call tree.
  */
-function combineFrameTables(
+function mergeFrameTables(
+  profiles: ReadonlyArray<Profile>,
   translationMapsForFuncs: TranslationMapForFuncs[],
   translationMapsForNativeSymbols: TranslationMapForNativeSymbols[],
-  threads: ReadonlyArray<RawThread>
+  translationMapsForCategories: TranslationMapForCategories[]
 ): { frameTable: FrameTable; translationMaps: TranslationMapForFrames[] } {
   const translationMaps: TranslationMapForFrames[] = [];
   const newFrameTable = getEmptyFrameTable();
 
-  threads.forEach((thread, threadIndex) => {
-    const { frameTable } = thread;
+  profiles.forEach((profile, profileIndex) => {
+    const { frameTable } = profile.shared;
     const translationMap: TranslationMapForFrames = new Map();
-    const funcTranslationMap = translationMapsForFuncs[threadIndex];
-    const nativeSymbolTranslationMap =
-      translationMapsForNativeSymbols[threadIndex];
-
+    const translationMapForFuncs = translationMapsForFuncs[profileIndex];
+    const translationMapForNativeSymbols =
+      translationMapsForNativeSymbols[profileIndex];
+    const translationMapForCategories =
+      translationMapsForCategories[profileIndex];
     for (let i = 0; i < frameTable.length; i++) {
-      const newFunc = funcTranslationMap.get(frameTable.func[i]);
-      if (newFunc === undefined) {
-        throw new Error(stripIndent`
-          We couldn't find the function of frame ${i} in the translation map.
-          This is a programming error.
-        `);
-      }
-
-      const nativeSymbol = frameTable.nativeSymbol[i];
-      const newNativeSymbol =
-        nativeSymbol === null
-          ? null
-          : nativeSymbolTranslationMap.get(nativeSymbol);
-      if (newNativeSymbol === undefined) {
-        throw new Error(stripIndent`
-          We couldn't find the nativeSymbol of frame ${i} in the translation map.
-          This is a programming error.
-        `);
-      }
+      const func = _mapFunc(frameTable.func[i], translationMapForFuncs);
+      const nativeSymbol = _mapNullableNativeSymbol(
+        frameTable.nativeSymbol[i],
+        translationMapForNativeSymbols
+      );
+      const category = _mapNullableCategory(
+        frameTable.category[i],
+        translationMapForCategories
+      );
+      // TODO issue #2151: Also adjust subcategories.
+      const subcategory = frameTable.subcategory[i];
 
       newFrameTable.address.push(frameTable.address[i]);
       newFrameTable.inlineDepth.push(frameTable.inlineDepth[i]);
-      newFrameTable.category.push(frameTable.category[i]);
-      newFrameTable.subcategory.push(frameTable.subcategory[i]);
-      newFrameTable.nativeSymbol.push(newNativeSymbol);
-      newFrameTable.func.push(newFunc);
+      newFrameTable.category.push(category);
+      newFrameTable.subcategory.push(subcategory);
+      newFrameTable.nativeSymbol.push(nativeSymbol);
+      newFrameTable.func.push(func);
       newFrameTable.innerWindowID.push(frameTable.innerWindowID[i]);
       newFrameTable.line.push(frameTable.line[i]);
       newFrameTable.column.push(frameTable.column[i]);
@@ -1007,33 +1106,29 @@ function combineFrameTables(
 }
 
 /**
- * This combines the stack tables for a list of threads. It returns the new
+ * This combines the stack tables for a list of profiles. It returns the new
  * stack table with the translation maps to be used in subsequent merging
  * functions.
- * Note that we don't try to merge the stacks of the source threads, because
+ * Note that we don't try to merge the stacks of the source profiles, because
  * that's not needed to get a diffing call tree.
  */
-function combineStackTables(
-  translationMapsForFrames: TranslationMapForFrames[],
-  threads: ReadonlyArray<RawThread>
+function mergeStackTables(
+  profiles: ReadonlyArray<Profile>,
+  translationMapsForFrames: TranslationMapForFrames[]
 ): { stackTable: RawStackTable; translationMaps: TranslationMapForStacks[] } {
   const translationMaps: TranslationMapForStacks[] = [];
   const newStackTable = getEmptyRawStackTable();
 
-  threads.forEach((thread, threadIndex) => {
-    const { stackTable } = thread;
-    const translationMap: TranslationMapForStacks = new Map();
-    const frameTranslationMap = translationMapsForFrames[threadIndex];
+  profiles.forEach((profile, profileIndex) => {
+    const { stackTable } = profile.shared;
+    const translationMap = new Map();
+    const translationMapForFrames = translationMapsForFrames[profileIndex];
 
     for (let i = 0; i < stackTable.length; i++) {
-      const newFrameIndex = frameTranslationMap.get(stackTable.frame[i]);
-      if (newFrameIndex === undefined) {
-        throw new Error(stripIndent`
-          We couldn't find the frame of stack ${i} in the translation map.
-          This is a programming error.
-        `);
-      }
-
+      const frameIndex = _mapFrame(
+        stackTable.frame[i],
+        translationMapForFrames
+      );
       const prefix = stackTable.prefix[i];
       const newPrefix = prefix === null ? null : translationMap.get(prefix);
       if (newPrefix === undefined) {
@@ -1043,7 +1138,7 @@ function combineStackTables(
         `);
       }
 
-      newStackTable.frame.push(newFrameIndex);
+      newStackTable.frame.push(frameIndex);
       newStackTable.prefix.push(newPrefix);
 
       translationMap.set(i, newStackTable.length);
@@ -1065,13 +1160,11 @@ function combineStackTables(
  * subsequent merging functions, if necessary.
  */
 function combineSamplesDiffing(
-  translationMapsForStacks: TranslationMapForStacks[],
   threadsAndWeightMultipliers: [
     ThreadAndWeightMultiplier,
     ThreadAndWeightMultiplier,
   ]
-): { samples: RawSamplesTable; translationMaps: TranslationMapForSamples[] } {
-  const translationMaps: TranslationMapForSamples[] = [new Map(), new Map()];
+): RawSamplesTable {
   const [
     {
       thread: { samples: samples1, tid: tid1 },
@@ -1109,18 +1202,7 @@ function combineSamplesDiffing(
 
     if (nextSampleIsFromThread1) {
       // Next sample is from thread 1.
-      const stackIndex = samples1.stack[i];
-      const newStackIndex =
-        stackIndex === null
-          ? null
-          : translationMapsForStacks[0].get(stackIndex);
-      if (newStackIndex === undefined) {
-        throw new Error(stripIndent`
-          We couldn't find the stack of sample ${i} in the translation map.
-          This is a programming error.
-        `);
-      }
-      newSamples.stack.push(newStackIndex);
+      newSamples.stack.push(samples1.stack[i]);
       // Diffing event delay values doesn't make sense since interleaved values
       // of eventDelay/responsiveness don't mean anything.
       newSamples.eventDelay!.push(null);
@@ -1132,23 +1214,11 @@ function combineSamplesDiffing(
       const sampleWeight = samples1.weight ? samples1.weight[i] : 1;
       newWeight.push(-weightMultiplier1 * sampleWeight);
 
-      translationMaps[0].set(i, newSamples.length);
       newSamples.length++;
       i++;
     } else {
       // Next sample is from thread 2.
-      const stackIndex = samples2.stack[j];
-      const newStackIndex =
-        stackIndex === null
-          ? null
-          : translationMapsForStacks[1].get(stackIndex);
-      if (newStackIndex === undefined) {
-        throw new Error(stripIndent`
-          We couldn't find the stack of sample ${j} in the translation map.
-          This is a programming error.
-        `);
-      }
-      newSamples.stack.push(newStackIndex);
+      newSamples.stack.push(samples2.stack[j]);
       // Diffing event delay values doesn't make sense since interleaved values
       // of eventDelay/responsiveness don't mean anything.
       newSamples.eventDelay!.push(null);
@@ -1157,16 +1227,12 @@ function combineSamplesDiffing(
       const sampleWeight = samples2.weight ? samples2.weight[j] : 1;
       newWeight.push(weightMultiplier2 * sampleWeight);
 
-      translationMaps[1].set(j, newSamples.length);
       newSamples.length++;
       j++;
     }
   }
 
-  return {
-    samples: newSamples,
-    translationMaps,
-  };
+  return newSamples;
 }
 
 type ThreadAndWeightMultiplier = {
@@ -1188,32 +1254,7 @@ function getComparisonThread(
 ): RawThread {
   const threads = threadsAndWeightMultipliers.map((item) => item.thread);
 
-  const {
-    resourceTable: newResourceTable,
-    translationMaps: translationMapsForResources,
-  } = combineResourceTables(threads);
-  const {
-    nativeSymbols: newNativeSymbols,
-    translationMaps: translationMapsForNativeSymbols,
-  } = combineNativeSymbolTables(threads);
-  const { funcTable: newFuncTable, translationMaps: translationMapsForFuncs } =
-    combineFuncTables(translationMapsForResources, threads);
-  const {
-    frameTable: newFrameTable,
-    translationMaps: translationMapsForFrames,
-  } = combineFrameTables(
-    translationMapsForFuncs,
-    translationMapsForNativeSymbols,
-    threads
-  );
-  const {
-    stackTable: newStackTable,
-    translationMaps: translationMapsForStacks,
-  } = combineStackTables(translationMapsForFrames, threads);
-  const { samples: newSamples } = combineSamplesDiffing(
-    translationMapsForStacks,
-    threadsAndWeightMultipliers
-  );
+  const newSamples = combineSamplesDiffing(threadsAndWeightMultipliers);
 
   const mergedThread = {
     processType: 'comparison',
@@ -1239,11 +1280,6 @@ function getComparisonThread(
     isMainThread: true,
     samples: newSamples,
     markers: getEmptyRawMarkerTable(),
-    stackTable: newStackTable,
-    frameTable: newFrameTable,
-    funcTable: newFuncTable,
-    resourceTable: newResourceTable,
-    nativeSymbols: newNativeSymbols,
   };
 
   return mergedThread;
@@ -1256,40 +1292,8 @@ function getComparisonThread(
  * TODO: Overlapping threads will not look great due to #2783.
  */
 export function mergeThreads(threads: RawThread[]): RawThread {
-  // Combine the table we would need.
-  const {
-    resourceTable: newResourceTable,
-    translationMaps: translationMapsForResources,
-  } = combineResourceTables(threads);
-  const {
-    nativeSymbols: newNativeSymbols,
-    translationMaps: translationMapsForNativeSymbols,
-  } = combineNativeSymbolTables(threads);
-  const { funcTable: newFuncTable, translationMaps: translationMapsForFuncs } =
-    combineFuncTables(translationMapsForResources, threads);
-  const {
-    frameTable: newFrameTable,
-    translationMaps: translationMapsForFrames,
-  } = combineFrameTables(
-    translationMapsForFuncs,
-    translationMapsForNativeSymbols,
-    threads
-  );
-  const {
-    stackTable: newStackTable,
-    translationMaps: translationMapsForStacks,
-  } = combineStackTables(translationMapsForFrames, threads);
-
-  // Combine the samples for merging.
-  const newSamples = combineSamplesForMerging(
-    translationMapsForStacks,
-    threads
-  );
-
-  const { markerTable: newMarkers } = mergeMarkers(
-    translationMapsForStacks,
-    threads
-  );
+  const newSamples = combineSamplesForMerging(threads);
+  const newMarkers = mergeMarkers(threads);
 
   let processStartupTime = Infinity;
   let processShutdownTime = -Infinity;
@@ -1325,11 +1329,6 @@ export function mergeThreads(threads: RawThread[]): RawThread {
     isMainThread: true,
     samples: newSamples,
     markers: newMarkers,
-    stackTable: newStackTable,
-    frameTable: newFrameTable,
-    funcTable: newFuncTable,
-    nativeSymbols: newNativeSymbols,
-    resourceTable: newResourceTable,
   };
 
   return mergedThread;
@@ -1344,10 +1343,7 @@ export function mergeThreads(threads: RawThread[]): RawThread {
  * It returns the new sample table with the translation maps to be used in
  * subsequent merging functions, if necessary.
  */
-function combineSamplesForMerging(
-  translationMapsForStacks: TranslationMapForStacks[],
-  threads: RawThread[]
-): RawSamplesTable {
+function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
   const samplesPerThread: RawSamplesTable[] = threads.map(
     (thread) => thread.samples
   );
@@ -1407,19 +1403,7 @@ function combineSamplesForMerging(
     const sourceThreadSampleIndex: number =
       nextSampleIndexPerThread[sourceThreadIndex];
 
-    const stackIndex: number | null =
-      sourceThreadSamples.stack[sourceThreadSampleIndex];
-    const newStackIndex =
-      stackIndex === null
-        ? null
-        : translationMapsForStacks[sourceThreadIndex].get(stackIndex);
-    if (newStackIndex === undefined) {
-      throw new Error(stripIndent`
-          We couldn't find the stack of sample ${sourceThreadSampleIndex} in the translation map.
-          This is a programming error.
-        `);
-    }
-    newSamples.stack.push(newStackIndex);
+    newSamples.stack.push(sourceThreadSamples.stack[sourceThreadSampleIndex]);
     // It doesn't make sense to combine event delay values. We need to use jank markers
     // from independent threads instead.
     ensureExists(newSamples.eventDelay).push(null);
@@ -1437,77 +1421,34 @@ function combineSamplesForMerging(
   return newSamples;
 }
 
-type TranslationMapForMarkers = Map<MarkerIndex, MarkerIndex>;
-
 /**
  * Merge markers from different threads. And update the new string table while doing it.
  */
-function mergeMarkers(
-  translationMapsForStacks: TranslationMapForStacks[],
-  threads: RawThread[]
-): {
-  markerTable: RawMarkerTable;
-  translationMaps: TranslationMapForMarkers[];
-} {
-  const newThreadId: Tid[] = [];
-  const newMarkerTable = { ...getEmptyRawMarkerTable(), threadId: newThreadId };
+function mergeMarkers(threads: RawThread[]): RawMarkerTable {
+  const newThreadId: Array<Tid | null> = [];
+  const newMarkerTable: RawMarkerTable = {
+    ...getEmptyRawMarkerTable(),
+    threadId: newThreadId,
+  };
 
-  const translationMaps: TranslationMapForMarkers[] = [];
-
-  threads.forEach((thread, threadIndex) => {
-    const translationMapForStacks = translationMapsForStacks[threadIndex];
-    const translationMap: TranslationMapForMarkers = new Map();
+  threads.forEach((thread) => {
     const { markers } = thread;
 
     for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
-      // We need to move the name string to the new string table if doesn't exist.
-      const nameIndex = markers.name[markerIndex];
-
-      // Move marker data to the new marker table
-      const oldData = markers.data[markerIndex];
-
-      if (oldData && 'cause' in oldData && oldData.cause) {
-        // The old data has a cause, we need to convert the stack.
-        const oldStack = oldData.cause.stack;
-        const newStack =
-          oldStack !== null ? translationMapForStacks.get(oldStack) : null;
-        if (newStack === undefined) {
-          throw new Error(
-            `Missing old stack entry ${oldStack} in the translation map.`
-          );
-        }
-
-        newMarkerTable.data.push({
-          ...oldData,
-          cause: {
-            ...oldData.cause,
-            stack: newStack,
-          },
-        });
-      } else {
-        newMarkerTable.data.push(oldData);
-      }
-
-      newMarkerTable.name.push(nameIndex);
+      newMarkerTable.name.push(markers.name[markerIndex]);
+      newMarkerTable.data.push(markers.data[markerIndex]);
       newMarkerTable.startTime.push(markers.startTime[markerIndex]);
       newMarkerTable.endTime.push(markers.endTime[markerIndex]);
       newMarkerTable.phase.push(markers.phase[markerIndex]);
       newMarkerTable.category.push(markers.category[markerIndex]);
       newThreadId.push(
-        markers.threadId
-          ? (markers.threadId[markerIndex] ?? thread.tid)
-          : thread.tid
+        markers.threadId ? markers.threadId[markerIndex] : thread.tid
       );
-
-      // Set the translation map and increase the table length.
-      translationMap.set(markerIndex, newMarkerTable.length);
       newMarkerTable.length++;
     }
-
-    translationMaps.push(translationMap);
   });
 
-  return { markerTable: newMarkerTable, translationMaps };
+  return newMarkerTable;
 }
 
 /**

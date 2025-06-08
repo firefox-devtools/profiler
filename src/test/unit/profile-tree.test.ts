@@ -360,11 +360,10 @@ describe('unfiltered call tree', function () {
           A[lib:examplecom.js]
         `);
         const callTree = callTreeFromProfile(profile);
-        const [thread] = profile.threads;
         const hostStringIndex = stringTable.indexForString('examplecom.js');
 
-        thread.resourceTable.type[0] = resourceTypes.webhost;
-        thread.resourceTable.host[0] = hostStringIndex;
+        profile.shared.resourceTable.type[0] = resourceTypes.webhost;
+        profile.shared.resourceTable.host[0] = hostStringIndex;
         // Hijack the string table to provide the proper host name
         stringTable._array[hostStringIndex] = 'http://example.com';
 
@@ -681,9 +680,8 @@ describe('origin annotation', function () {
     C
     D
   `);
-  const {
-    threads: [thread],
-  } = profile;
+
+  const { shared } = profile;
 
   function addResource(
     funcName: string,
@@ -691,21 +689,18 @@ describe('origin annotation', function () {
     host: string | null,
     location: string | null
   ) {
-    const resourceIndex = thread.resourceTable.length;
+    const resourceIndex = shared.resourceTable.length;
     const funcIndex = funcNames.indexOf(funcName);
-    thread.funcTable.resource[funcIndex] = resourceIndex;
-    thread.funcTable.source[funcIndex] = location
-      ? addSourceToTable(
-          profile.shared.sources,
-          stringTable.indexForString(location)
-        )
+    shared.funcTable.resource[funcIndex] = resourceIndex;
+    shared.funcTable.source[funcIndex] = location
+      ? addSourceToTable(shared.sources, stringTable.indexForString(location))
       : null;
-    thread.resourceTable.lib.push(-1);
-    thread.resourceTable.name.push(stringTable.indexForString(name));
-    thread.resourceTable.host.push(
+    shared.resourceTable.lib.push(-1);
+    shared.resourceTable.name.push(stringTable.indexForString(name));
+    shared.resourceTable.host.push(
       host ? stringTable.indexForString(host) : null
     );
-    thread.resourceTable.length++;
+    shared.resourceTable.length++;
   }
 
   addResource(
@@ -729,10 +724,10 @@ describe('origin annotation', function () {
   function getOrigin(funcName: string): string {
     return getOriginAnnotationForFunc(
       funcNames.indexOf(funcName),
-      thread.funcTable,
-      thread.resourceTable,
+      shared.funcTable,
+      shared.resourceTable,
       stringTable,
-      profile.shared.sources
+      shared.sources
     );
   }
 

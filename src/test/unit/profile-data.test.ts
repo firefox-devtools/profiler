@@ -153,18 +153,24 @@ describe('process-profile', function () {
 
     it('should have a profile-wide libs property', function () {
       expect('libs' in profile).toBeTruthy();
+      expect('stackTable' in profile.shared).toBeTruthy();
+      expect('frameTable' in profile.shared).toBeTruthy();
+      expect('funcTable' in profile.shared).toBeTruthy();
+      expect('resourceTable' in profile.shared).toBeTruthy();
     });
 
     it('should have threads that are objects of the right shape', function () {
       for (const thread of profile.threads) {
         expect(typeof thread).toEqual('object');
-        expect('libs' in thread).toBeFalsy();
         expect('samples' in thread).toBeTruthy();
-        expect('stackTable' in thread).toBeTruthy();
-        expect('frameTable' in thread).toBeTruthy();
         expect('markers' in thread).toBeTruthy();
-        expect('funcTable' in thread).toBeTruthy();
-        expect('resourceTable' in thread).toBeTruthy();
+
+        // Shared data which is not part of a thread:
+        expect('libs' in thread).toBeFalsy();
+        expect('stackTable' in thread).toBeFalsy();
+        expect('frameTable' in thread).toBeFalsy();
+        expect('funcTable' in thread).toBeFalsy();
+        expect('resourceTable' in thread).toBeFalsy();
       }
     });
 
@@ -227,35 +233,59 @@ describe('process-profile', function () {
     });
 
     it('should create one function per frame, except for extra frames from return address nudging', function () {
-      const { shared, threads } = profile;
-      const thread = threads[0];
-      expect(thread.frameTable.length).toEqual(9);
-      expect('location' in thread.frameTable).toBeFalsy();
-      expect('func' in thread.frameTable).toBeTruthy();
-      expect('resource' in thread.funcTable).toBeTruthy();
-      expect(thread.funcTable.length).toEqual(7);
-      expect(thread.frameTable.func[0]).toEqual(0);
-      expect(thread.frameTable.func[1]).toEqual(1);
-      expect(thread.frameTable.func[2]).toEqual(2);
-      expect(thread.frameTable.func[3]).toEqual(3);
-      expect(thread.frameTable.func[4]).toEqual(4);
-      expect(thread.frameTable.func[5]).toEqual(5);
-      expect(thread.frameTable.func[6]).toEqual(6);
-      expect(thread.frameTable.func[7]).toEqual(2);
-      expect(thread.frameTable.func[8]).toEqual(1);
-      expect(thread.frameTable.address[0]).toEqual(-1);
+      const { shared } = profile;
+
+      // The Gecko profile has three threads, default:GeckoMain, default:Compositor, tab:GeckoMain.
+
+      // The function table contains 11 items; 3 items are shared between the threads
+      // ("(root)", "Startup::XRE_Main", "frobnicate"), and 4 items per process which
+      // are "unique" to that process; they are functions for unsymbolicated addresses.
+      // The same addresses are used in both processes, but we give the processes different
+      // library mappings.
+      // The parent process has a library resource for a 'firefox' binary and the content
+      // process has a library resource for a 'firefox-webcontent' binary. This makes
+      // those 4 native functions distinct, and we end up with 4 + 3 + 4 = 11 functions
+      // in the shared funcTable.
+      expect(shared.funcTable.length).toEqual(11);
+
+      // The Gecko profile frameTable has 7 frames per thread.
+      // The shared frameTable has 27 items: 7 * 3 + 2 * 3
+      // - 7 per thread from the gecko thread's frameTable - these all get concatenated
+      //   together to form the shared frameTable
+      // - 2 per thread from splitting two of these frames (per thread) into "nudged"
+      //   and "non-nudged" instances
+      expect(shared.frameTable.length).toEqual((7 + 2) * 3);
+
+      expect('location' in shared.frameTable).toBeFalsy();
+      expect('func' in shared.frameTable).toBeTruthy();
+      expect('resource' in shared.funcTable).toBeTruthy();
+
+      expect(shared.frameTable.func[0]).toEqual(0);
+      expect(shared.frameTable.func[1]).toEqual(1);
+      expect(shared.frameTable.func[2]).toEqual(2);
+      expect(shared.frameTable.func[3]).toEqual(3);
+      expect(shared.frameTable.func[4]).toEqual(4);
+      expect(shared.frameTable.func[5]).toEqual(5);
+      expect(shared.frameTable.func[6]).toEqual(6);
+      expect(shared.frameTable.func[21]).toEqual(2);
+      expect(shared.frameTable.func[22]).toEqual(2);
+      expect(shared.frameTable.func[24]).toEqual(1);
+      expect(shared.frameTable.func[25]).toEqual(1);
+      expect(shared.frameTable.address[0]).toEqual(-1);
       // The next two addresses were return addresses which were "nudged"
       // by one byte to point into the calling instruction.
-      expect(thread.frameTable.address[1]).toEqual(0xf83);
-      expect(thread.frameTable.address[2]).toEqual(0x1a44);
-      expect(thread.frameTable.address[3]).toEqual(-1);
-      expect(thread.frameTable.address[4]).toEqual(-1);
-      expect(thread.frameTable.address[5]).toEqual(0x1bcd);
-      expect(thread.frameTable.address[6]).toEqual(0x1bce);
+      expect(shared.frameTable.address[1]).toEqual(0xf83);
+      expect(shared.frameTable.address[2]).toEqual(0x1a44);
+      expect(shared.frameTable.address[3]).toEqual(-1);
+      expect(shared.frameTable.address[4]).toEqual(-1);
+      expect(shared.frameTable.address[5]).toEqual(0x1bcd);
+      expect(shared.frameTable.address[6]).toEqual(0x1bce);
       // Here are the non-nudged addresses for when they were sampled directly.
-      expect(thread.frameTable.address[7]).toEqual(0x1a45);
-      expect(thread.frameTable.address[8]).toEqual(0xf84);
-      const funcTableNames = thread.funcTable.name.map(
+      expect(shared.frameTable.address[21]).toEqual(0x1a45);
+      expect(shared.frameTable.address[22]).toEqual(0x1a45);
+      expect(shared.frameTable.address[24]).toEqual(0xf84);
+      expect(shared.frameTable.address[25]).toEqual(0xf84);
+      const funcTableNames = shared.funcTable.name.map(
         (nameIndex) => shared.stringArray[nameIndex]
       );
       expect(funcTableNames[0]).toEqual('(root)');
@@ -263,28 +293,29 @@ describe('process-profile', function () {
       expect(funcTableNames[2]).toEqual('0x100001a45');
       expect(funcTableNames[3]).toEqual('Startup::XRE_Main');
       expect(funcTableNames[4]).toEqual('frobnicate');
-      const chromeSourceIndex = thread.funcTable.source[4];
+      const chromeSourceIndex = shared.funcTable.source[4];
       if (typeof chromeSourceIndex !== 'number') {
         throw new Error('chromeSourceIndex must be a number');
       }
       const chromeStringIndex =
         profile.shared.sources.filename[chromeSourceIndex];
       expect(shared.stringArray[chromeStringIndex]).toEqual('chrome://blargh');
-      expect(thread.funcTable.lineNumber[4]).toEqual(34);
-      expect(thread.funcTable.columnNumber[4]).toEqual(35);
+      expect(shared.funcTable.lineNumber[4]).toEqual(34);
+      expect(shared.funcTable.columnNumber[4]).toEqual(35);
     });
 
     it('nudges return addresses but not sampled instruction pointer values', function () {
       const profile = processGeckoProfile(createGeckoProfile());
       const thread = profile.threads[0];
+      const shared = profile.shared;
       function getFrameAddressesForSampleIndex(sample: IndexIntoSamplesTable) {
         const addresses = [];
         let stack = thread.samples.stack[sample];
         while (stack !== null) {
           addresses.push(
-            thread.frameTable.address[thread.stackTable.frame[stack]]
+            shared.frameTable.address[shared.stackTable.frame[stack]]
           );
-          stack = thread.stackTable.prefix[stack];
+          stack = shared.stackTable.prefix[stack];
         }
         addresses.reverse();
         return addresses;
@@ -296,35 +327,29 @@ describe('process-profile', function () {
     });
 
     it('should create no entries in nativeSymbols before symbolication', function () {
-      const { threads } = profile;
-      const thread = threads[0];
-      expect(thread.frameTable.length).toEqual(9);
-      expect('nativeSymbol' in thread.frameTable).toBeTruthy();
-      expect(thread.nativeSymbols.length).toEqual(0);
-      expect(thread.frameTable.nativeSymbol[0]).toEqual(null);
-      expect(thread.frameTable.nativeSymbol[1]).toEqual(null);
-      expect(thread.frameTable.nativeSymbol[2]).toEqual(null);
-      expect(thread.frameTable.nativeSymbol[3]).toEqual(null);
-      expect(thread.frameTable.nativeSymbol[4]).toEqual(null);
-      expect(thread.frameTable.nativeSymbol[5]).toEqual(null);
-      expect(thread.frameTable.nativeSymbol[6]).toEqual(null);
-      expect(thread.frameTable.nativeSymbol[7]).toEqual(null);
-      expect(thread.frameTable.nativeSymbol[8]).toEqual(null);
+      const shared = profile.shared;
+      expect(shared.frameTable.length).toEqual(27);
+      expect('nativeSymbol' in shared.frameTable).toBeTruthy();
+      expect(shared.nativeSymbols.length).toEqual(0);
+      expect(
+        shared.frameTable.nativeSymbol.every((s) => s === null)
+      ).toBeTrue();
     });
 
     it('should create one resource per used library', function () {
-      const { shared, threads } = profile;
-      const thread = threads[0];
-      expect(thread.resourceTable.length).toEqual(3);
-      expect(thread.resourceTable.type[0]).toEqual(resourceTypes.addon);
-      expect(thread.resourceTable.type[1]).toEqual(resourceTypes.library);
-      expect(thread.resourceTable.type[2]).toEqual(resourceTypes.url);
-      const [name0, name1, name2] = thread.resourceTable.name;
+      const shared = profile.shared;
+      expect(shared.resourceTable.length).toEqual(4);
+      expect(shared.resourceTable.type[0]).toEqual(resourceTypes.addon);
+      expect(shared.resourceTable.type[1]).toEqual(resourceTypes.library);
+      expect(shared.resourceTable.type[2]).toEqual(resourceTypes.url);
+      expect(shared.resourceTable.type[3]).toEqual(resourceTypes.library);
+      const [name0, name1, name2, name3] = shared.resourceTable.name;
       expect(shared.stringArray[name0]).toEqual(
         'Extension "Form Autofill" (ID: formautofill@mozilla.org)'
       );
       expect(shared.stringArray[name1]).toEqual('firefox');
       expect(shared.stringArray[name2]).toEqual('chrome://blargh');
+      expect(shared.stringArray[name3]).toEqual('firefox-webcontent');
     });
   });
 
@@ -472,19 +497,18 @@ describe('profile-data', function () {
     const callNodeTable = callNodeInfo.getCallNodeTable();
 
     it('should create one callNode per original stack', function () {
-      // After nudgeReturnAddresses, the stack table now has 8 entries.
-      expect(thread.stackTable.length).toEqual(8);
-      // But the call node table only has 5, same as the original stack table.
-      // That's because, whenever nudgeReturnAddresses duplicates frames (one nudged
+      // After nudgeReturnAddresses, the stack table now has 24 entries, 8 per original thread.
+      expect(thread.stackTable.length).toEqual(24);
+      // But the call node table only has 9.
+      // This is because we de-duplicate nodes with the same function, and all threads share
+      // the same funcs except for the native functions which have a different library in the
+      // content process.
+      // Furthermore, whenever nudgeReturnAddresses duplicates frames (one nudged
       // and one non-nudged), the two frames still share the same func, so the call
       // node table respects that func sharing.
-      expect(callNodeTable.length).toEqual(5);
+      expect(callNodeTable.length).toEqual(9);
       expect('prefix' in callNodeTable).toBeTruthy();
       expect('func' in callNodeTable).toBeTruthy();
-      expect(callNodeTable.func[0]).toEqual(0);
-      expect(callNodeTable.func[1]).toEqual(1);
-      expect(callNodeTable.func[2]).toEqual(2);
-      expect(callNodeTable.func[3]).toEqual(3);
     });
   });
 
@@ -780,16 +804,17 @@ describe('symbolication', function () {
       const symbolicationPromise = symbolicateProfile(
         unsymbolicatedProfile,
         symbolStore,
-        (threadIndex, symbolicationStepInfo) => {
+        (symbolicationStepInfo) => {
           if (!symbolicatedProfile) {
             throw new Error('symbolicatedProfile cannot be null');
           }
-          const { thread } = applySymbolicationSteps(
-            symbolicatedProfile.threads[threadIndex],
+          const { threads, shared } = applySymbolicationSteps(
+            symbolicatedProfile.threads,
             symbolicatedProfile.shared,
             [symbolicationStepInfo]
           );
-          symbolicatedProfile.threads[threadIndex] = thread;
+          symbolicatedProfile.threads = threads;
+          symbolicatedProfile.shared = shared;
         }
       );
       return symbolicationPromise;
@@ -797,12 +822,12 @@ describe('symbolication', function () {
 
     it('should assign correct symbols to frames', function () {
       function functionNameForFrameInThread(
-        thread: RawThread,
+        _thread: RawThread,
         shared: RawProfileSharedData,
         frameIndex: IndexIntoFrameTable
       ) {
-        const funcIndex = thread.frameTable.func[frameIndex];
-        const funcNameStringIndex = thread.funcTable.name[funcIndex];
+        const funcIndex = shared.frameTable.func[frameIndex];
+        const funcNameStringIndex = shared.funcTable.name[funcIndex];
         return shared.stringArray[funcNameStringIndex];
       }
       if (!unsymbolicatedProfile || !symbolicatedProfile) {
@@ -1433,12 +1458,12 @@ describe('calculateFunctionSizeLowerBound', function () {
       some_function[lib:XUL][file:hello.cpp][line:622][address:1007][sym:symSomeFunc:1000:]
     `);
 
-    const thread = profile.threads[0];
+    const shared = profile.shared;
     const nativeSymbolsDict = nativeSymbolsDictPerThread[0];
     const nativeSymbolIndex = nativeSymbolsDict.symSomeFunc;
 
     const functionSizeLowerBound = calculateFunctionSizeLowerBound(
-      thread.frameTable,
+      shared.frameTable,
       0x1000,
       nativeSymbolIndex
     );
@@ -1547,16 +1572,15 @@ describe('getNativeSymbolInfo', function () {
       other_function[lib:XUL][file:hello.cpp][line:622][address:2007][sym:symOtherFunc:2000:1e]
     `);
 
-    const { shared, threads } = profile;
-    const thread = threads[0];
+    const { shared } = profile;
     const stringTable = StringTable.withBackingArray(shared.stringArray);
     const { symSomeFunc, symOtherFunc } = nativeSymbolsDictPerThread[0];
 
     expect(
       getNativeSymbolInfo(
         symSomeFunc,
-        thread.nativeSymbols,
-        thread.frameTable,
+        shared.nativeSymbols,
+        shared.frameTable,
         stringTable
       )
     ).toEqual({
@@ -1569,8 +1593,8 @@ describe('getNativeSymbolInfo', function () {
     expect(
       getNativeSymbolInfo(
         symOtherFunc,
-        thread.nativeSymbols,
-        thread.frameTable,
+        shared.nativeSymbols,
+        shared.frameTable,
         stringTable
       )
     ).toEqual({

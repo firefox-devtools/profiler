@@ -20,6 +20,20 @@ import { timeCode } from '../utils/time-code';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 import type { Profile } from 'firefox-profiler/types';
 
+export type ProfileUpgradeInfo = {
+  v60?: ProfileV60UpgradeInfo;
+};
+
+export type ProfileV60UpgradeInfo = {
+  threadMappings: ProfileV60UpgradeThreadMappings[];
+  newFuncCount: number;
+};
+
+export type ProfileV60UpgradeThreadMappings = {
+  funcTableIndexMap: Int32Array;
+  resourceTableIndexMap: Int32Array;
+};
+
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
 const UNANNOTATED_VERSION = 0;
@@ -30,7 +44,8 @@ const UNANNOTATED_VERSION = 0;
  * to be a processed profile, then return null.
  */
 export function attemptToUpgradeProcessedProfileThroughMutation(
-  profile: any
+  profile: any,
+  upgradeInfo: ProfileUpgradeInfo
 ): Profile | null {
   if (!profile || typeof profile !== 'object') {
     return null;
@@ -84,7 +99,7 @@ export function attemptToUpgradeProcessedProfileThroughMutation(
     destVersion++
   ) {
     if (destVersion in _upgraders) {
-      _upgraders[destVersion](profile);
+      _upgraders[destVersion](profile, upgradeInfo);
     }
   }
 
@@ -244,7 +259,10 @@ function _guessMarkerCategories(profile: any) {
   }
 }
 
-type ProcessedProfileUpgrader = (profile: any) => void;
+type ProcessedProfileUpgrader = (
+  profile: any,
+  upgradeInfo: ProfileUpgradeInfo
+) => void;
 
 // _upgraders[i] converts from version i - 1 to version i.
 // Every "upgrader" takes the profile as its single argument and mutates it.
@@ -2725,6 +2743,223 @@ const _upgraders: {
         thread.usedInnerWindowIDs = Array.from(usedInnerWindowIDsSet);
       }
     }
+  },
+  [60]: (profile, upgradeInfo: ProfileUpgradeInfo) => {
+    // The following tables are now shared across all threads:
+    // - stackTable
+    // - frameTable
+    // - funcTable
+    // - resourceTable
+    // - nativeSymbols
+    // They are now stored in profile.shared.
+    const funcTableMap = new Map();
+    const resourceTableMap = new Map();
+    const nativeSymbolsMap = new Map();
+    const newStackTable = {
+      frame: [] as Array<number>,
+      prefix: [] as Array<number | null>,
+      length: 0,
+    };
+    const newFrameTable = {
+      address: [] as Array<number | null>,
+      inlineDepth: [] as Array<number>,
+      category: [] as Array<number | null>,
+      subcategory: [] as Array<number | null>,
+      func: [] as Array<number>,
+      nativeSymbol: [] as Array<number | null>,
+      innerWindowID: [] as Array<number | null>,
+      line: [] as Array<number | null>,
+      column: [] as Array<number | null>,
+      length: 0,
+    };
+    const newFuncTable = {
+      name: [] as Array<number>,
+      isJS: [] as Array<boolean>,
+      relevantForJS: [] as Array<boolean>,
+      resource: [] as Array<number>,
+      source: [] as Array<number | null>,
+      lineNumber: [] as Array<number | null>,
+      columnNumber: [] as Array<number | null>,
+      length: 0,
+    };
+    const newResourceTable = {
+      type: [] as Array<number>,
+      lib: [] as Array<number | null>,
+      name: [] as Array<number>,
+      host: [] as Array<number>,
+      length: 0,
+    };
+    const newNativeSymbols = {
+      libIndex: [] as Array<number>,
+      address: [] as Array<number>,
+      name: [] as Array<number>,
+      functionSize: [] as Array<number | null>,
+      length: 0,
+    };
+    const threadMappings = [];
+    for (
+      let threadIndex = 0;
+      threadIndex < profile.threads.length;
+      threadIndex++
+    ) {
+      const thread = profile.threads[threadIndex];
+      const {
+        stackTable,
+        frameTable,
+        funcTable,
+        resourceTable,
+        nativeSymbols,
+        samples,
+        markers,
+      } = thread;
+      const funcTableIndexMap = new Int32Array(funcTable.length);
+      const resourceTableIndexMap = new Int32Array(resourceTable.length);
+      const nativeSymbolsIndexMap = new Int32Array(nativeSymbols.length);
+      (function integrateIntoSharedNativeSymbols() {
+        for (let i = 0; i < nativeSymbols.length; i++) {
+          const libIndex = nativeSymbols.libIndex[i];
+          const address = nativeSymbols.address[i];
+          const key = `${libIndex}-${address}`;
+          let newIndex = nativeSymbolsMap.get(key);
+          if (newIndex === undefined) {
+            newIndex = newNativeSymbols.length++;
+            nativeSymbolsMap.set(key, newIndex);
+            newNativeSymbols.libIndex[newIndex] = libIndex;
+            newNativeSymbols.address[newIndex] = address;
+            newNativeSymbols.name[newIndex] = nativeSymbols.name[i];
+            newNativeSymbols.functionSize[newIndex] =
+              nativeSymbols.functionSize[i];
+          }
+          nativeSymbolsIndexMap[i] = newIndex;
+        }
+      })();
+      (function integrateIntoSharedResources() {
+        for (let i = 0; i < resourceTable.length; i++) {
+          const type = resourceTable.type[i];
+          const lib = resourceTable.lib[i];
+          const name = resourceTable.name[i];
+          const host = resourceTable.host[i];
+          const key = `${type}-${lib !== null ? lib : ''}-${name}-${host !== null ? host : ''}`;
+          let newIndex = resourceTableMap.get(key);
+          if (newIndex === undefined) {
+            newIndex = newResourceTable.length++;
+            resourceTableMap.set(key, newIndex);
+            newResourceTable.type[newIndex] = type;
+            newResourceTable.lib[newIndex] = lib;
+            newResourceTable.name[newIndex] = name;
+            newResourceTable.host[newIndex] = host;
+          }
+          resourceTableIndexMap[i] = newIndex;
+        }
+      })();
+      (function integrateIntoSharedFuncTable() {
+        for (let i = 0; i < funcTable.length; i++) {
+          const name = funcTable.name[i];
+          const isJS = funcTable.isJS[i];
+          const relevantForJS = funcTable.relevantForJS[i];
+          const oldResource = funcTable.resource[i];
+          const resource =
+            oldResource !== -1 ? resourceTableIndexMap[oldResource] : -1;
+          const source = funcTable.source[i];
+          const lineNumber = funcTable.lineNumber[i];
+          const columnNumber = funcTable.columnNumber[i];
+          const key = `${name}-${isJS}-${relevantForJS}-${resource}-${source !== null ? source : ''}-${lineNumber !== null ? lineNumber : ''}-${columnNumber !== null ? columnNumber : ''}`;
+          let newIndex = funcTableMap.get(key);
+          if (newIndex === undefined) {
+            newIndex = newFuncTable.length++;
+            funcTableMap.set(key, newIndex);
+            newFuncTable.name[newIndex] = name;
+            newFuncTable.isJS[newIndex] = isJS;
+            newFuncTable.relevantForJS[newIndex] = relevantForJS;
+            newFuncTable.resource[newIndex] = resource;
+            newFuncTable.source[newIndex] = source;
+            newFuncTable.lineNumber[newIndex] = lineNumber;
+            newFuncTable.columnNumber[newIndex] = columnNumber;
+          }
+          funcTableIndexMap[i] = newIndex;
+        }
+      })();
+      // For the frame table, just copy over all frames from all threads into the
+      // shared frameTable without doing any deduplication.
+      // We will end up with duplicated frames, but that's ok.
+      // For a correct call tree we just need a deduplicated *func* table; it's
+      // ok if we have duplicated frames because the computation of the call node
+      // table will do the right thing anyway.
+      // Deduplicating frames might make the computation of the call node table
+      // a bit faster, but it would mean we'd have a very slow upgrader, so we'd
+      // rather keep the upgrader fast.
+      const frameIndexOffset = newFrameTable.length;
+      (function integrateIntoSharedFrameTable() {
+        for (let i = 0; i < frameTable.length; i++) {
+          const newIndex = i + frameIndexOffset;
+          newFrameTable.address[newIndex] = frameTable.address[i];
+          newFrameTable.inlineDepth[newIndex] = frameTable.inlineDepth[i];
+          newFrameTable.category[newIndex] = frameTable.category[i];
+          newFrameTable.subcategory[newIndex] = frameTable.subcategory[i];
+          newFrameTable.func[newIndex] = funcTableIndexMap[frameTable.func[i]];
+          const oldNativeSymbol = frameTable.nativeSymbol[i];
+          const nativeSymbol =
+            oldNativeSymbol !== null
+              ? nativeSymbolsIndexMap[oldNativeSymbol]
+              : null;
+          newFrameTable.nativeSymbol[newIndex] = nativeSymbol;
+          newFrameTable.innerWindowID[newIndex] = frameTable.innerWindowID[i];
+          newFrameTable.line[newIndex] = frameTable.line[i];
+          newFrameTable.column[newIndex] = frameTable.column[i];
+        }
+        newFrameTable.length += frameTable.length;
+      })();
+      // Don't deduplicate stacks; same reason as above.
+      const stackIndexOffset = newStackTable.length;
+      (function integrateIntoSharedStackTable() {
+        for (let i = 0; i < stackTable.length; i++) {
+          const frame = stackTable.frame[i] + frameIndexOffset;
+          const oldPrefix = stackTable.prefix[i];
+          const prefix =
+            oldPrefix !== null ? oldPrefix + stackIndexOffset : null;
+          const newIndex = newStackTable.length++;
+          newStackTable.frame[newIndex] = frame;
+          newStackTable.prefix[newIndex] = prefix;
+        }
+        newStackTable.length += stackTable.length;
+      })();
+      (function translateSamples() {
+        for (let i = 0; i < samples.length; i++) {
+          const oldStack = samples.stack[i];
+          const stack = oldStack !== null ? oldStack + stackIndexOffset : null;
+          samples.stack[i] = stack;
+        }
+      })();
+      (function translateMarkers() {
+        for (let i = 0; i < markers.length; i++) {
+          const data = markers.data[i];
+          if (!data || !data.cause) {
+            continue;
+          }
+          const oldStack = data.cause.stack;
+          const stack =
+            oldStack !== null && oldStack !== undefined
+              ? oldStack + stackIndexOffset
+              : null;
+          data.cause.stack = stack;
+        }
+      })();
+      delete thread.stackTable;
+      delete thread.frameTable;
+      delete thread.funcTable;
+      delete thread.resourceTable;
+      delete thread.nativeSymbols;
+      threadMappings[threadIndex] = {
+        funcTableIndexMap,
+        resourceTableIndexMap,
+      };
+    }
+    profile.shared.stackTable = newStackTable;
+    profile.shared.frameTable = newFrameTable;
+    profile.shared.funcTable = newFuncTable;
+    profile.shared.resourceTable = newResourceTable;
+    profile.shared.nativeSymbols = newNativeSymbols;
+    upgradeInfo.v60 = { threadMappings, newFuncCount: newFuncTable.length };
   },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.

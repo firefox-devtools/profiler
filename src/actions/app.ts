@@ -52,6 +52,7 @@ import type {
   BrowserConnection,
   BrowserConnectionStatus,
 } from 'firefox-profiler/app-logic/browser-connection';
+import type { ProfileUpgradeInfo } from 'firefox-profiler/profile-logic/processed-profile-versioning';
 
 export function changeSelectedTab(selectedTab: TabSlug): ThunkAction<void> {
   return (dispatch, getState) => {
@@ -129,12 +130,13 @@ export function setHasZoomedViaMousewheel() {
 export function setupInitialUrlState(
   location: Location,
   profile: Profile | null,
-  browserConnection: BrowserConnection | null
+  browserConnection: BrowserConnection | null,
+  profileUpgradeInfo?: ProfileUpgradeInfo
 ): ThunkAction<void> {
   return (dispatch) => {
     let urlState;
     try {
-      urlState = stateFromLocation(location, profile);
+      urlState = stateFromLocation(location, profile, profileUpgradeInfo);
     } catch (e) {
       if (e.name === 'UrlUpgradeError') {
         // The error is an URL upgrade error, let's fire a fatal error.

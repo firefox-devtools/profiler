@@ -291,7 +291,7 @@ function setupFlameGraph() {
 
   // Add some file and line number to the profile so that tooltips generate
   // an interesting snapshot.
-  const { funcTable } = profile.threads[0];
+  const { funcTable } = profile.shared;
 
   // Create source entries.
   const defaultFileIndex = stringTable.indexForString('path/to/file');
