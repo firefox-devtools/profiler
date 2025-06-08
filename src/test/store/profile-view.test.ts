@@ -757,10 +757,10 @@ describe('actions/ProfileView', function () {
       // use a BitSet to keep track of something that's per-stack (such as whether a stack matches
       // the search filter), the BitSet needs at least two 32-bit slots.
       const { profile } = getProfileFromTextSamples(`
-        A[lib:K][file:S]  A[lib:K][file:S]   A[lib:K][file:S]   D[lib:nNn][file:uV]  C[lib:m][file:t]
-        B[lib:L][file:t]  B[lib:L][file:t]   E[lib:O][file:Pq]
+        A[lib:K][file:S]  A[lib:K][file:S]     A[lib:K][file:S]   D[lib:nNn][file:uV]  C[lib:m][file:t]
+        B[lib:L][file:t]  B[lib:L][file:t]     E[lib:O][file:Pq]
         A[lib:K][file:S]  C[lib:m][file:t]
-        B[lib:L][file:t]  D[lib:n][file:uV]
+        B[lib:L][file:t]  D[lib:nNn][file:uV]
         B[lib:L][file:t]
         B[lib:L][file:t]
         B[lib:L][file:t]
@@ -911,7 +911,7 @@ describe('actions/ProfileView', function () {
       ]);
       dispatch(ProfileView.changeCallTreeSearchString('NN'));
       const callTree_NN = selectedThreadSelectors.getCallTree(getState());
-      // Keep all stacks which include function D, which has filename nNn
+      // Keep all stacks which include function D, which has lib name nNn
       expect(formatTree(callTree_NN)).toEqual([
         '- A (total: 1, self: —)',
         '  - B (total: 1, self: —)',
