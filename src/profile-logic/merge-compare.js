@@ -241,7 +241,7 @@ export function mergeProfilesForDiffing(
 
     // Make sure that screenshot markers make it into the merged profile, even
     // if they're not on the selected thread.
-    thread.markers = addScreenshotMarkersToTargetThreadMarkers(
+    thread.markers = getThreadMarkersAndScreenshotMarkers(
       profile.threads,
       thread
     );
@@ -1402,7 +1402,7 @@ function mergeMarkers(
  * Returns a RawMarkerTable which contains all the markers from targetThread,
  * as well as any CompositorScreenshot markers found on any other threads.
  */
-function addScreenshotMarkersToTargetThreadMarkers(
+function getThreadMarkersAndScreenshotMarkers(
   threads: RawThread[],
   targetThread: RawThread
 ): RawMarkerTable {
