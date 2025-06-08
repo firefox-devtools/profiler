@@ -557,8 +557,8 @@ function adjustStringIndexes(
   translationMap: TranslationMapForStrings
 ): Array<IndexIntoStringTable> {
   return stringIndexes.map((stringIndex) => {
-    const result = translationMap.get(stringIndex);
-    if (result === undefined) {
+    const newStringIndex = translationMap.get(stringIndex);
+    if (newStringIndex === undefined) {
       throw new Error(
         stripIndent`
           String with index ${stringIndex} hasn't been found in the translation map.
@@ -566,7 +566,7 @@ function adjustStringIndexes(
         `
       );
     }
-    return result;
+    return newStringIndex;
   });
 }
 
@@ -591,8 +591,8 @@ function adjustMarkerDataStringIndexes(
     for (const fieldKey of stringIndexMarkerFields) {
       const stringIndex = data[fieldKey];
       if (typeof stringIndex === 'number') {
-        const result = translationMap.get(stringIndex);
-        if (result === undefined) {
+        const newStringIndex = translationMap.get(stringIndex);
+        if (newStringIndex === undefined) {
           throw new Error(
             stripIndent`
               String with index ${stringIndex} hasn't been found in the translation map.
@@ -602,7 +602,7 @@ function adjustMarkerDataStringIndexes(
         }
         newData = ({
           ...newData,
-          [fieldKey]: result,
+          [fieldKey]: newStringIndex,
         }: any);
       }
     }
@@ -618,8 +618,8 @@ function adjustNullableStringIndexes(
     if (stringIndex === null) {
       return null;
     }
-    const result = translationMap.get(stringIndex);
-    if (result === undefined) {
+    const newStringIndex = translationMap.get(stringIndex);
+    if (newStringIndex === undefined) {
       throw new Error(
         stripIndent`
           String with index ${stringIndex} hasn't been found in the translation map.
@@ -627,7 +627,7 @@ function adjustNullableStringIndexes(
         `
       );
     }
-    return result;
+    return newStringIndex;
   });
 }
 
