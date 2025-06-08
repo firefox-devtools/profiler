@@ -3,7 +3,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { StringTable } from '../utils/string-table';
-import { getEmptySourceTable } from './data-structures';
+import {
+  getEmptyFrameTable,
+  getEmptyFuncTable,
+  getEmptyNativeSymbolTable,
+  getEmptyResourceTable,
+  getEmptySourceTable,
+  getEmptyStackTable,
+  resourceTypes,
+} from './data-structures';
 
 import type {
   Lib,
@@ -13,6 +21,13 @@ import type {
   IndexIntoSourceTable,
   RawProfileSharedData,
   SourceTable,
+  FrameTable,
+  RawStackTable,
+  FuncTable,
+  ResourceTable,
+  NativeSymbolTable,
+  IndexIntoResourceTable,
+  IndexIntoFuncTable,
 } from 'firefox-profiler/types';
 
 /**
@@ -29,7 +44,14 @@ export class GlobalDataCollector {
   _stringArray: string[] = [];
   _stringTable: StringTable = StringTable.withBackingArray(this._stringArray);
   _sources: SourceTable = getEmptySourceTable();
+  _frameTable: FrameTable = getEmptyFrameTable();
+  _stackTable: RawStackTable = getEmptyStackTable();
+  _funcTable: FuncTable = getEmptyFuncTable();
+  _resourceTable: ResourceTable = getEmptyResourceTable();
+  _nativeSymbols: NativeSymbolTable = getEmptyNativeSymbolTable();
+  _funcKeyToFuncIndex: Map<string, IndexIntoFuncTable> = new Map();
   _uuidToSourceIndex: Map<string, IndexIntoSourceTable> = new Map();
+  _originToResourceIndex: Map<string, IndexIntoResourceTable> = new Map();
   _filenameToSourceIndex: Map<IndexIntoStringTable, IndexIntoSourceTable> =
     new Map();
 
@@ -54,6 +76,31 @@ export class GlobalDataCollector {
       this._libKeyToLibIndex.set(libKey, index);
     }
     return index;
+  }
+
+  indexForFunc(
+    name: IndexIntoStringTable,
+    isJS: boolean,
+    relevantForJS: boolean,
+    resource: IndexIntoResourceTable | -1,
+    source: IndexIntoSourceTable | null,
+    lineNumber: number | null,
+    columnNumber: number | null
+  ): IndexIntoFuncTable {
+    const funcKey = `${name}-${isJS}-${relevantForJS}-${resource}-${source}-${lineNumber}-${columnNumber}`;
+    let funcIndex = this._funcKeyToFuncIndex.get(funcKey);
+    if (funcIndex === undefined) {
+      funcIndex = this._funcTable.length++;
+      this._funcTable.name[funcIndex] = name;
+      this._funcTable.isJS[funcIndex] = isJS;
+      this._funcTable.relevantForJS[funcIndex] = relevantForJS;
+      this._funcTable.resource[funcIndex] = resource;
+      this._funcTable.source[funcIndex] = source;
+      this._funcTable.lineNumber[funcIndex] = lineNumber;
+      this._funcTable.columnNumber[funcIndex] = columnNumber;
+      this._funcKeyToFuncIndex.set(funcKey, funcIndex);
+    }
+    return funcIndex;
   }
 
   // Return the global index for this source, adding it to the global list if
@@ -85,18 +132,80 @@ export class GlobalDataCollector {
     return index;
   }
 
+  // Returns the resource index for a "url" or "webhost" resource which is created
+  // on demand based on the script URI.
+  indexForURIResource(scriptURI: string) {
+    // Figure out the origin and host.
+    let origin;
+    let host;
+    try {
+      const url = new URL(scriptURI);
+      if (
+        !(
+          url.protocol === 'http:' ||
+          url.protocol === 'https:' ||
+          url.protocol === 'moz-extension:'
+        )
+      ) {
+        throw new Error('not a webhost or extension protocol');
+      }
+      origin = url.origin;
+      host = url.host;
+    } catch (_e) {
+      origin = scriptURI;
+      host = null;
+    }
+
+    let resourceIndex = this._originToResourceIndex.get(origin);
+    if (resourceIndex !== undefined) {
+      return resourceIndex;
+    }
+
+    const resourceTable = this._resourceTable;
+
+    resourceIndex = resourceTable.length++;
+    this._originToResourceIndex.set(origin, resourceIndex);
+    if (host) {
+      // This is a webhost URL.
+      resourceTable.lib[resourceIndex] = null;
+      resourceTable.name[resourceIndex] =
+        this._stringTable.indexForString(origin);
+      resourceTable.host[resourceIndex] =
+        this._stringTable.indexForString(host);
+      resourceTable.type[resourceIndex] = resourceTypes.webhost;
+    } else {
+      // This is a URL, but it doesn't point to something on the web, e.g. a
+      // chrome url.
+      resourceTable.lib[resourceIndex] = null;
+      resourceTable.name[resourceIndex] =
+        this._stringTable.indexForString(scriptURI);
+      resourceTable.host[resourceIndex] = null;
+      resourceTable.type[resourceIndex] = resourceTypes.url;
+    }
+    return resourceIndex;
+  }
+
   getStringTable(): StringTable {
     return this._stringTable;
   }
 
-  getSources(): SourceTable {
-    return this._sources;
+  getFrameTable(): FrameTable {
+    return this._frameTable;
+  }
+
+  getStackTable(): RawStackTable {
+    return this._stackTable;
   }
 
   // Package up all de-duplicated global tables so that they can be embedded in
   // the profile.
   finish(): { libs: Lib[]; shared: RawProfileSharedData } {
     const shared: RawProfileSharedData = {
+      stackTable: this._stackTable,
+      frameTable: this._frameTable,
+      funcTable: this._funcTable,
+      resourceTable: this._resourceTable,
+      nativeSymbols: this._nativeSymbols,
       stringArray: this._stringArray,
       sources: this._sources,
     };

@@ -28,7 +28,7 @@ import type {
   DataSource,
   Pid,
   Profile,
-  RawThread,
+  RawProfileSharedData,
   IndexIntoStackTable,
   TabID,
   TrackIndex,
@@ -898,10 +898,6 @@ const _upgraders: {
       return;
     }
 
-    // The transform stack is for the selected thread.
-    // At the time this upgrader was written, there was only one selected thread.
-    const thread = profile.threads[selectedThread];
-
     for (let i = 0; i < transforms.length; i++) {
       const transform = transforms[i];
       if (
@@ -922,7 +918,7 @@ const _upgraders: {
       // To be correct, we would need to apply all previous transforms and find
       // the right stack in the filtered thread.
       const callNodeStackIndex = getStackIndexFromVersion3JSCallNodePath(
-        thread,
+        profile.shared,
         transform.callNodePath
       );
       if (callNodeStackIndex === null) {
@@ -930,7 +926,7 @@ const _upgraders: {
         continue;
       }
       transform.callNodePath = getVersion4JSCallNodePathFromStackIndex(
-        thread,
+        profile.shared,
         callNodeStackIndex
       );
     }
@@ -1129,8 +1125,7 @@ const _upgraders: {
       return;
     }
 
-    const threadIndex = selectedThreads[0];
-    const funcTableLength = profile.threads[threadIndex].funcTable.length;
+    const funcTableLength = profile.shared.funcTable.length;
 
     //     cr-{implementation}-{resourceIndex}-{wrongFuncIndex}
     //  -> cr-{implementation}-{resourceIndex}-{correctFuncIndex}
@@ -1214,10 +1209,10 @@ for (const destVersionStr of Object.keys(_upgraders)) {
 // This should only be used for the URL upgrader, typically this
 // operation would use a call node index rather than a stack.
 function getStackIndexFromVersion3JSCallNodePath(
-  thread: RawThread,
+  shared: RawProfileSharedData,
   oldCallNodePath: CallNodePath
 ): IndexIntoStackTable | null {
-  const { stackTable, funcTable, frameTable } = thread;
+  const { stackTable, funcTable, frameTable } = shared;
   const stackIndexDepth: Map<IndexIntoStackTable | null, number> = new Map();
   stackIndexDepth.set(null, -1);
 
@@ -1260,10 +1255,10 @@ function getStackIndexFromVersion3JSCallNodePath(
 // Constructs the new JS CallNodePath from given stackIndex and returns it.
 // This should only be used for the URL upgrader.
 function getVersion4JSCallNodePathFromStackIndex(
-  thread: RawThread,
+  shared: RawProfileSharedData,
   stackIndex: IndexIntoStackTable
 ): CallNodePath {
-  const { funcTable, stackTable, frameTable } = thread;
+  const { funcTable, stackTable, frameTable } = shared;
   const callNodePath = [];
   let nextStackIndex: IndexIntoStackTable | null = stackIndex;
   while (nextStackIndex !== null) {

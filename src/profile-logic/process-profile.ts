@@ -36,7 +36,6 @@ import {
 } from '../app-logic/constants';
 import {
   getFriendlyThreadName,
-  getOrCreateURIResource,
   nudgeReturnAddresses,
 } from '../profile-logic/profile-data';
 import { computeStringIndexMarkerFieldsByDataType } from '../profile-logic/marker-schema';
@@ -512,14 +511,8 @@ function _extractJsFunction(
     return null;
   }
 
-  const {
-    funcTable,
-    stringTable,
-    resourceTable,
-    originToResourceIndex,
-    globalDataCollector,
-    geckoSourceTable,
-  } = extractionInfo;
+  const { funcTable, stringTable, globalDataCollector, geckoSourceTable } =
+    extractionInfo;
 
   // Case 4: JS function - A match was found in the location string in the format
   // of a JS function.
@@ -527,12 +520,7 @@ function _extractJsFunction(
     jsMatch;
   const scriptURI = _getRealScriptURI(rawScriptURI);
 
-  const resourceIndex = getOrCreateURIResource(
-    scriptURI,
-    resourceTable,
-    stringTable,
-    originToResourceIndex
-  );
+  const resourceIndex = globalDataCollector.indexForURIResource(scriptURI);
 
   // Process the source index if it's provided.
   let processedSourceIndex = null;
@@ -1224,11 +1212,6 @@ function _processThread(
     tid: thread.tid,
     pid: `${thread.pid}`,
     pausedRanges: pausedRanges || [],
-    frameTable,
-    funcTable,
-    nativeSymbols,
-    resourceTable,
-    stackTable,
     markers,
     samples,
   };
@@ -1291,7 +1274,7 @@ function _processThread(
 
   processJsTracer();
 
-  return nudgeReturnAddresses(newThread);
+  return newThread;
 }
 
 /**
@@ -1838,7 +1821,8 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   const profileGatheringLog = { ...(geckoProfile.profileGatheringLog || {}) };
 
   const stringTable = globalDataCollector.getStringTable();
-  const sources = globalDataCollector.getSources();
+
+  const { libs, shared } = globalDataCollector.finish();
 
   // Convert JS tracer information into their own threads. This mutates
   // the threads array.
@@ -1848,10 +1832,9 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
       const friendlyThreadName = getFriendlyThreadName(threads, thread);
       const jsTracerThread = convertJsTracerToThread(
         thread,
+        shared,
         jsTracer,
-        geckoProfile.meta.categories,
-        stringTable,
-        sources
+        geckoProfile.meta.categories
       );
       jsTracerThread.isJsTracer = true;
       jsTracerThread.name = `JS Tracer of ${friendlyThreadName}`;
@@ -1866,8 +1849,6 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     // Process the visual metrics to add markers for them.
     processVisualMetrics(threads, meta, pages, stringTable);
   }
-
-  const { libs, shared } = globalDataCollector.finish();
 
   const result = {
     meta,

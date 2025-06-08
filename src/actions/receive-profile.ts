@@ -84,10 +84,7 @@ import type {
   MixedObject,
 } from 'firefox-profiler/types';
 
-import type {
-  FuncToFuncsMap,
-  SymbolicationStepInfo,
-} from '../profile-logic/symbolication';
+import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
 import { assertExhaustiveCheck } from '../utils/types';
 import { bytesToBase64DataUrl } from 'firefox-profiler/utils/base64';
 import type {
@@ -337,7 +334,7 @@ export function finalizeFullProfileView(
         const thread = profile.threads[threadIndex];
         const { samples, jsAllocations, nativeAllocations } = thread;
         hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
-          hasUsefulSamples(table?.stack, thread, profile.shared)
+          hasUsefulSamples(table?.stack, profile.shared)
         );
         if (hasSamples) {
           break;
@@ -446,28 +443,20 @@ export function doneSymbolicating(): Action {
 // reach the screen because it would be invalidated by the next symbolication update.
 // So we queue up symbolication steps and run the update from requestIdleCallback.
 export function bulkProcessSymbolicationSteps(
-  symbolicationStepsPerThread: Map<ThreadIndex, SymbolicationStepInfo[]>
+  symbolicationSteps: SymbolicationStepInfo[]
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const { threads, shared } = getProfile(getState());
-    const oldFuncToNewFuncsMaps: Map<ThreadIndex, FuncToFuncsMap> = new Map();
-    const symbolicatedThreads = threads.map((oldThread, threadIndex) => {
-      const symbolicationSteps = symbolicationStepsPerThread.get(threadIndex);
-      if (symbolicationSteps === undefined) {
-        return oldThread;
-      }
-      const { thread, oldFuncToNewFuncsMap } = applySymbolicationSteps(
-        oldThread,
-        shared,
-        symbolicationSteps
-      );
-      oldFuncToNewFuncsMaps.set(threadIndex, oldFuncToNewFuncsMap);
-      return thread;
-    });
+    const {
+      threads: symbolicatedThreads,
+      shared: symbolicatedShared,
+      oldFuncToNewFuncsMap,
+    } = applySymbolicationSteps(threads, shared, symbolicationSteps);
     dispatch({
       type: 'BULK_SYMBOLICATION',
-      oldFuncToNewFuncsMaps,
+      oldFuncToNewFuncsMap,
       symbolicatedThreads,
+      symbolicatedShared,
     });
   };
 }
@@ -489,12 +478,12 @@ if (typeof window === 'object' && window.requestIdleCallback) {
 // Queues up symbolication steps and bulk-processes them from requestIdleCallback,
 // in order to improve UI responsiveness during symbolication.
 class SymbolicationStepQueue {
-  _updates: Map<ThreadIndex, SymbolicationStepInfo[]>;
+  _updates: SymbolicationStepInfo[];
   _updateObservers: Array<() => void>;
   _requestedUpdate: boolean;
 
   constructor() {
-    this._updates = new Map();
+    this._updates = [];
     this._updateObservers = [];
     this._requestedUpdate = false;
   }
@@ -512,7 +501,7 @@ class SymbolicationStepQueue {
   _dispatchUpdate(dispatch: Dispatch) {
     const updates = this._updates;
     const observers = this._updateObservers;
-    this._updates = new Map();
+    this._updates = [];
     this._updateObservers = [];
     this._requestedUpdate = false;
 
@@ -525,17 +514,11 @@ class SymbolicationStepQueue {
 
   enqueueSingleSymbolicationStep(
     dispatch: Dispatch,
-    threadIndex: ThreadIndex,
     symbolicationStepInfo: SymbolicationStepInfo,
     completionHandler: () => void
   ) {
     this._scheduleUpdate(dispatch);
-    let threadSteps = this._updates.get(threadIndex);
-    if (threadSteps === undefined) {
-      threadSteps = [];
-      this._updates.set(threadIndex, threadSteps);
-    }
-    threadSteps.push(symbolicationStepInfo);
+    this._updates.push(symbolicationStepInfo);
     this._updateObservers.push(completionHandler);
   }
 }
@@ -671,15 +654,11 @@ export async function doSymbolicateProfile(
   await symbolicateProfile(
     profile,
     symbolStore,
-    (
-      threadIndex: ThreadIndex,
-      symbolicationStepInfo: SymbolicationStepInfo
-    ) => {
+    (symbolicationStepInfo: SymbolicationStepInfo) => {
       completionPromises.push(
         new Promise((resolve) => {
           _symbolicationStepQueueSingleton.enqueueSingleSymbolicationStep(
             dispatch,
-            threadIndex,
             symbolicationStepInfo,
             () => resolve(undefined)
           );
@@ -1575,7 +1554,7 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
         const thread = profile.threads[threadIndex];
         const { samples, jsAllocations, nativeAllocations } = thread;
         hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
-          hasUsefulSamples(table?.stack, thread, profile.shared)
+          hasUsefulSamples(table?.stack, profile.shared)
         );
         if (hasSamples) {
           break;

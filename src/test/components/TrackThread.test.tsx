@@ -177,7 +177,7 @@ describe('timeline/TrackThread', function () {
         .getSelectedCallNodePath(getState())
         .map(
           (funcIndex) =>
-            profile.shared.stringArray[thread.funcTable.name[funcIndex]]
+            profile.shared.stringArray[profile.shared.funcTable.name[funcIndex]]
         );
 
     fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 0));
