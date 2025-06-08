@@ -1401,6 +1401,8 @@ function mergeMarkers(
 /**
  * Returns a RawMarkerTable which contains all the markers from targetThread,
  * as well as any CompositorScreenshot markers found on any other threads.
+ *
+ * `targetThread` is expected to be one of the threads in `threads`.
  */
 function getThreadMarkersAndScreenshotMarkers(
   threads: RawThread[],
@@ -1411,6 +1413,8 @@ function getThreadMarkersAndScreenshotMarkers(
   // Find screenshot markers in the other threads and add them to the target thread.
   for (const thread of threads) {
     if (thread === targetThread) {
+      // Skip the target thread itself, otherwise any screenshot markers on the target
+      // thread would be duplicated in the combined marker table.
       continue;
     }
 
