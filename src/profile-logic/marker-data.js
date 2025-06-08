@@ -467,7 +467,13 @@ export function correlateIPCMarkers(
     }
   }
 
+  // Don't bother checking for IPC markers if the profile's string table
+  // doesn't have the string "IPC". This lets us avoid looping over all the
+  // markers when we don't have to.
   const stringTable = StringTable.withBackingArray(shared.stringArray);
+  if (!stringTable.hasString('IPC')) {
+    return new IPCMarkerCorrelations();
+  }
 
   // First, construct a mapping of marker IDs to an array of markers with that
   // ID for faster lookup. We also collect the friendly thread names while we
@@ -479,12 +485,6 @@ export function correlateIPCMarkers(
   > = new Map();
   const threadNames: Map<number, string> = new Map();
   for (const thread of threads) {
-    // Don't bother checking for IPC markers if this thread's string table
-    // doesn't have the string "IPC". This lets us avoid looping over all the
-    // markers when we don't have to.
-    if (!stringTable.hasString('IPC')) {
-      continue;
-    }
     if (typeof thread.tid === 'number') {
       const tid: number = thread.tid;
       threadNames.set(tid, getFriendlyThreadName(threads, thread));
