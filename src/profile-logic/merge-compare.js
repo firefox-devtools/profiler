@@ -595,8 +595,8 @@ function adjustMarkerDataStringIndexes(
         if (result === undefined) {
           throw new Error(
             stripIndent`
-            String with index ${stringIndex} hasn't been found in the translation map.
-            This shouldn't happen and indicates a bug in the profiler's code.
+              String with index ${stringIndex} hasn't been found in the translation map.
+              This shouldn't happen and indicates a bug in the profiler's code.
             `
           );
         }
