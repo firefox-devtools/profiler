@@ -72,7 +72,7 @@ CallNodeContextMenu--transform-focus-function-inverted = Fonksiyona odaklan (ter
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-drop-function = Bu fonksiyonu taşıyan örnekleri at
     .title =
-        Atılan örneklerin süreleri profilden kaldırır. Bu işlem, analizle ilgili olmayan
+        Atılan örneklerin süreleri profilden kaldırılır. Bu işlem, analizle ilgili olmayan
         süre bilgilerini ortadan kaldırmak için kullanışlıdır.
 CallNodeContextMenu--expand-all = Tümünü genişlet
 # Searchfox is a source code indexing tool for Mozilla Firefox.
