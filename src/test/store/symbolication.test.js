@@ -597,7 +597,9 @@ function _createUnsymbolicatedProfile() {
       0x2000  0x2000
     `
   );
-  const thread = profile.threads[0];
+  const { threads, shared } = profile;
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
+  const thread = threads[0];
 
   // Add a mock lib.
   const libIndex = 0;
@@ -610,8 +612,6 @@ function _createUnsymbolicatedProfile() {
     breakpadId: '000000000000000000000000000000000',
     codeId: null,
   };
-
-  const stringTable = StringTable.withBackingArray(thread.stringArray);
 
   thread.resourceTable = {
     length: 1,

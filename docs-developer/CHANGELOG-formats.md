@@ -6,6 +6,10 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 56
+
+The `stringArray` is now shared across threads. The shared array is stored at `profile.shared.stringArray`.
+
 ### Version 55
 
 Changes to the `MarkerSchema` type which is used for the elements of the array at `profile.meta.markerSchema`:

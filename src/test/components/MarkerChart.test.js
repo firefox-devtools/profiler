@@ -796,29 +796,33 @@ describe('MarkerChart', function () {
         capacity: 1000000,
         activeTabID: firstTabTabID,
       };
-      addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
+      addMarkersToThreadWithCorrespondingSamples(
+        profile.threads[0],
+        profile.shared,
         [
-          'Marker Navigation',
-          3,
-          null,
-          {
-            type: 'tracing',
-            category: 'Navigation',
-            innerWindowID: parentInnerWindowIDsWithChildren,
-          },
-        ],
-        [
-          'Marker DomEvent',
-          6,
-          13,
-          {
-            type: 'DOMEvent',
-            latency: 7,
-            eventType: 'click',
-            innerWindowID: parentInnerWindowIDsWithChildren,
-          },
-        ],
-      ]);
+          [
+            'Marker Navigation',
+            3,
+            null,
+            {
+              type: 'tracing',
+              category: 'Navigation',
+              innerWindowID: parentInnerWindowIDsWithChildren,
+            },
+          ],
+          [
+            'Marker DomEvent',
+            6,
+            13,
+            {
+              type: 'DOMEvent',
+              latency: 7,
+              eventType: 'click',
+              innerWindowID: parentInnerWindowIDsWithChildren,
+            },
+          ],
+        ]
+      );
 
       const setupResult = setupWithProfile(profile);
       // Switch to active tab view.

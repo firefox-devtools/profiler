@@ -23,7 +23,6 @@ import {
 } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSourceViewFile } from '../../selectors/url-state';
-import { StringTable } from '../../utils/string-table';
 import { ensureExists } from '../../utils/flow';
 import { fireFullClick } from '../fixtures/utils';
 import { createBrowserConnection } from '../../app-logic/browser-connection';
@@ -58,13 +57,13 @@ describe('calltree/CallNodeContextMenu', function () {
     // Create a new profile that has JavaScript in it.
     const {
       profile,
+      stringTable,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
       A.js
       B.js
     `);
     const [thread] = profile.threads;
-    const stringTable = StringTable.withBackingArray(thread.stringArray);
     const fileNameIndex = stringTable.indexForString(
       'https://example.com/script.js'
     );
