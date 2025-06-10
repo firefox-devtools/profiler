@@ -21,10 +21,7 @@ import {
   IPCMarkerCorrelations,
   correlateIPCMarkers,
 } from '../profile-logic/marker-data';
-import {
-  markerSchemaFrontEndOnly,
-  computeStringIndexMarkerFieldsByDataType,
-} from '../profile-logic/marker-schema';
+import { markerSchemaFrontEndOnly } from '../profile-logic/marker-schema';
 import { getDefaultCategories } from 'firefox-profiler/profile-logic/data-structures';
 import * as CommittedRanges from '../profile-logic/committed-ranges';
 import { defaultTableViewOptions } from '../reducers/profile-view';
@@ -33,6 +30,7 @@ import type { TabSlug } from '../app-logic/tabs-handling';
 
 import type {
   Profile,
+  RawProfileSharedData,
   CategoryList,
   IndexIntoCategoryList,
   RawThread,
@@ -192,6 +190,9 @@ export const getProfile: Selector<Profile> = (state) =>
     getProfileOrNull(state),
     'Tried to access the profile before it was loaded.'
   );
+export const getRawProfileSharedData: Selector<RawProfileSharedData> = (
+  state
+) => getProfile(state).shared;
 export const getProfileInterval: Selector<Milliseconds> = (state) =>
   getProfile(state).meta.interval;
 export const getPageList = (state: State): PageList | null =>
@@ -255,6 +256,11 @@ export const getCategories: Selector<CategoryList> = createSelector(
   }
 );
 
+export const getStringTable: Selector<StringTable> = createSelector(
+  (state) => getRawProfileSharedData(state).stringArray,
+  (stringArray) => StringTable.withBackingArray(stringArray)
+);
+
 // Combine the marker schema from Gecko and the front-end. This allows the front-end
 // to generate markers such as the Jank markers, and display them.
 export const getMarkerSchema: Selector<MarkerSchema[]> = createSelector(
@@ -269,12 +275,6 @@ export const getMarkerSchema: Selector<MarkerSchema[]> = createSelector(
       ...markerSchemaFrontEndOnly,
     ];
   }
-);
-
-export const getStringIndexMarkerFieldsByDataType: Selector<
-  Map<string, string[]>,
-> = createSelector(getMarkerSchema, (schemaList) =>
-  computeStringIndexMarkerFieldsByDataType(schemaList)
 );
 
 export const getMarkerSchemaByName: Selector<MarkerSchemaByName> =
@@ -382,7 +382,7 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
 }
 
 export const getIPCMarkerCorrelations: Selector<IPCMarkerCorrelations> =
-  createSelector(getThreads, correlateIPCMarkers);
+  createSelector([getThreads, getRawProfileSharedData], correlateIPCMarkers);
 
 /**
  * Returns an InnerWindowID -> Page map, so we can look up the page from inner
@@ -460,17 +460,17 @@ export const getGlobalTrackReferences: Selector<GlobalTrackReference[]> =
   );
 
 export const getHasPreferenceMarkers: Selector<boolean> = createSelector(
+  getStringTable,
   getThreads,
-  (threads) => {
-    return threads.some(({ stringArray, markers }) => {
-      /*
-       * Does this particular thread have a Preference in it?
-       */
-      const stringTable = StringTable.withBackingArray(stringArray);
-      const indexForPreferenceString =
-        stringTable.indexForString('PreferenceRead');
-      return markers.name.some((name) => name === indexForPreferenceString);
-    });
+  (stringTable, threads) => {
+    if (!stringTable.hasString('PreferenceRead')) {
+      return false;
+    }
+    const indexForPreferenceString =
+      stringTable.indexForString('PreferenceRead');
+    return threads.some(({ markers }) =>
+      markers.name.includes(indexForPreferenceString)
+    );
   }
 );
 
@@ -597,14 +597,20 @@ export const getLocalTrackNamesByPid: Selector<Map<Pid, string[]>> =
   createSelector(
     getLocalTracksByPid,
     getThreads,
+    getRawProfileSharedData,
     getCounters,
-    (localTracksByPid, threads, counters) => {
+    (localTracksByPid, threads, shared, counters) => {
       const localTrackNamesByPid = new Map();
       for (const [pid, localTracks] of localTracksByPid) {
         localTrackNamesByPid.set(
           pid,
           localTracks.map((localTrack) =>
-            Tracks.getLocalTrackName(localTrack, threads, counters || [])
+            Tracks.getLocalTrackName(
+              localTrack,
+              threads,
+              shared,
+              counters || []
+            )
           )
         );
       }

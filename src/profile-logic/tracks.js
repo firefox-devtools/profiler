@@ -6,6 +6,7 @@
 import type {
   ScreenshotPayload,
   Profile,
+  RawProfileSharedData,
   RawThread,
   ThreadIndex,
   Pid,
@@ -476,13 +477,19 @@ export function computeGlobalTracks(
   let globalTracks: GlobalTrack[] = [];
 
   // Create the global tracks.
+  const { stringArray } = profile.shared;
+  const stringTable = StringTable.withBackingArray(stringArray);
+  const screenshotNameIndex = stringTable.hasString('CompositorScreenshot')
+    ? stringTable.indexForString('CompositorScreenshot')
+    : null;
+
   for (
     let threadIndex = 0;
     threadIndex < profile.threads.length;
     threadIndex++
   ) {
     const thread = profile.threads[threadIndex];
-    const { pid, markers, stringArray } = thread;
+    const { pid, markers } = thread;
     if (thread.isMainThread) {
       // This is a main thread, a global track needs to be created or updated with
       // the main thread info.
@@ -517,11 +524,7 @@ export function computeGlobalTracks(
 
     // Check for screenshots.
     const ids: Set<string> = new Set();
-    const stringTable = StringTable.withBackingArray(stringArray);
-    if (stringTable.hasString('CompositorScreenshot')) {
-      const screenshotNameIndex = stringTable.indexForString(
-        'CompositorScreenshot'
-      );
+    if (screenshotNameIndex !== null) {
       for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
         if (markers.name[markerIndex] === screenshotNameIndex) {
           // Coerce the payload to a screenshot one. Don't do a runtime check that
@@ -979,6 +982,7 @@ export function getGlobalTrackName(
 export function getLocalTrackName(
   localTrack: LocalTrack,
   threads: RawThread[],
+  shared: RawProfileSharedData,
   counters: RawCounter[]
 ): string {
   switch (localTrack.type) {
@@ -1005,7 +1009,7 @@ export function getLocalTrackName(
     case 'power':
       return counters[localTrack.counterIndex].name;
     case 'marker':
-      return threads[localTrack.threadIndex].stringArray[localTrack.markerName];
+      return shared.stringArray[localTrack.markerName];
     default:
       throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
   }

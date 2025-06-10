@@ -14,6 +14,7 @@ import { SymbolsNotFoundError } from './errors';
 
 import type {
   Profile,
+  RawProfileSharedData,
   RawThread,
   ThreadIndex,
   IndexIntoFuncTable,
@@ -476,6 +477,7 @@ function _computeThreadWithAddedExpansionStacks(
  */
 export function applySymbolicationSteps(
   oldThread: RawThread,
+  shared: RawProfileSharedData,
   symbolicationSteps: SymbolicationStepInfo[]
 ): { thread: RawThread, oldFuncToNewFuncsMap: FuncToFuncsMap } {
   const oldFuncToNewFuncsMap = new Map();
@@ -486,6 +488,7 @@ export function applySymbolicationSteps(
   for (const symbolicationStep of symbolicationSteps) {
     thread = _partiallyApplySymbolicationStep(
       thread,
+      shared,
       symbolicationStep,
       oldFuncToNewFuncsMap,
       shouldStacksWithThisFrameBeRemoved,
@@ -528,6 +531,7 @@ export function applySymbolicationSteps(
  */
 function _partiallyApplySymbolicationStep(
   thread: RawThread,
+  shared: RawProfileSharedData,
   symbolicationStepInfo: SymbolicationStepInfo,
   oldFuncToNewFuncsMap: FuncToFuncsMap,
   shouldStacksWithThisFrameBeRemoved: Uint8Array,
@@ -536,11 +540,11 @@ function _partiallyApplySymbolicationStep(
     IndexIntoFrameTable[],
   >
 ): RawThread {
+  const { stringArray } = shared;
   const {
     frameTable: oldFrameTable,
     funcTable: oldFuncTable,
     nativeSymbols: oldNativeSymbols,
-    stringArray,
   } = thread;
   const stringTable = StringTable.withBackingArray(stringArray);
   const { threadLibSymbolicationInfo, resultsForLib } = symbolicationStepInfo;
@@ -863,7 +867,8 @@ function _partiallyApplySymbolicationStep(
 export async function symbolicateProfile(
   profile: Profile,
   symbolStore: AbstractSymbolStore,
-  symbolicationStepCallback: SymbolicationStepCallback
+  symbolicationStepCallback: SymbolicationStepCallback,
+  ignoreCache?: boolean
 ): Promise<void> {
   const symbolicationInfo = profile.threads.map((thread) =>
     getThreadSymbolicationInfo(thread, profile.libs)
@@ -890,7 +895,8 @@ export async function symbolicateProfile(
       }
       // We could not find symbols for this library.
       console.warn(error);
-    }
+    },
+    ignoreCache
   );
 }
 

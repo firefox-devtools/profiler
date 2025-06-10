@@ -15,6 +15,7 @@ import { JsTracerCanvas } from './Canvas';
 import {
   getCommittedRange,
   getPreviewSelection,
+  getStringTable,
 } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
@@ -136,7 +137,7 @@ const JsTracerExpensiveChart = explicitConnect<
 >({
   mapStateToProps: (state, ownProps) => ({
     timeRange: getCommittedRange(state),
-    stringTable: selectedThreadSelectors.getStringTable(state),
+    stringTable: getStringTable(state),
     threadsKey: getSelectedThreadsKey(state),
     previewSelection: getPreviewSelection(state),
     jsTracerTimingRows: ensureExists(

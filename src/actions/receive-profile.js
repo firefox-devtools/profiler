@@ -38,6 +38,7 @@ import {
   getRelevantPagesForActiveTab,
   getSymbolServerUrl,
   getActiveTabID,
+  getBrowserConnection,
 } from 'firefox-profiler/selectors';
 import {
   getSelectedTab,
@@ -397,7 +398,7 @@ export function finalizeFullProfileView(
         const thread = profile.threads[threadIndex];
         const { samples, jsAllocations, nativeAllocations } = thread;
         hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
-          hasUsefulSamples(table?.stack, thread)
+          hasUsefulSamples(table?.stack, thread, profile.shared)
         );
         if (hasSamples) {
           break;
@@ -722,7 +723,7 @@ export function resymbolicateProfile(): ThunkAction<Promise<void>> {
     const symbolStore = getSymbolStore(
       dispatch,
       getSymbolServerUrl(getState()),
-      null
+      getBrowserConnection(getState())
     );
     const profile = getProfile(getState());
     if (!symbolStore) {
@@ -730,7 +731,12 @@ export function resymbolicateProfile(): ThunkAction<Promise<void>> {
         'There was no symbol store when attempting to re-symbolicate.'
       );
     }
-    await doSymbolicateProfile(dispatch, profile, symbolStore);
+    await doSymbolicateProfile(
+      dispatch,
+      profile,
+      symbolStore,
+      /* ignoreCache */ true
+    );
   };
 }
 
@@ -793,7 +799,7 @@ export function bulkProcessSymbolicationSteps(
   symbolicationStepsPerThread: Map<ThreadIndex, SymbolicationStepInfo[]>
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const { threads } = getProfile(getState());
+    const { threads, shared } = getProfile(getState());
     const oldFuncToNewFuncsMaps: Map<ThreadIndex, FuncToFuncsMap> = new Map();
     const symbolicatedThreads = threads.map((oldThread, threadIndex) => {
       const symbolicationSteps = symbolicationStepsPerThread.get(threadIndex);
@@ -802,6 +808,7 @@ export function bulkProcessSymbolicationSteps(
       }
       const { thread, oldFuncToNewFuncsMap } = applySymbolicationSteps(
         oldThread,
+        shared,
         symbolicationSteps
       );
       oldFuncToNewFuncsMaps.set(threadIndex, oldFuncToNewFuncsMap);
@@ -1004,7 +1011,8 @@ function getSymbolStore(
 export async function doSymbolicateProfile(
   dispatch: Dispatch,
   profile: Profile,
-  symbolStore: SymbolStore
+  symbolStore: SymbolStore,
+  ignoreCache?: boolean
 ) {
   dispatch(startSymbolicating());
 
@@ -1027,7 +1035,8 @@ export async function doSymbolicateProfile(
           );
         })
       );
-    }
+    },
+    ignoreCache
   );
 
   await Promise.all(completionPromises);
@@ -1895,7 +1904,7 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
         const thread = profile.threads[threadIndex];
         const { samples, jsAllocations, nativeAllocations } = thread;
         hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
-          hasUsefulSamples(table?.stack, thread)
+          hasUsefulSamples(table?.stack, thread, profile.shared)
         );
         if (hasSamples) {
           break;

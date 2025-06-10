@@ -80,7 +80,8 @@ export interface AbstractSymbolStore {
   getSymbols(
     requests: LibSymbolicationRequest[],
     successCb: (RequestedLib, Map<number, AddressResult>) => void,
-    errorCb: (LibSymbolicationRequest, Error) => void
+    errorCb: (LibSymbolicationRequest, Error) => void,
+    ignoreCache?: boolean
   ): Promise<void>;
 }
 
@@ -276,7 +277,8 @@ export class SymbolStore {
   async getSymbols(
     requests: LibSymbolicationRequest[],
     successCb: (RequestedLib, Map<number, AddressResult>) => void,
-    errorCb: (LibSymbolicationRequest, Error) => void
+    errorCb: (LibSymbolicationRequest, Error) => void,
+    ignoreCache: boolean = false
   ): Promise<void> {
     // For each library, we have three options to obtain symbol information for
     // it. We try all options in order, advancing to the next option on failure.
@@ -306,33 +308,37 @@ export class SymbolStore {
     // was successful.
     const requestsForNonCachedLibs = [];
     const resultsForCachedLibs = [];
-    await Promise.all(
-      requests.map(async (request) => {
-        const { lib, addresses } = request;
-        const { debugName, breakpadId } = lib;
-        try {
-          // Try to get the symbol table from the database.
-          // This call will throw if the symbol table is not present.
-          const symbolTable = await this._db.getSymbolTable(
-            debugName,
-            breakpadId
-          );
+    if (ignoreCache) {
+      requestsForNonCachedLibs.push(...requests);
+    } else {
+      await Promise.all(
+        requests.map(async (request) => {
+          const { lib, addresses } = request;
+          const { debugName, breakpadId } = lib;
+          try {
+            // Try to get the symbol table from the database.
+            // This call will throw if the symbol table is not present.
+            const symbolTable = await this._db.getSymbolTable(
+              debugName,
+              breakpadId
+            );
 
-          // Did not throw, option 1 was successful!
-          resultsForCachedLibs.push({
-            lib,
-            addresses,
-            symbolTable,
-          });
-        } catch (e) {
-          if (!(e instanceof SymbolsNotFoundError)) {
-            // rethrow JavaScript programming error
-            throw e;
+            // Did not throw, option 1 was successful!
+            resultsForCachedLibs.push({
+              lib,
+              addresses,
+              symbolTable,
+            });
+          } catch (e) {
+            if (!(e instanceof SymbolsNotFoundError)) {
+              // rethrow JavaScript programming error
+              throw e;
+            }
+            requestsForNonCachedLibs.push(request);
           }
-          requestsForNonCachedLibs.push(request);
-        }
-      })
-    );
+        })
+      );
+    }
 
     // First phase of option 2:
     // Try to service requestsForNonCachedLibs using the symbolication API,
