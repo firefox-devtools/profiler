@@ -2491,6 +2491,109 @@ const _upgraders = {
       }
     }
   },
+  [56]: (profile) => {
+    // The stringArray is now shared across all threads. It is stored at
+    // profile.shared.stringArray.
+    const stringArray = [];
+    const stringTable = StringTable.withBackingArray(stringArray);
+
+    // Precompute marker fields that need adjusting.
+    const stringIndexMarkerFieldsByDataType = new Map();
+    stringIndexMarkerFieldsByDataType.set('CompositorScreenshot', ['url']);
+    for (const schema of profile.meta.markerSchema) {
+      const { name, fields } = schema;
+      const stringIndexFields = [];
+      for (const field of fields) {
+        if (
+          field.format === 'unique-string' ||
+          field.format === 'flow-id' ||
+          field.format === 'terminating-flow-id'
+        ) {
+          stringIndexFields.push(field.key);
+        }
+      }
+      if (stringIndexFields.length !== 0) {
+        stringIndexMarkerFieldsByDataType.set(name, stringIndexFields);
+      }
+    }
+
+    // Adjust all data across all threads.
+    for (const thread of profile.threads) {
+      const {
+        markers,
+        funcTable,
+        nativeSymbols,
+        resourceTable,
+        jsTracer,
+        stringArray: threadStringArray,
+      } = thread;
+      for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+        const nameStr = threadStringArray[markers.name[markerIndex]];
+        markers.name[markerIndex] = stringTable.indexForString(nameStr);
+
+        // Adjust string index marker fields.
+        const data = markers.data[markerIndex];
+        if (!data || !data.type) {
+          continue;
+        }
+
+        const fieldsToAdjust = stringIndexMarkerFieldsByDataType.get(data.type);
+        if (fieldsToAdjust !== undefined) {
+          for (const fieldName of fieldsToAdjust) {
+            const fieldValue = data[fieldName];
+            const fieldStr = threadStringArray[fieldValue];
+            if (fieldStr !== undefined) {
+              data[fieldName] = stringTable.indexForString(fieldStr);
+            }
+          }
+        }
+      }
+      for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
+        funcTable.name[funcIndex] = stringTable.indexForString(
+          threadStringArray[funcTable.name[funcIndex]]
+        );
+        const funcFileName = funcTable.fileName[funcIndex];
+        if (funcFileName !== null) {
+          funcTable.fileName[funcIndex] = stringTable.indexForString(
+            threadStringArray[funcFileName]
+          );
+        }
+      }
+      for (let symIndex = 0; symIndex < nativeSymbols.length; symIndex++) {
+        nativeSymbols.name[symIndex] = stringTable.indexForString(
+          threadStringArray[nativeSymbols.name[symIndex]]
+        );
+      }
+      for (
+        let resourceIndex = 0;
+        resourceIndex < resourceTable.length;
+        resourceIndex++
+      ) {
+        resourceTable.name[resourceIndex] = stringTable.indexForString(
+          threadStringArray[resourceTable.name[resourceIndex]]
+        );
+        const resourceHost = resourceTable.host[resourceIndex];
+        if (resourceHost !== null) {
+          resourceTable.host[resourceIndex] = stringTable.indexForString(
+            threadStringArray[resourceHost]
+          );
+        }
+      }
+      if (jsTracer !== undefined) {
+        for (
+          let traceEventIndex = 0;
+          traceEventIndex < jsTracer.length;
+          traceEventIndex++
+        ) {
+          jsTracer.events[traceEventIndex] = stringTable.indexForString(
+            threadStringArray[jsTracer.events[traceEventIndex]]
+          );
+        }
+      }
+      delete thread.stringArray;
+    }
+    profile.shared = { stringArray };
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

@@ -9,6 +9,8 @@ import {
   shallowCloneRawMarkerTable,
   shallowCloneFuncTable,
 } from './data-structures';
+import { computeCompactedProfile } from './profile-compacting';
+import { StringTable } from '../utils/string-table';
 import { removeURLs } from '../utils/string';
 import {
   removeNetworkMarkerURLs,
@@ -125,6 +127,14 @@ export function sanitizePII(
     }
   }
 
+  let stringArray = profile.shared.stringArray;
+  if (PIIToBeRemoved.shouldRemoveUrls) {
+    // This is expensive but needs to be done somehow.
+    // Maybe we can find something better here.
+    stringArray = stringArray.map((s) => removeURLs(s));
+  }
+  const stringTable = StringTable.withBackingArray(stringArray);
+
   let removingCounters = false;
   const newProfile: Profile = {
     ...profile,
@@ -135,9 +145,13 @@ export function sanitizePII(
         : profile.meta.extensions,
     },
     pages: pages,
+    shared: {
+      stringArray,
+    },
     threads: profile.threads.reduce((acc, thread, threadIndex) => {
       const newThread: RawThread | null = sanitizeThreadPII(
         thread,
+        stringTable,
         derivedMarkerInfoForAllThreads[threadIndex],
         threadIndex,
         PIIToBeRemoved,
@@ -205,7 +219,7 @@ export function sanitizePII(
   }
 
   return {
-    profile: newProfile,
+    profile: computeCompactedProfile(newProfile).profile,
     // Note that the profile was sanitized.
     isSanitized: true,
     // Provide a new empty committed range if needed.
@@ -242,6 +256,7 @@ export function getShouldSanitizeByDefault(profile: Profile): boolean {
  */
 function sanitizeThreadPII(
   thread: RawThread,
+  stringTable: StringTable,
   derivedMarkerInfo: DerivedMarkerInfo,
   threadIndex: number,
   PIIToBeRemoved: RemoveProfileInformation,
@@ -266,10 +281,6 @@ function sanitizeThreadPII(
     return null;
   }
 
-  // We need to update the stringArray. StringTable doesn't allow mutating
-  // existing stored strings, so we create a copy of the underlying string array
-  // and mutated it manually.
-  const stringArray = thread.stringArray.slice();
   let markerTable = shallowCloneRawMarkerTable(thread.markers);
 
   // We iterate all the markers and remove/change data depending on the PII
@@ -315,11 +326,9 @@ function sanitizeThreadPII(
           markerTable.data[i] = removeNetworkMarkerURLs(currentMarker);
 
           // Strip the URL from the marker name
-          const stringIndex = markerTable.name[i];
-          stringArray[stringIndex] = stringArray[stringIndex].replace(
-            /:.*/,
-            ''
-          );
+          const requestStr = stringTable.getString(markerTable.name[i]);
+          const sanitizedRequestStr = requestStr.replace(/:.*/, '');
+          markerTable.name[i] = stringTable.indexForString(sanitizedRequestStr);
         }
 
         if (currentMarker.type === 'Text') {
@@ -336,7 +345,7 @@ function sanitizeThreadPII(
         currentMarker &&
         currentMarker.type === 'Text'
       ) {
-        const markerName = stringArray[markerTable.name[i]];
+        const markerName = stringTable.getString(markerTable.name[i]);
         // Sanitize extension ids out of known extension markers.
         markerTable.data[i] = sanitizeExtensionTextMarker(
           markerName,
@@ -351,13 +360,6 @@ function sanitizeThreadPII(
         currentMarker &&
         currentMarker.type === 'CompositorScreenshot'
       ) {
-        const urlIndex = currentMarker.url;
-        // We are mutating the stringArray here but it's okay to mutate since
-        // we copied them at the beginning while converting the string table
-        // to string array.
-        if (urlIndex !== undefined) {
-          stringArray[urlIndex] = '';
-        }
         markersToDelete.add(i);
       }
 
@@ -439,14 +441,6 @@ function sanitizeThreadPII(
     newThread = { ...thread };
   }
 
-  // This is expensive but needs to be done somehow.
-  // Maybe we can find something better here.
-  if (PIIToBeRemoved.shouldRemoveUrls) {
-    for (let i = 0; i < stringArray.length; i++) {
-      stringArray[i] = removeURLs(stringArray[i]);
-    }
-  }
-
   if (PIIToBeRemoved.shouldRemoveUrls && newThread['eTLD+1']) {
     // Remove the domain name of the isolated content process if it's provided
     // from the back-end.
@@ -524,8 +518,10 @@ function sanitizeThreadPII(
           // This function is used by both private and non-private data, therefore
           // we split this function into 2 sanitized and unsanitized functions.
           const sanitizedFuncIndex = newFuncTable.length;
-          newFuncTable.name.push(stringArray.length);
-          stringArray.push(`<Func #${sanitizedFuncIndex}>`);
+          const name = stringTable.indexForString(
+            `<Func #${sanitizedFuncIndex}>`
+          );
+          newFuncTable.name.push(name);
           newFuncTable.isJS.push(funcTable.isJS[funcIndex]);
           newFuncTable.relevantForJS.push(funcTable.isJS[funcIndex]);
           newFuncTable.resource.push(-1);
@@ -541,8 +537,8 @@ function sanitizeThreadPII(
         } else {
           // This function is used only by private data, so we can change it
           // directly.
-          newFuncTable.name[funcIndex] = stringArray.length;
-          stringArray.push(`<Func #${funcIndex}>`);
+          const name = stringTable.indexForString(`<Func #${funcIndex}>`);
+          newFuncTable.name[funcIndex] = name;
 
           newFuncTable.fileName[funcIndex] = null;
           if (newFuncTable.resource[funcIndex] >= 0) {
@@ -573,8 +569,10 @@ function sanitizeThreadPII(
           if (!remainingResources.has(resourceIndex)) {
             // This resource was used only by sanitized functions. Sanitize it
             // as well.
-            newResourceTable.name[resourceIndex] = stringArray.length;
-            stringArray.push(`<Resource #${resourceIndex}>`);
+            const name = stringTable.indexForString(
+              `<Resource #${resourceIndex}>`
+            );
+            newResourceTable.name[resourceIndex] = name;
             newResourceTable.lib[resourceIndex] = null;
             newResourceTable.host[resourceIndex] = null;
           }
@@ -660,9 +658,7 @@ function sanitizeThreadPII(
     }
   }
 
-  // Remove the old stringArray and markerTable and replace it
-  // with new updated ones.
-  newThread.stringArray = stringArray;
+  // Remove the old markerTable and replace it with the new updated one.
   newThread.markers = markerTable;
 
   // Have we removed everything from this thread?

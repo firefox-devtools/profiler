@@ -6,6 +6,7 @@
 import type {
   Profile,
   RawThread,
+  RawProfileSharedData,
   IndexIntoRawMarkerTable,
 } from 'firefox-profiler/types';
 
@@ -206,12 +207,13 @@ describe('timeline/TrackScreenshots', function () {
 
   it('renders a screenshot images when zooming into a range without a screenshot start time actually in the range', () => {
     const profile = getScreenshotTrackProfile();
-    const [thread] = profile.threads;
+    const { shared, threads } = profile;
+    const [thread] = threads;
     const markerIndexA = thread.markers.length - 3;
     const markerIndexB = thread.markers.length - 2;
     // We keep the last marker so that the profile's root range is correct.
 
-    _setScreenshotMarkersToUnknown(thread, markerIndexA, markerIndexB);
+    _setScreenshotMarkersToUnknown(thread, shared, markerIndexA, markerIndexB);
 
     const { dispatch, container } = setup(profile);
     act(() => {
@@ -232,12 +234,13 @@ describe('timeline/TrackScreenshots', function () {
 
   it('renders a no images when zooming into a range before screenshots', () => {
     const profile = getScreenshotTrackProfile();
-    const [thread] = profile.threads;
+    const { shared, threads } = profile;
+    const [thread] = threads;
 
     const markerIndexA = 0;
     const markerIndexB = 1;
 
-    _setScreenshotMarkersToUnknown(thread, markerIndexA, markerIndexB);
+    _setScreenshotMarkersToUnknown(thread, shared, markerIndexA, markerIndexB);
 
     const { dispatch, container } = setup(profile);
     act(() => {
@@ -394,10 +397,11 @@ function setup(
  */
 function _setScreenshotMarkersToUnknown(
   thread: RawThread,
+  shared: RawProfileSharedData,
   ...markerIndexes: IndexIntoRawMarkerTable[]
 ) {
   // Remove off the last few screenshot markers
-  const stringTable = StringTable.withBackingArray(thread.stringArray);
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
   const unknownStringIndex = stringTable.indexForString('Unknown');
   const screenshotStringIndex = stringTable.indexForString(
     'CompositorScreenshot'

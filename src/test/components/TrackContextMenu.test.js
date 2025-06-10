@@ -1217,7 +1217,8 @@ describe('timeline/TrackContextMenu', function () {
           messageSeqno: 1,
         },
         profile.threads[1], // Parent process
-        profile.threads[6] // tab process
+        profile.threads[6], // tab process
+        profile.shared
       );
       addIPCMarkerPairToThreads(
         {
@@ -1226,16 +1227,23 @@ describe('timeline/TrackContextMenu', function () {
           messageSeqno: 2,
         },
         profile.threads[1], // Parent process
-        profile.threads[7] // DOM Worker
+        profile.threads[7], // DOM Worker
+        profile.shared
       );
 
       // add a couple of global screenshots tracks
       profile.threads.push({
-        ...getThreadWithMarkers(getScreenshotMarkersForWindowId('0', 5)),
+        ...getThreadWithMarkers(
+          profile.shared,
+          getScreenshotMarkersForWindowId('0', 5)
+        ),
         tid: profile.threads.length,
       });
       profile.threads.push({
-        ...getThreadWithMarkers(getScreenshotMarkersForWindowId('1', 5)),
+        ...getThreadWithMarkers(
+          profile.shared,
+          getScreenshotMarkersForWindowId('1', 5)
+        ),
         tid: profile.threads.length,
       });
 
