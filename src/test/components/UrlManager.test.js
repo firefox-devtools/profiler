@@ -147,7 +147,7 @@ describe('UrlManager', function () {
   });
 
   it(`sets the data source to public and doesn't change the URL when there's a fetch error`, async function () {
-    window.fetch.getAny({ throws: new Error('Simulated network error') });
+    window.fetchMock.get('*', { throws: new Error('Simulated network error') });
     const urlPath = '/public/FAKE_HASH/marker-chart';
     const { getState, createUrlManager, waitUntilUrlSetupPhase } =
       setup(urlPath);
@@ -164,7 +164,7 @@ describe('UrlManager', function () {
   });
 
   it(`sets the data source to public and doesn't change the URL when there's a URL upgrading error`, async function () {
-    window.fetch.getAny(getSerializableProfile());
+    window.fetchMock.get('*', getSerializableProfile());
 
     const urlPath = '/public/FAKE_HASH/calltree';
     const searchString = '?v=' + (CURRENT_URL_VERSION + 1);
@@ -186,7 +186,7 @@ describe('UrlManager', function () {
   });
 
   it(`fetches profile and sets the phase to done when everything works`, async function () {
-    window.fetch.getAny(getSerializableProfile());
+    window.fetchMock.get('*', getSerializableProfile());
 
     const urlPath = '/public/FAKE_HASH/';
     const expectedResultingPath = urlPath + 'calltree/';
@@ -207,7 +207,7 @@ describe('UrlManager', function () {
   });
 
   it('allows navigating back and forward when changing view options', async () => {
-    window.fetch.getAny(getSerializableProfile());
+    window.fetchMock.get('*', getSerializableProfile());
 
     const urlPath = '/public/FAKE_HASH/calltree/';
     const searchString = 'v=' + CURRENT_URL_VERSION;

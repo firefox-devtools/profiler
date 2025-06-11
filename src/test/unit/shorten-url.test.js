@@ -15,12 +15,12 @@ function mockFetchForBitly({
   endpointUrl: string,
   responseFromRequestPayload: (any) => any,
 |}) {
-  window.fetch
+  window.fetchMock
     .catch(404) // catch all
-    .mock(endpointUrl, async (urlString, options) => {
+    .route(endpointUrl, async ({ options }) => {
       const { method, headers, body } = options;
 
-      if (method !== 'POST') {
+      if (method !== 'post') {
         return new Response(null, {
           status: 405,
           statusText: 'Method not allowed',
@@ -28,8 +28,8 @@ function mockFetchForBitly({
       }
 
       if (
-        headers['Content-Type'] !== 'application/json' ||
-        headers.Accept !== 'application/vnd.firefox-profiler+json;version=1.0'
+        headers['content-type'] !== 'application/json' ||
+        headers.accept !== 'application/vnd.firefox-profiler+json;version=1.0'
       ) {
         return new Response(null, {
           status: 406,
@@ -64,12 +64,7 @@ describe('shortenUrl', () => {
     const shortUrl = await shortenUrl(longUrl);
 
     expect(shortUrl).toBe(expectedShortUrl);
-    expect(window.fetch).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        body: expect.stringContaining(`"longUrl":"${longUrl}"`),
-      })
-    );
+    expect(window.fetch).toHaveFetched({ body: { longUrl } });
   });
 
   it('changes the requested url if is not the main URL', async () => {
@@ -86,12 +81,7 @@ describe('shortenUrl', () => {
 
     const shortUrl = await shortenUrl(longUrl);
     expect(shortUrl).toBe(expectedShortUrl);
-    expect(window.fetch).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        body: expect.stringContaining(`"longUrl":"${expectedLongUrl}"`),
-      })
-    );
+    expect(window.fetch).toHaveFetched({ body: { longUrl: expectedLongUrl } });
   });
 });
 
@@ -115,23 +105,18 @@ describe('expandUrl', () => {
 
     const longUrl = await expandUrl(shortUrl);
     expect(longUrl).toBe(returnedLongUrl);
-    expect(window.fetch).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        body: expect.stringContaining(`"shortUrl":"${shortUrl}"`),
-      })
-    );
+    expect(window.fetch).toHaveFetched({ body: { shortUrl } });
   });
 
   it('forwards errors', async () => {
-    window.fetch.any(503); // server error
+    window.fetchMock.any(503); // server error
 
     const shortUrl = 'https://share.firefox.dev/BITLYHASH';
     await expect(expandUrl(shortUrl)).rejects.toThrow();
   });
 
   it('returns an error when there is no match for this hash', async () => {
-    window.fetch.any(404); // not found
+    window.fetchMock.any(404); // not found
 
     const shortUrl = 'https://share.firefox.dev/BITLYHASH';
     await expect(expandUrl(shortUrl)).rejects.toThrow();
