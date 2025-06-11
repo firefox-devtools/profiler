@@ -681,7 +681,9 @@ describe('actions/receive-profile', function () {
         }
       };
 
-      window.fetch.any({ throws: new Error('No symbolication API in place') });
+      window.fetchMock.any({
+        throws: new Error('No symbolication API in place'),
+      });
 
       simulateSymbolStoreHasNoCache();
 
@@ -799,7 +801,7 @@ describe('actions/receive-profile', function () {
         expect.any(String)
       );
 
-      expect(window.fetch).toHaveBeenCalledWith(
+      expect(window.fetch).toHaveFetched(
         'https://symbolication.services.mozilla.com/symbolicate/v5',
         expect.objectContaining({
           body: expect.stringMatching(/memoryMap.*firefox/),
@@ -814,7 +816,7 @@ describe('actions/receive-profile', function () {
         await createBrowserConnection('Firefox/123.0');
       await dispatch(retrieveProfileFromBrowser(browserConnectionStatus));
 
-      expect(window.fetch).toHaveBeenCalledWith(
+      expect(window.fetch).toHaveFetched(
         'https://symbolication.services.mozilla.com/symbolicate/v5',
         expect.objectContaining({
           body: expect.stringMatching(/memoryMap.*firefox/),
@@ -825,11 +827,7 @@ describe('actions/receive-profile', function () {
     it('gets the favicons for the received profile using webchannel', async () => {
       // For some reason fetch-mock-jest removes the `data:` protocol.
       const mockDataUrl = 'image/png,test';
-      window.fetch.get('image/png,test', {
-        arrayBuffer: () => {
-          return new Uint8Array([1, 2, 3, 4, 5, 6]).buffer;
-        },
-      });
+      window.fetchMock.spy('begin:data:');
 
       // Create a simple urls getter for the pages.
       const faviconsGetter = async (): Promise<Array<FaviconData | null>> => {
@@ -858,7 +856,7 @@ describe('actions/receive-profile', function () {
 
   describe('retrieveProfileFromStore', function () {
     beforeEach(function () {
-      window.fetch.catch(403);
+      window.fetchMock.catch(403);
 
       // Call the argument of setTimeout asynchronously right away
       // (instead of waiting for the timeout).
@@ -871,7 +869,7 @@ describe('actions/receive-profile', function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
 
-      window.fetch.get(expectedUrl, _getSimpleProfile());
+      window.fetchMock.get(expectedUrl, _getSimpleProfile());
 
       const store = blankStore();
       await store.dispatch(retrieveProfileFromStore(hash));
@@ -890,7 +888,7 @@ describe('actions/receive-profile', function () {
         getProfileFromTextSamples('0xA[lib:libxul]');
       unsymbolicatedProfile.meta.symbolicated = false;
 
-      window.fetch
+      window.fetchMock
         .get(
           'https://storage.googleapis.com/profile-store/FAKEHASH',
           unsymbolicatedProfile
@@ -905,7 +903,7 @@ describe('actions/receive-profile', function () {
       const store = blankStore();
       await store.dispatch(retrieveProfileFromStore('FAKEHASH'));
 
-      expect(window.fetch).toHaveBeenLastCalledWith(
+      expect(window.fetch).toHaveLastFetched(
         'https://symbolication.services.mozilla.com/symbolicate/v5',
         expect.objectContaining({
           body: expect.stringMatching(/memoryMap.*libxul/),
@@ -926,11 +924,9 @@ describe('actions/receive-profile', function () {
     it('requests several times in case of 403', async function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
-      window.fetch
+      window.fetchMock
         .getOnce(expectedUrl, 403)
-        .get(expectedUrl, _getSimpleProfile(), {
-          overwriteRoutes: false,
-        });
+        .get(expectedUrl, _getSimpleProfile());
 
       const store = blankStore();
       const views = (
@@ -964,7 +960,7 @@ describe('actions/receive-profile', function () {
     it('fails in case the profile cannot be found after several tries', async function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
-      window.fetch.get(expectedUrl, 403);
+      window.fetchMock.get(expectedUrl, 403);
       const store = blankStore();
       const views = (
         await observeStoreStateChanges(store, () =>
@@ -991,7 +987,7 @@ describe('actions/receive-profile', function () {
     it('fails in case the fetch returns a server error', async function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
-      window.fetch.get(expectedUrl, 500);
+      window.fetchMock.get(expectedUrl, 500);
 
       const store = blankStore();
       await store.dispatch(retrieveProfileFromStore(hash));
@@ -1004,7 +1000,7 @@ describe('actions/receive-profile', function () {
 
   describe('retrieveProfileOrZipFromUrl', function () {
     beforeEach(function () {
-      window.fetch.catch(403);
+      window.fetchMock.catch(403);
 
       // Call the argument of setTimeout asynchronously right away
       // (instead of waiting for the timeout).
@@ -1015,7 +1011,7 @@ describe('actions/receive-profile', function () {
 
     it('can retrieve a profile from the web and save it to state', async function () {
       const expectedUrl = 'https://profiles.club/shared.json';
-      window.fetch.get(expectedUrl, _getSimpleProfile());
+      window.fetchMock.get(expectedUrl, _getSimpleProfile());
 
       const store = blankStore();
       await store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl));
@@ -1031,10 +1027,9 @@ describe('actions/receive-profile', function () {
 
     it('can retrieve a gzipped profile from the web and save it to state', async function () {
       const expectedUrl = 'https://profiles.club/shared.json';
-      window.fetch.get(
+      window.fetchMock.get(
         expectedUrl,
-        compress(serializeProfile(_getSimpleProfile())),
-        { sendAsJson: false }
+        compress(serializeProfile(_getSimpleProfile()))
       );
       const store = blankStore();
       await store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl));
@@ -1051,11 +1046,9 @@ describe('actions/receive-profile', function () {
     it('requests several times in case of 403', async function () {
       const expectedUrl = 'https://profiles.club/shared.json';
       // The first call will still be a 403 -- remember, it's the default return value.
-      window.fetch
+      window.fetchMock
         .getOnce(expectedUrl, 403)
-        .get(expectedUrl, _getSimpleProfile(), {
-          overwriteRoutes: false,
-        });
+        .get(expectedUrl, _getSimpleProfile());
 
       const store = blankStore();
       const views = (
@@ -1088,7 +1081,7 @@ describe('actions/receive-profile', function () {
 
     it('fails in case the profile cannot be found after several tries', async function () {
       const expectedUrl = 'https://profiles.club/shared.json';
-      window.fetch.get(expectedUrl, 403);
+      window.fetchMock.get(expectedUrl, 403);
 
       const store = blankStore();
       const views = (
@@ -1115,7 +1108,7 @@ describe('actions/receive-profile', function () {
 
     it('fails in case the fetch returns a server error', async function () {
       const expectedUrl = 'https://profiles.club/shared.json';
-      window.fetch.any(500);
+      window.fetchMock.any(500);
 
       const store = blankStore();
       await store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl));
@@ -1162,16 +1155,12 @@ describe('actions/receive-profile', function () {
           break;
       }
 
-      window.fetch.catch(403).get(
-        url,
-        {
-          body: arrayBuffer,
-          headers: {
-            'content-type': contentType,
-          },
+      window.fetchMock.catch(403).get(url, {
+        body: arrayBuffer,
+        headers: {
+          'content-type': contentType,
         },
-        { sendAsJson: false }
-      );
+      });
 
       const reportError = jest.fn();
       const args = {
@@ -1394,7 +1383,9 @@ describe('actions/receive-profile', function () {
     it('symbolicates unsymbolicated profiles', async function () {
       simulateSymbolStoreHasNoCache();
 
-      window.fetch.any({ throws: new Error('No symbolication API in place') });
+      window.fetchMock.any({
+        throws: new Error('No symbolication API in place'),
+      });
 
       // Silence console logs coming from the previous rejections
       jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -1406,7 +1397,7 @@ describe('actions/receive-profile', function () {
         payload: profile,
       });
 
-      expect(window.fetch).toHaveBeenCalledWith(
+      expect(window.fetch).toHaveFetched(
         'https://symbolication.services.mozilla.com/symbolicate/v5',
         expect.objectContaining({
           body: expect.stringMatching(/memoryMap.*firefox/),
@@ -1702,9 +1693,7 @@ describe('actions/receive-profile', function () {
           ])
         );
       }
-      window.fetch.getOnce('*', profile1).getOnce('*', profile2, {
-        overwriteRoutes: false,
-      });
+      window.fetchMock.getOnce('*', profile1).getOnce('*', profile2);
 
       const { dispatch, getState } = blankStore();
       await dispatch(retrieveProfilesToCompare([url1, url2]));
@@ -1731,7 +1720,7 @@ describe('actions/receive-profile', function () {
     }
 
     beforeEach(function () {
-      window.fetch.catch({
+      window.fetchMock.catch({
         throws: new Error('No more answers have been configured.'),
       });
     });
@@ -1980,9 +1969,7 @@ describe('actions/receive-profile', function () {
       // Add mock fetch response for the required number of times.
       // Usually it's 1 but it can be also 2 for `compare` dataSource.
       for (let i = 0; i < requiredProfile; i++) {
-        window.fetch.getOnce('*', profile, {
-          overwriteRoutes: false,
-        });
+        window.fetchMock.getOnce('*', profile);
       }
 
       const geckoProfiler = {
@@ -2039,7 +2026,7 @@ describe('actions/receive-profile', function () {
     }
 
     beforeEach(function () {
-      window.fetch.catch({
+      window.fetchMock.catch({
         throws: new Error('No more answers have been configured.'),
       });
     });
