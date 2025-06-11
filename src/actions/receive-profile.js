@@ -1030,8 +1030,10 @@ async function _extractZipFromResponse(
   reportError: (...data: Array<any>) => void
 ): Promise<JSZip> {
   const buffer = await response.arrayBuffer();
+  // Workaround for https://github.com/Stuk/jszip/issues/941
+  const typedBuffer = new Uint8Array(buffer);
   try {
-    const zip = await JSZip.loadAsync(buffer);
+    const zip = await JSZip.loadAsync(typedBuffer);
     // Catch the error if unable to load the zip.
     return zip;
   } catch (error) {
