@@ -204,7 +204,7 @@
       "escapeString": true,
       "printBasicPrototype": true
     },
-    "testEnvironment": "jsdom",
+    "testEnvironment": "./src/test/custom-environment",
     "verbose": false
   },
   "husky": {
