@@ -34,7 +34,7 @@ import { ensureExists } from '../../utils/flow';
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
-  addActiveTabInformationToProfile,
+  addTabInformationToProfile,
   markTabIdsAsPrivateBrowsing,
 } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
@@ -316,7 +316,7 @@ describe('app/MenuButtons', function () {
 
     it('Unchecks the Include Browsing Data checkbox in nightly when some private browsing data is in the profile', async () => {
       const { profile } = createSimpleProfile();
-      const { firstTabTabID } = addActiveTabInformationToProfile(profile);
+      const { firstTabTabID } = addTabInformationToProfile(profile);
       markTabIdsAsPrivateBrowsing(profile, [firstTabTabID]);
 
       const { getPrivateBrowsingCheckbox, openPublishPanel } =
@@ -330,7 +330,7 @@ describe('app/MenuButtons', function () {
 
     it('Unchecks the Include Browsing Data checkbox in release when some private browsing data is in the profile', async () => {
       const { profile } = createSimpleProfile('release');
-      const { firstTabTabID } = addActiveTabInformationToProfile(profile);
+      const { firstTabTabID } = addTabInformationToProfile(profile);
       markTabIdsAsPrivateBrowsing(profile, [firstTabTabID]);
 
       const { getPrivateBrowsingCheckbox, openPublishPanel } =

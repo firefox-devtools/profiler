@@ -9,7 +9,7 @@ import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import {
   getProfileWithMarkers,
   getProfileFromTextSamples,
-  addActiveTabInformationToProfile,
+  addTabInformationToProfile,
   markTabIdsAsPrivateBrowsing,
   addMarkersToThreadWithCorrespondingSamples,
   addInnerWindowIdToStacks,
@@ -917,7 +917,7 @@ describe('sanitizePII', function () {
       const {
         firstTabTabID: privateTabTabID,
         secondTabTabID: nonPrivateTabTabID,
-      } = addActiveTabInformationToProfile(originalProfile);
+      } = addTabInformationToProfile(originalProfile);
       markTabIdsAsPrivateBrowsing(originalProfile, [privateTabTabID]);
 
       // We run the sanitizing function with the sanitize private browsing flag.
@@ -981,7 +981,7 @@ describe('sanitizePII', function () {
         firstTabTabID: privateTabTabID,
         firstTabInnerWindowIDs: privateTabInnerWindowIDs,
         secondTabInnerWindowIDs: nonPrivateTabInnerWindowIDs,
-      } = addActiveTabInformationToProfile(originalProfile);
+      } = addTabInformationToProfile(originalProfile);
       markTabIdsAsPrivateBrowsing(originalProfile, [privateTabTabID]);
       addMarkersToThreadWithCorrespondingSamples(
         originalProfile.threads[0],
@@ -1149,7 +1149,7 @@ describe('sanitizePII', function () {
         firstTabTabID: privateTabTabID,
         firstTabInnerWindowIDs: privateTabInnerWindowIDs,
         secondTabInnerWindowIDs: nonPrivateTabInnerWindowIDs,
-      } = addActiveTabInformationToProfile(originalProfile);
+      } = addTabInformationToProfile(originalProfile);
       markTabIdsAsPrivateBrowsing(originalProfile, [privateTabTabID]);
       addInnerWindowIdToStacks(
         originalProfile.threads[0],
