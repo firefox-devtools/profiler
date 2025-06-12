@@ -15,8 +15,6 @@ import type {
   IndexIntoLibs,
   CounterIndex,
   GraphColor,
-  InnerWindowID,
-  Page,
   IndexIntoRawMarkerTable,
   IndexIntoStringTable,
   TabID,
@@ -628,107 +626,6 @@ export type Track = GlobalTrack | LocalTrack;
 export type TrackIndex = number;
 
 /**
- * The origins timeline view is experimental. These data structures may need to be
- * adjusted to fit closer to the other track types, but they were easy to do for now.
- */
-
-/**
- * This origin was loaded as a sub-frame to another one. It will be nested in the view.
- */
-export type OriginsTimelineEntry = {|
-  type: 'sub-origin',
-  innerWindowID: InnerWindowID,
-  threadIndex: ThreadIndex,
-  page: Page,
-  origin: string,
-|};
-
-/**
- * This is a "root" origin, which is viewed at the top level in a tab.
- */
-export type OriginsTimelineRoot = {|
-  type: 'origin',
-  innerWindowID: InnerWindowID,
-  threadIndex: ThreadIndex,
-  page: Page,
-  origin: string,
-  children: Array<OriginsTimelineEntry | OriginsTimelineNoOrigin>,
-|};
-
-/**
- * This thread does not have any origin information associated with it. However
- * it may be listed as a child of another "root" timeline origin if it is in the
- * same process as that thread.
- */
-export type OriginsTimelineNoOrigin = {|
-  type: 'no-origin',
-  threadIndex: ThreadIndex,
-|};
-
-export type OriginsTimelineTrack =
-  | OriginsTimelineEntry
-  | OriginsTimelineRoot
-  | OriginsTimelineNoOrigin;
-
-export type OriginsTimeline = Array<
-  OriginsTimelineNoOrigin | OriginsTimelineRoot,
->;
-
-/**
- * Active tab view tracks
- */
-
-/**
- * Main track for active tab view.
- * Currently it holds mainThreadIndex to make things easier because most of the
- * places require a single thread index instead of thread indexes array.
- * This will go away soon.
- */
-export type ActiveTabMainTrack = {|
-  type: 'tab',
-  threadIndexes: Set<ThreadIndex>,
-  threadsKey: ThreadsKey,
-|};
-
-export type ActiveTabScreenshotTrack = {|
-  +type: 'screenshots',
-  +id: string,
-  +threadIndex: ThreadIndex,
-|};
-
-export type ActiveTabResourceTrack =
-  | {|
-      +type: 'sub-frame',
-      +threadIndex: ThreadIndex,
-      +name: string,
-    |}
-  | {|
-      +type: 'thread',
-      +threadIndex: ThreadIndex,
-      +name: string,
-    |};
-
-/**
- * Timeline for active tab view.
- * It holds main track for the current tab, screenshots and resource tracks.
- * Main track is being computed during profile load and rest is being added to resources.
- * This timeline type is different compared to full view. This makes making main
- * track acess a lot easier.
- */
-export type ActiveTabTimeline = {
-  mainTrack: ActiveTabMainTrack,
-  screenshots: Array<ActiveTabScreenshotTrack>,
-  resources: Array<ActiveTabResourceTrack>,
-  resourcesThreadsKey: ThreadsKey,
-};
-
-export type ActiveTabGlobalTrack =
-  | ActiveTabMainTrack
-  | ActiveTabScreenshotTrack;
-
-export type ActiveTabTrack = ActiveTabGlobalTrack | ActiveTabResourceTrack;
-
-/**
  * Type that holds the values of personally identifiable information that user
  * wants to remove.
  */
@@ -749,8 +646,6 @@ export type RemoveProfileInformation = {|
   +shouldRemovePreferenceValues: boolean,
   // Remove the private browsing data if it's true.
   +shouldRemovePrivateBrowsingData: boolean,
-  // Remove all tab ids except this one.
-  +shouldRemoveTabsExceptTabID: TabID | null,
 |};
 
 /**
@@ -761,8 +656,6 @@ export type SelectedState =
   // Samples can be filtered through various operations, like searching, or
   // call tree transforms.
   | 'FILTERED_OUT_BY_TRANSFORM'
-  // Samples can be filtered out if they are not part of the active tab.
-  | 'FILTERED_OUT_BY_ACTIVE_TAB'
   // This sample is selected because either the tip or an ancestor call node matches
   // the currently selected call node.
   | 'SELECTED'

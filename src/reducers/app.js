@@ -50,8 +50,6 @@ const view: Reducer<AppViewState> = (
       return { phase: 'DATA_RELOAD' };
     case 'RECEIVE_ZIP_FILE':
     case 'VIEW_FULL_PROFILE':
-    case 'VIEW_ORIGINS_PROFILE':
-    case 'VIEW_ACTIVE_TAB_PROFILE':
     case 'CHANGE_TAB_FILTER':
       return { phase: 'DATA_LOADED' };
     default:
