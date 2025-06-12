@@ -15,7 +15,7 @@ import {
   getNetworkMarkers,
   getProfileWithMarkers,
   getProfileWithEventDelays,
-  addActiveTabInformationToProfile,
+  addTabInformationToProfile,
   markTabIdsAsPrivateBrowsing,
 } from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
@@ -556,7 +556,7 @@ describe('TooltipMarker', function () {
   // processing pipeline.
   function setupWithPayload(markers) {
     const profile = getProfileWithMarkers(markers);
-    const { secondTabTabID } = addActiveTabInformationToProfile(profile);
+    const { secondTabTabID } = addTabInformationToProfile(profile);
     markTabIdsAsPrivateBrowsing(profile, [secondTabTabID]);
 
     const store = storeWithProfile(profile);

@@ -1861,7 +1861,7 @@ export function getProfileWithBalancedNativeAllocations() {
  * |
  * mozilla.org
  */
-export function addActiveTabInformationToProfile(
+export function addTabInformationToProfile(
   profile: Profile,
   activeTabID?: TabID
 ) {
@@ -1951,7 +1951,7 @@ export function addActiveTabInformationToProfile(
 
 /**
  * Use this function to create a profile that has private browsing data.
- * This profile should first be run through addActiveTabInformationToProfile to
+ * This profile should first be run through addTabInformationToProfile to
  * add pages information.
  * To add markers with private browsing information, please use
  * addMarkersToThreadWithCorrespondingSamples directly.
@@ -1969,7 +1969,7 @@ export function markTabIdsAsPrivateBrowsing(
   const pages = profile.pages;
   if (!pages) {
     throw new Error(
-      `Can't add private browsing data to a profile without pages. Please run addActiveTabInformationToProfile on this profile first.`
+      `Can't add private browsing data to a profile without pages. Please run addTabInformationToProfile on this profile first.`
     );
   }
 

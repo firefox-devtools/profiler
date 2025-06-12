@@ -28,7 +28,6 @@ describe('uploaded-profiles-db', function () {
       publishedDate: new Date(),
       name: '',
       preset: null,
-      originHostname: null,
       meta: {
         product: 'Firefox',
       },

@@ -27,7 +27,6 @@ export type UploadedProfileInformation = {|
   +publishedDate: Date, // This key is indexed as well, to provide automatic sorting.
   +name: string,
   +preset: string | null,
-  +originHostname: string | null, // This key is indexed as well.
   +meta: {|
     // We're using some of the properties of the profile meta, but we're not
     // reusing the type ProfileMeta completely because we don't want to be
@@ -67,7 +66,7 @@ export type UploadedProfileInformation = {|
 // Exported for tests.
 export const DATABASE_NAME = 'published-profiles-store';
 export const OBJECTSTORE_NAME = 'published-profiles';
-export const DATABASE_VERSION = 2;
+export const DATABASE_VERSION = 3;
 
 async function reallyOpen(): Promise<Database> {
   const db = await openDB(DATABASE_NAME, DATABASE_VERSION, {
@@ -89,6 +88,12 @@ async function reallyOpen(): Promise<Database> {
           // ordered by date.
           const store = ensureExists(transaction.store);
           store.createIndex('publishedDate', 'publishedDate');
+        }
+        case 2: {
+          // Version 3: we remove the originHostname index that was used by the
+          // active tab view since it's been removed.
+          const store = ensureExists(transaction.store);
+          store.deleteIndex('originHostname');
         }
         default:
         // Nothing more here.
