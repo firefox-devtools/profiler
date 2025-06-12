@@ -51,6 +51,8 @@ exports[`timeline/TrackNetwork draws differently a request and displays a toolti
           class="tooltipTiming"
         >
           1ms
+           @ 
+          0s
         </div>
         <div
           class="tooltipTitle"
