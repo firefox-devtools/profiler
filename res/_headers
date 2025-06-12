@@ -7,9 +7,6 @@
   # Protection for versions that do not support CSP yet.
   X-XSS-Protection: 1; mode=block
 
-  # Do not allow being embedded in a frame.
-  X-Frame-Options: SAMEORIGIN
-
   # Do not give the referrer for external navigations.
   Referrer-Policy: same-origin
 
@@ -25,7 +22,7 @@
   # 7. `frame-ancestors` is the same purpose as `X-Frame-Options` above.
   # 8. `form-action`prevents forms, we don't need this.`
   # 9. `frame-src` allows the embedding of YouTube videos in the docs.
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src http: https: data:; object-src 'none'; connect-src *; frame-ancestors 'self'; form-action 'none'; frame-src www.youtube-nocookie.com
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src http: https: data:; object-src 'none'; connect-src *; form-action 'none'; frame-src www.youtube-nocookie.com
 
 # Set the correct MIME type for WebAssembly modules.
 /*.wasm
