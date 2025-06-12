@@ -12,7 +12,9 @@
 }
 
 .timelineTrackLocal {
-  margin-left: 15px;
+  --local-track-margin: 15px;
+
+  margin-left: var(--local-track-margin);
 }
 
 .timelineTrackRow {
@@ -75,8 +77,10 @@
 }
 
 .timelineTrackLabel {
+  --timeline-track-label-width: 150px;
+
   display: flex;
-  width: 150px;
+  width: var(--timeline-track-label-width);
   box-sizing: border-box;
   flex-flow: row nowrap;
   align-items: center;
@@ -167,9 +171,11 @@
 }
 
 .timelineTrackLocalLabel {
-  /* We want the width to look like it's 150px, but need to substract the
-   * margin and the 1px border */
-  width: 134px;
+  /* Calculate the width of the local track label by subtracting the margin and
+   * the 1px border from the total track label width. */
+  width: calc(
+    var(--timeline-track-label-width) - var(--local-track-margin) - 1px
+  );
 }
 
 @media (forced-colors: active) {
