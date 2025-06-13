@@ -265,8 +265,8 @@ describe('actions/receive-profile', function () {
 
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
-        'hide [thread GeckoMain tab]',
         'show [thread GeckoMain tab] SELECTED',
+        'hide [thread GeckoMain tab]',
         'hide [thread GeckoMain tab]',
       ]);
     });
@@ -396,8 +396,8 @@ describe('actions/receive-profile', function () {
 
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
-        'hide [thread GeckoMain tab]',
         'show [thread GeckoMain tab] SELECTED',
+        'hide [thread GeckoMain tab]',
       ]);
     });
 

@@ -745,10 +745,15 @@ export function initializeGlobalTrackOrder(
 export function initializeSelectedThreadIndex(
   selectedThreadIndexes: Set<ThreadIndex> | null,
   visibleThreadIndexes: ThreadIndex[],
-  profile: Profile
+  profile: Profile,
+  threadActivityScores: Array<ThreadActivityScore>
 ): Set<ThreadIndex> {
   if (selectedThreadIndexes === null) {
-    return getDefaultSelectedThreadIndexes(visibleThreadIndexes, profile);
+    return getDefaultSelectedThreadIndexes(
+      visibleThreadIndexes,
+      profile,
+      threadActivityScores
+    );
   }
 
   // Filter out hidden threads from the set of selected threads.
@@ -758,7 +763,11 @@ export function initializeSelectedThreadIndex(
   );
   if (visibleSelectedThreadIndexes.size === 0) {
     // No selected threads were visible. Fall back to default selection.
-    return getDefaultSelectedThreadIndexes(visibleThreadIndexes, profile);
+    return getDefaultSelectedThreadIndexes(
+      visibleThreadIndexes,
+      profile,
+      threadActivityScores
+    );
   }
   return visibleSelectedThreadIndexes;
 }
@@ -767,7 +776,8 @@ export function initializeSelectedThreadIndex(
 // order.
 function getDefaultSelectedThreadIndexes(
   visibleThreadIndexes: ThreadIndex[],
-  profile: Profile
+  profile: Profile,
+  threadActivityScores: Array<ThreadActivityScore>
 ): Set<ThreadIndex> {
   if (profile.meta.initialSelectedThreads !== undefined) {
     return new Set(
@@ -785,10 +795,11 @@ function getDefaultSelectedThreadIndexes(
       })
     );
   }
-  const visibleThreads = visibleThreadIndexes.map(
-    (threadIndex) => profile.threads[threadIndex]
+  const defaultThread = _findDefaultThread(
+    visibleThreadIndexes,
+    profile.threads,
+    threadActivityScores
   );
-  const defaultThread = _findDefaultThread(visibleThreads);
   const defaultThreadIndex = profile.threads.indexOf(defaultThread);
   if (defaultThreadIndex === -1) {
     throw new Error('Expected to find a thread index to select.');
@@ -1309,16 +1320,30 @@ function _computeThreadSampleScore(
   return nonIdleSampleCount * referenceCPUDeltaPerInterval;
 }
 
-function _findDefaultThread(threads: RawThread[]): RawThread | null {
+function _findDefaultThread(
+  visibleThreadIndexes: ThreadIndex[],
+  threads: RawThread[],
+  threadActivityScores: Array<ThreadActivityScore>
+): RawThread | null {
   if (threads.length === 0) {
     // Tests may have no threads.
     return null;
   }
-  const contentThreadId = threads.findIndex(
-    (thread) => thread.name === 'GeckoMain' && thread.processType === 'tab'
+
+  const threadOrder = defaultThreadOrder(
+    visibleThreadIndexes,
+    threads,
+    threadActivityScores
   );
+
+  // Try to find a tab process with the highest activity score. If it can't
+  // find one, select the first thread with the highest one.
   const defaultThreadIndex =
-    contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(threads)[0];
+    threadOrder.find(
+      (threadIndex) =>
+        threads[threadIndex].name === 'GeckoMain' &&
+        threads[threadIndex].processType === 'tab'
+    ) ?? threadOrder[0];
 
   return threads[defaultThreadIndex];
 }

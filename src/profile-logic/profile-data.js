@@ -95,6 +95,7 @@ import type {
   TabID,
 } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
+import type { ThreadActivityScore } from './tracks';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -1286,8 +1287,12 @@ export function getTimeRangeIncludingAllThreads(
   return completeRange;
 }
 
-export function defaultThreadOrder(threads: RawThread[]): ThreadIndex[] {
-  const threadOrder = threads.map((thread, i) => i);
+export function defaultThreadOrder(
+  visibleThreadIndexes: ThreadIndex[],
+  threads: RawThread[],
+  threadActivityScores: Array<ThreadActivityScore>
+): ThreadIndex[] {
+  const threadOrder = [...visibleThreadIndexes];
 
   // Note: to have a consistent behavior independant of the sorting algorithm,
   // we need to be careful that the comparator function is consistent:
@@ -1299,7 +1304,10 @@ export function defaultThreadOrder(threads: RawThread[]): ThreadIndex[] {
     const nameB = threads[b].name;
 
     if (nameA === nameB) {
-      return a - b;
+      return (
+        threadActivityScores[b].boostedSampleScore -
+        threadActivityScores[a].boostedSampleScore
+      );
     }
 
     // Put the compositor/renderer thread last.

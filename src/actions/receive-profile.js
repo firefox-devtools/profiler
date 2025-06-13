@@ -319,7 +319,8 @@ export function finalizeFullProfileView(
     const selectedThreadIndexes = initializeSelectedThreadIndex(
       maybeSelectedThreadIndexes,
       getVisibleThreads(tracksWithOrder, hiddenTracks),
-      profile
+      profile,
+      threadActivityScores
     );
 
     let timelineType = null;
@@ -1549,7 +1550,8 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
     const selectedThreadIndexes = initializeSelectedThreadIndex(
       null, // maybeSelectedThreadIndexes
       getVisibleThreads(tracksWithOrder, hiddenTracks),
-      profile
+      profile,
+      threadActivityScores
     );
 
     // If the currently selected tab is only visible when the selected track
