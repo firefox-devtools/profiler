@@ -260,11 +260,13 @@ export function finalizeFullProfileView(
     );
     const localTracksByPid = computeLocalTracksByPid(profile, globalTracks);
 
+    const threadActivityScores = getThreadActivityScores(getState());
     const legacyThreadOrder = getLegacyThreadOrder(getState());
     const globalTrackOrder = initializeGlobalTrackOrder(
       globalTracks,
       hasUrlInfo ? getGlobalTrackOrder(getState()) : null,
-      legacyThreadOrder
+      legacyThreadOrder,
+      threadActivityScores
     );
     const localTrackOrderByPid = initializeLocalTrackOrderByPid(
       hasUrlInfo ? getLocalTrackOrderByPid(getState()) : null,
@@ -308,7 +310,7 @@ export function finalizeFullProfileView(
       hiddenTracks = computeDefaultHiddenTracks(
         tracksWithOrder,
         profile,
-        getThreadActivityScores(getState()),
+        threadActivityScores,
         // Only include the parent process if there is no tab filter applied.
         includeParentProcessThreads
       );
@@ -1495,11 +1497,13 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
     );
     const localTracksByPid = computeLocalTracksByPid(profile, globalTracks);
 
+    const threadActivityScores = getThreadActivityScores(getState());
     const legacyThreadOrder = getLegacyThreadOrder(getState());
     const globalTrackOrder = initializeGlobalTrackOrder(
       globalTracks,
       null, // Passing null to urlGlobalTrackOrder to reinitilize it.
-      legacyThreadOrder
+      legacyThreadOrder,
+      threadActivityScores
     );
     const localTrackOrderByPid = initializeLocalTrackOrderByPid(
       null, // Passing null to urlTrackOrderByPid to reinitilize it.
@@ -1536,7 +1540,7 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
       hiddenTracks = computeDefaultHiddenTracks(
         tracksWithOrder,
         profile,
-        getThreadActivityScores(getState()),
+        threadActivityScores,
         // Only include the parent process if there is no tab filter applied.
         includeParentProcessThreads
       );
