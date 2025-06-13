@@ -254,31 +254,16 @@ export function getStackAndSampleSelectorsPerThread(
     ProfileData.getSampleIndexToCallNodeIndex
   );
 
-  const _getSampleIndexToNonInvertedCallNodeIndexForTabFilteredThread: Selector<
-    Array<IndexIntoCallNodeTable | null>,
-  > = createSelector(
-    (state) => threadSelectors.getTabFilteredThread(state).samples.stack,
-    (state) => getCallNodeInfo(state).getStackIndexToNonInvertedCallNodeIndex(),
-    ProfileData.getSampleIndexToCallNodeIndex
-  );
-
   const getSamplesSelectedStatesInFilteredThread: Selector<
     null | SelectedState[],
   > = createSelector(
     getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
-    _getSampleIndexToNonInvertedCallNodeIndexForTabFilteredThread,
     getCallNodeInfo,
     getSelectedCallNodeIndex,
-    (
-      sampleIndexToNonInvertedCallNodeIndex,
-      activeTabFilteredNonInvertedCallNodes,
-      callNodeInfo,
-      selectedCallNode
-    ) => {
+    (sampleIndexToNonInvertedCallNodeIndex, callNodeInfo, selectedCallNode) => {
       return ProfileData.getSamplesSelectedStates(
         callNodeInfo,
         sampleIndexToNonInvertedCallNodeIndex,
-        activeTabFilteredNonInvertedCallNodes,
         selectedCallNode
       );
     }

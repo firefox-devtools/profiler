@@ -28,7 +28,6 @@ import type {
   IndexIntoRawMarkerTable,
   IndexIntoCategoryList,
   CategoryList,
-  InnerWindowID,
   Marker,
   MarkerIndex,
   MarkerPayload,
@@ -299,50 +298,6 @@ function negativeFilterMarker(
   }
 
   return true;
-}
-
-/**
- * Gets the markers and the web pages that are relevant to the current active tab
- * and filters out the markers that don't belong to those revelant pages.
- * If we don't have any item in relevantPages, return the whole marker list.
- */
-export function getTabFilteredMarkerIndexes(
-  getMarker: (MarkerIndex) => Marker,
-  markerIndexes: MarkerIndex[],
-  relevantPages: Set<InnerWindowID>,
-  includeGlobalMarkers: boolean = true
-): MarkerIndex[] {
-  if (relevantPages.size === 0) {
-    return markerIndexes;
-  }
-
-  const newMarkers: MarkerIndex[] = [];
-  for (const markerIndex of markerIndexes) {
-    const { name, data } = getMarker(markerIndex);
-
-    // We want to retain some markers even though they do not belong to a specific tab.
-    // We are checking those before and pushing those markers to the new array.
-    // As of now, those markers are:
-    // - Jank markers
-    if (includeGlobalMarkers) {
-      if (name === 'Jank') {
-        newMarkers.push(markerIndex);
-        continue;
-      }
-    } else {
-      if (data && data.type === 'Network') {
-        // Now network markers have innerWindowIDs inside their payloads but those markers
-        // can be inside the main thread and not be related to that specific thread.
-        continue;
-      }
-    }
-
-    if (data && data.innerWindowID && relevantPages.has(data.innerWindowID)) {
-      newMarkers.push(markerIndex);
-    }
-  }
-
-  return newMarkers;
 }
 
 /**

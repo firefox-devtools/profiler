@@ -28,7 +28,6 @@ import {
   getUploadError,
   getShouldSanitizeByDefault,
 } from 'firefox-profiler/selectors/publish';
-import { getTimelineTrackOrganization } from 'firefox-profiler/selectors/url-state';
 import { BlobUrlLink } from 'firefox-profiler/components/shared/BlobUrlLink';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import prettyBytes from 'firefox-profiler/utils/pretty-bytes';
@@ -67,7 +66,6 @@ type StateProps = {|
   +shouldSanitizeByDefault: boolean,
   +uploadError: mixed,
   +abortFunction: () => mixed,
-  +timelineTrackOrganizationType: 'full' | 'active-tab' | 'origins',
 |};
 
 type DispatchProps = {|
@@ -154,10 +152,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
       downloadFileName,
       shouldSanitizeByDefault,
       isRepublish,
-      timelineTrackOrganizationType,
     } = this.props;
-
-    const isActiveTabTimeline = timelineTrackOrganizationType === 'active-tab';
 
     return (
       <div data-testid="MenuButtonsPublish-container">
@@ -198,15 +193,10 @@ class MenuButtonsPublishImpl extends React.PureComponent<
             </Localized>
           </h3>
           <div className="menuButtonsPublishDataChoices">
-            {isActiveTabTimeline
-              ? this._renderCheckbox(
-                  'includeAllTabs',
-                  'MenuButtons--publish--renderCheckbox-label-include-other-tabs'
-                )
-              : this._renderCheckbox(
-                  'includeHiddenThreads',
-                  'MenuButtons--publish--renderCheckbox-label-hidden-threads'
-                )}
+            {this._renderCheckbox(
+              'includeHiddenThreads',
+              'MenuButtons--publish--renderCheckbox-label-hidden-threads'
+            )}
             {this._renderCheckbox(
               'includeFullTimeRange',
               'MenuButtons--publish--renderCheckbox-label-hidden-time'
@@ -407,7 +397,6 @@ export const MenuButtonsPublish = explicitConnect<
     uploadError: getUploadError(state),
     shouldSanitizeByDefault: getShouldSanitizeByDefault(state),
     abortFunction: getAbortFunction(state),
-    timelineTrackOrganizationType: getTimelineTrackOrganization(state).type,
   }),
   mapDispatchToProps: {
     toggleCheckedSharingOptions,
