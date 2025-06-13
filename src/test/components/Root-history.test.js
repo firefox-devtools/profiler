@@ -188,7 +188,7 @@ describe('Root with history', function () {
 });
 
 function mockFetchProfileAtUrl(url: string, profile: Profile): void {
-  window.fetch
+  window.fetchMock
     .catch(404) // catchall
     .get(url, profile);
 }

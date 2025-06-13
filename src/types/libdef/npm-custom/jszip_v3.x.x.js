@@ -34,7 +34,7 @@ declare module 'jszip' {
     files: {| [fileName: string]: JSZipFile |};
     file: (fileName: string, contents: string) => void;
     generateAsync({ type: 'uint8array' }): Promise<Uint8Array>;
-    static loadAsync: (data: ArrayBuffer) => Promise<JSZip>;
+    static loadAsync: (data: ArrayBuffer | $TypedArray) => Promise<JSZip>;
   }
 
   declare module.exports: typeof JSZip;

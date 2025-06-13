@@ -285,11 +285,11 @@ describe('ListOfPublishedProfiles', () => {
       endpointUrl: string,
       jwtToken: string,
     }) {
-      window.fetch
+      window.fetchMock
         .catch(404) // Catchall
-        .mock(endpointUrl, (urlString, options) => {
+        .route(endpointUrl, ({ options }) => {
           const { method, headers } = options;
-          if (method !== 'DELETE') {
+          if (method !== 'delete') {
             return new Response(null, {
               status: 405,
               statusText: 'Method not allowed',
@@ -297,8 +297,8 @@ describe('ListOfPublishedProfiles', () => {
           }
 
           if (
-            headers['Content-Type'] !== 'application/json' ||
-            headers.Accept !==
+            headers['content-type'] !== 'application/json' ||
+            headers.accept !==
               'application/vnd.firefox-profiler+json;version=1.0'
           ) {
             return new Response(null, {
@@ -307,7 +307,7 @@ describe('ListOfPublishedProfiles', () => {
             });
           }
 
-          if (headers.Authorization !== `Bearer ${jwtToken}`) {
+          if (headers.authorization !== `Bearer ${jwtToken}`) {
             return new Response(null, {
               status: 401,
               statusText: 'Forbidden',

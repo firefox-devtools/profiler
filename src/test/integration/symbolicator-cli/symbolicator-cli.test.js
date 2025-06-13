@@ -33,7 +33,7 @@ describe('symbolicator-cli tool', function () {
       'src/test/integration/symbolicator-cli/symbol-server-response.json'
     );
 
-    window.fetch.post(
+    window.fetchMock.post(
       'http://symbol.server/symbolicate/v5',
       new Response(symbolsJson)
     );

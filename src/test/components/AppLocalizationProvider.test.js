@@ -37,11 +37,11 @@ describe('AppLocalizationProvider', () => {
     jest.spyOn(window.navigator, 'languages', 'get').mockReturnValue(languages);
 
     const translatedText = (language) => `This is ${language} Text`;
-    const fetchUrlRe = /^\/locales\/(?<language>[^/]+)\/app.ftl$/;
-    window.fetch
+    const fetchUrlRe = /\/locales\/(?<language>[^/]+)\/app.ftl$/;
+    window.fetchMock
       .catch(404) // catchall
-      .get(fetchUrlRe, (fetchUrl) => {
-        const matchUrlResult = fetchUrlRe.exec(fetchUrl);
+      .get(fetchUrlRe, ({ url }) => {
+        const matchUrlResult = fetchUrlRe.exec(url);
         if (matchUrlResult) {
           // $FlowExpectError Our Flow doesn't know about named groups.
           const { language } = matchUrlResult.groups;
@@ -188,15 +188,15 @@ describe('AppLocalizationProvider', () => {
 
     expect(await screen.findByText(translatedText('de'))).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'de');
-    expect(window.fetch).toHaveBeenCalledWith('/locales/de/app.ftl', {
+    expect(window.fetch).toHaveFetched('/locales/de/app.ftl', {
       credentials: 'include',
       mode: 'no-cors',
     });
-    expect(window.fetch).toHaveBeenCalledWith('/locales/en-US/app.ftl', {
+    expect(window.fetch).toHaveFetched('/locales/en-US/app.ftl', {
       credentials: 'include',
       mode: 'no-cors',
     });
-    expect(window.fetch).toHaveBeenCalledTimes(2);
+    expect(window.fetch).toHaveFetchedTimes(2);
   });
 
   it('falls back properly on en-US if the primary locale lacks a string', async () => {
@@ -220,14 +220,14 @@ describe('AppLocalizationProvider', () => {
       await screen.findByText(translatedText('en-US'))
     ).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'de');
-    expect(window.fetch).toHaveBeenCalledWith('/locales/de/app.ftl', {
+    expect(window.fetch).toHaveFetched('/locales/de/app.ftl', {
       credentials: 'include',
       mode: 'no-cors',
     });
-    expect(window.fetch).toHaveBeenCalledWith('/locales/en-US/app.ftl', {
+    expect(window.fetch).toHaveFetched('/locales/en-US/app.ftl', {
       credentials: 'include',
       mode: 'no-cors',
     });
-    expect(window.fetch).toHaveBeenCalledTimes(2);
+    expect(window.fetch).toHaveFetchedTimes(2);
   });
 });

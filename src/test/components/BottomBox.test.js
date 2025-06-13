@@ -50,7 +50,7 @@ describe('BottomBox', () => {
 
     const revision = '997f00815e6bc28806b75448c8829f0259d2cb28';
     const filepath = 'widget/cocoa/nsAppShell.mm';
-    window.fetch
+    window.fetchMock
       .post('http://127.0.0.1:8000/source/v1', 500)
       .get(
         `https://hg.mozilla.org/mozilla-central/raw-file/${revision}/${filepath}`,

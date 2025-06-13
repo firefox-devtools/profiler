@@ -117,6 +117,7 @@
     "@babel/preset-env": "^7.27.2",
     "@babel/preset-flow": "^7.27.1",
     "@babel/preset-react": "^7.27.1",
+    "@fetch-mock/jest": "^0.2.15",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -146,7 +147,6 @@
     "eslint-plugin-testing-library": "^7.2.1",
     "espree": "^10.3.0",
     "fake-indexeddb": "^6.0.1",
-    "fetch-mock-jest": "^1.5.1",
     "file-loader": "^6.2.0",
     "flow-bin": "^0.96.0",
     "glob": "^11.0.2",
@@ -159,7 +159,6 @@
     "local-web-server": "^5.4.0",
     "lockfile-lint": "^4.14.1",
     "mkdirp": "^3.0.1",
-    "node-fetch": "^2.6.11",
     "npm-run-all2": "^8.0.4",
     "open": "^10.1.2",
     "postcss": "^8.5.4",
@@ -188,7 +187,7 @@
       "jsx"
     ],
     "transformIgnorePatterns": [
-      "/node_modules/(?!(query-string|decode-uri-component|split-on-first|filter-obj)/)"
+      "/node_modules/(?!(query-string|decode-uri-component|split-on-first|filter-obj|@fetch-mock/jest|fetch-mock)/)"
     ],
     "moduleNameMapper": {
       "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ftl)$": "<rootDir>/src/test/fixtures/mocks/file-mock.js",
@@ -205,7 +204,7 @@
       "escapeString": true,
       "printBasicPrototype": true
     },
-    "testEnvironment": "jsdom",
+    "testEnvironment": "./src/test/custom-environment",
     "verbose": false
   },
   "husky": {

@@ -95,7 +95,10 @@ type APIResultV5 = {
 // Make sure that the JSON blob we receive from the API conforms to our flow
 // type definition.
 function _ensureIsAPIResultV5(result: MixedObject): APIResultV5 {
-  if (!(result instanceof Object) || !('results' in result)) {
+  const isObject = (subject) =>
+    Object.prototype.toString.call(subject) === '[object Object]';
+
+  if (!isObject(result) || !('results' in result)) {
     throw new Error('Expected an object with property `results`');
   }
   const results = result.results;
@@ -104,7 +107,7 @@ function _ensureIsAPIResultV5(result: MixedObject): APIResultV5 {
   }
   for (const jobResult of results) {
     if (
-      !(jobResult instanceof Object) ||
+      !isObject(jobResult) ||
       !('found_modules' in jobResult) ||
       !('stacks' in jobResult)
     ) {
@@ -113,7 +116,7 @@ function _ensureIsAPIResultV5(result: MixedObject): APIResultV5 {
       );
     }
     const found_modules = jobResult.found_modules;
-    if (!(found_modules instanceof Object)) {
+    if (!isObject(found_modules)) {
       throw new Error('Expected `found_modules` to be an object');
     }
     const stacks = jobResult.stacks;
@@ -125,7 +128,7 @@ function _ensureIsAPIResultV5(result: MixedObject): APIResultV5 {
         throw new Error('Expected `stack` to be an array');
       }
       for (const frameInfo of stack) {
-        if (!(frameInfo instanceof Object)) {
+        if (!isObject(frameInfo)) {
           throw new Error('Expected `frameInfo` to be an object');
         }
         if (
@@ -165,7 +168,7 @@ function _ensureIsAPIResultV5(result: MixedObject): APIResultV5 {
             throw new Error('Expected `inlines` to be an array');
           }
           for (const inlineFrame of inlines) {
-            if (!(inlineFrame instanceof Object)) {
+            if (!isObject(inlineFrame)) {
               throw new Error('Expected `inlineFrame` to be an object');
             }
           }
