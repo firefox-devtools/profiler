@@ -16,7 +16,6 @@ import {
   getVisualProgressTrackProfile,
   getProfileWithUnbalancedNativeAllocations,
   getProfileWithJsAllocations,
-  addActiveTabInformationToProfile,
   getProfileWithEventDelays,
   getProfileWithThreadCPUDelta,
   getThreadWithMarkers,
@@ -33,10 +32,7 @@ import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 
 import * as App from '../../actions/app';
 import * as ProfileView from '../../actions/profile-view';
-import {
-  viewProfile,
-  changeTimelineTrackOrganization,
-} from '../../actions/receive-profile';
+import { viewProfile } from '../../actions/receive-profile';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import * as UrlStateSelectors from '../../selectors/url-state';
 import { getRightClickedCallNodeInfo } from '../../selectors/right-clicked-call-node';
@@ -57,7 +53,6 @@ import { getSelfAndTotalForCallNode } from '../../profile-logic/call-tree';
 import type {
   TrackReference,
   Milliseconds,
-  TabID,
   RawThread,
   StartEndRange,
 } from 'firefox-profiler/types';
@@ -1942,15 +1937,6 @@ describe('snapshots of selectors/profile', function () {
     ]);
   });
 
-  it('matches the last stored run of selectedThreadSelector.getTabFilteredThread', function () {
-    const { getState, dispatch } = setupStore();
-
-    dispatch(changeTimelineTrackOrganization({ type: 'active-tab', tabID }));
-    expect(
-      selectedThreadSelectors.getTabFilteredThread(getState())
-    ).toMatchSnapshot();
-  });
-
   it('matches the last stored run of selectedThreadSelector.getRangeFilteredThread', function () {
     const { getState } = setupStore();
     expect(
@@ -3353,202 +3339,6 @@ describe('right clicked marker info', () => {
     dispatch(ProfileView.setContextMenuVisibility(false));
 
     expect(getRightClickedMarkerInfo(getState())).toBeNull();
-  });
-});
-
-describe('pages and active tab selectors', function () {
-  // Setting some IDs here so we can use those inside the setup and test functions.
-  const firstTabTabID = 1;
-  const secondTabTabID = 4;
-
-  // Setup an empty profile with pages array and activeTabID
-  function setup(activeTabID: TabID) {
-    const { profile, ...pageInfo } = addActiveTabInformationToProfile(
-      getEmptyProfile(),
-      activeTabID
-    );
-    // Adding an empty thread to the profile so the loadProfile function won't complain
-    profile.threads.push(getEmptyThread());
-
-    const { dispatch, getState } = storeWithProfile(profile);
-    dispatch(
-      changeTimelineTrackOrganization({
-        type: 'active-tab',
-        tabID: activeTabID,
-      })
-    );
-    return { profile, dispatch, getState, ...pageInfo };
-  }
-
-  it('getInnerWindowIDSetByTabID will construct the whole map correctly', function () {
-    const { getState, firstTabInnerWindowIDs, secondTabInnerWindowIDs } =
-      setup(firstTabTabID); // the given argument is not important for this test
-    const objectResult = [
-      [firstTabTabID, new Set(firstTabInnerWindowIDs)],
-      [secondTabTabID, new Set(secondTabInnerWindowIDs)],
-    ];
-    const result = new Map(objectResult);
-    expect(ProfileViewSelectors.getInnerWindowIDSetByTabID(getState())).toEqual(
-      result
-    );
-  });
-
-  it('getRelevantInnerWindowIDsForCurrentTab will get the correct InnerWindowIDs for the first tab', function () {
-    const { getState, firstTabInnerWindowIDs } = setup(firstTabTabID);
-    expect(
-      ProfileViewSelectors.getRelevantInnerWindowIDsForCurrentTab(getState())
-    ).toEqual(new Set(firstTabInnerWindowIDs));
-  });
-
-  it('getRelevantInnerWindowIDsForCurrentTab will get the correct InnerWindowIDs for the second tab', function () {
-    const { getState, secondTabInnerWindowIDs } = setup(secondTabTabID);
-    expect(
-      ProfileViewSelectors.getRelevantInnerWindowIDsForCurrentTab(getState())
-    ).toEqual(new Set(secondTabInnerWindowIDs));
-  });
-
-  it('getRelevantInnerWindowIDsForCurrentTab will return an empty set for an ID that is not in the array', function () {
-    const { getState } = setup(99999); // a non-existent TabID
-    expect(
-      ProfileViewSelectors.getRelevantInnerWindowIDsForCurrentTab(getState())
-    ).toEqual(new Set());
-  });
-
-  it('getTabToThreadIndexesMap will construct an empty map if the threads is empty', function () {
-    const { profile } = addActiveTabInformationToProfile(
-      getEmptyProfile(),
-      firstTabTabID
-    );
-    // Adding an empty thread to the profile so the loadProfile function won't complain
-    profile.threads.push(getEmptyThread());
-    const { getState } = storeWithProfile(profile);
-
-    // The profile doesn't have any samples or markers. It should  produce an empty map.
-    expect(ProfileViewSelectors.getTabToThreadIndexesMap(getState())).toEqual(
-      new Map()
-    );
-  });
-
-  it('getTabToThreadIndexesMap will construct a correct map if the thread has samples with innerWindowIDs', function () {
-    const { profile, ...pageInfo } = addActiveTabInformationToProfile(
-      getEmptyProfile(),
-      firstTabTabID
-    );
-    // Add 3 threads to add some samples.
-    profile.threads = [getEmptyThread(), getEmptyThread(), getEmptyThread()];
-
-    // Add some frames with innerWindowIDs now. Note that we only expand the
-    // innerWindowID array and not the others as we don't check them at all.
-    //
-    // Thread 0 and 1 will be present in firstTabTabID.
-    // Thread 1 and 2 will be present in secondTabTabID.
-    profile.threads[0].frameTable.innerWindowID[0] =
-      pageInfo.parentInnerWindowIDsWithChildren;
-    profile.threads[0].frameTable.length++;
-
-    profile.threads[1].frameTable.innerWindowID[0] =
-      pageInfo.firstTabInnerWindowIDs[2];
-    profile.threads[1].frameTable.length++;
-    profile.threads[1].frameTable.innerWindowID[1] =
-      pageInfo.secondTabInnerWindowIDs[0];
-    profile.threads[1].frameTable.length++;
-
-    profile.threads[2].frameTable.innerWindowID[0] =
-      pageInfo.secondTabInnerWindowIDs[1];
-    profile.threads[2].frameTable.length++;
-
-    const { getState } = storeWithProfile(profile);
-
-    // It should match the new map of:
-    // Thread 0 and 1 will be present in firstTabTabID.
-    // Thread 1 and 2 will be present in secondTabTabID.
-    const result = [
-      [pageInfo.firstTabTabID, new Set([0, 1])],
-      [pageInfo.secondTabTabID, new Set([1, 2])],
-    ];
-    expect(ProfileViewSelectors.getTabToThreadIndexesMap(getState())).toEqual(
-      new Map(result)
-    );
-  });
-
-  it('getTabToThreadIndexesMap will construct a correct map if the thread has markers with innerWindowIDs', function () {
-    const { profile, ...pageInfo } = addActiveTabInformationToProfile(
-      getEmptyProfile(),
-      firstTabTabID
-    );
-    // Add 3 threads to add some samples.
-    // profile.threads = [getEmptyThread(), getEmptyThread(), getEmptyThread()];
-
-    // Add some frames with innerWindowIDs now. Note that we only expand the
-    // innerWindowID array and not the others as we don't check them at all.
-    //
-    // Thread 0 and 1 will be present in firstTabTabID.
-    // Thread 1 and 2 will be present in secondTabTabID.
-    profile.threads.push(
-      getThreadWithMarkers(profile.shared, [
-        [
-          'Test 1',
-          1,
-          null,
-          {
-            type: 'tracing',
-            category: 'Navigation',
-            innerWindowID: pageInfo.parentInnerWindowIDsWithChildren,
-          },
-        ],
-      ])
-    );
-    profile.threads.push(
-      getThreadWithMarkers(profile.shared, [
-        [
-          'Test 2',
-          1,
-          null,
-          {
-            type: 'tracing',
-            category: 'Navigation',
-            innerWindowID: pageInfo.firstTabInnerWindowIDs[2],
-          },
-        ],
-        [
-          'Test 3',
-          2,
-          null,
-          {
-            type: 'tracing',
-            category: 'Navigation',
-            innerWindowID: pageInfo.secondTabInnerWindowIDs[0],
-          },
-        ],
-      ])
-    );
-    profile.threads.push(
-      getThreadWithMarkers(profile.shared, [
-        [
-          'Test 4',
-          1,
-          null,
-          {
-            type: 'tracing',
-            category: 'Navigation',
-            innerWindowID: pageInfo.secondTabInnerWindowIDs[1],
-          },
-        ],
-      ])
-    );
-
-    const { getState } = storeWithProfile(profile);
-
-    // It should match the new map of:
-    // Thread 0 and 1 will be present in firstTabTabID.
-    // Thread 1 and 2 will be present in secondTabTabID.
-    const result = [
-      [pageInfo.firstTabTabID, new Set([0, 1])],
-      [pageInfo.secondTabTabID, new Set([1, 2])],
-    ];
-    expect(ProfileViewSelectors.getTabToThreadIndexesMap(getState())).toEqual(
-      new Map(result)
-    );
   });
 });
 

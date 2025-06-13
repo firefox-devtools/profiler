@@ -37,7 +37,6 @@ const listOfProfileInformations = [
     publishedDate: new Date('4 Jul 2020 14:00'), // "today" earlier
     name: '',
     preset: null,
-    originHostname: null,
     meta: {
       product: 'Fennec',
       // Not more meta information, to test that we can handle profiles that
@@ -52,7 +51,6 @@ const listOfProfileInformations = [
     publishedDate: new Date('3 Jul 2020 08:00'), // yesterday
     name: 'Layout profile',
     preset: 'web',
-    originHostname: null,
     meta: {
       product: 'Firefox',
       platform: 'X11',
@@ -69,7 +67,6 @@ const listOfProfileInformations = [
     publishedDate: new Date('20 May 2018'), // ancient date
     name: '',
     preset: null,
-    originHostname: 'https://www.cnn.com',
     meta: {
       product: 'Firefox Preview',
       platform: 'Android 7.0',
@@ -88,7 +85,6 @@ const listOfProfileInformations = [
     publishedDate: new Date('4 Jul 2020 13:00'),
     name: 'Another good profile',
     preset: null,
-    originHostname: 'https://profiler.firefox.com',
     meta: {
       product: 'Firefox',
       platform: 'Windows',
@@ -105,7 +101,6 @@ const listOfProfileInformations = [
     publishedDate: new Date('5 Jul 2020 11:00'), // This is the future!
     name: 'MacOS X profile',
     preset: null,
-    originHostname: 'https://mozilla.org',
     meta: {
       product: 'Firefox',
       platform: 'Macintosh',
@@ -476,7 +471,6 @@ describe('ListOfPublishedProfiles', () => {
         publishedDate: new Date('4 Jul 2020 13:00'),
         name: 'PROFILE',
         preset: null,
-        originHostname: 'https://mozilla.org',
         meta: {
           product: 'Firefox',
           platform: 'Macintosh',

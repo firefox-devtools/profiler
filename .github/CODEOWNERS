@@ -2,3 +2,7 @@
 # Only the english locale should be reviewed from github, the others locales are
 # committed directly through pontoon.
 /locales/en-US/**/*.ftl @firefox-devtools/performance-l10n
+
+# Automatically request reviews for the dependency updates
+/package.json @canova
+/yarn.lock @canova

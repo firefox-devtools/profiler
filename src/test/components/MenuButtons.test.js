@@ -26,11 +26,7 @@ import {
   retrieveUploadedProfileInformationFromDb,
 } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import { updateUrlState } from 'firefox-profiler/actions/app';
-import {
-  changeTimelineTrackOrganization,
-  loadProfile,
-} from 'firefox-profiler/actions/receive-profile';
-import { getTimelineTrackOrganization } from 'firefox-profiler/selectors';
+import { loadProfile } from 'firefox-profiler/actions/receive-profile';
 
 import { getHash, getDataSource } from 'firefox-profiler/selectors/url-state';
 
@@ -38,13 +34,12 @@ import { ensureExists } from '../../utils/flow';
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
-  addActiveTabInformationToProfile,
+  addTabInformationToProfile,
   markTabIdsAsPrivateBrowsing,
 } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { fireFullClick } from '../fixtures/utils';
 import { storeWithProfile, blankStore } from '../fixtures/stores';
-import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 
 import type { Profile } from 'firefox-profiler/types';
 
@@ -321,7 +316,7 @@ describe('app/MenuButtons', function () {
 
     it('Unchecks the Include Browsing Data checkbox in nightly when some private browsing data is in the profile', async () => {
       const { profile } = createSimpleProfile();
-      const { firstTabTabID } = addActiveTabInformationToProfile(profile);
+      const { firstTabTabID } = addTabInformationToProfile(profile);
       markTabIdsAsPrivateBrowsing(profile, [firstTabTabID]);
 
       const { getPrivateBrowsingCheckbox, openPublishPanel } =
@@ -335,7 +330,7 @@ describe('app/MenuButtons', function () {
 
     it('Unchecks the Include Browsing Data checkbox in release when some private browsing data is in the profile', async () => {
       const { profile } = createSimpleProfile('release');
-      const { firstTabTabID } = addActiveTabInformationToProfile(profile);
+      const { firstTabTabID } = addTabInformationToProfile(profile);
       markTabIdsAsPrivateBrowsing(profile, [firstTabTabID]);
 
       const { getPrivateBrowsingCheckbox, openPublishPanel } =
@@ -353,24 +348,6 @@ describe('app/MenuButtons', function () {
         setupForPublish(profile);
       await openPublishPanel();
       expect(queryPrivateBrowsingCheckbox()).not.toBeInTheDocument();
-    });
-
-    it('shows the active tab data checkbox when the current track organization is active-tab', async () => {
-      const { profile } = addActiveTabInformationToProfile(
-        getProfileWithNiceTracks()
-      );
-      const { getRemoveOtherTabsCheckbox, openPublishPanel, dispatch } =
-        setupForPublish(profile);
-      act(() => {
-        dispatch(
-          changeTimelineTrackOrganization({
-            type: 'active-tab',
-            tabID: null,
-          })
-        );
-      });
-      await openPublishPanel();
-      expect(getRemoveOtherTabsCheckbox()).toBeInTheDocument();
     });
 
     it('can publish and revert', async () => {
@@ -662,7 +639,6 @@ describe('app/MenuButtons', function () {
         publishedDate: new Date('4 Jul 2020 13:00 GMT'),
         name: 'PROFILE',
         preset: null,
-        originHostname: 'https://mozilla.org',
         meta: {
           product: 'Firefox',
           platform: 'Macintosh',
@@ -852,67 +828,6 @@ describe('app/MenuButtons', function () {
         ).toBeInTheDocument();
         expect(screen.getByText('Re-symbolicate profile')).toBeInTheDocument();
       });
-    });
-  });
-
-  describe('Full View Button', function () {
-    function setupForFullViewButton() {
-      const { profile } = addActiveTabInformationToProfile(
-        getProfileWithNiceTracks()
-      );
-      return setup(storeWithProfile(profile));
-    }
-
-    it('is not present when we are in the full view already', () => {
-      const { getState, queryByText } = setupForFullViewButton();
-
-      // Make sure that we are in the full view and the button is not there.
-      expect(getTimelineTrackOrganization(getState()).type).toBe('full');
-      expect(queryByText('Full View')).not.toBeInTheDocument();
-    });
-
-    it('is present when we are in the active tab view', () => {
-      const { dispatch, getState, getByText, container } =
-        setupForFullViewButton();
-
-      act(() => {
-        dispatch(
-          changeTimelineTrackOrganization({
-            type: 'active-tab',
-            tabID: null,
-          })
-        );
-      });
-
-      // Make sure that we are in the active tab view and the button is there.
-      expect(getTimelineTrackOrganization(getState()).type).toBe('active-tab');
-      expect(getByText('Full View')).toBeInTheDocument();
-      expect(container).toMatchSnapshot();
-    });
-
-    it('switches to full view when clicked', () => {
-      const { dispatch, getState, getByText, queryByText } =
-        setupForFullViewButton();
-
-      act(() => {
-        dispatch(
-          changeTimelineTrackOrganization({
-            type: 'active-tab',
-            tabID: null,
-          })
-        );
-      });
-
-      // Make sure that we are in the active tab view already.
-      expect(getTimelineTrackOrganization(getState()).type).toBe('active-tab');
-      expect(getByText('Full View')).toBeInTheDocument();
-
-      // Switch to the full view by clicking on the Full View button
-      fireFullClick(getByText('Full View'));
-
-      // Make sure that we are in the full view and the button is no longer there
-      expect(getTimelineTrackOrganization(getState()).type).toBe('full');
-      expect(queryByText('Full View')).not.toBeInTheDocument();
     });
   });
 });

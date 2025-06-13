@@ -14,7 +14,6 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import { popCommittedRanges } from 'firefox-profiler/actions/profile-view';
 import {
   getPreviewSelection,
-  getProfileFilterPageData,
   getProfileFilterPageDataByTabID,
   getProfileRootRange,
   getProfileTimelineUnit,
@@ -36,7 +35,6 @@ import type {
 import './ProfileFilterNavigator.css';
 
 type Props = {|
-  +filterPageDataForActiveTab: ProfileFilterPageData | null,
   +pageDataByTabID: Map<TabID, ProfileFilterPageData> | null,
   +tabFilter: TabID | null,
   +rootRange: StartEndRange,
@@ -82,22 +80,22 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
       uncommittedItem,
       onPop,
       rootRange,
-      filterPageDataForActiveTab,
       pageDataByTabID,
       tabFilter,
       profileTimelineUnit,
     } = this.props;
 
     let firstItem;
-    if (filterPageDataForActiveTab) {
-      // TODO: Remove this once we ship the tab selector and remove the active tab view.
-      firstItem = (
+    if (pageDataByTabID && pageDataByTabID.size > 0) {
+      const pageData =
+        tabFilter !== null ? pageDataByTabID.get(tabFilter) : null;
+
+      const itemContents = pageData ? (
         <>
-          {filterPageDataForActiveTab.favicon ? (
-            <Icon iconUrl={filterPageDataForActiveTab.favicon} />
-          ) : null}
-          <span title={filterPageDataForActiveTab.origin}>
-            {filterPageDataForActiveTab.hostname} (
+          {/* Show the page data if the profile is filtered by tab */}
+          {pageData.favicon ? <Icon iconUrl={pageData.favicon} /> : null}
+          <span title={pageData.origin}>
+            {pageData.hostname} (
             {getFormattedTimelineValue(
               rootRange.end - rootRange.start,
               profileTimelineUnit
@@ -105,86 +103,62 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
             )
           </span>
         </>
+      ) : (
+        <Localized
+          id="ProfileFilterNavigator--full-range-with-duration"
+          vars={{
+            fullRangeDuration: getFormattedTimelineValue(
+              rootRange.end - rootRange.start,
+              profileTimelineUnit
+            ),
+          }}
+        >
+          Full Range
+        </Localized>
       );
-    } else {
-      // pageDataByTabID will be empty if there is no page information in the
-      // profile or when the page information is empty. This could happen for
-      // older profiles and profiles from external importers that don't have
-      // this information.
-      if (pageDataByTabID && pageDataByTabID.size > 0) {
-        const pageData =
-          tabFilter !== null ? pageDataByTabID.get(tabFilter) : null;
 
-        const itemContents = pageData ? (
-          <>
-            {/* Show the page data if the profile is filtered by tab */}
-            {pageData.favicon ? <Icon iconUrl={pageData.favicon} /> : null}
-            <span title={pageData.origin}>
-              {pageData.hostname} (
-              {getFormattedTimelineValue(
-                rootRange.end - rootRange.start,
-                profileTimelineUnit
-              )}
-              )
-            </span>
-          </>
-        ) : (
-          <Localized
-            id="ProfileFilterNavigator--full-range-with-duration"
-            vars={{
-              fullRangeDuration: getFormattedTimelineValue(
-                rootRange.end - rootRange.start,
-                profileTimelineUnit
-              ),
-            }}
-          >
-            Full Range
-          </Localized>
-        );
-
-        if (items.length === 0 && !uncommittedItem) {
-          // It should be a clickable button if there are no committed ranges.
-          firstItem = (
-            <button
-              type="button"
-              onClick={this._showTabSelectorMenu}
-              className={classNames(
-                'filterNavigatorBarItemContent',
-                'profileFilterNavigator--tab-selector'
-              )}
-            >
-              {itemContents}
-            </button>
-          );
-        } else {
-          // There are committed ranges, don't make it button because this will
-          // be wrapped with a button.
-          firstItem = (
-            <span
-              className={classNames(
-                'filterNavigatorBarItemContent',
-                'profileFilterNavigator--tab-selector'
-              )}
-            >
-              {itemContents}
-            </span>
-          );
-        }
-      } else {
+      if (items.length === 0 && !uncommittedItem) {
+        // It should be a clickable button if there are no committed ranges.
         firstItem = (
-          <Localized
-            id="ProfileFilterNavigator--full-range-with-duration"
-            vars={{
-              fullRangeDuration: getFormattedTimelineValue(
-                rootRange.end - rootRange.start,
-                profileTimelineUnit
-              ),
-            }}
+          <button
+            type="button"
+            onClick={this._showTabSelectorMenu}
+            className={classNames(
+              'filterNavigatorBarItemContent',
+              'profileFilterNavigator--tab-selector'
+            )}
           >
-            Full Range
-          </Localized>
+            {itemContents}
+          </button>
+        );
+      } else {
+        // There are committed ranges, don't make it button because this will
+        // be wrapped with a button.
+        firstItem = (
+          <span
+            className={classNames(
+              'filterNavigatorBarItemContent',
+              'profileFilterNavigator--tab-selector'
+            )}
+          >
+            {itemContents}
+          </span>
         );
       }
+    } else {
+      firstItem = (
+        <Localized
+          id="ProfileFilterNavigator--full-range-with-duration"
+          vars={{
+            fullRangeDuration: getFormattedTimelineValue(
+              rootRange.end - rootRange.start,
+              profileTimelineUnit
+            ),
+          }}
+        >
+          Full Range
+        </Localized>
+      );
     }
 
     const itemsWithFirstElement = this._getItemsWithFirstElement(
@@ -224,8 +198,6 @@ export const ProfileFilterNavigator = explicitConnect<
         )
       : undefined;
 
-    // TODO: Remove this once we ship the tab selector and remove the active tab view.
-    const filterPageDataForActiveTab = getProfileFilterPageData(state);
     const pageDataByTabID = getProfileFilterPageDataByTabID(state);
     const tabFilter = getTabFilter(state);
     const rootRange = getProfileRootRange(state);
@@ -236,7 +208,6 @@ export const ProfileFilterNavigator = explicitConnect<
       // array's length by adding the first element.
       selectedItem: items.length,
       uncommittedItem,
-      filterPageDataForActiveTab,
       pageDataByTabID,
       tabFilter,
       rootRange,

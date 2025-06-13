@@ -11,7 +11,6 @@ import {
   revertToPrePublishedState,
 } from '../../actions/publish';
 import { changeSelectedTab } from '../../actions/app';
-import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
 import {
   viewProfileFromPathInZipFile,
   returnToZipFileList,
@@ -39,10 +38,7 @@ import {
 import { getHasPreferenceMarkers } from '../../selectors/profile';
 import { urlFromState } from '../../app-logic/url-handling';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
-import {
-  getProfileFromTextSamples,
-  addActiveTabInformationToProfile,
-} from '../fixtures/profiles/processed-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
   getProfileWithFakeGlobalTrack,
   getHumanReadableTracks,
@@ -215,93 +211,6 @@ describe('getRemoveProfileInformation', function () {
     expect(
       ensureExists(getRemoveProfileInformation(getState())).shouldRemoveThreads
     ).toEqual(new Set([2, 3]));
-  });
-
-  describe('about non-active tab information', () => {
-    function setupForActiveTab(updateChannel, timelineTrackOrganization) {
-      const { profile, activeTabID } = addActiveTabInformationToProfile(
-        getProfileWithFakeGlobalTrack()
-      );
-      profile.meta.updateChannel = updateChannel;
-      const { getState, dispatch } = storeWithProfile(profile);
-
-      // Hide the second process to test if this will or won't be added to the
-      // set of removed data.
-      dispatch(hideGlobalTrack(1));
-
-      // Possibly switch to the active tab view.
-      if (timelineTrackOrganization) {
-        dispatch(changeTimelineTrackOrganization(timelineTrackOrganization));
-      }
-
-      return { getState, dispatch, activeTabID };
-    }
-
-    it('should remove them when in the active tab view in a nightly profile', () => {
-      const { getState, dispatch, activeTabID } = setupForActiveTab('nightly', {
-        type: 'active-tab',
-        tabID: null,
-      });
-      expect(getRemoveProfileInformation(getState())).toBe(null);
-
-      dispatch(toggleCheckedSharingOptions('includeAllTabs'));
-      const removeProfileInformation = ensureExists(
-        getRemoveProfileInformation(getState())
-      );
-
-      // Note: Jest doesn't check Set values with toMatchObject, so we're checking the
-      // properties individually. See https://github.com/facebook/jest/issues/11250
-      expect(removeProfileInformation.shouldRemoveTabsExceptTabID).toBe(
-        activeTabID
-      );
-      expect(removeProfileInformation.shouldRemoveThreads.size).toBe(0);
-    });
-
-    it('should remove them when in the active tab view in a release profile', () => {
-      const { getState, activeTabID } = setupForActiveTab('release', {
-        type: 'active-tab',
-        tabID: null,
-      });
-
-      const removeProfileInformation = ensureExists(
-        getRemoveProfileInformation(getState())
-      );
-
-      // Note: Jest doesn't check Set values with toMatchObject, so we're checking the
-      // properties individually. See https://github.com/facebook/jest/issues/11250
-      expect(removeProfileInformation.shouldRemoveTabsExceptTabID).toBe(
-        activeTabID
-      );
-      expect(removeProfileInformation.shouldRemoveThreads.size).toBe(0);
-    });
-
-    it('should not remove them when in full view in a nightly profile', () => {
-      const { getState, dispatch } = setupForActiveTab('nightly');
-      expect(getRemoveProfileInformation(getState())).toBe(null);
-
-      dispatch(toggleCheckedSharingOptions('includeAllTabs'));
-      const removeProfileInformation = ensureExists(
-        getRemoveProfileInformation(getState())
-      );
-
-      // Note: Jest doesn't check Set values with toMatchObject, so we're checking the
-      // properties individually. See https://github.com/facebook/jest/issues/11250
-      expect(removeProfileInformation.shouldRemoveTabsExceptTabID).toBe(null);
-      expect(removeProfileInformation.shouldRemoveThreads.size).toBe(0);
-    });
-
-    it('should not remove them when in full view in a release profile', () => {
-      const { getState } = setupForActiveTab('release');
-
-      const removeProfileInformation = ensureExists(
-        getRemoveProfileInformation(getState())
-      );
-
-      // Note: Jest doesn't check Set values with toMatchObject, so we're checking the
-      // properties individually. See https://github.com/facebook/jest/issues/11250
-      expect(removeProfileInformation.shouldRemoveTabsExceptTabID).toBe(null);
-      expect(removeProfileInformation.shouldRemoveThreads.size).toBe(2);
-    });
   });
 });
 

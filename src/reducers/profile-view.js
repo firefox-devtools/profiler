@@ -14,7 +14,6 @@ import type {
   LocalTrack,
   GlobalTrack,
   LastNonShiftClickInformation,
-  OriginsTimeline,
   StartEndRange,
   PreviewSelection,
   RequestedLib,
@@ -27,7 +26,6 @@ import type {
   TableViewOptionsPerTab,
   RightClickedCallNode,
   MarkerReference,
-  ActiveTabTimeline,
   CallNodePath,
   ThreadsKey,
   Milliseconds,
@@ -116,23 +114,6 @@ const localTracksByPid: Reducer<Map<Pid, LocalTrack[]>> = (
     case 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS':
     case 'CHANGE_TAB_FILTER':
       return action.localTracksByPid;
-    default:
-      return state;
-  }
-};
-
-/**
- * This information is stored, rather than derived via selectors, since the coalesced
- * function update would force it to be recomputed on every symbolication update
- * pass. It is valid for the lifetime of the profile.
- */
-const activeTabTimeline: Reducer<ActiveTabTimeline | null> = (
-  state = null,
-  action
-) => {
-  switch (action.type) {
-    case 'VIEW_ACTIVE_TAB_PROFILE':
-      return action.activeTabTimeline;
     default:
       return state;
   }
@@ -809,19 +790,6 @@ const mouseTimePosition: Reducer<Milliseconds | null> = (
 };
 
 /**
- * The origins timeline is experimental. See the OriginsTimeline component
- * for more information.
- */
-const originsTimeline: Reducer<OriginsTimeline> = (state = [], action) => {
-  switch (action.type) {
-    case 'VIEW_ORIGINS_PROFILE':
-      return action.originsTimeline;
-    default:
-      return state;
-  }
-};
-
-/**
  * Provide a mechanism to wrap the reducer in a special function that can reset
  * the state to the default values. This is useful when viewing multiple profiles
  * (e.g. in zip files).
@@ -863,16 +831,8 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       perTab: tableViewOptionsPerTab,
     }),
     profile,
-    full: combineReducers({
-      globalTracks,
-      localTracksByPid,
-    }),
-    activeTab: combineReducers({
-      activeTabTimeline,
-    }),
-    origins: combineReducers({
-      originsTimeline,
-    }),
+    globalTracks,
+    localTracksByPid,
   })
 );
 

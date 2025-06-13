@@ -73,18 +73,10 @@ export function sanitizePII(
 
   // This set keeps the ids to be removed when removing private browsing data.
   const windowIdFromPrivateBrowsing = new Set();
-  // This set keeps the id that are from the active tab id, when we want to
-  // remove the data of other tabs.
-  // Note that in the case of an id is both from private browsing and from
-  // the active tab, it will be present in both.
-  const windowIdFromActiveTab = new Set();
 
   let pages = profile.pages;
   if (pages) {
-    if (
-      PIIToBeRemoved.shouldRemovePrivateBrowsingData ||
-      PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null
-    ) {
+    if (PIIToBeRemoved.shouldRemovePrivateBrowsingData) {
       // slicing here so that we can mutate it later.
       pages = pages.slice();
 
@@ -100,15 +92,6 @@ export function sanitizePII(
           // it's coming from private browsing.
           windowIdFromPrivateBrowsing.add(page.innerWindowID);
           removePageEntry = true;
-        }
-
-        if (PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null) {
-          if (page.tabID === PIIToBeRemoved.shouldRemoveTabsExceptTabID) {
-            // This page is part of the active tab.
-            windowIdFromActiveTab.add(page.innerWindowID);
-          } else {
-            removePageEntry = true;
-          }
         }
 
         if (removePageEntry) {
@@ -156,7 +139,6 @@ export function sanitizePII(
         threadIndex,
         PIIToBeRemoved,
         windowIdFromPrivateBrowsing,
-        windowIdFromActiveTab,
         markerSchemaByName
       );
 
@@ -261,7 +243,6 @@ function sanitizeThreadPII(
   threadIndex: number,
   PIIToBeRemoved: RemoveProfileInformation,
   windowIdFromPrivateBrowsing: Set<InnerWindowID>,
-  windowIdFromActiveTab: Set<InnerWindowID>,
   markerSchemaByName: MarkerSchemaByName
 ): RawThread | null {
   if (PIIToBeRemoved.shouldRemoveThreads.has(threadIndex)) {
@@ -291,8 +272,7 @@ function sanitizeThreadPII(
     PIIToBeRemoved.shouldRemovePreferenceValues ||
     PIIToBeRemoved.shouldRemoveExtensions ||
     PIIToBeRemoved.shouldRemoveThreadsWithScreenshots.size > 0 ||
-    PIIToBeRemoved.shouldRemovePrivateBrowsingData ||
-    PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null
+    PIIToBeRemoved.shouldRemovePrivateBrowsingData
   ) {
     for (let i = 0; i < markerTable.length; i++) {
       let currentMarker = markerTable.data[i];
@@ -382,23 +362,6 @@ function sanitizeThreadPII(
           markersToDelete.add(i);
         }
       }
-
-      if (PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null) {
-        if (!currentMarker) {
-          // No payload, so no innerWindowID!
-          markersToDelete.add(i);
-        } else if (
-          !currentMarker.innerWindowID ||
-          !windowIdFromActiveTab.has(currentMarker.innerWindowID)
-        ) {
-          // Remove any marker that's not coming from this tab.
-          // But special case screenshot markers, because we want to keep
-          // screenshots around.
-          if (currentMarker.type !== 'CompositorScreenshot') {
-            markersToDelete.add(i);
-          }
-        }
-      }
     }
   }
 
@@ -447,13 +410,9 @@ function sanitizeThreadPII(
     delete newThread['eTLD+1'];
   }
 
-  if (
-    windowIdFromPrivateBrowsing.size > 0 ||
-    PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null
-  ) {
+  if (windowIdFromPrivateBrowsing.size > 0) {
     // In this block, we'll remove everything related to frame table entries
-    // that have a innerWindowID with a isPrivateBrowsing flag, or that come
-    // from other tabs than the one we want to keep.
+    // that have a innerWindowID with a isPrivateBrowsing flag.
 
     // This map holds the information about the frame indexes that should be
     // sanitized, with their functions as a key, so that we can easily change
@@ -475,11 +434,7 @@ function sanitizeThreadPII(
 
       const isPrivateBrowsing =
         innerWindowID && windowIdFromPrivateBrowsing.has(innerWindowID);
-      const isRemoveTabId =
-        innerWindowID &&
-        PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null &&
-        !windowIdFromActiveTab.has(innerWindowID);
-      if (isPrivateBrowsing || isRemoveTabId) {
+      if (isPrivateBrowsing) {
         // The function pointed by this frame should be sanitized.
         let sanitizedFrameIndexes =
           sanitizedFuncIndexesToFrameIndex.get(funcIndex);
@@ -592,20 +547,12 @@ function sanitizeThreadPII(
     // There can be 3 values:
     // - 0 is neutral, this means this stack isn't private browsing and isn't
     //   the tab id we want to keep.
-    // - 1 means that this stack has at least one frame that's part of the tab
-    //   we want to keep (if any).
-    // - 2 means that this stack comes from private browsing. It always has
-    //   precedence on the active tab. This means that if the active tab comes
-    //   from a private browsing session and the user wants to sanitize it, it
-    //   will _still_ be removed.
+    // - 1 means that this stack comes from private browsing.
     // They won't be set if the related sanitization isn't set in PIIToBeRemoved.
-    // Also remember that one id can't be both in windowIdFromPrivateBrowsing
-    // and windowIdFromOtherTabs (windowIdFromPrivateBrowsing has precedence).
     const stackFlags = new Uint8Array(stackTable.length);
 
     // Some constants to make it easier to read.
-    const KEEP_TAB_ID_STACK = 1;
-    const PRIVATE_BROWSING_STACK = 2;
+    const PRIVATE_BROWSING_STACK = 1;
 
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
@@ -626,13 +573,8 @@ function sanitizeThreadPII(
       }
 
       const isPrivateBrowsing = windowIdFromPrivateBrowsing.has(innerWindowID);
-      const isKeepTabId =
-        PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null &&
-        windowIdFromActiveTab.has(innerWindowID);
       if (isPrivateBrowsing) {
         stackFlags[stackIndex] = PRIVATE_BROWSING_STACK;
-      } else if (isKeepTabId) {
-        stackFlags[stackIndex] = KEEP_TAB_ID_STACK;
       }
     }
 
@@ -644,14 +586,6 @@ function sanitizeThreadPII(
 
       const stackFlag = stackFlags[stackIndex];
       if (stackFlag === PRIVATE_BROWSING_STACK) {
-        newSamples.stack[sampleIndex] = null;
-        continue;
-      }
-
-      if (
-        PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null &&
-        stackFlag !== KEEP_TAB_ID_STACK
-      ) {
         newSamples.stack[sampleIndex] = null;
         continue;
       }

@@ -10,7 +10,7 @@ import { screen } from '@testing-library/react';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { TabSelectorMenu } from 'firefox-profiler/components/shared/TabSelectorMenu';
-import { addActiveTabInformationToProfile } from '../fixtures/profiles/processed-profile';
+import { addTabInformationToProfile } from '../fixtures/profiles/processed-profile';
 import {
   getProfileWithNiceTracks,
   getHumanReadableTracks,
@@ -23,7 +23,7 @@ import { removeURLs } from 'firefox-profiler/utils/string';
 
 describe('app/TabSelectorMenu', () => {
   function setup() {
-    const { profile, ...extraPageData } = addActiveTabInformationToProfile(
+    const { profile, ...extraPageData } = addTabInformationToProfile(
       getProfileWithNiceTracks()
     );
     ensureExists(profile.pages)[3].favicon =
@@ -180,7 +180,7 @@ describe('app/TabSelectorMenu', () => {
   });
 
   it('should render sanitized page urls correctly', () => {
-    const { profile, ...extraPageData } = addActiveTabInformationToProfile(
+    const { profile, ...extraPageData } = addTabInformationToProfile(
       getProfileWithNiceTracks()
     );
     // This is needed for the thread activity score calculation.

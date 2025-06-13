@@ -366,8 +366,6 @@ export class ActivityGraphFillComputer {
     switch (samplesSelectedStates[sampleIndex]) {
       case 'FILTERED_OUT_BY_TRANSFORM':
         return percentageBuffers.filteredOutByTransformPercentageAtPixel;
-      case 'FILTERED_OUT_BY_ACTIVE_TAB':
-        return percentageBuffers.filteredOutByTabPercentageAtPixel;
       case 'UNSELECTED_ORDERED_BEFORE_SELECTED':
         return percentageBuffers.beforeSelectedPercentageAtPixel;
       case 'SELECTED':

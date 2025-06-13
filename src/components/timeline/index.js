@@ -4,24 +4,12 @@
 
 // @flow
 
-import * as React from 'react';
-import explicitConnect from 'firefox-profiler/utils/connect';
-import { getTimelineTrackOrganization } from 'firefox-profiler/selectors';
+import React, { PureComponent } from 'react';
 import { FullTimeline } from 'firefox-profiler/components/timeline/FullTimeline';
-import { ActiveTabTimeline } from 'firefox-profiler/components/timeline/ActiveTabTimeline';
-import { TimelineOrigins } from 'firefox-profiler/components/timeline/OriginsTimeline';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import type { TimelineTrackOrganization } from 'firefox-profiler/types';
+type TimelineProps = {||};
 
-type StateProps = {|
-  +timelineTrackOrganization: TimelineTrackOrganization,
-|};
-
-type Props = ConnectedProps<{||}, StateProps, {||}>;
-
-class TimelineImpl extends React.PureComponent<Props> {
+export class Timeline extends PureComponent<TimelineProps> {
   // This may contain a function that's called whenever we want to remove the
   // "wheel" listener.
   _removeWheelListener: null | (() => mixed) = null;
@@ -80,30 +68,6 @@ class TimelineImpl extends React.PureComponent<Props> {
   }
 
   render() {
-    const { timelineTrackOrganization } = this.props;
-    switch (timelineTrackOrganization.type) {
-      case 'full':
-        return <FullTimeline innerElementRef={this._onTimelineMountWithRef} />;
-      case 'active-tab':
-        return (
-          <ActiveTabTimeline innerElementRef={this._onTimelineMountWithRef} />
-        );
-      case 'origins':
-        return (
-          <TimelineOrigins innerElementRef={this._onTimelineMountWithRef} />
-        );
-      default:
-        throw assertExhaustiveCheck(
-          timelineTrackOrganization,
-          `Unhandled ViewType`
-        );
-    }
+    return <FullTimeline innerElementRef={this._onTimelineMountWithRef} />;
   }
 }
-
-export const Timeline = explicitConnect<{||}, StateProps, {||}>({
-  mapStateToProps: (state) => ({
-    timelineTrackOrganization: getTimelineTrackOrganization(state),
-  }),
-  component: TimelineImpl,
-});
