@@ -167,14 +167,58 @@ function _getDefaultLocalTrackOrder(tracks: LocalTrack[], profile: ?Profile) {
   return trackOrder;
 }
 
-function _getDefaultGlobalTrackOrder(tracks: GlobalTrack[]) {
+function _getDefaultGlobalTrackOrder(
+  tracks: GlobalTrack[],
+  threadActivityScores: Array<ThreadActivityScore>
+) {
   const trackOrder = tracks.map((_, index) => index);
+
   // In place sort!
-  trackOrder.sort(
-    (a, b) =>
-      GLOBAL_TRACK_DISPLAY_ORDER[tracks[a].type] -
-      GLOBAL_TRACK_DISPLAY_ORDER[tracks[b].type]
-  );
+  trackOrder.sort((a, b) => {
+    const trackA = tracks[a];
+    const trackB = tracks[b];
+
+    // First, sort by track type priority (visual progress, screenshots, then process).
+    const typeOrderA = GLOBAL_TRACK_DISPLAY_ORDER[trackA.type];
+    const typeOrderB = GLOBAL_TRACK_DISPLAY_ORDER[trackB.type];
+
+    if (typeOrderA !== typeOrderB) {
+      return typeOrderA - typeOrderB;
+    }
+
+    if (trackA.type !== 'process' || trackB.type !== 'process') {
+      // For all the cases where both of them are not the process type, return zero.
+      return 0;
+    }
+
+    // This is the case where both of the tracks are processes. Let's sort them
+    // by activity while keeping the parent process at the top.
+    const activityA =
+      trackA.mainThreadIndex !== null
+        ? threadActivityScores[trackA.mainThreadIndex]
+        : null;
+    const activityB =
+      trackB.mainThreadIndex !== null
+        ? threadActivityScores[trackB.mainThreadIndex]
+        : null;
+
+    // Keep the parent process at the top.
+    if (activityA?.isInParentProcess && !activityB?.isInParentProcess) {
+      return -1;
+    }
+    if (!activityA?.isInParentProcess && activityB?.isInParentProcess) {
+      return 1;
+    }
+
+    // For non-parent processes, sort by activity score.
+    if (activityA && activityB) {
+      return activityB.boostedSampleScore - activityA.boostedSampleScore;
+    }
+
+    // For all other cases, maintain original order.
+    return 0;
+  });
+
   return trackOrder;
 }
 
@@ -646,7 +690,8 @@ export function initializeGlobalTrackOrder(
   urlGlobalTrackOrder: TrackIndex[] | null,
   // If viewing an old profile URL, there were not tracks, only thread indexes. Turn
   // the legacy ordering into track ordering.
-  legacyThreadOrder: ThreadIndex[] | null
+  legacyThreadOrder: ThreadIndex[] | null,
+  threadActivityScores: Array<ThreadActivityScore>
 ): TrackIndex[] {
   if (legacyThreadOrder !== null) {
     // Upgrade an older URL value based on the thread index to the track index based
@@ -692,7 +737,7 @@ export function initializeGlobalTrackOrder(
   return urlGlobalTrackOrder !== null &&
     _indexesAreValid(globalTracks.length, urlGlobalTrackOrder)
     ? urlGlobalTrackOrder
-    : _getDefaultGlobalTrackOrder(globalTracks);
+    : _getDefaultGlobalTrackOrder(globalTracks, threadActivityScores);
 }
 
 // Returns the selected thread (set), intersected with the set of visible threads.
