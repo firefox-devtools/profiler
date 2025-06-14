@@ -343,9 +343,16 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         if (sourceView.sourceFile !== null) {
           query.sourceView = sourceView.sourceFile;
         }
-        if (assemblyView.isOpen && assemblyView.nativeSymbol !== null) {
+        if (
+          assemblyView.isOpen &&
+          assemblyView.currentNativeSymbolEntryIndex !== null
+        ) {
+          const {
+            currentNativeSymbolEntryIndex,
+            allNativeSymbolsForInitiatingCallNode,
+          } = assemblyView;
           query.assemblyView = stringifyAssemblyViewSymbol(
-            assemblyView.nativeSymbol
+            allNativeSymbolsForInitiatingCallNode[currentNativeSymbolEntryIndex]
           );
         }
       }
@@ -504,8 +511,9 @@ export function stateFromLocation(
   const assemblyView: AssemblyViewState = {
     isOpen: false,
     scrollGeneration: 0,
-    nativeSymbol: null,
+    currentNativeSymbolEntryIndex: null,
     allNativeSymbolsForInitiatingCallNode: [],
+    allNativeSymbolWeightsForInitiatingCallNode: [],
   };
   const isBottomBoxOpenPerPanel = {};
   tabSlugs.forEach((tabSlug) => (isBottomBoxOpenPerPanel[tabSlug] = false));
@@ -516,7 +524,7 @@ export function stateFromLocation(
   if (query.assemblyView) {
     const symbol = parseAssemblyViewSymbol(query.assemblyView);
     if (symbol !== null) {
-      assemblyView.nativeSymbol = symbol;
+      assemblyView.currentNativeSymbolEntryIndex = 0;
       assemblyView.allNativeSymbolsForInitiatingCallNode = [symbol];
       assemblyView.isOpen = true;
       isBottomBoxOpenPerPanel[selectedTab] = true;

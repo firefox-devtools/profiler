@@ -1741,6 +1741,7 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
       libIndex: 0,
       sourceFile,
       nativeSymbols: [],
+      nativeSymbolWeightsAtOpeningTime: [],
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
     const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
@@ -1772,6 +1773,7 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
       libIndex: 0,
       sourceFile,
       nativeSymbols: [],
+      nativeSymbolWeightsAtOpeningTime: [],
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
     dispatch(closeBottomBox());
@@ -1800,6 +1802,7 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
       libIndex: 0,
       sourceFile: null,
       nativeSymbols: [nativeSymbolInfo],
+      nativeSymbolWeightsAtOpeningTime: [0],
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
     const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
@@ -1841,6 +1844,7 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
       libIndex: 0,
       sourceFile: sourceFile,
       nativeSymbols: [nativeSymbolInfo],
+      nativeSymbolWeightsAtOpeningTime: [0],
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
     const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
