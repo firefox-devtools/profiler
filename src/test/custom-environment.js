@@ -6,6 +6,7 @@
 import { TestEnvironment } from 'jest-environment-jsdom';
 import { TextDecoder, TextEncoder } from 'util';
 
+// This class registers various globals coming from node in test environments.
 export default class CustomTestEnvironment extends TestEnvironment {
   async setup() {
     await super.setup();

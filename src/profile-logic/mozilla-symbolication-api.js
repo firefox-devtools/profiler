@@ -95,6 +95,9 @@ type APIResultV5 = {
 // Make sure that the JSON blob we receive from the API conforms to our flow
 // type definition.
 function _ensureIsAPIResultV5(result: MixedObject): APIResultV5 {
+  // It's possible (especially when running tests with Jest) that the parameter
+  // inherits from a `Object` global from another realm. By using toString
+  // this issue is solved wherever the parameter comes from.
   const isObject = (subject) =>
     Object.prototype.toString.call(subject) === '[object Object]';
 

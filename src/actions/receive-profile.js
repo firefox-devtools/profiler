@@ -1031,6 +1031,10 @@ async function _extractZipFromResponse(
 ): Promise<JSZip> {
   const buffer = await response.arrayBuffer();
   // Workaround for https://github.com/Stuk/jszip/issues/941
+  // When running this code in tests, `buffer` doesn't inherits from _this_
+  // realm's ArrayBuffer object, and this breaks JSZip which doesn't account for
+  // this case. We workaround the issue by wrapping the buffer in an Uint8Array
+  // that comes from this realm.
   const typedBuffer = new Uint8Array(buffer);
   try {
     const zip = await JSZip.loadAsync(typedBuffer);
