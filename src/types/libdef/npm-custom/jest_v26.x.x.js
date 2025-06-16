@@ -550,6 +550,140 @@ type JestExtendedMatchersType = {
   ...
 };
 
+// @fetch-mock/jest
+// https://www.wheresrhys.co.uk/fetch-mock/docs/wrappers/jest
+type $$FetchMockJestMatchersType$$Filter = any;
+type $$FetchMockJestMatchersType$$Options = any;
+type FetchMockJestMatchersType = {
+  toHaveFetched(
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveLastFetched(
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveNthFetched(
+    n: number,
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveFetchedTimes(
+    n: number,
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveGot(
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveLastGot(
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveNthGot(
+    n: number,
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveGotTimes(
+    n: number,
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHavePosted(
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveLastPosted(
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveNthPosted(
+    n: number,
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHavePostedTimes(
+    n: number,
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHavePut(
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveLastPut(
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveNthPut(
+    n: number,
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHavePutTimes(
+    n: number,
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveDeleted(
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveLastDeleted(
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveNthDeleted(
+    n: number,
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveDeletedTimes(
+    n: number,
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveFetchedHead(
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveLastFetchedHead(
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveNthFetchedHead(
+    n: number,
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveFetchedHeadTimes(
+    n: number,
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHavePatched(
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveLastPatched(
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHaveNthPatched(
+    n: number,
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toHavePatchedTimes(
+    n: number,
+    filter: $$FetchMockJestMatchersType$$Filter,
+    options: $$FetchMockJestMatchersType$$Options
+  ): void,
+  toBeDone(filter: $$FetchMockJestMatchersType$$Filter): void,
+};
+
 // Diffing snapshot utility for Jest (snapshot-diff)
 // https://github.com/jest-community/snapshot-diff
 type SnapshotDiffType = {
@@ -579,6 +713,7 @@ interface JestExpectType {
     JestJQueryMatchersType &
     JestStyledComponentsMatchersType &
     JestExtendedMatchersType &
+    FetchMockJestMatchersType &
     SnapshotDiffType;
   /**
    * If you have a mock function, you can use .lastCalledWith to test what
@@ -1169,6 +1304,7 @@ declare var expect: {
     JestJQueryMatchersType &
     JestStyledComponentsMatchersType &
     JestExtendedMatchersType &
+    FetchMockJestMatchersType &
     SnapshotDiffType,
   /** Add additional Jasmine matchers to Jest's roster */
   extend(matchers: { [name: string]: JestMatcher, ... }): void,
