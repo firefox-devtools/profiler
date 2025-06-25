@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`FlameGraph EmptyReasons matches the snapshot when a profile has no samples 1`] = `
 <div
