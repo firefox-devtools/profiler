@@ -54,7 +54,8 @@
     "test-coverage": "run-s test-build-coverage test-serve-coverage",
     "test-alex": "alex ./docs-* *.md",
     "test-lockfile": "lockfile-lint --path yarn.lock --allowed-hosts yarn --validate-https",
-    "test-debug": "node --inspect-brk node_modules/.bin/jest --runInBand"
+    "test-debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "postinstall": "patch-package"
   },
   "license": "MPL-2.0",
   "repository": {
@@ -161,8 +162,10 @@
     "mkdirp": "^3.0.1",
     "npm-run-all2": "^8.0.4",
     "open": "^10.1.2",
+    "patch-package": "^8.0.0",
     "postcss": "^8.5.4",
     "postcss-loader": "^8.1.1",
+    "postinstall-postinstall": "^2.1.0",
     "prettier": "^3.5.3",
     "raw-loader": "^4.0.2",
     "rimraf": "^5.0.10",
