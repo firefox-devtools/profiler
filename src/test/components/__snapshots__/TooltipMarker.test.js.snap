@@ -414,7 +414,7 @@ exports[`TooltipMarker renders properly network markers where content type is bl
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase tooltipNetworkPhaseEmpty"
-      style="margin-left: 83.7404047452896%;"
+      style="margin-left: 83.7404047452896%; margin-right: 7.105427357601002e-15%;"
     />
   </div>
 </div>
@@ -600,7 +600,7 @@ exports[`TooltipMarker renders properly network markers where content type is mi
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase tooltipNetworkPhaseEmpty"
-      style="margin-left: 83.7404047452896%;"
+      style="margin-left: 83.7404047452896%; margin-right: 7.105427357601002e-15%;"
     />
   </div>
 </div>
@@ -791,7 +791,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part 2
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase"
-      style="margin-left: 95.9090909090909%; opacity: 0.5;"
+      style="margin-left: 95.9090909090909%; margin-right: 2.6645352591003757e-15%; opacity: 0.5;"
     />
     <h3
       class="tooltipNetworkTitle3"
@@ -860,7 +860,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part 2
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase tooltipNetworkPhaseEmpty"
-      style="margin-left: 83.7404047452896%;"
+      style="margin-left: 83.7404047452896%; margin-right: 7.105427357601002e-15%;"
     />
   </div>
 </div>
@@ -1056,7 +1056,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part c
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase tooltipNetworkPhaseEmpty"
-      style="margin-left: 83.7404047452896%;"
+      style="margin-left: 83.7404047452896%; margin-right: 7.105427357601002e-15%;"
     />
   </div>
 </div>
@@ -1310,7 +1310,7 @@ exports[`TooltipMarker renders properly normal network markers 1`] = `
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase tooltipNetworkPhaseEmpty"
-      style="margin-left: 83.69368112707495%;"
+      style="margin-left: 83.69368112707495%; margin-right: -3.552713678800501e-15%;"
     />
   </div>
 </div>

@@ -9,6 +9,7 @@ exports[`VerticalIndicators displays tooltips 1`] = `
   <div>
     <span
       class="timelineVerticalIndicatorsSwatch"
+      style="background-color: var(--red-60);"
     />
      
     Load

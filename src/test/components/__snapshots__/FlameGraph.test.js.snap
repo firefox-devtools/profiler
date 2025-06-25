@@ -120,7 +120,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
-              style="width: 100%;"
+              style="width: 100%; background: var(--blue-40);"
             />
           </div>
           <div
@@ -160,7 +160,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
-              style="width: 33.33333333333333%;"
+              style="width: 33.33333333333333%; background: var(--category-color-lightblue);"
             />
           </div>
           <div
@@ -200,7 +200,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
-              style="width: 66.66666666666666%;"
+              style="width: 66.66666666666666%; background: var(--category-color-green);"
             />
           </div>
           <div
@@ -331,7 +331,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories when
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
-              style="width: 100%;"
+              style="width: 100%; background: var(--blue-40);"
             />
           </div>
           <div
@@ -371,7 +371,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories when
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
-              style="width: 100%;"
+              style="width: 100%; background: var(--category-color-lightblue);"
             />
           </div>
           <div
@@ -933,7 +933,7 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
-              style="width: 100%;"
+              style="width: 100%; background: var(--blue-40);"
             />
           </div>
           <div
@@ -946,7 +946,7 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
-              style="width: 100%;"
+              style="width: 100%; background: var(--blue-40);"
             />
           </div>
         </div>
@@ -978,7 +978,7 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
-              style="width: 100%;"
+              style="width: 100%; background: var(--category-color-green);"
             />
           </div>
           <div
@@ -991,7 +991,7 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
-              style="width: 100%;"
+              style="width: 100%; background: var(--category-color-green);"
             />
           </div>
         </div>
