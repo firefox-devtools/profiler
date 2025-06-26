@@ -795,15 +795,27 @@ function getDefaultSelectedThreadIndexes(
       })
     );
   }
-  const defaultThread = _findDefaultThread(
-    visibleThreadIndexes,
-    profile.threads,
-    threadActivityScores
-  );
-  const defaultThreadIndex = profile.threads.indexOf(defaultThread);
-  if (defaultThreadIndex === -1) {
+
+  const { threads } = profile;
+  if (threads.length === 0) {
     throw new Error('Expected to find a thread index to select.');
   }
+
+  const threadOrder = defaultThreadOrder(
+    visibleThreadIndexes,
+    threads,
+    threadActivityScores
+  );
+
+  // Try to find a tab process with the highest activity score. If it can't
+  // find one, select the first thread with the highest one.
+  const defaultThreadIndex =
+    threadOrder.find(
+      (threadIndex) =>
+        threads[threadIndex].name === 'GeckoMain' &&
+        threads[threadIndex].processType === 'tab'
+    ) ?? threadOrder[0];
+
   return new Set([defaultThreadIndex]);
 }
 
@@ -1318,34 +1330,6 @@ function _computeThreadSampleScore(
   ).length;
   const referenceCPUDeltaPerInterval = referenceCPUDeltaPerMs * meta.interval;
   return nonIdleSampleCount * referenceCPUDeltaPerInterval;
-}
-
-function _findDefaultThread(
-  visibleThreadIndexes: ThreadIndex[],
-  threads: RawThread[],
-  threadActivityScores: Array<ThreadActivityScore>
-): RawThread | null {
-  if (threads.length === 0) {
-    // Tests may have no threads.
-    return null;
-  }
-
-  const threadOrder = defaultThreadOrder(
-    visibleThreadIndexes,
-    threads,
-    threadActivityScores
-  );
-
-  // Try to find a tab process with the highest activity score. If it can't
-  // find one, select the first thread with the highest one.
-  const defaultThreadIndex =
-    threadOrder.find(
-      (threadIndex) =>
-        threads[threadIndex].name === 'GeckoMain' &&
-        threads[threadIndex].processType === 'tab'
-    ) ?? threadOrder[0];
-
-  return threads[defaultThreadIndex];
 }
 
 function _indexesAreValid(listLength: number, indexes: number[]) {
