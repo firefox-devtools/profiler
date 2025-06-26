@@ -20,7 +20,6 @@ import type {
 } from 'firefox-profiler/types';
 
 import {
-  defaultThreadOrder,
   getFriendlyThreadName,
   computeStackTableFromRawStackTable,
 } from './profile-data';
@@ -801,7 +800,7 @@ function getDefaultSelectedThreadIndexes(
     throw new Error('Expected to find a thread index to select.');
   }
 
-  const threadOrder = defaultThreadOrder(
+  const threadOrder = _defaultThreadOrder(
     visibleThreadIndexes,
     threads,
     threadActivityScores
@@ -817,6 +816,54 @@ function getDefaultSelectedThreadIndexes(
     ) ?? threadOrder[0];
 
   return new Set([defaultThreadIndex]);
+}
+
+function _defaultThreadOrder(
+  visibleThreadIndexes: ThreadIndex[],
+  threads: RawThread[],
+  threadActivityScores: Array<ThreadActivityScore>
+): ThreadIndex[] {
+  const threadOrder = [...visibleThreadIndexes];
+
+  // Note: to have a consistent behavior independant of the sorting algorithm,
+  // we need to be careful that the comparator function is consistent:
+  // comparator(a, b) === - comparator(b, a)
+  // and
+  // comparator(a, b) === 0   if and only if   a === b
+  threadOrder.sort((a, b) => {
+    const nameA = threads[a].name;
+    const nameB = threads[b].name;
+
+    if (nameA === nameB) {
+      return (
+        threadActivityScores[b].boostedSampleScore -
+        threadActivityScores[a].boostedSampleScore
+      );
+    }
+
+    // Put the compositor/renderer thread last.
+    // Compositor will always be before Renderer, if both are present.
+    if (nameA === 'Compositor') {
+      return 1;
+    }
+
+    if (nameB === 'Compositor') {
+      return -1;
+    }
+
+    if (nameA === 'Renderer') {
+      return 1;
+    }
+
+    if (nameB === 'Renderer') {
+      return -1;
+    }
+
+    // Otherwise keep the existing order. We don't return 0 to guarantee that
+    // the sort is stable even if the sort algorithm isn't.
+    return a - b;
+  });
+  return threadOrder;
 }
 
 // Returns either a configuration of hidden tracks that has at least one

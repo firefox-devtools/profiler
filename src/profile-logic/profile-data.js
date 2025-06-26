@@ -95,7 +95,6 @@ import type {
   TabID,
 } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
-import type { ThreadActivityScore } from './tracks';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -1285,54 +1284,6 @@ export function getTimeRangeIncludingAllThreads(
     completeRange.end = Math.max(completeRange.end, threadRange.end);
   });
   return completeRange;
-}
-
-export function defaultThreadOrder(
-  visibleThreadIndexes: ThreadIndex[],
-  threads: RawThread[],
-  threadActivityScores: Array<ThreadActivityScore>
-): ThreadIndex[] {
-  const threadOrder = [...visibleThreadIndexes];
-
-  // Note: to have a consistent behavior independant of the sorting algorithm,
-  // we need to be careful that the comparator function is consistent:
-  // comparator(a, b) === - comparator(b, a)
-  // and
-  // comparator(a, b) === 0   if and only if   a === b
-  threadOrder.sort((a, b) => {
-    const nameA = threads[a].name;
-    const nameB = threads[b].name;
-
-    if (nameA === nameB) {
-      return (
-        threadActivityScores[b].boostedSampleScore -
-        threadActivityScores[a].boostedSampleScore
-      );
-    }
-
-    // Put the compositor/renderer thread last.
-    // Compositor will always be before Renderer, if both are present.
-    if (nameA === 'Compositor') {
-      return 1;
-    }
-
-    if (nameB === 'Compositor') {
-      return -1;
-    }
-
-    if (nameA === 'Renderer') {
-      return 1;
-    }
-
-    if (nameB === 'Renderer') {
-      return -1;
-    }
-
-    // Otherwise keep the existing order. We don't return 0 to guarantee that
-    // the sort is stable even if the sort algorithm isn't.
-    return a - b;
-  });
-  return threadOrder;
 }
 
 export function toValidImplementationFilter(
