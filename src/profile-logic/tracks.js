@@ -771,8 +771,11 @@ export function initializeSelectedThreadIndex(
   return visibleSelectedThreadIndexes;
 }
 
-// Select either the GeckoMain [tab] thread, or the first thread in the thread
-// order.
+// Select either the most active GeckoMain [tab] thread, or the most active
+// thread sorted by the thread activity scores.
+// It always selects global tracks when there is a GeckoMain [tab], but when
+// there is no GeckoMain [tab], it might select local tracks too depending
+// on the activity score.
 function getDefaultSelectedThreadIndexes(
   visibleThreadIndexes: ThreadIndex[],
   profile: Profile,
