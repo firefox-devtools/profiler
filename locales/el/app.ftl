@@ -758,7 +758,7 @@ StackSettings--invert-call-stack = Αναστροφή στοίβας κλήσε�
 StackSettings--show-user-timing = Εμφάνιση χρονισμού χρήστη
 StackSettings--panel-search =
     .label = Φιλτράρισμα στοιβών:
-    .title = Εμφάνιση μόνο στοιβών που περιέχουν συνάρτηση της οποίας το όνομα αντιστοιχεί σε αυτή την υποσυμβολοσειρά
+    .title = Εμφάνιση μόνο στοιβών που περιέχουν συνάρτηση της οποίας το όνομα αντιστοιχεί σε αυτήν την υποσυμβολοσειρά
 
 ## Tab Bar for the bottom half of the analysis UI.
 
