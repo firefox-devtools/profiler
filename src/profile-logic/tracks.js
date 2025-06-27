@@ -192,6 +192,8 @@ function _getDefaultGlobalTrackOrder(
 
     // This is the case where both of the tracks are processes. Let's sort them
     // by activity while keeping the parent process at the top.
+    // mainThreadIndex might be null in case the GeckoMain thread is not
+    // profiled in a profile.
     const activityA =
       trackA.mainThreadIndex !== null
         ? threadActivityScores[trackA.mainThreadIndex]
