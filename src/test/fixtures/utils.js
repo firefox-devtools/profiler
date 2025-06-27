@@ -73,24 +73,35 @@ type FakeMouseEventInit = $Shape<{
 }>;
 
 class FakeMouseEvent extends MouseEvent {
-  offsetX: number;
-  offsetY: number;
-  pageX: number;
-  pageY: number;
-  x: number;
-  y: number;
-
   constructor(type: string, values: FakeMouseEventInit) {
     const { pageX, pageY, offsetX, offsetY, x, y, ...mouseValues } = values;
     super(type, (mouseValues: any));
 
-    Object.assign(this, {
-      offsetX: offsetX || 0,
-      offsetY: offsetY || 0,
-      pageX: pageX || 0,
-      pageY: pageY || 0,
-      x: x || 0,
-      y: y || 0,
+    Object.defineProperties(this, {
+      offsetX: {
+        value: offsetX || 0,
+        writable: false,
+      },
+      offsetY: {
+        value: offsetY || 0,
+        writable: false,
+      },
+      pageX: {
+        value: pageX || 0,
+        writable: false,
+      },
+      pageY: {
+        value: pageY || 0,
+        writable: false,
+      },
+      x: {
+        value: x || 0,
+        writable: false,
+      },
+      y: {
+        value: y || 0,
+        writable: false,
+      },
     });
   }
 }
