@@ -48,6 +48,7 @@ import type {
 } from '../shared/chart/Canvas';
 
 import type {
+  StackTimingByDepth,
   StackTimingDepth,
   IndexIntoStackTiming,
 } from '../../profile-logic/stack-timing';
@@ -62,6 +63,7 @@ type OwnProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +combinedTimingRows: CombinedTimingRows,
+  +stackTimingRows: StackTimingByDepth,
   +stackFrameHeight: CssPixels,
   +updatePreviewSelection: WrapFunctionInDispatch<
     typeof updatePreviewSelection,
@@ -77,6 +79,7 @@ type OwnProps = {|
   +scrollToSelectionGeneration: number,
   +marginLeft: CssPixels,
   +displayStackType: boolean,
+  +stackChartSameWidths: boolean,
 |};
 
 type Props = $ReadOnly<{|
@@ -160,12 +163,14 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       rangeStart,
       rangeEnd,
       combinedTimingRows,
+      stackTimingRows,
       stackFrameHeight,
       selectedCallNodeIndex,
       categories,
       callNodeInfo,
       getMarker,
       marginLeft,
+      stackChartSameWidths,
       viewport: {
         containerWidth,
         containerHeight,
@@ -221,6 +226,10 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       viewportRight - viewportLeft;
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportRangeLength: Milliseconds = rangeLength * viewportLength;
+
+    const timingAtDepthZero = stackTimingRows[0];
+    const sameWidthsLength =
+      timingAtDepthZero.sameWidthsEnd[timingAtDepthZero.length - 1];
 
     const innerContainerWidth =
       containerWidth - marginLeft - TIMELINE_MARGIN_RIGHT;
@@ -295,9 +304,13 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
           // First compute the left and right sides of the box.
           const viewportAtStartTime: UnitIntervalOfProfileRange =
-            (stackTiming.start[i] - rangeStart) / rangeLength;
+            stackChartSameWidths && stackTiming.sameWidthsStart
+              ? stackTiming.sameWidthsStart[i] / sameWidthsLength
+              : (stackTiming.start[i] - rangeStart) / rangeLength;
           const viewportAtEndTime: UnitIntervalOfProfileRange =
-            (stackTiming.end[i] - rangeStart) / rangeLength;
+            stackChartSameWidths && stackTiming.sameWidthsEnd
+              ? stackTiming.sameWidthsEnd[i] / sameWidthsLength
+              : (stackTiming.end[i] - rangeStart) / rangeLength;
           const floatX = pixelAtViewportPosition(viewportAtStartTime);
           const floatW: DevicePixels =
             ((viewportAtEndTime - viewportAtStartTime) *
@@ -584,6 +597,31 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     }
 
     return null;
+  };
+
+  _hitTestForSameWidths = (
+    x: CssPixels,
+    y: CssPixels
+  ): HoveredStackTiming | null => {
+    const {
+      stackTimingRows,
+      combinedTimingRows,
+      viewport: { viewportLeft, viewportRight, viewportTop, containerWidth },
+    } = this.props;
+
+    const timingAtDepthZero = stackTimingRows[0];
+    const sameWidthsLength =
+      timingAtDepthZero.sameWidthsEnd[timingAtDepthZero.length - 1];
+
+    const depth = Math.floor((y + viewportTop) / ROW_CSS_PIXELS_HEIGHT);
+
+    const stackTiming = combinedTimingRows[depth];
+
+    if (!stackTiming) {
+      return null;
+    }
+
+    const stackTimingLength = stackTiming.length;
   };
 
   onMouseMove = (event: { nativeEvent: MouseEvent }) => {
