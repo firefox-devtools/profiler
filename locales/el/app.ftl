@@ -557,9 +557,9 @@ MenuButtons--metaInfo--abi = ABI:
 MenuButtons--metaInfo--visual-metrics = Οπτικές μετρήσεις
 MenuButtons--metaInfo--speed-index = Δείκτης ταχύτητας:
 # “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
-MenuButtons--metaInfo--perceptual-speed-index = Δείκτης "Perceptual Speed":
+MenuButtons--metaInfo--perceptual-speed-index = Δείκτης «Perceptual Speed»:
 # “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
-MenuButtons--metaInfo--contentful-speed-Index = Δείκτης "Contentful Speed":
+MenuButtons--metaInfo--contentful-speed-Index = Δείκτης «Contentful Speed»:
 MenuButtons--metaInfo-renderRowOfList-label-features = Λειτουργίες:
 MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Φίλτρο νημάτων:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Επεκτάσεις:
