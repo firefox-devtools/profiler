@@ -411,9 +411,9 @@ describe('actions/receive-profile', function () {
 
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
-        'show [thread Empty default] SELECTED',
         'show [thread Empty default]',
-        'show [thread Diff between 1 and 2 comparison]',
+        'show [thread Empty default]',
+        'show [thread Diff between 1 and 2 comparison] SELECTED',
       ]);
     });
 
@@ -514,9 +514,9 @@ describe('actions/receive-profile', function () {
 
         store.dispatch(viewProfile(profile));
         expect(getHumanReadableTracks(store.getState())).toEqual([
-          'show [thread Empty default] SELECTED',
           'show [thread Empty default]',
-          'show [thread Diff between 1 and 2 comparison]',
+          'show [thread Empty default]',
+          'show [thread Diff between 1 and 2 comparison] SELECTED',
         ]);
       });
     });
@@ -571,7 +571,7 @@ describe('actions/receive-profile', function () {
           '  - show [thread Thread with 140 CPU]',
           '  - show [thread Thread with 160 CPU]',
           '  - show [thread Thread with 180 CPU]',
-          '  - show [thread Thread with 190 CPU] SELECTED',
+          '  - show [thread Thread with 190 CPU]',
           '  - show [thread Thread with 220 CPU]',
           '  - show [thread Thread with 230 CPU]',
           '  - show [thread Thread with 270 CPU]',
@@ -579,7 +579,7 @@ describe('actions/receive-profile', function () {
           '  - show [thread Thread with 320 CPU]',
           '  - show [thread Thread with 330 CPU]',
           '  - show [thread Thread with 350 CPU]',
-          '  - show [thread Thread with 380 CPU]',
+          '  - show [thread Thread with 380 CPU] SELECTED',
         ]);
       });
 
@@ -634,7 +634,7 @@ describe('actions/receive-profile', function () {
           '  - show [thread Thread with 130 CPU]',
           '  - show [thread Thread with 140 CPU]',
           '  - show [thread Thread with 180 CPU]',
-          '  - show [thread Thread with 190 CPU] SELECTED',
+          '  - show [thread Thread with 190 CPU]',
           '  - show [thread Thread with 220 CPU]',
           '  - show [thread Thread with 230 CPU]',
           '  - show [thread Thread with 270 CPU]',
@@ -642,7 +642,7 @@ describe('actions/receive-profile', function () {
           '  - show [thread Thread with 320 CPU]',
           '  - show [thread Thread with 330 CPU]',
           '  - show [thread Thread with 350 CPU]',
-          '  - show [thread Thread with 380 CPU]',
+          '  - show [thread Thread with 380 CPU] SELECTED',
         ]);
       });
     });
@@ -1899,9 +1899,9 @@ describe('actions/receive-profile', function () {
 
       store.dispatch(viewProfile(resultProfile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
-        'show [thread Empty default] SELECTED',
         'show [thread Empty default]',
-        'show [thread Diff between 1 and 2 comparison]',
+        'show [thread Empty default]',
+        'show [thread Diff between 1 and 2 comparison] SELECTED',
       ]);
     });
 

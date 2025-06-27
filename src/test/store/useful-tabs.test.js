@@ -53,6 +53,12 @@ describe('getUsefulTabs', function () {
   it('shows only the call tree when a diffing track is selected', function () {
     const { profile } = getMergedProfileFromTextSamples(['A  B  C', 'A  B  B']);
     const { getState, dispatch } = storeWithProfile(profile);
+    dispatch({
+      type: 'SELECT_TRACK',
+      selectedThreadIndexes: new Set([0]),
+      selectedTab: 'calltree',
+      lastNonShiftClickInformation: null,
+    });
     expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
       'calltree',
       'flame-graph',

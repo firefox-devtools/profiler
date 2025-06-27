@@ -835,9 +835,11 @@ function _defaultThreadOrder(
     const nameB = threads[b].name;
 
     if (nameA === nameB) {
+      // Sort by the activity, but keep the original order if the activity
+      // scores are the equal.
       return (
         threadActivityScores[b].boostedSampleScore -
-        threadActivityScores[a].boostedSampleScore
+          threadActivityScores[a].boostedSampleScore || a - b
       );
     }
 
@@ -861,7 +863,10 @@ function _defaultThreadOrder(
 
     // Otherwise keep the existing order. We don't return 0 to guarantee that
     // the sort is stable even if the sort algorithm isn't.
-    return a - b;
+    return (
+      threadActivityScores[b].boostedSampleScore -
+        threadActivityScores[a].boostedSampleScore || a - b
+    );
   });
   return threadOrder;
 }
