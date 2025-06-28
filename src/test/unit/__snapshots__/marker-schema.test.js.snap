@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`marker schema formatting supports complex formats 1`] = `
 Array [
@@ -170,9 +170,7 @@ Array [
           <th>
             a
           </th>
-          <th>
-            
-          </th>
+          <th />
         </tr>
       </thead>
       <tbody>
@@ -213,9 +211,7 @@ Array [
           <th>
             a
           </th>
-          <th>
-            
-          </th>
+          <th />
         </tr>
       </thead>
       <tbody>

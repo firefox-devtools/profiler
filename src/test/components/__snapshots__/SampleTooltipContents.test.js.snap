@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`SampleTooltipContents renders the CPU usage only when outside of the activity graph is hovered 1`] = `
 <div

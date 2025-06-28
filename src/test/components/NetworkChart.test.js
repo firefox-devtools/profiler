@@ -455,7 +455,7 @@ describe('NetworkChartRowBar phase calculations', function () {
     const barStyles = getBarElementStyles();
     expect(barStyles).toHaveLength(2);
     expect(barStyles).toEqual([
-      'width: 40px; left: -18870px;',
+      'left: -18870px; width: 40px;',
       'width: 198px; left: 150px;',
     ]);
   });
@@ -485,7 +485,7 @@ describe('NetworkChartRowBar phase calculations', function () {
     const barStyles = getBarElementStyles();
     expect(barStyles).toHaveLength(2);
     expect(barStyles).toEqual([
-      'width: 40px; left: -18870px;',
+      'left: -18870px; width: 40px;',
       'width: 198px; left: 150px;',
     ]);
   });
