@@ -6,6 +6,8 @@
 
 import { fetchSource } from 'firefox-profiler/utils/fetch-source';
 
+import type { GlobalJSSourceId } from 'firefox-profiler/types';
+
 describe('fetchSource', function () {
   it('fetches single files', async function () {
     expect(
@@ -24,6 +26,11 @@ describe('fetchSource', function () {
           queryBrowserSymbolicationApi: async (
             _path: string,
             _requestJson: string
+          ) => {
+            throw new Error('No browser connection');
+          },
+          fetchJSSourceFromBrowser: async (
+            _globalSourceId: GlobalJSSourceId
           ) => {
             throw new Error('No browser connection');
           },
@@ -69,6 +76,11 @@ describe('fetchSource', function () {
     ) => {
       throw new Error('No browser connection');
     };
+    const fetchJSSourceFromBrowser = async (
+      _globalSourceId: GlobalJSSourceId
+    ) => {
+      throw new Error('No browser connection');
+    };
 
     const archiveCache = new Map();
 
@@ -78,7 +90,11 @@ describe('fetchSource', function () {
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
-        { fetchUrlResponse, queryBrowserSymbolicationApi },
+        {
+          fetchUrlResponse,
+          queryBrowserSymbolicationApi,
+          fetchJSSourceFromBrowser,
+        },
         null
       )
     ).toEqual({
@@ -97,7 +113,11 @@ describe('fetchSource', function () {
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
-        { fetchUrlResponse, queryBrowserSymbolicationApi },
+        {
+          fetchUrlResponse,
+          queryBrowserSymbolicationApi,
+          fetchJSSourceFromBrowser,
+        },
         null
       )
     ).toEqual({
@@ -114,7 +134,11 @@ describe('fetchSource', function () {
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
-        { fetchUrlResponse, queryBrowserSymbolicationApi },
+        {
+          fetchUrlResponse,
+          queryBrowserSymbolicationApi,
+          fetchJSSourceFromBrowser,
+        },
         null
       )
     ).toEqual({
@@ -147,6 +171,11 @@ describe('fetchSource', function () {
             _requestJson: string
           ) => {
             // Shouldn't be called anyway because we're not providing an AddressProof.
+            throw new Error('No browser connection');
+          },
+          fetchJSSourceFromBrowser: async (
+            _globalSourceId: GlobalJSSourceId
+          ) => {
             throw new Error('No browser connection');
           },
         },
@@ -192,6 +221,11 @@ describe('fetchSource', function () {
               file: '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs',
               source: `Fake source from browser symbolication API, for request JSON ${requestJson}`,
             });
+          },
+          fetchJSSourceFromBrowser: async (
+            _globalSourceId: GlobalJSSourceId
+          ) => {
+            throw new Error('No browser connection');
           },
         },
         null
@@ -241,6 +275,11 @@ describe('fetchSource', function () {
           queryBrowserSymbolicationApi: async (
             _path: string,
             _requestJson: string
+          ) => {
+            throw new Error('No browser connection');
+          },
+          fetchJSSourceFromBrowser: async (
+            _globalSourceId: GlobalJSSourceId
           ) => {
             throw new Error('No browser connection');
           },
@@ -295,6 +334,11 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
+          fetchJSSourceFromBrowser: async (
+            _globalSourceId: GlobalJSSourceId
+          ) => {
+            throw new Error('No browser connection');
+          },
         },
         null
       )
@@ -344,6 +388,11 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
+          fetchJSSourceFromBrowser: async (
+            _globalSourceId: GlobalJSSourceId
+          ) => {
+            throw new Error('No browser connection');
+          },
         },
         null
       )
@@ -372,6 +421,11 @@ describe('fetchSource', function () {
           queryBrowserSymbolicationApi: async (
             _path: string,
             _requestJson: string
+          ) => {
+            throw new Error('No browser connection');
+          },
+          fetchJSSourceFromBrowser: async (
+            _globalSourceId: GlobalJSSourceId
           ) => {
             throw new Error('No browser connection');
           },
@@ -416,6 +470,11 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
+          fetchJSSourceFromBrowser: async (
+            _globalSourceId: GlobalJSSourceId
+          ) => {
+            throw new Error('No browser connection');
+          },
         },
         null
       )
@@ -448,6 +507,11 @@ describe('fetchSource', function () {
               throw new Error(`Unrecognized API path ${path}`);
             }
             return '[Invalid \\ JSON}';
+          },
+          fetchJSSourceFromBrowser: async (
+            _globalSourceId: GlobalJSSourceId
+          ) => {
+            throw new Error('No browser connection');
           },
         },
         null
@@ -494,6 +558,11 @@ describe('fetchSource', function () {
               file: '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs',
               hahaYouThoughtThereWouldBeSourceHereButNo: 42,
             });
+          },
+          fetchJSSourceFromBrowser: async (
+            _globalSourceId: GlobalJSSourceId
+          ) => {
+            throw new Error('No browser connection');
           },
         },
         null

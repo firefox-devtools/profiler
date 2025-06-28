@@ -4,7 +4,7 @@
 
 // @flow
 
-import type { ApiQueryError } from 'firefox-profiler/types';
+import type { ApiQueryError, GlobalJSSourceId } from 'firefox-profiler/types';
 import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 
 /**
@@ -25,6 +25,8 @@ export interface ExternalCommunicationDelegate {
     path: string,
     requestJson: string
   ): Promise<string>;
+
+  fetchJSSourceFromBrowser(source: GlobalJSSourceId): Promise<string | null>;
 }
 
 export type ApiQueryResult<T> =
@@ -161,5 +163,14 @@ export class RegularExternalCommunicationDelegate
     }
     this._callbacks.onBeginBrowserConnectionQuery();
     return browserConnection.querySymbolicationApi(path, requestJson);
+  }
+
+  fetchJSSourceFromBrowser(source: GlobalJSSourceId): Promise<string | null> {
+    const browserConnection = this._browserConnection;
+    if (browserConnection === null) {
+      throw new Error('No connection to the browser.');
+    }
+    this._callbacks.onBeginBrowserConnectionQuery();
+    return browserConnection.getJSSource(source);
   }
 }

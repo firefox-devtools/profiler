@@ -171,7 +171,29 @@ export async function fetchSource(
     }
 
     case 'JS_SOURCE_VIA_WEBCHANNEL': {
-      // TODO: Fetch the JS source using webchannel.
+      const { globalJSSourceId } = downloadRecipe;
+
+      try {
+        const response =
+          await delegate.fetchJSSourceFromBrowser(globalJSSourceId);
+        if (response) {
+          return {
+            type: 'SUCCESS',
+            source: response,
+          };
+        }
+
+        errors.push({
+          type: 'NOT_PRESENT_IN_BROWSER',
+          globalJSSourceId,
+          url: file,
+        });
+      } catch (e) {
+        errors.push({
+          type: 'BROWSER_API_ERROR',
+          apiErrorMessage: e.message,
+        });
+      }
       break;
     }
 
