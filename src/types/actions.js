@@ -24,6 +24,7 @@ import type {
   MarkerIndex,
   ThreadsKey,
   NativeSymbolInfo,
+  GlobalJSSourceId,
 } from './profile-derived';
 import type { FuncToFuncsMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
@@ -343,6 +344,7 @@ type ProfileAction =
   | {|
       +type: 'UPDATE_BOTTOM_BOX',
       +libIndex: IndexIntoLibs | null,
+      +globalJSSourceId: GlobalJSSourceId | null,
       +sourceFile: string | null,
       +nativeSymbol: NativeSymbolInfo | null,
       +allNativeSymbolsForInitiatingCallNode: NativeSymbolInfo[],

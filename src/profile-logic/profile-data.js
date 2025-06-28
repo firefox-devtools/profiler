@@ -3981,6 +3981,15 @@ export function getBottomBoxInfoForCallNode(
     resource !== -1 && resourceTable.type[resource] === resourceTypes.library
       ? resourceTable.lib[resource]
       : null;
+  let globalJSSourceId = null;
+  if (resource !== -1 && resourceTable.sourceId[resource] !== null) {
+    // Combine thread PID with source ID to create a globally unique identifier
+    // since source IDs are only unique within a single process/thread
+    globalJSSourceId = {
+      pid: thread.pid,
+      sourceId: resourceTable.sourceId[resource],
+    };
+  }
   const nativeSymbolsForCallNode = getNativeSymbolsForCallNode(
     callNodeIndex,
     callNodeInfo,
@@ -3999,6 +4008,7 @@ export function getBottomBoxInfoForCallNode(
 
   return {
     libIndex,
+    globalJSSourceId,
     sourceFile,
     nativeSymbols: nativeSymbolInfosForCallNode,
   };

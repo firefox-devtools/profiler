@@ -760,6 +760,7 @@ export type NativeSymbolInfo = {|
  */
 export type BottomBoxInfo = {|
   libIndex: IndexIntoLibs | null,
+  globalJSSourceId: GlobalJSSourceId | null,
   sourceFile: string | null,
   nativeSymbols: NativeSymbolInfo[],
 |};
@@ -770,4 +771,17 @@ export type BottomBoxInfo = {|
 export type FaviconData = {|
   +data: ArrayBuffer,
   +mimeType: string,
+|};
+
+/**
+ * This is an identifier for each JS source, so we can fetch it from the
+ * browser.
+ *
+ * sourceId is unique per-process. So it's not a suitable identifier inside a
+ * multi-process profile. That's why we include the pid to make sure that we
+ * get the correct source that belongs to that process.
+ */
+export type GlobalJSSourceId = {|
+  pid: Pid,
+  sourceId: number,
 |};
