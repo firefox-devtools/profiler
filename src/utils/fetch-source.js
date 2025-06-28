@@ -17,6 +17,7 @@ import type { ExternalCommunicationDelegate } from './query-api';
 import type {
   SourceCodeLoadingError,
   AddressProof,
+  GlobalJSSourceId,
 } from 'firefox-profiler/types';
 
 export type FetchSourceResult =
@@ -42,7 +43,8 @@ export async function fetchSource(
   symbolServerUrl: string,
   addressProof: AddressProof | null,
   archiveCache: Map<string, Promise<Uint8Array>>,
-  delegate: ExternalCommunicationDelegate
+  delegate: ExternalCommunicationDelegate,
+  globalJSSourceId: GlobalJSSourceId | null
 ): Promise<FetchSourceResult> {
   const errors: SourceCodeLoadingError[] = [];
 
