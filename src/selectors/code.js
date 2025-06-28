@@ -27,7 +27,9 @@ export const getSourceViewCode: Selector<SourceCodeStatus | void> =
     getSourceViewFile,
     getSourceViewSourceId,
     (sourceCodeCache, file, sourceId) =>
-      file ? sourceCodeCache.get(`${file}-${sourceId ?? ''}`) : undefined
+      file
+        ? sourceCodeCache.get(`${file}${sourceId ? '-' + sourceId : ''}`)
+        : undefined
   );
 
 export const getAssemblyCodeCache: Selector<Map<string, AssemblyCodeStatus>> = (

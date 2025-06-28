@@ -87,7 +87,7 @@ class SourceCodeFetcherImpl extends React.PureComponent<Props> {
           beginLoadingSourceCodeFromUrl(file, url);
         },
         onBeginBrowserConnectionQuery: () => {
-          beginLoadingSourceCodeFromBrowserConnection(file);
+          beginLoadingSourceCodeFromBrowserConnection(file, sourceViewSourceId);
         },
       }
     );
@@ -103,10 +103,18 @@ class SourceCodeFetcherImpl extends React.PureComponent<Props> {
 
     switch (fetchSourceResult.type) {
       case 'SUCCESS':
-        finishLoadingSourceCode(file, fetchSourceResult.source);
+        finishLoadingSourceCode(
+          file,
+          sourceViewSourceId,
+          fetchSourceResult.source
+        );
         break;
       case 'ERROR':
-        failLoadingSourceCode(file, fetchSourceResult.errors);
+        failLoadingSourceCode(
+          file,
+          sourceViewSourceId,
+          fetchSourceResult.errors
+        );
         break;
       default:
         throw assertExhaustiveCheck(fetchSourceResult.type);
