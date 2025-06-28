@@ -29,6 +29,12 @@ describe('queryApiWithFallback', function () {
             throw new Error('Not implemented');
           })
       ),
+      fetchJSSourceFromBrowser: jest.fn(
+        overrides.fetchJSSourceFromBrowser ??
+          (async () => {
+            throw new Error('Not implemented');
+          })
+      ),
     };
   }
 

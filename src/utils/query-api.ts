@@ -23,6 +23,8 @@ export interface ExternalCommunicationDelegate {
     path: string,
     requestJson: string
   ): Promise<string>;
+
+  fetchJSSourceFromBrowser(source: string): Promise<string | null>;
 }
 
 export type ApiQueryResult<T> =
@@ -159,5 +161,14 @@ export class RegularExternalCommunicationDelegate
     }
     this._callbacks.onBeginBrowserConnectionQuery();
     return browserConnection.querySymbolicationApi(path, requestJson);
+  }
+
+  fetchJSSourceFromBrowser(source: string): Promise<string | null> {
+    const browserConnection = this._browserConnection;
+    if (browserConnection === null) {
+      throw new Error('No connection to the browser.');
+    }
+    this._callbacks.onBeginBrowserConnectionQuery();
+    return browserConnection.getJSSource(source);
   }
 }
