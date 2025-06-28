@@ -6,7 +6,7 @@
 
 import { assertExhaustiveCheck } from './flow';
 import {
-  getDownloadRecipeForSourceFile,
+  getDownloadRecipeForSourceFileAndId,
   parseFileNameFromSymbolication,
 } from './special-paths';
 import { isGzip, decompress } from './gz';
@@ -92,7 +92,10 @@ export async function fetchSource(
   // Try to obtain the source by downloading a file from the web.
 
   const parsedName = parseFileNameFromSymbolication(file);
-  const downloadRecipe = getDownloadRecipeForSourceFile(parsedName);
+  const downloadRecipe = getDownloadRecipeForSourceFileAndId(
+    parsedName,
+    globalJSSourceId
+  );
 
   switch (downloadRecipe.type) {
     case 'CORS_ENABLED_SINGLE_FILE': {
@@ -164,6 +167,11 @@ export async function fetchSource(
           parsingErrorMessage: e.toString(),
         });
       }
+      break;
+    }
+
+    case 'JS_SOURCE_VIA_WEBCHANNEL': {
+      // TODO: Fetch the JS source using webchannel.
       break;
     }
 
