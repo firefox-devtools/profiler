@@ -170,7 +170,26 @@ export async function fetchSource(
     }
 
     case 'JS_SOURCE_VIA_WEBCHANNEL': {
-      // TODO: Fetch the JS source using webchannel.
+      if (sourceId === null) {
+        throw new Error('Failed to find sourceId');
+      }
+
+      try {
+        const response = await delegate.fetchJSSourceFromBrowser(sourceId);
+        if (response) {
+          return {
+            type: 'SUCCESS',
+            source: response,
+          };
+        }
+
+        errors.push({ type: 'NOT_PRESENT_IN_BROWSER', sourceId, url: file });
+      } catch (e) {
+        errors.push({
+          type: 'BROWSER_API_ERROR',
+          apiErrorMessage: e.message,
+        });
+      }
       break;
     }
 
