@@ -191,3 +191,19 @@ function convertResponseJsonToSourceCode(responseJson: MixedObject): string {
 function _serverMightSupportSource(symbolServerUrl: string): boolean {
   return isLocalURL(symbolServerUrl);
 }
+
+/**
+ * Generate a cache key for source code caching.
+ *
+ * When globalJSSourceId is provided, it creates a unique cache key that includes
+ * the file path, process ID, and source ID to distinguish between different
+ * sources of the same file across processes.
+ */
+export function getSourceCodeCacheKey(
+  file: string,
+  globalJSSourceId: GlobalJSSourceId | null
+): string {
+  return globalJSSourceId
+    ? `${file}-${globalJSSourceId.pid}-${globalJSSourceId.sourceId}`
+    : file;
+}
