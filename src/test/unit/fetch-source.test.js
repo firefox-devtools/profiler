@@ -27,7 +27,8 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
-        }
+        },
+        null
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -77,7 +78,8 @@ describe('fetchSource', function () {
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
-        { fetchUrlResponse, queryBrowserSymbolicationApi }
+        { fetchUrlResponse, queryBrowserSymbolicationApi },
+        null
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -95,7 +97,8 @@ describe('fetchSource', function () {
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
-        { fetchUrlResponse, queryBrowserSymbolicationApi }
+        { fetchUrlResponse, queryBrowserSymbolicationApi },
+        null
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -111,7 +114,8 @@ describe('fetchSource', function () {
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
-        { fetchUrlResponse, queryBrowserSymbolicationApi }
+        { fetchUrlResponse, queryBrowserSymbolicationApi },
+        null
       )
     ).toEqual({
       type: 'ERROR',
@@ -145,7 +149,8 @@ describe('fetchSource', function () {
             // Shouldn't be called anyway because we're not providing an AddressProof.
             throw new Error('No browser connection');
           },
-        }
+        },
+        null
       )
     ).toEqual({
       type: 'ERROR',
@@ -188,7 +193,8 @@ describe('fetchSource', function () {
               source: `Fake source from browser symbolication API, for request JSON ${requestJson}`,
             });
           },
-        }
+        },
+        null
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -238,7 +244,8 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
-        }
+        },
+        null
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -288,7 +295,8 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
-        }
+        },
+        null
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -336,7 +344,8 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
-        }
+        },
+        null
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -366,7 +375,8 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
-        }
+        },
+        null
       )
     ).toEqual({
       type: 'ERROR',
@@ -406,7 +416,8 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
-        }
+        },
+        null
       )
     ).toEqual({
       type: 'ERROR',
@@ -438,7 +449,8 @@ describe('fetchSource', function () {
             }
             return '[Invalid \\ JSON}';
           },
-        }
+        },
+        null
       )
     ).toEqual({
       type: 'ERROR',
@@ -483,7 +495,8 @@ describe('fetchSource', function () {
               hahaYouThoughtThereWouldBeSourceHereButNo: 42,
             });
           },
-        }
+        },
+        null
       )
     ).toEqual({
       type: 'ERROR',

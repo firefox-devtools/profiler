@@ -42,7 +42,8 @@ export async function fetchSource(
   symbolServerUrl: string,
   addressProof: AddressProof | null,
   archiveCache: Map<string, Promise<Uint8Array>>,
-  delegate: ExternalCommunicationDelegate
+  delegate: ExternalCommunicationDelegate,
+  sourceId: number | null
 ): Promise<FetchSourceResult> {
   const errors: SourceCodeLoadingError[] = [];
 

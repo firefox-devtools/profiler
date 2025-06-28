@@ -10,6 +10,7 @@ import {
   getSourceViewCode,
   getBrowserConnection,
   getSourceViewFile,
+  getSourceViewSourceId,
   getSymbolServerUrl,
 } from 'firefox-profiler/selectors';
 import {
@@ -30,6 +31,7 @@ import type { SourceCodeStatus, Profile } from 'firefox-profiler/types';
 
 type StateProps = {|
   +sourceViewFile: string | null,
+  +sourceViewSourceId: number | null,
   +sourceViewCode: SourceCodeStatus | void,
   +symbolServerUrl: string,
   +profile: Profile | null,
@@ -72,6 +74,7 @@ class SourceCodeFetcherImpl extends React.PureComponent<Props> {
       symbolServerUrl,
       profile,
       browserConnection,
+      sourceViewSourceId,
     } = this.props;
 
     const addressProof =
@@ -94,7 +97,8 @@ class SourceCodeFetcherImpl extends React.PureComponent<Props> {
       symbolServerUrl,
       addressProof,
       this._archiveCache,
-      delegate
+      delegate,
+      sourceViewSourceId
     );
 
     switch (fetchSourceResult.type) {
@@ -121,6 +125,7 @@ export const SourceCodeFetcher = explicitConnect<
 >({
   mapStateToProps: (state) => ({
     sourceViewFile: getSourceViewFile(state),
+    sourceViewSourceId: getSourceViewSourceId(state),
     sourceViewCode: getSourceViewCode(state),
     symbolServerUrl: getSymbolServerUrl(state),
     profile: getProfileOrNull(state),
