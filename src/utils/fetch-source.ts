@@ -39,7 +39,7 @@ export type FetchSourceResult =
  */
 export async function fetchSource(
   file: string,
-  _sourceUuid: string | null,
+  sourceUuid: string | null,
   symbolServerUrl: string,
   addressProof: AddressProof | null,
   archiveCache: Map<string, Promise<Uint8Array>>,
@@ -85,6 +85,31 @@ export async function fetchSource(
       }
       default:
         throw assertExhaustiveCheck(queryResult);
+    }
+  }
+
+  // Try to obtain the source by downloading a file from the browser if it's a
+  // JS source.
+  if (sourceUuid !== null) {
+    try {
+      const response = await delegate.fetchJSSourceFromBrowser(sourceUuid);
+      if (response) {
+        return {
+          type: 'SUCCESS',
+          source: response,
+        };
+      }
+
+      errors.push({
+        type: 'NOT_PRESENT_IN_BROWSER',
+        sourceUuid,
+        url: file,
+      });
+    } catch (e) {
+      errors.push({
+        type: 'BROWSER_API_ERROR',
+        apiErrorMessage: e.message,
+      });
     }
   }
 

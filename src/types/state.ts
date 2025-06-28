@@ -330,6 +330,11 @@ export type SourceCodeLoadingError =
       type: 'ARCHIVE_PARSING_ERROR';
       url: string;
       parsingErrorMessage: string;
+    }
+  | {
+      type: 'NOT_PRESENT_IN_BROWSER';
+      sourceUuid: string;
+      url: string;
     };
 
 export type ProfileSpecificUrlState = {

@@ -26,6 +26,9 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -67,6 +70,9 @@ describe('fetchSource', function () {
     ) => {
       throw new Error('No browser connection');
     };
+    const fetchJSSourceFromBrowser = async (_sourceUuid: string) => {
+      throw new Error('No browser connection');
+    };
 
     const archiveCache = new Map<string, Promise<Uint8Array>>();
 
@@ -77,7 +83,11 @@ describe('fetchSource', function () {
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
-        { fetchUrlResponse, queryBrowserSymbolicationApi }
+        {
+          fetchUrlResponse,
+          queryBrowserSymbolicationApi,
+          fetchJSSourceFromBrowser,
+        }
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -96,7 +106,11 @@ describe('fetchSource', function () {
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
-        { fetchUrlResponse, queryBrowserSymbolicationApi }
+        {
+          fetchUrlResponse,
+          queryBrowserSymbolicationApi,
+          fetchJSSourceFromBrowser,
+        }
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -113,7 +127,11 @@ describe('fetchSource', function () {
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
-        { fetchUrlResponse, queryBrowserSymbolicationApi }
+        {
+          fetchUrlResponse,
+          queryBrowserSymbolicationApi,
+          fetchJSSourceFromBrowser,
+        }
       )
     ).toEqual({
       type: 'ERROR',
@@ -146,6 +164,9 @@ describe('fetchSource', function () {
             _requestJson: string
           ) => {
             // Shouldn't be called anyway because we're not providing an AddressProof.
+            throw new Error('No browser connection');
+          },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
             throw new Error('No browser connection');
           },
         }
@@ -191,6 +212,9 @@ describe('fetchSource', function () {
               file: '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs',
               source: `Fake source from browser symbolication API, for request JSON ${requestJson}`,
             });
+          },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
+            throw new Error('No browser connection');
           },
         }
       )
@@ -241,6 +265,9 @@ describe('fetchSource', function () {
             _path: string,
             _requestJson: string
           ) => {
+            throw new Error('No browser connection');
+          },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
             throw new Error('No browser connection');
           },
         }
@@ -294,6 +321,9 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -343,6 +373,9 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -372,6 +405,9 @@ describe('fetchSource', function () {
             _path: string,
             _requestJson: string
           ) => {
+            throw new Error('No browser connection');
+          },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
             throw new Error('No browser connection');
           },
         }
@@ -415,6 +451,9 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -447,6 +486,9 @@ describe('fetchSource', function () {
               throw new Error(`Unrecognized API path ${path}`);
             }
             return '[Invalid \\ JSON}';
+          },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
+            throw new Error('No browser connection');
           },
         }
       )
@@ -493,6 +535,9 @@ describe('fetchSource', function () {
               file: '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs',
               hahaYouThoughtThereWouldBeSourceHereButNo: 42,
             });
+          },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
+            throw new Error('No browser connection');
           },
         }
       )
