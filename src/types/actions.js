@@ -344,6 +344,7 @@ type ProfileAction =
   | {|
       +type: 'UPDATE_BOTTOM_BOX',
       +libIndex: IndexIntoLibs | null,
+      +sourceId: number | null,
       +sourceFile: string | null,
       +nativeSymbol: NativeSymbolInfo | null,
       +allNativeSymbolsForInitiatingCallNode: NativeSymbolInfo[],

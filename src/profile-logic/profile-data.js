@@ -3922,6 +3922,7 @@ export function getBottomBoxInfoForCallNode(
     resource !== -1 && resourceTable.type[resource] === resourceTypes.library
       ? resourceTable.lib[resource]
       : null;
+  const sourceId = resource !== -1 ? resourceTable.sourceId[resource] : null;
   const nativeSymbolsForCallNode = getNativeSymbolsForCallNode(
     callNodeIndex,
     callNodeInfo,
@@ -3940,6 +3941,7 @@ export function getBottomBoxInfoForCallNode(
 
   return {
     libIndex,
+    sourceId,
     sourceFile,
     nativeSymbols: nativeSymbolInfosForCallNode,
   };

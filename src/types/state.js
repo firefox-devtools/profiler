@@ -230,6 +230,11 @@ export type SourceViewState = {|
   // for example if the source view was opened via the URL (the source URL param
   // currently discards the libIndex).
   libIndex: IndexIntoLibs | null,
+  // Non-null if this source file was opened for a function from JS code.
+  // In theory, multiple different sourceIds can have source files with the same
+  // path but different content.
+  // Null if the source file is not from JS code.
+  sourceId: number | null,
   // The path to the source file. Null if a function without a file path was
   // double clicked.
   sourceFile: string | null,
