@@ -128,7 +128,7 @@ CallNodeContextMenu--show-the-function-in-devtools = Εμφάνιση της σ�
 
 CallTree--tracing-ms-total = Χρόνος εκτέλεσης (ms)
     .title =
-        Ο “συνολικός” χρόνος εκτέλεσης περιλαμβάνει μια περίληψη όλου του χρόνου όπου
+        Ο «συνολικός» χρόνος εκτέλεσης περιλαμβάνει μια περίληψη όλου του χρόνου όπου
         παρατηρήθηκε αυτή η συνάρτηση σε στοίβα. Περιέχει τον χρόνο πραγματικής
         εκτέλεσης της συνάρτησης και τον χρόνο που χρησιμοποιήθηκε στους καλούντες από
         αυτή τη συνάρτηση.
@@ -785,12 +785,12 @@ TrackContextMenu--only-show-this-process = Εμφάνιση μόνο αυτής 
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
-TrackContextMenu--only-show-track = Εμφάνιση μόνο του “{ $trackName }”
+TrackContextMenu--only-show-track = Εμφάνιση μόνο του «{ $trackName }»
 TrackContextMenu--hide-other-screenshots-tracks = Απόκρυψη άλλων κομματιών του Screenshots
 # This is used as the context menu item to hide the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
-TrackContextMenu--hide-track = Απόκρυψη του “{ $trackName }”
+TrackContextMenu--hide-track = Απόκρυψη του «{ $trackName }»
 TrackContextMenu--show-all-tracks = Εμφάνιση όλων των κομματιών
 TrackContextMenu--show-local-tracks-in-process = Εμφάνιση όλων των κομματιών σε αυτήν τη διεργασία
 # This is used as the context menu item to hide all tracks of the selected track's type.
@@ -982,7 +982,7 @@ TrackSearchField--search-input =
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the current thread. E.g.: Web Content.
-TransformNavigator--complete = Ολοκλήρωση “{ $item }”
+TransformNavigator--complete = Ολοκληρωμένο «{ $item }»
 # "Collapse resource" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
