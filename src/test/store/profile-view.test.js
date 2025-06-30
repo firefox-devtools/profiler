@@ -534,6 +534,10 @@ describe('actions/ProfileView', function () {
 
     describe('with a comparison profile', function () {
       it('selects the calltree tab when selecting the diffing track', function () {
+        const firstTrackReference = {
+          type: 'global',
+          trackIndex: 0,
+        };
         const diffingTrackReference = {
           type: 'global',
           trackIndex: 2,
@@ -545,6 +549,7 @@ describe('actions/ProfileView', function () {
         ]);
         const { getState, dispatch } = storeWithProfile(profile);
 
+        dispatch(ProfileView.selectTrackWithModifiers(firstTrackReference));
         dispatch(App.changeSelectedTab('flame-graph'));
         expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
           new Set([0])
