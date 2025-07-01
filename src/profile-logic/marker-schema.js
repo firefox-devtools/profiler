@@ -77,6 +77,13 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
         searchable: true,
         hidden: true,
       },
+      {
+        format: 'integer',
+        key: 'responseStatus',
+        label: 'Response Status',
+        searchable: true,
+        hidden: true,
+      },
     ],
   },
 ];
