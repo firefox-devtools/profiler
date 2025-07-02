@@ -484,7 +484,7 @@ describe('app/MenuButtons', function () {
        * code, and this triggers
        * https://github.com/testing-library/jest-dom/issues/306 */
       /* eslint-disable-next-line jest-dom/prefer-to-have-text-content */
-      expect(renderedCapacity.textContent).toBe('1GB');
+      expect(renderedCapacity.textContent).toBe('1 GiB');
       expect(getMetaInfoPanel()).toMatchSnapshot();
     });
 
