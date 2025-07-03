@@ -1242,6 +1242,14 @@ SourceView--not-in-archive-error-when-obtaining-source =
 SourceView--archive-parsing-error-when-obtaining-source =
     The archive at { $url } could not be parsed: { $parsingErrorMessage }
 
+# Displayed below SourceView--cannot-obtain-source, if a JS file could not be found in
+# the browser.
+# Variables:
+#   $url (String) - The URL of the JS source file.
+#   $sourceId (number) - The ID of the JS source file.
+SourceView--not-in-browser-error-when-obtaining-source =
+    The JS file { $url } with sourceId { $sourceId } was not found in the browser.
+
 ## Toggle buttons in the top right corner of the bottom box
 
 # The toggle button for the assembly view, while the assembly view is hidden.

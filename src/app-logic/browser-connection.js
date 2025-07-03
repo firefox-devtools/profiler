@@ -13,6 +13,7 @@ import {
   querySymbolicationApiViaWebChannel,
   getPageFaviconsViaWebChannel,
   showFunctionInDevtoolsViaWebChannel,
+  getJSSourcesViaWebChannel,
 } from './web-channel';
 import type { Milliseconds, FaviconData } from 'firefox-profiler/types';
 
@@ -79,6 +80,8 @@ export interface BrowserConnection {
     line: number | null,
     column: number | null
   ): Promise<void>;
+
+  getJSSource(sourceId: number): Promise<string | null>;
 }
 
 /**
@@ -94,6 +97,7 @@ class BrowserConnectionImpl implements BrowserConnection {
   _webChannelSupportsGetExternalMarkers: boolean;
   _webChannelSupportsGetPageFavicons: boolean;
   _webChannelSupportsOpenDebuggerInTab: boolean;
+  _webChannelSupportsGetJSSource: boolean;
   _geckoProfiler: $GeckoProfiler | void;
 
   constructor(webChannelVersion: number) {
@@ -102,6 +106,7 @@ class BrowserConnectionImpl implements BrowserConnection {
     this._webChannelSupportsGetExternalMarkers = webChannelVersion >= 3;
     this._webChannelSupportsGetPageFavicons = webChannelVersion >= 4;
     this._webChannelSupportsOpenDebuggerInTab = webChannelVersion >= 5;
+    this._webChannelSupportsGetJSSource = webChannelVersion >= 6;
   }
 
   // Only called when we must obtain the profile from the browser, i.e. if we
@@ -221,6 +226,19 @@ class BrowserConnectionImpl implements BrowserConnection {
     }
 
     return [];
+  }
+
+  async getJSSource(sourceId: number): Promise<string | null> {
+    if (!this._webChannelSupportsGetJSSource) {
+      throw new Error(
+        "Can't use getJSSource in Firefox versions with the old WebChannel."
+      );
+    }
+
+    // Even though the WebChannel request for fetching JS sources supports
+    // fetching multiple sources, we only fetch one at a time currently.
+    // TODO: Change this to fetch multiple JS sources at the load time.
+    return getJSSourcesViaWebChannel([sourceId]).then((sources) => sources[0]);
   }
 }
 

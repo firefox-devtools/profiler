@@ -6,6 +6,10 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 57
+
+A new `sourceId` column added to `thread.resourceTable`. This is an identifier for the JS sources to be used for source fetching later.
+
 ### Version 56
 
 The `stringArray` is now shared across threads. The shared array is stored at `profile.shared.stringArray`.

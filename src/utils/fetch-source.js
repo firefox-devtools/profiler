@@ -6,7 +6,7 @@
 
 import { assertExhaustiveCheck } from './flow';
 import {
-  getDownloadRecipeForSourceFile,
+  getDownloadRecipeForSourceFileAndId,
   parseFileNameFromSymbolication,
 } from './special-paths';
 import { isGzip, decompress } from './gz';
@@ -42,7 +42,8 @@ export async function fetchSource(
   symbolServerUrl: string,
   addressProof: AddressProof | null,
   archiveCache: Map<string, Promise<Uint8Array>>,
-  delegate: ExternalCommunicationDelegate
+  delegate: ExternalCommunicationDelegate,
+  sourceId: number | null
 ): Promise<FetchSourceResult> {
   const errors: SourceCodeLoadingError[] = [];
 
@@ -90,7 +91,10 @@ export async function fetchSource(
   // Try to obtain the source by downloading a file from the web.
 
   const parsedName = parseFileNameFromSymbolication(file);
-  const downloadRecipe = getDownloadRecipeForSourceFile(parsedName);
+  const downloadRecipe = getDownloadRecipeForSourceFileAndId(
+    parsedName,
+    sourceId
+  );
 
   switch (downloadRecipe.type) {
     case 'CORS_ENABLED_SINGLE_FILE': {
@@ -160,6 +164,30 @@ export async function fetchSource(
           type: 'ARCHIVE_PARSING_ERROR',
           url,
           parsingErrorMessage: e.toString(),
+        });
+      }
+      break;
+    }
+
+    case 'JS_SOURCE_VIA_WEBCHANNEL': {
+      if (sourceId === null) {
+        throw new Error('Failed to find sourceId');
+      }
+
+      try {
+        const response = await delegate.fetchJSSourceFromBrowser(sourceId);
+        if (response) {
+          return {
+            type: 'SUCCESS',
+            source: response,
+          };
+        }
+
+        errors.push({ type: 'NOT_PRESENT_IN_BROWSER', sourceId, url: file });
+      } catch (e) {
+        errors.push({
+          type: 'BROWSER_API_ERROR',
+          apiErrorMessage: e.message,
         });
       }
       break;

@@ -18,20 +18,30 @@ export function beginLoadingSourceCodeFromUrl(
 }
 
 export function beginLoadingSourceCodeFromBrowserConnection(
-  file: string
+  file: string,
+  sourceId: number | null
 ): Action {
-  return { type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION', file };
+  return {
+    type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION',
+    file,
+    sourceId,
+  };
 }
 
-export function finishLoadingSourceCode(file: string, code: string): Action {
-  return { type: 'SOURCE_CODE_LOADING_SUCCESS', file, code };
+export function finishLoadingSourceCode(
+  file: string,
+  sourceId: number | null,
+  code: string
+): Action {
+  return { type: 'SOURCE_CODE_LOADING_SUCCESS', file, sourceId, code };
 }
 
 export function failLoadingSourceCode(
   file: string,
+  sourceId: number | null,
   errors: SourceCodeLoadingError[]
 ): Action {
-  return { type: 'SOURCE_CODE_LOADING_ERROR', file, errors };
+  return { type: 'SOURCE_CODE_LOADING_ERROR', file, sourceId, errors };
 }
 
 export function beginLoadingAssemblyCodeFromUrl(

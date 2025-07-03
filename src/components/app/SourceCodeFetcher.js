@@ -10,6 +10,7 @@ import {
   getSourceViewCode,
   getBrowserConnection,
   getSourceViewFile,
+  getSourceViewSourceId,
   getSymbolServerUrl,
 } from 'firefox-profiler/selectors';
 import {
@@ -30,6 +31,7 @@ import type { SourceCodeStatus, Profile } from 'firefox-profiler/types';
 
 type StateProps = {|
   +sourceViewFile: string | null,
+  +sourceViewSourceId: number | null,
   +sourceViewCode: SourceCodeStatus | void,
   +symbolServerUrl: string,
   +profile: Profile | null,
@@ -72,6 +74,7 @@ class SourceCodeFetcherImpl extends React.PureComponent<Props> {
       symbolServerUrl,
       profile,
       browserConnection,
+      sourceViewSourceId,
     } = this.props;
 
     const addressProof =
@@ -84,7 +87,7 @@ class SourceCodeFetcherImpl extends React.PureComponent<Props> {
           beginLoadingSourceCodeFromUrl(file, url);
         },
         onBeginBrowserConnectionQuery: () => {
-          beginLoadingSourceCodeFromBrowserConnection(file);
+          beginLoadingSourceCodeFromBrowserConnection(file, sourceViewSourceId);
         },
       }
     );
@@ -94,15 +97,24 @@ class SourceCodeFetcherImpl extends React.PureComponent<Props> {
       symbolServerUrl,
       addressProof,
       this._archiveCache,
-      delegate
+      delegate,
+      sourceViewSourceId
     );
 
     switch (fetchSourceResult.type) {
       case 'SUCCESS':
-        finishLoadingSourceCode(file, fetchSourceResult.source);
+        finishLoadingSourceCode(
+          file,
+          sourceViewSourceId,
+          fetchSourceResult.source
+        );
         break;
       case 'ERROR':
-        failLoadingSourceCode(file, fetchSourceResult.errors);
+        failLoadingSourceCode(
+          file,
+          sourceViewSourceId,
+          fetchSourceResult.errors
+        );
         break;
       default:
         throw assertExhaustiveCheck(fetchSourceResult.type);
@@ -121,6 +133,7 @@ export const SourceCodeFetcher = explicitConnect<
 >({
   mapStateToProps: (state) => ({
     sourceViewFile: getSourceViewFile(state),
+    sourceViewSourceId: getSourceViewSourceId(state),
     sourceViewCode: getSourceViewCode(state),
     symbolServerUrl: getSymbolServerUrl(state),
     profile: getProfileOrNull(state),

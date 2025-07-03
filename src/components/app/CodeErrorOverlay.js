@@ -115,6 +115,17 @@ export function CodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
               </Localized>
             );
           }
+          case 'NOT_PRESENT_IN_BROWSER': {
+            const { sourceId, url } = error;
+            return (
+              <Localized
+                id="SourceView--not-in-browser-error-when-obtaining-source"
+                vars={{ url, sourceId }}
+              >
+                <li>{`The JS file ${url} with sourceId ${sourceId} was not found in the browser.`}</li>
+              </Localized>
+            );
+          }
           default:
             throw assertExhaustiveCheck(error.type);
         }

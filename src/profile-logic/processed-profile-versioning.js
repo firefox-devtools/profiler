@@ -2594,6 +2594,12 @@ const _upgraders = {
     }
     profile.shared = { stringArray };
   },
+  [57]: (profile) => {
+    for (const thread of profile.threads) {
+      const { resourceTable } = thread;
+      resourceTable.sourceId = new Array(resourceTable.length).fill(null);
+    }
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

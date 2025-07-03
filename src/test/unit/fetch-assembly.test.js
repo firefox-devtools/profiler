@@ -76,6 +76,9 @@ describe('fetchAssembly', function () {
         ) => {
           throw new Error('No browser connection');
         },
+        fetchJSSourceFromBrowser: async (_sourceId: number) => {
+          throw new Error('No browser connection');
+        },
       })
     ).toEqual({
       type: 'SUCCESS',
@@ -147,6 +150,9 @@ describe('fetchAssembly', function () {
             ) => {
               throw new Error('No browser connection');
             },
+            fetchJSSourceFromBrowser: async (_sourceId: number) => {
+              throw new Error('No browser connection');
+            },
           }
         )
       ).type
@@ -176,6 +182,9 @@ describe('fetchAssembly', function () {
               }
               return exampleResponse;
             },
+            fetchJSSourceFromBrowser: async (_sourceId: number) => {
+              throw new Error('No browser connection');
+            },
           }
         )
       ).type
@@ -192,6 +201,9 @@ describe('fetchAssembly', function () {
           _path: string,
           _requestJson: string
         ) => {
+          throw new Error('No browser connection');
+        },
+        fetchJSSourceFromBrowser: async (_sourceId: number) => {
           throw new Error('No browser connection');
         },
       })
@@ -231,6 +243,9 @@ describe('fetchAssembly', function () {
               _requestJson: string
             ) => {
               return exampleResponse;
+            },
+            fetchJSSourceFromBrowser: async (_sourceId: number) => {
+              throw new Error('No browser connection');
             },
           }
         )
