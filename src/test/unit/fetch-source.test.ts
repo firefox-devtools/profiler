@@ -4,6 +4,8 @@
 
 import { fetchSource } from 'firefox-profiler/utils/fetch-source';
 
+const TEST_SOURCE_UUID = 'ff6d24c3-b8f5-45cd-a7d3-b643b3292e41';
+
 describe('fetchSource', function () {
   it('fetches single files', async function () {
     expect(
@@ -552,6 +554,111 @@ describe('fetchSource', function () {
           type: 'NO_KNOWN_CORS_URL',
         },
       ],
+    });
+  });
+
+  it('fetches JS source from browser with sourceUuid', async function () {
+    expect(
+      await fetchSource(
+        '/path/to/script.js',
+        TEST_SOURCE_UUID,
+        'https://symbolication.services.mozilla.com',
+        null,
+        new Map(),
+        {
+          fetchUrlResponse: async (_url: string, _postData?: string) => {
+            throw new Error('Should not fetch from URL');
+          },
+          queryBrowserSymbolicationApi: async (
+            _path: string,
+            _requestJson: string
+          ) => {
+            throw new Error('Should not query TEST_SOURCE_UUID API');
+          },
+          fetchJSSourceFromBrowser: async (sourceUuid: string) => {
+            if (sourceUuid === TEST_SOURCE_UUID) {
+              return `console.log("Hello from browser with sourceUuid ${sourceUuid}");`;
+            }
+            throw new Error(`Unexpected source: ${sourceUuid}`);
+          },
+        }
+      )
+    ).toEqual({
+      type: 'SUCCESS',
+      source: `console.log("Hello from browser with sourceUuid ${TEST_SOURCE_UUID}");`,
+    });
+  });
+
+  it('handles fetch JS source from browser with invalid sourceUuid', async function () {
+    expect(
+      await fetchSource(
+        '/path/to/script.js',
+        TEST_SOURCE_UUID,
+        'https://symbolication.services.mozilla.com',
+        null,
+        new Map(),
+        {
+          fetchUrlResponse: async (_url: string, _postData?: string) => {
+            throw new Error('Should not fetch from URL');
+          },
+          queryBrowserSymbolicationApi: async (
+            _path: string,
+            _requestJson: string
+          ) => {
+            throw new Error('Should not query symbolication API');
+          },
+          fetchJSSourceFromBrowser: async (sourceUuid: string) => {
+            throw new Error(
+              `Source not found for source with ID: ${sourceUuid}`
+            );
+          },
+        }
+      )
+    ).toEqual({
+      type: 'ERROR',
+      errors: [
+        {
+          type: 'BROWSER_API_ERROR',
+          apiErrorMessage: `Source not found for source with ID: ${TEST_SOURCE_UUID}`,
+        },
+        {
+          type: 'NO_KNOWN_CORS_URL',
+        },
+      ],
+    });
+  });
+
+  it('falls back to other methods when fetchJSSourceFromBrowser fails', async function () {
+    expect(
+      await fetchSource(
+        'hg:hg.mozilla.org/mozilla-central:widget/cocoa/nsAppShell.mm:997f00815e6bc28806b75448c8829f0259d2cb28',
+        // Should still try browser first but fall back to URL fetch
+        TEST_SOURCE_UUID,
+        'https://symbolication.services.mozilla.com',
+        null,
+        new Map(),
+        {
+          fetchUrlResponse: async (url: string, _postData?: string) => {
+            const r = new Response(`Fallback response from ${url}`, {
+              status: 200,
+            });
+            return r;
+          },
+          queryBrowserSymbolicationApi: async (
+            _path: string,
+            _requestJson: string
+          ) => {
+            throw new Error('No browser connection');
+          },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
+            throw new Error('Source not found in browser');
+          },
+        }
+      )
+    ).toEqual({
+      type: 'SUCCESS',
+      source:
+        'Fallback response from https://hg.mozilla.org/mozilla-central/raw-file/997f00815e6bc28806b75448c8829f0259d2cb28/widget/cocoa/nsAppShell.mm',
     });
   });
 });
