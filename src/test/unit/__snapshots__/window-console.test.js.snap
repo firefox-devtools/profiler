@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`console-accessible values on the window object logs a friendly message 1`] = `
 Array [
@@ -28,6 +28,7 @@ Array [
 %cwindow.filteredMarkers%c - The current filtered and processed markers
 %cwindow.selectedMarker%c - The selected processed marker in the current thread
 %cwindow.callTree%c - The call tree of the current filtered thread
+%cwindow.totalMarkerDuration%c - Calculate total duration of a marker array (e.g., totalMarkerDuration(filteredMarkers))
 %cwindow.getState%c - The function that returns the current Redux state.
 %cwindow.selectors%c - All the selectors that are used to get data from the Redux state.
 %cwindow.dispatch%c - The function to dispatch a Redux action to change the state.
@@ -45,6 +46,8 @@ The profile format is documented here:
 The CallTree class's source code is available here:
 %chttps://github.com/firefox-devtools/profiler/blob/main/src/profile-logic/call-tree.js%c",
     "font-size: 130%;",
+    "",
+    "font-weight: bold;",
     "",
     "font-weight: bold;",
     "",
