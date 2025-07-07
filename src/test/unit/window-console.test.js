@@ -75,26 +75,25 @@ describe('console-accessible values on the window object', function () {
   });
 
   describe('totalMarkerDuration', function () {
-    let target;
-    let consoleLogSpy;
+    function setup() {
+      jest.spyOn(console, 'log').mockImplementation(() => {});
 
-    beforeEach(function () {
       const store = storeWithSimpleProfile();
-      target = {};
+      const target = {};
       addDataToWindowObject(store.getState, store.dispatch, target);
-      consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    });
 
-    afterEach(function () {
-      consoleLogSpy.mockRestore();
-    });
+      return target;
+    }
+    beforeEach(function () {});
 
     it('returns 0 for empty array', function () {
+      const target = setup();
       const result = target.totalMarkerDuration([]);
       expect(result).toBe(0);
     });
 
     it('returns 0 and logs error for non-array input', function () {
+      const target = setup();
       const consoleErrorSpy = jest
         .spyOn(console, 'error')
         .mockImplementation(() => {});
@@ -107,6 +106,7 @@ describe('console-accessible values on the window object', function () {
     });
 
     it('calculates duration for interval markers', function () {
+      const target = setup();
       const markers = [
         {
           start: 100,
@@ -125,9 +125,13 @@ describe('console-accessible values on the window object', function () {
       ];
       const result = target.totalMarkerDuration(markers);
       expect(result).toBe(200); // (200-100) + (250-150) = 100 + 100 = 200
+
+      // Make sure that we print a formatted log for the duration.
+      expect(console.log).toHaveBeenCalledWith('Total marker duration: 200ms');
     });
 
     it('skips instant markers with null end times', function () {
+      const target = setup();
       const markers = [
         {
           start: 100,
@@ -159,6 +163,7 @@ describe('console-accessible values on the window object', function () {
     });
 
     it('handles mixed valid and invalid markers', function () {
+      const target = setup();
       const markers = [
         {
           start: 100,
@@ -188,23 +193,6 @@ describe('console-accessible values on the window object', function () {
       ];
       const result = target.totalMarkerDuration(markers);
       expect(result).toBe(200); // (200-100) + (500-400) = 100 + 100 = 200
-    });
-
-    it('logs formatted duration to console', function () {
-      const markers = [
-        {
-          start: 100,
-          end: 350,
-          name: 'marker',
-          category: 0,
-          threadId: null,
-          data: null,
-        },
-      ];
-      target.totalMarkerDuration(markers);
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        'Total marker duration: 250ms'
-      );
     });
   });
 });
