@@ -4,38 +4,33 @@
 
 // @flow
 import * as React from 'react';
-import {
-  TIMELINE_MARGIN_RIGHT,
-  TIMELINE_MARGIN_LEFT,
-} from 'firefox-profiler/app-logic/constants';
+import { TIMELINE_MARGIN_LEFT, TIMELINE_MARGIN_RIGHT } from 'firefox-profiler/app-logic/constants';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { MarkerChartCanvas } from './Canvas';
-import { MarkerChartEmptyReasons } from './MarkerChartEmptyReasons';
-import { MarkerSettings } from 'firefox-profiler/components/shared/MarkerSettings';
+import { FlowPanelCanvas } from './Canvas';
 
 import {
   getCommittedRange,
   getPreviewSelection,
 } from 'firefox-profiler/selectors/profile';
-import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
+import {
+  getFullMarkerListPerThread,
+  getMarkerChartLabelGetterPerThread,
+  getFlowTiming,
+} from 'firefox-profiler/selectors/flow';
 import {
   updatePreviewSelection,
-  changeRightClickedMarker,
   changeMouseTimePosition,
-  changeSelectedMarker,
-  activateFlowsForMarker,
+  changeActiveFlows,
 } from 'firefox-profiler/actions/profile-view';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 
 import type {
   Marker,
   MarkerIndex,
-  MarkerTimingAndBuckets,
+  FlowTiming,
   UnitIntervalOfProfileRange,
   StartEndRange,
   PreviewSelection,
-  ThreadsKey,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -46,28 +41,21 @@ const ROW_HEIGHT = 16;
 
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
-  +changeRightClickedMarker: typeof changeRightClickedMarker,
   +changeMouseTimePosition: typeof changeMouseTimePosition,
-  +changeSelectedMarker: typeof changeSelectedMarker,
-  +activateFlowsForMarker: typeof activateFlowsForMarker,
+  +changeActiveFlows: typeof changeActiveFlows,
 |};
 
 type StateProps = {|
-  +getMarker: (MarkerIndex) => Marker,
-  +getMarkerLabel: (MarkerIndex) => string,
-  +markerTimingAndBuckets: MarkerTimingAndBuckets,
-  +maxMarkerRows: number,
-  +markerListLength: number,
+  +fullMarkerListPerThread: Marker[][],
+  +markerLabelGetterPerThread: Array<(MarkerIndex) => string>,
+  +flowTiming: FlowTiming,
   +timeRange: StartEndRange,
-  +threadsKey: ThreadsKey,
   +previewSelection: PreviewSelection,
-  +rightClickedMarkerIndex: MarkerIndex | null,
-  +selectedMarkerIndex: MarkerIndex | null,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class MarkerChartImpl extends React.PureComponent<Props> {
+class FlowPanelImpl extends React.PureComponent<Props> {
   _viewport: HTMLDivElement | null = null;
 
   /**
@@ -85,7 +73,7 @@ class MarkerChartImpl extends React.PureComponent<Props> {
     return ONE_NS / (end - start);
   }
 
-  _shouldDisplayTooltips = () => this.props.rightClickedMarkerIndex === null;
+  _shouldDisplayTooltips = () => true;
 
   _takeViewportRef = (viewport: HTMLDivElement | null) => {
     this._viewport = viewport;
@@ -103,41 +91,31 @@ class MarkerChartImpl extends React.PureComponent<Props> {
 
   render() {
     const {
-      maxMarkerRows,
-      markerListLength,
       timeRange,
-      threadsKey,
-      markerTimingAndBuckets,
-      getMarker,
-      getMarkerLabel,
+      flowTiming,
+      fullMarkerListPerThread,
+      markerLabelGetterPerThread,
       previewSelection,
       updatePreviewSelection,
       changeMouseTimePosition,
-      changeRightClickedMarker,
-      activateFlowsForMarker,
-      rightClickedMarkerIndex,
-      selectedMarkerIndex,
-      changeSelectedMarker,
+      changeActiveFlows,
     } = this.props;
 
     // The viewport needs to know about the height of what it's drawing, calculate
     // that here at the top level component.
-    const maxViewportHeight = maxMarkerRows * ROW_HEIGHT;
+    const rowCount = flowTiming.rows.length;
+    const maxViewportHeight = rowCount * ROW_HEIGHT;
 
     return (
-      <div className="markerChart">
-        <MarkerSettings />
-        {maxMarkerRows === 0 ? (
-          <MarkerChartEmptyReasons />
-        ) : (
+      <div className="flowPanel">
+        {rowCount === 0 ? null : (
           <ContextMenuTrigger
             id="MarkerContextMenu"
             attributes={{
               className: 'treeViewContextMenu',
             }}
           >
-            <MarkerChartCanvas
-              key={threadsKey}
+            <FlowPanelCanvas
               viewportProps={{
                 timeRange,
                 previewSelection,
@@ -149,25 +127,18 @@ class MarkerChartImpl extends React.PureComponent<Props> {
                 containerRef: this._takeViewportRef,
               }}
               chartProps={{
-                markerTimingAndBuckets,
-                getMarker,
-                getMarkerLabel,
-                markerListLength,
+                flowTiming,
+                fullMarkerListPerThread,
+                markerLabelGetterPerThread,
                 // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                 updatePreviewSelection,
                 changeMouseTimePosition,
-                changeRightClickedMarker,
-                // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-                activateFlowsForMarker,
+                changeActiveFlows,
                 rangeStart: timeRange.start,
                 rangeEnd: timeRange.end,
                 rowHeight: ROW_HEIGHT,
-                threadsKey,
                 marginLeft: TIMELINE_MARGIN_LEFT,
                 marginRight: TIMELINE_MARGIN_RIGHT,
-                changeSelectedMarker,
-                selectedMarkerIndex,
-                rightClickedMarkerIndex,
                 shouldDisplayTooltips: this._shouldDisplayTooltips,
               }}
             />
@@ -178,39 +149,29 @@ class MarkerChartImpl extends React.PureComponent<Props> {
   }
 }
 
-// This function is given the MarkerChartCanvas's chartProps.
+// This function is given the FlowPanelCanvas's chartProps.
 function viewportNeedsUpdate(
-  prevProps: { +markerTimingAndBuckets: MarkerTimingAndBuckets },
-  newProps: { +markerTimingAndBuckets: MarkerTimingAndBuckets }
+  prevProps: { +flowTiming: FlowTiming },
+  newProps: { +flowTiming: FlowTiming }
 ) {
-  return prevProps.markerTimingAndBuckets !== newProps.markerTimingAndBuckets;
+  return prevProps.flowTiming !== newProps.flowTiming;
 }
 
-export const MarkerChart = explicitConnect<{||}, StateProps, DispatchProps>({
+export const FlowPanel = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state) => {
-    const markerTimingAndBuckets =
-      selectedThreadSelectors.getMarkerChartTimingAndBuckets(state);
+    const flowTiming = getFlowTiming(state);
     return {
-      getMarker: selectedThreadSelectors.getMarkerGetter(state),
-      getMarkerLabel: selectedThreadSelectors.getMarkerChartLabelGetter(state),
-      markerTimingAndBuckets,
-      maxMarkerRows: markerTimingAndBuckets.length,
-      markerListLength: selectedThreadSelectors.getMarkerListLength(state),
+      fullMarkerListPerThread: getFullMarkerListPerThread(state),
+      markerLabelGetterPerThread: getMarkerChartLabelGetterPerThread(state),
+      flowTiming,
       timeRange: getCommittedRange(state),
-      threadsKey: getSelectedThreadsKey(state),
       previewSelection: getPreviewSelection(state),
-      rightClickedMarkerIndex:
-        selectedThreadSelectors.getRightClickedMarkerIndex(state),
-      selectedMarkerIndex:
-        selectedThreadSelectors.getSelectedMarkerIndex(state),
     };
   },
   mapDispatchToProps: {
     updatePreviewSelection,
     changeMouseTimePosition,
-    changeRightClickedMarker,
-    changeSelectedMarker,
-    activateFlowsForMarker,
+    changeActiveFlows,
   },
-  component: MarkerChartImpl,
+  component: FlowPanelImpl,
 });
