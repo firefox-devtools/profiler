@@ -75,11 +75,18 @@ beforeEach(addRootOverlayElement);
 afterEach(removeRootOverlayElement);
 
 describe('StackChart', function () {
-  it('matches the snapshot', () => {
-    const { container } = setupSamples();
+  it('matches the snapshot and can display a tooltip', () => {
+    const { container, getTooltip, moveMouse } = setupSamples();
     const drawCalls = flushDrawLog();
-    expect(container.firstChild).toMatchSnapshot();
-    expect(drawCalls).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot('dom');
+    expect(drawCalls).toMatchSnapshot('draw calls');
+
+    // It can also display a tooltip when hovering a stack.
+    expect(getTooltip()).toBe(null);
+
+    moveMouse(findFillTextPositionFromDrawLog(drawCalls, 'B'));
+    expect(getTooltip()).toBeTruthy();
+    expect(getTooltip()).toMatchSnapshot('tooltip');
   });
 
   it('can select a call node when clicking the chart', function () {
