@@ -165,7 +165,8 @@ class StackChartImpl extends React.PureComponent<Props> {
       const bottomBoxInfo = getBottomBoxInfoForCallNode(
         nodeIndex,
         callNodeInfo,
-        thread
+        thread,
+        thread.samples
       );
       updateBottomBoxContentsAndMaybeOpen('stack-chart', bottomBoxInfo);
       return;

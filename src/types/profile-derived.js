@@ -757,6 +757,7 @@ export type BottomBoxInfo = {|
   libIndex: IndexIntoLibs | null,
   sourceFile: string | null,
   nativeSymbols: NativeSymbolInfo[],
+  nativeSymbolWeightsAtOpeningTime: number[],
 |};
 
 /**
