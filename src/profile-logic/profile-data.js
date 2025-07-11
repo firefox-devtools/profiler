@@ -71,7 +71,6 @@ import type {
   PageList,
   CallNodeTable,
   CallNodePath,
-  CallNodeAndCategoryPath,
   IndexIntoCallNodeTable,
   AccumulatedCounterSamples,
   SamplesLikeTable,
@@ -2146,30 +2145,6 @@ export function processEventDelays(
     maxDelay,
     delayRange,
   };
-}
-
-/**
- * This function converts a stack information into a call node and
- * category path structure.
- */
-export function convertStackToCallNodeAndCategoryPath(
-  thread: Thread,
-  stack: IndexIntoStackTable
-): CallNodeAndCategoryPath {
-  const { stackTable, frameTable } = thread;
-  const path = [];
-  for (
-    let stackIndex = stack;
-    stackIndex !== null;
-    stackIndex = stackTable.prefix[stackIndex]
-  ) {
-    const index = stackTable.frame[stackIndex];
-    path.push({
-      category: stackTable.category[stackIndex],
-      func: frameTable.func[index],
-    });
-  }
-  return path.reverse();
 }
 
 /**

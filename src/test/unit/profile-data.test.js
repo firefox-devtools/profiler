@@ -16,7 +16,6 @@ import {
   getInvertedCallNodeInfo,
   filterThreadByImplementation,
   getSampleIndexClosestToStartTime,
-  convertStackToCallNodeAndCategoryPath,
   getSampleIndexToCallNodeIndex,
   getTreeOrderComparator,
   getSamplesSelectedStates,
@@ -947,24 +946,6 @@ describe('funcHasDirectRecursiveCall and funcHasRecursiveCall', function () {
     expect(
       funcHasRecursiveCall(callNodeTable, funcNames.indexOf('C.cpp'))
     ).toBeFalse();
-  });
-});
-
-describe('convertStackToCallNodeAndCategoryPath', function () {
-  it('correctly returns a call node path for a stack', function () {
-    const profile = getCallNodeProfile();
-    const { derivedThreads } = getProfileWithDicts(profile);
-    const [thread] = derivedThreads;
-    const stack1 = thread.samples.stack[0];
-    const stack2 = thread.samples.stack[1];
-    if (stack1 === null || stack2 === null) {
-      // Makes flow happy
-      throw new Error("stack shouldn't be null");
-    }
-    let callNodePath = convertStackToCallNodeAndCategoryPath(thread, stack1);
-    expect(callNodePath.map((f) => f.func)).toEqual([0, 1, 2, 3, 4]);
-    callNodePath = convertStackToCallNodeAndCategoryPath(thread, stack2);
-    expect(callNodePath.map((f) => f.func)).toEqual([0, 1, 2, 3, 5]);
   });
 });
 
