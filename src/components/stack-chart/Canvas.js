@@ -105,6 +105,12 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement;
   _textMeasurementCssToDeviceScale: number = 1;
 
+  // When the user checks the "use same widths for each stack" checkbox, some
+  // expensive computation happens when the canvas is drawn. These computations
+  // can be reused for hit testing, and therefore are saved in these variables.
+  _sameWidthsIndexAtStart: null | number;
+  _sameWidthsRangeLength: null | number;
+
   componentDidUpdate(prevProps) {
     // We want to scroll the selection into view when this component
     // is mounted, but using componentDidMount won't work here as the
@@ -246,17 +252,23 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     const timeAtEnd: Milliseconds =
       timeAtViewportEnd + TIMELINE_MARGIN_RIGHT * timePerCssPixel;
 
-    // Compute the range for the "same width" drawing as well.
-    const sameWidthsIndexAtStart = Math.max(
-      0,
-      bisectionRight(sameWidthsIndexToTimestampMap, timeAtViewportStart) - 1
-    );
-    const sameWidthsIndexAtEnd = Math.min(
-      sameWidthsIndexToTimestampMap.length - 1,
-      bisectionLeft(sameWidthsIndexToTimestampMap, timeAtViewportEnd)
-    );
+    // Compute the start index as well as the length for the "same width"
+    // drawing as well, if needed.
+    this._sameWidthsRangeLength = this._sameWidthsIndexAtStart = null;
+    if (useStackChartSameWidths) {
+      const sameWidthsIndexAtStart = Math.max(
+        0,
+        bisectionRight(sameWidthsIndexToTimestampMap, timeAtViewportStart) - 1
+      );
+      const sameWidthsIndexAtEnd = Math.min(
+        sameWidthsIndexToTimestampMap.length - 1,
+        bisectionLeft(sameWidthsIndexToTimestampMap, timeAtViewportEnd)
+      );
 
-    const sameWidthsRangeLength = sameWidthsIndexAtEnd - sameWidthsIndexAtStart;
+      this._sameWidthsIndexAtStart = sameWidthsIndexAtStart;
+      this._sameWidthsRangeLength =
+        sameWidthsIndexAtEnd - sameWidthsIndexAtStart;
+    }
 
     const pixelAtViewportPosition = (
       viewportPosition: UnitIntervalOfProfileRange
@@ -320,19 +332,22 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
           if (
             useStackChartSameWidths &&
             stackTiming.sameWidthsStart &&
-            stackTiming.sameWidthsEnd
+            stackTiming.sameWidthsEnd &&
+            this._sameWidthsRangeLength !== null &&
+            this._sameWidthsIndexAtStart !== null
           ) {
             floatX =
               cssToDeviceScale *
               (marginLeft +
                 (innerContainerWidth *
-                  (stackTiming.sameWidthsStart[i] - sameWidthsIndexAtStart)) /
-                  sameWidthsRangeLength);
+                  (stackTiming.sameWidthsStart[i] -
+                    this._sameWidthsIndexAtStart)) /
+                  this._sameWidthsRangeLength);
             floatW =
               (innerDevicePixelsWidth *
                 (stackTiming.sameWidthsEnd[i] -
                   stackTiming.sameWidthsStart[i])) /
-                sameWidthsRangeLength -
+                this._sameWidthsRangeLength -
               1;
           } else {
             const viewportAtStartTime: UnitIntervalOfProfileRange =
@@ -632,12 +647,9 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     y: CssPixels
   ): HoveredStackTiming | null => {
     const {
-      rangeStart,
-      rangeEnd,
       combinedTimingRows,
-      sameWidthsIndexToTimestampMap,
       marginLeft,
-      viewport: { containerWidth, viewportLeft, viewportRight, viewportTop },
+      viewport: { containerWidth, viewportTop },
     } = this.props;
 
     const depth = Math.floor((y + viewportTop) / ROW_CSS_PIXELS_HEIGHT);
@@ -652,28 +664,23 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       return this._hitTest(x, y);
     }
 
-    const rangeLength = rangeEnd - rangeStart;
+    if (
+      this._sameWidthsRangeLength === null ||
+      this._sameWidthsIndexAtStart === null
+    ) {
+      console.warn(
+        'The local variables sameWidthsRangeLength or samewidthsIndexAtStart are null when they should be present.'
+      );
+      return null;
+    }
+
     const innerContainerWidth =
       containerWidth - marginLeft - TIMELINE_MARGIN_RIGHT;
-    const timeAtViewportStart: Milliseconds =
-      rangeStart + rangeLength * viewportLeft;
-    const timeAtViewportEnd: Milliseconds =
-      rangeStart + rangeLength * viewportRight;
-    const sameWidthsIndexAtStart = Math.max(
-      0,
-      bisectionRight(sameWidthsIndexToTimestampMap, timeAtViewportStart) - 1
-    );
-    const sameWidthsIndexAtEnd = Math.min(
-      sameWidthsIndexToTimestampMap.length - 1,
-      bisectionLeft(sameWidthsIndexToTimestampMap, timeAtViewportEnd)
-    );
-
-    const sameWidthsRangeLength = sameWidthsIndexAtEnd - sameWidthsIndexAtStart;
 
     const xMinusMargin = x - marginLeft;
     const hoveredBox =
-      (xMinusMargin / innerContainerWidth) * sameWidthsRangeLength +
-      sameWidthsIndexAtStart;
+      (xMinusMargin / innerContainerWidth) * this._sameWidthsRangeLength +
+      this._sameWidthsIndexAtStart;
 
     for (let i = 0; i < stackTiming.length; i++) {
       const start = stackTiming.sameWidthsStart[i];
