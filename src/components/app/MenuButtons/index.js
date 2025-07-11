@@ -17,7 +17,6 @@ import { getProfileRootRange } from 'firefox-profiler/selectors/profile';
 import {
   getDataSource,
   getProfileUrl,
-  getTimelineTrackOrganization,
 } from 'firefox-profiler/selectors/url-state';
 import {
   getIsNewlyPublished,
@@ -46,13 +45,11 @@ import {
   getHasPrePublishedState,
 } from 'firefox-profiler/selectors/publish';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
-import { changeTimelineTrackOrganization } from 'firefox-profiler/actions/receive-profile';
 
 import type {
   StartEndRange,
   DataSource,
   UploadPhase,
-  TimelineTrackOrganization,
   UploadedProfileInformation,
 } from 'firefox-profiler/types';
 
@@ -76,14 +73,12 @@ type StateProps = {|
   +uploadPhase: UploadPhase,
   +hasPrePublishedState: boolean,
   +abortFunction: () => mixed,
-  +timelineTrackOrganization: TimelineTrackOrganization,
   +currentProfileUploadedInformation: UploadedProfileInformation | null,
 |};
 
 type DispatchProps = {|
   +dismissNewlyPublished: typeof dismissNewlyPublished,
   +revertToPrePublishedState: typeof revertToPrePublishedState,
-  +changeTimelineTrackOrganization: typeof changeTimelineTrackOrganization,
   +profileRemotelyDeleted: typeof profileRemotelyDeleted,
 |};
 
@@ -247,27 +242,6 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
     );
   }
 
-  _changeTimelineTrackOrganizationToFull = () => {
-    this.props.changeTimelineTrackOrganization({ type: 'full' });
-  };
-
-  _renderFullViewButtonForActiveTab() {
-    const { timelineTrackOrganization } = this.props;
-    if (timelineTrackOrganization.type !== 'active-tab') {
-      return null;
-    }
-
-    return (
-      <button
-        type="button"
-        className="menuButtonsButton menuButtonsButton-hasIcon menuButtonsRevertToFullView"
-        onClick={this._changeTimelineTrackOrganizationToFull}
-      >
-        <Localized id="MenuButtons--index--full-view">Full View</Localized>
-      </button>
-    );
-  }
-
   _renderPublishPanel() {
     const { uploadPhase, dataSource, abortFunction, profileUrl } = this.props;
 
@@ -355,7 +329,6 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
   render() {
     return (
       <>
-        {this._renderFullViewButtonForActiveTab()}
         {this._renderRevertProfile()}
         {this._renderMetaInfoButton()}
         {this._renderPublishPanel()}
@@ -384,14 +357,12 @@ export const MenuButtons = explicitConnect<OwnProps, StateProps, DispatchProps>(
       uploadPhase: getUploadPhase(state),
       hasPrePublishedState: getHasPrePublishedState(state),
       abortFunction: getAbortFunction(state),
-      timelineTrackOrganization: getTimelineTrackOrganization(state),
       currentProfileUploadedInformation:
         getCurrentProfileUploadedInformation(state),
     }),
     mapDispatchToProps: {
       dismissNewlyPublished,
       revertToPrePublishedState,
-      changeTimelineTrackOrganization,
       profileRemotelyDeleted,
     },
     component: MenuButtonsImpl,

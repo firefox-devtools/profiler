@@ -15,7 +15,6 @@ import {
 import { FilterNavigatorBar } from 'firefox-profiler/components/shared/FilterNavigatorBar';
 import { ProfileFilterNavigator } from '../../components/app/ProfileFilterNavigator';
 import * as ProfileView from '../../actions/profile-view';
-import * as ReceiveProfile from '../../actions/receive-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { ensureExists } from '../../utils/flow';
@@ -71,7 +70,6 @@ describe('app/ProfileFilterNavigator', () => {
       D  F  I
       E  G
       `);
-    // Add page for active tab.
     profile.pages = [
       {
         tabID: tabID,
@@ -132,34 +130,5 @@ describe('app/ProfileFilterNavigator', () => {
   it('displays the "Full Range" text as its first element', () => {
     const { getByText } = setup();
     expect(getByText(/Full Range/)).toBeInTheDocument();
-  });
-
-  it('renders the site hostname as its first element in the single tab view', () => {
-    const { dispatch, container } = setup();
-    act(() => {
-      dispatch(
-        ReceiveProfile.changeTimelineTrackOrganization({
-          type: 'active-tab',
-          tabID,
-        })
-      );
-    });
-
-    expect(container.firstChild).toMatchSnapshot();
-  });
-
-  it('displays the site hostname as its first element in the single tab view', () => {
-    const { dispatch, queryByText, getByText } = setup();
-    act(() => {
-      dispatch(
-        ReceiveProfile.changeTimelineTrackOrganization({
-          type: 'active-tab',
-          tabID,
-        })
-      );
-    });
-    expect(queryByText(/Full Range/)).not.toBeInTheDocument();
-    // Using regexp because searching for a partial text.
-    expect(getByText(/developer\.mozilla\.org \(/)).toBeInTheDocument();
   });
 });

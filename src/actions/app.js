@@ -7,8 +7,6 @@ import { oneLine } from 'common-tags';
 import {
   getSelectedTab,
   getDataSource,
-  getIsActiveTabResourcesPanelOpen,
-  getSelectedThreadIndexes,
   getLocalTrackOrderByPid,
 } from 'firefox-profiler/selectors/url-state';
 import {
@@ -18,7 +16,6 @@ import {
   getIsExperimentalProcessCPUTracksEnabled,
 } from 'firefox-profiler/selectors/app';
 import {
-  getActiveTabMainTrack,
   getLocalTracksByPid,
   getThreads,
   getCounters,
@@ -238,29 +235,6 @@ export function registerDragAndDropOverlay(): Action {
  */
 export function unregisterDragAndDropOverlay(): Action {
   return { type: 'UNREGISTER_DRAG_AND_DROP_OVERLAY' };
-}
-
-/**
- * Toggle the active tab resources panel
- */
-export function toggleResourcesPanel(): ThunkAction<void> {
-  return (dispatch, getState) => {
-    const isResourcesPanelOpen = getIsActiveTabResourcesPanelOpen(getState());
-    let selectedThreadIndexes = getSelectedThreadIndexes(getState());
-
-    if (isResourcesPanelOpen) {
-      // If it was open when we dispatched that action, it means we are closing this panel.
-      // We would like to also select the main track when we close this panel.
-      const mainTrack = getActiveTabMainTrack(getState());
-      selectedThreadIndexes = new Set([...mainTrack.threadIndexes]);
-    }
-
-    // Toggle the resources panel eventually.
-    dispatch({
-      type: 'TOGGLE_RESOURCES_PANEL',
-      selectedThreadIndexes,
-    });
-  };
 }
 
 /*

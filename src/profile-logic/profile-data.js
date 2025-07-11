@@ -747,8 +747,7 @@ export function getSampleIndexToCallNodeIndex(
  * no call node is selected.
  */
 function _getSamplesSelectedStatesForNoSelection(
-  sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
-  activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>
+  sampleCallNodes: Array<IndexIntoCallNodeTable | null>
 ): SelectedState[] {
   const result = new Array(sampleCallNodes.length);
   for (
@@ -765,12 +764,7 @@ function _getSamplesSelectedStatesForNoSelection(
     // But we still want to display filtered-out samples differently.
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex === null) {
-      sampleSelectedState =
-        activeTabFilteredCallNodes[sampleIndex] === null
-          ? // This sample was not part of the active tab.
-            'FILTERED_OUT_BY_ACTIVE_TAB'
-          : // This sample was filtered out in the transform pipeline.
-            'FILTERED_OUT_BY_TRANSFORM';
+      sampleSelectedState = 'FILTERED_OUT_BY_TRANSFORM';
     }
 
     result[sampleIndex] = sampleSelectedState;
@@ -827,7 +821,6 @@ function _getSamplesSelectedStatesForNoSelection(
  */
 function _getSamplesSelectedStatesNonInverted(
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
-  activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedCallNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfo
 ): SelectedState[] {
@@ -849,12 +842,7 @@ function _getSamplesSelectedStatesNonInverted(
       }
     } else {
       // This sample was filtered out.
-      sampleSelectedState =
-        activeTabFilteredCallNodes[sampleIndex] === null
-          ? // This sample was not part of the active tab.
-            'FILTERED_OUT_BY_ACTIVE_TAB'
-          : // This sample was filtered out in the transform pipeline.
-            'FILTERED_OUT_BY_TRANSFORM';
+      sampleSelectedState = 'FILTERED_OUT_BY_TRANSFORM';
     }
     samplesSelectedStates[sampleIndex] = sampleSelectedState;
   }
@@ -868,7 +856,6 @@ function _getSamplesSelectedStatesNonInverted(
  */
 function _getSamplesSelectedStatesInverted(
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
-  activeTabFilteredNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedInvertedCallNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfoInverted
 ): SelectedState[] {
@@ -891,12 +878,7 @@ function _getSamplesSelectedStatesInverted(
       }
     } else {
       // This sample was filtered out.
-      sampleSelectedState =
-        activeTabFilteredNonInvertedCallNodes[sampleIndex] === null
-          ? // This sample was not part of the active tab.
-            'FILTERED_OUT_BY_ACTIVE_TAB'
-          : // This sample was filtered out in the transform pipeline.
-            'FILTERED_OUT_BY_TRANSFORM';
+      sampleSelectedState = 'FILTERED_OUT_BY_TRANSFORM';
     }
     samplesSelectedStates[sampleIndex] = sampleSelectedState;
   }
@@ -913,27 +895,21 @@ function _getSamplesSelectedStatesInverted(
 export function getSamplesSelectedStates(
   callNodeInfo: CallNodeInfo,
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
-  activeTabFilteredNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedCallNodeIndex: IndexIntoCallNodeTable | null
 ): SelectedState[] {
   if (selectedCallNodeIndex === null || selectedCallNodeIndex === -1) {
-    return _getSamplesSelectedStatesForNoSelection(
-      sampleNonInvertedCallNodes,
-      activeTabFilteredNonInvertedCallNodes
-    );
+    return _getSamplesSelectedStatesForNoSelection(sampleNonInvertedCallNodes);
   }
 
   const callNodeInfoInverted = callNodeInfo.asInverted();
   return callNodeInfoInverted !== null
     ? _getSamplesSelectedStatesInverted(
         sampleNonInvertedCallNodes,
-        activeTabFilteredNonInvertedCallNodes,
         selectedCallNodeIndex,
         callNodeInfoInverted
       )
     : _getSamplesSelectedStatesNonInverted(
         sampleNonInvertedCallNodes,
-        activeTabFilteredNonInvertedCallNodes,
         selectedCallNodeIndex,
         callNodeInfo
       );
@@ -1310,47 +1286,6 @@ export function getTimeRangeIncludingAllThreads(
   return completeRange;
 }
 
-export function defaultThreadOrder(threads: RawThread[]): ThreadIndex[] {
-  const threadOrder = threads.map((thread, i) => i);
-
-  // Note: to have a consistent behavior independant of the sorting algorithm,
-  // we need to be careful that the comparator function is consistent:
-  // comparator(a, b) === - comparator(b, a)
-  // and
-  // comparator(a, b) === 0   if and only if   a === b
-  threadOrder.sort((a, b) => {
-    const nameA = threads[a].name;
-    const nameB = threads[b].name;
-
-    if (nameA === nameB) {
-      return a - b;
-    }
-
-    // Put the compositor/renderer thread last.
-    // Compositor will always be before Renderer, if both are present.
-    if (nameA === 'Compositor') {
-      return 1;
-    }
-
-    if (nameB === 'Compositor') {
-      return -1;
-    }
-
-    if (nameA === 'Renderer') {
-      return 1;
-    }
-
-    if (nameB === 'Renderer') {
-      return -1;
-    }
-
-    // Otherwise keep the existing order. We don't return 0 to guarantee that
-    // the sort is stable even if the sort algorithm isn't.
-    return a - b;
-  });
-  return threadOrder;
-}
-
 export function toValidImplementationFilter(
   implementation: string
 ): ImplementationFilter {
@@ -1545,79 +1480,6 @@ export function filterThreadToSearchString(
   return updateThreadStacks(thread, stackTable, (stackIndex) =>
     stackMatchesFilter(stackIndex) ? stackIndex : null
   );
-}
-
-/**
- * We have page data(innerWindowID) inside the JS frames. Go through each sample
- * and filter out the ones that don't include any JS frame with the relevant innerWindowID.
- * Please note that it also keeps native frames if that sample has a relevant JS
- * frame in any part of the stack. Also it doesn't mutate the stack itself, only
- * nulls the stack array elements of samples object. Therefore, it doesn't
- * invalidate transforms.
- * If we don't have any item in relevantPages, returns all the samples.
- */
-export function filterThreadByTab(
-  thread: Thread,
-  relevantPages: Set<InnerWindowID>
-): Thread {
-  return timeCode('filterThreadByTab', () => {
-    if (relevantPages.size === 0) {
-      // Either there is no relevant page or "active tab only" view is not active.
-      return thread;
-    }
-
-    const { frameTable, stackTable } = thread;
-
-    // innerWindowID array lives inside the frameTable. Check that and decide
-    // if we should keep that sample or not.
-    const frameMatchesFilterCache: Map<IndexIntoFrameTable, boolean> =
-      new Map();
-    function frameMatchesFilter(frame) {
-      const cache = frameMatchesFilterCache.get(frame);
-      if (cache !== undefined) {
-        return cache;
-      }
-
-      const innerWindowID = frameTable.innerWindowID[frame];
-      const matches =
-        innerWindowID && innerWindowID > 0
-          ? relevantPages.has(innerWindowID)
-          : false;
-      frameMatchesFilterCache.set(frame, matches);
-      return matches;
-    }
-
-    // Use the stackTable to navigate to frameTable and cache the result of it.
-    const stackMatchesFilterCache: Map<IndexIntoStackTable, boolean> =
-      new Map();
-    function stackMatchesFilter(stackIndex) {
-      if (stackIndex === null) {
-        return false;
-      }
-      const cache = stackMatchesFilterCache.get(stackIndex);
-      if (cache !== undefined) {
-        return cache;
-      }
-
-      const prefix = stackTable.prefix[stackIndex];
-      if (stackMatchesFilter(prefix)) {
-        stackMatchesFilterCache.set(stackIndex, true);
-        return true;
-      }
-
-      const frame = stackTable.frame[stackIndex];
-      const matches = frameMatchesFilter(frame);
-      stackMatchesFilterCache.set(stackIndex, matches);
-      return matches;
-    }
-
-    // Update the stack array elements of samples object and make them null if
-    // they don't include any relevant JS frame.
-    // It doesn't mutate the stack itself.
-    return updateThreadStacks(thread, stackTable, (stackIndex) =>
-      stackMatchesFilter(stackIndex) ? stackIndex : null
-    );
-  });
 }
 
 export function computeTimeColumnForRawSamplesTable(

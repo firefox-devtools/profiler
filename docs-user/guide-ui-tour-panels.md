@@ -75,11 +75,24 @@ Web Developers can add their own markers using [performance.mark](https://develo
 [performance.measure](https://developer.mozilla.org/en-US/docs/Web/API/Performance/measure). Gecko Developers can look at [this comprehensive
 documentation](https://firefox-source-docs.mozilla.org/tools/profiler/markers-guide.html) to add their new markers.
 
+Markers can be filtered with a comma-separated list of search terms. Each term
+can be a substring to match, `key:substring` to match more specifically,
+or `-key:substring` to drop anything matching. (`-substring` will not work;
+negative matches require a `key`.) Valid `key` values are: `name`, `cat` (for
+marker category), `type` (for markers with payload objects), and any marker
+payload field key that is searchable according to the marker's schema.
+
+Example: `DOM,cat:GC,-name:CSS` will match anything with DOM in its category,
+name, type, or searchable field, plus anything with "GC" in its category,
+but omitting markers with "CSS" anywhere in their names.
+
 ## The Marker Table
 
 This panel provide a table view to the same data as the marker chart. Its
 strength is that by searching it's possibly faster to display the payload
 information for several markers at once.
+
+Filtering works the same as in the Marker Chart.
 
 ## The Network Chart
 

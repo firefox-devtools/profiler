@@ -12,19 +12,9 @@ import {
 import { storeWithProfile } from '../stores';
 import { oneLine } from 'common-tags';
 
-import type {
-  OriginsTimelineTrack,
-  Profile,
-  State,
-  Pid,
-} from 'firefox-profiler/types';
+import type { Profile, State, Pid } from 'firefox-profiler/types';
 
 import { StringTable } from '../../../utils/string-table';
-import { assertExhaustiveCheck } from '../../../utils/flow';
-import {
-  getFriendlyThreadName,
-  hasThreadKeys,
-} from '../../../profile-logic/profile-data';
 import { INSTANT } from 'firefox-profiler/app-logic/constants';
 
 /**
@@ -58,13 +48,7 @@ export function getHumanReadableTracks(state: State): string[] {
   const hiddenGlobalTracks = urlStateSelectors.getHiddenGlobalTracks(state);
   const selectedThreadIndexes =
     urlStateSelectors.getSelectedThreadIndexes(state);
-  const timelineTrackOrganization =
-    urlStateSelectors.getTimelineTrackOrganization(state);
   const text: string[] = [];
-
-  if (timelineTrackOrganization.type !== 'full') {
-    throw new Error('Expected to have the full timeline track organization.');
-  }
 
   for (const globalTrackIndex of urlStateSelectors.getGlobalTrackOrder(state)) {
     const globalTrack = globalTracks[globalTrackIndex];
@@ -329,130 +313,4 @@ export function getStoreWithMemoryTrack(pid: Pid = '222') {
     throw new Error('Expected a memory track.');
   }
   return { store, ...store, profile, trackReference, localTrack, threadIndex };
-}
-
-/**
- * This function takes the current active tab timeline tracks, and generates a
- * human readable result that makes it easy to assert the shape and structure
- * of the tracks in tests.
- *
- * Usage:
- *
- * expect(getHumanReadableTracks(getState())).toEqual([
- *  'screenshots',
- *  'main track [tab]',
- * ]);
- *
- */
-export function getHumanReadableActiveTabTracks(state: State): string[] {
-  const globalTracks = profileViewSelectors.getActiveTabGlobalTracks(state);
-  const resourceTracks = profileViewSelectors.getActiveTabResourceTracks(state);
-  const selectedThreadIndexes =
-    urlStateSelectors.getSelectedThreadIndexes(state);
-  const text: string[] = [];
-
-  for (const globalTrack of globalTracks) {
-    switch (globalTrack.type) {
-      case 'tab': {
-        // Only print the main track if we actually managed to find it.
-        if (globalTrack.threadIndexes.size > 0) {
-          const selected = hasThreadKeys(
-            selectedThreadIndexes,
-            globalTrack.threadsKey
-          )
-            ? ' SELECTED'
-            : '';
-          text.push(`main track [tab]${selected}`);
-          // TODO: Add resource tracks
-        }
-        break;
-      }
-      case 'screenshots': {
-        text.push(`${globalTrack.type}`);
-        break;
-      }
-      default:
-        throw assertExhaustiveCheck(
-          globalTrack,
-          'Unhandled ActiveTabGlobalTrack.'
-        );
-    }
-  }
-
-  for (const resourceTrack of resourceTracks) {
-    switch (resourceTrack.type) {
-      case 'sub-frame':
-        text.push(`  - iframe: ${resourceTrack.name}`);
-        break;
-      case 'thread':
-        text.push(`  - ${resourceTrack.name}`);
-        break;
-      default:
-        throw assertExhaustiveCheck(
-          resourceTrack,
-          'Unhandled ActiveTabResourceTrack.'
-        );
-    }
-  }
-
-  return text;
-}
-
-/**
- * This function takes the current origins timeline tracks, and generates a
- * human readable result that makes it easy to assert the shape and structure
- * of the tracks in tests.
- *
- * Usage:
- *
- *  expect(getHumanReadableOriginTracks(getState())).toEqual([
- *    'Parent Process',
- *    'Compositor',
- *    'GeckoMain pid:(2)',
- *    'GeckoMain pid:(3)',
- *    'https://aaaa.example.com',
- *    '  - https://bbbb.example.com',
- *    '  - https://cccc.example.com',
- *    'https://dddd.example.com',
- *    '  - https://eeee.example.com',
- *    '  - https://ffff.example.com',
- *  ]);
- */
-export function getHumanReadableOriginTracks(state: State): string[] {
-  const threads = profileViewSelectors.getThreads(state);
-  const originsTimeline = profileViewSelectors.getOriginsTimeline(state);
-
-  const results: string[] = [];
-
-  function addHumanFriendlyTrack(
-    track: OriginsTimelineTrack,
-    nested: boolean = false
-  ) {
-    const prefix = nested ? '  - ' : '';
-    switch (track.type) {
-      case 'origin':
-        results.push(track.origin);
-        for (const child of track.children) {
-          addHumanFriendlyTrack(child, true);
-        }
-        break;
-      case 'no-origin': {
-        const thread = threads[track.threadIndex];
-        results.push(prefix + getFriendlyThreadName(threads, thread));
-        break;
-      }
-      case 'sub-origin': {
-        results.push(prefix + track.origin);
-        break;
-      }
-      default:
-        throw assertExhaustiveCheck(track, 'Unhandled OriginsTimelineTrack.');
-    }
-  }
-
-  for (const track of originsTimeline) {
-    addHumanFriendlyTrack(track);
-  }
-
-  return results;
 }

@@ -60,10 +60,20 @@ CallNodeContextMenu--transform-merge-function = Fonksiyonu birleştir
         Bir fonksiyonun birleştirilmesi onu profilden kaldırıp
         süresini onu çağıran fonksiyona atar. Bu işlem, fonksiyonun
         ağaçta çağrıldığı her yerde gerçekleşir.
+CallNodeContextMenu--transform-merge-call-node = Yalnızca düğümü birleştir
+    .title =
+        Bir düğümü birleştirmek onu profilden kaldırır ve süresini onu çağıran
+        fonksiyonun düğümüne atar. Fonksiyonu yalnızca ağacın o belirli
+        bölümünden kaldırır. Fonksiyonun çağrıldığı diğer yerler
+        profilde kalacaktır.
 CallNodeContextMenu--transform-focus-function = Fonksiyona odaklan
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Fonksiyona odaklan (tersine)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-drop-function = Bu fonksiyonu taşıyan örnekleri at
+    .title =
+        Atılan örneklerin süreleri profilden kaldırılır. Bu işlem, analizle ilgili olmayan
+        süre bilgilerini ortadan kaldırmak için kullanışlıdır.
 CallNodeContextMenu--expand-all = Tümünü genişlet
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/

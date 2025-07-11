@@ -20,7 +20,6 @@ import type {
 } from 'firefox-profiler/types';
 
 import {
-  defaultThreadOrder,
   getFriendlyThreadName,
   computeStackTableFromRawStackTable,
 } from './profile-data';
@@ -167,14 +166,60 @@ function _getDefaultLocalTrackOrder(tracks: LocalTrack[], profile: ?Profile) {
   return trackOrder;
 }
 
-function _getDefaultGlobalTrackOrder(tracks: GlobalTrack[]) {
+function _getDefaultGlobalTrackOrder(
+  tracks: GlobalTrack[],
+  threadActivityScores: Array<ThreadActivityScore>
+) {
   const trackOrder = tracks.map((_, index) => index);
+
   // In place sort!
-  trackOrder.sort(
-    (a, b) =>
-      GLOBAL_TRACK_DISPLAY_ORDER[tracks[a].type] -
-      GLOBAL_TRACK_DISPLAY_ORDER[tracks[b].type]
-  );
+  trackOrder.sort((a, b) => {
+    const trackA = tracks[a];
+    const trackB = tracks[b];
+
+    // First, sort by track type priority (visual progress, screenshots, then process).
+    const typeOrderA = GLOBAL_TRACK_DISPLAY_ORDER[trackA.type];
+    const typeOrderB = GLOBAL_TRACK_DISPLAY_ORDER[trackB.type];
+
+    if (typeOrderA !== typeOrderB) {
+      return typeOrderA - typeOrderB;
+    }
+
+    if (trackA.type !== 'process' || trackB.type !== 'process') {
+      // For all the cases where both of them are not the process type, return zero.
+      return 0;
+    }
+
+    // This is the case where both of the tracks are processes. Let's sort them
+    // by activity while keeping the parent process at the top.
+    // mainThreadIndex might be null in case the GeckoMain thread is not
+    // profiled in a profile.
+    const activityA =
+      trackA.mainThreadIndex !== null
+        ? threadActivityScores[trackA.mainThreadIndex]
+        : null;
+    const activityB =
+      trackB.mainThreadIndex !== null
+        ? threadActivityScores[trackB.mainThreadIndex]
+        : null;
+
+    // Keep the parent process at the top.
+    if (activityA?.isInParentProcess && !activityB?.isInParentProcess) {
+      return -1;
+    }
+    if (!activityA?.isInParentProcess && activityB?.isInParentProcess) {
+      return 1;
+    }
+
+    // For non-parent processes, sort by activity score.
+    if (activityA && activityB) {
+      return activityB.boostedSampleScore - activityA.boostedSampleScore;
+    }
+
+    // For all other cases, maintain original order.
+    return 0;
+  });
+
   return trackOrder;
 }
 
@@ -646,7 +691,8 @@ export function initializeGlobalTrackOrder(
   urlGlobalTrackOrder: TrackIndex[] | null,
   // If viewing an old profile URL, there were not tracks, only thread indexes. Turn
   // the legacy ordering into track ordering.
-  legacyThreadOrder: ThreadIndex[] | null
+  legacyThreadOrder: ThreadIndex[] | null,
+  threadActivityScores: Array<ThreadActivityScore>
 ): TrackIndex[] {
   if (legacyThreadOrder !== null) {
     // Upgrade an older URL value based on the thread index to the track index based
@@ -692,7 +738,7 @@ export function initializeGlobalTrackOrder(
   return urlGlobalTrackOrder !== null &&
     _indexesAreValid(globalTracks.length, urlGlobalTrackOrder)
     ? urlGlobalTrackOrder
-    : _getDefaultGlobalTrackOrder(globalTracks);
+    : _getDefaultGlobalTrackOrder(globalTracks, threadActivityScores);
 }
 
 // Returns the selected thread (set), intersected with the set of visible threads.
@@ -700,10 +746,15 @@ export function initializeGlobalTrackOrder(
 export function initializeSelectedThreadIndex(
   selectedThreadIndexes: Set<ThreadIndex> | null,
   visibleThreadIndexes: ThreadIndex[],
-  profile: Profile
+  profile: Profile,
+  threadActivityScores: Array<ThreadActivityScore>
 ): Set<ThreadIndex> {
   if (selectedThreadIndexes === null) {
-    return getDefaultSelectedThreadIndexes(visibleThreadIndexes, profile);
+    return getDefaultSelectedThreadIndexes(
+      visibleThreadIndexes,
+      profile,
+      threadActivityScores
+    );
   }
 
   // Filter out hidden threads from the set of selected threads.
@@ -713,16 +764,24 @@ export function initializeSelectedThreadIndex(
   );
   if (visibleSelectedThreadIndexes.size === 0) {
     // No selected threads were visible. Fall back to default selection.
-    return getDefaultSelectedThreadIndexes(visibleThreadIndexes, profile);
+    return getDefaultSelectedThreadIndexes(
+      visibleThreadIndexes,
+      profile,
+      threadActivityScores
+    );
   }
   return visibleSelectedThreadIndexes;
 }
 
-// Select either the GeckoMain [tab] thread, or the first thread in the thread
-// order.
+// Select either the most active GeckoMain [tab] thread, or the most active
+// thread sorted by the thread activity scores.
+// It always selects global tracks when there is a GeckoMain [tab], but when
+// there is no GeckoMain [tab], it might select local tracks too depending
+// on the activity score.
 function getDefaultSelectedThreadIndexes(
   visibleThreadIndexes: ThreadIndex[],
-  profile: Profile
+  profile: Profile,
+  threadActivityScores: Array<ThreadActivityScore>
 ): Set<ThreadIndex> {
   if (profile.meta.initialSelectedThreads !== undefined) {
     return new Set(
@@ -740,15 +799,81 @@ function getDefaultSelectedThreadIndexes(
       })
     );
   }
-  const visibleThreads = visibleThreadIndexes.map(
-    (threadIndex) => profile.threads[threadIndex]
-  );
-  const defaultThread = _findDefaultThread(visibleThreads);
-  const defaultThreadIndex = profile.threads.indexOf(defaultThread);
-  if (defaultThreadIndex === -1) {
+
+  const { threads } = profile;
+  if (threads.length === 0) {
     throw new Error('Expected to find a thread index to select.');
   }
+
+  const threadOrder = _defaultThreadOrder(
+    visibleThreadIndexes,
+    threads,
+    threadActivityScores
+  );
+
+  // Try to find a tab process with the highest activity score. If it can't
+  // find one, select the first thread with the highest one.
+  const defaultThreadIndex =
+    threadOrder.find(
+      (threadIndex) =>
+        threads[threadIndex].name === 'GeckoMain' &&
+        threads[threadIndex].processType === 'tab'
+    ) ?? threadOrder[0];
+
   return new Set([defaultThreadIndex]);
+}
+
+function _defaultThreadOrder(
+  visibleThreadIndexes: ThreadIndex[],
+  threads: RawThread[],
+  threadActivityScores: Array<ThreadActivityScore>
+): ThreadIndex[] {
+  const threadOrder = [...visibleThreadIndexes];
+
+  // Note: to have a consistent behavior independant of the sorting algorithm,
+  // we need to be careful that the comparator function is consistent:
+  // comparator(a, b) === - comparator(b, a)
+  // and
+  // comparator(a, b) === 0   if and only if   a === b
+  threadOrder.sort((a, b) => {
+    const nameA = threads[a].name;
+    const nameB = threads[b].name;
+
+    if (nameA === nameB) {
+      // Sort by the activity, but keep the original order if the activity
+      // scores are the equal.
+      return (
+        threadActivityScores[b].boostedSampleScore -
+          threadActivityScores[a].boostedSampleScore || a - b
+      );
+    }
+
+    // Put the compositor/renderer thread last.
+    // Compositor will always be before Renderer, if both are present.
+    if (nameA === 'Compositor') {
+      return 1;
+    }
+
+    if (nameB === 'Compositor') {
+      return -1;
+    }
+
+    if (nameA === 'Renderer') {
+      return 1;
+    }
+
+    if (nameB === 'Renderer') {
+      return -1;
+    }
+
+    // Otherwise keep the existing order. We don't return 0 to guarantee that
+    // the sort is stable even if the sort algorithm isn't.
+    return (
+      threadActivityScores[b].boostedSampleScore -
+        threadActivityScores[a].boostedSampleScore || a - b
+    );
+  });
+  return threadOrder;
 }
 
 // Returns either a configuration of hidden tracks that has at least one
@@ -1262,20 +1387,6 @@ function _computeThreadSampleScore(
   ).length;
   const referenceCPUDeltaPerInterval = referenceCPUDeltaPerMs * meta.interval;
   return nonIdleSampleCount * referenceCPUDeltaPerInterval;
-}
-
-function _findDefaultThread(threads: RawThread[]): RawThread | null {
-  if (threads.length === 0) {
-    // Tests may have no threads.
-    return null;
-  }
-  const contentThreadId = threads.findIndex(
-    (thread) => thread.name === 'GeckoMain' && thread.processType === 'tab'
-  );
-  const defaultThreadIndex =
-    contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(threads)[0];
-
-  return threads[defaultThreadIndex];
 }
 
 function _indexesAreValid(listLength: number, indexes: number[]) {
