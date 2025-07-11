@@ -2883,34 +2883,32 @@ export function reserveFunctionsInThread(
 }
 
 /**
- * From a valid call node path, this function returns a list of information
- * about each function in this path: their names and their origins.
+ * Returns whether the given sample has a stack which is non-null and not just
+ * a single function with the name '(root)'.
  */
-export function getFuncNamesAndOriginsForPath(
-  path: CallNodeAndCategoryPath,
+export function isSampleWithNonEmptyStack(
+  sampleIndex: IndexIntoSamplesTable,
   thread: Thread
-): Array<{
-  funcName: string,
-  category: IndexIntoCategoryList,
-  isFrameLabel: boolean,
-  origin: string,
-}> {
-  const { funcTable, stringTable, resourceTable } = thread;
+): boolean {
+  const { samples, stackTable, frameTable, funcTable, stringTable } = thread;
 
-  return path.map((frame) => {
-    const { category, func } = frame;
-    return {
-      funcName: stringTable.getString(funcTable.name[func]),
-      category: category,
-      isFrameLabel: funcTable.resource[func] === -1,
-      origin: getOriginAnnotationForFunc(
-        func,
-        funcTable,
-        resourceTable,
-        stringTable
-      ),
-    };
-  });
+  const stackIndex = samples.stack[sampleIndex];
+  if (stackIndex === null) {
+    return false;
+  }
+
+  if (stackTable.prefix[stackIndex] !== null) {
+    // Stack contains at least two frames.
+    return true;
+  }
+
+  // Stack is only a single frame. Is it the '(root)' frame that Firefox puts
+  // in its profiles?
+  const frameIndex = stackTable.frame[stackIndex];
+  const funcIndex = frameTable.func[frameIndex];
+  const funcNameStringIndex = funcTable.name[funcIndex];
+  const funcName = stringTable.getString(funcNameStringIndex);
+  return funcName !== '(root)';
 }
 
 /**
