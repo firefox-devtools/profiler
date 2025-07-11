@@ -132,8 +132,8 @@ describe('StackChart', function () {
         updatePreviewSelection({
           hasSelection: true,
           isModifying: false,
-          selectionStart: 2.1,
-          selectionEnd: 3.1,
+          selectionStart: 3.1,
+          selectionEnd: 3.4,
         })
       )
     );

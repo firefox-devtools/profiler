@@ -1447,9 +1447,9 @@ Array [
   ],
   Array [
     "fillRect",
-    50,
     0,
-    299.4,
+    0,
+    349.4,
     15,
   ],
   Array [
@@ -1459,7 +1459,7 @@ Array [
   Array [
     "fillText",
     "A",
-    53,
+    3,
     11,
   ],
   Array [
@@ -1468,9 +1468,9 @@ Array [
   ],
   Array [
     "fillRect",
-    50,
+    0,
     16,
-    299.4,
+    349.4,
     15,
   ],
   Array [
@@ -1480,7 +1480,7 @@ Array [
   Array [
     "fillText",
     "B",
-    53,
+    3,
     27,
   ],
   Array [
@@ -1489,7 +1489,28 @@ Array [
   ],
   Array [
     "fillRect",
-    50,
+    0,
+    32,
+    149.4,
+    15,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "C",
+    3,
+    43,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "fillRect",
+    150,
     32,
     199.4,
     15,
@@ -1500,29 +1521,8 @@ Array [
   ],
   Array [
     "fillText",
-    "C",
-    53,
-    43,
-  ],
-  Array [
-    "set fillStyle",
-    "#45a1ff60",
-  ],
-  Array [
-    "fillRect",
-    250,
-    32,
-    99.4,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#000000",
-  ],
-  Array [
-    "fillText",
     "H",
-    253,
+    153,
     43,
   ],
   Array [
@@ -1531,9 +1531,9 @@ Array [
   ],
   Array [
     "fillRect",
-    150,
+    0,
     48,
-    99.4,
+    149.4,
     15,
   ],
   Array [
@@ -1543,7 +1543,7 @@ Array [
   Array [
     "fillText",
     "F",
-    153,
+    3,
     59,
   ],
   Array [
@@ -1552,9 +1552,9 @@ Array [
   ],
   Array [
     "fillRect",
-    250,
+    150,
     48,
-    99.4,
+    199.4,
     15,
   ],
   Array [
@@ -1564,7 +1564,7 @@ Array [
   Array [
     "fillText",
     "I",
-    253,
+    153,
     59,
   ],
   Array [
@@ -1573,9 +1573,9 @@ Array [
   ],
   Array [
     "fillRect",
-    150,
+    0,
     64,
-    99.4,
+    149.4,
     15,
   ],
   Array [
@@ -1585,7 +1585,7 @@ Array [
   Array [
     "fillText",
     "G",
-    153,
+    3,
     75,
   ],
   Array [
@@ -1594,14 +1594,14 @@ Array [
   ],
   Array [
     "fillRect",
-    -270,
+    -1916.6666666666679,
     0,
     1,
     300,
   ],
   Array [
     "fillRect",
-    530,
+    750.0000000000002,
     0,
     1,
     300,
@@ -1670,7 +1670,7 @@ exports[`StackChart matches the snapshot and can display a tooltip with the same
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="left: 264px; top: 54px;"
+  style="left: 164px; top: 54px;"
 >
   <div
     class="tooltipCallNode"
