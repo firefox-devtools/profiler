@@ -6,11 +6,7 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { filterCallNodeAndCategoryPathByImplementation } from 'firefox-profiler/profile-logic/transforms';
-import {
-  getFuncNamesAndOriginsForPath,
-  convertStackToCallNodeAndCategoryPath,
-} from 'firefox-profiler/profile-logic/profile-data';
+import { getBacktraceItemsForStack } from 'firefox-profiler/profile-logic/transforms';
 
 import type {
   CategoryList,
@@ -34,15 +30,11 @@ type Props = {|
 export function Backtrace(props: Props) {
   const { stackIndex, thread, implementationFilter, maxStacks, categories } =
     props;
-  const callNodePath = filterCallNodeAndCategoryPathByImplementation(
-    thread,
+  const funcNamesAndOrigins = getBacktraceItemsForStack(
+    stackIndex,
     implementationFilter,
-    convertStackToCallNodeAndCategoryPath(thread, stackIndex)
-  );
-  const funcNamesAndOrigins = getFuncNamesAndOriginsForPath(
-    callNodePath,
     thread
-  ).reverse();
+  );
 
   if (funcNamesAndOrigins.length) {
     return (
