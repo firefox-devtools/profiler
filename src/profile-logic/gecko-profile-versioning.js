@@ -14,7 +14,7 @@
  * `docs-developer/CHANGELOG-formats.md`.
  */
 
-import { UniqueStringArray } from '../utils/unique-string-array';
+import { StringTable } from '../utils/string-table';
 import { GECKO_PROFILE_VERSION } from '../app-logic/constants';
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
@@ -204,11 +204,10 @@ const _upgraders = {
     // The type field for DOMEventMarkerPayload was renamed to eventType.
     function convertToVersionSevenRecursive(p) {
       for (const thread of p.threads) {
-        const stringTable = new UniqueStringArray(thread.stringTable);
         const nameIndex = thread.markers.schema.name;
         const dataIndex = thread.markers.schema.data;
         for (let i = 0; i < thread.markers.data.length; i++) {
-          const name = stringTable.getString(thread.markers.data[i][nameIndex]);
+          const name = thread.stringTable[thread.markers.data[i][nameIndex]];
           if (name === 'DOMEvent') {
             const data = thread.markers.data[i][dataIndex];
             data.eventType = data.type;
@@ -328,8 +327,6 @@ const _upgraders = {
 
     function convertToVersionNineRecursive(p) {
       for (const thread of p.threads) {
-        //const stringTable = new UniqueStringArray(thread.stringTable);
-        //const nameIndex = thread.markers.schema.name;
         const dataIndex = thread.markers.schema.data;
         for (let i = 0; i < thread.markers.data.length; i++) {
           let marker = thread.markers.data[i][dataIndex];
@@ -363,14 +360,13 @@ const _upgraders = {
     function convertToVersionTenRecursive(p) {
       for (const thread of p.threads) {
         const { markers } = thread;
-        const stringTable = new UniqueStringArray(thread.stringTable);
         const nameIndex = markers.schema.name;
         const dataIndex = markers.schema.data;
         const timeIndex = markers.schema.time;
         const extraMarkers = [];
         for (let i = 0; i < markers.data.length; i++) {
           const marker = markers.data[i];
-          const name = stringTable.getString(marker[nameIndex]);
+          const name = thread.stringTable[marker[nameIndex]];
           const data = marker[dataIndex];
           if (name === 'DOMEvent' && data.type !== 'tracing') {
             const endMarker = [];
@@ -541,11 +537,10 @@ const _upgraders = {
     // a type field to Screenshot marker payload.
     function convertToVersionThirteenRecursive(p) {
       for (const thread of p.threads) {
-        const stringTable = new UniqueStringArray(thread.stringTable);
         const nameIndex = thread.markers.schema.name;
         const dataIndex = thread.markers.schema.data;
         for (let i = 0; i < thread.markers.data.length; i++) {
-          const name = stringTable.getString(thread.markers.data[i][nameIndex]);
+          const name = thread.stringTable[thread.markers.data[i][nameIndex]];
           const data = thread.markers.data[i][dataIndex];
           switch (name) {
             case 'VsyncTimestamp':
@@ -594,7 +589,7 @@ const _upgraders = {
         };
         const locationIndex = thread.frameTable.schema.location;
         const relevantForJSIndex = thread.frameTable.schema.relevantForJS;
-        const stringTable = new UniqueStringArray(thread.stringTable);
+        const stringTable = StringTable.withBackingArray(thread.stringTable);
         for (let i = 0; i < thread.frameTable.data.length; i++) {
           const frameData = thread.frameTable.data[i];
           frameData.splice(relevantForJSIndex, 0, false);
@@ -609,7 +604,6 @@ const _upgraders = {
             frameData[relevantForJSIndex] = domCallRegex.test(location);
           }
         }
-        thread.stringTable = stringTable.serializeToArray();
       }
       for (const subprocessProfile of p.processes) {
         convertToVersionFourteenRecursive(subprocessProfile);
@@ -621,17 +615,13 @@ const _upgraders = {
     // The type field for DOMEventMarkerPayload was renamed to eventType.
     function convertToVersion15Recursive(p) {
       for (const thread of p.threads) {
-        if (thread.stringTable.indexOf('DiskIO') === -1) {
+        const stringTable = StringTable.withBackingArray(thread.stringTable);
+        if (!stringTable.hasString('DiskIO')) {
           // There are no DiskIO markers.
           continue;
         }
 
-        let fileIoStringIndex = thread.stringTable.indexOf('FileIO');
-        if (fileIoStringIndex === -1) {
-          fileIoStringIndex = thread.stringTable.length;
-          thread.stringTable.push('FileIO');
-        }
-
+        const fileIoStringIndex = stringTable.indexForString('FileIO');
         const nameIndex = thread.markers.schema.name;
         const dataIndex = thread.markers.schema.data;
         for (let i = 0; i < thread.markers.data.length; i++) {
@@ -1262,27 +1252,27 @@ const _upgraders = {
           // eventType is in the payload as well.
         ],
       },
+
+      // The following three schemas should have just been a single schema named
+      // "tracing". They are kept here for historical accuracy.
+      // There is a processed profile format upgrader (version 52) which adds the
+      // "tracing" schema for profiles which don't have it.
       {
-        // TODO - Note that this marker is a "tracing" marker currently.
-        // See issue #2749
         name: 'Paint',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'category', label: 'Type', format: 'string' }],
       },
       {
-        // TODO - Note that this marker is a "tracing" marker currently.
-        // See issue #2749
         name: 'Navigation',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'category', label: 'Type', format: 'string' }],
       },
       {
-        // TODO - Note that this marker is a "tracing" marker currently.
-        // See issue #2749
         name: 'Layout',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'category', label: 'Type', format: 'string' }],
       },
+
       {
         name: 'IPC',
         tooltipLabel: 'IPC — {marker.data.niceDirection}',
@@ -1298,6 +1288,14 @@ const _upgraders = {
         ],
       },
       {
+        // An unused schema for RefreshDriverTick markers.
+        // This schema is not consistent with what post-schema Firefox would
+        // output. Firefox (as of Jan 2026) is still using Text markers and does
+        // not have a RefreshDriverTick schema. Furthermore, upgraded profiles
+        // which get this schema do not have any { type: 'RefreshDriverTick' }
+        // markers - in the past they picked up this schema due to a compat hack,
+        // but this hack is now removed. So this schema is unused. It is kept
+        // here for historical accuracy.
         name: 'RefreshDriverTick',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'name', label: 'Tick Reasons', format: 'string' }],

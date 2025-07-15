@@ -30,7 +30,7 @@ export type MarkerFormatType =
   // sanitized. Please be careful with including other types of PII here as well.
   // e.g. "Label: Some String"
   | 'string'
-  /// An index into a (currently) thread-local string table, aka UniqueStringArray
+  /// An index into a (currently) thread-local string table, aka StringTable
   /// This is effectively an integer, so wherever we need to display this value, we
   /// must first perform a lookup into the appropriate string table.
   | 'unique-string'
@@ -118,6 +118,29 @@ export type MarkerGraph = {|
   color?: GraphColor,
 |};
 
+export type MarkerSchemaField = {|
+  // The property key of the marker data property that carries the field value.
+  key: string,
+
+  // An optional user-facing label.
+  // If no label is provided, the key is displayed instead.
+  label?: string,
+
+  // The format / type of this field. This affects how the field's value is
+  // displayed and determines which types of values are accepted for this field.
+  format: MarkerFormatType,
+
+  // If present and set to true, the marker search string will be matched
+  // against the values of this field when determining which markers match the
+  // search.
+  searchable?: boolean,
+
+  // If present and set to true, this field will not be shown in the list
+  // of fields in the tooltip or in the sidebar. Such fields can still be
+  // used inside labels and they can be searchable.
+  hidden?: boolean,
+|};
+
 export type MarkerSchema = {|
   // The unique identifier for this marker.
   name: string, // e.g. "CC"
@@ -138,20 +161,13 @@ export type MarkerSchema = {|
   // The locations to display
   display: MarkerDisplayLocation[],
 
-  data: Array<
-    | {|
-        key: string,
-        // If no label is provided, the key is displayed.
-        label?: string,
-        format: MarkerFormatType,
-        searchable?: boolean,
-      |}
-    | {|
-        // This type is a static bit of text that will be displayed
-        label: string,
-        value: string,
-      |},
-  >,
+  // The fields that can be present on markers of this type.
+  // Not all listed fields have to be present on every marker (they're all optional).
+  fields: MarkerSchemaField[],
+
+  // An optional description for markers of this type.
+  // Will be displayed to the user.
+  description?: string,
 
   // if present, give the marker its own local track
   graphs?: Array<MarkerGraph>,
@@ -330,9 +346,14 @@ type GCMajorCompleted_Shared = {|
   // 'None' as a reason.
   nonincremental_reason?: 'None' | string,
 
-  // The allocated space for the whole heap before the GC started.
+  // The total size of GC things before and after the GC.
   allocated_bytes: number,
   post_heap_size?: number,
+
+  // The total size of malloc data owned by GC things before and after the GC.
+  // Added in Firefox v135 (Bug 1933205).
+  pre_malloc_heap_size?: number,
+  post_malloc_heap_size?: number,
 
   // Only present if non-zero.
   added_chunks?: number,
@@ -401,6 +422,10 @@ export type GCMinorCompletedData = {|
   // The number of strings that were deduplicated during tenuring
   // (since https://bugzilla.mozilla.org/show_bug.cgi?id=1658866).
   strings_deduplicated?: number,
+
+  // The allocation rate when promoting live GC things in bytes per second
+  // (since https://bugzilla.mozilla.org/show_bug.cgi?id=1963597).
+  tenured_allocation_rate?: number,
 
   // The numbers of cells allocated since the previous minor GC.
   // These were added in
@@ -475,6 +500,7 @@ export type GCSliceMarkerPayload_Gecko = {|
  * that redirects are logged as well.
  */
 
+export type NetworkHttpVersion = 'h3' | 'h2' | 'http/1.1' | 'http/1.0';
 export type NetworkStatus =
   | 'STATUS_START'
   | 'STATUS_STOP'
@@ -520,6 +546,20 @@ export type NetworkPayload = {|
   // It's always absent in Firefox < 98 because we couldn't capture private
   // browsing data back then.
   isPrivateBrowsing?: boolean,
+  httpVersion?: NetworkHttpVersion,
+
+  // Used to express class dependencies and characteristics.
+  // Possible flags: Leader, Follower, Speculative, Background, Unblocked,
+  // Throttleable, UrgentStart, DontThrottle, Tail, TailAllowed, and
+  // TailForbidden. Multiple flags can be set, separated by '|',
+  // or we use 'Unset' if no flag is set.
+  classOfService?: string,
+
+  // Used to show the request status (nsresult nsIRequest::status)
+  requestStatus?: string,
+
+  // Used to show the HTTP response status code
+  responseStatus?: number,
 
   // NOTE: the following comments are valid for the merged markers. For the raw
   // markers, startTime and endTime have different meanings. Please look

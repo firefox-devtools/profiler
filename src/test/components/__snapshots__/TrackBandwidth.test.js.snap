@@ -1,52 +1,10 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`TrackBandwidth draws a dot that matches the snapshot 1`] = `
 <div
   class="timelineTrackBandwidthGraphDot"
   style="left: 15px; top: 24.872px; background-color: rgb(0, 96, 223);"
 />
-`;
-
-exports[`TrackBandwidth has a tooltip that matches the snapshot 1`] = `
-<div
-  class="timelineTrackBandwidthTooltip"
->
-  <div
-    class="tooltipDetails"
-  >
-    <div
-      class="tooltipLabel"
-    >
-      Transfer speed for this sample
-      :
-    </div>
-    ⁨4.66GB⁩ per second
-    <div
-      class="tooltipLabel"
-    >
-      read/write operations since the previous sample
-      :
-    </div>
-    0
-    <div
-      class="tooltipDetailSeparator"
-    />
-    <div
-      class="tooltipLabel"
-    >
-      Data transferred up to this time
-      :
-    </div>
-    ⁨6.86MB⁩ (⁨1.3⁩ g CO₂e)
-    <div
-      class="tooltipLabel"
-    >
-      Data transferred in the visible range
-      :
-    </div>
-    ⁨7.97MB⁩ (⁨1.6⁩ g CO₂e)
-  </div>
-</div>
 `;
 
 exports[`TrackBandwidth matches the 2d canvas draw snapshot 1`] = `

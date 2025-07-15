@@ -1,5 +1,114 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`SampleGraph ThreadSampleGraph shows the correct tooltip when hovered 1`] = `
+<div
+  class="tooltip"
+  data-testid="tooltip"
+  style="left: 21px; top: 10px;"
+>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Sampled at:
+    </div>
+    <div>
+      1ms
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Category:
+    </div>
+    <div>
+      <span
+        class="colored-square category-color-green"
+      />
+      Graphics
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Stack:
+    </div>
+  </div>
+  <ul
+    class="backtrace"
+  >
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-green"
+        title="Graphics"
+      />
+      G
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-green"
+        title="Graphics"
+      />
+      F
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-blue"
+        title="DOM"
+      />
+      C
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-blue"
+        title="DOM"
+      />
+      B
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-blue"
+        title="DOM"
+      />
+      A
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+  </ul>
+</div>
+`;
+
 exports[`SampleGraph matches the 2d canvas draw snapshot 1`] = `
 Array [
   Array [

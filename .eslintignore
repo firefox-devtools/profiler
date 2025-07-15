@@ -1,3 +1,4 @@
+src/profile-logic/import/proto
 src/types/libdef/npm
 docs-user
 coverage

@@ -256,6 +256,24 @@ describe('converting Google Chrome profile', function () {
     expect(profile).toMatchSnapshot();
   });
 
+  it('successfully imports a profile with the chrome array format', async function () {
+    const fs = require('fs');
+    const zlib = require('zlib');
+    const compressedBuffer = fs.readFileSync(
+      'src/test/fixtures/upgrades/chrome-trace-issue-5429.json.gz'
+    );
+    const decompressedBuffer = zlib.gunzipSync(compressedBuffer);
+    const profile = await unserializeProfileOfArbitraryFormat(
+      decompressedBuffer.buffer
+    );
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+
+    checkProfileContainsUniqueTid(profile);
+    expect(profile).toMatchSnapshot();
+  });
+
   it('successfully imports a chrome profile using markers of different types', async function () {
     const chromeProfile = {
       traceEvents: [
@@ -421,6 +439,38 @@ describe('converting ART trace', function () {
     const zlib = require('zlib');
     const buffer = fs.readFileSync(
       'src/test/fixtures/upgrades/art-trace-streaming.trace.gz'
+    );
+    const arrayBuffer = zlib.gunzipSync(buffer).buffer;
+    const profile = await unserializeProfileOfArbitraryFormat(arrayBuffer);
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+    checkProfileContainsUniqueTid(profile);
+    expect(profile).toMatchSnapshot();
+  });
+});
+
+describe('converting Simpleperf trace', function () {
+  it('successfully imports a simpleperf trace with task-clock', async function () {
+    const fs = require('fs');
+    const zlib = require('zlib');
+    const buffer = fs.readFileSync(
+      'src/test/fixtures/upgrades/simpleperf-task-clock.trace.gz'
+    );
+    const arrayBuffer = zlib.gunzipSync(buffer).buffer;
+    const profile = await unserializeProfileOfArbitraryFormat(arrayBuffer);
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+    checkProfileContainsUniqueTid(profile);
+    expect(profile).toMatchSnapshot();
+  });
+
+  it('successfully imports a simpleperf trace with cpu-clock', async function () {
+    const fs = require('fs');
+    const zlib = require('zlib');
+    const buffer = fs.readFileSync(
+      'src/test/fixtures/upgrades/simpleperf-cpu-clock.trace.gz'
     );
     const arrayBuffer = zlib.gunzipSync(buffer).buffer;
     const profile = await unserializeProfileOfArbitraryFormat(arrayBuffer);

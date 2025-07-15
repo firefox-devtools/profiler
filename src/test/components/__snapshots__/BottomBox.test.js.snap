@@ -12,6 +12,7 @@ exports[`BottomBox should show the assembly view when pressing the toggle button
   spellcheck="false"
   style="tab-size: 4;"
   translate="no"
+  writingsuggestions="false"
 >
   <div
     class="cm-line"
@@ -74,6 +75,7 @@ exports[`BottomBox should show the source view when a line in the tree view is d
   style="tab-size: 4;"
   tabindex="0"
   translate="no"
+  writingsuggestions="false"
 >
   <div
     class="cm-line"

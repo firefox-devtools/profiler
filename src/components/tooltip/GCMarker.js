@@ -6,7 +6,6 @@
 
 import * as React from 'react';
 import {
-  formatNumber,
   formatPercent,
   formatBytes,
   formatSI,
@@ -33,23 +32,6 @@ export function getGCMinorDetails(
     const nursery = data.nursery;
     switch (nursery.status) {
       case 'complete': {
-        // Don't bother adding up the eviction time without the
-        // CollectToFP phase since that's the main phase.  If it's
-        // missing then there's something wrong with the profile and
-        // we'd only get bogus data.  All these times are in
-        // Milliseconds
-        const evictTimeMS = nursery.phase_times.CollectToFP
-          ? _sumMaybeEntries(nursery.phase_times, [
-              'TraceValues',
-              'TraceCells',
-              'TraceSlots',
-              'TraceWholeCells',
-              'TraceGenericEntries',
-              'MarkRuntime',
-              'MarkDebugger',
-              'CollectToFP',
-            ])
-          : undefined;
         details.push(
           <TooltipDetail label="Reason" key="GCMinor-Reason">
             {nursery.reason}
@@ -122,43 +104,29 @@ export function getGCMinorDetails(
             </TooltipDetail>
           );
         }
-        if (evictTimeMS) {
+        if (nursery.strings_tenured && nursery.strings_deduplicated) {
           details.push(
             <TooltipDetail
-              label="Tenuring allocation rate"
-              key="GCMinor-bytes_tenured"
+              label="Strings deduplicated when tenuring"
+              key="GCMinor-strings_deduped"
             >
-              {formatBytes(
-                // evictTimeMS is in milliseconds.
-                nursery.bytes_tenured / (evictTimeMS / 1000000)
-              ) + '/s'}
+              {formatValueTotal(
+                nursery.strings_deduplicated,
+                nursery.strings_deduplicated + nursery.strings_tenured,
+                formatSI
+              )}
             </TooltipDetail>
           );
-          if (nursery.cells_tenured) {
-            details.push(
-              <TooltipDetail
-                label="Tenuring allocation rate"
-                key="GCMinor-cells_tenured"
-              >
-                {formatSI(nursery.cells_tenured / (evictTimeMS / 10000000)) +
-                  '/s'}
-              </TooltipDetail>
-            );
-          }
-          if (nursery.strings_tenured && nursery.strings_deduplicated) {
-            details.push(
-              <TooltipDetail
-                label="Strings deduplicated when tenuring"
-                key="GCMinor-strings_deduped"
-              >
-                {formatValueTotal(
-                  nursery.strings_deduplicated,
-                  nursery.strings_deduplicated + nursery.strings_tenured,
-                  formatSI
-                )}
-              </TooltipDetail>
-            );
-          }
+        }
+        if (nursery.tenured_allocation_rate) {
+          details.push(
+            <TooltipDetail
+              label="Tenured allocation rate"
+              key="GCMinor-Tenured allocation rate"
+            >
+              {formatBytes(nursery.tenured_allocation_rate) + '/s'}
+            </TooltipDetail>
+          );
         }
         if (nursery.chunk_alloc_us) {
           details.push(
@@ -167,16 +135,6 @@ export function getGCMinorDetails(
               key="GCMinor-Time spent allocating chunks in mutator"
             >
               {formatMicroseconds(nursery.chunk_alloc_us)}
-            </TooltipDetail>
-          );
-        }
-        if (nursery.groups_pretenured) {
-          details.push(
-            <TooltipDetail
-              label="Number of groups to pretenure"
-              key="GCMinor-Number of groups to pretenure"
-            >
-              {formatNumber(nursery.groups_pretenured, 2, 0)}
             </TooltipDetail>
           );
         }
@@ -249,8 +207,8 @@ export function getGCMajorDetails(
       if (post_heap_size !== undefined) {
         gcsize = (
           <TooltipDetail
-            label="Heap size (pre - post)"
-            key="GMajor-Heap size (pre - post)"
+            label="GC heap size (pre - post)"
+            key="GMajor-GC heap size (pre - post)"
           >
             {formatBytes(timings.allocated_bytes) +
               ' - ' +
@@ -259,7 +217,10 @@ export function getGCMajorDetails(
         );
       } else {
         gcsize = (
-          <TooltipDetail label="Heap size (pre)" key="GMajor-Heap size (pre)">
+          <TooltipDetail
+            label="GC heap size (pre)"
+            key="GMajor-GC heap size (pre)"
+          >
             {formatBytes(timings.allocated_bytes)}
           </TooltipDetail>
         );
@@ -283,7 +244,26 @@ export function getGCMajorDetails(
             /* maxFractionalDigits */ 2
           )}
         </TooltipDetail>,
-        gcsize,
+        gcsize
+      );
+      const pre_malloc_heap_size = timings.pre_malloc_heap_size;
+      const post_malloc_heap_size = timings.post_malloc_heap_size;
+      if (
+        pre_malloc_heap_size !== undefined &&
+        post_malloc_heap_size !== undefined
+      ) {
+        details.push(
+          <TooltipDetail
+            label="Malloc heap size (pre - post)"
+            key="GMajor-Malloc heap size (pre - post)"
+          >
+            {formatBytes(pre_malloc_heap_size) +
+              ' - ' +
+              formatBytes(post_malloc_heap_size)}
+          </TooltipDetail>
+        );
+      }
+      details.push(
         <TooltipDetail label="MMU 20ms" key="GMajor-MMU 20ms">
           {formatPercent(timings.mmu_20ms)}
         </TooltipDetail>,
@@ -531,13 +511,4 @@ function _filterInterestingPhaseTimes(
   }
 
   return sortedPhaseTimes.sort((a, b) => order[a.name] - order[b.name]);
-}
-
-function _sumMaybeEntries(
-  entries: PhaseTimes<Microseconds>,
-  selectEntries: Array<string>
-): Microseconds {
-  return selectEntries
-    .map((name) => (entries[name] ? entries[name] : 0))
-    .reduce((a, x) => a + x, 0);
 }

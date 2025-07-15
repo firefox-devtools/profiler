@@ -14,7 +14,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import { getMarkerSchema } from '../../selectors/profile';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
-import { UniqueStringArray } from '../../utils/unique-string-array';
+import { StringTable } from '../../utils/string-table';
 
 /**
  * Generally, higher level type of testing is preferred to detailed unit tests of
@@ -24,7 +24,7 @@ import { UniqueStringArray } from '../../utils/unique-string-array';
  */
 describe('marker schema labels', function () {
   type LabelOptions = {|
-    schemaData: $PropertyType<MarkerSchema, 'data'>,
+    schemaFields: $PropertyType<MarkerSchema, 'fields'>,
     label: string,
     payload: any,
   |};
@@ -34,9 +34,9 @@ describe('marker schema labels', function () {
   });
 
   function applyLabel(options: LabelOptions): string {
-    const { schemaData, label, payload } = options;
+    const { schemaFields, label, payload } = options;
     const categories = getDefaultCategories();
-    const stringTable = new UniqueStringArray([
+    const stringTable = StringTable.withBackingArray([
       'IPC Message',
       'MouseDown Event',
     ]);
@@ -44,7 +44,7 @@ describe('marker schema labels', function () {
     const schema = {
       name: 'TestDefinedMarker',
       display: [],
-      data: schemaData,
+      fields: schemaFields,
     };
 
     const marker: Marker = {
@@ -65,7 +65,7 @@ describe('marker schema labels', function () {
     expect(
       applyLabel({
         label: 'Just text',
-        schemaData: [],
+        schemaFields: [],
         payload: {},
       })
     ).toEqual('Just text');
@@ -76,7 +76,9 @@ describe('marker schema labels', function () {
     expect(
       applyLabel({
         label: '{marker.data.duration}',
-        schemaData: [{ key: 'duration', label: 'Duration', format: 'seconds' }],
+        schemaFields: [
+          { key: 'duration', label: 'Duration', format: 'seconds' },
+        ],
         payload: { duration: 12345 },
       })
     ).toEqual('12.345s');
@@ -87,7 +89,9 @@ describe('marker schema labels', function () {
     expect(
       applyLabel({
         label: 'It took {marker.data.duration} for this test.',
-        schemaData: [{ key: 'duration', label: 'Duration', format: 'seconds' }],
+        schemaFields: [
+          { key: 'duration', label: 'Duration', format: 'seconds' },
+        ],
         payload: { duration: 12345 },
       })
     ).toEqual('It took 12.345s for this test.');
@@ -98,7 +102,7 @@ describe('marker schema labels', function () {
     expect(
       applyLabel({
         label: 'It took {marker.data.duration}, which is {marker.data.ratio}',
-        schemaData: [
+        schemaFields: [
           { key: 'duration', label: 'Duration', format: 'seconds' },
           { key: 'ratio', label: 'Ratio', format: 'percentage' },
         ],
@@ -115,7 +119,9 @@ describe('marker schema labels', function () {
     expect(
       applyLabel({
         label: 'This will be nothing: "{marker.data.nokey}"',
-        schemaData: [{ key: 'duration', label: 'Duration', format: 'seconds' }],
+        schemaFields: [
+          { key: 'duration', label: 'Duration', format: 'seconds' },
+        ],
         payload: { duration: 12345 },
       })
     ).toEqual('This will be nothing: ""');
@@ -131,7 +137,7 @@ describe('marker schema labels', function () {
         'Name: {marker.name}',
         'Category: {marker.category}',
       ].join('\n'),
-      schemaData: [],
+      schemaFields: [],
       payload: {},
     });
 
@@ -149,7 +155,7 @@ describe('marker schema labels', function () {
     expect(
       applyLabel({
         label: '{marker.data.message} happened because of {marker.data.event}',
-        schemaData: [
+        schemaFields: [
           { key: 'message', label: 'Message', format: 'unique-string' },
           { key: 'event', label: 'Event', format: 'unique-string' },
         ],
@@ -167,7 +173,7 @@ describe('marker schema labels', function () {
       expect(
         applyLabel({
           label,
-          schemaData: [
+          schemaFields: [
             { key: 'duration', label: 'Duration', format: 'seconds' },
           ],
           payload: { duration: 12345 },
@@ -256,6 +262,8 @@ describe('marker schema formatting', function () {
       ['bytes', 10],
       ['bytes', 12.3456789],
       ['bytes', 123456.789],
+      ['bytes', 123456789],
+      ['bytes', 123456789123],
       ['bytes', 0.000123456],
       ['integer', 0],
       ['integer', 10],
@@ -290,7 +298,7 @@ describe('marker schema formatting', function () {
             'none',
             format,
             value,
-            new UniqueStringArray(['IPC Message', 'MouseDown Event'])
+            StringTable.withBackingArray(['IPC Message', 'MouseDown Event'])
           )
       )
     ).toMatchInlineSnapshot(`
@@ -345,6 +353,8 @@ describe('marker schema formatting', function () {
         "bytes - 10B",
         "bytes - 12B",
         "bytes - 121KB",
+        "bytes - 118MB",
+        "bytes - 115GB",
         "bytes - 0.000B",
         "integer - 0",
         "integer - 10",
@@ -412,17 +422,13 @@ describe('marker schema formatting', function () {
       ['list', []],
       ['list', ['a', 'b']],
     ];
+    const stringTable = StringTable.withBackingArray([]);
     expect(
       entries.map(([format, value]) => [
         format,
         value,
-        formatMarkupFromMarkerSchema(
-          'none',
-          format,
-          value,
-          new UniqueStringArray()
-        ),
-        formatFromMarkerSchema('none', format, value, new UniqueStringArray()),
+        formatMarkupFromMarkerSchema('none', format, value, stringTable),
+        formatFromMarkerSchema('none', format, value, stringTable),
       ])
     ).toMatchSnapshot();
   });

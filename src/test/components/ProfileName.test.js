@@ -75,7 +75,7 @@ describe('ProfileName', function () {
     expect(getProfileNameFromUrl(getState())).toBe(null);
 
     // Click the button to activate it.
-    button.click();
+    fireEvent.click(button);
     const input = getByDisplayValue(defaultName);
 
     expect(queryByText('Custom name')).not.toBeInTheDocument();
@@ -92,7 +92,7 @@ describe('ProfileName', function () {
     withAnalyticsMock(() => {
       const { getByText, getByDisplayValue } = setup();
       const button = getByText(defaultName);
-      button.click();
+      fireEvent.click(button);
       const input = getByDisplayValue(defaultName);
       fireEvent.change(input, { target: { value: 'Custom name' } });
       fireEvent.blur(input);

@@ -239,53 +239,45 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
 
     if (data) {
       // Add the details for the markers based on their Marker schema.
-      const schema = getSchemaFromMarker(
-        markerSchemaByName,
-        marker.name,
-        marker.data
-      );
+      const schema = getSchemaFromMarker(markerSchemaByName, marker.data);
       if (schema) {
-        for (const schemaData of schema.data) {
-          // Check for a schema that is looking up and formatting a value from
-          // the payload.
-          if (schemaData.value === undefined) {
-            const { key, label, format } = schemaData;
-            if (key in data) {
-              const value = data[key];
-
-              // Don't add undefined values, as values are optional.
-              if (value !== undefined && value !== null) {
-                details.push(
-                  <TooltipDetail
-                    key={schema.name + '-' + key}
-                    label={label || key}
-                  >
-                    {formatMarkupFromMarkerSchema(
-                      schema.name,
-                      format,
-                      value,
-                      thread.stringTable,
-                      threadIdToNameMap,
-                      processIdToNameMap
-                    )}
-                  </TooltipDetail>
-                );
-              }
-            }
+        for (const field of schema.fields) {
+          if (field.hidden) {
+            // Do not include hidden fields.
+            continue;
           }
 
-          // Do a check to see if there is no key. This means this is a simple
-          // label that is applied to every marker of this type, with no data
-          // lookup. For some reason Flow as not able to refine this.
-          if (schemaData.key === undefined) {
-            const { label, value } = schemaData;
-            const key = label + '-' + value;
-            details.push(
-              <TooltipDetail key={key} label={label}>
-                <div className="tooltipDetailsDescription">{value}</div>
-              </TooltipDetail>
-            );
+          const { key, label, format } = field;
+
+          const value = data[key];
+          if (value === undefined || value === null) {
+            // This marker doesn't have a value for this field. Values are optional.
+            continue;
           }
+
+          details.push(
+            <TooltipDetail key={schema.name + '-' + key} label={label || key}>
+              {formatMarkupFromMarkerSchema(
+                schema.name,
+                format,
+                value,
+                thread.stringTable,
+                threadIdToNameMap,
+                processIdToNameMap
+              )}
+            </TooltipDetail>
+          );
+        }
+
+        if (schema.description) {
+          const key = schema.name + '-description';
+          details.push(
+            <TooltipDetail key={key} label="Description">
+              <div className="tooltipDetailsDescription">
+                {schema.description}
+              </div>
+            </TooltipDetail>
+          );
         }
       }
 

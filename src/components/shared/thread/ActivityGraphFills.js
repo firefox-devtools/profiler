@@ -40,7 +40,6 @@ type RenderedComponentSettings = {|
   +sampleIndexOffset: number,
   +xPixelsPerMs: number,
   +enableCPUUsage: boolean,
-  +maxThreadCPUDeltaPerMs: number,
   +treeOrderSampleComparator: ?(
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
@@ -240,7 +239,7 @@ export class ActivityGraphFillComputer {
     }
 
     // Go through the samples and accumulate the category into the percentageBuffers.
-    const { threadCPUDelta } = samples;
+    const { threadCPURatio } = samples;
     for (let i = 0; i < samples.length - 1; i++) {
       const nextSampleTime = samples.time[i + 1];
       const stackIndex = samples.stack[i];
@@ -249,13 +248,11 @@ export class ActivityGraphFillComputer {
           ? greyCategoryIndex
           : stackTable.category[stackIndex];
 
-      let cpuBeforeSample = null;
-      let cpuAfterSample = null;
-      if (enableCPUUsage && threadCPUDelta) {
-        // It must be non-null because we are checking this in the processing
-        // step and eliminating all the null values.
-        cpuBeforeSample = ensureExists(threadCPUDelta[i]);
-        cpuAfterSample = ensureExists(threadCPUDelta[i + 1]);
+      let beforeSampleCpuRatio = 1;
+      let afterSampleCpuRatio = 1;
+      if (enableCPUUsage && threadCPURatio) {
+        beforeSampleCpuRatio = threadCPURatio[i];
+        afterSampleCpuRatio = threadCPURatio[i + 1];
       }
 
       // Mutate the percentage buffers.
@@ -265,8 +262,8 @@ export class ActivityGraphFillComputer {
         prevSampleTime,
         sampleTime,
         nextSampleTime,
-        cpuBeforeSample,
-        cpuAfterSample
+        beforeSampleCpuRatio,
+        afterSampleCpuRatio
       );
 
       prevSampleTime = sampleTime;
@@ -281,23 +278,23 @@ export class ActivityGraphFillComputer {
         ? stackTable.category[lastSampleStack]
         : greyCategoryIndex;
 
-    let cpuBeforeSample = null;
-    let cpuAfterSample = null;
-    if (enableCPUUsage && threadCPUDelta) {
-      cpuBeforeSample = ensureExists(threadCPUDelta[lastIdx]);
+    let beforeSampleCpuRatio = 1;
+    let afterSampleCpuRatio = 1;
+    if (enableCPUUsage && threadCPURatio) {
+      beforeSampleCpuRatio = threadCPURatio[lastIdx];
 
       const nextIdxInFullThread = sampleIndexOffset + lastIdx + 1;
       if (nextIdxInFullThread < fullThread.samples.length) {
         // Since we are zoomed in the timeline, rangeFilteredThread will not
         // have the information of the next sample. So we need to get that
         // information from the full thread.
-        cpuAfterSample = ensureExists(
-          ensureExists(fullThread.samples.threadCPUDelta)[nextIdxInFullThread]
-        );
+        afterSampleCpuRatio = ensureExists(fullThread.samples.threadCPURatio)[
+          nextIdxInFullThread
+        ];
       } else {
         // If we don't have this information in the full thread, simply use the
-        // previous CPU delta.
-        cpuAfterSample = cpuBeforeSample;
+        // previous CPU ratio.
+        afterSampleCpuRatio = beforeSampleCpuRatio;
       }
     }
 
@@ -307,8 +304,8 @@ export class ActivityGraphFillComputer {
       prevSampleTime,
       sampleTime,
       sampleTime + interval,
-      cpuBeforeSample,
-      cpuAfterSample
+      beforeSampleCpuRatio,
+      afterSampleCpuRatio
     );
   }
 
@@ -322,8 +319,8 @@ export class ActivityGraphFillComputer {
     prevSampleTime: Milliseconds,
     sampleTime: Milliseconds,
     nextSampleTime: Milliseconds,
-    cpuBeforeSample: number | null,
-    cpuAfterSample: number | null
+    beforeSampleCpuRatio: number,
+    afterSampleCpuRatio: number
   ) {
     const { rangeEnd, rangeStart, categoryDrawStyles } =
       this.renderedComponentSettings;
@@ -349,8 +346,8 @@ export class ActivityGraphFillComputer {
       prevSampleTime,
       sampleTime,
       nextSampleTime,
-      cpuBeforeSample,
-      cpuAfterSample,
+      beforeSampleCpuRatio,
+      afterSampleCpuRatio,
       rangeStart
     );
   }
@@ -369,8 +366,6 @@ export class ActivityGraphFillComputer {
     switch (samplesSelectedStates[sampleIndex]) {
       case 'FILTERED_OUT_BY_TRANSFORM':
         return percentageBuffers.filteredOutByTransformPercentageAtPixel;
-      case 'FILTERED_OUT_BY_ACTIVE_TAB':
-        return percentageBuffers.filteredOutByTabPercentageAtPixel;
       case 'UNSELECTED_ORDERED_BEFORE_SELECTED':
         return percentageBuffers.beforeSelectedPercentageAtPixel;
       case 'SELECTED':
@@ -512,9 +507,9 @@ export class ActivityFillGraphQuerier {
       return null;
     }
 
-    const threadCPUDelta = samples.threadCPUDelta;
-    if (!threadCPUDelta) {
-      // There is no threadCPUDelta information in the array. Return null.
+    const threadCPURatio = samples.threadCPURatio;
+    if (!threadCPURatio) {
+      // There is no threadCPURatio information in the array. Return null.
       return null;
     }
 
@@ -700,33 +695,32 @@ export class ActivityFillGraphQuerier {
         ? fullThread.samples.time[fullThreadSample + 1]
         : sampleTime + interval;
 
-    let cpuDeltaBeforeSample = null;
-    let cpuDeltaAfterSample = null;
-    const { threadCPUDelta } = samples;
-    if (enableCPUUsage && threadCPUDelta) {
-      // It must be non-null because we are checking this in the processing
-      // step and eliminating all the null values.
-      cpuDeltaBeforeSample = ensureExists(threadCPUDelta[sample]);
+    let beforeSampleCpuRatio = 1;
+    let afterSampleCpuRatio = 1;
+    const { threadCPURatio } = samples;
+    if (enableCPUUsage && threadCPURatio) {
+      beforeSampleCpuRatio = threadCPURatio[sample];
       // Use the fullThread here to properly get the next in case zoomed in.
-      cpuDeltaAfterSample = ensureExists(fullThread.samples.threadCPUDelta)[
-        fullThreadSample + 1
-      ];
-      cpuDeltaAfterSample =
-        // It can be undefined if this is the last sample in the profile.
-        cpuDeltaAfterSample !== undefined && cpuDeltaAfterSample !== null
-          ? cpuDeltaAfterSample
-          : cpuDeltaBeforeSample;
+      const fullThreadSamplesCPURatio = ensureExists(
+        fullThread.samples.threadCPURatio
+      );
+      if (fullThreadSample + 1 < fullThreadSamplesCPURatio.length) {
+        afterSampleCpuRatio = fullThreadSamplesCPURatio[fullThreadSample + 1];
+      } else {
+        afterSampleCpuRatio = beforeSampleCpuRatio;
+      }
     }
 
     const kernelRangeStartTime = rangeStart + kernelPos / xPixelsPerMs;
+
     _accumulateInBuffer(
       pixelsAroundX,
       this.renderedComponentSettings,
       prevSampleTime,
       sampleTime,
       nextSampleTime,
-      cpuDeltaBeforeSample,
-      cpuDeltaAfterSample,
+      beforeSampleCpuRatio,
+      afterSampleCpuRatio,
       kernelRangeStartTime
     );
 
@@ -852,11 +846,11 @@ function _accumulateInBuffer(
   prevSampleTime: Milliseconds,
   sampleTime: Milliseconds,
   nextSampleTime: Milliseconds,
-  cpuDeltaBeforeSample: number | null,
-  cpuDeltaAfterSample: number | null,
+  beforeSampleCpuRatio: number,
+  afterSampleCpuRatio: number,
   bufferTimeRangeStart: Milliseconds
 ) {
-  const { xPixelsPerMs, maxThreadCPUDeltaPerMs } = renderedComponentSettings;
+  const { xPixelsPerMs } = renderedComponentSettings;
   const sampleCategoryStartTime = (prevSampleTime + sampleTime) / 2;
   const sampleCategoryEndTime = (sampleTime + nextSampleTime) / 2;
   let sampleCategoryStartPixel =
@@ -873,8 +867,6 @@ function _accumulateInBuffer(
   const intCategoryStartPixel = sampleCategoryStartPixel | 0;
   const intCategoryEndPixel = sampleCategoryEndPixel | 0;
   const intSamplePixel = samplePixel | 0;
-  const sampleTimeDeltaBefore = sampleTime - prevSampleTime;
-  const sampleTimeDeltaAfter = nextSampleTime - sampleTime;
 
   // Every sample has two parts because of different CPU usage values.
   // For every sample part, we have a fractional interval of this sample part's
@@ -899,17 +891,6 @@ function _accumulateInBuffer(
   // |       |       |       |///////////////////////|       |       |
   // |       |       +-------+///////////////////////|       |       |
   // +-------+-------+///////////////////////////////+-------+-------+
-
-  // A number between 0 and 1 for sample ratio. It changes depending on
-  // the CPU usage per ms if it's given. If not, it uses 1 directly.
-  const beforeSampleCpuRatio =
-    cpuDeltaBeforeSample === null || sampleTimeDeltaBefore === 0
-      ? 1
-      : cpuDeltaBeforeSample / sampleTimeDeltaBefore / maxThreadCPUDeltaPerMs;
-  const afterSampleCpuRatio =
-    cpuDeltaAfterSample === null || sampleTimeDeltaAfter === 0
-      ? 1
-      : cpuDeltaAfterSample / sampleTimeDeltaAfter / maxThreadCPUDeltaPerMs;
 
   // Samples have two parts to be able to present the different CPU usages properly.
   // This is because CPU usage number of a sample represents the CPU usage

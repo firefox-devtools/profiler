@@ -9,45 +9,92 @@ Array [
   ],
   Array [
     "JSON parsing error:",
-    [SyntaxError: Unexpected token i in JSON at position 0],
+    [SyntaxError: Unexpected token 'i', "invalid" is not valid JSON],
   ],
   Array [
     "Fetch response:",
     Response {
-      "_fmResults": Object {
-        "arrayBuffer": Promise {},
-      },
-      "size": 0,
-      "timeout": 0,
-      Symbol(Body internals): Object {
+      Symbol(state): Object {
+        "aborted": false,
         "body": Object {
-          "data": Array [
-            105,
-            110,
-            118,
-            97,
-            108,
-            105,
-            100,
-          ],
-          "type": "Buffer",
-        },
-        "disturbed": true,
-        "error": null,
-      },
-      Symbol(Response internals): Object {
-        "counter": undefined,
-        "headers": Headers {
-          Symbol(map): Object {
-            "content-type": Array [
-              "application/json",
-            ],
+          "length": 7,
+          "source": Uint8Array [],
+          "stream": ReadableStream {
+            Symbol(kType): "ReadableStream",
+            Symbol(kState): Object {
+              "controller": ReadableByteStreamController {
+                Symbol(kType): "ReadableByteStreamController",
+                Symbol(kState): Object {
+                  "autoAllocateChunkSize": undefined,
+                  "byobRequest": null,
+                  "cancelAlgorithm": undefined,
+                  "closeRequested": false,
+                  "highWaterMark": 0,
+                  "pendingPullIntos": Array [],
+                  "pullAgain": false,
+                  "pullAlgorithm": undefined,
+                  "pulling": false,
+                  "queue": Array [],
+                  "queueTotalSize": 0,
+                  "started": true,
+                  "stream": [Circular],
+                },
+              },
+              "disturbed": true,
+              "reader": ReadableStreamDefaultReader {
+                Symbol(kType): "ReadableStreamDefaultReader",
+                Symbol(kState): Object {
+                  "close": Object {
+                    "promise": Promise {},
+                    "reject": [Function],
+                    "resolve": [Function],
+                  },
+                  "readRequests": Array [],
+                  "stream": [Circular],
+                },
+              },
+              "state": "closed",
+              "storedError": undefined,
+              "transfer": Object {
+                "port1": undefined,
+                "port2": undefined,
+                "promise": undefined,
+                "writable": undefined,
+              },
+            },
+            Symbol(nodejs.webstream.isClosedPromise): Object {
+              "promise": Promise {},
+              "reject": [Function],
+              "resolve": [Function],
+            },
+            Symbol(nodejs.webstream.controllerErrorFunction): [Function],
           },
         },
+        "cacheState": "",
+        "headersList": HeadersList {
+          "cookies": null,
+          Symbol(headers map): Map {
+            "content-length" => Object {
+              "name": "content-length",
+              "value": "7",
+            },
+            "content-type" => Object {
+              "name": "content-type",
+              "value": "application/json",
+            },
+          },
+          Symbol(headers map sorted): null,
+        },
+        "rangeRequested": false,
+        "requestIncludesCredentials": false,
         "status": 200,
         "statusText": "OK",
-        "url": "https://example.com/profile.json",
+        "timingAllowPassed": false,
+        "timingInfo": null,
+        "type": "default",
+        "urlList": Array [],
       },
+      Symbol(headers): Headers {},
     },
   ],
 ]
@@ -62,45 +109,92 @@ Array [
   ],
   Array [
     "JSON parsing error:",
-    [SyntaxError: Unexpected token i in JSON at position 0],
+    [SyntaxError: Unexpected token 'i', "invalid" is not valid JSON],
   ],
   Array [
     "Fetch response:",
     Response {
-      "_fmResults": Object {
-        "arrayBuffer": Promise {},
-      },
-      "size": 0,
-      "timeout": 0,
-      Symbol(Body internals): Object {
+      Symbol(state): Object {
+        "aborted": false,
         "body": Object {
-          "data": Array [
-            105,
-            110,
-            118,
-            97,
-            108,
-            105,
-            100,
-          ],
-          "type": "Buffer",
-        },
-        "disturbed": true,
-        "error": null,
-      },
-      Symbol(Response internals): Object {
-        "counter": undefined,
-        "headers": Headers {
-          Symbol(map): Object {
-            "content-type": Array [
-              "undefined",
-            ],
+          "length": 7,
+          "source": Uint8Array [],
+          "stream": ReadableStream {
+            Symbol(kType): "ReadableStream",
+            Symbol(kState): Object {
+              "controller": ReadableByteStreamController {
+                Symbol(kType): "ReadableByteStreamController",
+                Symbol(kState): Object {
+                  "autoAllocateChunkSize": undefined,
+                  "byobRequest": null,
+                  "cancelAlgorithm": undefined,
+                  "closeRequested": false,
+                  "highWaterMark": 0,
+                  "pendingPullIntos": Array [],
+                  "pullAgain": false,
+                  "pullAlgorithm": undefined,
+                  "pulling": false,
+                  "queue": Array [],
+                  "queueTotalSize": 0,
+                  "started": true,
+                  "stream": [Circular],
+                },
+              },
+              "disturbed": true,
+              "reader": ReadableStreamDefaultReader {
+                Symbol(kType): "ReadableStreamDefaultReader",
+                Symbol(kState): Object {
+                  "close": Object {
+                    "promise": Promise {},
+                    "reject": [Function],
+                    "resolve": [Function],
+                  },
+                  "readRequests": Array [],
+                  "stream": [Circular],
+                },
+              },
+              "state": "closed",
+              "storedError": undefined,
+              "transfer": Object {
+                "port1": undefined,
+                "port2": undefined,
+                "promise": undefined,
+                "writable": undefined,
+              },
+            },
+            Symbol(nodejs.webstream.isClosedPromise): Object {
+              "promise": Promise {},
+              "reject": [Function],
+              "resolve": [Function],
+            },
+            Symbol(nodejs.webstream.controllerErrorFunction): [Function],
           },
         },
+        "cacheState": "",
+        "headersList": HeadersList {
+          "cookies": null,
+          Symbol(headers map): Map {
+            "content-length" => Object {
+              "name": "content-length",
+              "value": "7",
+            },
+            "content-type" => Object {
+              "name": "content-type",
+              "value": "undefined",
+            },
+          },
+          Symbol(headers map sorted): null,
+        },
+        "rangeRequested": false,
+        "requestIncludesCredentials": false,
         "status": 200,
         "statusText": "OK",
-        "url": "https://example.com/profile.json",
+        "timingAllowPassed": false,
+        "timingInfo": null,
+        "type": "default",
+        "urlList": Array [],
       },
+      Symbol(headers): Headers {},
     },
   ],
 ]
@@ -120,37 +214,87 @@ Array [
   Array [
     "Fetch response:",
     Response {
-      "_fmResults": Object {
-        "arrayBuffer": Promise {},
-      },
-      "size": 0,
-      "timeout": 0,
-      Symbol(Body internals): Object {
+      Symbol(state): Object {
+        "aborted": false,
         "body": Object {
-          "data": Array [
-            0,
-            1,
-            2,
-            3,
-          ],
-          "type": "Buffer",
-        },
-        "disturbed": true,
-        "error": null,
-      },
-      Symbol(Response internals): Object {
-        "counter": undefined,
-        "headers": Headers {
-          Symbol(map): Object {
-            "content-type": Array [
-              "application/zip",
-            ],
+          "length": 4,
+          "source": Uint8Array [],
+          "stream": ReadableStream {
+            Symbol(kType): "ReadableStream",
+            Symbol(kState): Object {
+              "controller": ReadableByteStreamController {
+                Symbol(kType): "ReadableByteStreamController",
+                Symbol(kState): Object {
+                  "autoAllocateChunkSize": undefined,
+                  "byobRequest": null,
+                  "cancelAlgorithm": undefined,
+                  "closeRequested": false,
+                  "highWaterMark": 0,
+                  "pendingPullIntos": Array [],
+                  "pullAgain": false,
+                  "pullAlgorithm": undefined,
+                  "pulling": false,
+                  "queue": Array [],
+                  "queueTotalSize": 0,
+                  "started": true,
+                  "stream": [Circular],
+                },
+              },
+              "disturbed": true,
+              "reader": ReadableStreamDefaultReader {
+                Symbol(kType): "ReadableStreamDefaultReader",
+                Symbol(kState): Object {
+                  "close": Object {
+                    "promise": Promise {},
+                    "reject": [Function],
+                    "resolve": [Function],
+                  },
+                  "readRequests": Array [],
+                  "stream": [Circular],
+                },
+              },
+              "state": "closed",
+              "storedError": undefined,
+              "transfer": Object {
+                "port1": undefined,
+                "port2": undefined,
+                "promise": undefined,
+                "writable": undefined,
+              },
+            },
+            Symbol(nodejs.webstream.isClosedPromise): Object {
+              "promise": Promise {},
+              "reject": [Function],
+              "resolve": [Function],
+            },
+            Symbol(nodejs.webstream.controllerErrorFunction): [Function],
           },
         },
+        "cacheState": "",
+        "headersList": HeadersList {
+          "cookies": null,
+          Symbol(headers map): Map {
+            "content-length" => Object {
+              "name": "content-length",
+              "value": "4",
+            },
+            "content-type" => Object {
+              "name": "content-type",
+              "value": "application/zip",
+            },
+          },
+          Symbol(headers map sorted): null,
+        },
+        "rangeRequested": false,
+        "requestIncludesCredentials": false,
         "status": 200,
         "statusText": "OK",
-        "url": "https://example.com/profile.file",
+        "timingAllowPassed": false,
+        "timingInfo": null,
+        "type": "default",
+        "urlList": Array [],
       },
+      Symbol(headers): Headers {},
     },
   ],
 ]

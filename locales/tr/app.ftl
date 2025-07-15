@@ -30,6 +30,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = Profil içe aktarılamadı.
 AppViewRouter--error-unpublished = { -firefox-brand-name } tarayıcısından profil alınamadı.
 AppViewRouter--error-from-file = Dosya okunamadı veya içindeki profil ayrıştırılamadı.
 AppViewRouter--error-local = Henüz hazır değil.
@@ -59,10 +60,20 @@ CallNodeContextMenu--transform-merge-function = Fonksiyonu birleştir
         Bir fonksiyonun birleştirilmesi onu profilden kaldırıp
         süresini onu çağıran fonksiyona atar. Bu işlem, fonksiyonun
         ağaçta çağrıldığı her yerde gerçekleşir.
+CallNodeContextMenu--transform-merge-call-node = Yalnızca düğümü birleştir
+    .title =
+        Bir düğümü birleştirmek onu profilden kaldırır ve süresini onu çağıran
+        fonksiyonun düğümüne atar. Fonksiyonu yalnızca ağacın o belirli
+        bölümünden kaldırır. Fonksiyonun çağrıldığı diğer yerler
+        profilde kalacaktır.
 CallNodeContextMenu--transform-focus-function = Fonksiyona odaklan
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Fonksiyona odaklan (tersine)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-drop-function = Bu fonksiyonu taşıyan örnekleri at
+    .title =
+        Atılan örneklerin süreleri profilden kaldırılır. Bu işlem, analizle ilgili olmayan
+        süre bilgilerini ortadan kaldırmak için kullanışlıdır.
 CallNodeContextMenu--expand-all = Tümünü genişlet
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -70,6 +81,7 @@ CallNodeContextMenu--searchfox = Fonksiyon adını Searchfox’ta ara
 CallNodeContextMenu--copy-function-name = Fonksiyon adını kopyala
 CallNodeContextMenu--copy-script-url = Betik URL’sini kopyala
 CallNodeContextMenu--copy-stack = Yığını kopyala
+CallNodeContextMenu--show-the-function-in-devtools = Fonksiyonu geliştirici araçlarında göster
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -122,6 +134,10 @@ CallTreeSidebar--implementation = Yürütme
 ## See: https://profiler.firefox.com/compare/
 
 CompareHome--instruction-title = Karşılaştırmak istediğiniz profil URL’lerini girin
+CompareHome--instruction-content =
+    Araç, her profil için seçilen yol ve aralıktan verileri çıkaracak ve
+    karşılaştırmayı kolaylaştırmak için her ikisini de aynı görünüme
+    yerleştirecektir.
 CompareHome--form-label-profile1 = Profil 1:
 CompareHome--form-label-profile2 = Profil 2:
 CompareHome--submit-button =
@@ -200,6 +216,7 @@ Home--additional-content-title = Mevcut profilleri yükleyin
 Home--additional-content-content = Profil dosyasını buraya <strong>sürükleyip bırakarak</strong> yükleyebilirsiniz ya da:
 Home--compare-recordings-info = Ayrıca kayıtları karşılaştırabilirsiniz. <a>Karşılaştırma arayüzünü aç.</a>
 Home--your-recent-uploaded-recordings-title = Son yüklediğiniz kayıtlar
+Home--install-chrome-extension = Chrome uzantısını yükle
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -474,6 +491,14 @@ NumberFormat--short-date = { SHORTDATE($date) }
 
 PanelSearch--search-field-hint = Birden fazla terim kullanarak arama yapmak için virgül (,) kullanabileceğinizi biliyor muydunuz?
 
+## Profile Name Button
+
+ProfileName--edit-profile-name-button =
+    .title = Profil adını düzenle
+ProfileName--edit-profile-name-input =
+    .title = Profil adını düzenle
+    .aria-label = Profil adı
+
 ## Profile Delete Button
 
 # This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
@@ -521,6 +546,7 @@ ProfileFilterNavigator--full-range-with-duration = Tam aralık ({ $fullRangeDura
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-from-post-message = Profil içe aktarılıyor ve işleniyor…
 ProfileLoaderAnimation--loading-unpublished = Profil doğrudan { -firefox-brand-name } tarayıcısından içe aktarılıyor…
 ProfileLoaderAnimation--loading-from-file = Dosya okunuyor ve profil işleniyor…
 ProfileLoaderAnimation--loading-local = Henüz hazır değil.
@@ -603,6 +629,10 @@ TrackContextMenu--hide-other-screenshots-tracks = Diğer ekran görüntüsü yol
 TrackContextMenu--hide-track = “{ $trackName }” yolunu gizle
 TrackContextMenu--show-all-tracks = Tüm yolları göster
 TrackContextMenu--show-local-tracks-in-process = Bu işlemdeki tüm yolları göster
+# This is used as the context menu item to hide all tracks of the selected track's type.
+# Variables:
+#   $type (String) - Name of the type of selected track to hide.
+TrackContextMenu--hide-all-tracks-by-selected-track-type = “{ $type }” türündeki tüm yolları gizle
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Eşleşen tüm yolları göster
@@ -807,6 +837,11 @@ TransformNavigator--focus-function = Odak: { $item }
 # Variables:
 #   $item (String) - Name of the category that transform applied to.
 TransformNavigator--focus-category = Odak kategorisi: { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Düğümü birleştir: { $item }
 # "Merge function" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
@@ -875,6 +910,33 @@ SourceView--no-known-cors-url = Bu dosya için bilinen çapraz kökenli erişile
 #   $url (String) - The URL which we tried to get the source code from
 #   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
 SourceView--network-error-when-obtaining-source = { $url } adresi getirilirken bir ağ hatası oluştu: { $networkErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source = Tarayıcının sembolikleştirme API’si sorgulanamadı: { $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-error-when-obtaining-source = Tarayıcının sembolikleştirme API’si hata döndürdü: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-error-when-obtaining-source = Yerel sembol sunucusunun sembolikleştirme API’si hata döndürdü: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-malformed-response-when-obtaining-source = Tarayıcının sembolikleştirme API’si hasarlı bir yanıt döndürdü: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-malformed-response-when-obtaining-source = Yerel sembol sunucusunun sembolikleştirme API’si hasarlı bir yanıt döndürdü: { $apiErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:

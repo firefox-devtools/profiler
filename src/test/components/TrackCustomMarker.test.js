@@ -50,17 +50,16 @@ function getMarkerPixelPosition(time: number): CssPixels {
 }
 
 function setup() {
-  const { profile } = getProfileFromTextSamples(
+  const { profile, stringTable } = getProfileFromTextSamples(
     Array(SAMPLE_COUNT).fill('A').join('  ')
   );
-  const markerStringIndex =
-    profile.threads[0].stringTable.indexForString('Marker');
+  const markerStringIndex = stringTable.indexForString('Marker');
   const threadIndex = 0;
   const thread = profile.threads[threadIndex];
   profile.meta.markerSchema.push({
     name: 'Marker',
     display: ['marker-chart', 'marker-table', 'timeline-memory'],
-    data: [
+    fields: [
       { key: 'first', label: 'first', format: 'integer', searchable: true },
       { key: 'second', label: 'second', format: 'integer', searchable: true },
     ],

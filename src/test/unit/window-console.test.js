@@ -73,4 +73,126 @@ describe('console-accessible values on the window object', function () {
       1970-01-01 00:00:00.190000000 UTC - [Unknown Process 0: Empty]: D/nsJarProtocol nsJARChannel::nsJARChannel [this=0x87f1ec80]
     `);
   });
+
+  describe('totalMarkerDuration', function () {
+    function setup() {
+      jest.spyOn(console, 'log').mockImplementation(() => {});
+
+      const store = storeWithSimpleProfile();
+      const target = {};
+      addDataToWindowObject(store.getState, store.dispatch, target);
+
+      return target;
+    }
+    beforeEach(function () {});
+
+    it('returns 0 for empty array', function () {
+      const target = setup();
+      const result = target.totalMarkerDuration([]);
+      expect(result).toBe(0);
+    });
+
+    it('returns 0 and logs error for non-array input', function () {
+      const target = setup();
+      const consoleErrorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+      const result = target.totalMarkerDuration('not an array');
+      expect(result).toBe(0);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'totalMarkerDuration expects an array of markers'
+      );
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('calculates duration for interval markers', function () {
+      const target = setup();
+      const markers = [
+        {
+          start: 100,
+          end: 200,
+          name: 'marker1',
+          category: 0,
+          data: null,
+        },
+        {
+          start: 150,
+          end: 250,
+          name: 'marker2',
+          category: 0,
+          data: null,
+        },
+      ];
+      const result = target.totalMarkerDuration(markers);
+      expect(result).toBe(200); // (200-100) + (250-150) = 100 + 100 = 200
+
+      // Make sure that we print a formatted log for the duration.
+      expect(console.log).toHaveBeenCalledWith('Total marker duration: 200ms');
+    });
+
+    it('skips instant markers with null end times', function () {
+      const target = setup();
+      const markers = [
+        {
+          start: 100,
+          end: 200,
+          name: 'interval',
+          category: 0,
+          threadId: null,
+          data: null,
+        },
+        {
+          start: 150,
+          end: null,
+          name: 'instant',
+          category: 0,
+          threadId: null,
+          data: null,
+        },
+        {
+          start: 300,
+          end: 400,
+          name: 'interval2',
+          category: 0,
+          threadId: null,
+          data: null,
+        },
+      ];
+      const result = target.totalMarkerDuration(markers);
+      expect(result).toBe(200); // (200-100) + (400-300) = 100 + 100 = 200
+    });
+
+    it('handles mixed valid and invalid markers', function () {
+      const target = setup();
+      const markers = [
+        {
+          start: 100,
+          end: 200,
+          name: 'valid',
+          category: 0,
+          threadId: null,
+          data: null,
+        },
+        null,
+        {
+          start: 'invalid',
+          end: 300,
+          name: 'invalid',
+          category: 0,
+          threadId: null,
+          data: null,
+        },
+        {
+          start: 400,
+          end: 500,
+          name: 'valid2',
+          category: 0,
+          threadId: null,
+          data: null,
+        },
+      ];
+      const result = target.totalMarkerDuration(markers);
+      expect(result).toBe(200); // (200-100) + (500-400) = 100 + 100 = 200
+    });
+  });
 });

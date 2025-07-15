@@ -54,7 +54,7 @@ import classNames from 'classnames';
 import { intersectSets } from 'firefox-profiler/utils/set';
 
 import type {
-  Thread,
+  RawThread,
   ThreadIndex,
   Pid,
   TrackIndex,
@@ -67,7 +67,7 @@ import type {
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {|
-  +threads: Thread[],
+  +threads: RawThread[],
   +globalTrackOrder: TrackIndex[],
   +hiddenGlobalTracks: Set<TrackIndex>,
   +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,

@@ -318,6 +318,132 @@ Process: \\"tab\\" (222)"
 </li>
 `;
 
+exports[`timeline/GlobalTrack matches the snapshot of a global process track with pid set to 0 1`] = `
+<li
+  class="timelineTrack"
+>
+  <div
+    class="timelineTrackRow timelineTrackGlobalRow"
+  >
+    <div
+      class="react-contextmenu-wrapper timelineTrackLabel timelineTrackGlobalGrippy"
+      title="Content Process
+Thread: \\"GeckoMain\\" (22)
+Process: \\"tab\\" (0)"
+    >
+      <button
+        class="timelineTrackNameButton"
+        type="button"
+      >
+        Content Process
+      </button>
+      <button
+        class="timelineTrackCloseButton"
+        title="Hide process"
+        type="button"
+      />
+    </div>
+    <div
+      class="timelineTrackTrack"
+    >
+      <div
+        class="timelineTrackThread expanded"
+      >
+        <div
+          class="timelineMarkers timelineMarkersMemory"
+          data-testid="TimelineMarkersMemory"
+        >
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <div>
+              <canvas
+                class="timelineMarkersCanvas"
+                height="400"
+                width="400"
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          class="timelineMarkers"
+          data-testid="TimelineMarkersJank"
+        >
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <div>
+              <canvas
+                class="timelineMarkersCanvas"
+                height="400"
+                width="400"
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          class="timelineMarkers timelineMarkersGeckoMain"
+          data-testid="TimelineMarkersOverview"
+        >
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <div>
+              <canvas
+                class="timelineMarkersCanvas"
+                height="400"
+                width="400"
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          class="threadActivityGraph"
+        >
+          <div>
+            <canvas
+              class="threadActivityGraphCanvas threadActivityGraphCanvas"
+              height="400"
+              width="400"
+            >
+              <h2>
+                Activity Graph for 
+                Content Process
+              </h2>
+              <p>
+                This graph shows a visual chart of thread activity.
+              </p>
+            </canvas>
+          </div>
+        </div>
+        <div
+          class="threadSampleGraph"
+        >
+          <div>
+            <canvas
+              class="threadSampleGraphCanvas threadSampleGraphCanvas"
+              height="400"
+              width="400"
+            >
+              <h2>
+                Stack Graph for 
+                Content Process
+              </h2>
+              <p>
+                This graph charts the stack height of each sample.
+              </p>
+            </canvas>
+          </div>
+        </div>
+        <div
+          class="timelineEmptyThreadIndicator"
+        />
+      </div>
+    </div>
+  </div>
+</li>
+`;
+
 exports[`timeline/GlobalTrack matches the snapshot of a global process track without a thread 1`] = `
 <li
   class="timelineTrack"

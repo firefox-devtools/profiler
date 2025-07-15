@@ -10,7 +10,7 @@ import { screen } from '@testing-library/react';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { TabSelectorMenu } from 'firefox-profiler/components/shared/TabSelectorMenu';
-import { addActiveTabInformationToProfile } from '../fixtures/profiles/processed-profile';
+import { addTabInformationToProfile } from '../fixtures/profiles/processed-profile';
 import {
   getProfileWithNiceTracks,
   getHumanReadableTracks,
@@ -19,10 +19,11 @@ import { storeWithProfile } from '../fixtures/stores';
 import { fireFullClick } from '../fixtures/utils';
 import { getTabFilter } from '../../selectors/url-state';
 import { ensureExists } from 'firefox-profiler/utils/flow';
+import { removeURLs } from 'firefox-profiler/utils/string';
 
 describe('app/TabSelectorMenu', () => {
   function setup() {
-    const { profile, ...extraPageData } = addActiveTabInformationToProfile(
+    const { profile, ...extraPageData } = addTabInformationToProfile(
       getProfileWithNiceTracks()
     );
     ensureExists(profile.pages)[3].favicon =
@@ -176,5 +177,49 @@ describe('app/TabSelectorMenu', () => {
     expect(profilerTab.compareDocumentPosition(mozillaTab)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING
     );
+  });
+
+  it('should render sanitized page urls correctly', () => {
+    const { profile, ...extraPageData } = addTabInformationToProfile(
+      getProfileWithNiceTracks()
+    );
+    // This is needed for the thread activity score calculation.
+    profile.meta.sampleUnits = {
+      time: 'ms',
+      eventDelay: 'ms',
+      threadCPUDelta: 'ns',
+    };
+
+    // Add a webextension url to test it.
+    ensureExists(profile.pages)[4].url =
+      'moz-extension://259ec0ce-9df7-8e4a-ad30-3b67bed900f3/';
+
+    // Sanitize the page urls.
+    profile.pages = ensureExists(profile.pages).map((page, index) => ({
+      ...page,
+      url: removeURLs(page.url, `<Page #${index}>`),
+    }));
+
+    // Attach innerWindowIDs to the samples.
+    profile.threads[0].frameTable.innerWindowID[0] =
+      extraPageData.parentInnerWindowIDsWithChildren;
+    profile.threads[0].frameTable.length++;
+    profile.threads[0].frameTable.innerWindowID[1] =
+      extraPageData.secondTabInnerWindowIDs[0];
+    profile.threads[0].frameTable.length++;
+
+    const store = storeWithProfile(profile);
+    render(
+      <Provider store={store}>
+        <TabSelectorMenu />
+      </Provider>
+    );
+
+    // Make sure that sanitized https and moz-extension urls are still visible.
+    expect(screen.getByText('https://', { exact: false })).toBeInTheDocument();
+    expect(
+      screen.getByText('moz-extension://', { exact: false })
+    ).toBeInTheDocument();
+    expect(document.body).toMatchSnapshot();
   });
 });

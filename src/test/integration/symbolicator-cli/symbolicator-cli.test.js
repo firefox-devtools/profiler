@@ -32,14 +32,8 @@ describe('symbolicator-cli tool', function () {
     const symbolsJson = fs.readFileSync(
       'src/test/integration/symbolicator-cli/symbol-server-response.json'
     );
-    const expected = JSON.parse(
-      fs.readFileSync(
-        'src/test/integration/symbolicator-cli/symbolicated.json',
-        'utf-8'
-      )
-    );
 
-    window.fetch.post(
+    window.fetchMock.post(
       'http://symbol.server/symbolicate/v5',
       new Response(symbolsJson)
     );
@@ -53,6 +47,6 @@ describe('symbolicator-cli tool', function () {
     const result = await runToTempFileAndReturnOutput(options);
 
     expect(console.warn).not.toHaveBeenCalled();
-    expect(result).toEqual(expected);
+    expect(result).toMatchSnapshot();
   });
 });

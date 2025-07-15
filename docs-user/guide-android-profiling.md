@@ -1,6 +1,8 @@
 # Perf Profiling on Android
 
-Android has an application [`simpleperf`](https://android.googlesource.com/platform/system/extras/+/master/simpleperf/doc/README.md) which can profile any Android process. Simpleperf is mostly a drop-in replacement for the Linux `perf` tool.
+Firefox profiler can visualize the CPU profiles exported from [Android Studio CPU Profiler](https://developer.android.com/studio/profile/cpu-profiler) as `*.trace` files. Load the exported file into [profiler.firefox.com](https://profiler.firefox.com), using drag-and-drop or "Load a profile from file".
+
+Alternatively, Android ndk provides [`simpleperf`](https://android.googlesource.com/platform/system/extras/+/master/simpleperf/doc/README.md) which can profile any Android process. Simpleperf is mostly a drop-in replacement for the Linux `perf` tool. Android Studio CPU profiler also uses `simpleperf` internally.
 
 Firefox Profiler can visualise these `simpleperf` profiles, augmenting the viewers that ship with `simpleperf` (e.g. [`report_html.py`](https://android.googlesource.com/platform/system/extras/+/master/simpleperf/doc/scripts_reference.md#report_html_py)).
 
@@ -29,6 +31,20 @@ This records the profile into a `perf.data` file, and pulls it to your host.
 
 ### Step 2: Convert the profile
 
+You can convert the `perf.data` file to one of the format supported by Firefox Profiler.
+
+#### Option 1: Simpleperf trace file
+
+Convert `perf.data` to the Simpleperf trace file format. You can also modify this command to provide proguard mapping file or unstripped SOs to symbolicate.
+
+```bash
+# Convert perf.data to perf.trace
+# If on Mac/Windows, use simpleperf host executable for those platforms instead.
+./bin/linux/x86_64/simpleperf report-sample --show-callchain --protobuf -i perf.data -o perf.trace
+```
+
+#### Option 2: Using gecko_profile_generator.py
+
 Then convert to a Gecko Profile (Firefox Profiler) format, using [`gecko_profile_generator.py`](https://android.googlesource.com/platform/system/extras/+/master/simpleperf/doc/scripts_reference.md#gecko_profile_generator_py):
 
 ```bash
@@ -39,7 +55,7 @@ Then convert to a Gecko Profile (Firefox Profiler) format, using [`gecko_profile
 
 ### Step 3: View the profile in profiler.firefox.com
 
-Load `profile.json.gz` into [profiler.firefox.com](https://profiler.firefox.com), using drag-and-drop or "Load a profile from file".
+Load the `perf.trace` or `profile.json.gz` created in previous step into [profiler.firefox.com](https://profiler.firefox.com), using drag-and-drop or "Load a profile from file".
 
 ## See also
 

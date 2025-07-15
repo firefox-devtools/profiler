@@ -31,14 +31,11 @@ import {
   getLocalTrackOrderByPid,
   getLegacyThreadOrder,
   getLegacyHiddenThreads,
-  getTimelineTrackOrganization,
   getProfileOrNull,
   getProfile,
   getView,
-  getRelevantPagesForActiveTab,
   getSymbolServerUrl,
-  getActiveTabID,
-  getMarkerSchemaByName,
+  getBrowserConnection,
 } from 'firefox-profiler/selectors';
 import {
   getSelectedTab,
@@ -66,7 +63,6 @@ import {
   computeDefaultHiddenTracks,
   getVisibleThreads,
 } from 'firefox-profiler/profile-logic/tracks';
-import { computeActiveTabTracks } from 'firefox-profiler/profile-logic/active-tab';
 import { setDataSource } from './profile-view';
 import { fatalError } from './errors';
 import { batchLoadDataUrlIcons } from './icons';
@@ -83,14 +79,9 @@ import type {
   Action,
   ThunkAction,
   Dispatch,
-  TimelineTrackOrganization,
   Profile,
   ThreadIndex,
   TabID,
-  Page,
-  InnerWindowID,
-  Pid,
-  OriginsTimelineRoot,
   PageList,
 } from 'firefox-profiler/types';
 
@@ -98,7 +89,7 @@ import type {
   FuncToFuncsMap,
   SymbolicationStepInfo,
 } from '../profile-logic/symbolication';
-import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
+import { assertExhaustiveCheck } from '../utils/flow';
 import { bytesToBase64DataUrl } from 'firefox-profiler/utils/base64';
 import type {
   BrowserConnection,
@@ -131,7 +122,6 @@ export function waitingForProfileFromBrowser(): Action {
 export function loadProfile(
   profile: Profile,
   config: $Shape<{|
-    timelineTrackOrganization: TimelineTrackOrganization,
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
@@ -175,7 +165,6 @@ export function loadProfile(
       await dispatch(
         finalizeProfileView(
           config.browserConnection ?? null,
-          config.timelineTrackOrganization,
           config.skipSymbolication
         )
       );
@@ -194,7 +183,6 @@ export function loadProfile(
  */
 export function finalizeProfileView(
   browserConnection: BrowserConnection | null = null,
-  timelineTrackOrganization?: TimelineTrackOrganization,
   skipSymbolication?: boolean
 ): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
@@ -213,59 +201,8 @@ export function finalizeProfileView(
     // encoded into the URL.
     const selectedThreadIndexes = getSelectedThreadIndexesOrNull(getState());
     const pages = profile.pages;
-    if (!timelineTrackOrganization) {
-      // Most likely we'll need to load the timeline track organization, as requested
-      // by the URL, but tests can pass in a value.
-      timelineTrackOrganization = getTimelineTrackOrganization(getState());
-    }
 
-    switch (timelineTrackOrganization.type) {
-      case 'full':
-        // The url state says this is a full view. We should compute and initialize
-        // the state relevant to that state.
-        dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
-        break;
-      case 'active-tab': {
-        const activeTabID = getActiveTabID(getState());
-        if (pages && activeTabID !== null) {
-          // Initialize the active tab view only if pages array is present and
-          // activeTabID is not null. Pages array might be missing on the older
-          // profiles. And activeTabID can be null when Firefox fails to get
-          // this information from the platform. For example, it will be null
-          // when users capture a startup profile.
-          dispatch(
-            finalizeActiveTabProfileView(
-              profile,
-              selectedThreadIndexes,
-              timelineTrackOrganization.tabID
-            )
-          );
-        } else {
-          // Don't fully trust the URL, this view doesn't support the active tab based
-          // view. Switch to fulll view.
-          dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
-        }
-
-        break;
-      }
-      case 'origins': {
-        if (pages) {
-          dispatch(
-            finalizeOriginProfileView(profile, pages, selectedThreadIndexes)
-          );
-        } else {
-          // Don't fully trust the URL, this view doesn't support the origins based
-          // view. Switch to fulll view.
-          dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
-        }
-        break;
-      }
-      default:
-        throw assertExhaustiveCheck(
-          timelineTrackOrganization,
-          `Unhandled TimelineTrackOrganization type.`
-        );
-    }
+    dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
 
     let faviconsPromise = null;
     if (browserConnection && pages && pages.length > 0) {
@@ -321,17 +258,15 @@ export function finalizeFullProfileView(
       tabFilter,
       tabToThreadIndexesMap
     );
-    const localTracksByPid = computeLocalTracksByPid(
-      profile,
-      globalTracks,
-      getMarkerSchemaByName(getState())
-    );
+    const localTracksByPid = computeLocalTracksByPid(profile, globalTracks);
 
+    const threadActivityScores = getThreadActivityScores(getState());
     const legacyThreadOrder = getLegacyThreadOrder(getState());
     const globalTrackOrder = initializeGlobalTrackOrder(
       globalTracks,
       hasUrlInfo ? getGlobalTrackOrder(getState()) : null,
-      legacyThreadOrder
+      legacyThreadOrder,
+      threadActivityScores
     );
     const localTrackOrderByPid = initializeLocalTrackOrderByPid(
       hasUrlInfo ? getLocalTrackOrderByPid(getState()) : null,
@@ -375,7 +310,7 @@ export function finalizeFullProfileView(
       hiddenTracks = computeDefaultHiddenTracks(
         tracksWithOrder,
         profile,
-        getThreadActivityScores(getState()),
+        threadActivityScores,
         // Only include the parent process if there is no tab filter applied.
         includeParentProcessThreads
       );
@@ -384,7 +319,8 @@ export function finalizeFullProfileView(
     const selectedThreadIndexes = initializeSelectedThreadIndex(
       maybeSelectedThreadIndexes,
       getVisibleThreads(tracksWithOrder, hiddenTracks),
-      profile
+      profile,
+      threadActivityScores
     );
 
     let timelineType = null;
@@ -402,7 +338,7 @@ export function finalizeFullProfileView(
         const thread = profile.threads[threadIndex];
         const { samples, jsAllocations, nativeAllocations } = thread;
         hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
-          hasUsefulSamples(table, thread)
+          hasUsefulSamples(table?.stack, thread, profile.shared)
         );
         if (hasSamples) {
           break;
@@ -430,294 +366,6 @@ export function finalizeFullProfileView(
 }
 
 /**
- * This is a small utility to extract the origin from a URL, to build the origins-based
- * profile view.
- */
-function getOrigin(urlString: string): string {
-  if (urlString.startsWith('chrome://')) {
-    return urlString;
-  }
-  try {
-    const url = new URL(urlString);
-    if (url.origin === 'null') {
-      // This can happen for "about:newtab"
-      return urlString;
-    }
-    return url.origin;
-  } catch {
-    // This failed, maybe it's an internal URL.
-    return urlString;
-  }
-}
-
-/**
- * Finalize the profile state for the origin-based view. This is an experimental
- * view for fission. It's not turned on by default. Note, that this function
- * probably needs a lot of work to become more correct to handle everything,
- * so it shouldn't be trusted too much at this time.
- */
-export function finalizeOriginProfileView(
-  profile: Profile,
-  pages: Page[],
-  selectedThreadIndexes: Set<ThreadIndex> | null
-): ThunkAction<void> {
-  return (dispatch) => {
-    const idToPage: Map<InnerWindowID, Page> = new Map();
-    for (const page of pages) {
-      idToPage.set(page.innerWindowID, page);
-    }
-
-    // TODO - A thread can have multiple pages. Ignore this for now.
-    const pageOfThread: Array<Page | null> = [];
-    // These maps essentially serve as a tuple of the InnerWindowID and ThreadIndex
-    // that can be iterated through on a "for of" loop.
-    const rootOrigins: Map<InnerWindowID, ThreadIndex> = new Map();
-    const subOrigins: Map<InnerWindowID, ThreadIndex> = new Map();
-    // The set of all thread indexes that do not have an origin associated with them.
-    const noOrigins: Set<ThreadIndex> = new Set();
-
-    // Populate the collections above by iterating through all of the threads.
-    for (
-      let threadIndex = 0;
-      threadIndex < profile.threads.length;
-      threadIndex++
-    ) {
-      const { frameTable } = profile.threads[threadIndex];
-
-      let originFound = false;
-      for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
-        const innerWindowID = frameTable.innerWindowID[frameIndex];
-        if (innerWindowID === null || innerWindowID === 0) {
-          continue;
-        }
-
-        const page = idToPage.get(innerWindowID);
-        if (!page) {
-          // This should only happen if there is an error in the Gecko implementation.
-          console.error('Could not find the page for an innerWindowID', {
-            innerWindowID,
-            pages,
-          });
-          break;
-        }
-
-        if (page.embedderInnerWindowID === 0) {
-          rootOrigins.set(innerWindowID, threadIndex);
-        } else {
-          subOrigins.set(innerWindowID, threadIndex);
-        }
-
-        originFound = true;
-        pageOfThread[threadIndex] = page;
-        break;
-      }
-
-      if (!originFound) {
-        pageOfThread[threadIndex] = null;
-        noOrigins.add(threadIndex);
-      }
-    }
-
-    // Build up the `originsTimelineRoots` variable and any relationships needed
-    // for determining the structure of the threads in terms of their origins.
-    const originsTimelineRoots: OriginsTimelineRoot[] = [];
-    // This map can be used to take a thread with no origin information, and assign
-    // it to some origin based on a shared PID.
-    const pidToRootInnerWindowID: Map<Pid, InnerWindowID> = new Map();
-    // The root is a root domain only.
-    const innerWindowIDToRoot: Map<InnerWindowID, InnerWindowID> = new Map();
-    for (const [innerWindowID, threadIndex] of rootOrigins) {
-      const thread = profile.threads[threadIndex];
-      const page = ensureExists(pageOfThread[threadIndex]);
-      pidToRootInnerWindowID.set(thread.pid, innerWindowID);
-      // These are all roots.
-      innerWindowIDToRoot.set(innerWindowID, innerWindowID);
-      originsTimelineRoots.push({
-        type: 'origin',
-        innerWindowID,
-        threadIndex,
-        page,
-        origin: getOrigin(page.url),
-        children: [],
-      });
-    }
-
-    // Iterate and drain the sub origins from this set, and attempt to assign them
-    // to a root origin. This needs to loop to handle arbitrary sub-iframe depths.
-    const remainingSubOrigins = new Set([...subOrigins]);
-    let lastRemaining = Infinity;
-    while (lastRemaining !== remainingSubOrigins.size) {
-      lastRemaining = remainingSubOrigins.size;
-      for (const suborigin of remainingSubOrigins) {
-        const [innerWindowID, threadIndex] = suborigin;
-        const page = ensureExists(pageOfThread[threadIndex]);
-        const rootInnerWindowID = innerWindowIDToRoot.get(
-          page.embedderInnerWindowID
-        );
-        if (rootInnerWindowID === undefined) {
-          // This root has not been found yet.
-          continue;
-        }
-        const thread = profile.threads[threadIndex];
-        pidToRootInnerWindowID.set(thread.pid, rootInnerWindowID);
-
-        remainingSubOrigins.delete(suborigin);
-        innerWindowIDToRoot.set(innerWindowID, rootInnerWindowID);
-        const root = ensureExists(
-          originsTimelineRoots.find(
-            (root) => root.innerWindowID === rootInnerWindowID
-          )
-        );
-        root.children.push({
-          type: 'sub-origin',
-          innerWindowID,
-          threadIndex,
-          origin: getOrigin(page.url),
-          page,
-        });
-      }
-    }
-
-    // Try to blame a thread on another thread with an origin. If this doesn't work,
-    // then add it to this originsTimelineNoOrigin array.
-    const originsTimelineNoOrigin = [];
-    for (const threadIndex of noOrigins) {
-      const thread = profile.threads[threadIndex];
-      const rootInnerWindowID = pidToRootInnerWindowID.get(thread.pid);
-      const noOriginEntry = {
-        type: 'no-origin',
-        threadIndex,
-      };
-      if (rootInnerWindowID) {
-        const root = ensureExists(
-          originsTimelineRoots.find(
-            (root) => root.innerWindowID === rootInnerWindowID
-          )
-        );
-        root.children.push(noOriginEntry);
-      } else {
-        originsTimelineNoOrigin.push(noOriginEntry);
-      }
-    }
-
-    dispatch({
-      type: 'VIEW_ORIGINS_PROFILE',
-      // TODO - We should pick the best selected thread.
-      selectedThreadIndexes:
-        selectedThreadIndexes === null ? new Set([0]) : selectedThreadIndexes,
-      originsTimeline: [...originsTimelineNoOrigin, ...originsTimelineRoots],
-    });
-  };
-}
-
-/**
- * Finalize the profile state for active tab view.
- * This function will take the view information from the URL, such as hiding and sorting
- * information, and it will validate it against the profile. If there is no pre-existing
- * view information, this function will compute the defaults.
- */
-export function finalizeActiveTabProfileView(
-  profile: Profile,
-  selectedThreadIndexes: Set<ThreadIndex> | null,
-  tabID: TabID | null
-): ThunkAction<void> {
-  return (dispatch, getState) => {
-    const hasUrlInfo = selectedThreadIndexes !== null;
-    const relevantPages = getRelevantPagesForActiveTab(getState());
-
-    if (relevantPages.length === 0) {
-      // If no relevant pages found, it doesn't make sense for us to continue
-      // with the active tab view anymore. No relevant page means empty view in
-      // the active tab view.
-      dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
-      return;
-    }
-
-    const activeTabTimeline = computeActiveTabTracks(
-      profile,
-      relevantPages,
-      getState()
-    );
-
-    if (selectedThreadIndexes === null) {
-      // Select the main track if there is no selected thread.
-      selectedThreadIndexes = new Set([
-        ...activeTabTimeline.mainTrack.threadIndexes,
-      ]);
-    }
-
-    // Check the profile to see if we have threadCPUDelta values and switch to
-    // the category view with CPU if we have. This is needed only while we are
-    // still experimenting with the new activity graph. We should remove this
-    // when we have this on by default.
-    let timelineType = null;
-    if (!hasUrlInfo) {
-      timelineType = determineTimelineType(profile);
-    }
-
-    dispatch({
-      type: 'VIEW_ACTIVE_TAB_PROFILE',
-      activeTabTimeline,
-      selectedThreadIndexes,
-      tabID,
-      timelineType,
-    });
-  };
-}
-
-/**
- * Re-compute the profile view data. That's used to be able to switch between
- * full and active tab view.
- */
-export function changeTimelineTrackOrganization(
-  timelineTrackOrganization: TimelineTrackOrganization
-): ThunkAction<void> {
-  return (dispatch, getState) => {
-    const profile = getProfile(getState());
-    // We are resetting the selected thread index and the url state, because we
-    // are not sure if the selected thread will be availabe in the next view.
-    const selectedThreadIndexes = null;
-    dispatch({
-      type: 'DATA_RELOAD',
-    });
-
-    switch (timelineTrackOrganization.type) {
-      case 'full':
-        // The url state says this is a full view. We should compute and initialize
-        // the state relevant to that state.
-        dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
-        break;
-      case 'active-tab':
-        // The url state says this is an active tab view. We should compute and
-        // initialize the state relevant to that state.
-        dispatch(
-          finalizeActiveTabProfileView(
-            profile,
-            selectedThreadIndexes,
-            timelineTrackOrganization.tabID
-          )
-        );
-        break;
-      case 'origins': {
-        const pages = ensureExists(
-          profile.pages,
-          'There was no page information in the profile.'
-        );
-        dispatch(
-          finalizeOriginProfileView(profile, pages, selectedThreadIndexes)
-        );
-        break;
-      }
-      default:
-        throw assertExhaustiveCheck(
-          timelineTrackOrganization,
-          `Unhandled TimelineTrackOrganization type.`
-        );
-    }
-  };
-}
-
-/**
  * Symbolication normally happens when a profile is first loaded. This function
  * provides the ability to kick off symbolication again after it has already been
  * attempted once.
@@ -727,7 +375,7 @@ export function resymbolicateProfile(): ThunkAction<Promise<void>> {
     const symbolStore = getSymbolStore(
       dispatch,
       getSymbolServerUrl(getState()),
-      null
+      getBrowserConnection(getState())
     );
     const profile = getProfile(getState());
     if (!symbolStore) {
@@ -735,7 +383,12 @@ export function resymbolicateProfile(): ThunkAction<Promise<void>> {
         'There was no symbol store when attempting to re-symbolicate.'
       );
     }
-    await doSymbolicateProfile(dispatch, profile, symbolStore);
+    await doSymbolicateProfile(
+      dispatch,
+      profile,
+      symbolStore,
+      /* ignoreCache */ true
+    );
   };
 }
 
@@ -748,7 +401,6 @@ export function resymbolicateProfile(): ThunkAction<Promise<void>> {
 export function viewProfile(
   profile: Profile,
   config: $Shape<{|
-    timelineTrackOrganization: TimelineTrackOrganization,
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
@@ -798,7 +450,7 @@ export function bulkProcessSymbolicationSteps(
   symbolicationStepsPerThread: Map<ThreadIndex, SymbolicationStepInfo[]>
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const { threads } = getProfile(getState());
+    const { threads, shared } = getProfile(getState());
     const oldFuncToNewFuncsMaps: Map<ThreadIndex, FuncToFuncsMap> = new Map();
     const symbolicatedThreads = threads.map((oldThread, threadIndex) => {
       const symbolicationSteps = symbolicationStepsPerThread.get(threadIndex);
@@ -807,6 +459,7 @@ export function bulkProcessSymbolicationSteps(
       }
       const { thread, oldFuncToNewFuncsMap } = applySymbolicationSteps(
         oldThread,
+        shared,
         symbolicationSteps
       );
       oldFuncToNewFuncsMaps.set(threadIndex, oldFuncToNewFuncsMap);
@@ -1009,7 +662,8 @@ function getSymbolStore(
 export async function doSymbolicateProfile(
   dispatch: Dispatch,
   profile: Profile,
-  symbolStore: SymbolStore
+  symbolStore: SymbolStore,
+  ignoreCache?: boolean
 ) {
   dispatch(startSymbolicating());
 
@@ -1032,7 +686,8 @@ export async function doSymbolicateProfile(
           );
         })
       );
-    }
+    },
+    ignoreCache
   );
 
   await Promise.all(completionPromises);
@@ -1378,8 +1033,14 @@ async function _extractZipFromResponse(
   reportError: (...data: Array<any>) => void
 ): Promise<JSZip> {
   const buffer = await response.arrayBuffer();
+  // Workaround for https://github.com/Stuk/jszip/issues/941
+  // When running this code in tests, `buffer` doesn't inherits from _this_
+  // realm's ArrayBuffer object, and this breaks JSZip which doesn't account for
+  // this case. We workaround the issue by wrapping the buffer in an Uint8Array
+  // that comes from this realm.
+  const typedBuffer = new Uint8Array(buffer);
   try {
-    const zip = await JSZip.loadAsync(buffer);
+    const zip = await JSZip.loadAsync(typedBuffer);
     // Catch the error if unable to load the zip.
     return zip;
   } catch (error) {
@@ -1575,15 +1236,7 @@ export function retrieveProfileFromFile(
         // Profile files can have file names with uncommon extensions
         // (eg .profile). So we can't rely on the mime type to decide how to
         // handle them.
-        let arrayBuffer = await fileReader(file).asArrayBuffer();
-
-        // Check for the gzip magic number in the header. If we find it, decompress
-        // the data first.
-        const profileBytes = new Uint8Array(arrayBuffer);
-        if (isGzip(profileBytes)) {
-          const decompressedProfile = await decompress(profileBytes);
-          arrayBuffer = decompressedProfile.buffer;
-        }
+        const arrayBuffer = await fileReader(file).asArrayBuffer();
 
         const profile = await unserializeProfileOfArbitraryFormat(
           arrayBuffer,
@@ -1843,17 +1496,15 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
       tabID,
       tabToThreadIndexesMap
     );
-    const localTracksByPid = computeLocalTracksByPid(
-      profile,
-      globalTracks,
-      getMarkerSchemaByName(getState())
-    );
+    const localTracksByPid = computeLocalTracksByPid(profile, globalTracks);
 
+    const threadActivityScores = getThreadActivityScores(getState());
     const legacyThreadOrder = getLegacyThreadOrder(getState());
     const globalTrackOrder = initializeGlobalTrackOrder(
       globalTracks,
       null, // Passing null to urlGlobalTrackOrder to reinitilize it.
-      legacyThreadOrder
+      legacyThreadOrder,
+      threadActivityScores
     );
     const localTrackOrderByPid = initializeLocalTrackOrderByPid(
       null, // Passing null to urlTrackOrderByPid to reinitilize it.
@@ -1890,7 +1541,7 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
       hiddenTracks = computeDefaultHiddenTracks(
         tracksWithOrder,
         profile,
-        getThreadActivityScores(getState()),
+        threadActivityScores,
         // Only include the parent process if there is no tab filter applied.
         includeParentProcessThreads
       );
@@ -1899,7 +1550,8 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
     const selectedThreadIndexes = initializeSelectedThreadIndex(
       null, // maybeSelectedThreadIndexes
       getVisibleThreads(tracksWithOrder, hiddenTracks),
-      profile
+      profile,
+      threadActivityScores
     );
 
     // If the currently selected tab is only visible when the selected track
@@ -1912,7 +1564,7 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
         const thread = profile.threads[threadIndex];
         const { samples, jsAllocations, nativeAllocations } = thread;
         hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
-          hasUsefulSamples(table, thread)
+          hasUsefulSamples(table?.stack, thread, profile.shared)
         );
         if (hasSamples) {
           break;

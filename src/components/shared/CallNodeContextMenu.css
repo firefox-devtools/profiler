@@ -44,3 +44,11 @@
   color: #000;
   margin-inline-start: 12px;
 }
+
+@media (forced-colors: active) {
+  .callNodeContextMenuShortcut {
+    background: SelectedItemText;
+    color: SelectedItem;
+    outline: 1px solid CanvasText;
+  }
+}

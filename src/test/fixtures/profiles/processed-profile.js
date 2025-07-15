@@ -13,8 +13,10 @@ import {
   getEmptyBalancedNativeAllocationsTable,
 } from '../../../profile-logic/data-structures';
 import { mergeProfilesForDiffing } from '../../../profile-logic/merge-compare';
+import { computeReferenceCPUDeltaPerMs } from '../../../profile-logic/cpu';
 import { stateFromLocation } from '../../../app-logic/url-handling';
-import { UniqueStringArray } from '../../../utils/unique-string-array';
+import { StringTable } from '../../../utils/string-table';
+import { computeThreadFromRawThread } from '../utils';
 import { ensureExists } from '../../../utils/flow';
 import {
   INTERVAL,
@@ -25,13 +27,15 @@ import {
 
 import type {
   Profile,
+  RawProfileSharedData,
+  RawThread,
   Thread,
   ThreadIndex,
   IndexIntoCategoryList,
   IndexIntoStackTable,
   CategoryList,
   JsTracerTable,
-  Counter,
+  RawCounter,
   TabID,
   MarkerPayload,
   NetworkPayload,
@@ -52,7 +56,10 @@ import {
   deriveMarkersFromRawMarkerTable,
   IPCMarkerCorrelations,
 } from '../../../profile-logic/marker-data';
-import { getTimeRangeForThread } from '../../../profile-logic/profile-data';
+import {
+  getTimeRangeForThread,
+  computeTimeColumnForRawSamplesTable,
+} from '../../../profile-logic/profile-data';
 import { markerSchemaForTests } from './marker-schema';
 import { GlobalDataCollector } from 'firefox-profiler/profile-logic/process-profile';
 import { getVisualMetrics } from './gecko-profile';
@@ -62,17 +69,23 @@ type MarkerName = string;
 type MarkerTime = Milliseconds;
 
 // These markers can create an Instant or a complete Interval marker, depending
-// on if an end time is passed in. The definition uses a union, becaus as far
+// on if an end time is passed in.
+//
+// If the data field is left out (undefined), a default value { type: MarkerName }
+// is used. If the data field is manually set to null, a null data is used.
+//
+// The definition uses a union, becaus as far
 // as I can tell, Flow doesn't support multiple arity tuples.
 export type TestDefinedMarkers = Array<
-  // Instant marker:
+  // Instant marker, payload defaulting to { type: MarkerName }:
   | [MarkerName, MarkerTime]
-  // No payload:
+  // Interval marker:
   | [
       MarkerName,
       MarkerTime, // start time
       MarkerTime | null, // end time
     ]
+  // Marker with manual payload:
   | [
       MarkerName,
       MarkerTime, // start time
@@ -101,10 +114,11 @@ export type TestDefinedJsTracerEvent = [
 ];
 
 export function addRawMarkersToThread(
-  thread: Thread,
+  thread: RawThread,
+  shared: RawProfileSharedData,
   markers: TestDefinedRawMarker[]
 ) {
-  const stringTable = thread.stringTable;
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
   const markersTable = thread.markers;
 
   for (const { name, startTime, endTime, phase, category, data } of markers) {
@@ -126,7 +140,7 @@ export function addRawMarkersToThread(
 function _replaceUniqueStringFieldValuesWithStringIndexesInMarkerPayload(
   payload: MixedObject | null,
   markerSchemas: MarkerSchema[],
-  stringTable: UniqueStringArray
+  stringTable: StringTable
 ) {
   if (payload === null) {
     return;
@@ -139,8 +153,8 @@ function _replaceUniqueStringFieldValuesWithStringIndexesInMarkerPayload(
   if (schema === undefined) {
     return;
   }
-  for (const fieldSchema of schema.data) {
-    if (!fieldSchema.format || fieldSchema.format !== 'unique-string') {
+  for (const fieldSchema of schema.fields) {
+    if (fieldSchema.format !== 'unique-string') {
       continue;
     }
     const { key } = fieldSchema;
@@ -153,10 +167,11 @@ function _replaceUniqueStringFieldValuesWithStringIndexesInMarkerPayload(
 
 // This is used in tests, with TestDefinedMarkers.
 export function addMarkersToThreadWithCorrespondingSamples(
-  thread: Thread,
+  thread: RawThread,
+  shared: RawProfileSharedData,
   markers: TestDefinedMarkers
 ) {
-  const stringTable = thread.stringTable;
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
   const markersTable = thread.markers;
   const allTimes = new Set();
 
@@ -165,7 +180,8 @@ export function addMarkersToThreadWithCorrespondingSamples(
     const startTime = tuple[1];
     // Flow doesn't support variadic tuple types.
     const maybeEndTime = (tuple: any)[2] || null;
-    const payload: MarkerPayload | null = (tuple: any)[3] || null;
+    const maybePayload: MarkerPayload | null | void = (tuple: any)[3];
+    const payload = maybePayload === undefined ? { type: name } : maybePayload;
 
     markersTable.name.push(stringTable.indexForString(name));
     if (maybeEndTime === null) {
@@ -184,7 +200,7 @@ export function addMarkersToThreadWithCorrespondingSamples(
       markerSchemaForTests,
       stringTable
     );
-    markersTable.data.push(payload);
+    markersTable.data.push((payload: any));
     markersTable.category.push(0);
     markersTable.length++;
   });
@@ -198,17 +214,19 @@ export function addMarkersToThreadWithCorrespondingSamples(
     const firstMarkerTime = Math.min(...allTimes);
     const lastMarkerTime = Math.max(...allTimes);
 
+    const sampleTimes = ensureExists(samples.time);
+
     // The first marker time should be added if there's no sample before this time.
-    const shouldAddFirstMarkerTime = samples.time[0] > firstMarkerTime;
+    const shouldAddFirstMarkerTime = sampleTimes[0] > firstMarkerTime;
 
     // The last marker time should be added if there's no sample after this time,
     // but only if it's different than the other time.
     const shouldAddLastMarkerTime =
-      samples.time[samples.length - 1] < lastMarkerTime &&
+      sampleTimes[samples.length - 1] < lastMarkerTime &&
       firstMarkerTime !== lastMarkerTime;
 
     if (shouldAddFirstMarkerTime) {
-      samples.time.unshift(firstMarkerTime);
+      sampleTimes.unshift(firstMarkerTime);
       samples.stack.unshift(null);
       if (samples.responsiveness) {
         samples.responsiveness.unshift(null);
@@ -223,7 +241,7 @@ export function addMarkersToThreadWithCorrespondingSamples(
     }
 
     if (shouldAddLastMarkerTime) {
-      samples.time.push(lastMarkerTime);
+      sampleTimes.push(lastMarkerTime);
       samples.stack.push(null);
       if (samples.responsiveness) {
         samples.responsiveness.push(null);
@@ -239,15 +257,21 @@ export function addMarkersToThreadWithCorrespondingSamples(
   }
 }
 
-export function getThreadWithMarkers(markers: TestDefinedMarkers) {
+export function getThreadWithMarkers(
+  shared: RawProfileSharedData,
+  markers: TestDefinedMarkers
+) {
   const thread = getEmptyThread();
-  addMarkersToThreadWithCorrespondingSamples(thread, markers);
+  addMarkersToThreadWithCorrespondingSamples(thread, shared, markers);
   return thread;
 }
 
-export function getThreadWithRawMarkers(markers: TestDefinedRawMarker[]) {
+export function getThreadWithRawMarkers(
+  shared: RawProfileSharedData,
+  markers: TestDefinedRawMarker[]
+) {
   const thread = getEmptyThread();
-  addRawMarkersToThread(thread, markers);
+  addRawMarkersToThread(thread, shared, markers);
   return thread;
 }
 
@@ -255,10 +279,13 @@ export function getThreadWithRawMarkers(markers: TestDefinedRawMarker[]) {
  * This can be a little annoying to derive with all of the dependencies,
  * so provide an easy interface to do so here.
  */
-export function getTestFriendlyDerivedMarkerInfo(thread: Thread) {
+export function getTestFriendlyDerivedMarkerInfo(
+  thread: RawThread,
+  shared: RawProfileSharedData
+) {
   return deriveMarkersFromRawMarkerTable(
     thread.markers,
-    thread.stringTable,
+    shared.stringArray,
     thread.tid || 0,
     getTimeRangeForThread(thread, 1),
     new IPCMarkerCorrelations()
@@ -376,7 +403,7 @@ export function getProfileWithMarkers(
     );
   }
   profile.threads = markersPerThread.map((testDefinedMarkers, i) => ({
-    ...getThreadWithMarkers(testDefinedMarkers),
+    ...getThreadWithMarkers(profile.shared, testDefinedMarkers),
     tid: i,
   }));
   return profile;
@@ -477,9 +504,12 @@ export function getProfileWithNamedThreads(threadNames: string[]): Profile {
 
 export type ProfileWithDicts = {
   profile: Profile,
+  derivedThreads: Thread[],
+  stringTable: StringTable,
   funcNamesPerThread: Array<string[]>,
   funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
   nativeSymbolsDictPerThread: Array<{ [nativeSymbolName: string]: number }>,
+  defaultCategory: IndexIntoCategoryList,
 };
 
 /**
@@ -512,9 +542,7 @@ export type ProfileWithDicts = {
  * * an array mapping the func names to their indices
  *
  * Functions ending in "js" are marked as JS functions in the funcTable's isJS
- * column. It's possible to specify a JIT type by specifying in brackets like
- * this: [jit:baseline] or [jit:ion], right after the function name (see below
- * for an example). The default is no JIT.
+ * column.
  *
  * The time of the sample can also be set by making the first row all numbers:
  * ```
@@ -533,7 +561,7 @@ export type ProfileWithDicts = {
  * } = getProfileFromTextSamples(`
  *    A             A
  *    B             B
- *    Cjs[jit:ion]  Cjs[jit:baseline]
+ *    Cjs           Cjs
  *    D[cat:DOM]    D[cat:DOM]
  *    E             F
  *  `);
@@ -542,7 +570,6 @@ export type ProfileWithDicts = {
  * be used in tests.
  *
  * The following func and frame attributes are supported:
- *  - [jit:*] - The JIT used for a JS frame, affects frameTable.implementation.
  *  - [cat:*] - The category name, affects frameTable.category
  *  - [lib:*] - The library name, affects funcTable.resource + resourceTable + libs
  *  - [file:*] - The filename, affects funcTable.file
@@ -745,27 +772,6 @@ function _parseTextSamples(textSamples: string): Array<string[]> {
   });
 }
 
-const JIT_IMPLEMENTATIONS = ['ion', 'baseline', 'blinterp'];
-
-function _findJitTypeFromFuncName(funcNameWithModifier: string): string | null {
-  const findJitTypeResult = /\[jit:([^\]]+)\]/.exec(funcNameWithModifier);
-  let jitType = null;
-  if (findJitTypeResult) {
-    jitType = findJitTypeResult[1];
-  }
-
-  if (jitType) {
-    if (JIT_IMPLEMENTATIONS.includes(jitType)) {
-      return jitType;
-    }
-    throw new Error(
-      `The jitType '${jitType}' is unknown to this tool. Is it a typo or should you update the list of possible values?`
-    );
-  }
-
-  return null;
-}
-
 function _isJsFunctionName(funcName) {
   return funcName.endsWith('js');
 }
@@ -877,18 +883,18 @@ function _buildThreadFromTextOnlyStacks(
   categories: CategoryList,
   globalDataCollector: GlobalDataCollector,
   sampleTimes: number[] | null
-): Thread {
+): RawThread {
   const thread = getEmptyThread();
 
   const {
     funcTable,
-    stringTable,
     frameTable,
     stackTable,
     samples,
     resourceTable,
     nativeSymbols,
   } = thread;
+  const stringTable = globalDataCollector.getStringTable();
 
   // Create the FuncTable.
   funcNames.forEach((funcName) => {
@@ -898,12 +904,9 @@ function _buildThreadFromTextOnlyStacks(
     funcTable.isJS.push(_isJsFunctionName(funcName));
     funcTable.lineNumber.push(null);
     funcTable.columnNumber.push(null);
-    // Ignore resources for now, this way funcNames have really nice string indexes.
     // The resource column will be filled in the loop below.
     funcTable.length++;
   });
-
-  const categoryOther = categories.findIndex((c) => c.name === 'Other');
 
   // This map caches resource indexes for library names.
   const resourceIndexCache = {};
@@ -913,10 +916,9 @@ function _buildThreadFromTextOnlyStacks(
     let prefix = null;
     column.forEach((funcNameWithModifier) => {
       const funcName = funcNameWithModifier.replace(/\[.*/, '');
-
-      // There is a one-to-one relationship between strings and funcIndexes here, so
-      // the indexes can double as both string indexes and func indexes.
-      const funcIndex = stringTable.indexForString(funcName);
+      const funcIndex = funcTable.name.indexOf(
+        stringTable.indexForString(funcName)
+      );
 
       // Find the library name from the function name and create an entry if needed.
       const libraryName = _findLibNameFromFuncName(funcNameWithModifier);
@@ -955,9 +957,6 @@ function _buildThreadFromTextOnlyStacks(
         funcTable.fileName[funcIndex] = stringTable.indexForString(fileName);
       }
 
-      // Find the wanted jit type from the function name
-      const jitType = _findJitTypeFromFuncName(funcNameWithModifier);
-      const jitTypeIndex = jitType ? stringTable.indexForString(jitType) : null;
       const category = _findCategoryFromFuncName(
         funcNameWithModifier,
         funcName,
@@ -995,13 +994,12 @@ function _buildThreadFromTextOnlyStacks(
       const inlineDepth =
         _findInlineDepthFromFuncName(funcNameWithModifier) ?? 0;
 
-      // Attempt to find a frame that satisfies the given funcIndex, jit type,
+      // Attempt to find a frame that satisfies the given funcIndex,
       // category, and line number.
       let frameIndex;
       for (let i = 0; i < frameTable.length; i++) {
         if (
           funcIndex === frameTable.func[i] &&
-          jitTypeIndex === frameTable.implementation[i] &&
           category === frameTable.category[i] &&
           lineNumber === frameTable.line[i] &&
           address === frameTable.address[i] &&
@@ -1021,7 +1019,6 @@ function _buildThreadFromTextOnlyStacks(
         frameTable.subcategory.push(0);
         frameTable.innerWindowID.push(0);
         frameTable.nativeSymbol.push(nativeSymbol);
-        frameTable.implementation.push(jitTypeIndex);
         frameTable.line.push(lineNumber);
         frameTable.column.push(null);
         frameIndex = frameTable.length++;
@@ -1041,21 +1038,8 @@ function _buildThreadFromTextOnlyStacks(
 
       // If we couldn't find a stack, go ahead and create it.
       if (stackIndex === undefined) {
-        const frameCategory = frameTable.category[frameIndex];
-        const frameSubcategory = frameTable.subcategory[frameIndex];
-        const prefixCategory =
-          prefix === null ? categoryOther : stackTable.category[prefix];
-        const prefixSubcategory =
-          prefix === null ? 0 : stackTable.subcategory[prefix];
-        const stackCategory =
-          frameCategory === null ? prefixCategory : frameCategory;
-        const stackSubcategory =
-          frameSubcategory === null ? prefixSubcategory : frameSubcategory;
-
         stackTable.frame.push(frameIndex);
         stackTable.prefix.push(prefix);
-        stackTable.category.push(stackCategory);
-        stackTable.subcategory.push(stackSubcategory);
         stackIndex = stackTable.length++;
       }
 
@@ -1066,7 +1050,7 @@ function _buildThreadFromTextOnlyStacks(
     samples.length++;
     ensureExists(samples.eventDelay).push(0);
     samples.stack.push(prefix);
-    samples.time.push(columnIndex);
+    ensureExists(samples.time).push(columnIndex);
   });
 
   if (sampleTimes) {
@@ -1104,20 +1088,40 @@ export function getNativeSymbolsDictForThread(thread: Thread): {
 }
 
 export function getProfileWithDicts(profile: Profile): ProfileWithDicts {
-  const funcNameDicts = profile.threads.map(getFuncNamesDictForThread);
+  const defaultCategory = ensureExists(
+    profile.meta.categories,
+    'Expected to find categories'
+  ).findIndex((c) => c.name === 'Other');
+
+  const referenceCPUDeltaPerMs = computeReferenceCPUDeltaPerMs(profile);
+  const { shared, threads } = profile;
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
+  const derivedThreads = threads.map((rawThread) =>
+    computeThreadFromRawThread(
+      rawThread,
+      shared,
+      profile.meta.sampleUnits,
+      referenceCPUDeltaPerMs,
+      defaultCategory
+    )
+  );
+  const funcNameDicts = derivedThreads.map(getFuncNamesDictForThread);
   const funcNamesPerThread = funcNameDicts.map(({ funcNames }) => funcNames);
   const funcNamesDictPerThread = funcNameDicts.map(
     ({ funcNamesDict }) => funcNamesDict
   );
-  const nativeSymbolsDictPerThread = profile.threads.map(
+  const nativeSymbolsDictPerThread = derivedThreads.map(
     getNativeSymbolsDictForThread
   );
 
   return {
     profile,
+    derivedThreads,
     funcNamesPerThread,
     funcNamesDictPerThread,
     nativeSymbolsDictPerThread,
+    stringTable,
+    defaultCategory,
   };
 }
 
@@ -1241,7 +1245,8 @@ export function getNetworkTrackProfile() {
     },
   ];
 
-  const thread = profile.threads[0];
+  const { shared, threads } = profile;
+  const thread = threads[0];
 
   const loadPayloadBase = {
     type: 'tracing',
@@ -1256,7 +1261,7 @@ export function getNetworkTrackProfile() {
     innerWindowID: innerWindowID,
   };
 
-  addMarkersToThreadWithCorrespondingSamples(thread, [
+  addMarkersToThreadWithCorrespondingSamples(thread, shared, [
     [
       'Load',
       4,
@@ -1388,13 +1393,14 @@ export function getScreenshotTrackProfile() {
  */
 export function addIPCMarkerPairToThreads(
   payload: $Shape<IPCMarkerPayload>,
-  senderThread: Thread,
-  receiverThread: Thread
+  senderThread: RawThread,
+  receiverThread: RawThread,
+  shared: RawProfileSharedData
 ) {
   const ipcMarker = (
     direction: 'sending' | 'receiving',
     isParent: boolean,
-    otherThread: Thread
+    otherThread: RawThread
   ) => [
     'IPC',
     payload.startTime,
@@ -1423,11 +1429,11 @@ export function addIPCMarkerPairToThreads(
     senderThread.name === 'GeckoMain' && senderThread.processType === 'default'
       ? true
       : false;
-  addMarkersToThreadWithCorrespondingSamples(senderThread, [
+  addMarkersToThreadWithCorrespondingSamples(senderThread, shared, [
     ipcMarker('sending', isSenderParent, receiverThread),
   ]);
 
-  addMarkersToThreadWithCorrespondingSamples(receiverThread, [
+  addMarkersToThreadWithCorrespondingSamples(receiverThread, shared, [
     ipcMarker('receiving', !isSenderParent, senderThread),
   ]);
 }
@@ -1439,7 +1445,7 @@ export function getVisualProgressTrackProfile(profileString: string): Profile {
 }
 
 export function getJsTracerTable(
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   events: TestDefinedJsTracerEvent[]
 ): JsTracerTable {
   const jsTracer = getEmptyJsTracerTable();
@@ -1458,10 +1464,12 @@ export function getJsTracerTable(
 }
 
 export function getThreadWithJsTracerEvents(
-  events: TestDefinedJsTracerEvent[]
-): Thread {
+  events: TestDefinedJsTracerEvent[],
+  shared: RawProfileSharedData
+): RawThread {
   const thread = getEmptyThread();
-  thread.jsTracer = getJsTracerTable(thread.stringTable, events);
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
+  thread.jsTracer = getJsTracerTable(stringTable, events);
 
   let endOfEvents = 0;
   for (const [, , end] of events) {
@@ -1498,7 +1506,7 @@ export function getProfileWithJsTracerEvents(
 ): Profile {
   const profile = getEmptyProfile();
   profile.threads = eventsLists.map((events) =>
-    getThreadWithJsTracerEvents(events)
+    getThreadWithJsTracerEvents(events, profile.shared)
   );
   return profile;
 }
@@ -1507,24 +1515,25 @@ export function getProfileWithJsTracerEvents(
  * Creates a Counter fixture for a given thread.
  */
 export function getCounterForThread(
-  thread: Thread,
+  thread: RawThread,
   mainThreadIndex: ThreadIndex,
   config: { hasCountNumber: boolean } = {}
-): Counter {
-  const counter: Counter = {
+): RawCounter {
+  const sampleTimes = computeTimeColumnForRawSamplesTable(thread.samples);
+  const counter: RawCounter = {
     name: 'My Counter',
     category: 'My Category',
     description: 'My Description',
     pid: thread.pid,
     mainThreadIndex,
     samples: {
-      time: thread.samples.time.slice(),
+      time: sampleTimes.slice(),
       // Create some arbitrary (positive integer) values for the number.
       number: config.hasCountNumber
-        ? thread.samples.time.map((_, i) => Math.floor(50 * Math.sin(i) + 50))
+        ? sampleTimes.map((_, i) => Math.floor(50 * Math.sin(i) + 50))
         : undefined,
       // Create some arbitrary values for the count.
-      count: thread.samples.time.map((_, i) => Math.sin(i)),
+      count: sampleTimes.map((_, i) => Math.sin(i)),
       length: thread.samples.length,
     },
   };
@@ -1535,7 +1544,7 @@ export function getCounterForThread(
  * Creates a Counter fixture for a given thread with the given samples.
  */
 export function getCounterForThreadWithSamples(
-  thread: Thread,
+  thread: RawThread,
   mainThreadIndex: ThreadIndex,
   samples: {
     time?: number[],
@@ -1545,7 +1554,7 @@ export function getCounterForThreadWithSamples(
   },
   name?: string,
   category?: string
-): Counter {
+): RawCounter {
   const newSamples = {
     time: samples.time
       ? samples.time
@@ -1557,7 +1566,7 @@ export function getCounterForThreadWithSamples(
     length: samples.length,
   };
 
-  const counter: Counter = {
+  const counter: RawCounter = {
     name: name ?? 'My Counter',
     category: category ?? 'My Category',
     description: 'My Description',
@@ -1585,7 +1594,7 @@ export function getProfileWithEventDelays(
  */
 export function getThreadWithEventDelay(
   userEventDelay?: Milliseconds[]
-): Thread {
+): RawThread {
   const thread = getEmptyThread();
 
   // Creating some empty event delays because they will be filled with the pre-process.
@@ -1631,6 +1640,7 @@ export function getProfileWithJsAllocations() {
   const {
     profile,
     funcNamesDictPerThread: [funcNamesDict],
+    funcNamesPerThread: [funcNames],
   } = getProfileFromTextSamples(`
     A  A     A
     B  B     B
@@ -1669,7 +1679,7 @@ export function getProfileWithJsAllocations() {
     jsAllocations.length++;
   }
 
-  return { profile, funcNamesDict };
+  return { profile, funcNamesDict, funcNames };
 }
 
 /**
@@ -1851,7 +1861,7 @@ export function getProfileWithBalancedNativeAllocations() {
  * |
  * mozilla.org
  */
-export function addActiveTabInformationToProfile(
+export function addTabInformationToProfile(
   profile: Profile,
   activeTabID?: TabID
 ) {
@@ -1941,7 +1951,7 @@ export function addActiveTabInformationToProfile(
 
 /**
  * Use this function to create a profile that has private browsing data.
- * This profile should first be run through addActiveTabInformationToProfile to
+ * This profile should first be run through addTabInformationToProfile to
  * add pages information.
  * To add markers with private browsing information, please use
  * addMarkersToThreadWithCorrespondingSamples directly.
@@ -1959,7 +1969,7 @@ export function markTabIdsAsPrivateBrowsing(
   const pages = profile.pages;
   if (!pages) {
     throw new Error(
-      `Can't add private browsing data to a profile without pages. Please run addActiveTabInformationToProfile on this profile first.`
+      `Can't add private browsing data to a profile without pages. Please run addTabInformationToProfile on this profile first.`
     );
   }
 
@@ -1973,7 +1983,7 @@ export function markTabIdsAsPrivateBrowsing(
 // /!\ This algorithm is good enough for tests, but it's not correct for
 // general cases.
 function getStackIndexForCallNodePath(
-  { stackTable, frameTable }: Thread,
+  { stackTable, frameTable }: RawThread,
   callNodePath: CallNodePath
 ): IndexIntoStackTable {
   let currentFuncInCallNodePath = 0;
@@ -2017,7 +2027,7 @@ function getStackIndexForCallNodePath(
  *                        get all passed innerWindowIDs
  */
 export function addInnerWindowIdToStacks(
-  thread: Thread,
+  thread: RawThread,
   listOfOperations: Array<{ innerWindowID: number, callNodes: CallNodePath[] }>,
   callNodesToDupe?: CallNodePath[]
 ) {
@@ -2059,9 +2069,6 @@ export function addInnerWindowIdToStacks(
       frameTable.subcategory.push(frameTable.subcategory[foundFrameIndex]);
       frameTable.func.push(frameTable.func[foundFrameIndex]);
       frameTable.nativeSymbol.push(frameTable.nativeSymbol[foundFrameIndex]);
-      frameTable.implementation.push(
-        frameTable.implementation[foundFrameIndex]
-      );
       frameTable.line.push(frameTable.line[foundFrameIndex]);
       frameTable.column.push(frameTable.column[foundFrameIndex]);
 
@@ -2071,14 +2078,13 @@ export function addInnerWindowIdToStacks(
       // Clone the stack
       const newStackIndex = stackTable.length++;
       stackTable.prefix.push(stackTable.prefix[stackIndex]);
-      stackTable.category.push(stackTable.category[stackIndex]);
-      stackTable.subcategory.push(stackTable.subcategory[stackIndex]);
       // Using the cloned frame index.
       stackTable.frame.push(newFrameIndex);
 
       mapStackIndexToDupe.set(stackIndex, newStackIndex);
     }
 
+    const sampleTimes = ensureExists(samples.time);
     for (let sampleIndex = samples.length; sampleIndex >= 0; sampleIndex--) {
       // We're looping from the end because we'll push some samples to the end
       // and don't want to look at them.
@@ -2089,7 +2095,7 @@ export function addInnerWindowIdToStacks(
       }
 
       // Dupe the sample
-      samples.time.push(samples.time[samples.length - 1] + 1);
+      sampleTimes.push(sampleTimes[samples.length - 1] + 1);
       samples.stack.push(newStackIndex);
       if (samples.eventDelay) {
         samples.eventDelay.push(samples.eventDelay[sampleIndex]);
@@ -2142,7 +2148,7 @@ export function getProfileWithThreadCPUDelta(
 export function getThreadWithThreadCPUDelta(
   userThreadCPUDelta?: Array<number | null>,
   interval: Milliseconds = 1
-): Thread {
+): RawThread {
   const thread = getEmptyThread();
   const samplesLength = userThreadCPUDelta ? userThreadCPUDelta.length : 10;
 

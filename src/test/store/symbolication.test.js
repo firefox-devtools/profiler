@@ -25,6 +25,7 @@ import {
 } from '../../actions/profile-view';
 import { formatTree, formatStack } from '../fixtures/utils';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
+import { StringTable } from '../../utils/string-table';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 
 // fake-indexeddb no longer includes a structuredClone polyfill, so we need to
@@ -182,6 +183,54 @@ describe('doSymbolicateProfile', function () {
       ]);
     });
 
+    it('uses the cache when available', async () => {
+      // This reuses the db from the previous test
+      const {
+        store: { dispatch, getState },
+        profile,
+        symbolStore,
+        switchSymbolTable,
+      } = init();
+
+      // This partial symbol table should not be used, because the db cache is
+      // used instead.
+      switchSymbolTable(partialSymbolTable);
+
+      await doSymbolicateProfile(dispatch, profile, symbolStore);
+      expect(formatTree(getCallTree(getState()))).toEqual([
+        // 0x0000 and 0x000a get merged together.
+        '- first symbol (total: 2, self: —)',
+        '  - last symbol (total: 2, self: 2)',
+        '- third symbol (total: 1, self: 1)',
+        '- second symbol (total: 1, self: 1)',
+      ]);
+
+      // But the partial symbol table should be used when ignoring the cache.
+      await doSymbolicateProfile(
+        dispatch,
+        profile,
+        symbolStore,
+        /* ignoreCache */ true
+      );
+      expect(formatTree(getCallTree(getState()))).toEqual([
+        '- overencompassing first symbol (total: 4, self: 2)',
+        '  - last symbol (total: 2, self: 2)',
+      ]);
+
+      // And then the cache should have been overwritten, let's check this by
+      // switching the symbol table again.
+      switchSymbolTable(completeSymbolTable);
+      // This time do not ignore the cache.
+      await doSymbolicateProfile(dispatch, profile, symbolStore);
+      // The result should be the same despite that the complete symbol table
+      // has been configured, this means the incomplete symbol table is in the
+      // DB cache.
+      expect(formatTree(getCallTree(getState()))).toEqual([
+        '- overencompassing first symbol (total: 4, self: 2)',
+        '  - last symbol (total: 2, self: 2)',
+      ]);
+    });
+
     it('can symbolicate a profile when symbols come from-server', async () => {
       // Get rid of any cached symbol tables from the previous test.
       await _deleteDatabase(`${symbolStoreName}-symbol-tables`);
@@ -215,8 +264,7 @@ describe('doSymbolicateProfile', function () {
         '- second symbol (total: 1, self: 1)',
       ]);
 
-      const symbolicatedProfile = ProfileViewSelectors.getProfile(getState());
-      const thread = symbolicatedProfile.threads[0];
+      const thread = getThread(getState());
       const { frameTable, funcTable, stringTable } = thread;
       expect(funcTable.length).toBeGreaterThanOrEqual(4);
 
@@ -549,7 +597,9 @@ function _createUnsymbolicatedProfile() {
       0x2000  0x2000
     `
   );
-  const thread = profile.threads[0];
+  const { threads, shared } = profile;
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
+  const thread = threads[0];
 
   // Add a mock lib.
   const libIndex = 0;
@@ -566,8 +616,8 @@ function _createUnsymbolicatedProfile() {
   thread.resourceTable = {
     length: 1,
     lib: [libIndex],
-    name: [thread.stringTable.indexForString('example lib')],
-    host: [thread.stringTable.indexForString('example host')],
+    name: [stringTable.indexForString('example lib')],
+    host: [stringTable.indexForString('example host')],
     type: [resourceTypes.library],
   };
   for (let i = 0; i < thread.funcTable.length; i++) {
@@ -590,10 +640,9 @@ function _createUnsymbolicatedProfile() {
   const markers = getEmptyRawMarkerTable();
   const markerIndex = markers.length++;
   markers.data[markerIndex] = markerData;
-  markers.name[markerIndex] =
-    thread.stringTable.indexForString('MarkerWithStack');
-  markers.startTime[markerIndex] = thread.samples.time[0];
-  markers.endTime[markerIndex] = thread.samples.time[1];
+  markers.name[markerIndex] = stringTable.indexForString('MarkerWithStack');
+  markers.startTime[markerIndex] = 0;
+  markers.endTime[markerIndex] = 3;
   markers.phase[markerIndex] = INTERVAL;
   markers.category[markerIndex] = 0;
 

@@ -91,29 +91,3 @@ exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 3`] 
   </li>
 </ol>
 `;
-
-exports[`app/ProfileFilterNavigator renders the site hostname as its first element in the single tab view 1`] = `
-<ol
-  class="filterNavigatorBar profileFilterNavigator"
->
-  <li
-    class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
-  >
-    <span
-      class="filterNavigatorBarItemContent"
-    >
-      <div
-        class="nodeIcon "
-      />
-      <span
-        title="https://developer.mozilla.org"
-      >
-        developer.mozilla.org
-         (
-        51ms
-        )
-      </span>
-    </span>
-  </li>
-</ol>
-`;

@@ -173,12 +173,12 @@ describe('profile deletion', () => {
     endpointUrl: string,
     jwtToken: string,
   }) {
-    window.fetch
+    window.fetchMock
       .catch(404) // catchall
-      .mock(endpointUrl, async (urlString, options) => {
+      .route(endpointUrl, async ({ options }) => {
         const { method, headers } = options;
 
-        if (method !== 'DELETE') {
+        if (method !== 'delete') {
           return new Response(null, {
             status: 405,
             statusText: 'Method not allowed',
@@ -186,8 +186,8 @@ describe('profile deletion', () => {
         }
 
         if (
-          headers['Content-Type'] !== 'application/json' ||
-          headers.Accept !== 'application/vnd.firefox-profiler+json;version=1.0'
+          headers['content-type'] !== 'application/json' ||
+          headers.accept !== 'application/vnd.firefox-profiler+json;version=1.0'
         ) {
           return new Response(null, {
             status: 406,
@@ -195,7 +195,7 @@ describe('profile deletion', () => {
           });
         }
 
-        if (headers.Authorization !== `Bearer ${jwtToken}`) {
+        if (headers.authorization !== `Bearer ${jwtToken}`) {
           return new Response(null, {
             status: 401,
             statusText: 'Forbidden',
@@ -219,6 +219,6 @@ describe('profile deletion', () => {
       profileToken: PROFILE_TOKEN,
       jwtToken: JWT_TOKEN,
     });
-    expect(window.fetch).toHaveBeenCalledWith(endpointUrl, expect.anything());
+    expect(window.fetch).toHaveFetched(endpointUrl, expect.anything());
   });
 });

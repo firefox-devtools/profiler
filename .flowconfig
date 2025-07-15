@@ -10,6 +10,7 @@ esproposal.optional_chaining=enable
 [ignore]
 <PROJECT_ROOT>/node_modules/.*
 <PROJECT_ROOT>/dist/.*
+src/profile-logic/import/proto/.*
 
 [libs]
 src/types/libdef

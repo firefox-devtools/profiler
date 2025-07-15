@@ -148,3 +148,19 @@
 .react-contextmenu-item--selected > strong {
   color: #fff;
 }
+
+@media (forced-colors: active) {
+  .react-contextmenu {
+    border: 1px solid CanvasText;
+  }
+
+  .react-contextmenu-item:not(.react-contextmenu-item--disabled):hover {
+    background-color: SelectedItem;
+    color: SelectedItemText;
+  }
+
+  .react-contextmenu-item.react-contextmenu-item--disabled,
+  .react-contextmenu-item.react-contextmenu-item--disabled:hover {
+    color: GrayText;
+  }
+}

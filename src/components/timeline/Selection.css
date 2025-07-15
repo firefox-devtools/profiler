@@ -9,6 +9,10 @@
     100vw - var(--thread-label-column-width) -
       var(--vertical-scrollbar-reserved-width)
   );
+  --grippy-range-background-color: #aaa;
+  --grippy-range-border-color: white;
+  --grippy-range-hover-background-color: #888;
+  --selection-outbound-opacity: 0.1;
 
   position: relative;
   display: flex;
@@ -54,7 +58,8 @@
 .timelineSelectionDimmerBefore,
 .timelineSelectionDimmerAfter {
   flex-shrink: 0;
-  background: rgb(12 12 13 / 0.1);
+  background: rgb(12 12 13 / var(--selection-outbound-opacity));
+  forced-color-adjust: none;
 }
 
 .timelineSelectionDimmerAfter {
@@ -79,10 +84,10 @@
   z-index: 3;
   width: 0;
   padding: 3px;
-  border: 1px solid white;
+  border: 1px solid var(--grippy-range-border-color);
   border-radius: 5px;
   margin: 0 -4px;
-  background: #aaa;
+  background: var(--grippy-range-background-color);
   cursor: ew-resize;
 }
 
@@ -99,7 +104,7 @@
 .timelineSelectionGrippyRangeEnd:hover,
 .draggingEnd > .timelineSelectionGrippyRangeEnd,
 :not(.draggingStart, .draggingEnd) > .timelineSelectionGrippyRangeEnd.dragging {
-  background: #888;
+  background: var(--grippy-range-hover-background-color);
 }
 
 .timelineSelectionGrippyMoveRange {
@@ -145,12 +150,19 @@
   border: 1px solid rgb(0 0 0 / 0.2);
   border-radius: 100%;
   margin: -15px;
-  background: url(../../../res/img/svg/zoom-icon.svg) center center no-repeat
-    rgb(255 255 255 / 0.6);
+  background-color: rgb(255 255 255 / 0.6);
   opacity: 0.5;
   pointer-events: auto;
   transition: opacity 200ms ease-in-out;
   will-change: opacity;
+}
+
+.timelineSelectionOverlayZoomButton::before {
+  position: absolute;
+  display: grid;
+  content: url(firefox-profiler-res/img/svg/zoom-icon.svg);
+  inset: 0;
+  place-content: center;
 }
 
 .timelineSelectionOverlayZoomButton.hidden {
@@ -170,4 +182,58 @@
 
 .timelineSelectionOverlayZoomButton:active:hover {
   background-color: rgb(160 160 160 / 0.6);
+}
+
+@media (forced-colors: active) {
+  .timelineSelectionOverlayTime {
+    background-color: CanvasText;
+    color: Canvas;
+  }
+
+  .timelineSelectionHoverLine {
+    background-color: CanvasText;
+  }
+
+  .timelineSelection {
+    --grippy-range-background-color: ButtonText;
+    --grippy-range-border-color: ButtonBorder;
+    --grippy-range-hover-background-color: SelectedItem;
+    --selection-outbound-opacity: 0.6;
+  }
+
+  .timelineSelectionDimmerBefore {
+    border-inline-end: 1px solid CanvasText;
+  }
+
+  .timelineSelectionDimmerAfter {
+    border-inline-start: 1px solid CanvasText;
+  }
+
+  .timelineSelectionOverlayZoomButton {
+    border-color: ButtonText;
+    background-color: ButtonFace;
+    opacity: 1;
+  }
+
+  .timelineSelectionOverlayZoomButton::before {
+    filter: url(#--button-icon-color);
+  }
+
+  .timelineSelectionOverlayZoomButton:hover {
+    border-color: SelectedItem;
+    background-color: SelectedItemText;
+  }
+
+  .timelineSelectionOverlayZoomButton:hover::before {
+    filter: url(#--button-icon-hover-color);
+  }
+
+  .timelineSelectionOverlayZoomButton:active:hover {
+    border-color: ButtonText;
+    background-color: ButtonFace;
+  }
+
+  .timelineSelectionOverlayZoomButton:hover:active::before {
+    filter: url(#--button-icon-active-color);
+  }
 }

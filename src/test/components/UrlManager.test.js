@@ -7,7 +7,6 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 
 import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
-import { makeProfileSerializable } from '../../profile-logic/process-profile';
 import { getView, getUrlSetupPhase } from '../../selectors/app';
 import { UrlManager } from '../../components/app/UrlManager';
 import { blankStore } from '../fixtures/stores';
@@ -15,7 +14,6 @@ import {
   getDataSource,
   getHash,
   getCurrentSearchString,
-  getTimelineTrackOrganization,
 } from '../../selectors/url-state';
 import { waitUntilState } from '../fixtures/utils';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
@@ -37,7 +35,7 @@ describe('UrlManager', function () {
   autoMockFullNavigation();
 
   function getSerializableProfile() {
-    return makeProfileSerializable(getProfileFromTextSamples('A').profile);
+    return getProfileFromTextSamples('A').profile;
   }
 
   function setup(urlPath: ?string) {
@@ -148,7 +146,7 @@ describe('UrlManager', function () {
   });
 
   it(`sets the data source to public and doesn't change the URL when there's a fetch error`, async function () {
-    window.fetch.getAny({ throws: new Error('Simulated network error') });
+    window.fetchMock.get('*', { throws: new Error('Simulated network error') });
     const urlPath = '/public/FAKE_HASH/marker-chart';
     const { getState, createUrlManager, waitUntilUrlSetupPhase } =
       setup(urlPath);
@@ -165,7 +163,7 @@ describe('UrlManager', function () {
   });
 
   it(`sets the data source to public and doesn't change the URL when there's a URL upgrading error`, async function () {
-    window.fetch.getAny(getSerializableProfile());
+    window.fetchMock.get('*', getSerializableProfile());
 
     const urlPath = '/public/FAKE_HASH/calltree';
     const searchString = '?v=' + (CURRENT_URL_VERSION + 1);
@@ -187,7 +185,7 @@ describe('UrlManager', function () {
   });
 
   it(`fetches profile and sets the phase to done when everything works`, async function () {
-    window.fetch.getAny(getSerializableProfile());
+    window.fetchMock.get('*', getSerializableProfile());
 
     const urlPath = '/public/FAKE_HASH/';
     const expectedResultingPath = urlPath + 'calltree/';
@@ -208,7 +206,7 @@ describe('UrlManager', function () {
   });
 
   it('allows navigating back and forward when changing view options', async () => {
-    window.fetch.getAny(getSerializableProfile());
+    window.fetchMock.get('*', getSerializableProfile());
 
     const urlPath = '/public/FAKE_HASH/calltree/';
     const searchString = 'v=' + CURRENT_URL_VERSION;
@@ -328,23 +326,6 @@ describe('UrlManager', function () {
     expect(getDataSource(getState())).toMatch('public');
     expect(getHash(getState())).toMatch('SOME_OTHER_HASH');
     expect(previousLocation).toEqual(window.location.href);
-  });
-
-  it('persists view query string for `from-browser` data source ', async function () {
-    // This setup function doesn't add any profile to the state, so that's why
-    // it logs an error that says we don't have innerWindowID in this profile.
-    // We can safely ignore that part because we don't test this part of the
-    // codebase here. We only care about the timeline track organization.
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    const { getState, waitUntilUrlSetupPhase, createUrlManager } = setup(
-      '/from-browser/?view=active-tab'
-    );
-    await createUrlManager();
-    await waitUntilUrlSetupPhase('done');
-
-    // It should successfully preserve the view query string and update the
-    // timeline track organization state.
-    expect(getTimelineTrackOrganization(getState()).type).toBe('active-tab');
   });
 
   it('can handle a from-post-message data source', async () => {

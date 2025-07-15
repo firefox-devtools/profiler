@@ -3,12 +3,26 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .treeView {
+  --tree-row-toggle-button-color: #888;
+  --tree-row-toggle-button-active-color: var(--grey-60);
+  --selected-tree-row-toggle-button-color: #fff;
+  --selected-tree-row-toggle-button-active-color: rgb(255 255 255 / 0.7);
+
   display: flex;
   flex: 1;
   flex-flow: column nowrap;
   border-top: 1px solid var(--grey-30);
   cursor: default;
   user-select: none;
+}
+
+@media (forced-colors: active) {
+  .treeView {
+    --tree-row-toggle-button-color: ButtonText;
+    --tree-row-toggle-button-active-color: SelectedItem;
+    --selected-tree-row-toggle-button-color: SelectedItemText;
+    --selected-tree-row-toggle-button-active-color: ButtonText;
+  }
 }
 
 .treeViewRow,
@@ -166,8 +180,10 @@
   color: HighlightText;
 
   /* Safari's non-standard SelectedItem equivalent (until SelectedItem is implemented, https://bugs.webkit.org/show_bug.cgi?id=230007 ) */
+  /* stylelint-disable declaration-property-value-no-unknown */
   background-color: -apple-system-selected-content-background;
   color: -apple-system-alternate-selected-text;
+  /* stylelint-enable declaration-property-value-no-unknown */
 
   /* The new standard color */
   background-color: SelectedItem;
@@ -202,7 +218,10 @@
   border-bottom: 5px solid transparent;
   border-left: 8px solid;
   margin-left: 8px;
-  color: #888;
+  color: var(--tree-row-toggle-button-color);
+
+  /* Opt-out of forced colors so the transparent borders aren't turned into opaque ones */
+  forced-color-adjust: none;
 }
 
 .treeRowToggleButton.expanded {
@@ -216,17 +235,17 @@
 }
 
 .treeRowToggleButton:active:hover {
-  color: var(--grey-60);
+  color: var(--tree-row-toggle-button-active-color);
 }
 
 .treeViewBody:focus .treeViewRow.isSelected > .treeRowToggleButton {
-  color: #fff;
+  color: var(--selected-tree-row-toggle-button-color);
 }
 
 .treeViewBody:focus
   .treeViewRow.isSelected
   > .treeRowToggleButton:active:hover {
-  color: rgb(255 255 255 / 0.7);
+  color: var(--selected-tree-row-toggle-button-active-color);
 }
 
 .treeRowToggleButton.leaf {

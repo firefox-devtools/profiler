@@ -13,9 +13,9 @@ import type {
   CategoryList,
   IndexIntoSamplesTable,
   Milliseconds,
-  CallNodeInfo,
   SelectedState,
 } from 'firefox-profiler/types';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 type Props = {|
   +className: string,
@@ -33,7 +33,6 @@ type Props = {|
   // Decide which way the stacks grow up from the floor, or down from the ceiling.
   +stacksGrowFromCeiling?: boolean,
   +trackName: string,
-  +maxThreadCPUDeltaPerMs: number,
 |};
 
 export class ThreadCPUGraph extends PureComponent<Props> {
@@ -47,10 +46,7 @@ export class ThreadCPUGraph extends PureComponent<Props> {
     if (sampleIndex >= samples.length - 1) {
       return 0;
     }
-    const cpuDelta = ensureExists(samples.threadCPUDelta)[sampleIndex + 1] || 0;
-    const interval = samples.time[sampleIndex + 1] - samples.time[sampleIndex];
-    const currentCPUPerMs = cpuDelta / interval;
-    return currentCPUPerMs;
+    return ensureExists(samples.threadCPURatio)[sampleIndex + 1] || 0;
   };
 
   render() {
@@ -63,7 +59,6 @@ export class ThreadCPUGraph extends PureComponent<Props> {
       rangeEnd,
       categories,
       trackName,
-      maxThreadCPUDeltaPerMs,
       onSampleClick,
     } = this.props;
 
@@ -73,7 +68,7 @@ export class ThreadCPUGraph extends PureComponent<Props> {
     return (
       <ThreadHeightGraph
         heightFunc={this._heightFunction}
-        maxValue={maxThreadCPUDeltaPerMs}
+        maxValue={1}
         className={className}
         trackName={trackName}
         interval={interval}

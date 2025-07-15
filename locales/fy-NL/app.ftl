@@ -30,6 +30,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = Koe it profyl net ymportearje.
 AppViewRouter--error-unpublished = Kin it profyl net ophelje fan { -firefox-brand-name }.
 AppViewRouter--error-from-file = Kin it bestân net lêze of it profyl deryn ûntlede.
 AppViewRouter--error-local = Noch net ymplemintearre.
@@ -120,6 +121,7 @@ CallNodeContextMenu--searchfox = De funksjenamme op Searchfox opsykje
 CallNodeContextMenu--copy-function-name = Funksjenamme kopiearje
 CallNodeContextMenu--copy-script-url = Script-URL kopiearje
 CallNodeContextMenu--copy-stack = Stack kopiearje
+CallNodeContextMenu--show-the-function-in-devtools = Funksje toane yn DevTools
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -342,6 +344,15 @@ Home--load-files-from-other-tools2 =
     elk bestân mei it <dhat>dhat-formaat</dhat> of de <traceevent>Trace Event-yndieling
     fan Google</traceevent> brûkt. <write>Lês hoe’t jo jo
     eigen ymportearder skriuwe</write>.
+Home--install-chrome-extension = De Chrome-útwreiding ynstallearje
+Home--chrome-extension-instructions =
+    Brûk de <a>{ -profiler-brand-name }-útwreiding foar Chrome</a>
+    om prestaasjeprofilen yn Chrome fêst te lizzen en se yn de
+    { -profiler-brand-name } te analysearjen. Ynstallearje de útwreiding fan de Chrome Web Store út.
+Home--chrome-extension-recording-instructions =
+    Brûk nei ynstallaasje it arkbalkepiktogram fan de
+    útwreiding of de fluchkeppelingen om it profilearjen te starten en te stopjen. Jo kinne ek
+    profilen eksportearje en dizze hjir lade foar detaillearre analyze.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -628,6 +639,14 @@ NumberFormat--short-date = { SHORTDATE($date) }
 
 PanelSearch--search-field-hint = Wisten jo dat jo de komma (,) brûke kinne om mei ferskate termen te sykjen?
 
+## Profile Name Button
+
+ProfileName--edit-profile-name-button =
+    .title = De profylnamme bewurkje
+ProfileName--edit-profile-name-input =
+    .title = De profylnamme bewurkje
+    .aria-label = Profylnamme
+
 ## Profile Delete Button
 
 # This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
@@ -675,6 +694,7 @@ ProfileFilterNavigator--full-range-with-duration = Folslein berik ({ $fullRangeD
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-from-post-message = Profyl ymportearje en ferwurkje…
 ProfileLoaderAnimation--loading-unpublished = Profyl streekrjocht fan { -firefox-brand-name } út ymportearje…
 ProfileLoaderAnimation--loading-from-file = It bestân lêze en it profyl ferwurkje…
 ProfileLoaderAnimation--loading-local = Noch net ymplemintearre.

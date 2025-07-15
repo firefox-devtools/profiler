@@ -17,7 +17,6 @@ import { getProfileRootRange } from 'firefox-profiler/selectors/profile';
 import {
   getDataSource,
   getProfileUrl,
-  getTimelineTrackOrganization,
 } from 'firefox-profiler/selectors/url-state';
 import {
   getIsNewlyPublished,
@@ -46,13 +45,11 @@ import {
   getHasPrePublishedState,
 } from 'firefox-profiler/selectors/publish';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
-import { changeTimelineTrackOrganization } from 'firefox-profiler/actions/receive-profile';
 
 import type {
   StartEndRange,
   DataSource,
   UploadPhase,
-  TimelineTrackOrganization,
   UploadedProfileInformation,
 } from 'firefox-profiler/types';
 
@@ -76,20 +73,18 @@ type StateProps = {|
   +uploadPhase: UploadPhase,
   +hasPrePublishedState: boolean,
   +abortFunction: () => mixed,
-  +timelineTrackOrganization: TimelineTrackOrganization,
   +currentProfileUploadedInformation: UploadedProfileInformation | null,
 |};
 
 type DispatchProps = {|
   +dismissNewlyPublished: typeof dismissNewlyPublished,
   +revertToPrePublishedState: typeof revertToPrePublishedState,
-  +changeTimelineTrackOrganization: typeof changeTimelineTrackOrganization,
   +profileRemotelyDeleted: typeof profileRemotelyDeleted,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 type State = $ReadOnly<{|
-  metaInfoPanelState: 'initial' | 'delete-confirmation' | 'profile-deleted',
+  metaInfoPanelState: 'initial' | 'delete-confirmation',
 |}>;
 
 class MenuButtonsImpl extends React.PureComponent<Props, State> {
@@ -129,9 +124,6 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
 
   _onProfileDeleted = () => {
     this.props.profileRemotelyDeleted();
-    this.setState({
-      metaInfoPanelState: 'profile-deleted',
-    });
   };
 
   _resetMetaInfoState = () => {
@@ -196,42 +188,37 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
         );
       }
 
-      case 'delete-confirmation': {
-        if (!currentProfileUploadedInformation) {
-          throw new Error(
-            `We're in the state "delete-confirmation" but there's no stored data for this profile, this should not happen.`
+      case 'delete-confirmation':
+        if (currentProfileUploadedInformation) {
+          const { name, profileToken, jwtToken } =
+            currentProfileUploadedInformation;
+
+          if (!jwtToken) {
+            throw new Error(
+              `We're in the state "delete-confirmation" but there's no JWT token for this profile, this should not happen.`
+            );
+          }
+
+          const slicedProfileToken = profileToken.slice(0, 6);
+          const profileName = name ? name : `Profile #${slicedProfileToken}`;
+          return (
+            <ProfileDeletePanel
+              profileName={profileName}
+              profileToken={profileToken}
+              jwtToken={jwtToken}
+              onProfileDeleted={this._onProfileDeleted}
+              onProfileDeleteCanceled={this._resetMetaInfoState}
+            />
           );
         }
 
-        const { name, profileToken, jwtToken } =
-          currentProfileUploadedInformation;
+        // The profile data has been deleted
 
-        if (!jwtToken) {
-          throw new Error(
-            `We're in the state "delete-confirmation" but there's no JWT token for this profile, this should not happen.`
-          );
-        }
-
-        const slicedProfileToken = profileToken.slice(0, 6);
-        const profileName = name ? name : `Profile #${slicedProfileToken}`;
-        return (
-          <ProfileDeletePanel
-            profileName={profileName}
-            profileToken={profileToken}
-            jwtToken={jwtToken}
-            onProfileDeleted={this._onProfileDeleted}
-            onProfileDeleteCanceled={this._resetMetaInfoState}
-          />
-        );
-      }
-
-      case 'profile-deleted':
         // Note that <ProfileDeletePanel> can also render <ProfileDeleteSuccess>
         // in some situations. However it's not suitable for this case, because
         // we still have to pass jwtToken / profileToken, and we don't have
         // these values anymore when we're in this state.
         return <ProfileDeleteSuccess />;
-
       default:
         throw assertExhaustiveCheck(metaInfoPanelState);
     }
@@ -252,27 +239,6 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
           panelContent={this._renderMetaInfoPanel()}
         />
       </Localized>
-    );
-  }
-
-  _changeTimelineTrackOrganizationToFull = () => {
-    this.props.changeTimelineTrackOrganization({ type: 'full' });
-  };
-
-  _renderFullViewButtonForActiveTab() {
-    const { timelineTrackOrganization } = this.props;
-    if (timelineTrackOrganization.type !== 'active-tab') {
-      return null;
-    }
-
-    return (
-      <button
-        type="button"
-        className="menuButtonsButton menuButtonsButton-hasIcon menuButtonsRevertToFullView"
-        onClick={this._changeTimelineTrackOrganizationToFull}
-      >
-        <Localized id="MenuButtons--index--full-view">Full View</Localized>
-      </button>
     );
   }
 
@@ -363,7 +329,6 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
   render() {
     return (
       <>
-        {this._renderFullViewButtonForActiveTab()}
         {this._renderRevertProfile()}
         {this._renderMetaInfoButton()}
         {this._renderPublishPanel()}
@@ -392,14 +357,12 @@ export const MenuButtons = explicitConnect<OwnProps, StateProps, DispatchProps>(
       uploadPhase: getUploadPhase(state),
       hasPrePublishedState: getHasPrePublishedState(state),
       abortFunction: getAbortFunction(state),
-      timelineTrackOrganization: getTimelineTrackOrganization(state),
       currentProfileUploadedInformation:
         getCurrentProfileUploadedInformation(state),
     }),
     mapDispatchToProps: {
       dismissNewlyPublished,
       revertToPrePublishedState,
-      changeTimelineTrackOrganization,
       profileRemotelyDeleted,
     },
     component: MenuButtonsImpl,

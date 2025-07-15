@@ -12,6 +12,7 @@ import { changeProfileName } from 'firefox-profiler/actions/profile-view';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './ProfileName.css';
+import { Localized } from '@fluent/react';
 
 type StateProps = {|
   +profileNameWithDefault: string,
@@ -103,7 +104,6 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
     const { focusedWithKey } = this.state;
     // The profileNameWithDefault is either set by the user, or a default is chosen.
     const { profileNameWithDefault } = this.props;
-    const title = 'Edit the profile name';
     const key = this.getKey();
 
     // Only stay focused with the current focus key. This will be invalidated when
@@ -118,34 +118,44 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
     // controlled by CSS.
     return (
       <>
-        <button
-          type="button"
-          style={{
-            display: isFocused ? 'none' : null,
-          }}
-          title={title}
-          className="profileNameButton menuButtonsButton menuButtonsButton-hasRightBorder menuButtonsButton-hasIcon"
-          onFocus={this.handleButtonFocus}
-          onClick={this.handleButtonFocus}
+        <Localized
+          id="ProfileName--edit-profile-name-button"
+          attrs={{ title: true }}
         >
-          {profileNameWithDefault}
-        </button>
-        <input
-          // Make sure and use the profile name and focus generation to support the
-          // back button invalidating the state
-          key={key}
-          className="profileNameInput"
-          style={{
-            display: isFocused ? null : 'none',
-          }}
-          defaultValue={profileNameWithDefault}
-          aria-label="Profile name"
-          title={title}
-          onBlur={this.changeProfileNameIfChanged}
-          ref={this.inputRef}
-          // Keypress won't
-          onKeyDown={this.blurOnEscapeOrEnter}
-        />
+          <button
+            type="button"
+            style={{
+              display: isFocused ? 'none' : null,
+            }}
+            title="Edit the profile name"
+            className="profileNameButton menuButtonsButton menuButtonsButton-hasRightBorder menuButtonsButton-hasIcon"
+            onFocus={this.handleButtonFocus}
+            onClick={this.handleButtonFocus}
+          >
+            {profileNameWithDefault}
+          </button>
+        </Localized>
+        <Localized
+          id="ProfileName--edit-profile-name-input"
+          attrs={{ title: true, 'aria-label': true }}
+        >
+          <input
+            // Make sure and use the profile name and focus generation to support the
+            // back button invalidating the state
+            key={key}
+            className="profileNameInput"
+            style={{
+              display: isFocused ? null : 'none',
+            }}
+            defaultValue={profileNameWithDefault}
+            aria-label="Profile name"
+            title="Edit the profile name"
+            onBlur={this.changeProfileNameIfChanged}
+            ref={this.inputRef}
+            // Keypress won't
+            onKeyDown={this.blurOnEscapeOrEnter}
+          />
+        </Localized>
       </>
     );
   }

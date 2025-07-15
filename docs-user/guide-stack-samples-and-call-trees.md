@@ -13,6 +13,7 @@ These examples assume the profiler is configured to collect samples every 1 mill
 ![This image shows stacks going from left to right. They are at 1 millisecond intervals. Each stack is composed of the function, A, B, C, and doWork. There are 5 samples](./images/simple-stacks.svg)
 
 <!--alex ignore simple-->
+
 This example creates a fairly contrived and simple example. `A` calls `B`, which calls `C`, then calls `doWork`. `A`, `B`, `C` are very quick to run, and the profiler never directly samples them. However, `doWork` is sampled 5 times. An aggregation of this profile would smush everything into one graph.
 
 ![This graphic demonstrates a call tree. It is a chart of the stacks A, B, C, and doWork, each connected by an arrow going from the root A to the leaf doWork. The running time of all the samples is 5ms. The self time is 0ms, except for doWork, which has a self time of 5ms.](./images/simple-call-tree.svg)
@@ -38,6 +39,7 @@ In summary, self time is where work was actually happening when observed by the 
 > Note: Feel free to follow along with a real call tree that reproduces this structure: [https://perfht.ml/2w45IdC](https://perfht.ml/2w45IdC)
 
 <!--alex ignore simple-->
+
 The simple call tree above did not take into account any branching stacks. It only concerned itself with running and self time. This section will dive into how the call tree handles stacks of different shapes.
 
 ![This image shows contiguous stacks, and how they are sampled over time. It fades out as it goes left to right to indicate that samples are gathered for long periods of time. The stacks are labeled by 1 millisecond intervals. The stacks are labeled by functions that are single capital letters, ranged A to H.](./images/samples.svg)

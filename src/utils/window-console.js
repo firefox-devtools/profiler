@@ -8,6 +8,7 @@ import { selectorsForConsole } from 'firefox-profiler/selectors';
 import actions from 'firefox-profiler/actions';
 import { shortenUrl } from 'firefox-profiler/utils/shorten-url';
 import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
+import { formatTimestamp } from 'firefox-profiler/utils/format-numbers';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still
 // special-cases the `value` property: if it's missing it throws an error. Using
@@ -34,9 +35,7 @@ export function addDataToWindowObject(
   defineProperty(target, 'filteredThread', {
     enumerable: true,
     get() {
-      return selectorsForConsole.selectedThread.getPreviewFilteredThread(
-        getState()
-      );
+      return selectorsForConsole.selectedThread.getFilteredThread(getState());
     },
   });
 
@@ -265,6 +264,28 @@ export function addDataToWindowObject(
     return logs.sort().join('\n');
   };
 
+  target.totalMarkerDuration = function (markers) {
+    if (!Array.isArray(markers)) {
+      console.error('totalMarkerDuration expects an array of markers');
+      return 0;
+    }
+
+    let totalDuration = 0;
+    for (const marker of markers) {
+      if (
+        marker &&
+        typeof marker.start === 'number' &&
+        typeof marker.end === 'number'
+      ) {
+        totalDuration += marker.end - marker.start;
+      }
+      // Skip markers with null end times (instant markers have no duration)
+    }
+
+    console.log(`Total marker duration: ${formatTimestamp(totalDuration)}`);
+    return totalDuration;
+  };
+
   target.shortenUrl = shortenUrl;
   target.getState = getState;
   target.selectors = selectorsForConsole;
@@ -317,6 +338,7 @@ export function logFriendlyPreamble() {
       %cwindow.filteredMarkers%c - The current filtered and processed markers
       %cwindow.selectedMarker%c - The selected processed marker in the current thread
       %cwindow.callTree%c - The call tree of the current filtered thread
+      %cwindow.totalMarkerDuration%c - Calculate total duration of a marker array (e.g., totalMarkerDuration(filteredMarkers))
       %cwindow.getState%c - The function that returns the current Redux state.
       %cwindow.selectors%c - All the selectors that are used to get data from the Redux state.
       %cwindow.dispatch%c - The function to dispatch a Redux action to change the state.
@@ -350,6 +372,9 @@ export function logFriendlyPreamble() {
     bold,
     reset,
     // "window.callTree"
+    bold,
+    reset,
+    // "window.totalMarkerDuration"
     bold,
     reset,
     // "window.getState"

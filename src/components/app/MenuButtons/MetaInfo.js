@@ -33,7 +33,7 @@ import type {
   ExtraProfileInfoSection,
 } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
+import { StringTable } from 'firefox-profiler/utils/string-table';
 
 import './MetaInfo.css';
 
@@ -153,7 +153,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
                     'moreInfo',
                     format,
                     value,
-                    new UniqueStringArray()
+                    StringTable.withBackingArray([])
                   )}
                 </div>
               </div>
@@ -224,7 +224,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
     return (
       <>
         <div className="metaInfoSection">
-          {meta.profilingStartTime !== undefined ? (
+          {meta.profilingStartTime !== undefined && meta.startTime ? (
             <div className="metaInfoRow">
               <span className="metaInfoLabel">
                 <Localized id="MenuButtons--metaInfo--profiling-started">
@@ -363,7 +363,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
                   Build ID:
                 </Localized>
               </span>
-              {meta.sourceURL ? (
+              {meta.sourceURL && /^https?:\/\//i.test(meta.sourceURL) ? (
                 <a
                   href={meta.sourceURL}
                   title={meta.sourceURL}

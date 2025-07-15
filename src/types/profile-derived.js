@@ -7,25 +7,205 @@ import type { Milliseconds, StartEndRange, Address, Bytes } from './units';
 import type { MarkerPayload, MarkerSchema } from './markers';
 import type {
   ThreadIndex,
-  Thread,
   Pid,
   IndexIntoFuncTable,
   IndexIntoJsTracerEvents,
   IndexIntoCategoryList,
   IndexIntoResourceTable,
-  IndexIntoNativeSymbolTable,
   IndexIntoLibs,
   CounterIndex,
-  InnerWindowID,
-  Page,
+  GraphColor,
   IndexIntoRawMarkerTable,
   IndexIntoStringTable,
   TabID,
   Tid,
+  ProcessType,
+  PausedRange,
+  JsAllocationsTable,
+  NativeAllocationsTable,
+  RawMarkerTable,
+  FrameTable,
+  FuncTable,
+  ResourceTable,
+  NativeSymbolTable,
+  JsTracerTable,
+  IndexIntoStackTable,
+  WeightType,
+  IndexIntoFrameTable,
+  IndexIntoSubcategoryListForCategory,
 } from './profile';
 import type { IndexedArray } from './utils';
 import type { StackTiming } from '../profile-logic/stack-timing';
+import type { StringTable } from '../utils/string-table';
 export type IndexIntoCallNodeTable = number;
+
+/**
+ * The derived Thread type.
+ *
+ * This type is more ergonomic than the RawThread type:
+ *
+ * - `RawThread` represents the data as it is stored in the profile file format,
+ *   so it needs to be JSON-compatible, and it is encouraged to use more compact
+ *   data representations, e.g. no duplication of shared data on each thread.
+ * - `Thread` is computed at runtime by selectors, and can store data in a way
+ *   that's most convenient for users of the derived state.
+ *
+ * The fields that differ from RawThread are collected at the end of this type
+ * definition.
+ */
+export type Thread = {|
+  processType: ProcessType,
+  processStartupTime: Milliseconds,
+  processShutdownTime: Milliseconds | null,
+  registerTime: Milliseconds,
+  unregisterTime: Milliseconds | null,
+  pausedRanges: PausedRange[],
+  showMarkersInTimeline?: boolean,
+  name: string,
+  isMainThread: boolean,
+  // The eTLD+1 of the isolated content process if provided by the back-end.
+  // It will be undefined if:
+  // - Fission is not enabled.
+  // - It's not an isolated content process.
+  // - It's a sanitized profile.
+  // - It's a profile from an older Firefox which doesn't include this field (introduced in Firefox 80).
+  'eTLD+1'?: string,
+  processName?: string,
+  isJsTracer?: boolean,
+  pid: Pid,
+  tid: Tid,
+  jsAllocations?: JsAllocationsTable,
+  nativeAllocations?: NativeAllocationsTable,
+  markers: RawMarkerTable,
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  nativeSymbols: NativeSymbolTable,
+  jsTracer?: JsTracerTable,
+  // If present and true, this thread was launched for a private browsing session only.
+  // When false, it can still contain private browsing data if the profile was
+  // captured in a non-fission browser.
+  // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
+  // had no extra attribute at all.
+  isPrivateBrowsing?: boolean,
+  // If present and non-0, the number represents the container this thread was loaded in.
+  // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
+  // had no extra attribute at all.
+  userContextId?: number,
+
+  // The fields below this comment are derived data, and not present on the RawThread
+  // in the same form.
+
+  // Strings for profiles are collected into a single table, and are referred to by
+  // their index by other tables.
+  stringTable: StringTable,
+  // The stack samples collected for this thread. This field is different from
+  // RawThread in that the `time` column is always present.
+  samples: SamplesTable,
+|};
+
+/**
+ * The derived samples table.
+ */
+export type SamplesTable = {|
+  // Responsiveness is the older version of eventDelay. It injects events every 16ms.
+  // This is optional because newer profiles don't have that field anymore.
+  responsiveness?: Array<?Milliseconds>,
+  // Event delay is the newer version of responsiveness. It allow us to get a finer-grained
+  // view of jank by inferring what would be the delay of a hypothetical input event at
+  // any point in time. It requires a pre-processing to be able to visualize properly.
+  // This is optional because older profiles didn't have that field.
+  eventDelay?: Array<?Milliseconds>,
+  stack: Array<IndexIntoStackTable | null>,
+  time: Milliseconds[],
+  // An optional weight array. If not present, then the weight is assumed to be 1.
+  // See the WeightType type for more information.
+  weight: null | number[],
+  weightType: WeightType,
+  // The CPU ratio, between 0 and 1, over the time between the previous sample
+  // and this sample.
+  threadCPURatio?: Float64Array,
+  // This property isn't present in normal threads. However it's present for
+  // merged threads, so that we know the origin thread for these samples.
+  threadId?: Tid[],
+  length: number,
+|};
+
+type SamplesLikeTableShape = {
+  stack: Array<IndexIntoStackTable | null>,
+  time: Milliseconds[],
+  // An optional weight array. If not present, then the weight is assumed to be 1.
+  // See the WeightType type for more information.
+  weight: null | number[],
+  weightType: WeightType,
+  length: number,
+};
+
+export type SamplesLikeTable =
+  | SamplesLikeTableShape
+  | SamplesTable
+  | NativeAllocationsTable
+  | JsAllocationsTable;
+
+export type CounterSamplesTable = {|
+  time: Milliseconds[],
+  // The number of times the Counter's "number" was changed since the previous sample.
+  // This property was mandatory until the format version 42, it was made optional in 43.
+  number?: number[],
+  // The count of the data, for instance for memory this would be bytes.
+  count: number[],
+  length: number,
+|};
+
+export type Counter = {|
+  name: string,
+  category: string,
+  description: string,
+  color?: GraphColor,
+  pid: Pid,
+  mainThreadIndex: ThreadIndex,
+  samples: CounterSamplesTable,
+|};
+
+/**
+ * The `StackTable` type of the derived thread.
+ *
+ * The only difference from the `RawStackTable` is that the `StackTable` has a
+ * `category` and a `subcategory` column.
+ *
+ * The category of a stack node is always non-null and is derived from a stack's
+ * frame and its prefix. Frames can have null categories, stacks cannot. If a
+ * stack's frame has a null category, the stack inherits the category of its
+ * prefix stack. Root stacks whose frame has a null stack have their category
+ * set to the "default category". (The default category is currently defined as
+ * the category in the profile's category list whose color is "grey", and such
+ * a category is required to be present.)
+ *
+ * We compute the category information at the start of the thread transform
+ * pipeline, not at the end. This allows us to preserve categories more accurately
+ * when transforms are applied. Example:
+ *
+ * In the call path
+ *   someJSFunction [JS] -> Node.insertBefore [DOM] -> nsAttrAndChildArray::InsertChildAt,
+ * the stack node for nsAttrAndChildArray::InsertChildAt should inherit the
+ * category DOM from its "Node.insertBefore" prefix stack. And it should keep
+ * the DOM category even if you apply the "Merge node into calling function"
+ * transform to Node.insertBefore. This transform removes the stack node
+ * "Node.insertBefore" from the stackTable, so the information about the DOM
+ * category would be lost if it wasn't inherited into the
+ * nsAttrAndChildArray::InsertChildAt stack before transforms are applied.
+ */
+export type StackTable = {|
+  // Same as in RawStackTable
+  frame: IndexIntoFrameTable[],
+  prefix: Array<IndexIntoStackTable | null>,
+  length: number,
+
+  // Derived from RawStackTable + FrameTable
+  category: IndexIntoCategoryList[],
+  subcategory: IndexIntoSubcategoryListForCategory[],
+|};
 
 /**
  * Contains a table of function call information that represents the stacks of what
@@ -109,74 +289,17 @@ export type CallNodeTable = {
   category: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
   subcategory: Int32Array, // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
   innerWindowID: Float64Array, // IndexIntoCallNodeTable -> InnerWindowID
-  // null: no inlining
   // IndexIntoNativeSymbolTable: all frames that collapsed into this call node inlined into the same native symbol
   // -1: divergent: not all frames that collapsed into this call node were inlined, or they are from different symbols
-  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
+  // -2: no inlining
+  sourceFramesInlinedIntoSymbol: Int32Array,
   // The depth of the call node. Roots have depth 0.
-  depth: number[],
+  depth: Int32Array,
   // The maximum value in the depth column, or -1 if this table is empty.
   maxDepth: number,
   // The number of call nodes. All columns in this table have this length.
   length: number,
 };
-
-/**
- * Wraps the call node table and provides associated functionality.
- */
-export interface CallNodeInfo {
-  // If true, call node indexes describe nodes in the inverted call tree.
-  isInverted(): boolean;
-
-  // Returns the call node table. If isInverted() is true, this is an inverted
-  // call node table, otherwise this is the non-inverted call node table.
-  getCallNodeTable(): CallNodeTable;
-
-  // Returns the non-inverted call node table.
-  // This is always the non-inverted call node table, regardless of isInverted().
-  getNonInvertedCallNodeTable(): CallNodeTable;
-
-  // Returns a mapping from the stack table to the call node table.
-  // The Int32Array should be used as if it were a
-  // Map<IndexIntoStackTable, IndexIntoCallNodeTable | -1>.
-  //
-  // If this CallNodeInfo is for the non-inverted tree, this maps the stack index
-  // to its corresponding call node index, and all entries are >= 0.
-  // If this CallNodeInfo is for the inverted tree, this maps the non-inverted
-  // stack index to the inverted call node index. For example, the stack
-  // A -> B -> C -> D is mapped to the inverted call node describing the
-  // call path D <- C <- B <- A, i.e. the node with function A under the D root
-  // of the inverted tree. Stacks which are only used as prefixes are not mapped
-  // to an inverted call node; for those, the entry will be -1. In the example
-  // above, if the stack node A -> B -> C only exists so that it can be the prefix
-  // of the A -> B -> C -> D stack and no sample / marker / allocation has
-  // A -> B -> C as its stack, then there is no need to have a call node
-  // C <- B <- A in the inverted call node table.
-  getStackIndexToCallNodeIndex(): Int32Array;
-
-  // Returns a mapping from the stack table to the non-inverted call node table.
-  // This always maps to the non-inverted call node table, regardless of isInverted().
-  getStackIndexToNonInvertedCallNodeIndex(): Int32Array;
-
-  // Converts a call node index into a call node path.
-  getCallNodePathFromIndex(
-    callNodeIndex: IndexIntoCallNodeTable | null
-  ): CallNodePath;
-
-  // Converts a call node path into a call node index.
-  getCallNodeIndexFromPath(
-    callNodePath: CallNodePath
-  ): IndexIntoCallNodeTable | null;
-
-  // Returns the call node index that matches the function `func` and whose
-  // parent's index  is `parent`. If `parent` is -1, this returns the index of
-  // the root node with function `func`.
-  // Returns null if the described call node doesn't exist.
-  getCallNodeIndexFromParentAndFunc(
-    parent: IndexIntoCallNodeTable | -1,
-    func: IndexIntoFuncTable
-  ): IndexIntoCallNodeTable | null;
-}
 
 export type LineNumber = number;
 
@@ -503,107 +626,6 @@ export type Track = GlobalTrack | LocalTrack;
 export type TrackIndex = number;
 
 /**
- * The origins timeline view is experimental. These data structures may need to be
- * adjusted to fit closer to the other track types, but they were easy to do for now.
- */
-
-/**
- * This origin was loaded as a sub-frame to another one. It will be nested in the view.
- */
-export type OriginsTimelineEntry = {|
-  type: 'sub-origin',
-  innerWindowID: InnerWindowID,
-  threadIndex: ThreadIndex,
-  page: Page,
-  origin: string,
-|};
-
-/**
- * This is a "root" origin, which is viewed at the top level in a tab.
- */
-export type OriginsTimelineRoot = {|
-  type: 'origin',
-  innerWindowID: InnerWindowID,
-  threadIndex: ThreadIndex,
-  page: Page,
-  origin: string,
-  children: Array<OriginsTimelineEntry | OriginsTimelineNoOrigin>,
-|};
-
-/**
- * This thread does not have any origin information associated with it. However
- * it may be listed as a child of another "root" timeline origin if it is in the
- * same process as that thread.
- */
-export type OriginsTimelineNoOrigin = {|
-  type: 'no-origin',
-  threadIndex: ThreadIndex,
-|};
-
-export type OriginsTimelineTrack =
-  | OriginsTimelineEntry
-  | OriginsTimelineRoot
-  | OriginsTimelineNoOrigin;
-
-export type OriginsTimeline = Array<
-  OriginsTimelineNoOrigin | OriginsTimelineRoot,
->;
-
-/**
- * Active tab view tracks
- */
-
-/**
- * Main track for active tab view.
- * Currently it holds mainThreadIndex to make things easier because most of the
- * places require a single thread index instead of thread indexes array.
- * This will go away soon.
- */
-export type ActiveTabMainTrack = {|
-  type: 'tab',
-  threadIndexes: Set<ThreadIndex>,
-  threadsKey: ThreadsKey,
-|};
-
-export type ActiveTabScreenshotTrack = {|
-  +type: 'screenshots',
-  +id: string,
-  +threadIndex: ThreadIndex,
-|};
-
-export type ActiveTabResourceTrack =
-  | {|
-      +type: 'sub-frame',
-      +threadIndex: ThreadIndex,
-      +name: string,
-    |}
-  | {|
-      +type: 'thread',
-      +threadIndex: ThreadIndex,
-      +name: string,
-    |};
-
-/**
- * Timeline for active tab view.
- * It holds main track for the current tab, screenshots and resource tracks.
- * Main track is being computed during profile load and rest is being added to resources.
- * This timeline type is different compared to full view. This makes making main
- * track acess a lot easier.
- */
-export type ActiveTabTimeline = {
-  mainTrack: ActiveTabMainTrack,
-  screenshots: Array<ActiveTabScreenshotTrack>,
-  resources: Array<ActiveTabResourceTrack>,
-  resourcesThreadsKey: ThreadsKey,
-};
-
-export type ActiveTabGlobalTrack =
-  | ActiveTabMainTrack
-  | ActiveTabScreenshotTrack;
-
-export type ActiveTabTrack = ActiveTabGlobalTrack | ActiveTabResourceTrack;
-
-/**
  * Type that holds the values of personally identifiable information that user
  * wants to remove.
  */
@@ -624,8 +646,6 @@ export type RemoveProfileInformation = {|
   +shouldRemovePreferenceValues: boolean,
   // Remove the private browsing data if it's true.
   +shouldRemovePrivateBrowsingData: boolean,
-  // Remove all tab ids except this one.
-  +shouldRemoveTabsExceptTabID: TabID | null,
 |};
 
 /**
@@ -636,8 +656,6 @@ export type SelectedState =
   // Samples can be filtered through various operations, like searching, or
   // call tree transforms.
   | 'FILTERED_OUT_BY_TRANSFORM'
-  // Samples can be filtered out if they are not part of the active tab.
-  | 'FILTERED_OUT_BY_ACTIVE_TAB'
   // This sample is selected because either the tip or an ancestor call node matches
   // the currently selected call node.
   | 'SELECTED'
@@ -673,11 +691,11 @@ export type SortedTabPageData = Array<{|
   pageData: ProfileFilterPageData,
 |}>;
 
-export type CallNodeLeafAndSummary = {|
-  // This property stores the amount of unit (time, bytes, count, etc.) spent in the
-  // stacks' leaf nodes.
-  callNodeLeaf: Float32Array,
-  // The sum of absolute values in callNodeLeaf.
+export type CallNodeSelfAndSummary = {|
+  // This property stores the amount of unit (time, bytes, count, etc.) spent in
+  // this call node and not in any of its descendant nodes.
+  callNodeSelf: Float64Array,
+  // The sum of absolute values in callNodeSelf.
   // This is used for computing the percentages displayed in the call tree.
   rootTotalSummary: number,
 |};

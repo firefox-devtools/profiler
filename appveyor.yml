@@ -1,6 +1,7 @@
+image: Visual Studio 2022
 clone_depth: 5
 environment:
-  nodejs_version: '18.19'
+  nodejs_version: '22.14'
 platform: x64 # flow needs 64b platforms
 
 branches:

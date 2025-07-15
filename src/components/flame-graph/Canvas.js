@@ -28,7 +28,6 @@ import type {
   CssPixels,
   DevicePixels,
   Milliseconds,
-  CallNodeInfo,
   IndexIntoCallNodeTable,
   CallTreeSummaryStrategy,
   WeightType,
@@ -42,6 +41,7 @@ import type {
   FlameGraphDepth,
   IndexIntoFlameGraphTiming,
 } from 'firefox-profiler/profile-logic/flame-graph';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import type {
   ChartCanvasScale,
@@ -50,7 +50,7 @@ import type {
 
 import type {
   CallTree,
-  CallTreeTimings,
+  CallTreeTimingsNonInverted,
 } from 'firefox-profiler/profile-logic/call-tree';
 
 export type OwnProps = {|
@@ -58,7 +58,7 @@ export type OwnProps = {|
   +weightType: WeightType,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +unfilteredThread: Thread,
-  +sampleIndexOffset: number,
+  +ctssSampleIndexOffset: number,
   +maxStackDepthPlusOne: number,
   +flameGraphTiming: FlameGraphTiming,
   +callNodeInfo: CallNodeInfo,
@@ -75,10 +75,9 @@ export type OwnProps = {|
   +interval: Milliseconds,
   +isInverted: boolean,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
-  +samples: SamplesLikeTable,
-  +unfilteredSamples: SamplesLikeTable,
-  +tracedTiming: CallTreeTimings | null,
-  +displayImplementation: boolean,
+  +ctssSamples: SamplesLikeTable,
+  +unfilteredCtssSamples: SamplesLikeTable,
+  +tracedTiming: CallTreeTimingsNonInverted | null,
   +displayStackType: boolean,
 |};
 
@@ -360,7 +359,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     const {
       thread,
       unfilteredThread,
-      sampleIndexOffset,
+      ctssSampleIndexOffset,
       flameGraphTiming,
       callTree,
       callNodeInfo,
@@ -370,10 +369,9 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       callTreeSummaryStrategy,
       innerWindowIDToPageMap,
       weightType,
-      samples,
-      unfilteredSamples,
+      ctssSamples,
+      unfilteredCtssSamples,
       tracedTiming,
-      displayImplementation,
       displayStackType,
     } = this.props;
 
@@ -432,13 +430,11 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
                 callNodeIndex,
                 callNodeInfo,
                 interval,
-                thread,
                 unfilteredThread,
-                sampleIndexOffset,
+                ctssSampleIndexOffset,
                 categories,
-                samples,
-                unfilteredSamples,
-                displayImplementation
+                ctssSamples,
+                unfilteredCtssSamples
               )
             : undefined
         }

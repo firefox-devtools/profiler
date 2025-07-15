@@ -3,7 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .filterNavigatorBar {
+  --internal-background-color: transparent;
+  --internal-hover-background-color: rgb(0 0 0 / 0.1);
+  --internal-hover-color: inherit;
+  --internal-active-background-color: rgb(0 0 0 / 0.2);
+  --internal-selected-background-color: transparent;
   --internal-selected-color: var(--selected-color, var(--blue-60));
+  --internal-separator-img: url(firefox-profiler-res/img/svg/scope-bar-separator.svg);
 
   display: flex;
   height: 24px;
@@ -28,6 +34,11 @@
   border-width: 0 8px 0 6px;
   border-right-color: transparent !important;
   background-clip: padding-box;
+  background-color: var(--internal-background-color);
+
+  /* Make sure the design also works in High Contrast Mode. The colors are overriden
+     in the forced colors media query. */
+  forced-color-adjust: none;
   line-height: 24px;
   transition:
     opacity 250ms var(--animation-curve),
@@ -88,7 +99,7 @@
 
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem)::after {
   animation: fadeIn 250ms var(--animation-curve);
-  background-image: url(../../../res/img/svg/scope-bar-separator.svg);
+  background-image: var(--internal-separator-img);
   background-position: -18px -12px;
   background-repeat: no-repeat;
   background-size: 24px 24px;
@@ -104,13 +115,28 @@
   }
 }
 
-.filterNavigatorBarSelectedItem {
+.filterNavigatorBarItem:not(
+    .filterNavigatorBarRootItem,
+    .filterNavigatorBarLeafItem
+  )::before,
+.filterNavigatorBarItem:not(.filterNavigatorBarLeafItem)::after {
+  border-color: var(--internal-background-color);
+}
+
+.filterNavigatorBarItem.filterNavigatorBarSelectedItem {
+  background-color: var(--internal-selected-background-color);
   color: var(--internal-selected-color);
+}
+
+.filterNavigatorBarSelectedItem:not(.filterNavigatorBarRootItem)::before,
+.filterNavigatorBarSelectedItem:not(:first-of-type:last-of-type)::after {
+  border-color: var(--internal-selected-background-color);
 }
 
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):hover,
 .filterNavigatorBarItem:has(button.profileFilterNavigator--tab-selector):hover {
-  background-color: rgb(0 0 0 / 0.1);
+  background-color: var(--internal-hover-background-color);
+  color: var(--internal-hover-color);
 }
 
 .filterNavigatorBarItem:not(
@@ -118,11 +144,11 @@
     .filterNavigatorBarLeafItem
   ):hover::before,
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):hover::after {
-  border-color: rgb(0 0 0 / 0.1);
+  border-color: var(--internal-hover-background-color);
 }
 
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):active:hover {
-  background-color: rgb(0 0 0 / 0.2);
+  background-color: var(--internal-hover-background-color);
 }
 
 .filterNavigatorBarItem:not(
@@ -130,7 +156,7 @@
     .filterNavigatorBarLeafItem
   ):active:hover::before,
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):active:hover::after {
-  border-color: rgb(0 0 0 / 0.2);
+  border-color: var(--internal-hover-background-color);
 }
 
 .filterNavigatorBarUncommittedItem {
@@ -174,5 +200,42 @@
   .filterNavigatorBarItem {
     animation: none;
     transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .filterNavigatorBar {
+    --internal-background-color: ButtonFace;
+    --internal-hover-background-color: SelectedItemText;
+    --internal-hover-color: SelectedItem;
+    --internal-active-background-color: SelectedItemText;
+    --internal-selected-background-color: SelectedItem;
+    --internal-selected-color: SelectedItemText;
+    --internal-separator-img: url(firefox-profiler-res/img/svg/scope-bar-separator-hcm-light.svg);
+  }
+
+  .filterNavigatorBarItem {
+    color: ButtonText;
+  }
+
+  /* When the tab selector is active, we want the item to look like a button */
+  .filterNavigatorBarSelectedItem:has(
+    button.profileFilterNavigator--tab-selector
+  ) {
+    background-color: ButtonFace;
+    color: ButtonText;
+  }
+
+  /* In regular mode, the opacity is tweaked, which isn't suited for High Contrast Mode.
+     Here we want the full opacity and a gray text */
+  .filterNavigatorBarUncommittedItem {
+    color: GrayText;
+    opacity: 1;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .filterNavigatorBar {
+      --internal-separator-img: url(firefox-profiler-res/img/svg/scope-bar-separator-hcm-dark.svg);
+    }
   }
 }

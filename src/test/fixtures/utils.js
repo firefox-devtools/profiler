@@ -4,7 +4,7 @@
 // @flow
 import {
   getCallTree,
-  computeCallNodeLeafAndSummary,
+  computeCallNodeSelfAndSummary,
   computeCallTreeTimings,
   type CallTree,
 } from 'firefox-profiler/profile-logic/call-tree';
@@ -13,15 +13,24 @@ import {
   getCallNodeInfo,
   getSampleIndexToCallNodeIndex,
   getOriginAnnotationForFunc,
+  createThreadFromDerivedTables,
+  computeStackTableFromRawStackTable,
+  computeSamplesTableFromRawSamplesTable,
 } from 'firefox-profiler/profile-logic/profile-data';
+import { getProfileWithDicts } from './profiles/processed-profile';
+import { StringTable } from '../../utils/string-table';
 
 import type {
   IndexIntoCallNodeTable,
+  RawProfileSharedData,
   Profile,
   Store,
   State,
   Thread,
   IndexIntoStackTable,
+  RawThread,
+  IndexIntoCategoryList,
+  SampleUnits,
 } from 'firefox-profiler/types';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
@@ -64,24 +73,35 @@ type FakeMouseEventInit = $Shape<{
 }>;
 
 class FakeMouseEvent extends MouseEvent {
-  offsetX: number;
-  offsetY: number;
-  pageX: number;
-  pageY: number;
-  x: number;
-  y: number;
-
   constructor(type: string, values: FakeMouseEventInit) {
     const { pageX, pageY, offsetX, offsetY, x, y, ...mouseValues } = values;
     super(type, (mouseValues: any));
 
-    Object.assign(this, {
-      offsetX: offsetX || 0,
-      offsetY: offsetY || 0,
-      pageX: pageX || 0,
-      pageY: pageY || 0,
-      x: x || 0,
-      y: y || 0,
+    Object.defineProperties(this, {
+      offsetX: {
+        value: offsetX || 0,
+        writable: false,
+      },
+      offsetY: {
+        value: offsetY || 0,
+        writable: false,
+      },
+      pageX: {
+        value: pageX || 0,
+        writable: false,
+      },
+      pageY: {
+        value: pageY || 0,
+        writable: false,
+      },
+      x: {
+        value: x || 0,
+        writable: false,
+      },
+      y: {
+        value: y || 0,
+        writable: false,
+      },
     });
   }
 }
@@ -111,6 +131,32 @@ export function getMouseEvent(
   return new FakeMouseEvent(type, values);
 }
 
+export function computeThreadFromRawThread(
+  rawThread: RawThread,
+  shared: RawProfileSharedData,
+  sampleUnits: SampleUnits | void,
+  referenceCPUDeltaPerMs: number,
+  defaultCategory: IndexIntoCategoryList
+): Thread {
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
+  const stackTable = computeStackTableFromRawStackTable(
+    rawThread.stackTable,
+    rawThread.frameTable,
+    defaultCategory
+  );
+  const samples = computeSamplesTableFromRawSamplesTable(
+    rawThread.samples,
+    sampleUnits,
+    referenceCPUDeltaPerMs
+  );
+  return createThreadFromDerivedTables(
+    rawThread,
+    samples,
+    stackTable,
+    stringTable
+  );
+}
+
 /**
  * This function retrieves a CallTree object from a profile.
  * It's convenient to use it with formatTree below.
@@ -119,33 +165,31 @@ export function callTreeFromProfile(
   profile: Profile,
   threadIndex: number = 0
 ): CallTree {
-  const thread = profile.threads[threadIndex] ?? getEmptyThread();
-  const categories = ensureExists(
-    profile.meta.categories,
-    'Expected to find categories'
-  );
-  const defaultCategory = categories.findIndex((c) => c.name === 'Other');
+  if (!profile.threads[threadIndex]) {
+    profile.threads[threadIndex] = getEmptyThread();
+  }
+  const { derivedThreads, defaultCategory } = getProfileWithDicts(profile);
+  const thread = derivedThreads[threadIndex];
   const callNodeInfo = getCallNodeInfo(
     thread.stackTable,
     thread.frameTable,
-    thread.funcTable,
     defaultCategory
   );
   const callTreeTimings = computeCallTreeTimings(
     callNodeInfo,
-    computeCallNodeLeafAndSummary(
+    computeCallNodeSelfAndSummary(
       thread.samples,
       getSampleIndexToCallNodeIndex(
         thread.samples.stack,
-        callNodeInfo.getStackIndexToCallNodeIndex()
+        callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
       ),
-      callNodeInfo.getCallNodeTable().length
+      callNodeInfo.getNonInvertedCallNodeTable().length
     )
   );
   return getCallTree(
     thread,
     callNodeInfo,
-    categories,
+    ensureExists(profile.meta.categories),
     callTreeTimings,
     'samples'
   );
@@ -317,6 +361,27 @@ export function removeRootOverlayElement() {
     ensureExists(
       document.querySelector('#root-overlay'),
       'Expected to find a root overlay element to clean up.'
+    )
+  );
+}
+
+export function addScreenshotHoverlement() {
+  const div = document.createElement('div');
+  div.id = 'screenshot-hover';
+  ensureExists(
+    document.body,
+    'Expected the document.body to exist.'
+  ).appendChild(div);
+}
+
+export function removeScreenshotHoverElement() {
+  ensureExists(
+    document.body,
+    'Expected the document.body to exist.'
+  ).removeChild(
+    ensureExists(
+      document.querySelector('#screenshot-hover'),
+      'Expected to find a screenshot hover element to clean up.'
     )
   );
 }

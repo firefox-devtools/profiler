@@ -1,9 +1,9 @@
 body,
 html {
   /* Please keep it synced with res/css/style.css */
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    Oxygen-Sans, Ubuntu, 'Noto Sans', 'Liberation Sans', Cantarell,
-    'Helvetica Neue', sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu,
+    'Noto Sans', 'Liberation Sans', Cantarell, 'Helvetica Neue', sans-serif;
   font-size: 11px;
 }
 

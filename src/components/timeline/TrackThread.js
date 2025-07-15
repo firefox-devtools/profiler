@@ -23,9 +23,10 @@ import {
   getSelectedThreadIndexes,
   getTimelineType,
   getThreadSelectorsFromThreadsKey,
-  getMaxThreadCPUDeltaPerMs,
   getIsExperimentalCPUGraphsEnabled,
   getImplementationFilter,
+  getZeroAt,
+  getProfileTimelineUnit,
 } from 'firefox-profiler/selectors';
 import {
   TimelineMarkersJank,
@@ -52,13 +53,13 @@ import type {
   IndexIntoSamplesTable,
   Milliseconds,
   StartEndRange,
-  CallNodeInfo,
   ImplementationFilter,
   IndexIntoCallNodeTable,
   SelectedState,
   State,
   ThreadsKey,
 } from 'firefox-profiler/types';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
@@ -91,9 +92,10 @@ type StateProps = {|
   +selectedThreadIndexes: Set<ThreadIndex>,
   +enableCPUUsage: boolean,
   +isExperimentalCPUGraphsEnabled: boolean,
-  +maxThreadCPUDeltaPerMs: number,
   +implementationFilter: ImplementationFilter,
   +callTreeVisible: boolean,
+  +zeroAt: Milliseconds,
+  +profileTimelineUnit: string,
 |};
 
 type DispatchProps = {|
@@ -192,9 +194,10 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       trackType,
       trackName,
       enableCPUUsage,
-      maxThreadCPUDeltaPerMs,
       isExperimentalCPUGraphsEnabled,
       implementationFilter,
+      zeroAt,
+      profileTimelineUnit,
     } = this.props;
 
     const processType = filteredThread.processType;
@@ -262,9 +265,10 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               samplesSelectedStates={samplesSelectedStates}
               treeOrderSampleComparator={treeOrderSampleComparator}
               enableCPUUsage={enableCPUUsage}
-              maxThreadCPUDeltaPerMs={maxThreadCPUDeltaPerMs}
               implementationFilter={implementationFilter}
               timelineType={timelineType}
+              zeroAt={zeroAt}
+              profileTimelineUnit={profileTimelineUnit}
             />
             {trackType === 'expanded' ? (
               <ThreadSampleGraph
@@ -277,10 +281,14 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
                 samplesSelectedStates={samplesSelectedStates}
                 categories={categories}
                 onSampleClick={this._onSampleClick}
+                timelineType={timelineType}
+                implementationFilter={implementationFilter}
+                zeroAt={zeroAt}
+                profileTimelineUnit={profileTimelineUnit}
               />
             ) : null}
             {isExperimentalCPUGraphsEnabled &&
-            rangeFilteredThread.samples.threadCPUDelta !== undefined ? (
+            rangeFilteredThread.samples.threadCPURatio !== undefined ? (
               <ThreadCPUGraph
                 className="threadCPUGraph"
                 trackName={trackName}
@@ -292,7 +300,6 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
                 samplesSelectedStates={samplesSelectedStates}
                 categories={categories}
                 onSampleClick={this._onSampleClick}
-                maxThreadCPUDeltaPerMs={maxThreadCPUDeltaPerMs}
               />
             ) : null}
           </>
@@ -333,11 +340,11 @@ export const TimelineTrackThread = explicitConnect<
     const selectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const selectedThreadIndexes = getSelectedThreadIndexes(state);
     const committedRange = getCommittedRange(state);
-    const fullThread = selectors.getCPUProcessedThread(state);
+    const fullThread = selectors.getThread(state);
     const timelineType = getTimelineType(state);
     const enableCPUUsage =
       timelineType === 'cpu-category' &&
-      fullThread.samples.threadCPUDelta !== undefined;
+      fullThread.samples.threadCPURatio !== undefined;
 
     return {
       fullThread,
@@ -352,8 +359,7 @@ export const TimelineTrackThread = explicitConnect<
       interval: getProfileInterval(state),
       rangeStart: committedRange.start,
       rangeEnd: committedRange.end,
-      sampleIndexOffset:
-        selectors.getSampleIndexOffsetFromCommittedRange(state),
+      sampleIndexOffset: selectors.getFilteredSampleIndexOffset(state),
       categories: getCategories(state),
       timelineType,
       hasFileIoMarkers:
@@ -365,9 +371,10 @@ export const TimelineTrackThread = explicitConnect<
       selectedThreadIndexes,
       enableCPUUsage,
       isExperimentalCPUGraphsEnabled: getIsExperimentalCPUGraphsEnabled(state),
-      maxThreadCPUDeltaPerMs: getMaxThreadCPUDeltaPerMs(state),
       implementationFilter: getImplementationFilter(state),
       callTreeVisible: selectors.getUsefulTabs(state).includes('calltree'),
+      zeroAt: getZeroAt(state),
+      profileTimelineUnit: getProfileTimelineUnit(state),
     };
   },
   mapDispatchToProps: {

@@ -30,6 +30,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = Impossible d’importer le profil.
 AppViewRouter--error-unpublished = Impossible de récupérer le profil depuis { -firefox-brand-name }.
 AppViewRouter--error-from-file = Impossible de lire le fichier ou d’analyser le profil qu’il contient.
 AppViewRouter--error-local = Pas encore implémenté.
@@ -89,6 +90,7 @@ CallNodeContextMenu--searchfox = Rechercher le nom de la fonction sur Searchfox
 CallNodeContextMenu--copy-function-name = Copier le nom de la fonction
 CallNodeContextMenu--copy-script-url = Copier l’URL du script
 CallNodeContextMenu--copy-stack = Copier la pile
+CallNodeContextMenu--show-the-function-in-devtools = Afficher la fonction dans les outils de développement
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -142,6 +144,30 @@ CallTreeSidebar--call-node-details = Détails du nœud d’appel
 ## in the functions it called. "Running time" is the time spent in the function
 ## itself, including the time spent in the functions it called.
 
+CallTreeSidebar--traced-running-time =
+    .label = Temps d’exécution tracé
+CallTreeSidebar--traced-self-time =
+    .label = Temps individuel tracé
+CallTreeSidebar--running-time =
+    .label = Temps d’exécution
+CallTreeSidebar--self-time =
+    .label = Temps individuel
+CallTreeSidebar--running-samples =
+    .label = Échantillons totaux
+CallTreeSidebar--self-samples =
+    .label = Échantillons individuels
+CallTreeSidebar--running-size =
+    .label = Taille totale
+CallTreeSidebar--self-size =
+    .label = Taille individuelle
+CallTreeSidebar--categories = Catégories
+CallTreeSidebar--implementation = Implémentation
+CallTreeSidebar--running-milliseconds = Millisecondes totales
+CallTreeSidebar--running-sample-count = Nombre d’échantillons total
+CallTreeSidebar--running-bytes = Octets totaux
+CallTreeSidebar--self-milliseconds = Millisecondes individuelles
+CallTreeSidebar--self-sample-count = Nombre d’échantillons individuels
+CallTreeSidebar--self-bytes = Octets individuels
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -246,6 +272,12 @@ Home--load-files-from-other-tools2 =
     Panneau de performances Chrome, <androidstudio>Android Studio</androidstudio>, ou
     tout fichier utilisant les formats <dhat>dhat</dhat> ou <traceevent>Trace Event de Google</traceevent>. <write>Apprenez à écrire votre
     propre importateur</write>.
+Home--install-chrome-extension = Installer l’extension Chrome
+Home--chrome-extension-instructions =
+    Utilisez l’extension <a>{ -profiler-brand-name } pour Chrome</a>
+    pour capturer des profils de performance dans Chrome et les analyser dans le
+    { -profiler-brand-name }. Installez l’extension depuis le Chrome Web Store.
+Home--chrome-extension-recording-instructions = Une fois l’extension installée, utilisez l’icône de la barre d’outils ou les raccourcis pour démarrer et arrêter le profilage. Vous pouvez également exporter des profils et les charger ici pour une analyse détaillée.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -532,6 +564,14 @@ NumberFormat--short-date = { SHORTDATE($date) }
 
 PanelSearch--search-field-hint = Saviez-vous que vous pouvez utiliser la virgule (,) pour effectuer une recherche à l’aide de plusieurs termes ?
 
+## Profile Name Button
+
+ProfileName--edit-profile-name-button =
+    .title = Modifier le nom du profil
+ProfileName--edit-profile-name-input =
+    .title = Modifier le nom du profil
+    .aria-label = Nom du profil
+
 ## Profile Delete Button
 
 # This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
@@ -577,6 +617,7 @@ ProfileFilterNavigator--full-range-with-duration = Plage entière ({ $fullRangeD
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-from-post-message = Importation et traitement du profil…
 ProfileLoaderAnimation--loading-unpublished = Importation du profil directement depuis { -firefox-brand-name }…
 ProfileLoaderAnimation--loading-from-file = Lecture du fichier et traitement du profil…
 ProfileLoaderAnimation--loading-local = Pas encore implémenté.
@@ -655,6 +696,7 @@ TabBar--js-tracer-tab = Traceur JS
 ## range at the top left corner for profiler analysis view. It's used to switch
 ## between tabs that were captured in the profile.
 
+TabSelectorMenu--all-tabs-and-windows = Tous les onglets et fenêtres
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
@@ -672,6 +714,10 @@ TrackContextMenu--hide-other-screenshots-tracks = Masquer les autres pistes de c
 TrackContextMenu--hide-track = Masquer « { $trackName } »
 TrackContextMenu--show-all-tracks = Afficher toutes les pistes
 TrackContextMenu--show-local-tracks-in-process = Afficher toutes les pistes de ce processus
+# This is used as the context menu item to hide all tracks of the selected track's type.
+# Variables:
+#   $type (String) - Name of the type of selected track to hide.
+TrackContextMenu--hide-all-tracks-by-selected-track-type = Masquer les pistes de type « { $type } »
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Afficher toutes les pistes correspondantes
@@ -724,6 +770,21 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Puissance
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-kilowatt = { $value } kW
+    .label = Puissance moyenne pour la sélection actuelle
+# This is used in the tooltip when the power value uses the watt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-watt = { $value } W
+    .label = Puissance moyenne pour la sélection actuelle
+# This is used in the tooltip when the instant power value uses the milliwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-milliwatt = { $value } mW
+    .label = Puissance moyenne pour la sélection actuelle
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.
 # Variables:

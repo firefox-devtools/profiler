@@ -14,8 +14,6 @@ import {
   getLocalTrackFromReference,
   getGlobalTrackFromReference,
   getPreviewSelection,
-  getActiveTabGlobalTrackFromReference,
-  getActiveTabResourceTrackFromReference,
   getLocalTracksByPid,
   getThreads,
   getLastNonShiftClick,
@@ -57,7 +55,6 @@ import type {
   TrackReference,
   TimelineType,
   DataSource,
-  ActiveTabTrackReference,
   State,
   Action,
   ThunkAction,
@@ -65,7 +62,6 @@ import type {
   Pid,
   IndexIntoSamplesTable,
   CallNodePath,
-  CallNodeInfo,
   IndexIntoCallNodeTable,
   IndexIntoResourceTable,
   TrackIndex,
@@ -86,6 +82,7 @@ import {
 } from '../profile-logic/transforms';
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import type { TabSlug } from '../app-logic/tabs-handling';
+import type { CallNodeInfo } from '../profile-logic/call-node-info';
 import { intersectSets } from 'firefox-profiler/utils/set';
 
 /**
@@ -705,109 +702,6 @@ export function selectTrackFromTid(tid: Tid): ThunkAction<void> {
     }
 
     dispatch(selectTrackWithModifiers(trackReference));
-  };
-}
-
-/**
- * This selects an active tab track from its reference.
- * This will ultimately select the thread that this track belongs to, using its
- * thread index, and may also change the selected tab if it makes sense for this
- * track.
- */
-export function selectActiveTabTrack(
-  trackReference: ActiveTabTrackReference
-): ThunkAction<void> {
-  return (dispatch, getState) => {
-    const currentlySelectedTab = getSelectedTab(getState());
-    const currentlySelectedThreadIndex = getSelectedThreadIndexes(getState());
-    // These get assigned based on the track type.
-    let selectedThreadIndexes;
-    let selectedTab = currentlySelectedTab;
-
-    switch (trackReference.type) {
-      case 'global': {
-        // Handle the case of global tracks.
-        const globalTrack = getActiveTabGlobalTrackFromReference(
-          getState(),
-          trackReference
-        );
-
-        // Go through each type, and determine the selected slug and thread index.
-        switch (globalTrack.type) {
-          case 'tab': {
-            selectedThreadIndexes = new Set([...globalTrack.threadIndexes]);
-            // Ensure a relevant thread-based tab is used.
-            if (selectedTab === 'network-chart') {
-              selectedTab = getLastVisibleThreadTabSlug(getState());
-            }
-            break;
-          }
-          case 'screenshots':
-            // Do not allow selecting this track.
-            return;
-          default:
-            throw assertExhaustiveCheck(
-              globalTrack,
-              `Unhandled ActiveTabGlobalTrack type.`
-            );
-        }
-        break;
-      }
-      case 'resource': {
-        // Handle the case of resource tracks.
-        const resourceTrack = getActiveTabResourceTrackFromReference(
-          getState(),
-          trackReference
-        );
-
-        // Go through each type, and determine the selected slug and thread index.
-        switch (resourceTrack.type) {
-          case 'sub-frame':
-          case 'thread': {
-            selectedThreadIndexes = new Set([resourceTrack.threadIndex]);
-            // Ensure a relevant thread-based tab is used.
-            if (selectedTab === 'network-chart') {
-              selectedTab = getLastVisibleThreadTabSlug(getState());
-            }
-            break;
-          }
-          default:
-            throw assertExhaustiveCheck(
-              resourceTrack,
-              `Unhandled ActiveTabResourceTrack type.`
-            );
-        }
-        break;
-      }
-      default:
-        throw assertExhaustiveCheck(
-          trackReference,
-          'Unhandled TrackReference type'
-        );
-    }
-
-    const visibleTabs = getThreadSelectors(selectedThreadIndexes).getUsefulTabs(
-      getState()
-    );
-    if (!visibleTabs.includes(selectedTab)) {
-      // If the user switches to another track that doesn't have the current
-      // selectedTab then switch to the first tab.
-      selectedTab = visibleTabs[0];
-    }
-
-    if (
-      currentlySelectedTab === selectedTab &&
-      currentlySelectedThreadIndex === selectedThreadIndexes
-    ) {
-      return;
-    }
-
-    dispatch({
-      type: 'SELECT_TRACK',
-      selectedThreadIndexes,
-      selectedTab,
-      lastNonShiftClickInformation: null,
-    });
   };
 }
 
@@ -2035,12 +1929,13 @@ export function handleCallNodeTransformShortcut(
     const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const unfilteredThread = threadSelectors.getThread(getState());
     const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
-    const callNodeTable = callNodeInfo.getCallNodeTable();
     const implementation = getImplementationFilter(getState());
     const inverted = getInvertCallstack(getState());
     const callNodePath = callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
-    const funcIndex = callNodeTable.func[callNodeIndex];
-    const category = callNodeTable.category[callNodeIndex];
+    const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
+    const category = callNodeInfo.categoryForNode(callNodeIndex);
+
+    const nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
 
     switch (event.key) {
       case 'F':
@@ -2099,7 +1994,7 @@ export function handleCallNodeTransformShortcut(
         break;
       }
       case 'r': {
-        if (funcHasRecursiveCall(callNodeTable, funcIndex)) {
+        if (funcHasRecursiveCall(nonInvertedCallNodeTable, funcIndex)) {
           dispatch(
             addTransformToStack(threadsKey, {
               type: 'collapse-recursion',
@@ -2110,7 +2005,7 @@ export function handleCallNodeTransformShortcut(
         break;
       }
       case 'R': {
-        if (funcHasDirectRecursiveCall(callNodeTable, funcIndex)) {
+        if (funcHasDirectRecursiveCall(nonInvertedCallNodeTable, funcIndex)) {
           dispatch(
             addTransformToStack(threadsKey, {
               type: 'collapse-direct-recursion',

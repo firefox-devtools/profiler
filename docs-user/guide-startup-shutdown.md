@@ -7,15 +7,21 @@ please go to https://profiler.firefox.com to add it first to your Firefox.
 
 1. Start your Firefox with the environment variable `MOZ_PROFILER_STARTUP=1` set. This way, the profiler is started as early as possible during startup.
 
+   This can also be done inline when running Firefox [Mach](https://firefox-source-docs.mozilla.org/mach/):
+
+   ```bash
+   $ MOZ_PROFILER_STARTUP=1 ./mach run
+   ```
+
 2. Then capture the profile using the popup, as usual.
 
 Startup profiling does not use the settings that you configured in the `about:profiling`. It uses settings that can be configured with the environment variables `MOZ_PROFILER_STARTUP_ENTRIES`, `MOZ_PROFILER_STARTUP_INTERVAL`, and more:
 
-* If it looks like the buffer is not large enough, you can tweak the buffer size with the env var `MOZ_PROFILER_STARTUP_ENTRIES`. This defaults to 1000000, which is 9MB. If you want 90MB, use 10000000, and for 180MB, use 20000000, which are good values to debug long startups.
+- If it looks like the buffer is not large enough, you can tweak the buffer size with the env var `MOZ_PROFILER_STARTUP_ENTRIES`. This defaults to 1000000, which is 9MB. If you want 90MB, use 10000000, and for 180MB, use 20000000, which are good values to debug long startups.
 
-* If you'd like a coarser resolution, you can also choose a different interval using `MOZ_PROFILER_STARTUP_INTERVAL`, which defaults to 1 (unit is millisecond). You can't go below 1 ms, but you can use e.g. 10 ms.
+- If you'd like a coarser resolution, you can also choose a different interval using `MOZ_PROFILER_STARTUP_INTERVAL`, which defaults to 1 (unit is millisecond). You can't go below 1 ms, but you can use e.g. 10 ms.
 
-* More environment variables are available to control the profiler settings. They can be listed by setting `MOZ_PROFILER_HELP=1` and running Firefox from a command line inside a terminal; Firefox will exit immediately, and display all accepted variables in the terminal.
+- More environment variables are available to control the profiler settings. They can be listed by setting `MOZ_PROFILER_HELP=1` and running Firefox from a command line inside a terminal; Firefox will exit immediately, and display all accepted variables in the terminal.
 
 ## Shutdown
 
@@ -26,7 +32,6 @@ Startup profiling does not use the settings that you configured in the `about:pr
 3. The file you specified will contain the recorded profile. Load it through the [profiler.firefox.com](https://profiler.firefox.com) interface by either drag and drop or the file upload interface.
 
 For startup profiling, similar to [startup profiling on Desktop](https://developer.mozilla.org/en-US/docs/Mozilla/Performance/Profiling_with_the_Built-in_Profiler#Profiling_Firefox_Startup), you will need to manually set some `MOZ_PROFILER_STARTUP*` environment variables. The way to do this varies based on the app you want to profile (more details below). Once the app has been started with these environment variables, the profiler will be running. Then you can connect to the app using `about:debugging` as usual, and capture the profile with the regular UI.
-
 
 ## Firefox for Android
 
@@ -59,6 +64,7 @@ adb shell am start -n org.mozilla.geckoview_example/.App \
 Fenix has a [different way](https://firefox-source-docs.mozilla.org/mobile/android/geckoview/consumer/automation.html#reading-configuration-from-a-file) to specify environment variables: it uses a yaml file.
 
 The easiest way to set up startup profiling is to run the `<mozilla-central-repo>/mobile/android/fenix/tools/setup-startup-profiling.py` script. For example:
+
 ```bash
 ./mobile/android/fenix/tools/setup-startup-profiling.py activate nightly  # To activate startup profiling on nightly.
 ./mobile/android/fenix/tools/setup-startup-profiling.py deactivate beta  # To deactivate startup profiling on beta.
@@ -72,7 +78,7 @@ If you don't want to check out [mozilla-central](https://hg.mozilla.org/mozilla-
 
 The filename of the YAML file mentioned above depends on the bundle ID of your Fenix app. The instructions below assume you want to profile the Fenix Nightly app, with the bundle ID `org.mozilla.fenix`.
 
- 1. Create a file with the name `org.mozilla.fenix-geckoview-config.yaml` on your desktop machine and content of the following form:
+1.  Create a file with the name `org.mozilla.fenix-geckoview-config.yaml` on your desktop machine and content of the following form:
 
     ```
     env:
@@ -81,8 +87,9 @@ The filename of the YAML file mentioned above depends on the bundle ID of your F
       MOZ_PROFILER_STARTUP_FEATURES: js,stackwalk,screenshots,ipcmessages,java,processcpu,cpu
       MOZ_PROFILER_STARTUP_FILTERS: GeckoMain,Compositor,Renderer,IPDL Background
     ```
- 2. Push this file to the device with `adb push org.mozilla.fenix-geckoview-config.yaml /data/local/tmp/`.
- 3. Run `adb shell am set-debug-app --persistent org.mozilla.fenix` to make sure the file is respected.
+
+2.  Push this file to the device with `adb push org.mozilla.fenix-geckoview-config.yaml /data/local/tmp/`.
+3.  Run `adb shell am set-debug-app --persistent org.mozilla.fenix` to make sure the file is respected.
 
 From now on, whenever you open the Fenix app, Gecko will be profiling itself automatically from the start, even if remote debugging is turned off. Then you can enable remote debugging, connect to the browser with `about:debugging`, and capture the profiling run.
 
@@ -104,5 +111,3 @@ adb shell am start-activity -d "https://www.mozilla.org/" \
 When combined with the startup profiling `.yaml` file as described in the previous section, this allows profiling GeckoView during the App Link startup path. This is the scenario of a user opening a link from a different Android app in the default browser.
 
 Startup from App Link is the most important GeckoView startup scenario. In this scenario, GeckoView startup is directly in the critical path between the user action (tapping the link) and the first useful result (the web page being shown on the screen). This is different from the scenario of launching Fenix from the home screen - in that case, Fenix can show meaningful content even before Gecko is initialized, so Gecko's startup time is not as crucial to the experience.
-
-

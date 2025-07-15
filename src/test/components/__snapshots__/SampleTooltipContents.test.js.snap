@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`SampleTooltipContents renders the CPU usage only when outside of the activity graph is hovered 1`] = `
 <div
@@ -27,6 +27,18 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
   data-testid="tooltip"
   style="left: 11px; top: 10px;"
 >
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Sampled at:
+    </div>
+    <div>
+      0s
+    </div>
+  </div>
   <div
     class="tooltipDetails"
   >
@@ -314,6 +326,18 @@ exports[`SampleTooltipContents renders the sample with "variable CPU cycles" CPU
     <div
       class="tooltipLabel"
     >
+      Sampled at:
+    </div>
+    <div>
+      1ms
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
       CPU:
     </div>
     <div>
@@ -426,6 +450,18 @@ exports[`SampleTooltipContents renders the sample with ns CPU usage information 
     <div
       class="tooltipLabel"
     >
+      Sampled at:
+    </div>
+    <div>
+      1ms
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
       CPU:
     </div>
     <div>
@@ -532,6 +568,18 @@ exports[`SampleTooltipContents renders the sample with µs CPU usage information
   data-testid="tooltip"
   style="left: 11px; top: 10px;"
 >
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Sampled at:
+    </div>
+    <div>
+      1ms
+    </div>
+  </div>
   <div
     class="tooltipDetails"
   >

@@ -76,17 +76,17 @@ UI.
 
 The following keyboard shortcuts are available:
 
-* `Ctrl + Shift + 1`: start the profiler, or stop and discard the data if it's already running.
-* `Ctrl + Shift + 2`: capture the profile from the currently running session. It
+- `Ctrl + Shift + 1`: start the profiler, or stop and discard the data if it's already running.
+- `Ctrl + Shift + 2`: capture the profile from the currently running session. It
   has no effect if the profiler isn't running.
 
 ## Share a profile
 
 ![A screenshot highlighting the toolbar's upload profile button.](images/getting-started-upload.png)
 
-One of the most powerful and useful features of the Firefox Profiler is the ability to upload and share profiles. The first step is to hit the *Upload Local Profile* button. You'll be able to exclude some information before uploading. Then the profile will be uploaded to an online storage. This profile can then be shared in online chat, emails, and bug reports. Note that anybody that has the link will be able to access the uploaded data, as it's not protected otherwise.
+One of the most powerful and useful features of the Firefox Profiler is the ability to upload and share profiles. The first step is to hit the _Upload Local Profile_ button. You'll be able to exclude some information before uploading. Then the profile will be uploaded to an online storage. This profile can then be shared in online chat, emails, and bug reports. Note that anybody that has the link will be able to access the uploaded data, as it's not protected otherwise.
 
-The current view and all of the filters applied to the profile will be encoded into the URL. After initially sharing the profile, a *Permalink* button will be added, that can then be used to provide a handy shortened URL to the current view.
+The current view and all of the filters applied to the profile will be encoded into the URL. After initially sharing the profile, a _Permalink_ button will be added, that can then be used to provide a handy shortened URL to the current view.
 
 [A video showing how to upload a profile and how to get the permalink](images/getting-started-upload-permalink.webm ':include :type=video controls')
 
@@ -112,4 +112,3 @@ you uploaded from the same browser instance.
 It's possible to name a profile so that it's conveniently findable later by
 searching in the address bar. The name is part of the URL you'll share to others,
 but otherwise isn't stored in the profile data.
-

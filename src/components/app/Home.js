@@ -225,6 +225,7 @@ type PopupInstallPhase =
   | 'popup-enabled'
   | 'suggest-enable-popup'
   // Other browsers:
+  | 'suggest-chrome-extension'
   | 'other-browser';
 
 class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
@@ -249,6 +250,10 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
           this.setState({ popupInstallPhase: 'webchannel-unavailable' });
         }
       );
+    } else if (_isChromium()) {
+      popupInstallPhase = 'suggest-chrome-extension';
+      // TODO: Check if the extension is installed and show the recording
+      // instructions. But we need to check if extension is there to do that.
     }
 
     this.state = {
@@ -266,6 +271,8 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
         return this._renderEnablePopupInstructions(false);
       case 'popup-enabled':
         return this._renderRecordInstructions(FirefoxPopupScreenshot);
+      case 'suggest-chrome-extension':
+        return this._renderChromeInstructions();
       case 'other-browser':
         return this._renderOtherBrowserInstructions();
       default:
@@ -369,6 +376,69 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
                 <a>Profiling Firefox for Android directly on device</a>.
               </p>
             </Localized>
+          </div>
+          {/* end of grid container */}
+        </div>
+      </InstructionTransition>
+    );
+  }
+
+  _renderChromeInstructions() {
+    const chromeExtensionUrl =
+      'https://chromewebstore.google.com/detail/firefox-profiler/ljmahpnflmbkgaipnfbpgjipcnahlghn';
+    return (
+      <InstructionTransition key={0}>
+        <div
+          className="homeInstructions"
+          data-testid="home-enable-popup-instructions"
+        >
+          {/* Grid container: homeInstructions */}
+          {/* Left column: img */}
+          <img
+            className="homeSectionScreenshot"
+            src={PerfScreenshot}
+            alt="screenshot of profiler.firefox.com"
+          />
+          {/* Right column: instructions */}
+          <div>
+            <a
+              className="homeSectionButton"
+              href={chromeExtensionUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span className="homeSectionPlus">+</span>
+              <Localized id="Home--install-chrome-extension">
+                Install the Chrome extension
+              </Localized>
+            </a>
+            <DocsButton />
+            <Localized
+              id="Home--chrome-extension-instructions"
+              elems={{
+                a: (
+                  <a
+                    href={chromeExtensionUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  />
+                ),
+              }}
+            >
+              <p>
+                Use the <a>Firefox Profiler extension for Chrome</a> to capture
+                performance profiles in Chrome and analyze them in the Firefox
+                Profiler. Install the extension from the Chrome Web Store.
+              </p>
+            </Localized>
+            <Localized id="Home--chrome-extension-recording-instructions">
+              <p>
+                Once installed, use the extension’s toolbar icon or the
+                shortcuts to start and stop profiling. You can also export
+                profiles and load them here for detailed analysis.
+              </p>
+            </Localized>
+            {this._renderShortcuts()}
           </div>
           {/* end of grid container */}
         </div>
@@ -625,6 +695,10 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
 
 function _isFirefox(): boolean {
   return Boolean(navigator.userAgent.match(/Firefox\/\d+\.\d+/));
+}
+
+function _isChromium(): boolean {
+  return Boolean(navigator.userAgent.match(/Chrome\/\d+\.\d+/));
 }
 
 export const Home = explicitConnect<

@@ -26,11 +26,10 @@ import {
 import { oneLine } from 'common-tags';
 import type {
   UrlState,
-  TimelineTrackOrganization,
   DataSource,
   Pid,
   Profile,
-  Thread,
+  RawThread,
   IndexIntoStackTable,
   TabID,
   TrackIndex,
@@ -48,7 +47,7 @@ import {
 } from '../utils/uintarray-encoding';
 import { tabSlugs } from '../app-logic/tabs-handling';
 
-export const CURRENT_URL_VERSION = 10;
+export const CURRENT_URL_VERSION = 11;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -147,8 +146,10 @@ function getPathParts(urlState: UrlState): string[] {
   }
 }
 
-// Base query that only applies to full profile view.
-type FullProfileSpecificBaseQuery = {|
+// "null | void" in the query objects are flags which map to true for null, and false
+// for void. False flags do not show up the URL.
+type BaseQuery = {|
+  v: number,
   globalTrackOrder: string, // "3201"
   hiddenGlobalTracks: string, // "01"
   hiddenLocalTracksByPid: string, // "1549-0w8~1593-23~1598-01~1602-02~1607-1"
@@ -159,21 +160,6 @@ type FullProfileSpecificBaseQuery = {|
   // must be fetched to compute the tracks.
   threadOrder: string, // "3-2-0-1"
   hiddenThreads: string, // "0-1"
-|};
-
-// Base query that only applies to active tab profile view.
-type ActiveTabProfileSpecificBaseQuery = {|
-  resources: null | void,
-  ctxId: TabID | void,
-|};
-
-// Base query that only applies to origins profile view.
-type OriginsProfileSpecificBaseQuery = {||};
-
-// "null | void" in the query objects are flags which map to true for null, and false
-// for void. False flags do not show up the URL.
-type BaseQuery = {|
-  v: number,
   range: string, //
   thread: string, // "3"
   file: string, // Path into a zip file.
@@ -186,9 +172,6 @@ type BaseQuery = {|
   timelineType: string,
   sourceView: string,
   assemblyView: string,
-  ...FullProfileSpecificBaseQuery,
-  ...ActiveTabProfileSpecificBaseQuery,
-  ...OriginsProfileSpecificBaseQuery,
 |};
 
 type CallTreeQuery = {|
@@ -231,17 +214,6 @@ type Query =
 type $MakeOptional = <T>(T) => T | void;
 // Base query shape is needed for the typechecking during the URL query initialization.
 type BaseQueryShape = $Shape<$ObjMap<BaseQuery, $MakeOptional>>;
-// Full profile view and active tab profile view query shapes are for also
-// typechecking during the query object initialization.
-type FullProfileSpecificBaseQueryShape = $Shape<
-  $ObjMap<FullProfileSpecificBaseQuery, $MakeOptional>,
->;
-type ActiveTabProfileSpecificBaseQueryShape = $Shape<
-  $ObjMap<ActiveTabProfileSpecificBaseQuery, $MakeOptional>,
->;
-type OriginsProfileSpecificBaseQueryShape = $Shape<
-  $ObjMap<OriginsProfileSpecificBaseQuery, $MakeOptional>,
->;
 
 // Query shapes for individual query paths. These are needed for QueryShape union type.
 type CallTreeQueryShape = $Shape<$ObjMap<CallTreeQuery, $MakeOptional>>;
@@ -289,72 +261,21 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
   const selectedThreadsKey =
     selectedThreads !== null ? getThreadsKey(selectedThreads) : null;
 
-  let ctxId;
-  let view;
-  const { timelineTrackOrganization } = urlState;
-  switch (timelineTrackOrganization.type) {
-    case 'full':
-      // Dont URL-encode anything.
-      break;
-    case 'active-tab':
-      view = timelineTrackOrganization.type;
-      ctxId = timelineTrackOrganization.tabID;
-      break;
-    case 'origins':
-      view = timelineTrackOrganization.type;
-      break;
-    default:
-      throw assertExhaustiveCheck(
-        timelineTrackOrganization,
-        'Unhandled TimelineTrackOrganization case'
-      );
-  }
-
-  // Start with the query parameters that are shown regardless of the active panel.
-  let baseQuery;
-  switch (timelineTrackOrganization.type) {
-    case 'full': {
-      // Add the full profile specific state query here.
-      baseQuery = ({}: FullProfileSpecificBaseQueryShape);
-      baseQuery.globalTrackOrder = convertGlobalTrackOrderToString(
-        urlState.profileSpecific.full.globalTrackOrder
-      );
-      baseQuery.hiddenGlobalTracks = convertHiddenGlobalTracksToString(
-        urlState.profileSpecific.full.hiddenGlobalTracks
-      );
-      baseQuery.hiddenLocalTracksByPid = convertHiddenLocalTracksByPidToString(
-        urlState.profileSpecific.full.hiddenLocalTracksByPid
-      );
-      baseQuery.localTrackOrderByPid = convertLocalTrackOrderByPidToString(
-        urlState.profileSpecific.full.localTrackOrderByPid,
-        urlState.profileSpecific.full.localTrackOrderChangedPids
-      );
-      baseQuery.tabID = urlState.profileSpecific.full.tabFilter ?? undefined;
-
-      break;
-    }
-    case 'active-tab': {
-      baseQuery = ({}: ActiveTabProfileSpecificBaseQueryShape);
-
-      baseQuery.resources = urlState.profileSpecific.activeTab
-        .isResourcesPanelOpen
-        ? null
-        : undefined;
-      baseQuery.ctxId = ctxId || undefined;
-      break;
-    }
-    case 'origins':
-      baseQuery = ({}: OriginsProfileSpecificBaseQueryShape);
-      break;
-    default:
-      throw assertExhaustiveCheck(
-        timelineTrackOrganization,
-        `Unhandled GlobalTrack type.`
-      );
-  }
-
-  baseQuery = ({
-    ...baseQuery,
+  const baseQuery = ({
+    globalTrackOrder: convertGlobalTrackOrderToString(
+      urlState.profileSpecific.globalTrackOrder
+    ),
+    hiddenGlobalTracks: convertHiddenGlobalTracksToString(
+      urlState.profileSpecific.hiddenGlobalTracks
+    ),
+    hiddenLocalTracksByPid: convertHiddenLocalTracksByPidToString(
+      urlState.profileSpecific.hiddenLocalTracksByPid
+    ),
+    localTrackOrderByPid: convertLocalTrackOrderByPidToString(
+      urlState.profileSpecific.localTrackOrderByPid,
+      urlState.profileSpecific.localTrackOrderChangedPids
+    ),
+    tabID: urlState.profileSpecific.tabFilter ?? undefined,
     range:
       stringifyCommittedRanges(urlState.profileSpecific.committedRanges) ||
       undefined,
@@ -364,7 +285,6 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         : encodeUintSetForUrlComponent(selectedThreads),
     file: urlState.pathInZipFile || undefined,
     profiles: urlState.profilesToCompare || undefined,
-    view,
     v: CURRENT_URL_VERSION,
     profileName: urlState.profileName || undefined,
     symbolServer: urlState.symbolServerUrl || undefined,
@@ -444,24 +364,9 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       break;
     case 'js-tracer': {
       query = (baseQuery: JsTracerQueryShape);
-      const { timelineTrackOrganization } = urlState;
-      switch (timelineTrackOrganization.type) {
-        case 'full':
-        case 'origins':
-          // `null` adds the parameter to the query, while `undefined` doesn't.
-          query.summary = urlState.profileSpecific.full.showJsTracerSummary
-            ? null
-            : undefined;
-          break;
-        case 'active-tab':
-          // JS Tracer isn't helpful for web developers.
-          break;
-        default:
-          throw assertExhaustiveCheck(
-            timelineTrackOrganization,
-            'Unhandled timelineTrackOrganization case'
-          );
-      }
+      query.summary = urlState.profileSpecific.showJsTracerSummary
+        ? null
+        : undefined;
       break;
     }
     default:
@@ -583,13 +488,6 @@ export function stateFromLocation(
     transforms[selectedThreadsKey] = parseTransforms(query.transforms);
   }
 
-  // oldTabID is used for the old active tab view that we had. We will remove
-  // it in the end, but have to keep this while we have the view.
-  let oldTabID = null;
-  if (query.ctxId && Number.isInteger(Number(query.ctxId))) {
-    oldTabID = Number(query.ctxId);
-  }
-
   // tabID is used for the tab selector that we have in our full view.
   let tabID = null;
   if (query.tabID && Number.isInteger(Number(query.tabID))) {
@@ -639,10 +537,6 @@ export function stateFromLocation(
     pathInZipFile: query.file || null,
     profileName: query.profileName,
     symbolServerUrl: query.symbolServer || null,
-    timelineTrackOrganization: validateTimelineTrackOrganization(
-      query.view,
-      oldTabID
-    ),
     profileSpecific: {
       implementation,
       lastSelectedCallTreeSummaryStrategy: toValidCallTreeSummaryStrategy(
@@ -660,30 +554,25 @@ export function stateFromLocation(
       assemblyView,
       isBottomBoxOpenPerPanel,
       timelineType: validateTimelineType(query.timelineType),
-      full: {
-        showJsTracerSummary: query.summary === undefined ? false : true,
-        globalTrackOrder: convertGlobalTrackOrderFromString(
-          query.globalTrackOrder
-        ),
-        hiddenGlobalTracks: convertHiddenGlobalTracksFromString(
-          query.hiddenGlobalTracks
-        ),
-        hiddenLocalTracksByPid: convertHiddenLocalTracksByPidFromString(
-          query.hiddenLocalTracksByPid
-        ),
-        localTrackOrderByPid,
-        localTrackOrderChangedPids,
-        tabFilter: tabID,
-        legacyThreadOrder: query.threadOrder
-          ? query.threadOrder.split('-').map((index) => Number(index))
-          : null,
-        legacyHiddenThreads: query.hiddenThreads
-          ? query.hiddenThreads.split('-').map((index) => Number(index))
-          : null,
-      },
-      activeTab: {
-        isResourcesPanelOpen: query.resources !== undefined,
-      },
+      showJsTracerSummary: query.summary === undefined ? false : true,
+      globalTrackOrder: convertGlobalTrackOrderFromString(
+        query.globalTrackOrder
+      ),
+      hiddenGlobalTracks: convertHiddenGlobalTracksFromString(
+        query.hiddenGlobalTracks
+      ),
+      hiddenLocalTracksByPid: convertHiddenLocalTracksByPidFromString(
+        query.hiddenLocalTracksByPid
+      ),
+      localTrackOrderByPid,
+      localTrackOrderChangedPids,
+      tabFilter: tabID,
+      legacyThreadOrder: query.threadOrder
+        ? query.threadOrder.split('-').map((index) => Number(index))
+        : null,
+      legacyHiddenThreads: query.hiddenThreads
+        ? query.hiddenThreads.split('-').map((index) => Number(index))
+        : null,
     },
   };
 }
@@ -1244,6 +1133,18 @@ const _upgraders: {|
     const transformStrings = query.transforms.split('~');
     query.transforms = transformStrings.map(upgradeTransformString).join('~');
   },
+  [11]: (processedLocation: ProcessedLocationBeforeUpgrade) => {
+    // This version removes the active tab and origins views. The provided
+    // parameters are not relevant to the full view, so we remove them all.
+    // This will load the full view from scratch.
+    if (
+      processedLocation.query.view === 'active-tab' ||
+      processedLocation.query.view === 'origins'
+    ) {
+      // Clear EVERYTHING in the query. Let it compute everything for the full view.
+      processedLocation.query = {};
+    }
+  },
 };
 
 for (let destVersion = 1; destVersion <= CURRENT_URL_VERSION; destVersion++) {
@@ -1268,7 +1169,7 @@ for (const destVersionStr of Object.keys(_upgraders)) {
 // This should only be used for the URL upgrader, typically this
 // operation would use a call node index rather than a stack.
 function getStackIndexFromVersion3JSCallNodePath(
-  thread: Thread,
+  thread: RawThread,
   oldCallNodePath: CallNodePath
 ): IndexIntoStackTable | null {
   const { stackTable, funcTable, frameTable } = thread;
@@ -1314,7 +1215,7 @@ function getStackIndexFromVersion3JSCallNodePath(
 // Constructs the new JS CallNodePath from given stackIndex and returns it.
 // This should only be used for the URL upgrader.
 function getVersion4JSCallNodePathFromStackIndex(
-  thread: Thread,
+  thread: RawThread,
   stackIndex: IndexIntoStackTable
 ): CallNodePath {
   const { funcTable, stackTable, frameTable } = thread;
@@ -1329,28 +1230,6 @@ function getVersion4JSCallNodePathFromStackIndex(
     nextStackIndex = stackTable.prefix[nextStackIndex];
   }
   return callNodePath;
-}
-
-function validateTimelineTrackOrganization(
-  type: ?string,
-  tabID: number | null
-): TimelineTrackOrganization {
-  // Pretend this is a TimelineTrackOrganization so that we can exhaustively
-  // go through each option.
-  const timelineTrackOrganization: TimelineTrackOrganization = ({ type }: any);
-  switch (timelineTrackOrganization.type) {
-    case 'full':
-      return { type: 'full' };
-    case 'active-tab':
-      return { type: 'active-tab', tabID };
-    case 'origins':
-      return { type: 'origins' };
-    default:
-      // Type assert we've checked everythign:
-      (timelineTrackOrganization: empty);
-
-      return { type: 'full' };
-  }
 }
 
 /**

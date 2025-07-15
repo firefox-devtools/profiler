@@ -6,6 +6,7 @@
 import { getEmptyRawMarkerTable } from './data-structures';
 import { getFriendlyThreadName } from './profile-data';
 import { removeFilePath, removeURLs, stringsToRegExp } from '../utils/string';
+import { StringTable } from '../utils/string-table';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
   INSTANT,
@@ -14,20 +15,19 @@ import {
   INTERVAL_END,
 } from 'firefox-profiler/app-logic/constants';
 import {
-  getMarkerSchemaName,
   getSchemaFromMarker,
   markerPayloadMatchesSearch,
 } from './marker-schema';
 
 import type {
-  Thread,
   SamplesTable,
+  RawThread,
+  RawProfileSharedData,
   RawMarkerTable,
   IndexIntoStringTable,
   IndexIntoRawMarkerTable,
   IndexIntoCategoryList,
   CategoryList,
-  InnerWindowID,
   Marker,
   MarkerIndex,
   MarkerPayload,
@@ -44,8 +44,6 @@ import type {
   MarkerDisplayLocation,
   Tid,
 } from 'firefox-profiler/types';
-
-import type { UniqueStringArray } from '../utils/unique-string-array';
 
 /**
  * Jank instances are created from responsiveness values. Responsiveness is a profiler
@@ -120,7 +118,7 @@ export function getSearchFilteredMarkerIndexes(
   markerIndexes: MarkerIndex[],
   markerSchemaByName: MarkerSchemaByName,
   searchRegExps: MarkerRegExps | null,
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   categoryList: CategoryList
 ): MarkerIndex[] {
   if (!searchRegExps) {
@@ -178,7 +176,7 @@ function positiveFilterMarker(
   marker: Marker,
   markerSchemaByName: MarkerSchemaByName,
   searchRegExps: MarkerRegExps,
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   categoryList: CategoryList
 ): boolean {
   // Need to assign it to a constant variable so Flow doesn't complain about
@@ -226,11 +224,7 @@ function positiveFilterMarker(
     }
 
     // Now check the schema for the marker payload for searchable
-    const markerSchema = getSchemaFromMarker(
-      markerSchemaByName,
-      marker.name,
-      marker.data
-    );
+    const markerSchema = getSchemaFromMarker(markerSchemaByName, marker.data);
     if (
       markerSchema &&
       markerPayloadMatchesSearch(markerSchema, marker, stringTable, test)
@@ -246,7 +240,7 @@ function negativeFilterMarker(
   marker: Marker,
   markerSchemaByName: MarkerSchemaByName,
   searchRegExps: MarkerRegExps,
-  stringTable: UniqueStringArray,
+  stringTable: StringTable,
   categoryList: CategoryList
 ): boolean {
   // Need to assign it to a constant variable so Flow doesn't complain about
@@ -292,11 +286,7 @@ function negativeFilterMarker(
     }
 
     // Now check the schema for the marker payload for searchable
-    const markerSchema = getSchemaFromMarker(
-      markerSchemaByName,
-      marker.name,
-      marker.data
-    );
+    const markerSchema = getSchemaFromMarker(markerSchemaByName, marker.data);
 
     if (
       markerSchema &&
@@ -308,50 +298,6 @@ function negativeFilterMarker(
   }
 
   return true;
-}
-
-/**
- * Gets the markers and the web pages that are relevant to the current active tab
- * and filters out the markers that don't belong to those revelant pages.
- * If we don't have any item in relevantPages, return the whole marker list.
- */
-export function getTabFilteredMarkerIndexes(
-  getMarker: (MarkerIndex) => Marker,
-  markerIndexes: MarkerIndex[],
-  relevantPages: Set<InnerWindowID>,
-  includeGlobalMarkers: boolean = true
-): MarkerIndex[] {
-  if (relevantPages.size === 0) {
-    return markerIndexes;
-  }
-
-  const newMarkers: MarkerIndex[] = [];
-  for (const markerIndex of markerIndexes) {
-    const { name, data } = getMarker(markerIndex);
-
-    // We want to retain some markers even though they do not belong to a specific tab.
-    // We are checking those before and pushing those markers to the new array.
-    // As of now, those markers are:
-    // - Jank markers
-    if (includeGlobalMarkers) {
-      if (name === 'Jank') {
-        newMarkers.push(markerIndex);
-        continue;
-      }
-    } else {
-      if (data && data.type === 'Network') {
-        // Now network markers have innerWindowIDs inside their payloads but those markers
-        // can be inside the main thread and not be related to that specific thread.
-        continue;
-      }
-    }
-
-    if (data && data.innerWindowID && relevantPages.has(data.innerWindowID)) {
-      newMarkers.push(markerIndex);
-    }
-  }
-
-  return newMarkers;
 }
 
 /**
@@ -409,7 +355,10 @@ export class IPCMarkerCorrelations {
  *        endpoint   (receiver or background thread)
  *                   (or main thread in receiver process if they are not profiled)
  */
-export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
+export function correlateIPCMarkers(
+  threads: RawThread[],
+  shared: RawProfileSharedData
+): IPCMarkerCorrelations {
   // Create a unique ID constructed from the source PID, destination PID,
   // message seqno, and message type. Since the seqno is only unique for each
   // message channel pair, we use the PIDs and message type as a way of
@@ -473,6 +422,14 @@ export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
     }
   }
 
+  // Don't bother checking for IPC markers if the profile's string table
+  // doesn't have the string "IPC". This lets us avoid looping over all the
+  // markers when we don't have to.
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
+  if (!stringTable.hasString('IPC')) {
+    return new IPCMarkerCorrelations();
+  }
+
   // First, construct a mapping of marker IDs to an array of markers with that
   // ID for faster lookup. We also collect the friendly thread names while we
   // have access to all the threads. It's considerably more difficult to do
@@ -483,12 +440,6 @@ export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
   > = new Map();
   const threadNames: Map<number, string> = new Map();
   for (const thread of threads) {
-    // Don't bother checking for IPC markers if this thread's string table
-    // doesn't have the string "IPC". This lets us avoid looping over all the
-    // markers when we don't have to.
-    if (!thread.stringTable.hasString('IPC')) {
-      continue;
-    }
     if (typeof thread.tid === 'number') {
       const tid: number = thread.tid;
       threadNames.set(tid, getFriendlyThreadName(threads, thread));
@@ -600,7 +551,7 @@ export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
  */
 export function deriveMarkersFromRawMarkerTable(
   rawMarkers: RawMarkerTable,
-  stringTable: UniqueStringArray,
+  stringArray: $ReadOnlyArray<string>,
   threadId: Tid,
   threadRange: StartEndRange,
   ipcCorrelations: IPCMarkerCorrelations
@@ -716,7 +667,7 @@ export function deriveMarkersFromRawMarkerTable(
               addMarker([startIndex, rawMarkerIndex], {
                 start: startStartTime,
                 end: endEndTime,
-                name: stringTable.getString(name),
+                name: stringArray[name],
                 category,
                 threadId: markerThreadId,
                 data: {
@@ -740,7 +691,7 @@ export function deriveMarkersFromRawMarkerTable(
               addMarker([rawMarkerIndex], {
                 start,
                 end,
-                name: stringTable.getString(name),
+                name: stringArray[name],
                 category,
                 threadId: markerThreadId,
                 data: {
@@ -789,10 +740,7 @@ export function deriveMarkersFromRawMarkerTable(
               data,
             });
           }
-          if (
-            stringTable.getString(name) ===
-            'CompositorScreenshotWindowDestroyed'
-          ) {
+          if (stringArray[name] === 'CompositorScreenshotWindowDestroyed') {
             // This marker is added when a window is destroyed. In this case we
             // don't want to store it as the start of the next compositor
             // marker. But we do want to keep it, so we break out of the
@@ -887,7 +835,7 @@ export function deriveMarkersFromRawMarkerTable(
             'An Instant marker did not have a startTime.'
           ),
           end: null,
-          name: stringTable.getString(name),
+          name: stringArray[name],
           category,
           threadId: markerThreadId,
           data,
@@ -907,7 +855,7 @@ export function deriveMarkersFromRawMarkerTable(
           addMarker([rawMarkerIndex], {
             start: startTime,
             end: endTime,
-            name: stringTable.getString(name),
+            name: stringArray[name],
             category,
             threadId: markerThreadId,
             data,
@@ -947,7 +895,7 @@ export function deriveMarkersFromRawMarkerTable(
             );
             addMarker([startIndex, rawMarkerIndex], {
               start,
-              name: stringTable.getString(name),
+              name: stringArray[name],
               end: endTime,
               category,
               threadId: markerThreadId,
@@ -969,7 +917,7 @@ export function deriveMarkersFromRawMarkerTable(
 
             addMarker([rawMarkerIndex], {
               start,
-              name: stringTable.getString(name),
+              name: stringArray[name],
               end: endTime,
               category,
               threadId: markerThreadId,
@@ -997,7 +945,7 @@ export function deriveMarkersFromRawMarkerTable(
       addMarker([startIndex], {
         start,
         end: Math.max(endOfThread, start),
-        name: stringTable.getString(rawMarkers.name[startIndex]),
+        name: stringArray[rawMarkers.name[startIndex]],
         data: rawMarkers.data[startIndex],
         category: rawMarkers.category[startIndex],
         threadId: rawMarkers.threadId ? rawMarkers.threadId[startIndex] : null,
@@ -1014,7 +962,7 @@ export function deriveMarkersFromRawMarkerTable(
     addMarker([startIndex], {
       start: startTime,
       end: Math.max(endOfThread, startTime),
-      name: stringTable.getString(rawMarkers.name[startIndex]),
+      name: stringArray[rawMarkers.name[startIndex]],
       category: rawMarkers.category[startIndex],
       threadId: rawMarkers.threadId ? rawMarkers.threadId[startIndex] : null,
       data: rawMarkers.data[startIndex],
@@ -1287,14 +1235,12 @@ export function getAllowMarkersWithNoSchema(
     const { data } = marker;
 
     if (!data) {
-      // Keep the marker if there is payload.
+      // Keep the marker if there is no payload.
       return true;
     }
 
     if (!markerSchemaByName[data.type]) {
-      // Keep the marker if there is no schema. Note that this function doesn't use
-      // the getMarkerSchemaName function, as that function attempts to find a
-      // marker schema name in a very permissive manner. In the marker chart
+      // Keep the marker if there is no schema. In the marker chart
       // and marker table, most likely we want to show everything.
       return true;
     }
@@ -1446,36 +1392,29 @@ export function sanitizeFromMarkerSchema(
   markerSchema: MarkerSchema,
   markerPayload: MarkerPayload
 ): MarkerPayload {
-  for (const propertyDescription of markerSchema.data) {
-    if (
-      propertyDescription.key !== undefined &&
-      propertyDescription.format !== undefined
-    ) {
-      const key = propertyDescription.key;
-      const format = propertyDescription.format;
-      if (!(key in markerPayload)) {
-        continue;
-      }
+  for (const { key, format } of markerSchema.fields) {
+    if (!(key in markerPayload)) {
+      continue;
+    }
 
-      // We're typing the result of the sanitization with `any` because Flow
-      // doesn't like much our enormous enum of non-exact objects that's used as
-      // MarkerPayload type, and this code is too generic for Flow in this context.
-      if (format === 'url') {
-        markerPayload = ({
-          ...markerPayload,
-          [key]: removeURLs(markerPayload[key]),
-        }: any);
-      } else if (format === 'file-path') {
-        markerPayload = ({
-          ...markerPayload,
-          [key]: removeFilePath(markerPayload[key]),
-        }: any);
-      } else if (format === 'sanitized-string') {
-        markerPayload = ({
-          ...markerPayload,
-          [key]: '<sanitized>',
-        }: any);
-      }
+    // We're typing the result of the sanitization with `any` because Flow
+    // doesn't like much our enormous enum of non-exact objects that's used as
+    // MarkerPayload type, and this code is too generic for Flow in this context.
+    if (format === 'url') {
+      markerPayload = ({
+        ...markerPayload,
+        [key]: removeURLs(markerPayload[key]),
+      }: any);
+    } else if (format === 'file-path') {
+      markerPayload = ({
+        ...markerPayload,
+        [key]: removeFilePath(markerPayload[key]),
+      }: any);
+    } else if (format === 'sanitized-string') {
+      markerPayload = ({
+        ...markerPayload,
+        [key]: '<sanitized>',
+      }: any);
     }
   }
 
@@ -1528,9 +1467,8 @@ export function filterMarkerByDisplayLocation(
       return additionalResult;
     }
 
-    return markerTypes.has(
-      getMarkerSchemaName(markerSchemaByName, marker.name, marker.data)
-    );
+    const schemaName = marker.data ? (marker.data.type ?? null) : null;
+    return schemaName !== null && markerTypes.has(schemaName);
   });
 }
 

@@ -102,7 +102,7 @@
   background-color: rgb(240 240 240 / 0.8);
   gap: 15px;
   inset: 0;
-  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Use ::before to add a loading spinner image */

@@ -7,6 +7,7 @@ import type { IDBFactory, IDBKeyRange } from '../indexeddb';
 import type { SymbolTableAsTuple } from '../../profile-logic/symbol-store-db';
 import type { GoogleAnalytics } from '../../utils/analytics';
 import type { MixedObject } from '../utils';
+import type { FetchMockJest } from '@fetch-mock/jest';
 
 // Because this type isn't an existing Global type, but still it's useful to
 // have it available, we define it with a $ as prfix.
@@ -70,6 +71,7 @@ declare class Window {
     },
   };
   fetch: typeof fetch;
+  fetchMock: FetchMockJest /* only used in tests */;
   requestIdleCallback: typeof requestIdleCallback;
   requestAnimationFrame: typeof requestAnimationFrame;
   devicePixelRatio: number;
@@ -90,6 +92,7 @@ declare class Window {
     platform: string,
   };
   postMessage: (message: any, targetOrigin: string) => void;
+  matchMedia: (matchMedia: string) => MediaQueryList;
 }
 
 declare var window: Window;

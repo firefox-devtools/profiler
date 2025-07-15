@@ -148,7 +148,7 @@ export function simulateWebChannel(
           requestId: message.requestId,
           response: {
             menuButtonIsEnabled: true,
-            version: 4,
+            version: 5,
           },
         });
         break;
@@ -207,6 +207,15 @@ export function simulateWebChannel(
         });
         break;
       }
+      case 'OPEN_SCRIPT_IN_DEBUGGER': {
+        triggerResponse({
+          type: 'SUCCESS_RESPONSE',
+          requestId: message.requestId,
+          response: undefined,
+        });
+        break;
+      }
+
       default: {
         triggerResponse({
           type: 'ERROR_RESPONSE',

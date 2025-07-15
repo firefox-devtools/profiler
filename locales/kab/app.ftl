@@ -30,11 +30,13 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = Yegguma ad d-ikter n umaɣnu.
 AppViewRouter--error-unpublished = Ur yezmir ara ad d-yaf amaɣnu seg { -firefox-brand-name }.
 AppViewRouter--error-from-file = Ur izmir ara ad d-iɣer afaylu neɣ ad yesleḍ amaɣnu  yellan deg-s.
 AppViewRouter--error-local = Ur yebdid ara yakan.
 AppViewRouter--error-public = Ur yezmir ara ad d-yader amaɣnu.
 AppViewRouter--error-from-url = Ur yezmir ara ad d-yessader amaɣnu.
+AppViewRouter--error-compare = Yegguma ad d-yerr imaɣunen.
 AppViewRouter--route-not-found--home =
     .specialMessage = URL wuɣur tettaɛraḍeḍ ad tawḍeḍ ur tettwassen ara.
 
@@ -63,6 +65,7 @@ CallNodeContextMenu--searchfox = Nadi isem n twuri ɣef Searchfox
 CallNodeContextMenu--copy-function-name = Nɣel isem n tmahalt
 CallNodeContextMenu--copy-script-url = Nɣel URL n usekript
 CallNodeContextMenu--copy-stack = Nqel tanebdant
+CallNodeContextMenu--show-the-function-in-devtools = Sken tawuri deg yifecka n usnefli
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -79,6 +82,7 @@ CallNodeContextMenu--copy-stack = Nqel tanebdant
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Fren takerrist i uskan n talɣut fell-as.
+CallTreeSidebar--call-node-details = Talqayt n tkerrist n usiwel
 
 ## CallTreeSidebar timing information
 ##
@@ -163,6 +167,7 @@ Home--additional-content-title = Sali imuɣna yellan
 Home--additional-content-content = Tzemreḍ <strong>ad tzuɣreḍ syen sers</strong> afaylu n umaɣnu da i usali-ines, neɣ:
 Home--compare-recordings-info = Tzemreḍ daɣen ad tsenmehleḍ iseklasen. <a>Ldi agrudem n usnemhel.</a>
 Home--your-recent-uploaded-recordings-title = Iseklasen-ik·im i d-yulin melmi kan
+Home--install-chrome-extension = Sbedd aseɣẓan  n Chrome
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -258,6 +263,7 @@ MenuButtons--index--profile-info-uploaded-label = Yuli-d:
 MenuButtons--index--profile-info-uploaded-actions = Kkes
 MenuButtons--index--metaInfo-subtitle = Talɣut n umaɣnu
 MenuButtons--metaInfo--symbols = Izamulen:
+MenuButtons--metaInfo--main-memory = Takatut tagejdant:
 MenuButtons--index--show-moreInfo-button = Sken ugar
 MenuButtons--index--hide-moreInfo-button = Sken drus
 MenuButtons--metaInfo--profiling-started = Asekles yebda:
@@ -357,6 +363,11 @@ NumberFormat--short-date = { SHORTDATE($date) }
 ## The component that is used for all the search input hints in the application.
 
 
+## Profile Name Button
+
+ProfileName--edit-profile-name-button =
+    .title = Ẓreg isem n umaɣnu
+
 ## Profile Delete Button
 
 # This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
@@ -433,6 +444,12 @@ StackSettings--show-user-timing = Sken tanzagt n useqdac
 
 TabBar--calltree-tab = Aseklu n usiwel
 TabBar--network-tab = Aẓeṭṭa
+
+## TabSelectorMenu
+## This component is a context menu that's opened when you click on the root
+## range at the top left corner for profiler analysis view. It's used to switch
+## between tabs that were captured in the profile.
+
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
@@ -531,6 +548,11 @@ TransformNavigator--merge-function = Smezdi: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Sers: { $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = Fneẓ asniles: { $item }
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI

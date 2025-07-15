@@ -17,11 +17,11 @@
 
 import { sortDataTable } from '../utils/data-table-utils';
 import { resourceTypes } from './data-structures';
-import { UniqueStringArray } from '../utils/unique-string-array';
+import { StringTable } from '../utils/string-table';
 import { timeCode } from '../utils/time-code';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 import { coerce } from '../utils/flow';
-import type { SerializableProfile } from 'firefox-profiler/types';
+import type { Profile } from 'firefox-profiler/types';
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -30,12 +30,11 @@ const UNANNOTATED_VERSION = 0;
 /**
  * Upgrades the supplied profile to the current version, by mutating |profile|.
  * Throws an exception if the profile is too new. If the profile does not appear
- * to be a processed profile, then return null. The profile provided is the
- * "serialized" form of a processed profile, i.e. stringArray instead of stringTable.
+ * to be a processed profile, then return null.
  */
 export function attemptToUpgradeProcessedProfileThroughMutation(
   profile: mixed
-): SerializableProfile | null {
+): Profile | null {
   if (!profile || typeof profile !== 'object') {
     return null;
   }
@@ -70,7 +69,7 @@ export function attemptToUpgradeProcessedProfileThroughMutation(
       : UNANNOTATED_VERSION;
 
   if (profileVersion === PROCESSED_PROFILE_VERSION) {
-    return coerce<MixedObject, SerializableProfile>(profile);
+    return coerce<MixedObject, Profile>(profile);
   }
 
   if (profileVersion > PROCESSED_PROFILE_VERSION) {
@@ -92,7 +91,7 @@ export function attemptToUpgradeProcessedProfileThroughMutation(
     }
   }
 
-  const upgradedProfile = coerce<MixedObject, SerializableProfile>(profile);
+  const upgradedProfile = coerce<MixedObject, Profile>(profile);
   upgradedProfile.meta.preprocessedProfileVersion = PROCESSED_PROFILE_VERSION;
 
   return upgradedProfile;
@@ -305,7 +304,7 @@ const _upgraders = {
   [4]: (profile) => {
     profile.threads.forEach((thread) => {
       const { funcTable, stringArray, resourceTable } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
+      const stringTable = StringTable.withBackingArray(stringArray);
 
       // resourceTable gains a new field ("host") and a new resourceType:
       // "webhost". Resources from http and https URLs are now grouped by
@@ -426,7 +425,6 @@ const _upgraders = {
       }
 
       thread.resourceTable = newResourceTable;
-      thread.stringArray = stringTable.serializeToArray();
     });
   },
   [5]: (profile) => {
@@ -439,10 +437,9 @@ const _upgraders = {
     // The type field for DOMEventMarkerPayload was renamed to eventType.
     for (const thread of profile.threads) {
       const { stringArray, markers } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
       const newDataArray = [];
       for (let i = 0; i < markers.length; i++) {
-        const name = stringTable.getString(markers.name[i]);
+        const name = stringArray[markers.name[i]];
         const data = markers.data[i];
         if (name === 'DOMEvent') {
           newDataArray[i] = {
@@ -499,10 +496,9 @@ const _upgraders = {
         continue;
       }
       const { stringArray, markers } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
       const newDataArray = [];
       for (let i = 0; i < markers.length; i++) {
-        const name = stringTable.getString(markers.name[i]);
+        const name = stringArray[markers.name[i]];
         const data = markers.data[i];
         if (name === 'DOMEvent' && data.timeStamp) {
           newDataArray[i] = {
@@ -681,10 +677,9 @@ const _upgraders = {
         continue;
       }
 
-      const stringTable = new UniqueStringArray(stringArray);
       const extraMarkers = [];
       for (let i = 0; i < markers.length; i++) {
-        const name = stringTable.getString(markers.name[i]);
+        const name = stringArray[markers.name[i]];
         const data = markers.data[i];
         if (name === 'DOMEvent') {
           markers.data[i] = {
@@ -906,10 +901,9 @@ const _upgraders = {
     // the categories by looking at the function names.
     for (const thread of profile.threads) {
       const { frameTable, funcTable, stringArray } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
       for (let i = 0; i < frameTable.length; i++) {
         const funcIndex = frameTable.func[i];
-        const funcName = stringTable.getString(funcTable.name[funcIndex]);
+        const funcName = stringArray[funcTable.name[funcIndex]];
         const categoryBasedOnFuncName = getCategoryForFuncName(funcName);
         if (categoryBasedOnFuncName !== undefined) {
           frameTable.category[i] = categoryBasedOnFuncName;
@@ -992,10 +986,9 @@ const _upgraders = {
     // Old profiles might still have this property.
     for (const thread of profile.threads) {
       const { stringArray, markers } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
       const newDataArray = [];
       for (let i = 0; i < markers.length; i++) {
-        const name = stringTable.getString(markers.name[i]);
+        const name = stringArray[markers.name[i]];
         const data = markers.data[i];
         switch (name) {
           case 'VsyncTimestamp':
@@ -1047,7 +1040,7 @@ const _upgraders = {
     const domCallRegex = /^(get |set )?\w+(\.\w+| constructor)$/;
     for (const thread of profile.threads) {
       const { funcTable, stringArray } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
+      const stringTable = StringTable.withBackingArray(stringArray);
       funcTable.relevantForJS = new Array(funcTable.length);
       for (let i = 0; i < funcTable.length; i++) {
         const location = stringTable.getString(funcTable.name[i]);
@@ -1060,7 +1053,6 @@ const _upgraders = {
           funcTable.relevantForJS[i] = domCallRegex.test(location);
         }
       }
-      thread.stringArray = stringTable.serializeToArray();
     }
   },
   [18]: (profile) => {
@@ -1071,7 +1063,7 @@ const _upgraders = {
     // We update the func table with right values of 'fileName', 'lineNumber' and 'columnNumber'.
     for (const thread of profile.threads) {
       const { funcTable, stringArray } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
+      const stringTable = StringTable.withBackingArray(stringArray);
       funcTable.columnNumber = [];
       for (
         let funcIndex = 0;
@@ -1097,7 +1089,6 @@ const _upgraders = {
           }
         }
       }
-      thread.stringArray = stringTable.serializeToArray();
     }
   },
   [19]: (profile) => {
@@ -1166,16 +1157,13 @@ const _upgraders = {
   [22]: (profile) => {
     // FileIO was originally called DiskIO. This profile upgrade performs the rename.
     for (const thread of profile.threads) {
-      if (thread.stringArray.indexOf('DiskIO') === -1) {
+      const { stringArray } = thread;
+      const stringTable = StringTable.withBackingArray(stringArray);
+      if (!stringTable.hasString('DiskIO')) {
         // There are no DiskIO markers.
         continue;
       }
-      let fileIoStringIndex = thread.stringArray.indexOf('FileIO');
-      if (fileIoStringIndex === -1) {
-        fileIoStringIndex = thread.stringArray.length;
-        thread.stringArray.push('FileIO');
-      }
-
+      const fileIoStringIndex = stringTable.indexForString('FileIO');
       for (let i = 0; i < thread.markers.length; i++) {
         const data = thread.markers.data[i];
         if (data && data.type === 'DiskIO') {
@@ -1651,27 +1639,26 @@ const _upgraders = {
           // eventType is in the payload as well.
         ],
       },
+
+      // The following three schemas should have just been a single schema named
+      // "tracing". They are kept here for historical accuracy.
+      // The upgrader for version 52 adds the missing "tracing" schema.
       {
-        // TODO - Note that this marker is a "tracing" marker currently.
-        // See issue #2749
         name: 'Paint',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'category', label: 'Type', format: 'string' }],
       },
       {
-        // TODO - Note that this marker is a "tracing" marker currently.
-        // See issue #2749
         name: 'Navigation',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'category', label: 'Type', format: 'string' }],
       },
       {
-        // TODO - Note that this marker is a "tracing" marker currently.
-        // See issue #2749
         name: 'Layout',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'category', label: 'Type', format: 'string' }],
       },
+
       {
         name: 'IPC',
         tooltipLabel: 'IPC — {marker.data.niceDirection}',
@@ -1687,6 +1674,14 @@ const _upgraders = {
         ],
       },
       {
+        // An unused schema for RefreshDriverTick markers.
+        // This schema is not consistent with what post-schema Firefox would
+        // output. Firefox (as of Jan 2025) is still using Text markers and does
+        // not have a RefreshDriverTick schema. Furthermore, upgraded profiles
+        // which get this schema do not have any { type: 'RefreshDriverTick' }
+        // markers - in the past they picked up this schema due to a compat hack,
+        // but this hack is now removed. So this schema is unused. It is kept
+        // here for historical accuracy.
         name: 'RefreshDriverTick',
         display: ['marker-chart', 'marker-table', 'timeline-overview'],
         data: [{ key: 'name', label: 'Tick Reasons', format: 'string' }],
@@ -2062,8 +2057,9 @@ const _upgraders = {
         libs: threadLibs,
         resourceTable,
         nativeSymbols,
-        stringTable,
+        stringArray,
       } = thread;
+      const stringTable = StringTable.withBackingArray(stringArray);
       const threadLibIndexToGlobalLibIndex = new Map();
       delete thread.libs;
 
@@ -2268,10 +2264,8 @@ const _upgraders = {
     // The 'sanitized-string' marker schema format type has been added.
   },
   [50]: (_) => {
-    // The serialized format can now optionally store sample and counter sample
+    // The format can now optionally store sample and counter sample
     // times as time deltas instead of absolute timestamps to reduce the JSON size.
-    // The unserialized version is unchanged, and because the upgraders run
-    // after unserialization they see no difference.
   },
   [51]: (_) => {
     // This version bump added two new form types for new marker schema field:
@@ -2281,6 +2275,324 @@ const _upgraders = {
     // No upgrade is needed, as older versions of firefox would not generate
     // marker data with the new field types data, and no modification is needed in the
     // frontend to display older formats.
+  },
+  [52]: (profile) => {
+    // This version simplifies how markers are mapped to their schema.
+    // The schema is now purely determined by data.type. The marker's name is ignored.
+    // If a marker has a null data, then it has no schema.
+    //
+    // In earlier versions, there were special cases for mapping markers with type
+    // "tracing" and "Text", and for markers with a null data property. These
+    // special cases have been removed.
+    //
+    // The upgrader for version 52 makes it so that existing profiles appear the
+    // same with the simplified logic. Specifically:
+    //  - Some old profiles have markers with data.type === 'tracing' but no schema
+    //    with the name 'tracing'. To ensure that the tracing markers from these
+    //    profile still show up in the 'timeline-overview' area, this upgrader adds
+    //    a schema to such profiles.
+    //  - Some old profiles have CC markers which only showed up in the memory track
+    //    because of special treatment of 'tracing' markers - the markers would have
+    //    data.type === 'tracing' and data.category === 'CC', and there would be a
+    //    'CC' schema with 'timeline-memory'. This upgrader moves these tracing CC
+    //    markers to a new 'tracingCCFrom52Upgrader' schema.
+    //
+    // Profiles from modern versions of Firefox already include a 'tracing' schema.
+    // And they don't use tracing markers for CC markers.
+
+    const schemaNames = new Set(profile.meta.markerSchema.map((s) => s.name));
+    const kTracingCCSchemaName = 'tracingCCFrom52Upgrader';
+    const shouldMigrateTracingCCMarkers = schemaNames.has('CC');
+    let hasTracingMarkers = false;
+    let hasMigratedTracingCCMarkers = false;
+    for (const thread of profile.threads) {
+      const { markers } = thread;
+      for (let i = 0; i < markers.length; i++) {
+        const data = markers.data[i];
+        if (data && data.type === 'tracing' && data.category) {
+          hasTracingMarkers = true;
+          if (shouldMigrateTracingCCMarkers && data.category === 'CC') {
+            data.type = kTracingCCSchemaName;
+            hasMigratedTracingCCMarkers = true;
+            if (data.interval) {
+              // Also delete the interval property. This is present on old
+              // profiles where marker phase information was represented in the
+              // payload, i.e. you'd have interval: "start" / "end" on the
+              // data object.
+              // Our kTracingCCSchemaName schema does not list the interval field,
+              // so we shouldn't have this field on the payload either.
+              delete data.interval;
+            }
+          }
+        }
+      }
+    }
+    if (hasTracingMarkers && !schemaNames.has('tracing')) {
+      // Make sure that tracing markers still show up in the timeline-overview area.
+      profile.meta.markerSchema.push({
+        name: 'tracing',
+        display: ['marker-chart', 'marker-table', 'timeline-overview'],
+        data: [{ key: 'category', label: 'Type', format: 'string' }],
+      });
+    }
+
+    if (hasMigratedTracingCCMarkers) {
+      // Add the kTracingCCSchemaName schema for migrated tracing CC markers, to
+      // make sure that these markers still show up in the timeline-memory area.
+      profile.meta.markerSchema.push({
+        name: kTracingCCSchemaName,
+        display: ['marker-chart', 'marker-table', 'timeline-memory'],
+        data: [{ key: 'category', label: 'Type', format: 'string' }],
+      });
+    }
+  },
+  [53]: (profile) => {
+    for (const thread of profile.threads) {
+      const { frameTable, stackTable } = thread;
+
+      // Attempt to keep some existing profiles working which weren't compliant
+      // with the profile format's type definitions.
+      if (!frameTable.category) {
+        // Profiles generated by Lean before https://github.com/leanprover/lean4/pull/6363
+        // didn't have category / subcategory columns in the frameTable. Migrate
+        // the category / subcategory values from the stackTable.
+        frameTable.category = new Array(frameTable.length).fill(null);
+        frameTable.subcategory = new Array(frameTable.length).fill(null);
+        for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+          const frameIndex = stackTable.frame[stackIndex];
+          frameTable.category[frameIndex] = stackTable.category[stackIndex];
+          frameTable.subcategory[frameIndex] =
+            stackTable.subcategory[stackIndex];
+        }
+      } else if (!frameTable.subcategory) {
+        // Profiles from vernier before https://github.com/jhawthorn/vernier/issues/128
+        // didn't contain a subcategory column in the frameTable.
+        //
+        // Supply a column where every value is set to 0.
+        // 0 is always a valid value for the subcategory.
+        //
+        // The requirements for subcategory values are:
+        // - For frames with a null category, the subcategory value is ignored.
+        // - For frames with a non-null category, the subcategory must be non-null.
+        // - Subcategory 0 refers to the category itself; in profile.meta.categories,
+        //   every category should have a subcategory list which starts with the
+        //   generic subcategory "Other" at index 0.
+        frameTable.subcategory = new Array(frameTable.length).fill(0);
+      }
+
+      // Remove stackTable.category and stackTable.subcategory.
+      delete stackTable.category;
+      delete stackTable.subcategory;
+    }
+  },
+  [54]: (profile) => {
+    // The `implementation` column was removed from the frameTable. Modern
+    // profiles from Firefox use subcategories to represent the information
+    // about the JIT type of a JS frame.
+    // Furthermore, marker schema fields now support a `hidden` attribute. When
+    // present and set to true, such fields will be omitted from the tooltip and
+    // the sidebar.
+    // And finally, `profile.meta.sampleUnits.time` now supports both `'ms'`
+    // (milliseconds) and `'bytes'`. When set to `'bytes'`, the time value of a
+    // sample will be interpreted as a bytes offset. This is useful for size
+    // profiles, where a sample's "time" describes the offset at which the piece
+    // is located within the entire file.
+
+    // Very old Gecko profiles don't have JS subcategories. Convert the
+    // implementation information to subcategories.
+    function maybeConvertImplementationToSubcategories(profile) {
+      const { categories } = profile.meta;
+      if (!categories) {
+        return;
+      }
+
+      if (categories.some((c) => c.subcategories.length !== 1)) {
+        // This profile has subcategories.
+        return;
+      }
+
+      const jsCategoryIndex = categories.findIndex(
+        (c) => c.name === 'JavaScript'
+      );
+      if (jsCategoryIndex === -1) {
+        // This profile has no JavaScript category.
+        return;
+      }
+
+      const jsCategorySubcategories = categories[jsCategoryIndex].subcategories;
+      const subcategoryForImplStr = new Map();
+
+      for (const thread of profile.threads) {
+        const { frameTable, stringArray } = thread;
+        for (let i = 0; i < frameTable.length; i++) {
+          const implStrIndex = frameTable.implementation[i];
+          if (implStrIndex === null) {
+            continue;
+          }
+          const implStr = stringArray[implStrIndex];
+          let subcategory = subcategoryForImplStr.get(implStr);
+          if (subcategory === undefined) {
+            subcategory = jsCategorySubcategories.length;
+            jsCategorySubcategories[subcategory] = `JIT (${implStr})`;
+            subcategoryForImplStr.set(implStr, subcategory);
+          }
+          frameTable.category[i] = jsCategoryIndex;
+          frameTable.subcategory[i] = subcategory;
+        }
+      }
+    }
+
+    maybeConvertImplementationToSubcategories(profile);
+
+    // Delete the implementation column from the frameTable of every thread.
+    for (const thread of profile.threads) {
+      delete thread.frameTable.implementation;
+    }
+
+    // This field is no longer needed.
+    delete profile.meta.doesNotUseFrameImplementation;
+  },
+  [55]: (profile) => {
+    for (const markerSchema of profile.meta.markerSchema) {
+      const staticFields = markerSchema.data.filter((f) => f.key === undefined);
+      const fields = markerSchema.data.filter((f) => f.value === undefined);
+
+      markerSchema.fields = fields;
+      delete markerSchema.data;
+
+      if (staticFields.length === 0) {
+        continue;
+      }
+
+      // Migrate one of the static fields to the new `description` property.
+      let staticDescriptionFieldIndex = staticFields.findIndex(
+        (f) => f.label === 'Description'
+      );
+      if (staticDescriptionFieldIndex === -1) {
+        staticDescriptionFieldIndex = 0;
+      }
+      const description = staticFields[staticDescriptionFieldIndex].value;
+      markerSchema.description = description;
+
+      // If there was more than one static field, we may be discarding useful data.
+      // Print a warning to the console if that's the case, unless this is the
+      // old { label: "Marker", value: "UserTiming" } field which never provided
+      // any value. (On the Gecko side, it was removed by D196332.)
+      const discardedFields = staticFields.filter(
+        (_f, i) => i !== staticDescriptionFieldIndex
+      );
+      const potentiallyUsefulDiscardedFields = discardedFields.filter(
+        (f) => f.label !== 'Marker' && f.value !== 'UserTiming'
+      );
+      if (potentiallyUsefulDiscardedFields.length !== 0) {
+        console.warn(
+          `Discarding the following static fields from marker schema "${markerSchema.name}": ${potentiallyUsefulDiscardedFields.map((f) => f.label + ': ' + f.value).join(', ')}`
+        );
+      }
+    }
+  },
+  [56]: (profile) => {
+    // The stringArray is now shared across all threads. It is stored at
+    // profile.shared.stringArray.
+    const stringArray = [];
+    const stringTable = StringTable.withBackingArray(stringArray);
+
+    // Precompute marker fields that need adjusting.
+    const stringIndexMarkerFieldsByDataType = new Map();
+    stringIndexMarkerFieldsByDataType.set('CompositorScreenshot', ['url']);
+    for (const schema of profile.meta.markerSchema) {
+      const { name, fields } = schema;
+      const stringIndexFields = [];
+      for (const field of fields) {
+        if (
+          field.format === 'unique-string' ||
+          field.format === 'flow-id' ||
+          field.format === 'terminating-flow-id'
+        ) {
+          stringIndexFields.push(field.key);
+        }
+      }
+      if (stringIndexFields.length !== 0) {
+        stringIndexMarkerFieldsByDataType.set(name, stringIndexFields);
+      }
+    }
+
+    // Adjust all data across all threads.
+    for (const thread of profile.threads) {
+      const {
+        markers,
+        funcTable,
+        nativeSymbols,
+        resourceTable,
+        jsTracer,
+        stringArray: threadStringArray,
+      } = thread;
+      for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+        const nameStr = threadStringArray[markers.name[markerIndex]];
+        markers.name[markerIndex] = stringTable.indexForString(nameStr);
+
+        // Adjust string index marker fields.
+        const data = markers.data[markerIndex];
+        if (!data || !data.type) {
+          continue;
+        }
+
+        const fieldsToAdjust = stringIndexMarkerFieldsByDataType.get(data.type);
+        if (fieldsToAdjust !== undefined) {
+          for (const fieldName of fieldsToAdjust) {
+            const fieldValue = data[fieldName];
+            const fieldStr = threadStringArray[fieldValue];
+            if (fieldStr !== undefined) {
+              data[fieldName] = stringTable.indexForString(fieldStr);
+            }
+          }
+        }
+      }
+      for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
+        funcTable.name[funcIndex] = stringTable.indexForString(
+          threadStringArray[funcTable.name[funcIndex]]
+        );
+        const funcFileName = funcTable.fileName[funcIndex];
+        if (funcFileName !== null) {
+          funcTable.fileName[funcIndex] = stringTable.indexForString(
+            threadStringArray[funcFileName]
+          );
+        }
+      }
+      for (let symIndex = 0; symIndex < nativeSymbols.length; symIndex++) {
+        nativeSymbols.name[symIndex] = stringTable.indexForString(
+          threadStringArray[nativeSymbols.name[symIndex]]
+        );
+      }
+      for (
+        let resourceIndex = 0;
+        resourceIndex < resourceTable.length;
+        resourceIndex++
+      ) {
+        resourceTable.name[resourceIndex] = stringTable.indexForString(
+          threadStringArray[resourceTable.name[resourceIndex]]
+        );
+        const resourceHost = resourceTable.host[resourceIndex];
+        if (resourceHost !== null) {
+          resourceTable.host[resourceIndex] = stringTable.indexForString(
+            threadStringArray[resourceHost]
+          );
+        }
+      }
+      if (jsTracer !== undefined) {
+        for (
+          let traceEventIndex = 0;
+          traceEventIndex < jsTracer.length;
+          traceEventIndex++
+        ) {
+          jsTracer.events[traceEventIndex] = stringTable.indexForString(
+            threadStringArray[jsTracer.events[traceEventIndex]]
+          );
+        }
+      }
+      delete thread.stringArray;
+    }
+    profile.shared = { stringArray };
   },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.

@@ -17,7 +17,7 @@
 -firefox-brand-name = Firefox
 -firefox-android-brand-name = Firefox для Android
 -profiler-brand-name = Firefox Profiler
--profiler-brand-short-name = Profiler
+-profiler-brand-short-name = Профайлер
 -firefox-nightly-brand-name = Firefox Nightly
 
 ## AppHeader
@@ -30,6 +30,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = Не вдалося імпортувати профіль.
 AppViewRouter--error-unpublished = Не вдалося відновити профіль із { -firefox-brand-name }.
 AppViewRouter--error-from-file = Не вдалося прочитати файл або проаналізувати профіль у ньому.
 AppViewRouter--error-local = Ще не впроваджено.
@@ -120,6 +121,7 @@ CallNodeContextMenu--searchfox = Шукати назву функції у Searc
 CallNodeContextMenu--copy-function-name = Скопіювати назву функції
 CallNodeContextMenu--copy-script-url = Скопіювати URL-адресу скрипту
 CallNodeContextMenu--copy-stack = Копіювати стек
+CallNodeContextMenu--show-the-function-in-devtools = Показати функцію в інструментах розробника
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -337,6 +339,15 @@ Home--load-files-from-other-tools2 =
     Панель швидкодії Chrome, <androidstudio>Android Studio</androidstudio>, або
     з будь-якого файлу в форматі <dhat>dhat</dhat> чи <traceevent>Google’s Trace Event</traceevent>.
     <write>Навчіться записувати власний імпортер</write>.
+Home--install-chrome-extension = Встановіть розширення Chrome
+Home--chrome-extension-instructions =
+    Використовуйте розширення <a>{ -profiler-brand-name } для Chrome</a>
+    для фіксації профілів продуктивності в Chrome та їх аналізу в
+    { -profiler-brand-name }. Установіть розширення з вебмагазину Chrome.
+Home--chrome-extension-recording-instructions =
+    Після встановлення використовуйте піктограму розширення на панелі інструментів
+    або ярлики для запуску та зупинки профілювання. Ви також можете
+    експортувати профілі та завантажити їх тут для детального аналізу.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -477,13 +488,24 @@ MenuButtons--index--hide-moreInfo-button = Показати менше
 #   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
 MenuButtons--metaInfo--physical-and-logical-cpu =
     { $physicalCPUs ->
-        [one] { $physicalCPUs } фізичне ядро
-        [few] { $physicalCPUs } фізичні ядра
-       *[many] { $physicalCPUs } фізичних ядер
-    }, { $logicalCPUs ->
-        [one] { $logicalCPUs } логічне ядро
-        [few] { $logicalCPUs } логічні ядра
-       *[many] { $logicalCPUs } логічних ядер
+        [one]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } фізичне ядро, { $logicalCPUs } логічне ядро
+                [few] { $physicalCPUs } фізичне ядро, { $logicalCPUs } логічні ядра
+               *[many] { $physicalCPUs } фізичне ядро, { $logicalCPUs } логічних ядер
+            }
+        [few]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } фізичні ядра, { $logicalCPUs } логічне ядро
+                [few] { $physicalCPUs } фізичні ядра, { $logicalCPUs } логічні ядра
+               *[many] { $physicalCPUs } фізичні ядра, { $logicalCPUs } логічних ядер
+            }
+       *[many]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } фізичних ядер, { $logicalCPUs } логічне ядро
+                [few] { $physicalCPUs } фізичних ядер, { $logicalCPUs } логічні ядра
+               *[many] { $physicalCPUs } фізичних ядер, { $logicalCPUs } логічних ядер
+            }
     }
 # This string is used when we only have the information about the number of
 # physical CPU cores.
@@ -629,6 +651,14 @@ NumberFormat--short-date = { SHORTDATE($date) }
 
 PanelSearch--search-field-hint = Чи знаєте ви, що для пошуку кількох термінів можна використовувати кому (,)?
 
+## Profile Name Button
+
+ProfileName--edit-profile-name-button =
+    .title = Змінити назву профілю
+ProfileName--edit-profile-name-input =
+    .title = Змінити назву профілю
+    .aria-label = Назва профілю
+
 ## Profile Delete Button
 
 # This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
@@ -676,6 +706,7 @@ ProfileFilterNavigator--full-range-with-duration = Повний діапазон
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-from-post-message = Імпорт та обробка профілю…
 ProfileLoaderAnimation--loading-unpublished = Імпортування профілю безпосередньо з { -firefox-brand-name }…
 ProfileLoaderAnimation--loading-from-file = Читання файлу та обробка профілю…
 ProfileLoaderAnimation--loading-local = Ще не впроваджено.

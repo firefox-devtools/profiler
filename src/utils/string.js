@@ -19,16 +19,32 @@ const REMOVE_URLS_REGEXP = (function () {
     'moz-page-thumb',
   ];
 
+  // Captures the protocol part (like "http://") in group 1
+  const standardUrlPattern = `\\b((?:${protocols.join('|')})://)/?[^\\s/$.?#][^\\s)]*`;
+  //                          ^  ^                              ^ ^          ^
+  //                          |  |                              | |          Matches any characters except
+  //                          |  |                              | |          whitespaces and ')' character.
+  //                          |  |                              | Matches any character except whitespace
+  //                          |  |                              | and '/', '$', '.', '?' or '#' characters
+  //                          |  |                              | because this is start of the URL path/host
+  //                          |  |                              Optional '/' after '://'
+  //                          |  Captures the protocol and '://' part (Group 1)
+  //                          Word boundary, ensures the protocol isn't part of a larger word.
+
+  // Captures the base 'about:...' part (like "about:profiling") in group 2
+  const aboutQueryPattern = `\\b(about:[^?#\\s]+)([?#])[^\\s)]*`;
+  //                         ^  ^                ^     ^
+  //                         |  |                |     Captures the query string:
+  //                         |  |                |     Zero or more non-whitespace characters except ')'.
+  //                         |  |                Matches the literal '?' or '#' as a saparator (Group 3)
+  //                         |  Captures the base 'about:' URI (Group 2):
+  //                         |  'about:' followed by one or more non-?, non-#, non-whitespace chars.
+  //                         |
+  //                         Word boundary, ensures the protocol isn't part of a larger word.
+
   return new RegExp(
-    `\\b((?:${protocols.join('|')})://)/?[^\\s/$.?#][^\\s)]*`,
-    //    ^                              ^          ^
-    //    |                              |          Matches any characters except
-    //    |                              |          whitespaces and ')' character.
-    //    |                              |          Other characters are allowed now
-    //    |                              Matches any character except whitespace
-    //    |                              and '/', '$', '.', '?' or '#' characters
-    //    |                              because this is start of the URL
-    //    Matches URL schemes we need to sanitize.
+    // Combine two patterns into one RegExp.
+    `${standardUrlPattern}|${aboutQueryPattern}`,
     'gi'
   );
 })();
@@ -37,12 +53,29 @@ const REMOVE_URLS_REGEXP = (function () {
  * Takes a string and returns the string with public URLs removed.
  * It doesn't remove the URLs like `chrome://..` because they are internal URLs
  * and they shouldn't be removed.
+ *
+ * Additionally, for "about:*" URLs, only remove the query strings if they exist.
  */
 export function removeURLs(
   string: string,
-  redactedText: string = '<URL>'
+  redactedText: string = '<URL>',
+  sanitizedQueryText: string = '<sanitized>'
 ): string {
-  return string.replace(REMOVE_URLS_REGEXP, '$1' + redactedText);
+  return string.replace(
+    REMOVE_URLS_REGEXP,
+    (match, protoGroup, aboutBaseGroup, separator) => {
+      if (protoGroup) {
+        // Matched a standard URL (http, https, ftp, file, etc.).
+        // Replace everything after the protocol part
+        return protoGroup + redactedText;
+      } else if (aboutBaseGroup) {
+        // Matched an `about:` URL with a query string.
+        // Replace only the query string part (after '?')
+        return aboutBaseGroup + separator + sanitizedQueryText;
+      }
+      return match;
+    }
+  );
 }
 
 /**

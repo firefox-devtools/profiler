@@ -17,9 +17,9 @@ body {
    * (used on Linux Gnome), because it lacks a glyph for the symbol µ.
    * Please keep it synced with res/photon/style.css.
    */
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    Oxygen-Sans, Ubuntu, 'Noto Sans', 'Liberation Sans', Cantarell,
-    'Helvetica Neue', sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu,
+    'Noto Sans', 'Liberation Sans', Cantarell, 'Helvetica Neue', sans-serif;
   font-size: 11px;
 
   /* equal size all numbers, so that longer numbers are larger */
@@ -39,6 +39,19 @@ body {
   color: var(--grey-90);
 }
 
+@media (forced-colors: active) {
+  :root {
+    /* The following properties are retrieved in index.js to create SVG filters that
+    * we can apply on icons to control their color.
+    * These variable can be declared in any rule, as long as their value is still
+    * a valid color (which means we can use `light-dark()` or any other color functions).
+    * The colors can be applied on SVG icons with `filter: url(#--var-name)` */
+    --button-icon-color: ButtonText;
+    --button-icon-hover-color: SelectedItem;
+    --button-icon-active-color: SelectedItem;
+  }
+}
+
 .profileFilterNavigator {
   height: 24px;
   flex-shrink: 1;
@@ -48,4 +61,12 @@ body {
   display: flex;
   flex: 1;
   flex-flow: column nowrap;
+}
+
+#svg-filters {
+  position: absolute;
+  overflow: hidden;
+  width: 0;
+  height: 0;
+  inset-inline-start: -1000vw;
 }

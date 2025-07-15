@@ -11,10 +11,12 @@ import {
   tabsShowingSampleData,
 } from '../../app-logic/tabs-handling';
 
+import { getRawProfileSharedData } from '../profile';
+
 import type {
   Selector,
   $ReturnType,
-  Thread,
+  RawThread,
   JsTracerTable,
   MarkerTimingRows,
   CombinedTimingRows,
@@ -43,7 +45,7 @@ export type ComposedSelectorsPerThread = $ReturnType<
  * elements that we don't use here, and that's OK.
  */
 type NeededThreadSelectors = {
-  getThread: Selector<Thread>,
+  getRawThread: Selector<RawThread>,
   getIsNetworkChartEmptyInFullRange: Selector<boolean>,
   getJsTracerTable: Selector<JsTracerTable | null>,
   getUserTimingMarkerTiming: Selector<MarkerTimingRows>,
@@ -62,10 +64,11 @@ export function getComposedSelectorsPerThread(
    * when it's absurd.
    */
   const getUsefulTabs: Selector<$ReadOnlyArray<TabSlug>> = createSelector(
-    threadSelectors.getThread,
+    getRawProfileSharedData,
+    threadSelectors.getRawThread,
     threadSelectors.getIsNetworkChartEmptyInFullRange,
     threadSelectors.getJsTracerTable,
-    (thread, isNetworkChartEmpty, jsTracerTable) => {
+    (shared, thread, isNetworkChartEmpty, jsTracerTable) => {
       if (thread.processType === 'comparison') {
         // For a diffing tracks, we display only the calltree tab for now, because
         // other views make no or not much sense.
@@ -86,7 +89,7 @@ export function getComposedSelectorsPerThread(
 
       const { samples, jsAllocations, nativeAllocations } = thread;
       const hasSamples = [samples, jsAllocations, nativeAllocations].some(
-        (table) => hasUsefulSamples(table, thread)
+        (table) => hasUsefulSamples(table?.stack, thread, shared)
       );
       if (!hasSamples) {
         visibleTabs = visibleTabs.filter(

@@ -88,17 +88,13 @@ Then, the following things happen:
 1.  [profiler.firefox.com] iterates over all addresses in the profile's call stacks, finds which binary they came from by comparing them to the library information stored in the profile, and converts them into binary-relative offsets.
 
 2.  [profiler.firefox.com] checks for which of these libraries it has cached symbol tables in IndexedDB.
-
     1. For libraries with cached symbol tables, it uses those symbol tables to map the addresses to symbols.
 
 3.  For all other libraries, it requests symbols for the collected addresses using the Mozilla symbolication API. The results of this are _not_ cached.
-
     1. The Mozilla symbolication API will be able to symbolicate any libraries for which there exist breakpad symbol files on the Mozilla symbol server, so: official Firefox builds, most of Windows system libraries, some macOS system libraries.
 
 4.  For any libraries which the Mozilla symbolication API was not able to find symbols, [profiler.firefox.com] requests a symbol table from the add-on, which will forward the request to the geckoProfiler WebExtension API.
-
     1.  The WebExtension API will try multiple methods to obtain symbol information. The code for this is at https://searchfox.org/mozilla-central/rev/7e663b9fa578d425684ce2560e5fa2464f504b34/browser/components/extensions/ext-geckoProfiler.js#409-473 .
-
         1. First, it will try to find a breakpad symbol file for the library in the objdir, if the Firefox build that is being symbolicated is a local build. These symbol files only exist if the user has run "mach buildsymbols" after compiling.
 
         2. Next, it will request a raw breakpad symbol file for the library from the Mozilla symbol server. This will never succeed, usually, because if the Mozilla symbol server had information about this library, the Mozilla symbolication API would already have found it. We should probably remove this step.

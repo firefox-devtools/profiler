@@ -30,6 +30,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = No se pudo importar el perfil.
 AppViewRouter--error-unpublished = No se pudo recuperar el perfil de { -firefox-brand-name }.
 AppViewRouter--error-from-file = No se pudo leer el archivo ni analizar el perfil que contiene.
 AppViewRouter--error-local = Aún no se ha implementado.
@@ -95,6 +96,7 @@ CallNodeContextMenu--searchfox = Busca el nombre de la función en Searchfox
 CallNodeContextMenu--copy-function-name = Copiar nombre de la función
 CallNodeContextMenu--copy-script-url = Copiar URL del script
 CallNodeContextMenu--copy-stack = Copiar pila
+CallNodeContextMenu--show-the-function-in-devtools = Mostrar la función en DevTools
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -276,12 +278,18 @@ Home--load-files-from-other-tools2 =
     panel de rendimiento de Chrome, <androidstudio>Android Studio</androidstudio>, o
     cualquier archivo usando el <dhat>formato dhat</dhat> o el <traceevent>formato Trace Event de Google</traceevent>. <write>Aprende a escribir tu
     propio importador</write>.
+Home--install-chrome-extension = Instalar la extensión de Chrome
+Home--chrome-extension-instructions =
+    Utiliza la <a>extensión de { -profiler-brand-name } para Chrome</a>
+    para capturar perfiles de rendimiento en Chrome y analizarlos en
+    { -profiler-brand-name }. Instala la extensión desde la Chrome Web Store.
+Home--chrome-extension-recording-instructions = Una vez instalada, utiliza el icono de la barra de herramientas de la extensión o los accesos directos para iniciar y detener la creación de perfiles. También puedes exportar perfiles y cargarlos aquí para realizar un análisis detallado.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
 IdleSearchField--search-input =
-    .placeholder = Ingrese términos de filtro
+    .placeholder = Ingresa los términos de filtro
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -562,6 +570,14 @@ NumberFormat--short-date = { SHORTDATE($date) }
 
 PanelSearch--search-field-hint = ¿Sabías que puedes usar la coma (,) para buscar usando varios términos?
 
+## Profile Name Button
+
+ProfileName--edit-profile-name-button =
+    .title = Editar el nombre del perfil
+ProfileName--edit-profile-name-input =
+    .title = Editar el nombre del perfil
+    .aria-label = Nombre del perfil
+
 ## Profile Delete Button
 
 # This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
@@ -607,6 +623,7 @@ ProfileFilterNavigator--full-range-with-duration = Rango completo ({ $fullRangeD
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-from-post-message = Importando y procesando el perfil…
 ProfileLoaderAnimation--loading-unpublished = Importando el perfil directamente desde { -firefox-brand-name }…
 ProfileLoaderAnimation--loading-from-file = Leyendo el archivo y procesando el perfil…
 ProfileLoaderAnimation--loading-local = Aún no se ha implementado.
@@ -875,7 +892,7 @@ TrackBandwidthGraph--total-bandwidth-in-range = { $value } ({ $carbonValue } g C
 ## The component that is used for the search input in the track context menu.
 
 TrackSearchField--search-input =
-    .placeholder = Ingrese términos de filtro
+    .placeholder = Ingresa los términos de filtro
     .title = Mostrar solo las pistas que coinciden con cierto texto
 
 ## TransformNavigator

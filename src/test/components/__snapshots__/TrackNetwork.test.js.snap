@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`VerticalIndicators displays tooltips 1`] = `
 <div
@@ -9,6 +9,7 @@ exports[`VerticalIndicators displays tooltips 1`] = `
   <div>
     <span
       class="timelineVerticalIndicatorsSwatch"
+      style="background-color: var(--red-60);"
     />
      
     Load

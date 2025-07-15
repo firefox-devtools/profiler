@@ -6,24 +6,27 @@
 import type {
   ScreenshotPayload,
   Profile,
-  Thread,
+  RawProfileSharedData,
+  RawThread,
   ThreadIndex,
   Pid,
   GlobalTrack,
   LocalTrack,
   TrackIndex,
-  Counter,
+  RawCounter,
   Tid,
   TrackReference,
-  MarkerSchemaByName,
   TabID,
 } from 'firefox-profiler/types';
 
-import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
+import {
+  getFriendlyThreadName,
+  computeStackTableFromRawStackTable,
+} from './profile-data';
 import { intersectSets, subtractSets } from '../utils/set';
+import { StringTable } from '../utils/string-table';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
-import { getMarkerSchemaName } from './marker-schema';
 
 export type TracksWithOrder = {|
   +globalTracks: GlobalTrack[],
@@ -163,14 +166,60 @@ function _getDefaultLocalTrackOrder(tracks: LocalTrack[], profile: ?Profile) {
   return trackOrder;
 }
 
-function _getDefaultGlobalTrackOrder(tracks: GlobalTrack[]) {
+function _getDefaultGlobalTrackOrder(
+  tracks: GlobalTrack[],
+  threadActivityScores: Array<ThreadActivityScore>
+) {
   const trackOrder = tracks.map((_, index) => index);
+
   // In place sort!
-  trackOrder.sort(
-    (a, b) =>
-      GLOBAL_TRACK_DISPLAY_ORDER[tracks[a].type] -
-      GLOBAL_TRACK_DISPLAY_ORDER[tracks[b].type]
-  );
+  trackOrder.sort((a, b) => {
+    const trackA = tracks[a];
+    const trackB = tracks[b];
+
+    // First, sort by track type priority (visual progress, screenshots, then process).
+    const typeOrderA = GLOBAL_TRACK_DISPLAY_ORDER[trackA.type];
+    const typeOrderB = GLOBAL_TRACK_DISPLAY_ORDER[trackB.type];
+
+    if (typeOrderA !== typeOrderB) {
+      return typeOrderA - typeOrderB;
+    }
+
+    if (trackA.type !== 'process' || trackB.type !== 'process') {
+      // For all the cases where both of them are not the process type, return zero.
+      return 0;
+    }
+
+    // This is the case where both of the tracks are processes. Let's sort them
+    // by activity while keeping the parent process at the top.
+    // mainThreadIndex might be null in case the GeckoMain thread is not
+    // profiled in a profile.
+    const activityA =
+      trackA.mainThreadIndex !== null
+        ? threadActivityScores[trackA.mainThreadIndex]
+        : null;
+    const activityB =
+      trackB.mainThreadIndex !== null
+        ? threadActivityScores[trackB.mainThreadIndex]
+        : null;
+
+    // Keep the parent process at the top.
+    if (activityA?.isInParentProcess && !activityB?.isInParentProcess) {
+      return -1;
+    }
+    if (!activityA?.isInParentProcess && activityB?.isInParentProcess) {
+      return 1;
+    }
+
+    // For non-parent processes, sort by activity score.
+    if (activityA && activityB) {
+      return activityB.boostedSampleScore - activityA.boostedSampleScore;
+    }
+
+    // For all other cases, maintain original order.
+    return 0;
+  });
+
   return trackOrder;
 }
 
@@ -258,8 +307,7 @@ export function initializeLocalTrackOrderByPid(
  */
 export function computeLocalTracksByPid(
   profile: Profile,
-  availableGlobalTracks: GlobalTrack[],
-  markerSchemaByName: MarkerSchemaByName
+  availableGlobalTracks: GlobalTrack[]
 ): Map<Pid, LocalTrack[]> {
   const localTracksByPid = new Map();
 
@@ -323,12 +371,8 @@ export function computeLocalTracksByPid(
       for (let i = 0; i < markers.length; ++i) {
         const markerNameIndex = markers.name[i];
         const markerData = markers.data[i];
-        const markerSchemaName = getMarkerSchemaName(
-          markerSchemaByName,
-          thread.stringTable.getString(markerNameIndex),
-          markerData
-        );
-        if (markerData && markerSchemaByName) {
+        const markerSchemaName = markerData ? markerData.type : null;
+        if (markerData && markerSchemaName) {
           const mapEntry = markerTracksBySchemaName.get(markerSchemaName);
           if (mapEntry && mapEntry.keys.every((k) => k in markerData)) {
             mapEntry.markerNames.add(markerNameIndex);
@@ -400,7 +444,7 @@ export function computeLocalTracksByPid(
  * localTracksByPid map.
  */
 export function addEventDelayTracksForThreads(
-  threads: Thread[],
+  threads: RawThread[],
   localTracksByPid: Map<Pid, LocalTrack[]>
 ): Map<Pid, LocalTrack[]> {
   const newLocalTracksByPid = new Map();
@@ -431,7 +475,7 @@ export function addEventDelayTracksForThreads(
  * localTracksByPid map.
  */
 export function addProcessCPUTracksForProcess(
-  counters: Counter[] | null,
+  counters: RawCounter[] | null,
   localTracksByPid: Map<Pid, LocalTrack[]>
 ): Map<Pid, LocalTrack[]> {
   if (counters === null) {
@@ -478,13 +522,19 @@ export function computeGlobalTracks(
   let globalTracks: GlobalTrack[] = [];
 
   // Create the global tracks.
+  const { stringArray } = profile.shared;
+  const stringTable = StringTable.withBackingArray(stringArray);
+  const screenshotNameIndex = stringTable.hasString('CompositorScreenshot')
+    ? stringTable.indexForString('CompositorScreenshot')
+    : null;
+
   for (
     let threadIndex = 0;
     threadIndex < profile.threads.length;
     threadIndex++
   ) {
     const thread = profile.threads[threadIndex];
-    const { pid, markers, stringTable } = thread;
+    const { pid, markers } = thread;
     if (thread.isMainThread) {
       // This is a main thread, a global track needs to be created or updated with
       // the main thread info.
@@ -519,10 +569,7 @@ export function computeGlobalTracks(
 
     // Check for screenshots.
     const ids: Set<string> = new Set();
-    if (stringTable.hasString('CompositorScreenshot')) {
-      const screenshotNameIndex = stringTable.indexForString(
-        'CompositorScreenshot'
-      );
+    if (screenshotNameIndex !== null) {
       for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
         if (markers.name[markerIndex] === screenshotNameIndex) {
           // Coerce the payload to a screenshot one. Don't do a runtime check that
@@ -644,7 +691,8 @@ export function initializeGlobalTrackOrder(
   urlGlobalTrackOrder: TrackIndex[] | null,
   // If viewing an old profile URL, there were not tracks, only thread indexes. Turn
   // the legacy ordering into track ordering.
-  legacyThreadOrder: ThreadIndex[] | null
+  legacyThreadOrder: ThreadIndex[] | null,
+  threadActivityScores: Array<ThreadActivityScore>
 ): TrackIndex[] {
   if (legacyThreadOrder !== null) {
     // Upgrade an older URL value based on the thread index to the track index based
@@ -690,7 +738,7 @@ export function initializeGlobalTrackOrder(
   return urlGlobalTrackOrder !== null &&
     _indexesAreValid(globalTracks.length, urlGlobalTrackOrder)
     ? urlGlobalTrackOrder
-    : _getDefaultGlobalTrackOrder(globalTracks);
+    : _getDefaultGlobalTrackOrder(globalTracks, threadActivityScores);
 }
 
 // Returns the selected thread (set), intersected with the set of visible threads.
@@ -698,10 +746,15 @@ export function initializeGlobalTrackOrder(
 export function initializeSelectedThreadIndex(
   selectedThreadIndexes: Set<ThreadIndex> | null,
   visibleThreadIndexes: ThreadIndex[],
-  profile: Profile
+  profile: Profile,
+  threadActivityScores: Array<ThreadActivityScore>
 ): Set<ThreadIndex> {
   if (selectedThreadIndexes === null) {
-    return getDefaultSelectedThreadIndexes(visibleThreadIndexes, profile);
+    return getDefaultSelectedThreadIndexes(
+      visibleThreadIndexes,
+      profile,
+      threadActivityScores
+    );
   }
 
   // Filter out hidden threads from the set of selected threads.
@@ -711,16 +764,24 @@ export function initializeSelectedThreadIndex(
   );
   if (visibleSelectedThreadIndexes.size === 0) {
     // No selected threads were visible. Fall back to default selection.
-    return getDefaultSelectedThreadIndexes(visibleThreadIndexes, profile);
+    return getDefaultSelectedThreadIndexes(
+      visibleThreadIndexes,
+      profile,
+      threadActivityScores
+    );
   }
   return visibleSelectedThreadIndexes;
 }
 
-// Select either the GeckoMain [tab] thread, or the first thread in the thread
-// order.
+// Select either the most active GeckoMain [tab] thread, or the most active
+// thread sorted by the thread activity scores.
+// It always selects global tracks when there is a GeckoMain [tab], but when
+// there is no GeckoMain [tab], it might select local tracks too depending
+// on the activity score.
 function getDefaultSelectedThreadIndexes(
   visibleThreadIndexes: ThreadIndex[],
-  profile: Profile
+  profile: Profile,
+  threadActivityScores: Array<ThreadActivityScore>
 ): Set<ThreadIndex> {
   if (profile.meta.initialSelectedThreads !== undefined) {
     return new Set(
@@ -738,15 +799,81 @@ function getDefaultSelectedThreadIndexes(
       })
     );
   }
-  const visibleThreads = visibleThreadIndexes.map(
-    (threadIndex) => profile.threads[threadIndex]
-  );
-  const defaultThread = _findDefaultThread(visibleThreads);
-  const defaultThreadIndex = profile.threads.indexOf(defaultThread);
-  if (defaultThreadIndex === -1) {
+
+  const { threads } = profile;
+  if (threads.length === 0) {
     throw new Error('Expected to find a thread index to select.');
   }
+
+  const threadOrder = _defaultThreadOrder(
+    visibleThreadIndexes,
+    threads,
+    threadActivityScores
+  );
+
+  // Try to find a tab process with the highest activity score. If it can't
+  // find one, select the first thread with the highest one.
+  const defaultThreadIndex =
+    threadOrder.find(
+      (threadIndex) =>
+        threads[threadIndex].name === 'GeckoMain' &&
+        threads[threadIndex].processType === 'tab'
+    ) ?? threadOrder[0];
+
   return new Set([defaultThreadIndex]);
+}
+
+function _defaultThreadOrder(
+  visibleThreadIndexes: ThreadIndex[],
+  threads: RawThread[],
+  threadActivityScores: Array<ThreadActivityScore>
+): ThreadIndex[] {
+  const threadOrder = [...visibleThreadIndexes];
+
+  // Note: to have a consistent behavior independant of the sorting algorithm,
+  // we need to be careful that the comparator function is consistent:
+  // comparator(a, b) === - comparator(b, a)
+  // and
+  // comparator(a, b) === 0   if and only if   a === b
+  threadOrder.sort((a, b) => {
+    const nameA = threads[a].name;
+    const nameB = threads[b].name;
+
+    if (nameA === nameB) {
+      // Sort by the activity, but keep the original order if the activity
+      // scores are the equal.
+      return (
+        threadActivityScores[b].boostedSampleScore -
+          threadActivityScores[a].boostedSampleScore || a - b
+      );
+    }
+
+    // Put the compositor/renderer thread last.
+    // Compositor will always be before Renderer, if both are present.
+    if (nameA === 'Compositor') {
+      return 1;
+    }
+
+    if (nameB === 'Compositor') {
+      return -1;
+    }
+
+    if (nameA === 'Renderer') {
+      return 1;
+    }
+
+    if (nameB === 'Renderer') {
+      return -1;
+    }
+
+    // Otherwise keep the existing order. We don't return 0 to guarantee that
+    // the sort is stable even if the sort algorithm isn't.
+    return (
+      threadActivityScores[b].boostedSampleScore -
+        threadActivityScores[a].boostedSampleScore || a - b
+    );
+  });
+  return threadOrder;
 }
 
 // Returns either a configuration of hidden tracks that has at least one
@@ -929,7 +1056,7 @@ export function getVisibleThreads(
 
 export function getGlobalTrackName(
   globalTrack: GlobalTrack,
-  threads: Thread[]
+  threads: RawThread[]
 ): string {
   switch (globalTrack.type) {
     case 'process': {
@@ -979,8 +1106,9 @@ export function getGlobalTrackName(
 
 export function getLocalTrackName(
   localTrack: LocalTrack,
-  threads: Thread[],
-  counters: Counter[]
+  threads: RawThread[],
+  shared: RawProfileSharedData,
+  counters: RawCounter[]
 ): string {
   switch (localTrack.type) {
     case 'thread':
@@ -1006,9 +1134,7 @@ export function getLocalTrackName(
     case 'power':
       return counters[localTrack.counterIndex].name;
     case 'marker':
-      return threads[localTrack.threadIndex].stringTable.getString(
-        localTrack.markerName
-      );
+      return shared.stringArray[localTrack.markerName];
     default:
       throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
   }
@@ -1176,8 +1302,8 @@ const AUDIO_THREAD_SAMPLE_SCORE_BOOST_FACTOR = 40;
 // "interesting" threads to make sure we keep the most interesting ones.
 export function computeThreadActivityScore(
   profile: Profile,
-  thread: Thread,
-  maxCpuDeltaPerInterval: number | null
+  thread: RawThread,
+  referenceCPUDeltaPerMs: number
 ): ThreadActivityScore {
   const isEssentialFirefoxThread = _isEssentialFirefoxThread(thread);
   const isInParentProcess = thread.processType === 'default';
@@ -1186,7 +1312,7 @@ export function computeThreadActivityScore(
   const sampleScore = _computeThreadSampleScore(
     profile,
     thread,
-    maxCpuDeltaPerInterval
+    referenceCPUDeltaPerMs
   );
   const boostedSampleScore = isInterestingEvenWithMinimalActivity
     ? sampleScore * AUDIO_THREAD_SAMPLE_SCORE_BOOST_FACTOR
@@ -1200,7 +1326,7 @@ export function computeThreadActivityScore(
   };
 }
 
-function _isEssentialFirefoxThread(thread: Thread): boolean {
+function _isEssentialFirefoxThread(thread: RawThread): boolean {
   return (
     // Don't hide the main thread of the parent process.
     (thread.name === 'GeckoMain' &&
@@ -1211,7 +1337,7 @@ function _isEssentialFirefoxThread(thread: Thread): boolean {
   );
 }
 
-function _isFirefoxMediaThreadWhichIsUsuallyIdle(thread: Thread): boolean {
+function _isFirefoxMediaThreadWhichIsUsuallyIdle(thread: RawThread): boolean {
   // Detect media threads: they are usually very idle, but are interesting
   // as soon as there's at least one sample. They're present with the media
   // preset, but not usually captured otherwise.
@@ -1225,12 +1351,12 @@ function _isFirefoxMediaThreadWhichIsUsuallyIdle(thread: Thread): boolean {
 // If the thread does not have CPU delta information, we compute a
 // "CPU-delta-like" number based on the number of samples which are in a
 // non-idle category.
-// If the profile has no cpu delta units, the return value is the number of
-// non-idle samples.
+// If the profile has no cpu delta units, the return value is based on the
+// number of non-idle samples.
 function _computeThreadSampleScore(
   { meta }: Profile,
-  { samples, stackTable }: Thread,
-  maxCpuDeltaPerInterval: number | null
+  { samples, stackTable, frameTable }: RawThread,
+  referenceCPUDeltaPerMs: number
 ): number {
   if (meta.sampleUnits && samples.threadCPUDelta) {
     // Sum up all CPU deltas in this thread, to compute a total
@@ -1244,28 +1370,23 @@ function _computeThreadSampleScore(
   // This thread has no CPU delta information.
   // Compute a score based on non-idle samples, in the same
   // units as the cpu delta score.
+  const defaultCategory = meta.categories
+    ? meta.categories.findIndex((c) => c.color === 'grey')
+    : -1;
   const idleCategoryIndex = meta.categories
     ? meta.categories.findIndex((c) => c.name === 'Idle')
     : -1;
+  const derivedStackTable = computeStackTableFromRawStackTable(
+    stackTable,
+    frameTable,
+    defaultCategory
+  );
   const nonIdleSampleCount = samples.stack.filter(
     (stack) =>
-      stack !== null && stackTable.category[stack] !== idleCategoryIndex
+      stack !== null && derivedStackTable.category[stack] !== idleCategoryIndex
   ).length;
-  return nonIdleSampleCount * (maxCpuDeltaPerInterval ?? 1);
-}
-
-function _findDefaultThread(threads: Thread[]): Thread | null {
-  if (threads.length === 0) {
-    // Tests may have no threads.
-    return null;
-  }
-  const contentThreadId = threads.findIndex(
-    (thread) => thread.name === 'GeckoMain' && thread.processType === 'tab'
-  );
-  const defaultThreadIndex =
-    contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(threads)[0];
-
-  return threads[defaultThreadIndex];
+  const referenceCPUDeltaPerInterval = referenceCPUDeltaPerMs * meta.interval;
+  return nonIdleSampleCount * referenceCPUDeltaPerInterval;
 }
 
 function _indexesAreValid(listLength: number, indexes: number[]) {
@@ -1288,7 +1409,7 @@ function _indexesAreValid(listLength: number, indexes: number[]) {
 export function getSearchFilteredGlobalTracks(
   tracks: GlobalTrack[],
   globalTrackNames: string[],
-  threads: Thread[],
+  threads: RawThread[],
   searchFilter: string
 ): Set<TrackIndex> | null {
   if (!searchFilter) {
@@ -1382,7 +1503,7 @@ export function getSearchFilteredGlobalTracks(
 export function getSearchFilteredLocalTracksByPid(
   localTracksByPid: Map<Pid, LocalTrack[]>,
   localTrackNamesByPid: Map<Pid, string[]>,
-  threads: Thread[],
+  threads: RawThread[],
   searchFilter: string
 ): Map<Pid, Set<TrackIndex>> | null {
   if (!searchFilter) {
@@ -1542,7 +1663,7 @@ export function getTrackReferenceFromTid(
   tid: Tid,
   globalTracks: GlobalTrack[],
   localTracksByPid: Map<Pid, LocalTrack[]>,
-  threads: Thread[]
+  threads: RawThread[]
 ): TrackReference | null {
   // First, check if it's a global track.
   for (

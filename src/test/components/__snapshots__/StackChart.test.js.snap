@@ -858,17 +858,6 @@ exports[`MarkerChart shows a tooltip when hovering 1`] = `
       <div
         class="tooltipLabel"
       >
-        Marker
-        :
-      </div>
-      <div
-        class="tooltipDetailsDescription"
-      >
-        UserTiming
-      </div>
-      <div
-        class="tooltipLabel"
-      >
         Entry Type
         :
       </div>
@@ -1356,6 +1345,468 @@ Array [
     "G",
     219.66666666666666,
     75,
+  ],
+  Array [
+    "set fillStyle",
+    "#d7d7db",
+  ],
+  Array [
+    "fillRect",
+    150,
+    0,
+    1,
+    300,
+  ],
+  Array [
+    "fillRect",
+    350,
+    0,
+    1,
+    300,
+  ],
+]
+`;
+
+exports[`StackChart works when the user selects the JS allocations option 1`] = `
+<body>
+  <div
+    id="root-overlay"
+  />
+  <div>
+    <div
+      aria-labelledby="stack-chart-tab-button"
+      class="stackChart"
+      id="stack-chart-tab"
+      role="tabpanel"
+    >
+      <div
+        class="stackSettings"
+      >
+        <ul
+          class="panelSettingsList"
+        >
+          <li
+            class="panelSettingsListItem"
+          >
+            <input
+              checked=""
+              class="photon-radio photon-radio-micro"
+              id="implementation-radio-combined"
+              title="Do not filter the stack frames"
+              type="radio"
+              value="combined"
+            />
+            <label
+              class="photon-label photon-label-micro photon-label-horiz-padding"
+              for="implementation-radio-combined"
+              title="Do not filter the stack frames"
+            >
+              All frames
+            </label>
+            <input
+              class="photon-radio photon-radio-micro"
+              id="implementation-radio-js"
+              title="Show only the stack frames related to JavaScript execution"
+              type="radio"
+              value="js"
+            />
+            <label
+              class="photon-label photon-label-micro photon-label-horiz-padding"
+              for="implementation-radio-js"
+              title="Show only the stack frames related to JavaScript execution"
+            >
+              JavaScript
+            </label>
+            <input
+              class="photon-radio photon-radio-micro"
+              id="implementation-radio-cpp"
+              title="Show only the stack frames for native code"
+              type="radio"
+              value="cpp"
+            />
+            <label
+              class="photon-label photon-label-micro photon-label-horiz-padding"
+              for="implementation-radio-cpp"
+              title="Show only the stack frames for native code"
+            >
+              Native
+            </label>
+          </li>
+          <li
+            class="panelSettingsListItem"
+          >
+            <label>
+              Data source:
+               
+              <select
+                class="stackSettingsSelect"
+              >
+                <option
+                  title="Summarize using sampled stacks of executed code over time"
+                  value="timing"
+                >
+                  Timings
+                </option>
+                <option
+                  title="Summarize using bytes of JavaScript allocated (no de-allocations)"
+                  value="js-allocations"
+                >
+                  JavaScript Allocations
+                </option>
+              </select>
+            </label>
+          </li>
+          <li
+            class="panelSettingsListItem"
+          >
+            <label
+              class="photon-label photon-label-micro photon-label-horiz-padding"
+            >
+              <input
+                class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+                type="checkbox"
+              />
+              Show user timing
+            </label>
+          </li>
+        </ul>
+        <div
+          class="panelSearchField stackSettingsSearchField"
+        >
+          <label
+            class="panelSearchFieldLabel"
+          >
+            Filter stacks: 
+            <form
+              class="idleSearchField panelSearchFieldInput"
+            >
+              <input
+                class="idleSearchFieldInput photon-input"
+                name="search"
+                placeholder="Enter filter terms"
+                required=""
+                title="Only display stacks which contain a function whose name matches this substring"
+                type="search"
+                value=""
+              />
+              <input
+                class="idleSearchFieldButton"
+                tabindex="-1"
+                type="reset"
+              />
+            </form>
+          </label>
+          <div
+            class="panelSearchFieldIntroduction isHidden"
+          >
+            Did you know you can use the comma (,) to search using several terms?
+          </div>
+        </div>
+      </div>
+      <ol
+        class="filterNavigatorBar calltreeTransformNavigator"
+      >
+        <li
+          class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+        >
+          <span
+            class="filterNavigatorBarItemContent"
+          >
+            Complete “⁨Empty⁩”
+          </span>
+        </li>
+      </ol>
+      <div
+        class="react-contextmenu-wrapper treeViewContextMenu"
+      >
+        <div
+          class="stackChartContent"
+        >
+          <div
+            class="chartViewport"
+            tabindex="0"
+          >
+            <div>
+              <canvas
+                class="chartCanvas stackChartCanvas"
+                height="300"
+                style="width: 365px; height: 300px;"
+                width="365"
+              />
+            </div>
+            <div
+              class="chartViewportScroll hidden"
+            >
+              Zoom Chart:
+              <kbd
+                class="chartViewportScrollKbd"
+              >
+                Ctrl + Scroll
+              </kbd>
+              or
+              <kbd
+                class="chartViewportScrollKbd"
+              >
+                Shift + Scroll
+              </kbd>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+`;
+
+exports[`StackChart works when the user selects the JS allocations option 2`] = `
+Array [
+  Array [
+    "set font",
+    "10px sans-serif",
+  ],
+  Array [
+    "measureText",
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
+  ],
+  Array [
+    "measureText",
+    "…",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    365,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "fillRect",
+    150,
+    0,
+    199.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "A",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "A",
+    153,
+    11,
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "fillRect",
+    150,
+    16,
+    199.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "B",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "B",
+    153,
+    27,
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "fillRect",
+    150,
+    32,
+    66.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "C",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "C",
+    153,
+    43,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "fillRect",
+    217,
+    32,
+    132.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "Fjs",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Fjs",
+    219.66666666666666,
+    43,
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "fillRect",
+    150,
+    48,
+    66.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "D",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "D",
+    153,
+    59,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "fillRect",
+    217,
+    48,
+    132.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "Gjs",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Gjs",
+    219.66666666666666,
+    59,
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "fillRect",
+    150,
+    64,
+    66.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "E",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "E",
+    153,
+    75,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "fillRect",
+    283,
+    64,
+    66.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "Hjs",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Hjs",
+    286.3333333333333,
+    75,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "fillRect",
+    283,
+    80,
+    66.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "I",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "I",
+    286.3333333333333,
+    91,
   ],
   Array [
     "set fillStyle",

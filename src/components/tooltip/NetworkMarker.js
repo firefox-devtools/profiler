@@ -20,6 +20,7 @@ import {
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type {
+  NetworkHttpVersion,
   NetworkPayload,
   NetworkStatus,
   Milliseconds,
@@ -66,6 +67,24 @@ function _getHumanReadableDataStatus(status: NetworkStatus): string {
       return 'Request was canceled';
     default:
       throw assertExhaustiveCheck(status);
+  }
+}
+
+function _getHumanReadableHttpVersion(httpVersion: NetworkHttpVersion): string {
+  switch (httpVersion) {
+    case 'h3':
+      return '3';
+    case 'h2':
+      return '2';
+    case 'http/1.0':
+      return '1.0';
+    case 'http/1.1':
+      return '1.1';
+    default:
+      throw assertExhaustiveCheck(
+        httpVersion,
+        `Unknown received HTTP version ${httpVersion}`
+      );
   }
 }
 
@@ -425,6 +444,38 @@ export function getNetworkMarkerDetails(
     details.push(
       <TooltipDetail label="Requested bytes" key="Network-Requested Bytes">
         {formatBytes(payload.count)}
+      </TooltipDetail>
+    );
+  }
+
+  if (payload.httpVersion) {
+    details.push(
+      <TooltipDetail label="HTTP Version" key="Network-HTTP Version">
+        {_getHumanReadableHttpVersion(payload.httpVersion)}
+      </TooltipDetail>
+    );
+  }
+
+  if (payload.classOfService) {
+    details.push(
+      <TooltipDetail label="Class of Service" key="Network-Class of Service">
+        {payload.classOfService}
+      </TooltipDetail>
+    );
+  }
+
+  if (payload.requestStatus) {
+    details.push(
+      <TooltipDetail label="Request Status" key="Network-Request Status">
+        {payload.requestStatus}
+      </TooltipDetail>
+    );
+  }
+
+  if (payload.responseStatus) {
+    details.push(
+      <TooltipDetail label="Response Status Code" key="Network-Response Status">
+        {payload.responseStatus}
       </TooltipDetail>
     );
   }

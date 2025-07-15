@@ -11,6 +11,11 @@ import { getSampleIndexClosestToCenteredTime } from 'firefox-profiler/profile-lo
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
+import {
+  Tooltip,
+  MOUSE_OFFSET,
+} from 'firefox-profiler/components/tooltip/Tooltip';
+import { SampleTooltipContents } from 'firefox-profiler/components/shared/SampleTooltipContents';
 
 import './SampleGraph.css';
 
@@ -20,8 +25,17 @@ import type {
   IndexIntoSamplesTable,
   Milliseconds,
   SelectedState,
+  CssPixels,
+  TimelineType,
+  ImplementationFilter,
 } from 'firefox-profiler/types';
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { CpuRatioInTimeRange } from './ActivityGraphFills';
+
+export type HoveredPixelState = {|
+  +sample: IndexIntoSamplesTable | null,
+  +cpuRatioInTimeRange: CpuRatioInTimeRange | null,
+|};
 
 type Props = {|
   +className: string,
@@ -33,13 +47,40 @@ type Props = {|
   +categories: CategoryList,
   +onSampleClick: (
     event: SyntheticMouseEvent<>,
-    sampleIndex: IndexIntoSamplesTable
+    sampleIndex: IndexIntoSamplesTable | null
   ) => void,
+  +trackName: string,
+  +timelineType: TimelineType,
+  +implementationFilter: ImplementationFilter,
+  +zeroAt: Milliseconds,
+  +profileTimelineUnit: string,
+  ...SizeProps,
+|};
+
+type State = {
+  hoveredPixelState: null | HoveredPixelState,
+  mouseX: CssPixels,
+  mouseY: CssPixels,
+};
+
+type CanvasProps = {|
+  +className: string,
+  +thread: Thread,
+  +samplesSelectedStates: null | SelectedState[],
+  +interval: Milliseconds,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +categories: CategoryList,
   +trackName: string,
   ...SizeProps,
 |};
 
-export class ThreadSampleGraphImpl extends PureComponent<Props> {
+/**
+ * This component controls the rendering of the canvas. Every render call through
+ * React triggers a new canvas render. Because of this, it's important to only pass
+ * in the props that are needed for the canvas draw call.
+ */
+class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
   _canvas: null | HTMLCanvasElement = null;
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) =>
     (this._canvas = canvas);
@@ -103,8 +144,7 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
     canvas.width = Math.round(width * devicePixelRatio);
     canvas.height = Math.round(height * devicePixelRatio);
     const ctx = canvas.getContext('2d');
-    const range = [rangeStart, rangeEnd];
-    const rangeLength = range[1] - range[0];
+    const rangeLength = rangeEnd - rangeStart;
     const xPixelsPerMs = canvas.width / rangeLength;
     const trueIntervalPixelWidth = interval * xPixelsPerMs;
     const multiplier = trueIntervalPixelWidth < 2.0 ? 1.2 : 1.0;
@@ -114,8 +154,8 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
     );
     const drawnSampleWidth = Math.min(drawnIntervalWidth, 10);
 
-    const firstDrawnSampleTime = range[0] - drawnIntervalWidth / xPixelsPerMs;
-    const lastDrawnSampleTime = range[1];
+    const firstDrawnSampleTime = rangeStart - drawnIntervalWidth / xPixelsPerMs;
+    const lastDrawnSampleTime = rangeEnd;
 
     const firstDrawnSampleIndex = bisectionRight(
       thread.samples.time,
@@ -145,7 +185,7 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
         continue;
       }
       const xPos =
-        (sampleTime - range[0]) * xPixelsPerMs - drawnSampleWidth / 2;
+        (sampleTime - rangeStart) * xPixelsPerMs - drawnSampleWidth / 2;
       let samplesBucket;
       if (
         samplesSelectedStates !== null &&
@@ -185,48 +225,169 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
     drawSamples(idleSamples, lighterBlue);
   }
 
-  _onClick = (event: SyntheticMouseEvent<>) => {
-    const canvas = this._canvas;
-    if (canvas) {
-      const { rangeStart, rangeEnd, thread } = this.props;
-      const r = canvas.getBoundingClientRect();
+  render() {
+    const { trackName } = this.props;
 
-      const x = event.pageX - r.left;
-      const time = rangeStart + (x / r.width) * (rangeEnd - rangeStart);
+    return (
+      <InView onChange={this._observerCallback}>
+        <canvas
+          className={classNames(
+            `${this.props.className}Canvas`,
+            'threadSampleGraphCanvas'
+          )}
+          ref={this._takeCanvasRef}
+        >
+          <h2>Stack Graph for {trackName}</h2>
+          <p>This graph charts the stack height of each sample.</p>
+        </canvas>
+      </InView>
+    );
+  }
+}
 
-      const sampleIndex = getSampleIndexClosestToCenteredTime(
-        thread.samples,
-        time
-      );
-
-      if (thread.samples.stack[sampleIndex] === null) {
-        // If the sample index refers to a null sample, that sample
-        // has been filtered out and means that there was no stack bar
-        // drawn at the place where the user clicked. Do nothing here.
-        return;
-      }
-
-      this.props.onSampleClick(event, sampleIndex);
-    }
+export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
+  state = {
+    hoveredPixelState: null,
+    mouseX: 0,
+    mouseY: 0,
   };
 
+  _onClick = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
+    const hoveredSample = this._getSampleAtMouseEvent(event);
+    this.props.onSampleClick(event, hoveredSample?.sample ?? null);
+  };
+
+  _onMouseLeave = () => {
+    this.setState({ hoveredPixelState: null });
+  };
+
+  _onMouseMove = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
+    const canvas = event.currentTarget;
+    if (!canvas) {
+      return;
+    }
+
+    const rect = canvas.getBoundingClientRect();
+    this.setState({
+      hoveredPixelState: this._getSampleAtMouseEvent(event),
+      mouseX: event.pageX,
+      // Have the tooltip align to the bottom of the track.
+      mouseY: rect.bottom - MOUSE_OFFSET,
+    });
+  };
+
+  _getSampleAtMouseEvent(
+    event: SyntheticMouseEvent<HTMLCanvasElement>
+  ): null | HoveredPixelState {
+    const canvas = event.currentTarget;
+    if (!canvas) {
+      return null;
+    }
+
+    const { rangeStart, rangeEnd, thread, interval } = this.props;
+    const r = canvas.getBoundingClientRect();
+
+    const x = event.nativeEvent.offsetX;
+    const time = rangeStart + (x / r.width) * (rangeEnd - rangeStart);
+
+    // These values are copied from the `drawCanvas` method to compute the
+    // `drawnSampleWidth` instead of extracting into a new function. Extracting
+    // into a new function is not really idea for performance reasons since we
+    // need these values for other values in `drawCanvas`.
+    const rangeLength = rangeEnd - rangeStart;
+    const xPixelsPerMs = r.width / rangeLength;
+    const trueIntervalPixelWidth = interval * xPixelsPerMs;
+    const multiplier = trueIntervalPixelWidth < 2.0 ? 1.2 : 1.0;
+    const drawnIntervalWidth = Math.max(
+      0.8,
+      trueIntervalPixelWidth * multiplier
+    );
+    const drawnSampleWidth = Math.min(drawnIntervalWidth, 10) / 2;
+
+    const maxTimeDistance = (drawnSampleWidth / 2 / r.width) * rangeLength;
+
+    const sampleIndex = getSampleIndexClosestToCenteredTime(
+      thread.samples,
+      time,
+      maxTimeDistance
+    );
+
+    if (sampleIndex === null) {
+      // No sample that is close enough found. Mouse doesn't hover any of the
+      // sample boxes in the sample graph.
+      return null;
+    }
+
+    if (thread.samples.stack[sampleIndex] === null) {
+      // If the sample index refers to a null sample, that sample
+      // has been filtered out and means that there was no stack bar
+      // drawn at the place where the user clicked. Do nothing here.
+      return null;
+    }
+
+    return {
+      sample: sampleIndex,
+      cpuRatioInTimeRange: null,
+    };
+  }
+
   render() {
-    const { className, trackName } = this.props;
+    const {
+      className,
+      trackName,
+      timelineType,
+      categories,
+      implementationFilter,
+      thread,
+      interval,
+      rangeStart,
+      rangeEnd,
+      samplesSelectedStates,
+      width,
+      height,
+      zeroAt,
+      profileTimelineUnit,
+    } = this.props;
+    const { hoveredPixelState, mouseX, mouseY } = this.state;
+
     return (
-      <div className={className}>
-        <InView onChange={this._observerCallback}>
-          <canvas
-            className={classNames(
-              `${this.props.className}Canvas`,
-              'threadSampleGraphCanvas'
-            )}
-            ref={this._takeCanvasRef}
-            onClick={this._onClick}
-          >
-            <h2>Stack Graph for {trackName}</h2>
-            <p>This graph charts the stack height of each sample.</p>
-          </canvas>
-        </InView>
+      <div
+        className={className}
+        onMouseMove={this._onMouseMove}
+        onMouseLeave={this._onMouseLeave}
+        onClick={this._onClick}
+      >
+        <ThreadSampleGraphCanvas
+          className={className}
+          trackName={trackName}
+          interval={interval}
+          thread={thread}
+          rangeStart={rangeStart}
+          rangeEnd={rangeEnd}
+          samplesSelectedStates={samplesSelectedStates}
+          categories={categories}
+          width={width}
+          height={height}
+        />
+
+        {hoveredPixelState === null ? null : (
+          <Tooltip mouseX={mouseX} mouseY={mouseY}>
+            <SampleTooltipContents
+              sampleIndex={hoveredPixelState.sample}
+              cpuRatioInTimeRange={
+                timelineType === 'cpu-category'
+                  ? hoveredPixelState.cpuRatioInTimeRange
+                  : null
+              }
+              rangeFilteredThread={thread}
+              categories={categories}
+              implementationFilter={implementationFilter}
+              zeroAt={zeroAt}
+              profileTimelineUnit={profileTimelineUnit}
+              interval={interval}
+            />
+          </Tooltip>
+        )}
       </div>
     );
   }

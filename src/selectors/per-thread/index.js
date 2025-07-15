@@ -263,13 +263,11 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     selectedThreadSelectors.getSelectedCallNodePath,
     selectedThreadSelectors.getCallNodeInfo,
     ProfileSelectors.getProfileInterval,
-    selectedThreadSelectors.getPreviewFilteredThread,
     selectedThreadSelectors.getThread,
-    selectedThreadSelectors.getSampleIndexOffsetFromPreviewRange,
+    selectedThreadSelectors.getPreviewFilteredCtssSampleIndexOffset,
     ProfileSelectors.getCategories,
-    selectedThreadSelectors.getPreviewFilteredSamplesForCallTree,
-    selectedThreadSelectors.getUnfilteredSamplesForCallTree,
-    ProfileSelectors.getProfileUsesFrameImplementation,
+    selectedThreadSelectors.getPreviewFilteredCtssSamples,
+    selectedThreadSelectors.getUnfilteredCtssSamples,
     ProfileData.getTimingsForPath
   );
 
@@ -288,8 +286,7 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
         if (sourceViewFile === null || selectedCallNodeIndex === null) {
           return null;
         }
-        const callNodeTable = callNodeInfo.getCallNodeTable();
-        const selectedFunc = callNodeTable.func[selectedCallNodeIndex];
+        const selectedFunc = callNodeInfo.funcForNode(selectedCallNodeIndex);
         const selectedFuncFile = funcTable.fileName[selectedFunc];
         if (
           selectedFuncFile === null ||
@@ -308,7 +305,7 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
 
   const getSourceViewLineTimings: Selector<LineTimings> = createSelector(
     getSourceViewStackLineInfo,
-    selectedThreadSelectors.getPreviewFilteredSamplesForCallTree,
+    selectedThreadSelectors.getPreviewFilteredCtssSamples,
     getLineTimings
   );
 
@@ -340,7 +337,7 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
   const getAssemblyViewAddressTimings: Selector<AddressTimings> =
     createSelector(
       getAssemblyViewStackAddressInfo,
-      selectedThreadSelectors.getPreviewFilteredSamplesForCallTree,
+      selectedThreadSelectors.getPreviewFilteredCtssSamples,
       getAddressTimings
     );
 

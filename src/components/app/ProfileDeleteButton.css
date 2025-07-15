@@ -19,7 +19,7 @@
   background: url(../../../res/img/svg/error-red.svg) no-repeat 0 4px / 16px
     16px;
   color: var(--red-60);
-  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .profileDeletePanel {

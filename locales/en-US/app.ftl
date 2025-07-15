@@ -127,6 +127,7 @@ CallNodeContextMenu--searchfox = Look up the function name on Searchfox
 CallNodeContextMenu--copy-function-name = Copy function name
 CallNodeContextMenu--copy-script-url = Copy script URL
 CallNodeContextMenu--copy-stack = Copy stack
+CallNodeContextMenu--show-the-function-in-devtools = Show the function in DevTools
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -364,6 +365,14 @@ Home--load-files-from-other-tools2 =
     any file using the <dhat>dhat format</dhat> or <traceevent>Google’s Trace Event
     Format</traceevent>. <write>Learn how to write your
     own importer</write>.
+
+Home--install-chrome-extension = Install the Chrome extension
+Home--chrome-extension-instructions = Use the <a>{ -profiler-brand-name } extension for Chrome</a>
+    to capture performance profiles in Chrome and analyze them in the
+    { -profiler-brand-name }. Install the extension from the Chrome Web Store.
+Home--chrome-extension-recording-instructions = Once installed, use the extension’s
+    toolbar icon or the shortcuts to start and stop profiling. You can also
+    export profiles and load them here for detailed analysis.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -678,6 +687,14 @@ NumberFormat--short-date = { SHORTDATE($date) }
 
 PanelSearch--search-field-hint =
     Did you know you can use the comma (,) to search using several terms?
+
+## Profile Name Button
+
+ProfileName--edit-profile-name-button =
+    .title = Edit the profile name
+ProfileName--edit-profile-name-input =
+    .title = Edit the profile name
+    .aria-label = Profile name
 
 ## Profile Delete Button
 

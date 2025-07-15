@@ -7,8 +7,6 @@ import { oneLine } from 'common-tags';
 import {
   getSelectedTab,
   getDataSource,
-  getIsActiveTabResourcesPanelOpen,
-  getSelectedThreadIndexes,
   getLocalTrackOrderByPid,
 } from 'firefox-profiler/selectors/url-state';
 import {
@@ -18,10 +16,9 @@ import {
   getIsExperimentalProcessCPUTracksEnabled,
 } from 'firefox-profiler/selectors/app';
 import {
-  getActiveTabMainTrack,
   getLocalTracksByPid,
   getThreads,
-  getCounter,
+  getCounters,
 } from 'firefox-profiler/selectors/profile';
 import { sendAnalytics } from 'firefox-profiler/utils/analytics';
 import {
@@ -240,29 +237,6 @@ export function unregisterDragAndDropOverlay(): Action {
   return { type: 'UNREGISTER_DRAG_AND_DROP_OVERLAY' };
 }
 
-/**
- * Toggle the active tab resources panel
- */
-export function toggleResourcesPanel(): ThunkAction<void> {
-  return (dispatch, getState) => {
-    const isResourcesPanelOpen = getIsActiveTabResourcesPanelOpen(getState());
-    let selectedThreadIndexes = getSelectedThreadIndexes(getState());
-
-    if (isResourcesPanelOpen) {
-      // If it was open when we dispatched that action, it means we are closing this panel.
-      // We would like to also select the main track when we close this panel.
-      const mainTrack = getActiveTabMainTrack(getState());
-      selectedThreadIndexes = new Set([...mainTrack.threadIndexes]);
-    }
-
-    // Toggle the resources panel eventually.
-    dispatch({
-      type: 'TOGGLE_RESOURCES_PANEL',
-      selectedThreadIndexes,
-    });
-  };
-}
-
 /*
  * This action enables the event delay tracks. They are hidden by default because
  * they are usually for power users and not so meaningful for average users.
@@ -375,7 +349,7 @@ export function enableExperimentalProcessCPUTracks(): ThunkAction<boolean> {
 
     const oldLocalTracks = getLocalTracksByPid(getState());
     const localTracksByPid = addProcessCPUTracksForProcess(
-      getCounter(getState()),
+      getCounters(getState()),
       oldLocalTracks
     );
     const localTrackOrderByPid = initializeLocalTrackOrderByPid(

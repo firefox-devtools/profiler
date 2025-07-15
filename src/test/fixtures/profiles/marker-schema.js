@@ -9,28 +9,28 @@ export const markerSchemaForTests: MarkerSchema[] = [
   {
     name: 'GCMajor',
     display: ['marker-chart', 'marker-table', 'timeline-memory'],
-    data: [],
+    fields: [],
   },
   {
     name: 'GCMinor',
     display: ['marker-chart', 'marker-table', 'timeline-memory'],
-    data: [],
+    fields: [],
   },
   {
     name: 'GCSlice',
     display: ['marker-chart', 'marker-table', 'timeline-memory'],
-    data: [],
+    fields: [],
   },
   {
     name: 'CC',
     tooltipLabel: 'Cycle Collect',
     display: ['marker-chart', 'marker-table', 'timeline-memory'],
-    data: [],
+    fields: [],
   },
   {
     name: 'FileIO',
     display: ['marker-chart', 'marker-table'],
-    data: [
+    fields: [
       {
         key: 'operation',
         label: 'Operation',
@@ -54,7 +54,7 @@ export const markerSchemaForTests: MarkerSchema[] = [
   {
     name: 'MediaSample',
     display: ['marker-chart', 'marker-table'],
-    data: [
+    fields: [
       {
         key: 'sampleStartTimeUs',
         label: 'Sample start time',
@@ -70,7 +70,7 @@ export const markerSchemaForTests: MarkerSchema[] = [
   {
     name: 'Styles',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [
+    fields: [
       {
         key: 'elementsTraversed',
         label: 'Elements traversed',
@@ -85,7 +85,7 @@ export const markerSchemaForTests: MarkerSchema[] = [
   {
     name: 'PreferenceRead',
     display: ['marker-chart', 'marker-table'],
-    data: [
+    fields: [
       { key: 'prefName', label: 'Name', format: 'string', searchable: true },
       { key: 'prefKind', label: 'Kind', format: 'string' },
       { key: 'prefType', label: 'Type', format: 'string' },
@@ -98,23 +98,19 @@ export const markerSchemaForTests: MarkerSchema[] = [
     chartLabel: '{marker.data.name}',
     tableLabel: '{marker.data.name}',
     display: ['marker-chart', 'marker-table'],
-    data: [
+    fields: [
       { key: 'name', label: 'Name', format: 'string', searchable: true },
-      { label: 'Marker', value: 'UserTiming' },
       { key: 'entryType', label: 'Entry Type', format: 'string' },
-      {
-        label: 'Description',
-        value:
-          'UserTiming is created using the DOM APIs performance.mark() and performance.measure().',
-      },
     ],
+    description:
+      'UserTiming is created using the DOM APIs performance.mark() and performance.measure().',
   },
   {
     name: 'Text',
     tableLabel: '{marker.name} — {marker.data.name}',
     chartLabel: '{marker.name} — {marker.data.name}',
     display: ['marker-chart', 'marker-table'],
-    data: [
+    fields: [
       { key: 'name', label: 'Details', format: 'string', searchable: true },
     ],
   },
@@ -122,7 +118,7 @@ export const markerSchemaForTests: MarkerSchema[] = [
     name: 'Log',
     display: ['marker-table'],
     tableLabel: '({marker.data.module}) {marker.data.name}',
-    data: [
+    fields: [
       { key: 'module', label: 'Module', format: 'string', searchable: true },
       { key: 'name', label: 'Name', format: 'string', searchable: true },
     ],
@@ -133,7 +129,7 @@ export const markerSchemaForTests: MarkerSchema[] = [
     tableLabel: '{marker.data.eventType}',
     chartLabel: '{marker.data.eventType}',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [
+    fields: [
       { key: 'latency', label: 'Latency', format: 'duration' },
       {
         key: 'eventType',
@@ -144,29 +140,16 @@ export const markerSchemaForTests: MarkerSchema[] = [
     ],
   },
   {
-    // TODO - Note that this marker is a "tracing" marker currently.
-    // See issue #2749
-    name: 'Paint',
+    name: 'tracing',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [
+    fields: [
       { key: 'category', label: 'Type', format: 'string', searchable: true },
     ],
   },
   {
-    // TODO - Note that this marker is a "tracing" marker currently.
-    // See issue #2749
-    name: 'Navigation',
-    display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [
-      { key: 'category', label: 'Type', format: 'string', searchable: true },
-    ],
-  },
-  {
-    // TODO - Note that this marker is a "tracing" marker currently.
-    // See issue #2749
     name: 'Layout',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [
+    fields: [
       { key: 'category', label: 'Type', format: 'string', searchable: true },
     ],
   },
@@ -177,7 +160,7 @@ export const markerSchemaForTests: MarkerSchema[] = [
       '{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}',
     chartLabel: '{marker.data.messageType}',
     display: ['marker-chart', 'marker-table', 'timeline-ipc'],
-    data: [
+    fields: [
       { key: 'messageType', label: 'Type', format: 'string' },
       { key: 'sync', label: 'Sync', format: 'string' },
       { key: 'sendThreadName', label: 'From', format: 'string' },
@@ -185,21 +168,14 @@ export const markerSchemaForTests: MarkerSchema[] = [
     ],
   },
   {
-    name: 'RefreshDriverTick',
+    name: 'VisibleInTimelineOverview',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [
-      {
-        key: 'name',
-        label: 'Tick Reasons',
-        format: 'string',
-        searchable: true,
-      },
-    ],
+    fields: [],
   },
   {
     name: 'StringTesting',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [
+    fields: [
       {
         key: 'searchableString',
         label: 'Searchable string field',
@@ -223,6 +199,19 @@ export const markerSchemaForTests: MarkerSchema[] = [
         label: 'Non-searchable unique string field',
         format: 'unique-string',
         searchable: false,
+      },
+    ],
+  },
+  {
+    name: 'MarkerWithHiddenField',
+    display: ['marker-chart', 'marker-table', 'timeline-overview'],
+    fields: [
+      {
+        key: 'hiddenString',
+        label: 'Hidden string',
+        format: 'string',
+        searchable: true,
+        hidden: true,
       },
     ],
   },

@@ -23,9 +23,8 @@ import {
   resetHistoryWithUrl,
 } from '../fixtures/mocks/window-navigation';
 import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
-import { makeProfileSerializable } from '../../profile-logic/process-profile';
 
-import type { SerializableProfile } from 'firefox-profiler/types';
+import type { Profile } from 'firefox-profiler/types';
 
 // ListOfPublishedProfiles depends on IDB and renders asynchronously, so we'll
 // just test we want to render it, but otherwise test it more fully in a
@@ -61,9 +60,7 @@ describe('Root with history', function () {
       );
 
       // Ensure this is a properly serialized profile.
-      const profile = makeProfileSerializable(
-        getProfileFromTextSamples('A  B  C  D  E').profile
-      );
+      const profile = getProfileFromTextSamples('A  B  C  D  E').profile;
       mockFetchProfileAtUrl(getProfileUrlForHash('FAKEHASH'), profile);
     } else {
       throw new Error(
@@ -190,11 +187,8 @@ describe('Root with history', function () {
   });
 });
 
-function mockFetchProfileAtUrl(
-  url: string,
-  profile: SerializableProfile
-): void {
-  window.fetch
+function mockFetchProfileAtUrl(url: string, profile: Profile): void {
+  window.fetchMock
     .catch(404) // catchall
     .get(url, profile);
 }

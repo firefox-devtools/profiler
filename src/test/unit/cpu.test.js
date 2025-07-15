@@ -4,81 +4,76 @@
 
 // @flow
 
-import { processThreadCPUDelta } from 'firefox-profiler/profile-logic/cpu';
-import { getProfileWithThreadCPUDelta } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileWithThreadCPUDelta,
+  getProfileWithDicts,
+} from '../fixtures/profiles/processed-profile';
+import { ensureExists } from '../../utils/flow';
 
 import type { ThreadCPUDeltaUnit, Milliseconds } from 'firefox-profiler/types';
 
 const MS_TO_US_MULTIPLIER = 1000;
 const MS_TO_NS_MULTIPLIER = 1000000;
 
-describe('processThreadCPUDelta', function () {
+describe('computeThreadCPURatio', function () {
   function setup(
-    threadCPUDelta?: Array<number | null>,
+    threadCPURatio?: Array<number | null>,
     unit: ThreadCPUDeltaUnit = 'ns',
     interval: Milliseconds = 1
   ) {
     const profile = getProfileWithThreadCPUDelta(
-      [threadCPUDelta],
+      [threadCPURatio],
       unit,
       interval
     );
-    const [thread] = profile.threads;
+    const { derivedThreads } = getProfileWithDicts(profile);
+    const [thread] = derivedThreads;
+    const cpuRatio = [...ensureExists(thread.samples.threadCPURatio)];
 
-    if (!profile.meta.sampleUnits) {
-      throw new Error('SampleUnits object could not found in the profile.');
-    }
-
-    const processedThread = processThreadCPUDelta(
-      thread,
-      profile.meta.sampleUnits,
-      profile.meta.interval
-    );
-
-    return { profile, thread, processedThread };
+    return { profile, cpuRatio };
   }
 
-  it('throws if all of its values are null', function () {
-    expect(() => setup([null, null, null, null, null, null])).toThrow();
-  });
-
-  it('throws if there are no threadCPUDelta values', function () {
-    expect(() => setup(undefined)).toThrow();
-  });
-
-  it('removes the null values by finding the closest non-null threadCPUDelta value', function () {
+  it('sets the first value to zero and turns null values into 100% CPU', function () {
     // Testing the case where only the values in the middle are null.
-    const { processedThread: processedThread1 } = setup([
-      0.1,
+    const { cpuRatio: cpuRatio1 } = setup([
+      null,
+      0.1 * MS_TO_NS_MULTIPLIER,
       null,
       null,
       null,
       null,
-      0.2,
+      0.2 * MS_TO_NS_MULTIPLIER,
     ]);
-    expect(processedThread1.samples.threadCPUDelta).toEqual([
-      0.1, 0.1, 0.1, 0.2, 0.2, 0.2,
-    ]);
+    expect(cpuRatio1).toEqual([0, 0.1, 1, 1, 1, 1, 0.2]);
 
     // Testing the case where the values at the start are null.
-    const { processedThread: processedThread2 } = setup([null, null, 0.1]);
-    expect(processedThread2.samples.threadCPUDelta).toEqual([0.1, 0.1, 0.1]);
+    const { cpuRatio: cpuRatio2 } = setup([
+      null,
+      null,
+      null,
+      0.1 * MS_TO_NS_MULTIPLIER,
+    ]);
+    expect(cpuRatio2).toEqual([0, 1, 1, 0.1]);
 
     // Testing the case where the values at the end are null.
-    const { processedThread: processedThread3 } = setup([0.1, null, null]);
-    expect(processedThread3.samples.threadCPUDelta).toEqual([0.1, 0.1, 0.1]);
-
-    // If there are values in either side of a null sample with the same distance,
-    // pick the latter one.
-    const { processedThread: processedThread4 } = setup([0.1, null, 0.2]);
-    expect(processedThread4.samples.threadCPUDelta).toEqual([0.1, 0.2, 0.2]);
+    // This does not happen in profiles from Firefox - Firefox only leaves values
+    // at the start null (the first one is always null, and the 2nd to nth values
+    // may be null for samples collected by the base profiler (bug 1756519)).
+    const { cpuRatio: cpuRatio3 } = setup([
+      0,
+      0.1 * MS_TO_NS_MULTIPLIER,
+      null,
+      null,
+    ]);
+    expect(cpuRatio3).toEqual([0, 0.1, 1, 1]);
   });
 
   it('processes Linux timing values and caps them to 100% if they are more than the interval values', function () {
-    // Interval is in the ms values and Linux uses ns for threadCPUDelta values.
+    // Interval is in the ms values and Linux uses ns for threadCPURatio values.
     const intervalMs = 1;
-    const { processedThread: processedThread1 } = setup(
+    const { cpuRatio: cpuRatio1 } = setup(
       [
+        0,
         0.5 * MS_TO_NS_MULTIPLIER, // <- Less than the interval
         0.7 * MS_TO_NS_MULTIPLIER, // <- Less than the interval
         1 * MS_TO_NS_MULTIPLIER, // <- Equal to the interval, should be fine
@@ -89,20 +84,22 @@ describe('processThreadCPUDelta', function () {
       intervalMs
     );
 
-    expect(processedThread1.samples.threadCPUDelta).toEqual([
-      0.5 * MS_TO_NS_MULTIPLIER, // <- not changed
-      0.7 * MS_TO_NS_MULTIPLIER, // <- not changed
-      1 * MS_TO_NS_MULTIPLIER, // <- not changed
-      1 * MS_TO_NS_MULTIPLIER, // <- capped to 100%
-      1 * MS_TO_NS_MULTIPLIER, // <- capped to 100%
+    expect(cpuRatio1).toEqual([
+      0,
+      0.5, // <- not changed
+      0.7, // <- not changed
+      1, // <- not changed
+      1, // <- capped to 100%
+      1, // <- capped to 100%
     ]);
   });
 
   it('processes macOS timing values and caps them to 100% if they are more than the interval values', function () {
-    // Interval is in the ms values and macOS uses µs for threadCPUDelta values.
+    // Interval is in the ms values and macOS uses µs for threadCPURatio values.
     const intervalMs = 1;
-    const { processedThread: processedThread1 } = setup(
+    const { cpuRatio: cpuRatio1 } = setup(
       [
+        0,
         0.5 * MS_TO_US_MULTIPLIER, // <- Less than the interval
         0.7 * MS_TO_US_MULTIPLIER, // <- Less than the interval
         1 * MS_TO_US_MULTIPLIER, // <- Equal to the interval, should be fine
@@ -113,19 +110,21 @@ describe('processThreadCPUDelta', function () {
       intervalMs
     );
 
-    expect(processedThread1.samples.threadCPUDelta).toEqual([
-      0.5 * MS_TO_US_MULTIPLIER, // <- not changed
-      0.7 * MS_TO_US_MULTIPLIER, // <- not changed
-      1 * MS_TO_US_MULTIPLIER, // <- not changed
-      1 * MS_TO_US_MULTIPLIER, // <- capped to 100%
-      1 * MS_TO_US_MULTIPLIER, // <- capped to 100%
+    expect(cpuRatio1).toEqual([
+      0,
+      0.5, // <- not changed
+      0.7, // <- not changed
+      1, // <- not changed
+      1, // <- capped to 100%
+      1, // <- capped to 100%
     ]);
   });
 
   it('does not process the Windows values for 100% capping because they are not timing values', function () {
     // Use the ns conversion multiplier to imitate the worst case.
     const intervalMs = 1;
-    const threadCPUDelta = [
+    const threadCPURatio = [
+      0,
       0.5 * MS_TO_NS_MULTIPLIER,
       0.7 * MS_TO_NS_MULTIPLIER,
       1 * MS_TO_NS_MULTIPLIER,
@@ -133,28 +132,21 @@ describe('processThreadCPUDelta', function () {
       23 * MS_TO_NS_MULTIPLIER,
       123123 * MS_TO_NS_MULTIPLIER,
     ];
-    const { processedThread: processedThread1 } = setup(
-      threadCPUDelta,
+    const { cpuRatio: cpuRatio1 } = setup(
+      threadCPURatio,
       'variable CPU cycles',
       intervalMs
     );
 
-    // It shouldn't change the values!
-    expect(processedThread1.samples.threadCPUDelta).toEqual(threadCPUDelta);
-  });
-
-  it('processes the timing values and caps the first element correctly if it exceeds the interval', function () {
-    // Testing the case where only the values in the middle are null.
-    const interval = 1;
-    const { processedThread: processedThread1 } = setup(
-      [2 * MS_TO_NS_MULTIPLIER, 0.5 * MS_TO_NS_MULTIPLIER],
-      'ns',
-      interval
-    );
-
-    expect(processedThread1.samples.threadCPUDelta).toEqual([
-      interval * MS_TO_NS_MULTIPLIER,
-      0.5 * MS_TO_NS_MULTIPLIER,
+    // 123123 is the max value, everything should be based on it
+    expect(cpuRatio1).toEqual([
+      0,
+      0.5 / 123123,
+      0.7 / 123123,
+      1 / 123123,
+      1.2 / 123123,
+      23 / 123123,
+      1,
     ]);
   });
 });

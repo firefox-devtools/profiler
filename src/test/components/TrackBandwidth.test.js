@@ -62,19 +62,20 @@ describe('TrackBandwidth', function () {
     );
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
+    const sampleTimes = ensureExists(thread.samples.time);
     // Changing one of the sample times, so we can test different intervals.
-    thread.samples.time[1] = 1.5; // It was 1 before.
+    sampleTimes[1] = 1.5; // It was 1 before.
     // Ensure some samples are very close to each other, to exercise
     // the max min decimation algorithm.
-    for (let i = 7; i < thread.samples.time.length - 1; ++i) {
-      thread.samples.time[i] = 7 + i / 100;
+    for (let i = 7; i < thread.samples.length - 1; ++i) {
+      sampleTimes[i] = 7 + i / 100;
     }
     profile.counters = [
       getCounterForThreadWithSamples(
         thread,
         threadIndex,
         {
-          time: thread.samples.time.slice(),
+          time: sampleTimes.slice(),
           // Bandwidth usage numbers. They are bytes.
           count: [
             10000, 40000, 50000, 100000, 2000000, 5000000, 30000, 1000000,
@@ -158,10 +159,36 @@ describe('TrackBandwidth', function () {
     expect(getTooltipContents()).toBeFalsy();
   });
 
-  it('has a tooltip that matches the snapshot', function () {
-    const { moveMouseAtCounter, getTooltipContents } = setup();
+  it('has a tooltip that has all the necessary information', function () {
+    const { moveMouseAtCounter } = setup();
     moveMouseAtCounter(4, 0.5);
-    expect(getTooltipContents()).toMatchSnapshot();
+
+    // Note: Fluent adds isolation characters \u2068 and \u2069 around variables.
+    expect(
+      screen.getByText('Transfer speed for this sample:')
+    ).toBeInTheDocument();
+    expect(screen.getByText(/speed/).nextSibling).toHaveTextContent(
+      '4.66GB\u2069 per second'
+    );
+
+    expect(
+      screen.getByText('read/write operations since the previous sample:')
+    ).toBeInTheDocument();
+    expect(screen.getByText(/operations/).nextSibling).toHaveTextContent('0');
+
+    expect(
+      screen.getByText('Data transferred up to this time:')
+    ).toBeInTheDocument();
+    expect(screen.getByText(/transferred up to/).nextSibling).toHaveTextContent(
+      /6.86MB\u2069 \(\u2068\d+(\.\d+)?\u2069 g CO₂e\)/
+    );
+
+    expect(
+      screen.getByText('Data transferred in the visible range:')
+    ).toBeInTheDocument();
+    expect(screen.getByText(/visible range/).nextSibling).toHaveTextContent(
+      /7.97MB\u2069 \(\u2068\d+(\.\d+)?\u2069 g CO₂e\)/
+    );
   });
 
   it('draws a dot on the graph', function () {
@@ -205,10 +232,10 @@ describe('TrackBandwidth', function () {
       '95.4MB\u2069 per second'
     );
     expect(screen.getByText(/visible range:/).nextSibling).toHaveTextContent(
-      '7.97MB\u2069 (\u20681.6\u2069 g CO₂e)'
+      /7.97MB\u2069 \(\u2068\d+(\.\d+)?\u2069 g CO₂e\)/
     );
     expect(
       screen.getByText(/current selection:/).nextSibling
-    ).toHaveTextContent('4.77MB\u2069 (\u20680.94\u2069 g CO₂e)');
+    ).toHaveTextContent(/4.77MB\u2069 \(\u2068\d+(\.\d+)?\u2069 g CO₂e\)/);
   });
 });

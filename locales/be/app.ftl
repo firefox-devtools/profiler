@@ -30,6 +30,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = Немагчыма імпартаваць профіль.
 AppViewRouter--error-unpublished = Не ўдалося атрымаць профіль з { -firefox-brand-name }.
 AppViewRouter--error-from-file = Не ўдалося прачытаць файл або разабраць профіль у ім.
 AppViewRouter--error-local = Яшчэ не рэалізавана.
@@ -109,6 +110,7 @@ CallNodeContextMenu--searchfox = Шукаць назву функцыі у Searc
 CallNodeContextMenu--copy-function-name = Капіяваць назву функцыі
 CallNodeContextMenu--copy-script-url = Капіяваць URL-адрас скрыпту
 CallNodeContextMenu--copy-stack = Капіяваць стэк
+CallNodeContextMenu--show-the-function-in-devtools = Паказаць функцыю ў DevTools
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -160,6 +162,46 @@ CallTree--inlining-badge = (убудаваны)
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Выберыце вузел, каб паказаць інфармацыю аб ім.
+CallTreeSidebar--call-node-details = Падрабязнасці вузла выкліку
+
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
+CallTreeSidebar--traced-running-time =
+    .label = Асочаны час працы
+CallTreeSidebar--traced-self-time =
+    .label = Асочаны ўласны час
+CallTreeSidebar--running-time =
+    .label = Час працы
+CallTreeSidebar--self-time =
+    .label = Уласны час
+CallTreeSidebar--running-samples =
+    .label = Выкананыя ўзоры
+CallTreeSidebar--self-samples =
+    .label = Уласныя ўзоры
+CallTreeSidebar--running-size =
+    .label = Выкананы памер
+CallTreeSidebar--self-size =
+    .label = Уласны памер
+CallTreeSidebar--categories = Катэгорыі
+CallTreeSidebar--implementation = Рэалізацыя
+CallTreeSidebar--running-milliseconds = Выкананыя мілісекунды
+CallTreeSidebar--running-sample-count = Колькасць выкананых узораў
+CallTreeSidebar--running-bytes = Выкананыя байты
+CallTreeSidebar--self-milliseconds = Уласныя мілісекунды
+CallTreeSidebar--self-sample-count = Колькасць уласных узораў
+CallTreeSidebar--self-bytes = Уласныя байты
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -278,6 +320,15 @@ Home--load-files-from-other-tools2 =
     <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>,
     панэль прадукцыйнасці Chrome, <androidstudio>Android Studio</androidstudio> або
     любы файл, які выкарыстоўвае фарматы <dhat>dhat</dhat> або <traceevent>Google Trace Event</traceevent>. <write>Даведайцеся, як напісаць свой уласны імпарцёр</write>.
+Home--install-chrome-extension = Усталяваць пашырэнне Chrome
+Home--chrome-extension-instructions =
+    Выкарыстоўвайце пашырэнне <a>{ -profiler-brand-name } для Chrome</a>
+    каб захапіць профілі прадукцыйнасці ў Chrome і прааналізаваць іх
+    у { -profiler-brand-name }. Усталюйце пашырэнне з інтэрнэт-крамы Chrome.
+Home--chrome-extension-recording-instructions =
+    Пасля ўсталявання выкарыстоўвайце значок пашырэння
+    на панэлі інструментаў або цэтлікі для запуску і спынення прафілявання.
+    Вы таксама можаце экспартаваць профілі і загрузіць іх тут для аналізу.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -593,6 +644,14 @@ NumberFormat--short-date = { SHORTDATE($date) }
 
 PanelSearch--search-field-hint = Вы ведаеце, што для пошуку па некалькіх тэрмінах можна выкарыстоўваць коску (,)?
 
+## Profile Name Button
+
+ProfileName--edit-profile-name-button =
+    .title = Змяніць назву профілю
+ProfileName--edit-profile-name-input =
+    .title = Змяніць назву профілю
+    .aria-label = Назва профілю
+
 ## Profile Delete Button
 
 # This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
@@ -640,6 +699,7 @@ ProfileFilterNavigator--full-range-with-duration = Поўны дыяпазон (
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-from-post-message = Імпарт і апрацоўка профілю…
 ProfileLoaderAnimation--loading-unpublished = Імпарт профілю непасрэдна з { -firefox-brand-name }…
 ProfileLoaderAnimation--loading-from-file = Чытанне файла і апрацоўка профілю…
 ProfileLoaderAnimation--loading-local = Яшчэ не рэалізавана.
@@ -713,6 +773,13 @@ TabBar--marker-table-tab = Маркерная табліца
 TabBar--network-tab = Сетка
 TabBar--js-tracer-tab = JS Tracer
 
+## TabSelectorMenu
+## This component is a context menu that's opened when you click on the root
+## range at the top left corner for profiler analysis view. It's used to switch
+## between tabs that were captured in the profile.
+
+TabSelectorMenu--all-tabs-and-windows = Усе карткі і вокны
+
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
@@ -729,6 +796,10 @@ TrackContextMenu--hide-other-screenshots-tracks = Схаваць дарожкі 
 TrackContextMenu--hide-track = Схаваць “{ $trackName }”
 TrackContextMenu--show-all-tracks = Паказаць усе дарожкі
 TrackContextMenu--show-local-tracks-in-process = Паказаць усе дарожкі ў гэтым працэсе
+# This is used as the context menu item to hide all tracks of the selected track's type.
+# Variables:
+#   $type (String) - Name of the type of selected track to hide.
+TrackContextMenu--hide-all-tracks-by-selected-track-type = Схаваць усе трэкі тыпу “{ $type }”
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Паказаць усе адпаведныя дарожкі
@@ -754,6 +825,7 @@ TrackNameButton--hide-process =
 
 TrackMemoryGraph--relative-memory-at-this-time = адносная памяць на гэты момант
 TrackMemoryGraph--memory-range-in-graph = дыяпазон памяці ў графіку
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = размеркаванні і вызваленні з моманту папярэдняга ўзору
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -780,6 +852,21 @@ TrackPower--tooltip-power-watt = { $value } Вт
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } мВт
     .label = Магутнасць
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-kilowatt = { $value } кВт
+    .label = Сярэдняя магутнасць у бягучым вылучэнні
+# This is used in the tooltip when the power value uses the watt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-watt = { $value } Вт
+    .label = Сярэдняя магутнасць у бягучым вылучэнні
+# This is used in the tooltip when the instant power value uses the milliwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-milliwatt = { $value } мВт
+    .label = Сярэдняя магутнасць у бягучым вылучэнні
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.
 # Variables:
@@ -855,6 +942,27 @@ TrackBandwidthGraph--speed = { $value } у секунду
 #   $value (String) - how many read or write operations were performed since the previous sample
 TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value }
     .label = аперацый уводу/вываду з часу папярэдняй выбаркі
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data until the hovered time.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--cumulative-bandwidth-at-this-time = { $value } ({ $carbonValue } г CO₂e)
+    .label = Звесткі, перасланыя да гэтага часу
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data during the visible time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-graph = { $value } ({ $carbonValue } г CO₂e)
+    .label = Звесткі, перасланыя ў бачным прамежку
+# This is used in the tooltip of the bandwidth track when a range is selected.
+# Variables:
+#   $value (String) - the total of transfered data during the selected time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-range = { $value } ({ $carbonValue } г CO₂e)
+    .label = Звесткі, перасланыя ў бягучым вылучэнні
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

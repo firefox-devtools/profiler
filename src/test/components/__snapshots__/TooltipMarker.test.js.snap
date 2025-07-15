@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 1`] = `
 <div
@@ -414,7 +414,7 @@ exports[`TooltipMarker renders properly network markers where content type is bl
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase tooltipNetworkPhaseEmpty"
-      style="margin-left: 83.7404047452896%;"
+      style="margin-left: 83.7404047452896%; margin-right: 7.105427357601002e-15%;"
     />
   </div>
 </div>
@@ -600,7 +600,7 @@ exports[`TooltipMarker renders properly network markers where content type is mi
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase tooltipNetworkPhaseEmpty"
-      style="margin-left: 83.7404047452896%;"
+      style="margin-left: 83.7404047452896%; margin-right: 7.105427357601002e-15%;"
     />
   </div>
 </div>
@@ -791,7 +791,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part 2
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase"
-      style="margin-left: 95.9090909090909%; opacity: 0.5;"
+      style="margin-left: 95.9090909090909%; margin-right: 2.6645352591003757e-15%; opacity: 0.5;"
     />
     <h3
       class="tooltipNetworkTitle3"
@@ -860,7 +860,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part 2
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase tooltipNetworkPhaseEmpty"
-      style="margin-left: 83.7404047452896%;"
+      style="margin-left: 83.7404047452896%; margin-right: 7.105427357601002e-15%;"
     />
   </div>
 </div>
@@ -1056,7 +1056,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part c
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase tooltipNetworkPhaseEmpty"
-      style="margin-left: 83.7404047452896%;"
+      style="margin-left: 83.7404047452896%; margin-right: 7.105427357601002e-15%;"
     />
   </div>
 </div>
@@ -1310,7 +1310,7 @@ exports[`TooltipMarker renders properly normal network markers 1`] = `
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase tooltipNetworkPhaseEmpty"
-      style="margin-left: 83.69368112707495%;"
+      style="margin-left: 83.69368112707495%; margin-right: -3.552713678800501e-15%;"
     />
   </div>
 </div>
@@ -2983,10 +2983,17 @@ exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = 
     <div
       class="tooltipLabel"
     >
-      Heap size (pre - post)
+      GC heap size (pre - post)
       :
     </div>
     46.1MB - 36.3MB
+    <div
+      class="tooltipLabel"
+    >
+      Malloc heap size (pre - post)
+      :
+    </div>
+    23.1MB - 12.1MB
     <div
       class="tooltipLabel"
     >
@@ -3140,24 +3147,17 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
     <div
       class="tooltipLabel"
     >
-      Tenuring allocation rate
-      :
-    </div>
-    190MB/s
-    <div
-      class="tooltipLabel"
-    >
-      Tenuring allocation rate
-      :
-    </div>
-    23.1M/s
-    <div
-      class="tooltipLabel"
-    >
       Strings deduplicated when tenuring
       :
     </div>
     1,234 / 11.2K (11%)
+    <div
+      class="tooltipLabel"
+    >
+      Tenured allocation rate
+      :
+    </div>
+    181MB/s
     <div
       class="tooltipLabel"
     >
@@ -4688,17 +4688,6 @@ exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`]
       :
     </div>
     foobar
-    <div
-      class="tooltipLabel"
-    >
-      Marker
-      :
-    </div>
-    <div
-      class="tooltipDetailsDescription"
-    >
-      UserTiming
-    </div>
     <div
       class="tooltipLabel"
     >
