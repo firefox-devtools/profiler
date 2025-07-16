@@ -6,12 +6,6 @@
 ### Localization for the App UI of Profiler
 
 
-# Naming convention for l10n IDs: "ComponentName--string-summary".
-# This allows us to minimize the risk of conflicting IDs throughout the app.
-# Please sort alphabetically by (component name), and
-# keep strings in order of appearance.
-
-
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
@@ -83,10 +77,6 @@ CallNodeContextMenu--copy-script-url = Betik URL’sini kopyala
 CallNodeContextMenu--copy-stack = Yığını kopyala
 CallNodeContextMenu--show-the-function-in-devtools = Fonksiyonu geliştirici araçlarında göster
 
-## CallTree
-## This is the component for Call Tree panel.
-
-
 ## Call tree "badges" (icons) with tooltips
 ##
 ## These inlining badges are displayed in the call tree in front of some
@@ -142,11 +132,6 @@ CompareHome--form-label-profile1 = Profil 1:
 CompareHome--form-label-profile2 = Profil 2:
 CompareHome--submit-button =
     .value = Profilleri getir
-
-## DebugWarning
-## This is displayed at the top of the analysis page when the loaded profile is
-## a debug build of Firefox.
-
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
@@ -211,7 +196,7 @@ Home--instructions-content =
     Ancak mevcut profiller herhangi bir modern tarayıcıda görüntülenebilir.
 Home--record-instructions-start-stop = Profillemeyi durdur ve başlat
 Home--record-instructions-capture-load = Profili yakala ve yükle
-Home--profiler-motto = Performans profili yakalayın. Analiz edin. Paylaşın. Web’i daha hızlı hale getirin.
+Home--profiler-motto = Performans profili kaydedin. Analiz edin. Paylaşın. Web’i daha hızlı hale getirin.
 Home--additional-content-title = Mevcut profilleri yükleyin
 Home--additional-content-content = Profil dosyasını buraya <strong>sürükleyip bırakarak</strong> yükleyebilirsiniz ya da:
 Home--compare-recordings-info = Ayrıca kayıtları karşılaştırabilirsiniz. <a>Karşılaştırma arayüzünü aç.</a>
@@ -223,10 +208,6 @@ Home--install-chrome-extension = Chrome uzantısını yükle
 
 IdleSearchField--search-input =
     .placeholder = Filtre terimlerini girin
-
-## JsTracerSettings
-## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
-
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
@@ -278,11 +259,6 @@ MarkerContextMenu--select-the-receiver-thread = “<strong>{ $threadName }</stro
 # Variables:
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = “<strong>{ $threadName }</strong>” gönderen iş parçacığını seç
-
-## MarkerFiltersContextMenu
-## This is the menu when filter icon is clicked in Marker Chart and Marker Table
-## panels.
-
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
