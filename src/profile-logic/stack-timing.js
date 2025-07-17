@@ -27,22 +27,52 @@ import type { CallNodeInfo } from './call-node-info';
  * depth. Each object is a table that contains the the start time and end time in
  * milliseconds, and the stack index that points into the stack table.
  *
+ * Here is a tree example:
+ *
+ * This table shows off how a stack chart gets filtered to JS only, where the number is
+ * the stack index, and P is platform code, and J javascript.
+ *
+ *   0-10-20-30-40-50-60-70-80-90-91 <- Timing (ms)
+ *    0-----1--2--3--4--5--6--7--8   <- same width indexes
+ *  ================================
+ *     0P 0P 0P 0P 0P 0P 0P 0P 0P  |
+ *     1P 1P 1P    1P 1P 1P 1P 1P  |
+ *     2P 2P 3P       4J 4J 4J 4J  |
+ *                       5J 5J     |
+ *                          6P     |
+ *                          7P     |
+ *                          8J     |
+ *
+ * Note that stacks 10 and 20 in the unfiltered tree are the same, therefore
+ * they'll form just one "same width" stack.
+ * It's easier to think of the "same widths" indexes as the space between each
+ * new stack.
+ *
  * stackTimingByDepth Example:
  * [
  *   // This first object represents the first box at the base of the chart. It only
  *   // contains a single stack frame to draw, starting at 10ms, ending at 100ms. It
  *   // points to the stackIndex 0.
  *
- *   {start: [10], end: [100], stack: [0]}
+ *   {start: [10], end: [91], sameWidthsStart: [0], sameWidthsEnd: [8], stack: [0], length: 1},
  *
- *   // This next object represents 3 boxes to draw, the first box being stack 1 in the
- *   // stack table, and it starts at 20ms, and ends at 40ms.
+ *   // This next object represents 2 boxes to draw, the first box being stack 1 in the
+ *   // stack table, and it starts at 10ms, and ends at 40ms.
+ *   {start: [10, 50], end: [40, 91], sameWidthsStart: [0, 3], sameWidthsEnd: [2, 8], stack: [1, 1], length: 2},
  *
- *   {start: [20, 40, 60], end: [40, 60, 80], stack: [1, 2, 3]}
- *   {start: [20, 40, 60], end: [40, 60, 80], stack: [34, 59, 72]}
+ *   // This next object represents 3 boxes to draw, the first box being stack 2 in the
+ *   // stack table, and it starts at 10ms, and ends at 30ms.
+ *   {start: [10, 30, 60], end: [30, 40, 91], sameWidthsStart: [0, 1, 4], sameWidthsEnd: [1, 2, 8], stack: [2, 3, 4], length: 3},
+ *   {start: [70], end: [90], sameWidthsStart: [5], sameWidthsEnd: [7], stack: [5], length: 1},
  *   ...
- *   {start: [25, 45], end: [35, 55], stack: [123, 159]}
  * ]
+ *
+ * As a result of the computation, getStackTimingByDepth also returns a mapping
+ * between the same widths indexes and the corresponding times. This is a normal
+ * array. In the previous example, it would have 8 elements and look like this:
+ *    0   1   2   3   4   5   6   7   8   <- indexes
+ *   [10, 30, 40, 50, 60, 70, 80, 90, 91] <- timings
+ * This array makes it easy to find the boxes to draw for a preview selection.
  */
 
 export type StackTimingDepth = number;
@@ -51,11 +81,22 @@ export type IndexIntoStackTiming = number;
 export type StackTiming = {|
   start: Milliseconds[],
   end: Milliseconds[],
+  // These 2 properties sameWidthsStart and sameWidthsEnd increments at each
+  // "tick", that is at each stack change. They'll make it possible to draw a
+  // stack chart where each different stack has the same width, and can better
+  // show very short changes.
+  sameWidthsStart: number[],
+  sameWidthsEnd: number[],
   callNode: IndexIntoCallNodeTable[],
   length: number,
 |};
 
 export type StackTimingByDepth = Array<StackTiming>;
+export type SameWidthsIndexToTimestampMap = number[];
+export type StackTimingByDepthWithMap = {|
+  timings: StackTimingByDepth,
+  sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap,
+|};
 
 /**
  * Build a StackTimingByDepth table from a given thread.
@@ -66,7 +107,7 @@ export function getStackTimingByDepth(
   callNodeInfo: CallNodeInfo,
   maxDepthPlusOne: number,
   interval: Milliseconds
-): StackTimingByDepth {
+): StackTimingByDepthWithMap {
   const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
   const {
     prefix: callNodeTablePrefixColumn,
@@ -76,12 +117,16 @@ export function getStackTimingByDepth(
   const stackTimingByDepth = Array.from({ length: maxDepthPlusOne }, () => ({
     start: [],
     end: [],
+    sameWidthsStart: [],
+    sameWidthsEnd: [],
     callNode: [],
     length: 0,
   }));
 
+  const sameWidthsIndexToTimestampMap = [];
+
   if (samples.length === 0) {
-    return stackTimingByDepth;
+    return { timings: stackTimingByDepth, sameWidthsIndexToTimestampMap };
   }
 
   // Overview of the algorithm:
@@ -106,13 +151,16 @@ export function getStackTimingByDepth(
   let deepestOpenBoxCallNodeIndex = -1;
   let deepestOpenBoxDepth = -1;
   const openBoxStartTimeByDepth = new Float64Array(maxDepthPlusOne);
+  const openBoxStartTickByDepth = new Float64Array(maxDepthPlusOne);
 
+  let currentStackTick = 0;
   for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
-    const sampleTime = samples.time[sampleIndex];
     const thisCallNodeIndex = sampleCallNodes[sampleIndex] ?? -1;
     if (thisCallNodeIndex === deepestOpenBoxCallNodeIndex) {
       continue;
     }
+
+    const sampleTime = samples.time[sampleIndex];
 
     // Phase 1: Commit open boxes which are not shared by the current call node,
     // i.e. any boxes whose call nodes are not ancestors of the current call node.
@@ -135,10 +183,13 @@ export function getStackTimingByDepth(
       // deepestOpenBoxCallNodeIndex is *not* an ancestors of thisCallNodeIndex.
       // Commit this box.
       const start = openBoxStartTimeByDepth[deepestOpenBoxDepth];
+      const startStackTick = openBoxStartTickByDepth[deepestOpenBoxDepth];
       const stackTimingForThisDepth = stackTimingByDepth[deepestOpenBoxDepth];
       const index = stackTimingForThisDepth.length++;
       stackTimingForThisDepth.start[index] = start;
       stackTimingForThisDepth.end[index] = sampleTime;
+      stackTimingForThisDepth.sameWidthsStart[index] = startStackTick;
+      stackTimingForThisDepth.sameWidthsEnd[index] = currentStackTick;
       stackTimingForThisDepth.callNode[index] = deepestOpenBoxCallNodeIndex;
       deepestOpenBoxCallNodeIndex =
         callNodeTablePrefixColumn[deepestOpenBoxCallNodeIndex];
@@ -154,10 +205,13 @@ export function getStackTimingByDepth(
       while (deepestOpenBoxDepth < thisCallNodeDepth) {
         deepestOpenBoxDepth++;
         openBoxStartTimeByDepth[deepestOpenBoxDepth] = sampleTime;
+        openBoxStartTickByDepth[deepestOpenBoxDepth] = currentStackTick;
       }
     }
 
     deepestOpenBoxCallNodeIndex = thisCallNodeIndex;
+    sameWidthsIndexToTimestampMap[currentStackTick] = sampleTime;
+    currentStackTick++;
   }
 
   // We've processed all samples.
@@ -167,13 +221,17 @@ export function getStackTimingByDepth(
     const stackTimingForThisDepth = stackTimingByDepth[deepestOpenBoxDepth];
     const index = stackTimingForThisDepth.length++;
     const start = openBoxStartTimeByDepth[deepestOpenBoxDepth];
+    const startStackTick = openBoxStartTickByDepth[deepestOpenBoxDepth];
     stackTimingForThisDepth.start[index] = start;
     stackTimingForThisDepth.end[index] = endTime;
+    stackTimingForThisDepth.sameWidthsStart[index] = startStackTick;
+    stackTimingForThisDepth.sameWidthsEnd[index] = currentStackTick;
     stackTimingForThisDepth.callNode[index] = deepestOpenBoxCallNodeIndex;
     deepestOpenBoxCallNodeIndex =
       callNodeTablePrefixColumn[deepestOpenBoxCallNodeIndex];
     deepestOpenBoxDepth--;
   }
+  sameWidthsIndexToTimestampMap[currentStackTick] = endTime;
 
-  return stackTimingByDepth;
+  return { timings: stackTimingByDepth, sameWidthsIndexToTimestampMap };
 }

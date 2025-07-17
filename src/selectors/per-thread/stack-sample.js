@@ -385,7 +385,7 @@ export function getStackAndSampleSelectorsPerThread(
       }
     );
 
-  const getStackTimingByDepth: Selector<StackTiming.StackTimingByDepth> =
+  const _getStackTimingByDepthWithMap: Selector<StackTiming.StackTimingByDepthWithMap> =
     createSelector(
       threadSelectors.getFilteredCtssSamples,
       _getSampleIndexToNonInvertedCallNodeIndexForFilteredCtssThread,
@@ -394,6 +394,13 @@ export function getStackAndSampleSelectorsPerThread(
       ProfileSelectors.getProfileInterval,
       StackTiming.getStackTimingByDepth
     );
+  const getStackTimingByDepth: Selector<StackTiming.StackTimingByDepth> = (
+    state
+  ) => _getStackTimingByDepthWithMap(state).timings;
+  const getSameWidthsIndexToTimestampMap: Selector<
+    StackTiming.SameWidthsIndexToTimestampMap,
+  > = (state) =>
+    _getStackTimingByDepthWithMap(state).sameWidthsIndexToTimestampMap;
 
   const getFlameGraphRows: Selector<FlameGraph.FlameGraphRows> = createSelector(
     (state) => getCallNodeInfo(state).getNonInvertedCallNodeTable(),
@@ -448,6 +455,7 @@ export function getStackAndSampleSelectorsPerThread(
     getTracedTiming,
     getTracedSelfAndTotalForSelectedCallNode,
     getStackTimingByDepth,
+    getSameWidthsIndexToTimestampMap,
     getFilteredCallNodeMaxDepthPlusOne,
     getFlameGraphTiming,
     getRightClickedCallNodeIndex,

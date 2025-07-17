@@ -20,11 +20,13 @@ import {
   getInnerWindowIDToPageMap,
   getProfileUsesMultipleStackTypes,
 } from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
+  getStackChartSameWidths,
   getShowUserTimings,
   getSelectedThreadsKey,
-} from '../../selectors/url-state';
+} from 'firefox-profiler/selectors/url-state';
+import type { SameWidthsIndexToTimestampMap } from 'firefox-profiler/profile-logic/stack-timing';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { StackChartEmptyReasons } from './StackChartEmptyReasons';
 import { ContextMenuTrigger } from '../shared/ContextMenuTrigger';
 import { StackSettings } from '../shared/StackSettings';
@@ -69,6 +71,7 @@ type StateProps = {|
   +weightType: WeightType,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +combinedTimingRows: CombinedTimingRows,
+  +sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap,
   +timeRange: StartEndRange,
   +interval: Milliseconds,
   +previewSelection: PreviewSelection,
@@ -82,6 +85,7 @@ type StateProps = {|
   +userTimings: MarkerIndex[],
   +displayStackType: boolean,
   +hasFilteredCtssSamples: boolean,
+  +useStackChartSameWidths: boolean,
 |};
 
 type DispatchProps = {|
@@ -202,6 +206,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       thread,
       threadsKey,
       combinedTimingRows,
+      sameWidthsIndexToTimestampMap,
       timeRange,
       interval,
       previewSelection,
@@ -217,6 +222,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       weightType,
       displayStackType,
       hasFilteredCtssSamples,
+      useStackChartSameWidths,
     } = this.props;
 
     const maxViewportHeight = combinedTimingRows.length * STACK_FRAME_HEIGHT;
@@ -258,6 +264,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   innerWindowIDToPageMap,
                   threadsKey,
                   combinedTimingRows,
+                  sameWidthsIndexToTimestampMap,
                   getMarker,
                   // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                   updatePreviewSelection,
@@ -275,6 +282,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   scrollToSelectionGeneration,
                   marginLeft: TIMELINE_MARGIN_LEFT,
                   displayStackType: displayStackType,
+                  useStackChartSameWidths,
                 }}
               />
             </div>
@@ -297,6 +305,8 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       // Use the raw WeightType here, as the stack chart does not use the call tree
       weightType: selectedThreadSelectors.getSamplesWeightType(state),
       combinedTimingRows,
+      sameWidthsIndexToTimestampMap:
+        selectedThreadSelectors.getSameWidthsIndexToTimestampMap(state),
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
       previewSelection: getPreviewSelection(state),
@@ -314,6 +324,7 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       displayStackType: getProfileUsesMultipleStackTypes(state),
       hasFilteredCtssSamples:
         selectedThreadSelectors.getHasFilteredCtssSamples(state),
+      useStackChartSameWidths: getStackChartSameWidths(state),
     };
   },
   mapDispatchToProps: {
