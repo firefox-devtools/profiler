@@ -189,7 +189,7 @@ export function formatGigaBytes(
         bytes / bytesPerGigabyte,
         significantDigits,
         maxFractionalDigits
-      ) + 'GB'
+      ) + ' GiB'
     );
   }
 
@@ -199,7 +199,7 @@ export function formatGigaBytes(
   const megabytes = bytes % bytesPerGigabyte;
   return (
     formatNumber((bytes - megabytes) / bytesPerGigabyte, significantDigits, 0) +
-    'GB' +
+    ' GiB' +
     ((megabytes > 0 && maxFractionalDigits > 0) || precision < bytesPerGigabyte
       ? ' ' + formatMegaBytes(megabytes, significantDigits, 0, precision)
       : '')
@@ -219,7 +219,7 @@ export function formatMegaBytes(
         bytes / bytesPerMegabyte,
         significantDigits,
         maxFractionalDigits
-      ) + 'MB'
+      ) + ' MiB'
     );
   }
 
@@ -229,7 +229,7 @@ export function formatMegaBytes(
   const kilobytes = bytes % bytesPerMegabyte;
   return (
     formatNumber((bytes - kilobytes) / bytesPerMegabyte, significantDigits, 0) +
-    'MB' +
+    ' MiB' +
     ((kilobytes > 0 && maxFractionalDigits > 0) || precision < bytesPerMegabyte
       ? ' ' + formatKiloBytes(kilobytes, significantDigits, 0, precision)
       : '')
@@ -249,7 +249,7 @@ export function formatKiloBytes(
         bytes / bytesPerKilobyte,
         significantDigits,
         maxFractionalDigits
-      ) + 'KB'
+      ) + ' KiB'
     );
   }
 
@@ -259,7 +259,7 @@ export function formatKiloBytes(
   const bytesOnly = bytes % bytesPerKilobyte;
   return (
     formatNumber((bytes - bytesOnly) / bytesPerKilobyte, significantDigits, 0) +
-    'KB' +
+    ' KiB' +
     ((bytesOnly > 0 && maxFractionalDigits > 0) || precision < bytesPerKilobyte
       ? ' ' + formatBytes(bytesOnly, significantDigits, 0, precision)
       : '')
@@ -275,7 +275,7 @@ export function formatBytes(
   if (bytes < 10000) {
     // Use singles up to 10,000.  I think 9,360B looks nicer than 9.36KB.
     // We use "0" for significantDigits because bytes will always be integers.
-    return formatNumber(bytes, 0) + 'B';
+    return formatNumber(bytes, 0) + ' B';
   } else if (bytes < 1024 ** 2) {
     return formatKiloBytes(
       bytes,
