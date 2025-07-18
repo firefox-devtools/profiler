@@ -27,7 +27,11 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
-        }
+          fetchJSSourceFromBrowser: async (_sourceId: number) => {
+            throw new Error('No browser connection');
+          },
+        },
+        null
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -68,6 +72,9 @@ describe('fetchSource', function () {
     ) => {
       throw new Error('No browser connection');
     };
+    const fetchJSSourceFromBrowser = async (_sourceId: number) => {
+      throw new Error('No browser connection');
+    };
 
     const archiveCache = new Map();
 
@@ -77,7 +84,12 @@ describe('fetchSource', function () {
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
-        { fetchUrlResponse, queryBrowserSymbolicationApi }
+        {
+          fetchUrlResponse,
+          queryBrowserSymbolicationApi,
+          fetchJSSourceFromBrowser,
+        },
+        null
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -95,7 +107,12 @@ describe('fetchSource', function () {
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
-        { fetchUrlResponse, queryBrowserSymbolicationApi }
+        {
+          fetchUrlResponse,
+          queryBrowserSymbolicationApi,
+          fetchJSSourceFromBrowser,
+        },
+        null
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -111,7 +128,12 @@ describe('fetchSource', function () {
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
-        { fetchUrlResponse, queryBrowserSymbolicationApi }
+        {
+          fetchUrlResponse,
+          queryBrowserSymbolicationApi,
+          fetchJSSourceFromBrowser,
+        },
+        null
       )
     ).toEqual({
       type: 'ERROR',
@@ -145,7 +167,11 @@ describe('fetchSource', function () {
             // Shouldn't be called anyway because we're not providing an AddressProof.
             throw new Error('No browser connection');
           },
-        }
+          fetchJSSourceFromBrowser: async (_sourceId: number) => {
+            throw new Error('No browser connection');
+          },
+        },
+        null
       )
     ).toEqual({
       type: 'ERROR',
@@ -188,7 +214,11 @@ describe('fetchSource', function () {
               source: `Fake source from browser symbolication API, for request JSON ${requestJson}`,
             });
           },
-        }
+          fetchJSSourceFromBrowser: async (_sourceId: number) => {
+            throw new Error('No browser connection');
+          },
+        },
+        null
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -238,7 +268,11 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
-        }
+          fetchJSSourceFromBrowser: async (_sourceId: number) => {
+            throw new Error('No browser connection');
+          },
+        },
+        null
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -288,7 +322,11 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
-        }
+          fetchJSSourceFromBrowser: async (_sourceId: number) => {
+            throw new Error('No browser connection');
+          },
+        },
+        null
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -336,7 +374,11 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
-        }
+          fetchJSSourceFromBrowser: async (_sourceId: number) => {
+            throw new Error('No browser connection');
+          },
+        },
+        null
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -366,7 +408,11 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
-        }
+          fetchJSSourceFromBrowser: async (_sourceId: number) => {
+            throw new Error('No browser connection');
+          },
+        },
+        null
       )
     ).toEqual({
       type: 'ERROR',
@@ -406,7 +452,11 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
-        }
+          fetchJSSourceFromBrowser: async (_sourceId: number) => {
+            throw new Error('No browser connection');
+          },
+        },
+        null
       )
     ).toEqual({
       type: 'ERROR',
@@ -438,7 +488,11 @@ describe('fetchSource', function () {
             }
             return '[Invalid \\ JSON}';
           },
-        }
+          fetchJSSourceFromBrowser: async (_sourceId: number) => {
+            throw new Error('No browser connection');
+          },
+        },
+        null
       )
     ).toEqual({
       type: 'ERROR',
@@ -483,7 +537,11 @@ describe('fetchSource', function () {
               hahaYouThoughtThereWouldBeSourceHereButNo: 42,
             });
           },
-        }
+          fetchJSSourceFromBrowser: async (_sourceId: number) => {
+            throw new Error('No browser connection');
+          },
+        },
+        null
       )
     ).toEqual({
       type: 'ERROR',
@@ -496,6 +554,105 @@ describe('fetchSource', function () {
           type: 'NO_KNOWN_CORS_URL',
         },
       ],
+    });
+  });
+
+  it('fetches JS source from browser with sourceId', async function () {
+    expect(
+      await fetchSource(
+        '/path/to/script.js',
+        'https://symbolication.services.mozilla.com',
+        null,
+        new Map(),
+        {
+          fetchUrlResponse: async (_url: string, _postData?: MixedObject) => {
+            throw new Error('Should not fetch from URL');
+          },
+          queryBrowserSymbolicationApi: async (
+            _path: string,
+            _requestJson: string
+          ) => {
+            throw new Error('Should not query symbolication API');
+          },
+          fetchJSSourceFromBrowser: async (sourceId: number) => {
+            if (sourceId === 42) {
+              return 'console.log("Hello from browser with sourceId 42");';
+            }
+            throw new Error(`Unexpected sourceId: ${sourceId}`);
+          },
+        },
+        42 // sourceId
+      )
+    ).toEqual({
+      type: 'SUCCESS',
+      source: 'console.log("Hello from browser with sourceId 42");',
+    });
+  });
+
+  it('handles fetch JS source from browser with invalid sourceId', async function () {
+    expect(
+      await fetchSource(
+        '/path/to/script.js',
+        'https://symbolication.services.mozilla.com',
+        null,
+        new Map(),
+        {
+          fetchUrlResponse: async (_url: string, _postData?: MixedObject) => {
+            throw new Error('Should not fetch from URL');
+          },
+          queryBrowserSymbolicationApi: async (
+            _path: string,
+            _requestJson: string
+          ) => {
+            throw new Error('Should not query symbolication API');
+          },
+          fetchJSSourceFromBrowser: async (sourceId: number) => {
+            throw new Error(`Source not found for sourceId: ${sourceId}`);
+          },
+        },
+        123 // sourceId
+      )
+    ).toEqual({
+      type: 'ERROR',
+      errors: [
+        {
+          type: 'BROWSER_API_ERROR',
+          apiErrorMessage: 'Source not found for sourceId: 123',
+        },
+      ],
+    });
+  });
+
+  it('falls back to other methods when fetchJSSourceFromBrowser fails', async function () {
+    expect(
+      await fetchSource(
+        'hg:hg.mozilla.org/mozilla-central:widget/cocoa/nsAppShell.mm:997f00815e6bc28806b75448c8829f0259d2cb28',
+        'https://symbolication.services.mozilla.com',
+        null,
+        new Map(),
+        {
+          fetchUrlResponse: async (url: string, _postData?: MixedObject) => {
+            const r = new Response(`Fallback response from ${url}`, {
+              status: 200,
+            });
+            return r;
+          },
+          queryBrowserSymbolicationApi: async (
+            _path: string,
+            _requestJson: string
+          ) => {
+            throw new Error('No browser connection');
+          },
+          fetchJSSourceFromBrowser: async (_sourceId: number) => {
+            throw new Error('Source not found in browser');
+          },
+        },
+        42 // sourceId - should still try browser first but fall back to URL fetch
+      )
+    ).toEqual({
+      type: 'SUCCESS',
+      source:
+        'Fallback response from https://hg.mozilla.org/mozilla-central/raw-file/997f00815e6bc28806b75448c8829f0259d2cb28/widget/cocoa/nsAppShell.mm',
     });
   });
 });

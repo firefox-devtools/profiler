@@ -748,6 +748,7 @@ export type NativeSymbolInfo = {|
  */
 export type BottomBoxInfo = {|
   libIndex: IndexIntoLibs | null,
+  sourceId: number | null,
   sourceFile: string | null,
   nativeSymbols: NativeSymbolInfo[],
 |};

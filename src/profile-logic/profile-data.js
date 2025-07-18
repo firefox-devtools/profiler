@@ -3267,7 +3267,8 @@ export function getOrCreateURIResource(
   scriptURI: string,
   resourceTable: ResourceTable,
   stringTable: StringTable,
-  originToResourceIndex: Map<string, IndexIntoResourceTable>
+  originToResourceIndex: Map<string, IndexIntoResourceTable>,
+  sourceIdStr: string | null
 ): IndexIntoResourceTable {
   // Figure out the origin and host.
   let origin;
@@ -3295,6 +3296,8 @@ export function getOrCreateURIResource(
     return resourceIndex;
   }
 
+  const sourceId = sourceIdStr ? parseInt(sourceIdStr, 10) : null;
+
   resourceIndex = resourceTable.length++;
   originToResourceIndex.set(origin, resourceIndex);
   if (host) {
@@ -3303,6 +3306,7 @@ export function getOrCreateURIResource(
     resourceTable.name[resourceIndex] = stringTable.indexForString(origin);
     resourceTable.host[resourceIndex] = stringTable.indexForString(host);
     resourceTable.type[resourceIndex] = resourceTypes.webhost;
+    resourceTable.sourceId[resourceIndex] = sourceId;
   } else {
     // This is a URL, but it doesn't point to something on the web, e.g. a
     // chrome url.
@@ -3310,6 +3314,7 @@ export function getOrCreateURIResource(
     resourceTable.name[resourceIndex] = stringTable.indexForString(scriptURI);
     resourceTable.host[resourceIndex] = null;
     resourceTable.type[resourceIndex] = resourceTypes.url;
+    resourceTable.sourceId[resourceIndex] = sourceId;
   }
   return resourceIndex;
 }
@@ -3890,6 +3895,7 @@ export function getBottomBoxInfoForCallNode(
     resource !== -1 && resourceTable.type[resource] === resourceTypes.library
       ? resourceTable.lib[resource]
       : null;
+  const sourceId = resource !== -1 ? resourceTable.sourceId[resource] : null;
   const nativeSymbolsForCallNode = getNativeSymbolsForCallNode(
     callNodeIndex,
     callNodeInfo,
@@ -3908,6 +3914,7 @@ export function getBottomBoxInfoForCallNode(
 
   return {
     libIndex,
+    sourceId,
     sourceFile,
     nativeSymbols: nativeSymbolInfosForCallNode,
   };

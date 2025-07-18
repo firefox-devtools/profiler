@@ -10,7 +10,11 @@ import type {
   SourceCodeStatus,
   Selector,
 } from 'firefox-profiler/types';
-import { getSourceViewFile, getAssemblyViewNativeSymbol } from './url-state';
+import {
+  getSourceViewFile,
+  getSourceViewSourceId,
+  getAssemblyViewNativeSymbol,
+} from './url-state';
 import { getProfileOrNull } from './profile';
 
 export const getSourceCodeCache: Selector<Map<string, SourceCodeStatus>> = (
@@ -21,7 +25,11 @@ export const getSourceViewCode: Selector<SourceCodeStatus | void> =
   createSelector(
     getSourceCodeCache,
     getSourceViewFile,
-    (sourceCodeCache, file) => (file ? sourceCodeCache.get(file) : undefined)
+    getSourceViewSourceId,
+    (sourceCodeCache, file, sourceId) =>
+      file
+        ? sourceCodeCache.get(`${file}${sourceId ? '-' + sourceId : ''}`)
+        : undefined
   );
 
 export const getAssemblyCodeCache: Selector<Map<string, AssemblyCodeStatus>> = (

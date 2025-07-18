@@ -344,6 +344,7 @@ type ProfileAction =
   | {|
       +type: 'UPDATE_BOTTOM_BOX',
       +libIndex: IndexIntoLibs | null,
+      +sourceId: number | null,
       +sourceFile: string | null,
       +nativeSymbol: NativeSymbolInfo | null,
       +allNativeSymbolsForInitiatingCallNode: NativeSymbolInfo[],
@@ -634,11 +635,21 @@ type L10nAction =
 
 type SourcesAction =
   | {| +type: 'SOURCE_CODE_LOADING_BEGIN_URL', file: string, url: string |}
-  | {| +type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION', file: string |}
-  | {| +type: 'SOURCE_CODE_LOADING_SUCCESS', file: string, code: string |}
+  | {|
+      +type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION',
+      file: string,
+      sourceId: number | null,
+    |}
+  | {|
+      +type: 'SOURCE_CODE_LOADING_SUCCESS',
+      file: string,
+      sourceId: number | null,
+      code: string,
+    |}
   | {|
       +type: 'SOURCE_CODE_LOADING_ERROR',
       file: string,
+      sourceId: number | null,
       errors: SourceCodeLoadingError[],
     |};
 

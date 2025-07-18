@@ -70,6 +70,8 @@ export const getShowUserTimings: Selector<boolean> = (state) =>
   getProfileSpecificState(state).showUserTimings;
 export const getSourceViewFile: Selector<string | null> = (state) =>
   getProfileSpecificState(state).sourceView.sourceFile;
+export const getSourceViewSourceId: Selector<number | null> = (state) =>
+  getProfileSpecificState(state).sourceView.sourceId;
 export const getSourceViewScrollGeneration: Selector<number> = (state) =>
   getProfileSpecificState(state).sourceView.scrollGeneration;
 export const getAssemblyViewIsOpen: Selector<boolean> = (state) =>

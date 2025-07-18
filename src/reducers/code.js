@@ -19,28 +19,32 @@ const sourceCodeCache: Reducer<Map<string, SourceCodeStatus>> = (
     case 'SOURCE_CODE_LOADING_BEGIN_URL': {
       const { file, url } = action;
       const newState = new Map(state);
+      // There is no way we can have a sourceId.
       newState.set(file, { type: 'LOADING', source: { type: 'URL', url } });
       return newState;
     }
     case 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION': {
-      const { file } = action;
+      const { file, sourceId } = action;
       const newState = new Map(state);
-      newState.set(file, {
+      const cacheKey = sourceId ? `${file}-${sourceId}` : file;
+      newState.set(cacheKey, {
         type: 'LOADING',
         source: { type: 'BROWSER_CONNECTION' },
       });
       return newState;
     }
     case 'SOURCE_CODE_LOADING_SUCCESS': {
-      const { file, code } = action;
+      const { file, sourceId, code } = action;
       const newState = new Map(state);
-      newState.set(file, { type: 'AVAILABLE', code });
+      const cacheKey = sourceId ? `${file}-${sourceId}` : file;
+      newState.set(cacheKey, { type: 'AVAILABLE', code });
       return newState;
     }
     case 'SOURCE_CODE_LOADING_ERROR': {
-      const { file, errors } = action;
+      const { file, sourceId, errors } = action;
       const newState = new Map(state);
-      newState.set(file, { type: 'ERROR', errors });
+      const cacheKey = sourceId ? `${file}-${sourceId}` : file;
+      newState.set(cacheKey, { type: 'ERROR', errors });
       return newState;
     }
     default:
