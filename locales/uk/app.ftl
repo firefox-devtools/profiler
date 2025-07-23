@@ -17,7 +17,7 @@
 -firefox-brand-name = Firefox
 -firefox-android-brand-name = Firefox для Android
 -profiler-brand-name = Firefox Profiler
--profiler-brand-short-name = Profiler
+-profiler-brand-short-name = Профайлер
 -firefox-nightly-brand-name = Firefox Nightly
 
 ## AppHeader
@@ -488,13 +488,24 @@ MenuButtons--index--hide-moreInfo-button = Показати менше
 #   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
 MenuButtons--metaInfo--physical-and-logical-cpu =
     { $physicalCPUs ->
-        [one] { $physicalCPUs } фізичне ядро
-        [few] { $physicalCPUs } фізичні ядра
-       *[many] { $physicalCPUs } фізичних ядер
-    }, { $logicalCPUs ->
-        [one] { $logicalCPUs } логічне ядро
-        [few] { $logicalCPUs } логічні ядра
-       *[many] { $logicalCPUs } логічних ядер
+        [one]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } фізичне ядро, { $logicalCPUs } логічне ядро
+                [few] { $physicalCPUs } фізичне ядро, { $logicalCPUs } логічні ядра
+               *[many] { $physicalCPUs } фізичне ядро, { $logicalCPUs } логічних ядер
+            }
+        [few]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } фізичні ядра, { $logicalCPUs } логічне ядро
+                [few] { $physicalCPUs } фізичні ядра, { $logicalCPUs } логічні ядра
+               *[many] { $physicalCPUs } фізичні ядра, { $logicalCPUs } логічних ядер
+            }
+       *[many]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } фізичних ядер, { $logicalCPUs } логічне ядро
+                [few] { $physicalCPUs } фізичних ядер, { $logicalCPUs } логічні ядра
+               *[many] { $physicalCPUs } фізичних ядер, { $logicalCPUs } логічних ядер
+            }
     }
 # This string is used when we only have the information about the number of
 # physical CPU cores.

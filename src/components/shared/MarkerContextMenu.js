@@ -42,11 +42,7 @@ import type {
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { getImplementationFilter } from 'firefox-profiler/selectors/url-state';
 
-import { filterCallNodeAndCategoryPathByImplementation } from 'firefox-profiler/profile-logic/transforms';
-import {
-  convertStackToCallNodeAndCategoryPath,
-  getFuncNamesAndOriginsForPath,
-} from 'firefox-profiler/profile-logic/profile-data';
+import { getBacktraceItemsForStack } from 'firefox-profiler/profile-logic/transforms';
 import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per-thread';
 
 import './MarkerContextMenu.css';
@@ -161,13 +157,12 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
       return '';
     }
 
-    const path = filterCallNodeAndCategoryPathByImplementation(
-      thread,
+    const funcNamesAndOrigins = getBacktraceItemsForStack(
+      stack,
       implementationFilter,
-      convertStackToCallNodeAndCategoryPath(thread, stack)
-    );
+      thread
+    ).reverse();
 
-    const funcNamesAndOrigins = getFuncNamesAndOriginsForPath(path, thread);
     return funcNamesAndOrigins
       .map(({ funcName, origin }) => `${funcName} [${origin}]`)
       .join('\n');
