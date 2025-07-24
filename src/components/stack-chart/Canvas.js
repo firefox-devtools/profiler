@@ -108,7 +108,13 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
   // When the user checks the "use same widths for each stack" checkbox, some
   // expensive computation happens when the canvas is drawn. These computations
   // can be reused for hit testing, and therefore are saved in these variables.
+  //
+  // The index at viewport start is the index of the first visible block inside
+  // the viewport (the margins excluded). It's used for hit testing as the
+  // start offset.
   _sameWidthsIndexAtViewportStart: null | number;
+  // The range length is how many "blocks" are present in the viewport
+  // (excluding the margins).
   _sameWidthsRangeLength: null | number;
 
   componentDidUpdate(prevProps) {
@@ -258,6 +264,54 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     let sameWidthsIndexAtCanvasStart = null;
     let sameWidthsIndexAtCanvasEnd = null;
     if (useStackChartSameWidths) {
+      // The canvas looks like this:
+      // | LEFT MARGIN | -- VIEWPORT -- | RIGHT MARGIN |
+      // In this part we need to compute the "same width index" at the start of
+      // the left margin.
+      // We do that by first calculating the indexes at the start of the
+      // viewport, then substracting how many "same width blocks" we can fit in
+      // the left margin.
+      // The same operation is done for the right margin.
+      // If we aren't drawing in the margin, the behavior doesn't feel quite right.
+      //
+      // If the start of the canvas isn't just on a block edge, we want to get
+      // the previous index (the start of the block where the start of the
+      // canvas is). If it is on a block edge, we want to get _that_ block
+      // start.
+      // Similarly for the end, if it's not on a block edge, we want to get the
+      // end of the block where the canvas end is. If it is on a block edge,
+      // we want to get the end of the block that ends here, that is the start
+      // of the next block.
+      //
+      // Below we're using "bisectionRight - 1" for the start index, and "bisectionLeft"
+      // for the end index for these reasons. Let's use an example to understand this.
+      //
+      // 0  1  2  3  4  5   <- same width indexes
+      // |  |  |  |  |  |
+      // 5  7  8  10 11 15  <- time values
+      //
+      // Start 4 => index 0      End 4 => N/A
+      // Start 5 => index 0      End 5 => index 0
+      // Start 6 => index 0      End 6 => index 1
+      // Start 7 => index 1      End 7 => index 1
+      // Start 9 => index 2      End 9 => index 3
+      // Start 15 => index 5     End 15 => index 5
+      // Start 16 => N/A         End 16 => index 5
+      //
+      // As a reminder these bisection functions return the same index when the
+      // searched value isn't in the array (the index of the first greater
+      // value), but a different index when the searched value is present:
+      // `bisectionRight` returns the index just after the value, while
+      // `bisectionLeft` returns the index of the value itself.
+      //
+      // Note that this case should happen very rarely in the context here (it's
+      // not common that the range starts or ends _exactly_ on a sample time),
+      // and even if this happens it wouldn't be such a problem is this wasn't
+      // 100% correct. But it's easy to get it right, so we did it.
+      //
+      // Note that in this mode we always draw whole blocks between the viewport
+      // start and end. (of course we can display just a part of a block in the
+      // start of the left margin or the end of the right margin).
       const sameWidthsIndexAtViewportStart = Math.max(
         0,
         bisectionRight(sameWidthsIndexToTimestampMap, timeAtViewportStart) - 1
