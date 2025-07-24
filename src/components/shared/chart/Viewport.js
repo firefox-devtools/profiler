@@ -428,7 +428,7 @@ export const withChartViewport: WithChartViewport<*, *> =
       //
       // [1] https://developer.chrome.com/blog/scrolling-intervention-2/
       // [2] https://bugzilla.mozilla.org/show_bug.cgi?id=1526725
-      _mouseWheelListener = (event: WheelEvent) => {
+      _pointerWheelListener = (event: WheelEvent) => {
         // We handle the wheel event, so disable the browser's handling, such
         // as back/forward swiping or scrolling.
         event.preventDefault();
@@ -586,18 +586,61 @@ export const withChartViewport: WithChartViewport<*, *> =
         );
       };
 
-      _mouseDownListener = (event: SyntheticMouseEvent<>) => {
+      _pointerDownListener = (event: SyntheticPointerEvent<>) => {
         event.preventDefault();
-        if (this._container) {
-          this._container.focus();
-        }
 
-        window.addEventListener('mousemove', this._mouseMoveListener, true);
-        window.addEventListener('mouseup', this._mouseUpListener, true);
+        const container = this._container;
+        if (container) {
+          container.focus();
+          container.setPointerCapture((event.pointerId:any));
+          container.addEventListener(
+            'pointermove',
+            this._pointerMoveListener,
+            true
+          );
+          container.addEventListener(
+            'pointerup',
+            this._pointerUpListener,
+            true
+          );
+          container.addEventListener(
+            'pointercancel',
+            this._pointerUpListener,
+            true
+          );
+        }
       };
 
-      _mouseMoveListener = (event: MouseEvent) => {
+      _removePointerListeners() {
+        const container = this._container;
+        if (container) {
+          container.removeEventListener(
+            'pointermove',
+            this._pointerMoveListener,
+            true
+          );
+          container.removeEventListener(
+            'pointerup',
+            this._pointerUpListener,
+            true
+          );
+          container.removeEventListener(
+            'pointercancel',
+            this._pointerUpListener,
+            true
+          );
+        }
+      }
+
+      _pointerMoveListener = (event: PointerEvent) => {
         event.preventDefault();
+
+        if (!event.isPrimary) {
+          // If two (or more) fingers are dragging, ignore everything but the
+          // primary, so that our delta computation below doesn't get confused.
+          // TODO: Implement pinch zooming
+          return;
+        }
 
         let { _dragX: dragX, _dragY: dragY } = this;
         if (!this.state.isDragging) {
@@ -799,10 +842,14 @@ export const withChartViewport: WithChartViewport<*, *> =
         }
       };
 
-      _mouseUpListener = (event: MouseEvent) => {
+      _pointerUpListener = (event: PointerEvent) => {
         event.preventDefault();
-        window.removeEventListener('mousemove', this._mouseMoveListener, true);
-        window.removeEventListener('mouseup', this._mouseUpListener, true);
+        if (!event.isPrimary) {
+          // Keep dragging if the primary pointer is still down.
+          return;
+        }
+
+        this._removePointerListeners();
         this.setState({
           isDragging: false,
         });
@@ -817,7 +864,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         if (this._container) {
           const container = this._container;
           getResizeObserverWrapper().subscribe(container, this._setSize);
-          container.addEventListener('wheel', this._mouseWheelListener, {
+          container.addEventListener('wheel', this._pointerWheelListener, {
             passive: false,
           });
         }
@@ -825,14 +872,13 @@ export const withChartViewport: WithChartViewport<*, *> =
 
       componentWillUnmount() {
         window.removeEventListener('resize', this._setSizeNextFrame, false);
-        window.removeEventListener('mousemove', this._mouseMoveListener, true);
-        window.removeEventListener('mouseup', this._mouseUpListener, true);
         const container = this._container;
         if (container) {
           getResizeObserverWrapper().unsubscribe(container, this._setSize);
-          container.removeEventListener('wheel', this._mouseWheelListener, {
+          container.removeEventListener('wheel', this._pointerWheelListener, {
             passive: false,
           });
+          this._removePointerListeners();
         }
       }
 
@@ -882,7 +928,8 @@ export const withChartViewport: WithChartViewport<*, *> =
         return (
           <div
             className={viewportClassName}
-            onMouseDown={this._mouseDownListener}
+            style={{ 'touch-action': 'none' }}
+            onPointerDown={this._pointerDownListener}
             onKeyDown={this._keyDownListener}
             onKeyUp={this._keyUpListener}
             onBlur={this._onBlur}
