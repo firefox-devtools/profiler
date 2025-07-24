@@ -16,6 +16,7 @@
 
 .profileNameButton {
   overflow: hidden;
+  min-width: 80px;
   padding: 0 9px;
   font-weight: 700;
   margin-inline-end: 5px;
@@ -24,6 +25,7 @@
 }
 
 .profileNameButton::before {
+  flex-shrink: 0;
   background-image: url(firefox-profiler-res/img/svg/edit-name-profiler.svg);
 }
 
