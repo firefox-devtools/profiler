@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`snapshots of selectors/profile matches the last stored run of getProfile 1`] = `
 Object {
@@ -127,19 +127,16 @@ Object {
             "format": "string",
             "key": "operation",
             "label": "Operation",
-            "searchable": true,
           },
           Object {
             "format": "string",
             "key": "source",
             "label": "Source",
-            "searchable": true,
           },
           Object {
             "format": "file-path",
             "key": "filename",
             "label": "Filename",
-            "searchable": true,
           },
         ],
         "name": "FileIO",
@@ -208,7 +205,6 @@ Object {
             "format": "string",
             "key": "prefName",
             "label": "Name",
-            "searchable": true,
           },
           Object {
             "format": "string",
@@ -240,7 +236,6 @@ Object {
             "format": "string",
             "key": "name",
             "label": "Name",
-            "searchable": true,
           },
           Object {
             "format": "string",
@@ -263,7 +258,6 @@ Object {
             "format": "string",
             "key": "name",
             "label": "Details",
-            "searchable": true,
           },
         ],
         "name": "Text",
@@ -278,13 +272,11 @@ Object {
             "format": "string",
             "key": "module",
             "label": "Module",
-            "searchable": true,
           },
           Object {
             "format": "string",
             "key": "name",
             "label": "Name",
-            "searchable": true,
           },
         ],
         "name": "Log",
@@ -307,7 +299,6 @@ Object {
             "format": "string",
             "key": "eventType",
             "label": "Event Type",
-            "searchable": true,
           },
         ],
         "name": "DOMEvent",
@@ -325,7 +316,6 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
-            "searchable": true,
           },
         ],
         "name": "tracing",
@@ -341,7 +331,6 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
-            "searchable": true,
           },
         ],
         "name": "Layout",
@@ -397,27 +386,13 @@ Object {
         "fields": Array [
           Object {
             "format": "string",
-            "key": "searchableString",
-            "label": "Searchable string field",
-            "searchable": true,
+            "key": "string",
+            "label": "string field",
           },
           Object {
             "format": "unique-string",
-            "key": "searchableUniqueString",
-            "label": "Searchable unique string field",
-            "searchable": true,
-          },
-          Object {
-            "format": "string",
-            "key": "nonSearchableString",
-            "label": "Non-searchable string field",
-            "searchable": false,
-          },
-          Object {
-            "format": "unique-string",
-            "key": "nonSearchableUniqueString",
-            "label": "Non-searchable unique string field",
-            "searchable": false,
+            "key": "uniqueString",
+            "label": "unique string field",
           },
         ],
         "name": "StringTesting",
@@ -434,7 +409,6 @@ Object {
             "hidden": true,
             "key": "hiddenString",
             "label": "Hidden string",
-            "searchable": true,
           },
         ],
         "name": "MarkerWithHiddenField",
@@ -444,7 +418,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 56,
+    "preprocessedProfileVersion": 57,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",

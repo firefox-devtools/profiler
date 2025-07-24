@@ -80,10 +80,10 @@ can be a substring to match, `key:substring` to match more specifically,
 or `-key:substring` to drop anything matching. (`-substring` will not work;
 negative matches require a `key`.) Valid `key` values are: `name`, `cat` (for
 marker category), `type` (for markers with payload objects), and any marker
-payload field key that is searchable according to the marker's schema.
+payload field key declared in the marker's schema.
 
 Example: `DOM,cat:GC,-name:CSS` will match anything with DOM in its category,
-name, type, or searchable field, plus anything with "GC" in its category,
+name, type, or any field, plus anything with "GC" in its category,
 but omitting markers with "CSS" anywhere in their names.
 
 ## The Marker Table

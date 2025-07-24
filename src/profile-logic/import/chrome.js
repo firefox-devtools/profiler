@@ -945,7 +945,6 @@ function extractMarkers(
           key: 'type2',
           label: 'Event Type',
           format: 'string',
-          searchable: true,
         },
       ],
     },

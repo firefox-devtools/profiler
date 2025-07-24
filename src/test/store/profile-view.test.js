@@ -904,7 +904,7 @@ describe('actions/ProfileView', function () {
       expect(getMarker(markerIndexes[1]).name.includes('b')).toBeTruthy();
     });
 
-    it('filters the markers by searchable unique-string fields', function () {
+    it('filters the markers by unique-string fields', function () {
       const profile = getProfileWithMarkers([
         [
           'a',
@@ -912,10 +912,8 @@ describe('actions/ProfileView', function () {
           10,
           {
             type: 'StringTesting',
-            searchableString: 'searchable cucumber',
-            searchableUniqueString: 'searchable mango',
-            nonSearchableString: 'non-searchable papaya',
-            nonSearchableUniqueString: 'non-searchable onion',
+            string: 'cucumber',
+            uniqueString: 'mango',
           },
         ],
         [
@@ -936,10 +934,8 @@ describe('actions/ProfileView', function () {
 
       const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
       const markerPayload: MixedObject = (getMarker(0).data: any);
-      expect(typeof markerPayload.searchableString).toBe('string');
-      expect(typeof markerPayload.searchableUniqueString).toBe('number');
-      expect(typeof markerPayload.nonSearchableString).toBe('string');
-      expect(typeof markerPayload.nonSearchableUniqueString).toBe('number');
+      expect(typeof markerPayload.string).toBe('string');
+      expect(typeof markerPayload.uniqueString).toBe('number');
 
       function getMarkerIndexesForSearch(searchString) {
         dispatch(ProfileView.changeMarkersSearchString(searchString));
@@ -949,12 +945,11 @@ describe('actions/ProfileView', function () {
       }
 
       // cucumber and mango should match the marker, because those strings
-      // are contained in searchable fields.
+      // are contained in fields.
       expect(getMarkerIndexesForSearch('cucumber')).toHaveLength(1);
       expect(getMarkerIndexesForSearch('mango')).toHaveLength(1);
 
-      // papaya and onion should not match the marker, because those strings
-      // are only contained in non-searchable fields.
+      // papaya and onion should not match any marker.
       expect(getMarkerIndexesForSearch('papaya')).toHaveLength(0);
       expect(getMarkerIndexesForSearch('onion')).toHaveLength(0);
     });
@@ -1293,7 +1288,7 @@ describe('actions/ProfileView', function () {
       dispatch(ProfileView.changeMarkersSearchString('cat:dom'));
       expect(filteredMarkerNames()).toEqual(['a']);
 
-      // This tests searching in all searchable field.
+      // This tests searching in all fields.
       // The 'c' in 'cat:' should not be matched.
       dispatch(ProfileView.changeMarkersSearchString('c'));
       expect(filteredMarkerNames()).toEqual(['c', 'd']);

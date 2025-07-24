@@ -130,14 +130,9 @@ export type MarkerSchemaField = {|
   // displayed and determines which types of values are accepted for this field.
   format: MarkerFormatType,
 
-  // If present and set to true, the marker search string will be matched
-  // against the values of this field when determining which markers match the
-  // search.
-  searchable?: boolean,
-
   // If present and set to true, this field will not be shown in the list
   // of fields in the tooltip or in the sidebar. Such fields can still be
-  // used inside labels and they can be searchable.
+  // used inside labels and their values are matched when searching.
   hidden?: boolean,
 |};
 
