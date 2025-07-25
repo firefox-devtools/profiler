@@ -1927,7 +1927,7 @@ describe('"filter-samples" transform', function () {
       dispatch(popTransformsFromStack(0));
     });
 
-    it('filters to range of "DOMEvent" by looking at its searchable fields', function () {
+    it('filters to range of "DOMEvent" by looking at its fields', function () {
       dispatch(
         addTransformToStack(threadIndex, {
           type: 'filter-samples',
@@ -1941,21 +1941,6 @@ describe('"filter-samples" transform', function () {
         '  - B (total: 1, self: —)',
         '    - C (total: 1, self: 1)',
       ]);
-      // Reset the transform stack.
-      dispatch(popTransformsFromStack(0));
-    });
-
-    it('does not filter to range of "DOMEvent" by looking at its unsearchable fields', function () {
-      dispatch(
-        addTransformToStack(threadIndex, {
-          type: 'filter-samples',
-          filterType: 'marker-search',
-          filter: '7', // This is the `latency` field.
-        })
-      );
-      const callTree = selectedThreadSelectors.getCallTree(getState());
-      // It should show an empty array because there is no match.
-      expect(formatTree(callTree)).toEqual([]);
       // Reset the transform stack.
       dispatch(popTransformsFromStack(0));
     });
@@ -1979,7 +1964,7 @@ describe('"filter-samples" transform', function () {
       dispatch(popTransformsFromStack(0));
     });
 
-    it('filters to range of "Log" by looking at its searchable fields', function () {
+    it('filters to range of "Log" by looking at its fields', function () {
       dispatch(
         addTransformToStack(threadIndex, {
           type: 'filter-samples',

@@ -73,7 +73,6 @@ import type {
   GeckoThread,
   GeckoMetaMarkerSchema,
   GeckoStaticFieldSchemaData,
-  GeckoDynamicFieldSchemaData,
   GeckoMarkers,
   GeckoMarkerStruct,
   GeckoMarkerTuple,
@@ -94,6 +93,7 @@ import type {
   PhaseTimes,
   ExternalMarkersData,
   MarkerSchema,
+  MarkerSchemaField,
   ProfileMeta,
   PageList,
   ThreadIndex,
@@ -1460,11 +1460,12 @@ function _convertGeckoMarkerSchema(
     isStackBased,
   } = markerSchema;
 
-  const fields: GeckoDynamicFieldSchemaData[] = [];
+  const fields: MarkerSchemaField[] = [];
   const staticFields: GeckoStaticFieldSchemaData[] = [];
   for (const f of data) {
     if (f.value === undefined) {
-      fields.push(f);
+      const { key, label, format, hidden } = f;
+      fields.push({ key, label, format, hidden });
     } else if (f.key === undefined) {
       // extra check to placate Flow
       staticFields.push(f);

@@ -55,11 +55,11 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
     chartLabel: '{marker.data.messageType}',
     display: ['marker-chart', 'marker-table', 'timeline-ipc'],
     fields: [
-      { key: 'messageType', label: 'Type', format: 'string', searchable: true },
+      { key: 'messageType', label: 'Type', format: 'string' },
       { key: 'sync', label: 'Sync', format: 'string' },
       { key: 'sendThreadName', label: 'From', format: 'string' },
       { key: 'recvThreadName', label: 'To', format: 'string' },
-      { key: 'otherPid', label: 'Other Pid', format: 'pid', searchable: true },
+      { key: 'otherPid', label: 'Other Pid', format: 'pid' },
     ],
   },
   {
@@ -74,14 +74,12 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
         format: 'string',
         key: 'contentType',
         label: 'Content Type',
-        searchable: true,
         hidden: true,
       },
       {
         format: 'integer',
         key: 'responseStatus',
         label: 'Response Status',
-        searchable: true,
         hidden: true,
       },
     ],
@@ -615,7 +613,7 @@ export function formatMarkupFromMarkerSchema(
 }
 
 /**
- * Takes a marker and a RegExp and checks if any of its `searchable` marker
+ * Takes a marker and a RegExp and checks if any of its marker
  * payload fields match the search regular expression.
  */
 export function markerPayloadMatchesSearch(
@@ -629,39 +627,37 @@ export function markerPayloadMatchesSearch(
     return false;
   }
 
-  // Check if searchable fields match the search regular expression.
+  // Check if fields match the search regular expression.
   for (const payloadField of markerSchema.fields) {
-    if (payloadField.searchable) {
-      let value = data[payloadField.key];
-      if (value === undefined || value === null) {
-        // The value is missing, but this is OK, values are optional.
+    let value = data[payloadField.key];
+    if (value === undefined || value === null) {
+      // The value is missing, but this is OK, values are optional.
+      continue;
+    }
+
+    if (
+      payloadField.format === 'unique-string' ||
+      payloadField.format === 'flow-id' ||
+      payloadField.format === 'terminating-flow-id'
+    ) {
+      if (typeof value !== 'number') {
+        console.warn(
+          `In marker ${marker.name}, the key ${payloadField.key} has an invalid value "${value}" as a unique string, it isn't a number.`
+        );
         continue;
       }
 
-      if (
-        payloadField.format === 'unique-string' ||
-        payloadField.format === 'flow-id' ||
-        payloadField.format === 'terminating-flow-id'
-      ) {
-        if (typeof value !== 'number') {
-          console.warn(
-            `In marker ${marker.name}, the key ${payloadField.key} has an invalid value "${value}" as a unique string, it isn't a number.`
-          );
-          continue;
-        }
-
-        if (!stringTable.hasIndex(value)) {
-          console.warn(
-            `In marker ${marker.name}, the key ${payloadField.key} has an invalid index "${value}" as a unique string, as it's missing from the string table.`
-          );
-          continue;
-        }
-        value = stringTable.getString(value);
+      if (!stringTable.hasIndex(value)) {
+        console.warn(
+          `In marker ${marker.name}, the key ${payloadField.key} has an invalid index "${value}" as a unique string, as it's missing from the string table.`
+        );
+        continue;
       }
+      value = stringTable.getString(value);
+    }
 
-      if (value !== '' && testFun(value, payloadField.key)) {
-        return true;
-      }
+    if (value !== '' && testFun(value, payloadField.key)) {
+      return true;
     }
   }
 

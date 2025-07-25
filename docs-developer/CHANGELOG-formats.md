@@ -6,6 +6,10 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 57
+
+The `searchable` property in marker schemas, originally added in version 44, is now removed again. Now all marker fields are searchable.
+
 ### Version 56
 
 The `stringArray` is now shared across threads. The shared array is stored at `profile.shared.stringArray`.

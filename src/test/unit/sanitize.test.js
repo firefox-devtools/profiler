@@ -80,25 +80,21 @@ describe('sanitizePII', function () {
             key: 'operation',
             label: 'Operation',
             format: 'string',
-            searchable: true,
           },
           {
             key: 'source',
             label: 'Source',
             format: 'string',
-            searchable: true,
           },
           {
             key: 'filename',
             label: 'Filename',
             format: 'file-path',
-            searchable: true,
           },
           {
             key: 'threadId',
             label: 'Thread ID',
             format: 'string',
-            searchable: true,
           },
         ],
       },
@@ -121,12 +117,10 @@ describe('sanitizePII', function () {
           {
             key: 'host',
             format: 'sanitized-string',
-            searchable: true,
           },
           {
             key: 'originSuffix',
             format: 'sanitized-string',
-            searchable: true,
           },
           {
             key: 'flags',
