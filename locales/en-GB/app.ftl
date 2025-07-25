@@ -755,6 +755,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Deallocation Site
 StackSettings--invert-call-stack = Invert call stack
     .title = Sort by the time spent in a call node, ignoring its children.
 StackSettings--show-user-timing = Show user timing
+StackSettings--use-stack-chart-same-widths = Use the same width for each stack
 StackSettings--panel-search =
     .label = Filter stacks:
     .title = Only display stacks which contain a function whose name matches this substring
