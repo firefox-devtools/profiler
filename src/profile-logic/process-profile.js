@@ -1482,9 +1482,12 @@ function _convertGeckoMarkerSchema(
     const discardedFields = staticFields.filter(
       (_f, i) => i !== staticDescriptionFieldIndex
     );
-    if (discardedFields.length !== 0) {
+    const potentiallyUsefulDiscardedFields = discardedFields.filter(
+      (f) => f.label !== 'Marker' && f.value !== 'UserTiming'
+    );
+    if (potentiallyUsefulDiscardedFields.length !== 0) {
       console.warn(
-        `Discarding the following static fields from marker schema "${name}": ${discardedFields.join(', ')}`
+        `Discarding the following static fields from marker schema "${markerSchema.name}": ${potentiallyUsefulDiscardedFields.map((f) => f.label + ': ' + f.value).join(', ')}`
       );
     }
     description = staticFields[staticDescriptionFieldIndex].value;
