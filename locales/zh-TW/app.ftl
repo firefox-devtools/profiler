@@ -657,6 +657,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = 取消分配的�
 StackSettings--invert-call-stack = 反轉呼叫堆疊
     .title = 依照呼叫節點當中花費的時間排序，並忽略其 children。
 StackSettings--show-user-timing = 顯示使用者計時
+StackSettings--use-stack-chart-same-widths = 將每個堆疊以相同寬度顯示
 StackSettings--panel-search =
     .label = 過濾堆疊：
     .title = 只顯示包含符合的子字串的函數名稱的相關堆疊
