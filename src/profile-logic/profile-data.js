@@ -579,7 +579,7 @@ export function getInvertedCallNodeInfo(
   funcCount: number
 ): CallNodeInfoInverted {
   return new CallNodeInfoInverted(
-    callNodeInfo.getNonInvertedCallNodeTable(),
+    callNodeInfo.getCallNodeTable(),
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
     defaultCategory,
     funcCount
@@ -600,19 +600,19 @@ export function getInvertedCallNodeInfo(
 function _compareNonInvertedCallNodesInSuffixOrder(
   callNodeA: IndexIntoCallNodeTable,
   callNodeB: IndexIntoCallNodeTable,
-  nonInvertedCallNodeTable: CallNodeTable
+  callNodeTable: CallNodeTable
 ): number {
   // Walk up both and stop at the first non-matching function.
   // Walking up the non-inverted tree is equivalent to walking down the
   // inverted tree.
   while (true) {
-    const funcA = nonInvertedCallNodeTable.func[callNodeA];
-    const funcB = nonInvertedCallNodeTable.func[callNodeB];
+    const funcA = callNodeTable.func[callNodeA];
+    const funcB = callNodeTable.func[callNodeB];
     if (funcA !== funcB) {
       return funcA - funcB;
     }
-    callNodeA = nonInvertedCallNodeTable.prefix[callNodeA];
-    callNodeB = nonInvertedCallNodeTable.prefix[callNodeB];
+    callNodeA = callNodeTable.prefix[callNodeA];
+    callNodeB = callNodeTable.prefix[callNodeB];
     if (callNodeA === callNodeB) {
       break;
     }
@@ -822,7 +822,7 @@ function _getSamplesSelectedStatesNonInverted(
   selectedCallNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfo
 ): SelectedState[] {
-  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+  const callNodeTable = callNodeInfo.getCallNodeTable();
   const selectedCallNodeDescendantsEndIndex =
     callNodeTable.subtreeRangeEnd[selectedCallNodeIndex];
   const sampleCount = sampleCallNodes.length;
@@ -1068,7 +1068,7 @@ export function getTimingsForCallNodeIndex(
     return { forPath: pathTimings, rootTime };
   }
 
-  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+  const callNodeTable = callNodeInfo.getCallNodeTable();
   const stackIndexToCallNodeIndex =
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
   const callNodeInfoInverted = callNodeInfo.asInverted();
@@ -2165,7 +2165,7 @@ export function computeCallNodeMaxDepthPlusOne(
   // computed for the filtered thread, but a samples-like table can use the preview
   // filtered thread, which involves a subset of the total call nodes.
   let maxDepth = -1;
-  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+  const callNodeTable = callNodeInfo.getCallNodeTable();
   // TODO: Use sampleCallNodes instead
   const stackIndexToCallNodeIndex =
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
@@ -2954,7 +2954,7 @@ function _getTreeOrderComparatorInverted(
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   callNodeInfo: CallNodeInfoInverted
 ): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
-  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+  const callNodeTable = callNodeInfo.getCallNodeTable();
   return function treeOrderComparator(
     sampleA: IndexIntoSamplesTable,
     sampleB: IndexIntoSamplesTable

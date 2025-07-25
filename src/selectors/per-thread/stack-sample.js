@@ -297,7 +297,7 @@ export function getStackAndSampleSelectorsPerThread(
         return CallTree.computeCallNodeSelfAndSummary(
           samples,
           sampleIndexToCallNodeIndex,
-          callNodeInfo.getNonInvertedCallNodeTable().length
+          callNodeInfo.getCallNodeTable().length
         );
       }
     );
@@ -348,7 +348,7 @@ export function getStackAndSampleSelectorsPerThread(
           CallTree.computeCallNodeTracedSelfAndSummary(
             samples,
             sampleIndexToCallNodeIndex,
-            callNodeInfo.getNonInvertedCallNodeTable().length,
+            callNodeInfo.getCallNodeTable().length,
             interval
           );
         if (CallNodeSelfAndSummary === null) {
@@ -396,7 +396,7 @@ export function getStackAndSampleSelectorsPerThread(
     _getStackTimingByDepthWithMap(state).sameWidthsIndexToTimestampMap;
 
   const getFlameGraphRows: Selector<FlameGraph.FlameGraphRows> = createSelector(
-    (state) => getCallNodeInfo(state).getNonInvertedCallNodeTable(),
+    (state) => getCallNodeInfo(state).getCallNodeTable(),
     (state) => threadSelectors.getFilteredThread(state).funcTable,
     (state) => threadSelectors.getFilteredThread(state).stringTable,
     FlameGraph.computeFlameGraphRows
@@ -405,7 +405,7 @@ export function getStackAndSampleSelectorsPerThread(
   const getFlameGraphTiming: Selector<FlameGraph.FlameGraphTiming> =
     createSelector(
       getFlameGraphRows,
-      (state) => getCallNodeInfo(state).getNonInvertedCallNodeTable(),
+      (state) => getCallNodeInfo(state).getCallNodeTable(),
       getCallTreeTimingsNonInverted,
       FlameGraph.getFlameGraphTiming
     );
