@@ -2875,6 +2875,7 @@ CallTree {
       "weight": null,
       "weightType": "samples",
     },
+    "shapes": undefined,
     "showMarkersInTimeline": undefined,
     "stackTable": Object {
       "category": Array [
@@ -2954,6 +2955,7 @@ CallTree {
     "tid": 0,
     "unregisterTime": null,
     "userContextId": undefined,
+    "valuesBuffer": undefined,
   },
   "_weightType": "samples",
 }
@@ -3204,6 +3206,7 @@ Object {
     "weight": null,
     "weightType": "samples",
   },
+  "shapes": undefined,
   "showMarkersInTimeline": undefined,
   "stackTable": Object {
     "category": Array [
@@ -3283,6 +3286,7 @@ Object {
   "tid": 0,
   "unregisterTime": null,
   "userContextId": undefined,
+  "valuesBuffer": undefined,
 }
 `;
 
@@ -3605,6 +3609,7 @@ Object {
     "weight": null,
     "weightType": "samples",
   },
+  "shapes": undefined,
   "showMarkersInTimeline": undefined,
   "stackTable": Object {
     "category": Array [
@@ -3684,6 +3689,7 @@ Object {
   "tid": 0,
   "unregisterTime": null,
   "userContextId": undefined,
+  "valuesBuffer": undefined,
 }
 `;
 
@@ -3932,6 +3938,7 @@ Object {
     "weight": null,
     "weightType": "samples",
   },
+  "shapes": undefined,
   "showMarkersInTimeline": undefined,
   "stackTable": Object {
     "category": Array [
@@ -4011,6 +4018,7 @@ Object {
   "tid": 0,
   "unregisterTime": null,
   "userContextId": undefined,
+  "valuesBuffer": undefined,
 }
 `;
 
@@ -4259,6 +4267,7 @@ Object {
     "weight": null,
     "weightType": "samples",
   },
+  "shapes": undefined,
   "showMarkersInTimeline": undefined,
   "stackTable": Object {
     "category": Array [
@@ -4338,6 +4347,7 @@ Object {
   "tid": 0,
   "unregisterTime": null,
   "userContextId": undefined,
+  "valuesBuffer": undefined,
 }
 `;
 
