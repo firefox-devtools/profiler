@@ -6,12 +6,6 @@
 ### Localization for the App UI of Profiler
 
 
-# Naming convention for l10n IDs: "ComponentName--string-summary".
-# This allows us to minimize the risk of conflicting IDs throughout the app.
-# Please sort alphabetically by (component name), and
-# keep strings in order of appearance.
-
-
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
@@ -468,11 +462,16 @@ MenuButtons--index--hide-moreInfo-button = Weniger anzeigen
 #   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
 MenuButtons--metaInfo--physical-and-logical-cpu =
     { $physicalCPUs ->
-        [one] { $physicalCPUs } physischer Kern
-       *[other] { $physicalCPUs } physische Kerne
-    },{ $logicalCPUs ->
-        [one] { $logicalCPUs } logischer Kern
-       *[other] { $logicalCPUs } logische Kerne
+        [one]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } physischer Kern,{ $logicalCPUs } logischer Kern
+               *[other] { $physicalCPUs } physischer Kern,{ $logicalCPUs } logische Kerne
+            }
+       *[other]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } physische Kerne,{ $logicalCPUs } logischer Kern
+               *[other] { $physicalCPUs } physische Kerne,{ $logicalCPUs } logische Kerne
+            }
     }
 # This string is used when we only have the information about the number of
 # physical CPU cores.
