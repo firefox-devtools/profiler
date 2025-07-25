@@ -73,7 +73,7 @@ describe('unfiltered call tree', function () {
             thread.samples.stack,
             callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
           ),
-          callNodeInfo.getNonInvertedCallNodeTable().length
+          callNodeInfo.getCallNodeTable().length
         )
       );
       expect(callTreeTimings).toEqual({
@@ -120,7 +120,7 @@ describe('unfiltered call tree', function () {
       const cnKN = callNodeInfo.getCallNodeIndexFromPath([K, N]);
 
       const rows = computeFlameGraphRows(
-        callNodeInfo.getNonInvertedCallNodeTable(),
+        callNodeInfo.getCallNodeTable(),
         thread.funcTable,
         thread.stringTable
       );
@@ -442,7 +442,7 @@ describe('inverted call tree', function () {
           thread.samples.stack,
           callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
         ),
-        callNodeInfo.getNonInvertedCallNodeTable().length
+        callNodeInfo.getCallNodeTable().length
       )
     );
     const callTree = getCallTree(
@@ -483,7 +483,7 @@ describe('inverted call tree', function () {
           thread.samples.stack,
           invertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
         ),
-        invertedCallNodeInfo.getNonInvertedCallNodeTable().length
+        invertedCallNodeInfo.getCallNodeTable().length
       )
     );
     const invertedCallTree = getCallTree(
@@ -632,7 +632,7 @@ describe('diffing trees', function () {
           thread.samples.stack,
           callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
         ),
-        callNodeInfo.getNonInvertedCallNodeTable().length
+        callNodeInfo.getCallNodeTable().length
       )
     );
     expect(callTreeTimings.timings.rootTotalSummary).toBe(12);

@@ -453,7 +453,7 @@ describe('profile-data', function () {
       thread.frameTable,
       defaultCategory
     );
-    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+    const callNodeTable = callNodeInfo.getCallNodeTable();
 
     it('should create one callNode per original stack', function () {
       // After nudgeReturnAddresses, the stack table now has 8 entries.
@@ -502,7 +502,7 @@ describe('profile-data', function () {
       thread.frameTable,
       defaultCategory
     );
-    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const stackIndexToCallNodeIndex =
       callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
     const stack0 = thread.samples.stack[0];
@@ -899,13 +899,13 @@ describe('funcHasDirectRecursiveCall and funcHasRecursiveCall', function () {
       thread.stackTable,
       thread.frameTable,
       defaultCategory
-    ).getNonInvertedCallNodeTable();
+    ).getCallNodeTable();
     const jsOnlyThread = filterThreadByImplementation(thread, 'js');
     const jsOnlyCallNodeTable = getCallNodeInfo(
       jsOnlyThread.stackTable,
       jsOnlyThread.frameTable,
       defaultCategory
-    ).getNonInvertedCallNodeTable();
+    ).getCallNodeTable();
     return { callNodeTable, jsOnlyCallNodeTable, funcNames };
   }
 
