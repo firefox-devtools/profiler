@@ -667,6 +667,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Deallocazione sit
 StackSettings--invert-call-stack = Inverti stack di chiamata
     .title = Ordina in base al tempo trascorso in un nodo di chiamata, ignorando i nodi figlio.
 StackSettings--show-user-timing = Mostra tempo utente
+StackSettings--use-stack-chart-same-widths = Utilizza la stessa larghezza per ogni stack
 StackSettings--panel-search =
     .label = Filtra stack:
     .title = Mostra solo stack che contengono una funzione il cui nome corrisponde a questa sottostringa
