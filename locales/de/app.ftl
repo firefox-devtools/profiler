@@ -731,6 +731,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Freigegebene Webs
 StackSettings--invert-call-stack = Aufrufstack umkehren
     .title = Sortieren nach in einem Aufrufknoten, die Unterpunkte werden ignoriert.
 StackSettings--show-user-timing = Nutzer-Zeitrechnung anzeigen
+StackSettings--use-stack-chart-same-widths = Für jeden Stapel die gleiche Breite verwenden
 StackSettings--panel-search =
     .label = Stacks filtern:
     .title = Nur Stacks anzeigen, die eine Funktion enthalten, deren Namen zu diesem Unterstring passen
