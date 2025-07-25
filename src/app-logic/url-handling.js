@@ -172,6 +172,7 @@ type BaseQuery = {|
   timelineType: string,
   sourceView: string,
   assemblyView: string,
+  activeFlows: string,
 |};
 
 type CallTreeQuery = {|
@@ -358,6 +359,9 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       query = (baseQuery: MarkersQueryShape);
       query.markerSearch =
         urlState.profileSpecific.markersSearchString || undefined;
+      query.activeFlows =
+        encodeUintArrayForUrlComponent(urlState.profileSpecific.activeFlows) ||
+        undefined;
       break;
     case 'network-chart':
       query = (baseQuery: NetworkQueryShape);
@@ -485,6 +489,8 @@ export function stateFromLocation(
     implementation = query.implementation;
   }
 
+  const activeFlows = decodeUintArrayFromUrlComponent(query.activeFlows ?? '');
+
   const transforms = {};
   if (selectedThreadsKey !== null) {
     transforms[selectedThreadsKey] = parseTransforms(query.transforms);
@@ -555,6 +561,7 @@ export function stateFromLocation(
       transforms,
       sourceView,
       assemblyView,
+      activeFlows,
       isBottomBoxOpenPerPanel,
       timelineType: validateTimelineType(query.timelineType),
       showJsTracerSummary: query.summary === undefined ? false : true,

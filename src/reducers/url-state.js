@@ -21,6 +21,7 @@ import type {
   UrlState,
   Reducer,
   SourceViewState,
+  IndexIntoFlowTable,
   AssemblyViewState,
   IsOpenPerPanelState,
   TabID,
@@ -644,6 +645,17 @@ const isBottomBoxOpenPerPanel: Reducer<IsOpenPerPanelState> = (
   }
 };
 
+const activeFlows: Reducer<IndexIntoFlowTable[]> = (state = [], action) => {
+  switch (action.type) {
+    case 'CHANGE_ACTIVE_FLOWS': {
+      const { activeFlows } = action;
+      return activeFlows;
+    }
+    default:
+      return state;
+  }
+};
+
 /**
  * This value is only set from the URL and never changed.
  */
@@ -668,6 +680,7 @@ const profileSpecific = combineReducers({
   transforms,
   sourceView,
   assemblyView,
+  activeFlows,
   isBottomBoxOpenPerPanel,
   timelineType,
   globalTrackOrder,
