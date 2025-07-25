@@ -128,8 +128,7 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
     );
     const callNodeInfo = isInverted
       ? getInvertedCallNodeInfo(
-          nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
-          nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+          nonInvertedCallNodeInfo,
           defaultCategory,
           funcTable.length
         )

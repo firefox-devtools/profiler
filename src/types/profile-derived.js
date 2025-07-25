@@ -35,6 +35,7 @@ import type {
   IndexIntoSubcategoryListForCategory,
 } from './profile';
 import type { IndexedArray } from './utils';
+import type { BitSet } from '../utils/bitset';
 import type { StackTiming } from '../profile-logic/stack-timing';
 import type { StringTable } from '../utils/string-table';
 export type IndexIntoCallNodeTable = number;
@@ -208,7 +209,14 @@ export type StackTable = {|
 |};
 
 /**
- * Contains a table of function call information that represents the stacks of what
+ * Similar to the StackTable, but based on functions rather than on frames.
+ *
+ * The CallNodeTable, like the StackTable, always describes the *non-inverted* tree.
+ * Indexes into its columns are the non-inverted call node indexes.
+ *
+ * # Detailed description
+ *
+ * The CallNodeTable is a table of function call information and represents the stacks of what
  * functions were called, as opposed to stacks based on frames. There can be multiple
  * frames for a single function call. Using stacks as opposed to a computed tree of
  * CallNodes can cause duplicated functions in the call tree.
@@ -300,6 +308,10 @@ export type CallNodeTable = {
   // The number of call nodes. All columns in this table have this length.
   length: number,
 };
+
+// A bitset which indicates something per call node. Use `checkBit` from
+// utils/bitset to check whether a call node is part of the set.
+export type CallNodeTableBitSet = BitSet;
 
 export type LineNumber = number;
 

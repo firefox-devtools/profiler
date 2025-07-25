@@ -22,6 +22,7 @@ import {
 import { resourceTypes } from '../../profile-logic/data-structures';
 import {
   callTreeFromProfile,
+  functionListTreeFromProfile,
   formatTree,
   formatTreeIncludeCategories,
 } from '../fixtures/utils';
@@ -73,7 +74,7 @@ describe('unfiltered call tree', function () {
             thread.samples.stack,
             callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
           ),
-          callNodeInfo.getNonInvertedCallNodeTable().length
+          callNodeInfo.getCallNodeTable().length
         )
       );
       expect(callTreeTimings).toEqual({
@@ -120,7 +121,7 @@ describe('unfiltered call tree', function () {
       const cnKN = callNodeInfo.getCallNodeIndexFromPath([K, N]);
 
       const rows = computeFlameGraphRows(
-        callNodeInfo.getNonInvertedCallNodeTable(),
+        callNodeInfo.getCallNodeTable(),
         thread.funcTable,
         thread.stringTable
       );
@@ -442,7 +443,7 @@ describe('inverted call tree', function () {
           thread.samples.stack,
           callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
         ),
-        callNodeInfo.getNonInvertedCallNodeTable().length
+        callNodeInfo.getCallNodeTable().length
       )
     );
     const callTree = getCallTree(
@@ -471,8 +472,7 @@ describe('inverted call tree', function () {
 
     // Now compute the inverted tree and check it.
     const invertedCallNodeInfo = getInvertedCallNodeInfo(
-      callNodeInfo.getNonInvertedCallNodeTable(),
-      callNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+      callNodeInfo,
       defaultCategory,
       thread.funcTable.length
     );
@@ -484,7 +484,7 @@ describe('inverted call tree', function () {
           thread.samples.stack,
           invertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
         ),
-        invertedCallNodeInfo.getNonInvertedCallNodeTable().length
+        invertedCallNodeInfo.getCallNodeTable().length
       )
     );
     const invertedCallTree = getCallTree(
@@ -544,6 +544,28 @@ describe('inverted call tree', function () {
         '        - A [Other] (total: 1, self: —)',
       ]);
     });
+  });
+});
+
+describe('function list', function () {
+  it('computes an unfiltered function list', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A  A  A
+      B  E  B
+      C  C  A
+      B  F  G
+      D  E
+    `);
+    const callTree = functionListTreeFromProfile(profile);
+    expect(formatTree(callTree)).toEqual([
+      '- A (total: 3, self: —)',
+      '- B (total: 2, self: —)',
+      '- C (total: 2, self: —)',
+      '- D (total: 1, self: 1)',
+      '- E (total: 1, self: 1)',
+      '- F (total: 1, self: —)',
+      '- G (total: 1, self: 1)',
+    ]);
   });
 });
 
@@ -633,7 +655,7 @@ describe('diffing trees', function () {
           thread.samples.stack,
           callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
         ),
-        callNodeInfo.getNonInvertedCallNodeTable().length
+        callNodeInfo.getCallNodeTable().length
       )
     );
     expect(callTreeTimings.timings.rootTotalSummary).toBe(12);

@@ -202,7 +202,7 @@ describe('selectors/getFlameGraphTiming', function () {
     const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(
       store.getState()
     );
-    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const flameGraphTiming = selectedThreadSelectors.getFlameGraphTiming(
       store.getState()
     );
@@ -233,7 +233,7 @@ describe('selectors/getFlameGraphTiming', function () {
     const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(
       store.getState()
     );
-    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const flameGraphTiming = selectedThreadSelectors.getFlameGraphTiming(
       store.getState()
     );

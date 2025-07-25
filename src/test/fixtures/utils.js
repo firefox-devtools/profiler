@@ -6,11 +6,14 @@ import {
   getCallTree,
   computeCallNodeSelfAndSummary,
   computeCallTreeTimings,
+  computeFunctionListTimings,
   type CallTree,
 } from 'firefox-profiler/profile-logic/call-tree';
 import { getEmptyThread } from 'firefox-profiler/profile-logic/data-structures';
 import {
+  computeCallNodeFuncIsDuplicate,
   getCallNodeInfo,
+  getInvertedCallNodeInfo,
   getSampleIndexToCallNodeIndex,
   getOriginAnnotationForFunc,
   createThreadFromDerivedTables,
@@ -183,7 +186,7 @@ export function callTreeFromProfile(
         thread.samples.stack,
         callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
       ),
-      callNodeInfo.getNonInvertedCallNodeTable().length
+      callNodeInfo.getCallNodeTable().length
     )
   );
   return getCallTree(
@@ -191,6 +194,54 @@ export function callTreeFromProfile(
     callNodeInfo,
     ensureExists(profile.meta.categories),
     callTreeTimings,
+    'samples'
+  );
+}
+
+/**
+ * This function creates the "function list" CallTree object for a profile.
+ * It's convenient to use it with formatTree below.
+ */
+export function functionListTreeFromProfile(
+  profile: Profile,
+  threadIndex: number = 0
+): CallTree {
+  if (!profile.threads[threadIndex]) {
+    profile.threads[threadIndex] = getEmptyThread();
+  }
+  const { derivedThreads, defaultCategory } = getProfileWithDicts(profile);
+  const thread = derivedThreads[threadIndex];
+  const callNodeInfo = getCallNodeInfo(
+    thread.stackTable,
+    thread.frameTable,
+    defaultCategory
+  );
+  const funcCount = thread.funcTable.length;
+  const invertedCallNodeInfo = getInvertedCallNodeInfo(
+    callNodeInfo,
+    defaultCategory,
+    funcCount
+  );
+  const callNodeTable = callNodeInfo.getCallNodeTable();
+  const callNodeFuncIsDuplicate = computeCallNodeFuncIsDuplicate(callNodeTable);
+  const functionListTimings = computeFunctionListTimings(
+    callNodeTable,
+    callNodeFuncIsDuplicate,
+    computeCallNodeSelfAndSummary(
+      thread.samples,
+      getSampleIndexToCallNodeIndex(
+        thread.samples.stack,
+        callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
+      ),
+      callNodeTable.length
+    ),
+    funcCount
+  );
+  return getCallTree(
+    thread,
+    invertedCallNodeInfo,
+    ensureExists(profile.meta.categories),
+    { type: 'FUNCTION_LIST', timings: functionListTimings },
     'samples'
   );
 }
