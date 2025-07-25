@@ -1,5 +1,6 @@
 .Details {
   display: flex;
+  overflow: clip;
   flex: auto;
   flex-direction: column;
 }
