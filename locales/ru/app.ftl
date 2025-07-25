@@ -764,6 +764,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Сайты осв
 StackSettings--invert-call-stack = Инвертировать стек вызовов
     .title = Сортировать по времени, потраченному на вызов узла, игнорируя его дочерние элементы.
 StackSettings--show-user-timing = Показать время пользователя
+StackSettings--use-stack-chart-same-widths = Использовать одинаковую ширину для всех стеков
 StackSettings--panel-search =
     .label = Стеки фильтров:
     .title = Отображать только стеки, содержащие функции, имена которых совпадают с этой подстрокой
