@@ -1,0 +1,35 @@
+{
+  "_comment": "This is a distribution package for a pre-bundled CLI artifact. Build dependencies are defined in the root package.json. Run 'yarn build-profile-query-cli' from the repository root to build dist/pq.js.",
+  "name": "@firefox-profiler/pq",
+  "version": "0.1.0",
+  "description": "Command-line interface for querying Firefox Profiler profiles with persistent daemon sessions",
+  "main": "./dist/pq.js",
+  "bin": {
+    "pq": "./dist/pq.js"
+  },
+  "files": [
+    "dist/pq.js"
+  ],
+  "engines": {
+    "node": ">= 22 < 23"
+  },
+  "keywords": [
+    "profiler",
+    "firefox",
+    "performance",
+    "profiling",
+    "cli",
+    "performance-analysis"
+  ],
+  "author": "Mozilla DevTools",
+  "license": "MPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/firefox-devtools/profiler",
+    "directory": "src/profile-query-cli"
+  },
+  "homepage": "https://profiler.firefox.com",
+  "bugs": {
+    "url": "https://github.com/firefox-devtools/profiler/issues"
+  }
+}

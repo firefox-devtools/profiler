@@ -205,6 +205,25 @@ export function getBasicThreadSelectorsPerThread(
   );
 
   /**
+   * Get activity slices for the range-filtered thread (respecting zoom).
+   * This shows CPU activity only for the samples within the committed range.
+   */
+  const getRangeFilteredActivitySlices: Selector<SliceTree | null> =
+    createSelector(getRangeFilteredThread, (thread) => {
+      const samples = thread.samples;
+      return samples.hasCPUDeltas
+        ? getSlices(
+            [0.05, 0.2, 0.4, 0.6, 0.8],
+            Float64Array.from(
+              samples.threadCPUPercent.subarray(0, samples.length),
+              (v) => v / 100
+            ),
+            samples.time
+          )
+        : null;
+    });
+
+  /**
    * The CallTreeSummaryStrategy determines how the call tree summarizes the
    * the current thread. By default, this is done by timing, but other
    * methods are also available. This selectors also ensures that the current
@@ -416,6 +435,7 @@ export function getBasicThreadSelectorsPerThread(
     getSamplesTable,
     getTracedValuesBuffer,
     getActivitySlices,
+    getRangeFilteredActivitySlices,
     getSamplesWeightType,
     getNativeAllocations,
     getJsAllocations,

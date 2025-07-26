@@ -14,3 +14,4 @@ webpack.local-config.js
 *.orig
 *.rej
 .idea/
+.pq-dev/
