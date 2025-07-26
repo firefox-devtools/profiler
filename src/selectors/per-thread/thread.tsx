@@ -51,6 +51,8 @@ import type { MarkerSelectorsPerThread } from './markers';
 
 import { mergeThreads } from '../../profile-logic/merge-compare';
 import { defaultThreadViewOptions } from '../../reducers/profile-view';
+import type { SliceTree } from '../../utils/slice-tree';
+import { getSlices } from '../../utils/slice-tree';
 
 // Memoize some of these functions globally, so that in the common case we only
 // need to do these computations once globally instead of per thread. These
@@ -126,6 +128,20 @@ export function getBasicThreadSelectorsPerThread(
     ProfileSelectors.getReferenceCPUDeltaPerMs,
     ProfileSelectors.getDefaultCategory,
     ProfileData.computeSamplesTableFromRawSamplesTable
+  );
+  const getActivitySlices: Selector<SliceTree | null> = createSelector(
+    getSamplesTable,
+    (samples) =>
+      samples.hasCPUDeltas
+        ? getSlices(
+            [0.05, 0.2, 0.4, 0.6, 0.8],
+            Float64Array.from(
+              samples.threadCPUPercent.subarray(0, samples.length),
+              (v) => v / 100
+            ),
+            samples.time
+          )
+        : null
   );
   const getNativeAllocations: Selector<NativeAllocationsTable | void> = (
     state
@@ -399,6 +415,7 @@ export function getBasicThreadSelectorsPerThread(
     getThread,
     getSamplesTable,
     getTracedValuesBuffer,
+    getActivitySlices,
     getSamplesWeightType,
     getNativeAllocations,
     getJsAllocations,
