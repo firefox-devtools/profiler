@@ -21,6 +21,7 @@ import {
   getThemePreference,
   setThemePreference,
 } from 'firefox-profiler/utils/dark-mode';
+import { printSliceTree } from 'firefox-profiler/utils/slice-tree';
 import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still
@@ -52,6 +53,7 @@ export type ExtraPropertiesOnWindowForConsole = {
   ) => Promise<void>;
   extractGeckoLogs: () => string;
   totalMarkerDuration: (markers: any) => number;
+  activity: () => void;
   shortenUrl: typeof shortenUrl;
   getState: GetState;
   selectors: typeof selectorsForConsole;
@@ -358,6 +360,14 @@ export function addDataToWindowObject(
 
     console.log(`Total marker duration: ${formatTimestamp(totalDuration)}`);
     return totalDuration;
+  };
+
+  target.activity = function () {
+    const slices =
+      selectorsForConsole.selectedThread.getActivitySlices(getState());
+    if (slices) {
+      console.log(printSliceTree(slices).join('\n'));
+    }
   };
 
   target.shortenUrl = shortenUrl;
