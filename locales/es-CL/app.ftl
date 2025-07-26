@@ -682,6 +682,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Sitios de desasig
 StackSettings--invert-call-stack = Invertir llamada de pila
     .title = Ordenar por el tiempo ocupado en un nodo de llamada, ignorando sus hijos.
 StackSettings--show-user-timing = Mostrar usando tiempos
+StackSettings--use-stack-chart-same-widths = Utilizar el mismo ancho para cada pila
 StackSettings--panel-search =
     .label = Filtrar pilas:
     .title = Solo muestra las pilas que contienen una función cuyo nombre coincida con esta subcadena
