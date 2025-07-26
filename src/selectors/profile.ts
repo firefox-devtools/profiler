@@ -757,12 +757,45 @@ export const getCombinedThreadCPUData: Selector<CombinedCPU.CpuRatioTimeSeries |
   );
 
 /**
+ * Get combined CPU activity data from all threads, filtered to the committed range.
+ * This respects zoom and shows only data within the current view.
+ */
+export const getRangeFilteredCombinedThreadCPUData: Selector<CombinedCPU.CpuRatioTimeSeries | null> =
+  createSelector(
+    getAllThreadsSamplesTables,
+    getCommittedRange,
+    (samplesTables, range) =>
+      CombinedCPU.combineCPUDataFromThreads(
+        samplesTables,
+        range.start,
+        range.end
+      )
+  );
+
+/**
  * Get activity slices for the combined CPU usage across all threads.
  * Returns hierarchical slices showing periods of high combined CPU activity,
  * or null if no CPU data is available.
  */
 export const getCombinedThreadActivitySlices: Selector<SliceTree | null> =
   createSelector(getCombinedThreadCPUData, (combinedCPU) => {
+    if (combinedCPU === null) {
+      return null;
+    }
+    const m = Math.ceil(combinedCPU.maxCpuRatio);
+    return getSlices(
+      [0.05 * m, 0.2 * m, 0.4 * m, 0.6 * m, 0.8 * m],
+      combinedCPU.cpuRatio,
+      combinedCPU.time
+    );
+  });
+
+/**
+ * Get activity slices for the combined CPU usage, filtered to the committed range.
+ * This respects zoom and shows only activity within the current view.
+ */
+export const getRangeFilteredCombinedThreadActivitySlices: Selector<SliceTree | null> =
+  createSelector(getRangeFilteredCombinedThreadCPUData, (combinedCPU) => {
     if (combinedCPU === null) {
       return null;
     }

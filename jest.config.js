@@ -56,5 +56,28 @@ module.exports = {
         printBasicPrototype: true,
       },
     },
+
+    // ========================================================================
+    // CLI Tests (Node.js environment)
+    // ========================================================================
+    {
+      displayName: 'cli',
+      testMatch: ['<rootDir>/src/profile-query-cli/tests/**/*.test.ts'],
+
+      // Use Node.js environment (not browser/jsdom)
+      testEnvironment: 'node',
+
+      // CLI-specific setup (just jest-extended for matchers)
+      setupFilesAfterEnv: ['./src/profile-query-cli/tests/setup.ts'],
+
+      // CLI operations can be slow (loading profiles, spawning processes)
+      testTimeout: 30000,
+
+      // File extensions for CLI tests
+      moduleFileExtensions: ['ts', 'js'],
+
+      // No need for asset mocks in CLI tests
+      // No transformIgnorePatterns needed - we don't use ESM-only deps here
+    },
   ],
 };

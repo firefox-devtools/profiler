@@ -1,0 +1,32 @@
+# Source files - only publish the built dist/pq.js
+*.ts
+webpack.config.js
+
+# Build artifacts (except dist/pq.js which is in "files")
+dist/*
+!dist/pq.js
+
+# Development files
+node_modules/
+*.log
+*.tmp
+.DS_Store
+
+# Git files
+.git/
+.gitignore
+
+# Editor configs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test files
+*.test.ts
+*.test.js
+__tests__/
+tests/
+
+# CI/CD
+.github/
