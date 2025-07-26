@@ -2594,6 +2594,15 @@ const _upgraders = {
     }
     profile.shared = { stringArray };
   },
+  [57]: (profile) => {
+    // The "searchable" property for fields in the marker schema was removed again.
+    // Now all marker fields are searchable.
+    for (const schema of profile.meta.markerSchema) {
+      for (const field of schema.fields) {
+        delete field.searchable;
+      }
+    }
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

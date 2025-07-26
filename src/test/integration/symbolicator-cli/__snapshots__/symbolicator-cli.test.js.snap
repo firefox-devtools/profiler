@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`symbolicator-cli tool is symbolicating a trace correctly 1`] = `
 Object {
@@ -87,7 +87,7 @@ Object {
     "markerSchema": Array [],
     "oscpu": "macOS 14.6.1",
     "pausedRanges": Array [],
-    "preprocessedProfileVersion": 56,
+    "preprocessedProfileVersion": 57,
     "processType": 0,
     "product": "a.out",
     "sampleUnits": Object {

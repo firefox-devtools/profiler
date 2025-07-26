@@ -113,6 +113,8 @@
   border-bottom: 1px solid var(--grey-30);
   margin: 0;
   background: var(--grey-10);
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .profileViewerSpacer {
