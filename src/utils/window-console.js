@@ -9,6 +9,7 @@ import actions from 'firefox-profiler/actions';
 import { shortenUrl } from 'firefox-profiler/utils/shorten-url';
 import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { formatTimestamp } from 'firefox-profiler/utils/format-numbers';
+import { togglePseudoStrategy } from 'firefox-profiler/components/app/AppLocalizationProvider';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still
 // special-cases the `value` property: if it's missing it throws an error. Using
@@ -122,7 +123,7 @@ export function addDataToWindowObject(
       return;
     }
 
-    dispatch(actions.togglePseudoStrategy(pseudoStrategy ?? null));
+    togglePseudoStrategy(pseudoStrategy ?? null);
     if (pseudoStrategy) {
       console.log(stripIndent`
         ✅ The pseudo strategy "${pseudoStrategy}" is now enabled for the localization.
