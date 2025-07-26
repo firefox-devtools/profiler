@@ -750,6 +750,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Ιστότοπο�
 StackSettings--invert-call-stack = Αναστροφή στοίβας κλήσεων
     .title = Ταξινόμηση κατά χρόνο που χρησιμοποιήθηκε σε κόμβο κλήσεων, αγνοώντας τους θυγατρικούς του.
 StackSettings--show-user-timing = Εμφάνιση χρονισμού χρήστη
+StackSettings--use-stack-chart-same-widths = Χρήση του ίδιου πλάτους για κάθε στοίβα
 StackSettings--panel-search =
     .label = Φιλτράρισμα στοιβών:
     .title = Εμφάνιση μόνο στοιβών που περιέχουν συνάρτηση της οποίας το όνομα αντιστοιχεί σε αυτήν την υποσυμβολοσειρά
