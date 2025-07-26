@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import type { SamplesTable } from 'firefox-profiler/types';
+import { bisectionLeft } from '../utils/bisect';
 
 /**
  * Represents CPU usage over time for a single thread.
@@ -31,11 +32,15 @@ export type CpuRatioTimeSeries = {
  * extend a thread's CPU usage beyond its last sample time.
  *
  * @param threadSamples - Array of SamplesTable objects, one per thread
+ * @param rangeStart - Optional start time to filter samples (inclusive)
+ * @param rangeEnd - Optional end time to filter samples (exclusive)
  * @returns Combined CPU data with unified time array and summed CPU ratios,
  *          or null if no threads have CPU data
  */
 export function combineCPUDataFromThreads(
-  threadSamples: SamplesTable[]
+  threadSamples: SamplesTable[],
+  rangeStart?: number,
+  rangeEnd?: number
 ): CpuRatioTimeSeries | null {
   // Filter threads that have CPU ratio data.
   // We require at least two samples per thread; the first sample's CPU ratio
@@ -44,11 +49,30 @@ export function combineCPUDataFromThreads(
   const threadsWithCPU: CpuRatioTimeSeries[] = [];
   for (const samples of threadSamples) {
     if (samples.threadCPURatio && samples.time.length >= 2) {
+      let time = samples.time;
+      let cpuRatio = samples.threadCPURatio;
+      let length = samples.length;
+
+      // If a range is specified, slice the data to that range
+      if (rangeStart !== undefined && rangeEnd !== undefined) {
+        const startIndex = bisectionLeft(samples.time, rangeStart);
+        const endIndex = bisectionLeft(samples.time, rangeEnd, startIndex);
+
+        if (startIndex < endIndex) {
+          time = samples.time.slice(startIndex, endIndex);
+          cpuRatio = samples.threadCPURatio.slice(startIndex, endIndex);
+          length = endIndex - startIndex;
+        } else {
+          // No samples in this range for this thread
+          continue;
+        }
+      }
+
       threadsWithCPU.push({
-        time: samples.time,
-        cpuRatio: samples.threadCPURatio,
+        time,
+        cpuRatio,
         maxCpuRatio: Infinity,
-        length: samples.length,
+        length,
       });
     }
   }
