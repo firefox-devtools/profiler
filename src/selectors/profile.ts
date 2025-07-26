@@ -4,7 +4,10 @@
 import { createSelector } from 'reselect';
 import * as Tracks from '../profile-logic/tracks';
 import * as CPU from '../profile-logic/cpu';
+import * as CombinedCPU from '../profile-logic/combined-cpu';
 import * as UrlState from './url-state';
+import type { SliceTree } from '../utils/slice-tree';
+import { getSlices } from '../utils/slice-tree';
 import { ensureExists } from '../utils/types';
 import {
   accumulateCounterSamples,
@@ -14,6 +17,7 @@ import {
   processCounter,
   getInclusiveSampleIndexRangeForSelection,
   computeTabToThreadIndexesMap,
+  computeSamplesTableFromRawSamplesTable,
 } from '../profile-logic/profile-data';
 import type { IPCMarkerCorrelations } from '../profile-logic/marker-data';
 import { correlateIPCMarkers } from '../profile-logic/marker-data';
@@ -65,6 +69,7 @@ import type {
   MarkerSchema,
   MarkerSchemaByName,
   SampleUnits,
+  SamplesTable,
   IndexIntoSamplesTable,
   ExtraProfileInfoSection,
   TableViewOptions,
@@ -677,6 +682,97 @@ export const getThreadActivityScores: Selector<Array<ThreadActivityScore>> =
       );
     }
   );
+
+/**
+ * Get the CPU time in milliseconds for each thread.
+ * Returns an array of CPU times (one per thread), or null if no CPU delta
+ * information is available. This uses the raw sampleScore without boost factors.
+ */
+export const getThreadCPUTimeMs: Selector<Array<number> | null> =
+  createSelector(getProfile, (profile) => {
+    const { threads, meta } = profile;
+    const { sampleUnits } = meta;
+
+    if (!sampleUnits || !sampleUnits.threadCPUDelta) {
+      return null;
+    }
+
+    // Determine the conversion factor to milliseconds
+    let cpuDeltaToMs: number;
+    switch (sampleUnits.threadCPUDelta) {
+      case 'µs':
+        cpuDeltaToMs = 1 / 1000;
+        break;
+      case 'ns':
+        cpuDeltaToMs = 1 / 1000000;
+        break;
+      case 'variable CPU cycles':
+        // CPU cycles are not time units, return null
+        return null;
+      default:
+        return null;
+    }
+
+    return threads.map((thread) => {
+      const { threadCPUDelta } = thread.samples;
+      if (!threadCPUDelta) {
+        return 0;
+      }
+      // Sum up all CPU deltas and convert to milliseconds
+      const totalCPUDelta = threadCPUDelta.reduce<number>(
+        (accum, delta) => accum + (delta ?? 0),
+        0
+      );
+      return totalCPUDelta * cpuDeltaToMs;
+    });
+  });
+
+/**
+ * Get SamplesTable for all threads in the profile.
+ * Returns an array of SamplesTable objects, one per thread.
+ */
+export const getAllThreadsSamplesTables: Selector<SamplesTable[]> =
+  createSelector(
+    getProfile,
+    getSampleUnits,
+    getReferenceCPUDeltaPerMs,
+    (profile, sampleUnits, referenceCPUDeltaPerMs) => {
+      return profile.threads.map((thread) =>
+        computeSamplesTableFromRawSamplesTable(
+          thread.samples,
+          sampleUnits,
+          referenceCPUDeltaPerMs
+        )
+      );
+    }
+  );
+
+/**
+ * Get combined CPU activity data from all threads.
+ * Returns combined time and CPU ratio arrays, or null if no CPU data is available.
+ */
+export const getCombinedThreadCPUData: Selector<CombinedCPU.CpuRatioTimeSeries | null> =
+  createSelector(getAllThreadsSamplesTables, (samplesTables) =>
+    CombinedCPU.combineCPUDataFromThreads(samplesTables)
+  );
+
+/**
+ * Get activity slices for the combined CPU usage across all threads.
+ * Returns hierarchical slices showing periods of high combined CPU activity,
+ * or null if no CPU data is available.
+ */
+export const getCombinedThreadActivitySlices: Selector<SliceTree | null> =
+  createSelector(getCombinedThreadCPUData, (combinedCPU) => {
+    if (combinedCPU === null) {
+      return null;
+    }
+    const m = Math.ceil(combinedCPU.maxCpuRatio);
+    return getSlices(
+      [0.05 * m, 0.2 * m, 0.4 * m, 0.6 * m, 0.8 * m],
+      combinedCPU.cpuRatio,
+      combinedCPU.time
+    );
+  });
 
 /**
  * Get the pages array and construct a Map of pages that we can use to get the
