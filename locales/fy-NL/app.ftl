@@ -755,6 +755,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = De-allokaasje fan
 StackSettings--invert-call-stack = Oanropstack omkeare
     .title = Sortearje op de tiid dy’t yn in oanropnode bestege wurdt, wêrby ûnderlizzende nodes negearre wurde
 StackSettings--show-user-timing = Brûkerstiming toane
+StackSettings--use-stack-chart-same-widths = Foar elke stack deselde breedte brûke
 StackSettings--panel-search =
     .label = Stacks filterje:
     .title = Allinnich stacks toane dy’t in funksje befetsje wêrfan de namme oerienkomt mei dizze substring
