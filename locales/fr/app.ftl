@@ -676,6 +676,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Sites de désallo
 StackSettings--invert-call-stack = Inverser la pile d’appels
     .title = Trier par le temps passé dans un nœud d’appel, en ignorant ses enfants.
 StackSettings--show-user-timing = Afficher le temps utilisateur
+StackSettings--use-stack-chart-same-widths = Utiliser la même largeur pour chaque pile
 StackSettings--panel-search =
     .label = Filtrer les piles :
     .title = Afficher uniquement les piles qui contiennent une fonction dont le nom correspond à cette sous-chaîne
