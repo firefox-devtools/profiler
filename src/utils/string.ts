@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 
-import * as escapeStringRegexp from 'escape-string-regexp';
+import escapeStringRegexp from 'escape-string-regexp';
 
 // Initializing this RegExp outside of removeURLs because that function is in a
 // hot path during sanitization and it's good to avoid the initialization of the
