@@ -37,6 +37,53 @@ This represents a significant achievement in the Flow→TypeScript migration:
 - `yarn typecheck` validates all converted TypeScript files
 - Mixed Flow/TypeScript codebase is stable and tested
 
+## TypeScript Configuration Setup
+
+### Dual Configuration Strategy
+
+This project uses **two separate TypeScript configurations** to handle the mixed Flow/TypeScript migration:
+
+#### 1. `tsconfig.json` (Primary Config)
+- **Purpose**: Full project configuration with Flow compatibility
+- **Key settings**:
+  - `"allowJs": true` - Allows TypeScript to process `.js` files when imported by `.ts` files
+  - `"include": ["src/**/*.ts", "src/**/*.tsx", "src/global.d.ts"]` - Only explicitly includes TypeScript files
+  - **Important**: Due to `allowJs: true`, when TypeScript processes `.ts` files that import `.js` files, it will also type-check those `.js` files and fail on Flow annotations
+
+#### 2. `tsconfig.migration.json` (Migration-Specific Config)
+- **Purpose**: Safe type checking during migration process  
+- **Extends**: `tsconfig.json` but overrides key settings
+- **Key settings**:
+  - `"allowJs": false` - Completely ignores `.js` files
+  - `"exclude": ["src/**/*.js", "src/**/*.jsx"]` - Explicitly excludes all JavaScript files
+  - **Result**: Only checks actual TypeScript files, avoiding Flow annotation errors
+
+### Commands & Usage
+
+```bash
+# Migration-safe type checking (recommended during development)
+yarn typecheck  # Uses tsconfig.migration.json
+
+# Full project type checking (use when migration is complete)  
+yarn typecheck-all  # Uses default tsconfig.json
+```
+
+### About `--skipLibCheck` Flag
+
+The `--skipLibCheck` flag in commands **does not affect** the `.js` file errors from Flow annotations. It only:
+- Skips type checking of `.d.ts` declaration files (in `node_modules`, etc.)
+- Provides performance benefits
+- Is safe to remove but commonly kept as standard practice
+
+**The real protection** from Flow annotation errors comes from using `tsconfig.migration.json` which excludes `.js` files entirely.
+
+### Webpack Configuration
+
+The webpack configuration has been updated to support TypeScript module resolution:
+- Added `extensions: ['.js', '.jsx', '.ts', '.tsx']` for extensionless imports
+- Added webpack rule to process `.ts`/`.tsx` files through babel-loader
+- Enables `yarn build` to properly resolve TypeScript files
+
 ---
 
 ## Critical Process (Prevents Mistakes)
