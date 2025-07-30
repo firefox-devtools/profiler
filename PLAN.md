@@ -34,26 +34,35 @@ Based on analysis of the codebase and GitHub issue #2931, this migration involve
 
 **Lesson Learned**: Global Flow syntax changes don't work in mixed codebase - must be done per-file.
 
-### Phase 3: File-by-File Migration (IN PROGRESS)
+### Phase 3: File-by-File Migration (IN PROGRESS - MAJOR MILESTONE ACHIEVED)
 
 **Goal**: Convert individual files from .js to .ts/.tsx while maintaining functionality.
 
-**Strategy Revised**: Start with type definitions first to build foundation.
+**Strategy Proven**: Type-first migration approach successfully completed - all 13/13 type definition files converted ✅
 
-#### 3.1 Type Definitions Migration (IN PROGRESS)
+#### 3.1 Type Definitions Migration (COMPLETED ✅)
 - [x] Convert `src/types/units.js` → `units.ts` ✅
 - [x] Convert `src/types/utils.js` → `utils.ts` ✅  
 - [x] Convert `src/types/store.js` → `store.ts` ✅
 - [x] Convert `src/types/index.js` → `index.ts` ✅
-- [ ] **Next**: Convert remaining complex type files (actions.js, state.js, etc.)
-- [ ] Handle Flow-specific patterns: `$ReadOnly`, `$Call`, etc.
-- [ ] Validate all imports work from converted files
+- [x] Convert `src/types/actions.js` → `actions.ts` ✅ (691 lines, complex Redux types)
+- [x] Convert `src/types/state.js` → `state.ts` ✅ (395 lines, complete app state)
+- [x] Convert `src/types/profile.js` → `profile.ts` ✅
+- [x] Convert `src/types/profile-derived.js` → `profile-derived.ts` ✅
+- [x] Convert `src/types/transforms.js` → `transforms.ts` ✅
+- [x] Convert `src/types/symbolication.js` → `symbolication.ts` ✅
+- [x] Convert `src/types/indexeddb.js` → `indexeddb.ts` ✅
+- [x] Convert `src/types/markers.js` → `markers.ts` ✅ (890 lines, complex marker types)
+- [x] Convert `src/types/gecko-profile.js` → `gecko-profile.ts` ✅ (572 lines, Gecko profile format)
+- [x] **ALL 13/13 type definition files successfully converted and compiling** ✅
 
-#### 3.2 Core Utilities Migration
-- [ ] Convert `src/utils/*.js` to `.ts` (build on type foundation)
-- [ ] Start with simple utility functions without complex dependencies
-- [ ] Test TypeScript compilation and imports work correctly
-- [ ] Validate existing functionality is preserved
+#### 3.2 Core Utilities Migration (IN PROGRESS)
+- [x] Convert `src/utils/colors.js` → `colors.ts` ✅ (Photon color constants)
+- [x] Convert `src/utils/string.js` → `string.ts` ✅ (URL sanitization utilities)
+- [x] Convert `src/utils/format-numbers.js` → `format-numbers.ts` ✅ (Number formatting with localization)
+- [ ] Convert remaining ~37 utility files in src/utils/
+- [x] Test TypeScript compilation and imports work correctly
+- [x] Validate existing functionality is preserved
 
 #### 3.3 Component Migration
 - [ ] Start with simple leaf components (no complex Redux connections)
@@ -158,9 +167,10 @@ Based on analysis of the codebase and GitHub issue #2931, this migration involve
 **Total Estimated Duration: 6-8 weeks** (Updated based on progress)
 
 - ✅ **Phase 1 & 2**: COMPLETED (Infrastructure + Flow cleanup)
-- 🔄 **Phase 3**: 2-3 weeks (File-by-file migration) - IN PROGRESS  
-  - 🔄 Type definitions: 8/14 files converted (units, utils, store, index, actions, state, profile, profile-derived)
-  - ⏳ Remaining: 6 type files, utilities, components
+- 🔄 **Phase 3**: File-by-file migration - IN PROGRESS  
+  - ✅ **Type definitions: 13/13 files converted** - MAJOR MILESTONE COMPLETED ✅
+  - 🔄 **Core utilities: 3/40+ files converted** (colors.ts, string.ts, format-numbers.ts)
+  - ⏳ Remaining: ~37 utility files, ~150 React components
 - ⏳ **Phase 4**: 2-3 weeks (Advanced type fixes)
 - ⏳ **Phase 5**: 1-2 weeks (Testing & validation)
 - ⏳ **Phase 6**: 1 week (Final cleanup)
@@ -327,6 +337,41 @@ type Example = {
 }; // ← No trailing comma
 ```
 
+#### 10. CommonJS Import Compatibility (NEW PATTERN)
+```typescript
+// Flow - works with various import styles
+import escapeStringRegexp from 'escape-string-regexp';
+
+// TypeScript - requires esModuleInterop for default imports from CommonJS
+import escapeStringRegexp from 'escape-string-regexp'; // ✅ Works with esModuleInterop: true
+
+// Alternative if needed:
+import * as escapeStringRegexp from 'escape-string-regexp';
+```
+
+#### 11. Complex Flow Utility Types (ADVANCED PATTERNS)
+```typescript
+// Flow
+export type $ReplaceCauseWithStack<T: Object> = {
+  ...$Diff<T, { cause: any }>,
+  stack?: GeckoMarkerStack,
+};
+
+// TypeScript
+export type ReplaceCauseWithStack<T extends Record<string, unknown>> = Omit<T, 'cause'> & {
+  stack?: GeckoMarkerStack,
+};
+```
+
+#### 12. Array Type Variations (NEW PATTERN)
+```typescript
+// Flow
+data: $ReadOnlyArray<[number, number, number]>
+
+// TypeScript
+data: readonly [number, number, number][]
+```
+
 ### Conversion Process (Per File) - REVISED
 1. Copy `.js` → `.ts`
 2. Remove `// @flow`
@@ -341,9 +386,10 @@ type Example = {
 11. Mark file as "converted" only after error-free compilation
 
 ### Success Metrics
-- **actions.ts**: 691 lines, complex Redux types, compiles with zero errors
-- **state.ts**: 395 lines, complete app state, compiles with zero errors
-- **Pattern Reliability**: Same regex patterns work across different file types
+- **All Type Definitions**: 13/13 files, including complex 890-line markers.ts and 572-line gecko-profile.ts
+- **Core Utilities Started**: colors.ts, string.ts, format-numbers.ts - all compile with zero errors
+- **Pattern Reliability**: Proven conversion patterns work consistently across different file types
+- **Zero Compilation Errors**: All converted files compile successfully with TypeScript
 
 ## Lessons Learned from Failed Approaches
 
@@ -360,6 +406,18 @@ type Example = {
 **Proven Approach**: Start with type definitions first, then utilities ✅
 **Evidence**: Successfully converted actions.ts (691 lines) and state.ts (395 lines) with zero compilation errors
 **Lesson**: Dependencies matter - convert foundation files (types) before dependent files
+
+### TypeScript Configuration Strategy (NEW LESSON)
+**What Was Done**: Updated tsconfig.json to 2025 TypeScript standards with enhanced migration support
+**Key Improvements**:
+- **ES2022 target** with modern module resolution
+- **noImplicitReturns: true** - catches Flow-style function return issues
+- **Enhanced esModuleInterop** - better CommonJS import compatibility
+- **JSON Schema reference** - improved IDE support
+
+**Result**: SUCCESSFUL - Better error detection, improved import handling, modern TypeScript features
+**Evidence**: Caught import compatibility issues in string.ts that previous config missed
+**Lesson**: Modern TypeScript configuration significantly improves migration experience and error detection
 
 ## Resources and References
 
