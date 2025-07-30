@@ -738,6 +738,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Sitos de de-alloc
 StackSettings--invert-call-stack = Inverter le pila de appello
     .title = Ordina per le tempore passate in un nodo de appello, ignorante su filios.
 StackSettings--show-user-timing = Monstrar temporisation de usator
+StackSettings--use-stack-chart-same-widths = Usar le mesme largessa pro cata pila
 StackSettings--panel-search =
     .label = Filtrar pilas:
     .title = Solo monstra pilas que contine un function cuje nomine concorda con iste sub-catena
