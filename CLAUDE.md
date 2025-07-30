@@ -67,21 +67,24 @@ The Firefox Profiler is a React/Redux web application for visualizing performanc
 ### Build System
 
 - **Webpack** - Main bundler with separate configs for different build targets
-- **Babel** - JavaScript compilation with Flow type stripping
-- **Flow** - Static type checking (not TypeScript)
+- **Babel** - JavaScript compilation with Flow type stripping (transitioning)
+- **TypeScript** - Modern type checking with 2025 configuration standards
+- **Flow** - Legacy type checking (being phased out during migration)
 - **Jest** - Test runner with custom environment setup
 
 ## Development Notes
 
 ### Type System
 
-This project is in the progress of being migrated from Flow to TypeScript. Type definitions are in `src/types/`.
+This project is in the process of being migrated from Flow to TypeScript. Type definitions are in `src/types/`.
 
-See PLAN.md for the overall migration plan.
+**Migration Status**: Major milestone achieved - all 13/13 type definition files successfully converted to TypeScript ✅
 
-Check TODO.md for the work items that need to be completed for a full conversion.
-
-Check STATUS.md for the current status of the migration.
+See **PLAN.md** for comprehensive migration guidance including:
+- Current progress status and achievements
+- Proven Flow→TypeScript conversion patterns  
+- Next steps and actionable tasks
+- Lessons learned and best practices
 
 ### Testing
 
