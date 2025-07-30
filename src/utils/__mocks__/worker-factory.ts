@@ -9,7 +9,7 @@ class NodeWorker {
   onmessage: ((event: MessageEvent) => unknown) | null;
 
   constructor(file: string) {
-    const worker = new Worker(__dirname + '/node-worker-contents.js', {
+    const worker = new Worker(__dirname + '/node-worker-contents.ts', {
       workerData: file,
     });
     worker.on('message', this.onMessage);
@@ -62,13 +62,11 @@ const workerConfigs: { [key: string]: string } = {
 
 const workerInstances: NodeWorker[] = [];
 
-export default class {
-  constructor(file: string) {
-    const path = workerConfigs[file];
-    const worker = new NodeWorker(path);
-    workerInstances.push(worker);
-    return worker;
-  }
+export function makeWebWorker(file: string): NodeWorker {
+  const path = workerConfigs[file];
+  const worker = new NodeWorker(path);
+  workerInstances.push(worker);
+  return worker;
 }
 
 /**

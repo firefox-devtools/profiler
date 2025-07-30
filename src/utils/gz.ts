@@ -4,7 +4,7 @@
 
 // This worker is imported as WebWorker since it's conflicting with the Worker
 // global type.
-import WebWorker from './worker-factory';
+import { makeWebWorker } from './worker-factory';
 
 const zeeCallbacks: Array<{ success: (data: any) => void; error: (error: any) => void } | null> = [];
 
@@ -30,7 +30,7 @@ export function compress(
   data: string | Uint8Array,
   compressionLevel?: number
 ): Promise<Uint8Array> {
-  const zeeWorker = new WebWorker('zee-worker') as any as Worker;
+  const zeeWorker = makeWebWorker('zee-worker');
   workerOnMessage(zeeWorker);
 
   const arrayData =
@@ -55,7 +55,7 @@ export function compress(
 // Neuters data's buffer, if data is a typed array.
 export function decompress(data: Uint8Array): Promise<Uint8Array> {
   return new Promise(function (resolve, reject) {
-    const zeeWorker = new WebWorker('zee-worker') as any as Worker;
+    const zeeWorker = makeWebWorker('zee-worker');
     workerOnMessage(zeeWorker);
     zeeWorker.postMessage(
       {
