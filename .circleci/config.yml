@@ -110,7 +110,7 @@ workflows:
       - tests
       - lint
       - build-prod
-      - flow
+      - typecheck
       - licence-check
       - alex
       - yarn_lock
