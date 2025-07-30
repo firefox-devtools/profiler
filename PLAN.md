@@ -13,24 +13,27 @@ This represents a significant achievement in the Flow→TypeScript migration:
 - **All tests continue to pass** - no functionality broken during migration
 - **Advanced type safety maintained** with proper TypeScript equivalents
 
-### 📊 Progress
+### 📊 Progress Summary
 
 - **Type Definitions**: ✅ 13/13 files complete (100%)
-- **Core Utilities**: ✅ 40/40 files complete (100%) - colors.ts, string.ts, format-numbers.ts, errors.ts, base64.ts, bisect.ts, pretty-bytes.ts, sha1.ts, set.ts, magic.ts, analytics.ts, l10n-pseudo.ts, path.ts, time-code.ts, number-series.ts, jwt.ts, shorten-url.ts, uintarray-encoding.ts, range-set.ts, special-paths.ts, string-table.ts, window-console.ts, css-geometry-tools.ts, gz.ts, react.ts, flow.ts, index.ts, codemirror-shared.ts, data-table-utils.ts, resize-observer-wrapper.ts, text-measurement.ts, url.ts, l10n-ftl-functions.ts, query-api.ts, worker-factory.ts, **mocks**/worker-factory.ts, fetch-assembly.ts, untar.ts, fetch-source.ts, connect.ts
-- **React Components**: ✅ 6/150+ files started (4.0%) - Warning.tsx, BlobUrlLink.tsx, FooterLinks.tsx, DebugWarning.tsx, EmptyReasons.tsx, Icon.tsx
+- **Core Utilities**: ✅ 41/41 files complete (100%)  
+- **React Components**: ✅ 6/150+ files complete (4.0%) - Warning.tsx, BlobUrlLink.tsx, FooterLinks.tsx, DebugWarning.tsx, EmptyReasons.tsx, Icon.tsx
+- **Profile Logic**: ⏳ 0/80+ files - Core business logic modules
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 
-### 🎯 Next Steps
+### 🎯 Immediate Next Steps
 
-1. ✅ **COMPLETED**: All utility files migrated (100%)!
-   - Successfully converted complex connect.js with advanced Flow features
-   - All 41 utility files now use TypeScript
-2. ✅ **IN PROGRESS**: React component migration started (6 components complete)
-   - Successfully converted simple presentational and connected components
-   - Proven patterns for TypeScript component conversions established
-   - Union type handling with type guards ('displayData' in ownProps)
-3. Continue React component migration with more leaf components
-4. Maintain test validation after each conversion
+**Priority**: Continue React component migration with simple leaf components before tackling complex profile-logic modules.
+
+**Target Components** (simple, minimal dependencies):
+1. Simple presentational components in `src/components/shared/`
+2. Small utility components with few props
+3. Components with minimal external dependencies
+
+**Avoid for now**: 
+- Profile-logic modules (complex business logic)
+- Complex connected components with many selectors
+- Components with heavy Canvas/WebGL usage
 
 ### ✅ Current Migration State
 
