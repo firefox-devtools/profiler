@@ -1,3 +1,3 @@
 export function makeWebWorker(file: string): Worker {
-  return new Worker(`/${file}.js`);
+  return new window.Worker(`/${file}.js`);
 }

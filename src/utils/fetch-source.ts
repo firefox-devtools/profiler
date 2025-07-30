@@ -79,7 +79,7 @@ export async function fetchSource(
         break;
       }
       default:
-        throw assertExhaustiveCheck(queryResult as never);
+        throw assertExhaustiveCheck(queryResult);
     }
   }
 
@@ -136,7 +136,7 @@ export async function fetchSource(
         const bytes = await promise;
 
         // Find the file inside of the archive.
-        const stream = new UntarFileStream(bytes.buffer as ArrayBuffer);
+        const stream = new UntarFileStream(bytes.buffer);
         const textDecoder = new TextDecoder();
 
         while (stream.hasNext()) {
@@ -167,7 +167,7 @@ export async function fetchSource(
     }
 
     default:
-      throw assertExhaustiveCheck(downloadRecipe as never);
+      throw assertExhaustiveCheck(downloadRecipe);
   }
   return { type: 'ERROR', errors };
 }

@@ -17,7 +17,7 @@ class ByteReader {
   _position = 0;
   _asciiDecoder = new TextDecoder('ascii', { fatal: true });
 
-  constructor(arrayBuffer: ArrayBuffer) {
+  constructor(arrayBuffer: ArrayBufferLike) {
     this._uint8Array = new Uint8Array(arrayBuffer);
     this._bufferView = new DataView(arrayBuffer);
   }
@@ -89,7 +89,7 @@ function _parseOptionalInt(s: string, base: number): number | null {
 class PaxHeader {
   _fields: FieldEntry[];
 
-  static parse(buffer: ArrayBuffer): PaxHeader {
+  static parse(buffer: Uint8Array): PaxHeader {
     // https://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_03
     // An extended header shall consist of one or more records, each constructed as follows:
     // "%d %s=%s\n", <length>, <keyword>, <value>
@@ -203,7 +203,7 @@ export class UntarFileStream {
   _reader: ByteReader;
   _globalPaxHeader: PaxHeader | null = null;
 
-  constructor(arrayBuffer: ArrayBuffer) {
+  constructor(arrayBuffer: ArrayBufferLike) {
     this._reader = new ByteReader(arrayBuffer);
   }
 
