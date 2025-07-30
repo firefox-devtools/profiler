@@ -2,17 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
 
 import memoize from 'memoize-immutable';
 import NamedTupleMap from 'namedtuplemap';
 
-import type {
+import {
   Microseconds,
   Milliseconds,
   Nanoseconds,
   WeightType,
-} from 'firefox-profiler/types';
+} from '../types';
 import { assertExhaustiveCheck } from './flow';
 
 // Calling `toLocalestring` repeatedly in a tight loop can be a performance

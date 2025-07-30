@@ -1,7 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
 /**
  * These are the colors from Photon. They are inlined to provide easy access. If updating
@@ -75,10 +74,10 @@ export const INK_80 = '#202340';
 export const INK_90 = '#0f1126';
 
 type ColorStyles = {
-  +selectedFillStyle: string,
-  +unselectedFillStyle: string,
-  +selectedTextColor: string,
-  +gravity: number,
+  readonly selectedFillStyle: string,
+  readonly unselectedFillStyle: string,
+  readonly selectedTextColor: string,
+  readonly gravity: number,
 };
 
 const GRAY_STYLE = {
@@ -93,7 +92,7 @@ const DARK_GRAY_STYLE = {
   selectedTextColor: '#fff',
   gravity: 11,
 };
-const STYLE_MAP: { [string]: ColorStyles } = {
+const STYLE_MAP: { [key: string]: ColorStyles } = {
   transparent: {
     selectedFillStyle: 'transparent',
     unselectedFillStyle: 'transparent',

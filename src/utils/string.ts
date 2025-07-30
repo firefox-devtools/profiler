@@ -2,9 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
 
-import escapeStringRegexp from 'escape-string-regexp';
+import * as escapeStringRegexp from 'escape-string-regexp';
 
 // Initializing this RegExp outside of removeURLs because that function is in a
 // hot path during sanitization and it's good to avoid the initialization of the
