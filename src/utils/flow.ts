@@ -1,10 +1,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
-import type { TabSlug } from '../app-logic/tabs-handling';
-import type { TransformType } from 'firefox-profiler/types';
+import { TabSlug } from '../app-logic/tabs-handling';
+import { TransformType } from 'firefox-profiler/types';
 
 /**
  * This file contains utils that help Flow understand things better. Occasionally
@@ -20,7 +19,7 @@ import type { TransformType } from 'firefox-profiler/types';
  * more readable.
  */
 export function assertExhaustiveCheck(
-  notValid: empty,
+  notValid: never,
   errorMessage: string = `There was an unhandled case for the value: "${notValid}"`
 ): void {
   throw new Error(errorMessage);
@@ -40,7 +39,7 @@ export function immutableUpdate<T>(object: T, ...rest: any[]): T {
  * throw an error so that any arbitrary string can be converted, e.g. from a URL.
  */
 export function toValidTabSlug(tabSlug: any): TabSlug | null {
-  const coercedTabSlug = (tabSlug: TabSlug);
+  const coercedTabSlug = tabSlug as TabSlug;
   switch (coercedTabSlug) {
     case 'calltree':
     case 'stack-chart':
@@ -53,7 +52,6 @@ export function toValidTabSlug(tabSlug: any): TabSlug | null {
     default: {
       // The coerced type SHOULD be empty here. If in reality we get
       // here, then it's not a valid transform type, so return null.
-      (coercedTabSlug: empty);
       return null;
     }
   }
@@ -79,7 +77,7 @@ export function ensureIsValidTabSlug(type: string): TabSlug {
  */
 export function convertToTransformType(type: string): TransformType | null {
   // Coerce this into a TransformType even if it's not one.
-  const coercedType = ((type: any): TransformType);
+  const coercedType = type as TransformType;
   switch (coercedType) {
     // Exhaustively check each TransformType. The default arm will assert that
     // we have been exhaustive.
@@ -98,7 +96,6 @@ export function convertToTransformType(type: string): TransformType | null {
     default: {
       // The coerced type SHOULD be empty here. If in reality we get
       // here, then it's not a valid transform type, so return null.
-      (coercedType: empty);
       return null;
     }
   }
@@ -109,54 +106,52 @@ export function convertToTransformType(type: string): TransformType | null {
  * This is equivalent to: (((value: A): any): B)
  */
 export function coerce<A, B>(item: A): B {
-  return (item: any);
+  return item as any;
 }
 
 /**
  * It can be helpful to coerce one type that matches the shape of another.
  */
-export function coerceMatchingShape<T>(item: $Shape<T>): T {
-  return (item: any);
+export function coerceMatchingShape<T>(item: Partial<T>): T {
+  return item as any;
 }
 
 /**
  * This is a type-friendly version of Object.values that assumes the object has
  * a Map-like structure.
  */
-export function objectValues<Value, Obj: { [string]: Value }>(
+export function objectValues<Value, Obj extends Record<string, Value>>(
   object: Obj
 ): Value[] {
-  return (Object.values: any)(object);
+  return Object.values(object) as any;
 }
 
 /**
  * This is a type-friendly version of Object.entries that assumes the object has
  * a Map-like structure.
  */
-export function objectEntries<Key, Value>(object: {
-  [Key]: Value,
+export function objectEntries<Key extends string, Value>(object: {
+  [K in Key]: Value;
 }): Array<[Key, Value]> {
-  return (Object.entries: any)(object);
+  return Object.entries(object) as any;
 }
 
 /**
  * This is a type-friendly version of Object.entries that assumes the object has
  * a Map-like structure.
  */
-export function objectMap<Return, Key, Value>(
-  object: { [Key]: Value },
-  fn: (Value, Key) => Return
-): { [Key]: Return } {
-  const result: { [Key]: Return } = {};
+export function objectMap<Return, Key extends string, Value>(
+  object: { [K in Key]: Value },
+  fn: (value: Value, key: Key) => Return
+): { [K in Key]: Return } {
+  const result: { [K in Key]: Return } = {} as any;
   for (const [key, value] of objectEntries(object)) {
     result[key] = fn(value, key);
   }
   return result;
 }
 
-// Generic bounds with an Object is a false positive.
-// eslint-disable-next-line flowtype/no-weak-types
-export function getObjectValuesAsUnion<T: Object>(obj: T): Array<$Values<T>> {
+export function getObjectValuesAsUnion<T extends Record<string, any>>(obj: T): Array<T[keyof T]> {
   return Object.values(obj);
 }
 
@@ -174,7 +169,7 @@ export function ensureIsTransformType(type: string): TransformType {
   return assertedType;
 }
 
-export function ensureExists<T>(item: ?T, message: ?string): T {
+export function ensureExists<T>(item: T | null | undefined, message?: string): T {
   if (item === null) {
     throw new Error(message || 'Expected an item to exist, and it was null.');
   }
@@ -189,6 +184,6 @@ export function ensureExists<T>(item: ?T, message: ?string): T {
 /**
  * Returns the first item from Set in a type friendly manner.
  */
-export function getFirstItemFromSet<T>(set: Set<T>): T | void {
+export function getFirstItemFromSet<T>(set: Set<T>): T | undefined {
   return set.values().next().value;
 }

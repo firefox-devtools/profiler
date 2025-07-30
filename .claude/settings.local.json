@@ -18,7 +18,8 @@
       "Bash(yarn typecheck-file:*)",
       "Bash(tsc:*)",
       "Bash(yarn test)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }

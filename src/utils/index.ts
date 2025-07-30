@@ -1,14 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
-import type {
-  KeyboardModifiers,
+import {
   Marker,
   Milliseconds,
   StartEndRange,
 } from 'firefox-profiler/types';
+import { KeyboardModifiers } from 'firefox-profiler/types/actions';
+import { MouseEvent as SyntheticMouseEvent, KeyboardEvent as SyntheticKeyboardEvent } from 'react';
 
 /**
  * Firefox has issues switching quickly between fill style colors, as the CSS color
@@ -36,18 +36,15 @@ export class FastFillStyle {
  * Perform a simple shallow object equality check.
  */
 export function objectShallowEquals<
-  // False positive, Objects are fine as generic trait bounds.
-  // eslint-disable-next-line flowtype/no-weak-types
-  A: Object,
-  // eslint-disable-next-line flowtype/no-weak-types
-  B: Object,
+  A extends Record<string, any>,
+  B extends Record<string, any>,
 >(a: A, b: B): boolean {
   let aLength = 0;
   let bLength = 0;
   for (const key in a) {
     if (Object.prototype.hasOwnProperty.call(a, key)) {
       aLength++;
-      if (a[key] !== b[key]) {
+      if ((a as any)[key] !== (b as any)[key]) {
         return false;
       }
     }
@@ -102,8 +99,8 @@ export function getTrackSelectionModifiers(
   event:
     | MouseEvent
     | KeyboardEvent
-    | SyntheticMouseEvent<>
-    | SyntheticKeyboardEvent<>
+    | SyntheticMouseEvent<any>
+    | SyntheticKeyboardEvent<any>
 ): KeyboardModifiers {
   return {
     ctrlOrMeta: (event.ctrlKey || event.metaKey) && !event.altKey,
@@ -127,7 +124,7 @@ export function countPositiveValues(arr: Array<number>): number {
  * If multiple entries with the highest value exist, it returns the key of the
  * first encountered highest value.
  */
-export function mapGetKeyWithMaxValue<K>(map: Map<K, number>): K | void {
+export function mapGetKeyWithMaxValue<K>(map: Map<K, number>): K | undefined {
   let maxValue = -Infinity;
   let keyForMaxValue;
   for (const [key, value] of map) {
