@@ -5,13 +5,13 @@
 ### 📊 Progress
 
 - **Type Definitions**: ✅ 13/13 files complete (100%)
-- **Core Utilities**: 🔄 16/40+ files complete (40%) - colors.ts, string.ts, format-numbers.ts, errors.ts, base64.ts, bisect.ts, pretty-bytes.ts, sha1.ts, set.ts, magic.ts, analytics.ts, l10n-pseudo.ts, path.ts, time-code.ts, number-series.ts, jwt.ts
+- **Core Utilities**: 🔄 19/40+ files complete (47.5%) - colors.ts, string.ts, format-numbers.ts, errors.ts, base64.ts, bisect.ts, pretty-bytes.ts, sha1.ts, set.ts, magic.ts, analytics.ts, l10n-pseudo.ts, path.ts, time-code.ts, number-series.ts, jwt.ts, shorten-url.ts, uintarray-encoding.ts, range-set.ts
 - **React Components**: ⏳ 0/150+ files (pending)
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 
 ### 🎯 Next Steps
 
-1. Continue converting remaining ~25 utility files in src/utils/
+1. Continue converting remaining ~21 utility files in src/utils/
 2. Begin React component migration with basic leaf components
 3. Maintain test validation after each conversion
 
@@ -30,10 +30,54 @@
 1. Copy `.js` → `.ts/.tsx`
 2. Remove `// @flow`
 3. Apply conversion patterns (see below)
-4. **CRITICAL**: Test compilation: `yarn typecheck-file file.ts`
+4. **CRITICAL**: Test compilation: `yarn typecheck` (project-wide is fastest)
 5. **CRITICAL**: Fix ALL compilation errors before proceeding
 6. Only after successful compilation, remove original `.js` file
 7. Run tests to ensure no regressions
+
+### ⚡ Efficient Commands (Use These)
+
+```bash
+# TypeScript compilation check (fast, use this)
+yarn typecheck
+
+# Combined check, remove, and test in one command (most efficient)
+yarn typecheck && rm src/utils/filename.js && yarn test
+
+# Batch operations for multiple files
+yarn typecheck && rm src/utils/file1.js src/utils/file2.js && yarn test
+
+# Stage and commit changes
+git add -A
+git commit -m "Convert X files to TypeScript"
+```
+
+### ❌ Inefficient Commands (Avoid These)
+
+```bash
+# DON'T: Individual file checking (too slow)
+yarn typecheck-file src/utils/filename.ts
+npx tsc --noEmit --skipLibCheck src/utils/filename.ts
+
+# DON'T: Project + file mixing (causes errors)
+npx tsc --noEmit --skipLibCheck --project tsconfig.migration.json src/utils/filename.ts
+
+# DON'T: Direct tsc without yarn (missing from PATH)
+tsc --noEmit --skipLibCheck --project tsconfig.migration.json
+
+# DON'T: Separate test runs (wastes time)
+yarn typecheck
+rm src/utils/filename.js  
+yarn test  # Run together instead
+```
+
+### 💡 Pro Tips
+
+- **Project-wide `yarn typecheck` is faster** than individual file checks
+- **Batch multiple file conversions** before testing to save time
+- **Use `&&` operators** to chain commands efficiently
+- **Remove original files only after** successful TypeScript compilation
+- **The migration config is optimized** - project-wide checks are very fast (~0.65s)
 
 ### Proven Flow→TypeScript Conversion Patterns
 
