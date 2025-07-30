@@ -93,7 +93,10 @@ export class PathSet implements Iterable<CallNodePath> {
     }
   }
 
-  forEach(func: (value: CallNodePath, value2: CallNodePath, set: PathSet) => void, thisArg?: any) {
+  forEach(
+    func: (value: CallNodePath, value2: CallNodePath, set: PathSet) => void,
+    thisArg?: any
+  ) {
     for (const entry of this) {
       func.call(thisArg, entry, entry, this);
     }

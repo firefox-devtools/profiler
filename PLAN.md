@@ -5,7 +5,7 @@
 ### 📊 Progress
 
 - **Type Definitions**: ✅ 13/13 files complete (100%)
-- **Core Utilities**: 🔄 38/41 files complete (92.7%) - colors.ts, string.ts, format-numbers.ts, errors.ts, base64.ts, bisect.ts, pretty-bytes.ts, sha1.ts, set.ts, magic.ts, analytics.ts, l10n-pseudo.ts, path.ts, time-code.ts, number-series.ts, jwt.ts, shorten-url.ts, uintarray-encoding.ts, range-set.ts, special-paths.ts, string-table.ts, window-console.ts, css-geometry-tools.ts, gz.ts, react.ts, flow.ts, index.ts, codemirror-shared.ts, data-table-utils.ts, resize-observer-wrapper.ts, text-measurement.ts, url.ts, l10n-ftl-functions.ts, query-api.ts, worker-factory.ts, __mocks__/node-worker-contents.ts, __mocks__/worker-factory.ts, fetch-assembly.ts
+- **Core Utilities**: 🔄 38/41 files complete (92.7%) - colors.ts, string.ts, format-numbers.ts, errors.ts, base64.ts, bisect.ts, pretty-bytes.ts, sha1.ts, set.ts, magic.ts, analytics.ts, l10n-pseudo.ts, path.ts, time-code.ts, number-series.ts, jwt.ts, shorten-url.ts, uintarray-encoding.ts, range-set.ts, special-paths.ts, string-table.ts, window-console.ts, css-geometry-tools.ts, gz.ts, react.ts, flow.ts, index.ts, codemirror-shared.ts, data-table-utils.ts, resize-observer-wrapper.ts, text-measurement.ts, url.ts, l10n-ftl-functions.ts, query-api.ts, worker-factory.ts, **mocks**/node-worker-contents.ts, **mocks**/worker-factory.ts, fetch-assembly.ts
 - **React Components**: ⏳ 0/150+ files (pending)
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 
@@ -36,6 +36,7 @@
 5. **CRITICAL**: Fix ALL compilation errors before proceeding
 6. Only after successful compilation, remove original `.js` file
 7. Run tests to ensure no regressions
+8. **CRITICAL**: Run `yarn prettier-fix` prior to committing.
 
 ### ⚡ Efficient Commands (Use These)
 
@@ -69,7 +70,7 @@ tsc --noEmit --skipLibCheck --project tsconfig.migration.json
 
 # DON'T: Separate test runs (wastes time)
 yarn typecheck
-rm src/utils/filename.js  
+rm src/utils/filename.js
 yarn test  # Run together instead
 ```
 

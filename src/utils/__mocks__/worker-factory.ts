@@ -18,10 +18,7 @@ class NodeWorker {
     this.onmessage = null;
   }
 
-  postMessage(
-    message: unknown,
-    transfer?: any[]
-  ) {
+  postMessage(message: unknown, transfer?: any[]) {
     let payload = message;
 
     // Starting with node v11.12, postMessage sends the payload using the same

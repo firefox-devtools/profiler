@@ -6,7 +6,10 @@
 // global type.
 import { makeWebWorker } from './worker-factory';
 
-const zeeCallbacks: Array<{ success: (data: any) => void; error: (error: any) => void } | null> = [];
+const zeeCallbacks: Array<{
+  success: (data: any) => void;
+  error: (error: any) => void;
+} | null> = [];
 
 type ZeeWorkerData = {
   callbackID: number;

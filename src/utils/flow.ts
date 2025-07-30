@@ -151,7 +151,9 @@ export function objectMap<Return, Key extends string, Value>(
   return result;
 }
 
-export function getObjectValuesAsUnion<T extends Record<string, any>>(obj: T): Array<T[keyof T]> {
+export function getObjectValuesAsUnion<T extends Record<string, any>>(
+  obj: T
+): Array<T[keyof T]> {
   return Object.values(obj);
 }
 
@@ -169,7 +171,10 @@ export function ensureIsTransformType(type: string): TransformType {
   return assertedType;
 }
 
-export function ensureExists<T>(item: T | null | undefined, message?: string): T {
+export function ensureExists<T>(
+  item: T | null | undefined,
+  message?: string
+): T {
   if (item === null) {
     throw new Error(message || 'Expected an item to exist, and it was null.');
   }

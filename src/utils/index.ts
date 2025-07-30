@@ -2,13 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import {
-  Marker,
-  Milliseconds,
-  StartEndRange,
-} from 'firefox-profiler/types';
+import { Marker, Milliseconds, StartEndRange } from 'firefox-profiler/types';
 import { KeyboardModifiers } from 'firefox-profiler/types/actions';
-import { MouseEvent as SyntheticMouseEvent, KeyboardEvent as SyntheticKeyboardEvent } from 'react';
+import {
+  MouseEvent as SyntheticMouseEvent,
+  KeyboardEvent as SyntheticKeyboardEvent,
+} from 'react';
 
 /**
  * Firefox has issues switching quickly between fill style colors, as the CSS color

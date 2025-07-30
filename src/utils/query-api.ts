@@ -76,7 +76,9 @@ export async function queryApiWithFallback<T>(
   if (symbolServerUrlForFallback !== null) {
     const url = symbolServerUrlForFallback + path;
     try {
-      const response = await delegate.fetchUrlResponse(url, { data: requestJson });
+      const response = await delegate.fetchUrlResponse(url, {
+        data: requestJson,
+      });
       const responseText = await response.text();
 
       try {

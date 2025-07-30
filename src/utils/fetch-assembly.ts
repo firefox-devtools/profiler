@@ -3,12 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { assertExhaustiveCheck } from './flow';
+import { NativeSymbolInfo, Lib, MixedObject } from 'firefox-profiler/types';
 import {
-  NativeSymbolInfo,
-  Lib,
-  MixedObject,
-} from 'firefox-profiler/types';
-import { ApiQueryError, DecodedInstruction } from 'firefox-profiler/types/state';
+  ApiQueryError,
+  DecodedInstruction,
+} from 'firefox-profiler/types/state';
 import { queryApiWithFallback } from './query-api';
 import { ExternalCommunicationDelegate } from './query-api';
 import { isLocalURL } from './url';
