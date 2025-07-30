@@ -2,19 +2,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 
 type Props = {
   // Do not make these props exact, the extra props are passed to the anchor element.
-  +blob: Blob,
-  +children: React.Node,
+  readonly blob: Blob;
+  readonly children: React.ReactNode;
 };
 
 type State = {
-  url: string,
-  prevBlob: Blob | null,
+  url: string;
+  prevBlob: Blob | null;
 };
 
 /**
@@ -24,7 +22,7 @@ type State = {
  * is mounted, updated, and unmounted.
  */
 export class BlobUrlLink extends React.PureComponent<Props, State> {
-  state = {
+  override state = {
     url: '',
     prevBlob: null,
   };
@@ -42,11 +40,11 @@ export class BlobUrlLink extends React.PureComponent<Props, State> {
     };
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     URL.revokeObjectURL(this.state.url);
   }
 
-  render() {
+  override render() {
     const {
       // eslint-disable-next-line no-unused-vars
       blob,

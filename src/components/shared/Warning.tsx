@@ -1,25 +1,24 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
 import React, { PureComponent } from 'react';
 import './Warning.css';
 
 type Props = {
-  +message: string,
-  +actionText?: string,
-  +actionTitle?: string,
-  +actionOnClick?: () => mixed,
-  +onClose?: () => mixed,
+  readonly message: string;
+  readonly actionText?: string;
+  readonly actionTitle?: string;
+  readonly actionOnClick?: () => unknown;
+  readonly onClose?: () => unknown;
 };
 
 type State = {
-  +isNoticeDisplayed: boolean,
+  readonly isNoticeDisplayed: boolean;
 };
 
 export class Warning extends PureComponent<Props, State> {
-  state = { isNoticeDisplayed: true };
+  override state = { isNoticeDisplayed: true };
 
   _onHideClick = () => {
     this.setState({
@@ -31,7 +30,7 @@ export class Warning extends PureComponent<Props, State> {
     }
   };
 
-  render() {
+  override render() {
     if (!this.state.isNoticeDisplayed) {
       return null;
     }

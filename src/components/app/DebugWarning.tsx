@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import React, { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 
@@ -11,16 +9,16 @@ import { Warning } from '../shared/Warning';
 import explicitConnect from '../../utils/connect';
 import { getMeta } from '../../selectors/profile';
 
-import type { ProfileMeta } from 'firefox-profiler/types';
-import type { ConnectedProps } from '../../utils/connect';
+import { ProfileMeta } from 'firefox-profiler/types';
+import { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {
-  +meta: ProfileMeta,
+  readonly meta: ProfileMeta;
 };
 
 type Props = ConnectedProps<{}, StateProps, {}>;
 class DebugWarningImp extends PureComponent<Props> {
-  render() {
+  override render() {
     const { meta } = this.props;
 
     return (
