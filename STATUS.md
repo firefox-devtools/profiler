@@ -147,44 +147,45 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 - **Build Performance**: Monitoring TypeScript compilation impact
 - **Type Safety**: Gradual strictness increase prevents overwhelming errors
 
-## Current Issues & Blockers (July 30, 2025)
+## Current Status (July 30, 2025) - RESOLVED CRITICAL ISSUES ✅
 
-### ⚠️ Critical: Compilation Errors in Converted Files
-**Issue**: Previously converted type files have TypeScript compilation errors that must be fixed before proceeding.
+### ✅ Successfully Resolved: Compilation Errors Fixed
+**Previous Issue**: TypeScript compilation errors in converted files have been **FIXED**.
 
-**Affected Files**:
-- **profile-derived.ts**: Flow syntax not fully converted
-  - `?` nullable syntax at start of types (lines 113, 118)
-  - Trailing commas in types (line 441)
-  - `mixed` type not converted to `unknown` (line 477)
-  - `$Exact` and `$ReadOnly` Flow utility types (lines 482-483)
-- **state.ts**: Generic type usage issue
-  - `ThreadsKey` used as value instead of type constraint (line 63)
+**Fixed Files**:
+- **profile-derived.ts**: ✅ All Flow syntax successfully converted
+  - ✅ Fixed `?Type` → `Type | null` for nullable types (lines 113, 118)
+  - ✅ Removed trailing commas in generic type parameters (lines 441, 503)
+  - ✅ Converted `mixed` → `unknown` (line 477)
+  - ✅ Converted `$Exact<$ReadOnly<T>>` → `Readonly<T>` (lines 482-483)
+- **state.ts**: ✅ Generic type constraint fixed
+  - ✅ Fixed `ThreadsKey` mapped type usage (line 63)
 
-**Root Cause**: Files were marked as "converted" but still contain Flow-specific syntax that doesn't compile in TypeScript.
+**Verification**: All files now compile with zero TypeScript errors ✅
 
-**Fix Required**: Must systematically fix these files using established conversion patterns before proceeding with new file conversions.
+### ✅ Successfully Converted Type Definition Files
+- **Core Foundation**: ✅ units.ts, utils.ts, store.ts, index.ts, actions.ts, state.ts
+- **Complex Types**: ✅ profile.ts, profile-derived.ts 
+- **New Conversions**: ✅ transforms.ts, symbolication.ts, indexeddb.ts
+- **Total Converted**: 11/13 type definition files (85% complete)
 
-### 🔄 Incomplete File Conversions
-- **transforms.ts**: ✅ Converted successfully 
-- **symbolication.ts**: ✅ Converted successfully
-- **indexeddb.ts**: ✅ Converted successfully
-- **markers.ts**: 🔄 In progress (partially converted)
-- **gecko-profile.js**: ⏳ Not started
+### ⏳ Remaining File Conversions
+- **markers.js**: ⏳ Not started (complex, 890 lines)
+- **gecko-profile.js**: ⏳ Not started (complex, 572 lines)
 
 ## Next Steps (Current - Next 1-2 weeks)
 
-### Phase 3: File-by-File Migration (REVISED APPROACH)
-1. **Fix Existing Converted Files** (IMMEDIATE):
-   - 🚨 **Fix profile-derived.ts compilation errors**
-   - 🚨 **Fix state.ts compilation errors** 
-   - ✅ Verify all previously converted files compile successfully
-   - Test that all type imports work correctly from fixed files
+### Phase 3: File-by-File Migration (CURRENT PROGRESS)
+1. **✅ COMPLETED: Fix Existing Converted Files**:
+   - ✅ **Fixed profile-derived.ts compilation errors**
+   - ✅ **Fixed state.ts compilation errors** 
+   - ✅ **Verified all converted files compile successfully** (11/11 files)
+   - ✅ Test that all type imports work correctly from fixed files
 
-2. **Complete Remaining Type Definitions**:
-   - 🔄 **Complete markers.ts conversion** (partially done)
-   - ⏳ **Convert gecko-profile.js** → gecko-profile.ts
-   - Test full type definition compilation
+2. **Complete Remaining Type Definitions** (IN PROGRESS):
+   - ⏳ **Convert markers.js** → markers.ts (890 lines, complex marker types)
+   - ⏳ **Convert gecko-profile.js** → gecko-profile.ts (572 lines, Gecko profile format)
+   - Test full type definition compilation after each conversion
 
 2. **Move to Core Utilities**:
    - Convert `src/utils/*.js` → `.ts` (builds on type foundation)

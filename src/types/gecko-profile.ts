@@ -1,9 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
-import type {
+import {
   IndexIntoStringTable,
   IndexIntoCategoryList,
   PausedRange,
@@ -15,13 +14,13 @@ import type {
   ProfilerConfiguration,
   SampleUnits,
 } from './profile';
-import type {
+import {
   MarkerPayload_Gecko,
   MarkerDisplayLocation,
   MarkerFormatType,
   MarkerGraph,
 } from './markers';
-import type { Milliseconds, Nanoseconds, MemoryOffset, Bytes } from './units';
+import { Milliseconds, Nanoseconds, MemoryOffset, Bytes } from './units';
 
 export type IndexIntoGeckoFrameTable = number;
 export type IndexIntoGeckoStackTable = number;
@@ -143,8 +142,8 @@ export type GeckoSamples = {
         Milliseconds,
         // CPU usage value of the current thread.
         // It's present only when the CPU Utilization feature is enabled in Firefox.
-        number | null,
-      ],
+        number | null
+      ]
   >,
 };
 
@@ -152,7 +151,7 @@ export type GeckoSamples = {
 export type GeckoSampleStructWithResponsiveness = {
   stack: Array<null | IndexIntoGeckoStackTable>,
   time: Milliseconds[],
-  responsiveness: Array<?Milliseconds>,
+  responsiveness: Array<Milliseconds | null>,
   // CPU usage value of the current thread. Its values are null only if the back-end
   // fails to get the CPU usage from operating system.
   // It's landed in Firefox 86, and it is optional because older profile
@@ -166,7 +165,7 @@ export type GeckoSampleStructWithResponsiveness = {
 export type GeckoSampleStructWithEventDelay = {
   stack: Array<null | IndexIntoGeckoStackTable>,
   time: Milliseconds[],
-  eventDelay: Array<?Milliseconds>,
+  eventDelay: Array<Milliseconds | null>,
   // CPU usage value of the current thread. Its values are null only if the back-end
   // fails to get the CPU usage from operating system.
   // It's landed in Firefox 86, and it is optional because older profile
@@ -219,8 +218,8 @@ export type GeckoFrameTable = {
       // index into profile.meta.categories
       null | number,
       // index into profile.meta.categories[category].subcategories. Always non-null if category is non-null.
-      null | number,
-    ],
+      null | number
+    ]
   >,
 };
 
@@ -304,7 +303,7 @@ export type GeckoCounter = {
       count: 1,
       number: 2,
     },
-    data: $ReadOnlyArray<[number, number, number]>,
+    data: readonly [number, number, number][],
   },
 };
 
@@ -325,7 +324,7 @@ export type GeckoProfilerOverhead = {
       threads: 4,
     },
     data: Array<
-      [Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds],
+      [Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds]
     >,
   },
   // There is no statistics object if there is no sample.
@@ -419,8 +418,7 @@ export type GeckoProfileShortMeta = {
  * Using https://searchfox.org/mozilla-central/rev/7556a400affa9eb99e522d2d17c40689fa23a729/tools/profiler/core/platform.cpp#1829
  * as source of truth. (Please update the link whenever there's a new property).
  * */
-export type GeckoProfileFullMeta = {
-  ...GeckoProfileShortMeta,
+export type GeckoProfileFullMeta = GeckoProfileShortMeta & {
   // When the recording started (in milliseconds after startTime).
   profilingStartTime?: Milliseconds,
   // When the recording ended (in milliseconds after startTime).
@@ -538,7 +536,7 @@ export type LibMapping = {
  * This type might also change in the future without warning.
  */
 export type ProcessProfilingLog = {
-  [log: string]: mixed,
+  [log: string]: unknown,
 };
 
 /**

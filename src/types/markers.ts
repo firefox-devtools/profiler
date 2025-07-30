@@ -1,18 +1,17 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
-import type { Milliseconds, Microseconds, Seconds, Bytes } from './units';
-import type { GeckoMarkerStack } from './gecko-profile';
-import type {
+import { Milliseconds, Microseconds, Seconds, Bytes } from './units';
+import { GeckoMarkerStack } from './gecko-profile';
+import {
   IndexIntoStackTable,
   IndexIntoStringTable,
   Tid,
   Pid,
   GraphColor,
 } from './profile';
-import type { ObjectMap } from './utils';
+import { ObjectMap, MixedObject } from './utils';
 
 // Provide different formatting options for strings.
 
@@ -219,16 +218,7 @@ export type IPCSharedData = {
  * a stack. This effectively converts it from a processed payload to a Gecko payload.
  */
 
-export type $ReplaceCauseWithStack<
-  // False positive, generic type bounds are alright:
-  // eslint-disable-next-line flowtype/no-weak-types
-  T: Object,
-> = {
-  ...$Diff<
-    T,
-    // Remove the cause property.
-    { cause: any },
-  >,
+export type ReplaceCauseWithStack<T extends Record<string, unknown>> = Omit<T, 'cause'> & {
   // Add on the stack property:
   stack?: GeckoMarkerStack,
 };
@@ -257,8 +247,8 @@ export type PaintProfilerMarkerTracing = {
 };
 
 export type ArbitraryEventTracing = {
-  +type: 'tracing',
-  +category: string,
+  readonly type: 'tracing',
+  readonly category: string,
 };
 
 export type CcMarkerTracing = {
@@ -301,12 +291,10 @@ type GCSliceData_Shared = {
 
   start_timestamp: Seconds,
 };
-export type GCSliceData_Gecko = {
-  ...GCSliceData_Shared,
+export type GCSliceData_Gecko = GCSliceData_Shared & {
   times: PhaseTimes<Milliseconds>,
 };
-export type GCSliceData = {
-  ...GCSliceData_Shared,
+export type GCSliceData = GCSliceData_Shared & {
   phase_times: PhaseTimes<Microseconds>,
 };
 
@@ -366,8 +354,7 @@ type GCMajorCompleted_Shared = {
   slices_list?: GCSliceData[],
 };
 
-export type GCMajorCompleted = {
-  ...GCMajorCompleted_Shared,
+export type GCMajorCompleted = GCMajorCompleted_Shared & {
   // MMU (Minimum mutator utilisation) A measure of GC's affect on
   // responsiveness  See Statistics::computeMMU(), these percentages in the
   // rage of 0-100.
@@ -380,8 +367,7 @@ export type GCMajorCompleted = {
   phase_times: PhaseTimes<Microseconds>,
 };
 
-export type GCMajorCompleted_Gecko = {
-  ...GCMajorCompleted_Shared,
+export type GCMajorCompleted_Gecko = GCMajorCompleted_Shared & {
   // As above except in parts of 100.
   mmu_20ms: number,
   mmu_50ms: number,
@@ -884,7 +870,7 @@ export type MarkerPayload_Gecko =
   // The following payloads come in with a stack property. During the profile processing
   // the "stack" property is are converted into a "cause". See the CauseBacktrace type
   // for more information.
-  | $ReplaceCauseWithStack<FileIoPayload>
-  | $ReplaceCauseWithStack<PaintProfilerMarkerTracing>
-  | $ReplaceCauseWithStack<StyleMarkerPayload>
-  | $ReplaceCauseWithStack<TextMarkerPayload>;
+  | ReplaceCauseWithStack<FileIoPayload>
+  | ReplaceCauseWithStack<PaintProfilerMarkerTracing>
+  | ReplaceCauseWithStack<StyleMarkerPayload>
+  | ReplaceCauseWithStack<TextMarkerPayload>;
