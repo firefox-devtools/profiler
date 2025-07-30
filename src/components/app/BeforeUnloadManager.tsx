@@ -2,16 +2,14 @@
  * license, v. 2.0. if a copy of the mpl was not distributed with this
  * file, you can obtain one at http://mozilla.org/mpl/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { getUploadPhase } from 'firefox-profiler/selectors/publish';
 
 type StateProps = {
-  +isUploading: boolean,
+  readonly isUploading: boolean;
 };
 
 type Props = ConnectedProps<{}, StateProps, {}>;
@@ -34,19 +32,19 @@ class BeforeUnloadManagerImpl extends React.PureComponent<Props> {
     event.returnValue = 'Are you sure you want to close while uploading?';
   };
 
-  componentDidMount() {
+  override componentDidMount() {
     this.manageBeforeUnloadListener();
   }
 
-  componentDidUpdate() {
+  override componentDidUpdate() {
     this.manageBeforeUnloadListener();
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     window.removeEventListener('beforeunload', this.handleUnload);
   }
 
-  render() {
+  override render() {
     return false;
   }
 }

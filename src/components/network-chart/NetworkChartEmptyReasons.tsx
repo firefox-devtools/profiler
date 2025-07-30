@@ -1,7 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
 import React, { PureComponent } from 'react';
 
@@ -9,18 +8,18 @@ import { EmptyReasons } from '../shared/EmptyReasons';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { oneLine } from 'common-tags';
 
-import explicitConnect, { type ConnectedProps } from '../../utils/connect';
+import explicitConnect, { ConnectedProps } from '../../utils/connect';
 
-import type { State } from 'firefox-profiler/types';
+import { State } from 'firefox-profiler/types';
 
 type StateProps = {
-  +threadName: string,
+  readonly threadName: string;
 };
 
 type Props = ConnectedProps<{}, StateProps, {}>;
 
 class NetworkChartEmptyReasonsImpl extends PureComponent<Props> {
-  render() {
+  override render() {
     const { threadName } = this.props;
 
     return (

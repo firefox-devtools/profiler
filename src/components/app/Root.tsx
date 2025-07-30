@@ -1,7 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
 import React, { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
@@ -18,18 +17,18 @@ import { ServiceWorkerManager } from './ServiceWorkerManager';
 import { WindowTitle } from './WindowTitle';
 import { AppLocalizationProvider } from 'firefox-profiler/components/app/AppLocalizationProvider';
 
-import type { Store } from 'firefox-profiler/types';
+import { Store } from 'firefox-profiler/types';
 
 import './Root.css';
 
 type RootProps = {
-  store: Store,
+  store: Store;
 };
 
 import { DragAndDrop } from './DragAndDrop';
 
 export class Root extends PureComponent<RootProps> {
-  render() {
+  override render() {
     const { store } = this.props;
     return (
       <NonLocalizedErrorBoundary message="Uh oh, some unknown error happened in profiler.firefox.com.">
