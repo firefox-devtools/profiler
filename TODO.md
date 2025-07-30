@@ -2,20 +2,18 @@
 
 This document tracks specific actionable tasks for the Flow to TypeScript migration. See PLAN.md for the overall strategy and timeline.
 
-## Phase 1: Pre-migration Flow Cleanup
+## ✅ Phase 1 & 2: Infrastructure and Flow Cleanup - COMPLETED
 
-### 1.1 Connected Components Modernization
-- [ ] Review and test PR #3063 (Flow connect API)
-- [ ] Review and test PR #3064 (TypeScript connect API)
-- [ ] Complete any remaining work on the connect API PRs
-- [ ] Identify all components using ExplicitConnect (search for `explicitConnect`)
-- [ ] Migrate components to use built-in `connect` (start with simple cases)
-- [ ] Remove ExplicitConnect utility once all components migrated
-- [ ] Verify type safety with both Flow and TypeScript tests
+### 1.1 TypeScript Infrastructure - COMPLETED ✅
+- [x] Install TypeScript and related dependencies  
+- [x] Create tsconfig.json with appropriate compiler options
+- [x] Set up global type compatibility layer (src/global.d.ts)
+- [x] Verify build system works with TypeScript files
 
-### 1.2 Flow Type System Cleanup
+### 1.2 Flow Type System Cleanup - PARTIALLY COMPLETED
+- [x] **Replace exact object syntax**: Converted 1,132 instances of `{||}` → `{}`
 - [ ] **Replace readonly property syntax**: Search for `{+` and replace with `$ReadOnly<>`
-  - Estimated ~15 occurrences based on grep results
+  - Estimated ~1,881 occurrences found
 - [ ] **Replace type spread syntax**: Search for type spreads in object types and replace with intersections
 - [ ] **Replace Object and {} types**: 
   - Replace `Object` with `{[key: string]: mixed}`
@@ -24,116 +22,76 @@ This document tracks specific actionable tasks for the Flow to TypeScript migrat
 - [ ] **Fix function parameter types**: Find `Type => ReturnType` and change to `(param: Type) => ReturnType`
 - [ ] **Fix unnamed object keys**: Find `{[Key]: Value}` and change to `{[key: Key]: Value}`
 
-### 1.3 Higher-Order Components to Hooks Migration
-- [ ] **Audit WithSize usage**: Search for `WithSize` and `withSize` 
-- [ ] **Audit WithViewport usage**: Search for `WithViewport` and `withViewport`
-- [ ] Create `useSize` hook to replace WithSize HOC
-- [ ] Create `useViewport` hook to replace WithViewport HOC
-- [ ] Migrate components one by one from HOCs to hooks
-- [ ] Remove HOC utilities once migration complete
+## 🔄 Phase 3: File-by-File Migration - IN PROGRESS
 
-## Phase 2: TypeScript Infrastructure Setup
+### 3.1 Core Utilities Migration (Priority: High)
+- [ ] **Convert simple utilities first**: `src/utils/string.js`, `src/utils/colors.js`, etc.
+- [ ] **Test compilation**: `npx tsc --noEmit` passes for converted files
+- [ ] **Test imports**: Ensure other files can import from .ts files
+- [ ] **Run existing tests**: Validate no runtime regressions
 
-### 2.1 Build System Configuration
-- [ ] **Install TypeScript dependencies**:
-  ```bash
-  yarn add -D typescript @types/react @types/react-dom @types/jest
-  ```
-- [ ] **Create tsconfig.json** with appropriate settings:
-  - Enable strict mode gradually
-  - Configure path mappings to match current webpack aliases
-  - Set up incremental compilation
-- [ ] **Update webpack config** to handle .ts/.tsx files
-- [ ] **Configure Jest** for TypeScript:
-  - Install ts-jest or babel preset
-  - Update jest.config.js
-- [ ] **Update ESLint config** for TypeScript support
-- [ ] **Test build pipeline** with a few converted files
+### 3.2 Type Definitions Migration (Priority: High)  
+- [ ] **Convert type files**: `src/types/*.js` → `.ts`
+- [ ] **Fix Flow-specific syntax**: Template constraints, import types, etc.
+- [ ] **Test IDE support**: Ensure better autocomplete and error detection
+- [ ] **Validate component imports**: Components can import types correctly
 
-### 2.2 Type Definitions and Globals
-- [ ] **Install @types packages** for external dependencies:
-  - Check current dependencies and find corresponding @types packages
-  - Install packages like @types/classnames, @types/react-redux, etc.
-- [ ] **Create global.d.ts** with type aliases:
-  ```typescript
-  type $ReadOnly<T> = Readonly<T>;
-  type $Shape<T> = Partial<T>;
-  type empty = never;
-  type mixed = unknown;
-  ```
-- [ ] **Convert Flow globals** to TypeScript (.d.ts files)
+### 3.3 Simple Components Migration (Priority: Medium)
+- [ ] **Start with leaf components**: No Redux connections, simple props
+- [ ] **Convert .js → .tsx**: Add proper React component types
+- [ ] **Fix prop types**: Proper TypeScript interfaces for props/state
+- [ ] **Test component rendering**: All existing tests still pass
 
-## Phase 3: Automated Migration
+### 3.4 Connected Components Migration (Priority: Medium)
+- [ ] **Identify ExplicitConnect usage**: Search codebase for patterns
+- [ ] **Add TypeScript types**: Create typed selectors and action creators
+- [ ] **Migrate component by component**: Add proper typing to existing patterns
+- [ ] **No API changes**: Keep existing ExplicitConnect, just add types
 
-### 3.1 Create Migration Scripts
-- [ ] **File renaming script**: Create script to rename .js → .ts/.tsx
-- [ ] **Syntax replacement script**: 
-  - Replace `{|` with `{` and `|}` with `}`
-  - Remove `// @flow` comments
-  - Change `import type {` to `import {`
-- [ ] **Test scripts** on a small subset of files first
+## ⏳ Phase 4: Advanced Type System Fixes
 
-### 3.2 Run Migration Tools
-- [ ] **Test flow-to-typescript-codemod** on sample files
-- [ ] **Run custom scripts** on entire codebase
-- [ ] **Fix compilation errors** from automated changes
-- [ ] **Commit automated changes** in phases for easier review
-
-## Phase 4: Manual Migration and Type Fixes
-
-### 4.1 Core Type System (Priority: High)
+### 4.1 Flow-Specific Syntax Cleanup (Priority: High)
 - [ ] **Fix template constraints**: `<T: Constraint>` → `<T extends Constraint>`
-- [ ] **Address exact object types**: Remove Flow-specific exact object syntax
-- [ ] **Fix per-thread selectors**: This may require architectural changes
-- [ ] **Update union/intersection types** for TypeScript compatibility
+- [ ] **Clean up import type statements**: Remove Flow-specific imports
+- [ ] **Fix function type syntax**: Arrow function parameter types
+- [ ] **Address remaining readonly properties**: Convert to `$ReadOnly<>` wrapper
 
-### 4.2 React Component Types (Priority: High)
-- [ ] **Fix component prop types**: Ensure all props are properly typed
-- [ ] **Update Redux connections**: Use new connect API types
-- [ ] **Fix event handlers**: Ensure proper React event types
-- [ ] **Update refs and component instances**
+### 4.2 Complex Type Patterns (Priority: High)
+- [ ] **Per-thread selectors**: Manual migration with possible architectural changes
+- [ ] **Complex generic constraints**: Fix advanced type parameter usage
+- [ ] **Union/intersection type fixes**: Ensure TypeScript compatibility
+- [ ] **Profile processing types**: Handle complex format union types
 
-### 4.3 Profile Logic Types (Priority: Medium)
-- [ ] **Profile processing types**: Update complex profile format types
-- [ ] **Marker and thread types**: Ensure compatibility
-- [ ] **Symbolication types**: Address any issues
-- [ ] **Import/export types**: Various profile format handlers
+### 4.3 Connected Components Advanced Typing (Priority: Medium)
+- [ ] **Typed selectors**: Ensure all selectors have proper return types
+- [ ] **Action creator types**: Add proper typing to all actions
+- [ ] **State shape validation**: Ensure Redux state types are accurate
+- [ ] **Component connection testing**: Verify typed connections work correctly
 
-### 4.4 Utility Types (Priority: Low)
-- [ ] **Utility function types**: General helper functions
-- [ ] **Test helper types**: Testing utilities
-- [ ] **Worker types**: Web worker implementations
+## ⏳ Phase 5: Final Validation and Testing
 
-## Phase 5: Testing and Validation
+### 5.1 Type System Validation
+- [ ] **Achieve zero TypeScript compilation errors**: All files must compile cleanly
+- [ ] **Enable stricter TypeScript settings**: Gradually increase strictness
+- [ ] **Performance testing**: Monitor TypeScript compilation impact on build times
 
-### 5.1 Type Checking
-- [ ] **Achieve zero TypeScript errors**: All files must compile
-- [ ] **Configure strict TypeScript settings** gradually
-- [ ] **Optimize tsconfig.json** for development speed
+### 5.2 Runtime and Integration Testing  
+- [ ] **Full test suite validation**: All existing tests must continue to pass
+- [ ] **Manual testing**: Verify key profiler functionality works correctly
+- [ ] **Build target testing**: Production builds, dev server, symbolicator CLI
 
-### 5.2 Runtime Testing  
-- [ ] **Run full test suite**: Ensure no runtime regressions
-- [ ] **Manual testing**: Test key profiler functionality
-- [ ] **Performance testing**: Check for any regressions
+## ⏳ Phase 6: Flow Infrastructure Removal
 
-### 5.3 Build Validation
-- [ ] **Test production builds**: Ensure webpack bundles correctly
-- [ ] **Test development server**: Hot reloading and development tools
-- [ ] **Validate all build targets**: Including symbolicator CLI, etc.
-
-## Phase 6: Cleanup
-
-### 6.1 Remove Flow Infrastructure
+### 6.1 Clean Up Flow Remnants
 - [ ] **Remove .flowconfig file**
-- [ ] **Remove Flow dependencies** from package.json
-- [ ] **Remove Flow scripts** from package.json
-- [ ] **Clean up Flow libdefs directory**
+- [ ] **Remove Flow dependencies** from package.json (flow-bin, etc.)
+- [ ] **Remove Flow scripts** from package.json (flow, flow:ci)
+- [ ] **Clean up Flow libdefs directory** (src/types/libdef)
 
-### 6.2 Documentation Updates
-- [ ] **Update README.md** with TypeScript information
-- [ ] **Update CONTRIBUTING.md** with TypeScript guidelines
-- [ ] **Update CLAUDE.md** to reflect TypeScript setup
-- [ ] **Document TypeScript patterns** used in the project
+### 6.2 Documentation and Process Updates
+- [ ] **Update CLAUDE.md**: Reflect TypeScript development setup
+- [ ] **Update build commands**: Replace flow commands with TypeScript equivalents
+- [ ] **Document migration**: Record lessons learned and patterns established
 
 ## Quick Reference Commands
 
