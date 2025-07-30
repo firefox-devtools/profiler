@@ -1,7 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
 /**
  * Space-efficient url component compatible encoding for arrays of 32bit
@@ -308,12 +307,12 @@ function decodeUint(
   start: number
 ): {
   // The decoded number.
-  value: number,
+  value: number;
   // Whether the encoding of this number started with a "leading zero" digit.
   // Our caller uses this as a "consecutive range" marker.
-  hasLeadingZero: boolean,
+  hasLeadingZero: boolean;
   // The end of the variable-length encoding; the next number starts at s[nextI].
-  nextI: number,
+  nextI: number;
 } {
   let i = start;
   let bits = bitsFromEncodingDigit(s[i]);

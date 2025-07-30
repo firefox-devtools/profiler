@@ -5,13 +5,13 @@
 ### 📊 Progress
 
 - **Type Definitions**: ✅ 13/13 files complete (100%)
-- **Core Utilities**: 🔄 11/40+ files complete (28%) - colors.ts, string.ts, format-numbers.ts, errors.ts, base64.ts, bisect.ts, pretty-bytes.ts, sha1.ts, set.ts, magic.ts, analytics.ts, l10n-pseudo.ts
+- **Core Utilities**: 🔄 16/40+ files complete (40%) - colors.ts, string.ts, format-numbers.ts, errors.ts, base64.ts, bisect.ts, pretty-bytes.ts, sha1.ts, set.ts, magic.ts, analytics.ts, l10n-pseudo.ts, path.ts, time-code.ts, number-series.ts, jwt.ts
 - **React Components**: ⏳ 0/150+ files (pending)
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 
 ### 🎯 Next Steps
 
-1. Continue converting remaining ~29 utility files in src/utils/
+1. Continue converting remaining ~25 utility files in src/utils/
 2. Begin React component migration with basic leaf components
 3. Maintain test validation after each conversion
 

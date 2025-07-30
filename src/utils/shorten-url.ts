@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import { PROFILER_SERVER_ORIGIN } from 'firefox-profiler/app-logic/constants';
 
 const ACCEPT_HEADER_VALUE = 'application/vnd.firefox-profiler+json;version=1.0';
