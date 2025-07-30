@@ -1,16 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
 import React from 'react';
 
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import { Localized } from '@fluent/react';
-import type { CodeLoadingSource } from 'firefox-profiler/types';
+import { CodeLoadingSource } from 'firefox-profiler/types/state';
 
 type CodeLoadingOverlayProps = {
-  source: CodeLoadingSource,
+  source: CodeLoadingSource;
 };
 
 export function CodeLoadingOverlay({ source }: CodeLoadingOverlayProps) {
@@ -37,7 +36,7 @@ export function CodeLoadingOverlay({ source }: CodeLoadingOverlayProps) {
       );
     }
     default:
-      throw assertExhaustiveCheck(source.type);
+      throw assertExhaustiveCheck(source);
   }
 }
 

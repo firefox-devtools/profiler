@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
 import React from 'react';
 
 import {
@@ -16,14 +15,13 @@ type Props = {
   // We don't use ProfileMeta directly, because this is used also by the stored
   // data in the local IndexedDB, which doesn't use ProfileMeta. Therefore we
   // specify only the properties we use here.
-  +meta: {
-    +product: string,
-    +misc?: string,
-    +platform?: string,
-    +oscpu?: string,
-    +toolkit?: string,
-    ...
-  },
+  readonly meta: {
+    readonly product: string;
+    readonly misc?: string;
+    readonly platform?: string;
+    readonly oscpu?: string;
+    readonly toolkit?: string;
+  };
 };
 
 export function ProfileMetaInfoSummary({ meta }: Props) {

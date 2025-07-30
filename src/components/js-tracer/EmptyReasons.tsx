@@ -1,7 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
 import React, { PureComponent } from 'react';
 
@@ -9,18 +8,18 @@ import { EmptyReasons } from 'firefox-profiler/components/shared/EmptyReasons';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 
 import explicitConnect, {
-  type ConnectedProps,
+  ConnectedProps,
 } from 'firefox-profiler/utils/connect';
 
-import type { State } from 'firefox-profiler/types';
+import { State } from 'firefox-profiler/types';
 
 type StateProps = {
-  +threadName: string,
+  readonly threadName: string;
 };
 
 type Props = ConnectedProps<{}, StateProps, {}>;
 class MarkerChartEmptyReasonsImpl extends PureComponent<Props> {
-  render() {
+  override render() {
     const { threadName } = this.props;
 
     return (
