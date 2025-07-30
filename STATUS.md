@@ -19,7 +19,7 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 - **Files Modified**: 240+ files with pure syntax transformation
 - **Build Compatibility**: Maintains both Flow and TypeScript compilation paths
 
-## Current Status: Ready for File-by-File Migration
+## Current Status: Type Definitions Migration In Progress
 
 ### Build & Test Status
 - **Build**: ✅ Working (`yarn build` passes)
@@ -43,11 +43,11 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 - [x] 100% - TypeScript build system setup 
 - [x] 100% - Global type compatibility layer
 - [x] 100% - Exact object type conversion (1,132 instances)
-- [ ] 30% - Flow type system cleanup (readonly properties remain)
+- [x] 100% - Flow readonly properties approach (discarded - see lessons learned)
 
 **🔄 Phase 3 - File-by-File Migration** (IN PROGRESS)
 - [ ] 0% - Core utility files (.js → .ts)
-- [ ] 0% - Type definition files (.js → .ts)
+- [x] 20% - Type definition files (.js → .ts) - units.ts, utils.ts, store.ts, index.ts converted
 - [ ] 0% - React components (.js → .tsx)
 - [ ] 0% - Test files migration
 
@@ -65,14 +65,15 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 
 ### Completed Work
 - **Exact Objects Converted**: 1,132 instances (`{||}` → `{}`)
+- **TypeScript Files Converted**: 4 type definition files (units.ts, utils.ts, store.ts, index.ts)
 - **Files Modified**: 240+ files across entire codebase
 - **Build System**: Fully functional dual Flow/TypeScript compilation
-- **Test Coverage**: 100% of existing tests still pass
+- **Test Coverage**: 100% of existing tests still pass after each conversion
 
-### Remaining Work
+### Remaining Work  
+- **Type Definition Files**: ~10 remaining in src/types/ (actions.js, state.js, etc.)
 - **Files to Convert**: ~250 .js files → .ts/.tsx
-- **Readonly Properties**: ~1,881 instances to address
-- **Flow Syntax**: `import type`, type annotations, etc.
+- **Flow Syntax**: Per-file conversion during .js → .ts migration
 - **Complex Types**: Per-thread selectors, exact patterns
 
 ### Target Architecture
@@ -80,35 +81,54 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 - **Type Strategy**: Gradual strictness increase
 - **Compatibility**: Global aliases maintain Flow→TypeScript bridge during transition
 
-## Approach Changes
+## Lessons Learned & Approach Changes
+
+### Readonly Properties Strategy
+**Original Plan**: Convert all Flow `+prop:` syntax to TypeScript `readonly prop:` globally  
+**Approach Tried**: Used regex replacement across 1,795 instances in 156 files  
+**Result**: FAILED - Flow parser couldn't handle TypeScript `readonly` keyword  
+**Lesson**: Global syntax changes don't work in mixed Flow/TypeScript codebase
+
+**New Approach**: Convert readonly properties during individual file .js → .ts conversion
+- **Benefits**: Each file gets proper TypeScript syntax when it becomes a .ts file
+- **Safer**: No risk of breaking Flow parser for remaining .js files
+
+### Type-First Migration Strategy  
+**Original Plan**: Start with utility files  
+**New Approach**: Start with type definition files in src/types/  
+**Benefits**:
+- Type definitions provide foundation for other files
+- Simple type-only files are easiest to convert
+- Other files can import from .ts type files without issues
+- Builds confidence in conversion process
 
 ### Connected Components Strategy
 **Original Plan**: Wait for PR #3063/#3064 to modernize connect API  
-**New Approach**: Migrate existing `ExplicitConnect` patterns to TypeScript as-is, then refactor later
+**Current Approach**: Migrate existing `ExplicitConnect` patterns to TypeScript as-is, then refactor later
 
 **Benefits**:
 - Removes external dependency blocker
 - Allows immediate progress on file conversion
 - Provides working TypeScript types for current patterns
-- Can upgrade connect API in separate future work
 
 ### Risk Mitigation
 - **Per-thread Selectors**: Will tackle these manually with careful testing
 - **Build Performance**: Monitoring TypeScript compilation impact
 - **Type Safety**: Gradual strictness increase prevents overwhelming errors
 
-## Next Steps (Immediate - Next 1-2 weeks)
+## Next Steps (Current - Next 1-2 weeks)
 
-### Phase 3: File-by-File Migration
-1. **Start with Core Utilities**:
-   - Convert `src/utils/*.js` → `.ts` (low risk, high impact)
-   - Test TypeScript compilation pipeline with real files
+### Phase 3: File-by-File Migration (Revised Order)
+1. **Complete Type Definitions** (IN PROGRESS):
+   - ✅ Converted: units.ts, utils.ts, store.ts, index.ts
+   - 🔄 **Next**: Convert remaining src/types/*.js files (actions.js, state.js, etc.)
+   - Convert complex type files with Flow-specific patterns
+   - Test that all type imports work correctly
+
+2. **Move to Core Utilities**:
+   - Convert `src/utils/*.js` → `.ts` (builds on type foundation)
+   - Start with simple utility files without complex dependencies
    - Validate import/export patterns work correctly
-
-2. **Move to Type Definitions**:
-   - Convert `src/types/*.js` → `.ts` (provides better IDE support)
-   - Fix any TypeScript-specific type syntax issues
-   - Test that components can import these types
 
 3. **Begin Component Migration**:
    - Start with simple leaf components (no complex Redux connections)
@@ -137,5 +157,5 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 
 ---
 
-**Last Updated**: January 30, 2025  
-**Next Status Update**: After first batch of file conversions (.ts/.tsx) completed
+**Last Updated**: July 30, 2025  
+**Next Status Update**: After completing remaining type definition files in src/types/

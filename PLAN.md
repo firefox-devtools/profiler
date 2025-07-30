@@ -25,26 +25,35 @@ Based on analysis of the codebase and GitHub issue #2931, this migration involve
 
 #### 1.2 Flow Type System Cleanup
 - [x] Replace exact object types `{||}` with regular objects `{}` (1,132 instances converted)
-- [ ] Replace readonly property syntax `{+prop: Type}` with `$ReadOnly<{prop: Type}>` (~1,881 instances remaining)
-- [ ] Replace type spread `{...A, ...B}` with intersection types `A & B`
-- [ ] Replace `Object` and `{}` types with explicit `{[key: string]: mixed}` and `{[key: string]: empty}`
-- [ ] Remove all usage of the `*` type (replace with `mixed` or specific types)
-- [ ] Fix named function arguments: `Error => void` → `(error: Error) => void`
-- [ ] Fix unnamed object keys: `{[ThreadsKey]: Type}` → `{[key: ThreadsKey]: Type}`
+- [x] **APPROACH CHANGED**: Readonly properties now handled per-file during .js → .ts conversion
+- [ ] Replace type spread `{...A, ...B}` with intersection types `A & B` (per-file conversion)
+- [ ] Replace `Object` and `{}` types with explicit types (per-file conversion)
+- [ ] Remove all usage of the `*` type (per-file conversion)
+- [ ] Fix named function arguments (per-file conversion)
+- [ ] Fix unnamed object keys (per-file conversion)
+
+**Lesson Learned**: Global Flow syntax changes don't work in mixed codebase - must be done per-file.
 
 ### Phase 3: File-by-File Migration (IN PROGRESS)
 
 **Goal**: Convert individual files from .js to .ts/.tsx while maintaining functionality.
 
-#### 3.1 Core Utilities Migration
-- [ ] Convert `src/utils/*.js` to `.ts` (start with simple utility functions)
+**Strategy Revised**: Start with type definitions first to build foundation.
+
+#### 3.1 Type Definitions Migration (IN PROGRESS)
+- [x] Convert `src/types/units.js` → `units.ts` ✅
+- [x] Convert `src/types/utils.js` → `utils.ts` ✅  
+- [x] Convert `src/types/store.js` → `store.ts` ✅
+- [x] Convert `src/types/index.js` → `index.ts` ✅
+- [ ] **Next**: Convert remaining complex type files (actions.js, state.js, etc.)
+- [ ] Handle Flow-specific patterns: `$ReadOnly`, `$Call`, etc.
+- [ ] Validate all imports work from converted files
+
+#### 3.2 Core Utilities Migration
+- [ ] Convert `src/utils/*.js` to `.ts` (build on type foundation)
+- [ ] Start with simple utility functions without complex dependencies
 - [ ] Test TypeScript compilation and imports work correctly
 - [ ] Validate existing functionality is preserved
-
-#### 3.2 Type Definitions Migration  
-- [ ] Convert `src/types/*.js` to `.ts` (provides better IDE support)
-- [ ] Fix Flow-specific syntax issues for TypeScript
-- [ ] Ensure components can import these types correctly
 
 #### 3.3 Component Migration
 - [ ] Start with simple leaf components (no complex Redux connections)
@@ -150,6 +159,8 @@ Based on analysis of the codebase and GitHub issue #2931, this migration involve
 
 - ✅ **Phase 1 & 2**: COMPLETED (Infrastructure + Flow cleanup)
 - 🔄 **Phase 3**: 2-3 weeks (File-by-file migration) - IN PROGRESS
+  - 🔄 Type definitions: 4/15 files converted (units, utils, store, index)
+  - ⏳ Remaining types, utilities, components
 - ⏳ **Phase 4**: 2-3 weeks (Advanced type fixes)
 - ⏳ **Phase 5**: 1-2 weeks (Testing & validation)
 - ⏳ **Phase 6**: 1 week (Final cleanup)
@@ -161,8 +172,11 @@ Based on analysis of the codebase and GitHub issue #2931, this migration involve
 The migration follows a proven incremental strategy:
 1. ✅ **Infrastructure First**: TypeScript build system established without disrupting Flow
 2. ✅ **Syntax Compatibility**: Flow exact objects converted to TypeScript-compatible syntax  
-3. 🔄 **File-by-File**: Individual .js → .ts/.tsx conversion with immediate validation
-4. ⏳ **Advanced Types**: Complex patterns addressed after basic migration
+3. 🔄 **Type-First Migration**: Start with type definitions to build foundation
+4. 🔄 **File-by-File**: Individual .js → .ts/.tsx conversion with immediate validation
+5. ⏳ **Advanced Types**: Complex patterns addressed after basic migration
+
+**Key Insight**: Type definitions first, then utilities, then components - provides stable foundation.
 
 ### Connected Components Strategy
 
@@ -176,6 +190,21 @@ The migration follows a proven incremental strategy:
 - ✅ **Continuous Validation**: All tests pass throughout migration process
 - 🔄 **Per-File Verification**: Each converted file tested before proceeding
 - **Dual Support**: Maintain Flow compatibility until migration complete
+
+## Lessons Learned from Failed Approaches
+
+### Global Readonly Property Conversion (FAILED)
+**What Was Tried**: Converting 1,795 `+prop:` → `readonly prop:` instances globally across all files
+**Approach**: Used regex replacement script to convert Flow readonly syntax to TypeScript
+**Result**: FAILED - Flow parser couldn't handle TypeScript `readonly` keyword in .js files
+**Root Cause**: Mixed codebase with both Flow (.js) and TypeScript (.ts) files
+**Lesson**: Global syntax changes don't work in mixed codebases - conversion must be per-file
+
+### Utility-First Migration (REVISED)
+**Original Plan**: Start file conversion with `src/utils/*.js` files
+**Issue**: Utility files import types from `src/types/*.js` files
+**Better Approach**: Start with type definitions first, then utilities
+**Lesson**: Dependencies matter - convert foundation files (types) before dependent files
 
 ## Resources and References
 
