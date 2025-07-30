@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 // This code was originally from https://github.com/InvokIT/js-untar/blob/master/src/untar-worker.js (MIT).
 // It was modernized, the Worker requirement was removed, and some Flow types were added.
 // Tar is an uncompressed format. If you have the tar bytes in a buffer, you can
@@ -19,12 +17,12 @@ class ByteReader {
   _position = 0;
   _asciiDecoder = new TextDecoder('ascii', { fatal: true });
 
-  constructor(arrayBuffer) {
+  constructor(arrayBuffer: ArrayBuffer) {
     this._uint8Array = new Uint8Array(arrayBuffer);
     this._bufferView = new DataView(arrayBuffer);
   }
 
-  readString(byteCount) {
+  readString(byteCount: number): string {
     const bytes = this.readBuffer(byteCount);
     const nulBytePos = bytes.indexOf(0);
     return nulBytePos === -1
@@ -32,7 +30,7 @@ class ByteReader {
       : this._asciiDecoder.decode(bytes.subarray(0, nulBytePos));
   }
 
-  readBuffer(byteCount) {
+  readBuffer(byteCount: number): Uint8Array {
     const buf = this._uint8Array.subarray(
       this.position(),
       this.position() + byteCount
@@ -41,33 +39,33 @@ class ByteReader {
     return buf;
   }
 
-  seekBy(byteCount) {
+  seekBy(byteCount: number): void {
     this._position += byteCount;
   }
 
-  seekTo(newpos) {
+  seekTo(newpos: number): void {
     this._position = newpos;
   }
 
-  peekUint32() {
+  peekUint32(): number {
     return this._bufferView.getUint32(this.position(), true);
   }
 
-  position() {
+  position(): number {
     return this._position;
   }
 
-  size() {
+  size(): number {
     return this._bufferView.byteLength;
   }
 }
 
 type FieldEntry = {
-  name: string,
-  value: string | number | null,
+  name: string;
+  value: string | number | null;
 };
 
-function _parseIntStrict(s, base): number {
+function _parseIntStrict(s: string, base: number): number {
   const val = parseInt(s, base);
   if (isNaN(val)) {
     throw new Error('Parsing number failed');
@@ -75,7 +73,7 @@ function _parseIntStrict(s, base): number {
   return val;
 }
 
-function _parseOptionalInt(s, base): number | null {
+function _parseOptionalInt(s: string, base: number): number | null {
   if (s === '') {
     return null;
   }
@@ -91,7 +89,7 @@ function _parseOptionalInt(s, base): number | null {
 class PaxHeader {
   _fields: FieldEntry[];
 
-  static parse(buffer) {
+  static parse(buffer: ArrayBuffer): PaxHeader {
     // https://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_03
     // An extended header shall consist of one or more records, each constructed as follows:
     // "%d %s=%s\n", <length>, <keyword>, <value>
@@ -124,11 +122,11 @@ class PaxHeader {
       }
 
       const fieldName = fieldMatch[1];
-      let fieldValue = fieldMatch[2];
+      let fieldValue: string | number | null = fieldMatch[2];
 
-      if (fieldValue.length === 0) {
+      if (typeof fieldValue === 'string' && fieldValue.length === 0) {
         fieldValue = null;
-      } else if (/^\d+$/.test(fieldValue)) {
+      } else if (typeof fieldValue === 'string' && /^\d+$/.test(fieldValue)) {
         // If it's an integer field, parse it as int
         fieldValue = _parseIntStrict(fieldValue, 10);
       }
@@ -151,7 +149,7 @@ class PaxHeader {
     this._fields = fields;
   }
 
-  applyHeader(file) {
+  applyHeader(file: any): void {
     // Apply fields to the file
     // If a field is of value null, it should be deleted from the file
     // https://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_03
@@ -175,30 +173,30 @@ class PaxHeader {
       if (fieldValue === null) {
         delete file[fieldName];
       } else {
-        file[fieldName] = (fieldValue: any);
+        file[fieldName] = fieldValue;
       }
     }
   }
 }
 
 export type TarFileEntry = {
-  name: string,
-  type: string,
-  size: number,
-  buffer: Uint8Array | null,
-  mode: string,
-  uid: number | null,
-  gid: number | null,
-  mtime: number | null,
-  checksum: number | null,
-  linkname: string,
-  ustarFormat: string,
-  version: string | null,
-  uname: string | null,
-  gname: string | null,
-  devmajor: number | null,
-  devminor: number | null,
-  namePrefix: string | null,
+  name: string;
+  type: string;
+  size: number;
+  buffer: Uint8Array | null;
+  mode: string;
+  uid: number | null;
+  gid: number | null;
+  mtime: number | null;
+  checksum: number | null;
+  linkname: string;
+  ustarFormat: string;
+  version: string | null;
+  uname: string | null;
+  gname: string | null;
+  devmajor: number | null;
+  devminor: number | null;
+  namePrefix: string | null;
 };
 
 export class UntarFileStream {
@@ -209,7 +207,7 @@ export class UntarFileStream {
     this._reader = new ByteReader(arrayBuffer);
   }
 
-  hasNext() {
+  hasNext(): boolean {
     // A tar file ends with 4 zero bytes
     return (
       this._reader.position() + 4 < this._reader.size() &&

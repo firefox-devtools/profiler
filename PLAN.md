@@ -5,14 +5,14 @@
 ### 📊 Progress
 
 - **Type Definitions**: ✅ 13/13 files complete (100%)
-- **Core Utilities**: 🔄 38/41 files complete (92.7%) - colors.ts, string.ts, format-numbers.ts, errors.ts, base64.ts, bisect.ts, pretty-bytes.ts, sha1.ts, set.ts, magic.ts, analytics.ts, l10n-pseudo.ts, path.ts, time-code.ts, number-series.ts, jwt.ts, shorten-url.ts, uintarray-encoding.ts, range-set.ts, special-paths.ts, string-table.ts, window-console.ts, css-geometry-tools.ts, gz.ts, react.ts, flow.ts, index.ts, codemirror-shared.ts, data-table-utils.ts, resize-observer-wrapper.ts, text-measurement.ts, url.ts, l10n-ftl-functions.ts, query-api.ts, worker-factory.ts, **mocks**/node-worker-contents.ts, **mocks**/worker-factory.ts, fetch-assembly.ts
+- **Core Utilities**: 🔄 39/41 files complete (95.1%) - colors.ts, string.ts, format-numbers.ts, errors.ts, base64.ts, bisect.ts, pretty-bytes.ts, sha1.ts, set.ts, magic.ts, analytics.ts, l10n-pseudo.ts, path.ts, time-code.ts, number-series.ts, jwt.ts, shorten-url.ts, uintarray-encoding.ts, range-set.ts, special-paths.ts, string-table.ts, window-console.ts, css-geometry-tools.ts, gz.ts, react.ts, flow.ts, index.ts, codemirror-shared.ts, data-table-utils.ts, resize-observer-wrapper.ts, text-measurement.ts, url.ts, l10n-ftl-functions.ts, query-api.ts, worker-factory.ts, **mocks**/node-worker-contents.ts, **mocks**/worker-factory.ts, fetch-assembly.ts
 - **React Components**: ⏳ 0/150+ files (pending)
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 
 ### 🎯 Next Steps
 
-1. Complete utility file migration (92.7% complete!)
-   - Remaining complex files: connect.js, fetch-source.js, untar.js
+1. Complete utility file migration (95.1% complete!)
+   - Remaining complex files: connect.js, fetch-source.js
    - These are non-trivial due to heavy Flow type usage and complex APIs
 2. Begin React component migration with basic leaf components
 3. Maintain test validation after each conversion
