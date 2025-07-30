@@ -20,7 +20,8 @@
       "Bash(yarn test)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(yarn lint-js)"
+      "Bash(yarn lint-js)",
+      "Bash(yarn tsc:*)"
     ],
     "deny": []
   }
