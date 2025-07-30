@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 /**
  * Transforms are the minimal representation some kind of transformation to the data
  * that is used to transform the sample and stack information of a profile. They are
@@ -16,13 +14,13 @@
  * This combination of information will provide a stable reference to a call node for a
  * given view into a call tree.
  */
-import type {
+import {
   IndexIntoFuncTable,
   IndexIntoResourceTable,
   IndexIntoCategoryList,
 } from './profile';
-import type { CallNodePath, ThreadsKey } from './profile-derived';
-import type { ImplementationFilter } from './actions';
+import { CallNodePath, ThreadsKey } from './profile-derived';
+import { ImplementationFilter } from './actions';
 
 /**
  * This type represents the filter types for the 'filter-samples' transform.
@@ -32,7 +30,7 @@ import type { ImplementationFilter } from './actions';
 export type FilterSamplesType = 'marker-search';
 
 /*
- * Define all of the transforms on an object to conveniently access $ObjMap and do
+ * Define all of the transforms on an object to conveniently access mapped types and do
  * nice things like iterate over every transform type. There is no way to create a
  * union from a tuple in flow.
  *
@@ -94,10 +92,10 @@ export type TransformDefinitions = {
    *                      A:1,0                           X:1,1
    */
   'focus-subtree': {
-    +type: 'focus-subtree',
-    +callNodePath: CallNodePath,
-    +implementation: ImplementationFilter,
-    +inverted: boolean,
+    readonly type: 'focus-subtree',
+    readonly callNodePath: CallNodePath,
+    readonly implementation: ImplementationFilter,
+    readonly inverted: boolean,
   },
 
   /**
@@ -125,8 +123,8 @@ export type TransformDefinitions = {
    *                 D:2,2
    */
   'focus-function': {
-    +type: 'focus-function',
-    +funcIndex: IndexIntoFuncTable,
+    readonly type: 'focus-function',
+    readonly funcIndex: IndexIntoFuncTable,
   },
 
   /**
@@ -173,9 +171,9 @@ export type TransformDefinitions = {
    * not particularly useful, and prone to not give the expected results.
    */
   'merge-call-node': {
-    +type: 'merge-call-node',
-    +callNodePath: CallNodePath,
-    +implementation: ImplementationFilter,
+    readonly type: 'merge-call-node',
+    readonly callNodePath: CallNodePath,
+    readonly implementation: ImplementationFilter,
   },
 
   /**
@@ -198,8 +196,8 @@ export type TransformDefinitions = {
    *      E:1,1       G:1,1
    */
   'merge-function': {
-    +type: 'merge-function',
-    +funcIndex: IndexIntoFuncTable,
+    readonly type: 'merge-function',
+    readonly funcIndex: IndexIntoFuncTable,
   },
 
   /**
@@ -218,8 +216,8 @@ export type TransformDefinitions = {
    *      D:1,1
    */
   'drop-function': {
-    +type: 'drop-function',
-    +funcIndex: IndexIntoFuncTable,
+    readonly type: 'drop-function',
+    readonly funcIndex: IndexIntoFuncTable,
   },
 
   /**
@@ -239,11 +237,11 @@ export type TransformDefinitions = {
    *        D
    */
   'collapse-resource': {
-    +type: 'collapse-resource',
-    +resourceIndex: IndexIntoResourceTable,
+    readonly type: 'collapse-resource',
+    readonly resourceIndex: IndexIntoResourceTable,
     // This is the index of the newly created function that represents the collapsed stack.
-    +collapsedFuncIndex: IndexIntoFuncTable,
-    +implementation: ImplementationFilter,
+    readonly collapsedFuncIndex: IndexIntoFuncTable,
+    readonly implementation: ImplementationFilter,
   },
 
   /**
@@ -263,9 +261,9 @@ export type TransformDefinitions = {
    *      C
    */
   'collapse-direct-recursion': {
-    +type: 'collapse-direct-recursion',
-    +funcIndex: IndexIntoFuncTable,
-    +implementation: ImplementationFilter,
+    readonly type: 'collapse-direct-recursion',
+    readonly funcIndex: IndexIntoFuncTable,
+    readonly implementation: ImplementationFilter,
   },
 
   /**
@@ -285,8 +283,8 @@ export type TransformDefinitions = {
    *      D
    */
   'collapse-recursion': {
-    +type: 'collapse-recursion',
-    +funcIndex: IndexIntoFuncTable,
+    readonly type: 'collapse-recursion',
+    readonly funcIndex: IndexIntoFuncTable,
   },
 
   /**
@@ -307,8 +305,8 @@ export type TransformDefinitions = {
    *      E:1,1     G:1,1    I:1,1    J:1,1
    */
   'collapse-function-subtree': {
-    +type: 'collapse-function-subtree',
-    +funcIndex: IndexIntoFuncTable,
+    readonly type: 'collapse-function-subtree',
+    readonly funcIndex: IndexIntoFuncTable,
   },
   /**
    * Focus on the functions that belong to the same category as the current function.
@@ -329,8 +327,8 @@ export type TransformDefinitions = {
    *              F:JS   A:JS
    */
   'focus-category': {
-    +type: 'focus-category',
-    +category: IndexIntoCategoryList,
+    readonly type: 'focus-category',
+    readonly category: IndexIntoCategoryList,
   },
 
   /**
@@ -339,20 +337,20 @@ export type TransformDefinitions = {
    * to support more filters in the future.
    */
   'filter-samples': {
-    +type: 'filter-samples',
+    readonly type: 'filter-samples',
     // Expand this type when you need to support more than just the marker.
-    +filterType: FilterSamplesType,
-    +filter: string,
+    readonly filterType: FilterSamplesType,
+    readonly filter: string,
   },
 };
 
 // Extract the transforms into a union.
-export type Transform = $Values<TransformDefinitions>;
+export type Transform = TransformDefinitions[keyof TransformDefinitions];
 
 // This pulls the string value out of { type } for a transform.
-type ExtractType = <T: string, S: { +type: T }>(transform: S) => T;
+type ExtractType<T extends string, S extends { readonly type: T }> = (transform: S) => T;
 
-export type TransformType = $Values<$ObjMap<TransformDefinitions, ExtractType>>;
+export type TransformType = Transform['type'];
 
 export type TransformStack = Transform[];
 export type TransformStacksPerThread = { [key: ThreadsKey]: TransformStack };

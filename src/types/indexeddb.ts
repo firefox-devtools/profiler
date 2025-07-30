@@ -5,8 +5,6 @@
 // Fixed the interfaces, especially added some genericity,
 // and changed so that it can be simply `import`ed.
 
-// @flow
-
 // Implemented by window & worker
 export interface IDBEnvironment {
   indexedDB: IDBFactory;
@@ -29,22 +27,22 @@ export interface IDBFactory {
 export interface IDBRequest<V> extends EventTarget {
   result: V;
   error: Error;
-  source: ?(
+  source: (
     | IDBIndex<any, any, V>
     | IDBObjectStore<any, V>
     | IDBCursor<any, any, V>
-  );
+  ) | null;
   transaction: IDBTransaction;
   readyState: 'pending' | 'done';
-  onerror: (e: Event & { target: IDBRequest<V> }) => mixed;
-  onsuccess: (e: Event & { target: IDBRequest<V> }) => mixed;
+  onerror: (e: Event & { target: IDBRequest<V> }) => unknown;
+  onsuccess: (e: Event & { target: IDBRequest<V> }) => unknown;
 }
 
 export interface IDBOpenDBRequest extends IDBRequest<IDBDatabase> {
-  onblocked: (e: IDBVersionChangeEvent & { target: IDBDatabase }) => mixed;
+  onblocked: (e: IDBVersionChangeEvent & { target: IDBDatabase }) => unknown;
   onupgradeneeded: (
     e: IDBVersionChangeEvent & { target: IDBDatabase }
-  ) => mixed;
+  ) => unknown;
 }
 
 export interface IDBDatabase extends EventTarget {
@@ -52,7 +50,7 @@ export interface IDBDatabase extends EventTarget {
   createObjectStore<K, V>(
     name: string,
     options?: {
-      keyPath?: ?(string | string[]),
+      keyPath?: (string | string[]) | null,
       autoIncrement?: boolean,
     }
   ): IDBObjectStore<K, V>;
@@ -64,9 +62,9 @@ export interface IDBDatabase extends EventTarget {
   name: string;
   version: number;
   objectStoreNames: string[];
-  onabort: (e: Event) => mixed;
-  onerror: (e: Event) => mixed;
-  onversionchange: (e: Event) => mixed;
+  onabort: (e: Event) => unknown;
+  onerror: (e: Event) => unknown;
+  onversionchange: (e: Event) => unknown;
 }
 
 export interface IDBTransaction extends EventTarget {
@@ -76,9 +74,9 @@ export interface IDBTransaction extends EventTarget {
   mode: 'readonly' | 'readwrite' | 'versionchange';
   name: string;
   objectStore<K, V>(name: string): IDBObjectStore<K, V>;
-  onabort: (e: Event) => mixed;
-  oncomplete: (e: Event) => mixed;
-  onerror: (e: Event) => mixed;
+  onabort: (e: Event) => unknown;
+  oncomplete: (e: Event) => unknown;
+  onerror: (e: Event) => unknown;
 }
 
 export interface IDBObjectStore<K, V> {

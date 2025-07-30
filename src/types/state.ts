@@ -60,7 +60,7 @@ export type ThreadViewOptions = {
   readonly selectedNetworkMarker: MarkerIndex | null,
 };
 
-export type ThreadViewOptionsPerThreads = { [ThreadsKey]: ThreadViewOptions };
+export type ThreadViewOptionsPerThreads = { [K in ThreadsKey]: ThreadViewOptions };
 
 export type TableViewOptions = {
   readonly fixedColumnWidths: Array<CssPixels> | null,

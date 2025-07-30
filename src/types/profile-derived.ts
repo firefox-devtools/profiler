@@ -110,12 +110,12 @@ export type Thread = {
 export type SamplesTable = {
   // Responsiveness is the older version of eventDelay. It injects events every 16ms.
   // This is optional because newer profiles don't have that field anymore.
-  responsiveness?: Array<?Milliseconds>,
+  responsiveness?: Array<Milliseconds | null>,
   // Event delay is the newer version of responsiveness. It allow us to get a finer-grained
   // view of jank by inferring what would be the delay of a hypothetical input event at
   // any point in time. It requires a pre-processing to be able to visualize properly.
   // This is optional because older profiles didn't have that field.
-  eventDelay?: Array<?Milliseconds>,
+  eventDelay?: Array<Milliseconds | null>,
   stack: Array<IndexIntoStackTable | null>,
   time: Milliseconds[],
   // An optional weight array. If not present, then the weight is assumed to be 1.
@@ -438,7 +438,7 @@ export type DerivedMarkerInfo = {
   markers: Marker[],
   markerIndexToRawMarkerIndexes: IndexedArray<
     MarkerIndex,
-    IndexIntoRawMarkerTable[],
+    IndexIntoRawMarkerTable[]
   >,
 };
 
@@ -474,13 +474,12 @@ export type CallNodeData = {
 export type ExtraBadgeInfo = {
   name: string,
   localizationId: string,
-  vars: mixed,
+  vars: unknown,
   titleFallback: string,
   contentFallback: string,
 };
 
-export type CallNodeDisplayData = $Exact<
-  $ReadOnly<{
+export type CallNodeDisplayData = Readonly<{
     total: string,
     totalWithUnit: string,
     totalPercent: string,
@@ -495,14 +494,13 @@ export type CallNodeDisplayData = $Exact<
     badge?: ExtraBadgeInfo,
     icon: string | null,
     ariaLabel: string,
-  }>,
->;
+  }>;
 
 export type ThreadWithReservedFunctions = {
   thread: Thread,
   reservedFunctionsForResources: Map<
     IndexIntoResourceTable,
-    IndexIntoFuncTable,
+    IndexIntoFuncTable
   >,
 };
 

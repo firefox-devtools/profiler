@@ -99,6 +99,12 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 
 ## Lessons Learned & Approach Changes
 
+### Critical Lesson: Verify Compilation After Each Conversion ⚠️
+**New Issue Discovered**: Files marked as "converted" still contained Flow syntax causing compilation errors
+**Problem**: Converting syntax without testing compilation leads to broken TypeScript files
+**New Process**: MUST test `npx tsc --noEmit --skipLibCheck file.ts` after each individual file conversion
+**Fix Required**: Go back and fix all "converted" files that still have compilation errors
+
 ### Readonly Properties Strategy
 **Original Plan**: Convert all Flow `+prop:` syntax to TypeScript `readonly prop:` globally  
 **Approach Tried**: Used regex replacement across 1,795 instances in 156 files  
@@ -108,6 +114,15 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 **New Approach**: Convert readonly properties during individual file .js → .ts conversion
 - **Benefits**: Each file gets proper TypeScript syntax when it becomes a .ts file
 - **Safer**: No risk of breaking Flow parser for remaining .js files
+
+### File Conversion Process (REVISED)
+**Previous Approach**: Mark files as converted without thorough verification
+**New Approach**: 
+1. Copy .js → .ts
+2. Apply all conversion patterns
+3. **VERIFY COMPILATION**: `npx tsc --noEmit --skipLibCheck file.ts`
+4. Fix any remaining errors before proceeding
+5. Only then mark file as "converted"
 
 ### Type-First Migration Strategy  
 **Original Plan**: Start with utility files  
@@ -132,15 +147,44 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 - **Build Performance**: Monitoring TypeScript compilation impact
 - **Type Safety**: Gradual strictness increase prevents overwhelming errors
 
+## Current Issues & Blockers (July 30, 2025)
+
+### ⚠️ Critical: Compilation Errors in Converted Files
+**Issue**: Previously converted type files have TypeScript compilation errors that must be fixed before proceeding.
+
+**Affected Files**:
+- **profile-derived.ts**: Flow syntax not fully converted
+  - `?` nullable syntax at start of types (lines 113, 118)
+  - Trailing commas in types (line 441)
+  - `mixed` type not converted to `unknown` (line 477)
+  - `$Exact` and `$ReadOnly` Flow utility types (lines 482-483)
+- **state.ts**: Generic type usage issue
+  - `ThreadsKey` used as value instead of type constraint (line 63)
+
+**Root Cause**: Files were marked as "converted" but still contain Flow-specific syntax that doesn't compile in TypeScript.
+
+**Fix Required**: Must systematically fix these files using established conversion patterns before proceeding with new file conversions.
+
+### 🔄 Incomplete File Conversions
+- **transforms.ts**: ✅ Converted successfully 
+- **symbolication.ts**: ✅ Converted successfully
+- **indexeddb.ts**: ✅ Converted successfully
+- **markers.ts**: 🔄 In progress (partially converted)
+- **gecko-profile.js**: ⏳ Not started
+
 ## Next Steps (Current - Next 1-2 weeks)
 
-### Phase 3: File-by-File Migration (Revised Order)
-1. **Complete Type Definitions** (80% COMPLETE):
-   - ✅ **Core Files**: units.ts, utils.ts, store.ts, index.ts, actions.ts, state.ts
-   - 🔄 **In Progress**: profile.ts (✅ compiling), profile-derived.ts (needs fixes)
-   - ⏳ **Remaining**: gecko-profile.js, markers.js, transforms.js, symbolication.js, indexeddb.js
-   - Convert complex type files with Flow-specific patterns
-   - Test that all type imports work correctly
+### Phase 3: File-by-File Migration (REVISED APPROACH)
+1. **Fix Existing Converted Files** (IMMEDIATE):
+   - 🚨 **Fix profile-derived.ts compilation errors**
+   - 🚨 **Fix state.ts compilation errors** 
+   - ✅ Verify all previously converted files compile successfully
+   - Test that all type imports work correctly from fixed files
+
+2. **Complete Remaining Type Definitions**:
+   - 🔄 **Complete markers.ts conversion** (partially done)
+   - ⏳ **Convert gecko-profile.js** → gecko-profile.ts
+   - Test full type definition compilation
 
 2. **Move to Core Utilities**:
    - Convert `src/utils/*.js` → `.ts` (builds on type foundation)

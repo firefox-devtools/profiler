@@ -30,12 +30,35 @@ This document tracks specific actionable tasks for the Flow to TypeScript migrat
 - [ ] **Test imports**: Ensure other files can import from .ts files
 - [ ] **Run existing tests**: Validate no runtime regressions
 
-### 3.2 Type Definitions Migration (Priority: High)  
-- [x] **Convert core type files**: `src/types/{actions,state,units,utils,store,index}.js` → `.ts` ✅
-- [ ] **Convert remaining type files**: `src/types/{profile,profile-derived,markers,transforms,symbolication,indexeddb}.js` → `.ts`
-- [ ] **Fix Flow-specific syntax**: Template constraints, import types, etc.
-- [ ] **Test IDE support**: Ensure better autocomplete and error detection
-- [ ] **Validate component imports**: Components can import types correctly
+### 3.2 Type Definitions Migration (Priority: HIGH - BLOCKED)
+
+#### 🚨 IMMEDIATE FIXES REQUIRED (Must complete before proceeding)
+- [ ] **Fix profile-derived.ts compilation errors**:
+  - Convert `?Type` → `Type | null` (lines 113, 118) 
+  - Remove trailing commas in type definitions (line 441)
+  - Replace `mixed` → `unknown` (line 477)
+  - Convert `$Exact<T>` → `T` and `$ReadOnly<T>` → `Readonly<T>` (lines 482-483)
+  - Fix other Flow utility types
+- [ ] **Fix state.ts compilation errors**:
+  - Fix generic type constraint `ThreadsKey` usage (line 63)
+  - Verify all other Flow patterns are converted
+
+#### ✅ Successfully Converted Files
+- [x] **Core Foundation**: units.ts, utils.ts, store.ts, index.ts, actions.ts ✅  
+- [x] **Recent Conversions**: transforms.ts, symbolication.ts, indexeddb.ts ✅
+
+#### 🔄 Partially Converted Files  
+- [ ] **Complete markers.ts**: Finish Flow→TypeScript conversion and verify compilation
+- [ ] **Complete profile.ts**: Verify no remaining Flow syntax
+
+#### ⏳ Not Started
+- [ ] **Convert gecko-profile.js** → gecko-profile.ts
+
+#### Verification Process (MANDATORY)
+- [ ] **Test each file**: Run `npx tsc --noEmit --skipLibCheck file.ts` after each conversion
+- [ ] **Fix all errors**: Before marking any file as "converted"
+- [ ] **Test IDE support**: Ensure better autocomplete and error detection  
+- [ ] **Validate imports**: Components can import types correctly
 
 ### 3.3 Simple Components Migration (Priority: Medium)
 - [ ] **Start with leaf components**: No Redux connections, simple props

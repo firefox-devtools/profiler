@@ -284,15 +284,61 @@ type Example = {
 };
 ```
 
-### Conversion Process (Per File)
+#### 7. Flow Utility Types (Additional Patterns)
+```typescript
+// Flow
+type Values = $Values<SomeObject>;
+type ObjMap = $ObjMap<SomeObject, ExtractType>;
+type Exact = $Exact<SomeType>;
+
+// TypeScript
+type Values = SomeObject[keyof SomeObject];
+type ObjMap = { [K in keyof SomeObject]: ExtractType<SomeObject[K]> };
+type Exact = SomeType; // Often can be removed
+```
+
+#### 8. Nullable Type Variants
+```typescript
+// Flow - nullable at start of type
+type Example = {
+  prop: ?number,
+  optional?: ?string,
+};
+
+// TypeScript
+type Example = {
+  prop: number | null,
+  optional?: string | null,
+};
+```
+
+#### 9. Trailing Commas in Types (CRITICAL)
+```typescript
+// Flow - allows trailing commas in some contexts
+type Example = {
+  prop1: string,
+  prop2: number,
+}; // ← This comma causes TypeScript errors in some contexts
+
+// TypeScript - remove trailing commas
+type Example = {
+  prop1: string,
+  prop2: number
+}; // ← No trailing comma
+```
+
+### Conversion Process (Per File) - REVISED
 1. Copy `.js` → `.ts`
 2. Remove `// @flow`
 3. Convert imports: `import type` → `import`
 4. Apply readonly properties: `+prop:` → `readonly prop:`
 5. Convert nullable types: `?Type` → `Type | null`
-6. Fix Flow utility types
-7. Test compilation: `npx tsc --noEmit --skipLibCheck file.ts`
-8. Remove original `.js` file
+6. Fix Flow utility types: `$Values<T>` → `T[keyof T]`, `$ReadOnly<T>` → `Readonly<T>`, `mixed` → `unknown`
+7. Fix trailing commas in type definitions
+8. **CRITICAL**: Test compilation: `npx tsc --noEmit --skipLibCheck file.ts`
+9. **CRITICAL**: Fix ALL compilation errors before proceeding
+10. Only after successful compilation, remove original `.js` file
+11. Mark file as "converted" only after error-free compilation
 
 ### Success Metrics
 - **actions.ts**: 691 lines, complex Redux types, compiles with zero errors
