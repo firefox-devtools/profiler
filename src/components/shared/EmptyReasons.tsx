@@ -1,15 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 import React, { PureComponent } from 'react';
 
 import './EmptyReasons.css';
 
 type Props = {
-  +viewName: string,
-  +threadName: string,
-  +reason: string,
+  readonly viewName: string;
+  readonly threadName: string;
+  readonly reason: string;
 };
 
 /**
@@ -17,7 +16,7 @@ type Props = {
  * the end user.
  */
 export class EmptyReasons extends PureComponent<Props> {
-  render() {
+  override render() {
     const { viewName, reason, threadName } = this.props;
 
     return (

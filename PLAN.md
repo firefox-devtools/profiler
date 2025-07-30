@@ -17,7 +17,7 @@ This represents a significant achievement in the Flow→TypeScript migration:
 
 - **Type Definitions**: ✅ 13/13 files complete (100%)
 - **Core Utilities**: ✅ 40/40 files complete (100%) - colors.ts, string.ts, format-numbers.ts, errors.ts, base64.ts, bisect.ts, pretty-bytes.ts, sha1.ts, set.ts, magic.ts, analytics.ts, l10n-pseudo.ts, path.ts, time-code.ts, number-series.ts, jwt.ts, shorten-url.ts, uintarray-encoding.ts, range-set.ts, special-paths.ts, string-table.ts, window-console.ts, css-geometry-tools.ts, gz.ts, react.ts, flow.ts, index.ts, codemirror-shared.ts, data-table-utils.ts, resize-observer-wrapper.ts, text-measurement.ts, url.ts, l10n-ftl-functions.ts, query-api.ts, worker-factory.ts, **mocks**/worker-factory.ts, fetch-assembly.ts, untar.ts, fetch-source.ts, connect.ts
-- **React Components**: ✅ 4/150+ files started (2.7%) - Warning.tsx, BlobUrlLink.tsx, FooterLinks.tsx, DebugWarning.tsx
+- **React Components**: ✅ 6/150+ files started (4.0%) - Warning.tsx, BlobUrlLink.tsx, FooterLinks.tsx, DebugWarning.tsx, EmptyReasons.tsx, Icon.tsx
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 
 ### 🎯 Next Steps
@@ -25,9 +25,10 @@ This represents a significant achievement in the Flow→TypeScript migration:
 1. ✅ **COMPLETED**: All utility files migrated (100%)!
    - Successfully converted complex connect.js with advanced Flow features
    - All 41 utility files now use TypeScript
-2. ✅ **IN PROGRESS**: React component migration started (4 components complete)
+2. ✅ **IN PROGRESS**: React component migration started (6 components complete)
    - Successfully converted simple presentational and connected components
    - Proven patterns for TypeScript component conversions established
+   - Union type handling with type guards ('displayData' in ownProps)
 3. Continue React component migration with more leaf components
 4. Maintain test validation after each conversion
 
@@ -69,24 +70,6 @@ yarn typecheck  # Uses tsconfig.migration.json
 # Full project type checking (use when migration is complete)
 yarn typecheck-all  # Uses default tsconfig.json
 ```
-
-### About `--skipLibCheck` Flag
-
-The `--skipLibCheck` flag in commands **does not affect** the `.js` file errors from Flow annotations. It only:
-
-- Skips type checking of `.d.ts` declaration files (in `node_modules`, etc.)
-- Provides performance benefits
-- Is safe to remove but commonly kept as standard practice
-
-**The real protection** from Flow annotation errors comes from using `tsconfig.migration.json` which excludes `.js` files entirely.
-
-### Webpack Configuration
-
-The webpack configuration has been updated to support TypeScript module resolution:
-
-- Added `extensions: ['.js', '.jsx', '.ts', '.tsx']` for extensionless imports
-- Added webpack rule to process `.ts`/`.tsx` files through babel-loader
-- Enables `yarn build` to properly resolve TypeScript files
 
 ---
 
@@ -249,7 +232,20 @@ type Fn = ('send', GAPayload) => void;
 type Fn = (command: 'send', payload: GAPayload) => void;
 ```
 
-#### 7. `assertExhaustiveCheck`
+#### 7. Union Type Handling
+
+```typescript
+// Flow
+const icon = ownProps.displayData
+  ? ownProps.displayData.iconSrc
+  : ownProps.iconUrl;
+
+// TypeScript (use type guards)
+const icon =
+  'displayData' in ownProps ? ownProps.displayData.iconSrc : ownProps.iconUrl;
+```
+
+#### 8. `assertExhaustiveCheck`
 
 Usually used in switch default cases. When switching on a property of an object,
 discard that property because the entire object will be the `never` type in TS.
@@ -266,47 +262,24 @@ default:
 
 ---
 
-## ✅ RESOLVED: Build System Configuration
-
-**Problem**: Babel was not correctly handling mixed Flow/TypeScript files.
-
-**Solution**: Migrated from `babel.config.json` to `babel.config.js` with proper file-based overrides:
-
-```javascript
-module.exports = function (api) {
-  api.cache(true);
-  return {
-    overrides: [
-      {
-        test: /\.jsx?$/, // Flow files
-        presets: [
-          [
-            '@babel/preset-env',
-            { useBuiltIns: 'usage', corejs: '3.9', bugfixes: true },
-          ],
-          ['@babel/preset-react', { useSpread: true }],
-          ['@babel/preset-flow', { all: true }],
-        ],
-      },
-      {
-        test: /\.tsx?$/, // TypeScript files
-        presets: [
-          [
-            '@babel/preset-env',
-            { useBuiltIns: 'usage', corejs: '3.9', bugfixes: true },
-          ],
-          ['@babel/preset-react', { useSpread: true }],
-          ['@babel/preset-typescript', { isTSX: true, allExtensions: true }],
-        ],
-      },
-    ],
-  };
-};
-```
-
----
-
 ## Lessons Learned (Avoid These Mistakes)
+
+### ⚠️ CRITICAL: Snapshot Test Policy
+
+**Never update snapshots (`yarn test -u`) without investigating the root cause of differences.**
+
+**Case Study**: EmptyReasons component conversion initially failed snapshot tests due to curly quote differences (straight quotes `"` vs curved quotes `"` and `"`). This indicated a real rendering difference that needed investigation, not snapshot updates.
+
+**Root Cause**: Claude Code cannot preserve curly quotes in copy/paste operations, causing unintended character changes that affect React rendering.
+
+**Solution Process**:
+
+1. Always investigate snapshot failures - they indicate real differences
+2. Compare original vs converted files character-by-character if needed
+3. For quote issues: manually copy correct quotes from original file in IDE
+4. Verify tests pass before proceeding
+
+**Policy**: Snapshot changes are NEVER acceptable without understanding and validating the underlying cause.
 
 ### ❌ FAILED: Global Syntax Changes
 
@@ -328,45 +301,11 @@ module.exports = function (api) {
 
 ---
 
-## Key Files & Commands
-
-### Development Commands
+## Key Development Commands
 
 - `yarn test` - Run all tests (must pass after each conversion)
 - `yarn typecheck` - Check TypeScript compilation for converted files only
-- `yarn typecheck-file <file>` - Check specific TypeScript file
-- `yarn test-all` - Run all checks (TypeScript + lint + test + etc.) - **PASSES during migration**
-- `yarn test-all-flow` - Original test-all with Flow (will fail during migration)
-- `yarn test-all-migration-done` - Post-migration test-all (will fail until migration complete)
-
-### Critical Configuration Files
-
-- `tsconfig.json` - TypeScript configuration (working correctly)
-- `tsconfig.migration.json` - Migration-specific config (only checks .ts/.tsx files)
-- `babel.config.js` - Mixed Flow/TypeScript support (resolved)
-- `jest.config.js` - Test configuration (supports .ts/.tsx)
-
-### Current TypeScript Configuration
-
-```json
-{
-  "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "moduleResolution": "Node",
-    "allowJs": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": false,
-    "noImplicitReturns": true,
-    "skipLibCheck": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx"
-  }
-}
-```
+- `yarn test-all` - Run all checks (TypeScript + lint + test + etc.)
 
 ---
 
@@ -387,9 +326,10 @@ module.exports = function (api) {
 ### Phase 3: 🔄 IN PROGRESS - React Components
 
 - Target: 150+ files in src/components/
-- Current: 4/150+ complete (2.7%)
-- ✅ Started with simple leaf components (Warning, BlobUrlLink, FooterLinks)
-- ✅ Successfully converted connected component (DebugWarning)
+- Current: 6/150+ complete (4.0%)
+- ✅ Started with simple leaf components (Warning, BlobUrlLink, FooterLinks, EmptyReasons)
+- ✅ Successfully converted connected components (DebugWarning, Icon)
+- ✅ Established patterns for union type handling with type guards
 - Focus: Continue with more leaf components before complex ones
 
 ### Phase 4: ⏳ PLANNED - Connected Components
