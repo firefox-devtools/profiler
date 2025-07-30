@@ -77,6 +77,8 @@ The Firefox Profiler is a React/Redux web application for visualizing performanc
 
 This project is in the progress of being migrated from Flow to TypeScript. Type definitions are in `src/types/`.
 
+See PLAN.md for the overall migration plan.
+
 Check TODO.md for the work items that need to be completed for a full conversion.
 
 Check STATUS.md for the current status of the migration.
