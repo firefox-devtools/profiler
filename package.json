@@ -49,7 +49,7 @@
     "start-examples": "ws -d examples/ -s index.html -p 4242",
     "start-docs": "ws -d docs-user/ -p 3000",
     "start-photon": "node res/photon/server",
-    "test": "node bin/output-fixing-commands.js cross-env LC_ALL=C TZ=UTC NODE_ENV=test jest",
+    "test": "node bin/output-fixing-commands.js cross-env LC_ALL=C TZ=UTC NODE_ENV=test jest --silent",
     "test-all": "run-p --max-parallel 4 typecheck license-check lint test test-alex test-lockfile",
     "test-all:ci": "run-p --max-parallel 4 typecheck license-check lint test test-alex test-lockfile",
     "test-all-flow": "run-p --max-parallel 4 flow license-check lint test test-alex test-lockfile",
