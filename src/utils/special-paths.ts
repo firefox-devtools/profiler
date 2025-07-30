@@ -2,33 +2,31 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 export type ParsedFileNameFromSymbolication =
   | {
-      type: 'normal',
-      path: string,
+      type: 'normal';
+      path: string;
     }
   | {
-      type: 'hg' | 'git',
-      repo: string,
-      path: string,
-      rev: string,
+      type: 'hg' | 'git';
+      repo: string;
+      path: string;
+      rev: string;
     }
   | {
-      type: 's3',
-      bucket: string,
-      digest: string,
-      path: string,
+      type: 's3';
+      bucket: string;
+      digest: string;
+      path: string;
     }
   | {
-      type: 'cargo',
-      registry: string,
-      crate: string,
-      version: string,
-      path: string,
+      type: 'cargo';
+      registry: string;
+      crate: string;
+      version: string;
+      path: string;
     };
 
 // Describes how to obtain a source file from the web.
@@ -45,8 +43,8 @@ export type ParsedFileNameFromSymbolication =
 // SourceFileDownloadRecipe; SourceFileDownloadRecipe only covers sources that
 // can be downloaded from the web.
 export type SourceFileDownloadRecipe =
-  | { type: 'CORS_ENABLED_SINGLE_FILE', url: string }
-  | { type: 'CORS_ENABLED_ARCHIVE', archiveUrl: string, pathInArchive: string }
+  | { type: 'CORS_ENABLED_SINGLE_FILE'; url: string }
+  | { type: 'CORS_ENABLED_ARCHIVE'; archiveUrl: string; pathInArchive: string }
   | { type: 'NO_KNOWN_CORS_URL' };
 
 // For native code, the symbolication API returns special filenames that allow
@@ -213,6 +211,6 @@ export function getDownloadRecipeForSourceFile(
       return { type: 'NO_KNOWN_CORS_URL' };
     }
     default:
-      throw assertExhaustiveCheck(parsedFile.type, 'unhandled ParsedFile type');
+      throw assertExhaustiveCheck(parsedFile, 'unhandled ParsedFile type');
   }
 }

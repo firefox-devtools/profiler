@@ -16,7 +16,9 @@
       "Bash(yarn lint-fix-js:*)",
       "Bash(yarn prettier-fix:*)",
       "Bash(yarn typecheck-file:*)",
-      "Bash(tsc:*)"
+      "Bash(tsc:*)",
+      "Bash(yarn test)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

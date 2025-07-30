@@ -2,8 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-import type { IndexIntoStringTable } from 'firefox-profiler/types';
+import { IndexIntoStringTable } from 'firefox-profiler/types';
 
 const _cachedTables: WeakMap<string[], StringTable> = new WeakMap();
 
@@ -61,7 +60,7 @@ export class StringTable {
     return table;
   }
 
-  getString(index: IndexIntoStringTable, els: ?string): string {
+  getString(index: IndexIntoStringTable, els?: string | null): string {
     if (!this.hasIndex(index)) {
       if (els) {
         console.warn(`index ${index} not in StringTable`);

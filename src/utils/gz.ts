@@ -1,23 +1,22 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
 // This worker is imported as WebWorker since it's conflicting with the Worker
 // global type.
 import WebWorker from './worker-factory';
 
-const zeeCallbacks = [];
+const zeeCallbacks: Array<{ success: (data: any) => void; error: (error: any) => void } | null> = [];
 
 type ZeeWorkerData = {
-  callbackID: number,
-  type: 'success' | 'error',
-  data: any,
+  callbackID: number;
+  type: 'success' | 'error';
+  data: any;
 };
 
 function workerOnMessage(zeeWorker: Worker) {
   zeeWorker.onmessage = function (msg: MessageEvent) {
-    const data = ((msg.data: any): ZeeWorkerData);
+    const data = msg.data as ZeeWorkerData;
     const callbacks = zeeCallbacks[data.callbackID];
     if (callbacks) {
       callbacks[data.type](data.data);

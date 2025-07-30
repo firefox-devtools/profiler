@@ -1,9 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 import { stripIndent, oneLine } from 'common-tags';
-import type { GetState, Dispatch, MixedObject } from 'firefox-profiler/types';
+import { GetState, Dispatch, MixedObject } from 'firefox-profiler/types';
 import { selectorsForConsole } from 'firefox-profiler/selectors';
 import actions from 'firefox-profiler/actions';
 import { shortenUrl } from 'firefox-profiler/utils/shorten-url';
@@ -23,7 +22,7 @@ const defineProperty = Object.defineProperty;
 export function addDataToWindowObject(
   getState: GetState,
   dispatch: Dispatch,
-  target: MixedObject = window
+  target: MixedObject = window as unknown as MixedObject
 ) {
   defineProperty(target, 'profile', {
     enumerable: true,
@@ -156,7 +155,7 @@ export function addDataToWindowObject(
   };
 
   target.retrieveRawProfileDataFromBrowser = async function (): Promise<
-    MixedObject | ArrayBuffer | null,
+    MixedObject | ArrayBuffer | null
   > {
     // Note that a new connection is created instead of reusing the one in the
     // redux state, as an attempt to make it work even in the worst situations.
@@ -180,7 +179,7 @@ export function addDataToWindowObject(
   };
 
   target.saveToDisk = async function (
-    unknownObject: ArrayBuffer | mixed,
+    unknownObject: ArrayBuffer | unknown,
     filename?: string
   ) {
     if (unknownObject === undefined || unknownObject === null) {
@@ -191,7 +190,7 @@ export function addDataToWindowObject(
     const arrayBufferOrString =
       typeof unknownObject === 'string' ||
       String(unknownObject) === '[object ArrayBuffer]'
-        ? unknownObject
+        ? (unknownObject as string | ArrayBuffer)
         : JSON.stringify(unknownObject);
 
     const blob = new Blob([arrayBufferOrString], {
