@@ -11,3 +11,4 @@ coverage
 webpack.local-config.js
 *.orig
 *.rej
+.tsbuildinfo
