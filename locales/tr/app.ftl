@@ -60,10 +60,20 @@ CallNodeContextMenu--transform-merge-function = Fonksiyonu birleştir
         Bir fonksiyonun birleştirilmesi onu profilden kaldırıp
         süresini onu çağıran fonksiyona atar. Bu işlem, fonksiyonun
         ağaçta çağrıldığı her yerde gerçekleşir.
+CallNodeContextMenu--transform-merge-call-node = Yalnızca düğümü birleştir
+    .title =
+        Bir düğümü birleştirmek onu profilden kaldırır ve süresini onu çağıran
+        fonksiyonun düğümüne atar. Fonksiyonu yalnızca ağacın o belirli
+        bölümünden kaldırır. Fonksiyonun çağrıldığı diğer yerler
+        profilde kalacaktır.
 CallNodeContextMenu--transform-focus-function = Fonksiyona odaklan
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Fonksiyona odaklan (tersine)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-drop-function = Bu fonksiyonu taşıyan örnekleri at
+    .title =
+        Atılan örneklerin süreleri profilden kaldırılır. Bu işlem, analizle ilgili olmayan
+        süre bilgilerini ortadan kaldırmak için kullanışlıdır.
 CallNodeContextMenu--expand-all = Tümünü genişlet
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -71,6 +81,7 @@ CallNodeContextMenu--searchfox = Fonksiyon adını Searchfox’ta ara
 CallNodeContextMenu--copy-function-name = Fonksiyon adını kopyala
 CallNodeContextMenu--copy-script-url = Betik URL’sini kopyala
 CallNodeContextMenu--copy-stack = Yığını kopyala
+CallNodeContextMenu--show-the-function-in-devtools = Fonksiyonu geliştirici araçlarında göster
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -123,6 +134,10 @@ CallTreeSidebar--implementation = Yürütme
 ## See: https://profiler.firefox.com/compare/
 
 CompareHome--instruction-title = Karşılaştırmak istediğiniz profil URL’lerini girin
+CompareHome--instruction-content =
+    Araç, her profil için seçilen yol ve aralıktan verileri çıkaracak ve
+    karşılaştırmayı kolaylaştırmak için her ikisini de aynı görünüme
+    yerleştirecektir.
 CompareHome--form-label-profile1 = Profil 1:
 CompareHome--form-label-profile2 = Profil 2:
 CompareHome--submit-button =
@@ -201,6 +216,7 @@ Home--additional-content-title = Mevcut profilleri yükleyin
 Home--additional-content-content = Profil dosyasını buraya <strong>sürükleyip bırakarak</strong> yükleyebilirsiniz ya da:
 Home--compare-recordings-info = Ayrıca kayıtları karşılaştırabilirsiniz. <a>Karşılaştırma arayüzünü aç.</a>
 Home--your-recent-uploaded-recordings-title = Son yüklediğiniz kayıtlar
+Home--install-chrome-extension = Chrome uzantısını yükle
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -477,6 +493,11 @@ PanelSearch--search-field-hint = Birden fazla terim kullanarak arama yapmak içi
 
 ## Profile Name Button
 
+ProfileName--edit-profile-name-button =
+    .title = Profil adını düzenle
+ProfileName--edit-profile-name-input =
+    .title = Profil adını düzenle
+    .aria-label = Profil adı
 
 ## Profile Delete Button
 

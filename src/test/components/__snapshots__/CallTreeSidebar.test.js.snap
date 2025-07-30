@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`CallTreeSidebar can expand subcategories 1`] = `
 <aside
@@ -125,7 +125,7 @@ exports[`CallTreeSidebar can expand subcategories 1`] = `
     >
       <div
         class="sidebar-histogram-bar-color category-color-purple"
-        style="width: 100.0000%;"
+        style="width: 100%;"
       />
     </div>
     <h4
@@ -168,73 +168,7 @@ exports[`CallTreeSidebar can expand subcategories 1`] = `
     >
       <div
         class="sidebar-histogram-bar-color category-color-purple"
-        style="width: 100.0000%;"
-      />
-    </div>
-    <h4
-      class="sidebar-title3 sidebar-title-label"
-    >
-      <div>
-        Implementation
-      </div>
-      <div>
-        Running sample count
-      </div>
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      Native code
-    </div>
-    <div
-      class="sidebar-percentage"
-    >
-      100%
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      3
-    </div>
-    <div
-      class="sidebar-histogram-bar"
-    >
-      <div
-        class="sidebar-histogram-bar-color"
-        style="width: 100.0000%;"
-      />
-    </div>
-    <h4
-      class="sidebar-title3 sidebar-title-label"
-    >
-      <div>
-        Implementation
-      </div>
-      <div>
-        Self sample count
-      </div>
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      Native code
-    </div>
-    <div
-      class="sidebar-percentage"
-    >
-      100%
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2
-    </div>
-    <div
-      class="sidebar-histogram-bar"
-    >
-      <div
-        class="sidebar-histogram-bar-color"
-        style="width: 100.0000%;"
+        style="width: 100%;"
       />
     </div>
   </div>
@@ -366,7 +300,7 @@ exports[`CallTreeSidebar can expand subcategories 2`] = `
     >
       <div
         class="sidebar-histogram-bar-color category-color-purple"
-        style="width: 100.0000%;"
+        style="width: 100%;"
       />
     </div>
     <div
@@ -439,73 +373,7 @@ exports[`CallTreeSidebar can expand subcategories 2`] = `
     >
       <div
         class="sidebar-histogram-bar-color category-color-purple"
-        style="width: 100.0000%;"
-      />
-    </div>
-    <h4
-      class="sidebar-title3 sidebar-title-label"
-    >
-      <div>
-        Implementation
-      </div>
-      <div>
-        Running sample count
-      </div>
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      Native code
-    </div>
-    <div
-      class="sidebar-percentage"
-    >
-      100%
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      3
-    </div>
-    <div
-      class="sidebar-histogram-bar"
-    >
-      <div
-        class="sidebar-histogram-bar-color"
-        style="width: 100.0000%;"
-      />
-    </div>
-    <h4
-      class="sidebar-title3 sidebar-title-label"
-    >
-      <div>
-        Implementation
-      </div>
-      <div>
-        Self sample count
-      </div>
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      Native code
-    </div>
-    <div
-      class="sidebar-percentage"
-    >
-      100%
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2
-    </div>
-    <div
-      class="sidebar-histogram-bar"
-    >
-      <div
-        class="sidebar-histogram-bar-color"
-        style="width: 100.0000%;"
+        style="width: 100%;"
       />
     </div>
   </div>
@@ -617,40 +485,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying bytes data 2`] = 
     >
       <div
         class="sidebar-histogram-bar-color category-color-yellow"
-        style="width: 100.0000%;"
-      />
-    </div>
-    <h4
-      class="sidebar-title3 sidebar-title-label"
-    >
-      <div>
-        Implementation
-      </div>
-      <div>
-        Running bytes
-      </div>
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      JS interpreter
-    </div>
-    <div
-      class="sidebar-percentage"
-    >
-      100%
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1B
-    </div>
-    <div
-      class="sidebar-histogram-bar"
-    >
-      <div
-        class="sidebar-histogram-bar-color"
-        style="width: 100.0000%;"
+        style="width: 100%;"
       />
     </div>
   </div>
@@ -788,40 +623,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-yellow"
-        style="width: 100.0000%;"
-      />
-    </div>
-    <h4
-      class="sidebar-title3 sidebar-title-label"
-    >
-      <div>
-        Implementation
-      </div>
-      <div>
-        Running sample count
-      </div>
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      JS interpreter
-    </div>
-    <div
-      class="sidebar-percentage"
-    >
-      100%
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2
-    </div>
-    <div
-      class="sidebar-histogram-bar"
-    >
-      <div
-        class="sidebar-histogram-bar-color"
-        style="width: 100.0000%;"
+        style="width: 100%;"
       />
     </div>
   </div>
@@ -947,40 +749,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-yellow"
-        style="width: 100.0000%;"
-      />
-    </div>
-    <h4
-      class="sidebar-title3 sidebar-title-label"
-    >
-      <div>
-        Implementation
-      </div>
-      <div>
-        Running sample count
-      </div>
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      JS interpreter
-    </div>
-    <div
-      class="sidebar-percentage"
-    >
-      100%
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1
-    </div>
-    <div
-      class="sidebar-histogram-bar"
-    >
-      <div
-        class="sidebar-histogram-bar-color"
-        style="width: 100.0000%;"
+        style="width: 100%;"
       />
     </div>
   </div>
@@ -1106,7 +875,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-transparent"
-        style="width: 50.0000%;"
+        style="width: 50%;"
       />
     </div>
     <div
@@ -1129,7 +898,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-purple"
-        style="width: 50.0000%;"
+        style="width: 50%;"
       />
     </div>
     <h4
@@ -1166,73 +935,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-purple"
-        style="width: 100.0000%;"
-      />
-    </div>
-    <h4
-      class="sidebar-title3 sidebar-title-label"
-    >
-      <div>
-        Implementation
-      </div>
-      <div>
-        Running sample count
-      </div>
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      Native code
-    </div>
-    <div
-      class="sidebar-percentage"
-    >
-      100%
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2
-    </div>
-    <div
-      class="sidebar-histogram-bar"
-    >
-      <div
-        class="sidebar-histogram-bar-color"
-        style="width: 100.0000%;"
-      />
-    </div>
-    <h4
-      class="sidebar-title3 sidebar-title-label"
-    >
-      <div>
-        Implementation
-      </div>
-      <div>
-        Self sample count
-      </div>
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      Native code
-    </div>
-    <div
-      class="sidebar-percentage"
-    >
-      100%
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1
-    </div>
-    <div
-      class="sidebar-histogram-bar"
-    >
-      <div
-        class="sidebar-histogram-bar-color"
-        style="width: 100.0000%;"
+        style="width: 100%;"
       />
     </div>
   </div>
@@ -1358,7 +1061,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-yellow"
-        style="width: 100.0000%;"
+        style="width: 100%;"
       />
     </div>
     <h4
@@ -1395,73 +1098,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-yellow"
-        style="width: 100.0000%;"
-      />
-    </div>
-    <h4
-      class="sidebar-title3 sidebar-title-label"
-    >
-      <div>
-        Implementation
-      </div>
-      <div>
-        Running sample count
-      </div>
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      JS interpreter
-    </div>
-    <div
-      class="sidebar-percentage"
-    >
-      100%
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1
-    </div>
-    <div
-      class="sidebar-histogram-bar"
-    >
-      <div
-        class="sidebar-histogram-bar-color"
-        style="width: 100.0000%;"
-      />
-    </div>
-    <h4
-      class="sidebar-title3 sidebar-title-label"
-    >
-      <div>
-        Implementation
-      </div>
-      <div>
-        Self sample count
-      </div>
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      JS interpreter
-    </div>
-    <div
-      class="sidebar-percentage"
-    >
-      100%
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1
-    </div>
-    <div
-      class="sidebar-histogram-bar"
-    >
-      <div
-        class="sidebar-histogram-bar-color"
-        style="width: 100.0000%;"
+        style="width: 100%;"
       />
     </div>
   </div>
@@ -1599,40 +1236,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-yellow"
-        style="width: 100.0000%;"
-      />
-    </div>
-    <h4
-      class="sidebar-title3 sidebar-title-label"
-    >
-      <div>
-        Implementation
-      </div>
-      <div>
-        Running sample count
-      </div>
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      JS interpreter
-    </div>
-    <div
-      class="sidebar-percentage"
-    >
-      100%
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2
-    </div>
-    <div
-      class="sidebar-histogram-bar"
-    >
-      <div
-        class="sidebar-histogram-bar-color"
-        style="width: 100.0000%;"
+        style="width: 100%;"
       />
     </div>
   </div>
@@ -1758,40 +1362,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-purple"
-        style="width: 100.0000%;"
-      />
-    </div>
-    <h4
-      class="sidebar-title3 sidebar-title-label"
-    >
-      <div>
-        Implementation
-      </div>
-      <div>
-        Running sample count
-      </div>
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      Native code
-    </div>
-    <div
-      class="sidebar-percentage"
-    >
-      100%
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1
-    </div>
-    <div
-      class="sidebar-histogram-bar"
-    >
-      <div
-        class="sidebar-histogram-bar-color"
-        style="width: 100.0000%;"
+        style="width: 100%;"
       />
     </div>
   </div>
@@ -1917,40 +1488,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-transparent"
-        style="width: 100.0000%;"
-      />
-    </div>
-    <h4
-      class="sidebar-title3 sidebar-title-label"
-    >
-      <div>
-        Implementation
-      </div>
-      <div>
-        Running sample count
-      </div>
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      Native code
-    </div>
-    <div
-      class="sidebar-percentage"
-    >
-      100%
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1
-    </div>
-    <div
-      class="sidebar-histogram-bar"
-    >
-      <div
-        class="sidebar-histogram-bar-color"
-        style="width: 100.0000%;"
+        style="width: 100%;"
       />
     </div>
   </div>
@@ -2076,40 +1614,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-purple"
-        style="width: 100.0000%;"
-      />
-    </div>
-    <h4
-      class="sidebar-title3 sidebar-title-label"
-    >
-      <div>
-        Implementation
-      </div>
-      <div>
-        Running sample count
-      </div>
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      Native code
-    </div>
-    <div
-      class="sidebar-percentage"
-    >
-      100%
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1
-    </div>
-    <div
-      class="sidebar-histogram-bar"
-    >
-      <div
-        class="sidebar-histogram-bar-color"
-        style="width: 100.0000%;"
+        style="width: 100%;"
       />
     </div>
   </div>

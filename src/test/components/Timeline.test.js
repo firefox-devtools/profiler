@@ -1007,7 +1007,8 @@ describe('Timeline multiple thread selection', function () {
         messageSeqno: 1,
       },
       profile.threads[0], // Parent process
-      profile.threads[6] // tab process
+      profile.threads[6], // tab process
+      profile.shared
     );
 
     addIPCMarkerPairToThreads(
@@ -1017,7 +1018,8 @@ describe('Timeline multiple thread selection', function () {
         messageSeqno: 2,
       },
       profile.threads[0], // Parent process
-      profile.threads[7] // DOM Worker
+      profile.threads[7], // DOM Worker
+      profile.shared
     );
 
     const { getState, showAllIPCTracks } = setup(profile);
@@ -1106,7 +1108,8 @@ describe('Timeline multiple thread selection', function () {
         messageSeqno: 1,
       },
       profile.threads[0], // Parent process
-      profile.threads[6] // tab process
+      profile.threads[6], // tab process
+      profile.shared
     );
 
     addIPCMarkerPairToThreads(
@@ -1116,7 +1119,8 @@ describe('Timeline multiple thread selection', function () {
         messageSeqno: 2,
       },
       profile.threads[0], // Parent process
-      profile.threads[7] // DOM Worker
+      profile.threads[7], // DOM Worker
+      profile.shared
     );
 
     const { getState, showAllIPCTracks } = setup(profile);
@@ -1236,7 +1240,7 @@ function _getProfileWithDroppedSamples(): Profile {
       }
     }
   }
-  thread2.samples.length = sampleTimes2.length;
+  thread2.samples.length = thread2.samples.stack.length;
 
   profile.threads.push(thread2);
   return profile;

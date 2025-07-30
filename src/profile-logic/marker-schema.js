@@ -39,16 +39,12 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
     display: ['marker-table', 'marker-chart'],
     tooltipLabel: 'Jank – event processing delay',
     tableLabel: 'Event processing delay',
-    data: [
-      {
-        label: 'Description',
-        value: oneLine`
-          Jank markers show when the main event loop of a thread has been busy. It is
-          a good indicator that there may be some kind of performance problem that
-          is worth investigating.
-        `,
-      },
-    ],
+    fields: [],
+    description: oneLine`
+      Jank markers show when the main event loop of a thread has been busy. It is
+      a good indicator that there may be some kind of performance problem that
+      is worth investigating.
+    `,
   },
   // Note, these can also come from Gecko, but since we have lots of special handling
   // for IPC, the Gecko ones get overwritten by this definition.
@@ -58,17 +54,12 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
     tableLabel: '{marker.data.messageType} — {marker.data.niceDirection}',
     chartLabel: '{marker.data.messageType}',
     display: ['marker-chart', 'marker-table', 'timeline-ipc'],
-    data: [
-      { key: 'messageType', label: 'Type', format: 'string', searchable: true },
+    fields: [
+      { key: 'messageType', label: 'Type', format: 'string' },
       { key: 'sync', label: 'Sync', format: 'string' },
       { key: 'sendThreadName', label: 'From', format: 'string' },
       { key: 'recvThreadName', label: 'To', format: 'string' },
-      {
-        key: 'otherPid',
-        label: 'Other Pid',
-        format: 'pid',
-        searchable: true,
-      },
+      { key: 'otherPid', label: 'Other Pid', format: 'pid' },
     ],
   },
   {
@@ -78,7 +69,20 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
     name: 'Network',
     display: ['marker-table', 'marker-chart'],
     chartLabel: '{marker.data.URI}',
-    data: [],
+    fields: [
+      {
+        format: 'string',
+        key: 'contentType',
+        label: 'Content Type',
+        hidden: true,
+      },
+      {
+        format: 'integer',
+        key: 'responseStatus',
+        label: 'Response Status',
+        hidden: true,
+      },
+    ],
   },
 ];
 
@@ -204,11 +208,9 @@ export function parseLabel(
       // Handle:                                      ^^^^^^^^^^^^^^^^
 
       let format = null;
-      for (const rule of markerSchema.data) {
-        // The rule.value === undefined line is odd mainly because Flow was having trouble
-        // refining the type.
-        if (rule.value === undefined && rule.key === payloadKey) {
-          format = rule.format;
+      for (const field of markerSchema.fields) {
+        if (field.key === payloadKey) {
+          format = field.format;
           break;
         }
       }
@@ -611,7 +613,7 @@ export function formatMarkupFromMarkerSchema(
 }
 
 /**
- * Takes a marker and a RegExp and checks if any of its `searchable` marker
+ * Takes a marker and a RegExp and checks if any of its marker
  * payload fields match the search regular expression.
  */
 export function markerPayloadMatchesSearch(
@@ -625,43 +627,37 @@ export function markerPayloadMatchesSearch(
     return false;
   }
 
-  // Check if searchable fields match the search regular expression.
-  for (const payloadField of markerSchema.data) {
-    if (payloadField.searchable) {
-      let value = data[payloadField.key];
-      if (
-        payloadField.format === 'unique-string' ||
-        payloadField.format === 'flow-id' ||
-        payloadField.format === 'terminating-flow-id'
-      ) {
-        if (value === undefined) {
-          // The value is missing, but this is OK, values are optional.
-          continue;
-        }
+  // Check if fields match the search regular expression.
+  for (const payloadField of markerSchema.fields) {
+    let value = data[payloadField.key];
+    if (value === undefined || value === null) {
+      // The value is missing, but this is OK, values are optional.
+      continue;
+    }
 
-        if (typeof value !== 'number') {
-          console.warn(
-            `In marker ${marker.name}, the key ${payloadField.key} has an invalid value "${value}" as a unique string, it isn't a number.`
-          );
-          continue;
-        }
-
-        if (!stringTable.hasIndex(value)) {
-          console.warn(
-            `In marker ${marker.name}, the key ${payloadField.key} has an invalid index "${value}" as a unique string, as it's missing from the string table.`
-          );
-          continue;
-        }
-        value = stringTable.getString(value);
-      }
-
-      if (value === undefined || value === null || value === '') {
+    if (
+      payloadField.format === 'unique-string' ||
+      payloadField.format === 'flow-id' ||
+      payloadField.format === 'terminating-flow-id'
+    ) {
+      if (typeof value !== 'number') {
+        console.warn(
+          `In marker ${marker.name}, the key ${payloadField.key} has an invalid value "${value}" as a unique string, it isn't a number.`
+        );
         continue;
       }
 
-      if (testFun(value, payloadField.key)) {
-        return true;
+      if (!stringTable.hasIndex(value)) {
+        console.warn(
+          `In marker ${marker.name}, the key ${payloadField.key} has an invalid index "${value}" as a unique string, as it's missing from the string table.`
+        );
+        continue;
       }
+      value = stringTable.getString(value);
+    }
+
+    if (value !== '' && testFun(value, payloadField.key)) {
+      return true;
     }
   }
 
@@ -683,10 +679,15 @@ export function computeStringIndexMarkerFieldsByDataType(
   stringIndexMarkerFieldsByDataType.set('CompositorScreenshot', ['url']);
 
   for (const schema of markerSchemas) {
-    const { name, data } = schema;
+    const { name, fields } = schema;
     const stringIndexFields = [];
-    for (const field of data) {
-      if (field.format === 'unique-string' && field.key) {
+    for (const field of fields) {
+      if (
+        (field.format === 'unique-string' ||
+          field.format === 'flow-id' ||
+          field.format === 'terminating-flow-id') &&
+        field.key
+      ) {
         stringIndexFields.push(field.key);
       }
     }

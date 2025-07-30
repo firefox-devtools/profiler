@@ -20,7 +20,6 @@ import type {
   TimelineType,
   UrlState,
   Reducer,
-  TimelineTrackOrganization,
   SourceViewState,
   AssemblyViewState,
   IsOpenPerPanelState,
@@ -130,8 +129,6 @@ const selectedThreads: Reducer<Set<ThreadIndex> | null> = (
     case 'CHANGE_SELECTED_THREAD':
     case 'SELECT_TRACK':
     case 'VIEW_FULL_PROFILE':
-    case 'VIEW_ORIGINS_PROFILE':
-    case 'VIEW_ACTIVE_TAB_PROFILE':
     case 'ISOLATE_PROCESS':
     case 'ISOLATE_PROCESS_MAIN_THREAD':
     case 'HIDE_GLOBAL_TRACK':
@@ -241,7 +238,6 @@ const timelineType: Reducer<TimelineType> = (
     case 'CHANGE_TIMELINE_TYPE':
       return action.timelineType;
     case 'VIEW_FULL_PROFILE':
-    case 'VIEW_ACTIVE_TAB_PROFILE':
       // The timelineType can be set at load time from a URL value.
       // If it's not set from a URL value we provide a default value from this action.
       // When it's null we don't want to override the value that was set already.
@@ -305,6 +301,15 @@ const showUserTimings: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
     case 'CHANGE_SHOW_USER_TIMINGS':
       return action.showUserTimings;
+    default:
+      return state;
+  }
+};
+
+const stackChartSameWidths: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'CHANGE_STACK_CHART_SAME_WIDTHS':
+      return action.stackChartSameWidths;
     default:
       return state;
   }
@@ -556,25 +561,6 @@ const profileName: Reducer<string | null> = (state = null, action) => {
   }
 };
 
-const timelineTrackOrganization: Reducer<TimelineTrackOrganization> = (
-  state = { type: 'full' },
-  action
-) => {
-  switch (action.type) {
-    case 'VIEW_FULL_PROFILE':
-      return { type: 'full' };
-    case 'VIEW_ACTIVE_TAB_PROFILE':
-      return {
-        type: 'active-tab',
-        tabID: action.tabID,
-      };
-    case 'VIEW_ORIGINS_PROFILE':
-      return { type: 'origins' };
-    default:
-      return state;
-  }
-};
-
 const sourceView: Reducer<SourceViewState> = (
   state = { scrollGeneration: 0, libIndex: null, sourceFile: null },
   action
@@ -659,22 +645,6 @@ const isBottomBoxOpenPerPanel: Reducer<IsOpenPerPanelState> = (
 };
 
 /**
- * Active tab specific profile url states
- */
-
-/**
- * Active tab resources panel open/close state.
- */
-const isResourcesPanelOpen: Reducer<boolean> = (state = false, action) => {
-  switch (action.type) {
-    case 'TOGGLE_RESOURCES_PANEL':
-      return !state;
-    default:
-      return state;
-  }
-};
-
-/**
  * This value is only set from the URL and never changed.
  */
 const symbolServerUrl: Reducer<string | null> = (state = null) => {
@@ -682,9 +652,24 @@ const symbolServerUrl: Reducer<string | null> = (state = null) => {
 };
 
 /**
- * These values are specific to an individual full profile.
+ * These values are specific to an individual profile.
  */
-const fullProfileSpecific = combineReducers({
+const profileSpecific = combineReducers({
+  selectedThreads,
+  implementation,
+  lastSelectedCallTreeSummaryStrategy,
+  invertCallstack,
+  showUserTimings,
+  stackChartSameWidths,
+  committedRanges,
+  callTreeSearchString,
+  markersSearchString,
+  networkSearchString,
+  transforms,
+  sourceView,
+  assemblyView,
+  isBottomBoxOpenPerPanel,
+  timelineType,
   globalTrackOrder,
   hiddenGlobalTracks,
   hiddenLocalTracksByPid,
@@ -698,35 +683,6 @@ const fullProfileSpecific = combineReducers({
   // process. These value are only set by the locationToState function.
   legacyThreadOrder: (state: ThreadIndex[] | null = null) => state,
   legacyHiddenThreads: (state: ThreadIndex[] | null = null) => state,
-});
-
-/**
- * These values are specific to an individual active tab profile.
- */
-const activeTabProfileSpecific = combineReducers({
-  isResourcesPanelOpen,
-});
-
-/**
- * These values are specific to an individual profile.
- */
-const profileSpecific = combineReducers({
-  selectedThreads,
-  implementation,
-  lastSelectedCallTreeSummaryStrategy,
-  invertCallstack,
-  showUserTimings,
-  committedRanges,
-  callTreeSearchString,
-  markersSearchString,
-  networkSearchString,
-  transforms,
-  sourceView,
-  assemblyView,
-  isBottomBoxOpenPerPanel,
-  timelineType,
-  full: fullProfileSpecific,
-  activeTab: activeTabProfileSpecific,
 });
 
 /**
@@ -770,7 +726,6 @@ const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
     pathInZipFile,
     profileSpecific,
     profileName,
-    timelineTrackOrganization,
     symbolServerUrl,
   })
 );

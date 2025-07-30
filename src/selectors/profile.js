@@ -7,7 +7,7 @@ import { createSelector } from 'reselect';
 import * as Tracks from '../profile-logic/tracks';
 import * as CPU from '../profile-logic/cpu';
 import * as UrlState from './url-state';
-import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
+import { ensureExists } from '../utils/flow';
 import {
   accumulateCounterSamples,
   extractProfileFilterPageData,
@@ -21,17 +21,16 @@ import {
   IPCMarkerCorrelations,
   correlateIPCMarkers,
 } from '../profile-logic/marker-data';
-import {
-  markerSchemaFrontEndOnly,
-  computeStringIndexMarkerFieldsByDataType,
-} from '../profile-logic/marker-schema';
+import { markerSchemaFrontEndOnly } from '../profile-logic/marker-schema';
 import { getDefaultCategories } from 'firefox-profiler/profile-logic/data-structures';
+import * as CommittedRanges from '../profile-logic/committed-ranges';
 import { defaultTableViewOptions } from '../reducers/profile-view';
 import { StringTable } from '../utils/string-table';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
 import type {
   Profile,
+  RawProfileSharedData,
   CategoryList,
   IndexIntoCategoryList,
   RawThread,
@@ -54,9 +53,6 @@ import type {
   GlobalTrack,
   AccumulatedCounterSamples,
   ProfileFilterPageData,
-  ActiveTabGlobalTrack,
-  OriginsTimeline,
-  ActiveTabResourceTrack,
   Milliseconds,
   StartEndRange,
   GlobalTrackReference,
@@ -65,19 +61,11 @@ import type {
   LastNonShiftClickInformation,
   PreviewSelection,
   HiddenTrackCount,
-  ActiveTabGlobalTrackReference,
-  ActiveTabResourceTrackReference,
   Selector,
   DangerousSelectorWithArguments,
   State,
   ProfileViewState,
   SymbolicationStatus,
-  FullProfileViewState,
-  ActiveTabProfileViewState,
-  OriginsViewState,
-  ActiveTabTimeline,
-  ActiveTabMainTrack,
-  ThreadsKey,
   $ReturnType,
   MarkerSchema,
   MarkerSchemaByName,
@@ -87,19 +75,13 @@ import type {
   TableViewOptions,
   ExtensionTable,
   SortedTabPageData,
+  TimelineUnit,
 } from 'firefox-profiler/types';
 
 import type { ThreadActivityScore } from '../profile-logic/tracks';
 
 export const getProfileView: Selector<ProfileViewState> = (state) =>
   state.profileView;
-export const getFullProfileView: Selector<FullProfileViewState> = (state) =>
-  getProfileView(state).full;
-export const getActiveTabProfileView: Selector<ActiveTabProfileViewState> = (
-  state
-) => getProfileView(state).activeTab;
-export const getOriginsProfileView: Selector<OriginsViewState> = (state) =>
-  getProfileView(state).origins;
 
 /**
  * Profile View Options
@@ -120,6 +102,10 @@ export const getFocusCallTreeGeneration: Selector<number> = (state) =>
   getProfileViewOptions(state).focusCallTreeGeneration;
 export const getZeroAt: Selector<Milliseconds> = (state) =>
   getProfileRootRange(state).start;
+export const getProfileTimelineUnit: Selector<TimelineUnit> = (state) => {
+  const { sampleUnits } = getProfile(state).meta;
+  return sampleUnits ? sampleUnits.time : 'ms';
+};
 
 export const getCommittedRange: Selector<StartEndRange> = createSelector(
   getProfileRootRange,
@@ -134,6 +120,16 @@ export const getCommittedRange: Selector<StartEndRange> = createSelector(
     }
     return rootRange;
   }
+);
+
+/**
+ * This selector transforms the committed ranges into a list of labels that can
+ * be displayed in the UI.
+ */
+export const getCommittedRangeLabels: Selector<string[]> = createSelector(
+  UrlState.getAllCommittedRanges,
+  getProfileTimelineUnit,
+  CommittedRanges.getCommittedRangeLabels
 );
 
 export const getMouseTimePosition: Selector<Milliseconds | null> = (state) =>
@@ -176,6 +172,9 @@ export const getProfile: Selector<Profile> = (state) =>
     getProfileOrNull(state),
     'Tried to access the profile before it was loaded.'
   );
+export const getRawProfileSharedData: Selector<RawProfileSharedData> = (
+  state
+) => getProfile(state).shared;
 export const getProfileInterval: Selector<Milliseconds> = (state) =>
   getProfile(state).meta.interval;
 export const getPageList = (state: State): PageList | null =>
@@ -239,6 +238,11 @@ export const getCategories: Selector<CategoryList> = createSelector(
   }
 );
 
+export const getStringTable: Selector<StringTable> = createSelector(
+  (state) => getRawProfileSharedData(state).stringArray,
+  (stringArray) => StringTable.withBackingArray(stringArray)
+);
+
 // Combine the marker schema from Gecko and the front-end. This allows the front-end
 // to generate markers such as the Jank markers, and display them.
 export const getMarkerSchema: Selector<MarkerSchema[]> = createSelector(
@@ -255,12 +259,6 @@ export const getMarkerSchema: Selector<MarkerSchema[]> = createSelector(
   }
 );
 
-export const getStringIndexMarkerFieldsByDataType: Selector<
-  Map<string, string[]>,
-> = createSelector(getMarkerSchema, (schemaList) =>
-  computeStringIndexMarkerFieldsByDataType(schemaList)
-);
-
 export const getMarkerSchemaByName: Selector<MarkerSchemaByName> =
   createSelector(getMarkerSchema, (schemaList) => {
     const result = Object.create(null);
@@ -269,21 +267,6 @@ export const getMarkerSchemaByName: Selector<MarkerSchemaByName> =
     }
     return result;
   });
-
-export const getActiveTabID: Selector<TabID | null> = (state) => {
-  const configuration = getProfilerConfiguration(state);
-  if (
-    configuration &&
-    configuration.activeTabID &&
-    configuration.activeTabID !== 0
-  ) {
-    // activeTabID can be `0` and that means Firefox has failed to get
-    // the TabID of the active tab. We are converting that `0` to
-    // `null` here to explicitly indicate that we don't have that information.
-    return configuration.activeTabID;
-  }
-  return null;
-};
 
 type CounterSelectors = $ReturnType<typeof _createCounterSelectors>;
 
@@ -366,7 +349,7 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
 }
 
 export const getIPCMarkerCorrelations: Selector<IPCMarkerCorrelations> =
-  createSelector(getThreads, correlateIPCMarkers);
+  createSelector([getThreads, getRawProfileSharedData], correlateIPCMarkers);
 
 /**
  * Returns an InnerWindowID -> Page map, so we can look up the page from inner
@@ -430,7 +413,7 @@ export const getTabToThreadIndexesMap: Selector<Map<TabID, Set<ThreadIndex>>> =
  * They're uniquely referenced by a TrackReference.
  */
 export const getGlobalTracks: Selector<GlobalTrack[]> = (state) =>
-  getFullProfileView(state).globalTracks;
+  getProfileView(state).globalTracks;
 
 /**
  * This returns all TrackReferences for global tracks.
@@ -444,17 +427,17 @@ export const getGlobalTrackReferences: Selector<GlobalTrackReference[]> =
   );
 
 export const getHasPreferenceMarkers: Selector<boolean> = createSelector(
+  getStringTable,
   getThreads,
-  (threads) => {
-    return threads.some(({ stringArray, markers }) => {
-      /*
-       * Does this particular thread have a Preference in it?
-       */
-      const stringTable = StringTable.withBackingArray(stringArray);
-      const indexForPreferenceString =
-        stringTable.indexForString('PreferenceRead');
-      return markers.name.some((name) => name === indexForPreferenceString);
-    });
+  (stringTable, threads) => {
+    if (!stringTable.hasString('PreferenceRead')) {
+      return false;
+    }
+    const indexForPreferenceString =
+      stringTable.indexForString('PreferenceRead');
+    return threads.some(({ markers }) =>
+      markers.name.includes(indexForPreferenceString)
+    );
   }
 );
 
@@ -496,7 +479,7 @@ export const getGlobalTrackAndIndexByPid: DangerousSelectorWithArguments<
  * This returns a map of local tracks from a pid.
  */
 export const getLocalTracksByPid: Selector<Map<Pid, LocalTrack[]>> = (state) =>
-  getFullProfileView(state).localTracksByPid;
+  getProfileView(state).localTracksByPid;
 
 /**
  * This selectors performs a simple look up in a Map, throws an error if it doesn't exist,
@@ -508,7 +491,7 @@ export const getLocalTracks: DangerousSelectorWithArguments<
   Pid,
 > = (state, pid) =>
   ensureExists(
-    getFullProfileView(state).localTracksByPid.get(pid),
+    getProfileView(state).localTracksByPid.get(pid),
     'Unable to get the tracks for the given pid.'
   );
 
@@ -581,14 +564,20 @@ export const getLocalTrackNamesByPid: Selector<Map<Pid, string[]>> =
   createSelector(
     getLocalTracksByPid,
     getThreads,
+    getRawProfileSharedData,
     getCounters,
-    (localTracksByPid, threads, counters) => {
+    (localTracksByPid, threads, shared, counters) => {
       const localTrackNamesByPid = new Map();
       for (const [pid, localTracks] of localTracksByPid) {
         localTrackNamesByPid.set(
           pid,
           localTracks.map((localTrack) =>
-            Tracks.getLocalTrackName(localTrack, threads, counters || [])
+            Tracks.getLocalTrackName(
+              localTrack,
+              threads,
+              shared,
+              counters || []
+            )
           )
         );
       }
@@ -607,80 +596,9 @@ export const getLocalTrackName = (
   )[trackIndex];
 
 /**
- * Active tab profile selectors
- */
-
-/**
- * Returns global tracks for the active tab view.
- */
-export const getActiveTabTimeline: Selector<ActiveTabTimeline> = (state) =>
-  getActiveTabProfileView(state).activeTabTimeline;
-
-export const getActiveTabMainTrack: Selector<ActiveTabMainTrack> = (state) =>
-  getActiveTabTimeline(state).mainTrack;
-
-export const getActiveTabGlobalTracks: Selector<ActiveTabGlobalTrack[]> = (
-  state
-) => [
-  ...getActiveTabTimeline(state).screenshots,
-  getActiveTabTimeline(state).mainTrack,
-];
-
-/**
- * Returns resource tracks for the active tab view.
- */
-export const getActiveTabResourceTracks: Selector<ActiveTabResourceTrack[]> = (
-  state
-) => getActiveTabTimeline(state).resources;
-
-export const getActiveTabResourcesThreadsKey: Selector<ThreadsKey> = (state) =>
-  getActiveTabTimeline(state).resourcesThreadsKey;
-
-/**
- * This returns all TrackReferences for global tracks.
- */
-export const getActiveTabGlobalTrackReferences: Selector<
-  GlobalTrackReference[],
-> = createSelector(getActiveTabGlobalTracks, (globalTracks) =>
-  globalTracks.map((globalTrack, trackIndex) => ({
-    type: 'global',
-    trackIndex,
-  }))
-);
-
-/**
- * This finds an ActiveTabGlobalTrack from its TrackReference. No memoization is needed
- * as this is a simple value look-up.
- */
-export const getActiveTabGlobalTrackFromReference: DangerousSelectorWithArguments<
-  ActiveTabGlobalTrack,
-  ActiveTabGlobalTrackReference,
-> = (state, trackReference) =>
-  getActiveTabGlobalTracks(state)[trackReference.trackIndex];
-
-/**
- * This finds an ActiveTabResourceTrack from its TrackReference. No memoization is needed
- * as this is a simple value look-up.
- */
-export const getActiveTabResourceTrackFromReference: DangerousSelectorWithArguments<
-  ActiveTabResourceTrack,
-  ActiveTabResourceTrackReference,
-> = (state, trackReference) =>
-  getActiveTabResourceTracks(state)[trackReference.trackIndex];
-
-/**
- * Origins profile view selectors.
- */
-
-export const getOriginsTimeline: Selector<OriginsTimeline> = (state) =>
-  getOriginsProfileView(state).originsTimeline;
-
-/**
  * It's a bit hard to deduce the total amount of hidden tracks, as there are both
  * global and local tracks, and they are stored by PID. If a global track is hidden,
- * then all its children are as well. Also we need to take into account the tracks
- * that are hidden by active tab view. We should ignore them because they will not
- * be visible in the track list. This function walks all of the data to determine
+ * then all its children are as well. This function walks all of the data to determine
  * the correct hidden counts.
  */
 export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
@@ -809,29 +727,6 @@ export const getPagesMap: Selector<Map<TabID, Page[]> | null> = createSelector(
 );
 
 /**
- * Return the relevant page array for active tab.
- * This is useful for operations that require the whole Page object instead of
- * only the InnerWindowIDs. If you only need the InnerWindowID array of the active
- * tab, please use getRelevantInnerWindowIDsForActiveTab selector. Returns
- * _emptyRelevantPagesForActiveTab array as empty array to return the same array
- * every time the selector inputs are invalidated. That eliminates the re-render
- * of the components.
- */
-const _emptyRelevantPagesForActiveTab = [];
-export const getRelevantPagesForActiveTab: Selector<Page[]> = createSelector(
-  getPagesMap,
-  getActiveTabID,
-  (pagesMap, activeTabID) => {
-    if (pagesMap === null || pagesMap.size === 0 || activeTabID === null) {
-      // Return an empty array if we want to see everything or that data is not there.
-      return _emptyRelevantPagesForActiveTab;
-    }
-
-    return pagesMap.get(activeTabID) ?? _emptyRelevantPagesForActiveTab;
-  }
-);
-
-/**
  * Get the page map and return the set of InnerWindowIDs by its parent TabID.
  * This is a helper selector for other selectors so we can easily get the relevant
  * InnerWindowID set of a parent TabID. Set is useful for faster
@@ -855,62 +750,6 @@ export const getInnerWindowIDSetByTabID: Selector<Map<
   }
   return innerWindowIDSetByTabID;
 });
-
-/**
- * Get the page map and the active tab ID, then return the InnerWindowIDs that
- * are related to this active tab. This is a fairly simple map element access.
- * The `TabID -> Set<InnerWindowID>` construction happens inside
- * the getInnerWindowIDSetByTabID selector.
- * This function returns the Set all the time even though we are not in the active
- * tab view at the moment. Ideally you should use the wrapper
- * getRelevantInnerWindowIDsForCurrentTab function if you want to do something
- * inside the active tab view. This is needed for only viewProfile function to
- * calculate the hidden tracks during page load, even though we are not in the
- * active tab view.
- */
-export const getRelevantInnerWindowIDsForActiveTab: Selector<
-  Set<InnerWindowID>,
-> = createSelector(
-  getInnerWindowIDSetByTabID,
-  getActiveTabID,
-  (pagesMap, activeTabID) => {
-    if (pagesMap === null || pagesMap.size === 0 || activeTabID === null) {
-      // Return an empty set if we want to see everything or that data is not there.
-      return new Set();
-    }
-
-    const pageSet = pagesMap.get(activeTabID);
-    return pageSet ?? new Set();
-  }
-);
-
-/**
- * A simple wrapper for getRelevantInnerWindowIDsForActiveTab.
- * It returns an empty Set if ctxId is null, and returns the real Set if
- * ctxId is assigned already. We should usually use this instead of the
- * wrapped function. But the wrapped function is helpful to calculate the hidden
- * tracks by active tab view during the first page load(inside viewProfile function).
- */
-export const getRelevantInnerWindowIDsForCurrentTab: Selector<
-  Set<InnerWindowID>,
-> = createSelector(
-  UrlState.getTimelineTrackOrganization,
-  getRelevantInnerWindowIDsForActiveTab,
-  (timelineTrackOrganization, relevantInnerWindowIDs) => {
-    switch (timelineTrackOrganization.type) {
-      case 'active-tab':
-        return relevantInnerWindowIDs;
-      case 'full':
-      case 'origins':
-        return new Set();
-      default:
-        throw assertExhaustiveCheck(
-          timelineTrackOrganization,
-          'Unhandled timelineTrackOrganization case'
-        );
-    }
-  }
-);
 
 export const getExtensionIdToNameMap: Selector<Map<string, string> | null> =
   createSelector(getExtensionTable, (extensions) => {
@@ -982,25 +821,6 @@ export const getProfileFilterSortedPageData: Selector<SortedTabPageData> =
   );
 
 /**
- * This returns the hostname and favicon information for the current tab id.
- * Returns null if profiler is not in the single tab view at the moment.
- * TODO: This is only used for the active tab view. Remove it later.
- */
-export const getProfileFilterPageData: Selector<
-  ProfileFilterPageData | null,
-> = (state) => {
-  const pageDataByTabID = getProfileFilterPageDataByTabID(state);
-  const activeTabID = getActiveTabID(state);
-  const timelineTrackOrganization =
-    UrlState.getTimelineTrackOrganization(state);
-  if (activeTabID === null || timelineTrackOrganization.type !== 'active-tab') {
-    return null;
-  }
-
-  return pageDataByTabID.get(activeTabID) ?? null;
-};
-
-/**
  * Get the map of Thread ID -> Thread Name for easy access.
  */
 export const getThreadIdToNameMap: Selector<Map<Tid, string>> = createSelector(
@@ -1067,15 +887,6 @@ export const getProfiledThreadIds: Selector<Set<Tid>> = createSelector(
     return profiledThreadIds;
   }
 );
-
-/** Does the profile have implementation data? */
-export const getProfileUsesFrameImplementation: Selector<boolean> = (state) => {
-  const { profile } = state.profileView;
-  if (!profile) {
-    return true;
-  }
-  return profile.meta.doesNotUseFrameImplementation !== true;
-};
 
 /** Should the "Look up the function name on Searchfox" menu entry be hidden? */
 export const getShouldDisplaySearchfox: Selector<boolean> = (state) => {

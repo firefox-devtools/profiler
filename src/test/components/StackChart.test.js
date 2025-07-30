@@ -11,6 +11,7 @@ import {
   fireEvent,
   screen,
   act,
+  within,
 } from 'firefox-profiler/test/fixtures/testing-library';
 import * as UrlStateSelectors from '../../selectors/url-state';
 
@@ -31,6 +32,8 @@ import {
   changeSelectedCallNode,
   commitRange,
   changeImplementationFilter,
+  changeCallTreeSummaryStrategy,
+  updatePreviewSelection,
 } from '../../actions/profile-view';
 import { changeSelectedTab } from '../../actions/app';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
@@ -55,10 +58,11 @@ import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
   getUserTiming,
+  getProfileWithJsAllocations,
 } from '../fixtures/profiles/processed-profile';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
-import type { Profile, CssPixels } from 'firefox-profiler/types';
+import type { CssPixels } from 'firefox-profiler/types';
 
 jest.useFakeTimers();
 
@@ -73,11 +77,84 @@ beforeEach(addRootOverlayElement);
 afterEach(removeRootOverlayElement);
 
 describe('StackChart', function () {
-  it('matches the snapshot', () => {
-    const { container } = setupSamples();
+  it('matches the snapshot and can display a tooltip', () => {
+    const { container, getTooltip, moveMouse } = setupSamples();
     const drawCalls = flushDrawLog();
-    expect(container.firstChild).toMatchSnapshot();
-    expect(drawCalls).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot('dom');
+    expect(drawCalls).toMatchSnapshot('draw calls');
+
+    // It can also display a tooltip when hovering a stack.
+    expect(getTooltip()).toBe(null);
+
+    moveMouse(findFillTextPositionFromDrawLog(drawCalls, 'B'));
+    expect(getTooltip()).toBeTruthy();
+    expect(getTooltip()).toMatchSnapshot('tooltip');
+  });
+
+  it('matches the snapshot and can display a tooltip with the same widths option', () => {
+    const samples = `
+      A[cat:DOM]       A[cat:DOM]       A[cat:DOM]       A[cat:DOM]
+      B[cat:DOM]       B[cat:DOM]       B[cat:DOM]       B[cat:DOM]
+      C[cat:Graphics]  C[cat:Graphics]  C[cat:Graphics]  H[cat:Network]
+      D[cat:Graphics]  F[cat:Graphics]  F[cat:Graphics]  I[cat:Network]
+      E[cat:Graphics]  G[cat:Graphics]  G[cat:Graphics]
+    `;
+    const { getTooltip, moveMouse, flushRafCalls, dispatch } =
+      setupSamples(samples);
+    useSameWidthsStackChart({ flushRafCalls });
+
+    let drawCalls = flushDrawLog();
+    expect(document.body).toMatchSnapshot('dom');
+    expect(getDrawnFrames(drawCalls)).toEqual([
+      'A',
+      'B',
+      'C',
+      'H',
+      'D',
+      'F',
+      'I',
+      'E',
+      'G',
+    ]);
+    expect(drawCalls).toMatchSnapshot('draw calls');
+
+    // It can also display a tooltip when hovering a stack.
+    expect(getTooltip()).toBe(null);
+
+    moveMouse(findFillTextPositionFromDrawLog(drawCalls, 'I'));
+    expect(getTooltip()).toBeTruthy();
+    expect(getTooltip()).toMatchSnapshot('tooltip');
+
+    // Let's add a preview selection and do it again.
+    flushDrawLog();
+    act(() =>
+      dispatch(
+        updatePreviewSelection({
+          hasSelection: true,
+          isModifying: false,
+          selectionStart: 3.1,
+          selectionEnd: 3.4,
+        })
+      )
+    );
+
+    flushRafCalls();
+    drawCalls = flushDrawLog();
+    expect(getDrawnFrames(drawCalls)).toEqual([
+      'A',
+      'B',
+      'C',
+      'H',
+      'F',
+      'I',
+      'G',
+    ]);
+    expect(drawCalls).toMatchSnapshot('draw calls for preview selection');
+
+    // It can also display a tooltip when hovering a new stack.
+    moveMouse(findFillTextPositionFromDrawLog(drawCalls, 'H'));
+    expect(getTooltip()).toBeTruthy();
+    expect(getTooltip()).toMatchSnapshot('tooltip after preview selection');
   });
 
   it('can select a call node when clicking the chart', function () {
@@ -154,11 +231,6 @@ describe('StackChart', function () {
     expect(copy).toHaveBeenLastCalledWith('B');
   });
 
-  function getDrawnFrames() {
-    const drawCalls = flushDrawLog();
-    return drawCalls.filter(([fn]) => fn === 'fillText').map(([, arg]) => arg);
-  }
-
   it('can scroll into view when selecting a node', function () {
     // Create a stack deep enough to not have all its rendered frames
     // fit within GRAPH_HEIGHT.
@@ -233,6 +305,13 @@ describe('StackChart', function () {
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
     });
   });
+
+  it('works when the user selects the JS allocations option', function () {
+    setupAllocations();
+    const drawCalls = flushDrawLog();
+    expect(document.body).toMatchSnapshot();
+    expect(drawCalls).toMatchSnapshot();
+  });
 });
 
 describe('MarkerChart', function () {
@@ -268,15 +347,28 @@ describe('MarkerChart', function () {
   it.todo('can right click a marker and show a context menu');
 
   it('shows a tooltip when hovering', () => {
-    const { getTooltip, moveMouse, findFillTextPosition } = setupUserTimings({
-      isShowUserTimingsClicked: true,
-    });
+    const { getTooltip, moveMouse, findFillTextPosition, flushRafCalls } =
+      setupUserTimings({
+        isShowUserTimingsClicked: true,
+      });
 
     expect(getTooltip()).toBe(null);
 
     moveMouse(findFillTextPosition('componentB'));
-    expect(getTooltip()).toBeTruthy();
-    expect(getTooltip()).toMatchSnapshot();
+    let tooltip = getTooltip();
+    expect(
+      within(ensureExists(tooltip)).getByText('componentB')
+    ).toBeInTheDocument();
+    expect(tooltip).toMatchSnapshot();
+
+    // This still matches markers with the same widths option
+    useSameWidthsStackChart({ flushRafCalls });
+    moveMouse(findFillTextPosition('componentA'));
+    tooltip = getTooltip();
+    expect(
+      within(ensureExists(tooltip)).getByText('componentA')
+    ).toBeInTheDocument();
+    expect(tooltip).toMatchSnapshot();
   });
 });
 
@@ -294,6 +386,17 @@ function showUserTimings({ getByLabelText, flushRafCalls }) {
   const checkbox = getByLabelText('Show user timing');
   fireFullClick(checkbox);
   flushRafCalls();
+}
+
+function useSameWidthsStackChart({ flushRafCalls }) {
+  flushDrawLog();
+  const checkbox = screen.getByLabelText('Use the same width for each stack');
+  fireFullClick(checkbox);
+  flushRafCalls();
+}
+
+function getDrawnFrames(drawCalls = flushDrawLog()) {
+  return drawCalls.filter(([fn]) => fn === 'fillText').map(([, arg]) => arg);
 }
 
 function setupCombinedTimings() {
@@ -314,7 +417,7 @@ function setupCombinedTimings() {
   `);
 
   profile.threads[0].markers = userTimingsProfile.threads[0].markers;
-  const results = setup(profile);
+  const results = setup(storeWithProfile(profile));
   showUserTimings(results);
   return results;
 }
@@ -334,7 +437,7 @@ function setupUserTimings(config: {| isShowUserTimingsClicked: boolean |}) {
     getUserTiming('componentD', 7, 1),
   ]);
 
-  const results = setup(profile);
+  const results = setup(storeWithProfile(profile));
 
   if (config.isShowUserTimingsClicked) {
     showUserTimings(results);
@@ -361,16 +464,22 @@ function setupSamples(
     funcNamesPerThread: [funcNames],
   } = getProfileFromTextSamples(samples);
 
-  return setup(profile, funcNames);
+  return setup(storeWithProfile(profile), funcNames);
+}
+
+function setupAllocations() {
+  const { profile, funcNames } = getProfileWithJsAllocations();
+  const store = storeWithProfile(profile);
+  store.dispatch(changeCallTreeSummaryStrategy('js-allocations'));
+  return setup(store, funcNames);
 }
 
 /**
  * Setup the stack chart component with a profile.
  */
-function setup(profile: Profile, funcNames: string[] = []) {
+function setup(store, funcNames: string[] = []) {
   const flushRafCalls = mockRaf();
 
-  const store = storeWithProfile(profile);
   store.dispatch(changeSelectedTab('stack-chart'));
 
   const renderResult = render(
@@ -445,6 +554,7 @@ function setup(profile: Profile, funcNames: string[] = []) {
 
   function moveMouse(where) {
     fireMouseEvent('mousemove', getPositioningOptions(where));
+    flushRafCalls();
   }
 
   // Context menu tools

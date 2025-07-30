@@ -9,10 +9,9 @@ import { Backtrace } from './Backtrace';
 import { TooltipDetailSeparator } from '../tooltip/TooltipDetails';
 import {
   getCategoryPairLabel,
-  getFuncNamesAndOriginsForPath,
-  convertStackToCallNodeAndCategoryPath,
+  isSampleWithNonEmptyStack,
 } from 'firefox-profiler/profile-logic/profile-data';
-import { getFormattedTimeLength } from 'firefox-profiler/profile-logic/committed-ranges';
+import { getFormattedTimelineValue } from 'firefox-profiler/profile-logic/committed-ranges';
 import {
   formatMilliseconds,
   formatPercent,
@@ -26,7 +25,6 @@ import type {
   Milliseconds,
 } from 'firefox-profiler/types';
 import type { CpuRatioInTimeRange } from './thread/ActivityGraphFills';
-import { ensureExists } from '../../utils/flow';
 
 type CPUProps = CpuRatioInTimeRange;
 
@@ -42,6 +40,7 @@ type Props = {|
   +cpuRatioInTimeRange: CPUProps | null,
   +sampleIndex: IndexIntoSamplesTable | null,
   +zeroAt: Milliseconds,
+  +profileTimelineUnit: string,
   +interval: Milliseconds,
 |};
 
@@ -126,30 +125,21 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
       categories,
       implementationFilter,
       zeroAt,
+      profileTimelineUnit,
       interval,
     } = this.props;
 
     let hasStack = false;
     let formattedSampleTime = null;
     if (sampleIndex !== null) {
-      const { samples, stackTable } = rangeFilteredThread;
+      const { samples } = rangeFilteredThread;
       const sampleTime = samples.time[sampleIndex];
-      const stackIndex = samples.stack[sampleIndex];
-      const hasSamples = samples.length > 0 && stackTable.length > 1;
 
-      if (hasSamples) {
-        const stack = getFuncNamesAndOriginsForPath(
-          convertStackToCallNodeAndCategoryPath(
-            rangeFilteredThread,
-            ensureExists(stackIndex)
-          ),
-          rangeFilteredThread
-        );
-        hasStack = stack.length > 1 || stack[0].funcName !== '(root)';
-      }
+      hasStack = isSampleWithNonEmptyStack(sampleIndex, rangeFilteredThread);
 
-      formattedSampleTime = getFormattedTimeLength(
+      formattedSampleTime = getFormattedTimelineValue(
         sampleTime - zeroAt,
+        profileTimelineUnit,
         // Make sure that we show enough precision for the given sample interval.
         interval / 10
       );

@@ -168,6 +168,14 @@ describe('timeline/GlobalTrack', function () {
     expect(container.firstChild).toMatchSnapshot();
   });
 
+  it('matches the snapshot of a global process track with pid set to 0', () => {
+    const profile = getGlobalTrackProfile();
+    profile.threads[GECKOMAIN_TAB_TRACK_INDEX].pid = '0';
+
+    const { container } = setup(GECKOMAIN_TAB_TRACK_INDEX, profile);
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
   it('matches the snapshot of a global process track without a thread', () => {
     const { container } = setup(NO_THREAD_TRACK_INDEX);
     expect(container.firstChild).toMatchSnapshot();
@@ -256,7 +264,7 @@ describe('timeline/GlobalTrack', function () {
       {
         name: 'task',
         display: ['timeline-overview'],
-        data: [],
+        fields: [],
       },
     ];
     const [thread] = profile.threads;

@@ -10,7 +10,6 @@ import {
   getCommittedRange,
   getPreviewSelection,
 } from 'firefox-profiler/selectors/profile';
-import { getScreenshotTrackHeight } from 'firefox-profiler/selectors/app';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
   withSize,
@@ -19,6 +18,7 @@ import {
 import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { createPortal } from 'react-dom';
 import { computeScreenshotSize } from 'firefox-profiler/profile-logic/marker-data';
+import { FULL_TRACK_SCREENSHOT_HEIGHT } from 'firefox-profiler/app-logic/constants';
 
 import type {
   ScreenshotPayload,
@@ -44,7 +44,6 @@ type StateProps = {|
   +screenshots: Marker[],
   +threadName: string,
   +isMakingPreviewSelection: boolean,
-  +trackHeight: number,
 |};
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
@@ -138,7 +137,6 @@ class Screenshots extends PureComponent<Props, State> {
       width,
       rangeStart,
       rangeEnd,
-      trackHeight,
     } = this.props;
 
     const { pageX, offsetX, containerTop } = this.state;
@@ -154,7 +152,7 @@ class Screenshots extends PureComponent<Props, State> {
     return (
       <div
         className="timelineTrackScreenshot"
-        style={{ height: trackHeight }}
+        style={{ height: FULL_TRACK_SCREENSHOT_HEIGHT }}
         onMouseLeave={this._handleMouseLeave}
         onMouseMove={this._handleMouseMove}
         onClick={this._selectScreenshotOnClick}
@@ -165,7 +163,7 @@ class Screenshots extends PureComponent<Props, State> {
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
           screenshots={screenshots}
-          trackHeight={trackHeight}
+          trackHeight={FULL_TRACK_SCREENSHOT_HEIGHT}
         />
         {payload ? (
           <HoverPreview
@@ -177,7 +175,7 @@ class Screenshots extends PureComponent<Props, State> {
             containerTop={containerTop}
             rangeEnd={rangeEnd}
             rangeStart={rangeStart}
-            trackHeight={trackHeight}
+            trackHeight={FULL_TRACK_SCREENSHOT_HEIGHT}
             payload={payload}
           />
         ) : null}
@@ -208,7 +206,6 @@ export const TimelineTrackScreenshots = explicitConnect<
       rangeEnd: end,
       isMakingPreviewSelection:
         previewSelection.hasSelection && previewSelection.isModifying,
-      trackHeight: getScreenshotTrackHeight(state),
     };
   },
   mapDispatchToProps: {
@@ -234,9 +231,9 @@ const MAXIMUM_HOVER_SIZE = 350;
 const MAXIMUM_HOVER_SIZE_WHEN_SELECTING_RANGE = 100;
 
 class HoverPreview extends PureComponent<HoverPreviewProps> {
-  _overlayElement = ensureExists(
-    document.querySelector('#root-overlay'),
-    'Expected to find a root overlay element.'
+  _screenshotHoverElement = ensureExists(
+    document.querySelector('#screenshot-hover'),
+    'Expected to find a screenshot hover element.'
   );
 
   render() {
@@ -307,7 +304,7 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
           }}
         />
       </div>,
-      this._overlayElement
+      this._screenshotHoverElement
     );
   }
 }

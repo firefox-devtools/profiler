@@ -27,6 +27,7 @@ import {
 
 import type {
   Profile,
+  RawProfileSharedData,
   RawThread,
   Thread,
   ThreadIndex,
@@ -114,9 +115,10 @@ export type TestDefinedJsTracerEvent = [
 
 export function addRawMarkersToThread(
   thread: RawThread,
+  shared: RawProfileSharedData,
   markers: TestDefinedRawMarker[]
 ) {
-  const stringTable = StringTable.withBackingArray(thread.stringArray);
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
   const markersTable = thread.markers;
 
   for (const { name, startTime, endTime, phase, category, data } of markers) {
@@ -151,8 +153,8 @@ function _replaceUniqueStringFieldValuesWithStringIndexesInMarkerPayload(
   if (schema === undefined) {
     return;
   }
-  for (const fieldSchema of schema.data) {
-    if (!fieldSchema.format || fieldSchema.format !== 'unique-string') {
+  for (const fieldSchema of schema.fields) {
+    if (fieldSchema.format !== 'unique-string') {
       continue;
     }
     const { key } = fieldSchema;
@@ -166,9 +168,10 @@ function _replaceUniqueStringFieldValuesWithStringIndexesInMarkerPayload(
 // This is used in tests, with TestDefinedMarkers.
 export function addMarkersToThreadWithCorrespondingSamples(
   thread: RawThread,
+  shared: RawProfileSharedData,
   markers: TestDefinedMarkers
 ) {
-  const stringTable = StringTable.withBackingArray(thread.stringArray);
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
   const markersTable = thread.markers;
   const allTimes = new Set();
 
@@ -254,15 +257,21 @@ export function addMarkersToThreadWithCorrespondingSamples(
   }
 }
 
-export function getThreadWithMarkers(markers: TestDefinedMarkers) {
+export function getThreadWithMarkers(
+  shared: RawProfileSharedData,
+  markers: TestDefinedMarkers
+) {
   const thread = getEmptyThread();
-  addMarkersToThreadWithCorrespondingSamples(thread, markers);
+  addMarkersToThreadWithCorrespondingSamples(thread, shared, markers);
   return thread;
 }
 
-export function getThreadWithRawMarkers(markers: TestDefinedRawMarker[]) {
+export function getThreadWithRawMarkers(
+  shared: RawProfileSharedData,
+  markers: TestDefinedRawMarker[]
+) {
   const thread = getEmptyThread();
-  addRawMarkersToThread(thread, markers);
+  addRawMarkersToThread(thread, shared, markers);
   return thread;
 }
 
@@ -270,10 +279,13 @@ export function getThreadWithRawMarkers(markers: TestDefinedRawMarker[]) {
  * This can be a little annoying to derive with all of the dependencies,
  * so provide an easy interface to do so here.
  */
-export function getTestFriendlyDerivedMarkerInfo(thread: RawThread) {
+export function getTestFriendlyDerivedMarkerInfo(
+  thread: RawThread,
+  shared: RawProfileSharedData
+) {
   return deriveMarkersFromRawMarkerTable(
     thread.markers,
-    thread.stringArray,
+    shared.stringArray,
     thread.tid || 0,
     getTimeRangeForThread(thread, 1),
     new IPCMarkerCorrelations()
@@ -391,7 +403,7 @@ export function getProfileWithMarkers(
     );
   }
   profile.threads = markersPerThread.map((testDefinedMarkers, i) => ({
-    ...getThreadWithMarkers(testDefinedMarkers),
+    ...getThreadWithMarkers(profile.shared, testDefinedMarkers),
     tid: i,
   }));
   return profile;
@@ -493,6 +505,7 @@ export function getProfileWithNamedThreads(threadNames: string[]): Profile {
 export type ProfileWithDicts = {
   profile: Profile,
   derivedThreads: Thread[],
+  stringTable: StringTable,
   funcNamesPerThread: Array<string[]>,
   funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
   nativeSymbolsDictPerThread: Array<{ [nativeSymbolName: string]: number }>,
@@ -529,9 +542,7 @@ export type ProfileWithDicts = {
  * * an array mapping the func names to their indices
  *
  * Functions ending in "js" are marked as JS functions in the funcTable's isJS
- * column. It's possible to specify a JIT type by specifying in brackets like
- * this: [jit:baseline] or [jit:ion], right after the function name (see below
- * for an example). The default is no JIT.
+ * column.
  *
  * The time of the sample can also be set by making the first row all numbers:
  * ```
@@ -550,7 +561,7 @@ export type ProfileWithDicts = {
  * } = getProfileFromTextSamples(`
  *    A             A
  *    B             B
- *    Cjs[jit:ion]  Cjs[jit:baseline]
+ *    Cjs           Cjs
  *    D[cat:DOM]    D[cat:DOM]
  *    E             F
  *  `);
@@ -559,7 +570,6 @@ export type ProfileWithDicts = {
  * be used in tests.
  *
  * The following func and frame attributes are supported:
- *  - [jit:*] - The JIT used for a JS frame, affects frameTable.implementation.
  *  - [cat:*] - The category name, affects frameTable.category
  *  - [lib:*] - The library name, affects funcTable.resource + resourceTable + libs
  *  - [file:*] - The filename, affects funcTable.file
@@ -762,27 +772,6 @@ function _parseTextSamples(textSamples: string): Array<string[]> {
   });
 }
 
-const JIT_IMPLEMENTATIONS = ['ion', 'baseline', 'blinterp'];
-
-function _findJitTypeFromFuncName(funcNameWithModifier: string): string | null {
-  const findJitTypeResult = /\[jit:([^\]]+)\]/.exec(funcNameWithModifier);
-  let jitType = null;
-  if (findJitTypeResult) {
-    jitType = findJitTypeResult[1];
-  }
-
-  if (jitType) {
-    if (JIT_IMPLEMENTATIONS.includes(jitType)) {
-      return jitType;
-    }
-    throw new Error(
-      `The jitType '${jitType}' is unknown to this tool. Is it a typo or should you update the list of possible values?`
-    );
-  }
-
-  return null;
-}
-
 function _isJsFunctionName(funcName) {
   return funcName.endsWith('js');
 }
@@ -899,14 +888,13 @@ function _buildThreadFromTextOnlyStacks(
 
   const {
     funcTable,
-    stringArray,
     frameTable,
     stackTable,
     samples,
     resourceTable,
     nativeSymbols,
   } = thread;
-  const stringTable = StringTable.withBackingArray(stringArray);
+  const stringTable = globalDataCollector.getStringTable();
 
   // Create the FuncTable.
   funcNames.forEach((funcName) => {
@@ -916,7 +904,6 @@ function _buildThreadFromTextOnlyStacks(
     funcTable.isJS.push(_isJsFunctionName(funcName));
     funcTable.lineNumber.push(null);
     funcTable.columnNumber.push(null);
-    // Ignore resources for now, this way funcNames have really nice string indexes.
     // The resource column will be filled in the loop below.
     funcTable.length++;
   });
@@ -929,10 +916,9 @@ function _buildThreadFromTextOnlyStacks(
     let prefix = null;
     column.forEach((funcNameWithModifier) => {
       const funcName = funcNameWithModifier.replace(/\[.*/, '');
-
-      // There is a one-to-one relationship between strings and funcIndexes here, so
-      // the indexes can double as both string indexes and func indexes.
-      const funcIndex = stringTable.indexForString(funcName);
+      const funcIndex = funcTable.name.indexOf(
+        stringTable.indexForString(funcName)
+      );
 
       // Find the library name from the function name and create an entry if needed.
       const libraryName = _findLibNameFromFuncName(funcNameWithModifier);
@@ -971,9 +957,6 @@ function _buildThreadFromTextOnlyStacks(
         funcTable.fileName[funcIndex] = stringTable.indexForString(fileName);
       }
 
-      // Find the wanted jit type from the function name
-      const jitType = _findJitTypeFromFuncName(funcNameWithModifier);
-      const jitTypeIndex = jitType ? stringTable.indexForString(jitType) : null;
       const category = _findCategoryFromFuncName(
         funcNameWithModifier,
         funcName,
@@ -1011,13 +994,12 @@ function _buildThreadFromTextOnlyStacks(
       const inlineDepth =
         _findInlineDepthFromFuncName(funcNameWithModifier) ?? 0;
 
-      // Attempt to find a frame that satisfies the given funcIndex, jit type,
+      // Attempt to find a frame that satisfies the given funcIndex,
       // category, and line number.
       let frameIndex;
       for (let i = 0; i < frameTable.length; i++) {
         if (
           funcIndex === frameTable.func[i] &&
-          jitTypeIndex === frameTable.implementation[i] &&
           category === frameTable.category[i] &&
           lineNumber === frameTable.line[i] &&
           address === frameTable.address[i] &&
@@ -1037,7 +1019,6 @@ function _buildThreadFromTextOnlyStacks(
         frameTable.subcategory.push(0);
         frameTable.innerWindowID.push(0);
         frameTable.nativeSymbol.push(nativeSymbol);
-        frameTable.implementation.push(jitTypeIndex);
         frameTable.line.push(lineNumber);
         frameTable.column.push(null);
         frameIndex = frameTable.length++;
@@ -1113,9 +1094,12 @@ export function getProfileWithDicts(profile: Profile): ProfileWithDicts {
   ).findIndex((c) => c.name === 'Other');
 
   const referenceCPUDeltaPerMs = computeReferenceCPUDeltaPerMs(profile);
-  const derivedThreads = profile.threads.map((rawThread) =>
+  const { shared, threads } = profile;
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
+  const derivedThreads = threads.map((rawThread) =>
     computeThreadFromRawThread(
       rawThread,
+      shared,
       profile.meta.sampleUnits,
       referenceCPUDeltaPerMs,
       defaultCategory
@@ -1136,6 +1120,7 @@ export function getProfileWithDicts(profile: Profile): ProfileWithDicts {
     funcNamesPerThread,
     funcNamesDictPerThread,
     nativeSymbolsDictPerThread,
+    stringTable,
     defaultCategory,
   };
 }
@@ -1260,7 +1245,8 @@ export function getNetworkTrackProfile() {
     },
   ];
 
-  const thread = profile.threads[0];
+  const { shared, threads } = profile;
+  const thread = threads[0];
 
   const loadPayloadBase = {
     type: 'tracing',
@@ -1275,7 +1261,7 @@ export function getNetworkTrackProfile() {
     innerWindowID: innerWindowID,
   };
 
-  addMarkersToThreadWithCorrespondingSamples(thread, [
+  addMarkersToThreadWithCorrespondingSamples(thread, shared, [
     [
       'Load',
       4,
@@ -1408,7 +1394,8 @@ export function getScreenshotTrackProfile() {
 export function addIPCMarkerPairToThreads(
   payload: $Shape<IPCMarkerPayload>,
   senderThread: RawThread,
-  receiverThread: RawThread
+  receiverThread: RawThread,
+  shared: RawProfileSharedData
 ) {
   const ipcMarker = (
     direction: 'sending' | 'receiving',
@@ -1442,11 +1429,11 @@ export function addIPCMarkerPairToThreads(
     senderThread.name === 'GeckoMain' && senderThread.processType === 'default'
       ? true
       : false;
-  addMarkersToThreadWithCorrespondingSamples(senderThread, [
+  addMarkersToThreadWithCorrespondingSamples(senderThread, shared, [
     ipcMarker('sending', isSenderParent, receiverThread),
   ]);
 
-  addMarkersToThreadWithCorrespondingSamples(receiverThread, [
+  addMarkersToThreadWithCorrespondingSamples(receiverThread, shared, [
     ipcMarker('receiving', !isSenderParent, senderThread),
   ]);
 }
@@ -1477,10 +1464,11 @@ export function getJsTracerTable(
 }
 
 export function getThreadWithJsTracerEvents(
-  events: TestDefinedJsTracerEvent[]
+  events: TestDefinedJsTracerEvent[],
+  shared: RawProfileSharedData
 ): RawThread {
   const thread = getEmptyThread();
-  const stringTable = StringTable.withBackingArray(thread.stringArray);
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
   thread.jsTracer = getJsTracerTable(stringTable, events);
 
   let endOfEvents = 0;
@@ -1518,7 +1506,7 @@ export function getProfileWithJsTracerEvents(
 ): Profile {
   const profile = getEmptyProfile();
   profile.threads = eventsLists.map((events) =>
-    getThreadWithJsTracerEvents(events)
+    getThreadWithJsTracerEvents(events, profile.shared)
   );
   return profile;
 }
@@ -1652,6 +1640,7 @@ export function getProfileWithJsAllocations() {
   const {
     profile,
     funcNamesDictPerThread: [funcNamesDict],
+    funcNamesPerThread: [funcNames],
   } = getProfileFromTextSamples(`
     A  A     A
     B  B     B
@@ -1690,7 +1679,7 @@ export function getProfileWithJsAllocations() {
     jsAllocations.length++;
   }
 
-  return { profile, funcNamesDict };
+  return { profile, funcNamesDict, funcNames };
 }
 
 /**
@@ -1872,7 +1861,7 @@ export function getProfileWithBalancedNativeAllocations() {
  * |
  * mozilla.org
  */
-export function addActiveTabInformationToProfile(
+export function addTabInformationToProfile(
   profile: Profile,
   activeTabID?: TabID
 ) {
@@ -1962,7 +1951,7 @@ export function addActiveTabInformationToProfile(
 
 /**
  * Use this function to create a profile that has private browsing data.
- * This profile should first be run through addActiveTabInformationToProfile to
+ * This profile should first be run through addTabInformationToProfile to
  * add pages information.
  * To add markers with private browsing information, please use
  * addMarkersToThreadWithCorrespondingSamples directly.
@@ -1980,7 +1969,7 @@ export function markTabIdsAsPrivateBrowsing(
   const pages = profile.pages;
   if (!pages) {
     throw new Error(
-      `Can't add private browsing data to a profile without pages. Please run addActiveTabInformationToProfile on this profile first.`
+      `Can't add private browsing data to a profile without pages. Please run addTabInformationToProfile on this profile first.`
     );
   }
 
@@ -2080,9 +2069,6 @@ export function addInnerWindowIdToStacks(
       frameTable.subcategory.push(frameTable.subcategory[foundFrameIndex]);
       frameTable.func.push(frameTable.func[foundFrameIndex]);
       frameTable.nativeSymbol.push(frameTable.nativeSymbol[foundFrameIndex]);
-      frameTable.implementation.push(
-        frameTable.implementation[foundFrameIndex]
-      );
       frameTable.line.push(frameTable.line[foundFrameIndex]);
       frameTable.column.push(frameTable.column[foundFrameIndex]);
 

@@ -15,7 +15,6 @@ import * as ProfileData from '../../profile-logic/profile-data';
 import * as CallTree from '../../profile-logic/call-tree';
 import * as ProfileSelectors from '../profile';
 import * as JsTracer from '../../profile-logic/js-tracer';
-import { StringTable } from '../../utils/string-table';
 import {
   assertExhaustiveCheck,
   ensureExists,
@@ -83,11 +82,9 @@ export function getBasicThreadSelectorsPerThread(
 
   const getMergedRawThread: Selector<RawThread> = createSelector(
     ProfileSelectors.getProfile,
-    ProfileSelectors.getStringIndexMarkerFieldsByDataType,
-    (profile, stringIndexMarkerFieldsByDataType) =>
+    (profile) =>
       mergeThreads(
-        [...threadIndexes].map((threadIndex) => profile.threads[threadIndex]),
-        stringIndexMarkerFieldsByDataType
+        [...threadIndexes].map((threadIndex) => profile.threads[threadIndex])
       )
   );
   /**
@@ -99,10 +96,6 @@ export function getBasicThreadSelectorsPerThread(
       ? ProfileSelectors.getProfile(state).threads[singleThreadIndex]
       : getMergedRawThread(state);
 
-  const getStringTable: Selector<StringTable> = createSelector(
-    (state) => getRawThread(state).stringArray,
-    (stringArray) => StringTable.withBackingArray(stringArray)
-  );
   const getRawSamplesTable: Selector<RawSamplesTable> = (state) =>
     getRawThread(state).samples;
   const getSamplesTable: Selector<SamplesTable> = createSelector(
@@ -145,19 +138,18 @@ export function getBasicThreadSelectorsPerThread(
    * 1. Unfiltered getThread - The first selector gets the unmodified original thread.
    * 2. CPU - New samples table with processed threadCPUDelta values.
    * 3. Reserved functions - New funcTable with reserved functions for collapsed resources.
-   * 4. Tab - New samples table with only samples that belong to the active tab.
-   * 5. Range - New samples table with only samples in the committed range.
-   * 6. Transform - Apply the transform stack that modifies the stacks and samples.
-   * 7. Implementation - Modify stacks and samples to only show a single implementation.
-   * 8. Search - Exclude samples that don't include some text in the stack.
-   * 9. Preview - Only include samples that are within a user's preview range selection.
+   * 4. Range - New samples table with only samples in the committed range.
+   * 5. Transform - Apply the transform stack that modifies the stacks and samples.
+   * 6. Implementation - Modify stacks and samples to only show a single implementation.
+   * 7. Search - Exclude samples that don't include some text in the stack.
+   * 8. Preview - Only include samples that are within a user's preview range selection.
    */
 
   const getThread: Selector<Thread> = createSelector(
     getRawThread,
     getSamplesTable,
     getStackTable,
-    getStringTable,
+    ProfileSelectors.getStringTable,
     ProfileData.createThreadFromDerivedTables
   );
 
@@ -172,38 +164,8 @@ export function getBasicThreadSelectorsPerThread(
   > = (state) =>
     getThreadWithReservedFunctions(state).reservedFunctionsForResources;
 
-  const getTabFilteredThread: Selector<Thread> = createSelector(
-    getFunctionsReservedThread,
-    ProfileSelectors.getRelevantInnerWindowIDsForCurrentTab,
-    (thread, relevantPages) => {
-      if (relevantPages.size === 0) {
-        // If this set doesn't have any relevant page, just return the whole thread.
-        return thread;
-      }
-      return ProfileData.filterThreadByTab(thread, relevantPages);
-    }
-  );
-
-  /**
-   * Similar to getTabFilteredThread, but this selector returns the active tab
-   * filtered thread even though we are not in the active tab view at the moment.
-   * This selector is needed to make the hidden track calculations during profile
-   * load time(during viewProfile).
-   */
-  const getActiveTabFilteredThread: Selector<Thread> = createSelector(
-    getFunctionsReservedThread,
-    ProfileSelectors.getRelevantInnerWindowIDsForActiveTab,
-    (thread, relevantPages) => {
-      if (relevantPages.size === 0) {
-        // If this set doesn't have any relevant page, just return the whole thread.
-        return thread;
-      }
-      return ProfileData.filterThreadByTab(thread, relevantPages);
-    }
-  );
-
   const getRangeFilteredThread: Selector<Thread> = createSelector(
-    getTabFilteredThread,
+    getFunctionsReservedThread,
     ProfileSelectors.getCommittedRange,
     (thread, range) => {
       const { start, end } = range;
@@ -316,7 +278,7 @@ export function getBasicThreadSelectorsPerThread(
   );
 
   const getThreadProcessDetails: Selector<string> = createSelector(
-    getThread,
+    getRawThread,
     getFriendlyThreadName,
     ProfileData.getThreadProcessDetails
   );
@@ -328,22 +290,25 @@ export function getBasicThreadSelectorsPerThread(
   const getHasUsefulTimingSamples: Selector<boolean> = createSelector(
     getSamplesTable,
     getRawThread,
-    (samples, rawThread) =>
-      ProfileData.hasUsefulSamples(samples.stack, rawThread)
+    ProfileSelectors.getRawProfileSharedData,
+    (samples, rawThread, shared) =>
+      ProfileData.hasUsefulSamples(samples.stack, rawThread, shared)
   );
 
   const getHasUsefulJsAllocations: Selector<boolean> = createSelector(
     getJsAllocations,
     getRawThread,
-    (jsAllocations, rawThread) =>
-      ProfileData.hasUsefulSamples(jsAllocations?.stack, rawThread)
+    ProfileSelectors.getRawProfileSharedData,
+    (jsAllocations, rawThread, shared) =>
+      ProfileData.hasUsefulSamples(jsAllocations?.stack, rawThread, shared)
   );
 
   const getHasUsefulNativeAllocations: Selector<boolean> = createSelector(
     getNativeAllocations,
     getRawThread,
-    (nativeAllocations, rawThread) =>
-      ProfileData.hasUsefulSamples(nativeAllocations?.stack, rawThread)
+    ProfileSelectors.getRawProfileSharedData,
+    (nativeAllocations, rawThread, shared) =>
+      ProfileData.hasUsefulSamples(nativeAllocations?.stack, rawThread, shared)
   );
 
   /**
@@ -376,7 +341,7 @@ export function getBasicThreadSelectorsPerThread(
     createSelector(
       getJsTracerTable,
       getRawThread,
-      getStringTable,
+      ProfileSelectors.getStringTable,
       (jsTracerTable, thread, stringTable) =>
         jsTracerTable === null
           ? null
@@ -391,7 +356,7 @@ export function getBasicThreadSelectorsPerThread(
   const getExpensiveJsTracerLeafTiming: Selector<JsTracerTiming[] | null> =
     createSelector(
       getJsTracerTable,
-      getStringTable,
+      ProfileSelectors.getStringTable,
       (jsTracerTable, stringTable) =>
         jsTracerTable === null
           ? null
@@ -417,7 +382,6 @@ export function getBasicThreadSelectorsPerThread(
   return {
     getRawThread,
     getThread,
-    getStringTable,
     getSamplesTable,
     getSamplesWeightType,
     getNativeAllocations,
@@ -439,8 +403,6 @@ export function getBasicThreadSelectorsPerThread(
     getHasUsefulNativeAllocations,
     getCanShowRetainedMemory,
     getFunctionsReservedThread,
-    getTabFilteredThread,
-    getActiveTabFilteredThread,
     getProcessedEventDelays,
     getCallTreeSummaryStrategy,
   };

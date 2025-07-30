@@ -12,6 +12,7 @@ import {
   updateThreadStacks,
   updateThreadStacksByGeneratingNewStackColumns,
   getMapStackUpdater,
+  getOriginAnnotationForFunc,
 } from './profile-data';
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
@@ -32,9 +33,7 @@ import type {
   IndexIntoStackTable,
   IndexIntoResourceTable,
   CallNodePath,
-  CallNodeAndCategoryPath,
   CallNodeTable,
-  CallNodeInfo,
   StackType,
   ImplementationFilter,
   Transform,
@@ -49,6 +48,7 @@ import type {
   CategoryList,
   Milliseconds,
 } from 'firefox-profiler/types';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 import type { StringTable } from 'firefox-profiler/utils/string-table';
 
 /**
@@ -602,8 +602,6 @@ function _removeOtherCategoryFunctionsInNodePathWithFunction(
   callNodePath: CallNodePath,
   callNodeInfo: CallNodeInfo
 ): CallNodePath {
-  const callNodeTable = callNodeInfo.getCallNodeTable();
-
   const newCallNodePath = [];
 
   let prefix = -1;
@@ -618,7 +616,7 @@ function _removeOtherCategoryFunctionsInNodePathWithFunction(
       );
     }
 
-    if (callNodeTable.category[callNodeIndex] === category) {
+    if (callNodeInfo.categoryForNode(callNodeIndex) === category) {
       newCallNodePath.push(funcIndex);
     }
 
@@ -965,9 +963,6 @@ export function collapseResource(
             newFrameTable.column.push(frameTable.column[frameIndex]);
             newFrameTable.innerWindowID.push(
               frameTable.innerWindowID[frameIndex]
-            );
-            newFrameTable.implementation.push(
-              frameTable.implementation[frameIndex]
             );
           }
 
@@ -1568,15 +1563,72 @@ export function filterCallNodePathByImplementation(
   );
 }
 
-export function filterCallNodeAndCategoryPathByImplementation(
-  thread: Thread,
+// User-facing properties about a stack frame.
+export type BacktraceItem = {|
+  // The function name of the stack frame.
+  funcName: string,
+  // The frame category of the stack frame.
+  category: IndexIntoCategoryList,
+  // Whether this frame is a label frame.
+  isFrameLabel: boolean,
+  // A string which is usually displayed after the function name, and which
+  // describes, in some way, where this function or frame came from.
+  // If known, this contains the file name of the function, and the line and
+  // column number of the frame, i.e. the spot within the function that was
+  // being executed.
+  // If the source file name is not known, this might be the name of a native
+  // library instead.
+  // May also be empty.
+  origin: string,
+|};
+
+/**
+ * Convert the stack into an array of "backtrace items" for each stack frame.
+ * The returned array is ordered from callee-most to caller-most, i.e. the root
+ * caller is at the end.
+ */
+export function getBacktraceItemsForStack(
+  stack: IndexIntoStackTable,
   implementationFilter: ImplementationFilter,
-  path: CallNodeAndCategoryPath
-): CallNodeAndCategoryPath {
+  thread: Thread
+): BacktraceItem[] {
+  const { funcTable, stringTable, resourceTable } = thread;
+
+  const { stackTable, frameTable } = thread;
+  const unfilteredPath = [];
+  for (
+    let stackIndex = stack;
+    stackIndex !== null;
+    stackIndex = stackTable.prefix[stackIndex]
+  ) {
+    const frameIndex = stackTable.frame[stackIndex];
+    unfilteredPath.push({
+      category: stackTable.category[stackIndex],
+      funcIndex: frameTable.func[frameIndex],
+      frameLine: frameTable.line[frameIndex],
+      frameColumn: frameTable.column[frameIndex],
+    });
+  }
+
   const funcMatchesImplementation = FUNC_MATCHES[implementationFilter];
-  return path.filter((funcIndex) =>
-    funcMatchesImplementation(thread, funcIndex.func)
+  const path = unfilteredPath.filter(({ funcIndex }) =>
+    funcMatchesImplementation(thread, funcIndex)
   );
+  return path.map(({ category, funcIndex, frameLine, frameColumn }) => {
+    return {
+      funcName: stringTable.getString(funcTable.name[funcIndex]),
+      category: category,
+      isFrameLabel: funcTable.resource[funcIndex] === -1,
+      origin: getOriginAnnotationForFunc(
+        funcIndex,
+        funcTable,
+        resourceTable,
+        stringTable,
+        frameLine,
+        frameColumn
+      ),
+    };
+  });
 }
 
 /**

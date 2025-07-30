@@ -96,6 +96,7 @@ CallNodeContextMenu--searchfox = Busca el nombre de la función en Searchfox
 CallNodeContextMenu--copy-function-name = Copiar nombre de la función
 CallNodeContextMenu--copy-script-url = Copiar URL del script
 CallNodeContextMenu--copy-stack = Copiar pila
+CallNodeContextMenu--show-the-function-in-devtools = Mostrar la función en DevTools
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -571,6 +572,11 @@ PanelSearch--search-field-hint = ¿Sabías que puedes usar la coma (,) para busc
 
 ## Profile Name Button
 
+ProfileName--edit-profile-name-button =
+    .title = Editar el nombre del perfil
+ProfileName--edit-profile-name-input =
+    .title = Editar el nombre del perfil
+    .aria-label = Nombre del perfil
 
 ## Profile Delete Button
 

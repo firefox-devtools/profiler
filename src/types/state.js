@@ -33,8 +33,6 @@ import type {
   LocalTrack,
   TrackIndex,
   MarkerIndex,
-  ActiveTabTimeline,
-  OriginsTimeline,
   ThreadsKey,
   NativeSymbolInfo,
 } from './profile-derived';
@@ -83,29 +81,6 @@ export type MarkerReference = {|
 |};
 
 /**
- * Full profile view state
- * They should not be used from the active tab view.
- * NOTE: This state is empty for now, but will be used later, do not remove.
- * globalTracks and localTracksByPid states will be here in the future.
- */
-export type FullProfileViewState = {|
-  globalTracks: GlobalTrack[],
-  localTracksByPid: Map<Pid, LocalTrack[]>,
-|};
-
-export type OriginsViewState = {|
-  originsTimeline: OriginsTimeline,
-|};
-
-/**
- * Active tab profile view state
- * They should not be used from the full view.
- */
-export type ActiveTabProfileViewState = {|
-  activeTabTimeline: ActiveTabTimeline,
-|};
-
-/**
  * Profile view state
  */
 export type ProfileViewState = {
@@ -126,9 +101,8 @@ export type ProfileViewState = {
     perTab: TableViewOptionsPerTab,
   |},
   +profile: Profile | null,
-  +full: FullProfileViewState,
-  +activeTab: ActiveTabProfileViewState,
-  +origins: OriginsViewState,
+  globalTracks: GlobalTrack[],
+  localTracksByPid: Map<Pid, LocalTrack[]>,
 };
 
 export type AppViewState =
@@ -344,11 +318,22 @@ export type SourceCodeLoadingError =
       parsingErrorMessage: string,
     |};
 
-/**
- * Full profile specific url state
- * They should not be used from the active tab view.
- */
-export type FullProfileSpecificUrlState = {|
+export type ProfileSpecificUrlState = {|
+  selectedThreads: Set<ThreadIndex> | null,
+  implementation: ImplementationFilter,
+  lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy,
+  invertCallstack: boolean,
+  showUserTimings: boolean,
+  stackChartSameWidths: boolean,
+  committedRanges: StartEndRange[],
+  callTreeSearchString: string,
+  markersSearchString: string,
+  networkSearchString: string,
+  transforms: TransformStacksPerThread,
+  timelineType: TimelineType,
+  sourceView: SourceViewState,
+  assemblyView: AssemblyViewState,
+  isBottomBoxOpenPerPanel: IsOpenPerPanelState,
   globalTrackOrder: TrackIndex[],
   hiddenGlobalTracks: Set<TrackIndex>,
   hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
@@ -359,41 +344,6 @@ export type FullProfileSpecificUrlState = {|
   legacyThreadOrder: ThreadIndex[] | null,
   legacyHiddenThreads: ThreadIndex[] | null,
 |};
-
-/**
- * Active tab profile specific url state
- * They should not be used from the full view.
- */
-export type ActiveTabSpecificProfileUrlState = {|
-  isResourcesPanelOpen: boolean,
-|};
-
-export type ProfileSpecificUrlState = {|
-  selectedThreads: Set<ThreadIndex> | null,
-  implementation: ImplementationFilter,
-  lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy,
-  invertCallstack: boolean,
-  showUserTimings: boolean,
-  committedRanges: StartEndRange[],
-  callTreeSearchString: string,
-  markersSearchString: string,
-  networkSearchString: string,
-  transforms: TransformStacksPerThread,
-  timelineType: TimelineType,
-  sourceView: SourceViewState,
-  assemblyView: AssemblyViewState,
-  isBottomBoxOpenPerPanel: IsOpenPerPanelState,
-  full: FullProfileSpecificUrlState,
-  activeTab: ActiveTabSpecificProfileUrlState,
-|};
-
-/**
- * Determines how the timeline's tracks are organized.
- */
-export type TimelineTrackOrganization =
-  | {| +type: 'full' |}
-  | {| +type: 'active-tab', +tabID: TabID | null |}
-  | {| +type: 'origins' |};
 
 export type UrlState = {|
   +dataSource: DataSource,
@@ -406,7 +356,6 @@ export type UrlState = {|
   +selectedTab: TabSlug,
   +pathInZipFile: string | null,
   +profileName: string | null,
-  +timelineTrackOrganization: TimelineTrackOrganization,
   +profileSpecific: ProfileSpecificUrlState,
   +symbolServerUrl: string | null,
 |};

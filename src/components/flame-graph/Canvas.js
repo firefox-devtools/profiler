@@ -28,7 +28,6 @@ import type {
   CssPixels,
   DevicePixels,
   Milliseconds,
-  CallNodeInfo,
   IndexIntoCallNodeTable,
   CallTreeSummaryStrategy,
   WeightType,
@@ -42,6 +41,7 @@ import type {
   FlameGraphDepth,
   IndexIntoFlameGraphTiming,
 } from 'firefox-profiler/profile-logic/flame-graph';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import type {
   ChartCanvasScale,
@@ -50,7 +50,7 @@ import type {
 
 import type {
   CallTree,
-  CallTreeTimings,
+  CallTreeTimingsNonInverted,
 } from 'firefox-profiler/profile-logic/call-tree';
 
 export type OwnProps = {|
@@ -77,8 +77,7 @@ export type OwnProps = {|
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +ctssSamples: SamplesLikeTable,
   +unfilteredCtssSamples: SamplesLikeTable,
-  +tracedTiming: CallTreeTimings | null,
-  +displayImplementation: boolean,
+  +tracedTiming: CallTreeTimingsNonInverted | null,
   +displayStackType: boolean,
 |};
 
@@ -373,7 +372,6 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       ctssSamples,
       unfilteredCtssSamples,
       tracedTiming,
-      displayImplementation,
       displayStackType,
     } = this.props;
 
@@ -436,8 +434,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
                 ctssSampleIndexOffset,
                 categories,
                 ctssSamples,
-                unfilteredCtssSamples,
-                displayImplementation
+                unfilteredCtssSamples
               )
             : undefined
         }

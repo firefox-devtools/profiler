@@ -43,8 +43,8 @@ describe('jwt/isValidJwtToken', () => {
 
 describe('jwt/decodeJwtBase64Url', () => {
   it('decodes base64url values', () => {
-    const fixture = 'eyJuYW1lIjoiP34_fj9-In0';
-    const expected = '{"name":"?~?~?~"}';
+    const fixture = 'eyJuYW1lIjoiP34_fj9-P34_fj9-P34ifQ';
+    const expected = '{"name":"?~?~?~?~?~?~?~"}';
     expect(Jwt.decodeJwtBase64Url(fixture)).toEqual(expected);
   });
 });

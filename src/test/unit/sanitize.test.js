@@ -9,14 +9,13 @@ import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import {
   getProfileWithMarkers,
   getProfileFromTextSamples,
-  addActiveTabInformationToProfile,
+  addTabInformationToProfile,
   markTabIdsAsPrivateBrowsing,
   addMarkersToThreadWithCorrespondingSamples,
   addInnerWindowIdToStacks,
   getNetworkMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { ensureExists } from '../../utils/flow';
-import type { RemoveProfileInformation } from 'firefox-profiler/types';
 import {
   correlateIPCMarkers,
   deriveMarkersFromRawMarkerTable,
@@ -29,6 +28,7 @@ import {
   callTreeFromProfile,
   formatTree,
 } from 'firefox-profiler/test/fixtures/utils';
+import type { RemoveProfileInformation } from 'firefox-profiler/types';
 
 describe('sanitizePII', function () {
   function setup(
@@ -44,7 +44,6 @@ describe('sanitizePII', function () {
       shouldRemoveExtensions: false,
       shouldRemovePreferenceValues: false,
       shouldRemovePrivateBrowsingData: false,
-      shouldRemoveTabsExceptTabID: null,
     };
 
     const PIIToRemove = {
@@ -54,14 +53,17 @@ describe('sanitizePII', function () {
 
     const derivedMarkerInfoForAllThreads = originalProfile.threads.map(
       (thread) => {
-        const ipcCorrelations = correlateIPCMarkers(originalProfile.threads);
+        const ipcCorrelations = correlateIPCMarkers(
+          originalProfile.threads,
+          originalProfile.shared
+        );
         const timeRangeForThread = getTimeRangeForThread(
           thread,
           originalProfile.meta.interval
         );
         return deriveMarkersFromRawMarkerTable(
           thread.markers,
-          thread.stringArray,
+          originalProfile.shared.stringArray,
           thread.tid || 0,
           timeRangeForThread,
           ipcCorrelations
@@ -73,30 +75,26 @@ describe('sanitizePII', function () {
       FileIO: {
         name: 'FileIO',
         display: ['marker-chart', 'marker-table', 'timeline-fileio'],
-        data: [
+        fields: [
           {
             key: 'operation',
             label: 'Operation',
             format: 'string',
-            searchable: true,
           },
           {
             key: 'source',
             label: 'Source',
             format: 'string',
-            searchable: true,
           },
           {
             key: 'filename',
             label: 'Filename',
             format: 'file-path',
-            searchable: true,
           },
           {
             key: 'threadId',
             label: 'Thread ID',
             format: 'string',
-            searchable: true,
           },
         ],
       },
@@ -104,7 +102,7 @@ describe('sanitizePII', function () {
         name: 'Url',
         tableLabel: '{marker.name} - {marker.data.url}',
         display: ['marker-chart', 'marker-table'],
-        data: [
+        fields: [
           {
             key: 'url',
             format: 'url',
@@ -115,16 +113,14 @@ describe('sanitizePII', function () {
         name: 'HostResolver',
         tableLabel: '{marker.name} - {marker.data.host}',
         display: ['marker-chart', 'marker-table'],
-        data: [
+        fields: [
           {
             key: 'host',
             format: 'sanitized-string',
-            searchable: true,
           },
           {
             key: 'originSuffix',
             format: 'sanitized-string',
-            searchable: true,
           },
           {
             key: 'flags',
@@ -484,8 +480,8 @@ describe('sanitizePII', function () {
       shouldRemoveUrls: true,
     });
 
+    const stringArray = sanitizedProfile.shared.stringArray;
     for (const thread of sanitizedProfile.threads) {
-      const stringArray = thread.stringArray;
       for (let i = 0; i < thread.markers.length; i++) {
         const currentMarker = thread.markers.data[i];
         if (
@@ -537,13 +533,12 @@ describe('sanitizePII', function () {
       shouldRemoveUrls: true,
     });
 
-    for (const thread of sanitizedProfile.threads) {
-      for (const string of thread.stringArray) {
-        // We are keeping the http(s) and removing the rest.
-        // That's why we can't test it with `includes('http')`.
-        // Tested `.com` here since all of the test urls have .com in it
-        expect(string.includes('.com')).toBe(false);
-      }
+    const stringArray = sanitizedProfile.shared.stringArray;
+    for (const string of stringArray) {
+      // We are keeping the http(s) and removing the rest.
+      // That's why we can't test it with `includes('http')`.
+      // Tested `.com` here since all of the test urls have .com in it
+      expect(string.includes('.com')).toBe(false);
     }
   });
 
@@ -916,7 +911,7 @@ describe('sanitizePII', function () {
       const {
         firstTabTabID: privateTabTabID,
         secondTabTabID: nonPrivateTabTabID,
-      } = addActiveTabInformationToProfile(originalProfile);
+      } = addTabInformationToProfile(originalProfile);
       markTabIdsAsPrivateBrowsing(originalProfile, [privateTabTabID]);
 
       // We run the sanitizing function with the sanitize private browsing flag.
@@ -980,57 +975,61 @@ describe('sanitizePII', function () {
         firstTabTabID: privateTabTabID,
         firstTabInnerWindowIDs: privateTabInnerWindowIDs,
         secondTabInnerWindowIDs: nonPrivateTabInnerWindowIDs,
-      } = addActiveTabInformationToProfile(originalProfile);
+      } = addTabInformationToProfile(originalProfile);
       markTabIdsAsPrivateBrowsing(originalProfile, [privateTabTabID]);
-      addMarkersToThreadWithCorrespondingSamples(originalProfile.threads[0], [
-        ...getNetworkMarkers({
-          id: 1235,
-          startTime: 19000,
-          fetchStart: 19200.2,
-          endTime: 20433.8,
-          uri: 'https://example.org/index.html',
-          payload: {
-            cache: 'Hit',
-            pri: 8,
-            count: 47027,
-            contentType: 'text/html',
-            isPrivateBrowsing: true,
-          },
-        }),
-        ...getNetworkMarkers({
-          id: 1236,
-          startTime: 19000,
-          fetchStart: 19200.2,
-          endTime: 20433.8,
-          uri: 'https://duckduckgo.com',
-          payload: {
-            cache: 'Hit',
-            pri: 8,
-            count: 47027,
-            contentType: 'text/html',
-          },
-        }),
+      addMarkersToThreadWithCorrespondingSamples(
+        originalProfile.threads[0],
+        originalProfile.shared,
         [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: privateTabInnerWindowIDs[0],
-          },
-        ],
-        [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: nonPrivateTabInnerWindowIDs[0],
-          },
-        ],
-      ]);
+          ...getNetworkMarkers({
+            id: 1235,
+            startTime: 19000,
+            fetchStart: 19200.2,
+            endTime: 20433.8,
+            uri: 'https://example.org/index.html',
+            payload: {
+              cache: 'Hit',
+              pri: 8,
+              count: 47027,
+              contentType: 'text/html',
+              isPrivateBrowsing: true,
+            },
+          }),
+          ...getNetworkMarkers({
+            id: 1236,
+            startTime: 19000,
+            fetchStart: 19200.2,
+            endTime: 20433.8,
+            uri: 'https://duckduckgo.com',
+            payload: {
+              cache: 'Hit',
+              pri: 8,
+              count: 47027,
+              contentType: 'text/html',
+            },
+          }),
+          [
+            'DOMEvent',
+            10.6,
+            11.1,
+            {
+              type: 'DOMEvent',
+              eventType: 'load',
+              innerWindowID: privateTabInnerWindowIDs[0],
+            },
+          ],
+          [
+            'DOMEvent',
+            10.6,
+            11.1,
+            {
+              type: 'DOMEvent',
+              eventType: 'load',
+              innerWindowID: nonPrivateTabInnerWindowIDs[0],
+            },
+          ],
+        ]
+      );
 
       const { sanitizedProfile } = setup(
         { shouldRemovePrivateBrowsingData: true },
@@ -1144,7 +1143,7 @@ describe('sanitizePII', function () {
         firstTabTabID: privateTabTabID,
         firstTabInnerWindowIDs: privateTabInnerWindowIDs,
         secondTabInnerWindowIDs: nonPrivateTabInnerWindowIDs,
-      } = addActiveTabInformationToProfile(originalProfile);
+      } = addTabInformationToProfile(originalProfile);
       markTabIdsAsPrivateBrowsing(originalProfile, [privateTabTabID]);
       addInnerWindowIdToStacks(
         originalProfile.threads[0],
@@ -1191,601 +1190,6 @@ describe('sanitizePII', function () {
         '    - Cjs (total: 1, self: 1)',
       ]);
       expect(formatTree(callTreeFromProfile(sanitizedProfile))).toEqual([
-        '- A (total: 2, self: —)',
-        '  - B (total: 2, self: —)',
-        '    - Cjs (total: 1, self: 1)',
-        '    - Ejs (total: 1, self: 1)',
-      ]);
-    });
-  });
-
-  describe('in active-tab view', () => {
-    it('removes pages information coming from other tabs', function () {
-      const { profile: originalProfile } = getProfileFromTextSamples(`A`);
-      const { firstTabTabID, secondTabTabID } =
-        addActiveTabInformationToProfile(originalProfile);
-
-      const { sanitizedProfile: unsanitizedProfile } = setup(
-        {},
-        originalProfile
-      );
-
-      const { sanitizedProfile } = setup(
-        { shouldRemoveTabsExceptTabID: secondTabTabID },
-        originalProfile
-      );
-
-      // before sanitization
-      expect(originalProfile.pages).toContainEqual(
-        expect.objectContaining({
-          tabID: firstTabTabID,
-        })
-      );
-      expect(originalProfile.pages).toContainEqual(
-        expect.objectContaining({
-          tabID: secondTabTabID,
-        })
-      );
-
-      // Without sanitization
-      expect(unsanitizedProfile.pages).toContainEqual(
-        expect.objectContaining({
-          tabID: firstTabTabID,
-        })
-      );
-      expect(unsanitizedProfile.pages).toContainEqual(
-        expect.objectContaining({
-          tabID: secondTabTabID,
-        })
-      );
-
-      // after sanitization
-      expect(sanitizedProfile.pages).not.toContainEqual(
-        expect.objectContaining({
-          tabID: firstTabTabID,
-        })
-      );
-      expect(sanitizedProfile.pages).toContainEqual(
-        expect.objectContaining({
-          tabID: secondTabTabID,
-        })
-      );
-    });
-
-    it('removes markers coming from other tabs', function () {
-      // 0. Create a profile with markers containing both private and non
-      // private innerWindowIDs, as well as network markers with the
-      // isPrivateBrowsing information but no innerWindowIDs information
-      // otherwise.
-
-      const { profile: originalProfile } = getProfileFromTextSamples(`A`);
-      const {
-        secondTabTabID,
-        firstTabInnerWindowIDs,
-        secondTabInnerWindowIDs,
-      } = addActiveTabInformationToProfile(originalProfile);
-      const unknownInnerWindowID = 555;
-
-      addMarkersToThreadWithCorrespondingSamples(originalProfile.threads[0], [
-        [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: firstTabInnerWindowIDs[0],
-          },
-        ],
-        [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: secondTabInnerWindowIDs[0],
-          },
-        ],
-        [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: unknownInnerWindowID,
-          },
-        ],
-        [
-          'GCMinor',
-          10.7,
-          11.2,
-          {
-            type: 'GCMinor',
-            nursery: {
-              status: 'nursery empty',
-            },
-          },
-        ],
-        [
-          'CompositorScreenshot',
-          20,
-          21,
-          {
-            type: 'CompositorScreenshot',
-            url: 0,
-            windowID: 'XXX',
-            windowWidth: 300,
-            windowHeight: 600,
-          },
-        ],
-        ['TextOnlyMarker', 22, 23, null],
-      ]);
-
-      const { sanitizedProfile: unsanitizedProfile } = setup(
-        {},
-        originalProfile
-      );
-      const { sanitizedProfile } = setup(
-        { shouldRemoveTabsExceptTabID: secondTabTabID },
-        originalProfile
-      );
-
-      // 1. Let's make sure the original profile has all the initial markers.
-      expect(originalProfile.threads[0].markers.data).toContainEqual(
-        expect.objectContaining({
-          innerWindowID: expect.toBeOneOf(firstTabInnerWindowIDs),
-        })
-      );
-      expect(originalProfile.threads[0].markers.data).toContainEqual(
-        expect.objectContaining({
-          innerWindowID: expect.toBeOneOf(secondTabInnerWindowIDs),
-        })
-      );
-      expect(originalProfile.threads[0].markers.data).toContainEqual(
-        expect.objectContaining({
-          innerWindowID: unknownInnerWindowID,
-        })
-      );
-
-      const indexForGCMinor =
-        originalProfile.threads[0].stringArray.indexOf('GCMinor');
-      expect(indexForGCMinor).not.toBe(-1);
-      expect(originalProfile.threads[0].markers.name).toContain(
-        indexForGCMinor
-      );
-
-      const indexForScreenshot = originalProfile.threads[0].stringArray.indexOf(
-        'CompositorScreenshot'
-      );
-      expect(indexForScreenshot).not.toBe(-1);
-      expect(originalProfile.threads[0].markers.name).toContain(
-        indexForScreenshot
-      );
-
-      const indexForTextOnlyMarker =
-        originalProfile.threads[0].stringArray.indexOf('TextOnlyMarker');
-      expect(indexForTextOnlyMarker).not.toBe(-1);
-      expect(originalProfile.threads[0].markers.name).toContain(
-        indexForTextOnlyMarker
-      );
-
-      // 2. An unsanitized profile also has all the initial markers.
-      expect(unsanitizedProfile.threads[0].markers.data).toContainEqual(
-        expect.objectContaining({
-          innerWindowID: expect.toBeOneOf(firstTabInnerWindowIDs),
-        })
-      );
-      expect(unsanitizedProfile.threads[0].markers.data).toContainEqual(
-        expect.objectContaining({
-          innerWindowID: expect.toBeOneOf(secondTabInnerWindowIDs),
-        })
-      );
-      expect(unsanitizedProfile.threads[0].markers.data).toContainEqual(
-        expect.objectContaining({
-          innerWindowID: unknownInnerWindowID,
-        })
-      );
-      expect(unsanitizedProfile.threads[0].markers.name).toContain(
-        indexForGCMinor
-      );
-      expect(unsanitizedProfile.threads[0].markers.name).toContain(
-        indexForScreenshot
-      );
-      expect(unsanitizedProfile.threads[0].markers.name).toContain(
-        indexForTextOnlyMarker
-      );
-
-      // 3. Finally check the innerWindowID property of remaining markers in the
-      // sanitized profile.
-      // We don't have the markers coming from the first tab.
-      expect(sanitizedProfile.threads[0].markers.data).not.toContainEqual(
-        expect.objectContaining({
-          innerWindowID: expect.toBeOneOf(firstTabInnerWindowIDs),
-        })
-      );
-      expect(sanitizedProfile.threads[0].markers.data).not.toContainEqual(
-        expect.objectContaining({
-          innerWindowID: unknownInnerWindowID,
-        })
-      );
-
-      // Nor the markers that aren't tied to a tab
-      expect(sanitizedProfile.threads[0].markers.name).not.toContain(
-        indexForGCMinor
-      );
-
-      expect(sanitizedProfile.threads[0].markers.name).not.toContain(
-        indexForTextOnlyMarker
-      );
-
-      // But we still have the others.
-      expect(sanitizedProfile.threads[0].markers.data).toContainEqual(
-        expect.objectContaining({
-          innerWindowID: expect.toBeOneOf(secondTabInnerWindowIDs),
-        })
-      );
-
-      // Including the screenshots
-      expect(originalProfile.threads[0].markers.name).toContain(
-        indexForScreenshot
-      );
-    });
-
-    it('removes samples coming from other tabs', () => {
-      // This profile has 6 samples:
-      // - [A, B, Cjs] <= will be added a innerWindowID for the tab that will be kept
-      // - [A, B, Djs] <= will be added a innerWindowID for the tab that will be removed
-      // - [A, B, Ejs] <= will be duped to 1 sample for each tab
-      // - [A, B, Djs, F] <= only [A, B, Djs] will be changed to removed innerWindowID , but F being native it won't have the flag
-      // - [A, B]      <= has no innerWindowID, therefore it will be removed as well.
-      // - [A, Gjs]    <= has an unknown innerWindowID, therefore it will be removed as well.
-      const {
-        profile: originalProfile,
-        funcNamesDictPerThread: [{ A, B, Cjs, Djs, Ejs, Gjs }],
-      } = getProfileFromTextSamples(`
-        A    A    A    A    A  A
-        B    B    B    B    B  Gjs
-        Cjs  Djs  Ejs  Djs
-                       F
-      `);
-
-      const {
-        secondTabTabID,
-        firstTabInnerWindowIDs,
-        secondTabInnerWindowIDs,
-      } = addActiveTabInformationToProfile(originalProfile);
-      const unknownInnerWindowID = 555;
-
-      addInnerWindowIdToStacks(
-        originalProfile.threads[0],
-        /* listOfOperations */
-        [
-          // First tab will be removed, second tab will be kept
-          {
-            innerWindowID: firstTabInnerWindowIDs[0],
-            callNodes: [[A, B, Djs]],
-          },
-          {
-            innerWindowID: secondTabInnerWindowIDs[0],
-            callNodes: [[A, B, Cjs]],
-          },
-        ],
-        /* callNodesToDupe */
-        [[A, B, Ejs]]
-      );
-
-      addInnerWindowIdToStacks(originalProfile.threads[0], [
-        { innerWindowID: unknownInnerWindowID, callNodes: [[A, Gjs]] },
-      ]);
-
-      const { sanitizedProfile: unsanitizedProfile } = setup(
-        {},
-        originalProfile
-      );
-      const { sanitizedProfile } = setup(
-        { shouldRemoveTabsExceptTabID: secondTabTabID },
-        originalProfile
-      );
-
-      expect(formatTree(callTreeFromProfile(originalProfile))).toEqual([
-        '- A (total: 7, self: —)',
-        '  - B (total: 6, self: 1)',
-        '    - Djs (total: 2, self: 1)',
-        '      - F (total: 1, self: 1)',
-        '    - Ejs (total: 2, self: 2)',
-        '    - Cjs (total: 1, self: 1)',
-        '  - Gjs (total: 1, self: 1)',
-      ]);
-      expect(formatTree(callTreeFromProfile(unsanitizedProfile))).toEqual([
-        '- A (total: 7, self: —)',
-        '  - B (total: 6, self: 1)',
-        '    - Djs (total: 2, self: 1)',
-        '      - F (total: 1, self: 1)',
-        '    - Ejs (total: 2, self: 2)',
-        '    - Cjs (total: 1, self: 1)',
-        '  - Gjs (total: 1, self: 1)',
-      ]);
-      expect(formatTree(callTreeFromProfile(sanitizedProfile))).toEqual([
-        '- A (total: 2, self: —)',
-        '  - B (total: 2, self: —)',
-        '    - Cjs (total: 1, self: 1)',
-        '    - Ejs (total: 1, self: 1)',
-      ]);
-    });
-  });
-
-  describe('when removing both active tab and private browsing information', () => {
-    it('sanitizes properly the pages information', () => {
-      const { profile: originalProfile } = getProfileFromTextSamples(`A`);
-      const {
-        firstTabTabID: privateTabTabID,
-        secondTabTabID: nonPrivateTabTabID,
-      } = addActiveTabInformationToProfile(originalProfile);
-      markTabIdsAsPrivateBrowsing(originalProfile, [privateTabTabID]);
-
-      // We're asking the sanitizing function to remove both the private
-      // browsing tab _and_ keep it as the active tab id. As a result it should
-      // be removed because private browsing data has precedence.
-      // In this case the other tab id should be removed as well, because
-      // they're not the active tab id.
-      const { sanitizedProfile } = setup(
-        {
-          shouldRemovePrivateBrowsingData: true,
-          shouldRemoveTabsExceptTabID: privateTabTabID,
-        },
-        originalProfile
-      );
-
-      // before sanitization
-      expect(originalProfile.pages).toContainEqual(
-        expect.objectContaining({
-          tabID: privateTabTabID,
-        })
-      );
-      expect(originalProfile.pages).toContainEqual(
-        expect.objectContaining({
-          tabID: nonPrivateTabTabID,
-        })
-      );
-
-      // after sanitization
-      expect(sanitizedProfile.pages).not.toContainEqual(
-        expect.objectContaining({
-          tabID: privateTabTabID,
-        })
-      );
-      expect(sanitizedProfile.pages).not.toContainEqual(
-        expect.objectContaining({
-          tabID: nonPrivateTabTabID,
-        })
-      );
-
-      // And now we're trying this again but this time using the second tab id
-      // as the active tab id.
-      const { sanitizedProfile: sanitizedProfile2 } = setup(
-        {
-          shouldRemovePrivateBrowsingData: true,
-          shouldRemoveTabsExceptTabID: nonPrivateTabTabID,
-        },
-        originalProfile
-      );
-
-      expect(sanitizedProfile2.pages).not.toContainEqual(
-        expect.objectContaining({
-          tabID: privateTabTabID,
-        })
-      );
-      expect(sanitizedProfile2.pages).toContainEqual(
-        expect.objectContaining({
-          tabID: nonPrivateTabTabID,
-        })
-      );
-    });
-
-    it('sanitizes properly the marker information', () => {
-      // 0. Create a profile with markers containing both private and non
-      // private innerWindowIDs, as well as network markers with the
-      // isPrivateBrowsing information but no innerWindowIDs information
-      // otherwise.
-
-      const { profile: originalProfile } = getProfileFromTextSamples(`A`);
-      const {
-        firstTabTabID: privateTabTabID,
-        secondTabTabID: nonPrivateTabTabID,
-        firstTabInnerWindowIDs: privateTabInnerWindowIDs,
-        secondTabInnerWindowIDs: nonPrivateTabInnerWindowIDs,
-      } = addActiveTabInformationToProfile(originalProfile);
-      markTabIdsAsPrivateBrowsing(originalProfile, [privateTabTabID]);
-      addMarkersToThreadWithCorrespondingSamples(originalProfile.threads[0], [
-        ...getNetworkMarkers({
-          id: 1235,
-          startTime: 19000,
-          fetchStart: 19200.2,
-          endTime: 20433.8,
-          uri: 'https://example.org/index.html',
-          payload: {
-            cache: 'Hit',
-            pri: 8,
-            count: 47027,
-            contentType: 'text/html',
-            isPrivateBrowsing: true,
-          },
-        }),
-        ...getNetworkMarkers({
-          id: 1236,
-          startTime: 19000,
-          fetchStart: 19200.2,
-          endTime: 20433.8,
-          uri: 'https://duckduckgo.com',
-          payload: {
-            cache: 'Hit',
-            pri: 8,
-            count: 47027,
-            contentType: 'text/html',
-          },
-        }),
-        [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: privateTabInnerWindowIDs[0],
-          },
-        ],
-        [
-          'DOMEvent',
-          10.6,
-          11.1,
-          {
-            type: 'DOMEvent',
-            eventType: 'load',
-            innerWindowID: nonPrivateTabInnerWindowIDs[0],
-          },
-        ],
-      ]);
-
-      const { sanitizedProfile } = setup(
-        {
-          shouldRemovePrivateBrowsingData: true,
-          shouldRemoveTabsExceptTabID: privateTabTabID,
-        },
-        originalProfile
-      );
-
-      // Network markers have the isPrivateBrowsing property.
-      // But other markers have the innerWindowID property.
-      // In this test we're testing both cases.
-
-      // 1. Let's make sure the original profile has all the initial markers.
-      expect(originalProfile.threads[0].markers.data).toContainEqual(
-        expect.objectContaining({ isPrivateBrowsing: true })
-      );
-      expect(originalProfile.threads[0].markers.data).toContainEqual(
-        expect.objectContaining({
-          innerWindowID: expect.toBeOneOf(privateTabInnerWindowIDs),
-        })
-      );
-      expect(originalProfile.threads[0].markers.data).toContainEqual(
-        expect.objectContaining({
-          innerWindowID: expect.toBeOneOf(nonPrivateTabInnerWindowIDs),
-        })
-      );
-
-      // 2. The thread has been removed because all data has been removed.
-      expect(sanitizedProfile.threads).toHaveLength(0);
-
-      // Now let's test this again but using the second tab ID as the active tab ID.
-      const { sanitizedProfile: sanitizedProfile2 } = setup(
-        {
-          shouldRemovePrivateBrowsingData: true,
-          shouldRemoveTabsExceptTabID: nonPrivateTabTabID,
-        },
-        originalProfile
-      );
-
-      // Then let's see if any isPrivateBrowsing markers are present in the
-      // sanitized profile.
-      expect(sanitizedProfile2.threads[0].markers.data).not.toContainEqual(
-        expect.objectContaining({ isPrivateBrowsing: true })
-      );
-
-      // Finally check the innerWindowID property of remaining markers in the
-      // sanitized profile.
-      // We don't have the markers coming from private browsing windows.
-      expect(sanitizedProfile2.threads[0].markers.data).not.toContainEqual(
-        expect.objectContaining({
-          innerWindowID: expect.toBeOneOf(privateTabInnerWindowIDs),
-        })
-      );
-      // But we still have the others.
-      expect(sanitizedProfile2.threads[0].markers.data).toContainEqual(
-        expect.objectContaining({
-          innerWindowID: expect.toBeOneOf(nonPrivateTabInnerWindowIDs),
-        })
-      );
-    });
-
-    it('sanitizes properly the samples information', () => {
-      // This profile has 5 samples:
-      // - [A, B, Cjs] <= will be added a non-private browsing innerWindowID
-      // - [A, B, Djs] <= will be added a private browsing innerWindowID
-      // - [A, B, Ejs] <= will stay non-private but be duped to a sample with the same stack with a private browsing innerWindowID
-      // - [A, B, Djs, F] <= only [A, B, Djs] will be changed to the private browsing innerWindowID , but F being native it won't have the flag
-      // - [A, B, G]   <= This has no innerWindowID.
-      // The private window is also the active tab id.
-      const {
-        profile: originalProfile,
-        funcNamesDictPerThread: [{ A, B, Cjs, Djs, Ejs }],
-      } = getProfileFromTextSamples(`
-        A    A    A    A    A
-        B    B    B    B    B
-        Cjs  Djs  Ejs  Djs  G
-                       F
-      `);
-
-      const {
-        firstTabTabID: privateTabTabID,
-        secondTabTabID: nonPrivateTabTabID,
-        firstTabInnerWindowIDs: privateTabInnerWindowIDs,
-        secondTabInnerWindowIDs: nonPrivateTabInnerWindowIDs,
-      } = addActiveTabInformationToProfile(originalProfile);
-      markTabIdsAsPrivateBrowsing(originalProfile, [privateTabTabID]);
-      addInnerWindowIdToStacks(
-        originalProfile.threads[0],
-        /* listOfOperations */
-        [
-          {
-            innerWindowID: nonPrivateTabInnerWindowIDs[0],
-            callNodes: [[A, B, Cjs]],
-          },
-          {
-            innerWindowID: privateTabInnerWindowIDs[0],
-            callNodes: [[A, B, Djs]],
-          },
-        ],
-        /* callNodesToDupe */
-        [[A, B, Ejs]]
-      );
-
-      // We're sanitizing with both options to remove private browsing data and
-      // the non-active tab data. In this case all active tab data is also
-      // private browsing so it should be removed.
-      const { sanitizedProfile } = setup(
-        {
-          shouldRemovePrivateBrowsingData: true,
-          shouldRemoveTabsExceptTabID: privateTabTabID,
-        },
-        originalProfile
-      );
-
-      expect(formatTree(callTreeFromProfile(originalProfile))).toEqual([
-        '- A (total: 6, self: —)',
-        '  - B (total: 6, self: —)',
-        '    - Djs (total: 2, self: 1)',
-        '      - F (total: 1, self: 1)',
-        '    - Ejs (total: 2, self: 2)',
-        '    - Cjs (total: 1, self: 1)',
-        '    - G (total: 1, self: 1)',
-      ]);
-
-      // Everything has been removed.
-      expect(formatTree(callTreeFromProfile(sanitizedProfile))).toEqual([]);
-
-      // Now let's try this again, this time using the non private tab id as the
-      // active tab id.
-      const { sanitizedProfile: sanitizedProfile2 } = setup(
-        {
-          shouldRemovePrivateBrowsingData: true,
-          shouldRemoveTabsExceptTabID: nonPrivateTabTabID,
-        },
-        originalProfile
-      );
-
-      expect(formatTree(callTreeFromProfile(sanitizedProfile2))).toEqual([
         '- A (total: 2, self: —)',
         '  - B (total: 2, self: —)',
         '    - Cjs (total: 1, self: 1)',

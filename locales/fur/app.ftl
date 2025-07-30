@@ -30,6 +30,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-post-message = Impussibil impuartâ il profîl.
 AppViewRouter--error-unpublished = Impussibil recuperâ il profîl di { -firefox-brand-name }.
 AppViewRouter--error-from-file = Impussibil lei il file o analizâ il profîl che al à dentri.
 AppViewRouter--error-local = No ancjemò implementât.
@@ -116,6 +117,7 @@ CallNodeContextMenu--searchfox = Cîr il non de funzion in Searchfox
 CallNodeContextMenu--copy-function-name = Copie non de funzion
 CallNodeContextMenu--copy-script-url = Copie URL dal script
 CallNodeContextMenu--copy-stack = Copie stack
+CallNodeContextMenu--show-the-function-in-devtools = Mostre la funzion in struments di svilup
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -310,6 +312,11 @@ Home--your-recent-uploaded-recordings-title = Lis tôs regjistrazions cjariadis 
 Home--load-files-from-other-tools2 =
     { -profiler-brand-name } al pues ancje impuartâ profîi di altris profiladôrs, come <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, il
     panel prestazions di Chrome, <androidstudio>Android Studio</androidstudio> o qualsisei file che al dopri il <dhat>formât dhat</dhat> o <traceevent>Trace Event di Google</traceevent>. <write>Scuvierç cemût creâ un strument di importazion</write>.
+Home--install-chrome-extension = Instale la estensions par Chrome
+Home--chrome-extension-instructions =
+    Dopre la estension <a>{ -profiler-brand-name } par Chrome</a>
+    par tirâ dongje i profîi des prestazions in Chrome e analizâju in { -profiler-brand-name }. Instale la estension dal Chrome Web Store.
+Home--chrome-extension-recording-instructions = Une volte instalade, dopre la icone de estension te sbare dai struments o lis scurtis par inviâe interompi la profilazion. Tu puedis ancje espuartâ i profîi e cjariâju achì par fâ une analisi detaiade.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -603,6 +610,11 @@ PanelSearch--search-field-hint = Savevistu che tu puedis doprâ la virgule (,) p
 
 ## Profile Name Button
 
+ProfileName--edit-profile-name-button =
+    .title = Modifiche il non dal profîl
+ProfileName--edit-profile-name-input =
+    .title = Modifiche il non dal profîl
+    .aria-label = Non dal profîl
 
 ## Profile Delete Button
 
@@ -649,6 +661,7 @@ ProfileFilterNavigator--full-range-with-duration = Interval complet ({ $fullRang
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-from-post-message = Daûr a impuartâ e a elaborâ il profîl…
 ProfileLoaderAnimation--loading-unpublished = Importazion dal profîl dret di { -firefox-brand-name }…
 ProfileLoaderAnimation--loading-from-file = Leture dal file e analisi dal profîl…
 ProfileLoaderAnimation--loading-local = No ancjemò implementât.

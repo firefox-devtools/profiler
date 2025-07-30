@@ -20,6 +20,7 @@ import {
   getEmptyRawStackTable,
   getEmptyRawMarkerTable,
   getEmptySamplesTableWithEventDelay,
+  shallowCloneRawMarkerTable,
 } from './data-structures';
 import {
   filterRawThreadSamplesToRange,
@@ -32,8 +33,9 @@ import {
   deriveMarkersFromRawMarkerTable,
   correlateIPCMarkers,
 } from './marker-data';
-import { StringTable } from '../utils/string-table';
+import { computeStringIndexMarkerFieldsByDataType } from './marker-schema';
 import { ensureExists, getFirstItemFromSet } from '../utils/flow';
+import { StringTable } from '../utils/string-table';
 
 import type {
   Profile,
@@ -47,6 +49,7 @@ import type {
   IndexIntoNativeSymbolTable,
   IndexIntoStackTable,
   IndexIntoSamplesTable,
+  IndexIntoStringTable,
   FuncTable,
   FrameTable,
   Lib,
@@ -59,9 +62,9 @@ import type {
   TransformStacksPerThread,
   DerivedMarkerInfo,
   RawMarkerTable,
+  MarkerPayload,
   MarkerIndex,
   Milliseconds,
-  MarkerPayload,
 } from 'firefox-profiler/types';
 
 /**
@@ -93,6 +96,13 @@ export function mergeProfilesForDiffing(
 
   // Copy over identical values for the ProfileMeta.
   for (const [key, value] of Object.entries(profiles[0].meta)) {
+    // Do not copy over some properties though.
+    // profilingStartTime and profilingEndTime, if present, are used to define
+    // the root range directly. But because we adjust timestamps below in each
+    // threads, these values won't be correct anymore.
+    if (['profilingStartTime', 'profilingEndTime'].includes(key)) {
+      continue;
+    }
     if (profiles.every((profile) => profile.meta[key] === value)) {
       resultProfile.meta[key] = value;
     }
@@ -105,6 +115,10 @@ export function mergeProfilesForDiffing(
   resultProfile.meta.interval = Math.min(
     ...profiles.map((profile) => profile.meta.interval)
   );
+
+  // Precompute marker fields that need adjusting.
+  const stringIndexMarkerFieldsByDataType =
+    computeStringIndexMarkerFieldsByDataType(resultProfile.meta.markerSchema);
 
   // If all profiles have an unknown symbolication status, we keep this unknown
   // status for the combined profile. Otherwise, we mark the combined profile
@@ -126,11 +140,20 @@ export function mergeProfilesForDiffing(
   } = mergeCategories(profiles.map((profile) => profile.meta.categories));
   resultProfile.meta.categories = newCategories;
 
+  const {
+    stringArray: newStringArray,
+    translationMaps: translationMapForStrings,
+  } = mergeStringArrays(profiles.map((profile) => profile.shared.stringArray));
+
   // Then merge libs.
   const { libs: newLibs, translationMaps: translationMapsForLibs } = mergeLibs(
     profiles.map((profile) => profile.libs)
   );
   resultProfile.libs = newLibs;
+
+  resultProfile.shared = {
+    stringArray: newStringArray,
+  };
 
   // Then we loop over all profiles and do the necessary changes according
   // to the states we computed earlier.
@@ -166,8 +189,27 @@ export function mergeProfilesForDiffing(
         translationMapsForCategories[i]
       ),
     };
+    thread.funcTable = {
+      ...thread.funcTable,
+      name: adjustStringIndexes(
+        thread.funcTable.name,
+        translationMapForStrings[i]
+      ),
+      fileName: adjustNullableStringIndexes(
+        thread.funcTable.fileName,
+        translationMapForStrings[i]
+      ),
+    };
     thread.resourceTable = {
       ...thread.resourceTable,
+      name: adjustStringIndexes(
+        thread.resourceTable.name,
+        translationMapForStrings[i]
+      ),
+      host: adjustNullableStringIndexes(
+        thread.resourceTable.host,
+        translationMapForStrings[i]
+      ),
       lib: adjustResourceTableLibs(
         thread.resourceTable.lib,
         translationMapsForLibs[i]
@@ -175,17 +217,34 @@ export function mergeProfilesForDiffing(
     };
     thread.nativeSymbols = {
       ...thread.nativeSymbols,
+      name: adjustStringIndexes(
+        thread.nativeSymbols.name,
+        translationMapForStrings[i]
+      ),
       libIndex: adjustNativeSymbolLibs(
         thread.nativeSymbols.libIndex,
         translationMapsForLibs[i]
       ),
     };
+    thread.markers = {
+      ...thread.markers,
+      name: adjustStringIndexes(
+        thread.markers.name,
+        translationMapForStrings[i]
+      ),
+      data: adjustMarkerDataStringIndexes(
+        thread.markers.data,
+        translationMapForStrings[i],
+        stringIndexMarkerFieldsByDataType
+      ),
+    };
 
-    //Screenshot markers is in different threads of the imported profile.
-    //These markers are extracted and merged here using the mergeScreenshotMarkers().
-
-    const { markerTable } = mergeScreenshotMarkers(profile.threads, thread);
-    thread.markers = { ...thread.markers, ...markerTable };
+    // Make sure that screenshot markers make it into the merged profile, even
+    // if they're not on the selected thread.
+    thread.markers = getThreadMarkersAndScreenshotMarkers(
+      profile.threads,
+      thread
+    );
 
     // We filter the profile using the range from the state for this profile.
     const zeroAt = getTimeRangeIncludingAllThreads(profile).start;
@@ -196,11 +255,11 @@ export function mergeProfilesForDiffing(
       // Filtering markers in a thread happens with the derived markers, so they
       // will need to be computed.
       if (!ipcCorrelations) {
-        ipcCorrelations = correlateIPCMarkers(profile.threads);
+        ipcCorrelations = correlateIPCMarkers(profile.threads, profile.shared);
       }
       const derivedMarkerInfo = deriveMarkersFromRawMarkerTable(
         thread.markers,
-        thread.stringArray,
+        profile.shared.stringArray,
         thread.tid || 0,
         committedRange,
         ipcCorrelations
@@ -357,6 +416,7 @@ type TranslationMapForNativeSymbols = Map<
 type TranslationMapForFrames = Map<IndexIntoFrameTable, IndexIntoFrameTable>;
 type TranslationMapForStacks = Map<IndexIntoStackTable, IndexIntoStackTable>;
 type TranslationMapForLibs = Map<IndexIntoLibs, IndexIntoLibs>;
+type TranslationMapForStrings = Map<IndexIntoStringTable, IndexIntoStringTable>;
 type TranslationMapForSamples = Map<
   IndexIntoSamplesTable,
   IndexIntoSamplesTable,
@@ -366,22 +426,20 @@ type TranslationMapForSamples = Map<
  * Merges several categories lists into one, resolving duplicates if necessary.
  * It returns a translation map that can be used in `adjustCategories` later.
  */
-function mergeCategories(categoriesPerThread: Array<CategoryList | void>): {|
+function mergeCategories(categoriesPerProfile: Array<CategoryList | void>): {|
   categories: CategoryList,
   translationMaps: TranslationMapForCategories[],
 |} {
   const newCategories = [];
-  const translationMaps = [];
   const newCategoryIndexByName: Map<string, IndexIntoCategoryList> = new Map();
 
-  categoriesPerThread.forEach((categories) => {
+  const translationMaps = categoriesPerProfile.map((categories) => {
     const translationMap = new Map();
-    translationMaps.push(translationMap);
 
     if (!categories) {
       // Profiles that are imported may not have categories. Ignore it when attempting
       // to merge categories.
-      return;
+      return translationMap;
     }
 
     categories.forEach((category, i) => {
@@ -399,9 +457,29 @@ function mergeCategories(categoriesPerThread: Array<CategoryList | void>): {|
       }
       translationMap.set(i, newCategoryIndex);
     });
+
+    return translationMap;
   });
 
   return { categories: newCategories, translationMaps };
+}
+
+function mergeStringArrays(stringArraysPerProfile: Array<string[]>): {|
+  stringArray: string[],
+  translationMaps: TranslationMapForStrings[],
+|} {
+  const newStringArray = [];
+  const newStringTable = StringTable.withBackingArray(newStringArray);
+
+  const translationMaps = stringArraysPerProfile.map((stringArray) => {
+    const translationMap = new Map();
+    for (let i = 0; i < stringArray.length; i++) {
+      translationMap.set(i, newStringTable.indexForString(stringArray[i]));
+    }
+    return translationMap;
+  });
+
+  return { stringArray: newStringArray, translationMaps };
 }
 
 /**
@@ -474,6 +552,85 @@ function adjustNullableCategories(
   });
 }
 
+function adjustStringIndexes(
+  stringIndexes: $ReadOnlyArray<IndexIntoStringTable>,
+  translationMap: TranslationMapForStrings
+): Array<IndexIntoStringTable> {
+  return stringIndexes.map((stringIndex) => {
+    const newStringIndex = translationMap.get(stringIndex);
+    if (newStringIndex === undefined) {
+      throw new Error(
+        stripIndent`
+          String with index ${stringIndex} hasn't been found in the translation map.
+          This shouldn't happen and indicates a bug in the profiler's code.
+        `
+      );
+    }
+    return newStringIndex;
+  });
+}
+
+function adjustMarkerDataStringIndexes(
+  dataCol: $ReadOnlyArray<MarkerPayload | null>,
+  translationMap: TranslationMapForStrings,
+  stringIndexMarkerFieldsByDataType: Map<string, string[]>
+): Array<MarkerPayload | null> {
+  return dataCol.map((data) => {
+    if (!data || !data.type) {
+      return data;
+    }
+
+    const stringIndexMarkerFields = stringIndexMarkerFieldsByDataType.get(
+      data.type
+    );
+    if (stringIndexMarkerFields === undefined) {
+      return data;
+    }
+
+    let newData: MarkerPayload = data;
+    for (const fieldKey of stringIndexMarkerFields) {
+      const stringIndex = data[fieldKey];
+      if (typeof stringIndex === 'number') {
+        const newStringIndex = translationMap.get(stringIndex);
+        if (newStringIndex === undefined) {
+          throw new Error(
+            stripIndent`
+              String with index ${stringIndex} hasn't been found in the translation map.
+              This shouldn't happen and indicates a bug in the profiler's code.
+            `
+          );
+        }
+        newData = ({
+          ...newData,
+          [fieldKey]: newStringIndex,
+        }: any);
+      }
+    }
+    return newData;
+  });
+}
+
+function adjustNullableStringIndexes(
+  stringIndexes: $ReadOnlyArray<IndexIntoStringTable | null>,
+  translationMap: TranslationMapForStrings
+): Array<IndexIntoStringTable | null> {
+  return stringIndexes.map((stringIndex) => {
+    if (stringIndex === null) {
+      return null;
+    }
+    const newStringIndex = translationMap.get(stringIndex);
+    if (newStringIndex === undefined) {
+      throw new Error(
+        stripIndent`
+          String with index ${stringIndex} hasn't been found in the translation map.
+          This shouldn't happen and indicates a bug in the profiler's code.
+        `
+      );
+    }
+    return newStringIndex;
+  });
+}
+
 /**
  * This combines the library lists from multiple profiles. It returns a merged
  * Lib array, along with a translation maps that can be used in other functions
@@ -516,10 +673,7 @@ function mergeLibs(libsPerProfile: Lib[][]): {
  * resource table with the translation maps to be used in subsequent merging
  * functions.
  */
-function combineResourceTables(
-  newStringTable: StringTable,
-  threads: $ReadOnlyArray<RawThread>
-): {
+function combineResourceTables(threads: $ReadOnlyArray<RawThread>): {
   resourceTable: ResourceTable,
   translationMaps: TranslationMapForResources[],
 } {
@@ -529,20 +683,16 @@ function combineResourceTables(
 
   threads.forEach((thread) => {
     const translationMap = new Map();
-    const { resourceTable, stringArray } = thread;
+    const { resourceTable } = thread;
 
     for (let i = 0; i < resourceTable.length; i++) {
       const libIndex = resourceTable.lib[i];
       const nameIndex = resourceTable.name[i];
-      const newName = stringArray[nameIndex] ?? '';
-
       const hostIndex = resourceTable.host[i];
-      const newHost = hostIndex !== null ? stringArray[hostIndex] : null;
-
       const type = resourceTable.type[i];
 
       // Duplicate search.
-      const resourceKey = [newName, type].join('#');
+      const resourceKey = [nameIndex, type].join('#');
       const insertedResourceIndex = mapOfInsertedResources.get(resourceKey);
       if (insertedResourceIndex !== undefined) {
         translationMap.set(i, insertedResourceIndex);
@@ -553,10 +703,8 @@ function combineResourceTables(
       mapOfInsertedResources.set(resourceKey, newResourceTable.length);
 
       newResourceTable.lib.push(libIndex);
-      newResourceTable.name.push(newStringTable.indexForString(newName));
-      newResourceTable.host.push(
-        newHost === null ? null : newStringTable.indexForString(newHost)
-      );
+      newResourceTable.name.push(nameIndex);
+      newResourceTable.host.push(hostIndex);
       newResourceTable.type.push(type);
       newResourceTable.length++;
     }
@@ -570,10 +718,7 @@ function combineResourceTables(
 /**
  * This combines the nativeSymbols tables for the threads.
  */
-function combineNativeSymbolTables(
-  newStringTable: StringTable,
-  threads: $ReadOnlyArray<RawThread>
-): {
+function combineNativeSymbolTables(threads: $ReadOnlyArray<RawThread>): {
   nativeSymbols: NativeSymbolTable,
   translationMaps: TranslationMapForNativeSymbols[],
 } {
@@ -584,17 +729,16 @@ function combineNativeSymbolTables(
 
   threads.forEach((thread) => {
     const translationMap = new Map();
-    const { nativeSymbols, stringArray } = thread;
+    const { nativeSymbols } = thread;
 
     for (let i = 0; i < nativeSymbols.length; i++) {
       const libIndex = nativeSymbols.libIndex[i];
       const nameIndex = nativeSymbols.name[i];
-      const newName = stringArray[nameIndex];
       const address = nativeSymbols.address[i];
       const functionSize = nativeSymbols.functionSize[i];
 
       // Duplicate search.
-      const nativeSymbolKey = [newName, address].join('#');
+      const nativeSymbolKey = [nameIndex, address].join('#');
       const insertedNativeSymbolIndex =
         mapOfInsertedNativeSymbols.get(nativeSymbolKey);
       if (insertedNativeSymbolIndex !== undefined) {
@@ -606,7 +750,7 @@ function combineNativeSymbolTables(
       mapOfInsertedNativeSymbols.set(nativeSymbolKey, newNativeSymbols.length);
 
       newNativeSymbols.libIndex.push(libIndex);
-      newNativeSymbols.name.push(newStringTable.indexForString(newName));
+      newNativeSymbols.name.push(nameIndex);
       newNativeSymbols.address.push(address);
       newNativeSymbols.functionSize.push(functionSize);
 
@@ -626,7 +770,6 @@ function combineNativeSymbolTables(
  */
 function combineFuncTables(
   translationMapsForResources: TranslationMapForResources[],
-  newStringTable: StringTable,
   threads: $ReadOnlyArray<RawThread>
 ): { funcTable: FuncTable, translationMaps: TranslationMapForFuncs[] } {
   const mapOfInsertedFuncs: Map<string, IndexIntoFuncTable> = new Map();
@@ -634,14 +777,12 @@ function combineFuncTables(
   const newFuncTable = getEmptyFuncTable();
 
   threads.forEach((thread, threadIndex) => {
-    const { funcTable, stringArray } = thread;
+    const { funcTable } = thread;
     const translationMap = new Map();
     const resourceTranslationMap = translationMapsForResources[threadIndex];
 
     for (let i = 0; i < funcTable.length; i++) {
       const fileNameIndex = funcTable.fileName[i];
-      const fileName =
-        typeof fileNameIndex === 'number' ? stringArray[fileNameIndex] : null;
       const resourceIndex = funcTable.resource[i];
       const newResourceIndex =
         resourceIndex >= 0
@@ -653,7 +794,7 @@ function combineFuncTables(
           This is a programming error.
         `);
       }
-      const name = stringArray[funcTable.name[i]];
+      const nameIndex = funcTable.name[i];
       const lineNumber = funcTable.lineNumber[i];
 
       // Entries in this table can be either:
@@ -664,7 +805,7 @@ function combineFuncTables(
       //    number as well.
       // 3. Label frames: they have no resource, only a name. So we can't do
       //    better than this.
-      const funcKey = [name, newResourceIndex, lineNumber].join('#');
+      const funcKey = [nameIndex, newResourceIndex, lineNumber].join('#');
       const insertedFuncIndex = mapOfInsertedFuncs.get(funcKey);
       if (insertedFuncIndex !== undefined) {
         translationMap.set(i, insertedFuncIndex);
@@ -674,12 +815,10 @@ function combineFuncTables(
       translationMap.set(i, newFuncTable.length);
 
       newFuncTable.isJS.push(funcTable.isJS[i]);
-      newFuncTable.name.push(newStringTable.indexForString(name));
+      newFuncTable.name.push(nameIndex);
       newFuncTable.resource.push(newResourceIndex);
       newFuncTable.relevantForJS.push(funcTable.relevantForJS[i]);
-      newFuncTable.fileName.push(
-        fileName === null ? null : newStringTable.indexForString(fileName)
-      );
+      newFuncTable.fileName.push(fileNameIndex);
       newFuncTable.lineNumber.push(lineNumber);
       newFuncTable.columnNumber.push(funcTable.columnNumber[i]);
 
@@ -702,14 +841,13 @@ function combineFuncTables(
 function combineFrameTables(
   translationMapsForFuncs: TranslationMapForFuncs[],
   translationMapsForNativeSymbols: TranslationMapForNativeSymbols[],
-  newStringTable: StringTable,
   threads: $ReadOnlyArray<RawThread>
 ): { frameTable: FrameTable, translationMaps: TranslationMapForFrames[] } {
   const translationMaps = [];
   const newFrameTable = getEmptyFrameTable();
 
   threads.forEach((thread, threadIndex) => {
-    const { frameTable, stringArray } = thread;
+    const { frameTable } = thread;
     const translationMap = new Map();
     const funcTranslationMap = translationMapsForFuncs[threadIndex];
     const nativeSymbolTranslationMap =
@@ -723,12 +861,6 @@ function combineFrameTables(
           This is a programming error.
         `);
       }
-
-      const implementationIndex = frameTable.implementation[i];
-      const implementation =
-        typeof implementationIndex === 'number'
-          ? stringArray[implementationIndex]
-          : null;
 
       const nativeSymbol = frameTable.nativeSymbol[i];
       const newNativeSymbol =
@@ -749,11 +881,6 @@ function combineFrameTables(
       newFrameTable.nativeSymbol.push(newNativeSymbol);
       newFrameTable.func.push(newFunc);
       newFrameTable.innerWindowID.push(frameTable.innerWindowID[i]);
-      newFrameTable.implementation.push(
-        implementation === null
-          ? null
-          : newStringTable.indexForString(implementation)
-      );
       newFrameTable.line.push(frameTable.line[i]);
       newFrameTable.column.push(frameTable.column[i]);
 
@@ -947,28 +1074,24 @@ function getComparisonThread(
     ThreadAndWeightMultiplier,
   ]
 ): RawThread {
-  const newStringArray = [];
-  const newStringTable = StringTable.withBackingArray(newStringArray);
-
   const threads = threadsAndWeightMultipliers.map((item) => item.thread);
 
   const {
     resourceTable: newResourceTable,
     translationMaps: translationMapsForResources,
-  } = combineResourceTables(newStringTable, threads);
+  } = combineResourceTables(threads);
   const {
     nativeSymbols: newNativeSymbols,
     translationMaps: translationMapsForNativeSymbols,
-  } = combineNativeSymbolTables(newStringTable, threads);
+  } = combineNativeSymbolTables(threads);
   const { funcTable: newFuncTable, translationMaps: translationMapsForFuncs } =
-    combineFuncTables(translationMapsForResources, newStringTable, threads);
+    combineFuncTables(translationMapsForResources, threads);
   const {
     frameTable: newFrameTable,
     translationMaps: translationMapsForFrames,
   } = combineFrameTables(
     translationMapsForFuncs,
     translationMapsForNativeSymbols,
-    newStringTable,
     threads
   );
   const {
@@ -1006,7 +1129,6 @@ function getComparisonThread(
     markers: getEmptyRawMarkerTable(),
     stackTable: newStackTable,
     frameTable: newFrameTable,
-    stringArray: newStringArray,
     funcTable: newFuncTable,
     resourceTable: newResourceTable,
     nativeSymbols: newNativeSymbols,
@@ -1021,31 +1143,24 @@ function getComparisonThread(
  * this does not merge the profile level information like metadata, categories etc.
  * TODO: Overlapping threads will not look great due to #2783.
  */
-export function mergeThreads(
-  threads: RawThread[],
-  stringIndexMarkerFieldsByDataType: Map<string, string[]>
-): RawThread {
-  const newStringArray = [];
-  const newStringTable = StringTable.withBackingArray(newStringArray);
-
+export function mergeThreads(threads: RawThread[]): RawThread {
   // Combine the table we would need.
   const {
     resourceTable: newResourceTable,
     translationMaps: translationMapsForResources,
-  } = combineResourceTables(newStringTable, threads);
+  } = combineResourceTables(threads);
   const {
     nativeSymbols: newNativeSymbols,
     translationMaps: translationMapsForNativeSymbols,
-  } = combineNativeSymbolTables(newStringTable, threads);
+  } = combineNativeSymbolTables(threads);
   const { funcTable: newFuncTable, translationMaps: translationMapsForFuncs } =
-    combineFuncTables(translationMapsForResources, newStringTable, threads);
+    combineFuncTables(translationMapsForResources, threads);
   const {
     frameTable: newFrameTable,
     translationMaps: translationMapsForFrames,
   } = combineFrameTables(
     translationMapsForFuncs,
     translationMapsForNativeSymbols,
-    newStringTable,
     threads
   );
   const {
@@ -1061,8 +1176,6 @@ export function mergeThreads(
 
   const { markerTable: newMarkers } = mergeMarkers(
     translationMapsForStacks,
-    newStringTable,
-    stringIndexMarkerFieldsByDataType,
     threads
   );
 
@@ -1102,7 +1215,6 @@ export function mergeThreads(
     markers: newMarkers,
     stackTable: newStackTable,
     frameTable: newFrameTable,
-    stringArray: newStringArray,
     funcTable: newFuncTable,
     nativeSymbols: newNativeSymbols,
     resourceTable: newResourceTable,
@@ -1220,8 +1332,6 @@ type TranslationMapForMarkers = Map<MarkerIndex, MarkerIndex>;
  */
 function mergeMarkers(
   translationMapsForStacks: TranslationMapForStacks[],
-  newStringTable: StringTable,
-  stringIndexMarkerFieldsByDataType: Map<string, string[]>,
   threads: RawThread[]
 ): {
   markerTable: RawMarkerTable,
@@ -1235,66 +1345,44 @@ function mergeMarkers(
   threads.forEach((thread, threadIndex) => {
     const translationMapForStacks = translationMapsForStacks[threadIndex];
     const translationMap = new Map();
-    const { markers, stringArray } = thread;
+    const { markers } = thread;
 
     for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
       // We need to move the name string to the new string table if doesn't exist.
       const nameIndex = markers.name[markerIndex];
-      const newName = nameIndex >= 0 ? stringArray[nameIndex] : null;
 
       // Move marker data to the new marker table
       const oldData = markers.data[markerIndex];
 
-      let data: MarkerPayload | null = oldData;
-      if (data !== null && data.type) {
-        const markerType = data.type;
-
-        // Convert stacks in marker data.
-        if (data.cause) {
-          const oldStack = data.cause.stack;
-          const newStack = translationMapForStacks.get(oldStack);
-          if (newStack === undefined) {
-            throw new Error(
-              `Missing old stack entry ${oldStack} in the translation map.`
-            );
-          }
-
-          data = ({
-            ...data,
-            cause: {
-              ...data.cause,
-              stack: newStack,
-            },
-          }: any);
+      if (oldData && 'cause' in oldData && oldData.cause) {
+        // The old data has a cause, we need to convert the stack.
+        const oldStack = oldData.cause.stack;
+        const newStack = translationMapForStacks.get(oldStack);
+        if (newStack === undefined) {
+          throw new Error(
+            `Missing old stack entry ${oldStack} in the translation map.`
+          );
         }
 
-        // Convert string index fields in marker data.
-        const stringIndexMarkerFields =
-          stringIndexMarkerFieldsByDataType.get(markerType);
-        if (stringIndexMarkerFields !== undefined) {
-          for (const fieldKey of stringIndexMarkerFields) {
-            const stringIndex = data[fieldKey];
-            if (typeof stringIndex === 'number') {
-              const newStringIndex = newStringTable.indexForString(
-                stringArray[stringIndex]
-              );
-              data = ({
-                ...data,
-                [fieldKey]: newStringIndex,
-              }: any);
-            }
-          }
-        }
+        // Flow doesn't know well how to handle the spread operator with our
+        // MarkerPayload type.
+        // $FlowExpectError
+        newMarkerTable.data.push({
+          ...oldData,
+          cause: {
+            ...oldData.cause,
+            stack: newStack,
+          },
+        });
+      } else {
+        newMarkerTable.data.push(oldData);
       }
 
-      newMarkerTable.name.push(
-        newName === null ? -1 : newStringTable.indexForString(newName)
-      );
+      newMarkerTable.name.push(nameIndex);
       newMarkerTable.startTime.push(markers.startTime[markerIndex]);
       newMarkerTable.endTime.push(markers.endTime[markerIndex]);
       newMarkerTable.phase.push(markers.phase[markerIndex]);
       newMarkerTable.category.push(markers.category[markerIndex]);
-      newMarkerTable.data.push(data);
       newThreadId.push(
         markers.threadId ? markers.threadId[markerIndex] : thread.tid
       );
@@ -1311,73 +1399,48 @@ function mergeMarkers(
 }
 
 /**
- * Merge screenshot markers from different threads. And update the target threads string table while doing it.
+ * Returns a RawMarkerTable which contains all the markers from targetThread,
+ * as well as any CompositorScreenshot markers found on any other threads.
+ *
+ * `targetThread` is expected to be one of the threads in `threads`.
  */
-function mergeScreenshotMarkers(
+function getThreadMarkersAndScreenshotMarkers(
   threads: RawThread[],
   targetThread: RawThread
-): {
-  markerTable: RawMarkerTable,
-  translationMaps: TranslationMapForMarkers[],
-} {
-  const targetMarkerTable = { ...targetThread.markers };
-  const translationMaps = [];
-  const targetStringTable = StringTable.withBackingArray(
-    targetThread.stringArray
-  );
+): RawMarkerTable {
+  const targetMarkerTable = shallowCloneRawMarkerTable(targetThread.markers);
 
-  threads.forEach((thread) => {
-    const stringTable = StringTable.withBackingArray(thread.stringArray);
-    if (stringTable.hasString('CompositorScreenshot')) {
-      const translationMap = new Map();
-      const { markers } = thread;
-
-      for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
-        const data = markers.data[markerIndex];
-
-        if (data !== null && data.type === 'CompositorScreenshot') {
-          // We need to move the name string to the new string table if doesn't exist.
-          const nameIndex = markers.name[markerIndex];
-          const newName =
-            nameIndex >= 0 ? stringTable.getString(nameIndex) : null;
-
-          // We need to move the url string to the new string table if doesn't exist.
-          const urlString =
-            data.url === undefined
-              ? undefined
-              : stringTable.getString(data.url);
-
-          // Move compositor screenshot marker data to the new marker table.
-          const compositorScreenshotMarkerData = {
-            ...data,
-            url:
-              urlString === undefined
-                ? undefined
-                : targetStringTable.indexForString(urlString),
-          };
-
-          targetMarkerTable.data.push(compositorScreenshotMarkerData);
-          targetMarkerTable.name.push(
-            newName === null ? -1 : targetStringTable.indexForString(newName)
-          );
-          targetMarkerTable.startTime.push(markers.startTime[markerIndex]);
-          targetMarkerTable.endTime.push(markers.endTime[markerIndex]);
-          targetMarkerTable.phase.push(markers.phase[markerIndex]);
-          targetMarkerTable.category.push(markers.category[markerIndex]);
-          if (targetMarkerTable.threadId) {
-            targetMarkerTable.threadId.push(
-              markers.threadId ? markers.threadId[markerIndex] : thread.tid
-            );
-          }
-
-          // Set the translation map and increase the table length.
-          translationMap.set(markerIndex, targetMarkerTable.length);
-          targetMarkerTable.length++;
-        }
-      }
-      translationMaps.push(translationMap);
+  // Find screenshot markers in the other threads and add them to the target thread.
+  for (const thread of threads) {
+    if (thread === targetThread) {
+      // Skip the target thread itself, otherwise any screenshot markers on the target
+      // thread would be duplicated in the combined marker table.
+      continue;
     }
-  });
 
-  return { markerTable: targetMarkerTable, translationMaps };
+    const { markers } = thread;
+
+    for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+      const data = markers.data[markerIndex];
+      if (data === null || data.type !== 'CompositorScreenshot') {
+        continue;
+      }
+      targetMarkerTable.data.push(data);
+      targetMarkerTable.name.push(markers.name[markerIndex]);
+      targetMarkerTable.startTime.push(markers.startTime[markerIndex]);
+      targetMarkerTable.endTime.push(markers.endTime[markerIndex]);
+      targetMarkerTable.phase.push(markers.phase[markerIndex]);
+      targetMarkerTable.category.push(markers.category[markerIndex]);
+      if (targetMarkerTable.threadId) {
+        targetMarkerTable.threadId.push(
+          markers.threadId ? markers.threadId[markerIndex] : thread.tid
+        );
+      }
+
+      // Set the translation map and increase the table length.
+      targetMarkerTable.length++;
+    }
+  }
+
+  return targetMarkerTable;
 }

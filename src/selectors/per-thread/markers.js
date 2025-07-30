@@ -89,7 +89,7 @@ export function getMarkerSelectorsPerThread(
    * very start of our marker pipeline. */
   const getDerivedMarkerInfo: Selector<DerivedMarkerInfo> = createSelector(
     _getRawMarkerTable,
-    (state) => threadSelectors.getRawThread(state).stringArray,
+    (state) => ProfileSelectors.getProfile(state).shared.stringArray,
     _getThreadId,
     threadSelectors.getThreadRange,
     ProfileSelectors.getIPCMarkerCorrelations,
@@ -217,17 +217,6 @@ export function getMarkerSelectorsPerThread(
     );
 
   /**
-   * This selector applies the tab filter(if in a single tab view) to the range filtered markers.
-   */
-  const getCommittedRangeAndTabFilteredMarkerIndexes: Selector<MarkerIndex[]> =
-    createSelector(
-      getMarkerGetter,
-      getCommittedRangeFilteredMarkerIndexes,
-      ProfileSelectors.getRelevantInnerWindowIDsForCurrentTab,
-      MarkerData.getTabFilteredMarkerIndexes
-    );
-
-  /**
    * This selector filters out markers that are usually too long to be displayed
    * in the header, because they would obscure the header, or that are displayed
    * in other tracks already.
@@ -235,7 +224,7 @@ export function getMarkerSelectorsPerThread(
   const getTimelineOverviewMarkerIndexes: Selector<MarkerIndex[]> =
     createSelector(
       getMarkerGetter,
-      getCommittedRangeAndTabFilteredMarkerIndexes,
+      getCommittedRangeFilteredMarkerIndexes,
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
       () => 'timeline-overview',
@@ -243,34 +232,12 @@ export function getMarkerSelectorsPerThread(
     );
 
   /**
-   * This selector applies the tab filter(if in a single tab view) to the full
-   * list of markers but excludes the global markers.
-   * This selector is useful to determine if a thread is completely empty or not
-   * so we can hide it inside active tab view.
-   */
-  const getActiveTabFilteredMarkerIndexesWithoutGlobals: Selector<
-    MarkerIndex[],
-  > = createSelector(
-    getMarkerGetter,
-    getFullMarkerListIndexes,
-    ProfileSelectors.getRelevantInnerWindowIDsForActiveTab,
-    (markerGetter, markerIndexes, relevantPages) => {
-      return MarkerData.getTabFilteredMarkerIndexes(
-        markerGetter,
-        markerIndexes,
-        relevantPages,
-        false // exclude global markers
-      );
-    }
-  );
-
-  /**
    * This selector selects only navigation markers.
    */
   const getTimelineVerticalMarkerIndexes: Selector<MarkerIndex[]> =
     createSelector(
       getMarkerGetter,
-      getCommittedRangeAndTabFilteredMarkerIndexes,
+      getCommittedRangeFilteredMarkerIndexes,
       filterMarkerIndexesCreator(MarkerData.isNavigationMarker)
     );
 
@@ -279,7 +246,7 @@ export function getMarkerSelectorsPerThread(
    */
   const getTimelineJankMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
-    getCommittedRangeAndTabFilteredMarkerIndexes,
+    getCommittedRangeFilteredMarkerIndexes,
     _getDerivedJankMarkers,
     (getMarker, markerIndexes, derivedMarkers) => {
       const type = derivedMarkers.length > 0 ? 'Jank' : 'BHR-detected hang';
@@ -296,10 +263,10 @@ export function getMarkerSelectorsPerThread(
   const getSearchFilteredMarkerIndexes: Selector<MarkerIndex[]> =
     createSelector(
       getMarkerGetter,
-      getCommittedRangeAndTabFilteredMarkerIndexes,
+      getCommittedRangeFilteredMarkerIndexes,
       ProfileSelectors.getMarkerSchemaByName,
       UrlState.getMarkersSearchStringsAsRegExp,
-      threadSelectors.getStringTable,
+      ProfileSelectors.getStringTable,
       ProfileSelectors.getCategories,
       MarkerData.getSearchFilteredMarkerIndexes
     );
@@ -358,7 +325,7 @@ export function getMarkerSelectorsPerThread(
       getNetworkMarkerIndexes,
       ProfileSelectors.getMarkerSchemaByName,
       UrlState.getNetworkSearchStringsAsRegExp,
-      threadSelectors.getStringTable,
+      ProfileSelectors.getStringTable,
       ProfileSelectors.getCategories,
       MarkerData.getSearchFilteredMarkerIndexes
     );
@@ -427,7 +394,7 @@ export function getMarkerSelectorsPerThread(
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
       ProfileSelectors.getCategories,
-      threadSelectors.getStringTable,
+      ProfileSelectors.getStringTable,
       () => 'tooltipLabel',
       getLabelGetter
     );
@@ -441,7 +408,7 @@ export function getMarkerSelectorsPerThread(
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
       ProfileSelectors.getCategories,
-      threadSelectors.getStringTable,
+      ProfileSelectors.getStringTable,
       () => 'tableLabel',
       getLabelGetter
     );
@@ -455,7 +422,7 @@ export function getMarkerSelectorsPerThread(
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
       ProfileSelectors.getCategories,
-      threadSelectors.getStringTable,
+      ProfileSelectors.getStringTable,
       () => 'chartLabel',
       getLabelGetter
     );
@@ -471,7 +438,7 @@ export function getMarkerSelectorsPerThread(
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
       ProfileSelectors.getCategories,
-      threadSelectors.getStringTable,
+      ProfileSelectors.getStringTable,
       () => 'copyLabel',
       getLabelGetter
     );
@@ -496,7 +463,7 @@ export function getMarkerSelectorsPerThread(
   const getTimelineFileIoMarkerIndexes: Selector<MarkerIndex[]> =
     createSelector(
       getMarkerGetter,
-      getCommittedRangeAndTabFilteredMarkerIndexes,
+      getCommittedRangeFilteredMarkerIndexes,
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
       () => 'timeline-fileio',
@@ -511,7 +478,7 @@ export function getMarkerSelectorsPerThread(
   const getTimelineMemoryMarkerIndexes: Selector<MarkerIndex[]> =
     createSelector(
       getMarkerGetter,
-      getCommittedRangeAndTabFilteredMarkerIndexes,
+      getCommittedRangeFilteredMarkerIndexes,
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
       () => 'timeline-memory',
@@ -523,7 +490,7 @@ export function getMarkerSelectorsPerThread(
    */
   const getTimelineIPCMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
-    getCommittedRangeAndTabFilteredMarkerIndexes,
+    getCommittedRangeFilteredMarkerIndexes,
     ProfileSelectors.getMarkerSchema,
     ProfileSelectors.getMarkerSchemaByName,
     () => 'timeline-ipc',
@@ -657,7 +624,7 @@ export function getMarkerSelectorsPerThread(
     const getCollectedCustomMarkerSamples: Selector<CollectedCustomMarkerSamples> =
       createSelector(
         getFullMarkerList,
-        threadSelectors.getStringTable,
+        ProfileSelectors.getStringTable,
         (fullMarkerList, stringTable) => {
           if (markerSchema.graphs === undefined) {
             throw new Error(
@@ -747,9 +714,7 @@ export function getMarkerSelectorsPerThread(
     getMarkerLabelToCopyGetter,
     getMarkerChartTimingAndBuckets,
     getCommittedRangeFilteredMarkerIndexes,
-    getCommittedRangeAndTabFilteredMarkerIndexes,
     getTimelineOverviewMarkerIndexes,
-    getActiveTabFilteredMarkerIndexesWithoutGlobals,
     getTimelineVerticalMarkerIndexes,
     getTimelineFileIoMarkerIndexes,
     getTimelineMemoryMarkerIndexes,

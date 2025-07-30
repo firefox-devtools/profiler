@@ -12,10 +12,10 @@ import type {
   CategoryList,
   IndexIntoSamplesTable,
   Milliseconds,
-  CallNodeInfo,
   IndexIntoCallNodeTable,
   SelectedState,
 } from 'firefox-profiler/types';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 type Props = {|
   +className: string,

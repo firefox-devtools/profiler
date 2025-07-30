@@ -15,6 +15,7 @@ import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
 import { formatMilliseconds } from '../../utils/format-numbers';
+import { bisectionLeft, bisectionRight } from '../../utils/bisect';
 import {
   updatePreviewSelection,
   typeof changeMouseTimePosition as ChangeMouseTimePosition,
@@ -29,7 +30,6 @@ import type {
   ThreadsKey,
   UserTimingMarkerPayload,
   WeightType,
-  CallNodeInfo,
   IndexIntoCallNodeTable,
   CombinedTimingRows,
   Milliseconds,
@@ -41,6 +41,7 @@ import type {
   InnerWindowID,
   Page,
 } from 'firefox-profiler/types';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import type {
   ChartCanvasScale,
@@ -50,6 +51,7 @@ import type {
 import type {
   StackTimingDepth,
   IndexIntoStackTiming,
+  SameWidthsIndexToTimestampMap,
 } from '../../profile-logic/stack-timing';
 import type { WrapFunctionInDispatch } from '../../utils/connect';
 
@@ -62,6 +64,7 @@ type OwnProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +combinedTimingRows: CombinedTimingRows,
+  +sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap,
   +stackFrameHeight: CssPixels,
   +updatePreviewSelection: WrapFunctionInDispatch<
     typeof updatePreviewSelection,
@@ -77,6 +80,7 @@ type OwnProps = {|
   +scrollToSelectionGeneration: number,
   +marginLeft: CssPixels,
   +displayStackType: boolean,
+  +useStackChartSameWidths: boolean,
 |};
 
 type Props = $ReadOnly<{|
@@ -100,6 +104,18 @@ const BORDER_OPACITY = 0.4;
 class StackChartCanvasImpl extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement;
   _textMeasurementCssToDeviceScale: number = 1;
+
+  // When the user checks the "use same widths for each stack" checkbox, some
+  // expensive computation happens when the canvas is drawn. These computations
+  // can be reused for hit testing, and therefore are saved in these variables.
+  //
+  // The index at viewport start is the index of the first visible block inside
+  // the viewport (the margins excluded). It's used for hit testing as the
+  // start offset.
+  _sameWidthsIndexAtViewportStart: null | number;
+  // The range length is how many "blocks" are present in the viewport
+  // (excluding the margins).
+  _sameWidthsRangeLength: null | number;
 
   componentDidUpdate(prevProps) {
     // We want to scroll the selection into view when this component
@@ -128,8 +144,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       return;
     }
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const depth = callNodeTable.depth[selectedCallNodeIndex];
+    const depth = callNodeInfo.depthForNode(selectedCallNodeIndex);
     const y = depth * ROW_CSS_PIXELS_HEIGHT;
 
     if (y < this.props.viewport.viewportTop) {
@@ -161,12 +176,14 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       rangeStart,
       rangeEnd,
       combinedTimingRows,
+      sameWidthsIndexToTimestampMap,
       stackFrameHeight,
       selectedCallNodeIndex,
       categories,
       callNodeInfo,
       getMarker,
       marginLeft,
+      useStackChartSameWidths,
       viewport: {
         containerWidth,
         containerHeight,
@@ -230,13 +247,92 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     const timePerCssPixel = viewportRangeLength / innerContainerWidth;
 
     // Compute the time range that's displayed on the canvas, including in the
-    // margins around the viewport.
+    // margins around the viewport. This means we're displaying more than the
+    // range when doing a preview selection.
+    const timeAtViewportStart: Milliseconds =
+      rangeStart + rangeLength * viewportLeft;
     const timeAtStart: Milliseconds =
-      rangeStart + rangeLength * viewportLeft - timePerCssPixel * marginLeft;
+      timeAtViewportStart - marginLeft * timePerCssPixel;
+    const timeAtViewportEnd: Milliseconds =
+      rangeStart + rangeLength * viewportRight;
     const timeAtEnd: Milliseconds =
-      rangeStart +
-      rangeLength * viewportRight +
-      timePerCssPixel * TIMELINE_MARGIN_RIGHT;
+      timeAtViewportEnd + TIMELINE_MARGIN_RIGHT * timePerCssPixel;
+
+    // Compute the start index as well as the length for the "same width"
+    // drawing as well, if needed.
+    this._sameWidthsRangeLength = this._sameWidthsIndexAtViewportStart = null;
+    let sameWidthsIndexAtCanvasStart = null;
+    let sameWidthsIndexAtCanvasEnd = null;
+    if (useStackChartSameWidths) {
+      // The canvas looks like this:
+      // | LEFT MARGIN | -- VIEWPORT -- | RIGHT MARGIN |
+      // In this part we need to compute the "same width index" at the start of
+      // the left margin.
+      // We do that by first calculating the indexes at the start of the
+      // viewport, then substracting how many "same width blocks" we can fit in
+      // the left margin.
+      // The same operation is done for the right margin.
+      // If we aren't drawing in the margin, the behavior doesn't feel quite right.
+      //
+      // If the start of the canvas isn't just on a block edge, we want to get
+      // the previous index (the start of the block where the start of the
+      // canvas is). If it is on a block edge, we want to get _that_ block
+      // start.
+      // Similarly for the end, if it's not on a block edge, we want to get the
+      // end of the block where the canvas end is. If it is on a block edge,
+      // we want to get the end of the block that ends here, that is the start
+      // of the next block.
+      //
+      // Below we're using "bisectionRight - 1" for the start index, and "bisectionLeft"
+      // for the end index for these reasons. Let's use an example to understand this.
+      //
+      // 0  1  2  3  4  5   <- same width indexes
+      // |  |  |  |  |  |
+      // 5  7  8  10 11 15  <- time values
+      //
+      // Start 4 => index 0      End 4 => N/A
+      // Start 5 => index 0      End 5 => index 0
+      // Start 6 => index 0      End 6 => index 1
+      // Start 7 => index 1      End 7 => index 1
+      // Start 9 => index 2      End 9 => index 3
+      // Start 15 => index 5     End 15 => index 5
+      // Start 16 => N/A         End 16 => index 5
+      //
+      // As a reminder these bisection functions return the same index when the
+      // searched value isn't in the array (the index of the first greater
+      // value), but a different index when the searched value is present:
+      // `bisectionRight` returns the index just after the value, while
+      // `bisectionLeft` returns the index of the value itself.
+      //
+      // Note that this case should happen very rarely in the context here (it's
+      // not common that the range starts or ends _exactly_ on a sample time),
+      // and even if this happens it wouldn't be such a problem is this wasn't
+      // 100% correct. But it's easy to get it right, so we did it.
+      //
+      // Note that in this mode we always draw whole blocks between the viewport
+      // start and end. (of course we can display just a part of a block in the
+      // start of the left margin or the end of the right margin).
+      const sameWidthsIndexAtViewportStart = Math.max(
+        0,
+        bisectionRight(sameWidthsIndexToTimestampMap, timeAtViewportStart) - 1
+      );
+      const sameWidthsIndexAtViewportEnd = Math.min(
+        sameWidthsIndexToTimestampMap.length - 1,
+        bisectionLeft(sameWidthsIndexToTimestampMap, timeAtViewportEnd)
+      );
+
+      this._sameWidthsIndexAtViewportStart = sameWidthsIndexAtViewportStart;
+      this._sameWidthsRangeLength =
+        sameWidthsIndexAtViewportEnd - sameWidthsIndexAtViewportStart;
+
+      sameWidthsIndexAtCanvasStart =
+        sameWidthsIndexAtViewportStart -
+        (marginLeft / innerContainerWidth) * this._sameWidthsRangeLength;
+      sameWidthsIndexAtCanvasEnd =
+        sameWidthsIndexAtViewportEnd +
+        (TIMELINE_MARGIN_RIGHT / innerContainerWidth) *
+          this._sameWidthsRangeLength;
+    }
 
     const pixelAtViewportPosition = (
       viewportPosition: UnitIntervalOfProfileRange
@@ -262,7 +358,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       categoryForUserTiming = 0;
     }
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
 
     // Only draw the stack frames that are vertically within view.
     for (let depth = startDepth; depth < endDepth; depth++) {
@@ -275,137 +371,175 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       let lastDrawnPixelX = 0;
       for (let i = 0; i < stackTiming.length; i++) {
         // Only draw boxes that overlap with the canvas.
-        if (
-          stackTiming.end[i] > timeAtStart &&
-          stackTiming.start[i] < timeAtEnd
-        ) {
-          // Draw a box, but increase the size by a small portion in order to draw
-          // a single pixel at the end with a slight opacity.
-          //
-          // Legend:
-          // |======|  A stack frame's timing.
-          // |O|       A single fully opaque pixel.
-          // |.|       A slightly transparent pixel.
-          // | |       A fully transparent pixel.
-          //
-          // Drawing strategy:
-          //
-          // Frame timing   |=====||========|    |=====|    |=|     |=|=|=|=|
-          // Device Pixels  |O|O|.|O|O|O|O|.| | |O|O|O|.| | |O|.| | |O|.|O|.|
-          // CSS Pixels     |   |   |   |   |   |   |   |   |   |   |   |   |
+        const isTimingBoxBeforeCanvas =
+          useStackChartSameWidths &&
+          stackTiming.sameWidthsEnd &&
+          sameWidthsIndexAtCanvasStart !== null
+            ? stackTiming.sameWidthsEnd[i] < sameWidthsIndexAtCanvasStart
+            : stackTiming.end[i] < timeAtStart;
+        if (isTimingBoxBeforeCanvas) {
+          continue;
+        }
 
-          // First compute the left and right sides of the box.
+        const isTimingBoxAfterCanvas =
+          useStackChartSameWidths &&
+          stackTiming.sameWidthsStart &&
+          sameWidthsIndexAtCanvasEnd !== null
+            ? stackTiming.sameWidthsStart[i] > sameWidthsIndexAtCanvasEnd
+            : stackTiming.start[i] > timeAtEnd;
+        if (isTimingBoxAfterCanvas) {
+          break;
+        }
+
+        // Draw a box, but increase the size by a small portion in order to draw
+        // a single pixel at the end with a slight opacity.
+        //
+        // Legend:
+        // |======|  A stack frame's timing.
+        // |O|       A single fully opaque pixel.
+        // |.|       A slightly transparent pixel.
+        // | |       A fully transparent pixel.
+        //
+        // Drawing strategy:
+        //
+        // Frame timing   |=====||========|    |=====|    |=|     |=|=|=|=|
+        // Device Pixels  |O|O|.|O|O|O|O|.| | |O|O|O|.| | |O|.| | |O|.|O|.|
+        // CSS Pixels     |   |   |   |   |   |   |   |   |   |   |   |   |
+
+        // First compute the left and right sides of the box.
+        let floatX: DevicePixels;
+        let floatW: DevicePixels;
+        if (
+          useStackChartSameWidths &&
+          stackTiming.sameWidthsStart &&
+          stackTiming.sameWidthsEnd &&
+          this._sameWidthsRangeLength !== null &&
+          this._sameWidthsIndexAtViewportStart !== null
+        ) {
+          floatX =
+            cssToDeviceScale *
+            (marginLeft +
+              (innerContainerWidth *
+                (stackTiming.sameWidthsStart[i] -
+                  this._sameWidthsIndexAtViewportStart)) /
+                this._sameWidthsRangeLength);
+          floatW =
+            (innerDevicePixelsWidth *
+              (stackTiming.sameWidthsEnd[i] - stackTiming.sameWidthsStart[i])) /
+              this._sameWidthsRangeLength -
+            1;
+        } else {
           const viewportAtStartTime: UnitIntervalOfProfileRange =
             (stackTiming.start[i] - rangeStart) / rangeLength;
           const viewportAtEndTime: UnitIntervalOfProfileRange =
             (stackTiming.end[i] - rangeStart) / rangeLength;
-          const floatX = pixelAtViewportPosition(viewportAtStartTime);
-          const floatW: DevicePixels =
+          floatX = pixelAtViewportPosition(viewportAtStartTime);
+          floatW =
             ((viewportAtEndTime - viewportAtStartTime) *
               innerDevicePixelsWidth) /
               viewportLength -
             1;
+        }
 
-          // Determine if there is enough pixel space to draw this box, and snap the
-          // box to the pixels.
-          let snappedFloatX = floatX;
-          let snappedFloatW = floatW;
-          let skipDraw = true;
-          if (floatX >= lastDrawnPixelX) {
-            // The x value is past the last lastDrawnPixelX, so it can be drawn.
-            skipDraw = false;
-          } else if (floatX + floatW > lastDrawnPixelX) {
-            // The left side of the box is before the lastDrawnPixelX value, but the
-            // right hand side is within a range to be drawn. Truncate the box a little
-            // bit in order to draw it to the screen in the free space.
-            snappedFloatW = floatW - (lastDrawnPixelX - floatX);
-            snappedFloatX = lastDrawnPixelX;
-            skipDraw = false;
-          }
+        // Determine if there is enough pixel space to draw this box, and snap the
+        // box to the pixels.
+        let snappedFloatX = floatX;
+        let snappedFloatW = floatW;
+        let skipDraw = true;
+        if (floatX >= lastDrawnPixelX) {
+          // The x value is past the last lastDrawnPixelX, so it can be drawn.
+          skipDraw = false;
+        } else if (floatX + floatW > lastDrawnPixelX) {
+          // The left side of the box is before the lastDrawnPixelX value, but the
+          // right hand side is within a range to be drawn. Truncate the box a little
+          // bit in order to draw it to the screen in the free space.
+          snappedFloatW = floatW - (lastDrawnPixelX - floatX);
+          snappedFloatX = lastDrawnPixelX;
+          skipDraw = false;
+        }
 
-          if (skipDraw) {
-            // This box didn't satisfy the constraints in the above if checks, so skip it.
-            continue;
-          }
+        if (skipDraw) {
+          // This box didn't satisfy the constraints in the above if checks, so skip it.
+          continue;
+        }
 
-          // Convert or compute all of the integer values for drawing the box.
-          // Note, this should all be Math.round instead of floor and ceil, but some
-          // off by one errors appear to be creating gaps where there shouldn't be any.
-          const intX = Math.floor(snappedFloatX);
-          const intY = Math.round(
-            depth * rowDevicePixelsHeight - viewportDevicePixelsTop
-          );
-          const intW = Math.ceil(Math.max(1, snappedFloatW));
-          const intH = Math.round(
-            rowDevicePixelsHeight - oneCssPixelInDevicePixels
-          );
+        // Convert or compute all of the integer values for drawing the box.
+        // Note, this should all be Math.round instead of floor and ceil, but some
+        // off by one errors appear to be creating gaps where there shouldn't be any.
+        const intX = Math.floor(snappedFloatX);
+        const intY = Math.round(
+          depth * rowDevicePixelsHeight - viewportDevicePixelsTop
+        );
+        const intW = Math.ceil(Math.max(1, snappedFloatW));
+        const intH = Math.round(
+          rowDevicePixelsHeight - oneCssPixelInDevicePixels
+        );
 
-          // Look up information about this stack frame.
-          let text, category, isSelected;
-          if (stackTiming.callNode) {
-            const callNodeIndex = stackTiming.callNode[i];
-            const funcIndex = callNodeTable.func[callNodeIndex];
-            const funcNameIndex = thread.funcTable.name[funcIndex];
-            text = thread.stringTable.getString(funcNameIndex);
-            const categoryIndex = callNodeTable.category[callNodeIndex];
-            category = categories[categoryIndex];
-            isSelected = selectedCallNodeIndex === callNodeIndex;
-          } else {
-            const markerIndex = stackTiming.index[i];
-            const markerPayload = ((getMarker(markerIndex)
-              .data: any): UserTimingMarkerPayload);
-            text = markerPayload.name;
-            category = categories[categoryForUserTiming];
-            isSelected = selectedCallNodeIndex === markerIndex;
-          }
+        // Look up information about this stack frame.
+        let text, category, isSelected;
+        if (stackTiming.callNode) {
+          const callNodeIndex = stackTiming.callNode[i];
+          const funcIndex = callNodeTable.func[callNodeIndex];
+          const funcNameIndex = thread.funcTable.name[funcIndex];
+          text = thread.stringTable.getString(funcNameIndex);
+          const categoryIndex = callNodeTable.category[callNodeIndex];
+          category = categories[categoryIndex];
+          isSelected = selectedCallNodeIndex === callNodeIndex;
+        } else {
+          const markerIndex = stackTiming.index[i];
+          const markerPayload = ((getMarker(markerIndex)
+            .data: any): UserTimingMarkerPayload);
+          text = markerPayload.name;
+          category = categories[categoryForUserTiming];
+          isSelected = selectedCallNodeIndex === markerIndex;
+        }
 
-          const isHovered =
-            hoveredItem &&
-            depth === hoveredItem.depth &&
-            i === hoveredItem.stackTimingIndex;
+        const isHovered =
+          hoveredItem &&
+          depth === hoveredItem.depth &&
+          i === hoveredItem.stackTimingIndex;
 
-          const colorStyles = mapCategoryColorNameToStackChartStyles(
-            category.color
-          );
-          // Draw the box.
-          fastFillStyle.set(
-            isHovered || isSelected
-              ? colorStyles.selectedFillStyle
-              : colorStyles.unselectedFillStyle
-          );
-          ctx.fillRect(
-            intX,
-            intY,
-            // Add on a bit of BORDER_OPACITY to the end of the width, to draw a partial
-            // pixel. This will effectively draw a transparent version of the fill color
-            // without having to change the fill color. At the time of this writing it
-            // was the same performance cost as only providing integer values here.
-            intW + BORDER_OPACITY,
-            intH
-          );
-          lastDrawnPixelX =
-            intX +
-            intW +
-            // The border on the right is 1 device pixel wide.
-            1;
+        const colorStyles = mapCategoryColorNameToStackChartStyles(
+          category.color
+        );
+        // Draw the box.
+        fastFillStyle.set(
+          isHovered || isSelected
+            ? colorStyles.selectedFillStyle
+            : colorStyles.unselectedFillStyle
+        );
+        ctx.fillRect(
+          intX,
+          intY,
+          // Add on a bit of BORDER_OPACITY to the end of the width, to draw a partial
+          // pixel. This will effectively draw a transparent version of the fill color
+          // without having to change the fill color. At the time of this writing it
+          // was the same performance cost as only providing integer values here.
+          intW + BORDER_OPACITY,
+          intH
+        );
+        lastDrawnPixelX =
+          intX +
+          intW +
+          // The border on the right is 1 device pixel wide.
+          1;
 
-          // Draw the text label if it fits. Use the original float values here so that
-          // the text doesn't snap around when moving. Only the boxes should snap.
-          const textX: DevicePixels =
-            // Constrain the x coordinate to the leftmost area.
-            Math.max(floatX, 0) + textDevicePixelsOffsetStart;
-          const textW: DevicePixels = Math.max(0, floatW - (textX - floatX));
+        // Draw the text label if it fits. Use the original float values here so that
+        // the text doesn't snap around when moving. Only the boxes should snap.
+        const textX: DevicePixels =
+          // Constrain the x coordinate to the leftmost area.
+          Math.max(floatX, 0) + textDevicePixelsOffsetStart;
+        const textW: DevicePixels = Math.max(0, floatW - (textX - floatX));
 
-          if (textW > textMeasurement.minWidth) {
-            const fittedText = textMeasurement.getFittedText(text, textW);
-            if (fittedText) {
-              fastFillStyle.set(
-                isHovered || isSelected
-                  ? colorStyles.selectedTextColor
-                  : '#000000'
-              );
-              ctx.fillText(fittedText, textX, intY + textDevicePixelsOffsetTop);
-            }
+        if (textW > textMeasurement.minWidth) {
+          const fittedText = textMeasurement.getFittedText(text, textW);
+          if (fittedText) {
+            fastFillStyle.set(
+              isHovered || isSelected
+                ? colorStyles.selectedTextColor
+                : '#000000'
+            );
+            ctx.fillText(fittedText, textX, intY + textDevicePixelsOffsetTop);
           }
         }
       }
@@ -560,14 +694,13 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       viewport: { viewportLeft, viewportRight, viewportTop, containerWidth },
     } = this.props;
 
-    const innerDevicePixelsWidth =
+    const innerContainerWidth =
       containerWidth - marginLeft - TIMELINE_MARGIN_RIGHT;
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
     const unitIntervalTime: UnitIntervalOfProfileRange =
-      viewportLeft +
-      viewportLength * ((x - marginLeft) / innerDevicePixelsWidth);
+      viewportLeft + viewportLength * ((x - marginLeft) / innerContainerWidth);
     const time: Milliseconds = rangeStart + unitIntervalTime * rangeLength;
     const depth = Math.floor((y + viewportTop) / ROW_CSS_PIXELS_HEIGHT);
     const stackTiming = combinedTimingRows[depth];
@@ -580,6 +713,57 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       const start = stackTiming.start[i];
       const end = stackTiming.end[i];
       if (start < time && end > time) {
+        return { depth, stackTimingIndex: i };
+      }
+    }
+
+    return null;
+  };
+
+  _hitTestForSameWidths = (
+    x: CssPixels,
+    y: CssPixels
+  ): HoveredStackTiming | null => {
+    const {
+      combinedTimingRows,
+      marginLeft,
+      viewport: { containerWidth, viewportTop },
+    } = this.props;
+
+    const depth = Math.floor((y + viewportTop) / ROW_CSS_PIXELS_HEIGHT);
+    const stackTiming = combinedTimingRows[depth];
+
+    if (!stackTiming) {
+      return null;
+    }
+
+    if (!stackTiming.sameWidthsStart || !stackTiming.sameWidthsEnd) {
+      // Probably a user timing marker
+      return this._hitTest(x, y);
+    }
+
+    if (
+      this._sameWidthsRangeLength === null ||
+      this._sameWidthsIndexAtViewportStart === null
+    ) {
+      console.warn(
+        'The local variables sameWidthsRangeLength or sameWidthsIndexAtViewportStart are null when they should be present.'
+      );
+      return null;
+    }
+
+    const innerContainerWidth =
+      containerWidth - marginLeft - TIMELINE_MARGIN_RIGHT;
+
+    const xMinusMargin = x - marginLeft;
+    const hoveredBox =
+      (xMinusMargin / innerContainerWidth) * this._sameWidthsRangeLength +
+      this._sameWidthsIndexAtViewportStart;
+
+    for (let i = 0; i < stackTiming.length; i++) {
+      const start = stackTiming.sameWidthsStart[i];
+      const end = stackTiming.sameWidthsEnd[i];
+      if (start < hoveredBox && end > hoveredBox) {
         return { depth, stackTimingIndex: i };
       }
     }
@@ -619,6 +803,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
   render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
+    const { useStackChartSameWidths } = this.props;
 
     return (
       <ChartCanvas
@@ -630,7 +815,9 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         onDoubleClickItem={this._onDoubleClickStack}
         getHoveredItemInfo={this._getHoveredStackInfo}
         drawCanvas={this._drawCanvas}
-        hitTest={this._hitTest}
+        hitTest={
+          useStackChartSameWidths ? this._hitTestForSameWidths : this._hitTest
+        }
         onMouseMove={this.onMouseMove}
         onMouseLeave={this.onMouseLeave}
         onSelectItem={this._onSelectItem}

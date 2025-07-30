@@ -220,8 +220,8 @@
 
   /* When the tab selector is active, we want the item to look like a button */
   .filterNavigatorBarSelectedItem:has(
-      button.profileFilterNavigator--tab-selector
-    ) {
+    button.profileFilterNavigator--tab-selector
+  ) {
     background-color: ButtonFace;
     color: ButtonText;
   }

@@ -68,10 +68,8 @@ git fetch upstream && git log upstream/production..upstream/main --first-parent 
 3. Gather the locales author changes:
 
 ```
-for i in ./locales/* ; do git log upstream/production..upstream/main --grep Pontoon: --oneline --no-decorate --format="format:$(basename $i): %an" $i ; done
+git log upstream/production..upstream/main --grep '^Pontoon' --format="%(trailers:key=Co-authored-by,valueonly)" | awk NF | sed -E 's/([^<]*).*\(([a-z-]+)\)/\2: \1/i' | sort -h | uniq
 ```
-
-4. You'll also need to adjust the result, by merging the lines for the same locale.
 
 ## How to revert to a previous version
 

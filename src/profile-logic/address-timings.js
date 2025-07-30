@@ -74,7 +74,6 @@ import type {
   FuncTable,
   StackTable,
   SamplesLikeTable,
-  CallNodeInfo,
   IndexIntoCallNodeTable,
   IndexIntoNativeSymbolTable,
   StackAddressInfo,
@@ -83,6 +82,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import { getMatchingAncestorStackForInvertedCallNode } from './profile-data';
+import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
 
 /**
  * For each stack in `stackTable`, and one specific native symbol, compute the
@@ -202,12 +202,13 @@ export function getStackAddressInfoForCallNode(
   callNodeInfo: CallNodeInfo,
   nativeSymbol: IndexIntoNativeSymbolTable
 ): StackAddressInfo {
-  return callNodeInfo.isInverted()
+  const callNodeInfoInverted = callNodeInfo.asInverted();
+  return callNodeInfoInverted !== null
     ? getStackAddressInfoForCallNodeInverted(
         stackTable,
         frameTable,
         callNodeIndex,
-        callNodeInfo,
+        callNodeInfoInverted,
         nativeSymbol
       )
     : getStackAddressInfoForCallNodeNonInverted(
@@ -426,16 +427,17 @@ export function getStackAddressInfoForCallNodeInverted(
   stackTable: StackTable,
   frameTable: FrameTable,
   callNodeIndex: IndexIntoCallNodeTable,
-  callNodeInfo: CallNodeInfo,
+  callNodeInfo: CallNodeInfoInverted,
   nativeSymbol: IndexIntoNativeSymbolTable
 ): StackAddressInfo {
-  const invertedCallNodeTable = callNodeInfo.getCallNodeTable();
-  const depth = invertedCallNodeTable.depth[callNodeIndex];
-  const endIndex = invertedCallNodeTable.subtreeRangeEnd[callNodeIndex];
-  const callNodeIsRootOfInvertedTree =
-    invertedCallNodeTable.prefix[callNodeIndex] === -1;
-  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
+  const depth = callNodeInfo.depthForNode(callNodeIndex);
+  const [rangeStart, rangeEnd] =
+    callNodeInfo.getSuffixOrderIndexRangeForCallNode(callNodeIndex);
+  const callNodeIsRootOfInvertedTree = callNodeInfo.isRoot(callNodeIndex);
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
   const stackTablePrefixCol = stackTable.prefix;
+  const suffixOrderIndexes = callNodeInfo.getSuffixOrderIndexes();
 
   // "self address" == "the address which a stack's self time is contributed to"
   const callNodeSelfAddressForAllStacks = [];
@@ -449,8 +451,9 @@ export function getStackAddressInfoForCallNodeInverted(
 
     const stackForCallNode = getMatchingAncestorStackForInvertedCallNode(
       stackIndex,
-      callNodeIndex,
-      endIndex,
+      rangeStart,
+      rangeEnd,
+      suffixOrderIndexes,
       depth,
       stackIndexToCallNodeIndex,
       stackTablePrefixCol

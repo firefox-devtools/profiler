@@ -15,26 +15,22 @@ import { render, screen, fireEvent } from '@testing-library/react';
 beforeEach(() => {
   // Implement the fetch operation for local language files, so that we can test
   // switching languages.
-  const fetchUrlRe = /^\/locales\/(?<language>[^/]+)\/app.ftl$/;
-  window.fetch
+  const fetchUrlRe = /\/locales\/(?<language>[^/]+)\/app.ftl$/;
+  window.fetchMock
     .catch(404) // catchall
-    .get(
-      fetchUrlRe,
-      (fetchUrl) => {
-        const matchUrlResult = fetchUrlRe.exec(fetchUrl);
-        if (matchUrlResult) {
-          // $FlowExpectError Our Flow doesn't know about named groups.
-          const { language } = matchUrlResult.groups;
-          const path = `locales/${language}/app.ftl`;
-          if (fs.existsSync(path)) {
-            return fs.readFileSync(path);
-          }
+    .get(fetchUrlRe, ({ url }) => {
+      const matchUrlResult = fetchUrlRe.exec(url);
+      if (matchUrlResult) {
+        // $FlowExpectError Our Flow doesn't know about named groups.
+        const { language } = matchUrlResult.groups;
+        const path = `locales/${language}/app.ftl`;
+        if (fs.existsSync(path)) {
+          return fs.readFileSync(path);
         }
+      }
 
-        return 404;
-      },
-      { sendAsJson: false }
-    );
+      return 404;
+    });
 });
 
 afterEach(function () {

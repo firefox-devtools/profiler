@@ -180,10 +180,10 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
   const profile = getEmptyProfile();
   profile.meta.product = dhat.cmd + ' (dhat)';
   profile.meta.importedFrom = `dhat`;
+  const stringTable = StringTable.withBackingArray(profile.shared.stringArray);
 
   const allocationsTable = getEmptyUnbalancedNativeAllocationsTable();
-  const { funcTable, stringArray, stackTable, frameTable } = getEmptyThread();
-  const stringTable = StringTable.withBackingArray(stringArray);
+  const { funcTable, stackTable, frameTable } = getEmptyThread();
 
   const funcKeyToFuncIndex = new Map<string, IndexIntoFuncTable>();
 
@@ -208,7 +208,6 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
   frameTable.category.push(otherCategory);
   frameTable.subcategory.push(otherSubCategory);
   frameTable.innerWindowID.push(null);
-  frameTable.implementation.push(null);
   frameTable.nativeSymbol.push(null);
   frameTable.inlineDepth.push(0);
   frameTable.func.push(rootFuncIndex);
@@ -280,7 +279,6 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     frameTable.category.push(otherCategory);
     frameTable.subcategory.push(otherSubCategory);
     frameTable.innerWindowID.push(null);
-    frameTable.implementation.push(null);
     frameTable.nativeSymbol.push(null);
     frameTable.inlineDepth.push(0);
     frameTable.func.push(funcIndex);
@@ -373,7 +371,6 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     thread.pid = dhat.pid;
     thread.tid = i;
     thread.name = name;
-    thread.stringArray = stringTable.getBackingArray();
 
     thread.funcTable.name = funcTable.name.slice();
     thread.funcTable.isJS = funcTable.isJS.slice();
@@ -390,7 +387,6 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     thread.frameTable.category = frameTable.category.slice();
     thread.frameTable.subcategory = frameTable.subcategory.slice();
     thread.frameTable.innerWindowID = frameTable.innerWindowID.slice();
-    thread.frameTable.implementation = frameTable.implementation.slice();
     thread.frameTable.func = frameTable.func.slice();
     thread.frameTable.length = frameTable.length;
 

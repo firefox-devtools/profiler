@@ -126,7 +126,6 @@ export function getEmptyFrameTable(): FrameTable {
     func: [],
     nativeSymbol: [],
     innerWindowID: [],
-    implementation: [],
     line: [],
     column: [],
     length: 0,
@@ -146,7 +145,6 @@ export function shallowCloneFrameTable(frameTable: FrameTable): FrameTable {
     func: frameTable.func.slice(),
     nativeSymbol: frameTable.nativeSymbol.slice(),
     innerWindowID: frameTable.innerWindowID.slice(),
-    implementation: frameTable.implementation.slice(),
     line: frameTable.line.slice(),
     column: frameTable.column.slice(),
     length: frameTable.length,
@@ -399,7 +397,6 @@ export function getEmptyThread(overrides?: $Shape<RawThread>): RawThread {
     markers: getEmptyRawMarkerTable(),
     stackTable: getEmptyRawStackTable(),
     frameTable: getEmptyFrameTable(),
-    stringArray: [],
     funcTable: getEmptyFuncTable(),
     resourceTable: getEmptyResourceTable(),
     nativeSymbols: getEmptyNativeSymbolTable(),
@@ -438,6 +435,9 @@ export function getEmptyProfile(): Profile {
     },
     libs: [],
     pages: [],
+    shared: {
+      stringArray: [],
+    },
     threads: [],
   };
 }
@@ -455,8 +455,8 @@ export function getEmptyCallNodeTable(): CallNodeTable {
     category: new Int32Array(0),
     subcategory: new Int32Array(0),
     innerWindowID: new Float64Array(0),
-    sourceFramesInlinedIntoSymbol: [],
-    depth: [],
+    sourceFramesInlinedIntoSymbol: new Int32Array(0),
+    depth: new Int32Array(0),
     maxDepth: -1,
     length: 0,
   };

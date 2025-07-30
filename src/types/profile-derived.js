@@ -12,12 +12,9 @@ import type {
   IndexIntoJsTracerEvents,
   IndexIntoCategoryList,
   IndexIntoResourceTable,
-  IndexIntoNativeSymbolTable,
   IndexIntoLibs,
   CounterIndex,
   GraphColor,
-  InnerWindowID,
-  Page,
   IndexIntoRawMarkerTable,
   IndexIntoStringTable,
   TabID,
@@ -292,74 +289,17 @@ export type CallNodeTable = {
   category: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
   subcategory: Int32Array, // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
   innerWindowID: Float64Array, // IndexIntoCallNodeTable -> InnerWindowID
-  // null: no inlining
   // IndexIntoNativeSymbolTable: all frames that collapsed into this call node inlined into the same native symbol
   // -1: divergent: not all frames that collapsed into this call node were inlined, or they are from different symbols
-  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
+  // -2: no inlining
+  sourceFramesInlinedIntoSymbol: Int32Array,
   // The depth of the call node. Roots have depth 0.
-  depth: number[],
+  depth: Int32Array,
   // The maximum value in the depth column, or -1 if this table is empty.
   maxDepth: number,
   // The number of call nodes. All columns in this table have this length.
   length: number,
 };
-
-/**
- * Wraps the call node table and provides associated functionality.
- */
-export interface CallNodeInfo {
-  // If true, call node indexes describe nodes in the inverted call tree.
-  isInverted(): boolean;
-
-  // Returns the call node table. If isInverted() is true, this is an inverted
-  // call node table, otherwise this is the non-inverted call node table.
-  getCallNodeTable(): CallNodeTable;
-
-  // Returns the non-inverted call node table.
-  // This is always the non-inverted call node table, regardless of isInverted().
-  getNonInvertedCallNodeTable(): CallNodeTable;
-
-  // Returns a mapping from the stack table to the call node table.
-  // The Int32Array should be used as if it were a
-  // Map<IndexIntoStackTable, IndexIntoCallNodeTable | -1>.
-  //
-  // If this CallNodeInfo is for the non-inverted tree, this maps the stack index
-  // to its corresponding call node index, and all entries are >= 0.
-  // If this CallNodeInfo is for the inverted tree, this maps the non-inverted
-  // stack index to the inverted call node index. For example, the stack
-  // A -> B -> C -> D is mapped to the inverted call node describing the
-  // call path D <- C <- B <- A, i.e. the node with function A under the D root
-  // of the inverted tree. Stacks which are only used as prefixes are not mapped
-  // to an inverted call node; for those, the entry will be -1. In the example
-  // above, if the stack node A -> B -> C only exists so that it can be the prefix
-  // of the A -> B -> C -> D stack and no sample / marker / allocation has
-  // A -> B -> C as its stack, then there is no need to have a call node
-  // C <- B <- A in the inverted call node table.
-  getStackIndexToCallNodeIndex(): Int32Array;
-
-  // Returns a mapping from the stack table to the non-inverted call node table.
-  // This always maps to the non-inverted call node table, regardless of isInverted().
-  getStackIndexToNonInvertedCallNodeIndex(): Int32Array;
-
-  // Converts a call node index into a call node path.
-  getCallNodePathFromIndex(
-    callNodeIndex: IndexIntoCallNodeTable | null
-  ): CallNodePath;
-
-  // Converts a call node path into a call node index.
-  getCallNodeIndexFromPath(
-    callNodePath: CallNodePath
-  ): IndexIntoCallNodeTable | null;
-
-  // Returns the call node index that matches the function `func` and whose
-  // parent's index  is `parent`. If `parent` is -1, this returns the index of
-  // the root node with function `func`.
-  // Returns null if the described call node doesn't exist.
-  getCallNodeIndexFromParentAndFunc(
-    parent: IndexIntoCallNodeTable | -1,
-    func: IndexIntoFuncTable
-  ): IndexIntoCallNodeTable | null;
-}
 
 export type LineNumber = number;
 
@@ -490,13 +430,6 @@ export type AddressProof = {|
  * that goes from tip to root.
  */
 export type CallNodePath = IndexIntoFuncTable[];
-
-export type CallNodeAndCategory = {|
-  func: IndexIntoFuncTable,
-  category: IndexIntoCategoryList,
-|};
-
-export type CallNodeAndCategoryPath = CallNodeAndCategory[];
 
 /**
  * This type contains the first derived `Marker[]` information, plus an IndexedArray
@@ -686,107 +619,6 @@ export type Track = GlobalTrack | LocalTrack;
 export type TrackIndex = number;
 
 /**
- * The origins timeline view is experimental. These data structures may need to be
- * adjusted to fit closer to the other track types, but they were easy to do for now.
- */
-
-/**
- * This origin was loaded as a sub-frame to another one. It will be nested in the view.
- */
-export type OriginsTimelineEntry = {|
-  type: 'sub-origin',
-  innerWindowID: InnerWindowID,
-  threadIndex: ThreadIndex,
-  page: Page,
-  origin: string,
-|};
-
-/**
- * This is a "root" origin, which is viewed at the top level in a tab.
- */
-export type OriginsTimelineRoot = {|
-  type: 'origin',
-  innerWindowID: InnerWindowID,
-  threadIndex: ThreadIndex,
-  page: Page,
-  origin: string,
-  children: Array<OriginsTimelineEntry | OriginsTimelineNoOrigin>,
-|};
-
-/**
- * This thread does not have any origin information associated with it. However
- * it may be listed as a child of another "root" timeline origin if it is in the
- * same process as that thread.
- */
-export type OriginsTimelineNoOrigin = {|
-  type: 'no-origin',
-  threadIndex: ThreadIndex,
-|};
-
-export type OriginsTimelineTrack =
-  | OriginsTimelineEntry
-  | OriginsTimelineRoot
-  | OriginsTimelineNoOrigin;
-
-export type OriginsTimeline = Array<
-  OriginsTimelineNoOrigin | OriginsTimelineRoot,
->;
-
-/**
- * Active tab view tracks
- */
-
-/**
- * Main track for active tab view.
- * Currently it holds mainThreadIndex to make things easier because most of the
- * places require a single thread index instead of thread indexes array.
- * This will go away soon.
- */
-export type ActiveTabMainTrack = {|
-  type: 'tab',
-  threadIndexes: Set<ThreadIndex>,
-  threadsKey: ThreadsKey,
-|};
-
-export type ActiveTabScreenshotTrack = {|
-  +type: 'screenshots',
-  +id: string,
-  +threadIndex: ThreadIndex,
-|};
-
-export type ActiveTabResourceTrack =
-  | {|
-      +type: 'sub-frame',
-      +threadIndex: ThreadIndex,
-      +name: string,
-    |}
-  | {|
-      +type: 'thread',
-      +threadIndex: ThreadIndex,
-      +name: string,
-    |};
-
-/**
- * Timeline for active tab view.
- * It holds main track for the current tab, screenshots and resource tracks.
- * Main track is being computed during profile load and rest is being added to resources.
- * This timeline type is different compared to full view. This makes making main
- * track acess a lot easier.
- */
-export type ActiveTabTimeline = {
-  mainTrack: ActiveTabMainTrack,
-  screenshots: Array<ActiveTabScreenshotTrack>,
-  resources: Array<ActiveTabResourceTrack>,
-  resourcesThreadsKey: ThreadsKey,
-};
-
-export type ActiveTabGlobalTrack =
-  | ActiveTabMainTrack
-  | ActiveTabScreenshotTrack;
-
-export type ActiveTabTrack = ActiveTabGlobalTrack | ActiveTabResourceTrack;
-
-/**
  * Type that holds the values of personally identifiable information that user
  * wants to remove.
  */
@@ -807,8 +639,6 @@ export type RemoveProfileInformation = {|
   +shouldRemovePreferenceValues: boolean,
   // Remove the private browsing data if it's true.
   +shouldRemovePrivateBrowsingData: boolean,
-  // Remove all tab ids except this one.
-  +shouldRemoveTabsExceptTabID: TabID | null,
 |};
 
 /**
@@ -819,8 +649,6 @@ export type SelectedState =
   // Samples can be filtered through various operations, like searching, or
   // call tree transforms.
   | 'FILTERED_OUT_BY_TRANSFORM'
-  // Samples can be filtered out if they are not part of the active tab.
-  | 'FILTERED_OUT_BY_ACTIVE_TAB'
   // This sample is selected because either the tip or an ancestor call node matches
   // the currently selected call node.
   | 'SELECTED'
@@ -856,11 +684,11 @@ export type SortedTabPageData = Array<{|
   pageData: ProfileFilterPageData,
 |}>;
 
-export type CallNodeLeafAndSummary = {|
-  // This property stores the amount of unit (time, bytes, count, etc.) spent in the
-  // stacks' leaf nodes.
-  callNodeLeaf: Float32Array,
-  // The sum of absolute values in callNodeLeaf.
+export type CallNodeSelfAndSummary = {|
+  // This property stores the amount of unit (time, bytes, count, etc.) spent in
+  // this call node and not in any of its descendant nodes.
+  callNodeSelf: Float64Array,
+  // The sum of absolute values in callNodeSelf.
   // This is used for computing the percentages displayed in the call tree.
   rootTotalSummary: number,
 |};

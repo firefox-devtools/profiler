@@ -86,7 +86,7 @@ valgrind --tool=dhat ./my-program
 
 A dhat profile will be output in the same directory as your program: `dhat.out.<pid>`. Drag that file into the profiler to view it. There will be 4 tracks containing the memory information. Only the call tree and flame graph are supported.
 
- * **Bytes at End** - Allocations that were never freed when the program ended.
- * **Bytes at Global Max** - Bytes allocated when the global heap size peaked.
- * **Maximum Bytes** - The maximum bytes allocated at that call site at one time.
- * **Total Bytes** - The total bytes allocated over the course of the program.
+- **Bytes at End** - Allocations that were never freed when the program ended.
+- **Bytes at Global Max** - Bytes allocated when the global heap size peaked.
+- **Maximum Bytes** - The maximum bytes allocated at that call site at one time.
+- **Total Bytes** - The total bytes allocated over the course of the program.

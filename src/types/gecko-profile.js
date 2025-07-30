@@ -15,7 +15,12 @@ import type {
   ProfilerConfiguration,
   SampleUnits,
 } from './profile';
-import type { MarkerPayload_Gecko, MarkerSchema } from './markers';
+import type {
+  MarkerPayload_Gecko,
+  MarkerDisplayLocation,
+  MarkerFormatType,
+  MarkerGraph,
+} from './markers';
 import type { Milliseconds, Nanoseconds, MemoryOffset, Bytes } from './units';
 
 export type IndexIntoGeckoFrameTable = number;
@@ -76,7 +81,7 @@ export type ExternalMarkers = {
 
 export type ExternalMarkersData =
   | {|
-      markerSchema: MarkerSchema[],
+      markerSchema: GeckoMetaMarkerSchema[],
       categories: CategoryList,
       markers: ExternalMarkers,
     |}
@@ -219,10 +224,12 @@ export type GeckoFrameTable = {|
   >,
 |};
 
+export type IndexIntoGeckoThreadStringTable = number;
+
 export type GeckoFrameStruct = {|
-  location: IndexIntoStringTable[],
+  location: IndexIntoGeckoThreadStringTable[],
   relevantForJS: Array<boolean>,
-  implementation: Array<null | IndexIntoStringTable>,
+  implementation: Array<null | IndexIntoGeckoThreadStringTable>,
   line: Array<null | number>,
   column: Array<null | number>,
   category: Array<null | number>,
@@ -325,6 +332,72 @@ export type GeckoProfilerOverhead = {|
   statistics?: ProfilerOverheadStats,
 |};
 
+export type GeckoDynamicFieldSchemaData = {|
+  // The property key of the marker data property that carries the field value.
+  key: string,
+
+  // An optional user-facing label.
+  // If no label is provided, the key is displayed instead.
+  label?: string,
+
+  // The format / type of this field. This affects how the field's value is
+  // displayed and determines which types of values are accepted for this field.
+  format: MarkerFormatType,
+
+  // If present and set to true, the marker search string will be matched
+  // against the values of this field when determining which markers match the
+  // search.
+  searchable?: boolean,
+
+  // If present and set to true, this field will not be shown in the list
+  // of fields in the tooltip or in the sidebar. Such fields can still be
+  // used inside labels and they can be searchable.
+  hidden?: boolean,
+|};
+
+export type GeckoStaticFieldSchemaData = {|
+  // This type is a static bit of text that will be displayed
+  label: string,
+  value: string,
+|};
+
+export type GeckoMetaMarkerSchema = {|
+  // The unique identifier for this marker.
+  name: string, // e.g. "CC"
+
+  // The label of how this marker should be displayed in the UI.
+  // If none is provided, then the name is used.
+  tooltipLabel?: string, // e.g. "Cycle Collect"
+
+  // This is how the marker shows up in the Marker Table description.
+  // If none is provided, then the name is used.
+  tableLabel?: string, // e.g. "{marker.data.eventType} – DOMEvent"
+
+  // This is how the marker shows up in the Marker Chart, where it is drawn
+  // on the screen as a bar.
+  // If none is provided, then the name is used.
+  chartLabel?: string,
+
+  // The locations to display
+  display: MarkerDisplayLocation[],
+
+  data: Array<GeckoDynamicFieldSchemaData | GeckoStaticFieldSchemaData>,
+
+  // if present, give the marker its own local track
+  graphs?: Array<MarkerGraph>,
+
+  // If set to true, markers of this type are assumed to be well-nested with all
+  // other stack-based markers on the same thread. Stack-based markers may
+  // be displayed in a different part of the marker chart than non-stack-based
+  // markers.
+  // Instant markers are always well-nested.
+  // For interval markers, or for intervals defined by a start and an end marker,
+  // well-nested means that, for all marker-defined timestamp intervals A and B,
+  // A either fully encompasses B or is fully encompassed by B - there is no
+  // partial overlap.
+  isStackBased?: boolean,
+|};
+
 /* This meta object is used in subprocesses profiles.
  * Using https://searchfox.org/mozilla-central/rev/7556a400affa9eb99e522d2d17c40689fa23a729/tools/profiler/core/platform.cpp#1829
  * as source of truth. (Please update the link whenever there's a new property).
@@ -334,9 +407,12 @@ export type GeckoProfileShortMeta = {|
   // When the main process started. Timestamp expressed in milliseconds since
   // midnight January 1, 1970 GMT.
   startTime: Milliseconds,
+  startTimeAsClockMonotonicNanosecondsSinceBoot?: number,
+  startTimeAsMachAbsoluteTimeNanoseconds?: number,
+  startTimeAsQueryPerformanceCounterValue?: number,
   shutdownTime: Milliseconds | null,
   categories: CategoryList,
-  markerSchema: MarkerSchema[],
+  markerSchema: GeckoMetaMarkerSchema[],
 |};
 
 /* This meta object is used on the top level profile object.

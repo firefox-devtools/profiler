@@ -44,6 +44,7 @@ Convert `perf.data` to the Simpleperf trace file format. You can also modify thi
 ```
 
 #### Option 2: Using gecko_profile_generator.py
+
 Then convert to a Gecko Profile (Firefox Profiler) format, using [`gecko_profile_generator.py`](https://android.googlesource.com/platform/system/extras/+/master/simpleperf/doc/scripts_reference.md#gecko_profile_generator_py):
 
 ```bash

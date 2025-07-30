@@ -41,9 +41,9 @@ AppViewRouter--error-compare = Δεν ήταν δυνατή η ανάκτηση 
 # Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
 # https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
 AppViewRouter--error-from-localhost-url-safari =
-    Λόγω ενός <a>συγκεκριμένου περιορισμού στο Safari</a>, το { -profiler-brand-name } δεν μπορεί να
-    εισαγάγει προφίλ από τη συσκευή σε αυτό το πρόγραμμα περιήγησης. Παρακαλούμε
-    ανοίξτε αυτήν τη σελίδα στο { -firefox-brand-name } ή το Chrome.
+    Λόγω ενός <a>συγκεκριμένου περιορισμού του Safari</a>, το { -profiler-brand-name } δεν μπορεί να
+    εισαγάγει προφίλ από τη συσκευή σε αυτό το πρόγραμμα περιήγησης.
+    Ανοίξτε αυτήν τη σελίδα στο { -firefox-brand-name } ή το Chrome.
     .title = Το Safari δεν μπορεί να εισαγάγει τοπικά προφίλ
 AppViewRouter--route-not-found--home =
     .specialMessage = Δεν αναγνωρίστηκε το URL που προσπαθήσατε να μεταβείτε.
@@ -57,12 +57,12 @@ AppViewRouter--route-not-found--home =
 CallNodeContextMenu--show-file = Εμφάνιση <strong>{ $fileName }</strong>
 CallNodeContextMenu--transform-merge-function = Συγχώνευση συνάρτησης
     .title =
-        Η συγχώνευση μιας συνάρτησης την αφαιρεί από το προφίλ και αναθέτει το χρόνο της στη
+        Η συγχώνευση μιας συνάρτησης την αφαιρεί από το προφίλ και αναθέτει τον χρόνο της στη
         συνάρτηση που την κάλεσε. Αυτό συμβαίνει οπουδήποτε κλήθηκε η συνάρτηση
         στο δέντρο.
 CallNodeContextMenu--transform-merge-call-node = Συγχώνευση κόμβου μόνο
     .title =
-        Η συγχώνευση κόμβου τον αφαιρεί από το προφίλ και αναθέτει το χρόνο του
+        Η συγχώνευση κόμβου τον αφαιρεί από το προφίλ και αναθέτει τον χρόνο του
         στον κόμβο της συνάρτησης που τον κάλεσε. Αφαιρεί μόνο τη συνάρτηση από
         αυτό το συγκεκριμένο μέρος του δέντρου. Τα υπόλοιπα μέρη από τα οποία
         κλήθηκε η συνάρτηση θα παραμείνουν στο προφίλ.
@@ -110,7 +110,7 @@ CallNodeContextMenu--transform-collapse-direct-recursion-only = Σύμπτυξη
     .title =
         Η σύμπτυξη άμεσης αναδρομής αφαιρεί κλήσεις που κάνουν επαναλαμβανόμενα αναδρομή
         στην ίδια συνάρτηση, χωρίς ενδιάμεσες συναρτήσεις στη στοίβα.
-CallNodeContextMenu--transform-drop-function = Απόρριψη δειγμάτων με αυτή τη συνάρτηση
+CallNodeContextMenu--transform-drop-function = Απόρριψη δειγμάτων με αυτήν τη συνάρτηση
     .title =
         Η απόρριψη δειγμάτων αφαιρεί τον χρόνο τους από το προφίλ. Αυτό είναι χρήσιμο για την
         εξάλειψη στοιχείων χρόνου που δεν είναι σχετικά για την ανάλυση.
@@ -121,16 +121,17 @@ CallNodeContextMenu--searchfox = Αναζήτηση ονόματος συνάρ�
 CallNodeContextMenu--copy-function-name = Αντιγραφή ονόματος συνάρτησης
 CallNodeContextMenu--copy-script-url = Αντιγραφή URL σεναρίου
 CallNodeContextMenu--copy-stack = Αντιγραφή στοίβας
+CallNodeContextMenu--show-the-function-in-devtools = Εμφάνιση της συνάρτησης στα DevTools
 
 ## CallTree
 ## This is the component for Call Tree panel.
 
 CallTree--tracing-ms-total = Χρόνος εκτέλεσης (ms)
     .title =
-        Ο “συνολικός” χρόνος εκτέλεσης περιλαμβάνει μια περίληψη όλου του χρόνου όπου
+        Ο «συνολικός» χρόνος εκτέλεσης περιλαμβάνει μια περίληψη όλου του χρόνου όπου
         παρατηρήθηκε αυτή η συνάρτηση σε στοίβα. Περιέχει τον χρόνο πραγματικής
         εκτέλεσης της συνάρτησης και τον χρόνο που χρησιμοποιήθηκε στους καλούντες από
-        αυτή τη συνάρτηση.
+        αυτήν τη συνάρτηση.
 CallTree--tracing-ms-self = Ιδιοχρόνος (ms)
     .title =
         Ο ατομικός χρόνος περιλαμβάνει μόνο τον χρόνο που η συνάρτηση βρισκόταν
@@ -260,8 +261,8 @@ Details--error-boundary-message =
 
 # This message will always be displayed after another context-specific message.
 ErrorBoundary--report-error-to-developers-description =
-    Παρακαλώ αναφέρετε αυτό το ζήτημα στους προγραμματιστές, μαζί με το
-    πλήρες σφάλμα, όπως εμφανίζεται στην κονσόλα ιστού των εργαλείων ανάπτυξης.
+    Αναφέρετε αυτό το ζήτημα στους προγραμματιστές, μαζί με το πλήρες
+    σφάλμα, όπως εμφανίζεται στην κονσόλα ιστού των εργαλείων ανάπτυξης.
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Αναφορά σφάλματος στο GitHub
 
@@ -301,7 +302,7 @@ Home--menu-button-instructions =
     επιδόσεων στο { -firefox-brand-name } και έπειτα, να το αναλύσετε και να το μοιραστείτε με το profiler.firefox.com.
 Home--profile-firefox-android-instructions =
     Μπορείτε επίσης να καταγράψετε προφίλ για το { -firefox-android-brand-name }.
-    Για περισσότερες πληροφορίες, παρακαλούμε συμβουλευτείτε την τεκμηρίωση:
+    Για περισσότερες πληροφορίες, συμβουλευτείτε την τεκμηρίωση:
     <a>Καταγραφή προφίλ του { -firefox-android-brand-name } απευθείας στη συσκευή</a>.
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
@@ -314,7 +315,7 @@ Home--web-channel-unavailable =
     Αυτή η διεργασία του εργαλείου προφίλ δεν μπόρεσε να συνδεθεί στο WebChannel. Αυτό συνήθως σημαίνει
     ότι εκτελείται σε διαφορετικό κεντρικό υπολογιστή από αυτόν που καθορίστηκε στην προτίμηση
     <code>devtools.performance.recording.ui-base-url</code>. Αν θέλετε να καταγράψετε νέα προφίλ
-    με αυτή τη διεργασία και να της δώσετε προγραμματικό έλεγχο του κουμπιού του μενού του εργαλείου,
+    με αυτήν τη διεργασία και να της δώσετε προγραμματικό έλεγχο του κουμπιού του μενού του εργαλείου,
     μπορείτε να μεταβείτε στο <code>about:config</code> και να αλλάξετε την προτίμηση.
 Home--record-instructions =
     Για να αρχίσει η καταγραφή προφίλ, κάντε κλικ στο αντίστοιχο κουμπί ή χρησιμοποιήστε
@@ -474,7 +475,7 @@ MenuButtons--metaInfo--profile-not-symbolicated = Το προφίλ δεν εί�
 MenuButtons--metaInfo--resymbolicate-profile = Επανασυμβολισμός προφίλ
 MenuButtons--metaInfo--symbolicate-profile = Συμβολισμός προφίλ
 MenuButtons--metaInfo--attempting-resymbolicate = Απόπειρα επανασυμβολισμού προφίλ
-MenuButtons--metaInfo--currently-symbolicating = Γίνεται συμβολισμός προφίλ αυτή τη στιγμή
+MenuButtons--metaInfo--currently-symbolicating = Γίνεται συμβολισμός προφίλ αυτήν τη στιγμή
 MenuButtons--metaInfo--cpu-model = Μοντέλο CPU:
 MenuButtons--metaInfo--cpu-cores = Πυρήνες CPU:
 MenuButtons--metaInfo--main-memory = Κύρια μνήμη:
@@ -486,11 +487,16 @@ MenuButtons--index--hide-moreInfo-button = Εμφάνιση λιγότερων
 #   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
 MenuButtons--metaInfo--physical-and-logical-cpu =
     { $physicalCPUs ->
-        [one] { $physicalCPUs } φυσικός πυρήνας
-       *[other] { $physicalCPUs } φυσικοί πυρήνες
-    }, { $logicalCPUs ->
-        [one] { $logicalCPUs } λογικός πυρήνας
-       *[other] { $logicalCPUs } λογικοί πυρήνες
+        [one]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } φυσικός πυρήνας, { $logicalCPUs } λογικός πυρήνας
+               *[other] { $physicalCPUs } φυσικός πυρήνας, { $logicalCPUs } λογικοί πυρήνες
+            }
+       *[other]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } φυσικοί πυρήνες, { $logicalCPUs } λογικός πυρήνας
+               *[other] { $physicalCPUs } φυσικοί πυρήνες, { $logicalCPUs } λογικοί πυρήνες
+            }
     }
 # This string is used when we only have the information about the number of
 # physical CPU cores.
@@ -551,9 +557,9 @@ MenuButtons--metaInfo--abi = ABI:
 MenuButtons--metaInfo--visual-metrics = Οπτικές μετρήσεις
 MenuButtons--metaInfo--speed-index = Δείκτης ταχύτητας:
 # “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
-MenuButtons--metaInfo--perceptual-speed-index = Δείκτης "Perceptual Speed":
+MenuButtons--metaInfo--perceptual-speed-index = Δείκτης «Perceptual Speed»:
 # “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
-MenuButtons--metaInfo--contentful-speed-Index = Δείκτης "Contentful Speed":
+MenuButtons--metaInfo--contentful-speed-Index = Δείκτης «Contentful Speed»:
 MenuButtons--metaInfo-renderRowOfList-label-features = Λειτουργίες:
 MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Φίλτρο νημάτων:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Επεκτάσεις:
@@ -752,7 +758,7 @@ StackSettings--invert-call-stack = Αναστροφή στοίβας κλήσε�
 StackSettings--show-user-timing = Εμφάνιση χρονισμού χρήστη
 StackSettings--panel-search =
     .label = Φιλτράρισμα στοιβών:
-    .title = Εμφάνιση μόνο στοιβών που περιέχουν συνάρτηση της οποίας το όνομα αντιστοιχεί σε αυτή την υποσυμβολοσειρά
+    .title = Εμφάνιση μόνο στοιβών που περιέχουν συνάρτηση της οποίας το όνομα αντιστοιχεί σε αυτήν την υποσυμβολοσειρά
 
 ## Tab Bar for the bottom half of the analysis UI.
 
@@ -779,12 +785,12 @@ TrackContextMenu--only-show-this-process = Εμφάνιση μόνο αυτής 
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
-TrackContextMenu--only-show-track = Εμφάνιση μόνο του “{ $trackName }”
+TrackContextMenu--only-show-track = Εμφάνιση μόνο του «{ $trackName }»
 TrackContextMenu--hide-other-screenshots-tracks = Απόκρυψη άλλων κομματιών του Screenshots
 # This is used as the context menu item to hide the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
-TrackContextMenu--hide-track = Απόκρυψη του “{ $trackName }”
+TrackContextMenu--hide-track = Απόκρυψη του «{ $trackName }»
 TrackContextMenu--show-all-tracks = Εμφάνιση όλων των κομματιών
 TrackContextMenu--show-local-tracks-in-process = Εμφάνιση όλων των κομματιών σε αυτήν τη διεργασία
 # This is used as the context menu item to hide all tracks of the selected track's type.
@@ -976,7 +982,7 @@ TrackSearchField--search-input =
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the current thread. E.g.: Web Content.
-TransformNavigator--complete = Ολοκλήρωση “{ $item }”
+TransformNavigator--complete = Ολοκληρωμένο «{ $item }»
 # "Collapse resource" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:

@@ -258,8 +258,21 @@ export type FrameTable = {|
   // nativeSymbol, but each has a different func and line.
   inlineDepth: number[],
 
+  // The category of the frame. This is used to calculate the category of the stack nodes
+  // which use this frame:
+  // - If the frame has a null category, the stack node inherits its parent node's category
+  //   and subcategory. If there is no parent node, we use the "default category" (see ProfileMeta.categories).
+  // - If the frame has a non-null category, this category and subcategory is used for the stack node.
   category: (IndexIntoCategoryList | null)[],
+
+  // The subcategory of a frame. This is used to calculate the subcategory of the stack nodes
+  // which use this frame.
+  // Must be non-null if the frame's category is non-null.
+  // Ignored if the frame's category is null.
+  // 0 is always a valid value and refers to the "Other" subcategory (see Category.subcategories).
   subcategory: (IndexIntoSubcategoryListForCategory | null)[],
+
+  // The frame's function.
   func: IndexIntoFuncTable[],
 
   // The symbol index (referring into this thread's nativeSymbols table) corresponding
@@ -276,7 +289,6 @@ export type FrameTable = {|
   // is being stored as `uint64_t` there.
   innerWindowID: (InnerWindowID | null)[],
 
-  implementation: (IndexIntoStringTable | null)[],
   line: (number | null)[],
   column: (number | null)[],
   length: number,
@@ -391,9 +403,36 @@ export type Lib = {|
   codeId: string | null, // e.g. "6132B96B70fd000"
 |};
 
+// The list of available category colors.
+//
+// We don't accept just any CSS color so that the front-end has more freedom about
+// picking colors, for example to ensure contrast or to adjust to light/dark modes.
+export type CategoryColor =
+  | 'transparent' // used for "idle" frames / stacks
+  | 'purple'
+  | 'green'
+  | 'orange'
+  | 'yellow'
+  | 'lightblue'
+  | 'blue'
+  | 'brown'
+  | 'magenta'
+  | 'red'
+  | 'lightred'
+  | 'darkgrey'
+  | 'grey'; // <-- "grey" marks the default category
+
+// A category in profile.meta.categories, used for stack frames and call nodes.
 export type Category = {|
+  // The category name.
   name: string,
-  color: string,
+
+  // The category color. Must be picked from the CategoryColor list. At least one
+  // category with color "grey" must be present in the category list.
+  color: CategoryColor,
+
+  // The list of subcategories. Must always have at least one element; subcategory
+  // zero must be the "Other" subcategory and is used to refer to the category itself.
   subcategories: string[],
 |};
 
@@ -528,8 +567,7 @@ export type ProfilerConfiguration = {|
   capacity: Bytes,
   duration?: number,
   // Optional because that field is introduced in Firefox 72.
-  // Active Tab ID indicates a Firefox tab. That field allows us to
-  // create an "active tab view".
+  // Active Tab ID indicates a Firefox tab.
   // `0` means null value. Firefox only outputs `0` and not null, that's why we
   // should take care of this case while we are consuming it. If it's `0`, we
   // should revert back to the full view since there isn't enough data to show
@@ -619,9 +657,6 @@ export type RawThread = {|
   markers: RawMarkerTable,
   stackTable: RawStackTable,
   frameTable: FrameTable,
-  // Strings for profiles are collected into a single table, and are referred to by
-  // their index by other tables.
-  stringArray: string[],
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   nativeSymbols: NativeSymbolTable,
@@ -697,11 +732,14 @@ export type VisualMetrics = {|
 // Units of ThreadCPUDelta values for different platforms.
 export type ThreadCPUDeltaUnit = 'ns' | 'µs' | 'variable CPU cycles';
 
+// Unit of the values in the timeline. Used to differentiate size-profiles.
+export type TimelineUnit = 'ms' | 'bytes';
+
 // Object that holds the units of samples table values. Some of the values can be
 // different depending on the platform, e.g. threadCPUDelta.
 // See https://searchfox.org/mozilla-central/rev/851bbbd9d9a38c2785a24c13b6412751be8d3253/tools/profiler/core/platform.cpp#2601-2606
 export type SampleUnits = {|
-  +time: 'ms',
+  +time: TimelineUnit,
   +eventDelay: 'ms',
   +threadCPUDelta: ThreadCPUDeltaUnit,
 |};
@@ -726,6 +764,9 @@ export type ProfileMeta = {|
   // When the main process started. Timestamp expressed in milliseconds since
   // midnight January 1, 1970 GMT.
   startTime: Milliseconds,
+  startTimeAsClockMonotonicNanosecondsSinceBoot?: number,
+  startTimeAsMachAbsoluteTimeNanoseconds?: number,
+  startTimeAsQueryPerformanceCounterValue?: number,
   // The number of milliseconds since midnight January 1, 1970 GMT.
   endTime?: Milliseconds,
   // When the recording started (in milliseconds after startTime).
@@ -739,10 +780,10 @@ export type ProfileMeta = {|
   // The extensions property landed in Firefox 60, and is only optional because older
   // processed profile versions may not have it. No upgrader was written for this change.
   extensions?: ExtensionTable,
-  // The list of categories as provided by the platform. The categories are present for
-  // all Firefox profiles, but imported profiles may not include any category support.
-  // The front-end will provide a default list of categories, but the saved profile
-  // will not include them.
+  // The list of categories used in this profile. If present, it must contain at least the
+  // "default category" which is defined as the first category whose color is "grey" - this
+  // category usually has the name "Other".
+  // If meta.categories is not present, a default list is substituted.
   categories?: CategoryList,
   // The name of the product, most likely "Firefox".
   product: 'Firefox' | string,
@@ -861,8 +902,6 @@ export type ProfileMeta = {|
 
   // Do not distinguish between different stack types?
   usesOnlyOneStackType?: boolean,
-  // Hide the "implementation" information in the UI (see #3709)?
-  doesNotUseFrameImplementation?: boolean,
   // Hide the "Look up the function name on Searchfox" menu entry?
   sourceCodeIsNotOnSearchfox?: boolean,
   // Extra information about the profile, not shown in the "Profile Info" panel,
@@ -884,6 +923,12 @@ export type ProfileMeta = {|
   gramsOfCO2ePerKWh?: number,
 |};
 
+export type RawProfileSharedData = {|
+  // Strings for profiles are collected into a single table, and are referred to by
+  // their index by other tables.
+  stringArray: string[],
+|};
+
 /**
  * All of the data for a processed profile.
  */
@@ -898,6 +943,7 @@ export type Profile = {|
   // have them. An upgrader could be written to make this non-optional.
   // This is list because there is a profiler overhead per process.
   profilerOverhead?: ProfilerOverhead[],
+  shared: RawProfileSharedData,
   threads: RawThread[],
   profilingLog?: ProfilingLog,
   profileGatheringLog?: ProfilingLog,

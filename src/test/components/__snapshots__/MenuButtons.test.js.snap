@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`app/MenuButtons <MetaInfoPanel> deleting a profile clicking on the button shows the confirmation 1`] = `
 <div
@@ -2211,7 +2211,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
           class="menuButtonsDownloadSize"
         >
           (
-          1.62 kB
+          1.58 kB
           )
         </span>
       </a>
@@ -2329,7 +2329,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           class="menuButtonsDownloadSize"
         >
           (
-          1.6 kB
+          1.56 kB
           )
         </span>
       </a>
@@ -2442,7 +2442,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           class="menuButtonsDownloadSize"
         >
           (
-          1.62 kB
+          1.58 kB
           )
         </span>
       </a>
@@ -2457,49 +2457,5 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
       </button>
     </div>
   </form>
-</div>
-`;
-
-exports[`app/MenuButtons Full View Button is present when we are in the active tab view 1`] = `
-<div>
-  <button
-    class="menuButtonsButton menuButtonsButton-hasIcon menuButtonsRevertToFullView"
-    type="button"
-  >
-    Full View
-  </button>
-  <div
-    class="buttonWithPanel"
-  >
-    <button
-      aria-expanded="false"
-      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon"
-      type="button"
-    >
-      Profile Info
-    </button>
-  </div>
-  <div
-    class="buttonWithPanel"
-  >
-    <button
-      aria-expanded="false"
-      class="buttonWithPanelButton menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon"
-      type="button"
-    >
-      Upload Local Profile
-    </button>
-  </div>
-  <a
-    class="menuButtonsButton menuButtonsButton-hasLeftBorder"
-    href="/docs/"
-    target="_blank"
-    title="Open the documentation in a new window"
-  >
-    Docs
-    <i
-      class="open-in-new"
-    />
-  </a>
 </div>
 `;

@@ -7,6 +7,8 @@ import {
   getNetworkTrackProfile,
   addIPCMarkerPairToThreads,
   getProfileWithMarkers,
+  getProfileFromTextSamples,
+  getProfileWithThreadCPUDelta,
 } from '../fixtures/profiles/processed-profile';
 import { getEmptyThread } from '../../profile-logic/data-structures';
 import { storeWithProfile } from '../fixtures/stores';
@@ -135,9 +137,7 @@ describe('ordering and hiding', function () {
       {
         name: 'Marker',
         display: ['marker-chart', 'marker-table', 'timeline-memory'],
-        data: [
-          { key: 'first', label: 'first', format: 'integer', searchable: true },
-        ],
+        fields: [{ key: 'first', label: 'first', format: 'integer' }],
         graphs: [
           {
             key: 'first',
@@ -148,9 +148,7 @@ describe('ordering and hiding', function () {
       {
         name: 'NoGraphMarker',
         display: ['marker-chart', 'marker-table'],
-        data: [
-          { key: 'first', label: 'first', format: 'integer', searchable: true },
-        ],
+        fields: [{ key: 'first', label: 'first', format: 'integer' }],
         // An empty array should behave just as if the property isn't present.
         graphs: [],
       },
@@ -394,6 +392,202 @@ describe('ordering and hiding', function () {
         expect(
           globalTrackOrder.map((trackIndex) => globalTracks[trackIndex].type)
         ).toEqual(userFacingSortOrder);
+      });
+    });
+
+    describe('ordering by activity', function () {
+      it('orders process tracks by activity score while keeping parent process first', function () {
+        const { profile } = getProfileFromTextSamples(
+          'A  B  C  D  E  F  G  H  I  J', // High activity parent process
+          'X  Y', // Low activity tab process
+          'P  Q  R  S  T  U  V  W  X  Y  Z  A  B  C  D' // Very high activity tab process
+        );
+
+        // Set up threads as different processes
+        profile.threads[0].name = 'GeckoMain';
+        profile.threads[0].isMainThread = true;
+        profile.threads[0].processType = 'default'; // Parent process
+        profile.threads[0].pid = '1';
+
+        profile.threads[1].name = 'GeckoMain';
+        profile.threads[1].isMainThread = true;
+        profile.threads[1].processType = 'tab';
+        profile.threads[1].pid = '2';
+
+        profile.threads[2].name = 'GeckoMain';
+        profile.threads[2].isMainThread = true;
+        profile.threads[2].processType = 'tab';
+        profile.threads[2].pid = '3';
+
+        const { getState } = storeWithProfile(profile);
+
+        // Parent process should be first, then tab processes ordered by activity
+        // The highest activity tab process (index 2) should be selected by default
+        expect(getHumanReadableTracks(getState())).toEqual([
+          'show [thread GeckoMain default]', // Parent process first
+          'show [thread GeckoMain tab] SELECTED', // Very high activity tab process selected
+          'show [thread GeckoMain tab]', // Low activity tab process
+        ]);
+
+        const globalTrackOrder =
+          UrlStateSelectors.getGlobalTrackOrder(getState());
+        expect(globalTrackOrder).toEqual([0, 2, 1]);
+      });
+
+      it('orders multiple tab processes by their activity levels', function () {
+        const profile = getProfileWithThreadCPUDelta([
+          [5, 5, 5], // Low activity tab process
+          [50, 50, 50], // High activity tab process
+          [25, 25, 25], // Medium activity tab process
+        ]);
+
+        profile.threads[0].name = 'GeckoMain';
+        profile.threads[0].isMainThread = true;
+        profile.threads[0].processType = 'tab';
+        profile.threads[0].pid = '1';
+
+        profile.threads[1].name = 'GeckoMain';
+        profile.threads[1].isMainThread = true;
+        profile.threads[1].processType = 'tab';
+        profile.threads[1].pid = '2';
+
+        profile.threads[2].name = 'GeckoMain';
+        profile.threads[2].isMainThread = true;
+        profile.threads[2].processType = 'tab';
+        profile.threads[2].pid = '3';
+
+        const { getState } = storeWithProfile(profile);
+
+        // Processes should be ordered by activity: high, medium, low
+        expect(getHumanReadableTracks(getState())).toEqual([
+          'show [thread GeckoMain tab] SELECTED', // High activity (index 1)
+          'show [thread GeckoMain tab]', // Medium activity (index 2)
+          'show [thread GeckoMain tab]', // Low activity (index 0)
+        ]);
+
+        const globalTrackOrder =
+          UrlStateSelectors.getGlobalTrackOrder(getState());
+        expect(globalTrackOrder).toEqual([1, 2, 0]);
+      });
+
+      it('handles processes without main threads gracefully', function () {
+        const { profile } = getProfileFromTextSamples('A', 'B');
+
+        profile.threads[0].name = 'GeckoMain';
+        profile.threads[0].isMainThread = true;
+        profile.threads[0].processType = 'tab';
+        profile.threads[0].pid = '1';
+
+        profile.threads[1].name = 'DOM Worker';
+        profile.threads[1].isMainThread = false;
+        profile.threads[1].processType = 'tab';
+        profile.threads[1].pid = '2'; // Different PID, no main thread
+
+        const { getState } = storeWithProfile(profile);
+
+        // Should not crash and maintain a stable order
+        expect(getHumanReadableTracks(getState())).toEqual([
+          'show [thread GeckoMain tab] SELECTED',
+          'show [process]',
+          '  - show [thread DOM Worker]',
+        ]);
+
+        const globalTrackOrder =
+          UrlStateSelectors.getGlobalTrackOrder(getState());
+        expect(globalTrackOrder).toEqual([0, 1]);
+      });
+    });
+
+    describe('default selected thread selection by activity', function () {
+      it('selects the tab process with highest activity as default', function () {
+        const profile = getProfileWithThreadCPUDelta([
+          [10, 10, 10], // Low activity parent process
+          [5, 5, 5], // Low activity tab process
+          [50, 50, 50], // High activity tab process
+        ]);
+
+        profile.threads[0].name = 'GeckoMain';
+        profile.threads[0].isMainThread = true;
+        profile.threads[0].processType = 'default'; // Parent process
+        profile.threads[0].pid = '0';
+
+        profile.threads[1].name = 'GeckoMain';
+        profile.threads[1].isMainThread = true;
+        profile.threads[1].processType = 'tab';
+        profile.threads[1].pid = '1';
+
+        profile.threads[2].name = 'GeckoMain';
+        profile.threads[2].isMainThread = true;
+        profile.threads[2].processType = 'tab';
+        profile.threads[2].pid = '2';
+
+        const { getState } = storeWithProfile(profile);
+
+        // The high activity tab process (index 2) should be selected
+        expect(getHumanReadableTracks(getState())).toEqual([
+          'show [thread GeckoMain default]', // Parent process
+          'show [thread GeckoMain tab] SELECTED', // High activity tab selected
+          'show [thread GeckoMain tab]', // Low activity tab
+        ]);
+
+        const globalTrackOrder =
+          UrlStateSelectors.getGlobalTrackOrder(getState());
+        expect(globalTrackOrder).toEqual([0, 2, 1]);
+      });
+
+      it('falls back to first thread when no tab processes exist', function () {
+        const profile = getProfileWithThreadCPUDelta([
+          [10, 10, 10], // Parent process only
+        ]);
+
+        profile.threads[0].name = 'GeckoMain';
+        profile.threads[0].isMainThread = true;
+        profile.threads[0].processType = 'default';
+        profile.threads[0].pid = '0';
+
+        const { getState } = storeWithProfile(profile);
+
+        // Parent process should be selected as fallback
+        expect(getHumanReadableTracks(getState())).toEqual([
+          'show [thread GeckoMain default] SELECTED',
+        ]);
+      });
+
+      it('selects highest activity tab even when parent has higher activity', function () {
+        const profile = getProfileWithThreadCPUDelta([
+          [100, 100, 100], // Very high activity parent process
+          [50, 50, 50], // Medium activity tab process
+          [75, 75, 75], // High activity tab process
+        ]);
+
+        profile.threads[0].name = 'GeckoMain';
+        profile.threads[0].isMainThread = true;
+        profile.threads[0].processType = 'default'; // Parent process
+        profile.threads[0].pid = '0';
+
+        profile.threads[1].name = 'GeckoMain';
+        profile.threads[1].isMainThread = true;
+        profile.threads[1].processType = 'tab';
+        profile.threads[1].pid = '1';
+
+        profile.threads[2].name = 'GeckoMain';
+        profile.threads[2].isMainThread = true;
+        profile.threads[2].processType = 'tab';
+        profile.threads[2].pid = '2';
+
+        const { getState } = storeWithProfile(profile);
+
+        // The highest activity tab process (index 2) should be selected,
+        // not the parent process despite it having higher activity
+        expect(getHumanReadableTracks(getState())).toEqual([
+          'show [thread GeckoMain default]', // Parent process not selected
+          'show [thread GeckoMain tab] SELECTED', // High activity tab selected
+          'show [thread GeckoMain tab]', // Medium activity tab
+        ]);
+
+        const globalTrackOrder =
+          UrlStateSelectors.getGlobalTrackOrder(getState());
+        expect(globalTrackOrder).toEqual([0, 2, 1]);
       });
     });
   });
@@ -693,7 +887,8 @@ describe('ordering and hiding', function () {
           messageSeqno: 1,
         },
         profile.threads[1], // tab process
-        profile.threads[2] // DOM Worker
+        profile.threads[2], // DOM Worker
+        profile.shared
       );
       const { getState } = storeWithProfile(profile);
       const localTracks = ProfileViewSelectors.getLocalTracks(getState(), pid);

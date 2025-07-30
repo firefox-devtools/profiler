@@ -22,12 +22,12 @@ import {
 import type {
   SamplesTable,
   RawThread,
+  RawProfileSharedData,
   RawMarkerTable,
   IndexIntoStringTable,
   IndexIntoRawMarkerTable,
   IndexIntoCategoryList,
   CategoryList,
-  InnerWindowID,
   Marker,
   MarkerIndex,
   MarkerPayload,
@@ -223,7 +223,7 @@ function positiveFilterMarker(
       return true;
     }
 
-    // Now check the schema for the marker payload for searchable
+    // Now check the schema for the marker payload for field matches
     const markerSchema = getSchemaFromMarker(markerSchemaByName, marker.data);
     if (
       markerSchema &&
@@ -285,7 +285,7 @@ function negativeFilterMarker(
       return false;
     }
 
-    // Now check the schema for the marker payload for searchable
+    // Now check the schema for the marker payload for field matches
     const markerSchema = getSchemaFromMarker(markerSchemaByName, marker.data);
 
     if (
@@ -298,50 +298,6 @@ function negativeFilterMarker(
   }
 
   return true;
-}
-
-/**
- * Gets the markers and the web pages that are relevant to the current active tab
- * and filters out the markers that don't belong to those revelant pages.
- * If we don't have any item in relevantPages, return the whole marker list.
- */
-export function getTabFilteredMarkerIndexes(
-  getMarker: (MarkerIndex) => Marker,
-  markerIndexes: MarkerIndex[],
-  relevantPages: Set<InnerWindowID>,
-  includeGlobalMarkers: boolean = true
-): MarkerIndex[] {
-  if (relevantPages.size === 0) {
-    return markerIndexes;
-  }
-
-  const newMarkers: MarkerIndex[] = [];
-  for (const markerIndex of markerIndexes) {
-    const { name, data } = getMarker(markerIndex);
-
-    // We want to retain some markers even though they do not belong to a specific tab.
-    // We are checking those before and pushing those markers to the new array.
-    // As of now, those markers are:
-    // - Jank markers
-    if (includeGlobalMarkers) {
-      if (name === 'Jank') {
-        newMarkers.push(markerIndex);
-        continue;
-      }
-    } else {
-      if (data && data.type === 'Network') {
-        // Now network markers have innerWindowIDs inside their payloads but those markers
-        // can be inside the main thread and not be related to that specific thread.
-        continue;
-      }
-    }
-
-    if (data && data.innerWindowID && relevantPages.has(data.innerWindowID)) {
-      newMarkers.push(markerIndex);
-    }
-  }
-
-  return newMarkers;
 }
 
 /**
@@ -400,7 +356,8 @@ export class IPCMarkerCorrelations {
  *                   (or main thread in receiver process if they are not profiled)
  */
 export function correlateIPCMarkers(
-  threads: RawThread[]
+  threads: RawThread[],
+  shared: RawProfileSharedData
 ): IPCMarkerCorrelations {
   // Create a unique ID constructed from the source PID, destination PID,
   // message seqno, and message type. Since the seqno is only unique for each
@@ -465,6 +422,14 @@ export function correlateIPCMarkers(
     }
   }
 
+  // Don't bother checking for IPC markers if the profile's string table
+  // doesn't have the string "IPC". This lets us avoid looping over all the
+  // markers when we don't have to.
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
+  if (!stringTable.hasString('IPC')) {
+    return new IPCMarkerCorrelations();
+  }
+
   // First, construct a mapping of marker IDs to an array of markers with that
   // ID for faster lookup. We also collect the friendly thread names while we
   // have access to all the threads. It's considerably more difficult to do
@@ -475,13 +440,6 @@ export function correlateIPCMarkers(
   > = new Map();
   const threadNames: Map<number, string> = new Map();
   for (const thread of threads) {
-    // Don't bother checking for IPC markers if this thread's string table
-    // doesn't have the string "IPC". This lets us avoid looping over all the
-    // markers when we don't have to.
-    const stringTable = StringTable.withBackingArray(thread.stringArray);
-    if (!stringTable.hasString('IPC')) {
-      continue;
-    }
     if (typeof thread.tid === 'number') {
       const tid: number = thread.tid;
       threadNames.set(tid, getFriendlyThreadName(threads, thread));
@@ -1434,36 +1392,29 @@ export function sanitizeFromMarkerSchema(
   markerSchema: MarkerSchema,
   markerPayload: MarkerPayload
 ): MarkerPayload {
-  for (const propertyDescription of markerSchema.data) {
-    if (
-      propertyDescription.key !== undefined &&
-      propertyDescription.format !== undefined
-    ) {
-      const key = propertyDescription.key;
-      const format = propertyDescription.format;
-      if (!(key in markerPayload)) {
-        continue;
-      }
+  for (const { key, format } of markerSchema.fields) {
+    if (!(key in markerPayload)) {
+      continue;
+    }
 
-      // We're typing the result of the sanitization with `any` because Flow
-      // doesn't like much our enormous enum of non-exact objects that's used as
-      // MarkerPayload type, and this code is too generic for Flow in this context.
-      if (format === 'url') {
-        markerPayload = ({
-          ...markerPayload,
-          [key]: removeURLs(markerPayload[key]),
-        }: any);
-      } else if (format === 'file-path') {
-        markerPayload = ({
-          ...markerPayload,
-          [key]: removeFilePath(markerPayload[key]),
-        }: any);
-      } else if (format === 'sanitized-string') {
-        markerPayload = ({
-          ...markerPayload,
-          [key]: '<sanitized>',
-        }: any);
-      }
+    // We're typing the result of the sanitization with `any` because Flow
+    // doesn't like much our enormous enum of non-exact objects that's used as
+    // MarkerPayload type, and this code is too generic for Flow in this context.
+    if (format === 'url') {
+      markerPayload = ({
+        ...markerPayload,
+        [key]: removeURLs(markerPayload[key]),
+      }: any);
+    } else if (format === 'file-path') {
+      markerPayload = ({
+        ...markerPayload,
+        [key]: removeFilePath(markerPayload[key]),
+      }: any);
+    } else if (format === 'sanitized-string') {
+      markerPayload = ({
+        ...markerPayload,
+        [key]: '<sanitized>',
+      }: any);
     }
   }
 

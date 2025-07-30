@@ -19,10 +19,7 @@ import { toggleOpenCategoryInSidebar } from 'firefox-profiler/actions/app';
 import { getSidebarOpenCategories } from 'firefox-profiler/selectors/app';
 import { getCategories } from 'firefox-profiler/selectors/profile';
 import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
-import {
-  getFriendlyStackTypeName,
-  shouldDisplaySubcategoryInfoForCategory,
-} from 'firefox-profiler/profile-logic/profile-data';
+import { shouldDisplaySubcategoryInfoForCategory } from 'firefox-profiler/profile-logic/profile-data';
 import { CanSelectContent } from './CanSelectContent';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -31,15 +28,12 @@ import type {
   CategoryList,
   IndexIntoCallNodeTable,
   SelfAndTotal,
-  Milliseconds,
   WeightType,
   IndexIntoCategoryList,
 } from 'firefox-profiler/types';
 
 import type {
-  BreakdownByImplementation,
   BreakdownByCategory,
-  StackImplementation,
   TimingsForPath,
 } from 'firefox-profiler/profile-logic/profile-data';
 import {
@@ -79,71 +73,6 @@ function SidebarDetail({
       <div className="sidebar-value">{value}</div>
     </React.Fragment>
   );
-}
-
-type ImplementationBreakdownProps = {|
-  +breakdown: BreakdownByImplementation,
-  +number: (number) => string,
-|};
-
-// This component is responsible for displaying the breakdown data specific to
-// the JavaScript engine and native code implementation.
-class ImplementationBreakdown extends React.PureComponent<ImplementationBreakdownProps> {
-  _orderedImplementations: $ReadOnlyArray<StackImplementation> = [
-    'native',
-    'interpreter',
-    'blinterp',
-    'baseline',
-    'ion',
-    'unknown',
-  ];
-
-  render() {
-    const { breakdown, number } = this.props;
-
-    const data: Array<{| +group: string, +value: Milliseconds | number |}> = [];
-
-    for (const implementation of this._orderedImplementations) {
-      const value = breakdown[implementation];
-      if (!value && implementation === 'unknown') {
-        continue;
-      }
-
-      data.push({
-        group: getFriendlyStackTypeName(implementation),
-        value: value || 0,
-      });
-    }
-
-    const totalTime = data.reduce<number>(
-      (result, item) => result + item.value,
-      0
-    );
-
-    return data
-      .filter(({ value }) => value)
-      .map(({ group, value }) => {
-        return (
-          <React.Fragment key={group}>
-            <SidebarDetail
-              label={group}
-              value={number(value)}
-              percentage={formatPercent(value / totalTime)}
-            />
-            {/* Draw a histogram bar. */}
-            <div className="sidebar-histogram-bar">
-              <div
-                className="sidebar-histogram-bar-color"
-                style={{
-                  width: ratioToCssPercent(value / totalTime),
-                  backgroundColor: 'var(--grey-50)',
-                }}
-              ></div>
-            </div>
-          </React.Fragment>
-        );
-      });
-  }
 }
 
 type CategoryBreakdownOwnProps = {|
@@ -391,10 +320,6 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
     const selfTimePercent = Math.round((selfTime.value / rootTime) * 100);
     const totalTimeBreakdownByCategory = totalTime.breakdownByCategory;
     const selfTimeBreakdownByCategory = selfTime.breakdownByCategory;
-    const totalTimeBreakdownByImplementation =
-      totalTime.breakdownByImplementation;
-    const selfTimeBreakdownByImplementation =
-      selfTime.breakdownByImplementation;
 
     return (
       <aside className="sidebar sidebar-calltree">
@@ -503,38 +428,6 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
                 number={number}
               />
             </>
-          ) : null}
-          {totalTimeBreakdownByImplementation && totalTime.value ? (
-            <React.Fragment>
-              <h4 className="sidebar-title3 sidebar-title-label">
-                <Localized id="CallTreeSidebar--implementation">
-                  <div>Implementation</div>
-                </Localized>
-                <Localized id={getRunningWeightTypeLabelL10nId(weightType)}>
-                  <div></div>
-                </Localized>
-              </h4>
-              <ImplementationBreakdown
-                breakdown={totalTimeBreakdownByImplementation}
-                number={number}
-              />
-            </React.Fragment>
-          ) : null}
-          {selfTimeBreakdownByImplementation && selfTime.value ? (
-            <React.Fragment>
-              <h4 className="sidebar-title3 sidebar-title-label">
-                <Localized id="CallTreeSidebar--implementation">
-                  <div>Implementation</div>
-                </Localized>
-                <Localized id={getSelfWeightTypeLabelL10nId(weightType)}>
-                  <div></div>
-                </Localized>
-              </h4>
-              <ImplementationBreakdown
-                breakdown={selfTimeBreakdownByImplementation}
-                number={number}
-              />
-            </React.Fragment>
           ) : null}
         </div>
       </aside>

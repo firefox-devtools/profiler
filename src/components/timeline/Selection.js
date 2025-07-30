@@ -12,6 +12,7 @@ import {
   getCommittedRange,
   getZeroAt,
   getMouseTimePosition,
+  getProfileTimelineUnit,
 } from 'firefox-profiler/selectors/profile';
 import {
   updatePreviewSelection,
@@ -21,7 +22,7 @@ import {
 import explicitConnect from 'firefox-profiler/utils/connect';
 import classNames from 'classnames';
 import { Draggable } from 'firefox-profiler/components/shared/Draggable';
-import { getFormattedTimeLength } from 'firefox-profiler/profile-logic/committed-ranges';
+import { getFormattedTimelineValue } from 'firefox-profiler/profile-logic/committed-ranges';
 import './Selection.css';
 
 import type {
@@ -45,6 +46,7 @@ type StateProps = {|
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
   +zeroAt: Milliseconds,
+  +profileTimelineUnit: string,
   +mouseTimePosition: Milliseconds | null,
 |};
 
@@ -344,7 +346,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
     +draggingStart?: boolean,
     +draggingEnd?: boolean,
   }) {
-    const { committedRange, width } = this.props;
+    const { committedRange, width, profileTimelineUnit } = this.props;
     const { selectionStart, selectionEnd } = previewSelection;
 
     if (!Number.isFinite(selectionStart) || !Number.isFinite(selectionEnd)) {
@@ -399,7 +401,10 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
                 hidden: !previewSelection.isModifying,
               })}
             >
-              {getFormattedTimeLength(selectionEnd - selectionStart)}
+              {getFormattedTimelineValue(
+                selectionEnd - selectionStart,
+                profileTimelineUnit
+              )}
             </span>
             <button
               className={classNames('timelineSelectionOverlayZoomButton', {
@@ -425,6 +430,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
       width,
       committedRange,
       zeroAt,
+      profileTimelineUnit,
     } = this.props;
 
     let hoverLocation = null;
@@ -441,8 +447,9 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
       // Only compute and display the timestamp when there is a mouse position
       // and the position is not NaN or Infinity which is the case when there
       // is no data in the timeline.
-      mousePosTimestamp = getFormattedTimeLength(
+      mousePosTimestamp = getFormattedTimelineValue(
         mouseTimePosition - zeroAt,
+        profileTimelineUnit,
         (committedRange.end - committedRange.start) / width
       );
     }
@@ -489,6 +496,7 @@ export const TimelineSelection = explicitConnect<
     previewSelection: getPreviewSelection(state),
     committedRange: getCommittedRange(state),
     zeroAt: getZeroAt(state),
+    profileTimelineUnit: getProfileTimelineUnit(state),
     mouseTimePosition: getMouseTimePosition(state),
   }),
   mapDispatchToProps: {

@@ -6,7 +6,6 @@ import {
   mergeProfilesForDiffing,
   mergeThreads,
 } from '../../profile-logic/merge-compare';
-import { computeStringIndexMarkerFieldsByDataType } from '../../profile-logic/marker-schema';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import {
   getProfileFromTextSamples,
@@ -16,8 +15,7 @@ import {
 import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { getTimeRangeIncludingAllThreads } from 'firefox-profiler/profile-logic/profile-data';
-import { StringTable } from '../../utils/string-table';
-import type { RawThread } from 'firefox-profiler/types';
+import type { RawThread, RawProfileSharedData } from 'firefox-profiler/types';
 
 describe('mergeProfilesForDiffing function', function () {
   it('merges the various tables properly in the diffing profile', function () {
@@ -42,7 +40,7 @@ describe('mergeProfilesForDiffing function', function () {
     const mergedLibs = mergedProfile.libs;
     const mergedResources = mergedThread.resourceTable;
     const mergedFunctions = mergedThread.funcTable;
-    const stringArray = mergedThread.stringArray;
+    const stringArray = mergedProfile.shared.stringArray;
 
     expect(mergedLibs).toHaveLength(3);
     expect(mergedResources).toHaveLength(3);
@@ -193,8 +191,8 @@ describe('mergeProfilesForDiffing function', function () {
 
     const threadA = sampleProfileA.profile.threads[0];
     const threadB = sampleProfileB.profile.threads[0];
-    const stringTableA = StringTable.withBackingArray(threadA.stringArray);
-    const stringTableB = StringTable.withBackingArray(threadB.stringArray);
+    const stringTableA = sampleProfileA.stringTable;
+    const stringTableB = sampleProfileB.stringTable;
 
     threadA.nativeSymbols = {
       length: 2,
@@ -272,17 +270,20 @@ describe('mergeProfilesForDiffing function', function () {
 });
 
 describe('mergeThreads function', function () {
-  function getFriendlyFuncLibResources(thread: RawThread): string[] {
-    const { funcTable, resourceTable, stringArray } = thread;
+  function getFriendlyFuncLibResources(
+    thread: RawThread,
+    shared: RawProfileSharedData
+  ): string[] {
+    const { funcTable, resourceTable } = thread;
     const strings = [];
     for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
-      const funcName = stringArray[funcTable.name[funcIndex]];
+      const funcName = shared.stringArray[funcTable.name[funcIndex]];
       const resourceIndex = funcTable.resource[funcIndex];
 
       let resourceName = '';
       if (resourceIndex >= 0) {
         const nameIndex = resourceTable.name[resourceIndex];
-        resourceName = stringArray[nameIndex];
+        resourceName = shared.stringArray[nameIndex];
       }
       strings.push(`${funcName} [${resourceName}]`);
     }
@@ -295,10 +296,7 @@ describe('mergeThreads function', function () {
       'A[lib:libA]  A[lib:libB]  C[lib:libC]'
     );
 
-    const mergedThread = mergeThreads(
-      profile.threads,
-      computeStringIndexMarkerFieldsByDataType(profile.meta.markerSchema)
-    );
+    const mergedThread = mergeThreads(profile.threads);
 
     const mergedResources = mergedThread.resourceTable;
     const mergedFunctions = mergedThread.funcTable;
@@ -310,7 +308,7 @@ describe('mergeThreads function', function () {
     // Now check that all functions are linked to the right resources.
     // We should have 2 A functions, linked to 2 different resources.
     // And we should have 1 B function, and 1 C function.
-    expect(getFriendlyFuncLibResources(mergedThread)).toEqual([
+    expect(getFriendlyFuncLibResources(mergedThread, profile.shared)).toEqual([
       'A [libA]',
       'B [libA]',
       'A [libB]',
@@ -325,10 +323,7 @@ describe('mergeThreads function', function () {
       'A[lib:libA]  A[lib:libB]  D[lib:libD]'
     );
 
-    const mergedThread = mergeThreads(
-      profile.threads,
-      computeStringIndexMarkerFieldsByDataType(profile.meta.markerSchema)
-    );
+    const mergedThread = mergeThreads(profile.threads);
 
     const mergedResources = mergedThread.resourceTable;
     const mergedFunctions = mergedThread.funcTable;
@@ -340,7 +335,7 @@ describe('mergeThreads function', function () {
     // Now check that all functions are linked to the right resources.
     // We should have 2 A functions, linked to 2 different resources.
     // And we should have 1 B function, 1 C function and 1 D function.
-    expect(getFriendlyFuncLibResources(mergedThread)).toEqual([
+    expect(getFriendlyFuncLibResources(mergedThread, profile.shared)).toEqual([
       'A [libA]',
       'B [libA]',
       'A [libB]',
@@ -373,15 +368,11 @@ describe('mergeThreads function', function () {
       ]
     );
 
-    const mergedThread = mergeThreads(
-      profile.threads,
-      computeStringIndexMarkerFieldsByDataType(profile.meta.markerSchema)
-    );
+    const mergedThread = mergeThreads(profile.threads);
 
     const mergedMarkers = mergedThread.markers;
-    const mergedStringArray = mergedThread.stringArray;
     expect(mergedMarkers).toHaveLength(6);
-    expect(mergedStringArray).toHaveLength(6);
+    expect(profile.shared.stringArray).toHaveLength(6);
 
     const markerNames = [];
     const markerStartTimes = [];
@@ -396,7 +387,7 @@ describe('mergeThreads function', function () {
 
       const markerStarTime = mergedMarkers.startTime[markerIndex];
       const markerEndTime = mergedMarkers.endTime[markerIndex];
-      const markerName = mergedStringArray[markerNameIdx];
+      const markerName = profile.shared.stringArray[markerNameIdx];
       markerNames.push(markerName);
       markerStartTimes.push(markerStarTime);
       markerEndTimes.push(markerEndTime);
@@ -437,35 +428,40 @@ describe('mergeThreads function', function () {
     // Get a useful marker schema
     profile.meta.markerSchema = markerSchemaForTests;
 
-    addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
+    addMarkersToThreadWithCorrespondingSamples(
+      profile.threads[0],
+      profile.shared,
       [
-        'Paint',
-        2,
-        3,
-        {
-          type: 'tracing',
-          category: 'Paint',
-          cause: { time: 2, stack: funcNames[0].C },
-        },
-      ],
-    ]);
-    addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
-      [
-        'Paint',
-        2,
-        3,
-        {
-          type: 'tracing',
-          category: 'Paint',
-          cause: { time: 2, stack: funcNames[1].C },
-        },
-      ],
-    ]);
-
-    const mergedThread = mergeThreads(
-      profile.threads,
-      computeStringIndexMarkerFieldsByDataType(profile.meta.markerSchema)
+        [
+          'Paint',
+          2,
+          3,
+          {
+            type: 'tracing',
+            category: 'Paint',
+            cause: { time: 2, stack: funcNames[0].C },
+          },
+        ],
+      ]
     );
+    addMarkersToThreadWithCorrespondingSamples(
+      profile.threads[1],
+      profile.shared,
+      [
+        [
+          'Paint',
+          2,
+          3,
+          {
+            type: 'tracing',
+            category: 'Paint',
+            cause: { time: 2, stack: funcNames[1].C },
+          },
+        ],
+      ]
+    );
+
+    const mergedThread = mergeThreads(profile.threads);
     const mergedMarkers = mergedThread.markers;
     expect(mergedMarkers).toHaveLength(2);
 
@@ -487,21 +483,19 @@ describe('mergeThreads function', function () {
   });
 
   it('merges CompositorScreenshot marker urls properly', function () {
-    const { profile } = getProfileFromTextSamples(`A`, `B`);
+    const { profile, stringTable } = getProfileFromTextSamples(`A`, `B`);
     const thread1 = profile.threads[0];
     const thread2 = profile.threads[1];
-    const stringTable1 = StringTable.withBackingArray(thread1.stringArray);
-    const stringTable2 = StringTable.withBackingArray(thread2.stringArray);
 
     // This screenshot marker will be added to the first thread.
     const screenshotUrl1 = 'Url1';
-    const screenshot1UrlIndex = stringTable1.indexForString(screenshotUrl1);
+    const screenshot1UrlIndex = stringTable.indexForString(screenshotUrl1);
     // This screenshot marker will be added to the second thread.
     const screenshotUrl2 = 'Url2';
-    const screenshot2UrlIndex = stringTable2.indexForString(screenshotUrl2);
+    const screenshot2UrlIndex = stringTable.indexForString(screenshotUrl2);
 
     // Let's add the markers now.
-    addMarkersToThreadWithCorrespondingSamples(thread1, [
+    addMarkersToThreadWithCorrespondingSamples(thread1, profile.shared, [
       [
         'CompositorScreenshot',
         1,
@@ -516,7 +510,7 @@ describe('mergeThreads function', function () {
       ],
     ]);
 
-    addMarkersToThreadWithCorrespondingSamples(thread2, [
+    addMarkersToThreadWithCorrespondingSamples(thread2, profile.shared, [
       [
         'CompositorScreenshot',
         2,
@@ -531,10 +525,7 @@ describe('mergeThreads function', function () {
       ],
     ]);
 
-    const mergedThread = mergeThreads(
-      profile.threads,
-      computeStringIndexMarkerFieldsByDataType(profile.meta.markerSchema)
-    );
+    const mergedThread = mergeThreads(profile.threads);
     const mergedMarkers = mergedThread.markers;
 
     // Make sure that we have 2 markers in the merged thread.
@@ -546,33 +537,33 @@ describe('mergeThreads function', function () {
         ? markerData.url
         : null
     );
-    const url1AfterMerge =
-      mergedThread.stringArray[ensureExists(markerUrlsAfterMerge[0])];
-    const url2AfterMerge =
-      mergedThread.stringArray[ensureExists(markerUrlsAfterMerge[1])];
+    const url1AfterMerge = stringTable.getString(
+      ensureExists(markerUrlsAfterMerge[0])
+    );
+    const url2AfterMerge = stringTable.getString(
+      ensureExists(markerUrlsAfterMerge[1])
+    );
 
     expect(url1AfterMerge).toBe(screenshotUrl1);
     expect(url2AfterMerge).toBe(screenshotUrl2);
   });
 
   it('merges schema markers with unique-string fields properly', function () {
-    const { profile } = getProfileFromTextSamples(`A`, `B`);
+    const { profile, stringTable } = getProfileFromTextSamples(`A`, `B`);
     profile.meta.markerSchema.push({
       name: 'testSchemaWithUniqueUrlField',
       display: [],
-      data: [{ key: 'fieldWithUniqueString', format: 'unique-string' }],
+      fields: [{ key: 'fieldWithUniqueString', format: 'unique-string' }],
     });
     const thread1 = profile.threads[0];
     const thread2 = profile.threads[1];
-    const stringTable1 = StringTable.withBackingArray(thread1.stringArray);
-    const stringTable2 = StringTable.withBackingArray(thread2.stringArray);
 
     const uniqueString1 = 'Unique string value in thread 1';
-    const uniqueString1Index = stringTable1.indexForString(uniqueString1);
+    const uniqueString1Index = stringTable.indexForString(uniqueString1);
     const uniqueString2 = 'A different unique string value in thread 2';
-    const uniqueString2Index = stringTable2.indexForString(uniqueString2);
+    const uniqueString2Index = stringTable.indexForString(uniqueString2);
 
-    addMarkersToThreadWithCorrespondingSamples(thread1, [
+    addMarkersToThreadWithCorrespondingSamples(thread1, profile.shared, [
       [
         'Thread1Marker',
         1,
@@ -584,7 +575,7 @@ describe('mergeThreads function', function () {
       ],
     ]);
 
-    addMarkersToThreadWithCorrespondingSamples(thread2, [
+    addMarkersToThreadWithCorrespondingSamples(thread2, profile.shared, [
       [
         'Thread2Marker',
         2,
@@ -596,24 +587,19 @@ describe('mergeThreads function', function () {
       ],
     ]);
 
-    const mergedThread = mergeThreads(
-      profile.threads,
-      computeStringIndexMarkerFieldsByDataType(profile.meta.markerSchema)
-    );
+    const mergedThread = mergeThreads(profile.threads);
     const mergedMarkers = mergedThread.markers;
 
     // Make sure that we have 2 markers in the merged thread.
     expect(mergedMarkers).toHaveLength(2);
 
     // Check if we properly merged the string tables and have the correct fields.
-    const string1AfterMerge =
-      mergedThread.stringArray[
-        (ensureExists(mergedMarkers.data[0]): MixedObject).fieldWithUniqueString
-      ];
-    const string2AfterMerge =
-      mergedThread.stringArray[
-        (ensureExists(mergedMarkers.data[1]): MixedObject).fieldWithUniqueString
-      ];
+    const string1AfterMerge = stringTable.getString(
+      (ensureExists(mergedMarkers.data[0]): MixedObject).fieldWithUniqueString
+    );
+    const string2AfterMerge = stringTable.getString(
+      (ensureExists(mergedMarkers.data[1]): MixedObject).fieldWithUniqueString
+    );
 
     expect(string1AfterMerge).toBe(uniqueString1);
     expect(string2AfterMerge).toBe(uniqueString2);

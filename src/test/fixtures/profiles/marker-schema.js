@@ -9,52 +9,49 @@ export const markerSchemaForTests: MarkerSchema[] = [
   {
     name: 'GCMajor',
     display: ['marker-chart', 'marker-table', 'timeline-memory'],
-    data: [],
+    fields: [],
   },
   {
     name: 'GCMinor',
     display: ['marker-chart', 'marker-table', 'timeline-memory'],
-    data: [],
+    fields: [],
   },
   {
     name: 'GCSlice',
     display: ['marker-chart', 'marker-table', 'timeline-memory'],
-    data: [],
+    fields: [],
   },
   {
     name: 'CC',
     tooltipLabel: 'Cycle Collect',
     display: ['marker-chart', 'marker-table', 'timeline-memory'],
-    data: [],
+    fields: [],
   },
   {
     name: 'FileIO',
     display: ['marker-chart', 'marker-table'],
-    data: [
+    fields: [
       {
         key: 'operation',
         label: 'Operation',
         format: 'string',
-        searchable: true,
       },
       {
         key: 'source',
         label: 'Source',
         format: 'string',
-        searchable: true,
       },
       {
         key: 'filename',
         label: 'Filename',
         format: 'file-path',
-        searchable: true,
       },
     ],
   },
   {
     name: 'MediaSample',
     display: ['marker-chart', 'marker-table'],
-    data: [
+    fields: [
       {
         key: 'sampleStartTimeUs',
         label: 'Sample start time',
@@ -70,7 +67,7 @@ export const markerSchemaForTests: MarkerSchema[] = [
   {
     name: 'Styles',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [
+    fields: [
       {
         key: 'elementsTraversed',
         label: 'Elements traversed',
@@ -85,8 +82,8 @@ export const markerSchemaForTests: MarkerSchema[] = [
   {
     name: 'PreferenceRead',
     display: ['marker-chart', 'marker-table'],
-    data: [
-      { key: 'prefName', label: 'Name', format: 'string', searchable: true },
+    fields: [
+      { key: 'prefName', label: 'Name', format: 'string' },
       { key: 'prefKind', label: 'Kind', format: 'string' },
       { key: 'prefType', label: 'Type', format: 'string' },
       { key: 'prefValue', label: 'Value', format: 'string' },
@@ -98,33 +95,27 @@ export const markerSchemaForTests: MarkerSchema[] = [
     chartLabel: '{marker.data.name}',
     tableLabel: '{marker.data.name}',
     display: ['marker-chart', 'marker-table'],
-    data: [
-      { key: 'name', label: 'Name', format: 'string', searchable: true },
-      { label: 'Marker', value: 'UserTiming' },
+    fields: [
+      { key: 'name', label: 'Name', format: 'string' },
       { key: 'entryType', label: 'Entry Type', format: 'string' },
-      {
-        label: 'Description',
-        value:
-          'UserTiming is created using the DOM APIs performance.mark() and performance.measure().',
-      },
     ],
+    description:
+      'UserTiming is created using the DOM APIs performance.mark() and performance.measure().',
   },
   {
     name: 'Text',
     tableLabel: '{marker.name} — {marker.data.name}',
     chartLabel: '{marker.name} — {marker.data.name}',
     display: ['marker-chart', 'marker-table'],
-    data: [
-      { key: 'name', label: 'Details', format: 'string', searchable: true },
-    ],
+    fields: [{ key: 'name', label: 'Details', format: 'string' }],
   },
   {
     name: 'Log',
     display: ['marker-table'],
     tableLabel: '({marker.data.module}) {marker.data.name}',
-    data: [
-      { key: 'module', label: 'Module', format: 'string', searchable: true },
-      { key: 'name', label: 'Name', format: 'string', searchable: true },
+    fields: [
+      { key: 'module', label: 'Module', format: 'string' },
+      { key: 'name', label: 'Name', format: 'string' },
     ],
   },
   {
@@ -133,29 +124,24 @@ export const markerSchemaForTests: MarkerSchema[] = [
     tableLabel: '{marker.data.eventType}',
     chartLabel: '{marker.data.eventType}',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [
+    fields: [
       { key: 'latency', label: 'Latency', format: 'duration' },
       {
         key: 'eventType',
         label: 'Event Type',
         format: 'string',
-        searchable: true,
       },
     ],
   },
   {
     name: 'tracing',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [
-      { key: 'category', label: 'Type', format: 'string', searchable: true },
-    ],
+    fields: [{ key: 'category', label: 'Type', format: 'string' }],
   },
   {
     name: 'Layout',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [
-      { key: 'category', label: 'Type', format: 'string', searchable: true },
-    ],
+    fields: [{ key: 'category', label: 'Type', format: 'string' }],
   },
   {
     name: 'IPC',
@@ -164,7 +150,7 @@ export const markerSchemaForTests: MarkerSchema[] = [
       '{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}',
     chartLabel: '{marker.data.messageType}',
     display: ['marker-chart', 'marker-table', 'timeline-ipc'],
-    data: [
+    fields: [
       { key: 'messageType', label: 'Type', format: 'string' },
       { key: 'sync', label: 'Sync', format: 'string' },
       { key: 'sendThreadName', label: 'From', format: 'string' },
@@ -174,35 +160,33 @@ export const markerSchemaForTests: MarkerSchema[] = [
   {
     name: 'VisibleInTimelineOverview',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [],
+    fields: [],
   },
   {
     name: 'StringTesting',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [
+    fields: [
       {
-        key: 'searchableString',
-        label: 'Searchable string field',
+        key: 'string',
+        label: 'string field',
         format: 'string',
-        searchable: true,
       },
       {
-        key: 'searchableUniqueString',
-        label: 'Searchable unique string field',
+        key: 'uniqueString',
+        label: 'unique string field',
         format: 'unique-string',
-        searchable: true,
       },
+    ],
+  },
+  {
+    name: 'MarkerWithHiddenField',
+    display: ['marker-chart', 'marker-table', 'timeline-overview'],
+    fields: [
       {
-        key: 'nonSearchableString',
-        label: 'Non-searchable string field',
+        key: 'hiddenString',
+        label: 'Hidden string',
         format: 'string',
-        searchable: false,
-      },
-      {
-        key: 'nonSearchableUniqueString',
-        label: 'Non-searchable unique string field',
-        format: 'unique-string',
-        searchable: false,
+        hidden: true,
       },
     ],
   },

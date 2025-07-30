@@ -10,7 +10,7 @@ import type {
   IndexIntoCallNodeTable,
 } from 'firefox-profiler/types';
 import type { StringTable } from 'firefox-profiler/utils/string-table';
-import type { CallTreeTimings } from './call-tree';
+import type { CallTreeTimingsNonInverted } from './call-tree';
 
 import { bisectionRightByStrKey } from 'firefox-profiler/utils/bisect';
 
@@ -229,7 +229,7 @@ export function computeFlameGraphRows(
 export function getFlameGraphTiming(
   flameGraphRows: FlameGraphRows,
   callNodeTable: CallNodeTable,
-  callTreeTimings: CallTreeTimings
+  callTreeTimings: CallTreeTimingsNonInverted
 ): FlameGraphTiming {
   const { total, self, rootTotalSummary } = callTreeTimings;
   const { prefix } = callNodeTable;

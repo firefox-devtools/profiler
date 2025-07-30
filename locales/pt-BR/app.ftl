@@ -94,6 +94,7 @@ CallNodeContextMenu--searchfox = Procurar o nome da função no Searchfox
 CallNodeContextMenu--copy-function-name = Copiar nome da função
 CallNodeContextMenu--copy-script-url = Copiar URL do script
 CallNodeContextMenu--copy-stack = Copiar pilha
+CallNodeContextMenu--show-the-function-in-devtools = Mostrar a função no DevTools
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -563,6 +564,11 @@ PanelSearch--search-field-hint = Você sabia que pode usar vírgula (,) para pes
 
 ## Profile Name Button
 
+ProfileName--edit-profile-name-button =
+    .title = Mudar o nome do profile
+ProfileName--edit-profile-name-input =
+    .title = Mudar o nome do profile
+    .aria-label = Nome do profile
 
 ## Profile Delete Button
 

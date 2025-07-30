@@ -176,34 +176,126 @@ export function ratioToCssPercent(ratio: number): string {
   return (ratio * 100).toFixed(4) + '%';
 }
 
-export function formatBytes(
+export function formatGigaBytes(
   bytes: number,
   significantDigits: number = 3,
-  maxFractionalDigits: number = 2
+  maxFractionalDigits: number = 2,
+  precision: number = Infinity
 ): string {
-  if (bytes < 10000) {
-    // Use singles up to 10,000.  I think 9,360B looks nicer than 9.36KB.
-    // We use "0" for significantDigits because bytes will always be integers.
-    return formatNumber(bytes, 0) + 'B';
-  } else if (bytes < 1024 * 1024) {
-    return (
-      formatNumber(bytes / 1024, significantDigits, maxFractionalDigits) + 'KB'
-    );
-  } else if (bytes < 1024 * 1024 * 1024) {
+  const bytesPerGigabyte = 1024 ** 3;
+  if (precision === Infinity) {
     return (
       formatNumber(
-        bytes / (1024 * 1024),
+        bytes / bytesPerGigabyte,
+        significantDigits,
+        maxFractionalDigits
+      ) + 'GB'
+    );
+  }
+
+  if (precision >= bytesPerGigabyte) {
+    bytes = Math.round(bytes / bytesPerGigabyte) * bytesPerGigabyte;
+  }
+  const megabytes = bytes % bytesPerGigabyte;
+  return (
+    formatNumber((bytes - megabytes) / bytesPerGigabyte, significantDigits, 0) +
+    'GB' +
+    ((megabytes > 0 && maxFractionalDigits > 0) || precision < bytesPerGigabyte
+      ? ' ' + formatMegaBytes(megabytes, significantDigits, 0, precision)
+      : '')
+  );
+}
+
+export function formatMegaBytes(
+  bytes: number,
+  significantDigits: number = 3,
+  maxFractionalDigits: number = 2,
+  precision: number = Infinity
+): string {
+  const bytesPerMegabyte = 1024 ** 2;
+  if (precision === Infinity) {
+    return (
+      formatNumber(
+        bytes / bytesPerMegabyte,
         significantDigits,
         maxFractionalDigits
       ) + 'MB'
     );
   }
+
+  if (precision >= bytesPerMegabyte) {
+    bytes = Math.round(bytes / bytesPerMegabyte) * bytesPerMegabyte;
+  }
+  const kilobytes = bytes % bytesPerMegabyte;
   return (
-    formatNumber(
-      bytes / (1024 * 1024 * 1024),
+    formatNumber((bytes - kilobytes) / bytesPerMegabyte, significantDigits, 0) +
+    'MB' +
+    ((kilobytes > 0 && maxFractionalDigits > 0) || precision < bytesPerMegabyte
+      ? ' ' + formatKiloBytes(kilobytes, significantDigits, 0, precision)
+      : '')
+  );
+}
+
+export function formatKiloBytes(
+  bytes: number,
+  significantDigits: number = 3,
+  maxFractionalDigits: number = 2,
+  precision: number = Infinity
+): string {
+  const bytesPerKilobyte = 1024;
+  if (precision === Infinity) {
+    return (
+      formatNumber(
+        bytes / bytesPerKilobyte,
+        significantDigits,
+        maxFractionalDigits
+      ) + 'KB'
+    );
+  }
+
+  if (precision >= bytesPerKilobyte) {
+    bytes = Math.round(bytes / bytesPerKilobyte) * bytesPerKilobyte;
+  }
+  const bytesOnly = bytes % bytesPerKilobyte;
+  return (
+    formatNumber((bytes - bytesOnly) / bytesPerKilobyte, significantDigits, 0) +
+    'KB' +
+    ((bytesOnly > 0 && maxFractionalDigits > 0) || precision < bytesPerKilobyte
+      ? ' ' + formatBytes(bytesOnly, significantDigits, 0, precision)
+      : '')
+  );
+}
+
+export function formatBytes(
+  bytes: number,
+  significantDigits: number = 3,
+  maxFractionalDigits: number = 2,
+  precision: number = Infinity
+): string {
+  if (bytes < 10000) {
+    // Use singles up to 10,000.  I think 9,360B looks nicer than 9.36KB.
+    // We use "0" for significantDigits because bytes will always be integers.
+    return formatNumber(bytes, 0) + 'B';
+  } else if (bytes < 1024 ** 2) {
+    return formatKiloBytes(
+      bytes,
       significantDigits,
-      maxFractionalDigits
-    ) + 'GB'
+      maxFractionalDigits,
+      precision
+    );
+  } else if (bytes < 1024 ** 3) {
+    return formatMegaBytes(
+      bytes,
+      significantDigits,
+      maxFractionalDigits,
+      precision
+    );
+  }
+  return formatGigaBytes(
+    bytes,
+    significantDigits,
+    maxFractionalDigits,
+    precision
   );
 }
 
@@ -434,4 +526,61 @@ export function formatValueTotal(
   }
 
   return value_total + percent;
+}
+
+function _findRoundValueGreaterOrEqualTo(minValue: number): number {
+  // Write minValue as a * 10^b, with 1 <= a < 10.
+  // Return the lowest of 2 * 10^b, 5 * 10^b, 10 * 10^b that is greater or
+  // equal to minValue.
+  const b = Math.floor(Math.log10(minValue));
+  if (minValue <= 2 * Math.pow(10, b)) {
+    return 2 * Math.pow(10, b);
+  }
+  if (minValue <= 5 * Math.pow(10, b)) {
+    return 5 * Math.pow(10, b);
+  }
+  return Math.pow(10, b + 1);
+}
+
+export function findRoundBytesValueGreaterOrEqualTo(minValue: number): number {
+  // Special case KB, MB, GB.
+  if (minValue > 1024 && minValue <= 1024 ** 4) {
+    for (const power of [1, 2, 3]) {
+      for (const value of [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]) {
+        const number = value * 1024 ** power;
+        if (minValue <= number) {
+          return number;
+        }
+      }
+    }
+  }
+
+  return _findRoundValueGreaterOrEqualTo(minValue);
+}
+
+export function findRoundMillisecondsValueGreaterOrEqualTo(
+  minValue: Milliseconds
+): number {
+  if (minValue > 10000 && minValue <= 48 * 3600 * 1000) {
+    for (const seconds of [15, 20, 30]) {
+      const number = seconds * 1000;
+      if (minValue <= number) {
+        return number;
+      }
+    }
+    for (const minutes of [1, 2, 5, 10, 15, 20, 30]) {
+      const number = minutes * 60 * 1000;
+      if (minValue <= number) {
+        return number;
+      }
+    }
+    for (const hours of [1, 2, 3, 4, 6, 8, 12, 24, 48]) {
+      const number = hours * 3600 * 1000;
+      if (minValue <= number) {
+        return number;
+      }
+    }
+  }
+
+  return _findRoundValueGreaterOrEqualTo(minValue);
 }

@@ -26,6 +26,7 @@ import {
   getIsExperimentalCPUGraphsEnabled,
   getImplementationFilter,
   getZeroAt,
+  getProfileTimelineUnit,
 } from 'firefox-profiler/selectors';
 import {
   TimelineMarkersJank,
@@ -52,13 +53,13 @@ import type {
   IndexIntoSamplesTable,
   Milliseconds,
   StartEndRange,
-  CallNodeInfo,
   ImplementationFilter,
   IndexIntoCallNodeTable,
   SelectedState,
   State,
   ThreadsKey,
 } from 'firefox-profiler/types';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
@@ -94,6 +95,7 @@ type StateProps = {|
   +implementationFilter: ImplementationFilter,
   +callTreeVisible: boolean,
   +zeroAt: Milliseconds,
+  +profileTimelineUnit: string,
 |};
 
 type DispatchProps = {|
@@ -195,6 +197,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       isExperimentalCPUGraphsEnabled,
       implementationFilter,
       zeroAt,
+      profileTimelineUnit,
     } = this.props;
 
     const processType = filteredThread.processType;
@@ -265,6 +268,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               implementationFilter={implementationFilter}
               timelineType={timelineType}
               zeroAt={zeroAt}
+              profileTimelineUnit={profileTimelineUnit}
             />
             {trackType === 'expanded' ? (
               <ThreadSampleGraph
@@ -280,6 +284,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
                 timelineType={timelineType}
                 implementationFilter={implementationFilter}
                 zeroAt={zeroAt}
+                profileTimelineUnit={profileTimelineUnit}
               />
             ) : null}
             {isExperimentalCPUGraphsEnabled &&
@@ -369,6 +374,7 @@ export const TimelineTrackThread = explicitConnect<
       implementationFilter: getImplementationFilter(state),
       callTreeVisible: selectors.getUsefulTabs(state).includes('calltree'),
       zeroAt: getZeroAt(state),
+      profileTimelineUnit: getProfileTimelineUnit(state),
     };
   },
   mapDispatchToProps: {

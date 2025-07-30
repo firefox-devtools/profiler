@@ -37,7 +37,6 @@ const listOfProfileInformations = [
     publishedDate: new Date('4 Jul 2020 14:00'), // "today" earlier
     name: '',
     preset: null,
-    originHostname: null,
     meta: {
       product: 'Fennec',
       // Not more meta information, to test that we can handle profiles that
@@ -52,7 +51,6 @@ const listOfProfileInformations = [
     publishedDate: new Date('3 Jul 2020 08:00'), // yesterday
     name: 'Layout profile',
     preset: 'web',
-    originHostname: null,
     meta: {
       product: 'Firefox',
       platform: 'X11',
@@ -69,7 +67,6 @@ const listOfProfileInformations = [
     publishedDate: new Date('20 May 2018'), // ancient date
     name: '',
     preset: null,
-    originHostname: 'https://www.cnn.com',
     meta: {
       product: 'Firefox Preview',
       platform: 'Android 7.0',
@@ -88,7 +85,6 @@ const listOfProfileInformations = [
     publishedDate: new Date('4 Jul 2020 13:00'),
     name: 'Another good profile',
     preset: null,
-    originHostname: 'https://profiler.firefox.com',
     meta: {
       product: 'Firefox',
       platform: 'Windows',
@@ -105,7 +101,6 @@ const listOfProfileInformations = [
     publishedDate: new Date('5 Jul 2020 11:00'), // This is the future!
     name: 'MacOS X profile',
     preset: null,
-    originHostname: 'https://mozilla.org',
     meta: {
       product: 'Firefox',
       platform: 'Macintosh',
@@ -290,11 +285,11 @@ describe('ListOfPublishedProfiles', () => {
       endpointUrl: string,
       jwtToken: string,
     }) {
-      window.fetch
+      window.fetchMock
         .catch(404) // Catchall
-        .mock(endpointUrl, (urlString, options) => {
+        .route(endpointUrl, ({ options }) => {
           const { method, headers } = options;
-          if (method !== 'DELETE') {
+          if (method !== 'delete') {
             return new Response(null, {
               status: 405,
               statusText: 'Method not allowed',
@@ -302,8 +297,8 @@ describe('ListOfPublishedProfiles', () => {
           }
 
           if (
-            headers['Content-Type'] !== 'application/json' ||
-            headers.Accept !==
+            headers['content-type'] !== 'application/json' ||
+            headers.accept !==
               'application/vnd.firefox-profiler+json;version=1.0'
           ) {
             return new Response(null, {
@@ -312,7 +307,7 @@ describe('ListOfPublishedProfiles', () => {
             });
           }
 
-          if (headers.Authorization !== `Bearer ${jwtToken}`) {
+          if (headers.authorization !== `Bearer ${jwtToken}`) {
             return new Response(null, {
               status: 401,
               statusText: 'Forbidden',
@@ -476,7 +471,6 @@ describe('ListOfPublishedProfiles', () => {
         publishedDate: new Date('4 Jul 2020 13:00'),
         name: 'PROFILE',
         preset: null,
-        originHostname: 'https://mozilla.org',
         meta: {
           product: 'Firefox',
           platform: 'Macintosh',

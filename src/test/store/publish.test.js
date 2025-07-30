@@ -11,7 +11,6 @@ import {
   revertToPrePublishedState,
 } from '../../actions/publish';
 import { changeSelectedTab } from '../../actions/app';
-import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
 import {
   viewProfileFromPathInZipFile,
   returnToZipFileList,
@@ -39,18 +38,16 @@ import {
 import { getHasPreferenceMarkers } from '../../selectors/profile';
 import { urlFromState } from '../../app-logic/url-handling';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
-import {
-  getProfileFromTextSamples,
-  addActiveTabInformationToProfile,
-} from '../fixtures/profiles/processed-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
   getProfileWithFakeGlobalTrack,
   getHumanReadableTracks,
 } from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';
 import { ensureExists } from '../../utils/flow';
-import { waitUntilData, waitUntilState } from '../fixtures/utils';
+import { waitUntilData, waitUntilState, formatTree } from '../fixtures/utils';
 import { storeWithZipFile } from '../fixtures/profiles/zip-file';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
   addTransformToStack,
   hideGlobalTrack,
@@ -214,93 +211,6 @@ describe('getRemoveProfileInformation', function () {
     expect(
       ensureExists(getRemoveProfileInformation(getState())).shouldRemoveThreads
     ).toEqual(new Set([2, 3]));
-  });
-
-  describe('about non-active tab information', () => {
-    function setupForActiveTab(updateChannel, timelineTrackOrganization) {
-      const { profile, activeTabID } = addActiveTabInformationToProfile(
-        getProfileWithFakeGlobalTrack()
-      );
-      profile.meta.updateChannel = updateChannel;
-      const { getState, dispatch } = storeWithProfile(profile);
-
-      // Hide the second process to test if this will or won't be added to the
-      // set of removed data.
-      dispatch(hideGlobalTrack(1));
-
-      // Possibly switch to the active tab view.
-      if (timelineTrackOrganization) {
-        dispatch(changeTimelineTrackOrganization(timelineTrackOrganization));
-      }
-
-      return { getState, dispatch, activeTabID };
-    }
-
-    it('should remove them when in the active tab view in a nightly profile', () => {
-      const { getState, dispatch, activeTabID } = setupForActiveTab('nightly', {
-        type: 'active-tab',
-        tabID: null,
-      });
-      expect(getRemoveProfileInformation(getState())).toBe(null);
-
-      dispatch(toggleCheckedSharingOptions('includeAllTabs'));
-      const removeProfileInformation = ensureExists(
-        getRemoveProfileInformation(getState())
-      );
-
-      // Note: Jest doesn't check Set values with toMatchObject, so we're checking the
-      // properties individually. See https://github.com/facebook/jest/issues/11250
-      expect(removeProfileInformation.shouldRemoveTabsExceptTabID).toBe(
-        activeTabID
-      );
-      expect(removeProfileInformation.shouldRemoveThreads.size).toBe(0);
-    });
-
-    it('should remove them when in the active tab view in a release profile', () => {
-      const { getState, activeTabID } = setupForActiveTab('release', {
-        type: 'active-tab',
-        tabID: null,
-      });
-
-      const removeProfileInformation = ensureExists(
-        getRemoveProfileInformation(getState())
-      );
-
-      // Note: Jest doesn't check Set values with toMatchObject, so we're checking the
-      // properties individually. See https://github.com/facebook/jest/issues/11250
-      expect(removeProfileInformation.shouldRemoveTabsExceptTabID).toBe(
-        activeTabID
-      );
-      expect(removeProfileInformation.shouldRemoveThreads.size).toBe(0);
-    });
-
-    it('should not remove them when in full view in a nightly profile', () => {
-      const { getState, dispatch } = setupForActiveTab('nightly');
-      expect(getRemoveProfileInformation(getState())).toBe(null);
-
-      dispatch(toggleCheckedSharingOptions('includeAllTabs'));
-      const removeProfileInformation = ensureExists(
-        getRemoveProfileInformation(getState())
-      );
-
-      // Note: Jest doesn't check Set values with toMatchObject, so we're checking the
-      // properties individually. See https://github.com/facebook/jest/issues/11250
-      expect(removeProfileInformation.shouldRemoveTabsExceptTabID).toBe(null);
-      expect(removeProfileInformation.shouldRemoveThreads.size).toBe(0);
-    });
-
-    it('should not remove them when in full view in a release profile', () => {
-      const { getState } = setupForActiveTab('release');
-
-      const removeProfileInformation = ensureExists(
-        getRemoveProfileInformation(getState())
-      );
-
-      // Note: Jest doesn't check Set values with toMatchObject, so we're checking the
-      // properties individually. See https://github.com/facebook/jest/issues/11250
-      expect(removeProfileInformation.shouldRemoveTabsExceptTabID).toBe(null);
-      expect(removeProfileInformation.shouldRemoveThreads.size).toBe(2);
-    });
   });
 });
 
@@ -589,7 +499,7 @@ describe('attemptToPublish', function () {
     const {
       profile,
       funcNamesPerThread: [, funcNames],
-    } = getProfileFromTextSamples('A', 'B');
+    } = getProfileFromTextSamples('A', 'B  C  D');
 
     // This will cause the profile to be sanitized by default when uploading.
     profile.meta.updateChannel = 'release';
@@ -605,30 +515,42 @@ describe('attemptToPublish', function () {
     const { dispatch, getState, resolveUpload, assertUploadSuccess } =
       setupFakeUploadsWithStore(store);
 
-    // Add some transforms
-    const B = funcNames.indexOf('B');
+    // Add a committed range so that only samples C and D are in range.
+    dispatch(commitRange(0.5, 2.5));
+
+    // Add a focus-function transform for C.
+    const C = funcNames.indexOf('C');
     dispatch(
       addTransformToStack(1, {
         type: 'focus-function',
-        funcIndex: B,
+        funcIndex: C,
       })
     );
 
-    // Hide the first track
-    // Note that the includeHiddenTracks checkbox is already false, so we don't
-    // need to toggle that.
+    // Hide the first track.
     dispatch(hideGlobalTrack(0));
 
-    // Publish
+    // Verify that the call tree is as expected.
+    const callTreeBefore = selectedThreadSelectors.getCallTree(getState());
+    expect(formatTree(callTreeBefore)).toEqual(['- C (total: 1, self: 1)']);
+
+    // Publish. This will remove thread 0 and filter out samples outside of
+    // the committed range.
+    // We rely on the fact that all sharing options start out as false,
+    // specifically includeHiddenThreads and includeFullTimeRange.
     const publishAttempt = dispatch(attemptToPublish());
     resolveUpload(JWT_TOKEN);
     expect(getUploadGeneration(getState())).toEqual(0);
     await assertUploadSuccess(publishAttempt);
 
     // The transform still should be there.
-    // Also, now it should be index 0.
+    // Also, the remaining thread's index is now 0.
     const transforms = getTransformStack(getState(), 0);
     expect(transforms.length).toBe(1);
+
+    // Verify that the call tree structure is preserved after sanitization.
+    const callTreeAfter = selectedThreadSelectors.getCallTree(getState());
+    expect(formatTree(callTreeAfter)).toEqual(['- C (total: 1, self: 1)']);
   });
 
   describe('with zip files', function () {

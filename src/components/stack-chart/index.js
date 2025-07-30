@@ -7,6 +7,7 @@ import * as React from 'react';
 import {
   TIMELINE_MARGIN_RIGHT,
   JS_TRACER_MAXIMUM_CHART_ZOOM,
+  TIMELINE_MARGIN_LEFT,
 } from '../../app-logic/constants';
 import explicitConnect from '../../utils/connect';
 import { StackChartCanvas } from './Canvas';
@@ -19,12 +20,13 @@ import {
   getInnerWindowIDToPageMap,
   getProfileUsesMultipleStackTypes,
 } from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
+  getStackChartSameWidths,
   getShowUserTimings,
   getSelectedThreadsKey,
-} from '../../selectors/url-state';
-import { getTimelineMarginLeft } from '../../selectors/app';
+} from 'firefox-profiler/selectors/url-state';
+import type { SameWidthsIndexToTimestampMap } from 'firefox-profiler/profile-logic/stack-timing';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { StackChartEmptyReasons } from './StackChartEmptyReasons';
 import { ContextMenuTrigger } from '../shared/ContextMenuTrigger';
 import { StackSettings } from '../shared/StackSettings';
@@ -43,7 +45,6 @@ import { getBottomBoxInfoForCallNode } from '../../profile-logic/profile-data';
 import type {
   Thread,
   CategoryList,
-  CallNodeInfo,
   IndexIntoCallNodeTable,
   CombinedTimingRows,
   MarkerIndex,
@@ -54,10 +55,10 @@ import type {
   PreviewSelection,
   WeightType,
   ThreadsKey,
-  CssPixels,
   InnerWindowID,
   Page,
 } from 'firefox-profiler/types';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import type { ConnectedProps } from '../../utils/connect';
 
@@ -70,6 +71,7 @@ type StateProps = {|
   +weightType: WeightType,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +combinedTimingRows: CombinedTimingRows,
+  +sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap,
   +timeRange: StartEndRange,
   +interval: Milliseconds,
   +previewSelection: PreviewSelection,
@@ -81,9 +83,9 @@ type StateProps = {|
   +scrollToSelectionGeneration: number,
   +getMarker: (MarkerIndex) => Marker,
   +userTimings: MarkerIndex[],
-  +timelineMarginLeft: CssPixels,
   +displayStackType: boolean,
   +hasFilteredCtssSamples: boolean,
+  +useStackChartSameWidths: boolean,
 |};
 
 type DispatchProps = {|
@@ -181,8 +183,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       event.preventDefault();
       const { callNodeInfo, selectedCallNodeIndex, thread } = this.props;
       if (selectedCallNodeIndex !== null) {
-        const callNodeTable = callNodeInfo.getCallNodeTable();
-        const funcIndex = callNodeTable.func[selectedCallNodeIndex];
+        const funcIndex = callNodeInfo.funcForNode(selectedCallNodeIndex);
         const funcName = thread.stringTable.getString(
           thread.funcTable.name[funcIndex]
         );
@@ -205,6 +206,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       thread,
       threadsKey,
       combinedTimingRows,
+      sameWidthsIndexToTimestampMap,
       timeRange,
       interval,
       previewSelection,
@@ -218,9 +220,9 @@ class StackChartImpl extends React.PureComponent<Props> {
       getMarker,
       userTimings,
       weightType,
-      timelineMarginLeft,
       displayStackType,
       hasFilteredCtssSamples,
+      useStackChartSameWidths,
     } = this.props;
 
     const maxViewportHeight = combinedTimingRows.length * STACK_FRAME_HEIGHT;
@@ -250,7 +252,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   timeRange,
                   maxViewportHeight,
                   viewportNeedsUpdate,
-                  marginLeft: timelineMarginLeft,
+                  marginLeft: TIMELINE_MARGIN_LEFT,
                   marginRight: TIMELINE_MARGIN_RIGHT,
                   maximumZoom: this.getMaximumZoom(),
                   containerRef: this._takeViewportRef,
@@ -262,6 +264,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   innerWindowIDToPageMap,
                   threadsKey,
                   combinedTimingRows,
+                  sameWidthsIndexToTimestampMap,
                   getMarker,
                   // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                   updatePreviewSelection,
@@ -277,8 +280,9 @@ class StackChartImpl extends React.PureComponent<Props> {
                   onRightClick: this._onRightClickedCallNodeChange,
                   shouldDisplayTooltips: this._shouldDisplayTooltips,
                   scrollToSelectionGeneration,
-                  marginLeft: timelineMarginLeft,
+                  marginLeft: TIMELINE_MARGIN_LEFT,
                   displayStackType: displayStackType,
+                  useStackChartSameWidths,
                 }}
               />
             </div>
@@ -301,6 +305,8 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       // Use the raw WeightType here, as the stack chart does not use the call tree
       weightType: selectedThreadSelectors.getSamplesWeightType(state),
       combinedTimingRows,
+      sameWidthsIndexToTimestampMap:
+        selectedThreadSelectors.getSameWidthsIndexToTimestampMap(state),
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
       previewSelection: getPreviewSelection(state),
@@ -315,10 +321,10 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       innerWindowIDToPageMap: getInnerWindowIDToPageMap(state),
       getMarker: selectedThreadSelectors.getMarkerGetter(state),
       userTimings: selectedThreadSelectors.getUserTimingMarkerIndexes(state),
-      timelineMarginLeft: getTimelineMarginLeft(state),
       displayStackType: getProfileUsesMultipleStackTypes(state),
       hasFilteredCtssSamples:
         selectedThreadSelectors.getHasFilteredCtssSamples(state),
+      useStackChartSameWidths: getStackChartSameWidths(state),
     };
   },
   mapDispatchToProps: {

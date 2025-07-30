@@ -18,13 +18,10 @@ import type {
 import type {
   Thread,
   CallNodePath,
-  CallNodeInfo,
   GlobalTrack,
   LocalTrack,
   TrackIndex,
   MarkerIndex,
-  OriginsTimeline,
-  ActiveTabTimeline,
   ThreadsKey,
   NativeSymbolInfo,
 } from './profile-derived';
@@ -32,6 +29,7 @@ import type { FuncToFuncsMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
+import type { CallNodeInfo } from '../profile-logic/call-node-info';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type {
   PseudoStrategy,
@@ -128,23 +126,6 @@ export type LastNonShiftClickInformation = {|
   clickedTrack: TrackReference,
   selection: Set<ThreadIndex>,
 |};
-
-/**
- * Active tab track references
- * A TrackReference uniquely identifies a track.
- */
-export type ActiveTabGlobalTrackReference = {|
-  +type: 'global',
-  +trackIndex: TrackIndex,
-|};
-export type ActiveTabResourceTrackReference = {|
-  +type: 'resource',
-  +trackIndex: TrackIndex,
-|};
-
-export type ActiveTabTrackReference =
-  | ActiveTabGlobalTrackReference
-  | ActiveTabResourceTrackReference;
 
 export type RequestedLib = {|
   +debugName: string,
@@ -418,18 +399,6 @@ type ReceiveProfileAction =
       +selectedTab: TabSlug,
     |}
   | {|
-      +type: 'VIEW_ORIGINS_PROFILE',
-      +selectedThreadIndexes: Set<ThreadIndex>,
-      +originsTimeline: OriginsTimeline,
-    |}
-  | {|
-      +type: 'VIEW_ACTIVE_TAB_PROFILE',
-      +selectedThreadIndexes: Set<ThreadIndex>,
-      +activeTabTimeline: ActiveTabTimeline,
-      +tabID: TabID | null,
-      +timelineType: TimelineType | null,
-    |}
-  | {|
       +type: 'DATA_RELOAD',
     |}
   | {| +type: 'RECEIVE_ZIP_FILE', +zip: JSZip |}
@@ -522,6 +491,10 @@ type UrlStateAction =
   | {|
       +type: 'CHANGE_SHOW_USER_TIMINGS',
       +showUserTimings: boolean,
+    |}
+  | {|
+      +type: 'CHANGE_STACK_CHART_SAME_WIDTHS',
+      +stackChartSameWidths: boolean,
     |}
   | {|
       +type: 'CHANGE_SHOW_JS_TRACER_SUMMARY',
