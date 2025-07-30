@@ -174,13 +174,13 @@ describe('extract functions and resource from location strings', function () {
 });
 
 describe('gecko counters processing', function () {
-  function setup(): {|
+  function setup(): {
     parentGeckoProfile: GeckoProfile,
     parentPid: Pid,
     childPid: Pid,
     parentCounter: GeckoCounter,
     childCounter: GeckoCounter,
-  |} {
+  } {
     // Create a gecko profile with counters.
     const findMainThread = (profile): GeckoThread =>
       ensureExists(
@@ -283,13 +283,13 @@ describe('gecko counters processing', function () {
 });
 
 describe('gecko profilerOverhead processing', function () {
-  function setup(): {|
+  function setup(): {
     parentGeckoProfile: GeckoProfile,
     parentPid: Pid,
     childPid: Pid,
     parentOverhead: GeckoProfilerOverhead,
     childOverhead: GeckoProfilerOverhead,
-  |} {
+  } {
     // Create a gecko profile with profilerOverhead.
     const findMainThread = (profile) =>
       ensureExists(
@@ -727,11 +727,11 @@ describe('visualMetrics processing', function () {
   function checkVisualMetricsForThread(
     thread: RawThread,
     shared: RawProfileSharedData,
-    metrics: Array<{|
+    metrics: Array<{
       name: string,
       hasProgressMarker: boolean,
       changeMarkerLength: number,
-    |}>
+    }>
   ) {
     for (const { name, hasProgressMarker, changeMarkerLength } of metrics) {
       // Check the visual metric progress markers.

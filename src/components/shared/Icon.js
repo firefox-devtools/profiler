@@ -15,23 +15,23 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './Icon.css';
 
 type OwnProps =
-  | {|
+  | {
       // This prop is used by call tree.
       +displayData: CallNodeDisplayData,
-    |}
-  | {|
+    }
+  | {
       // This prop is for other parts of the profiler.
       +iconUrl: string | null,
-    |};
+    };
 
-type StateProps = {|
+type StateProps = {
   +className: string,
   +icon: string | null,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +iconStartLoading: typeof iconStartLoading,
-|};
+};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 

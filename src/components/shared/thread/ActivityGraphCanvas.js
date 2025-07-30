@@ -24,7 +24,7 @@ import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 
 import type { CategoryDrawStyles } from './ActivityGraphFills';
 
-type CanvasProps = {|
+type CanvasProps = {
   +className: string,
   +trackName: string,
   +fullThread: Thread,
@@ -43,12 +43,12 @@ type CanvasProps = {|
   +onClick: (SyntheticMouseEvent<HTMLCanvasElement>) => void,
   +enableCPUUsage: boolean,
   ...SizeProps,
-|};
+};
 
 export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
-  _canvas: {| current: null | HTMLCanvasElement |} = React.createRef();
+  _canvas: { current: null | HTMLCanvasElement } = React.createRef();
   _categoryDrawStyles: null | CategoryDrawStyles = null;
-  _canvasState: {| renderScheduled: boolean, inView: boolean |} = {
+  _canvasState: { renderScheduled: boolean, inView: boolean } = {
     renderScheduled: false,
     inView: false,
   };

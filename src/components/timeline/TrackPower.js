@@ -27,23 +27,23 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackPower.css';
 
-type OwnProps = {|
+type OwnProps = {
   +counterIndex: CounterIndex,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +threadIndex: ThreadIndex,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   updatePreviewSelection: typeof updatePreviewSelection,
-|};
+};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-type State = {||};
+type State = {};
 
 export class TrackPowerImpl extends React.PureComponent<Props, State> {
   render() {

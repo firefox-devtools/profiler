@@ -12,11 +12,11 @@ import { withSize, type SizeProps } from '../../components/shared/WithSize';
  * strips off the width and height from the component's props.
  */
 
-type Props = {|
+type Props = {
   +ownPropA: 'a',
   +ownPropB: 'b',
   ...SizeProps,
-|};
+};
 
 class ExampleComponent extends React.PureComponent<Props> {
   render() {
@@ -67,11 +67,11 @@ const exampleWithSize3 = (
 // $FlowExpectError - ownPropB was not passed in.
 const exampleWithSize4 = <ExampleComponentWithSize ownPropA="a" />;
 
-type NoSizingProps = {|
+type NoSizingProps = {
   +ownPropA: 'a',
   +ownPropB: 'b',
   // The size props are omitted.
-|};
+};
 
 class NoSizing extends React.PureComponent<NoSizingProps> {
   render() {

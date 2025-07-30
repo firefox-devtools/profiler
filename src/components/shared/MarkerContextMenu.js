@@ -47,11 +47,11 @@ import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per
 
 import './MarkerContextMenu.css';
 
-type OwnProps = {|
+type OwnProps = {
   +rightClickedMarkerInfo: MarkerReference,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +marker: Marker,
   +markerIndex: MarkerIndex,
   +previewSelection: PreviewSelection,
@@ -61,13 +61,13 @@ type StateProps = {|
   +getMarkerLabelToCopy: (MarkerIndex) => string,
   +profiledThreadIds: Set<Tid>,
   innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +updatePreviewSelection: typeof updatePreviewSelection,
   +setContextMenuVisibility: typeof setContextMenuVisibility,
   +selectTrackFromTid: typeof selectTrackFromTid,
-|};
+};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
@@ -535,9 +535,9 @@ const MarkerContextMenu = explicitConnect<OwnProps, StateProps, DispatchProps>({
   component: MarkerContextMenuImpl,
 });
 
-type MaybeProps = {|
+type MaybeProps = {
   +rightClickedMarkerInfo: MarkerReference | null,
-|};
+};
 
 /**
  * This component only renders the context menu if there is a right clicked marker.
@@ -557,7 +557,7 @@ class MaybeMarkerContextMenuImpl extends PureComponent<MaybeProps> {
   }
 }
 
-export const MaybeMarkerContextMenu = explicitConnect<{||}, MaybeProps, {||}>({
+export const MaybeMarkerContextMenu = explicitConnect<{}, MaybeProps, {}>({
   mapStateToProps: (state) => ({
     rightClickedMarkerInfo: getRightClickedMarkerInfo(state),
   }),

@@ -148,7 +148,7 @@ function getPathParts(urlState: UrlState): string[] {
 
 // "null | void" in the query objects are flags which map to true for null, and false
 // for void. False flags do not show up the URL.
-type BaseQuery = {|
+type BaseQuery = {
   v: number,
   globalTrackOrder: string, // "3201"
   hiddenGlobalTracks: string, // "01"
@@ -172,38 +172,38 @@ type BaseQuery = {|
   timelineType: string,
   sourceView: string,
   assemblyView: string,
-|};
+};
 
-type CallTreeQuery = {|
+type CallTreeQuery = {
   ...BaseQuery,
   search: string, // "js::RunScript"
   invertCallstack: null | void,
   ctSummary: string,
-|};
+};
 
-type MarkersQuery = {|
+type MarkersQuery = {
   ...BaseQuery,
   markerSearch: string, // "DOMEvent"
-|};
+};
 
-type NetworkQuery = {|
+type NetworkQuery = {
   ...BaseQuery,
   networkSearch?: string, // "DOMEvent"
-|};
+};
 
-type StackChartQuery = {|
+type StackChartQuery = {
   ...BaseQuery,
   search: string, // "js::RunScript"
   invertCallstack: null | void,
   showUserTimings: null | void,
   sameWidths: null | void,
   ctSummary: string,
-|};
+};
 
-type JsTracerQuery = {|
+type JsTracerQuery = {
   ...BaseQuery,
   summary: null | void,
-|};
+};
 
 type Query =
   | CallTreeQuery
@@ -717,16 +717,16 @@ export class UrlUpgradeError extends Error {
   name = 'UrlUpgradeError';
 }
 
-type ProcessedLocation = {|
+type ProcessedLocation = {
   pathname: string,
   hash: string,
   query: Query,
-|};
+};
 
-type ProcessedLocationBeforeUpgrade = {|
+type ProcessedLocationBeforeUpgrade = {
   ...ProcessedLocation,
   query: any,
-|};
+};
 
 // URL upgrading is skipped if the profile argument is null.
 // URL upgrading is performed if the profile argument is missing (undefined) or if it's an actual profile.
@@ -779,12 +779,12 @@ export function upgradeLocationToCurrentVersion(
 // Every "upgrader" takes the processedLocation as its first argument and mutates it.
 // If available, the profile is passed as the second argument, for any upgraders that need it.
 /* eslint-disable no-useless-computed-key */
-const _upgraders: {|
+const _upgraders: {
   [number]: (
     location: ProcessedLocationBeforeUpgrade,
     profile?: Profile
   ) => void,
-|} = {
+} = {
   [1]: (processedLocation: ProcessedLocationBeforeUpgrade) => {
     // Version 1 is the first versioned url. Do some best-effort upgrading from
     // un-versioned URLs.

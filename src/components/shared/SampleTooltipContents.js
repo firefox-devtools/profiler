@@ -28,21 +28,21 @@ import type { CpuRatioInTimeRange } from './thread/ActivityGraphFills';
 
 type CPUProps = CpuRatioInTimeRange;
 
-type RestProps = {|
+type RestProps = {
   +sampleIndex: IndexIntoSamplesTable,
   +categories: CategoryList,
   +rangeFilteredThread: Thread,
   +implementationFilter: ImplementationFilter,
-|};
+};
 
-type Props = {|
+type Props = {
   ...RestProps,
   +cpuRatioInTimeRange: CPUProps | null,
   +sampleIndex: IndexIntoSamplesTable | null,
   +zeroAt: Milliseconds,
   +profileTimelineUnit: string,
   +interval: Milliseconds,
-|};
+};
 
 /**
  * Render thread CPU usage if it's present in the profile.

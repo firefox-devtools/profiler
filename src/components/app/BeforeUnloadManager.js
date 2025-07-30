@@ -10,11 +10,11 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { getUploadPhase } from 'firefox-profiler/selectors/publish';
 
-type StateProps = {|
+type StateProps = {
   +isUploading: boolean,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, {||}>;
+type Props = ConnectedProps<{}, StateProps, {}>;
 
 class BeforeUnloadManagerImpl extends React.PureComponent<Props> {
   manageBeforeUnloadListener() {
@@ -51,7 +51,7 @@ class BeforeUnloadManagerImpl extends React.PureComponent<Props> {
   }
 }
 
-export const BeforeUnloadManager = explicitConnect<{||}, StateProps, {||}>({
+export const BeforeUnloadManager = explicitConnect<{}, StateProps, {}>({
   mapStateToProps: (state) => ({
     isUploading: getUploadPhase(state) === 'uploading',
   }),

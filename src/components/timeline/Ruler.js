@@ -21,13 +21,13 @@ import type {
   TimelineUnit,
 } from 'firefox-profiler/types';
 
-type Props = {|
+type Props = {
   +zeroAt: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +width: CssPixels,
   +unit: TimelineUnit,
-|};
+};
 
 export class TimelineRuler extends PureComponent<Props> {
   _pickNotchLength(unit: TimelineUnit, minLength: Milliseconds) {

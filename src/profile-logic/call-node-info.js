@@ -307,7 +307,7 @@ type IndexIntoInvertedNonRootCallNodeTable = number;
 // information upfront for all roots. The root count is fixed, so most of the
 // arrays in this struct are fixed-size typed arrays.
 // The number of roots is the same as the number of functions in the funcTable.
-type InvertedRootCallNodeTable = {|
+type InvertedRootCallNodeTable = {
   category: Int32Array, // IndexIntoFuncTable -> IndexIntoCategoryList
   subcategory: Int32Array, // IndexIntoFuncTable -> IndexIntoSubcategoryListForCategory
   innerWindowID: Float64Array, // IndexIntoFuncTable -> InnerWindowID
@@ -321,11 +321,11 @@ type InvertedRootCallNodeTable = {|
   // are determined by the func order.
   suffixOrderIndexRangeEnd: Uint32Array, // IndexIntoFuncTable -> SuffixOrderIndex,
   length: number,
-|};
+};
 
 // Information about the non-root nodes of the inverted call tree. This table
 // grows on-demand, as new inverted call nodes are materialized.
-type InvertedNonRootCallNodeTable = {|
+type InvertedNonRootCallNodeTable = {
   prefix: InvertedCallNodeHandle[],
   func: IndexIntoFuncTable[], // IndexIntoInvertedNonRootCallNodeTable -> IndexIntoFuncTable
   pathHash: string[], // IndexIntoInvertedNonRootCallNodeTable -> string
@@ -357,7 +357,7 @@ type InvertedNonRootCallNodeTable = {|
 
   depth: number[], // IndexIntoInvertedNonRootCallNodeTable -> number
   length: number,
-|};
+};
 
 // Compute the InvertedRootCallNodeTable.
 // We compute this information upfront for all roots. The root count is fixed -
@@ -493,11 +493,11 @@ function _createEmptyInvertedNonRootCallNodeTable(): InvertedNonRootCallNodeTabl
 // refined up to depth zero. It is refined enough so that every root has a
 // contiguous range in the suffix order, where each range contains the root's
 // corresponding non-inverted nodes.
-type SuffixOrderForInvertedRoots = {|
+type SuffixOrderForInvertedRoots = {
   suffixOrderedCallNodes: Uint32Array,
   suffixOrderIndexes: Uint32Array,
   rootSuffixOrderIndexRangeEndCol: Uint32Array,
-|};
+};
 
 /**
  * Computes an ordering for the non-inverted call node table where all
@@ -563,7 +563,7 @@ function _computeSuffixOrderForInvertedRoots(
 }
 
 // Information used to create the children of a node in the inverted tree.
-type ChildrenInfo = {|
+type ChildrenInfo = {
   // The func for each child. Duplicate-free and sorted by func.
   funcPerChild: Uint32Array, // IndexIntoFuncTable[]
   // The number of deep nodes for each child. Every entry is non-zero.
@@ -577,7 +577,7 @@ type ChildrenInfo = {|
   childrenDeepNodes: Uint32Array,
   // The suffixOrderIndexRangeStart of the first child.
   childrenSuffixOrderIndexRangeStart: number,
-|};
+};
 
 // An index into SuffixOrderedCallNodes.
 export type SuffixOrderIndex = number;

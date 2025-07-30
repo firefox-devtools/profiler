@@ -18,12 +18,12 @@ export const MOUSE_OFFSET = 11;
 // If changing this value, make sure and adjust the max-width in the .tooltip class.
 export const VISUAL_MARGIN: CssPixels = 8;
 
-type Props = {|
+type Props = {
   +mouseX: CssPixels,
   +mouseY: CssPixels,
   +children: React.Node,
   +className?: string,
-|};
+};
 
 // These types represent the tooltip's position. They will be used when storing
 // the previous position as well as when defining the new one.
@@ -31,7 +31,7 @@ type PositionFromMouse = 'before-mouse' | 'after-mouse';
 type TooltipPosition = PositionFromMouse | 'window-edge';
 
 export class Tooltip extends React.PureComponent<Props> {
-  _interiorElementRef: {| current: HTMLDivElement | null |} = React.createRef();
+  _interiorElementRef: { current: HTMLDivElement | null } = React.createRef();
 
   // This keeps the previous tooltip positioning relatively to the mouse cursor.
   // "after" / "after" is the prefered positioning, so it's our default.

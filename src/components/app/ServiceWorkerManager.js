@@ -26,20 +26,20 @@ import type {
 
 import './ServiceWorkerManager.css';
 
-type StateProps = {|
+type StateProps = {
   +dataSource: DataSource,
   +profileUrl: string,
   +phase: Phase,
   +symbolicationStatus: SymbolicationStatus,
-|};
-type Props = ConnectedProps<{||}, StateProps, {||}>;
+};
+type Props = ConnectedProps<{}, StateProps, {}>;
 
 type InstallStatus = 'pending' | 'activating' | 'controlling' | 'idle';
-type State = {|
+type State = {
   installStatus: InstallStatus,
   isNoticeDisplayed: boolean,
   updatedWhileNotReady: boolean,
-|};
+};
 
 /**
  * This component is responsible for installing and updating the service worker,
@@ -414,7 +414,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
   }
 }
 
-export const ServiceWorkerManager = explicitConnect<{||}, StateProps, {||}>({
+export const ServiceWorkerManager = explicitConnect<{}, StateProps, {}>({
   mapStateToProps: (state) => ({
     phase: getView(state).phase,
     dataSource: getDataSource(state),

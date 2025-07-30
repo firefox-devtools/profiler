@@ -9,10 +9,10 @@ import type {
   IconWithClassName,
 } from 'firefox-profiler/types';
 
-export function iconHasLoaded(iconWithClassName: {|
+export function iconHasLoaded(iconWithClassName: {
   +icon: string,
   +className: string,
-|}): Action {
+}): Action {
   return {
     type: 'ICON_HAS_LOADED',
     iconWithClassName,
@@ -30,11 +30,11 @@ const icons: Set<string> = new Set();
 let iconCounter = 0;
 
 type IconRequestResult =
-  | {| type: 'error' | 'cached' |}
-  | {|
+  | { type: 'error' | 'cached' }
+  | {
       type: 'loaded',
       iconWithClassName: IconWithClassName,
-    |};
+    };
 
 async function _getIcon(icon: string): Promise<IconRequestResult> {
   if (icons.has(icon)) {

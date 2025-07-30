@@ -14,7 +14,7 @@ import './UploadedRecordingsHome.css';
 // This component represents the root page for uploaded recordings. It doesn't
 // do much more than providing a header for ListOfPublishedProfiles.
 
-export class UploadedRecordingsHome extends PureComponent<{||}> {
+export class UploadedRecordingsHome extends PureComponent<{}> {
   render() {
     return (
       <main className="uploadedRecordingsHome">

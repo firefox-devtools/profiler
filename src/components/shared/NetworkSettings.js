@@ -16,15 +16,15 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './NetworkSettings.css';
 
-type StateProps = {|
+type StateProps = {
   +searchString: string,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +changeNetworkSearchString: typeof changeNetworkSearchString,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class NetworkSettingsImpl extends PureComponent<Props> {
   _onSearch = (value: string) => {
@@ -53,7 +53,7 @@ class NetworkSettingsImpl extends PureComponent<Props> {
   }
 }
 
-export const NetworkSettings = explicitConnect<{||}, StateProps, DispatchProps>(
+export const NetworkSettings = explicitConnect<{}, StateProps, DispatchProps>(
   {
     mapStateToProps: (state) => ({
       searchString: getNetworkSearchString(state),

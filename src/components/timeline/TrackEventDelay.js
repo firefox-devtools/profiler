@@ -15,11 +15,11 @@ import type { ThreadIndex } from 'firefox-profiler/types';
 
 import './TrackEventDelay.css';
 
-type Props = {|
+type Props = {
   +threadIndex: ThreadIndex,
-|};
+};
 
-export class TrackEventDelay extends React.PureComponent<Props, {||}> {
+export class TrackEventDelay extends React.PureComponent<Props, {}> {
   render() {
     const { threadIndex } = this.props;
     const graphHeight = TRACK_EVENT_DELAY_HEIGHT;

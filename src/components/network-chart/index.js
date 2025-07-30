@@ -44,13 +44,13 @@ import './index.css';
 const ROW_HEIGHT = 16;
 
 // The SizeProps are injected by the WithSize higher order component.
-type DispatchProps = {|
+type DispatchProps = {
   +changeSelectedNetworkMarker: typeof changeSelectedNetworkMarker,
   +changeRightClickedMarker: typeof changeRightClickedMarker,
   +changeHoveredMarker: typeof changeHoveredMarker,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +markerIndexes: MarkerIndex[],
   +getMarker: (MarkerIndex) => Marker,
   +selectedNetworkMarkerIndex: MarkerIndex | null,
@@ -60,9 +60,9 @@ type StateProps = {|
   +timeRange: StartEndRange,
   +threadsKey: ThreadsKey,
   +scrollToSelectionGeneration: number,
-|};
+};
 
-type OwnProps = {| ...SizeProps |};
+type OwnProps = { ...SizeProps };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 

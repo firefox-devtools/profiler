@@ -42,7 +42,7 @@ import type { CssPixels } from 'firefox-profiler/types';
 
 type RenderItem<Item> = (Item, number, number) => React.Node;
 
-type VirtualListRowProps<Item> = {|
+type VirtualListRowProps<Item> = {
   +renderItem: RenderItem<Item>,
   +item: Item,
   +index: number,
@@ -66,7 +66,7 @@ type VirtualListRowProps<Item> = {|
   //   panels where we'd want to redraw if some source value necessary to the
   //   computation changes.
   +forceRender?: number | string,
-|};
+};
 
 class VirtualListRow<Item> extends React.PureComponent<
   VirtualListRowProps<Item>,
@@ -77,7 +77,7 @@ class VirtualListRow<Item> extends React.PureComponent<
   }
 }
 
-type VirtualListInnerChunkProps<Item> = {|
+type VirtualListInnerChunkProps<Item> = {
   +className: string,
   +renderItem: RenderItem<Item>,
   +items: $ReadOnlyArray<Item>,
@@ -86,7 +86,7 @@ type VirtualListInnerChunkProps<Item> = {|
   +visibleRangeEnd: number,
   +columnIndex: number,
   +forceRender?: number | string,
-|};
+};
 
 class VirtualListInnerChunk<Item> extends React.PureComponent<
   VirtualListInnerChunkProps<Item>,
@@ -139,7 +139,7 @@ class VirtualListInnerChunk<Item> extends React.PureComponent<
   }
 }
 
-type VirtualListInnerProps<Item> = {|
+type VirtualListInnerProps<Item> = {
   +itemHeight: CssPixels,
   +className: string,
   +renderItem: RenderItem<Item>,
@@ -150,7 +150,7 @@ type VirtualListInnerProps<Item> = {|
   +columnIndex: number,
   +containerWidth: CssPixels,
   +forceRender?: number | string,
-|};
+};
 
 class VirtualListInner<Item> extends React.PureComponent<
   VirtualListInnerProps<Item>,
@@ -214,7 +214,7 @@ class VirtualListInner<Item> extends React.PureComponent<
   }
 }
 
-type VirtualListProps<Item> = {|
+type VirtualListProps<Item> = {
   +itemHeight: CssPixels,
   +className: string,
   +renderItem: RenderItem<Item>,
@@ -244,20 +244,20 @@ type VirtualListProps<Item> = {|
   +ariaRole?: string,
   // Aria-activedescendant specifies the children's "virtual" focus.
   +ariaActiveDescendant?: null | string,
-|};
+};
 
-type VirtualListState = {|
+type VirtualListState = {
   // This value is updated from the scroll event.
   scrollTop: CssPixels,
   // This is updated from a resize observer.
   containerHeight: CssPixels,
-|};
+};
 
 export class VirtualList<Item> extends React.PureComponent<
   VirtualListProps<Item>,
   VirtualListState,
 > {
-  _container: {| current: HTMLDivElement | null |} = React.createRef();
+  _container: { current: HTMLDivElement | null } = React.createRef();
   state = { scrollTop: 0, containerHeight: 0 };
 
   componentDidMount() {

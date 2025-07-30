@@ -26,18 +26,18 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './index.css';
 
-type DispatchProps = {|
+type DispatchProps = {
   +updatePreviewSelection: typeof updatePreviewSelection,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +profile: Profile,
   +threadsKey: ThreadsKey,
   +jsTracerTable: JsTracerTable | null,
   +showJsTracerSummary: boolean,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class JsTracerImpl extends React.PureComponent<Props> {
   render() {
@@ -63,7 +63,7 @@ class JsTracerImpl extends React.PureComponent<Props> {
   }
 }
 
-export const JsTracer = explicitConnect<{||}, StateProps, DispatchProps>({
+export const JsTracer = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => {
     return {
       profile: getProfile(state),

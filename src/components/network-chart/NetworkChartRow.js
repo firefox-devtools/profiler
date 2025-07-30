@@ -80,13 +80,13 @@ const PHASE_OPACITIES = PROPERTIES_IN_ORDER.reduce(
   {}
 );
 
-type NetworkPhaseProps = {|
+type NetworkPhaseProps = {
   +name: string,
   +previousName: string,
   +value: number | string,
   +duration: Milliseconds,
   +style: MixedObject,
-|};
+};
 
 function NetworkPhase({
   name,
@@ -110,14 +110,14 @@ function NetworkPhase({
   );
 }
 
-export type NetworkChartRowBarProps = {|
+export type NetworkChartRowBarProps = {
   +marker: Marker,
   +width: CssPixels,
   +timeRange: StartEndRange,
   // Pass the payload in as well, since our types can't express a Marker with
   // a specific payload.
   +networkPayload: NetworkPayload,
-|};
+};
 
 // This component splits a network marker duration in different phases,
 // and renders each phase as a differently colored bar.
@@ -311,7 +311,7 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
   }
 }
 
-type NetworkChartRowProps = {|
+type NetworkChartRowProps = {
   +index: number,
   +marker: Marker,
   +markerIndex: MarkerIndex,
@@ -328,13 +328,13 @@ type NetworkChartRowProps = {|
   +onRightClick?: (MarkerIndex) => mixed,
   +onHover?: (MarkerIndex | null) => mixed,
   +shouldDisplayTooltips: () => boolean,
-|};
+};
 
-type State = {|
+type State = {
   pageX: CssPixels,
   pageY: CssPixels,
   hovered: ?boolean,
-|};
+};
 
 export class NetworkChartRow extends React.PureComponent<
   NetworkChartRowProps,

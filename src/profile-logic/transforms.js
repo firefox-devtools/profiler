@@ -379,10 +379,10 @@ export function stringifyTransforms(transformStack: TransformStack): string {
     .join('~');
 }
 
-export type TransformLabeL10nIds = {|
+export type TransformLabeL10nIds = {
   +l10nId: string,
   +item: string,
-|};
+};
 
 /**
  * Gets all applied transforms and returns their labels as l10n Ids with the
@@ -1564,7 +1564,7 @@ export function filterCallNodePathByImplementation(
 }
 
 // User-facing properties about a stack frame.
-export type BacktraceItem = {|
+export type BacktraceItem = {
   // The function name of the stack frame.
   funcName: string,
   // The frame category of the stack frame.
@@ -1580,7 +1580,7 @@ export type BacktraceItem = {|
   // library instead.
   // May also be empty.
   origin: string,
-|};
+};
 
 /**
  * Convert the stack into an array of "backtrace items" for each stack frame.

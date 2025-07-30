@@ -17,16 +17,16 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import { Localized } from '@fluent/react';
 
-type StateProps = {|
+type StateProps = {
   +assemblyViewIsOpen: boolean,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +openAssemblyView: typeof openAssemblyView,
   +closeAssemblyView: typeof closeAssemblyView,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class AssemblyViewToggleButtonImpl extends React.PureComponent<Props> {
   _onClick = () => {
@@ -72,7 +72,7 @@ class AssemblyViewToggleButtonImpl extends React.PureComponent<Props> {
 }
 
 export const AssemblyViewToggleButton = explicitConnect<
-  {||},
+  {},
   StateProps,
   DispatchProps,
 >({

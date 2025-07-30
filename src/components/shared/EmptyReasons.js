@@ -6,11 +6,11 @@ import React, { PureComponent } from 'react';
 
 import './EmptyReasons.css';
 
-type Props = {|
+type Props = {
   +viewName: string,
   +threadName: string,
   +reason: string,
-|};
+};
 
 /**
  * This component tells why a panel is empty and display a friendly message to

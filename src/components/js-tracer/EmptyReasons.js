@@ -14,11 +14,11 @@ import explicitConnect, {
 
 import type { State } from 'firefox-profiler/types';
 
-type StateProps = {|
+type StateProps = {
   +threadName: string,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, {||}>;
+type Props = ConnectedProps<{}, StateProps, {}>;
 class MarkerChartEmptyReasonsImpl extends PureComponent<Props> {
   render() {
     const { threadName } = this.props;
@@ -33,7 +33,7 @@ class MarkerChartEmptyReasonsImpl extends PureComponent<Props> {
   }
 }
 
-export const JsTracerEmptyReasons = explicitConnect<{||}, StateProps, {||}>({
+export const JsTracerEmptyReasons = explicitConnect<{}, StateProps, {}>({
   mapStateToProps: (state: State) => ({
     threadName: selectedThreadSelectors.getFriendlyThreadName(state),
   }),

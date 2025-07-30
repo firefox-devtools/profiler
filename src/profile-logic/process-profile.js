@@ -221,7 +221,7 @@ export class GlobalDataCollector {
 
   // Package up all de-duplicated global tables so that they can be embedded in
   // the profile.
-  finish(): {| libs: Lib[], shared: RawProfileSharedData |} {
+  finish(): { libs: Lib[], shared: RawProfileSharedData } {
     return { libs: this._libs, shared: { stringArray: this._stringArray } };
   }
 }
@@ -696,11 +696,11 @@ function _processMarkers(
   stringArray: string[],
   stringIndexMarkerFieldsByDataType: Map<string, string[]>,
   globalDataCollector: GlobalDataCollector
-): {|
+): {
   markers: RawMarkerTable,
   jsAllocations: JsAllocationsTable | null,
   nativeAllocations: NativeAllocationsTable | null,
-|} {
+} {
   const markers = getEmptyRawMarkerTable();
   const jsAllocations = getEmptyJsAllocationsTable();
   const inProgressNativeAllocations =

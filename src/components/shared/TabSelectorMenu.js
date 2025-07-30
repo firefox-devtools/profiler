@@ -18,21 +18,21 @@ import { Icon } from 'firefox-profiler/components/shared/Icon';
 import type { TabID, SortedTabPageData } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-type StateProps = {|
+type StateProps = {
   +tabFilter: TabID | null,
   +sortedPageData: SortedTabPageData | null,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +changeTabFilter: typeof changeTabFilter,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 import './TabSelectorMenu.css';
 
 class TabSelectorMenuImpl extends React.PureComponent<Props> {
-  _handleClick = (_event: SyntheticEvent<>, data: {| id: TabID |}): void => {
+  _handleClick = (_event: SyntheticEvent<>, data: { id: TabID }): void => {
     this.props.changeTabFilter(data.id);
   };
 
@@ -89,7 +89,7 @@ class TabSelectorMenuImpl extends React.PureComponent<Props> {
   }
 }
 
-export const TabSelectorMenu = explicitConnect<{||}, StateProps, DispatchProps>(
+export const TabSelectorMenu = explicitConnect<{}, StateProps, DispatchProps>(
   {
     mapStateToProps: (state) => ({
       tabFilter: getTabFilter(state),

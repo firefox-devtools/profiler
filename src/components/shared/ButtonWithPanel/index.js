@@ -31,7 +31,7 @@ import { ArrowPanel } from './ArrowPanel';
 
 import './ButtonWithPanel.css';
 
-type Props = {|
+type Props = {
   +className?: string,
   +label: string,
   +panelContent: React.Node,
@@ -44,11 +44,11 @@ type Props = {|
   +onPanelOpen?: () => mixed,
   +onPanelClose?: () => mixed,
   +title?: string,
-|};
+};
 
-type State = {|
+type State = {
   +open: boolean,
-|};
+};
 
 export class ButtonWithPanel extends React.PureComponent<Props, State> {
   _panel: ArrowPanel | null = null;

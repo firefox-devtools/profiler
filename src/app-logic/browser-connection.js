@@ -22,23 +22,23 @@ import type { Milliseconds, FaviconData } from 'firefox-profiler/types';
 
 export type BrowserConnectionStatus =
   // The initial state.
-  | {| status: 'NO_ATTEMPT' |}
+  | { status: 'NO_ATTEMPT' }
   // In non-Firefox browsers we don't attempt to establish a connection.
   // This is determined via the userAgent.
-  | {| status: 'NOT_FIREFOX' |}
+  | { status: 'NOT_FIREFOX' }
   // We are in Firefox, and have sent the initial WebChannel event.
-  | {| status: 'WAITING' |}
+  | { status: 'WAITING' }
   // We are in Firefox but the WebChannel connection has been denied.
   // This usually means that this profiler instance is running on a
   // different host than the one that's specified in the
   // preference `devtools.performance.recording.ui-base-url`.
-  | {| status: 'DENIED', error: Error |}
+  | { status: 'DENIED', error: Error }
   // We are in Firefox but the WebChannel did not respond within 5 seconds.
   // This is unexpected. It could mean that we are running in an old Firefox
   // (older than Firefox 76) which did not have a profiler WebChannel.
-  | {| status: 'TIMED_OUT' |}
+  | { status: 'TIMED_OUT' }
   // The WebChannel connection has been established.
-  | {| status: 'ESTABLISHED', browserConnection: BrowserConnection |};
+  | { status: 'ESTABLISHED', browserConnection: BrowserConnection };
 
 /**
  * The interface of communication with the browser. Can be backed by a WebChannel
@@ -47,9 +47,9 @@ export type BrowserConnectionStatus =
  */
 export interface BrowserConnection {
   // Get the profile for this tab from the browser.
-  getProfile(options: {|
+  getProfile(options: {
     onThirtySecondTimeout: () => void,
-  |}): Promise<ArrayBuffer | MixedObject>;
+  }): Promise<ArrayBuffer | MixedObject>;
 
   getExternalMarkers(
     startTime: Milliseconds,
@@ -115,9 +115,9 @@ class BrowserConnectionImpl implements BrowserConnection {
     return this._geckoProfiler;
   }
 
-  async getProfile(options: {|
+  async getProfile(options: {
     onThirtySecondTimeout: () => void,
-  |}): Promise<ArrayBuffer | MixedObject> {
+  }): Promise<ArrayBuffer | MixedObject> {
     const timeoutId = setTimeout(options.onThirtySecondTimeout, 30000);
 
     // On Firefox 96 and above, we can get the profile from the WebChannel.

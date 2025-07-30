@@ -46,7 +46,7 @@ type MouseEventHandler = (SyntheticMouseEvent<HTMLCanvasElement>) => any;
 /**
  * When adding properties to these props, please consider the comment above the component.
  */
-type CanvasProps = {|
+type CanvasProps = {
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +width: CssPixels,
@@ -60,7 +60,7 @@ type CanvasProps = {|
   +onMouseUp: MouseEventHandler,
   +onMouseMove: MouseEventHandler,
   +onMouseOut: MouseEventHandler,
-|};
+};
 
 function _drawRoundedRect(
   ctx: CanvasRenderingContext2D,
@@ -84,9 +84,9 @@ function _drawRoundedRect(
  * in the props that are needed for the canvas draw call.
  */
 class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
-  _canvas: {| current: HTMLCanvasElement | null |} = React.createRef();
+  _canvas: { current: HTMLCanvasElement | null } = React.createRef();
   _requestedAnimationFrame: boolean = false;
-  _canvasState: {| renderScheduled: boolean, inView: boolean |} = {
+  _canvasState: { renderScheduled: boolean, inView: boolean } = {
     renderScheduled: false,
     inView: false,
   };
@@ -283,14 +283,14 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
  * );
  */
 
-export type OwnProps = {|
+export type OwnProps = {
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +threadsKey: ThreadsKey,
   +onSelect: (Milliseconds, Milliseconds) => mixed,
-|};
+};
 
-export type StateProps = {|
+export type StateProps = {
   +additionalClassName?: ?string,
   +getMarker: (MarkerIndex) => Marker,
   +markerIndexes: MarkerIndex[],
@@ -298,16 +298,16 @@ export type StateProps = {|
   +isModifyingSelection: boolean,
   +testId: string,
   +rightClickedMarker: Marker | null,
-|};
+};
 
-export type DispatchProps = {|
+export type DispatchProps = {
   +changeRightClickedMarker: typeof changeRightClickedMarker,
-|};
+};
 
-type Props = {|
+type Props = {
   ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
   ...SizeProps,
-|};
+};
 
 type State = {
   hoveredMarkerIndex: MarkerIndex | null,

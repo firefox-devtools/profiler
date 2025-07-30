@@ -56,7 +56,7 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './CallTree.css';
 
-type StateProps = {|
+type StateProps = {
   +threadsKey: ThreadsKey,
   +scrollToSelectionGeneration: number,
   +focusCallTreeGeneration: number,
@@ -73,9 +73,9 @@ type StateProps = {|
   +callNodeMaxDepthPlusOne: number,
   +weightType: WeightType,
   +tableViewOptions: TableViewOptions,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +changeRightClickedCallNode: typeof changeRightClickedCallNode,
   +changeExpandedCallNodes: typeof changeExpandedCallNodes,
@@ -83,9 +83,9 @@ type DispatchProps = {|
   +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
   +updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen,
   +onTableViewOptionsChange: (TableViewOptions) => any,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class CallTreeImpl extends PureComponent<Props> {
   _mainColumn: Column<CallNodeDisplayData> = {
@@ -396,7 +396,7 @@ class CallTreeImpl extends PureComponent<Props> {
   }
 }
 
-export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
+export const CallTree = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => ({
     threadsKey: getSelectedThreadsKey(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),

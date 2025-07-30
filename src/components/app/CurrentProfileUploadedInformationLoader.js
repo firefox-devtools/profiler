@@ -24,15 +24,15 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-type StateProps = {|
+type StateProps = {
   +hash: string,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +setCurrentProfileUploadedInformation: typeof setCurrentProfileUploadedInformation,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class CurrentProfileUploadedInformationLoaderImpl extends PureComponent<Props> {
   async updateCurrentProfileInformationState() {
@@ -67,7 +67,7 @@ class CurrentProfileUploadedInformationLoaderImpl extends PureComponent<Props> {
 }
 
 export const CurrentProfileUploadedInformationLoader = explicitConnect<
-  {||},
+  {},
   StateProps,
   DispatchProps,
 >({

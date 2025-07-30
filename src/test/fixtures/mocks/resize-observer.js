@@ -10,28 +10,28 @@ import { act } from 'firefox-profiler/test/fixtures/testing-library';
  * Creating a mock resize observer type because Flow's ResizeObserver
  * type is a bit obsolete.
  */
-type MockResizeObserver = {|
+type MockResizeObserver = {
   observe: (HTMLElement, ResizeObserverOptions) => void,
   unobserve: (HTMLElement) => void,
   disconnect: () => void,
-|};
+};
 
 type ResizeObserverBoxOptions =
   | 'border-box'
   | 'content-box'
   | 'device-pixel-content-box';
-type ResizeObserverOptions = {|
+type ResizeObserverOptions = {
   box?: ResizeObserverBoxOptions,
-|};
+};
 
 /**
  * Type of the item we are going to keep for tracking observers.
  */
-type Item = {|
+type Item = {
   callback: (ResizeObserverEntry[], MockResizeObserver) => void,
   elements: Set<HTMLElement>,
   scheduledElements: Set<HTMLElement> | null,
-|};
+};
 
 /**
  * Tracked observers during the testing.
@@ -141,9 +141,9 @@ function triggerSingleObserver(
  */
 export function triggerResizeObservers({
   newSize,
-}: {|
+}: {
   newSize?: DOMRectReadOnly,
-|} = {}) {
+} = {}) {
   for (const [observer, item] of observers) {
     triggerSingleObserver(observer, item, item.elements, newSize);
   }

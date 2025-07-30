@@ -59,10 +59,10 @@ export type StackAndSampleSelectorsPerThread = $ReturnType<
   typeof getStackAndSampleSelectorsPerThread,
 >;
 
-type ThreadAndMarkerSelectorsPerThread = {|
+type ThreadAndMarkerSelectorsPerThread = {
   ...ThreadSelectorsPerThread,
   ...MarkerSelectorsPerThread,
-|};
+};
 
 // A variant of createSelector which caches the value for two most recent keys,
 // not just for the single most recent key.

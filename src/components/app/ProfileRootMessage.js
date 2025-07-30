@@ -9,13 +9,13 @@ import * as React from 'react';
 
 import './ProfileRootMessage.css';
 
-type Props = {|
+type Props = {
   +title?: string,
   +additionalMessage: React.Node,
   +showLoader: boolean,
   +showBackHomeLink: boolean,
   +children: React.Node,
-|};
+};
 
 export class ProfileRootMessage extends React.PureComponent<Props> {
   render() {

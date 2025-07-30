@@ -22,14 +22,14 @@ type SyntheticCssDeclarations = {
   [string]: string | number,
 };
 
-type Props = {|
+type Props = {
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +thread: Thread,
   +interval: Milliseconds,
   +unfilteredSamplesRange: StartEndRange | null,
   ...SizeProps,
-|};
+};
 
 /**
  * This component displays the reasons why a thread may be empty. The supported indicators
@@ -82,11 +82,11 @@ class EmptyThreadIndicatorImpl extends PureComponent<Props> {
  * pretty clear explanations of the requirements:
  * src/test/components/EmptyThreadIndicator.test.js
  */
-export function getIndicatorPositions(props: Props): {|
+export function getIndicatorPositions(props: Props): {
   startup: SyntheticCssDeclarations | null,
   shutdown: SyntheticCssDeclarations | null,
   emptyBufferStart: SyntheticCssDeclarations | null,
-|} {
+} {
   const {
     rangeStart,
     rangeEnd,

@@ -14,17 +14,17 @@ import explicitConnect, {
 
 import type { DataSource } from 'firefox-profiler/types';
 
-type OwnProps = {|
+type OwnProps = {
   +className?: string,
   +dataSource: DataSource,
   +children: React.Node,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +setDataSource: typeof setDataSource,
-|};
+};
 
-type Props = ConnectedProps<OwnProps, {||}, DispatchProps>;
+type Props = ConnectedProps<OwnProps, {}, DispatchProps>;
 
 class InnerNavigationLinkImpl extends React.PureComponent<Props> {
   onClick = (e: SyntheticMouseEvent<>) => {
@@ -53,7 +53,7 @@ class InnerNavigationLinkImpl extends React.PureComponent<Props> {
 
 export const InnerNavigationLink = explicitConnect<
   OwnProps,
-  {||},
+  {},
   DispatchProps,
 >({
   mapDispatchToProps: { setDataSource },

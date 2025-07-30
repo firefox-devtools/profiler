@@ -27,7 +27,7 @@ describe('AppLocalizationProvider', () => {
   function setup({
     languages,
     missingTranslation,
-  }: $Shape<{| languages: string[], missingTranslation: string[] |}> = {}) {
+  }: $Shape<{ languages: string[], missingTranslation: string[] }> = {}) {
     languages = languages ?? ['en-US'];
     missingTranslation = missingTranslation ?? [];
 

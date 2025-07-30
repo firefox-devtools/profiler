@@ -124,7 +124,7 @@ const CTRL_KEYMAP: { [string]: NavigationKey } = {
 
 // These viewport values (most of which are computed dynamically by
 // the HOC) are passed into the props of the wrapped component.
-export type Viewport = {|
+export type Viewport = {
   +containerWidth: CssPixels,
   +containerHeight: CssPixels,
   +viewportLeft: UnitIntervalOfProfileRange,
@@ -134,22 +134,22 @@ export type Viewport = {|
   +isDragging: boolean,
   +moveViewport: (CssPixels, CssPixels) => void,
   +isSizeSet: boolean,
-|};
+};
 
-type ViewportStateProps = {|
+type ViewportStateProps = {
   +panelLayoutGeneration: number,
   +hasZoomedViaMousewheel?: boolean,
-|};
+};
 
-type ViewportDispatchProps = {|
+type ViewportDispatchProps = {
   +updatePreviewSelection: typeof updatePreviewSelection,
   +setHasZoomedViaMousewheel?: typeof setHasZoomedViaMousewheel,
-|};
+};
 
 // These are the props consumed by this Higher-Order Component (HOC), but can be
 // optionally used by the wrapped component.
-type ViewportOwnProps<ChartProps> = {|
-  +viewportProps: {|
+type ViewportOwnProps<ChartProps> = {
+  +viewportProps: {
     // The "committed range", whose endpoints correspond to 0 and 1.
     +timeRange: StartEndRange,
     // The preview selection, whose endpoints correspond to viewportLeft and viewportRight.
@@ -176,20 +176,20 @@ type ViewportOwnProps<ChartProps> = {|
       prevProps: ChartProps,
       nextProps: ChartProps
     ) => boolean,
-  |},
+  },
   +chartProps: ChartProps,
-|};
+};
 
-type HorizontalViewport = {|
+type HorizontalViewport = {
   // The position of the profile range that should be drawn at the left edge of
   // the chart's "inner box", i.e. after the marginLeft.
   viewportLeft: UnitIntervalOfProfileRange,
   // The position of the profile range that should be drawn at the right edge of
   // the chart's "inner box", i.e. to the left of marginRight.
   viewportRight: UnitIntervalOfProfileRange,
-|};
+};
 
-type State = {|
+type State = {
   containerWidth: CssPixels,
   containerHeight: CssPixels,
   containerLeft: CssPixels,
@@ -199,7 +199,7 @@ type State = {|
   isDragging: boolean,
   isScrollHintVisible: boolean,
   isSizeSet: boolean,
-|};
+};
 
 import './Viewport.css';
 
@@ -218,10 +218,10 @@ export type WithChartViewport<
   ChartOwnProps: Object,
   // The chart component's props are given the viewport object, as well as the original
   // ChartOwnProps.
-  ChartProps: $ReadOnly<{|
+  ChartProps: $ReadOnly<{
     ...ChartOwnProps,
     viewport: Viewport,
-  |}>,
+  }>,
 > = (
   // Take as input a React component whose props accept the { +viewport: Viewport }.
   ChartComponent: React.ComponentType<ChartProps>

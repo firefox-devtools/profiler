@@ -407,11 +407,11 @@ function getHumanReadableJsTracerTiming({
   useSelfTime,
   events,
   profile,
-}: {|
+}: {
   useSelfTime: boolean,
   events?: TestDefinedJsTracerEvent[],
   profile?: Profile,
-|}): string[] {
+}): string[] {
   if (!profile) {
     profile = getProfileWithJsTracerEvents(
       ensureExists(

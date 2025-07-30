@@ -9,10 +9,10 @@
 // This was inspired by the code in https://github.com/jaredLunde/react-hook/blob/master/packages/resize-observer/src/index.tsx
 
 export type ResizeObserverCallback = (DOMRectReadOnly) => mixed;
-export type ResizeObserverWrapper = {|
+export type ResizeObserverWrapper = {
   subscribe: (elt: HTMLElement, ResizeObserverCallback) => void,
   unsubscribe: (elt: HTMLElement, ResizeObserverCallback) => void,
-|};
+};
 
 function createResizeObserverWrapper() {
   // This keeps the list of callbacks for each observed element.

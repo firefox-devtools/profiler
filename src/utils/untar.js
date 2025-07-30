@@ -62,10 +62,10 @@ class ByteReader {
   }
 }
 
-type FieldEntry = {|
+type FieldEntry = {
   name: string,
   value: string | number | null,
-|};
+};
 
 function _parseIntStrict(s, base): number {
   const val = parseInt(s, base);
@@ -181,7 +181,7 @@ class PaxHeader {
   }
 }
 
-export type TarFileEntry = {|
+export type TarFileEntry = {
   name: string,
   type: string,
   size: number,
@@ -199,7 +199,7 @@ export type TarFileEntry = {|
   devmajor: number | null,
   devminor: number | null,
   namePrefix: string | null,
-|};
+};
 
 export class UntarFileStream {
   _reader: ByteReader;

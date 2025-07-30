@@ -36,33 +36,33 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type MouseHandler = (event: MouseEvent) => void;
 
-type OwnProps = {|
+type OwnProps = {
   +width: number,
   +children: React.Node,
   +className?: string,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
   +zeroAt: Milliseconds,
   +profileTimelineUnit: string,
   +mouseTimePosition: Milliseconds | null,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +commitRange: typeof commitRange,
   +updatePreviewSelection: typeof updatePreviewSelection,
   +changeMouseTimePosition: typeof changeMouseTimePosition,
-|};
+};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class TimelineRulerAndSelection extends React.PureComponent<Props> {
-  _handlers: ?{|
+  _handlers: ?{
     mouseMoveHandler: MouseHandler,
     mouseClickHandler: MouseHandler,
-  |};
+  };
 
   _container: ?HTMLElement;
 

@@ -9,9 +9,9 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import { Localized } from '@fluent/react';
 import type { CodeLoadingSource } from 'firefox-profiler/types';
 
-type CodeLoadingOverlayProps = {|
+type CodeLoadingOverlayProps = {
   source: CodeLoadingSource,
-|};
+};
 
 export function CodeLoadingOverlay({ source }: CodeLoadingOverlayProps) {
   switch (source.type) {

@@ -8,7 +8,7 @@
  * Creating a mock intersection observer type because Flow's IntersectionObserver
  * type is not completely correct in this version.
  */
-type MockIntersectionObserver = {|
+type MockIntersectionObserver = {
   thresholds: number[],
   root: HTMLElement | Document,
   rootMargin: string,
@@ -16,16 +16,16 @@ type MockIntersectionObserver = {|
   unobserve: (HTMLElement) => void,
   disconnect: () => void,
   takeRecords: () => void,
-|};
+};
 
 /**
  * Type of the item we are going to keep for tracking observers.
  */
-type Item = {|
+type Item = {
   callback: (IntersectionObserverEntry[], MockIntersectionObserver) => void,
   elements: Set<HTMLElement>,
   created: number,
-|};
+};
 
 /**
  * Tracked observers during the testing.
@@ -123,9 +123,9 @@ function triggerSingleObserver(
  */
 export function triggerIntersectionObservers({
   isIntersecting = true,
-}: {|
+}: {
   isIntersecting?: boolean,
-|}) {
+}) {
   for (const [observer, item] of observers) {
     triggerSingleObserver(observer, item, isIntersecting);
   }

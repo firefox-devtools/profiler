@@ -19,7 +19,7 @@ import type {
 
 import './VerticalIndicators.css';
 
-type Props = {|
+type Props = {
   +getMarker: (MarkerIndex) => Marker,
   +verticalMarkerIndexes: MarkerIndex[],
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
@@ -29,7 +29,7 @@ type Props = {|
   +width: CssPixels,
   +shouldShowTooltip: boolean,
   +onRightClick: (MarkerIndex) => mixed,
-|};
+};
 
 /**
  * This component draws vertical indicators from navigation related markers for a track

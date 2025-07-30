@@ -36,18 +36,18 @@ import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 
 import './Details.css';
 
-type StateProps = {|
+type StateProps = {
   +visibleTabs: $ReadOnlyArray<TabSlug>,
   +selectedTab: TabSlug,
   +isSidebarOpen: boolean,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +changeSelectedTab: typeof changeSelectedTab,
   +changeSidebarOpenState: typeof changeSidebarOpenState,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 const SMALL_SCREEN_WIDTH = 768;
 
@@ -141,7 +141,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
   }
 }
 
-export const Details = explicitConnect<{||}, StateProps, DispatchProps>({
+export const Details = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     visibleTabs: selectedThreadSelectors.getUsefulTabs(state),
     selectedTab: getSelectedTab(state),

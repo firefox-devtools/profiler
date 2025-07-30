@@ -15,13 +15,13 @@ import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type { ThreadsKey, Marker, MarkerIndex } from 'firefox-profiler/types';
 
-type StateProps = {|
+type StateProps = {
   +selectedThreadsKey: ThreadsKey,
   +marker: Marker | null,
   +markerIndex: MarkerIndex | null,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, {||}>;
+type Props = ConnectedProps<{}, StateProps, {}>;
 
 class MarkerSidebarImpl extends React.PureComponent<Props> {
   render() {
@@ -54,7 +54,7 @@ class MarkerSidebarImpl extends React.PureComponent<Props> {
   }
 }
 
-export const MarkerSidebar = explicitConnect<{||}, StateProps, {||}>({
+export const MarkerSidebar = explicitConnect<{}, StateProps, {}>({
   mapStateToProps: (state) => ({
     marker: selectedThreadSelectors.getSelectedMarker(state),
     markerIndex: selectedThreadSelectors.getSelectedMarkerIndex(state),

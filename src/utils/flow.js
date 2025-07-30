@@ -123,7 +123,7 @@ export function coerceMatchingShape<T>(item: $Shape<T>): T {
  * This is a type-friendly version of Object.values that assumes the object has
  * a Map-like structure.
  */
-export function objectValues<Value, Obj: {| [string]: Value |}>(
+export function objectValues<Value, Obj: { [string]: Value }>(
   object: Obj
 ): Value[] {
   return (Object.values: any)(object);

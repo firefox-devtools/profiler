@@ -34,15 +34,15 @@ function _formatRange(range: StartEndRange): string {
   return formatSeconds(range.end - range.start, 3, 1);
 }
 
-type PublishedProfileProps = {|
+type PublishedProfileProps = {
   +onProfileDelete: () => void,
   +uploadedProfileInformation: UploadedProfileInformation,
   +withActionButtons: boolean,
-|};
+};
 
-type PublishedProfileState = {|
+type PublishedProfileState = {
   +confirmDialogIsOpen: boolean,
-|};
+};
 
 /**
  * This implements one line in the list of published profiles.
@@ -152,14 +152,14 @@ class PublishedProfile extends React.PureComponent<
   }
 }
 
-type Props = {|
+type Props = {
   withActionButtons: boolean,
   limit?: number,
-|};
+};
 
-type State = {|
+type State = {
   uploadedProfileInformationList: null | UploadedProfileInformation[],
-|};
+};
 
 export class ListOfPublishedProfiles extends PureComponent<Props, State> {
   _isMounted = false;

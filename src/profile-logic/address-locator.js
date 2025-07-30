@@ -25,7 +25,7 @@
 
 export class AddressLocator {
   _libs /* : LibMapping[] */;
-  _libRanges /* : Array<{| baseAddress: BigInt, start: BigInt, end: BigInt |}> */;
+  _libRanges /* : Array<{ baseAddress: BigInt, start: BigInt, end: BigInt }> */;
 
   /**
    * Create an AddressLocator for an array of libs.

@@ -54,12 +54,12 @@ import type { TimingsForPath } from '../../profile-logic/profile-data';
  * across a single render call. Instead for ThreadSelectors, duplicate the selector
  * functions once per thread in the profile, so each memoizes separately.
  */
-export type ThreadSelectors = {|
+export type ThreadSelectors = {
   ...ThreadSelectorsPerThread,
   ...MarkerSelectorsPerThread,
   ...StackAndSampleSelectorsPerThread,
   ...ComposedSelectorsPerThread,
-|};
+};
 
 /**
  * This is the static object store that holds the selector functions.
@@ -204,7 +204,7 @@ export const selectedThreadSelectors: ThreadSelectors = (() => {
   return result2;
 })();
 
-export type NodeSelectors = {|
+export type NodeSelectors = {
   +getName: Selector<string>,
   +getIsJS: Selector<boolean>,
   +getLib: Selector<string>,
@@ -213,7 +213,7 @@ export type NodeSelectors = {|
   +getSourceViewLineTimings: Selector<LineTimings>,
   +getAssemblyViewStackAddressInfo: Selector<StackAddressInfo | null>,
   +getAssemblyViewAddressTimings: Selector<AddressTimings>,
-|};
+};
 
 export const selectedNodeSelectors: NodeSelectors = (() => {
   const getName: Selector<string> = createSelector(

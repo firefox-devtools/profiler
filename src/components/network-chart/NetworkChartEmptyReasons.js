@@ -13,11 +13,11 @@ import explicitConnect, { type ConnectedProps } from '../../utils/connect';
 
 import type { State } from 'firefox-profiler/types';
 
-type StateProps = {|
+type StateProps = {
   +threadName: string,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, {||}>;
+type Props = ConnectedProps<{}, StateProps, {}>;
 
 class NetworkChartEmptyReasonsImpl extends PureComponent<Props> {
   render() {
@@ -40,7 +40,7 @@ class NetworkChartEmptyReasonsImpl extends PureComponent<Props> {
   }
 }
 
-export const NetworkChartEmptyReasons = explicitConnect<{||}, StateProps, {||}>(
+export const NetworkChartEmptyReasons = explicitConnect<{}, StateProps, {}>(
   {
     mapStateToProps: (state: State) => ({
       threadName: selectedThreadSelectors.getFriendlyThreadName(state),

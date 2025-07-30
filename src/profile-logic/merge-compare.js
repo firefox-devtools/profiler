@@ -78,11 +78,11 @@ import type {
 export function mergeProfilesForDiffing(
   profiles: Profile[],
   profileStates: UrlState[]
-): {|
+): {
   profile: Profile,
   transformStacks: TransformStacksPerThread,
   implementationFilters: ImplementationFilter[],
-|} {
+} {
   if (profiles.length !== profileStates.length) {
     throw new Error(
       'Passed arrays do not have the same length. This should not happen.'
@@ -426,10 +426,10 @@ type TranslationMapForSamples = Map<
  * Merges several categories lists into one, resolving duplicates if necessary.
  * It returns a translation map that can be used in `adjustCategories` later.
  */
-function mergeCategories(categoriesPerProfile: Array<CategoryList | void>): {|
+function mergeCategories(categoriesPerProfile: Array<CategoryList | void>): {
   categories: CategoryList,
   translationMaps: TranslationMapForCategories[],
-|} {
+} {
   const newCategories = [];
   const newCategoryIndexByName: Map<string, IndexIntoCategoryList> = new Map();
 
@@ -464,10 +464,10 @@ function mergeCategories(categoriesPerProfile: Array<CategoryList | void>): {|
   return { categories: newCategories, translationMaps };
 }
 
-function mergeStringArrays(stringArraysPerProfile: Array<string[]>): {|
+function mergeStringArrays(stringArraysPerProfile: Array<string[]>): {
   stringArray: string[],
   translationMaps: TranslationMapForStrings[],
-|} {
+} {
   const newStringArray = [];
   const newStringTable = StringTable.withBackingArray(newStringArray);
 
@@ -1057,10 +1057,10 @@ function combineSamplesDiffing(
   };
 }
 
-type ThreadAndWeightMultiplier = {|
+type ThreadAndWeightMultiplier = {
   thread: RawThread,
   weightMultiplier: number,
-|};
+};
 
 /**
  * This function will compute a diffing thread from 2 different threads, using

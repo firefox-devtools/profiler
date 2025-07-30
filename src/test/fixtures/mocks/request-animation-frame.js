@@ -80,7 +80,7 @@ export function mockRaf() {
   });
 
   return function flushRafCalls(
-    { timestamps, once }: $Shape<{| timestamps: number[], once: boolean |}> = {
+    { timestamps, once }: $Shape<{ timestamps: number[], once: boolean }> = {
       timestamps: [],
       once: false,
     }

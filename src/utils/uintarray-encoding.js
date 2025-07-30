@@ -306,7 +306,7 @@ function bitsFromEncodingDigit(x: string): number {
 function decodeUint(
   s: string,
   start: number
-): {|
+): {
   // The decoded number.
   value: number,
   // Whether the encoding of this number started with a "leading zero" digit.
@@ -314,7 +314,7 @@ function decodeUint(
   hasLeadingZero: boolean,
   // The end of the variable-length encoding; the next number starts at s[nextI].
   nextI: number,
-|} {
+} {
   let i = start;
   let bits = bitsFromEncodingDigit(s[i]);
   let continuationBit = bits & 0b100000;

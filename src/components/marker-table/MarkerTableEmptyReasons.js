@@ -12,12 +12,12 @@ import explicitConnect, { type ConnectedProps } from '../../utils/connect';
 
 import type { State } from 'firefox-profiler/types';
 
-type StateProps = {|
+type StateProps = {
   +threadName: string,
   +isMarkerTableEmptyInFullRange: boolean,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, {||}>;
+type Props = ConnectedProps<{}, StateProps, {}>;
 class MarkerTableEmptyReasonsImpl extends PureComponent<Props> {
   render() {
     const { isMarkerTableEmptyInFullRange, threadName } = this.props;
@@ -36,7 +36,7 @@ class MarkerTableEmptyReasonsImpl extends PureComponent<Props> {
   }
 }
 
-export const MarkerTableEmptyReasons = explicitConnect<{||}, StateProps, {||}>({
+export const MarkerTableEmptyReasons = explicitConnect<{}, StateProps, {}>({
   mapStateToProps: (state: State) => ({
     threadName: selectedThreadSelectors.getFriendlyThreadName(state),
     isMarkerTableEmptyInFullRange:

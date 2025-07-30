@@ -52,7 +52,7 @@ import './TrackNetwork.css';
 /**
  * When adding properties to these props, please consider the comment above the component.
  */
-type CanvasProps = {|
+type CanvasProps = {
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +hoveredMarkerIndex: MarkerIndex | null,
@@ -65,7 +65,7 @@ type CanvasProps = {|
     mouseX?: CssPixels,
     mouseY?: CssPixels
   ) => void,
-|};
+};
 
 /**
  * This component controls the rendering of the canvas. Every render call through
@@ -245,11 +245,11 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
   }
 }
 
-type OwnProps = {|
+type OwnProps = {
   +threadIndex: ThreadIndex,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
@@ -261,24 +261,24 @@ type StateProps = {|
   +rightClickedMarkerIndex: MarkerIndex | null,
   +selectedNetworkMarkerIndex: MarkerIndex | null,
   +hoveredMarkerIndexFromState: MarkerIndex | null,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   changeRightClickedMarker: typeof changeRightClickedMarker,
   changeSelectedNetworkMarker: typeof changeSelectedNetworkMarker,
   changeHoveredMarker: typeof changeHoveredMarker,
-|};
+};
 
-type Props = {|
+type Props = {
   ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
   ...SizeProps,
-|};
+};
 
-type State = {|
+type State = {
   +hoveredMarkerIndex: MarkerIndex | null,
   +mouseX: CssPixels,
   +mouseY: CssPixels,
-|};
+};
 
 class Network extends PureComponent<Props, State> {
   state = { hoveredMarkerIndex: null, mouseX: 0, mouseY: 0 };

@@ -76,7 +76,7 @@ function _maybeFormatDuration(
   return 'unknown';
 }
 
-type OwnProps = {|
+type OwnProps = {
   +markerIndex: MarkerIndex,
   +marker: Marker,
   +threadsKey: ThreadsKey,
@@ -85,9 +85,9 @@ type OwnProps = {|
   // the layout to be huge. This option when set to true will restrict the
   // height of things like stacks, and the width of long things like URLs.
   +restrictHeightWidth: boolean,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +threadName?: string,
   +thread: Thread,
   +implementationFilter: ImplementationFilter,
@@ -99,9 +99,9 @@ type StateProps = {|
   +markerSchemaByName: MarkerSchemaByName,
   +getMarkerLabel: (MarkerIndex) => string,
   +categories: CategoryList,
-|};
+};
 
-type Props = ConnectedProps<OwnProps, StateProps, {||}>;
+type Props = ConnectedProps<OwnProps, StateProps, {}>;
 
 // Maximum image size of a tooltip field.
 const MAXIMUM_IMAGE_SIZE = 350;
@@ -516,7 +516,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
   }
 }
 
-export const TooltipMarker = explicitConnect<OwnProps, StateProps, {||}>({
+export const TooltipMarker = explicitConnect<OwnProps, StateProps, {}>({
   mapStateToProps: (state, props) => {
     const selectors = getThreadSelectorsFromThreadsKey(props.threadsKey);
     return {

@@ -66,7 +66,7 @@ import './index.css';
 
 const STACK_FRAME_HEIGHT = 16;
 
-type StateProps = {|
+type StateProps = {
   +thread: Thread,
   +weightType: WeightType,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
@@ -86,18 +86,18 @@ type StateProps = {|
   +displayStackType: boolean,
   +hasFilteredCtssSamples: boolean,
   +useStackChartSameWidths: boolean,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +changeRightClickedCallNode: typeof changeRightClickedCallNode,
   +updatePreviewSelection: typeof updatePreviewSelection,
   +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
   +updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen,
   +changeMouseTimePosition: typeof changeMouseTimePosition,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class StackChartImpl extends React.PureComponent<Props> {
   _viewport: HTMLDivElement | null = null;
@@ -293,7 +293,7 @@ class StackChartImpl extends React.PureComponent<Props> {
   }
 }
 
-export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
+export const StackChart = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => {
     const showUserTimings = getShowUserTimings(state);
     const combinedTimingRows = showUserTimings

@@ -29,7 +29,7 @@ import type { HoveredPixelState } from './ActivityGraph';
  * immutable values. This object makes it easy to share these values between different
  * classes and functions.
  */
-type RenderedComponentSettings = {|
+type RenderedComponentSettings = {
   +canvasPixelWidth: DevicePixels,
   +canvasPixelHeight: DevicePixels,
   +fullThread: Thread,
@@ -47,48 +47,48 @@ type RenderedComponentSettings = {|
   +greyCategoryIndex: IndexIntoCategoryList,
   +samplesSelectedStates: null | Array<SelectedState>,
   +categoryDrawStyles: CategoryDrawStyles,
-|};
+};
 
-type SampleContributionToPixel = {|
+type SampleContributionToPixel = {
   +sample: IndexIntoSamplesTable,
   +contribution: number,
-|};
+};
 
 /**
  * The category fills are the computation that is ultimately returned for drawing
  * the categories to the canvas. During the computation step, this value is mutated
  * in place, but should be consumed immutably.
  */
-type CategoryFill = {|
+type CategoryFill = {
   +category: IndexIntoCategoryList,
   +fillStyle: string | CanvasPattern,
   // The Float32Arrays are mutated in place during the computation step.
   +perPixelContribution: Float32Array,
   +accumulatedUpperEdge: Float32Array,
-|};
+};
 
-export type CategoryDrawStyles = $ReadOnlyArray<{|
+export type CategoryDrawStyles = $ReadOnlyArray<{
   +category: number,
   +gravity: number,
   +selectedFillStyle: string,
   +unselectedFillStyle: string,
   +filteredOutByTransformFillStyle: CanvasPattern,
   +selectedTextColor: string,
-|}>;
+}>;
 
-type SelectedPercentageAtPixelBuffers = {|
+type SelectedPercentageAtPixelBuffers = {
   // These Float32Arrays are mutated in place during the computation step.
   +beforeSelectedPercentageAtPixel: Float32Array,
   +selectedPercentageAtPixel: Float32Array,
   +afterSelectedPercentageAtPixel: Float32Array,
   +filteredOutByTransformPercentageAtPixel: Float32Array,
   +filteredOutByTabPercentageAtPixel: Float32Array,
-|};
+};
 
-export type CpuRatioInTimeRange = {|
+export type CpuRatioInTimeRange = {
   +cpuRatio: number,
   +timeRange: Milliseconds,
-|};
+};
 
 const BOX_BLUR_RADII = [3, 2, 2];
 const SMOOTHING_RADIUS = 3 + 2 + 2;
@@ -152,10 +152,10 @@ export class ActivityGraphFillComputer {
    * Run the computation to compute a list of the fills that need to be drawn for the
    * ThreadActivityGraph.
    */
-  run(): {|
+  run(): {
     +averageCPUPerPixel: Float32Array,
     +upperGraphEdge: Float32Array,
-  |} {
+  } {
     // First go through each sample, and set the buffers that contain the percentage
     // that a category contributes to a given place in the X axis of the chart.
     this._accumulateSampleCategories();

@@ -12,10 +12,10 @@ type Props = {
   +children: React.Node,
 };
 
-type State = {|
+type State = {
   url: string,
   prevBlob: Blob | null,
-|};
+};
 
 /**
  * This component is responsible for converting a Blob into an

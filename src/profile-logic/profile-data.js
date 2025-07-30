@@ -211,13 +211,13 @@ export function computeCallNodeTable(
  * At this point we are done with grouping stacks into call nodes.
  * But we haven't put the call nodes in the final order yet.
  */
-type CallNodeTableHierarchy = {|
+type CallNodeTableHierarchy = {
   prefix: Array<IndexIntoCallNodeTable>,
   firstChild: Array<IndexIntoFuncTable>,
   nextSibling: Array<IndexIntoFuncTable>,
   length: number,
   stackIndexToCallNodeIndex: Int32Array,
-|};
+};
 
 /**
  * The return type of _computeCallNodeTableDFSOrder.
@@ -225,7 +225,7 @@ type CallNodeTableHierarchy = {|
  * The values in these columns are in the final order in which they'll be in the
  * actual call node table. DFS here means "depth-first search".
  */
-type CallNodeTableDFSOrder = {|
+type CallNodeTableDFSOrder = {
   length: number,
   stackIndexToCallNodeIndex: Int32Array,
   nextSiblingSorted: Int32Array,
@@ -233,7 +233,7 @@ type CallNodeTableDFSOrder = {|
   prefixSorted: Int32Array,
   depthSorted: Int32Array,
   maxDepth: number,
-|};
+};
 
 /**
  * The return type of _computeCallNodeTableExtraColumns.
@@ -241,13 +241,13 @@ type CallNodeTableDFSOrder = {|
  * We compute these columns once we know the final size and order of the call
  * node table.
  */
-type CallNodeTableExtraColumns = {|
+type CallNodeTableExtraColumns = {
   funcCol: Int32Array, // IndexIntoCallNodeTable -> IndexIntoFuncTable
   categoryCol: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
   subcategoryCol: Int32Array, // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
   innerWindowIDCol: Float64Array, // IndexIntoCallNodeTable -> InnerWindowID
   inlinedIntoCol: Int32Array, // IndexIntoCallNodeTable -> IndexIntoNativeSymbolTable | -1 | -2
-|};
+};
 
 /**
  * Used as part of creating the call node table.
@@ -926,29 +926,29 @@ export function getLeafFuncIndex(path: CallNodePath): IndexIntoFuncTable {
   return path[path.length - 1];
 }
 
-export type OneCategoryBreakdown = {|
+export type OneCategoryBreakdown = {
   entireCategoryValue: Milliseconds,
   subcategoryBreakdown: Milliseconds[], // { [IndexIntoSubcategoryList]: Milliseconds }
-|};
+};
 export type BreakdownByCategory = OneCategoryBreakdown[]; // { [IndexIntoCategoryList]: OneCategoryBreakdown }
-export type ItemTimings = {|
-  selfTime: {|
+export type ItemTimings = {
+  selfTime: {
     // time spent excluding children
     value: Milliseconds,
     breakdownByCategory: BreakdownByCategory | null,
-  |},
-  totalTime: {|
+  },
+  totalTime: {
     // time spent including children
     value: Milliseconds,
     breakdownByCategory: BreakdownByCategory | null,
-  |},
-|};
+  },
+};
 
-export type TimingsForPath = {|
+export type TimingsForPath = {
   // timings for this path
   forPath: ItemTimings,
   rootTime: Milliseconds, // time for all the samples in the current tree
-|};
+};
 
 /**
  * This function is the same as getTimingsForCallNodeIndex, but accepts a CallNodePath
@@ -3343,7 +3343,7 @@ export function hasThreadKeys(
   return true;
 }
 
-export type StackReferences = {|
+export type StackReferences = {
   // Stacks which were sampled by sampling. For native stacks, the
   // corresponding frame address was observed as a value of the instruction
   // pointer register.
@@ -3355,7 +3355,7 @@ export type StackReferences = {|
   // frame with the instruction pointer. This difference only matters for
   // "return address nudging" which happens at the end of profile processing.
   syncBacktraceSelfStacks: Set<IndexIntoStackTable>,
-|};
+};
 
 /**
  * Find the sets of stacks that are referenced as "self" stacks by

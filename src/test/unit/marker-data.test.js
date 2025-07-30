@@ -779,11 +779,11 @@ describe('deriveMarkersFromRawMarkerTable', function () {
 });
 
 describe('filterRawMarkerTableToRange', () => {
-  type TestConfig = {|
+  type TestConfig = {
     start: Milliseconds,
     end: Milliseconds,
     markers: Array<TestDefinedRawMarker>,
-  |};
+  };
 
   function setup({ start, end, markers }: TestConfig) {
     const shared: RawProfileSharedData = {
@@ -1271,11 +1271,11 @@ describe('filterRawMarkerTableToRange', () => {
 // We don't need to test with other marker types since they are already being
 // tested in `filterRawMarkerTableToRange` tests.
 describe('filterRawMarkerTableToRangeWithMarkersToDelete', () => {
-  type TestConfig = {|
-    timeRange: {| start: Milliseconds, end: Milliseconds |} | null,
+  type TestConfig = {
+    timeRange: { start: Milliseconds, end: Milliseconds } | null,
     markersToDelete: Set<IndexIntoRawMarkerTable>,
     markers: Array<TestDefinedRawMarker>,
-  |};
+  };
 
   function setup({ timeRange, markersToDelete, markers }: TestConfig) {
     const shared: RawProfileSharedData = {

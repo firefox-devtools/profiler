@@ -58,7 +58,7 @@ function getSamplesPixelPosition(
  */
 describe('TrackMemory', function () {
   function setup(
-    counterConfig: $Shape<{| hasCountNumber: boolean |}> = {
+    counterConfig: $Shape<{ hasCountNumber: boolean }> = {
       hasCountNumber: true,
     }
   ) {

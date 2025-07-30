@@ -14,7 +14,7 @@ import './sidebar.css';
 
 export function selectSidebar(
   selectedTab: TabSlug
-): React.ComponentType<{||}> | null {
+): React.ComponentType<{}> | null {
   return {
     calltree: CallTreeSidebar,
     'flame-graph': CallTreeSidebar,

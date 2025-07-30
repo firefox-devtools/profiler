@@ -1478,7 +1478,7 @@ export function filterMarkerByDisplayLocation(
 export function computeScreenshotSize(
   payload: { windowWidth: number, windowHeight: number },
   maximumSize: number
-): {| +width: number, +height: number |} {
+): { +width: number, +height: number } {
   const { windowWidth, windowHeight } = payload;
 
   // Coefficient should be according to bigger side.
@@ -1500,13 +1500,13 @@ export function computeScreenshotSize(
 
 export type MarkerSearchFieldMap = Map<
   string,
-  {| positive: RegExp | null, negative: RegExp | null |},
+  { positive: RegExp | null, negative: RegExp | null },
 >;
 
-export type MarkerRegExps = $ReadOnly<{|
+export type MarkerRegExps = $ReadOnly<{
   generic: RegExp | null,
   fieldMap: MarkerSearchFieldMap,
-|}>;
+}>;
 
 /**
  * Concatenate an array of strings into multiple RegExps that match on all
@@ -1523,7 +1523,7 @@ export const stringsToMarkerRegExps = (
   // we aggregate them to create a single regexp for each field later.
   const fieldStrings: Map<
     string,
-    {| positive: string[], negative: string[] |},
+    { positive: string[], negative: string[] },
   > = new Map();
   // These are the non-field specific search strings. They have to be positive
   // as we don't support negative generic filtering.

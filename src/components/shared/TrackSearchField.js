@@ -9,14 +9,14 @@ import { Localized } from '@fluent/react';
 
 import './TrackSearchField.css';
 
-type Props = {|
+type Props = {
   +className: string,
   +currentSearchString: string,
   +onSearch: (string) => void,
-|};
+};
 
 export class TrackSearchField extends React.PureComponent<Props> {
-  searchFieldInput: {| current: HTMLInputElement | null |} = React.createRef();
+  searchFieldInput: { current: HTMLInputElement | null } = React.createRef();
   _onSearchFieldChange = (e: SyntheticEvent<HTMLInputElement>) => {
     this.props.onSearch(e.currentTarget.value);
   };

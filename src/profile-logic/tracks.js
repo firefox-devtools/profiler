@@ -28,17 +28,17 @@ import { StringTable } from '../utils/string-table';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 
-export type TracksWithOrder = {|
+export type TracksWithOrder = {
   +globalTracks: GlobalTrack[],
   +globalTrackOrder: TrackIndex[],
   +localTracksByPid: Map<Pid, LocalTrack[]>,
   +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
-|};
+};
 
-export type HiddenTracks = {|
+export type HiddenTracks = {
   +hiddenGlobalTracks: Set<TrackIndex>,
   +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
-|};
+};
 
 /**
  * This file collects all the logic that goes into validating URL-encoded view options.
@@ -1273,7 +1273,7 @@ export function computeDefaultVisibleThreads(
   return new Set(finalList.map(({ threadIndex }) => threadIndex));
 }
 
-export type ThreadActivityScore = {|
+export type ThreadActivityScore = {
   // Whether this thread is one of the essential threads that
   // should always be kept (unless there's too many of them).
   isEssentialFirefoxThread: boolean,
@@ -1291,7 +1291,7 @@ export type ThreadActivityScore = {|
   // Like sampleScore, but with a boost factor applied if this thread
   // is "interesting even with minimal activity".
   boostedSampleScore: number,
-|};
+};
 
 // Also called "padenot factor".
 const AUDIO_THREAD_SAMPLE_SCORE_BOOST_FACTOR = 40;

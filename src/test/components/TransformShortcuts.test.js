@@ -30,7 +30,7 @@ import type {
 
 type KeyPressOptions = { key: string, ... };
 
-type TestSetup = {|
+type TestSetup = {
   getTransform: () => null | Transform,
   pressKey: (options: KeyPressOptions) => void,
   expectedCallNodePath: CallNodePath,
@@ -38,7 +38,7 @@ type TestSetup = {|
   expectedFuncIndex: IndexIntoFuncTable,
   expectedResourceIndex: IndexIntoResourceTable,
   expectedCategory: IndexIntoCategoryList,
-|};
+};
 
 function testTransformKeyboardShortcuts(setup: () => TestSetup) {
   it('handles focus subtree', () => {

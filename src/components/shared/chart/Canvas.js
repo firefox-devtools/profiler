@@ -10,7 +10,7 @@ import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 
 import type { CssPixels, DevicePixels } from 'firefox-profiler/types';
 
-type Props<Item> = {|
+type Props<Item> = {
   +containerWidth: CssPixels,
   +containerHeight: CssPixels,
   +className: string,
@@ -35,7 +35,7 @@ type Props<Item> = {|
   +onMouseLeave?: (e: { nativeEvent: MouseEvent }) => mixed,
   // Defaults to false. Set to true if the chart should persist the tooltips on click.
   +stickyTooltips?: boolean,
-|};
+};
 
 // The naming of the X and Y coordinates here correspond to the ones
 // found on the MouseEvent interface.

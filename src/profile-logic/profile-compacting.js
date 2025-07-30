@@ -16,10 +16,10 @@ import type {
   NativeSymbolTable,
 } from 'firefox-profiler/types';
 
-export type CompactedProfileWithTranslationMaps = {|
+export type CompactedProfileWithTranslationMaps = {
   profile: Profile,
   oldStringToNewStringPlusOne: Int32Array,
-|};
+};
 
 /**
  * Returns a new profile with all unreferenced strings removed.

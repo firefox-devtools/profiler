@@ -15,13 +15,13 @@ import type { ElementProps } from 'react';
 import './TransformNavigator.css';
 
 type Props = ElementProps<typeof FilterNavigatorBar>;
-type DispatchProps = {|
+type DispatchProps = {
   +onPop: $PropertyType<Props, 'onPop'>,
-|};
+};
 type StateProps = $Diff<Props, DispatchProps>;
 
 export const TransformNavigator = explicitConnect<
-  {||},
+  {},
   StateProps,
   DispatchProps,
 >({

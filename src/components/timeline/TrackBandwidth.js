@@ -26,21 +26,21 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackBandwidth.css';
 
-type OwnProps = {|
+type OwnProps = {
   +counterIndex: CounterIndex,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +threadIndex: ThreadIndex,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-|};
+};
 
-type DispatchProps = {||};
+type DispatchProps = {};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-type State = {||};
+type State = {};
 
 export class TrackBandwidthImpl extends React.PureComponent<Props, State> {
   render() {

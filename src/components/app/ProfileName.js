@@ -14,22 +14,22 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './ProfileName.css';
 import { Localized } from '@fluent/react';
 
-type StateProps = {|
+type StateProps = {
   +profileNameWithDefault: string,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +changeProfileName: typeof changeProfileName,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
-type State = {|
+type State = {
   focusedWithKey: null | string,
   // Every time the input is focused, it's recreated to consistently set the initial
   // value.
   focusGeneration: number,
-|};
+};
 
 /**
  * Allow the user to rename profiles. These get persisted to the URL, and the document
@@ -161,7 +161,7 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
   }
 }
 
-export const ProfileName = explicitConnect<{||}, StateProps, DispatchProps>({
+export const ProfileName = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     profileNameWithDefault: getProfileNameWithDefault(state),
   }),

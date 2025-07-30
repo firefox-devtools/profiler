@@ -74,12 +74,12 @@ export const INK_70 = '#363959';
 export const INK_80 = '#202340';
 export const INK_90 = '#0f1126';
 
-type ColorStyles = {|
+type ColorStyles = {
   +selectedFillStyle: string,
   +unselectedFillStyle: string,
   +selectedTextColor: string,
   +gravity: number,
-|};
+};
 
 const GRAY_STYLE = {
   selectedFillStyle: GREY_40,

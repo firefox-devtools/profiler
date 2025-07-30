@@ -33,18 +33,18 @@ import './Home.css';
 
 import { DragAndDropOverlay } from './DragAndDrop';
 
-type ActionButtonsProps = {|
+type ActionButtonsProps = {
   +onLoadProfileFromFileRequested: (file: File) => void,
   +onLoadProfileFromUrlRequested: (url: string) => void,
-|};
+};
 
 type ActionButtonsState = {
   isLoadFromUrlPressed: boolean,
 };
 
-type LoadFromUrlProps = {|
+type LoadFromUrlProps = {
   +onLoadProfileFromUrlRequested: (url: string) => void,
-|};
+};
 
 type LoadFromUrlState = {
   value: string,
@@ -195,18 +195,18 @@ function InstructionTransition(props: { children: React.Node }) {
   );
 }
 
-type OwnHomeProps = {|
+type OwnHomeProps = {
   +specialMessage?: string,
-|};
+};
 
-type StateHomeProps = {|
+type StateHomeProps = {
   +browserConnection: BrowserConnection | null,
-|};
+};
 
-type DispatchHomeProps = {|
+type DispatchHomeProps = {
   +retrieveProfileFromFile: typeof retrieveProfileFromFile,
   +triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
-|};
+};
 
 type HomeProps = ConnectedProps<
   OwnHomeProps,

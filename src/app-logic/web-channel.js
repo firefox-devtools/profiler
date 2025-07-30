@@ -17,9 +17,9 @@ import type {
  * allows us to safely send messages between the browser and an allowed domain.
  */
 
-export type MessageToBrowser = {|
+export type MessageToBrowser = {
   requestId: number,
-|} & Request;
+} & Request;
 
 export type Request =
   | StatusQueryRequest
@@ -32,56 +32,56 @@ export type Request =
   | GetPageFaviconsRequest
   | OpenScriptInTabDebuggerRequest;
 
-type StatusQueryRequest = {| type: 'STATUS_QUERY' |};
-type EnableMenuButtonRequest = {| type: 'ENABLE_MENU_BUTTON' |};
-type GetProfileRequest = {| type: 'GET_PROFILE' |};
-type GetExternalMarkersRequest = {|
+type StatusQueryRequest = { type: 'STATUS_QUERY' };
+type EnableMenuButtonRequest = { type: 'ENABLE_MENU_BUTTON' };
+type GetProfileRequest = { type: 'GET_PROFILE' };
+type GetExternalMarkersRequest = {
   type: 'GET_EXTERNAL_MARKERS',
   startTime: Milliseconds,
   endTime: Milliseconds,
-|};
-type GetExternalPowerTracksRequest = {|
+};
+type GetExternalPowerTracksRequest = {
   type: 'GET_EXTERNAL_POWER_TRACKS',
   startTime: Milliseconds,
   endTime: Milliseconds,
-|};
-type GetSymbolTableRequest = {|
+};
+type GetSymbolTableRequest = {
   type: 'GET_SYMBOL_TABLE',
   debugName: string,
   breakpadId: string,
-|};
-type QuerySymbolicationApiRequest = {|
+};
+type QuerySymbolicationApiRequest = {
   type: 'QUERY_SYMBOLICATION_API',
   path: string,
   requestJson: string,
-|};
-type GetPageFaviconsRequest = {|
+};
+type GetPageFaviconsRequest = {
   type: 'GET_PAGE_FAVICONS',
   pageUrls: Array<string>,
-|};
-type OpenScriptInTabDebuggerRequest = {|
+};
+type OpenScriptInTabDebuggerRequest = {
   type: 'OPEN_SCRIPT_IN_DEBUGGER',
   tabId: number,
   scriptUrl: string,
   line: number | null,
   column: number | null,
-|};
+};
 
 export type MessageFromBrowser<R: ResponseFromBrowser> =
   | OutOfBandErrorMessageFromBrowser
   | ErrorResponseMessageFromBrowser
   | SuccessResponseMessageFromBrowser<R>;
 
-type OutOfBandErrorMessageFromBrowser = {|
+type OutOfBandErrorMessageFromBrowser = {
   errno: number,
   error: string,
-|};
+};
 
-type ErrorResponseMessageFromBrowser = {|
+type ErrorResponseMessageFromBrowser = {
   type: 'ERROR_RESPONSE',
   requestId: number,
   error: string,
-|};
+};
 
 type SuccessResponseMessageFromBrowser<R: ResponseFromBrowser> = {
   type: 'SUCCESS_RESPONSE',
@@ -100,7 +100,7 @@ export type ResponseFromBrowser =
   | GetPageFaviconsResponse
   | OpenScriptInTabDebuggerResponse;
 
-type StatusQueryResponse = {|
+type StatusQueryResponse = {
   menuButtonIsEnabled: boolean,
   // The version indicates which message types are supported by the browser.
   // No version:
@@ -131,7 +131,7 @@ type StatusQueryResponse = {|
   //  Adds support for showing the JS script in DevTools debugger.
   //    - OPEN_SCRIPT_IN_DEBUGGER
   version?: number,
-|};
+};
 type EnableMenuButtonResponse = void;
 type GetProfileResponse = ArrayBuffer | MixedObject;
 type GetExternalMarkersResponse = ExternalMarkersData;

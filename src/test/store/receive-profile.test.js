@@ -1603,15 +1603,15 @@ describe('actions/receive-profile', function () {
       return { profile1, profile2 };
     }
 
-    type SetupProfileParams = {|
+    type SetupProfileParams = {
       profile1: Profile,
       profile2: Profile,
-    |};
+    };
 
-    type SetupUrlSearchParams = {|
+    type SetupUrlSearchParams = {
       urlSearch1: string,
       urlSearch2: string,
-    |};
+    };
 
     function setupWithLongUrl(
       profiles: SetupProfileParams,
@@ -1658,14 +1658,14 @@ describe('actions/receive-profile', function () {
       };
     }
 
-    type SetupUrlParams = {|
+    type SetupUrlParams = {
       url1: string,
       url2: string,
-    |};
+    };
 
-    type SetupOptionsParams = $Shape<{|
+    type SetupOptionsParams = $Shape<{
       +skipMarkers: boolean,
-    |}>;
+    }>;
 
     async function setup(
       { profile1, profile2 }: SetupProfileParams,

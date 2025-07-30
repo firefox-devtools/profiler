@@ -43,12 +43,12 @@ import type { ConnectedProps } from '../../utils/connect';
 // Limit how many characters in the description get sent to the DOM.
 const MAX_DESCRIPTION_CHARACTERS = 500;
 
-type MarkerDisplayData = {|
+type MarkerDisplayData = {
   start: string,
   duration: string | null,
   name: string,
   details: string,
-|};
+};
 
 class MarkerTree {
   _getMarker: (MarkerIndex) => Marker;
@@ -133,7 +133,7 @@ function _formatStart(start: number, zeroAt) {
   return formatSeconds(start - zeroAt);
 }
 
-type StateProps = {|
+type StateProps = {
   +threadsKey: ThreadsKey,
   +getMarker: (MarkerIndex) => Marker,
   +markerIndexes: MarkerIndex[],
@@ -144,15 +144,15 @@ type StateProps = {|
   +markerSchemaByName: MarkerSchemaByName,
   +getMarkerLabel: (MarkerIndex) => string,
   +tableViewOptions: TableViewOptions,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +changeSelectedMarker: typeof changeSelectedMarker,
   +changeRightClickedMarker: typeof changeRightClickedMarker,
   +onTableViewOptionsChange: (TableViewOptions) => any,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class MarkerTableImpl extends PureComponent<Props> {
   _fixedColumns = [
@@ -276,7 +276,7 @@ class MarkerTableImpl extends PureComponent<Props> {
   }
 }
 
-export const MarkerTable = explicitConnect<{||}, StateProps, DispatchProps>({
+export const MarkerTable = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     threadsKey: getSelectedThreadsKey(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),

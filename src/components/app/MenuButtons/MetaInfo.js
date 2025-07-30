@@ -37,21 +37,21 @@ import { StringTable } from 'firefox-profiler/utils/string-table';
 
 import './MetaInfo.css';
 
-type State = {|
+type State = {
   showsMoreInfo: boolean,
-|};
+};
 
-type StateProps = $ReadOnly<{|
+type StateProps = $ReadOnly<{
   profile: Profile,
   symbolicationStatus: SymbolicationStatus,
   profileExtraInfo: ExtraProfileInfoSection[],
-|}>;
+}>;
 
-type DispatchProps = $ReadOnly<{|
+type DispatchProps = $ReadOnly<{
   resymbolicateProfile: typeof resymbolicateProfile,
-|}>;
+}>;
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 /**
  * This component formats the profile's meta information into a dropdown panel.
@@ -553,7 +553,7 @@ function _formatDate(timestamp: number): string {
   return timestampDate;
 }
 
-export const MetaInfoPanel = explicitConnect<{||}, StateProps, DispatchProps>({
+export const MetaInfoPanel = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     profile: getProfile(state),
     symbolicationStatus: getSymbolicationStatus(state),

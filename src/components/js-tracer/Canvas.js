@@ -39,7 +39,7 @@ import type {
 
 import type { WrapFunctionInDispatch } from 'firefox-profiler/utils/connect';
 
-type OwnProps = {|
+type OwnProps = {
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +jsTracerTimingRows: JsTracerTiming[],
@@ -50,30 +50,30 @@ type OwnProps = {|
   +updatePreviewSelection: WrapFunctionInDispatch<
     typeof updatePreviewSelection,
   >,
-|};
+};
 
-type Props = {|
+type Props = {
   ...OwnProps,
   // Bring in the viewport props from the higher order Viewport component.
   +viewport: Viewport,
-|};
+};
 
-type State = {|
+type State = {
   // hoveredItem: null | number,
   hasFirstDraw: boolean,
-|};
+};
 
 /**
  * Collect all of values that are dependent on the current rendering pass.
  * These values will be reset on every draw call.
  */
-type RenderPass = {|
+type RenderPass = {
   +ctx: CanvasRenderingContext2D,
   +textMeasurement: TextMeasurement,
   +fastFillStyle: FastFillStyle,
   +startRow: number,
   +endRow: number,
-  +devicePixels: {|
+  +devicePixels: {
     +rowHeight: DevicePixels,
     +containerWidth: DevicePixels,
     +innerContainerWidth: DevicePixels,
@@ -85,8 +85,8 @@ type RenderPass = {|
     +timelineMarginRight: DevicePixels,
     +oneCssPixel: DevicePixels,
     +rowLabelOffsetLeft: DevicePixels,
-  |},
-|};
+  },
+};
 
 const TEXT_OFFSET_TOP: CssPixels = 11;
 const TEXT_OFFSET_START: CssPixels = 3;

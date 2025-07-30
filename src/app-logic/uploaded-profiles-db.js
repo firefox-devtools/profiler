@@ -21,13 +21,13 @@ import type { StartEndRange } from 'firefox-profiler/types';
 // the data we store and retrieve in the local DB. That's especially why it's
 // defined in this file, close to the DB operations. Indeed we don't want that
 // this type evolves without implementing a migration step for the stored data.
-export type UploadedProfileInformation = {|
+export type UploadedProfileInformation = {
   +profileToken: string, // This is the primary key.
   +jwtToken: string | null,
   +publishedDate: Date, // This key is indexed as well, to provide automatic sorting.
   +name: string,
   +preset: string | null,
-  +meta: {|
+  +meta: {
     // We're using some of the properties of the profile meta, but we're not
     // reusing the type ProfileMeta completely because we don't want to be
     // impacted from future changes to ProfileMeta.
@@ -57,11 +57,11 @@ export type UploadedProfileInformation = {|
       | 'esr' // Extended Support Release channel
       | string,
     +appBuildID?: string,
-  |},
+  },
   // Storing the state as the path makes it easy to reuse our URL upgrade mechanism.
   +urlPath: string,
   +publishedRange: StartEndRange,
-|};
+};
 
 // Exported for tests.
 export const DATABASE_NAME = 'published-profiles-store';

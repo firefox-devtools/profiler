@@ -22,18 +22,18 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import 'firefox-profiler/components/shared/PanelSettingsList.css';
 import './MarkerSettings.css';
 
-type StateProps = {|
+type StateProps = {
   +searchString: string,
   +allowSwitchingStackType: boolean,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +changeMarkersSearchString: typeof changeMarkersSearchString,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
-type State = {|
+type State = {
   +isMarkerFiltersMenuVisible: boolean,
   // react-contextmenu library automatically hides the menu on mousedown even
   // if it's already visible. That's why we need to handle the mousedown event
@@ -41,7 +41,7 @@ type State = {|
   // Otherwise, if we check this in onClick event, the state will always be
   // `false` since the library already hid it on mousedown.
   +isFilterMenuVisibleOnMouseDown: boolean,
-|};
+};
 
 class MarkerSettingsImpl extends PureComponent<Props, State> {
   state = {
@@ -139,7 +139,7 @@ class MarkerSettingsImpl extends PureComponent<Props, State> {
   }
 }
 
-export const MarkerSettings = explicitConnect<{||}, StateProps, DispatchProps>({
+export const MarkerSettings = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     searchString: getMarkersSearchString(state),
     allowSwitchingStackType: getProfileUsesMultipleStackTypes(state),

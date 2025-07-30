@@ -14,18 +14,18 @@ import classNames from 'classnames';
 
 import './ArrowPanel.css';
 
-type Props = {|
+type Props = {
   +onOpen: () => mixed,
   +onClose: () => mixed,
   +className?: string,
   +children: React.Node,
-|};
+};
 
-type State = {|
+type State = {
   +open: boolean,
   +isClosing: boolean,
   +openGeneration: number,
-|};
+};
 
 export class ArrowPanel extends React.PureComponent<Props, State> {
   closeTimeout = null;

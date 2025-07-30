@@ -202,7 +202,7 @@ export type SymbolicationStepCallback = (
   symbolicationStepInfo: SymbolicationStepInfo
 ) => void;
 
-type ThreadLibSymbolicationInfo = {|
+type ThreadLibSymbolicationInfo = {
   // The resourceIndex for this lib in this thread.
   resourceIndex: IndexIntoResourceTable,
   // The libIndex for this lib in this thread.
@@ -215,14 +215,14 @@ type ThreadLibSymbolicationInfo = {|
   allFramesForThisLib: Array<IndexIntoFrameTable>,
   // All addresses for frames for this lib in this thread, as lib-relative offsets.
   frameAddresses: Array<Address>,
-|};
+};
 
 // This type exists because we symbolicate the profile in steps in order to
 // provide a profile to the user faster. This type represents a single step.
-export type SymbolicationStepInfo = {|
+export type SymbolicationStepInfo = {
   threadLibSymbolicationInfo: ThreadLibSymbolicationInfo,
   resultsForLib: Map<Address, AddressResult>,
-|};
+};
 
 export type FuncToFuncsMap = Map<IndexIntoFuncTable, IndexIntoFuncTable[]>;
 

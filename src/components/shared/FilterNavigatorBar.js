@@ -9,7 +9,7 @@ import classNames from 'classnames';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import './FilterNavigatorBar.css';
 
-type FilterNavigatorBarListItemProps = {|
+type FilterNavigatorBarListItemProps = {
   +onClick?: null | ((number) => mixed),
   +index: number,
   +isFirstItem: boolean,
@@ -18,7 +18,7 @@ type FilterNavigatorBarListItemProps = {|
   +title?: string,
   +additionalClassName?: string,
   +children: React.Node,
-|};
+};
 
 class FilterNavigatorBarListItem extends React.PureComponent<FilterNavigatorBarListItemProps> {
   _onClick = () => {
@@ -60,13 +60,13 @@ class FilterNavigatorBarListItem extends React.PureComponent<FilterNavigatorBarL
   }
 }
 
-type Props = {|
+type Props = {
   +className: string,
   +items: $ReadOnlyArray<React.Node>,
   +onPop: (number) => mixed,
   +selectedItem: number,
   +uncommittedItem?: string,
-|};
+};
 
 export class FilterNavigatorBar extends React.PureComponent<Props> {
   render() {

@@ -9,8 +9,8 @@ import type {
   GeckoMarkerStack,
 } from 'firefox-profiler/types';
 
-type ObjectWithCause = {| a: number, cause: CauseBacktrace |};
-type ObjectWithOptionalCause = {| a: number, cause?: CauseBacktrace |};
+type ObjectWithCause = { a: number, cause: CauseBacktrace };
+type ObjectWithOptionalCause = { a: number, cause?: CauseBacktrace };
 declare var stack: GeckoMarkerStack;
 declare var cause: CauseBacktrace;
 

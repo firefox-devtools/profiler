@@ -9,9 +9,9 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import type { SourceCodeLoadingError } from 'firefox-profiler/types';
 import { Localized } from '@fluent/react';
 
-export type CodeErrorOverlayProps = {|
+export type CodeErrorOverlayProps = {
   errors: SourceCodeLoadingError[],
-|};
+};
 
 export function CodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
   return (

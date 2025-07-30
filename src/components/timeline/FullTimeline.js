@@ -49,12 +49,12 @@ import type {
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-type OwnProps = {|
+type OwnProps = {
   // This ref will be added to the inner container.
   +innerElementRef?: React.Ref<any>,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +committedRange: StartEndRange,
   +globalTracks: GlobalTrack[],
   +globalTrackOrder: TrackIndex[],
@@ -63,26 +63,26 @@ type StateProps = {|
   +zeroAt: Milliseconds,
   +profileTimelineUnit: TimelineUnit,
   +hiddenTrackCount: HiddenTrackCount,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +changeGlobalTrackOrder: typeof changeGlobalTrackOrder,
   +changeRightClickedTrack: typeof changeRightClickedTrack,
-|};
+};
 
-type Props = {|
+type Props = {
   ...SizeProps,
   ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
-|};
+};
 
-type State = {|
+type State = {
   initialSelected: InitialSelectedTrackReference | null,
-|};
+};
 
-class TimelineSettingsHiddenTracks extends React.PureComponent<{|
+class TimelineSettingsHiddenTracks extends React.PureComponent<{
   +hiddenTrackCount: HiddenTrackCount,
   +changeRightClickedTrack: typeof changeRightClickedTrack,
-|}> {
+}> {
   _showMenu = (event: SyntheticMouseEvent<HTMLElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     this.props.changeRightClickedTrack(null);

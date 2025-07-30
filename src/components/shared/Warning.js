@@ -6,17 +6,17 @@
 import React, { PureComponent } from 'react';
 import './Warning.css';
 
-type Props = {|
+type Props = {
   +message: string,
   +actionText?: string,
   +actionTitle?: string,
   +actionOnClick?: () => mixed,
   +onClose?: () => mixed,
-|};
+};
 
-type State = {|
+type State = {
   +isNoticeDisplayed: boolean,
-|};
+};
 
 export class Warning extends PureComponent<Props, State> {
   state = { isNoticeDisplayed: true };

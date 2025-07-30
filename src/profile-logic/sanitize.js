@@ -39,12 +39,12 @@ import type {
   RawCounter,
 } from 'firefox-profiler/types';
 
-export type SanitizeProfileResult = {|
+export type SanitizeProfileResult = {
   +profile: Profile,
   +oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
   +committedRanges: StartEndRange[] | null,
   +isSanitized: boolean,
-|};
+};
 
 /**
  * Take a processed profile with PII that user wants to be removed and remove the

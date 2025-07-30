@@ -14,11 +14,11 @@ import { getMeta } from '../../selectors/profile';
 import type { ProfileMeta } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
-type StateProps = {|
+type StateProps = {
   +meta: ProfileMeta,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, {||}>;
+type Props = ConnectedProps<{}, StateProps, {}>;
 class DebugWarningImp extends PureComponent<Props> {
   render() {
     const { meta } = this.props;
@@ -38,7 +38,7 @@ class DebugWarningImp extends PureComponent<Props> {
   }
 }
 
-export const DebugWarning = explicitConnect<{||}, StateProps, {||}>({
+export const DebugWarning = explicitConnect<{}, StateProps, {}>({
   mapStateToProps: (state) => ({
     meta: getMeta(state),
   }),

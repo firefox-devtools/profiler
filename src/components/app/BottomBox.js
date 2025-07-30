@@ -48,7 +48,7 @@ import { Localized } from '@fluent/react';
 
 import './BottomBox.css';
 
-type StateProps = {|
+type StateProps = {
   +sourceViewFile: string | null,
   +sourceViewCode: SourceCodeStatus | void,
   +sourceViewScrollGeneration: number,
@@ -61,13 +61,13 @@ type StateProps = {|
   +globalAddressTimings: AddressTimings,
   +selectedCallNodeAddressTimings: AddressTimings,
   +disableOverscan: boolean,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +closeBottomBox: typeof closeBottomBox,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 export function SourceCodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
   return (
@@ -280,7 +280,7 @@ function convertErrors(errors: ApiQueryError[]): SourceCodeLoadingError[] {
   return errors.map((e) => e);
 }
 
-export const BottomBox = explicitConnect<{||}, StateProps, DispatchProps>({
+export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     sourceViewFile: getSourceViewFile(state),
     sourceViewCode: getSourceViewCode(state),

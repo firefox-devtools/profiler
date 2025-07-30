@@ -18,18 +18,18 @@ export type LibSymbolicationRequest = {
 };
 
 export type LibSymbolicationResponse =
-  | {|
+  | {
       type: 'SUCCESS',
       lib: RequestedLib,
       results: Map<number, AddressResult>,
-    |}
-  | {|
+    }
+  | {
       type: 'ERROR',
       request: LibSymbolicationRequest,
       error: Error,
-    |};
+    };
 
-export type AddressResult = {|
+export type AddressResult = {
   // The name of the outer function that this address belongs to.
   name: string,
   // The address (relative to the library) where the function that
@@ -52,13 +52,13 @@ export type AddressResult = {|
   // An optional size, in bytes, of the machine code of the outer function that
   // this address belongs to.
   functionSize?: number,
-|};
+};
 
-export type AddressInlineFrame = {|
+export type AddressInlineFrame = {
   name: string,
   file?: string,
   line?: number,
-|};
+};
 
 interface SymbolProvider {
   // Cheap, should be called first.

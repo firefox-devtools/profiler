@@ -78,7 +78,7 @@ import type { CallNodeInfo } from './call-node-info';
 export type StackTimingDepth = number;
 export type IndexIntoStackTiming = number;
 
-export type StackTiming = {|
+export type StackTiming = {
   start: Milliseconds[],
   end: Milliseconds[],
   // These 2 properties sameWidthsStart and sameWidthsEnd increments at each
@@ -89,14 +89,14 @@ export type StackTiming = {|
   sameWidthsEnd: number[],
   callNode: IndexIntoCallNodeTable[],
   length: number,
-|};
+};
 
 export type StackTimingByDepth = Array<StackTiming>;
 export type SameWidthsIndexToTimestampMap = number[];
-export type StackTimingByDepthWithMap = {|
+export type StackTimingByDepthWithMap = {
   timings: StackTimingByDepth,
   sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap,
-|};
+};
 
 /**
  * Build a StackTimingByDepth table from a given thread.

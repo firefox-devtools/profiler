@@ -44,19 +44,19 @@ function PermissiveLocalized(props: React.ElementConfig<typeof Localized>) {
 // See https://github.com/facebook/flow/issues/4099
 type RegExpResult = null | ({ index: number, input: string } & string[]);
 type NodeIndex = number;
-type TableViewOptionsWithDefault = {|
+type TableViewOptionsWithDefault = {
   fixedColumnWidths: Array<CssPixels>,
-|};
+};
 
-export type Column<DisplayData: Object> = {|
+export type Column<DisplayData: Object> = {
   +propName: string,
   +titleL10nId: string,
-  +component?: React.ComponentType<{|
+  +component?: React.ComponentType<{
     displayData: DisplayData,
-  |}>,
-|};
+  }>,
+};
 
-export type MaybeResizableColumn<DisplayData: Object> = {|
+export type MaybeResizableColumn<DisplayData: Object> = {
   ...Column<DisplayData>,
   /** defaults to initialWidth */
   +minWidth?: CssPixels,
@@ -68,9 +68,9 @@ export type MaybeResizableColumn<DisplayData: Object> = {|
   +resizable?: boolean,
   // is the divider after the column hidden? false by default
   +hideDividerAfter?: boolean,
-|};
+};
 
-type TreeViewHeaderProps<DisplayData: Object> = {|
+type TreeViewHeaderProps<DisplayData: Object> = {
   +fixedColumns: MaybeResizableColumn<DisplayData>[],
   +mainColumn: Column<DisplayData>,
   +viewOptions: TableViewOptionsWithDefault,
@@ -78,7 +78,7 @@ type TreeViewHeaderProps<DisplayData: Object> = {|
   // passes the column index and the start x coordinate
   +onColumnWidthChangeStart: (number, CssPixels) => void,
   +onColumnWidthReset: (number) => void,
-|};
+};
 
 class TreeViewHeader<DisplayData: Object> extends React.PureComponent<
   TreeViewHeaderProps<DisplayData>,
@@ -178,7 +178,7 @@ function reactStringWithHighlightedSubstrings(
   return highlighted;
 }
 
-type TreeViewRowFixedColumnsProps<DisplayData: Object> = {|
+type TreeViewRowFixedColumnsProps<DisplayData: Object> = {
   +displayData: DisplayData,
   +nodeId: NodeIndex,
   +columns: MaybeResizableColumn<DisplayData>[],
@@ -189,7 +189,7 @@ type TreeViewRowFixedColumnsProps<DisplayData: Object> = {|
   +highlightRegExp: RegExp | null,
   +rowHeightStyle: { height: CssPixels, lineHeight: string },
   +viewOptions: TableViewOptionsWithDefault,
-|};
+};
 
 class TreeViewRowFixedColumns<DisplayData: Object> extends React.PureComponent<
   TreeViewRowFixedColumnsProps<DisplayData>,
@@ -253,7 +253,7 @@ class TreeViewRowFixedColumns<DisplayData: Object> extends React.PureComponent<
   }
 }
 
-type TreeViewRowScrolledColumnsProps<DisplayData: Object> = {|
+type TreeViewRowScrolledColumnsProps<DisplayData: Object> = {
   +displayData: DisplayData,
   +nodeId: NodeIndex,
   +depth: number,
@@ -271,7 +271,7 @@ type TreeViewRowScrolledColumnsProps<DisplayData: Object> = {|
   // non-'px' units.
   +rowHeightStyle: { height: CssPixels, lineHeight: string },
   +indentWidth: CssPixels,
-|};
+};
 
 // This is a false-positive, as it's used as a generic trait bounds.
 class TreeViewRowScrolledColumns<
@@ -437,7 +437,7 @@ interface Tree<DisplayData: Object> {
   getAllDescendants(NodeIndex): Set<NodeIndex>;
 }
 
-type TreeViewProps<DisplayData> = {|
+type TreeViewProps<DisplayData> = {
   +fixedColumns: MaybeResizableColumn<DisplayData>[],
   +mainColumn: Column<DisplayData>,
   +tree: Tree<DisplayData>,
@@ -453,7 +453,7 @@ type TreeViewProps<DisplayData> = {|
   +maxNodeDepth: number,
   +onSelectionChange: (
     NodeIndex,
-    {| source: 'keyboard' | 'pointer' |}
+    { source: 'keyboard' | 'pointer' }
   ) => mixed,
   +onRightClickSelection?: (NodeIndex) => mixed,
   +onEnterKey?: (NodeIndex) => mixed,
@@ -463,12 +463,12 @@ type TreeViewProps<DisplayData> = {|
   +onKeyDown?: (SyntheticKeyboardEvent<>) => void,
   +viewOptions: TableViewOptions,
   +onViewOptionsChange?: (TableViewOptions) => void,
-|};
+};
 
-type TreeViewState = {|
+type TreeViewState = {
   +fixedColumnWidths: Array<CssPixels> | null,
   +isResizingColumns: boolean,
-|};
+};
 
 export class TreeView<DisplayData: Object> extends React.PureComponent<
   TreeViewProps<DisplayData>,
@@ -478,11 +478,11 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
   _takeListRef = (list: VirtualList<NodeIndex> | null) => (this._list = list);
 
   // This contains the information about the current column resizing happening currently.
-  _currentMovedColumnState: {|
+  _currentMovedColumnState: {
     columnIndex: number,
     startX: CssPixels,
     initialWidth: CssPixels,
-  |} | null = null;
+  } | null = null;
 
   state = {
     // This contains the current widths, while or after the user resizes them.

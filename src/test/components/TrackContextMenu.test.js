@@ -56,9 +56,9 @@ describe('timeline/TrackContextMenu', function () {
 
   const clickTracksWithExpectation = async (
     matchers: Array<string | RegExp>,
-    expectations: {|
+    expectations: {
       +checked: boolean,
-    |}
+    }
   ) => {
     const elements = matchers.map((matcher) =>
       screen.getByRole('menuitemcheckbox', { name: matcher })

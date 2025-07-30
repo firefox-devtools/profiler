@@ -40,23 +40,23 @@ import './index.css';
 
 const ROW_HEIGHT: CssPixels = 16;
 
-type OwnProps = {|
+type OwnProps = {
   +jsTracerTable: JsTracerTable,
   +showJsTracerSummary: boolean,
   +doFadeIn: boolean,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +updatePreviewSelection: typeof updatePreviewSelection,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +jsTracerTimingRows: JsTracerTiming[],
   +stringTable: StringTable,
   +timeRange: StartEndRange,
   +threadsKey: ThreadsKey,
   +previewSelection: PreviewSelection,
-|};
+};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
@@ -151,16 +151,16 @@ const JsTracerExpensiveChart = explicitConnect<
   component: JsTracerExpensiveChartImpl,
 });
 
-type ChartLoaderProps = {|
+type ChartLoaderProps = {
   +profile: Profile,
   +jsTracerTable: JsTracerTable,
   +showJsTracerSummary: boolean,
   +keyString: string,
-|};
+};
 
-type ChartLoaderState = {|
+type ChartLoaderState = {
   readyToRenderExpensiveChart: boolean,
-|};
+};
 
 // Keep track of all the React keys seen for a component. If everything is correctly
 // memoized, then it should only be slow and expensive to compute the timing information
@@ -233,12 +233,12 @@ class JsTracerChartLoader extends React.PureComponent<
   }
 }
 
-type ChartProps = {|
+type ChartProps = {
   +profile: Profile,
   +jsTracerTable: JsTracerTable,
   +showJsTracerSummary: boolean,
   +threadsKey: ThreadsKey,
-|};
+};
 
 /**
  * This component enforces that the JsTracerChartLoader has a correct key in order

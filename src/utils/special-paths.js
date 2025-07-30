@@ -7,29 +7,29 @@
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 export type ParsedFileNameFromSymbolication =
-  | {|
+  | {
       type: 'normal',
       path: string,
-    |}
-  | {|
+    }
+  | {
       type: 'hg' | 'git',
       repo: string,
       path: string,
       rev: string,
-    |}
-  | {|
+    }
+  | {
       type: 's3',
       bucket: string,
       digest: string,
       path: string,
-    |}
-  | {|
+    }
+  | {
       type: 'cargo',
       registry: string,
       crate: string,
       version: string,
       path: string,
-    |};
+    };
 
 // Describes how to obtain a source file from the web.
 // In the simplest case, the source code is served as a cross-origin accessible
