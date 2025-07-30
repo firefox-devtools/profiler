@@ -21,11 +21,11 @@ import './MaybeFlameGraph.css';
 // only used in the "flame-graph" tab.
 
 type StateProps = {
-  +isPreviewSelectionEmpty: boolean,
-  +invertCallstack: boolean,
+  readonly isPreviewSelectionEmpty: boolean,
+  readonly invertCallstack: boolean,
 };
 type DispatchProps = {
-  +changeInvertCallstack: typeof changeInvertCallstack,
+  readonly changeInvertCallstack: typeof changeInvertCallstack,
 };
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 

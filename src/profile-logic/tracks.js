@@ -29,15 +29,15 @@ import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 
 export type TracksWithOrder = {
-  +globalTracks: GlobalTrack[],
-  +globalTrackOrder: TrackIndex[],
-  +localTracksByPid: Map<Pid, LocalTrack[]>,
-  +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+  readonly globalTracks: GlobalTrack[],
+  readonly globalTrackOrder: TrackIndex[],
+  readonly localTracksByPid: Map<Pid, LocalTrack[]>,
+  readonly localTrackOrderByPid: Map<Pid, TrackIndex[]>,
 };
 
 export type HiddenTracks = {
-  +hiddenGlobalTracks: Set<TrackIndex>,
-  +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
+  readonly hiddenGlobalTracks: Set<TrackIndex>,
+  readonly hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
 };
 
 /**

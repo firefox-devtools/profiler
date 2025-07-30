@@ -47,19 +47,19 @@ type MouseEventHandler = (SyntheticMouseEvent<HTMLCanvasElement>) => any;
  * When adding properties to these props, please consider the comment above the component.
  */
 type CanvasProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +width: CssPixels,
-  +height: CssPixels,
-  +getMarker: (MarkerIndex) => Marker,
-  +markerIndexes: MarkerIndex[],
-  +hoveredMarker: Marker | null,
-  +mouseDownMarker: Marker | null,
-  +rightClickedMarker: Marker | null,
-  +onMouseDown: MouseEventHandler,
-  +onMouseUp: MouseEventHandler,
-  +onMouseMove: MouseEventHandler,
-  +onMouseOut: MouseEventHandler,
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly width: CssPixels,
+  readonly height: CssPixels,
+  readonly getMarker: (MarkerIndex) => Marker,
+  readonly markerIndexes: MarkerIndex[],
+  readonly hoveredMarker: Marker | null,
+  readonly mouseDownMarker: Marker | null,
+  readonly rightClickedMarker: Marker | null,
+  readonly onMouseDown: MouseEventHandler,
+  readonly onMouseUp: MouseEventHandler,
+  readonly onMouseMove: MouseEventHandler,
+  readonly onMouseOut: MouseEventHandler,
 };
 
 function _drawRoundedRect(
@@ -284,24 +284,24 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
  */
 
 export type OwnProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +threadsKey: ThreadsKey,
-  +onSelect: (Milliseconds, Milliseconds) => mixed,
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly threadsKey: ThreadsKey,
+  readonly onSelect: (Milliseconds, Milliseconds) => mixed,
 };
 
 export type StateProps = {
   +additionalClassName?: ?string,
-  +getMarker: (MarkerIndex) => Marker,
-  +markerIndexes: MarkerIndex[],
-  +isSelected: boolean,
-  +isModifyingSelection: boolean,
-  +testId: string,
-  +rightClickedMarker: Marker | null,
+  readonly getMarker: (MarkerIndex) => Marker,
+  readonly markerIndexes: MarkerIndex[],
+  readonly isSelected: boolean,
+  readonly isModifyingSelection: boolean,
+  readonly testId: string,
+  readonly rightClickedMarker: Marker | null,
 };
 
 export type DispatchProps = {
-  +changeRightClickedMarker: typeof changeRightClickedMarker,
+  readonly changeRightClickedMarker: typeof changeRightClickedMarker,
 };
 
 type Props = {

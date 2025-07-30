@@ -33,27 +33,27 @@ import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type { CpuRatioInTimeRange } from './ActivityGraphFills';
 
 export type HoveredPixelState = {
-  +sample: IndexIntoSamplesTable | null,
-  +cpuRatioInTimeRange: CpuRatioInTimeRange | null,
+  readonly sample: IndexIntoSamplesTable | null,
+  readonly cpuRatioInTimeRange: CpuRatioInTimeRange | null,
 };
 
 type Props = {
-  +className: string,
-  +thread: Thread,
-  +samplesSelectedStates: null | SelectedState[],
-  +interval: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +categories: CategoryList,
-  +onSampleClick: (
+  readonly className: string,
+  readonly thread: Thread,
+  readonly samplesSelectedStates: null | SelectedState[],
+  readonly interval: Milliseconds,
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly categories: CategoryList,
+  readonly onSampleClick: (
     event: SyntheticMouseEvent<>,
     sampleIndex: IndexIntoSamplesTable | null
   ) => void,
-  +trackName: string,
-  +timelineType: TimelineType,
-  +implementationFilter: ImplementationFilter,
-  +zeroAt: Milliseconds,
-  +profileTimelineUnit: string,
+  readonly trackName: string,
+  readonly timelineType: TimelineType,
+  readonly implementationFilter: ImplementationFilter,
+  readonly zeroAt: Milliseconds,
+  readonly profileTimelineUnit: string,
   ...SizeProps,
 };
 
@@ -64,14 +64,14 @@ type State = {
 };
 
 type CanvasProps = {
-  +className: string,
-  +thread: Thread,
-  +samplesSelectedStates: null | SelectedState[],
-  +interval: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +categories: CategoryList,
-  +trackName: string,
+  readonly className: string,
+  readonly thread: Thread,
+  readonly samplesSelectedStates: null | SelectedState[],
+  readonly interval: Milliseconds,
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly categories: CategoryList,
+  readonly trackName: string,
   ...SizeProps,
 };
 

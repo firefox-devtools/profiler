@@ -76,8 +76,8 @@ describe('Root with history', function () {
       name,
       selected,
     }: {
-      +name: string,
-      +selected: boolean,
+      readonly name: string,
+      readonly selected: boolean,
     }): Promise<HTMLElement> {
       // This uses `findByText` instead of `findbyRole` because this is a lot
       // faster in our use case where there's a lot of DOM nodes.

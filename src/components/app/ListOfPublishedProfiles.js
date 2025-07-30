@@ -35,13 +35,13 @@ function _formatRange(range: StartEndRange): string {
 }
 
 type PublishedProfileProps = {
-  +onProfileDelete: () => void,
-  +uploadedProfileInformation: UploadedProfileInformation,
-  +withActionButtons: boolean,
+  readonly onProfileDelete: () => void,
+  readonly uploadedProfileInformation: UploadedProfileInformation,
+  readonly withActionButtons: boolean,
 };
 
 type PublishedProfileState = {
-  +confirmDialogIsOpen: boolean,
+  readonly confirmDialogIsOpen: boolean,
 };
 
 /**

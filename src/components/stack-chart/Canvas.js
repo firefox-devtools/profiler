@@ -56,41 +56,41 @@ import type {
 import type { WrapFunctionInDispatch } from '../../utils/connect';
 
 type OwnProps = {
-  +thread: Thread,
-  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-  +threadsKey: ThreadsKey,
-  +interval: Milliseconds,
-  +weightType: WeightType,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +combinedTimingRows: CombinedTimingRows,
-  +sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap,
-  +stackFrameHeight: CssPixels,
-  +updatePreviewSelection: WrapFunctionInDispatch<
+  readonly thread: Thread,
+  readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
+  readonly threadsKey: ThreadsKey,
+  readonly interval: Milliseconds,
+  readonly weightType: WeightType,
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly combinedTimingRows: CombinedTimingRows,
+  readonly sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap,
+  readonly stackFrameHeight: CssPixels,
+  readonly updatePreviewSelection: WrapFunctionInDispatch<
     typeof updatePreviewSelection,
   >,
-  +changeMouseTimePosition: ChangeMouseTimePosition,
-  +getMarker: (MarkerIndex) => Marker,
-  +categories: CategoryList,
-  +callNodeInfo: CallNodeInfo,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
-  +onRightClick: (IndexIntoCallNodeTable | null) => void,
-  +shouldDisplayTooltips: () => boolean,
-  +scrollToSelectionGeneration: number,
-  +marginLeft: CssPixels,
-  +displayStackType: boolean,
-  +useStackChartSameWidths: boolean,
+  readonly changeMouseTimePosition: ChangeMouseTimePosition,
+  readonly getMarker: (MarkerIndex) => Marker,
+  readonly categories: CategoryList,
+  readonly callNodeInfo: CallNodeInfo,
+  readonly selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  readonly onSelectionChange: (IndexIntoCallNodeTable | null) => void,
+  readonly onRightClick: (IndexIntoCallNodeTable | null) => void,
+  readonly shouldDisplayTooltips: () => boolean,
+  readonly scrollToSelectionGeneration: number,
+  readonly marginLeft: CssPixels,
+  readonly displayStackType: boolean,
+  readonly useStackChartSameWidths: boolean,
 };
 
 type Props = $ReadOnly<{
   ...OwnProps,
-  +viewport: Viewport,
+  readonly viewport: Viewport,
 }>;
 
 type HoveredStackTiming = {
-  +depth: StackTimingDepth,
-  +stackTimingIndex: IndexIntoStackTiming,
+  readonly depth: StackTimingDepth,
+  readonly stackTimingIndex: IndexIntoStackTiming,
 };
 
 import './Canvas.css';

@@ -37,14 +37,14 @@ import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import './Details.css';
 
 type StateProps = {
-  +visibleTabs: $ReadOnlyArray<TabSlug>,
-  +selectedTab: TabSlug,
-  +isSidebarOpen: boolean,
+  readonly visibleTabs: $ReadOnlyArray<TabSlug>,
+  readonly selectedTab: TabSlug,
+  readonly isSidebarOpen: boolean,
 };
 
 type DispatchProps = {
-  +changeSelectedTab: typeof changeSelectedTab,
-  +changeSidebarOpenState: typeof changeSidebarOpenState,
+  readonly changeSelectedTab: typeof changeSelectedTab,
+  readonly changeSidebarOpenState: typeof changeSidebarOpenState,
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;

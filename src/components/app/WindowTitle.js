@@ -21,12 +21,12 @@ import type { Profile, DataSource } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {
-  +profile: Profile | null,
-  +profileNameFromUrl: string | null,
-  +fileNameInZipFilePath: string | null,
-  +formattedMetaInfoString: string | null,
-  +dataSource: DataSource,
-  +listingZipFile: boolean,
+  readonly profile: Profile | null,
+  readonly profileNameFromUrl: string | null,
+  readonly fileNameInZipFilePath: string | null,
+  readonly formattedMetaInfoString: string | null,
+  readonly dataSource: DataSource,
+  readonly listingZipFile: boolean,
 };
 
 type Props = ConnectedProps<{}, StateProps, {}>;

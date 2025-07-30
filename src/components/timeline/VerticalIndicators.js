@@ -20,15 +20,15 @@ import type {
 import './VerticalIndicators.css';
 
 type Props = {
-  +getMarker: (MarkerIndex) => Marker,
-  +verticalMarkerIndexes: MarkerIndex[],
-  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +zeroAt: Milliseconds,
-  +width: CssPixels,
-  +shouldShowTooltip: boolean,
-  +onRightClick: (MarkerIndex) => mixed,
+  readonly getMarker: (MarkerIndex) => Marker,
+  readonly verticalMarkerIndexes: MarkerIndex[],
+  readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly zeroAt: Milliseconds,
+  readonly width: CssPixels,
+  readonly shouldShowTooltip: boolean,
+  readonly onRightClick: (MarkerIndex) => mixed,
 };
 
 /**

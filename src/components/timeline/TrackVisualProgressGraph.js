@@ -31,13 +31,13 @@ import './TrackVisualProgress.css';
  * When adding properties to these props, please consider the comment above the component.
  */
 type CanvasProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +progressGraphData: ProgressGraphData[],
-  +interval: Milliseconds,
-  +width: CssPixels,
-  +height: CssPixels,
-  +lineWidth: CssPixels,
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly progressGraphData: ProgressGraphData[],
+  readonly interval: Milliseconds,
+  readonly width: CssPixels,
+  readonly height: CssPixels,
+  readonly lineWidth: CssPixels,
 };
 
 /**
@@ -172,16 +172,16 @@ class TrackVisualProgressCanvas extends React.PureComponent<CanvasProps> {
 }
 
 type OwnProps = {
-  +progressGraphData: ProgressGraphData[],
-  +lineWidth: CssPixels,
-  +graphHeight: CssPixels,
-  +graphDotTooltipText: string,
+  readonly progressGraphData: ProgressGraphData[],
+  readonly lineWidth: CssPixels,
+  readonly graphHeight: CssPixels,
+  readonly graphDotTooltipText: string,
 };
 
 type StateProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +interval: Milliseconds,
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly interval: Milliseconds,
 };
 
 type DispatchProps = {};

@@ -48,14 +48,14 @@ import './TrackCustomMarker.css';
  * When adding properties to these props, please consider the comment above the component.
  */
 type CanvasProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +markerSchema: MarkerSchema,
-  +markerSampleRanges: [IndexIntoSamplesTable, IndexIntoSamplesTable],
-  +collectedSamples: CollectedCustomMarkerSamples,
-  +width: CssPixels,
-  +height: CssPixels,
-  +getMarker: (MarkerIndex) => Marker,
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly markerSchema: MarkerSchema,
+  readonly markerSampleRanges: [IndexIntoSamplesTable, IndexIntoSamplesTable],
+  readonly collectedSamples: CollectedCustomMarkerSamples,
+  readonly width: CssPixels,
+  readonly height: CssPixels,
+  readonly getMarker: (MarkerIndex) => Marker,
 };
 
 function _calculateUnitValue(
@@ -327,18 +327,18 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
 }
 
 type OwnProps = {
-  +threadIndex: ThreadIndex,
-  +markerSchema: MarkerSchema,
-  +markerName: IndexIntoStringTable,
-  +graphHeight: CssPixels,
+  readonly threadIndex: ThreadIndex,
+  readonly markerSchema: MarkerSchema,
+  readonly markerName: IndexIntoStringTable,
+  readonly graphHeight: CssPixels,
 };
 
 type StateProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +markerSampleRanges: [IndexIntoSamplesTable, IndexIntoSamplesTable],
-  +collectedSamples: CollectedCustomMarkerSamples,
-  +getMarker: (MarkerIndex) => Marker,
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly markerSampleRanges: [IndexIntoSamplesTable, IndexIntoSamplesTable],
+  readonly collectedSamples: CollectedCustomMarkerSamples,
+  readonly getMarker: (MarkerIndex) => Marker,
 };
 
 type DispatchProps = {};

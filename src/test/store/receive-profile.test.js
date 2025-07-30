@@ -1664,7 +1664,7 @@ describe('actions/receive-profile', function () {
     };
 
     type SetupOptionsParams = $Shape<{
-      +skipMarkers: boolean,
+      readonly skipMarkers: boolean,
     }>;
 
     async function setup(

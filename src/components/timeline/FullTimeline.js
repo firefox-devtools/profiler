@@ -55,19 +55,19 @@ type OwnProps = {
 };
 
 type StateProps = {
-  +committedRange: StartEndRange,
-  +globalTracks: GlobalTrack[],
-  +globalTrackOrder: TrackIndex[],
-  +globalTrackReferences: GlobalTrackReference[],
-  +panelLayoutGeneration: number,
-  +zeroAt: Milliseconds,
-  +profileTimelineUnit: TimelineUnit,
-  +hiddenTrackCount: HiddenTrackCount,
+  readonly committedRange: StartEndRange,
+  readonly globalTracks: GlobalTrack[],
+  readonly globalTrackOrder: TrackIndex[],
+  readonly globalTrackReferences: GlobalTrackReference[],
+  readonly panelLayoutGeneration: number,
+  readonly zeroAt: Milliseconds,
+  readonly profileTimelineUnit: TimelineUnit,
+  readonly hiddenTrackCount: HiddenTrackCount,
 };
 
 type DispatchProps = {
-  +changeGlobalTrackOrder: typeof changeGlobalTrackOrder,
-  +changeRightClickedTrack: typeof changeRightClickedTrack,
+  readonly changeGlobalTrackOrder: typeof changeGlobalTrackOrder,
+  readonly changeRightClickedTrack: typeof changeRightClickedTrack,
 };
 
 type Props = {
@@ -80,8 +80,8 @@ type State = {
 };
 
 class TimelineSettingsHiddenTracks extends React.PureComponent<{
-  +hiddenTrackCount: HiddenTrackCount,
-  +changeRightClickedTrack: typeof changeRightClickedTrack,
+  readonly hiddenTrackCount: HiddenTrackCount,
+  readonly changeRightClickedTrack: typeof changeRightClickedTrack,
 }> {
   _showMenu = (event: SyntheticMouseEvent<HTMLElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();

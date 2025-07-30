@@ -147,10 +147,10 @@ const NETWORK_PROPERTY_OPACITIES = {
 };
 
 type NetworkPhaseProps = {
-  +propertyName: string,
-  +dur: Milliseconds,
-  +startPosition: Milliseconds,
-  +phaseDuration: Milliseconds,
+  readonly propertyName: string,
+  readonly dur: Milliseconds,
+  readonly startPosition: Milliseconds,
+  readonly phaseDuration: Milliseconds,
 };
 
 class NetworkPhase extends React.PureComponent<NetworkPhaseProps> {
@@ -191,8 +191,8 @@ class NetworkPhase extends React.PureComponent<NetworkPhaseProps> {
 }
 
 type Props = {
-  +payload: NetworkPayload,
-  +zeroAt: Milliseconds,
+  readonly payload: NetworkPayload,
+  readonly zeroAt: Milliseconds,
 };
 
 export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {

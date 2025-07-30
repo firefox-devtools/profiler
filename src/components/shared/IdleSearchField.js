@@ -10,13 +10,13 @@ import { Localized } from '@fluent/react';
 import './IdleSearchField.css';
 
 type Props = {
-  +onIdleAfterChange: (string) => void,
+  readonly onIdleAfterChange: (string) => void,
   +onFocus?: () => void,
   +onBlur?: (Element | null) => void,
-  +idlePeriod: number,
-  +defaultValue: ?string,
-  +className: ?string,
-  +title: ?string,
+  readonly idlePeriod: number,
+  readonly defaultValue: ?string,
+  readonly className: ?string,
+  readonly title: ?string,
 };
 
 type State = {

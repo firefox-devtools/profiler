@@ -22,11 +22,11 @@ import type {
 } from 'firefox-profiler/types';
 
 type Props = {
-  +zeroAt: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +width: CssPixels,
-  +unit: TimelineUnit,
+  readonly zeroAt: Milliseconds,
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly width: CssPixels,
+  readonly unit: TimelineUnit,
 };
 
 export class TimelineRuler extends PureComponent<Props> {

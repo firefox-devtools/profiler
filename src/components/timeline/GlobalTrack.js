@@ -55,31 +55,31 @@ import type {
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {
-  +trackReference: GlobalTrackReference,
-  +trackIndex: TrackIndex,
+  readonly trackReference: GlobalTrackReference,
+  readonly trackIndex: TrackIndex,
   +style?: MixedObject /* This is used by Reorderable */,
-  +setInitialSelected: (el: InitialSelectedTrackReference) => void,
+  readonly setInitialSelected: (el: InitialSelectedTrackReference) => void,
 };
 
 type StateProps = {
-  +trackName: string,
-  +globalTrack: GlobalTrack,
-  +isSelected: boolean,
-  +isHidden: boolean,
-  +titleText: string | null,
-  +localTrackOrder: TrackIndex[],
-  +localTracks: LocalTrack[],
-  +pid: Pid | null,
-  +selectedTab: TabSlug,
-  +processesWithMemoryTrack: Set<Pid>,
-  +progressGraphData: ProgressGraphData[] | null,
+  readonly trackName: string,
+  readonly globalTrack: GlobalTrack,
+  readonly isSelected: boolean,
+  readonly isHidden: boolean,
+  readonly titleText: string | null,
+  readonly localTrackOrder: TrackIndex[],
+  readonly localTracks: LocalTrack[],
+  readonly pid: Pid | null,
+  readonly selectedTab: TabSlug,
+  readonly processesWithMemoryTrack: Set<Pid>,
+  readonly progressGraphData: ProgressGraphData[] | null,
 };
 
 type DispatchProps = {
-  +changeRightClickedTrack: typeof changeRightClickedTrack,
-  +changeLocalTrackOrder: typeof changeLocalTrackOrder,
-  +selectTrackWithModifiers: typeof selectTrackWithModifiers,
-  +hideGlobalTrack: typeof hideGlobalTrack,
+  readonly changeRightClickedTrack: typeof changeRightClickedTrack,
+  readonly changeLocalTrackOrder: typeof changeLocalTrackOrder,
+  readonly selectTrackWithModifiers: typeof selectTrackWithModifiers,
+  readonly hideGlobalTrack: typeof hideGlobalTrack,
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;

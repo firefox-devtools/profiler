@@ -257,8 +257,8 @@ export type PaintProfilerMarkerTracing = {
 };
 
 export type ArbitraryEventTracing = {
-  +type: 'tracing',
-  +category: string,
+  readonly type: 'tracing',
+  readonly category: string,
 };
 
 export type CcMarkerTracing = {

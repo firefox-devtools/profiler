@@ -40,14 +40,14 @@ import type {
 import type { WrapFunctionInDispatch } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +jsTracerTimingRows: JsTracerTiming[],
-  +jsTracerTable: JsTracerTable,
-  +rowHeight: CssPixels,
-  +threadsKey: ThreadsKey,
-  +doFadeIn: boolean,
-  +updatePreviewSelection: WrapFunctionInDispatch<
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly jsTracerTimingRows: JsTracerTiming[],
+  readonly jsTracerTable: JsTracerTable,
+  readonly rowHeight: CssPixels,
+  readonly threadsKey: ThreadsKey,
+  readonly doFadeIn: boolean,
+  readonly updatePreviewSelection: WrapFunctionInDispatch<
     typeof updatePreviewSelection,
   >,
 };
@@ -55,7 +55,7 @@ type OwnProps = {
 type Props = {
   ...OwnProps,
   // Bring in the viewport props from the higher order Viewport component.
-  +viewport: Viewport,
+  readonly viewport: Viewport,
 };
 
 type State = {
@@ -68,23 +68,23 @@ type State = {
  * These values will be reset on every draw call.
  */
 type RenderPass = {
-  +ctx: CanvasRenderingContext2D,
-  +textMeasurement: TextMeasurement,
-  +fastFillStyle: FastFillStyle,
-  +startRow: number,
-  +endRow: number,
-  +devicePixels: {
-    +rowHeight: DevicePixels,
-    +containerWidth: DevicePixels,
-    +innerContainerWidth: DevicePixels,
-    +containerHeight: DevicePixels,
-    +viewportTop: DevicePixels,
-    +textOffsetStart: DevicePixels,
-    +textOffsetTop: DevicePixels,
-    +timelineMarginLeft: DevicePixels,
-    +timelineMarginRight: DevicePixels,
-    +oneCssPixel: DevicePixels,
-    +rowLabelOffsetLeft: DevicePixels,
+  readonly ctx: CanvasRenderingContext2D,
+  readonly textMeasurement: TextMeasurement,
+  readonly fastFillStyle: FastFillStyle,
+  readonly startRow: number,
+  readonly endRow: number,
+  readonly devicePixels: {
+    readonly rowHeight: DevicePixels,
+    readonly containerWidth: DevicePixels,
+    readonly innerContainerWidth: DevicePixels,
+    readonly containerHeight: DevicePixels,
+    readonly viewportTop: DevicePixels,
+    readonly textOffsetStart: DevicePixels,
+    readonly textOffsetTop: DevicePixels,
+    readonly timelineMarginLeft: DevicePixels,
+    readonly timelineMarginRight: DevicePixels,
+    readonly oneCssPixel: DevicePixels,
+    readonly rowLabelOffsetLeft: DevicePixels,
   },
 };
 

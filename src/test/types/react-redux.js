@@ -32,21 +32,21 @@ const ANY_VALUE = (0: any);
  */
 
 type OwnProps = {
-  +ownPropString: string,
-  +ownPropNumber: number,
+  readonly ownPropString: string,
+  readonly ownPropNumber: number,
 };
 
 type StateProps = {
-  +statePropString: string,
-  +statePropNumber: number,
+  readonly statePropString: string,
+  readonly statePropNumber: number,
 };
 
 type ExampleActionCreator = (string) => Action;
 type ExampleThunkActionCreator = (string) => ThunkAction<number>;
 
 type DispatchProps = {
-  +dispatchString: ExampleActionCreator,
-  +dispatchThunk: ExampleThunkActionCreator,
+  readonly dispatchString: ExampleActionCreator,
+  readonly dispatchThunk: ExampleThunkActionCreator,
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -81,8 +81,8 @@ const validMapStateToProps = (state, ownProps) => {
 };
 
 declare var validDispatchToProps: {
-  +dispatchString: (string) => Action,
-  +dispatchThunk: (string) => ThunkAction<number>,
+  readonly dispatchString: (string) => Action,
+  readonly dispatchThunk: (string) => ThunkAction<number>,
 };
 
 // This value also serves as a test for the common case of creating a component
@@ -100,17 +100,17 @@ const ConnectedExampleComponent = explicitConnect<
 {
   // Test that WrapDispatchProps modifies the ThunkActions.
   const wrapped: WrapDispatchProps<DispatchProps> = (ANY_VALUE: {
-    +dispatchString: (string) => Action,
-    +dispatchThunk: (string) => number,
+    readonly dispatchString: (string) => Action,
+    readonly dispatchThunk: (string) => number,
   });
 }
 
 {
   // Test that the original unwrapped action creators do not work.
   const wrapped: WrapDispatchProps<DispatchProps> = (ANY_VALUE: {
-    +dispatchString: (string) => Action,
+    readonly dispatchString: (string) => Action,
     // $FlowExpectError
-    +dispatchThunk: (string) => ThunkAction<number>,
+    readonly dispatchThunk: (string) => ThunkAction<number>,
   });
 }
 
@@ -161,7 +161,7 @@ const ConnectedExampleComponent = explicitConnect<
     mapStateToProps: validMapStateToProps,
     // $FlowExpectError
     mapDispatchToProps: (ANY_VALUE: {
-      +dispatchThunk: (string) => ThunkAction<number>,
+      readonly dispatchThunk: (string) => ThunkAction<number>,
     }),
     component: ExampleComponent,
   });
@@ -173,8 +173,8 @@ const ConnectedExampleComponent = explicitConnect<
     mapStateToProps: validMapStateToProps,
     mapDispatchToProps: (ANY_VALUE: {
       // $FlowExpectError
-      +dispatchString: (string) => string,
-      +dispatchThunk: (string) => ThunkAction<number>,
+      readonly dispatchString: (string) => string,
+      readonly dispatchThunk: (string) => ThunkAction<number>,
     }),
     component: ExampleComponent,
   });
@@ -187,7 +187,7 @@ const ConnectedExampleComponent = explicitConnect<
     // $FlowExpectError
     mapDispatchToProps: (ANY_VALUE: {
       ...typeof validDispatchToProps,
-      +extraProperty: (string) => string,
+      readonly extraProperty: (string) => string,
     }),
     component: ExampleComponent,
   });

@@ -18,22 +18,22 @@ import type {
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 type Props = {
-  +className: string,
-  +thread: Thread,
-  +samplesSelectedStates: null | SelectedState[],
-  +sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
-  +interval: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +callNodeInfo: CallNodeInfo,
-  +categories: CategoryList,
-  +onSampleClick: (
+  readonly className: string,
+  readonly thread: Thread,
+  readonly samplesSelectedStates: null | SelectedState[],
+  readonly sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
+  readonly interval: Milliseconds,
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly callNodeInfo: CallNodeInfo,
+  readonly categories: CategoryList,
+  readonly onSampleClick: (
     event: SyntheticMouseEvent<>,
     sampleIndex: IndexIntoSamplesTable
   ) => void,
   // Decide which way the stacks grow up from the floor, or down from the ceiling.
   +stacksGrowFromCeiling?: boolean,
-  +trackName: string,
+  readonly trackName: string,
 };
 
 export class ThreadStackGraph extends PureComponent<Props> {

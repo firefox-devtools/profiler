@@ -42,8 +42,8 @@ function fewTimes(count: number) {
 }
 
 type ProfileLoaderAnimationStateProps = {
-  +view: AppViewState,
-  +dataSource: DataSource,
+  readonly view: AppViewState,
+  readonly dataSource: DataSource,
 };
 
 type ProfileLoaderAnimationProps = ConnectedProps<

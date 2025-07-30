@@ -125,43 +125,43 @@ const CTRL_KEYMAP: { [string]: NavigationKey } = {
 // These viewport values (most of which are computed dynamically by
 // the HOC) are passed into the props of the wrapped component.
 export type Viewport = {
-  +containerWidth: CssPixels,
-  +containerHeight: CssPixels,
-  +viewportLeft: UnitIntervalOfProfileRange,
-  +viewportRight: UnitIntervalOfProfileRange,
-  +viewportTop: CssPixels,
-  +viewportBottom: CssPixels,
-  +isDragging: boolean,
-  +moveViewport: (CssPixels, CssPixels) => void,
-  +isSizeSet: boolean,
+  readonly containerWidth: CssPixels,
+  readonly containerHeight: CssPixels,
+  readonly viewportLeft: UnitIntervalOfProfileRange,
+  readonly viewportRight: UnitIntervalOfProfileRange,
+  readonly viewportTop: CssPixels,
+  readonly viewportBottom: CssPixels,
+  readonly isDragging: boolean,
+  readonly moveViewport: (CssPixels, CssPixels) => void,
+  readonly isSizeSet: boolean,
 };
 
 type ViewportStateProps = {
-  +panelLayoutGeneration: number,
+  readonly panelLayoutGeneration: number,
   +hasZoomedViaMousewheel?: boolean,
 };
 
 type ViewportDispatchProps = {
-  +updatePreviewSelection: typeof updatePreviewSelection,
+  readonly updatePreviewSelection: typeof updatePreviewSelection,
   +setHasZoomedViaMousewheel?: typeof setHasZoomedViaMousewheel,
 };
 
 // These are the props consumed by this Higher-Order Component (HOC), but can be
 // optionally used by the wrapped component.
 type ViewportOwnProps<ChartProps> = {
-  +viewportProps: {
+  readonly viewportProps: {
     // The "committed range", whose endpoints correspond to 0 and 1.
-    +timeRange: StartEndRange,
+    readonly timeRange: StartEndRange,
     // The preview selection, whose endpoints correspond to viewportLeft and viewportRight.
-    +previewSelection: PreviewSelection,
+    readonly previewSelection: PreviewSelection,
     // The left margin. Margins are outside the viewport but inside containerWidth.
-    +marginLeft: CssPixels,
+    readonly marginLeft: CssPixels,
     // The right margin. Margins are outside the viewport but inside containerWidth.
-    +marginRight: CssPixels,
+    readonly marginRight: CssPixels,
 
-    +maxViewportHeight: number,
+    readonly maxViewportHeight: number,
     +startsAtBottom?: boolean,
-    +maximumZoom: UnitIntervalOfProfileRange,
+    readonly maximumZoom: UnitIntervalOfProfileRange,
     +disableHorizontalMovement?: boolean,
     +className?: string,
     +containerRef?: (HTMLDivElement | null) => void,
@@ -172,12 +172,12 @@ type ViewportOwnProps<ChartProps> = {
     //   (withChartViewport: WithChartViewport<OwnProps, Props>)(
     //     MarkerChartCanvas
     //   )
-    +viewportNeedsUpdate: (
+    readonly viewportNeedsUpdate: (
       prevProps: ChartProps,
       nextProps: ChartProps
     ) => boolean,
   },
-  +chartProps: ChartProps,
+  readonly chartProps: ChartProps,
 };
 
 type HorizontalViewport = {

@@ -30,28 +30,28 @@ import type { HoveredPixelState } from './ActivityGraph';
  * classes and functions.
  */
 type RenderedComponentSettings = {
-  +canvasPixelWidth: DevicePixels,
-  +canvasPixelHeight: DevicePixels,
-  +fullThread: Thread,
-  +rangeFilteredThread: Thread,
-  +interval: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +sampleIndexOffset: number,
-  +xPixelsPerMs: number,
-  +enableCPUUsage: boolean,
-  +treeOrderSampleComparator: ?(
+  readonly canvasPixelWidth: DevicePixels,
+  readonly canvasPixelHeight: DevicePixels,
+  readonly fullThread: Thread,
+  readonly rangeFilteredThread: Thread,
+  readonly interval: Milliseconds,
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly sampleIndexOffset: number,
+  readonly xPixelsPerMs: number,
+  readonly enableCPUUsage: boolean,
+  readonly treeOrderSampleComparator: ?(
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
   ) => number,
-  +greyCategoryIndex: IndexIntoCategoryList,
-  +samplesSelectedStates: null | Array<SelectedState>,
-  +categoryDrawStyles: CategoryDrawStyles,
+  readonly greyCategoryIndex: IndexIntoCategoryList,
+  readonly samplesSelectedStates: null | Array<SelectedState>,
+  readonly categoryDrawStyles: CategoryDrawStyles,
 };
 
 type SampleContributionToPixel = {
-  +sample: IndexIntoSamplesTable,
-  +contribution: number,
+  readonly sample: IndexIntoSamplesTable,
+  readonly contribution: number,
 };
 
 /**
@@ -60,34 +60,34 @@ type SampleContributionToPixel = {
  * in place, but should be consumed immutably.
  */
 type CategoryFill = {
-  +category: IndexIntoCategoryList,
-  +fillStyle: string | CanvasPattern,
+  readonly category: IndexIntoCategoryList,
+  readonly fillStyle: string | CanvasPattern,
   // The Float32Arrays are mutated in place during the computation step.
-  +perPixelContribution: Float32Array,
-  +accumulatedUpperEdge: Float32Array,
+  readonly perPixelContribution: Float32Array,
+  readonly accumulatedUpperEdge: Float32Array,
 };
 
 export type CategoryDrawStyles = $ReadOnlyArray<{
-  +category: number,
-  +gravity: number,
-  +selectedFillStyle: string,
-  +unselectedFillStyle: string,
-  +filteredOutByTransformFillStyle: CanvasPattern,
-  +selectedTextColor: string,
+  readonly category: number,
+  readonly gravity: number,
+  readonly selectedFillStyle: string,
+  readonly unselectedFillStyle: string,
+  readonly filteredOutByTransformFillStyle: CanvasPattern,
+  readonly selectedTextColor: string,
 }>;
 
 type SelectedPercentageAtPixelBuffers = {
   // These Float32Arrays are mutated in place during the computation step.
-  +beforeSelectedPercentageAtPixel: Float32Array,
-  +selectedPercentageAtPixel: Float32Array,
-  +afterSelectedPercentageAtPixel: Float32Array,
-  +filteredOutByTransformPercentageAtPixel: Float32Array,
-  +filteredOutByTabPercentageAtPixel: Float32Array,
+  readonly beforeSelectedPercentageAtPixel: Float32Array,
+  readonly selectedPercentageAtPixel: Float32Array,
+  readonly afterSelectedPercentageAtPixel: Float32Array,
+  readonly filteredOutByTransformPercentageAtPixel: Float32Array,
+  readonly filteredOutByTabPercentageAtPixel: Float32Array,
 };
 
 export type CpuRatioInTimeRange = {
-  +cpuRatio: number,
-  +timeRange: Milliseconds,
+  readonly cpuRatio: number,
+  readonly timeRange: Milliseconds,
 };
 
 const BOX_BLUR_RADII = [3, 2, 2];
@@ -133,10 +133,10 @@ export function computeActivityGraphFills(
  * fills by mutating the selected pecentage buffers and the category fill values.
  */
 export class ActivityGraphFillComputer {
-  +renderedComponentSettings: RenderedComponentSettings;
+  readonly renderedComponentSettings: RenderedComponentSettings;
   // The fills and percentages are mutated in place.
-  +mutablePercentageBuffers: SelectedPercentageAtPixelBuffers[];
-  +mutableFills: CategoryFill[];
+  readonly mutablePercentageBuffers: SelectedPercentageAtPixelBuffers[];
+  readonly mutableFills: CategoryFill[];
 
   constructor(
     renderedComponentSettings: RenderedComponentSettings,
@@ -153,8 +153,8 @@ export class ActivityGraphFillComputer {
    * ThreadActivityGraph.
    */
   run(): {
-    +averageCPUPerPixel: Float32Array,
-    +upperGraphEdge: Float32Array,
+    readonly averageCPUPerPixel: Float32Array,
+    readonly upperGraphEdge: Float32Array,
   } {
     // First go through each sample, and set the buffers that contain the percentage
     // that a category contributes to a given place in the X axis of the chart.

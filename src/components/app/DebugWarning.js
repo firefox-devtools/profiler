@@ -15,7 +15,7 @@ import type { ProfileMeta } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {
-  +meta: ProfileMeta,
+  readonly meta: ProfileMeta,
 };
 
 type Props = ConnectedProps<{}, StateProps, {}>;

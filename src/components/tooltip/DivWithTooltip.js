@@ -10,7 +10,7 @@ import type { CssPixels } from 'firefox-profiler/types';
 // This isn't an exact object on purpose, because we'll pass all other props to
 // the underlying <div>.
 type Props = {
-  +tooltip: React.Node,
+  readonly tooltip: React.Node,
   +children?: React.Node,
 };
 

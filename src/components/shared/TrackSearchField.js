@@ -10,9 +10,9 @@ import { Localized } from '@fluent/react';
 import './TrackSearchField.css';
 
 type Props = {
-  +className: string,
-  +currentSearchString: string,
-  +onSearch: (string) => void,
+  readonly className: string,
+  readonly currentSearchString: string,
+  readonly onSearch: (string) => void,
 };
 
 export class TrackSearchField extends React.PureComponent<Props> {

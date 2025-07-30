@@ -14,8 +14,8 @@ import type {
 } from 'firefox-profiler/types';
 
 export type RightClickedCallNodeInfo = {
-  +threadsKey: ThreadsKey,
-  +callNodePath: CallNodePath,
+  readonly threadsKey: ThreadsKey,
+  readonly callNodePath: CallNodePath,
 };
 
 export const getRightClickedCallNodeInfo: Selector<RightClickedCallNodeInfo | null> =

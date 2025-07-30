@@ -46,24 +46,24 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { TrackCustomMarker } from './TrackCustomMarker';
 
 type OwnProps = {
-  +pid: Pid,
-  +localTrack: LocalTrack,
-  +trackIndex: TrackIndex,
+  readonly pid: Pid,
+  readonly localTrack: LocalTrack,
+  readonly trackIndex: TrackIndex,
   +style?: MixedObject /* This is used by Reorderable */,
-  +setIsInitialSelectedPane: (value: boolean) => void,
+  readonly setIsInitialSelectedPane: (value: boolean) => void,
 };
 
 type StateProps = {
-  +trackName: string,
-  +isSelected: boolean,
-  +isHidden: boolean,
-  +titleText: string | null,
+  readonly trackName: string,
+  readonly isSelected: boolean,
+  readonly isHidden: boolean,
+  readonly titleText: string | null,
 };
 
 type DispatchProps = {
-  +changeRightClickedTrack: typeof changeRightClickedTrack,
-  +selectTrackWithModifiers: typeof selectTrackWithModifiers,
-  +hideLocalTrack: typeof hideLocalTrack,
+  readonly changeRightClickedTrack: typeof changeRightClickedTrack,
+  readonly selectTrackWithModifiers: typeof selectTrackWithModifiers,
+  readonly hideLocalTrack: typeof hideLocalTrack,
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;

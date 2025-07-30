@@ -14,7 +14,7 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './CompareHome.css';
 
 type DispatchProps = {
-  +changeProfilesToCompare: typeof changeProfilesToCompare,
+  readonly changeProfilesToCompare: typeof changeProfilesToCompare,
 };
 
 type Props = ConnectedProps<{}, {}, DispatchProps>;

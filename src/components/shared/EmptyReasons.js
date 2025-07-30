@@ -7,9 +7,9 @@ import React, { PureComponent } from 'react';
 import './EmptyReasons.css';
 
 type Props = {
-  +viewName: string,
-  +threadName: string,
-  +reason: string,
+  readonly viewName: string,
+  readonly threadName: string,
+  readonly reason: string,
 };
 
 /**

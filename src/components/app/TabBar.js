@@ -16,9 +16,9 @@ import {
 import './TabBar.css';
 
 type Props = {
-  +selectedTabSlug: string,
-  +visibleTabs: $ReadOnlyArray<TabSlug>,
-  +onSelectTab: (string) => void,
+  readonly selectedTabSlug: string,
+  readonly visibleTabs: $ReadOnlyArray<TabSlug>,
+  readonly onSelectTab: (string) => void,
 };
 
 export class TabBar extends React.PureComponent<Props> {

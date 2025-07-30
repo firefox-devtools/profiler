@@ -27,18 +27,18 @@ import type { DataSource } from 'firefox-profiler/types';
 import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
 
 type StateProps = {
-  +dataSource: DataSource,
-  +hash: string,
-  +profileUrl: string,
-  +profilesToCompare: string[] | null,
-  +browserConnectionStatus: BrowserConnectionStatus,
+  readonly dataSource: DataSource,
+  readonly hash: string,
+  readonly profileUrl: string,
+  readonly profilesToCompare: string[] | null,
+  readonly browserConnectionStatus: BrowserConnectionStatus,
 };
 
 type DispatchProps = {
-  +retrieveProfileFromBrowser: typeof retrieveProfileFromBrowser,
-  +retrieveProfileFromStore: typeof retrieveProfileFromStore,
-  +retrieveProfileOrZipFromUrl: typeof retrieveProfileOrZipFromUrl,
-  +retrieveProfilesToCompare: typeof retrieveProfilesToCompare,
+  readonly retrieveProfileFromBrowser: typeof retrieveProfileFromBrowser,
+  readonly retrieveProfileFromStore: typeof retrieveProfileFromStore,
+  readonly retrieveProfileOrZipFromUrl: typeof retrieveProfileOrZipFromUrl,
+  readonly retrieveProfilesToCompare: typeof retrieveProfilesToCompare,
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;

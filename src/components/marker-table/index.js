@@ -134,22 +134,22 @@ function _formatStart(start: number, zeroAt) {
 }
 
 type StateProps = {
-  +threadsKey: ThreadsKey,
-  +getMarker: (MarkerIndex) => Marker,
-  +markerIndexes: MarkerIndex[],
-  +selectedMarker: MarkerIndex | null,
-  +rightClickedMarkerIndex: MarkerIndex | null,
-  +zeroAt: Milliseconds,
-  +scrollToSelectionGeneration: number,
-  +markerSchemaByName: MarkerSchemaByName,
-  +getMarkerLabel: (MarkerIndex) => string,
-  +tableViewOptions: TableViewOptions,
+  readonly threadsKey: ThreadsKey,
+  readonly getMarker: (MarkerIndex) => Marker,
+  readonly markerIndexes: MarkerIndex[],
+  readonly selectedMarker: MarkerIndex | null,
+  readonly rightClickedMarkerIndex: MarkerIndex | null,
+  readonly zeroAt: Milliseconds,
+  readonly scrollToSelectionGeneration: number,
+  readonly markerSchemaByName: MarkerSchemaByName,
+  readonly getMarkerLabel: (MarkerIndex) => string,
+  readonly tableViewOptions: TableViewOptions,
 };
 
 type DispatchProps = {
-  +changeSelectedMarker: typeof changeSelectedMarker,
-  +changeRightClickedMarker: typeof changeRightClickedMarker,
-  +onTableViewOptionsChange: (TableViewOptions) => any,
+  readonly changeSelectedMarker: typeof changeSelectedMarker,
+  readonly changeRightClickedMarker: typeof changeRightClickedMarker,
+  readonly onTableViewOptionsChange: (TableViewOptions) => any,
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;

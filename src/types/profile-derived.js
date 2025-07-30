@@ -562,25 +562,25 @@ export type JsTracerTiming = {
  * structure that can be used to see the total range of change over all the samples.
  */
 export type AccumulatedCounterSamples = {
-  +minCount: number,
-  +maxCount: number,
-  +countRange: number,
+  readonly minCount: number,
+  readonly maxCount: number,
+  readonly countRange: number,
   // This value holds the accumulation of all the previous counts in the Counter samples.
   // For a memory counter, this gives the relative offset of bytes in that range
   // selection. The array will share the indexes of the range filtered counter samples.
-  +accumulatedCounts: number[],
+  readonly accumulatedCounts: number[],
 };
 
 /**
  * A collection of the data for all configured lines for a given marker
  */
 export type CollectedCustomMarkerSamples = {
-  +minNumber: number,
-  +maxNumber: number,
+  readonly minNumber: number,
+  readonly maxNumber: number,
   // This value holds the number per configured line
   // selection. The array will share the indexes of the range filtered marker samples.
-  +numbersPerLine: number[][],
-  +markerIndexes: MarkerIndex[],
+  readonly numbersPerLine: number[][],
+  readonly markerIndexes: MarkerIndex[],
 };
 
 export type StackType = 'js' | 'native' | 'unsymbolicated';
@@ -604,10 +604,10 @@ export type LocalTrack =
   | { +type: 'process-cpu', +counterIndex: CounterIndex }
   | { +type: 'power', +counterIndex: CounterIndex }
   | {
-      +type: 'marker',
-      +threadIndex: ThreadIndex,
-      +markerSchema: MarkerSchema,
-      +markerName: IndexIntoStringTable,
+      readonly type: 'marker',
+      readonly threadIndex: ThreadIndex,
+      readonly markerSchema: MarkerSchema,
+      readonly markerName: IndexIntoStringTable,
     };
 
 export type Track = GlobalTrack | LocalTrack;
@@ -624,21 +624,21 @@ export type TrackIndex = number;
  */
 export type RemoveProfileInformation = {
   // Remove the given hidden threads if they are provided.
-  +shouldRemoveThreads: Set<ThreadIndex>,
+  readonly shouldRemoveThreads: Set<ThreadIndex>,
   // Remove the given counters if they are provided.
-  +shouldRemoveCounters: Set<CounterIndex>,
+  readonly shouldRemoveCounters: Set<CounterIndex>,
   // Remove the screenshots if they are provided.
-  +shouldRemoveThreadsWithScreenshots: Set<ThreadIndex>,
+  readonly shouldRemoveThreadsWithScreenshots: Set<ThreadIndex>,
   // Remove the full time range if StartEndRange is provided.
-  +shouldFilterToCommittedRange: StartEndRange | null,
+  readonly shouldFilterToCommittedRange: StartEndRange | null,
   // Remove all the URLs if it's true.
-  +shouldRemoveUrls: boolean,
+  readonly shouldRemoveUrls: boolean,
   // Remove the extension list if it's true.
-  +shouldRemoveExtensions: boolean,
+  readonly shouldRemoveExtensions: boolean,
   // Remove the preference values if it's true.
-  +shouldRemovePreferenceValues: boolean,
+  readonly shouldRemovePreferenceValues: boolean,
   // Remove the private browsing data if it's true.
-  +shouldRemovePrivateBrowsingData: boolean,
+  readonly shouldRemovePrivateBrowsingData: boolean,
 };
 
 /**
@@ -711,10 +711,10 @@ export type SelfAndTotal = { self: number, total: number };
  * https://searchfox.org/mozilla-central/rev/3811b11b5773c1dccfe8228bfc7143b10a9a2a99/tools/profiler/core/platform.cpp#3000-3186
  */
 export type EventDelayInfo = {
-  +eventDelays: Float32Array,
-  +minDelay: Milliseconds,
-  +maxDelay: Milliseconds,
-  +delayRange: Milliseconds,
+  readonly eventDelays: Float32Array,
+  readonly minDelay: Milliseconds,
+  readonly maxDelay: Milliseconds,
+  readonly delayRange: Milliseconds,
 };
 
 /**
@@ -756,6 +756,6 @@ export type BottomBoxInfo = {
  * Favicon data that is retrieved from the browser connection.
  */
 export type FaviconData = {
-  +data: ArrayBuffer,
-  +mimeType: string,
+  readonly data: ArrayBuffer,
+  readonly mimeType: string,
 };

@@ -34,8 +34,8 @@ import './Home.css';
 import { DragAndDropOverlay } from './DragAndDrop';
 
 type ActionButtonsProps = {
-  +onLoadProfileFromFileRequested: (file: File) => void,
-  +onLoadProfileFromUrlRequested: (url: string) => void,
+  readonly onLoadProfileFromFileRequested: (file: File) => void,
+  readonly onLoadProfileFromUrlRequested: (url: string) => void,
 };
 
 type ActionButtonsState = {
@@ -43,7 +43,7 @@ type ActionButtonsState = {
 };
 
 type LoadFromUrlProps = {
-  +onLoadProfileFromUrlRequested: (url: string) => void,
+  readonly onLoadProfileFromUrlRequested: (url: string) => void,
 };
 
 type LoadFromUrlState = {
@@ -200,12 +200,12 @@ type OwnHomeProps = {
 };
 
 type StateHomeProps = {
-  +browserConnection: BrowserConnection | null,
+  readonly browserConnection: BrowserConnection | null,
 };
 
 type DispatchHomeProps = {
-  +retrieveProfileFromFile: typeof retrieveProfileFromFile,
-  +triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
+  readonly retrieveProfileFromFile: typeof retrieveProfileFromFile,
+  readonly triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
 };
 
 type HomeProps = ConnectedProps<

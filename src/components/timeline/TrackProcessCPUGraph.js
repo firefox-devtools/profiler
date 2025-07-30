@@ -39,15 +39,15 @@ import './TrackProcessCPU.css';
  * When adding properties to these props, please consider the comment above the component.
  */
 type CanvasProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +counter: Counter,
-  +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
-  +maxCounterSampleCountPerMs: number,
-  +interval: Milliseconds,
-  +width: CssPixels,
-  +height: CssPixels,
-  +lineWidth: CssPixels,
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly counter: Counter,
+  readonly counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
+  readonly maxCounterSampleCountPerMs: number,
+  readonly interval: Milliseconds,
+  readonly width: CssPixels,
+  readonly height: CssPixels,
+  readonly lineWidth: CssPixels,
 };
 
 /**
@@ -198,21 +198,21 @@ class TrackProcessCPUCanvas extends React.PureComponent<CanvasProps> {
 }
 
 type OwnProps = {
-  +counterIndex: CounterIndex,
-  +lineWidth: CssPixels,
-  +graphHeight: CssPixels,
+  readonly counterIndex: CounterIndex,
+  readonly lineWidth: CssPixels,
+  readonly graphHeight: CssPixels,
 };
 
 type StateProps = {
-  +threadIndex: ThreadIndex,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +counter: Counter,
-  +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
-  +maxCounterSampleCountPerMs: number,
-  +interval: Milliseconds,
-  +filteredThread: Thread,
-  +unfilteredSamplesRange: StartEndRange | null,
+  readonly threadIndex: ThreadIndex,
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly counter: Counter,
+  readonly counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
+  readonly maxCounterSampleCountPerMs: number,
+  readonly interval: Milliseconds,
+  readonly filteredThread: Thread,
+  readonly unfilteredSamplesRange: StartEndRange | null,
 };
 
 type DispatchProps = {};

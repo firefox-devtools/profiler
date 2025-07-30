@@ -43,10 +43,10 @@ import type { CssPixels } from 'firefox-profiler/types';
 type RenderItem<Item> = (Item, number, number) => React.Node;
 
 type VirtualListRowProps<Item> = {
-  +renderItem: RenderItem<Item>,
-  +item: Item,
-  +index: number,
-  +columnIndex: number,
+  readonly renderItem: RenderItem<Item>,
+  readonly item: Item,
+  readonly index: number,
+  readonly columnIndex: number,
   // These properties are not used directly, but are needed for strict equality
   // checks so that the components update correctly.
   // * `forceRenderControl` is used when we want to update one row or a few rows only,
@@ -54,12 +54,12 @@ type VirtualListRowProps<Item> = {
   //   selection need to be changed.
   //   It needs to change whenever the row should be updated, so it should be
   //   computed from the values that control these update.
-  +forceRenderItem: string,
+  readonly forceRenderItem: string,
   // * `items` contains the full items, so that we update the whole list
   //   whenever the source changes. This is necessary because often `item` is a
   //   native value (eg a number), and shallow checking only `item` won't always
   //   give the expected behavior.
-  +items: $ReadOnlyArray<Item>,
+  readonly items: $ReadOnlyArray<Item>,
   // * `forceRender` is passed through directly from the main VirtualList
   //   component to the row as a way to update the full list for reasons
   //   unbeknownst to this component. This can be used for example in chart-like
@@ -78,13 +78,13 @@ class VirtualListRow<Item> extends React.PureComponent<
 }
 
 type VirtualListInnerChunkProps<Item> = {
-  +className: string,
-  +renderItem: RenderItem<Item>,
-  +items: $ReadOnlyArray<Item>,
-  +specialItems: $ReadOnlyArray<Item | void>,
-  +visibleRangeStart: number,
-  +visibleRangeEnd: number,
-  +columnIndex: number,
+  readonly className: string,
+  readonly renderItem: RenderItem<Item>,
+  readonly items: $ReadOnlyArray<Item>,
+  readonly specialItems: $ReadOnlyArray<Item | void>,
+  readonly visibleRangeStart: number,
+  readonly visibleRangeEnd: number,
+  readonly columnIndex: number,
   +forceRender?: number | string,
 };
 
@@ -140,15 +140,15 @@ class VirtualListInnerChunk<Item> extends React.PureComponent<
 }
 
 type VirtualListInnerProps<Item> = {
-  +itemHeight: CssPixels,
-  +className: string,
-  +renderItem: RenderItem<Item>,
-  +items: $ReadOnlyArray<Item>,
-  +specialItems: $ReadOnlyArray<Item | void>,
-  +visibleRangeStart: number,
-  +visibleRangeEnd: number,
-  +columnIndex: number,
-  +containerWidth: CssPixels,
+  readonly itemHeight: CssPixels,
+  readonly className: string,
+  readonly renderItem: RenderItem<Item>,
+  readonly items: $ReadOnlyArray<Item>,
+  readonly specialItems: $ReadOnlyArray<Item | void>,
+  readonly visibleRangeStart: number,
+  readonly visibleRangeEnd: number,
+  readonly columnIndex: number,
+  readonly containerWidth: CssPixels,
   +forceRender?: number | string,
 };
 
@@ -215,12 +215,12 @@ class VirtualListInner<Item> extends React.PureComponent<
 }
 
 type VirtualListProps<Item> = {
-  +itemHeight: CssPixels,
-  +className: string,
-  +renderItem: RenderItem<Item>,
-  +items: $ReadOnlyArray<Item>,
-  +focusable: boolean,
-  +specialItems: $ReadOnlyArray<Item | void>,
+  readonly itemHeight: CssPixels,
+  readonly className: string,
+  readonly renderItem: RenderItem<Item>,
+  readonly items: $ReadOnlyArray<Item>,
+  readonly focusable: boolean,
+  readonly specialItems: $ReadOnlyArray<Item | void>,
   +onKeyDown?: (SyntheticKeyboardEvent<>) => void,
   +onCopy?: (ClipboardEvent) => void,
   // This is called when the mouse leaves the list as it is rendered. That is if
@@ -229,9 +229,9 @@ type VirtualListProps<Item> = {
   +onMouseLeaveRenderedList?: () => void,
   // Set `disableOverscan` to `true` when you expect a lot of updates in a short
   // time: this will render only the visible part, which makes each update faster.
-  +disableOverscan: boolean,
-  +columnCount: number,
-  +containerWidth: CssPixels,
+  readonly disableOverscan: boolean,
+  readonly columnCount: number,
+  readonly containerWidth: CssPixels,
   // `forceRender` is passed through directly from the main VirtualList
   // component to the row as a way to update the full list for reasons
   // unbeknownst to this component. This can be used for example in chart-like

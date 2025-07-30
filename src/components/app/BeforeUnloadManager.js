@@ -11,7 +11,7 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { getUploadPhase } from 'firefox-profiler/selectors/publish';
 
 type StateProps = {
-  +isUploading: boolean,
+  readonly isUploading: boolean,
 };
 
 type Props = ConnectedProps<{}, StateProps, {}>;

@@ -7,7 +7,7 @@ import React, { PureComponent } from 'react';
 import './Warning.css';
 
 type Props = {
-  +message: string,
+  readonly message: string,
   +actionText?: string,
   +actionTitle?: string,
   +actionOnClick?: () => mixed,
@@ -15,7 +15,7 @@ type Props = {
 };
 
 type State = {
-  +isNoticeDisplayed: boolean,
+  readonly isNoticeDisplayed: boolean,
 };
 
 export class Warning extends PureComponent<Props, State> {

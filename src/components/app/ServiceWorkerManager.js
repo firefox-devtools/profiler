@@ -27,10 +27,10 @@ import type {
 import './ServiceWorkerManager.css';
 
 type StateProps = {
-  +dataSource: DataSource,
-  +profileUrl: string,
-  +phase: Phase,
-  +symbolicationStatus: SymbolicationStatus,
+  readonly dataSource: DataSource,
+  readonly profileUrl: string,
+  readonly phase: Phase,
+  readonly symbolicationStatus: SymbolicationStatus,
 };
 type Props = ConnectedProps<{}, StateProps, {}>;
 

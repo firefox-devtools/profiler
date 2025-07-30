@@ -13,8 +13,8 @@ import { withSize, type SizeProps } from '../../components/shared/WithSize';
  */
 
 type Props = {
-  +ownPropA: 'a',
-  +ownPropB: 'b',
+  readonly ownPropA: 'a',
+  readonly ownPropB: 'b',
   ...SizeProps,
 };
 
@@ -68,8 +68,8 @@ const exampleWithSize3 = (
 const exampleWithSize4 = <ExampleComponentWithSize ownPropA="a" />;
 
 type NoSizingProps = {
-  +ownPropA: 'a',
-  +ownPropB: 'b',
+  readonly ownPropA: 'a',
+  readonly ownPropB: 'b',
   // The size props are omitted.
 };
 

@@ -19,7 +19,7 @@ import './MetaOverheadStatistics.css';
 type StatKeys = 'Overhead' | 'Cleaning' | 'Counter' | 'Interval' | 'Lockings';
 
 type Props = {
-  +profilerOverhead: ProfilerOverhead[],
+  readonly profilerOverhead: ProfilerOverhead[],
 };
 
 /**

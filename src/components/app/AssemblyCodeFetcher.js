@@ -33,19 +33,19 @@ import type {
 } from 'firefox-profiler/types';
 
 type StateProps = {
-  +assemblyViewNativeSymbol: NativeSymbolInfo | null,
-  +assemblyViewCode: AssemblyCodeStatus | void,
-  +assemblyViewIsOpen: boolean,
-  +symbolServerUrl: string,
-  +profile: Profile | null,
-  +browserConnection: BrowserConnection | null,
+  readonly assemblyViewNativeSymbol: NativeSymbolInfo | null,
+  readonly assemblyViewCode: AssemblyCodeStatus | void,
+  readonly assemblyViewIsOpen: boolean,
+  readonly symbolServerUrl: string,
+  readonly profile: Profile | null,
+  readonly browserConnection: BrowserConnection | null,
 };
 
 type DispatchProps = {
-  +beginLoadingAssemblyCodeFromUrl: typeof beginLoadingAssemblyCodeFromUrl,
-  +beginLoadingAssemblyCodeFromBrowserConnection: typeof beginLoadingAssemblyCodeFromBrowserConnection,
-  +finishLoadingAssemblyCode: typeof finishLoadingAssemblyCode,
-  +failLoadingAssemblyCode: typeof failLoadingAssemblyCode,
+  readonly beginLoadingAssemblyCodeFromUrl: typeof beginLoadingAssemblyCodeFromUrl,
+  readonly beginLoadingAssemblyCodeFromBrowserConnection: typeof beginLoadingAssemblyCodeFromBrowserConnection,
+  readonly finishLoadingAssemblyCode: typeof finishLoadingAssemblyCode,
+  readonly failLoadingAssemblyCode: typeof failLoadingAssemblyCode,
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;

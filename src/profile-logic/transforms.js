@@ -380,8 +380,8 @@ export function stringifyTransforms(transformStack: TransformStack): string {
 }
 
 export type TransformLabeL10nIds = {
-  +l10nId: string,
-  +item: string,
+  readonly l10nId: string,
+  readonly item: string,
 };
 
 /**

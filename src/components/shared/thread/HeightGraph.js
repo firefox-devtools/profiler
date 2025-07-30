@@ -21,22 +21,22 @@ import type {
 } from 'firefox-profiler/types';
 
 type Props = {
-  +heightFunc: (IndexIntoSamplesTable) => number | null,
-  +maxValue: number,
-  +className: string,
-  +thread: Thread,
-  +samplesSelectedStates: null | SelectedState[],
-  +interval: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +categories: CategoryList,
-  +onSampleClick: (
+  readonly heightFunc: (IndexIntoSamplesTable) => number | null,
+  readonly maxValue: number,
+  readonly className: string,
+  readonly thread: Thread,
+  readonly samplesSelectedStates: null | SelectedState[],
+  readonly interval: Milliseconds,
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly categories: CategoryList,
+  readonly onSampleClick: (
     event: SyntheticMouseEvent<>,
     sampleIndex: IndexIntoSamplesTable
   ) => void,
   // Decide which way the stacks grow up from the floor, or down from the ceiling.
   +stacksGrowFromCeiling?: boolean,
-  +trackName: string,
+  readonly trackName: string,
 };
 
 export class ThreadHeightGraph extends PureComponent<Props> {

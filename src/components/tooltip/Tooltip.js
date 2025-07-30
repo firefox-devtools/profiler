@@ -19,9 +19,9 @@ export const MOUSE_OFFSET = 11;
 export const VISUAL_MARGIN: CssPixels = 8;
 
 type Props = {
-  +mouseX: CssPixels,
-  +mouseY: CssPixels,
-  +children: React.Node,
+  readonly mouseX: CssPixels,
+  readonly mouseY: CssPixels,
+  readonly children: React.Node,
   +className?: string,
 };
 

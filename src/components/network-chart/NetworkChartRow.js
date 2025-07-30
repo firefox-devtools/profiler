@@ -81,11 +81,11 @@ const PHASE_OPACITIES = PROPERTIES_IN_ORDER.reduce(
 );
 
 type NetworkPhaseProps = {
-  +name: string,
-  +previousName: string,
-  +value: number | string,
-  +duration: Milliseconds,
-  +style: MixedObject,
+  readonly name: string,
+  readonly previousName: string,
+  readonly value: number | string,
+  readonly duration: Milliseconds,
+  readonly style: MixedObject,
 };
 
 function NetworkPhase({
@@ -111,12 +111,12 @@ function NetworkPhase({
 }
 
 export type NetworkChartRowBarProps = {
-  +marker: Marker,
-  +width: CssPixels,
-  +timeRange: StartEndRange,
+  readonly marker: Marker,
+  readonly width: CssPixels,
+  readonly timeRange: StartEndRange,
   // Pass the payload in as well, since our types can't express a Marker with
   // a specific payload.
-  +networkPayload: NetworkPayload,
+  readonly networkPayload: NetworkPayload,
 };
 
 // This component splits a network marker duration in different phases,
@@ -312,22 +312,22 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
 }
 
 type NetworkChartRowProps = {
-  +index: number,
-  +marker: Marker,
-  +markerIndex: MarkerIndex,
+  readonly index: number,
+  readonly marker: Marker,
+  readonly markerIndex: MarkerIndex,
   // Pass the payload in as well, since our types can't express a Marker with
   // a specific payload.
-  +networkPayload: NetworkPayload,
-  +timeRange: StartEndRange,
-  +width: CssPixels,
-  +threadsKey: ThreadsKey,
-  +isRightClicked: boolean,
-  +isSelected: boolean,
-  +isHoveredFromState: boolean,
+  readonly networkPayload: NetworkPayload,
+  readonly timeRange: StartEndRange,
+  readonly width: CssPixels,
+  readonly threadsKey: ThreadsKey,
+  readonly isRightClicked: boolean,
+  readonly isSelected: boolean,
+  readonly isHoveredFromState: boolean,
   +onLeftClick?: (MarkerIndex) => mixed,
   +onRightClick?: (MarkerIndex) => mixed,
   +onHover?: (MarkerIndex | null) => mixed,
-  +shouldDisplayTooltips: () => boolean,
+  readonly shouldDisplayTooltips: () => boolean,
 };
 
 type State = {

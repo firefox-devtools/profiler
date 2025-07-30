@@ -10,8 +10,8 @@ import type {
 } from 'firefox-profiler/types';
 
 export function iconHasLoaded(iconWithClassName: {
-  +icon: string,
-  +className: string,
+  readonly icon: string,
+  readonly className: string,
 }): Action {
   return {
     type: 'ICON_HAS_LOADED',

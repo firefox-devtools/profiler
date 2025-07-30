@@ -15,11 +15,11 @@ import './ProfileName.css';
 import { Localized } from '@fluent/react';
 
 type StateProps = {
-  +profileNameWithDefault: string,
+  readonly profileNameWithDefault: string,
 };
 
 type DispatchProps = {
-  +changeProfileName: typeof changeProfileName,
+  readonly changeProfileName: typeof changeProfileName,
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;

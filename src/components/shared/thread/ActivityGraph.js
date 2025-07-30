@@ -34,35 +34,35 @@ import type {
 } from './ActivityGraphFills';
 
 export type Props = {
-  +className: string,
-  +trackName: string,
-  +fullThread: Thread,
-  +rangeFilteredThread: Thread,
-  +interval: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +sampleIndexOffset: number,
-  +onSampleClick: (
+  readonly className: string,
+  readonly trackName: string,
+  readonly fullThread: Thread,
+  readonly rangeFilteredThread: Thread,
+  readonly interval: Milliseconds,
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly sampleIndexOffset: number,
+  readonly onSampleClick: (
     event: SyntheticMouseEvent<>,
     sampleIndex: IndexIntoSamplesTable | null
   ) => void,
-  +categories: CategoryList,
-  +samplesSelectedStates: null | SelectedState[],
-  +treeOrderSampleComparator: (
+  readonly categories: CategoryList,
+  readonly samplesSelectedStates: null | SelectedState[],
+  readonly treeOrderSampleComparator: (
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
   ) => number,
-  +enableCPUUsage: boolean,
-  +implementationFilter: ImplementationFilter,
-  +timelineType: TimelineType,
-  +zeroAt: Milliseconds,
-  +profileTimelineUnit: string,
+  readonly enableCPUUsage: boolean,
+  readonly implementationFilter: ImplementationFilter,
+  readonly timelineType: TimelineType,
+  readonly zeroAt: Milliseconds,
+  readonly profileTimelineUnit: string,
   ...SizeProps,
 };
 
 export type HoveredPixelState = {
-  +sample: IndexIntoSamplesTable | null,
-  +cpuRatioInTimeRange: CpuRatioInTimeRange | null,
+  readonly sample: IndexIntoSamplesTable | null,
+  readonly cpuRatioInTimeRange: CpuRatioInTimeRange | null,
 };
 
 type State = {

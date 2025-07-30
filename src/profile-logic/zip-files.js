@@ -22,9 +22,9 @@ export type ZipFileTable = {
 };
 
 export type ZipDisplayData = {
-  +name: string,
-  +url: null | string,
-  +zipTableIndex: IndexIntoZipFileTable,
+  readonly name: string,
+  readonly url: null | string,
+  readonly zipTableIndex: IndexIntoZipFileTable,
 };
 
 export function createZipTable(zipEntries: JSZip): ZipFileTable {

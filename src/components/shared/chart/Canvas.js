@@ -11,22 +11,22 @@ import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import type { CssPixels, DevicePixels } from 'firefox-profiler/types';
 
 type Props<Item> = {
-  +containerWidth: CssPixels,
-  +containerHeight: CssPixels,
-  +className: string,
+  readonly containerWidth: CssPixels,
+  readonly containerHeight: CssPixels,
+  readonly className: string,
   +onSelectItem?: (Item | null) => void,
   +onRightClick?: (Item | null) => void,
-  +onDoubleClickItem: (Item | null) => void,
-  +getHoveredItemInfo: (Item) => React.Node,
-  +drawCanvas: (
+  readonly onDoubleClickItem: (Item | null) => void,
+  readonly getHoveredItemInfo: (Item) => React.Node,
+  readonly drawCanvas: (
     CanvasRenderingContext2D,
     ChartCanvasScale: ChartCanvasScale,
     ChartCanvasHoverInfo: ChartCanvasHoverInfo<Item>
   ) => void,
-  +isDragging: boolean,
+  readonly isDragging: boolean,
   // Applies ctx.scale() to the canvas to draw using CssPixels rather than DevicePixels.
-  +scaleCtxToCssPixels: boolean,
-  +hitTest: (x: CssPixels, y: CssPixels) => Item | null,
+  readonly scaleCtxToCssPixels: boolean,
+  readonly hitTest: (x: CssPixels, y: CssPixels) => Item | null,
   // Default to true. Set to false if the chart should be redrawn right away after
   // rerender.
   +drawCanvasAfterRaf?: boolean,

@@ -9,7 +9,7 @@ declare type $$reactsplitterlayout$$Props = {
   +onDragStart?: () => mixed,
   +onDragEnd?: () => mixed,
   +onSecondaryPaneSizeChange?: number => mixed,
-  +children: React$Node,
+  readonly children: React$Node,
 };
 
 declare module 'react-splitter-layout' {

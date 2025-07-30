@@ -89,10 +89,10 @@ export type TimelineType = 'stack' | 'category' | 'cpu-category';
 export type PreviewSelection =
   | { +hasSelection: false, +isModifying: false }
   | {
-      +hasSelection: true,
-      +isModifying: boolean,
-      +selectionStart: number,
-      +selectionEnd: number,
+      readonly hasSelection: true,
+      readonly isModifying: boolean,
+      readonly selectionStart: number,
+      readonly selectionEnd: number,
       +draggingStart?: boolean,
       +draggingEnd?: boolean,
     };
@@ -101,8 +101,8 @@ export type PreviewSelection =
  * The counts for how many tracks are hidden in the timeline.
  */
 export type HiddenTrackCount = {
-  +hidden: number,
-  +total: number,
+  readonly hidden: number,
+  readonly total: number,
 };
 
 /**
@@ -111,13 +111,13 @@ export type HiddenTrackCount = {
  * tracks, and they're unique among local tracks for a specific Pid.
  */
 export type GlobalTrackReference = {
-  +type: 'global',
-  +trackIndex: TrackIndex,
+  readonly type: 'global',
+  readonly trackIndex: TrackIndex,
 };
 export type LocalTrackReference = {
-  +type: 'local',
-  +trackIndex: TrackIndex,
-  +pid: Pid,
+  readonly type: 'local',
+  readonly trackIndex: TrackIndex,
+  readonly pid: Pid,
 };
 
 export type TrackReference = GlobalTrackReference | LocalTrackReference;
@@ -128,8 +128,8 @@ export type LastNonShiftClickInformation = {
 };
 
 export type RequestedLib = {
-  +debugName: string,
-  +breakpadId: string,
+  readonly debugName: string,
+  readonly breakpadId: string,
 };
 export type ImplementationFilter = 'combined' | 'js' | 'cpp';
 // Change the strategy for computing the summarizing information for the call tree.
@@ -168,119 +168,119 @@ export type KeyboardModifiers = { ctrlOrMeta: boolean, shift: boolean };
 export type SelectionContext = {
   // This is the source for this selection: is it a keyboard or a pointer event,
   // or is it the result of some automatic selection.
-  +source: 'keyboard' | 'pointer' | 'auto',
+  readonly source: 'keyboard' | 'pointer' | 'auto',
 };
 
 type ProfileAction =
   | {
-      +type: 'ROUTE_NOT_FOUND',
-      +url: string,
+      readonly type: 'ROUTE_NOT_FOUND',
+      readonly url: string,
     }
   | {
-      +type: 'ASSIGN_TASK_TRACER_NAMES',
-      +addressIndices: number[],
-      +symbolNames: string[],
+      readonly type: 'ASSIGN_TASK_TRACER_NAMES',
+      readonly addressIndices: number[],
+      readonly symbolNames: string[],
     }
   | {
-      +type: 'CHANGE_SELECTED_CALL_NODE',
-      +isInverted: boolean,
-      +threadsKey: ThreadsKey,
-      +selectedCallNodePath: CallNodePath,
-      +optionalExpandedToCallNodePath: ?CallNodePath,
-      +context: SelectionContext,
+      readonly type: 'CHANGE_SELECTED_CALL_NODE',
+      readonly isInverted: boolean,
+      readonly threadsKey: ThreadsKey,
+      readonly selectedCallNodePath: CallNodePath,
+      readonly optionalExpandedToCallNodePath: ?CallNodePath,
+      readonly context: SelectionContext,
     }
   | {
-      +type: 'UPDATE_TRACK_THREAD_HEIGHT',
-      +height: CssPixels,
-      +threadsKey: ThreadsKey,
+      readonly type: 'UPDATE_TRACK_THREAD_HEIGHT',
+      readonly height: CssPixels,
+      readonly threadsKey: ThreadsKey,
     }
   | {
-      +type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
-      +threadsKey: ThreadsKey,
-      +callNodePath: CallNodePath | null,
+      readonly type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+      readonly threadsKey: ThreadsKey,
+      readonly callNodePath: CallNodePath | null,
     }
   | {
-      +type: 'FOCUS_CALL_TREE',
+      readonly type: 'FOCUS_CALL_TREE',
     }
   | {
-      +type: 'CHANGE_EXPANDED_CALL_NODES',
-      +threadsKey: ThreadsKey,
-      +isInverted: boolean,
-      +expandedCallNodePaths: Array<CallNodePath>,
+      readonly type: 'CHANGE_EXPANDED_CALL_NODES',
+      readonly threadsKey: ThreadsKey,
+      readonly isInverted: boolean,
+      readonly expandedCallNodePaths: Array<CallNodePath>,
     }
   | {
-      +type: 'CHANGE_SELECTED_MARKER',
-      +threadsKey: ThreadsKey,
-      +selectedMarker: MarkerIndex | null,
-      +context: SelectionContext,
+      readonly type: 'CHANGE_SELECTED_MARKER',
+      readonly threadsKey: ThreadsKey,
+      readonly selectedMarker: MarkerIndex | null,
+      readonly context: SelectionContext,
     }
   | {
-      +type: 'CHANGE_SELECTED_NETWORK_MARKER',
-      +threadsKey: ThreadsKey,
-      +selectedNetworkMarker: MarkerIndex | null,
-      +context: SelectionContext,
+      readonly type: 'CHANGE_SELECTED_NETWORK_MARKER',
+      readonly threadsKey: ThreadsKey,
+      readonly selectedNetworkMarker: MarkerIndex | null,
+      readonly context: SelectionContext,
     }
   | {
-      +type: 'CHANGE_RIGHT_CLICKED_MARKER',
-      +threadsKey: ThreadsKey,
-      +markerIndex: MarkerIndex | null,
+      readonly type: 'CHANGE_RIGHT_CLICKED_MARKER',
+      readonly threadsKey: ThreadsKey,
+      readonly markerIndex: MarkerIndex | null,
     }
   | {
-      +type: 'CHANGE_HOVERED_MARKER',
-      +threadsKey: ThreadsKey,
-      +markerIndex: MarkerIndex | null,
+      readonly type: 'CHANGE_HOVERED_MARKER',
+      readonly threadsKey: ThreadsKey,
+      readonly markerIndex: MarkerIndex | null,
     }
   | {
-      +type: 'UPDATE_PREVIEW_SELECTION',
-      +previewSelection: PreviewSelection,
+      readonly type: 'UPDATE_PREVIEW_SELECTION',
+      readonly previewSelection: PreviewSelection,
     }
   | {
-      +type: 'CHANGE_SELECTED_ZIP_FILE',
-      +selectedZipFileIndex: IndexIntoZipFileTable | null,
+      readonly type: 'CHANGE_SELECTED_ZIP_FILE',
+      readonly selectedZipFileIndex: IndexIntoZipFileTable | null,
     }
   | {
-      +type: 'CHANGE_EXPANDED_ZIP_FILES',
-      +expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
+      readonly type: 'CHANGE_EXPANDED_ZIP_FILES',
+      readonly expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
     }
   | {
-      +type: 'CHANGE_GLOBAL_TRACK_ORDER',
-      +globalTrackOrder: TrackIndex[],
+      readonly type: 'CHANGE_GLOBAL_TRACK_ORDER',
+      readonly globalTrackOrder: TrackIndex[],
     }
   | {
-      +type: 'HIDE_GLOBAL_TRACK',
-      +trackIndex: TrackIndex,
-      +pid: Pid | null,
-      +selectedThreadIndexes: Set<ThreadIndex>,
+      readonly type: 'HIDE_GLOBAL_TRACK',
+      readonly trackIndex: TrackIndex,
+      readonly pid: Pid | null,
+      readonly selectedThreadIndexes: Set<ThreadIndex>,
     }
   | {
-      +type: 'SHOW_ALL_TRACKS',
+      readonly type: 'SHOW_ALL_TRACKS',
     }
   | {
-      +type: 'SHOW_PROVIDED_TRACKS',
-      +globalTracksToShow: Set<TrackIndex>,
-      +localTracksByPidToShow: Map<Pid, Set<TrackIndex>>,
+      readonly type: 'SHOW_PROVIDED_TRACKS',
+      readonly globalTracksToShow: Set<TrackIndex>,
+      readonly localTracksByPidToShow: Map<Pid, Set<TrackIndex>>,
     }
   | {
-      +type: 'HIDE_PROVIDED_TRACKS',
-      +globalTracksToHide: Set<TrackIndex>,
-      +localTracksByPidToHide: Map<Pid, Set<TrackIndex>>,
-      +selectedThreadIndexes: Set<ThreadIndex>,
+      readonly type: 'HIDE_PROVIDED_TRACKS',
+      readonly globalTracksToHide: Set<TrackIndex>,
+      readonly localTracksByPidToHide: Map<Pid, Set<TrackIndex>>,
+      readonly selectedThreadIndexes: Set<ThreadIndex>,
     }
   | {
-      +type: 'SHOW_GLOBAL_TRACK',
-      +trackIndex: TrackIndex,
+      readonly type: 'SHOW_GLOBAL_TRACK',
+      readonly trackIndex: TrackIndex,
     }
   | {
-      +type: 'SHOW_GLOBAL_TRACK_INCLUDING_LOCAL_TRACKS',
-      +trackIndex: TrackIndex,
-      +pid: Pid,
+      readonly type: 'SHOW_GLOBAL_TRACK_INCLUDING_LOCAL_TRACKS',
+      readonly trackIndex: TrackIndex,
+      readonly pid: Pid,
     }
   | {
       // Isolate only the process track, and not the local tracks.
-      +type: 'ISOLATE_PROCESS',
-      +hiddenGlobalTracks: Set<TrackIndex>,
-      +isolatedTrackIndex: TrackIndex,
-      +selectedThreadIndexes: Set<ThreadIndex>,
+      readonly type: 'ISOLATE_PROCESS',
+      readonly hiddenGlobalTracks: Set<TrackIndex>,
+      readonly isolatedTrackIndex: TrackIndex,
+      readonly selectedThreadIndexes: Set<ThreadIndex>,
     }
   | {
       // Isolate the process track, and hide the local tracks.
@@ -293,113 +293,113 @@ type ProfileAction =
     }
   | {
       // Isolate only the screenshot track
-      +type: 'ISOLATE_SCREENSHOT_TRACK',
-      +hiddenGlobalTracks: Set<TrackIndex>,
+      readonly type: 'ISOLATE_SCREENSHOT_TRACK',
+      readonly hiddenGlobalTracks: Set<TrackIndex>,
     }
   | {
-      +type: 'CHANGE_LOCAL_TRACK_ORDER',
-      +localTrackOrder: TrackIndex[],
-      +pid: Pid,
+      readonly type: 'CHANGE_LOCAL_TRACK_ORDER',
+      readonly localTrackOrder: TrackIndex[],
+      readonly pid: Pid,
     }
   | {
-      +type: 'HIDE_LOCAL_TRACK',
-      +pid: Pid,
-      +trackIndex: TrackIndex,
-      +selectedThreadIndexes: Set<ThreadIndex>,
+      readonly type: 'HIDE_LOCAL_TRACK',
+      readonly pid: Pid,
+      readonly trackIndex: TrackIndex,
+      readonly selectedThreadIndexes: Set<ThreadIndex>,
     }
   | {
-      +type: 'SHOW_LOCAL_TRACK',
-      +pid: Pid,
-      +trackIndex: TrackIndex,
+      readonly type: 'SHOW_LOCAL_TRACK',
+      readonly pid: Pid,
+      readonly trackIndex: TrackIndex,
     }
   | {
-      +type: 'ISOLATE_LOCAL_TRACK',
-      +pid: Pid,
-      +hiddenGlobalTracks: Set<TrackIndex>,
-      +hiddenLocalTracks: Set<TrackIndex>,
-      +selectedThreadIndexes: Set<ThreadIndex>,
+      readonly type: 'ISOLATE_LOCAL_TRACK',
+      readonly pid: Pid,
+      readonly hiddenGlobalTracks: Set<TrackIndex>,
+      readonly hiddenLocalTracks: Set<TrackIndex>,
+      readonly selectedThreadIndexes: Set<ThreadIndex>,
     }
   | {
-      +type: 'SET_CONTEXT_MENU_VISIBILITY',
-      +isVisible: boolean,
+      readonly type: 'SET_CONTEXT_MENU_VISIBILITY',
+      readonly isVisible: boolean,
     }
   | {
-      +type: 'INCREMENT_PANEL_LAYOUT_GENERATION',
+      readonly type: 'INCREMENT_PANEL_LAYOUT_GENERATION',
     }
   | { +type: 'HAS_ZOOMED_VIA_MOUSEWHEEL' }
   | { +type: 'DISMISS_NEWLY_PUBLISHED' }
   | {
-      +type: 'ENABLE_EVENT_DELAY_TRACKS',
-      +localTracksByPid: Map<Pid, LocalTrack[]>,
-      +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+      readonly type: 'ENABLE_EVENT_DELAY_TRACKS',
+      readonly localTracksByPid: Map<Pid, LocalTrack[]>,
+      readonly localTrackOrderByPid: Map<Pid, TrackIndex[]>,
     }
   | {
-      +type: 'ENABLE_EXPERIMENTAL_CPU_GRAPHS',
+      readonly type: 'ENABLE_EXPERIMENTAL_CPU_GRAPHS',
     }
   | {
-      +type: 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS',
-      +localTracksByPid: Map<Pid, LocalTrack[]>,
-      +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+      readonly type: 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS',
+      readonly localTracksByPid: Map<Pid, LocalTrack[]>,
+      readonly localTrackOrderByPid: Map<Pid, TrackIndex[]>,
     }
   | {
-      +type: 'UPDATE_BOTTOM_BOX',
-      +libIndex: IndexIntoLibs | null,
-      +sourceFile: string | null,
-      +nativeSymbol: NativeSymbolInfo | null,
-      +allNativeSymbolsForInitiatingCallNode: NativeSymbolInfo[],
-      +currentTab: TabSlug,
-      +shouldOpenBottomBox: boolean,
-      +shouldOpenAssemblyView: boolean,
+      readonly type: 'UPDATE_BOTTOM_BOX',
+      readonly libIndex: IndexIntoLibs | null,
+      readonly sourceFile: string | null,
+      readonly nativeSymbol: NativeSymbolInfo | null,
+      readonly allNativeSymbolsForInitiatingCallNode: NativeSymbolInfo[],
+      readonly currentTab: TabSlug,
+      readonly shouldOpenBottomBox: boolean,
+      readonly shouldOpenAssemblyView: boolean,
     }
   | {
-      +type: 'OPEN_ASSEMBLY_VIEW',
+      readonly type: 'OPEN_ASSEMBLY_VIEW',
     }
   | {
-      +type: 'CLOSE_ASSEMBLY_VIEW',
+      readonly type: 'CLOSE_ASSEMBLY_VIEW',
     }
   | {
-      +type: 'CLOSE_BOTTOM_BOX_FOR_TAB',
-      +tab: TabSlug,
+      readonly type: 'CLOSE_BOTTOM_BOX_FOR_TAB',
+      readonly tab: TabSlug,
     };
 
 type ReceiveProfileAction =
   | {
-      +type: 'BULK_SYMBOLICATION',
-      +symbolicatedThreads: RawThread[],
-      +oldFuncToNewFuncsMaps: Map<ThreadIndex, FuncToFuncsMap>,
+      readonly type: 'BULK_SYMBOLICATION',
+      readonly symbolicatedThreads: RawThread[],
+      readonly oldFuncToNewFuncsMaps: Map<ThreadIndex, FuncToFuncsMap>,
     }
   | {
-      +type: 'DONE_SYMBOLICATING',
+      readonly type: 'DONE_SYMBOLICATING',
     }
   | {
-      +type: 'TEMPORARY_ERROR',
-      +error: TemporaryError,
+      readonly type: 'TEMPORARY_ERROR',
+      readonly error: TemporaryError,
     }
   | {
-      +type: 'FATAL_ERROR',
-      +error: Error,
+      readonly type: 'FATAL_ERROR',
+      readonly error: Error,
     }
   | {
-      +type: 'PROFILE_LOADED',
-      +profile: Profile,
-      +pathInZipFile: ?string,
-      +implementationFilter: ?ImplementationFilter,
-      +transformStacks: ?TransformStacksPerThread,
+      readonly type: 'PROFILE_LOADED',
+      readonly profile: Profile,
+      readonly pathInZipFile: ?string,
+      readonly implementationFilter: ?ImplementationFilter,
+      readonly transformStacks: ?TransformStacksPerThread,
     }
   | {
-      +type: 'VIEW_FULL_PROFILE',
-      +selectedThreadIndexes: Set<ThreadIndex>,
-      +globalTracks: GlobalTrack[],
-      +globalTrackOrder: TrackIndex[],
-      +hiddenGlobalTracks: Set<TrackIndex>,
-      +localTracksByPid: Map<Pid, LocalTrack[]>,
-      +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
-      +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
-      +timelineType: TimelineType | null,
-      +selectedTab: TabSlug,
+      readonly type: 'VIEW_FULL_PROFILE',
+      readonly selectedThreadIndexes: Set<ThreadIndex>,
+      readonly globalTracks: GlobalTrack[],
+      readonly globalTrackOrder: TrackIndex[],
+      readonly hiddenGlobalTracks: Set<TrackIndex>,
+      readonly localTracksByPid: Map<Pid, LocalTrack[]>,
+      readonly hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
+      readonly localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+      readonly timelineType: TimelineType | null,
+      readonly selectedTab: TabSlug,
     }
   | {
-      +type: 'DATA_RELOAD',
+      readonly type: 'DATA_RELOAD',
     }
   | { +type: 'RECEIVE_ZIP_FILE', +zip: JSZip }
   | { +type: 'PROCESS_PROFILE_FROM_ZIP_FILE', +pathInZipFile: string }
@@ -415,8 +415,8 @@ type ReceiveProfileAction =
   | { +type: 'WAITING_FOR_PROFILE_FROM_URL', +profileUrl: ?string }
   | { +type: 'TRIGGER_LOADING_FROM_URL', +profileUrl: string }
   | {
-      +type: 'UPDATE_PAGES',
-      +newPages: PageList,
+      readonly type: 'UPDATE_PAGES',
+      readonly newPages: PageList,
     };
 
 type UrlEnhancerAction =
@@ -427,213 +427,213 @@ type UrlEnhancerAction =
 type UrlStateAction =
   | { +type: 'WAITING_FOR_PROFILE_FROM_FILE' }
   | {
-      +type: 'PROFILE_PUBLISHED',
-      +hash: string,
-      +profileName: string,
-      +prePublishedState: State | null,
+      readonly type: 'PROFILE_PUBLISHED',
+      readonly hash: string,
+      readonly profileName: string,
+      readonly prePublishedState: State | null,
     }
   | { +type: 'CHANGE_SELECTED_TAB', +selectedTab: TabSlug }
   | { +type: 'COMMIT_RANGE', +start: number, +end: number }
   | {
-      +type: 'POP_COMMITTED_RANGES',
-      +firstPoppedFilterIndex: number,
-      +committedRange: StartEndRange | false,
+      readonly type: 'POP_COMMITTED_RANGES',
+      readonly firstPoppedFilterIndex: number,
+      readonly committedRange: StartEndRange | false,
     }
   | {
-      +type: 'CHANGE_SELECTED_THREAD',
-      +selectedThreadIndexes: Set<ThreadIndex>,
+      readonly type: 'CHANGE_SELECTED_THREAD',
+      readonly selectedThreadIndexes: Set<ThreadIndex>,
     }
   | {
-      +type: 'SELECT_TRACK',
-      +lastNonShiftClickInformation: LastNonShiftClickInformation | null,
-      +selectedThreadIndexes: Set<ThreadIndex>,
-      +selectedTab: TabSlug,
+      readonly type: 'SELECT_TRACK',
+      readonly lastNonShiftClickInformation: LastNonShiftClickInformation | null,
+      readonly selectedThreadIndexes: Set<ThreadIndex>,
+      readonly selectedTab: TabSlug,
     }
   | {
-      +type: 'CHANGE_RIGHT_CLICKED_TRACK',
-      +trackReference: TrackReference | null,
+      readonly type: 'CHANGE_RIGHT_CLICKED_TRACK',
+      readonly trackReference: TrackReference | null,
     }
   | { +type: 'CHANGE_CALL_TREE_SEARCH_STRING', +searchString: string }
   | {
-      +type: 'ADD_TRANSFORM_TO_STACK',
-      +threadsKey: ThreadsKey,
-      +transform: Transform,
-      +transformedThread: Thread,
-      +callNodeInfo: CallNodeInfo,
+      readonly type: 'ADD_TRANSFORM_TO_STACK',
+      readonly threadsKey: ThreadsKey,
+      readonly transform: Transform,
+      readonly transformedThread: Thread,
+      readonly callNodeInfo: CallNodeInfo,
     }
   | {
-      +type: 'POP_TRANSFORMS_FROM_STACK',
-      +threadsKey: ThreadsKey,
-      +firstPoppedFilterIndex: number,
+      readonly type: 'POP_TRANSFORMS_FROM_STACK',
+      readonly threadsKey: ThreadsKey,
+      readonly firstPoppedFilterIndex: number,
     }
   | {
-      +type: 'CHANGE_TIMELINE_TYPE',
-      +timelineType: TimelineType,
+      readonly type: 'CHANGE_TIMELINE_TYPE',
+      readonly timelineType: TimelineType,
     }
   | {
-      +type: 'CHANGE_IMPLEMENTATION_FILTER',
-      +implementation: ImplementationFilter,
-      +threadsKey: ThreadsKey,
-      +transformedThread: Thread,
-      +previousImplementation: ImplementationFilter,
-      +implementation: ImplementationFilter,
+      readonly type: 'CHANGE_IMPLEMENTATION_FILTER',
+      readonly implementation: ImplementationFilter,
+      readonly threadsKey: ThreadsKey,
+      readonly transformedThread: Thread,
+      readonly previousImplementation: ImplementationFilter,
+      readonly implementation: ImplementationFilter,
     }
   | {
       type: 'CHANGE_CALL_TREE_SUMMARY_STRATEGY',
       callTreeSummaryStrategy: CallTreeSummaryStrategy,
     }
   | {
-      +type: 'CHANGE_INVERT_CALLSTACK',
-      +invertCallstack: boolean,
-      +newSelectedCallNodePath: CallNodePath,
-      +selectedThreadIndexes: Set<ThreadIndex>,
+      readonly type: 'CHANGE_INVERT_CALLSTACK',
+      readonly invertCallstack: boolean,
+      readonly newSelectedCallNodePath: CallNodePath,
+      readonly selectedThreadIndexes: Set<ThreadIndex>,
     }
   | {
-      +type: 'CHANGE_SHOW_USER_TIMINGS',
-      +showUserTimings: boolean,
+      readonly type: 'CHANGE_SHOW_USER_TIMINGS',
+      readonly showUserTimings: boolean,
     }
   | {
-      +type: 'CHANGE_STACK_CHART_SAME_WIDTHS',
-      +stackChartSameWidths: boolean,
+      readonly type: 'CHANGE_STACK_CHART_SAME_WIDTHS',
+      readonly stackChartSameWidths: boolean,
     }
   | {
-      +type: 'CHANGE_SHOW_JS_TRACER_SUMMARY',
-      +showSummary: boolean,
+      readonly type: 'CHANGE_SHOW_JS_TRACER_SUMMARY',
+      readonly showSummary: boolean,
     }
   | { +type: 'CHANGE_MARKER_SEARCH_STRING', +searchString: string }
   | { +type: 'CHANGE_NETWORK_SEARCH_STRING', +searchString: string }
   | { +type: 'CHANGE_PROFILES_TO_COMPARE', +profiles: string[] }
   | { +type: 'CHANGE_PROFILE_NAME', +profileName: string | null }
   | {
-      +type: 'SANITIZED_PROFILE_PUBLISHED',
-      +hash: string,
-      +committedRanges: StartEndRange[] | null,
-      +oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
-      +profileName: string,
-      +prePublishedState: State | null,
+      readonly type: 'SANITIZED_PROFILE_PUBLISHED',
+      readonly hash: string,
+      readonly committedRanges: StartEndRange[] | null,
+      readonly oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
+      readonly profileName: string,
+      readonly prePublishedState: State | null,
     }
   | {
-      +type: 'SET_DATA_SOURCE',
-      +dataSource: DataSource,
+      readonly type: 'SET_DATA_SOURCE',
+      readonly dataSource: DataSource,
     }
   | {
-      +type: 'CHANGE_MOUSE_TIME_POSITION',
-      +mouseTimePosition: Milliseconds | null,
+      readonly type: 'CHANGE_MOUSE_TIME_POSITION',
+      readonly mouseTimePosition: Milliseconds | null,
     }
   | {
-      +type: 'CHANGE_TABLE_VIEW_OPTIONS',
-      +tab: TabSlug,
-      +tableViewOptions: TableViewOptions,
+      readonly type: 'CHANGE_TABLE_VIEW_OPTIONS',
+      readonly tab: TabSlug,
+      readonly tableViewOptions: TableViewOptions,
     }
   | {
-      +type: 'TOGGLE_RESOURCES_PANEL',
-      +selectedThreadIndexes: Set<ThreadIndex>,
+      readonly type: 'TOGGLE_RESOURCES_PANEL',
+      readonly selectedThreadIndexes: Set<ThreadIndex>,
     }
   | {
-      +type: 'PROFILE_REMOTELY_DELETED',
+      readonly type: 'PROFILE_REMOTELY_DELETED',
     }
   | {
-      +type: 'TOGGLE_SIDEBAR_OPEN_CATEGORY',
-      +kind: string,
-      +category: IndexIntoCategoryList,
+      readonly type: 'TOGGLE_SIDEBAR_OPEN_CATEGORY',
+      readonly kind: string,
+      readonly category: IndexIntoCategoryList,
     }
   | {
-      +type: 'CHANGE_TAB_FILTER',
-      +tabID: TabID | null,
-      +selectedThreadIndexes: Set<ThreadIndex>,
-      +globalTracks: GlobalTrack[],
-      +globalTrackOrder: TrackIndex[],
-      +hiddenGlobalTracks: Set<TrackIndex>,
-      +localTracksByPid: Map<Pid, LocalTrack[]>,
-      +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
-      +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
-      +selectedTab: TabSlug,
+      readonly type: 'CHANGE_TAB_FILTER',
+      readonly tabID: TabID | null,
+      readonly selectedThreadIndexes: Set<ThreadIndex>,
+      readonly globalTracks: GlobalTrack[],
+      readonly globalTrackOrder: TrackIndex[],
+      readonly hiddenGlobalTracks: Set<TrackIndex>,
+      readonly localTracksByPid: Map<Pid, LocalTrack[]>,
+      readonly hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
+      readonly localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+      readonly selectedTab: TabSlug,
     };
 
 export type IconWithClassName = { +icon: string, +className: string };
 type IconsAction =
   | {
-      +type: 'ICON_HAS_LOADED',
-      +iconWithClassName: IconWithClassName,
+      readonly type: 'ICON_HAS_LOADED',
+      readonly iconWithClassName: IconWithClassName,
     }
   | { +type: 'ICON_IN_ERROR', +icon: string }
   | { +type: 'ICON_BATCH_ADD', icons: IconWithClassName[] };
 
 type SidebarAction = {
-  +type: 'CHANGE_SIDEBAR_OPEN_STATE',
-  +tab: TabSlug,
-  +isOpen: boolean,
+  readonly type: 'CHANGE_SIDEBAR_OPEN_STATE',
+  readonly tab: TabSlug,
+  readonly isOpen: boolean,
 };
 
 type PublishAction =
   | {
-      +type: 'TOGGLE_CHECKED_SHARING_OPTION',
-      +slug: $Keys<CheckedSharingOptions>,
+      readonly type: 'TOGGLE_CHECKED_SHARING_OPTION',
+      readonly slug: $Keys<CheckedSharingOptions>,
     }
   | {
-      +type: 'UPLOAD_STARTED',
+      readonly type: 'UPLOAD_STARTED',
     }
   | {
-      +type: 'UPDATE_UPLOAD_PROGRESS',
-      +uploadProgress: number,
+      readonly type: 'UPDATE_UPLOAD_PROGRESS',
+      readonly uploadProgress: number,
     }
   | {
-      +type: 'UPLOAD_FAILED',
-      +error: mixed,
+      readonly type: 'UPLOAD_FAILED',
+      readonly error: mixed,
     }
   | {
-      +type: 'UPLOAD_ABORTED',
+      readonly type: 'UPLOAD_ABORTED',
     }
   | {
-      +type: 'UPLOAD_RESET',
+      readonly type: 'UPLOAD_RESET',
     }
   | {
-      +type: 'UPLOAD_COMPRESSION_STARTED',
-      +abortFunction: () => void,
+      readonly type: 'UPLOAD_COMPRESSION_STARTED',
+      readonly abortFunction: () => void,
     }
   | {
-      +type: 'CHANGE_UPLOAD_STATE',
-      +changes: $Shape<UploadState>,
+      readonly type: 'CHANGE_UPLOAD_STATE',
+      readonly changes: $Shape<UploadState>,
     }
   | {
-      +type: 'REVERT_TO_PRE_PUBLISHED_STATE',
-      +prePublishedState: State,
+      readonly type: 'REVERT_TO_PRE_PUBLISHED_STATE',
+      readonly prePublishedState: State,
     }
   | { +type: 'HIDE_STALE_PROFILE' };
 
 type DragAndDropAction =
   | {
-      +type: 'START_DRAGGING',
+      readonly type: 'START_DRAGGING',
     }
   | {
-      +type: 'STOP_DRAGGING',
+      readonly type: 'STOP_DRAGGING',
     }
   | {
-      +type: 'REGISTER_DRAG_AND_DROP_OVERLAY',
+      readonly type: 'REGISTER_DRAG_AND_DROP_OVERLAY',
     }
   | {
-      +type: 'UNREGISTER_DRAG_AND_DROP_OVERLAY',
+      readonly type: 'UNREGISTER_DRAG_AND_DROP_OVERLAY',
     };
 
 type CurrentProfileUploadedInformationAction = {
-  +type: 'SET_CURRENT_PROFILE_UPLOADED_INFORMATION',
-  +uploadedProfileInformation: UploadedProfileInformation | null,
+  readonly type: 'SET_CURRENT_PROFILE_UPLOADED_INFORMATION',
+  readonly uploadedProfileInformation: UploadedProfileInformation | null,
 };
 
 type L10nAction =
   | {
-      +type: 'REQUEST_L10N',
-      +locales: string[],
+      readonly type: 'REQUEST_L10N',
+      readonly locales: string[],
     }
   | {
-      +type: 'RECEIVE_L10N',
-      +localization: Localization,
-      +primaryLocale: string,
-      +direction: 'ltr' | 'rtl',
+      readonly type: 'RECEIVE_L10N',
+      readonly localization: Localization,
+      readonly primaryLocale: string,
+      readonly direction: 'ltr' | 'rtl',
     }
   | {
-      +type: 'TOGGLE_PSEUDO_STRATEGY',
-      +pseudoStrategy: PseudoStrategy,
+      readonly type: 'TOGGLE_PSEUDO_STRATEGY',
+      readonly pseudoStrategy: PseudoStrategy,
     };
 
 type SourcesAction =
@@ -641,7 +641,7 @@ type SourcesAction =
   | { +type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION', file: string }
   | { +type: 'SOURCE_CODE_LOADING_SUCCESS', file: string, code: string }
   | {
-      +type: 'SOURCE_CODE_LOADING_ERROR',
+      readonly type: 'SOURCE_CODE_LOADING_ERROR',
       file: string,
       errors: SourceCodeLoadingError[],
     };
@@ -650,28 +650,28 @@ type SourcesAction =
 
 type AssemblyAction =
   | {
-      +type: 'ASSEMBLY_CODE_LOADING_BEGIN_URL',
+      readonly type: 'ASSEMBLY_CODE_LOADING_BEGIN_URL',
       nativeSymbolKey: string,
       url: string,
     }
   | {
-      +type: 'ASSEMBLY_CODE_LOADING_BEGIN_BROWSER_CONNECTION',
+      readonly type: 'ASSEMBLY_CODE_LOADING_BEGIN_BROWSER_CONNECTION',
       nativeSymbolKey: string,
     }
   | {
-      +type: 'ASSEMBLY_CODE_LOADING_SUCCESS',
+      readonly type: 'ASSEMBLY_CODE_LOADING_SUCCESS',
       nativeSymbolKey: string,
       instructions: DecodedInstruction[],
     }
   | {
-      +type: 'ASSEMBLY_CODE_LOADING_ERROR',
+      readonly type: 'ASSEMBLY_CODE_LOADING_ERROR',
       nativeSymbolKey: string,
       errors: ApiQueryError[],
     };
 
 type AppAction = {
-  +type: 'UPDATE_BROWSER_CONNECTION_STATUS',
-  +browserConnectionStatus: BrowserConnectionStatus,
+  readonly type: 'UPDATE_BROWSER_CONNECTION_STATUS',
+  readonly browserConnectionStatus: BrowserConnectionStatus,
 };
 
 export type Action =

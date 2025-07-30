@@ -35,23 +35,23 @@ import type {
 import type { UrlState, Phase, UrlSetupPhase } from 'firefox-profiler/types';
 
 type StateProps = {
-  +phase: Phase,
-  +urlState: UrlState,
-  +urlSetupPhase: UrlSetupPhase,
+  readonly phase: Phase,
+  readonly urlState: UrlState,
+  readonly urlSetupPhase: UrlSetupPhase,
 };
 
 type DispatchProps = {
-  +updateUrlState: typeof updateUrlState,
-  +startFetchingProfiles: typeof startFetchingProfiles,
-  +urlSetupDone: typeof urlSetupDone,
-  +show404: typeof show404,
-  +retrieveProfileForRawUrl: typeof retrieveProfileForRawUrl,
-  +updateBrowserConnectionStatus: typeof updateBrowserConnectionStatus,
-  +setupInitialUrlState: typeof setupInitialUrlState,
+  readonly updateUrlState: typeof updateUrlState,
+  readonly startFetchingProfiles: typeof startFetchingProfiles,
+  readonly urlSetupDone: typeof urlSetupDone,
+  readonly show404: typeof show404,
+  readonly retrieveProfileForRawUrl: typeof retrieveProfileForRawUrl,
+  readonly updateBrowserConnectionStatus: typeof updateBrowserConnectionStatus,
+  readonly setupInitialUrlState: typeof setupInitialUrlState,
 };
 
 type OwnProps = {
-  +children: React.Node,
+  readonly children: React.Node,
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;

@@ -25,11 +25,11 @@ type OwnProps = {
 };
 
 type StateProps = {
-  +implementationFilter: ImplementationFilter,
+  readonly implementationFilter: ImplementationFilter,
 };
 
 type DispatchProps = {
-  +changeImplementationFilter: typeof changeImplementationFilter,
+  readonly changeImplementationFilter: typeof changeImplementationFilter,
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;

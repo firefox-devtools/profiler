@@ -20,12 +20,12 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './DetailsContainer.css';
 
 type StateProps = {
-  +selectedTab: TabSlug,
-  +isSidebarOpen: boolean,
+  readonly selectedTab: TabSlug,
+  readonly isSidebarOpen: boolean,
 };
 
 type DispatchProps = {
-  +invalidatePanelLayout: typeof invalidatePanelLayout,
+  readonly invalidatePanelLayout: typeof invalidatePanelLayout,
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;

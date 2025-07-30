@@ -11,10 +11,10 @@ import './ProfileRootMessage.css';
 
 type Props = {
   +title?: string,
-  +additionalMessage: React.Node,
-  +showLoader: boolean,
-  +showBackHomeLink: boolean,
-  +children: React.Node,
+  readonly additionalMessage: React.Node,
+  readonly showLoader: boolean,
+  readonly showBackHomeLink: boolean,
+  readonly children: React.Node,
 };
 
 export class ProfileRootMessage extends React.PureComponent<Props> {

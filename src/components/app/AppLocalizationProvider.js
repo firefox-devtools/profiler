@@ -29,9 +29,9 @@ import type { Localization } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type FetchProps = {
-  +requestedLocales: null | string[],
-  +pseudoStrategy: null | 'accented' | 'bidi',
-  +receiveL10n: typeof receiveL10n,
+  readonly requestedLocales: null | string[],
+  readonly pseudoStrategy: null | 'accented' | 'bidi',
+  readonly receiveL10n: typeof receiveL10n,
 };
 
 /**
@@ -98,8 +98,8 @@ class AppLocalizationFetcher extends React.PureComponent<FetchProps> {
 }
 
 type InitProps = {
-  +requestL10n: typeof requestL10n,
-  +requestedLocales: null | string[],
+  readonly requestL10n: typeof requestL10n,
+  readonly requestedLocales: null | string[],
 };
 
 /**
@@ -177,18 +177,18 @@ class AppLocalizationInit extends React.PureComponent<InitProps> {
 }
 
 type ProviderStateProps = {
-  +requestedLocales: null | string[],
-  +pseudoStrategy: null | 'accented' | 'bidi',
-  +localization: Localization,
-  +primaryLocale: string | null,
-  +direction: 'ltr' | 'rtl',
+  readonly requestedLocales: null | string[],
+  readonly pseudoStrategy: null | 'accented' | 'bidi',
+  readonly localization: Localization,
+  readonly primaryLocale: string | null,
+  readonly direction: 'ltr' | 'rtl',
 };
 type ProviderOwnProps = {
   children: React.Node,
 };
 type ProviderDispatchProps = {
-  +requestL10n: typeof requestL10n,
-  +receiveL10n: typeof receiveL10n,
+  readonly requestL10n: typeof requestL10n,
+  readonly receiveL10n: typeof receiveL10n,
 };
 
 type ProviderProps = ConnectedProps<

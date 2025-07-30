@@ -9,7 +9,7 @@ import classNames from 'classnames';
 
 type Props = {
   +tagName?: string,
-  +content: string,
+  readonly content: string,
   +className?: string,
 };
 

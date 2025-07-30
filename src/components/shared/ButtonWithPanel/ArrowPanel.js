@@ -15,16 +15,16 @@ import classNames from 'classnames';
 import './ArrowPanel.css';
 
 type Props = {
-  +onOpen: () => mixed,
-  +onClose: () => mixed,
+  readonly onOpen: () => mixed,
+  readonly onClose: () => mixed,
   +className?: string,
-  +children: React.Node,
+  readonly children: React.Node,
 };
 
 type State = {
-  +open: boolean,
-  +isClosing: boolean,
-  +openGeneration: number,
+  readonly open: boolean,
+  readonly isClosing: boolean,
+  readonly openGeneration: number,
 };
 
 export class ArrowPanel extends React.PureComponent<Props, State> {

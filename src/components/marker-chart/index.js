@@ -44,23 +44,23 @@ import './index.css';
 const ROW_HEIGHT = 16;
 
 type DispatchProps = {
-  +updatePreviewSelection: typeof updatePreviewSelection,
-  +changeRightClickedMarker: typeof changeRightClickedMarker,
-  +changeMouseTimePosition: typeof changeMouseTimePosition,
-  +changeSelectedMarker: typeof changeSelectedMarker,
+  readonly updatePreviewSelection: typeof updatePreviewSelection,
+  readonly changeRightClickedMarker: typeof changeRightClickedMarker,
+  readonly changeMouseTimePosition: typeof changeMouseTimePosition,
+  readonly changeSelectedMarker: typeof changeSelectedMarker,
 };
 
 type StateProps = {
-  +getMarker: (MarkerIndex) => Marker,
-  +getMarkerLabel: (MarkerIndex) => string,
-  +markerTimingAndBuckets: MarkerTimingAndBuckets,
-  +maxMarkerRows: number,
-  +markerListLength: number,
-  +timeRange: StartEndRange,
-  +threadsKey: ThreadsKey,
-  +previewSelection: PreviewSelection,
-  +rightClickedMarkerIndex: MarkerIndex | null,
-  +selectedMarkerIndex: MarkerIndex | null,
+  readonly getMarker: (MarkerIndex) => Marker,
+  readonly getMarkerLabel: (MarkerIndex) => string,
+  readonly markerTimingAndBuckets: MarkerTimingAndBuckets,
+  readonly maxMarkerRows: number,
+  readonly markerListLength: number,
+  readonly timeRange: StartEndRange,
+  readonly threadsKey: ThreadsKey,
+  readonly previewSelection: PreviewSelection,
+  readonly rightClickedMarkerIndex: MarkerIndex | null,
+  readonly selectedMarkerIndex: MarkerIndex | null,
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;

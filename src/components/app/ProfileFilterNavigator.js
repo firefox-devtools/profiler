@@ -35,15 +35,15 @@ import type {
 import './ProfileFilterNavigator.css';
 
 type Props = {
-  +pageDataByTabID: Map<TabID, ProfileFilterPageData> | null,
-  +tabFilter: TabID | null,
-  +rootRange: StartEndRange,
-  +profileTimelineUnit: string,
+  readonly pageDataByTabID: Map<TabID, ProfileFilterPageData> | null,
+  readonly tabFilter: TabID | null,
+  readonly rootRange: StartEndRange,
+  readonly profileTimelineUnit: string,
   ...ElementProps<typeof FilterNavigatorBar>,
 };
 
 type DispatchProps = {
-  +onPop: $PropertyType<Props, 'onPop'>,
+  readonly onPop: $PropertyType<Props, 'onPop'>,
 };
 
 type StateProps = $ReadOnly<$Exact<$Diff<Props, DispatchProps>>>;

@@ -54,37 +54,37 @@ export type UploadedProfileInformation = ImportedUploadedProfileInformation;
 
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {
-  +selectedNonInvertedCallNodePath: CallNodePath,
-  +selectedInvertedCallNodePath: CallNodePath,
-  +expandedNonInvertedCallNodePaths: PathSet,
-  +expandedInvertedCallNodePaths: PathSet,
-  +selectedMarker: MarkerIndex | null,
-  +selectedNetworkMarker: MarkerIndex | null,
+  readonly selectedNonInvertedCallNodePath: CallNodePath,
+  readonly selectedInvertedCallNodePath: CallNodePath,
+  readonly expandedNonInvertedCallNodePaths: PathSet,
+  readonly expandedInvertedCallNodePaths: PathSet,
+  readonly selectedMarker: MarkerIndex | null,
+  readonly selectedNetworkMarker: MarkerIndex | null,
 };
 
 export type ThreadViewOptionsPerThreads = { [ThreadsKey]: ThreadViewOptions };
 
 export type TableViewOptions = {
-  +fixedColumnWidths: Array<CssPixels> | null,
+  readonly fixedColumnWidths: Array<CssPixels> | null,
 };
 
 export type TableViewOptionsPerTab = { [TabSlug]: TableViewOptions };
 
 export type RightClickedCallNode = {
-  +threadsKey: ThreadsKey,
-  +callNodePath: CallNodePath,
+  readonly threadsKey: ThreadsKey,
+  readonly callNodePath: CallNodePath,
 };
 
 export type MarkerReference = {
-  +threadsKey: ThreadsKey,
-  +markerIndex: MarkerIndex,
+  readonly threadsKey: ThreadsKey,
+  readonly markerIndex: MarkerIndex,
 };
 
 /**
  * Profile view state
  */
 export type ProfileViewState = {
-  +viewOptions: {
+  readonly viewOptions: {
     perThread: ThreadViewOptionsPerThreads,
     symbolicationStatus: SymbolicationStatus,
     waitingForLibs: Set<RequestedLib>,
@@ -100,7 +100,7 @@ export type ProfileViewState = {
     mouseTimePosition: Milliseconds | null,
     perTab: TableViewOptionsPerTab,
   },
-  +profile: Profile | null,
+  readonly profile: Profile | null,
   globalTracks: GlobalTrack[],
   localTracksByPid: Map<Pid, LocalTrack[]>,
 };
@@ -113,7 +113,7 @@ export type AppViewState =
   | { +phase: 'DATA_RELOAD' }
   | { +phase: 'FATAL_ERROR', +error: Error }
   | {
-      +phase: 'INITIALIZING',
+      readonly phase: 'INITIALIZING',
       +additionalData?: { +attempt: Attempt | null, +message: string },
     };
 
@@ -125,34 +125,34 @@ export type Phase = $PropertyType<AppViewState, 'phase'>;
  */
 export type ZipFileState =
   | {
-      +phase: 'NO_ZIP_FILE',
-      +zip: null,
-      +pathInZipFile: null,
+      readonly phase: 'NO_ZIP_FILE',
+      readonly zip: null,
+      readonly pathInZipFile: null,
     }
   | {
-      +phase: 'LIST_FILES_IN_ZIP_FILE',
-      +zip: JSZip,
-      +pathInZipFile: null,
+      readonly phase: 'LIST_FILES_IN_ZIP_FILE',
+      readonly zip: JSZip,
+      readonly pathInZipFile: null,
     }
   | {
-      +phase: 'PROCESS_PROFILE_FROM_ZIP_FILE',
-      +zip: JSZip,
-      +pathInZipFile: string,
+      readonly phase: 'PROCESS_PROFILE_FROM_ZIP_FILE',
+      readonly zip: JSZip,
+      readonly pathInZipFile: string,
     }
   | {
-      +phase: 'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE',
-      +zip: JSZip,
-      +pathInZipFile: string,
+      readonly phase: 'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE',
+      readonly zip: JSZip,
+      readonly pathInZipFile: string,
     }
   | {
-      +phase: 'FILE_NOT_FOUND_IN_ZIP_FILE',
-      +zip: JSZip,
-      +pathInZipFile: string,
+      readonly phase: 'FILE_NOT_FOUND_IN_ZIP_FILE',
+      readonly zip: JSZip,
+      readonly pathInZipFile: string,
     }
   | {
-      +phase: 'VIEW_PROFILE_IN_ZIP_FILE',
-      +zip: JSZip,
-      +pathInZipFile: string,
+      readonly phase: 'VIEW_PROFILE_IN_ZIP_FILE',
+      readonly zip: JSZip,
+      readonly pathInZipFile: string,
     };
 
 export type IsOpenPerPanelState = { [TabSlug]: boolean };
@@ -165,28 +165,28 @@ export type UrlSetupPhase = 'initial-load' | 'loading-profile' | 'done';
  * e.g. `experimental.enableEventDelayTracks()`.
  */
 export type ExperimentalFlags = {
-  +eventDelayTracks: boolean,
-  +cpuGraphs: boolean,
-  +processCPUTracks: boolean,
+  readonly eventDelayTracks: boolean,
+  readonly cpuGraphs: boolean,
+  readonly processCPUTracks: boolean,
 };
 
 export type AppState = {
-  +view: AppViewState,
-  +urlSetupPhase: UrlSetupPhase,
-  +hasZoomedViaMousewheel: boolean,
-  +isSidebarOpenPerPanel: IsOpenPerPanelState,
-  +sidebarOpenCategories: Map<string, Set<number>>,
-  +panelLayoutGeneration: number,
-  +lastVisibleThreadTabSlug: TabSlug,
-  +trackThreadHeights: {
+  readonly view: AppViewState,
+  readonly urlSetupPhase: UrlSetupPhase,
+  readonly hasZoomedViaMousewheel: boolean,
+  readonly isSidebarOpenPerPanel: IsOpenPerPanelState,
+  readonly sidebarOpenCategories: Map<string, Set<number>>,
+  readonly panelLayoutGeneration: number,
+  readonly lastVisibleThreadTabSlug: TabSlug,
+  readonly trackThreadHeights: {
     [key: ThreadsKey]: CssPixels,
   },
-  +isNewlyPublished: boolean,
-  +isDragAndDropDragging: boolean,
-  +isDragAndDropOverlayRegistered: boolean,
-  +experimental: ExperimentalFlags,
-  +currentProfileUploadedInformation: UploadedProfileInformation | null,
-  +browserConnectionStatus: BrowserConnectionStatus,
+  readonly isNewlyPublished: boolean,
+  readonly isDragAndDropDragging: boolean,
+  readonly isDragAndDropOverlayRegistered: boolean,
+  readonly experimental: ExperimentalFlags,
+  readonly currentProfileUploadedInformation: UploadedProfileInformation | null,
+  readonly browserConnectionStatus: BrowserConnectionStatus,
 };
 
 export type UploadPhase =
@@ -205,11 +205,11 @@ export type UploadState = {
 };
 
 export type PublishState = {
-  +checkedSharingOptions: CheckedSharingOptions,
-  +upload: UploadState,
-  +isHidingStaleProfile: boolean,
-  +hasSanitizedProfile: boolean,
-  +prePublishedState: State | null,
+  readonly checkedSharingOptions: CheckedSharingOptions,
+  readonly upload: UploadState,
+  readonly isHidingStaleProfile: boolean,
+  readonly hasSanitizedProfile: boolean,
+  readonly prePublishedState: State | null,
 };
 
 export type ZippedProfilesState = {
@@ -346,18 +346,18 @@ export type ProfileSpecificUrlState = {
 };
 
 export type UrlState = {
-  +dataSource: DataSource,
+  readonly dataSource: DataSource,
   // This is used for the "public" dataSource".
-  +hash: string,
+  readonly hash: string,
   // This is used for the "from-url" dataSource.
-  +profileUrl: string,
+  readonly profileUrl: string,
   // This is used for the "compare" dataSource, to compare 2 profiles.
-  +profilesToCompare: string[] | null,
-  +selectedTab: TabSlug,
-  +pathInZipFile: string | null,
-  +profileName: string | null,
-  +profileSpecific: ProfileSpecificUrlState,
-  +symbolServerUrl: string | null,
+  readonly profilesToCompare: string[] | null,
+  readonly selectedTab: TabSlug,
+  readonly pathInZipFile: string | null,
+  readonly profileName: string | null,
+  readonly profileSpecific: ProfileSpecificUrlState,
+  readonly symbolServerUrl: string | null,
 };
 
 /**
@@ -365,11 +365,11 @@ export type UrlState = {
  */
 export type PseudoStrategy = null | 'bidi' | 'accented';
 export type L10nState = {
-  +requestedLocales: string[] | null,
-  +pseudoStrategy: PseudoStrategy,
-  +localization: Localization,
-  +primaryLocale: string | null,
-  +direction: 'ltr' | 'rtl',
+  readonly requestedLocales: string[] | null,
+  readonly pseudoStrategy: PseudoStrategy,
+  readonly localization: Localization,
+  readonly primaryLocale: string | null,
+  readonly direction: 'ltr' | 'rtl',
 };
 
 /**
@@ -378,17 +378,17 @@ export type L10nState = {
 export type IconsWithClassNames = Map<string, string>;
 
 export type CodeState = {
-  +sourceCodeCache: Map<string, SourceCodeStatus>,
-  +assemblyCodeCache: Map<string, AssemblyCodeStatus>,
+  readonly sourceCodeCache: Map<string, SourceCodeStatus>,
+  readonly assemblyCodeCache: Map<string, AssemblyCodeStatus>,
 };
 
 export type State = {
-  +app: AppState,
-  +profileView: ProfileViewState,
-  +urlState: UrlState,
-  +icons: IconsWithClassNames,
-  +zippedProfiles: ZippedProfilesState,
-  +publish: PublishState,
-  +l10n: L10nState,
-  +code: CodeState,
+  readonly app: AppState,
+  readonly profileView: ProfileViewState,
+  readonly urlState: UrlState,
+  readonly icons: IconsWithClassNames,
+  readonly zippedProfiles: ZippedProfilesState,
+  readonly publish: PublishState,
+  readonly l10n: L10nState,
+  readonly code: CodeState,
 };

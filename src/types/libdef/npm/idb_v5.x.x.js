@@ -9,7 +9,7 @@ declare type $idb$IDBValidKey = number | string | Date | $idb$IDBArrayKey;
 
 // TODO: upstream this to Flow DOM definitions
 declare class $idb$DOMStringList {
-  +length: number;
+  readonly length: number;
   // Comment syntax here as @@iterator is invalid syntax for eslint and babylon
   /*:: @@iterator(): Iterator<string>; */
   contains(str: string): boolean;
@@ -21,13 +21,13 @@ declare class $idb$DOMStringList {
 /** Similar to equivalent IDBDatabase. */
 declare class $idb$DB<ObjectStore: $idb$ObjectStore<any, any>> {
   /** A DOMString that contains the name of the connected database. */
-  +name: string;
+  readonly name: string;
 
   /** A 64-bit integer that contains the version of the connected database. When a database is first created, this attribute is an empty string. */
-  +version: number;
+  readonly version: number;
 
   /** A DOMStringList that contains a list of the names of the object stores currently in the connected database. */
-  +objectStoreNames: $idb$DOMStringList;
+  readonly objectStoreNames: $idb$DOMStringList;
 
   /** Returns immediately and closes the connection to a database in a separate thread. */
   close(): void;
@@ -42,8 +42,8 @@ declare class $idb$DB<ObjectStore: $idb$ObjectStore<any, any>> {
   createObjectStore(
     name: string,
     optionalParameters?: $Shape<{
-     +keyPath: string,
-     +autoIncrement: boolean,
+     readonly keyPath: string,
+     readonly autoIncrement: boolean,
     }>
   ): ObjectStore;
 
@@ -256,14 +256,14 @@ type $idb$OpenDBCallbacks<ObjectStore: $idb$ObjectStore<any, any>> = {
 /** Wrapper of IDBTransaction that presents the asynchronous operations as a Promise. */
 declare class $idb$Transaction<ObjectStore: $idb$ObjectStore<any, any>, StoreType: ObjectStore | null> {
   /** Resolves when transaction completes, rejects if transaction aborts or errors. */
-  +done: Promise<void>;
-  +store: StoreType;
+  readonly done: Promise<void>;
+  readonly store: StoreType;
 
   /** Returns a DOMStringList of the names of IDBObjectStore objects. */
-  +objectStoreNames: $idb$DOMStringList;
+  readonly objectStoreNames: $idb$DOMStringList;
 
   /** The mode for isolating access to data in the object stores that are in the scope of the transaction. For possible values, see the Constants section below. The default value is readonly. */
-  +mode: 'readonly' | 'readwrite' | 'versionchange';
+  readonly mode: 'readonly' | 'readwrite' | 'versionchange';
 
   /** Rolls back all the changes to objects in the database associated with this transaction. If this transaction has been aborted or completed, then this method throws an error event. */
   abort(): void;
@@ -309,13 +309,13 @@ declare class $idb$ObjectStore<Cursor: $idb$Cursor, Index: $idb$Index<Cursor>> e
   name: string;
 
   /** The key path of this object store. If this attribute is null, the application must provide a key for each modification operation. */
-  +keyPath: string | Array<string>;
+  readonly keyPath: string | Array<string>;
 
   /** A list of the names of indexes on objects in this object store. */
-  +indexNames: $idb$DOMStringList;
+  readonly indexNames: $idb$DOMStringList;
 
   /** The value of the auto increment flag for this object store. */
-  +autoIncrement: boolean;
+  readonly autoIncrement: boolean;
 
   /**
    * Returns a Promise of an IDBRequest object that (in a separate thread) creates a structured clone of the value, and updates the cloned value in the object store.
@@ -403,9 +403,9 @@ declare class $idb$ObjectStore<Cursor: $idb$Cursor, Index: $idb$Index<Cursor>> e
     name: string,
     keyPath: string | Array<string>,
     optionalParameters?: $Shape<{
-     +unique: boolean,
-     +multiEntry: boolean,
-     +locale: string | 'auto' | null,
+     readonly unique: boolean,
+     readonly multiEntry: boolean,
+     readonly locale: string | 'auto' | null,
     }>
   ): Index;
 
@@ -426,20 +426,20 @@ declare class $idb$ObjectStore<Cursor: $idb$Cursor, Index: $idb$Index<Cursor>> e
 /** Wrapper of IDBIndex that presents the asynchronous operations as Promises. */
 declare class $idb$Index<Cursor: $idb$Cursor> extends $idb$HasCursor<Cursor> {
   /** The name of this index. */
-  +name: string;
+  readonly name: string;
 
   /** The key path of this index. If null, this index is not auto-populated. */
-  +keyPath: string | Array<string>;
+  readonly keyPath: string | Array<string>;
 
   /**
    * Affects how the index behaves when the result of evaluating the index's key path yields an array.
    * If true, there is one record in the index for each item in an array of keys.
    * If false, then there is one record for each key that is an array.
    */
-  +multiEntry: boolean;
+  readonly multiEntry: boolean;
 
   /** If true, this index does not allow duplicate values for a key. */
-  +unique: boolean;
+  readonly unique: boolean;
 
   /**
    * Returns a Promise of an IDBRequest object that (in a separate thread) counts the matching records.
@@ -487,19 +487,19 @@ declare class $idb$Index<Cursor: $idb$Cursor> extends $idb$HasCursor<Cursor> {
 /** Wrapper of IDBCursor that presents the asynchronous operations as Promises. */
 declare class $idb$Cursor {
   /** The key for the record at the cursor's position. If the cursor is outside its range, this is set to undefined. The cursor's key can be any data type. */
-  +key: IDBKeyRange | $idb$IDBValidKey;
+  readonly key: IDBKeyRange | $idb$IDBValidKey;
 
   /** The cursor's current effective primary key. If the cursor is currently being iterated or has iterated outside its range, this is set to undefined. The cursor's primary key can be any data type. */
-  +primaryKey: any;
+  readonly primaryKey: any;
 
   /** The direction of traversal of the cursor. */
-  +direction: 'next' | 'nextunique' | 'prev' | 'prevunique';
+  readonly direction: 'next' | 'nextunique' | 'prev' | 'prevunique';
 
   /** The current value under the cursor. */
-  +value: any;
+  readonly value: any;
 
   /** Returns the IDBObjectStore or IDBIndex the cursor was opened from. */
-  +source: $idb$Index<Class<this>> | $idb$ObjectStore<Class<this>, $idb$Index<Class<this>>>;
+  readonly source: $idb$Index<Class<this>> | $idb$ObjectStore<Class<this>, $idb$Index<Class<this>>>;
 
   /**
    * Returns a Promise of an IDBRequest object that (in a separate thread) deletes the record at the cursor's position, without changing the cursor's position.

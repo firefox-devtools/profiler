@@ -29,19 +29,19 @@ import type { CpuRatioInTimeRange } from './thread/ActivityGraphFills';
 type CPUProps = CpuRatioInTimeRange;
 
 type RestProps = {
-  +sampleIndex: IndexIntoSamplesTable,
-  +categories: CategoryList,
-  +rangeFilteredThread: Thread,
-  +implementationFilter: ImplementationFilter,
+  readonly sampleIndex: IndexIntoSamplesTable,
+  readonly categories: CategoryList,
+  readonly rangeFilteredThread: Thread,
+  readonly implementationFilter: ImplementationFilter,
 };
 
 type Props = {
   ...RestProps,
-  +cpuRatioInTimeRange: CPUProps | null,
-  +sampleIndex: IndexIntoSamplesTable | null,
-  +zeroAt: Milliseconds,
-  +profileTimelineUnit: string,
-  +interval: Milliseconds,
+  readonly cpuRatioInTimeRange: CPUProps | null,
+  readonly sampleIndex: IndexIntoSamplesTable | null,
+  readonly zeroAt: Milliseconds,
+  readonly profileTimelineUnit: string,
+  readonly interval: Milliseconds,
 };
 
 /**

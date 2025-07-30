@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh issue view:*)",
+      "Bash(gh pr view:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(gh pr list:*)",
+      "Bash(grep:*)",
+      "Bash(yarn test)",
+      "Bash(yarn flow)",
+      "Bash(chmod:*)",
+      "Bash(yarn test:*)",
+      "Bash(git checkout:*)"
+    ],
+    "deny": []
+  }
+}

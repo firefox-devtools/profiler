@@ -40,12 +40,12 @@ for understanding where time was actually spent in a program."
 };
 
 type SourceViewProps = {
-  +timings: LineTimings,
-  +sourceCode: string,
-  +disableOverscan: boolean,
-  +filePath: string | null,
-  +scrollToHotSpotGeneration: number,
-  +hotSpotTimings: LineTimings,
+  readonly timings: LineTimings,
+  readonly sourceCode: string,
+  readonly disableOverscan: boolean,
+  readonly filePath: string | null,
+  readonly scrollToHotSpotGeneration: number,
+  readonly hotSpotTimings: LineTimings,
 };
 
 let editorModulePromise: Promise<any> | null = null;

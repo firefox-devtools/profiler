@@ -15,7 +15,7 @@
 import React, { PureComponent } from 'react';
 
 type StyleDefProps = {
-  +content: string,
+  readonly content: string,
 };
 
 export class StyleDef extends PureComponent<StyleDefProps> {
@@ -53,8 +53,8 @@ export class StyleDef extends PureComponent<StyleDefProps> {
 }
 
 type BackgroundImageStyleDefProps = {
-  +className: string,
-  +url: string,
+  readonly className: string,
+  readonly url: string,
 };
 
 export class BackgroundImageStyleDef extends PureComponent<BackgroundImageStyleDefProps> {
