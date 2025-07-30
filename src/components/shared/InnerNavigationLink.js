@@ -51,11 +51,9 @@ class InnerNavigationLinkImpl extends React.PureComponent<Props> {
   }
 }
 
-export const InnerNavigationLink = explicitConnect<
-  OwnProps,
-  {},
-  DispatchProps,
->({
-  mapDispatchToProps: { setDataSource },
-  component: InnerNavigationLinkImpl,
-});
+export const InnerNavigationLink = explicitConnect<OwnProps, {}, DispatchProps>(
+  {
+    mapDispatchToProps: { setDataSource },
+    component: InnerNavigationLinkImpl,
+  }
+);

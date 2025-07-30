@@ -68,11 +68,7 @@ class SymbolicationStatusOverlayImpl extends PureComponent<Props> {
   }
 }
 
-export const SymbolicationStatusOverlay = explicitConnect<
-  {},
-  StateProps,
-  {},
->({
+export const SymbolicationStatusOverlay = explicitConnect<{}, StateProps, {}>({
   mapStateToProps: (state) => ({
     symbolicationStatus: getSymbolicationStatus(state),
     waitingForLibs: getProfileViewOptions(state).waitingForLibs,

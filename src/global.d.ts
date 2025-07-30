@@ -11,7 +11,7 @@ type $ElementType<T extends readonly unknown[], N extends number> = T[N];
 type $Keys<T> = keyof T;
 type $Values<T> = T[keyof T];
 
-// Flow primitives -> TypeScript equivalents  
+// Flow primitives -> TypeScript equivalents
 type empty = never;
 type mixed = unknown;
 

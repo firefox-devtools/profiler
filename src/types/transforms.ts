@@ -92,11 +92,11 @@ export type TransformDefinitions = {
    *                      A:1,0                           X:1,1
    */
   'focus-subtree': {
-    readonly type: 'focus-subtree',
-    readonly callNodePath: CallNodePath,
-    readonly implementation: ImplementationFilter,
-    readonly inverted: boolean,
-  },
+    readonly type: 'focus-subtree';
+    readonly callNodePath: CallNodePath;
+    readonly implementation: ImplementationFilter;
+    readonly inverted: boolean;
+  };
 
   /**
    * This is the same operation as the FocusSubtree, but it is performed on each usage
@@ -123,9 +123,9 @@ export type TransformDefinitions = {
    *                 D:2,2
    */
   'focus-function': {
-    readonly type: 'focus-function',
-    readonly funcIndex: IndexIntoFuncTable,
-  },
+    readonly type: 'focus-function';
+    readonly funcIndex: IndexIntoFuncTable;
+  };
 
   /**
    * The MergeCallNode transform represents merging a CallNode into the parent CallNode. The
@@ -171,10 +171,10 @@ export type TransformDefinitions = {
    * not particularly useful, and prone to not give the expected results.
    */
   'merge-call-node': {
-    readonly type: 'merge-call-node',
-    readonly callNodePath: CallNodePath,
-    readonly implementation: ImplementationFilter,
-  },
+    readonly type: 'merge-call-node';
+    readonly callNodePath: CallNodePath;
+    readonly implementation: ImplementationFilter;
+  };
 
   /**
    * The MergeFunctions transform is similar to the MergeCallNode, except it merges a single
@@ -196,9 +196,9 @@ export type TransformDefinitions = {
    *      E:1,1       G:1,1
    */
   'merge-function': {
-    readonly type: 'merge-function',
-    readonly funcIndex: IndexIntoFuncTable,
-  },
+    readonly type: 'merge-function';
+    readonly funcIndex: IndexIntoFuncTable;
+  };
 
   /**
    * The DropFunction transform removes samples from the thread that have a function
@@ -216,9 +216,9 @@ export type TransformDefinitions = {
    *      D:1,1
    */
   'drop-function': {
-    readonly type: 'drop-function',
-    readonly funcIndex: IndexIntoFuncTable,
-  },
+    readonly type: 'drop-function';
+    readonly funcIndex: IndexIntoFuncTable;
+  };
 
   /**
    * Collapse resource takes CallNodes that are of a consecutive library, and collapses
@@ -237,12 +237,12 @@ export type TransformDefinitions = {
    *        D
    */
   'collapse-resource': {
-    readonly type: 'collapse-resource',
-    readonly resourceIndex: IndexIntoResourceTable,
+    readonly type: 'collapse-resource';
+    readonly resourceIndex: IndexIntoResourceTable;
     // This is the index of the newly created function that represents the collapsed stack.
-    readonly collapsedFuncIndex: IndexIntoFuncTable,
-    readonly implementation: ImplementationFilter,
-  },
+    readonly collapsedFuncIndex: IndexIntoFuncTable;
+    readonly implementation: ImplementationFilter;
+  };
 
   /**
    * Collapse direct recursion takes a function that calls itself recursively and collapses
@@ -261,10 +261,10 @@ export type TransformDefinitions = {
    *      C
    */
   'collapse-direct-recursion': {
-    readonly type: 'collapse-direct-recursion',
-    readonly funcIndex: IndexIntoFuncTable,
-    readonly implementation: ImplementationFilter,
-  },
+    readonly type: 'collapse-direct-recursion';
+    readonly funcIndex: IndexIntoFuncTable;
+    readonly implementation: ImplementationFilter;
+  };
 
   /**
    * Collapse recursion takes a function that calls itself recursively (directly
@@ -283,9 +283,9 @@ export type TransformDefinitions = {
    *      D
    */
   'collapse-recursion': {
-    readonly type: 'collapse-recursion',
-    readonly funcIndex: IndexIntoFuncTable,
-  },
+    readonly type: 'collapse-recursion';
+    readonly funcIndex: IndexIntoFuncTable;
+  };
 
   /**
    * Collapse the subtree of a function into that function across the entire tree.
@@ -305,9 +305,9 @@ export type TransformDefinitions = {
    *      E:1,1     G:1,1    I:1,1    J:1,1
    */
   'collapse-function-subtree': {
-    readonly type: 'collapse-function-subtree',
-    readonly funcIndex: IndexIntoFuncTable,
-  },
+    readonly type: 'collapse-function-subtree';
+    readonly funcIndex: IndexIntoFuncTable;
+  };
   /**
    * Focus on the functions that belong to the same category as the current function.
    * A example of this is given below with 'function:category' as the node name.
@@ -327,9 +327,9 @@ export type TransformDefinitions = {
    *              F:JS   A:JS
    */
   'focus-category': {
-    readonly type: 'focus-category',
-    readonly category: IndexIntoCategoryList,
-  },
+    readonly type: 'focus-category';
+    readonly category: IndexIntoCategoryList;
+  };
 
   /**
    * Filter the samples in the thread by the filter.
@@ -337,18 +337,20 @@ export type TransformDefinitions = {
    * to support more filters in the future.
    */
   'filter-samples': {
-    readonly type: 'filter-samples',
+    readonly type: 'filter-samples';
     // Expand this type when you need to support more than just the marker.
-    readonly filterType: FilterSamplesType,
-    readonly filter: string,
-  },
+    readonly filterType: FilterSamplesType;
+    readonly filter: string;
+  };
 };
 
 // Extract the transforms into a union.
 export type Transform = TransformDefinitions[keyof TransformDefinitions];
 
 // This pulls the string value out of { type } for a transform.
-type ExtractType<T extends string, S extends { readonly type: T }> = (transform: S) => T;
+type ExtractType<T extends string, S extends { readonly type: T }> = (
+  transform: S
+) => T;
 
 export type TransformType = Transform['type'];
 

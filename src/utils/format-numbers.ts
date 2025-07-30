@@ -2,16 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-
 import memoize from 'memoize-immutable';
 import NamedTupleMap from 'namedtuplemap';
 
-import {
-  Microseconds,
-  Milliseconds,
-  Nanoseconds,
-  WeightType,
-} from '../types';
+import { Microseconds, Milliseconds, Nanoseconds, WeightType } from '../types';
 import { assertExhaustiveCheck } from './flow';
 
 // Calling `toLocalestring` repeatedly in a tight loop can be a performance
@@ -23,8 +17,8 @@ function _getNumberFormat({
   places,
   style,
 }: {
-  places: number,
-  style: 'decimal' | 'percent',
+  places: number;
+  style: 'decimal' | 'percent';
 }) {
   return new Intl.NumberFormat(undefined, {
     minimumFractionDigits: places,

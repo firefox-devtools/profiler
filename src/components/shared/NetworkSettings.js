@@ -53,12 +53,10 @@ class NetworkSettingsImpl extends PureComponent<Props> {
   }
 }
 
-export const NetworkSettings = explicitConnect<{}, StateProps, DispatchProps>(
-  {
-    mapStateToProps: (state) => ({
-      searchString: getNetworkSearchString(state),
-    }),
-    mapDispatchToProps: { changeNetworkSearchString },
-    component: NetworkSettingsImpl,
-  }
-);
+export const NetworkSettings = explicitConnect<{}, StateProps, DispatchProps>({
+  mapStateToProps: (state) => ({
+    searchString: getNetworkSearchString(state),
+  }),
+  mapDispatchToProps: { changeNetworkSearchString },
+  component: NetworkSettingsImpl,
+});

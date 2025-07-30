@@ -9,38 +9,42 @@
  * https://developers.google.com/analytics/devguides/collection/analyticsjs/pages
  */
 type GAEvent = {
-  hitType: 'event',
+  hitType: 'event';
   // Specifies the event category. Must not be empty
-  eventCategory: string,
-  eventAction: string,
-  eventLabel?: string,
-  eventValue?: number,
+  eventCategory: string;
+  eventAction: string;
+  eventLabel?: string;
+  eventValue?: number;
 };
 
 type GAPageView = {
-  hitType: 'pageview',
-  page: string,
+  hitType: 'pageview';
+  page: string;
 };
 
 type GATiming = {
-  hitType: 'timing',
-  timingCategory: string,
-  timingVar: string,
-  timingValue: number,
-  timingLabel?: string,
+  hitType: 'timing';
+  timingCategory: string;
+  timingVar: string;
+  timingValue: number;
+  timingLabel?: string;
 };
 
 export type GAPayload = GAEvent | GAPageView | GATiming;
 
 export type GAErrorPayload = {
-  readonly exDescription: string,
-  readonly exFatal: boolean,
+  readonly exDescription: string;
+  readonly exFatal: boolean;
 };
 
 // Prettier breaks with multiple arrow functions and intersections, so name the arrow
 // functions.
 type _Send = (command: 'send', payload: GAPayload) => void;
-type _Exception = (command: 'send', type: 'exception', payload: GAErrorPayload) => void;
+type _Exception = (
+  command: 'send',
+  type: 'exception',
+  payload: GAErrorPayload
+) => void;
 export type GoogleAnalytics = _Send & _Exception;
 
 export function sendAnalytics(payload: GAPayload) {

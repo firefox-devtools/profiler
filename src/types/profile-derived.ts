@@ -53,55 +53,55 @@ export type IndexIntoCallNodeTable = number;
  * definition.
  */
 export type Thread = {
-  processType: ProcessType,
-  processStartupTime: Milliseconds,
-  processShutdownTime: Milliseconds | null,
-  registerTime: Milliseconds,
-  unregisterTime: Milliseconds | null,
-  pausedRanges: PausedRange[],
-  showMarkersInTimeline?: boolean,
-  name: string,
-  isMainThread: boolean,
+  processType: ProcessType;
+  processStartupTime: Milliseconds;
+  processShutdownTime: Milliseconds | null;
+  registerTime: Milliseconds;
+  unregisterTime: Milliseconds | null;
+  pausedRanges: PausedRange[];
+  showMarkersInTimeline?: boolean;
+  name: string;
+  isMainThread: boolean;
   // The eTLD+1 of the isolated content process if provided by the back-end.
   // It will be undefined if:
   // - Fission is not enabled.
   // - It's not an isolated content process.
   // - It's a sanitized profile.
   // - It's a profile from an older Firefox which doesn't include this field (introduced in Firefox 80).
-  'eTLD+1'?: string,
-  processName?: string,
-  isJsTracer?: boolean,
-  pid: Pid,
-  tid: Tid,
-  jsAllocations?: JsAllocationsTable,
-  nativeAllocations?: NativeAllocationsTable,
-  markers: RawMarkerTable,
-  stackTable: StackTable,
-  frameTable: FrameTable,
-  funcTable: FuncTable,
-  resourceTable: ResourceTable,
-  nativeSymbols: NativeSymbolTable,
-  jsTracer?: JsTracerTable,
+  'eTLD+1'?: string;
+  processName?: string;
+  isJsTracer?: boolean;
+  pid: Pid;
+  tid: Tid;
+  jsAllocations?: JsAllocationsTable;
+  nativeAllocations?: NativeAllocationsTable;
+  markers: RawMarkerTable;
+  stackTable: StackTable;
+  frameTable: FrameTable;
+  funcTable: FuncTable;
+  resourceTable: ResourceTable;
+  nativeSymbols: NativeSymbolTable;
+  jsTracer?: JsTracerTable;
   // If present and true, this thread was launched for a private browsing session only.
   // When false, it can still contain private browsing data if the profile was
   // captured in a non-fission browser.
   // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
   // had no extra attribute at all.
-  isPrivateBrowsing?: boolean,
+  isPrivateBrowsing?: boolean;
   // If present and non-0, the number represents the container this thread was loaded in.
   // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
   // had no extra attribute at all.
-  userContextId?: number,
+  userContextId?: number;
 
   // The fields below this comment are derived data, and not present on the RawThread
   // in the same form.
 
   // Strings for profiles are collected into a single table, and are referred to by
   // their index by other tables.
-  stringTable: StringTable,
+  stringTable: StringTable;
   // The stack samples collected for this thread. This field is different from
   // RawThread in that the `time` column is always present.
-  samples: SamplesTable,
+  samples: SamplesTable;
 };
 
 /**
@@ -110,35 +110,35 @@ export type Thread = {
 export type SamplesTable = {
   // Responsiveness is the older version of eventDelay. It injects events every 16ms.
   // This is optional because newer profiles don't have that field anymore.
-  responsiveness?: Array<Milliseconds | null>,
+  responsiveness?: Array<Milliseconds | null>;
   // Event delay is the newer version of responsiveness. It allow us to get a finer-grained
   // view of jank by inferring what would be the delay of a hypothetical input event at
   // any point in time. It requires a pre-processing to be able to visualize properly.
   // This is optional because older profiles didn't have that field.
-  eventDelay?: Array<Milliseconds | null>,
-  stack: Array<IndexIntoStackTable | null>,
-  time: Milliseconds[],
+  eventDelay?: Array<Milliseconds | null>;
+  stack: Array<IndexIntoStackTable | null>;
+  time: Milliseconds[];
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
-  weight: null | number[],
-  weightType: WeightType,
+  weight: null | number[];
+  weightType: WeightType;
   // The CPU ratio, between 0 and 1, over the time between the previous sample
   // and this sample.
-  threadCPURatio?: Float64Array,
+  threadCPURatio?: Float64Array;
   // This property isn't present in normal threads. However it's present for
   // merged threads, so that we know the origin thread for these samples.
-  threadId?: Tid[],
-  length: number,
+  threadId?: Tid[];
+  length: number;
 };
 
 type SamplesLikeTableShape = {
-  stack: Array<IndexIntoStackTable | null>,
-  time: Milliseconds[],
+  stack: Array<IndexIntoStackTable | null>;
+  time: Milliseconds[];
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
-  weight: null | number[],
-  weightType: WeightType,
-  length: number,
+  weight: null | number[];
+  weightType: WeightType;
+  length: number;
 };
 
 export type SamplesLikeTable =
@@ -148,23 +148,23 @@ export type SamplesLikeTable =
   | JsAllocationsTable;
 
 export type CounterSamplesTable = {
-  time: Milliseconds[],
+  time: Milliseconds[];
   // The number of times the Counter's "number" was changed since the previous sample.
   // This property was mandatory until the format version 42, it was made optional in 43.
-  number?: number[],
+  number?: number[];
   // The count of the data, for instance for memory this would be bytes.
-  count: number[],
-  length: number,
+  count: number[];
+  length: number;
 };
 
 export type Counter = {
-  name: string,
-  category: string,
-  description: string,
-  color?: GraphColor,
-  pid: Pid,
-  mainThreadIndex: ThreadIndex,
-  samples: CounterSamplesTable,
+  name: string;
+  category: string;
+  description: string;
+  color?: GraphColor;
+  pid: Pid;
+  mainThreadIndex: ThreadIndex;
+  samples: CounterSamplesTable;
 };
 
 /**
@@ -197,13 +197,13 @@ export type Counter = {
  */
 export type StackTable = {
   // Same as in RawStackTable
-  frame: IndexIntoFrameTable[],
-  prefix: Array<IndexIntoStackTable | null>,
-  length: number,
+  frame: IndexIntoFrameTable[];
+  prefix: Array<IndexIntoStackTable | null>;
+  length: number;
 
   // Derived from RawStackTable + FrameTable
-  category: IndexIntoCategoryList[],
-  subcategory: IndexIntoSubcategoryListForCategory[],
+  category: IndexIntoCategoryList[];
+  subcategory: IndexIntoSubcategoryListForCategory[];
 };
 
 /**
@@ -271,10 +271,10 @@ export type StackTable = {
  */
 export type CallNodeTable = {
   // The index of the parent call node, or -1 for root nodes.
-  prefix: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
+  prefix: Int32Array; // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
 
   // The index of this node's next sibling, or -1 if this node is the last child / last root.
-  nextSibling: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
+  nextSibling: Int32Array; // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
 
   // The index after this node's last descendant. If this node has a next sibling,
   // subtreeRangeEnd is equal to nextSibling. Otherwise, this is the index
@@ -282,22 +282,22 @@ export type CallNodeTable = {
   // The last node has subtreeRangeEnd set to callNodeTable.length.
   //
   // The nodes in the range range [A, subtreeRangeEnd[A]) form A's subtree.
-  subtreeRangeEnd: Uint32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable
+  subtreeRangeEnd: Uint32Array; // IndexIntoCallNodeTable -> IndexIntoCallNodeTable
 
-  func: Int32Array, // IndexIntoCallNodeTable -> IndexIntoFuncTable
-  category: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
-  subcategory: Int32Array, // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
-  innerWindowID: Float64Array, // IndexIntoCallNodeTable -> InnerWindowID
+  func: Int32Array; // IndexIntoCallNodeTable -> IndexIntoFuncTable
+  category: Int32Array; // IndexIntoCallNodeTable -> IndexIntoCategoryList
+  subcategory: Int32Array; // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
+  innerWindowID: Float64Array; // IndexIntoCallNodeTable -> InnerWindowID
   // IndexIntoNativeSymbolTable: all frames that collapsed into this call node inlined into the same native symbol
   // -1: divergent: not all frames that collapsed into this call node were inlined, or they are from different symbols
   // -2: no inlining
-  sourceFramesInlinedIntoSymbol: Int32Array,
+  sourceFramesInlinedIntoSymbol: Int32Array;
   // The depth of the call node. Roots have depth 0.
-  depth: Int32Array,
+  depth: Int32Array;
   // The maximum value in the depth column, or -1 if this table is empty.
-  maxDepth: number,
+  maxDepth: number;
   // The number of call nodes. All columns in this table have this length.
-  length: number,
+  length: number;
 };
 
 export type LineNumber = number;
@@ -325,21 +325,21 @@ export type StackLineInfo = {
   // stack is in a different file or if the line number is not known.
   // For non-"self" stacks, i.e. stacks which are only used as prefix stacks and
   // never referred to from a SamplesLikeTable, the value may be null.
-  selfLine: Array<LineNumber | null>,
+  selfLine: Array<LineNumber | null>;
   // An array that contains, for each "self" stack, all the lines that the frames in
   // this stack hit in this file, or null if this stack does not hit any line
   // in the given file.
   // For non-"self" stacks, i.e. stacks which are only used as prefix stacks and
   // never referred to from a SamplesLikeTable, the value may be null.
-  stackLines: Array<Set<LineNumber> | null>,
+  stackLines: Array<Set<LineNumber> | null>;
 };
 
 // Stores, for all lines of one specific file, how many times each line is hit
 // by samples in a thread. The maps only contain non-zero values.
 // So map.get(line) === undefined should be treated as zero.
 export type LineTimings = {
-  totalLineHits: Map<LineNumber, number>,
-  selfLineHits: Map<LineNumber, number>,
+  totalLineHits: Map<LineNumber, number>;
+  selfLineHits: Map<LineNumber, number>;
 };
 
 // Stores the addresses which are hit by each stack, for addresses belonging to
@@ -365,21 +365,21 @@ export type StackAddressInfo = {
   // the stack is in a different native symbol or if the address is not known.
   // For non-"self" stacks, i.e. stacks which are only used as prefix stacks and
   // never referred to from a SamplesLikeTable, the value may be null.
-  selfAddress: Array<Address | null>,
+  selfAddress: Array<Address | null>;
   // An array that contains, for each "self" stack, all the addresses that the
   // frames in this stack hit in this native symbol, or null if this stack does
   // not hit any address in the given native symbol.
   // For non-"self" stacks, i.e. stacks which are only used as prefix stacks and
   // never referred to from a SamplesLikeTable, the value may be null.
-  stackAddresses: Array<Set<Address> | null>,
+  stackAddresses: Array<Set<Address> | null>;
 };
 
 // Stores, for all addresses of one specific library, how many times each
 // address is hit by samples in a thread. The maps only contain non-zero values.
 // So map.get(address) === undefined should be treated as zero.
 export type AddressTimings = {
-  totalAddressHits: Map<Address, number>,
-  selfAddressHits: Map<Address, number>,
+  totalAddressHits: Map<Address, number>;
+  selfAddressHits: Map<Address, number>;
 };
 
 // Stores the information that's needed to prove to the symbolication API that
@@ -408,12 +408,12 @@ export type AddressTimings = {
 export type AddressProof = {
   // The debugName of a library whose symbol information refers to the requested
   // file.
-  debugName: string,
+  debugName: string;
   // The breakpadId of that library.
-  breakpadId: string,
+  breakpadId: string;
   // The address in that library for which the symbolicated frames refer to the
   // requested file.
-  address: Address,
+  address: Address;
 };
 
 /**
@@ -435,21 +435,21 @@ export type CallNodePath = IndexIntoFuncTable[];
  * to get back to the RawMarkerTable.
  */
 export type DerivedMarkerInfo = {
-  markers: Marker[],
+  markers: Marker[];
   markerIndexToRawMarkerIndexes: IndexedArray<
     MarkerIndex,
     IndexIntoRawMarkerTable[]
-  >,
+  >;
 };
 
 export type Marker = {
-  start: Milliseconds,
-  end: Milliseconds | null,
-  name: string,
-  category: IndexIntoCategoryList,
-  threadId: Tid | null,
-  data: MarkerPayload | null,
-  incomplete?: boolean,
+  start: Milliseconds;
+  end: Milliseconds | null;
+  name: string;
+  category: IndexIntoCategoryList;
+  threadId: Tid | null;
+  data: MarkerPayload | null;
+  incomplete?: boolean;
 };
 
 /**
@@ -464,44 +464,44 @@ export type Marker = {
 export type MarkerIndex = number;
 
 export type CallNodeData = {
-  funcName: string,
-  total: number,
-  totalRelative: number,
-  self: number,
-  selfRelative: number,
+  funcName: string;
+  total: number;
+  totalRelative: number;
+  self: number;
+  selfRelative: number;
 };
 
 export type ExtraBadgeInfo = {
-  name: string,
-  localizationId: string,
-  vars: unknown,
-  titleFallback: string,
-  contentFallback: string,
+  name: string;
+  localizationId: string;
+  vars: unknown;
+  titleFallback: string;
+  contentFallback: string;
 };
 
 export type CallNodeDisplayData = Readonly<{
-    total: string,
-    totalWithUnit: string,
-    totalPercent: string,
-    self: string,
-    selfWithUnit: string,
-    name: string,
-    lib: string,
-    isFrameLabel: boolean,
-    categoryName: string,
-    categoryColor: string,
-    iconSrc: string | null,
-    badge?: ExtraBadgeInfo,
-    icon: string | null,
-    ariaLabel: string,
-  }>;
+  total: string;
+  totalWithUnit: string;
+  totalPercent: string;
+  self: string;
+  selfWithUnit: string;
+  name: string;
+  lib: string;
+  isFrameLabel: boolean;
+  categoryName: string;
+  categoryColor: string;
+  iconSrc: string | null;
+  badge?: ExtraBadgeInfo;
+  icon: string | null;
+  ariaLabel: string;
+}>;
 
 export type ThreadWithReservedFunctions = {
-  thread: Thread,
+  thread: Thread;
   reservedFunctionsForResources: Map<
     IndexIntoResourceTable,
     IndexIntoFuncTable
-  >,
+  >;
 };
 
 /**
@@ -510,15 +510,15 @@ export type ThreadWithReservedFunctions = {
  */
 export type MarkerTiming = {
   // Start time in milliseconds.
-  start: number[],
+  start: number[];
   // End time in milliseconds. It will equals start for instant markers.
-  end: number[],
-  index: MarkerIndex[],
-  name: string,
-  bucket: string,
+  end: number[];
+  index: MarkerIndex[];
+  name: string;
+  bucket: string;
   // True if this marker timing contains only instant markers.
-  instantOnly: boolean,
-  length: number,
+  instantOnly: boolean;
+  length: number;
 };
 
 export type MarkerTimingRows = Array<MarkerTiming>;
@@ -544,14 +544,14 @@ export type MarkerTimingAndBuckets = Array<MarkerTiming | string>;
 
 export type JsTracerTiming = {
   // Start time in milliseconds.
-  start: number[],
+  start: number[];
   // End time in milliseconds.
-  end: number[],
-  index: IndexIntoJsTracerEvents[],
-  label: string[],
-  name: string,
-  func: Array<IndexIntoFuncTable | null>,
-  length: number,
+  end: number[];
+  index: IndexIntoJsTracerEvents[];
+  label: string[];
+  name: string;
+  func: Array<IndexIntoFuncTable | null>;
+  length: number;
 };
 
 /**
@@ -559,25 +559,25 @@ export type JsTracerTiming = {
  * structure that can be used to see the total range of change over all the samples.
  */
 export type AccumulatedCounterSamples = {
-  readonly minCount: number,
-  readonly maxCount: number,
-  readonly countRange: number,
+  readonly minCount: number;
+  readonly maxCount: number;
+  readonly countRange: number;
   // This value holds the accumulation of all the previous counts in the Counter samples.
   // For a memory counter, this gives the relative offset of bytes in that range
   // selection. The array will share the indexes of the range filtered counter samples.
-  readonly accumulatedCounts: number[],
+  readonly accumulatedCounts: number[];
 };
 
 /**
  * A collection of the data for all configured lines for a given marker
  */
 export type CollectedCustomMarkerSamples = {
-  readonly minNumber: number,
-  readonly maxNumber: number,
+  readonly minNumber: number;
+  readonly maxNumber: number;
   // This value holds the number per configured line
   // selection. The array will share the indexes of the range filtered marker samples.
-  readonly numbersPerLine: number[][],
-  readonly markerIndexes: MarkerIndex[],
+  readonly numbersPerLine: number[][];
+  readonly markerIndexes: MarkerIndex[];
 };
 
 export type StackType = 'js' | 'native' | 'unsymbolicated';
@@ -585,26 +585,34 @@ export type StackType = 'js' | 'native' | 'unsymbolicated';
 export type GlobalTrack =
   // mainThreadIndex is null when this is a fake global process added to contain
   // real threads.
-  | { readonly type: 'process', readonly pid: Pid, readonly mainThreadIndex: ThreadIndex | null }
-  | { readonly type: 'screenshots', readonly id: string, readonly threadIndex: ThreadIndex }
+  | {
+      readonly type: 'process';
+      readonly pid: Pid;
+      readonly mainThreadIndex: ThreadIndex | null;
+    }
+  | {
+      readonly type: 'screenshots';
+      readonly id: string;
+      readonly threadIndex: ThreadIndex;
+    }
   | { readonly type: 'visual-progress' }
   | { readonly type: 'perceptual-visual-progress' }
   | { readonly type: 'contentful-visual-progress' };
 
 export type LocalTrack =
-  | { readonly type: 'thread', readonly threadIndex: ThreadIndex }
-  | { readonly type: 'network', readonly threadIndex: ThreadIndex }
-  | { readonly type: 'memory', readonly counterIndex: CounterIndex }
-  | { readonly type: 'bandwidth', readonly counterIndex: CounterIndex }
-  | { readonly type: 'ipc', readonly threadIndex: ThreadIndex }
-  | { readonly type: 'event-delay', readonly threadIndex: ThreadIndex }
-  | { readonly type: 'process-cpu', readonly counterIndex: CounterIndex }
-  | { readonly type: 'power', readonly counterIndex: CounterIndex }
+  | { readonly type: 'thread'; readonly threadIndex: ThreadIndex }
+  | { readonly type: 'network'; readonly threadIndex: ThreadIndex }
+  | { readonly type: 'memory'; readonly counterIndex: CounterIndex }
+  | { readonly type: 'bandwidth'; readonly counterIndex: CounterIndex }
+  | { readonly type: 'ipc'; readonly threadIndex: ThreadIndex }
+  | { readonly type: 'event-delay'; readonly threadIndex: ThreadIndex }
+  | { readonly type: 'process-cpu'; readonly counterIndex: CounterIndex }
+  | { readonly type: 'power'; readonly counterIndex: CounterIndex }
   | {
-      readonly type: 'marker',
-      readonly threadIndex: ThreadIndex,
-      readonly markerSchema: MarkerSchema,
-      readonly markerName: IndexIntoStringTable,
+      readonly type: 'marker';
+      readonly threadIndex: ThreadIndex;
+      readonly markerSchema: MarkerSchema;
+      readonly markerName: IndexIntoStringTable;
     };
 
 export type Track = GlobalTrack | LocalTrack;
@@ -621,21 +629,21 @@ export type TrackIndex = number;
  */
 export type RemoveProfileInformation = {
   // Remove the given hidden threads if they are provided.
-  readonly shouldRemoveThreads: Set<ThreadIndex>,
+  readonly shouldRemoveThreads: Set<ThreadIndex>;
   // Remove the given counters if they are provided.
-  readonly shouldRemoveCounters: Set<CounterIndex>,
+  readonly shouldRemoveCounters: Set<CounterIndex>;
   // Remove the screenshots if they are provided.
-  readonly shouldRemoveThreadsWithScreenshots: Set<ThreadIndex>,
+  readonly shouldRemoveThreadsWithScreenshots: Set<ThreadIndex>;
   // Remove the full time range if StartEndRange is provided.
-  readonly shouldFilterToCommittedRange: StartEndRange | null,
+  readonly shouldFilterToCommittedRange: StartEndRange | null;
   // Remove all the URLs if it's true.
-  readonly shouldRemoveUrls: boolean,
+  readonly shouldRemoveUrls: boolean;
   // Remove the extension list if it's true.
-  readonly shouldRemoveExtensions: boolean,
+  readonly shouldRemoveExtensions: boolean;
   // Remove the preference values if it's true.
-  readonly shouldRemovePreferenceValues: boolean,
+  readonly shouldRemovePreferenceValues: boolean;
   // Remove the private browsing data if it's true.
-  readonly shouldRemovePrivateBrowsingData: boolean,
+  readonly shouldRemovePrivateBrowsingData: boolean;
 };
 
 /**
@@ -666,9 +674,9 @@ export type InitialSelectedTrackReference = HTMLElement;
  * Page data for ProfileFilterNavigator component.
  */
 export type ProfileFilterPageData = {
-  origin: string,
-  hostname: string,
-  favicon: string,
+  origin: string;
+  hostname: string;
+  favicon: string;
 };
 
 /**
@@ -676,18 +684,18 @@ export type ProfileFilterPageData = {
  * scores.
  */
 export type SortedTabPageData = Array<{
-  tabID: TabID,
-  tabScore: number,
-  pageData: ProfileFilterPageData,
+  tabID: TabID;
+  tabScore: number;
+  pageData: ProfileFilterPageData;
 }>;
 
 export type CallNodeSelfAndSummary = {
   // This property stores the amount of unit (time, bytes, count, etc.) spent in
   // this call node and not in any of its descendant nodes.
-  callNodeSelf: Float64Array,
+  callNodeSelf: Float64Array;
   // The sum of absolute values in callNodeSelf.
   // This is used for computing the percentages displayed in the call tree.
-  rootTotalSummary: number,
+  rootTotalSummary: number;
 };
 
 /**
@@ -698,7 +706,7 @@ export type CallNodeSelfAndSummary = {
  *  - Otherwise, the values are in the same unit as the sample weight type. For
  *    example, they could be sample counts, weights, or bytes.
  */
-export type SelfAndTotal = { self: number, total: number };
+export type SelfAndTotal = { self: number; total: number };
 
 /*
  * Event delay table that holds the pre-processed event delay values and other
@@ -708,10 +716,10 @@ export type SelfAndTotal = { self: number, total: number };
  * https://searchfox.org/mozilla-central/rev/3811b11b5773c1dccfe8228bfc7143b10a9a2a99/tools/profiler/core/platform.cpp#3000-3186
  */
 export type EventDelayInfo = {
-  readonly eventDelays: Float32Array,
-  readonly minDelay: Milliseconds,
-  readonly maxDelay: Milliseconds,
-  readonly delayRange: Milliseconds,
+  readonly eventDelays: Float32Array;
+  readonly minDelay: Milliseconds;
+  readonly maxDelay: Milliseconds;
+  readonly delayRange: Milliseconds;
 };
 
 /**
@@ -730,13 +738,13 @@ export type ThreadsKey = string | number;
  * This can be removed if the native symbol table ever becomes global.
  */
 export type NativeSymbolInfo = {
-  name: string,
-  address: Address,
+  name: string;
+  address: Address;
   // The number of bytes belonging to this function, starting at the symbol address.
   // If functionSizeIsKnown is false, then this is a minimum size.
-  functionSize: Bytes,
-  functionSizeIsKnown: boolean,
-  libIndex: IndexIntoLibs,
+  functionSize: Bytes;
+  functionSizeIsKnown: boolean;
+  libIndex: IndexIntoLibs;
 };
 
 /**
@@ -744,15 +752,15 @@ export type NativeSymbolInfo = {
  * assembly view) is updated.
  */
 export type BottomBoxInfo = {
-  libIndex: IndexIntoLibs | null,
-  sourceFile: string | null,
-  nativeSymbols: NativeSymbolInfo[],
+  libIndex: IndexIntoLibs | null;
+  sourceFile: string | null;
+  nativeSymbols: NativeSymbolInfo[];
 };
 
 /**
  * Favicon data that is retrieved from the browser connection.
  */
 export type FaviconData = {
-  readonly data: ArrayBuffer,
-  readonly mimeType: string,
+  readonly data: ArrayBuffer;
+  readonly mimeType: string;
 };

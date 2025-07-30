@@ -1521,10 +1521,8 @@ export const stringsToMarkerRegExps = (
 
   // We create this map to group all the field specific search strings and then
   // we aggregate them to create a single regexp for each field later.
-  const fieldStrings: Map<
-    string,
-    { positive: string[], negative: string[] },
-  > = new Map();
+  const fieldStrings: Map<string, { positive: string[], negative: string[] }> =
+    new Map();
   // These are the non-field specific search strings. They have to be positive
   // as we don't support negative generic filtering.
   const genericPositiveStrings = [];

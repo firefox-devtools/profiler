@@ -3,17 +3,20 @@
 ## Current Status (July 30, 2025)
 
 ### 📊 Progress
+
 - **Type Definitions**: ✅ 13/13 files complete (100%)
 - **Core Utilities**: 🔄 11/40+ files complete (28%) - colors.ts, string.ts, format-numbers.ts, errors.ts, base64.ts, bisect.ts, pretty-bytes.ts, sha1.ts, set.ts, magic.ts, analytics.ts, l10n-pseudo.ts
 - **React Components**: ⏳ 0/150+ files (pending)
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 
 ### 🎯 Next Steps
+
 1. Continue converting remaining ~29 utility files in src/utils/
 2. Begin React component migration with basic leaf components
 3. Maintain test validation after each conversion
 
 ### ✅ Current Migration State
+
 - `yarn test-all` **PASSES** - All checks work correctly during migration
 - `yarn typecheck` validates all converted TypeScript files
 - Mixed Flow/TypeScript codebase is stable and tested
@@ -23,6 +26,7 @@
 ## Critical Process (Prevents Mistakes)
 
 ### File Conversion Steps - MUST FOLLOW IN ORDER
+
 1. Copy `.js` → `.ts/.tsx`
 2. Remove `// @flow`
 3. Apply conversion patterns (see below)
@@ -34,6 +38,7 @@
 ### Proven Flow→TypeScript Conversion Patterns
 
 #### 1. Import Statements
+
 ```typescript
 // Flow
 import type { SomeType } from './module';
@@ -43,6 +48,7 @@ import { SomeType } from './module';
 ```
 
 #### 2. Readonly Properties
+
 ```typescript
 // Flow
 type Example = {
@@ -56,21 +62,23 @@ type Example = {
 ```
 
 #### 3. Nullable Types
+
 ```typescript
 // Flow
 prop: ?string,
 array: Array<?number>,
 
-// TypeScript  
+// TypeScript
 prop: string | null,
 array: Array<number | null>,
 ```
 
 #### 4. Flow Utility Types
+
 ```typescript
 // Flow → TypeScript
 $Keys<T> → keyof T
-$Values<T> → T[keyof T]  
+$Values<T> → T[keyof T]
 $ReadOnly<T> → Readonly<T>
 $Shape<T> → Partial<T>
 $PropertyType<T, 'prop'> → T['prop']
@@ -78,15 +86,17 @@ mixed → unknown
 ```
 
 #### 5. Set Operations (Important Fix)
+
 ```typescript
 // Flow (causes TS errors)
-return new Set([...set1].filter(x => set2.has(x)));
+return new Set([...set1].filter((x) => set2.has(x)));
 
 // TypeScript (correct)
-return new Set(Array.from(set1).filter(x => set2.has(x)));
+return new Set(Array.from(set1).filter((x) => set2.has(x)));
 ```
 
 #### 6. Function Types
+
 ```typescript
 // Flow
 type Fn = ('send', GAPayload) => void;
@@ -109,22 +119,28 @@ module.exports = function (api) {
   return {
     overrides: [
       {
-        test: /\.jsx?$/,  // Flow files
+        test: /\.jsx?$/, // Flow files
         presets: [
-          ["@babel/preset-env", { useBuiltIns: "usage", corejs: "3.9", bugfixes: true }],
-          ["@babel/preset-react", { useSpread: true }],
-          ["@babel/preset-flow", { all: true }]
-        ]
+          [
+            '@babel/preset-env',
+            { useBuiltIns: 'usage', corejs: '3.9', bugfixes: true },
+          ],
+          ['@babel/preset-react', { useSpread: true }],
+          ['@babel/preset-flow', { all: true }],
+        ],
       },
       {
-        test: /\.tsx?$/,  // TypeScript files
+        test: /\.tsx?$/, // TypeScript files
         presets: [
-          ["@babel/preset-env", { useBuiltIns: "usage", corejs: "3.9", bugfixes: true }],
-          ["@babel/preset-react", { useSpread: true }],
-          ["@babel/preset-typescript", { isTSX: true, allExtensions: true }]
-        ]
-      }
-    ]
+          [
+            '@babel/preset-env',
+            { useBuiltIns: 'usage', corejs: '3.9', bugfixes: true },
+          ],
+          ['@babel/preset-react', { useSpread: true }],
+          ['@babel/preset-typescript', { isTSX: true, allExtensions: true }],
+        ],
+      },
+    ],
   };
 };
 ```
@@ -134,16 +150,19 @@ module.exports = function (api) {
 ## Lessons Learned (Avoid These Mistakes)
 
 ### ❌ FAILED: Global Syntax Changes
+
 **What Failed**: Converting all `+prop:` → `readonly prop:` globally across mixed codebase
 **Why**: Flow parser can't handle TypeScript `readonly` keyword in .js files
 **Lesson**: Conversion must be per-file during .js → .ts migration
 
-### ❌ FAILED: Utility-First Migration Order  
+### ❌ FAILED: Utility-First Migration Order
+
 **What Failed**: Starting with utility files before type definitions
 **Why**: Utilities import types from src/types/ - creates dependency issues
 **Lesson**: Always convert dependencies first (types → utilities → components)
 
 ### ✅ SUCCESS: Type-First Strategy
+
 **What Worked**: Converting all 13 type definition files first, then utilities
 **Why**: Provides stable foundation, utilities can import converted types
 **Result**: Zero compilation errors, smooth dependency resolution
@@ -153,6 +172,7 @@ module.exports = function (api) {
 ## Key Files & Commands
 
 ### Development Commands
+
 - `yarn test` - Run all tests (must pass after each conversion)
 - `yarn typecheck` - Check TypeScript compilation for converted files only
 - `yarn typecheck-file <file>` - Check specific TypeScript file
@@ -161,12 +181,14 @@ module.exports = function (api) {
 - `yarn test-all-migration-done` - Post-migration test-all (will fail until migration complete)
 
 ### Critical Configuration Files
+
 - `tsconfig.json` - TypeScript configuration (working correctly)
 - `tsconfig.migration.json` - Migration-specific config (only checks .ts/.tsx files)
 - `babel.config.js` - Mixed Flow/TypeScript support (resolved)
 - `jest.config.js` - Test configuration (supports .ts/.tsx)
 
 ### Current TypeScript Configuration
+
 ```json
 {
   "compilerOptions": {
@@ -191,27 +213,32 @@ module.exports = function (api) {
 
 ## Migration Strategy
 
-### Phase 1: ✅ COMPLETED - Infrastructure & Type Definitions  
+### Phase 1: ✅ COMPLETED - Infrastructure & Type Definitions
+
 - TypeScript configuration established
 - All 13 type definition files converted
 - Build system supporting mixed codebase
 
 ### Phase 2: 🔄 IN PROGRESS - Utility Files
+
 - Target: ~40 files in src/utils/
 - Current: 11/40+ complete (28%)
 - Focus: Simple, self-contained files first
 
 ### Phase 3: ⏳ PLANNED - React Components
+
 - Start with leaf components (no complex Redux connections)
 - Convert to .tsx with proper React types
 - Validate props, state, and event handlers
 
-### Phase 4: ⏳ PLANNED - Connected Components  
+### Phase 4: ⏳ PLANNED - Connected Components
+
 - Add TypeScript types to existing ExplicitConnect patterns
 - Create typed versions of selectors and actions
 - No API changes during migration
 
 ### Phase 5: ⏳ PLANNED - Final Cleanup
+
 - Remove Flow infrastructure (.flowconfig, dependencies)
 - Update documentation
 - Enable stricter TypeScript settings

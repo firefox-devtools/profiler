@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import type { CallNodePath, IndexIntoFuncTable } from 'firefox-profiler/types';
 
 export function arePathsEqual(a: CallNodePath, b: CallNodePath): boolean {
@@ -95,7 +93,7 @@ export class PathSet implements Iterable<CallNodePath> {
     }
   }
 
-  forEach(func: (CallNodePath, CallNodePath, PathSet) => void, thisArg?: any) {
+  forEach(func: (value: CallNodePath, value2: CallNodePath, set: PathSet) => void, thisArg?: any) {
     for (const entry of this) {
       func.call(thisArg, entry, entry, this);
     }
@@ -109,21 +107,7 @@ export class PathSet implements Iterable<CallNodePath> {
     return this._table.size;
   }
 
-  // Because Flow doesn't understand Symbols and well-known symbols yet, we need
-  // to resort to this hack to make it possible to implement the iterator.
-  // See https://github.com/facebook/flow/issues/3258 for more information
-  // and https://stackoverflow.com/questions/48491307/iterable-class-in-flow for
-  // the solution used here.
-
-  // $FlowFixMe ignore Flow error about computed properties in a class
   *[Symbol.iterator]() {
     yield* this._table.values();
   }
-
-  /*::
-  @@iterator(): * {
-    // $FlowFixMe ignore Flow error about Symbol support
-    return this[Symbol.iterator]()
-  }
-  */
 }

@@ -70,18 +70,16 @@ class MaybeFlameGraphImpl extends React.PureComponent<Props> {
   }
 }
 
-export const MaybeFlameGraph = explicitConnect<{}, StateProps, DispatchProps>(
-  {
-    mapStateToProps: (state) => {
-      return {
-        invertCallstack: getInvertCallstack(state),
-        isPreviewSelectionEmpty:
-          !selectedThreadSelectors.getHasPreviewFilteredCtssSamples(state),
-      };
-    },
-    mapDispatchToProps: {
-      changeInvertCallstack,
-    },
-    component: MaybeFlameGraphImpl,
-  }
-);
+export const MaybeFlameGraph = explicitConnect<{}, StateProps, DispatchProps>({
+  mapStateToProps: (state) => {
+    return {
+      invertCallstack: getInvertCallstack(state),
+      isPreviewSelectionEmpty:
+        !selectedThreadSelectors.getHasPreviewFilteredCtssSamples(state),
+    };
+  },
+  mapDispatchToProps: {
+    changeInvertCallstack,
+  },
+  component: MaybeFlameGraphImpl,
+});

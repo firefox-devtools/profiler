@@ -89,15 +89,13 @@ class TabSelectorMenuImpl extends React.PureComponent<Props> {
   }
 }
 
-export const TabSelectorMenu = explicitConnect<{}, StateProps, DispatchProps>(
-  {
-    mapStateToProps: (state) => ({
-      tabFilter: getTabFilter(state),
-      sortedPageData: getProfileFilterSortedPageData(state),
-    }),
-    mapDispatchToProps: {
-      changeTabFilter,
-    },
-    component: TabSelectorMenuImpl,
-  }
-);
+export const TabSelectorMenu = explicitConnect<{}, StateProps, DispatchProps>({
+  mapStateToProps: (state) => ({
+    tabFilter: getTabFilter(state),
+    sortedPageData: getProfileFilterSortedPageData(state),
+  }),
+  mapDispatchToProps: {
+    changeTabFilter,
+  },
+  component: TabSelectorMenuImpl,
+});

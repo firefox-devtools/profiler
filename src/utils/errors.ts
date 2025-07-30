@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 export type Attempt = {
-  count: number,
-  total: number,
+  count: number;
+  total: number;
 };
 
 export class TemporaryError extends Error {

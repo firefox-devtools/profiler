@@ -81,8 +81,9 @@ This project is in the process of being migrated from Flow to TypeScript. Type d
 **Migration Status**: Major milestone achieved - all 13/13 type definition files successfully converted to TypeScript ✅
 
 See **PLAN.md** for comprehensive migration guidance including:
+
 - Current progress status and achievements
-- Proven Flow→TypeScript conversion patterns  
+- Proven Flow→TypeScript conversion patterns
 - Next steps and actionable tasks
 - Lessons learned and best practices
 

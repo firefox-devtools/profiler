@@ -7,81 +7,81 @@ module.exports = function (api) {
         test: /\.jsx?$/,
         presets: [
           [
-            "@babel/preset-env",
+            '@babel/preset-env',
             {
-              useBuiltIns: "usage",
-              corejs: "3.9",
-              bugfixes: true
-            }
+              useBuiltIns: 'usage',
+              corejs: '3.9',
+              bugfixes: true,
+            },
           ],
           [
-            "@babel/preset-react",
+            '@babel/preset-react',
             {
-              useSpread: true
-            }
+              useSpread: true,
+            },
           ],
           [
-            "@babel/preset-flow",
+            '@babel/preset-flow',
             {
-              all: true
-            }
-          ]
-        ]
+              all: true,
+            },
+          ],
+        ],
       },
       {
         test: /\.tsx?$/,
         presets: [
           [
-            "@babel/preset-env",
+            '@babel/preset-env',
             {
-              useBuiltIns: "usage",
-              corejs: "3.9",
-              bugfixes: true
-            }
+              useBuiltIns: 'usage',
+              corejs: '3.9',
+              bugfixes: true,
+            },
           ],
           [
-            "@babel/preset-react",
+            '@babel/preset-react',
             {
-              useSpread: true
-            }
+              useSpread: true,
+            },
           ],
           [
-            "@babel/preset-typescript",
+            '@babel/preset-typescript',
             {
               isTSX: true,
-              allExtensions: true
-            }
-          ]
-        ]
-      }
+              allExtensions: true,
+            },
+          ],
+        ],
+      },
     ],
     plugins: [
       [
-        "@babel/plugin-transform-class-properties",
+        '@babel/plugin-transform-class-properties',
         {
-          loose: true
-        }
+          loose: true,
+        },
       ],
       [
-        "@babel/plugin-transform-private-methods",
+        '@babel/plugin-transform-private-methods',
         {
-          loose: true
-        }
+          loose: true,
+        },
       ],
       [
-        "@babel/plugin-transform-private-property-in-object",
+        '@babel/plugin-transform-private-property-in-object',
         {
-          loose: true
-        }
+          loose: true,
+        },
       ],
       [
-        "module-resolver",
+        'module-resolver',
         {
           alias: {
-            "firefox-profiler": "./src"
-          }
-        }
-      ]
-    ]
+            'firefox-profiler': './src',
+          },
+        },
+      ],
+    ],
   };
 };

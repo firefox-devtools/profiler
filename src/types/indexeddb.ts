@@ -27,11 +27,9 @@ export interface IDBFactory {
 export interface IDBRequest<V> extends EventTarget {
   result: V;
   error: Error;
-  source: (
-    | IDBIndex<any, any, V>
-    | IDBObjectStore<any, V>
-    | IDBCursor<any, any, V>
-  ) | null;
+  source:
+    | (IDBIndex<any, any, V> | IDBObjectStore<any, V> | IDBCursor<any, any, V>)
+    | null;
   transaction: IDBTransaction;
   readyState: 'pending' | 'done';
   onerror: (e: Event & { target: IDBRequest<V> }) => unknown;
@@ -50,8 +48,8 @@ export interface IDBDatabase extends EventTarget {
   createObjectStore<K, V>(
     name: string,
     options?: {
-      keyPath?: (string | string[]) | null,
-      autoIncrement?: boolean,
+      keyPath?: (string | string[]) | null;
+      autoIncrement?: boolean;
     }
   ): IDBObjectStore<K, V>;
   deleteObjectStore(name: string): void;
@@ -87,8 +85,8 @@ export interface IDBObjectStore<K, V> {
     indexName: string,
     keyPath: string | string[],
     optionalParameter?: {
-      unique?: boolean,
-      multiEntry?: boolean,
+      unique?: boolean;
+      multiEntry?: boolean;
     }
   ): IDBIndex<K, L, V>;
   count(keyRange?: K | IDBKeyRange<K>): IDBRequest<number>;

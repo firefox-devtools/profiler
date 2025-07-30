@@ -51,17 +51,17 @@ export type GeckoMarkerTuple = [
 ];
 
 type GeckoMarkerSchema = {
-  name: 0,
-  startTime: 1,
-  endTime: 2,
-  phase: 3,
-  category: 4,
-  data: 5,
+  name: 0;
+  startTime: 1;
+  endTime: 2;
+  phase: 3;
+  category: 4;
+  data: 5;
 };
 
 export type GeckoMarkers = {
-  schema: GeckoMarkerSchema,
-  data: Array<GeckoMarkerTuple>,
+  schema: GeckoMarkerSchema;
+  data: Array<GeckoMarkerTuple>;
 };
 
 export type ExternalMarkerTuple = [
@@ -74,15 +74,15 @@ export type ExternalMarkerTuple = [
 ];
 
 export type ExternalMarkers = {
-  schema: GeckoMarkerSchema,
-  data: Array<ExternalMarkerTuple>,
+  schema: GeckoMarkerSchema;
+  data: Array<ExternalMarkerTuple>;
 };
 
 export type ExternalMarkersData =
   | {
-      markerSchema: GeckoMetaMarkerSchema[],
-      categories: CategoryList,
-      markers: ExternalMarkers,
+      markerSchema: GeckoMetaMarkerSchema[];
+      categories: CategoryList;
+      markers: ExternalMarkers;
     }
   | {};
 
@@ -93,39 +93,39 @@ export type ExternalMarkersData =
  * information.
  */
 export type GeckoMarkerStruct = {
-  name: IndexIntoStringTable[],
-  startTime: Milliseconds[],
-  endTime: Milliseconds[],
-  phase: MarkerPhase[],
-  data: Array<MarkerPayload_Gecko | null>,
-  category: IndexIntoCategoryList[],
-  length: number,
+  name: IndexIntoStringTable[];
+  startTime: Milliseconds[];
+  endTime: Milliseconds[];
+  phase: MarkerPhase[];
+  data: Array<MarkerPayload_Gecko | null>;
+  category: IndexIntoCategoryList[];
+  length: number;
 };
 
 export type GeckoMarkerStack = {
-  name: 'SyncProfile',
-  registerTime: null,
-  unregisterTime: null,
-  processType: string,
-  tid: number,
-  pid: number,
-  markers: GeckoMarkers,
-  samples: GeckoSamples,
+  name: 'SyncProfile';
+  registerTime: null;
+  unregisterTime: null;
+  processType: string;
+  tid: number;
+  pid: number;
+  markers: GeckoMarkers;
+  samples: GeckoSamples;
 };
 
 export type GeckoSamples = {
   schema:
     | {
-        stack: 0,
-        time: 1,
-        responsiveness: 2,
+        stack: 0;
+        time: 1;
+        responsiveness: 2;
       }
     | {
-        stack: 0,
-        time: 1,
-        eventDelay: 2,
-        threadCPUDelta?: 3,
-      },
+        stack: 0;
+        time: 1;
+        eventDelay: 2;
+        threadCPUDelta?: 3;
+      };
   data: Array<
     | [
         null | IndexIntoGeckoStackTable,
@@ -142,37 +142,37 @@ export type GeckoSamples = {
         Milliseconds,
         // CPU usage value of the current thread.
         // It's present only when the CPU Utilization feature is enabled in Firefox.
-        number | null
+        number | null,
       ]
-  >,
+  >;
 };
 
 // Older profiles have samples with `responsiveness` values.
 export type GeckoSampleStructWithResponsiveness = {
-  stack: Array<null | IndexIntoGeckoStackTable>,
-  time: Milliseconds[],
-  responsiveness: Array<Milliseconds | null>,
+  stack: Array<null | IndexIntoGeckoStackTable>;
+  time: Milliseconds[];
+  responsiveness: Array<Milliseconds | null>;
   // CPU usage value of the current thread. Its values are null only if the back-end
   // fails to get the CPU usage from operating system.
   // It's landed in Firefox 86, and it is optional because older profile
   // versions may not have it or that feature could be disabled. No upgrader was
   // written for this change because it's a completely new data source.
-  threadCPUDelta?: Array<number | null>,
-  length: number,
+  threadCPUDelta?: Array<number | null>;
+  length: number;
 };
 
 // Newer profiles have the improved version of `responsiveness`, `eventDelay`.
 export type GeckoSampleStructWithEventDelay = {
-  stack: Array<null | IndexIntoGeckoStackTable>,
-  time: Milliseconds[],
-  eventDelay: Array<Milliseconds | null>,
+  stack: Array<null | IndexIntoGeckoStackTable>;
+  time: Milliseconds[];
+  eventDelay: Array<Milliseconds | null>;
   // CPU usage value of the current thread. Its values are null only if the back-end
   // fails to get the CPU usage from operating system.
   // It's landed in Firefox 86, and it is optional because older profile
   // versions may not have it or that feature could be disabled. No upgrader was
   // written for this change because it's a completely new data source.
-  threadCPUDelta?: Array<number | null>,
-  length: number,
+  threadCPUDelta?: Array<number | null>;
+  length: number;
 };
 
 export type GeckoSampleStruct =
@@ -181,15 +181,15 @@ export type GeckoSampleStruct =
 
 export type GeckoFrameTable = {
   schema: {
-    location: 0,
-    relevantForJS: 1,
-    innerWindowID: 2,
-    implementation: 3,
-    line: 4,
-    column: 5,
-    category: 6,
-    subcategory: 7,
-  },
+    location: 0;
+    relevantForJS: 1;
+    innerWindowID: 2;
+    implementation: 3;
+    line: 4;
+    column: 5;
+    category: 6;
+    subcategory: 7;
+  };
   data: Array<
     [
       // index into stringTable, points to strings like:
@@ -218,172 +218,172 @@ export type GeckoFrameTable = {
       // index into profile.meta.categories
       null | number,
       // index into profile.meta.categories[category].subcategories. Always non-null if category is non-null.
-      null | number
+      null | number,
     ]
-  >,
+  >;
 };
 
 export type IndexIntoGeckoThreadStringTable = number;
 
 export type GeckoFrameStruct = {
-  location: IndexIntoGeckoThreadStringTable[],
-  relevantForJS: Array<boolean>,
-  implementation: Array<null | IndexIntoGeckoThreadStringTable>,
-  line: Array<null | number>,
-  column: Array<null | number>,
-  category: Array<null | number>,
-  subcategory: Array<null | number>,
-  innerWindowID: Array<null | number>,
-  length: number,
+  location: IndexIntoGeckoThreadStringTable[];
+  relevantForJS: Array<boolean>;
+  implementation: Array<null | IndexIntoGeckoThreadStringTable>;
+  line: Array<null | number>;
+  column: Array<null | number>;
+  category: Array<null | number>;
+  subcategory: Array<null | number>;
+  innerWindowID: Array<null | number>;
+  length: number;
 };
 
 export type GeckoStackTable = {
   schema: {
-    prefix: 0,
-    frame: 1,
-  },
-  data: Array<[IndexIntoGeckoStackTable | null, IndexIntoGeckoFrameTable]>,
+    prefix: 0;
+    frame: 1;
+  };
+  data: Array<[IndexIntoGeckoStackTable | null, IndexIntoGeckoFrameTable]>;
 };
 
 export type GeckoStackStruct = {
-  frame: IndexIntoGeckoFrameTable[],
-  prefix: Array<IndexIntoGeckoStackTable | null>,
-  length: number,
+  frame: IndexIntoGeckoFrameTable[];
+  prefix: Array<IndexIntoGeckoStackTable | null>;
+  length: number;
 };
 
 export type GeckoThread = {
-  name: string,
+  name: string;
   // The eTLD+1 of the isolated content process if provided by the back-end.
   // It will be undefined if:
   // - Fission is not enabled.
   // - It's not an isolated content process.
   // - It's a profile from an older Firefox which doesn't include this field (introduced in Firefox 80).
-  'eTLD+1'?: string,
+  'eTLD+1'?: string;
   // If present and true, this thread was launched for a private browsing
   // session only.
   // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
   // doesn't have any non-origin attribute (this happens in non-Fission
   // especially but also in Fission for normal threads).
-  isPrivateBrowsing?: boolean,
+  isPrivateBrowsing?: boolean;
   // If present, the number represents the container this thread was loaded in.
   // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
   // doesn't have any non-origin attribute (this happens in non-Fission
   // especially but also in Fission for normal threads).
-  userContextId?: number,
-  registerTime: number,
-  processType: string,
-  processName?: string,
-  unregisterTime: number | null,
-  tid: number,
-  pid: number,
-  markers: GeckoMarkers,
-  samples: GeckoSamples,
-  frameTable: GeckoFrameTable,
-  stackTable: GeckoStackTable,
-  stringTable: string[],
-  jsTracerEvents?: JsTracerTable,
+  userContextId?: number;
+  registerTime: number;
+  processType: string;
+  processName?: string;
+  unregisterTime: number | null;
+  tid: number;
+  pid: number;
+  markers: GeckoMarkers;
+  samples: GeckoSamples;
+  frameTable: GeckoFrameTable;
+  stackTable: GeckoStackTable;
+  stringTable: string[];
+  jsTracerEvents?: JsTracerTable;
 };
 
 export type GeckoExtensionMeta = {
   schema: {
-    id: 0,
-    name: 1,
-    baseURL: 2,
-  },
-  data: Array<[string, string, string]>,
+    id: 0;
+    name: 1;
+    baseURL: 2;
+  };
+  data: Array<[string, string, string]>;
 };
 
 export type GeckoCounter = {
-  name: string,
-  category: string,
-  description: string,
+  name: string;
+  category: string;
+  description: string;
   samples: {
     schema: {
-      time: 0,
-      count: 1,
-      number: 2,
-    },
-    data: readonly [number, number, number][],
-  },
+      time: 0;
+      count: 1;
+      number: 2;
+    };
+    data: readonly [number, number, number][];
+  };
 };
 
 export type GeckoCounterSamplesStruct = {
-  time: Milliseconds[],
-  count: number[],
-  number?: number[],
-  length: number,
+  time: Milliseconds[];
+  count: number[];
+  number?: number[];
+  length: number;
 };
 
 export type GeckoProfilerOverhead = {
   samples: {
     schema: {
-      time: 0,
-      locking: 1,
-      expiredMarkerCleaning: 2,
-      counters: 3,
-      threads: 4,
-    },
+      time: 0;
+      locking: 1;
+      expiredMarkerCleaning: 2;
+      counters: 3;
+      threads: 4;
+    };
     data: Array<
       [Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds]
-    >,
-  },
+    >;
+  };
   // There is no statistics object if there is no sample.
-  statistics?: ProfilerOverheadStats,
+  statistics?: ProfilerOverheadStats;
 };
 
 export type GeckoDynamicFieldSchemaData = {
   // The property key of the marker data property that carries the field value.
-  key: string,
+  key: string;
 
   // An optional user-facing label.
   // If no label is provided, the key is displayed instead.
-  label?: string,
+  label?: string;
 
   // The format / type of this field. This affects how the field's value is
   // displayed and determines which types of values are accepted for this field.
-  format: MarkerFormatType,
+  format: MarkerFormatType;
 
   // If present and set to true, the marker search string will be matched
   // against the values of this field when determining which markers match the
   // search.
-  searchable?: boolean,
+  searchable?: boolean;
 
   // If present and set to true, this field will not be shown in the list
   // of fields in the tooltip or in the sidebar. Such fields can still be
   // used inside labels and they can be searchable.
-  hidden?: boolean,
+  hidden?: boolean;
 };
 
 export type GeckoStaticFieldSchemaData = {
   // This type is a static bit of text that will be displayed
-  label: string,
-  value: string,
+  label: string;
+  value: string;
 };
 
 export type GeckoMetaMarkerSchema = {
   // The unique identifier for this marker.
-  name: string, // e.g. "CC"
+  name: string; // e.g. "CC"
 
   // The label of how this marker should be displayed in the UI.
   // If none is provided, then the name is used.
-  tooltipLabel?: string, // e.g. "Cycle Collect"
+  tooltipLabel?: string; // e.g. "Cycle Collect"
 
   // This is how the marker shows up in the Marker Table description.
   // If none is provided, then the name is used.
-  tableLabel?: string, // e.g. "{marker.data.eventType} – DOMEvent"
+  tableLabel?: string; // e.g. "{marker.data.eventType} – DOMEvent"
 
   // This is how the marker shows up in the Marker Chart, where it is drawn
   // on the screen as a bar.
   // If none is provided, then the name is used.
-  chartLabel?: string,
+  chartLabel?: string;
 
   // The locations to display
-  display: MarkerDisplayLocation[],
+  display: MarkerDisplayLocation[];
 
-  data: Array<GeckoDynamicFieldSchemaData | GeckoStaticFieldSchemaData>,
+  data: Array<GeckoDynamicFieldSchemaData | GeckoStaticFieldSchemaData>;
 
   // if present, give the marker its own local track
-  graphs?: Array<MarkerGraph>,
+  graphs?: Array<MarkerGraph>;
 
   // If set to true, markers of this type are assumed to be well-nested with all
   // other stack-based markers on the same thread. Stack-based markers may
@@ -394,7 +394,7 @@ export type GeckoMetaMarkerSchema = {
   // well-nested means that, for all marker-defined timestamp intervals A and B,
   // A either fully encompasses B or is fully encompassed by B - there is no
   // partial overlap.
-  isStackBased?: boolean,
+  isStackBased?: boolean;
 };
 
 /* This meta object is used in subprocesses profiles.
@@ -402,16 +402,16 @@ export type GeckoMetaMarkerSchema = {
  * as source of truth. (Please update the link whenever there's a new property).
  * */
 export type GeckoProfileShortMeta = {
-  version: number,
+  version: number;
   // When the main process started. Timestamp expressed in milliseconds since
   // midnight January 1, 1970 GMT.
-  startTime: Milliseconds,
-  startTimeAsClockMonotonicNanosecondsSinceBoot?: number,
-  startTimeAsMachAbsoluteTimeNanoseconds?: number,
-  startTimeAsQueryPerformanceCounterValue?: number,
-  shutdownTime: Milliseconds | null,
-  categories: CategoryList,
-  markerSchema: GeckoMetaMarkerSchema[],
+  startTime: Milliseconds;
+  startTimeAsClockMonotonicNanosecondsSinceBoot?: number;
+  startTimeAsMachAbsoluteTimeNanoseconds?: number;
+  startTimeAsQueryPerformanceCounterValue?: number;
+  shutdownTime: Milliseconds | null;
+  categories: CategoryList;
+  markerSchema: GeckoMetaMarkerSchema[];
 };
 
 /* This meta object is used on the top level profile object.
@@ -420,20 +420,20 @@ export type GeckoProfileShortMeta = {
  * */
 export type GeckoProfileFullMeta = GeckoProfileShortMeta & {
   // When the recording started (in milliseconds after startTime).
-  profilingStartTime?: Milliseconds,
+  profilingStartTime?: Milliseconds;
   // When the recording ended (in milliseconds after startTime).
-  profilingEndTime?: Milliseconds,
-  interval: Milliseconds,
-  stackwalk: 0 | 1,
+  profilingEndTime?: Milliseconds;
+  interval: Milliseconds;
+  stackwalk: 0 | 1;
   // This value represents a boolean, but for some reason is written out as an int
   // value as the previous field.
   // It's 0 for opt builds, and 1 for debug builds.
   // This property was added to Firefox Profiler a long time after it was added to
   // Firefox, that's why we don't need to make it optional for gecko profiles.
-  debug: 0 | 1,
-  gcpoison: 0 | 1,
-  asyncstack: 0 | 1,
-  processType: number,
+  debug: 0 | 1;
+  gcpoison: 0 | 1;
+  asyncstack: 0 | 1;
+  processType: number;
   // The Update channel for this build of the application.
   // This property is landed in Firefox 67, and is optional because older
   // Firefox versions may not have them. No upgrader was necessary.
@@ -445,53 +445,53 @@ export type GeckoProfileFullMeta = GeckoProfileShortMeta & {
     | 'beta'
     | 'release'
     | 'esr' // Extended Support Release channel
-    | string,
+    | string;
   // -- platform information -- This can be absent in some very rare situations.
-  platform?: string,
-  oscpu?: string,
-  misc?: string,
+  platform?: string;
+  oscpu?: string;
+  misc?: string;
   // -- Runtime -- This can be absent in some very rare situations.
-  abi?: string,
-  toolkit?: string,
-  product?: string,
+  abi?: string;
+  toolkit?: string;
+  product?: string;
   // -- appInfo -- This can be absent in some very rare situations.
   // The appBuildID, sourceURL, physicalCPUs and logicalCPUs properties landed
   // in Firefox 62, and are only optional because older processed profile
   // versions may not have them. No upgrader was written for this change.
-  appBuildID?: string,
-  sourceURL?: string,
+  appBuildID?: string;
+  sourceURL?: string;
   // -- system info -- This can be absent in some very rare situations.
-  physicalCPUs?: number,
-  logicalCPUs?: number,
-  CPUName?: string,
+  physicalCPUs?: number;
+  logicalCPUs?: number;
+  CPUName?: string;
   // -- extensions --
   // The extensions property landed in Firefox 60, and is only optional because
   // older profile versions may not have it. No upgrader was written for this change.
-  extensions?: GeckoExtensionMeta,
+  extensions?: GeckoExtensionMeta;
   // -- extra properties added by the frontend --
   // This boolean indicates whether this gecko profile includes already
   // symbolicated frames. This will be missing for profiles coming from Gecko
   // (which indicates that they'll need to be symbolicated) but may be specified
   // for profiles imported from other formats (eg: linux perf).
-  presymbolicated?: boolean,
+  presymbolicated?: boolean;
   // Visual metrics contains additional performance metrics such as Speed Index,
   // Perceptual Speed Index, and ContentfulSpeedIndex. This is optional because only
   // profiles generated by browsertime will have this property. Source code for
   // browsertime can be found at https://github.com/sitespeedio/browsertime.
-  visualMetrics?: VisualMetrics,
+  visualMetrics?: VisualMetrics;
   // Optional because older Firefox versions may not have the data.
-  configuration?: ProfilerConfiguration,
+  configuration?: ProfilerConfiguration;
   // Units of samples table values.
   // The sampleUnits property landed in Firefox 86, and is only optional because
   // older profile versions may not have it. No upgrader was written for this change.
-  sampleUnits?: SampleUnits,
+  sampleUnits?: SampleUnits;
   // Information of the device that profile is captured from.
   // Currently it's only present for Android devices and it includes brand and
   // model names of that device.
   // It's optional because profiles from non-Android devices and from older
   // Firefox versions may not have it.
   // This property landed in Firefox 88.
-  device?: string,
+  device?: string;
 };
 
 /**
@@ -512,22 +512,22 @@ export type GeckoProfileFullMeta = GeckoProfileShortMeta & {
 export type LibMapping = {
   // The range in the address space of the profiled process that the mappings for
   // this shared library occupied.
-  start: MemoryOffset,
-  end: MemoryOffset,
+  start: MemoryOffset;
+  end: MemoryOffset;
 
   // The offset relative to the library's base address where the first mapping starts.
   // libBaseAddress + lib.offset = lib.start
   // When instruction addresses are given as library-relative offsets, they are
   // relative to the library's baseAddress.
-  offset: Bytes,
+  offset: Bytes;
 
-  arch: string, // e.g. "x86_64"
-  name: string, // e.g. "firefox"
-  path: string, // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
-  debugName: string, // e.g. "firefox", or "firefox.pdb" on Windows
-  debugPath: string, // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
-  breakpadId: string, // e.g. "E54D3AF274383256B9F6144F83F3F7510"
-  codeId?: string, // e.g. "6132B96B70fd000"
+  arch: string; // e.g. "x86_64"
+  name: string; // e.g. "firefox"
+  path: string; // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
+  debugName: string; // e.g. "firefox", or "firefox.pdb" on Windows
+  debugPath: string; // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
+  breakpadId: string; // e.g. "E54D3AF274383256B9F6144F83F3F7510"
+  codeId?: string; // e.g. "6132B96B70fd000"
 };
 
 /**
@@ -536,7 +536,7 @@ export type LibMapping = {
  * This type might also change in the future without warning.
  */
 export type ProcessProfilingLog = {
-  [log: string]: unknown,
+  [log: string]: unknown;
 };
 
 /**
@@ -545,24 +545,24 @@ export type ProcessProfilingLog = {
  * This type might also change in the future without warning.
  */
 export type ProfilingLog = {
-  [pid: number]: ProcessProfilingLog,
+  [pid: number]: ProcessProfilingLog;
 };
 
 export type GeckoProfileWithMeta<Meta> = {
-  counters?: GeckoCounter[],
+  counters?: GeckoCounter[];
   // Optional because older Firefox versions may not have that data and
   // no upgrader was necessary.
-  profilerOverhead?: GeckoProfilerOverhead,
-  meta: Meta,
-  libs: LibMapping[],
-  pages?: PageList,
-  threads: GeckoThread[],
-  pausedRanges: PausedRange[],
-  processes: GeckoSubprocessProfile[],
-  jsTracerDictionary?: string[],
+  profilerOverhead?: GeckoProfilerOverhead;
+  meta: Meta;
+  libs: LibMapping[];
+  pages?: PageList;
+  threads: GeckoThread[];
+  pausedRanges: PausedRange[];
+  processes: GeckoSubprocessProfile[];
+  jsTracerDictionary?: string[];
   // Logs are optional because older Firefox versions may not have that data.
-  profilingLog?: ProfilingLog,
-  profileGatheringLog?: ProfilingLog,
+  profilingLog?: ProfilingLog;
+  profileGatheringLog?: ProfilingLog;
 };
 
 export type GeckoSubprocessProfile =

@@ -92,7 +92,17 @@
  */
 
 export function bisectionRight(
-  array: number[] | Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array,
+  array:
+    | number[]
+    | Int8Array
+    | Uint8Array
+    | Uint8ClampedArray
+    | Int16Array
+    | Uint16Array
+    | Int32Array
+    | Uint32Array
+    | Float32Array
+    | Float64Array,
   x: number,
   low?: number,
   high?: number
@@ -182,7 +192,17 @@ export function bisectionRightByStrKey<T>(
 }
 
 export function bisectionLeft(
-  array: number[] | Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array,
+  array:
+    | number[]
+    | Int8Array
+    | Uint8Array
+    | Uint8ClampedArray
+    | Int16Array
+    | Uint16Array
+    | Int32Array
+    | Uint32Array
+    | Float32Array
+    | Float64Array,
   x: number,
   low?: number,
   high?: number

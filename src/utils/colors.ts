@@ -74,10 +74,10 @@ export const INK_80 = '#202340';
 export const INK_90 = '#0f1126';
 
 type ColorStyles = {
-  readonly selectedFillStyle: string,
-  readonly unselectedFillStyle: string,
-  readonly selectedTextColor: string,
-  readonly gravity: number,
+  readonly selectedFillStyle: string;
+  readonly unselectedFillStyle: string;
+  readonly selectedTextColor: string;
+  readonly gravity: number;
 };
 
 const GRAY_STYLE = {

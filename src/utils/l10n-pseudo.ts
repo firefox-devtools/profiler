@@ -58,7 +58,7 @@ const FLIPPED_MAP = {
 };
 
 function transformString(
-  map: { caps: number[], small: number[] },
+  map: { caps: number[]; small: number[] },
   elongate = false,
   prefix = '',
   postfix = '',

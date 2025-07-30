@@ -451,10 +451,7 @@ type TreeViewProps<DisplayData> = {
   +contextMenu?: React.Element<any>,
   +contextMenuId?: string,
   +maxNodeDepth: number,
-  +onSelectionChange: (
-    NodeIndex,
-    { source: 'keyboard' | 'pointer' }
-  ) => mixed,
+  +onSelectionChange: (NodeIndex, { source: 'keyboard' | 'pointer' }) => mixed,
   +onRightClickSelection?: (NodeIndex) => mixed,
   +onEnterKey?: (NodeIndex) => mixed,
   +onDoubleClick?: (NodeIndex) => mixed,

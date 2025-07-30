@@ -114,23 +114,21 @@ class SourceCodeFetcherImpl extends React.PureComponent<Props> {
   }
 }
 
-export const SourceCodeFetcher = explicitConnect<
-  {},
-  StateProps,
-  DispatchProps,
->({
-  mapStateToProps: (state) => ({
-    sourceViewFile: getSourceViewFile(state),
-    sourceViewCode: getSourceViewCode(state),
-    symbolServerUrl: getSymbolServerUrl(state),
-    profile: getProfileOrNull(state),
-    browserConnection: getBrowserConnection(state),
-  }),
-  mapDispatchToProps: {
-    beginLoadingSourceCodeFromUrl,
-    beginLoadingSourceCodeFromBrowserConnection,
-    finishLoadingSourceCode,
-    failLoadingSourceCode,
-  },
-  component: SourceCodeFetcherImpl,
-});
+export const SourceCodeFetcher = explicitConnect<{}, StateProps, DispatchProps>(
+  {
+    mapStateToProps: (state) => ({
+      sourceViewFile: getSourceViewFile(state),
+      sourceViewCode: getSourceViewCode(state),
+      symbolServerUrl: getSymbolServerUrl(state),
+      profile: getProfileOrNull(state),
+      browserConnection: getBrowserConnection(state),
+    }),
+    mapDispatchToProps: {
+      beginLoadingSourceCodeFromUrl,
+      beginLoadingSourceCodeFromBrowserConnection,
+      finishLoadingSourceCode,
+      failLoadingSourceCode,
+    },
+    component: SourceCodeFetcherImpl,
+  }
+);

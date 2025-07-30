@@ -40,11 +40,9 @@ class NetworkChartEmptyReasonsImpl extends PureComponent<Props> {
   }
 }
 
-export const NetworkChartEmptyReasons = explicitConnect<{}, StateProps, {}>(
-  {
-    mapStateToProps: (state: State) => ({
-      threadName: selectedThreadSelectors.getFriendlyThreadName(state),
-    }),
-    component: NetworkChartEmptyReasonsImpl,
-  }
-);
+export const NetworkChartEmptyReasons = explicitConnect<{}, StateProps, {}>({
+  mapStateToProps: (state: State) => ({
+    threadName: selectedThreadSelectors.getFriendlyThreadName(state),
+  }),
+  component: NetworkChartEmptyReasonsImpl,
+});

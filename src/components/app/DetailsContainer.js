@@ -50,11 +50,7 @@ function DetailsContainerImpl({
   );
 }
 
-export const DetailsContainer = explicitConnect<
-  {},
-  StateProps,
-  DispatchProps,
->({
+export const DetailsContainer = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     selectedTab: getSelectedTab(state),
     isSidebarOpen: getIsSidebarOpen(state),

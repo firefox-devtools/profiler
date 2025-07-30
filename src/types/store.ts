@@ -67,7 +67,10 @@ export type GetState = () => State;
 /**
  * A thunk action
  */
-export type ThunkAction<Returns> = (dispatch: Dispatch, getState: GetState) => Returns;
+export type ThunkAction<Returns> = (
+  dispatch: Dispatch,
+  getState: GetState
+) => Returns;
 
 /**
  * The `dispatch` function can accept either a plain action or a thunk action.
