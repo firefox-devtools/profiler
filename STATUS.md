@@ -47,7 +47,7 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 
 **🔄 Phase 3 - File-by-File Migration** (IN PROGRESS)
 - [ ] 0% - Core utility files (.js → .ts)
-- [x] 40% - Type definition files (.js → .ts) - units.ts, utils.ts, store.ts, index.ts, actions.ts, state.ts converted
+- [x] 100% - Type definition files (.js → .ts) - ALL 13 files successfully converted ✅
 - [ ] 0% - React components (.js → .tsx)
 - [ ] 0% - Test files migration
 
@@ -167,11 +167,11 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 - **Core Foundation**: ✅ units.ts, utils.ts, store.ts, index.ts, actions.ts, state.ts
 - **Complex Types**: ✅ profile.ts, profile-derived.ts 
 - **New Conversions**: ✅ transforms.ts, symbolication.ts, indexeddb.ts
-- **Total Converted**: 11/13 type definition files (85% complete)
+- **Total Converted**: 13/13 type definition files (100% complete ✅)
 
-### ⏳ Remaining File Conversions
-- **markers.js**: ⏳ Not started (complex, 890 lines)
-- **gecko-profile.js**: ⏳ Not started (complex, 572 lines)
+### ✅ Recently Completed (July 30, 2025)
+- **markers.ts**: ✅ Successfully converted (890 lines, complex marker type definitions)
+- **gecko-profile.ts**: ✅ Successfully converted (572 lines, Gecko profile format types)
 
 ## Next Steps (Current - Next 1-2 weeks)
 
@@ -182,12 +182,12 @@ This document tracks the current status of the Flow to TypeScript migration. It 
    - ✅ **Verified all converted files compile successfully** (11/11 files)
    - ✅ Test that all type imports work correctly from fixed files
 
-2. **Complete Remaining Type Definitions** (IN PROGRESS):
-   - ⏳ **Convert markers.js** → markers.ts (890 lines, complex marker types)
-   - ⏳ **Convert gecko-profile.js** → gecko-profile.ts (572 lines, Gecko profile format)
-   - Test full type definition compilation after each conversion
+2. **✅ COMPLETED: All Type Definition Files Converted**:
+   - ✅ **Converted markers.js** → markers.ts (890 lines, complex marker types)
+   - ✅ **Converted gecko-profile.js** → gecko-profile.ts (572 lines, Gecko profile format)
+   - ✅ All 13/13 type files in src/types/ successfully converted and compiling
 
-2. **Move to Core Utilities**:
+3. **Next: Move to Core Utilities**:
    - Convert `src/utils/*.js` → `.ts` (builds on type foundation)
    - Start with simple utility files without complex dependencies
    - Validate import/export patterns work correctly
@@ -220,4 +220,5 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 ---
 
 **Last Updated**: July 30, 2025  
-**Next Status Update**: After completing all type definition files in src/types/
+**Major Milestone**: All type definition files (13/13) successfully converted to TypeScript ✅
+**Next Status Update**: After beginning core utilities conversion in src/utils/
