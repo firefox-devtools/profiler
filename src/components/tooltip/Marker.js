@@ -77,28 +77,28 @@ function _maybeFormatDuration(
 }
 
 type OwnProps = {
-  readonly markerIndex: MarkerIndex,
-  readonly marker: Marker,
-  readonly threadsKey: ThreadsKey,
+  +markerIndex: MarkerIndex,
+  +marker: Marker,
+  +threadsKey: ThreadsKey,
   +className?: string,
   // In tooltips it can be awkward for really long and tall things to force
   // the layout to be huge. This option when set to true will restrict the
   // height of things like stacks, and the width of long things like URLs.
-  readonly restrictHeightWidth: boolean,
+  +restrictHeightWidth: boolean,
 };
 
 type StateProps = {
   +threadName?: string,
-  readonly thread: Thread,
-  readonly implementationFilter: ImplementationFilter,
-  readonly pages: PageList | null,
-  readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-  readonly zeroAt: Milliseconds,
-  readonly threadIdToNameMap: Map<Tid, string>,
-  readonly processIdToNameMap: Map<Pid, string>,
-  readonly markerSchemaByName: MarkerSchemaByName,
-  readonly getMarkerLabel: (MarkerIndex) => string,
-  readonly categories: CategoryList,
+  +thread: Thread,
+  +implementationFilter: ImplementationFilter,
+  +pages: PageList | null,
+  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
+  +zeroAt: Milliseconds,
+  +threadIdToNameMap: Map<Tid, string>,
+  +processIdToNameMap: Map<Pid, string>,
+  +markerSchemaByName: MarkerSchemaByName,
+  +getMarkerLabel: (MarkerIndex) => string,
+  +categories: CategoryList,
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, {}>;

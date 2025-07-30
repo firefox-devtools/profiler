@@ -42,38 +42,38 @@ import type {
 import type { WrapFunctionInDispatch } from 'firefox-profiler/utils/connect';
 
 type MarkerDrawingInformation = {
-  readonly x: CssPixels,
-  readonly y: CssPixels,
-  readonly w: CssPixels,
-  readonly h: CssPixels,
-  readonly isInstantMarker: boolean,
-  readonly markerIndex: MarkerIndex,
+  +x: CssPixels,
+  +y: CssPixels,
+  +w: CssPixels,
+  +h: CssPixels,
+  +isInstantMarker: boolean,
+  +markerIndex: MarkerIndex,
 };
 
 type OwnProps = {
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
-  readonly markerTimingAndBuckets: MarkerTimingAndBuckets,
-  readonly rowHeight: CssPixels,
-  readonly getMarker: (MarkerIndex) => Marker,
-  readonly getMarkerLabel: (MarkerIndex) => string,
-  readonly markerListLength: number,
-  readonly threadsKey: ThreadsKey,
-  readonly updatePreviewSelection: WrapFunctionInDispatch<UpdatePreviewSelection>,
-  readonly changeMouseTimePosition: ChangeMouseTimePosition,
-  readonly changeSelectedMarker: ChangeSelectedMarker,
-  readonly changeRightClickedMarker: ChangeRightClickedMarker,
-  readonly marginLeft: CssPixels,
-  readonly marginRight: CssPixels,
-  readonly selectedMarkerIndex: MarkerIndex | null,
-  readonly rightClickedMarkerIndex: MarkerIndex | null,
-  readonly shouldDisplayTooltips: () => boolean,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +markerTimingAndBuckets: MarkerTimingAndBuckets,
+  +rowHeight: CssPixels,
+  +getMarker: (MarkerIndex) => Marker,
+  +getMarkerLabel: (MarkerIndex) => string,
+  +markerListLength: number,
+  +threadsKey: ThreadsKey,
+  +updatePreviewSelection: WrapFunctionInDispatch<UpdatePreviewSelection>,
+  +changeMouseTimePosition: ChangeMouseTimePosition,
+  +changeSelectedMarker: ChangeSelectedMarker,
+  +changeRightClickedMarker: ChangeRightClickedMarker,
+  +marginLeft: CssPixels,
+  +marginRight: CssPixels,
+  +selectedMarkerIndex: MarkerIndex | null,
+  +rightClickedMarkerIndex: MarkerIndex | null,
+  +shouldDisplayTooltips: () => boolean,
 };
 
 type Props = {
   ...OwnProps,
   // Bring in the viewport props from the higher order Viewport component.
-  readonly viewport: Viewport,
+  +viewport: Viewport,
 };
 
 const TEXT_OFFSET_TOP = 11;

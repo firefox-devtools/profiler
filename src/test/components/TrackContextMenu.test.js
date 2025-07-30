@@ -57,7 +57,7 @@ describe('timeline/TrackContextMenu', function () {
   const clickTracksWithExpectation = async (
     matchers: Array<string | RegExp>,
     expectations: {
-      readonly checked: boolean,
+      +checked: boolean,
     }
   ) => {
     const elements = matchers.map((matcher) =>

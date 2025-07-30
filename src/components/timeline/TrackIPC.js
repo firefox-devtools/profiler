@@ -18,12 +18,12 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './TrackIPC.css';
 
 type OwnProps = {
-  readonly threadIndex: ThreadIndex,
+  +threadIndex: ThreadIndex,
 };
 
 type StateProps = {
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
 };
 
 type DispatchProps = {

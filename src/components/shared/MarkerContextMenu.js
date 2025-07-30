@@ -48,25 +48,25 @@ import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per
 import './MarkerContextMenu.css';
 
 type OwnProps = {
-  readonly rightClickedMarkerInfo: MarkerReference,
+  +rightClickedMarkerInfo: MarkerReference,
 };
 
 type StateProps = {
-  readonly marker: Marker,
-  readonly markerIndex: MarkerIndex,
-  readonly previewSelection: PreviewSelection,
-  readonly committedRange: StartEndRange,
-  readonly thread: Thread | null,
-  readonly implementationFilter: ImplementationFilter,
-  readonly getMarkerLabelToCopy: (MarkerIndex) => string,
-  readonly profiledThreadIds: Set<Tid>,
+  +marker: Marker,
+  +markerIndex: MarkerIndex,
+  +previewSelection: PreviewSelection,
+  +committedRange: StartEndRange,
+  +thread: Thread | null,
+  +implementationFilter: ImplementationFilter,
+  +getMarkerLabelToCopy: (MarkerIndex) => string,
+  +profiledThreadIds: Set<Tid>,
   innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
 };
 
 type DispatchProps = {
-  readonly updatePreviewSelection: typeof updatePreviewSelection,
-  readonly setContextMenuVisibility: typeof setContextMenuVisibility,
-  readonly selectTrackFromTid: typeof selectTrackFromTid,
+  +updatePreviewSelection: typeof updatePreviewSelection,
+  +setContextMenuVisibility: typeof setContextMenuVisibility,
+  +selectTrackFromTid: typeof selectTrackFromTid,
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -536,7 +536,7 @@ const MarkerContextMenu = explicitConnect<OwnProps, StateProps, DispatchProps>({
 });
 
 type MaybeProps = {
-  readonly rightClickedMarkerInfo: MarkerReference | null,
+  +rightClickedMarkerInfo: MarkerReference | null,
 };
 
 /**

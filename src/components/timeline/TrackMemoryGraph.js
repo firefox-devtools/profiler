@@ -50,15 +50,15 @@ import './TrackMemory.css';
  * When adding properties to these props, please consider the comment above the component.
  */
 type CanvasProps = {
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
-  readonly counter: Counter,
-  readonly counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
-  readonly accumulatedSamples: AccumulatedCounterSamples,
-  readonly interval: Milliseconds,
-  readonly width: CssPixels,
-  readonly height: CssPixels,
-  readonly lineWidth: CssPixels,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +counter: Counter,
+  +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
+  +accumulatedSamples: AccumulatedCounterSamples,
+  +interval: Milliseconds,
+  +width: CssPixels,
+  +height: CssPixels,
+  +lineWidth: CssPixels,
 };
 
 /**
@@ -243,21 +243,21 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
 }
 
 type OwnProps = {
-  readonly counterIndex: CounterIndex,
-  readonly lineWidth: CssPixels,
-  readonly graphHeight: CssPixels,
+  +counterIndex: CounterIndex,
+  +lineWidth: CssPixels,
+  +graphHeight: CssPixels,
 };
 
 type StateProps = {
-  readonly threadIndex: ThreadIndex,
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
-  readonly counter: Counter,
-  readonly counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
-  readonly accumulatedSamples: AccumulatedCounterSamples,
-  readonly interval: Milliseconds,
-  readonly filteredThread: Thread,
-  readonly unfilteredSamplesRange: StartEndRange | null,
+  +threadIndex: ThreadIndex,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +counter: Counter,
+  +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
+  +accumulatedSamples: AccumulatedCounterSamples,
+  +interval: Milliseconds,
+  +filteredThread: Thread,
+  +unfilteredSamplesRange: StartEndRange | null,
 };
 
 type DispatchProps = {};

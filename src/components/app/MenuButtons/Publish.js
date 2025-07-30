@@ -53,25 +53,25 @@ type OwnProps = {
 };
 
 type StateProps = {
-  readonly profile: Profile,
-  readonly rootRange: StartEndRange,
-  readonly shouldShowPreferenceOption: boolean,
-  readonly profileContainsPrivateBrowsingInformation: boolean,
-  readonly checkedSharingOptions: CheckedSharingOptions,
-  readonly sanitizedProfileDataPromise: Promise<Uint8Array>,
-  readonly downloadFileName: string,
-  readonly uploadPhase: UploadPhase,
-  readonly uploadProgress: number,
-  readonly uploadProgressString: string,
-  readonly shouldSanitizeByDefault: boolean,
-  readonly uploadError: mixed,
-  readonly abortFunction: () => mixed,
+  +profile: Profile,
+  +rootRange: StartEndRange,
+  +shouldShowPreferenceOption: boolean,
+  +profileContainsPrivateBrowsingInformation: boolean,
+  +checkedSharingOptions: CheckedSharingOptions,
+  +sanitizedProfileDataPromise: Promise<Uint8Array>,
+  +downloadFileName: string,
+  +uploadPhase: UploadPhase,
+  +uploadProgress: number,
+  +uploadProgressString: string,
+  +shouldSanitizeByDefault: boolean,
+  +uploadError: mixed,
+  +abortFunction: () => mixed,
 };
 
 type DispatchProps = {
-  readonly toggleCheckedSharingOptions: typeof toggleCheckedSharingOptions,
-  readonly attemptToPublish: typeof attemptToPublish,
-  readonly resetUploadState: typeof resetUploadState,
+  +toggleCheckedSharingOptions: typeof toggleCheckedSharingOptions,
+  +attemptToPublish: typeof attemptToPublish,
+  +resetUploadState: typeof resetUploadState,
 };
 
 type PublishProps = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -407,9 +407,9 @@ export const MenuButtonsPublish = explicitConnect<
 });
 
 type DownloadButtonProps = {
-  readonly sanitizedProfileDataPromise: Promise<Uint8Array>,
-  readonly downloadFileName: string,
-  readonly onCompressError: (Error | string) => mixed,
+  +sanitizedProfileDataPromise: Promise<Uint8Array>,
+  +downloadFileName: string,
+  +onCompressError: (Error | string) => mixed,
 };
 
 type DownloadButtonState = {

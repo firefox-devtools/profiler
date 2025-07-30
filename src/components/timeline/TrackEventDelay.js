@@ -16,7 +16,7 @@ import type { ThreadIndex } from 'firefox-profiler/types';
 import './TrackEventDelay.css';
 
 type Props = {
-  readonly threadIndex: ThreadIndex,
+  +threadIndex: ThreadIndex,
 };
 
 export class TrackEventDelay extends React.PureComponent<Props, {}> {

@@ -17,11 +17,11 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './NetworkSettings.css';
 
 type StateProps = {
-  readonly searchString: string,
+  +searchString: string,
 };
 
 type DispatchProps = {
-  readonly changeNetworkSearchString: typeof changeNetworkSearchString,
+  +changeNetworkSearchString: typeof changeNetworkSearchString,
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;

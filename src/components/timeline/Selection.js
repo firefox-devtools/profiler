@@ -37,23 +37,23 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 type MouseHandler = (event: MouseEvent) => void;
 
 type OwnProps = {
-  readonly width: number,
-  readonly children: React.Node,
+  +width: number,
+  +children: React.Node,
   +className?: string,
 };
 
 type StateProps = {
-  readonly previewSelection: PreviewSelection,
-  readonly committedRange: StartEndRange,
-  readonly zeroAt: Milliseconds,
-  readonly profileTimelineUnit: string,
-  readonly mouseTimePosition: Milliseconds | null,
+  +previewSelection: PreviewSelection,
+  +committedRange: StartEndRange,
+  +zeroAt: Milliseconds,
+  +profileTimelineUnit: string,
+  +mouseTimePosition: Milliseconds | null,
 };
 
 type DispatchProps = {
-  readonly commitRange: typeof commitRange,
-  readonly updatePreviewSelection: typeof updatePreviewSelection,
-  readonly changeMouseTimePosition: typeof changeMouseTimePosition,
+  +commitRange: typeof commitRange,
+  +updatePreviewSelection: typeof updatePreviewSelection,
+  +changeMouseTimePosition: typeof changeMouseTimePosition,
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -340,9 +340,9 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
   };
 
   renderSelectionOverlay(previewSelection: {
-    readonly selectionStart: number,
-    readonly selectionEnd: number,
-    readonly isModifying: boolean,
+    +selectionStart: number,
+    +selectionEnd: number,
+    +isModifying: boolean,
     +draggingStart?: boolean,
     +draggingEnd?: boolean,
   }) {

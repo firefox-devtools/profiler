@@ -19,17 +19,17 @@ import type { ThreadsKey } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {
-  readonly onShow: () => void,
-  readonly onHide: () => void,
+  +onShow: () => void,
+  +onHide: () => void,
 };
 
 type StateProps = {
-  readonly searchString: string,
-  readonly threadsKey: ThreadsKey,
+  +searchString: string,
+  +threadsKey: ThreadsKey,
 };
 
 type DispatchProps = {
-  readonly addTransformToStack: typeof addTransformToStack,
+  +addTransformToStack: typeof addTransformToStack,
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;

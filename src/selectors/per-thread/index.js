@@ -205,14 +205,14 @@ export const selectedThreadSelectors: ThreadSelectors = (() => {
 })();
 
 export type NodeSelectors = {
-  readonly getName: Selector<string>,
-  readonly getIsJS: Selector<boolean>,
-  readonly getLib: Selector<string>,
-  readonly getTimingsForSidebar: Selector<TimingsForPath>,
-  readonly getSourceViewStackLineInfo: Selector<StackLineInfo | null>,
-  readonly getSourceViewLineTimings: Selector<LineTimings>,
-  readonly getAssemblyViewStackAddressInfo: Selector<StackAddressInfo | null>,
-  readonly getAssemblyViewAddressTimings: Selector<AddressTimings>,
+  +getName: Selector<string>,
+  +getIsJS: Selector<boolean>,
+  +getLib: Selector<string>,
+  +getTimingsForSidebar: Selector<TimingsForPath>,
+  +getSourceViewStackLineInfo: Selector<StackLineInfo | null>,
+  +getSourceViewLineTimings: Selector<LineTimings>,
+  +getAssemblyViewStackAddressInfo: Selector<StackAddressInfo | null>,
+  +getAssemblyViewAddressTimings: Selector<AddressTimings>,
 };
 
 export const selectedNodeSelectors: NodeSelectors = (() => {

@@ -14,7 +14,7 @@ import explicitConnect, { type ConnectedProps } from '../../utils/connect';
 import type { State } from 'firefox-profiler/types';
 
 type StateProps = {
-  readonly threadName: string,
+  +threadName: string,
 };
 
 type Props = ConnectedProps<{}, StateProps, {}>;

@@ -28,15 +28,15 @@ type OwnProps = {
 };
 
 type StateProps = {
-  readonly callTreeSummaryStrategy: CallTreeSummaryStrategy,
-  readonly hasUsefulTimingSamples: boolean,
-  readonly hasUsefulJsAllocations: boolean,
-  readonly hasUsefulNativeAllocations: boolean,
-  readonly canShowRetainedMemory: boolean,
+  +callTreeSummaryStrategy: CallTreeSummaryStrategy,
+  +hasUsefulTimingSamples: boolean,
+  +hasUsefulJsAllocations: boolean,
+  +hasUsefulNativeAllocations: boolean,
+  +canShowRetainedMemory: boolean,
 };
 
 type DispatchProps = {
-  readonly changeCallTreeSummaryStrategy: typeof changeCallTreeSummaryStrategy,
+  +changeCallTreeSummaryStrategy: typeof changeCallTreeSummaryStrategy,
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;

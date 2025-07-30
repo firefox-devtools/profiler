@@ -37,32 +37,32 @@ import type {
 import './ZipFileViewer.css';
 
 type StateProps = {
-  readonly zipFileState: ZipFileState,
-  readonly pathInZipFile: string | null,
-  readonly zipFileTree: ZipFileTree,
-  readonly zipFileMaxDepth: number,
-  readonly selectedZipFileIndex: IndexIntoZipFileTable | null,
+  +zipFileState: ZipFileState,
+  +pathInZipFile: string | null,
+  +zipFileTree: ZipFileTree,
+  +zipFileMaxDepth: number,
+  +selectedZipFileIndex: IndexIntoZipFileTable | null,
   // In practice this should never contain null, but needs to support the
   // TreeView interface.
-  readonly expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
-  readonly zipFileErrorMessage: null | string,
+  +expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
+  +zipFileErrorMessage: null | string,
 };
 
 type DispatchProps = {
-  readonly changeSelectedZipFile: typeof changeSelectedZipFile,
-  readonly changeExpandedZipFile: typeof changeExpandedZipFile,
-  readonly viewProfileFromZip: typeof viewProfileFromZip,
-  readonly viewProfileFromPathInZipFile: typeof viewProfileFromPathInZipFile,
-  readonly returnToZipFileList: typeof returnToZipFileList,
+  +changeSelectedZipFile: typeof changeSelectedZipFile,
+  +changeExpandedZipFile: typeof changeExpandedZipFile,
+  +viewProfileFromZip: typeof viewProfileFromZip,
+  +viewProfileFromPathInZipFile: typeof viewProfileFromPathInZipFile,
+  +returnToZipFileList: typeof returnToZipFileList,
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 type ZipFileRowDispatchProps = {
-  readonly viewProfileFromZip: typeof viewProfileFromZip,
+  +viewProfileFromZip: typeof viewProfileFromZip,
 };
 type ZipFileRowOwnProps = {
-  readonly displayData: ZipDisplayData,
+  +displayData: ZipDisplayData,
 };
 
 type ZipFileRowProps = ConnectedProps<

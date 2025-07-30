@@ -7,12 +7,12 @@ import * as colors from 'photon-colors';
 import type { CssPixels, Marker } from 'firefox-profiler/types';
 
 type MarkerStyle = {
-  readonly top: CssPixels,
-  readonly height: CssPixels,
-  readonly background: string,
-  readonly squareCorners: boolean,
-  readonly borderLeft: null | string,
-  readonly borderRight: null | string,
+  +top: CssPixels,
+  +height: CssPixels,
+  +background: string,
+  +squareCorners: boolean,
+  +borderLeft: null | string,
+  +borderRight: null | string,
 };
 
 const defaultStyle = {

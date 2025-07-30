@@ -21,13 +21,13 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './TrackVisualProgress.css';
 
 type OwnProps = {
-  readonly progressGraphData: ProgressGraphData[],
-  readonly graphDotTooltipText: string,
+  +progressGraphData: ProgressGraphData[],
+  +graphDotTooltipText: string,
 };
 
 type StateProps = {
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
 };
 
 type DispatchProps = {

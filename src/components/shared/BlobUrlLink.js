@@ -8,8 +8,8 @@ import * as React from 'react';
 
 type Props = {
   // Do not make these props exact, the extra props are passed to the anchor element.
-  readonly blob: Blob,
-  readonly children: React.Node,
+  +blob: Blob,
+  +children: React.Node,
 };
 
 type State = {

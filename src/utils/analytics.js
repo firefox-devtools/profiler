@@ -34,8 +34,8 @@ type GATiming = {
 export type GAPayload = GAEvent | GAPageView | GATiming;
 
 export type GAErrorPayload = {
-  readonly exDescription: string,
-  readonly exFatal: boolean,
+  +exDescription: string,
+  +exFatal: boolean,
 };
 
 // Prettier breaks with multiple arrow functions and intersections, so name the arrow

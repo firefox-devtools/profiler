@@ -44,12 +44,12 @@ for understanding where time was actually spent in a program."
 };
 
 type AssemblyViewProps = {
-  readonly timings: AddressTimings,
-  readonly assemblyCode: DecodedInstruction[],
-  readonly disableOverscan: boolean,
-  readonly nativeSymbol: NativeSymbolInfo | null,
-  readonly scrollToHotSpotGeneration: number,
-  readonly hotSpotTimings: AddressTimings,
+  +timings: AddressTimings,
+  +assemblyCode: DecodedInstruction[],
+  +disableOverscan: boolean,
+  +nativeSymbol: NativeSymbolInfo | null,
+  +scrollToHotSpotGeneration: number,
+  +hotSpotTimings: AddressTimings,
 };
 
 let editorModulePromise: Promise<any> | null = null;

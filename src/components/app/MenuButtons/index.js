@@ -66,20 +66,20 @@ type OwnProps = {
 };
 
 type StateProps = {
-  readonly rootRange: StartEndRange,
-  readonly dataSource: DataSource,
-  readonly profileUrl: string,
-  readonly isNewlyPublished: boolean,
-  readonly uploadPhase: UploadPhase,
-  readonly hasPrePublishedState: boolean,
-  readonly abortFunction: () => mixed,
-  readonly currentProfileUploadedInformation: UploadedProfileInformation | null,
+  +rootRange: StartEndRange,
+  +dataSource: DataSource,
+  +profileUrl: string,
+  +isNewlyPublished: boolean,
+  +uploadPhase: UploadPhase,
+  +hasPrePublishedState: boolean,
+  +abortFunction: () => mixed,
+  +currentProfileUploadedInformation: UploadedProfileInformation | null,
 };
 
 type DispatchProps = {
-  readonly dismissNewlyPublished: typeof dismissNewlyPublished,
-  readonly revertToPrePublishedState: typeof revertToPrePublishedState,
-  readonly profileRemotelyDeleted: typeof profileRemotelyDeleted,
+  +dismissNewlyPublished: typeof dismissNewlyPublished,
+  +revertToPrePublishedState: typeof revertToPrePublishedState,
+  +profileRemotelyDeleted: typeof profileRemotelyDeleted,
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;

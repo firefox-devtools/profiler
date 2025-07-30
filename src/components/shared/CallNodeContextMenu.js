@@ -67,26 +67,26 @@ import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info
 import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
 
 type StateProps = {
-  readonly thread: Thread | null,
-  readonly threadsKey: ThreadsKey | null,
-  readonly categories: CategoryList,
-  readonly callNodeInfo: CallNodeInfo | null,
-  readonly rightClickedCallNodePath: CallNodePath | null,
-  readonly rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
-  readonly implementation: ImplementationFilter,
-  readonly inverted: boolean,
-  readonly selectedTab: TabSlug,
-  readonly displaySearchfox: boolean,
-  readonly browserConnectionStatus: BrowserConnectionStatus,
-  readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
+  +thread: Thread | null,
+  +threadsKey: ThreadsKey | null,
+  +categories: CategoryList,
+  +callNodeInfo: CallNodeInfo | null,
+  +rightClickedCallNodePath: CallNodePath | null,
+  +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +implementation: ImplementationFilter,
+  +inverted: boolean,
+  +selectedTab: TabSlug,
+  +displaySearchfox: boolean,
+  +browserConnectionStatus: BrowserConnectionStatus,
+  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
 };
 
 type DispatchProps = {
-  readonly addTransformToStack: typeof addTransformToStack,
-  readonly addCollapseResourceTransformToStack: typeof addCollapseResourceTransformToStack,
-  readonly expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants,
-  readonly updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen,
-  readonly setContextMenuVisibility: typeof setContextMenuVisibility,
+  +addTransformToStack: typeof addTransformToStack,
+  +addCollapseResourceTransformToStack: typeof addCollapseResourceTransformToStack,
+  +expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants,
+  +updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen,
+  +setContextMenuVisibility: typeof setContextMenuVisibility,
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -522,11 +522,11 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   }
 
   getRightClickedCallNodeInfo(): null | {
-    readonly thread: Thread,
-    readonly threadsKey: ThreadsKey,
-    readonly callNodeInfo: CallNodeInfo,
-    readonly callNodePath: CallNodePath,
-    readonly callNodeIndex: IndexIntoCallNodeTable,
+    +thread: Thread,
+    +threadsKey: ThreadsKey,
+    +callNodeInfo: CallNodeInfo,
+    +callNodePath: CallNodePath,
+    +callNodeIndex: IndexIntoCallNodeTable,
   } {
     const {
       thread,
@@ -803,14 +803,14 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   }
 
   renderTransformMenuItem(props: {
-    readonly l10nId: string,
+    +l10nId: string,
     +l10nProps?: mixed,
-    readonly content: React.Node,
-    readonly onClick: (event: SyntheticEvent<>, data: { type: string }) => void,
-    readonly transform: string,
-    readonly shortcut: string,
-    readonly icon: string,
-    readonly title: string,
+    +content: React.Node,
+    +onClick: (event: SyntheticEvent<>, data: { type: string }) => void,
+    +transform: string,
+    +shortcut: string,
+    +icon: string,
+    +title: string,
   }) {
     return (
       <MenuItem onClick={props.onClick} data={{ type: props.transform }}>
@@ -835,12 +835,12 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   }
 
   renderMenuItemWithShortcut(props: {
-    readonly l10nId: string,
+    +l10nId: string,
     +l10nProps?: mixed,
-    readonly content: React.Node,
-    readonly onClick: (event: SyntheticEvent<>, data: { type: string }) => void,
-    readonly shortcut: string,
-    readonly data: { type: string },
+    +content: React.Node,
+    +onClick: (event: SyntheticEvent<>, data: { type: string }) => void,
+    +shortcut: string,
+    +data: { type: string },
   }) {
     return (
       <MenuItem onClick={props.onClick} data={{ type: props.data.type }}>
@@ -925,8 +925,8 @@ export const CallNodeContextMenu = explicitConnect<
 
 function DivWithTitle(props: {
   +className?: string,
-  readonly children: React.Node,
-  readonly title: string,
+  +children: React.Node,
+  +title: string,
 }) {
   return (
     <div className={props.className} title={oneLine`${props.title}`}>

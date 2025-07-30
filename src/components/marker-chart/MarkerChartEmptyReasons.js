@@ -15,8 +15,8 @@ import explicitConnect, {
 import type { State } from 'firefox-profiler/types';
 
 type StateProps = {
-  readonly threadName: string,
-  readonly isMarkerChartEmptyInFullRange: boolean,
+  +threadName: string,
+  +isMarkerChartEmptyInFullRange: boolean,
 };
 
 type Props = ConnectedProps<{}, StateProps, {}>;

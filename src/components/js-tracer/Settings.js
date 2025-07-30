@@ -15,11 +15,11 @@ import './Settings.css';
 import { Localized } from '@fluent/react';
 
 type StateProps = {
-  readonly showJsTracerSummary: boolean,
+  +showJsTracerSummary: boolean,
 };
 
 type DispatchProps = {
-  readonly changeShowJsTracerSummary: typeof changeShowJsTracerSummary,
+  +changeShowJsTracerSummary: typeof changeShowJsTracerSummary,
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;

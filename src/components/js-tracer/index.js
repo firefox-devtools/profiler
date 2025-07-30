@@ -27,14 +27,14 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './index.css';
 
 type DispatchProps = {
-  readonly updatePreviewSelection: typeof updatePreviewSelection,
+  +updatePreviewSelection: typeof updatePreviewSelection,
 };
 
 type StateProps = {
-  readonly profile: Profile,
-  readonly threadsKey: ThreadsKey,
-  readonly jsTracerTable: JsTracerTable | null,
-  readonly showJsTracerSummary: boolean,
+  +profile: Profile,
+  +threadsKey: ThreadsKey,
+  +jsTracerTable: JsTracerTable | null,
+  +showJsTracerSummary: boolean,
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;

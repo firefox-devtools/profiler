@@ -30,14 +30,14 @@ import './TrackEventDelay.css';
  * When adding properties to these props, please consider the comment above the component.
  */
 type CanvasProps = {
-  readonly thread: Thread,
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
-  readonly interval: Milliseconds,
-  readonly width: CssPixels,
-  readonly height: CssPixels,
-  readonly lineWidth: CssPixels,
-  readonly eventDelays: EventDelayInfo,
+  +thread: Thread,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +interval: Milliseconds,
+  +width: CssPixels,
+  +height: CssPixels,
+  +lineWidth: CssPixels,
+  +eventDelays: EventDelayInfo,
 };
 
 /**
@@ -169,20 +169,20 @@ class TrackEventDelayCanvas extends React.PureComponent<CanvasProps> {
 }
 
 type OwnProps = {
-  readonly threadIndex: ThreadIndex,
-  readonly lineWidth: CssPixels,
-  readonly graphHeight: CssPixels,
+  +threadIndex: ThreadIndex,
+  +lineWidth: CssPixels,
+  +graphHeight: CssPixels,
 };
 
 type StateProps = {
-  readonly threadIndex: ThreadIndex,
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
-  readonly interval: Milliseconds,
-  readonly thread: Thread,
-  readonly filteredThread: Thread,
-  readonly unfilteredSamplesRange: StartEndRange | null,
-  readonly eventDelays: EventDelayInfo,
+  +threadIndex: ThreadIndex,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +interval: Milliseconds,
+  +thread: Thread,
+  +filteredThread: Thread,
+  +unfilteredSamplesRange: StartEndRange | null,
+  +eventDelays: EventDelayInfo,
 };
 
 type DispatchProps = {};

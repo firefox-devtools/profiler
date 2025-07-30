@@ -18,12 +18,12 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { Localized } from '@fluent/react';
 
 type StateProps = {
-  readonly assemblyViewIsOpen: boolean,
+  +assemblyViewIsOpen: boolean,
 };
 
 type DispatchProps = {
-  readonly openAssemblyView: typeof openAssemblyView,
-  readonly closeAssemblyView: typeof closeAssemblyView,
+  +openAssemblyView: typeof openAssemblyView,
+  +closeAssemblyView: typeof closeAssemblyView,
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;

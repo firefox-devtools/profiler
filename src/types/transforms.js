@@ -94,10 +94,10 @@ export type TransformDefinitions = {
    *                      A:1,0                           X:1,1
    */
   'focus-subtree': {
-    readonly type: 'focus-subtree',
-    readonly callNodePath: CallNodePath,
-    readonly implementation: ImplementationFilter,
-    readonly inverted: boolean,
+    +type: 'focus-subtree',
+    +callNodePath: CallNodePath,
+    +implementation: ImplementationFilter,
+    +inverted: boolean,
   },
 
   /**
@@ -125,8 +125,8 @@ export type TransformDefinitions = {
    *                 D:2,2
    */
   'focus-function': {
-    readonly type: 'focus-function',
-    readonly funcIndex: IndexIntoFuncTable,
+    +type: 'focus-function',
+    +funcIndex: IndexIntoFuncTable,
   },
 
   /**
@@ -173,9 +173,9 @@ export type TransformDefinitions = {
    * not particularly useful, and prone to not give the expected results.
    */
   'merge-call-node': {
-    readonly type: 'merge-call-node',
-    readonly callNodePath: CallNodePath,
-    readonly implementation: ImplementationFilter,
+    +type: 'merge-call-node',
+    +callNodePath: CallNodePath,
+    +implementation: ImplementationFilter,
   },
 
   /**
@@ -198,8 +198,8 @@ export type TransformDefinitions = {
    *      E:1,1       G:1,1
    */
   'merge-function': {
-    readonly type: 'merge-function',
-    readonly funcIndex: IndexIntoFuncTable,
+    +type: 'merge-function',
+    +funcIndex: IndexIntoFuncTable,
   },
 
   /**
@@ -218,8 +218,8 @@ export type TransformDefinitions = {
    *      D:1,1
    */
   'drop-function': {
-    readonly type: 'drop-function',
-    readonly funcIndex: IndexIntoFuncTable,
+    +type: 'drop-function',
+    +funcIndex: IndexIntoFuncTable,
   },
 
   /**
@@ -239,11 +239,11 @@ export type TransformDefinitions = {
    *        D
    */
   'collapse-resource': {
-    readonly type: 'collapse-resource',
-    readonly resourceIndex: IndexIntoResourceTable,
+    +type: 'collapse-resource',
+    +resourceIndex: IndexIntoResourceTable,
     // This is the index of the newly created function that represents the collapsed stack.
-    readonly collapsedFuncIndex: IndexIntoFuncTable,
-    readonly implementation: ImplementationFilter,
+    +collapsedFuncIndex: IndexIntoFuncTable,
+    +implementation: ImplementationFilter,
   },
 
   /**
@@ -263,9 +263,9 @@ export type TransformDefinitions = {
    *      C
    */
   'collapse-direct-recursion': {
-    readonly type: 'collapse-direct-recursion',
-    readonly funcIndex: IndexIntoFuncTable,
-    readonly implementation: ImplementationFilter,
+    +type: 'collapse-direct-recursion',
+    +funcIndex: IndexIntoFuncTable,
+    +implementation: ImplementationFilter,
   },
 
   /**
@@ -285,8 +285,8 @@ export type TransformDefinitions = {
    *      D
    */
   'collapse-recursion': {
-    readonly type: 'collapse-recursion',
-    readonly funcIndex: IndexIntoFuncTable,
+    +type: 'collapse-recursion',
+    +funcIndex: IndexIntoFuncTable,
   },
 
   /**
@@ -307,8 +307,8 @@ export type TransformDefinitions = {
    *      E:1,1     G:1,1    I:1,1    J:1,1
    */
   'collapse-function-subtree': {
-    readonly type: 'collapse-function-subtree',
-    readonly funcIndex: IndexIntoFuncTable,
+    +type: 'collapse-function-subtree',
+    +funcIndex: IndexIntoFuncTable,
   },
   /**
    * Focus on the functions that belong to the same category as the current function.
@@ -329,8 +329,8 @@ export type TransformDefinitions = {
    *              F:JS   A:JS
    */
   'focus-category': {
-    readonly type: 'focus-category',
-    readonly category: IndexIntoCategoryList,
+    +type: 'focus-category',
+    +category: IndexIntoCategoryList,
   },
 
   /**
@@ -339,10 +339,10 @@ export type TransformDefinitions = {
    * to support more filters in the future.
    */
   'filter-samples': {
-    readonly type: 'filter-samples',
+    +type: 'filter-samples',
     // Expand this type when you need to support more than just the marker.
-    readonly filterType: FilterSamplesType,
-    readonly filter: string,
+    +filterType: FilterSamplesType,
+    +filter: string,
   },
 };
 

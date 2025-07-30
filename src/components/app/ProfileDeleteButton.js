@@ -24,17 +24,17 @@ import './ProfileDeleteButton.css';
  */
 type ButtonProps = {
   /* This string will be used in a title */
-  readonly profileName: string,
+  +profileName: string,
   /* This string will be used in longer sentence in a tooltip */
-  readonly smallProfileName: string,
+  +smallProfileName: string,
   /* This identifies the profile we want to delete. This is also commonly known as the "hash" of the profile. */
-  readonly profileToken: string,
+  +profileToken: string,
   /* This token is used to authenticate the deletion HTTP request to the server. */
-  readonly jwtToken: string,
+  +jwtToken: string,
   +buttonClassName?: string,
-  readonly onOpenConfirmDialog: () => mixed,
-  readonly onCloseConfirmDialog: () => mixed,
-  readonly onCloseSuccessMessage: () => mixed,
+  +onOpenConfirmDialog: () => mixed,
+  +onCloseConfirmDialog: () => mixed,
+  +onCloseSuccessMessage: () => mixed,
 };
 
 export class ProfileDeleteButton extends PureComponent<ButtonProps> {
@@ -109,18 +109,18 @@ export class ProfileDeleteButton extends PureComponent<ButtonProps> {
  * calling the deletion process when the user confirms.
  */
 type PanelProps = {
-  readonly profileName: string,
+  +profileName: string,
   /* This identifies the profile we want to delete. This is also commonly known as the "hash" of the profile. */
-  readonly profileToken: string,
+  +profileToken: string,
   /* This token is used to authenticate the deletion HTTP request to the server. */
-  readonly jwtToken: string,
-  readonly onProfileDeleted: () => mixed,
-  readonly onProfileDeleteCanceled: () => mixed,
+  +jwtToken: string,
+  +onProfileDeleted: () => mixed,
+  +onProfileDeleteCanceled: () => mixed,
 };
 
 type PanelState = {
-  readonly status: 'idle' | 'working' | 'deleted',
-  readonly error: Error | null,
+  +status: 'idle' | 'working' | 'deleted',
+  +error: Error | null,
 };
 
 export class ProfileDeletePanel extends PureComponent<PanelProps, PanelState> {

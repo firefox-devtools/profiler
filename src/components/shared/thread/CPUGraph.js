@@ -18,21 +18,21 @@ import type {
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 type Props = {
-  readonly className: string,
-  readonly thread: Thread,
-  readonly samplesSelectedStates: null | SelectedState[],
-  readonly interval: Milliseconds,
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
-  readonly callNodeInfo: CallNodeInfo,
-  readonly categories: CategoryList,
-  readonly onSampleClick: (
+  +className: string,
+  +thread: Thread,
+  +samplesSelectedStates: null | SelectedState[],
+  +interval: Milliseconds,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +callNodeInfo: CallNodeInfo,
+  +categories: CategoryList,
+  +onSampleClick: (
     event: SyntheticMouseEvent<>,
     sampleIndex: IndexIntoSamplesTable
   ) => void,
   // Decide which way the stacks grow up from the floor, or down from the ceiling.
   +stacksGrowFromCeiling?: boolean,
-  readonly trackName: string,
+  +trackName: string,
 };
 
 export class ThreadCPUGraph extends PureComponent<Props> {

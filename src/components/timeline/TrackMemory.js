@@ -30,13 +30,13 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './TrackMemory.css';
 
 type OwnProps = {
-  readonly counterIndex: CounterIndex,
+  +counterIndex: CounterIndex,
 };
 
 type StateProps = {
-  readonly threadIndex: ThreadIndex,
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
+  +threadIndex: ThreadIndex,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
 };
 
 type DispatchProps = {

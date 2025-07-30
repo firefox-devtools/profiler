@@ -25,11 +25,11 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {
-  readonly hash: string,
+  +hash: string,
 };
 
 type DispatchProps = {
-  readonly setCurrentProfileUploadedInformation: typeof setCurrentProfileUploadedInformation,
+  +setCurrentProfileUploadedInformation: typeof setCurrentProfileUploadedInformation,
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;

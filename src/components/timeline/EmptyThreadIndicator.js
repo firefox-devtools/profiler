@@ -23,11 +23,11 @@ type SyntheticCssDeclarations = {
 };
 
 type Props = {
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
-  readonly thread: Thread,
-  readonly interval: Milliseconds,
-  readonly unfilteredSamplesRange: StartEndRange | null,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +thread: Thread,
+  +interval: Milliseconds,
+  +unfilteredSamplesRange: StartEndRange | null,
   ...SizeProps,
 };
 

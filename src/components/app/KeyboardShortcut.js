@@ -11,15 +11,15 @@ import classNames from 'classnames';
 import './KeyboardShortcut.css';
 
 type Props = {
-  readonly wrapperClassName: string,
-  readonly children: React.Node,
+  +wrapperClassName: string,
+  +children: React.Node,
 };
 
 type State = {
-  readonly isOpen: boolean,
+  +isOpen: boolean,
   // The modal steals the focus of the screen. This is the element that was focused
   // before showing the modal. The focus will be restored once the modal is dismissed.
-  readonly focusAfterClosed: HTMLElement | null,
+  +focusAfterClosed: HTMLElement | null,
 };
 
 /**

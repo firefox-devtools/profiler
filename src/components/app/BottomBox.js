@@ -49,22 +49,22 @@ import { Localized } from '@fluent/react';
 import './BottomBox.css';
 
 type StateProps = {
-  readonly sourceViewFile: string | null,
-  readonly sourceViewCode: SourceCodeStatus | void,
-  readonly sourceViewScrollGeneration: number,
-  readonly globalLineTimings: LineTimings,
-  readonly selectedCallNodeLineTimings: LineTimings,
-  readonly assemblyViewIsOpen: boolean,
-  readonly assemblyViewNativeSymbol: NativeSymbolInfo | null,
-  readonly assemblyViewCode: AssemblyCodeStatus | void,
-  readonly assemblyViewScrollGeneration: number,
-  readonly globalAddressTimings: AddressTimings,
-  readonly selectedCallNodeAddressTimings: AddressTimings,
-  readonly disableOverscan: boolean,
+  +sourceViewFile: string | null,
+  +sourceViewCode: SourceCodeStatus | void,
+  +sourceViewScrollGeneration: number,
+  +globalLineTimings: LineTimings,
+  +selectedCallNodeLineTimings: LineTimings,
+  +assemblyViewIsOpen: boolean,
+  +assemblyViewNativeSymbol: NativeSymbolInfo | null,
+  +assemblyViewCode: AssemblyCodeStatus | void,
+  +assemblyViewScrollGeneration: number,
+  +globalAddressTimings: AddressTimings,
+  +selectedCallNodeAddressTimings: AddressTimings,
+  +disableOverscan: boolean,
 };
 
 type DispatchProps = {
-  readonly closeBottomBox: typeof closeBottomBox,
+  +closeBottomBox: typeof closeBottomBox,
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;

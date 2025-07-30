@@ -17,20 +17,20 @@ import './Icon.css';
 type OwnProps =
   | {
       // This prop is used by call tree.
-      readonly displayData: CallNodeDisplayData,
+      +displayData: CallNodeDisplayData,
     }
   | {
       // This prop is for other parts of the profiler.
-      readonly iconUrl: string | null,
+      +iconUrl: string | null,
     };
 
 type StateProps = {
-  readonly className: string,
-  readonly icon: string | null,
+  +className: string,
+  +icon: string | null,
 };
 
 type DispatchProps = {
-  readonly iconStartLoading: typeof iconStartLoading,
+  +iconStartLoading: typeof iconStartLoading,
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;

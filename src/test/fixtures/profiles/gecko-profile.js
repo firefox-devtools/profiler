@@ -334,9 +334,9 @@ export function createGeckoProfile(): GeckoProfile {
 
 type TestDefinedGeckoMarker = {
   +name?: string,
-  readonly startTime: Milliseconds | null,
-  readonly endTime: Milliseconds | null,
-  readonly phase: MarkerPhase,
+  +startTime: Milliseconds | null,
+  +endTime: Milliseconds | null,
+  +phase: MarkerPhase,
   +category?: IndexIntoCategoryList,
   +data?: MarkerPayload_Gecko | null,
 };

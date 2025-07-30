@@ -33,8 +33,8 @@ import './ButtonWithPanel.css';
 
 type Props = {
   +className?: string,
-  readonly label: string,
-  readonly panelContent: React.Node,
+  +label: string,
+  +panelContent: React.Node,
   +panelClassName?: string,
   // This prop tells the panel to be open by default, but the open/close state is fully
   // managed by the ButtonWithPanel component.
@@ -47,7 +47,7 @@ type Props = {
 };
 
 type State = {
-  readonly open: boolean,
+  +open: boolean,
 };
 
 export class ButtonWithPanel extends React.PureComponent<Props, State> {

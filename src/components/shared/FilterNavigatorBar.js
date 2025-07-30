@@ -11,13 +11,13 @@ import './FilterNavigatorBar.css';
 
 type FilterNavigatorBarListItemProps = {
   +onClick?: null | ((number) => mixed),
-  readonly index: number,
-  readonly isFirstItem: boolean,
-  readonly isLastItem: boolean,
-  readonly isSelectedItem: boolean,
+  +index: number,
+  +isFirstItem: boolean,
+  +isLastItem: boolean,
+  +isSelectedItem: boolean,
   +title?: string,
   +additionalClassName?: string,
-  readonly children: React.Node,
+  +children: React.Node,
 };
 
 class FilterNavigatorBarListItem extends React.PureComponent<FilterNavigatorBarListItemProps> {
@@ -61,10 +61,10 @@ class FilterNavigatorBarListItem extends React.PureComponent<FilterNavigatorBarL
 }
 
 type Props = {
-  readonly className: string,
-  readonly items: $ReadOnlyArray<React.Node>,
-  readonly onPop: (number) => mixed,
-  readonly selectedItem: number,
+  +className: string,
+  +items: $ReadOnlyArray<React.Node>,
+  +onPop: (number) => mixed,
+  +selectedItem: number,
   +uncommittedItem?: string,
 };
 

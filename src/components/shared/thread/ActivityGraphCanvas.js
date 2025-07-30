@@ -25,23 +25,23 @@ import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type { CategoryDrawStyles } from './ActivityGraphFills';
 
 type CanvasProps = {
-  readonly className: string,
-  readonly trackName: string,
-  readonly fullThread: Thread,
-  readonly rangeFilteredThread: Thread,
-  readonly interval: Milliseconds,
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
-  readonly sampleIndexOffset: number,
-  readonly samplesSelectedStates: null | SelectedState[],
-  readonly treeOrderSampleComparator: (
+  +className: string,
+  +trackName: string,
+  +fullThread: Thread,
+  +rangeFilteredThread: Thread,
+  +interval: Milliseconds,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +sampleIndexOffset: number,
+  +samplesSelectedStates: null | SelectedState[],
+  +treeOrderSampleComparator: (
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
   ) => number,
-  readonly categories: CategoryList,
-  readonly passFillsQuerier: (ActivityFillGraphQuerier) => void,
-  readonly onClick: (SyntheticMouseEvent<HTMLCanvasElement>) => void,
-  readonly enableCPUUsage: boolean,
+  +categories: CategoryList,
+  +passFillsQuerier: (ActivityFillGraphQuerier) => void,
+  +onClick: (SyntheticMouseEvent<HTMLCanvasElement>) => void,
+  +enableCPUUsage: boolean,
   ...SizeProps,
 };
 

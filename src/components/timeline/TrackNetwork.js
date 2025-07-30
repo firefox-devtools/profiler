@@ -53,14 +53,14 @@ import './TrackNetwork.css';
  * When adding properties to these props, please consider the comment above the component.
  */
 type CanvasProps = {
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
-  readonly hoveredMarkerIndex: MarkerIndex | null,
-  readonly rightClickedMarkerIndex: MarkerIndex | null,
-  readonly selectedNetworkMarkerIndex: MarkerIndex | null,
-  readonly width: CssPixels,
-  readonly networkTiming: MarkerTiming[],
-  readonly onHoveredMarkerChange: (
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +hoveredMarkerIndex: MarkerIndex | null,
+  +rightClickedMarkerIndex: MarkerIndex | null,
+  +selectedNetworkMarkerIndex: MarkerIndex | null,
+  +width: CssPixels,
+  +networkTiming: MarkerTiming[],
+  +onHoveredMarkerChange: (
     hoveredMarkerIndex: MarkerIndex | null,
     mouseX?: CssPixels,
     mouseY?: CssPixels
@@ -246,21 +246,21 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
 }
 
 type OwnProps = {
-  readonly threadIndex: ThreadIndex,
+  +threadIndex: ThreadIndex,
 };
 
 type StateProps = {
-  readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
-  readonly isModifyingSelection: boolean,
-  readonly zeroAt: Milliseconds,
-  readonly getMarker: (MarkerIndex) => Marker,
-  readonly networkTiming: MarkerTiming[],
-  readonly verticalMarkerIndexes: MarkerIndex[],
-  readonly rightClickedMarkerIndex: MarkerIndex | null,
-  readonly selectedNetworkMarkerIndex: MarkerIndex | null,
-  readonly hoveredMarkerIndexFromState: MarkerIndex | null,
+  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +isModifyingSelection: boolean,
+  +zeroAt: Milliseconds,
+  +getMarker: (MarkerIndex) => Marker,
+  +networkTiming: MarkerTiming[],
+  +verticalMarkerIndexes: MarkerIndex[],
+  +rightClickedMarkerIndex: MarkerIndex | null,
+  +selectedNetworkMarkerIndex: MarkerIndex | null,
+  +hoveredMarkerIndexFromState: MarkerIndex | null,
 };
 
 type DispatchProps = {
@@ -275,9 +275,9 @@ type Props = {
 };
 
 type State = {
-  readonly hoveredMarkerIndex: MarkerIndex | null,
-  readonly mouseX: CssPixels,
-  readonly mouseY: CssPixels,
+  +hoveredMarkerIndex: MarkerIndex | null,
+  +mouseX: CssPixels,
+  +mouseY: CssPixels,
 };
 
 class Network extends PureComponent<Props, State> {

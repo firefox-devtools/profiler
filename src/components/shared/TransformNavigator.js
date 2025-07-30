@@ -16,7 +16,7 @@ import './TransformNavigator.css';
 
 type Props = ElementProps<typeof FilterNavigatorBar>;
 type DispatchProps = {
-  readonly onPop: $PropertyType<Props, 'onPop'>,
+  +onPop: $PropertyType<Props, 'onPop'>,
 };
 type StateProps = $Diff<Props, DispatchProps>;
 

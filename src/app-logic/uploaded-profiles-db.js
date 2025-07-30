@@ -22,17 +22,17 @@ import type { StartEndRange } from 'firefox-profiler/types';
 // defined in this file, close to the DB operations. Indeed we don't want that
 // this type evolves without implementing a migration step for the stored data.
 export type UploadedProfileInformation = {
-  readonly profileToken: string, // This is the primary key.
-  readonly jwtToken: string | null,
-  readonly publishedDate: Date, // This key is indexed as well, to provide automatic sorting.
-  readonly name: string,
-  readonly preset: string | null,
-  readonly meta: {
+  +profileToken: string, // This is the primary key.
+  +jwtToken: string | null,
+  +publishedDate: Date, // This key is indexed as well, to provide automatic sorting.
+  +name: string,
+  +preset: string | null,
+  +meta: {
     // We're using some of the properties of the profile meta, but we're not
     // reusing the type ProfileMeta completely because we don't want to be
     // impacted from future changes to ProfileMeta.
     // Look at ProfileMeta definition to know more about these fields.
-    readonly product: string,
+    +product: string,
     +abi?: string,
     +platform?:
       | 'Android'
@@ -59,8 +59,8 @@ export type UploadedProfileInformation = {
     +appBuildID?: string,
   },
   // Storing the state as the path makes it easy to reuse our URL upgrade mechanism.
-  readonly urlPath: string,
-  readonly publishedRange: StartEndRange,
+  +urlPath: string,
+  +publishedRange: StartEndRange,
 };
 
 // Exported for tests.

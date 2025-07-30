@@ -29,18 +29,18 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type { SourceCodeStatus, Profile } from 'firefox-profiler/types';
 
 type StateProps = {
-  readonly sourceViewFile: string | null,
-  readonly sourceViewCode: SourceCodeStatus | void,
-  readonly symbolServerUrl: string,
-  readonly profile: Profile | null,
-  readonly browserConnection: BrowserConnection | null,
+  +sourceViewFile: string | null,
+  +sourceViewCode: SourceCodeStatus | void,
+  +symbolServerUrl: string,
+  +profile: Profile | null,
+  +browserConnection: BrowserConnection | null,
 };
 
 type DispatchProps = {
-  readonly beginLoadingSourceCodeFromUrl: typeof beginLoadingSourceCodeFromUrl,
-  readonly beginLoadingSourceCodeFromBrowserConnection: typeof beginLoadingSourceCodeFromBrowserConnection,
-  readonly finishLoadingSourceCode: typeof finishLoadingSourceCode,
-  readonly failLoadingSourceCode: typeof failLoadingSourceCode,
+  +beginLoadingSourceCodeFromUrl: typeof beginLoadingSourceCodeFromUrl,
+  +beginLoadingSourceCodeFromBrowserConnection: typeof beginLoadingSourceCodeFromBrowserConnection,
+  +finishLoadingSourceCode: typeof finishLoadingSourceCode,
+  +failLoadingSourceCode: typeof failLoadingSourceCode,
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;

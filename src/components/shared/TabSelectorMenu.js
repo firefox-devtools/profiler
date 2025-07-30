@@ -19,12 +19,12 @@ import type { TabID, SortedTabPageData } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {
-  readonly tabFilter: TabID | null,
-  readonly sortedPageData: SortedTabPageData | null,
+  +tabFilter: TabID | null,
+  +sortedPageData: SortedTabPageData | null,
 };
 
 type DispatchProps = {
-  readonly changeTabFilter: typeof changeTabFilter,
+  +changeTabFilter: typeof changeTabFilter,
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;

@@ -38,21 +38,21 @@ type OwnProps = {
 };
 
 type StateProps = {
-  readonly selectedTab: string,
-  readonly allowSwitchingStackType: boolean,
-  readonly invertCallstack: boolean,
-  readonly showUserTimings: boolean,
-  readonly stackChartSameWidths: boolean,
-  readonly currentSearchString: string,
-  readonly hasUsefulJsAllocations: boolean,
-  readonly hasUsefulNativeAllocations: boolean,
+  +selectedTab: string,
+  +allowSwitchingStackType: boolean,
+  +invertCallstack: boolean,
+  +showUserTimings: boolean,
+  +stackChartSameWidths: boolean,
+  +currentSearchString: string,
+  +hasUsefulJsAllocations: boolean,
+  +hasUsefulNativeAllocations: boolean,
 };
 
 type DispatchProps = {
-  readonly changeInvertCallstack: typeof changeInvertCallstack,
-  readonly changeShowUserTimings: typeof changeShowUserTimings,
-  readonly changeCallTreeSearchString: typeof changeCallTreeSearchString,
-  readonly changeStackChartSameWidths: typeof changeStackChartSameWidths,
+  +changeInvertCallstack: typeof changeInvertCallstack,
+  +changeShowUserTimings: typeof changeShowUserTimings,
+  +changeCallTreeSearchString: typeof changeCallTreeSearchString,
+  +changeStackChartSameWidths: typeof changeStackChartSameWidths,
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;

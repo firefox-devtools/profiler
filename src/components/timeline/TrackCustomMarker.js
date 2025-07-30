@@ -19,14 +19,14 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './TrackCustomMarker.css';
 
 type OwnProps = {
-  readonly markerSchema: MarkerSchema,
-  readonly markerName: IndexIntoStringTable,
-  readonly threadIndex: ThreadIndex,
+  +markerSchema: MarkerSchema,
+  +markerName: IndexIntoStringTable,
+  +threadIndex: ThreadIndex,
 };
 
 type StateProps = {
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
 };
 
 type DispatchProps = {};

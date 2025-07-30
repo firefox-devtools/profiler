@@ -39,10 +39,10 @@ const ERROR_MESSAGES_L10N_ID: { [string]: string } = Object.freeze({
 });
 
 type AppViewRouterStateProps = {
-  readonly view: AppViewState,
-  readonly dataSource: DataSource,
-  readonly profilesToCompare: string[] | null,
-  readonly hasZipFile: boolean,
+  +view: AppViewState,
+  +dataSource: DataSource,
+  +profilesToCompare: string[] | null,
+  +hasZipFile: boolean,
 };
 
 type AppViewRouterProps = ConnectedProps<{}, AppViewRouterStateProps, {}>;

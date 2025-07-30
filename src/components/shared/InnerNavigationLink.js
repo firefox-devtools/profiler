@@ -16,12 +16,12 @@ import type { DataSource } from 'firefox-profiler/types';
 
 type OwnProps = {
   +className?: string,
-  readonly dataSource: DataSource,
-  readonly children: React.Node,
+  +dataSource: DataSource,
+  +children: React.Node,
 };
 
 type DispatchProps = {
-  readonly setDataSource: typeof setDataSource,
+  +setDataSource: typeof setDataSource,
 };
 
 type Props = ConnectedProps<OwnProps, {}, DispatchProps>;

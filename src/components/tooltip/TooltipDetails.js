@@ -26,7 +26,7 @@ import * as React from 'react';
  */
 
 type DetailProps = {
-  readonly label: string,
+  +label: string,
   // Only one child is accepted.
   +children?: void | null | boolean | string | number | React.Element<any>,
 };
@@ -53,7 +53,7 @@ export type TooltipDetailComponent = React.Element<
 > | null;
 type Props = {
   // This component accepts only TooltipDetail children.
-  readonly children: React.ChildrenArray<TooltipDetailComponent>,
+  +children: React.ChildrenArray<TooltipDetailComponent>,
 };
 
 export function TooltipDetails({ children }: Props) {

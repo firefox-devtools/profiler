@@ -64,46 +64,46 @@ import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {
-  readonly threadsKey: ThreadsKey,
-  readonly trackType: 'expanded' | 'condensed',
+  +threadsKey: ThreadsKey,
+  +trackType: 'expanded' | 'condensed',
   +showMemoryMarkers?: boolean,
-  readonly trackName: string,
+  +trackName: string,
 };
 
 type StateProps = {
-  readonly fullThread: Thread,
-  readonly rangeFilteredThread: Thread,
-  readonly filteredThread: Thread,
-  readonly callNodeInfo: CallNodeInfo,
-  readonly unfilteredSamplesRange: StartEndRange | null,
-  readonly interval: Milliseconds,
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
-  readonly sampleIndexOffset: number,
-  readonly categories: CategoryList,
-  readonly timelineType: TimelineType,
-  readonly hasFileIoMarkers: boolean,
-  readonly samplesSelectedStates: null | SelectedState[],
-  readonly sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
-  readonly treeOrderSampleComparator: (
+  +fullThread: Thread,
+  +rangeFilteredThread: Thread,
+  +filteredThread: Thread,
+  +callNodeInfo: CallNodeInfo,
+  +unfilteredSamplesRange: StartEndRange | null,
+  +interval: Milliseconds,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +sampleIndexOffset: number,
+  +categories: CategoryList,
+  +timelineType: TimelineType,
+  +hasFileIoMarkers: boolean,
+  +samplesSelectedStates: null | SelectedState[],
+  +sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
+  +treeOrderSampleComparator: (
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
   ) => number,
-  readonly selectedThreadIndexes: Set<ThreadIndex>,
-  readonly enableCPUUsage: boolean,
-  readonly isExperimentalCPUGraphsEnabled: boolean,
-  readonly implementationFilter: ImplementationFilter,
-  readonly callTreeVisible: boolean,
-  readonly zeroAt: Milliseconds,
-  readonly profileTimelineUnit: string,
+  +selectedThreadIndexes: Set<ThreadIndex>,
+  +enableCPUUsage: boolean,
+  +isExperimentalCPUGraphsEnabled: boolean,
+  +implementationFilter: ImplementationFilter,
+  +callTreeVisible: boolean,
+  +zeroAt: Milliseconds,
+  +profileTimelineUnit: string,
 };
 
 type DispatchProps = {
-  readonly updatePreviewSelection: typeof updatePreviewSelection,
-  readonly changeSelectedCallNode: typeof changeSelectedCallNode,
-  readonly focusCallTree: typeof focusCallTree,
-  readonly selectSelfCallNode: typeof selectSelfCallNode,
-  readonly reportTrackThreadHeight: typeof reportTrackThreadHeight,
+  +updatePreviewSelection: typeof updatePreviewSelection,
+  +changeSelectedCallNode: typeof changeSelectedCallNode,
+  +focusCallTree: typeof focusCallTree,
+  +selectSelfCallNode: typeof selectSelfCallNode,
+  +reportTrackThreadHeight: typeof reportTrackThreadHeight,
 };
 
 type Props = {

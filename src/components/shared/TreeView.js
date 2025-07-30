@@ -49,8 +49,8 @@ type TableViewOptionsWithDefault = {
 };
 
 export type Column<DisplayData: Object> = {
-  readonly propName: string,
-  readonly titleL10nId: string,
+  +propName: string,
+  +titleL10nId: string,
   +component?: React.ComponentType<{
     displayData: DisplayData,
   }>,
@@ -61,7 +61,7 @@ export type MaybeResizableColumn<DisplayData: Object> = {
   /** defaults to initialWidth */
   +minWidth?: CssPixels,
   /** This is the initial width, this can be changed in resizable columns */
-  readonly initialWidth: CssPixels,
+  +initialWidth: CssPixels,
   /** found width + adjustment = width of header column */
   +headerWidthAdjustment?: CssPixels,
   // false by default
@@ -71,13 +71,13 @@ export type MaybeResizableColumn<DisplayData: Object> = {
 };
 
 type TreeViewHeaderProps<DisplayData: Object> = {
-  readonly fixedColumns: MaybeResizableColumn<DisplayData>[],
-  readonly mainColumn: Column<DisplayData>,
-  readonly viewOptions: TableViewOptionsWithDefault,
+  +fixedColumns: MaybeResizableColumn<DisplayData>[],
+  +mainColumn: Column<DisplayData>,
+  +viewOptions: TableViewOptionsWithDefault,
   // called when the users moves the divider right of the column,
   // passes the column index and the start x coordinate
-  readonly onColumnWidthChangeStart: (number, CssPixels) => void,
-  readonly onColumnWidthReset: (number) => void,
+  +onColumnWidthChangeStart: (number, CssPixels) => void,
+  +onColumnWidthReset: (number) => void,
 };
 
 class TreeViewHeader<DisplayData: Object> extends React.PureComponent<
@@ -179,16 +179,16 @@ function reactStringWithHighlightedSubstrings(
 }
 
 type TreeViewRowFixedColumnsProps<DisplayData: Object> = {
-  readonly displayData: DisplayData,
-  readonly nodeId: NodeIndex,
-  readonly columns: MaybeResizableColumn<DisplayData>[],
-  readonly index: number,
-  readonly isSelected: boolean,
-  readonly isRightClicked: boolean,
-  readonly onClick: (NodeIndex, SyntheticMouseEvent<>) => mixed,
-  readonly highlightRegExp: RegExp | null,
-  readonly rowHeightStyle: { height: CssPixels, lineHeight: string },
-  readonly viewOptions: TableViewOptionsWithDefault,
+  +displayData: DisplayData,
+  +nodeId: NodeIndex,
+  +columns: MaybeResizableColumn<DisplayData>[],
+  +index: number,
+  +isSelected: boolean,
+  +isRightClicked: boolean,
+  +onClick: (NodeIndex, SyntheticMouseEvent<>) => mixed,
+  +highlightRegExp: RegExp | null,
+  +rowHeightStyle: { height: CssPixels, lineHeight: string },
+  +viewOptions: TableViewOptionsWithDefault,
 };
 
 class TreeViewRowFixedColumns<DisplayData: Object> extends React.PureComponent<
@@ -254,23 +254,23 @@ class TreeViewRowFixedColumns<DisplayData: Object> extends React.PureComponent<
 }
 
 type TreeViewRowScrolledColumnsProps<DisplayData: Object> = {
-  readonly displayData: DisplayData,
-  readonly nodeId: NodeIndex,
-  readonly depth: number,
-  readonly mainColumn: Column<DisplayData>,
+  +displayData: DisplayData,
+  +nodeId: NodeIndex,
+  +depth: number,
+  +mainColumn: Column<DisplayData>,
   +appendageColumn?: Column<DisplayData>,
-  readonly index: number,
-  readonly canBeExpanded: boolean,
-  readonly isExpanded: boolean,
-  readonly isSelected: boolean,
-  readonly isRightClicked: boolean,
-  readonly onToggle: (NodeIndex, boolean, boolean) => mixed,
-  readonly onClick: (NodeIndex, SyntheticMouseEvent<>) => mixed,
-  readonly highlightRegExp: RegExp | null,
+  +index: number,
+  +canBeExpanded: boolean,
+  +isExpanded: boolean,
+  +isSelected: boolean,
+  +isRightClicked: boolean,
+  +onToggle: (NodeIndex, boolean, boolean) => mixed,
+  +onClick: (NodeIndex, SyntheticMouseEvent<>) => mixed,
+  +highlightRegExp: RegExp | null,
   // React converts height into 'px' values, while lineHeight is valid in
   // non-'px' units.
-  readonly rowHeightStyle: { height: CssPixels, lineHeight: string },
-  readonly indentWidth: CssPixels,
+  +rowHeightStyle: { height: CssPixels, lineHeight: string },
+  +indentWidth: CssPixels,
 };
 
 // This is a false-positive, as it's used as a generic trait bounds.
@@ -438,36 +438,36 @@ interface Tree<DisplayData: Object> {
 }
 
 type TreeViewProps<DisplayData> = {
-  readonly fixedColumns: MaybeResizableColumn<DisplayData>[],
-  readonly mainColumn: Column<DisplayData>,
-  readonly tree: Tree<DisplayData>,
-  readonly expandedNodeIds: Array<NodeIndex | null>,
-  readonly selectedNodeId: NodeIndex | null,
+  +fixedColumns: MaybeResizableColumn<DisplayData>[],
+  +mainColumn: Column<DisplayData>,
+  +tree: Tree<DisplayData>,
+  +expandedNodeIds: Array<NodeIndex | null>,
+  +selectedNodeId: NodeIndex | null,
   +rightClickedNodeId?: NodeIndex | null,
-  readonly onExpandedNodesChange: (Array<NodeIndex | null>) => mixed,
+  +onExpandedNodesChange: (Array<NodeIndex | null>) => mixed,
   +highlightRegExp?: RegExp | null,
   +appendageColumn?: Column<DisplayData>,
   +disableOverscan?: boolean,
   +contextMenu?: React.Element<any>,
   +contextMenuId?: string,
-  readonly maxNodeDepth: number,
-  readonly onSelectionChange: (
+  +maxNodeDepth: number,
+  +onSelectionChange: (
     NodeIndex,
     { source: 'keyboard' | 'pointer' }
   ) => mixed,
   +onRightClickSelection?: (NodeIndex) => mixed,
   +onEnterKey?: (NodeIndex) => mixed,
   +onDoubleClick?: (NodeIndex) => mixed,
-  readonly rowHeight: CssPixels,
-  readonly indentWidth: CssPixels,
+  +rowHeight: CssPixels,
+  +indentWidth: CssPixels,
   +onKeyDown?: (SyntheticKeyboardEvent<>) => void,
-  readonly viewOptions: TableViewOptions,
+  +viewOptions: TableViewOptions,
   +onViewOptionsChange?: (TableViewOptions) => void,
 };
 
 type TreeViewState = {
-  readonly fixedColumnWidths: Array<CssPixels> | null,
-  readonly isResizingColumns: boolean,
+  +fixedColumnWidths: Array<CssPixels> | null,
+  +isResizingColumns: boolean,
 };
 
 export class TreeView<DisplayData: Object> extends React.PureComponent<

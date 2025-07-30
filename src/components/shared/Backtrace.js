@@ -18,13 +18,13 @@ import type {
 import './Backtrace.css';
 
 type Props = {
-  readonly thread: Thread,
+  +thread: Thread,
   // Tooltips will want to only show a certain number of stacks, while the sidebars
   // can show all of the stacks.
-  readonly maxStacks: number,
-  readonly stackIndex: IndexIntoStackTable,
-  readonly implementationFilter: ImplementationFilter,
-  readonly categories: CategoryList,
+  +maxStacks: number,
+  +stackIndex: IndexIntoStackTable,
+  +implementationFilter: ImplementationFilter,
+  +categories: CategoryList,
 };
 
 export function Backtrace(props: Props) {

@@ -11,11 +11,11 @@ import './PanelSearch.css';
 import { Localized } from '@fluent/react';
 
 type Props = {
-  readonly className: string,
-  readonly label: string,
-  readonly title: string,
-  readonly currentSearchString: string,
-  readonly onSearch: (string) => void,
+  +className: string,
+  +label: string,
+  +title: string,
+  +currentSearchString: string,
+  +onSearch: (string) => void,
 };
 
 type State = { searchFieldFocused: boolean };

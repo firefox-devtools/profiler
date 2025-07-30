@@ -34,19 +34,19 @@ import { ensureExists } from 'firefox-profiler/utils/flow';
 import './TrackScreenshots.css';
 
 type OwnProps = {
-  readonly threadIndex: ThreadIndex,
-  readonly windowId: string,
+  +threadIndex: ThreadIndex,
+  +windowId: string,
 };
 type StateProps = {
-  readonly thread: Thread,
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
-  readonly screenshots: Marker[],
-  readonly threadName: string,
-  readonly isMakingPreviewSelection: boolean,
+  +thread: Thread,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +screenshots: Marker[],
+  +threadName: string,
+  +isMakingPreviewSelection: boolean,
 };
 type DispatchProps = {
-  readonly updatePreviewSelection: typeof updatePreviewSelection,
+  +updatePreviewSelection: typeof updatePreviewSelection,
 };
 type Props = {
   ...SizeProps,
@@ -215,16 +215,16 @@ export const TimelineTrackScreenshots = explicitConnect<
 });
 
 type HoverPreviewProps = {
-  readonly thread: Thread,
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
-  readonly isMakingPreviewSelection: boolean,
-  readonly offsetX: null | number,
-  readonly pageX: null | number,
-  readonly containerTop: null | number,
-  readonly width: number,
-  readonly trackHeight: number,
-  readonly payload: ScreenshotPayload,
+  +thread: Thread,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +isMakingPreviewSelection: boolean,
+  +offsetX: null | number,
+  +pageX: null | number,
+  +containerTop: null | number,
+  +width: number,
+  +trackHeight: number,
+  +payload: ScreenshotPayload,
 };
 
 const MAXIMUM_HOVER_SIZE = 350;
@@ -310,12 +310,12 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
 }
 
 type ScreenshotStripProps = {
-  readonly thread: Thread,
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
-  readonly screenshots: Marker[],
-  readonly width: number,
-  readonly trackHeight: number,
+  +thread: Thread,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +screenshots: Marker[],
+  +width: number,
+  +trackHeight: number,
 };
 
 class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {

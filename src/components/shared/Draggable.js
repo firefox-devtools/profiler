@@ -16,8 +16,8 @@ export type OnMove = (
 
 type Props = {
   value: {
-    readonly selectionStart: Milliseconds,
-    readonly selectionEnd: Milliseconds,
+    +selectionStart: Milliseconds,
+    +selectionEnd: Milliseconds,
   },
   onMove: OnMove,
   className: string,

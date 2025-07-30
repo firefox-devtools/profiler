@@ -44,19 +44,19 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './ProfileViewer.css';
 
 type StateProps = {
-  readonly hasZipFile: boolean,
-  readonly timelineHeight: CssPixels | null,
-  readonly uploadProgress: number,
-  readonly isUploading: boolean,
-  readonly isHidingStaleProfile: boolean,
-  readonly hasSanitizedProfile: boolean,
-  readonly icons: IconsWithClassNames,
-  readonly isBottomBoxOpen: boolean,
+  +hasZipFile: boolean,
+  +timelineHeight: CssPixels | null,
+  +uploadProgress: number,
+  +isUploading: boolean,
+  +isHidingStaleProfile: boolean,
+  +hasSanitizedProfile: boolean,
+  +icons: IconsWithClassNames,
+  +isBottomBoxOpen: boolean,
 };
 
 type DispatchProps = {
-  readonly returnToZipFileList: typeof returnToZipFileList,
-  readonly invalidatePanelLayout: typeof invalidatePanelLayout,
+  +returnToZipFileList: typeof returnToZipFileList,
+  +invalidatePanelLayout: typeof invalidatePanelLayout,
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;

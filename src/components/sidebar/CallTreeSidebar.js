@@ -46,10 +46,10 @@ import {
 import classNames from 'classnames';
 
 type SidebarDetailProps = {
-  readonly label: React.Node,
+  +label: React.Node,
   +color?: string,
   +indent?: boolean,
-  readonly value: React.Node,
+  +value: React.Node,
   +percentage?: string | number,
 };
 
@@ -77,18 +77,18 @@ function SidebarDetail({
 
 type CategoryBreakdownOwnProps = {
   /** for total or self breakdown */
-  readonly kind: 'total' | 'self',
-  readonly breakdown: BreakdownByCategory,
-  readonly categoryList: CategoryList,
-  readonly number: (number) => string,
+  +kind: 'total' | 'self',
+  +breakdown: BreakdownByCategory,
+  +categoryList: CategoryList,
+  +number: (number) => string,
 };
 
 type CategoryBreakdownStateProps = {
-  readonly sidebarOpenCategories: Map<string, Set<IndexIntoCategoryList>>,
+  +sidebarOpenCategories: Map<string, Set<IndexIntoCategoryList>>,
 };
 
 type CategoryBreakdownDispatchProps = {
-  readonly toggleOpenCategoryInSidebar: typeof toggleOpenCategoryInSidebar,
+  +toggleOpenCategoryInSidebar: typeof toggleOpenCategoryInSidebar,
 };
 
 type CategoryBreakdownAllProps = ConnectedProps<
@@ -213,22 +213,22 @@ export const CategoryBreakdown = explicitConnect<
 });
 
 type StateProps = {
-  readonly selectedNodeIndex: IndexIntoCallNodeTable | null,
-  readonly selectedThreadsKey: ThreadsKey,
-  readonly name: string,
-  readonly lib: string,
-  readonly timings: TimingsForPath,
-  readonly categoryList: CategoryList,
-  readonly weightType: WeightType,
-  readonly selectedNodeTracedSelfAndTotal: SelfAndTotal | null,
+  +selectedNodeIndex: IndexIntoCallNodeTable | null,
+  +selectedThreadsKey: ThreadsKey,
+  +name: string,
+  +lib: string,
+  +timings: TimingsForPath,
+  +categoryList: CategoryList,
+  +weightType: WeightType,
+  +selectedNodeTracedSelfAndTotal: SelfAndTotal | null,
 };
 
 type Props = ConnectedProps<{}, StateProps, {}>;
 
 type WeightDetails = {
-  readonly runningL10nId: string,
-  readonly selfL10nId: string,
-  readonly number: (n: number) => string,
+  +runningL10nId: string,
+  +selfL10nId: string,
+  +number: (n: number) => string,
 };
 
 function getRunningWeightTypeLabelL10nId(weightType: WeightType): string {

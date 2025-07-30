@@ -23,24 +23,24 @@ import 'firefox-profiler/components/shared/PanelSettingsList.css';
 import './MarkerSettings.css';
 
 type StateProps = {
-  readonly searchString: string,
-  readonly allowSwitchingStackType: boolean,
+  +searchString: string,
+  +allowSwitchingStackType: boolean,
 };
 
 type DispatchProps = {
-  readonly changeMarkersSearchString: typeof changeMarkersSearchString,
+  +changeMarkersSearchString: typeof changeMarkersSearchString,
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 type State = {
-  readonly isMarkerFiltersMenuVisible: boolean,
+  +isMarkerFiltersMenuVisible: boolean,
   // react-contextmenu library automatically hides the menu on mousedown even
   // if it's already visible. That's why we need to handle the mousedown event
   // as well and check if the menu is visible or not before it hides it.
   // Otherwise, if we check this in onClick event, the state will always be
   // `false` since the library already hid it on mousedown.
-  readonly isFilterMenuVisibleOnMouseDown: boolean,
+  +isFilterMenuVisibleOnMouseDown: boolean,
 };
 
 class MarkerSettingsImpl extends PureComponent<Props, State> {

@@ -36,15 +36,15 @@ type OwnProps = {
 };
 
 type StateProps = {
-  readonly isNewProfileLoadAllowed: boolean,
-  readonly useDefaultOverlay: boolean,
-  readonly browserConnection: BrowserConnection | null,
+  +isNewProfileLoadAllowed: boolean,
+  +useDefaultOverlay: boolean,
+  +browserConnection: BrowserConnection | null,
 };
 
 type DispatchProps = {
-  readonly retrieveProfileFromFile: typeof retrieveProfileFromFile,
-  readonly startDragging: typeof startDragging,
-  readonly stopDragging: typeof stopDragging,
+  +retrieveProfileFromFile: typeof retrieveProfileFromFile,
+  +startDragging: typeof startDragging,
+  +stopDragging: typeof stopDragging,
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -216,12 +216,12 @@ type OverlayOwnProps = {
   +isDefault?: boolean,
 };
 type OverlayStateProps = {
-  readonly isDragging: boolean,
-  readonly isNewProfileLoadAllowed: boolean,
+  +isDragging: boolean,
+  +isNewProfileLoadAllowed: boolean,
 };
 type OverlayDispatchProps = {
-  readonly registerDragAndDropOverlay: typeof registerDragAndDropOverlay,
-  readonly unregisterDragAndDropOverlay: typeof unregisterDragAndDropOverlay,
+  +registerDragAndDropOverlay: typeof registerDragAndDropOverlay,
+  +unregisterDragAndDropOverlay: typeof unregisterDragAndDropOverlay,
 };
 type OverlayProps = ConnectedProps<
   OverlayOwnProps,

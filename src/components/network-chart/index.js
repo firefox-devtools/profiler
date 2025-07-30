@@ -45,21 +45,21 @@ const ROW_HEIGHT = 16;
 
 // The SizeProps are injected by the WithSize higher order component.
 type DispatchProps = {
-  readonly changeSelectedNetworkMarker: typeof changeSelectedNetworkMarker,
-  readonly changeRightClickedMarker: typeof changeRightClickedMarker,
-  readonly changeHoveredMarker: typeof changeHoveredMarker,
+  +changeSelectedNetworkMarker: typeof changeSelectedNetworkMarker,
+  +changeRightClickedMarker: typeof changeRightClickedMarker,
+  +changeHoveredMarker: typeof changeHoveredMarker,
 };
 
 type StateProps = {
-  readonly markerIndexes: MarkerIndex[],
-  readonly getMarker: (MarkerIndex) => Marker,
-  readonly selectedNetworkMarkerIndex: MarkerIndex | null,
-  readonly rightClickedMarkerIndex: MarkerIndex | null,
-  readonly hoveredMarkerIndexFromState: MarkerIndex | null,
-  readonly disableOverscan: boolean,
-  readonly timeRange: StartEndRange,
-  readonly threadsKey: ThreadsKey,
-  readonly scrollToSelectionGeneration: number,
+  +markerIndexes: MarkerIndex[],
+  +getMarker: (MarkerIndex) => Marker,
+  +selectedNetworkMarkerIndex: MarkerIndex | null,
+  +rightClickedMarkerIndex: MarkerIndex | null,
+  +hoveredMarkerIndexFromState: MarkerIndex | null,
+  +disableOverscan: boolean,
+  +timeRange: StartEndRange,
+  +threadsKey: ThreadsKey,
+  +scrollToSelectionGeneration: number,
 };
 
 type OwnProps = { ...SizeProps };

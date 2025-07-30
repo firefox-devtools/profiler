@@ -115,20 +115,20 @@ function TooltipCallNodeTotalSelfMeters({
 }
 
 type Props = {
-  readonly thread: Thread,
-  readonly weightType: WeightType,
-  readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-  readonly callNodeIndex: IndexIntoCallNodeTable,
-  readonly callNodeInfo: CallNodeInfo,
-  readonly categories: CategoryList,
-  readonly interval: Milliseconds,
+  +thread: Thread,
+  +weightType: WeightType,
+  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
+  +callNodeIndex: IndexIntoCallNodeTable,
+  +callNodeInfo: CallNodeInfo,
+  +categories: CategoryList,
+  +interval: Milliseconds,
   // Since this tooltip can be used in different context, provide some kind of duration
   // label, e.g. "100ms" or "33%".
-  readonly durationText: string,
+  +durationText: string,
   +displayData?: CallNodeDisplayData,
   +timings?: TimingsForPath,
-  readonly callTreeSummaryStrategy: CallTreeSummaryStrategy,
-  readonly displayStackType: boolean,
+  +callTreeSummaryStrategy: CallTreeSummaryStrategy,
+  +displayStackType: boolean,
 };
 
 /**

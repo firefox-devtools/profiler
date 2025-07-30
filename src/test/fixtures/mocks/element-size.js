@@ -5,8 +5,8 @@
 // @flow
 
 type Size = {
-  readonly width: number,
-  readonly height: number,
+  +width: number,
+  +height: number,
   // offsetX and offsetY will define values for left/right/x/y/top/bottom,
   // taking into account width and height as well.
   +offsetX?: number,

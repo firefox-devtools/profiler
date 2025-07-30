@@ -40,10 +40,10 @@ import type {
 } from 'firefox-profiler/types';
 
 export type SanitizeProfileResult = {
-  readonly profile: Profile,
-  readonly oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
-  readonly committedRanges: StartEndRange[] | null,
-  readonly isSanitized: boolean,
+  +profile: Profile,
+  +oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
+  +committedRanges: StartEndRange[] | null,
+  +isSanitized: boolean,
 };
 
 /**

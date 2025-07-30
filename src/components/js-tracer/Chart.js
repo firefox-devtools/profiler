@@ -41,21 +41,21 @@ import './index.css';
 const ROW_HEIGHT: CssPixels = 16;
 
 type OwnProps = {
-  readonly jsTracerTable: JsTracerTable,
-  readonly showJsTracerSummary: boolean,
-  readonly doFadeIn: boolean,
+  +jsTracerTable: JsTracerTable,
+  +showJsTracerSummary: boolean,
+  +doFadeIn: boolean,
 };
 
 type DispatchProps = {
-  readonly updatePreviewSelection: typeof updatePreviewSelection,
+  +updatePreviewSelection: typeof updatePreviewSelection,
 };
 
 type StateProps = {
-  readonly jsTracerTimingRows: JsTracerTiming[],
-  readonly stringTable: StringTable,
-  readonly timeRange: StartEndRange,
-  readonly threadsKey: ThreadsKey,
-  readonly previewSelection: PreviewSelection,
+  +jsTracerTimingRows: JsTracerTiming[],
+  +stringTable: StringTable,
+  +timeRange: StartEndRange,
+  +threadsKey: ThreadsKey,
+  +previewSelection: PreviewSelection,
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -152,10 +152,10 @@ const JsTracerExpensiveChart = explicitConnect<
 });
 
 type ChartLoaderProps = {
-  readonly profile: Profile,
-  readonly jsTracerTable: JsTracerTable,
-  readonly showJsTracerSummary: boolean,
-  readonly keyString: string,
+  +profile: Profile,
+  +jsTracerTable: JsTracerTable,
+  +showJsTracerSummary: boolean,
+  +keyString: string,
 };
 
 type ChartLoaderState = {
@@ -234,10 +234,10 @@ class JsTracerChartLoader extends React.PureComponent<
 }
 
 type ChartProps = {
-  readonly profile: Profile,
-  readonly jsTracerTable: JsTracerTable,
-  readonly showJsTracerSummary: boolean,
-  readonly threadsKey: ThreadsKey,
+  +profile: Profile,
+  +jsTracerTable: JsTracerTable,
+  +showJsTracerSummary: boolean,
+  +threadsKey: ThreadsKey,
 };
 
 /**

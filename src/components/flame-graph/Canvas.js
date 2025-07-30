@@ -54,42 +54,42 @@ import type {
 } from 'firefox-profiler/profile-logic/call-tree';
 
 export type OwnProps = {
-  readonly thread: Thread,
-  readonly weightType: WeightType,
-  readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-  readonly unfilteredThread: Thread,
-  readonly ctssSampleIndexOffset: number,
-  readonly maxStackDepthPlusOne: number,
-  readonly flameGraphTiming: FlameGraphTiming,
-  readonly callNodeInfo: CallNodeInfo,
-  readonly callTree: CallTree,
-  readonly stackFrameHeight: CssPixels,
-  readonly selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  readonly rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
-  readonly onSelectionChange: (IndexIntoCallNodeTable | null) => void,
-  readonly onRightClick: (IndexIntoCallNodeTable | null) => void,
-  readonly onDoubleClick: (IndexIntoCallNodeTable | null) => void,
-  readonly shouldDisplayTooltips: () => boolean,
-  readonly scrollToSelectionGeneration: number,
-  readonly categories: CategoryList,
-  readonly interval: Milliseconds,
-  readonly isInverted: boolean,
-  readonly callTreeSummaryStrategy: CallTreeSummaryStrategy,
-  readonly ctssSamples: SamplesLikeTable,
-  readonly unfilteredCtssSamples: SamplesLikeTable,
-  readonly tracedTiming: CallTreeTimingsNonInverted | null,
-  readonly displayStackType: boolean,
+  +thread: Thread,
+  +weightType: WeightType,
+  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
+  +unfilteredThread: Thread,
+  +ctssSampleIndexOffset: number,
+  +maxStackDepthPlusOne: number,
+  +flameGraphTiming: FlameGraphTiming,
+  +callNodeInfo: CallNodeInfo,
+  +callTree: CallTree,
+  +stackFrameHeight: CssPixels,
+  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
+  +onRightClick: (IndexIntoCallNodeTable | null) => void,
+  +onDoubleClick: (IndexIntoCallNodeTable | null) => void,
+  +shouldDisplayTooltips: () => boolean,
+  +scrollToSelectionGeneration: number,
+  +categories: CategoryList,
+  +interval: Milliseconds,
+  +isInverted: boolean,
+  +callTreeSummaryStrategy: CallTreeSummaryStrategy,
+  +ctssSamples: SamplesLikeTable,
+  +unfilteredCtssSamples: SamplesLikeTable,
+  +tracedTiming: CallTreeTimingsNonInverted | null,
+  +displayStackType: boolean,
 };
 
 type Props = {
   ...OwnProps,
   // Bring in the viewport props from the higher order Viewport component.
-  readonly viewport: Viewport,
+  +viewport: Viewport,
 };
 
 type HoveredStackTiming = {
-  readonly depth: FlameGraphDepth,
-  readonly flameGraphTimingIndex: IndexIntoFlameGraphTiming,
+  +depth: FlameGraphDepth,
+  +flameGraphTimingIndex: IndexIntoFlameGraphTiming,
 };
 
 import './Canvas.css';

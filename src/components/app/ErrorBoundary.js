@@ -14,8 +14,8 @@ type State = {
 };
 
 type ExternalProps = {
-  readonly children: React.Node,
-  readonly message: string,
+  +children: React.Node,
+  +message: string,
 };
 
 type InternalProps = {

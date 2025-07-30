@@ -34,8 +34,8 @@ function englishListJoin(list) {
 }
 
 type StateProps = {
-  readonly symbolicationStatus: string,
-  readonly waitingForLibs: Set<RequestedLib>,
+  +symbolicationStatus: string,
+  +waitingForLibs: Set<RequestedLib>,
 };
 
 type Props = ConnectedProps<{}, StateProps, {}>;

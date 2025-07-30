@@ -35,7 +35,7 @@ function removeUselessEndZeroInVersion(version: string): string {
 // This returns a string to identify the product and its version out of the meta
 // information, eg `Firefox 77` of `Firefox Preview 78`.
 export function formatProductAndVersion(meta: {
-  readonly product: string,
+  +product: string,
   +misc?: string,
 }): string {
   const product = meta.product || '';

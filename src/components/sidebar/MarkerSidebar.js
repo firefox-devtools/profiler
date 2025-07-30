@@ -16,9 +16,9 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type { ThreadsKey, Marker, MarkerIndex } from 'firefox-profiler/types';
 
 type StateProps = {
-  readonly selectedThreadsKey: ThreadsKey,
-  readonly marker: Marker | null,
-  readonly markerIndex: MarkerIndex | null,
+  +selectedThreadsKey: ThreadsKey,
+  +marker: Marker | null,
+  +markerIndex: MarkerIndex | null,
 };
 
 type Props = ConnectedProps<{}, StateProps, {}>;

@@ -97,9 +97,9 @@ export type TestDefinedMarkers = Array<
 // This type is used when needing to create a specific RawMarkerTable.
 export type TestDefinedRawMarker = {
   +name?: string,
-  readonly startTime: Milliseconds | null,
-  readonly endTime: Milliseconds | null,
-  readonly phase: MarkerPhase,
+  +startTime: Milliseconds | null,
+  +endTime: Milliseconds | null,
+  +phase: MarkerPhase,
   +category?: IndexIntoCategoryList,
   +data?: MarkerPayload | null,
 };

@@ -20,7 +20,7 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {};
 type StateProps = {
-  readonly primaryLocale: string | null,
+  +primaryLocale: string | null,
 };
 type DispatchProps = {
   requestL10n: typeof requestL10n,
