@@ -19,7 +19,14 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 - **Files Modified**: 240+ files with pure syntax transformation
 - **Build Compatibility**: Maintains both Flow and TypeScript compilation paths
 
-## Current Status: Type Definitions Migration In Progress
+## Current Status: Type Definitions Complete - Core Utilities In Progress
+
+### 🎯 Key Achievements (July 30, 2025)
+- **✅ MAJOR MILESTONE**: All type definition files (13/13) successfully converted to TypeScript
+- **✅ Complex Type Mastery**: Handled advanced Flow patterns in 890-line markers.ts and 572-line gecko-profile.ts
+- **✅ Zero Compilation Errors**: All converted files compile successfully with TypeScript
+- **✅ Utility Migration Started**: 3 core utility files converted (colors.ts, string.ts, format-numbers.ts)
+- **✅ Proven Conversion Patterns**: Systematic approach for Flow→TypeScript migration established
 
 ### Build & Test Status
 - **Build**: ✅ Working (`yarn build` passes)
@@ -46,7 +53,7 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 - [x] 100% - Flow readonly properties approach (discarded - see lessons learned)
 
 **🔄 Phase 3 - File-by-File Migration** (IN PROGRESS)
-- [ ] 0% - Core utility files (.js → .ts)
+- [x] 5% - Core utility files (.js → .ts) - Started with 3 files: colors.ts, string.ts, format-numbers.ts ✅
 - [x] 100% - Type definition files (.js → .ts) - ALL 13 files successfully converted ✅
 - [ ] 0% - React components (.js → .tsx)
 - [ ] 0% - Test files migration
@@ -65,10 +72,16 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 
 ### Completed Work
 - **Exact Objects Converted**: 1,132 instances (`{||}` → `{}`)
-- **Core Type Definition Files**: 6 critical files converted and compiling successfully
-  - ✅ units.ts, utils.ts, store.ts, index.ts (foundational types)
-  - ✅ **actions.ts** (691 lines, complex Redux action types)
-  - ✅ **state.ts** (395 lines, complete application state types)
+- **All Type Definition Files**: 13/13 files successfully converted and compiling ✅
+  - ✅ **Foundation Types**: units.ts, utils.ts, store.ts, index.ts
+  - ✅ **Core Application Types**: actions.ts (691 lines), state.ts (395 lines)
+  - ✅ **Complex Profile Types**: profile.ts, profile-derived.ts
+  - ✅ **Additional Types**: transforms.ts, symbolication.ts, indexeddb.ts
+  - ✅ **Final Complex Types**: markers.ts (890 lines), gecko-profile.ts (572 lines)
+- **Core Utility Files Started**: 3/40+ files converted
+  - ✅ **colors.ts**: Photon color constants and style mapping
+  - ✅ **string.ts**: URL sanitization and text processing utilities  
+  - ✅ **format-numbers.ts**: Number formatting with localization support
 - **Flow→TypeScript Patterns**: Established systematic conversion patterns (see PLAN.md)
 - **Files Modified**: 240+ files across entire codebase
 - **Build System**: Fully functional dual Flow/TypeScript compilation
@@ -76,19 +89,21 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 
 ### Current Progress Status
 
-#### ✅ Completed (6/14 type files)
+#### ✅ MAJOR MILESTONE: Type Foundation Complete (13/13 type files)
+- **All Type Definition Files**: 100% converted and compiling successfully ✅
 - **Foundation Types**: units.ts, utils.ts, store.ts, index.ts
 - **Core Application Types**: actions.ts (Redux actions), state.ts (app state)
-- All compile successfully with zero TypeScript errors
+- **Complex Profile Types**: profile.ts, profile-derived.ts
+- **Advanced Types**: transforms.ts, symbolication.ts, indexeddb.ts
+- **Final Complex Files**: markers.ts (890 lines), gecko-profile.ts (572 lines)
 
-#### 🔄 In Progress (2/14 type files)
-- **profile.ts**: 95% converted, compiles successfully
-- **profile-derived.ts**: 90% converted, needs final Flow pattern fixes
+#### 🔄 Current Work: Core Utilities Migration (3/40+ files)
+- **Recently Converted**: colors.ts, string.ts, format-numbers.ts
+- **Patterns Established**: CommonJS imports, relative path fixes, Flow syntax removal
+- **Next Target**: Continue with remaining utility files in src/utils/
 
 #### ⏳ Remaining Work
-- **Type Definition Files**: 6 remaining files in src/types/
-  - gecko-profile.js, markers.js, transforms.js, symbolication.js, indexeddb.js, globals/*
-- **Core Utilities**: ~20 files in src/utils/*.js → .ts
+- **Core Utilities**: ~37 remaining files in src/utils/*.js → .ts
 - **React Components**: ~150 .js files → .tsx
 - **Complex Types**: Per-thread selectors, exact patterns
 
@@ -187,12 +202,13 @@ This document tracks the current status of the Flow to TypeScript migration. It 
    - ✅ **Converted gecko-profile.js** → gecko-profile.ts (572 lines, Gecko profile format)
    - ✅ All 13/13 type files in src/types/ successfully converted and compiling
 
-3. **Next: Move to Core Utilities**:
-   - Convert `src/utils/*.js` → `.ts` (builds on type foundation)
-   - Start with simple utility files without complex dependencies
+3. **🔄 CURRENT: Core Utilities Migration**:
+   - ✅ Started with 3 files: colors.ts, string.ts, format-numbers.ts  
+   - ⏳ Continue with remaining ~37 utility files in src/utils/
+   - Focus on files with fewer dependencies first
    - Validate import/export patterns work correctly
 
-3. **Begin Component Migration**:
+4. **Next: Begin Component Migration**:
    - Start with simple leaf components (no complex Redux connections)
    - Convert `.js` → `.tsx` with proper React types
    - Validate that component props and state work correctly
@@ -220,5 +236,6 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 ---
 
 **Last Updated**: July 30, 2025  
-**Major Milestone**: All type definition files (13/13) successfully converted to TypeScript ✅
-**Next Status Update**: After beginning core utilities conversion in src/utils/
+**Major Milestone**: All type definition files (13/13) successfully converted to TypeScript ✅  
+**Current Phase**: Core utilities migration (3/40+ files converted)
+**Next Status Update**: After converting significant portion of utility files in src/utils/
