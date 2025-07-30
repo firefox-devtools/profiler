@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 // This file implements functions that we can use in fluent translation files.
 
 import { FluentDateTime } from '@fluent/bundle';
@@ -12,14 +10,14 @@ import { FluentDateTime } from '@fluent/bundle';
 // and directly import Fluent's types when we switch to Typescript.
 
 interface Scope {
-  reportError(error: mixed): void;
+  reportError(error: unknown): void;
 }
 
-export type FluentValue = FluentType<mixed> | string;
+export type FluentValue = FluentType<unknown> | string;
 
 export type FluentFunction = (
   positional: Array<FluentValue>,
-  named: { [string]: FluentValue }
+  named: { [key: string]: FluentValue }
 ) => FluentValue;
 
 /**
@@ -77,7 +75,7 @@ const DATE_FORMATS = {
     month: 'short',
     day: 'numeric',
   },
-};
+} as const;
 
 /**
  * This function takes a timestamp as a parameter. It's similar to the builtin
@@ -88,12 +86,14 @@ export const SHORTDATE: FluentFunction = (args, _named) => {
   const date = args[0];
   const nowTimestamp = Date.now();
 
-  const timeDifference = nowTimestamp - +date;
+  // Convert FluentValue to number for calculations
+  const dateValue = +date;
+  const timeDifference = nowTimestamp - dateValue;
   if (timeDifference < 0 || timeDifference > ONE_YEAR_IN_MS) {
-    return new FluentDateTime(date, DATE_FORMATS.ancient);
+    return new FluentDateTime(dateValue, DATE_FORMATS.ancient);
   }
   if (timeDifference > ONE_DAY_IN_MS) {
-    return new FluentDateTime(date, DATE_FORMATS.thisYear);
+    return new FluentDateTime(dateValue, DATE_FORMATS.thisYear);
   }
-  return new FluentDateTime(date, DATE_FORMATS.thisDay);
+  return new FluentDateTime(dateValue, DATE_FORMATS.thisDay);
 };
