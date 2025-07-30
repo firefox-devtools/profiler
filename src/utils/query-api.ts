@@ -16,7 +16,7 @@ import { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection
 export interface ExternalCommunicationDelegate {
   // Fetch a cross-origin URL and return its Response. If postData is specified,
   // the method should be POST.
-  fetchUrlResponse(url: string, postData?: MixedObject): Promise<Response>;
+  fetchUrlResponse(url: string, postData?: string): Promise<Response>;
 
   // Query the symbolication API of the browser, if a connection to the browser
   // is available.
@@ -76,9 +76,7 @@ export async function queryApiWithFallback<T>(
   if (symbolServerUrlForFallback !== null) {
     const url = symbolServerUrlForFallback + path;
     try {
-      const response = await delegate.fetchUrlResponse(url, {
-        data: requestJson,
-      });
+      const response = await delegate.fetchUrlResponse(url, requestJson);
       const responseText = await response.text();
 
       try {
@@ -135,7 +133,7 @@ export class RegularExternalCommunicationDelegate
     this._callbacks = callbacks;
   }
 
-  async fetchUrlResponse(url: string, postData?: MixedObject) {
+  async fetchUrlResponse(url: string, postData?: string) {
     this._callbacks.onBeginUrlRequest(url);
     const requestInit: RequestInit =
       postData !== undefined

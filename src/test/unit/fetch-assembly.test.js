@@ -62,7 +62,7 @@ describe('fetchAssembly', function () {
     let observedPostData = null;
     expect(
       await fetchAssembly(nativeSymbolInfo, lib, 'http://127.0.0.1:8000/api', {
-        fetchUrlResponse: async (url: string, postData?: MixedObject) => {
+        fetchUrlResponse: async (url: string, postData?: string) => {
           observedUrl = url;
           observedPostData = postData;
           const r = new Response(exampleResponse, {
@@ -134,7 +134,7 @@ describe('fetchAssembly', function () {
           lib,
           'http://127.0.0.1:8000/api',
           {
-            fetchUrlResponse: async (_url: string, postData?: MixedObject) => {
+            fetchUrlResponse: async (_url: string, postData?: string) => {
               observedPostData = postData;
               const r = new Response(exampleResponse, {
                 status: 200,
@@ -164,7 +164,7 @@ describe('fetchAssembly', function () {
           lib,
           'http://127.0.0.1:8000/api',
           {
-            fetchUrlResponse: async (_url: string, _postData?: MixedObject) => {
+            fetchUrlResponse: async (_url: string, _postData?: string) => {
               throw new Error('Some network error');
             },
             queryBrowserSymbolicationApi: async (
@@ -185,7 +185,7 @@ describe('fetchAssembly', function () {
   it('propagates all errors', async function () {
     expect(
       await fetchAssembly(nativeSymbolInfo, lib, 'http://127.0.0.1:8000/api', {
-        fetchUrlResponse: async (_url: string, _postData?: MixedObject) => {
+        fetchUrlResponse: async (_url: string, _postData?: string) => {
           throw new Error('Some network error');
         },
         queryBrowserSymbolicationApi: async (
@@ -220,7 +220,7 @@ describe('fetchAssembly', function () {
           lib,
           'https://symbolication.services.mozilla.com',
           {
-            fetchUrlResponse: async (url: string, _postData?: MixedObject) => {
+            fetchUrlResponse: async (url: string, _postData?: string) => {
               observedUrl = url;
               throw new Error(
                 'Should not have queried this API on the official symbol server because it does not support it yet'
