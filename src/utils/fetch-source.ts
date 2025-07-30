@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import { assertExhaustiveCheck } from './flow';
 import {
   getDownloadRecipeForSourceFile,
@@ -13,15 +11,13 @@ import { isGzip, decompress } from './gz';
 import { UntarFileStream } from './untar';
 import { isLocalURL } from './url';
 import { queryApiWithFallback } from './query-api';
-import type { ExternalCommunicationDelegate } from './query-api';
-import type {
-  SourceCodeLoadingError,
-  AddressProof,
-} from 'firefox-profiler/types';
+import { ExternalCommunicationDelegate } from './query-api';
+import { AddressProof } from 'firefox-profiler/types';
+import { SourceCodeLoadingError } from 'firefox-profiler/types/state';
 
 export type FetchSourceResult =
-  | { type: 'SUCCESS', source: string }
-  | { type: 'ERROR', errors: SourceCodeLoadingError[] };
+  | { type: 'SUCCESS'; source: string }
+  | { type: 'ERROR'; errors: SourceCodeLoadingError[] };
 
 /**
  * Fetch the source code for a file path from the web.
@@ -83,7 +79,7 @@ export async function fetchSource(
         break;
       }
       default:
-        throw assertExhaustiveCheck(queryResult.type);
+        throw assertExhaustiveCheck(queryResult as never);
     }
   }
 
@@ -140,7 +136,7 @@ export async function fetchSource(
         const bytes = await promise;
 
         // Find the file inside of the archive.
-        const stream = new UntarFileStream(bytes.buffer);
+        const stream = new UntarFileStream(bytes.buffer as ArrayBuffer);
         const textDecoder = new TextDecoder();
 
         while (stream.hasNext()) {
@@ -171,12 +167,12 @@ export async function fetchSource(
     }
 
     default:
-      throw assertExhaustiveCheck(downloadRecipe.type);
+      throw assertExhaustiveCheck(downloadRecipe as never);
   }
   return { type: 'ERROR', errors };
 }
 
-function convertResponseJsonToSourceCode(responseJson: MixedObject): string {
+function convertResponseJsonToSourceCode(responseJson: any): string {
   if (!('source' in responseJson) || typeof responseJson.source !== 'string') {
     throw new Error('No string "source" property on API response');
   }
