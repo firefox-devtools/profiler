@@ -2,10 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
-import type { ApiQueryError } from 'firefox-profiler/types';
-import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
+import { MixedObject } from 'firefox-profiler/types';
+import { ApiQueryError } from 'firefox-profiler/types/state';
+import { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 
 /**
  * An abstraction which simplifies writing tests for things like source and assembly
@@ -28,8 +27,8 @@ export interface ExternalCommunicationDelegate {
 }
 
 export type ApiQueryResult<T> =
-  | { type: 'SUCCESS', convertedResponse: T }
-  | { type: 'ERROR', errors: ApiQueryError[] };
+  | { type: 'SUCCESS'; convertedResponse: T }
+  | { type: 'ERROR'; errors: ApiQueryError[] };
 
 /**
  * Sends a JSON query to the browser symbolication API and, if supplied, to a
@@ -40,7 +39,7 @@ export async function queryApiWithFallback<T>(
   requestJson: string,
   symbolServerUrlForFallback: string | null,
   delegate: ExternalCommunicationDelegate,
-  convertJsonResponse: (MixedObject) => T
+  convertJsonResponse: (responseJson: MixedObject) => T
 ): Promise<ApiQueryResult<T>> {
   const errors: ApiQueryError[] = [];
 
@@ -77,7 +76,7 @@ export async function queryApiWithFallback<T>(
   if (symbolServerUrlForFallback !== null) {
     const url = symbolServerUrlForFallback + path;
     try {
-      const response = await delegate.fetchUrlResponse(url, requestJson);
+      const response = await delegate.fetchUrlResponse(url, { data: requestJson });
       const responseText = await response.text();
 
       try {
@@ -136,10 +135,10 @@ export class RegularExternalCommunicationDelegate
 
   async fetchUrlResponse(url: string, postData?: MixedObject) {
     this._callbacks.onBeginUrlRequest(url);
-    const requestInit =
+    const requestInit: RequestInit =
       postData !== undefined
         ? {
-            body: postData,
+            body: JSON.stringify(postData),
             method: 'POST',
             mode: 'cors',
             credentials: 'omit',

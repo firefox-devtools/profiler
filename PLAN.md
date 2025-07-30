@@ -5,17 +5,15 @@
 ### 📊 Progress
 
 - **Type Definitions**: ✅ 13/13 files complete (100%)
-- **Core Utilities**: 🔄 27/41 files complete (65.9%) - colors.ts, string.ts, format-numbers.ts, errors.ts, base64.ts, bisect.ts, pretty-bytes.ts, sha1.ts, set.ts, magic.ts, analytics.ts, l10n-pseudo.ts, path.ts, time-code.ts, number-series.ts, jwt.ts, shorten-url.ts, uintarray-encoding.ts, range-set.ts, special-paths.ts, string-table.ts, window-console.ts, css-geometry-tools.ts, gz.ts, react.ts, flow.ts, index.ts
+- **Core Utilities**: 🔄 33/41 files complete (80.5%) - colors.ts, string.ts, format-numbers.ts, errors.ts, base64.ts, bisect.ts, pretty-bytes.ts, sha1.ts, set.ts, magic.ts, analytics.ts, l10n-pseudo.ts, path.ts, time-code.ts, number-series.ts, jwt.ts, shorten-url.ts, uintarray-encoding.ts, range-set.ts, special-paths.ts, string-table.ts, window-console.ts, css-geometry-tools.ts, gz.ts, react.ts, flow.ts, index.ts, codemirror-shared.ts, data-table-utils.ts, resize-observer-wrapper.ts, text-measurement.ts, url.ts, l10n-ftl-functions.ts
 - **React Components**: ⏳ 0/150+ files (pending)
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 
 ### 🎯 Next Steps
 
-1. Continue converting remaining 14 utility files in src/utils/
-   - Priority files: codemirror-shared.js, data-table-utils.js, resize-observer-wrapper.js, text-measurement.js, url.js
+1. Continue converting remaining 8 utility files in src/utils/
    - Complex files: connect.js, fetch-assembly.js, fetch-source.js, query-api.js, untar.js, worker-factory.js
    - Mock files: __mocks__/node-worker-contents.js, __mocks__/worker-factory.js
-   - L10N file: l10n-ftl-functions.js
 2. Begin React component migration with basic leaf components
 3. Maintain test validation after each conversion
 

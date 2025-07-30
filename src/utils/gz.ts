@@ -30,7 +30,7 @@ export function compress(
   data: string | Uint8Array,
   compressionLevel?: number
 ): Promise<Uint8Array> {
-  const zeeWorker = new WebWorker('zee-worker');
+  const zeeWorker = new WebWorker('zee-worker') as any as Worker;
   workerOnMessage(zeeWorker);
 
   const arrayData =
@@ -55,7 +55,7 @@ export function compress(
 // Neuters data's buffer, if data is a typed array.
 export function decompress(data: Uint8Array): Promise<Uint8Array> {
   return new Promise(function (resolve, reject) {
-    const zeeWorker = new WebWorker('zee-worker');
+    const zeeWorker = new WebWorker('zee-worker') as any as Worker;
     workerOnMessage(zeeWorker);
     zeeWorker.postMessage(
       {

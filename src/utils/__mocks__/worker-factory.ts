@@ -1,14 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
-// $FlowExpectError Flow doesn't know about this util
 import { Worker } from 'worker_threads';
 
 class NodeWorker {
-  _instance: Worker;
-  onmessage: (MessageEvent) => mixed;
+  _instance: Worker | null;
+  onmessage: ((event: MessageEvent) => unknown) | null;
 
   constructor(file: string) {
     const worker = new Worker(__dirname + '/node-worker-contents.js', {
@@ -17,11 +15,12 @@ class NodeWorker {
     worker.on('message', this.onMessage);
     worker.on('error', this.onError);
     this._instance = worker;
+    this.onmessage = null;
   }
 
   postMessage(
-    message: mixed,
-    transfer?: Array<ArrayBuffer | MessagePort | ImageBitmap>
+    message: unknown,
+    transfer?: any[]
   ) {
     let payload = message;
 
@@ -29,16 +28,16 @@ class NodeWorker {
     // semantics than Web Workers. This code adds the support for older node
     // versions. We can remove this thin compatibility layer when we stop
     // supporting these node versions.
-    const nodeVersion = process.versions.node;
+    const nodeVersion = (process as any).versions.node;
     const [major, minor] = nodeVersion.split('.');
 
     if (+major < 11 || (+major === 11 && +minor < 12)) {
       payload = { data: message };
     }
-    this._instance.postMessage(payload, transfer);
+    this._instance?.postMessage(payload, transfer);
   }
 
-  onMessage = (message: mixed) => {
+  onMessage = (message: unknown) => {
     if (this.onmessage) {
       this.onmessage(new MessageEvent('message', { data: message }));
     }
@@ -49,17 +48,19 @@ class NodeWorker {
   };
 
   terminate() {
-    this._instance.terminate();
-    this._instance.unref();
-    this._instance = null;
+    if (this._instance) {
+      this._instance.terminate();
+      this._instance.unref();
+      this._instance = null;
+    }
   }
 }
 
-const workerConfigs = {
+const workerConfigs: { [key: string]: string } = {
   'zee-worker': './res/zee-worker.js',
 };
 
-const workerInstances = [];
+const workerInstances: NodeWorker[] = [];
 
 export default class {
   constructor(file: string) {
