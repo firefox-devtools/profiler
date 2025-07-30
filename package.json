@@ -57,7 +57,7 @@
     "test-build-coverage": "yarn test --coverage --coverageReporters=html",
     "test-serve-coverage": "ws -d coverage/ -p 4343",
     "test-coverage": "run-s test-build-coverage test-serve-coverage",
-    "test-alex": "alex ./docs-* *.md",
+    "test-alex": "alex ./docs-* CODE_OF_CONDUCT.md CONTRIBUTING.md README.md",
     "test-lockfile": "lockfile-lint --path yarn.lock --allowed-hosts yarn --validate-https",
     "test-debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "postinstall": "patch-package"
