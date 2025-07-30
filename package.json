@@ -118,6 +118,7 @@
     "@babel/preset-env": "^7.28.0",
     "@babel/preset-flow": "^7.27.1",
     "@babel/preset-react": "^7.27.1",
+    "@babel/preset-typescript": "^7.27.1",
     "@fetch-mock/jest": "^0.2.16",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
@@ -189,13 +190,15 @@
   },
   "jest": {
     "collectCoverageFrom": [
-      "src/**/*.{js,jsx}",
+      "src/**/*.{js,jsx,ts,tsx}",
       "!**/node_modules/**",
       "!src/types/libdef/**"
     ],
     "moduleFileExtensions": [
       "js",
-      "jsx"
+      "jsx",
+      "ts",
+      "tsx"
     ],
     "transformIgnorePatterns": [
       "/node_modules/(?!(query-string|decode-uri-component|split-on-first|filter-obj|@fetch-mock/jest|fetch-mock)/)"

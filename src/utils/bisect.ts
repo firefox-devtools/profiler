@@ -91,10 +91,8 @@
  * ```
  */
 
-// @flow
-
 export function bisectionRight(
-  array: number[] | $TypedArray,
+  array: number[] | Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array,
   x: number,
   low?: number,
   high?: number
@@ -127,7 +125,7 @@ export function bisectionRight(
 export function bisectionRightByKey<T>(
   array: T[],
   x: number,
-  toKey: (T) => number,
+  toKey: (arg: T) => number,
   low?: number,
   high?: number
 ): number {
@@ -159,7 +157,7 @@ export function bisectionRightByKey<T>(
 export function bisectionRightByStrKey<T>(
   array: T[],
   x: string,
-  toKey: (T) => string,
+  toKey: (arg: T) => string,
   low?: number,
   high?: number
 ): number {
@@ -184,7 +182,7 @@ export function bisectionRightByStrKey<T>(
 }
 
 export function bisectionLeft(
-  array: number[] | $TypedArray,
+  array: number[] | Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array,
   x: number,
   low?: number,
   high?: number
