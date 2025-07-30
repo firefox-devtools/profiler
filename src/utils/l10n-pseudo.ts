@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 // Stolen from https://hg.mozilla.org/mozilla-central/file/a1f74e8c8fb72390d22054d6b00c28b1a32f6c43/intl/l10n/L10nRegistry.jsm#l425
 /**
  * Pseudolocalizations
@@ -60,12 +58,12 @@ const FLIPPED_MAP = {
 };
 
 function transformString(
-  map,
+  map: { caps: number[], small: number[] },
   elongate = false,
   prefix = '',
   postfix = '',
   msg: string
-) {
+): string {
   // Exclude access-keys and other single-char messages
   if (msg.length === 1) {
     return msg;

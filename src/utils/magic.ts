@@ -1,5 +1,3 @@
-// @flow
-
 export const SIMPLEPERF = 'SIMPLEPERF';
 
 export function verifyMagic(magic: string, traceBuffer: ArrayBuffer): boolean {

@@ -1,7 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
 /**
  * Document Google Analytics API that is used in the project. These definitions
@@ -34,25 +33,25 @@ type GATiming = {
 export type GAPayload = GAEvent | GAPageView | GATiming;
 
 export type GAErrorPayload = {
-  +exDescription: string,
-  +exFatal: boolean,
+  readonly exDescription: string,
+  readonly exFatal: boolean,
 };
 
 // Prettier breaks with multiple arrow functions and intersections, so name the arrow
 // functions.
-type _Send = ('send', GAPayload) => void;
-type _Exception = ('send', 'exception', GAErrorPayload) => void;
+type _Send = (command: 'send', payload: GAPayload) => void;
+type _Exception = (command: 'send', type: 'exception', payload: GAErrorPayload) => void;
 export type GoogleAnalytics = _Send & _Exception;
 
 export function sendAnalytics(payload: GAPayload) {
-  const ga: ?GoogleAnalytics = self.ga;
+  const ga: GoogleAnalytics | null = (self as any).ga;
   if (ga) {
     ga('send', payload);
   }
 }
 
 export function reportError(errorPayload: GAErrorPayload) {
-  const ga: ?GoogleAnalytics = self.ga;
+  const ga: GoogleAnalytics | null = (self as any).ga;
   if (ga) {
     ga('send', 'exception', errorPayload);
   }
