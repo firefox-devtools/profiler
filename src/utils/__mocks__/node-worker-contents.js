@@ -2,9 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { parentPort, workerData } from 'worker_threads';
-import fs from 'fs';
-import vm from 'vm';
+// DO NOT MIGRATE THIS FILE TO TYPESCRIPT
+// This file is executed as-is in a node Worker and is not preprocessed.
+// As such, it cannot use TypeScript syntax.
+
+const { parentPort, workerData } = require('worker_threads');
+const fs = require('fs');
+const vm = require('vm');
 
 if (typeof workerData !== 'string') {
   throw new Error(`Please pass a file name using the 'workerData' property.`);
@@ -22,4 +26,4 @@ const sandbox = {
 
 vm.runInNewContext(scriptContent, sandbox, { filename: workerData });
 
-(parentPort as any).onmessage = sandbox.onmessage.bind(null);
+parentPort.onmessage = sandbox.onmessage.bind(null);
