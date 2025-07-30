@@ -158,9 +158,9 @@ Based on analysis of the codebase and GitHub issue #2931, this migration involve
 **Total Estimated Duration: 6-8 weeks** (Updated based on progress)
 
 - ✅ **Phase 1 & 2**: COMPLETED (Infrastructure + Flow cleanup)
-- 🔄 **Phase 3**: 2-3 weeks (File-by-file migration) - IN PROGRESS
-  - 🔄 Type definitions: 4/15 files converted (units, utils, store, index)
-  - ⏳ Remaining types, utilities, components
+- 🔄 **Phase 3**: 2-3 weeks (File-by-file migration) - IN PROGRESS  
+  - 🔄 Type definitions: 8/14 files converted (units, utils, store, index, actions, state, profile, profile-derived)
+  - ⏳ Remaining: 6 type files, utilities, components
 - ⏳ **Phase 4**: 2-3 weeks (Advanced type fixes)
 - ⏳ **Phase 5**: 1-2 weeks (Testing & validation)
 - ⏳ **Phase 6**: 1 week (Final cleanup)
@@ -191,6 +191,114 @@ The migration follows a proven incremental strategy:
 - 🔄 **Per-File Verification**: Each converted file tested before proceeding
 - **Dual Support**: Maintain Flow compatibility until migration complete
 
+## Flow → TypeScript Conversion Patterns
+
+### Core Syntax Conversions (Proven Patterns)
+
+Based on successful conversion of actions.ts and state.ts, here are the reliable patterns:
+
+#### 1. Readonly Properties
+```typescript
+// Flow
+export type Example = {
+  +prop: string,
+  +optional?: number,
+};
+
+// TypeScript
+export type Example = {
+  readonly prop: string,
+  readonly optional?: number,
+};
+```
+**Command**: `sed 's/+\\([a-zA-Z_][a-zA-Z0-9_]*\\):/readonly \\1:/g'`
+
+#### 2. Nullable Types
+```typescript
+// Flow
+type Example = {
+  prop: ?string,
+  array: Array<?number>,
+};
+
+// TypeScript  
+type Example = {
+  prop: string | null,
+  array: Array<number | null>,
+};
+```
+**Commands**: 
+- `sed 's/?\\([A-Z][a-zA-Z0-9_]*\\)/\\1 | null/g'`
+- `sed 's/Array<?\\([^>]*\\)>/Array<\\1 | null>/g'`
+
+#### 3. Flow Utility Types
+```typescript
+// Flow
+type Keys = $Keys<SomeType>;
+type Partial = $Shape<SomeType>;
+type Property = $PropertyType<SomeType, 'prop'>;
+type ReadOnly = $ReadOnly<SomeType>;
+
+// TypeScript
+type Keys = keyof SomeType;
+type Partial = Partial<SomeType>;
+type Property = SomeType['prop'];
+type ReadOnly = Readonly<SomeType>;
+```
+
+#### 4. Import Statements
+```typescript
+// Flow
+import type { SomeType } from './module';
+import type JSZip from 'jszip';
+
+// TypeScript
+import { SomeType } from './module';
+import * as JSZip from 'jszip';  // for CJS modules
+```
+
+#### 5. Object Spread in Types
+```typescript
+// Flow
+type Extended = {
+  ...BaseType,
+  newProp: string,
+};
+
+// TypeScript  
+type Extended = BaseType & {
+  newProp: string,
+};
+```
+
+#### 6. Mixed Type
+```typescript
+// Flow
+type Example = {
+  prop: mixed,
+};
+
+// TypeScript
+type Example = {
+  prop: unknown,
+};
+```
+
+### Conversion Process (Per File)
+1. Copy `.js` → `.ts`
+2. Remove `// @flow`
+3. Convert imports: `import type` → `import`
+4. Apply readonly properties: `+prop:` → `readonly prop:`
+5. Convert nullable types: `?Type` → `Type | null`
+6. Fix Flow utility types
+7. Test compilation: `npx tsc --noEmit --skipLibCheck file.ts`
+8. Remove original `.js` file
+
+### Success Metrics
+- **actions.ts**: 691 lines, complex Redux types, compiles with zero errors
+- **state.ts**: 395 lines, complete app state, compiles with zero errors
+- **Pattern Reliability**: Same regex patterns work across different file types
+
 ## Lessons Learned from Failed Approaches
 
 ### Global Readonly Property Conversion (FAILED)
@@ -200,10 +308,11 @@ The migration follows a proven incremental strategy:
 **Root Cause**: Mixed codebase with both Flow (.js) and TypeScript (.ts) files
 **Lesson**: Global syntax changes don't work in mixed codebases - conversion must be per-file
 
-### Utility-First Migration (REVISED)
+### Utility-First Migration (REVISED → VALIDATED)
 **Original Plan**: Start file conversion with `src/utils/*.js` files
 **Issue**: Utility files import types from `src/types/*.js` files
-**Better Approach**: Start with type definitions first, then utilities
+**Proven Approach**: Start with type definitions first, then utilities ✅
+**Evidence**: Successfully converted actions.ts (691 lines) and state.ts (395 lines) with zero compilation errors
 **Lesson**: Dependencies matter - convert foundation files (types) before dependent files
 
 ## Resources and References

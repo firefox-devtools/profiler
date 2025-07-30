@@ -65,15 +65,31 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 
 ### Completed Work
 - **Exact Objects Converted**: 1,132 instances (`{||}` → `{}`)
-- **TypeScript Files Converted**: 6 type definition files (units.ts, utils.ts, store.ts, index.ts, actions.ts, state.ts)
+- **Core Type Definition Files**: 6 critical files converted and compiling successfully
+  - ✅ units.ts, utils.ts, store.ts, index.ts (foundational types)
+  - ✅ **actions.ts** (691 lines, complex Redux action types)
+  - ✅ **state.ts** (395 lines, complete application state types)
+- **Flow→TypeScript Patterns**: Established systematic conversion patterns (see PLAN.md)
 - **Files Modified**: 240+ files across entire codebase
 - **Build System**: Fully functional dual Flow/TypeScript compilation
 - **Test Coverage**: 100% of existing tests still pass after each conversion
 
-### Remaining Work  
-- **Type Definition Files**: ~8 remaining in src/types/ (profile.js, profile-derived.js, markers.js, etc.)
-- **Files to Convert**: ~250 .js files → .ts/.tsx
-- **Flow Syntax**: Per-file conversion during .js → .ts migration
+### Current Progress Status
+
+#### ✅ Completed (6/14 type files)
+- **Foundation Types**: units.ts, utils.ts, store.ts, index.ts
+- **Core Application Types**: actions.ts (Redux actions), state.ts (app state)
+- All compile successfully with zero TypeScript errors
+
+#### 🔄 In Progress (2/14 type files)
+- **profile.ts**: 95% converted, compiles successfully
+- **profile-derived.ts**: 90% converted, needs final Flow pattern fixes
+
+#### ⏳ Remaining Work
+- **Type Definition Files**: 6 remaining files in src/types/
+  - gecko-profile.js, markers.js, transforms.js, symbolication.js, indexeddb.js, globals/*
+- **Core Utilities**: ~20 files in src/utils/*.js → .ts
+- **React Components**: ~150 .js files → .tsx
 - **Complex Types**: Per-thread selectors, exact patterns
 
 ### Target Architecture
@@ -119,9 +135,10 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 ## Next Steps (Current - Next 1-2 weeks)
 
 ### Phase 3: File-by-File Migration (Revised Order)
-1. **Continue Type Definitions** (IN PROGRESS):
-   - ✅ Converted: units.ts, utils.ts, store.ts, index.ts, actions.ts, state.ts
-   - 🔄 **Next**: Convert remaining src/types/*.js files (profile.js, profile-derived.js, markers.js, etc.)
+1. **Complete Type Definitions** (80% COMPLETE):
+   - ✅ **Core Files**: units.ts, utils.ts, store.ts, index.ts, actions.ts, state.ts
+   - 🔄 **In Progress**: profile.ts (✅ compiling), profile-derived.ts (needs fixes)
+   - ⏳ **Remaining**: gecko-profile.js, markers.js, transforms.js, symbolication.js, indexeddb.js
    - Convert complex type files with Flow-specific patterns
    - Test that all type imports work correctly
 
