@@ -4,21 +4,21 @@
 // @flow
 
 declare module 'workbox-window' {
-  declare type WorkboxLifecycleEvent = {|
+  declare type WorkboxLifecycleEvent = {
     isExternal: boolean,
     isUpdate: boolean,
     originalEvent: MessageEvent,
     sw: ServiceWorker,
     target: Workbox,
     type: string,
-  |};
+  };
 
-  declare type WorkboxLifecycleWaitingEvent = {|
+  declare type WorkboxLifecycleWaitingEvent = {
     ...WorkboxLifecycleEvent,
     wasWaitingBeforeRegister: boolean,
-  |};
+  };
 
-  declare type WorkboxMessageEvent = {|
+  declare type WorkboxMessageEvent = {
     data: any,
     isExternal: boolean,
     originalEvent: MessageEvent,
@@ -26,7 +26,7 @@ declare module 'workbox-window' {
     sw: ServiceWorker,
     target: Workbox,
     type: 'message',
-  |};
+  };
 
   declare export class Workbox {
     constructor(

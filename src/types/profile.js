@@ -55,11 +55,11 @@ export type Pid = string;
  * shared prefix; storing these stacks as a tree saves a lot of space compared
  * to storing them as actual lists of frames.
  */
-export type RawStackTable = {|
+export type RawStackTable = {
   frame: IndexIntoFrameTable[],
   prefix: Array<IndexIntoStackTable | null>,
   length: number,
-|};
+};
 
 /**
  * Profile samples can come in a variety of forms and represent different information.
@@ -105,7 +105,7 @@ export type WeightType = 'samples' | 'tracing-ms' | 'bytes';
  * information that is needed to represent that sampled function. Most of the entries
  * are indices into other tables.
  */
-export type RawSamplesTable = {|
+export type RawSamplesTable = {
   // Responsiveness is the older version of eventDelay. It injects events every 16ms.
   // This is optional because newer profiles don't have that field anymore.
   responsiveness?: Array<?Milliseconds>,
@@ -134,13 +134,13 @@ export type RawSamplesTable = {|
   // merged threads, so that we know the origin thread for these samples.
   threadId?: Tid[],
   length: number,
-|};
+};
 
 /**
  * JS allocations are recorded as a marker payload, but in profile processing they
  * are moved to the Thread. This allows them to be part of the stack processing pipeline.
  */
-export type JsAllocationsTable = {|
+export type JsAllocationsTable = {
   time: Milliseconds[],
   className: string[],
   typeName: string[], // Currently only 'JSObject'
@@ -152,13 +152,13 @@ export type JsAllocationsTable = {|
   inNursery: boolean[],
   stack: Array<IndexIntoStackTable | null>,
   length: number,
-|};
+};
 
 /**
  * This variant is the original version of the table, before the memory address
  * and threadId were added.
  */
-export type UnbalancedNativeAllocationsTable = {|
+export type UnbalancedNativeAllocationsTable = {
   time: Milliseconds[],
   // "weight" is used here rather than "bytes", so that this type will match the
   // SamplesLikeTableShape.
@@ -166,16 +166,16 @@ export type UnbalancedNativeAllocationsTable = {|
   weightType: 'bytes',
   stack: Array<IndexIntoStackTable | null>,
   length: number,
-|};
+};
 
 /**
  * The memory address and thread ID were added later.
  */
-export type BalancedNativeAllocationsTable = {|
+export type BalancedNativeAllocationsTable = {
   ...UnbalancedNativeAllocationsTable,
   memoryAddress: number[],
   threadId: number[],
-|};
+};
 
 /**
  * Native allocations are recorded as a marker payload, but in profile processing they
@@ -199,7 +199,7 @@ export type NativeAllocationsTable =
  * create markers with durations, or even take a string-only marker and parse
  * it into a structured marker.
  */
-export type RawMarkerTable = {|
+export type RawMarkerTable = {
   data: Array<MarkerPayload | null>,
   name: IndexIntoStringTable[],
   startTime: Array<number | null>,
@@ -210,13 +210,13 @@ export type RawMarkerTable = {|
   // merged threads, so that we know the origin thread for these markers.
   threadId?: Tid[],
   length: number,
-|};
+};
 
 /**
  * Frames contain the context information about the function execution at the moment in
  * time. The caller/callee relationship between frames is defined by the StackTable.
  */
-export type FrameTable = {|
+export type FrameTable = {
   // If this is a frame for native code, the address is the address of the frame's
   // assembly instruction,  relative to the native library that contains it.
   //
@@ -292,7 +292,7 @@ export type FrameTable = {|
   line: (number | null)[],
   column: (number | null)[],
   length: number,
-|};
+};
 
 /**
  * The funcTable stores the functions that were called in the profile.
@@ -311,7 +311,7 @@ export type FrameTable = {|
  * were created upfront to become orphaned, as the frames that originally referred
  * to them get reassigned to the canonical func for their actual function.
  */
-export type FuncTable = {|
+export type FuncTable = {
   // The function name.
   name: Array<IndexIntoStringTable>,
 
@@ -338,7 +338,7 @@ export type FuncTable = {|
   columnNumber: Array<number | null>,
 
   length: number,
-|};
+};
 
 /**
  * The nativeSymbols table stores the addresses and symbol names for all symbols
@@ -350,7 +350,7 @@ export type FuncTable = {|
  * contains *all* symbols of a given library. But this table only contains a
  * subset of those symbols, and mixes symbols from multiple libraries.
  */
-export type NativeSymbolTable = {|
+export type NativeSymbolTable = {
   // The library that this native symbol is in.
   libIndex: Array<IndexIntoLibs>,
   // The library-relative offset of this symbol.
@@ -361,19 +361,19 @@ export type NativeSymbolTable = {|
   functionSize: Array<Bytes | null>,
 
   length: number,
-|};
+};
 
 /**
  * The ResourceTable holds additional information about functions. It tends to contain
  * sparse arrays. Multiple functions can point to the same resource.
  */
-export type ResourceTable = {|
+export type ResourceTable = {
   length: number,
   lib: Array<IndexIntoLibs | null>,
   name: Array<IndexIntoStringTable>,
   host: Array<IndexIntoStringTable | null>,
   type: resourceTypeEnum[],
-|};
+};
 
 /**
  * Information about the shared libraries that were loaded into the processes in
@@ -381,7 +381,7 @@ export type ResourceTable = {|
  * the symbolication API requires a debugName + breakpadId for each set of
  * unsymbolicated addresses, to know where to obtain symbols for those addresses.
  */
-export type Lib = {|
+export type Lib = {
   arch: string, // e.g. "x86_64"
   name: string, // e.g. "firefox"
   path: string, // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
@@ -401,7 +401,7 @@ export type Lib = {|
   //    by Windows symbol servers. This will allow us to get assembly code for
   //    Windows system libraries for profiles which were captured on another machine.
   codeId: string | null, // e.g. "6132B96B70fd000"
-|};
+};
 
 // The list of available category colors.
 //
@@ -423,7 +423,7 @@ export type CategoryColor =
   | 'grey'; // <-- "grey" marks the default category
 
 // A category in profile.meta.categories, used for stack frames and call nodes.
-export type Category = {|
+export type Category = {
   // The category name.
   name: string,
 
@@ -434,7 +434,7 @@ export type Category = {|
   // The list of subcategories. Must always have at least one element; subcategory
   // zero must be the "Other" subcategory and is used to refer to the category itself.
   subcategories: string[],
-|};
+};
 
 export type CategoryList = Array<Category>;
 
@@ -447,7 +447,7 @@ export type CategoryList = Array<Category>;
  *
  * The unique field for a page is innerWindowID.
  */
-export type Page = {|
+export type Page = {
   // Tab ID of the page. This ID is the same for all the pages inside a tab's
   // session history.
   tabID: TabID,
@@ -471,32 +471,32 @@ export type Page = {|
   // It's null when Firefox can't get the favicon.
   // This is added in Firefox 134, earlier profiles will not have it.
   favicon?: string | null,
-|};
+};
 
 export type PageList = Array<Page>;
 
 /**
  * Information about a period of time during which no samples were collected.
  */
-export type PausedRange = {|
+export type PausedRange = {
   // null if the profiler was already paused at the beginning of the period of
   // time that was present in the profile buffer
   startTime: Milliseconds | null,
   // null if the profiler was still paused when the profile was captured
   endTime: Milliseconds | null,
   reason: 'profiler-paused' | 'collecting',
-|};
+};
 
-export type JsTracerTable = {|
+export type JsTracerTable = {
   events: Array<IndexIntoStringTable>,
   timestamps: Array<Microseconds>,
   durations: Array<Microseconds | null>,
   line: Array<number | null>, // Line number.
   column: Array<number | null>, // Column number.
   length: number,
-|};
+};
 
-export type RawCounterSamplesTable = {|
+export type RawCounterSamplesTable = {
   time?: Milliseconds[],
   timeDeltas?: Milliseconds[],
   // The number of times the Counter's "number" was changed since the previous sample.
@@ -505,7 +505,7 @@ export type RawCounterSamplesTable = {|
   // The count of the data, for instance for memory this would be bytes.
   count: number[],
   length: number,
-|};
+};
 
 export type GraphColor =
   | 'blue'
@@ -519,7 +519,7 @@ export type GraphColor =
   | 'teal'
   | 'yellow';
 
-export type RawCounter = {|
+export type RawCounter = {
   name: string,
   category: string,
   description: string,
@@ -527,13 +527,13 @@ export type RawCounter = {|
   pid: Pid,
   mainThreadIndex: ThreadIndex,
   samples: RawCounterSamplesTable,
-|};
+};
 
 /**
  * The statistics about profiler overhead. It includes max/min/mean values of
  * individual and overall overhead timings.
  */
-export type ProfilerOverheadStats = {|
+export type ProfilerOverheadStats = {
   maxCleaning: Microseconds,
   maxCounter: Microseconds,
   maxInterval: Microseconds,
@@ -556,12 +556,12 @@ export type ProfilerOverheadStats = {|
   overheadPercentage: Microseconds,
   profiledDuration: Microseconds,
   samplingCount: Microseconds,
-|};
+};
 
 /**
  * This object represents the configuration of the profiler when the profile was recorded.
  */
-export type ProfilerConfiguration = {|
+export type ProfilerConfiguration = {
   threads: string[],
   features: string[],
   capacity: Bytes,
@@ -573,7 +573,7 @@ export type ProfilerConfiguration = {|
   // should revert back to the full view since there isn't enough data to show
   // the active tab view.
   activeTabID?: TabID,
-|};
+};
 
 /**
  * Gecko Profiler records profiler overhead samples of specific tasks that take time.
@@ -582,27 +582,27 @@ export type ProfilerConfiguration = {|
  * lockings: Time spent during acquiring locks.
  * threads: Time spent during threads sampling and marker collection.
  */
-export type ProfilerOverheadSamplesTable = {|
+export type ProfilerOverheadSamplesTable = {
   counters: Array<Microseconds>,
   expiredMarkerCleaning: Array<Microseconds>,
   locking: Array<Microseconds>,
   threads: Array<Microseconds>,
   time: Array<Milliseconds>,
   length: number,
-|};
+};
 
 /**
  * Information about profiler overhead. It includes overhead timings for
  * counters, expired marker cleanings, mutex locking and threads. Also it
  * includes statistics about those individual and overall overhead.
  */
-export type ProfilerOverhead = {|
+export type ProfilerOverhead = {
   samples: ProfilerOverheadSamplesTable,
   // There is no statistics object if there is no sample.
   statistics?: ProfilerOverheadStats,
   pid: Pid,
   mainThreadIndex: ThreadIndex,
-|};
+};
 
 // This list of process types is defined here:
 // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/xpcom/build/nsXULAppAPI.h#383
@@ -630,7 +630,7 @@ export type ProcessType =
  *
  * There is also a derived `Thread` type, see profile-derived.js.
  */
-export type RawThread = {|
+export type RawThread = {
   processType: ProcessType,
   processStartupTime: Milliseconds,
   processShutdownTime: Milliseconds | null,
@@ -671,26 +671,26 @@ export type RawThread = {|
   // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
   // had no extra attribute at all.
   userContextId?: number,
-|};
+};
 
-export type ExtensionTable = {|
+export type ExtensionTable = {
   baseURL: string[],
   id: string[],
   name: string[],
   length: number,
-|};
+};
 
 /**
  * Visual progress describes the visual progression during page load. A sample is generated
  * everytime the visual completeness of the webpage changes.
  */
-export type ProgressGraphData = {|
+export type ProgressGraphData = {
   // A percentage that describes the visual completeness of the webpage, ranging from 0% - 100%
   percent: number,
   // The time in milliseconds which the sample was taken.
   // This can be null due to https://github.com/sitespeedio/browsertime/issues/1746.
   timestamp: Milliseconds | null,
-|};
+};
 
 /**
  * Visual metrics are performance metrics that measure above-the-fold webpage visual performance,
@@ -709,7 +709,7 @@ export type ProgressGraphData = {|
  * and https://github.com/sitespeedio/browsertime/blob/6e88284930c1d3ded8d9d95252d2e13c252d361c/lib/core/engine/iteration.js#L261-L264.
  * Finally they're inserted into the JSON profile in https://github.com/sitespeedio/browsertime/blob/6e88284930c1d3ded8d9d95252d2e13c252d361c/lib/firefox/webdriver/firefox.js#L215-L230
  */
-export type VisualMetrics = {|
+export type VisualMetrics = {
   FirstVisualChange: number,
   LastVisualChange: number,
   SpeedIndex: number,
@@ -727,7 +727,7 @@ export type VisualMetrics = {|
   VisualComplete85: number,
   VisualComplete95: number,
   VisualComplete99: number,
-|};
+};
 
 // Units of ThreadCPUDelta values for different platforms.
 export type ThreadCPUDeltaUnit = 'ns' | 'µs' | 'variable CPU cycles';
@@ -738,27 +738,27 @@ export type TimelineUnit = 'ms' | 'bytes';
 // Object that holds the units of samples table values. Some of the values can be
 // different depending on the platform, e.g. threadCPUDelta.
 // See https://searchfox.org/mozilla-central/rev/851bbbd9d9a38c2785a24c13b6412751be8d3253/tools/profiler/core/platform.cpp#2601-2606
-export type SampleUnits = {|
-  +time: TimelineUnit,
-  +eventDelay: 'ms',
-  +threadCPUDelta: ThreadCPUDeltaUnit,
-|};
+export type SampleUnits = $ReadOnly<{
+  time: TimelineUnit,
+  eventDelay: 'ms',
+  threadCPUDelta: ThreadCPUDeltaUnit,
+}>;
 
-export type ExtraProfileInfoSection = {|
+export type ExtraProfileInfoSection = {
   // section label
   label: string,
-  entries: Array<{|
+  entries: Array<{
     label: string,
     format: MarkerFormatType,
     // any value valid for the formatter
     value: any,
-  |}>,
-|};
+  }>,
+};
 
 /**
  * Meta information associated for the entire profile.
  */
-export type ProfileMeta = {|
+export type ProfileMeta = {
   // The interval at which the threads are sampled.
   interval: Milliseconds,
   // When the main process started. Timestamp expressed in milliseconds since
@@ -921,18 +921,18 @@ export type ProfileMeta = {|
   // Grams of CO2 equivalent per kWh. Used to display power track tooltips.
   // Will fallback to the global average if this is missing.
   gramsOfCO2ePerKWh?: number,
-|};
+};
 
-export type RawProfileSharedData = {|
+export type RawProfileSharedData = {
   // Strings for profiles are collected into a single table, and are referred to by
   // their index by other tables.
   stringArray: string[],
-|};
+};
 
 /**
  * All of the data for a processed profile.
  */
-export type Profile = {|
+export type Profile = {
   meta: ProfileMeta,
   libs: Lib[],
   pages?: PageList,
@@ -947,4 +947,4 @@ export type Profile = {|
   threads: RawThread[],
   profilingLog?: ProfilingLog,
   profileGatheringLog?: ProfilingLog,
-|};
+};

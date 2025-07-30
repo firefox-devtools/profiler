@@ -18,11 +18,11 @@ declare module '@testing-library/react' {
     callback: () => void | ReactDOMTestUtilsThenable
   ) => ReactDOMTestUtilsThenable;
 
-  declare type WaitForElementOptions = {|
+  declare type WaitForElementOptions = {
     container?: HTMLElement,
     timeout?: number,
     mutationObserverOptions?: MutationObserverInit,
-  |};
+  };
 
   declare type TextMatch =
     | string
@@ -146,7 +146,7 @@ declare module '@testing-library/react' {
     waitForElementOptions?: WaitForElementOptions
   ) => Promise<HTMLElement[]>;
 
-  declare type GetsAndQueries = {|
+  declare type GetsAndQueries = {
     getByLabelText: GetByText,
     getAllByLabelText: AllByText,
     queryByLabelText: QueryByText,
@@ -202,7 +202,7 @@ declare module '@testing-library/react' {
     queryAllByTestId: AllByBoundAttribute,
     findByTestId: FindByBoundAttribute,
     findAllByTestId: FindAllByBoundAttribute,
-  |};
+  };
 
   declare type FireEvent<TInit> = (
     element: HTMLElement,
@@ -238,21 +238,21 @@ declare module '@testing-library/react' {
     ...
   };
 
-  declare export type RenderOptionsWithoutCustomQueries = {|
+  declare export type RenderOptionsWithoutCustomQueries = {
     container?: HTMLElement,
     baseElement?: HTMLElement,
     hydrate?: boolean,
     wrapper?: React$ComponentType<*>,
-  |};
+  };
 
   declare export type RenderOptionsWithCustomQueries<CustomQueries: { ... }> =
-    {|
+    {
       queries: CustomQueries,
       container?: HTMLElement,
       baseElement?: HTMLElement,
       hydrate?: boolean,
       wrapper?: React$ComponentType<*>,
-    |};
+    };
 
   declare export function render(
     ui: React$Element<any>,
@@ -270,22 +270,22 @@ declare module '@testing-library/react' {
 
   declare export function waitFor<T>(
     callback: () => T,
-    options?: {|
+    options?: {
       container?: HTMLElement,
       timeout?: number,
       interval?: number,
       mutationObserverOptions?: MutationObserverInit,
-    |}
+    }
   ): Promise<T>;
 
   declare export function waitForElementToBeRemoved<T>(
     callback: (() => T) | T,
-    options?: {|
+    options?: {
       container?: HTMLElement,
       timeout?: number,
       interval?: number,
       mutationObserverOptions?: MutationObserverInit,
-    |}
+    }
   ): Promise<T>;
 
   /* Deprecated */
@@ -322,7 +322,7 @@ declare module '@testing-library/react' {
     queriesToBind?: GetsAndQueries | Array<GetsAndQueries>
   ): GetsAndQueries;
 
-  declare export var fireEvent: {|
+  declare export var fireEvent: {
     (element: HTMLElement, event: Event): void,
 
     copy: FireEvent<Event$Init>,
@@ -394,7 +394,7 @@ declare module '@testing-library/react' {
     animationEnd: FireEvent<Event$Init>,
     animationIteration: FireEvent<Event$Init>,
     transitionEnd: FireEvent<Event$Init>,
-  |};
+  };
   // dom-testing-library re-declares
   declare export function queryByTestId(
     container: HTMLElement,

@@ -2,7 +2,7 @@
 // flow-typed version: c6154227d1/glob_v7.1.x/flow_>=v0.42.x <=v0.103.x
 
 declare module "glob" {
-  declare type MinimatchOptions = {|
+  declare type MinimatchOptions = {
     debug?: boolean,
     nobrace?: boolean,
     noglobstar?: boolean,
@@ -14,9 +14,9 @@ declare module "glob" {
     nocomment?: boolean,
     nonegate?: boolean,
     flipNegate?: boolean
-  |};
+  };
 
-  declare type Options = {|
+  declare type Options = {
     ...MinimatchOptions,
     cwd?: string,
     root?: string,
@@ -41,7 +41,7 @@ declare module "glob" {
     follow?: boolean,
     realpath?: boolean,
     absolute?: boolean
-  |};
+  };
 
   /**
    * Called when an error occurs, or matches are found

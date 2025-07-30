@@ -31,7 +31,7 @@ declare module 'jszip' {
 
   declare class JSZip {
     constructor(): JSZip;
-    files: {| [fileName: string]: JSZipFile |};
+    files: { [fileName: string]: JSZipFile };
     file: (fileName: string, contents: string) => void;
     generateAsync({ type: 'uint8array' }): Promise<Uint8Array>;
     static loadAsync: (data: ArrayBuffer | $TypedArray) => Promise<JSZip>;

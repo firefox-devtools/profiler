@@ -53,38 +53,38 @@ export type Reducer<T> = (T | void, Action) => T;
 export type UploadedProfileInformation = ImportedUploadedProfileInformation;
 
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
-export type ThreadViewOptions = {|
+export type ThreadViewOptions = {
   +selectedNonInvertedCallNodePath: CallNodePath,
   +selectedInvertedCallNodePath: CallNodePath,
   +expandedNonInvertedCallNodePaths: PathSet,
   +expandedInvertedCallNodePaths: PathSet,
   +selectedMarker: MarkerIndex | null,
   +selectedNetworkMarker: MarkerIndex | null,
-|};
+};
 
 export type ThreadViewOptionsPerThreads = { [ThreadsKey]: ThreadViewOptions };
 
-export type TableViewOptions = {|
+export type TableViewOptions = {
   +fixedColumnWidths: Array<CssPixels> | null,
-|};
+};
 
 export type TableViewOptionsPerTab = { [TabSlug]: TableViewOptions };
 
-export type RightClickedCallNode = {|
+export type RightClickedCallNode = {
   +threadsKey: ThreadsKey,
   +callNodePath: CallNodePath,
-|};
+};
 
-export type MarkerReference = {|
+export type MarkerReference = {
   +threadsKey: ThreadsKey,
   +markerIndex: MarkerIndex,
-|};
+};
 
 /**
  * Profile view state
  */
 export type ProfileViewState = {
-  +viewOptions: {|
+  +viewOptions: {
     perThread: ThreadViewOptionsPerThreads,
     symbolicationStatus: SymbolicationStatus,
     waitingForLibs: Set<RequestedLib>,
@@ -99,23 +99,23 @@ export type ProfileViewState = {
     hoveredMarker: MarkerReference | null,
     mouseTimePosition: Milliseconds | null,
     perTab: TableViewOptionsPerTab,
-  |},
+  },
   +profile: Profile | null,
   globalTracks: GlobalTrack[],
   localTracksByPid: Map<Pid, LocalTrack[]>,
 };
 
 export type AppViewState =
-  | {| +phase: 'ROUTE_NOT_FOUND' |}
-  | {| +phase: 'TRANSITIONING_FROM_STALE_PROFILE' |}
-  | {| +phase: 'PROFILE_LOADED' |}
-  | {| +phase: 'DATA_LOADED' |}
-  | {| +phase: 'DATA_RELOAD' |}
-  | {| +phase: 'FATAL_ERROR', +error: Error |}
-  | {|
+  | { +phase: 'ROUTE_NOT_FOUND' }
+  | { +phase: 'TRANSITIONING_FROM_STALE_PROFILE' }
+  | { +phase: 'PROFILE_LOADED' }
+  | { +phase: 'DATA_LOADED' }
+  | { +phase: 'DATA_RELOAD' }
+  | { +phase: 'FATAL_ERROR', +error: Error }
+  | {
       +phase: 'INITIALIZING',
-      +additionalData?: {| +attempt: Attempt | null, +message: string |},
-    |};
+      +additionalData?: { +attempt: Attempt | null, +message: string },
+    };
 
 export type Phase = $PropertyType<AppViewState, 'phase'>;
 
@@ -124,36 +124,36 @@ export type Phase = $PropertyType<AppViewState, 'phase'>;
  * where the state is now.
  */
 export type ZipFileState =
-  | {|
+  | {
       +phase: 'NO_ZIP_FILE',
       +zip: null,
       +pathInZipFile: null,
-    |}
-  | {|
+    }
+  | {
       +phase: 'LIST_FILES_IN_ZIP_FILE',
       +zip: JSZip,
       +pathInZipFile: null,
-    |}
-  | {|
+    }
+  | {
       +phase: 'PROCESS_PROFILE_FROM_ZIP_FILE',
       +zip: JSZip,
       +pathInZipFile: string,
-    |}
-  | {|
+    }
+  | {
       +phase: 'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE',
       +zip: JSZip,
       +pathInZipFile: string,
-    |}
-  | {|
+    }
+  | {
       +phase: 'FILE_NOT_FOUND_IN_ZIP_FILE',
       +zip: JSZip,
       +pathInZipFile: string,
-    |}
-  | {|
+    }
+  | {
       +phase: 'VIEW_PROFILE_IN_ZIP_FILE',
       +zip: JSZip,
       +pathInZipFile: string,
-    |};
+    };
 
 export type IsOpenPerPanelState = { [TabSlug]: boolean };
 
@@ -164,13 +164,13 @@ export type UrlSetupPhase = 'initial-load' | 'loading-profile' | 'done';
  * them from the DevTools console with `experimental.enable<feature-camel-case>()`,
  * e.g. `experimental.enableEventDelayTracks()`.
  */
-export type ExperimentalFlags = {|
+export type ExperimentalFlags = {
   +eventDelayTracks: boolean,
   +cpuGraphs: boolean,
   +processCPUTracks: boolean,
-|};
+};
 
-export type AppState = {|
+export type AppState = {
   +view: AppViewState,
   +urlSetupPhase: UrlSetupPhase,
   +hasZoomedViaMousewheel: boolean,
@@ -187,7 +187,7 @@ export type AppState = {|
   +experimental: ExperimentalFlags,
   +currentProfileUploadedInformation: UploadedProfileInformation | null,
   +browserConnectionStatus: BrowserConnectionStatus,
-|};
+};
 
 export type UploadPhase =
   | 'local'
@@ -196,21 +196,21 @@ export type UploadPhase =
   | 'uploaded'
   | 'error';
 
-export type UploadState = {|
+export type UploadState = {
   phase: UploadPhase,
   uploadProgress: number,
   error: Error | mixed,
   abortFunction: () => void,
   generation: number,
-|};
+};
 
-export type PublishState = {|
+export type PublishState = {
   +checkedSharingOptions: CheckedSharingOptions,
   +upload: UploadState,
   +isHidingStaleProfile: boolean,
   +hasSanitizedProfile: boolean,
   +prePublishedState: State | null,
-|};
+};
 
 export type ZippedProfilesState = {
   zipFile: ZipFileState,
@@ -221,7 +221,7 @@ export type ZippedProfilesState = {
   expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
 };
 
-export type SourceViewState = {|
+export type SourceViewState = {
   scrollGeneration: number,
   // Non-null if this source file was opened for a function from native code.
   // In theory, multiple different libraries can have source files with the same
@@ -233,9 +233,9 @@ export type SourceViewState = {|
   // The path to the source file. Null if a function without a file path was
   // double clicked.
   sourceFile: string | null,
-|};
+};
 
-export type AssemblyViewState = {|
+export type AssemblyViewState = {
   // Whether the assembly view panel is open within the bottom box. This can be
   // true even if the bottom box itself is closed.
   isOpen: boolean,
@@ -250,75 +250,75 @@ export type AssemblyViewState = {|
   // function like `Vec::push` in an inverted call tree, if that function has
   // been inlined into multiple different callers.
   allNativeSymbolsForInitiatingCallNode: NativeSymbolInfo[],
-|};
+};
 
-export type DecodedInstruction = {|
+export type DecodedInstruction = {
   address: Address,
   decodedString: string,
-|};
+};
 
 export type SourceCodeStatus =
-  | {| type: 'LOADING', source: CodeLoadingSource |}
-  | {| type: 'ERROR', errors: SourceCodeLoadingError[] |}
-  | {| type: 'AVAILABLE', code: string |};
+  | { type: 'LOADING', source: CodeLoadingSource }
+  | { type: 'ERROR', errors: SourceCodeLoadingError[] }
+  | { type: 'AVAILABLE', code: string };
 
 export type AssemblyCodeStatus =
-  | {| type: 'LOADING', source: CodeLoadingSource |}
-  | {| type: 'ERROR', errors: ApiQueryError[] |}
-  | {| type: 'AVAILABLE', instructions: DecodedInstruction[] |};
+  | { type: 'LOADING', source: CodeLoadingSource }
+  | { type: 'ERROR', errors: ApiQueryError[] }
+  | { type: 'AVAILABLE', instructions: DecodedInstruction[] };
 
 export type CodeLoadingSource =
-  | {| type: 'URL', url: string |}
-  | {| type: 'BROWSER_CONNECTION' |};
+  | { type: 'URL', url: string }
+  | { type: 'BROWSER_CONNECTION' };
 
 export type ApiQueryError =
-  | {|
+  | {
       type: 'NETWORK_ERROR',
       url: string,
       networkErrorMessage: string,
-    |}
+    }
   // Used when the symbol server reported an error, for example because our
   // request was bad.
-  | {|
+  | {
       type: 'SYMBOL_SERVER_API_ERROR',
       apiErrorMessage: string,
-    |}
+    }
   // Used when the symbol server's response was bad.
-  | {|
+  | {
       type: 'SYMBOL_SERVER_API_MALFORMED_RESPONSE',
       errorMessage: string,
-    |}
+    }
   // Used when the browser API reported an error, for example because our
   // request was bad.
-  | {|
+  | {
       type: 'BROWSER_CONNECTION_ERROR',
       browserConnectionErrorMessage: string,
-    |}
+    }
   // Used when the browser's response was bad.
-  | {|
+  | {
       type: 'BROWSER_API_ERROR',
       apiErrorMessage: string,
-    |}
-  | {|
+    }
+  | {
       type: 'BROWSER_API_MALFORMED_RESPONSE',
       errorMessage: string,
-    |};
+    };
 
 export type SourceCodeLoadingError =
   | ApiQueryError
-  | {| type: 'NO_KNOWN_CORS_URL' |}
-  | {|
+  | { type: 'NO_KNOWN_CORS_URL' }
+  | {
       type: 'NOT_PRESENT_IN_ARCHIVE',
       url: string,
       pathInArchive: string,
-    |}
-  | {|
+    }
+  | {
       type: 'ARCHIVE_PARSING_ERROR',
       url: string,
       parsingErrorMessage: string,
-    |};
+    };
 
-export type ProfileSpecificUrlState = {|
+export type ProfileSpecificUrlState = {
   selectedThreads: Set<ThreadIndex> | null,
   implementation: ImplementationFilter,
   lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy,
@@ -343,9 +343,9 @@ export type ProfileSpecificUrlState = {|
   tabFilter: TabID | null,
   legacyThreadOrder: ThreadIndex[] | null,
   legacyHiddenThreads: ThreadIndex[] | null,
-|};
+};
 
-export type UrlState = {|
+export type UrlState = {
   +dataSource: DataSource,
   // This is used for the "public" dataSource".
   +hash: string,
@@ -358,31 +358,31 @@ export type UrlState = {|
   +profileName: string | null,
   +profileSpecific: ProfileSpecificUrlState,
   +symbolServerUrl: string | null,
-|};
+};
 
 /**
  * Localization State
  */
 export type PseudoStrategy = null | 'bidi' | 'accented';
-export type L10nState = {|
+export type L10nState = {
   +requestedLocales: string[] | null,
   +pseudoStrategy: PseudoStrategy,
   +localization: Localization,
   +primaryLocale: string | null,
   +direction: 'ltr' | 'rtl',
-|};
+};
 
 /**
  * Map of icons to their class names
  */
 export type IconsWithClassNames = Map<string, string>;
 
-export type CodeState = {|
+export type CodeState = {
   +sourceCodeCache: Map<string, SourceCodeStatus>,
   +assemblyCodeCache: Map<string, AssemblyCodeStatus>,
-|};
+};
 
-export type State = {|
+export type State = {
   +app: AppState,
   +profileView: ProfileViewState,
   +urlState: UrlState,
@@ -391,4 +391,4 @@ export type State = {|
   +publish: PublishState,
   +l10n: L10nState,
   +code: CodeState,
-|};
+};

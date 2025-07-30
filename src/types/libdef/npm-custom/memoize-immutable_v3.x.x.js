@@ -13,13 +13,13 @@ declare module 'memoize-immutable' {
   }
 
   // TODO also support caches that come from immutable
-  declare type CacheConfig<F> = {|
+  declare type CacheConfig<F> = {
     cache: CacheInstance<$Call<ExtractArgType, F>, $Call<ExtractReturnType, F>>,
-  |};
+  };
 
-  declare type LimitConfig = {|
+  declare type LimitConfig = {
     limit: number,
-  |};
+  };
 
   declare type ExtractArgType = <A>((...rest: A) => any) => A;
   declare type ExtractReturnType = <V>((...rest: any) => V) => V;

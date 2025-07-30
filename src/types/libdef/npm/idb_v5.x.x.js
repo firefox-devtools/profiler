@@ -41,10 +41,10 @@ declare class $idb$DB<ObjectStore: $idb$ObjectStore<any, any>> {
    */
   createObjectStore(
     name: string,
-    optionalParameters?: $Shape<{|
+    optionalParameters?: $Shape<{
      +keyPath: string,
      +autoIncrement: boolean,
-    |}>
+    }>
   ): ObjectStore;
 
   /**
@@ -220,7 +220,7 @@ declare class $idb$DB<ObjectStore: $idb$ObjectStore<any, any>> {
   getAllKeysFromIndex(storeName: string, indexName: string, query?: IDBKeyRange, count?: number): Promise<Array<any>>;
 }
 
-type $idb$OpenDBCallbacks<ObjectStore: $idb$ObjectStore<any, any>> = {|
+type $idb$OpenDBCallbacks<ObjectStore: $idb$ObjectStore<any, any>> = {
   /**
    * Called if this version of the database has never been opened before. Use it to specify the
    * schema for the database.
@@ -251,7 +251,7 @@ type $idb$OpenDBCallbacks<ObjectStore: $idb$ObjectStore<any, any>> = {|
    * This is not called when `db.close()` is called.
    */
   terminated(): void,
-|};
+};
 
 /** Wrapper of IDBTransaction that presents the asynchronous operations as a Promise. */
 declare class $idb$Transaction<ObjectStore: $idb$ObjectStore<any, any>, StoreType: ObjectStore | null> {
@@ -402,11 +402,11 @@ declare class $idb$ObjectStore<Cursor: $idb$Cursor, Index: $idb$Index<Cursor>> e
   createIndex(
     name: string,
     keyPath: string | Array<string>,
-    optionalParameters?: $Shape<{|
+    optionalParameters?: $Shape<{
      +unique: boolean,
      +multiEntry: boolean,
      +locale: string | 'auto' | null,
-    |}>
+    }>
   ): Index;
 
   /**
@@ -571,21 +571,21 @@ declare module 'idb' {
    */
   declare export function deleteDB(name: string): Promise<void>;
 
-  declare export var wrap: {|
+  declare export var wrap: {
     (IDBDatabase): DB;
     (IDBTransaction): Transaction<null>;
     (IDBObjectStore): ObjectStore;
     (IDBIndex): Index;
     (IDBRequest): Promise<any>; // Unfortunately the default Flow types for IDB are severaly lacking, so we can't do better.
-  |};
+  };
 
-  declare export var unwrap: {|
+  declare export var unwrap: {
     (DB): IDBDatabase;
     (Transaction<any>): IDBTransaction;
     (ObjectStore): IDBObjectStore;
     (Index): IDBIndex;
     (Promise<any>): IDBRequest;
-  |};
+  };
 }
 
 declare module 'idb/with-async-ittr.js' {
@@ -628,19 +628,19 @@ declare module 'idb/with-async-ittr.js' {
    */
   declare export function deleteDB(name: string): Promise<void>;
 
-  declare export var wrap: {|
+  declare export var wrap: {
     (IDBDatabase): DB;
     (IDBTransaction): Transaction<null>;
     (IDBObjectStore): ObjectStore;
     (IDBIndex): Index;
     (IDBRequest): Promise<any>; // Unfortunately the default Flow types for IDB are severaly lacking, so we can't do better.
-  |};
+  };
 
-  declare export var unwrap: {|
+  declare export var unwrap: {
     (DB): IDBDatabase;
     (Transaction<any>): IDBTransaction;
     (ObjectStore): IDBObjectStore;
     (Index): IDBIndex;
     (Promise<any>): IDBRequest;
-  |};
+  };
 }

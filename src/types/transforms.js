@@ -93,12 +93,12 @@ export type TransformDefinitions = {
    *                        ↓                               ↓
    *                      A:1,0                           X:1,1
    */
-  'focus-subtree': {|
+  'focus-subtree': {
     +type: 'focus-subtree',
     +callNodePath: CallNodePath,
     +implementation: ImplementationFilter,
     +inverted: boolean,
-  |},
+  },
 
   /**
    * This is the same operation as the FocusSubtree, but it is performed on each usage
@@ -124,10 +124,10 @@ export type TransformDefinitions = {
    *                   v
    *                 D:2,2
    */
-  'focus-function': {|
+  'focus-function': {
     +type: 'focus-function',
     +funcIndex: IndexIntoFuncTable,
-  |},
+  },
 
   /**
    * The MergeCallNode transform represents merging a CallNode into the parent CallNode. The
@@ -172,11 +172,11 @@ export type TransformDefinitions = {
    * This same operation is not applied to an inverted call stack as it has been deemed
    * not particularly useful, and prone to not give the expected results.
    */
-  'merge-call-node': {|
+  'merge-call-node': {
     +type: 'merge-call-node',
     +callNodePath: CallNodePath,
     +implementation: ImplementationFilter,
-  |},
+  },
 
   /**
    * The MergeFunctions transform is similar to the MergeCallNode, except it merges a single
@@ -197,10 +197,10 @@ export type TransformDefinitions = {
    *        v           v
    *      E:1,1       G:1,1
    */
-  'merge-function': {|
+  'merge-function': {
     +type: 'merge-function',
     +funcIndex: IndexIntoFuncTable,
-  |},
+  },
 
   /**
    * The DropFunction transform removes samples from the thread that have a function
@@ -217,10 +217,10 @@ export type TransformDefinitions = {
    *        v
    *      D:1,1
    */
-  'drop-function': {|
+  'drop-function': {
     +type: 'drop-function',
     +funcIndex: IndexIntoFuncTable,
-  |},
+  },
 
   /**
    * Collapse resource takes CallNodes that are of a consecutive library, and collapses
@@ -238,13 +238,13 @@ export type TransformDefinitions = {
    *        v
    *        D
    */
-  'collapse-resource': {|
+  'collapse-resource': {
     +type: 'collapse-resource',
     +resourceIndex: IndexIntoResourceTable,
     // This is the index of the newly created function that represents the collapsed stack.
     +collapsedFuncIndex: IndexIntoFuncTable,
     +implementation: ImplementationFilter,
-  |},
+  },
 
   /**
    * Collapse direct recursion takes a function that calls itself recursively and collapses
@@ -262,11 +262,11 @@ export type TransformDefinitions = {
    *      ↓
    *      C
    */
-  'collapse-direct-recursion': {|
+  'collapse-direct-recursion': {
     +type: 'collapse-direct-recursion',
     +funcIndex: IndexIntoFuncTable,
     +implementation: ImplementationFilter,
-  |},
+  },
 
   /**
    * Collapse recursion takes a function that calls itself recursively (directly
@@ -284,10 +284,10 @@ export type TransformDefinitions = {
    *      ↓
    *      D
    */
-  'collapse-recursion': {|
+  'collapse-recursion': {
     +type: 'collapse-recursion',
     +funcIndex: IndexIntoFuncTable,
-  |},
+  },
 
   /**
    * Collapse the subtree of a function into that function across the entire tree.
@@ -306,10 +306,10 @@ export type TransformDefinitions = {
    *        v          v        v     v
    *      E:1,1     G:1,1    I:1,1    J:1,1
    */
-  'collapse-function-subtree': {|
+  'collapse-function-subtree': {
     +type: 'collapse-function-subtree',
     +funcIndex: IndexIntoFuncTable,
-  |},
+  },
   /**
    * Focus on the functions that belong to the same category as the current function.
    * A example of this is given below with 'function:category' as the node name.
@@ -328,22 +328,22 @@ export type TransformDefinitions = {
    *              v       v
    *              F:JS   A:JS
    */
-  'focus-category': {|
+  'focus-category': {
     +type: 'focus-category',
     +category: IndexIntoCategoryList,
-  |},
+  },
 
   /**
    * Filter the samples in the thread by the filter.
    * Currently it only supports filtering by the marker name but can be extended
    * to support more filters in the future.
    */
-  'filter-samples': {|
+  'filter-samples': {
     +type: 'filter-samples',
     // Expand this type when you need to support more than just the marker.
     +filterType: FilterSamplesType,
     +filter: string,
-  |},
+  },
 };
 
 // Extract the transforms into a union.

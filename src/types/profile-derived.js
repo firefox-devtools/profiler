@@ -53,7 +53,7 @@ export type IndexIntoCallNodeTable = number;
  * The fields that differ from RawThread are collected at the end of this type
  * definition.
  */
-export type Thread = {|
+export type Thread = {
   processType: ProcessType,
   processStartupTime: Milliseconds,
   processShutdownTime: Milliseconds | null,
@@ -103,12 +103,12 @@ export type Thread = {|
   // The stack samples collected for this thread. This field is different from
   // RawThread in that the `time` column is always present.
   samples: SamplesTable,
-|};
+};
 
 /**
  * The derived samples table.
  */
-export type SamplesTable = {|
+export type SamplesTable = {
   // Responsiveness is the older version of eventDelay. It injects events every 16ms.
   // This is optional because newer profiles don't have that field anymore.
   responsiveness?: Array<?Milliseconds>,
@@ -130,7 +130,7 @@ export type SamplesTable = {|
   // merged threads, so that we know the origin thread for these samples.
   threadId?: Tid[],
   length: number,
-|};
+};
 
 type SamplesLikeTableShape = {
   stack: Array<IndexIntoStackTable | null>,
@@ -148,7 +148,7 @@ export type SamplesLikeTable =
   | NativeAllocationsTable
   | JsAllocationsTable;
 
-export type CounterSamplesTable = {|
+export type CounterSamplesTable = {
   time: Milliseconds[],
   // The number of times the Counter's "number" was changed since the previous sample.
   // This property was mandatory until the format version 42, it was made optional in 43.
@@ -156,9 +156,9 @@ export type CounterSamplesTable = {|
   // The count of the data, for instance for memory this would be bytes.
   count: number[],
   length: number,
-|};
+};
 
-export type Counter = {|
+export type Counter = {
   name: string,
   category: string,
   description: string,
@@ -166,7 +166,7 @@ export type Counter = {|
   pid: Pid,
   mainThreadIndex: ThreadIndex,
   samples: CounterSamplesTable,
-|};
+};
 
 /**
  * The `StackTable` type of the derived thread.
@@ -196,7 +196,7 @@ export type Counter = {|
  * category would be lost if it wasn't inherited into the
  * nsAttrAndChildArray::InsertChildAt stack before transforms are applied.
  */
-export type StackTable = {|
+export type StackTable = {
   // Same as in RawStackTable
   frame: IndexIntoFrameTable[],
   prefix: Array<IndexIntoStackTable | null>,
@@ -205,7 +205,7 @@ export type StackTable = {|
   // Derived from RawStackTable + FrameTable
   category: IndexIntoCategoryList[],
   subcategory: IndexIntoSubcategoryListForCategory[],
-|};
+};
 
 /**
  * Contains a table of function call information that represents the stacks of what
@@ -320,7 +320,7 @@ export type LineNumber = number;
 // For stacks which are only used as prefix stack nodes, selfLine and
 // stackLine may be null. This is fine because their values are not accessed
 // during the LineTimings computation.
-export type StackLineInfo = {|
+export type StackLineInfo = {
   // An array that contains, for each "self" stack, the line number that this stack
   // spends its self time in, in this file, or null if the self time of the
   // stack is in a different file or if the line number is not known.
@@ -333,15 +333,15 @@ export type StackLineInfo = {|
   // For non-"self" stacks, i.e. stacks which are only used as prefix stacks and
   // never referred to from a SamplesLikeTable, the value may be null.
   stackLines: Array<Set<LineNumber> | null>,
-|};
+};
 
 // Stores, for all lines of one specific file, how many times each line is hit
 // by samples in a thread. The maps only contain non-zero values.
 // So map.get(line) === undefined should be treated as zero.
-export type LineTimings = {|
+export type LineTimings = {
   totalLineHits: Map<LineNumber, number>,
   selfLineHits: Map<LineNumber, number>,
-|};
+};
 
 // Stores the addresses which are hit by each stack, for addresses belonging to
 // one specific native symbol.
@@ -360,7 +360,7 @@ export type LineTimings = {|
 // For stacks which are only used as prefix stack nodes, selfAddress and
 // stackAddress may be null. This is fine because their values are not accessed
 // during the AddressTimings computation.
-export type StackAddressInfo = {|
+export type StackAddressInfo = {
   // An array that contains, for each "self" stack, the address that this stack
   // spends its self time in, in this native symbol, or null if the self time of
   // the stack is in a different native symbol or if the address is not known.
@@ -373,15 +373,15 @@ export type StackAddressInfo = {|
   // For non-"self" stacks, i.e. stacks which are only used as prefix stacks and
   // never referred to from a SamplesLikeTable, the value may be null.
   stackAddresses: Array<Set<Address> | null>,
-|};
+};
 
 // Stores, for all addresses of one specific library, how many times each
 // address is hit by samples in a thread. The maps only contain non-zero values.
 // So map.get(address) === undefined should be treated as zero.
-export type AddressTimings = {|
+export type AddressTimings = {
   totalAddressHits: Map<Address, number>,
   selfAddressHits: Map<Address, number>,
-|};
+};
 
 // Stores the information that's needed to prove to the symbolication API that
 // we are authorized to request the source code for a specific file.
@@ -406,7 +406,7 @@ export type AddressTimings = {|
 //    will usually put a randomized token into the URL in order to make it even
 //    harder to guess the right URL. The address proof check is an extra layer
 //    of protection on top of that, in case the secret URL somehow leaks.
-export type AddressProof = {|
+export type AddressProof = {
   // The debugName of a library whose symbol information refers to the requested
   // file.
   debugName: string,
@@ -415,7 +415,7 @@ export type AddressProof = {|
   // The address in that library for which the symbolicated frames refer to the
   // requested file.
   address: Address,
-|};
+};
 
 /**
  * When working with call trees, individual nodes in the tree are not stable across
@@ -435,15 +435,15 @@ export type CallNodePath = IndexIntoFuncTable[];
  * This type contains the first derived `Marker[]` information, plus an IndexedArray
  * to get back to the RawMarkerTable.
  */
-export type DerivedMarkerInfo = {|
+export type DerivedMarkerInfo = {
   markers: Marker[],
   markerIndexToRawMarkerIndexes: IndexedArray<
     MarkerIndex,
     IndexIntoRawMarkerTable[],
   >,
-|};
+};
 
-export type Marker = {|
+export type Marker = {
   start: Milliseconds,
   end: Milliseconds | null,
   name: string,
@@ -451,7 +451,7 @@ export type Marker = {|
   threadId: Tid | null,
   data: MarkerPayload | null,
   incomplete?: boolean,
-|};
+};
 
 /**
  * A value with this type uniquely identifies a marker. This is the index of a
@@ -472,13 +472,13 @@ export type CallNodeData = {
   selfRelative: number,
 };
 
-export type ExtraBadgeInfo = {|
+export type ExtraBadgeInfo = {
   name: string,
   localizationId: string,
   vars: mixed,
   titleFallback: string,
   contentFallback: string,
-|};
+};
 
 export type CallNodeDisplayData = $Exact<
   $ReadOnly<{
@@ -499,19 +499,19 @@ export type CallNodeDisplayData = $Exact<
   }>,
 >;
 
-export type ThreadWithReservedFunctions = {|
+export type ThreadWithReservedFunctions = {
   thread: Thread,
   reservedFunctionsForResources: Map<
     IndexIntoResourceTable,
     IndexIntoFuncTable,
   >,
-|};
+};
 
 /**
  * The marker timing contains the necessary information to draw markers very quickly
  * in the marker chart. It represents a single row of markers in the chart.
  */
-export type MarkerTiming = {|
+export type MarkerTiming = {
   // Start time in milliseconds.
   start: number[],
   // End time in milliseconds. It will equals start for instant markers.
@@ -522,7 +522,7 @@ export type MarkerTiming = {|
   // True if this marker timing contains only instant markers.
   instantOnly: boolean,
   length: number,
-|};
+};
 
 export type MarkerTimingRows = Array<MarkerTiming>;
 
@@ -561,7 +561,7 @@ export type JsTracerTiming = {
  * The memory counter contains relative offsets of memory. This type provides a data
  * structure that can be used to see the total range of change over all the samples.
  */
-export type AccumulatedCounterSamples = {|
+export type AccumulatedCounterSamples = {
   +minCount: number,
   +maxCount: number,
   +countRange: number,
@@ -569,46 +569,46 @@ export type AccumulatedCounterSamples = {|
   // For a memory counter, this gives the relative offset of bytes in that range
   // selection. The array will share the indexes of the range filtered counter samples.
   +accumulatedCounts: number[],
-|};
+};
 
 /**
  * A collection of the data for all configured lines for a given marker
  */
-export type CollectedCustomMarkerSamples = {|
+export type CollectedCustomMarkerSamples = {
   +minNumber: number,
   +maxNumber: number,
   // This value holds the number per configured line
   // selection. The array will share the indexes of the range filtered marker samples.
   +numbersPerLine: number[][],
   +markerIndexes: MarkerIndex[],
-|};
+};
 
 export type StackType = 'js' | 'native' | 'unsymbolicated';
 
 export type GlobalTrack =
   // mainThreadIndex is null when this is a fake global process added to contain
   // real threads.
-  | {| +type: 'process', +pid: Pid, +mainThreadIndex: ThreadIndex | null |}
-  | {| +type: 'screenshots', +id: string, +threadIndex: ThreadIndex |}
-  | {| +type: 'visual-progress' |}
-  | {| +type: 'perceptual-visual-progress' |}
-  | {| +type: 'contentful-visual-progress' |};
+  | { +type: 'process', +pid: Pid, +mainThreadIndex: ThreadIndex | null }
+  | { +type: 'screenshots', +id: string, +threadIndex: ThreadIndex }
+  | { +type: 'visual-progress' }
+  | { +type: 'perceptual-visual-progress' }
+  | { +type: 'contentful-visual-progress' };
 
 export type LocalTrack =
-  | {| +type: 'thread', +threadIndex: ThreadIndex |}
-  | {| +type: 'network', +threadIndex: ThreadIndex |}
-  | {| +type: 'memory', +counterIndex: CounterIndex |}
-  | {| +type: 'bandwidth', +counterIndex: CounterIndex |}
-  | {| +type: 'ipc', +threadIndex: ThreadIndex |}
-  | {| +type: 'event-delay', +threadIndex: ThreadIndex |}
-  | {| +type: 'process-cpu', +counterIndex: CounterIndex |}
-  | {| +type: 'power', +counterIndex: CounterIndex |}
-  | {|
+  | { +type: 'thread', +threadIndex: ThreadIndex }
+  | { +type: 'network', +threadIndex: ThreadIndex }
+  | { +type: 'memory', +counterIndex: CounterIndex }
+  | { +type: 'bandwidth', +counterIndex: CounterIndex }
+  | { +type: 'ipc', +threadIndex: ThreadIndex }
+  | { +type: 'event-delay', +threadIndex: ThreadIndex }
+  | { +type: 'process-cpu', +counterIndex: CounterIndex }
+  | { +type: 'power', +counterIndex: CounterIndex }
+  | {
       +type: 'marker',
       +threadIndex: ThreadIndex,
       +markerSchema: MarkerSchema,
       +markerName: IndexIntoStringTable,
-    |};
+    };
 
 export type Track = GlobalTrack | LocalTrack;
 
@@ -622,7 +622,7 @@ export type TrackIndex = number;
  * Type that holds the values of personally identifiable information that user
  * wants to remove.
  */
-export type RemoveProfileInformation = {|
+export type RemoveProfileInformation = {
   // Remove the given hidden threads if they are provided.
   +shouldRemoveThreads: Set<ThreadIndex>,
   // Remove the given counters if they are provided.
@@ -639,7 +639,7 @@ export type RemoveProfileInformation = {|
   +shouldRemovePreferenceValues: boolean,
   // Remove the private browsing data if it's true.
   +shouldRemovePrivateBrowsingData: boolean,
-|};
+};
 
 /**
  * This type is used to decide how to highlight and stripe areas in the
@@ -668,30 +668,30 @@ export type InitialSelectedTrackReference = HTMLElement;
 /**
  * Page data for ProfileFilterNavigator component.
  */
-export type ProfileFilterPageData = {|
+export type ProfileFilterPageData = {
   origin: string,
   hostname: string,
   favicon: string,
-|};
+};
 
 /**
  * Information about the Tab selector state that is sorted by their tab activity
  * scores.
  */
-export type SortedTabPageData = Array<{|
+export type SortedTabPageData = Array<{
   tabID: TabID,
   tabScore: number,
   pageData: ProfileFilterPageData,
-|}>;
+}>;
 
-export type CallNodeSelfAndSummary = {|
+export type CallNodeSelfAndSummary = {
   // This property stores the amount of unit (time, bytes, count, etc.) spent in
   // this call node and not in any of its descendant nodes.
   callNodeSelf: Float64Array,
   // The sum of absolute values in callNodeSelf.
   // This is used for computing the percentages displayed in the call tree.
   rootTotalSummary: number,
-|};
+};
 
 /**
  * The self and total time, usually for a single call node.
@@ -701,7 +701,7 @@ export type CallNodeSelfAndSummary = {|
  *  - Otherwise, the values are in the same unit as the sample weight type. For
  *    example, they could be sample counts, weights, or bytes.
  */
-export type SelfAndTotal = {| self: number, total: number |};
+export type SelfAndTotal = { self: number, total: number };
 
 /*
  * Event delay table that holds the pre-processed event delay values and other
@@ -710,12 +710,12 @@ export type SelfAndTotal = {| self: number, total: number |};
  * to make a calculation to find out their real values. Also see:
  * https://searchfox.org/mozilla-central/rev/3811b11b5773c1dccfe8228bfc7143b10a9a2a99/tools/profiler/core/platform.cpp#3000-3186
  */
-export type EventDelayInfo = {|
+export type EventDelayInfo = {
   +eventDelays: Float32Array,
   +minDelay: Milliseconds,
   +maxDelay: Milliseconds,
   +delayRange: Milliseconds,
-|};
+};
 
 /**
  * This is a unique key that can be used in an object cache that represents either
@@ -732,7 +732,7 @@ export type ThreadsKey = string | number;
  * would only be meaningful within a thread.
  * This can be removed if the native symbol table ever becomes global.
  */
-export type NativeSymbolInfo = {|
+export type NativeSymbolInfo = {
   name: string,
   address: Address,
   // The number of bytes belonging to this function, starting at the symbol address.
@@ -740,22 +740,22 @@ export type NativeSymbolInfo = {|
   functionSize: Bytes,
   functionSizeIsKnown: boolean,
   libIndex: IndexIntoLibs,
-|};
+};
 
 /**
  * Information about the initiating call node when the bottom box (source view +
  * assembly view) is updated.
  */
-export type BottomBoxInfo = {|
+export type BottomBoxInfo = {
   libIndex: IndexIntoLibs | null,
   sourceFile: string | null,
   nativeSymbols: NativeSymbolInfo[],
-|};
+};
 
 /**
  * Favicon data that is retrieved from the browser connection.
  */
-export type FaviconData = {|
+export type FaviconData = {
   +data: ArrayBuffer,
   +mimeType: string,
-|};
+};
