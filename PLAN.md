@@ -163,6 +163,21 @@ type Fn = ('send', GAPayload) => void;
 type Fn = (command: 'send', payload: GAPayload) => void;
 ```
 
+#### 7. `assertExhaustiveCheck`
+
+Usually used in switch default cases. When switching on a property of an object,
+discard that property because the entire object will be the `never` type in TS.
+
+```typescript
+// Flow
+default:
+   throw assertExhaustiveCheck(error.type);
+
+// TypeScript
+default:
+   throw assertExhaustiveCheck(error);
+```
+
 ---
 
 ## ✅ RESOLVED: Build System Configuration
