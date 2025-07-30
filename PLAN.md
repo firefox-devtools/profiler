@@ -17,7 +17,7 @@ This represents a significant achievement in the Flow→TypeScript migration:
 
 - **Type Definitions**: ✅ 13/13 files complete (100%)
 - **Core Utilities**: ✅ 40/40 files complete (100%) - colors.ts, string.ts, format-numbers.ts, errors.ts, base64.ts, bisect.ts, pretty-bytes.ts, sha1.ts, set.ts, magic.ts, analytics.ts, l10n-pseudo.ts, path.ts, time-code.ts, number-series.ts, jwt.ts, shorten-url.ts, uintarray-encoding.ts, range-set.ts, special-paths.ts, string-table.ts, window-console.ts, css-geometry-tools.ts, gz.ts, react.ts, flow.ts, index.ts, codemirror-shared.ts, data-table-utils.ts, resize-observer-wrapper.ts, text-measurement.ts, url.ts, l10n-ftl-functions.ts, query-api.ts, worker-factory.ts, **mocks**/worker-factory.ts, fetch-assembly.ts, untar.ts, fetch-source.ts, connect.ts
-- **React Components**: ⏳ 0/150+ files (pending)
+- **React Components**: ✅ 4/150+ files started (2.7%) - Warning.tsx, BlobUrlLink.tsx, FooterLinks.tsx, DebugWarning.tsx
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 
 ### 🎯 Next Steps
@@ -25,8 +25,11 @@ This represents a significant achievement in the Flow→TypeScript migration:
 1. ✅ **COMPLETED**: All utility files migrated (100%)!
    - Successfully converted complex connect.js with advanced Flow features
    - All 41 utility files now use TypeScript
-2. Begin React component migration with basic leaf components
-3. Maintain test validation after each conversion
+2. ✅ **IN PROGRESS**: React component migration started (4 components complete)
+   - Successfully converted simple presentational and connected components
+   - Proven patterns for TypeScript component conversions established
+3. Continue React component migration with more leaf components
+4. Maintain test validation after each conversion
 
 ### ✅ Current Migration State
 
@@ -94,6 +97,38 @@ yarn test  # Run together instead
 - **The migration config is optimized** - project-wide checks are very fast (~0.65s)
 
 ### Proven Flow→TypeScript Conversion Patterns
+
+#### React Component Patterns
+
+```typescript
+// Flow class component
+class ComponentName extends PureComponent<Props, State> {
+  state = { value: true };
+  render() { ... }
+}
+
+// TypeScript class component
+class ComponentName extends PureComponent<Props, State> {
+  override state = { value: true };
+  override render() { ... }
+}
+```
+
+#### Connected Component Pattern
+
+```typescript
+// Flow
+import type { ConnectedProps } from '../../utils/connect';
+type StateProps = {
+  +prop: string,
+};
+
+// TypeScript
+import { ConnectedProps } from '../../utils/connect';
+type StateProps = {
+  readonly prop: string;
+};
+```
 
 #### 1. Import Statements
 
@@ -292,17 +327,19 @@ module.exports = function (api) {
 - All 13 type definition files converted
 - Build system supporting mixed codebase
 
-### Phase 2: 🔄 IN PROGRESS - Utility Files
+### Phase 2: ✅ COMPLETED - Utility Files
 
-- Target: 39 files in src/utils/
-- Current: 27/39 complete (69.2%)
-- Focus: Simple, self-contained files first
+- Target: 40 files in src/utils/
+- Current: 40/40 complete (100%)
+- All utility files successfully migrated to TypeScript
 
-### Phase 3: ⏳ PLANNED - React Components
+### Phase 3: 🔄 IN PROGRESS - React Components
 
-- Start with leaf components (no complex Redux connections)
-- Convert to .tsx with proper React types
-- Validate props, state, and event handlers
+- Target: 150+ files in src/components/
+- Current: 4/150+ complete (2.7%)
+- ✅ Started with simple leaf components (Warning, BlobUrlLink, FooterLinks)
+- ✅ Successfully converted connected component (DebugWarning)
+- Focus: Continue with more leaf components before complex ones
 
 ### Phase 4: ⏳ PLANNED - Connected Components
 
