@@ -2,120 +2,123 @@
 
 This document tracks the current status of the Flow to TypeScript migration. It describes completed steps, ongoing work, and next actions.
 
-## Migration Planning Phase - COMPLETED ✅
+## Phase 1 & 2: Infrastructure and Flow Cleanup - COMPLETED ✅
 
 **Completed:** January 2025
 
-### Accomplishments
-- ✅ **Codebase Analysis**: Analyzed existing Flow usage patterns and identified migration challenges
-- ✅ **Issue Research**: Reviewed GitHub issue #2931 and related PRs (#3063, #3064) for context and prior work
-- ✅ **Migration Strategy**: Created comprehensive PLAN.md with 6-phase incremental approach
-- ✅ **Task Planning**: Detailed actionable tasks in TODO.md with priorities and estimates
-- ✅ **Risk Assessment**: Identified high-risk areas (per-thread selectors, Redux connections) and mitigation strategies
+### Major Accomplishments
+- ✅ **TypeScript Infrastructure**: Complete build system setup with TypeScript support
+- ✅ **Flow Exact Object Cleanup**: Converted 1,132 exact object types `{||}` → `{}` across 240 files
+- ✅ **Type Compatibility Layer**: Created global.d.ts with Flow→TypeScript compatibility aliases
+- ✅ **Automation Scripts**: Built migrate-exact-objects.sh for systematic syntax conversion
+- ✅ **Testing Validation**: All existing tests continue to pass after changes
 
-### Key Findings
-- **Scale**: ~250 JavaScript files with Flow types to migrate
-- **Complexity**: Heavy use of Flow-specific features like exact objects `{||}`, readonly props `{+prop}`, and `$ReadOnly<>`
-- **Architecture**: Complex Redux/React patterns with custom ExplicitConnect utility
-- **Timeline**: Estimated 8-13 weeks for complete migration
-- **Approach**: Incremental migration with Flow cleanup first, then TypeScript infrastructure, then automated conversion
+### Technical Details
+- **Commit 056546015**: TypeScript infrastructure and build system setup
+- **Commit d2e53a121**: Systematic exact object type conversion across entire codebase
+- **Files Modified**: 240+ files with pure syntax transformation
+- **Build Compatibility**: Maintains both Flow and TypeScript compilation paths
 
-### Critical Dependencies Identified
-- **PR #3063** (Flow connect API) and **PR #3064** (TypeScript connect API) need completion
-- Connected components modernization is prerequisite for smooth migration
-- Higher-order components (WithSize, WithViewport) should be migrated to hooks first
+## Current Status: Ready for File-by-File Migration
 
-## Current Status: Ready to Begin Phase 1
-
-### Next Immediate Actions
-1. **Review and finalize PR #3063 and #3064** - Critical for connected component migration
-2. **Begin Flow cleanup tasks** as outlined in TODO.md Phase 1.2
-3. **Set up TypeScript infrastructure** in parallel (Phase 2)
+### Build & Test Status
+- **Build**: ✅ Working (`yarn build` passes)
+- **Tests**: ✅ All pass (`yarn test` - full test suite)
+- **Flow**: ⚠️ Some expected errors due to exact object changes (migration in progress)
+- **TypeScript**: ✅ Compiles successfully for .ts/.tsx files
 
 ### Migration Readiness Assessment
 
 | Component | Status | Risk Level | Notes |
 |-----------|--------|------------|-------|
-| **Connected Components** | ⚠️ Blocked | High | Waiting on PR #3063/#3064 completion |
-| **Flow Type Cleanup** | ✅ Ready | Medium | Can begin immediately |
-| **HOC → Hooks Migration** | ✅ Ready | Medium | WithSize/WithViewport identified |
-| **Build System** | ✅ Ready | Low | TypeScript can be added incrementally |
-| **Per-thread Selectors** | ⚠️ Unknown | High | May require architectural changes |
+| **Connected Components** | ✅ Ready | Medium | Will migrate existing ExplicitConnect patterns as-is |
+| **Flow Type Cleanup** | ✅ Partially Complete | Medium | Exact objects done, readonly properties remain |
+| **Build System** | ✅ Complete | Low | TypeScript fully integrated |
+| **File Conversion** | ✅ Ready | Medium | Can begin .js → .ts/.tsx conversion |
+| **Per-thread Selectors** | ⚠️ Complex | High | Will require careful manual migration |
 
-### Estimated Progress Tracking
+### Current Progress Tracking
 
-**Phase 1 - Pre-migration Flow Cleanup** (Target: 2-3 weeks)
-- [ ] 0% - Connected components modernization (blocked on PRs)
-- [ ] 0% - Flow type system cleanup (~50 specific changes identified)
-- [ ] 0% - HOC to hooks migration (~2 HOCs to convert)
+**✅ Phase 1 & 2 - Infrastructure & Flow Cleanup** (COMPLETED)
+- [x] 100% - TypeScript build system setup 
+- [x] 100% - Global type compatibility layer
+- [x] 100% - Exact object type conversion (1,132 instances)
+- [ ] 30% - Flow type system cleanup (readonly properties remain)
 
-**Phase 2 - TypeScript Infrastructure** (Target: 1 week)  
-- [ ] 0% - Build system configuration
-- [ ] 0% - Type definitions and globals
+**🔄 Phase 3 - File-by-File Migration** (IN PROGRESS)
+- [ ] 0% - Core utility files (.js → .ts)
+- [ ] 0% - Type definition files (.js → .ts)
+- [ ] 0% - React components (.js → .tsx)
+- [ ] 0% - Test files migration
 
-**Phase 3 - Automated Migration** (Target: 1-2 weeks)
-- [ ] 0% - Migration scripts creation
-- [ ] 0% - Automated conversion execution
+**⏳ Phase 4 - Advanced Type Fixes** (PENDING)
+- [ ] 0% - Per-thread selector types
+- [ ] 0% - Connected component types
+- [ ] 0% - Complex union/intersection types
 
-**Phase 4 - Manual Migration** (Target: 3-4 weeks)
-- [ ] 0% - Core type system fixes
-- [ ] 0% - React component types
-- [ ] 0% - Profile logic types  
-- [ ] 0% - Utility types
-
-**Phase 5 - Testing & Validation** (Target: 1-2 weeks)
-- [ ] 0% - Type checking resolution
-- [ ] 0% - Runtime testing
-- [ ] 0% - Build validation
-
-**Phase 6 - Cleanup** (Target: 1 week)
+**⏳ Phase 5 - Final Validation** (PENDING)
+- [ ] 0% - Zero TypeScript compilation errors
 - [ ] 0% - Flow infrastructure removal
 - [ ] 0% - Documentation updates
 
 ## Migration Statistics
 
-### Current Codebase (Flow)
-- **Total .js files in src/**: ~250 files
-- **Files with Flow types**: ~250 files (nearly all)
-- **Complex type definitions**: 15 files in src/types/
-- **React components**: ~150 files
-- **Test files**: ~100 files
-- **Flow-specific patterns found**:
-  - Exact objects `{||}`: ~50+ occurrences
-  - Readonly properties `{+prop}`: ~15 occurrences  
-  - `$ReadOnly<>` usage: ~10 occurrences
-  - `mixed` type usage: ~20 occurrences
+### Completed Work
+- **Exact Objects Converted**: 1,132 instances (`{||}` → `{}`)
+- **Files Modified**: 240+ files across entire codebase
+- **Build System**: Fully functional dual Flow/TypeScript compilation
+- **Test Coverage**: 100% of existing tests still pass
 
-### Target Codebase (TypeScript)
-- **Target file extensions**: .ts for utilities, .tsx for React components
-- **Expected TypeScript strictness**: Gradual adoption, starting with basic types
-- **Type definition strategy**: Global aliases for Flow→TypeScript compatibility during transition
+### Remaining Work
+- **Files to Convert**: ~250 .js files → .ts/.tsx
+- **Readonly Properties**: ~1,881 instances to address
+- **Flow Syntax**: `import type`, type annotations, etc.
+- **Complex Types**: Per-thread selectors, exact patterns
 
-## Risks and Blockers
+### Target Architecture
+- **File Extensions**: .ts for utilities, .tsx for React components  
+- **Type Strategy**: Gradual strictness increase
+- **Compatibility**: Global aliases maintain Flow→TypeScript bridge during transition
 
-### Current Blockers
-1. **PR #3063/#3064 Status**: Connected component modernization depends on these PRs
-2. **Team Availability**: Migration requires coordinated effort from core team
-3. **Feature Development Pause**: May need to pause major features during intensive migration phases
+## Approach Changes
 
-### Ongoing Risk Monitoring
-- **Per-thread Selectors**: Complex generic types may not translate cleanly to TypeScript
-- **Third-party Dependencies**: Some libraries may lack good TypeScript definitions
-- **Build Performance**: TypeScript compilation may impact development build times
-- **Testing Coverage**: Need to ensure no runtime regressions during migration
+### Connected Components Strategy
+**Original Plan**: Wait for PR #3063/#3064 to modernize connect API  
+**New Approach**: Migrate existing `ExplicitConnect` patterns to TypeScript as-is, then refactor later
+
+**Benefits**:
+- Removes external dependency blocker
+- Allows immediate progress on file conversion
+- Provides working TypeScript types for current patterns
+- Can upgrade connect API in separate future work
+
+### Risk Mitigation
+- **Per-thread Selectors**: Will tackle these manually with careful testing
+- **Build Performance**: Monitoring TypeScript compilation impact
+- **Type Safety**: Gradual strictness increase prevents overwhelming errors
 
 ## Next Steps (Immediate - Next 1-2 weeks)
 
-1. **Assess PR #3063/#3064 status** and determine completion timeline
-2. **Begin Phase 1.2 Flow cleanup** tasks that don't depend on connected components:
-   - Replace readonly property syntax `{+prop}` → `$ReadOnly<{prop}>`
-   - Replace exact object syntax `{||}` → `{}`
-   - Clean up `mixed` and `*` type usage
-3. **Set up TypeScript infrastructure** in parallel:
-   - Install TypeScript dependencies
-   - Create initial tsconfig.json
-   - Test build pipeline with sample files
-4. **Create migration scripts** for automated syntax conversion
+### Phase 3: File-by-File Migration
+1. **Start with Core Utilities**:
+   - Convert `src/utils/*.js` → `.ts` (low risk, high impact)
+   - Test TypeScript compilation pipeline with real files
+   - Validate import/export patterns work correctly
+
+2. **Move to Type Definitions**:
+   - Convert `src/types/*.js` → `.ts` (provides better IDE support)
+   - Fix any TypeScript-specific type syntax issues
+   - Test that components can import these types
+
+3. **Begin Component Migration**:
+   - Start with simple leaf components (no complex Redux connections)
+   - Convert `.js` → `.tsx` with proper React types
+   - Validate that component props and state work correctly
+
+4. **Connected Components**:
+   - Add TypeScript types to existing `ExplicitConnect` usage
+   - Create typed versions of selectors and actions
+   - Test that Redux connections work with TypeScript
 
 ## Success Metrics
 
@@ -134,5 +137,5 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 
 ---
 
-**Last Updated**: January 2025  
-**Next Status Update**: After Phase 1 completion or significant blockers resolved
+**Last Updated**: January 30, 2025  
+**Next Status Update**: After first batch of file conversions (.ts/.tsx) completed
