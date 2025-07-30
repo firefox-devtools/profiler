@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
+// TypeScript types
 
 import type { Store as ReduxStore } from 'redux';
 import type { Action as ActionsRef } from './actions';
@@ -26,7 +26,7 @@ export type State = StateRef;
  *
  * See the type below for additional considerations.
  */
-export type Selector<T> = (State) => T;
+export type Selector<T> = (state: State) => T;
 
 /**
  * Selectors generally come in two different varieties: selectors that trivially access
@@ -54,10 +54,10 @@ export type Selector<T> = (State) => T;
  * See: https://github.com/reduxjs/reselect/blob/master/README.md#q-how-do-i-create-a-selector-that-takes-an-argument
  */
 export type DangerousSelectorWithArguments<T, A1, A2 = void, A3 = void> = (
-  State,
-  A1,
-  A2,
-  A3
+  state: State,
+  arg1: A1,
+  arg2: A2,
+  arg3: A3
 ) => T;
 
 type ThunkDispatch = <Returns>(action: ThunkAction<Returns>) => Returns;
@@ -67,7 +67,7 @@ export type GetState = () => State;
 /**
  * A thunk action
  */
-export type ThunkAction<Returns> = (dispatch: Dispatch, GetState) => Returns;
+export type ThunkAction<Returns> = (dispatch: Dispatch, getState: GetState) => Returns;
 
 /**
  * The `dispatch` function can accept either a plain action or a thunk action.

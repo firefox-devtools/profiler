@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
+// TypeScript types
 
-export type ExtractReturnType = <V>((...args: any[]) => V) => V;
+export type ExtractReturnType<V> = (...args: any[]) => V;
 
 /**
  * This type serves as documentation for how an array is meant to be used, but does
@@ -18,7 +18,7 @@ export type IndexedArray<_IndexType, Value> = Array<Value>;
 /**
  * This is a utility type that extracts the return type of a function.
  */
-export type $ReturnType<Fn> = $Call<ExtractReturnType, Fn>;
+export type $ReturnType<Fn extends (...args: any[]) => any> = ReturnType<Fn>;
 
 /**
  * This type is equivalent to {[string]: T} for an object created without a prototype,
@@ -27,9 +27,9 @@ export type $ReturnType<Fn> = $Call<ExtractReturnType, Fn>;
  * See: https://github.com/facebook/flow/issues/4967#issuecomment-402355640
  */
 export type ObjectMap<T> = {
-  [string]: T,
+  [key: string]: T;
   // No prototype was created:
-  __proto__: null,
+  __proto__: null;
 };
 
-export type MixedObject = { [key: string]: mixed };
+export type MixedObject = { [key: string]: unknown };
