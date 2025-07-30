@@ -4,6 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Common Development Commands
 
+### Github Commands
+
+You can use the `gh` command line tool to read issues and pull requests.
+
 ### Build Commands
 
 - `yarn build` - Development build. You don't need to run this, just run tests.
