@@ -17,7 +17,7 @@ This represents a significant achievement in the Flow→TypeScript migration:
 
 - **Type Definitions**: ✅ 13/13 files complete (100%)
 - **Core Utilities**: ✅ 41/41 files complete (100%)  
-- **React Components**: ✅ 6/150+ files complete (4.0%) - Warning.tsx, BlobUrlLink.tsx, FooterLinks.tsx, DebugWarning.tsx, EmptyReasons.tsx, Icon.tsx
+- **React Components**: ✅ 16/150+ files complete (10.7%) - Warning.tsx, BlobUrlLink.tsx, FooterLinks.tsx, DebugWarning.tsx, EmptyReasons.tsx, Icon.tsx, ContextMenuTrigger.tsx, ContextMenuNoHidingOnEnter.tsx, UploadedRecordingsHome.tsx, TransformNavigator.tsx, TrackEventDelay.tsx, JsTracerEmptyReasons.tsx, CodeLoadingOverlay.tsx, ProfileMetaInfoSummary.tsx, MarkerTableEmptyReasons.tsx, MarkerChartEmptyReasons.tsx
 - **Profile Logic**: ⏳ 0/80+ files - Core business logic modules
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 
@@ -263,6 +263,73 @@ default:
    throw assertExhaustiveCheck(error);
 ```
 
+#### 9. React Component Props Types
+
+```typescript
+// Flow
+import type { ElementProps } from 'react';
+type Props = ElementProps<typeof Component>;
+
+// TypeScript
+import { ComponentProps } from 'react';
+type Props = ComponentProps<typeof Component>;
+```
+
+#### 10. CSS Custom Properties (CSS Variables)
+
+```typescript
+// TypeScript - CSS custom properties need type assertion
+<div
+  style={{
+    height: graphHeight,
+    '--graph-height': `${graphHeight}px`,
+    '--markers-height': `0px`,
+  } as React.CSSProperties}
+>
+```
+
+#### 11. Specific Type Imports
+
+```typescript
+// Sometimes generic imports don't work
+import { CodeLoadingSource } from 'firefox-profiler/types'; // ❌ May fail
+
+// Use specific import paths
+import { CodeLoadingSource } from 'firefox-profiler/types/state'; // ✅ Works
+```
+
+#### 12. Empty Reasons Connected Component Pattern
+
+```typescript
+// Common pattern for empty state components
+type StateProps = {
+  readonly threadName: string;
+  readonly isEmptyInFullRange: boolean;
+};
+
+type Props = ConnectedProps<{}, StateProps, {}>;
+class EmptyReasonsImpl extends PureComponent<Props> {
+  override render() {
+    const { isEmptyInFullRange, threadName } = this.props;
+    return (
+      <EmptyReasons
+        threadName={threadName}
+        reason={isEmptyInFullRange ? 'No data' : 'Filtered out'}
+        viewName="view-name"
+      />
+    );
+  }
+}
+
+export const ComponentEmptyReasons = explicitConnect<{}, StateProps, {}>({
+  mapStateToProps: (state: State) => ({
+    threadName: selectedThreadSelectors.getFriendlyThreadName(state),
+    isEmptyInFullRange: selectedThreadSelectors.getSomeEmptyCheck(state),
+  }),
+  component: EmptyReasonsImpl,
+});
+```
+
 ---
 
 ## Lessons Learned (Avoid These Mistakes)
@@ -329,10 +396,12 @@ default:
 ### Phase 3: 🔄 IN PROGRESS - React Components
 
 - Target: 150+ files in src/components/
-- Current: 6/150+ complete (4.0%)
-- ✅ Started with simple leaf components (Warning, BlobUrlLink, FooterLinks, EmptyReasons)
-- ✅ Successfully converted connected components (DebugWarning, Icon)
+- Current: 16/150+ complete (10.7%)
+- ✅ Successfully converted simple leaf components (Warning, BlobUrlLink, FooterLinks, EmptyReasons)
+- ✅ Successfully converted connected components (DebugWarning, Icon, TransformNavigator)
 - ✅ Established patterns for union type handling with type guards
+- ✅ Converted EmptyReasons pattern components (JsTracer, MarkerTable, MarkerChart)
+- ✅ Function components with complex union types (CodeLoadingOverlay)
 - Focus: Continue with more leaf components before complex ones
 
 ### Phase 4: ⏳ PLANNED - Connected Components
