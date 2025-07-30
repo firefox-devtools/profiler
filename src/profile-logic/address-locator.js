@@ -1,7 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-/* eslint-disable flowtype/require-valid-file-annotation */
 
 // Find an address in the list of libraries, and convert the address from
 // an absolute virtual memory address into a library-relative address.
