@@ -47,7 +47,7 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 
 **🔄 Phase 3 - File-by-File Migration** (IN PROGRESS)
 - [ ] 0% - Core utility files (.js → .ts)
-- [x] 20% - Type definition files (.js → .ts) - units.ts, utils.ts, store.ts, index.ts converted
+- [x] 40% - Type definition files (.js → .ts) - units.ts, utils.ts, store.ts, index.ts, actions.ts, state.ts converted
 - [ ] 0% - React components (.js → .tsx)
 - [ ] 0% - Test files migration
 
@@ -65,13 +65,13 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 
 ### Completed Work
 - **Exact Objects Converted**: 1,132 instances (`{||}` → `{}`)
-- **TypeScript Files Converted**: 4 type definition files (units.ts, utils.ts, store.ts, index.ts)
+- **TypeScript Files Converted**: 6 type definition files (units.ts, utils.ts, store.ts, index.ts, actions.ts, state.ts)
 - **Files Modified**: 240+ files across entire codebase
 - **Build System**: Fully functional dual Flow/TypeScript compilation
 - **Test Coverage**: 100% of existing tests still pass after each conversion
 
 ### Remaining Work  
-- **Type Definition Files**: ~10 remaining in src/types/ (actions.js, state.js, etc.)
+- **Type Definition Files**: ~8 remaining in src/types/ (profile.js, profile-derived.js, markers.js, etc.)
 - **Files to Convert**: ~250 .js files → .ts/.tsx
 - **Flow Syntax**: Per-file conversion during .js → .ts migration
 - **Complex Types**: Per-thread selectors, exact patterns
@@ -119,9 +119,9 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 ## Next Steps (Current - Next 1-2 weeks)
 
 ### Phase 3: File-by-File Migration (Revised Order)
-1. **Complete Type Definitions** (IN PROGRESS):
-   - ✅ Converted: units.ts, utils.ts, store.ts, index.ts
-   - 🔄 **Next**: Convert remaining src/types/*.js files (actions.js, state.js, etc.)
+1. **Continue Type Definitions** (IN PROGRESS):
+   - ✅ Converted: units.ts, utils.ts, store.ts, index.ts, actions.ts, state.ts
+   - 🔄 **Next**: Convert remaining src/types/*.js files (profile.js, profile-derived.js, markers.js, etc.)
    - Convert complex type files with Flow-specific patterns
    - Test that all type imports work correctly
 
@@ -158,4 +158,4 @@ This document tracks the current status of the Flow to TypeScript migration. It 
 ---
 
 **Last Updated**: July 30, 2025  
-**Next Status Update**: After completing remaining type definition files in src/types/
+**Next Status Update**: After completing all type definition files in src/types/

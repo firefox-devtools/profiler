@@ -31,7 +31,8 @@ This document tracks specific actionable tasks for the Flow to TypeScript migrat
 - [ ] **Run existing tests**: Validate no runtime regressions
 
 ### 3.2 Type Definitions Migration (Priority: High)  
-- [ ] **Convert type files**: `src/types/*.js` → `.ts`
+- [x] **Convert core type files**: `src/types/{actions,state,units,utils,store,index}.js` → `.ts` ✅
+- [ ] **Convert remaining type files**: `src/types/{profile,profile-derived,markers,transforms,symbolication,indexeddb}.js` → `.ts`
 - [ ] **Fix Flow-specific syntax**: Template constraints, import types, etc.
 - [ ] **Test IDE support**: Ensure better autocomplete and error detection
 - [ ] **Validate component imports**: Components can import types correctly

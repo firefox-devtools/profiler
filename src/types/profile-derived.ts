@@ -2,10 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-import type { Milliseconds, StartEndRange, Address, Bytes } from './units';
-import type { MarkerPayload, MarkerSchema } from './markers';
-import type {
+import { Milliseconds, StartEndRange, Address, Bytes } from './units';
+import { MarkerPayload, MarkerSchema } from './markers';
+import {
   ThreadIndex,
   Pid,
   IndexIntoFuncTable,
@@ -34,9 +33,9 @@ import type {
   IndexIntoFrameTable,
   IndexIntoSubcategoryListForCategory,
 } from './profile';
-import type { IndexedArray } from './utils';
-import type { StackTiming } from '../profile-logic/stack-timing';
-import type { StringTable } from '../utils/string-table';
+import { IndexedArray } from './utils';
+import { StackTiming } from '../profile-logic/stack-timing';
+import { StringTable } from '../utils/string-table';
 export type IndexIntoCallNodeTable = number;
 
 /**
@@ -562,25 +561,25 @@ export type JsTracerTiming = {
  * structure that can be used to see the total range of change over all the samples.
  */
 export type AccumulatedCounterSamples = {
-  +minCount: number,
-  +maxCount: number,
-  +countRange: number,
+  readonly minCount: number,
+  readonly maxCount: number,
+  readonly countRange: number,
   // This value holds the accumulation of all the previous counts in the Counter samples.
   // For a memory counter, this gives the relative offset of bytes in that range
   // selection. The array will share the indexes of the range filtered counter samples.
-  +accumulatedCounts: number[],
+  readonly accumulatedCounts: number[],
 };
 
 /**
  * A collection of the data for all configured lines for a given marker
  */
 export type CollectedCustomMarkerSamples = {
-  +minNumber: number,
-  +maxNumber: number,
+  readonly minNumber: number,
+  readonly maxNumber: number,
   // This value holds the number per configured line
   // selection. The array will share the indexes of the range filtered marker samples.
-  +numbersPerLine: number[][],
-  +markerIndexes: MarkerIndex[],
+  readonly numbersPerLine: number[][],
+  readonly markerIndexes: MarkerIndex[],
 };
 
 export type StackType = 'js' | 'native' | 'unsymbolicated';
@@ -588,26 +587,26 @@ export type StackType = 'js' | 'native' | 'unsymbolicated';
 export type GlobalTrack =
   // mainThreadIndex is null when this is a fake global process added to contain
   // real threads.
-  | { +type: 'process', +pid: Pid, +mainThreadIndex: ThreadIndex | null }
-  | { +type: 'screenshots', +id: string, +threadIndex: ThreadIndex }
-  | { +type: 'visual-progress' }
-  | { +type: 'perceptual-visual-progress' }
-  | { +type: 'contentful-visual-progress' };
+  | { readonly type: 'process', readonly pid: Pid, readonly mainThreadIndex: ThreadIndex | null }
+  | { readonly type: 'screenshots', readonly id: string, readonly threadIndex: ThreadIndex }
+  | { readonly type: 'visual-progress' }
+  | { readonly type: 'perceptual-visual-progress' }
+  | { readonly type: 'contentful-visual-progress' };
 
 export type LocalTrack =
-  | { +type: 'thread', +threadIndex: ThreadIndex }
-  | { +type: 'network', +threadIndex: ThreadIndex }
-  | { +type: 'memory', +counterIndex: CounterIndex }
-  | { +type: 'bandwidth', +counterIndex: CounterIndex }
-  | { +type: 'ipc', +threadIndex: ThreadIndex }
-  | { +type: 'event-delay', +threadIndex: ThreadIndex }
-  | { +type: 'process-cpu', +counterIndex: CounterIndex }
-  | { +type: 'power', +counterIndex: CounterIndex }
+  | { readonly type: 'thread', readonly threadIndex: ThreadIndex }
+  | { readonly type: 'network', readonly threadIndex: ThreadIndex }
+  | { readonly type: 'memory', readonly counterIndex: CounterIndex }
+  | { readonly type: 'bandwidth', readonly counterIndex: CounterIndex }
+  | { readonly type: 'ipc', readonly threadIndex: ThreadIndex }
+  | { readonly type: 'event-delay', readonly threadIndex: ThreadIndex }
+  | { readonly type: 'process-cpu', readonly counterIndex: CounterIndex }
+  | { readonly type: 'power', readonly counterIndex: CounterIndex }
   | {
-      +type: 'marker',
-      +threadIndex: ThreadIndex,
-      +markerSchema: MarkerSchema,
-      +markerName: IndexIntoStringTable,
+      readonly type: 'marker',
+      readonly threadIndex: ThreadIndex,
+      readonly markerSchema: MarkerSchema,
+      readonly markerName: IndexIntoStringTable,
     };
 
 export type Track = GlobalTrack | LocalTrack;
@@ -624,21 +623,21 @@ export type TrackIndex = number;
  */
 export type RemoveProfileInformation = {
   // Remove the given hidden threads if they are provided.
-  +shouldRemoveThreads: Set<ThreadIndex>,
+  readonly shouldRemoveThreads: Set<ThreadIndex>,
   // Remove the given counters if they are provided.
-  +shouldRemoveCounters: Set<CounterIndex>,
+  readonly shouldRemoveCounters: Set<CounterIndex>,
   // Remove the screenshots if they are provided.
-  +shouldRemoveThreadsWithScreenshots: Set<ThreadIndex>,
+  readonly shouldRemoveThreadsWithScreenshots: Set<ThreadIndex>,
   // Remove the full time range if StartEndRange is provided.
-  +shouldFilterToCommittedRange: StartEndRange | null,
+  readonly shouldFilterToCommittedRange: StartEndRange | null,
   // Remove all the URLs if it's true.
-  +shouldRemoveUrls: boolean,
+  readonly shouldRemoveUrls: boolean,
   // Remove the extension list if it's true.
-  +shouldRemoveExtensions: boolean,
+  readonly shouldRemoveExtensions: boolean,
   // Remove the preference values if it's true.
-  +shouldRemovePreferenceValues: boolean,
+  readonly shouldRemovePreferenceValues: boolean,
   // Remove the private browsing data if it's true.
-  +shouldRemovePrivateBrowsingData: boolean,
+  readonly shouldRemovePrivateBrowsingData: boolean,
 };
 
 /**
@@ -711,10 +710,10 @@ export type SelfAndTotal = { self: number, total: number };
  * https://searchfox.org/mozilla-central/rev/3811b11b5773c1dccfe8228bfc7143b10a9a2a99/tools/profiler/core/platform.cpp#3000-3186
  */
 export type EventDelayInfo = {
-  +eventDelays: Float32Array,
-  +minDelay: Milliseconds,
-  +maxDelay: Milliseconds,
-  +delayRange: Milliseconds,
+  readonly eventDelays: Float32Array,
+  readonly minDelay: Milliseconds,
+  readonly maxDelay: Milliseconds,
+  readonly delayRange: Milliseconds,
 };
 
 /**
@@ -756,6 +755,6 @@ export type BottomBoxInfo = {
  * Favicon data that is retrieved from the browser connection.
  */
 export type FaviconData = {
-  +data: ArrayBuffer,
-  +mimeType: string,
+  readonly data: ArrayBuffer,
+  readonly mimeType: string,
 };

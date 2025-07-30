@@ -2,11 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
-import type { Milliseconds, Address, Microseconds, Bytes } from './units';
-import type { MarkerPayload, MarkerSchema, MarkerFormatType } from './markers';
-import type { MarkerPhase, ProfilingLog } from './gecko-profile';
+import { Milliseconds, Address, Microseconds, Bytes } from './units';
+import { MarkerPayload, MarkerSchema, MarkerFormatType } from './markers';
+import { MarkerPhase, ProfilingLog } from './gecko-profile';
 
 export type IndexIntoStackTable = number;
 export type IndexIntoSamplesTable = number;
@@ -108,12 +106,12 @@ export type WeightType = 'samples' | 'tracing-ms' | 'bytes';
 export type RawSamplesTable = {
   // Responsiveness is the older version of eventDelay. It injects events every 16ms.
   // This is optional because newer profiles don't have that field anymore.
-  responsiveness?: Array<?Milliseconds>,
+  responsiveness?: Array<Milliseconds | null>,
   // Event delay is the newer version of responsiveness. It allow us to get a finer-grained
   // view of jank by inferring what would be the delay of a hypothetical input event at
   // any point in time. It requires a pre-processing to be able to visualize properly.
   // This is optional because older profiles didn't have that field.
-  eventDelay?: Array<?Milliseconds>,
+  eventDelay?: Array<Milliseconds | null>,
   stack: Array<IndexIntoStackTable | null>,
   time?: Milliseconds[],
   // If the `time` column is not present, then the `timeDeltas` column must be present.
@@ -171,8 +169,7 @@ export type UnbalancedNativeAllocationsTable = {
 /**
  * The memory address and thread ID were added later.
  */
-export type BalancedNativeAllocationsTable = {
-  ...UnbalancedNativeAllocationsTable,
+export type BalancedNativeAllocationsTable = UnbalancedNativeAllocationsTable & {
   memoryAddress: number[],
   threadId: number[],
 };
@@ -738,7 +735,7 @@ export type TimelineUnit = 'ms' | 'bytes';
 // Object that holds the units of samples table values. Some of the values can be
 // different depending on the platform, e.g. threadCPUDelta.
 // See https://searchfox.org/mozilla-central/rev/851bbbd9d9a38c2785a24c13b6412751be8d3253/tools/profiler/core/platform.cpp#2601-2606
-export type SampleUnits = $ReadOnly<{
+export type SampleUnits = Readonly<{
   time: TimelineUnit,
   eventDelay: 'ms',
   threadCPUDelta: ThreadCPUDeltaUnit,
