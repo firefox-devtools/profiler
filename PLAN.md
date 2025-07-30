@@ -10,8 +10,13 @@
 
 ### 🎯 Next Steps
 1. Continue converting remaining ~29 utility files in src/utils/
-2. Begin React component migration with simple leaf components
+2. Begin React component migration with basic leaf components
 3. Maintain test validation after each conversion
+
+### ✅ Current Migration State
+- `yarn test-all` **PASSES** - All checks work correctly during migration
+- `yarn typecheck` validates all converted TypeScript files
+- Mixed Flow/TypeScript codebase is stable and tested
 
 ---
 
@@ -21,7 +26,7 @@
 1. Copy `.js` → `.ts/.tsx`
 2. Remove `// @flow`
 3. Apply conversion patterns (see below)
-4. **CRITICAL**: Test compilation: `npx tsc --noEmit --skipLibCheck file.ts`
+4. **CRITICAL**: Test compilation: `yarn typecheck-file file.ts`
 5. **CRITICAL**: Fix ALL compilation errors before proceeding
 6. Only after successful compilation, remove original `.js` file
 7. Run tests to ensure no regressions
@@ -149,11 +154,15 @@ module.exports = function (api) {
 
 ### Development Commands
 - `yarn test` - Run all tests (must pass after each conversion)
-- `npx tsc --noEmit --skipLibCheck` - Test TypeScript compilation
-- `yarn build` - Development build (not needed for conversion)
+- `yarn typecheck` - Check TypeScript compilation for converted files only
+- `yarn typecheck-file <file>` - Check specific TypeScript file
+- `yarn test-all` - Run all checks (TypeScript + lint + test + etc.) - **PASSES during migration**
+- `yarn test-all-flow` - Original test-all with Flow (will fail during migration)
+- `yarn test-all-migration-done` - Post-migration test-all (will fail until migration complete)
 
 ### Critical Configuration Files
 - `tsconfig.json` - TypeScript configuration (working correctly)
+- `tsconfig.migration.json` - Migration-specific config (only checks .ts/.tsx files)
 - `babel.config.js` - Mixed Flow/TypeScript support (resolved)
 - `jest.config.js` - Test configuration (supports .ts/.tsx)
 
