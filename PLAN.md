@@ -5,13 +5,13 @@
 ### 📊 Progress
 
 - **Type Definitions**: ✅ 13/13 files complete (100%)
-- **Core Utilities**: 🔄 19/40+ files complete (47.5%) - colors.ts, string.ts, format-numbers.ts, errors.ts, base64.ts, bisect.ts, pretty-bytes.ts, sha1.ts, set.ts, magic.ts, analytics.ts, l10n-pseudo.ts, path.ts, time-code.ts, number-series.ts, jwt.ts, shorten-url.ts, uintarray-encoding.ts, range-set.ts
+- **Core Utilities**: 🔄 27/39 files complete (69.2%) - colors.ts, string.ts, format-numbers.ts, errors.ts, base64.ts, bisect.ts, pretty-bytes.ts, sha1.ts, set.ts, magic.ts, analytics.ts, l10n-pseudo.ts, path.ts, time-code.ts, number-series.ts, jwt.ts, shorten-url.ts, uintarray-encoding.ts, range-set.ts, special-paths.ts, string-table.ts, window-console.ts, css-geometry-tools.ts, gz.ts, react.ts, flow.ts, index.ts
 - **React Components**: ⏳ 0/150+ files (pending)
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 
 ### 🎯 Next Steps
 
-1. Continue converting remaining ~21 utility files in src/utils/
+1. Continue converting remaining 12 utility files in src/utils/
 2. Begin React component migration with basic leaf components
 3. Maintain test validation after each conversion
 
@@ -265,8 +265,8 @@ module.exports = function (api) {
 
 ### Phase 2: 🔄 IN PROGRESS - Utility Files
 
-- Target: ~40 files in src/utils/
-- Current: 11/40+ complete (28%)
+- Target: 39 files in src/utils/
+- Current: 27/39 complete (69.2%)
 - Focus: Simple, self-contained files first
 
 ### Phase 3: ⏳ PLANNED - React Components
