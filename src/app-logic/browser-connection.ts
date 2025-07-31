@@ -79,7 +79,7 @@ export interface BrowserConnection {
   getExternalPowerTracks(
     startTime: Milliseconds,
     endTime: Milliseconds
-  ): Promise<MixedObject>;
+  ): Promise<MixedObject[]>;
 
   // Query the browser-internal symbolication API. This provides richer
   // information than getSymbolTable.
@@ -170,13 +170,13 @@ class BrowserConnectionImpl implements BrowserConnection {
   async getExternalPowerTracks(
     startTime: Milliseconds,
     endTime: Milliseconds
-  ): Promise<MixedObject> {
+  ): Promise<MixedObject[]> {
     // On Firefox 121 and above, we can get additional power tracks recorded outside the browser.
     if (this._webChannelSupportsGetExternalPowerTracks) {
       return getExternalPowerTracksViaWebChannel(startTime, endTime);
     }
 
-    return [] as unknown as MixedObject;
+    return [];
   }
 
   async querySymbolicationApi(
@@ -278,10 +278,10 @@ export async function createBrowserConnection(
     return { status: 'NOT_FIREFOX' };
   }
   try {
-    const webChannelVersion = await Promise.race([
+    const webChannelVersion = (await Promise.race([
       queryWebChannelVersionViaWebChannel(),
       makeTimeoutRejectionPromise(5000),
-    ]);
+    ])) as number;
     // If we get here, it means queryWebChannelVersionViaWebChannel()
     // did not throw an exception. This means that a WebChannel exists.
     const browserConnection = new BrowserConnectionImpl(webChannelVersion);

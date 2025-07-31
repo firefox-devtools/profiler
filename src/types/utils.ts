@@ -32,4 +32,4 @@ export type ObjectMap<T> = {
   __proto__: null;
 };
 
-export type MixedObject = { [key: string]: unknown } | unknown[] | unknown;
+export type MixedObject = { [key: string]: unknown };
