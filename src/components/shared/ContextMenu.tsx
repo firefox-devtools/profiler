@@ -27,7 +27,7 @@ export class ContextMenu extends PureComponent<Props> {
       // The context menu component does not expose a reference to its internal
       // DOM node so using findDOMNode is currently unavoidable.
       // eslint-disable-next-line react/no-find-dom-node
-      const contextMenuNode = (ReactDOM as any).findDOMNode(this._contextMenu);
+      const contextMenuNode = ReactDOM.findDOMNode(this._contextMenu);
       if (contextMenuNode) {
         // There's no need to remove this event listener since the component is
         // never unmounted. Duplicate event listeners will also be discarded
@@ -39,7 +39,7 @@ export class ContextMenu extends PureComponent<Props> {
 
   override componentWillUnmount() {
     // eslint-disable-next-line react/no-find-dom-node
-    const contextMenuNode = (ReactDOM as any).findDOMNode(this._contextMenu);
+    const contextMenuNode = ReactDOM.findDOMNode(this._contextMenu);
     if (contextMenuNode) {
       contextMenuNode.removeEventListener('mousedown', this._mouseDownHandler);
     }
