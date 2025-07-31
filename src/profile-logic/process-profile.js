@@ -73,7 +73,6 @@ import type {
   GeckoThread,
   GeckoMetaMarkerSchema,
   GeckoStaticFieldSchemaData,
-  GeckoDynamicFieldSchemaData,
   GeckoMarkers,
   GeckoMarkerStruct,
   GeckoMarkerTuple,
@@ -94,6 +93,7 @@ import type {
   PhaseTimes,
   ExternalMarkersData,
   MarkerSchema,
+  MarkerSchemaField,
   ProfileMeta,
   PageList,
   ThreadIndex,
@@ -1460,11 +1460,12 @@ function _convertGeckoMarkerSchema(
     isStackBased,
   } = markerSchema;
 
-  const fields: GeckoDynamicFieldSchemaData[] = [];
+  const fields: MarkerSchemaField[] = [];
   const staticFields: GeckoStaticFieldSchemaData[] = [];
   for (const f of data) {
     if (f.value === undefined) {
-      fields.push(f);
+      const { key, label, format, hidden } = f;
+      fields.push({ key, label, format, hidden });
     } else if (f.key === undefined) {
       // extra check to placate Flow
       staticFields.push(f);
@@ -1482,9 +1483,12 @@ function _convertGeckoMarkerSchema(
     const discardedFields = staticFields.filter(
       (_f, i) => i !== staticDescriptionFieldIndex
     );
-    if (discardedFields.length !== 0) {
+    const potentiallyUsefulDiscardedFields = discardedFields.filter(
+      (f) => f.label !== 'Marker' && f.value !== 'UserTiming'
+    );
+    if (potentiallyUsefulDiscardedFields.length !== 0) {
       console.warn(
-        `Discarding the following static fields from marker schema "${name}": ${discardedFields.join(', ')}`
+        `Discarding the following static fields from marker schema "${markerSchema.name}": ${potentiallyUsefulDiscardedFields.map((f) => f.label + ': ' + f.value).join(', ')}`
       );
     }
     description = staticFields[staticDescriptionFieldIndex].value;

@@ -324,6 +324,7 @@ export type ProfileSpecificUrlState = {|
   lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy,
   invertCallstack: boolean,
   showUserTimings: boolean,
+  stackChartSameWidths: boolean,
   committedRanges: StartEndRange[],
   callTreeSearchString: string,
   markersSearchString: string,
@@ -388,6 +389,5 @@ export type State = {|
   +icons: IconsWithClassNames,
   +zippedProfiles: ZippedProfilesState,
   +publish: PublishState,
-  +l10n: L10nState,
   +code: CodeState,
 |};

@@ -32,7 +32,6 @@ import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { CallNodeInfo } from '../profile-logic/call-node-info';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type {
-  PseudoStrategy,
   UrlState,
   UploadState,
   State,
@@ -493,6 +492,10 @@ type UrlStateAction =
       +showUserTimings: boolean,
     |}
   | {|
+      +type: 'CHANGE_STACK_CHART_SAME_WIDTHS',
+      +stackChartSameWidths: boolean,
+    |}
+  | {|
       +type: 'CHANGE_SHOW_JS_TRACER_SUMMARY',
       +showSummary: boolean,
     |}
@@ -616,22 +619,6 @@ type CurrentProfileUploadedInformationAction = {|
   +uploadedProfileInformation: UploadedProfileInformation | null,
 |};
 
-type L10nAction =
-  | {|
-      +type: 'REQUEST_L10N',
-      +locales: string[],
-    |}
-  | {|
-      +type: 'RECEIVE_L10N',
-      +localization: Localization,
-      +primaryLocale: string,
-      +direction: 'ltr' | 'rtl',
-    |}
-  | {|
-      +type: 'TOGGLE_PSEUDO_STRATEGY',
-      +pseudoStrategy: PseudoStrategy,
-    |};
-
 type SourcesAction =
   | {| +type: 'SOURCE_CODE_LOADING_BEGIN_URL', file: string, url: string |}
   | {| +type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION', file: string |}
@@ -680,7 +667,6 @@ export type Action =
   | PublishAction
   | DragAndDropAction
   | CurrentProfileUploadedInformationAction
-  | L10nAction
   | SourcesAction
   | AssemblyAction
   | AppAction;

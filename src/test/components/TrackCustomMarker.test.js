@@ -60,8 +60,8 @@ function setup() {
     name: 'Marker',
     display: ['marker-chart', 'marker-table', 'timeline-memory'],
     fields: [
-      { key: 'first', label: 'first', format: 'integer', searchable: true },
-      { key: 'second', label: 'second', format: 'integer', searchable: true },
+      { key: 'first', label: 'first', format: 'integer' },
+      { key: 'second', label: 'second', format: 'integer' },
     ],
     graphs: [
       // multiple lines are supported

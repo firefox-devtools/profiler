@@ -20,6 +20,8 @@ import {
   setDataSource,
   updateBottomBoxContentsAndMaybeOpen,
   closeBottomBox,
+  changeShowUserTimings,
+  changeStackChartSameWidths,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
@@ -430,16 +432,6 @@ describe('search strings', function () {
     expect(urlStateSelectors.getMarkersSearchString(getState())).toBe(
       'otherString'
     );
-  });
-
-  it('properly handles showUserTimings strings', function () {
-    const { getState } = _getStoreWithURL({ search: '' });
-    expect(urlStateSelectors.getShowUserTimings(getState())).toBe(false);
-  });
-
-  it('defaults to not showing user timings', function () {
-    const { getState } = _getStoreWithURL();
-    expect(urlStateSelectors.getShowUserTimings(getState())).toBe(false);
   });
 
   it('serializes the call tree search strings in the URL', function () {
@@ -1609,6 +1601,46 @@ describe('last requested call tree summary strategy', function () {
     expect(getLastSelectedCallTreeSummaryStrategy(getState())).toEqual(
       'timing'
     );
+  });
+});
+
+describe('stack chart specific queries', function () {
+  it('persists the "show user timings" setting to the URL', function () {
+    const { getState, dispatch } = _getStoreWithURL({
+      pathname: '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/stack-chart/',
+    });
+
+    const expectedQueryString = 'showUserTimings';
+    expect(getQueryStringFromState(getState())).not.toContain(
+      expectedQueryString
+    );
+    dispatch(changeShowUserTimings(true));
+    expect(getQueryStringFromState(getState())).toContain(expectedQueryString);
+
+    const storeAfterReload = _getStoreFromStateAfterUrlRoundtrip(getState());
+
+    expect(
+      urlStateSelectors.getShowUserTimings(storeAfterReload.getState())
+    ).toBe(true);
+  });
+
+  it('persists the "use same widths" setting to the URL', function () {
+    const { getState, dispatch } = _getStoreWithURL({
+      pathname: '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/stack-chart/',
+    });
+
+    const expectedQueryString = 'sameWidths';
+    expect(getQueryStringFromState(getState())).not.toContain(
+      expectedQueryString
+    );
+    dispatch(changeStackChartSameWidths(true));
+    expect(getQueryStringFromState(getState())).toContain(expectedQueryString);
+
+    const storeAfterReload = _getStoreFromStateAfterUrlRoundtrip(getState());
+
+    expect(
+      urlStateSelectors.getStackChartSameWidths(storeAfterReload.getState())
+    ).toBe(true);
   });
 });
 

@@ -35,19 +35,16 @@ export const markerSchemaForTests: MarkerSchema[] = [
         key: 'operation',
         label: 'Operation',
         format: 'string',
-        searchable: true,
       },
       {
         key: 'source',
         label: 'Source',
         format: 'string',
-        searchable: true,
       },
       {
         key: 'filename',
         label: 'Filename',
         format: 'file-path',
-        searchable: true,
       },
     ],
   },
@@ -86,7 +83,7 @@ export const markerSchemaForTests: MarkerSchema[] = [
     name: 'PreferenceRead',
     display: ['marker-chart', 'marker-table'],
     fields: [
-      { key: 'prefName', label: 'Name', format: 'string', searchable: true },
+      { key: 'prefName', label: 'Name', format: 'string' },
       { key: 'prefKind', label: 'Kind', format: 'string' },
       { key: 'prefType', label: 'Type', format: 'string' },
       { key: 'prefValue', label: 'Value', format: 'string' },
@@ -99,7 +96,7 @@ export const markerSchemaForTests: MarkerSchema[] = [
     tableLabel: '{marker.data.name}',
     display: ['marker-chart', 'marker-table'],
     fields: [
-      { key: 'name', label: 'Name', format: 'string', searchable: true },
+      { key: 'name', label: 'Name', format: 'string' },
       { key: 'entryType', label: 'Entry Type', format: 'string' },
     ],
     description:
@@ -110,17 +107,15 @@ export const markerSchemaForTests: MarkerSchema[] = [
     tableLabel: '{marker.name} — {marker.data.name}',
     chartLabel: '{marker.name} — {marker.data.name}',
     display: ['marker-chart', 'marker-table'],
-    fields: [
-      { key: 'name', label: 'Details', format: 'string', searchable: true },
-    ],
+    fields: [{ key: 'name', label: 'Details', format: 'string' }],
   },
   {
     name: 'Log',
     display: ['marker-table'],
     tableLabel: '({marker.data.module}) {marker.data.name}',
     fields: [
-      { key: 'module', label: 'Module', format: 'string', searchable: true },
-      { key: 'name', label: 'Name', format: 'string', searchable: true },
+      { key: 'module', label: 'Module', format: 'string' },
+      { key: 'name', label: 'Name', format: 'string' },
     ],
   },
   {
@@ -135,23 +130,18 @@ export const markerSchemaForTests: MarkerSchema[] = [
         key: 'eventType',
         label: 'Event Type',
         format: 'string',
-        searchable: true,
       },
     ],
   },
   {
     name: 'tracing',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    fields: [
-      { key: 'category', label: 'Type', format: 'string', searchable: true },
-    ],
+    fields: [{ key: 'category', label: 'Type', format: 'string' }],
   },
   {
     name: 'Layout',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    fields: [
-      { key: 'category', label: 'Type', format: 'string', searchable: true },
-    ],
+    fields: [{ key: 'category', label: 'Type', format: 'string' }],
   },
   {
     name: 'IPC',
@@ -177,28 +167,14 @@ export const markerSchemaForTests: MarkerSchema[] = [
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
     fields: [
       {
-        key: 'searchableString',
-        label: 'Searchable string field',
+        key: 'string',
+        label: 'string field',
         format: 'string',
-        searchable: true,
       },
       {
-        key: 'searchableUniqueString',
-        label: 'Searchable unique string field',
+        key: 'uniqueString',
+        label: 'unique string field',
         format: 'unique-string',
-        searchable: true,
-      },
-      {
-        key: 'nonSearchableString',
-        label: 'Non-searchable string field',
-        format: 'string',
-        searchable: false,
-      },
-      {
-        key: 'nonSearchableUniqueString',
-        label: 'Non-searchable unique string field',
-        format: 'unique-string',
-        searchable: false,
       },
     ],
   },
@@ -210,7 +186,6 @@ export const markerSchemaForTests: MarkerSchema[] = [
         key: 'hiddenString',
         label: 'Hidden string',
         format: 'string',
-        searchable: true,
         hidden: true,
       },
     ],

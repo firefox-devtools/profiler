@@ -223,7 +223,7 @@ function positiveFilterMarker(
       return true;
     }
 
-    // Now check the schema for the marker payload for searchable
+    // Now check the schema for the marker payload for field matches
     const markerSchema = getSchemaFromMarker(markerSchemaByName, marker.data);
     if (
       markerSchema &&
@@ -285,7 +285,7 @@ function negativeFilterMarker(
       return false;
     }
 
-    // Now check the schema for the marker payload for searchable
+    // Now check the schema for the marker payload for field matches
     const markerSchema = getSchemaFromMarker(markerSchemaByName, marker.data);
 
     if (
