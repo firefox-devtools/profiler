@@ -57,8 +57,8 @@ import type { StringTable } from 'firefox-profiler/utils/string-table';
  */
 
 // Create mappings from a transform name, to a url-friendly short name.
-const TRANSFORM_TO_SHORT_KEY: { [TransformType]: string } = {};
-const SHORT_KEY_TO_TRANSFORM: { [string]: TransformType } = {};
+const TRANSFORM_TO_SHORT_KEY: Partial<{ [TT in TransformType]: string }> = {};
+const SHORT_KEY_TO_TRANSFORM: { [TT: string]: TransformType } = {};
 [
   'focus-subtree',
   'focus-function',
@@ -363,7 +363,7 @@ export function stringifyTransforms(transformStack: TransformStack): string {
             transform.implementation,
             encodeUintArrayForUrlComponent(transform.callNodePath),
           ].join('-');
-          if (transform.inverted) {
+          if ('inverted' in transform && transform.inverted) {
             string += '-i';
           }
           return string;
@@ -380,8 +380,8 @@ export function stringifyTransforms(transformStack: TransformStack): string {
 }
 
 export type TransformLabeL10nIds = {
-  +l10nId: string,
-  +item: string,
+  readonly l10nId: string;
+  readonly item: string;
 };
 
 /**
@@ -716,7 +716,7 @@ export function mergeCallNode(
     const depthAtCallNodePathLeaf = callNodePath.length - 1;
     const oldStackToNewStack: Map<
       IndexIntoStackTable | null,
-      IndexIntoStackTable | null,
+      IndexIntoStackTable | null
     > = new Map();
     // A root stack's prefix will be null. Maintain that relationship from old to new
     // stacks by mapping from null to null.
@@ -902,11 +902,11 @@ export function collapseResource(
   const newStackTable = getEmptyStackTable();
   const oldStackToNewStack: Map<
     IndexIntoStackTable | null,
-    IndexIntoStackTable | null,
+    IndexIntoStackTable | null
   > = new Map();
   const prefixStackToCollapsedStack: Map<
     IndexIntoStackTable | null, // prefix stack index
-    IndexIntoStackTable | null, // collapsed stack index
+    IndexIntoStackTable | null // collapsed stack index
   > = new Map();
   const collapsedStacks: Set<IndexIntoStackTable | null> = new Set();
   const funcMatchesImplementation = FUNC_MATCHES[implementation];
@@ -1079,7 +1079,7 @@ export function collapseDirectRecursion(
   // E.g. B3 -> A1 in the example.
   const recursionChainPrefixForStack = new Map<
     IndexIntoStackTable,
-    IndexIntoStackTable | null,
+    IndexIntoStackTable | null
   >();
   const funcMatchesImplementation = FUNC_MATCHES[implementation];
   const newStackTablePrefixColumn = stackTable.prefix.slice();
@@ -1175,7 +1175,7 @@ export function collapseRecursion(
   // B1's prefix A1.
   const funcToCollapseSubtreePrefixForStack = new Map<
     IndexIntoStackTable,
-    IndexIntoStackTable | null,
+    IndexIntoStackTable | null
   >();
   const newStackTablePrefixColumn = stackTable.prefix.slice();
 
@@ -1292,7 +1292,7 @@ export function focusSubtree(
     const funcMatchesImplementation = FUNC_MATCHES[implementation];
     const oldStackToNewStack: Map<
       IndexIntoStackTable | null,
-      IndexIntoStackTable | null,
+      IndexIntoStackTable | null
     > = new Map();
     // A root stack's prefix will be null. Maintain that relationship from old to new
     // stacks by mapping from null to null.
@@ -1437,7 +1437,7 @@ export function focusCategory(thread: Thread, category: IndexIntoCategoryList) {
     const { stackTable } = thread;
     const oldStackToNewStack: Map<
       IndexIntoStackTable | null,
-      IndexIntoStackTable | null,
+      IndexIntoStackTable | null
     > = new Map();
     oldStackToNewStack.set(null, null);
 
@@ -1566,11 +1566,11 @@ export function filterCallNodePathByImplementation(
 // User-facing properties about a stack frame.
 export type BacktraceItem = {
   // The function name of the stack frame.
-  funcName: string,
+  funcName: string;
   // The frame category of the stack frame.
-  category: IndexIntoCategoryList,
+  category: IndexIntoCategoryList;
   // Whether this frame is a label frame.
-  isFrameLabel: boolean,
+  isFrameLabel: boolean;
   // A string which is usually displayed after the function name, and which
   // describes, in some way, where this function or frame came from.
   // If known, this contains the file name of the function, and the line and
@@ -1579,7 +1579,7 @@ export type BacktraceItem = {
   // If the source file name is not known, this might be the name of a native
   // library instead.
   // May also be empty.
-  origin: string,
+  origin: string;
 };
 
 /**

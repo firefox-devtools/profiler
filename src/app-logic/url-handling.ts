@@ -897,8 +897,9 @@ const _upgraders: {
     for (let i = 0; i < transforms.length; i++) {
       const transform = transforms[i];
       if (
-        !transform.implementation ||
+        !('implementation' in transform) ||
         transform.implementation !== 'js' ||
+        !('callNodePath' in transform) ||
         !transform.callNodePath
       ) {
         // Only transforms with JS implementation filters that have callNodePaths
