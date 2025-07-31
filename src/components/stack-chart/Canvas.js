@@ -21,6 +21,7 @@ import {
   typeof changeMouseTimePosition as ChangeMouseTimePosition,
 } from '../../actions/profile-view';
 import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
+import { ValueSummaryReader } from '../../utils/value-summaries';
 import { TooltipCallNode } from '../tooltip/CallNode';
 import { TooltipMarker } from '../tooltip/Marker';
 
@@ -608,6 +609,18 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     const duration =
       timing.end[stackTimingIndex] - timing.start[stackTimingIndex];
 
+    let argumentSummaries = undefined;
+    if (timing.argumentValues) {
+      const argumentValues = timing.argumentValues[stackTimingIndex];
+      if (argumentValues !== -1) {
+        argumentSummaries = ValueSummaryReader.getArgumentSummaries(
+          thread.tracedValuesBuffer,
+          thread.tracedObjectShapes,
+          argumentValues
+        );
+      }
+    }
+
     return (
       <TooltipCallNode
         thread={thread}
@@ -621,6 +634,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         callTreeSummaryStrategy="timing"
         durationText={formatMilliseconds(duration)}
         displayStackType={displayStackType}
+        argumentValues={argumentSummaries}
       />
     );
   };
