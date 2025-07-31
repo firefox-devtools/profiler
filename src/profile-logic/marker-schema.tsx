@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
+
 import * as React from 'react';
 import { oneLine } from 'common-tags';
 import {
@@ -15,7 +15,7 @@ import {
   formatNanoseconds,
 } from '../utils/format-numbers';
 import { ensureExists } from '../utils/flow';
-import type {
+import {
   CategoryList,
   MarkerFormatType,
   MarkerSchema,
@@ -26,7 +26,7 @@ import type {
   Tid,
   Pid,
 } from 'firefox-profiler/types';
-import type { StringTable } from '../utils/string-table';
+import { StringTable } from '../utils/string-table';
 
 /**
  * The marker schema comes from Gecko, and is embedded in the profile. However,
@@ -110,7 +110,7 @@ export function parseLabel(
   categories: CategoryList,
   stringTable: StringTable,
   label: string
-): (Marker) => string {
+): (marker: Marker) => string {
   // Split the label on the "{key}" capture groups.
   // Each (zero-indexed) even entry will be a raw string label.
   // Each (zero-indexed) odd entry will be a key to the payload.
@@ -149,96 +149,98 @@ export function parseLabel(
   }
 
   // This is a list of functions that will compute each part of the label.
-  const computeLabelParts: Array<(Marker) => string> = splits.map((part, i) => {
-    if (i % 2 === 0) {
-      // This is a normal string part. Return it.
-      // Given: "Marker information: {marker.name} – {marker.data.info}"
-      // Handle: ^^^^^^^^^^^^^^^^^^^^             ^^^
-      return () => part;
-    }
-    // Now consider each keyed property:
-    // Given: "Marker information: {marker.name} – {marker.data.info}"
-    // Handle:                      ^^^^^^^^^^^     ^^^^^^^^^^^^^^^^
-
-    const keys = part.trim().split('.');
-
-    if (keys.length !== 2 && keys.length !== 3) {
-      // The following examples would trigger this error:
-      // Given: "Marker information: {name} – {marker.data.info.subinfo}"
-      // Handle:                      ^^^^     ^^^^^^^^^^^^^^^^^^^^^^^^
-      return parseError(label, part);
-    }
-
-    const [marker, markerKey, payloadKey] = keys;
-    if (marker !== 'marker') {
-      // The following examples would trigger this error:
-      // Given: "Value: {property.name}"
-      // Handle:         ^^^^^^^^
-      return parseError(label, part);
-    }
-
-    if (keys.length === 2) {
-      // Access parts of the payload
-      // Given: "Marker information: {marker.name} – {marker.data.info}"
-      // Handle:                      ^^^^^^^^^^^
-      switch (markerKey) {
-        case 'start':
-          return (marker) => formatTimestamp(marker.start);
-        case 'end':
-          return (marker) =>
-            marker.end === null ? 'unknown' : formatTimestamp(marker.end);
-        case 'duration':
-          return (marker) =>
-            marker.end === null
-              ? 'unknown'
-              : formatTimestamp(marker.end - marker.start);
-        case 'name':
-          return (marker) => marker.name;
-        case 'category':
-          return (marker) => categories[marker.category].name;
-        case 'data':
-        default:
-          return parseError(label, part);
+  const computeLabelParts: Array<(marker: Marker) => string> = splits.map(
+    (part, i) => {
+      if (i % 2 === 0) {
+        // This is a normal string part. Return it.
+        // Given: "Marker information: {marker.name} – {marker.data.info}"
+        // Handle: ^^^^^^^^^^^^^^^^^^^^             ^^^
+        return () => part;
       }
-    }
-
-    if (markerKey === 'data') {
-      // This is accessing the payload.
+      // Now consider each keyed property:
       // Given: "Marker information: {marker.name} – {marker.data.info}"
-      // Handle:                                      ^^^^^^^^^^^^^^^^
+      // Handle:                      ^^^^^^^^^^^     ^^^^^^^^^^^^^^^^
 
-      let format = null;
-      for (const field of markerSchema.fields) {
-        if (field.key === payloadKey) {
-          format = field.format;
-          break;
+      const keys = part.trim().split('.');
+
+      if (keys.length !== 2 && keys.length !== 3) {
+        // The following examples would trigger this error:
+        // Given: "Marker information: {name} – {marker.data.info.subinfo}"
+        // Handle:                      ^^^^     ^^^^^^^^^^^^^^^^^^^^^^^^
+        return parseError(label, part);
+      }
+
+      const [marker, markerKey, payloadKey] = keys;
+      if (marker !== 'marker') {
+        // The following examples would trigger this error:
+        // Given: "Value: {property.name}"
+        // Handle:         ^^^^^^^^
+        return parseError(label, part);
+      }
+
+      if (keys.length === 2) {
+        // Access parts of the payload
+        // Given: "Marker information: {marker.name} – {marker.data.info}"
+        // Handle:                      ^^^^^^^^^^^
+        switch (markerKey) {
+          case 'start':
+            return (marker) => formatTimestamp(marker.start);
+          case 'end':
+            return (marker) =>
+              marker.end === null ? 'unknown' : formatTimestamp(marker.end);
+          case 'duration':
+            return (marker) =>
+              marker.end === null
+                ? 'unknown'
+                : formatTimestamp(marker.end - marker.start);
+          case 'name':
+            return (marker) => marker.name;
+          case 'category':
+            return (marker) => categories[marker.category].name;
+          case 'data':
+          default:
+            return parseError(label, part);
         }
       }
 
-      return (marker) => {
-        if (!marker.data) {
-          // There was no data.
-          return '';
+      if (markerKey === 'data') {
+        // This is accessing the payload.
+        // Given: "Marker information: {marker.name} – {marker.data.info}"
+        // Handle:                                      ^^^^^^^^^^^^^^^^
+
+        let format = null;
+        for (const field of markerSchema.fields) {
+          if (field.key === payloadKey) {
+            format = field.format;
+            break;
+          }
         }
 
-        const value = marker.data[payloadKey];
-        if (value === undefined || value === null) {
-          // This would return "undefined" or "null" otherwise.
-          return '';
-        }
-        return format
-          ? formatFromMarkerSchema(
-              markerSchema.name,
-              format,
-              value,
-              stringTable
-            )
-          : value;
-      };
+        return (marker) => {
+          if (!marker.data) {
+            // There was no data.
+            return '';
+          }
+
+          const value = (marker.data as any)[payloadKey];
+          if (value === undefined || value === null) {
+            // This would return "undefined" or "null" otherwise.
+            return '';
+          }
+          return format
+            ? formatFromMarkerSchema(
+                markerSchema.name,
+                format,
+                value,
+                stringTable
+              )
+            : value;
+        };
+      }
+
+      return parseError(label, part);
     }
-
-    return parseError(label, part);
-  });
+  );
 
   return (marker: Marker) => {
     let result: string = '';
@@ -254,7 +256,7 @@ type LabelKey = 'tooltipLabel' | 'tableLabel' | 'chartLabel' | 'copyLabel';
 // If no label making rule, these functions provide the fallbacks for how
 // to label things. It also allows for a place to do some custom handling
 // in the cases where the marker schema is not enough.
-const fallbacks: { [LabelKey]: (Marker) => string } = {
+const fallbacks: Record<LabelKey, (marker: any) => string> = {
   tooltipLabel: (marker) => marker.name,
 
   chartLabel: (_marker) => '',
@@ -295,15 +297,15 @@ const fallbacks: { [LabelKey]: (Marker) => string } = {
  * This function should only be used behind a selector.
  */
 export function getLabelGetter(
-  getMarker: (MarkerIndex) => Marker,
+  getMarker: (markerIndex: MarkerIndex) => Marker,
   markerSchemaList: MarkerSchema[],
   markerSchemaByName: MarkerSchemaByName,
   categoryList: CategoryList,
   stringTable: StringTable,
   labelKey: LabelKey
-): (MarkerIndex) => string {
+): (markerIndex: MarkerIndex) => string {
   // Build up a list of label functions, that are tied to the schema name.
-  const labelFns: Map<string, (Marker) => string> = new Map();
+  const labelFns: Map<string, (marker: Marker) => string> = new Map();
   const markerNamePrefixRe = /^{marker.name}\s[-—]\s/;
   for (const schema of markerSchemaList) {
     let labelString;
@@ -407,7 +409,7 @@ export function formatFromMarkerSchema(
             );
           }
           return row.map((cell, j) => {
-            const { format } = columns[j];
+            const { type: format } = columns[j];
             return formatFromMarkerSchema(
               markerType,
               format || 'string',
@@ -423,7 +425,7 @@ export function formatFromMarkerSchema(
       }
       default:
         throw new Error(
-          `Unknown format type ${JSON.stringify((format.type: empty))}`
+          `Unknown format type ${JSON.stringify(format.type as never)}`
         );
     }
   }
@@ -477,7 +479,7 @@ export function formatFromMarkerSchema(
     default:
       console.warn(
         `A marker schema of type "${markerType}" had an unknown format ${JSON.stringify(
-          (format: empty)
+          format as never
         )}`
       );
       return value;
@@ -499,7 +501,7 @@ export function formatMarkupFromMarkerSchema(
   stringTable: StringTable,
   threadIdToNameMap?: Map<Tid, string>,
   processIdToNameMap?: Map<Pid, string>
-): React.Element<any> | string {
+): React.ReactElement | string {
   if (value === undefined || value === null) {
     console.warn(`Formatting ${value} for ${JSON.stringify(markerType)}`);
     return '(empty)';
@@ -569,7 +571,7 @@ export function formatMarkupFromMarkerSchema(
       }
       default:
         throw new Error(
-          `Unknown format type ${JSON.stringify((format: empty))}`
+          `Unknown format type ${JSON.stringify(format as never)}`
         );
     }
   }
@@ -608,7 +610,7 @@ export function formatMarkupFromMarkerSchema(
       );
     }
     default:
-      throw new Error(`Unknown format type ${JSON.stringify((format: empty))}`);
+      throw new Error(`Unknown format type ${JSON.stringify(format as never)}`);
   }
 }
 
@@ -620,7 +622,7 @@ export function markerPayloadMatchesSearch(
   markerSchema: MarkerSchema,
   marker: Marker,
   stringTable: StringTable,
-  testFun: (string, string) => boolean
+  testFun: (a: string, b: string) => boolean
 ): boolean {
   const { data } = marker;
   if (!data) {
@@ -629,7 +631,7 @@ export function markerPayloadMatchesSearch(
 
   // Check if fields match the search regular expression.
   for (const payloadField of markerSchema.fields) {
-    let value = data[payloadField.key];
+    let value = (data as any)[payloadField.key];
     if (value === undefined || value === null) {
       // The value is missing, but this is OK, values are optional.
       continue;

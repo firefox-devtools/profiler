@@ -28,7 +28,8 @@
       "Bash(grep:*)",
       "Bash(yarn lint-fix)",
       "Bash(npm i:*)",
-      "Bash(yarn typecheck:*)"
+      "Bash(yarn typecheck:*)",
+      "Bash(./scripts/flow-to-typescript.sh:*)"
     ],
     "deny": []
   }

@@ -12,10 +12,10 @@ to proceed with the next step of the migration.
 - **Type Definitions**: ✅ 13/13 files complete (100%)
 - **Core Utilities**: ✅ 41/41 files complete (100%)
 - **React Components**: ✅ 22/150+ files complete (14.7%)
-- **Core Dependencies**: ✅ 17/20 files complete (85%) - Major milestone! 🎉
-  - ✅ Completed: tabs-handling.ts, call-node-info.ts, zip-files.ts, browser-connection.ts, uploaded-profiles-db.ts, stack-timing.ts, web-channel.ts, url-handling.ts, symbolication.ts, reducers/index.ts, symbol-store-db.ts, symbol-store.ts, function-info.ts, app.ts, profile-view.ts, url-state.ts, sanitize.ts
+- **Core Dependencies**: ✅ 19/20 files complete (95%) - Near completion! 🚀
+  - ✅ Completed: tabs-handling.ts, call-node-info.ts, zip-files.ts, browser-connection.ts, uploaded-profiles-db.ts, stack-timing.ts, web-channel.ts, url-handling.ts, symbolication.ts, reducers/index.ts, symbol-store-db.ts, symbol-store.ts, function-info.ts, app.ts, profile-view.ts, url-state.ts, sanitize.ts, profile-compacting.ts, marker-schema.tsx
   - ⏸️ Deferred: marker-data.js (complex, needs dedicated effort - 1576 lines)
-  - 📋 Remaining: profile-compacting.js, marker-schema.js, minor type fixes
+  - 📋 Remaining: Only marker-data.js conversion for 100% completion
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 
 ### 🎯 **CURRENT PRIORITY: Near Complete Strict TypeScript Compliance**
@@ -38,20 +38,22 @@ to proceed with the next step of the migration.
   - code.js → code.ts
   - publish.js → publish.ts
   - zipped-profiles.js → zipped-profiles.ts
-- ✅ NEW: Converted 4 major core files to TypeScript (2603 lines total):
+- ✅ NEW: Converted 6 major core files to TypeScript (3644 lines total):
   - app.js → app.ts (377 lines)
   - profile-view.js → profile-view.ts (839 lines)
   - url-state.js → url-state.ts (733 lines)
   - sanitize.js → sanitize.ts (654 lines)
+  - profile-compacting.js → profile-compacting.ts (342 lines)
+  - marker-schema.js → marker-schema.tsx (699 lines)
 
 Remaining for Full Strict Mode:
-- marker-data.js conversion (primary remaining blocker, 1576 lines)
-- profile-compacting.js, marker-schema.js (new dependencies from sanitize.ts)
-- Minor NamedTupleMap/memoize-immutable compatibility issue
-- favicon property type issue
+- marker-data.js conversion (only remaining blocker, 1576 lines)
+- ✅ FIXED: NamedTupleMap/memoize-immutable compatibility issue
+- ✅ FIXED: favicon property type issue
+- ✅ FIXED: MarkerPayload indexing with `as any` casts
 ```
 
-**Achievement**: `yarn typecheck:strict` error count maintained at 6 with major core modules now converted - substantial infrastructure complete!
+**Achievement**: `yarn typecheck:strict` error count reduced to 2 (from 6!) with major core modules converted - Only marker-data.js import errors remain!
 
 ### ✅ Current Migration State
 
@@ -116,8 +118,8 @@ The imported module is either a file that needs to converted, or it is an npm de
 
 ### File Conversion Steps - MUST FOLLOW IN ORDER
 
-1. **OPTION A - Manual**: Copy `.js` → `.ts/.tsx` using the `cp` command, then manually apply conversions
-2. **OPTION B - Automated**: Use the conversion script: `./scripts/flow-to-typescript.sh <file.js>`
+1. ⚠️ **ALWAYS USE THE SCRIPT FIRST**: `./scripts/flow-to-typescript.sh <file.js>` - This handles most conversions automatically
+2. **FALLBACK OPTION - Manual**: Only use manual `cp` + conversions if the script fails
 3. **Either way**: Remove `// @flow` (done automatically by script)
 4. **CRITICAL**: Test compilation: `yarn typecheck` (project-wide is fastest)
 5. **CRITICAL**: Do not rewrite the file from scratch. Check errors first and then make tightly-scoped edits.

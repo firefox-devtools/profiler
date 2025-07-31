@@ -28,7 +28,7 @@ function _getNumberFormat({
 }
 
 const _memoizedGetNumberFormat = memoize(_getNumberFormat, {
-  cache: new NamedTupleMap(),
+  cache: new NamedTupleMap() as any,
 });
 
 /**

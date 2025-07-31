@@ -2,11 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import { computeStringIndexMarkerFieldsByDataType } from './marker-schema';
 
-import type {
+import {
   Profile,
   RawThread,
   RawProfileSharedData,
@@ -17,8 +15,8 @@ import type {
 } from 'firefox-profiler/types';
 
 export type CompactedProfileWithTranslationMaps = {
-  profile: Profile,
-  oldStringToNewStringPlusOne: Int32Array,
+  profile: Profile;
+  oldStringToNewStringPlusOne: Int32Array;
 };
 
 /**
@@ -168,7 +166,7 @@ function _gatherReferencesInMarkers(
       );
       if (stringIndexMarkerFields !== undefined) {
         for (const fieldKey of stringIndexMarkerFields) {
-          const stringIndex = data[fieldKey];
+          const stringIndex = (data as any)[fieldKey];
           if (typeof stringIndex === 'number') {
             referencedStrings[stringIndex] = 1;
           }
@@ -200,7 +198,7 @@ function _createMarkersWithTranslatedStringIndexes(
       );
       if (stringIndexMarkerFields !== undefined) {
         for (const fieldKey of stringIndexMarkerFields) {
-          const stringIndex = data[fieldKey];
+          const stringIndex = (data as any)[fieldKey];
           if (typeof stringIndex === 'number') {
             newData = {
               ...newData,
@@ -211,7 +209,7 @@ function _createMarkersWithTranslatedStringIndexes(
       }
     }
 
-    newDataCol[i] = (newData: any);
+    newDataCol[i] = newData as any;
   }
 
   return {
@@ -324,7 +322,7 @@ function _createNativeSymbolsWithTranslatedStringIndexes(
 function _createCompactedStringArray(
   stringArray: string[],
   referencedStrings: Uint8Array
-): { newStringArray: string[], oldStringToNewStringPlusOne: Int32Array } {
+): { newStringArray: string[]; oldStringToNewStringPlusOne: Int32Array } {
   const oldStringToNewStringPlusOne = new Int32Array(stringArray.length);
   let nextIndex = 0;
   const newStringArray = [];
