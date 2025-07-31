@@ -1,7 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
 import { oneLine } from 'common-tags';
 import {
@@ -14,7 +13,28 @@ import {
   getPageFaviconsViaWebChannel,
   showFunctionInDevtoolsViaWebChannel,
 } from './web-channel';
-import type { Milliseconds, FaviconData } from 'firefox-profiler/types';
+import {
+  Milliseconds,
+  FaviconData,
+  MixedObject,
+  SymbolTableAsTuple,
+} from 'firefox-profiler/types';
+
+// Temporary type definition until Window types are converted
+type GeckoProfiler = {
+  getProfile: () => MixedObject;
+  getSymbolTable: (
+    debugName: string,
+    breakpadId: string
+  ) => Promise<SymbolTableAsTuple>;
+};
+
+// Extend Window interface to include geckoProfilerPromise
+declare global {
+  interface Window {
+    geckoProfilerPromise: Promise<GeckoProfiler>;
+  }
+}
 
 /**
  * This file manages the communication between the profiler and the browser.
@@ -32,13 +52,13 @@ export type BrowserConnectionStatus =
   // This usually means that this profiler instance is running on a
   // different host than the one that's specified in the
   // preference `devtools.performance.recording.ui-base-url`.
-  | { status: 'DENIED', error: Error }
+  | { status: 'DENIED'; error: Error }
   // We are in Firefox but the WebChannel did not respond within 5 seconds.
   // This is unexpected. It could mean that we are running in an old Firefox
   // (older than Firefox 76) which did not have a profiler WebChannel.
   | { status: 'TIMED_OUT' }
   // The WebChannel connection has been established.
-  | { status: 'ESTABLISHED', browserConnection: BrowserConnection };
+  | { status: 'ESTABLISHED'; browserConnection: BrowserConnection };
 
 /**
  * The interface of communication with the browser. Can be backed by a WebChannel
@@ -48,7 +68,7 @@ export type BrowserConnectionStatus =
 export interface BrowserConnection {
   // Get the profile for this tab from the browser.
   getProfile(options: {
-    onThirtySecondTimeout: () => void,
+    onThirtySecondTimeout: () => void;
   }): Promise<ArrayBuffer | MixedObject>;
 
   getExternalMarkers(
@@ -94,7 +114,7 @@ class BrowserConnectionImpl implements BrowserConnection {
   _webChannelSupportsGetExternalMarkers: boolean;
   _webChannelSupportsGetPageFavicons: boolean;
   _webChannelSupportsOpenDebuggerInTab: boolean;
-  _geckoProfiler: $GeckoProfiler | void;
+  _geckoProfiler: GeckoProfiler | undefined;
 
   constructor(webChannelVersion: number) {
     this._webChannelSupportsGetProfileAndSymbolication = webChannelVersion >= 1;
@@ -108,7 +128,7 @@ class BrowserConnectionImpl implements BrowserConnection {
   // cannot proceed without a connection to the browser. This method falls back
   // to the frame script API (window.geckoProfilerPromise) if this browser has
   // an old version of the WebChannel.
-  async _getConnectionViaFrameScript(): Promise<$GeckoProfiler> {
+  async _getConnectionViaFrameScript(): Promise<GeckoProfiler> {
     if (!this._geckoProfiler) {
       this._geckoProfiler = await window.geckoProfilerPromise;
     }
@@ -116,7 +136,7 @@ class BrowserConnectionImpl implements BrowserConnection {
   }
 
   async getProfile(options: {
-    onThirtySecondTimeout: () => void,
+    onThirtySecondTimeout: () => void;
   }): Promise<ArrayBuffer | MixedObject> {
     const timeoutId = setTimeout(options.onThirtySecondTimeout, 30000);
 
@@ -144,7 +164,7 @@ class BrowserConnectionImpl implements BrowserConnection {
       return getExternalMarkersViaWebChannel(startTime, endTime);
     }
 
-    return [];
+    return [] as unknown as MixedObject;
   }
 
   async getExternalPowerTracks(
@@ -156,7 +176,7 @@ class BrowserConnectionImpl implements BrowserConnection {
       return getExternalPowerTracksViaWebChannel(startTime, endTime);
     }
 
-    return [];
+    return [] as unknown as MixedObject;
   }
 
   async querySymbolicationApi(
@@ -240,10 +260,10 @@ function _isFirefox(userAgent: string): boolean {
 }
 
 class TimeoutError extends Error {
-  name = 'TimeoutError';
+  override name = 'TimeoutError';
 }
 
-function makeTimeoutRejectionPromise(durationInMs) {
+function makeTimeoutRejectionPromise(durationInMs: number) {
   return new Promise((_resolve, reject) => {
     setTimeout(() => {
       reject(new TimeoutError(`Timed out after ${durationInMs}ms`));
