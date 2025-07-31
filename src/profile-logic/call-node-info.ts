@@ -308,36 +308,36 @@ type IndexIntoInvertedNonRootCallNodeTable = number;
 // arrays in this struct are fixed-size typed arrays.
 // The number of roots is the same as the number of functions in the funcTable.
 type InvertedRootCallNodeTable = {
-  category: Int32Array, // IndexIntoFuncTable -> IndexIntoCategoryList
-  subcategory: Int32Array, // IndexIntoFuncTable -> IndexIntoSubcategoryListForCategory
-  innerWindowID: Float64Array, // IndexIntoFuncTable -> InnerWindowID
+  category: Int32Array; // IndexIntoFuncTable -> IndexIntoCategoryList
+  subcategory: Int32Array; // IndexIntoFuncTable -> IndexIntoSubcategoryListForCategory
+  innerWindowID: Float64Array; // IndexIntoFuncTable -> InnerWindowID
   // IndexIntoNativeSymbolTable: all frames that collapsed into this call node inlined into the same native symbol
   // -1: divergent: some, but not all, frames that collapsed into this call node were inlined, or they are from different symbols
   // -2: no inlining
-  sourceFramesInlinedIntoSymbol: Int32Array, // IndexIntoFuncTable -> IndexIntoNativeSymbolTable | -1 | -2
+  sourceFramesInlinedIntoSymbol: Int32Array; // IndexIntoFuncTable -> IndexIntoNativeSymbolTable | -1 | -2
   // The (exclusive) end of the suffix order index range for each root node.
   // The beginning of the range is given by suffixOrderIndexRangeEnd[i - 1], or by
   // zero. This is possible because both the inverted root order and the suffix order
   // are determined by the func order.
-  suffixOrderIndexRangeEnd: Uint32Array, // IndexIntoFuncTable -> SuffixOrderIndex,
-  length: number,
+  suffixOrderIndexRangeEnd: Uint32Array; // IndexIntoFuncTable -> SuffixOrderIndex,
+  length: number;
 };
 
 // Information about the non-root nodes of the inverted call tree. This table
 // grows on-demand, as new inverted call nodes are materialized.
 type InvertedNonRootCallNodeTable = {
-  prefix: InvertedCallNodeHandle[],
-  func: IndexIntoFuncTable[], // IndexIntoInvertedNonRootCallNodeTable -> IndexIntoFuncTable
-  pathHash: string[], // IndexIntoInvertedNonRootCallNodeTable -> string
-  category: IndexIntoCategoryList[], // IndexIntoInvertedNonRootCallNodeTable -> IndexIntoCategoryList
-  subcategory: IndexIntoSubcategoryListForCategory[], // IndexIntoInvertedNonRootCallNodeTable -> IndexIntoSubcategoryListForCategory
-  innerWindowID: InnerWindowID[], // IndexIntoInvertedNonRootCallNodeTable -> InnerWindowID
+  prefix: InvertedCallNodeHandle[];
+  func: IndexIntoFuncTable[]; // IndexIntoInvertedNonRootCallNodeTable -> IndexIntoFuncTable
+  pathHash: string[]; // IndexIntoInvertedNonRootCallNodeTable -> string
+  category: IndexIntoCategoryList[]; // IndexIntoInvertedNonRootCallNodeTable -> IndexIntoCategoryList
+  subcategory: IndexIntoSubcategoryListForCategory[]; // IndexIntoInvertedNonRootCallNodeTable -> IndexIntoSubcategoryListForCategory
+  innerWindowID: InnerWindowID[]; // IndexIntoInvertedNonRootCallNodeTable -> InnerWindowID
   // IndexIntoNativeSymbolTable: all frames that collapsed into this call node inlined into the same native symbol
   // -1: divergent: some, but not all, frames that collapsed into this call node were inlined, or they are from different symbols
   // -2: no inlining
-  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | -2>,
-  suffixOrderIndexRangeStart: SuffixOrderIndex[], // IndexIntoInvertedNonRootCallNodeTable -> SuffixOrderIndex
-  suffixOrderIndexRangeEnd: SuffixOrderIndex[], // IndexIntoInvertedNonRootCallNodeTable -> SuffixOrderIndex
+  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | -2>;
+  suffixOrderIndexRangeStart: SuffixOrderIndex[]; // IndexIntoInvertedNonRootCallNodeTable -> SuffixOrderIndex
+  suffixOrderIndexRangeEnd: SuffixOrderIndex[]; // IndexIntoInvertedNonRootCallNodeTable -> SuffixOrderIndex
 
   // Non-null for non-root nodes whose children haven't been created yet.
   // The array at index x caches ancestors of the non-inverted nodes belonging
@@ -353,10 +353,10 @@ type InvertedNonRootCallNodeTable = {
   //   For every suffix order index i in suffixOrderIndexRangeStart[x]..suffixOrderIndexRangeEnd[x],
   //   the k'th parent node of suffixOrderedCallNodes[i] is stored at
   //   deepNodes[x][i - suffixOrderIndexRangeStart[x]], with k = depth[x].
-  deepNodes: Array<Uint32Array | null>, // IndexIntoInvertedNonRootCallNodeTable -> (Uint32Array | null)
+  deepNodes: Array<Uint32Array | null>; // IndexIntoInvertedNonRootCallNodeTable -> (Uint32Array | null)
 
-  depth: number[], // IndexIntoInvertedNonRootCallNodeTable -> number
-  length: number,
+  depth: number[]; // IndexIntoInvertedNonRootCallNodeTable -> number
+  length: number;
 };
 
 // Compute the InvertedRootCallNodeTable.
@@ -494,9 +494,9 @@ function _createEmptyInvertedNonRootCallNodeTable(): InvertedNonRootCallNodeTabl
 // contiguous range in the suffix order, where each range contains the root's
 // corresponding non-inverted nodes.
 type SuffixOrderForInvertedRoots = {
-  suffixOrderedCallNodes: Uint32Array,
-  suffixOrderIndexes: Uint32Array,
-  rootSuffixOrderIndexRangeEndCol: Uint32Array,
+  suffixOrderedCallNodes: Uint32Array;
+  suffixOrderIndexes: Uint32Array;
+  rootSuffixOrderIndexRangeEndCol: Uint32Array;
 };
 
 /**
@@ -565,18 +565,18 @@ function _computeSuffixOrderForInvertedRoots(
 // Information used to create the children of a node in the inverted tree.
 type ChildrenInfo = {
   // The func for each child. Duplicate-free and sorted by func.
-  funcPerChild: Uint32Array, // IndexIntoFuncTable[]
+  funcPerChild: Uint32Array; // IndexIntoFuncTable[]
   // The number of deep nodes for each child. Every entry is non-zero.
-  deepNodeCountPerChild: Uint32Array,
+  deepNodeCountPerChild: Uint32Array;
   // The subset of the parent's self nodes which are not part of childrenSelfNodes.
-  selfNodesWhichEndAtParent: IndexIntoCallNodeTable[],
+  selfNodesWhichEndAtParent: IndexIntoCallNodeTable[];
   // The self nodes and their corresponding deep nodes for all children, each
   // flattened into a single array.
   // The length of these arrays is the sum of the values in deepNodeCountPerChild.
-  childrenSelfNodes: Uint32Array,
-  childrenDeepNodes: Uint32Array,
+  childrenSelfNodes: Uint32Array;
+  childrenDeepNodes: Uint32Array;
   // The suffixOrderIndexRangeStart of the first child.
-  childrenSuffixOrderIndexRangeStart: number,
+  childrenSuffixOrderIndexRangeStart: number;
 };
 
 // An index into SuffixOrderedCallNodes.

@@ -21,27 +21,59 @@ This represents a significant achievement in the Flow→TypeScript migration:
 - **Profile Logic**: ⏳ 0/80+ files - Core business logic modules
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 
-### 🎯 Immediate Next Steps
+### 🎯 **NEW PRIORITY: Strict TypeScript Enforcement**
 
-**Priority**: Continue React component migration with simple leaf components before tackling complex profile-logic modules.
+**CRITICAL ISSUE DISCOVERED**: Current converted files import unconverted dependencies, causing `noImplicitAny` failures.
 
-**Target Components** (simple, minimal dependencies):
+**New Strategy - Dependency-First Migration:**
 
-1. Simple presentational components in `src/components/shared/`
-2. Small utility components with few props
-3. Components with minimal external dependencies
+1. **Enable strict TypeScript checking** with `yarn typecheck:strict` (includes `noImplicitAny`)
+2. **Convert dependencies before dependents** using topological order
+3. **Clear the exclude list** in `tsconfig.migration.strict.json` systematically
+4. **No more component conversions** until strict checking passes
 
-**Avoid for now**:
+**Immediate Action Plan:**
 
-- Profile-logic modules (complex business logic)
-- Complex connected components with many selectors
-- Components with heavy Canvas/WebGL usage
+**Phase A: Convert Core Dependencies** (enabling strict checking)
+
+```
+Priority 1 (No dependencies):
+- src/app-logic/tabs-handling.js ✅ Ready (48 lines, no imports)
+
+Priority 2 (Utility dependencies only):
+- src/profile-logic/call-node-info.js ✅ Ready (imports utils/path, utils/flow, utils/bisect)
+- src/profile-logic/zip-files.js ✅ Ready (imports utils/flow)
+- src/app-logic/uploaded-profiles-db.js (imports utils/*)
+- src/app-logic/browser-connection.js (imports utils/*)
+
+Priority 3 (After Priority 2):
+- src/profile-logic/stack-timing.js (imports call-node-info)
+- src/profile-logic/symbolication.js
+```
+
+**Target**: Make `yarn typecheck:strict` pass with empty exclude list before resuming component migration.
 
 ### ✅ Current Migration State
 
 - `yarn test-all` **PASSES** - All checks work correctly during migration
 - `yarn typecheck` validates all converted TypeScript files
+- ❌ `yarn typecheck:strict` **FAILS** - Contains `noImplicitAny` errors from import dependencies
 - Mixed Flow/TypeScript codebase is stable and tested
+
+### 🔧 Strict TypeScript Configuration
+
+**New Commands:**
+
+```bash
+yarn typecheck:strict   # Strict TypeScript checking with noImplicitAny
+yarn typecheck         # Regular migration checking (still used during development)
+```
+
+**Configuration Files:**
+
+- `tsconfig.migration.strict.json` - Extends migration config + `noImplicitAny: true`
+- Contains exclude list of files that fail strict checking
+- **Goal**: Empty the exclude list by converting dependencies first
 
 ## TypeScript Configuration Setup
 

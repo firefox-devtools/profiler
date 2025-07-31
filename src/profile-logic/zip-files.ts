@@ -4,7 +4,8 @@
 // @flow
 
 import { ensureIsValidTabSlug, objectEntries } from '../utils/flow';
-import type JSZip, { JSZipFile } from 'jszip';
+import JSZip from 'jszip';
+import { JSZipObject } from 'jszip';
 export type IndexIntoZipFileTable = number;
 
 /**
@@ -13,18 +14,18 @@ export type IndexIntoZipFileTable = number;
  * generate a file tree.
  */
 export type ZipFileTable = {
-  prefix: Array<IndexIntoZipFileTable | null>,
-  path: string[], // e.g. "profile_tresize/tresize/cycle_0.profile"
-  partName: string[], // e.g. "cycle_0.profile" or "tresize"
-  file: Array<JSZipFile | null>,
-  depth: number[],
-  length: number,
+  prefix: Array<IndexIntoZipFileTable | null>;
+  path: string[]; // e.g. "profile_tresize/tresize/cycle_0.profile"
+  partName: string[]; // e.g. "cycle_0.profile" or "tresize"
+  file: Array<JSZipObject | null>;
+  depth: number[];
+  length: number;
 };
 
 export type ZipDisplayData = {
-  +name: string,
-  +url: null | string,
-  +zipTableIndex: IndexIntoZipFileTable,
+  readonly name: string;
+  readonly url: null | string;
+  readonly zipTableIndex: IndexIntoZipFileTable;
 };
 
 export function createZipTable(zipEntries: JSZip): ZipFileTable {
@@ -157,7 +158,7 @@ export class ZipFileTree {
         Array.from({ length: this._zipFileTable.length }, (_, i) => i)
       );
     }
-    const result = new Set();
+    const result: Set<IndexIntoZipFileTable> = new Set();
     for (const child of this.getChildren(zipTableIndex)) {
       result.add(child);
       for (const descendant of this.getAllDescendants(child)) {

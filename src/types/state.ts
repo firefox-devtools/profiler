@@ -62,7 +62,7 @@ export type TableViewOptions = {
   readonly fixedColumnWidths: Array<CssPixels> | null;
 };
 
-export type TableViewOptionsPerTab = { [TabSlug]: TableViewOptions };
+export type TableViewOptionsPerTab = { [K in TabSlug]: TableViewOptions };
 
 export type RightClickedCallNode = {
   readonly threadsKey: ThreadsKey;
@@ -152,7 +152,7 @@ export type ZipFileState =
       readonly pathInZipFile: string;
     };
 
-export type IsOpenPerPanelState = { [TabSlug]: boolean };
+export type IsOpenPerPanelState = { [K in TabSlug]: boolean };
 
 export type UrlSetupPhase = 'initial-load' | 'loading-profile' | 'done';
 

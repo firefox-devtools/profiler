@@ -23,7 +23,8 @@
       "Bash(yarn lint-js)",
       "Bash(yarn tsc:*)",
       "Bash(yarn test:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(yarn typecheck:strict)"
     ],
     "deny": []
   }
