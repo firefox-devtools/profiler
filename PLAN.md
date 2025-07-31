@@ -140,13 +140,14 @@ yarn test  # Run together instead
 ### Key Flow→TypeScript Conversion Patterns
 
 #### Essential Changes
+
 ```typescript
 // Imports: Remove 'type' keyword
 import type { SomeType } from './module';  // Flow
 import { SomeType } from './module';       // TypeScript
 
 // Properties: +prop → readonly prop
-type Example = { +prop: string };          // Flow  
+type Example = { +prop: string };          // Flow
 type Example = { readonly prop: string };  // TypeScript
 
 // Nullable: ?string → string | null
@@ -161,6 +162,7 @@ class Component extends PureComponent<Props> {
 ```
 
 #### Common Utility Type Mappings
+
 ```typescript
 $Keys<T> → keyof T
 $ReadOnly<T> → Readonly<T>
@@ -174,12 +176,14 @@ Array.from(set) replaces [...set] for type safety
 ## Key Lessons Learned
 
 ### ⚠️ Critical Guidelines
+
 - **Never update snapshots** without investigating root cause of differences
 - **Convert dependencies first** - always follow topological order
 - **Per-file conversion only** - avoid global syntax changes across mixed codebase
 - **Test after each file** - ensure TypeScript compilation + tests pass before proceeding
 
 ### ✅ Proven Strategy
+
 - **Dependency-first migration** resolves import issues systematically
 - **Type definitions first** provides stable foundation for all other files
 - **Mixed Flow/TypeScript codebase** works reliably during migration
@@ -189,7 +193,7 @@ Array.from(set) replaces [...set] for type safety
 ## Essential Commands
 
 - `yarn typecheck:strict` - Strict TypeScript checking (current focus)
-- `yarn typecheck` - Regular TypeScript checking for converted files  
+- `yarn typecheck` - Regular TypeScript checking for converted files
 - `yarn test-all` - Full validation (must pass after each conversion)
 
 ---
@@ -197,27 +201,33 @@ Array.from(set) replaces [...set] for type safety
 ## Migration Strategy
 
 ### Phase 1: ✅ COMPLETED - Infrastructure & Type Definitions
+
 - TypeScript configuration established
 - All 13 type definition files converted
 - Build system supporting mixed codebase
 
-### Phase 2: ✅ COMPLETED - Utility Files  
+### Phase 2: ✅ COMPLETED - Utility Files
+
 - All 41 utility files successfully migrated to TypeScript
 
 ### Phase 3: ⏸️ PAUSED - React Components
+
 - **Status**: 22/150+ files complete (14.7%) - Component migration paused
 - **Reason**: Dependency-first migration prioritized for strict TypeScript enforcement
 
 ### Phase 4: 🔄 IN PROGRESS - Core Dependencies
+
 - **Status**: 6/12 files complete (50%)
 - **Completed**: tabs-handling.ts, call-node-info.ts, zip-files.ts, browser-connection.ts, uploaded-profiles-db.ts, stack-timing.ts
 - **Remaining**: web-channel.js, url-handling.js, symbolication.js + type fixes
 - **Goal**: Enable `yarn typecheck:strict` to pass completely
 
 ### Phase 5: ⏳ PLANNED - Resume Component Migration
+
 - Resume React component conversions after strict checking passes
 - Add TypeScript types to existing ExplicitConnect patterns
 
 ### Phase 6: ⏳ PLANNED - Final Cleanup
+
 - Remove Flow infrastructure (.flowconfig, dependencies)
 - Update documentation
