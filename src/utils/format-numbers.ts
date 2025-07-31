@@ -509,7 +509,7 @@ export function formatTimestamp(
 export function formatValueTotal(
   a: number,
   b: number,
-  formatNum: (number) => string = String,
+  formatNum: (num: number) => string = String,
   includePercent: boolean = true
 ) {
   const value_total = formatNum(a) + ' / ' + formatNum(b);

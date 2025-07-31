@@ -77,19 +77,19 @@ export function encodeUintArrayForUrlComponent(numbers: number[]): string {
 }
 
 export function decodeUintArrayFromUrlComponent(s: string): number[] {
-  const array = [];
+  const array: number[] = [];
   let i = 0;
   while (i < s.length) {
     const { value, hasLeadingZero, nextI } = decodeUint(s, i);
     if (hasLeadingZero && array.length >= 1) {
-      const startValue = array[array.length - 1];
-      const endValue = value;
+      const startValue: number = array[array.length - 1];
+      const endValue: number = value;
       if (endValue > startValue) {
-        for (let x = startValue + 1; x < endValue; x++) {
+        for (let x: number = startValue + 1; x < endValue; x++) {
           array.push(x);
         }
       } else {
-        for (let x = startValue - 1; x > endValue; x--) {
+        for (let x: number = startValue - 1; x > endValue; x--) {
           array.push(x);
         }
       }

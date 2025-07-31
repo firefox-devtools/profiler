@@ -1350,12 +1350,12 @@ export function filterThreadByImplementation(
 
 function _filterThreadByFunc(
   thread: Thread,
-  shouldIncludeFuncInFilteredThread: (IndexIntoFuncTable) => boolean
+  shouldIncludeFuncInFilteredThread: (funcIndex: IndexIntoFuncTable) => boolean
 ): Thread {
   return timeCode('_filterThreadByFunc', () => {
     const { stackTable, frameTable } = thread;
 
-    const newStackTable = {
+    const newStackTable: StackTable = {
       length: 0,
       frame: [],
       prefix: [],
@@ -1417,7 +1417,7 @@ export function filterThreadToSearchString(
   const { funcTable, frameTable, stackTable, stringTable, resourceTable } =
     thread;
 
-  function computeFuncMatchesFilter(func) {
+  function computeFuncMatchesFilter(func: IndexIntoFuncTable) {
     const nameIndex = funcTable.name[func];
     const nameString = stringTable.getString(nameIndex);
     if (nameString.toLowerCase().includes(lowercaseSearchString)) {
@@ -1445,7 +1445,7 @@ export function filterThreadToSearchString(
   }
 
   const funcMatchesFilterCache = new Map();
-  function funcMatchesFilter(func) {
+  function funcMatchesFilter(func: IndexIntoFuncTable) {
     let result = funcMatchesFilterCache.get(func);
     if (result === undefined) {
       result = computeFuncMatchesFilter(func);
@@ -1455,7 +1455,7 @@ export function filterThreadToSearchString(
   }
 
   const stackMatchesFilterCache = new Map();
-  function stackMatchesFilter(stackIndex) {
+  function stackMatchesFilter(stackIndex: IndexIntoStackTable | null) {
     if (stackIndex === null) {
       return false;
     }
@@ -2625,8 +2625,8 @@ export function getFriendlyThreadName(
   threads: RawThread[],
   thread: RawThread
 ): string {
-  let label;
-  let homonymThreads;
+  let label: string;
+  let homonymThreads: RawThread[];
 
   switch (thread.name) {
     case 'GeckoMain': {

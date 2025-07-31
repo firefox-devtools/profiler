@@ -12,51 +12,51 @@ import { ensureExists } from '../utils/flow';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 
 export type LibSymbolicationRequest = {
-  lib: RequestedLib,
-  addresses: Set<number>,
+  lib: RequestedLib;
+  addresses: Set<number>;
 };
 
 export type LibSymbolicationResponse =
   | {
-      type: 'SUCCESS',
-      lib: RequestedLib,
-      results: Map<number, AddressResult>,
+      type: 'SUCCESS';
+      lib: RequestedLib;
+      results: Map<number, AddressResult>;
     }
   | {
-      type: 'ERROR',
-      request: LibSymbolicationRequest,
-      error: Error,
+      type: 'ERROR';
+      request: LibSymbolicationRequest;
+      error: Error;
     };
 
 export type AddressResult = {
   // The name of the outer function that this address belongs to.
-  name: string,
+  name: string;
   // The address (relative to the library) where the function that
   // contains this address starts, i.e. the address of the function symbol.
-  symbolAddress: number,
+  symbolAddress: number;
   // The path of the file that contains the source code of the outer function that contains
   // this address.
   // Optional because the information may not be known by the symbolication source, or because
   // the symbolication method does not expose it.
-  file?: string,
+  file?: string;
   // The line number that contains the source code of the outer function that generated the
   // instructions at the address, optional.
   // Optional because the information may not be known by the symbolication source, or because
   // the symbolication method does not expose it.
-  line?: number,
+  line?: number;
   // An optional inline callstack, ordered from inside to outside.
   // addressResult.name calls addressResult.inlines[inlines.length - 1].function, which
   // calls addressResult.inlines[inlines.length - 2].function etc.
-  inlines?: Array<AddressInlineFrame>,
+  inlines?: Array<AddressInlineFrame>;
   // An optional size, in bytes, of the machine code of the outer function that
   // this address belongs to.
-  functionSize?: number,
+  functionSize?: number;
 };
 
 export type AddressInlineFrame = {
-  name: string,
-  file?: string,
-  line?: number,
+  name: string;
+  file?: string;
+  line?: number;
 };
 
 interface SymbolProvider {
@@ -122,7 +122,7 @@ export function readSymbolsFromSymbolTable(
     // bisection() returns the insertion index, which is one position after
     // the index that we consider the match, so we need to subtract 1 from the
     // result.
-    const symbolIndex =
+    const symbolIndex: number =
       bisectionRight(symbolTableAddrs, address, currentSymbolIndex) - 1;
 
     if (symbolIndex >= 0) {
@@ -170,9 +170,9 @@ function _partitionIntoChunksOfMaxValue<T>(
   array: T[],
   maxValue: number,
   maxChunkLength: number,
-  computeValue: (T) => number
+  computeValue: (element: T) => number
 ): T[][] {
-  const chunks = [];
+  const chunks: Array<{ value: number; elements: T[] }> = [];
   for (const element of array) {
     const elementValue = computeValue(element);
     // Find an existing chunk that still has enough "value space" left to
@@ -193,7 +193,7 @@ function _partitionIntoChunksOfMaxValue<T>(
   return chunks.map(({ elements }) => elements);
 }
 
-type DemangleFunction = (string) => string;
+type DemangleFunction = (name: string) => string;
 
 /**
  * This function returns a function that can demangle function name using a
@@ -305,8 +305,12 @@ export class SymbolStore {
 
     // First, try option 1 for all libraries and partition them by whether it
     // was successful.
-    const requestsForNonCachedLibs = [];
-    const resultsForCachedLibs = [];
+    const requestsForNonCachedLibs: LibSymbolicationRequest[] = [];
+    const resultsForCachedLibs: Array<{
+      lib: RequestedLib;
+      addresses: Set<number>;
+      symbolTable: SymbolTableAsTuple;
+    }> = [];
     if (ignoreCache) {
       requestsForNonCachedLibs.push(...requests);
     } else {
@@ -389,7 +393,7 @@ export class SymbolStore {
           // Store any errors encountered along the way in this map.
           // We will report them if all avenues fail.
           const errorMap: Map<LibSymbolicationRequest, Error[]> = new Map(
-            requests.map((r) => [r, []])
+            requests.map((r): [LibSymbolicationRequest, Error[]] => [r, []])
           );
 
           // Process the results of option 2: The response from the Mozilla symbolication APi.
@@ -490,7 +494,7 @@ export class SymbolStore {
     errorMap: Map<LibSymbolicationRequest, Error[]>,
     demangleCallback: DemangleFunction,
     successCb: (lib: RequestedLib, results: Map<number, AddressResult>) => void,
-    errorCb: (LibSymbolicationRequest, Error) => void
+    errorCb: (request: LibSymbolicationRequest, error: Error) => void
   ): Promise<void> {
     for (const request of requests) {
       const { lib, addresses } = request;

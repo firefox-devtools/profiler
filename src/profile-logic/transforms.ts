@@ -133,7 +133,7 @@ export function parseTransforms(transformString: string): TransformStack {
   if (!transformString) {
     return [];
   }
-  const transforms = [];
+  const transforms: Transform[] = [];
 
   transformString.split('~').forEach((s) => {
     const tuple = s.split('-');
@@ -734,11 +734,11 @@ export function mergeCallNode(
       const funcIndex = frameTable.func[frameIndex];
 
       const doesPrefixMatch = prefix === null ? true : stackMatches[prefix];
-      const prefixDepth = prefix === null ? -1 : stackDepths[prefix];
+      const prefixDepth: number = prefix === null ? -1 : stackDepths[prefix];
       const currentFuncOnPath = callNodePath[prefixDepth + 1];
 
       let doMerge = false;
-      let stackDepth = prefixDepth;
+      let stackDepth: number = prefixDepth;
       let doesMatchCallNodePath;
       if (doesPrefixMatch && stackDepth < depthAtCallNodePathLeaf) {
         // This stack's prefixes were in our CallNodePath.
@@ -1357,7 +1357,7 @@ export function focusInvertedSubtree(
     const postfixDepth = postfixCallNodePath.length;
     const { stackTable, frameTable } = thread;
     const funcMatchesImplementation = FUNC_MATCHES[implementation];
-    function convertStack(leaf) {
+    function convertStack(leaf: IndexIntoStackTable) {
       let matchesUpToDepth = 0; // counted from the leaf
       for (let stack = leaf; stack !== null; stack = stackTable.prefix[stack]) {
         const frame = stackTable.frame[stack];
@@ -1497,13 +1497,14 @@ export function restoreAllFunctionsInCallNodePath(
     const prefix = stackTable.prefix[stackIndex];
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
-    const prefixPathDepth = prefix === null ? -1 : matchesUpToDepth[prefix];
+    const prefixPathDepth: number =
+      prefix === null ? -1 : matchesUpToDepth[prefix];
 
     if (prefixPathDepth === null) {
       continue;
     }
 
-    const pathDepth = prefixPathDepth + 1;
+    const pathDepth: number = prefixPathDepth + 1;
     const nextPathFuncIndex = callNodePath[pathDepth];
     if (nextPathFuncIndex === funcIndex) {
       // This function is a match.
@@ -1682,7 +1683,7 @@ export function funcHasRecursiveCall(
 }
 
 function _findRangesByMarkerFilter(
-  getMarker: (MarkerIndex) => Marker,
+  getMarker: (markerIndex: MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   markerSchemaByName: MarkerSchemaByName,
   stringTable: StringTable,
@@ -1720,7 +1721,7 @@ function _findRangesByMarkerFilter(
  */
 export function filterSamples(
   thread: Thread,
-  getMarker: (MarkerIndex) => Marker,
+  getMarker: (markerIndex: MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   markerSchemaByName: MarkerSchemaByName,
   categoryList: CategoryList,
@@ -1799,7 +1800,7 @@ export function applyTransform(
   thread: Thread,
   transform: Transform,
   defaultCategory: IndexIntoCategoryList,
-  getMarker: (MarkerIndex) => Marker,
+  getMarker: (markerIndex: MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   markerSchemaByName: MarkerSchemaByName,
   categoryList: CategoryList

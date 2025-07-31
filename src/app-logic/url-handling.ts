@@ -1012,7 +1012,9 @@ const _upgraders: {
         .join('~');
     }
     if (query.thread) {
-      const selectedThreads = new Set(query.thread.split(',').map((n: string) => +n));
+      const selectedThreads = new Set(
+        query.thread.split(',').map((n: string) => +n)
+      );
       query.thread = encodeUintSetForUrlComponent(
         selectedThreads as Set<number>
       );

@@ -30,12 +30,12 @@ export type SymbolTableAsTuple = [
 ];
 
 type SymbolItem = {
-  debugName: string,
-  breakpadId: string,
-  addrs: Uint32Array,
-  index: Uint32Array,
-  buffer: Uint8Array,
-  lastUsedDate: Date,
+  debugName: string;
+  breakpadId: string;
+  addrs: Uint32Array;
+  index: Uint32Array;
+  buffer: Uint8Array;
+  lastUsedDate: Date;
 };
 
 type SymbolPrimaryKey = [string, string];
@@ -255,9 +255,7 @@ export default class SymbolStoreDB {
     const lastUsedDateIndex = store.index('lastUsedDate');
     // Get a cursor that walks all records whose lastUsedDate is less than beforeDate.
     const range = window.IDBKeyRange.upperBound(beforeDate, true);
-    const cursorReq = lastUsedDateIndex.openCursor(
-      range
-    );
+    const cursorReq = lastUsedDateIndex.openCursor(range);
     // Iterate over all records in this cursor and delete them.
     cursorReq.onsuccess = () => {
       const cursor = cursorReq.result;
