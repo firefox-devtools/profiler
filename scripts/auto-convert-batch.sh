@@ -14,8 +14,15 @@ NC='\033[0m' # No Color
 echo "🚀 Automated TypeScript batch conversion"
 echo "========================================"
 
-# Get list of files with 0 JS dependencies and < 200 lines (good candidates)
-CANDIDATES=$(./scripts/analyze-dependencies.sh | grep "🟢 0 deps" | awk -F: '{if ($2 < 200 && $2 > 0) print $3}' | head -5)
+# Get list of files with 0 JS dependencies and < 100 lines (good candidates)
+# Focus on actual source files, not type declarations
+CANDIDATES=$(./scripts/analyze-dependencies.sh | grep "🟢 0 deps" | grep -E "src/(components|utils|profile-logic)" | awk '{
+    # Extract line count (field 4 should be the number)
+    linecount = $4;
+    # Extract filename (last field)
+    filename = $NF;
+    if (linecount < 100 && linecount > 20) print filename;
+}' | head -3)
 
 if [ -z "$CANDIDATES" ]; then
     echo "❌ No good candidates found for batch conversion"
