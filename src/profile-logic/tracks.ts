@@ -1,9 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
-import type {
+import {
   ScreenshotPayload,
   Profile,
   RawProfileSharedData,
@@ -29,15 +27,15 @@ import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 
 export type TracksWithOrder = {
-  +globalTracks: GlobalTrack[],
-  +globalTrackOrder: TrackIndex[],
-  +localTracksByPid: Map<Pid, LocalTrack[]>,
-  +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+  readonly globalTracks: GlobalTrack[];
+  readonly globalTrackOrder: TrackIndex[];
+  readonly localTracksByPid: Map<Pid, LocalTrack[]>,
+  readonly localTrackOrderByPid: Map<Pid, TrackIndex[]>,
 };
 
 export type HiddenTracks = {
-  +hiddenGlobalTracks: Set<TrackIndex>,
-  +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
+  readonly hiddenGlobalTracks: Set<TrackIndex>;
+  readonly hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
 };
 
 /**
@@ -97,7 +95,7 @@ const GLOBAL_TRACK_DISPLAY_ORDER = {
   process: 4,
 };
 
-function _getDefaultLocalTrackOrder(tracks: LocalTrack[], profile: ?Profile) {
+function _getDefaultLocalTrackOrder(tracks: LocalTrack[], profile: Profile | null) {
   const trackOrder = tracks.map((_, index) => index);
   const naturalSort = new Intl.Collator('en-US', { numeric: true });
   // In place sort!
@@ -236,7 +234,7 @@ export function initializeLocalTrackOrderByPid(
   // If viewing an old profile URL, there were not tracks, only thread indexes. Turn
   // the legacy ordering into track ordering.
   legacyThreadOrder: ThreadIndex[] | null,
-  profile: ?Profile
+  profile: Profile | null
 ): Map<Pid, TrackIndex[]> {
   const trackOrderByPid = new Map();
 
@@ -313,7 +311,7 @@ export function computeLocalTracksByPid(
 
   // Create a new set of available pids, so we can filter out the local tracks
   // if their globalTracks are also filtered out by the tab selector.
-  const availablePids = new Set();
+  const availablePids = new Set<Pid>();
   for (const globalTrack of availableGlobalTracks) {
     if (globalTrack.type === 'process') {
       availablePids.add(globalTrack.pid);
@@ -558,7 +556,7 @@ export function computeGlobalTracks(
         // This is a thread without a known main thread. Create a global process
         // track for it, but don't add a main thread for it.
         const globalTrack = {
-          type: 'process',
+          type: 'process' as const,
           pid: pid,
           mainThreadIndex: null,
         };
@@ -574,7 +572,7 @@ export function computeGlobalTracks(
         if (markers.name[markerIndex] === screenshotNameIndex) {
           // Coerce the payload to a screenshot one. Don't do a runtime check that
           // this is correct.
-          const data: ScreenshotPayload = (markers.data[markerIndex]: any);
+          const data: ScreenshotPayload = (markers.data[markerIndex] as any);
           ids.add(data.windowID);
         }
       }
@@ -1146,7 +1144,7 @@ export function getLocalTrackName(
 function computeAllTrackThreads(
   tracksWithOrder: TracksWithOrder
 ): Set<ThreadIndex> {
-  const allTrackThreads = new Set();
+  const allTrackThreads = new Set<ThreadIndex>();
 
   for (const globalTrack of tracksWithOrder.globalTracks) {
     switch (globalTrack.type) {
@@ -1422,7 +1420,7 @@ export function getSearchFilteredGlobalTracks(
     return null;
   }
 
-  const searchFilteredGlobalTracks = new Set();
+  const searchFilteredGlobalTracks = new Set<TrackIndex>();
   for (let trackIndex = 0; trackIndex < tracks.length; trackIndex++) {
     const globalTrack = tracks[trackIndex];
 
@@ -1518,7 +1516,7 @@ export function getSearchFilteredLocalTracksByPid(
 
   const searchFilteredLocalTracksByPid = new Map();
   for (const [pid, tracks] of localTracksByPid) {
-    const searchFilteredLocalTracks = new Set();
+    const searchFilteredLocalTracks = new Set<TrackIndex>();
     const localTrackNames = localTrackNamesByPid.get(pid);
     if (localTrackNames === undefined) {
       throw new Error('Failed to get the local track names');
@@ -1612,7 +1610,7 @@ export function getTypeFilteredGlobalTracks(
     return null;
   }
 
-  const typeFilteredGlobalTracks = new Set();
+  const typeFilteredGlobalTracks = new Set<TrackIndex>();
 
   for (let trackIndex = 0; trackIndex < tracks.length; trackIndex++) {
     const globalTrack = tracks[trackIndex];
@@ -1638,7 +1636,7 @@ export function getTypeFilteredLocalTracksByPid(
 
   const typeFilteredLocalTracksByPid = new Map();
   for (const [pid, tracks] of localTracksByPid) {
-    const typeFilteredLocalTracks = new Set();
+    const typeFilteredLocalTracks = new Set<TrackIndex>();
 
     for (let trackIndex = 0; trackIndex < tracks.length; trackIndex++) {
       const localTrack = tracks[trackIndex];

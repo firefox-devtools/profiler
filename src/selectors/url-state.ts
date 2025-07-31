@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
 import { createSelector } from 'reselect';
 import { ensureExists, getFirstItemFromSet } from '../utils/flow';
 import { urlFromState } from '../app-logic/url-handling';
@@ -13,7 +12,7 @@ import { SYMBOL_SERVER_URL } from '../app-logic/constants';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { isLocalURL } from '../utils/url';
 
-import type {
+import {
   ThreadIndex,
   Pid,
   TransformStack,
@@ -33,8 +32,8 @@ import type {
   TabID,
 } from 'firefox-profiler/types';
 
-import type { TabSlug } from '../app-logic/tabs-handling';
-import type { MarkerRegExps } from '../profile-logic/marker-data';
+import { TabSlug } from '../app-logic/tabs-handling';
+import { MarkerRegExps } from '../profile-logic/marker-data';
 
 import urlStateReducer from '../reducers/url-state';
 import { formatMetaInfoString } from '../profile-logic/profile-metainfo';
@@ -63,7 +62,7 @@ export const getImplementationFilter: Selector<ImplementationFilter> = (
   state
 ) => getProfileSpecificState(state).implementation;
 export const getLastSelectedCallTreeSummaryStrategy: Selector<
-  CallTreeSummaryStrategy,
+  CallTreeSummaryStrategy
 > = (state) =>
   getProfileSpecificState(state).lastSelectedCallTreeSummaryStrategy;
 export const getShowUserTimings: Selector<boolean> = (state) =>
@@ -100,7 +99,7 @@ export const getInvertCallstack: Selector<boolean> = (state) =>
   getProfileSpecificState(state).invertCallstack;
 
 export const getSelectedThreadIndexesOrNull: Selector<
-  Set<ThreadIndex> | null,
+  Set<ThreadIndex> | null
 > = (state) => getProfileSpecificState(state).selectedThreads;
 export const getSelectedThreadIndexes: Selector<Set<ThreadIndex>> = (state) =>
   ensureExists(
@@ -150,7 +149,7 @@ export const hasTabFilter: Selector<boolean> = (state) =>
  */
 export const getHiddenLocalTracks: DangerousSelectorWithArguments<
   Set<TrackIndex>,
-  Pid,
+  Pid
 > = (state, pid) =>
   ensureExists(
     getHiddenLocalTracksByPid(state).get(pid),
@@ -163,7 +162,7 @@ export const getHiddenLocalTracks: DangerousSelectorWithArguments<
  */
 export const getLocalTrackOrder: DangerousSelectorWithArguments<
   TrackIndex[],
-  Pid,
+  Pid
 > = (state, pid) =>
   ensureExists(
     getLocalTrackOrderByPid(state).get(pid),
@@ -203,7 +202,7 @@ const EMPTY_TRANSFORM_STACK = [];
 
 export const getTransformStack: DangerousSelectorWithArguments<
   TransformStack,
-  ThreadsKey,
+  ThreadsKey
 > = (state, threadsKey) => {
   return (
     getProfileSpecificState(state).transforms[threadsKey] ||
@@ -220,7 +219,7 @@ export const getIsBottomBoxOpen: Selector<boolean> = (state) => {
  * The URL predictor is used to generate a link for an uploaded profile, to predict
  * what the URL will be.
  */
-export const getUrlPredictor: Selector<(Action | Action[]) => string> =
+export const getUrlPredictor: Selector<(actionOrActionList: Action | Action[]) => string> =
   createSelector(
     getUrlState,
     (oldUrlState: UrlState) => (actionOrActionList: Action | Action[]) => {
@@ -313,7 +312,7 @@ export const getProfileNameForStorage: Selector<string> = createSelector(
   }
 );
 
-function _shouldAllowSymbolServerUrl(symbolServerUrl) {
+function _shouldAllowSymbolServerUrl(symbolServerUrl: string) {
   try {
     const url = new URL(symbolServerUrl);
     if (isLocalURL(url)) {
