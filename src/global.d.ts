@@ -34,3 +34,8 @@ interface Worker {
   onmessage: ((this: Worker, ev: MessageEvent) => any) | null;
   onerror: ((this: Worker, ev: ErrorEvent) => any) | null;
 }
+
+declare module '*.svg' {
+  const content: string;
+  export default content;
+}

@@ -146,9 +146,9 @@ function _computeFrameTableInlinedIntoColumn(
 }
 
 type CallNodeTableAndStackMap = {
-  callNodeTable: CallNodeTable,
+  callNodeTable: CallNodeTable;
   // IndexIntoStackTable -> IndexIntoCallNodeTable
-  stackIndexToCallNodeIndex: Int32Array,
+  stackIndexToCallNodeIndex: Int32Array;
 };
 
 /**
@@ -212,11 +212,11 @@ export function computeCallNodeTable(
  * But we haven't put the call nodes in the final order yet.
  */
 type CallNodeTableHierarchy = {
-  prefix: Array<IndexIntoCallNodeTable>,
-  firstChild: Array<IndexIntoFuncTable>,
-  nextSibling: Array<IndexIntoFuncTable>,
-  length: number,
-  stackIndexToCallNodeIndex: Int32Array,
+  prefix: Array<IndexIntoCallNodeTable>;
+  firstChild: Array<IndexIntoFuncTable>;
+  nextSibling: Array<IndexIntoFuncTable>;
+  length: number;
+  stackIndexToCallNodeIndex: Int32Array;
 };
 
 /**
@@ -226,13 +226,13 @@ type CallNodeTableHierarchy = {
  * actual call node table. DFS here means "depth-first search".
  */
 type CallNodeTableDFSOrder = {
-  length: number,
-  stackIndexToCallNodeIndex: Int32Array,
-  nextSiblingSorted: Int32Array,
-  subtreeRangeEndSorted: Uint32Array,
-  prefixSorted: Int32Array,
-  depthSorted: Int32Array,
-  maxDepth: number,
+  length: number;
+  stackIndexToCallNodeIndex: Int32Array;
+  nextSiblingSorted: Int32Array;
+  subtreeRangeEndSorted: Uint32Array;
+  prefixSorted: Int32Array;
+  depthSorted: Int32Array;
+  maxDepth: number;
 };
 
 /**
@@ -242,11 +242,11 @@ type CallNodeTableDFSOrder = {
  * node table.
  */
 type CallNodeTableExtraColumns = {
-  funcCol: Int32Array, // IndexIntoCallNodeTable -> IndexIntoFuncTable
-  categoryCol: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
-  subcategoryCol: Int32Array, // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
-  innerWindowIDCol: Float64Array, // IndexIntoCallNodeTable -> InnerWindowID
-  inlinedIntoCol: Int32Array, // IndexIntoCallNodeTable -> IndexIntoNativeSymbolTable | -1 | -2
+  funcCol: Int32Array; // IndexIntoCallNodeTable -> IndexIntoFuncTable
+  categoryCol: Int32Array; // IndexIntoCallNodeTable -> IndexIntoCategoryList
+  subcategoryCol: Int32Array; // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
+  innerWindowIDCol: Float64Array; // IndexIntoCallNodeTable -> InnerWindowID
+  inlinedIntoCol: Int32Array; // IndexIntoCallNodeTable -> IndexIntoNativeSymbolTable | -1 | -2
 };
 
 /**
@@ -733,7 +733,7 @@ export function getNthPrefixStack(
 export function getSampleIndexToCallNodeIndex(
   stacks: Array<IndexIntoStackTable | null>,
   stackIndexToCallNodeIndex: {
-    [key: IndexIntoStackTable]: IndexIntoCallNodeTable,
+    [key: IndexIntoStackTable]: IndexIntoCallNodeTable;
   }
 ): Array<IndexIntoCallNodeTable | null> {
   return stacks.map((stack) => {
@@ -927,27 +927,27 @@ export function getLeafFuncIndex(path: CallNodePath): IndexIntoFuncTable {
 }
 
 export type OneCategoryBreakdown = {
-  entireCategoryValue: Milliseconds,
-  subcategoryBreakdown: Milliseconds[], // { [IndexIntoSubcategoryList]: Milliseconds }
+  entireCategoryValue: Milliseconds;
+  subcategoryBreakdown: Milliseconds[]; // { [IndexIntoSubcategoryList]: Milliseconds }
 };
 export type BreakdownByCategory = OneCategoryBreakdown[]; // { [IndexIntoCategoryList]: OneCategoryBreakdown }
 export type ItemTimings = {
   selfTime: {
     // time spent excluding children
-    value: Milliseconds,
-    breakdownByCategory: BreakdownByCategory | null,
-  },
+    value: Milliseconds;
+    breakdownByCategory: BreakdownByCategory | null;
+  };
   totalTime: {
     // time spent including children
-    value: Milliseconds,
-    breakdownByCategory: BreakdownByCategory | null,
-  },
+    value: Milliseconds;
+    breakdownByCategory: BreakdownByCategory | null;
+  };
 };
 
 export type TimingsForPath = {
   // timings for this path
-  forPath: ItemTimings,
-  rootTime: Milliseconds, // time for all the samples in the current tree
+  forPath: ItemTimings;
+  rootTime: Milliseconds; // time for all the samples in the current tree
 };
 
 /**
@@ -1029,8 +1029,8 @@ export function getTimingsForCallNodeIndex(
    */
   function accumulateDataToTimings(
     timings: {
-      breakdownByCategory: BreakdownByCategory | null,
-      value: number,
+      breakdownByCategory: BreakdownByCategory | null;
+      value: number;
     },
     sampleIndex: IndexIntoSamplesTable,
     duration: Milliseconds
@@ -1493,7 +1493,7 @@ export function computeTimeColumnForRawSamplesTable(
  * A useful sample being one that isn't a "(root)" sample.
  */
 export function hasUsefulSamples(
-  sampleStacks?: Array<IndexIntoStackTable | null>,
+  sampleStacks: Array<IndexIntoStackTable | null> | undefined,
   thread: RawThread,
   shared: RawProfileSharedData
 ): boolean {
@@ -1532,7 +1532,7 @@ export function hasUsefulSamples(
  * This function takes both a SamplesTable and can be used on CounterSamplesTable.
  */
 export function getSampleIndexRangeForSelection(
-  times: { time: Milliseconds[], length: number },
+  times: { time: Milliseconds[]; length: number },
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
@@ -1555,7 +1555,7 @@ export function getIndexRangeForSelection(
  * sure that some charts will not be cut off at the edges when zoomed in to a range.
  */
 export function getInclusiveSampleIndexRangeForSelection(
-  table: { time: Milliseconds[], length: number },
+  table: { time: Milliseconds[]; length: number },
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
@@ -1687,7 +1687,7 @@ export function filterThreadSamplesToRange(
     );
     const stack = nativeAllocations.stack.slice(startAllocIndex, endAllocIndex);
     const length = endAllocIndex - startAllocIndex;
-    if (nativeAllocations.memoryAddress) {
+    if ('memoryAddress' in nativeAllocations) {
       newThread.nativeAllocations = {
         time,
         weight,
@@ -1813,7 +1813,7 @@ export function filterRawThreadSamplesToRange(
     );
     const stack = nativeAllocations.stack.slice(startAllocIndex, endAllocIndex);
     const length = endAllocIndex - startAllocIndex;
-    if (nativeAllocations.memoryAddress) {
+    if ('memoryAddress' in nativeAllocations) {
       newThread.nativeAllocations = {
         time,
         weight,
@@ -2190,7 +2190,7 @@ export function computeCallNodeMaxDepthPlusOne(
  */
 export function computeSamplesTableFromRawSamplesTable(
   rawSamples: RawSamplesTable,
-  sampleUnits: SampleUnits | void,
+  sampleUnits: SampleUnits | undefined,
   referenceCPUDeltaPerMs: number
 ): SamplesTable {
   const {
@@ -2318,15 +2318,15 @@ export function updateThreadStacksByGeneratingNewStackColumns(
   thread: Thread,
   newStackTable: StackTable,
   computeMappedStackColumn: (
-    Array<IndexIntoStackTable | null>,
-    Array<Milliseconds>
+    oldStack: Array<IndexIntoStackTable | null>,
+    sampleTime: Array<Milliseconds>
   ) => Array<IndexIntoStackTable | null>,
   computeMappedSyncBacktraceStackColumn: (
-    Array<IndexIntoStackTable | null>,
-    Array<Milliseconds>
+    oldStack: Array<IndexIntoStackTable | null>,
+    sampleTime: Array<Milliseconds>
   ) => Array<IndexIntoStackTable | null>,
   computeMappedMarkerDataColumn: (
-    Array<MarkerPayload | null>
+    markerData: Array<MarkerPayload | null>
   ) => Array<MarkerPayload | null>
 ): Thread {
   const { jsAllocations, nativeAllocations, samples, markers } = thread;
@@ -2383,7 +2383,9 @@ export function updateThreadStacksByGeneratingNewStackColumns(
 export function updateThreadStacks(
   thread: Thread,
   newStackTable: StackTable,
-  convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null
+  convertStack: (
+    oldStack: IndexIntoStackTable | null
+  ) => IndexIntoStackTable | null
 ): Thread {
   function convertMarkerData(
     oldData: MarkerPayload | null
@@ -2421,7 +2423,9 @@ export function updateThreadStacks(
 export function updateRawThreadStacks(
   thread: RawThread,
   newStackTable: RawStackTable,
-  convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null
+  convertStack: (
+    oldStack: IndexIntoStackTable | null
+  ) => IndexIntoStackTable | null
 ): RawThread {
   return updateRawThreadStacksSeparate(
     thread,
@@ -2445,9 +2449,11 @@ export function updateRawThreadStacks(
 export function updateRawThreadStacksSeparate(
   thread: RawThread,
   newStackTable: RawStackTable,
-  convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null,
+  convertStack: (
+    oldStack: IndexIntoStackTable | null
+  ) => IndexIntoStackTable | null,
   convertSyncBacktraceStack: (
-    IndexIntoStackTable | null
+    oldStack: IndexIntoStackTable | null
   ) => IndexIntoStackTable | null
 ): RawThread {
   function convertMarkerData(
@@ -2512,9 +2518,9 @@ export function updateRawThreadStacksSeparate(
 export function getMapStackUpdater(
   oldStackToNewStack: Map<
     null | IndexIntoStackTable,
-    null | IndexIntoStackTable,
+    null | IndexIntoStackTable
   >
-): (IndexIntoStackTable | null) => IndexIntoStackTable | null {
+): (oldStack: IndexIntoStackTable | null) => IndexIntoStackTable | null {
   return (oldStack: IndexIntoStackTable | null) => {
     if (oldStack === null) {
       return null;
@@ -2907,7 +2913,7 @@ export function isSampleWithNonEmptyStack(
 export function getTreeOrderComparator(
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   callNodeInfo: CallNodeInfo
-): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
+): (sampleA: IndexIntoSamplesTable, sampleB: IndexIntoSamplesTable) => number {
   const callNodeInfoInverted = callNodeInfo.asInverted();
   return callNodeInfoInverted !== null
     ? _getTreeOrderComparatorInverted(
@@ -2919,7 +2925,7 @@ export function getTreeOrderComparator(
 
 export function _getTreeOrderComparatorNonInverted(
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>
-): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
+): (sampleA: IndexIntoSamplesTable, sampleB: IndexIntoSamplesTable) => number {
   /**
    * Determine the ordering of (possibly null) call nodes for two given samples.
    * Returns a value < 0 if sampleA is ordered before sampleB,
@@ -2954,7 +2960,7 @@ export function _getTreeOrderComparatorNonInverted(
 function _getTreeOrderComparatorInverted(
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   callNodeInfo: CallNodeInfoInverted
-): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
+): (sampleA: IndexIntoSamplesTable, sampleB: IndexIntoSamplesTable) => number {
   const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
   return function treeOrderComparator(
     sampleA: IndexIntoSamplesTable,
@@ -3347,14 +3353,14 @@ export type StackReferences = {
   // Stacks which were sampled by sampling. For native stacks, the
   // corresponding frame address was observed as a value of the instruction
   // pointer register.
-  samplingSelfStacks: Set<IndexIntoStackTable>,
+  samplingSelfStacks: Set<IndexIntoStackTable>;
   // Stacks which were obtained during a synchronous backtrace. For
   // native stacks, the corresponding frame address is *not* an observed
   // value of the instruction pointer, because synchronous backtraces have
   // a few frames removed from the end of the stack, which includes the
   // frame with the instruction pointer. This difference only matters for
   // "return address nudging" which happens at the end of profile processing.
-  syncBacktraceSelfStacks: Set<IndexIntoStackTable>,
+  syncBacktraceSelfStacks: Set<IndexIntoStackTable>;
 };
 
 /**
@@ -3367,8 +3373,8 @@ export type StackReferences = {
  * The two have slightly different properties, see the type definition.
  */
 export function gatherStackReferences(thread: RawThread): StackReferences {
-  const samplingSelfStacks = new Set();
-  const syncBacktraceSelfStacks = new Set();
+  const samplingSelfStacks: Set<IndexIntoStackTable> = new Set();
+  const syncBacktraceSelfStacks: Set<IndexIntoStackTable> = new Set();
 
   const { samples, markers, jsAllocations, nativeAllocations } = thread;
 
@@ -3383,7 +3389,7 @@ export function gatherStackReferences(thread: RawThread): StackReferences {
   // Markers
   for (let i = 0; i < markers.length; i++) {
     const data = markers.data[i];
-    if (data && data.cause) {
+    if (data && 'cause' in data && data.cause) {
       const stack = data.cause.stack;
       if (stack !== null) {
         syncBacktraceSelfStacks.add(stack);
@@ -3785,7 +3791,7 @@ export function getNativeSymbolsForCallNodeNonInverted(
 ): IndexIntoNativeSymbolTable[] {
   const stackIndexToCallNodeIndex =
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
-  const set = new Set();
+  const set: Set<IndexIntoNativeSymbolTable> = new Set();
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     if (stackIndexToCallNodeIndex[stackIndex] === callNodeIndex) {
       const frame = stackTable.frame[stackIndex];
@@ -3811,7 +3817,7 @@ export function getNativeSymbolsForCallNodeInverted(
   const stackIndexToCallNodeIndex =
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
   const suffixOrderIndexes = callNodeInfo.getSuffixOrderIndexes();
-  const set = new Set();
+  const set: Set<IndexIntoNativeSymbolTable> = new Set();
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const stackForNode = getMatchingAncestorStackForInvertedCallNode(
       stackIndex,
@@ -3996,6 +4002,7 @@ export function computeTabToThreadIndexesMap(
       }
 
       if (
+        'innerWindowID' in markerData &&
         markerData.innerWindowID !== null &&
         markerData.innerWindowID !== undefined &&
         // Zero value also means null for innerWindowID.
