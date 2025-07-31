@@ -96,7 +96,7 @@ function _ensureIsAPIResultV5(result: unknown): APIResultV5 {
   // It's possible (especially when running tests with Jest) that the parameter
   // inherits from a `Object` global from another realm. By using toString
   // this issue is solved wherever the parameter comes from.
-  const isObject = (subject) =>
+  const isObject = (subject: unknown) =>
     Object.prototype.toString.call(subject) === '[object Object]';
 
   if (!isObject(result) || !('results' in (result as object))) {
