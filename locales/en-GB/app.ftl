@@ -6,12 +6,6 @@
 ### Localization for the App UI of Profiler
 
 
-# Naming convention for l10n IDs: "ComponentName--string-summary".
-# This allows us to minimize the risk of conflicting IDs throughout the app.
-# Please sort alphabetically by (component name), and
-# keep strings in order of appearance.
-
-
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
@@ -492,11 +486,16 @@ MenuButtons--index--hide-moreInfo-button = Show less
 #   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
 MenuButtons--metaInfo--physical-and-logical-cpu =
     { $physicalCPUs ->
-        [one] { $physicalCPUs } physical core
-       *[other] { $physicalCPUs } physical cores
-    }, { $logicalCPUs ->
-        [one] { $logicalCPUs } logical core
-       *[other] { $logicalCPUs } logical cores
+        [one]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } physical core, { $logicalCPUs } logical core
+               *[other] { $physicalCPUs } physical core, { $logicalCPUs } logical cores
+            }
+       *[other]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } physical cores, { $logicalCPUs } logical core
+               *[other] { $physicalCPUs } physical cores, { $logicalCPUs } logical cores
+            }
     }
 # This string is used when we only have the information about the number of
 # physical CPU cores.
@@ -756,6 +755,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Deallocation Site
 StackSettings--invert-call-stack = Invert call stack
     .title = Sort by the time spent in a call node, ignoring its children.
 StackSettings--show-user-timing = Show user timing
+StackSettings--use-stack-chart-same-widths = Use the same width for each stack
 StackSettings--panel-search =
     .label = Filter stacks:
     .title = Only display stacks which contain a function whose name matches this substring
