@@ -183,9 +183,37 @@ yarn test  # Run together instead
 
 ### Key Flow→TypeScript Conversion Patterns
 
-#### Recent Discoveries (August 2025)
+#### Recent Discoveries (July 2025)
 
 ```typescript
+// CRITICAL: Function types must have parameter names in TypeScript
+// This addresses TS1005 "'>' expected" and TS1109 "Expression expected" errors
+const selector: Selector<(Action | Action[]) => string>        // Flow (FAILS)
+const selector: Selector<(actionList: Action | Action[]) => string>  // TypeScript (WORKS)
+
+// The > character in "=> string" confuses the parser when parameters lack names
+// Error occurs because TypeScript expects "param: Type" syntax, not just "Type"
+
+// Set constructors need explicit type parameters  
+const items = new Set();                   // Flow (inferred)
+const items = new Set<ThreadIndex>();      // TypeScript (explicit)
+
+// Nullable types: Flow → TypeScript syntax
+function process(profile: ?Profile)        // Flow
+function process(profile: Profile | null)  // TypeScript
+
+// Literal types need 'as const' for proper inference
+const track = { type: 'process' };         // Inferred as string
+const track = { type: 'process' as const }; // Inferred as 'process'
+
+// Trailing commas in multiline type definitions
+type Selector<
+  ReturnType,
+> = (state) => ReturnType;                 // Flow (allowed)
+type Selector<
+  ReturnType
+> = (state) => ReturnType;                 // TypeScript (required)
+
 // API validation with unknown types
 function validate(result: unknown): APIType {
   // Runtime validation
@@ -366,31 +394,32 @@ If a phase is only partially complete, but feels complete "in the important ways
   - ✅ marker-data.js → marker-data.ts conversion (1576 lines)
   - ✅ All reducer modules conversion (profile-view.ts, app.ts, url-state.ts, icons.ts, zipped-profiles.ts, publish.ts, l10n.ts, code.ts)
   - ✅ All NamedTupleMap/memoize-immutable compatibility issues resolved
-  - ✅ **NEW TODAY**: Reduced exclude list significantly (July 31, 2025):
-    - ✅ shorten-url.ts - removed from excludes, passes strict checking
-    - ✅ flow.ts - removed from excludes, passes strict checking
-    - ✅ query-api.ts - removed from excludes, passes strict checking
-    - ✅ uintarray-encoding.ts - removed from excludes, passes strict checking
-    - ✅ format-numbers.ts - removed from excludes, passes strict checking
-    - ✅ state.ts - removed from excludes, passes strict checking
-    - ✅ data-table-utils.ts - removed from excludes, fixed type issues, passes strict checking
-    - ✅ profile-derived.ts - removed from excludes, passes strict checking
-    - ✅ actions.ts - removed from excludes, passes strict checking
+  - ✅ **NEW TODAY (July 31, 2025)**: Key dependency conversions completed:
+    - ✅ profile-logic/tracks.js → tracks.ts (core dependency)
+    - ✅ selectors/url-state.js → url-state.ts (core dependency)
+    - ✅ Previous: shorten-url.ts, flow.ts, query-api.ts, uintarray-encoding.ts, format-numbers.ts, state.ts, data-table-utils.ts, profile-derived.ts, actions.ts - all removed from excludes
 - **Remaining for 100% Strict Mode with no exclusion list**:
-  - **Current excludes count**: 15 files remaining (down from 16+ files) 
-  - **✅ COMPLETED TODAY**: BlobUrlLink.tsx, ProfileMetaInfoSummary.tsx (dependencies resolved)
-  - **Remaining files**: mostly React components + 2 utility files with dependencies
+  - **Current excludes count**: 17 files remaining (stable count after dependency conversions) 
+  - **✅ COMPLETED TODAY**: profile-logic/tracks.ts, selectors/url-state.ts (major core dependencies)
+  - **Previous**: BlobUrlLink.tsx, ProfileMetaInfoSummary.tsx (dependencies resolved)
+  - **Remaining files**: mostly React components + 3 utility files with dependencies
   - **📋 RECOMMENDED CONVERSION ORDER** (based on dependency analysis):
     
     **✅ COMPLETED:**
     1. ✅ `src/components/shared/BlobUrlLink.tsx` - Fixed state type annotation
     2. ✅ `src/components/shared/ProfileMetaInfoSummary.tsx` - Converted profile-metainfo.js dependency
+    3. ✅ `src/profile-logic/tracks.js` → `tracks.ts` - Core dependency converted
+    4. ✅ `src/selectors/url-state.js` → `url-state.ts` - Core dependency converted
     
-    **Next Priority (1 unconverted dependency each):**
-    3. `src/components/app/BeforeUnloadManager.tsx` - needs `selectors/publish.js`
-    4. `src/components/app/DebugWarning.tsx` - needs `selectors/profile.js`
-    5. `src/components/shared/InnerNavigationLink.tsx` - needs `actions/profile-view.js`
-    6. `src/utils/codemirror-shared.ts` - needs `profile-logic/line-timings.js`
+    **Next Priority (remaining core dependencies):**
+    5. `src/selectors/profile.ts` - needs `profile-logic/tracks.ts` (✅ done), `selectors/url-state.ts` (✅ done) - **READY FOR CONVERSION**
+    6. `src/selectors/publish.ts` - needs `profile-logic/process-profile.js`, `selectors/per-thread/index.js` 
+    7. `src/actions/profile-view.ts` - needs multiple dependencies, convert after selectors
+    
+    **Components with simple dependencies:**
+    8. `src/components/app/BeforeUnloadManager.tsx` - needs `selectors/publish.ts` (in exclude list)
+    9. `src/components/app/DebugWarning.tsx` - needs `selectors/profile.ts` (in exclude list)
+    10. `src/components/shared/InnerNavigationLink.tsx` - needs `actions/profile-view.ts` (in exclude list)
     
     **Partially Converted (still need additional dependencies):**
     - `src/components/timeline/TrackEventDelay.tsx` - TrackEventDelayGraph.tsx converted but still needs WithSize.js, selectors, etc.
