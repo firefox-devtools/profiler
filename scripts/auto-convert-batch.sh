@@ -75,14 +75,16 @@ for file in $CANDIDATES; do
                 echo -e "  ${GREEN}🎉 Successfully converted $file${NC}"
             else
                 echo -e "  ${RED}❌ Tests failed${NC}"
-                # Revert the conversion
-                mv "$output_file" "$file"
+                # Revert the conversion - restore original file
+                rm "$output_file" 2>/dev/null || true
+                git checkout HEAD -- "$file" 2>/dev/null || true
                 FAILED=$((FAILED + 1))
             fi
         else
             echo -e "  ${RED}❌ TypeScript compilation failed${NC}"
-            # Revert the conversion  
-            mv "$output_file" "$file"
+            # Revert the conversion - restore original file
+            rm "$output_file" 2>/dev/null || true
+            git checkout HEAD -- "$file" 2>/dev/null || true
             FAILED=$((FAILED + 1))
         fi
     else
