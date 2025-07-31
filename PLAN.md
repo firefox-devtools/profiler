@@ -12,17 +12,17 @@ to proceed with the next step of the migration.
 - **Type Definitions**: ✅ 13/13 files complete (100%)
 - **Core Utilities**: ✅ 41/41 files complete (100%)
 - **React Components**: ✅ 22/150+ files complete (14.7%)
-- **Core Dependencies**: ✅ 13/16 files complete (81%) - Major milestone! 🎉
-  - ✅ Completed: tabs-handling.ts, call-node-info.ts, zip-files.ts, browser-connection.ts, uploaded-profiles-db.ts, stack-timing.ts, web-channel.ts, url-handling.ts, symbolication.ts, reducers/index.ts, symbol-store-db.ts, symbol-store.ts, function-info.ts
-  - ⏸️ Deferred: marker-data.js (complex, needs dedicated effort)
-  - 📋 Remaining: Various reducer modules
+- **Core Dependencies**: ✅ 17/20 files complete (85%) - Major milestone! 🎉
+  - ✅ Completed: tabs-handling.ts, call-node-info.ts, zip-files.ts, browser-connection.ts, uploaded-profiles-db.ts, stack-timing.ts, web-channel.ts, url-handling.ts, symbolication.ts, reducers/index.ts, symbol-store-db.ts, symbol-store.ts, function-info.ts, app.ts, profile-view.ts, url-state.ts, sanitize.ts
+  - ⏸️ Deferred: marker-data.js (complex, needs dedicated effort - 1576 lines)
+  - 📋 Remaining: profile-compacting.js, marker-schema.js, minor type fixes
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 
 ### 🎯 **CURRENT PRIORITY: Near Complete Strict TypeScript Compliance**
 
 **Strategy**: Achieved strict TypeScript compliance for all core dependencies except unconverted JS modules.
 
-**🎉 MAJOR PROGRESS: 5 Additional Reducer Files Converted**
+**🎉 MAJOR BREAKTHROUGH: Core Dependencies Converted**
 
 ```
 ✅ COMPLETED:
@@ -32,21 +32,26 @@ to proceed with the next step of the migration.
 - Fixed type issues in format-numbers.ts and uintarray-encoding.ts
 - Created namedtuplemap type declaration
 - All tests passing with strict TypeScript checking
-- ✅ NEW: Converted 5 reducer files to TypeScript:
+- ✅ PREVIOUS: Converted 5 reducer files to TypeScript:
   - icons.js → icons.ts
   - l10n.js → l10n.ts
   - code.js → code.ts
   - publish.js → publish.ts
   - zipped-profiles.js → zipped-profiles.ts
+- ✅ NEW: Converted 4 major core files to TypeScript (2603 lines total):
+  - app.js → app.ts (377 lines)
+  - profile-view.js → profile-view.ts (839 lines)
+  - url-state.js → url-state.ts (733 lines)
+  - sanitize.js → sanitize.ts (654 lines)
 
 Remaining for Full Strict Mode:
-- marker-data.js conversion (only blocker for transforms.ts import)
-- sanitize.js conversion (newly discovered, blocks publish.ts)
-- Remaining reducer modules (profile-view.js, app.js, url-state.js)
+- marker-data.js conversion (primary remaining blocker, 1576 lines)
+- profile-compacting.js, marker-schema.js (new dependencies from sanitize.ts)
 - Minor NamedTupleMap/memoize-immutable compatibility issue
+- favicon property type issue
 ```
 
-**Achievement**: `yarn typecheck:strict` error count reduced from 9 to 6 - significant progress toward full strict compliance!
+**Achievement**: `yarn typecheck:strict` error count maintained at 6 with major core modules now converted - substantial infrastructure complete!
 
 ### ✅ Current Migration State
 
