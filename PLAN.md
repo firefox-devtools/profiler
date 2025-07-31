@@ -290,17 +290,7 @@ type Props = ComponentProps<typeof Component>;
 >
 ```
 
-#### 11. Specific Type Imports
-
-```typescript
-// Sometimes generic imports don't work
-import { CodeLoadingSource } from 'firefox-profiler/types'; // ❌ May fail
-
-// Use specific import paths
-import { CodeLoadingSource } from 'firefox-profiler/types/state'; // ✅ Works
-```
-
-#### 12. Empty Reasons Connected Component Pattern
+#### 11. Empty Reasons Connected Component Pattern
 
 ```typescript
 // Common pattern for empty state components

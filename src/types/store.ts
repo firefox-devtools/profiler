@@ -3,20 +3,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // TypeScript types
 
-import type { Store as ReduxStore } from 'redux';
-import type { Action as ActionsRef } from './actions';
-import type { State as StateRef } from './state';
+import { Store as ReduxStore } from 'redux';
+import { Action } from './actions';
+import { State } from './state';
 
 /**
  * This file contains type definitions for the Redux store. Unlike the definitions
  * that are provided by the libdef, the store will be opinionated by this project's
  * specific union of Actions and the store's specific State type definition.
  */
-
-// Re-export these here so they are easily available from wherever and avoids
-// circular dependencies.
-export type Action = ActionsRef;
-export type State = StateRef;
 
 /**
  * The selector type enforces the selector pattern, and should be used when

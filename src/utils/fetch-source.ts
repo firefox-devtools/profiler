@@ -12,8 +12,7 @@ import { UntarFileStream } from './untar';
 import { isLocalURL } from './url';
 import { queryApiWithFallback } from './query-api';
 import { ExternalCommunicationDelegate } from './query-api';
-import { AddressProof } from 'firefox-profiler/types';
-import { SourceCodeLoadingError } from 'firefox-profiler/types/state';
+import { AddressProof, SourceCodeLoadingError } from 'firefox-profiler/types';
 
 export type FetchSourceResult =
   | { type: 'SUCCESS'; source: string }

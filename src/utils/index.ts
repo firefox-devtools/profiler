@@ -2,8 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { Marker, Milliseconds, StartEndRange } from 'firefox-profiler/types';
-import { KeyboardModifiers } from 'firefox-profiler/types/actions';
+import { Marker, Milliseconds, StartEndRange, KeyboardModifiers } from 'firefox-profiler/types';
 import {
   MouseEvent as SyntheticMouseEvent,
   KeyboardEvent as SyntheticKeyboardEvent,
