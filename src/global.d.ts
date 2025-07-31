@@ -24,15 +24,6 @@ type $Exact<T> = T;
 type $Diff<A, B> = Omit<A, keyof B>;
 type $Rest<A, B> = Omit<A, keyof B>;
 
-// Node.js globals that may not be in DOM types
-declare var process: {
-  env: {
-    NODE_ENV?: string;
-    L10N?: string;
-    [key: string]: string | undefined;
-  };
-};
-
 // Firefox Profiler specific globals
 declare var AVAILABLE_STAGING_LOCALES: string[] | null;
 
