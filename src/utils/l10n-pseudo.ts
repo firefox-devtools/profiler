@@ -107,7 +107,12 @@ export const PSEUDO_STRATEGIES = {
   bidi: transformString.bind(null, FLIPPED_MAP, false, '\u202e', '\u202c'),
 };
 
-export const PSEUDO_STRATEGIES_DIRECTION = {
+export type Direction = 'ltr' | 'rtl';
+
+export const PSEUDO_STRATEGIES_DIRECTION: {
+  readonly accented: Direction;
+  readonly bidi: Direction;
+} = {
   accented: 'ltr',
   bidi: 'rtl',
 };
