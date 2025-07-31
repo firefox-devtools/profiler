@@ -2,9 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
-import type {
+import {
   FrameTable,
   FuncTable,
   StackTable,
@@ -17,7 +15,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import { getMatchingAncestorStackForInvertedCallNode } from './profile-data';
-import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
+import { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
 
 /**
  * For each stack in `stackTable`, and one specific source file, compute the

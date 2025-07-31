@@ -1,10 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import { createSelector } from 'reselect';
-import clamp from 'clamp';
+// TODO: Add proper types for clamp library
+const clamp = require('clamp') as (
+  value: number,
+  min: number,
+  max: number
+) => number;
 
 import {
   getProfile,
@@ -28,7 +31,7 @@ import { ensureExists } from '../utils/flow';
 import { formatNumber } from '../utils/format-numbers';
 import { getHiddenGlobalTracks, getHiddenLocalTracksByPid } from './url-state';
 
-import type {
+import {
   PublishState,
   UploadState,
   UploadPhase,
@@ -37,6 +40,8 @@ import type {
   CheckedSharingOptions,
   RemoveProfileInformation,
   DerivedMarkerInfo,
+  ThreadIndex,
+  CounterIndex,
 } from 'firefox-profiler/types';
 import { getThreadSelectors } from './per-thread';
 
@@ -53,7 +58,7 @@ export const getFilenameString: Selector<string> = createSelector(
     const { startTime, product } = profile.meta;
 
     // Pad single digit numbers with a 0.
-    const pad = (x) => (x < 10 ? `0${x}` : `${x}`);
+    const pad = (x: number) => (x < 10 ? `0${x}` : `${x}`);
 
     // Compute the date string.
     const date = new Date(startTime + rootRange.start);
@@ -115,8 +120,8 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
       }
 
       // Find all of the thread indexes that are hidden.
-      const shouldRemoveThreads = new Set();
-      const shouldRemoveCounters = new Set();
+      const shouldRemoveThreads = new Set<ThreadIndex>();
+      const shouldRemoveCounters = new Set<CounterIndex>();
       if (!checkedSharingOptions.includeHiddenThreads) {
         for (const globalTrackIndex of hiddenGlobalTracks) {
           const globalTrack = globalTracks[globalTrackIndex];
@@ -161,10 +166,12 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
           ? null
           : committedRange,
         shouldRemoveUrls: !checkedSharingOptions.includeUrls,
-        shouldRemoveThreadsWithScreenshots: new Set(
+        shouldRemoveThreadsWithScreenshots: new Set<ThreadIndex>(
           checkedSharingOptions.includeScreenshots
             ? []
-            : profile.threads.map((_, threadIndex) => threadIndex)
+            : profile.threads.map(
+                (_: any, threadIndex: ThreadIndex) => threadIndex
+              )
         ),
         shouldRemoveThreads,
         shouldRemoveCounters,
@@ -184,14 +191,15 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
  * and to the individual threads. This function therefore implements some simple
  * memoization behavior on the current list of threads.
  */
-let _threads = null;
-let _derivedMarkerInfo = null;
+let _threads: any = null;
+let _derivedMarkerInfo: DerivedMarkerInfo[] | null = null;
 function getDerivedMarkerInfoForAllThreads(state: State): DerivedMarkerInfo[] {
   const threads = getThreads(state);
   if (_threads !== threads || _derivedMarkerInfo === null) {
     _threads = threads;
-    _derivedMarkerInfo = getThreads(state).map((_, threadIndex) =>
-      getThreadSelectors(threadIndex).getDerivedMarkerInfo(state)
+    _derivedMarkerInfo = getThreads(state).map(
+      (_: any, threadIndex: ThreadIndex) =>
+        getThreadSelectors(threadIndex).getDerivedMarkerInfo(state)
     );
   }
   return _derivedMarkerInfo;

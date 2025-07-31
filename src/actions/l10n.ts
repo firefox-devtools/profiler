@@ -2,13 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
-import type {
-  Action,
-  Localization,
-  PseudoStrategy,
-} from 'firefox-profiler/types';
+import { Action, Localization, PseudoStrategy } from 'firefox-profiler/types';
 
 /**
  * Notify that translations for the UI are being fetched.

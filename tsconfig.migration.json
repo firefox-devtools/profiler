@@ -9,6 +9,9 @@
     "dist",
     "src/types/libdef",
     "src/**/*.js",
-    "src/**/*.jsx"
+    "src/**/*.jsx",
+    "src/actions/profile-view.ts",
+    "src/selectors/profile.ts",
+    "src/selectors/publish.ts"
   ]
 }

@@ -342,6 +342,8 @@ If a phase is only partially complete, but feels complete "in the important ways
     17. `src/components/app/Root.tsx` - needs 8+ files (should be last)
     
   - **Strategy**: Start with BlobUrlLink.tsx (immediate), then work through files requiring only 1 dependency conversion
+  - Note that converting new files automatically causes them to be on the (implicit) list of *included* files for `yarn typecheck:strict`!
+  - Add newly-converted files, or their dependencies, to the `excludes` list if needed to keep error count from increasing.
   - Phase 4 is completed once the `excludes` list is empty and `yarn typecheck:strict` passes.
 
 ### Phase 5: ⏳ PLANNED - Resume Component Migration

@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import { createSelector } from 'reselect';
 import * as Tracks from '../profile-logic/tracks';
 import * as CPU from '../profile-logic/cpu';
@@ -26,9 +24,9 @@ import { getDefaultCategories } from 'firefox-profiler/profile-logic/data-struct
 import * as CommittedRanges from '../profile-logic/committed-ranges';
 import { defaultTableViewOptions } from '../reducers/profile-view';
 import { StringTable } from '../utils/string-table';
-import type { TabSlug } from '../app-logic/tabs-handling';
+import { TabSlug } from '../app-logic/tabs-handling';
 
-import type {
+import {
   Profile,
   RawProfileSharedData,
   CategoryList,
@@ -78,7 +76,7 @@ import type {
   TimelineUnit,
 } from 'firefox-profiler/types';
 
-import type { ThreadActivityScore } from '../profile-logic/tracks';
+import { ThreadActivityScore } from '../profile-logic/tracks';
 
 export const getProfileView: Selector<ProfileViewState> = (state) =>
   state.profileView;
@@ -87,7 +85,7 @@ export const getProfileView: Selector<ProfileViewState> = (state) =>
  * Profile View Options
  */
 export const getProfileViewOptions: Selector<
-  $PropertyType<ProfileViewState, 'viewOptions'>,
+  ProfileViewState['viewOptions']
 > = (state) => getProfileView(state).viewOptions;
 export const getCurrentTableViewOptions: Selector<TableViewOptions> = (state) =>
   getProfileViewOptions(state).perTab[UrlState.getSelectedTab(state)] ||
@@ -135,11 +133,12 @@ export const getCommittedRangeLabels: Selector<string[]> = createSelector(
 export const getMouseTimePosition: Selector<Milliseconds | null> = (state) =>
   getProfileViewOptions(state).mouseTimePosition;
 
-export const getTableViewOptionSelectors: (TabSlug) => Selector<TableViewOptions> =
-  (tab) => (state) => {
-    const options = getProfileViewOptions(state).perTab[tab];
-    return options || defaultTableViewOptions;
-  };
+export const getTableViewOptionSelectors: (
+  TabSlug
+) => Selector<TableViewOptions> = (tab) => (state) => {
+  const options = getProfileViewOptions(state).perTab[tab];
+  return options || defaultTableViewOptions;
+};
 
 export const getPreviewSelection: Selector<PreviewSelection> = (state) =>
   getProfileViewOptions(state).previewSelection;
@@ -186,7 +185,7 @@ export const getThreads: Selector<RawThread[]> = (state) =>
 export const getThreadNames: Selector<string[]> = (state) =>
   getProfile(state).threads.map((t) => t.name);
 export const getLastNonShiftClick: Selector<
-  LastNonShiftClickInformation | null,
+  LastNonShiftClickInformation | null
 > = (state) => getProfileViewOptions(state).lastNonShiftClick;
 export const getRightClickedTrack: Selector<TrackReference | null> = (state) =>
   getProfileViewOptions(state).rightClickedTrack;
@@ -204,14 +203,14 @@ export const getVisualProgress: Selector<ProgressGraphData[] | null> = (
   state
 ) => getVisualMetrics(state).VisualProgress;
 export const getPerceptualSpeedIndexProgress: Selector<
-  ProgressGraphData[] | null,
+  ProgressGraphData[] | null
 > = (state) => getVisualMetrics(state).PerceptualSpeedIndexProgress ?? null;
 export const getContentfulSpeedIndexProgress: Selector<
-  ProgressGraphData[] | null,
+  ProgressGraphData[] | null
 > = (state) => getVisualMetrics(state).ContentfulSpeedIndexProgress ?? null;
-export const getProfilerConfiguration: Selector<?ProfilerConfiguration> = (
-  state
-) => getMeta(state).configuration;
+export const getProfilerConfiguration: Selector<
+  ProfilerConfiguration | null
+> = (state) => getMeta(state).configuration;
 
 // Get the marker schema that comes from the Gecko profile.
 const getMarkerSchemaGecko: Selector<MarkerSchema[]> = (state) =>
@@ -240,7 +239,7 @@ export const getCategories: Selector<CategoryList> = createSelector(
 
 export const getStringTable: Selector<StringTable> = createSelector(
   (state) => getRawProfileSharedData(state).stringArray,
-  (stringArray) => StringTable.withBackingArray(stringArray)
+  (stringArray) => StringTable.withBackingArray(stringArray as string[])
 );
 
 // Combine the marker schema from Gecko and the front-end. This allows the front-end
@@ -301,7 +300,7 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
   const getPid: Selector<Pid> = (state) => getCounter(state).pid;
 
   const getCommittedRangeCounterSampleRange: Selector<
-    [IndexIntoSamplesTable, IndexIntoSamplesTable],
+    [IndexIntoSamplesTable, IndexIntoSamplesTable]
   > = createSelector(getCounter, getCommittedRange, (counter, range) =>
     getInclusiveSampleIndexRangeForSelection(
       counter.samples,
@@ -357,7 +356,7 @@ export const getIPCMarkerCorrelations: Selector<IPCMarkerCorrelations> =
  */
 export const getInnerWindowIDToPageMap: Selector<Map<
   InnerWindowID,
-  Page,
+  Page
 > | null> = createSelector(getPageList, (pages) => {
   if (!pages) {
     // Return null if there are no pages.
@@ -378,7 +377,7 @@ export const getInnerWindowIDToPageMap: Selector<Map<
  */
 export const getInnerWindowIDToTabMap: Selector<Map<
   InnerWindowID,
-  TabID,
+  TabID
 > | null> = createSelector(getPageList, (pages) => {
   if (!pages) {
     // Return null if there are no pages.
@@ -447,7 +446,7 @@ export const getHasPreferenceMarkers: Selector<boolean> = createSelector(
  */
 export const getGlobalTrackFromReference: DangerousSelectorWithArguments<
   GlobalTrack,
-  GlobalTrackReference,
+  GlobalTrackReference
 > = (state, trackReference) =>
   getGlobalTracks(state)[trackReference.trackIndex];
 
@@ -458,8 +457,8 @@ export const getGlobalTrackFromReference: DangerousSelectorWithArguments<
  * properly work with a PureComponent.
  */
 export const getGlobalTrackAndIndexByPid: DangerousSelectorWithArguments<
-  { +globalTrackIndex: TrackIndex, +globalTrack: GlobalTrack },
-  Pid,
+  { readonly globalTrackIndex: TrackIndex; readonly globalTrack: GlobalTrack },
+  Pid
 > = (state, pid) => {
   const globalTracks = getGlobalTracks(state);
   const globalTrackIndex = globalTracks.findIndex(
@@ -488,7 +487,7 @@ export const getLocalTracksByPid: Selector<Map<Pid, LocalTrack[]>> = (state) =>
  */
 export const getLocalTracks: DangerousSelectorWithArguments<
   LocalTrack[],
-  Pid,
+  Pid
 > = (state, pid) =>
   ensureExists(
     getProfileView(state).localTracksByPid.get(pid),
@@ -501,7 +500,7 @@ export const getLocalTracks: DangerousSelectorWithArguments<
  */
 export const getLocalTrackFromReference: DangerousSelectorWithArguments<
   LocalTrack,
-  LocalTrackReference,
+  LocalTrackReference
 > = (state, trackReference) =>
   getLocalTracks(state, trackReference.pid)[trackReference.trackIndex];
 
@@ -512,7 +511,7 @@ export const getLocalTrackFromReference: DangerousSelectorWithArguments<
 export const getProcessesWithMemoryTrack: Selector<Set<Pid>> = createSelector(
   getLocalTracksByPid,
   (localTracksByPid) => {
-    const processesWithMemoryTrack = new Set();
+    const processesWithMemoryTrack = new Set<Pid>();
     for (const [pid, localTracks] of localTracksByPid.entries()) {
       if (localTracks.some((track) => track.type === 'memory')) {
         processesWithMemoryTrack.add(pid);
@@ -557,7 +556,7 @@ export const getGlobalTrackNames: Selector<string[]> = createSelector(
 
 export const getGlobalTrackName: DangerousSelectorWithArguments<
   string,
-  TrackIndex,
+  TrackIndex
 > = (state, trackIndex) => getGlobalTrackNames(state)[trackIndex];
 
 export const getLocalTrackNamesByPid: Selector<Map<Pid, string[]>> =
@@ -734,7 +733,7 @@ export const getPagesMap: Selector<Map<TabID, Page[]> | null> = createSelector(
  */
 export const getInnerWindowIDSetByTabID: Selector<Map<
   TabID,
-  Set<InnerWindowID>,
+  Set<InnerWindowID>
 > | null> = createSelector(getPagesMap, (pagesMap) => {
   if (pagesMap === null || pagesMap.size === 0) {
     // There is no data, return null
@@ -773,7 +772,7 @@ export const getExtensionIdToNameMap: Selector<Map<string, string> | null> =
  * returns an empty Map if we don't have information about pages (in older profiles).
  */
 export const getProfileFilterPageDataByTabID: Selector<
-  Map<TabID, ProfileFilterPageData>,
+  Map<TabID, ProfileFilterPageData>
 > = createSelector(
   getPagesMap,
   getExtensionIdToNameMap,
@@ -880,7 +879,7 @@ export const getContainsPrivateBrowsingInformation: Selector<boolean> =
 export const getProfiledThreadIds: Selector<Set<Tid>> = createSelector(
   getThreads,
   (threads) => {
-    const profiledThreadIds = new Set();
+    const profiledThreadIds = new Set<Tid>();
     for (const { tid } of threads) {
       profiledThreadIds.add(tid);
     }

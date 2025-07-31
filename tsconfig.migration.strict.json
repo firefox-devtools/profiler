@@ -4,6 +4,7 @@
     "noImplicitAny": true
   },
   "exclude": [
+    "src/actions/profile-view.ts",
     "src/components/app/BeforeUnloadManager.tsx",
     "src/components/app/DebugWarning.tsx",
     "src/components/app/Root.tsx",
@@ -17,7 +18,8 @@
     "src/components/shared/TransformNavigator.tsx",
     "src/components/timeline/TrackEventDelay.tsx",
     "src/components/timeline/TrackEventDelayGraph.tsx",
-    "src/utils/codemirror-shared.ts",
+    "src/selectors/profile.ts",
+    "src/selectors/publish.ts",
     "src/utils/window-console.ts"
   ]
 }

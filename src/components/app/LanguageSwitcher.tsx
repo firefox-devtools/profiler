@@ -50,7 +50,9 @@ class LanguageSwitcherImpl extends React.PureComponent<Props> {
         >
           {AVAILABLE_LOCALES.map((locale) => (
             <option value={locale} key={locale}>
-              {AVAILABLE_LOCALES_TO_LOCALIZED_NAMES[locale] ?? locale}
+              {(AVAILABLE_LOCALES_TO_LOCALIZED_NAMES as Record<string, string>)[
+                locale
+              ] ?? locale}
             </option>
           ))}
         </select>
