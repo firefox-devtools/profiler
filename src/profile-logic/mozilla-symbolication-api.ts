@@ -1,9 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
-import type {
+import {
   AddressResult,
   LibSymbolicationRequest,
   LibSymbolicationResponse,
@@ -28,83 +26,83 @@ import type {
 export type QuerySymbolicationApiCallback = (
   path: string,
   requestJson: string
-) => Promise<MixedObject>;
+) => Promise<unknown>;
 
 type APIFoundModulesV5 = {
   // For every requested library in the memoryMap, this object contains a string
   // key of the form `${debugName}/${breakpadId}`. The value is null if no
   // address with the module index was requested, and otherwise a boolean that
   // says whether the symbol server had symbols for this library.
-  [string]: null | boolean,
+  [key: string]: null | boolean;
 };
 
 type APIInlineFrameInfoV5 = {
   // The name of the function this inline frame was in, if known.
-  function?: string,
+  function?: string;
   // The path of the file that contains the function this inline frame was in, optional.
-  file?: string,
+  file?: string;
   // The line number that contains the source code for this inline frame that
   // contributed to the instruction at the looked-up address, optional.
   // e.g. 543
-  line?: number,
+  line?: number;
 };
 
 type APIFrameInfoV5 = {
   // The hex version of the address that we requested (e.g. "0x5ab").
-  module_offset: string,
+  module_offset: string;
   // The debugName of the library that this frame was in.
-  module: string,
+  module: string;
   // The index of this APIFrameInfo in its enclosing APIStack.
-  frame: number,
+  frame: number;
   // The name of the function this frame was in, if symbols were found.
-  function?: string,
+  function?: string;
   // The hex offset between the requested address and the start of the function,
   // e.g. "0x3c".
-  function_offset?: string,
+  function_offset?: string;
   // An optional size, in bytes, of the machine code of the outer function that
   // this address belongs to, as a hex string, e.g. "0x270".
-  function_size?: string,
+  function_size?: string;
   // The path of the file that contains the function this frame was in, optional.
   // As of June 2021, this is only supported on the staging symbolication server
   // ("Eliot") but not on the implementation that's currently in production ("Tecken").
   // e.g. "hg:hg.mozilla.org/mozilla-central:js/src/vm/Interpreter.cpp:24938c537a55f9db3913072d33b178b210e7d6b5"
-  file?: string,
+  file?: string;
   // The line number that contains the source code that generated the instructions at the address, optional.
   // (Same support as file.)
   // e.g. 543
-  line?: number,
+  line?: number;
   // Information about functions that were inlined at this address.
   // Ordered from inside to outside.
   // As of November 2021, this is only supported by profiler-symbol-server.
   // Adding this functionality to the Mozilla symbol server is tracked in
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1636194
-  inlines?: APIInlineFrameInfoV5[],
+  inlines?: APIInlineFrameInfoV5[];
 };
 
 type APIStackV5 = APIFrameInfoV5[];
 
 type APIJobResultV5 = {
-  found_modules: APIFoundModulesV5,
-  stacks: APIStackV5[],
+  found_modules: APIFoundModulesV5;
+  stacks: APIStackV5[];
 };
 
 type APIResultV5 = {
-  results: APIJobResultV5[],
+  results: APIJobResultV5[];
 };
 
 // Make sure that the JSON blob we receive from the API conforms to our flow
 // type definition.
-function _ensureIsAPIResultV5(result: MixedObject): APIResultV5 {
+function _ensureIsAPIResultV5(result: unknown): APIResultV5 {
   // It's possible (especially when running tests with Jest) that the parameter
   // inherits from a `Object` global from another realm. By using toString
   // this issue is solved wherever the parameter comes from.
   const isObject = (subject) =>
     Object.prototype.toString.call(subject) === '[object Object]';
 
-  if (!isObject(result) || !('results' in result)) {
+  if (!isObject(result) || !('results' in (result as object))) {
     throw new Error('Expected an object with property `results`');
   }
-  const results = result.results;
+  const results = (result as { results: unknown }).results;
   if (!Array.isArray(results)) {
     throw new Error('Expected `results` to be an array');
   }
@@ -179,7 +177,7 @@ function _ensureIsAPIResultV5(result: MixedObject): APIResultV5 {
       }
     }
   }
-  return result;
+  return result as APIResultV5;
 }
 
 function getV5ResultForLibRequest(
