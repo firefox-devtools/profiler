@@ -16,8 +16,8 @@ This represents a significant achievement in the Flow→TypeScript migration:
 ### 📊 Progress Summary
 
 - **Type Definitions**: ✅ 13/13 files complete (100%)
-- **Core Utilities**: ✅ 41/41 files complete (100%)  
-- **React Components**: ✅ 16/150+ files complete (10.7%) - Warning.tsx, BlobUrlLink.tsx, FooterLinks.tsx, DebugWarning.tsx, EmptyReasons.tsx, Icon.tsx, ContextMenuTrigger.tsx, ContextMenuNoHidingOnEnter.tsx, UploadedRecordingsHome.tsx, TransformNavigator.tsx, TrackEventDelay.tsx, JsTracerEmptyReasons.tsx, CodeLoadingOverlay.tsx, ProfileMetaInfoSummary.tsx, MarkerTableEmptyReasons.tsx, MarkerChartEmptyReasons.tsx
+- **Core Utilities**: ✅ 41/41 files complete (100%)
+- **React Components**: ✅ 22/150+ files complete (14.7%) - Warning.tsx, BlobUrlLink.tsx, FooterLinks.tsx, DebugWarning.tsx, EmptyReasons.tsx, Icon.tsx, ContextMenuTrigger.tsx, ContextMenuNoHidingOnEnter.tsx, UploadedRecordingsHome.tsx, TransformNavigator.tsx, TrackEventDelay.tsx, JsTracerEmptyReasons.tsx, CodeLoadingOverlay.tsx, ProfileMetaInfoSummary.tsx, MarkerTableEmptyReasons.tsx, MarkerChartEmptyReasons.tsx, NetworkChartEmptyReasons.tsx, ContextMenu.tsx, BeforeUnloadManager.tsx, Root.tsx, InnerNavigationLink.tsx
 - **Profile Logic**: ⏳ 0/80+ files - Core business logic modules
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 
@@ -26,11 +26,13 @@ This represents a significant achievement in the Flow→TypeScript migration:
 **Priority**: Continue React component migration with simple leaf components before tackling complex profile-logic modules.
 
 **Target Components** (simple, minimal dependencies):
+
 1. Simple presentational components in `src/components/shared/`
 2. Small utility components with few props
 3. Components with minimal external dependencies
 
-**Avoid for now**: 
+**Avoid for now**:
+
 - Profile-logic modules (complex business logic)
 - Complex connected components with many selectors
 - Components with heavy Canvas/WebGL usage
@@ -396,12 +398,15 @@ export const ComponentEmptyReasons = explicitConnect<{}, StateProps, {}>({
 ### Phase 3: 🔄 IN PROGRESS - React Components
 
 - Target: 150+ files in src/components/
-- Current: 16/150+ complete (10.7%)
+- Current: 22/150+ complete (14.7%)
 - ✅ Successfully converted simple leaf components (Warning, BlobUrlLink, FooterLinks, EmptyReasons)
 - ✅ Successfully converted connected components (DebugWarning, Icon, TransformNavigator)
 - ✅ Established patterns for union type handling with type guards
 - ✅ Converted EmptyReasons pattern components (JsTracer, MarkerTable, MarkerChart)
 - ✅ Function components with complex union types (CodeLoadingOverlay)
+- ✅ Root app component with provider patterns (Root.tsx)
+- ✅ Complex components with legacy ReactDOM.findDOMNode (ContextMenu.tsx)
+- ✅ Lifecycle management components (BeforeUnloadManager.tsx)
 - Focus: Continue with more leaf components before complex ones
 
 ### Phase 4: ⏳ PLANNED - Connected Components

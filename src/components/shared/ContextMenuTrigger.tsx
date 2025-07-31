@@ -8,6 +8,12 @@ import { MixedObject } from 'firefox-profiler/types';
 
 export class ContextMenuTrigger extends PureComponent<MixedObject> {
   override render() {
-    return <ReactContextMenuTrigger holdToDisplay={-1} id="contextmenu" {...this.props} />;
+    return (
+      <ReactContextMenuTrigger
+        holdToDisplay={-1}
+        id="contextmenu"
+        {...this.props}
+      />
+    );
   }
 }

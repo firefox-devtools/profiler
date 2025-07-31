@@ -24,11 +24,13 @@ export class TrackEventDelay extends React.PureComponent<Props, {}> {
     return (
       <div
         className="timelineTrackEventDelay"
-        style={{
-          height: graphHeight,
-          '--graph-height': `${graphHeight}px`,
-          '--markers-height': `0px`,
-        } as React.CSSProperties}
+        style={
+          {
+            height: graphHeight,
+            '--graph-height': `${graphHeight}px`,
+            '--markers-height': `0px`,
+          } as React.CSSProperties
+        }
       >
         <TrackEventDelayGraph
           threadIndex={threadIndex}
