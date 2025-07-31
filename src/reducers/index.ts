@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
 import profileView from './profile-view';
 import app from './app';
 import urlState from './url-state';
@@ -12,7 +11,7 @@ import publish from './publish';
 import l10n from './l10n';
 import code from './code';
 import { combineReducers } from 'redux';
-import type { Reducer, State } from 'firefox-profiler/types';
+import { Reducer, State } from 'firefox-profiler/types';
 
 /**
  * This function provides a mechanism to swap out to an old state that we have

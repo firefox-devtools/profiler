@@ -2,17 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import { SymbolsNotFoundError } from './errors';
-
-import type {
-  IDBFactory,
-  IDBDatabase,
-  IDBObjectStore,
-  IDBIndex,
-  IDBKeyRange,
-} from 'firefox-profiler/types';
 
 // Contains a symbol table, which can be used to map addresses to strings.
 // Symbol tables of this format are created within Firefox's implementation of
@@ -49,8 +39,8 @@ type SymbolItem = {
 };
 
 type SymbolPrimaryKey = [string, string];
-type SymbolDateKey = $PropertyType<SymbolItem, 'lastUsedDate'>;
-type SymbolStore = IDBObjectStore<SymbolPrimaryKey, SymbolItem>;
+type SymbolDateKey = SymbolItem['lastUsedDate'];
+type SymbolStore = IDBObjectStore;
 
 const kTwoWeeksInMilliseconds = 2 * 7 * 24 * 60 * 60 * 1000;
 
@@ -90,7 +80,7 @@ export default class SymbolStoreDB {
   }
 
   _setupDB(dbName: string): Promise<IDBDatabase> {
-    const indexedDB: IDBFactory | void = window.indexedDB;
+    const indexedDB = window.indexedDB;
     if (!indexedDB) {
       throw new Error('Could not find indexedDB on the window object.');
     }
@@ -262,12 +252,11 @@ export default class SymbolStoreDB {
     beforeDate: Date,
     callback: () => void
   ): void {
-    const lastUsedDateIndex: IDBIndex<any, Date, any> =
-      store.index('lastUsedDate');
+    const lastUsedDateIndex = store.index('lastUsedDate');
     // Get a cursor that walks all records whose lastUsedDate is less than beforeDate.
     const range = window.IDBKeyRange.upperBound(beforeDate, true);
     const cursorReq = lastUsedDateIndex.openCursor(
-      (range: IDBKeyRange<SymbolDateKey>)
+      range
     );
     // Iterate over all records in this cursor and delete them.
     cursorReq.onsuccess = () => {
@@ -289,8 +278,7 @@ export default class SymbolStoreDB {
   ): void {
     // Get a cursor that walks the records from oldest to newest
     // lastUsedDate.
-    const lastUsedDateIndex: IDBIndex<any, Date, any> =
-      store.index('lastUsedDate');
+    const lastUsedDateIndex = store.index('lastUsedDate');
     const cursorReq = lastUsedDateIndex.openCursor();
     let deletedCount = 0;
     cursorReq.onsuccess = () => {
@@ -311,7 +299,7 @@ export default class SymbolStoreDB {
     };
   }
 
-  _count(store: SymbolStore, callback: (number) => void): void {
+  _count(store: SymbolStore, callback: (count: number) => void): void {
     const countReq = store.count();
     countReq.onsuccess = () => callback(countReq.result);
   }

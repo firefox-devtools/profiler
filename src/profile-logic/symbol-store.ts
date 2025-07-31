@@ -2,12 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
 import SymbolStoreDB from './symbol-store-db';
 import { SymbolsNotFoundError } from './errors';
 
-import type { RequestedLib, ISymbolStoreDB } from 'firefox-profiler/types';
-import type { SymbolTableAsTuple } from './symbol-store-db';
+import { RequestedLib, ISymbolStoreDB } from 'firefox-profiler/types';
+import { SymbolTableAsTuple } from './symbol-store-db';
 import { ensureExists } from '../utils/flow';
 
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
@@ -79,8 +78,8 @@ interface SymbolProvider {
 export interface AbstractSymbolStore {
   getSymbols(
     requests: LibSymbolicationRequest[],
-    successCb: (RequestedLib, Map<number, AddressResult>) => void,
-    errorCb: (LibSymbolicationRequest, Error) => void,
+    successCb: (lib: RequestedLib, results: Map<number, AddressResult>) => void,
+    errorCb: (request: LibSymbolicationRequest, error: Error) => void,
     ignoreCache?: boolean
   ): Promise<void>;
 }
@@ -95,7 +94,7 @@ const MAX_JOB_COUNT_PER_CHUNK = 10;
 export function readSymbolsFromSymbolTable(
   addresses: Set<number>,
   symbolTable: SymbolTableAsTuple,
-  demangleCallback: (string) => string
+  demangleCallback: (name: string) => string
 ): Map<number, AddressResult> {
   const [symbolTableAddrs, symbolTableIndex, symbolTableBuffer] = symbolTable;
   const addressArray = Uint32Array.from(addresses);
@@ -276,8 +275,8 @@ export class SymbolStore {
    */
   async getSymbols(
     requests: LibSymbolicationRequest[],
-    successCb: (RequestedLib, Map<number, AddressResult>) => void,
-    errorCb: (LibSymbolicationRequest, Error) => void,
+    successCb: (lib: RequestedLib, results: Map<number, AddressResult>) => void,
+    errorCb: (request: LibSymbolicationRequest, error: Error) => void,
     ignoreCache: boolean = false
   ): Promise<void> {
     // For each library, we have three options to obtain symbol information for
@@ -360,7 +359,7 @@ export class SymbolStore {
     // Kick off the requests to the symbolication API, and create a list of
     // promises, one promise per chunk.
     const symbolicationApiRequestsAndResponsesPerChunk: Array<
-      [LibSymbolicationRequest[], Promise<LibSymbolicationResponse[]>],
+      [LibSymbolicationRequest[], Promise<LibSymbolicationResponse[]>]
     > = chunks.map((requests) => [
       requests,
       this._symbolProvider.requestSymbolsFromServer(requests),
@@ -446,7 +445,7 @@ export class SymbolStore {
     requests: LibSymbolicationRequest[],
     responsesPromise: Promise<LibSymbolicationResponse[]>,
     errorMap: Map<LibSymbolicationRequest, Error[]>,
-    successCb: (RequestedLib, Map<number, AddressResult>) => void
+    successCb: (lib: RequestedLib, results: Map<number, AddressResult>) => void
   ): Promise<LibSymbolicationRequest[]> {
     try {
       const responses: LibSymbolicationResponse[] = await responsesPromise;
@@ -490,7 +489,7 @@ export class SymbolStore {
     requests: LibSymbolicationRequest[],
     errorMap: Map<LibSymbolicationRequest, Error[]>,
     demangleCallback: DemangleFunction,
-    successCb: (RequestedLib, Map<number, AddressResult>) => void,
+    successCb: (lib: RequestedLib, results: Map<number, AddressResult>) => void,
     errorCb: (LibSymbolicationRequest, Error) => void
   ): Promise<void> {
     for (const request of requests) {

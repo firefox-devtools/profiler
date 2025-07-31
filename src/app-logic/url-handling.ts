@@ -38,6 +38,7 @@ import {
   SourceViewState,
   AssemblyViewState,
   NativeSymbolInfo,
+  Transform,
 } from 'firefox-profiler/types';
 import {
   decodeUintArrayFromUrlComponent,
@@ -489,7 +490,7 @@ export function stateFromLocation(
     implementation = query.implementation;
   }
 
-  const transforms = {};
+  const transforms: { [key: string]: Transform[] } = {};
   if (selectedThreadsKey !== null) {
     transforms[selectedThreadsKey] = parseTransforms(query.transforms);
   }
@@ -823,7 +824,7 @@ const _upgraders: {
       processedLocation.query.transforms =
         processedLocation.query.callTreeFilters
           .split('~')
-          .map((s) => {
+          .map((s: string) => {
             const [type, val] = s.split('-');
             switch (type) {
               case 'prefix':
@@ -838,7 +839,7 @@ const _upgraders: {
                 return undefined;
             }
           })
-          .filter((f) => f)
+          .filter((f: string | undefined) => f)
           .join('~');
       delete processedLocation.query.callTreeFilters;
     }
@@ -948,7 +949,7 @@ const _upgraders: {
 
     query.range = query.range
       .split('~')
-      .map((committedRange) => {
+      .map((committedRange: string) => {
         // This regexp captures two (positive or negative) numbers, separated by a `_`.
         const m = committedRange.match(/^(-?[0-9.]+)_(-?[0-9.]+)$/);
         if (!m) {
@@ -1011,7 +1012,7 @@ const _upgraders: {
         .join('~');
     }
     if (query.thread) {
-      const selectedThreads = new Set(query.thread.split(',').map((n) => +n));
+      const selectedThreads = new Set(query.thread.split(',').map((n: string) => +n));
       query.thread = encodeUintSetForUrlComponent(
         selectedThreads as Set<number>
       );
@@ -1069,7 +1070,7 @@ const _upgraders: {
     // The "collapse recursion" transforms have been renamed:
     // irec-{implementation}-{funcIndex} -> rec-{funcIndex}
     // rec-{implementation}-{funcIndex} -> drec-{implementation}-{funcIndex}
-    function upgradeTransformString(transformString) {
+    function upgradeTransformString(transformString: string) {
       // Collapse recursion (formerly "collapse indirect recursion")
       if (transformString.startsWith('irec-')) {
         // irec-{implementation}-{funcIndex} -> rec-{funcIndex}
@@ -1127,7 +1128,7 @@ const _upgraders: {
 
     //     cr-{implementation}-{resourceIndex}-{wrongFuncIndex}
     //  -> cr-{implementation}-{resourceIndex}-{correctFuncIndex}
-    function upgradeTransformString(transformString) {
+    function upgradeTransformString(transformString: string) {
       if (transformString.startsWith('cr-')) {
         const [, implementation, resourceIndex] = transformString.split('-');
         const funcIndex = funcTableLength + +resourceIndex;
