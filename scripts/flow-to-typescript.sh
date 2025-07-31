@@ -23,7 +23,7 @@ if [ $# -eq 2 ]; then
     OUTPUT_FILE="$2"
 else
     # Check if file contains JSX to determine .tsx vs .ts extension
-    if grep -q -E '\<[A-Z][a-zA-Z]*[^>]*>|\<\/[A-Z]|React\.|jsx' "$INPUT_FILE"; then
+    if grep -q -E ' from .react.;' "$INPUT_FILE"; then
         OUTPUT_FILE="${INPUT_FILE%.js}.tsx"
     else
         OUTPUT_FILE="${INPUT_FILE%.js}.ts"
@@ -64,10 +64,10 @@ sed 's/): ?\([A-Za-z][A-Za-z0-9_]*\)/): \1 | null/g' "$OUTPUT_FILE" > "$TEMP_FIL
 # 5. Convert Flow type annotations in various contexts
 # (value: Type) → value as Type - in return statements
 sed 's/return (\([^:)]*\): \([^)]*\));/return \1 as \2;/g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
-# Object destructuring with type annotation: }: any) → } as any)
-sed 's/}: *\([^)]*\))/} as \1)/g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
-# Array destructuring with type annotation: ]: any) → ] as any)
-sed 's/]: *\([^)]*\))/] as \1)/g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
+# "any" type annotation: `: any)` → ` as any)`
+sed 's/: any\\)/ as any)/g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
+# "empty" type annotation: `: empty)` → ` as never)`
+sed 's/: empty\\)/ as never)/g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
 
 # 6. Convert common Flow utility types
 sed 's/\$Keys<\([^>]*\)>/keyof \1/g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
@@ -91,11 +91,10 @@ echo "   - Complex multiline type definitions"
 echo "   - Generic constructor types (new Set() → new Set<T>())"  
 echo "   - React component overrides (add 'override' keyword)"
 echo "   - Function parameter types (add explicit parameter names)"
-echo "   - Complex Flow patterns like (format: empty)"
 echo "   - MarkerPayload property access (may need 'as any' casts)"
 echo ""
 echo "🔧 Next steps:"
-echo "   1. Review and fix any remaining type issues"
-echo "   2. Run 'yarn typecheck' to validate"
+echo "   1. Run 'yarn typecheck' to validate"
+echo "   2. Review and fix any remaining type issues"
 echo "   3. Run 'yarn test' to ensure functionality"
 echo "   4. Remove original .js file after validation"
