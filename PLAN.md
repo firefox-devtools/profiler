@@ -229,9 +229,14 @@ Array.from(set) replaces [...set] for type safety
 ### ⚠️ Critical Guidelines
 
 - **Never update snapshots** without investigating root cause of differences
+- **Take TypeScript type definitions with a grain of salt** - they were created from Flow types
+- **Don't change runtime behavior of the code** - prefer adjusting types if needed
 - **Convert dependencies first** - always follow topological order
 - **Per-file conversion only** - avoid global syntax changes across mixed codebase
 - **Test after each file** - ensure TypeScript compilation + tests pass before proceeding
+
+Read the original Flow types or the original code by recovering file contents from git history if needed.
+Some of the converted types will not have been exercised yet; a newly-converted file might be the first code to exercise the type definition.
 
 ### ✅ Proven Strategy
 

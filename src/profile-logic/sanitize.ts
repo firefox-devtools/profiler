@@ -264,7 +264,7 @@ function sanitizeThreadPII(
 
   // We iterate all the markers and remove/change data depending on the PII
   // status.
-  const markersToDelete = new Set();
+  const markersToDelete = new Set<number>();
   if (
     PIIToBeRemoved.shouldRemoveUrls ||
     PIIToBeRemoved.shouldRemovePreferenceValues ||

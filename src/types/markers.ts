@@ -209,8 +209,8 @@ export type IPCSharedData = {
   endTime?: Milliseconds;
   sendTid?: number;
   recvTid?: number;
-  sendThreadName?: string;
-  recvThreadName?: string;
+  sendThreadName?: string | void;
+  recvThreadName?: string | void;
 };
 
 /**
@@ -776,8 +776,8 @@ export type IPCMarkerPayload = {
   recvEndTime?: Milliseconds;
   sendTid?: Tid;
   recvTid?: Tid;
-  sendThreadName?: string;
-  recvThreadName?: string;
+  sendThreadName?: string | void;
+  recvThreadName?: string | void;
 
   // This field is a nicely formatted field for the direction.
   niceDirection?: string;

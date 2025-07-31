@@ -65,9 +65,9 @@ sed 's/): ?\([A-Za-z][A-Za-z0-9_]*\)/): \1 | null/g' "$OUTPUT_FILE" > "$TEMP_FIL
 # (value: Type) → value as Type - in return statements
 sed 's/return (\([^:)]*\): \([^)]*\));/return \1 as \2;/g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
 # "any" type annotation: `: any)` → ` as any)`
-sed 's/: any\\)/ as any)/g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
+sed 's/: any)/ as any)/g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
 # "empty" type annotation: `: empty)` → ` as never)`
-sed 's/: empty\\)/ as never)/g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
+sed 's/: empty)/ as never)/g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
 
 # 6. Convert common Flow utility types
 sed 's/\$Keys<\([^>]*\)>/keyof \1/g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"

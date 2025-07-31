@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import { getEmptyRawMarkerTable } from './data-structures';
 import { getFriendlyThreadName } from './profile-data';
 import { removeFilePath, removeURLs, stringsToRegExp } from '../utils/string';
@@ -19,7 +17,7 @@ import {
   markerPayloadMatchesSearch,
 } from './marker-schema';
 
-import type {
+import {
   SamplesTable,
   RawThread,
   RawProfileSharedData,
@@ -321,7 +319,7 @@ export class IPCMarkerCorrelations {
     threadData.set(index, data);
   }
 
-  get(tid: Tid, index: number): ?IPCSharedData {
+  get(tid: Tid, index: number): IPCSharedData | null {
     const threadData = this._correlations.get(tid);
     if (!threadData) {
       return undefined;
@@ -373,7 +371,7 @@ export function correlateIPCMarkers(
     return pids + `,${data.messageSeqno},${data.messageType}`;
   }
 
-  function formatThreadName(tid: ?number): string | void {
+  function formatThreadName(tid: number | null): string | void {
     if (tid !== null && tid !== undefined) {
       const name = threadNames.get(tid);
       if (name !== undefined) {
@@ -436,7 +434,7 @@ export function correlateIPCMarkers(
   // this processing later.
   const markersByKey: Map<
     string,
-    Array<{ tid: number, index: number, data: IPCMarkerPayload } | void>,
+    Array<{ tid: number; index: number; data: IPCMarkerPayload } | void>
   > = new Map();
   const threadNames: Map<number, string> = new Map();
   for (const thread of threads) {
@@ -515,10 +513,17 @@ export function correlateIPCMarkers(
       // make the main thread crowded. It's important to add all the threads to
       // the marker.
       for (const m of markers.slice(1, 4)) {
-        if (m !== undefined && !addedThreadIds.has(m.tid)) {
-          // Add the marker to a thread only if it's not already added.
-          correlations.set(m.tid, m.index, sharedData);
-          addedThreadIds.add(m.tid);
+        if (m !== undefined) {
+          const marker = m as {
+            tid: number;
+            index: number;
+            data: IPCMarkerPayload;
+          };
+          if (!addedThreadIds.has(marker.tid)) {
+            // Add the marker to a thread only if it's not already added.
+            correlations.set(marker.tid, marker.index, sharedData);
+            addedThreadIds.add(marker.tid);
+          }
         }
       }
     }
@@ -551,7 +556,7 @@ export function correlateIPCMarkers(
  */
 export function deriveMarkersFromRawMarkerTable(
   rawMarkers: RawMarkerTable,
-  stringArray: $ReadOnlyArray<string>,
+  stringArray: ReadonlyArray<string>,
   threadId: Tid,
   threadRange: StartEndRange,
   ipcCorrelations: IPCMarkerCorrelations
@@ -559,7 +564,7 @@ export function deriveMarkersFromRawMarkerTable(
   const markers: Marker[] = [];
   const markerIndexToRawMarkerIndexes: IndexedArray<
     MarkerIndex,
-    IndexIntoRawMarkerTable[],
+    IndexIntoRawMarkerTable[]
   > = [];
 
   // These maps contain the start markers we find while looping the marker
@@ -589,10 +594,10 @@ export function deriveMarkersFromRawMarkerTable(
     if (!startData && !endData) {
       return null;
     }
-    return ({
+    return {
       ...startData,
       ...endData,
-    }: any);
+    } as any;
   }
 
   // We don't add a screenshot marker as we find it, because to know its
@@ -653,9 +658,9 @@ export function deriveMarkersFromRawMarkerTable(
               openNetworkMarkers.delete(data.id);
 
               // We know this startIndex points to a Network marker.
-              const startData: NetworkPayload = (rawMarkers.data[
+              const startData: NetworkPayload = rawMarkers.data[
                 startIndex
-              ]: any);
+              ] as any;
 
               const startStartTime = ensureExists(
                 rawMarkers.startTime[startIndex],
@@ -1077,8 +1082,8 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
   markersToDelete: Set<IndexIntoRawMarkerTable>,
   filterRange: StartEndRange | null
 ): {
-  rawMarkerTable: RawMarkerTable,
-  oldMarkerIndexToNew: Map<IndexIntoRawMarkerTable, IndexIntoRawMarkerTable>,
+  rawMarkerTable: RawMarkerTable;
+  oldMarkerIndexToNew: Map<IndexIntoRawMarkerTable, IndexIntoRawMarkerTable>;
 } {
   const newMarkerTable = getEmptyRawMarkerTable();
   const newThreadId = [];
@@ -1087,7 +1092,7 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
   }
   const oldMarkerIndexToNew: Map<
     IndexIntoRawMarkerTable,
-    IndexIntoRawMarkerTable,
+    IndexIntoRawMarkerTable
   > = new Map();
   const addMarkerIndexIfIncluded = (index: IndexIntoRawMarkerTable) => {
     if (markersToDelete.has(index)) {
@@ -1188,11 +1193,11 @@ export function isNavigationMarker({ name, data }: Marker) {
     return false;
   }
 
-  if (data.innerWindowID && name === 'Navigation::Start') {
+  if ((data as any).innerWindowID && name === 'Navigation::Start') {
     return true;
   }
 
-  if (data.category === 'Navigation') {
+  if ((data as any).category === 'Navigation') {
     // Filter by payloads.
     if (name === 'Load' || name === 'DOMContentLoaded') {
       return true;
@@ -1401,20 +1406,20 @@ export function sanitizeFromMarkerSchema(
     // doesn't like much our enormous enum of non-exact objects that's used as
     // MarkerPayload type, and this code is too generic for Flow in this context.
     if (format === 'url') {
-      markerPayload = ({
+      markerPayload = {
         ...markerPayload,
         [key]: removeURLs(markerPayload[key]),
-      }: any);
+      } as any;
     } else if (format === 'file-path') {
-      markerPayload = ({
+      markerPayload = {
         ...markerPayload,
         [key]: removeFilePath(markerPayload[key]),
-      }: any);
+      } as any;
     } else if (format === 'sanitized-string') {
-      markerPayload = ({
+      markerPayload = {
         ...markerPayload,
         [key]: '<sanitized>',
-      }: any);
+      } as any;
     }
   }
 
@@ -1427,9 +1432,9 @@ export function sanitizeFromMarkerSchema(
  */
 export function getMarkerTypesForDisplay(
   markerSchema: MarkerSchema[],
-  displayArea: string
+  displayArea: MarkerDisplayLocation
 ): Set<string> {
-  const types = new Set();
+  const types = new Set<string>();
   for (const { display, name } of markerSchema) {
     if (display.includes(displayArea)) {
       types.add(name);
@@ -1454,17 +1459,17 @@ export function filterMarkerByDisplayLocation(
   // This argument allows a filtering function to customize the result, without having
   // to loop through all of the markers again. Return a boolean if making a decision,
   // or undefined if not.
-  preemptiveFilterFunc?: (
+  preemptiveFilterFunc: (
     data: Marker
   ) => boolean | void = _doNotAutomaticallyAdd
 ): MarkerIndex[] {
   const markerTypes = getMarkerTypesForDisplay(markerSchema, displayLocation);
-  return filterMarkerIndexes(getMarker, markerIndexes, (marker) => {
+  return filterMarkerIndexes(getMarker, markerIndexes, (marker): boolean => {
     const additionalResult = preemptiveFilterFunc(marker);
 
     if (additionalResult !== undefined) {
       // This is a boolean value, use it rather than the schema.
-      return additionalResult;
+      return additionalResult as boolean;
     }
 
     const schemaName = marker.data ? (marker.data.type ?? null) : null;
@@ -1476,9 +1481,9 @@ export function filterMarkerByDisplayLocation(
  * Compute the Screenshot image's thumbnail size.
  */
 export function computeScreenshotSize(
-  payload: { windowWidth: number, windowHeight: number },
+  payload: { windowWidth: number; windowHeight: number },
   maximumSize: number
-): { +width: number, +height: number } {
+): { readonly width: number; readonly height: number } {
   const { windowWidth, windowHeight } = payload;
 
   // Coefficient should be according to bigger side.
@@ -1500,12 +1505,12 @@ export function computeScreenshotSize(
 
 export type MarkerSearchFieldMap = Map<
   string,
-  { positive: RegExp | null, negative: RegExp | null },
+  { positive: RegExp | null; negative: RegExp | null }
 >;
 
 export type MarkerRegExps = $ReadOnly<{
-  generic: RegExp | null,
-  fieldMap: MarkerSearchFieldMap,
+  generic: RegExp | null;
+  fieldMap: MarkerSearchFieldMap;
 }>;
 
 /**
@@ -1521,7 +1526,7 @@ export const stringsToMarkerRegExps = (
 
   // We create this map to group all the field specific search strings and then
   // we aggregate them to create a single regexp for each field later.
-  const fieldStrings: Map<string, { positive: string[], negative: string[] }> =
+  const fieldStrings: Map<string, { positive: string[]; negative: string[] }> =
     new Map();
   // These are the non-field specific search strings. They have to be positive
   // as we don't support negative generic filtering.
