@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { withSize, type SizeProps } from '../shared/WithSize';
@@ -14,7 +12,7 @@ import { getThreadSelectors } from '../../selectors/per-thread';
 import { Tooltip } from '../tooltip/Tooltip';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
 
-import type {
+import {
   Thread,
   ThreadIndex,
   Milliseconds,
@@ -22,7 +20,7 @@ import type {
   StartEndRange,
   EventDelayInfo,
 } from 'firefox-profiler/types';
-import type { ConnectedProps } from '../../utils/connect';
+import { ConnectedProps } from '../../utils/connect';
 
 import './TrackEventDelay.css';
 
@@ -30,14 +28,14 @@ import './TrackEventDelay.css';
  * When adding properties to these props, please consider the comment above the component.
  */
 type CanvasProps = {
-  +thread: Thread,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +interval: Milliseconds,
-  +width: CssPixels,
-  +height: CssPixels,
-  +lineWidth: CssPixels,
-  +eventDelays: EventDelayInfo,
+  readonly thread: Thread;
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly interval: Milliseconds;
+  readonly width: CssPixels;
+  readonly height: CssPixels;
+  readonly lineWidth: CssPixels;
+  readonly eventDelays: EventDelayInfo;
 };
 
 /**
@@ -156,7 +154,7 @@ class TrackEventDelayCanvas extends React.PureComponent<CanvasProps> {
     this._canvas = canvas;
   };
 
-  render() {
+  override render() {
     this._scheduleDraw();
 
     return (
@@ -169,40 +167,37 @@ class TrackEventDelayCanvas extends React.PureComponent<CanvasProps> {
 }
 
 type OwnProps = {
-  +threadIndex: ThreadIndex,
-  +lineWidth: CssPixels,
-  +graphHeight: CssPixels,
+  readonly threadIndex: ThreadIndex;
+  readonly lineWidth: CssPixels;
+  readonly graphHeight: CssPixels;
 };
 
 type StateProps = {
-  +threadIndex: ThreadIndex,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +interval: Milliseconds,
-  +thread: Thread,
-  +filteredThread: Thread,
-  +unfilteredSamplesRange: StartEndRange | null,
-  +eventDelays: EventDelayInfo,
+  readonly threadIndex: ThreadIndex;
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly interval: Milliseconds;
+  readonly thread: Thread;
+  readonly filteredThread: Thread;
+  readonly unfilteredSamplesRange: StartEndRange | null;
+  readonly eventDelays: EventDelayInfo;
 };
 
 type DispatchProps = {};
 
-type Props = {
-  ...SizeProps,
-  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
-};
+type Props = SizeProps & ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 type State = {
-  hoveredDelay: null | number,
-  mouseX: CssPixels,
-  mouseY: CssPixels,
+  hoveredDelay: null | number;
+  mouseX: CssPixels;
+  mouseY: CssPixels;
 };
 
 /**
  *
  */
 class TrackEventDelayGraphImpl extends React.PureComponent<Props, State> {
-  state = {
+  override state = {
     hoveredDelay: null,
     mouseX: 0,
     mouseY: 0,
@@ -212,7 +207,7 @@ class TrackEventDelayGraphImpl extends React.PureComponent<Props, State> {
     this.setState({ hoveredDelay: null });
   };
 
-  _onMouseMove = (event: SyntheticMouseEvent<HTMLDivElement>) => {
+  _onMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     const { pageX: mouseX, pageY: mouseY } = event;
     // Get the offset from here, and apply it to the time lookup.
     const { left } = event.currentTarget.getBoundingClientRect();
@@ -258,7 +253,7 @@ class TrackEventDelayGraphImpl extends React.PureComponent<Props, State> {
     }
   };
 
-  _renderTooltip(delayIndex: number): React.Node {
+  _renderTooltip(delayIndex: number): React.ReactNode {
     const { eventDelays } = this.props.eventDelays;
     const { delayRange } = this.props.eventDelays;
     return (
@@ -283,7 +278,7 @@ class TrackEventDelayGraphImpl extends React.PureComponent<Props, State> {
    * Create a div that is a dot on top of the graph representing the current
    * height of the graph.
    */
-  _renderEventDelayDot(delayIndex: number): React.Node {
+  _renderEventDelayDot(delayIndex: number): React.ReactNode {
     const {
       rangeStart,
       rangeEnd,
@@ -309,7 +304,7 @@ class TrackEventDelayGraphImpl extends React.PureComponent<Props, State> {
     );
   }
 
-  render() {
+  override render() {
     const { hoveredDelay, mouseX, mouseY } = this.state;
     const {
       filteredThread,
@@ -363,7 +358,7 @@ class TrackEventDelayGraphImpl extends React.PureComponent<Props, State> {
 export const TrackEventDelayGraph = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state, ownProps) => {
     const { threadIndex } = ownProps;

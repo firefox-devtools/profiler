@@ -22,7 +22,7 @@ type State = {
  * is mounted, updated, and unmounted.
  */
 export class BlobUrlLink extends React.PureComponent<Props, State> {
-  override state = {
+  override state: State = {
     url: '',
     prevBlob: null,
   };

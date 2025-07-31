@@ -2,9 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
-import type { ProfileMeta } from 'firefox-profiler/types';
+import { ProfileMeta } from 'firefox-profiler/types';
 
 // This extracts the version number out of the 'misc' value we have in the
 // profile.
@@ -35,8 +33,8 @@ function removeUselessEndZeroInVersion(version: string): string {
 // This returns a string to identify the product and its version out of the meta
 // information, eg `Firefox 77` of `Firefox Preview 78`.
 export function formatProductAndVersion(meta: {
-  +product: string,
-  +misc?: string,
+  readonly product: string;
+  readonly misc?: string;
 }): string {
   const product = meta.product || '';
   const version = removeUselessEndZeroInVersion(formatVersionNumber(meta.misc));
@@ -51,9 +49,9 @@ export function formatProductAndVersion(meta: {
 // If you change something, please make sure that the CSS in
 // components/shared/ProfileMetaInfoSummary.css still works.
 export function formatPlatform(meta: {
-  +platform?: string,
-  +oscpu?: string,
-  +toolkit?: string,
+  readonly platform?: string;
+  readonly oscpu?: string;
+  readonly toolkit?: string;
 }): string {
   switch (meta.toolkit) {
     case 'android':

@@ -12,8 +12,9 @@ to proceed with the next step of the migration.
 - **Type Definitions**: ✅ 13/13 files complete (100%)
 - **Core Utilities**: ✅ 41/41 files complete (100%)
 - **React Components**: ✅ 22/150+ files complete (14.7%)
-- **Core Dependencies**: ✅ 20/20 files complete (100%) - COMPLETE! 🎉
+- **Core Dependencies**: ✅ 23/23 files complete (100%) - COMPLETE! 🎉
   - ✅ Completed: tabs-handling.ts, call-node-info.ts, zip-files.ts, browser-connection.ts, uploaded-profiles-db.ts, stack-timing.ts, web-channel.ts, url-handling.ts, symbolication.ts, reducers/index.ts, symbol-store-db.ts, symbol-store.ts, function-info.ts, app.ts, profile-view.ts, url-state.ts, sanitize.ts, profile-compacting.ts, marker-schema.tsx, marker-data.ts
+  - ✅ **NEW TODAY**: profile-logic/profile-metainfo.ts, components/timeline/TrackEventDelayGraph.tsx, components/app/LanguageSwitcher.tsx
   - 📋 All core dependencies now converted to TypeScript!
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 
@@ -292,13 +293,55 @@ If a phase is only partially complete, but feels complete "in the important ways
 
 ### Phase 4: IN PROGRESS - Strict compliance
 
-- **Status**: `yarn typecheck:strict` passes for all converted modules! Core dependencies complete.
+- **Status**: `yarn typecheck:strict` passes for all converted modules! **MAJOR PROGRESS TODAY**
 - **✅ COMPLETED**:
   - ✅ marker-data.js → marker-data.ts conversion (1576 lines)
   - ✅ All reducer modules conversion (profile-view.ts, app.ts, url-state.ts, icons.ts, zipped-profiles.ts, publish.ts, l10n.ts, code.ts)
   - ✅ All NamedTupleMap/memoize-immutable compatibility issues resolved
+  - ✅ **NEW TODAY**: Reduced exclude list significantly (July 31, 2025):
+    - ✅ shorten-url.ts - removed from excludes, passes strict checking
+    - ✅ flow.ts - removed from excludes, passes strict checking
+    - ✅ query-api.ts - removed from excludes, passes strict checking
+    - ✅ uintarray-encoding.ts - removed from excludes, passes strict checking
+    - ✅ format-numbers.ts - removed from excludes, passes strict checking
+    - ✅ state.ts - removed from excludes, passes strict checking
+    - ✅ data-table-utils.ts - removed from excludes, fixed type issues, passes strict checking
+    - ✅ profile-derived.ts - removed from excludes, passes strict checking
+    - ✅ actions.ts - removed from excludes, passes strict checking
 - **Remaining for 100% Strict Mode with no exclusion list**:
-  - Look at the `excludes` list in tsconfig.migration.strict.json, pick an easy file (fewer imports are easier), remove it from the list, resolve `yarn typecheck:strict` errors.
+  - **Current excludes count**: 15 files remaining (down from 16+ files) 
+  - **✅ COMPLETED TODAY**: BlobUrlLink.tsx, ProfileMetaInfoSummary.tsx (dependencies resolved)
+  - **Remaining files**: mostly React components + 2 utility files with dependencies
+  - **📋 RECOMMENDED CONVERSION ORDER** (based on dependency analysis):
+    
+    **✅ COMPLETED:**
+    1. ✅ `src/components/shared/BlobUrlLink.tsx` - Fixed state type annotation
+    2. ✅ `src/components/shared/ProfileMetaInfoSummary.tsx` - Converted profile-metainfo.js dependency
+    
+    **Next Priority (1 unconverted dependency each):**
+    3. `src/components/app/BeforeUnloadManager.tsx` - needs `selectors/publish.js`
+    4. `src/components/app/DebugWarning.tsx` - needs `selectors/profile.js`
+    5. `src/components/shared/InnerNavigationLink.tsx` - needs `actions/profile-view.js`
+    6. `src/utils/codemirror-shared.ts` - needs `profile-logic/line-timings.js`
+    
+    **Partially Converted (still need additional dependencies):**
+    - `src/components/timeline/TrackEventDelay.tsx` - TrackEventDelayGraph.tsx converted but still needs WithSize.js, selectors, etc.
+    - `src/components/app/FooterLinks.tsx` - LanguageSwitcher.tsx converted but still needs l10n actions/selectors
+    
+    **Medium Priority (2 unconverted dependencies each):**
+    9. `src/components/shared/Icon.tsx` - needs `selectors/icons.js` + `actions/icons.js`
+    10. `src/components/js-tracer/EmptyReasons.tsx` - needs `selectors/per-thread/thread.js`
+    11. `src/components/marker-chart/MarkerChartEmptyReasons.tsx` - needs `selectors/per-thread/thread.js`
+    12. `src/components/marker-table/MarkerTableEmptyReasons.tsx` - needs `selectors/per-thread/thread.js`
+    13. `src/components/network-chart/NetworkChartEmptyReasons.tsx` - needs `selectors/per-thread/thread.js`
+    
+    **Lower Priority (3+ unconverted dependencies):**
+    14. `src/components/shared/TransformNavigator.tsx` - needs 3 files
+    15. `src/components/app/UploadedRecordingsHome.tsx` - needs 3 files
+    16. `src/utils/window-console.ts` - needs 6+ files (convert after core files)
+    17. `src/components/app/Root.tsx` - needs 8+ files (should be last)
+    
+  - **Strategy**: Start with BlobUrlLink.tsx (immediate), then work through files requiring only 1 dependency conversion
   - Phase 4 is completed once the `excludes` list is empty and `yarn typecheck:strict` passes.
 
 ### Phase 5: ⏳ PLANNED - Resume Component Migration

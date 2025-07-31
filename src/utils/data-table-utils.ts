@@ -44,7 +44,7 @@ export function sortDataTable<KeyColumnElementType>(
     if (i !== j) {
       for (const columnName in table) {
         if (columnName !== 'length') {
-          const column = table[columnName];
+          const column = table[columnName] as unknown[];
           const temp = column[i];
           column[i] = column[j];
           column[j] = temp;

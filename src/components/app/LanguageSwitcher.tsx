@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 
 import { Localized } from '@fluent/react';
@@ -16,23 +14,23 @@ import {
 } from 'firefox-profiler/app-logic/l10n';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {};
 type StateProps = {
-  +primaryLocale: string | null,
+  readonly primaryLocale: string | null;
 };
 type DispatchProps = {
-  requestL10n: typeof requestL10n,
+  requestL10n: typeof requestL10n;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 class LanguageSwitcherImpl extends React.PureComponent<Props> {
-  _onLocaleChange = (event: SyntheticEvent<HTMLSelectElement>) => {
+  _onLocaleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     this.props.requestL10n([event.currentTarget.value]);
   };
 
-  render() {
+  override render() {
     const { primaryLocale } = this.props;
     if (!primaryLocale) {
       // We're actually guaranteed primaryLocale is not null, because
@@ -64,7 +62,7 @@ class LanguageSwitcherImpl extends React.PureComponent<Props> {
 export const LanguageSwitcher = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   component: LanguageSwitcherImpl,
   mapStateToProps: (state) => ({
