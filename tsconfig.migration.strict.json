@@ -5,6 +5,7 @@
   },
   "exclude": [
     "src/actions/profile-view.ts",
+    "src/components/shared/InnerNavigationLink.tsx",
     "src/components/app/BeforeUnloadManager.tsx",
     "src/components/app/DebugWarning.tsx",
     "src/components/app/Root.tsx",
@@ -14,7 +15,6 @@
     "src/components/marker-table/MarkerTableEmptyReasons.tsx",
     "src/components/network-chart/NetworkChartEmptyReasons.tsx",
     "src/components/shared/Icon.tsx",
-    "src/components/shared/InnerNavigationLink.tsx",
     "src/components/shared/TransformNavigator.tsx",
     "src/components/timeline/TrackEventDelay.tsx",
     "src/components/timeline/TrackEventDelayGraph.tsx",

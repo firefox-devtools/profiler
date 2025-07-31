@@ -8,7 +8,7 @@ import {
 } from 'firefox-profiler/utils/flow';
 import { numberSeriesToDeltas } from 'firefox-profiler/utils/number-series';
 
-import type {
+import {
   RawThread,
   SampleUnits,
   Profile,
