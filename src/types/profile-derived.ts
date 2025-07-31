@@ -124,7 +124,7 @@ export type SamplesTable = {
   weightType: WeightType;
   // The CPU ratio, between 0 and 1, over the time between the previous sample
   // and this sample.
-  threadCPURatio?: Float64Array;
+  threadCPURatio?: Float64Array | undefined;
   // This property isn't present in normal threads. However it's present for
   // merged threads, so that we know the origin thread for these samples.
   threadId?: Tid[];
