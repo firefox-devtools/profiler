@@ -22,7 +22,7 @@
 ```
 ✅ COMPLETED:
 - Fixed all implicit any types in profile-data.ts
-- Fixed all implicit any types in symbol-store.ts  
+- Fixed all implicit any types in symbol-store.ts
 - Fixed all implicit any types in transforms.ts
 - Fixed type issues in format-numbers.ts and uintarray-encoding.ts
 - Created namedtuplemap type declaration
