@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
 import {
   GECKO_PROFILE_VERSION,
   PROCESSED_PROFILE_VERSION,
@@ -319,23 +318,14 @@ export function shallowCloneRawMarkerTable(
   };
 }
 
-export function getResourceTypes() {
-  return {
-    unknown: 0,
-    library: 1,
-    addon: 2,
-    webhost: 3,
-    otherhost: 4,
-    url: 5,
-  };
-}
-
-/**
- * Export a read-only copy of the resource types.
- */
-export const resourceTypes = (getResourceTypes(): $Exact<
-  $ReadOnly<$Call<typeof getResourceTypes>>,
->);
+export const resourceTypes = {
+  unknown: 0,
+  library: 1,
+  addon: 2,
+  webhost: 3,
+  otherhost: 4,
+  url: 5,
+};
 
 export function getEmptyExtensions(): ExtensionTable {
   return {
