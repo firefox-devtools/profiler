@@ -8,3 +8,4 @@ dist
 coverage
 taskcluster/
 .taskcluster.yml
+PLAN.md
