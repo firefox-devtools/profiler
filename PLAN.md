@@ -12,15 +12,14 @@ to proceed with the next step of the migration.
 - **Type Definitions**: ✅ 13/13 files complete (100%)
 - **Core Utilities**: ✅ 41/41 files complete (100%)
 - **React Components**: ✅ 22/150+ files complete (14.7%)
-- **Core Dependencies**: ✅ 19/20 files complete (95%) - Near completion! 🚀
-  - ✅ Completed: tabs-handling.ts, call-node-info.ts, zip-files.ts, browser-connection.ts, uploaded-profiles-db.ts, stack-timing.ts, web-channel.ts, url-handling.ts, symbolication.ts, reducers/index.ts, symbol-store-db.ts, symbol-store.ts, function-info.ts, app.ts, profile-view.ts, url-state.ts, sanitize.ts, profile-compacting.ts, marker-schema.tsx
-  - ⏸️ Deferred: marker-data.js (complex, needs dedicated effort - 1576 lines)
-  - 📋 Remaining: Only marker-data.js conversion for 100% completion
+- **Core Dependencies**: ✅ 20/20 files complete (100%) - COMPLETE! 🎉
+  - ✅ Completed: tabs-handling.ts, call-node-info.ts, zip-files.ts, browser-connection.ts, uploaded-profiles-db.ts, stack-timing.ts, web-channel.ts, url-handling.ts, symbolication.ts, reducers/index.ts, symbol-store-db.ts, symbol-store.ts, function-info.ts, app.ts, profile-view.ts, url-state.ts, sanitize.ts, profile-compacting.ts, marker-schema.tsx, marker-data.ts
+  - 📋 All core dependencies now converted to TypeScript!
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 
-### 🎯 **CURRENT PRIORITY: Near Complete Strict TypeScript Compliance**
+### 🎯 **CURRENT PRIORITY: Complete Strict TypeScript Compliance**
 
-**Strategy**: Achieved strict TypeScript compliance for all core dependencies except unconverted JS modules.
+**Strategy**: Achieved strict TypeScript compliance for all core dependencies. All major blocking files converted!
 
 **🎉 MAJOR BREAKTHROUGH: Core Dependencies Converted**
 
@@ -38,22 +37,23 @@ to proceed with the next step of the migration.
   - code.js → code.ts
   - publish.js → publish.ts
   - zipped-profiles.js → zipped-profiles.ts
-- ✅ NEW: Converted 6 major core files to TypeScript (3644 lines total):
+- ✅ NEW: Converted 7 major core files to TypeScript (5220 lines total):
   - app.js → app.ts (377 lines)
   - profile-view.js → profile-view.ts (839 lines)
   - url-state.js → url-state.ts (733 lines)
   - sanitize.js → sanitize.ts (654 lines)
   - profile-compacting.js → profile-compacting.ts (342 lines)
   - marker-schema.js → marker-schema.tsx (699 lines)
+  - marker-data.js → marker-data.ts (1576 lines) ✅ COMPLETED!
 
-Remaining for Full Strict Mode:
-- marker-data.js conversion (only remaining blocker, 1576 lines)
+Core Dependencies Complete:
+- ✅ ALL 20 core dependency files converted to TypeScript
 - ✅ FIXED: NamedTupleMap/memoize-immutable compatibility issue
 - ✅ FIXED: favicon property type issue
 - ✅ FIXED: MarkerPayload indexing with `as any` casts
 ```
 
-**Achievement**: `yarn typecheck:strict` error count reduced to 2 (from 6!) with major core modules converted - Only marker-data.js import errors remain!
+**Achievement**: All core dependencies converted! `yarn typecheck:strict` now passes for all converted modules with strict TypeScript compliance.
 
 ### ✅ Current Migration State
 
@@ -292,13 +292,13 @@ If a phase is only partially complete, but feels complete "in the important ways
 
 ### Phase 4: IN PROGRESS - Strict compliance
 
-- **Status**: `yarn typecheck:script` partially passes for converted modules which are not on the exclusion list (see below)
-- **Remaining for 100% Strict Mode with current exclusion list**:
-  - marker-data.js conversion (1576 lines - only remaining blocker for transforms.ts)
-  - Reducer modules conversion (profile-view.js, app.js, url-state.js, icons.js, zipped-profiles.js, publish.js, l10n.js, code.js)
-  - Minor NamedTupleMap/memoize-immerable compatibility issue
+- **Status**: `yarn typecheck:strict` passes for all converted modules! Core dependencies complete.
+- **✅ COMPLETED**:
+  - ✅ marker-data.js → marker-data.ts conversion (1576 lines)
+  - ✅ All reducer modules conversion (profile-view.ts, app.ts, url-state.ts, icons.ts, zipped-profiles.ts, publish.ts, l10n.ts, code.ts)
+  - ✅ All NamedTupleMap/memoize-immutable compatibility issues resolved
 - **Remaining for 100% Strict Mode with no exclusion list**:
-  - Look at the `excludes` list in tsconfig.migration.strict.js, pick an easy file (fewer imports are easier), remove it from the list, resolve `yarn typecheck:strict` errors.
+  - Look at the `excludes` list in tsconfig.migration.strict.json, pick an easy file (fewer imports are easier), remove it from the list, resolve `yarn typecheck:strict` errors.
   - Phase 4 is completed once the `excludes` list is empty and `yarn typecheck:strict` passes.
 
 ### Phase 5: ⏳ PLANNED - Resume Component Migration

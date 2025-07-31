@@ -112,7 +112,7 @@ export function deriveJankMarkers(
 }
 
 export function getSearchFilteredMarkerIndexes(
-  getMarker: (MarkerIndex) => Marker,
+  getMarker: (markerIndex: MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   markerSchemaByName: MarkerSchemaByName,
   searchRegExps: MarkerRegExps | null,
@@ -181,7 +181,7 @@ function positiveFilterMarker(
   // passing it inside a function below.
   const regExps = searchRegExps;
 
-  function test(value, key) {
+  function test(value: string, key: string) {
     key = key.toLowerCase();
     const fieldRegexp = regExps.fieldMap.get(key);
     const found =
@@ -245,7 +245,7 @@ function negativeFilterMarker(
   // passing it inside a function below.
   const regExps = searchRegExps;
 
-  function test(value, key) {
+  function test(value: string, key: string) {
     key = key.toLowerCase();
     const fieldRegexp = regExps.fieldMap.get(key);
     const negativeRegexp = fieldRegexp?.negative;
@@ -361,7 +361,7 @@ export function correlateIPCMarkers(
   // message seqno, and message type. Since the seqno is only unique for each
   // message channel pair, we use the PIDs and message type as a way of
   // identifying which channel pair generated this message.
-  function makeIPCMessageID(thread, data): string {
+  function makeIPCMessageID(thread: RawThread, data: IPCMarkerPayload): string {
     let pids;
     if (data.direction === 'sending') {
       pids = `${thread.pid},${data.otherPid}`;
@@ -1008,7 +1008,7 @@ export function filterRawMarkerTableToRange(
   rangeEnd: number
 ): RawMarkerTable {
   const newMarkerTable = getEmptyRawMarkerTable();
-  const newThreadId = [];
+  const newThreadId: (Tid | null)[] = [];
   if (markerTable.threadId) {
     newMarkerTable.threadId = newThreadId;
   }
@@ -1086,7 +1086,7 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
   oldMarkerIndexToNew: Map<IndexIntoRawMarkerTable, IndexIntoRawMarkerTable>;
 } {
   const newMarkerTable = getEmptyRawMarkerTable();
-  const newThreadId = [];
+  const newThreadId: (Tid | null)[] = [];
   if (oldMarkerTable.threadId) {
     newMarkerTable.threadId = newThreadId;
   }
@@ -1143,9 +1143,9 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
  * markers, with marker indexes both as input and output.
  */
 export function filterMarkerIndexes(
-  getMarker: (MarkerIndex) => Marker,
+  getMarker: (markerIndex: MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
-  filterFunc: (Marker) => boolean
+  filterFunc: (marker: Marker) => boolean
 ): MarkerIndex[] {
   return markerIndexes.filter((markerIndex) => {
     return filterFunc(getMarker(markerIndex));
@@ -1153,7 +1153,7 @@ export function filterMarkerIndexes(
 }
 
 export function filterMarkerIndexesToRange(
-  getMarker: (MarkerIndex) => Marker,
+  getMarker: (markerIndex: MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   rangeStart: number,
   rangeEnd: number
@@ -1235,7 +1235,7 @@ export function isOnThreadFileIoMarker(marker: Marker): boolean | void {
  */
 export function getAllowMarkersWithNoSchema(
   markerSchemaByName: MarkerSchemaByName
-): (Marker) => boolean | void {
+): (marker: Marker) => boolean | void {
   return (marker) => {
     const { data } = marker;
 
@@ -1324,7 +1324,7 @@ export function getColorClassNameForMimeType(
 }
 
 export function groupScreenshotsById(
-  getMarker: (MarkerIndex) => Marker,
+  getMarker: (markerIndex: MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[]
 ): Map<string, Marker[]> {
   const idToScreenshotMarkers = new Map();
@@ -1408,12 +1408,12 @@ export function sanitizeFromMarkerSchema(
     if (format === 'url') {
       markerPayload = {
         ...markerPayload,
-        [key]: removeURLs(markerPayload[key]),
+        [key]: removeURLs((markerPayload as any)[key]),
       } as any;
     } else if (format === 'file-path') {
       markerPayload = {
         ...markerPayload,
-        [key]: removeFilePath(markerPayload[key]),
+        [key]: removeFilePath((markerPayload as any)[key]),
       } as any;
     } else if (format === 'sanitized-string') {
       markerPayload = {
@@ -1443,7 +1443,7 @@ export function getMarkerTypesForDisplay(
   return types;
 }
 
-function _doNotAutomaticallyAdd(_data: Marker) {
+function _doNotAutomaticallyAdd(_data: Marker): boolean | void {
   return undefined;
 }
 
@@ -1451,7 +1451,7 @@ function _doNotAutomaticallyAdd(_data: Marker) {
  * Filter markers to a smaller set based on the location.
  */
 export function filterMarkerByDisplayLocation(
-  getMarker: (MarkerIndex) => Marker,
+  getMarker: (markerIndex: MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   markerSchema: MarkerSchema[],
   markerSchemaByName: MarkerSchemaByName,
