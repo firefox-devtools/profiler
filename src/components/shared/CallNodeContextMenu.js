@@ -594,7 +594,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       filePath &&
       parseFileNameFromSymbolication(filePath).path.match(/[^\\/]+$/)?.[0];
 
-    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+    const callNodeTable = callNodeInfo.getCallNodeTable();
 
     const showOpenDebuggerItem =
       isJS &&
