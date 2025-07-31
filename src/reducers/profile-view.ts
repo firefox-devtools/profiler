@@ -2,13 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
 import { combineReducers } from 'redux';
 import * as Transforms from '../profile-logic/transforms';
 import * as ProfileData from '../profile-logic/profile-data';
 import { arePathsEqual, PathSet } from '../utils/path';
 
-import type {
+import {
   Profile,
   Pid,
   LocalTrack,
@@ -35,7 +34,7 @@ import {
   applyFuncSubstitutionToCallPath,
   applyFuncSubstitutionToPathSetAndIncludeNewAncestors,
 } from '../profile-logic/symbolication';
-import type { TabSlug } from '../app-logic/tabs-handling';
+import { TabSlug } from '../app-logic/tabs-handling';
 
 import { objectMap } from '../utils/flow';
 
@@ -167,7 +166,7 @@ function _updateThreadViewOptions(
 }
 
 const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
-  state = ({}: ThreadViewOptionsPerThreads),
+  state = {} as ThreadViewOptionsPerThreads,
   action
 ): ThreadViewOptionsPerThreads => {
   switch (action.type) {
@@ -495,7 +494,7 @@ function _updateTableViewOptions(
 }
 
 const tableViewOptionsPerTab: Reducer<TableViewOptionsPerTab> = (
-  state = ({}: TableViewOptionsPerTab),
+  state = {} as TableViewOptionsPerTab,
   action
 ): TableViewOptionsPerTab => {
   switch (action.type) {

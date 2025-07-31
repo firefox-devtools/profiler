@@ -2,13 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
 import { combineReducers } from 'redux';
 import { oneLine } from 'common-tags';
 import { objectEntries } from '../utils/flow';
 import { tabSlugs } from '../app-logic/tabs-handling';
 
-import type {
+import {
   ThreadIndex,
   Pid,
   TrackIndex,
@@ -26,7 +25,7 @@ import type {
   TabID,
 } from 'firefox-profiler/types';
 
-import type { TabSlug } from '../app-logic/tabs-handling';
+import { TabSlug } from '../app-logic/tabs-handling';
 
 /*
  * This state file governs the state that comes from, and alters, the window
@@ -124,7 +123,7 @@ const committedRanges: Reducer<StartEndRange[]> = (state = [], action) => {
 const selectedThreads: Reducer<Set<ThreadIndex> | null> = (
   state = null,
   action
-) => {
+): Set<ThreadIndex> | null => {
   switch (action.type) {
     case 'CHANGE_SELECTED_THREAD':
     case 'SELECT_TRACK':
@@ -138,14 +137,14 @@ const selectedThreads: Reducer<Set<ThreadIndex> | null> = (
     case 'TOGGLE_RESOURCES_PANEL':
     case 'CHANGE_TAB_FILTER':
       // Only switch to non-null selected threads.
-      return (action.selectedThreadIndexes: Set<ThreadIndex>);
+      return action.selectedThreadIndexes as Set<ThreadIndex>;
     case 'SANITIZED_PROFILE_PUBLISHED': {
       const { oldThreadIndexToNew } = action;
       if (state === null || !oldThreadIndexToNew) {
         // Either there was no selected thread, or the thread indexes were not modified.
         return state;
       }
-      const newSelectedThreads = new Set();
+      const newSelectedThreads = new Set<ThreadIndex>();
       for (const oldThreadIndex of state) {
         const newThreadIndex = oldThreadIndexToNew.get(oldThreadIndex);
         if (newThreadIndex === undefined) {
@@ -216,7 +215,7 @@ const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
         return state;
       }
       // This may no longer be valid because of PII sanitization.
-      const newTransforms = {};
+      const newTransforms = {} as TransformStacksPerThread;
       for (const [threadsKey, transformStack] of objectEntries(state)) {
         const newThreadIndex = oldThreadIndexToNew.get(Number(threadsKey));
         if (newThreadIndex !== undefined) {
@@ -614,8 +613,8 @@ const assemblyView: Reducer<AssemblyViewState> = (
   }
 };
 
-function _getBottomBoxInitialState() {
-  const state = {};
+function _getBottomBoxInitialState(): IsOpenPerPanelState {
+  const state = {} as IsOpenPerPanelState;
   tabSlugs.forEach((tabSlug) => (state[tabSlug] = false));
   return state;
 }
@@ -707,7 +706,7 @@ const wrapReducerInResetter = (
         // Invalidate all information that would be specific to an individual profile.
         return {
           ...regularUrlStateReducer(state, action),
-          profileSpecific: profileSpecific(undefined, state),
+          profileSpecific: profileSpecific(undefined, state as any),
           selectedTab: selectedTab(undefined, action),
         };
       default:

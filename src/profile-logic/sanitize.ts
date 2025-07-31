@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import {
   getEmptyExtensions,
   shallowCloneRawMarkerTable,
@@ -25,7 +23,7 @@ import {
   filterRawThreadSamplesToRange,
   filterCounterSamplesToRange,
 } from './profile-data';
-import type {
+import {
   Profile,
   RawThread,
   ThreadIndex,
@@ -40,10 +38,10 @@ import type {
 } from 'firefox-profiler/types';
 
 export type SanitizeProfileResult = {
-  +profile: Profile,
-  +oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
-  +committedRanges: StartEndRange[] | null,
-  +isSanitized: boolean,
+  readonly profile: Profile;
+  readonly oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null;
+  readonly committedRanges: StartEndRange[] | null;
+  readonly isSanitized: boolean;
 };
 
 /**
@@ -72,7 +70,7 @@ export function sanitizePII(
   const oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> = new Map();
 
   // This set keeps the ids to be removed when removing private browsing data.
-  const windowIdFromPrivateBrowsing = new Set();
+  const windowIdFromPrivateBrowsing = new Set<InnerWindowID>();
 
   let pages = profile.pages;
   if (pages) {
@@ -355,8 +353,8 @@ function sanitizeThreadPII(
 
         if (
           currentMarker &&
-          currentMarker.innerWindowID &&
-          windowIdFromPrivateBrowsing.has(currentMarker.innerWindowID)
+          (currentMarker as any).innerWindowID &&
+          windowIdFromPrivateBrowsing.has((currentMarker as any).innerWindowID)
         ) {
           // Remove any marker that we know they come from private browsing sessions
           markersToDelete.add(i);
@@ -419,12 +417,12 @@ function sanitizeThreadPII(
     // all frames if we need to.
     const sanitizedFuncIndexesToFrameIndex: Map<
       IndexIntoFuncTable,
-      IndexIntoFrameTable[],
+      IndexIntoFrameTable[]
     > = new Map();
     // This set holds all func indexes that shouldn't be sanitized. This will be
     // intersected with the previous map's keys to know which functions need to
     // be split in 2.
-    const funcIndexesToBeKept = new Set();
+    const funcIndexesToBeKept = new Set<IndexIntoFuncTable>();
 
     const { frameTable, funcTable, resourceTable, stackTable, samples } =
       newThread;
@@ -453,7 +451,7 @@ function sanitizeThreadPII(
     }
 
     if (sanitizedFuncIndexesToFrameIndex.size) {
-      const resourcesToBeSanitized = new Set();
+      const resourcesToBeSanitized = new Set<number>();
 
       const newFuncTable = (newThread.funcTable =
         shallowCloneFuncTable(funcTable));
