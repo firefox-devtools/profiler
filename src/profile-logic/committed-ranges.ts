@@ -134,7 +134,7 @@ export function stringifyStartEnd({ start, end }: StartEndRange): string {
     let durationInMs = strDurationInNs.slice(0, -6);
     if (!strDurationInNs.endsWith('000000')) {
       // We round up the duration, this is like running Math.ceil on the integer part.
-      durationInMs = Number(durationInMs) + 1;
+      durationInMs = (+durationInMs + 1).toString();
     }
     result = `${startInMs}m${durationInMs}`;
   } else if (durationInNs > 9000) {
@@ -143,7 +143,7 @@ export function stringifyStartEnd({ start, end }: StartEndRange): string {
     let durationInUs = strDurationInNs.slice(0, -3);
     if (!strDurationInNs.endsWith('000')) {
       // We round up the duration, this is like running Math.ceil on the integer part.
-      durationInUs = Number(durationInUs) + 1;
+      durationInUs = (+durationInUs + 1).toString();
     }
     result = `${startInUs}u${durationInUs}`;
   } else if (durationInNs === 0) {
