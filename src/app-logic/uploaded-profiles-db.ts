@@ -1,12 +1,11 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
 // This file contains the code responsible for storing informations about
 // published profiles.
 
-import { openDB, deleteDB } from 'idb';
+import { openDB, deleteDB, IDBPDatabase } from 'idb';
 import { stripIndent } from 'common-tags';
 import {
   stateFromLocation,
@@ -14,40 +13,44 @@ import {
 } from 'firefox-profiler/app-logic/url-handling';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 
-import type { DB as Database } from 'idb';
-import type { StartEndRange } from 'firefox-profiler/types';
+import { StartEndRange } from 'firefox-profiler/types';
 
 // This type is closely tied to the IndexedDB operation. Indeed it represents
 // the data we store and retrieve in the local DB. That's especially why it's
 // defined in this file, close to the DB operations. Indeed we don't want that
 // this type evolves without implementing a migration step for the stored data.
 export type UploadedProfileInformation = {
-  +profileToken: string, // This is the primary key.
-  +jwtToken: string | null,
-  +publishedDate: Date, // This key is indexed as well, to provide automatic sorting.
-  +name: string,
-  +preset: string | null,
-  +meta: {
+  readonly profileToken: string; // This is the primary key.
+  readonly jwtToken: string | null;
+  readonly publishedDate: Date; // This key is indexed as well, to provide automatic sorting.
+  readonly name: string;
+  readonly preset: string | null;
+  readonly meta: {
     // We're using some of the properties of the profile meta, but we're not
     // reusing the type ProfileMeta completely because we don't want to be
     // impacted from future changes to ProfileMeta.
     // Look at ProfileMeta definition to know more about these fields.
-    +product: string,
-    +abi?: string,
-    +platform?:
+    readonly product: string;
+    readonly abi?: string;
+    readonly platform?:
       | 'Android'
       | 'Windows'
       | 'Macintosh'
       // X11 is used for historic reasons, but this value means that it is a Unix platform.
       | 'X11'
-      | string,
-    +toolkit?: string,
-    +misc?: string,
-    +oscpu?: string,
+      | string;
+    readonly misc?: string;
+    readonly oscpu?: string;
     // Older versions of Firefox for Linux had the 2 flavors gtk2/gtk3, and so
     // we could find the value "gtk3".
-    +toolkit?: 'gtk' | 'gtk3' | 'windows' | 'cocoa' | 'android' | string,
-    +updateChannel?:
+    readonly toolkit?:
+      | 'gtk'
+      | 'gtk3'
+      | 'windows'
+      | 'cocoa'
+      | 'android'
+      | string;
+    readonly updateChannel?:
       | 'default' // Local builds
       | 'nightly'
       | 'nightly-try' // Nightly try builds for QA
@@ -55,12 +58,12 @@ export type UploadedProfileInformation = {
       | 'beta'
       | 'release'
       | 'esr' // Extended Support Release channel
-      | string,
-    +appBuildID?: string,
-  },
+      | string;
+    readonly appBuildID?: string;
+  };
   // Storing the state as the path makes it easy to reuse our URL upgrade mechanism.
-  +urlPath: string,
-  +publishedRange: StartEndRange,
+  readonly urlPath: string;
+  readonly publishedRange: StartEndRange;
 };
 
 // Exported for tests.
@@ -68,35 +71,31 @@ export const DATABASE_NAME = 'published-profiles-store';
 export const OBJECTSTORE_NAME = 'published-profiles';
 export const DATABASE_VERSION = 3;
 
-async function reallyOpen(): Promise<Database> {
+async function reallyOpen(): Promise<IDBPDatabase> {
   const db = await openDB(DATABASE_NAME, DATABASE_VERSION, {
     upgrade(db, oldVersion, newVersion, transaction) {
       // In the following switch block, we don't "break" for each case block
       // because we want to run all migration steps in sequence, starting with
       // the right step.
       /* eslint-disable no-fallthrough */
-      switch (oldVersion) {
-        case 0: {
-          // Version 1: this is the first version of the DB.
-          const store = db.createObjectStore(OBJECTSTORE_NAME, {
-            keyPath: 'profileToken',
-          });
-          store.createIndex('originHostname', 'originHostname');
-        }
-        case 1: {
-          // Version 2: we create a new index to allow retrieving the values
-          // ordered by date.
-          const store = ensureExists(transaction.store);
-          store.createIndex('publishedDate', 'publishedDate');
-        }
-        case 2: {
-          // Version 3: we remove the originHostname index that was used by the
-          // active tab view since it's been removed.
-          const store = ensureExists(transaction.store);
-          store.deleteIndex('originHostname');
-        }
-        default:
-        // Nothing more here.
+      if (oldVersion <= 0) {
+        // Version 1: this is the first version of the DB.
+        const store = db.createObjectStore(OBJECTSTORE_NAME, {
+          keyPath: 'profileToken',
+        });
+        store.createIndex('originHostname', 'originHostname');
+      }
+      if (oldVersion <= 1) {
+        // Version 2: we create a new index to allow retrieving the values
+        // ordered by date.
+        const store = transaction.objectStore(OBJECTSTORE_NAME);
+        store.createIndex('publishedDate', 'publishedDate');
+      }
+      if (oldVersion <= 2) {
+        // Version 3: we remove the originHostname index that was used by the
+        // active tab view since it's been removed.
+        const store = transaction.objectStore(OBJECTSTORE_NAME);
+        store.deleteIndex('originHostname');
       }
       /* eslint-enable */
     },
@@ -105,7 +104,7 @@ async function reallyOpen(): Promise<Database> {
   return db;
 }
 
-async function open(): Promise<Database> {
+async function open(): Promise<IDBPDatabase> {
   if (!window.indexedDB) {
     throw new Error('Could not find indexedDB on the window object.');
   }
@@ -123,7 +122,7 @@ async function open(): Promise<Database> {
       // changes.
       // Let's explain that in an error, that will be output to the console by
       // the caller.
-      (window: any).deleteDB = () => deleteDB(DATABASE_NAME);
+      (window as any).deleteDB = () => deleteDB(DATABASE_NAME);
       throw new Error(stripIndent`
         We tried to open an existing published profiles store database with a
         smaller version than the current one. We can't do that with IndexedDB.
@@ -158,7 +157,7 @@ export async function persistUploadedProfileInformationToDb(
  * This returns the list of all the stored data.
  */
 export async function listAllUploadedProfileInformationFromDb(): Promise<
-  UploadedProfileInformation[],
+  UploadedProfileInformation[]
 > {
   const db = await open();
   return db.getAllFromIndex(OBJECTSTORE_NAME, 'publishedDate');
