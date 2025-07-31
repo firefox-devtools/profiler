@@ -36,7 +36,19 @@ jest.mock('../../components/app/ListOfPublishedProfiles', () => ({
 // AppLocalizationProvider calls a async function in componentDidMount()
 // The tests related to it are in separate file.
 jest.mock('../../components/app/AppLocalizationProvider', () => ({
-  AppLocalizationProvider: ({ children }) => children,
+  AppLocalizationProvider: ({ children }) => {
+    const { L10nContext } = require('firefox-profiler/contexts/L10nContext');
+    return (
+      <L10nContext.Provider
+        value={{
+          primaryLocale: null,
+          requestL10n: () => {},
+        }}
+      >
+        {children}
+      </L10nContext.Provider>
+    );
+  },
 }));
 
 describe('Root with history', function () {

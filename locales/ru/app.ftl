@@ -6,12 +6,6 @@
 ### Localization for the App UI of Profiler
 
 
-# Naming convention for l10n IDs: "ComponentName--string-summary".
-# This allows us to minimize the risk of conflicting IDs throughout the app.
-# Please sort alphabetically by (component name), and
-# keep strings in order of appearance.
-
-
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
@@ -770,6 +764,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Сайты осв
 StackSettings--invert-call-stack = Инвертировать стек вызовов
     .title = Сортировать по времени, потраченному на вызов узла, игнорируя его дочерние элементы.
 StackSettings--show-user-timing = Показать время пользователя
+StackSettings--use-stack-chart-same-widths = Использовать одинаковую ширину для всех стеков
 StackSettings--panel-search =
     .label = Стеки фильтров:
     .title = Отображать только стеки, содержащие функции, имена которых совпадают с этой подстрокой

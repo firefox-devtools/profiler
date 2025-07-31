@@ -4,7 +4,6 @@
 
 // @flow
 export * from './app';
-export * from './l10n';
 export * from './per-thread';
 export * from './profile';
 export * from './url-state';
@@ -24,7 +23,6 @@ import * as urlState from './url-state';
 import * as icons from './icons';
 import * as publish from './publish';
 import * as zippedProfiles from './zipped-profiles';
-import * as l10n from './l10n';
 import * as cpu from './cpu';
 import * as code from './code';
 
@@ -37,7 +35,6 @@ const _selectorsForConsole = {
   zippedProfiles,
   selectedThread,
   selectedNode,
-  l10n,
   cpu,
   code,
 };
