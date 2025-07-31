@@ -308,7 +308,7 @@ function getInformationFromTrackReference(
         pid: trackReference.pid,
         globalTrackIndex,
         localTrackIndex: trackReference.trackIndex,
-      };
+      } as const;
 
       // Go through each type, and determine the tab slug and thread index.
       switch (localTrack.type) {
