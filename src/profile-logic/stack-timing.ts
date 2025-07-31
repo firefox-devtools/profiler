@@ -2,13 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-import type {
+import {
   SamplesLikeTable,
   Milliseconds,
   IndexIntoCallNodeTable,
 } from 'firefox-profiler/types';
-import type { CallNodeInfo } from './call-node-info';
+import { CallNodeInfo } from './call-node-info';
 
 /**
  * The StackTimingByDepth data structure organizes stack frames by their depth, and start
@@ -79,23 +78,23 @@ export type StackTimingDepth = number;
 export type IndexIntoStackTiming = number;
 
 export type StackTiming = {
-  start: Milliseconds[],
-  end: Milliseconds[],
+  start: Milliseconds[];
+  end: Milliseconds[];
   // These 2 properties sameWidthsStart and sameWidthsEnd increments at each
   // "tick", that is at each stack change. They'll make it possible to draw a
   // stack chart where each different stack has the same width, and can better
   // show very short changes.
-  sameWidthsStart: number[],
-  sameWidthsEnd: number[],
-  callNode: IndexIntoCallNodeTable[],
-  length: number,
+  sameWidthsStart: number[];
+  sameWidthsEnd: number[];
+  callNode: IndexIntoCallNodeTable[];
+  length: number;
 };
 
 export type StackTimingByDepth = Array<StackTiming>;
 export type SameWidthsIndexToTimestampMap = number[];
 export type StackTimingByDepthWithMap = {
-  timings: StackTimingByDepth,
-  sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap,
+  timings: StackTimingByDepth;
+  sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap;
 };
 
 /**
