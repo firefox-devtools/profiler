@@ -16,7 +16,7 @@ import {
  */
 
 export type MessageToBrowser = {
-  requestId: number,
+  requestId: number;
 } & Request;
 
 export type Request =
@@ -34,35 +34,35 @@ type StatusQueryRequest = { type: 'STATUS_QUERY' };
 type EnableMenuButtonRequest = { type: 'ENABLE_MENU_BUTTON' };
 type GetProfileRequest = { type: 'GET_PROFILE' };
 type GetExternalMarkersRequest = {
-  type: 'GET_EXTERNAL_MARKERS',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
+  type: 'GET_EXTERNAL_MARKERS';
+  startTime: Milliseconds;
+  endTime: Milliseconds;
 };
 type GetExternalPowerTracksRequest = {
-  type: 'GET_EXTERNAL_POWER_TRACKS',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
+  type: 'GET_EXTERNAL_POWER_TRACKS';
+  startTime: Milliseconds;
+  endTime: Milliseconds;
 };
 type GetSymbolTableRequest = {
-  type: 'GET_SYMBOL_TABLE',
-  debugName: string,
-  breakpadId: string,
+  type: 'GET_SYMBOL_TABLE';
+  debugName: string;
+  breakpadId: string;
 };
 type QuerySymbolicationApiRequest = {
-  type: 'QUERY_SYMBOLICATION_API',
-  path: string,
-  requestJson: string,
+  type: 'QUERY_SYMBOLICATION_API';
+  path: string;
+  requestJson: string;
 };
 type GetPageFaviconsRequest = {
-  type: 'GET_PAGE_FAVICONS',
-  pageUrls: Array<string>,
+  type: 'GET_PAGE_FAVICONS';
+  pageUrls: Array<string>;
 };
 type OpenScriptInTabDebuggerRequest = {
-  type: 'OPEN_SCRIPT_IN_DEBUGGER',
-  tabId: number,
-  scriptUrl: string,
-  line: number | null,
-  column: number | null,
+  type: 'OPEN_SCRIPT_IN_DEBUGGER';
+  tabId: number;
+  scriptUrl: string;
+  line: number | null;
+  column: number | null;
 };
 
 export type MessageFromBrowser<R extends ResponseFromBrowser> =
@@ -71,20 +71,20 @@ export type MessageFromBrowser<R extends ResponseFromBrowser> =
   | SuccessResponseMessageFromBrowser<R>;
 
 type OutOfBandErrorMessageFromBrowser = {
-  errno: number,
-  error: string,
+  errno: number;
+  error: string;
 };
 
 type ErrorResponseMessageFromBrowser = {
-  type: 'ERROR_RESPONSE',
-  requestId: number,
-  error: string,
+  type: 'ERROR_RESPONSE';
+  requestId: number;
+  error: string;
 };
 
 type SuccessResponseMessageFromBrowser<R extends ResponseFromBrowser> = {
-  type: 'SUCCESS_RESPONSE',
-  requestId: number,
-  response: R,
+  type: 'SUCCESS_RESPONSE';
+  requestId: number;
+  response: R;
 };
 
 export type ResponseFromBrowser =
@@ -99,7 +99,7 @@ export type ResponseFromBrowser =
   | OpenScriptInTabDebuggerResponse;
 
 type StatusQueryResponse = {
-  menuButtonIsEnabled: boolean,
+  menuButtonIsEnabled: boolean;
   // The version indicates which message types are supported by the browser.
   // No version:
   //   Shipped in Firefox 76.
@@ -167,9 +167,7 @@ function _sendMessageWithResponse(
 function _sendMessageWithResponse(
   request: OpenScriptInTabDebuggerRequest
 ): Promise<OpenScriptInTabDebuggerResponse>;
-function _sendMessageWithResponse(
-  request: Request
-): Promise<any> {
+function _sendMessageWithResponse(request: Request): Promise<any> {
   const requestId = _requestId++;
   const type = request.type;
 
@@ -190,7 +188,10 @@ function _sendMessageWithResponse(
           message as MessageFromBrowser<ResponseFromBrowser>;
 
         if ('type' in messageFromBrowser && messageFromBrowser.type) {
-          if ('requestId' in messageFromBrowser && messageFromBrowser.requestId === requestId) {
+          if (
+            'requestId' in messageFromBrowser &&
+            messageFromBrowser.requestId === requestId
+          ) {
             if (process.env.NODE_ENV === 'development') {
               console.log(
                 `[webchannel] %creceived response to "${type}"`,
@@ -205,12 +206,23 @@ function _sendMessageWithResponse(
             );
 
             if (messageFromBrowser.type === 'SUCCESS_RESPONSE') {
-              resolve((messageFromBrowser as SuccessResponseMessageFromBrowser<ResponseFromBrowser>).response);
+              resolve(
+                (
+                  messageFromBrowser as SuccessResponseMessageFromBrowser<ResponseFromBrowser>
+                ).response
+              );
             } else {
-              reject(new Error((messageFromBrowser as ErrorResponseMessageFromBrowser).error));
+              reject(
+                new Error(
+                  (messageFromBrowser as ErrorResponseMessageFromBrowser).error
+                )
+              );
             }
           }
-        } else if ('error' in messageFromBrowser && typeof messageFromBrowser.error === 'string') {
+        } else if (
+          'error' in messageFromBrowser &&
+          typeof messageFromBrowser.error === 'string'
+        ) {
           // There was some kind of error with the message. This is expected for older
           // versions of Firefox that don't have this WebChannel set up yet, or
           // if the about:config preference points to a different URL.
@@ -223,7 +235,11 @@ function _sendMessageWithResponse(
             listener,
             true
           );
-          reject(new WebChannelError(messageFromBrowser as OutOfBandErrorMessageFromBrowser));
+          reject(
+            new WebChannelError(
+              messageFromBrowser as OutOfBandErrorMessageFromBrowser
+            )
+          );
         }
       } else {
         reject(new Error('A malformed WebChannel event was received.'));
@@ -239,9 +255,9 @@ function _sendMessageWithResponse(
 
     // Add the requestId to the message.
     _sendMessage({
-        requestId,
-        ...request,
-      } as MessageToBrowser);
+      requestId,
+      ...request,
+    } as MessageToBrowser);
   });
 }
 
@@ -392,7 +408,6 @@ export class WebChannelError extends Error {
     this.errno = rawError.errno;
   }
 }
-
 
 // This can be removed once the oldest supported Firefox ESR version is 93 or newer.
 function _fixupOldResponseMessageIfNeeded(message: MixedObject) {

@@ -25,7 +25,8 @@
       "Bash(yarn test:*)",
       "Bash(git checkout:*)",
       "Bash(yarn typecheck:strict)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(yarn lint-fix)"
     ],
     "deny": []
   }

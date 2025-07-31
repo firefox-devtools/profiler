@@ -202,24 +202,24 @@ export type SymbolicationStepCallback = (
 
 type ThreadLibSymbolicationInfo = {
   // The resourceIndex for this lib in this thread.
-  resourceIndex: IndexIntoResourceTable,
+  resourceIndex: IndexIntoResourceTable;
   // The libIndex for this lib in this thread.
-  libIndex: IndexIntoLibs,
+  libIndex: IndexIntoLibs;
   // The set of funcs for this lib in this thread.
-  allFuncsForThisLib: Set<IndexIntoFuncTable>,
+  allFuncsForThisLib: Set<IndexIntoFuncTable>;
   // The set of native symbols for this lib in this thread.
-  allNativeSymbolsForThisLib: Set<IndexIntoNativeSymbolTable>,
+  allNativeSymbolsForThisLib: Set<IndexIntoNativeSymbolTable>;
   // All frames for this lib in this thread.
-  allFramesForThisLib: Array<IndexIntoFrameTable>,
+  allFramesForThisLib: Array<IndexIntoFrameTable>;
   // All addresses for frames for this lib in this thread, as lib-relative offsets.
-  frameAddresses: Array<Address>,
+  frameAddresses: Array<Address>;
 };
 
 // This type exists because we symbolicate the profile in steps in order to
 // provide a profile to the user faster. This type represents a single step.
 export type SymbolicationStepInfo = {
-  threadLibSymbolicationInfo: ThreadLibSymbolicationInfo,
-  resultsForLib: Map<Address, AddressResult>,
+  threadLibSymbolicationInfo: ThreadLibSymbolicationInfo;
+  resultsForLib: Map<Address, AddressResult>;
 };
 
 export type FuncToFuncsMap = Map<IndexIntoFuncTable, IndexIntoFuncTable[]>;
@@ -477,7 +477,7 @@ export function applySymbolicationSteps(
   oldThread: RawThread,
   shared: RawProfileSharedData,
   symbolicationSteps: SymbolicationStepInfo[]
-): { thread: RawThread, oldFuncToNewFuncsMap: FuncToFuncsMap } {
+): { thread: RawThread; oldFuncToNewFuncsMap: FuncToFuncsMap } {
   const oldFuncToNewFuncsMap = new Map();
   const frameCount = oldThread.frameTable.length;
   const shouldStacksWithThisFrameBeRemoved = new Uint8Array(frameCount);

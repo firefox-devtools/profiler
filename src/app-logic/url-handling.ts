@@ -148,29 +148,29 @@ function getPathParts(urlState: UrlState): string[] {
 // "null | void" in the query objects are flags which map to true for null, and false
 // for void. False flags do not show up the URL.
 type BaseQuery = {
-  v: number,
-  globalTrackOrder: string, // "3201"
-  hiddenGlobalTracks: string, // "01"
-  hiddenLocalTracksByPid: string, // "1549-0w8~1593-23~1598-01~1602-02~1607-1"
-  localTrackOrderByPid: string, // "1549-780w6~1560-01"
-  tabID: TabID,
+  v: number;
+  globalTrackOrder: string; // "3201"
+  hiddenGlobalTracks: string; // "01"
+  hiddenLocalTracksByPid: string; // "1549-0w8~1593-23~1598-01~1602-02~1607-1"
+  localTrackOrderByPid: string; // "1549-780w6~1560-01"
+  tabID: TabID;
   // The following values are legacy, and will be converted to track-based values. These
   // value can't be upgraded using the typical URL upgrading process, as the full profile
   // must be fetched to compute the tracks.
-  threadOrder: string, // "3-2-0-1"
-  hiddenThreads: string, // "0-1"
-  range: string, //
-  thread: string, // "3"
-  file: string, // Path into a zip file.
-  transforms: string,
-  profiles: string[],
-  profileName: string,
-  symbolServer: string,
-  view: string,
-  implementation: string,
-  timelineType: string,
-  sourceView: string,
-  assemblyView: string,
+  threadOrder: string; // "3-2-0-1"
+  hiddenThreads: string; // "0-1"
+  range: string; //
+  thread: string; // "3"
+  file: string; // Path into a zip file.
+  transforms: string;
+  profiles: string[];
+  profileName: string;
+  symbolServer: string;
+  view: string;
+  implementation: string;
+  timelineType: string;
+  sourceView: string;
+  assemblyView: string;
 };
 
 type CallTreeQuery = BaseQuery & {
@@ -208,17 +208,17 @@ type Query = BaseQuery & {
   transforms?: string;
   sourceView?: string;
   assemblyView?: string;
-  
+
   // StackChart specific
   showUserTimings?: null | undefined;
   sameWidths?: null | undefined;
-  
+
   // Markers specific
   markerSearch?: string;
-  
+
   // Network specific
   networkSearch?: string;
-  
+
   // JsTracer specific
   summary?: null | undefined;
 };
@@ -267,7 +267,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
   const selectedThreadsKey =
     selectedThreads !== null ? getThreadsKey(selectedThreads) : null;
 
-  const baseQuery = ({
+  const baseQuery = {
     globalTrackOrder: convertGlobalTrackOrderToString(
       urlState.profileSpecific.globalTrackOrder
     ),
@@ -304,7 +304,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       urlState.profileSpecific.timelineType === 'cpu-category'
         ? undefined
         : urlState.profileSpecific.timelineType,
-  } as BaseQueryShape);
+  } as BaseQueryShape;
 
   // Depending on which panel is active, also show tab-specific query parameters.
   let query: QueryShape;
@@ -431,9 +431,9 @@ export function ensureIsValidDataSource(
  * so that it can be mocked in tests.
  */
 type Location = {
-  pathname: string,
-  search: string,
-  hash: string,
+  pathname: string;
+  search: string;
+  hash: string;
 };
 
 /**
@@ -722,9 +722,9 @@ export class UrlUpgradeError extends Error {
 }
 
 type ProcessedLocation = {
-  pathname: string,
-  hash: string,
-  query: Query,
+  pathname: string;
+  hash: string;
+  query: Query;
 };
 
 type ProcessedLocationBeforeUpgrade = ProcessedLocation & {
@@ -1011,7 +1011,9 @@ const _upgraders: {
     }
     if (query.thread) {
       const selectedThreads = new Set(query.thread.split(',').map((n) => +n));
-      query.thread = encodeUintSetForUrlComponent(selectedThreads as Set<number>);
+      query.thread = encodeUintSetForUrlComponent(
+        selectedThreads as Set<number>
+      );
     }
 
     // In this version, uintarray-encoding started supporting a range syntax:

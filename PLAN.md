@@ -19,7 +19,7 @@
 ```
 ✅ COMPLETED:
 - src/app-logic/web-channel.js → web-channel.ts
-- src/app-logic/url-handling.js → url-handling.ts  
+- src/app-logic/url-handling.js → url-handling.ts
 - src/profile-logic/symbolication.js → symbolication.ts
 - Fixed implicit any[] types in stack-timing.ts
 - Installed @types/common-tags
