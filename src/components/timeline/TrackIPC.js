@@ -17,22 +17,22 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackIPC.css';
 
-type OwnProps = {|
+type OwnProps = {
   +threadIndex: ThreadIndex,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   updatePreviewSelection: typeof updatePreviewSelection,
-|};
+};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-type State = {||};
+type State = {};
 
 /**
  * A component for showing IPC messages for a particular thread.

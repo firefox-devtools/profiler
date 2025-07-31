@@ -4,14 +4,14 @@
 
 // @flow
 
-type Size = {|
+type Size = {
   +width: number,
   +height: number,
   // offsetX and offsetY will define values for left/right/x/y/top/bottom,
   // taking into account width and height as well.
   +offsetX?: number,
   +offsetY?: number,
-|};
+};
 
 // This function returns an object suitable to be returned from
 // getBoundingClientRect. Generally you don't need to call it directly, but

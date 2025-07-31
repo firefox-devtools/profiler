@@ -8,10 +8,10 @@ import { findDOMNode } from 'react-dom';
 import type { CssPixels } from 'firefox-profiler/types';
 import { getResizeObserverWrapper } from 'firefox-profiler/utils/resize-observer-wrapper';
 
-type State = {|
+type State = {
   width: CssPixels,
   height: CssPixels,
-|};
+};
 
 export type SizeProps = $ReadOnly<State>;
 

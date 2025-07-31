@@ -18,19 +18,19 @@ import { addTransformToStack } from 'firefox-profiler/actions/profile-view';
 import type { ThreadsKey } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-type OwnProps = {|
+type OwnProps = {
   +onShow: () => void,
   +onHide: () => void,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +searchString: string,
   +threadsKey: ThreadsKey,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +addTransformToStack: typeof addTransformToStack,
-|};
+};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 

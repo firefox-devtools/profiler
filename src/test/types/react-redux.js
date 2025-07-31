@@ -31,23 +31,23 @@ const ANY_VALUE = (0: any);
  * that the react-redux system is working correctly.
  */
 
-type OwnProps = {|
+type OwnProps = {
   +ownPropString: string,
   +ownPropNumber: number,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +statePropString: string,
   +statePropNumber: number,
-|};
+};
 
 type ExampleActionCreator = (string) => Action;
 type ExampleThunkActionCreator = (string) => ThunkAction<number>;
 
-type DispatchProps = {|
+type DispatchProps = {
   +dispatchString: ExampleActionCreator,
   +dispatchThunk: ExampleThunkActionCreator,
-|};
+};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
@@ -80,10 +80,10 @@ const validMapStateToProps = (state, ownProps) => {
   };
 };
 
-declare var validDispatchToProps: {|
+declare var validDispatchToProps: {
   +dispatchString: (string) => Action,
   +dispatchThunk: (string) => ThunkAction<number>,
-|};
+};
 
 // This value also serves as a test for the common case of creating a component
 // with valid values.
@@ -99,19 +99,19 @@ const ConnectedExampleComponent = explicitConnect<
 
 {
   // Test that WrapDispatchProps modifies the ThunkActions.
-  const wrapped: WrapDispatchProps<DispatchProps> = (ANY_VALUE: {|
+  const wrapped: WrapDispatchProps<DispatchProps> = (ANY_VALUE: {
     +dispatchString: (string) => Action,
     +dispatchThunk: (string) => number,
-  |});
+  });
 }
 
 {
   // Test that the original unwrapped action creators do not work.
-  const wrapped: WrapDispatchProps<DispatchProps> = (ANY_VALUE: {|
+  const wrapped: WrapDispatchProps<DispatchProps> = (ANY_VALUE: {
     +dispatchString: (string) => Action,
     // $FlowExpectError
     +dispatchThunk: (string) => ThunkAction<number>,
-  |});
+  });
 }
 
 {
@@ -160,9 +160,9 @@ const ConnectedExampleComponent = explicitConnect<
   explicitConnect<OwnProps, StateProps, DispatchProps>({
     mapStateToProps: validMapStateToProps,
     // $FlowExpectError
-    mapDispatchToProps: (ANY_VALUE: {|
+    mapDispatchToProps: (ANY_VALUE: {
       +dispatchThunk: (string) => ThunkAction<number>,
-    |}),
+    }),
     component: ExampleComponent,
   });
 }
@@ -171,11 +171,11 @@ const ConnectedExampleComponent = explicitConnect<
   // Test that mapDispatchToProps will error if a variable type definition is wrong.
   explicitConnect<OwnProps, StateProps, DispatchProps>({
     mapStateToProps: validMapStateToProps,
-    mapDispatchToProps: (ANY_VALUE: {|
+    mapDispatchToProps: (ANY_VALUE: {
       // $FlowExpectError
       +dispatchString: (string) => string,
       +dispatchThunk: (string) => ThunkAction<number>,
-    |}),
+    }),
     component: ExampleComponent,
   });
 }
@@ -185,10 +185,10 @@ const ConnectedExampleComponent = explicitConnect<
   explicitConnect<OwnProps, StateProps, DispatchProps>({
     mapStateToProps: validMapStateToProps,
     // $FlowExpectError
-    mapDispatchToProps: (ANY_VALUE: {|
+    mapDispatchToProps: (ANY_VALUE: {
       ...typeof validDispatchToProps,
       +extraProperty: (string) => string,
-    |}),
+    }),
     component: ExampleComponent,
   });
 }

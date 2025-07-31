@@ -458,7 +458,7 @@ export const getGlobalTrackFromReference: DangerousSelectorWithArguments<
  * properly work with a PureComponent.
  */
 export const getGlobalTrackAndIndexByPid: DangerousSelectorWithArguments<
-  {| +globalTrackIndex: TrackIndex, +globalTrack: GlobalTrack |},
+  { +globalTrackIndex: TrackIndex, +globalTrack: GlobalTrack },
   Pid,
 > = (state, pid) => {
   const globalTracks = getGlobalTracks(state);

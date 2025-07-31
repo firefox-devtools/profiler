@@ -334,7 +334,7 @@ export function getGCSliceDetails(
   return details;
 }
 
-type PhaseTimeTuple = {| name: string, time: Microseconds |};
+type PhaseTimeTuple = { name: string, time: Microseconds };
 
 function _markerDetailPhase(p: PhaseTimeTuple) {
   return (
@@ -390,11 +390,11 @@ function _makePhaseTimesArray(
  * (self-time) is 180ms".
  */
 
-type PhaseTreeNode = {|
+type PhaseTreeNode = {
   value: PhaseTimeTuple,
   leaf: boolean,
   branches: Map<string, PhaseTreeNode>,
-|};
+};
 
 function _treeInsert(
   tree: Map<string, PhaseTreeNode>,

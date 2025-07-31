@@ -20,17 +20,17 @@ import './StackImplementationSetting.css';
 
 import type { ImplementationFilter } from 'firefox-profiler/types';
 
-type OwnProps = {|
+type OwnProps = {
   labelL10nId?: string,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +implementationFilter: ImplementationFilter,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +changeImplementationFilter: typeof changeImplementationFilter,
-|};
+};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 

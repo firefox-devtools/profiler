@@ -53,7 +53,7 @@ import type {
   CallTreeTimingsNonInverted,
 } from 'firefox-profiler/profile-logic/call-tree';
 
-export type OwnProps = {|
+export type OwnProps = {
   +thread: Thread,
   +weightType: WeightType,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
@@ -79,18 +79,18 @@ export type OwnProps = {|
   +unfilteredCtssSamples: SamplesLikeTable,
   +tracedTiming: CallTreeTimingsNonInverted | null,
   +displayStackType: boolean,
-|};
+};
 
-type Props = {|
+type Props = {
   ...OwnProps,
   // Bring in the viewport props from the higher order Viewport component.
   +viewport: Viewport,
-|};
+};
 
-type HoveredStackTiming = {|
+type HoveredStackTiming = {
   +depth: FlameGraphDepth,
   +flameGraphTimingIndex: IndexIntoFlameGraphTiming,
-|};
+};
 
 import './Canvas.css';
 

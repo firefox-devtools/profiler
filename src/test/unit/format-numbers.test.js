@@ -12,7 +12,7 @@ import {
   formatBytes,
   findRoundBytesValueGreaterOrEqualTo,
   findRoundMillisecondsValueGreaterOrEqualTo,
-} from 'firefox-profiler/utils/format-numbers.js';
+} from 'firefox-profiler/utils/format-numbers';
 
 describe('formatNumber', () => {
   it('return 0 without digits when called with 0', () => {

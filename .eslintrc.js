@@ -51,11 +51,6 @@ module.exports = {
     'react/no-unused-state': 'error',
     'react/jsx-no-bind': 'error',
     'react/jsx-no-leaked-render': 'error',
-    'flowtype/require-valid-file-annotation': [
-      'error',
-      'always',
-      { annotationStyle: 'line' },
-    ],
     // no-dupe-keys crashes with recent eslint. See
     // https://github.com/gajus/eslint-plugin-flowtype/pull/266 and
     // https://github.com/gajus/eslint-plugin-flowtype/pull/302
@@ -137,7 +132,7 @@ module.exports = {
           ['firefox-profiler', './src'],
           ['firefox-profiler-res', './res'],
         ],
-        extensions: ['.js', '.jpg'],
+        extensions: ['.js', '.ts', '.tsx', '.jpg'],
       },
     },
   },

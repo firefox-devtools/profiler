@@ -516,10 +516,10 @@ describe('MarkerChart', function () {
         fireFullClick(menuItem);
       }
 
-      function findFillTextPosition(fillText: string): {|
+      function findFillTextPosition(fillText: string): {
         x: number,
         y: number,
-      |} {
+      } {
         return findFillTextPositionFromDrawLog(drawLog, fillText);
       }
 

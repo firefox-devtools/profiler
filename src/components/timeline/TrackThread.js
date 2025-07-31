@@ -63,14 +63,14 @@ import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-type OwnProps = {|
+type OwnProps = {
   +threadsKey: ThreadsKey,
   +trackType: 'expanded' | 'condensed',
   +showMemoryMarkers?: boolean,
   +trackName: string,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +fullThread: Thread,
   +rangeFilteredThread: Thread,
   +filteredThread: Thread,
@@ -96,20 +96,20 @@ type StateProps = {|
   +callTreeVisible: boolean,
   +zeroAt: Milliseconds,
   +profileTimelineUnit: string,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +updatePreviewSelection: typeof updatePreviewSelection,
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +focusCallTree: typeof focusCallTree,
   +selectSelfCallNode: typeof selectSelfCallNode,
   +reportTrackThreadHeight: typeof reportTrackThreadHeight,
-|};
+};
 
-type Props = {|
+type Props = {
   ...SizeProps,
   ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
-|};
+};
 
 class TimelineTrackThreadImpl extends PureComponent<Props> {
   /**

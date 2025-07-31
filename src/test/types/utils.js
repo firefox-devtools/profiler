@@ -6,8 +6,8 @@
 
 import { coerce, coerceMatchingShape } from 'firefox-profiler/utils/flow';
 
-type CoerceA = {| startTime: number |};
-type CoerceB = {| startTime: number, endTime: number |};
+type CoerceA = { startTime: number };
+type CoerceB = { startTime: number, endTime: number };
 type CoerceC = number;
 
 const coerceA: CoerceA = { startTime: 0 };

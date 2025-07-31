@@ -39,31 +39,31 @@ import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 
-export type CallTreeTimingsNonInverted = {|
+export type CallTreeTimingsNonInverted = {
   callNodeHasChildren: Uint8Array,
   self: Float64Array,
   total: Float64Array,
   rootTotalSummary: number, // sum of absolute values, this is used for computing percentages
-|};
+};
 
-type TotalAndHasChildren = {| total: number, hasChildren: boolean |};
+type TotalAndHasChildren = { total: number, hasChildren: boolean };
 
-export type InvertedCallTreeRoot = {|
+export type InvertedCallTreeRoot = {
   totalAndHasChildren: TotalAndHasChildren,
   func: IndexIntoFuncTable,
-|};
+};
 
-export type CallTreeTimingsInverted = {|
+export type CallTreeTimingsInverted = {
   callNodeSelf: Float64Array,
   rootTotalSummary: number,
   sortedRoots: IndexIntoFuncTable[],
   totalPerRootFunc: Float64Array,
   hasChildrenPerRootFunc: Uint8Array,
-|};
+};
 
 export type CallTreeTimings =
-  | {| type: 'NON_INVERTED', timings: CallTreeTimingsNonInverted |}
-  | {| type: 'INVERTED', timings: CallTreeTimingsInverted |};
+  | { type: 'NON_INVERTED', timings: CallTreeTimingsNonInverted }
+  | { type: 'INVERTED', timings: CallTreeTimingsInverted };
 
 /**
  * Gets the CallTreeTimingsNonInverted out of a CallTreeTimings object.

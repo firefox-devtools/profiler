@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    // Target & Module System (Updated to 2025 standards)
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Node",
+
+    // Import/Export Compatibility (Simplifies conversion)
+    "allowJs": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "verbatimModuleSyntax": false, // Allow flexibility during migration
+
+    // Type Checking (Gradual strictness)
+    "strict": false, // Keep false during migration
+    "noImplicitReturns": true, // Helps catch Flow-style issues
+    "noFallthroughCasesInSwitch": false, // Disabled during Flow migration
+    "forceConsistentCasingInFileNames": true,
+
+    // Additional Helpful Options for Migration
+    "noImplicitOverride": true, // Modern TypeScript feature
+    "exactOptionalPropertyTypes": false, // Too strict for migration
+    "noUncheckedIndexedAccess": false, // Too strict for migration
+
+    // Build & Performance
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "listFiles": false,
+    "noEmit": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
+
+    // Module Resolution (Enhanced)
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": false, // Not needed for this migration
+    "baseUrl": ".",
+    "paths": {
+      "firefox-profiler/*": ["./src/*"]
+    },
+
+    // React & JSX
+    "jsx": "react-jsx"
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/global.d.ts"],
+  "exclude": ["node_modules", "dist", "src/types/libdef"]
+}

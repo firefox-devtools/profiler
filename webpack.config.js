@@ -27,6 +27,7 @@ const config = {
   },
   mode: process.env.NODE_ENV,
   resolve: {
+    extensions: ['.js', '.jsx', '.ts', '.tsx'],
     alias: {
       // Note: the alias for firefox-profiler is defined at the Babel level, so
       // that Jest can profit from it too.
@@ -40,6 +41,11 @@ const config = {
         test: /\.js$/,
         use: ['babel-loader'],
         include: includes.concat(es6modulePaths),
+      },
+      {
+        test: /\.(ts|tsx)$/,
+        use: ['babel-loader'],
+        include: includes,
       },
       {
         test: /\.json$/,

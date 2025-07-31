@@ -17,7 +17,7 @@ import type {
 } from 'firefox-profiler/types';
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
-type Props = {|
+type Props = {
   +className: string,
   +thread: Thread,
   +samplesSelectedStates: null | SelectedState[],
@@ -33,7 +33,7 @@ type Props = {|
   // Decide which way the stacks grow up from the floor, or down from the ceiling.
   +stacksGrowFromCeiling?: boolean,
   +trackName: string,
-|};
+};
 
 export class ThreadCPUGraph extends PureComponent<Props> {
   _heightFunction = (sampleIndex: IndexIntoSamplesTable): number | null => {

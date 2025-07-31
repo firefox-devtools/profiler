@@ -121,13 +121,13 @@ export function waitingForProfileFromBrowser(): Action {
  */
 export function loadProfile(
   profile: Profile,
-  config: $Shape<{|
+  config: $Shape<{
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
     browserConnection: BrowserConnection | null,
     skipSymbolication: boolean, // Please use this in tests only.
-  |}> = {},
+  }> = {},
   initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
   return async (dispatch) => {
@@ -400,13 +400,13 @@ export function resymbolicateProfile(): ThunkAction<Promise<void>> {
 // `loadProfile`) and wait until symbolication finishes.
 export function viewProfile(
   profile: Profile,
-  config: $Shape<{|
+  config: $Shape<{
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
     skipSymbolication: boolean,
     browserConnection: BrowserConnection | null,
-  |}> = {}
+  }> = {}
 ): ThunkAction<Promise<void>> {
   return async (dispatch) => {
     await dispatch(loadProfile(profile, config, false));
@@ -898,8 +898,8 @@ type FetchProfileArgs = {
 };
 
 type ProfileOrZip =
-  | {| responseType: 'PROFILE', profile: mixed |}
-  | {| responseType: 'ZIP', zip: JSZip |};
+  | { responseType: 'PROFILE', profile: mixed }
+  | { responseType: 'ZIP', zip: JSZip };
 
 /**
  * Tries to fetch a profile on `url`. If the profile is not found,

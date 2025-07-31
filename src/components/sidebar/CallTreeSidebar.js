@@ -45,13 +45,13 @@ import {
 } from 'firefox-profiler/utils/format-numbers';
 import classNames from 'classnames';
 
-type SidebarDetailProps = {|
+type SidebarDetailProps = {
   +label: React.Node,
   +color?: string,
   +indent?: boolean,
   +value: React.Node,
   +percentage?: string | number,
-|};
+};
 
 function SidebarDetail({
   label,
@@ -75,21 +75,21 @@ function SidebarDetail({
   );
 }
 
-type CategoryBreakdownOwnProps = {|
+type CategoryBreakdownOwnProps = {
   /** for total or self breakdown */
   +kind: 'total' | 'self',
   +breakdown: BreakdownByCategory,
   +categoryList: CategoryList,
   +number: (number) => string,
-|};
+};
 
-type CategoryBreakdownStateProps = {|
+type CategoryBreakdownStateProps = {
   +sidebarOpenCategories: Map<string, Set<IndexIntoCategoryList>>,
-|};
+};
 
-type CategoryBreakdownDispatchProps = {|
+type CategoryBreakdownDispatchProps = {
   +toggleOpenCategoryInSidebar: typeof toggleOpenCategoryInSidebar,
-|};
+};
 
 type CategoryBreakdownAllProps = ConnectedProps<
   CategoryBreakdownOwnProps,
@@ -212,7 +212,7 @@ export const CategoryBreakdown = explicitConnect<
   component: CategoryBreakdownImpl,
 });
 
-type StateProps = {|
+type StateProps = {
   +selectedNodeIndex: IndexIntoCallNodeTable | null,
   +selectedThreadsKey: ThreadsKey,
   +name: string,
@@ -221,15 +221,15 @@ type StateProps = {|
   +categoryList: CategoryList,
   +weightType: WeightType,
   +selectedNodeTracedSelfAndTotal: SelfAndTotal | null,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, {||}>;
+type Props = ConnectedProps<{}, StateProps, {}>;
 
-type WeightDetails = {|
+type WeightDetails = {
   +runningL10nId: string,
   +selfL10nId: string,
   +number: (n: number) => string,
-|};
+};
 
 function getRunningWeightTypeLabelL10nId(weightType: WeightType): string {
   switch (weightType) {
@@ -435,7 +435,7 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
   }
 }
 
-export const CallTreeSidebar = explicitConnect<{||}, StateProps, {||}>({
+export const CallTreeSidebar = explicitConnect<{}, StateProps, {}>({
   mapStateToProps: (state) => ({
     selectedNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(state),
     selectedThreadsKey: getSelectedThreadsKey(state),

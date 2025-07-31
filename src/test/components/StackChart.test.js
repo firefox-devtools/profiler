@@ -422,7 +422,7 @@ function setupCombinedTimings() {
   return results;
 }
 
-function setupUserTimings(config: {| isShowUserTimingsClicked: boolean |}) {
+function setupUserTimings(config: { isShowUserTimingsClicked: boolean }) {
   // Approximately generate this type of graph with the following user timings.
   //
   // [renderFunction---------------------]
@@ -533,7 +533,7 @@ function setup(store, funcNames: string[] = []) {
     return document.querySelector('#root-overlay .tooltip');
   }
 
-  type Position = {| x: CssPixels, y: CssPixels |};
+  type Position = { x: CssPixels, y: CssPixels };
 
   // Use findFillTextPosition to determin the position.
   function leftClick(where: Position) {

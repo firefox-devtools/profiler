@@ -41,15 +41,15 @@ function fewTimes(count: number) {
   }
 }
 
-type ProfileLoaderAnimationStateProps = {|
+type ProfileLoaderAnimationStateProps = {
   +view: AppViewState,
   +dataSource: DataSource,
-|};
+};
 
 type ProfileLoaderAnimationProps = ConnectedProps<
-  {||},
+  {},
   ProfileLoaderAnimationStateProps,
-  {||},
+  {},
 >;
 
 class ProfileLoaderAnimationImpl extends PureComponent<ProfileLoaderAnimationProps> {
@@ -94,9 +94,9 @@ class ProfileLoaderAnimationImpl extends PureComponent<ProfileLoaderAnimationPro
 }
 
 export const ProfileLoaderAnimation = explicitConnect<
-  {||},
+  {},
   ProfileLoaderAnimationStateProps,
-  {||},
+  {},
 >({
   mapStateToProps: (state: State) => ({
     view: getView(state),

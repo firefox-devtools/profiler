@@ -30,22 +30,22 @@ function _dragPreventDefault(event: DragEvent) {
   event.preventDefault();
 }
 
-type OwnProps = {|
+type OwnProps = {
   +className?: string,
   +children?: React.Node,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +isNewProfileLoadAllowed: boolean,
   +useDefaultOverlay: boolean,
   +browserConnection: BrowserConnection | null,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +retrieveProfileFromFile: typeof retrieveProfileFromFile,
   +startDragging: typeof startDragging,
   +stopDragging: typeof stopDragging,
-|};
+};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
@@ -212,17 +212,17 @@ export const DragAndDrop = explicitConnect<OwnProps, StateProps, DispatchProps>(
   }
 );
 
-type OverlayOwnProps = {|
+type OverlayOwnProps = {
   +isDefault?: boolean,
-|};
-type OverlayStateProps = {|
+};
+type OverlayStateProps = {
   +isDragging: boolean,
   +isNewProfileLoadAllowed: boolean,
-|};
-type OverlayDispatchProps = {|
+};
+type OverlayDispatchProps = {
   +registerDragAndDropOverlay: typeof registerDragAndDropOverlay,
   +unregisterDragAndDropOverlay: typeof unregisterDragAndDropOverlay,
-|};
+};
 type OverlayProps = ConnectedProps<
   OverlayOwnProps,
   OverlayStateProps,

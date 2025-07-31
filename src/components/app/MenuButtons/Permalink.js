@@ -12,19 +12,19 @@ import * as UrlUtils from 'firefox-profiler/utils/shorten-url';
 import './Permalink.css';
 import { Localized } from '@fluent/react';
 
-type Props = {|
+type Props = {
   +isNewlyPublished: boolean,
   // This is for injecting a URL shortener for tests. Normally we would use a Jest mock
   // that would mock out a local module, but I was having trouble getting it working
   // correctly (perhaps due to ES6 modules), so I just went with dependency injection
   // instead.
   +injectedUrlShortener?: typeof UrlUtils.shortenUrl | void,
-|};
+};
 
-type State = {|
+type State = {
   fullUrl: string,
   shortUrl: string,
-|};
+};
 
 export class MenuButtonsPermalink extends React.PureComponent<Props, State> {
   _permalinkTextField: HTMLInputElement | null;

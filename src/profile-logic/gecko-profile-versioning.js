@@ -936,7 +936,7 @@ const _upgraders = {
     //
     // It also removes the startTime and endTime from payloads, except for IPC and
     // Network markers.
-    type OldSchema = {| name: 0, time: 1, category: 2, data: 3 |};
+    type OldSchema = { name: 0, time: 1, category: 2, data: 3 };
     type Payload = $Shape<{
       startTime: number,
       endTime: number,
@@ -1051,10 +1051,10 @@ const _upgraders = {
 
     type ProfileV20 = {
       threads: Array<{
-        markers: {|
+        markers: {
           data: UnknownArityTuple[],
           schema: { name: number, startTime: number, data: number },
-        |},
+        },
         ...
       }>,
       processes: ProfileV20[],

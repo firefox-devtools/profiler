@@ -764,9 +764,9 @@ describe('app/MenuButtons', function () {
     });
 
     describe('symbolication', function () {
-      type SymbolicationTestConfig = $ReadOnly<{|
+      type SymbolicationTestConfig = $ReadOnly<{
         symbolicated: boolean,
-      |}>;
+      }>;
 
       async function setupSymbolicationTest(config: SymbolicationTestConfig) {
         const { profile } = getProfileFromTextSamples('A');

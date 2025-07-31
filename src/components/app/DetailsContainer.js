@@ -19,16 +19,16 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './DetailsContainer.css';
 
-type StateProps = {|
+type StateProps = {
   +selectedTab: TabSlug,
   +isSidebarOpen: boolean,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +invalidatePanelLayout: typeof invalidatePanelLayout,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 function DetailsContainerImpl({
   selectedTab,
@@ -50,11 +50,7 @@ function DetailsContainerImpl({
   );
 }
 
-export const DetailsContainer = explicitConnect<
-  {||},
-  StateProps,
-  DispatchProps,
->({
+export const DetailsContainer = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     selectedTab: getSelectedTab(state),
     isSidebarOpen: getIsSidebarOpen(state),

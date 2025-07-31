@@ -51,7 +51,7 @@ declare module "prettier" {
     options: Options
   ) => AST;
 
-  declare export type Options = {|
+  declare export type Options = {
     printWidth?: number,
     tabWidth?: number,
     useTabs?: boolean,
@@ -69,7 +69,7 @@ declare module "prettier" {
     insertPragma?: boolean,
     proseWrap?: "always" | "never" | "preserve",
     plugins?: Array<string | Plugin>
-  |};
+  };
 
   declare export type Plugin = {
     languages: SupportLanguage,
@@ -120,7 +120,7 @@ declare module "prettier" {
     ...
   };
 
-  declare export type CursorOptions = {|
+  declare export type CursorOptions = {
     cursorOffset: number,
     printWidth?: $PropertyType<Options, "printWidth">,
     tabWidth?: $PropertyType<Options, "tabWidth">,
@@ -137,18 +137,18 @@ declare module "prettier" {
     insertPragma?: $PropertyType<Options, "insertPragma">,
     proseWrap?: $PropertyType<Options, "proseWrap">,
     plugins?: $PropertyType<Options, "plugins">
-  |};
+  };
 
-  declare export type CursorResult = {|
+  declare export type CursorResult = {
     formatted: string,
     cursorOffset: number
-  |};
+  };
 
-  declare export type ResolveConfigOptions = {|
+  declare export type ResolveConfigOptions = {
     useCache?: boolean,
     config?: string,
     editorconfig?: boolean
-  |};
+  };
 
   declare export type SupportLanguage = {
     name: string,
@@ -167,7 +167,7 @@ declare module "prettier" {
     ...
   };
 
-  declare export type SupportOption = {|
+  declare export type SupportOption = {
     since: string,
     type: "int" | "boolean" | "choice" | "path",
     deprecated?: string,
@@ -177,35 +177,35 @@ declare module "prettier" {
     default: SupportOptionValue,
     range?: SupportOptionRange,
     choices?: SupportOptionChoice
-  |};
+  };
 
-  declare export type SupportOptionRedirect = {|
+  declare export type SupportOptionRedirect = {
     options: string,
     value: SupportOptionValue
-  |};
+  };
 
-  declare export type SupportOptionRange = {|
+  declare export type SupportOptionRange = {
     start: number,
     end: number,
     step: number
-  |};
+  };
 
-  declare export type SupportOptionChoice = {|
+  declare export type SupportOptionChoice = {
     value: boolean | string,
     description?: string,
     since?: string,
     deprecated?: string,
     redirect?: SupportOptionValue
-  |};
+  };
 
   declare export type SupportOptionValue = number | boolean | string;
 
-  declare export type SupportInfo = {|
+  declare export type SupportInfo = {
     languages: Array<SupportLanguage>,
     options: Array<SupportOption>
-  |};
+  };
 
-  declare export type Prettier = {|
+  declare export type Prettier = {
     format: (source: string, options?: Options) => string,
     check: (source: string, options?: Options) => boolean,
     formatWithCursor: (source: string, options: CursorOptions) => CursorResult,
@@ -215,7 +215,7 @@ declare module "prettier" {
     },
     clearConfigCache: () => void,
     getSupportInfo: (version?: string) => SupportInfo
-  |};
+  };
 
   declare export default Prettier;
 }

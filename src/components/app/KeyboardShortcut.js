@@ -10,17 +10,17 @@ import classNames from 'classnames';
 
 import './KeyboardShortcut.css';
 
-type Props = {|
+type Props = {
   +wrapperClassName: string,
   +children: React.Node,
-|};
+};
 
-type State = {|
+type State = {
   +isOpen: boolean,
   // The modal steals the focus of the screen. This is the element that was focused
   // before showing the modal. The focus will be restored once the modal is dismissed.
   +focusAfterClosed: HTMLElement | null,
-|};
+};
 
 /**
  * Display a list of shortcuts that overlays the screen.
@@ -256,11 +256,11 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
   }
 }
 
-type ShortcutProps = $ReadOnly<{|
+type ShortcutProps = $ReadOnly<{
   label: string,
   shortcut: string,
   macShortcut?: string,
-|}>;
+}>;
 
 function Shortcut(props: ShortcutProps) {
   let shortcut = props.shortcut;

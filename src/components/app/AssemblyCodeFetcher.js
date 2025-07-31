@@ -32,23 +32,23 @@ import type {
   NativeSymbolInfo,
 } from 'firefox-profiler/types';
 
-type StateProps = {|
+type StateProps = {
   +assemblyViewNativeSymbol: NativeSymbolInfo | null,
   +assemblyViewCode: AssemblyCodeStatus | void,
   +assemblyViewIsOpen: boolean,
   +symbolServerUrl: string,
   +profile: Profile | null,
   +browserConnection: BrowserConnection | null,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +beginLoadingAssemblyCodeFromUrl: typeof beginLoadingAssemblyCodeFromUrl,
   +beginLoadingAssemblyCodeFromBrowserConnection: typeof beginLoadingAssemblyCodeFromBrowserConnection,
   +finishLoadingAssemblyCode: typeof finishLoadingAssemblyCode,
   +failLoadingAssemblyCode: typeof failLoadingAssemblyCode,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class AssemblyCodeFetcherImpl extends React.PureComponent<Props> {
   componentDidMount() {
@@ -127,7 +127,7 @@ class AssemblyCodeFetcherImpl extends React.PureComponent<Props> {
 }
 
 export const AssemblyCodeFetcher = explicitConnect<
-  {||},
+  {},
   StateProps,
   DispatchProps,
 >({

@@ -57,15 +57,15 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import { isLocalURL } from 'firefox-profiler/utils/url';
 
-type OwnProps = {|
+type OwnProps = {
   // This is for injecting a URL shortener for tests. Normally we would use a Jest mock
   // that would mock out a local module, but I was having trouble getting it working
   // correctly (perhaps due to ES6 modules), so I just went with dependency injection
   // instead.
   injectedUrlShortener?: (string) => Promise<string>,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +rootRange: StartEndRange,
   +dataSource: DataSource,
   +profileUrl: string,
@@ -74,18 +74,18 @@ type StateProps = {|
   +hasPrePublishedState: boolean,
   +abortFunction: () => mixed,
   +currentProfileUploadedInformation: UploadedProfileInformation | null,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +dismissNewlyPublished: typeof dismissNewlyPublished,
   +revertToPrePublishedState: typeof revertToPrePublishedState,
   +profileRemotelyDeleted: typeof profileRemotelyDeleted,
-|};
+};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
-type State = $ReadOnly<{|
+type State = $ReadOnly<{
   metaInfoPanelState: 'initial' | 'delete-confirmation',
-|}>;
+}>;
 
 class MenuButtonsImpl extends React.PureComponent<Props, State> {
   state = { metaInfoPanelState: 'initial' };

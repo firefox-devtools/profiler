@@ -18,13 +18,13 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-type OwnProps = {||};
-type StateProps = {|
+type OwnProps = {};
+type StateProps = {
   +primaryLocale: string | null,
-|};
-type DispatchProps = {|
+};
+type DispatchProps = {
   requestL10n: typeof requestL10n,
-|};
+};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 class LanguageSwitcherImpl extends React.PureComponent<Props> {

@@ -33,7 +33,7 @@ import type {
   CpuRatioInTimeRange,
 } from './ActivityGraphFills';
 
-export type Props = {|
+export type Props = {
   +className: string,
   +trackName: string,
   +fullThread: Thread,
@@ -58,12 +58,12 @@ export type Props = {|
   +zeroAt: Milliseconds,
   +profileTimelineUnit: string,
   ...SizeProps,
-|};
+};
 
-export type HoveredPixelState = {|
+export type HoveredPixelState = {
   +sample: IndexIntoSamplesTable | null,
   +cpuRatioInTimeRange: CpuRatioInTimeRange | null,
-|};
+};
 
 type State = {
   hoveredPixelState: null | HoveredPixelState,

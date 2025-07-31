@@ -40,9 +40,9 @@ jest.mock('../../components/app/AppLocalizationProvider', () => ({
 }));
 
 describe('Root with history', function () {
-  type TestConfig = {|
+  type TestConfig = {
     profileHash?: string,
-  |};
+  };
 
   autoMockFullNavigation();
   autoMockCanvasContext();
@@ -75,10 +75,10 @@ describe('Root with history', function () {
     async function waitForTab({
       name,
       selected,
-    }: {|
+    }: {
       +name: string,
       +selected: boolean,
-    |}): Promise<HTMLElement> {
+    }): Promise<HTMLElement> {
       // This uses `findByText` instead of `findbyRole` because this is a lot
       // faster in our use case where there's a lot of DOM nodes.
       return screen.findByText(name, {

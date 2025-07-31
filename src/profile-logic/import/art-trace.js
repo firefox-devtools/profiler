@@ -163,19 +163,19 @@ class ByteReader {
   }
 }
 
-type ArtTraceThread = {|
+type ArtTraceThread = {
   tid: number,
   threadName: string,
-|};
+};
 
-export type ArtTraceMethod = {|
+export type ArtTraceMethod = {
   methodId: number,
   className: string,
   methodName: string,
   signature: string,
-|};
+};
 
-type ArtTrace = {|
+type ArtTrace = {
   summaryDetails: {
     clock: string,
     pid?: string,
@@ -183,14 +183,14 @@ type ArtTrace = {|
   startTimeInUsecSinceBoot: number,
   threads: ArtTraceThread[],
   methods: ArtTraceMethod[],
-  methodActions: {|
+  methodActions: {
     tid: number,
     methodId: number,
     globalTime: number,
     threadTime: number,
     action: 'enter' | 'exit' | 'exit-unroll',
-  |}[],
-|};
+  }[],
+};
 
 function detectArtTraceFormat(
   traceBuffer: ArrayBuffer

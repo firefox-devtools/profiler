@@ -55,7 +55,7 @@ import type {
 } from '../../profile-logic/stack-timing';
 import type { WrapFunctionInDispatch } from '../../utils/connect';
 
-type OwnProps = {|
+type OwnProps = {
   +thread: Thread,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +threadsKey: ThreadsKey,
@@ -81,17 +81,17 @@ type OwnProps = {|
   +marginLeft: CssPixels,
   +displayStackType: boolean,
   +useStackChartSameWidths: boolean,
-|};
+};
 
-type Props = $ReadOnly<{|
+type Props = $ReadOnly<{
   ...OwnProps,
   +viewport: Viewport,
-|}>;
+}>;
 
-type HoveredStackTiming = {|
+type HoveredStackTiming = {
   +depth: StackTimingDepth,
   +stackTimingIndex: IndexIntoStackTiming,
-|};
+};
 
 import './Canvas.css';
 
@@ -641,7 +641,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
   _getCallNodeIndexOrMarkerIndexFromHoveredItem(
     hoveredItem: HoveredStackTiming | null
-  ): {| index: number, type: 'marker' | 'call-node' |} | null {
+  ): { index: number, type: 'marker' | 'call-node' } | null {
     if (hoveredItem === null) {
       return null;
     }

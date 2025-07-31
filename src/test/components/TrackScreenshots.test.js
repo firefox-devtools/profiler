@@ -362,10 +362,10 @@ function setup(
     return parseInt(screenshotHover().style.top);
   }
 
-  function moveMouseAndGetImageSize(pageX: number): {|
+  function moveMouseAndGetImageSize(pageX: number): {
     width: number,
     height: number,
-  |} {
+  } {
     moveMouse(pageX);
     const style = screenshotHoverImage().style;
     return {

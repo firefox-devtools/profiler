@@ -33,30 +33,30 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import './TrackScreenshots.css';
 
-type OwnProps = {|
+type OwnProps = {
   +threadIndex: ThreadIndex,
   +windowId: string,
-|};
-type StateProps = {|
+};
+type StateProps = {
   +thread: Thread,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +screenshots: Marker[],
   +threadName: string,
   +isMakingPreviewSelection: boolean,
-|};
-type DispatchProps = {|
+};
+type DispatchProps = {
   +updatePreviewSelection: typeof updatePreviewSelection,
-|};
-type Props = {|
+};
+type Props = {
   ...SizeProps,
   ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
-|};
-type State = {|
+};
+type State = {
   offsetX: null | number,
   pageX: null | number,
   containerTop: null | number,
-|};
+};
 
 class Screenshots extends PureComponent<Props, State> {
   state = {
@@ -214,7 +214,7 @@ export const TimelineTrackScreenshots = explicitConnect<
   component: withSize<Props>(Screenshots),
 });
 
-type HoverPreviewProps = {|
+type HoverPreviewProps = {
   +thread: Thread,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
@@ -225,7 +225,7 @@ type HoverPreviewProps = {|
   +width: number,
   +trackHeight: number,
   +payload: ScreenshotPayload,
-|};
+};
 
 const MAXIMUM_HOVER_SIZE = 350;
 const MAXIMUM_HOVER_SIZE_WHEN_SELECTING_RANGE = 100;
@@ -309,14 +309,14 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
   }
 }
 
-type ScreenshotStripProps = {|
+type ScreenshotStripProps = {
   +thread: Thread,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +screenshots: Marker[],
   +width: number,
   +trackHeight: number,
-|};
+};
 
 class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
   render() {

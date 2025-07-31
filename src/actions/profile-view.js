@@ -223,7 +223,7 @@ export function changeSelectedThreads(
 
 // This structure contains information needed to find the selected track from a
 // track reference.
-type TrackInformation = {|
+type TrackInformation = {
   type: 'global' | 'local',
   // This is the thread index for this specific track reference. This is null if
   // this track isn't a thread track.
@@ -243,7 +243,7 @@ type TrackInformation = {|
   // This is the track reference that was passed to
   // getInformationFromTrackReference to generate this structure.
   trackReference: TrackReference,
-|};
+};
 
 /**
  * This function collects some information about a track by requesting

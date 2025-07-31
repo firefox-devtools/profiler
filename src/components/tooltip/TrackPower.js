@@ -32,19 +32,19 @@ import type {
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-type OwnProps = {|
+type OwnProps = {
   counter: Counter,
   counterSampleIndex: number,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   interval: Milliseconds,
   meta: ProfileMeta,
   committedRange: StartEndRange,
   previewSelection: PreviewSelection,
-|};
+};
 
-type Props = ConnectedProps<OwnProps, StateProps, {||}>;
+type Props = ConnectedProps<OwnProps, StateProps, {}>;
 
 class TooltipTrackPowerImpl extends React.PureComponent<Props> {
   // This compute the sum of the power in the range. This returns a value in Wh.
@@ -209,7 +209,7 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
   }
 }
 
-export const TooltipTrackPower = explicitConnect<OwnProps, StateProps, {||}>({
+export const TooltipTrackPower = explicitConnect<OwnProps, StateProps, {}>({
   mapStateToProps: (state) => ({
     interval: getProfileInterval(state),
     meta: getMeta(state),

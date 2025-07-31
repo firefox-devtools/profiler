@@ -39,14 +39,14 @@ export type SymbolTableAsTuple = [
   Uint8Array, // buffer
 ];
 
-type SymbolItem = {|
+type SymbolItem = {
   debugName: string,
   breakpadId: string,
   addrs: Uint32Array,
   index: Uint32Array,
   buffer: Uint8Array,
   lastUsedDate: Date,
-|};
+};
 
 type SymbolPrimaryKey = [string, string];
 type SymbolDateKey = $PropertyType<SymbolItem, 'lastUsedDate'>;

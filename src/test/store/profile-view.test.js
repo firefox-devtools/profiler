@@ -3347,7 +3347,7 @@ describe('traced timing', function () {
     {
       inverted,
       previewSelection,
-    }: {| inverted: boolean, previewSelection?: StartEndRange |},
+    }: { inverted: boolean, previewSelection?: StartEndRange },
     textSamples: string
   ) {
     const { profile, funcNamesDictPerThread } =

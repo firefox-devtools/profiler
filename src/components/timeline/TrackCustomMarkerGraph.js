@@ -47,7 +47,7 @@ import './TrackCustomMarker.css';
 /**
  * When adding properties to these props, please consider the comment above the component.
  */
-type CanvasProps = {|
+type CanvasProps = {
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +markerSchema: MarkerSchema,
@@ -56,7 +56,7 @@ type CanvasProps = {|
   +width: CssPixels,
   +height: CssPixels,
   +getMarker: (MarkerIndex) => Marker,
-|};
+};
 
 function _calculateUnitValue(
   type: MarkerGraphType,
@@ -91,7 +91,7 @@ function _calculateUnitValue(
 class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
   _canvas: null | HTMLCanvasElement = null;
   _requestedAnimationFrame: boolean = false;
-  _canvasState: {| renderScheduled: boolean, inView: boolean |} = {
+  _canvasState: { renderScheduled: boolean, inView: boolean } = {
     renderScheduled: false,
     inView: false,
   };
@@ -326,33 +326,33 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
   }
 }
 
-type OwnProps = {|
+type OwnProps = {
   +threadIndex: ThreadIndex,
   +markerSchema: MarkerSchema,
   +markerName: IndexIntoStringTable,
   +graphHeight: CssPixels,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +markerSampleRanges: [IndexIntoSamplesTable, IndexIntoSamplesTable],
   +collectedSamples: CollectedCustomMarkerSamples,
   +getMarker: (MarkerIndex) => Marker,
-|};
+};
 
-type DispatchProps = {||};
+type DispatchProps = {};
 
-type Props = {|
+type Props = {
   ...SizeProps,
   ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
-|};
+};
 
-type State = {|
+type State = {
   hoveredCounter: null | number,
   mouseX: CssPixels,
   mouseY: CssPixels,
-|};
+};
 
 /**
  * The marker track graph takes information from markers, and renders it as a

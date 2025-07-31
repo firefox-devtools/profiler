@@ -222,7 +222,7 @@ type EnzymeMatchersType = {
   toIncludeText(text: string): void,
   toMatchElement(
     element: React$Element<any>,
-    options?: {| ignoreProps?: boolean, verbose?: boolean |}
+    options?: { ignoreProps?: boolean, verbose?: boolean }
   ): void,
   toMatchSelector(selector: string): void,
   // 7.x
@@ -257,7 +257,7 @@ type DomTestingLibraryType = {
   toHaveStyle(css: string | { [name: string]: any, ... }): void,
   toHaveTextContent(
     text: string | RegExp,
-    options?: {| normalizeWhitespace: boolean |}
+    options?: { normalizeWhitespace: boolean }
   ): void,
   toHaveValue(value?: string | string[] | number): void,
 
@@ -693,14 +693,14 @@ type SnapshotDiffType = {
    */
   toMatchDiffSnapshot(
     valueB: any,
-    options?: {|
+    options?: {
       expand?: boolean,
       colors?: boolean,
       contextLines?: number,
       stablePatchmarks?: boolean,
       aAnnotation?: string,
       bAnnotation?: string,
-    |},
+    },
     testName?: string
   ): void,
   ...
@@ -1075,10 +1075,10 @@ type JestObjectType = {
 
 type JestSpyType = { calls: JestCallsType, ... };
 
-type JestDoneFn = {|
+type JestDoneFn = {
   (error?: Error): void,
   fail: (error: Error) => void,
-|};
+};
 
 /** Runs this function after every test inside this context */
 declare function afterEach(
@@ -1151,7 +1151,7 @@ declare var it: {
    * @param {Function} Test
    * @param {number} Timeout for the test, in milliseconds.
    */
-  only: {|
+  only: {
     (
       name: JestTestName,
       fn?: (done: JestDoneFn) => ?Promise<mixed>,
@@ -1164,7 +1164,7 @@ declare var it: {
       fn?: (...args: Array<any>) => ?Promise<mixed>,
       timeout?: number
     ) => void,
-  |},
+  },
   /**
    * Skip running this test
    *
@@ -1258,7 +1258,7 @@ type JestPrettyFormatColors = {
 type JestPrettyFormatIndent = (string) => string;
 type JestPrettyFormatPrint = (any) => string;
 
-type JestPrettyFormatOptions = {|
+type JestPrettyFormatOptions = {
   callToJSON: boolean,
   edgeSpacing: string,
   escapeRegex: boolean,
@@ -1269,14 +1269,14 @@ type JestPrettyFormatOptions = {|
   plugins: JestPrettyFormatPlugins,
   printFunctionName: boolean,
   spacing: string,
-  theme: {|
+  theme: {
     comment: string,
     content: string,
     prop: string,
     tag: string,
     value: string,
-  |},
-|};
+  },
+};
 
 type JestPrettyFormatPlugin = {
   print: (

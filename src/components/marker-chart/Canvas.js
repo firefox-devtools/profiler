@@ -41,16 +41,16 @@ import type {
 
 import type { WrapFunctionInDispatch } from 'firefox-profiler/utils/connect';
 
-type MarkerDrawingInformation = {|
+type MarkerDrawingInformation = {
   +x: CssPixels,
   +y: CssPixels,
   +w: CssPixels,
   +h: CssPixels,
   +isInstantMarker: boolean,
   +markerIndex: MarkerIndex,
-|};
+};
 
-type OwnProps = {|
+type OwnProps = {
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +markerTimingAndBuckets: MarkerTimingAndBuckets,
@@ -68,13 +68,13 @@ type OwnProps = {|
   +selectedMarkerIndex: MarkerIndex | null,
   +rightClickedMarkerIndex: MarkerIndex | null,
   +shouldDisplayTooltips: () => boolean,
-|};
+};
 
-type Props = {|
+type Props = {
   ...OwnProps,
   // Bring in the viewport props from the higher order Viewport component.
   +viewport: Viewport,
-|};
+};
 
 const TEXT_OFFSET_TOP = 11;
 const TEXT_OFFSET_START = 3;

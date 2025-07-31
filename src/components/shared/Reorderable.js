@@ -14,7 +14,7 @@ import {
 } from 'firefox-profiler/utils/css-geometry-tools';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 
-type Props = {|
+type Props = {
   orient: 'horizontal' | 'vertical',
   tagName: string,
   className: string,
@@ -30,9 +30,9 @@ type Props = {|
   // If present, this will be attached to the container added for these
   // children. As a reminder, the container will use the tagName defined above.
   innerElementRef?: React.Ref<any>,
-|};
+};
 
-type State = {|
+type State = {
   phase: 'RESTING' | 'FINISHING' | 'MANIPULATING',
   manipulatingIndex: number,
   destinationIndex: number,
@@ -40,19 +40,19 @@ type State = {|
   adjustPrecedingBy: number,
   adjustSucceedingBy: number,
   finalOffset: number,
-|};
+};
 
-type XY = {|
+type XY = {
   pageXY: 'pageX' | 'pageY',
   translateXY: 'translateX' | 'translateY',
   lefttop: 'left' | 'top',
   rightbottom: 'right' | 'bottom',
-|};
+};
 
 type EventWithPageProperties = { pageX: number, pageY: number };
 
 export class Reorderable extends React.PureComponent<Props, State> {
-  _xy: {| horizontal: XY, vertical: XY |} = {
+  _xy: { horizontal: XY, vertical: XY } = {
     horizontal: {
       pageXY: 'pageX',
       translateXY: 'translateX',

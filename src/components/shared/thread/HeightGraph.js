@@ -20,7 +20,7 @@ import type {
   SelectedState,
 } from 'firefox-profiler/types';
 
-type Props = {|
+type Props = {
   +heightFunc: (IndexIntoSamplesTable) => number | null,
   +maxValue: number,
   +className: string,
@@ -37,7 +37,7 @@ type Props = {|
   // Decide which way the stacks grow up from the floor, or down from the ceiling.
   +stacksGrowFromCeiling?: boolean,
   +trackName: string,
-|};
+};
 
 export class ThreadHeightGraph extends PureComponent<Props> {
   _canvas: null | HTMLCanvasElement = null;

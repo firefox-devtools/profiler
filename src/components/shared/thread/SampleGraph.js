@@ -32,12 +32,12 @@ import type {
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type { CpuRatioInTimeRange } from './ActivityGraphFills';
 
-export type HoveredPixelState = {|
+export type HoveredPixelState = {
   +sample: IndexIntoSamplesTable | null,
   +cpuRatioInTimeRange: CpuRatioInTimeRange | null,
-|};
+};
 
-type Props = {|
+type Props = {
   +className: string,
   +thread: Thread,
   +samplesSelectedStates: null | SelectedState[],
@@ -55,7 +55,7 @@ type Props = {|
   +zeroAt: Milliseconds,
   +profileTimelineUnit: string,
   ...SizeProps,
-|};
+};
 
 type State = {
   hoveredPixelState: null | HoveredPixelState,
@@ -63,7 +63,7 @@ type State = {
   mouseY: CssPixels,
 };
 
-type CanvasProps = {|
+type CanvasProps = {
   +className: string,
   +thread: Thread,
   +samplesSelectedStates: null | SelectedState[],
@@ -73,7 +73,7 @@ type CanvasProps = {|
   +categories: CategoryList,
   +trackName: string,
   ...SizeProps,
-|};
+};
 
 /**
  * This component controls the rendering of the canvas. Every render call through
@@ -84,7 +84,7 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
   _canvas: null | HTMLCanvasElement = null;
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) =>
     (this._canvas = canvas);
-  _canvasState: {| renderScheduled: boolean, inView: boolean |} = {
+  _canvasState: { renderScheduled: boolean, inView: boolean } = {
     renderScheduled: false,
     inView: false,
   };

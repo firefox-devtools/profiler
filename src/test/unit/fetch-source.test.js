@@ -15,7 +15,7 @@ describe('fetchSource', function () {
         null,
         new Map(),
         {
-          fetchUrlResponse: async (url: string, _postData?: MixedObject) => {
+          fetchUrlResponse: async (url: string, _postData?: string) => {
             const r = new Response(`Fake response from ${url}`, {
               status: 200,
             });
@@ -38,7 +38,7 @@ describe('fetchSource', function () {
 
   it('fetches archives', async function () {
     const fetchUrlResponse = jest.fn(
-      async (_url: string, _postData?: MixedObject) => {
+      async (_url: string, _postData?: string) => {
         // Return an array buffer with .tar.gz bytes for an archive with the following contents:
         // - addr2line-0.17.0 (directory)
         //   - src (directory)
@@ -135,7 +135,7 @@ describe('fetchSource', function () {
         null,
         new Map(),
         {
-          fetchUrlResponse: async (_url: string, _postData?: MixedObject) => {
+          fetchUrlResponse: async (_url: string, _postData?: string) => {
             throw new Error('Some network error');
           },
           queryBrowserSymbolicationApi: async (
@@ -171,7 +171,7 @@ describe('fetchSource', function () {
         },
         new Map(),
         {
-          fetchUrlResponse: async (_url: string, _postData?: MixedObject) => {
+          fetchUrlResponse: async (_url: string, _postData?: string) => {
             throw new Error('Some network error');
           },
           queryBrowserSymbolicationApi: async (
@@ -209,7 +209,7 @@ describe('fetchSource', function () {
         },
         new Map(),
         {
-          fetchUrlResponse: async (url: string, postData?: MixedObject) => {
+          fetchUrlResponse: async (url: string, postData?: string) => {
             if (url === 'http://127.0.0.1:3000/source/v1') {
               if (!postData) {
                 throw new Error('Expected post data');
@@ -259,7 +259,7 @@ describe('fetchSource', function () {
         },
         new Map(),
         {
-          fetchUrlResponse: async (url: string, postData?: MixedObject) => {
+          fetchUrlResponse: async (url: string, postData?: string) => {
             if (url === 'http://127.0.0.1:3001/source/v1') {
               if (!postData) {
                 throw new Error('Expected post data');
@@ -309,7 +309,7 @@ describe('fetchSource', function () {
         },
         new Map(),
         {
-          fetchUrlResponse: async (url: string, postData?: MixedObject) => {
+          fetchUrlResponse: async (url: string, postData?: string) => {
             if (url === 'http://127.0.0.1:3002/source/v1') {
               if (!postData) {
                 throw new Error('Expected post data');
@@ -357,7 +357,7 @@ describe('fetchSource', function () {
         },
         new Map(),
         {
-          fetchUrlResponse: async (_url: string, _postData?: MixedObject) => {
+          fetchUrlResponse: async (_url: string, _postData?: string) => {
             throw new Error('Some network error');
           },
           queryBrowserSymbolicationApi: async (
@@ -426,7 +426,7 @@ describe('fetchSource', function () {
         },
         new Map(),
         {
-          fetchUrlResponse: async (_url: string, _postData?: MixedObject) => {
+          fetchUrlResponse: async (_url: string, _postData?: string) => {
             throw new Error('Some network error');
           },
           queryBrowserSymbolicationApi: async (
@@ -466,7 +466,7 @@ describe('fetchSource', function () {
         },
         new Map(),
         {
-          fetchUrlResponse: async (_url: string, _postData?: MixedObject) => {
+          fetchUrlResponse: async (_url: string, _postData?: string) => {
             throw new Error('Some network error');
           },
           queryBrowserSymbolicationApi: async (

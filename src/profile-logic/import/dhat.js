@@ -28,7 +28,7 @@ import { coerce, ensureExists } from 'firefox-profiler/utils/flow';
  * git clone git://sourceware.org/git/valgrind.git
  * dhat/dh_main.c
  */
-type DhatJson = $ReadOnly<{|
+type DhatJson = $ReadOnly<{
   // Version number of the format. Incremented on each
   // backwards-incompatible change. A mandatory integer.
   dhatFileVersion: 2,
@@ -89,9 +89,9 @@ type DhatJson = $ReadOnly<{|
   //   '0x4A9A2BE: _nl_find_locale (findlocale.c:153)'
   // ],
   ftbl: string[],
-|}>;
+}>;
 
-type ProgramPoint = $ReadOnly<{|
+type ProgramPoint = $ReadOnly<{
   // Total bytes and blocks. Mandatory integers.
   tb: Bytes,
   tbk: Blocks,
@@ -139,7 +139,7 @@ type ProgramPoint = $ReadOnly<{|
   // The array is ordered from leaf to root.
   // - All modes: A mandatory array of integers.
   fs: IndexIntoDhatFrames[],
-|}>;
+}>;
 
 // All units of time are in instruction counts.
 // Per: https://valgrind.org/docs/manual/dh-manual.html

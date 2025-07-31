@@ -7,6 +7,9 @@ module.exports = {
   name: 'symbolicator-cli',
   target: 'node',
   mode: process.env.NODE_ENV,
+  resolve: {
+    extensions: ['.js', '.jsx', '.ts', '.tsx'],
+  },
   output: {
     path: path.resolve(projectRoot, 'dist'),
     filename: 'symbolicator-cli.js',
@@ -16,6 +19,11 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
+        use: ['babel-loader'],
+        include: includes,
+      },
+      {
+        test: /\.(ts|tsx)$/,
         use: ['babel-loader'],
         include: includes,
       },

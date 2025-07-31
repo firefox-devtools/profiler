@@ -8,21 +8,21 @@ import { Localized } from '@fluent/react';
 import { reportError } from 'firefox-profiler/utils/analytics';
 import './ErrorBoundary.css';
 
-type State = {|
+type State = {
   hasError: boolean,
   errorString: string | null,
-|};
+};
 
-type ExternalProps = {|
+type ExternalProps = {
   +children: React.Node,
   +message: string,
-|};
+};
 
-type InternalProps = {|
+type InternalProps = {
   ...ExternalProps,
   buttonContent: React.Node,
   reportExplanationMessage: React.Node,
-|};
+};
 
 /**
  * This component will catch errors in components, and display a more friendly error

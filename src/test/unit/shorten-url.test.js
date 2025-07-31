@@ -11,10 +11,10 @@ import { shortenUrl, expandUrl } from 'firefox-profiler/utils/shorten-url';
 function mockFetchForBitly({
   endpointUrl,
   responseFromRequestPayload,
-}: {|
+}: {
   endpointUrl: string,
   responseFromRequestPayload: (any) => any,
-|}) {
+}) {
   window.fetchMock
     .catch(404) // catch all
     .route(endpointUrl, async ({ options }) => {

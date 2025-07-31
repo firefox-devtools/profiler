@@ -14,13 +14,13 @@ import explicitConnect, {
 
 import type { Thread, State } from 'firefox-profiler/types';
 
-type StateProps = {|
+type StateProps = {
   threadName: string,
   rangeFilteredThread: Thread,
   thread: Thread,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, {||}>;
+type Props = ConnectedProps<{}, StateProps, {}>;
 
 /**
  * This component attempts to tell why exactly a flame graph is empty with no samples
@@ -52,7 +52,7 @@ class FlameGraphEmptyReasonsImpl extends PureComponent<Props> {
   }
 }
 
-export const FlameGraphEmptyReasons = explicitConnect<{||}, StateProps, {||}>({
+export const FlameGraphEmptyReasons = explicitConnect<{}, StateProps, {}>({
   mapStateToProps: (state: State) => ({
     threadName: selectedThreadSelectors.getFriendlyThreadName(state),
     thread: selectedThreadSelectors.getThread(state),

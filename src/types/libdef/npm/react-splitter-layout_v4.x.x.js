@@ -1,4 +1,4 @@
-declare type $$reactsplitterlayout$$Props = {|
+declare type $$reactsplitterlayout$$Props = {
   +customClassName?: string,
   +vertical?: boolean,
   +percentage?: boolean,
@@ -10,7 +10,7 @@ declare type $$reactsplitterlayout$$Props = {|
   +onDragEnd?: () => mixed,
   +onSecondaryPaneSizeChange?: number => mixed,
   +children: React$Node,
-|};
+};
 
 declare module 'react-splitter-layout' {
   declare export default React$ComponentType<$$reactsplitterlayout$$Props>

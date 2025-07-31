@@ -47,13 +47,13 @@ function TooltipCallNodeMeter({
   value,
   color,
   ariaLabel,
-}: {|
+}: {
   additionalClassName: string,
   max: number,
   value: number,
   color?: string,
   ariaLabel: string,
-|}) {
+}) {
   const widthPercent = (value / max) * 100 + '%';
   const barColor = color ? `var(--category-color-${color})` : 'var(--blue-40)';
   return (
@@ -82,14 +82,14 @@ function TooltipCallNodeTotalSelfMeters({
   total,
   color,
   labelQualifier,
-}: {|
+}: {
   isHeader: boolean,
   max: number,
   self: number,
   total: number,
   color?: string,
   labelQualifier: string,
-|}) {
+}) {
   return (
     <div
       className={classNames('tooltipCallNodeGraph', {
@@ -114,7 +114,7 @@ function TooltipCallNodeTotalSelfMeters({
   );
 }
 
-type Props = {|
+type Props = {
   +thread: Thread,
   +weightType: WeightType,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
@@ -129,7 +129,7 @@ type Props = {|
   +timings?: TimingsForPath,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +displayStackType: boolean,
-|};
+};
 
 /**
  * This class collects the tooltip rendering for anything that cares about call nodes.

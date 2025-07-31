@@ -29,7 +29,7 @@ import './TrackEventDelay.css';
 /**
  * When adding properties to these props, please consider the comment above the component.
  */
-type CanvasProps = {|
+type CanvasProps = {
   +thread: Thread,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
@@ -38,7 +38,7 @@ type CanvasProps = {|
   +height: CssPixels,
   +lineWidth: CssPixels,
   +eventDelays: EventDelayInfo,
-|};
+};
 
 /**
  * This component controls the rendering of the canvas. Every render call through
@@ -168,13 +168,13 @@ class TrackEventDelayCanvas extends React.PureComponent<CanvasProps> {
   }
 }
 
-type OwnProps = {|
+type OwnProps = {
   +threadIndex: ThreadIndex,
   +lineWidth: CssPixels,
   +graphHeight: CssPixels,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +threadIndex: ThreadIndex,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
@@ -183,20 +183,20 @@ type StateProps = {|
   +filteredThread: Thread,
   +unfilteredSamplesRange: StartEndRange | null,
   +eventDelays: EventDelayInfo,
-|};
+};
 
-type DispatchProps = {||};
+type DispatchProps = {};
 
-type Props = {|
+type Props = {
   ...SizeProps,
   ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
-|};
+};
 
-type State = {|
+type State = {
   hoveredDelay: null | number,
   mouseX: CssPixels,
   mouseY: CssPixels,
-|};
+};
 
 /**
  *

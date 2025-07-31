@@ -48,11 +48,11 @@ import type {
 import './Publish.css';
 import { Localized } from '@fluent/react';
 
-type OwnProps = {|
+type OwnProps = {
   +isRepublish?: boolean,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +profile: Profile,
   +rootRange: StartEndRange,
   +shouldShowPreferenceOption: boolean,
@@ -66,19 +66,19 @@ type StateProps = {|
   +shouldSanitizeByDefault: boolean,
   +uploadError: mixed,
   +abortFunction: () => mixed,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +toggleCheckedSharingOptions: typeof toggleCheckedSharingOptions,
   +attemptToPublish: typeof attemptToPublish,
   +resetUploadState: typeof resetUploadState,
-|};
+};
 
 type PublishProps = ConnectedProps<OwnProps, StateProps, DispatchProps>;
-type PublishState = {|
+type PublishState = {
   compressError: Error | string | null,
   prevCompressedPromise: Promise<Uint8Array> | null,
-|};
+};
 
 class MenuButtonsPublishImpl extends React.PureComponent<
   PublishProps,
@@ -406,17 +406,17 @@ export const MenuButtonsPublish = explicitConnect<
   component: MenuButtonsPublishImpl,
 });
 
-type DownloadButtonProps = {|
+type DownloadButtonProps = {
   +sanitizedProfileDataPromise: Promise<Uint8Array>,
   +downloadFileName: string,
   +onCompressError: (Error | string) => mixed,
-|};
+};
 
-type DownloadButtonState = {|
+type DownloadButtonState = {
   sanitizedProfileData: Uint8Array | null,
   prevPromise: Promise<Uint8Array> | null,
   error: Error | string | null,
-|};
+};
 
 /**
  * The DownloadButton handles unpacking the compressed profile promise.

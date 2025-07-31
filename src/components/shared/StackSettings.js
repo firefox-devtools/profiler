@@ -33,11 +33,11 @@ import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import './PanelSettingsList.css';
 import './StackSettings.css';
 
-type OwnProps = {|
+type OwnProps = {
   +hideInvertCallstack?: true,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +selectedTab: string,
   +allowSwitchingStackType: boolean,
   +invertCallstack: boolean,
@@ -46,14 +46,14 @@ type StateProps = {|
   +currentSearchString: string,
   +hasUsefulJsAllocations: boolean,
   +hasUsefulNativeAllocations: boolean,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +changeInvertCallstack: typeof changeInvertCallstack,
   +changeShowUserTimings: typeof changeShowUserTimings,
   +changeCallTreeSearchString: typeof changeCallTreeSearchString,
   +changeStackChartSameWidths: typeof changeStackChartSameWidths,
-|};
+};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 

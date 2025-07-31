@@ -393,7 +393,7 @@ export function removeScreenshotHoverElement() {
  * Usage:
  * changeSelect({ from: 'Timing Data', to: 'Deallocations' });
  */
-export function changeSelect({ from, to }: {| from: string, to: string |}) {
+export function changeSelect({ from, to }: { from: string, to: string }) {
   // Look up the <option> with the text label.
   const option = screen.getByText(to);
   // Fire a change event to the select.
@@ -408,7 +408,7 @@ export function changeSelect({ from, to }: {| from: string, to: string |}) {
 export function findFillTextPositionFromDrawLog(
   drawLog: any[],
   fillText: string
-): {| x: number, y: number |} {
+): { x: number, y: number } {
   const positions = drawLog
     .filter(([cmd, text]) => cmd === 'fillText' && text === fillText)
     .map(([, , x, y]) => ({ x, y }));

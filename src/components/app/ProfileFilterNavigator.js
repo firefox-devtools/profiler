@@ -34,17 +34,17 @@ import type {
 
 import './ProfileFilterNavigator.css';
 
-type Props = {|
+type Props = {
   +pageDataByTabID: Map<TabID, ProfileFilterPageData> | null,
   +tabFilter: TabID | null,
   +rootRange: StartEndRange,
   +profileTimelineUnit: string,
   ...ElementProps<typeof FilterNavigatorBar>,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +onPop: $PropertyType<Props, 'onPop'>,
-|};
+};
 
 type StateProps = $ReadOnly<$Exact<$Diff<Props, DispatchProps>>>;
 
@@ -183,7 +183,7 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
 }
 
 export const ProfileFilterNavigator = explicitConnect<
-  {||},
+  {},
   StateProps,
   DispatchProps,
 >({

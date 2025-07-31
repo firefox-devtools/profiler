@@ -14,7 +14,7 @@ import type {
 } from '../../profile-logic/symbol-store';
 
 export class FakeSymbolStore implements AbstractSymbolStore {
-  _symbolTables: Map<string, {| addrs: Uint32Array, syms: string[] |}>;
+  _symbolTables: Map<string, { addrs: Uint32Array, syms: string[] }>;
 
   constructor(symbolTables: Map<string, Map<number, string>>) {
     this._symbolTables = new Map();

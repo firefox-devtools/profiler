@@ -14,11 +14,11 @@ type Props = {
   +children?: React.Node,
 };
 
-type State = {|
+type State = {
   isMouseOver: boolean,
   mouseX: CssPixels,
   mouseY: CssPixels,
-|};
+};
 
 /**
  * This component provides a way to automatically insert a tooltip when mousing over

@@ -18,18 +18,18 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackCustomMarker.css';
 
-type OwnProps = {|
+type OwnProps = {
   +markerSchema: MarkerSchema,
   +markerName: IndexIntoStringTable,
   +threadIndex: ThreadIndex,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-|};
+};
 
-type DispatchProps = {||};
+type DispatchProps = {};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 

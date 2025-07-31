@@ -62,10 +62,10 @@ import { defaultThreadViewOptions } from '../../reducers/profile-view';
 export type BasicThreadSelectorsPerThread = $ReturnType<
   typeof getBasicThreadSelectorsPerThread,
 >;
-export type ThreadSelectorsPerThread = {|
+export type ThreadSelectorsPerThread = {
   ...BasicThreadSelectorsPerThread,
   ...$ReturnType<typeof getThreadSelectorsWithMarkersPerThread>,
-|};
+};
 
 /**
  * Create the selectors for a thread that have to do with an entire thread. This includes
@@ -408,10 +408,10 @@ export function getBasicThreadSelectorsPerThread(
   };
 }
 
-type BasicThreadAndMarkerSelectorsPerThread = {|
+type BasicThreadAndMarkerSelectorsPerThread = {
   ...BasicThreadSelectorsPerThread,
   ...MarkerSelectorsPerThread,
-|};
+};
 
 export function getThreadSelectorsWithMarkersPerThread(
   threadSelectors: BasicThreadAndMarkerSelectorsPerThread,

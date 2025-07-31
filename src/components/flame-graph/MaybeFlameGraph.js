@@ -20,17 +20,17 @@ import './MaybeFlameGraph.css';
 // is "flame-graph", `invertCallstack` will be `false`. <MaybeFlameGraph /> is
 // only used in the "flame-graph" tab.
 
-type StateProps = {|
+type StateProps = {
   +isPreviewSelectionEmpty: boolean,
   +invertCallstack: boolean,
-|};
-type DispatchProps = {|
+};
+type DispatchProps = {
   +changeInvertCallstack: typeof changeInvertCallstack,
-|};
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+};
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class MaybeFlameGraphImpl extends React.PureComponent<Props> {
-  _flameGraph: {| current: HTMLDivElement | null |} = React.createRef();
+  _flameGraph: { current: HTMLDivElement | null } = React.createRef();
 
   _onSwitchToNormalCallstackClick = () => {
     this.props.changeInvertCallstack(false);
@@ -70,18 +70,16 @@ class MaybeFlameGraphImpl extends React.PureComponent<Props> {
   }
 }
 
-export const MaybeFlameGraph = explicitConnect<{||}, StateProps, DispatchProps>(
-  {
-    mapStateToProps: (state) => {
-      return {
-        invertCallstack: getInvertCallstack(state),
-        isPreviewSelectionEmpty:
-          !selectedThreadSelectors.getHasPreviewFilteredCtssSamples(state),
-      };
-    },
-    mapDispatchToProps: {
-      changeInvertCallstack,
-    },
-    component: MaybeFlameGraphImpl,
-  }
-);
+export const MaybeFlameGraph = explicitConnect<{}, StateProps, DispatchProps>({
+  mapStateToProps: (state) => {
+    return {
+      invertCallstack: getInvertCallstack(state),
+      isPreviewSelectionEmpty:
+        !selectedThreadSelectors.getHasPreviewFilteredCtssSamples(state),
+    };
+  },
+  mapDispatchToProps: {
+    changeInvertCallstack,
+  },
+  component: MaybeFlameGraphImpl,
+});

@@ -28,11 +28,11 @@ import { ensureExists } from 'firefox-profiler/utils/flow';
 import type { Localization } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-type FetchProps = {|
+type FetchProps = {
   +requestedLocales: null | string[],
   +pseudoStrategy: null | 'accented' | 'bidi',
   +receiveL10n: typeof receiveL10n,
-|};
+};
 
 /**
  * This class is responsible for handling the changes of the requested locales
@@ -97,10 +97,10 @@ class AppLocalizationFetcher extends React.PureComponent<FetchProps> {
   }
 }
 
-type InitProps = {|
+type InitProps = {
   +requestL10n: typeof requestL10n,
   +requestedLocales: null | string[],
-|};
+};
 
 /**
  * This component is responsible for initializing the locales as well as
@@ -176,20 +176,20 @@ class AppLocalizationInit extends React.PureComponent<InitProps> {
   }
 }
 
-type ProviderStateProps = {|
+type ProviderStateProps = {
   +requestedLocales: null | string[],
   +pseudoStrategy: null | 'accented' | 'bidi',
   +localization: Localization,
   +primaryLocale: string | null,
   +direction: 'ltr' | 'rtl',
-|};
-type ProviderOwnProps = {|
+};
+type ProviderOwnProps = {
   children: React.Node,
-|};
-type ProviderDispatchProps = {|
+};
+type ProviderDispatchProps = {
   +requestL10n: typeof requestL10n,
   +receiveL10n: typeof receiveL10n,
-|};
+};
 
 type ProviderProps = ConnectedProps<
   ProviderOwnProps,

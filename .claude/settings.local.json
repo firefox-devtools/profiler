@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mv:*)",
+      "Bash(npx tsc:*)",
+      "Bash(sed:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(cp:*)",
+      "Bash(rm:*)",
+      "Bash(yarn build)",
+      "Bash(npx babel:*)",
+      "Bash(git rm:*)",
+      "Bash(yarn typecheck)",
+      "Bash(yarn lint)",
+      "Bash(yarn lint-fix-js:*)",
+      "Bash(yarn prettier-fix:*)",
+      "Bash(yarn typecheck-file:*)",
+      "Bash(tsc:*)",
+      "Bash(yarn test)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(yarn lint-js)",
+      "Bash(yarn tsc:*)",
+      "Bash(yarn test:*)",
+      "Bash(git checkout:*)",
+      "Bash(yarn typecheck:strict)",
+      "Bash(grep:*)",
+      "Bash(yarn lint-fix)"
+    ],
+    "deny": []
+  }
+}

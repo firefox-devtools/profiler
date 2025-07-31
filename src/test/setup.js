@@ -26,7 +26,7 @@ global.fetchMock = fetchMock;
 afterEach(function () {
   // This `__shutdownWorkers` function only exists in the mocked test environment,
   // do not use flow typing on it.
-  const { __shutdownWorkers } = (WorkerFactory: any);
+  const { __shutdownWorkers } = WorkerFactory;
   __shutdownWorkers();
 });
 

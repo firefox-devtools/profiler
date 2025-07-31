@@ -9,30 +9,30 @@ import type {
   AddressInlineFrame,
 } from '../../profile-logic/symbol-store';
 
-export type LineRange = {|
+export type LineRange = {
   startAddress: number,
   line: number,
   inlinedCall?: InlinedCall,
-|};
+};
 
-export type InlinedCall = {|
+export type InlinedCall = {
   name: string,
   file: string,
   lineRanges: LineRange[],
-|};
+};
 
-export type ExampleSymbolTableSymbols = Array<{|
+export type ExampleSymbolTableSymbols = Array<{
   address: number,
   name: string,
   file?: string,
   lineRanges?: LineRange[],
-|}>;
+}>;
 
-export type ExampleSymbolTable = {|
+export type ExampleSymbolTable = {
   symbols: ExampleSymbolTableSymbols,
   asTuple: SymbolTableAsTuple,
   getAddressResult: (number) => AddressResult | null,
-|};
+};
 
 function _makeSymbolTableAsTuple(syms): SymbolTableAsTuple {
   const index = [0];

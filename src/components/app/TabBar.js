@@ -15,11 +15,11 @@ import {
 
 import './TabBar.css';
 
-type Props = {|
+type Props = {
   +selectedTabSlug: string,
   +visibleTabs: $ReadOnlyArray<TabSlug>,
   +onSelectTab: (string) => void,
-|};
+};
 
 export class TabBar extends React.PureComponent<Props> {
   _onClickListener = (e: SyntheticMouseEvent<HTMLElement>) => {

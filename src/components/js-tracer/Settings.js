@@ -14,15 +14,15 @@ import explicitConnect, {
 import './Settings.css';
 import { Localized } from '@fluent/react';
 
-type StateProps = {|
+type StateProps = {
   +showJsTracerSummary: boolean,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +changeShowJsTracerSummary: typeof changeShowJsTracerSummary,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class JsTracerSettingsImpl extends PureComponent<Props> {
   _onCheckboxChange = () => {
@@ -56,11 +56,7 @@ class JsTracerSettingsImpl extends PureComponent<Props> {
   }
 }
 
-export const JsTracerSettings = explicitConnect<
-  {||},
-  StateProps,
-  DispatchProps,
->({
+export const JsTracerSettings = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     showJsTracerSummary: getShowJsTracerSummary(state),
   }),

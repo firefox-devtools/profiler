@@ -38,14 +38,14 @@ const ERROR_MESSAGES_L10N_ID: { [string]: string } = Object.freeze({
   compare: 'AppViewRouter--error-compare',
 });
 
-type AppViewRouterStateProps = {|
+type AppViewRouterStateProps = {
   +view: AppViewState,
   +dataSource: DataSource,
   +profilesToCompare: string[] | null,
   +hasZipFile: boolean,
-|};
+};
 
-type AppViewRouterProps = ConnectedProps<{||}, AppViewRouterStateProps, {||}>;
+type AppViewRouterProps = ConnectedProps<{}, AppViewRouterStateProps, {}>;
 
 class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
   render() {
@@ -147,11 +147,7 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
   }
 }
 
-export const AppViewRouter = explicitConnect<
-  {||},
-  AppViewRouterStateProps,
-  {||},
->({
+export const AppViewRouter = explicitConnect<{}, AppViewRouterStateProps, {}>({
   mapStateToProps: (state: State) => ({
     view: getView(state),
     dataSource: getDataSource(state),

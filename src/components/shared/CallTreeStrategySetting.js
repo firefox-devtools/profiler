@@ -23,21 +23,21 @@ import './PanelSettingsList.css';
 
 import type { CallTreeSummaryStrategy } from 'firefox-profiler/types';
 
-type OwnProps = {|
+type OwnProps = {
   labelL10nId?: string,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +hasUsefulTimingSamples: boolean,
   +hasUsefulJsAllocations: boolean,
   +hasUsefulNativeAllocations: boolean,
   +canShowRetainedMemory: boolean,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +changeCallTreeSummaryStrategy: typeof changeCallTreeSummaryStrategy,
-|};
+};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 

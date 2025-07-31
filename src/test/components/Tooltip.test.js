@@ -155,12 +155,12 @@ describe('shared/Tooltip', () => {
   });
 });
 
-type Size = {| width: number, height: number |};
-type Position = {| x: number, y: number |};
-type Setup = {|
+type Size = { width: number, height: number };
+type Position = { x: number, y: number };
+type Setup = {
   box: Size,
   mouse: Position,
-|};
+};
 
 function setup({ box, mouse }: Setup) {
   // Note we don't mock the window size and rely on the default in JSDom that is

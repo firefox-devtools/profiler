@@ -66,7 +66,7 @@ import type {
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-type StateProps = {|
+type StateProps = {
   +threads: RawThread[],
   +globalTrackOrder: TrackIndex[],
   +hiddenGlobalTracks: Set<TrackIndex>,
@@ -78,9 +78,9 @@ type StateProps = {|
   +globalTrackNames: string[],
   +localTracksByPid: Map<Pid, LocalTrack[]>,
   +localTrackNamesByPid: Map<Pid, string[]>,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +hideGlobalTrack: typeof hideGlobalTrack,
   +showAllTracks: typeof showAllTracks,
   +showGlobalTrack: typeof showGlobalTrack,
@@ -93,17 +93,17 @@ type DispatchProps = {|
   +isolateScreenshot: typeof isolateScreenshot,
   +showProvidedTracks: typeof showProvidedTracks,
   +hideProvidedTracks: typeof hideProvidedTracks,
-|};
+};
 
 type TimelineTrackContextMenuProps = ConnectedProps<
-  {||},
+  {},
   StateProps,
   DispatchProps,
 >;
 
-type TimelineTrackContextMenuState = {|
+type TimelineTrackContextMenuState = {
   searchFilter: string,
-|};
+};
 
 class TimelineTrackContextMenuImpl extends PureComponent<
   TimelineTrackContextMenuProps,
@@ -111,7 +111,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
 > {
   state = { searchFilter: '' };
   _globalTrackClickTimeout: TimeoutID | null = null;
-  _trackSearchFieldElem: {| current: TrackSearchField | null |} =
+  _trackSearchFieldElem: { current: TrackSearchField | null } =
     React.createRef();
 
   _showAllTracks = (): void => {
@@ -1311,7 +1311,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
 }
 
 export const TimelineTrackContextMenu = explicitConnect<
-  {||},
+  {},
   StateProps,
   DispatchProps,
 >({

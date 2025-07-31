@@ -28,22 +28,22 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type { SourceCodeStatus, Profile } from 'firefox-profiler/types';
 
-type StateProps = {|
+type StateProps = {
   +sourceViewFile: string | null,
   +sourceViewCode: SourceCodeStatus | void,
   +symbolServerUrl: string,
   +profile: Profile | null,
   +browserConnection: BrowserConnection | null,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +beginLoadingSourceCodeFromUrl: typeof beginLoadingSourceCodeFromUrl,
   +beginLoadingSourceCodeFromBrowserConnection: typeof beginLoadingSourceCodeFromBrowserConnection,
   +finishLoadingSourceCode: typeof finishLoadingSourceCode,
   +failLoadingSourceCode: typeof failLoadingSourceCode,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class SourceCodeFetcherImpl extends React.PureComponent<Props> {
   _archiveCache: Map<string, Promise<Uint8Array>> = new Map();
@@ -114,23 +114,21 @@ class SourceCodeFetcherImpl extends React.PureComponent<Props> {
   }
 }
 
-export const SourceCodeFetcher = explicitConnect<
-  {||},
-  StateProps,
-  DispatchProps,
->({
-  mapStateToProps: (state) => ({
-    sourceViewFile: getSourceViewFile(state),
-    sourceViewCode: getSourceViewCode(state),
-    symbolServerUrl: getSymbolServerUrl(state),
-    profile: getProfileOrNull(state),
-    browserConnection: getBrowserConnection(state),
-  }),
-  mapDispatchToProps: {
-    beginLoadingSourceCodeFromUrl,
-    beginLoadingSourceCodeFromBrowserConnection,
-    finishLoadingSourceCode,
-    failLoadingSourceCode,
-  },
-  component: SourceCodeFetcherImpl,
-});
+export const SourceCodeFetcher = explicitConnect<{}, StateProps, DispatchProps>(
+  {
+    mapStateToProps: (state) => ({
+      sourceViewFile: getSourceViewFile(state),
+      sourceViewCode: getSourceViewCode(state),
+      symbolServerUrl: getSymbolServerUrl(state),
+      profile: getProfileOrNull(state),
+      browserConnection: getBrowserConnection(state),
+    }),
+    mapDispatchToProps: {
+      beginLoadingSourceCodeFromUrl,
+      beginLoadingSourceCodeFromBrowserConnection,
+      finishLoadingSourceCode,
+      failLoadingSourceCode,
+    },
+    component: SourceCodeFetcherImpl,
+  }
+);

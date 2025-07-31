@@ -30,7 +30,7 @@ import './TrackVisualProgress.css';
 /**
  * When adding properties to these props, please consider the comment above the component.
  */
-type CanvasProps = {|
+type CanvasProps = {
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +progressGraphData: ProgressGraphData[],
@@ -38,7 +38,7 @@ type CanvasProps = {|
   +width: CssPixels,
   +height: CssPixels,
   +lineWidth: CssPixels,
-|};
+};
 
 /**
  * This component controls the rendering of the canvas. Every render call through
@@ -171,31 +171,31 @@ class TrackVisualProgressCanvas extends React.PureComponent<CanvasProps> {
   }
 }
 
-type OwnProps = {|
+type OwnProps = {
   +progressGraphData: ProgressGraphData[],
   +lineWidth: CssPixels,
   +graphHeight: CssPixels,
   +graphDotTooltipText: string,
-|};
+};
 
-type StateProps = {|
+type StateProps = {
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +interval: Milliseconds,
-|};
+};
 
-type DispatchProps = {||};
+type DispatchProps = {};
 
-type Props = {|
+type Props = {
   ...SizeProps,
   ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
-|};
+};
 
-type State = {|
+type State = {
   hoveredVisualProgress: null | number,
   mouseX: CssPixels,
   mouseY: CssPixels,
-|};
+};
 
 /**
  * The visual progress track graph takes visual progress information from visual metrics, and renders it as a

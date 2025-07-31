@@ -7,11 +7,11 @@
 import * as React from 'react';
 import classNames from 'classnames';
 
-type Props = {|
+type Props = {
   +tagName?: string,
   +content: string,
   +className?: string,
-|};
+};
 
 export class CanSelectContent extends React.PureComponent<Props> {
   _selectContent(e: SyntheticMouseEvent<HTMLInputElement>) {

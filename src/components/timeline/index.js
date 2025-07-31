@@ -7,7 +7,7 @@
 import React, { PureComponent } from 'react';
 import { FullTimeline } from 'firefox-profiler/components/timeline/FullTimeline';
 
-type TimelineProps = {||};
+type TimelineProps = {};
 
 export class Timeline extends PureComponent<TimelineProps> {
   // This may contain a function that's called whenever we want to remove the

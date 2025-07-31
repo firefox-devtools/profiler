@@ -95,14 +95,14 @@ export type TestDefinedMarkers = Array<
 >;
 
 // This type is used when needing to create a specific RawMarkerTable.
-export type TestDefinedRawMarker = {|
+export type TestDefinedRawMarker = {
   +name?: string,
   +startTime: Milliseconds | null,
   +endTime: Milliseconds | null,
   +phase: MarkerPhase,
   +category?: IndexIntoCategoryList,
   +data?: MarkerPayload | null,
-|};
+};
 
 export type TestDefinedJsTracerEvent = [
   // Event name:
@@ -858,7 +858,7 @@ function _findInlineDepthFromFuncName(
 
 function _findNativeSymbolNameFromFuncName(
   funcNameWithModifier: string
-): {| name: string, address: Address, functionSize: Bytes | null |} | null {
+): { name: string, address: Address, functionSize: Bytes | null } | null {
   const findNativeSymbolResult = /\[sym:([^\]]+)\]/.exec(funcNameWithModifier);
   if (findNativeSymbolResult) {
     const s = findNativeSymbolResult[1];
@@ -1130,10 +1130,10 @@ export function getProfileWithDicts(profile: Profile): ProfileWithDicts {
  */
 export function getMergedProfileFromTextSamples(
   profileStrings: string[],
-  cpuValuesPerProfile: Array<{|
+  cpuValuesPerProfile: Array<{
     threadCPUDelta: Array<number | null>,
     threadCPUDeltaUnit: ThreadCPUDeltaUnit,
-  |} | null> = []
+  } | null> = []
 ): ProfileWithDicts {
   const profilesAndFuncNames = profileStrings.map((str) =>
     getProfileFromTextSamples(str)
@@ -1161,14 +1161,14 @@ export function getMergedProfileFromTextSamples(
   return getProfileWithDicts(profile);
 }
 
-type NetworkMarkersOptions = {|
+type NetworkMarkersOptions = {
   uri: string,
   id: number,
   startTime: number,
   fetchStart: number,
   endTime: number,
   payload: $Shape<NetworkPayload>,
-|};
+};
 
 export function getNetworkMarkers(options: $Shape<NetworkMarkersOptions> = {}) {
   // Default values
@@ -1294,7 +1294,7 @@ export function getNetworkTrackProfile() {
   return profile;
 }
 
-type IPCMarkersOptions = {|
+type IPCMarkersOptions = {
   startTime: number,
   endTime: number,
   otherPid: Pid,
@@ -1304,7 +1304,7 @@ type IPCMarkersOptions = {|
   direction: 'sending' | 'receiving',
   phase: 'endpoint' | 'transferStart' | 'transferEnd',
   sync: boolean,
-|};
+};
 
 function _getIPCMarkers(
   options: $Shape<IPCMarkersOptions> = {}

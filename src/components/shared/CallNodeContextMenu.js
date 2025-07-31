@@ -66,7 +66,7 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
 
-type StateProps = {|
+type StateProps = {
   +thread: Thread | null,
   +threadsKey: ThreadsKey | null,
   +categories: CategoryList,
@@ -79,17 +79,17 @@ type StateProps = {|
   +displaySearchfox: boolean,
   +browserConnectionStatus: BrowserConnectionStatus,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-|};
+};
 
-type DispatchProps = {|
+type DispatchProps = {
   +addTransformToStack: typeof addTransformToStack,
   +addCollapseResourceTransformToStack: typeof addCollapseResourceTransformToStack,
   +expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants,
   +updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen,
   +setContextMenuVisibility: typeof setContextMenuVisibility,
-|};
+};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 import './CallNodeContextMenu.css';
 
@@ -521,13 +521,13 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     return stringTable.getString(resNameStringIndex);
   }
 
-  getRightClickedCallNodeInfo(): null | {|
+  getRightClickedCallNodeInfo(): null | {
     +thread: Thread,
     +threadsKey: ThreadsKey,
     +callNodeInfo: CallNodeInfo,
     +callNodePath: CallNodePath,
     +callNodeIndex: IndexIntoCallNodeTable,
-  |} {
+  } {
     const {
       thread,
       threadsKey,
@@ -802,7 +802,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     );
   }
 
-  renderTransformMenuItem(props: {|
+  renderTransformMenuItem(props: {
     +l10nId: string,
     +l10nProps?: mixed,
     +content: React.Node,
@@ -811,7 +811,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     +shortcut: string,
     +icon: string,
     +title: string,
-  |}) {
+  }) {
     return (
       <MenuItem onClick={props.onClick} data={{ type: props.transform }}>
         <span
@@ -834,14 +834,14 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     );
   }
 
-  renderMenuItemWithShortcut(props: {|
+  renderMenuItemWithShortcut(props: {
     +l10nId: string,
     +l10nProps?: mixed,
     +content: React.Node,
     +onClick: (event: SyntheticEvent<>, data: { type: string }) => void,
     +shortcut: string,
     +data: { type: string },
-  |}) {
+  }) {
     return (
       <MenuItem onClick={props.onClick} data={{ type: props.data.type }}>
         <Localized id={props.l10nId} {...props.l10nProps}>
@@ -873,7 +873,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 }
 
 export const CallNodeContextMenu = explicitConnect<
-  {||},
+  {},
   StateProps,
   DispatchProps,
 >({
@@ -923,11 +923,11 @@ export const CallNodeContextMenu = explicitConnect<
   component: CallNodeContextMenuImpl,
 });
 
-function DivWithTitle(props: {|
+function DivWithTitle(props: {
   +className?: string,
   +children: React.Node,
   +title: string,
-|}) {
+}) {
   return (
     <div className={props.className} title={oneLine`${props.title}`}>
       {props.children}

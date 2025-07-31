@@ -81,11 +81,11 @@ describe('TooltipCallNode', function () {
       pageUrl,
       iframeUrl,
       isPrivateBrowsing,
-    }: {|
+    }: {
       pageUrl: string,
       iframeUrl?: string,
       isPrivateBrowsing?: boolean,
-    |}) {
+    }) {
       const {
         profile,
         funcNamesDictPerThread: [{ A, Bjs, Cjs }],

@@ -39,14 +39,14 @@ for understanding where time was actually spent in a program."
   );
 };
 
-type SourceViewProps = {|
+type SourceViewProps = {
   +timings: LineTimings,
   +sourceCode: string,
   +disableOverscan: boolean,
   +filePath: string | null,
   +scrollToHotSpotGeneration: number,
   +hotSpotTimings: LineTimings,
-|};
+};
 
 let editorModulePromise: Promise<any> | null = null;
 

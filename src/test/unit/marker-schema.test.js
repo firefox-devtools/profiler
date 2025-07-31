@@ -23,11 +23,11 @@ import { StringTable } from '../../utils/string-table';
  * code branches, especially parse errors.
  */
 describe('marker schema labels', function () {
-  type LabelOptions = {|
+  type LabelOptions = {
     schemaFields: $PropertyType<MarkerSchema, 'fields'>,
     label: string,
     payload: any,
-  |};
+  };
 
   beforeEach(() => {
     jest.spyOn(console, 'error').mockImplementation(() => {});

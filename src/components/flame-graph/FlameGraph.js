@@ -68,7 +68,7 @@ const STACK_FRAME_HEIGHT = 16;
  */
 const SELECTABLE_THRESHOLD = 0.001;
 
-type StateProps = {|
+type StateProps = {
   +thread: Thread,
   +weightType: WeightType,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
@@ -92,14 +92,14 @@ type StateProps = {|
   +unfilteredCtssSamples: SamplesLikeTable,
   +tracedTiming: CallTreeTimings | null,
   +displayStackType: boolean,
-|};
-type DispatchProps = {|
+};
+type DispatchProps = {
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +changeRightClickedCallNode: typeof changeRightClickedCallNode,
   +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
   +updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen,
-|};
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+};
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class FlameGraphImpl extends React.PureComponent<Props> {
   _viewport: HTMLDivElement | null = null;
@@ -424,7 +424,7 @@ function viewportNeedsUpdate() {
   return false;
 }
 
-export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
+export const FlameGraph = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     thread: selectedThreadSelectors.getFilteredThread(state),
     unfilteredThread: selectedThreadSelectors.getThread(state),

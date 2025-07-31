@@ -3,16 +3,16 @@
 
 declare module 'query-string' {
   declare type ArrayFormat = 'none' | 'bracket' | 'index' | 'comma'
-  declare type ParseOptions = {|
+  declare type ParseOptions = {
     arrayFormat?: ArrayFormat,
-  |}
+  }
 
-  declare type StringifyOptions = {|
+  declare type StringifyOptions = {
     arrayFormat?: ArrayFormat,
     encode?: boolean,
     strict?: boolean,
     sort?: false | <A, B>(A, B) => number,
-  |}
+  }
 
   declare type ObjectParameter = string | number | boolean | null | void;
 

@@ -634,14 +634,14 @@ export function convertJsTracerToThreadWithoutSamples(
   return { thread, stackMap };
 }
 
-type JsTracerFixed = {|
+type JsTracerFixed = {
   events: Array<IndexIntoStringTable>,
   start: Array<Microseconds>,
   end: Array<Microseconds>,
   line: Array<number | null>, // Line number.
   column: Array<number | null>, // Column number.
   length: number,
-|};
+};
 
 /**
  * JS Tracer information has a start and duration, but due to precision issues, this
