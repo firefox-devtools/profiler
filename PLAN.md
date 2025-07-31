@@ -1,68 +1,48 @@
 # Flow to TypeScript Migration Plan & Status
 
-## Current Status (July 30, 2025)
+## Current Status (July 31, 2025)
 
 ### 📊 Progress Summary
 
 - **Type Definitions**: ✅ 13/13 files complete (100%)
 - **Core Utilities**: ✅ 41/41 files complete (100%)
-- **React Components**: ✅ 22/150+ files complete (14.7%) - Warning.tsx, BlobUrlLink.tsx, FooterLinks.tsx, DebugWarning.tsx, EmptyReasons.tsx, Icon.tsx, ContextMenuTrigger.tsx, ContextMenuNoHidingOnEnter.tsx, UploadedRecordingsHome.tsx, TransformNavigator.tsx, TrackEventDelay.tsx, JsTracerEmptyReasons.tsx, CodeLoadingOverlay.tsx, ProfileMetaInfoSummary.tsx, MarkerTableEmptyReasons.tsx, MarkerChartEmptyReasons.tsx, NetworkChartEmptyReasons.tsx, ContextMenu.tsx, BeforeUnloadManager.tsx, Root.tsx, InnerNavigationLink.tsx
-- **Profile Logic**: ⏳ 2/80+ files - Core business logic modules
+- **React Components**: ✅ 22/150+ files complete (14.7%)
+- **Core Dependencies**: ✅ 6/12 files complete (50%) - tabs-handling.ts, call-node-info.ts, zip-files.ts, browser-connection.ts, uploaded-profiles-db.ts, stack-timing.ts
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 
-### 🎯 **NEW PRIORITY: Strict TypeScript Enforcement**
+### 🎯 **CURRENT PRIORITY: Complete Dependency-First Migration**
 
-**CRITICAL ISSUE DISCOVERED**: Current converted files import unconverted dependencies, causing `noImplicitAny` failures.
+**Strategy**: Convert all dependencies required for strict TypeScript checking before resuming component migration.
 
-**New Strategy - Dependency-First Migration:**
-
-1. **Enable strict TypeScript checking** with `yarn typecheck:strict` (includes `noImplicitAny`)
-2. **Convert dependencies before dependents** using topological order
-3. **Clear the exclude list** in `tsconfig.migration.strict.json` systematically
-4. **No more component conversions** until strict checking passes
-
-**Immediate Action Plan:**
-
-**Phase A: Convert Core Dependencies** (enabling strict checking)
+**Remaining Dependencies for `yarn typecheck:strict`:**
 
 ```
-Priority 1 (No dependencies):
-- src/app-logic/tabs-handling.js ✅ Ready (48 lines, no imports)
+Next Priority Files:
+- src/app-logic/web-channel.js (imported by browser-connection.ts)
+- src/app-logic/url-handling.js (imported by uploaded-profiles-db.ts)
+- src/profile-logic/symbolication.js (imported by types/actions.ts)
 
-Priority 2 (Utility dependencies only):
-- src/profile-logic/call-node-info.js ✅ Ready (imports utils/path, utils/flow, utils/bisect)
-- src/profile-logic/zip-files.js ✅ Ready (imports utils/flow)
-- src/app-logic/uploaded-profiles-db.js (imports utils/*)
-- src/app-logic/browser-connection.js (imports utils/*)
-
-Priority 3 (After Priority 2):
-- src/profile-logic/stack-timing.js (imports call-node-info)
-- src/profile-logic/symbolication.js
+Type Issues to Fix:
+- Fix implicit any[] types in stack-timing.ts Array.from() calls
+- Add common-tags module declaration or install @types/common-tags
 ```
 
-**Target**: Make `yarn typecheck:strict` pass with empty exclude list before resuming component migration.
+**Target**: Make `yarn typecheck:strict` pass completely before resuming component migration.
 
 ### ✅ Current Migration State
 
 - `yarn test-all` **PASSES** - All checks work correctly during migration
 - `yarn typecheck` validates all converted TypeScript files
-- ❌ `yarn typecheck:strict` **FAILS** - Contains `noImplicitAny` errors from import dependencies
+- ❌ `yarn typecheck:strict` **FAILS** - 3 remaining dependencies + type fixes needed
 - Mixed Flow/TypeScript codebase is stable and tested
 
-### 🔧 Strict TypeScript Configuration
-
-**New Commands:**
+### 🔧 Key Commands
 
 ```bash
 yarn typecheck:strict   # Strict TypeScript checking with noImplicitAny
-yarn typecheck         # Regular migration checking (still used during development)
+yarn typecheck         # Regular migration checking (used during development)
+yarn test-all          # Full validation (lint, test, typecheck)
 ```
-
-**Configuration Files:**
-
-- `tsconfig.migration.strict.json` - Extends migration config + `noImplicitAny: true`
-- Contains exclude list of files that fail strict checking
-- **Goal**: Empty the exclude list by converting dependencies first
 
 ## TypeScript Configuration Setup
 
@@ -157,278 +137,87 @@ yarn test  # Run together instead
 - **Remove original files only after** successful TypeScript compilation
 - **The migration config is optimized** - project-wide checks are very fast (~0.65s)
 
-### Proven Flow→TypeScript Conversion Patterns
+### Key Flow→TypeScript Conversion Patterns
 
-#### React Component Patterns
-
+#### Essential Changes
 ```typescript
-// Flow class component
-class ComponentName extends PureComponent<Props, State> {
-  state = { value: true };
-  render() { ... }
+// Imports: Remove 'type' keyword
+import type { SomeType } from './module';  // Flow
+import { SomeType } from './module';       // TypeScript
+
+// Properties: +prop → readonly prop
+type Example = { +prop: string };          // Flow  
+type Example = { readonly prop: string };  // TypeScript
+
+// Nullable: ?string → string | null
+prop: ?string                              // Flow
+prop: string | null                        // TypeScript
+
+// React overrides: Add 'override' keyword
+class Component extends PureComponent<Props> {
+  state = { value: true };                 // Flow
+  override state = { value: true };        // TypeScript
 }
-
-// TypeScript class component
-class ComponentName extends PureComponent<Props, State> {
-  override state = { value: true };
-  override render() { ... }
-}
 ```
 
-#### Connected Component Pattern
-
+#### Common Utility Type Mappings
 ```typescript
-// Flow
-import type { ConnectedProps } from '../../utils/connect';
-type StateProps = {
-  +prop: string,
-};
-
-// TypeScript
-import { ConnectedProps } from '../../utils/connect';
-type StateProps = {
-  readonly prop: string;
-};
-```
-
-#### 1. Import Statements
-
-```typescript
-// Flow
-import type { SomeType } from './module';
-
-// TypeScript
-import { SomeType } from './module';
-```
-
-#### 2. Readonly Properties
-
-```typescript
-// Flow
-type Example = {
-  +prop: string,
-};
-
-// TypeScript
-type Example = {
-  readonly prop: string,
-};
-```
-
-#### 3. Nullable Types
-
-```typescript
-// Flow
-prop: ?string,
-array: Array<?number>,
-
-// TypeScript
-prop: string | null,
-array: Array<number | null>,
-```
-
-#### 4. Flow Utility Types
-
-```typescript
-// Flow → TypeScript
 $Keys<T> → keyof T
-$Values<T> → T[keyof T]
 $ReadOnly<T> → Readonly<T>
 $Shape<T> → Partial<T>
-$PropertyType<T, 'prop'> → T['prop']
 mixed → unknown
-```
-
-#### 5. Set Operations (Important Fix)
-
-```typescript
-// Flow (causes TS errors)
-return new Set([...set1].filter((x) => set2.has(x)));
-
-// TypeScript (correct)
-return new Set(Array.from(set1).filter((x) => set2.has(x)));
-```
-
-#### 6. Function Types
-
-```typescript
-// Flow
-type Fn = ('send', GAPayload) => void;
-
-// TypeScript
-type Fn = (command: 'send', payload: GAPayload) => void;
-```
-
-#### 7. Union Type Handling
-
-```typescript
-// Flow
-const icon = ownProps.displayData
-  ? ownProps.displayData.iconSrc
-  : ownProps.iconUrl;
-
-// TypeScript (use type guards)
-const icon =
-  'displayData' in ownProps ? ownProps.displayData.iconSrc : ownProps.iconUrl;
-```
-
-#### 8. `assertExhaustiveCheck`
-
-Usually used in switch default cases. When switching on a property of an object,
-discard that property because the entire object will be the `never` type in TS.
-
-```typescript
-// Flow
-default:
-   throw assertExhaustiveCheck(error.type);
-
-// TypeScript
-default:
-   throw assertExhaustiveCheck(error);
-```
-
-#### 9. React Component Props Types
-
-```typescript
-// Flow
-import type { ElementProps } from 'react';
-type Props = ElementProps<typeof Component>;
-
-// TypeScript
-import { ComponentProps } from 'react';
-type Props = ComponentProps<typeof Component>;
-```
-
-#### 10. CSS Custom Properties (CSS Variables)
-
-```typescript
-// TypeScript - CSS custom properties need type assertion
-<div
-  style={{
-    height: graphHeight,
-    '--graph-height': `${graphHeight}px`,
-    '--markers-height': `0px`,
-  } as React.CSSProperties}
->
-```
-
-#### 11. Empty Reasons Connected Component Pattern
-
-```typescript
-// Common pattern for empty state components
-type StateProps = {
-  readonly threadName: string;
-  readonly isEmptyInFullRange: boolean;
-};
-
-type Props = ConnectedProps<{}, StateProps, {}>;
-class EmptyReasonsImpl extends PureComponent<Props> {
-  override render() {
-    const { isEmptyInFullRange, threadName } = this.props;
-    return (
-      <EmptyReasons
-        threadName={threadName}
-        reason={isEmptyInFullRange ? 'No data' : 'Filtered out'}
-        viewName="view-name"
-      />
-    );
-  }
-}
-
-export const ComponentEmptyReasons = explicitConnect<{}, StateProps, {}>({
-  mapStateToProps: (state: State) => ({
-    threadName: selectedThreadSelectors.getFriendlyThreadName(state),
-    isEmptyInFullRange: selectedThreadSelectors.getSomeEmptyCheck(state),
-  }),
-  component: EmptyReasonsImpl,
-});
+Array.from(set) replaces [...set] for type safety
 ```
 
 ---
 
-## Lessons Learned (Avoid These Mistakes)
+## Key Lessons Learned
 
-### ⚠️ CRITICAL: Snapshot Test Policy
+### ⚠️ Critical Guidelines
+- **Never update snapshots** without investigating root cause of differences
+- **Convert dependencies first** - always follow topological order
+- **Per-file conversion only** - avoid global syntax changes across mixed codebase
+- **Test after each file** - ensure TypeScript compilation + tests pass before proceeding
 
-**Never update snapshots (`yarn test -u`) without investigating the root cause of differences.**
-
-**Case Study**: EmptyReasons component conversion initially failed snapshot tests due to curly quote differences (straight quotes `"` vs curved quotes `"` and `"`). This indicated a real rendering difference that needed investigation, not snapshot updates.
-
-**Root Cause**: Claude Code cannot preserve curly quotes in copy/paste operations, causing unintended character changes that affect React rendering.
-
-**Solution Process**:
-
-1. Always investigate snapshot failures - they indicate real differences
-2. Compare original vs converted files character-by-character if needed
-3. For quote issues: manually copy correct quotes from original file in IDE
-4. Verify tests pass before proceeding
-
-**Policy**: Snapshot changes are NEVER acceptable without understanding and validating the underlying cause.
-
-### ❌ FAILED: Global Syntax Changes
-
-**What Failed**: Converting all `+prop:` → `readonly prop:` globally across mixed codebase
-**Why**: Flow parser can't handle TypeScript `readonly` keyword in .js files
-**Lesson**: Conversion must be per-file during .js → .ts migration
-
-### ❌ FAILED: Utility-First Migration Order
-
-**What Failed**: Starting with utility files before type definitions
-**Why**: Utilities import types from src/types/ - creates dependency issues
-**Lesson**: Always convert dependencies first (types → utilities → components)
-
-### ✅ SUCCESS: Type-First Strategy
-
-**What Worked**: Converting all 13 type definition files first, then utilities
-**Why**: Provides stable foundation, utilities can import converted types
-**Result**: Zero compilation errors, smooth dependency resolution
+### ✅ Proven Strategy
+- **Dependency-first migration** resolves import issues systematically
+- **Type definitions first** provides stable foundation for all other files
+- **Mixed Flow/TypeScript codebase** works reliably during migration
 
 ---
 
-## Key Development Commands
+## Essential Commands
 
-- `yarn test` - Run all tests (must pass after each conversion)
-- `yarn typecheck` - Check TypeScript compilation for converted files only
-- `yarn test-all` - Run all checks (TypeScript + lint + test + etc.)
+- `yarn typecheck:strict` - Strict TypeScript checking (current focus)
+- `yarn typecheck` - Regular TypeScript checking for converted files  
+- `yarn test-all` - Full validation (must pass after each conversion)
 
 ---
 
 ## Migration Strategy
 
 ### Phase 1: ✅ COMPLETED - Infrastructure & Type Definitions
-
 - TypeScript configuration established
 - All 13 type definition files converted
 - Build system supporting mixed codebase
 
-### Phase 2: ✅ COMPLETED - Utility Files
+### Phase 2: ✅ COMPLETED - Utility Files  
+- All 41 utility files successfully migrated to TypeScript
 
-- Target: 40 files in src/utils/
-- Current: 40/40 complete (100%)
-- All utility files successfully migrated to TypeScript
+### Phase 3: ⏸️ PAUSED - React Components
+- **Status**: 22/150+ files complete (14.7%) - Component migration paused
+- **Reason**: Dependency-first migration prioritized for strict TypeScript enforcement
 
-### Phase 3: 🔄 IN PROGRESS - React Components
+### Phase 4: 🔄 IN PROGRESS - Core Dependencies
+- **Status**: 6/12 files complete (50%)
+- **Completed**: tabs-handling.ts, call-node-info.ts, zip-files.ts, browser-connection.ts, uploaded-profiles-db.ts, stack-timing.ts
+- **Remaining**: web-channel.js, url-handling.js, symbolication.js + type fixes
+- **Goal**: Enable `yarn typecheck:strict` to pass completely
 
-- Target: 150+ files in src/components/
-- Current: 22/150+ complete (14.7%)
-- ✅ Successfully converted simple leaf components (Warning, BlobUrlLink, FooterLinks, EmptyReasons)
-- ✅ Successfully converted connected components (DebugWarning, Icon, TransformNavigator)
-- ✅ Established patterns for union type handling with type guards
-- ✅ Converted EmptyReasons pattern components (JsTracer, MarkerTable, MarkerChart)
-- ✅ Function components with complex union types (CodeLoadingOverlay)
-- ✅ Root app component with provider patterns (Root.tsx)
-- ✅ Complex components with legacy ReactDOM.findDOMNode (ContextMenu.tsx)
-- ✅ Lifecycle management components (BeforeUnloadManager.tsx)
-- Focus: Continue with more leaf components before complex ones
-
-### Phase 4: ⏳ PLANNED - Connected Components
-
+### Phase 5: ⏳ PLANNED - Resume Component Migration
+- Resume React component conversions after strict checking passes
 - Add TypeScript types to existing ExplicitConnect patterns
-- Create typed versions of selectors and actions
-- No API changes during migration
 
-### Phase 5: ⏳ PLANNED - Final Cleanup
-
+### Phase 6: ⏳ PLANNED - Final Cleanup
 - Remove Flow infrastructure (.flowconfig, dependencies)
 - Update documentation
-- Enable stricter TypeScript settings
