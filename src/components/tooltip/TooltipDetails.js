@@ -1,6 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+// @flow
 import * as React from 'react';
 
 /*
@@ -24,9 +26,9 @@ import * as React from 'react';
  */
 
 type DetailProps = {
-  readonly label: string,
+  +label: string,
   // Only one child is accepted.
-  +children?: void | null | boolean | string | number | React.ReactElement<any>,
+  +children?: void | null | boolean | string | number | React.Element<any>,
 };
 
 export function TooltipDetail({ label, children }: DetailProps) {
@@ -46,12 +48,12 @@ export function TooltipDetailSeparator() {
   return <div className="tooltipDetailSeparator"></div>;
 }
 
-export type TooltipDetailComponent = React.ReactElement<
+export type TooltipDetailComponent = React.Element<
   typeof TooltipDetail | typeof TooltipDetailSeparator,
 > | null;
 type Props = {
   // This component accepts only TooltipDetail children.
-  readonly children: React.ChildrenArray<TooltipDetailComponent>,
+  +children: React.ChildrenArray<TooltipDetailComponent>,
 };
 
 export function TooltipDetails({ children }: Props) {
