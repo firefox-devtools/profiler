@@ -22,18 +22,26 @@ count_ts_dependencies() {
         return
     fi
     
-    # Count import statements that reference files without explicit .ts/.tsx extension
-    # These likely point to .js files that haven't been converted yet
-    local total_imports=$(grep -c "from.*['\"]" "$file" 2>/dev/null || echo 0)
-    local ts_imports=$(grep -c "from.*\.\(ts\|tsx\)['\"]" "$file" 2>/dev/null || echo 0)
-    echo $((total_imports - ts_imports))
+    # Count import statements that likely reference .js files (not yet converted)
+    # Look for relative imports that don't specify .ts/.tsx extension
+    local js_imports=$(grep -c "from ['\"]\..*['\"]" "$file" 2>/dev/null || echo 0)
+    echo "$js_imports"
 }
 
 # Function to analyze a single file
 analyze_file() {
     local file="$1"
+    if [ ! -f "$file" ]; then
+        return
+    fi
+    
     local js_deps=$(count_ts_dependencies "$file")
     local line_count=$(wc -l < "$file" 2>/dev/null || echo 0)
+    
+    # Skip empty files or files with no content
+    if [ "$line_count" -eq 0 ]; then
+        return
+    fi
     
     echo "$js_deps:$line_count:$file"
 }
@@ -45,7 +53,12 @@ echo ""
 # Analyze all files and sort by dependency count, then by size
 for file in $JS_FILES; do
     analyze_file "$file"
-done | sort -t: -k1,1n -k2,2n | while IFS=: read deps lines filepath; do
+done | grep -v "^$" | sort -t: -k1,1n -k2,2n | while IFS=: read deps lines filepath; do
+    # Skip empty entries
+    if [ -z "$filepath" ] || [ -z "$lines" ]; then
+        continue
+    fi
+    
     if [ "$deps" -eq 0 ]; then
         echo "🟢 $deps deps, $lines lines: $filepath"  # No JS dependencies - ready to convert
     elif [ "$deps" -le 2 ]; then
