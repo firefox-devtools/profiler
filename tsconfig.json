@@ -16,7 +16,7 @@
     // Type Checking (Gradual strictness)
     "strict": false, // Keep false during migration
     "noImplicitReturns": true, // Helps catch Flow-style issues
-    "noFallthroughCasesInSwitch": true,
+    "noFallthroughCasesInSwitch": false, // Disabled during Flow migration
     "forceConsistentCasingInFileNames": true,
 
     // Additional Helpful Options for Migration

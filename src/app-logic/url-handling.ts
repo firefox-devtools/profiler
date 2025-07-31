@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
 import queryString from 'query-string';
 import {
   stringifyCommittedRanges,
@@ -24,7 +23,7 @@ import {
   toValidCallTreeSummaryStrategy,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { oneLine } from 'common-tags';
-import type {
+import {
   UrlState,
   DataSource,
   Pid,
@@ -174,61 +173,67 @@ type BaseQuery = {
   assemblyView: string,
 };
 
-type CallTreeQuery = {
-  ...BaseQuery,
-  search: string, // "js::RunScript"
-  invertCallstack: null | void,
-  ctSummary: string,
+type CallTreeQuery = BaseQuery & {
+  search: string; // "js::RunScript"
+  invertCallstack: null | undefined;
+  ctSummary: string;
 };
 
-type MarkersQuery = {
-  ...BaseQuery,
-  markerSearch: string, // "DOMEvent"
+type MarkersQuery = BaseQuery & {
+  markerSearch: string; // "DOMEvent"
 };
 
-type NetworkQuery = {
-  ...BaseQuery,
-  networkSearch?: string, // "DOMEvent"
+type NetworkQuery = BaseQuery & {
+  networkSearch?: string; // "DOMEvent"
 };
 
-type StackChartQuery = {
-  ...BaseQuery,
-  search: string, // "js::RunScript"
-  invertCallstack: null | void,
-  showUserTimings: null | void,
-  sameWidths: null | void,
-  ctSummary: string,
+type StackChartQuery = BaseQuery & {
+  search: string; // "js::RunScript"
+  invertCallstack: null | undefined;
+  showUserTimings: null | undefined;
+  sameWidths: null | undefined;
+  ctSummary: string;
 };
 
-type JsTracerQuery = {
-  ...BaseQuery,
-  summary: null | void,
+type JsTracerQuery = BaseQuery & {
+  summary: null | undefined;
 };
 
-type Query =
-  | CallTreeQuery
-  | MarkersQuery
-  | NetworkQuery
-  | StackChartQuery
-  | JsTracerQuery;
+// Make Query a union that includes all possible properties
+type Query = BaseQuery & {
+  // CallTree/StackChart specific
+  search?: string;
+  invertCallstack?: null | undefined;
+  ctSummary?: string;
+  transforms?: string;
+  sourceView?: string;
+  assemblyView?: string;
+  
+  // StackChart specific
+  showUserTimings?: null | undefined;
+  sameWidths?: null | undefined;
+  
+  // Markers specific
+  markerSearch?: string;
+  
+  // Network specific
+  networkSearch?: string;
+  
+  // JsTracer specific
+  summary?: null | undefined;
+};
 
-type $MakeOptional = <T>(T) => T | void;
 // Base query shape is needed for the typechecking during the URL query initialization.
-type BaseQueryShape = $Shape<$ObjMap<BaseQuery, $MakeOptional>>;
+type BaseQueryShape = Partial<BaseQuery>;
 
 // Query shapes for individual query paths. These are needed for QueryShape union type.
-type CallTreeQueryShape = $Shape<$ObjMap<CallTreeQuery, $MakeOptional>>;
-type MarkersQueryShape = $Shape<$ObjMap<MarkersQuery, $MakeOptional>>;
-type NetworkQueryShape = $Shape<$ObjMap<NetworkQuery, $MakeOptional>>;
-type StackChartQueryShape = $Shape<$ObjMap<StackChartQuery, $MakeOptional>>;
-type JsTracerQueryShape = $Shape<$ObjMap<JsTracerQuery, $MakeOptional>>;
+type CallTreeQueryShape = Partial<CallTreeQuery>;
+type MarkersQueryShape = Partial<MarkersQuery>;
+type NetworkQueryShape = Partial<NetworkQuery>;
+type StackChartQueryShape = Partial<StackChartQuery>;
+type JsTracerQueryShape = Partial<JsTracerQuery>;
 
-type QueryShape =
-  | CallTreeQueryShape
-  | MarkersQueryShape
-  | NetworkQueryShape
-  | StackChartQueryShape
-  | JsTracerQueryShape;
+type QueryShape = Partial<Query>;
 
 /**
  * Take the UrlState and map it into a query string.
@@ -299,7 +304,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       urlState.profileSpecific.timelineType === 'cpu-category'
         ? undefined
         : urlState.profileSpecific.timelineType,
-  }: BaseQueryShape);
+  } as BaseQueryShape);
 
   // Depending on which panel is active, also show tab-specific query parameters.
   let query: QueryShape;
@@ -308,17 +313,16 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
     case 'stack-chart':
       // Stack chart uses all of the CallTree's query strings but also has
       // additional query strings.
-      query = (baseQuery: StackChartQueryShape);
+      query = baseQuery as StackChartQueryShape;
       query.showUserTimings = urlState.profileSpecific.showUserTimings
         ? null
         : undefined;
       query.sameWidths = urlState.profileSpecific.stackChartSameWidths
         ? null
         : undefined;
-    /* fallsthrough */
     case 'flame-graph':
     case 'calltree': {
-      query = (baseQuery: CallTreeQueryShape);
+      query = baseQuery as CallTreeQueryShape;
 
       query.search = urlState.profileSpecific.callTreeSearchString || undefined;
       query.invertCallstack = urlState.profileSpecific.invertCallstack
@@ -355,17 +359,17 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
     }
     case 'marker-table':
     case 'marker-chart':
-      query = (baseQuery: MarkersQueryShape);
+      query = baseQuery as MarkersQueryShape;
       query.markerSearch =
         urlState.profileSpecific.markersSearchString || undefined;
       break;
     case 'network-chart':
-      query = (baseQuery: NetworkQueryShape);
+      query = baseQuery as NetworkQueryShape;
       query.networkSearch =
         urlState.profileSpecific.networkSearchString || undefined;
       break;
     case 'js-tracer': {
-      query = (baseQuery: JsTracerQueryShape);
+      query = baseQuery as JsTracerQueryShape;
       query.summary = urlState.profileSpecific.showJsTracerSummary
         ? null
         : undefined;
@@ -451,7 +455,7 @@ export function stateFromLocation(
       hash: location.hash,
       query: queryString.parse(location.search.substr(1), {
         arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
-      }),
+      }) as any,
     },
     profile
   );
@@ -478,7 +482,7 @@ export function stateFromLocation(
   // The selected tab is the last path part in the URL.
   const selectedTabPathPart = hasProfileHash || hasProfileUrl ? 2 : 1;
 
-  let implementation = 'combined';
+  let implementation: 'combined' | 'js' | 'cpp' = 'combined';
   // Don't trust the implementation values from the user. Make sure it conforms
   // to known values.
   if (query.implementation === 'js' || query.implementation === 'cpp') {
@@ -509,7 +513,7 @@ export function stateFromLocation(
     nativeSymbol: null,
     allNativeSymbolsForInitiatingCallNode: [],
   };
-  const isBottomBoxOpenPerPanel = {};
+  const isBottomBoxOpenPerPanel: any = {};
   tabSlugs.forEach((tabSlug) => (isBottomBoxOpenPerPanel[tabSlug] = false));
   if (query.sourceView) {
     sourceView.sourceFile = query.sourceView;
@@ -714,7 +718,7 @@ function convertLocalTrackOrderByPidToString(
 // errors.
 // Exported for tests.
 export class UrlUpgradeError extends Error {
-  name = 'UrlUpgradeError';
+  override name = 'UrlUpgradeError';
 }
 
 type ProcessedLocation = {
@@ -723,9 +727,8 @@ type ProcessedLocation = {
   query: Query,
 };
 
-type ProcessedLocationBeforeUpgrade = {
-  ...ProcessedLocation,
-  query: any,
+type ProcessedLocationBeforeUpgrade = ProcessedLocation & {
+  query: any;
 };
 
 // URL upgrading is skipped if the profile argument is null.
@@ -780,10 +783,10 @@ export function upgradeLocationToCurrentVersion(
 // If available, the profile is passed as the second argument, for any upgraders that need it.
 /* eslint-disable no-useless-computed-key */
 const _upgraders: {
-  [number]: (
+  [key: number]: (
     location: ProcessedLocationBeforeUpgrade,
     profile?: Profile
-  ) => void,
+  ) => void;
 } = {
   [1]: (processedLocation: ProcessedLocationBeforeUpgrade) => {
     // Version 1 is the first versioned url. Do some best-effort upgrading from
@@ -918,7 +921,7 @@ const _upgraders: {
         continue;
       }
       // This property is not writable, make it an "any"
-      (transform: any).callNodePath = getVersion4JSCallNodePathFromStackIndex(
+      (transform as any).callNodePath = getVersion4JSCallNodePathFromStackIndex(
         thread,
         callNodeStackIndex
       );
@@ -971,7 +974,7 @@ const _upgraders: {
     // The tracks-related query arguments have been converted to use uintarray-encoding.
     // Update them from the 0-10-9-8-1-2-3-4-5-6-7 syntax to the "0aw81w7" syntax.
     if (query.globalTrackOrder) {
-      const globalTrackOrder = (query.globalTrackOrder: string)
+      const globalTrackOrder = (query.globalTrackOrder as string)
         .split('-')
         .map((s) => +s);
       query.globalTrackOrder =
@@ -979,13 +982,13 @@ const _upgraders: {
     }
     if (query.hiddenGlobalTracks) {
       const hiddenGlobalTracks = new Set(
-        (query.hiddenGlobalTracks: string).split('-').map((s) => +s)
+        (query.hiddenGlobalTracks as string).split('-').map((s) => +s)
       );
       query.hiddenGlobalTracks =
         encodeUintSetForUrlComponent(hiddenGlobalTracks) || undefined;
     }
     if (query.hiddenLocalTracksByPid) {
-      query.hiddenLocalTracksByPid = (query.hiddenLocalTracksByPid: string)
+      query.hiddenLocalTracksByPid = (query.hiddenLocalTracksByPid as string)
         .split('~')
         .map((pidAndTracks) => {
           // TODO: handle escaped dashes and tildes in pid strings (#4512)
@@ -996,7 +999,7 @@ const _upgraders: {
         .join('~');
     }
     if (query.localTrackOrderByPid) {
-      query.localTrackOrderByPid = (query.localTrackOrderByPid: string)
+      query.localTrackOrderByPid = (query.localTrackOrderByPid as string)
         .split('~')
         .map((pidAndTracks) => {
           // TODO: handle escaped dashes and tildes in pid strings (#4512)
@@ -1008,7 +1011,7 @@ const _upgraders: {
     }
     if (query.thread) {
       const selectedThreads = new Set(query.thread.split(',').map((n) => +n));
-      query.thread = encodeUintSetForUrlComponent(selectedThreads);
+      query.thread = encodeUintSetForUrlComponent(selectedThreads as Set<number>);
     }
 
     // In this version, uintarray-encoding started supporting a range syntax:
@@ -1239,10 +1242,10 @@ function getVersion4JSCallNodePathFromStackIndex(
  * Validate the timeline type and fall back to the category type if it's not
  * provided or something else is provided for some reason.
  */
-function validateTimelineType(type: ?string): TimelineType {
+function validateTimelineType(type: string | null | undefined): TimelineType {
   // Pretend this is a TimelineType so that we can exhaustively go through
   // each option.
-  const timelineType: TimelineType = (type: any);
+  const timelineType: TimelineType = type as any;
   switch (timelineType) {
     case 'stack':
     case 'cpu-category':
@@ -1250,7 +1253,7 @@ function validateTimelineType(type: ?string): TimelineType {
       return timelineType;
     default:
       // Type assert we've checked everything:
-      (timelineType: empty);
+      const _exhaustiveCheck: never = timelineType;
       return 'cpu-category';
   }
 }

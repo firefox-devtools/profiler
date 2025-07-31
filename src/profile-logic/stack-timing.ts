@@ -113,7 +113,7 @@ export function getStackTimingByDepth(
     subtreeRangeEnd: callNodeTableSubtreeRangeEndColumn,
     depth: callNodeTableDepthColumn,
   } = callNodeTable;
-  const stackTimingByDepth = Array.from({ length: maxDepthPlusOne }, () => ({
+  const stackTimingByDepth: StackTimingByDepth = Array.from({ length: maxDepthPlusOne }, (): StackTiming => ({
     start: [],
     end: [],
     sameWidthsStart: [],
@@ -122,7 +122,7 @@ export function getStackTimingByDepth(
     length: 0,
   }));
 
-  const sameWidthsIndexToTimestampMap = [];
+  const sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap = [];
 
   if (samples.length === 0) {
     return { timings: stackTimingByDepth, sameWidthsIndexToTimestampMap };

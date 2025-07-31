@@ -125,6 +125,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@types/classnames": "^2.3.4",
+    "@types/common-tags": "^1.8.4",
     "@types/jest": "^30.0.0",
     "@types/long": "^5.0.0",
     "@types/minimist": "^1.2.5",

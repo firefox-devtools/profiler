@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import {
   resourceTypes,
   getEmptyRawStackTable,
@@ -12,7 +10,7 @@ import {
 } from './data-structures';
 import { SymbolsNotFoundError } from './errors';
 
-import type {
+import {
   Profile,
   RawProfileSharedData,
   RawThread,
@@ -26,7 +24,7 @@ import type {
   CallNodePath,
   Lib,
 } from 'firefox-profiler/types';
-import type {
+import {
   AbstractSymbolStore,
   AddressResult,
   LibSymbolicationRequest,
@@ -423,7 +421,7 @@ function _computeThreadWithAddedExpansionStacks(
   shouldStacksWithThisOldFrameBeRemoved: Uint8Array,
   frameIndexToInlineExpansionFrames: Map<
     IndexIntoFrameTable,
-    IndexIntoFrameTable[],
+    IndexIntoFrameTable[]
   >
 ): RawThread {
   if (frameIndexToInlineExpansionFrames.size === 0) {
@@ -537,7 +535,7 @@ function _partiallyApplySymbolicationStep(
   shouldStacksWithThisFrameBeRemoved: Uint8Array,
   frameIndexToInlineExpansionFrames: Map<
     IndexIntoFrameTable,
-    IndexIntoFrameTable[],
+    IndexIntoFrameTable[]
   >
 ): RawThread {
   const { stringArray } = shared;
@@ -564,7 +562,7 @@ function _partiallyApplySymbolicationStep(
   const symbolAddressToInfoMap: Map<Address, AddressResult> = new Map();
   const symbolAddressToCanonicalSymbolIndexMap: Map<
     Address,
-    IndexIntoNativeSymbolTable,
+    IndexIntoNativeSymbolTable
   > = new Map();
 
   // If this profile was symbolicated before, we may have frames for inlined functions

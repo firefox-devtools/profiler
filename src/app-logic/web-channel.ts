@@ -1,10 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
-import type { SymbolTableAsTuple } from '../profile-logic/symbol-store-db';
-import type {
+import { SymbolTableAsTuple } from '../profile-logic/symbol-store-db';
+import {
   Milliseconds,
   MixedObject,
   ExternalMarkersData,
@@ -67,7 +65,7 @@ type OpenScriptInTabDebuggerRequest = {
   column: number | null,
 };
 
-export type MessageFromBrowser<R: ResponseFromBrowser> =
+export type MessageFromBrowser<R extends ResponseFromBrowser> =
   | OutOfBandErrorMessageFromBrowser
   | ErrorResponseMessageFromBrowser
   | SuccessResponseMessageFromBrowser<R>;
@@ -83,7 +81,7 @@ type ErrorResponseMessageFromBrowser = {
   error: string,
 };
 
-type SuccessResponseMessageFromBrowser<R: ResponseFromBrowser> = {
+type SuccessResponseMessageFromBrowser<R extends ResponseFromBrowser> = {
   type: 'SUCCESS_RESPONSE',
   requestId: number,
   response: R,
@@ -130,7 +128,7 @@ type StatusQueryResponse = {
   //  Shipped in Firefox 136.
   //  Adds support for showing the JS script in DevTools debugger.
   //    - OPEN_SCRIPT_IN_DEBUGGER
-  version?: number,
+  version?: number;
 };
 type EnableMenuButtonResponse = void;
 type GetProfileResponse = ArrayBuffer | MixedObject;
@@ -141,36 +139,111 @@ type QuerySymbolicationApiResponse = string;
 type GetPageFaviconsResponse = Array<FaviconData | null>;
 type OpenScriptInTabDebuggerResponse = void;
 
-// Manually declare all pairs of request + response for Flow.
-/* eslint-disable no-redeclare */
-declare function _sendMessageWithResponse(
-  StatusQueryRequest
+// TypeScript function overloads for request/response pairs.
+function _sendMessageWithResponse(
+  request: StatusQueryRequest
 ): Promise<StatusQueryResponse>;
-declare function _sendMessageWithResponse(
-  EnableMenuButtonRequest
+function _sendMessageWithResponse(
+  request: EnableMenuButtonRequest
 ): Promise<EnableMenuButtonResponse>;
-declare function _sendMessageWithResponse(
-  GetProfileRequest
+function _sendMessageWithResponse(
+  request: GetProfileRequest
 ): Promise<GetProfileResponse>;
-declare function _sendMessageWithResponse(
-  GetExternalMarkersRequest
+function _sendMessageWithResponse(
+  request: GetExternalMarkersRequest
 ): Promise<GetExternalMarkersResponse>;
-declare function _sendMessageWithResponse(
-  GetExternalPowerTracksRequest
+function _sendMessageWithResponse(
+  request: GetExternalPowerTracksRequest
 ): Promise<GetExternalPowerTracksResponse>;
-declare function _sendMessageWithResponse(
-  GetSymbolTableRequest
+function _sendMessageWithResponse(
+  request: GetSymbolTableRequest
 ): Promise<GetSymbolTableResponse>;
-declare function _sendMessageWithResponse(
-  QuerySymbolicationApiRequest
+function _sendMessageWithResponse(
+  request: QuerySymbolicationApiRequest
 ): Promise<QuerySymbolicationApiResponse>;
-declare function _sendMessageWithResponse(
-  GetPageFaviconsRequest
+function _sendMessageWithResponse(
+  request: GetPageFaviconsRequest
 ): Promise<GetPageFaviconsResponse>;
-declare function _sendMessageWithResponse(
-  OpenScriptInTabDebuggerRequest
+function _sendMessageWithResponse(
+  request: OpenScriptInTabDebuggerRequest
 ): Promise<OpenScriptInTabDebuggerResponse>;
-/* eslint-enable no-redeclare */
+function _sendMessageWithResponse(
+  request: Request
+): Promise<any> {
+  const requestId = _requestId++;
+  const type = request.type;
+
+  return new Promise((resolve, reject) => {
+    function listener(event: any) {
+      const { id, message } = event.detail;
+
+      // Don't trust the message too much, and do some checking for known properties.
+      if (
+        id === 'profiler.firefox.com' &&
+        message &&
+        typeof message === 'object'
+      ) {
+        _fixupOldResponseMessageIfNeeded(message);
+
+        // Make the type system assume that we have the right message.
+        const messageFromBrowser: MessageFromBrowser<ResponseFromBrowser> =
+          message as MessageFromBrowser<ResponseFromBrowser>;
+
+        if ('type' in messageFromBrowser && messageFromBrowser.type) {
+          if ('requestId' in messageFromBrowser && messageFromBrowser.requestId === requestId) {
+            if (process.env.NODE_ENV === 'development') {
+              console.log(
+                `[webchannel] %creceived response to "${type}"`,
+                LOG_STYLE,
+                messageFromBrowser
+              );
+            }
+            window.removeEventListener(
+              'WebChannelMessageToContent',
+              listener,
+              true
+            );
+
+            if (messageFromBrowser.type === 'SUCCESS_RESPONSE') {
+              resolve((messageFromBrowser as SuccessResponseMessageFromBrowser<ResponseFromBrowser>).response);
+            } else {
+              reject(new Error((messageFromBrowser as ErrorResponseMessageFromBrowser).error));
+            }
+          }
+        } else if ('error' in messageFromBrowser && typeof messageFromBrowser.error === 'string') {
+          // There was some kind of error with the message. This is expected for older
+          // versions of Firefox that don't have this WebChannel set up yet, or
+          // if the about:config preference points to a different URL.
+          console.error(
+            `[webchannel] %c${(messageFromBrowser as OutOfBandErrorMessageFromBrowser).error}`,
+            LOG_STYLE
+          );
+          window.removeEventListener(
+            'WebChannelMessageToContent',
+            listener,
+            true
+          );
+          reject(new WebChannelError(messageFromBrowser as OutOfBandErrorMessageFromBrowser));
+        }
+      } else {
+        reject(new Error('A malformed WebChannel event was received.'));
+        console.error(
+          `[webchannel] %cmalformed event received`,
+          LOG_STYLE,
+          event
+        );
+      }
+    }
+
+    window.addEventListener('WebChannelMessageToContent', listener, true);
+
+    // Add the requestId to the message.
+    _sendMessage({
+        requestId,
+        ...request,
+      } as MessageToBrowser);
+  });
+}
 
 /**
  * Ask the browser if the menu button is enabled.
@@ -218,7 +291,7 @@ export async function getSymbolTableViaWebChannel(
 }
 
 export async function getProfileViaWebChannel(): Promise<
-  ArrayBuffer | MixedObject,
+  ArrayBuffer | MixedObject
 > {
   return _sendMessageWithResponse({
     type: 'GET_PROFILE',
@@ -312,7 +385,7 @@ function _sendMessage(message: MessageToBrowser) {
 let _requestId = 0;
 
 export class WebChannelError extends Error {
-  name = 'WebChannelError';
+  override name = 'WebChannelError';
   errno: number;
   constructor(rawError: OutOfBandErrorMessageFromBrowser) {
     super(`${rawError.error} (errno: ${rawError.errno})`);
@@ -320,86 +393,6 @@ export class WebChannelError extends Error {
   }
 }
 
-// eslint-disable-next-line no-redeclare
-function _sendMessageWithResponse(
-  Request: Request
-): Promise<ResponseFromBrowser> {
-  const requestId = _requestId++;
-  const type = Request.type;
-
-  return new Promise((resolve, reject) => {
-    function listener(event) {
-      const { id, message } = event.detail;
-
-      // Don't trust the message too much, and do some checking for known properties.
-      if (
-        id === 'profiler.firefox.com' &&
-        message &&
-        typeof message === 'object'
-      ) {
-        _fixupOldResponseMessageIfNeeded(message);
-
-        // Make the type system assume that we have the right message.
-        const messageFromBrowser: MessageFromBrowser<ResponseFromBrowser> =
-          (message: any);
-
-        if (messageFromBrowser.type) {
-          if (messageFromBrowser.requestId === requestId) {
-            if (process.env.NODE_ENV === 'development') {
-              console.log(
-                `[webchannel] %creceived response to "${type}"`,
-                LOG_STYLE,
-                messageFromBrowser
-              );
-            }
-            window.removeEventListener(
-              'WebChannelMessageToContent',
-              listener,
-              true
-            );
-
-            if (messageFromBrowser.type === 'SUCCESS_RESPONSE') {
-              resolve(messageFromBrowser.response);
-            } else {
-              reject(new Error(messageFromBrowser.error));
-            }
-          }
-        } else if (typeof messageFromBrowser.error === 'string') {
-          // There was some kind of error with the message. This is expected for older
-          // versions of Firefox that don't have this WebChannel set up yet, or
-          // if the about:config preference points to a different URL.
-          console.error(
-            `[webchannel] %c${messageFromBrowser.error}`,
-            LOG_STYLE
-          );
-          window.removeEventListener(
-            'WebChannelMessageToContent',
-            listener,
-            true
-          );
-          reject(new WebChannelError(messageFromBrowser));
-        }
-      } else {
-        reject(new Error('A malformed WebChannel event was received.'));
-        console.error(
-          `[webchannel] %cmalformed event received`,
-          LOG_STYLE,
-          event
-        );
-      }
-    }
-
-    window.addEventListener('WebChannelMessageToContent', listener, true);
-
-    // Add the requestId to the message.
-    _sendMessage(
-      ({
-        requestId,
-        ...Request,
-      }: any)
-    );
-  });
-}
 
 // This can be removed once the oldest supported Firefox ESR version is 93 or newer.
 function _fixupOldResponseMessageIfNeeded(message: MixedObject) {
