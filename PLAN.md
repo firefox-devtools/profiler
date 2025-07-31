@@ -199,6 +199,14 @@ class Component extends PureComponent<Props> {
   state = { value: true };                 // Flow
   override state = { value: true };        // TypeScript
 }
+
+// Type annotations: (value: Type) → value as Type
+return (action.selectedThreads: Set<ThreadIndex>);  // Flow
+return action.selectedThreads as Set<ThreadIndex>;  // TypeScript
+
+// Generic constructors: Specify type parameters
+const items = new Set();                   // Flow (inferred)
+const items = new Set<ThreadIndex>();      // TypeScript (explicit)
 ```
 
 #### Common Utility Type Mappings
