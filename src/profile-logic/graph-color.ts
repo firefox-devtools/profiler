@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import {
   BLUE_50,
   BLUE_60,
@@ -26,7 +24,7 @@ import {
   YELLOW_60,
 } from 'photon-colors';
 
-import type { GraphColor } from 'firefox-profiler/types';
+import { GraphColor } from 'firefox-profiler/types';
 
 export function getStrokeColor(color: GraphColor) {
   switch (color) {
