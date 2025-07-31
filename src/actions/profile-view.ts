@@ -419,7 +419,7 @@ function toggleOneTrack(
         clickedTrack: trackInformation.trackReference,
         selection: selectedThreadIndexes,
       },
-    });
+    } as Action);
   };
 }
 
@@ -696,7 +696,7 @@ export function selectTrackFromTid(tid: Tid): ThunkAction<void> {
         break;
       }
       default:
-        throw assertExhaustiveCheck(trackReference.type);
+        throw assertExhaustiveCheck(trackReference.type as never);
     }
 
     dispatch(selectTrackWithModifiers(trackReference));
@@ -878,7 +878,11 @@ export function showProvidedTracks(
     // their children are going to be made visible.
     const globalTracks = getGlobalTracks(getState());
     for (const [globalTrackIndex, globalTrack] of globalTracks.entries()) {
-      if (globalTrack.pid && localTracksByPidToShow.has(globalTrack.pid)) {
+      if (
+        globalTrack.type === 'process' &&
+        globalTrack.pid &&
+        localTracksByPidToShow.has(globalTrack.pid)
+      ) {
         globalTracksToShow.add(globalTrackIndex);
       }
     }
@@ -960,7 +964,10 @@ export function hideProvidedTracks(
           pid
         );
 
-        if (globalTrack.mainThreadIndex === null) {
+        if (
+          globalTrack.type === 'process' &&
+          globalTrack.mainThreadIndex === null
+        ) {
           // Since the process has no main thread, the entire process should be hidden.
           dispatch(hideGlobalTrack(globalTrackIndex));
         }
@@ -1064,6 +1071,7 @@ export function isolateProcess(
       // Now look at all of the local tracks
       for (const localTrack of localTracks) {
         if (
+          localTrack.type === 'thread' &&
           localTrack.threadIndex !== undefined &&
           oldSelectedThreadIndexes.has(localTrack.threadIndex)
         ) {
@@ -1102,12 +1110,12 @@ export function isolateProcess(
 
     dispatch({
       type: 'ISOLATE_PROCESS',
-      hiddenGlobalTracks: new Set(
+      hiddenGlobalTracks: new Set<TrackIndex>(
         trackIndexes.filter((i) => i !== isolatedTrackIndex)
       ),
       isolatedTrackIndex,
       selectedThreadIndexes: newSelectedThreadIndexes,
-    });
+    } as Action);
   };
 }
 
@@ -1129,7 +1137,9 @@ export function isolateScreenshot(
       // Make sure that a thread really exists.
       return;
     }
-    const hiddenGlobalTracks = new Set(getHiddenGlobalTracks(getState()));
+    const hiddenGlobalTracks = new Set<TrackIndex>(
+      getHiddenGlobalTracks(getState())
+    );
     for (let i = 0; i < globalTracks.length; i++) {
       const track = globalTracks[i];
       if (track.type === 'screenshots' && i !== isolatedTrackIndex) {
@@ -1145,7 +1155,7 @@ export function isolateScreenshot(
     dispatch({
       type: 'ISOLATE_SCREENSHOT_TRACK',
       hiddenGlobalTracks,
-    });
+    } as Action);
   };
 }
 
@@ -1316,7 +1326,10 @@ export function hideLocalTrack(
       //       local tracks.
       //   2.) There is no main thread for the process, attempt to hide the
       //       processes' global track.
-      if (globalTrack.mainThreadIndex === null) {
+      if (
+        globalTrack.type === 'process' &&
+        globalTrack.mainThreadIndex === null
+      ) {
         // Since the process has no main thread, the entire process should be hidden.
         dispatch(hideGlobalTrack(globalTrackIndex));
         return;
@@ -1349,6 +1362,7 @@ export function hideLocalTrack(
 
       if (
         newSelectedThreadIndexes.size === 0 &&
+        globalTrack.type === 'process' &&
         globalTrack.mainThreadIndex !== null &&
         globalTrack.mainThreadIndex !== undefined
       ) {
@@ -1460,14 +1474,14 @@ export function isolateLocalTrack(
     dispatch({
       type: 'ISOLATE_LOCAL_TRACK',
       pid,
-      hiddenGlobalTracks: new Set(
+      hiddenGlobalTracks: new Set<TrackIndex>(
         globalTrackIndexes.filter((i) => i !== globalTrackIndex)
       ),
-      hiddenLocalTracks: new Set(
+      hiddenLocalTracks: new Set<TrackIndex>(
         localTrackIndexes.filter((i) => i !== isolatedTrackIndex)
       ),
       selectedThreadIndexes,
-    });
+    } as Action);
   };
 }
 
@@ -1932,7 +1946,7 @@ export function closeBottomBox(): ThunkAction<void> {
 }
 
 export function handleCallNodeTransformShortcut(
-  event: React.KeyboardEvent<>,
+  event: React.KeyboardEvent<HTMLElement>,
   threadsKey: ThreadsKey,
   callNodeIndex: IndexIntoCallNodeTable
 ): ThunkAction<void> {
