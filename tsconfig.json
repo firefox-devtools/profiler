@@ -27,6 +27,7 @@
     // Build & Performance
     "skipLibCheck": true,
     "isolatedModules": true,
+    "listFiles": false,
     "noEmit": true,
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo",
