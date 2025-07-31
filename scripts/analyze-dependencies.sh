@@ -7,8 +7,9 @@ set -e
 
 echo "🔍 Analyzing JavaScript files and their TypeScript dependencies..."
 
-# Find all .js files (excluding tests and node_modules)
-JS_FILES=$(find src -name "*.js" -not -path "*/test/*" -not -path "*/node_modules/*" | sort)
+# Find all .js files (excluding tests, libdefs, and node_modules)
+# Also exclude the special node-worker-contents.js file which must not be converted.
+JS_FILES=$(find src -name "*.js" -not -name "node-worker-contents.js" -not -path "*/libdef/*" -not -path "*/test/*" -not -path "*/node_modules/*" | sort)
 
 echo "📊 JavaScript files remaining for conversion:"
 echo "$JS_FILES" | wc -l | tr -d ' '
