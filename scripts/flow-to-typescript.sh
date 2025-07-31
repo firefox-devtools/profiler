@@ -82,16 +82,46 @@ sed 's/React\.Element</React.ReactElement</g' "$OUTPUT_FILE" > "$TEMP_FILE" && m
 # 8. Convert Flow object type casting ({}: Type → {} as Type)
 sed 's/({}:  *\([^)]*\))/({} as \1)/g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
 
+# 9. Convert React event types (encountered in LanguageSwitcher.tsx)
+sed 's/SyntheticEvent</React.ChangeEvent</g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
+sed 's/SyntheticMouseEvent</React.MouseEvent</g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
+sed 's/SyntheticKeyboardEvent</React.KeyboardEvent</g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
+
+# 10. Convert React.Node to React.ReactNode (React 18 compatibility)
+sed 's/React\.Node/React.ReactNode/g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
+
+# 11. Fix type object syntax (encountered in profile-metainfo.ts and TrackEventDelayGraph.tsx)
+# Convert type object properties from Flow comma syntax to TypeScript semicolon syntax
+# This is complex and may need manual review for multiline cases
+sed 's/readonly \([a-zA-Z_][a-zA-Z0-9_]*\): \([^,}]*\),$/readonly \1: \2;/g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
+
+# 12. Convert Flow spread types to TypeScript intersection types
+# Note: This is a simple case - complex spreads need manual review
+sed 's/type \([A-Za-z][A-Za-z0-9_]*\) = {\(.*\)\.\.\.\([A-Za-z][A-Za-z0-9_]*\),\(.*\)};/type \1 = \3 \& {\2\4};/g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
+
+# 13. Remove trailing commas from generic type parameters (TypeScript doesn't allow them)
+# Pattern: <Type1, Type2, Type3,> → <Type1, Type2, Type3>
+sed 's/,\([[:space:]]*\)>/\1>/g' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
+
 # Clean up any empty lines created by removing @flow
 sed '/^$/N;/^\n$/d' "$OUTPUT_FILE" > "$TEMP_FILE" && mv "$TEMP_FILE" "$OUTPUT_FILE"
 
 echo "✅ Enhanced Flow→TypeScript conversion complete!"
-echo "⚠️  Manual review required for:"
+echo "✅ Automatically handled:"
+echo "   - React event types (SyntheticEvent → React.ChangeEvent)"
+echo "   - React.Node → React.ReactNode compatibility"
+echo "   - Type object property syntax (comma → semicolon)"
+echo "   - Flow spread types → TypeScript intersection types (simple cases)"
+echo "   - Generic type parameter trailing commas removal"
+echo ""
+echo "⚠️  Manual review still required for:"
 echo "   - Complex multiline type definitions"
 echo "   - Generic constructor types (new Set() → new Set<T>())"  
 echo "   - React component overrides (add 'override' keyword)"
 echo "   - Function parameter types (add explicit parameter names)"
 echo "   - MarkerPayload property access (may need 'as any' casts)"
+echo "   - Complex spread type patterns (...Props in multiline types)"
+echo "   - State type annotations (state = {} → state: State = {})"
 echo ""
 echo "🔧 Next steps:"
 echo "   1. Run 'yarn typecheck' to validate"
