@@ -2,23 +2,12 @@
 
 ## Current Status (July 30, 2025)
 
-### 🎉 MAJOR MILESTONE ACHIEVED!
-
-**ALL UTILITY FILES SUCCESSFULLY MIGRATED TO TYPESCRIPT** ✅
-
-This represents a significant achievement in the Flow→TypeScript migration:
-
-- **100% of utility files converted** (41/41 files)
-- **Complex Flow features successfully translated** including `$ObjMap`, `$Call`, generic bounds
-- **All tests continue to pass** - no functionality broken during migration
-- **Advanced type safety maintained** with proper TypeScript equivalents
-
 ### 📊 Progress Summary
 
 - **Type Definitions**: ✅ 13/13 files complete (100%)
 - **Core Utilities**: ✅ 41/41 files complete (100%)
 - **React Components**: ✅ 22/150+ files complete (14.7%) - Warning.tsx, BlobUrlLink.tsx, FooterLinks.tsx, DebugWarning.tsx, EmptyReasons.tsx, Icon.tsx, ContextMenuTrigger.tsx, ContextMenuNoHidingOnEnter.tsx, UploadedRecordingsHome.tsx, TransformNavigator.tsx, TrackEventDelay.tsx, JsTracerEmptyReasons.tsx, CodeLoadingOverlay.tsx, ProfileMetaInfoSummary.tsx, MarkerTableEmptyReasons.tsx, MarkerChartEmptyReasons.tsx, NetworkChartEmptyReasons.tsx, ContextMenu.tsx, BeforeUnloadManager.tsx, Root.tsx, InnerNavigationLink.tsx
-- **Profile Logic**: ⏳ 0/80+ files - Core business logic modules
+- **Profile Logic**: ⏳ 2/80+ files - Core business logic modules
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 
 ### 🎯 **NEW PRIORITY: Strict TypeScript Enforcement**
@@ -114,14 +103,15 @@ yarn typecheck-all  # Uses default tsconfig.json
 
 ### File Conversion Steps - MUST FOLLOW IN ORDER
 
-1. Copy `.js` → `.ts/.tsx`
+1. Copy `.js` → `.ts/.tsx` using the `cp` command.
 2. Remove `// @flow`
-3. Apply conversion patterns (see below)
-4. **CRITICAL**: Test compilation: `yarn typecheck` (project-wide is fastest)
-5. **CRITICAL**: Fix ALL compilation errors before proceeding
-6. Only after successful compilation, remove original `.js` file
-7. Run tests to ensure no regressions
-8. **CRITICAL**: Run `yarn prettier-fix` prior to committing.
+3. **CRITICAL**: Test compilation: `yarn typecheck` (project-wide is fastest)
+4. **CRITICAL**: Do not rewrite the file from scratch. Check errors first and then make tightly-scoped edits.
+5. Apply conversion patterns (see below)
+6. **CRITICAL**: Fix ALL compilation errors before proceeding
+7. Only after successful compilation, remove original `.js` file
+8. Run tests to ensure no regressions
+9. **CRITICAL**: Run `yarn prettier-fix` prior to committing.
 
 ### ⚡ Efficient Commands (Use These)
 
@@ -129,11 +119,11 @@ yarn typecheck-all  # Uses default tsconfig.json
 # TypeScript compilation check (fast, use this)
 yarn typecheck
 
-# Combined check, remove, and test in one command (most efficient)
-yarn typecheck && rm src/utils/filename.js && yarn test
+# Combined check, test, and remove in one command (most efficient)
+yarn typecheck && yarn test && rm src/utils/filename.js
 
 # Batch operations for multiple files
-yarn typecheck && rm src/utils/file1.js src/utils/file2.js && yarn test
+yarn typecheck && yarn test && rm src/utils/file1.js src/utils/file2.js
 
 # Stage and commit changes
 git add -A
