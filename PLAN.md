@@ -183,6 +183,38 @@ yarn test  # Run together instead
 
 ### Key Flow→TypeScript Conversion Patterns
 
+#### Recent Discoveries (August 2025)
+
+```typescript
+// API validation with unknown types
+function validate(result: unknown): APIType {
+  // Runtime validation
+  if (!isObject(result) || !('property' in (result as object))) {
+    throw new Error('Invalid structure');
+  }
+  // Type assertion after validation
+  return result as APIType;
+}
+
+// Index signatures require key names in TypeScript
+type FlowType = { [string]: boolean };     // Flow
+type TSType = { [key: string]: boolean };  // TypeScript
+
+// MixedObject → unknown (more type-safe than any)
+callback: () => Promise<MixedObject>       // Flow
+callback: () => Promise<unknown>           // TypeScript
+
+// void vs undefined return types
+function compute(): Float64Array | void    // Flow (problematic)
+function compute(): Float64Array | undefined  // TypeScript (correct)
+
+// Parameter typing in arrow functions
+const isObject = (subject) => ...          // Implicit any
+const isObject = (subject: unknown) => ... // Explicit type
+```
+
+### Key Flow→TypeScript Conversion Patterns
+
 #### Essential Changes
 
 ```typescript
@@ -252,6 +284,42 @@ Some of the converted types will not have been exercised yet; a newly-converted 
 - `yarn typecheck:strict` - Strict TypeScript checking (current focus)
 - `yarn typecheck` - Regular TypeScript checking for converted files
 - `yarn test-all` - Full validation (must pass after each conversion)
+
+## 🚀 Enhanced Tooling (Added August 2025)
+
+New automation scripts for more efficient migration:
+
+### Conversion Tools
+- `./scripts/flow-to-typescript-enhanced.sh <file.js>` - Enhanced conversion with better error handling
+  - Handles MixedObject → unknown automatically
+  - Fixes index signature syntax [string] → [key: string]
+  - Adds parameter types for common patterns
+  - Auto-detects and warns about remaining issues
+  
+### Analysis Tools  
+- `./scripts/analyze-dependencies.sh` - Analyzes JS files by dependency count and size
+  - Identifies files with 0 JS dependencies (🟢 ready to convert)
+  - Ranks by conversion difficulty 
+  - Helps prioritize conversion order
+
+### Batch Processing
+- `./scripts/auto-convert-batch.sh` - Automated batch conversion with validation
+  - Converts multiple small files automatically
+  - Tests each conversion (typecheck + tests)
+  - Reverts failed conversions automatically
+  - Only commits successful conversions
+
+### Usage Pattern
+```bash
+# 1. Analyze remaining files
+./scripts/analyze-dependencies.sh | head -20
+
+# 2. Either convert individual files:
+./scripts/flow-to-typescript-enhanced.sh src/path/to/file.js
+
+# 3. Or batch convert easy files:
+./scripts/auto-convert-batch.sh
+```
 
 ---
 

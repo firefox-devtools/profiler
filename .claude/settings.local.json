@@ -29,7 +29,8 @@
       "Bash(yarn lint-fix)",
       "Bash(npm i:*)",
       "Bash(yarn typecheck:*)",
-      "Bash(./scripts/flow-to-typescript.sh:*)"
+      "Bash(./scripts/flow-to-typescript.sh:*)",
+      "Bash(chmod:*)"
     ],
     "deny": []
   }
