@@ -116,15 +116,16 @@ The imported module is either a file that needs to converted, or it is an npm de
 
 ### File Conversion Steps - MUST FOLLOW IN ORDER
 
-1. Copy `.js` → `.ts/.tsx` using the `cp` command.
-2. Remove `// @flow`
-3. **CRITICAL**: Test compilation: `yarn typecheck` (project-wide is fastest)
-4. **CRITICAL**: Do not rewrite the file from scratch. Check errors first and then make tightly-scoped edits.
-5. Apply conversion patterns (see below)
-6. **CRITICAL**: Fix ALL compilation errors before proceeding
-7. Only after successful compilation, remove original `.js` file
-8. Run tests to ensure no regressions
-9. **CRITICAL**: Run `yarn prettier-fix` prior to committing.
+1. **OPTION A - Manual**: Copy `.js` → `.ts/.tsx` using the `cp` command, then manually apply conversions
+2. **OPTION B - Automated**: Use the conversion script: `./scripts/flow-to-typescript.sh <file.js>`
+3. **Either way**: Remove `// @flow` (done automatically by script)
+4. **CRITICAL**: Test compilation: `yarn typecheck` (project-wide is fastest)
+5. **CRITICAL**: Do not rewrite the file from scratch. Check errors first and then make tightly-scoped edits.
+6. Apply remaining conversion patterns manually (see below)
+7. **CRITICAL**: Fix ALL compilation errors before proceeding
+8. Only after successful compilation, remove original `.js` file
+9. Run tests to ensure no regressions
+10. **CRITICAL**: Run `yarn prettier-fix` prior to committing.
 
 ### npm Dependency Declaration Files
 
