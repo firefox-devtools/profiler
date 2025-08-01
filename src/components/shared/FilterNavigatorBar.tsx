@@ -70,48 +70,52 @@ export class FilterNavigatorBar extends React.PureComponent<Props> {
   override render() {
     const { className, items, selectedItem, uncommittedItem, onPop } =
       this.props;
+
+    const transitions = items.map((item, i) => (
+      <CSSTransition
+        key={i}
+        classNames="filterNavigatorBarTransition"
+        timeout={250}
+      >
+        <FilterNavigatorBarListItem
+          index={i}
+          onClick={i === items.length - 1 && !uncommittedItem ? null : onPop}
+          isFirstItem={i === 0}
+          isLastItem={i === items.length - 1}
+          isSelectedItem={i === selectedItem}
+        >
+          {item}
+        </FilterNavigatorBarListItem>
+      </CSSTransition>
+    ));
+
+    if (uncommittedItem) {
+      transitions.push(
+        <CSSTransition
+          key={items.length}
+          classNames="filterNavigatorBarUncommittedTransition"
+          timeout={0}
+        >
+          <FilterNavigatorBarListItem
+            index={items.length}
+            isFirstItem={false}
+            isLastItem={true}
+            isSelectedItem={false}
+            additionalClassName="filterNavigatorBarUncommittedItem"
+            title={uncommittedItem}
+          >
+            {uncommittedItem}
+          </FilterNavigatorBarListItem>
+        </CSSTransition>
+      );
+    }
+
     return (
       <TransitionGroup
         component="ol"
         className={classNames('filterNavigatorBar', className)}
       >
-        {items.map((item, i) => (
-          <CSSTransition
-            key={i}
-            classNames="filterNavigatorBarTransition"
-            timeout={250}
-          >
-            <FilterNavigatorBarListItem
-              index={i}
-              onClick={
-                i === items.length - 1 && !uncommittedItem ? null : onPop
-              }
-              isFirstItem={i === 0}
-              isLastItem={i === items.length - 1}
-              isSelectedItem={i === selectedItem}
-            >
-              {item}
-            </FilterNavigatorBarListItem>
-          </CSSTransition>
-        ))}
-        {uncommittedItem ? (
-          <CSSTransition
-            key={items.length}
-            classNames="filterNavigatorBarUncommittedTransition"
-            timeout={0}
-          >
-            <FilterNavigatorBarListItem
-              index={items.length}
-              isFirstItem={false}
-              isLastItem={true}
-              isSelectedItem={false}
-              additionalClassName="filterNavigatorBarUncommittedItem"
-              title={uncommittedItem}
-            >
-              {uncommittedItem}
-            </FilterNavigatorBarListItem>
-          </CSSTransition>
-        ) : null}
+        {transitions}
       </TransitionGroup>
     );
   }
