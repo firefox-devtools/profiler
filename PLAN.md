@@ -328,15 +328,19 @@ Some of the converted types will not have been exercised yet; a newly-converted 
 
 ## Conversion Script Notes
 
-The `flow-to-typescript-unified.sh` script handles most conversions automatically. Key manual fixes typically needed:
+The `flow-to-typescript-unified.sh` script handles most conversions automatically. Recent improvements (August 2025) include:
 
-- Add `override` modifiers to React component methods
-- Convert `mixed` → `unknown` 
-- Fix function parameter names in type definitions
-- Handle React event types and boolean attributes
-- Add type parameters to generic constructors
+**✅ Automated Fixes:**
+- React `override` modifiers (render, componentDidMount, state)
+- HTML boolean attributes → React boolean props (`required="required"` → `required={true}`)
+- TimeoutID/IntervalID → NodeJS.Timeout type mapping
+- Enhanced React event type conversions
+- Improved function parameter name handling
 
-**Fixed Issues**: Object literal semicolon bug resolved (August 2025)
+**Key manual fixes that may still be needed:**
+- Add type parameters to generic constructors (`new Set()` → `new Set<Type>()`)
+- Add 'as const' for literal type inference
+- Convert commas to semicolons in type/interface definitions only
 
 ---
 
