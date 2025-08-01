@@ -7,8 +7,8 @@ import { CssPixels } from 'firefox-profiler/types';
 import { getResizeObserverWrapper } from 'firefox-profiler/utils/resize-observer-wrapper';
 
 type State = {
-  width: CssPixels,
-  height: CssPixels,
+  width: CssPixels;
+  height: CssPixels;
 };
 
 export type SizeProps = Readonly<State>;
@@ -31,8 +31,10 @@ export type SizeProps = Readonly<State>;
 export function withSize<
   // The SizeProps act as a bounds on the generic props. This ensures that the props
   // that passed in take into account they are being given the width and height.
-  Props extends Readonly<SizeProps>
->(Wrapped: React.ComponentType<Props>): React.ComponentType<
+  Props extends Readonly<SizeProps>,
+>(
+  Wrapped: React.ComponentType<Props>
+): React.ComponentType<
   // The component that is returned does not accept width and height parameters, as
   // they are injected by this higher order component.
   Readonly<Omit<Props, keyof SizeProps>>
@@ -41,7 +43,10 @@ export function withSize<
   // use a hook instead.
   // See: https://github.com/firefox-devtools/profiler/issues/3062
   // eslint-disable-next-line flowtype/no-existential-type
-  return class WithSizeWrapper extends React.PureComponent<Omit<Props, keyof SizeProps>, State> {
+  return class WithSizeWrapper extends React.PureComponent<
+    Omit<Props, keyof SizeProps>,
+    State
+  > {
     override state = { width: 0, height: 0 };
     _container: HTMLElement | null;
 
@@ -72,7 +77,7 @@ export function withSize<
       this._container = null;
     }
 
-    _updateSize(container: HTMLElement, contentRect: DOMRectReadOnly) {
+    _updateSize(_container: HTMLElement, contentRect: DOMRectReadOnly) {
       this.setState({
         width: contentRect.width,
         height: contentRect.height,

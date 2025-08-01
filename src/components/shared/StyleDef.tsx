@@ -44,7 +44,7 @@ export class StyleDef extends PureComponent<StyleDefProps> {
     }
   }
 
-  override render() {
+  override render(): null {
     // The <StyleDef> itself should not appear in the DOM.
     return null;
   }
@@ -56,7 +56,7 @@ type BackgroundImageStyleDefProps = {
 };
 
 export class BackgroundImageStyleDef extends PureComponent<BackgroundImageStyleDefProps> {
-  override render() {
+  override render(): React.ReactElement {
     const content = `
       .${this.props.className} {
         background-image: url(${this.props.url});

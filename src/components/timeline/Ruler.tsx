@@ -13,18 +13,14 @@ import {
 
 import './Ruler.css';
 
-import {
-  Milliseconds,
-  CssPixels,
-  TimelineUnit,
-} from 'firefox-profiler/types';
+import { Milliseconds, CssPixels, TimelineUnit } from 'firefox-profiler/types';
 
 type Props = {
-  readonly zeroAt: Milliseconds,
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
-  readonly width: CssPixels,
-  readonly unit: TimelineUnit,
+  readonly zeroAt: Milliseconds;
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly width: CssPixels;
+  readonly unit: TimelineUnit;
 };
 
 export class TimelineRuler extends PureComponent<Props> {
@@ -35,7 +31,11 @@ export class TimelineRuler extends PureComponent<Props> {
     return findRoundMillisecondsValueGreaterOrEqualTo(minLength);
   }
 
-  _getNotches() {
+  _getNotches(): {
+    notches: Array<{ time: number; pos: number }>;
+    notchTime: number;
+    unit: string;
+  } {
     if (this.props.width === 0) {
       return { notches: [], notchTime: 0, unit: 'ms' };
     }
@@ -47,7 +47,7 @@ export class TimelineRuler extends PureComponent<Props> {
     const notchTime = this._pickNotchLength(unit, minMillisecondsPerNotch);
     const firstNotchIndex = Math.ceil((rangeStart - zeroAt) / notchTime);
     const lastNotchIndex = Math.floor((rangeEnd - zeroAt) / notchTime);
-    const notches = [];
+    const notches: Array<{ time: number; pos: number }> = [];
     for (let i = firstNotchIndex; i <= lastNotchIndex; i++) {
       notches.push({
         time: i * notchTime,
@@ -62,7 +62,11 @@ export class TimelineRuler extends PureComponent<Props> {
     return (
       <div
         className="timelineRuler"
-        style={{ '--timeline-ruler-height': `${TIMELINE_RULER_HEIGHT}px` } as React.CSSProperties}
+        style={
+          {
+            '--timeline-ruler-height': `${TIMELINE_RULER_HEIGHT}px`,
+          } as React.CSSProperties
+        }
       >
         <ol className="timelineRulerContainer">
           {notches.map(({ time, pos }, i) => (

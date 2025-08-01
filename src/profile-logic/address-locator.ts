@@ -26,7 +26,7 @@ import { LibMapping } from 'firefox-profiler/types';
 
 export class AddressLocator {
   _libs: LibMapping[];
-  _libRanges: Array<{ baseAddress: bigint, start: bigint, end: bigint }>;
+  _libRanges: Array<{ baseAddress: bigint; start: bigint; end: bigint }>;
 
   /**
    * Create an AddressLocator for an array of libs.
@@ -56,7 +56,10 @@ export class AddressLocator {
    * @param {string} addressHexString The address, as a hex string, including the leading "0x".
    * @return {Object} The library object (and its index) if found, and the address relative to that library.
    */
-  locateAddress(addressHexString: string): { lib: LibMapping | null; relativeAddress: number } {
+  locateAddress(addressHexString: string): {
+    lib: LibMapping | null;
+    relativeAddress: number;
+  } {
     // Diagram of the various offsets and spaces:
     //
     //  process virtual memory
