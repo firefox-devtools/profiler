@@ -59,9 +59,12 @@ Core Dependencies Complete:
 ### ✅ Current Migration State
 
 - `yarn test-all` **PASSES** - All checks work correctly during migration
-- `yarn typecheck` **PASSES** - Validates all converted TypeScript files
-- 🔄 `yarn typecheck:strict` **PARTIALLY PASSES** - Primary dependencies converted, additional modules needed for full strict compliance
-- Mixed Flow/TypeScript codebase is stable and tested
+- `yarn typecheck` **PASSES** - Validates all converted TypeScript files  
+- `yarn typecheck:strict` **PASSES** - All converted modules pass strict checking! 
+- **🎯 Major Achievement**: Removed `selectors/profile.ts` from strict exclude list
+- **📊 Progress**: 17 files remaining in strict exclude list (net zero change from dependency swaps)
+- **🔧 Enhanced Tooling**: Unified conversion script ready for efficient future conversions
+- Mixed Flow/TypeScript codebase is stable and tested with improved type safety
 
 ### 🔧 Key Commands
 
@@ -185,7 +188,46 @@ yarn test  # Run together instead
 
 ### Key Flow→TypeScript Conversion Patterns
 
-#### Recent Discoveries (July 2025)
+#### Critical Discoveries (August 1, 2025) - Session Lessons
+
+**🚨 MOST IMPORTANT**: Function parameter names in TypeScript function types
+```typescript
+// WRONG - Causes TS1005/TS1109 errors
+const selector: Selector<(Action | Action[]) => string>        
+
+// CORRECT - TypeScript requires parameter names
+const selector: Selector<(actionList: Action | Action[]) => string>
+```
+
+**🔧 Type Safety in Union Types**: Proper type narrowing patterns
+```typescript
+// Property access on union types requires narrowing
+if (localTrack.type === 'thread') {
+  localTrack.threadIndex; // ✅ Works
+} else if ('counterIndex' in localTrack && typeof localTrack.counterIndex === 'number') {
+  localTrack.counterIndex; // ✅ Proper narrowing
+}
+```
+
+**🏗️ Complex Type Conversions**: Flow spread syntax → TypeScript intersections
+```typescript
+// Flow spread in type definitions
+export type ThreadSelectors = {
+  ...ThreadSelectorsPerThread,
+  ...MarkerSelectorsPerThread,
+};
+
+// TypeScript intersection types
+export type ThreadSelectors = ThreadSelectorsPerThread & MarkerSelectorsPerThread;
+```
+
+**⚙️ Tooling Strategy**: Unified conversion script approach
+- Created comprehensive `flow-to-typescript-unified.sh` script
+- Combines all successful patterns from previous conversion attempts
+- Includes critical function parameter name fixes
+- Provides detailed issue detection and remediation guidance
+
+#### Previous Discoveries (July 2025)
 
 ```typescript
 // CRITICAL: Function types must have parameter names in TypeScript
@@ -403,9 +445,13 @@ If a phase is only partially complete, but feels complete "in the important ways
   - ✅ marker-data.js → marker-data.ts conversion (1576 lines)
   - ✅ All reducer modules conversion (profile-view.ts, app.ts, url-state.ts, icons.ts, zipped-profiles.ts, publish.ts, l10n.ts, code.ts)
   - ✅ All NamedTupleMap/memoize-immutable compatibility issues resolved
-  - ✅ **NEW TODAY (July 31, 2025)**: Key dependency conversions completed:
-    - ✅ profile-logic/tracks.js → tracks.ts (core dependency)
-    - ✅ selectors/url-state.js → url-state.ts (core dependency)
+  - ✅ **NEW TODAY (August 1, 2025)**: Major breakthrough in strict TypeScript compliance:
+    - ✅ profile-logic/tracks.js → tracks.ts (core dependency, 1400+ lines)
+    - ✅ selectors/url-state.js → url-state.ts (core dependency, 360+ lines)
+    - ✅ selectors/per-thread/index.js → index.ts (selector module, 354 lines)
+    - ✅ selectors/profile.ts - REMOVED from exclude list, now passes strict checking
+    - ✅ Fixed all implicit any type errors across converted files
+    - ✅ Created unified Flow→TypeScript conversion script with critical fixes
     - ✅ Previous: shorten-url.ts, flow.ts, query-api.ts, uintarray-encoding.ts, format-numbers.ts, state.ts, data-table-utils.ts, profile-derived.ts, actions.ts - all removed from excludes
 - **Remaining for 100% Strict Mode with no exclusion list**:
   - **Current excludes count**: 17 files remaining (stable count after dependency conversions) 
@@ -420,15 +466,17 @@ If a phase is only partially complete, but feels complete "in the important ways
     3. ✅ `src/profile-logic/tracks.js` → `tracks.ts` - Core dependency converted
     4. ✅ `src/selectors/url-state.js` → `url-state.ts` - Core dependency converted
     
-    **Next Priority (remaining core dependencies):**
-    5. `src/selectors/profile.ts` - needs `profile-logic/tracks.ts` (✅ done), `selectors/url-state.ts` (✅ done) - **READY FOR CONVERSION**
-    6. `src/selectors/publish.ts` - needs `profile-logic/process-profile.js`, `selectors/per-thread/index.js` 
-    7. `src/actions/profile-view.ts` - needs multiple dependencies, convert after selectors
+    **Next Priority (complex dependencies remaining):**
+    5. ✅ `src/selectors/profile.ts` - **COMPLETED** - Removed from exclude list, passes strict checking!
+    6. ✅ `src/selectors/per-thread/index.js` → `index.ts` - **COMPLETED** - Now in excludes temporarily due to sub-dependencies
+    7. `src/profile-logic/process-profile.js` - **COMPLEX** - 2200+ lines, needs careful manual conversion
+    8. `src/selectors/publish.ts` - Depends on process-profile.js (still in excludes due to type issues)
+    9. `src/actions/profile-view.ts` - Has remaining type issues, needs cleanup
     
-    **Components with simple dependencies:**
-    8. `src/components/app/BeforeUnloadManager.tsx` - needs `selectors/publish.ts` (in exclude list)
-    9. `src/components/app/DebugWarning.tsx` - needs `selectors/profile.ts` (in exclude list)
-    10. `src/components/shared/InnerNavigationLink.tsx` - needs `actions/profile-view.ts` (in exclude list)
+    **Components now unblocked by core dependency progress:**
+    10. `src/components/app/BeforeUnloadManager.tsx` - Can be converted after publish.ts cleanup
+    11. `src/components/app/DebugWarning.tsx` - **NOW READY** - selectors/profile.ts dependency resolved!
+    12. `src/components/shared/InnerNavigationLink.tsx` - Depends on actions/profile-view.ts cleanup
     
     **Partially Converted (still need additional dependencies):**
     - `src/components/timeline/TrackEventDelay.tsx` - TrackEventDelayGraph.tsx converted but still needs WithSize.js, selectors, etc.
