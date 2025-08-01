@@ -7,69 +7,25 @@ to proceed with the next step of the migration.
 
 ## Current Status (August 1, 2025)
 
-### 📊 Progress Summary
+### Progress Summary
 
-- **Type Definitions**: ✅ 13/13 files complete (100%)
-- **Core Utilities**: ✅ 41/41 files complete (100%)
-- **React Components**: ✅ 28/150+ files complete (18.7%)
-- **Core Dependencies**: ✅ 23/23 files complete (100%) - COMPLETE! 🎉
-  - ✅ Completed: tabs-handling.ts, call-node-info.ts, zip-files.ts, browser-connection.ts, uploaded-profiles-db.ts, stack-timing.ts, web-channel.ts, url-handling.ts, symbolication.ts, reducers/index.ts, symbol-store-db.ts, symbol-store.ts, function-info.ts, app.ts, profile-view.ts, url-state.ts, sanitize.ts, profile-compacting.ts, marker-schema.tsx, marker-data.ts
-  - ✅ **NEW TODAY (11 files, 869 lines)**: profile-logic/profile-metainfo.ts, components/timeline/TrackEventDelayGraph.tsx, components/app/LanguageSwitcher.tsx, sidebar/CanSelectContent.tsx, tooltip/TooltipDetails.tsx, app/ProfileRootMessage.tsx, shared/StyleDef.tsx, types/globals/Window.d.ts, shared/TrackSearchField.tsx, shared/Backtrace.tsx, app/TabBar.tsx, shared/IdleSearchField.tsx, shared/PanelSearch.tsx, tooltip/Tooltip.tsx
-  - 📋 All core dependencies now converted to TypeScript!
-- **Build System**: ✅ Mixed Flow/TypeScript support working correctly
-- **🔧 Migration Tooling**: ✅ Enhanced dependency analysis with Node.js implementation
+- **Type Definitions**: 13/13 files complete (100%)
+- **Core Utilities**: 41/41 files complete (100%)  
+- **React Components**: ~38/150+ files complete (~25%)
+- **Core Dependencies**: All major blocking files converted
+- **Build System**: Mixed Flow/TypeScript support working
+- **Migration Tooling**: Enhanced dependency analysis available
 
-### 🎯 **CURRENT PRIORITY: Complete Strict TypeScript Compliance**
+### Current Priority: Continue Component Migration
 
-**Strategy**: Achieved strict TypeScript compliance for all core dependencies. All major blocking files converted!
+**Strategy**: Core dependencies converted, focus on React components using dependency-first approach.
 
-**🎉 MAJOR BREAKTHROUGH: Core Dependencies Converted**
+### Migration Status
 
-```
-✅ COMPLETED:
-- Fixed all implicit any types in profile-data.ts
-- Fixed all implicit any types in symbol-store.ts
-- Fixed all implicit any types in transforms.ts
-- Fixed type issues in format-numbers.ts and uintarray-encoding.ts
-- Created namedtuplemap type declaration
-- All tests passing with strict TypeScript checking
-- ✅ PREVIOUS: Converted 5 reducer files to TypeScript:
-  - icons.js → icons.ts
-  - l10n.js → l10n.ts
-  - code.js → code.ts
-  - publish.js → publish.ts
-  - zipped-profiles.js → zipped-profiles.ts
-- ✅ NEW: Converted 7 major core files to TypeScript (5220 lines total):
-  - app.js → app.ts (377 lines)
-  - profile-view.js → profile-view.ts (839 lines)
-  - url-state.js → url-state.ts (733 lines)
-  - sanitize.js → sanitize.ts (654 lines)
-  - profile-compacting.js → profile-compacting.ts (342 lines)
-  - marker-schema.js → marker-schema.tsx (699 lines)
-  - marker-data.js → marker-data.ts (1576 lines) ✅ COMPLETED!
-
-Core Dependencies Complete:
-- ✅ ALL 20 core dependency files converted to TypeScript
-- ✅ FIXED: NamedTupleMap/memoize-immutable compatibility issue
-- ✅ FIXED: favicon property type issue
-- ✅ FIXED: MarkerPayload indexing with `as any` casts
-```
-
-**Achievement**: All core dependencies converted! `yarn typecheck:strict` now passes for all converted modules with strict TypeScript compliance.
-
-### ✅ Current Migration State
-
-- `yarn test-all` **PASSES** - All checks work correctly during migration
-- `yarn typecheck` **PASSES** - Validates all converted TypeScript files  
-- `yarn typecheck:strict` **PASSES** - All converted modules pass strict checking! 
-- **🎯 Major Achievement**: Removed `selectors/profile.ts` from strict exclude list
-- **📊 Progress**: 17 files remaining in strict exclude list (net zero change from dependency swaps)
-- **🔧 Enhanced Tooling**: 
-  - ✅ Unified conversion script ready for efficient future conversions
-  - ✅ **NEW**: Enhanced dependency analysis with Node.js implementation
-  - ✅ **NEW**: Accurate transitive dependency calculation for optimal conversion planning
-  - ✅ **NEW**: Comprehensive analysis of both JS and TS files with strict type checking status
-- Mixed Flow/TypeScript codebase is stable and tested with improved type safety
+- `yarn test-all` passes - All checks work correctly
+- `yarn typecheck` passes - TypeScript files compile  
+- `yarn typecheck:strict` passes - Strict checking for converted modules
+- Mixed Flow/TypeScript codebase is stable
 
 ### 🔧 Key Commands
 
@@ -362,147 +318,25 @@ Some of the converted types will not have been exercised yet; a newly-converted 
 - `yarn typecheck` - Regular TypeScript checking for converted files
 - `yarn test-all` - Full validation (must pass after each conversion)
 
-## 🚀 Comprehensive Migration Tooling
+## Migration Tools
 
-Complete automation toolkit for efficient TypeScript migration:
-
-### Core Conversion Tools
-- **`./scripts/flow-to-typescript-unified.sh <file.js>`** - 🌟 **RECOMMENDED** - Unified script with all learnings
-  - ✅ Fixes critical function parameter name issue (TS1005/TS1109 errors)
-  - ✅ Handles MixedObject → unknown, index signatures, trailing commas
-  - ✅ Comprehensive React type conversions
-  - ✅ Auto-detects remaining issues with detailed warnings
-  - ✅ Includes all successful patterns from both previous scripts
-- `./scripts/flow-to-typescript.sh <file.js>` - Original comprehensive script (fallback)
-- `./scripts/flow-to-typescript-enhanced.sh <file.js>` - Enhanced error handling (legacy)
-
-### Analysis & Planning Tools  
-- **`./scripts/analyze-dependencies.sh`** - ✅ **Enhanced Node.js implementation** - Analyzes both JS and TS files
-  - 🟢 **57 JS files ready for immediate conversion** (no transitive dependencies)
-  - 🟡 **Files with 1-2 transitive dependencies** (moderate difficulty)
-  - 🔴 **136 files blocked by dependencies** (convert dependencies first)
-  - 📊 **107 TS files may need strict type checking fixes**
-  - ✅ **Computes both direct and transitive dependencies** with improved accuracy
-  - ✅ **Handles firefox-profiler/* path mapping** and relative imports correctly
-  - Essential for planning conversion order and tracking progress
-- `./scripts/migrate-exact-objects.sh` - Bulk conversion of Flow exact objects `{|...|}` → `{...}`
-
-### Batch Processing
-- **`./scripts/auto-convert-batch.sh`** - Automated batch conversion with validation
-  - Converts multiple small files automatically
-  - Tests each conversion (typecheck + tests)
-  - Reverts failed conversions automatically
-  - Only commits successful conversions
-
-### Optimal Workflow
-```bash
-# 1. Analyze conversion opportunities
-./scripts/analyze-dependencies.sh | head -20
-
-# 2. For individual files (RECOMMENDED):
-./scripts/flow-to-typescript-unified.sh src/path/to/file.js
-
-# 3. For bulk conversion of simple files:
-./scripts/auto-convert-batch.sh
-
-# 4. For exact object type cleanup (one-time):
-./scripts/migrate-exact-objects.sh
-```
+**Conversion**: `./scripts/flow-to-typescript-unified.sh <file.js>` - Primary conversion script
+**Analysis**: `./scripts/analyze-dependencies.sh` - Shows files ready for conversion by dependency count  
+**Batch**: `./scripts/auto-convert-batch.sh` - Converts multiple files automatically
 
 ---
 
-## 🛠️ Conversion Script Issues & Future Improvements
+## Conversion Script Notes
 
-### Issues Discovered During August 1, 2025 Session
+The `flow-to-typescript-unified.sh` script handles most conversions automatically. Key manual fixes typically needed:
 
-The `flow-to-typescript-unified.sh` script has been working well overall, but several recurring issues were identified that require manual fixes:
+- Add `override` modifiers to React component methods
+- Convert `mixed` → `unknown` 
+- Fix function parameter names in type definitions
+- Handle React event types and boolean attributes
+- Add type parameters to generic constructors
 
-#### **Critical Issues (High Priority for Script Updates)**
-
-1. **Object Literal Semicolon Bug** - ✅ **FIXED (August 1, 2025)**
-   ```typescript
-   // Script was incorrectly converting:
-   { property: value, other: value2 }
-   // Into:
-   { property: value; other: value2; }
-   
-   // This has been fixed by disabling the problematic transformations
-   ```
-   **Impact**: Previously affected every file with object literals (className props, state objects, etc.)
-   **Fix applied**: Disabled overly broad comma→semicolon transformations, added manual conversion guidance
-
-2. **Function Parameter Name Issues**
-   ```typescript
-   // Script converts Flow function types incorrectly:
-   readonly onFocus?: () => void  // Should be this
-   readonly onFocus?: (param: ) => void  // Script generates this (invalid)
-   ```
-   **Impact**: Functions with no parameters get invalid syntax
-   **Fix needed**: Better parameter detection for void functions
-
-3. **Missing Override Modifiers**
-   ```typescript
-   // Script doesn't add override for:
-   state = { ... };                // Class state property
-   componentDidMount() { ... }     // Lifecycle methods
-   render() { ... }               // Render method
-   ```
-   **Impact**: Every React component needs manual override additions
-   **Fix needed**: Detect and add override modifiers automatically
-
-#### **Medium Priority Issues**
-
-4. **Boolean Attribute Conversion**
-   ```typescript
-   // HTML boolean attributes not converted:
-   required="required"  // Should become: required={true}
-   ```
-   **Impact**: Form components fail TypeScript compilation
-   **Fix needed**: Detect and convert HTML boolean attributes
-
-5. **TimeoutID Type Issues**
-   ```typescript
-   // Flow TimeoutID → needs NodeJS.Timeout in TypeScript
-   ```
-   **Impact**: setTimeout/clearTimeout usage breaks
-   **Fix needed**: Type mapping for Flow built-in types
-
-6. **React Event Handler Types**
-   ```typescript
-   // Some SyntheticEvent types not converted properly:
-   SyntheticFocusEvent → React.FocusEvent  // Usually works
-   SyntheticEvent<HTMLFormElement> → React.FormEvent<HTMLFormElement>  // Sometimes missed
-   ```
-
-#### **Low Priority Issues**
-
-7. **Generic Type Parameters**
-   ```typescript
-   // Empty generics not handled:
-   React.MouseEvent<> → React.MouseEvent<HTMLElement>
-   ```
-
-8. **Trailing Comma Removal**
-   ```typescript
-   // Script removes needed trailing commas in multiline types occasionally
-   ```
-
-### **Recommended Script Improvements**
-
-1. **Fix object literal regex** to preserve commas instead of converting to semicolons
-2. **Add React component detection** to automatically add override modifiers  
-3. **Improve function type parameter handling** for parameterless functions
-4. **Add HTML boolean attribute detection** and conversion
-5. **Expand built-in type mapping** (TimeoutID, etc.)
-6. **Better generic type parameter handling** for empty generics
-
-### **Workaround Patterns Developed**
-
-- **Object literals**: Always check for semicolons and convert to commas manually
-- **React components**: Add `override` to render, lifecycle methods, and state
-- **Event handlers**: Verify correct React.* event types
-- **Boolean attributes**: Convert string values to boolean props
-- **Generic types**: Add proper type parameters to empty generics
+**Fixed Issues**: Object literal semicolon bug resolved (August 2025)
 
 ---
 
@@ -570,60 +404,10 @@ If a phase is only partially complete, but feels complete "in the important ways
   - **✅ COMPLETED PREVIOUSLY**: profile-logic/tracks.ts, selectors/url-state.ts (major core dependencies)
   - **Previous**: BlobUrlLink.tsx, ProfileMetaInfoSummary.tsx (dependencies resolved)
   - **Remaining files**: mostly React components + 3 utility files with dependencies
-  - **📋 RECOMMENDED CONVERSION ORDER** (based on dependency analysis):
-    
-    **✅ COMPLETED:**
-    1. ✅ `src/components/shared/BlobUrlLink.tsx` - Fixed state type annotation
-    2. ✅ `src/components/shared/ProfileMetaInfoSummary.tsx` - Converted profile-metainfo.js dependency
-    3. ✅ `src/profile-logic/tracks.js` → `tracks.ts` - Core dependency converted
-    4. ✅ `src/selectors/url-state.js` → `url-state.ts` - Core dependency converted
-    
-    **📊 UPDATED ANALYSIS (August 1, 2025)**: Enhanced dependency analysis reveals new priorities
-    
-    **🟢 IMMEDIATE CONVERSION TARGETS (57 files ready, no dependencies):**
-    - Small files (3-100 lines): `src/types/mocks/ftl.js`, `src/types/globals/*.js`, `src/selectors/right-clicked-*.js`, `src/actions/errors.js`
-    - Medium files (100-300 lines): `src/selectors/app.js` (247 lines), `src/components/shared/SourceView.js` (187 lines)
-    - **Strategy**: Convert small files first for quick wins, then tackle larger files
-    
-    **🟡 MODERATE COMPLEXITY (files with 1-2 transitive dependencies):**
-    - `src/components/shared/PanelSearch.js` (73 lines)
-    - `src/components/tooltip/DivWithTooltip.js` (80 lines)  
-    - `src/components/shared/thread/CPUGraph.js` (85 lines)
-    - `src/profile-logic/flame-graph.js` (309 lines)
-    
-    **Next Priority (complex dependencies remaining):**
-    5. ✅ `src/selectors/profile.ts` - **COMPLETED** - Removed from exclude list, passes strict checking!
-    6. ✅ `src/selectors/per-thread/index.js` → `index.ts` - **COMPLETED** - Now in excludes temporarily due to sub-dependencies
-    7. `src/profile-logic/process-profile.js` - **COMPLEX** - 2200+ lines, needs careful manual conversion
-    8. `src/selectors/publish.ts` - Depends on process-profile.js (still in excludes due to type issues)
-    9. `src/actions/profile-view.ts` - Has remaining type issues, needs cleanup
-    
-    **Components now unblocked by core dependency progress:**
-    10. `src/components/app/BeforeUnloadManager.tsx` - Can be converted after publish.ts cleanup
-    11. ✅ `src/components/app/DebugWarning.tsx` - **COMPLETED** - Removed from exclude list, passes strict checking!
-    12. `src/components/shared/InnerNavigationLink.tsx` - Depends on actions/profile-view.ts cleanup
-    
-    **Partially Converted (still need additional dependencies):**
-    - `src/components/timeline/TrackEventDelay.tsx` - TrackEventDelayGraph.tsx converted but still needs WithSize.js, selectors, etc.
-    - `src/components/app/FooterLinks.tsx` - LanguageSwitcher.tsx converted but still needs l10n actions/selectors
-    
-    **Medium Priority (2 unconverted dependencies each):**
-    9. ✅ `src/components/shared/Icon.tsx` - **COMPLETED** - Removed from exclude list, passes strict checking!
-    10. `src/components/js-tracer/EmptyReasons.tsx` - needs `selectors/per-thread/thread.js`
-    11. `src/components/marker-chart/MarkerChartEmptyReasons.tsx` - needs `selectors/per-thread/thread.js`
-    12. `src/components/marker-table/MarkerTableEmptyReasons.tsx` - needs `selectors/per-thread/thread.js`
-    13. `src/components/network-chart/NetworkChartEmptyReasons.tsx` - needs `selectors/per-thread/thread.js`
-    
-    **Lower Priority (3+ unconverted dependencies):**
-    14. `src/components/shared/TransformNavigator.tsx` - needs 3 files
-    15. `src/components/app/UploadedRecordingsHome.tsx` - needs 3 files
-    16. `src/utils/window-console.ts` - needs 6+ files (convert after core files)
-    17. `src/components/app/Root.tsx` - needs 8+ files (should be last)
-    
-  - **Strategy**: Start with BlobUrlLink.tsx (immediate), then work through files requiring only 1 dependency conversion
-  - Note that converting new files automatically causes them to be on the (implicit) list of *included* files for `yarn typecheck:strict`!
-  - Add newly-converted files, or their dependencies, to the `excludes` list if needed to keep error count from increasing.
-  - Phase 4 is completed once the `excludes` list is empty and `yarn typecheck:strict` passes.
+  **Recent Progress**:
+- Major core dependencies converted (profile-data.ts, tracks.ts, etc.)
+- Key React components converted: WithSize, DivWithTooltip, ButtonWithPanel
+- Dependency analysis tool provides conversion priorities
 
 ### Phase 5: ⏳ PLANNED - Resume Component Migration
 
@@ -637,33 +421,11 @@ If a phase is only partially complete, but feels complete "in the important ways
 
 ---
 
-## 📈 Current Status & Momentum (August 1, 2025)
+## Next Steps
 
-### **🎯 Immediate Priorities**
+Use dependency analysis tool to identify files ready for conversion:
+```bash
+./scripts/analyze-dependencies.sh | head -20
+```
 
-1. **Continue strategic dependency conversions** - Tooltip.js conversion unblocked multiple files
-2. **Focus on remaining strict exclude list** - Now down to 15 files from 17
-3. **Convert files that unlock multiple dependents** - maximize impact per conversion
-
-### **🚀 Migration Velocity**
-
-- **11 files converted in single session** (869 lines) - strong momentum
-- **Dependency-first strategy proving highly effective** - PanelSearch unlocked after IdleSearchField
-- **Major dependency conversions** - Tooltip.js (187 lines) unblocks multiple downstream files
-- **Tooling working well** - conversion script + manual fixes established workflow
-
-### **🎉 Key Achievements**
-
-- **Strict TypeScript compliance improved** - 2 files removed from exclude list
-- **Component migration resumed** - 18.7% complete and accelerating  
-- **Major blockers removed** - Tooltip, search components, core utilities all converted
-- **Conversion patterns mastered** - reliable workflow for React components established
-
-### **📋 Next Session Recommendations**
-
-1. **High-impact targets**: Convert files with 1-2 transitive dependencies that unblock others
-2. **Strategic dependencies**: Focus on `WithSize.js`, `Tooltip` dependencies, selector files
-3. **Batch small files**: Convert remaining 0-dependency files for quick progress
-4. **Script improvements**: Address object literal semicolon bug (highest priority)
-
-The migration has strong momentum with proven strategies and tooling. The dependency-first approach continues to show excellent results.
+Priority: Convert files with 0-1 dependencies first, focusing on files that unlock others.
