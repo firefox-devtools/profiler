@@ -84,16 +84,16 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
   };
 
   _handleCloseClick = () => {
-    this.setState((state) => {
-      const { focusAfterClosed, isOpen } = state;
-      if (!isOpen) {
-        return null as any;
-      }
+    if (this.state.isOpen) {
+      const { focusAfterClosed } = this.state;
+      this._untrapFocus();
+      this.setState({ isOpen: false, focusAfterClosed: null });
       if (focusAfterClosed && focusAfterClosed.focus) {
-        focusAfterClosed.focus();
+        requestAnimationFrame(() => {
+          focusAfterClosed.focus();
+        });
       }
-      return { isOpen: false };
-    });
+    }
   };
 
   _handleKeyPress = (event: KeyboardEvent) => {
@@ -110,37 +110,37 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
           return;
         }
         // Toggle the state.
-        this.setState((state) => {
-          if (state.isOpen) {
-            // Close logic
-            const { focusAfterClosed } = state;
-            if (focusAfterClosed && focusAfterClosed.focus) {
+        if (this.state.isOpen) {
+          // Close logic
+          const { focusAfterClosed } = this.state;
+          this._untrapFocus();
+          this.setState({ isOpen: false, focusAfterClosed: null });
+          if (focusAfterClosed && focusAfterClosed.focus) {
+            requestAnimationFrame(() => {
               focusAfterClosed.focus();
-            }
-            return { isOpen: false, focusAfterClosed: null };
-          } else {
-            // Open logic
-            const focusAfterClosed =
-              document.activeElement as HTMLElement | null;
-            this._trapFocus();
-            this._focus();
-            return { isOpen: true, focusAfterClosed };
+            });
           }
-        });
+        } else {
+          // Open logic
+          const focusAfterClosed = document.activeElement as HTMLElement | null;
+          this._trapFocus();
+          this._focus();
+          this.setState({ isOpen: true, focusAfterClosed });
+        }
         break;
       }
       case 'Escape': {
         // Unconditionally run close on escape, which is a noop if it's not open.
-        this.setState((state) => {
-          const { focusAfterClosed, isOpen } = state;
-          if (!isOpen) {
-            return null as any;
-          }
+        if (this.state.isOpen) {
+          const { focusAfterClosed } = this.state;
+          this._untrapFocus();
+          this.setState({ isOpen: false, focusAfterClosed: null });
           if (focusAfterClosed && focusAfterClosed.focus) {
-            focusAfterClosed.focus();
+            requestAnimationFrame(() => {
+              focusAfterClosed.focus();
+            });
           }
-          return { isOpen: false };
-        });
+        }
         break;
       }
       default:

@@ -1,8 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-import type {
+
+import {
   CategoryList,
   Marker,
   MarkerIndex,
@@ -82,11 +82,11 @@ const MAX_STACKING_DEPTH = 300;
  * they're inserted in `getMarkerTimingAndBuckets`.
  */
 export function getMarkerTiming(
-  getMarker: (MarkerIndex) => Marker,
+  getMarker: (param: MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   // Categories can be null for things like Network Markers, where we don't care to
   // break things up by category.
-  categories: ?CategoryList
+  categories: CategoryList | null
 ): MarkerTiming[] {
   // Each marker type will have it's own timing information, later collapse these into
   // a single array.
@@ -282,11 +282,11 @@ export function getMarkerTiming(
  *  ]
  */
 export function getMarkerTimingAndBuckets(
-  getMarker: (MarkerIndex) => Marker,
+  getMarker: (param: MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   // Categories can be null for things like Network Markers, where we don't care to
   // break things up by category.
-  categories: ?CategoryList
+  categories: CategoryList | null
 ): MarkerTimingAndBuckets {
   const allMarkerTimings = getMarkerTiming(
     getMarker,

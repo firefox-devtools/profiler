@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
@@ -13,17 +11,18 @@ import {
   getCommittedRange,
   getProfileInterval,
 } from 'firefox-profiler/selectors/profile';
+import type { State as AppState } from 'firefox-profiler/types';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import { BLUE_50, BLUE_60 } from 'photon-colors';
 
-import type {
+import {
   ProgressGraphData,
   Milliseconds,
   CssPixels,
 } from 'firefox-profiler/types';
 
-import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackVisualProgress.css';
 
@@ -31,13 +30,13 @@ import './TrackVisualProgress.css';
  * When adding properties to these props, please consider the comment above the component.
  */
 type CanvasProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +progressGraphData: ProgressGraphData[],
-  +interval: Milliseconds,
-  +width: CssPixels,
-  +height: CssPixels,
-  +lineWidth: CssPixels,
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly progressGraphData: ProgressGraphData[];
+  readonly interval: Milliseconds;
+  readonly width: CssPixels;
+  readonly height: CssPixels;
+  readonly lineWidth: CssPixels;
 };
 
 /**
@@ -159,7 +158,7 @@ class TrackVisualProgressCanvas extends React.PureComponent<CanvasProps> {
     this._canvas = canvas;
   };
 
-  render() {
+  override render() {
     this._scheduleDraw();
 
     return (
@@ -172,29 +171,26 @@ class TrackVisualProgressCanvas extends React.PureComponent<CanvasProps> {
 }
 
 type OwnProps = {
-  +progressGraphData: ProgressGraphData[],
-  +lineWidth: CssPixels,
-  +graphHeight: CssPixels,
-  +graphDotTooltipText: string,
+  readonly progressGraphData: ProgressGraphData[];
+  readonly lineWidth: CssPixels;
+  readonly graphHeight: CssPixels;
+  readonly graphDotTooltipText: string;
 };
 
 type StateProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +interval: Milliseconds,
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly interval: Milliseconds;
 };
 
 type DispatchProps = {};
 
-type Props = {
-  ...SizeProps,
-  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
-};
+type Props = SizeProps & ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 type State = {
-  hoveredVisualProgress: null | number,
-  mouseX: CssPixels,
-  mouseY: CssPixels,
+  hoveredVisualProgress: null | number;
+  mouseX: CssPixels;
+  mouseY: CssPixels;
 };
 
 /**
@@ -202,7 +198,7 @@ type State = {
  * graph in the timeline.
  */
 class TrackVisualProgressGraphImpl extends React.PureComponent<Props, State> {
-  state = {
+  override state = {
     hoveredVisualProgress: null,
     mouseX: 0,
     mouseY: 0,
@@ -212,7 +208,7 @@ class TrackVisualProgressGraphImpl extends React.PureComponent<Props, State> {
     this.setState({ hoveredVisualProgress: null });
   };
 
-  _onMouseMove = (event: SyntheticMouseEvent<HTMLDivElement>) => {
+  _onMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     const { pageX: mouseX, pageY: mouseY } = event;
     // Get the offset from here, and apply it to the time lookup.
     const { left } = event.currentTarget.getBoundingClientRect();
@@ -248,7 +244,7 @@ class TrackVisualProgressGraphImpl extends React.PureComponent<Props, State> {
     }
   };
 
-  _renderTooltip(graphDataIndex: number): React.Node {
+  _renderTooltip(graphDataIndex: number): React.ReactNode {
     const { progressGraphData, graphDotTooltipText } = this.props;
     const percentage = progressGraphData[graphDataIndex].percent / 100;
     return (
@@ -267,7 +263,7 @@ class TrackVisualProgressGraphImpl extends React.PureComponent<Props, State> {
    * Create a div that is a dot on top of the graph representing the current
    * height of the graph.
    */
-  _renderVisualProgressDot(graphDataIndex: number): React.Node {
+  _renderVisualProgressDot(graphDataIndex: number): React.ReactNode {
     const {
       progressGraphData,
       rangeStart,
@@ -289,13 +285,13 @@ class TrackVisualProgressGraphImpl extends React.PureComponent<Props, State> {
 
     return (
       <div
-        style={{ left, top, '--dot-color': BLUE_60 }}
+        style={{ left, top, '--dot-color': BLUE_60 } as React.CSSProperties}
         className="timelineTrackVisualProgressGraphDot"
       />
     );
   }
 
-  render() {
+  override render() {
     const { hoveredVisualProgress, mouseX, mouseY } = this.state;
     const {
       interval,
@@ -338,9 +334,9 @@ class TrackVisualProgressGraphImpl extends React.PureComponent<Props, State> {
 export const TrackVisualProgressGraph = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
-  mapStateToProps: (state) => {
+  mapStateToProps: (state: AppState) => {
     const { start, end } = getCommittedRange(state);
     return {
       rangeStart: start,

@@ -1,19 +1,21 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import * as React from 'react';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
+import {
+  AddressTimings,
+  NativeSymbolInfo,
+  DecodedInstruction,
+} from 'firefox-profiler/types';
 import { mapGetKeyWithMaxValue } from 'firefox-profiler/utils';
-import type { LineTimings } from 'firefox-profiler/types';
 
-import type { SourceViewEditor } from './SourceView-codemirror';
+import { AssemblyViewEditor } from './AssemblyView-codemirror';
 
 import './CodeView.css';
 
-const SourceViewHeader = () => {
+const AssemblyViewHeader = () => {
   return (
     <div className="codeViewHeader">
       <span
@@ -34,25 +36,25 @@ for understanding where time was actually spent in a program."
       >
         Self
       </span>
-      <span className="codeViewHeaderColumn codeViewMainColumn source"></span>
+      <span className="codeViewHeaderColumn codeViewMainColumn assembly"></span>
     </div>
   );
 };
 
-type SourceViewProps = {
-  +timings: LineTimings,
-  +sourceCode: string,
-  +disableOverscan: boolean,
-  +filePath: string | null,
-  +scrollToHotSpotGeneration: number,
-  +hotSpotTimings: LineTimings,
+type AssemblyViewProps = {
+  readonly timings: AddressTimings;
+  readonly assemblyCode: DecodedInstruction[];
+  readonly disableOverscan: boolean;
+  readonly nativeSymbol: NativeSymbolInfo | null;
+  readonly scrollToHotSpotGeneration: number;
+  readonly hotSpotTimings: AddressTimings;
 };
 
 let editorModulePromise: Promise<any> | null = null;
 
-export class SourceView extends React.PureComponent<SourceViewProps> {
+export class AssemblyView extends React.PureComponent<AssemblyViewProps> {
   _ref = React.createRef<HTMLDivElement>();
-  _editor: SourceViewEditor | null = null;
+  _editor: AssemblyViewEditor | null = null;
 
   /**
    * Scroll to the line with the most hits, based on the timings in
@@ -61,7 +63,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
    * How is timingsForScrolling different from this.props.timings?
    * In the current implementation, this.props.timings are always the "global"
    * timings, i.e. they show the line hits for all samples in the current view,
-   * regardless of the selected call node. However, when opening the source
+   * regardless of the selected call node. However, when opening the assembly
    * view from a specific call node, you really want to see the code that's
    * relevant to that specific call node, or at least that specific function.
    * So timingsForScrolling are the timings that indicate just the line hits
@@ -70,65 +72,72 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
    * relevant to that specific call node.
    *
    * Sometimes, timingsForScrolling can be completely empty. This happens, for
-   * example, when the source view is showing a different file than the
+   * example, when the assembly view is showing a different file than the
    * selected call node's function's file, for example because we just loaded
    * from a URL and ended up with an arbitrary selected call node.
    * In that case, pick the hotspot from the global line timings.
    */
-  _scrollToHotSpot(timingsForScrolling: LineTimings) {
-    const heaviestLine =
-      mapGetKeyWithMaxValue(timingsForScrolling.totalLineHits) ??
-      mapGetKeyWithMaxValue(this.props.timings.totalLineHits);
-    if (heaviestLine !== undefined) {
-      this._scrollToLine(heaviestLine - 5);
+  _scrollToHotSpot(timingsForScrolling: AddressTimings) {
+    const heaviestAddress =
+      mapGetKeyWithMaxValue(timingsForScrolling.totalAddressHits) ??
+      mapGetKeyWithMaxValue(this.props.timings.totalAddressHits);
+    if (heaviestAddress !== undefined) {
+      this._scrollToAddressWithSpaceOnTop(heaviestAddress, 5);
     }
   }
 
-  _scrollToLine(lineNumber: number) {
+  _scrollToAddressWithSpaceOnTop(address: number, topSpaceLines: number) {
     if (this._editor) {
-      this._editor.scrollToLine(lineNumber);
+      this._editor.scrollToAddressWithSpaceOnTop(address, topSpaceLines);
     }
   }
 
-  _getMaxLineNumber() {
-    const { sourceCode, timings } = this.props;
-    const sourceLines = sourceCode.split('\n');
-    let maxLineNumber = sourceLines.length;
-    if (maxLineNumber <= 1) {
-      // We probably don't have the true source code yet, and don't really know
-      // the true number of lines in this file.
-      // Derive a maximum line number from the timings.
-      // Add a bit of space at the bottom (10 rows) so that the scroll position
-      // isn't too constrained - if the last known line is chosen as the "hot spot",
-      // this extra space allows us to display it in the top half of the viewport,
-      // if the viewport is small enough.
-      maxLineNumber = Math.max(1, ...timings.totalLineHits.keys()) + 10;
+  _getAssemblyCodeOrFallback(): DecodedInstruction[] {
+    const { assemblyCode } = this.props;
+    if (assemblyCode.length !== 0) {
+      // We have assembly code for the selected symbol. Good.
+      return assemblyCode;
     }
-    return maxLineNumber;
+
+    // We don't have the true assembly code yet, and don't really know
+    // at which address each instruction starts.
+    // Compute a fallback by getting known addresses from the timings.
+
+    const { timings, nativeSymbol } = this.props;
+    const addresses = [...timings.totalAddressHits.keys()];
+
+    // Also include the start address of the symbol, if it's not already present.
+    if (
+      nativeSymbol !== null &&
+      !timings.totalAddressHits.has(nativeSymbol.address)
+    ) {
+      addresses.push(nativeSymbol.address);
+    }
+
+    addresses.sort((a, b) => a - b);
+
+    // Create fallback assembly code where each known address is mapped to an
+    // empty string instruction.
+    return addresses.map((address) => ({
+      address,
+      decodedString: '',
+    }));
   }
 
-  _getSourceCodeOrFallback() {
-    const { sourceCode } = this.props;
-    if (sourceCode !== '') {
-      return sourceCode;
-    }
-    return '\n'.repeat(this._getMaxLineNumber());
-  }
-
-  render() {
+  override render() {
     return (
-      <div className="sourceView codeView">
-        <SourceViewHeader />
+      <div className="assemblyView codeView">
+        <AssemblyViewHeader />
         <div className="codeMirrorContainer" ref={this._ref}></div>
       </div>
     );
   }
 
-  componentDidMount() {
+  override componentDidMount() {
     // Load the module with all the @codemirror imports asynchronously, so that
     // it can be split into a separate bundle chunk.
     if (editorModulePromise === null) {
-      editorModulePromise = import('./SourceView-codemirror');
+      editorModulePromise = import('./AssemblyView-codemirror');
     }
     (async () => {
       const codeMirrorModulePromise = ensureExists(editorModulePromise);
@@ -137,10 +146,10 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
       if (!domParent) {
         return;
       }
-      const { SourceViewEditor } = codeMirrorModule;
-      const editor = new SourceViewEditor(
-        this._getSourceCodeOrFallback(),
-        this.props.filePath,
+      const { AssemblyViewEditor } = codeMirrorModule;
+      const editor = new AssemblyViewEditor(
+        this._getAssemblyCodeOrFallback(),
+        this.props.nativeSymbol,
         this.props.timings,
         domParent
       );
@@ -151,23 +160,19 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
 
   // CodeMirror's API is not based on React. When our props change, we need to
   // translate those changes into CodeMirror API calls manually.
-  componentDidUpdate(prevProps: SourceViewProps) {
+  override componentDidUpdate(prevProps: AssemblyViewProps) {
     if (!this._editor) {
       return;
     }
 
-    if (this.props.filePath !== prevProps.filePath) {
-      this._editor.updateLanguageForFilePath(this.props.filePath);
-    }
-
     let contentsChanged = false;
     if (
-      this.props.sourceCode !== prevProps.sourceCode ||
-      (this.props.sourceCode === '' &&
-        prevProps.sourceCode === '' &&
+      this.props.assemblyCode !== prevProps.assemblyCode ||
+      (this.props.assemblyCode.length === 0 &&
+        prevProps.assemblyCode.length === 0 &&
         this.props.timings !== prevProps.timings)
     ) {
-      this._editor.setContents(this._getSourceCodeOrFallback());
+      this._editor.setContents(this._getAssemblyCodeOrFallback());
       contentsChanged = true;
     }
 

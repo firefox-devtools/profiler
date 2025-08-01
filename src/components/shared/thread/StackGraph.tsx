@@ -1,13 +1,11 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import React, { PureComponent } from 'react';
 
 import { ThreadHeightGraph } from './HeightGraph';
 
-import type {
+import {
   Thread,
   CategoryList,
   IndexIntoSamplesTable,
@@ -15,25 +13,25 @@ import type {
   IndexIntoCallNodeTable,
   SelectedState,
 } from 'firefox-profiler/types';
-import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
+import { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 type Props = {
-  +className: string,
-  +thread: Thread,
-  +samplesSelectedStates: null | SelectedState[],
-  +sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
-  +interval: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +callNodeInfo: CallNodeInfo,
-  +categories: CategoryList,
-  +onSampleClick: (
-    event: SyntheticMouseEvent<>,
+  readonly className: string;
+  readonly thread: Thread;
+  readonly samplesSelectedStates: null | SelectedState[];
+  readonly sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>;
+  readonly interval: Milliseconds;
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly callNodeInfo: CallNodeInfo;
+  readonly categories: CategoryList;
+  readonly onSampleClick: (
+    event: React.MouseEvent<HTMLCanvasElement>,
     sampleIndex: IndexIntoSamplesTable
-  ) => void,
+  ) => void;
   // Decide which way the stacks grow up from the floor, or down from the ceiling.
-  +stacksGrowFromCeiling?: boolean,
-  +trackName: string,
+  readonly stacksGrowFromCeiling?: boolean;
+  readonly trackName: string;
 };
 
 export class ThreadStackGraph extends PureComponent<Props> {
@@ -48,7 +46,7 @@ export class ThreadStackGraph extends PureComponent<Props> {
     return nonInvertedCallNodeTable.depth[nonInvertedCallNodeIndex];
   };
 
-  render() {
+  override render() {
     const {
       className,
       thread,
