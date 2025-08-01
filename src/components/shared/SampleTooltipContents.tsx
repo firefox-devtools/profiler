@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import * as React from 'react';
 
 import { Backtrace } from './Backtrace';
@@ -17,31 +15,30 @@ import {
   formatPercent,
 } from 'firefox-profiler/utils/format-numbers';
 
-import type {
+import {
   ImplementationFilter,
   IndexIntoSamplesTable,
   CategoryList,
   Thread,
   Milliseconds,
 } from 'firefox-profiler/types';
-import type { CpuRatioInTimeRange } from './thread/ActivityGraphFills';
+import { CpuRatioInTimeRange } from './thread/ActivityGraphFills';
 
 type CPUProps = CpuRatioInTimeRange;
 
 type RestProps = {
-  +sampleIndex: IndexIntoSamplesTable,
-  +categories: CategoryList,
-  +rangeFilteredThread: Thread,
-  +implementationFilter: ImplementationFilter,
+  readonly sampleIndex: IndexIntoSamplesTable;
+  readonly categories: CategoryList;
+  readonly rangeFilteredThread: Thread;
+  readonly implementationFilter: ImplementationFilter;
 };
 
-type Props = {
-  ...RestProps,
-  +cpuRatioInTimeRange: CPUProps | null,
-  +sampleIndex: IndexIntoSamplesTable | null,
-  +zeroAt: Milliseconds,
-  +profileTimelineUnit: string,
-  +interval: Milliseconds,
+type Props = RestProps & {
+  readonly cpuRatioInTimeRange: CPUProps | null;
+  readonly sampleIndex: IndexIntoSamplesTable | null;
+  readonly zeroAt: Milliseconds;
+  readonly profileTimelineUnit: string;
+  readonly interval: Milliseconds;
 };
 
 /**
@@ -49,7 +46,7 @@ type Props = {
  * This is split to reduce the rerender of the SampleTooltipRestContents component.
  */
 class SampleTooltipCPUContents extends React.PureComponent<CPUProps> {
-  render() {
+  override render() {
     const { cpuRatio, timeRange } = this.props;
 
     const percentageText = formatPercent(cpuRatio);
@@ -70,7 +67,7 @@ class SampleTooltipCPUContents extends React.PureComponent<CPUProps> {
  * Render the non-CPU related parts of the SampleTooltipContents.
  */
 class SampleTooltipRestContents extends React.PureComponent<RestProps> {
-  render() {
+  override render() {
     const {
       sampleIndex,
       rangeFilteredThread,
@@ -117,7 +114,7 @@ class SampleTooltipRestContents extends React.PureComponent<RestProps> {
  * will want to know what the function is, and its category.
  */
 export class SampleTooltipContents extends React.PureComponent<Props> {
-  render() {
+  override render() {
     const {
       cpuRatioInTimeRange,
       sampleIndex,

@@ -1,16 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
-import type {
+import {
   UnitIntervalOfProfileRange,
   CallNodeTable,
   FuncTable,
   IndexIntoCallNodeTable,
 } from 'firefox-profiler/types';
-import type { StringTable } from 'firefox-profiler/utils/string-table';
-import type { CallTreeTimingsNonInverted } from './call-tree';
+import { StringTable } from 'firefox-profiler/utils/string-table';
+import { CallTreeTimingsNonInverted } from './call-tree';
 
 import { bisectionRightByStrKey } from 'firefox-profiler/utils/bisect';
 
@@ -33,11 +31,11 @@ export type IndexIntoFlameGraphTiming = number;
  * which is used to color the drawn functions.
  */
 export type FlameGraphTiming = Array<{
-  start: UnitIntervalOfProfileRange[],
-  end: UnitIntervalOfProfileRange[],
-  selfRelative: Array<number>,
-  callNode: IndexIntoCallNodeTable[],
-  length: number,
+  start: UnitIntervalOfProfileRange[];
+  end: UnitIntervalOfProfileRange[];
+  selfRelative: Array<number>;
+  callNode: IndexIntoCallNodeTable[];
+  length: number;
 }>;
 
 /**

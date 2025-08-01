@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  * */
-// @flow
-
 import * as React from 'react';
 import { InView } from 'react-intersection-observer';
 import {
@@ -13,42 +11,41 @@ import {
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import { mapCategoryColorNameToStyles } from 'firefox-profiler/utils/colors';
 
-import type {
+import {
   Thread,
   Milliseconds,
   SelectedState,
   IndexIntoSamplesTable,
   CategoryList,
 } from 'firefox-profiler/types';
-import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 
-import type { CategoryDrawStyles } from './ActivityGraphFills';
+import { CategoryDrawStyles } from './ActivityGraphFills';
 
 type CanvasProps = {
-  +className: string,
-  +trackName: string,
-  +fullThread: Thread,
-  +rangeFilteredThread: Thread,
-  +interval: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +sampleIndexOffset: number,
-  +samplesSelectedStates: null | SelectedState[],
-  +treeOrderSampleComparator: (
-    IndexIntoSamplesTable,
-    IndexIntoSamplesTable
-  ) => number,
-  +categories: CategoryList,
-  +passFillsQuerier: (ActivityFillGraphQuerier) => void,
-  +onClick: (SyntheticMouseEvent<HTMLCanvasElement>) => void,
-  +enableCPUUsage: boolean,
-  ...SizeProps,
-};
+  readonly className: string;
+  readonly trackName: string;
+  readonly fullThread: Thread;
+  readonly rangeFilteredThread: Thread;
+  readonly interval: Milliseconds;
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly sampleIndexOffset: number;
+  readonly samplesSelectedStates: null | SelectedState[];
+  readonly treeOrderSampleComparator: (
+    a: IndexIntoSamplesTable,
+    b: IndexIntoSamplesTable
+  ) => number;
+  readonly categories: CategoryList;
+  readonly passFillsQuerier: (param: ActivityFillGraphQuerier) => void;
+  readonly onClick: (param: React.MouseEvent<HTMLCanvasElement>) => void;
+  readonly enableCPUUsage: boolean;
+} & SizeProps;
 
 export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
   _canvas: { current: null | HTMLCanvasElement } = React.createRef();
   _categoryDrawStyles: null | CategoryDrawStyles = null;
-  _canvasState: { renderScheduled: boolean, inView: boolean } = {
+  _canvasState: { renderScheduled: boolean; inView: boolean } = {
     renderScheduled: false,
     inView: false,
   };
@@ -107,11 +104,11 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
     this._renderCanvas();
   };
 
-  componentDidMount() {
+  override componentDidMount() {
     this._renderCanvas();
   }
 
-  componentDidUpdate() {
+  override componentDidUpdate() {
     this._renderCanvas();
   }
 
@@ -215,7 +212,7 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
     }
   }
 
-  render() {
+  override render() {
     const { className, trackName, onClick } = this.props;
     return (
       <InView onChange={this._observerCallback}>

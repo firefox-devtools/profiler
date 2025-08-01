@@ -1,10 +1,8 @@
-// @flow
-
 import { simpleperf_report_proto as report } from './proto/simpleperf_report';
 
 import { PROCESSED_PROFILE_VERSION } from 'firefox-profiler/app-logic/constants';
-import type { Milliseconds } from 'firefox-profiler/types/units';
-import type {
+import { Milliseconds } from 'firefox-profiler/types/units';
+import {
   CategoryList,
   CategoryColor,
   FrameTable,
@@ -359,7 +357,7 @@ class FirefoxProfile {
   eventTypes: string[];
   cpuClockEventId: number;
 
-  appPackageName: ?string | null;
+  appPackageName: string | null | null;
   sampleCount: number = 0;
   lostCount: number = 0;
 
