@@ -2,23 +2,21 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import { Localized } from '@fluent/react';
 import * as React from 'react';
 
 import './ProfileRootMessage.css';
 
 type Props = {
-  +title?: string,
-  +additionalMessage: React.Node,
-  +showLoader: boolean,
-  +showBackHomeLink: boolean,
-  +children: React.Node,
+  readonly title?: string;
+  readonly additionalMessage: React.ReactNode;
+  readonly showLoader: boolean;
+  readonly showBackHomeLink: boolean;
+  readonly children: React.ReactNode;
 };
 
 export class ProfileRootMessage extends React.PureComponent<Props> {
-  render() {
+  override render() {
     const { children, additionalMessage, showLoader, showBackHomeLink, title } =
       this.props;
     return (

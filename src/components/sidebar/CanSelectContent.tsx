@@ -2,31 +2,29 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import classNames from 'classnames';
 
 type Props = {
-  +tagName?: string,
-  +content: string,
-  +className?: string,
+  readonly tagName?: string;
+  readonly content: string;
+  readonly className?: string;
 };
 
 export class CanSelectContent extends React.PureComponent<Props> {
-  _selectContent(e: SyntheticMouseEvent<HTMLInputElement>) {
+  _selectContent(e: React.FocusEvent<HTMLInputElement>) {
     const input = e.currentTarget;
     input.focus();
     input.select();
   }
 
-  _unselectContent(e: SyntheticMouseEvent<HTMLInputElement>) {
+  _unselectContent(e: React.FocusEvent<HTMLInputElement>) {
     e.currentTarget.setSelectionRange(0, 0);
   }
 
-  render() {
+  override render() {
     const { tagName, content, className } = this.props;
-    const TagName = tagName || 'div';
+    const TagName = (tagName || 'div') as any;
 
     return (
       <TagName
