@@ -22,18 +22,9 @@ export type SizeProps = Readonly<State>;
  *
  * Note that the props are *not* updated if the size of the element changes
  * for reasons other than a window resize.
- *
- * Usage: withSize must be used with explicit type arguments.
- *
- * Correct: withSize<Props>(ComponentClass)
- * Incorrect: withSize(ComponentClass)
  */
-export function withSize<
-  // The SizeProps act as a bounds on the generic props. This ensures that the props
-  // that passed in take into account they are being given the width and height.
-  Props extends Readonly<SizeProps>,
->(
-  Wrapped: React.ComponentType<Props>
+export function withSize<Props>(
+  Wrapped: React.ComponentType<Props & SizeProps>
 ): React.ComponentType<
   // The component that is returned does not accept width and height parameters, as
   // they are injected by this higher order component.
@@ -43,10 +34,7 @@ export function withSize<
   // use a hook instead.
   // See: https://github.com/firefox-devtools/profiler/issues/3062
   // eslint-disable-next-line flowtype/no-existential-type
-  return class WithSizeWrapper extends React.PureComponent<
-    Omit<Props, keyof SizeProps>,
-    State
-  > {
+  return class WithSizeWrapper extends React.PureComponent<Props, State> {
     override state = { width: 0, height: 0 };
     _container: HTMLElement | null;
 
@@ -85,7 +73,11 @@ export function withSize<
     }
 
     override render() {
-      return <Wrapped {...(this.props as any)} {...this.state} />;
+      const combinedProps: Props & SizeProps = {
+        ...this.props,
+        ...this.state,
+      };
+      return <Wrapped {...combinedProps} />;
     }
   };
 }

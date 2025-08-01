@@ -1,34 +1,27 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import React, { PureComponent } from 'react';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import { DivWithTooltip } from 'firefox-profiler/components/tooltip/DivWithTooltip';
 import { oneLine } from 'common-tags';
 
-import type {
-  Thread,
-  Milliseconds,
-  StartEndRange,
-} from 'firefox-profiler/types';
+import { Thread, Milliseconds, StartEndRange } from 'firefox-profiler/types';
 
-import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 
 import './EmptyThreadIndicator.css';
 
 type SyntheticCssDeclarations = {
-  [string]: string | number,
+  [key: string]: string | number;
 };
 
-type Props = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +thread: Thread,
-  +interval: Milliseconds,
-  +unfilteredSamplesRange: StartEndRange | null,
-  ...SizeProps,
+type Props = SizeProps & {
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly thread: Thread;
+  readonly interval: Milliseconds;
+  readonly unfilteredSamplesRange: StartEndRange | null;
 };
 
 /**
@@ -38,7 +31,7 @@ type Props = {
  * thread was shut down.
  */
 class EmptyThreadIndicatorImpl extends PureComponent<Props> {
-  render() {
+  override render() {
     const style = getIndicatorPositions(this.props);
     return (
       <div className="timelineEmptyThreadIndicator">
@@ -83,9 +76,9 @@ class EmptyThreadIndicatorImpl extends PureComponent<Props> {
  * src/test/components/EmptyThreadIndicator.test.js
  */
 export function getIndicatorPositions(props: Props): {
-  startup: SyntheticCssDeclarations | null,
-  shutdown: SyntheticCssDeclarations | null,
-  emptyBufferStart: SyntheticCssDeclarations | null,
+  startup: SyntheticCssDeclarations | null;
+  shutdown: SyntheticCssDeclarations | null;
+  emptyBufferStart: SyntheticCssDeclarations | null;
 } {
   const {
     rangeStart,

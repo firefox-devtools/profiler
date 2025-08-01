@@ -149,7 +149,47 @@ yarn test  # Run together instead
 
 ### Key Flow→TypeScript Conversion Patterns
 
-#### Critical Discoveries (August 1, 2025) - Session Lessons
+#### Essential Changes
+
+```typescript
+// Imports: Remove 'type' keyword
+import type { SomeType } from './module';  // Flow
+import { SomeType } from './module';       // TypeScript
+
+// Properties: +prop → readonly prop
+type Example = { +prop: string };          // Flow
+type Example = { readonly prop: string };  // TypeScript
+
+// Nullable: ?string → string | null
+prop: ?string                              // Flow
+prop: string | null                        // TypeScript
+
+// React overrides: Add 'override' keyword
+class Component extends PureComponent<Props> {
+  state = { value: true };                 // Flow
+  override state = { value: true };        // TypeScript
+}
+
+// Type annotations: (value: Type) → value as Type
+return (action.selectedThreads: Set<ThreadIndex>);  // Flow
+return action.selectedThreads as Set<ThreadIndex>;  // TypeScript
+
+// Generic constructors: Specify type parameters
+const items = new Set();                   // Flow (inferred)
+const items = new Set<ThreadIndex>();      // TypeScript (explicit)
+```
+
+#### Common Utility Type Mappings
+
+```typescript
+$Keys<T> → keyof T
+$ReadOnly<T> → Readonly<T>
+$Shape<T> → Partial<T>
+mixed → unknown
+Array.from(set) replaces [...set] for type safety
+```
+
+### Other conversion patterns
 
 **🚨 MOST IMPORTANT**: Function parameter names in TypeScript function types
 ```typescript
@@ -181,14 +221,6 @@ export type ThreadSelectors = {
 // TypeScript intersection types
 export type ThreadSelectors = ThreadSelectorsPerThread & MarkerSelectorsPerThread;
 ```
-
-**⚙️ Tooling Strategy**: Unified conversion script approach
-- Created comprehensive `flow-to-typescript-unified.sh` script
-- Combines all successful patterns from previous conversion attempts
-- Includes critical function parameter name fixes
-- Provides detailed issue detection and remediation guidance
-
-#### Previous Discoveries (July 2025)
 
 ```typescript
 // CRITICAL: Function types must have parameter names in TypeScript
@@ -246,46 +278,12 @@ const isObject = (subject) => ...          // Implicit any
 const isObject = (subject: unknown) => ... // Explicit type
 ```
 
-### Key Flow→TypeScript Conversion Patterns
+### `withSize` higher-order React component
 
-#### Essential Changes
-
-```typescript
-// Imports: Remove 'type' keyword
-import type { SomeType } from './module';  // Flow
-import { SomeType } from './module';       // TypeScript
-
-// Properties: +prop → readonly prop
-type Example = { +prop: string };          // Flow
-type Example = { readonly prop: string };  // TypeScript
-
-// Nullable: ?string → string | null
-prop: ?string                              // Flow
-prop: string | null                        // TypeScript
-
-// React overrides: Add 'override' keyword
-class Component extends PureComponent<Props> {
-  state = { value: true };                 // Flow
-  override state = { value: true };        // TypeScript
-}
-
-// Type annotations: (value: Type) → value as Type
-return (action.selectedThreads: Set<ThreadIndex>);  // Flow
-return action.selectedThreads as Set<ThreadIndex>;  // TypeScript
-
-// Generic constructors: Specify type parameters
-const items = new Set();                   // Flow (inferred)
-const items = new Set<ThreadIndex>();      // TypeScript (explicit)
-```
-
-#### Common Utility Type Mappings
+The props type argument `P` in `withSize<P>(...)` is now the props **without width/height**. As a consequence, it's better to just let TypeScript infer `P` type automatically, by removing the explicit argument.
 
 ```typescript
-$Keys<T> → keyof T
-$ReadOnly<T> → Readonly<T>
-$Shape<T> → Partial<T>
-mixed → unknown
-Array.from(set) replaces [...set] for type safety
+withSize<Props>(ComponentImpl) → withSize(ComponentImpl) // Remove explicit type argument
 ```
 
 ---
