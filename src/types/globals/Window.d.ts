@@ -1,28 +1,26 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
-import type { IDBFactory, IDBKeyRange } from '../indexeddb';
-import type { SymbolTableAsTuple } from '../../profile-logic/symbol-store-db';
-import type { GoogleAnalytics } from '../../utils/analytics';
-import type { MixedObject } from '../utils';
-import type { FetchMockJest } from '@fetch-mock/jest';
+import { IDBFactory, IDBKeyRange } from '../indexeddb';
+import { SymbolTableAsTuple } from '../../profile-logic/symbol-store-db';
+import { GoogleAnalytics } from '../../utils/analytics';
+import { FetchMockJest } from '@fetch-mock/jest';
 
 // Because this type isn't an existing Global type, but still it's useful to
 // have it available, we define it with a $ as prfix.
 declare type $GeckoProfiler = {
-  getProfile: () => MixedObject,
+  getProfile: () => unknown;
   getSymbolTable: (
     debugName: string,
     breakpadId: string
-  ) => Promise<SymbolTableAsTuple>,
+  ) => Promise<SymbolTableAsTuple>;
 };
 
 declare class WebChannelEvent {
   detail: {
-    id: string,
-    message: mixed,
+    id: string;
+    message: unknown;
   };
 }
 
@@ -31,7 +29,7 @@ declare class Window {
   ga?: GoogleAnalytics;
   // profiler.firefox.com and globals injected via frame scripts.
   geckoProfilerPromise: Promise<$GeckoProfiler>;
-  connectToGeckoProfiler: ($GeckoProfiler) => void;
+  connectToGeckoProfiler: (profiler: $GeckoProfiler) => void;
 
   // For debugging purposes, allow tooltips to persist. This aids in inspecting
   // the DOM structure.
@@ -39,27 +37,27 @@ declare class Window {
 
   // WebChannel events.
   // https://searchfox.org/mozilla-central/source/toolkit/modules/WebChannel.sys.mjs
-  addEventListener: $PropertyType<EventTarget, 'addEventListener'> &
+  addEventListener: EventTarget['addEventListener'] &
     ((
-      'WebChannelMessageToContent',
-      (event: WebChannelEvent) => void,
-      true
+      event: 'WebChannelMessageToContent',
+      listener: (event: WebChannelEvent) => void,
+      useCapture: true
     ) => void) &
-    (('message', (event: MessageEvent) => void) => void);
+    ((event: 'message', listener: (event: MessageEvent) => void) => void);
 
-  removeEventListener: $PropertyType<EventTarget, 'removeEventListener'> &
+  removeEventListener: EventTarget['removeEventListener'] &
     ((
-      'WebChannelMessageToContent',
-      (event: WebChannelEvent) => void,
-      true
+      event: 'WebChannelMessageToContent',
+      listener: (event: WebChannelEvent) => void,
+      useCapture: true
     ) => void) &
-    (('message', (event: MessageEvent) => void) => void);
+    ((event: 'message', listener: (event: MessageEvent) => void) => void);
 
   // Built-ins.
-  dispatchEvent: $PropertyType<EventTarget, 'dispatchEvent'>;
+  dispatchEvent: EventTarget['dispatchEvent'];
   getComputedStyle: (
     element: HTMLElement,
-    pseudoEl: ?string
+    pseudoEl?: string | null
   ) => CSSStyleDeclaration;
   TextDecoder: typeof TextDecoder;
   setTimeout: typeof setTimeout;
@@ -67,8 +65,8 @@ declare class Window {
     // This is a definition of only the methods we use.
     // https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
     subtle: {
-      digest: (string, Uint8Array) => Promise<ArrayBuffer>,
-    },
+      digest: (algorithm: string, data: Uint8Array) => Promise<ArrayBuffer>;
+    };
   };
   fetch: typeof fetch;
   fetchMock: FetchMockJest /* only used in tests */;
@@ -79,17 +77,21 @@ declare class Window {
   // where this is not available. It can lead to hard to debug promise failure
   // messages.
   indexedDB?: IDBFactory;
-  IDBKeyRange: IDBKeyRange<>;
+  IDBKeyRange: IDBKeyRange<any>;
   innerWidth: number;
   innerHeight: number;
   location: Location;
-  open: (url: string, windowName: string, windowFeatures: ?string) => Window;
+  open: (
+    url: string,
+    windowName: string,
+    windowFeatures?: string | null
+  ) => Window;
   history: History;
   Worker: typeof Worker;
   WheelEvent: WheelEvent;
   navigator: {
-    userAgent: string,
-    platform: string,
+    userAgent: string;
+    platform: string;
   };
   postMessage: (message: any, targetOrigin: string) => void;
   matchMedia: (matchMedia: string) => MediaQueryList;

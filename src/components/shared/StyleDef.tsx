@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 // inspired from https://gist.github.com/jviereck/9a71734afcfe848ddbe2 -- simplified
 //
 // Because JSX isn't nice with CSS content because of the braces, we use a
@@ -15,13 +13,13 @@
 import React, { PureComponent } from 'react';
 
 type StyleDefProps = {
-  +content: string,
+  readonly content: string;
 };
 
 export class StyleDef extends PureComponent<StyleDefProps> {
-  _dom: ?HTMLStyleElement;
+  _dom: HTMLStyleElement | null;
 
-  componentDidMount() {
+  override componentDidMount() {
     const dom = document.createElement('style');
     dom.textContent = this.props.content;
     const documentHead = document.head;
@@ -31,14 +29,14 @@ export class StyleDef extends PureComponent<StyleDefProps> {
     }
   }
 
-  componentDidUpdate(prevProps: StyleDefProps) {
+  override componentDidUpdate(prevProps: StyleDefProps) {
     const dom = this._dom;
     if (prevProps.content !== this.props.content && dom) {
       dom.textContent = this.props.content;
     }
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     const dom = this._dom;
     if (dom) {
       dom.remove();
@@ -46,19 +44,19 @@ export class StyleDef extends PureComponent<StyleDefProps> {
     }
   }
 
-  render() {
+  override render() {
     // The <StyleDef> itself should not appear in the DOM.
     return null;
   }
 }
 
 type BackgroundImageStyleDefProps = {
-  +className: string,
-  +url: string,
+  readonly className: string;
+  readonly url: string;
 };
 
 export class BackgroundImageStyleDef extends PureComponent<BackgroundImageStyleDefProps> {
-  render() {
+  override render() {
     const content = `
       .${this.props.className} {
         background-image: url(${this.props.url});
