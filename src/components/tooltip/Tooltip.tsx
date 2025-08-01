@@ -1,12 +1,10 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import classNames from 'classnames';
-import type { CssPixels } from 'firefox-profiler/types';
+import { CssPixels } from 'firefox-profiler/types';
 
 import {
   ensureExists,
@@ -19,10 +17,10 @@ export const MOUSE_OFFSET = 11;
 export const VISUAL_MARGIN: CssPixels = 8;
 
 type Props = {
-  +mouseX: CssPixels,
-  +mouseY: CssPixels,
-  +children: React.Node,
-  +className?: string,
+  readonly mouseX: CssPixels;
+  readonly mouseY: CssPixels;
+  readonly children: React.ReactNode;
+  readonly className?: string;
 };
 
 // These types represent the tooltip's position. They will be used when storing
@@ -37,9 +35,9 @@ export class Tooltip extends React.PureComponent<Props> {
   // "after" / "after" is the prefered positioning, so it's our default.
   // "edge" means aligned to the window's left or top edge.
   _previousPosition: {
-    horizontal: TooltipPosition,
-    vertical: TooltipPosition,
-  } = { horizontal: 'after-mouse', vertical: 'after-mouse' };
+    horizontal: TooltipPosition;
+    vertical: TooltipPosition;
+  } = { horizontal: 'after-mouse' as const, vertical: 'after-mouse' as const };
 
   _overlayElement = ensureExists(
     document.querySelector('#root-overlay'),
@@ -55,11 +53,11 @@ export class Tooltip extends React.PureComponent<Props> {
     windowSize,
     previousPosition,
   }: {
-    mousePosition: CssPixels,
-    elementSize: CssPixels,
-    windowSize: CssPixels,
-    previousPosition: TooltipPosition,
-  }): { position: TooltipPosition, style: CssPixels } {
+    mousePosition: CssPixels;
+    elementSize: CssPixels;
+    windowSize: CssPixels;
+    previousPosition: TooltipPosition;
+  }): { position: TooltipPosition; style: CssPixels } {
     // 1. Compute the possible tooltip positions depending on the mouse position,
     // the tooltip's size, as well as the available space in the window.
     const possiblePositions: Array<PositionFromMouse> = [];
@@ -112,7 +110,10 @@ export class Tooltip extends React.PureComponent<Props> {
         cssStyle = VISUAL_MARGIN;
         break;
       default:
-        throw assertExhaustiveCheck(newPosition);
+        throw assertExhaustiveCheck(
+          newPosition as never,
+          'Unknown position type'
+        );
     }
 
     // 4. Return all the values, so that they can be applied and saved.
@@ -153,21 +154,21 @@ export class Tooltip extends React.PureComponent<Props> {
     };
   }
 
-  componentDidMount() {
+  override componentDidMount() {
     this.setPositioningStyle();
   }
 
-  componentDidUpdate() {
+  override componentDidUpdate() {
     this.setPositioningStyle();
   }
 
-  _mouseDownListener = (event: SyntheticMouseEvent<>) => {
+  _mouseDownListener = (event: React.MouseEvent<HTMLElement>) => {
     // Prevent the canvas element to handle the mouse down event. Otherwise
     // drag and drop events closes the tooltip.
     event.stopPropagation();
   };
 
-  render() {
+  override render() {
     return ReactDOM.createPortal(
       <div
         className={classNames('tooltip', this.props.className)}
