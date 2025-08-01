@@ -11,10 +11,10 @@ to proceed with the next step of the migration.
 
 - **Type Definitions**: ✅ 13/13 files complete (100%)
 - **Core Utilities**: ✅ 41/41 files complete (100%)
-- **React Components**: ✅ 22/150+ files complete (14.7%)
+- **React Components**: ✅ 25/150+ files complete (16.7%)
 - **Core Dependencies**: ✅ 23/23 files complete (100%) - COMPLETE! 🎉
   - ✅ Completed: tabs-handling.ts, call-node-info.ts, zip-files.ts, browser-connection.ts, uploaded-profiles-db.ts, stack-timing.ts, web-channel.ts, url-handling.ts, symbolication.ts, reducers/index.ts, symbol-store-db.ts, symbol-store.ts, function-info.ts, app.ts, profile-view.ts, url-state.ts, sanitize.ts, profile-compacting.ts, marker-schema.tsx, marker-data.ts
-  - ✅ **NEW TODAY**: profile-logic/profile-metainfo.ts, components/timeline/TrackEventDelayGraph.tsx, components/app/LanguageSwitcher.tsx
+  - ✅ **NEW TODAY**: profile-logic/profile-metainfo.ts, components/timeline/TrackEventDelayGraph.tsx, components/app/LanguageSwitcher.tsx, sidebar/CanSelectContent.tsx, tooltip/TooltipDetails.tsx, app/ProfileRootMessage.tsx
   - 📋 All core dependencies now converted to TypeScript!
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
 - **🔧 Migration Tooling**: ✅ Enhanced dependency analysis with Node.js implementation
@@ -463,8 +463,11 @@ If a phase is only partially complete, but feels complete "in the important ways
     - ✅ Created unified Flow→TypeScript conversion script with critical fixes
     - ✅ Previous: shorten-url.ts, flow.ts, query-api.ts, uintarray-encoding.ts, format-numbers.ts, state.ts, data-table-utils.ts, profile-derived.ts, actions.ts - all removed from excludes
 - **Remaining for 100% Strict Mode with no exclusion list**:
-  - **Current excludes count**: 17 files remaining (stable count after dependency conversions) 
-  - **✅ COMPLETED TODAY**: profile-logic/tracks.ts, selectors/url-state.ts (major core dependencies)
+  - **Current excludes count**: 15 files remaining (down from 17, net -2 progress!) 
+  - **✅ NEW TODAY (August 1, 2025)**: Major progress in strict TypeScript compliance and additional JS→TS conversions:
+    - ✅ **REMOVED from exclude list**: DebugWarning.tsx, Icon.tsx (now pass strict checking!)
+    - ✅ **NEW CONVERSIONS (3 files, 134 lines)**: CanSelectContent.js → .tsx, TooltipDetails.js → .tsx, ProfileRootMessage.js → .tsx
+  - **✅ COMPLETED PREVIOUSLY**: profile-logic/tracks.ts, selectors/url-state.ts (major core dependencies)
   - **Previous**: BlobUrlLink.tsx, ProfileMetaInfoSummary.tsx (dependencies resolved)
   - **Remaining files**: mostly React components + 3 utility files with dependencies
   - **📋 RECOMMENDED CONVERSION ORDER** (based on dependency analysis):
@@ -497,7 +500,7 @@ If a phase is only partially complete, but feels complete "in the important ways
     
     **Components now unblocked by core dependency progress:**
     10. `src/components/app/BeforeUnloadManager.tsx` - Can be converted after publish.ts cleanup
-    11. `src/components/app/DebugWarning.tsx` - **NOW READY** - selectors/profile.ts dependency resolved!
+    11. ✅ `src/components/app/DebugWarning.tsx` - **COMPLETED** - Removed from exclude list, passes strict checking!
     12. `src/components/shared/InnerNavigationLink.tsx` - Depends on actions/profile-view.ts cleanup
     
     **Partially Converted (still need additional dependencies):**
@@ -505,7 +508,7 @@ If a phase is only partially complete, but feels complete "in the important ways
     - `src/components/app/FooterLinks.tsx` - LanguageSwitcher.tsx converted but still needs l10n actions/selectors
     
     **Medium Priority (2 unconverted dependencies each):**
-    9. `src/components/shared/Icon.tsx` - needs `selectors/icons.js` + `actions/icons.js`
+    9. ✅ `src/components/shared/Icon.tsx` - **COMPLETED** - Removed from exclude list, passes strict checking!
     10. `src/components/js-tracer/EmptyReasons.tsx` - needs `selectors/per-thread/thread.js`
     11. `src/components/marker-chart/MarkerChartEmptyReasons.tsx` - needs `selectors/per-thread/thread.js`
     12. `src/components/marker-table/MarkerTableEmptyReasons.tsx` - needs `selectors/per-thread/thread.js`
