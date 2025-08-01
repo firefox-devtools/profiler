@@ -8,14 +8,14 @@ import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import './FilterNavigatorBar.css';
 
 type FilterNavigatorBarListItemProps = {
-  readonly onClick?: null | ((index: number) => unknown),
-  readonly index: number,
-  readonly isFirstItem: boolean,
-  readonly isLastItem: boolean,
-  readonly isSelectedItem: boolean,
-  readonly title?: string,
-  readonly additionalClassName?: string,
-  readonly children: React.ReactNode,
+  readonly onClick?: null | ((index: number) => unknown);
+  readonly index: number;
+  readonly isFirstItem: boolean;
+  readonly isLastItem: boolean;
+  readonly isSelectedItem: boolean;
+  readonly title?: string;
+  readonly additionalClassName?: string;
+  readonly children: React.ReactNode;
 };
 
 class FilterNavigatorBarListItem extends React.PureComponent<FilterNavigatorBarListItemProps> {
@@ -59,11 +59,11 @@ class FilterNavigatorBarListItem extends React.PureComponent<FilterNavigatorBarL
 }
 
 type Props = {
-  readonly className: string,
-  readonly items: ReadonlyArray<React.ReactNode>,
-  readonly onPop: (param: number) => mixed,
-  readonly selectedItem: number,
-  readonly uncommittedItem?: string,
+  readonly className: string;
+  readonly items: ReadonlyArray<React.ReactNode>;
+  readonly onPop: (param: number) => mixed;
+  readonly selectedItem: number;
+  readonly uncommittedItem?: string;
 };
 
 export class FilterNavigatorBar extends React.PureComponent<Props> {

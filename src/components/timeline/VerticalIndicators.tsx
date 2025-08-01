@@ -18,15 +18,15 @@ import {
 import './VerticalIndicators.css';
 
 type Props = {
-  readonly getMarker: (param: MarkerIndex) => Marker,
-  readonly verticalMarkerIndexes: MarkerIndex[],
-  readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-  readonly rangeStart: Milliseconds,
-  readonly rangeEnd: Milliseconds,
-  readonly zeroAt: Milliseconds,
-  readonly width: CssPixels,
-  readonly shouldShowTooltip: boolean,
-  readonly onRightClick: (param: MarkerIndex) => unknown,
+  readonly getMarker: (param: MarkerIndex) => Marker;
+  readonly verticalMarkerIndexes: MarkerIndex[];
+  readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null;
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly zeroAt: Milliseconds;
+  readonly width: CssPixels;
+  readonly shouldShowTooltip: boolean;
+  readonly onRightClick: (param: MarkerIndex) => unknown;
 };
 
 /**
@@ -109,7 +109,9 @@ export class VerticalIndicators extends React.PureComponent<Props> {
         <DivWithTooltip
           key={markerIndex}
           data-testid="vertical-indicator-line"
-          style={{ '--vertical-indicator-color': color, left } as React.CSSProperties}
+          style={
+            { '--vertical-indicator-color': color, left } as React.CSSProperties
+          }
           className="timelineVerticalIndicatorsLine"
           onMouseDown={this._onMouseDown}
           data-marker-index={markerIndex}

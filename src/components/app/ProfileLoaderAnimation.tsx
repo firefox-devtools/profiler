@@ -40,8 +40,8 @@ function fewTimes(count: number) {
 }
 
 type ProfileLoaderAnimationStateProps = {
-  readonly view: AppViewState,
-  readonly dataSource: DataSource,
+  readonly view: AppViewState;
+  readonly dataSource: DataSource;
 };
 
 type ProfileLoaderAnimationProps = ConnectedProps<
@@ -59,7 +59,9 @@ class ProfileLoaderAnimationImpl extends PureComponent<ProfileLoaderAnimationPro
       : 'ProfileLoaderAnimation--loading-view-not-found';
     const showLoader = Boolean(loadingMessage);
     const showBackHomeLink = Boolean(
-      'additionalData' in view && view.additionalData && view.additionalData.message
+      'additionalData' in view &&
+        view.additionalData &&
+        view.additionalData.message
     );
 
     return (

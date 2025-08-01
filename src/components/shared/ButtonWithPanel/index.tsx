@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 // This implements a Button that triggers a panel. The panel will have a small
 // arrow pointing towards the button, which is implemented in ArrowPanel.
 //
@@ -32,22 +30,22 @@ import { ArrowPanel } from './ArrowPanel';
 import './ButtonWithPanel.css';
 
 type Props = {
-  +className?: string,
-  +label: string,
-  +panelContent: React.Node,
-  +panelClassName?: string,
+  readonly className?: string;
+  readonly label: string;
+  readonly panelContent: React.ReactNode;
+  readonly panelClassName?: string;
   // This prop tells the panel to be open by default, but the open/close state is fully
   // managed by the ButtonWithPanel component.
-  +initialOpen?: boolean,
+  readonly initialOpen?: boolean;
   // The class name of the button input element.
-  +buttonClassName?: string,
-  +onPanelOpen?: () => mixed,
-  +onPanelClose?: () => mixed,
-  +title?: string,
+  readonly buttonClassName?: string;
+  readonly onPanelOpen?: () => unknown;
+  readonly onPanelClose?: () => unknown;
+  readonly title?: string;
 };
 
 type State = {
-  +open: boolean,
+  readonly open: boolean;
 };
 
 export class ButtonWithPanel extends React.PureComponent<Props, State> {
@@ -60,7 +58,7 @@ export class ButtonWithPanel extends React.PureComponent<Props, State> {
     this.state = { open: !!props.initialOpen };
   }
 
-  componentDidMount() {
+  override componentDidMount() {
     // the panel can be closed by clicking anywhere on the window
     window.addEventListener('click', this._onWindowClick);
     // the panel can be closed by pressing the Esc key
@@ -70,7 +68,7 @@ export class ButtonWithPanel extends React.PureComponent<Props, State> {
     }
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     window.removeEventListener('keydown', this._onKeyDown);
     window.removeEventListener('click', this._onWindowClick);
   }
@@ -154,7 +152,7 @@ export class ButtonWithPanel extends React.PureComponent<Props, State> {
     return false;
   }
 
-  render() {
+  override render() {
     const {
       className,
       label,
@@ -167,12 +165,12 @@ export class ButtonWithPanel extends React.PureComponent<Props, State> {
     return (
       <div
         className={classNames('buttonWithPanel', className, { open })}
-        ref={this._wrapperRef}
+        ref={this._wrapperRef as React.RefObject<HTMLDivElement>}
       >
         <button
           type="button"
           className={classNames('buttonWithPanelButton', buttonClassName)}
-          aria-expanded={String(open)}
+          aria-expanded={open}
           title={open ? null : title}
           onClick={this._onButtonClick}
           ref={this._buttonRef}
