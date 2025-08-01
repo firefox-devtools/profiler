@@ -136,7 +136,7 @@
     "css-loader": "^7.1.2",
     "cssnano": "^7.1.0",
     "devtools-license-check": "^0.9.0",
-    "eslint": "^8.57.1",
+    "eslint": "^9.32.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-plugin-flowtype": "^8.0.3",
