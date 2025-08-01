@@ -2112,6 +2112,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/clamp@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@types/clamp/-/clamp-1.0.3.tgz#4b0976f1a272bca801f603c02724f9b9fcb1d366"
+  integrity sha512-xFcJ5qIQGxEjYjwSo5f6wyiPQx30CEfxMzh2PYYyoSM8Yvts54/pg7HU0g1bA5R6sklRAkVJpY1ejES/uyLOVw==
+
 "@types/classnames@^2.3.4":
   version "2.3.4"
   resolved "https://registry.yarnpkg.com/@types/classnames/-/classnames-2.3.4.tgz#1a1fdf5023ef216219f13e702543f9ce9b394560"
@@ -2480,6 +2485,11 @@
   version "8.1.1"
   resolved "https://registry.yarnpkg.com/@types/supports-color/-/supports-color-8.1.1.tgz#1b44b1b096479273adf7f93c75fc4ecc40a61ee4"
   integrity sha512-dPWnWsf+kzIG140B8z2w3fr5D03TLWbOAFQl45xUpI3vcizeXriNR5VYkWZ+WTMsUHqZ9Xlt3hrxGNANFyNQfw==
+
+"@types/tgwf__co2@^0.14.2":
+  version "0.14.2"
+  resolved "https://registry.yarnpkg.com/@types/tgwf__co2/-/tgwf__co2-0.14.2.tgz#fea70be29000e2308fa80319da90600773392c12"
+  integrity sha512-kgSh14wLbydB4TwHYVq/1pbOC4ww3EDNgLQ3kZSH6wZyDmBMTRyEaIBqXtCmuhKCotU71QAOpkIO3IHbHTtANA==
 
 "@types/tough-cookie@*":
   version "4.0.2"

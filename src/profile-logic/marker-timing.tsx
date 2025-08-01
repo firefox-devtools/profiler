@@ -119,7 +119,11 @@ export function getMarkerTiming(
         ? 'Network Requests'
         : marker.name;
 
-    const emptyTiming = ({ instantOnly }): MarkerTiming => ({
+    const emptyTiming = ({
+      instantOnly,
+    }: {
+      instantOnly: boolean;
+    }): MarkerTiming => ({
       start: [],
       end: [],
       index: [],

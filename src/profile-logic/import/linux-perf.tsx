@@ -73,7 +73,7 @@ const KERNEL_CATEGORY_INDEX = 1;
 export function convertPerfScriptProfile(
   profile: string
 ): GeckoProfileVersion24 {
-  function _createThread(name, pid, tid) {
+  function _createThread(name: string, pid: number, tid: number) {
     const markers = {
       schema: {
         name: 0,
@@ -114,15 +114,15 @@ export function convertPerfScriptProfile(
       },
       data: [],
     };
-    const stringTable = [];
+    const stringTable: string[] = [];
 
     const stackMap = new Map();
-    function getOrCreateStack(frame, prefix) {
+    function getOrCreateStack(frame: string, prefix: string | null) {
       const key = prefix === null ? `${frame}` : `${frame},${prefix}`;
       let stack = stackMap.get(key);
       if (stack === undefined) {
         stack = stackTable.data.length;
-        stackTable.data.push([prefix, frame]);
+        (stackTable.data as any[]).push([prefix, frame]);
         stackMap.set(key, stack);
       }
       return stack;
@@ -157,7 +157,7 @@ export function convertPerfScriptProfile(
         const subcategory = null;
         const innerWindowID = 0;
         const column = null;
-        frameTable.data.push([
+        (frameTable.data as any[]).push([
           location,
           relevantForJS,
           innerWindowID,
@@ -173,7 +173,7 @@ export function convertPerfScriptProfile(
       return frame;
     }
 
-    function addSample(threadName, stackArray, time) {
+    function addSample(threadName: string, stackArray: string[], time: number) {
       // often we create a thread which inherits the name of the parent, and
       // set the thread's name slightly later.  Avoid having the first
       // sample's name stick.
@@ -187,7 +187,7 @@ export function convertPerfScriptProfile(
       // We don't have this information, so simulate that there's no latency at
       // all in processing events.
       const responsiveness = 0;
-      samples.data.push([stack, time, responsiveness]);
+      (samples.data as any[]).push([stack, time, responsiveness]);
     }
 
     return {
@@ -212,7 +212,13 @@ export function convertPerfScriptProfile(
 
   const threadMap = new Map();
 
-  function _addThreadSample(pid, tid, threadName, timeStamp, stack) {
+  function _addThreadSample(
+    pid: number,
+    tid: number,
+    threadName: string,
+    timeStamp: number,
+    stack: string[]
+  ) {
     // Right now this assumes that you can't have two identical tids in
     // different pids, which is true in linux at least.
     let thread = threadMap.get(tid);

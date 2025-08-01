@@ -75,12 +75,15 @@ export class ThreadHeightGraph extends PureComponent<Props> {
     } = this.props;
 
     const devicePixelRatio = canvas.ownerDocument
-      ? canvas.ownerDocument.defaultView.devicePixelRatio
+      ? (canvas.ownerDocument.defaultView?.devicePixelRatio ?? 1)
       : 1;
     const rect = canvas.getBoundingClientRect();
     canvas.width = Math.round(rect.width * devicePixelRatio);
     canvas.height = Math.round(rect.height * devicePixelRatio);
     const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
     const range = [rangeStart, rangeEnd];
     const rangeLength = range[1] - range[0];
     const xPixelsPerMs = canvas.width / rangeLength;
@@ -107,12 +110,12 @@ export class ThreadHeightGraph extends PureComponent<Props> {
 
     // Do one pass over the samples array to gather the samples we want to draw.
     const regularSamples = {
-      height: [],
-      xPos: [],
+      height: [] as number[],
+      xPos: [] as number[],
     };
     const idleSamples = {
-      height: [],
-      xPos: [],
+      height: [] as number[],
+      xPos: [] as number[],
     };
     const highlightedSamples = {
       height: [],
@@ -167,12 +170,15 @@ export class ThreadHeightGraph extends PureComponent<Props> {
       if (samplesBucket.xPos.length === 0) {
         return;
       }
+      if (!ctx) return;
       ctx.fillStyle = color;
       for (let i = 0; i < samplesBucket.height.length; i++) {
         const height = samplesBucket.height[i];
         const startY = stacksGrowFromCeiling ? 0 : canvas.height - height;
         const xPos = samplesBucket.xPos[i];
-        ctx.fillRect(xPos, startY, drawnIntervalWidth, height);
+        if (ctx) {
+          ctx.fillRect(xPos, startY, drawnIntervalWidth, height);
+        }
       }
     }
 

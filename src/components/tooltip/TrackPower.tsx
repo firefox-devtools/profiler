@@ -82,10 +82,10 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
 
   _formatPowerValue(
     power: number,
-    l10nIdKiloUnit,
-    l10nIdUnit,
-    l10nIdMilliUnit,
-    l10nIdMicroUnit
+    l10nIdKiloUnit: string,
+    l10nIdUnit: string,
+    l10nIdMilliUnit: string,
+    l10nIdMicroUnit: string
   ): React.ReactElement<any> {
     let value, l10nId, carbonValue;
     const carbon = this._computeCO2eFromPower(power);
@@ -125,7 +125,7 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
   }
 
   maybeRenderForPreviewSelection(
-    previewSelection
+    previewSelection: PreviewSelection
   ): React.ReactElement<any> | null {
     if (!previewSelection.hasSelection) {
       return null;

@@ -1,62 +1,60 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import * as React from 'react';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import classNames from 'classnames';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 
-import type { CssPixels, DevicePixels } from 'firefox-profiler/types';
+import { CssPixels, DevicePixels } from 'firefox-profiler/types';
 
 type Props<Item> = {
-  +containerWidth: CssPixels,
-  +containerHeight: CssPixels,
-  +className: string,
-  +onSelectItem?: (Item | null) => void,
-  +onRightClick?: (Item | null) => void,
-  +onDoubleClickItem: (Item | null) => void,
-  +getHoveredItemInfo: (Item) => React.Node,
-  +drawCanvas: (
+  readonly containerWidth: CssPixels;
+  readonly containerHeight: CssPixels;
+  readonly className: string;
+  readonly onSelectItem?: (param: Item | null) => void;
+  readonly onRightClick?: (param: Item | null) => void;
+  readonly onDoubleClickItem: (param: Item | null) => void;
+  readonly getHoveredItemInfo: (param: Item) => React.ReactNode;
+  readonly drawCanvas: (
     CanvasRenderingContext2D,
     ChartCanvasScale: ChartCanvasScale,
     ChartCanvasHoverInfo: ChartCanvasHoverInfo<Item>
-  ) => void,
-  +isDragging: boolean,
+  ) => void;
+  readonly isDragging: boolean;
   // Applies ctx.scale() to the canvas to draw using CssPixels rather than DevicePixels.
-  +scaleCtxToCssPixels: boolean,
-  +hitTest: (x: CssPixels, y: CssPixels) => Item | null,
+  readonly scaleCtxToCssPixels: boolean;
+  readonly hitTest: (x: CssPixels, y: CssPixels) => Item | null;
   // Default to true. Set to false if the chart should be redrawn right away after
   // rerender.
-  +drawCanvasAfterRaf?: boolean,
+  readonly drawCanvasAfterRaf?: boolean;
 
-  +onMouseMove?: (e: { nativeEvent: MouseEvent }) => mixed,
-  +onMouseLeave?: (e: { nativeEvent: MouseEvent }) => mixed,
+  readonly onMouseMove?: (e: { nativeEvent: MouseEvent }) => unknown;
+  readonly onMouseLeave?: (e: { nativeEvent: MouseEvent }) => unknown;
   // Defaults to false. Set to true if the chart should persist the tooltips on click.
-  +stickyTooltips?: boolean,
+  readonly stickyTooltips?: boolean;
 };
 
 // The naming of the X and Y coordinates here correspond to the ones
 // found on the MouseEvent interface.
 type State<Item> = {
-  hoveredItem: Item | null,
-  selectedItem: Item | null,
-  pageX: CssPixels,
-  pageY: CssPixels,
+  hoveredItem: Item | null;
+  selectedItem: Item | null;
+  pageX: CssPixels;
+  pageY: CssPixels;
 };
 
 export type ChartCanvasScale = {
   // Always equal to devicePixelRatio
-  cssToDeviceScale: number,
+  cssToDeviceScale: number;
   // 1 if scaleCtxToCssPixels is true, otherwise equal to cssToDeviceScale
-  cssToUserScale: number,
+  cssToUserScale: number;
 };
 
 export type ChartCanvasHoverInfo<Item> = {
-  hoveredItem: Item | null,
-  prevHoveredItem: Item | null,
-  isHoveredOnlyDifferent: boolean,
+  hoveredItem: Item | null;
+  prevHoveredItem: Item | null;
+  isHoveredOnlyDifferent: boolean;
 };
 
 import './Canvas.css';
@@ -76,7 +74,7 @@ const MOUSE_CLICK_MAX_MOVEMENT_DELTA: CssPixels = 5;
 // But we still conditionally update the canvas itself, see componentDidUpdate.
 export class ChartCanvas<Item> extends React.Component<
   Props<Item>,
-  State<Item>,
+  State<Item>
 > {
   _devicePixelRatio: number = 1;
   // The current mouse position. Needs to be stored for tooltip
@@ -95,7 +93,7 @@ export class ChartCanvas<Item> extends React.Component<
   _canvas: HTMLCanvasElement | null = null;
   _isDrawScheduled: boolean = false;
 
-  state: State<Item> = {
+  override state: State<Item> = {
     hoveredItem: null,
     selectedItem: null,
     pageX: 0,
@@ -201,7 +199,9 @@ export class ChartCanvas<Item> extends React.Component<
     }
   }
 
-  _onMouseDown = (e: { nativeEvent: MouseEvent } & SyntheticMouseEvent<>) => {
+  _onMouseDown = (
+    e: { nativeEvent: MouseEvent } & React.MouseEvent<HTMLElement>
+  ) => {
     if (e.button === 0) {
       // Remember where the mouse was positioned. Move too far and it
       // won't be registered as a selecting click on mouse up.
@@ -219,7 +219,7 @@ export class ChartCanvas<Item> extends React.Component<
     }
   };
 
-  _onClick = (e: SyntheticMouseEvent<>) => {
+  _onClick = (e: React.MouseEvent<HTMLElement>) => {
     if (this._mouseMovedWhileClicked) {
       return;
     }
@@ -239,7 +239,7 @@ export class ChartCanvas<Item> extends React.Component<
   };
 
   _onMouseLeave = (
-    event: { nativeEvent: MouseEvent } & SyntheticMouseEvent<>
+    event: { nativeEvent: MouseEvent } & React.MouseEvent<HTMLElement>
   ) => {
     if (this.props.onMouseLeave) {
       this.props.onMouseLeave(event);
@@ -247,7 +247,7 @@ export class ChartCanvas<Item> extends React.Component<
   };
 
   _onMouseMove = (
-    event: { nativeEvent: MouseEvent } & SyntheticMouseEvent<>
+    event: { nativeEvent: MouseEvent } & React.MouseEvent<HTMLElement>
   ) => {
     if (!this._canvas) {
       return;
@@ -304,7 +304,7 @@ export class ChartCanvas<Item> extends React.Component<
       this.state.hoveredItem !== null &&
       // This persistTooltips property is part of the web console API. It helps
       // in being able to inspect and debug tooltips.
-      !window.persistTooltips
+      !(window as any).persistTooltips
     ) {
       this.setState({
         hoveredItem: null,
@@ -317,7 +317,7 @@ export class ChartCanvas<Item> extends React.Component<
       this.state.hoveredItem !== null &&
       // This persistTooltips property is part of the web console API. It helps
       // in being able to inspect and debug tooltips.
-      !window.persistTooltips
+      !(window as any).persistTooltips
     ) {
       this.setState({ hoveredItem: null });
     }
@@ -327,7 +327,7 @@ export class ChartCanvas<Item> extends React.Component<
     this.props.onDoubleClickItem(this.state.hoveredItem);
   };
 
-  _getHoveredItemInfo = (): React.Node => {
+  _getHoveredItemInfo = (): React.ReactNode => {
     const { hoveredItem, selectedItem } = this.state;
     if (selectedItem !== null) {
       // If we have a selected item, persist that one instead of returning
@@ -346,7 +346,7 @@ export class ChartCanvas<Item> extends React.Component<
     this._canvas = canvas;
   };
 
-  UNSAFE_componentWillReceiveProps() {
+  override UNSAFE_componentWillReceiveProps() {
     // It is possible that the data backing the chart has been
     // changed, for instance after symbolication. Clear the
     // hoveredItem if the mouse no longer hovers over it.
@@ -362,7 +362,7 @@ export class ChartCanvas<Item> extends React.Component<
     }
   }
 
-  componentDidUpdate(prevProps: Props<Item>, prevState: State<Item>) {
+  override componentDidUpdate(prevProps: Props<Item>, prevState: State<Item>) {
     if (prevProps !== this.props) {
       if (
         this.state.selectedItem !== null &&
@@ -385,7 +385,7 @@ export class ChartCanvas<Item> extends React.Component<
     }
   }
 
-  render() {
+  override render() {
     const { isDragging } = this.props;
     const { hoveredItem, pageX, pageY } = this.state;
 

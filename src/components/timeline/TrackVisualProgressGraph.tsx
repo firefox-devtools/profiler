@@ -64,6 +64,9 @@ class TrackVisualProgressCanvas extends React.PureComponent<CanvasProps> {
     }
 
     const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
     const devicePixelRatio = window.devicePixelRatio;
     const deviceWidth = width * devicePixelRatio;
     const deviceHeight = height * devicePixelRatio;

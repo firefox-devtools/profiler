@@ -85,19 +85,19 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
 
   _handleCloseClick = () => {
     if (this.state.isOpen) {
-      const { focusAfterClosed } = this.state;
+      const focusAfterClosed = this.state.focusAfterClosed;
       this._untrapFocus();
       this.setState({ isOpen: false, focusAfterClosed: null });
-      if (focusAfterClosed && focusAfterClosed.focus) {
+      if (focusAfterClosed && 'focus' in focusAfterClosed) {
         requestAnimationFrame(() => {
-          focusAfterClosed.focus();
+          (focusAfterClosed as HTMLElement).focus();
         });
       }
     }
   };
 
   _handleKeyPress = (event: KeyboardEvent) => {
-    const target = coerce<EventTarget, HTMLElement>(event.target);
+    const target = coerce<EventTarget, HTMLElement>(event.target!);
     switch (event.key) {
       case '?': {
         if (
@@ -112,12 +112,12 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
         // Toggle the state.
         if (this.state.isOpen) {
           // Close logic
-          const { focusAfterClosed } = this.state;
+          const focusAfterClosed = this.state.focusAfterClosed;
           this._untrapFocus();
           this.setState({ isOpen: false, focusAfterClosed: null });
-          if (focusAfterClosed && focusAfterClosed.focus) {
+          if (focusAfterClosed && 'focus' in focusAfterClosed) {
             requestAnimationFrame(() => {
-              focusAfterClosed.focus();
+              (focusAfterClosed as HTMLElement).focus();
             });
           }
         } else {
@@ -132,12 +132,12 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
       case 'Escape': {
         // Unconditionally run close on escape, which is a noop if it's not open.
         if (this.state.isOpen) {
-          const { focusAfterClosed } = this.state;
+          const focusAfterClosed = this.state.focusAfterClosed;
           this._untrapFocus();
           this.setState({ isOpen: false, focusAfterClosed: null });
-          if (focusAfterClosed && focusAfterClosed.focus) {
+          if (focusAfterClosed && 'focus' in focusAfterClosed) {
             requestAnimationFrame(() => {
-              focusAfterClosed.focus();
+              (focusAfterClosed as HTMLElement).focus();
             });
           }
         }
@@ -168,7 +168,7 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
     if (!div) {
       return;
     }
-    if (!div.contains(coerce<EventTarget, Node>(event.target))) {
+    if (!div.contains(coerce<EventTarget, Node>(event.target!))) {
       // TODO - This does not handle shift-tabbing going to the last focusable
       // element in the list.
       div.focus();

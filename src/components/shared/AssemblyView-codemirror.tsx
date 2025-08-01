@@ -103,7 +103,7 @@ class AddressToLineMap {
   // works.
   _instructionAddresses: Address[];
 
-  constructor(instructionAddresses) {
+  constructor(instructionAddresses: Address[]) {
     this._instructionAddresses = instructionAddresses;
   }
 

@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import classNames from 'classnames';
 
@@ -19,7 +17,7 @@ import {
 } from 'firefox-profiler/utils/format-numbers';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import type {
+import {
   NetworkHttpVersion,
   NetworkPayload,
   NetworkStatus,
@@ -147,14 +145,14 @@ const NETWORK_PROPERTY_OPACITIES = {
 };
 
 type NetworkPhaseProps = {
-  +propertyName: string,
-  +dur: Milliseconds,
-  +startPosition: Milliseconds,
-  +phaseDuration: Milliseconds,
+  readonly propertyName: string;
+  readonly dur: Milliseconds;
+  readonly startPosition: Milliseconds;
+  readonly phaseDuration: Milliseconds;
 };
 
 class NetworkPhase extends React.PureComponent<NetworkPhaseProps> {
-  render() {
+  override render() {
     const { startPosition, dur, propertyName, phaseDuration } = this.props;
     const startPositionPercent = (startPosition / dur) * 100;
     const durationPercent = Math.max(0.3, (phaseDuration / dur) * 100);
@@ -191,8 +189,8 @@ class NetworkPhase extends React.PureComponent<NetworkPhaseProps> {
 }
 
 type Props = {
-  +payload: NetworkPayload,
-  +zeroAt: Milliseconds,
+  readonly payload: NetworkPayload;
+  readonly zeroAt: Milliseconds;
 };
 
 export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
@@ -200,7 +198,7 @@ export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
     properties: string[],
     sectionDuration: Milliseconds,
     startTime: Milliseconds
-  ): Array<React.Element<typeof NetworkPhase>> | null {
+  ): Array<React.ReactElement<typeof NetworkPhase>> | null {
     if (properties.length < 2) {
       console.error(
         'Only 1 preconnect property has been found, this should not happen.'
@@ -255,7 +253,7 @@ export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
     return null;
   }
 
-  _renderPreconnectPhases(): React.Node {
+  _renderPreconnectPhases(): React.ReactNode {
     const { payload, zeroAt } = this.props;
     const preconnectStart = payload.domainLookupStart;
     if (typeof preconnectStart !== 'number') {
@@ -303,7 +301,7 @@ export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
     );
   }
 
-  render() {
+  override render() {
     const { payload } = this.props;
     const mimeType =
       payload.contentType || guessMimeTypeFromNetworkMarker(payload);
