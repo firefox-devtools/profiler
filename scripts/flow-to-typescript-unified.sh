@@ -69,8 +69,21 @@ apply_transform 's/): ?\([A-Za-z][A-Za-z0-9_]*\)/): \1 | null/g' "Convert nullab
 # 5. Convert Flow readonly properties (+prop → readonly prop)
 apply_transform 's/+\([a-zA-Z_][a-zA-Z0-9_]*\):/readonly \1:/g' "Convert readonly properties"
 
+# Also handle readonly properties with optional syntax (+prop?:)
+apply_transform 's/+\([a-zA-Z_][a-zA-Z0-9_]*\)?:/readonly \1?:/g' "Convert optional readonly properties"
+
 # 6. Fix trailing commas in multiline type definitions (TypeScript strict requirement)
+# Handle simple case first
 apply_transform 's/,\([[:space:]]*\)>/\1>/g' "Remove trailing commas from generic types"
+
+# Handle multiline case: comma followed by newline, whitespace, and closing bracket
+# Use perl for proper multiline regex handling
+if command -v perl >/dev/null 2>&1; then
+    perl -0777 -i -pe 's/,(\s*\n\s*>)/\1/g' "$OUTPUT_FILE" && echo "Applied multiline trailing comma removal" || echo "⚠️  Perl multiline fix failed"
+else
+    # Fallback using sed (less reliable for multiline)
+    apply_transform ':a;N;$!ba;s/,\([[:space:]]*\n[[:space:]]*\)>/\1>/g' "Remove multiline trailing commas (sed fallback)"
+fi
 
 # 7. Convert Flow utility types
 apply_transform 's/\$Keys<\([^>]*\)>/keyof \1/g' "Convert $Keys to keyof"
@@ -100,7 +113,10 @@ apply_transform 's/: empty)/ as never)/g' "Convert empty type annotations"
 apply_transform 's/({}:  *\([^)]*\))/({} as \1)/g' "Convert object type casting"
 
 # 12. Type object property syntax (comma → semicolon)
-apply_transform 's/readonly \([a-zA-Z_][a-zA-Z0-9_]*\): \([^,}]*\),$/readonly \1: \2;/g' "Convert type object property syntax"
+apply_transform 's/readonly \([a-zA-Z_][a-zA-Z0-9_]*\): \([^,}]*\),$/readonly \1: \2;/g' "Convert readonly type object property syntax"
+apply_transform 's/readonly \([a-zA-Z_][a-zA-Z0-9_]*\)?: \([^,}]*\),$/readonly \1?: \2;/g' "Convert optional readonly type object property syntax"
+apply_transform 's/\([a-zA-Z_][a-zA-Z0-9_]*\): \([^,}]*\),$/\1: \2;/g' "Convert regular type object property syntax"
+apply_transform 's/\([a-zA-Z_][a-zA-Z0-9_]*\)?: \([^,}]*\),$/\1?: \2;/g' "Convert optional type object property syntax"
 
 # 13. Convert void return types to undefined where appropriate
 apply_transform 's/): void$/): undefined/g' "Convert void to undefined in return types"
@@ -148,6 +164,12 @@ fi
 # Check for literal types that may need 'as const'
 if grep -q "type: '[^']*'" "$OUTPUT_FILE" 2>/dev/null; then
     WARNINGS+=("Found literal types that may need 'as const' for proper inference")
+    ISSUES_FOUND=$((ISSUES_FOUND + 1))
+fi
+
+# Check for remaining trailing commas in type definitions
+if grep -q -E ',\s*>' "$OUTPUT_FILE" 2>/dev/null; then
+    WARNINGS+=("Found remaining trailing commas in type definitions")
     ISSUES_FOUND=$((ISSUES_FOUND + 1))
 fi
 

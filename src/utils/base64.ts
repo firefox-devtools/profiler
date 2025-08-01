@@ -3,10 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * Encode the ArrayBuffer{,View} bytes into a base64 data url.
+ * Encode the ArrayBuffer bytes into a base64 data url.
  */
 export async function bytesToBase64DataUrl(
-  bytes: ArrayBufferView | ArrayBuffer,
+  bytes: ArrayBuffer,
   type: string = 'application/octet-stream'
 ): Promise<string> {
   return new Promise((resolve, reject) => {

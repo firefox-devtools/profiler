@@ -1,21 +1,19 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import { createSelector } from 'reselect';
 import { getProfileUrl } from './url-state';
 import { ensureExists } from '../utils/flow';
 import * as ZipFiles from '../profile-logic/zip-files';
 
-import type {
+import {
   ZipFileState,
   ZippedProfilesState,
   Selector,
 } from 'firefox-profiler/types';
 
-import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
-import type JSZip from 'jszip';
+import { IndexIntoZipFileTable } from '../profile-logic/zip-files';
+import JSZip from 'jszip';
 
 /**
  * Simple selectors into the ZippedProfilesState.
@@ -26,7 +24,7 @@ export const getSelectedZipFileIndex: Selector<IndexIntoZipFileTable | null> = (
   state
 ) => getZippedProfilesState(state).selectedZipFileIndex;
 export const getExpandedZipFileIndexes: Selector<
-  Array<IndexIntoZipFileTable | null>,
+  Array<IndexIntoZipFileTable | null>
 > = (state) => getZippedProfilesState(state).expandedZipFileIndexes;
 export const getZipFileState: Selector<ZipFileState> = (state) =>
   getZippedProfilesState(state).zipFile;

@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import { createSelector } from 'reselect';
 
 import {
@@ -12,7 +10,7 @@ import {
   getHiddenLocalTracksByPid,
 } from './url-state';
 import { getGlobalTracks, getLocalTracksByPid } from './profile';
-import { getZipFileState } from './zipped-profiles.js';
+import { getZipFileState } from './zipped-profiles';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import {
   FULL_TRACK_SCREENSHOT_HEIGHT,
@@ -28,7 +26,7 @@ import {
   TRACK_MARKER_HEIGHT,
 } from '../app-logic/constants';
 
-import type {
+import {
   AppState,
   AppViewState,
   UrlSetupPhase,
@@ -38,8 +36,8 @@ import type {
   ExperimentalFlags,
   UploadedProfileInformation,
 } from 'firefox-profiler/types';
-import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
-import type {
+import { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
+import {
   BrowserConnectionStatus,
   BrowserConnection,
 } from 'firefox-profiler/app-logic/browser-connection';
@@ -61,8 +59,8 @@ export const getPanelLayoutGeneration: Selector<number> = (state) =>
 export const getLastVisibleThreadTabSlug: Selector<TabSlug> = (state) =>
   getApp(state).lastVisibleThreadTabSlug;
 export const getTrackThreadHeights: Selector<{
-  [key: ThreadsKey]: CssPixels,
-}> = (state) => getApp(state).trackThreadHeights;
+  [key: ThreadsKey]: CssPixels
+}> = (state) => getApp(state).trackThreadHeights as unknown as { [key: ThreadsKey]: CssPixels };
 export const getIsNewlyPublished: Selector<boolean> = (state) =>
   getApp(state).isNewlyPublished;
 export const getExperimental: Selector<ExperimentalFlags> = (state) =>
@@ -88,7 +86,7 @@ export const getIsDragAndDropOverlayRegistered: Selector<boolean> = (state) =>
   getApp(state).isDragAndDropOverlayRegistered;
 
 export const getCurrentProfileUploadedInformation: Selector<
-  UploadedProfileInformation | null,
+  UploadedProfileInformation | null
 > = (state) => getApp(state).currentProfileUploadedInformation;
 
 /**
