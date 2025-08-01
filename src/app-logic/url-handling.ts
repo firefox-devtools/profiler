@@ -456,7 +456,7 @@ export function stateFromLocation(
       hash: location.hash,
       query: queryString.parse(location.search.substr(1), {
         arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
-      }) as any,
+      }),
     },
     profile
   );
@@ -728,7 +728,9 @@ type ProcessedLocation = {
   query: Query;
 };
 
-type ProcessedLocationBeforeUpgrade = ProcessedLocation & {
+type ProcessedLocationBeforeUpgrade = {
+  pathname: string;
+  hash: string;
   query: any;
 };
 
