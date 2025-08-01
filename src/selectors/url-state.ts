@@ -198,7 +198,7 @@ export const getNetworkSearchStringsAsRegExp: Selector<MarkerRegExps | null> =
   createSelector(getNetworkSearchStrings, stringsToMarkerRegExps);
 
 // Pre-allocate an array to help with strict equality tests in the selectors.
-const EMPTY_TRANSFORM_STACK = [];
+const EMPTY_TRANSFORM_STACK: TransformStack = [];
 
 export const getTransformStack: DangerousSelectorWithArguments<
   TransformStack,

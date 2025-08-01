@@ -375,7 +375,7 @@ export function computeLocalTracksByPid(
         const markerSchemaName = markerData ? markerData.type : null;
         if (markerData && markerSchemaName) {
           const mapEntry = markerTracksBySchemaName.get(markerSchemaName);
-          if (mapEntry && mapEntry.keys.every((k) => k in markerData)) {
+          if (mapEntry && mapEntry.keys.every((k: string) => k in markerData)) {
             mapEntry.markerNames.add(markerNameIndex);
           }
         }
@@ -432,7 +432,7 @@ export function computeLocalTracksByPid(
   for (const localTracks of localTracksByPid.values()) {
     // In place sort!
     localTracks.sort(
-      (a, b) =>
+      (a: LocalTrack, b: LocalTrack) =>
         LOCAL_TRACK_INDEX_ORDER[a.type] - LOCAL_TRACK_INDEX_ORDER[b.type]
     );
   }
@@ -561,7 +561,7 @@ export function computeGlobalTracks(
         const globalTrack = {
           type: 'process' as const,
           pid: pid,
-          mainThreadIndex: null,
+          mainThreadIndex: null as ThreadIndex | null,
         };
         globalTracks.push(globalTrack);
         globalTracksByPid.set(pid, globalTrack);
@@ -1242,7 +1242,10 @@ export function computeDefaultVisibleThreads(
     })
   );
   const thresholdSampleScore = highestSampleScore * IDLE_THRESHOLD_FRACTION;
-  const tryToHideList = [];
+  const tryToHideList: Array<{
+    threadIndex: ThreadIndex;
+    score: ThreadActivityScore;
+  }> = [];
   let finalList = top15.filter((activityScore) => {
     const { score } = activityScore;
     if (score.isInParentProcess && !includeParentProcessThreads) {

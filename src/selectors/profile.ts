@@ -134,7 +134,7 @@ export const getMouseTimePosition: Selector<Milliseconds | null> = (state) =>
   getProfileViewOptions(state).mouseTimePosition;
 
 export const getTableViewOptionSelectors: (
-  TabSlug
+  tab: TabSlug
 ) => Selector<TableViewOptions> = (tab) => (state) => {
   const options = getProfileViewOptions(state).perTab[tab];
   return options || defaultTableViewOptions;
@@ -269,7 +269,7 @@ export const getMarkerSchemaByName: Selector<MarkerSchemaByName> =
 
 type CounterSelectors = $ReturnType<typeof _createCounterSelectors>;
 
-const _counterSelectors = {};
+const _counterSelectors: { [key: number]: CounterSelectors } = {};
 export const getCounterSelectors = (index: CounterIndex): CounterSelectors => {
   let selectors = _counterSelectors[index];
   if (!selectors) {
@@ -694,7 +694,7 @@ export const getPagesMap: Selector<Map<TabID, Page[]> | null> = createSelector(
 
     for (const page of pageList) {
       // If this is an iframe, we recursively visit its parent.
-      const getTopMostParent = (item) => {
+      const getTopMostParent = (item: any) => {
         if (item.embedderInnerWindowID === 0) {
           return item;
         }
