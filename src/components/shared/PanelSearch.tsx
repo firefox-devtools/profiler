@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import * as React from 'react';
 import classNames from 'classnames';
 import { IdleSearchField } from './IdleSearchField';
@@ -11,17 +9,17 @@ import './PanelSearch.css';
 import { Localized } from '@fluent/react';
 
 type Props = {
-  +className: string,
-  +label: string,
-  +title: string,
-  +currentSearchString: string,
-  +onSearch: (string) => void,
+  readonly className: string;
+  readonly label: string;
+  readonly title: string;
+  readonly currentSearchString: string;
+  readonly onSearch: (param: string) => void;
 };
 
 type State = { searchFieldFocused: boolean };
 
 export class PanelSearch extends React.PureComponent<Props, State> {
-  state = { searchFieldFocused: false };
+  override state = { searchFieldFocused: false };
   _onSearchFieldIdleAfterChange = (value: string) => {
     this.props.onSearch(value);
   };
@@ -34,7 +32,7 @@ export class PanelSearch extends React.PureComponent<Props, State> {
     this.setState(() => ({ searchFieldFocused: false }));
   };
 
-  render() {
+  override render() {
     const { label, title, currentSearchString, className } = this.props;
     const { searchFieldFocused } = this.state;
     const showIntroduction =

@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { Localized } from '@fluent/react';
@@ -10,22 +8,22 @@ import { Localized } from '@fluent/react';
 import './IdleSearchField.css';
 
 type Props = {
-  +onIdleAfterChange: (string) => void,
-  +onFocus?: () => void,
-  +onBlur?: (Element | null) => void,
-  +idlePeriod: number,
-  +defaultValue: ?string,
-  +className: ?string,
-  +title: ?string,
+  readonly onIdleAfterChange: (param: string) => void;
+  readonly onFocus?: () => void;
+  readonly onBlur?: (param: Element | null) => void;
+  readonly idlePeriod: number;
+  readonly defaultValue: string | null;
+  readonly className: string | null;
+  readonly title: string | null;
 };
 
 type State = {
-  value: string,
-  previousDefaultValue: string,
+  value: string;
+  previousDefaultValue: string;
 };
 
 export class IdleSearchField extends PureComponent<Props, State> {
-  _timeout: TimeoutID | null = null;
+  _timeout: NodeJS.Timeout | null = null;
   _previouslyNotifiedValue: string;
   _input: HTMLInputElement | null = null;
   _takeInputRef = (input: HTMLInputElement | null) => (this._input = input);
@@ -39,7 +37,7 @@ export class IdleSearchField extends PureComponent<Props, State> {
     this._previouslyNotifiedValue = this.state.value;
   }
 
-  _onSearchFieldFocus = (e: SyntheticFocusEvent<HTMLInputElement>) => {
+  _onSearchFieldFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     e.currentTarget.select();
 
     if (this.props.onFocus) {
@@ -53,7 +51,7 @@ export class IdleSearchField extends PureComponent<Props, State> {
     }
   };
 
-  _onSearchFieldChange = (e: SyntheticEvent<HTMLInputElement>) => {
+  _onSearchFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({
       value: e.currentTarget.value,
     });
@@ -90,7 +88,7 @@ export class IdleSearchField extends PureComponent<Props, State> {
     this._notifyIfChanged('');
   };
 
-  _onFormSubmit(e: SyntheticEvent<HTMLFormElement>) {
+  _onFormSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
   }
   static getDerivedStateFromProps(props: Props, state: State) {
@@ -103,7 +101,7 @@ export class IdleSearchField extends PureComponent<Props, State> {
     return null;
   }
 
-  render() {
+  override render() {
     const { className, title } = this.props;
     return (
       <form
@@ -119,7 +117,7 @@ export class IdleSearchField extends PureComponent<Props, State> {
             name="search"
             placeholder="Enter filter terms"
             className="idleSearchFieldInput photon-input"
-            required="required"
+            required={true}
             title={title}
             value={this.state.value}
             onChange={this._onSearchFieldChange}
