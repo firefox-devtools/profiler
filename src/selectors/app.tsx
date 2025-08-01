@@ -59,8 +59,11 @@ export const getPanelLayoutGeneration: Selector<number> = (state) =>
 export const getLastVisibleThreadTabSlug: Selector<TabSlug> = (state) =>
   getApp(state).lastVisibleThreadTabSlug;
 export const getTrackThreadHeights: Selector<{
-  [key: ThreadsKey]: CssPixels
-}> = (state) => getApp(state).trackThreadHeights as unknown as { [key: ThreadsKey]: CssPixels };
+  [key: ThreadsKey]: CssPixels;
+}> = (state) =>
+  getApp(state).trackThreadHeights as unknown as {
+    [key: ThreadsKey]: CssPixels;
+  };
 export const getIsNewlyPublished: Selector<boolean> = (state) =>
   getApp(state).isNewlyPublished;
 export const getExperimental: Selector<ExperimentalFlags> = (state) =>
