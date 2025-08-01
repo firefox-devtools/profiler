@@ -5,7 +5,7 @@
 This document is written for and updated by Claude. It gives a fresh instance of Claude enough context
 to proceed with the next step of the migration.
 
-## Current Status (July 31, 2025)
+## Current Status (August 1, 2025)
 
 ### 📊 Progress Summary
 
@@ -17,6 +17,7 @@ to proceed with the next step of the migration.
   - ✅ **NEW TODAY**: profile-logic/profile-metainfo.ts, components/timeline/TrackEventDelayGraph.tsx, components/app/LanguageSwitcher.tsx
   - 📋 All core dependencies now converted to TypeScript!
 - **Build System**: ✅ Mixed Flow/TypeScript support working correctly
+- **🔧 Migration Tooling**: ✅ Enhanced dependency analysis with Node.js implementation
 
 ### 🎯 **CURRENT PRIORITY: Complete Strict TypeScript Compliance**
 
@@ -63,7 +64,11 @@ Core Dependencies Complete:
 - `yarn typecheck:strict` **PASSES** - All converted modules pass strict checking! 
 - **🎯 Major Achievement**: Removed `selectors/profile.ts` from strict exclude list
 - **📊 Progress**: 17 files remaining in strict exclude list (net zero change from dependency swaps)
-- **🔧 Enhanced Tooling**: Unified conversion script ready for efficient future conversions
+- **🔧 Enhanced Tooling**: 
+  - ✅ Unified conversion script ready for efficient future conversions
+  - ✅ **NEW**: Enhanced dependency analysis with Node.js implementation
+  - ✅ **NEW**: Accurate transitive dependency calculation for optimal conversion planning
+  - ✅ **NEW**: Comprehensive analysis of both JS and TS files with strict type checking status
 - Mixed Flow/TypeScript codebase is stable and tested with improved type safety
 
 ### 🔧 Key Commands
@@ -372,10 +377,14 @@ Complete automation toolkit for efficient TypeScript migration:
 - `./scripts/flow-to-typescript-enhanced.sh <file.js>` - Enhanced error handling (legacy)
 
 ### Analysis & Planning Tools  
-- **`./scripts/analyze-dependencies.sh`** - Analyzes JS files by dependency count and size
-  - Identifies files with 0 JS dependencies (🟢 ready to convert)
-  - Ranks by conversion difficulty and file size
-  - Essential for planning conversion order
+- **`./scripts/analyze-dependencies.sh`** - ✅ **Enhanced Node.js implementation** - Analyzes both JS and TS files
+  - 🟢 **57 JS files ready for immediate conversion** (no transitive dependencies)
+  - 🟡 **Files with 1-2 transitive dependencies** (moderate difficulty)
+  - 🔴 **136 files blocked by dependencies** (convert dependencies first)
+  - 📊 **107 TS files may need strict type checking fixes**
+  - ✅ **Computes both direct and transitive dependencies** with improved accuracy
+  - ✅ **Handles firefox-profiler/* path mapping** and relative imports correctly
+  - Essential for planning conversion order and tracking progress
 - `./scripts/migrate-exact-objects.sh` - Bulk conversion of Flow exact objects `{|...|}` → `{...}`
 
 ### Batch Processing
@@ -465,6 +474,19 @@ If a phase is only partially complete, but feels complete "in the important ways
     2. ✅ `src/components/shared/ProfileMetaInfoSummary.tsx` - Converted profile-metainfo.js dependency
     3. ✅ `src/profile-logic/tracks.js` → `tracks.ts` - Core dependency converted
     4. ✅ `src/selectors/url-state.js` → `url-state.ts` - Core dependency converted
+    
+    **📊 UPDATED ANALYSIS (August 1, 2025)**: Enhanced dependency analysis reveals new priorities
+    
+    **🟢 IMMEDIATE CONVERSION TARGETS (57 files ready, no dependencies):**
+    - Small files (3-100 lines): `src/types/mocks/ftl.js`, `src/types/globals/*.js`, `src/selectors/right-clicked-*.js`, `src/actions/errors.js`
+    - Medium files (100-300 lines): `src/selectors/app.js` (247 lines), `src/components/shared/SourceView.js` (187 lines)
+    - **Strategy**: Convert small files first for quick wins, then tackle larger files
+    
+    **🟡 MODERATE COMPLEXITY (files with 1-2 transitive dependencies):**
+    - `src/components/shared/PanelSearch.js` (73 lines)
+    - `src/components/tooltip/DivWithTooltip.js` (80 lines)  
+    - `src/components/shared/thread/CPUGraph.js` (85 lines)
+    - `src/profile-logic/flame-graph.js` (309 lines)
     
     **Next Priority (complex dependencies remaining):**
     5. ✅ `src/selectors/profile.ts` - **COMPLETED** - Removed from exclude list, passes strict checking!
