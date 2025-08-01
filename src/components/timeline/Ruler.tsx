@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import React, { PureComponent } from 'react';
 import { TIMELINE_RULER_HEIGHT } from 'firefox-profiler/app-logic/constants';
 import {
@@ -15,18 +13,18 @@ import {
 
 import './Ruler.css';
 
-import type {
+import {
   Milliseconds,
   CssPixels,
   TimelineUnit,
 } from 'firefox-profiler/types';
 
 type Props = {
-  +zeroAt: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +width: CssPixels,
-  +unit: TimelineUnit,
+  readonly zeroAt: Milliseconds,
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly width: CssPixels,
+  readonly unit: TimelineUnit,
 };
 
 export class TimelineRuler extends PureComponent<Props> {
@@ -59,12 +57,12 @@ export class TimelineRuler extends PureComponent<Props> {
     return { notches, notchTime, unit };
   }
 
-  render() {
+  override render() {
     const { notches, notchTime, unit } = this._getNotches();
     return (
       <div
         className="timelineRuler"
-        style={{ '--timeline-ruler-height': `${TIMELINE_RULER_HEIGHT}px` }}
+        style={{ '--timeline-ruler-height': `${TIMELINE_RULER_HEIGHT}px` } as React.CSSProperties}
       >
         <ol className="timelineRulerContainer">
           {notches.map(({ time, pos }, i) => (

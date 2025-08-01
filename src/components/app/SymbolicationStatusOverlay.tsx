@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import React, { PureComponent } from 'react';
 import {
   getProfileViewOptions,
@@ -11,16 +9,16 @@ import {
 } from 'firefox-profiler/selectors/profile';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
-import type { RequestedLib } from 'firefox-profiler/types';
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { RequestedLib, State } from 'firefox-profiler/types';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './SymbolicationStatusOverlay.css';
 
-function englishSgPlLibrary(count) {
+function englishSgPlLibrary(count: number) {
   return count === 1 ? 'library' : 'libraries';
 }
 
-function englishListJoin(list) {
+function englishListJoin(list: string[]) {
   switch (list.length) {
     case 0:
       return '';
@@ -34,14 +32,14 @@ function englishListJoin(list) {
 }
 
 type StateProps = {
-  +symbolicationStatus: string,
-  +waitingForLibs: Set<RequestedLib>,
+  readonly symbolicationStatus: string,
+  readonly waitingForLibs: Set<RequestedLib>,
 };
 
 type Props = ConnectedProps<{}, StateProps, {}>;
 
 class SymbolicationStatusOverlayImpl extends PureComponent<Props> {
-  render() {
+  override render() {
     const { symbolicationStatus, waitingForLibs } = this.props;
     if (symbolicationStatus === 'SYMBOLICATING') {
       if (waitingForLibs.size > 0) {
@@ -69,7 +67,7 @@ class SymbolicationStatusOverlayImpl extends PureComponent<Props> {
 }
 
 export const SymbolicationStatusOverlay = explicitConnect<{}, StateProps, {}>({
-  mapStateToProps: (state) => ({
+  mapStateToProps: (state: State) => ({
     symbolicationStatus: getSymbolicationStatus(state),
     waitingForLibs: getProfileViewOptions(state).waitingForLibs,
   }),

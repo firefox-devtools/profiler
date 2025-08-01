@@ -1,17 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import * as React from 'react';
 import { Tooltip } from './Tooltip';
-import type { CssPixels } from 'firefox-profiler/types';
+import { CssPixels } from 'firefox-profiler/types';
 
 // This isn't an exact object on purpose, because we'll pass all other props to
 // the underlying <div>.
 type Props = {
-  +tooltip: React.Node,
-  +children?: React.Node,
+  readonly tooltip: React.ReactNode,
+  readonly children?: React.ReactNode,
 };
 
 type State = {
@@ -25,13 +23,13 @@ type State = {
  * a div.
  */
 export class DivWithTooltip extends React.PureComponent<Props, State> {
-  state = {
+  override state = {
     isMouseOver: false,
     mouseX: 0,
     mouseY: 0,
   };
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     document.removeEventListener('mousemove', this._onMouseMove, false);
   }
 
@@ -43,7 +41,7 @@ export class DivWithTooltip extends React.PureComponent<Props, State> {
   _onMouseLeave = () => {
     // This persistTooltips property is part of the web console API. It helps
     // in being able to inspect and debug tooltips.
-    if (!window.persistTooltips) {
+    if (!(window as any).persistTooltips) {
       this.setState({ isMouseOver: false });
     }
     document.removeEventListener('mousemove', this._onMouseMove, false);
@@ -56,7 +54,7 @@ export class DivWithTooltip extends React.PureComponent<Props, State> {
     });
   };
 
-  render() {
+  override render() {
     const { children, tooltip, ...containerProps } = this.props;
     const { mouseX, mouseY, isMouseOver } = this.state;
     const shouldShowTooltip = isMouseOver;

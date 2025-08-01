@@ -22,9 +22,11 @@
 // always be represented accurately by a JS number, because libraries are always
 // small enough.
 
+import { LibMapping } from 'firefox-profiler/types';
+
 export class AddressLocator {
-  _libs /* : LibMapping[] */;
-  _libRanges /* : Array<{ baseAddress: BigInt, start: BigInt, end: BigInt }> */;
+  _libs: LibMapping[];
+  _libRanges: Array<{ baseAddress: bigint, start: bigint, end: bigint }>;
 
   /**
    * Create an AddressLocator for an array of libs.
@@ -32,7 +34,7 @@ export class AddressLocator {
    * ranges of the libraries need to be non-overlapping.
    * @param {Libs[]} libs The array of libraries, ordered by start address.
    */
-  constructor(libs) {
+  constructor(libs: LibMapping[]) {
     this._libs = libs;
     this._libRanges = libs.map((lib) => {
       const start = BigInt(lib.start);
@@ -54,7 +56,7 @@ export class AddressLocator {
    * @param {string} addressHexString The address, as a hex string, including the leading "0x".
    * @return {Object} The library object (and its index) if found, and the address relative to that library.
    */
-  locateAddress(addressHexString) {
+  locateAddress(addressHexString: string): { lib: LibMapping | null; relativeAddress: number } {
     // Diagram of the various offsets and spaces:
     //
     //  process virtual memory

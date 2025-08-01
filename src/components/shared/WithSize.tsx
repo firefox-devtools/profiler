@@ -1,11 +1,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import * as React from 'react';
 import { findDOMNode } from 'react-dom';
-import type { CssPixels } from 'firefox-profiler/types';
+import { CssPixels } from 'firefox-profiler/types';
 import { getResizeObserverWrapper } from 'firefox-profiler/utils/resize-observer-wrapper';
 
 type State = {
@@ -13,7 +11,7 @@ type State = {
   height: CssPixels,
 };
 
-export type SizeProps = $ReadOnly<State>;
+export type SizeProps = Readonly<State>;
 
 /**
  * Wraps a React component and makes 'width' and 'height' available in the
@@ -33,22 +31,22 @@ export type SizeProps = $ReadOnly<State>;
 export function withSize<
   // The SizeProps act as a bounds on the generic props. This ensures that the props
   // that passed in take into account they are being given the width and height.
-  Props: $ReadOnly<{ ...SizeProps }>,
+  Props extends Readonly<SizeProps>
 >(Wrapped: React.ComponentType<Props>): React.ComponentType<
   // The component that is returned does not accept width and height parameters, as
   // they are injected by this higher order component.
-  $ReadOnly<$Diff<Props, SizeProps>>,
+  Readonly<Omit<Props, keyof SizeProps>>
 > {
   // An existential type in a generic is a bit tricky to remove. Perhaps this can
   // use a hook instead.
   // See: https://github.com/firefox-devtools/profiler/issues/3062
   // eslint-disable-next-line flowtype/no-existential-type
-  return class WithSizeWrapper extends React.PureComponent<*, State> {
-    state = { width: 0, height: 0 };
+  return class WithSizeWrapper extends React.PureComponent<Omit<Props, keyof SizeProps>, State> {
+    override state = { width: 0, height: 0 };
     _container: HTMLElement | null;
 
-    componentDidMount() {
-      const container = findDOMNode(this); // eslint-disable-line react/no-find-dom-node
+    override componentDidMount() {
+      const container = findDOMNode(this) as HTMLElement; // eslint-disable-line react/no-find-dom-node
       if (!container) {
         throw new Error('Unable to find the DOMNode');
       }
@@ -65,7 +63,7 @@ export function withSize<
       this._updateSize(container, contentRect);
     };
 
-    componentWillUnmount() {
+    override componentWillUnmount() {
       const container = this._container;
       if (container) {
         getResizeObserverWrapper().unsubscribe(container, this._resizeListener);
@@ -81,8 +79,8 @@ export function withSize<
       });
     }
 
-    render() {
-      return <Wrapped {...this.props} {...this.state} />;
+    override render() {
+      return <Wrapped {...(this.props as any)} {...this.state} />;
     }
   };
 }
