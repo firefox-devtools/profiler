@@ -4,7 +4,7 @@
 
 // This file implements functions that we can use in fluent translation files.
 
-import { FluentDateTime } from '@fluent/bundle';
+import { FluentDateTime, FluentValue } from '@fluent/bundle';
 
 // These types come from Fluent's typescript types. We'll be able to remove them
 // and directly import Fluent's types when we switch to Typescript.
@@ -12,8 +12,6 @@ import { FluentDateTime } from '@fluent/bundle';
 interface Scope {
   reportError(error: unknown): void;
 }
-
-export type FluentValue = FluentType<unknown> | string;
 
 export type FluentFunction = (
   positional: Array<FluentValue>,
@@ -82,7 +80,10 @@ const DATE_FORMATS = {
  * DATE but it changes the date format depending on the proximity of the date
  * from the current date.
  */
-export const SHORTDATE: FluentFunction = (args, _named) => {
+export const SHORTDATE: FluentFunction = (
+  args: Array<FluentValue>,
+  _named: { [key: string]: FluentValue }
+): FluentValue => {
   const date = args[0];
   const nowTimestamp = Date.now();
 

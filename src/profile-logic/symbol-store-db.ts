@@ -87,7 +87,7 @@ export default class SymbolStoreDB {
     return new Promise((resolve, reject) => {
       const openReq = indexedDB.open(dbName, 2);
       openReq.onerror = () => {
-        if (openReq.error.name === 'VersionError') {
+        if (openReq.error && openReq.error.name === 'VersionError') {
           // This error fires if the database already exists, and the existing
           // database has a higher version than what we requested. So either
           // this version of profiler.firefox.com is outdated, or somebody briefly tried

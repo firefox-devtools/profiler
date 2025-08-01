@@ -7,6 +7,19 @@ import { SymbolTableAsTuple } from '../../profile-logic/symbol-store-db';
 import { GoogleAnalytics } from '../../utils/analytics';
 import { FetchMockJest } from '@fetch-mock/jest';
 
+declare type TypedArray =
+  | Int8Array
+  | Uint8Array
+  | Uint8ClampedArray
+  | Int16Array
+  | Uint16Array
+  | Int32Array
+  | Uint32Array
+  | Float32Array
+  | Float64Array
+  | BigInt64Array
+  | BigUint64Array;
+
 // Because this type isn't an existing Global type, but still it's useful to
 // have it available, we define it with a $ as prfix.
 declare type $GeckoProfiler = {

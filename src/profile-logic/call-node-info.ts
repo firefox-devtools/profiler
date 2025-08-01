@@ -213,7 +213,7 @@ export class CallNodeInfoNonInverted implements CallNodeInfo {
       }
 
       // Contributing to the shared cache
-      const hash = sliceHashes.pop();
+      const hash = sliceHashes.pop()!;
       cache.set(hash, nextNodeIndex);
 
       index = nextNodeIndex;

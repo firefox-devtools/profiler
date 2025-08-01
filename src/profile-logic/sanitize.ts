@@ -35,6 +35,7 @@ import {
   InnerWindowID,
   MarkerSchemaByName,
   RawCounter,
+  ProfilerOverhead,
 } from 'firefox-profiler/types';
 
 export type SanitizeProfileResult = {
@@ -129,7 +130,7 @@ export function sanitizePII(
     shared: {
       stringArray,
     },
-    threads: profile.threads.reduce((acc, thread, threadIndex) => {
+    threads: profile.threads.reduce<RawThread[]>((acc, thread, threadIndex) => {
       const newThread: RawThread | null = sanitizeThreadPII(
         thread,
         stringTable,
@@ -152,7 +153,7 @@ export function sanitizePII(
     // Remove counters which belong to the removed counters.
     // Also adjust other counters to point to the right thread.
     counters: profile.counters
-      ? profile.counters.reduce((acc, counter, counterIndex) => {
+      ? profile.counters.reduce<RawCounter[]>((acc, counter, counterIndex) => {
           if (PIIToBeRemoved.shouldRemoveCounters.has(counterIndex)) {
             removingCounters = true;
             return acc;
@@ -174,7 +175,7 @@ export function sanitizePII(
     // Remove profilerOverhead which belong to the removed threads.
     // Also adjust other overheads to point to the right thread.
     profilerOverhead: profile.profilerOverhead
-      ? profile.profilerOverhead.reduce((acc, overhead) => {
+      ? profile.profilerOverhead.reduce<ProfilerOverhead[]>((acc, overhead) => {
           const newThreadIndex = oldThreadIndexToNew.get(
             overhead.mainThreadIndex
           );

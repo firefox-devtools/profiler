@@ -171,7 +171,7 @@ export class ButtonWithPanel extends React.PureComponent<Props, State> {
           type="button"
           className={classNames('buttonWithPanelButton', buttonClassName)}
           aria-expanded={open}
-          title={open ? null : title}
+          title={open ? undefined : title}
           onClick={this._onButtonClick}
           ref={this._buttonRef}
         >

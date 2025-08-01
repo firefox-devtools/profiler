@@ -1365,7 +1365,7 @@ function _computeThreadSampleScore(
   if (meta.sampleUnits && samples.threadCPUDelta) {
     // Sum up all CPU deltas in this thread, to compute a total
     // CPU time for this thread (or a total CPU cycle count).
-    return samples.threadCPUDelta.reduce(
+    return samples.threadCPUDelta.reduce<number>(
       (accum, delta) => accum + (delta ?? 0),
       0
     );

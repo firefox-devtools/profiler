@@ -30,7 +30,7 @@ to proceed with the next step of the migration.
 ### 🔧 Key Commands
 
 ```bash
-yarn typecheck:strict   # Strict TypeScript checking with noImplicitAny, uses tsconfig.migration.strict.json
+yarn typecheck:strict   # Strict TypeScript checking, uses tsconfig.migration.strict.json
 yarn typecheck         # Regular migration checking (used during development), uses tsconfig.migration.json
 yarn test-all          # Full validation (lint, test, typecheck)
 ```
@@ -60,10 +60,11 @@ This project uses **three separate TypeScript configurations** to handle the mix
 
 #### 3. `tsconfig.migration.strict.json` (Migration-Specific Config with )
 
-- **Purpose**: Stricter typechecking with `"noImplicitAny": true`, used by `yarn typecheck:strict`. Currently fails.
+- **Purpose**: Stricter typechecking, used by `yarn typecheck:strict`. Currently passes but contains excludes list.
 - **Extends**: `tsconfig.migration.json` but overrides key settings
 - **Key settings**:
-  - `"noImplicitAny": true` - Enforces that all imported modules have been converted to TypeScript or have .d.ts type definitions.
+  - `"noImplicitAny": true` - Enforces that all imported modules have been converted to TypeScript or have .d.ts type definitions
+  - `"strictNullChecks": true` - Catches more mistakes
   - `"exclude": [...]` - Contains a list of files that should be reduced over time
   - **Result**: Allows gradual conversion to strict typechecking without disrupting `yarn typecheck`
 

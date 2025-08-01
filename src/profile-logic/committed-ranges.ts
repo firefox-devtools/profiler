@@ -96,7 +96,7 @@ export function parseCommittedRanges(
         return { start: startInMs, end: endInMs };
       })
       // Filter out possible null values coming from bad inputs.
-      .filter(Boolean)
+      .filter((r) => r !== null)
   );
 }
 

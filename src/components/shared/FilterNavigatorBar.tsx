@@ -44,7 +44,7 @@ class FilterNavigatorBarListItem extends React.PureComponent<FilterNavigatorBarL
           filterNavigatorBarLeafItem: isLastItem,
         })}
         title={title}
-        onClick={onClick ? this._onClick : null}
+        onClick={onClick ? this._onClick : undefined}
       >
         {onClick ? (
           <button type="button" className="filterNavigatorBarItemContent">

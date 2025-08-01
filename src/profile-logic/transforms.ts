@@ -1357,9 +1357,13 @@ export function focusInvertedSubtree(
     const postfixDepth = postfixCallNodePath.length;
     const { stackTable, frameTable } = thread;
     const funcMatchesImplementation = FUNC_MATCHES[implementation];
-    function convertStack(leaf: IndexIntoStackTable) {
+    function convertStack(leaf: IndexIntoStackTable | null) {
       let matchesUpToDepth = 0; // counted from the leaf
-      for (let stack = leaf; stack !== null; stack = stackTable.prefix[stack]) {
+      for (
+        let stack: number | null = leaf;
+        stack !== null;
+        stack = stackTable.prefix[stack]
+      ) {
         const frame = stackTable.frame[stack];
         const funcIndex = frameTable.func[frame];
         if (funcIndex === postfixCallNodePath[matchesUpToDepth]) {
@@ -1489,7 +1493,7 @@ export function restoreAllFunctionsInCallNodePath(
   // For every stackIndex, matchesUpToDepth[stackIndex] will be:
   //  - null if stackIndex does not match the callNodePath
   //  - <depth> if stackIndex matches callNodePath up to (and including) callNodePath[<depth>]
-  const matchesUpToDepth = [];
+  const matchesUpToDepth: Array<number | null> = [];
   let tipStackIndex = null;
   // Try to find the tip most stackIndex in the CallNodePath, but skip anything
   // that doesn't match the previous implementation filter.
@@ -1497,7 +1501,7 @@ export function restoreAllFunctionsInCallNodePath(
     const prefix = stackTable.prefix[stackIndex];
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
-    const prefixPathDepth: number =
+    const prefixPathDepth: number | null =
       prefix === null ? -1 : matchesUpToDepth[prefix];
 
     if (prefixPathDepth === null) {
@@ -1529,7 +1533,7 @@ export function restoreAllFunctionsInCallNodePath(
   }
   const newCallNodePath = [];
   for (
-    let stackIndex = tipStackIndex;
+    let stackIndex: IndexIntoStackTable | null = tipStackIndex;
     stackIndex !== null;
     stackIndex = stackTable.prefix[stackIndex]
   ) {
@@ -1597,7 +1601,7 @@ export function getBacktraceItemsForStack(
   const { stackTable, frameTable } = thread;
   const unfilteredPath = [];
   for (
-    let stackIndex = stack;
+    let stackIndex: IndexIntoStackTable | null = stack;
     stackIndex !== null;
     stackIndex = stackTable.prefix[stackIndex]
   ) {

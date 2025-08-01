@@ -2389,15 +2389,17 @@ export function updateThreadStacks(
     oldData: MarkerPayload | null
   ): MarkerPayload | null {
     if (oldData && 'cause' in oldData && oldData.cause) {
-      // Replace the cause with the right stack index.
-      // $FlowExpectError Flow is failing to refine oldData.type based on the `cause` field check
-      return {
-        ...oldData,
-        cause: {
-          ...oldData.cause,
-          stack: convertStack(oldData.cause.stack),
-        },
-      };
+      const stack = convertStack(oldData.cause.stack);
+      if (stack) {
+        // Replace the cause with the right stack index.
+        return {
+          ...oldData,
+          cause: {
+            ...oldData.cause,
+            stack,
+          },
+        };
+      }
     }
     return oldData;
   }
@@ -2458,15 +2460,17 @@ export function updateRawThreadStacksSeparate(
     oldData: MarkerPayload | null
   ): MarkerPayload | null {
     if (oldData && 'cause' in oldData && oldData.cause) {
-      // Replace the cause with the right stack index.
-      // $FlowExpectError Flow is failing to refine oldData.type based on the `cause` field check
-      return {
-        ...oldData,
-        cause: {
-          ...oldData.cause,
-          stack: convertSyncBacktraceStack(oldData.cause.stack),
-        },
-      };
+      const stack = convertSyncBacktraceStack(oldData.cause.stack);
+      if (stack) {
+        // Replace the cause with the right stack index.
+        return {
+          ...oldData,
+          cause: {
+            ...oldData.cause,
+            stack,
+          },
+        };
+      }
     }
     return oldData;
   }
@@ -2625,8 +2629,8 @@ export function getFriendlyThreadName(
   threads: RawThread[],
   thread: RawThread
 ): string {
-  let label: string;
-  let homonymThreads: RawThread[];
+  let label: string | undefined;
+  let homonymThreads: RawThread[] | undefined;
 
   switch (thread.name) {
     case 'GeckoMain': {

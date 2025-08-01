@@ -227,7 +227,10 @@ export const getUrlPredictor: Selector<
     const actionList: Action[] = Array.isArray(actionOrActionList)
       ? actionOrActionList
       : [actionOrActionList];
-    const newUrlState = actionList.reduce(urlStateReducer, oldUrlState);
+    const newUrlState = actionList.reduce<UrlState>(
+      urlStateReducer,
+      oldUrlState
+    );
     return urlFromState(newUrlState);
   }
 );

@@ -14,7 +14,7 @@ import { ProfilerOverhead } from 'firefox-profiler/types';
 import './MetaOverheadStatistics.css';
 
 // Profiler overhead statistics keys that have max/min/mean values.
-type StatKeys = 'Overhead' | 'Cleaning' | 'Counter' | 'Interval' | 'Lockings';
+type StatKey = 'Overhead' | 'Cleaning' | 'Counter' | 'Interval' | 'Lockings';
 
 type Props = {
   readonly profilerOverhead: ProfilerOverhead[];
@@ -27,7 +27,7 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
   override render() {
     const { profilerOverhead } = this.props;
 
-    const calculatedStats: Map<StatKeys, ProfilerStats> = new Map();
+    const calculatedStats: Map<StatKey, ProfilerStats> = new Map();
     // These 3 values only have single values, so we are not using ProfilerStats class for them.
     // Weightedly accumulated value of `overheadDurations. It's used to calculate mean value.
     let overheadDurations = 0;
@@ -40,7 +40,7 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
     let totalSamplingCount = 0;
 
     // Overhead keys that have min/max/mean values to loop.
-    const statKeys: StatKeys[] = [
+    const statKeys: StatKey[] = [
       'Overhead',
       'Cleaning',
       'Counter',
@@ -76,9 +76,9 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
       // Looping through the overhead values that have min/max/mean values
       // and calculating them.
       for (const stat of statKeys) {
-        const max = statistics['max' + stat];
-        const mean = statistics['mean' + stat];
-        const min = statistics['min' + stat];
+        const max = statistics[`max${stat}`];
+        const mean = statistics[`mean${stat}`];
+        const min = statistics[`min${stat}`];
 
         let currentStat = calculatedStats.get(stat);
         if (currentStat === undefined) {

@@ -63,7 +63,7 @@ export function getStackLineInfo(
   // "self line" == "the line which a stack's self time is contributed to"
   const selfLineForAllStacks = [];
   // "total lines" == "the set of lines whose total time this stack contributes to"
-  const totalLinesForAllStacks = [];
+  const totalLinesForAllStacks: Array<Set<LineNumber> | null> = [];
 
   // This loop takes advantage of the fact that the stack table is topologically ordered:
   // Prefix stacks are always visited before their descendants.
@@ -215,7 +215,7 @@ export function getStackLineInfoForCallNodeNonInverted(
   const callNodeSelfLineForAllStacks = [];
   // "total lines" == "the set of lines whose total time this stack contributes to"
   // Either null or a single-element set.
-  const callNodeTotalLinesForAllStacks = [];
+  const callNodeTotalLinesForAllStacks: Array<Set<LineNumber> | null> = [];
 
   // This loop takes advantage of the fact that the stack table is topologically ordered:
   // Prefix stacks are always visited before their descendants.

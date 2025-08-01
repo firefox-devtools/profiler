@@ -39,6 +39,7 @@ import {
   AssemblyViewState,
   NativeSymbolInfo,
   Transform,
+  IndexIntoFrameTable,
 } from 'firefox-profiler/types';
 import {
   decodeUintArrayFromUrlComponent,
@@ -1235,9 +1236,9 @@ function getVersion4JSCallNodePathFromStackIndex(
 ): CallNodePath {
   const { funcTable, stackTable, frameTable } = thread;
   const callNodePath = [];
-  let nextStackIndex = stackIndex;
+  let nextStackIndex: IndexIntoStackTable | null = stackIndex;
   while (nextStackIndex !== null) {
-    const frameIndex = stackTable.frame[nextStackIndex];
+    const frameIndex: IndexIntoFrameTable = stackTable.frame[nextStackIndex];
     const funcIndex = frameTable.func[frameIndex];
     if (funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]) {
       callNodePath.unshift(funcIndex);
@@ -1259,7 +1260,7 @@ function validateTimelineType(
     category: true,
     'cpu-category': true,
   };
-  if (timelineType in VALID_TIMELINE_TYPES) {
+  if (timelineType && timelineType in VALID_TIMELINE_TYPES) {
     return timelineType as TimelineType;
   }
   return 'cpu-category';

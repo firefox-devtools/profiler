@@ -319,7 +319,7 @@ export class IPCMarkerCorrelations {
     threadData.set(index, data);
   }
 
-  get(tid: Tid, index: number): IPCSharedData | null {
+  get(tid: Tid, index: number): IPCSharedData | undefined {
     const threadData = this._correlations.get(tid);
     if (!threadData) {
       return undefined;
@@ -371,7 +371,7 @@ export function correlateIPCMarkers(
     return pids + `,${data.messageSeqno},${data.messageType}`;
   }
 
-  function formatThreadName(tid: number | null): string | void {
+  function formatThreadName(tid: number | undefined): string | undefined {
     if (tid !== null && tid !== undefined) {
       const name = threadNames.get(tid);
       if (name !== undefined) {
@@ -1008,9 +1008,8 @@ export function filterRawMarkerTableToRange(
   rangeEnd: number
 ): RawMarkerTable {
   const newMarkerTable = getEmptyRawMarkerTable();
-  const newThreadId: (Tid | null)[] = [];
   if (markerTable.threadId) {
-    newMarkerTable.threadId = newThreadId;
+    newMarkerTable.threadId = [];
   }
 
   const filteredMarkerIndexes = filterRawMarkerTableIndexesToRange(
@@ -1027,8 +1026,8 @@ export function filterRawMarkerTableToRange(
     newMarkerTable.name.push(markerTable.name[index]);
     newMarkerTable.data.push(markerTable.data[index]);
     newMarkerTable.category.push(markerTable.category[index]);
-    if (markerTable.threadId) {
-      newThreadId.push(markerTable.threadId[index]);
+    if (markerTable.threadId && newMarkerTable.threadId) {
+      newMarkerTable.threadId.push(markerTable.threadId[index]);
     }
     newMarkerTable.length++;
   }

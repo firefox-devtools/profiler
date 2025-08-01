@@ -91,25 +91,25 @@
  * ```
  */
 
-export function bisectionRight(
-  array:
-    | number[]
-    | Int8Array
-    | Uint8Array
-    | Uint8ClampedArray
-    | Int16Array
-    | Uint16Array
-    | Int32Array
-    | Uint32Array
-    | Float32Array
-    | Float64Array,
-  x: number,
-  low?: number,
-  high?: number
-): number {
-  low = low || 0;
-  high = high || array.length;
+type TypedArray =
+  | Int8Array
+  | Uint8Array
+  | Uint8ClampedArray
+  | Int16Array
+  | Uint16Array
+  | Int32Array
+  | Uint32Array
+  | Float32Array
+  | Float64Array
+  | BigInt64Array
+  | BigUint64Array;
 
+export function bisectionRight(
+  array: number[] | TypedArray,
+  x: number,
+  low: number = 0,
+  high: number = array.length
+): number {
   if (low < 0 || low > array.length || high < 0 || high > array.length) {
     throw new TypeError("low and high must lie within the array's range");
   }
@@ -136,12 +136,9 @@ export function bisectionRightByKey<T>(
   array: T[],
   x: number,
   toKey: (arg: T) => number,
-  low?: number,
-  high?: number
+  low: number = 0,
+  high: number = array.length
 ): number {
-  low = low || 0;
-  high = high || array.length;
-
   if (low < 0 || low > array.length || high < 0 || high > array.length) {
     throw new TypeError("low and high must lie within the array's range");
   }
@@ -168,12 +165,9 @@ export function bisectionRightByStrKey<T>(
   array: T[],
   x: string,
   toKey: (arg: T) => string,
-  low?: number,
-  high?: number
+  low: number = 0,
+  high: number = array.length
 ): number {
-  low = low || 0;
-  high = high || array.length;
-
   if (low < 0 || low > array.length || high < 0 || high > array.length) {
     throw new TypeError("low and high must lie within the array's range");
   }
@@ -192,24 +186,11 @@ export function bisectionRightByStrKey<T>(
 }
 
 export function bisectionLeft(
-  array:
-    | number[]
-    | Int8Array
-    | Uint8Array
-    | Uint8ClampedArray
-    | Int16Array
-    | Uint16Array
-    | Int32Array
-    | Uint32Array
-    | Float32Array
-    | Float64Array,
+  array: number[] | TypedArray,
   x: number,
-  low?: number,
-  high?: number
+  low: number = 0,
+  high: number = array.length
 ): number {
-  low = low || 0;
-  high = high || array.length;
-
   if (low < 0 || low > array.length || high < 0 || high > array.length) {
     throw new TypeError("low and high must lie within the array's range");
   }

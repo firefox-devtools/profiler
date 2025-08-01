@@ -1,7 +1,8 @@
 {
   "extends": "./tsconfig.migration.json",
   "compilerOptions": {
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "strictNullChecks": true
   },
   "exclude": [
     "src/actions/profile-view.ts",

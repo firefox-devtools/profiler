@@ -209,7 +209,7 @@ export const getContentfulSpeedIndexProgress: Selector<
   ProgressGraphData[] | null
 > = (state) => getVisualMetrics(state).ContentfulSpeedIndexProgress ?? null;
 export const getProfilerConfiguration: Selector<
-  ProfilerConfiguration | null
+  ProfilerConfiguration | undefined
 > = (state) => getMeta(state).configuration;
 
 // Get the marker schema that comes from the Gecko profile.

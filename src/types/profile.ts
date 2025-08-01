@@ -206,7 +206,7 @@ export type RawMarkerTable = {
   category: IndexIntoCategoryList[];
   // This property isn't present in normal threads. However it's present for
   // merged threads, so that we know the origin thread for these markers.
-  threadId?: Tid[];
+  threadId?: Array<Tid | null>;
   length: number;
 };
 

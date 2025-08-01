@@ -64,7 +64,7 @@ export class Draggable extends React.PureComponent<Props, State> {
     const mouseDownY = e.pageY;
     const startValue = this.props.value;
 
-    const mouseMoveHandler = (e) => {
+    const mouseMoveHandler = (e: MouseEvent) => {
       this.props.onMove(
         startValue,
         e.pageX - mouseDownX,
@@ -76,7 +76,7 @@ export class Draggable extends React.PureComponent<Props, State> {
       e.preventDefault();
     };
 
-    const mouseUpHandler = (e) => {
+    const mouseUpHandler = (e: MouseEvent) => {
       this.props.onMove(
         startValue,
         e.pageX - mouseDownX,

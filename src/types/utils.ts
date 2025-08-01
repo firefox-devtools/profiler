@@ -21,15 +21,13 @@ export type IndexedArray<_IndexType, Value> = Array<Value>;
 export type $ReturnType<Fn extends (...args: any[]) => any> = ReturnType<Fn>;
 
 /**
- * This type is equivalent to {[string]: T} for an object created without a prototype,
- * e.g. Object.create(null).
+ * This type was used in Flow because as an equivalent to {[string]: T} for an
+ * object created without a prototype, e.g. Object.create(null).
  *
- * See: https://github.com/facebook/flow/issues/4967#issuecomment-402355640
+ * It can probably be removed.
  */
 export type ObjectMap<T> = {
   [key: string]: T;
-  // No prototype was created:
-  __proto__: null;
 };
 
 export type MixedObject = { [key: string]: unknown };

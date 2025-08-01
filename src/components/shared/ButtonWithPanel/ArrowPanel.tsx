@@ -53,7 +53,9 @@ export class ArrowPanel extends React.PureComponent<Props, State> {
       }
       const openGeneration = state.openGeneration + 1;
 
-      clearTimeout(this.closeTimeout);
+      if (this.closeTimeout) {
+        clearTimeout(this.closeTimeout);
+      }
       this.closeTimeout = setTimeout(
         this._onCloseAnimationFinish(openGeneration),
         400
@@ -100,7 +102,9 @@ export class ArrowPanel extends React.PureComponent<Props, State> {
   }
 
   override componentWillUnmount() {
-    clearTimeout(this.closeTimeout);
+    if (this.closeTimeout !== null) {
+      clearTimeout(this.closeTimeout);
+    }
   }
 
   override render() {
