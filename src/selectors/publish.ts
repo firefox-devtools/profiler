@@ -154,7 +154,10 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
             const localTrack = localTracks[hiddenLocalTrackIndex];
             if (localTrack.type === 'thread') {
               shouldRemoveThreads.add(localTrack.threadIndex);
-            } else if (typeof localTrack.counterIndex === 'number') {
+            } else if (
+              'counterIndex' in localTrack &&
+              typeof localTrack.counterIndex === 'number'
+            ) {
               shouldRemoveCounters.add(localTrack.counterIndex);
             }
           }

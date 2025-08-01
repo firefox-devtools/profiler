@@ -696,7 +696,10 @@ export function selectTrackFromTid(tid: Tid): ThunkAction<void> {
         break;
       }
       default:
-        throw assertExhaustiveCheck(trackReference.type as never);
+        throw assertExhaustiveCheck(
+          trackReference,
+          'Unhandled TrackReference type.'
+        );
     }
 
     dispatch(selectTrackWithModifiers(trackReference));
