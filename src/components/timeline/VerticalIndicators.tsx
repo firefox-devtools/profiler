@@ -1,14 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import * as React from 'react';
 import { DivWithTooltip } from 'firefox-profiler/components/tooltip/DivWithTooltip';
 import { displayNiceUrl } from 'firefox-profiler/utils';
 import { formatSeconds } from 'firefox-profiler/utils/format-numbers';
 
-import type {
+import {
   Marker,
   MarkerIndex,
   Milliseconds,
@@ -20,15 +18,15 @@ import type {
 import './VerticalIndicators.css';
 
 type Props = {
-  +getMarker: (MarkerIndex) => Marker,
-  +verticalMarkerIndexes: MarkerIndex[],
-  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +zeroAt: Milliseconds,
-  +width: CssPixels,
-  +shouldShowTooltip: boolean,
-  +onRightClick: (MarkerIndex) => mixed,
+  readonly getMarker: (param: MarkerIndex) => Marker,
+  readonly verticalMarkerIndexes: MarkerIndex[],
+  readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
+  readonly rangeStart: Milliseconds,
+  readonly rangeEnd: Milliseconds,
+  readonly zeroAt: Milliseconds,
+  readonly width: CssPixels,
+  readonly shouldShowTooltip: boolean,
+  readonly onRightClick: (param: MarkerIndex) => unknown,
 };
 
 /**
@@ -36,16 +34,16 @@ type Props = {
  * in the timeline.
  */
 export class VerticalIndicators extends React.PureComponent<Props> {
-  _onMouseDown = (e: SyntheticMouseEvent<HTMLDivElement>) => {
+  _onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.button === 2 && this.props.onRightClick && e.currentTarget) {
-      this.props.onRightClick(parseInt(e.currentTarget.dataset.markerIndex));
+      this.props.onRightClick(parseInt(e.currentTarget.dataset.markerIndex!));
     }
     // We handled this event here, so let's avoid that it's handled also in the
     // main canvas code and empty the state.
     e.stopPropagation();
   };
 
-  render() {
+  override render() {
     const {
       getMarker,
       verticalMarkerIndexes,
@@ -56,7 +54,7 @@ export class VerticalIndicators extends React.PureComponent<Props> {
       width,
       shouldShowTooltip,
     } = this.props;
-    return verticalMarkerIndexes.map<React.Node>((markerIndex) => {
+    return verticalMarkerIndexes.map<React.ReactNode>((markerIndex) => {
       const marker = getMarker(markerIndex);
       // Decide on the indicator color.
       let color = '#000';
@@ -111,7 +109,7 @@ export class VerticalIndicators extends React.PureComponent<Props> {
         <DivWithTooltip
           key={markerIndex}
           data-testid="vertical-indicator-line"
-          style={{ '--vertical-indicator-color': color, left }}
+          style={{ '--vertical-indicator-color': color, left } as React.CSSProperties}
           className="timelineVerticalIndicatorsLine"
           onMouseDown={this._onMouseDown}
           data-marker-index={markerIndex}

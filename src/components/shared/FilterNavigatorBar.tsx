@@ -2,22 +2,20 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import classNames from 'classnames';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import './FilterNavigatorBar.css';
 
 type FilterNavigatorBarListItemProps = {
-  +onClick?: null | ((number) => mixed),
-  +index: number,
-  +isFirstItem: boolean,
-  +isLastItem: boolean,
-  +isSelectedItem: boolean,
-  +title?: string,
-  +additionalClassName?: string,
-  +children: React.Node,
+  readonly onClick?: null | ((index: number) => unknown),
+  readonly index: number,
+  readonly isFirstItem: boolean,
+  readonly isLastItem: boolean,
+  readonly isSelectedItem: boolean,
+  readonly title?: string,
+  readonly additionalClassName?: string,
+  readonly children: React.ReactNode,
 };
 
 class FilterNavigatorBarListItem extends React.PureComponent<FilterNavigatorBarListItemProps> {
@@ -28,7 +26,7 @@ class FilterNavigatorBarListItem extends React.PureComponent<FilterNavigatorBarL
     }
   };
 
-  render() {
+  override render() {
     const {
       isFirstItem,
       isLastItem,
@@ -61,15 +59,15 @@ class FilterNavigatorBarListItem extends React.PureComponent<FilterNavigatorBarL
 }
 
 type Props = {
-  +className: string,
-  +items: $ReadOnlyArray<React.Node>,
-  +onPop: (number) => mixed,
-  +selectedItem: number,
-  +uncommittedItem?: string,
+  readonly className: string,
+  readonly items: ReadonlyArray<React.ReactNode>,
+  readonly onPop: (param: number) => mixed,
+  readonly selectedItem: number,
+  readonly uncommittedItem?: string,
 };
 
 export class FilterNavigatorBar extends React.PureComponent<Props> {
-  render() {
+  override render() {
     const { className, items, selectedItem, uncommittedItem, onPop } =
       this.props;
     return (

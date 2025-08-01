@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
@@ -14,11 +12,11 @@ import { ProfileRootMessage } from 'firefox-profiler/components/app/ProfileRootM
 import { getView } from 'firefox-profiler/selectors/app';
 import { getDataSource } from 'firefox-profiler/selectors/url-state';
 
-import type { AppViewState, State, DataSource } from 'firefox-profiler/types';
+import { AppViewState, State, DataSource } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-const LOADING_MESSAGES_L10N_ID: { [string]: string } = Object.freeze({
+const LOADING_MESSAGES_L10N_ID: { [key: string]: string } = Object.freeze({
   'from-browser': 'ProfileLoaderAnimation--loading-unpublished',
   'from-post-message': 'ProfileLoaderAnimation--loading-from-post-message',
   unpublished: 'ProfileLoaderAnimation--loading-unpublished',
@@ -42,18 +40,18 @@ function fewTimes(count: number) {
 }
 
 type ProfileLoaderAnimationStateProps = {
-  +view: AppViewState,
-  +dataSource: DataSource,
+  readonly view: AppViewState,
+  readonly dataSource: DataSource,
 };
 
 type ProfileLoaderAnimationProps = ConnectedProps<
   {},
   ProfileLoaderAnimationStateProps,
-  {},
+  {}
 >;
 
 class ProfileLoaderAnimationImpl extends PureComponent<ProfileLoaderAnimationProps> {
-  render() {
+  override render() {
     const { view, dataSource } = this.props;
     const loadingMessage = LOADING_MESSAGES_L10N_ID[dataSource];
     const message = loadingMessage
@@ -61,7 +59,7 @@ class ProfileLoaderAnimationImpl extends PureComponent<ProfileLoaderAnimationPro
       : 'ProfileLoaderAnimation--loading-view-not-found';
     const showLoader = Boolean(loadingMessage);
     const showBackHomeLink = Boolean(
-      view.additionalData && view.additionalData.message
+      'additionalData' in view && view.additionalData && view.additionalData.message
     );
 
     return (
@@ -75,9 +73,9 @@ class ProfileLoaderAnimationImpl extends PureComponent<ProfileLoaderAnimationPro
     );
   }
 
-  _renderAdditionalMessage(): React.Node {
+  _renderAdditionalMessage(): React.ReactNode {
     const { view } = this.props;
-    if (!view.additionalData) {
+    if (!('additionalData' in view) || !view.additionalData) {
       return null;
     }
 
@@ -96,7 +94,7 @@ class ProfileLoaderAnimationImpl extends PureComponent<ProfileLoaderAnimationPro
 export const ProfileLoaderAnimation = explicitConnect<
   {},
   ProfileLoaderAnimationStateProps,
-  {},
+  {}
 >({
   mapStateToProps: (state: State) => ({
     view: getView(state),

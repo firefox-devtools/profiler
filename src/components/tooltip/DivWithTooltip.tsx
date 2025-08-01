@@ -7,9 +7,8 @@ import { CssPixels } from 'firefox-profiler/types';
 
 // This isn't an exact object on purpose, because we'll pass all other props to
 // the underlying <div>.
-type Props = {
+type Props = React.HTMLAttributes<HTMLDivElement> & {
   readonly tooltip: React.ReactNode;
-  readonly children?: React.ReactNode;
 };
 
 type State = {

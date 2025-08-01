@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 // This implements a panel with a "arrow" triangle graphic that points to the
 // button that triggers it.
 // Please do not use this component directly. This is used by ButtonWithPanel
@@ -15,21 +13,21 @@ import classNames from 'classnames';
 import './ArrowPanel.css';
 
 type Props = {
-  +onOpen: () => mixed,
-  +onClose: () => mixed,
-  +className?: string,
-  +children: React.Node,
+  readonly onOpen: () => unknown,
+  readonly onClose: () => unknown,
+  readonly className?: string,
+  readonly children: React.ReactNode,
 };
 
 type State = {
-  +open: boolean,
-  +isClosing: boolean,
-  +openGeneration: number,
+  readonly open: boolean,
+  readonly isClosing: boolean,
+  readonly openGeneration: number,
 };
 
 export class ArrowPanel extends React.PureComponent<Props, State> {
-  closeTimeout = null;
-  state = {
+  closeTimeout: NodeJS.Timeout | null = null;
+  override state = {
     open: false,
     isClosing: false,
     openGeneration: 0,
@@ -76,11 +74,11 @@ export class ArrowPanel extends React.PureComponent<Props, State> {
     };
   }
 
-  _onArrowPanelClick = (e: { target: HTMLElement } & SyntheticMouseEvent<>) => {
+  _onArrowPanelClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // The arrow panel element contains the element that has the top arrow,
     // that is visually outside the panel. We still want to hide the panel
     // when clicking in this area.
-    if (e.target.className !== 'arrowPanelArrow') {
+    if ((e.target as HTMLElement).className !== 'arrowPanelArrow') {
       // Stop the click propagation to reach the _onWindowClick event when the
       // click is visually inside the panel.
       e.stopPropagation();
@@ -89,7 +87,7 @@ export class ArrowPanel extends React.PureComponent<Props, State> {
 
   // We're calling open and close callbacks in componentDidUpdate because they
   // often run side-effects, so we want them out of the render phase.
-  componentDidUpdate(prevProps: Props, prevState: State) {
+  override componentDidUpdate(prevProps: Props, prevState: State) {
     if (!prevState.open && this.state.open) {
       // Opening
       this.props.onOpen();
@@ -101,11 +99,11 @@ export class ArrowPanel extends React.PureComponent<Props, State> {
     }
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     clearTimeout(this.closeTimeout);
   }
 
-  render() {
+  override render() {
     const { className, children } = this.props;
     const { open, isClosing } = this.state;
     if (!open && !isClosing) {
