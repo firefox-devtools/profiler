@@ -781,15 +781,17 @@ export function upgradeLocationToCurrentVersion(
   return processedLocation;
 }
 
+type ProcessedLocationUpgrader = (
+  location: ProcessedLocationBeforeUpgrade,
+  profile?: Profile
+) => void;
+
 // _upgraders[i] converts from version i - 1 to version i.
 // Every "upgrader" takes the processedLocation as its first argument and mutates it.
 // If available, the profile is passed as the second argument, for any upgraders that need it.
 /* eslint-disable no-useless-computed-key */
 const _upgraders: {
-  [key: number]: (
-    location: ProcessedLocationBeforeUpgrade,
-    profile?: Profile
-  ) => void;
+  [key: number]: ProcessedLocationUpgrader;
 } = {
   [1]: (processedLocation: ProcessedLocationBeforeUpgrade) => {
     // Version 1 is the first versioned url. Do some best-effort upgrading from
