@@ -1251,20 +1251,18 @@ function getVersion4JSCallNodePathFromStackIndex(
  * Validate the timeline type and fall back to the category type if it's not
  * provided or something else is provided for some reason.
  */
-function validateTimelineType(type: string | null | undefined): TimelineType {
-  // Pretend this is a TimelineType so that we can exhaustively go through
-  // each option.
-  const timelineType: TimelineType = type as any;
-  switch (timelineType) {
-    case 'stack':
-    case 'cpu-category':
-    case 'category':
-      return timelineType;
-    default:
-      // Type assert we've checked everything:
-      const _exhaustiveCheck: never = timelineType;
-      return 'cpu-category';
+function validateTimelineType(
+  timelineType: string | null | undefined
+): TimelineType {
+  const VALID_TIMELINE_TYPES: Record<TimelineType, true> = {
+    stack: true,
+    category: true,
+    'cpu-category': true,
+  };
+  if (timelineType in VALID_TIMELINE_TYPES) {
+    return timelineType as TimelineType;
   }
+  return 'cpu-category';
 }
 
 /**
