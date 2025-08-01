@@ -44,10 +44,10 @@ describe('StackSettings', function () {
     return (element: any).checked;
   }
 
-  it('can change the implementation filter to JavaScript', async function () {
+  it('can change the implementation filter to script', async function () {
     const { getByLabelText, getState } = setup();
     expect(getImplementationFilter(getState())).toEqual('combined');
-    const radioButton = getByLabelText(/JavaScript/);
+    const radioButton = getByLabelText(/Script/);
 
     fireFullClick(radioButton);
 
