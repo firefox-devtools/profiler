@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import * as React from 'react';
 import classNames from 'classnames';
 import { Localized } from '@fluent/react';
@@ -10,14 +8,14 @@ import { Localized } from '@fluent/react';
 import './TrackSearchField.css';
 
 type Props = {
-  +className: string,
-  +currentSearchString: string,
-  +onSearch: (string) => void,
+  readonly className: string;
+  readonly currentSearchString: string;
+  readonly onSearch: (param: string) => void;
 };
 
 export class TrackSearchField extends React.PureComponent<Props> {
   searchFieldInput: { current: HTMLInputElement | null } = React.createRef();
-  _onSearchFieldChange = (e: SyntheticEvent<HTMLInputElement>) => {
+  _onSearchFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.props.onSearch(e.currentTarget.value);
   };
 
@@ -29,7 +27,7 @@ export class TrackSearchField extends React.PureComponent<Props> {
     }
   };
 
-  _onFormSubmit(e: SyntheticEvent<HTMLFormElement>) {
+  _onFormSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
   }
 
@@ -41,7 +39,7 @@ export class TrackSearchField extends React.PureComponent<Props> {
     this.props.onSearch('');
   };
 
-  render() {
+  override render() {
     const { currentSearchString, className } = this.props;
     return (
       <form
@@ -57,7 +55,7 @@ export class TrackSearchField extends React.PureComponent<Props> {
             name="search"
             placeholder="Enter filter terms"
             className="trackSearchFieldInput photon-input"
-            required="required"
+            required={true}
             title="Only display tracks that match a certain text"
             value={currentSearchString}
             onChange={this._onSearchFieldChange}

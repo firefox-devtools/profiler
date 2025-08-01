@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import classNames from 'classnames';
 import { Localized } from '@fluent/react';
@@ -16,24 +14,24 @@ import {
 import './TabBar.css';
 
 type Props = {
-  +selectedTabSlug: string,
-  +visibleTabs: $ReadOnlyArray<TabSlug>,
-  +onSelectTab: (string) => void,
+  readonly selectedTabSlug: string;
+  readonly visibleTabs: ReadonlyArray<TabSlug>;
+  readonly onSelectTab: (param: string) => void;
 };
 
 export class TabBar extends React.PureComponent<Props> {
-  _onClickListener = (e: SyntheticMouseEvent<HTMLElement>) => {
-    this.props.onSelectTab(e.currentTarget.dataset.name);
+  _onClickListener = (e: React.MouseEvent<HTMLElement>) => {
+    this.props.onSelectTab(e.currentTarget.dataset.name || '');
   };
 
-  _onMouseDown = (e: SyntheticMouseEvent<HTMLElement>) => {
-    this.props.onSelectTab(e.currentTarget.dataset.name);
+  _onMouseDown = (e: React.MouseEvent<HTMLElement>) => {
+    this.props.onSelectTab(e.currentTarget.dataset.name || '');
     // Prevent focusing the tab so that actual content like the
     // calltree can perform its own focusing.
     e.preventDefault();
   };
 
-  render() {
+  override render() {
     const { selectedTabSlug, visibleTabs } = this.props;
     return (
       <ol

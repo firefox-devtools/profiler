@@ -2,13 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import React from 'react';
 import classNames from 'classnames';
 import { getBacktraceItemsForStack } from 'firefox-profiler/profile-logic/transforms';
 
-import type {
+import {
   CategoryList,
   Thread,
   IndexIntoStackTable,
@@ -18,13 +16,13 @@ import type {
 import './Backtrace.css';
 
 type Props = {
-  +thread: Thread,
+  readonly thread: Thread;
   // Tooltips will want to only show a certain number of stacks, while the sidebars
   // can show all of the stacks.
-  +maxStacks: number,
-  +stackIndex: IndexIntoStackTable,
-  +implementationFilter: ImplementationFilter,
-  +categories: CategoryList,
+  readonly maxStacks: number;
+  readonly stackIndex: IndexIntoStackTable;
+  readonly implementationFilter: ImplementationFilter;
+  readonly categories: CategoryList;
 };
 
 export function Backtrace(props: Props) {
