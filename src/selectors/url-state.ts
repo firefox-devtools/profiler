@@ -219,17 +219,18 @@ export const getIsBottomBoxOpen: Selector<boolean> = (state) => {
  * The URL predictor is used to generate a link for an uploaded profile, to predict
  * what the URL will be.
  */
-export const getUrlPredictor: Selector<(actionOrActionList: Action | Action[]) => string> =
-  createSelector(
-    getUrlState,
-    (oldUrlState: UrlState) => (actionOrActionList: Action | Action[]) => {
-      const actionList: Action[] = Array.isArray(actionOrActionList)
-        ? actionOrActionList
-        : [actionOrActionList];
-      const newUrlState = actionList.reduce(urlStateReducer, oldUrlState);
-      return urlFromState(newUrlState);
-    }
-  );
+export const getUrlPredictor: Selector<
+  (actionOrActionList: Action | Action[]) => string
+> = createSelector(
+  getUrlState,
+  (oldUrlState: UrlState) => (actionOrActionList: Action | Action[]) => {
+    const actionList: Action[] = Array.isArray(actionOrActionList)
+      ? actionOrActionList
+      : [actionOrActionList];
+    const newUrlState = actionList.reduce(urlStateReducer, oldUrlState);
+    return urlFromState(newUrlState);
+  }
+);
 
 /**
  * Get the current path for a zip file that is being used.

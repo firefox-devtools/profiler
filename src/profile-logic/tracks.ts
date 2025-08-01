@@ -29,13 +29,13 @@ import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 export type TracksWithOrder = {
   readonly globalTracks: GlobalTrack[];
   readonly globalTrackOrder: TrackIndex[];
-  readonly localTracksByPid: Map<Pid, LocalTrack[]>,
-  readonly localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+  readonly localTracksByPid: Map<Pid, LocalTrack[]>;
+  readonly localTrackOrderByPid: Map<Pid, TrackIndex[]>;
 };
 
 export type HiddenTracks = {
   readonly hiddenGlobalTracks: Set<TrackIndex>;
-  readonly hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
+  readonly hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>;
 };
 
 /**
@@ -95,7 +95,10 @@ const GLOBAL_TRACK_DISPLAY_ORDER = {
   process: 4,
 };
 
-function _getDefaultLocalTrackOrder(tracks: LocalTrack[], profile: Profile | null) {
+function _getDefaultLocalTrackOrder(
+  tracks: LocalTrack[],
+  profile: Profile | null
+) {
   const trackOrder = tracks.map((_, index) => index);
   const naturalSort = new Intl.Collator('en-US', { numeric: true });
   // In place sort!
@@ -512,9 +515,9 @@ export function computeGlobalTracks(
   // the internals of this function, otherwise each GlobalTrack usage would need
   // to check that it's a process type.
   type ProcessTrack = {
-    type: 'process',
-    pid: Pid,
-    mainThreadIndex: number | null,
+    type: 'process';
+    pid: Pid;
+    mainThreadIndex: number | null;
   };
   const globalTracksByPid: Map<Pid, ProcessTrack> = new Map();
   let globalTracks: GlobalTrack[] = [];
@@ -572,7 +575,7 @@ export function computeGlobalTracks(
         if (markers.name[markerIndex] === screenshotNameIndex) {
           // Coerce the payload to a screenshot one. Don't do a runtime check that
           // this is correct.
-          const data: ScreenshotPayload = (markers.data[markerIndex] as any);
+          const data: ScreenshotPayload = markers.data[markerIndex] as any;
           ids.add(data.windowID);
         }
       }
@@ -1274,21 +1277,21 @@ export function computeDefaultVisibleThreads(
 export type ThreadActivityScore = {
   // Whether this thread is one of the essential threads that
   // should always be kept (unless there's too many of them).
-  isEssentialFirefoxThread: boolean,
+  isEssentialFirefoxThread: boolean;
   // Whether this thread belongs to the parent process. We do not want to show
   // them by default if the tab selector is used.
-  isInParentProcess: boolean,
+  isInParentProcess: boolean;
   // Whether this thread should be kept even if it looks very idle,
   // as long as there's a single sample with non-zero activity.
-  isInterestingEvenWithMinimalActivity: boolean,
+  isInterestingEvenWithMinimalActivity: boolean;
   // The accumulated CPU delta for the entire thread.
   // If the thread does not have CPU delta information, we compute
   // a "CPU-delta-like" number based on the number of samples which
   // are in a non-idle category.
-  sampleScore: number,
+  sampleScore: number;
   // Like sampleScore, but with a boost factor applied if this thread
   // is "interesting even with minimal activity".
-  boostedSampleScore: number,
+  boostedSampleScore: number;
 };
 
 // Also called "padenot factor".

@@ -119,9 +119,11 @@ The imported module is either a file that needs to converted, or it is an npm de
 
 ### File Conversion Steps - MUST FOLLOW IN ORDER
 
-1. ⚠️ **ALWAYS USE THE SCRIPT FIRST**: `./scripts/flow-to-typescript.sh <file.js>` - This handles most conversions automatically
-2. **FALLBACK OPTION - Manual**: Only use manual `cp` + conversions if the script fails
-3. **Either way**: Remove `// @flow` (done automatically by script)
+1. ⚠️ **ALWAYS USE THE UNIFIED SCRIPT FIRST**: `./scripts/flow-to-typescript-unified.sh <file.js>` - This handles most conversions automatically including the critical function parameter name fix
+2. **FALLBACK OPTIONS** (if unified script fails):
+   - Try: `./scripts/flow-to-typescript.sh <file.js>` - Original comprehensive script
+   - Last resort: Manual `cp` + conversions
+3. **Either way**: Remove `// @flow` (done automatically by scripts)
 4. **CRITICAL**: Test compilation: `yarn typecheck` (project-wide is fastest)
 5. **CRITICAL**: Do not rewrite the file from scratch. Check errors first and then make tightly-scoped edits.
 6. Apply remaining conversion patterns manually (see below)
@@ -313,40 +315,47 @@ Some of the converted types will not have been exercised yet; a newly-converted 
 - `yarn typecheck` - Regular TypeScript checking for converted files
 - `yarn test-all` - Full validation (must pass after each conversion)
 
-## 🚀 Enhanced Tooling (Added August 2025)
+## 🚀 Comprehensive Migration Tooling
 
-New automation scripts for more efficient migration:
+Complete automation toolkit for efficient TypeScript migration:
 
-### Conversion Tools
-- `./scripts/flow-to-typescript-enhanced.sh <file.js>` - Enhanced conversion with better error handling
-  - Handles MixedObject → unknown automatically
-  - Fixes index signature syntax [string] → [key: string]
-  - Adds parameter types for common patterns
-  - Auto-detects and warns about remaining issues
-  
-### Analysis Tools  
-- `./scripts/analyze-dependencies.sh` - Analyzes JS files by dependency count and size
+### Core Conversion Tools
+- **`./scripts/flow-to-typescript-unified.sh <file.js>`** - 🌟 **RECOMMENDED** - Unified script with all learnings
+  - ✅ Fixes critical function parameter name issue (TS1005/TS1109 errors)
+  - ✅ Handles MixedObject → unknown, index signatures, trailing commas
+  - ✅ Comprehensive React type conversions
+  - ✅ Auto-detects remaining issues with detailed warnings
+  - ✅ Includes all successful patterns from both previous scripts
+- `./scripts/flow-to-typescript.sh <file.js>` - Original comprehensive script (fallback)
+- `./scripts/flow-to-typescript-enhanced.sh <file.js>` - Enhanced error handling (legacy)
+
+### Analysis & Planning Tools  
+- **`./scripts/analyze-dependencies.sh`** - Analyzes JS files by dependency count and size
   - Identifies files with 0 JS dependencies (🟢 ready to convert)
-  - Ranks by conversion difficulty 
-  - Helps prioritize conversion order
+  - Ranks by conversion difficulty and file size
+  - Essential for planning conversion order
+- `./scripts/migrate-exact-objects.sh` - Bulk conversion of Flow exact objects `{|...|}` → `{...}`
 
 ### Batch Processing
-- `./scripts/auto-convert-batch.sh` - Automated batch conversion with validation
+- **`./scripts/auto-convert-batch.sh`** - Automated batch conversion with validation
   - Converts multiple small files automatically
   - Tests each conversion (typecheck + tests)
   - Reverts failed conversions automatically
   - Only commits successful conversions
 
-### Usage Pattern
+### Optimal Workflow
 ```bash
-# 1. Analyze remaining files
+# 1. Analyze conversion opportunities
 ./scripts/analyze-dependencies.sh | head -20
 
-# 2. Either convert individual files:
-./scripts/flow-to-typescript-enhanced.sh src/path/to/file.js
+# 2. For individual files (RECOMMENDED):
+./scripts/flow-to-typescript-unified.sh src/path/to/file.js
 
-# 3. Or batch convert easy files:
+# 3. For bulk conversion of simple files:
 ./scripts/auto-convert-batch.sh
+
+# 4. For exact object type cleanup (one-time):
+./scripts/migrate-exact-objects.sh
 ```
 
 ---
