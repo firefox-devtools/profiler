@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { Action, ThunkAction, IconWithClassName } from 'firefox-profiler/types';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 export function iconHasLoaded(iconWithClassName: {
   readonly icon: string;
@@ -70,7 +71,7 @@ export function iconStartLoading(icon: string): ThunkAction<Promise<void>> {
           // nothing to do
           break;
         default:
-          throw new Error(`Unknown icon load result ${(result as any).type}`);
+          throw assertExhaustiveCheck(result, 'Unknown icon load result');
       }
     });
   };
