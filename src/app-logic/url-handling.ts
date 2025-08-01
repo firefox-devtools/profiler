@@ -926,8 +926,7 @@ const _upgraders: {
         // If we can't find the stack index of given call node path, just abort.
         continue;
       }
-      // This property is not writable, make it an "any"
-      (transform as any).callNodePath = getVersion4JSCallNodePathFromStackIndex(
+      transform.callNodePath = getVersion4JSCallNodePathFromStackIndex(
         thread,
         callNodeStackIndex
       );

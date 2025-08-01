@@ -93,7 +93,7 @@ export type TransformDefinitions = {
    */
   'focus-subtree': {
     readonly type: 'focus-subtree';
-    readonly callNodePath: CallNodePath;
+    callNodePath: CallNodePath;
     readonly implementation: ImplementationFilter;
     readonly inverted: boolean;
   };
@@ -172,7 +172,7 @@ export type TransformDefinitions = {
    */
   'merge-call-node': {
     readonly type: 'merge-call-node';
-    readonly callNodePath: CallNodePath;
+    callNodePath: CallNodePath;
     readonly implementation: ImplementationFilter;
   };
 
