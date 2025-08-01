@@ -132,7 +132,7 @@
     "circular-dependency-plugin": "^5.2.1",
     "codecov": "^3.8.3",
     "copy-webpack-plugin": "^13.0.0",
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.0.0",
     "css-loader": "^7.1.2",
     "cssnano": "^7.1.0",
     "devtools-license-check": "^0.9.0",
