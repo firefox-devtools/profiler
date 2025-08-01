@@ -112,11 +112,17 @@ apply_transform 's/: empty)/ as never)/g' "Convert empty type annotations"
 # 11. Convert Flow object type casting
 apply_transform 's/({}:  *\([^)]*\))/({} as \1)/g' "Convert object type casting"
 
-# 12. Type object property syntax (comma → semicolon)
-apply_transform 's/readonly \([a-zA-Z_][a-zA-Z0-9_]*\): \([^,}]*\),$/readonly \1: \2;/g' "Convert readonly type object property syntax"
-apply_transform 's/readonly \([a-zA-Z_][a-zA-Z0-9_]*\)?: \([^,}]*\),$/readonly \1?: \2;/g' "Convert optional readonly type object property syntax"
-apply_transform 's/\([a-zA-Z_][a-zA-Z0-9_]*\): \([^,}]*\),$/\1: \2;/g' "Convert regular type object property syntax"
-apply_transform 's/\([a-zA-Z_][a-zA-Z0-9_]*\)?: \([^,}]*\),$/\1?: \2;/g' "Convert optional type object property syntax"
+# 12. Type object property syntax (comma → semicolon) - DISABLED
+# NOTE: These transformations were causing issues by converting commas to semicolons 
+# in regular JavaScript object literals, not just TypeScript type definitions.
+# Manual conversion is safer for these cases.
+# 
+# TODO: Implement smarter logic to only target actual type definitions:
+# - Line starts with whitespace + property name + colon (likely type definition)
+# - Avoid lines with = assignments (likely object literals)
+# - Context-aware parsing to distinguish type vs value contexts
+#
+# For now, these conversions should be done manually during review.
 
 # 13. Convert void return types to undefined where appropriate
 apply_transform 's/): void$/): undefined/g' "Convert void to undefined in return types"
@@ -194,3 +200,5 @@ echo "   - Add type parameters: new Set() → new Set<Type>()"
 echo "   - Add 'as const': { type: 'process' } → { type: 'process' as const }"
 echo "   - Add parameter names: (Type) => string → (param: Type) => string"
 echo "   - Fix trailing commas in multiline type definitions"
+echo "   - Convert commas to semicolons in type/interface definitions ONLY"
+echo "   - Keep commas in regular object literals (className={...}, state={...})"
