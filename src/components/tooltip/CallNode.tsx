@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
+
 import * as React from 'react';
 
 import { getStackType } from 'firefox-profiler/profile-logic/transforms';
@@ -11,7 +11,7 @@ import { Icon } from 'firefox-profiler/components/shared/Icon';
 import { getCategoryPairLabel } from 'firefox-profiler/profile-logic/profile-data';
 import { countPositiveValues } from 'firefox-profiler/utils';
 
-import type {
+import {
   Thread,
   CategoryList,
   IndexIntoCallNodeTable,
@@ -25,12 +25,12 @@ import type {
   IndexIntoSubcategoryListForCategory,
 } from 'firefox-profiler/types';
 
-import type {
+import {
   TimingsForPath,
   ItemTimings,
   OneCategoryBreakdown,
 } from 'firefox-profiler/profile-logic/profile-data';
-import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
+import { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import './CallNode.css';
 import classNames from 'classnames';
@@ -48,11 +48,11 @@ function TooltipCallNodeMeter({
   color,
   ariaLabel,
 }: {
-  additionalClassName: string,
-  max: number,
-  value: number,
-  color?: string,
-  ariaLabel: string,
+  additionalClassName: string;
+  max: number;
+  value: number;
+  color?: string;
+  ariaLabel: string;
 }) {
   const widthPercent = (value / max) * 100 + '%';
   const barColor = color ? `var(--category-color-${color})` : 'var(--blue-40)';
@@ -83,12 +83,12 @@ function TooltipCallNodeTotalSelfMeters({
   color,
   labelQualifier,
 }: {
-  isHeader: boolean,
-  max: number,
-  self: number,
-  total: number,
-  color?: string,
-  labelQualifier: string,
+  isHeader: boolean;
+  max: number;
+  self: number;
+  total: number;
+  color?: string;
+  labelQualifier: string;
 }) {
   return (
     <div
@@ -115,20 +115,20 @@ function TooltipCallNodeTotalSelfMeters({
 }
 
 type Props = {
-  +thread: Thread,
-  +weightType: WeightType,
-  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-  +callNodeIndex: IndexIntoCallNodeTable,
-  +callNodeInfo: CallNodeInfo,
-  +categories: CategoryList,
-  +interval: Milliseconds,
+  readonly thread: Thread;
+  readonly weightType: WeightType;
+  readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null;
+  readonly callNodeIndex: IndexIntoCallNodeTable;
+  readonly callNodeInfo: CallNodeInfo;
+  readonly categories: CategoryList;
+  readonly interval: Milliseconds;
   // Since this tooltip can be used in different context, provide some kind of duration
   // label, e.g. "100ms" or "33%".
-  +durationText: string,
-  +displayData?: CallNodeDisplayData,
-  +timings?: TimingsForPath,
-  +callTreeSummaryStrategy: CallTreeSummaryStrategy,
-  +displayStackType: boolean,
+  readonly durationText: string;
+  readonly displayData?: CallNodeDisplayData;
+  readonly timings?: TimingsForPath;
+  readonly callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  readonly displayStackType: boolean;
 };
 
 /**
@@ -197,7 +197,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     { selfTime, totalTime }: ItemTimings,
     category: IndexIntoCategoryList,
     isHighPrecision: boolean
-  ): React.Node {
+  ): React.ReactNode {
     if (totalTime.breakdownByCategory === null) {
       return null;
     }
@@ -286,7 +286,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     return rows;
   }
 
-  _renderCategoryTimings(maybeTimings: ?TimingsForPath) {
+  _renderCategoryTimings(maybeTimings: TimingsForPath | null) {
     if (!maybeTimings) {
       return null;
     }
@@ -352,7 +352,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     );
   }
 
-  render() {
+  override render() {
     const {
       callNodeIndex,
       thread,

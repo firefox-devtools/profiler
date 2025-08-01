@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 /**
  * In this file, "address" always means "instruction address", expressed as a
  * byte offset into a given library ("relative address").
@@ -69,7 +67,7 @@
  *      - func:D nativeSymbol:F address:0x435 (inlineDepth:1)
  */
 
-import type {
+import {
   FrameTable,
   FuncTable,
   StackTable,
@@ -82,7 +80,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import { getMatchingAncestorStackForInvertedCallNode } from './profile-data';
-import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
+import { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
 
 /**
  * For each stack in `stackTable`, and one specific native symbol, compute the

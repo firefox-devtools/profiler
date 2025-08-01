@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 // Parses the ART trace format and converts it to the Gecko profile format.
 
 // These profiles are obtained from Android in two ways:
@@ -26,45 +24,45 @@
 // The type definitions below are very coarse and just enough to catch the
 // biggest mistakes.
 type GeckoThreadVersion11 = {
-  tid: number,
-  pid: number,
-  name: string,
-  registerTime: number,
-  unregisterTime: number | null,
+  tid: number;
+  pid: number;
+  name: string;
+  registerTime: number;
+  unregisterTime: number | null;
   // eslint-disable-next-line flowtype/no-weak-types
-  markers: Object,
+  markers: Object;
   // eslint-disable-next-line flowtype/no-weak-types
-  samples: Object,
+  samples: Object;
   // eslint-disable-next-line flowtype/no-weak-types
-  frameTable: Object,
+  frameTable: Object;
   // eslint-disable-next-line flowtype/no-weak-types
-  stackTable: Object,
-  stringTable: string[],
+  stackTable: Object;
+  stringTable: string[];
 };
 type GeckoCategoryVersion11 = {
-  name: string,
-  color: string,
+  name: string;
+  color: string;
 };
 type GeckoProfileVersion11 = {
   meta: {
-    version: 11,
-    interval: number,
-    processType: 0,
-    product: string,
-    pid?: string,
-    stackwalk: 1,
-    startTime: number,
-    shutdownTime: null,
-    presymbolicated: true,
-    categories: GeckoCategoryVersion11[],
-  },
+    version: 11;
+    interval: number;
+    processType: 0;
+    product: string;
+    pid?: string;
+    stackwalk: 1;
+    startTime: number;
+    shutdownTime: null;
+    presymbolicated: true;
+    categories: GeckoCategoryVersion11[];
+  };
   // eslint-disable-next-line flowtype/no-weak-types
-  libs: Object[],
-  threads: GeckoThreadVersion11[],
+  libs: Object[];
+  threads: GeckoThreadVersion11[];
   // eslint-disable-next-line flowtype/no-weak-types
-  processes: Object[],
+  processes: Object[];
   // eslint-disable-next-line flowtype/no-weak-types
-  pausedRanges: Object[],
+  pausedRanges: Object[];
 };
 
 // From VmTraceParser.java:
@@ -164,32 +162,32 @@ class ByteReader {
 }
 
 type ArtTraceThread = {
-  tid: number,
-  threadName: string,
+  tid: number;
+  threadName: string;
 };
 
 export type ArtTraceMethod = {
-  methodId: number,
-  className: string,
-  methodName: string,
-  signature: string,
+  methodId: number;
+  className: string;
+  methodName: string;
+  signature: string;
 };
 
 type ArtTrace = {
   summaryDetails: {
-    clock: string,
-    pid?: string,
-  },
-  startTimeInUsecSinceBoot: number,
-  threads: ArtTraceThread[],
-  methods: ArtTraceMethod[],
+    clock: string;
+    pid?: string;
+  };
+  startTimeInUsecSinceBoot: number;
+  threads: ArtTraceThread[];
+  methods: ArtTraceMethod[];
   methodActions: {
-    tid: number,
-    methodId: number,
-    globalTime: number,
-    threadTime: number,
-    action: 'enter' | 'exit' | 'exit-unroll',
-  }[],
+    tid: number;
+    methodId: number;
+    globalTime: number;
+    threadTime: number;
+    action: 'enter' | 'exit' | 'exit-unroll';
+  }[];
 };
 
 function detectArtTraceFormat(
@@ -578,8 +576,8 @@ function procureSamplingInterval(trace) {
 }
 
 export type SpecialCategoryInfo = {
-  prefixes: string[],
-  name: string,
+  prefixes: string[];
+  name: string;
 };
 
 // Make a category for a frequently-encountered bag of code that is not covered
@@ -984,7 +982,7 @@ export function convertArtTraceProfile(
       version: 11,
       presymbolicated: true,
       categories: categoryInfo.categories,
-    },
+    } as any,
     libs: [],
     threads: threadArray,
     processes: [],

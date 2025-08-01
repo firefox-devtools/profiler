@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import {
   formatPercent,
@@ -16,7 +14,7 @@ import {
 
 import { TooltipDetail, type TooltipDetailComponent } from './TooltipDetails';
 
-import type {
+import {
   Microseconds,
   PhaseTimes,
   GCMinorMarkerPayload,
@@ -334,7 +332,7 @@ export function getGCSliceDetails(
   return details;
 }
 
-type PhaseTimeTuple = { name: string, time: Microseconds };
+type PhaseTimeTuple = { name: string; time: Microseconds };
 
 function _markerDetailPhase(p: PhaseTimeTuple) {
   return (
@@ -391,9 +389,9 @@ function _makePhaseTimesArray(
  */
 
 type PhaseTreeNode = {
-  value: PhaseTimeTuple,
-  leaf: boolean,
-  branches: Map<string, PhaseTreeNode>,
+  value: PhaseTimeTuple;
+  leaf: boolean;
+  branches: Map<string, PhaseTreeNode>;
 };
 
 function _treeInsert(

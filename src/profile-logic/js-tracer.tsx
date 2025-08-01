@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import {
   getEmptyFrameTable,
   getEmptyRawStackTable,
@@ -11,7 +9,7 @@ import {
 } from './data-structures';
 import { StringTable } from '../utils/string-table';
 import { ensureExists } from '../utils/flow';
-import type {
+import {
   JsTracerTable,
   IndexIntoStringTable,
   IndexIntoJsTracerEvents,
@@ -500,8 +498,8 @@ export function convertJsTracerToThreadWithoutSamples(
   jsTracer: JsTracerFixed,
   categories: CategoryList
 ): {
-  thread: RawThread,
-  stackMap: Map<IndexIntoJsTracerEvents, IndexIntoStackTable>,
+  thread: RawThread;
+  stackMap: Map<IndexIntoJsTracerEvents, IndexIntoStackTable>;
 } {
   // Create a new thread, with empty information, but preserve some of the existing
   // thread information.
@@ -635,12 +633,12 @@ export function convertJsTracerToThreadWithoutSamples(
 }
 
 type JsTracerFixed = {
-  events: Array<IndexIntoStringTable>,
-  start: Array<Microseconds>,
-  end: Array<Microseconds>,
-  line: Array<number | null>, // Line number.
-  column: Array<number | null>, // Column number.
-  length: number,
+  events: Array<IndexIntoStringTable>;
+  start: Array<Microseconds>;
+  end: Array<Microseconds>;
+  line: Array<number | null>; // Line number.
+  column: Array<number | null>; // Column number.
+  length: number;
 };
 
 /**
