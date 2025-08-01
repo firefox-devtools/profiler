@@ -59,8 +59,14 @@ apply_transform 's/^import type \([^{].*\) from/import \1 from/g' "Convert impor
 
 # 3. CRITICAL: Convert function types without parameter names (fixes TS1005/TS1109)
 # This is the most important fix discovered during conversion
-apply_transform 's/Selector<(\([^)]*\)) =>/Selector<(actionOrActionList: \1) =>/g' "Add parameter names to function types"
-apply_transform 's/: (\([^)]*\)) =>/: (param: \1) =>/g' "Add parameter names to generic function types"
+# Only add parameter names when there are actual parameters (not empty parens)
+apply_transform 's/Selector<(\([^)][^)]*\)) =>/Selector<(actionOrActionList: \1) =>/g' "Add parameter names to Selector function types"
+apply_transform 's/: (\([^)][^)]*\)) =>/: (param: \1) =>/g' "Add parameter names to generic function types"
+
+# Specifically handle common Flow type patterns that need parameter names
+apply_transform 's/: (Action | Action\[\]/: (actionOrActionList: Action | Action[]/g' "Fix Action union parameter names"
+# Remove the problematic string-based pattern that was too broad
+# apply_transform 's/: (string[^)]*) =>/: (param: \1) =>/g' "Add parameter names to string-based function types"
 
 # 4. Convert Flow nullable types (?Type → Type | null)
 apply_transform 's/: ?\([A-Za-z][A-Za-z0-9_]*\)/: \1 | null/g' "Convert nullable types"
@@ -93,6 +99,19 @@ apply_transform 's/\$Shape<\([^>]*\)>/Partial<\1>/g' "Convert $Shape to Partial"
 apply_transform 's/: mixed/: unknown/g' "Convert mixed to unknown"
 apply_transform 's/: MixedObject/: unknown/g' "Convert MixedObject to unknown"
 
+# Convert Flow built-in types to TypeScript equivalents
+apply_transform 's/: TimeoutID/: NodeJS.Timeout/g' "Convert TimeoutID to NodeJS.Timeout"
+apply_transform 's/TimeoutID/NodeJS.Timeout/g' "Convert TimeoutID type references"
+apply_transform 's/: IntervalID/: NodeJS.Timeout/g' "Convert IntervalID to NodeJS.Timeout"
+
+# Convert HTML boolean attributes to React boolean props
+apply_transform 's/required="required"/required={true}/g' "Convert required attribute"
+apply_transform 's/disabled="disabled"/disabled={true}/g' "Convert disabled attribute"
+apply_transform 's/checked="checked"/checked={true}/g' "Convert checked attribute"
+apply_transform 's/selected="selected"/selected={true}/g' "Convert selected attribute"
+apply_transform 's/multiple="multiple"/multiple={true}/g' "Convert multiple attribute"
+apply_transform 's/readonly="readonly"/readOnly={true}/g' "Convert readonly attribute (note: readOnly in React)"
+
 # 8. Fix index signatures (require key names in TypeScript)
 apply_transform 's/\[string\]:/[key: string]:/g' "Fix string index signatures"
 apply_transform 's/\[number\]:/[key: number]:/g' "Fix number index signatures"
@@ -103,6 +122,31 @@ apply_transform 's/React\.Node/React.ReactNode/g' "Convert React.Node"
 apply_transform 's/SyntheticEvent</React.ChangeEvent</g' "Convert SyntheticEvent"
 apply_transform 's/SyntheticMouseEvent</React.MouseEvent</g' "Convert SyntheticMouseEvent"
 apply_transform 's/SyntheticKeyboardEvent</React.KeyboardEvent</g' "Convert SyntheticKeyboardEvent"
+apply_transform 's/SyntheticFocusEvent</React.FocusEvent</g' "Convert SyntheticFocusEvent"
+apply_transform 's/SyntheticEvent<HTMLFormElement>/React.FormEvent<HTMLFormElement>/g' "Convert SyntheticEvent with form elements"
+
+# 9a. Add React component override modifiers (critical for TypeScript compilation)
+# Add override to class state properties
+apply_transform 's/^  state = {/  override state = {/g' "Add override to class state"
+apply_transform 's/^    state = {/    override state = {/g' "Add override to class state (4-space indent)"
+
+# Add override to React lifecycle methods
+apply_transform 's/^  componentDidMount(/  override componentDidMount(/g' "Add override to componentDidMount"
+apply_transform 's/^  componentDidUpdate(/  override componentDidUpdate(/g' "Add override to componentDidUpdate"
+apply_transform 's/^  componentWillUnmount(/  override componentWillUnmount(/g' "Add override to componentWillUnmount"
+apply_transform 's/^  componentDidCatch(/  override componentDidCatch(/g' "Add override to componentDidCatch"
+apply_transform 's/^  getSnapshotBeforeUpdate(/  override getSnapshotBeforeUpdate(/g' "Add override to getSnapshotBeforeUpdate"
+
+# Add override to render method
+apply_transform 's/^  render(/  override render(/g' "Add override to render method"
+
+# Handle 4-space indentation as well
+apply_transform 's/^    componentDidMount(/    override componentDidMount(/g' "Add override to componentDidMount (4-space)"
+apply_transform 's/^    componentDidUpdate(/    override componentDidUpdate(/g' "Add override to componentDidUpdate (4-space)"
+apply_transform 's/^    componentWillUnmount(/    override componentWillUnmount(/g' "Add override to componentWillUnmount (4-space)"
+apply_transform 's/^    componentDidCatch(/    override componentDidCatch(/g' "Add override to componentDidCatch (4-space)"
+apply_transform 's/^    getSnapshotBeforeUpdate(/    override getSnapshotBeforeUpdate(/g' "Add override to getSnapshotBeforeUpdate (4-space)"
+apply_transform 's/^    render(/    override render(/g' "Add override to render method (4-space)"
 
 # 10. Convert Flow type annotations in various contexts
 apply_transform 's/return (\([^:)]*\): \([^)]*\));/return \1 as \2;/g' "Convert return type annotations"
@@ -179,6 +223,20 @@ if grep -q -E ',\s*>' "$OUTPUT_FILE" 2>/dev/null; then
     ISSUES_FOUND=$((ISSUES_FOUND + 1))
 fi
 
+# Check for React components that might need override (should be fixed automatically now)
+if grep -q "class.*extends.*Component" "$OUTPUT_FILE" 2>/dev/null; then
+    if grep -q "render(" "$OUTPUT_FILE" 2>/dev/null && ! grep -q "override render(" "$OUTPUT_FILE" 2>/dev/null; then
+        WARNINGS+=("Found React component render method without override (should be fixed automatically)")
+        ISSUES_FOUND=$((ISSUES_FOUND + 1))
+    fi
+fi
+
+# Check for old HTML boolean attributes (should be fixed automatically now)
+if grep -q 'required="required"\|disabled="disabled"\|checked="checked"' "$OUTPUT_FILE" 2>/dev/null; then
+    WARNINGS+=("Found HTML boolean attributes that should be React boolean props (should be fixed automatically)")
+    ISSUES_FOUND=$((ISSUES_FOUND + 1))
+fi
+
 if [ $ISSUES_FOUND -eq 0 ]; then
     echo "✅ No obvious issues detected - ready for compilation!"
 else
@@ -195,10 +253,16 @@ echo "   2. Review/fix any errors   # Address compilation issues"
 echo "   3. yarn test              # Ensure functionality" 
 echo "   4. rm $INPUT_FILE         # Remove original after validation"
 echo ""
-echo "💡 Common manual fixes needed:"
+echo "💡 Common manual fixes that may still be needed:"
 echo "   - Add type parameters: new Set() → new Set<Type>()"
 echo "   - Add 'as const': { type: 'process' } → { type: 'process' as const }"
-echo "   - Add parameter names: (Type) => string → (param: Type) => string"
 echo "   - Fix trailing commas in multiline type definitions"
 echo "   - Convert commas to semicolons in type/interface definitions ONLY"
 echo "   - Keep commas in regular object literals (className={...}, state={...})"
+echo ""
+echo "✨ Automated improvements in this version:"
+echo "   ✅ React override modifiers (render, componentDidMount, state)"
+echo "   ✅ HTML boolean attributes → React boolean props" 
+echo "   ✅ TimeoutID/IntervalID → NodeJS.Timeout type mapping"
+echo "   ✅ Improved function parameter name handling (avoids void function issues)"
+echo "   ✅ Enhanced React event type conversions (SyntheticFocusEvent, form events)"
