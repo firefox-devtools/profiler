@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
+
 import { createSelector } from 'reselect';
 import memoize from 'memoize-immutable';
 import * as UrlState from '../url-state';
@@ -34,7 +34,7 @@ import {
 import * as ProfileSelectors from '../profile';
 import { ensureExists, getFirstItemFromSet } from '../../utils/flow';
 
-import type {
+import {
   Thread,
   ThreadIndex,
   Selector,
@@ -45,7 +45,7 @@ import type {
   AddressTimings,
 } from 'firefox-profiler/types';
 
-import type { TimingsForPath } from '../../profile-logic/profile-data';
+import { TimingsForPath } from '../../profile-logic/profile-data';
 
 /**
  * Traditional selectors only take one parameter, the `State` object. The selectors
@@ -54,17 +54,15 @@ import type { TimingsForPath } from '../../profile-logic/profile-data';
  * across a single render call. Instead for ThreadSelectors, duplicate the selector
  * functions once per thread in the profile, so each memoizes separately.
  */
-export type ThreadSelectors = {
-  ...ThreadSelectorsPerThread,
-  ...MarkerSelectorsPerThread,
-  ...StackAndSampleSelectorsPerThread,
-  ...ComposedSelectorsPerThread,
-};
+export type ThreadSelectors = ThreadSelectorsPerThread &
+  MarkerSelectorsPerThread &
+  StackAndSampleSelectorsPerThread &
+  ComposedSelectorsPerThread;
 
 /**
  * This is the static object store that holds the selector functions.
  */
-const _threadSelectorsCache: { [number]: ThreadSelectors } = {};
+const _threadSelectorsCache: { [key: number]: ThreadSelectors } = {};
 const _mergedThreadSelectorsMemoized = memoize(
   (threadsKey: ThreadsKey) => {
     // We don't pass this set inside this memoization function since we create
@@ -195,24 +193,24 @@ function _buildThreadSelectors(
  */
 export const selectedThreadSelectors: ThreadSelectors = (() => {
   const anyThreadSelectors: ThreadSelectors = getThreadSelectors(0);
-  const result: $Shape<ThreadSelectors> = {};
+  const result: Partial<ThreadSelectors> = {};
   for (const key in anyThreadSelectors) {
     result[key] = (state) =>
       getThreadSelectors(UrlState.getSelectedThreadIndexes(state))[key](state);
   }
-  const result2: ThreadSelectors = (result: any);
+  const result2: ThreadSelectors = result as any;
   return result2;
 })();
 
 export type NodeSelectors = {
-  +getName: Selector<string>,
-  +getIsJS: Selector<boolean>,
-  +getLib: Selector<string>,
-  +getTimingsForSidebar: Selector<TimingsForPath>,
-  +getSourceViewStackLineInfo: Selector<StackLineInfo | null>,
-  +getSourceViewLineTimings: Selector<LineTimings>,
-  +getAssemblyViewStackAddressInfo: Selector<StackAddressInfo | null>,
-  +getAssemblyViewAddressTimings: Selector<AddressTimings>,
+  readonly getName: Selector<string>;
+  readonly getIsJS: Selector<boolean>;
+  readonly getLib: Selector<string>;
+  readonly getTimingsForSidebar: Selector<TimingsForPath>;
+  readonly getSourceViewStackLineInfo: Selector<StackLineInfo | null>;
+  readonly getSourceViewLineTimings: Selector<LineTimings>;
+  readonly getAssemblyViewStackAddressInfo: Selector<StackAddressInfo | null>;
+  readonly getAssemblyViewAddressTimings: Selector<AddressTimings>;
 };
 
 export const selectedNodeSelectors: NodeSelectors = (() => {

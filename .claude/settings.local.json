@@ -32,7 +32,8 @@
       "Bash(./scripts/flow-to-typescript.sh:*)",
       "Bash(chmod:*)",
       "Bash(./scripts/analyze-dependencies.sh:*)",
-      "Bash(./scripts/auto-convert-batch.sh:*)"
+      "Bash(./scripts/auto-convert-batch.sh:*)",
+      "Bash(./scripts/flow-to-typescript-unified.sh:*)"
     ],
     "deny": []
   }
