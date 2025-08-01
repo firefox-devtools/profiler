@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { LocalizationProvider, ReactLocalization } from '@fluent/react';
 import { negotiateLanguages } from '@fluent/langneg';
@@ -15,6 +13,7 @@ import {
   getRequestedLocales,
   getPseudoStrategy,
 } from 'firefox-profiler/selectors/l10n';
+import type { State } from 'firefox-profiler/types';
 import { requestL10n, receiveL10n } from 'firefox-profiler/actions/l10n';
 import {
   AVAILABLE_LOCALES,
@@ -25,13 +24,13 @@ import {
 } from 'firefox-profiler/app-logic/l10n';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
-import type { Localization } from 'firefox-profiler/types';
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { Localization } from 'firefox-profiler/types';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type FetchProps = {
-  +requestedLocales: null | string[],
-  +pseudoStrategy: null | 'accented' | 'bidi',
-  +receiveL10n: typeof receiveL10n,
+  readonly requestedLocales: null | string[];
+  readonly pseudoStrategy: null | 'accented' | 'bidi';
+  readonly receiveL10n: typeof receiveL10n;
 };
 
 /**
@@ -84,22 +83,22 @@ class AppLocalizationFetcher extends React.PureComponent<FetchProps> {
     receiveL10n(localization, primaryLocale, direction);
   }
 
-  componentDidMount() {
+  override componentDidMount() {
     this._setupLocalization();
   }
 
-  componentDidUpdate() {
+  override componentDidUpdate() {
     this._setupLocalization();
   }
 
-  render() {
+  override render() {
     return null;
   }
 }
 
 type InitProps = {
-  +requestL10n: typeof requestL10n,
-  +requestedLocales: null | string[],
+  readonly requestL10n: typeof requestL10n;
+  readonly requestedLocales: null | string[];
 };
 
 /**
@@ -107,12 +106,12 @@ type InitProps = {
  * persisting the current locale to localStorage.
  */
 class AppLocalizationInit extends React.PureComponent<InitProps> {
-  componentDidMount() {
+  override componentDidMount() {
     const { requestL10n } = this.props;
-    requestL10n(this._getPersistedLocale() ?? navigator.languages);
+    requestL10n(this._getPersistedLocale() ?? Array.from(navigator.languages));
   }
 
-  componentDidUpdate() {
+  override componentDidUpdate() {
     this._persistCurrentLocale();
   }
 
@@ -171,30 +170,30 @@ class AppLocalizationInit extends React.PureComponent<InitProps> {
     }
   }
 
-  render() {
+  override render() {
     return null;
   }
 }
 
 type ProviderStateProps = {
-  +requestedLocales: null | string[],
-  +pseudoStrategy: null | 'accented' | 'bidi',
-  +localization: Localization,
-  +primaryLocale: string | null,
-  +direction: 'ltr' | 'rtl',
+  readonly requestedLocales: null | string[];
+  readonly pseudoStrategy: null | 'accented' | 'bidi';
+  readonly localization: Localization;
+  readonly primaryLocale: string | null;
+  readonly direction: 'ltr' | 'rtl';
 };
 type ProviderOwnProps = {
-  children: React.Node,
+  children: React.ReactNode;
 };
 type ProviderDispatchProps = {
-  +requestL10n: typeof requestL10n,
-  +receiveL10n: typeof receiveL10n,
+  readonly requestL10n: typeof requestL10n;
+  readonly receiveL10n: typeof receiveL10n;
 };
 
 type ProviderProps = ConnectedProps<
   ProviderOwnProps,
   ProviderStateProps,
-  ProviderDispatchProps,
+  ProviderDispatchProps
 >;
 
 /**
@@ -204,11 +203,11 @@ type ProviderProps = ConnectedProps<
  * handling of initialization, persisting and fetching the locales information.
  */
 class AppLocalizationProviderImpl extends React.PureComponent<ProviderProps> {
-  componentDidMount() {
+  override componentDidMount() {
     this._updateLocalizationDocumentAttribute();
   }
 
-  componentDidUpdate() {
+  override componentDidUpdate() {
     this._updateLocalizationDocumentAttribute();
   }
 
@@ -223,7 +222,7 @@ class AppLocalizationProviderImpl extends React.PureComponent<ProviderProps> {
     ensureExists(document.documentElement).setAttribute('lang', primaryLocale);
   }
 
-  render() {
+  override render() {
     const {
       primaryLocale,
       children,
@@ -257,9 +256,9 @@ class AppLocalizationProviderImpl extends React.PureComponent<ProviderProps> {
 export const AppLocalizationProvider = explicitConnect<
   ProviderOwnProps,
   ProviderStateProps,
-  ProviderDispatchProps,
+  ProviderDispatchProps
 >({
-  mapStateToProps: (state) => ({
+  mapStateToProps: (state: State) => ({
     localization: getLocalization(state),
     primaryLocale: getPrimaryLocale(state),
     direction: getDirection(state),

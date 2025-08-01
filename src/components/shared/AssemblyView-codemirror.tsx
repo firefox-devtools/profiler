@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 /**
  * This module wraps all the interaction with the CodeMirror API into a
  * AssemblyViewEditor class.
@@ -26,7 +24,7 @@ import { syntaxHighlighting } from '@codemirror/language';
 import { classHighlighter } from '@lezer/highlight';
 import clamp from 'clamp';
 
-import type {
+import {
   AddressTimings,
   Address,
   LineTimings,
@@ -50,7 +48,7 @@ const updateAddressToLineMapEffect = StateEffect.define<AddressToLineMap>();
 // instructionAddressGutter to map line numbers to addresses.
 const addressToLineMapField = StateField.define<AddressToLineMap>({
   create() {
-    return [];
+    return new AddressToLineMap([]);
   },
   update(instructionAddresses, transaction) {
     // Get the new value from an effect in the transaction.

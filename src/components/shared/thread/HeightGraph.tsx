@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { ensureExists } from 'firefox-profiler/utils/flow';
@@ -12,7 +10,7 @@ import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
 import './HeightGraph.css';
 
-import type {
+import {
   Thread,
   CategoryList,
   IndexIntoSamplesTable,
@@ -21,22 +19,22 @@ import type {
 } from 'firefox-profiler/types';
 
 type Props = {
-  +heightFunc: (IndexIntoSamplesTable) => number | null,
-  +maxValue: number,
-  +className: string,
-  +thread: Thread,
-  +samplesSelectedStates: null | SelectedState[],
-  +interval: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +categories: CategoryList,
-  +onSampleClick: (
-    event: SyntheticMouseEvent<>,
+  readonly heightFunc: (param: IndexIntoSamplesTable) => number | null;
+  readonly maxValue: number;
+  readonly className: string;
+  readonly thread: Thread;
+  readonly samplesSelectedStates: null | SelectedState[];
+  readonly interval: Milliseconds;
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly categories: CategoryList;
+  readonly onSampleClick: (
+    event: React.MouseEvent<HTMLCanvasElement>,
     sampleIndex: IndexIntoSamplesTable
-  ) => void,
+  ) => void;
   // Decide which way the stacks grow up from the floor, or down from the ceiling.
-  +stacksGrowFromCeiling?: boolean,
-  +trackName: string,
+  readonly stacksGrowFromCeiling?: boolean;
+  readonly trackName: string;
 };
 
 export class ThreadHeightGraph extends PureComponent<Props> {
@@ -54,12 +52,12 @@ export class ThreadHeightGraph extends PureComponent<Props> {
     }
   }
 
-  componentDidMount() {
+  override componentDidMount() {
     window.addEventListener('resize', this._resizeListener);
     this.forceUpdate(); // for initial size
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     window.removeEventListener('resize', this._resizeListener);
   }
 
@@ -162,8 +160,8 @@ export class ThreadHeightGraph extends PureComponent<Props> {
     }
 
     type SamplesBucket = {
-      height: number[],
-      xPos: number[],
+      height: number[];
+      xPos: number[];
     };
     function drawSamples(samplesBucket: SamplesBucket, color: string) {
       if (samplesBucket.xPos.length === 0) {
@@ -186,7 +184,7 @@ export class ThreadHeightGraph extends PureComponent<Props> {
     drawSamples(idleSamples, lighterBlue);
   }
 
-  _onClick = (event: SyntheticMouseEvent<>) => {
+  _onClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = this._canvas;
     if (canvas) {
       const { rangeStart, rangeEnd, thread, interval } = this.props;
@@ -212,7 +210,7 @@ export class ThreadHeightGraph extends PureComponent<Props> {
     }
   };
 
-  render() {
+  override render() {
     this._renderCanvas();
     const { className, trackName } = this.props;
     return (

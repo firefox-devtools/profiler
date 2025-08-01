@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 /**
  * This module wraps all the interaction with the CodeMirror API into a
  * SourceViewEditor class.
@@ -29,7 +27,7 @@ import { rust } from '@codemirror/lang-rust';
 import { javascript } from '@codemirror/lang-javascript';
 import clamp from 'clamp';
 
-import type { LineTimings } from 'firefox-profiler/types';
+import { LineTimings } from 'firefox-profiler/types';
 import {
   timingsExtension,
   updateTimingsEffect,

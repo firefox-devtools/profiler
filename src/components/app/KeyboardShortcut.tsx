@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import { coerce } from '../../utils/flow';
 import classNames from 'classnames';
@@ -11,22 +9,22 @@ import classNames from 'classnames';
 import './KeyboardShortcut.css';
 
 type Props = {
-  +wrapperClassName: string,
-  +children: React.Node,
+  readonly wrapperClassName: string;
+  readonly children: React.ReactNode;
 };
 
 type State = {
-  +isOpen: boolean,
+  readonly isOpen: boolean;
   // The modal steals the focus of the screen. This is the element that was focused
   // before showing the modal. The focus will be restored once the modal is dismissed.
-  +focusAfterClosed: HTMLElement | null,
+  readonly focusAfterClosed: HTMLElement | null;
 };
 
 /**
  * Display a list of shortcuts that overlays the screen.
  */
 export class KeyboardShortcut extends React.PureComponent<Props, State> {
-  state = {
+  override state = {
     isOpen: false,
     // The eslint error is a false positive due to how it's used, see the line:
     //  `focusAfterClosed.focus()`
@@ -35,7 +33,7 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
 
   _focusArea = React.createRef<HTMLDivElement>();
 
-  componentDidMount() {
+  override componentDidMount() {
     window.addEventListener('keydown', this._handleKeyPress);
   }
 
@@ -54,18 +52,18 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
     });
   }
 
-  _open = (state: State): $Shape<State> => {
+  _open = (state: State): Partial<State> => {
     if (state.isOpen) {
       // Do nothing.
       return {};
     }
-    const focusAfterClosed = document.activeElement;
+    const focusAfterClosed = document.activeElement as HTMLElement | null;
     this._trapFocus();
     this._focus();
     return { isOpen: true, focusAfterClosed };
   };
 
-  _close = (state: State): $Shape<State> => {
+  _close = (state: State): Partial<State> => {
     const { focusAfterClosed, isOpen } = state;
 
     if (!isOpen) {
@@ -86,7 +84,16 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
   };
 
   _handleCloseClick = () => {
-    this.setState(this._close);
+    this.setState((state) => {
+      const { focusAfterClosed, isOpen } = state;
+      if (!isOpen) {
+        return null as any;
+      }
+      if (focusAfterClosed && focusAfterClosed.focus) {
+        focusAfterClosed.focus();
+      }
+      return { isOpen: false };
+    });
   };
 
   _handleKeyPress = (event: KeyboardEvent) => {
@@ -103,14 +110,37 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
           return;
         }
         // Toggle the state.
-        this.setState((state) =>
-          state.isOpen ? this._close(state) : this._open(state)
-        );
+        this.setState((state) => {
+          if (state.isOpen) {
+            // Close logic
+            const { focusAfterClosed } = state;
+            if (focusAfterClosed && focusAfterClosed.focus) {
+              focusAfterClosed.focus();
+            }
+            return { isOpen: false, focusAfterClosed: null };
+          } else {
+            // Open logic
+            const focusAfterClosed =
+              document.activeElement as HTMLElement | null;
+            this._trapFocus();
+            this._focus();
+            return { isOpen: true, focusAfterClosed };
+          }
+        });
         break;
       }
       case 'Escape': {
         // Unconditionally run close on escape, which is a noop if it's not open.
-        this.setState(this._close);
+        this.setState((state) => {
+          const { focusAfterClosed, isOpen } = state;
+          if (!isOpen) {
+            return null as any;
+          }
+          if (focusAfterClosed && focusAfterClosed.focus) {
+            focusAfterClosed.focus();
+          }
+          return { isOpen: false };
+        });
         break;
       }
       default:
@@ -118,7 +148,7 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
     }
   };
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     window.removeEventListener('keydown', this._handleKeyPress);
     this._untrapFocus();
   }
@@ -222,7 +252,7 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
     );
   }
 
-  render() {
+  override render() {
     const { wrapperClassName, children } = this.props;
     const { isOpen } = this.state;
     return (
@@ -243,7 +273,7 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
           <div
             className="appKeyboardShortcutsBox"
             ref={this._focusArea}
-            tabIndex="0"
+            tabIndex={0}
             role="dialog"
             aria-modal="true"
             aria-labelledby="AppKeyboardShortcutsHeaderTitle"
@@ -257,9 +287,9 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
 }
 
 type ShortcutProps = $ReadOnly<{
-  label: string,
-  shortcut: string,
-  macShortcut?: string,
+  label: string;
+  shortcut: string;
+  macShortcut?: string;
 }>;
 
 function Shortcut(props: ShortcutProps) {

@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import { Localized } from '@fluent/react';
 import memoize from 'memoize-one';
@@ -18,11 +16,12 @@ import {
   getProfileInterval,
   getMeta,
 } from 'firefox-profiler/selectors/profile';
+import type { State } from 'firefox-profiler/types';
 import { getSampleIndexRangeForSelection } from 'firefox-profiler/profile-logic/profile-data';
 
 import { TooltipDetails, TooltipDetail } from './TooltipDetails';
 
-import type {
+import {
   Counter,
   Milliseconds,
   PreviewSelection,
@@ -30,18 +29,18 @@ import type {
   ProfileMeta,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {
-  counter: Counter,
-  counterSampleIndex: number,
+  counter: Counter;
+  counterSampleIndex: number;
 };
 
 type StateProps = {
-  interval: Milliseconds,
-  meta: ProfileMeta,
-  committedRange: StartEndRange,
-  previewSelection: PreviewSelection,
+  interval: Milliseconds;
+  meta: ProfileMeta;
+  committedRange: StartEndRange;
+  previewSelection: PreviewSelection;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, {}>;
@@ -87,7 +86,7 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
     l10nIdUnit,
     l10nIdMilliUnit,
     l10nIdMicroUnit
-  ): Localized {
+  ): React.ReactElement<any> {
     let value, l10nId, carbonValue;
     const carbon = this._computeCO2eFromPower(power);
     if (power > 1000) {
@@ -127,7 +126,7 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
 
   maybeRenderForPreviewSelection(
     previewSelection
-  ): React.ChildrenArray<React.Element<typeof TooltipDetail> | null> | null {
+  ): React.ReactElement<any> | null {
     if (!previewSelection.hasSelection) {
       return null;
     }
@@ -159,13 +158,14 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
             selectionRange,
           'TrackPower--tooltip-average-power-kilowatt',
           'TrackPower--tooltip-average-power-watt',
-          'TrackPower--tooltip-average-power-milliwatt'
+          'TrackPower--tooltip-average-power-milliwatt',
+          'TrackPower--tooltip-average-power-microwatt'
         )}
       </>
     );
   }
 
-  render() {
+  override render() {
     const {
       counter,
       counterSampleIndex,
@@ -193,7 +193,8 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
             power,
             'TrackPower--tooltip-power-kilowatt',
             'TrackPower--tooltip-power-watt',
-            'TrackPower--tooltip-power-milliwatt'
+            'TrackPower--tooltip-power-milliwatt',
+            'TrackPower--tooltip-power-microwatt'
           )}
           {this.maybeRenderForPreviewSelection(previewSelection)}
           {this._formatPowerValue(
@@ -210,7 +211,7 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
 }
 
 export const TooltipTrackPower = explicitConnect<OwnProps, StateProps, {}>({
-  mapStateToProps: (state) => ({
+  mapStateToProps: (state: State) => ({
     interval: getProfileInterval(state),
     meta: getMeta(state),
     committedRange: getCommittedRange(state),
