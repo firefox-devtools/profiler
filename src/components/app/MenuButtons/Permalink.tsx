@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import { flushSync } from 'react-dom';
 import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
@@ -13,17 +11,17 @@ import './Permalink.css';
 import { Localized } from '@fluent/react';
 
 type Props = {
-  +isNewlyPublished: boolean,
+  readonly isNewlyPublished: boolean;
   // This is for injecting a URL shortener for tests. Normally we would use a Jest mock
   // that would mock out a local module, but I was having trouble getting it working
   // correctly (perhaps due to ES6 modules), so I just went with dependency injection
   // instead.
-  +injectedUrlShortener?: typeof UrlUtils.shortenUrl | void,
+  readonly injectedUrlShortener?: typeof UrlUtils.shortenUrl | void;
 };
 
 type State = {
-  fullUrl: string,
-  shortUrl: string,
+  fullUrl: string;
+  shortUrl: string;
 };
 
 export class MenuButtonsPermalink extends React.PureComponent<Props, State> {
@@ -32,7 +30,7 @@ export class MenuButtonsPermalink extends React.PureComponent<Props, State> {
     this._permalinkTextField = elem;
   };
 
-  state = {
+  override state = {
     fullUrl: '',
     shortUrl: '',
   };
@@ -72,7 +70,7 @@ export class MenuButtonsPermalink extends React.PureComponent<Props, State> {
     }
   };
 
-  render() {
+  override render() {
     return (
       <Localized id="MenuButtons--permalink--button" attrs={{ label: true }}>
         <ButtonWithPanel
@@ -88,7 +86,7 @@ export class MenuButtonsPermalink extends React.PureComponent<Props, State> {
               type="text"
               className="menuButtonsPermalinkTextField photon-input"
               value={this.state.shortUrl}
-              readOnly="readOnly"
+              readOnly={true}
               ref={this._takePermalinkTextFieldRef}
             />
           }

@@ -375,7 +375,7 @@ If a phase is only partially complete, but feels complete "in the important ways
 
 ### Phase 3: 🚀 RESUMED - React Components  
 
-- **Status**: 28/150+ files complete (18.7%) - **SIGNIFICANT PROGRESS TODAY**
+- **Status**: 33/150+ files complete (22%) - **CONTINUED PROGRESS TODAY**
 - **Strategy**: Dependency-first migration proving highly effective
 - **Recent progress**: 11 files converted in single session with strategic dependency unlocking
 
@@ -403,6 +403,11 @@ If a phase is only partially complete, but feels complete "in the important ways
       - **Major dependency**: Tooltip.tsx (187 lines) - unblocks multiple downstream files
       - **Small components**: CanSelectContent.tsx, TooltipDetails.tsx, ProfileRootMessage.tsx, StyleDef.tsx, TrackSearchField.tsx, Backtrace.tsx, TabBar.tsx
       - **Type definitions**: Window.d.ts global type definitions
+  - **✅ ADDITIONAL PROGRESS (August 1, 2025 - Second Session)**: 5 more strategic files converted:
+    - **React Components**: MenuButtons/Permalink.tsx (100 lines) - permalink UI component
+    - **Error Handling**: CodeErrorOverlay.tsx (125 lines), ErrorBoundary.tsx (135 lines) - improved error boundaries
+    - **Core Logic**: profile-logic/profile-store.ts (124 lines) - profile upload/storage functionality
+    - **Selectors**: selectors/per-thread/composed.ts (125 lines) - thread-specific data selectors
   - **✅ COMPLETED PREVIOUSLY**: profile-logic/tracks.ts, selectors/url-state.ts (major core dependencies)
   - **Previous**: BlobUrlLink.tsx, ProfileMetaInfoSummary.tsx (dependencies resolved)
   - **Remaining files**: mostly React components + 3 utility files with dependencies

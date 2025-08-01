@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import React, { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 
@@ -24,17 +22,17 @@ import './ProfileDeleteButton.css';
  */
 type ButtonProps = {
   /* This string will be used in a title */
-  +profileName: string,
+  readonly profileName: string;
   /* This string will be used in longer sentence in a tooltip */
-  +smallProfileName: string,
+  readonly smallProfileName: string;
   /* This identifies the profile we want to delete. This is also commonly known as the "hash" of the profile. */
-  +profileToken: string,
+  readonly profileToken: string;
   /* This token is used to authenticate the deletion HTTP request to the server. */
-  +jwtToken: string,
-  +buttonClassName?: string,
-  +onOpenConfirmDialog: () => mixed,
-  +onCloseConfirmDialog: () => mixed,
-  +onCloseSuccessMessage: () => mixed,
+  readonly jwtToken: string;
+  readonly buttonClassName?: string;
+  readonly onOpenConfirmDialog: () => mixed;
+  readonly onCloseConfirmDialog: () => mixed;
+  readonly onCloseSuccessMessage: () => mixed;
 };
 
 export class ProfileDeleteButton extends PureComponent<ButtonProps> {
@@ -62,7 +60,7 @@ export class ProfileDeleteButton extends PureComponent<ButtonProps> {
     }
   };
 
-  render() {
+  override render() {
     const {
       profileName,
       smallProfileName,
@@ -109,22 +107,22 @@ export class ProfileDeleteButton extends PureComponent<ButtonProps> {
  * calling the deletion process when the user confirms.
  */
 type PanelProps = {
-  +profileName: string,
+  readonly profileName: string;
   /* This identifies the profile we want to delete. This is also commonly known as the "hash" of the profile. */
-  +profileToken: string,
+  readonly profileToken: string;
   /* This token is used to authenticate the deletion HTTP request to the server. */
-  +jwtToken: string,
-  +onProfileDeleted: () => mixed,
-  +onProfileDeleteCanceled: () => mixed,
+  readonly jwtToken: string;
+  readonly onProfileDeleted: () => mixed;
+  readonly onProfileDeleteCanceled: () => mixed;
 };
 
 type PanelState = {
-  +status: 'idle' | 'working' | 'deleted',
-  +error: Error | null,
+  readonly status: 'idle' | 'working' | 'deleted';
+  readonly error: Error | null;
 };
 
 export class ProfileDeletePanel extends PureComponent<PanelProps, PanelState> {
-  state = { error: null, status: 'idle' };
+  override state: PanelState = { error: null, status: 'idle' };
 
   onConfirmDeletion = async () => {
     const { profileToken, jwtToken } = this.props;
@@ -153,7 +151,7 @@ export class ProfileDeletePanel extends PureComponent<PanelProps, PanelState> {
     }
   };
 
-  preventClick(e: SyntheticMouseEvent<>) {
+  preventClick(e: React.MouseEvent<HTMLElement>) {
     e.preventDefault();
   }
 
@@ -177,7 +175,7 @@ export class ProfileDeletePanel extends PureComponent<PanelProps, PanelState> {
       </Localized>
     );
   }
-  render() {
+  override render() {
     const { profileName } = this.props;
     const { status } = this.state;
 

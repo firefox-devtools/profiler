@@ -2,27 +2,25 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import classNames from 'classnames';
-import type { InitialSelectedTrackReference } from 'firefox-profiler/types';
+import { InitialSelectedTrackReference } from 'firefox-profiler/types';
 
 import './OverflowEdgeIndicator.css';
 
 type Props = {
-  className: string,
-  children: React.Node,
-  panelLayoutGeneration: number,
-  initialSelected: InitialSelectedTrackReference | null,
-  forceLayoutGeneration?: number,
+  className: string;
+  children: React.ReactNode;
+  panelLayoutGeneration: number;
+  initialSelected: InitialSelectedTrackReference | null;
+  forceLayoutGeneration?: number;
 };
 
 type State = {
-  overflowsOnTop: boolean,
-  overflowsOnRight: boolean,
-  overflowsOnBottom: boolean,
-  overflowsOnLeft: boolean,
+  overflowsOnTop: boolean;
+  overflowsOnRight: boolean;
+  overflowsOnBottom: boolean;
+  overflowsOnLeft: boolean;
 };
 
 class OverflowEdgeIndicator extends React.PureComponent<Props, State> {
@@ -30,7 +28,7 @@ class OverflowEdgeIndicator extends React.PureComponent<Props, State> {
   _contentsWrapper: HTMLDivElement | null = null;
   _scrolledToInitialSelected: boolean = false;
 
-  state = {
+  override state = {
     overflowsOnTop: false,
     overflowsOnRight: false,
     overflowsOnBottom: false,
@@ -49,11 +47,11 @@ class OverflowEdgeIndicator extends React.PureComponent<Props, State> {
     this._updateIndicatorStatus();
   };
 
-  componentDidMount() {
+  override componentDidMount() {
     this._updateIndicatorStatus();
   }
 
-  componentDidUpdate(prevProps: Props) {
+  override componentDidUpdate(prevProps: Props) {
     this._updateIndicatorStatus();
     const { initialSelected, forceLayoutGeneration } = this.props;
     const container = this._container;
@@ -104,7 +102,7 @@ class OverflowEdgeIndicator extends React.PureComponent<Props, State> {
     }
   }
 
-  render() {
+  override render() {
     const { className, children } = this.props;
     return (
       <div

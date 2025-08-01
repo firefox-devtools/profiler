@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import * as React from 'react';
 import { Localized } from '@fluent/react';
 
@@ -11,7 +9,7 @@ import {
   formatPercent,
 } from 'firefox-profiler/utils/format-numbers';
 
-import type { ProfilerOverhead } from 'firefox-profiler/types';
+import { ProfilerOverhead } from 'firefox-profiler/types';
 
 import './MetaOverheadStatistics.css';
 
@@ -19,14 +17,14 @@ import './MetaOverheadStatistics.css';
 type StatKeys = 'Overhead' | 'Cleaning' | 'Counter' | 'Interval' | 'Lockings';
 
 type Props = {
-  +profilerOverhead: ProfilerOverhead[],
+  readonly profilerOverhead: ProfilerOverhead[];
 };
 
 /**
  * This component formats the profile's meta information into a dropdown panel.
  */
 export class MetaOverheadStatistics extends React.PureComponent<Props> {
-  render() {
+  override render() {
     const { profilerOverhead } = this.props;
 
     const calculatedStats: Map<StatKeys, ProfilerStats> = new Map();
@@ -42,7 +40,7 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
     let totalSamplingCount = 0;
 
     // Overhead keys that have min/max/mean values to loop.
-    const statKeys = [
+    const statKeys: StatKeys[] = [
       'Overhead',
       'Cleaning',
       'Counter',

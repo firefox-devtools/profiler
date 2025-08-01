@@ -2,13 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
-import type { Milliseconds } from 'firefox-profiler/types';
+import { Milliseconds } from 'firefox-profiler/types';
 
 export type OnMove = (
-  originalValue: { +selectionEnd: Milliseconds, +selectionStart: Milliseconds },
+  originalValue: {
+    readonly selectionEnd: Milliseconds;
+    readonly selectionStart: Milliseconds;
+  },
   dx: number,
   dy: number,
   isModifying: boolean
@@ -16,16 +17,16 @@ export type OnMove = (
 
 type Props = {
   value: {
-    +selectionStart: Milliseconds,
-    +selectionEnd: Milliseconds,
-  },
-  onMove: OnMove,
-  className: string,
-  children?: React.Node,
+    readonly selectionStart: Milliseconds;
+    readonly selectionEnd: Milliseconds;
+  };
+  onMove: OnMove;
+  className: string;
+  children?: React.ReactNode;
 };
 
 type State = {
-  dragging: boolean,
+  dragging: boolean;
 };
 
 /**
@@ -39,10 +40,10 @@ type State = {
 export class Draggable extends React.PureComponent<Props, State> {
   _container: HTMLDivElement | null = null;
   _handlers: {
-    mouseMoveHandler: (MouseEvent) => void,
-    mouseUpHandler: (MouseEvent) => void,
+    mouseMoveHandler: (param: MouseEvent) => void;
+    mouseUpHandler: (param: MouseEvent) => void;
   } | null = null;
-  state = {
+  override state = {
     dragging: false,
   };
 
@@ -50,7 +51,7 @@ export class Draggable extends React.PureComponent<Props, State> {
     this._container = c;
   };
 
-  _onMouseDown = (e: SyntheticMouseEvent<>) => {
+  _onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!this._container || e.button !== 0) {
       return;
     }
@@ -92,8 +93,8 @@ export class Draggable extends React.PureComponent<Props, State> {
   };
 
   _installMoveAndUpHandlers(
-    mouseMoveHandler: (MouseEvent) => void,
-    mouseUpHandler: (MouseEvent) => void
+    mouseMoveHandler: (param: MouseEvent) => void,
+    mouseUpHandler: (param: MouseEvent) => void
   ) {
     // Unregister any leftover old handlers, in case we didn't get a mouseup for the previous
     // drag (e.g. when tab switching during a drag, or when ctrl+clicking on macOS).
@@ -113,25 +114,19 @@ export class Draggable extends React.PureComponent<Props, State> {
     }
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     this._uninstallMoveAndUpHandlers();
   }
 
-  render() {
-    const props = Object.assign({}, this.props);
-    if (this.state.dragging) {
-      props.className += ' dragging';
-    }
-    delete props.onMove;
-    delete props.value;
-    delete props.children;
+  override render() {
+    const { children, className } = this.props;
     return (
       <div
-        {...props}
+        className={this.state.dragging ? className + ' dragging' : className}
         onMouseDown={this._onMouseDown}
         ref={this._takeContainerRef}
       >
-        {this.props.children}
+        {children}
       </div>
     );
   }

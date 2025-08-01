@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
+
 import { oneLine } from 'common-tags';
 import { PROFILER_SERVER_ORIGIN } from 'firefox-profiler/app-logic/constants';
 
@@ -16,7 +16,7 @@ const ACCEPT_HEADER_VALUE = 'application/vnd.firefox-profiler+json;version=1.0';
 // the caller function.
 // It's exported because we use it in tests.
 export class UploadAbortedError extends Error {
-  name = 'UploadAbortedError';
+  override name = 'UploadAbortedError';
 }
 
 export function uploadBinaryProfileData() {
@@ -29,8 +29,8 @@ export function uploadBinaryProfileData() {
       xhr.abort();
     },
     startUpload: (
-      data: $TypedArray,
-      progressChangeCallback?: (number) => mixed
+      data: ArrayBufferView,
+      progressChangeCallback?: (param: number) => unknown
     ): Promise<string> =>
       new Promise((resolve, reject) => {
         if (isAborted) {
@@ -101,8 +101,8 @@ export async function deleteProfileOnServer({
   profileToken,
   jwtToken,
 }: {
-  profileToken: string,
-  jwtToken: string,
+  profileToken: string;
+  jwtToken: string;
 }): Promise<void> {
   const ENDPOINT = `${PROFILER_SERVER_ORIGIN}/profile/${profileToken}`;
 

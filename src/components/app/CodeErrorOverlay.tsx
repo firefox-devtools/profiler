@@ -1,16 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import React from 'react';
 
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
-import type { SourceCodeLoadingError } from 'firefox-profiler/types';
+import { SourceCodeLoadingError } from 'firefox-profiler/types';
 import { Localized } from '@fluent/react';
 
 export type CodeErrorOverlayProps = {
-  errors: SourceCodeLoadingError[],
+  errors: SourceCodeLoadingError[];
 };
 
 export function CodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
@@ -116,7 +114,7 @@ export function CodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
             );
           }
           default:
-            throw assertExhaustiveCheck(error.type);
+            throw assertExhaustiveCheck(error);
         }
       })}
     </ul>

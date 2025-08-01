@@ -1,27 +1,24 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import * as React from 'react';
 import { Localized } from '@fluent/react';
 import { reportError } from 'firefox-profiler/utils/analytics';
 import './ErrorBoundary.css';
 
 type State = {
-  hasError: boolean,
-  errorString: string | null,
+  hasError: boolean;
+  errorString: string | null;
 };
 
 type ExternalProps = {
-  +children: React.Node,
-  +message: string,
+  readonly children: React.ReactNode;
+  readonly message: string;
 };
 
-type InternalProps = {
-  ...ExternalProps,
-  buttonContent: React.Node,
-  reportExplanationMessage: React.Node,
+type InternalProps = ExternalProps & {
+  buttonContent: React.ReactNode;
+  reportExplanationMessage: React.ReactNode;
 };
 
 /**
@@ -31,13 +28,13 @@ type InternalProps = {
  * See: https://reactjs.org/docs/error-boundaries.html
  */
 class ErrorBoundaryInternal extends React.Component<InternalProps, State> {
-  state = {
+  override state: State = {
     hasError: false,
     errorString: null,
   };
 
-  componentDidCatch(
-    error: mixed,
+  override componentDidCatch(
+    error: unknown,
     { componentStack }: { componentStack: string }
   ) {
     console.error(
@@ -68,7 +65,7 @@ class ErrorBoundaryInternal extends React.Component<InternalProps, State> {
     });
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       const { errorString } = this.state;
       return (

@@ -1,18 +1,18 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
+
 import * as colors from 'photon-colors';
 
-import type { CssPixels, Marker } from 'firefox-profiler/types';
+import { CssPixels, Marker } from 'firefox-profiler/types';
 
 type MarkerStyle = {
-  +top: CssPixels,
-  +height: CssPixels,
-  +background: string,
-  +squareCorners: boolean,
-  +borderLeft: null | string,
-  +borderRight: null | string,
+  readonly top: CssPixels;
+  readonly height: CssPixels;
+  readonly background: string;
+  readonly squareCorners: boolean;
+  readonly borderLeft: null | string;
+  readonly borderRight: null | string;
 };
 
 const defaultStyle = {
@@ -51,7 +51,7 @@ export function getMarkerStyle(marker: Marker): MarkerStyle {
   return markerStyles.default;
 }
 
-const markerStyles: { +[styleName: string]: MarkerStyle } = {
+const markerStyles: { readonly [styleName: string]: MarkerStyle } = {
   default: defaultStyle,
   RefreshDriverTick: {
     ...defaultStyle,
