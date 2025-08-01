@@ -2,9 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
-import type { MixedObject } from 'firefox-profiler/types';
+import { MixedObject } from 'firefox-profiler/types';
 
 /**
  * The "perf script" format is the plain text format that is output by an
@@ -346,7 +344,7 @@ export function convertPerfScriptProfile(
   for (const thread of threadArray) {
     // The samples are not guaranteed to be in order, sort them so that they are.
     const key = thread.samples.schema.time;
-    (thread.samples.data: Array<any>).sort((a, b) => a[key] - b[key]);
+    (thread.samples.data as Array<any>).sort((a, b) => a[key] - b[key]);
   }
 
   return {

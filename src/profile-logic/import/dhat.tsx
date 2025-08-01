@@ -1,8 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-import type {
+
+import {
   Profile,
   Pid,
   Bytes,
@@ -31,54 +31,54 @@ import { coerce, ensureExists } from 'firefox-profiler/utils/flow';
 type DhatJson = $ReadOnly<{
   // Version number of the format. Incremented on each
   // backwards-incompatible change. A mandatory integer.
-  dhatFileVersion: 2,
+  dhatFileVersion: 2;
 
   // The invocation mode. A mandatory, free-form string.
-  mode: 'heap',
+  mode: 'heap';
 
   // The verb used before above stack frames, i.e. "<verb> at {". A
   // mandatory string.
-  verb: 'Allocated',
+  verb: 'Allocated';
 
   // Are block lifetimes recorded? Affects whether some other fields are
   // present. A mandatory boolean.
-  bklt: boolean,
+  bklt: boolean;
 
   // Are block accesses recorded? Affects whether some other fields are
   // present. A mandatory boolean.
-  bkacc: boolean,
+  bkacc: boolean;
 
   // Byte/bytes/blocks-position units. Optional strings. "byte", "bytes",
   // and "blocks" are the values used if these fields are omitted.
-  bu: 'byte',
-  bsu: 'bytes',
-  bksu: 'blocks',
+  bu: 'byte';
+  bsu: 'bytes';
+  bksu: 'blocks';
 
   // Time units (individual and 1,000,000x). Mandatory strings.
-  tu: 'instrs',
-  Mtu: 'Minstr',
+  tu: 'instrs';
+  Mtu: 'Minstr';
 
   // The "short-lived" time threshold, measures in "tu"s.
   // - bklt=true: a mandatory integer.
   // - bklt=false: omitted.
-  tuth: 500,
+  tuth: 500;
 
   // The executed command. A mandatory string.
-  cmd: string,
+  cmd: string;
 
   // The process ID. A mandatory integer.
-  pid: Pid,
+  pid: Pid;
 
   // The time at the end of execution (t-end). A mandatory integer.
-  te: InstructionCounts,
+  te: InstructionCounts;
 
   // The time of the global max (t-gmax).
   // - bklt=true: a mandatory integer.
   // - bklt=false: omitted.
-  tg: InstructionCounts,
+  tg: InstructionCounts;
 
   // The program points. A mandatory array.
-  pps: ProgramPoint[],
+  pps: ProgramPoint[];
 
   // Frame table. A mandatory array of strings.
   // e.g.
@@ -88,42 +88,42 @@ type DhatJson = $ReadOnly<{
   //   '0x4A9B414: _nl_load_locale_from_archive (loadarchive.c:173)',
   //   '0x4A9A2BE: _nl_find_locale (findlocale.c:153)'
   // ],
-  ftbl: string[],
+  ftbl: string[];
 }>;
 
 type ProgramPoint = $ReadOnly<{
   // Total bytes and blocks. Mandatory integers.
-  tb: Bytes,
-  tbk: Blocks,
+  tb: Bytes;
+  tbk: Blocks;
 
   // Total lifetimes of all blocks allocated at this PP.
   // - bklt=true: a mandatory integer.
   // - bklt=false: omitted.
-  tl: InstructionCounts,
+  tl: InstructionCounts;
 
   // The maximum bytes and blocks for this PP.
   // - bklt=true: mandatory integers.
   // - bklt=false: omitted.
-  mb: Bytes,
-  mbk: Blocks,
+  mb: Bytes;
+  mbk: Blocks;
 
   // The bytes and blocks at t-gmax for this PP.
   // - bklt=true: mandatory integers.
   // - bklt=false: omitted.
-  gb: Bytes,
-  gbk: Blocks,
+  gb: Bytes;
+  gbk: Blocks;
 
   // The bytes and blocks at t-end for this PP.
   // - bklt=true: mandatory integers.
   // - bklt=false: omitted.
-  eb: Bytes,
-  ebk: Blocks,
+  eb: Bytes;
+  ebk: Blocks;
 
   // The reads and writes of blocks for this PP.
   // - bkacc=true: mandatory integers.
   // - bkacc=false: omitted.
-  rb: ReadCount,
-  wb: WriteCount,
+  rb: ReadCount;
+  wb: WriteCount;
 
   // The exact accesses of blocks for this PP. Only used when all
   // allocations are the same size and sufficiently small. A negative
@@ -133,12 +133,12 @@ type ProgramPoint = $ReadOnly<{
   // - bkacc=false: omitted.
   //
   // e.g. [5, -3, 4, 2]
-  acc: number[],
+  acc: number[];
 
   // Frames. Each element is an index into the "ftbl" array above.
   // The array is ordered from leaf to root.
   // - All modes: A mandatory array of integers.
-  fs: IndexIntoDhatFrames[],
+  fs: IndexIntoDhatFrames[];
 }>;
 
 // All units of time are in instruction counts.
@@ -159,12 +159,12 @@ type WriteCount = number;
  * in the Gecko format. In the Gecko format, that data comes in the form of markers, which
  * would be awkard to target.
  */
-export function attemptToConvertDhat(json: mixed): Profile | null {
+export function attemptToConvertDhat(json: unknown): Profile | null {
   if (!json || typeof json !== 'object') {
     return null;
   }
 
-  const { dhatFileVersion } = json;
+  const { dhatFileVersion } = json as any;
   if (typeof dhatFileVersion !== 'number') {
     // This is not a dhat file.
     return null;

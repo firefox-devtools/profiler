@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import React, { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 import { Workbox } from 'workbox-window';
@@ -16,29 +14,26 @@ import {
 } from 'firefox-profiler/selectors/url-state';
 import { getView } from 'firefox-profiler/selectors/app';
 import { getSymbolicationStatus } from 'firefox-profiler/selectors/profile';
+import type { State as AppState } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import type {
-  DataSource,
-  Phase,
-  SymbolicationStatus,
-} from 'firefox-profiler/types';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { DataSource, Phase, SymbolicationStatus } from 'firefox-profiler/types';
 
 import './ServiceWorkerManager.css';
 
 type StateProps = {
-  +dataSource: DataSource,
-  +profileUrl: string,
-  +phase: Phase,
-  +symbolicationStatus: SymbolicationStatus,
+  readonly dataSource: DataSource;
+  readonly profileUrl: string;
+  readonly phase: Phase;
+  readonly symbolicationStatus: SymbolicationStatus;
 };
 type Props = ConnectedProps<{}, StateProps, {}>;
 
 type InstallStatus = 'pending' | 'activating' | 'controlling' | 'idle';
 type State = {
-  installStatus: InstallStatus,
-  isNoticeDisplayed: boolean,
-  updatedWhileNotReady: boolean,
+  installStatus: InstallStatus;
+  isNoticeDisplayed: boolean;
+  updatedWhileNotReady: boolean;
 };
 
 /**
@@ -81,7 +76,7 @@ type State = {
  */
 
 class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
-  state = {
+  override state: State = {
     installStatus: 'idle',
     isNoticeDisplayed: false,
     updatedWhileNotReady: false,
@@ -186,7 +181,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
   _isProfileLoadedAndReady(): boolean {
     const { phase, symbolicationStatus } = this.props;
 
-    if (phase !== ('DATA_LOADED': Phase)) {
+    if (phase !== 'DATA_LOADED') {
       // Note we don't use a switch for the phase because it has a lot of
       // different values and won't likely change often. Hopefully this comment
       // won't age badly.
@@ -242,7 +237,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
     }
   }
 
-  componentDidMount() {
+  override componentDidMount() {
     if (
       process.env.NODE_ENV === 'production' &&
       // Do not install the service worker for l10n branch so localizers can see
@@ -254,7 +249,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
     }
   }
 
-  componentDidUpdate() {
+  override componentDidUpdate() {
     const { phase, dataSource } = this.props;
     const { installStatus } = this.state;
 
@@ -333,11 +328,11 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
           </Localized>
         );
       default:
-        throw assertExhaustiveCheck(installStatus);
+        throw assertExhaustiveCheck(installStatus as never);
     }
   }
 
-  render() {
+  override render() {
     const { isNoticeDisplayed, updatedWhileNotReady } = this.state;
 
     if (!isNoticeDisplayed) {
@@ -415,7 +410,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
 }
 
 export const ServiceWorkerManager = explicitConnect<{}, StateProps, {}>({
-  mapStateToProps: (state) => ({
+  mapStateToProps: (state: AppState) => ({
     phase: getView(state).phase,
     dataSource: getDataSource(state),
     profileUrl: getProfileUrl(state),
