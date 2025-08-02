@@ -472,11 +472,11 @@ class FirefoxProfile {
 }
 
 export class SimpleperfReportConverter {
-  buffer: ArrayBuffer;
+  buffer: ArrayBufferLike;
   bufferView: DataView;
   bufferOffset: number = 0;
 
-  constructor(buffer: ArrayBuffer) {
+  constructor(buffer: ArrayBufferLike) {
     this.buffer = buffer;
     this.bufferView = new DataView(buffer);
   }
@@ -575,7 +575,7 @@ export class SimpleperfReportConverter {
 }
 
 export function convertSimpleperfTraceProfile(
-  traceBuffer: ArrayBuffer
+  traceBuffer: ArrayBufferLike
 ): Profile {
   return new SimpleperfReportConverter(traceBuffer).process();
 }

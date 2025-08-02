@@ -50,7 +50,7 @@ export type GeckoMarkerTuple = [
   MarkerPayload_Gecko | null,
 ];
 
-type GeckoMarkerSchema = {
+export type GeckoMarkerSchema = {
   name: 0;
   startTime: 1;
   endTime: 2;
