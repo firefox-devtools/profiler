@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 /**
  * This file deals with old versions of the "processed" profile format,
  * i.e. the format that profiler.firefox.com uses internally. Profiles in this format
@@ -21,7 +19,7 @@ import { StringTable } from '../utils/string-table';
 import { timeCode } from '../utils/time-code';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 import { coerce } from '../utils/flow';
-import type { Profile } from 'firefox-profiler/types';
+import { Profile } from 'firefox-profiler/types';
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -33,7 +31,7 @@ const UNANNOTATED_VERSION = 0;
  * to be a processed profile, then return null.
  */
 export function attemptToUpgradeProcessedProfileThroughMutation(
-  profile: mixed
+  profile: any
 ): Profile | null {
   if (!profile || typeof profile !== 'object') {
     return null;
@@ -69,7 +67,7 @@ export function attemptToUpgradeProcessedProfileThroughMutation(
       : UNANNOTATED_VERSION;
 
   if (profileVersion === PROCESSED_PROFILE_VERSION) {
-    return coerce<MixedObject, Profile>(profile);
+    return profile;
   }
 
   if (profileVersion > PROCESSED_PROFILE_VERSION) {
@@ -91,20 +89,20 @@ export function attemptToUpgradeProcessedProfileThroughMutation(
     }
   }
 
-  const upgradedProfile = coerce<MixedObject, Profile>(profile);
+  const upgradedProfile = profile as Profile;
   upgradedProfile.meta.preprocessedProfileVersion = PROCESSED_PROFILE_VERSION;
 
   return upgradedProfile;
 }
 
-function _archFromAbi(abi) {
+function _archFromAbi(abi: string): string {
   if (abi === 'x86_64-gcc3') {
     return 'x86_64';
   }
   return abi;
 }
 
-function _getRealScriptURI(url) {
+function _getRealScriptURI(url: string): string {
   if (url) {
     const urls = url.split(' -> ');
     return urls[urls.length - 1];
@@ -112,7 +110,7 @@ function _getRealScriptURI(url) {
   return url;
 }
 
-function _mutateProfileToEnsureCauseBacktraces(profile) {
+function _mutateProfileToEnsureCauseBacktraces(profile: any) {
   for (const thread of profile.threads) {
     for (let i = 0; i < thread.markers.length; i++) {
       const marker = thread.markers.data[i];
@@ -195,7 +193,7 @@ function _guessMarkerCategories(profile: any) {
     { name: 'DOM', color: 'blue', subcategories: ['Other'] },
   ]) {
     const index = profile.meta.categories.findIndex(
-      (category) => category.name === defaultCategory.name
+      (category: any) => category.name === defaultCategory.name
     );
     if (index === -1) {
       // Add on any unknown categories.
@@ -204,13 +202,13 @@ function _guessMarkerCategories(profile: any) {
   }
 
   const otherCategory = profile.meta.categories.findIndex(
-    (category) => category.name === 'Other'
+    (category: any) => category.name === 'Other'
   );
 
   const keyToCategoryIndex: Map<string, number> = new Map(
     keyToCategoryName.map(([key, categoryName]) => {
       const index = profile.meta.categories.findIndex(
-        (category) => category.name === categoryName
+        (category: any) => category.name === categoryName
       );
       if (index === -1) {
         throw new Error('Could not find a category index to map to.');
@@ -247,15 +245,23 @@ function _guessMarkerCategories(profile: any) {
   }
 }
 
+type ProcessedProfileUpgrader = (profile: any) => void;
+
 // _upgraders[i] converts from version i - 1 to version i.
 // Every "upgrader" takes the profile as its single argument and mutates it.
 /* eslint-disable no-useless-computed-key */
-const _upgraders = {
-  [1]: (profile) => {
+const _upgraders: {
+  [key: number]: ProcessedProfileUpgrader;
+} = {
+  [1]: (profile: any) => {
     // Starting with version 1, markers are sorted.
     timeCode('sorting thread markers', () => {
       for (const thread of profile.threads) {
-        sortDataTable(thread.markers, thread.markers.time, (a, b) => a - b);
+        sortDataTable<number>(
+          thread.markers,
+          thread.markers.time,
+          (a, b) => a - b
+        );
       }
     });
 
@@ -273,7 +279,7 @@ const _upgraders = {
       }
     }
   },
-  [2]: (profile) => {
+  [2]: (profile: any) => {
     // pdbName -> debugName, add arch
     for (const thread of profile.threads) {
       for (const lib of thread.libs) {
@@ -291,7 +297,7 @@ const _upgraders = {
       }
     }
   },
-  [3]: (profile) => {
+  [3]: (profile: any) => {
     // Make sure every lib has a debugPath property. We can't infer this
     // value from the other properties on the lib so we just set it to the
     // empty string.
@@ -301,8 +307,8 @@ const _upgraders = {
       }
     }
   },
-  [4]: (profile) => {
-    profile.threads.forEach((thread) => {
+  [4]: (profile: any) => {
+    profile.threads.forEach((thread: any) => {
       const { funcTable, stringArray, resourceTable } = thread;
       const stringTable = StringTable.withBackingArray(stringArray);
 
@@ -314,7 +320,15 @@ const _upgraders = {
       // resource. We need to keep track of such collapsing (using the
       // oldResourceToNewResourceMap) and then execute apply the changes to
       // the resource pointers in the funcTable.
-      const newResourceTable = {
+      const newResourceTable: {
+        length: number;
+        type: number[];
+        name: number[];
+        lib: number[];
+        icon: number[];
+        addonId: number[];
+        host: number[];
+      } = {
         length: 0,
         type: [],
         name: [],
@@ -323,19 +337,19 @@ const _upgraders = {
         addonId: [],
         host: [],
       };
-      function addLibResource(name, lib) {
+      function addLibResource(name: number, lib: number) {
         const index = newResourceTable.length++;
         newResourceTable.type[index] = resourceTypes.library;
         newResourceTable.name[index] = name;
         newResourceTable.lib[index] = lib;
       }
-      function addWebhostResource(origin, host) {
+      function addWebhostResource(origin: number, host: number) {
         const index = newResourceTable.length++;
         newResourceTable.type[index] = resourceTypes.webhost;
         newResourceTable.name[index] = origin;
         newResourceTable.host[index] = host;
       }
-      function addUrlResource(url) {
+      function addUrlResource(url: number) {
         const index = newResourceTable.length++;
         newResourceTable.type[index] = resourceTypes.url;
         newResourceTable.name[index] = url;
@@ -427,13 +441,13 @@ const _upgraders = {
       thread.resourceTable = newResourceTable;
     });
   },
-  [5]: (profile) => {
+  [5]: (profile: any) => {
     // The "frameNumber" column was removed from the samples table.
     for (const thread of profile.threads) {
       delete thread.samples.frameNumber;
     }
   },
-  [6]: (profile) => {
+  [6]: (profile: any) => {
     // The type field for DOMEventMarkerPayload was renamed to eventType.
     for (const thread of profile.threads) {
       const { stringArray, markers } = thread;
@@ -456,7 +470,7 @@ const _upgraders = {
       thread.markers.data = newDataArray;
     }
   },
-  [7]: (profile) => {
+  [7]: (profile: any) => {
     // Each thread has the following new attributes:
     //  - processShutdownTime: null if the process is still running, otherwise
     //    the shutdown time of the process in milliseconds relative to
@@ -483,7 +497,7 @@ const _upgraders = {
       thread.unregisterTime = null;
     }
   },
-  [8]: (profile) => {
+  [8]: (profile: any) => {
     // DOMEventMarkerPayload.timeStamp in content process should be in
     // milliseconds relative to meta.startTime.  Adjust it by adding
     // the thread.processStartupTime which is the delta to
@@ -516,13 +530,13 @@ const _upgraders = {
       thread.markers.data = newDataArray;
     }
   },
-  [9]: (profile) => {
+  [9]: (profile: any) => {
     // Upgrade the GC markers
 
     /*
      * Upgrade a GCMajor marker in the Gecko profile format.
      */
-    function upgradeGCMajorMarker_Gecko8To9(marker) {
+    function upgradeGCMajorMarker_Gecko8To9(marker: any) {
       if ('timings' in marker) {
         if (!('status' in marker.timings)) {
           /*
@@ -550,7 +564,7 @@ const _upgraders = {
       return marker;
     }
 
-    function upgradeGCMajorMarker_Processed8to9(marker8) {
+    function upgradeGCMajorMarker_Processed8to9(marker8: any) {
       // The Processed 8-to-9 upgrade is a superset of the gecko 8-to-9 upgrade.
       const marker9 = upgradeGCMajorMarker_Gecko8To9(marker8);
       const mt = marker9.timings;
@@ -584,7 +598,7 @@ const _upgraders = {
       }
     }
 
-    function upgradeGCMinorMarker(marker8) {
+    function upgradeGCMinorMarker(marker8: any) {
       if ('nursery' in marker8) {
         if ('status' in marker8.nursery) {
           if (marker8.nursery.status === 'no collection') {
@@ -618,8 +632,8 @@ const _upgraders = {
       return marker8;
     }
 
-    function convertPhaseTimes(old_phases) {
-      const phases = {};
+    function convertPhaseTimes(old_phases: Record<string, number>) {
+      const phases: Record<string, number> = {};
       for (const phase in old_phases) {
         phases[phase] = old_phases[phase] * 1000;
       }
@@ -653,7 +667,7 @@ const _upgraders = {
       }
     }
   },
-  [10]: (profile) => {
+  [10]: (profile: any) => {
     // Cause backtraces
     // Styles and reflow tracing markers supply call stacks that were captured
     // at the time that style or layout was invalidated. In version 9, this
@@ -665,7 +679,7 @@ const _upgraders = {
     // a simple number, the stack index.
     _mutateProfileToEnsureCauseBacktraces(profile);
   },
-  [11]: (profile) => {
+  [11]: (profile: any) => {
     // Removed the startTime and endTime from DOMEventMarkerPayload and
     // made it a tracing marker instead. DOMEventMarkerPayload is no longer a
     // single marker, it requires a start and an end marker. Therefore, we have
@@ -711,7 +725,12 @@ const _upgraders = {
 
         // Create a new markers table that includes both the old markers and
         // the markers from extraMarkers, sorted by time.
-        const newMarkers = {
+        const newMarkers: {
+          length: number;
+          name: number[];
+          time: number[];
+          data: Array<unknown | null>;
+        } = {
           length: 0,
           name: [],
           time: [],
@@ -758,7 +777,7 @@ const _upgraders = {
       }
     }
   },
-  [12]: (profile) => {
+  [12]: (profile: any) => {
     // profile.meta has a new property called "categories", which contains a
     // list of categories, which are objects with "name" and "color" properties.
     // The "category" column in the frameTable now refers to elements in this
@@ -924,7 +943,7 @@ const _upgraders = {
       }
     }
   },
-  [13]: (profile) => {
+  [13]: (profile: any) => {
     // The stackTable has a new column called "category", which is computed
     // from the stack's frame's category, or if that is null, from the stack's
     // prefix's category. For root stacks whose frame doesn't have a category,
@@ -934,7 +953,7 @@ const _upgraders = {
     // not have a category column in its stack table).
     const { meta, threads } = profile;
     const defaultCategory = meta.categories.findIndex(
-      (c) => c.color === 'grey'
+      (c: any) => c.color === 'grey'
     );
 
     for (const thread of threads) {
@@ -956,7 +975,7 @@ const _upgraders = {
       }
     }
   },
-  [14]: (profile) => {
+  [14]: (profile: any) => {
     // Profiles are now required to have either a string or number pid. If the pid
     // is a string, then it is a generated name, if it is a number, it's the pid
     // generated by the system.
@@ -968,7 +987,7 @@ const _upgraders = {
       }
     }
   },
-  [15]: (profile) => {
+  [15]: (profile: any) => {
     // Profiles now have a column property in the frameTable
     for (const thread of profile.threads) {
       thread.frameTable.column = new Array(thread.frameTable.length);
@@ -977,7 +996,7 @@ const _upgraders = {
       }
     }
   },
-  [16]: (profile) => {
+  [16]: (profile: any) => {
     // The type field on some markers were missing. Renamed category field of
     // VsyncTimestamp and LayerTranslation marker payloads to type and added
     // a type field to Screenshot marker payload.
@@ -1022,7 +1041,7 @@ const _upgraders = {
       thread.markers.data = newDataArray;
     }
   },
-  [17]: (profile) => {
+  [17]: (profile: any) => {
     // Profiles now have a relevantForJS property in the funcTable.
     // This column is false on C++ and JS frames, and true on label frames that
     // are entry and exit points to JS.
@@ -1055,7 +1074,7 @@ const _upgraders = {
       }
     }
   },
-  [18]: (profile) => {
+  [18]: (profile: any) => {
     // When we added column numbers we forgot to update the func table.
     // As a result, when we had a column number for an entry, the line number
     // ended up in the `fileName` property, and the column number in the
@@ -1091,7 +1110,7 @@ const _upgraders = {
       }
     }
   },
-  [19]: (profile) => {
+  [19]: (profile: any) => {
     // When we added timing information to network markers, we forgot to shift
     // timestamps from subprocesses during profile processing. This upgrade
     // fixes that.
@@ -1136,12 +1155,12 @@ const _upgraders = {
       }
     }
   },
-  [20]: (_profile) => {
+  [20]: (_profile: any) => {
     // rss and uss was removed from the SamplesTable. The version number was bumped
     // to help catch errors of using an outdated version of profiler.firefox.com with a newer
     // profile. There's no good reason to remove the values for upgrading profiles though.
   },
-  [21]: (profile) => {
+  [21]: (profile: any) => {
     // Before version 21, during the profile processing step, only certain markers had
     // their stacks converted to causes. However, in version 10, an upgrader was written
     // that would convert every single marker's stack to a cause. This created two types
@@ -1154,7 +1173,7 @@ const _upgraders = {
     // markers. This upgrader upgrades profiles from case 2 above.
     _mutateProfileToEnsureCauseBacktraces(profile);
   },
-  [22]: (profile) => {
+  [22]: (profile: any) => {
     // FileIO was originally called DiskIO. This profile upgrade performs the rename.
     for (const thread of profile.threads) {
       const { stringArray } = thread;
@@ -1173,7 +1192,7 @@ const _upgraders = {
       }
     }
   },
-  [23]: (profile) => {
+  [23]: (profile: any) => {
     // profile.meta.categories now has a subcategories property on each element,
     // with an array of subcategories for that category, with at least one
     // subcategory per category.
@@ -1184,19 +1203,19 @@ const _upgraders = {
     }
     for (const thread of profile.threads) {
       const { frameTable, stackTable } = thread;
-      frameTable.subcategory = frameTable.category.map((c) =>
+      frameTable.subcategory = frameTable.category.map((c: any) =>
         c === null ? null : 0
       );
-      stackTable.subcategory = stackTable.category.map((c) =>
+      stackTable.subcategory = stackTable.category.map((c: any) =>
         c === null ? null : 0
       );
     }
   },
-  [24]: (profile) => {
+  [24]: (profile: any) => {
     // Markers now have a category field. For older profiles, guess the marker category.
     _guessMarkerCategories(profile);
   },
-  [25]: (profile) => {
+  [25]: (profile: any) => {
     // Previously, we had DocShell ID and DocShell History ID in the page object
     // to identify a specific page. We changed these IDs in the gecko side to
     // Browsing Context ID and Inner Window ID. Inner Window ID is enough to
@@ -1249,7 +1268,7 @@ const _upgraders = {
 
       for (const thread of profile.threads) {
         const { markers } = thread;
-        markers.data = markers.data.map((data) => {
+        markers.data = markers.data.map((data: any) => {
           if (
             data &&
             data.docShellId !== undefined &&
@@ -1276,7 +1295,7 @@ const _upgraders = {
       }
     }
   },
-  [26]: (profile) => {
+  [26]: (profile: any) => {
     // Due to a bug in gecko side, we were keeping the sample_group inside an
     // object instead of an array. Usually there is only one sample group, that's
     // why it wasn't a problem before. To future proof it, we are fixing it by
@@ -1287,7 +1306,7 @@ const _upgraders = {
       }
     }
   },
-  [27]: (profile) => {
+  [27]: (profile: any) => {
     // Profiles now have an innerWindowID property in the frameTable.
     // We are filling this array with 0 values because we have no idea what that value might be.
     for (const thread of profile.threads) {
@@ -1295,7 +1314,7 @@ const _upgraders = {
       frameTable.innerWindowID = new Array(frameTable.length).fill(0);
     }
   },
-  [28]: (profile) => {
+  [28]: (profile: any) => {
     // There was a bug where some markers got a null category during sanitization.
     for (const thread of profile.threads) {
       const { markers } = thread;
@@ -1306,7 +1325,7 @@ const _upgraders = {
       }
     }
   },
-  [29]: (profile) => {
+  [29]: (profile: any) => {
     // The sample and allocation properties "duration" were changed to "weight"
     // The weight and weightType fields were made non-optional. The sample
     // "duration" field was used for diffing profiles.
@@ -1338,7 +1357,7 @@ const _upgraders = {
       }
     }
   },
-  [30]: (profile) => {
+  [30]: (profile: any) => {
     // The idea of phased markers was added to profiles, where the startTime and
     // endTime is always in the RawMarkerTable directly, not in the payload.
     //
@@ -1350,10 +1369,10 @@ const _upgraders = {
     const INTERVAL_END = 3;
 
     type Payload = $Shape<{
-      startTime: number,
-      endTime: number,
-      type: string,
-      interval: string,
+      startTime: number;
+      endTime: number;
+      type: string;
+      interval: string;
     }>;
 
     for (const { markers } of profile.threads) {
@@ -1371,13 +1390,13 @@ const _upgraders = {
 
       // Update the time information.
       for (let i = 0; i < markers.length; i++) {
-        const data: ?Payload = markers.data[i];
+        const data: Payload | null = markers.data[i];
         const time: number = times[i];
 
         // Start out by assuming it's an instant marker.
-        let newStartTime = time;
-        let newEndTime = null;
-        let phase = INSTANT;
+        let newStartTime: number | null = time;
+        let newEndTime: number | null = null;
+        let phase: 0 | 1 | 2 | 3 = INSTANT;
 
         // If there is a payload, it MAY change to an interval marker.
         if (data) {
@@ -1423,7 +1442,7 @@ const _upgraders = {
       }
     }
   },
-  [31]: (profile) => {
+  [31]: (profile: any) => {
     // The upgrader for 30 messed up markers with type "tracing" but that don't
     // have an interval. This upgrader fixes them.
 
@@ -1445,36 +1464,34 @@ const _upgraders = {
       }
     }
   },
-  [32]: (profile) => {
+  [32]: (profile: any) => {
     // Migrate DOMEvent markers to Markers 2.0
 
     // This is a fairly permissive type, but helps ensure the logic below is type checked.
     type DOMEventPayload31_to_32 = {
       // Tracing -> DOMEvent
-      type: 'tracing' | 'DOMEvent',
-      category: 'DOMEvent',
-      eventType: string,
+      type: 'tracing' | 'DOMEvent';
+      category: 'DOMEvent';
+      eventType: string;
       // These are removed:
-      timeStamp: number,
+      timeStamp?: number;
       // This gets added:
-      latency: number,
+      latency?: number;
     };
 
     // This is just the useful parts of the processed profile version 31.
     type ProfileV31 = {
       threads: Array<{
         markers: {
-          data: any[],
-          startTime: Array<number | null>,
-          length: number,
-          ...
-        },
-        ...
-      }>,
-      processes: ProfileV31[],
+          data: any[];
+          startTime: Array<number | null>;
+          length: number;
+        };
+      }>;
+      processes: ProfileV31[];
     };
 
-    for (const { markers } of (profile: ProfileV31).threads) {
+    for (const { markers } of (profile as ProfileV31).threads) {
       for (let i = 0; i < markers.length; i++) {
         // This isn't particularly type-safe, we need to refine to this type.
         const data: DOMEventPayload31_to_32 = markers.data[i];
@@ -1490,7 +1507,7 @@ const _upgraders = {
       }
     }
   },
-  [33]: (profile) => {
+  [33]: (profile: any) => {
     // The marker schema, which details how to display markers was added. Back-fill
     // any old profiles with a default schema.
 
@@ -1697,7 +1714,7 @@ const _upgraders = {
       },
     ];
   },
-  [34]: (profile) => {
+  [34]: (profile: any) => {
     // We were incrementing timestamps for marker' causes only for a few marker
     // types: 'tracing' and 'Styles'.
     // See https://github.com/firefox-devtools/profiler/issues/3030
@@ -1721,7 +1738,7 @@ const _upgraders = {
       }
     }
   },
-  [35]: (profile) => {
+  [35]: (profile: any) => {
     // The browsingContextID inside the pages array and activeBrowsingContextID
     // have been renamed to tabID and activeTabID.
     // Previously, we were using the browsingcontextID to figure out which tab
@@ -1748,13 +1765,18 @@ const _upgraders = {
       }
     }
   },
-  [36]: (profile) => {
+  [36]: (profile: any) => {
     // Threads now have a nativeSymbols table.
     // The frame table has a new field: nativeSymbol.
     // The function table loses one field: address. (This field moves to the nativeSymbols table.)
     // The NativeSymbolsTable has the fields libIndex, address, and name.
     for (const thread of profile.threads) {
-      const nativeSymbols = {
+      const nativeSymbols: {
+        libIndex: number[];
+        address: Array<number | null>;
+        name: number[];
+        length: number;
+      } = {
         libIndex: [],
         address: [],
         name: [],
@@ -1788,12 +1810,12 @@ const _upgraders = {
       }
       delete funcTable.address;
       frameTable.nativeSymbol = frameTable.func.map(
-        (f) => funcToNativeSymbolMap.get(f) ?? null
+        (f: number) => funcToNativeSymbolMap.get(f) ?? null
       );
       thread.nativeSymbols = nativeSymbols;
     }
   },
-  [37]: (profile) => {
+  [37]: (profile: any) => {
     // "Java Main Thread" has been renamed to "AndroidUI (JVM)".
     // Usually thread name changes are not that important as they don't affect
     // the front-end logic. But this one is important because visibility of
@@ -1806,7 +1828,7 @@ const _upgraders = {
       }
     }
   },
-  [38]: (profile) => {
+  [38]: (profile: any) => {
     // The frame table no longer contains return addresses, it now contains
     // "nudged" return addresses, i.e. return address minus one byte.
     // See nudgeReturnAddresses for more details.
@@ -1819,8 +1841,8 @@ const _upgraders = {
     // and so that the assembly view (once implemented) on an old profile will
     // assign the correct "total" cost to call instructions.
     for (const thread of profile.threads) {
-      const samplingSelfStacks = new Set();
-      const syncBacktraceSelfStacks = new Set();
+      const samplingSelfStacks = new Set<number>();
+      const syncBacktraceSelfStacks = new Set<number>();
 
       const {
         samples,
@@ -1864,7 +1886,7 @@ const _upgraders = {
       }
 
       const oldIpFrameToNewIpFrame = new Uint32Array(frameTable.length);
-      const ipFrames = new Set();
+      const ipFrames = new Set<number>();
       for (const stack of samplingSelfStacks) {
         const frame = stackTable.frame[stack];
         oldIpFrameToNewIpFrame[frame] = frame;
@@ -1929,7 +1951,13 @@ const _upgraders = {
       // Now the frame table contains adjusted / "nudged" addresses.
 
       // Make a new stack table which refers to the adjusted frames.
-      const newStackTable = {
+      const newStackTable: {
+        frame: number[];
+        prefix: Array<number | null>;
+        category: number[];
+        subcategory: number[];
+        length: number;
+      } = {
         frame: [],
         prefix: [],
         category: [],
@@ -1975,26 +2003,27 @@ const _upgraders = {
       }
       thread.stackTable = newStackTable;
 
-      samples.stack = samples.stack.map((oldStackIndex) =>
+      samples.stack = samples.stack.map((oldStackIndex: number | null) =>
         oldStackIndex === null
           ? null
           : (mapForSamplingSelfStacks.get(oldStackIndex) ?? null)
       );
-      markers.data.forEach((data) => {
+      markers.data.forEach((data: any) => {
         if (data && 'cause' in data && data.cause) {
           data.cause.stack = mapForSyncBacktraces.get(data.cause.stack);
         }
       });
       if (jsAllocations !== undefined) {
-        jsAllocations.stack = jsAllocations.stack.map((oldStackIndex) =>
-          oldStackIndex === null
-            ? null
-            : (mapForSyncBacktraces.get(oldStackIndex) ?? null)
+        jsAllocations.stack = jsAllocations.stack.map(
+          (oldStackIndex: number | null) =>
+            oldStackIndex === null
+              ? null
+              : (mapForSyncBacktraces.get(oldStackIndex) ?? null)
         );
       }
       if (nativeAllocations !== undefined) {
         nativeAllocations.stack = nativeAllocations.stack.map(
-          (oldStackIndex) =>
+          (oldStackIndex: number | null) =>
             oldStackIndex === null
               ? null
               : (mapForSyncBacktraces.get(oldStackIndex) ?? null)
@@ -2002,7 +2031,7 @@ const _upgraders = {
       }
     }
   },
-  [39]: (profile) => {
+  [39]: (profile: any) => {
     for (const thread of profile.threads) {
       if (thread.samples.threadCPUDelta) {
         // Check to see the CPU delta numbers are all null and if they are, remove
@@ -2011,7 +2040,7 @@ const _upgraders = {
         // Instead we should remove the whole array. This call will be quick for most
         // of the cases because we usually have values at least in the second sample.
         const hasCPUDeltaValues = thread.samples.threadCPUDelta.some(
-          (val) => val !== null
+          (val: number | null) => val !== null
         );
         if (!hasCPUDeltaValues) {
           delete thread.samples.threadCPUDelta;
@@ -2019,7 +2048,7 @@ const _upgraders = {
       }
     }
   },
-  [40]: (profile) => {
+  [40]: (profile: any) => {
     // The FrameTable has a new column: inlineDepth.
     // We can initialize this column to zero for all frames. Zero means "this is
     // the frame for the outer function at this address". That's correct because
@@ -2029,7 +2058,7 @@ const _upgraders = {
       thread.frameTable.inlineDepth = Array(thread.frameTable.length).fill(0);
     }
   },
-  [41]: (profile) => {
+  [41]: (profile: any) => {
     // The libs list has moved from Thread to Profile - it is now shared between
     // all threads in the profile. And it only contains libs which are used by
     // at least one resource.
@@ -2050,7 +2079,7 @@ const _upgraders = {
     //  - Resources without a "host" or "lib" field have these fields set to
     //    null consistently.
 
-    const libs = [];
+    const libs: any[] = [];
     const libKeyToLibIndex = new Map();
     for (const thread of profile.threads) {
       const {
@@ -2063,7 +2092,7 @@ const _upgraders = {
       const threadLibIndexToGlobalLibIndex = new Map();
       delete thread.libs;
 
-      const getOrAddNewLib = (libIndex) => {
+      const getOrAddNewLib = (libIndex: number) => {
         let newLibIndex = threadLibIndexToGlobalLibIndex.get(libIndex);
         if (newLibIndex === undefined) {
           const lib = threadLibs[libIndex];
@@ -2131,7 +2160,7 @@ const _upgraders = {
     }
     profile.libs = libs;
   },
-  [42]: (profile) => {
+  [42]: (profile: any) => {
     // The nativeSymbols table now has a new column: functionSize.
     // Its values can be null.
     for (const thread of profile.threads) {
@@ -2139,16 +2168,16 @@ const _upgraders = {
       nativeSymbols.functionSize = Array(nativeSymbols.length).fill(null);
     }
   },
-  [43]: (_) => {
+  [43]: (_profile: any) => {
     // The number property in counters is now optional.
   },
-  [44]: (profile) => {
+  [44]: (profile: any) => {
     // `searchable` property in the marker schema wasn't implemented before and
     // we had some manual checks for the marker fields below. With this version,
     // we removed this manual check and started to use the `searchable` property
     // of the marker schema.
     for (const schema of profile.meta.markerSchema) {
-      let searchableFieldKeys;
+      let searchableFieldKeys: string[];
       switch (schema.name) {
         case 'FileIO': {
           // threadId wasn't in the schema before, so we need to add manually.
@@ -2198,13 +2227,13 @@ const _upgraders = {
       }
     }
   },
-  [45]: (profile) => {
+  [45]: (profile: any) => {
     // The "optimizations" column was removed from the frame table.
     for (const thread of profile.threads) {
       delete thread.frameTable.optimizations;
     }
   },
-  [46]: (profile) => {
+  [46]: (profile: any) => {
     // An `isMainThread` field was added to the Thread type.
     //
     // This replaces the following function:
@@ -2227,7 +2256,7 @@ const _upgraders = {
         String(thread.pid) === thread.tid;
     }
   },
-  [47]: (profile) => {
+  [47]: (profile: any) => {
     // The `pid` field of the Thread type was changed from `string | number` to `string`.
     // The same happened to the data.otherPid field of IPC markers, and to the
     // pid fields in the profiler.counters and profile.profilerOverhead lists.
@@ -2251,7 +2280,7 @@ const _upgraders = {
       }
     }
   },
-  [48]: (profile) => {
+  [48]: (profile: any) => {
     // Remove the 'sampleGroups' object from the Counter structure.
     if (profile.counters && profile.counters.length > 0) {
       for (const counter of profile.counters) {
@@ -2260,14 +2289,14 @@ const _upgraders = {
       }
     }
   },
-  [49]: (_) => {
+  [49]: (_profile: any) => {
     // The 'sanitized-string' marker schema format type has been added.
   },
-  [50]: (_) => {
+  [50]: (_profile: any) => {
     // The format can now optionally store sample and counter sample
     // times as time deltas instead of absolute timestamps to reduce the JSON size.
   },
-  [51]: (_) => {
+  [51]: (_profile: any) => {
     // This version bump added two new form types for new marker schema field:
     // "flow-id" and "terminating-flow-id".
     // Older frontends will not be able to display these fields.
@@ -2276,7 +2305,7 @@ const _upgraders = {
     // marker data with the new field types data, and no modification is needed in the
     // frontend to display older formats.
   },
-  [52]: (profile) => {
+  [52]: (profile: any) => {
     // This version simplifies how markers are mapped to their schema.
     // The schema is now purely determined by data.type. The marker's name is ignored.
     // If a marker has a null data, then it has no schema.
@@ -2300,7 +2329,9 @@ const _upgraders = {
     // Profiles from modern versions of Firefox already include a 'tracing' schema.
     // And they don't use tracing markers for CC markers.
 
-    const schemaNames = new Set(profile.meta.markerSchema.map((s) => s.name));
+    const schemaNames = new Set<string>(
+      profile.meta.markerSchema.map((s: any) => s.name)
+    );
     const kTracingCCSchemaName = 'tracingCCFrom52Upgrader';
     const shouldMigrateTracingCCMarkers = schemaNames.has('CC');
     let hasTracingMarkers = false;
@@ -2346,7 +2377,7 @@ const _upgraders = {
       });
     }
   },
-  [53]: (profile) => {
+  [53]: (profile: any) => {
     for (const thread of profile.threads) {
       const { frameTable, stackTable } = thread;
 
@@ -2385,7 +2416,7 @@ const _upgraders = {
       delete stackTable.subcategory;
     }
   },
-  [54]: (profile) => {
+  [54]: (profile: any) => {
     // The `implementation` column was removed from the frameTable. Modern
     // profiles from Firefox use subcategories to represent the information
     // about the JIT type of a JS frame.
@@ -2400,19 +2431,19 @@ const _upgraders = {
 
     // Very old Gecko profiles don't have JS subcategories. Convert the
     // implementation information to subcategories.
-    function maybeConvertImplementationToSubcategories(profile) {
+    function maybeConvertImplementationToSubcategories(profile: any) {
       const { categories } = profile.meta;
       if (!categories) {
         return;
       }
 
-      if (categories.some((c) => c.subcategories.length !== 1)) {
+      if (categories.some((c: any) => c.subcategories.length !== 1)) {
         // This profile has subcategories.
         return;
       }
 
       const jsCategoryIndex = categories.findIndex(
-        (c) => c.name === 'JavaScript'
+        (c: any) => c.name === 'JavaScript'
       );
       if (jsCategoryIndex === -1) {
         // This profile has no JavaScript category.
@@ -2452,10 +2483,14 @@ const _upgraders = {
     // This field is no longer needed.
     delete profile.meta.doesNotUseFrameImplementation;
   },
-  [55]: (profile) => {
+  [55]: (profile: any) => {
     for (const markerSchema of profile.meta.markerSchema) {
-      const staticFields = markerSchema.data.filter((f) => f.key === undefined);
-      const fields = markerSchema.data.filter((f) => f.value === undefined);
+      const staticFields = markerSchema.data.filter(
+        (f: any) => f.key === undefined
+      );
+      const fields = markerSchema.data.filter(
+        (f: any) => f.value === undefined
+      );
 
       markerSchema.fields = fields;
       delete markerSchema.data;
@@ -2466,7 +2501,7 @@ const _upgraders = {
 
       // Migrate one of the static fields to the new `description` property.
       let staticDescriptionFieldIndex = staticFields.findIndex(
-        (f) => f.label === 'Description'
+        (f: any) => f.label === 'Description'
       );
       if (staticDescriptionFieldIndex === -1) {
         staticDescriptionFieldIndex = 0;
@@ -2479,22 +2514,22 @@ const _upgraders = {
       // old { label: "Marker", value: "UserTiming" } field which never provided
       // any value. (On the Gecko side, it was removed by D196332.)
       const discardedFields = staticFields.filter(
-        (_f, i) => i !== staticDescriptionFieldIndex
+        (_f: any, i: number) => i !== staticDescriptionFieldIndex
       );
       const potentiallyUsefulDiscardedFields = discardedFields.filter(
-        (f) => f.label !== 'Marker' && f.value !== 'UserTiming'
+        (f: any) => f.label !== 'Marker' && f.value !== 'UserTiming'
       );
       if (potentiallyUsefulDiscardedFields.length !== 0) {
         console.warn(
-          `Discarding the following static fields from marker schema "${markerSchema.name}": ${potentiallyUsefulDiscardedFields.map((f) => f.label + ': ' + f.value).join(', ')}`
+          `Discarding the following static fields from marker schema "${markerSchema.name}": ${potentiallyUsefulDiscardedFields.map((f: any) => f.label + ': ' + f.value).join(', ')}`
         );
       }
     }
   },
-  [56]: (profile) => {
+  [56]: (profile: any) => {
     // The stringArray is now shared across all threads. It is stored at
     // profile.shared.stringArray.
-    const stringArray = [];
+    const stringArray: string[] = [];
     const stringTable = StringTable.withBackingArray(stringArray);
 
     // Precompute marker fields that need adjusting.
@@ -2594,7 +2629,7 @@ const _upgraders = {
     }
     profile.shared = { stringArray };
   },
-  [57]: (profile) => {
+  [57]: (profile: any) => {
     // The "searchable" property for fields in the marker schema was removed again.
     // Now all marker fields are searchable.
     for (const schema of profile.meta.markerSchema) {
