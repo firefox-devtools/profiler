@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import * as React from 'react';
 import classNames from 'classnames';
 
@@ -14,11 +12,11 @@ import {
 import { SampleTooltipContents } from 'firefox-profiler/components/shared/SampleTooltipContents';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 
-import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 
 import './ActivityGraph.css';
 
-import type {
+import {
   Thread,
   CategoryList,
   ImplementationFilter,
@@ -28,53 +26,52 @@ import type {
   CssPixels,
   TimelineType,
 } from 'firefox-profiler/types';
-import type {
+import {
   ActivityFillGraphQuerier,
   CpuRatioInTimeRange,
 } from './ActivityGraphFills';
 
 export type Props = {
-  +className: string,
-  +trackName: string,
-  +fullThread: Thread,
-  +rangeFilteredThread: Thread,
-  +interval: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +sampleIndexOffset: number,
-  +onSampleClick: (
-    event: SyntheticMouseEvent<>,
+  readonly className: string;
+  readonly trackName: string;
+  readonly fullThread: Thread;
+  readonly rangeFilteredThread: Thread;
+  readonly interval: Milliseconds;
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly sampleIndexOffset: number;
+  readonly onSampleClick: (
+    event: React.MouseEvent<HTMLElement>,
     sampleIndex: IndexIntoSamplesTable | null
-  ) => void,
-  +categories: CategoryList,
-  +samplesSelectedStates: null | SelectedState[],
-  +treeOrderSampleComparator: (
-    IndexIntoSamplesTable,
-    IndexIntoSamplesTable
-  ) => number,
-  +enableCPUUsage: boolean,
-  +implementationFilter: ImplementationFilter,
-  +timelineType: TimelineType,
-  +zeroAt: Milliseconds,
-  +profileTimelineUnit: string,
-  ...SizeProps,
-};
+  ) => void;
+  readonly categories: CategoryList;
+  readonly samplesSelectedStates: null | SelectedState[];
+  readonly treeOrderSampleComparator: (
+    a: IndexIntoSamplesTable,
+    b: IndexIntoSamplesTable
+  ) => number;
+  readonly enableCPUUsage: boolean;
+  readonly implementationFilter: ImplementationFilter;
+  readonly timelineType: TimelineType;
+  readonly zeroAt: Milliseconds;
+  readonly profileTimelineUnit: string;
+} & SizeProps;
 
 export type HoveredPixelState = {
-  +sample: IndexIntoSamplesTable | null,
-  +cpuRatioInTimeRange: CpuRatioInTimeRange | null,
+  readonly sample: IndexIntoSamplesTable | null;
+  readonly cpuRatioInTimeRange: CpuRatioInTimeRange | null;
 };
 
 type State = {
-  hoveredPixelState: null | HoveredPixelState,
-  mouseX: CssPixels,
-  mouseY: CssPixels,
+  hoveredPixelState: null | HoveredPixelState;
+  mouseX: CssPixels;
+  mouseY: CssPixels;
 };
 
 class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
   _fillsQuerier: null | ActivityFillGraphQuerier = null;
 
-  state = {
+  override state: State = {
     hoveredPixelState: null,
     mouseX: 0,
     mouseY: 0,
@@ -84,7 +81,7 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
     this.setState({ hoveredPixelState: null });
   };
 
-  _onMouseMove = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
+  _onMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     const canvas = event.currentTarget;
     if (!canvas) {
       return;
@@ -105,7 +102,7 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
   };
 
   _getSampleAtMouseEvent(
-    event: SyntheticMouseEvent<HTMLCanvasElement>
+    event: React.MouseEvent<HTMLElement>
   ): null | HoveredPixelState {
     const { width } = this.props;
     // Create local variables so that Flow can refine the following to be non-null.
@@ -123,12 +120,12 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
     return fillsQuerier.getSampleAndCpuRatioAtClick(x, y, time);
   }
 
-  _onClick = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
+  _onClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const sampleState = this._getSampleAtMouseEvent(event);
     this.props.onSampleClick(event, sampleState ? sampleState.sample : null);
   };
 
-  render() {
+  override render() {
     const {
       fullThread,
       rangeFilteredThread,
@@ -176,7 +173,8 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
           width={width}
           height={height}
         />
-        {hoveredPixelState === null ? null : (
+        {hoveredPixelState === null ||
+        hoveredPixelState.sample === null ? null : (
           <Tooltip mouseX={mouseX} mouseY={mouseY}>
             <SampleTooltipContents
               sampleIndex={hoveredPixelState.sample}

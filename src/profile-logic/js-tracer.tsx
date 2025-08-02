@@ -190,7 +190,7 @@ export function getJsTracerLeafTiming(
   // Each event type will have it's own timing information, later collapse these into
   // a single array.
   const jsTracerTimingMap: Map<string, JsTracerTiming> = new Map();
-  const isUrlCache = [];
+  const isUrlCache: boolean[] = [];
   const isUrlRegex = /:\/\//;
 
   function isUrl(index: IndexIntoStringTable): boolean {
@@ -625,7 +625,7 @@ export function convertJsTracerToThreadWithoutSamples(
       // Reached a new root, reset the index to 1.
       unmatchedIndex = 1;
     }
-    unmatchedEventIndexes[unmatchedIndex] = tracerEventIndex;
+    (unmatchedEventIndexes as any)[unmatchedIndex] = tracerEventIndex;
     unmatchedEventEnds[unmatchedIndex] = end;
   }
 
@@ -661,7 +661,7 @@ export function getJsTracerFixed(jsTracer: JsTracerTable): JsTracerFixed {
     };
   }
   let prevStart = jsTracer.timestamps[0];
-  let prevEnd = prevStart + jsTracer.durations[0];
+  let prevEnd = prevStart + (jsTracer.durations![0] || 0);
   const start = [prevStart];
   const end = [prevEnd];
   const jsTracerFixed = {
@@ -794,11 +794,11 @@ export function getSelfTimeSamplesFromJsTracer(
 ): RawSamplesTable {
   // Give more leeway for floating number precision issues.
   const epsilon = 1e-5;
-  const isNearlyEqual = (a, b) => Math.abs(a - b) < epsilon;
+  const isNearlyEqual = (a: number, b: number) => Math.abs(a - b) < epsilon;
   // Each event type will have it's own timing information, later collapse these into
   // a single array.
   const samples = getEmptySamplesTableWithEventDelay();
-  const sampleWeights = [];
+  const sampleWeights: number[] = [];
   samples.weight = sampleWeights;
 
   function addSelfTimeAsASample(

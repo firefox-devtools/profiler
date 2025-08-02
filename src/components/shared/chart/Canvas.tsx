@@ -17,7 +17,7 @@ type Props<Item> = {
   readonly onDoubleClickItem: (param: Item | null) => void;
   readonly getHoveredItemInfo: (param: Item) => React.ReactNode;
   readonly drawCanvas: (
-    CanvasRenderingContext2D,
+    ctx: CanvasRenderingContext2D,
     ChartCanvasScale: ChartCanvasScale,
     ChartCanvasHoverInfo: ChartCanvasHoverInfo<Item>
   ) => void;
@@ -132,7 +132,7 @@ export class ChartCanvas<Item> extends React.Component<
 
     let ctx = this._ctx;
     if (!ctx) {
-      ctx = canvas.getContext('2d', { alpha: false });
+      ctx = canvas.getContext('2d', { alpha: false })!;
       this._ctx = ctx;
     }
 

@@ -128,7 +128,7 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       height,
     } = this.props;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d')!;
     const canvasPixelWidth = Math.round(width * window.devicePixelRatio);
     const canvasPixelHeight = Math.round(height * window.devicePixelRatio);
     canvas.width = canvasPixelWidth;
@@ -148,7 +148,7 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       xPixelsPerMs: canvasPixelWidth / (rangeEnd - rangeStart),
       treeOrderSampleComparator,
       greyCategoryIndex: categories.findIndex((c) => c.color === 'grey') || 0,
-      categoryDrawStyles: this._getCategoryDrawStyles(ctx),
+      categoryDrawStyles: this._getCategoryDrawStyles(ctx!),
     });
 
     // The value in fillsQuerier is needed in ActivityGraph but is computed in this method
@@ -238,7 +238,7 @@ function _createDiagonalStripePattern(
   const dpr = Math.round(window.devicePixelRatio);
   patternCanvas.width = 4 * dpr;
   patternCanvas.height = 4 * dpr;
-  const patternContext = patternCanvas.getContext('2d');
+  const patternContext = patternCanvas.getContext('2d')!;
   patternContext.scale(dpr, dpr);
 
   const linear = patternContext.createLinearGradient(0, 0, 4, 4);
@@ -253,13 +253,17 @@ function _createDiagonalStripePattern(
   patternContext.fillStyle = linear;
   patternContext.fillRect(0, 0, 4, 4);
 
-  return chartCtx.createPattern(patternCanvas, 'repeat');
+  return chartCtx.createPattern(patternCanvas, 'repeat')!;
 }
 
 /**
  * Search an array from a starting index to find where two arrays diverge.
  */
-function _findNextDifferentIndex(arr1, arr2, startIndex) {
+function _findNextDifferentIndex(
+  arr1: Float32Array,
+  arr2: Float32Array,
+  startIndex: number
+): number {
   for (let i = startIndex; i < arr1.length; i++) {
     if (arr1[i] !== arr2[i]) {
       return i;

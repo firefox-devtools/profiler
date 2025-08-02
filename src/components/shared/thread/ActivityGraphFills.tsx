@@ -1,14 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 
 import './ActivityGraph.css';
 
-import type {
+import {
   IndexIntoSamplesTable,
   IndexIntoCategoryList,
   Thread,
@@ -17,7 +15,7 @@ import type {
   DevicePixels,
   CssPixels,
 } from 'firefox-profiler/types';
-import type { HoveredPixelState } from './ActivityGraph';
+import { HoveredPixelState } from './ActivityGraph';
 
 /**
  * This type contains the values that were used to render the ThreadActivityGraph's React
@@ -30,28 +28,27 @@ import type { HoveredPixelState } from './ActivityGraph';
  * classes and functions.
  */
 type RenderedComponentSettings = {
-  +canvasPixelWidth: DevicePixels,
-  +canvasPixelHeight: DevicePixels,
-  +fullThread: Thread,
-  +rangeFilteredThread: Thread,
-  +interval: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +sampleIndexOffset: number,
-  +xPixelsPerMs: number,
-  +enableCPUUsage: boolean,
-  +treeOrderSampleComparator: ?(
-    IndexIntoSamplesTable,
-    IndexIntoSamplesTable
-  ) => number,
-  +greyCategoryIndex: IndexIntoCategoryList,
-  +samplesSelectedStates: null | Array<SelectedState>,
-  +categoryDrawStyles: CategoryDrawStyles,
+  readonly canvasPixelWidth: DevicePixels;
+  readonly canvasPixelHeight: DevicePixels;
+  readonly fullThread: Thread;
+  readonly rangeFilteredThread: Thread;
+  readonly interval: Milliseconds;
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly sampleIndexOffset: number;
+  readonly xPixelsPerMs: number;
+  readonly enableCPUUsage: boolean;
+  readonly treeOrderSampleComparator:
+    | ((a: IndexIntoSamplesTable, b: IndexIntoSamplesTable) => number)
+    | null;
+  readonly greyCategoryIndex: IndexIntoCategoryList;
+  readonly samplesSelectedStates: null | Array<SelectedState>;
+  readonly categoryDrawStyles: CategoryDrawStyles;
 };
 
 type SampleContributionToPixel = {
-  +sample: IndexIntoSamplesTable,
-  +contribution: number,
+  readonly sample: IndexIntoSamplesTable;
+  readonly contribution: number;
 };
 
 /**
@@ -60,34 +57,34 @@ type SampleContributionToPixel = {
  * in place, but should be consumed immutably.
  */
 type CategoryFill = {
-  +category: IndexIntoCategoryList,
-  +fillStyle: string | CanvasPattern,
+  readonly category: IndexIntoCategoryList;
+  readonly fillStyle: string | CanvasPattern;
   // The Float32Arrays are mutated in place during the computation step.
-  +perPixelContribution: Float32Array,
-  +accumulatedUpperEdge: Float32Array,
+  readonly perPixelContribution: Float32Array;
+  readonly accumulatedUpperEdge: Float32Array;
 };
 
-export type CategoryDrawStyles = $ReadOnlyArray<{
-  +category: number,
-  +gravity: number,
-  +selectedFillStyle: string,
-  +unselectedFillStyle: string,
-  +filteredOutByTransformFillStyle: CanvasPattern,
-  +selectedTextColor: string,
+export type CategoryDrawStyles = ReadonlyArray<{
+  readonly category: number;
+  readonly gravity: number;
+  readonly selectedFillStyle: string;
+  readonly unselectedFillStyle: string;
+  readonly filteredOutByTransformFillStyle: CanvasPattern;
+  readonly selectedTextColor: string;
 }>;
 
 type SelectedPercentageAtPixelBuffers = {
   // These Float32Arrays are mutated in place during the computation step.
-  +beforeSelectedPercentageAtPixel: Float32Array,
-  +selectedPercentageAtPixel: Float32Array,
-  +afterSelectedPercentageAtPixel: Float32Array,
-  +filteredOutByTransformPercentageAtPixel: Float32Array,
-  +filteredOutByTabPercentageAtPixel: Float32Array,
+  readonly beforeSelectedPercentageAtPixel: Float32Array;
+  readonly selectedPercentageAtPixel: Float32Array;
+  readonly afterSelectedPercentageAtPixel: Float32Array;
+  readonly filteredOutByTransformPercentageAtPixel: Float32Array;
+  readonly filteredOutByTabPercentageAtPixel: Float32Array;
 };
 
 export type CpuRatioInTimeRange = {
-  +cpuRatio: number,
-  +timeRange: Milliseconds,
+  readonly cpuRatio: number;
+  readonly timeRange: Milliseconds;
 };
 
 const BOX_BLUR_RADII = [3, 2, 2];
@@ -133,10 +130,10 @@ export function computeActivityGraphFills(
  * fills by mutating the selected pecentage buffers and the category fill values.
  */
 export class ActivityGraphFillComputer {
-  +renderedComponentSettings: RenderedComponentSettings;
+  readonly renderedComponentSettings: RenderedComponentSettings;
   // The fills and percentages are mutated in place.
-  +mutablePercentageBuffers: SelectedPercentageAtPixelBuffers[];
-  +mutableFills: CategoryFill[];
+  readonly mutablePercentageBuffers: SelectedPercentageAtPixelBuffers[];
+  readonly mutableFills: CategoryFill[];
 
   constructor(
     renderedComponentSettings: RenderedComponentSettings,
@@ -153,8 +150,8 @@ export class ActivityGraphFillComputer {
    * ThreadActivityGraph.
    */
   run(): {
-    +averageCPUPerPixel: Float32Array,
-    +upperGraphEdge: Float32Array,
+    readonly averageCPUPerPixel: Float32Array;
+    readonly upperGraphEdge: Float32Array;
   } {
     // First go through each sample, and set the buffers that contain the percentage
     // that a category contributes to a given place in the X axis of the chart.
@@ -495,7 +492,7 @@ export class ActivityFillGraphQuerier {
    */
   _getCPURatioAtX(
     deviceX: DevicePixels,
-    samplesAtThisPixel: $ReadOnlyArray<SampleContributionToPixel>
+    samplesAtThisPixel: ReadonlyArray<SampleContributionToPixel>
   ): CpuRatioInTimeRange | null {
     const {
       rangeFilteredThread: { samples },
@@ -540,9 +537,9 @@ export class ActivityFillGraphQuerier {
     deviceX: DevicePixels,
     deviceY: DevicePixels
   ): null | {
-    category: IndexIntoCategoryList,
-    categoryLowerEdge: number,
-    yPercentage: number,
+    category: IndexIntoCategoryList;
+    categoryLowerEdge: number;
+    yPercentage: number;
   } {
     const { canvasPixelHeight } = this.renderedComponentSettings;
 
@@ -599,7 +596,7 @@ export class ActivityFillGraphQuerier {
    */
   _getSamplesAtTime(
     time: Milliseconds
-  ): $ReadOnlyArray<SampleContributionToPixel> {
+  ): ReadonlyArray<SampleContributionToPixel> {
     const { rangeStart, treeOrderSampleComparator, xPixelsPerMs } =
       this.renderedComponentSettings;
 
@@ -756,6 +753,9 @@ function _getSmoothingKernel(
 function _createSelectedPercentageAtPixelBuffers({
   categoryDrawStyles,
   canvasPixelWidth,
+}: {
+  categoryDrawStyles: CategoryDrawStyles;
+  canvasPixelWidth: number;
 }): SelectedPercentageAtPixelBuffers[] {
   return categoryDrawStyles.map(() => ({
     beforeSelectedPercentageAtPixel: new Float32Array(canvasPixelWidth),
@@ -831,7 +831,7 @@ function _getCategoryFills(
   );
 
   // Flatten out the fills into a single array.
-  return [].concat(...nestedFills);
+  return ([] as CategoryFill[]).concat(...nestedFills);
 }
 
 /**

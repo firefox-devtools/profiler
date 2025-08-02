@@ -100,7 +100,7 @@ class ByteReader {
     return this._pos;
   }
 
-  setCurPos(newPos) {
+  setCurPos(newPos: number) {
     this._pos = newPos;
   }
 
@@ -128,7 +128,7 @@ class ByteReader {
     return high * Math.pow(2, 32) + low;
   }
 
-  getBytesUntil(endPos) {
+  getBytesUntil(endPos: number) {
     if (endPos < this._pos) {
       throw new Error(
         `getBytesUntil() called with a target position in the past (curPos: ${this._pos}, endPos: ${endPos})`
@@ -139,11 +139,11 @@ class ByteReader {
     return buffer;
   }
 
-  getBytes(byteCount) {
+  getBytes(byteCount: number) {
     return this.getBytesUntil(this._pos + byteCount);
   }
 
-  getString(byteLength) {
+  getString(byteLength: number) {
     const stringBytes = this.getBytes(byteLength);
     return this._decoder.decode(stringBytes);
   }
@@ -222,7 +222,7 @@ function detectArtTraceFormat(
   return 'unrecognized';
 }
 
-function validateMagicHeader(magicHeader) {
+function validateMagicHeader(magicHeader: number) {
   if (magicHeader !== TRACE_MAGIC) {
     const expectedString = `0x${TRACE_MAGIC.toString(16)}`;
     const gotString = `0x${magicHeader.toString(16)}`;
@@ -231,7 +231,7 @@ function validateMagicHeader(magicHeader) {
     );
   }
 }
-function validateVersion(version) {
+function validateVersion(version: number) {
   if (version < 1 || version > 3) {
     throw new Error(
       `This code only knows how to parse versions 1 to 3, got version ${version}.`
@@ -239,7 +239,7 @@ function validateVersion(version) {
   }
 }
 
-function validateMatchingVersions(version, summaryVersion) {
+function validateMatchingVersions(version: number, summaryVersion: number) {
   if (version !== summaryVersion) {
     throw new Error(
       `Error: version number mismatch; got ${summaryVersion} in summary but ${version} in data section`
@@ -247,7 +247,7 @@ function validateMatchingVersions(version, summaryVersion) {
   }
 }
 
-function parseSummary(reader) {
+function parseSummary(reader: ByteReader) {
   // Example:
   //
   // *version
@@ -274,12 +274,12 @@ function parseSummary(reader) {
       break;
     }
     const [headerInfoLabel, headerInfoValue] = line.split('=');
-    summaryDetails[headerInfoLabel] = headerInfoValue;
+    (summaryDetails as any)[headerInfoLabel] = headerInfoValue;
   }
   return { summaryVersion, summaryDetails, lineAfterSummary: line };
 }
 
-function parseThreads(reader) {
+function parseThreads(reader: ByteReader) {
   // Example:
   //
   // *threads
@@ -305,14 +305,14 @@ function parseThreads(reader) {
   return { threads, lineAfterThreads: line };
 }
 
-function parseOneMethod(s) {
+function parseOneMethod(s: string) {
   // Example:
   // 0x3f4	android.view.Window	adjustLayoutParamsForSubWindow	(Landroid/view/WindowManager$LayoutParams;)V	Window.java
   const [methodId, className, methodName, signature] = s.split('\t');
   return { methodId: +methodId, className, methodName, signature };
 }
 
-function parseMethods(reader) {
+function parseMethods(reader: ByteReader) {
   // Example:
   //
   // *methods
@@ -332,7 +332,7 @@ function parseMethods(reader) {
   return { methods, lineAfterMethods: line };
 }
 
-function parseRecordSize(reader, version) {
+function parseRecordSize(reader: ByteReader, version: number) {
   switch (version) {
     case 1:
       return 9;
@@ -343,7 +343,12 @@ function parseRecordSize(reader, version) {
   }
 }
 
-function parseRecord(reader, version, recordSize, clock) {
+function parseRecord(
+  reader: ByteReader,
+  version: number,
+  recordSize: number,
+  clock: string
+) {
   const recordStart = reader.curPos();
   const tid = version === 1 ? reader.getU8() : reader.getU16();
   const methodIdAndAction = reader.getU32();
@@ -377,11 +382,14 @@ function parseRecord(reader, version, recordSize, clock) {
     methodId,
     globalTime,
     threadTime,
-    action: ['enter', 'exit', 'exit-unroll'][action],
+    action: ['enter', 'exit', 'exit-unroll'][action] as
+      | 'enter'
+      | 'exit'
+      | 'exit-unroll',
   };
 }
 
-function parseRegularFormat(reader) {
+function parseRegularFormat(reader: ByteReader) {
   // *version
   const { summaryVersion, summaryDetails, lineAfterSummary } =
     parseSummary(reader);
@@ -430,7 +438,7 @@ function parseRegularFormat(reader) {
   };
 }
 
-function parseStreamingFormat(reader) {
+function parseStreamingFormat(reader: ByteReader) {
   // The "streaming" format interleaves method declarations and thread
   // declarations with the method actions that refer to them. This is different
   // from the regular format, which collects all methods and threads and neatly
@@ -544,7 +552,7 @@ function parseArtTrace(buffer: ArrayBuffer): ArtTrace {
 //
 // This function returns the average of the lowest 20% of timestamp deltas that
 // can be observed among the first 500 method actions.
-function procureSamplingInterval(trace) {
+function procureSamplingInterval(trace: ArtTrace) {
   const { methodActions } = trace;
 
   // Gather up to 500 time deltas between method actions on a thread.
@@ -589,7 +597,7 @@ export type SpecialCategoryInfo = {
 export function getSpecialCategory(
   methods: ArtTraceMethod[]
 ): SpecialCategoryInfo | void {
-  function getSignificantNamespaceSegment(className) {
+  function getSignificantNamespaceSegment(className: string) {
     // Cut off leading "org." or "com.". Those are boring.
     const s =
       className.startsWith('org.') || className.startsWith('com.')
@@ -786,13 +794,13 @@ class ThreadBuilder {
   _categoryInfo;
 
   constructor(
-    name,
-    pid,
-    tid,
-    methodMap,
-    intervalInMsec,
-    honorOriginalSamplingTimestamps,
-    categoryInfo
+    name: string,
+    pid: number,
+    tid: number,
+    methodMap: Map<number, ArtTraceMethod>,
+    intervalInMsec: number,
+    honorOriginalSamplingTimestamps: boolean,
+    categoryInfo: any
   ) {
     this._name = name;
     this._pid = pid;
@@ -803,18 +811,18 @@ class ThreadBuilder {
     this._categoryInfo = categoryInfo;
   }
 
-  _getOrCreateStack(frame, prefix) {
+  _getOrCreateStack(frame: number, prefix: number | null) {
     const key = prefix === null ? `${frame}` : `${frame},${prefix}`;
     let stack = this._stackMap.get(key);
     if (stack === undefined) {
       stack = this._stackTable.data.length;
-      this._stackTable.data.push([frame, prefix]);
+      (this._stackTable.data as any).push([frame, prefix]);
       this._stackMap.set(key, stack);
     }
     return stack;
   }
 
-  _getOrCreateFrameForMethodId(methodId) {
+  _getOrCreateFrameForMethodId(methodId: number) {
     let frame = this._frameMap.get(methodId);
     if (frame === undefined) {
       const methodInfo = this._methodMap.get(methodId);
@@ -828,21 +836,27 @@ class ThreadBuilder {
         methodString = className + '.' + methodName;
       }
       const stringIndex = this._stringTable.length;
-      this._stringTable.push(methodString);
+      (this._stringTable as any).push(methodString);
       const category = this._categoryInfo.inferJavaCategory(methodString);
       frame = this._frameTable.data.length;
-      this._frameTable.data.push([stringIndex, null, null, null, category]);
+      (this._frameTable.data as any).push([
+        stringIndex,
+        null,
+        null,
+        null,
+        category,
+      ]);
       this._frameMap.set(methodId, frame);
     }
     return frame;
   }
 
-  enterMethod(methodId) {
+  enterMethod(methodId: number) {
     const frame = this._getOrCreateFrameForMethodId(methodId);
     this._currentStack = this._getOrCreateStack(frame, this._currentStack);
   }
 
-  exitMethod(_methodId) {
+  exitMethod(_methodId: number) {
     if (this._currentStack === null) {
       // This has been observed to happen in tracing-based traces (rather than sampling-based traces). Not sure why.
       // console.warn('exiting method when stack is empty');
@@ -852,7 +866,7 @@ class ThreadBuilder {
   }
 
   // Called before enter/exitMethod are called for this time
-  advanceTimeTo(timestampInMSSinceStartTime) {
+  advanceTimeTo(timestampInMSSinceStartTime: number) {
     if (this._nextSampleTimestamp === 0) {
       this._nextSampleTimestamp = timestampInMSSinceStartTime;
       if (this._name !== 'main') {
@@ -867,7 +881,10 @@ class ThreadBuilder {
     // such gaps with evenly-spaced synthesized samples at the interval that
     // was divined earlier.
     while (this._nextSampleTimestamp < timestampInMSSinceStartTime) {
-      this._samples.data.push([this._currentStack, this._nextSampleTimestamp]);
+      (this._samples.data as any).push([
+        this._currentStack,
+        this._nextSampleTimestamp,
+      ]);
       if (this._honorOriginalSamplingTimestamps) {
         // Only use this loop to fill up any gaps that are at least 2 * interval wide.
         // When less than 2 * interval remains, snap to the original next timestamp.
@@ -885,7 +902,10 @@ class ThreadBuilder {
 
   finish(): GeckoThreadVersion11 {
     if (this._nextSampleTimestamp !== null) {
-      this._samples.data.push([this._currentStack, this._nextSampleTimestamp]);
+      (this._samples.data as any).push([
+        this._currentStack,
+        this._nextSampleTimestamp,
+      ]);
     }
     return {
       tid: this._tid,

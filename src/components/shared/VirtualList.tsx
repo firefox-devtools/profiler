@@ -110,7 +110,7 @@ class VirtualListInnerChunk<Item> extends React.PureComponent<
         {range(
           visibleRangeStart,
           Math.max(visibleRangeStart, visibleRangeEnd)
-        ).map((i) => {
+        ).map((i: number) => {
           const item = items[i];
 
           // We compute forceRenderItem from the first position of item in the list,
@@ -177,7 +177,7 @@ class VirtualListInner<Item> extends React.PureComponent<
     const chunks = range(
       startChunkIndex,
       Math.max(startChunkIndex, endChunkIndex)
-    ).map((c) => c * chunkSize);
+    ).map((c: number) => c * chunkSize);
 
     return (
       <div
@@ -193,7 +193,7 @@ class VirtualListInner<Item> extends React.PureComponent<
           key={-1}
           style={{ height: Math.max(0, visibleRangeStart) * itemHeight + 'px' }}
         />
-        {chunks.map((chunkStart) => {
+        {chunks.map((chunkStart: number) => {
           return (
             <VirtualListInnerChunk
               className={`${className}InnerChunk`}
@@ -245,7 +245,7 @@ type VirtualListProps<Item> = {
   readonly ariaLabel?: string;
   readonly ariaRole?: string;
   // Aria-activedescendant specifies the children's "virtual" focus.
-  readonly ariaActiveDescendant?: null | string;
+  readonly ariaActiveDescendant?: string;
 };
 
 type VirtualListState = {
@@ -484,7 +484,7 @@ export class VirtualList<Item> extends React.PureComponent<
           className={`${className}InnerWrapper`}
           onMouseLeave={this._onMouseLeaveInnerWrapper}
         >
-          {range(columnCount).map((columnIndex) => (
+          {range(columnCount).map((columnIndex: number) => (
             <VirtualListInner
               className={classNames(
                 `${className}Inner`,
