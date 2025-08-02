@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 /*
  * This file contains all functions that are needed to achieve profiles
  * comparison: how to merge profiles, how to diff them, etc.
@@ -37,7 +35,7 @@ import { computeStringIndexMarkerFieldsByDataType } from './marker-schema';
 import { ensureExists, getFirstItemFromSet } from '../utils/flow';
 import { StringTable } from '../utils/string-table';
 
-import type {
+import {
   Profile,
   RawThread,
   IndexIntoCategoryList,
@@ -65,6 +63,9 @@ import type {
   MarkerPayload,
   MarkerIndex,
   Milliseconds,
+  CategoryColor,
+  ThreadIndex,
+  Tid,
 } from 'firefox-profiler/types';
 
 /**
@@ -79,9 +80,9 @@ export function mergeProfilesForDiffing(
   profiles: Profile[],
   profileStates: UrlState[]
 ): {
-  profile: Profile,
-  transformStacks: TransformStacksPerThread,
-  implementationFilters: ImplementationFilter[],
+  profile: Profile;
+  transformStacks: TransformStacksPerThread;
+  implementationFilters: ImplementationFilter[];
 } {
   if (profiles.length !== profileStates.length) {
     throw new Error(
@@ -103,8 +104,8 @@ export function mergeProfilesForDiffing(
     if (['profilingStartTime', 'profilingEndTime'].includes(key)) {
       continue;
     }
-    if (profiles.every((profile) => profile.meta[key] === value)) {
-      resultProfile.meta[key] = value;
+    if (profiles.every((profile) => (profile.meta as any)[key] === value)) {
+      (resultProfile.meta as any)[key] = value;
     }
   }
   // Ensure it has a copy of the marker schema and categories, even though these could
@@ -157,8 +158,8 @@ export function mergeProfilesForDiffing(
 
   // Then we loop over all profiles and do the necessary changes according
   // to the states we computed earlier.
-  const transformStacks = {};
-  const implementationFilters = [];
+  const transformStacks: any = {};
+  const implementationFilters: ImplementationFilter[] = [];
   // These may be needed for filtering markers.
   let ipcCorrelations;
 
@@ -402,16 +403,16 @@ function _adjustSampleTimestamps(
 }
 type TranslationMapForCategories = Map<
   IndexIntoCategoryList,
-  IndexIntoCategoryList,
+  IndexIntoCategoryList
 >;
 type TranslationMapForFuncs = Map<IndexIntoFuncTable, IndexIntoFuncTable>;
 type TranslationMapForResources = Map<
   IndexIntoResourceTable,
-  IndexIntoResourceTable,
+  IndexIntoResourceTable
 >;
 type TranslationMapForNativeSymbols = Map<
   IndexIntoNativeSymbolTable,
-  IndexIntoNativeSymbolTable,
+  IndexIntoNativeSymbolTable
 >;
 type TranslationMapForFrames = Map<IndexIntoFrameTable, IndexIntoFrameTable>;
 type TranslationMapForStacks = Map<IndexIntoStackTable, IndexIntoStackTable>;
@@ -419,7 +420,7 @@ type TranslationMapForLibs = Map<IndexIntoLibs, IndexIntoLibs>;
 type TranslationMapForStrings = Map<IndexIntoStringTable, IndexIntoStringTable>;
 type TranslationMapForSamples = Map<
   IndexIntoSamplesTable,
-  IndexIntoSamplesTable,
+  IndexIntoSamplesTable
 >;
 
 /**
@@ -427,10 +428,10 @@ type TranslationMapForSamples = Map<
  * It returns a translation map that can be used in `adjustCategories` later.
  */
 function mergeCategories(categoriesPerProfile: Array<CategoryList | void>): {
-  categories: CategoryList,
-  translationMaps: TranslationMapForCategories[],
+  categories: CategoryList;
+  translationMaps: TranslationMapForCategories[];
 } {
-  const newCategories = [];
+  const newCategories: CategoryList = [];
   const newCategoryIndexByName: Map<string, IndexIntoCategoryList> = new Map();
 
   const translationMaps = categoriesPerProfile.map((categories) => {
@@ -465,10 +466,10 @@ function mergeCategories(categoriesPerProfile: Array<CategoryList | void>): {
 }
 
 function mergeStringArrays(stringArraysPerProfile: Array<string[]>): {
-  stringArray: string[],
-  translationMaps: TranslationMapForStrings[],
+  stringArray: string[];
+  translationMaps: TranslationMapForStrings[];
 } {
-  const newStringArray = [];
+  const newStringArray: string[] = [];
   const newStringTable = StringTable.withBackingArray(newStringArray);
 
   const translationMaps = stringArraysPerProfile.map((stringArray) => {
@@ -532,7 +533,7 @@ function adjustNativeSymbolLibs(
  * safety.
  */
 function adjustNullableCategories(
-  categories: $ReadOnlyArray<IndexIntoCategoryList | null>,
+  categories: ReadonlyArray<IndexIntoCategoryList | null>,
   translationMap: TranslationMapForCategories
 ): Array<IndexIntoCategoryList | null> {
   return categories.map((category) => {
@@ -553,7 +554,7 @@ function adjustNullableCategories(
 }
 
 function adjustStringIndexes(
-  stringIndexes: $ReadOnlyArray<IndexIntoStringTable>,
+  stringIndexes: ReadonlyArray<IndexIntoStringTable>,
   translationMap: TranslationMapForStrings
 ): Array<IndexIntoStringTable> {
   return stringIndexes.map((stringIndex) => {
@@ -571,7 +572,7 @@ function adjustStringIndexes(
 }
 
 function adjustMarkerDataStringIndexes(
-  dataCol: $ReadOnlyArray<MarkerPayload | null>,
+  dataCol: ReadonlyArray<MarkerPayload | null>,
   translationMap: TranslationMapForStrings,
   stringIndexMarkerFieldsByDataType: Map<string, string[]>
 ): Array<MarkerPayload | null> {
@@ -589,7 +590,7 @@ function adjustMarkerDataStringIndexes(
 
     let newData: MarkerPayload = data;
     for (const fieldKey of stringIndexMarkerFields) {
-      const stringIndex = data[fieldKey];
+      const stringIndex = (data as any)[fieldKey];
       if (typeof stringIndex === 'number') {
         const newStringIndex = translationMap.get(stringIndex);
         if (newStringIndex === undefined) {
@@ -600,10 +601,10 @@ function adjustMarkerDataStringIndexes(
             `
           );
         }
-        newData = ({
+        newData = {
           ...newData,
           [fieldKey]: newStringIndex,
-        }: any);
+        } as any;
       }
     }
     return newData;
@@ -611,7 +612,7 @@ function adjustMarkerDataStringIndexes(
 }
 
 function adjustNullableStringIndexes(
-  stringIndexes: $ReadOnlyArray<IndexIntoStringTable | null>,
+  stringIndexes: ReadonlyArray<IndexIntoStringTable | null>,
   translationMap: TranslationMapForStrings
 ): Array<IndexIntoStringTable | null> {
   return stringIndexes.map((stringIndex) => {
@@ -637,13 +638,13 @@ function adjustNullableStringIndexes(
  * when merging lib references in other tables.
  */
 function mergeLibs(libsPerProfile: Lib[][]): {
-  libs: Lib[],
-  translationMaps: TranslationMapForLibs[],
+  libs: Lib[];
+  translationMaps: TranslationMapForLibs[];
 } {
   const mapOfInsertedLibs: Map<string, IndexIntoLibs> = new Map();
 
-  const translationMaps = [];
-  const newLibTable = [];
+  const translationMaps: Array<Map<IndexIntoLibs, IndexIntoLibs>> = [];
+  const newLibTable: Lib[] = [];
 
   for (const libs of libsPerProfile) {
     const translationMap = new Map();
@@ -673,12 +674,12 @@ function mergeLibs(libsPerProfile: Lib[][]): {
  * resource table with the translation maps to be used in subsequent merging
  * functions.
  */
-function combineResourceTables(threads: $ReadOnlyArray<RawThread>): {
-  resourceTable: ResourceTable,
-  translationMaps: TranslationMapForResources[],
+function combineResourceTables(threads: ReadonlyArray<RawThread>): {
+  resourceTable: ResourceTable;
+  translationMaps: TranslationMapForResources[];
 } {
   const mapOfInsertedResources: Map<string, IndexIntoResourceTable> = new Map();
-  const translationMaps = [];
+  const translationMaps: TranslationMapForResources[] = [];
   const newResourceTable = getEmptyResourceTable();
 
   threads.forEach((thread) => {
@@ -718,13 +719,13 @@ function combineResourceTables(threads: $ReadOnlyArray<RawThread>): {
 /**
  * This combines the nativeSymbols tables for the threads.
  */
-function combineNativeSymbolTables(threads: $ReadOnlyArray<RawThread>): {
-  nativeSymbols: NativeSymbolTable,
-  translationMaps: TranslationMapForNativeSymbols[],
+function combineNativeSymbolTables(threads: ReadonlyArray<RawThread>): {
+  nativeSymbols: NativeSymbolTable;
+  translationMaps: TranslationMapForNativeSymbols[];
 } {
   const mapOfInsertedNativeSymbols: Map<string, IndexIntoNativeSymbolTable> =
     new Map();
-  const translationMaps = [];
+  const translationMaps: TranslationMapForNativeSymbols[] = [];
   const newNativeSymbols = getEmptyNativeSymbolTable();
 
   threads.forEach((thread) => {
@@ -770,10 +771,10 @@ function combineNativeSymbolTables(threads: $ReadOnlyArray<RawThread>): {
  */
 function combineFuncTables(
   translationMapsForResources: TranslationMapForResources[],
-  threads: $ReadOnlyArray<RawThread>
-): { funcTable: FuncTable, translationMaps: TranslationMapForFuncs[] } {
+  threads: ReadonlyArray<RawThread>
+): { funcTable: FuncTable; translationMaps: TranslationMapForFuncs[] } {
   const mapOfInsertedFuncs: Map<string, IndexIntoFuncTable> = new Map();
-  const translationMaps = [];
+  const translationMaps: TranslationMapForFuncs[] = [];
   const newFuncTable = getEmptyFuncTable();
 
   threads.forEach((thread, threadIndex) => {
@@ -841,9 +842,9 @@ function combineFuncTables(
 function combineFrameTables(
   translationMapsForFuncs: TranslationMapForFuncs[],
   translationMapsForNativeSymbols: TranslationMapForNativeSymbols[],
-  threads: $ReadOnlyArray<RawThread>
-): { frameTable: FrameTable, translationMaps: TranslationMapForFrames[] } {
-  const translationMaps = [];
+  threads: ReadonlyArray<RawThread>
+): { frameTable: FrameTable; translationMaps: TranslationMapForFrames[] } {
+  const translationMaps: TranslationMapForFrames[] = [];
   const newFrameTable = getEmptyFrameTable();
 
   threads.forEach((thread, threadIndex) => {
@@ -903,9 +904,9 @@ function combineFrameTables(
  */
 function combineStackTables(
   translationMapsForFrames: TranslationMapForFrames[],
-  threads: $ReadOnlyArray<RawThread>
-): { stackTable: RawStackTable, translationMaps: TranslationMapForStacks[] } {
-  const translationMaps = [];
+  threads: ReadonlyArray<RawThread>
+): { stackTable: RawStackTable; translationMaps: TranslationMapForStacks[] } {
+  const translationMaps: TranslationMapForStacks[] = [];
   const newStackTable = getEmptyRawStackTable();
 
   threads.forEach((thread, threadIndex) => {
@@ -958,7 +959,7 @@ function combineSamplesDiffing(
     ThreadAndWeightMultiplier,
     ThreadAndWeightMultiplier,
   ]
-): { samples: RawSamplesTable, translationMaps: TranslationMapForSamples[] } {
+): { samples: RawSamplesTable; translationMaps: TranslationMapForSamples[] } {
   const translationMaps = [new Map(), new Map()];
   const [
     {
@@ -971,8 +972,8 @@ function combineSamplesDiffing(
     },
   ] = threadsAndWeightMultipliers;
 
-  const newWeight = [];
-  const newThreadId = [];
+  const newWeight: number[] = [];
+  const newThreadId: Tid[] = [];
   const newSamples = {
     ...getEmptySamplesTableWithEventDelay(),
     weight: newWeight,
@@ -1011,8 +1012,8 @@ function combineSamplesDiffing(
       newSamples.stack.push(newStackIndex);
       // Diffing event delay values doesn't make sense since interleaved values
       // of eventDelay/responsiveness don't mean anything.
-      newSamples.eventDelay.push(null);
-      newSamples.time.push(samples1Time[i]);
+      newSamples.eventDelay!.push(null);
+      newSamples.time!.push(samples1Time[i]);
       newThreadId.push(samples1.threadId ? samples1.threadId[i] : tid1);
       // TODO (issue #3151): Figure out a way to diff CPU usage numbers.
       // We add the first thread with a negative weight, because this is the
@@ -1039,8 +1040,8 @@ function combineSamplesDiffing(
       newSamples.stack.push(newStackIndex);
       // Diffing event delay values doesn't make sense since interleaved values
       // of eventDelay/responsiveness don't mean anything.
-      newSamples.eventDelay.push(null);
-      newSamples.time.push(samples2Time[j]);
+      newSamples.eventDelay!.push(null);
+      newSamples.time!.push(samples2Time[j]);
       newThreadId.push(samples2.threadId ? samples2.threadId[j] : tid2);
       const sampleWeight = samples2.weight ? samples2.weight[j] : 1;
       newWeight.push(weightMultiplier2 * sampleWeight);
@@ -1058,8 +1059,8 @@ function combineSamplesDiffing(
 }
 
 type ThreadAndWeightMultiplier = {
-  thread: RawThread,
-  weightMultiplier: number,
+  thread: RawThread;
+  weightMultiplier: number;
 };
 
 /**
@@ -1249,7 +1250,7 @@ function combineSamplesForMerging(
   ).fill(0);
   // This array will contain the source thread ids. It will be added to the
   // samples table after the loop.
-  const newThreadId = [];
+  const newThreadId: Tid[] = [];
   // Creating a new empty samples table to fill.
   const newSamples = {
     ...getEmptySamplesTableWithEventDelay(),
@@ -1311,7 +1312,7 @@ function combineSamplesForMerging(
     // It doesn't make sense to combine event delay values. We need to use jank markers
     // from independent threads instead.
     ensureExists(newSamples.eventDelay).push(null);
-    newSamples.time.push(sourceThreadSamplesTimeCol[sourceThreadSampleIndex]);
+    newSamples.time!.push(sourceThreadSamplesTimeCol[sourceThreadSampleIndex]);
     newThreadId.push(
       sourceThreadSamples.threadId
         ? sourceThreadSamples.threadId[sourceThreadSampleIndex]
@@ -1334,13 +1335,13 @@ function mergeMarkers(
   translationMapsForStacks: TranslationMapForStacks[],
   threads: RawThread[]
 ): {
-  markerTable: RawMarkerTable,
-  translationMaps: TranslationMapForMarkers[],
+  markerTable: RawMarkerTable;
+  translationMaps: TranslationMapForMarkers[];
 } {
-  const newThreadId = [];
+  const newThreadId: Tid[] = [];
   const newMarkerTable = { ...getEmptyRawMarkerTable(), threadId: newThreadId };
 
-  const translationMaps = [];
+  const translationMaps: TranslationMapForMarkers[] = [];
 
   threads.forEach((thread, threadIndex) => {
     const translationMapForStacks = translationMapsForStacks[threadIndex];
@@ -1384,7 +1385,9 @@ function mergeMarkers(
       newMarkerTable.phase.push(markers.phase[markerIndex]);
       newMarkerTable.category.push(markers.category[markerIndex]);
       newThreadId.push(
-        markers.threadId ? markers.threadId[markerIndex] : thread.tid
+        markers.threadId
+          ? (markers.threadId[markerIndex] ?? thread.tid)
+          : thread.tid
       );
 
       // Set the translation map and increase the table length.

@@ -1,5 +1,3 @@
-// @flow
-
 /*
  * This implements a simple CLI to symbolicate profiles captured by the profiler
  * or by samply.
@@ -23,11 +21,11 @@ import {
   symbolicateProfile,
   applySymbolicationSteps,
 } from '../profile-logic/symbolication';
-import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
-import type { SymbolTableAsTuple } from '../profile-logic/symbol-store-db';
+import { SymbolicationStepInfo } from '../profile-logic/symbolication';
+import { SymbolTableAsTuple } from '../profile-logic/symbol-store-db';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
 import { SymbolsNotFoundError } from '../profile-logic/errors';
-import type { ThreadIndex } from '../types';
+import { ThreadIndex } from '../types';
 
 /**
  * Simple 'in-memory' symbol DB that conforms to the same interface as SymbolStoreDB but

@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import { createSelector } from 'reselect';
 import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
@@ -21,7 +19,7 @@ import {
   getFirstItemFromSet,
 } from '../../utils/flow';
 
-import type {
+import {
   Thread,
   RawThread,
   ThreadIndex,
@@ -47,8 +45,8 @@ import type {
   IndexIntoFuncTable,
 } from 'firefox-profiler/types';
 
-import type { TransformLabeL10nIds } from 'firefox-profiler/profile-logic/transforms';
-import type { MarkerSelectorsPerThread } from './markers';
+import { TransformLabeL10nIds } from 'firefox-profiler/profile-logic/transforms';
+import { MarkerSelectorsPerThread } from './markers';
 
 import { mergeThreads } from '../../profile-logic/merge-compare';
 import { defaultThreadViewOptions } from '../../reducers/profile-view';
@@ -59,13 +57,11 @@ import { defaultThreadViewOptions } from '../../reducers/profile-view';
  * the local type definition with `Selector<T>` is the canonical definition for
  * the type of the selector.
  */
-export type BasicThreadSelectorsPerThread = $ReturnType<
-  typeof getBasicThreadSelectorsPerThread,
+export type BasicThreadSelectorsPerThread = ReturnType<
+  typeof getBasicThreadSelectorsPerThread
 >;
-export type ThreadSelectorsPerThread = {
-  ...BasicThreadSelectorsPerThread,
-  ...$ReturnType<typeof getThreadSelectorsWithMarkersPerThread>,
-};
+export type ThreadSelectorsPerThread = BasicThreadSelectorsPerThread &
+  ReturnType<typeof getThreadSelectorsWithMarkersPerThread>;
 
 /**
  * Create the selectors for a thread that have to do with an entire thread. This includes
@@ -160,7 +156,7 @@ export function getBasicThreadSelectorsPerThread(
     getThreadWithReservedFunctions(state).thread;
 
   const getReservedFunctionsForResources: Selector<
-    Map<IndexIntoResourceTable, IndexIntoFuncTable>,
+    Map<IndexIntoResourceTable, IndexIntoFuncTable>
   > = (state) =>
     getThreadWithReservedFunctions(state).reservedFunctionsForResources;
 
@@ -259,7 +255,7 @@ export function getBasicThreadSelectorsPerThread(
    * samples.
    */
   const getFilteredSampleIndexOffset: Selector<number> = createSelector(
-    (state) => getSamplesTable(state),
+    getSamplesTable,
     ProfileSelectors.getCommittedRange,
     (samples, { start, end }) => {
       const [beginSampleIndex] = ProfileData.getSampleIndexRangeForSelection(
@@ -408,10 +404,8 @@ export function getBasicThreadSelectorsPerThread(
   };
 }
 
-type BasicThreadAndMarkerSelectorsPerThread = {
-  ...BasicThreadSelectorsPerThread,
-  ...MarkerSelectorsPerThread,
-};
+type BasicThreadAndMarkerSelectorsPerThread = BasicThreadSelectorsPerThread &
+  MarkerSelectorsPerThread;
 
 export function getThreadSelectorsWithMarkersPerThread(
   threadSelectors: BasicThreadAndMarkerSelectorsPerThread,
@@ -550,9 +544,8 @@ export function getThreadSelectorsWithMarkersPerThread(
       Transforms.getTransformLabelL10nIds
     );
 
-  const getLocalizedTransformLabels: Selector<React.Node[]> = createSelector(
-    getTransformLabelL10nIds,
-    (transformL10nIds) =>
+  const getLocalizedTransformLabels: Selector<React.ReactNode[]> =
+    createSelector(getTransformLabelL10nIds, (transformL10nIds) =>
       transformL10nIds.map((transform) => (
         <Localized
           id={transform.l10nId}
@@ -560,7 +553,7 @@ export function getThreadSelectorsWithMarkersPerThread(
           key={transform.item}
         ></Localized>
       ))
-  );
+    );
 
   return {
     getTransformStack,
