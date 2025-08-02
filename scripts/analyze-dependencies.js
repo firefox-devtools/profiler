@@ -37,7 +37,8 @@ function findFiles() {
         // Skip special files that shouldn't be converted
         if (
           file === 'node-worker-contents.js' ||
-          file === 'simpleperf_report.js'
+          file === 'simpleperf_report.js' ||
+          file === 'webpack.config.js'
         ) {
           continue;
         }
