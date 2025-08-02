@@ -19,13 +19,13 @@ to proceed with the next step of the migration.
 
 ### Current Priority: Continue Component Migration
 
-**Strategy**: Core dependencies converted, TypeScript strict compliance largely achieved, focus on React components using dependency-first approach.
+**Strategy**: Core dependencies converted, strict compliance improved significantly, focus on React components using dependency-first approach.
 
 ### Migration Status
 
 - `yarn test-all` passes - All checks work correctly
 - `yarn typecheck` passes - TypeScript files compile  
-- `yarn typecheck:strict` LARGELY COMPLIANT - Only 19 minor errors remain (down from 100+)
+- `yarn typecheck:strict` has 19 errors remaining (reduced from 100+)
 - Mixed Flow/TypeScript codebase is stable
 
 ### 🔧 Key Commands
@@ -394,65 +394,23 @@ If a phase is only partially complete, but feels complete "in the important ways
 
 ### Phase 3: 🚀 IN PROGRESS - React Components  
 
-- **Status**: ~42/150+ files complete (28%) - **PROGRESS TODAY (August 2, 2025)**
-- **Strategy**: Dependency-first migration proving highly effective
-- **Recent progress**: Additional files converted during strict compliance work (ActivityGraph.tsx, ActivityGraphFills.tsx)
-- **Key achievement**: Major strict compliance breakthrough allows focusing on component migration
+- **Status**: ~42/150+ files complete (28%)
+- **Strategy**: Dependency-first migration
+- **Recent progress**: ActivityGraph.tsx, ActivityGraphFills.tsx converted during strict compliance work
 
 ### Phase 4: ✅ LARGELY COMPLETED - Strict compliance
 
-- **Status**: `yarn typecheck:strict` LARGELY COMPLIANT with only 19 minor errors remaining! **MAJOR BREAKTHROUGH TODAY (August 2, 2025)**
-- **✅ COMPLETED**:
-  - ✅ marker-data.js → marker-data.ts conversion (1576 lines)
-  - ✅ All reducer modules conversion (profile-view.ts, app.ts, url-state.ts, icons.ts, zipped-profiles.ts, publish.ts, l10n.ts, code.ts)
-  - ✅ All NamedTupleMap/memoize-immutable compatibility issues resolved
-  - ✅ **MAJOR BREAKTHROUGH (August 2, 2025)**: TypeScript strict compliance achieved:
-    - ✅ **REDUCED STRICT ERRORS FROM 100+ TO ONLY 19** - massive improvement in type safety
-    - ✅ **Canvas.tsx** - Fixed null checking and parameter type issues for 2D canvas context
-    - ✅ **ActivityGraphCanvas.tsx** - Fixed null checking for getContext and createPattern methods  
-    - ✅ **ActivityGraphFills.js → .tsx** - Converted complex graphics module, fixed Flow type syntax
-    - ✅ **VirtualList.tsx** - Added array-range type declaration, fixed parameter types
-    - ✅ **art-trace.tsx** - Fixed 20+ parameter type issues in ART profiler import logic
-    - ✅ **simpleperf.tsx** - Created type declaration for protobuf module import
-    - ✅ **js-tracer.tsx** - Fixed implicit type issues with arrays and parameters
-    - ✅ **ActivityGraph.js → .tsx** - Converted React component with complex event handling
-    - ✅ Created type declarations for missing modules (array-range, simpleperf_report, call-tree)
-  - ✅ **PREVIOUS (August 1, 2025)**: Major breakthrough in strict TypeScript compliance:
-    - ✅ profile-logic/tracks.js → tracks.ts (core dependency, 1400+ lines)
-    - ✅ selectors/url-state.js → url-state.ts (core dependency, 360+ lines)
-    - ✅ selectors/per-thread/index.js → index.ts (selector module, 354 lines)
-    - ✅ selectors/profile.ts - REMOVED from exclude list, now passes strict checking
-    - ✅ Fixed all implicit any type errors across converted files
-    - ✅ Created unified Flow→TypeScript conversion script with critical fixes
-    - ✅ Previous: shorten-url.ts, flow.ts, query-api.ts, uintarray-encoding.ts, format-numbers.ts, state.ts, data-table-utils.ts, profile-derived.ts, actions.ts - all removed from excludes
-- **Remaining for 100% Strict Mode**:
-  - **Current status**: Only 19 minor errors remain (mostly dynamic object property access)
-  - **Major achievement**: Reduced from 100+ strict mode errors to just 19 remaining
-  - **Remaining errors**: Primarily TS7053 (object property access with dynamic keys) and similar patterns
-  - **✅ NEW TODAY (August 2, 2025)**: TypeScript strict compliance breakthrough achieved!
-  - **✅ PREVIOUS (August 1, 2025)**: Major breakthrough in both strict compliance and strategic conversions:
-    - ✅ **REMOVED from exclude list**: DebugWarning.tsx, Icon.tsx (now pass strict checking!)
-    - ✅ **STRATEGIC CONVERSIONS (11 files, 869 lines total)**: 
-      - **Dependency-driven**: IdleSearchField.tsx → PanelSearch.tsx (unblocked dependency chain)
-      - **Major dependency**: Tooltip.tsx (187 lines) - unblocks multiple downstream files
-      - **Small components**: CanSelectContent.tsx, TooltipDetails.tsx, ProfileRootMessage.tsx, StyleDef.tsx, TrackSearchField.tsx, Backtrace.tsx, TabBar.tsx
-      - **Type definitions**: Window.d.ts global type definitions
-  - **✅ ADDITIONAL PROGRESS (August 1, 2025 - Second Session)**: 5 more strategic files converted:
-    - **React Components**: MenuButtons/Permalink.tsx (100 lines) - permalink UI component
-    - **Error Handling**: CodeErrorOverlay.tsx (125 lines), ErrorBoundary.tsx (135 lines) - improved error boundaries
-    - **Core Logic**: profile-logic/profile-store.ts (124 lines) - profile upload/storage functionality
-    - **Selectors**: selectors/per-thread/composed.ts (125 lines) - thread-specific data selectors
-  - **✅ COMPLETED PREVIOUSLY**: profile-logic/tracks.ts, selectors/url-state.ts (major core dependencies)
-  - **Previous**: BlobUrlLink.tsx, ProfileMetaInfoSummary.tsx (dependencies resolved)
-  - **Remaining files**: mostly React components + 3 utility files with dependencies
-  **Recent Progress**:
-- Major core dependencies converted (profile-data.ts, tracks.ts, etc.)
-- Key React components converted: WithSize, DivWithTooltip, ButtonWithPanel
-- Dependency analysis tool provides conversion priorities
+- **Status**: `yarn typecheck:strict` has 19 errors remaining (reduced from 100+)
+- **Recent conversions**:
+  - August 2: Canvas.tsx, ActivityGraphCanvas.tsx, ActivityGraphFills.tsx, VirtualList.tsx, art-trace.tsx, js-tracer.tsx, ActivityGraph.tsx
+  - August 1: profile-logic/tracks.ts, selectors/url-state.ts, selectors/per-thread/index.ts
+  - Previous: marker-data.ts, reducer modules, core utilities
+- **Type declarations created**: array-range, simpleperf_report, call-tree
+- **Remaining errors**: 19 minor issues, primarily TS7053 (dynamic object property access)
 
 ### Phase 5: ⏳ PLANNED - Resume Component Migration
 
-- Resume React component conversions after strict checking passes
+- Resume React component conversions using dependency-first approach
 - Add TypeScript types to existing ExplicitConnect patterns
 
 ### Phase 6: ⏳ PLANNED - Final Cleanup
@@ -464,14 +422,11 @@ If a phase is only partially complete, but feels complete "in the important ways
 
 ## Next Steps
 
-**PRIORITY**: Continue React component conversion using dependency-first approach. TypeScript strict compliance is largely achieved (only 19 minor errors remaining).
+Continue React component conversion using dependency-first approach. TypeScript strict compliance is largely achieved.
 
 Use dependency analysis tool to identify files ready for conversion:
 ```bash
 ./scripts/analyze-dependencies.sh | head -20
 ```
 
-**Current Focus**: 
-- Convert files with 0-1 dependencies first, focusing on files that unlock others
-- The remaining 19 strict mode errors are primarily dynamic object property access patterns that can be addressed later
-- Strict compliance phase is essentially complete - time to resume component migration
+Convert files with 0-1 dependencies first, focusing on files that unlock others.
