@@ -173,8 +173,7 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
           width={width}
           height={height}
         />
-        {hoveredPixelState === null ||
-        hoveredPixelState.sample === null ? null : (
+        {hoveredPixelState === null ? null : (
           <Tooltip mouseX={mouseX} mouseY={mouseY}>
             <SampleTooltipContents
               sampleIndex={hoveredPixelState.sample}

@@ -33,8 +33,11 @@ type RestProps = {
   readonly implementationFilter: ImplementationFilter;
 };
 
-type Props = RestProps & {
+type Props = {
   readonly cpuRatioInTimeRange: CPUProps | null;
+  readonly categories: CategoryList;
+  readonly rangeFilteredThread: Thread;
+  readonly implementationFilter: ImplementationFilter;
   readonly sampleIndex: IndexIntoSamplesTable | null;
   readonly zeroAt: Milliseconds;
   readonly profileTimelineUnit: string;
