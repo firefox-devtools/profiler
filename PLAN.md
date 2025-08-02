@@ -90,7 +90,7 @@ The imported module is either a file that needs to converted, or it is an npm de
 1. Check if a @types package for the module exists. For example, for `memoize-immutable`, try installing `@types/memoize-immutable` via `yarn add --dev @types/memoize-immutable`.
 2. If the @types package exists, ensure its version matches the version of the actual package. Edit package.json manually and run `yarn install` if needed.
 3. If no @types package exists, create a type declaration file yourself.
-4. Type declaration files go into src/types/libdef/npm or src/types/libdef/npm-custom, next to the corresponding .js file. For example, check if already exists a types/libdef/npm*/memoize-immutable*.js file. If so, copy this file, give it a name like memoize-immutable_v3.x.x.d.ts, and edit it to convert the type definitions to TypeScript syntax. Then delete the old .js Flow type definition file.
+4. Type declaration files go into src/types/@types/package-name/index.d.ts. You can look at an existing Flow type definition file for inspiration. For example, when creating src/types/@types/memoize-immutable/index.d.ts, check if there already exists a types/libdef/npm*/memoize-immutable*.js file.
 
 ### ⚡ Efficient Commands (Use These)
 
