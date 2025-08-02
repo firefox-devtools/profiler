@@ -1,8 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-import type {
+
+import {
   Profile,
   RawThread,
   RawStackTable,
@@ -49,65 +49,64 @@ export type TracingEventUnion =
   | TracingStartedInBrowserEvent;
 
 type TracingEvent<Event> = {
-  cat: string,
+  cat: string;
   // List out all known phase values, but then also allow strings. This will get
   // overwritten by the `...Event` line, which will put in the exact phase.
-  ph: string, // Phase
-  pid: number, // Process ID
-  tid: number, // Thread ID
-  ts: number, // Timestamp
-  tts?: number, // Thread Timestamp
-  tdur?: number, // Time duration
-  dur?: number, // Time duration
-  ...Event,
-};
+  ph: string; // Phase
+  pid: number; // Process ID
+  tid: number; // Thread ID
+  ts: number; // Timestamp
+  tts?: number; // Thread Timestamp
+  tdur?: number; // Time duration
+  dur?: number; // Time duration
+} & Event;
 
 // V8 can generate this backward compatible event.
 // See https://github.com/firefox-devtools/profiler/issues/4308#issuecomment-1303551614
 type FallbackEndEvent = TracingEvent<{
-  name: 'ProfileChunk',
-  id: string,
+  name: 'ProfileChunk';
+  id: string;
   args: {
     data: {
-      endTime: number,
-    },
-  },
+      endTime: number;
+    };
+  };
 }>;
 
 type ProfileEvent = TracingEvent<{
-  name: 'Profile',
+  name: 'Profile';
   args: {
     data: {
-      startTime: number,
-    },
-  },
-  ph: 'P',
-  id: string,
+      startTime: number;
+    };
+  };
+  ph: 'P';
+  id: string;
 }>;
 
 type ProfileChunkEvent = TracingEvent<{
-  name: 'ProfileChunk',
+  name: 'ProfileChunk';
   args: {
     data: {
       cpuProfile: {
         nodes?: Array<{
           callFrame: {
-            functionName: string,
-            scriptId: number,
-            lineNumber?: number,
-            columnNumber?: number,
-            url?: string,
-          },
-          id: number,
-          parent?: number,
-        }>,
-        samples: number[], // Index into cpuProfile nodes
-      },
-      timeDeltas: number[],
-    },
-  },
-  ph: 'P',
-  id: string,
+            functionName: string;
+            scriptId: number;
+            lineNumber?: number;
+            columnNumber?: number;
+            url?: string;
+          };
+          id: number;
+          parent?: number;
+        }>;
+        samples: number[]; // Index into cpuProfile nodes
+      };
+      timeDeltas: number[];
+    };
+  };
+  ph: 'P';
+  id: string;
 }>;
 
 // The CpuProfileEvent format is similar to the ProfileChunkEvent format.
@@ -118,13 +117,13 @@ type ProfileChunkEvent = TracingEvent<{
 //    opposite direction: ProfileChunkEvent has a "parent" field on each nodes,
 //    CpuProfileEvent has a "children" field on each node.
 export type CpuProfileEvent = TracingEvent<{
-  name: 'CpuProfile',
+  name: 'CpuProfile';
   args: {
     data: {
-      cpuProfile: CpuProfileData,
-    },
-  },
-  ph: 'I',
+      cpuProfile: CpuProfileData;
+    };
+  };
+  ph: 'I';
 }>;
 
 // A node performance profile only outputs this.
@@ -132,60 +131,60 @@ export type CpuProfileEvent = TracingEvent<{
 type CpuProfileData = {
   nodes?: Array<{
     callFrame: {
-      functionName: string,
-      scriptId: number,
-      lineNumber?: number,
-      columnNumber?: number,
-      url?: string,
-    },
-    id: number,
-    children?: number[],
-  }>,
-  samples: number[], // Index into cpuProfile nodes
-  timeDeltas: number[],
-  startTime: number, // microseconds
-  endTime: number, // microseconds
+      functionName: string;
+      scriptId: number;
+      lineNumber?: number;
+      columnNumber?: number;
+      url?: string;
+    };
+    id: number;
+    children?: number[];
+  }>;
+  samples: number[]; // Index into cpuProfile nodes
+  timeDeltas: number[];
+  startTime: number; // microseconds
+  endTime: number; // microseconds
 };
 
 type ThreadNameEvent = TracingEvent<{
-  name: 'thread_name',
-  ph: 'm' | 'M',
-  args: { name: string },
+  name: 'thread_name';
+  ph: 'm' | 'M';
+  args: { name: string };
 }>;
 
 type ProcessNameEvent = TracingEvent<{
-  name: 'process_name',
-  ph: 'm' | 'M',
-  args: { name: string },
+  name: 'process_name';
+  ph: 'm' | 'M';
+  args: { name: string };
 }>;
 
 type ProcessLabelsEvent = TracingEvent<{
-  name: 'process_labels',
-  ph: 'm' | 'M',
-  args: { labels: string },
+  name: 'process_labels';
+  ph: 'm' | 'M';
+  args: { labels: string };
 }>;
 
 type ProcessSortIndexEvent = TracingEvent<{
-  name: 'process_sort_index',
-  ph: 'm' | 'M',
-  args: { sort_index: number },
+  name: 'process_sort_index';
+  ph: 'm' | 'M';
+  args: { sort_index: number };
 }>;
 
 type ThreadSortIndexEvent = TracingEvent<{
-  name: 'thread_sort_index',
-  ph: 'm' | 'M',
-  args: { sort_index: number },
+  name: 'thread_sort_index';
+  ph: 'm' | 'M';
+  args: { sort_index: number };
 }>;
 
 type ScreenshotEvent = TracingEvent<{
-  name: 'Screenshot',
-  ph: 'O',
-  args: { snapshot: string },
+  name: 'Screenshot';
+  ph: 'O';
+  args: { snapshot: string };
 }>;
 
 type TracingStartedInBrowserEvent = TracingEvent<{
-  name: 'TracingStartedInBrowser',
-  ph: 'I',
+  name: 'TracingStartedInBrowser';
+  ph: 'I';
 }>;
 
 function wrapCpuProfileInEvent(cpuProfile: CpuProfileData): CpuProfileEvent {
@@ -204,14 +203,14 @@ function wrapCpuProfileInEvent(cpuProfile: CpuProfileData): CpuProfileEvent {
 }
 
 export function attemptToConvertChromeProfile(
-  json: mixed,
+  json: unknown,
   profileUrl?: string
 ): Promise<Profile> | null {
   if (!json) {
     return null;
   }
 
-  let events: TracingEventUnion[] | void;
+  let events: TracingEventUnion[] | undefined;
 
   if (Array.isArray(json)) {
     // Chrome profiles come as a list of events.
@@ -267,44 +266,44 @@ export function attemptToConvertChromeProfile(
       list = [];
       eventsByName.set(name, list);
     }
-    list.push((tracingEvent: any));
+    list.push(tracingEvent as any);
   }
 
   return processTracingEvents(eventsByName, profileUrl);
 }
 
 type ThreadInfo = {
-  thread: RawThread,
-  funcKeyToFuncId: Map<string, IndexIntoFuncTable>,
-  nodeIdToStackId: Map<number | void, IndexIntoStackTable | null>,
-  originToResourceIndex: Map<string, IndexIntoResourceTable>,
-  lastSeenTime: number,
-  lastSampledTime: number,
-  pid: number,
-  processSortIndex: number,
-  threadSortIndex: number,
-  tieBreakerIndex: number,
+  thread: RawThread;
+  funcKeyToFuncId: Map<string, IndexIntoFuncTable>;
+  nodeIdToStackId: Map<number | void, IndexIntoStackTable | null>;
+  originToResourceIndex: Map<string, IndexIntoResourceTable>;
+  lastSeenTime: number;
+  lastSampledTime: number;
+  pid: number;
+  processSortIndex: number;
+  threadSortIndex: number;
+  tieBreakerIndex: number;
 };
 
-function findEvent<T: TracingEventUnion>(
+function findEvent<T extends TracingEventUnion>(
   eventsByName: Map<string, TracingEventUnion[]>,
   name: string,
-  f: (T) => boolean
-): T | void {
-  const events: T[] | void = (eventsByName.get(name): any);
+  f: (param: T) => boolean
+): T | undefined {
+  const events: T[] | undefined = eventsByName.get(name) as any;
   return events ? events.find(f) : undefined;
 }
 
 function findEvents<
   // False positive, generic type bounds:
   // eslint-disable-next-line flowtype/no-weak-types
-  T: Object,
+  T extends Record<string, any>,
 >(
   eventsByName: Map<string, TracingEventUnion[]>,
   name: string,
-  f: (T) => boolean
+  f: (param: T) => boolean
 ): T[] {
-  const events: T[] | void = (eventsByName.get(name): any);
+  const events: T[] | undefined = eventsByName.get(name) as any;
   if (!events) {
     return [];
   }
@@ -440,17 +439,17 @@ function getTimeDeltas(
 }
 
 type FunctionInfo = {
-  category: number,
-  isJS: boolean,
-  relevantForJS: boolean,
+  category: number;
+  isJS: boolean;
+  relevantForJS: boolean;
 };
 
-function makeFunctionInfoFinder(categories) {
-  const jsCat = categories.findIndex((c) => c.name === 'JavaScript');
-  const gcCat = categories.findIndex((c) => c.name === 'GC / CC');
-  const nativeCat = categories.findIndex((c) => c.name === 'Native');
-  const otherCat = categories.findIndex((c) => c.name === 'Other');
-  const idleCat = categories.findIndex((c) => c.name === 'Idle');
+function makeFunctionInfoFinder(categories: any) {
+  const jsCat = categories.findIndex((c: any) => c.name === 'JavaScript');
+  const gcCat = categories.findIndex((c: any) => c.name === 'GC / CC');
+  const nativeCat = categories.findIndex((c: any) => c.name === 'Native');
+  const otherCat = categories.findIndex((c: any) => c.name === 'Other');
+  const idleCat = categories.findIndex((c: any) => c.name === 'Idle');
   if (
     jsCat === -1 ||
     gcCat === -1 ||
@@ -464,8 +463,8 @@ function makeFunctionInfoFinder(categories) {
   }
 
   return function getFunctionInfo(
-    functionName,
-    hasURLOrLineNumber
+    functionName: any,
+    hasURLOrLineNumber: any
   ): FunctionInfo {
     switch (functionName) {
       case '(idle)':
@@ -515,12 +514,12 @@ async function processTracingEvents(
   const stringTable = StringTable.withBackingArray(profile.shared.stringArray);
 
   let profileEvents: (ProfileEvent | CpuProfileEvent)[] =
-    (eventsByName.get('Profile'): any) || [];
+    (eventsByName.get('Profile') as any) || [];
 
   if (eventsByName.has('CpuProfile')) {
-    const cpuProfiles: CpuProfileEvent[] = (eventsByName.get(
+    const cpuProfiles: CpuProfileEvent[] = eventsByName.get(
       'CpuProfile'
-    ): any);
+    ) as any;
     profileEvents = profileEvents.concat(cpuProfiles);
   }
 
@@ -543,9 +542,10 @@ async function processTracingEvents(
     const { thread, funcKeyToFuncId, nodeIdToStackId, originToResourceIndex } =
       threadInfo;
 
-    let profileChunks = [];
+    let profileChunks: any[] = [];
     if (profileEvent.name === 'Profile') {
-      threadInfo.lastSeenTime = (profileEvent.args.data.startTime: any) / 1000;
+      threadInfo.lastSeenTime =
+        (profileEvent.args.data.startTime as any) / 1000;
       const { id, pid } = profileEvent;
       profileChunks = findEvents<ProfileChunkEvent>(
         eventsByName,
@@ -589,12 +589,12 @@ async function processTracingEvents(
           const { callFrame, id: nodeIndex } = node;
           let parent: number | void = undefined;
           if (node.parent !== undefined) {
-            parent = (node.parent: any);
+            parent = node.parent as any;
           } else {
             parent = parentMap.get(nodeIndex);
           }
           if (node.children !== undefined) {
-            const children: number[] = (node.children: any);
+            const children: number[] = node.children as any;
             for (let i = 0; i < children.length; i++) {
               parentMap.set(children[i], nodeIndex);
             }
@@ -730,7 +730,7 @@ async function processTracingEvents(
     threadInfoByThread,
     eventsByName,
     profile,
-    (eventsByName.get('Screenshot'): any)
+    eventsByName.get('Screenshot') as any
   );
 
   extractMarkers(
@@ -820,7 +820,7 @@ async function extractScreenshots(
   threadInfoByThread: Map<RawThread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile,
-  screenshots: ?(ScreenshotEvent[])
+  screenshots: ScreenshotEvent[] | null | undefined
 ): Promise<void> {
   if (!screenshots) {
     return;
@@ -881,7 +881,7 @@ async function extractScreenshots(
  */
 function getImageSize(
   url: string
-): Promise<null | { width: number, height: number }> {
+): Promise<null | { width: number; height: number }> {
   return new Promise((resolve) => {
     const image = new Image();
     image.src = url;
@@ -904,7 +904,7 @@ function getImageSize(
  * always preceeds the current stack index in the StackTable.
  */
 function assertStackOrdering(stackTable: RawStackTable) {
-  const visitedStacks = new Set([null]);
+  const visitedStacks = new Set<number | null>([null]);
   for (let i = 0; i < stackTable.length; i++) {
     if (!visitedStacks.has(stackTable.prefix[i])) {
       throw new Error('The stack ordering is incorrect');
@@ -987,7 +987,7 @@ function extractMarkers(
         // Mark events
         event.ph === 'R'
       ) {
-        const time: number = (event.ts: any) / 1000;
+        const time: number = (event.ts as any) / 1000;
         const threadInfo = getThreadInfo(
           threadInfoByPidAndTid,
           threadInfoByThread,
@@ -997,22 +997,22 @@ function extractMarkers(
         );
         const { thread } = threadInfo;
         const { markers } = thread;
-        let argData: MixedObject | null = null;
-        if (event.args && typeof event.args === 'object') {
-          argData = (event.args: any).data || null;
+        let argData: unknown | null = null;
+        if ((event as any).args && typeof (event as any).args === 'object') {
+          argData = ((event as any).args as any).data || null;
         }
         markers.name.push(stringTable.indexForString(name));
         markers.category.push(otherCategoryIndex);
 
-        if (argData && 'type' in argData) {
-          argData.type2 = argData.type;
+        if (argData && 'type' in (argData as any)) {
+          (argData as any).type2 = (argData as any).type;
         }
-        if (argData && 'category' in argData) {
-          argData.category2 = argData.category;
+        if (argData && 'category' in (argData as any)) {
+          (argData as any).category2 = (argData as any).category;
         }
 
         const newData = {
-          ...argData,
+          ...(argData as any),
           type: name,
           category: event.cat,
         };
@@ -1023,7 +1023,7 @@ function extractMarkers(
         if (event.ph === 'X') {
           // Complete Event
           // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.lpfof2aylapb
-          const duration: number = (event.dur: any) / 1000;
+          const duration: number = (event.dur as any) / 1000;
           markers.phase.push(INTERVAL);
           markers.startTime.push(time);
           markers.endTime.push(time + duration);

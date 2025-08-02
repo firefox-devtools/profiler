@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import { oneLine } from 'common-tags';
 import { timeCode } from '../utils/time-code';
 import {
@@ -12,7 +10,7 @@ import {
 } from './profile-data';
 import { resourceTypes } from './data-structures';
 import { getFunctionName } from './function-info';
-import type {
+import {
   CategoryList,
   Thread,
   IndexIntoFuncTable,
@@ -28,42 +26,43 @@ import type {
   BottomBoxInfo,
   CallNodeSelfAndSummary,
   SelfAndTotal,
+  BalancedNativeAllocationsTable,
 } from 'firefox-profiler/types';
 
 import ExtensionIcon from '../../res/img/svg/extension.svg';
 import { formatCallNodeNumber, formatPercent } from '../utils/format-numbers';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import * as ProfileData from './profile-data';
-import type { CallTreeSummaryStrategy } from '../types/actions';
-import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
+import { CallTreeSummaryStrategy } from '../types/actions';
+import { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 
 export type CallTreeTimingsNonInverted = {
-  callNodeHasChildren: Uint8Array,
-  self: Float64Array,
-  total: Float64Array,
-  rootTotalSummary: number, // sum of absolute values, this is used for computing percentages
+  callNodeHasChildren: Uint8Array;
+  self: Float64Array;
+  total: Float64Array;
+  rootTotalSummary: number; // sum of absolute values, this is used for computing percentages
 };
 
-type TotalAndHasChildren = { total: number, hasChildren: boolean };
+type TotalAndHasChildren = { total: number; hasChildren: boolean };
 
 export type InvertedCallTreeRoot = {
-  totalAndHasChildren: TotalAndHasChildren,
-  func: IndexIntoFuncTable,
+  totalAndHasChildren: TotalAndHasChildren;
+  func: IndexIntoFuncTable;
 };
 
 export type CallTreeTimingsInverted = {
-  callNodeSelf: Float64Array,
-  rootTotalSummary: number,
-  sortedRoots: IndexIntoFuncTable[],
-  totalPerRootFunc: Float64Array,
-  hasChildrenPerRootFunc: Uint8Array,
+  callNodeSelf: Float64Array;
+  rootTotalSummary: number;
+  sortedRoots: IndexIntoFuncTable[];
+  totalPerRootFunc: Float64Array;
+  hasChildrenPerRootFunc: Uint8Array;
 };
 
 export type CallTreeTimings =
-  | { type: 'NON_INVERTED', timings: CallTreeTimingsNonInverted }
-  | { type: 'INVERTED', timings: CallTreeTimingsInverted };
+  | { type: 'NON_INVERTED'; timings: CallTreeTimingsNonInverted }
+  | { type: 'INVERTED'; timings: CallTreeTimingsInverted };
 
 /**
  * Gets the CallTreeTimingsNonInverted out of a CallTreeTimings object.
@@ -200,7 +199,7 @@ class CallTreeInternalInverted implements CallTreeInternal {
   _hasChildrenPerRootFunc: Uint8Array;
   _totalAndHasChildrenPerNonRootNode: Map<
     IndexIntoCallNodeTable,
-    TotalAndHasChildren,
+    TotalAndHasChildren
   > = new Map();
 
   constructor(
@@ -376,7 +375,7 @@ export class CallTree {
   getAllDescendants(
     callNodeIndex: IndexIntoCallNodeTable
   ): Set<IndexIntoCallNodeTable> {
-    const result = new Set();
+    const result = new Set<IndexIntoCallNodeTable>();
     this._addDescendantsToSet(callNodeIndex, result);
     return result;
   }
@@ -413,7 +412,7 @@ export class CallTree {
   _getInliningBadge(
     callNodeIndex: IndexIntoCallNodeTable,
     funcName: string
-  ): ExtraBadgeInfo | void {
+  ): ExtraBadgeInfo | undefined {
     const calledFunction = getFunctionName(funcName);
     const inlinedIntoNativeSymbol =
       this._callNodeInfo.sourceFramesInlinedIntoSymbolForNode(callNodeIndex);
@@ -667,7 +666,10 @@ export function getSelfAndTotalForCallNode(
       return { self: 0, total };
     }
     default:
-      throw assertExhaustiveCheck(callTreeTimings.type);
+      throw assertExhaustiveCheck(
+        callTreeTimings as never,
+        'callTreeTimings.type'
+      );
   }
 }
 
@@ -873,7 +875,7 @@ export function getCallTree(
       }
       default:
         throw assertExhaustiveCheck(
-          callTreeTimings.type,
+          callTreeTimings as never,
           'Unhandled CallTreeTimings type.'
         );
     }
@@ -912,12 +914,14 @@ export function extractSamplesLikeTable(
       );
 
       /* istanbul ignore if */
-      if (!nativeAllocations.memoryAddress) {
+      if (!('memoryAddress' in nativeAllocations)) {
         throw new Error(
           'Attempting to filter by retained allocations data that is missing the memory addresses.'
         );
       }
-      return ProfileData.filterToRetainedAllocations(nativeAllocations);
+      return ProfileData.filterToRetainedAllocations(
+        nativeAllocations as BalancedNativeAllocationsTable
+      );
     }
     case 'native-allocations':
       return ProfileData.filterToAllocations(
@@ -940,7 +944,7 @@ export function extractSamplesLikeTable(
       );
 
       /* istanbul ignore if */
-      if (!nativeAllocations.memoryAddress) {
+      if (!('memoryAddress' in nativeAllocations)) {
         throw new Error(
           'Attempting to filter by retained allocations data that is missing the memory addresses.'
         );
@@ -948,7 +952,7 @@ export function extractSamplesLikeTable(
 
       return ProfileData.filterToDeallocationsMemory(
         ensureExists(
-          nativeAllocations,
+          nativeAllocations as BalancedNativeAllocationsTable,
           'Expected the NativeAllocationTable to exist when using a "js-allocation" strategy'
         )
       );

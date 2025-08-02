@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 // This file uses extensive use of Object generic trait bounds, which is a false
 // positive for this rule.
 /* eslint-disable flowtype/no-weak-types */
@@ -16,7 +14,7 @@ import { VirtualList } from './VirtualList';
 
 import { ContextMenuTrigger } from './ContextMenuTrigger';
 
-import type { CssPixels, TableViewOptions } from 'firefox-profiler/types';
+import { CssPixels, TableViewOptions } from 'firefox-profiler/types';
 
 import './TreeView.css';
 
@@ -35,68 +33,68 @@ const PAGE_KEYS_DELTA = 15;
  * `Localized` throws a warning if the `id` field is empty or null. This is made
  * to silence those warnings by directy rendering the children for that case instead.
  */
-function PermissiveLocalized(props: React.ElementConfig<typeof Localized>) {
+function PermissiveLocalized(props: React.ComponentProps<typeof Localized>) {
   const { children, id } = props;
   return id ? <Localized {...props}>{children}</Localized> : children;
 }
 
 // This is used for the result of RegExp.prototype.exec because Flow doesn't do it.
 // See https://github.com/facebook/flow/issues/4099
-type RegExpResult = null | ({ index: number, input: string } & string[]);
+type RegExpResult = null | ({ index: number; input: string } & string[]);
 type NodeIndex = number;
 type TableViewOptionsWithDefault = {
-  fixedColumnWidths: Array<CssPixels>,
+  fixedColumnWidths: Array<CssPixels>;
 };
 
-export type Column<DisplayData: Object> = {
-  +propName: string,
-  +titleL10nId: string,
-  +component?: React.ComponentType<{
-    displayData: DisplayData,
-  }>,
+export type Column<DisplayData extends Record<string, any>> = {
+  readonly propName: string;
+  readonly titleL10nId: string;
+  readonly component?: React.ComponentType<{
+    displayData: DisplayData;
+  }>;
 };
 
-export type MaybeResizableColumn<DisplayData: Object> = {
-  ...Column<DisplayData>,
-  /** defaults to initialWidth */
-  +minWidth?: CssPixels,
-  /** This is the initial width, this can be changed in resizable columns */
-  +initialWidth: CssPixels,
-  /** found width + adjustment = width of header column */
-  +headerWidthAdjustment?: CssPixels,
-  // false by default
-  +resizable?: boolean,
-  // is the divider after the column hidden? false by default
-  +hideDividerAfter?: boolean,
-};
+export type MaybeResizableColumn<DisplayData extends Record<string, any>> =
+  Column<DisplayData> & {
+    /** defaults to initialWidth */
+    readonly minWidth?: CssPixels;
+    /** This is the initial width, this can be changed in resizable columns */
+    readonly initialWidth: CssPixels;
+    /** found width + adjustment = width of header column */
+    readonly headerWidthAdjustment?: CssPixels;
+    // false by default
+    readonly resizable?: boolean;
+    // is the divider after the column hidden? false by default
+    readonly hideDividerAfter?: boolean;
+  };
 
-type TreeViewHeaderProps<DisplayData: Object> = {
-  +fixedColumns: MaybeResizableColumn<DisplayData>[],
-  +mainColumn: Column<DisplayData>,
-  +viewOptions: TableViewOptionsWithDefault,
+type TreeViewHeaderProps<DisplayData extends Record<string, any>> = {
+  readonly fixedColumns: MaybeResizableColumn<DisplayData>[];
+  readonly mainColumn: Column<DisplayData>;
+  readonly viewOptions: TableViewOptionsWithDefault;
   // called when the users moves the divider right of the column,
   // passes the column index and the start x coordinate
-  +onColumnWidthChangeStart: (number, CssPixels) => void,
-  +onColumnWidthReset: (number) => void,
+  readonly onColumnWidthChangeStart: (param: number, x: CssPixels) => void;
+  readonly onColumnWidthReset: (param: number) => void;
 };
 
-class TreeViewHeader<DisplayData: Object> extends React.PureComponent<
-  TreeViewHeaderProps<DisplayData>,
-> {
-  _onDividerMouseDown = (event: SyntheticMouseEvent<HTMLElement>) => {
+class TreeViewHeader<
+  DisplayData extends Record<string, any>,
+> extends React.PureComponent<TreeViewHeaderProps<DisplayData>> {
+  _onDividerMouseDown = (event: React.MouseEvent<HTMLElement>) => {
     this.props.onColumnWidthChangeStart(
       Number(event.currentTarget.dataset.columnIndex),
       event.clientX
     );
   };
 
-  _onDividerDoubleClick = (event: SyntheticMouseEvent<HTMLElement>) => {
+  _onDividerDoubleClick = (event: React.MouseEvent<HTMLElement>) => {
     this.props.onColumnWidthReset(
       Number(event.currentTarget.dataset.columnIndex)
     );
   };
 
-  render() {
+  override render() {
     const { fixedColumns, mainColumn, viewOptions } = this.props;
     const columnWidths = viewOptions.fixedColumnWidths;
     if (fixedColumns.length === 0 && !mainColumn.titleL10nId) {
@@ -178,28 +176,31 @@ function reactStringWithHighlightedSubstrings(
   return highlighted;
 }
 
-type TreeViewRowFixedColumnsProps<DisplayData: Object> = {
-  +displayData: DisplayData,
-  +nodeId: NodeIndex,
-  +columns: MaybeResizableColumn<DisplayData>[],
-  +index: number,
-  +isSelected: boolean,
-  +isRightClicked: boolean,
-  +onClick: (NodeIndex, SyntheticMouseEvent<>) => mixed,
-  +highlightRegExp: RegExp | null,
-  +rowHeightStyle: { height: CssPixels, lineHeight: string },
-  +viewOptions: TableViewOptionsWithDefault,
+type TreeViewRowFixedColumnsProps<DisplayData extends Record<string, any>> = {
+  readonly displayData: DisplayData;
+  readonly nodeId: NodeIndex;
+  readonly columns: MaybeResizableColumn<DisplayData>[];
+  readonly index: number;
+  readonly isSelected: boolean;
+  readonly isRightClicked: boolean;
+  readonly onClick: (
+    param: NodeIndex,
+    event: React.MouseEvent<HTMLElement>
+  ) => void;
+  readonly highlightRegExp: RegExp | null;
+  readonly rowHeightStyle: { height: CssPixels; lineHeight: string };
+  readonly viewOptions: TableViewOptionsWithDefault;
 };
 
-class TreeViewRowFixedColumns<DisplayData: Object> extends React.PureComponent<
-  TreeViewRowFixedColumnsProps<DisplayData>,
-> {
-  _onClick = (event: SyntheticMouseEvent<>) => {
+class TreeViewRowFixedColumns<
+  DisplayData extends Record<string, any>,
+> extends React.PureComponent<TreeViewRowFixedColumnsProps<DisplayData>> {
+  _onClick = (event: React.MouseEvent<HTMLElement>) => {
     const { nodeId, onClick } = this.props;
     onClick(nodeId, event);
   };
 
-  render() {
+  override render() {
     const {
       displayData,
       columns,
@@ -253,51 +254,55 @@ class TreeViewRowFixedColumns<DisplayData: Object> extends React.PureComponent<
   }
 }
 
-type TreeViewRowScrolledColumnsProps<DisplayData: Object> = {
-  +displayData: DisplayData,
-  +nodeId: NodeIndex,
-  +depth: number,
-  +mainColumn: Column<DisplayData>,
-  +appendageColumn?: Column<DisplayData>,
-  +index: number,
-  +canBeExpanded: boolean,
-  +isExpanded: boolean,
-  +isSelected: boolean,
-  +isRightClicked: boolean,
-  +onToggle: (NodeIndex, boolean, boolean) => mixed,
-  +onClick: (NodeIndex, SyntheticMouseEvent<>) => mixed,
-  +highlightRegExp: RegExp | null,
-  // React converts height into 'px' values, while lineHeight is valid in
-  // non-'px' units.
-  +rowHeightStyle: { height: CssPixels, lineHeight: string },
-  +indentWidth: CssPixels,
-};
+type TreeViewRowScrolledColumnsProps<DisplayData extends Record<string, any>> =
+  {
+    readonly displayData: DisplayData;
+    readonly nodeId: NodeIndex;
+    readonly depth: number;
+    readonly mainColumn: Column<DisplayData>;
+    readonly appendageColumn?: Column<DisplayData>;
+    readonly index: number;
+    readonly canBeExpanded: boolean;
+    readonly isExpanded: boolean;
+    readonly isSelected: boolean;
+    readonly isRightClicked: boolean;
+    readonly onToggle: (
+      param: NodeIndex,
+      expanded: boolean,
+      alt: boolean
+    ) => void;
+    readonly onClick: (
+      param: NodeIndex,
+      event: React.MouseEvent<HTMLElement>
+    ) => void;
+    readonly highlightRegExp: RegExp | null;
+    // React converts height into 'px' values, while lineHeight is valid in
+    // non-'px' units.
+    readonly rowHeightStyle: { height: CssPixels; lineHeight: string };
+    readonly indentWidth: CssPixels;
+  };
 
 // This is a false-positive, as it's used as a generic trait bounds.
 class TreeViewRowScrolledColumns<
-  DisplayData: Object,
+  DisplayData extends Record<string, any>,
 > extends React.PureComponent<TreeViewRowScrolledColumnsProps<DisplayData>> {
   /**
    * In this mousedown handler, we use event delegation so we have to use
    * `target` instead of `currentTarget`.
    */
-  _onMouseDown = (
-    event: { target: Element } & SyntheticMouseEvent<Element>
-  ) => {
+  _onMouseDown = (event: React.MouseEvent<HTMLElement>) => {
     const { nodeId, onClick } = this.props;
-    if (!event.target.classList.contains('treeRowToggleButton')) {
+    if (!(event.target as Element).classList.contains('treeRowToggleButton')) {
       onClick(nodeId, event);
     }
   };
 
-  _onToggleClick = (
-    event: { target: Element } & SyntheticMouseEvent<Element>
-  ) => {
+  _onToggleClick = (event: React.MouseEvent<HTMLElement>) => {
     const { nodeId, isExpanded, onToggle } = this.props;
     onToggle(nodeId, !isExpanded, event.altKey === true);
   };
 
-  render() {
+  override render() {
     const {
       displayData,
       depth,
@@ -345,7 +350,7 @@ class TreeViewRowScrolledColumns<
         style={rowHeightStyle}
         onMouseDown={this._onMouseDown}
         // The following attributes are important for accessibility.
-        aria-expanded={ariaExpanded}
+        aria-expanded={ariaExpanded ?? undefined}
         aria-level={depth + 1}
         aria-selected={isSelected}
         aria-label={displayData.ariaLabel}
@@ -427,61 +432,63 @@ class TreeViewRowScrolledColumns<
   }
 }
 
-interface Tree<DisplayData: Object> {
-  getDepth(NodeIndex): number;
+interface Tree<DisplayData extends Record<string, any>> {
+  getDepth(nodeIndex: NodeIndex): number;
   getRoots(): NodeIndex[];
-  getDisplayData(NodeIndex): DisplayData;
-  getParent(NodeIndex): NodeIndex;
-  getChildren(NodeIndex): NodeIndex[];
-  hasChildren(NodeIndex): boolean;
-  getAllDescendants(NodeIndex): Set<NodeIndex>;
+  getDisplayData(nodeIndex: NodeIndex): DisplayData;
+  getParent(nodeIndex: NodeIndex): NodeIndex;
+  getChildren(nodeIndex: NodeIndex): NodeIndex[];
+  hasChildren(nodeIndex: NodeIndex): boolean;
+  getAllDescendants(nodeIndex: NodeIndex): Set<NodeIndex>;
 }
 
-type TreeViewProps<DisplayData> = {
-  +fixedColumns: MaybeResizableColumn<DisplayData>[],
-  +mainColumn: Column<DisplayData>,
-  +tree: Tree<DisplayData>,
-  +expandedNodeIds: Array<NodeIndex | null>,
-  +selectedNodeId: NodeIndex | null,
-  +rightClickedNodeId?: NodeIndex | null,
-  +onExpandedNodesChange: (Array<NodeIndex | null>) => mixed,
-  +highlightRegExp?: RegExp | null,
-  +appendageColumn?: Column<DisplayData>,
-  +disableOverscan?: boolean,
-  +contextMenu?: React.Element<any>,
-  +contextMenuId?: string,
-  +maxNodeDepth: number,
-  +onSelectionChange: (NodeIndex, { source: 'keyboard' | 'pointer' }) => mixed,
-  +onRightClickSelection?: (NodeIndex) => mixed,
-  +onEnterKey?: (NodeIndex) => mixed,
-  +onDoubleClick?: (NodeIndex) => mixed,
-  +rowHeight: CssPixels,
-  +indentWidth: CssPixels,
-  +onKeyDown?: (SyntheticKeyboardEvent<>) => void,
-  +viewOptions: TableViewOptions,
-  +onViewOptionsChange?: (TableViewOptions) => void,
+type TreeViewProps<DisplayData extends Record<string, any>> = {
+  readonly fixedColumns: MaybeResizableColumn<DisplayData>[];
+  readonly mainColumn: Column<DisplayData>;
+  readonly tree: Tree<DisplayData>;
+  readonly expandedNodeIds: Array<NodeIndex | null>;
+  readonly selectedNodeId: NodeIndex | null;
+  readonly rightClickedNodeId?: NodeIndex | null;
+  readonly onExpandedNodesChange: (param: Array<NodeIndex | null>) => void;
+  readonly highlightRegExp?: RegExp | null;
+  readonly appendageColumn?: Column<DisplayData>;
+  readonly disableOverscan?: boolean;
+  readonly contextMenu?: React.ReactElement<any>;
+  readonly contextMenuId?: string;
+  readonly maxNodeDepth: number;
+  readonly onSelectionChange: (
+    param: NodeIndex,
+    detail: { source: 'keyboard' | 'pointer' }
+  ) => void;
+  readonly onRightClickSelection?: (param: NodeIndex) => void;
+  readonly onEnterKey?: (param: NodeIndex) => void;
+  readonly onDoubleClick?: (param: NodeIndex) => void;
+  readonly rowHeight: CssPixels;
+  readonly indentWidth: CssPixels;
+  readonly onKeyDown?: (param: React.KeyboardEvent<HTMLElement>) => void;
+  readonly viewOptions: TableViewOptions;
+  readonly onViewOptionsChange?: (param: TableViewOptions) => void;
 };
 
 type TreeViewState = {
-  +fixedColumnWidths: Array<CssPixels> | null,
-  +isResizingColumns: boolean,
+  readonly fixedColumnWidths: Array<CssPixels> | null;
+  readonly isResizingColumns: boolean;
 };
 
-export class TreeView<DisplayData: Object> extends React.PureComponent<
-  TreeViewProps<DisplayData>,
-  TreeViewState,
-> {
+export class TreeView<
+  DisplayData extends Record<string, any>,
+> extends React.PureComponent<TreeViewProps<DisplayData>, TreeViewState> {
   _list: VirtualList<NodeIndex> | null = null;
   _takeListRef = (list: VirtualList<NodeIndex> | null) => (this._list = list);
 
   // This contains the information about the current column resizing happening currently.
   _currentMovedColumnState: {
-    columnIndex: number,
-    startX: CssPixels,
-    initialWidth: CssPixels,
+    columnIndex: number;
+    startX: CssPixels;
+    initialWidth: CssPixels;
   } | null = null;
 
-  state = {
+  override state = {
     // This contains the current widths, while or after the user resizes them.
     fixedColumnWidths: null,
 
@@ -499,7 +506,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
   _computeSpecialItemsMemoized = memoize(
     (
       selectedNodeId: NodeIndex | null,
-      rightClickedNodeId: ?NodeIndex
+      rightClickedNodeId: NodeIndex | null
     ): [NodeIndex | void, NodeIndex | void] => [
       selectedNodeId ?? undefined,
       rightClickedNodeId ?? undefined,
@@ -582,7 +589,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     this._propagateColumnWidthChange(this._getCurrentFixedColumnWidths());
   };
 
-  componentWillUnmount = () => {
+  override componentWillUnmount = () => {
     this._cleanUpMouseHandlers();
   };
 
@@ -609,7 +616,12 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
 
   _computeAllVisibleRowsMemoized = memoize(
     (tree: Tree<DisplayData>, expandedNodes: Set<NodeIndex | null>) => {
-      function _addVisibleRowsFromNode(tree, expandedNodes, arr, nodeId) {
+      function _addVisibleRowsFromNode(
+        tree: Tree<DisplayData>,
+        expandedNodes: Set<NodeIndex | null>,
+        arr: NodeIndex[],
+        nodeId: NodeIndex
+      ) {
         arr.push(nodeId);
         if (!expandedNodes.has(nodeId)) {
           return;
@@ -621,7 +633,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
       }
 
       const roots = tree.getRoots();
-      const allRows = [];
+      const allRows: NodeIndex[] = [];
       for (let i = 0; i < roots.length; i++) {
         _addVisibleRowsFromNode(tree, expandedNodes, allRows, roots[i]);
       }
@@ -719,7 +731,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     const { selectedNodeId, rightClickedNodeId } = this.props;
     return this._computeSpecialItemsMemoized(
       selectedNodeId,
-      rightClickedNodeId
+      rightClickedNodeId ?? null
     );
   }
 
@@ -765,7 +777,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     }
   }
 
-  _onRowClicked = (nodeId: NodeIndex, event: SyntheticMouseEvent<>) => {
+  _onRowClicked = (nodeId: NodeIndex, event: React.MouseEvent<HTMLElement>) => {
     if (event.button === 0) {
       this._selectWithMouse(nodeId);
     } else if (event.button === 2) {
@@ -787,7 +799,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     const { tree, selectedNodeId, mainColumn } = this.props;
     if (selectedNodeId) {
       const displayData = tree.getDisplayData(selectedNodeId);
-      const clipboardData: DataTransfer = (event: any).clipboardData;
+      const clipboardData: DataTransfer = (event as any).clipboardData;
       clipboardData.setData('text/plain', displayData[mainColumn.propName]);
     }
   };
@@ -796,7 +808,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     this.props.onSelectionChange(nodeId, { source: 'keyboard' });
   }
 
-  _onKeyDown = (event: SyntheticKeyboardEvent<>) => {
+  _onKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
     if (this.props.onKeyDown) {
       this.props.onKeyDown(event);
     }
@@ -933,7 +945,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     }
   }
 
-  render() {
+  override render() {
     const {
       fixedColumns,
       mainColumn,
@@ -966,7 +978,9 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
             // This attribute exposes the current active child element,
             // while keeping focus on the parent (call tree).
             ariaActiveDescendant={
-              selectedNodeId !== null ? `treeViewRow-${selectedNodeId}` : null
+              selectedNodeId !== null
+                ? `treeViewRow-${selectedNodeId}`
+                : undefined
             }
             items={this._getAllVisibleRows()}
             renderItem={this._renderRow}

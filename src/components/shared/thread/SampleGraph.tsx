@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { InView } from 'react-intersection-observer';
@@ -19,7 +17,7 @@ import { SampleTooltipContents } from 'firefox-profiler/components/shared/Sample
 
 import './SampleGraph.css';
 
-import type {
+import {
   Thread,
   CategoryList,
   IndexIntoSamplesTable,
@@ -29,51 +27,49 @@ import type {
   TimelineType,
   ImplementationFilter,
 } from 'firefox-profiler/types';
-import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
-import type { CpuRatioInTimeRange } from './ActivityGraphFills';
+import { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import { CpuRatioInTimeRange } from './ActivityGraphFills';
 
 export type HoveredPixelState = {
-  +sample: IndexIntoSamplesTable | null,
-  +cpuRatioInTimeRange: CpuRatioInTimeRange | null,
+  readonly sample: IndexIntoSamplesTable | null;
+  readonly cpuRatioInTimeRange: CpuRatioInTimeRange | null;
 };
 
 type Props = {
-  +className: string,
-  +thread: Thread,
-  +samplesSelectedStates: null | SelectedState[],
-  +interval: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +categories: CategoryList,
-  +onSampleClick: (
-    event: SyntheticMouseEvent<>,
+  readonly className: string;
+  readonly thread: Thread;
+  readonly samplesSelectedStates: null | SelectedState[];
+  readonly interval: Milliseconds;
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly categories: CategoryList;
+  readonly onSampleClick: (
+    event: React.MouseEvent<HTMLElement>,
     sampleIndex: IndexIntoSamplesTable | null
-  ) => void,
-  +trackName: string,
-  +timelineType: TimelineType,
-  +implementationFilter: ImplementationFilter,
-  +zeroAt: Milliseconds,
-  +profileTimelineUnit: string,
-  ...SizeProps,
-};
+  ) => void;
+  readonly trackName: string;
+  readonly timelineType: TimelineType;
+  readonly implementationFilter: ImplementationFilter;
+  readonly zeroAt: Milliseconds;
+  readonly profileTimelineUnit: string;
+} & SizeProps;
 
 type State = {
-  hoveredPixelState: null | HoveredPixelState,
-  mouseX: CssPixels,
-  mouseY: CssPixels,
+  hoveredPixelState: null | HoveredPixelState;
+  mouseX: CssPixels;
+  mouseY: CssPixels;
 };
 
 type CanvasProps = {
-  +className: string,
-  +thread: Thread,
-  +samplesSelectedStates: null | SelectedState[],
-  +interval: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +categories: CategoryList,
-  +trackName: string,
-  ...SizeProps,
-};
+  readonly className: string;
+  readonly thread: Thread;
+  readonly samplesSelectedStates: null | SelectedState[];
+  readonly interval: Milliseconds;
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly categories: CategoryList;
+  readonly trackName: string;
+} & SizeProps;
 
 /**
  * This component controls the rendering of the canvas. Every render call through
@@ -84,7 +80,7 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
   _canvas: null | HTMLCanvasElement = null;
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) =>
     (this._canvas = canvas);
-  _canvasState: { renderScheduled: boolean, inView: boolean } = {
+  _canvasState: { renderScheduled: boolean; inView: boolean } = {
     renderScheduled: false,
     inView: false,
   };
@@ -118,11 +114,11 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
     this._renderCanvas();
   };
 
-  componentDidMount() {
+  override componentDidMount() {
     this._renderCanvas();
   }
 
-  componentDidUpdate() {
+  override componentDidUpdate() {
     this._renderCanvas();
   }
 
@@ -139,11 +135,11 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
     } = this.props;
 
     const devicePixelRatio = canvas.ownerDocument
-      ? canvas.ownerDocument.defaultView.devicePixelRatio
+      ? canvas.ownerDocument.defaultView?.devicePixelRatio || 1
       : 1;
     canvas.width = Math.round(width * devicePixelRatio);
     canvas.height = Math.round(height * devicePixelRatio);
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d')!;
     const rangeLength = rangeEnd - rangeStart;
     const xPixelsPerMs = canvas.width / rangeLength;
     const trueIntervalPixelWidth = interval * xPixelsPerMs;
@@ -168,9 +164,9 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
     );
 
     // Do one pass over the samples array to gather the samples we want to draw.
-    const regularSamples = [];
-    const idleSamples = [];
-    const highlightedSamples = [];
+    const regularSamples: number[] = [];
+    const idleSamples: number[] = [];
+    const highlightedSamples: number[] = [];
     // Enforce a minimum distance so that we don't draw more than 4 samples per
     // pixel.
     const minGapMs = 0.25 / xPixelsPerMs;
@@ -225,7 +221,7 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
     drawSamples(idleSamples, lighterBlue);
   }
 
-  render() {
+  override render() {
     const { trackName } = this.props;
 
     return (
@@ -246,13 +242,13 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
 }
 
 export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
-  state = {
+  override state = {
     hoveredPixelState: null,
     mouseX: 0,
     mouseY: 0,
   };
 
-  _onClick = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
+  _onClick = (event: React.MouseEvent<HTMLElement>) => {
     const hoveredSample = this._getSampleAtMouseEvent(event);
     this.props.onSampleClick(event, hoveredSample?.sample ?? null);
   };
@@ -261,7 +257,7 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
     this.setState({ hoveredPixelState: null });
   };
 
-  _onMouseMove = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
+  _onMouseMove = (event: React.MouseEvent<HTMLElement>) => {
     const canvas = event.currentTarget;
     if (!canvas) {
       return;
@@ -277,9 +273,9 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
   };
 
   _getSampleAtMouseEvent(
-    event: SyntheticMouseEvent<HTMLCanvasElement>
+    event: React.MouseEvent<HTMLElement>
   ): null | HoveredPixelState {
-    const canvas = event.currentTarget;
+    const canvas = event.currentTarget as HTMLCanvasElement;
     if (!canvas) {
       return null;
     }
@@ -331,7 +327,7 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
     };
   }
 
-  render() {
+  override render() {
     const {
       className,
       trackName,
@@ -373,10 +369,10 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
         {hoveredPixelState === null ? null : (
           <Tooltip mouseX={mouseX} mouseY={mouseY}>
             <SampleTooltipContents
-              sampleIndex={hoveredPixelState.sample}
+              sampleIndex={(hoveredPixelState as HoveredPixelState).sample}
               cpuRatioInTimeRange={
                 timelineType === 'cpu-category'
-                  ? hoveredPixelState.cpuRatioInTimeRange
+                  ? (hoveredPixelState as HoveredPixelState).cpuRatioInTimeRange
                   : null
               }
               rangeFilteredThread={thread}

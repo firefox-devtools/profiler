@@ -300,13 +300,24 @@ withSize<Props>(ComponentImpl) → withSize(ComponentImpl) // Remove explicit ty
 
 - **Never update snapshots** without investigating root cause of differences
 - **Take TypeScript type definitions with a grain of salt** - they were created from Flow types
-- **Don't change runtime behavior of the code** - prefer adjusting types if needed
+- **NEVER change runtime behavior** - relax types instead
 - **Convert dependencies first** - always follow topological order
 - **Per-file conversion only** - avoid global syntax changes across mixed codebase
 - **Test after each file** - ensure TypeScript compilation + tests pass before proceeding
+- **ALWAYS prefer to adjust types instead of changing code**
 
 Read the original Flow types or the original code by recovering file contents from git history if needed.
 Some of the converted types will not have been exercised yet; a newly-converted file might be the first code to exercise the type definition.
+
+For example, the argument type of a method might be `React.MouseEvent<HTMLCanvasElement>`
+when it only really needs to be `React.MouseEvent<HTMLElement>`. Relax the type rather than
+passing a different event.
+
+To reiterate: Whenever you fix a type checking error, make sure that the fixed code has the
+exact same runtime behavior as before. If you changed the behavior in order to make the type
+checker happy, revert your change and see if you can change the types instead. If a solution
+remains elusive, it's sometimes fine to add `as any` workarounds, after alternatives have
+been explored.
 
 ### ✅ Proven Strategy
 

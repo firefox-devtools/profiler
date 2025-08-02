@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import clamp from 'clamp';
 import arrayMove from 'array-move';
@@ -15,44 +13,44 @@ import {
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 
 type Props = {
-  orient: 'horizontal' | 'vertical',
-  tagName: string,
-  className: string,
-  order: number[],
-  onChangeOrder: (number[]) => mixed,
+  orient: 'horizontal' | 'vertical';
+  tagName: React.ElementType;
+  className: string;
+  order: number[];
+  onChangeOrder: (param: number[]) => mixed;
   // Reorderable elements should set a class name to match against. This allows
   // nested reorderable elements to set different matching class names.
-  grippyClassName: string,
+  grippyClassName: string;
   // This forces the children to be an array of React Elements.
   // See https://flow.org/en/docs/react/children/ for more information.
   // Be careful: children need to handle a `style` property.
-  children: React.ChildrenArray<React.Element<any>>,
+  children: React.ReactElement<any>[];
   // If present, this will be attached to the container added for these
   // children. As a reminder, the container will use the tagName defined above.
-  innerElementRef?: React.Ref<any>,
+  innerElementRef?: React.Ref<any>;
 };
 
 type State = {
-  phase: 'RESTING' | 'FINISHING' | 'MANIPULATING',
-  manipulatingIndex: number,
-  destinationIndex: number,
-  manipulationDelta: number,
-  adjustPrecedingBy: number,
-  adjustSucceedingBy: number,
-  finalOffset: number,
+  phase: 'RESTING' | 'FINISHING' | 'MANIPULATING';
+  manipulatingIndex: number;
+  destinationIndex: number;
+  manipulationDelta: number;
+  adjustPrecedingBy: number;
+  adjustSucceedingBy: number;
+  finalOffset: number;
 };
 
 type XY = {
-  pageXY: 'pageX' | 'pageY',
-  translateXY: 'translateX' | 'translateY',
-  lefttop: 'left' | 'top',
-  rightbottom: 'right' | 'bottom',
+  pageXY: 'pageX' | 'pageY';
+  translateXY: 'translateX' | 'translateY';
+  lefttop: 'left' | 'top';
+  rightbottom: 'right' | 'bottom';
 };
 
-type EventWithPageProperties = { pageX: number, pageY: number };
+type EventWithPageProperties = { pageX: number; pageY: number };
 
 export class Reorderable extends React.PureComponent<Props, State> {
-  _xy: { horizontal: XY, vertical: XY } = {
+  _xy: { horizontal: XY; vertical: XY } = {
     horizontal: {
       pageXY: 'pageX',
       translateXY: 'translateX',
@@ -67,8 +65,8 @@ export class Reorderable extends React.PureComponent<Props, State> {
     },
   };
 
-  state = {
-    phase: 'RESTING',
+  override state = {
+    phase: 'RESTING' as const,
     manipulatingIndex: -1,
     destinationIndex: -1,
     manipulationDelta: 0,
@@ -78,7 +76,7 @@ export class Reorderable extends React.PureComponent<Props, State> {
   };
 
   _onMouseDown = (
-    event: { target: EventTarget } & SyntheticMouseEvent<HTMLElement>
+    event: { target: EventTarget } & React.MouseEvent<HTMLElement>
   ) => {
     const container = event.currentTarget;
 
@@ -93,7 +91,7 @@ export class Reorderable extends React.PureComponent<Props, State> {
 
     // Flow: Coerce the event target into an HTMLElement in combination with the above
     // `instanceof` statement.
-    let element = (event.target: HTMLElement);
+    let element = event.target as HTMLElement;
     const { grippyClassName } = this.props;
     if (!element.matches(`.${grippyClassName}, .${grippyClassName} *`)) {
       // Don't handle this event. Only clicking inside a matching grippy class
@@ -102,7 +100,7 @@ export class Reorderable extends React.PureComponent<Props, State> {
     }
 
     while (element instanceof HTMLElement && element.parentNode !== container) {
-      element = element.parentNode;
+      element = element.parentNode as HTMLElement;
     }
 
     if (!(element instanceof HTMLElement)) {
@@ -147,7 +145,7 @@ export class Reorderable extends React.PureComponent<Props, State> {
         isBefore = false;
         return 0;
       }
-      const childRect = getMarginRect(child);
+      const childRect = getMarginRect(child as HTMLElement);
       return isBefore
         ? extractDomRectValue(childRect, xy.lefttop) -
             extractDomRectValue(elementRect, xy.lefttop)
@@ -172,7 +170,7 @@ export class Reorderable extends React.PureComponent<Props, State> {
       elementIndex === children.length - 1
         ? extractDomRectValue(containerRect, xy.rightbottom)
         : extractDomRectValue(
-            getMarginRect(children[elementIndex + 1]),
+            getMarginRect(children[elementIndex + 1] as HTMLElement),
             xy.lefttop
           );
 
@@ -180,7 +178,7 @@ export class Reorderable extends React.PureComponent<Props, State> {
       elementIndex === 0
         ? extractDomRectValue(containerRect, xy.lefttop)
         : extractDomRectValue(
-            getMarginRect(children[elementIndex - 1]),
+            getMarginRect(children[elementIndex - 1] as HTMLElement),
             xy.rightbottom
           );
 
@@ -242,7 +240,7 @@ export class Reorderable extends React.PureComponent<Props, State> {
     window.addEventListener('mouseup', mouseUpListener, true);
   }
 
-  render() {
+  override render() {
     const { className, order, innerElementRef } = this.props;
     const children = React.Children.toArray(this.props.children);
     const orderedChildren = order.map((childIndex) => children[childIndex]);
@@ -282,7 +280,7 @@ export class Reorderable extends React.PureComponent<Props, State> {
           if (childIndex === manipulatingIndex) {
             style.zIndex = '2';
             if (phase === 'MANIPULATING') {
-              delete style.transition;
+              delete (style as any).transition;
               style.transform = `${xy.translateXY}(${this.state.manipulationDelta}px)`;
             } else {
               style.transform = `${xy.translateXY}(${this.state.finalOffset}px)`;
@@ -300,7 +298,9 @@ export class Reorderable extends React.PureComponent<Props, State> {
           }
 
           // Note: the child element needs to handle this `style` property.
-          return React.cloneElement(child, { style });
+          return React.cloneElement(child as React.ReactElement<any>, {
+            style,
+          });
         })}
       </TagName>
     );
