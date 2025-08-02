@@ -24,14 +24,12 @@ to proceed with the next step of the migration.
 ### Migration Status
 
 - `yarn test-all` passes - All checks work correctly
-- `yarn typecheck` passes - TypeScript files compile  
-- `yarn typecheck:strict` has 19 errors remaining (reduced from 100+)
+- `yarn typecheck` passes - TypeScript files compile
 - Mixed Flow/TypeScript codebase is stable
 
 ### 🔧 Key Commands
 
 ```bash
-yarn typecheck:strict   # Strict TypeScript checking, uses tsconfig.migration.strict.json
 yarn typecheck         # Regular migration checking (used during development), uses tsconfig.migration.json
 yarn test-all          # Full validation (lint, test, typecheck)
 ```
@@ -40,14 +38,13 @@ yarn test-all          # Full validation (lint, test, typecheck)
 
 ### Dual Configuration Strategy
 
-This project uses **three separate TypeScript configurations** to handle the mixed Flow/TypeScript migration:
+This project uses **two separate TypeScript configurations** to handle the mixed Flow/TypeScript migration:
 
 #### 1. `tsconfig.json` (Primary Config)
 
 - **Purpose**: Base configuration, used by `yarn typecheck-all`. Currently fails.
 - **Key settings**:
   - `"allowJs": true` - Allows TypeScript to process `.js` files when imported by `.ts` files
-  - `"include": ["src/**/*.ts", "src/**/*.tsx", "src/global.d.ts"]` - Only explicitly includes TypeScript files
   - **Important**: Due to `allowJs: true`, when TypeScript processes `.ts` files that import `.js` files, it will also type-check those `.js` files and fail on Flow annotations
 
 #### 2. `tsconfig.migration.json` (Migration-Specific Config)
@@ -56,18 +53,8 @@ This project uses **three separate TypeScript configurations** to handle the mix
 - **Extends**: `tsconfig.json` but overrides key settings
 - **Key settings**:
   - `"allowJs": false` - Completely ignores `.js` files
-  - `"exclude": ["src/**/*.js", "src/**/*.jsx"]` - Explicitly excludes all JavaScript files
+  - `"exclude": [...]` - Explicitly excludes a short list of partially converted files
   - **Result**: Only checks actual TypeScript files, avoiding Flow annotation errors
-
-#### 3. `tsconfig.migration.strict.json` (Migration-Specific Config with )
-
-- **Purpose**: Stricter typechecking, used by `yarn typecheck:strict`. Currently passes but contains excludes list.
-- **Extends**: `tsconfig.migration.json` but overrides key settings
-- **Key settings**:
-  - `"noImplicitAny": true` - Enforces that all imported modules have been converted to TypeScript or have .d.ts type definitions
-  - `"strictNullChecks": true` - Catches more mistakes
-  - `"exclude": [...]` - Contains a list of files that should be reduced over time
-  - **Result**: Allows gradual conversion to strict typechecking without disrupting `yarn typecheck`
 
 ---
 
@@ -75,7 +62,7 @@ This project uses **three separate TypeScript configurations** to handle the mix
 
 ### Addressing strict typecheck errors for imports
 
-`yarn typecheck:strict` can produce errors of the following form:
+`yarn typecheck` can produce errors of the following form:
 
 ```
 error TS7016: Could not find a declaration file for module
@@ -331,8 +318,7 @@ Some of the converted types will not have been exercised yet; a newly-converted 
 
 ## Essential Commands
 
-- `yarn typecheck:strict` - Strict TypeScript checking (current focus)
-- `yarn typecheck` - Regular TypeScript checking for converted files
+- `yarn typecheck` - TypeScript checking for converted files (current focus)
 - `yarn test-all` - Full validation (must pass after each conversion)
 
 ## Migration Tools
@@ -400,7 +386,7 @@ If a phase is only partially complete, but feels complete "in the important ways
 
 ### Phase 4: ✅ LARGELY COMPLETED - Strict compliance
 
-- **Status**: `yarn typecheck:strict` has 19 errors remaining (reduced from 100+)
+- **Status**: `yarn typecheck` passes, 16 files excluded
 - **Recent conversions**:
   - August 2: Canvas.tsx, ActivityGraphCanvas.tsx, ActivityGraphFills.tsx, VirtualList.tsx, art-trace.tsx, js-tracer.tsx, ActivityGraph.tsx
   - August 1: profile-logic/tracks.ts, selectors/url-state.ts, selectors/per-thread/index.ts
@@ -422,7 +408,7 @@ If a phase is only partially complete, but feels complete "in the important ways
 
 ## Next Steps
 
-Continue React component conversion using dependency-first approach. TypeScript strict compliance is largely achieved.
+Continue React component conversion using dependency-first approach.
 
 Use dependency analysis tool to identify files ready for conversion:
 ```bash

@@ -15,6 +15,8 @@
 
     // Type Checking (Gradual strictness)
     "strict": false, // Keep false during migration
+    "noImplicitAny": true,
+    "strictNullChecks": true,
     "noImplicitReturns": true, // Helps catch Flow-style issues
     "noFallthroughCasesInSwitch": false, // Disabled during Flow migration
     "forceConsistentCasingInFileNames": true,
@@ -32,9 +34,6 @@
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo",
 
-    // "noImplicitAny": true,
-    // "strictNullChecks": true,
-
     // Module Resolution
     "resolveJsonModule": true,
     "allowImportingTsExtensions": false,
@@ -47,6 +46,6 @@
     // React & JSX
     "jsx": "react-jsx"
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/global.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "dist", "src/types/libdef"]
 }

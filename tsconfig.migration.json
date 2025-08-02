@@ -3,15 +3,22 @@
   "compilerOptions": {
     "allowJs": false
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": [
-    "node_modules",
-    "dist",
-    "src/types/libdef",
-    "src/**/*.js",
-    "src/**/*.jsx",
     "src/actions/profile-view.ts",
-    "src/selectors/profile.ts",
-    "src/selectors/publish.ts"
+    "src/components/shared/InnerNavigationLink.tsx",
+    "src/components/app/BeforeUnloadManager.tsx",
+    "src/components/app/Root.tsx",
+    "src/components/app/UploadedRecordingsHome.tsx",
+    "src/components/js-tracer/EmptyReasons.tsx",
+    "src/components/marker-chart/MarkerChartEmptyReasons.tsx",
+    "src/components/marker-table/MarkerTableEmptyReasons.tsx",
+    "src/components/network-chart/NetworkChartEmptyReasons.tsx",
+    "src/components/shared/TransformNavigator.tsx",
+    "src/components/timeline/TrackEventDelay.tsx",
+    "src/components/timeline/TrackEventDelayGraph.tsx",
+    "src/profile-logic/flame-graph.ts",
+    "src/selectors/per-thread/index.ts",
+    "src/selectors/publish.ts",
+    "src/utils/window-console.ts"
   ]
 }
