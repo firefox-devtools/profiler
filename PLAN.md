@@ -11,15 +11,16 @@ to proceed with the next step of the migration.
 
 - **Type Definitions**: 13/13 files complete (100%)
 - **Core Utilities**: 41/41 files complete (100%)  
+- **Selector Files**: Major progress - per-thread selectors converted
 - **React Components**: ~42/150+ files complete (~28%)
-- **Strict Type Compliance**: LARGELY COMPLETE - 19 minor errors remain (down from 100+)
+- **Strict Type Compliance**: LARGELY COMPLETE - 15 files excluded from strict checking
 - **Core Dependencies**: All major blocking files converted
 - **Build System**: Mixed Flow/TypeScript support working
 - **Migration Tooling**: Enhanced dependency analysis available
 
-### Current Priority: Continue Component Migration
+### Current Priority: Continue Systematic File-by-File Migration
 
-**Strategy**: Core dependencies converted, strict compliance improved significantly, focus on React components using dependency-first approach.
+**Strategy**: With core infrastructure complete, continue dependency-first migration of remaining JavaScript files. Focus on files with zero or minimal dependencies first.
 
 ### Migration Status
 
@@ -356,6 +357,14 @@ The `flow-to-typescript-unified.sh` script handles most conversions automaticall
 - Add 'as const' for literal type inference
 - Convert commas to semicolons in type/interface definitions only
 
+**Recently Discovered Patterns (August 2025):**
+- **Flow spread in types**: `{...TypeA, ...TypeB}` → `TypeA & TypeB` (intersection types)
+- **Function parameters in types**: `(Type1, Type2) => ReturnType` → `(param1: Type1, param2: Type2) => ReturnType`
+- **Selector parameter annotations**: Complex selectors often need explicit type annotations for parameters
+- **Dynamic property access**: Use `(obj as any)[key]` for dynamic object property access
+- **Array type initialization**: `const arr = []` → `const arr: Type[] = []`
+- **Nullable type handling**: `param ?? fallback` for handling potentially null values from arrays
+
 ---
 
 ## General guidelines
@@ -389,26 +398,32 @@ The `flow-to-typescript-unified.sh` script handles most conversions automaticall
 
 - All 41 utility files successfully migrated to TypeScript
 
-### Phase 3: 🚀 IN PROGRESS - React Components  
+### Phase 3: 🚀 IN PROGRESS - Systematic File Migration
 
-- **Status**: ~42/150+ files complete (28%)
-- **Strategy**: Dependency-first migration
-- **Recent progress**: ActivityGraph.tsx, ActivityGraphFills.tsx converted during strict compliance work
+- **Status**: 86 JavaScript files remaining (down from 91)
+- **TypeScript files**: 209 (up from 204)
+- **Strategy**: Dependency-first migration focusing on zero-dependency files first
+- **Recent major conversions (August 2, 2025)**:
+  - **Core selectors**: src/selectors/per-thread/ (thread.tsx, markers.ts, stack-sample.ts)
+  - **Profile logic**: src/profile-logic/merge-compare.ts (1,447 lines)
+  - **CLI tools**: src/symbolicator-cli/index.ts
+  - **Total converted**: 5 files, 3,439 lines of code
 
-### Phase 4: ✅ LARGELY COMPLETED - Strict compliance
+### Phase 4: ✅ LARGELY COMPLETED - Strict TypeScript compliance
 
-- **Status**: `yarn typecheck` passes, 16 files excluded
-- **Recent conversions**:
-  - August 2: Canvas.tsx, ActivityGraphCanvas.tsx, ActivityGraphFills.tsx, VirtualList.tsx, art-trace.tsx, js-tracer.tsx, ActivityGraph.tsx
-  - August 1: profile-logic/tracks.ts, selectors/url-state.ts, selectors/per-thread/index.ts
-  - Previous: marker-data.ts, reducer modules, core utilities
+- **Status**: `yarn typecheck` passes consistently, 15 files excluded from strict checking
+- **Key achievements**:
+  - Successfully resolved circular dependencies between thread/markers selectors
+  - Converted Flow spread syntax to TypeScript intersection types
+  - Fixed complex selector parameter type mismatches
+  - All core infrastructure files now pass strict TypeScript compilation
 - **Type declarations created**: array-range, simpleperf_report, call-tree
-- **Remaining errors**: 19 minor issues, primarily TS7053 (dynamic object property access)
 
-### Phase 5: ⏳ PLANNED - Resume Component Migration
+### Phase 5: 🚀 CURRENT FOCUS - Continue File-by-File Migration
 
-- Resume React component conversions using dependency-first approach
-- Add TypeScript types to existing ExplicitConnect patterns
+- Continue systematic conversion using dependency analysis
+- Target files with 0-1 dependencies to unlock downstream conversions
+- Focus on high-impact files that enable multiple downstream conversions
 
 ### Phase 6: ⏳ PLANNED - Final Cleanup
 
@@ -419,19 +434,45 @@ The `flow-to-typescript-unified.sh` script handles most conversions automaticall
 
 ## Next Steps
 
-Continue React component conversion using dependency-first approach.
+**Current Strategy**: Continue systematic file-by-file conversion using dependency-first approach.
 
-Use dependency analysis tool to identify files ready for conversion:
-```bash
-./scripts/analyze-dependencies.sh | head -28
-```
+### Immediate Next Actions
 
-Convert files with 0-1 dependencies first, focusing on files that unlock others.
+1. **Use dependency analysis** to identify next conversion targets:
+   ```bash
+   ./scripts/analyze-dependencies.sh | head -25
+   ```
 
-When converting a file with a dependency, `yarn typecheck` will only pass once
-the types for the dependency are known, so keep that in mind - it means that you
-really have to convert the dependency as well.
+2. **Conversion Priority**:
+   - **Priority 1**: Files with 0 dependencies (ready for immediate conversion)
+   - **Priority 2**: Files with 1 dependency (convert dependency first if needed)
+   - **Priority 3**: TypeScript files needing strict compliance fixes (remove from exclude list)
 
-If you encounter cyclic dependencies, you'll have to convert the entire cycle. Or
-you could try to declare temporary types for the imported module, but you'll have
-to figure out how to make that work.
+3. **High-Impact Targets**: Look for files that, once converted, unlock many downstream files
+
+### Conversion Process (Refined August 2025)
+
+1. **Always start with dependency analysis** to identify ready files
+2. **Use unified conversion script**: `./scripts/flow-to-typescript-unified.sh <file.js>`
+3. **Fix TypeScript compilation errors**:
+   - Flow spread syntax (`{...A, ...B}`) → TypeScript intersections (`A & B`)
+   - Function parameter names in type signatures
+   - Proper type annotations for arrays and function parameters
+   - Add missing type imports
+4. **Validate**: `yarn typecheck && yarn test`
+5. **Clean up**: Remove original `.js` file only after successful validation
+6. **Commit frequently** to maintain progress
+
+### Special Cases Proven Successful
+
+- **Circular dependencies**: Convert entire cycle simultaneously (thread.js ↔ markers.js)
+- **Complex selectors**: Add explicit type annotations for parameters
+- **Large files**: merge-compare.ts (1,447 lines) successfully converted with systematic type fixes
+
+### Lessons Learned (August 2025)
+
+- **Dependency analysis is crucial** - always check before converting
+- **TypeScript compilation must pass** before removing original files
+- **Type assertion (`as any`)** is acceptable for dynamic property access during migration
+- **Parameter type annotations** often needed for complex selector functions
+- **Mixed codebase stability** - Flow and TypeScript coexist reliably
