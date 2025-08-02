@@ -204,52 +204,187 @@ function getLineCount(filePath) {
   }
 }
 
-// Calculate transitive unfinished dependencies
-function calculateTransitiveDependencies(
-  file,
-  graph,
-  transitiveDependenciesOfFile,
-  visited = new Set()
-) {
-  if (transitiveDependenciesOfFile.has(file)) {
-    return transitiveDependenciesOfFile.get(file);
+/**
+ * Compute the closure of each node, with correct handling of cycles. Makes use
+ * of Tarjan's SCC algorithm.
+ *
+ * For this input:
+ *
+ * ```js
+ * const testGraph = new Map([
+ *     ['A', new Set(['B', 'C', 'D'])],
+ *     ['B', new Set(['A', 'E'])],
+ *     ['C', new Set()],
+ *     ['D', new Set()],
+ *     ['E', new Set()]
+ * ]);
+ * ```
+ *
+ * The output will be:
+ *
+ * ```js
+ * const testGraph = new Map([
+ *     ['A', new Set(['B', 'C', 'D', 'E'])],
+ *     ['B', new Set(['A', 'C', 'D', 'E'])],
+ *     ['C', new Set()],
+ *     ['D', new Set()],
+ *     ['E', new Set()]
+ * ]);
+ * ```
+ *
+ * @param {Map<string, Set<string>>} graph The direct dependencies of each file
+ * @returns {Map<string, Set<string>>} The set of transitive dependencies of each file
+ */
+function calculateReachableNodes(graph) {
+  // Step 1: Find all nodes in the graph
+  const allNodes = new Set([...graph.keys()]);
+  for (const neighbors of graph.values()) {
+    for (const neighbor of neighbors) {
+      allNodes.add(neighbor);
+    }
   }
 
-  if (visited.has(file)) {
-    return new Set(); // Avoid cycles
-  }
+  // Step 2: Find strongly connected components using Tarjan's algorithm
+  const sccs = findSCCs(graph, allNodes);
 
-  visited.add(file);
-  const fileInfo = graph.get(file);
+  // Step 3: Build condensed graph (DAG of SCCs)
+  const { sccGraph, nodeToScc, sccNodes } = buildCondensedGraph(graph, sccs);
 
-  if (!fileInfo) {
-    return new Set();
-  }
+  // Step 4: Compute reachability on the condensed DAG
+  const sccReachability = computeDAGReachability(sccGraph);
 
-  const transitiveDeps = new Set();
+  // Step 5: Expand back to original nodes
+  const result = new Map();
 
-  for (const dep of fileInfo.directDependencies) {
-    const depInfo = graph.get(dep);
-    if (depInfo && !depInfo.isFinished) {
-      transitiveDeps.add(dep);
+  for (const node of allNodes) {
+    const reachable = new Set();
+    const nodeScc = nodeToScc.get(node);
+
+    // Add all nodes in reachable SCCs
+    const reachableSccs = sccReachability.get(nodeScc);
+    for (const scc of reachableSccs) {
+      for (const reachableNode of sccNodes.get(scc)) {
+        if (reachableNode !== node) {
+          // Don't include the node itself
+          reachable.add(reachableNode);
+        }
+      }
     }
 
-    // Add transitive dependencies
-    const transitiveOfDep = calculateTransitiveDependencies(
-      dep,
-      graph,
-      transitiveDependenciesOfFile,
-      new Set(visited)
-    );
-    for (const transitiveDep of transitiveOfDep) {
-      if (!graph.get(transitiveDep)?.isFinished) {
-        transitiveDeps.add(transitiveDep);
+    result.set(node, reachable);
+  }
+
+  return result;
+}
+
+function findSCCs(graph, allNodes) {
+  let index = 0;
+  const stack = [];
+  const indices = new Map();
+  const lowlinks = new Map();
+  const onStack = new Set();
+  const sccs = [];
+
+  function strongConnect(node) {
+    indices.set(node, index);
+    lowlinks.set(node, index);
+    index++;
+    stack.push(node);
+    onStack.add(node);
+
+    const neighbors = graph.get(node) || new Set();
+    for (const neighbor of neighbors) {
+      if (!indices.has(neighbor)) {
+        strongConnect(neighbor);
+        lowlinks.set(
+          node,
+          Math.min(lowlinks.get(node), lowlinks.get(neighbor))
+        );
+      } else if (onStack.has(neighbor)) {
+        lowlinks.set(node, Math.min(lowlinks.get(node), indices.get(neighbor)));
+      }
+    }
+
+    if (lowlinks.get(node) === indices.get(node)) {
+      const scc = [];
+      let w;
+      do {
+        w = stack.pop();
+        onStack.delete(w);
+        scc.push(w);
+      } while (w !== node);
+      sccs.push(scc);
+    }
+  }
+
+  for (const node of allNodes) {
+    if (!indices.has(node)) {
+      strongConnect(node);
+    }
+  }
+
+  return sccs;
+}
+
+function buildCondensedGraph(originalGraph, sccs) {
+  const nodeToScc = new Map();
+  const sccNodes = new Map();
+
+  // Map each node to its SCC index and track nodes in each SCC
+  sccs.forEach((scc, sccIndex) => {
+    sccNodes.set(sccIndex, new Set(scc));
+    scc.forEach((node) => {
+      nodeToScc.set(node, sccIndex);
+    });
+  });
+
+  // Build condensed graph (edges between SCCs)
+  const sccGraph = new Map();
+  for (let i = 0; i < sccs.length; i++) {
+    sccGraph.set(i, new Set());
+  }
+
+  for (const [node, neighbors] of originalGraph) {
+    const fromScc = nodeToScc.get(node);
+    for (const neighbor of neighbors) {
+      const toScc = nodeToScc.get(neighbor);
+      if (fromScc !== toScc) {
+        sccGraph.get(fromScc).add(toScc);
       }
     }
   }
 
-  transitiveDependenciesOfFile.set(file, transitiveDeps);
-  return transitiveDeps;
+  return { sccGraph, nodeToScc, sccNodes };
+}
+
+function computeDAGReachability(dagGraph) {
+  const result = new Map();
+
+  function dfs(scc) {
+    if (result.has(scc)) {
+      return result.get(scc);
+    }
+
+    const reachable = new Set();
+    reachable.add(scc); // SCC can reach itself
+
+    const neighbors = dagGraph.get(scc) || new Set();
+    for (const neighbor of neighbors) {
+      const neighborReachable = dfs(neighbor);
+      for (const reachableScc of neighborReachable) {
+        reachable.add(reachableScc);
+      }
+    }
+
+    result.set(scc, reachable);
+    return reachable;
+  }
+
+  for (const scc of dagGraph.keys()) {
+    dfs(scc);
+  }
+
+  return result;
 }
 
 // Analyze files and generate report
@@ -271,22 +406,15 @@ function analyzeFiles() {
 
   const graph = buildDependencyGraph(allFiles, excludedFiles);
 
-  // const importersOfFile = new Map();
-  // for (const [file, fileInfo] of graph) {
-  //   for (const dep of fileInfo.directDependencies) {
-  //     const importers = importersOfFile.get(dep);
-  //     if (importers !== undefined) {
-  //       importers.add(file);
-  //     } else {
-  //       importersOfFile.set(file, new Set([file]));
-  //     }
-  //   }
-  // }
+  const directDependencyMap = new Map(
+    Array.from(graph.entries()).map(([file, fileInfo]) => [
+      file,
+      fileInfo.directDependencies,
+    ])
+  );
 
-  const transitiveDependenciesOfFile = new Map();
-  for (const [file] of graph) {
-    calculateTransitiveDependencies(file, graph, transitiveDependenciesOfFile);
-  }
+  const transitiveDependenciesOfFile =
+    calculateReachableNodes(directDependencyMap);
 
   // Analyze each file
   const fileAnalysis = [];

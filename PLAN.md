@@ -360,20 +360,20 @@ The `flow-to-typescript-unified.sh` script handles most conversions automaticall
 
 ## General guidelines
 
-Commit whenever a distinct substep is completed.
-Reduce scope for the current step if additional complexities are found; it's ok to commit partial work if the remaining work is written down in this file.
-Run `yarn prettier-fix` before every commit.
-Maintain this `PLAN.md` file with the current status.
+- Commit whenever a distinct substep is completed.
+- Reduce scope for the current step if additional complexities are found; it's ok to commit partial work if the remaining work is written down in this file.
+- Run `yarn prettier-fix` before every commit.
+- Maintain this `PLAN.md` file with the current status.
 
 ## Maintaining PLAN.md
 
-The target audience for this file is a fresh Claude instance with no context.
-Include context that's useful to resume the migration with accuracy.
-Include examples of conversion patterns that required a few tries to get right.
-Include very recent achievements and overall progress.
-Minimize self celebration and prioritize accuracy and conciseness.
-***CRITICAL**: When deferring complicated work until later, record the remaining steps in this file.
-If a phase is only partially complete, but feels complete "in the important ways", still treat it as incomplete until it is actually complete.
+- The target audience for this file is a fresh Claude instance with no context.
+- Include context that's useful to resume the migration with accuracy.
+- Include examples of conversion patterns that required a few tries to get right.
+- Include very recent achievements and overall progress.
+- Minimize self celebration and prioritize accuracy and conciseness.
+- ***CRITICAL**: When deferring complicated work until later, record the remaining steps in this file.
+- If a phase is only partially complete, but feels complete "in the important ways", still treat it as incomplete until it is actually complete.
 
 ---
 
@@ -423,7 +423,15 @@ Continue React component conversion using dependency-first approach.
 
 Use dependency analysis tool to identify files ready for conversion:
 ```bash
-./scripts/analyze-dependencies.sh | head -20
+./scripts/analyze-dependencies.sh | head -28
 ```
 
 Convert files with 0-1 dependencies first, focusing on files that unlock others.
+
+When converting a file with a dependency, `yarn typecheck` will only pass once
+the types for the dependency are known, so keep that in mind - it means that you
+really have to convert the dependency as well.
+
+If you encounter cyclic dependencies, you'll have to convert the entire cycle. Or
+you could try to declare temporary types for the imported module, but you'll have
+to figure out how to make that work.
