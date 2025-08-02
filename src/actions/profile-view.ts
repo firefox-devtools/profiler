@@ -431,7 +431,7 @@ function toggleOneTrack(
  *   0   => if trackA and trackB represent the same track
  */
 function compareTrackOrder(
-  state,
+  state: State,
   trackA: TrackInformation,
   trackB: TrackInformation
 ): number {
@@ -440,7 +440,8 @@ function compareTrackOrder(
     // Then we need to look at their local order
     // If one is a global track, its localTrackIndex is null, and therefore the
     // indexOf operation will return -1, which is exactly what we want.
-    const localTrackOrder = getLocalTrackOrder(state, trackA.pid);
+    const localTrackOrder: ReadonlyArray<TrackIndex | null> =
+      getLocalTrackOrder(state, trackA.pid);
     const orderA = localTrackOrder.indexOf(trackA.localTrackIndex);
     const orderB = localTrackOrder.indexOf(trackB.localTrackIndex);
     return orderA - orderB;
@@ -503,9 +504,10 @@ function findThreadsBetweenTracks(
       // all tracks.
       if (fromTrack.type === 'local') {
         shouldAddStartGlobalTrack = false;
-        localTrackOrderStart = localTrackOrder.indexOf(
-          fromTrack.localTrackIndex
-        );
+        localTrackOrderStart =
+          fromTrack.localTrackIndex === null
+            ? -1
+            : localTrackOrder.indexOf(fromTrack.localTrackIndex);
       }
     }
 
@@ -516,7 +518,10 @@ function findThreadsBetweenTracks(
         // No local track should be added
         localTrackOrderEnd = -1;
       } else {
-        localTrackOrderEnd = localTrackOrder.indexOf(toTrack.localTrackIndex);
+        localTrackOrderEnd =
+          toTrack.localTrackIndex === null
+            ? -1
+            : localTrackOrder.indexOf(toTrack.localTrackIndex);
       }
     }
 

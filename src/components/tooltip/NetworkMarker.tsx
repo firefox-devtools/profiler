@@ -86,8 +86,21 @@ function _getHumanReadableHttpVersion(httpVersion: NetworkHttpVersion): string {
   }
 }
 
+type NetworkPhaseName =
+  | 'startTime'
+  | 'domainLookupStart'
+  | 'domainLookupEnd'
+  | 'connectStart'
+  | 'tcpConnectEnd'
+  | 'secureConnectionStart'
+  | 'connectEnd'
+  | 'requestStart'
+  | 'responseStart'
+  | 'responseEnd'
+  | 'endTime';
+
 /* The preconnect phase may only contain these properties. */
-const PRECONNECT_PROPERTIES_IN_ORDER = [
+const PRECONNECT_PROPERTIES_IN_ORDER: NetworkPhaseName[] = [
   'domainLookupStart',
   'domainLookupEnd',
   'connectStart',
@@ -97,7 +110,7 @@ const PRECONNECT_PROPERTIES_IN_ORDER = [
 ];
 
 /* A marker without a preconnect phase may contain all these properties. */
-const ALL_NETWORK_PROPERTIES_IN_ORDER = [
+const ALL_NETWORK_PROPERTIES_IN_ORDER: NetworkPhaseName[] = [
   'startTime',
   ...PRECONNECT_PROPERTIES_IN_ORDER,
   'requestStart',
@@ -116,7 +129,7 @@ const REQUEST_PROPERTIES_IN_ORDER = ALL_NETWORK_PROPERTIES_IN_ORDER.slice();
 REQUEST_PROPERTIES_IN_ORDER.splice(1, PRECONNECT_PROPERTIES_IN_ORDER.length);
 
 /* The labels are for the duration between _this_ label and the next label. */
-const PROPERTIES_HUMAN_LABELS = {
+const PROPERTIES_HUMAN_LABELS: Record<NetworkPhaseName, string> = {
   startTime: 'Waiting for socket thread',
   domainLookupStart: 'DNS request',
   domainLookupEnd: 'After DNS request',
@@ -130,7 +143,7 @@ const PROPERTIES_HUMAN_LABELS = {
   endTime: 'End',
 };
 
-const NETWORK_PROPERTY_OPACITIES = {
+const NETWORK_PROPERTY_OPACITIES: Record<NetworkPhaseName, number> = {
   startTime: 0,
   domainLookupStart: 0.5,
   domainLookupEnd: 0.5,
@@ -145,10 +158,15 @@ const NETWORK_PROPERTY_OPACITIES = {
 };
 
 type NetworkPhaseProps = {
-  readonly propertyName: string;
+  readonly propertyName: NetworkPhaseName;
   readonly dur: Milliseconds;
   readonly startPosition: Milliseconds;
   readonly phaseDuration: Milliseconds;
+};
+
+type NetworkPhaseAndValue = {
+  phase: NetworkPhaseName;
+  value: number;
 };
 
 class NetworkPhase extends React.PureComponent<NetworkPhaseProps> {
@@ -180,7 +198,7 @@ class NetworkPhase extends React.PureComponent<NetworkPhaseProps> {
           style={{
             marginLeft: startPositionPercent + '%',
             marginRight: 100 - startPositionPercent - durationPercent + '%',
-            opacity: opacity === 0 ? null : opacity,
+            opacity: opacity === 0 ? undefined : opacity,
           }}
         />
       </React.Fragment>
@@ -195,7 +213,7 @@ type Props = {
 
 export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
   _getPhasesForProperties(
-    properties: string[],
+    properties: NetworkPhaseAndValue[],
     sectionDuration: Milliseconds,
     startTime: Milliseconds
   ): Array<React.ReactElement<typeof NetworkPhase>> | null {
@@ -206,17 +224,11 @@ export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
       return null;
     }
 
-    const { payload } = this.props;
     const phases = [];
 
     for (let i = 1; i < properties.length; i++) {
-      const thisProperty = properties[i];
-      const previousProperty = properties[i - 1];
-      // We force-coerce the values into numbers just to appease Flow. Indeed the
-      // previous filter ensures that all values are numbers but Flow can't know
-      // that.
-      const startValue = +payload[previousProperty];
-      const endValue = +payload[thisProperty];
+      const { phase: previousProperty, value: startValue } = properties[i - 1];
+      const { value: endValue } = properties[i];
       const phaseDuration = endValue - startValue;
       const startPosition = startValue - startTime;
 
@@ -279,13 +291,16 @@ export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
       return null;
     }
 
-    const availableProperties = PRECONNECT_PROPERTIES_IN_ORDER.filter(
-      (property) => typeof payload[property] === 'number'
-    );
+    const preconnectProperties: NetworkPhaseAndValue[] = [];
+    for (const phase of PRECONNECT_PROPERTIES_IN_ORDER) {
+      if (typeof payload[phase] === 'number') {
+        preconnectProperties.push({ phase, value: payload[phase] });
+      }
+    }
     const dur = preconnectEnd - preconnectStart;
 
     const phases = this._getPhasesForProperties(
-      availableProperties,
+      preconnectProperties,
       dur,
       preconnectStart
     );
@@ -316,9 +331,12 @@ export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
       ? REQUEST_PROPERTIES_IN_ORDER
       : ALL_NETWORK_PROPERTIES_IN_ORDER;
 
-    const availableProperties = networkProperties.filter(
-      (property) => typeof payload[property] === 'number'
-    );
+    const availableProperties: NetworkPhaseAndValue[] = [];
+    for (const phase of networkProperties) {
+      if (typeof payload[phase] === 'number') {
+        availableProperties.push({ phase, value: payload[phase] });
+      }
+    }
 
     if (availableProperties.length === 0 || availableProperties.length === 1) {
       // This shouldn't happen as we should always have both startTime and endTime.

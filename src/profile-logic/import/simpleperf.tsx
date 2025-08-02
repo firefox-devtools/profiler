@@ -89,15 +89,15 @@ class FirefoxResourceTable {
   }
 
   findOrAddResource(file: report.IFile): IndexIntoResourceTable {
-    let resourceIndex = this.resourcesMap.get(file.id);
+    let resourceIndex = this.resourcesMap.get(file.id!);
     if (!resourceIndex) {
       this.resourceTable.lib.push(null);
-      this.resourceTable.name.push(this.strings.indexForString(file.path));
+      this.resourceTable.name.push(this.strings.indexForString(file.path!));
       this.resourceTable.host.push(null);
       this.resourceTable.type.push(1); // Library
 
       resourceIndex = this.resourceTable.length++;
-      this.resourcesMap.set(file.id, resourceIndex);
+      this.resourcesMap.set(file.id!, resourceIndex);
     }
 
     return resourceIndex;
@@ -233,8 +233,8 @@ class FirefoxThread {
   cpuClockEventId: number = -1;
 
   constructor(thread: report.IThread, stringTable: StringTable) {
-    this.tid = thread.threadId;
-    this.pid = thread.processId;
+    this.tid = thread.threadId!;
+    this.pid = thread.processId!;
 
     this.isMainThread = thread.threadId === thread.processId;
     this.name = thread.threadName ?? '';
@@ -280,14 +280,14 @@ class FirefoxThread {
 
   addSample(sample: report.ISample, fileMap: Map<number, report.IFile>): void {
     let prefixStackId: number | null = null;
-    for (const frame of sample.callchain.reverse()) {
-      const file: report.IFile = fileMap.get(frame.fileId);
+    for (const frame of sample.callchain!.reverse()) {
+      const file: report.IFile = fileMap.get(frame.fileId!)!;
 
       const resourceIndex = this.resourceTable.findOrAddResource(file);
       const methodName =
-        frame.symbolId >= 0
-          ? file.symbol[frame.symbolId]
-          : `${file.path.split(/[\\/]/).pop()}+0x${frame.vaddrInFile.toString(16)}`;
+        frame.symbolId! >= 0
+          ? file.symbol![frame.symbolId!]
+          : `${file.path!.split(/[\\/]/).pop()}+0x${frame.vaddrInFile!.toString(16)}`;
 
       const funcIndex = this.funcTable.findOrAddFunc(methodName, resourceIndex);
 
@@ -432,7 +432,7 @@ class FirefoxProfile {
 
   setMetaInfo(metaInfo: report.IMetaInfo | null) {
     this.eventTypes = metaInfo?.eventType ?? [];
-    this.appPackageName = metaInfo?.appPackageName;
+    this.appPackageName = metaInfo?.appPackageName ?? null;
 
     this.cpuClockEventId =
       (this.eventTypes && this.eventTypes.indexOf('cpu-clock')) ?? -1;
@@ -444,13 +444,13 @@ class FirefoxProfile {
   }
 
   addFile(file: report.IFile) {
-    this.fileMap.set(file.id, file);
+    this.fileMap.set(file.id!, file);
   }
 
   addThread(thread: report.IThread) {
     const firefoxThread = new FirefoxThread(thread, this.stringTable);
     this.threads.push(firefoxThread);
-    this.threadMap.set(thread.threadId, firefoxThread);
+    this.threadMap.set(thread.threadId!, firefoxThread);
   }
 
   finalizeThreads() {
@@ -460,7 +460,7 @@ class FirefoxProfile {
   }
 
   addSample(sample: report.ISample): void {
-    const thread = this.threadMap.get(sample.threadId);
+    const thread = this.threadMap.get(sample.threadId!);
 
     if (!thread) {
       console.warn(`Thread not found for sample: ${sample.threadId}`);
@@ -535,22 +535,22 @@ export class SimpleperfReportConverter {
 
       switch (record.recordData) {
         case 'sample':
-          samples.push(record.sample);
+          samples.push(record.sample!);
           break;
         case 'lost':
           // Expected only once
           sampleCount = toNumber(record.lost?.sampleCount ?? 0);
-          targetProfile.setLostSituation(record.lost);
+          targetProfile.setLostSituation(record.lost!);
           break;
         case 'file':
-          targetProfile.addFile(record.file);
+          targetProfile.addFile(record.file!);
           break;
         case 'thread':
-          targetProfile.addThread(record.thread);
+          targetProfile.addThread(record.thread!);
           break;
         case 'metaInfo':
           // Expected only once
-          targetProfile.setMetaInfo(record.metaInfo);
+          targetProfile.setMetaInfo(record.metaInfo!);
           break;
         case 'contextSwitch':
           // Not handled

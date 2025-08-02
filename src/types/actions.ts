@@ -185,7 +185,7 @@ type ProfileAction =
       readonly isInverted: boolean;
       readonly threadsKey: ThreadsKey;
       readonly selectedCallNodePath: CallNodePath;
-      readonly optionalExpandedToCallNodePath: CallNodePath | null;
+      readonly optionalExpandedToCallNodePath: CallNodePath | undefined;
       readonly context: SelectionContext;
     }
   | {

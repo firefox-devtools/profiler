@@ -286,7 +286,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     return rows;
   }
 
-  _renderCategoryTimings(maybeTimings: TimingsForPath | null) {
+  _renderCategoryTimings(maybeTimings: TimingsForPath | undefined) {
     if (!maybeTimings) {
       return null;
     }

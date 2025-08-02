@@ -138,7 +138,7 @@ export function getStackAddressInfo(
   // "self address" == "the address which a stack's self time is contributed to"
   const selfAddressForAllStacks = [];
   // "total addresses" == "the set of addresses whose total time this stack contributes to"
-  const totalAddressesForAllStacks = [];
+  const totalAddressesForAllStacks: Array<Set<Address> | null> = [];
 
   // This loop takes advantage of the fact that the stack table is topologically ordered:
   // Prefix stacks are always visited before their descendants.
@@ -356,7 +356,7 @@ export function getStackAddressInfoForCallNodeNonInverted(
   const callNodeSelfAddressForAllStacks = [];
   // "total addresses" == "the set of addresses whose total time this stack contributes to"
   // Either null or a single-element set.
-  const callNodeTotalAddressesForAllStacks = [];
+  const callNodeTotalAddressesForAllStacks: Array<Set<Address> | null> = [];
 
   // This loop takes advantage of the fact that the stack table is topologically ordered:
   // Prefix stacks are always visited before their descendants.

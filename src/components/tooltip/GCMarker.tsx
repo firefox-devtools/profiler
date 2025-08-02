@@ -501,7 +501,7 @@ function _filterInterestingPhaseTimes(
    * Sort by the ordering of the original list, which is in an execution order
    * that we'd like to preserve.
    */
-  const order = {};
+  const order: Record<string, number> = {};
   let i = 0;
   for (const { name } of phaseTimes) {
     order[name] = i++;

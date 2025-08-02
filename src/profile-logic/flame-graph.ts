@@ -111,7 +111,10 @@ export function computeFlameGraphRows(
   // children.
   // We need to queue up nodes before we can process their children because
   // we can only process children once their parents are in the right order.
-  const flameGraphRows = Array.from({ length: maxDepth + 1 }, () => []);
+  const flameGraphRows: FlameGraphRows = Array.from(
+    { length: maxDepth + 1 },
+    () => []
+  );
   const pendingRangeStartAtDepth = new Int32Array(maxDepth + 1);
 
   // At the beginning of each turn of this loop, add currentCallNode and all its

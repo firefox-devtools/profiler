@@ -91,8 +91,3 @@ declare module 'photon-colors' {
 
   export const WHITE_100: string;
 }
-
-declare module 'photon-colors/photon-colors.css' {
-  const content: any;
-  export default content;
-}

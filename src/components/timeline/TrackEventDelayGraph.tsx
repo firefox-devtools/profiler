@@ -63,7 +63,7 @@ class TrackEventDelayCanvas extends React.PureComponent<CanvasProps> {
       return;
     }
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d')!;
     const devicePixelRatio = window.devicePixelRatio;
     const deviceWidth = width * devicePixelRatio;
     const deviceHeight = height * devicePixelRatio;

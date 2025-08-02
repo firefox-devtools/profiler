@@ -32,10 +32,14 @@
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo",
 
-    // Module Resolution (Enhanced)
+    // "noImplicitAny": true,
+    // "strictNullChecks": true,
+
+    // Module Resolution
     "resolveJsonModule": true,
-    "allowImportingTsExtensions": false, // Not needed for this migration
+    "allowImportingTsExtensions": false,
     "baseUrl": ".",
+    "typeRoots": ["node_modules/@types", "src/types/@types"],
     "paths": {
       "firefox-profiler/*": ["./src/*"]
     },
