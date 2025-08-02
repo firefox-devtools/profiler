@@ -23,7 +23,7 @@ if [ $# -eq 2 ]; then
     OUTPUT_FILE="$2"
 else
     # Check if file contains JSX to determine .tsx vs .ts extension
-    if grep -q -E ' from .react.;|React\.|JSX|<.*>' "$INPUT_FILE"; then
+    if grep -q -E ' from .react.;' "$INPUT_FILE"; then
         OUTPUT_FILE="${INPUT_FILE%.js}.tsx"
     else
         OUTPUT_FILE="${INPUT_FILE%.js}.ts"
