@@ -401,10 +401,11 @@ The `flow-to-typescript-unified.sh` script handles most conversions automaticall
 
 ### Phase 3: 🚀 IN PROGRESS - Systematic File Migration
 
-- **Status**: 67 JavaScript files remaining (down from 68)
-- **TypeScript files**: 228 (up from 227)
+- **Status**: 57 JavaScript files remaining (down from 67)
+- **TypeScript files**: 238 (up from 228)
 - **Strategy**: Dependency-first migration focusing on zero-dependency files first
 - **Recent major conversions (August 3, 2025)**:
+  - **LATEST SESSION**: 10 component files converted (1,376 lines) - TrackCustomMarker, TrackVisualProgress, AssemblyViewToggleButton, MarkerFiltersContextMenu, TrackProcessCPU, StackImplementationSetting, CallTreeStrategySetting, ProfileName, MarkerSettings, StackSettings
   - **Core selectors**: src/selectors/per-thread/ (thread.tsx, markers.ts, stack-sample.ts)
   - **Profile logic**: src/profile-logic/merge-compare.ts (1,447 lines)
   - **CLI tools**: src/symbolicator-cli/index.ts
@@ -416,11 +417,11 @@ The `flow-to-typescript-unified.sh` script handles most conversions automaticall
   - **Tooltip components**: Marker.tsx (538 lines) - Advanced union type handling
   - **Sidebar components**: MarkerSidebar.tsx (65 lines) - Simple state mapping component
   - **Network components**: NetworkChartRow.tsx (531 lines) - Complex event handling and dynamic property access
-  - **Total converted**: 23 files, 6,889 lines of code
+  - **Total converted**: 33 files, 8,265 lines of code
 
 ### Phase 4: ✅ LARGELY COMPLETED - Strict TypeScript compliance
 
-- **Status**: `yarn typecheck` passes consistently, 8 files excluded from strict checking (down from 9)
+- **Status**: `yarn typecheck` passes consistently, 5 files excluded from strict checking (down from 8)
 - **Key achievements**:
   - Successfully resolved circular dependencies between thread/markers selectors
   - Converted Flow spread syntax to TypeScript intersection types
@@ -429,6 +430,10 @@ The `flow-to-typescript-unified.sh` script handles most conversions automaticall
     - Resolved TypeScript interface type mismatches in _buildThreadSelectors
     - Fixed dynamic property access with proper type assertions
     - Removed from strict exclude list, unblocking downstream conversions
+  - **LATEST FIXES**: Fixed 3 critical infrastructure files (August 3, 2025)
+    - publish.ts: Fixed mixed → unknown type conversion
+    - BeforeUnloadManager.tsx: Already compliant, removed from exclude list
+    - profile-view.ts: Already compliant, removed from exclude list (2,077 lines)
   - All core infrastructure files now pass strict TypeScript compilation
 - **Type declarations created**: array-range, simpleperf_report, call-tree
 
