@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import * as React from 'react';
 import { MenuItem } from '@firefox-devtools/react-contextmenu';
 import { Localized } from '@fluent/react';
@@ -15,16 +13,16 @@ import { getTabFilter } from '../../selectors/url-state';
 import { getProfileFilterSortedPageData } from 'firefox-profiler/selectors/profile';
 import { Icon } from 'firefox-profiler/components/shared/Icon';
 
-import type { TabID, SortedTabPageData } from 'firefox-profiler/types';
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { TabID, SortedTabPageData } from 'firefox-profiler/types';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {
-  +tabFilter: TabID | null,
-  +sortedPageData: SortedTabPageData | null,
+  readonly tabFilter: TabID | null;
+  readonly sortedPageData: SortedTabPageData | null;
 };
 
 type DispatchProps = {
-  +changeTabFilter: typeof changeTabFilter,
+  readonly changeTabFilter: typeof changeTabFilter;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -32,7 +30,10 @@ type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 import './TabSelectorMenu.css';
 
 class TabSelectorMenuImpl extends React.PureComponent<Props> {
-  _handleClick = (_event: SyntheticEvent<>, data: { id: TabID }): void => {
+  _handleClick = (
+    _event: React.ChangeEvent<HTMLElement>,
+    data: { id: TabID }
+  ): void => {
     this.props.changeTabFilter(data.id);
   };
 
@@ -80,7 +81,7 @@ class TabSelectorMenuImpl extends React.PureComponent<Props> {
     );
   }
 
-  render() {
+  override render() {
     return (
       <ContextMenu id="TabSelectorMenu" className="TabSelectorMenu">
         {this.renderTabSelectorMenuContents()}

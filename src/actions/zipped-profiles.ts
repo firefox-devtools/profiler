@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import {
   getZipFileTable,
   getZipFileState,
@@ -10,14 +8,14 @@ import {
 import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
 import { loadProfile } from './receive-profile';
 
-import type { Action, ThunkAction } from 'firefox-profiler/types';
-import type { IndexIntoZipFileTable } from 'firefox-profiler/profile-logic/zip-files';
+import { Action, ThunkAction } from 'firefox-profiler/types';
+import { IndexIntoZipFileTable } from 'firefox-profiler/profile-logic/zip-files';
 
 export function changeSelectedZipFile(
   selectedZipFileIndex: IndexIntoZipFileTable
 ): Action {
   return {
-    type: 'CHANGE_SELECTED_ZIP_FILE',
+    type: 'CHANGE_SELECTED_ZIP_FILE' as const,
     selectedZipFileIndex,
   };
 }
@@ -26,7 +24,7 @@ export function changeExpandedZipFile(
   expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>
 ): Action {
   return {
-    type: 'CHANGE_EXPANDED_ZIP_FILES',
+    type: 'CHANGE_EXPANDED_ZIP_FILES' as const,
     expandedZipFileIndexes,
   };
 }
@@ -54,7 +52,7 @@ export function viewProfileFromZip(
       );
     }
 
-    dispatch({ type: 'PROCESS_PROFILE_FROM_ZIP_FILE', pathInZipFile });
+    dispatch({ type: 'PROCESS_PROFILE_FROM_ZIP_FILE' as const, pathInZipFile });
 
     try {
       // Attempt to unserialize the profile.
@@ -78,7 +76,10 @@ export function viewProfileFromZip(
         'Failed to process the profile in the archive with the following error:'
       );
       console.error(error);
-      dispatch({ type: 'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE', error });
+      dispatch({
+        type: 'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE' as const,
+        error,
+      });
     }
   };
 }
@@ -102,9 +103,9 @@ export function viewProfileFromPathInZipFile(
 }
 
 export function returnToZipFileList() {
-  return { type: 'RETURN_TO_ZIP_FILE_LIST' };
+  return { type: 'RETURN_TO_ZIP_FILE_LIST' as const };
 }
 
 export function showErrorForNoFileInZip(pathInZipFile: string) {
-  return { type: 'FILE_NOT_FOUND_IN_ZIP_FILE', pathInZipFile };
+  return { type: 'FILE_NOT_FOUND_IN_ZIP_FILE' as const, pathInZipFile };
 }
