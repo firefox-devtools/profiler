@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import { PureComponent } from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
@@ -22,23 +20,23 @@ import {
 import { getBrowserConnectionStatus } from 'firefox-profiler/selectors/app';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import type { DataSource } from 'firefox-profiler/types';
-import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { DataSource } from 'firefox-profiler/types';
+import { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
 
 type StateProps = {
-  +dataSource: DataSource,
-  +hash: string,
-  +profileUrl: string,
-  +profilesToCompare: string[] | null,
-  +browserConnectionStatus: BrowserConnectionStatus,
+  readonly dataSource: DataSource;
+  readonly hash: string;
+  readonly profileUrl: string;
+  readonly profilesToCompare: string[] | null;
+  readonly browserConnectionStatus: BrowserConnectionStatus;
 };
 
 type DispatchProps = {
-  +retrieveProfileFromBrowser: typeof retrieveProfileFromBrowser,
-  +retrieveProfileFromStore: typeof retrieveProfileFromStore,
-  +retrieveProfileOrZipFromUrl: typeof retrieveProfileOrZipFromUrl,
-  +retrieveProfilesToCompare: typeof retrieveProfilesToCompare,
+  readonly retrieveProfileFromBrowser: typeof retrieveProfileFromBrowser;
+  readonly retrieveProfileFromStore: typeof retrieveProfileFromStore;
+  readonly retrieveProfileOrZipFromUrl: typeof retrieveProfileOrZipFromUrl;
+  readonly retrieveProfilesToCompare: typeof retrieveProfilesToCompare;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -67,10 +65,14 @@ class ProfileLoaderImpl extends PureComponent<Props> {
       case 'local':
         break;
       case 'public':
-        retrieveProfileFromStore(hash).catch((e) => console.error(e));
+        (retrieveProfileFromStore(hash) as any).catch((e: any) =>
+          console.error(e)
+        );
         break;
       case 'from-url':
-        retrieveProfileOrZipFromUrl(profileUrl).catch((e) => console.error(e));
+        (retrieveProfileOrZipFromUrl(profileUrl) as any).catch((e: any) =>
+          console.error(e)
+        );
         break;
       case 'compare':
         if (profilesToCompare) {
@@ -89,7 +91,7 @@ class ProfileLoaderImpl extends PureComponent<Props> {
     }
   };
 
-  componentDidUpdate(prevProps) {
+  override componentDidUpdate(prevProps: Props) {
     if (prevProps.dataSource === 'none' && this.props.dataSource !== 'none') {
       this._retrieveProfileFromDataSource();
     } else if (
@@ -101,7 +103,7 @@ class ProfileLoaderImpl extends PureComponent<Props> {
     }
   }
 
-  render() {
+  override render() {
     return null;
   }
 }
