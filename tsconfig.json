@@ -40,7 +40,8 @@
     "baseUrl": ".",
     "typeRoots": ["node_modules/@types", "src/types/@types"],
     "paths": {
-      "firefox-profiler/*": ["./src/*"]
+      "firefox-profiler/*": ["./src/*"],
+      "firefox-profiler-res/*": ["./res/*"]
     },
 
     // React & JSX
