@@ -150,9 +150,10 @@ import { SomeType } from './module';       // TypeScript
 type Example = { +prop: string };          // Flow
 type Example = { readonly prop: string };  // TypeScript
 
-// Nullable: ?string → string | null
+// Nullable: ?string → string | null | undefined (though usually just | null is enough)
 prop: ?string                              // Flow
-prop: string | null                        // TypeScript
+prop: string | null                        // TypeScript (more common)
+prop: string | null | undefined            // TypeScript (exact match for Flow semantics)
 
 // React overrides: Add 'override' keyword
 class Component extends PureComponent<Props> {
@@ -226,8 +227,8 @@ const items = new Set();                   // Flow (inferred)
 const items = new Set<ThreadIndex>();      // TypeScript (explicit)
 
 // Nullable types: Flow → TypeScript syntax
-function process(profile: ?Profile)        // Flow
-function process(profile: Profile | null)  // TypeScript
+function process(profile: ?Profile)                    // Flow
+function process(profile: Profile | null | undefined)  // TypeScript
 
 // Literal types need 'as const' for proper inference
 const track = { type: 'process' };         // Inferred as string
