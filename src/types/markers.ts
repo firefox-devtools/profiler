@@ -744,7 +744,7 @@ export type IPCMarkerPayload_Gecko = {
   // `tid` of the thread that this marker is originated from. It is undefined
   // when the IPC marker is originated from the same thread. Also, this field is
   // added in Firefox 100. It will always be undefined for the older profiles.
-  threadId?: Tid;
+  threadId?: number;
 };
 
 export type IPCMarkerPayload = {
@@ -763,7 +763,7 @@ export type IPCMarkerPayload = {
   // `tid` of the thread that this marker is originated from. It is undefined
   // when the IPC marker is originated from the same thread. Also, this field is
   // added in Firefox 100. It will always be undefined for the older profiles.
-  threadId?: Tid;
+  threadId?: number;
 
   // These fields are added in the deriving process from `IPCSharedData`, and
   // correspond to data from all the markers associated with a particular IPC
