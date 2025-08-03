@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import { PureComponent } from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
@@ -17,16 +15,16 @@ import {
   getZipFileState,
 } from 'firefox-profiler/selectors';
 
-import type { Profile, DataSource } from 'firefox-profiler/types';
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { Profile, DataSource } from 'firefox-profiler/types';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {
-  +profile: Profile | null,
-  +profileNameFromUrl: string | null,
-  +fileNameInZipFilePath: string | null,
-  +formattedMetaInfoString: string | null,
-  +dataSource: DataSource,
-  +listingZipFile: boolean,
+  readonly profile: Profile | null;
+  readonly profileNameFromUrl: string | null;
+  readonly fileNameInZipFilePath: string | null;
+  readonly formattedMetaInfoString: string | null;
+  readonly dataSource: DataSource;
+  readonly listingZipFile: boolean;
 };
 
 type Props = ConnectedProps<{}, StateProps, {}>;
@@ -113,15 +111,15 @@ class WindowTitleImpl extends PureComponent<Props> {
     }
   }
 
-  componentDidMount() {
+  override componentDidMount() {
     this._updateTitle();
   }
 
-  componentDidUpdate() {
+  override componentDidUpdate() {
     this._updateTitle();
   }
 
-  render() {
+  override render() {
     return null;
   }
 }
