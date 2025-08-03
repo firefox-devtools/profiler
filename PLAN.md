@@ -100,10 +100,7 @@ mixed → unknown
 - **Create MarkerPayload type guards** - Replace `(data as any).property` with proper type narrowing functions
 - **Audit remaining `as any` assertions** for potential type safety improvements
 
-## Tooling Improvements Needed
-
-### Conversion Script Enhancements
-- **Flow spread syntax auto-fix** - Detect `{ ...TypeA, ...TypeB }` and convert to `TypeA & TypeB` automatically
+## Tooling Enhancements Needed
 - **Window property access conversion** - Auto-convert `window.property` to `(window as any).property` for non-standard properties
 - **Enhanced Flow syntax detection** - Improve handling of complex Flow patterns like `?{...}`, `| null<Type>`, empty generics `<>`
 
@@ -111,9 +108,8 @@ mixed → unknown
 
 1. **Continue zero-dependency file conversions** - Good momentum with large files, 8 remaining zero-dependency files
 2. **Fix 2 remaining strict exclude files**: Root.tsx, UploadedRecordingsHome.tsx  
-3. **Create type safety utilities** - MarkerPayload type guards, canvas context helpers, window property types
-4. **Implement enhanced conversion script** for Flow spread syntax and React event generics
-5. **Continue systematic dependency-first migration** for remaining 48 JavaScript files
+3. **Create type safety utilities** - MarkerPayload type guards, window property types
+4. **Continue systematic dependency-first migration** for remaining 48 JavaScript files
 
 ---
 
