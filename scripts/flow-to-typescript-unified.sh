@@ -58,15 +58,12 @@ apply_transform 's/^import type {/import {/g' "Convert import type (object impor
 apply_transform 's/^import type \([^{].*\) from/import \1 from/g' "Convert import type (default imports)"
 
 # 3. CRITICAL: Convert function types without parameter names (fixes TS1005/TS1109)
-# This is the most important fix discovered during conversion
-# Only add parameter names when there are actual parameters (not empty parens)
+# Only add parameter names when the parameter starts with an uppercase letter (indicates type name)
 apply_transform 's/Selector<(\([^)][^)]*\)) =>/Selector<(actionOrActionList: \1) =>/g' "Add parameter names to Selector function types"
-apply_transform 's/: (\([^)][^)]*\)) =>/: (param: \1) =>/g' "Add parameter names to generic function types"
+apply_transform 's/: (\([A-Z][^)]*\)) =>/: (param: \1) =>/g' "Add parameter names to generic function types"
 
 # Specifically handle common Flow type patterns that need parameter names
 apply_transform 's/: (Action | Action\[\]/: (actionOrActionList: Action | Action[]/g' "Fix Action union parameter names"
-# Remove the problematic string-based pattern that was too broad
-# apply_transform 's/: (string[^)]*) =>/: (param: \1) =>/g' "Add parameter names to string-based function types"
 
 # 4. Convert Flow nullable types (?Type → Type | null)
 apply_transform 's/: ?\([A-Za-z][A-Za-z0-9_]*\)/: \1 | null/g' "Convert nullable types"

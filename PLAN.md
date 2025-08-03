@@ -25,10 +25,6 @@ yarn test-all          # Full validation (lint, test, typecheck)
 ### Common TypeScript Fixes
 
 ```typescript
-// Parameter types (MOST COMMON ERROR)
-mapStateToProps: (param: state) => ({     // WRONG - causes TS errors
-mapStateToProps: (state) => ({            // CORRECT
-
 // Flow spread in types  
 type Props = { ...TypeA, ...TypeB };      // Flow
 type Props = TypeA & TypeB;               // TypeScript
@@ -127,4 +123,4 @@ mixed → unknown
 
 ---
 
-**Critical Guidelines**: Never change runtime behavior. Always prefer adjusting types over changing code. Test after each conversion. Commit frequently.
+**Critical Guidelines**: Never change runtime behavior. Always prefer adjusting types over changing code. Test after each conversion. Commit frequently. Keep PLAN.md up-to-date and free of duplication and superfluous detail.
