@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 /*
  * This file implements a header to be used on top of our content pages. It
  * renders a title as well as links to our github and our home page.
@@ -16,7 +14,7 @@ import './AppHeader.css';
 import { Localized } from '@fluent/react';
 
 export class AppHeader extends React.PureComponent<{}> {
-  render() {
+  override render() {
     return (
       <header>
         <h1 className="appHeader">
@@ -28,7 +26,9 @@ export class AppHeader extends React.PureComponent<{}> {
                 <InnerNavigationLink
                   dataSource="none"
                   className="appHeaderLink"
-                ></InnerNavigationLink>
+                >
+                  <></>
+                </InnerNavigationLink>
               ),
               subheader: <span className="appHeaderSubtext"></span>,
             }}

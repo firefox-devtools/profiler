@@ -35,7 +35,9 @@
       "Bash(./scripts/auto-convert-batch.sh:*)",
       "Bash(./scripts/flow-to-typescript.sh:*)",
       "Bash(node:*)",
-      "Bash(yarn add:*)"
+      "Bash(yarn add:*)",
+      "Bash(yarn analyze-deps:*)",
+      "Bash(yarn convert:*)"
     ],
     "deny": []
   }
