@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import classNames from 'classnames';
 import {
@@ -41,7 +39,7 @@ import {
 } from 'firefox-profiler/profile-logic/marker-schema';
 import { computeScreenshotSize } from 'firefox-profiler/profile-logic/marker-data';
 
-import type {
+import {
   CategoryList,
   Milliseconds,
   Marker,
@@ -57,7 +55,7 @@ import type {
   Tid,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 import {
   getGCMinorDetails,
   getGCMajorDetails,
@@ -77,28 +75,28 @@ function _maybeFormatDuration(
 }
 
 type OwnProps = {
-  +markerIndex: MarkerIndex,
-  +marker: Marker,
-  +threadsKey: ThreadsKey,
-  +className?: string,
+  readonly markerIndex: MarkerIndex;
+  readonly marker: Marker;
+  readonly threadsKey: ThreadsKey;
+  readonly className?: string;
   // In tooltips it can be awkward for really long and tall things to force
   // the layout to be huge. This option when set to true will restrict the
   // height of things like stacks, and the width of long things like URLs.
-  +restrictHeightWidth: boolean,
+  readonly restrictHeightWidth: boolean;
 };
 
 type StateProps = {
-  +threadName?: string,
-  +thread: Thread,
-  +implementationFilter: ImplementationFilter,
-  +pages: PageList | null,
-  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-  +zeroAt: Milliseconds,
-  +threadIdToNameMap: Map<Tid, string>,
-  +processIdToNameMap: Map<Pid, string>,
-  +markerSchemaByName: MarkerSchemaByName,
-  +getMarkerLabel: (MarkerIndex) => string,
-  +categories: CategoryList,
+  readonly threadName?: string;
+  readonly thread: Thread;
+  readonly implementationFilter: ImplementationFilter;
+  readonly pages: PageList | null;
+  readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null;
+  readonly zeroAt: Milliseconds;
+  readonly threadIdToNameMap: Map<Tid, string>;
+  readonly processIdToNameMap: Map<Pid, string>;
+  readonly markerSchemaByName: MarkerSchemaByName;
+  readonly getMarkerLabel: (param: MarkerIndex) => string;
+  readonly categories: CategoryList;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, {}>;
@@ -119,6 +117,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
         pages &&
         innerWindowIDToPageMap &&
         marker.data &&
+        'innerWindowID' in marker.data &&
         marker.data.innerWindowID
       )
     ) {
@@ -188,7 +187,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
         ? threadIdToNameMap.get(marker.threadId)
         : this.props.threadName;
 
-    if (data && data.threadId !== undefined) {
+    if (data && 'threadId' in data && data.threadId !== undefined) {
       // This marker has some threadId data in its payload, which is about the
       // thread where this event happened.
       const threadId = data.threadId;
@@ -249,7 +248,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
 
           const { key, label, format } = field;
 
-          const value = data[key];
+          const value = (data as any)[key];
           if (value === undefined || value === null) {
             // This marker doesn't have a value for this field. Values are optional.
             continue;
@@ -333,7 +332,11 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
           break;
         }
         case 'CompositorScreenshot': {
-          if (data.url !== undefined) {
+          if (
+            data.url !== undefined &&
+            'windowWidth' in data &&
+            'windowHeight' in data
+          ) {
             const { width, height } = computeScreenshotSize(
               data,
               MAXIMUM_IMAGE_SIZE
@@ -494,7 +497,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
    * ternaries everywhere. This leads to a style of render function that includes
    * a short list of rendering strategies, in the order they appear.
    */
-  render() {
+  override render() {
     const { className } = this.props;
     return (
       <div className={classNames('tooltipMarker', className)}>

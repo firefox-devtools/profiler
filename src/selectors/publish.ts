@@ -112,7 +112,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
           continue;
         }
         isIncludingEverything =
-          isIncludingEverything && checkedSharingOptions[prop];
+          isIncludingEverything && (checkedSharingOptions as any)[prop];
       }
       if (isIncludingEverything) {
         // No sanitization is happening, bail out early.
