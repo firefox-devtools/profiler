@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import React, { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 import classNames from 'classnames';
@@ -40,8 +38,8 @@ import { Reorderable } from 'firefox-profiler/components/shared/Reorderable';
 import { TRACK_PROCESS_BLANK_HEIGHT } from 'firefox-profiler/app-logic/constants';
 import { getTrackSelectionModifiers } from 'firefox-profiler/utils';
 
-import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
-import type {
+import { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
+import {
   GlobalTrackReference,
   Pid,
   ProgressGraphData,
@@ -52,34 +50,34 @@ import type {
   MixedObject,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {
-  +trackReference: GlobalTrackReference,
-  +trackIndex: TrackIndex,
-  +style?: MixedObject /* This is used by Reorderable */,
-  +setInitialSelected: (el: InitialSelectedTrackReference) => void,
+  readonly trackReference: GlobalTrackReference;
+  readonly trackIndex: TrackIndex;
+  readonly style?: unknown /* This is used by Reorderable */;
+  readonly setInitialSelected: (el: InitialSelectedTrackReference) => void;
 };
 
 type StateProps = {
-  +trackName: string,
-  +globalTrack: GlobalTrack,
-  +isSelected: boolean,
-  +isHidden: boolean,
-  +titleText: string | null,
-  +localTrackOrder: TrackIndex[],
-  +localTracks: LocalTrack[],
-  +pid: Pid | null,
-  +selectedTab: TabSlug,
-  +processesWithMemoryTrack: Set<Pid>,
-  +progressGraphData: ProgressGraphData[] | null,
+  readonly trackName: string;
+  readonly globalTrack: GlobalTrack;
+  readonly isSelected: boolean;
+  readonly isHidden: boolean;
+  readonly titleText: string | null;
+  readonly localTrackOrder: TrackIndex[];
+  readonly localTracks: LocalTrack[];
+  readonly pid: Pid | null;
+  readonly selectedTab: TabSlug;
+  readonly processesWithMemoryTrack: Set<Pid>;
+  readonly progressGraphData: ProgressGraphData[] | null;
 };
 
 type DispatchProps = {
-  +changeRightClickedTrack: typeof changeRightClickedTrack,
-  +changeLocalTrackOrder: typeof changeLocalTrackOrder,
-  +selectTrackWithModifiers: typeof selectTrackWithModifiers,
-  +hideGlobalTrack: typeof hideGlobalTrack,
+  readonly changeRightClickedTrack: typeof changeRightClickedTrack;
+  readonly changeLocalTrackOrder: typeof changeLocalTrackOrder;
+  readonly selectTrackWithModifiers: typeof selectTrackWithModifiers;
+  readonly hideGlobalTrack: typeof hideGlobalTrack;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -95,14 +93,14 @@ class GlobalTrackComponent extends PureComponent<Props> {
   };
 
   _selectCurrentTrack = (
-    event: SyntheticMouseEvent<> | SyntheticKeyboardEvent<>
+    event: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>
   ) => {
     const { selectTrackWithModifiers, trackReference } = this.props;
     selectTrackWithModifiers(trackReference, getTrackSelectionModifiers(event));
   };
 
   _hideCurrentTrack = (
-    event: SyntheticMouseEvent<> | SyntheticKeyboardEvent<>
+    event: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>
   ) => {
     const { trackIndex, hideGlobalTrack } = this.props;
     hideGlobalTrack(trackIndex);
@@ -123,9 +121,11 @@ class GlobalTrackComponent extends PureComponent<Props> {
           return (
             <div
               className="timelineTrackThreadBlank"
-              style={{
-                '--timeline-track-thread-blank-height': `${TRACK_PROCESS_BLANK_HEIGHT}px`,
-              }}
+              style={
+                {
+                  '--timeline-track-thread-blank-height': `${TRACK_PROCESS_BLANK_HEIGHT}px`,
+                } as React.CSSProperties
+              }
             />
           );
         }
@@ -178,7 +178,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
         );
       }
       default:
-        console.error('Unhandled globalTrack type', (globalTrack: empty));
+        console.error('Unhandled globalTrack type', globalTrack as never);
         return null;
     }
   }
@@ -228,13 +228,13 @@ class GlobalTrackComponent extends PureComponent<Props> {
     this._isInitialSelectedPane = value;
   };
 
-  componentDidMount() {
+  override componentDidMount() {
     if (this._isInitialSelectedPane && this._container !== null) {
       this.props.setInitialSelected(this._container);
     }
   }
 
-  render() {
+  override render() {
     const {
       isSelected,
       isHidden,
@@ -253,7 +253,11 @@ class GlobalTrackComponent extends PureComponent<Props> {
     }
 
     return (
-      <li ref={this._takeContainerRef} className="timelineTrack" style={style}>
+      <li
+        ref={this._takeContainerRef}
+        className="timelineTrack"
+        style={style as React.CSSProperties}
+      >
         <div
           className={classNames('timelineTrackRow timelineTrackGlobalRow', {
             selected: isSelected,
@@ -280,7 +284,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
               }
               {pid !== null &&
               pid !== '0' &&
-              globalTrack.mainThreadIndex !== null ? (
+              (globalTrack as any).mainThreadIndex !== null ? (
                 <div className="timelineTrackNameButtonAdditionalDetails">
                   PID: {pid}
                 </div>
@@ -309,13 +313,13 @@ class GlobalTrackComponent extends PureComponent<Props> {
 }
 
 // Provide some empty lists, so that strict equality checks work for component updates.
-const EMPTY_TRACK_ORDER = [];
-const EMPTY_LOCAL_TRACKS = [];
+const EMPTY_TRACK_ORDER: number[] = [];
+const EMPTY_LOCAL_TRACKS: LocalTrack[] = [];
 
 export const TimelineGlobalTrack = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state, { trackIndex }) => {
     const globalTracks = getGlobalTracks(state);
@@ -364,7 +368,7 @@ export const TimelineGlobalTrack = explicitConnect<
         progressGraphData = getContentfulSpeedIndexProgress(state);
         break;
       default:
-        throw new Error(`Unhandled GlobalTrack type ${(globalTrack: empty)}`);
+        throw new Error(`Unhandled GlobalTrack type ${globalTrack as never}`);
     }
 
     return {

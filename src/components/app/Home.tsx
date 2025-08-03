@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 
 import { AppHeader } from './AppHeader';
@@ -11,13 +9,13 @@ import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNav
 import { ListOfPublishedProfiles } from './ListOfPublishedProfiles';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
-import PerfScreenshot from 'firefox-profiler-res/img/jpg/perf-screenshot-2021-05-06.jpg';
-import FirefoxPopupScreenshot from 'firefox-profiler-res/img/jpg/firefox-profiler-button-2021-05-06.jpg';
+const PerfScreenshot = require('firefox-profiler-res/img/jpg/perf-screenshot-2021-05-06.jpg');
+const FirefoxPopupScreenshot = require('firefox-profiler-res/img/jpg/firefox-profiler-button-2021-05-06.jpg');
 import {
   retrieveProfileFromFile,
   triggerLoadingFromUrl,
 } from 'firefox-profiler/actions/receive-profile';
-import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
+import { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import {
   queryIsMenuButtonEnabled,
@@ -26,7 +24,7 @@ import {
 import { getBrowserConnection } from 'firefox-profiler/selectors/app';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import { Localized } from '@fluent/react';
 import './Home.css';
@@ -34,38 +32,38 @@ import './Home.css';
 import { DragAndDropOverlay } from './DragAndDrop';
 
 type ActionButtonsProps = {
-  +onLoadProfileFromFileRequested: (file: File) => void,
-  +onLoadProfileFromUrlRequested: (url: string) => void,
+  readonly onLoadProfileFromFileRequested: (file: File) => void;
+  readonly onLoadProfileFromUrlRequested: (url: string) => void;
 };
 
 type ActionButtonsState = {
-  isLoadFromUrlPressed: boolean,
+  isLoadFromUrlPressed: boolean;
 };
 
 type LoadFromUrlProps = {
-  +onLoadProfileFromUrlRequested: (url: string) => void,
+  readonly onLoadProfileFromUrlRequested: (url: string) => void;
 };
 
 type LoadFromUrlState = {
-  value: string,
+  value: string;
 };
 
 class ActionButtons extends React.PureComponent<
   ActionButtonsProps,
-  ActionButtonsState,
+  ActionButtonsState
 > {
   _fileInput: HTMLInputElement | null;
 
-  state = {
+  override state = {
     isLoadFromUrlPressed: false,
   };
 
-  _takeInputRef = (input) => {
+  _takeInputRef = (input: HTMLInputElement | null) => {
     this._fileInput = input;
   };
 
   _uploadProfileFromFile = async () => {
-    if (this._fileInput) {
+    if (this._fileInput && this._fileInput.files?.[0]) {
       this.props.onLoadProfileFromFileRequested(this._fileInput.files[0]);
     }
   };
@@ -77,14 +75,14 @@ class ActionButtons extends React.PureComponent<
     }
   };
 
-  _loadFromUrlPressed = (event: SyntheticEvent<>) => {
+  _loadFromUrlPressed = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     this.setState((prevState) => {
       return { isLoadFromUrlPressed: !prevState.isLoadFromUrlPressed };
     });
   };
 
-  render() {
+  override render() {
     return (
       <div className="homeSectionLoadProfile">
         <div className="homeSectionActionButtons">
@@ -129,27 +127,27 @@ class ActionButtons extends React.PureComponent<
 
 class LoadFromUrl extends React.PureComponent<
   LoadFromUrlProps,
-  LoadFromUrlState,
+  LoadFromUrlState
 > {
-  state = {
+  override state = {
     value: '',
   };
 
-  handleChange = (event: SyntheticEvent<HTMLInputElement>) => {
+  handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
     this.setState({
       value: event.currentTarget.value,
     });
   };
 
-  _upload = (event: SyntheticEvent<>) => {
+  _upload = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (this.state.value) {
       this.props.onLoadProfileFromUrlRequested(this.state.value);
     }
   };
 
-  render() {
+  override render() {
     return (
       <form className="homeSectionLoadFromUrl" onSubmit={this._upload}>
         <input
@@ -184,7 +182,7 @@ function DocsButton() {
   );
 }
 
-function InstructionTransition(props: { children: React.Node }) {
+function InstructionTransition(props: { children: React.ReactNode }) {
   return (
     <CSSTransition
       {...props}
@@ -196,26 +194,26 @@ function InstructionTransition(props: { children: React.Node }) {
 }
 
 type OwnHomeProps = {
-  +specialMessage?: string,
+  readonly specialMessage?: string;
 };
 
 type StateHomeProps = {
-  +browserConnection: BrowserConnection | null,
+  readonly browserConnection: BrowserConnection | null;
 };
 
 type DispatchHomeProps = {
-  +retrieveProfileFromFile: typeof retrieveProfileFromFile,
-  +triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
+  readonly retrieveProfileFromFile: typeof retrieveProfileFromFile;
+  readonly triggerLoadingFromUrl: typeof triggerLoadingFromUrl;
 };
 
 type HomeProps = ConnectedProps<
   OwnHomeProps,
   StateHomeProps,
-  DispatchHomeProps,
+  DispatchHomeProps
 >;
 
 type HomeState = {
-  popupInstallPhase: PopupInstallPhase,
+  popupInstallPhase: PopupInstallPhase;
 };
 
 type PopupInstallPhase =
@@ -257,7 +255,7 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
     }
 
     this.state = {
-      popupInstallPhase,
+      popupInstallPhase: popupInstallPhase as PopupInstallPhase,
     };
   }
 
@@ -283,7 +281,7 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
     }
   }
 
-  _enableMenuButton = (e) => {
+  _enableMenuButton = (e: React.MouseEvent) => {
     e.preventDefault();
     enableMenuButton().then(
       () => {
@@ -576,7 +574,7 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
     this.props.triggerLoadingFromUrl(url);
   };
 
-  render() {
+  override render() {
     const { specialMessage } = this.props;
 
     return (
@@ -648,13 +646,13 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
               >
                 <p>
                   The Firefox Profiler can also import profiles from other
-                  profilers, such as <perf>Linux perf</perf>,
-                  <simpleperf>Android SimplePerf</simpleperf>, the Chrome
+                  profilers, such as {'<perf>Linux perf</perf>'},
+                  {'<simpleperf>Android SimplePerf</simpleperf>'}, the Chrome
                   performance panel,{' '}
-                  <androidstudio>Android Studio</androidstudio>, or any file
-                  using the <dhat>dhat format</dhat> or{' '}
-                  <traceevent>Google’s Trace Event Format</traceevent>.{' '}
-                  <write>Learn how to write your own importer</write>.
+                  {'<androidstudio>Android Studio</androidstudio>'}, or any file
+                  using the {'<dhat>dhat format</dhat>'} or{' '}
+                  {"<traceevent>Google's Trace Event Format</traceevent>"}.{' '}
+                  {'<write>Learn how to write your own importer</write>'}.
                 </p>
               </Localized>
 
@@ -663,7 +661,9 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
                 elems={{
                   a: (
                     // $FlowExpectError Flow doesn't know about this fluent rule for react component.
-                    <InnerNavigationLink dataSource="compare"></InnerNavigationLink>
+                    <InnerNavigationLink dataSource="compare">
+                      Compare
+                    </InnerNavigationLink>
                   ),
                 }}
               >
@@ -704,7 +704,7 @@ function _isChromium(): boolean {
 export const Home = explicitConnect<
   OwnHomeProps,
   StateHomeProps,
-  DispatchHomeProps,
+  DispatchHomeProps
 >({
   mapStateToProps: (state) => ({
     browserConnection: getBrowserConnection(state),

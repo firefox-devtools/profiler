@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import * as React from 'react';
 import { Localized } from '@fluent/react';
 
@@ -27,28 +25,28 @@ import {
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
-import type {
+import {
   Profile,
   SymbolicationStatus,
   ExtraProfileInfoSection,
 } from 'firefox-profiler/types';
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 
 import './MetaInfo.css';
 
 type State = {
-  showsMoreInfo: boolean,
+  showsMoreInfo: boolean;
 };
 
 type StateProps = $ReadOnly<{
-  profile: Profile,
-  symbolicationStatus: SymbolicationStatus,
-  profileExtraInfo: ExtraProfileInfoSection[],
+  profile: Profile;
+  symbolicationStatus: SymbolicationStatus;
+  profileExtraInfo: ExtraProfileInfoSection[];
 }>;
 
 type DispatchProps = $ReadOnly<{
-  resymbolicateProfile: typeof resymbolicateProfile,
+  resymbolicateProfile: typeof resymbolicateProfile;
 }>;
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -57,7 +55,7 @@ type Props = ConnectedProps<{}, StateProps, DispatchProps>;
  * This component formats the profile's meta information into a dropdown panel.
  */
 class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
-  state = { showsMoreInfo: false };
+  override state = { showsMoreInfo: false };
 
   /**
    * This method provides information about the symbolication status, and a button
@@ -134,7 +132,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
     }
   }
 
-  _handleMoreInfoButtonClick = (event: SyntheticMouseEvent<>) => {
+  _handleMoreInfoButtonClick = (event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
     this.setState((state) => ({ showsMoreInfo: !state.showsMoreInfo }));
   };
@@ -188,7 +186,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
     );
   }
 
-  render() {
+  override render() {
     const { meta, profilerOverhead } = this.props.profile;
     const { configuration } = meta;
 
@@ -521,7 +519,10 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
   }
 }
 
-function _renderRowOfList(labelL10nId: string, data: string[]): React.Node {
+function _renderRowOfList(
+  labelL10nId: string,
+  data: string[]
+): React.ReactNode {
   if (!data.length) {
     return null;
   }
