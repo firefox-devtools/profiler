@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import React, { PureComponent } from 'react';
 import { MenuItem } from '@firefox-devtools/react-contextmenu';
 import { Localized } from '@fluent/react';
@@ -25,7 +23,7 @@ import {
 import { getRightClickedMarkerInfo } from 'firefox-profiler/selectors/right-clicked-marker';
 import copy from 'copy-to-clipboard';
 
-import type {
+import {
   Marker,
   MarkerIndex,
   StartEndRange,
@@ -39,7 +37,7 @@ import type {
   Page,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { getImplementationFilter } from 'firefox-profiler/selectors/url-state';
 
 import { getBacktraceItemsForStack } from 'firefox-profiler/profile-logic/transforms';
@@ -48,25 +46,25 @@ import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per
 import './MarkerContextMenu.css';
 
 type OwnProps = {
-  +rightClickedMarkerInfo: MarkerReference,
+  readonly rightClickedMarkerInfo: MarkerReference;
 };
 
 type StateProps = {
-  +marker: Marker,
-  +markerIndex: MarkerIndex,
-  +previewSelection: PreviewSelection,
-  +committedRange: StartEndRange,
-  +thread: Thread | null,
-  +implementationFilter: ImplementationFilter,
-  +getMarkerLabelToCopy: (MarkerIndex) => string,
-  +profiledThreadIds: Set<Tid>,
-  innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
+  readonly marker: Marker;
+  readonly markerIndex: MarkerIndex;
+  readonly previewSelection: PreviewSelection;
+  readonly committedRange: StartEndRange;
+  readonly thread: Thread | null;
+  readonly implementationFilter: ImplementationFilter;
+  readonly getMarkerLabelToCopy: (param: MarkerIndex) => string;
+  readonly profiledThreadIds: Set<Tid>;
+  innerWindowIDToPageMap: Map<InnerWindowID, Page> | null;
 };
 
 type DispatchProps = {
-  +updatePreviewSelection: typeof updatePreviewSelection,
-  +setContextMenuVisibility: typeof setContextMenuVisibility,
-  +selectTrackFromTid: typeof selectTrackFromTid,
+  readonly updatePreviewSelection: typeof updatePreviewSelection;
+  readonly setContextMenuVisibility: typeof setContextMenuVisibility;
+  readonly selectTrackFromTid: typeof selectTrackFromTid;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -146,7 +144,7 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
     });
   };
 
-  _isZeroDurationMarker(marker: ?Marker): boolean {
+  _isZeroDurationMarker(marker: Marker | null): boolean {
     return !marker || marker.end === null;
   }
 
@@ -180,8 +178,10 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
   copyMarkerCause = () => {
     const { marker } = this.props;
 
-    if (marker.data && marker.data.cause) {
-      const stack = this._convertStackToString(marker.data.cause.stack);
+    if (marker.data && (marker.data as any).cause) {
+      const stack = this._convertStackToString(
+        (marker.data as any).cause.stack
+      );
       if (stack) {
         copy(stack);
       } else {
@@ -204,12 +204,12 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
     const { marker, innerWindowIDToPageMap } = this.props;
     const { data } = marker;
 
-    if (!data || !data.innerWindowID || !innerWindowIDToPageMap) {
+    if (!data || !(data as any).innerWindowID || !innerWindowIDToPageMap) {
       // Marker doesn't contain any page information. Do not do anything.
       return;
     }
 
-    const page = innerWindowIDToPageMap.get(data.innerWindowID);
+    const page = innerWindowIDToPageMap.get((data as any).innerWindowID);
     if (!page) {
       // Page couldn't be found. Do not do anything.
       return;
@@ -259,12 +259,12 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
         menuItemTextElement = (
           <Localized
             id="MarkerContextMenu--select-the-receiver-thread"
-            vars={{ threadName: data.recvThreadName }}
+            vars={{ threadName: data.recvThreadName ?? '' }}
             elems={{ strong: <strong /> }}
           >
             <>
-              Select the receiver thread “<strong>{data.recvThreadName}</strong>
-              ”
+              Select the receiver thread "
+              <strong>{data.recvThreadName ?? ''}</strong>”
             </>
           </Localized>
         );
@@ -283,11 +283,12 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
         menuItemTextElement = (
           <Localized
             id="MarkerContextMenu--select-the-sender-thread"
-            vars={{ threadName: data.sendThreadName }}
+            vars={{ threadName: data.sendThreadName ?? '' }}
             elems={{ strong: <strong /> }}
           >
             <>
-              Select the sender thread “<strong>{data.sendThreadName}</strong>”
+              Select the sender thread "
+              <strong>{data.sendThreadName ?? ''}</strong>"
             </>
           </Localized>
         );
@@ -311,12 +312,12 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
     const { marker, innerWindowIDToPageMap } = this.props;
     const { data } = marker;
 
-    if (!data || !data.innerWindowID || !innerWindowIDToPageMap) {
+    if (!data || !(data as any).innerWindowID || !innerWindowIDToPageMap) {
       // Marker doesn't contain any page information. Do not render anything.
       return null;
     }
 
-    const page = innerWindowIDToPageMap.get(data.innerWindowID);
+    const page = innerWindowIDToPageMap.get((data as any).innerWindowID);
     if (!page) {
       // Page couldn't be found. Do not render anything.
       return null;
@@ -356,7 +357,7 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
   //    value which was set earlier when handling the "mousedown" event.
   //    To avoid this problem we use this `setTimeout` call to delay the reset
   //    just a bit, just in case we get a `_onShow` call right after that.
-  _hidingTimeout: TimeoutID | null = null;
+  _hidingTimeout: NodeJS.Timeout | null = null;
 
   _onHide = () => {
     this._hidingTimeout = setTimeout(() => {
@@ -366,11 +367,11 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
   };
 
   _onShow = () => {
-    clearTimeout(this._hidingTimeout);
+    if (this._hidingTimeout) clearTimeout(this._hidingTimeout);
     this.props.setContextMenuVisibility(true);
   };
 
-  render() {
+  override render() {
     const { marker, previewSelection, committedRange } = this.props;
     const { data } = marker;
 
@@ -481,7 +482,7 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
             Copy description
           </Localized>
         </MenuItem>
-        {data && data.cause ? (
+        {data && (data as any).cause ? (
           <MenuItem onClick={this.copyMarkerCause}>
             <span className="react-contextmenu-icon markerContextMenuIconCopyStack" />
             <Localized id="MarkerContextMenu--copy-call-stack">
@@ -536,7 +537,7 @@ const MarkerContextMenu = explicitConnect<OwnProps, StateProps, DispatchProps>({
 });
 
 type MaybeProps = {
-  +rightClickedMarkerInfo: MarkerReference | null,
+  readonly rightClickedMarkerInfo: MarkerReference | null;
 };
 
 /**
@@ -544,7 +545,7 @@ type MaybeProps = {
  * It is the component that is actually exported here.
  */
 class MaybeMarkerContextMenuImpl extends PureComponent<MaybeProps> {
-  render() {
+  override render() {
     const { rightClickedMarkerInfo } = this.props;
 
     if (rightClickedMarkerInfo === null) {
