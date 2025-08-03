@@ -33,11 +33,6 @@ Even with comprehensive automation, you may still need to fix:
 - Complex multiline type definitions
 - React component overrides (add `override` keyword)
 
-### Legacy Scripts (Fallback Only)
-
-- `./scripts/flow-to-typescript.sh` - Original comprehensive script
-- `./scripts/flow-to-typescript-enhanced.sh` - Enhanced error handling version
-
 ### Other Tools
 
 - `./scripts/analyze-dependencies.sh` - Analyze conversion priorities
