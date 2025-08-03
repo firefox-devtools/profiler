@@ -168,8 +168,7 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
     const rowHeight = TRACK_NETWORK_ROW_HEIGHT * devicePixelRatio;
     canvas.width = Math.round(containerWidth * devicePixelRatio);
     canvas.height = Math.round(TRACK_NETWORK_HEIGHT * devicePixelRatio);
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const ctx = canvas.getContext('2d')!;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = NORMAL_STYLE;

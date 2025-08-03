@@ -89,7 +89,6 @@ mixed → unknown
 ### Type Safety Improvements Identified This Session
 - **MarkerPayload union type properties** - Many files need `(data as any).property` for union-specific properties like `cause`, `innerWindowID`, `module`, `name`
 - **Window property extensions** - `window.persistTooltips` pattern needs consistent typing approach
-- **Canvas context null safety** - Pattern of `if (!ctx) return;` after `getContext('2d')` calls
 - **Timeout handling** - `clearTimeout(timeout | null)` requires null checks: `if (timeout) clearTimeout(timeout)`
 
 ### Missing Type Declarations Needed
@@ -99,28 +98,14 @@ mixed → unknown
 ### Code Quality Improvements
 - **Standardize window property access** - Create utility types for console API extensions like `persistTooltips`
 - **Create MarkerPayload type guards** - Replace `(data as any).property` with proper type narrowing functions
-- **Canvas context utility** - Helper function for safe canvas context retrieval with null checks
 - **Audit remaining `as any` assertions** for potential type safety improvements
 
 ## Tooling Improvements Needed
 
 ### Conversion Script Enhancements
 - **Flow spread syntax auto-fix** - Detect `{ ...TypeA, ...TypeB }` and convert to `TypeA & TypeB` automatically
-- **React event generic auto-completion** - Detect `React.MouseEvent<>` and suggest appropriate element types
-- **Canvas context null safety injection** - Auto-add null checks after `getContext('2d')` calls
 - **Window property access conversion** - Auto-convert `window.property` to `(window as any).property` for non-standard properties
 - **Enhanced Flow syntax detection** - Improve handling of complex Flow patterns like `?{...}`, `| null<Type>`, empty generics `<>`
-
-### Development Experience
-- **Pre-conversion complexity analysis** - Script to identify potentially problematic files before conversion
-- **Batch conversion safety checks** - Validate entire batches before committing to avoid partial failures  
-- **Type declaration generator** - Automated Flow libdef → TypeScript declaration conversion tool
-- **Progress visualization** - Better reporting of remaining files by complexity/dependency depth
-
-### Quality Assurance
-- **Strict compliance checker** - Automated detection of files ready for strict exclude list removal
-- **Runtime behavior validator** - Ensure TypeScript conversions maintain identical runtime behavior
-- **Performance impact tracking** - Monitor TypeScript compilation times and bundle size changes
 
 ## Next Priority Actions
 

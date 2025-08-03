@@ -80,10 +80,7 @@ export class ThreadHeightGraph extends PureComponent<Props> {
     const rect = canvas.getBoundingClientRect();
     canvas.width = Math.round(rect.width * devicePixelRatio);
     canvas.height = Math.round(rect.height * devicePixelRatio);
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      return;
-    }
+    const ctx = canvas.getContext('2d')!;
     const range = [rangeStart, rangeEnd];
     const rangeLength = range[1] - range[0];
     const xPixelsPerMs = canvas.width / rangeLength;
@@ -170,7 +167,6 @@ export class ThreadHeightGraph extends PureComponent<Props> {
       if (samplesBucket.xPos.length === 0) {
         return;
       }
-      if (!ctx) return;
       ctx.fillStyle = color;
       for (let i = 0; i < samplesBucket.height.length; i++) {
         const height = samplesBucket.height[i];

@@ -122,6 +122,12 @@ apply_transform 's/SyntheticKeyboardEvent</React.KeyboardEvent</g' "Convert Synt
 apply_transform 's/SyntheticFocusEvent</React.FocusEvent</g' "Convert SyntheticFocusEvent"
 apply_transform 's/SyntheticEvent<HTMLFormElement>/React.FormEvent<HTMLFormElement>/g' "Convert SyntheticEvent with form elements"
 
+# Convert React.SomeEvent<> to React.SomeEvent<HTMLElement> for any event type
+apply_transform 's/React\.\([A-Za-z]*Event\)<>/React.\1<HTMLElement>/g' "Add HTMLElement to generic React events"
+
+# Convert getContext('2d') to getContext('2d')! for non-null assertion
+apply_transform "s/\.getContext('2d'\([^)]\))/\.getContext('2d'\1)!/g" "Add non-null assertion to 2d context"
+
 # 9a. Add React component override modifiers (critical for TypeScript compilation)
 # Add override to class state properties
 apply_transform 's/^  state = {/  override state = {/g' "Add override to class state"
