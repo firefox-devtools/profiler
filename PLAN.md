@@ -2,11 +2,12 @@
 
 ## Current Status (August 3, 2025)
 
-**JavaScript files remaining**: 56 → **TypeScript files**: 239 → **Strict exclude list**: 3 files
+**JavaScript files remaining**: 48 → **TypeScript files**: 247 → **Strict exclude list**: 2 files
 
 - `yarn test-all` passes - All checks work correctly  
 - `yarn typecheck` passes - Mixed Flow/TypeScript codebase is stable
 - **Strategy**: Dependency-first migration focusing on zero-dependency files first
+- **Progress**: 83.7% of files converted, accelerating with large file conversions
 
 ### Key Commands
 ```bash
@@ -67,40 +68,48 @@ mixed → unknown
 - All 41 utility files migrated
 
 ### Phase 3: 🚀 IN PROGRESS - Components & Logic
-**Recent conversions (34 files, 8,571 lines)**:
-- **Latest session**: BottomBox.tsx (306 lines) + 2 strict compliance fixes
-- **Previous session**: 10 components (1,376 lines) - TrackCustomMarker, ProfileName, StackSettings, etc.
+**Recent conversions (41 files, 12,052 lines)**:
+- **Latest session**: 7 large zero-dependency files (3,481 lines) - CallNodeContextMenu, Markers, CallTree, TrackNetwork, etc.
+- **Previous session**: window-console.ts strict compliance + AppHeader.tsx
 - **Core infrastructure**: merge-compare.ts (1,447 lines), per-thread selectors, profile-view.ts
 
 ### Phase 4: ✅ LARGELY COMPLETED - Strict Compliance  
-- Reduced strict exclude list from 14 → 3 files
-- Fixed critical infrastructure files (publish.ts, profile-view.ts)
+- Reduced strict exclude list from 14 → 2 files (window-console.ts fixed)
+- Fixed critical infrastructure files (publish.ts, profile-view.ts, window-console.ts)
 - Created type declarations: react-splitter-layout, array-range, simpleperf_report, call-tree
 
 ## Deferred Tasks & Issues
 
-### Complex Files Needing Special Handling
+### Complex Files Needing Special Handling  
 - **marker-table/index.js** (301 lines) - Flow type annotation parsing issues with `TreeView | null<Type>` syntax
 - **TrackScreenshots.js** (393 lines) - Complex ScreenshotPayload union types, missing windowWidth/windowHeight properties
 - **Selection.js** (509 lines) - Multiple Flow syntax issues: `?{...}` nullable object syntax, empty generic `<>` calls
 - **ListOfPublishedProfiles.js** (273 lines) - Dual component classes with separate state definitions causing type inference conflicts
+
+### Type Safety Improvements Identified This Session
+- **MarkerPayload union type properties** - Many files need `(data as any).property` for union-specific properties like `cause`, `innerWindowID`, `module`, `name`
+- **Window property extensions** - `window.persistTooltips` pattern needs consistent typing approach
+- **Canvas context null safety** - Pattern of `if (!ctx) return;` after `getContext('2d')` calls
+- **Timeout handling** - `clearTimeout(timeout | null)` requires null checks: `if (timeout) clearTimeout(timeout)`
 
 ### Missing Type Declarations Needed
 - **Create declarations for remaining npm dependencies** when encountered during conversions
 - **Investigate complex Flow libdefs** in `src/types/libdef/npm*` that may need TypeScript equivalents
 
 ### Code Quality Improvements
-- **Standardize CSS custom property typing** - Create utility type for consistent `as React.CSSProperties` usage
-- **Review dual state definitions** in components - may indicate architectural issues to address
+- **Standardize window property access** - Create utility types for console API extensions like `persistTooltips`
+- **Create MarkerPayload type guards** - Replace `(data as any).property` with proper type narrowing functions
+- **Canvas context utility** - Helper function for safe canvas context retrieval with null checks
 - **Audit remaining `as any` assertions** for potential type safety improvements
 
 ## Tooling Improvements Needed
 
 ### Conversion Script Enhancements
+- **Flow spread syntax auto-fix** - Detect `{ ...TypeA, ...TypeB }` and convert to `TypeA & TypeB` automatically
+- **React event generic auto-completion** - Detect `React.MouseEvent<>` and suggest appropriate element types
+- **Canvas context null safety injection** - Auto-add null checks after `getContext('2d')` calls
+- **Window property access conversion** - Auto-convert `window.property` to `(window as any).property` for non-standard properties
 - **Enhanced Flow syntax detection** - Improve handling of complex Flow patterns like `?{...}`, `| null<Type>`, empty generics `<>`
-- **Better union type conversion** - Automated detection and conversion of complex payload unions
-- **Dual class detection** - Handle files with multiple React components more intelligently
-- **CSS property type insertion** - Automatically add `as React.CSSProperties` for style objects with custom properties
 
 ### Development Experience
 - **Pre-conversion complexity analysis** - Script to identify potentially problematic files before conversion
@@ -115,11 +124,11 @@ mixed → unknown
 
 ## Next Priority Actions
 
-1. **Tackle simpler 0-dependency files first** - Avoid complex ones until tooling improvements  
-2. **Create remaining type declarations** as needed during conversions
-3. **Fix 3 remaining strict exclude files**: Root.tsx, UploadedRecordingsHome.tsx, window-console.ts
-4. **Implement enhanced conversion script** for complex Flow syntax patterns
-5. **Continue systematic dependency-first migration** for remaining 56 JavaScript files
+1. **Continue zero-dependency file conversions** - Good momentum with large files, 8 remaining zero-dependency files
+2. **Fix 2 remaining strict exclude files**: Root.tsx, UploadedRecordingsHome.tsx  
+3. **Create type safety utilities** - MarkerPayload type guards, canvas context helpers, window property types
+4. **Implement enhanced conversion script** for Flow spread syntax and React event generics
+5. **Continue systematic dependency-first migration** for remaining 48 JavaScript files
 
 ---
 
