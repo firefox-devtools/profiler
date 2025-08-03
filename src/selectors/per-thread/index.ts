@@ -154,7 +154,10 @@ function _buildThreadSelectors(
   // We define the thread selectors in 5 steps to ensure clarity in the
   // separate files.
   // 1. The basic thread selectors.
-  let selectors = getBasicThreadSelectorsPerThread(threadIndexes, threadsKey);
+  let selectors: any = getBasicThreadSelectorsPerThread(
+    threadIndexes,
+    threadsKey
+  );
   // 2. The marker selectors.
   selectors = {
     ...selectors,
@@ -195,8 +198,10 @@ export const selectedThreadSelectors: ThreadSelectors = (() => {
   const anyThreadSelectors: ThreadSelectors = getThreadSelectors(0);
   const result: Partial<ThreadSelectors> = {};
   for (const key in anyThreadSelectors) {
-    result[key] = (state) =>
-      getThreadSelectors(UrlState.getSelectedThreadIndexes(state))[key](state);
+    (result as any)[key] = (state: any) =>
+      (getThreadSelectors(UrlState.getSelectedThreadIndexes(state)) as any)[
+        key
+      ](state);
   }
   const result2: ThreadSelectors = result as any;
   return result2;

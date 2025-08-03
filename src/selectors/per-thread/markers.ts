@@ -47,7 +47,7 @@ export type MarkerSelectorsPerThread = $ReturnType<
  */
 export function getMarkerSelectorsPerThread(
   threadSelectors: BasicThreadSelectorsPerThread,
-  threadIndexes: Set<ThreadIndex>,
+  _threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
 ) {
   const _getRawMarkerTable: Selector<RawMarkerTable> = (state) =>

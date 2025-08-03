@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import React, { PureComponent } from 'react';
 
 import { EmptyReasons } from '../shared/EmptyReasons';
@@ -12,12 +10,12 @@ import explicitConnect, {
   type ConnectedProps,
 } from 'firefox-profiler/utils/connect';
 
-import type { Thread, State } from 'firefox-profiler/types';
+import { Thread, State } from 'firefox-profiler/types';
 
 type StateProps = {
-  threadName: string,
-  rangeFilteredThread: Thread,
-  thread: Thread,
+  threadName: string;
+  rangeFilteredThread: Thread;
+  thread: Thread;
 };
 
 type Props = ConnectedProps<{}, StateProps, {}>;
@@ -27,7 +25,7 @@ type Props = ConnectedProps<{}, StateProps, {}>;
  * and display a friendly message to the end user.
  */
 class FlameGraphEmptyReasonsImpl extends PureComponent<Props> {
-  render() {
+  override render() {
     const { thread, rangeFilteredThread, threadName } = this.props;
     let reason;
 
