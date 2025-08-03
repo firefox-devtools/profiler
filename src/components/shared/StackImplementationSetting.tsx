@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import React, { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 
@@ -18,24 +16,24 @@ import explicitConnect, {
 import './PanelSettingsList.css';
 import './StackImplementationSetting.css';
 
-import type { ImplementationFilter } from 'firefox-profiler/types';
+import { ImplementationFilter } from 'firefox-profiler/types';
 
 type OwnProps = {
-  labelL10nId?: string,
+  labelL10nId?: string;
 };
 
 type StateProps = {
-  +implementationFilter: ImplementationFilter,
+  readonly implementationFilter: ImplementationFilter;
 };
 
 type DispatchProps = {
-  +changeImplementationFilter: typeof changeImplementationFilter,
+  readonly changeImplementationFilter: typeof changeImplementationFilter;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class StackImplementationSettingImpl extends PureComponent<Props> {
-  _onImplementationFilterChange = (e: SyntheticEvent<HTMLInputElement>) => {
+  _onImplementationFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.props.changeImplementationFilter(
       // This function is here to satisfy Flow that we are getting a valid
       // implementation filter.
@@ -70,7 +68,7 @@ class StackImplementationSettingImpl extends PureComponent<Props> {
     );
   }
 
-  render() {
+  override render() {
     const { labelL10nId } = this.props;
 
     return (
@@ -100,7 +98,7 @@ class StackImplementationSettingImpl extends PureComponent<Props> {
 export const StackImplementationSetting = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state) => ({
     implementationFilter: getImplementationFilter(state),

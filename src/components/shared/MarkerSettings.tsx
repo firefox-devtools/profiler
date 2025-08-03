@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import React, { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 import classNames from 'classnames';
@@ -17,34 +15,34 @@ import { PanelSearch } from './PanelSearch';
 import { StackImplementationSetting } from 'firefox-profiler/components/shared/StackImplementationSetting';
 import { MarkerFiltersContextMenu } from './MarkerFiltersContextMenu';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import 'firefox-profiler/components/shared/PanelSettingsList.css';
 import './MarkerSettings.css';
 
 type StateProps = {
-  +searchString: string,
-  +allowSwitchingStackType: boolean,
+  readonly searchString: string;
+  readonly allowSwitchingStackType: boolean;
 };
 
 type DispatchProps = {
-  +changeMarkersSearchString: typeof changeMarkersSearchString,
+  readonly changeMarkersSearchString: typeof changeMarkersSearchString;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 type State = {
-  +isMarkerFiltersMenuVisible: boolean,
+  readonly isMarkerFiltersMenuVisible: boolean;
   // react-contextmenu library automatically hides the menu on mousedown even
   // if it's already visible. That's why we need to handle the mousedown event
   // as well and check if the menu is visible or not before it hides it.
   // Otherwise, if we check this in onClick event, the state will always be
   // `false` since the library already hid it on mousedown.
-  +isFilterMenuVisibleOnMouseDown: boolean,
+  readonly isFilterMenuVisibleOnMouseDown: boolean;
 };
 
 class MarkerSettingsImpl extends PureComponent<Props, State> {
-  state = {
+  override state = {
     isMarkerFiltersMenuVisible: false,
     isFilterMenuVisibleOnMouseDown: false,
   };
@@ -53,7 +51,7 @@ class MarkerSettingsImpl extends PureComponent<Props, State> {
     this.props.changeMarkersSearchString(value);
   };
 
-  _onClickToggleFilterButton = (event: SyntheticMouseEvent<HTMLElement>) => {
+  _onClickToggleFilterButton = (event: React.MouseEvent<HTMLElement>) => {
     const { isFilterMenuVisibleOnMouseDown } = this.state;
     if (isFilterMenuVisibleOnMouseDown) {
       // Do nothing as we would like to hide the menu if the menu was already visible on mouse down.
@@ -88,7 +86,7 @@ class MarkerSettingsImpl extends PureComponent<Props, State> {
     }));
   };
 
-  render() {
+  override render() {
     const { searchString, allowSwitchingStackType } = this.props;
     const { isMarkerFiltersMenuVisible } = this.state;
 

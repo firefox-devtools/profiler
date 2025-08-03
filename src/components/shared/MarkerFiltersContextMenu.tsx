@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import React, { PureComponent } from 'react';
 import { MenuItem } from '@firefox-devtools/react-contextmenu';
 import { Localized } from '@fluent/react';
@@ -15,21 +13,21 @@ import {
 } from 'firefox-profiler/selectors/url-state';
 import { addTransformToStack } from 'firefox-profiler/actions/profile-view';
 
-import type { ThreadsKey } from 'firefox-profiler/types';
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ThreadsKey } from 'firefox-profiler/types';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {
-  +onShow: () => void,
-  +onHide: () => void,
+  readonly onShow: () => void;
+  readonly onHide: () => void;
 };
 
 type StateProps = {
-  +searchString: string,
-  +threadsKey: ThreadsKey,
+  readonly searchString: string;
+  readonly threadsKey: ThreadsKey;
 };
 
 type DispatchProps = {
-  +addTransformToStack: typeof addTransformToStack,
+  readonly addTransformToStack: typeof addTransformToStack;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -44,7 +42,7 @@ class MarkerFiltersContextMenuImpl extends PureComponent<Props> {
     });
   };
 
-  render() {
+  override render() {
     const { searchString, onShow, onHide } = this.props;
     return (
       <ContextMenu
@@ -74,7 +72,7 @@ class MarkerFiltersContextMenuImpl extends PureComponent<Props> {
 export const MarkerFiltersContextMenu = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state) => ({
     searchString: getMarkersSearchString(state),

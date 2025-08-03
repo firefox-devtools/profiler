@@ -258,7 +258,7 @@ export const getUploadProgress: Selector<number> = createSelector(
     clamp(uploadProgress, 0.1, 0.95)
 );
 
-export const getUploadError: Selector<Error | mixed> = (state) =>
+export const getUploadError: Selector<Error | unknown> = (state) =>
   getUploadState(state).error;
 
 export const getUploadProgressString: Selector<string> = createSelector(

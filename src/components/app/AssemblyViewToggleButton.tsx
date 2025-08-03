@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import React from 'react';
 import classNames from 'classnames';
 
@@ -13,17 +11,17 @@ import {
 } from 'firefox-profiler/actions/profile-view';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import { Localized } from '@fluent/react';
 
 type StateProps = {
-  +assemblyViewIsOpen: boolean,
+  readonly assemblyViewIsOpen: boolean;
 };
 
 type DispatchProps = {
-  +openAssemblyView: typeof openAssemblyView,
-  +closeAssemblyView: typeof closeAssemblyView,
+  readonly openAssemblyView: typeof openAssemblyView;
+  readonly closeAssemblyView: typeof closeAssemblyView;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -37,7 +35,7 @@ class AssemblyViewToggleButtonImpl extends React.PureComponent<Props> {
     }
   };
 
-  render() {
+  override render() {
     const { assemblyViewIsOpen } = this.props;
 
     return assemblyViewIsOpen ? (
@@ -74,7 +72,7 @@ class AssemblyViewToggleButtonImpl extends React.PureComponent<Props> {
 export const AssemblyViewToggleButton = explicitConnect<
   {},
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state) => ({
     assemblyViewIsOpen: getAssemblyViewIsOpen(state),

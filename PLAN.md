@@ -401,22 +401,22 @@ The `flow-to-typescript-unified.sh` script handles most conversions automaticall
 
 ### Phase 3: 🚀 IN PROGRESS - Systematic File Migration
 
-- **Status**: 68 JavaScript files remaining (down from 70)
-- **TypeScript files**: 227 (up from 225)
+- **Status**: 67 JavaScript files remaining (down from 68)
+- **TypeScript files**: 228 (up from 227)
 - **Strategy**: Dependency-first migration focusing on zero-dependency files first
 - **Recent major conversions (August 3, 2025)**:
   - **Core selectors**: src/selectors/per-thread/ (thread.tsx, markers.ts, stack-sample.ts)
   - **Profile logic**: src/profile-logic/merge-compare.ts (1,447 lines)
   - **CLI tools**: src/symbolicator-cli/index.ts
   - **EmptyReasons components**: StackChart, CallTree, FlameGraph (183 lines)
-  - **Timeline components**: TrackBandwidthGraph.tsx (716 lines), TrackBandwidth.tsx (84 lines), TrackPower.tsx (84 lines)
+  - **Timeline components**: TrackBandwidthGraph.tsx (716 lines), TrackBandwidth.tsx (84 lines), TrackPower.tsx (84 lines), TrackCustomMarkerGraph.tsx (636 lines)
   - **Selector infrastructure**: src/selectors/index.ts (48 lines)
   - **App components**: SourceCodeFetcher.tsx (135 lines), WindowTitle.tsx (149 lines), AssemblyCodeFetcher.tsx (150 lines)
   - **Settings components**: NetworkSettings.tsx (63 lines), js-tracer/Settings.tsx (68 lines)
   - **Tooltip components**: Marker.tsx (538 lines) - Advanced union type handling
   - **Sidebar components**: MarkerSidebar.tsx (65 lines) - Simple state mapping component
   - **Network components**: NetworkChartRow.tsx (531 lines) - Complex event handling and dynamic property access
-  - **Total converted**: 22 files, 6,253 lines of code
+  - **Total converted**: 23 files, 6,889 lines of code
 
 ### Phase 4: ✅ LARGELY COMPLETED - Strict TypeScript compliance
 
@@ -498,4 +498,6 @@ The `flow-to-typescript-unified.sh` script handles most conversions automaticall
 - **React event types** - provide element type parameter: `React.MouseEvent<HTMLDivElement>`
 - **Custom window properties** - use `(window as any).customProperty` for non-standard APIs
 - **Null safety with nullish coalescing** - use `(value ?? fallback)` for handling possible null returns
+- **Flow spread in types** - convert `{...TypeA, ...TypeB}` to `TypeA & TypeB` (intersection types)
+- **Canvas context null safety** - use `canvas.getContext('2d')!` assertion for known-safe contexts
 - **Mixed codebase stability** - Flow and TypeScript coexist reliably

@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import {
@@ -17,28 +15,28 @@ import {
   TRACK_PROCESS_CPU_LINE_WIDTH,
 } from 'firefox-profiler/app-logic/constants';
 
-import type {
+import {
   CounterIndex,
   ThreadIndex,
   Milliseconds,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackProcessCPU.css';
 
 type OwnProps = {
-  +counterIndex: CounterIndex,
+  readonly counterIndex: CounterIndex;
 };
 
 type StateProps = {
-  +threadIndex: ThreadIndex,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  readonly threadIndex: ThreadIndex;
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
 };
 
 type DispatchProps = {
-  updatePreviewSelection: typeof updatePreviewSelection,
+  updatePreviewSelection: typeof updatePreviewSelection;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -46,15 +44,17 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 type State = {};
 
 export class TrackProcessCPUImpl extends React.PureComponent<Props, State> {
-  render() {
+  override render() {
     const { counterIndex } = this.props;
     return (
       <div
         className="timelineTrackProcessCPU"
-        style={{
-          height: TRACK_PROCESS_CPU_HEIGHT,
-          '--graph-height': `${TRACK_PROCESS_CPU_HEIGHT}px`,
-        }}
+        style={
+          {
+            height: TRACK_PROCESS_CPU_HEIGHT,
+            '--graph-height': `${TRACK_PROCESS_CPU_HEIGHT}px`,
+          } as React.CSSProperties
+        }
       >
         <TrackProcessCPUGraph
           counterIndex={counterIndex}
@@ -69,7 +69,7 @@ export class TrackProcessCPUImpl extends React.PureComponent<Props, State> {
 export const TrackProcessCPU = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state, ownProps) => {
     const { counterIndex } = ownProps;

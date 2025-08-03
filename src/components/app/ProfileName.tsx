@@ -1,34 +1,32 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import * as React from 'react';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { getProfileNameWithDefault } from 'firefox-profiler/selectors';
 import { changeProfileName } from 'firefox-profiler/actions/profile-view';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './ProfileName.css';
 import { Localized } from '@fluent/react';
 
 type StateProps = {
-  +profileNameWithDefault: string,
+  readonly profileNameWithDefault: string;
 };
 
 type DispatchProps = {
-  +changeProfileName: typeof changeProfileName,
+  readonly changeProfileName: typeof changeProfileName;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 type State = {
-  focusedWithKey: null | string,
+  focusedWithKey: null | string;
   // Every time the input is focused, it's recreated to consistently set the initial
   // value.
-  focusGeneration: number,
+  focusGeneration: number;
 };
 
 /**
@@ -39,12 +37,12 @@ type State = {
  * state), and then when active, it switches to an input, which is only fixed in size.
  */
 class ProfileNameImpl extends React.PureComponent<Props, State> {
-  state = {
+  override state = {
     focusedWithKey: null,
     focusGeneration: 0,
   };
 
-  inputRef = React.createRef();
+  inputRef = React.createRef<HTMLInputElement>();
 
   blurInput() {
     this.setState((state) => ({
@@ -60,7 +58,7 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
     return `${this.props.profileNameWithDefault}-${this.state.focusGeneration}`;
   }
 
-  changeProfileNameIfChanged = (event: SyntheticEvent<HTMLInputElement>) => {
+  changeProfileNameIfChanged = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { changeProfileName, profileNameWithDefault } = this.props;
     const newProfileName = event.currentTarget.value.trim();
     this.blurInput();
@@ -73,14 +71,17 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
     }
   };
 
-  blurOnEscapeOrEnter = (event: SyntheticKeyboardEvent<HTMLInputElement>) => {
+  blurOnEscapeOrEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
     switch (event.key) {
       case 'Escape': {
         this.blurInput();
         break;
       }
       case 'Enter': {
-        this.changeProfileNameIfChanged(event);
+        const inputEvent = {
+          currentTarget: event.currentTarget,
+        } as React.ChangeEvent<HTMLInputElement>;
+        this.changeProfileNameIfChanged(inputEvent);
         break;
       }
       default:
@@ -100,7 +101,7 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
     }
   };
 
-  render() {
+  override render() {
     const { focusedWithKey } = this.state;
     // The profileNameWithDefault is either set by the user, or a default is chosen.
     const { profileNameWithDefault } = this.props;
@@ -125,7 +126,7 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
           <button
             type="button"
             style={{
-              display: isFocused ? 'none' : null,
+              display: isFocused ? 'none' : undefined,
             }}
             title="Edit the profile name"
             className="profileNameButton menuButtonsButton menuButtonsButton-hasRightBorder menuButtonsButton-hasIcon"
@@ -145,7 +146,7 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
             key={key}
             className="profileNameInput"
             style={{
-              display: isFocused ? null : 'none',
+              display: isFocused ? undefined : 'none',
             }}
             defaultValue={profileNameWithDefault}
             aria-label="Profile name"

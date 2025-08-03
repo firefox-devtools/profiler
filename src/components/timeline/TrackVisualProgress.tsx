@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { getCommittedRange } from 'firefox-profiler/selectors/profile';
@@ -14,24 +12,24 @@ import {
   TRACK_VISUAL_PROGRESS_HEIGHT,
 } from 'firefox-profiler/app-logic/constants';
 
-import type { ProgressGraphData, Milliseconds } from 'firefox-profiler/types';
+import { ProgressGraphData, Milliseconds } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackVisualProgress.css';
 
 type OwnProps = {
-  +progressGraphData: ProgressGraphData[],
-  +graphDotTooltipText: string,
+  readonly progressGraphData: ProgressGraphData[];
+  readonly graphDotTooltipText: string;
 };
 
 type StateProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
 };
 
 type DispatchProps = {
-  updatePreviewSelection: typeof updatePreviewSelection,
+  updatePreviewSelection: typeof updatePreviewSelection;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -45,15 +43,17 @@ type State = {};
  * with other properties such as graph color and tooltip text as props.
  */
 export class TrackVisualProgressImpl extends React.PureComponent<Props, State> {
-  render() {
+  override render() {
     const { progressGraphData, graphDotTooltipText } = this.props;
     return (
       <div
         className="timelineTrackVisualProgress"
-        style={{
-          height: TRACK_VISUAL_PROGRESS_HEIGHT,
-          '--graph-height': `${TRACK_VISUAL_PROGRESS_HEIGHT}px`,
-        }}
+        style={
+          {
+            height: TRACK_VISUAL_PROGRESS_HEIGHT,
+            '--graph-height': `${TRACK_VISUAL_PROGRESS_HEIGHT}px`,
+          } as React.CSSProperties
+        }
       >
         <TrackVisualProgressGraph
           progressGraphData={progressGraphData}
@@ -69,7 +69,7 @@ export class TrackVisualProgressImpl extends React.PureComponent<Props, State> {
 export const TrackVisualProgress = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state) => {
     const { start, end } = getCommittedRange(state);

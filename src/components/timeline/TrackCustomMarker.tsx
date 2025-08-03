@@ -2,31 +2,29 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { getCommittedRange } from 'firefox-profiler/selectors/profile';
 import { TrackCustomMarkerGraph } from './TrackCustomMarkerGraph';
 import { TRACK_MARKER_HEIGHT } from 'firefox-profiler/app-logic/constants';
 
-import type { ThreadIndex, Milliseconds } from 'firefox-profiler/types';
-import type { MarkerSchema } from 'firefox-profiler/types/markers';
-import type { IndexIntoStringTable } from 'firefox-profiler/types/profile';
+import { ThreadIndex, Milliseconds } from 'firefox-profiler/types';
+import { MarkerSchema } from 'firefox-profiler/types/markers';
+import { IndexIntoStringTable } from 'firefox-profiler/types/profile';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackCustomMarker.css';
 
 type OwnProps = {
-  +markerSchema: MarkerSchema,
-  +markerName: IndexIntoStringTable,
-  +threadIndex: ThreadIndex,
+  readonly markerSchema: MarkerSchema;
+  readonly markerName: IndexIntoStringTable;
+  readonly threadIndex: ThreadIndex;
 };
 
 type StateProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
 };
 
 type DispatchProps = {};
@@ -34,15 +32,17 @@ type DispatchProps = {};
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 export class TrackCustomMarkerImpl extends React.PureComponent<Props> {
-  render() {
+  override render() {
     const { markerSchema, markerName, threadIndex } = this.props;
     return (
       <div
         className="timelineTrackCustomMarker"
-        style={{
-          height: TRACK_MARKER_HEIGHT,
-          '--graph-height': `${TRACK_MARKER_HEIGHT}px`,
-        }}
+        style={
+          {
+            height: TRACK_MARKER_HEIGHT,
+            '--graph-height': `${TRACK_MARKER_HEIGHT}px`,
+          } as React.CSSProperties
+        }
       >
         <TrackCustomMarkerGraph
           threadIndex={threadIndex}
@@ -58,7 +58,7 @@ export class TrackCustomMarkerImpl extends React.PureComponent<Props> {
 export const TrackCustomMarker = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state, _ownProps) => {
     const { start, end } = getCommittedRange(state);

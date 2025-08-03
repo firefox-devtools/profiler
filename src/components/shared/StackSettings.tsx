@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import React, { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 
@@ -34,39 +32,39 @@ import './PanelSettingsList.css';
 import './StackSettings.css';
 
 type OwnProps = {
-  +hideInvertCallstack?: true,
+  readonly hideInvertCallstack?: true;
 };
 
 type StateProps = {
-  +selectedTab: string,
-  +allowSwitchingStackType: boolean,
-  +invertCallstack: boolean,
-  +showUserTimings: boolean,
-  +stackChartSameWidths: boolean,
-  +currentSearchString: string,
-  +hasUsefulJsAllocations: boolean,
-  +hasUsefulNativeAllocations: boolean,
+  readonly selectedTab: string;
+  readonly allowSwitchingStackType: boolean;
+  readonly invertCallstack: boolean;
+  readonly showUserTimings: boolean;
+  readonly stackChartSameWidths: boolean;
+  readonly currentSearchString: string;
+  readonly hasUsefulJsAllocations: boolean;
+  readonly hasUsefulNativeAllocations: boolean;
 };
 
 type DispatchProps = {
-  +changeInvertCallstack: typeof changeInvertCallstack,
-  +changeShowUserTimings: typeof changeShowUserTimings,
-  +changeCallTreeSearchString: typeof changeCallTreeSearchString,
-  +changeStackChartSameWidths: typeof changeStackChartSameWidths,
+  readonly changeInvertCallstack: typeof changeInvertCallstack;
+  readonly changeShowUserTimings: typeof changeShowUserTimings;
+  readonly changeCallTreeSearchString: typeof changeCallTreeSearchString;
+  readonly changeStackChartSameWidths: typeof changeStackChartSameWidths;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class StackSettingsImpl extends PureComponent<Props> {
-  _onInvertCallstackClick = (e: SyntheticEvent<HTMLInputElement>) => {
+  _onInvertCallstackClick = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.props.changeInvertCallstack(e.currentTarget.checked);
   };
 
-  _onShowUserTimingsClick = (e: SyntheticEvent<HTMLInputElement>) => {
+  _onShowUserTimingsClick = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.props.changeShowUserTimings(e.currentTarget.checked);
   };
 
-  _onUseStackChartSameWidths = (e: SyntheticEvent<HTMLInputElement>) => {
+  _onUseStackChartSameWidths = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.props.changeStackChartSameWidths(e.currentTarget.checked);
   };
 
@@ -74,7 +72,7 @@ class StackSettingsImpl extends PureComponent<Props> {
     this.props.changeCallTreeSearchString(value);
   };
 
-  render() {
+  override render() {
     const {
       allowSwitchingStackType,
       invertCallstack,
@@ -169,7 +167,7 @@ class StackSettingsImpl extends PureComponent<Props> {
 export const StackSettings = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state) => ({
     allowSwitchingStackType: getProfileUsesMultipleStackTypes(state),

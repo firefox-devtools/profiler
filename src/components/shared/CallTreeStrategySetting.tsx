@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 // The "call tree strategy" is the listbox that lets you choose between "Timing"
 // and various allocation call trees. It is only shown when the profile includes
 // allocation data.
@@ -21,28 +19,30 @@ import explicitConnect, {
 
 import './PanelSettingsList.css';
 
-import type { CallTreeSummaryStrategy } from 'firefox-profiler/types';
+import { CallTreeSummaryStrategy } from 'firefox-profiler/types';
 
 type OwnProps = {
-  labelL10nId?: string,
+  labelL10nId?: string;
 };
 
 type StateProps = {
-  +callTreeSummaryStrategy: CallTreeSummaryStrategy,
-  +hasUsefulTimingSamples: boolean,
-  +hasUsefulJsAllocations: boolean,
-  +hasUsefulNativeAllocations: boolean,
-  +canShowRetainedMemory: boolean,
+  readonly callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  readonly hasUsefulTimingSamples: boolean;
+  readonly hasUsefulJsAllocations: boolean;
+  readonly hasUsefulNativeAllocations: boolean;
+  readonly canShowRetainedMemory: boolean;
 };
 
 type DispatchProps = {
-  +changeCallTreeSummaryStrategy: typeof changeCallTreeSummaryStrategy,
+  readonly changeCallTreeSummaryStrategy: typeof changeCallTreeSummaryStrategy;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class CallTreeStrategySettingImpl extends PureComponent<Props> {
-  _onCallTreeSummaryStrategyChange = (e: SyntheticEvent<HTMLInputElement>) => {
+  _onCallTreeSummaryStrategyChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     this.props.changeCallTreeSummaryStrategy(
       // This function is here to satisfy Flow that we are getting a valid
       // implementation filter.
@@ -61,7 +61,7 @@ class CallTreeStrategySettingImpl extends PureComponent<Props> {
     );
   }
 
-  render() {
+  override render() {
     const {
       hasUsefulTimingSamples,
       hasUsefulJsAllocations,
@@ -125,7 +125,7 @@ class CallTreeStrategySettingImpl extends PureComponent<Props> {
 export const CallTreeStrategySetting = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state) => ({
     hasUsefulTimingSamples:
