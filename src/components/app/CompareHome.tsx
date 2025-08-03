@@ -2,44 +2,42 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import React, { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 
 import { AppHeader } from './AppHeader';
 import { changeProfilesToCompare } from 'firefox-profiler/actions/app';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './CompareHome.css';
 
 type DispatchProps = {
-  +changeProfilesToCompare: typeof changeProfilesToCompare,
+  readonly changeProfilesToCompare: typeof changeProfilesToCompare;
 };
 
 type Props = ConnectedProps<{}, {}, DispatchProps>;
 
 type State = {
-  profile1: string,
-  profile2: string,
+  profile1: string;
+  profile2: string;
 };
 
 class CompareHomeImpl extends PureComponent<Props, State> {
-  state = { profile1: '', profile2: '' };
+  override state = { profile1: '', profile2: '' };
 
-  handleInputChange = (event: SyntheticInputEvent<>) => {
+  handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    this.setState({ [name]: value });
+    this.setState((prevState) => ({ ...prevState, [name]: value }));
   };
 
-  handleFormSubmit = (e: SyntheticEvent<>) => {
+  handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const { profile1, profile2 } = this.state;
     const { changeProfilesToCompare } = this.props;
     changeProfilesToCompare([profile1, profile2]);
   };
 
-  render() {
+  override render() {
     const { profile1, profile2 } = this.state;
 
     return (

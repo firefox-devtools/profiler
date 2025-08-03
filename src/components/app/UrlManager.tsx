@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { getView, getUrlSetupPhase } from 'firefox-profiler/selectors/app';
@@ -21,37 +19,36 @@ import {
   getIsHistoryReplaceState,
 } from 'firefox-profiler/app-logic/url-handling';
 import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
-import {
-  retrieveProfileForRawUrl,
-  typeof retrieveProfileForRawUrl as RetrieveProfileForRawUrl,
-} from 'firefox-profiler/actions/receive-profile';
+import { retrieveProfileForRawUrl } from 'firefox-profiler/actions/receive-profile';
+
+type RetrieveProfileAction = typeof retrieveProfileForRawUrl;
 import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import type {
+import {
   ConnectedProps,
   WrapFunctionInDispatch,
 } from 'firefox-profiler/utils/connect';
-import type { UrlState, Phase, UrlSetupPhase } from 'firefox-profiler/types';
+import { UrlState, Phase, UrlSetupPhase } from 'firefox-profiler/types';
 
 type StateProps = {
-  +phase: Phase,
-  +urlState: UrlState,
-  +urlSetupPhase: UrlSetupPhase,
+  readonly phase: Phase;
+  readonly urlState: UrlState;
+  readonly urlSetupPhase: UrlSetupPhase;
 };
 
 type DispatchProps = {
-  +updateUrlState: typeof updateUrlState,
-  +startFetchingProfiles: typeof startFetchingProfiles,
-  +urlSetupDone: typeof urlSetupDone,
-  +show404: typeof show404,
-  +retrieveProfileForRawUrl: typeof retrieveProfileForRawUrl,
-  +updateBrowserConnectionStatus: typeof updateBrowserConnectionStatus,
-  +setupInitialUrlState: typeof setupInitialUrlState,
+  readonly updateUrlState: typeof updateUrlState;
+  readonly startFetchingProfiles: typeof startFetchingProfiles;
+  readonly urlSetupDone: typeof urlSetupDone;
+  readonly show404: typeof show404;
+  readonly retrieveProfileForRawUrl: typeof retrieveProfileForRawUrl;
+  readonly updateBrowserConnectionStatus: typeof updateBrowserConnectionStatus;
+  readonly setupInitialUrlState: typeof setupInitialUrlState;
 };
 
 type OwnProps = {
-  +children: React.Node,
+  readonly children: React.ReactNode;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -94,8 +91,8 @@ class UrlManagerImpl extends React.PureComponent<Props> {
       updateBrowserConnectionStatus,
     } = this.props;
     // We have to wrap this because of the error introduced by upgrading to v0.96.0. See issue #1936.
-    const retrieveProfileForRawUrl: WrapFunctionInDispatch<RetrieveProfileForRawUrl> =
-      (this.props.retrieveProfileForRawUrl: any);
+    const retrieveProfileForRawUrl: WrapFunctionInDispatch<RetrieveProfileAction> =
+      this.props.retrieveProfileForRawUrl as any;
 
     // Notify the UI that we are starting to fetch profiles.
     startFetchingProfiles();
@@ -154,7 +151,7 @@ class UrlManagerImpl extends React.PureComponent<Props> {
     if (window.history.state) {
       // The UrlState is serialized and stored in the history API. Pull out that state
       // and use it as the real UrlState.
-      newUrlState = (window.history.state: UrlState);
+      newUrlState = window.history.state as UrlState;
     } else {
       // There is no state serialized and stored by the browser, attempt to create
       // a UrlState object by parsing the window.location.
@@ -210,16 +207,16 @@ class UrlManagerImpl extends React.PureComponent<Props> {
     updateUrlState(newUrlState);
   };
 
-  componentDidMount() {
+  override componentDidMount() {
     this._processInitialUrls();
     window.addEventListener('popstate', this._updateState);
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     window.removeEventListener('popstate', this._updateState);
   }
 
-  componentDidUpdate() {
+  override componentDidUpdate() {
     const { urlSetupPhase, phase, urlState } = this.props;
     if (urlSetupPhase !== 'done') {
       // Do not change the history before the url setup is done, because the URL
@@ -249,7 +246,7 @@ class UrlManagerImpl extends React.PureComponent<Props> {
     }
   }
 
-  render() {
+  override render() {
     const { urlSetupPhase, children } = this.props;
     switch (urlSetupPhase) {
       case 'initial-load':

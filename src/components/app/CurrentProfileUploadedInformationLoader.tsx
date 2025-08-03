@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 // This component is responsible for caching the stored profile data in the
 // redux state.  This will control whether we can delete this profile.
 
@@ -22,14 +20,14 @@ import { setCurrentProfileUploadedInformation } from 'firefox-profiler/actions/a
 import { retrieveUploadedProfileInformationFromDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {
-  +hash: string,
+  readonly hash: string;
 };
 
 type DispatchProps = {
-  +setCurrentProfileUploadedInformation: typeof setCurrentProfileUploadedInformation,
+  readonly setCurrentProfileUploadedInformation: typeof setCurrentProfileUploadedInformation;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -53,15 +51,15 @@ class CurrentProfileUploadedInformationLoaderImpl extends PureComponent<Props> {
     }
   }
 
-  componentDidMount() {
+  override componentDidMount() {
     this.updateCurrentProfileInformationState();
   }
 
-  componentDidUpdate() {
+  override componentDidUpdate() {
     this.updateCurrentProfileInformationState();
   }
 
-  render() {
+  override render() {
     return null;
   }
 }
@@ -69,7 +67,7 @@ class CurrentProfileUploadedInformationLoaderImpl extends PureComponent<Props> {
 export const CurrentProfileUploadedInformationLoader = explicitConnect<
   {},
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state) => ({
     hash: getHash(state),

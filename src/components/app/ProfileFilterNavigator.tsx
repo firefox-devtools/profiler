@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import React from 'react';
 import memoize from 'memoize-immutable';
 import { Localized } from '@fluent/react';
@@ -25,8 +23,7 @@ import { FilterNavigatorBar } from 'firefox-profiler/components/shared/FilterNav
 import { Icon } from 'firefox-profiler/components/shared/Icon';
 import { TabSelectorMenu } from '../shared/TabSelectorMenu';
 
-import type { ElementProps } from 'react';
-import type {
+import {
   ProfileFilterPageData,
   StartEndRange,
   TabID,
@@ -35,18 +32,17 @@ import type {
 import './ProfileFilterNavigator.css';
 
 type Props = {
-  +pageDataByTabID: Map<TabID, ProfileFilterPageData> | null,
-  +tabFilter: TabID | null,
-  +rootRange: StartEndRange,
-  +profileTimelineUnit: string,
-  ...ElementProps<typeof FilterNavigatorBar>,
-};
+  readonly pageDataByTabID: Map<TabID, ProfileFilterPageData> | null;
+  readonly tabFilter: TabID | null;
+  readonly rootRange: StartEndRange;
+  readonly profileTimelineUnit: string;
+} & React.ComponentProps<typeof FilterNavigatorBar>;
 
 type DispatchProps = {
-  +onPop: $PropertyType<Props, 'onPop'>,
+  readonly onPop: Props['onPop'];
 };
 
-type StateProps = $ReadOnly<$Exact<$Diff<Props, DispatchProps>>>;
+type StateProps = Readonly<Omit<Props, keyof DispatchProps>>;
 
 class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
   _getItemsWithFirstElement = memoize(
@@ -56,7 +52,7 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
     }
   );
 
-  _showTabSelectorMenu = (event: SyntheticMouseEvent<HTMLElement>) => {
+  _showTabSelectorMenu = (event: React.MouseEvent<HTMLElement>) => {
     if (this.props.items.length > 0 || this.props.uncommittedItem) {
       // Do nothing if there are committed ranges. We only allow users to change
       // the tab if they are on root range.
@@ -72,7 +68,7 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
     });
   };
 
-  render() {
+  override render() {
     const {
       className,
       items,
@@ -185,7 +181,7 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
 export const ProfileFilterNavigator = explicitConnect<
   {},
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state) => {
     const items = getCommittedRangeLabels(state);

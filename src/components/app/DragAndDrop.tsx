@@ -2,13 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import classNames from 'classnames';
 import { retrieveProfileFromFile } from 'firefox-profiler/actions/receive-profile';
-import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import {
@@ -31,20 +29,20 @@ function _dragPreventDefault(event: DragEvent) {
 }
 
 type OwnProps = {
-  +className?: string,
-  +children?: React.Node,
+  readonly className?: string;
+  readonly children?: React.ReactNode;
 };
 
 type StateProps = {
-  +isNewProfileLoadAllowed: boolean,
-  +useDefaultOverlay: boolean,
-  +browserConnection: BrowserConnection | null,
+  readonly isNewProfileLoadAllowed: boolean;
+  readonly useDefaultOverlay: boolean;
+  readonly browserConnection: BrowserConnection | null;
 };
 
 type DispatchProps = {
-  +retrieveProfileFromFile: typeof retrieveProfileFromFile,
-  +startDragging: typeof startDragging,
-  +stopDragging: typeof stopDragging,
+  readonly retrieveProfileFromFile: typeof retrieveProfileFromFile;
+  readonly startDragging: typeof startDragging;
+  readonly stopDragging: typeof stopDragging;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -85,10 +83,10 @@ class DragAndDropImpl extends React.PureComponent<Props> {
   // As the mouse moves over various nested elements inside this element,
   // every time the mouse enters a new element, we first get the dragenter
   // event for that new element and then a dragleave for the previous element.
-  _enteredElements: Set<HTMLElement> = new Set();
+  _enteredElements: Set<HTMLElement> = new Set<HTMLElement>();
 
   _updateDragLocation(
-    event: SyntheticDragEvent<HTMLDivElement>
+    event: React.DragEvent<HTMLDivElement>
   ): [DragLocation, DragLocation] {
     const before = this._enteredElements.size > 0 ? 'INSIDE' : 'OUTSIDE';
 
@@ -97,7 +95,7 @@ class DragAndDropImpl extends React.PureComponent<Props> {
     // `container` is always our container div; we use currentTarget here so that
     // we don't have to set up a react ref for the element.
     const container = event.currentTarget;
-    this._enteredElements = new Set(
+    this._enteredElements = new Set<HTMLElement>(
       [...this._enteredElements].filter((el) => container.contains(el))
     );
 
@@ -116,23 +114,23 @@ class DragAndDropImpl extends React.PureComponent<Props> {
   }
 
   _resetDragLocation() {
-    this._enteredElements = new Set();
+    this._enteredElements = new Set<HTMLElement>();
   }
 
-  componentDidMount() {
+  override componentDidMount() {
     // Prevent dropping files on the document.
     document.addEventListener('drag', _dragPreventDefault, false);
     document.addEventListener('dragover', _dragPreventDefault, false);
     document.addEventListener('drop', _dragPreventDefault, false);
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     document.removeEventListener('drag', _dragPreventDefault, false);
     document.removeEventListener('dragover', _dragPreventDefault, false);
     document.removeEventListener('drop', _dragPreventDefault, false);
   }
 
-  _onDragEnter = (event: SyntheticDragEvent<HTMLDivElement>) => {
+  _onDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
 
     const [before, after] = this._updateDragLocation(event);
@@ -141,7 +139,7 @@ class DragAndDropImpl extends React.PureComponent<Props> {
     }
   };
 
-  _onDragLeave = (event: SyntheticDragEvent<HTMLDivElement>) => {
+  _onDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
 
     const [before, after] = this._updateDragLocation(event);
@@ -150,7 +148,7 @@ class DragAndDropImpl extends React.PureComponent<Props> {
     }
   };
 
-  _handleProfileDrop = (event: DragEvent) => {
+  _handleProfileDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
 
     this._resetDragLocation();
@@ -169,7 +167,7 @@ class DragAndDropImpl extends React.PureComponent<Props> {
     }
   };
 
-  render() {
+  override render() {
     const { className, children } = this.props;
 
     return (
@@ -213,20 +211,20 @@ export const DragAndDrop = explicitConnect<OwnProps, StateProps, DispatchProps>(
 );
 
 type OverlayOwnProps = {
-  +isDefault?: boolean,
+  readonly isDefault?: boolean;
 };
 type OverlayStateProps = {
-  +isDragging: boolean,
-  +isNewProfileLoadAllowed: boolean,
+  readonly isDragging: boolean;
+  readonly isNewProfileLoadAllowed: boolean;
 };
 type OverlayDispatchProps = {
-  +registerDragAndDropOverlay: typeof registerDragAndDropOverlay,
-  +unregisterDragAndDropOverlay: typeof unregisterDragAndDropOverlay,
+  readonly registerDragAndDropOverlay: typeof registerDragAndDropOverlay;
+  readonly unregisterDragAndDropOverlay: typeof unregisterDragAndDropOverlay;
 };
 type OverlayProps = ConnectedProps<
   OverlayOwnProps,
   OverlayStateProps,
-  OverlayDispatchProps,
+  OverlayDispatchProps
 >;
 
 /**
@@ -237,19 +235,19 @@ type OverlayProps = ConnectedProps<
  * rendered.
  */
 class DragAndDropOverlayImpl extends React.PureComponent<OverlayProps> {
-  componentDidMount() {
+  override componentDidMount() {
     if (!this.props.isDefault) {
       this.props.registerDragAndDropOverlay();
     }
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     if (!this.props.isDefault) {
       this.props.unregisterDragAndDropOverlay();
     }
   }
 
-  render() {
+  override render() {
     return (
       <div
         className={classNames(
@@ -268,7 +266,7 @@ class DragAndDropOverlayImpl extends React.PureComponent<OverlayProps> {
 export const DragAndDropOverlay = explicitConnect<
   OverlayOwnProps,
   OverlayStateProps,
-  OverlayDispatchProps,
+  OverlayDispatchProps
 >({
   mapStateToProps: (state) => ({
     isDragging: getIsDragAndDropDragging(state),
