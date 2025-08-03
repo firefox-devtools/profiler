@@ -96,6 +96,15 @@ apply_transform 's/\$Shape<\([^>]*\)>/Partial<\1>/g' "Convert $Shape to Partial"
 apply_transform 's/: mixed/: unknown/g' "Convert mixed to unknown"
 apply_transform 's/: MixedObject/: unknown/g' "Convert MixedObject to unknown"
 
+# Convert Flow object type spreads to TypeScript intersection types
+# Use dedicated Perl script for robust multiline handling with proper iteration
+SCRIPT_DIR="$(dirname "$0")"
+if [ -f "$SCRIPT_DIR/convert-flow-spreads.pl" ]; then
+    perl "$SCRIPT_DIR/convert-flow-spreads.pl" "$OUTPUT_FILE" || echo "⚠️  Flow spread conversion failed"
+else
+    echo "⚠️  convert-flow-spreads.pl not found, skipping Flow spread conversion"
+fi
+
 # Convert Flow built-in types to TypeScript equivalents
 apply_transform 's/: TimeoutID/: NodeJS.Timeout/g' "Convert TimeoutID to NodeJS.Timeout"
 apply_transform 's/TimeoutID/NodeJS.Timeout/g' "Convert TimeoutID type references"
@@ -126,7 +135,11 @@ apply_transform 's/SyntheticEvent<HTMLFormElement>/React.FormEvent<HTMLFormEleme
 apply_transform 's/React\.\([A-Za-z]*Event\)<>/React.\1<HTMLElement>/g' "Add HTMLElement to generic React events"
 
 # Convert getContext('2d') to getContext('2d')! for non-null assertion
-apply_transform "s/\.getContext('2d'\([^)]\))/\.getContext('2d'\1)!/g" "Add non-null assertion to 2d context"
+apply_transform "s/\.getContext('2d')/\.getContext('2d')!/g" "Add non-null assertion to 2d context"
+apply_transform 's/\.getContext("2d")/\.getContext("2d")!/g' "Add non-null assertion to 2d context (double quotes)"
+# Handle case with extra second argument
+apply_transform "s/\.getContext('2d', \([^)]*\))/\.getContext('2d', \1)!/g" "Add non-null assertion to 2d context with options"
+apply_transform 's/\.getContext("2d", \([^)]*\))/\.getContext("2d", \1)!/g' "Add non-null assertion to 2d context with options (double quotes)"
 
 # 9a. Add React component override modifiers (critical for TypeScript compilation)
 # Add override to class state properties
