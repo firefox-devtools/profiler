@@ -17,6 +17,7 @@
     "strict": false, // Keep false during migration
     "noFallthroughCasesInSwitch": false, // Already checked by eslint, with opt-out
     "noUnusedLocals": true,
+    "noUncheckedSideEffectImports": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "noImplicitReturns": true,

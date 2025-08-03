@@ -35,6 +35,8 @@ interface Worker {
   onerror: ((this: Worker, ev: ErrorEvent) => any) | null;
 }
 
+declare module '*.css' {}
+
 declare module '*.svg' {
   const content: string;
   export default content;
