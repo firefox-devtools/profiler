@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import React from 'react';
 
 import {
@@ -21,41 +19,41 @@ import {
 } from 'firefox-profiler/actions/code';
 import { fetchAssembly } from 'firefox-profiler/utils/fetch-assembly';
 import { RegularExternalCommunicationDelegate } from 'firefox-profiler/utils/query-api';
-import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
+import { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import type {
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import {
   AssemblyCodeStatus,
   Profile,
   NativeSymbolInfo,
 } from 'firefox-profiler/types';
 
 type StateProps = {
-  +assemblyViewNativeSymbol: NativeSymbolInfo | null,
-  +assemblyViewCode: AssemblyCodeStatus | void,
-  +assemblyViewIsOpen: boolean,
-  +symbolServerUrl: string,
-  +profile: Profile | null,
-  +browserConnection: BrowserConnection | null,
+  readonly assemblyViewNativeSymbol: NativeSymbolInfo | null;
+  readonly assemblyViewCode: AssemblyCodeStatus | void;
+  readonly assemblyViewIsOpen: boolean;
+  readonly symbolServerUrl: string;
+  readonly profile: Profile | null;
+  readonly browserConnection: BrowserConnection | null;
 };
 
 type DispatchProps = {
-  +beginLoadingAssemblyCodeFromUrl: typeof beginLoadingAssemblyCodeFromUrl,
-  +beginLoadingAssemblyCodeFromBrowserConnection: typeof beginLoadingAssemblyCodeFromBrowserConnection,
-  +finishLoadingAssemblyCode: typeof finishLoadingAssemblyCode,
-  +failLoadingAssemblyCode: typeof failLoadingAssemblyCode,
+  readonly beginLoadingAssemblyCodeFromUrl: typeof beginLoadingAssemblyCodeFromUrl;
+  readonly beginLoadingAssemblyCodeFromBrowserConnection: typeof beginLoadingAssemblyCodeFromBrowserConnection;
+  readonly finishLoadingAssemblyCode: typeof finishLoadingAssemblyCode;
+  readonly failLoadingAssemblyCode: typeof failLoadingAssemblyCode;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class AssemblyCodeFetcherImpl extends React.PureComponent<Props> {
-  componentDidMount() {
+  override componentDidMount() {
     this._triggerAssemblyLoadingIfNeeded();
   }
 
-  componentDidUpdate() {
+  override componentDidUpdate() {
     this._triggerAssemblyLoadingIfNeeded();
   }
 
@@ -90,7 +88,7 @@ class AssemblyCodeFetcherImpl extends React.PureComponent<Props> {
     const delegate = new RegularExternalCommunicationDelegate(
       browserConnection,
       {
-        onBeginUrlRequest: (url) => {
+        onBeginUrlRequest: (url: string) => {
           beginLoadingAssemblyCodeFromUrl(nativeSymbolKey, url);
         },
         onBeginBrowserConnectionQuery: () => {
@@ -117,11 +115,11 @@ class AssemblyCodeFetcherImpl extends React.PureComponent<Props> {
         failLoadingAssemblyCode(nativeSymbolKey, fetchAssemblyResult.errors);
         break;
       default:
-        throw assertExhaustiveCheck(fetchAssemblyResult.type);
+        throw assertExhaustiveCheck(fetchAssemblyResult);
     }
   }
 
-  render() {
+  override render() {
     return null;
   }
 }
@@ -129,7 +127,7 @@ class AssemblyCodeFetcherImpl extends React.PureComponent<Props> {
 export const AssemblyCodeFetcher = explicitConnect<
   {},
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state) => ({
     assemblyViewNativeSymbol: getAssemblyViewNativeSymbol(state),
