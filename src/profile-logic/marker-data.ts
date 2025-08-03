@@ -591,13 +591,16 @@ export function deriveMarkersFromRawMarkerTable(
     startData: MarkerPayload | null,
     endData: MarkerPayload | null
   ): MarkerPayload | null {
-    if (!startData && !endData) {
-      return null;
+    if (startData === null) {
+      return endData;
+    }
+    if (endData === null) {
+      return startData;
     }
     return {
       ...startData,
       ...endData,
-    } as any;
+    };
   }
 
   // We don't add a screenshot marker as we find it, because to know its
