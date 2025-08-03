@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import React, { PureComponent } from 'react';
 import memoize from 'memoize-immutable';
 import explicitConnect from 'firefox-profiler/utils/connect';
@@ -34,7 +32,7 @@ import {
 } from 'firefox-profiler/actions/profile-view';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import type {
+import {
   State,
   ImplementationFilter,
   ThreadsKey,
@@ -45,44 +43,44 @@ import type {
   TableViewOptions,
   SelectionContext,
 } from 'firefox-profiler/types';
-import type { CallTree as CallTreeType } from 'firefox-profiler/profile-logic/call-tree';
-import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
+import { CallTree as CallTreeType } from 'firefox-profiler/profile-logic/call-tree';
+import { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
-import type {
+import {
   Column,
   MaybeResizableColumn,
 } from 'firefox-profiler/components/shared/TreeView';
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './CallTree.css';
 
 type StateProps = {
-  +threadsKey: ThreadsKey,
-  +scrollToSelectionGeneration: number,
-  +focusCallTreeGeneration: number,
-  +tree: CallTreeType,
-  +callNodeInfo: CallNodeInfo,
-  +categories: CategoryList,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>,
-  +searchStringsRegExp: RegExp | null,
-  +disableOverscan: boolean,
-  +invertCallstack: boolean,
-  +implementationFilter: ImplementationFilter,
-  +callNodeMaxDepthPlusOne: number,
-  +weightType: WeightType,
-  +tableViewOptions: TableViewOptions,
+  readonly threadsKey: ThreadsKey;
+  readonly scrollToSelectionGeneration: number;
+  readonly focusCallTreeGeneration: number;
+  readonly tree: CallTreeType;
+  readonly callNodeInfo: CallNodeInfo;
+  readonly categories: CategoryList;
+  readonly selectedCallNodeIndex: IndexIntoCallNodeTable | null;
+  readonly rightClickedCallNodeIndex: IndexIntoCallNodeTable | null;
+  readonly expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>;
+  readonly searchStringsRegExp: RegExp | null;
+  readonly disableOverscan: boolean;
+  readonly invertCallstack: boolean;
+  readonly implementationFilter: ImplementationFilter;
+  readonly callNodeMaxDepthPlusOne: number;
+  readonly weightType: WeightType;
+  readonly tableViewOptions: TableViewOptions;
 };
 
 type DispatchProps = {
-  +changeSelectedCallNode: typeof changeSelectedCallNode,
-  +changeRightClickedCallNode: typeof changeRightClickedCallNode,
-  +changeExpandedCallNodes: typeof changeExpandedCallNodes,
-  +addTransformToStack: typeof addTransformToStack,
-  +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
-  +updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen,
-  +onTableViewOptionsChange: (TableViewOptions) => any,
+  readonly changeSelectedCallNode: typeof changeSelectedCallNode;
+  readonly changeRightClickedCallNode: typeof changeRightClickedCallNode;
+  readonly changeExpandedCallNodes: typeof changeExpandedCallNodes;
+  readonly addTransformToStack: typeof addTransformToStack;
+  readonly handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut;
+  readonly updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen;
+  readonly onTableViewOptionsChange: (param: TableViewOptions) => any;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -97,7 +95,8 @@ class CallTreeImpl extends PureComponent<Props> {
     titleL10nId: '',
   };
   _treeView: TreeView<CallNodeDisplayData> | null = null;
-  _takeTreeViewRef = (treeView) => (this._treeView = treeView);
+  _takeTreeViewRef = (treeView: TreeView<CallNodeDisplayData> | null) =>
+    (this._treeView = treeView);
 
   /**
    * Call Trees can have different types of "weights" for the data. Choose the
@@ -132,7 +131,7 @@ class CallTreeImpl extends PureComponent<Props> {
             {
               propName: 'icon',
               titleL10nId: '',
-              component: Icon,
+              component: Icon as any,
               initialWidth: 10,
             },
           ];
@@ -162,7 +161,7 @@ class CallTreeImpl extends PureComponent<Props> {
             {
               propName: 'icon',
               titleL10nId: '',
-              component: Icon,
+              component: Icon as any,
               initialWidth: 10,
             },
           ];
@@ -192,7 +191,7 @@ class CallTreeImpl extends PureComponent<Props> {
             {
               propName: 'icon',
               titleL10nId: '',
-              component: Icon,
+              component: Icon as any,
               initialWidth: 10,
             },
           ];
@@ -204,7 +203,7 @@ class CallTreeImpl extends PureComponent<Props> {
     { cache: new Map() }
   );
 
-  componentDidMount() {
+  override componentDidMount() {
     this.focus();
     this.maybeProcureInterestingInitialSelection();
 
@@ -213,7 +212,7 @@ class CallTreeImpl extends PureComponent<Props> {
     }
   }
 
-  componentDidUpdate(prevProps) {
+  override componentDidUpdate(prevProps: Props) {
     if (
       this.props.focusCallTreeGeneration > prevProps.focusCallTreeGeneration
     ) {
@@ -270,7 +269,7 @@ class CallTreeImpl extends PureComponent<Props> {
     );
   };
 
-  _onKeyDown = (event: SyntheticKeyboardEvent<>) => {
+  _onKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
     const {
       selectedCallNodeIndex,
       rightClickedCallNodeIndex,
@@ -351,7 +350,7 @@ class CallTreeImpl extends PureComponent<Props> {
     }
   }
 
-  render() {
+  override render() {
     const {
       tree,
       selectedCallNodeIndex,
