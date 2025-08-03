@@ -4,7 +4,6 @@
 import { stripIndent, oneLine } from 'common-tags';
 import { GetState, Dispatch, MixedObject } from 'firefox-profiler/types';
 import { selectorsForConsole } from 'firefox-profiler/selectors';
-// @ts-ignore - actions module is JavaScript and will be converted later
 import actions from 'firefox-profiler/actions';
 import { shortenUrl } from 'firefox-profiler/utils/shorten-url';
 import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
