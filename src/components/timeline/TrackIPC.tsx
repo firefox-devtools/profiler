@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { getCommittedRange } from 'firefox-profiler/selectors/profile';
@@ -11,23 +9,23 @@ import { TimelineMarkersIPC } from './Markers';
 import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { TRACK_IPC_MARKERS_HEIGHT } from 'firefox-profiler/app-logic/constants';
 
-import type { ThreadIndex, Milliseconds } from 'firefox-profiler/types';
+import { ThreadIndex, Milliseconds } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackIPC.css';
 
 type OwnProps = {
-  +threadIndex: ThreadIndex,
+  readonly threadIndex: ThreadIndex;
 };
 
 type StateProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
 };
 
 type DispatchProps = {
-  updatePreviewSelection: typeof updatePreviewSelection,
+  updatePreviewSelection: typeof updatePreviewSelection;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -48,14 +46,16 @@ export class TrackIPCImpl extends React.PureComponent<Props, State> {
     });
   };
 
-  render() {
+  override render() {
     const { rangeStart, rangeEnd, threadIndex } = this.props;
     return (
       <div
-        style={{
-          height: TRACK_IPC_MARKERS_HEIGHT,
-          '--markers-height': `${TRACK_IPC_MARKERS_HEIGHT}px`,
-        }}
+        style={
+          {
+            height: TRACK_IPC_MARKERS_HEIGHT,
+            '--markers-height': `${TRACK_IPC_MARKERS_HEIGHT}px`,
+          } as React.CSSProperties
+        }
       >
         <TimelineMarkersIPC
           rangeStart={rangeStart}
