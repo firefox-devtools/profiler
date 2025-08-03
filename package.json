@@ -21,6 +21,8 @@
     "build-photon": "webpack --config res/photon/webpack.config.js",
     "build-symbolicator-cli": "yarn build-symbolicator-cli:quiet --progress",
     "build-symbolicator-cli:quiet": "yarn build:clean && cross-env NODE_ENV=production webpack --config src/symbolicator-cli/webpack.config.js",
+    "convert": "scripts/flow-to-typescript.sh",
+    "analyze-deps": "scripts/analyze-dependencies.sh",
     "lint": "node bin/output-fixing-commands.js run-p lint-js lint-css prettier-run",
     "lint-fix": "run-p lint-fix-js lint-fix-css prettier-fix",
     "lint-js": "node bin/output-fixing-commands.js eslint *.js bin src --report-unused-disable-directives --cache --cache-strategy content",

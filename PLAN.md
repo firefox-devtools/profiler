@@ -12,12 +12,12 @@
 ```bash
 yarn typecheck         # Fast TypeScript checking (uses tsconfig.migration.json)
 yarn test-all          # Full validation (lint, test, typecheck)
-./scripts/analyze-dependencies.sh | head -25  # Find next conversion targets
+yarn analyze-deps | head -25  # Find next conversion targets
 ```
 
 ## File Conversion Process
 
-1. **Use unified conversion script**: `./scripts/flow-to-typescript.sh <file.js>`
+1. **Use conversion tool**: `yarn convert <file.js>`
 2. **Fix compilation errors**: `yarn typecheck`
 3. **Test and clean up**: `yarn test && rm <file.js>`
 4. **Format and commit**: `yarn prettier-fix && git add -A && git commit`
