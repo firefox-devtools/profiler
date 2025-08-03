@@ -5,7 +5,6 @@
   },
   "exclude": [
     "src/components/app/Root.tsx",
-    "src/components/app/UploadedRecordingsHome.tsx",
-    "src/utils/window-console.ts"
+    "src/components/app/UploadedRecordingsHome.tsx"
   ]
 }

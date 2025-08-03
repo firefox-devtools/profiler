@@ -4,6 +4,7 @@
 import { stripIndent, oneLine } from 'common-tags';
 import { GetState, Dispatch, MixedObject } from 'firefox-profiler/types';
 import { selectorsForConsole } from 'firefox-profiler/selectors';
+// @ts-ignore - actions module is JavaScript and will be converted later
 import actions from 'firefox-profiler/actions';
 import { shortenUrl } from 'firefox-profiler/utils/shorten-url';
 import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
@@ -212,12 +213,12 @@ export function addDataToWindowObject(
   // using the MOZ_LOG canonical format. All logs are saved as a debug log
   // because the log level information isn't saved in these markers.
   target.extractGeckoLogs = function () {
-    function pad(p, c) {
+    function pad(p: string | number, c: number) {
       return String(p).padStart(c, '0');
     }
 
     // This transforms a timestamp to a string as output by mozlog usually.
-    function d2s(ts) {
+    function d2s(ts: number) {
       const d = new Date(ts);
       // new Date rounds down the timestamp (in milliseconds) to the lower integer,
       // let's get the microseconds and nanoseconds differently.
@@ -244,18 +245,24 @@ export function addDataToWindowObject(
         if (
           startTime !== null &&
           markers.data[i] &&
-          markers.data[i].type === 'Log' &&
+          markers.data[i]?.type === 'Log' &&
           startTime >= range.start &&
           startTime <= range.end
         ) {
           const data = markers.data[i];
-          const strTimestamp = d2s(
-            profile.meta.startTime + markers.startTime[i]
-          );
-          const processName = thread.processName ?? 'Unknown Process';
-          // TODO: lying about the log level as it's not available yet in the markers
-          const statement = `${strTimestamp} - [${processName} ${thread.pid}: ${thread.name}]: D/${data.module} ${data.name.trim()}`;
-          logs.push(statement);
+          const markerStartTime = markers.startTime[i];
+          if (
+            data &&
+            markerStartTime !== null &&
+            (data as any).module &&
+            (data as any).name
+          ) {
+            const strTimestamp = d2s(profile.meta.startTime + markerStartTime);
+            const processName = thread.processName ?? 'Unknown Process';
+            // TODO: lying about the log level as it's not available yet in the markers
+            const statement = `${strTimestamp} - [${processName} ${thread.pid}: ${thread.name}]: D/${(data as any).module} ${(data as any).name.trim()}`;
+            logs.push(statement);
+          }
         }
       }
     }
@@ -263,7 +270,7 @@ export function addDataToWindowObject(
     return logs.sort().join('\n');
   };
 
-  target.totalMarkerDuration = function (markers) {
+  target.totalMarkerDuration = function (markers: any) {
     if (!Array.isArray(markers)) {
       console.error('totalMarkerDuration expects an array of markers');
       return 0;
