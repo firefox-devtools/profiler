@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import { Localized } from '@fluent/react';
 
@@ -12,19 +10,19 @@ import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
 import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import type { ThreadsKey, Marker, MarkerIndex } from 'firefox-profiler/types';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ThreadsKey, Marker, MarkerIndex } from 'firefox-profiler/types';
 
 type StateProps = {
-  +selectedThreadsKey: ThreadsKey,
-  +marker: Marker | null,
-  +markerIndex: MarkerIndex | null,
+  readonly selectedThreadsKey: ThreadsKey;
+  readonly marker: Marker | null;
+  readonly markerIndex: MarkerIndex | null;
 };
 
 type Props = ConnectedProps<{}, StateProps, {}>;
 
 class MarkerSidebarImpl extends React.PureComponent<Props> {
-  render() {
+  override render() {
     const { marker, markerIndex, selectedThreadsKey } = this.props;
 
     if (marker === null || markerIndex === null) {

@@ -401,8 +401,8 @@ The `flow-to-typescript-unified.sh` script handles most conversions automaticall
 
 ### Phase 3: 🚀 IN PROGRESS - Systematic File Migration
 
-- **Status**: 71 JavaScript files remaining (down from 74)
-- **TypeScript files**: 224 (up from 221)
+- **Status**: 70 JavaScript files remaining (down from 71)
+- **TypeScript files**: 225 (up from 224)
 - **Strategy**: Dependency-first migration focusing on zero-dependency files first
 - **Recent major conversions (August 3, 2025)**:
   - **Core selectors**: src/selectors/per-thread/ (thread.tsx, markers.ts, stack-sample.ts)
@@ -413,7 +413,8 @@ The `flow-to-typescript-unified.sh` script handles most conversions automaticall
   - **Selector infrastructure**: src/selectors/index.ts (48 lines)
   - **App components**: SourceCodeFetcher.tsx (135 lines), WindowTitle.tsx (149 lines), AssemblyCodeFetcher.tsx (150 lines)
   - **Settings components**: NetworkSettings.tsx (63 lines), js-tracer/Settings.tsx (68 lines)
-  - **Total converted**: 19 files, 5,119 lines of code
+  - **Tooltip components**: Marker.tsx (538 lines) - Advanced union type handling
+  - **Total converted**: 20 files, 5,657 lines of code
 
 ### Phase 4: ✅ LARGELY COMPLETED - Strict TypeScript compliance
 
@@ -488,4 +489,7 @@ The `flow-to-typescript-unified.sh` script handles most conversions automaticall
 - **Canvas context null assertions** - use `canvas.getContext('2d')!` for TypeScript strict mode
 - **CO2 library integration** - requires careful type handling for union return types
 - **External library types** - use `InstanceType<typeof Library>` for proper constructor types
+- **Union type narrowing** - use `'property' in object` pattern for type guards
+- **MarkerPayload type safety** - union types require property checks before accessing
+- **ScreenshotPayload variants** - guard for windowWidth/windowHeight before using
 - **Mixed codebase stability** - Flow and TypeScript coexist reliably
