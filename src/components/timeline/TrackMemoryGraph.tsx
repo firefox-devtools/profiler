@@ -2,12 +2,20 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
+import { InView } from 'react-intersection-observer';
+import { Localized } from '@fluent/react';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
+import {
+  getStrokeColor,
+  getFillColor,
+  getDotColor,
+} from 'firefox-profiler/profile-logic/graph-color';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { formatPercent } from 'firefox-profiler/utils/format-numbers';
+import {
+  formatBytes,
+  formatNumber,
+} from 'firefox-profiler/utils/format-numbers';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import {
   getCommittedRange,
@@ -15,39 +23,40 @@ import {
   getProfileInterval,
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { GREY_50 } from 'photon-colors';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
+import { TRACK_MEMORY_DEFAULT_COLOR } from 'firefox-profiler/app-logic/constants';
 
-import type {
+import {
   CounterIndex,
   Counter,
   Thread,
   ThreadIndex,
+  AccumulatedCounterSamples,
   Milliseconds,
   CssPixels,
   StartEndRange,
   IndexIntoSamplesTable,
 } from 'firefox-profiler/types';
 
-import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import './TrackProcessCPU.css';
+import './TrackMemory.css';
 
 /**
  * When adding properties to these props, please consider the comment above the component.
  */
 type CanvasProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +counter: Counter,
-  +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
-  +maxCounterSampleCountPerMs: number,
-  +interval: Milliseconds,
-  +width: CssPixels,
-  +height: CssPixels,
-  +lineWidth: CssPixels,
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly counter: Counter;
+  readonly counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable];
+  readonly accumulatedSamples: AccumulatedCounterSamples;
+  readonly interval: Milliseconds;
+  readonly width: CssPixels;
+  readonly height: CssPixels;
+  readonly lineWidth: CssPixels;
 };
 
 /**
@@ -55,9 +64,13 @@ type CanvasProps = {
  * React triggers a new canvas render. Because of this, it's important to only pass
  * in the props that are needed for the canvas draw call.
  */
-class TrackProcessCPUCanvas extends React.PureComponent<CanvasProps> {
+class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
   _canvas: null | HTMLCanvasElement = null;
   _requestedAnimationFrame: boolean = false;
+  _canvasState: { renderScheduled: boolean; inView: boolean } = {
+    renderScheduled: false,
+    inView: false,
+  };
 
   drawCanvas(canvas: HTMLCanvasElement): void {
     const {
@@ -68,7 +81,7 @@ class TrackProcessCPUCanvas extends React.PureComponent<CanvasProps> {
       width,
       lineWidth,
       interval,
-      maxCounterSampleCountPerMs,
+      accumulatedSamples,
       counterSampleRange,
     } = this.props;
     if (width === 0) {
@@ -77,6 +90,9 @@ class TrackProcessCPUCanvas extends React.PureComponent<CanvasProps> {
     }
 
     const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
     const devicePixelRatio = window.devicePixelRatio;
     const deviceWidth = width * devicePixelRatio;
     const deviceHeight = height * devicePixelRatio;
@@ -98,8 +114,11 @@ class TrackProcessCPUCanvas extends React.PureComponent<CanvasProps> {
       return;
     }
 
+    // Take the sample information, and convert it into chart coordinates. Use a slightly
+    // smaller space than the deviceHeight, so that the stroke will be fully visible
+    // both at the top and bottom of the chart.
+    const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
     const [sampleStart, sampleEnd] = counterSampleRange;
-    const countRangePerMs = maxCounterSampleCountPerMs;
 
     {
       // Draw the chart.
@@ -110,12 +129,14 @@ class TrackProcessCPUCanvas extends React.PureComponent<CanvasProps> {
       //  4                        3
       //
       // Start by drawing from 1 - 2. This will be the top of all the peaks of the
-      // process CPU graph.
+      // memory graph.
 
       ctx.lineWidth = deviceLineWidth;
       ctx.lineJoin = 'bevel';
-      ctx.strokeStyle = GREY_50;
-      ctx.fillStyle = '#73737388'; // Grey 50 with transparency.
+      ctx.strokeStyle = getStrokeColor(
+        counter.color || TRACK_MEMORY_DEFAULT_COLOR
+      );
+      ctx.fillStyle = getFillColor(counter.color || TRACK_MEMORY_DEFAULT_COLOR);
       ctx.beginPath();
 
       // The x and y are used after the loop.
@@ -126,12 +147,9 @@ class TrackProcessCPUCanvas extends React.PureComponent<CanvasProps> {
         // Create a path for the top of the chart. This is the line that will have
         // a stroke applied to it.
         x = (samples.time[i] - rangeStart) * millisecondWidth;
-        const sampleTimeDeltaInMs =
-          i === 0 ? interval : samples.time[i] - samples.time[i - 1];
-        const unitGraphCount =
-          samples.count[i] / sampleTimeDeltaInMs / countRangePerMs;
         // Add on half the stroke's line width so that it won't be cut off the edge
         // of the graph.
+        const unitGraphCount = (accumulatedCounts[i] - minCount) / countRange;
         y =
           innerDeviceHeight -
           innerDeviceHeight * unitGraphCount +
@@ -169,6 +187,16 @@ class TrackProcessCPUCanvas extends React.PureComponent<CanvasProps> {
   }
 
   _scheduleDraw() {
+    if (!this._canvasState.inView) {
+      // Canvas is not in the view. Schedule the render for a later intersection
+      // observer callback.
+      this._canvasState.renderScheduled = true;
+      return;
+    }
+
+    // Canvas is in the view. Render the canvas and reset the schedule state.
+    this._canvasState.renderScheduled = false;
+
     if (!this._requestedAnimationFrame) {
       this._requestedAnimationFrame = true;
       window.requestAnimationFrame(() => {
@@ -185,65 +213,86 @@ class TrackProcessCPUCanvas extends React.PureComponent<CanvasProps> {
     this._canvas = canvas;
   };
 
-  render() {
-    this._scheduleDraw();
+  _observerCallback = (inView: boolean, _entry: IntersectionObserverEntry) => {
+    this._canvasState.inView = inView;
+    if (!this._canvasState.renderScheduled) {
+      // Skip if render is not scheduled.
+      return;
+    }
 
+    this._scheduleDraw();
+  };
+
+  override componentDidMount() {
+    this._scheduleDraw();
+  }
+
+  override componentDidUpdate() {
+    this._scheduleDraw();
+  }
+
+  override render() {
     return (
-      <canvas
-        className="timelineTrackProcessCPUCanvas"
-        ref={this._takeCanvasRef}
-      />
+      <InView onChange={this._observerCallback}>
+        <canvas
+          className="timelineTrackMemoryCanvas"
+          ref={this._takeCanvasRef}
+        />
+      </InView>
     );
   }
 }
 
 type OwnProps = {
-  +counterIndex: CounterIndex,
-  +lineWidth: CssPixels,
-  +graphHeight: CssPixels,
+  readonly counterIndex: CounterIndex;
+  readonly lineWidth: CssPixels;
+  readonly graphHeight: CssPixels;
 };
 
 type StateProps = {
-  +threadIndex: ThreadIndex,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +counter: Counter,
-  +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
-  +maxCounterSampleCountPerMs: number,
-  +interval: Milliseconds,
-  +filteredThread: Thread,
-  +unfilteredSamplesRange: StartEndRange | null,
+  readonly threadIndex: ThreadIndex;
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly counter: Counter;
+  readonly counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable];
+  readonly accumulatedSamples: AccumulatedCounterSamples;
+  readonly interval: Milliseconds;
+  readonly filteredThread: Thread;
+  readonly unfilteredSamplesRange: StartEndRange | null;
 };
 
 type DispatchProps = {};
 
-type Props = {
-  ...SizeProps,
-  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
-};
+type Props = SizeProps & ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 type State = {
-  hoveredCounter: null | number,
-  mouseX: CssPixels,
-  mouseY: CssPixels,
+  hoveredCounter: null | number;
+  mouseX: CssPixels;
+  mouseY: CssPixels;
 };
 
 /**
- * The process CPU track graph takes CPU information from counters, and renders it as a
+ * The memory track graph takes memory information from counters, and renders it as a
  * graph in the timeline.
  */
-class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
-  state = {
+class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
+  override state = {
     hoveredCounter: null,
     mouseX: 0,
     mouseY: 0,
   };
 
   _onMouseLeave = () => {
+    // This persistTooltips property is part of the web console API. It helps
+    // in being able to inspect and debug tooltips.
+    if ((window as any).persistTooltips) {
+      return;
+    }
+
     this.setState({ hoveredCounter: null });
   };
 
-  _onMouseMove = (event: SyntheticMouseEvent<HTMLDivElement>) => {
+  _onMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     const { pageX: mouseX, pageY: mouseY } = event;
     // Get the offset from here, and apply it to the time lookup.
     const { left } = event.currentTarget.getBoundingClientRect();
@@ -258,6 +307,11 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
     const rangeLength = rangeEnd - rangeStart;
     const timeAtMouse = rangeStart + ((mouseX - left) / width) * rangeLength;
 
+    if (counter.samples.length === 0) {
+      // Gecko failed to capture samples for some reason and it shouldn't happen for
+      // malloc counter. Print an error and bail out early.
+      throw new Error('No sample group found for memory counter');
+    }
     const { samples } = counter;
 
     if (
@@ -305,21 +359,16 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
     }
   };
 
-  _renderTooltip(counterIndex: number): React.Node {
-    const {
-      counter,
-      maxCounterSampleCountPerMs,
-      interval,
-      rangeStart,
-      rangeEnd,
-    } = this.props;
+  _renderTooltip(counterIndex: number): React.ReactNode {
+    const { accumulatedSamples, counter, rangeStart, rangeEnd } = this.props;
     const { mouseX, mouseY } = this.state;
     const { samples } = counter;
     if (samples.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
       // malloc counter. Print an error and bail out early.
-      throw new Error('No sample found for process CPU counter');
+      throw new Error('No accumulated sample found for memory counter');
     }
+
     const sampleTime = samples.time[counterIndex];
     if (sampleTime < rangeStart || sampleTime > rangeEnd) {
       // Do not draw the tooltip if it will be rendered outside of the timeline.
@@ -329,22 +378,40 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
       return null;
     }
 
-    const maxCPUPerMs = maxCounterSampleCountPerMs;
-    const cpuUsage = samples.count[counterIndex];
-    const sampleTimeDeltaInMs =
-      counterIndex === 0
-        ? interval
-        : samples.time[counterIndex] - samples.time[counterIndex - 1];
-    const cpuRatio = cpuUsage / sampleTimeDeltaInMs / maxCPUPerMs;
+    const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
+    const bytes = accumulatedCounts[counterIndex] - minCount;
+    const operations =
+      samples.number !== undefined ? samples.number[counterIndex] : null;
     return (
       <Tooltip mouseX={mouseX} mouseY={mouseY}>
-        <div className="timelineTrackProcessCPUTooltip">
-          <div className="timelineTrackProcessCPUTooltipLine">
-            CPU:{' '}
-            <span className="timelineTrackProcessCPUTooltipNumber">
-              {formatPercent(cpuRatio)}
+        <div className="timelineTrackMemoryTooltip">
+          <div className="timelineTrackMemoryTooltipLine">
+            <span className="timelineTrackMemoryTooltipNumber">
+              {formatBytes(bytes)}
             </span>
+            <Localized id="TrackMemoryGraph--relative-memory-at-this-time">
+              relative memory at this time
+            </Localized>
           </div>
+
+          <div className="timelineTrackMemoryTooltipLine">
+            <span className="timelineTrackMemoryTooltipNumber">
+              {formatBytes(countRange)}
+            </span>
+            <Localized id="TrackMemoryGraph--memory-range-in-graph">
+              memory range in graph
+            </Localized>
+          </div>
+          {operations !== null ? (
+            <div className="timelineTrackMemoryTooltipLine">
+              <span className="timelineTrackMemoryTooltipNumber">
+                {formatNumber(operations, 2, 0)}
+              </span>
+              <Localized id="TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample">
+                allocations and deallocations since the previous sample
+              </Localized>
+            </div>
+          ) : null}
         </div>
       </Tooltip>
     );
@@ -354,7 +421,7 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
    * Create a div that is a dot on top of the graph representing the current
    * height of the graph.
    */
-  _renderDot(counterIndex: number): React.Node {
+  _renderMemoryDot(counterIndex: number): React.ReactNode {
     const {
       counter,
       rangeStart,
@@ -362,10 +429,15 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
       graphHeight,
       width,
       lineWidth,
-      maxCounterSampleCountPerMs,
-      interval,
+      accumulatedSamples,
     } = this.props;
+
     const { samples } = counter;
+    if (samples.length === 0) {
+      // Gecko failed to capture samples for some reason and it shouldn't happen for
+      // malloc counter. Print an error and bail out early.
+      throw new Error('No sample found for memory counter');
+    }
     const rangeLength = rangeEnd - rangeStart;
     const sampleTime = samples.time[counterIndex];
 
@@ -377,31 +449,30 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
       return null;
     }
 
-    const left =
-      (width * (samples.time[counterIndex] - rangeStart)) / rangeLength;
+    const left = (width * (sampleTime - rangeStart)) / rangeLength;
 
-    if (samples.length === 0) {
-      // Gecko failed to capture samples for some reason and it shouldn't happen for
-      // process CPU counter. Print an error and bail out early.
-      throw new Error('No sample found for process CPU counter');
-    }
-    const countRangePerMs = maxCounterSampleCountPerMs;
-    const sampleTimeDeltaInMs =
-      counterIndex === 0
-        ? interval
-        : samples.time[counterIndex] - samples.time[counterIndex - 1];
+    const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
     const unitSampleCount =
-      samples.count[counterIndex] / sampleTimeDeltaInMs / countRangePerMs;
+      (accumulatedCounts[counterIndex] - minCount) / countRange;
     const innerTrackHeight = graphHeight - lineWidth / 2;
     const top =
       innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
 
     return (
-      <div style={{ left, top }} className="timelineTrackProcessCPUGraphDot" />
+      <div
+        style={{
+          left,
+          top,
+          backgroundColor: getDotColor(
+            counter.color || TRACK_MEMORY_DEFAULT_COLOR
+          ),
+        }}
+        className="timelineTrackMemoryGraphDot"
+      />
     );
   }
 
-  render() {
+  override render() {
     const { hoveredCounter } = this.state;
     const {
       filteredThread,
@@ -414,16 +485,16 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
       graphHeight,
       width,
       lineWidth,
-      maxCounterSampleCountPerMs,
+      accumulatedSamples,
     } = this.props;
 
     return (
       <div
-        className="timelineTrackProcessCPUGraph"
+        className="timelineTrackMemoryGraph"
         onMouseMove={this._onMouseMove}
         onMouseLeave={this._onMouseLeave}
       >
-        <TrackProcessCPUCanvas
+        <TrackMemoryCanvas
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
           counter={counter}
@@ -432,11 +503,11 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
           width={width}
           lineWidth={lineWidth}
           interval={interval}
-          maxCounterSampleCountPerMs={maxCounterSampleCountPerMs}
+          accumulatedSamples={accumulatedSamples}
         />
         {hoveredCounter === null ? null : (
           <>
-            {this._renderDot(hoveredCounter)}
+            {this._renderMemoryDot(hoveredCounter)}
             {this._renderTooltip(hoveredCounter)}
           </>
         )}
@@ -452,10 +523,10 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
   }
 }
 
-export const TrackProcessCPUGraph = explicitConnect<
+export const TrackMemoryGraph = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state, ownProps) => {
     const { counterIndex } = ownProps;
@@ -468,8 +539,7 @@ export const TrackProcessCPUGraph = explicitConnect<
     return {
       counter,
       threadIndex: counter.mainThreadIndex,
-      maxCounterSampleCountPerMs:
-        counterSelectors.getMaxCounterSampleCountPerMs(state),
+      accumulatedSamples: counterSelectors.getAccumulateCounterSamples(state),
       rangeStart: start,
       rangeEnd: end,
       counterSampleRange,
@@ -478,5 +548,5 @@ export const TrackProcessCPUGraph = explicitConnect<
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
     };
   },
-  component: withSize<Props>(TrackProcessCPUGraphImpl),
+  component: withSize<Props>(TrackMemoryGraphImpl),
 });

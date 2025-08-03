@@ -2,17 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
-import { InView } from 'react-intersection-observer';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
-import {
-  getStrokeColor,
-  getFillColor,
-  getDotColor,
-} from 'firefox-profiler/profile-logic/graph-color';
 import explicitConnect from 'firefox-profiler/utils/connect';
+import { formatPercent } from 'firefox-profiler/utils/format-numbers';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import {
   getCommittedRange,
@@ -20,12 +13,11 @@ import {
   getProfileInterval,
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { GREY_50 } from 'photon-colors';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
-import { TooltipTrackPower } from 'firefox-profiler/components/tooltip/TrackPower';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
-import { TRACK_POWER_DEFAULT_COLOR } from 'firefox-profiler/app-logic/constants';
 
-import type {
+import {
   CounterIndex,
   Counter,
   Thread,
@@ -36,25 +28,24 @@ import type {
   IndexIntoSamplesTable,
 } from 'firefox-profiler/types';
 
-import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import { timeCode } from 'firefox-profiler/utils/time-code';
+import { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import './TrackPower.css';
+import './TrackProcessCPU.css';
 
 /**
  * When adding properties to these props, please consider the comment above the component.
  */
 type CanvasProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +counter: Counter,
-  +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
-  +maxCounterSampleCountPerMs: number,
-  +interval: Milliseconds,
-  +width: CssPixels,
-  +height: CssPixels,
-  +lineWidth: CssPixels,
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly counter: Counter;
+  readonly counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable];
+  readonly maxCounterSampleCountPerMs: number;
+  readonly interval: Milliseconds;
+  readonly width: CssPixels;
+  readonly height: CssPixels;
+  readonly lineWidth: CssPixels;
 };
 
 /**
@@ -62,12 +53,9 @@ type CanvasProps = {
  * React triggers a new canvas render. Because of this, it's important to only pass
  * in the props that are needed for the canvas draw call.
  */
-class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
+class TrackProcessCPUCanvas extends React.PureComponent<CanvasProps> {
   _canvas: null | HTMLCanvasElement = null;
-  _canvasState: { renderScheduled: boolean, inView: boolean } = {
-    renderScheduled: false,
-    inView: false,
-  };
+  _requestedAnimationFrame: boolean = false;
 
   drawCanvas(canvas: HTMLCanvasElement): void {
     const {
@@ -87,6 +75,9 @@ class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
     }
 
     const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
     const devicePixelRatio = window.devicePixelRatio;
     const deviceWidth = width * devicePixelRatio;
     const deviceHeight = height * devicePixelRatio;
@@ -120,90 +111,42 @@ class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
       //  4                        3
       //
       // Start by drawing from 1 - 2. This will be the top of all the peaks of the
-      // power graph.
+      // process CPU graph.
 
       ctx.lineWidth = deviceLineWidth;
       ctx.lineJoin = 'bevel';
-      ctx.strokeStyle = getStrokeColor(
-        counter.color || TRACK_POWER_DEFAULT_COLOR
-      );
-      ctx.fillStyle = getFillColor(counter.color || TRACK_POWER_DEFAULT_COLOR);
+      ctx.strokeStyle = GREY_50;
+      ctx.fillStyle = '#73737388'; // Grey 50 with transparency.
       ctx.beginPath();
 
-      const getX = (i) =>
-        Math.round((samples.time[i] - rangeStart) * millisecondWidth);
-      const getPower = (i) => {
+      // The x and y are used after the loop.
+      let x = 0;
+      let y = 0;
+      let firstX = 0;
+      for (let i = sampleStart; i < sampleEnd; i++) {
+        // Create a path for the top of the chart. This is the line that will have
+        // a stroke applied to it.
+        x = (samples.time[i] - rangeStart) * millisecondWidth;
         const sampleTimeDeltaInMs =
           i === 0 ? interval : samples.time[i] - samples.time[i - 1];
-        return samples.count[i] / sampleTimeDeltaInMs;
-      };
-      const getY = (rawY) => {
-        if (!rawY) {
-          // Make the 0 values invisible so that 'almost 0' is noticeable.
-          return deviceHeight + deviceLineHalfWidth;
-        }
-
-        const unitGraphCount = rawY / countRangePerMs;
+        const unitGraphCount =
+          samples.count[i] / sampleTimeDeltaInMs / countRangePerMs;
         // Add on half the stroke's line width so that it won't be cut off the edge
         // of the graph.
-        return Math.round(
+        y =
           innerDeviceHeight -
-            innerDeviceHeight * unitGraphCount +
-            deviceLineHalfWidth
-        );
-      };
-
-      // The x and y are used after the loop.
-      const firstX = getX(sampleStart);
-      let x = firstX;
-      let y = getY(getPower(sampleStart));
-
-      // For the first sample, only move the line, do not draw it. Also
-      // remember this first X, as the bottom of the graph will need to connect
-      // back up to it.
-      ctx.moveTo(x, y);
-
-      // Create a path for the top of the chart. This is the line that will have
-      // a stroke applied to it.
-      for (let i = sampleStart + 1; i < sampleEnd; i++) {
-        const powerValues = [getPower(i)];
-        x = getX(i);
-        y = getY(powerValues[0]);
-        ctx.lineTo(x, y);
-
-        // If we have multiple samples to draw on the same horizontal pixel,
-        // we process all of them together with a max-min decimation algorithm
-        // to save time:
-        // - We draw the first and last samples to ensure the display is
-        //   correct if there are sampling gaps.
-        // - For the values in between, we only draw the min and max values,
-        //   to draw a vertical line covering all the other sample values.
-        while (i + 1 < sampleEnd && getX(i + 1) === x) {
-          powerValues.push(getPower(++i));
-        }
-
-        // Looking for the min and max only makes sense if we have more than 2
-        // samples to draw.
-        if (powerValues.length > 2) {
-          const minY = getY(Math.min(...powerValues));
-          if (minY !== y) {
-            y = minY;
-            ctx.lineTo(x, y);
-          }
-          const maxY = getY(Math.max(...powerValues));
-          if (maxY !== y) {
-            y = maxY;
-            ctx.lineTo(x, y);
-          }
-        }
-
-        const lastY = getY(powerValues[powerValues.length - 1]);
-        if (lastY !== y) {
-          y = lastY;
+          innerDeviceHeight * unitGraphCount +
+          deviceLineHalfWidth;
+        if (i === 0) {
+          // This is the first iteration, only move the line, do not draw it. Also
+          // remember this first X, as the bottom of the graph will need to connect
+          // back up to it.
+          firstX = x;
+          ctx.moveTo(x, y);
+        } else {
           ctx.lineTo(x, y);
         }
       }
-
       // The samples range ends at the time of the last sample, plus the interval.
       // Draw this last bit.
       ctx.lineTo(x + intervalWidth, y);
@@ -226,21 +169,15 @@ class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
     }
   }
 
-  _renderCanvas() {
-    if (!this._canvasState.inView) {
-      // Canvas is not in the view. Schedule the render for a later intersection
-      // observer callback.
-      this._canvasState.renderScheduled = true;
-      return;
-    }
-
-    // Canvas is in the view. Render the canvas and reset the schedule state.
-    this._canvasState.renderScheduled = false;
-
-    const canvas = this._canvas;
-    if (canvas) {
-      timeCode('TrackPowerCanvas render', () => {
-        this.drawCanvas(canvas);
+  _scheduleDraw() {
+    if (!this._requestedAnimationFrame) {
+      this._requestedAnimationFrame = true;
+      window.requestAnimationFrame(() => {
+        this._requestedAnimationFrame = false;
+        const canvas = this._canvas;
+        if (canvas) {
+          this.drawCanvas(canvas);
+        }
       });
     }
   }
@@ -249,67 +186,52 @@ class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
     this._canvas = canvas;
   };
 
-  _observerCallback = (inView: boolean, _entry: IntersectionObserverEntry) => {
-    this._canvasState.inView = inView;
-    if (!this._canvasState.renderScheduled) {
-      // Skip if render is not scheduled.
-      return;
-    }
-
-    this._renderCanvas();
-  };
-
-  render() {
-    this._renderCanvas();
+  override render() {
+    this._scheduleDraw();
 
     return (
-      <InView onChange={this._observerCallback}>
-        <canvas
-          className="timelineTrackPowerCanvas"
-          ref={this._takeCanvasRef}
-        />
-      </InView>
+      <canvas
+        className="timelineTrackProcessCPUCanvas"
+        ref={this._takeCanvasRef}
+      />
     );
   }
 }
 
 type OwnProps = {
-  +counterIndex: CounterIndex,
-  +lineWidth: CssPixels,
-  +graphHeight: CssPixels,
+  readonly counterIndex: CounterIndex;
+  readonly lineWidth: CssPixels;
+  readonly graphHeight: CssPixels;
 };
 
 type StateProps = {
-  +threadIndex: ThreadIndex,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +counter: Counter,
-  +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
-  +maxCounterSampleCountPerMs: number,
-  +interval: Milliseconds,
-  +filteredThread: Thread,
-  +unfilteredSamplesRange: StartEndRange | null,
+  readonly threadIndex: ThreadIndex;
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly counter: Counter;
+  readonly counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable];
+  readonly maxCounterSampleCountPerMs: number;
+  readonly interval: Milliseconds;
+  readonly filteredThread: Thread;
+  readonly unfilteredSamplesRange: StartEndRange | null;
 };
 
 type DispatchProps = {};
 
-type Props = {
-  ...SizeProps,
-  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
-};
+type Props = SizeProps & ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 type State = {
-  hoveredCounter: null | number,
-  mouseX: CssPixels,
-  mouseY: CssPixels,
+  hoveredCounter: null | number;
+  mouseX: CssPixels;
+  mouseY: CssPixels;
 };
 
 /**
- * The power track graph takes power use information from counters, and renders it as a
+ * The process CPU track graph takes CPU information from counters, and renders it as a
  * graph in the timeline.
  */
-class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
-  state = {
+class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
+  override state = {
     hoveredCounter: null,
     mouseX: 0,
     mouseY: 0,
@@ -319,7 +241,7 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
     this.setState({ hoveredCounter: null });
   };
 
-  _onMouseMove = (event: SyntheticMouseEvent<HTMLDivElement>) => {
+  _onMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     const { pageX: mouseX, pageY: mouseY } = event;
     // Get the offset from here, and apply it to the time lookup.
     const { left } = event.currentTarget.getBoundingClientRect();
@@ -362,32 +284,6 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
           // Right point is closer
           hoveredCounter = bisectionCounter;
         }
-
-        // If there are samples before or after hoveredCounter that fall
-        // horizontally on the same pixel, move hoveredCounter to the sample
-        // with the highest power value.
-        const mouseAtTime = (t) =>
-          Math.round(((t - rangeStart) / rangeLength) * width + left);
-        for (
-          let currentIndex = hoveredCounter - 1;
-          mouseAtTime(samples.time[currentIndex]) === mouseX &&
-          currentIndex > 0;
-          --currentIndex
-        ) {
-          if (samples.count[currentIndex] > samples.count[hoveredCounter]) {
-            hoveredCounter = currentIndex;
-          }
-        }
-        for (
-          let currentIndex = hoveredCounter + 1;
-          mouseAtTime(samples.time[currentIndex]) === mouseX &&
-          currentIndex < samples.time.length;
-          ++currentIndex
-        ) {
-          if (samples.count[currentIndex] > samples.count[hoveredCounter]) {
-            hoveredCounter = currentIndex;
-          }
-        }
       } else {
         hoveredCounter = bisectionCounter;
       }
@@ -407,18 +303,22 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
     }
   };
 
-  _renderTooltip(counterSampleIndex: number): React.Node {
-    const { counter, rangeStart, rangeEnd } = this.props;
+  _renderTooltip(counterIndex: number): React.ReactNode {
+    const {
+      counter,
+      maxCounterSampleCountPerMs,
+      interval,
+      rangeStart,
+      rangeEnd,
+    } = this.props;
     const { mouseX, mouseY } = this.state;
-
     const { samples } = counter;
     if (samples.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
       // malloc counter. Print an error and bail out early.
-      throw new Error('No sample found for power counter');
+      throw new Error('No sample found for process CPU counter');
     }
-
-    const sampleTime = samples.time[counterSampleIndex];
+    const sampleTime = samples.time[counterIndex];
     if (sampleTime < rangeStart || sampleTime > rangeEnd) {
       // Do not draw the tooltip if it will be rendered outside of the timeline.
       // This could happen when a sample time is outside of the time range.
@@ -427,12 +327,23 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
       return null;
     }
 
+    const maxCPUPerMs = maxCounterSampleCountPerMs;
+    const cpuUsage = samples.count[counterIndex];
+    const sampleTimeDeltaInMs =
+      counterIndex === 0
+        ? interval
+        : samples.time[counterIndex] - samples.time[counterIndex - 1];
+    const cpuRatio = cpuUsage / sampleTimeDeltaInMs / maxCPUPerMs;
     return (
       <Tooltip mouseX={mouseX} mouseY={mouseY}>
-        <TooltipTrackPower
-          counter={counter}
-          counterSampleIndex={counterSampleIndex}
-        />
+        <div className="timelineTrackProcessCPUTooltip">
+          <div className="timelineTrackProcessCPUTooltipLine">
+            CPU:{' '}
+            <span className="timelineTrackProcessCPUTooltipNumber">
+              {formatPercent(cpuRatio)}
+            </span>
+          </div>
+        </div>
       </Tooltip>
     );
   }
@@ -441,7 +352,7 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
    * Create a div that is a dot on top of the graph representing the current
    * height of the graph.
    */
-  _renderDot(counterIndex: number): React.Node {
+  _renderDot(counterIndex: number): React.ReactNode {
     const {
       counter,
       rangeStart,
@@ -452,7 +363,6 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
       maxCounterSampleCountPerMs,
       interval,
     } = this.props;
-
     const { samples } = counter;
     const rangeLength = rangeEnd - rangeStart;
     const sampleTime = samples.time[counterIndex];
@@ -465,12 +375,13 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
       return null;
     }
 
-    const left = (width * (sampleTime - rangeStart)) / rangeLength;
+    const left =
+      (width * (samples.time[counterIndex] - rangeStart)) / rangeLength;
 
     if (samples.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
-      // power counter. Print an error and bail out early.
-      throw new Error('No sample found for power counter');
+      // process CPU counter. Print an error and bail out early.
+      throw new Error('No sample found for process CPU counter');
     }
     const countRangePerMs = maxCounterSampleCountPerMs;
     const sampleTimeDeltaInMs =
@@ -484,20 +395,11 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
       innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
 
     return (
-      <div
-        style={{
-          left,
-          top,
-          backgroundColor: getDotColor(
-            counter.color || TRACK_POWER_DEFAULT_COLOR
-          ),
-        }}
-        className="timelineTrackPowerGraphDot"
-      />
+      <div style={{ left, top }} className="timelineTrackProcessCPUGraphDot" />
     );
   }
 
-  render() {
+  override render() {
     const { hoveredCounter } = this.state;
     const {
       filteredThread,
@@ -515,11 +417,11 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
 
     return (
       <div
-        className="timelineTrackPowerGraph"
+        className="timelineTrackProcessCPUGraph"
         onMouseMove={this._onMouseMove}
         onMouseLeave={this._onMouseLeave}
       >
-        <TrackPowerCanvas
+        <TrackProcessCPUCanvas
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
           counter={counter}
@@ -548,10 +450,10 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
   }
 }
 
-export const TrackPowerGraph = explicitConnect<
+export const TrackProcessCPUGraph = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state, ownProps) => {
     const { counterIndex } = ownProps;
@@ -560,13 +462,12 @@ export const TrackPowerGraph = explicitConnect<
     const { start, end } = getCommittedRange(state);
     const counterSampleRange =
       counterSelectors.getCommittedRangeCounterSampleRange(state);
-
     const selectors = getThreadSelectors(counter.mainThreadIndex);
     return {
       counter,
       threadIndex: counter.mainThreadIndex,
       maxCounterSampleCountPerMs:
-        counterSelectors.getMaxRangeCounterSampleCountPerMs(state),
+        counterSelectors.getMaxCounterSampleCountPerMs(state),
       rangeStart: start,
       rangeEnd: end,
       counterSampleRange,
@@ -575,5 +476,5 @@ export const TrackPowerGraph = explicitConnect<
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
     };
   },
-  component: withSize<Props>(TrackPowerGraphImpl),
+  component: withSize<Props>(TrackProcessCPUGraphImpl),
 });
