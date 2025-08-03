@@ -401,8 +401,8 @@ The `flow-to-typescript-unified.sh` script handles most conversions automaticall
 
 ### Phase 3: 🚀 IN PROGRESS - Systematic File Migration
 
-- **Status**: 70 JavaScript files remaining (down from 71)
-- **TypeScript files**: 225 (up from 224)
+- **Status**: 68 JavaScript files remaining (down from 70)
+- **TypeScript files**: 227 (up from 225)
 - **Strategy**: Dependency-first migration focusing on zero-dependency files first
 - **Recent major conversions (August 3, 2025)**:
   - **Core selectors**: src/selectors/per-thread/ (thread.tsx, markers.ts, stack-sample.ts)
@@ -414,7 +414,9 @@ The `flow-to-typescript-unified.sh` script handles most conversions automaticall
   - **App components**: SourceCodeFetcher.tsx (135 lines), WindowTitle.tsx (149 lines), AssemblyCodeFetcher.tsx (150 lines)
   - **Settings components**: NetworkSettings.tsx (63 lines), js-tracer/Settings.tsx (68 lines)
   - **Tooltip components**: Marker.tsx (538 lines) - Advanced union type handling
-  - **Total converted**: 20 files, 5,657 lines of code
+  - **Sidebar components**: MarkerSidebar.tsx (65 lines) - Simple state mapping component
+  - **Network components**: NetworkChartRow.tsx (531 lines) - Complex event handling and dynamic property access
+  - **Total converted**: 22 files, 6,253 lines of code
 
 ### Phase 4: ✅ LARGELY COMPLETED - Strict TypeScript compliance
 
@@ -492,4 +494,8 @@ The `flow-to-typescript-unified.sh` script handles most conversions automaticall
 - **Union type narrowing** - use `'property' in object` pattern for type guards
 - **MarkerPayload type safety** - union types require property checks before accessing
 - **ScreenshotPayload variants** - guard for windowWidth/windowHeight before using
+- **Dynamic property access** - use `(obj as any)[key]` for computed property access
+- **React event types** - provide element type parameter: `React.MouseEvent<HTMLDivElement>`
+- **Custom window properties** - use `(window as any).customProperty` for non-standard APIs
+- **Null safety with nullish coalescing** - use `(value ?? fallback)` for handling possible null returns
 - **Mixed codebase stability** - Flow and TypeScript coexist reliably

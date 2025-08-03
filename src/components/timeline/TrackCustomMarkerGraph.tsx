@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import { InView } from 'react-intersection-observer';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
@@ -23,7 +21,7 @@ import {
   TRACK_MARKER_LINE_WIDTH,
 } from 'firefox-profiler/app-logic/constants';
 
-import type {
+import {
   ThreadIndex,
   Milliseconds,
   CssPixels,
@@ -38,8 +36,8 @@ import type {
 
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 
 import './TrackCustomMarker.css';
@@ -48,14 +46,14 @@ import './TrackCustomMarker.css';
  * When adding properties to these props, please consider the comment above the component.
  */
 type CanvasProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +markerSchema: MarkerSchema,
-  +markerSampleRanges: [IndexIntoSamplesTable, IndexIntoSamplesTable],
-  +collectedSamples: CollectedCustomMarkerSamples,
-  +width: CssPixels,
-  +height: CssPixels,
-  +getMarker: (MarkerIndex) => Marker,
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly markerSchema: MarkerSchema;
+  readonly markerSampleRanges: [IndexIntoSamplesTable, IndexIntoSamplesTable];
+  readonly collectedSamples: CollectedCustomMarkerSamples;
+  readonly width: CssPixels;
+  readonly height: CssPixels;
+  readonly getMarker: (param: MarkerIndex) => Marker;
 };
 
 function _calculateUnitValue(
@@ -91,7 +89,7 @@ function _calculateUnitValue(
 class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
   _canvas: null | HTMLCanvasElement = null;
   _requestedAnimationFrame: boolean = false;
-  _canvasState: { renderScheduled: boolean, inView: boolean } = {
+  _canvasState: { renderScheduled: boolean; inView: boolean } = {
     renderScheduled: false,
     inView: false,
   };
@@ -117,7 +115,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
       throw new Error('No track config for marker');
     }
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d')!;
     const devicePixelRatio = window.devicePixelRatio;
     const deviceWidth = width * devicePixelRatio;
     const deviceHeight = height * devicePixelRatio;
@@ -149,12 +147,12 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
         //
         ctx.strokeStyle = getStrokeColor(color || TRACK_MARKER_DEFAULT_COLOR);
 
-        const getX = (time) =>
+        const getX = (time: number) =>
           Math.round((time - rangeStart) * millisecondWidth);
         // For line graphs, ensure y is at least half the stroke's line width
         // so that it won't be cut off the bottom edge of the graph.
         const minY = type === 'bar' ? 0 : deviceLineWidth * 0.5;
-        const getY = (i) => {
+        const getY = (i: number) => {
           const unitValue = _calculateUnitValue(
             type,
             minNumber,
@@ -306,15 +304,15 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
     this._scheduleDraw();
   };
 
-  componentDidMount() {
+  override componentDidMount() {
     this._scheduleDraw();
   }
 
-  componentDidUpdate() {
+  override componentDidUpdate() {
     this._scheduleDraw();
   }
 
-  render() {
+  override render() {
     return (
       <InView onChange={this._observerCallback}>
         <canvas
@@ -327,31 +325,28 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
 }
 
 type OwnProps = {
-  +threadIndex: ThreadIndex,
-  +markerSchema: MarkerSchema,
-  +markerName: IndexIntoStringTable,
-  +graphHeight: CssPixels,
+  readonly threadIndex: ThreadIndex;
+  readonly markerSchema: MarkerSchema;
+  readonly markerName: IndexIntoStringTable;
+  readonly graphHeight: CssPixels;
 };
 
 type StateProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +markerSampleRanges: [IndexIntoSamplesTable, IndexIntoSamplesTable],
-  +collectedSamples: CollectedCustomMarkerSamples,
-  +getMarker: (MarkerIndex) => Marker,
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly markerSampleRanges: [IndexIntoSamplesTable, IndexIntoSamplesTable];
+  readonly collectedSamples: CollectedCustomMarkerSamples;
+  readonly getMarker: (param: MarkerIndex) => Marker;
 };
 
 type DispatchProps = {};
 
-type Props = {
-  ...SizeProps,
-  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
-};
+type Props = SizeProps & ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 type State = {
-  hoveredCounter: null | number,
-  mouseX: CssPixels,
-  mouseY: CssPixels,
+  hoveredCounter: null | number;
+  mouseX: CssPixels;
+  mouseY: CssPixels;
 };
 
 /**
@@ -359,7 +354,7 @@ type State = {
  * graph in the timeline.
  */
 class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
-  state = {
+  override state = {
     hoveredCounter: null,
     mouseX: 0,
     mouseY: 0,
@@ -368,14 +363,14 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
   _onMouseLeave = () => {
     // This persistTooltips property is part of the web console API. It helps
     // in being able to inspect and debug tooltips.
-    if (window.persistTooltips) {
+    if ((window as any).persistTooltips) {
       return;
     }
 
     this.setState({ hoveredCounter: null });
   };
 
-  _onMouseMove = (event: SyntheticMouseEvent<HTMLDivElement>) => {
+  _onMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     const { pageX: mouseX, pageY: mouseY } = event;
     // Get the offset from here, and apply it to the time lookup.
     const { left } = event.currentTarget.getBoundingClientRect();
@@ -441,7 +436,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
     }
   };
 
-  _renderTooltip(counterIndex: number): React.Node {
+  _renderTooltip(counterIndex: number): React.ReactNode {
     const {
       collectedSamples,
       rangeStart,
@@ -481,7 +476,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
    * Create a div that is a dot on top of the graph representing the current
    * height of the graph.
    */
-  _renderDot(counterIndex: number): React.Node {
+  _renderDot(counterIndex: number): React.ReactNode {
     const {
       markerSchema,
       rangeStart,
@@ -528,8 +523,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
       const innerTrackHeight = graphHeight - halfLineWidth;
       const top =
         innerTrackHeight - unitValue * innerTrackHeight - halfLineWidth;
-      // eslint-disable-next-line flowtype/no-weak-types
-      const style: Object = { left, top };
+      const style: React.CSSProperties = { left, top };
       style.backgroundColor = getDotColor(color || TRACK_MARKER_DEFAULT_COLOR);
 
       if (marker.end) {
@@ -568,7 +562,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
     return <>{dots}</>;
   }
 
-  render() {
+  override render() {
     const { hoveredCounter } = this.state;
     const {
       rangeStart,
@@ -611,7 +605,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
 export const TrackCustomMarkerGraph = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state, ownProps) => {
     const { threadIndex, markerSchema, markerName } = ownProps;
