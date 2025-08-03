@@ -2,31 +2,28 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     // Target & Module System (Updated to 2025 standards)
-    "target": "ES2022",
+    "target": "es2022",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "moduleResolution": "Node",
-
-    // Import/Export Compatibility (Simplifies conversion)
-    "allowJs": true,
+    "module": "es2022",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
     "verbatimModuleSyntax": false,
-
-    // Type Checking (Gradual strictness)
-    "strict": false, // Keep false during migration
-    "noFallthroughCasesInSwitch": false, // Already checked by eslint, with opt-out
-    "noUnusedLocals": true,
     "noUncheckedSideEffectImports": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "noImplicitReturns": true,
     "forceConsistentCasingInFileNames": true,
 
-    // Additional Helpful Options for Migration
-    "noImplicitOverride": true, // Modern TypeScript feature
-    "exactOptionalPropertyTypes": false, // Too strict for migration
-    "noUncheckedIndexedAccess": false, // Too strict for migration
+    "noFallthroughCasesInSwitch": false, // Already checked by eslint, with opt-out
+    "noUnusedLocals": true,
+    "noUnusedParameters": false, // Should enable in the future
+
+    // Default to strict, with the exceptions below
+    "strict": true,
+
+    // Exceptions to strictness, consider enabling in the future
+    "strictFunctionTypes": false, // Seems desirable
+    "strictPropertyInitialization": false, // Seems very desirable
+    "useUnknownInCatchVariables": false, // Sounds fine, enforces `} catch (e) { if (e instanceof Error) {` etc
+    "alwaysStrict": false, // Affects runtime behavior, I think - need to check what we had with Flow
+    "exactOptionalPropertyTypes": false, // Benefit unclear
 
     // Build & Performance
     "skipLibCheck": true,
@@ -38,7 +35,6 @@
 
     // Module Resolution
     "resolveJsonModule": true,
-    "allowImportingTsExtensions": false,
     "baseUrl": ".",
     "typeRoots": ["node_modules/@types", "src/types/@types"],
     "paths": {
