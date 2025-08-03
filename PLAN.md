@@ -401,22 +401,23 @@ The `flow-to-typescript-unified.sh` script handles most conversions automaticall
 
 ### Phase 3: 🚀 IN PROGRESS - Systematic File Migration
 
-- **Status**: 74 JavaScript files remaining (down from 76)
-- **TypeScript files**: 221 (up from 218)
+- **Status**: 71 JavaScript files remaining (down from 74)
+- **TypeScript files**: 224 (up from 221)
 - **Strategy**: Dependency-first migration focusing on zero-dependency files first
 - **Recent major conversions (August 3, 2025)**:
   - **Core selectors**: src/selectors/per-thread/ (thread.tsx, markers.ts, stack-sample.ts)
   - **Profile logic**: src/profile-logic/merge-compare.ts (1,447 lines)
   - **CLI tools**: src/symbolicator-cli/index.ts
   - **EmptyReasons components**: StackChart, CallTree, FlameGraph (183 lines)
-  - **Timeline components**: TrackBandwidthGraph.tsx (716 lines), TrackBandwidth.tsx (84 lines)
+  - **Timeline components**: TrackBandwidthGraph.tsx (716 lines), TrackBandwidth.tsx (84 lines), TrackPower.tsx (84 lines)
   - **Selector infrastructure**: src/selectors/index.ts (48 lines)
   - **App components**: SourceCodeFetcher.tsx (135 lines), WindowTitle.tsx (149 lines), AssemblyCodeFetcher.tsx (150 lines)
-  - **Total converted**: 16 files, 4,904 lines of code
+  - **Settings components**: NetworkSettings.tsx (63 lines), js-tracer/Settings.tsx (68 lines)
+  - **Total converted**: 19 files, 5,119 lines of code
 
 ### Phase 4: ✅ LARGELY COMPLETED - Strict TypeScript compliance
 
-- **Status**: `yarn typecheck` passes consistently, 9 files excluded from strict checking (down from 10)
+- **Status**: `yarn typecheck` passes consistently, 8 files excluded from strict checking (down from 9)
 - **Key achievements**:
   - Successfully resolved circular dependencies between thread/markers selectors
   - Converted Flow spread syntax to TypeScript intersection types
