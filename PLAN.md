@@ -38,9 +38,11 @@ _treeView: TreeView<MarkerDisplayData> | null;  // TypeScript
 Selector<(Action | Action[]) => string>         // Flow (FAILS)
 Selector<(actionList: Action | Action[]) => string>  // TypeScript
 
-// Array initialization
+// Array, Map and Set initialization
 const items = [];                         // Implicit any[]
 const items: Type[] = [];                 // Explicit type
+const set = new Set<Type>();              // Explicit type
+const map = new Map<K, V>();              // Explicit type
 
 // CSS custom properties
 style={{ '--height': '100px' }}          // Fails strict typing
@@ -65,6 +67,7 @@ $Diff<Props, DispatchProps> → Omit<Props, keyof DispatchProps>
 mixed → unknown
 ?Type → Type | null
 +prop → readonly prop
+typeof Type as AliasName → type AliasName = typeof Type
 ```
 
 ## Migration Phases
@@ -193,37 +196,7 @@ const retrieveProfileForRawUrl: WrapFunctionInDispatch<RetrieveProfileAction> =
 
 **Key Pattern**: Use separate type alias to avoid circular reference issues with `typeof`.
 
-### Complex Flow Syntax Solutions
-
-**TreeView Generic Types**:
-```typescript
-// WRONG - Flow syntax that fails
-_treeView: TreeView | null<MarkerDisplayData>;
-
-// CORRECT - TypeScript syntax  
-_treeView: TreeView<MarkerDisplayData> | null;
-```
-
-**React Event Types**:
-```typescript
-// WRONG - Flow synthetic events
-onDragEnter = (event: SyntheticDragEvent<HTMLDivElement>) => {}
-
-// CORRECT - React event types
-onDragEnter = (event: React.DragEvent<HTMLDivElement>) => {}
-```
-
-**Flow Utility Types**:
-```typescript
-// Flow → TypeScript mappings
-$PropertyType<Props, 'onPop'> → Props['onPop']
-$Diff<Props, DispatchProps> → Omit<Props, keyof DispatchProps>
-typeof Type as AliasName → type AliasName = typeof Type
-```
-
 ### Conversion Script Improvements Needed
-
-**High-Priority Remaining Tasks**:
 
 1. **Flow Utility Type Detection**:
    ```bash
@@ -233,46 +206,11 @@ typeof Type as AliasName → type AliasName = typeof Type
    $Exact<T> → T (usually safe to remove)
    ```
 
-2. **Complex Generic Syntax**:
-   ```bash
-   # Patterns needing automation:
-   TreeView | null<T> → TreeView<T> | null
-   Set | Map<K, V> → Set<T> | Map<K, V>
-   ```
-
-3. **React Event Type Mapping**:
-   ```bash
-   # Patterns needing automation:
-   SyntheticDragEvent<T> → React.DragEvent<T>
-   SyntheticInputEvent<T> → React.ChangeEvent<T>
-   SyntheticFocusEvent<T> → React.FocusEvent<T>
-   ```
-
-4. **Type Import Handling**:
-   ```bash
-   # Pattern needing automation:
-   typeof func as FuncType → type FuncType = typeof func
-   ```
-
-5. **Set/Map Constructor Detection**:
-   ```bash
-   # Patterns needing context-aware inference:
-   new Set() → new Set<T>()
-   new Map() → new Map<K, V>()
-   ```
-
-**Medium-Priority Tasks**:
-
-6. **Component Method Parameter Typing**:
+2. **Component Method Parameter Typing**:
    ```bash
    # Pattern needing automation:
    componentDidUpdate(prevProps) → componentDidUpdate(prevProps: Props)
    ```
-
-**✅ Completed Script Improvements**:
-- Flow object type spreads: `{...ConnectedProps<A, B, C>}` → `ConnectedProps<A, B, C>`
-- Generic type support in spread conversions
-- Empty intersection cleanup: `& {}` removal
 
 ### Session Statistics
 - **Files converted**: 6 files (1,557 lines)
