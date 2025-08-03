@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import React from 'react';
 import SplitterLayout from 'react-splitter-layout';
 import classNames from 'classnames';
@@ -32,8 +30,8 @@ import {
 import { getPreviewSelection } from 'firefox-profiler/selectors/profile';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import type {
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import {
   LineTimings,
   AddressTimings,
   SourceCodeStatus,
@@ -42,29 +40,29 @@ import type {
   SourceCodeLoadingError,
   ApiQueryError,
 } from 'firefox-profiler/types';
-import type { CodeErrorOverlayProps } from './CodeErrorOverlay';
+import { CodeErrorOverlayProps } from './CodeErrorOverlay';
 
 import { Localized } from '@fluent/react';
 
 import './BottomBox.css';
 
 type StateProps = {
-  +sourceViewFile: string | null,
-  +sourceViewCode: SourceCodeStatus | void,
-  +sourceViewScrollGeneration: number,
-  +globalLineTimings: LineTimings,
-  +selectedCallNodeLineTimings: LineTimings,
-  +assemblyViewIsOpen: boolean,
-  +assemblyViewNativeSymbol: NativeSymbolInfo | null,
-  +assemblyViewCode: AssemblyCodeStatus | void,
-  +assemblyViewScrollGeneration: number,
-  +globalAddressTimings: AddressTimings,
-  +selectedCallNodeAddressTimings: AddressTimings,
-  +disableOverscan: boolean,
+  readonly sourceViewFile: string | null;
+  readonly sourceViewCode: SourceCodeStatus | void;
+  readonly sourceViewScrollGeneration: number;
+  readonly globalLineTimings: LineTimings;
+  readonly selectedCallNodeLineTimings: LineTimings;
+  readonly assemblyViewIsOpen: boolean;
+  readonly assemblyViewNativeSymbol: NativeSymbolInfo | null;
+  readonly assemblyViewCode: AssemblyCodeStatus | void;
+  readonly assemblyViewScrollGeneration: number;
+  readonly globalAddressTimings: AddressTimings;
+  readonly selectedCallNodeAddressTimings: AddressTimings;
+  readonly disableOverscan: boolean;
 };
 
 type DispatchProps = {
-  +closeBottomBox: typeof closeBottomBox,
+  readonly closeBottomBox: typeof closeBottomBox;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -151,7 +149,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     this.props.closeBottomBox();
   };
 
-  render() {
+  override render() {
     const {
       sourceViewFile,
       sourceViewCode,

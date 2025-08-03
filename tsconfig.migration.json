@@ -4,10 +4,8 @@
     "allowJs": false
   },
   "exclude": [
-    "src/components/shared/InnerNavigationLink.tsx",
     "src/components/app/Root.tsx",
     "src/components/app/UploadedRecordingsHome.tsx",
-    "src/components/shared/TransformNavigator.tsx",
     "src/utils/window-console.ts"
   ]
 }
