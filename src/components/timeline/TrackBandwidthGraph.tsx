@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import { InView } from 'react-intersection-observer';
 import { Localized } from '@fluent/react';
@@ -37,7 +35,7 @@ import { TRACK_BANDWIDTH_DEFAULT_COLOR } from 'firefox-profiler/app-logic/consta
 import { getSampleIndexRangeForSelection } from 'firefox-profiler/profile-logic/profile-data';
 import { co2 } from '@tgwf/co2';
 
-import type {
+import {
   CounterIndex,
   Counter,
   Thread,
@@ -50,8 +48,8 @@ import type {
   IndexIntoSamplesTable,
 } from 'firefox-profiler/types';
 
-import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackBandwidth.css';
 
@@ -59,16 +57,16 @@ import './TrackBandwidth.css';
  * When adding properties to these props, please consider the comment above the component.
  */
 type CanvasProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +counter: Counter,
-  +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
-  +accumulatedSamples: AccumulatedCounterSamples,
-  +maxCounterSampleCountPerMs: number,
-  +interval: Milliseconds,
-  +width: CssPixels,
-  +height: CssPixels,
-  +lineWidth: CssPixels,
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly counter: Counter;
+  readonly counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable];
+  readonly accumulatedSamples: AccumulatedCounterSamples;
+  readonly maxCounterSampleCountPerMs: number;
+  readonly interval: Milliseconds;
+  readonly width: CssPixels;
+  readonly height: CssPixels;
+  readonly lineWidth: CssPixels;
 };
 
 /**
@@ -79,7 +77,7 @@ type CanvasProps = {
 class TrackBandwidthCanvas extends React.PureComponent<CanvasProps> {
   _canvas: null | HTMLCanvasElement = null;
   _requestedAnimationFrame: boolean = false;
-  _canvasState: { renderScheduled: boolean, inView: boolean } = {
+  _canvasState: { renderScheduled: boolean; inView: boolean } = {
     renderScheduled: false,
     inView: false,
   };
@@ -101,7 +99,7 @@ class TrackBandwidthCanvas extends React.PureComponent<CanvasProps> {
       return;
     }
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d')!;
     const devicePixelRatio = window.devicePixelRatio;
     const deviceWidth = width * devicePixelRatio;
     const deviceHeight = height * devicePixelRatio;
@@ -150,9 +148,9 @@ class TrackBandwidthCanvas extends React.PureComponent<CanvasProps> {
       );
       ctx.beginPath();
 
-      const getX = (i) =>
+      const getX = (i: number) =>
         Math.round((samples.time[i] - rangeStart) * millisecondWidth);
-      const getY = (i) => {
+      const getY = (i: number) => {
         const rawY = samples.count[i];
         if (!rawY) {
           // Make the 0 values invisible so that 'almost 0' is noticeable.
@@ -281,15 +279,15 @@ class TrackBandwidthCanvas extends React.PureComponent<CanvasProps> {
     this._scheduleDraw();
   };
 
-  componentDidMount() {
+  override componentDidMount() {
     this._scheduleDraw();
   }
 
-  componentDidUpdate() {
+  override componentDidUpdate() {
     this._scheduleDraw();
   }
 
-  render() {
+  override render() {
     return (
       <InView onChange={this._observerCallback}>
         <canvas
@@ -302,36 +300,33 @@ class TrackBandwidthCanvas extends React.PureComponent<CanvasProps> {
 }
 
 type OwnProps = {
-  +counterIndex: CounterIndex,
-  +lineWidth: CssPixels,
-  +graphHeight: CssPixels,
+  readonly counterIndex: CounterIndex;
+  readonly lineWidth: CssPixels;
+  readonly graphHeight: CssPixels;
 };
 
 type StateProps = {
-  +threadIndex: ThreadIndex,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +counter: Counter,
-  +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
-  +accumulatedSamples: AccumulatedCounterSamples,
-  +maxCounterSampleCountPerMs: number,
-  +interval: Milliseconds,
-  +filteredThread: Thread,
-  +unfilteredSamplesRange: StartEndRange | null,
-  +previewSelection: PreviewSelection,
+  readonly threadIndex: ThreadIndex;
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly counter: Counter;
+  readonly counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable];
+  readonly accumulatedSamples: AccumulatedCounterSamples;
+  readonly maxCounterSampleCountPerMs: number;
+  readonly interval: Milliseconds;
+  readonly filteredThread: Thread;
+  readonly unfilteredSamplesRange: StartEndRange | null;
+  readonly previewSelection: PreviewSelection;
 };
 
 type DispatchProps = {};
 
-type Props = {
-  ...SizeProps,
-  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
-};
+type Props = SizeProps & ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 type State = {
-  hoveredCounter: null | number,
-  mouseX: CssPixels,
-  mouseY: CssPixels,
+  hoveredCounter: null | number;
+  mouseX: CssPixels;
+  mouseY: CssPixels;
 };
 
 /**
@@ -339,7 +334,7 @@ type State = {
  * graph in the timeline.
  */
 class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
-  state = {
+  override state = {
     hoveredCounter: null,
     mouseX: 0,
     mouseY: 0,
@@ -348,14 +343,14 @@ class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
   _onMouseLeave = () => {
     // This persistTooltips property is part of the web console API. It helps
     // in being able to inspect and debug tooltips.
-    if (window.persistTooltips) {
+    if ((window as any).persistTooltips) {
       return;
     }
 
     this.setState({ hoveredCounter: null });
   };
 
-  _onMouseMove = (event: SyntheticMouseEvent<HTMLDivElement>) => {
+  _onMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     const { pageX: mouseX, pageY: mouseY } = event;
     // Get the offset from here, and apply it to the time lookup.
     const { left } = event.currentTarget.getBoundingClientRect();
@@ -407,7 +402,7 @@ class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
         // If there are samples before or after hoveredCounter that fall
         // horizontally on the same pixel, move hoveredCounter to the sample
         // with the highest power value.
-        const mouseAtTime = (t) =>
+        const mouseAtTime = (t: number) =>
           Math.round(((t - rangeStart) / rangeLength) * width + left);
         for (
           let currentIndex = hoveredCounter - 1;
@@ -448,20 +443,22 @@ class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
     }
   };
 
-  _co2 = null;
+  _co2: InstanceType<typeof co2> | null = null;
   _formatDataTransferValue(bytes: number, l10nId: string) {
     if (!this._co2) {
-      this._co2 = new co2();
+      this._co2 = new co2({ model: 'swd' });
     }
     // By default when estimating emissions per byte, co2.js takes into account
     // emissions for the user device, the data center and the network.
     // Because we already have power tracks showing the power use and estimated
     // emissions of the device, set the 'device' grid intensity to 0 to avoid
     // double counting.
-    const co2eq = this._co2.perByteTrace(bytes, false, {
+    const co2eq = this._co2!.perByteTrace(bytes, false, {
       gridIntensity: { device: 0 },
     });
-    const carbonValue = formatNumber(co2eq.co2);
+    const carbonValue = formatNumber(
+      typeof co2eq.co2 === 'number' ? co2eq.co2 : co2eq.co2.total
+    );
     const value = formatBytes(bytes);
     return (
       <Localized
@@ -474,7 +471,7 @@ class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
     );
   }
 
-  _renderTooltip(counterIndex: number): React.Node {
+  _renderTooltip(counterIndex: number): React.ReactNode {
     const {
       accumulatedSamples,
       counter,
@@ -544,7 +541,7 @@ class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
             {operations !== null ? (
               <Localized
                 id="TrackBandwidthGraph--read-write-operations-since-the-previous-sample"
-                vars={{ value: ops }}
+                vars={{ value: ops || '' }}
                 attrs={{ label: true }}
               >
                 <TooltipDetail label="">{ops}</TooltipDetail>
@@ -575,7 +572,7 @@ class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
    * Create a div that is a dot on top of the graph representing the current
    * height of the graph.
    */
-  _renderBandwidthDot(counterIndex: number): React.Node {
+  _renderBandwidthDot(counterIndex: number): React.ReactNode {
     const {
       counter,
       rangeStart,
@@ -630,7 +627,7 @@ class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
     );
   }
 
-  render() {
+  override render() {
     const { hoveredCounter } = this.state;
     const {
       filteredThread,
@@ -686,7 +683,7 @@ class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
 export const TrackBandwidthGraph = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state, ownProps) => {
     const { counterIndex } = ownProps;
