@@ -401,15 +401,16 @@ The `flow-to-typescript-unified.sh` script handles most conversions automaticall
 
 ### Phase 3: 🚀 IN PROGRESS - Systematic File Migration
 
-- **Status**: 83 JavaScript files remaining (down from 86)
-- **TypeScript files**: 212 (up from 209)
+- **Status**: 82 JavaScript files remaining (down from 83)
+- **TypeScript files**: 213 (up from 212)
 - **Strategy**: Dependency-first migration focusing on zero-dependency files first
 - **Recent major conversions (August 2-3, 2025)**:
   - **Core selectors**: src/selectors/per-thread/ (thread.tsx, markers.ts, stack-sample.ts)
   - **Profile logic**: src/profile-logic/merge-compare.ts (1,447 lines)
   - **CLI tools**: src/symbolicator-cli/index.ts
   - **EmptyReasons components**: StackChart, CallTree, FlameGraph (183 lines)
-  - **Total converted**: 8 files, 3,622 lines of code
+  - **Timeline components**: TrackBandwidthGraph.tsx (716 lines)
+  - **Total converted**: 9 files, 4,338 lines of code
 
 ### Phase 4: ✅ LARGELY COMPLETED - Strict TypeScript compliance
 
@@ -481,4 +482,7 @@ The `flow-to-typescript-unified.sh` script handles most conversions automaticall
 - **TypeScript compilation must pass** before removing original files
 - **Type assertion (`as any`)** is acceptable for dynamic property access during migration
 - **Parameter type annotations** often needed for complex selector functions
+- **Canvas context null assertions** - use `canvas.getContext('2d')!` for TypeScript strict mode
+- **CO2 library integration** - requires careful type handling for union return types
+- **External library types** - use `InstanceType<typeof Library>` for proper constructor types
 - **Mixed codebase stability** - Flow and TypeScript coexist reliably
