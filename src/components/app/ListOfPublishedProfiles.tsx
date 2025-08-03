@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { Localized } from '@fluent/react';
@@ -18,7 +16,7 @@ import {
 } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import { formatSeconds } from 'firefox-profiler/utils/format-numbers';
 
-import type { StartEndRange } from 'firefox-profiler/types/units';
+import { StartEndRange } from 'firefox-profiler/types/units';
 
 import './ListOfPublishedProfiles.css';
 
@@ -35,13 +33,13 @@ function _formatRange(range: StartEndRange): string {
 }
 
 type PublishedProfileProps = {
-  +onProfileDelete: () => void,
-  +uploadedProfileInformation: UploadedProfileInformation,
-  +withActionButtons: boolean,
+  readonly onProfileDelete: () => void;
+  readonly uploadedProfileInformation: UploadedProfileInformation;
+  readonly withActionButtons: boolean;
 };
 
 type PublishedProfileState = {
-  +confirmDialogIsOpen: boolean,
+  readonly confirmDialogIsOpen: boolean;
 };
 
 /**
@@ -49,9 +47,9 @@ type PublishedProfileState = {
  */
 class PublishedProfile extends React.PureComponent<
   PublishedProfileProps,
-  PublishedProfileState,
+  PublishedProfileState
 > {
-  state = {
+  override state = {
     confirmDialogIsOpen: false,
   };
 
@@ -67,7 +65,7 @@ class PublishedProfile extends React.PureComponent<
     this.props.onProfileDelete();
   };
 
-  render() {
+  override render() {
     const { uploadedProfileInformation, withActionButtons } = this.props;
     const { confirmDialogIsOpen } = this.state;
 
@@ -153,18 +151,18 @@ class PublishedProfile extends React.PureComponent<
 }
 
 type Props = {
-  withActionButtons: boolean,
-  limit?: number,
+  withActionButtons: boolean;
+  limit?: number;
 };
 
 type State = {
-  uploadedProfileInformationList: null | UploadedProfileInformation[],
+  uploadedProfileInformationList: null | UploadedProfileInformation[];
 };
 
 export class ListOfPublishedProfiles extends PureComponent<Props, State> {
   _isMounted = false;
 
-  state = {
+  override state = {
     uploadedProfileInformationList: null,
   };
 
@@ -181,13 +179,13 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
     }
   };
 
-  async componentDidMount() {
+  override async componentDidMount() {
     this._isMounted = true;
     this._refreshList();
     window.addEventListener('focus', this._refreshList);
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     this._isMounted = false;
     window.removeEventListener('focus', this._refreshList);
   }
@@ -196,7 +194,7 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
     this._refreshList();
   };
 
-  render() {
+  override render() {
     const { limit, withActionButtons } = this.props;
     const { uploadedProfileInformationList } = this.state;
 
@@ -204,7 +202,11 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
       return null;
     }
 
-    if (!uploadedProfileInformationList.length) {
+    // TypeScript type narrowing help
+    const profileList: UploadedProfileInformation[] =
+      uploadedProfileInformationList;
+
+    if (!profileList.length) {
       return (
         <p className="photon-body-30">
           <Localized id="ListOfPublishedProfiles--uploaded-profile-information-list-empty">
@@ -215,12 +217,11 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
     }
 
     const reducedUploadedProfileInformationList = limit
-      ? uploadedProfileInformationList.slice(0, limit)
-      : uploadedProfileInformationList;
+      ? profileList.slice(0, limit)
+      : profileList;
 
     const profilesRestCount =
-      uploadedProfileInformationList.length -
-      reducedUploadedProfileInformationList.length;
+      profileList.length - reducedUploadedProfileInformationList.length;
 
     let profileRestLabel;
     if (profilesRestCount > 0) {
@@ -237,7 +238,7 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
         <Localized
           id="ListOfPublishedProfiles--uploaded-profile-information-list"
           vars={{
-            uploadedProfileCount: uploadedProfileInformationList.length,
+            uploadedProfileCount: profileList.length,
           }}
         >
           <>Manage this recording</>
@@ -249,7 +250,7 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
       <>
         <ul className="publishedProfilesList">
           {reducedUploadedProfileInformationList.map(
-            (uploadedProfileInformation) => (
+            (uploadedProfileInformation: UploadedProfileInformation) => (
               <PublishedProfile
                 onProfileDelete={this.onProfileDelete}
                 key={uploadedProfileInformation.profileToken}
