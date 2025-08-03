@@ -223,11 +223,11 @@ typeof Type as AliasName → type AliasName = typeof Type
 
 ### Conversion Script Improvements Needed
 
-**High-Priority Enhancements**:
+**High-Priority Remaining Tasks**:
 
 1. **Flow Utility Type Detection**:
    ```bash
-   # Should auto-convert these patterns:
+   # Patterns needing automation:
    $PropertyType<T, 'prop'> → T['prop']
    $Diff<A, B> → Omit<A, keyof B>
    $Exact<T> → T (usually safe to remove)
@@ -235,14 +235,14 @@ typeof Type as AliasName → type AliasName = typeof Type
 
 2. **Complex Generic Syntax**:
    ```bash
-   # Should detect and fix:
+   # Patterns needing automation:
    TreeView | null<T> → TreeView<T> | null
    Set | Map<K, V> → Set<T> | Map<K, V>
    ```
 
 3. **React Event Type Mapping**:
    ```bash
-   # Auto-convert synthetic events:
+   # Patterns needing automation:
    SyntheticDragEvent<T> → React.DragEvent<T>
    SyntheticInputEvent<T> → React.ChangeEvent<T>
    SyntheticFocusEvent<T> → React.FocusEvent<T>
@@ -250,30 +250,29 @@ typeof Type as AliasName → type AliasName = typeof Type
 
 4. **Type Import Handling**:
    ```bash
-   # Should detect typeof imports and restructure:
+   # Pattern needing automation:
    typeof func as FuncType → type FuncType = typeof func
    ```
 
 5. **Set/Map Constructor Detection**:
    ```bash
-   # Should add type parameters:
-   new Set() → new Set<T>() (with context-aware T inference)
-   new Map() → new Map<K, V>() (with context-aware inference)
+   # Patterns needing context-aware inference:
+   new Set() → new Set<T>()
+   new Map() → new Map<K, V>()
    ```
 
-**Medium-Priority Enhancements**:
+**Medium-Priority Tasks**:
 
-6. **Memoize Function Signatures**:
+6. **Component Method Parameter Typing**:
    ```bash
-   # Should handle spread operators better:
-   (...args) => new Class(...args) → (arg1: T1, arg2: T2) => new Class(arg1, arg2)
-   ```
-
-7. **Component Method Typing**:
-   ```bash
-   # Should add proper method parameter types:
+   # Pattern needing automation:
    componentDidUpdate(prevProps) → componentDidUpdate(prevProps: Props)
    ```
+
+**✅ Completed Script Improvements**:
+- Flow object type spreads: `{...ConnectedProps<A, B, C>}` → `ConnectedProps<A, B, C>`
+- Generic type support in spread conversions
+- Empty intersection cleanup: `& {}` removal
 
 ### Session Statistics
 - **Files converted**: 6 files (1,557 lines)
