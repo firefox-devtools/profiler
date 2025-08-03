@@ -24,7 +24,8 @@ while ($changed && $iterations < 100) {  # Safety limit
     $changed = 0;
     $iterations++;
     
-    if ($content =~ s/\{\s*\.\.\.([A-Z][A-Za-z0-9_]*)\s*,/\1 & {/g) {
+    # Handle both simple types and generic types with angle brackets
+    if ($content =~ s/\{\s*\.\.\.([A-Z][A-Za-z0-9_]*(?:<[^>]*>)?)\s*,/$1 & {/g) {
         $changed = 1;
         print "Applied spread-at-start conversion (iteration $iterations)\n";
     }
@@ -38,7 +39,8 @@ while ($changed && $iterations < 100) {  # Safety limit
     $changed = 0;
     $iterations++;
     
-    if ($content =~ s/,\s*\.\.\.([A-Z][A-Za-z0-9_]*)\s*,/} & \1 & {/g) {
+    # Handle both simple types and generic types with angle brackets
+    if ($content =~ s/,\s*\.\.\.([A-Z][A-Za-z0-9_]*(?:<[^>]*>)?)\s*,/} & $1 & {/g) {
         $changed = 1;
         print "Applied spread-in-middle conversion (iteration $iterations)\n";
     }
@@ -52,15 +54,22 @@ while ($changed && $iterations < 100) {  # Safety limit
     $changed = 0;
     $iterations++;
     
-    if ($content =~ s/,\s*\.\.\.([A-Z][A-Za-z0-9_]*)\s*\}/} & \1/g) {
+    # Handle both simple types and generic types with angle brackets
+    if ($content =~ s/,\s*\.\.\.([A-Z][A-Za-z0-9_]*(?:<[^>]*>)?)\s*\}/} & $1/g) {
         $changed = 1;
         print "Applied spread-at-end conversion (iteration $iterations)\n";
     }
 }
 
 # Step 4: Convert remaining single spreads: { ...TypeA } -> TypeA
-if ($content =~ s/\{\s*\.\.\.([A-Z][A-Za-z0-9_]*)\s*\}/\1/g) {
+# Handle both simple types and generic types with angle brackets
+if ($content =~ s/\{\s*\.\.\.([A-Z][A-Za-z0-9_]*(?:<[^>]*>)?)\s*\}/$1/g) {
     print "Applied single spread conversion\n";
+}
+
+# Step 5: Clean up empty intersections: & { } -> (remove)
+if ($content =~ s/\s*&\s*\{\s*\}//g) {
+    print "Applied empty intersection cleanup\n";
 }
 
 # Write the file back
