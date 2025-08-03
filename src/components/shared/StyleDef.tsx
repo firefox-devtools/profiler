@@ -10,7 +10,7 @@
 // needed with some simple logic than having a complex code to detect
 // duplication.
 
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 
 type StyleDefProps = {
   readonly content: string;

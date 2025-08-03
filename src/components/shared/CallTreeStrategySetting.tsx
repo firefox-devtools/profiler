@@ -6,7 +6,7 @@
 // and various allocation call trees. It is only shown when the profile includes
 // allocation data.
 
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 
 import { changeCallTreeSummaryStrategy } from 'firefox-profiler/actions/profile-view';

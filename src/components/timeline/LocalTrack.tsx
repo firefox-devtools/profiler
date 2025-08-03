@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 import classNames from 'classnames';
 import {
@@ -37,7 +37,6 @@ import {
   Pid,
   TrackIndex,
   LocalTrack,
-  MixedObject,
 } from 'firefox-profiler/types';
 
 import { ConnectedProps } from 'firefox-profiler/utils/connect';

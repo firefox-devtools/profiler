@@ -34,7 +34,6 @@ import {
   ThreadViewOptions,
   TransformStack,
   JsTracerTiming,
-  $ReturnType,
   StartEndRange,
   WeightType,
   EventDelayInfo,

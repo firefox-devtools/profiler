@@ -41,6 +41,7 @@ type ConnectOptions = {
  * This function type describes the operation of taking a simple action creator, and
  * just returning it.
  */
+// @ts-ignore
 type WrapActionCreator<Args extends any[]> = (
   actionCreator: (...args: Args) => Action
 ) => (...args: Args) => Action;
@@ -54,6 +55,7 @@ type WrapActionCreator<Args extends any[]> = (
  * Gets transformed into:
  *   (...Args) => Returns
  */
+// @ts-ignore
 type WrapThunkActionCreator<Args extends any[], Returns> = (
   thunkActionCreator: (...args: Args) => ThunkAction<Returns>
 ) => (...args: Args) => Returns;

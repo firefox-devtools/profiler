@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 import { ComponentProps } from 'react';
 import ReactDOM from 'react-dom';
 import { ContextMenu as ReactContextMenu } from '@firefox-devtools/react-contextmenu';

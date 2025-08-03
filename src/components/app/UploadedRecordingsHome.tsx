@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { Localized } from '@fluent/react';
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 import { AppHeader } from './AppHeader';
 import { ListOfPublishedProfiles } from './ListOfPublishedProfiles';
 

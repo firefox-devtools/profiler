@@ -20,15 +20,6 @@ import {
   SymbolTableAsTuple,
 } from 'firefox-profiler/types';
 
-// Temporary type definition until Window types are converted
-type GeckoProfiler = {
-  getProfile: () => MixedObject;
-  getSymbolTable: (
-    debugName: string,
-    breakpadId: string
-  ) => Promise<SymbolTableAsTuple>;
-};
-
 /**
  * This file manages the communication between the profiler and the browser.
  */

@@ -18,7 +18,6 @@ import { resourceTypes } from './data-structures';
 import { StringTable } from '../utils/string-table';
 import { timeCode } from '../utils/time-code';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
-import { coerce } from '../utils/flow';
 import { Profile } from 'firefox-profiler/types';
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion

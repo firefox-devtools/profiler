@@ -11,7 +11,6 @@ import {
   stateFromLocation,
   urlFromState,
 } from 'firefox-profiler/app-logic/url-handling';
-import { ensureExists } from 'firefox-profiler/utils/flow';
 
 import { StartEndRange } from 'firefox-profiler/types';
 

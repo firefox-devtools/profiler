@@ -63,8 +63,6 @@ import {
   MarkerPayload,
   MarkerIndex,
   Milliseconds,
-  CategoryColor,
-  ThreadIndex,
   Tid,
 } from 'firefox-profiler/types';
 

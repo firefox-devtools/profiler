@@ -11,14 +11,15 @@
     "allowJs": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "verbatimModuleSyntax": false, // Allow flexibility during migration
+    "verbatimModuleSyntax": false,
 
     // Type Checking (Gradual strictness)
     "strict": false, // Keep false during migration
+    "noFallthroughCasesInSwitch": false, // Already checked by eslint, with opt-out
+    "noUnusedLocals": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
-    "noImplicitReturns": true, // Helps catch Flow-style issues
-    "noFallthroughCasesInSwitch": false, // Disabled during Flow migration
+    "noImplicitReturns": true,
     "forceConsistentCasingInFileNames": true,
 
     // Additional Helpful Options for Migration
@@ -28,7 +29,7 @@
 
     // Build & Performance
     "skipLibCheck": true,
-    "isolatedModules": true,
+    "isolatedModules": true, // May want to change this once we start using const enum
     "listFiles": false,
     "noEmit": true,
     "incremental": true,

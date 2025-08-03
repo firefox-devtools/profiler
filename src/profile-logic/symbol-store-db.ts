@@ -253,7 +253,7 @@ export default class SymbolStoreDB {
     beforeDate: Date,
     callback: () => void
   ): void {
-    const lastUsedDateIndex = store.index('lastUsedDate');
+    const lastUsedDateIndex = store.index<SymbolDateKey>('lastUsedDate');
     // Get a cursor that walks all records whose lastUsedDate is less than beforeDate.
     const range = window.IDBKeyRange.upperBound(beforeDate, true);
     const cursorReq = lastUsedDateIndex.openCursor(range);
