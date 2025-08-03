@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import * as React from 'react';
 import { MenuItem } from '@firefox-devtools/react-contextmenu';
 import { Localized } from '@fluent/react';
@@ -49,7 +47,7 @@ import {
 } from 'firefox-profiler/selectors/profile';
 import { getBrowserConnectionStatus } from 'firefox-profiler/selectors/app';
 
-import type {
+import {
   TransformType,
   ImplementationFilter,
   IndexIntoCallNodeTable,
@@ -61,32 +59,32 @@ import type {
   Page,
 } from 'firefox-profiler/types';
 
-import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
-import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
+import { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
+import { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
 
 type StateProps = {
-  +thread: Thread | null,
-  +threadsKey: ThreadsKey | null,
-  +categories: CategoryList,
-  +callNodeInfo: CallNodeInfo | null,
-  +rightClickedCallNodePath: CallNodePath | null,
-  +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +implementation: ImplementationFilter,
-  +inverted: boolean,
-  +selectedTab: TabSlug,
-  +displaySearchfox: boolean,
-  +browserConnectionStatus: BrowserConnectionStatus,
-  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
+  readonly thread: Thread | null;
+  readonly threadsKey: ThreadsKey | null;
+  readonly categories: CategoryList;
+  readonly callNodeInfo: CallNodeInfo | null;
+  readonly rightClickedCallNodePath: CallNodePath | null;
+  readonly rightClickedCallNodeIndex: IndexIntoCallNodeTable | null;
+  readonly implementation: ImplementationFilter;
+  readonly inverted: boolean;
+  readonly selectedTab: TabSlug;
+  readonly displaySearchfox: boolean;
+  readonly browserConnectionStatus: BrowserConnectionStatus;
+  readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null;
 };
 
 type DispatchProps = {
-  +addTransformToStack: typeof addTransformToStack,
-  +addCollapseResourceTransformToStack: typeof addCollapseResourceTransformToStack,
-  +expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants,
-  +updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen,
-  +setContextMenuVisibility: typeof setContextMenuVisibility,
+  readonly addTransformToStack: typeof addTransformToStack;
+  readonly addCollapseResourceTransformToStack: typeof addCollapseResourceTransformToStack;
+  readonly expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants;
+  readonly updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen;
+  readonly setContextMenuVisibility: typeof setContextMenuVisibility;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -94,7 +92,7 @@ type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 import './CallNodeContextMenu.css';
 
 class CallNodeContextMenuImpl extends React.PureComponent<Props> {
-  _hidingTimeout: TimeoutID | null = null;
+  _hidingTimeout: NodeJS.Timeout | null = null;
 
   // Using setTimeout here is a bit complex, but is necessary to make the menu
   // work fine when we want to display it somewhere when it's already open
@@ -121,7 +119,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   //    To avoid this problem we use this `setTimeout` call to delay the reset
   //    just a bit, just in case we get a `_onShow` call right after that.
   _onShow = () => {
-    clearTimeout(this._hidingTimeout);
+    if (this._hidingTimeout) clearTimeout(this._hidingTimeout);
     this.props.setContextMenuVisibility(true);
   };
 
@@ -280,7 +278,10 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     copy(stack);
   }
 
-  _handleClick = (event: SyntheticEvent<>, data: { type: string }): void => {
+  _handleClick = (
+    event: React.ChangeEvent<HTMLElement>,
+    data: { type: string }
+  ): void => {
     const { type } = data;
 
     const transformType = convertToTransformType(type);
@@ -522,11 +523,11 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   }
 
   getRightClickedCallNodeInfo(): null | {
-    +thread: Thread,
-    +threadsKey: ThreadsKey,
-    +callNodeInfo: CallNodeInfo,
-    +callNodePath: CallNodePath,
-    +callNodeIndex: IndexIntoCallNodeTable,
+    readonly thread: Thread;
+    readonly threadsKey: ThreadsKey;
+    readonly callNodeInfo: CallNodeInfo;
+    readonly callNodePath: CallNodePath;
+    readonly callNodeIndex: IndexIntoCallNodeTable;
   } {
     const {
       thread,
@@ -803,14 +804,17 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   }
 
   renderTransformMenuItem(props: {
-    +l10nId: string,
-    +l10nProps?: mixed,
-    +content: React.Node,
-    +onClick: (event: SyntheticEvent<>, data: { type: string }) => void,
-    +transform: string,
-    +shortcut: string,
-    +icon: string,
-    +title: string,
+    readonly l10nId: string;
+    readonly l10nProps?: unknown;
+    readonly content: React.ReactNode;
+    readonly onClick: (
+      event: React.ChangeEvent<HTMLElement>,
+      data: { type: string }
+    ) => void;
+    readonly transform: string;
+    readonly shortcut: string;
+    readonly icon: string;
+    readonly title: string;
   }) {
     return (
       <MenuItem onClick={props.onClick} data={{ type: props.transform }}>
@@ -820,7 +824,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         <Localized
           id={props.l10nId}
           attrs={{ title: true }}
-          {...props.l10nProps}
+          {...(props.l10nProps as any)}
         >
           <DivWithTitle
             className="react-contextmenu-item-content"
@@ -835,16 +839,19 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   }
 
   renderMenuItemWithShortcut(props: {
-    +l10nId: string,
-    +l10nProps?: mixed,
-    +content: React.Node,
-    +onClick: (event: SyntheticEvent<>, data: { type: string }) => void,
-    +shortcut: string,
-    +data: { type: string },
+    readonly l10nId: string;
+    readonly l10nProps?: unknown;
+    readonly content: React.ReactNode;
+    readonly onClick: (
+      event: React.ChangeEvent<HTMLElement>,
+      data: { type: string }
+    ) => void;
+    readonly shortcut: string;
+    readonly data: { type: string };
   }) {
     return (
       <MenuItem onClick={props.onClick} data={{ type: props.data.type }}>
-        <Localized id={props.l10nId} {...props.l10nProps}>
+        <Localized id={props.l10nId} {...(props.l10nProps as any)}>
           <div className="react-contextmenu-item-content">{props.content}</div>
         </Localized>
         <kbd className="callNodeContextMenuShortcut">{props.shortcut}</kbd>
@@ -852,7 +859,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     );
   }
 
-  render() {
+  override render() {
     const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
@@ -875,7 +882,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 export const CallNodeContextMenu = explicitConnect<
   {},
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state) => {
     const rightClickedCallNodeInfo = getRightClickedCallNodeInfo(state);
@@ -924,9 +931,9 @@ export const CallNodeContextMenu = explicitConnect<
 });
 
 function DivWithTitle(props: {
-  +className?: string,
-  +children: React.Node,
-  +title: string,
+  readonly className?: string;
+  readonly children: React.ReactNode;
+  readonly title: string;
 }) {
   return (
     <div className={props.className} title={oneLine`${props.title}`}>

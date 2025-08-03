@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import { oneLine } from 'common-tags';
 import * as React from 'react';
 import memoize from 'memoize-immutable';
@@ -27,8 +25,8 @@ import {
   changeRightClickedMarker,
   changeHoveredMarker,
 } from '../../actions/profile-view';
-import type { SizeProps } from '../shared/WithSize';
-import type {
+import { SizeProps } from '../shared/WithSize';
+import {
   NetworkPayload,
   Marker,
   MarkerIndex,
@@ -37,7 +35,7 @@ import type {
   SelectionContext,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import { ConnectedProps } from '../../utils/connect';
 
 import './index.css';
 
@@ -45,24 +43,24 @@ const ROW_HEIGHT = 16;
 
 // The SizeProps are injected by the WithSize higher order component.
 type DispatchProps = {
-  +changeSelectedNetworkMarker: typeof changeSelectedNetworkMarker,
-  +changeRightClickedMarker: typeof changeRightClickedMarker,
-  +changeHoveredMarker: typeof changeHoveredMarker,
+  readonly changeSelectedNetworkMarker: typeof changeSelectedNetworkMarker;
+  readonly changeRightClickedMarker: typeof changeRightClickedMarker;
+  readonly changeHoveredMarker: typeof changeHoveredMarker;
 };
 
 type StateProps = {
-  +markerIndexes: MarkerIndex[],
-  +getMarker: (MarkerIndex) => Marker,
-  +selectedNetworkMarkerIndex: MarkerIndex | null,
-  +rightClickedMarkerIndex: MarkerIndex | null,
-  +hoveredMarkerIndexFromState: MarkerIndex | null,
-  +disableOverscan: boolean,
-  +timeRange: StartEndRange,
-  +threadsKey: ThreadsKey,
-  +scrollToSelectionGeneration: number,
+  readonly markerIndexes: MarkerIndex[];
+  readonly getMarker: (param: MarkerIndex) => Marker;
+  readonly selectedNetworkMarkerIndex: MarkerIndex | null;
+  readonly rightClickedMarkerIndex: MarkerIndex | null;
+  readonly hoveredMarkerIndexFromState: MarkerIndex | null;
+  readonly disableOverscan: boolean;
+  readonly timeRange: StartEndRange;
+  readonly threadsKey: ThreadsKey;
+  readonly scrollToSelectionGeneration: number;
 };
 
-type OwnProps = { ...SizeProps };
+type OwnProps = SizeProps;
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
@@ -90,12 +88,12 @@ class NetworkChartImpl extends React.PureComponent<Props> {
     { limit: 1 }
   );
 
-  componentDidMount() {
+  override componentDidMount() {
     this.focus();
     this.scrollSelectionIntoView();
   }
 
-  componentDidUpdate(prevProps) {
+  override componentDidUpdate(prevProps: Props) {
     if (
       this.props.scrollToSelectionGeneration >
       prevProps.scrollToSelectionGeneration
@@ -138,7 +136,7 @@ class NetworkChartImpl extends React.PureComponent<Props> {
     // Not implemented.
   };
 
-  _onKeyDown = (event: SyntheticKeyboardEvent<>) => {
+  _onKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
     const hasModifier = event.ctrlKey || event.altKey;
     const isNavigationKey =
       event.key.startsWith('Arrow') ||
@@ -259,7 +257,7 @@ class NetworkChartImpl extends React.PureComponent<Props> {
 
   _shouldDisplayTooltips = () => this.props.rightClickedMarkerIndex === null;
 
-  _renderRow = (markerIndex: MarkerIndex, index: number): React.Node => {
+  _renderRow = (markerIndex: MarkerIndex, index: number): React.ReactNode => {
     const {
       threadsKey,
       getMarker,
@@ -303,7 +301,7 @@ class NetworkChartImpl extends React.PureComponent<Props> {
     );
   };
 
-  render() {
+  override render() {
     const {
       selectedNetworkMarkerIndex,
       markerIndexes,
@@ -341,7 +339,7 @@ class NetworkChartImpl extends React.PureComponent<Props> {
               ariaActiveDescendant={
                 selectedNetworkMarkerIndex !== null
                   ? `networkChartRowItem-${selectedNetworkMarkerIndex}`
-                  : null
+                  : undefined
               }
               items={markerIndexes}
               renderItem={this._renderRow}

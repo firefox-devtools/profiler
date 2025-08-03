@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import * as React from 'react';
 import classNames from 'classnames';
 import memoize from 'memoize-immutable';
@@ -24,7 +22,7 @@ import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMe
 import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
 import './Markers.css';
 
-import type {
+import {
   Milliseconds,
   CssPixels,
   Marker,
@@ -32,8 +30,8 @@ import type {
   ThreadsKey,
 } from 'firefox-profiler/types';
 
-import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { getStartEndRangeForMarker } from 'firefox-profiler/utils';
 
 // Exported for tests.
@@ -41,25 +39,25 @@ export const MIN_MARKER_WIDTH = 0.3;
 
 type MarkerState = 'PRESSED' | 'HOVERED' | 'NONE';
 
-type MouseEventHandler = (SyntheticMouseEvent<HTMLCanvasElement>) => any;
+type MouseEventHandler = (event: React.MouseEvent<HTMLCanvasElement>) => any;
 
 /**
  * When adding properties to these props, please consider the comment above the component.
  */
 type CanvasProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +width: CssPixels,
-  +height: CssPixels,
-  +getMarker: (MarkerIndex) => Marker,
-  +markerIndexes: MarkerIndex[],
-  +hoveredMarker: Marker | null,
-  +mouseDownMarker: Marker | null,
-  +rightClickedMarker: Marker | null,
-  +onMouseDown: MouseEventHandler,
-  +onMouseUp: MouseEventHandler,
-  +onMouseMove: MouseEventHandler,
-  +onMouseOut: MouseEventHandler,
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly width: CssPixels;
+  readonly height: CssPixels;
+  readonly getMarker: (param: MarkerIndex) => Marker;
+  readonly markerIndexes: MarkerIndex[];
+  readonly hoveredMarker: Marker | null;
+  readonly mouseDownMarker: Marker | null;
+  readonly rightClickedMarker: Marker | null;
+  readonly onMouseDown: MouseEventHandler;
+  readonly onMouseUp: MouseEventHandler;
+  readonly onMouseMove: MouseEventHandler;
+  readonly onMouseOut: MouseEventHandler;
 };
 
 function _drawRoundedRect(
@@ -86,7 +84,7 @@ function _drawRoundedRect(
 class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
   _canvas: { current: HTMLCanvasElement | null } = React.createRef();
   _requestedAnimationFrame: boolean = false;
-  _canvasState: { renderScheduled: boolean, inView: boolean } = {
+  _canvasState: { renderScheduled: boolean; inView: boolean } = {
     renderScheduled: false,
     inView: false,
   };
@@ -119,7 +117,7 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
     }
 
     const devicePixelRatio = c.ownerDocument
-      ? c.ownerDocument.defaultView.devicePixelRatio
+      ? (c.ownerDocument.defaultView?.devicePixelRatio ?? 1)
       : 1;
     const pixelWidth = Math.round(width * devicePixelRatio);
     const pixelHeight = Math.round(height * devicePixelRatio);
@@ -237,15 +235,15 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
     this._scheduleDraw();
   };
 
-  componentDidMount() {
+  override componentDidMount() {
     this._scheduleDraw();
   }
 
-  componentDidUpdate() {
+  override componentDidUpdate() {
     this._scheduleDraw();
   }
 
-  render() {
+  override render() {
     return (
       <InView onChange={this._observerCallback}>
         <canvas
@@ -284,47 +282,44 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
  */
 
 export type OwnProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +threadsKey: ThreadsKey,
-  +onSelect: (Milliseconds, Milliseconds) => mixed,
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly threadsKey: ThreadsKey;
+  readonly onSelect: (start: Milliseconds, end: Milliseconds) => any;
 };
 
 export type StateProps = {
-  +additionalClassName?: ?string,
-  +getMarker: (MarkerIndex) => Marker,
-  +markerIndexes: MarkerIndex[],
-  +isSelected: boolean,
-  +isModifyingSelection: boolean,
-  +testId: string,
-  +rightClickedMarker: Marker | null,
+  readonly additionalClassName?: string | null;
+  readonly getMarker: (param: MarkerIndex) => Marker;
+  readonly markerIndexes: MarkerIndex[];
+  readonly isSelected: boolean;
+  readonly isModifyingSelection: boolean;
+  readonly testId: string;
+  readonly rightClickedMarker: Marker | null;
 };
 
 export type DispatchProps = {
-  +changeRightClickedMarker: typeof changeRightClickedMarker,
+  readonly changeRightClickedMarker: typeof changeRightClickedMarker;
 };
 
-type Props = {
-  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
-  ...SizeProps,
-};
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps> & SizeProps;
 
 type State = {
-  hoveredMarkerIndex: MarkerIndex | null,
-  mouseDownMarker: Marker | null,
-  mouseX: CssPixels,
-  mouseY: CssPixels,
+  hoveredMarkerIndex: MarkerIndex | null;
+  mouseDownMarker: Marker | null;
+  mouseX: CssPixels;
+  mouseY: CssPixels;
 };
 
 class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
-  state = {
+  override state = {
     hoveredMarkerIndex: null,
     mouseDownMarker: null,
     mouseX: 0,
     mouseY: 0,
   };
 
-  _hitTest(e: SyntheticMouseEvent<HTMLCanvasElement>): MarkerIndex | null {
+  _hitTest(e: React.MouseEvent<HTMLCanvasElement>): MarkerIndex | null {
     const c = e.currentTarget;
     const r = c.getBoundingClientRect();
     const { width, rangeStart, rangeEnd, getMarker, markerIndexes } =
@@ -358,7 +353,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     return null;
   }
 
-  _onMouseMove = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
+  _onMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const hoveredMarkerIndex = this._hitTest(event);
 
     if (hoveredMarkerIndex !== null) {
@@ -371,7 +366,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
       this.state.hoveredMarkerIndex !== null &&
       // This persistTooltips property is part of the web console API. It helps
       // in being able to inspect and debug tooltips.
-      !window.persistTooltips
+      !(window as any).persistTooltips
     ) {
       this.setState({
         hoveredMarkerIndex: null,
@@ -379,7 +374,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     }
   };
 
-  _onMouseDown = (e) => {
+  _onMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const markerIndex = this._hitTest(e);
     const { changeRightClickedMarker, threadsKey, getMarker } = this.props;
 
@@ -396,7 +391,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
 
       if (mouseDownMarker !== null) {
         // Disabling Flow type checking because Flow doesn't know about setCapture.
-        const canvas = (e.currentTarget: any);
+        const canvas = e.currentTarget as any;
         if (canvas.setCapture) {
           // This retargets all mouse events to this element. This is useful
           // when for example the user releases the mouse button outside of the
@@ -407,7 +402,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     }
   };
 
-  _onMouseUp = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
+  _onMouseUp = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const { mouseDownMarker } = this.state;
     if (mouseDownMarker !== null) {
       const mouseUpMarkerIndex = this._hitTest(event);
@@ -440,14 +435,14 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
   _onMouseOut = () => {
     // This persistTooltips property is part of the web console API. It helps
     // in being able to inspect and debug tooltips.
-    if (!window.persistTooltips) {
+    if (!(window as any).persistTooltips) {
       this.setState({
         hoveredMarkerIndex: null,
       });
     }
   };
 
-  render() {
+  override render() {
     const {
       additionalClassName,
       isSelected,
@@ -525,7 +520,7 @@ const _getTimelineMarkersIsSelected = memoize(
 export const TimelineMarkersJank = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state, props) => {
     const { threadsKey } = props;
@@ -552,7 +547,7 @@ export const TimelineMarkersJank = explicitConnect<
 export const TimelineMarkersOverview = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state, props) => {
     const { threadsKey } = props;
@@ -581,7 +576,7 @@ export const TimelineMarkersOverview = explicitConnect<
 export const TimelineMarkersFileIo = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state, props) => {
     const { threadsKey } = props;
@@ -607,7 +602,7 @@ export const TimelineMarkersFileIo = explicitConnect<
 export const TimelineMarkersMemory = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state, props) => {
     const { threadsKey } = props;
@@ -634,7 +629,7 @@ export const TimelineMarkersMemory = explicitConnect<
 export const TimelineMarkersIPC = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state, props) => {
     const { threadsKey } = props;
