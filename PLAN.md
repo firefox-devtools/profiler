@@ -5,15 +5,15 @@
 This document is written for and updated by Claude. It gives a fresh instance of Claude enough context
 to proceed with the next step of the migration.
 
-## Current Status (August 2, 2025)
+## Current Status (August 3, 2025)
 
 ### Progress Summary
 
 - **Type Definitions**: 13/13 files complete (100%)
 - **Core Utilities**: 41/41 files complete (100%)  
-- **Selector Files**: Major progress - per-thread selectors converted
-- **React Components**: ~42/150+ files complete (~28%)
-- **Strict Type Compliance**: LARGELY COMPLETE - 15 files excluded from strict checking
+- **Selector Files**: Major progress - per-thread selectors converted and strict-compliant
+- **React Components**: ~45/150+ files complete (~30%)
+- **Strict Type Compliance**: LARGELY COMPLETE - 14 files excluded from strict checking
 - **Core Dependencies**: All major blocking files converted
 - **Build System**: Mixed Flow/TypeScript support working
 - **Migration Tooling**: Enhanced dependency analysis available
@@ -401,22 +401,27 @@ The `flow-to-typescript-unified.sh` script handles most conversions automaticall
 
 ### Phase 3: 🚀 IN PROGRESS - Systematic File Migration
 
-- **Status**: 86 JavaScript files remaining (down from 91)
-- **TypeScript files**: 209 (up from 204)
+- **Status**: 83 JavaScript files remaining (down from 86)
+- **TypeScript files**: 212 (up from 209)
 - **Strategy**: Dependency-first migration focusing on zero-dependency files first
-- **Recent major conversions (August 2, 2025)**:
+- **Recent major conversions (August 2-3, 2025)**:
   - **Core selectors**: src/selectors/per-thread/ (thread.tsx, markers.ts, stack-sample.ts)
   - **Profile logic**: src/profile-logic/merge-compare.ts (1,447 lines)
   - **CLI tools**: src/symbolicator-cli/index.ts
-  - **Total converted**: 5 files, 3,439 lines of code
+  - **EmptyReasons components**: StackChart, CallTree, FlameGraph (183 lines)
+  - **Total converted**: 8 files, 3,622 lines of code
 
 ### Phase 4: ✅ LARGELY COMPLETED - Strict TypeScript compliance
 
-- **Status**: `yarn typecheck` passes consistently, 15 files excluded from strict checking
+- **Status**: `yarn typecheck` passes consistently, 14 files excluded from strict checking
 - **Key achievements**:
   - Successfully resolved circular dependencies between thread/markers selectors
   - Converted Flow spread syntax to TypeScript intersection types
   - Fixed complex selector parameter type mismatches
+  - **BREAKTHROUGH**: Fixed per-thread selector strict compliance (August 3, 2025)
+    - Resolved TypeScript interface type mismatches in _buildThreadSelectors
+    - Fixed dynamic property access with proper type assertions
+    - Removed from strict exclude list, unblocking downstream conversions
   - All core infrastructure files now pass strict TypeScript compilation
 - **Type declarations created**: array-range, simpleperf_report, call-tree
 
