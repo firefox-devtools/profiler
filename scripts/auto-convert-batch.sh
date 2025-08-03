@@ -44,7 +44,7 @@ for file in $CANDIDATES; do
     echo "🔄 Converting: $file"
     
     # Try conversion
-    if ./scripts/flow-to-typescript-unified.sh "$file"; then
+    if ./scripts/flow-to-typescript.sh "$file"; then
         # Get the output file name
         if [[ "$file" == *"react"* ]] || grep -q "React\|JSX" "$file" 2>/dev/null; then
             output_file="${file%.js}.tsx"

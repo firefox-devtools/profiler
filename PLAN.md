@@ -17,7 +17,7 @@ yarn test-all          # Full validation (lint, test, typecheck)
 
 ## File Conversion Process
 
-1. **Use unified conversion script**: `./scripts/flow-to-typescript-unified.sh <file.js>`
+1. **Use unified conversion script**: `./scripts/flow-to-typescript.sh <file.js>`
 2. **Fix compilation errors**: `yarn typecheck`
 3. **Test and clean up**: `yarn test && rm <file.js>`
 4. **Format and commit**: `yarn prettier-fix && git add -A && git commit`

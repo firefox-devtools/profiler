@@ -5,7 +5,7 @@
 ### Usage
 
 ```bash
-./scripts/flow-to-typescript-unified.sh <input.js> [output.ts]
+./scripts/flow-to-typescript.sh <input.js> [output.ts]
 ```
 
 **This is the recommended script** - it combines all learnings from the migration process including critical fixes for function parameter names that prevent TS1005/TS1109 compilation errors.
@@ -46,7 +46,7 @@ Even with comprehensive automation, you may still need to fix:
 ./scripts/analyze-dependencies.sh | head -10
 
 # 2. Convert individual files (recommended)
-./scripts/flow-to-typescript-unified.sh src/path/to/file.js
+./scripts/flow-to-typescript.sh src/path/to/file.js
 
 # 3. OR batch convert simple files
 ./scripts/auto-convert-batch.sh

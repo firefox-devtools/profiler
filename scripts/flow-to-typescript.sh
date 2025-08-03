@@ -2,7 +2,7 @@
 
 # Unified Flow to TypeScript conversion script
 # Combines best features from previous scripts + lessons learned from active conversion
-# Usage: ./scripts/flow-to-typescript-unified.sh <file.js> [output.ts]
+# Usage: ./scripts/flow-to-typescript.sh <file.js> [output.ts]
 
 set -e
 
