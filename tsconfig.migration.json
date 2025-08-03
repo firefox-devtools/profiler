@@ -10,7 +10,6 @@
     "src/components/app/Root.tsx",
     "src/components/app/UploadedRecordingsHome.tsx",
     "src/components/shared/TransformNavigator.tsx",
-    "src/components/timeline/TrackEventDelay.tsx",
     "src/selectors/publish.ts",
     "src/utils/window-console.ts"
   ]

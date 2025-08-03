@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import React, { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 
@@ -12,16 +10,16 @@ import { changeNetworkSearchString } from 'firefox-profiler/actions/profile-view
 import { getNetworkSearchString } from 'firefox-profiler/selectors/url-state';
 import { PanelSearch } from './PanelSearch';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './NetworkSettings.css';
 
 type StateProps = {
-  +searchString: string,
+  readonly searchString: string;
 };
 
 type DispatchProps = {
-  +changeNetworkSearchString: typeof changeNetworkSearchString,
+  readonly changeNetworkSearchString: typeof changeNetworkSearchString;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -31,7 +29,7 @@ class NetworkSettingsImpl extends PureComponent<Props> {
     this.props.changeNetworkSearchString(value);
   };
 
-  render() {
+  override render() {
     const { searchString } = this.props;
     return (
       <div className="networkSettings">

@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import {
@@ -17,28 +15,28 @@ import {
   TRACK_POWER_LINE_WIDTH,
 } from 'firefox-profiler/app-logic/constants';
 
-import type {
+import {
   CounterIndex,
   ThreadIndex,
   Milliseconds,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackPower.css';
 
 type OwnProps = {
-  +counterIndex: CounterIndex,
+  readonly counterIndex: CounterIndex;
 };
 
 type StateProps = {
-  +threadIndex: ThreadIndex,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  readonly threadIndex: ThreadIndex;
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
 };
 
 type DispatchProps = {
-  updatePreviewSelection: typeof updatePreviewSelection,
+  updatePreviewSelection: typeof updatePreviewSelection;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -46,15 +44,17 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 type State = {};
 
 export class TrackPowerImpl extends React.PureComponent<Props, State> {
-  render() {
+  override render() {
     const { counterIndex } = this.props;
     return (
       <div
         className="timelineTrackPower"
-        style={{
-          height: TRACK_POWER_HEIGHT,
-          '--graph-height': `${TRACK_POWER_HEIGHT}px`,
-        }}
+        style={
+          {
+            height: TRACK_POWER_HEIGHT,
+            '--graph-height': `${TRACK_POWER_HEIGHT}px`,
+          } as React.CSSProperties
+        }
       >
         <TrackPowerGraph
           counterIndex={counterIndex}

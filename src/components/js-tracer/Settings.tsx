@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import React, { PureComponent } from 'react';
 import { changeShowJsTracerSummary } from 'firefox-profiler/actions/profile-view';
 import { getShowJsTracerSummary } from 'firefox-profiler/selectors/url-state';
@@ -15,11 +13,11 @@ import './Settings.css';
 import { Localized } from '@fluent/react';
 
 type StateProps = {
-  +showJsTracerSummary: boolean,
+  readonly showJsTracerSummary: boolean;
 };
 
 type DispatchProps = {
-  +changeShowJsTracerSummary: typeof changeShowJsTracerSummary,
+  readonly changeShowJsTracerSummary: typeof changeShowJsTracerSummary;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -29,7 +27,7 @@ class JsTracerSettingsImpl extends PureComponent<Props> {
     this.props.changeShowJsTracerSummary(!this.props.showJsTracerSummary);
   };
 
-  render() {
+  override render() {
     const { showJsTracerSummary } = this.props;
     return (
       <div className="jsTracerSettings">
