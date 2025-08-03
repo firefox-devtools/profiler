@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import memoize from 'memoize-immutable';
 import { Localized } from '@fluent/react';
@@ -22,8 +20,8 @@ import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
 import { shouldDisplaySubcategoryInfoForCategory } from 'firefox-profiler/profile-logic/profile-data';
 import { CanSelectContent } from './CanSelectContent';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import type {
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import {
   ThreadsKey,
   CategoryList,
   IndexIntoCallNodeTable,
@@ -32,7 +30,7 @@ import type {
   IndexIntoCategoryList,
 } from 'firefox-profiler/types';
 
-import type {
+import {
   BreakdownByCategory,
   TimingsForPath,
 } from 'firefox-profiler/profile-logic/profile-data';
@@ -46,11 +44,11 @@ import {
 import classNames from 'classnames';
 
 type SidebarDetailProps = {
-  +label: React.Node,
-  +color?: string,
-  +indent?: boolean,
-  +value: React.Node,
-  +percentage?: string | number,
+  readonly label: React.ReactNode;
+  readonly color?: string;
+  readonly indent?: boolean;
+  readonly value: React.ReactNode;
+  readonly percentage?: string | number;
 };
 
 function SidebarDetail({
@@ -77,34 +75,36 @@ function SidebarDetail({
 
 type CategoryBreakdownOwnProps = {
   /** for total or self breakdown */
-  +kind: 'total' | 'self',
-  +breakdown: BreakdownByCategory,
-  +categoryList: CategoryList,
-  +number: (number) => string,
+  readonly kind: 'total' | 'self';
+  readonly breakdown: BreakdownByCategory;
+  readonly categoryList: CategoryList;
+  readonly number: (num: number) => string;
 };
 
 type CategoryBreakdownStateProps = {
-  +sidebarOpenCategories: Map<string, Set<IndexIntoCategoryList>>,
+  readonly sidebarOpenCategories: Map<string, Set<IndexIntoCategoryList>>;
 };
 
 type CategoryBreakdownDispatchProps = {
-  +toggleOpenCategoryInSidebar: typeof toggleOpenCategoryInSidebar,
+  readonly toggleOpenCategoryInSidebar: typeof toggleOpenCategoryInSidebar;
 };
 
 type CategoryBreakdownAllProps = ConnectedProps<
   CategoryBreakdownOwnProps,
   CategoryBreakdownStateProps,
-  CategoryBreakdownDispatchProps,
+  CategoryBreakdownDispatchProps
 >;
 
 class CategoryBreakdownImpl extends React.PureComponent<CategoryBreakdownAllProps> {
-  _toggleCategory = (event: SyntheticInputEvent<>) => {
+  _toggleCategory = (event: React.MouseEvent<HTMLButtonElement>) => {
     const { toggleOpenCategoryInSidebar, kind } = this.props;
-    const { categoryIndex } = event.target.dataset;
-    toggleOpenCategoryInSidebar(kind, parseInt(categoryIndex, 10));
+    const { categoryIndex } = (event.target as HTMLButtonElement).dataset;
+    if (categoryIndex) {
+      toggleOpenCategoryInSidebar(kind, parseInt(categoryIndex, 10));
+    }
   };
 
-  render() {
+  override render() {
     const { breakdown, categoryList, number, sidebarOpenCategories, kind } =
       this.props;
 
@@ -201,7 +201,7 @@ class CategoryBreakdownImpl extends React.PureComponent<CategoryBreakdownAllProp
 export const CategoryBreakdown = explicitConnect<
   CategoryBreakdownOwnProps,
   CategoryBreakdownStateProps,
-  CategoryBreakdownDispatchProps,
+  CategoryBreakdownDispatchProps
 >({
   mapStateToProps: (state) => {
     return {
@@ -213,22 +213,22 @@ export const CategoryBreakdown = explicitConnect<
 });
 
 type StateProps = {
-  +selectedNodeIndex: IndexIntoCallNodeTable | null,
-  +selectedThreadsKey: ThreadsKey,
-  +name: string,
-  +lib: string,
-  +timings: TimingsForPath,
-  +categoryList: CategoryList,
-  +weightType: WeightType,
-  +selectedNodeTracedSelfAndTotal: SelfAndTotal | null,
+  readonly selectedNodeIndex: IndexIntoCallNodeTable | null;
+  readonly selectedThreadsKey: ThreadsKey;
+  readonly name: string;
+  readonly lib: string;
+  readonly timings: TimingsForPath;
+  readonly categoryList: CategoryList;
+  readonly weightType: WeightType;
+  readonly selectedNodeTracedSelfAndTotal: SelfAndTotal | null;
 };
 
 type Props = ConnectedProps<{}, StateProps, {}>;
 
 type WeightDetails = {
-  +runningL10nId: string,
-  +selfL10nId: string,
-  +number: (n: number) => string,
+  readonly runningL10nId: string;
+  readonly selfL10nId: string;
+  readonly number: (n: number) => string;
 };
 
 function getRunningWeightTypeLabelL10nId(weightType: WeightType): string {
@@ -286,7 +286,7 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
     { cache: new Map() }
   );
 
-  render() {
+  override render() {
     const {
       selectedNodeIndex,
       name,

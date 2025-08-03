@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import classNames from 'classnames';
 import {
@@ -38,7 +36,7 @@ import explicitConnect, {
 
 import WarningImage from 'firefox-profiler-res/img/svg/warning.svg';
 
-import type {
+import {
   Profile,
   CheckedSharingOptions,
   StartEndRange,
@@ -49,43 +47,43 @@ import './Publish.css';
 import { Localized } from '@fluent/react';
 
 type OwnProps = {
-  +isRepublish?: boolean,
+  readonly isRepublish?: boolean;
 };
 
 type StateProps = {
-  +profile: Profile,
-  +rootRange: StartEndRange,
-  +shouldShowPreferenceOption: boolean,
-  +profileContainsPrivateBrowsingInformation: boolean,
-  +checkedSharingOptions: CheckedSharingOptions,
-  +sanitizedProfileDataPromise: Promise<Uint8Array>,
-  +downloadFileName: string,
-  +uploadPhase: UploadPhase,
-  +uploadProgress: number,
-  +uploadProgressString: string,
-  +shouldSanitizeByDefault: boolean,
-  +uploadError: mixed,
-  +abortFunction: () => mixed,
+  readonly profile: Profile;
+  readonly rootRange: StartEndRange;
+  readonly shouldShowPreferenceOption: boolean;
+  readonly profileContainsPrivateBrowsingInformation: boolean;
+  readonly checkedSharingOptions: CheckedSharingOptions;
+  readonly sanitizedProfileDataPromise: Promise<Uint8Array>;
+  readonly downloadFileName: string;
+  readonly uploadPhase: UploadPhase;
+  readonly uploadProgress: number;
+  readonly uploadProgressString: string;
+  readonly shouldSanitizeByDefault: boolean;
+  readonly uploadError: unknown;
+  readonly abortFunction: () => mixed;
 };
 
 type DispatchProps = {
-  +toggleCheckedSharingOptions: typeof toggleCheckedSharingOptions,
-  +attemptToPublish: typeof attemptToPublish,
-  +resetUploadState: typeof resetUploadState,
+  readonly toggleCheckedSharingOptions: typeof toggleCheckedSharingOptions;
+  readonly attemptToPublish: typeof attemptToPublish;
+  readonly resetUploadState: typeof resetUploadState;
 };
 
 type PublishProps = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 type PublishState = {
-  compressError: Error | string | null,
-  prevCompressedPromise: Promise<Uint8Array> | null,
+  compressError: Error | string | null;
+  prevCompressedPromise: Promise<Uint8Array> | null;
 };
 
 class MenuButtonsPublishImpl extends React.PureComponent<
   PublishProps,
-  PublishState,
+  PublishState
 > {
-  state = { compressError: null, prevCompressedPromise: null };
-  _toggles: { [$Keys<CheckedSharingOptions>]: () => mixed } = {
+  override state = { compressError: null, prevCompressedPromise: null };
+  _toggles: { [K in keyof CheckedSharingOptions]: () => void } = {
     includeHiddenThreads: () =>
       this.props.toggleCheckedSharingOptions('includeHiddenThreads'),
     includeAllTabs: () =>
@@ -104,9 +102,9 @@ class MenuButtonsPublishImpl extends React.PureComponent<
   };
 
   _renderCheckbox(
-    slug: $Keys<CheckedSharingOptions>,
+    slug: keyof CheckedSharingOptions,
     labelL10nId: string,
-    additionalContent?: React.Node
+    additionalContent?: React.ReactNode
   ) {
     const { checkedSharingOptions } = this.props;
     const toggle = this._toggles[slug];
@@ -128,7 +126,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
   static getDerivedStateFromProps(
     props: PublishProps,
     state: PublishState
-  ): $Shape<PublishState> | null {
+  ): Partial<PublishState> | null {
     if (state.prevCompressedPromise !== props.sanitizedProfileDataPromise) {
       return {
         // Invalidate the old error info
@@ -139,7 +137,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
     return null;
   }
 
-  _onCompressError = (error) => {
+  _onCompressError = (error: Error | string) => {
     this.setState({ compressError: error });
   };
 
@@ -255,7 +253,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
             <button
               type="submit"
               className="photon-button photon-button-primary menuButtonsPublishButton menuButtonsPublishButtonsUpload"
-              disabled={this.state.compressError}
+              disabled={!!this.state.compressError}
             >
               <span className="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgUpload" />
               <Localized id="MenuButtons--publish--button-upload">
@@ -360,7 +358,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
     );
   }
 
-  render() {
+  override render() {
     const { uploadPhase } = this.props;
     switch (uploadPhase) {
       case 'error':
@@ -380,7 +378,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
 export const MenuButtonsPublish = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state) => ({
     profile: getProfile(state),
@@ -407,15 +405,15 @@ export const MenuButtonsPublish = explicitConnect<
 });
 
 type DownloadButtonProps = {
-  +sanitizedProfileDataPromise: Promise<Uint8Array>,
-  +downloadFileName: string,
-  +onCompressError: (Error | string) => mixed,
+  readonly sanitizedProfileDataPromise: Promise<Uint8Array>;
+  readonly downloadFileName: string;
+  readonly onCompressError: (param: Error | string) => mixed;
 };
 
 type DownloadButtonState = {
-  sanitizedProfileData: Uint8Array | null,
-  prevPromise: Promise<Uint8Array> | null,
-  error: Error | string | null,
+  sanitizedProfileData: Uint8Array | null;
+  prevPromise: Promise<Uint8Array> | null;
+  error: Error | string | null;
 };
 
 /**
@@ -423,10 +421,10 @@ type DownloadButtonState = {
  */
 class DownloadButton extends React.PureComponent<
   DownloadButtonProps,
-  DownloadButtonState,
+  DownloadButtonState
 > {
   _isMounted: boolean = false;
-  state = {
+  override state = {
     sanitizedProfileData: null,
     prevPromise: null,
     error: null,
@@ -435,7 +433,7 @@ class DownloadButton extends React.PureComponent<
   static getDerivedStateFromProps(
     props: DownloadButtonProps,
     state: DownloadButtonState
-  ): $Shape<DownloadButtonState> | null {
+  ): Partial<DownloadButtonState> | null {
     if (state.prevPromise !== props.sanitizedProfileDataPromise) {
       return {
         // Invalidate the old download size.
@@ -465,12 +463,12 @@ class DownloadButton extends React.PureComponent<
     );
   }
 
-  componentDidMount() {
+  override componentDidMount() {
     this._isMounted = true;
     this._unwrapPromise();
   }
 
-  componentDidUpdate(prevProps: DownloadButtonProps) {
+  override componentDidUpdate(prevProps: DownloadButtonProps) {
     if (
       prevProps.sanitizedProfileDataPromise !==
       this.props.sanitizedProfileDataPromise
@@ -479,11 +477,11 @@ class DownloadButton extends React.PureComponent<
     }
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     this._isMounted = false;
   }
 
-  render() {
+  override render() {
     const { downloadFileName } = this.props;
     const { sanitizedProfileData, error } = this.state;
     const className =
@@ -495,9 +493,11 @@ class DownloadButton extends React.PureComponent<
       });
       return (
         <BlobUrlLink
-          blob={blob}
-          download={`${downloadFileName}.gz`}
-          className={className}
+          {...({
+            blob,
+            download: `${downloadFileName}.gz`,
+            className,
+          } as any)}
         >
           <span className="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgDownload" />
           <Localized id="MenuButtons--publish--download">Download</Localized>{' '}

@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import clamp from 'clamp';
 import { getContentRect } from 'firefox-profiler/utils/css-geometry-tools';
@@ -25,52 +23,52 @@ import { Draggable } from 'firefox-profiler/components/shared/Draggable';
 import { getFormattedTimelineValue } from 'firefox-profiler/profile-logic/committed-ranges';
 import './Selection.css';
 
-import type {
+import {
   Milliseconds,
   CssPixels,
   StartEndRange,
   PreviewSelection,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type MouseHandler = (event: MouseEvent) => void;
 
 type OwnProps = {
-  +width: number,
-  +children: React.Node,
-  +className?: string,
+  readonly width: number;
+  readonly children: React.ReactNode;
+  readonly className?: string;
 };
 
 type StateProps = {
-  +previewSelection: PreviewSelection,
-  +committedRange: StartEndRange,
-  +zeroAt: Milliseconds,
-  +profileTimelineUnit: string,
-  +mouseTimePosition: Milliseconds | null,
+  readonly previewSelection: PreviewSelection;
+  readonly committedRange: StartEndRange;
+  readonly zeroAt: Milliseconds;
+  readonly profileTimelineUnit: string;
+  readonly mouseTimePosition: Milliseconds | null;
 };
 
 type DispatchProps = {
-  +commitRange: typeof commitRange,
-  +updatePreviewSelection: typeof updatePreviewSelection,
-  +changeMouseTimePosition: typeof changeMouseTimePosition,
+  readonly commitRange: typeof commitRange;
+  readonly updatePreviewSelection: typeof updatePreviewSelection;
+  readonly changeMouseTimePosition: typeof changeMouseTimePosition;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class TimelineRulerAndSelection extends React.PureComponent<Props> {
-  _handlers: ?{
-    mouseMoveHandler: MouseHandler,
-    mouseClickHandler: MouseHandler,
-  };
+  _handlers: {
+    mouseMoveHandler: MouseHandler;
+    mouseClickHandler: MouseHandler;
+  } | null = null;
 
-  _container: ?HTMLElement;
+  _container: HTMLElement | null;
 
   _containerCreated = (element: HTMLElement | null) => {
     this._container = element;
   };
 
-  _onMouseDown = (event: SyntheticMouseEvent<>) => {
+  _onMouseDown = (event: React.MouseEvent<HTMLElement>) => {
     if (
       !this._container ||
       event.button !== 0 ||
@@ -129,7 +127,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
       return { selectionStart, selectionEnd };
     };
 
-    const mouseMoveHandler = (event) => {
+    const mouseMoveHandler = (event: MouseEvent) => {
       const isLeftButtonUsed = (event.buttons & 1) > 0;
       if (!isLeftButtonUsed) {
         // Oops, the mouseMove handler is still registered but the left button
@@ -168,7 +166,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
       }
     };
 
-    const clickHandler = (event) => {
+    const clickHandler = (event: MouseEvent) => {
       if (isRangeSelecting) {
         // This click ends the current selection gesture.
         const { selectionStart, selectionEnd } = getSelectionFromEvent(event);
@@ -240,7 +238,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
     }
   }
 
-  _onMouseMove = (event: SyntheticMouseEvent<>) => {
+  _onMouseMove = (event: React.MouseEvent<HTMLElement>) => {
     if (!this._container) {
       return;
     }
@@ -273,9 +271,12 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
   };
 
   _makeOnMove =
-    (fun: (number) => { startDelta: number, endDelta: number }) =>
+    (fun: (dx: number) => { startDelta: number; endDelta: number }) =>
     (
-      originalSelection: { +selectionStart: number, +selectionEnd: number },
+      originalSelection: {
+        readonly selectionStart: number;
+        readonly selectionEnd: number;
+      },
       dx: number,
       dy: number,
       isModifying: boolean
@@ -324,11 +325,11 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
     endDelta: delta,
   }));
 
-  _zoomButtonOnMouseDown = (e: SyntheticMouseEvent<>) => {
+  _zoomButtonOnMouseDown = (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
   };
 
-  _zoomButtonOnClick = (e: SyntheticMouseEvent<>) => {
+  _zoomButtonOnClick = (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
     const { previewSelection, zeroAt, commitRange } = this.props;
     if (previewSelection.hasSelection) {
@@ -340,11 +341,11 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
   };
 
   renderSelectionOverlay(previewSelection: {
-    +selectionStart: number,
-    +selectionEnd: number,
-    +isModifying: boolean,
-    +draggingStart?: boolean,
-    +draggingEnd?: boolean,
+    readonly selectionStart: number;
+    readonly selectionEnd: number;
+    readonly isModifying: boolean;
+    readonly draggingStart?: boolean;
+    readonly draggingEnd?: boolean;
   }) {
     const { committedRange, width, profileTimelineUnit } = this.props;
     const { selectionStart, selectionEnd } = previewSelection;
@@ -421,7 +422,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
     );
   }
 
-  render() {
+  override render() {
     const {
       children,
       previewSelection,
@@ -490,7 +491,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
 export const TimelineSelection = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state) => ({
     previewSelection: getPreviewSelection(state),

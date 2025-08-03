@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import React, { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 import classNames from 'classnames';
@@ -34,7 +32,7 @@ import { TrackIPC } from './TrackIPC';
 import { TrackProcessCPU } from './TrackProcessCPU';
 import { TrackPower } from './TrackPower';
 import { getTrackSelectionModifiers } from 'firefox-profiler/utils';
-import type {
+import {
   TrackReference,
   Pid,
   TrackIndex,
@@ -42,28 +40,28 @@ import type {
   MixedObject,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { TrackCustomMarker } from './TrackCustomMarker';
 
 type OwnProps = {
-  +pid: Pid,
-  +localTrack: LocalTrack,
-  +trackIndex: TrackIndex,
-  +style?: MixedObject /* This is used by Reorderable */,
-  +setIsInitialSelectedPane: (value: boolean) => void,
+  readonly pid: Pid;
+  readonly localTrack: LocalTrack;
+  readonly trackIndex: TrackIndex;
+  readonly style?: React.CSSProperties /* This is used by Reorderable */;
+  readonly setIsInitialSelectedPane: (value: boolean) => void;
 };
 
 type StateProps = {
-  +trackName: string,
-  +isSelected: boolean,
-  +isHidden: boolean,
-  +titleText: string | null,
+  readonly trackName: string;
+  readonly isSelected: boolean;
+  readonly isHidden: boolean;
+  readonly titleText: string | null;
 };
 
 type DispatchProps = {
-  +changeRightClickedTrack: typeof changeRightClickedTrack,
-  +selectTrackWithModifiers: typeof selectTrackWithModifiers,
-  +hideLocalTrack: typeof hideLocalTrack,
+  readonly changeRightClickedTrack: typeof changeRightClickedTrack;
+  readonly selectTrackWithModifiers: typeof selectTrackWithModifiers;
+  readonly hideLocalTrack: typeof hideLocalTrack;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -75,7 +73,7 @@ class LocalTrackComponent extends PureComponent<Props> {
   };
 
   _selectCurrentTrack = (
-    event: SyntheticMouseEvent<> | SyntheticKeyboardEvent<>
+    event: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>
   ) => {
     this.props.selectTrackWithModifiers(
       this._getTrackReference(),
@@ -89,7 +87,7 @@ class LocalTrackComponent extends PureComponent<Props> {
   }
 
   _hideCurrentTrack = (
-    event: SyntheticMouseEvent<> | SyntheticKeyboardEvent<>
+    event: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>
   ) => {
     const { pid, trackIndex, hideLocalTrack } = this.props;
     hideLocalTrack(pid, trackIndex);
@@ -130,19 +128,19 @@ class LocalTrackComponent extends PureComponent<Props> {
           />
         );
       default:
-        console.error('Unhandled localTrack type', (localTrack: empty));
+        console.error('Unhandled localTrack type', localTrack as never);
         return null;
     }
   }
 
-  componentDidMount() {
+  override componentDidMount() {
     const { isSelected } = this.props;
     if (isSelected) {
       this.props.setIsInitialSelectedPane(true);
     }
   }
 
-  render() {
+  override render() {
     const { isSelected, isHidden, titleText, trackName, style } = this.props;
 
     if (isHidden) {
@@ -192,7 +190,7 @@ class LocalTrackComponent extends PureComponent<Props> {
 export const TimelineLocalTrack = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state, { pid, localTrack, trackIndex }) => {
     // These get assigned based on the track type.
@@ -235,7 +233,7 @@ export const TimelineLocalTrack = explicitConnect<
         // Look up the thread information for the process if it exists.
         const threadIndex = localTrack.threadIndex;
         const selectors = getThreadSelectors(threadIndex);
-        isSelected = threadIndex === selectedThreadIndexes.has(threadIndex);
+        isSelected = selectedThreadIndexes.has(threadIndex);
         titleText =
           'Event Delay of ' + selectors.getThreadProcessDetails(state);
         break;
