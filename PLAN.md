@@ -2,12 +2,12 @@
 
 ## Current Status (August 3, 2025)
 
-**JavaScript files remaining**: 48 → **TypeScript files**: 247 → **Strict exclude list**: 2 files
+**JavaScript files remaining**: 45 → **TypeScript files**: 250 → **Strict exclude list**: 2 files
 
 - `yarn test-all` passes - All checks work correctly  
 - `yarn typecheck` passes - Mixed Flow/TypeScript codebase is stable
 - **Strategy**: Dependency-first migration focusing on zero-dependency files first
-- **Progress**: 83.7% of files converted, accelerating with large file conversions
+- **Progress**: 84.7% of files converted, accelerating with large file conversions
 
 ### Key Commands
 ```bash
@@ -68,10 +68,10 @@ mixed → unknown
 - All 41 utility files migrated
 
 ### Phase 3: 🚀 IN PROGRESS - Components & Logic
-**Recent conversions (41 files, 12,052 lines)**:
-- **Latest session**: 7 large zero-dependency files (3,481 lines) - CallNodeContextMenu, Markers, CallTree, TrackNetwork, etc.
-- **Previous session**: window-console.ts strict compliance + AppHeader.tsx
-- **Core infrastructure**: merge-compare.ts (1,447 lines), per-thread selectors, profile-view.ts
+**Recent conversions (44 files, 12,512 lines)**:
+- **Latest session**: 3 zero-dependency files (460 lines) - TrackIPC, TrackMemory, ListOfPublishedProfiles  
+- **Previous session**: 7 large zero-dependency files (3,481 lines) - CallNodeContextMenu, Markers, CallTree, TrackNetwork, etc.
+- **Core infrastructure**: merge-compare.ts (1,447 lines), per-thread selectors, profile-view.ts, window-console.ts strict compliance
 
 ### Phase 4: ✅ LARGELY COMPLETED - Strict Compliance  
 - Reduced strict exclude list from 14 → 2 files (window-console.ts fixed)
