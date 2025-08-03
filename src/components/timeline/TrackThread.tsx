@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import explicitConnect from 'firefox-profiler/utils/connect';
@@ -45,7 +43,7 @@ import { EmptyThreadIndicator } from './EmptyThreadIndicator';
 import { getTrackSelectionModifiers } from 'firefox-profiler/utils';
 import './TrackThread.css';
 
-import type {
+import {
   TimelineType,
   Thread,
   ThreadIndex,
@@ -59,57 +57,54 @@ import type {
   State,
   ThreadsKey,
 } from 'firefox-profiler/types';
-import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
+import { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {
-  +threadsKey: ThreadsKey,
-  +trackType: 'expanded' | 'condensed',
-  +showMemoryMarkers?: boolean,
-  +trackName: string,
+  readonly threadsKey: ThreadsKey;
+  readonly trackType: 'expanded' | 'condensed';
+  readonly showMemoryMarkers?: boolean;
+  readonly trackName: string;
 };
 
 type StateProps = {
-  +fullThread: Thread,
-  +rangeFilteredThread: Thread,
-  +filteredThread: Thread,
-  +callNodeInfo: CallNodeInfo,
-  +unfilteredSamplesRange: StartEndRange | null,
-  +interval: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +sampleIndexOffset: number,
-  +categories: CategoryList,
-  +timelineType: TimelineType,
-  +hasFileIoMarkers: boolean,
-  +samplesSelectedStates: null | SelectedState[],
-  +sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
-  +treeOrderSampleComparator: (
-    IndexIntoSamplesTable,
-    IndexIntoSamplesTable
-  ) => number,
-  +selectedThreadIndexes: Set<ThreadIndex>,
-  +enableCPUUsage: boolean,
-  +isExperimentalCPUGraphsEnabled: boolean,
-  +implementationFilter: ImplementationFilter,
-  +callTreeVisible: boolean,
-  +zeroAt: Milliseconds,
-  +profileTimelineUnit: string,
+  readonly fullThread: Thread;
+  readonly rangeFilteredThread: Thread;
+  readonly filteredThread: Thread;
+  readonly callNodeInfo: CallNodeInfo;
+  readonly unfilteredSamplesRange: StartEndRange | null;
+  readonly interval: Milliseconds;
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly sampleIndexOffset: number;
+  readonly categories: CategoryList;
+  readonly timelineType: TimelineType;
+  readonly hasFileIoMarkers: boolean;
+  readonly samplesSelectedStates: null | SelectedState[];
+  readonly sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>;
+  readonly treeOrderSampleComparator: (
+    a: IndexIntoSamplesTable,
+    b: IndexIntoSamplesTable
+  ) => number;
+  readonly selectedThreadIndexes: Set<ThreadIndex>;
+  readonly enableCPUUsage: boolean;
+  readonly isExperimentalCPUGraphsEnabled: boolean;
+  readonly implementationFilter: ImplementationFilter;
+  readonly callTreeVisible: boolean;
+  readonly zeroAt: Milliseconds;
+  readonly profileTimelineUnit: string;
 };
 
 type DispatchProps = {
-  +updatePreviewSelection: typeof updatePreviewSelection,
-  +changeSelectedCallNode: typeof changeSelectedCallNode,
-  +focusCallTree: typeof focusCallTree,
-  +selectSelfCallNode: typeof selectSelfCallNode,
-  +reportTrackThreadHeight: typeof reportTrackThreadHeight,
+  readonly updatePreviewSelection: typeof updatePreviewSelection;
+  readonly changeSelectedCallNode: typeof changeSelectedCallNode;
+  readonly focusCallTree: typeof focusCallTree;
+  readonly selectSelfCallNode: typeof selectSelfCallNode;
+  readonly reportTrackThreadHeight: typeof reportTrackThreadHeight;
 };
 
-type Props = {
-  ...SizeProps,
-  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
-};
+type Props = SizeProps & ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class TimelineTrackThreadImpl extends PureComponent<Props> {
   /**
@@ -117,7 +112,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
    * This will select the leaf-most stack frame or call node.
    */
   _onSampleClick = (
-    event: SyntheticMouseEvent<>,
+    event: React.MouseEvent<HTMLElement>,
     sampleIndex: IndexIntoSamplesTable | null
   ) => {
     const modifiers = getTrackSelectionModifiers(event);
@@ -165,14 +160,14 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
     });
   };
 
-  componentDidUpdate() {
+  override componentDidUpdate(prevProps: Props) {
     const { threadsKey, height, reportTrackThreadHeight } = this.props;
     // Most likely this track height shouldn't change, but if it does, report it.
     // The action will only dispatch on changed values.
     reportTrackThreadHeight(threadsKey, height);
   }
 
-  render() {
+  override render() {
     const {
       fullThread,
       filteredThread,
@@ -333,7 +328,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
 export const TimelineTrackThread = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state: State, ownProps: OwnProps) => {
     const { threadsKey } = ownProps;
