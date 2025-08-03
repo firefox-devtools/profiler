@@ -57,6 +57,10 @@ apply_transform 's|^// @flow$||g' "Remove @flow directive"
 apply_transform 's/^import type {/import {/g' "Convert import type (object imports)"
 apply_transform 's/^import type \([^{].*\) from/import \1 from/g' "Convert import type (default imports)"
 
+# NEW: Handle typeof imports (common pattern for Redux actions)
+# Convert: typeof func as FuncType → (separate import and type declaration)
+# This requires manual handling as it needs to restructure imports
+
 # 3. CRITICAL: Convert function types without parameter names (fixes TS1005/TS1109)
 # Only add parameter names when the parameter starts with an uppercase letter (indicates type name)
 apply_transform 's/Selector<(\([^)][^)]*\)) =>/Selector<(actionOrActionList: \1) =>/g' "Add parameter names to Selector function types"
@@ -96,6 +100,12 @@ apply_transform 's/\$Shape<\([^>]*\)>/Partial<\1>/g' "Convert $Shape to Partial"
 apply_transform 's/: mixed/: unknown/g' "Convert mixed to unknown"
 apply_transform 's/: MixedObject/: unknown/g' "Convert MixedObject to unknown"
 
+# NEW: Convert $PropertyType and $Diff utility types  
+apply_transform 's/\$PropertyType<\([^,]*\), *'"'"'\([^'"'"']*\)'"'"'>/\1['"'"'\2'"'"']/g' "Convert $PropertyType with single quotes"
+apply_transform 's/\$PropertyType<\([^,]*\), *"\([^"]*\)">/\1["\2"]/g' "Convert $PropertyType with double quotes"
+apply_transform 's/\$Diff<\([^,]*\), *\([^>]*\)>/Omit<\1, keyof \2>/g' "Convert $Diff to Omit"
+apply_transform 's/\$Exact<\([^>]*\)>/\1/g' "Remove $Exact (usually safe)"
+
 # Convert Flow object type spreads to TypeScript intersection types
 # Use dedicated Perl script for robust multiline handling with proper iteration
 SCRIPT_DIR="$(dirname "$0")"
@@ -131,8 +141,19 @@ apply_transform 's/SyntheticKeyboardEvent</React.KeyboardEvent</g' "Convert Synt
 apply_transform 's/SyntheticFocusEvent</React.FocusEvent</g' "Convert SyntheticFocusEvent"
 apply_transform 's/SyntheticEvent<HTMLFormElement>/React.FormEvent<HTMLFormElement>/g' "Convert SyntheticEvent with form elements"
 
+# NEW: Convert more React synthetic events
+apply_transform 's/SyntheticDragEvent</React.DragEvent</g' "Convert SyntheticDragEvent"
+apply_transform 's/SyntheticInputEvent</React.ChangeEvent</g' "Convert SyntheticInputEvent"
+apply_transform 's/SyntheticWheelEvent</React.WheelEvent</g' "Convert SyntheticWheelEvent"
+apply_transform 's/SyntheticTouchEvent</React.TouchEvent</g' "Convert SyntheticTouchEvent"
+
 # Convert React.SomeEvent<> to React.SomeEvent<HTMLElement> for any event type
 apply_transform 's/React\.\([A-Za-z]*Event\)<>/React.\1<HTMLElement>/g' "Add HTMLElement to generic React events"
+
+# NEW: Fix complex generic syntax patterns from Flow
+# Fix TreeView | null<T> → TreeView<T> | null (critical pattern from marker-table conversion)
+apply_transform 's/\([A-Za-z][A-Za-z0-9_]*\) | null<\([^>]*\)>/\1<\2> | null/g' "Fix Type | null<Generic> syntax"
+apply_transform 's/\([A-Za-z][A-Za-z0-9_]*\) | undefined<\([^>]*\)>/\1<\2> | undefined/g' "Fix Type | undefined<Generic> syntax"
 
 # Convert getContext('2d') to getContext('2d')! for non-null assertion
 apply_transform "s/\.getContext('2d')/\.getContext('2d')!/g" "Add non-null assertion to 2d context"
@@ -192,6 +213,15 @@ apply_transform 's/= (subject) =>/= (subject: unknown) =>/g' "Add types to subje
 apply_transform 's/= (item) =>/= (item: unknown) =>/g' "Add types to item parameters"
 apply_transform 's/= (element) =>/= (element: unknown) =>/g' "Add types to element parameters"
 
+# NEW: Add common component method typing
+apply_transform 's/componentDidUpdate(prevProps)/componentDidUpdate(prevProps: Props)/g' "Add Props type to componentDidUpdate"
+apply_transform 's/componentDidUpdate(\([^:)]*\))/componentDidUpdate(\1: Props)/g' "Add Props type to componentDidUpdate (general)"
+
+# NEW: Better Set/Map constructor detection with context
+# Note: These are basic patterns - more sophisticated detection would require AST parsing
+apply_transform 's/= new Set();/= new Set<unknown>();/g' "Add unknown type to bare Set constructors"
+apply_transform 's/= new Map();/= new Map<unknown, unknown>();/g' "Add unknown types to bare Map constructors"
+
 # 15. Clean up empty lines created by removing @flow
 apply_transform '/^$/N;/^\n$/d' "Remove empty lines"
 
@@ -204,8 +234,20 @@ ISSUES_FOUND=0
 WARNINGS=()
 
 # Check for remaining Flow-specific patterns
-if grep -q "MixedObject\|mixed\|\$Keys\|\$ReadOnly" "$OUTPUT_FILE" 2>/dev/null; then
+if grep -q "MixedObject\|mixed\|\$Keys\|\$ReadOnly\|\$PropertyType\|\$Diff\|\$Exact" "$OUTPUT_FILE" 2>/dev/null; then
     WARNINGS+=("Found remaining Flow types that may need manual conversion")
+    ISSUES_FOUND=$((ISSUES_FOUND + 1))
+fi
+
+# NEW: Check for complex generic syntax that should be auto-fixed now
+if grep -q "[A-Za-z] | null<[^>]*>" "$OUTPUT_FILE" 2>/dev/null; then
+    WARNINGS+=("Found Type | null<Generic> syntax that should be auto-converted")
+    ISSUES_FOUND=$((ISSUES_FOUND + 1))
+fi
+
+# Check for remaining synthetic events
+if grep -q "SyntheticDragEvent\|SyntheticInputEvent\|SyntheticWheelEvent\|SyntheticTouchEvent" "$OUTPUT_FILE" 2>/dev/null; then
+    WARNINGS+=("Found remaining synthetic events that should be auto-converted")
     ISSUES_FOUND=$((ISSUES_FOUND + 1))
 fi
 
@@ -282,3 +324,8 @@ echo "   ✅ HTML boolean attributes → React boolean props"
 echo "   ✅ TimeoutID/IntervalID → NodeJS.Timeout type mapping"
 echo "   ✅ Improved function parameter name handling (avoids void function issues)"
 echo "   ✅ Enhanced React event type conversions (SyntheticFocusEvent, form events)"
+echo "   🆕 Flow utility types (\$PropertyType, \$Diff, \$Exact)"
+echo "   🆕 More React synthetic events (SyntheticDragEvent, SyntheticInputEvent)"
+echo "   🆕 Complex generic syntax (TreeView | null<T> → TreeView<T> | null)"
+echo "   🆕 Better Set/Map constructor detection"
+echo "   🆕 Component method parameter typing (componentDidUpdate)"
