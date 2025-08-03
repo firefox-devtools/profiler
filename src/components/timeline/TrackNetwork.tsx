@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import React, { PureComponent } from 'react';
 
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
@@ -33,7 +31,7 @@ import {
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 
-import type {
+import {
   CssPixels,
   ThreadIndex,
   Marker,
@@ -44,8 +42,8 @@ import type {
   Page,
 } from 'firefox-profiler/types';
 
-import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackNetwork.css';
 
@@ -53,18 +51,18 @@ import './TrackNetwork.css';
  * When adding properties to these props, please consider the comment above the component.
  */
 type CanvasProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +hoveredMarkerIndex: MarkerIndex | null,
-  +rightClickedMarkerIndex: MarkerIndex | null,
-  +selectedNetworkMarkerIndex: MarkerIndex | null,
-  +width: CssPixels,
-  +networkTiming: MarkerTiming[],
-  +onHoveredMarkerChange: (
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly hoveredMarkerIndex: MarkerIndex | null;
+  readonly rightClickedMarkerIndex: MarkerIndex | null;
+  readonly selectedNetworkMarkerIndex: MarkerIndex | null;
+  readonly width: CssPixels;
+  readonly networkTiming: MarkerTiming[];
+  readonly onHoveredMarkerChange: (
     hoveredMarkerIndex: MarkerIndex | null,
     mouseX?: CssPixels,
     mouseY?: CssPixels
-  ) => void,
+  ) => void;
 };
 
 /**
@@ -76,7 +74,7 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
   _requestedAnimationFrame: boolean = false;
   _canvas = React.createRef<HTMLCanvasElement>();
 
-  _hitTest(e: SyntheticMouseEvent<>): MarkerIndex | null {
+  _hitTest(e: React.MouseEvent<HTMLElement>): MarkerIndex | null {
     const { rangeStart, rangeEnd, networkTiming, width } = this.props;
     // React's Synthetic event doesn't have these properties, but the native event does.
     const { offsetX: x, offsetY: y } = e.nativeEvent;
@@ -133,7 +131,7 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
     this.props.onHoveredMarkerChange(null);
   };
 
-  _onMouseMove = (e: SyntheticMouseEvent<>) => {
+  _onMouseMove = (e: React.MouseEvent<HTMLElement>) => {
     const hoveredMarkerIndex = this._hitTest(e);
     this.props.onHoveredMarkerChange(hoveredMarkerIndex, e.pageX, e.pageY);
   };
@@ -171,6 +169,8 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
     canvas.width = Math.round(containerWidth * devicePixelRatio);
     canvas.height = Math.round(TRACK_NETWORK_HEIGHT * devicePixelRatio);
     const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = NORMAL_STYLE;
 
@@ -232,7 +232,7 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
     }
   }
 
-  render() {
+  override render() {
     this._scheduleDraw();
     return (
       <canvas
@@ -246,42 +246,39 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
 }
 
 type OwnProps = {
-  +threadIndex: ThreadIndex,
+  readonly threadIndex: ThreadIndex;
 };
 
 type StateProps = {
-  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +isModifyingSelection: boolean,
-  +zeroAt: Milliseconds,
-  +getMarker: (MarkerIndex) => Marker,
-  +networkTiming: MarkerTiming[],
-  +verticalMarkerIndexes: MarkerIndex[],
-  +rightClickedMarkerIndex: MarkerIndex | null,
-  +selectedNetworkMarkerIndex: MarkerIndex | null,
-  +hoveredMarkerIndexFromState: MarkerIndex | null,
+  readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null;
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly isModifyingSelection: boolean;
+  readonly zeroAt: Milliseconds;
+  readonly getMarker: (param: MarkerIndex) => Marker;
+  readonly networkTiming: MarkerTiming[];
+  readonly verticalMarkerIndexes: MarkerIndex[];
+  readonly rightClickedMarkerIndex: MarkerIndex | null;
+  readonly selectedNetworkMarkerIndex: MarkerIndex | null;
+  readonly hoveredMarkerIndexFromState: MarkerIndex | null;
 };
 
 type DispatchProps = {
-  changeRightClickedMarker: typeof changeRightClickedMarker,
-  changeSelectedNetworkMarker: typeof changeSelectedNetworkMarker,
-  changeHoveredMarker: typeof changeHoveredMarker,
+  changeRightClickedMarker: typeof changeRightClickedMarker;
+  changeSelectedNetworkMarker: typeof changeSelectedNetworkMarker;
+  changeHoveredMarker: typeof changeHoveredMarker;
 };
 
-type Props = {
-  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
-  ...SizeProps,
-};
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps> & SizeProps;
 
 type State = {
-  +hoveredMarkerIndex: MarkerIndex | null,
-  +mouseX: CssPixels,
-  +mouseY: CssPixels,
+  readonly hoveredMarkerIndex: MarkerIndex | null;
+  readonly mouseX: CssPixels;
+  readonly mouseY: CssPixels;
 };
 
 class Network extends PureComponent<Props, State> {
-  state = { hoveredMarkerIndex: null, mouseX: 0, mouseY: 0 };
+  override state = { hoveredMarkerIndex: null, mouseX: 0, mouseY: 0 };
 
   _onHoveredMarkerChange = (
     hoveredMarkerIndex: MarkerIndex | null,
@@ -291,7 +288,7 @@ class Network extends PureComponent<Props, State> {
     const { threadIndex, changeHoveredMarker } = this.props;
     changeHoveredMarker(threadIndex, hoveredMarkerIndex);
     if (hoveredMarkerIndex === null) {
-      if (!window.persistTooltips) {
+      if (!(window as any).persistTooltips) {
         // This persistTooltips property is part of the web console API. It helps
         // in being able to inspect and debug tooltips.
         this.setState({
@@ -299,11 +296,15 @@ class Network extends PureComponent<Props, State> {
         });
       }
     } else {
-      this.setState({ hoveredMarkerIndex, mouseX, mouseY });
+      this.setState({
+        hoveredMarkerIndex,
+        mouseX: mouseX ?? 0,
+        mouseY: mouseY ?? 0,
+      });
     }
   };
 
-  _onMouseDown = (e: SyntheticMouseEvent<>) => {
+  _onMouseDown = (e: React.MouseEvent<HTMLElement>) => {
     if (e.button === 2) {
       // The right button is a contextual action. It is important that we call
       // the right click callback at mousedown so that the state is updated and
@@ -333,7 +334,7 @@ class Network extends PureComponent<Props, State> {
     changeRightClickedMarker(threadIndex, markerIndex);
   };
 
-  render() {
+  override render() {
     const {
       innerWindowIDToPageMap,
       rangeStart,
@@ -418,7 +419,7 @@ class Network extends PureComponent<Props, State> {
 export const TrackNetwork = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state, ownProps) => {
     const { threadIndex } = ownProps;
