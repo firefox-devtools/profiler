@@ -29,13 +29,6 @@ type GeckoProfiler = {
   ) => Promise<SymbolTableAsTuple>;
 };
 
-// Extend Window interface to include geckoProfilerPromise
-declare global {
-  interface Window {
-    geckoProfilerPromise: Promise<GeckoProfiler>;
-  }
-}
-
 /**
  * This file manages the communication between the profiler and the browser.
  */
@@ -114,7 +107,7 @@ class BrowserConnectionImpl implements BrowserConnection {
   _webChannelSupportsGetExternalMarkers: boolean;
   _webChannelSupportsGetPageFavicons: boolean;
   _webChannelSupportsOpenDebuggerInTab: boolean;
-  _geckoProfiler: GeckoProfiler | undefined;
+  _geckoProfiler: $GeckoProfiler | undefined;
 
   constructor(webChannelVersion: number) {
     this._webChannelSupportsGetProfileAndSymbolication = webChannelVersion >= 1;
@@ -128,7 +121,7 @@ class BrowserConnectionImpl implements BrowserConnection {
   // cannot proceed without a connection to the browser. This method falls back
   // to the frame script API (window.geckoProfilerPromise) if this browser has
   // an old version of the WebChannel.
-  async _getConnectionViaFrameScript(): Promise<GeckoProfiler> {
+  async _getConnectionViaFrameScript(): Promise<$GeckoProfiler> {
     if (!this._geckoProfiler) {
       this._geckoProfiler = await window.geckoProfilerPromise;
     }
@@ -152,7 +145,7 @@ class BrowserConnectionImpl implements BrowserConnection {
     const geckoProfiler = await this._getConnectionViaFrameScript();
     const profile = await geckoProfiler.getProfile();
     clearTimeout(timeoutId);
-    return profile;
+    return profile as MixedObject;
   }
 
   async getExternalMarkers(

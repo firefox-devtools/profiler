@@ -287,7 +287,7 @@ class Network extends PureComponent<Props, State> {
     const { threadIndex, changeHoveredMarker } = this.props;
     changeHoveredMarker(threadIndex, hoveredMarkerIndex);
     if (hoveredMarkerIndex === null) {
-      if (!(window as any).persistTooltips) {
+      if (!window.persistTooltips) {
         // This persistTooltips property is part of the web console API. It helps
         // in being able to inspect and debug tooltips.
         this.setState({

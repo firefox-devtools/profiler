@@ -40,7 +40,7 @@ export class DivWithTooltip extends React.PureComponent<Props, State> {
   _onMouseLeave = () => {
     // This persistTooltips property is part of the web console API. It helps
     // in being able to inspect and debug tooltips.
-    if (!(window as any).persistTooltips) {
+    if (!window.persistTooltips) {
       this.setState({ isMouseOver: false });
     }
     document.removeEventListener('mousemove', this._onMouseMove, false);

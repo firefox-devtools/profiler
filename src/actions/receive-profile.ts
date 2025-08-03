@@ -81,6 +81,7 @@ import {
   ThreadIndex,
   TabID,
   PageList,
+  MixedObject,
 } from 'firefox-profiler/types';
 
 import {
@@ -546,7 +547,7 @@ const _symbolicationStepQueueSingleton = new SymbolicationStepQueue();
  * to a gecko profile object by parsing the JSON.
  */
 async function _unpackGeckoProfileFromBrowser(
-  profile: ArrayBuffer | unknown
+  profile: ArrayBuffer | MixedObject
 ): Promise<unknown> {
   // Note: the following check will work for array buffers coming from another
   // global. This happens especially with tests but could happen in the future
@@ -1064,7 +1065,7 @@ async function _extractZipFromResponse(
 async function _extractJsonFromArrayBuffer(
   arrayBuffer: ArrayBuffer
 ): Promise<unknown> {
-  let profileBytes = new Uint8Array(arrayBuffer);
+  let profileBytes: Uint8Array<ArrayBufferLike> = new Uint8Array(arrayBuffer);
   // Check for the gzip magic number in the header.
   if (isGzip(profileBytes)) {
     profileBytes = await decompress(profileBytes);

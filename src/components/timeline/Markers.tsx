@@ -366,7 +366,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
       this.state.hoveredMarkerIndex !== null &&
       // This persistTooltips property is part of the web console API. It helps
       // in being able to inspect and debug tooltips.
-      !(window as any).persistTooltips
+      !window.persistTooltips
     ) {
       this.setState({
         hoveredMarkerIndex: null,
@@ -435,7 +435,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
   _onMouseOut = () => {
     // This persistTooltips property is part of the web console API. It helps
     // in being able to inspect and debug tooltips.
-    if (!(window as any).persistTooltips) {
+    if (!window.persistTooltips) {
       this.setState({
         hoveredMarkerIndex: null,
       });

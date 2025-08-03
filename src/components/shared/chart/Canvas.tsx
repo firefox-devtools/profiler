@@ -304,7 +304,7 @@ export class ChartCanvas<Item> extends React.Component<
       this.state.hoveredItem !== null &&
       // This persistTooltips property is part of the web console API. It helps
       // in being able to inspect and debug tooltips.
-      !(window as any).persistTooltips
+      !window.persistTooltips
     ) {
       this.setState({
         hoveredItem: null,
@@ -317,7 +317,7 @@ export class ChartCanvas<Item> extends React.Component<
       this.state.hoveredItem !== null &&
       // This persistTooltips property is part of the web console API. It helps
       // in being able to inspect and debug tooltips.
-      !(window as any).persistTooltips
+      !window.persistTooltips
     ) {
       this.setState({ hoveredItem: null });
     }

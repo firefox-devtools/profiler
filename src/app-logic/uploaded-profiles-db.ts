@@ -104,6 +104,12 @@ async function reallyOpen(): Promise<IDBPDatabase> {
   return db;
 }
 
+declare global {
+  interface Window {
+    deleteDB?: () => void;
+  }
+}
+
 async function open(): Promise<IDBPDatabase> {
   if (!window.indexedDB) {
     throw new Error('Could not find indexedDB on the window object.');
@@ -122,7 +128,7 @@ async function open(): Promise<IDBPDatabase> {
       // changes.
       // Let's explain that in an error, that will be output to the console by
       // the caller.
-      (window as any).deleteDB = () => deleteDB(DATABASE_NAME);
+      window.deleteDB = () => deleteDB(DATABASE_NAME);
       throw new Error(stripIndent`
         We tried to open an existing published profiles store database with a
         smaller version than the current one. We can't do that with IndexedDB.
