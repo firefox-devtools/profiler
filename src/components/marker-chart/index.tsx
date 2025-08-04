@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import * as React from 'react';
 import {
   TIMELINE_MARGIN_RIGHT,
@@ -44,23 +42,23 @@ import './index.css';
 const ROW_HEIGHT = 16;
 
 type DispatchProps = {
-  +updatePreviewSelection: typeof updatePreviewSelection,
-  +changeRightClickedMarker: typeof changeRightClickedMarker,
-  +changeMouseTimePosition: typeof changeMouseTimePosition,
-  +changeSelectedMarker: typeof changeSelectedMarker,
+  readonly updatePreviewSelection: typeof updatePreviewSelection;
+  readonly changeRightClickedMarker: typeof changeRightClickedMarker;
+  readonly changeMouseTimePosition: typeof changeMouseTimePosition;
+  readonly changeSelectedMarker: typeof changeSelectedMarker;
 };
 
 type StateProps = {
-  +getMarker: (MarkerIndex) => Marker,
-  +getMarkerLabel: (MarkerIndex) => string,
-  +markerTimingAndBuckets: MarkerTimingAndBuckets,
-  +maxMarkerRows: number,
-  +markerListLength: number,
-  +timeRange: StartEndRange,
-  +threadsKey: ThreadsKey,
-  +previewSelection: PreviewSelection,
-  +rightClickedMarkerIndex: MarkerIndex | null,
-  +selectedMarkerIndex: MarkerIndex | null,
+  readonly getMarker: (param: MarkerIndex) => Marker;
+  readonly getMarkerLabel: (param: MarkerIndex) => string;
+  readonly markerTimingAndBuckets: MarkerTimingAndBuckets;
+  readonly maxMarkerRows: number;
+  readonly markerListLength: number;
+  readonly timeRange: StartEndRange;
+  readonly threadsKey: ThreadsKey;
+  readonly previewSelection: PreviewSelection;
+  readonly rightClickedMarkerIndex: MarkerIndex | null;
+  readonly selectedMarkerIndex: MarkerIndex | null;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -95,11 +93,11 @@ class MarkerChartImpl extends React.PureComponent<Props> {
     }
   };
 
-  componentDidMount() {
+  override componentDidMount() {
     this._focusViewport();
   }
 
-  render() {
+  override render() {
     const {
       maxMarkerRows,
       markerListLength,
@@ -180,8 +178,8 @@ class MarkerChartImpl extends React.PureComponent<Props> {
 
 // This function is given the MarkerChartCanvas's chartProps.
 function viewportNeedsUpdate(
-  prevProps: { +markerTimingAndBuckets: MarkerTimingAndBuckets },
-  newProps: { +markerTimingAndBuckets: MarkerTimingAndBuckets }
+  prevProps: { readonly markerTimingAndBuckets: MarkerTimingAndBuckets },
+  newProps: { readonly markerTimingAndBuckets: MarkerTimingAndBuckets }
 ) {
   return prevProps.markerTimingAndBuckets !== newProps.markerTimingAndBuckets;
 }
