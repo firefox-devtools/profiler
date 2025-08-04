@@ -1472,7 +1472,6 @@ export function retrieveProfileForRawUrl(
       }
       case 'uploaded-recordings':
       case 'none':
-      case 'from-file' as any:
       case 'local':
       case 'unpublished':
         // There is no profile to download for these datasources.

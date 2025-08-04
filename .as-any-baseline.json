@@ -1,6 +1,6 @@
 {
-  "timestamp": "2025-08-04T23:15:31.764Z",
-  "totalUsages": 117,
+  "timestamp": "2025-08-04T23:16:25.158Z",
+  "totalUsages": 116,
   "totalFiles": 43,
   "usages": [
     {
@@ -37,11 +37,6 @@
       "file": "src/actions/receive-profile.ts",
       "line": 1463,
       "content": "(otherWindow as any).postMessage({ name: 'ready:response' }, '*');"
-    },
-    {
-      "file": "src/actions/receive-profile.ts",
-      "line": 1475,
-      "content": "case 'from-file' as any:"
     },
     {
       "file": "src/app-logic/create-store.ts",
