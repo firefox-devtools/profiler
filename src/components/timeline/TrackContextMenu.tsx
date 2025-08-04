@@ -21,7 +21,10 @@ import {
   hideProvidedTracks,
 } from 'firefox-profiler/actions/profile-view';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { assertExhaustiveCheck, ensureExists } from 'firefox-profiler/utils/flow';
+import {
+  assertExhaustiveCheck,
+  ensureExists,
+} from 'firefox-profiler/utils/flow';
 import {
   getThreads,
   getRightClickedTrack,
@@ -511,12 +514,14 @@ class TimelineTrackContextMenuImpl extends PureComponent<
       title += ` (Process ID: ${track.pid})`;
     }
 
+    const MenuItemAsAny = MenuItem as any; // https://github.com/firefox-devtools/react-contextmenu/issues/334
     return (
       <React.Fragment key={trackIndex}>
-        <MenuItem
+        <MenuItemAsAny
           preventClose={true}
           data={{ trackIndex }}
           onClick={this._toggleGlobalTrackVisibility}
+          role="menuitemcheckbox"
           attributes={{
             className: classNames('timelineTrackContextMenuItem', {
               checkable: true,
@@ -531,7 +536,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
           {track.type === 'process' && (
             <span className="timelineTrackContextMenuPid">({track.pid})</span>
           )}
-        </MenuItem>
+        </MenuItemAsAny>
         {track.type === 'process'
           ? this.renderLocalTracks(
               trackIndex,
@@ -599,12 +604,14 @@ class TimelineTrackContextMenuImpl extends PureComponent<
       const isChecked =
         !hiddenLocalTracks.has(trackIndex) && !isGlobalTrackHidden;
 
+      const MenuItemAsAny = MenuItem as any; // https://github.com/firefox-devtools/react-contextmenu/issues/334
       localTrackMenuItems.push(
-        <MenuItem
+        <MenuItemAsAny
           key={trackIndex}
           preventClose={true}
           data={{ pid, trackIndex, globalTrackIndex }}
           onClick={this._toggleLocalTrackVisibility}
+          role="menuitemcheckbox"
           attributes={{
             className: classNames('checkable indented', {
               checked: isChecked,
@@ -613,7 +620,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
           }}
         >
           {localTrackNames[trackIndex]}
-        </MenuItem>
+        </MenuItemAsAny>
       );
     }
 
