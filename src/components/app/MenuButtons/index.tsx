@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 // It's important to import the base CSS file first, so that CSS in the
 // subcomponents can more easily override the rules.
 import './index.css';
@@ -62,40 +60,40 @@ type OwnProps = {
   // that would mock out a local module, but I was having trouble getting it working
   // correctly (perhaps due to ES6 modules), so I just went with dependency injection
   // instead.
-  injectedUrlShortener?: (string) => Promise<string>,
+  injectedUrlShortener?: (url: string) => Promise<string>;
 };
 
 type StateProps = {
-  +rootRange: StartEndRange,
-  +dataSource: DataSource,
-  +profileUrl: string,
-  +isNewlyPublished: boolean,
-  +uploadPhase: UploadPhase,
-  +hasPrePublishedState: boolean,
-  +abortFunction: () => mixed,
-  +currentProfileUploadedInformation: UploadedProfileInformation | null,
+  readonly rootRange: StartEndRange;
+  readonly dataSource: DataSource;
+  readonly profileUrl: string;
+  readonly isNewlyPublished: boolean;
+  readonly uploadPhase: UploadPhase;
+  readonly hasPrePublishedState: boolean;
+  readonly abortFunction: () => mixed;
+  readonly currentProfileUploadedInformation: UploadedProfileInformation | null;
 };
 
 type DispatchProps = {
-  +dismissNewlyPublished: typeof dismissNewlyPublished,
-  +revertToPrePublishedState: typeof revertToPrePublishedState,
-  +profileRemotelyDeleted: typeof profileRemotelyDeleted,
+  readonly dismissNewlyPublished: typeof dismissNewlyPublished;
+  readonly revertToPrePublishedState: typeof revertToPrePublishedState;
+  readonly profileRemotelyDeleted: typeof profileRemotelyDeleted;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
-type State = $ReadOnly<{
-  metaInfoPanelState: 'initial' | 'delete-confirmation',
-}>;
+type State = {
+  metaInfoPanelState: 'initial' | 'delete-confirmation';
+};
 
 class MenuButtonsImpl extends React.PureComponent<Props, State> {
-  state = { metaInfoPanelState: 'initial' };
+  override state: State = { metaInfoPanelState: 'initial' };
 
-  componentDidMount() {
+  override componentDidMount() {
     // Clear out the newly published notice from the URL.
     this.props.dismissNewlyPublished();
   }
 
-  _getUploadedStatus(dataSource: DataSource, profileUrl) {
+  _getUploadedStatus(dataSource: DataSource, profileUrl: string) {
     switch (dataSource) {
       case 'public':
       case 'compare':
@@ -153,7 +151,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
             title={
               currentProfileUploadedInformation.jwtToken === null
                 ? 'This profile cannot be deleted because we lack the authorization information.'
-                : null
+                : undefined
             }
             disabled={currentProfileUploadedInformation.jwtToken === null}
           >
@@ -220,7 +218,10 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
         // these values anymore when we're in this state.
         return <ProfileDeleteSuccess />;
       default:
-        throw assertExhaustiveCheck(metaInfoPanelState);
+        throw assertExhaustiveCheck(
+          metaInfoPanelState,
+          `Unhandled metaInfoPanelState`
+        );
     }
   }
 
@@ -326,7 +327,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
     );
   }
 
-  render() {
+  override render() {
     return (
       <>
         {this._renderRevertProfile()}
