@@ -318,7 +318,7 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
     if (
       !data ||
       !('innerWindowID' in data) ||
-      data.innerWindowID ||
+      !data.innerWindowID ||
       !innerWindowIDToPageMap
     ) {
       // Marker doesn't contain any page information. Do not render anything.
