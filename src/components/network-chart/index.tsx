@@ -392,7 +392,7 @@ const ConnectedComponent = explicitConnect<OwnProps, StateProps, DispatchProps>(
   }
 );
 
-export const NetworkChart = withSize<OwnProps>(ConnectedComponent);
+export const NetworkChart = withSize(ConnectedComponent);
 
 /**
  * Our definition of markers does not currently have the ability to refine

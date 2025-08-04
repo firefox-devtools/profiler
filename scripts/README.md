@@ -16,12 +16,12 @@ The unified script automates all Flow→TypeScript conversion patterns:
 
 1. **Critical function type fixes**: Adds parameter names to prevent TS1005/TS1109 errors
 2. **Removes `// @flow` directive**
-2. **Converts nullable types**: `?string` → `string | null`
-3. **Fixes trailing commas** in multiline type definitions
-4. **Converts Flow utility types**: `$Keys<T>` → `keyof T`, `mixed` → `unknown`
-5. **Fixes index signatures**: `[string]:` → `[key: string]:`
-6. **Converts React types**: `React.Node` → `React.ReactNode`
-7. **Auto-detects remaining issues** with detailed warnings
+3. **Converts nullable types**: `?string` → `string | null`
+4. **Fixes trailing commas** in multiline type definitions
+5. **Converts Flow utility types**: `$Keys<T>` → `keyof T`, `mixed` → `unknown`
+6. **Fixes index signatures**: `[string]:` → `[key: string]:`
+7. **Converts React types**: `React.Node` → `React.ReactNode`
+8. **Auto-detects remaining issues** with detailed warnings
 
 ### What requires manual review
 

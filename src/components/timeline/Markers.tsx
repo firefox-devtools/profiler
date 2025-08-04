@@ -504,7 +504,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
  * Combine the base implementation of the TimelineMarkers with the
  * WithSize component.
  */
-export const TimelineMarkers = withSize<Props>(TimelineMarkersImplementation);
+export const TimelineMarkers = withSize(TimelineMarkersImplementation);
 
 /**
  * Memoize the isSelected result of the markers since this is user multiple times.

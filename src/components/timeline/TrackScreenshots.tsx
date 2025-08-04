@@ -206,7 +206,7 @@ export const TimelineTrackScreenshots = explicitConnect<
   mapDispatchToProps: {
     updatePreviewSelection,
   },
-  component: withSize<Props>(Screenshots),
+  component: withSize(Screenshots),
 });
 
 type HoverPreviewProps = {

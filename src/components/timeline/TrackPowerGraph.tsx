@@ -570,5 +570,5 @@ export const TrackPowerGraph = explicitConnect<
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
     };
   },
-  component: withSize<Props>(TrackPowerGraphImpl),
+  component: withSize(TrackPowerGraphImpl),
 });

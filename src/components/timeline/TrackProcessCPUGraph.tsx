@@ -473,5 +473,5 @@ export const TrackProcessCPUGraph = explicitConnect<
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
     };
   },
-  component: withSize<Props>(TrackProcessCPUGraphImpl),
+  component: withSize(TrackProcessCPUGraphImpl),
 });

@@ -545,5 +545,5 @@ export const TrackMemoryGraph = explicitConnect<
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
     };
   },
-  component: withSize<Props>(TrackMemoryGraphImpl),
+  component: withSize(TrackMemoryGraphImpl),
 });

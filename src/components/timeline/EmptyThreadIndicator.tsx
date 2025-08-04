@@ -140,4 +140,4 @@ export function getIndicatorPositions(props: Props): {
   return { startup, shutdown, emptyBufferStart };
 }
 
-export const EmptyThreadIndicator = withSize<Props>(EmptyThreadIndicatorImpl);
+export const EmptyThreadIndicator = withSize(EmptyThreadIndicatorImpl);

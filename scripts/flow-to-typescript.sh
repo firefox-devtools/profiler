@@ -53,9 +53,8 @@ echo "🔧 Applying Flow→TypeScript transformations..."
 # 1. Remove @flow directive
 apply_transform 's|^// @flow$||g' "Remove @flow directive"
 
-# 2. Handle typeof imports (common pattern for Redux actions)
-# Convert: typeof func as FuncType → (separate import and type declaration)
-# This requires manual handling as it needs to restructure imports
+# 2. withSize<Props>(...) → withSize(...)
+apply_transform 's/withSize<[^>]+>/withSize/g' "Remove explicit Props argument from withSize call"
 
 # 3. CRITICAL: Convert function types without parameter names (fixes TS1005/TS1109)
 # Only add parameter names when the parameter starts with an uppercase letter (indicates type name)

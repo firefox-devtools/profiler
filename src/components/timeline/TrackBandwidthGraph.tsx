@@ -708,5 +708,5 @@ export const TrackBandwidthGraph = explicitConnect<
       previewSelection: getPreviewSelection(state),
     };
   },
-  component: withSize<Props>(TrackBandwidthGraphImpl),
+  component: withSize(TrackBandwidthGraphImpl),
 });

@@ -390,4 +390,4 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
   }
 }
 
-export const ThreadSampleGraph = withSize<Props>(ThreadSampleGraphImpl);
+export const ThreadSampleGraph = withSize(ThreadSampleGraphImpl);

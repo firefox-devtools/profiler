@@ -625,5 +625,5 @@ export const TrackCustomMarkerGraph = explicitConnect<
       getMarker: selectors.getMarkerGetter(state),
     };
   },
-  component: withSize<Props>(TrackCustomMarkerGraphImpl),
+  component: withSize(TrackCustomMarkerGraphImpl),
 });

@@ -445,5 +445,5 @@ export const TrackNetwork = explicitConnect<
     changeSelectedNetworkMarker,
     changeHoveredMarker,
   },
-  component: withSize<Props>(Network),
+  component: withSize(Network),
 });
