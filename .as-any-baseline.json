@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-04T23:24:02.865Z",
-  "totalUsages": 112,
-  "totalFiles": 41,
+  "timestamp": "2025-08-04T23:26:45.739Z",
+  "totalUsages": 106,
+  "totalFiles": 40,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -94,23 +94,13 @@
       "content": "opacity: i === 0 ? 0 : (PHASE_OPACITIES as any)[property],"
     },
     {
-      "file": "src/components/shared/MarkerContextMenu.tsx",
-      "line": 318,
-      "content": "if (!data || !(data as any).innerWindowID || !innerWindowIDToPageMap) {"
-    },
-    {
-      "file": "src/components/shared/MarkerContextMenu.tsx",
-      "line": 323,
-      "content": "const page = innerWindowIDToPageMap.get((data as any).innerWindowID);"
-    },
-    {
       "file": "src/components/shared/chart/Viewport.tsx",
       "line": 387,
       "content": "// fact that, as of 2019 [1][2], `preventDefault()` no longer has any effect"
     },
     {
       "file": "src/components/timeline/Markers.tsx",
-      "line": 394,
+      "line": 396,
       "content": "const canvas = e.currentTarget as any;"
     },
     {
@@ -310,37 +300,27 @@
     },
     {
       "file": "src/profile-logic/marker-data.ts",
-      "line": 1198,
-      "content": "if ((data as any).innerWindowID && name === 'Navigation::Start') {"
-    },
-    {
-      "file": "src/profile-logic/marker-data.ts",
-      "line": 1202,
-      "content": "if ((data as any).category === 'Navigation') {"
-    },
-    {
-      "file": "src/profile-logic/marker-data.ts",
-      "line": 1413,
+      "line": 1417,
       "content": "[key]: removeURLs((markerPayload as any)[key]),"
     },
     {
       "file": "src/profile-logic/marker-data.ts",
-      "line": 1414,
+      "line": 1418,
       "content": "} as any;"
     },
     {
       "file": "src/profile-logic/marker-data.ts",
-      "line": 1418,
+      "line": 1422,
       "content": "[key]: removeFilePath((markerPayload as any)[key]),"
     },
     {
       "file": "src/profile-logic/marker-data.ts",
-      "line": 1419,
+      "line": 1423,
       "content": "} as any;"
     },
     {
       "file": "src/profile-logic/marker-data.ts",
-      "line": 1424,
+      "line": 1428,
       "content": "} as any;"
     },
     {
@@ -427,16 +407,6 @@
       "file": "src/profile-logic/sanitize.ts",
       "line": 107,
       "content": "favicon: null as any,"
-    },
-    {
-      "file": "src/profile-logic/sanitize.ts",
-      "line": 357,
-      "content": "(currentMarker as any).innerWindowID &&"
-    },
-    {
-      "file": "src/profile-logic/sanitize.ts",
-      "line": 358,
-      "content": "windowIdFromPrivateBrowsing.has((currentMarker as any).innerWindowID)"
     },
     {
       "file": "src/profile-logic/tracks.ts",

@@ -1195,11 +1195,15 @@ export function isNavigationMarker({ name, data }: Marker) {
     return false;
   }
 
-  if ((data as any).innerWindowID && name === 'Navigation::Start') {
+  if (
+    'innerWindowID' in data &&
+    data.innerWindowID &&
+    name === 'Navigation::Start'
+  ) {
     return true;
   }
 
-  if ((data as any).category === 'Navigation') {
+  if ('category' in data && data.category === 'Navigation') {
     // Filter by payloads.
     if (name === 'Load' || name === 'DOMContentLoaded') {
       return true;

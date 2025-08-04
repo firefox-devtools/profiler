@@ -354,8 +354,9 @@ function sanitizeThreadPII(
 
         if (
           currentMarker &&
-          (currentMarker as any).innerWindowID &&
-          windowIdFromPrivateBrowsing.has((currentMarker as any).innerWindowID)
+          'innerWindowID' in currentMarker &&
+          currentMarker.innerWindowID &&
+          windowIdFromPrivateBrowsing.has(currentMarker.innerWindowID)
         ) {
           // Remove any marker that we know they come from private browsing sessions
           markersToDelete.add(i);
