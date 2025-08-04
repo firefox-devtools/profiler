@@ -1,6 +1,6 @@
 {
-  "timestamp": "2025-08-04T23:36:17.638Z",
-  "totalUsages": 104,
+  "timestamp": "2025-08-04T23:47:17.843Z",
+  "totalUsages": 103,
   "totalFiles": 38,
   "usages": [
     {
@@ -415,17 +415,12 @@
     },
     {
       "file": "src/selectors/per-thread/index.ts",
-      "line": 201,
-      "content": "(result as any)[key] = (state: any) =>"
-    },
-    {
-      "file": "src/selectors/per-thread/index.ts",
-      "line": 202,
+      "line": 203,
       "content": "(getThreadSelectors(UrlState.getSelectedThreadIndexes(state)) as any)["
     },
     {
       "file": "src/selectors/per-thread/index.ts",
-      "line": 206,
+      "line": 207,
       "content": "const result2: ThreadSelectors = result as any;"
     },
     {

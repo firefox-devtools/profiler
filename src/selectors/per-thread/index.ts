@@ -43,6 +43,7 @@ import type {
   LineTimings,
   StackAddressInfo,
   AddressTimings,
+  State,
 } from 'firefox-profiler/types';
 
 import type { TimingsForPath } from '../../profile-logic/profile-data';
@@ -196,9 +197,9 @@ function _buildThreadSelectors(
  */
 export const selectedThreadSelectors: ThreadSelectors = (() => {
   const anyThreadSelectors: ThreadSelectors = getThreadSelectors(0);
-  const result: Partial<ThreadSelectors> = {};
+  const result: any = {};
   for (const key in anyThreadSelectors) {
-    (result as any)[key] = (state: any) =>
+    result[key] = (state: State) =>
       (getThreadSelectors(UrlState.getSelectedThreadIndexes(state)) as any)[
         key
       ](state);
