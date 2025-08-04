@@ -9,7 +9,6 @@ import urlState from './url-state';
 import icons from './icons';
 import zippedProfiles from './zipped-profiles';
 import publish from './publish';
-import l10n from './l10n';
 import code from './code';
 import { combineReducers } from 'redux';
 import type { Reducer, State } from 'firefox-profiler/types';
@@ -39,7 +38,6 @@ const rootReducer: Reducer<State> = wrapReducerInResetter(
     icons,
     zippedProfiles,
     publish,
-    l10n,
     code,
   })
 );

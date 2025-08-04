@@ -3,19 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import explicitConnect from 'firefox-profiler/utils/connect';
 import { LocalizationProvider, ReactLocalization } from '@fluent/react';
 import { negotiateLanguages } from '@fluent/langneg';
 
 import * as React from 'react';
-import {
-  getLocalization,
-  getPrimaryLocale,
-  getDirection,
-  getRequestedLocales,
-  getPseudoStrategy,
-} from 'firefox-profiler/selectors/l10n';
-import { requestL10n, receiveL10n } from 'firefox-profiler/actions/l10n';
 import {
   AVAILABLE_LOCALES,
   DEFAULT_LOCALE,
@@ -25,13 +16,18 @@ import {
 } from 'firefox-profiler/app-logic/l10n';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
-import type { Localization } from 'firefox-profiler/types';
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { Localization, PseudoStrategy } from 'firefox-profiler/types';
+import { L10nContext } from 'firefox-profiler/contexts/L10nContext';
+import type { L10nContextType } from 'firefox-profiler/contexts/L10nContext';
 
 type FetchProps = {|
   +requestedLocales: null | string[],
-  +pseudoStrategy: null | 'accented' | 'bidi',
-  +receiveL10n: typeof receiveL10n,
+  +pseudoStrategy: PseudoStrategy,
+  +receiveL10n: (
+    localization: Localization,
+    primaryLocale: string,
+    direction: 'ltr' | 'rtl'
+  ) => void,
 |};
 
 /**
@@ -98,7 +94,7 @@ class AppLocalizationFetcher extends React.PureComponent<FetchProps> {
 }
 
 type InitProps = {|
-  +requestL10n: typeof requestL10n,
+  +requestL10n: (locales: string[]) => void,
   +requestedLocales: null | string[],
 |};
 
@@ -176,26 +172,20 @@ class AppLocalizationInit extends React.PureComponent<InitProps> {
   }
 }
 
-type ProviderStateProps = {|
+type L10nState = {|
   +requestedLocales: null | string[],
-  +pseudoStrategy: null | 'accented' | 'bidi',
+  +pseudoStrategy: PseudoStrategy,
   +localization: Localization,
   +primaryLocale: string | null,
   +direction: 'ltr' | 'rtl',
 |};
-type ProviderOwnProps = {|
+
+type ProviderProps = {|
   children: React.Node,
 |};
-type ProviderDispatchProps = {|
-  +requestL10n: typeof requestL10n,
-  +receiveL10n: typeof receiveL10n,
-|};
 
-type ProviderProps = ConnectedProps<
-  ProviderOwnProps,
-  ProviderStateProps,
-  ProviderDispatchProps,
->;
+// Global reference to the AppLocalizationProvider instance for console access
+let globalL10nProvider: AppLocalizationProvider | null = null;
 
 /**
  * This component is responsible for providing the fluent localization data to
@@ -203,9 +193,27 @@ type ProviderProps = ConnectedProps<
  * Moreover it delegates to AppLocalizationInit and AppLocalizationFetcher the
  * handling of initialization, persisting and fetching the locales information.
  */
-class AppLocalizationProviderImpl extends React.PureComponent<ProviderProps> {
+export class AppLocalizationProvider extends React.PureComponent<
+  ProviderProps,
+  L10nState,
+> {
+  state: L10nState = {
+    requestedLocales: null,
+    pseudoStrategy: null,
+    localization: new ReactLocalization([]),
+    primaryLocale: null,
+    direction: 'ltr',
+  };
+
   componentDidMount() {
     this._updateLocalizationDocumentAttribute();
+    globalL10nProvider = this;
+  }
+
+  componentWillUnmount() {
+    if (globalL10nProvider === this) {
+      globalL10nProvider = null;
+    }
   }
 
   componentDidUpdate() {
@@ -213,7 +221,7 @@ class AppLocalizationProviderImpl extends React.PureComponent<ProviderProps> {
   }
 
   _updateLocalizationDocumentAttribute() {
-    const { primaryLocale, direction } = this.props;
+    const { primaryLocale, direction } = this.state;
     if (!primaryLocale) {
       // The localization isn't ready.
       return;
@@ -223,26 +231,44 @@ class AppLocalizationProviderImpl extends React.PureComponent<ProviderProps> {
     ensureExists(document.documentElement).setAttribute('lang', primaryLocale);
   }
 
+  _requestL10n = (locales: string[]) => {
+    this.setState({ requestedLocales: locales });
+  };
+
+  _receiveL10n = (
+    localization: Localization,
+    primaryLocale: string,
+    direction: 'ltr' | 'rtl'
+  ) => {
+    this.setState({ localization, primaryLocale, direction });
+  };
+
+  // Used by the global togglePseudoStrategy function for console access
+  // eslint-disable-next-line react/no-unused-class-component-methods
+  togglePseudoStrategy = (pseudoStrategy: PseudoStrategy) => {
+    this.setState({ pseudoStrategy });
+  };
+
   render() {
-    const {
+    const { primaryLocale, localization, requestedLocales, pseudoStrategy } =
+      this.state;
+    const { children } = this.props;
+
+    const contextValue: L10nContextType = {
       primaryLocale,
-      children,
-      localization,
-      requestedLocales,
-      pseudoStrategy,
-      receiveL10n,
-      requestL10n,
-    } = this.props;
+      requestL10n: this._requestL10n,
+    };
+
     return (
-      <>
+      <L10nContext.Provider value={contextValue}>
         <AppLocalizationInit
-          requestL10n={requestL10n}
+          requestL10n={this._requestL10n}
           requestedLocales={requestedLocales}
         />
         <AppLocalizationFetcher
           requestedLocales={requestedLocales}
           pseudoStrategy={pseudoStrategy}
-          receiveL10n={receiveL10n}
+          receiveL10n={this._receiveL10n}
         />
         {/* if primaryLocale is null, the localization isn't ready */}
         {primaryLocale ? (
@@ -250,25 +276,14 @@ class AppLocalizationProviderImpl extends React.PureComponent<ProviderProps> {
             {children}
           </LocalizationProvider>
         ) : null}
-      </>
+      </L10nContext.Provider>
     );
   }
 }
-export const AppLocalizationProvider = explicitConnect<
-  ProviderOwnProps,
-  ProviderStateProps,
-  ProviderDispatchProps,
->({
-  mapStateToProps: (state) => ({
-    localization: getLocalization(state),
-    primaryLocale: getPrimaryLocale(state),
-    direction: getDirection(state),
-    requestedLocales: getRequestedLocales(state),
-    pseudoStrategy: getPseudoStrategy(state),
-  }),
-  mapDispatchToProps: {
-    requestL10n,
-    receiveL10n,
-  },
-  component: AppLocalizationProviderImpl,
-});
+
+// Hack: Expose a way to call globalL10nProvider.togglePseudoStrategy from window-console.js.
+export function togglePseudoStrategy(pseudoStrategy: PseudoStrategy) {
+  if (globalL10nProvider) {
+    globalL10nProvider.togglePseudoStrategy(pseudoStrategy);
+  }
+}
