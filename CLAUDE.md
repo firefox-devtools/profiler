@@ -21,13 +21,13 @@ You can use the `gh` command line tool to read issues and pull requests.
 Run these commands as-is **without specifying a file path**. This project is small enough that running all tests and linting all files completes very quickly. It is not worth scoping down these commands.
 
 - `yarn test` - Run Jest tests
-- `yarn test-all` - Run all tests including flow, lint, and license checks
+- `yarn test-all` - Run all tests including typecheck, lint, and license checks
 
 ### Code Quality
 
 - `yarn lint` - Run ESLint and Stylelint
 - `yarn lint-fix` - Auto-fix linting issues
-- `yarn flow` - Run Flow type checking
+- `yarn typecheck` - Run TypeScript type checking
 - `yarn prettier-run` - Check code formatting
 - `yarn prettier-fix` - Auto-fix code formatting
 
@@ -76,14 +76,13 @@ The Firefox Profiler is a React/Redux web application for visualizing performanc
 
 ### Type System
 
-This project is in the process of being migrated from Flow to TypeScript. Type definitions are in `src/types/`.
+This project has recently been migrated from Flow to TypeScript. Type definitions are in `src/types/`.
 
-**Migration Status**: Major milestone achieved - all 13/13 type definition files successfully converted to TypeScript ✅
+**Migration Status**: Application code has been converted but at a considerable loss of type coverage due to frequent use of `as any`. Tests and test utility files have not been converted yet.
 
 See **PLAN.md** for comprehensive migration guidance including:
 
 - Current progress status and achievements
-- Proven Flow→TypeScript conversion patterns
 - Next steps and actionable tasks
 - Lessons learned and best practices
 
