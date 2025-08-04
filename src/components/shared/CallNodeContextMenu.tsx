@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import * as React from 'react';
 import { MenuItem } from '@firefox-devtools/react-contextmenu';
+import type { LocalizedProps } from '@fluent/react';
 import { Localized } from '@fluent/react';
 
 import { ContextMenu } from './ContextMenu';
@@ -807,7 +808,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
   renderTransformMenuItem(props: {
     readonly l10nId: string;
-    readonly l10nProps?: unknown;
+    readonly l10nProps?: Partial<LocalizedProps>;
     readonly content: React.ReactNode;
     readonly onClick: (
       event: React.ChangeEvent<HTMLElement>,
@@ -826,7 +827,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         <Localized
           id={props.l10nId}
           attrs={{ title: true }}
-          {...(props.l10nProps as any)}
+          {...props.l10nProps}
         >
           <DivWithTitle
             className="react-contextmenu-item-content"
@@ -842,7 +843,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
   renderMenuItemWithShortcut(props: {
     readonly l10nId: string;
-    readonly l10nProps?: unknown;
+    readonly l10nProps?: Partial<LocalizedProps>;
     readonly content: React.ReactNode;
     readonly onClick: (
       event: React.ChangeEvent<HTMLElement>,
@@ -853,7 +854,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   }) {
     return (
       <MenuItem onClick={props.onClick} data={{ type: props.data.type }}>
-        <Localized id={props.l10nId} {...(props.l10nProps as any)}>
+        <Localized id={props.l10nId} {...props.l10nProps}>
           <div className="react-contextmenu-item-content">{props.content}</div>
         </Localized>
         <kbd className="callNodeContextMenuShortcut">{props.shortcut}</kbd>
