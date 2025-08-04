@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import { GREY_20 } from 'photon-colors';
 import * as React from 'react';
 import classNames from 'classnames';
@@ -12,7 +10,6 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 import {
   withChartViewport,
-  type WithChartViewport,
   type Viewport,
 } from 'firefox-profiler/components/shared/chart/Viewport';
 import { ChartCanvas } from 'firefox-profiler/components/shared/chart/Canvas';
@@ -40,27 +37,26 @@ import type {
 import type { WrapFunctionInDispatch } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +jsTracerTimingRows: JsTracerTiming[],
-  +jsTracerTable: JsTracerTable,
-  +rowHeight: CssPixels,
-  +threadsKey: ThreadsKey,
-  +doFadeIn: boolean,
-  +updatePreviewSelection: WrapFunctionInDispatch<
-    typeof updatePreviewSelection,
-  >,
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly jsTracerTimingRows: JsTracerTiming[];
+  readonly jsTracerTable: JsTracerTable;
+  readonly rowHeight: CssPixels;
+  readonly threadsKey: ThreadsKey;
+  readonly doFadeIn: boolean;
+  readonly updatePreviewSelection: WrapFunctionInDispatch<
+    typeof updatePreviewSelection
+  >;
 };
 
-type Props = {
-  ...OwnProps,
+type Props = OwnProps & {
   // Bring in the viewport props from the higher order Viewport component.
-  +viewport: Viewport,
+  readonly viewport: Viewport;
 };
 
 type State = {
   // hoveredItem: null | number,
-  hasFirstDraw: boolean,
+  hasFirstDraw: boolean;
 };
 
 /**
@@ -68,24 +64,24 @@ type State = {
  * These values will be reset on every draw call.
  */
 type RenderPass = {
-  +ctx: CanvasRenderingContext2D,
-  +textMeasurement: TextMeasurement,
-  +fastFillStyle: FastFillStyle,
-  +startRow: number,
-  +endRow: number,
-  +devicePixels: {
-    +rowHeight: DevicePixels,
-    +containerWidth: DevicePixels,
-    +innerContainerWidth: DevicePixels,
-    +containerHeight: DevicePixels,
-    +viewportTop: DevicePixels,
-    +textOffsetStart: DevicePixels,
-    +textOffsetTop: DevicePixels,
-    +timelineMarginLeft: DevicePixels,
-    +timelineMarginRight: DevicePixels,
-    +oneCssPixel: DevicePixels,
-    +rowLabelOffsetLeft: DevicePixels,
-  },
+  readonly ctx: CanvasRenderingContext2D;
+  readonly textMeasurement: TextMeasurement;
+  readonly fastFillStyle: FastFillStyle;
+  readonly startRow: number;
+  readonly endRow: number;
+  readonly devicePixels: {
+    readonly rowHeight: DevicePixels;
+    readonly containerWidth: DevicePixels;
+    readonly innerContainerWidth: DevicePixels;
+    readonly containerHeight: DevicePixels;
+    readonly viewportTop: DevicePixels;
+    readonly textOffsetStart: DevicePixels;
+    readonly textOffsetTop: DevicePixels;
+    readonly timelineMarginLeft: DevicePixels;
+    readonly timelineMarginRight: DevicePixels;
+    readonly oneCssPixel: DevicePixels;
+    readonly rowLabelOffsetLeft: DevicePixels;
+  };
 };
 
 const TEXT_OFFSET_TOP: CssPixels = 11;
@@ -94,7 +90,7 @@ const ROW_LABEL_OFFSET_LEFT: CssPixels = 5;
 const FONT_SIZE: CssPixels = 10;
 
 class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
-  state = {
+  override state = {
     hasFirstDraw: false,
   };
   _textMeasurement: null | TextMeasurement;
@@ -625,7 +621,9 @@ class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
    * These methods were left, but commented out since the intent is to enable them
    * as follow-ups.
    */
-  getHoveredItemInfo = (_hoveredItem: IndexIntoJsTracerEvents): React.Node => {
+  getHoveredItemInfo = (
+    _hoveredItem: IndexIntoJsTracerEvents
+  ): React.ReactNode => {
     return null;
     // return (
     //   <JsTracerTooltipContents
@@ -635,7 +633,7 @@ class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
     // );
   };
 
-  render() {
+  override render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
     return (
       <ChartCanvas
@@ -657,7 +655,4 @@ class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
   }
 }
 
-export const JsTracerCanvas = (withChartViewport: WithChartViewport<
-  OwnProps,
-  Props,
->)(JsTracerCanvasImpl);
+export const JsTracerCanvas = withChartViewport(JsTracerCanvasImpl);
