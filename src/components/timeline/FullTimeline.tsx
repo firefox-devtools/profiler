@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import * as React from 'react';
 import { showMenu } from '@firefox-devtools/react-contextmenu';
 import { Localized } from '@fluent/react';
@@ -51,39 +49,36 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {
   // This ref will be added to the inner container.
-  +innerElementRef?: React.Ref<any>,
+  readonly innerElementRef?: React.Ref<any>;
 };
 
 type StateProps = {
-  +committedRange: StartEndRange,
-  +globalTracks: GlobalTrack[],
-  +globalTrackOrder: TrackIndex[],
-  +globalTrackReferences: GlobalTrackReference[],
-  +panelLayoutGeneration: number,
-  +zeroAt: Milliseconds,
-  +profileTimelineUnit: TimelineUnit,
-  +hiddenTrackCount: HiddenTrackCount,
+  readonly committedRange: StartEndRange;
+  readonly globalTracks: GlobalTrack[];
+  readonly globalTrackOrder: TrackIndex[];
+  readonly globalTrackReferences: GlobalTrackReference[];
+  readonly panelLayoutGeneration: number;
+  readonly zeroAt: Milliseconds;
+  readonly profileTimelineUnit: TimelineUnit;
+  readonly hiddenTrackCount: HiddenTrackCount;
 };
 
 type DispatchProps = {
-  +changeGlobalTrackOrder: typeof changeGlobalTrackOrder,
-  +changeRightClickedTrack: typeof changeRightClickedTrack,
+  readonly changeGlobalTrackOrder: typeof changeGlobalTrackOrder;
+  readonly changeRightClickedTrack: typeof changeRightClickedTrack;
 };
 
-type Props = {
-  ...SizeProps,
-  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
-};
+type Props = SizeProps & ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 type State = {
-  initialSelected: InitialSelectedTrackReference | null,
+  initialSelected: InitialSelectedTrackReference | null;
 };
 
 class TimelineSettingsHiddenTracks extends React.PureComponent<{
-  +hiddenTrackCount: HiddenTrackCount,
-  +changeRightClickedTrack: typeof changeRightClickedTrack,
+  readonly hiddenTrackCount: HiddenTrackCount;
+  readonly changeRightClickedTrack: typeof changeRightClickedTrack;
 }> {
-  _showMenu = (event: SyntheticMouseEvent<HTMLElement>) => {
+  _showMenu = (event: React.MouseEvent<HTMLElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     this.props.changeRightClickedTrack(null);
     showMenu({
@@ -94,7 +89,7 @@ class TimelineSettingsHiddenTracks extends React.PureComponent<{
     });
   };
 
-  render() {
+  override render() {
     const { hiddenTrackCount } = this.props;
 
     return (
@@ -128,7 +123,7 @@ class TimelineSettingsHiddenTracks extends React.PureComponent<{
 }
 
 class FullTimelineImpl extends React.PureComponent<Props, State> {
-  state = {
+  override state = {
     initialSelected: null,
   };
 
@@ -140,7 +135,7 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
     this.setState({ initialSelected: el });
   };
 
-  render() {
+  override render() {
     const {
       globalTracks,
       globalTrackOrder,
@@ -206,7 +201,7 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
 export const FullTimeline = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state) => ({
     globalTracks: getGlobalTracks(state),
