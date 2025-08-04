@@ -1,43 +1,8 @@
 {
-  "timestamp": "2025-08-04T23:08:08.876Z",
+  "timestamp": "2025-08-04T23:11:25.093Z",
   "totalUsages": 118,
   "totalFiles": 43,
   "usages": [
-    {
-      "file": "src/selectors/per-thread/index.ts",
-      "line": 201,
-      "content": "(result as any)[key] = (state: any) =>"
-    },
-    {
-      "file": "src/selectors/per-thread/index.ts",
-      "line": 202,
-      "content": "(getThreadSelectors(UrlState.getSelectedThreadIndexes(state)) as any)["
-    },
-    {
-      "file": "src/selectors/per-thread/index.ts",
-      "line": 206,
-      "content": "const result2: ThreadSelectors = result as any;"
-    },
-    {
-      "file": "src/selectors/per-thread/markers.ts",
-      "line": 663,
-      "content": "const val = (data as any)[keys[i]];"
-    },
-    {
-      "file": "src/selectors/publish.ts",
-      "line": 111,
-      "content": "isIncludingEverything && (checkedSharingOptions as any)[prop];"
-    },
-    {
-      "file": "src/reducers/url-state.ts",
-      "line": 709,
-      "content": "profileSpecific: profileSpecific(undefined, state as any),"
-    },
-    {
-      "file": "src/app-logic/create-store.ts",
-      "line": 33,
-      "content": "return store as any;"
-    },
     {
       "file": "src/actions/receive-profile.ts",
       "line": 805,
@@ -84,6 +49,11 @@
       "content": "case 'from-file' as any:"
     },
     {
+      "file": "src/app-logic/create-store.ts",
+      "line": 33,
+      "content": "return store as any;"
+    },
+    {
       "file": "src/components/calltree/CallTree.tsx",
       "line": 134,
       "content": "component: Icon as any,"
@@ -99,9 +69,9 @@
       "content": "component: Icon as any,"
     },
     {
-      "file": "src/components/tooltip/Marker.tsx",
-      "line": 251,
-      "content": "const value = (data as any)[key];"
+      "file": "src/components/marker-table/index.tsx",
+      "line": 272,
+      "content": "tree={tree as any}"
     },
     {
       "file": "src/components/network-chart/NetworkChartRow.tsx",
@@ -134,19 +104,44 @@
       "content": "opacity: i === 0 ? 0 : (PHASE_OPACITIES as any)[property],"
     },
     {
+      "file": "src/components/shared/MarkerContextMenu.tsx",
+      "line": 205,
+      "content": "if (!data || !(data as any).innerWindowID || !innerWindowIDToPageMap) {"
+    },
+    {
+      "file": "src/components/shared/MarkerContextMenu.tsx",
+      "line": 210,
+      "content": "const page = innerWindowIDToPageMap.get((data as any).innerWindowID);"
+    },
+    {
+      "file": "src/components/shared/MarkerContextMenu.tsx",
+      "line": 313,
+      "content": "if (!data || !(data as any).innerWindowID || !innerWindowIDToPageMap) {"
+    },
+    {
+      "file": "src/components/shared/MarkerContextMenu.tsx",
+      "line": 318,
+      "content": "const page = innerWindowIDToPageMap.get((data as any).innerWindowID);"
+    },
+    {
+      "file": "src/components/shared/chart/Viewport.tsx",
+      "line": 387,
+      "content": "// fact that, as of 2019 [1][2], `preventDefault()` no longer has any effect"
+    },
+    {
+      "file": "src/components/sidebar/CanSelectContent.tsx",
+      "line": 27,
+      "content": "const TagName = (tagName || 'div') as any;"
+    },
+    {
       "file": "src/components/timeline/GlobalTrack.tsx",
       "line": 286,
       "content": "(globalTrack as any).mainThreadIndex !== null ? ("
     },
     {
-      "file": "src/components/timeline/TrackScreenshots.tsx",
-      "line": 143,
-      "content": "payload = screenshots[screenshotIndex].data as any;"
-    },
-    {
-      "file": "src/components/timeline/TrackScreenshots.tsx",
-      "line": 359,
-      "content": ".data as any;"
+      "file": "src/components/timeline/Markers.tsx",
+      "line": 394,
+      "content": "const canvas = e.currentTarget as any;"
     },
     {
       "file": "src/components/timeline/TrackContextMenu.tsx",
@@ -159,144 +154,69 @@
       "content": "const MenuItemAsAny = MenuItem as any; // https://github.com/firefox-devtools/react-contextmenu/issues/334"
     },
     {
-      "file": "src/utils/connect.ts",
-      "line": 129,
-      "content": "return (connect as any)("
+      "file": "src/components/timeline/TrackScreenshots.tsx",
+      "line": 143,
+      "content": "payload = screenshots[screenshotIndex].data as any;"
     },
     {
-      "file": "src/utils/connect.ts",
-      "line": 154,
-      "content": "return (connect as any)("
+      "file": "src/components/timeline/TrackScreenshots.tsx",
+      "line": 359,
+      "content": ".data as any;"
     },
     {
-      "file": "src/utils/base64.ts",
-      "line": 14,
-      "content": "onload: () => resolve(reader.result as any),"
+      "file": "src/components/tooltip/Marker.tsx",
+      "line": 251,
+      "content": "const value = (data as any)[key];"
     },
     {
-      "file": "src/utils/flow.ts",
-      "line": 109,
-      "content": "return item as any;"
-    },
-    {
-      "file": "src/utils/flow.ts",
-      "line": 116,
-      "content": "return item as any;"
-    },
-    {
-      "file": "src/utils/flow.ts",
-      "line": 126,
-      "content": "return Object.values(object) as any;"
-    },
-    {
-      "file": "src/utils/flow.ts",
-      "line": 136,
-      "content": "return Object.entries(object) as any;"
-    },
-    {
-      "file": "src/utils/flow.ts",
-      "line": 147,
-      "content": "const result: { [K in Key]: Return } = {} as any;"
-    },
-    {
-      "file": "src/utils/index.ts",
-      "line": 50,
-      "content": "if (a[key] !== (b as any)[key]) {"
-    },
-    {
-      "file": "src/components/timeline/Markers.tsx",
-      "line": 394,
-      "content": "const canvas = e.currentTarget as any;"
-    },
-    {
-      "file": "src/utils/__mocks__/worker-factory.ts",
-      "line": 28,
-      "content": "const nodeVersion = (process as any).versions.node;"
-    },
-    {
-      "file": "src/components/marker-table/index.tsx",
-      "line": 272,
-      "content": "tree={tree as any}"
-    },
-    {
-      "file": "src/utils/analytics.ts",
-      "line": 51,
-      "content": "const ga: GoogleAnalytics | null = (self as any).ga;"
-    },
-    {
-      "file": "src/utils/analytics.ts",
-      "line": 58,
-      "content": "const ga: GoogleAnalytics | null = (self as any).ga;"
-    },
-    {
-      "file": "src/utils/css-geometry-tools.ts",
+      "file": "src/index.tsx",
       "line": 105,
-      "content": "return (rect as any)[key];"
+      "content": "addDataToWindowObject(store.getState, store.dispatch as any);"
     },
     {
-      "file": "src/utils/errors.ts",
-      "line": 16,
-      "content": "(this as any).__proto__ = TemporaryError.prototype;"
+      "file": "src/profile-logic/call-tree.tsx",
+      "line": 702,
+      "content": "// The inverted call node has children if it has any inverted child nodes"
     },
     {
-      "file": "src/components/sidebar/CanSelectContent.tsx",
-      "line": 27,
-      "content": "const TagName = (tagName || 'div') as any;"
+      "file": "src/profile-logic/errors.ts",
+      "line": 18,
+      "content": "(this as any).__proto__ = SymbolsNotFoundError.prototype;"
     },
     {
-      "file": "src/utils/window-console.ts",
-      "line": 256,
-      "content": "(data as any).module &&"
+      "file": "src/profile-logic/import/art-trace.tsx",
+      "line": 277,
+      "content": "(summaryDetails as any)[headerInfoLabel] = headerInfoValue;"
     },
     {
-      "file": "src/utils/window-console.ts",
-      "line": 257,
-      "content": "(data as any).name"
+      "file": "src/profile-logic/import/art-trace.tsx",
+      "line": 819,
+      "content": "(this._stackTable.data as any).push([frame, prefix]);"
     },
     {
-      "file": "src/utils/window-console.ts",
-      "line": 262,
-      "content": "const statement = `${strTimestamp} - [${processName} ${thread.pid}: ${thread.name}]: D/${(data as any).module} ${(data as any).name.trim()}`;"
+      "file": "src/profile-logic/import/art-trace.tsx",
+      "line": 839,
+      "content": "(this._stringTable as any).push(methodString);"
     },
     {
-      "file": "src/utils/format-numbers.ts",
-      "line": 36,
-      "content": "cache: new NamedTupleMap() as any,"
+      "file": "src/profile-logic/import/art-trace.tsx",
+      "line": 842,
+      "content": "(this._frameTable.data as any).push(["
     },
     {
-      "file": "src/profile-logic/process-profile.ts",
-      "line": 956,
-      "content": "const data: MarkerPayload = payload as any;"
+      "file": "src/profile-logic/import/art-trace.tsx",
+      "line": 884,
+      "content": "(this._samples.data as any).push(["
     },
     {
-      "file": "src/profile-logic/process-profile.ts",
-      "line": 971,
-      "content": "const stringIndex = (data as any)[fieldKey];"
+      "file": "src/profile-logic/import/art-trace.tsx",
+      "line": 905,
+      "content": "(this._samples.data as any).push(["
     },
     {
-      "file": "src/profile-logic/process-profile.ts",
-      "line": 976,
-      "content": "} as any;"
-    },
-    {
-      "file": "src/profile-logic/process-profile.ts",
-      "line": 1609,
-      "content": "const geckoMarker = marker as any as GeckoMarkerTuple;"
-    },
-    {
-      "file": "src/profile-logic/process-profile.ts",
-      "line": 1984,
-      "content": "let arrayBuffer: ArrayBufferLike = arbitraryFormat as any;"
-    },
-    {
-      "file": "src/profile-logic/js-tracer.tsx",
-      "line": 628,
-      "content": "(unmatchedEventIndexes as any)[unmatchedIndex] = tracerEventIndex;"
-    },
-    {
-      "file": "src/components/shared/chart/Viewport.tsx",
-      "line": 387,
-      "content": "// fact that, as of 2019 [1][2], `preventDefault()` no longer has any effect"
+      "file": "src/profile-logic/import/art-trace.tsx",
+      "line": 1005,
+      "content": "} as any,"
     },
     {
       "file": "src/profile-logic/import/chrome.tsx",
@@ -389,129 +309,29 @@
       "content": "const duration: number = (event.dur as any) / 1000;"
     },
     {
-      "file": "src/components/shared/MarkerContextMenu.tsx",
-      "line": 205,
-      "content": "if (!data || !(data as any).innerWindowID || !innerWindowIDToPageMap) {"
-    },
-    {
-      "file": "src/components/shared/MarkerContextMenu.tsx",
-      "line": 210,
-      "content": "const page = innerWindowIDToPageMap.get((data as any).innerWindowID);"
-    },
-    {
-      "file": "src/components/shared/MarkerContextMenu.tsx",
-      "line": 313,
-      "content": "if (!data || !(data as any).innerWindowID || !innerWindowIDToPageMap) {"
-    },
-    {
-      "file": "src/components/shared/MarkerContextMenu.tsx",
-      "line": 318,
-      "content": "const page = innerWindowIDToPageMap.get((data as any).innerWindowID);"
-    },
-    {
-      "file": "src/profile-logic/import/art-trace.tsx",
-      "line": 277,
-      "content": "(summaryDetails as any)[headerInfoLabel] = headerInfoValue;"
-    },
-    {
-      "file": "src/profile-logic/import/art-trace.tsx",
-      "line": 819,
-      "content": "(this._stackTable.data as any).push([frame, prefix]);"
-    },
-    {
-      "file": "src/profile-logic/import/art-trace.tsx",
-      "line": 839,
-      "content": "(this._stringTable as any).push(methodString);"
-    },
-    {
-      "file": "src/profile-logic/import/art-trace.tsx",
-      "line": 842,
-      "content": "(this._frameTable.data as any).push(["
-    },
-    {
-      "file": "src/profile-logic/import/art-trace.tsx",
-      "line": 884,
-      "content": "(this._samples.data as any).push(["
-    },
-    {
-      "file": "src/profile-logic/import/art-trace.tsx",
-      "line": 905,
-      "content": "(this._samples.data as any).push(["
-    },
-    {
-      "file": "src/profile-logic/import/art-trace.tsx",
-      "line": 1005,
-      "content": "} as any,"
-    },
-    {
-      "file": "src/index.tsx",
-      "line": 105,
-      "content": "addDataToWindowObject(store.getState, store.dispatch as any);"
-    },
-    {
-      "file": "src/profile-logic/errors.ts",
-      "line": 18,
-      "content": "(this as any).__proto__ = SymbolsNotFoundError.prototype;"
-    },
-    {
-      "file": "src/profile-logic/sanitize.ts",
-      "line": 107,
-      "content": "favicon: null as any,"
-    },
-    {
-      "file": "src/profile-logic/sanitize.ts",
-      "line": 357,
-      "content": "(currentMarker as any).innerWindowID &&"
-    },
-    {
-      "file": "src/profile-logic/sanitize.ts",
-      "line": 358,
-      "content": "windowIdFromPrivateBrowsing.has((currentMarker as any).innerWindowID)"
-    },
-    {
-      "file": "src/profile-logic/merge-compare.ts",
-      "line": 105,
-      "content": "if (profiles.every((profile) => (profile.meta as any)[key] === value)) {"
-    },
-    {
-      "file": "src/profile-logic/merge-compare.ts",
-      "line": 106,
-      "content": "(resultProfile.meta as any)[key] = value;"
-    },
-    {
-      "file": "src/profile-logic/merge-compare.ts",
-      "line": 591,
-      "content": "const stringIndex = (data as any)[fieldKey];"
-    },
-    {
-      "file": "src/profile-logic/merge-compare.ts",
-      "line": 605,
-      "content": "} as any;"
-    },
-    {
-      "file": "src/profile-logic/merge-compare.ts",
-      "line": 1404,
-      "content": "* as well as any CompositorScreenshot markers found on any other threads."
-    },
-    {
-      "file": "src/profile-logic/tracks.ts",
-      "line": 578,
-      "content": "const data: ScreenshotPayload = markers.data[markerIndex] as any;"
-    },
-    {
-      "file": "src/profile-logic/marker-schema.tsx",
-      "line": 225,
-      "content": "const value = (marker.data as any)[payloadKey];"
-    },
-    {
-      "file": "src/profile-logic/marker-schema.tsx",
-      "line": 634,
-      "content": "let value = (data as any)[payloadField.key];"
-    },
-    {
       "file": "src/profile-logic/import/dhat.tsx",
       "line": 167,
       "content": "const { dhatFileVersion } = json as any;"
+    },
+    {
+      "file": "src/profile-logic/import/linux-perf.tsx",
+      "line": 125,
+      "content": "(stackTable.data as any[]).push([prefix, frame]);"
+    },
+    {
+      "file": "src/profile-logic/import/linux-perf.tsx",
+      "line": 160,
+      "content": "(frameTable.data as any[]).push(["
+    },
+    {
+      "file": "src/profile-logic/import/linux-perf.tsx",
+      "line": 190,
+      "content": "(samples.data as any[]).push([stack, time, responsiveness]);"
+    },
+    {
+      "file": "src/profile-logic/js-tracer.tsx",
+      "line": 628,
+      "content": "(unmatchedEventIndexes as any)[unmatchedIndex] = tracerEventIndex;"
     },
     {
       "file": "src/profile-logic/marker-data.ts",
@@ -554,6 +374,66 @@
       "content": "} as any;"
     },
     {
+      "file": "src/profile-logic/marker-schema.tsx",
+      "line": 225,
+      "content": "const value = (marker.data as any)[payloadKey];"
+    },
+    {
+      "file": "src/profile-logic/marker-schema.tsx",
+      "line": 634,
+      "content": "let value = (data as any)[payloadField.key];"
+    },
+    {
+      "file": "src/profile-logic/merge-compare.ts",
+      "line": 105,
+      "content": "if (profiles.every((profile) => (profile.meta as any)[key] === value)) {"
+    },
+    {
+      "file": "src/profile-logic/merge-compare.ts",
+      "line": 106,
+      "content": "(resultProfile.meta as any)[key] = value;"
+    },
+    {
+      "file": "src/profile-logic/merge-compare.ts",
+      "line": 591,
+      "content": "const stringIndex = (data as any)[fieldKey];"
+    },
+    {
+      "file": "src/profile-logic/merge-compare.ts",
+      "line": 605,
+      "content": "} as any;"
+    },
+    {
+      "file": "src/profile-logic/merge-compare.ts",
+      "line": 1404,
+      "content": "* as well as any CompositorScreenshot markers found on any other threads."
+    },
+    {
+      "file": "src/profile-logic/process-profile.ts",
+      "line": 956,
+      "content": "const data: MarkerPayload = payload as any;"
+    },
+    {
+      "file": "src/profile-logic/process-profile.ts",
+      "line": 971,
+      "content": "const stringIndex = (data as any)[fieldKey];"
+    },
+    {
+      "file": "src/profile-logic/process-profile.ts",
+      "line": 976,
+      "content": "} as any;"
+    },
+    {
+      "file": "src/profile-logic/process-profile.ts",
+      "line": 1609,
+      "content": "const geckoMarker = marker as any as GeckoMarkerTuple;"
+    },
+    {
+      "file": "src/profile-logic/process-profile.ts",
+      "line": 1984,
+      "content": "let arrayBuffer: ArrayBufferLike = arbitraryFormat as any;"
+    },
+    {
       "file": "src/profile-logic/profile-compacting.ts",
       "line": 169,
       "content": "const stringIndex = (data as any)[fieldKey];"
@@ -569,29 +449,149 @@
       "content": "newDataCol[i] = newData as any;"
     },
     {
-      "file": "src/profile-logic/import/linux-perf.tsx",
-      "line": 125,
-      "content": "(stackTable.data as any[]).push([prefix, frame]);"
-    },
-    {
-      "file": "src/profile-logic/import/linux-perf.tsx",
-      "line": 160,
-      "content": "(frameTable.data as any[]).push(["
-    },
-    {
-      "file": "src/profile-logic/import/linux-perf.tsx",
-      "line": 190,
-      "content": "(samples.data as any[]).push([stack, time, responsiveness]);"
-    },
-    {
-      "file": "src/profile-logic/call-tree.tsx",
-      "line": 702,
-      "content": "// The inverted call node has children if it has any inverted child nodes"
-    },
-    {
       "file": "src/profile-logic/profile-data.ts",
       "line": 1490,
       "content": "* Checks if a sample table has any useful samples."
+    },
+    {
+      "file": "src/profile-logic/sanitize.ts",
+      "line": 107,
+      "content": "favicon: null as any,"
+    },
+    {
+      "file": "src/profile-logic/sanitize.ts",
+      "line": 357,
+      "content": "(currentMarker as any).innerWindowID &&"
+    },
+    {
+      "file": "src/profile-logic/sanitize.ts",
+      "line": 358,
+      "content": "windowIdFromPrivateBrowsing.has((currentMarker as any).innerWindowID)"
+    },
+    {
+      "file": "src/profile-logic/tracks.ts",
+      "line": 578,
+      "content": "const data: ScreenshotPayload = markers.data[markerIndex] as any;"
+    },
+    {
+      "file": "src/reducers/url-state.ts",
+      "line": 709,
+      "content": "profileSpecific: profileSpecific(undefined, state as any),"
+    },
+    {
+      "file": "src/selectors/per-thread/index.ts",
+      "line": 201,
+      "content": "(result as any)[key] = (state: any) =>"
+    },
+    {
+      "file": "src/selectors/per-thread/index.ts",
+      "line": 202,
+      "content": "(getThreadSelectors(UrlState.getSelectedThreadIndexes(state)) as any)["
+    },
+    {
+      "file": "src/selectors/per-thread/index.ts",
+      "line": 206,
+      "content": "const result2: ThreadSelectors = result as any;"
+    },
+    {
+      "file": "src/selectors/per-thread/markers.ts",
+      "line": 663,
+      "content": "const val = (data as any)[keys[i]];"
+    },
+    {
+      "file": "src/selectors/publish.ts",
+      "line": 111,
+      "content": "isIncludingEverything && (checkedSharingOptions as any)[prop];"
+    },
+    {
+      "file": "src/utils/__mocks__/worker-factory.ts",
+      "line": 28,
+      "content": "const nodeVersion = (process as any).versions.node;"
+    },
+    {
+      "file": "src/utils/analytics.ts",
+      "line": 51,
+      "content": "const ga: GoogleAnalytics | null = (self as any).ga;"
+    },
+    {
+      "file": "src/utils/analytics.ts",
+      "line": 58,
+      "content": "const ga: GoogleAnalytics | null = (self as any).ga;"
+    },
+    {
+      "file": "src/utils/base64.ts",
+      "line": 14,
+      "content": "onload: () => resolve(reader.result as any),"
+    },
+    {
+      "file": "src/utils/connect.ts",
+      "line": 129,
+      "content": "return (connect as any)("
+    },
+    {
+      "file": "src/utils/connect.ts",
+      "line": 154,
+      "content": "return (connect as any)("
+    },
+    {
+      "file": "src/utils/css-geometry-tools.ts",
+      "line": 105,
+      "content": "return (rect as any)[key];"
+    },
+    {
+      "file": "src/utils/errors.ts",
+      "line": 16,
+      "content": "(this as any).__proto__ = TemporaryError.prototype;"
+    },
+    {
+      "file": "src/utils/flow.ts",
+      "line": 109,
+      "content": "return item as any;"
+    },
+    {
+      "file": "src/utils/flow.ts",
+      "line": 116,
+      "content": "return item as any;"
+    },
+    {
+      "file": "src/utils/flow.ts",
+      "line": 126,
+      "content": "return Object.values(object) as any;"
+    },
+    {
+      "file": "src/utils/flow.ts",
+      "line": 136,
+      "content": "return Object.entries(object) as any;"
+    },
+    {
+      "file": "src/utils/flow.ts",
+      "line": 147,
+      "content": "const result: { [K in Key]: Return } = {} as any;"
+    },
+    {
+      "file": "src/utils/format-numbers.ts",
+      "line": 36,
+      "content": "cache: new NamedTupleMap() as any,"
+    },
+    {
+      "file": "src/utils/index.ts",
+      "line": 50,
+      "content": "if (a[key] !== (b as any)[key]) {"
+    },
+    {
+      "file": "src/utils/window-console.ts",
+      "line": 256,
+      "content": "(data as any).module &&"
+    },
+    {
+      "file": "src/utils/window-console.ts",
+      "line": 257,
+      "content": "(data as any).name"
+    },
+    {
+      "file": "src/utils/window-console.ts",
+      "line": 262,
+      "content": "const statement = `${strTimestamp} - [${processName} ${thread.pid}: ${thread.name}]: D/${(data as any).module} ${(data as any).name.trim()}`;"
     }
   ]
 }

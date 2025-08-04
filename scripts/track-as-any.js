@@ -46,6 +46,17 @@ function findAsAnyUsages() {
         }
       });
 
+    // Ensure consistent order.
+    usages.sort((a, b) => {
+      if (a.file !== b.file) {
+        return a.file < b.file ? -1 : 1;
+      }
+      if (a.line !== b.line) {
+        return a.line < b.line ? -1 : 1;
+      }
+      return 0;
+    });
+
     return usages;
   } catch (error) {
     if (error.status === 1) {
