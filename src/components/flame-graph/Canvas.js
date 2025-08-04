@@ -5,11 +5,7 @@
 // @flow
 import * as React from 'react';
 import memoize from 'memoize-immutable';
-import {
-  withChartViewport,
-  type WithChartViewport,
-  type Viewport,
-} from '../shared/chart/Viewport';
+import { withChartViewport, type Viewport } from '../shared/chart/Viewport';
 import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
@@ -525,7 +521,5 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
   }
 }
 
-export const FlameGraphCanvas = (withChartViewport: WithChartViewport<
-  OwnProps,
-  Props,
->)(FlameGraphCanvasImpl);
+export const FlameGraphCanvas =
+  withChartViewport<OwnProps>(FlameGraphCanvasImpl);

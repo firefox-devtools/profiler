@@ -3,10 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-// This is using the existential types in the generics, which would be harder to
-// remove. It might be possible to switch this took use hooks.
-/* eslint-disable flowtype/no-existential-type */
-
 import * as React from 'react';
 import classNames from 'classnames';
 import explicitConnect from 'firefox-profiler/utils/connect';
@@ -136,48 +132,48 @@ export type Viewport = {|
   +isSizeSet: boolean,
 |};
 
-type ViewportStateProps = {|
+type ChartViewportImplStateProps = {|
   +panelLayoutGeneration: number,
   +hasZoomedViaMousewheel?: boolean,
 |};
 
-type ViewportDispatchProps = {|
+type ChartViewportImplDispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
   +setHasZoomedViaMousewheel?: typeof setHasZoomedViaMousewheel,
 |};
 
-// These are the props consumed by this Higher-Order Component (HOC), but can be
-// optionally used by the wrapped component.
-type ViewportOwnProps<ChartProps> = {|
-  +viewportProps: {|
-    // The "committed range", whose endpoints correspond to 0 and 1.
-    +timeRange: StartEndRange,
-    // The preview selection, whose endpoints correspond to viewportLeft and viewportRight.
-    +previewSelection: PreviewSelection,
-    // The left margin. Margins are outside the viewport but inside containerWidth.
-    +marginLeft: CssPixels,
-    // The right margin. Margins are outside the viewport but inside containerWidth.
-    +marginRight: CssPixels,
+type ViewportProps<ChartProps> = {|
+  // The "committed range", whose endpoints correspond to 0 and 1.
+  +timeRange: StartEndRange,
+  // The preview selection, whose endpoints correspond to viewportLeft and viewportRight.
+  +previewSelection: PreviewSelection,
+  // The left margin. Margins are outside the viewport but inside containerWidth.
+  +marginLeft: CssPixels,
+  // The right margin. Margins are outside the viewport but inside containerWidth.
+  +marginRight: CssPixels,
 
-    +maxViewportHeight: number,
-    +startsAtBottom?: boolean,
-    +maximumZoom: UnitIntervalOfProfileRange,
-    +disableHorizontalMovement?: boolean,
-    +className?: string,
-    +containerRef?: (HTMLDivElement | null) => void,
-    // These props are defined by the generic variables passed into to the type
-    // WithChartViewport when calling withChartViewport. This is how the relationship
-    // is guaranteed. e.g. here with OwnProps:
-    //
-    //   (withChartViewport: WithChartViewport<OwnProps, Props>)(
-    //     MarkerChartCanvas
-    //   )
-    +viewportNeedsUpdate: (
-      prevProps: ChartProps,
-      nextProps: ChartProps
-    ) => boolean,
-  |},
+  +maxViewportHeight: number,
+  +startsAtBottom?: boolean,
+  +maximumZoom: UnitIntervalOfProfileRange,
+  +disableHorizontalMovement?: boolean,
+  +className?: string,
+  +containerRef?: (HTMLDivElement | null) => void,
+  +viewportNeedsUpdate: (
+    prevProps: ChartProps,
+    nextProps: ChartProps
+  ) => boolean,
+|};
+
+// These are the props consumed by the ViewportImpl component.
+type ChartViewportImplOwnProps<ChartProps> = {|
+  +viewportProps: ViewportProps<ChartProps>,
+  +chart: React.ComponentType<ChartPropsPlusViewport<ChartProps>>,
   +chartProps: ChartProps,
+|};
+
+export type ChartPropsPlusViewport<ChartProps> = {|
+  ...ChartProps,
+  +viewport: Viewport,
 |};
 
 type HorizontalViewport = {|
@@ -208,50 +204,22 @@ const ZOOM_SPEED = 1.003;
 // This value makes the pinch zooming faster than shift+scroll zooming.
 const PINCH_ZOOM_FACTOR = 3;
 
-/**
- * This is the type signature for the higher order component. It's easier to use generics
- * by separating out the type definition.
- */
-export type WithChartViewport<
-  // False positive generic trait bounds.
-  // eslint-disable-next-line flowtype/no-weak-types
-  ChartOwnProps: Object,
-  // The chart component's props are given the viewport object, as well as the original
-  // ChartOwnProps.
-  ChartProps: $ReadOnly<{|
-    ...ChartOwnProps,
-    viewport: Viewport,
-  |}>,
-> = (
-  // Take as input a React component whose props accept the { +viewport: Viewport }.
-  ChartComponent: React.ComponentType<ChartProps>
-) => React.ComponentType<
-  // Finally the returned component takes as input the InternalViewportProps, and
-  // the ChartProps, but NOT { +viewport: Viewport }.
-  ViewportOwnProps<ChartOwnProps>,
+type ChartViewportImplProps<ChartProps> = ConnectedProps<
+  ChartViewportImplOwnProps<ChartProps>,
+  ChartViewportImplStateProps,
+  ChartViewportImplDispatchProps,
 >;
 
-// Create the implementation of the WithChartViewport type, but let flow infer the
-// generic parameters.
-export const withChartViewport: WithChartViewport<*, *> =
-  // ChartOwnProps is the only generic actually used in the implementation. Infer
-  // the type signature of the arguments as the WithChartViewport will apply them.
-  <ChartOwnProps>(
-    ChartComponent: React.ComponentType<$Subtype<{ +viewport: Viewport }>>
-  ): * => {
-    type ViewportProps = ConnectedProps<
-      ViewportOwnProps<ChartOwnProps>,
-      ViewportStateProps,
-      ViewportDispatchProps,
-    >;
-
-    class ChartViewport extends React.PureComponent<ViewportProps, State> {
+    export class ChartViewportImpl<ChartProps> extends React.PureComponent<
+      ChartViewportImplProps<ChartProps>,
+      State,
+    > {
       zoomScrollId: number = 0;
       _pendingPreviewSelectionUpdates: Array<
         (HorizontalViewport) => PreviewSelection,
       > = [];
-      _container: HTMLElement | null = null;
-      _takeContainerRef = (container) => {
+      _container: HTMLDivElement | null = null;
+      _takeContainerRef = (container: HTMLDivElement | null) => {
         if (this.props.viewportProps.containerRef) {
           this.props.viewportProps.containerRef(container);
         }
@@ -259,11 +227,11 @@ export const withChartViewport: WithChartViewport<*, *> =
       };
       _lastKeyboardNavigationFrame: number = 0;
       _keysDown: Set<NavigationKey> = new Set();
-      _deltaToZoomFactor = (delta) => Math.pow(ZOOM_SPEED, delta);
+      _deltaToZoomFactor = (delta: number) => Math.pow(ZOOM_SPEED, delta);
       _dragX: number = 0;
       _dragY: number = 0;
 
-      constructor(props: ViewportProps) {
+      constructor(props: ChartViewportImplProps<ChartProps>) {
         super(props);
         this.state = this.getDefaultState(props);
       }
@@ -286,7 +254,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         };
       }
 
-      getDefaultState(props: ViewportProps) {
+      getDefaultState(props: ChartViewportImplProps<ChartProps>) {
         const { previewSelection, timeRange } = props.viewportProps;
         const horizontalViewport = this.getHorizontalViewport(
           previewSelection,
@@ -326,7 +294,9 @@ export const withChartViewport: WithChartViewport<*, *> =
         }, 1000);
       }
 
-      UNSAFE_componentWillReceiveProps(newProps: ViewportProps) {
+      UNSAFE_componentWillReceiveProps(
+        newProps: ChartViewportImplProps<ChartProps>
+      ) {
         if (
           this.props.viewportProps.viewportNeedsUpdate(
             this.props.chartProps,
@@ -534,9 +504,9 @@ export const withChartViewport: WithChartViewport<*, *> =
       zoomRangeSelection = (
         // A number between 0 and 1 indicating the horizontal position of the
         // zoom center.
-        center,
+        center: number,
         // The factor to zoom by. Factors smaller than 1 zoom in, larger than 1 zoom out.
-        zoomFactor
+        zoomFactor: number
       ) => {
         const { disableHorizontalMovement, maximumZoom } =
           this.props.viewportProps;
@@ -666,7 +636,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         this._keysDown.clear();
       };
 
-      _keyboardNavigation = (timestamp) => {
+      _keyboardNavigation = (timestamp: number) => {
         if (this._keysDown.size === 0) {
           // No keys are down, nothing to do.  Don't request a new
           // animation frame.
@@ -838,6 +808,7 @@ export const withChartViewport: WithChartViewport<*, *> =
 
       render() {
         const {
+          chart,
           chartProps,
           hasZoomedViaMousewheel,
           viewportProps: { className },
@@ -879,6 +850,11 @@ export const withChartViewport: WithChartViewport<*, *> =
           isSizeSet,
         };
 
+        const Chart = chart;
+        const chartPropsWithViewport = {
+          ...chartProps,
+          viewport,
+        };
         return (
           <div
             className={viewportClassName}
@@ -889,7 +865,7 @@ export const withChartViewport: WithChartViewport<*, *> =
             ref={this._takeContainerRef}
             tabIndex={0}
           >
-            <ChartComponent {...chartProps} viewport={viewport} />
+            <Chart {...chartPropsWithViewport} />
             <div className={scrollClassName}>
               Zoom Chart:
               <kbd className="chartViewportScrollKbd">Ctrl + Scroll</kbd>or
@@ -900,21 +876,48 @@ export const withChartViewport: WithChartViewport<*, *> =
       }
     }
 
-    // Connect this component so that it knows whether or not to nag the user to use ctrl
-    // for zooming on range selections.
-    return explicitConnect<
-      ViewportOwnProps<ChartOwnProps>,
-      ViewportStateProps,
-      ViewportDispatchProps,
-    >({
-      mapStateToProps: (state) => ({
-        panelLayoutGeneration: getPanelLayoutGeneration(state),
-        hasZoomedViaMousewheel: getHasZoomedViaMousewheel(state),
-      }),
-      mapDispatchToProps: { setHasZoomedViaMousewheel, updatePreviewSelection },
-      component: ChartViewport,
-    });
+export type ChartViewportProps<ChartProps> = {|
+  +viewportProps: ViewportProps<ChartProps>,
+  +chartProps: ChartProps,
+|};
+
+// const MyChartOuter = withChartViewport<ChartProps>(MyChartInner);
+//
+// The outer component has props { chartProps, viewportProps }.
+//   <MyChartOuter chartProps={{ color: 'blue' }} viewportProps={{...}} />
+// The inner component must have props { ...chartProps, viewport }.
+//   <MyChartInner color={blue} viewport={{...}} />
+export function withChartViewport<ChartProps>(
+  chart: React.ComponentType<ChartPropsPlusViewport<ChartProps>>
+): React.ComponentType<ChartViewportProps<ChartProps>> {
+  // Connect this component so that it knows whether or not to nag the user to use ctrl
+  // for zooming on range selections.
+  const ConnectedChartViewport = explicitConnect<
+    ChartViewportImplOwnProps<ChartProps>,
+    ChartViewportImplStateProps,
+    ChartViewportImplDispatchProps,
+  >({
+    mapStateToProps: (state) => ({
+      panelLayoutGeneration: getPanelLayoutGeneration(state),
+      hasZoomedViaMousewheel: getHasZoomedViaMousewheel(state),
+    }),
+    mapDispatchToProps: { setHasZoomedViaMousewheel, updatePreviewSelection },
+    component: ChartViewportImpl,
+  });
+
+  return function ChartViewportFunctionComponent({
+    chartProps,
+    viewportProps,
+  }: ChartViewportProps<ChartProps>) {
+    return (
+      <ConnectedChartViewport
+        chart={chart}
+        chartProps={chartProps}
+        viewportProps={viewportProps}
+      />
+    );
   };
+}
 
 function clamp(min, max, value) {
   return Math.max(min, Math.min(max, value));
