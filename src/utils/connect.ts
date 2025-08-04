@@ -157,3 +157,28 @@ export default function explicitConnect<
     options
   )(component);
 }
+
+export function explicitConnectWithForwardRef<
+  OwnProps extends Record<string, any>,
+  StateProps extends Record<string, any>,
+  DispatchProps extends Record<string, any>,
+  RefInterface,
+>(
+  connectOptions: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps>
+): React.ComponentType<OwnProps & { ref?: React.Ref<RefInterface> }> {
+  const {
+    mapStateToProps,
+    mapDispatchToProps,
+    mergeProps,
+    options,
+    component,
+  } = connectOptions;
+
+  // Opt out of the flow-typed definition of react-redux's connect, and use our own.
+  return (connect as any)(
+    mapStateToProps,
+    mapDispatchToProps,
+    mergeProps,
+    options
+  )(component);
+}

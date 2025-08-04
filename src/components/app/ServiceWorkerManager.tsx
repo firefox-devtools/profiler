@@ -14,7 +14,8 @@ import {
 } from 'firefox-profiler/selectors/url-state';
 import { getView } from 'firefox-profiler/selectors/app';
 import { getSymbolicationStatus } from 'firefox-profiler/selectors/profile';
-import type { State as AppState ,
+import type {
+  State as AppState,
   DataSource,
   Phase,
   SymbolicationStatus,

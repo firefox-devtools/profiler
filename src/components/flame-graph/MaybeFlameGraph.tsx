@@ -3,12 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import * as React from 'react';
 
-import { connectWithForwardRef } from 'firefox-profiler/utils/connect';
+import { explicitConnectWithForwardRef } from 'firefox-profiler/utils/connect';
 import { getInvertCallstack } from '../../selectors/url-state';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { changeInvertCallstack } from '../../actions/profile-view';
 import { FlameGraphEmptyReasons } from './FlameGraphEmptyReasons';
-import { FlameGraph, FlameGraphHandle } from './FlameGraph';
+import { FlameGraph, type FlameGraphHandle } from './FlameGraph';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
@@ -69,7 +69,7 @@ class MaybeFlameGraphImpl extends React.PureComponent<Props> {
   }
 }
 
-export const MaybeFlameGraph = connectWithForwardRef<
+export const MaybeFlameGraph = explicitConnectWithForwardRef<
   {},
   StateProps,
   DispatchProps,

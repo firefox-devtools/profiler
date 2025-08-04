@@ -6,8 +6,7 @@ import { PureComponent } from 'react';
 import { EmptyReasons } from '../shared/EmptyReasons';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { oneLine } from 'common-tags';
-import {
-  connect,
+import explicitConnect, {
   type ConnectedProps,
 } from 'firefox-profiler/utils/connect';
 
@@ -51,7 +50,7 @@ class FlameGraphEmptyReasonsImpl extends PureComponent<Props> {
   }
 }
 
-export const FlameGraphEmptyReasons = connect<{}, StateProps, {}>({
+export const FlameGraphEmptyReasons = explicitConnect<{}, StateProps, {}>({
   mapStateToProps: (state: State) => ({
     threadName: selectedThreadSelectors.getFriendlyThreadName(state),
     thread: selectedThreadSelectors.getThread(state),

@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import * as React from 'react';
 
-import { connectWithForwardRef } from '../../utils/connect';
+import { explicitConnectWithForwardRef } from '../../utils/connect';
 import { FlameGraphCanvas } from './Canvas';
 
 import {
@@ -429,7 +429,7 @@ function viewportNeedsUpdate() {
   return false;
 }
 
-export const FlameGraph = connectWithForwardRef<
+export const FlameGraph = explicitConnectWithForwardRef<
   {},
   StateProps,
   DispatchProps,

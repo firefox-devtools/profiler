@@ -13,7 +13,7 @@ import {
   getRequestedLocales,
   getPseudoStrategy,
 } from 'firefox-profiler/selectors/l10n';
-import type { State , Localization } from 'firefox-profiler/types';
+import type { State, Localization } from 'firefox-profiler/types';
 import { requestL10n, receiveL10n } from 'firefox-profiler/actions/l10n';
 import {
   AVAILABLE_LOCALES,
