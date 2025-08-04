@@ -1,13 +1,13 @@
 # Flow to TypeScript Migration Plan & Status
 
-## Current Status (August 3, 2025)
+## Current Status (August 4, 2025)
 
-**JavaScript files remaining**: 35 → **TypeScript files**: 260 → **Strict exclude list**: 2 files
+**JavaScript files remaining**: 9 → **TypeScript files**: 286 → **Strict exclude list**: 2 files
 
 - `yarn test-all` passes - All checks work correctly  
 - `yarn typecheck` passes - Mixed Flow/TypeScript codebase is stable
 - **Strategy**: Dependency-first migration focusing on zero-dependency files first
-- **Progress**: 88.1% of files converted, **major acceleration** achieved!
+- **Progress**: 96.9% of files converted, **nearing completion**!
 
 ### Key Commands
 ```bash
@@ -82,18 +82,16 @@ typeof Type as AliasName → type AliasName = typeof Type
 - Zero-dependency utilities providing foundation for component conversions
 
 ### Phase 3: 🚀 IN PROGRESS - Components & Logic (Non-Test Code)
-**Recent breakthrough progress (58 files, 16,413 lines)**:
-- **Latest session**: 6 files (1,557 lines) - marker-table, DragAndDrop, UrlManager, ProfileFilterNavigator, CompareHome, CurrentProfileUploadedInformationLoader
-- **Complex Flow syntax victories**: Fixed `TreeView | null<Type>`, thunk action typing, React event types
-- **Previous sessions**: receive-profile.ts (1591 lines), app.ts (405 lines), and cascading zero-dependency unlocks
+**Recent breakthrough progress (63 files, 18,427 lines)**:
+- **Current session**: 5 files (2,014 lines) - marker-chart/Canvas, marker-chart/index, timeline/FullTimeline, timeline/index, js-tracer/Canvas
+- **Previous session**: 6 files (1,557 lines) - marker-table, DragAndDrop, UrlManager, ProfileFilterNavigator, CompareHome, CurrentProfileUploadedInformationLoader
+- **Complex Flow syntax victories**: Fixed `TreeView | null<Type>`, thunk action typing, React event types, HOC export syntax
+- **Earlier sessions**: receive-profile.ts (1591 lines), app.ts (405 lines), and cascading zero-dependency unlocks
 - **Core infrastructure**: merge-compare.ts (1,447 lines), per-thread selectors, profile-view.ts
 
-**Files Remaining**: 35 JavaScript files, including several ready zero-dependency files:
-- `publish.js` (440 lines) - Actions file, now unlocked  
-- `TrackThread.js` (389 lines) - Timeline component
-- `TrackScreenshots.js` (393 lines) - Complex ScreenshotPayload types
-- `Selection.js` (509 lines) - Multiple Flow syntax challenges
-- `MetaInfo.js` (567 lines) - Component with complex props
+**Files Remaining**: 9 JavaScript files, with zero-dependency conversion continuing:
+- Next zero-dependency targets from analysis: js-tracer/Chart.js (269 lines), js-tracer/index.js (78 lines)
+- Remaining complex files: Details.js (156 lines), plus several others awaiting dependency chains
 
 ### Phase 4: 📋 PLANNED - `as any` Audit & Reduction
 - **Catalog all `as any` usage** across converted TypeScript files
@@ -133,7 +131,14 @@ typeof Type as AliasName → type AliasName = typeof Type
 - ✅ **`SyntheticDragEvent<HTMLDivElement>`** → `React.DragEvent<HTMLDivElement>`
 - ✅ **Thunk action typing** with `WrapFunctionInDispatch` pattern
 
-### Files Successfully Converted (Latest Session)
+### Files Successfully Converted (Current Session)
+1. **marker-chart/Canvas.js** (833 lines) - Complex canvas rendering with union types
+2. **marker-chart/index.js** (216 lines) - Clean conversion with minimal fixes
+3. **timeline/FullTimeline.js** (227 lines) - Used conversion tool successfully
+4. **timeline/index.js** (74 lines) - Fixed EventListener options type
+5. **js-tracer/Canvas.js** (664 lines) - Fixed HOC export syntax
+
+### Files Successfully Converted (Previous Session)
 1. **marker-table/index.js** (301 lines) - Complex Flow syntax, tree view typing
 2. **DragAndDrop.js** (283 lines) - React drag events, Set constructors  
 3. **UrlManager.js** (285 lines) - Thunk actions, Flow type casting
@@ -213,9 +218,10 @@ const retrieveProfileForRawUrl: WrapFunctionInDispatch<RetrieveProfileAction> =
    ```
 
 ### Session Statistics
-- **Files converted**: 6 files (1,557 lines)
-- **Complex syntax patterns solved**: 8 major patterns
-- **Manual fixes required per file**: ~3-5 (down from 10-15 in early sessions)
+- **Current session files**: 5 files (2,014 lines)
+- **Previous session files**: 6 files (1,557 lines)
+- **Complex syntax patterns solved**: 10+ major patterns including HOC export syntax
+- **Manual fixes required per file**: ~2-3 (continued improvement from conversion tool enhancements)
 - **Conversion success rate**: 100% compilation success after manual fixes
 
 ### Patterns That Still Need Manual Attention
@@ -226,9 +232,9 @@ const retrieveProfileForRawUrl: WrapFunctionInDispatch<RetrieveProfileAction> =
 
 ## Next Actions
 
-1. **Continue zero-dependency conversions** - `publish.js`, `TrackThread.js`, `TrackScreenshots.js`
-2. **Address complex files systematically** - Proven ability to handle Flow syntax
-3. **Begin `as any` cataloging** - Prepare for Phase 4 cleanup
+1. **Continue zero-dependency conversions** - Only 9 files remaining! Next targets: js-tracer/Chart.js, js-tracer/index.js
+2. **Complete final dependency chains** - Details.js and remaining complex files
+3. **Begin `as any` cataloging** - Prepare for Phase 4 cleanup (migration ~97% complete)
 4. **Monitor for main branch updates** - Plan integration strategy
 
 ---
