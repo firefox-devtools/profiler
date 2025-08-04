@@ -3,8 +3,5 @@
   "compilerOptions": {
     "allowJs": false
   },
-  "exclude": [
-    "src/components/app/Root.tsx",
-    "src/components/app/UploadedRecordingsHome.tsx"
-  ]
+  "exclude": []
 }
