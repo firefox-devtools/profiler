@@ -64,12 +64,6 @@ function findFiles() {
   return { jsFiles, tsFiles };
 }
 
-function findExcludedFiles() {
-  const content = fs.readFileSync('tsconfig.migration.json', 'utf8');
-  const json = JSON.parse(content);
-  return json.exclude;
-}
-
 // Extract import statements from a file
 function extractImports(filePath) {
   try {
@@ -394,7 +388,7 @@ function analyzeFiles() {
   );
 
   const { jsFiles, tsFiles } = findFiles();
-  const excludedFiles = new Set(findExcludedFiles());
+  const excludedFiles = new Set();
   const allFiles = new Set([...jsFiles, ...tsFiles]);
 
   console.log(`📊 File statistics:`);

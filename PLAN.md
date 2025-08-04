@@ -11,7 +11,7 @@
 
 ### Key Commands
 ```bash
-yarn typecheck         # Fast TypeScript checking (uses tsconfig.migration.json)
+yarn typecheck         # Fast TypeScript checking
 yarn test-all          # Full validation (lint, test, typecheck)
 yarn analyze-deps | head -25  # Find next conversion targets
 ```
@@ -73,7 +73,7 @@ typeof Type as AliasName → type AliasName = typeof Type
 ## Migration Phases
 
 ### Phase 1: ✅ COMPLETED - Infrastructure
-- TypeScript configuration with dual configs (`tsconfig.json` + `tsconfig.migration.json`)
+- TypeScript configuration with dual configs
 - All 13 type definition files converted
 - Build system supporting mixed codebase
 
@@ -99,8 +99,7 @@ typeof Type as AliasName → type AliasName = typeof Type
 - **Create tooling** to track `as any` reduction progress  
 - **Systematic replacement** with proper type narrowing and type guards
 - **Focus areas identified**:
-  - MarkerPayload union type properties 
-  - Window property extensions (`window.persistTooltips`)
+  - MarkerPayload union type properties
   - Complex tree/selector type mismatches
 
 ### Phase 5: 📋 PLANNED - Test Utilities Conversion
