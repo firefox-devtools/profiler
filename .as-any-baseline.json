@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-04T23:48:24.821Z",
-  "totalUsages": 102,
-  "totalFiles": 37,
+  "timestamp": "2025-08-04T23:48:42.126Z",
+  "totalUsages": 101,
+  "totalFiles": 36,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -452,11 +452,6 @@
       "file": "src/utils/connect.ts",
       "line": 154,
       "content": "return (connect as any)("
-    },
-    {
-      "file": "src/utils/css-geometry-tools.ts",
-      "line": 105,
-      "content": "return (rect as any)[key];"
     },
     {
       "file": "src/utils/errors.ts",
