@@ -11,7 +11,7 @@ export async function bytesToBase64DataUrl(
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = Object.assign(new FileReader(), {
-      onload: () => resolve(reader.result as any),
+      onload: () => resolve(reader.result as string),
       onerror: () => reject(reader.error),
     });
     reader.readAsDataURL(new Blob([bytes], { type }));

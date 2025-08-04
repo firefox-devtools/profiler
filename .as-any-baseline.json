@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-04T23:47:17.843Z",
-  "totalUsages": 103,
-  "totalFiles": 38,
+  "timestamp": "2025-08-04T23:48:24.821Z",
+  "totalUsages": 102,
+  "totalFiles": 37,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -442,11 +442,6 @@
       "file": "src/utils/analytics.ts",
       "line": 58,
       "content": "const ga: GoogleAnalytics | null = (self as any).ga;"
-    },
-    {
-      "file": "src/utils/base64.ts",
-      "line": 14,
-      "content": "onload: () => resolve(reader.result as any),"
     },
     {
       "file": "src/utils/connect.ts",
