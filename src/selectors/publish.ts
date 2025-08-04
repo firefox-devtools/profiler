@@ -93,7 +93,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
       containsPrivateBrowsingInformation
     ) => {
       let isIncludingEverything = true;
-      for (const prop in checkedSharingOptions) {
+      for (const [prop, value] of Object.entries(checkedSharingOptions)) {
         // Do not include preference values or private browsing checkboxes if
         // they're hidden. Even though `includePreferenceValues` is not taken
         // into account, it is false, if the profile updateChannel is not
@@ -107,8 +107,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
         ) {
           continue;
         }
-        isIncludingEverything =
-          isIncludingEverything && (checkedSharingOptions as any)[prop];
+        isIncludingEverything = isIncludingEverything && value;
       }
       if (isIncludingEverything) {
         // No sanitization is happening, bail out early.

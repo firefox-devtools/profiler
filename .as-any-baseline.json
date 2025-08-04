@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-04T23:34:07.686Z",
-  "totalUsages": 105,
-  "totalFiles": 39,
+  "timestamp": "2025-08-04T23:36:17.638Z",
+  "totalUsages": 104,
+  "totalFiles": 38,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -432,11 +432,6 @@
       "file": "src/selectors/per-thread/markers.ts",
       "line": 663,
       "content": "const val = (data as any)[keys[i]];"
-    },
-    {
-      "file": "src/selectors/publish.ts",
-      "line": 111,
-      "content": "isIncludingEverything && (checkedSharingOptions as any)[prop];"
     },
     {
       "file": "src/utils/__mocks__/worker-factory.ts",
