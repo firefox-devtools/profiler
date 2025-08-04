@@ -24,21 +24,19 @@ export class CanSelectContent extends React.PureComponent<Props> {
 
   override render() {
     const { tagName, content, className } = this.props;
-    const TagName = (tagName || 'div') as any;
 
-    return (
-      <TagName
-        className={classNames(className, 'can-select-content')}
-        title={`${content}\n(click to select)`}
-      >
-        <input
-          value={content}
-          className="can-select-content-input"
-          onFocus={this._selectContent}
-          onBlur={this._unselectContent}
-          readOnly={true}
-        />
-      </TagName>
+    return React.createElement(
+      tagName ?? 'div',
+      {
+        className: classNames(className, 'can-select-content'),
+      },
+      <input
+        value={content}
+        className="can-select-content-input"
+        onFocus={this._selectContent}
+        onBlur={this._unselectContent}
+        readOnly={true}
+      />
     );
   }
 }

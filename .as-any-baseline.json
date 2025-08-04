@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-04T23:17:22.538Z",
-  "totalUsages": 114,
-  "totalFiles": 43,
+  "timestamp": "2025-08-04T23:23:20.868Z",
+  "totalUsages": 113,
+  "totalFiles": 42,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -107,11 +107,6 @@
       "file": "src/components/shared/chart/Viewport.tsx",
       "line": 387,
       "content": "// fact that, as of 2019 [1][2], `preventDefault()` no longer has any effect"
-    },
-    {
-      "file": "src/components/sidebar/CanSelectContent.tsx",
-      "line": 27,
-      "content": "const TagName = (tagName || 'div') as any;"
     },
     {
       "file": "src/components/timeline/GlobalTrack.tsx",
