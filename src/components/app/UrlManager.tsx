@@ -20,15 +20,10 @@ import {
 } from 'firefox-profiler/app-logic/url-handling';
 import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { retrieveProfileForRawUrl } from 'firefox-profiler/actions/receive-profile';
-
-type RetrieveProfileAction = typeof retrieveProfileForRawUrl;
 import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import type {
-  ConnectedProps,
-  WrapFunctionInDispatch,
-} from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type { UrlState, Phase, UrlSetupPhase } from 'firefox-profiler/types';
 
 type StateProps = {
@@ -89,10 +84,8 @@ class UrlManagerImpl extends React.PureComponent<Props> {
       setupInitialUrlState,
       urlSetupDone,
       updateBrowserConnectionStatus,
+      retrieveProfileForRawUrl,
     } = this.props;
-    // We have to wrap this because of the error introduced by upgrading to v0.96.0. See issue #1936.
-    const retrieveProfileForRawUrl: WrapFunctionInDispatch<RetrieveProfileAction> =
-      this.props.retrieveProfileForRawUrl as any;
 
     // Notify the UI that we are starting to fetch profiles.
     startFetchingProfiles();
