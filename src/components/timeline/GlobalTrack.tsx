@@ -283,7 +283,8 @@ class GlobalTrackComponent extends PureComponent<Props> {
               }
               {pid !== null &&
               pid !== '0' &&
-              (globalTrack as any).mainThreadIndex !== null ? (
+              globalTrack.type === 'process' &&
+              globalTrack.mainThreadIndex !== null ? (
                 <div className="timelineTrackNameButtonAdditionalDetails">
                   PID: {pid}
                 </div>

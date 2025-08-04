@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-04T23:23:20.868Z",
-  "totalUsages": 113,
-  "totalFiles": 42,
+  "timestamp": "2025-08-04T23:24:02.865Z",
+  "totalUsages": 112,
+  "totalFiles": 41,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -107,11 +107,6 @@
       "file": "src/components/shared/chart/Viewport.tsx",
       "line": 387,
       "content": "// fact that, as of 2019 [1][2], `preventDefault()` no longer has any effect"
-    },
-    {
-      "file": "src/components/timeline/GlobalTrack.tsx",
-      "line": 286,
-      "content": "(globalTrack as any).mainThreadIndex !== null ? ("
     },
     {
       "file": "src/components/timeline/Markers.tsx",
