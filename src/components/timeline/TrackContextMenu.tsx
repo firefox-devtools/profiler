@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import React, { PureComponent } from 'react';
 import { MenuItem } from '@firefox-devtools/react-contextmenu';
 import { Localized } from '@fluent/react';
@@ -23,10 +21,7 @@ import {
   hideProvidedTracks,
 } from 'firefox-profiler/actions/profile-view';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import {
-  ensureExists,
-  assertExhaustiveCheck,
-} from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 import {
   getThreads,
   getRightClickedTrack,
@@ -67,50 +62,50 @@ import type {
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {
-  +threads: RawThread[],
-  +globalTrackOrder: TrackIndex[],
-  +hiddenGlobalTracks: Set<TrackIndex>,
-  +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
-  +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
-  +rightClickedTrack: TrackReference | null,
-  +globalTracks: GlobalTrack[],
-  +rightClickedThreadIndex: ThreadIndex | null,
-  +globalTrackNames: string[],
-  +localTracksByPid: Map<Pid, LocalTrack[]>,
-  +localTrackNamesByPid: Map<Pid, string[]>,
+  readonly threads: RawThread[];
+  readonly globalTrackOrder: TrackIndex[];
+  readonly hiddenGlobalTracks: Set<TrackIndex>;
+  readonly hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>;
+  readonly localTrackOrderByPid: Map<Pid, TrackIndex[]>;
+  readonly rightClickedTrack: TrackReference | null;
+  readonly globalTracks: GlobalTrack[];
+  readonly rightClickedThreadIndex: ThreadIndex | null;
+  readonly globalTrackNames: string[];
+  readonly localTracksByPid: Map<Pid, LocalTrack[]>;
+  readonly localTrackNamesByPid: Map<Pid, string[]>;
 };
 
 type DispatchProps = {
-  +hideGlobalTrack: typeof hideGlobalTrack,
-  +showAllTracks: typeof showAllTracks,
-  +showGlobalTrack: typeof showGlobalTrack,
-  +showGlobalTrackIncludingLocalTracks: typeof showGlobalTrackIncludingLocalTracks,
-  +isolateProcess: typeof isolateProcess,
-  +hideLocalTrack: typeof hideLocalTrack,
-  +showLocalTrack: typeof showLocalTrack,
-  +isolateLocalTrack: typeof isolateLocalTrack,
-  +isolateProcessMainThread: typeof isolateProcessMainThread,
-  +isolateScreenshot: typeof isolateScreenshot,
-  +showProvidedTracks: typeof showProvidedTracks,
-  +hideProvidedTracks: typeof hideProvidedTracks,
+  readonly hideGlobalTrack: typeof hideGlobalTrack;
+  readonly showAllTracks: typeof showAllTracks;
+  readonly showGlobalTrack: typeof showGlobalTrack;
+  readonly showGlobalTrackIncludingLocalTracks: typeof showGlobalTrackIncludingLocalTracks;
+  readonly isolateProcess: typeof isolateProcess;
+  readonly hideLocalTrack: typeof hideLocalTrack;
+  readonly showLocalTrack: typeof showLocalTrack;
+  readonly isolateLocalTrack: typeof isolateLocalTrack;
+  readonly isolateProcessMainThread: typeof isolateProcessMainThread;
+  readonly isolateScreenshot: typeof isolateScreenshot;
+  readonly showProvidedTracks: typeof showProvidedTracks;
+  readonly hideProvidedTracks: typeof hideProvidedTracks;
 };
 
 type TimelineTrackContextMenuProps = ConnectedProps<
   {},
   StateProps,
-  DispatchProps,
+  DispatchProps
 >;
 
 type TimelineTrackContextMenuState = {
-  searchFilter: string,
+  searchFilter: string;
 };
 
 class TimelineTrackContextMenuImpl extends PureComponent<
   TimelineTrackContextMenuProps,
-  TimelineTrackContextMenuState,
+  TimelineTrackContextMenuState
 > {
-  state = { searchFilter: '' };
-  _globalTrackClickTimeout: TimeoutID | null = null;
+  override state = { searchFilter: '' };
+  _globalTrackClickTimeout: NodeJS.Timeout | null = null;
   _trackSearchFieldElem: { current: TrackSearchField | null } =
     React.createRef();
 
@@ -155,17 +150,18 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     const localTracksByPidToShow = new Map(searchFilteredLocalTracksByPid);
     for (const globalTrackIndex of searchFilteredGlobalTracks) {
       const globalTrack = globalTracks[globalTrackIndex];
-      if (!globalTrack.pid) {
+      if (!('pid' in globalTrack) || !globalTrack.pid) {
         // There is no local track for this one, skip it.
         continue;
       }
 
       // Get all the local tracks and provided ones.
+      const pid = 'pid' in globalTrack ? globalTrack.pid : '';
       const localTracks = ensureExists(
-        localTracksByPid.get(globalTrack.pid),
+        localTracksByPid.get(pid),
         'Expected to find local tracks for the given pid'
       );
-      const localTracksToShow = localTracksByPidToShow.get(globalTrack.pid);
+      const localTracksToShow = localTracksByPidToShow.get(pid);
       // Check if their lengths are the same. If not, we must add all the local
       // track indexes.
       if (
@@ -173,10 +169,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
         localTracks.length !== localTracksToShow.size
       ) {
         // If they don't match, automatically show all the local tracks.
-        localTracksByPidToShow.set(
-          globalTrack.pid,
-          new Set(localTracks.keys())
-        );
+        localTracksByPidToShow.set(pid, new Set(localTracks.keys()));
       }
     }
 
@@ -236,7 +229,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
   };
 
   _toggleGlobalTrackVisibility = (
-    e: SyntheticMouseEvent<>,
+    e: React.MouseEvent<HTMLElement>,
     data: { trackIndex: TrackIndex }
   ): void => {
     const { trackIndex } = data;
@@ -255,7 +248,9 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     if (e.detail === 2) {
       // This is a double click.
       // Cancel the click timeout
-      clearTimeout(this._globalTrackClickTimeout);
+      if (this._globalTrackClickTimeout !== null) {
+        clearTimeout(this._globalTrackClickTimeout);
+      }
       this._globalTrackClickTimeout = null;
 
       const track = globalTracks[trackIndex];
@@ -278,8 +273,8 @@ class TimelineTrackContextMenuImpl extends PureComponent<
   };
 
   _toggleLocalTrackVisibility = (
-    _,
-    data: { pid: Pid, trackIndex: TrackIndex, globalTrackIndex: TrackIndex }
+    _: React.SyntheticEvent,
+    data: { pid: Pid; trackIndex: TrackIndex; globalTrackIndex: TrackIndex }
   ): void => {
     const { trackIndex, pid, globalTrackIndex } = data;
     const {
@@ -344,13 +339,15 @@ class TimelineTrackContextMenuImpl extends PureComponent<
         track = globalTracks[rightClickedTrack.trackIndex];
         break;
       default:
-        throw assertExhaustiveCheck(rightClickedTrack.type);
+        throw new Error(
+          `Unhandled rightClickedTrack type: ${(rightClickedTrack as any).type}`
+        );
     }
 
     return track.type;
   };
 
-  _hideTracksByType = (_): void => {
+  _hideTracksByType = (_: React.SyntheticEvent): void => {
     const {
       rightClickedTrack,
       globalTracks,
@@ -450,8 +447,8 @@ class TimelineTrackContextMenuImpl extends PureComponent<
   };
 
   _showLocalTracksInProcess = (
-    _,
-    data: { trackIndex: TrackIndex, pid: Pid }
+    _: React.SyntheticEvent,
+    data: { trackIndex: TrackIndex; pid: Pid }
   ) => {
     const { trackIndex, pid } = data;
     const { showGlobalTrackIncludingLocalTracks } = this.props;
@@ -464,7 +461,11 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     track: GlobalTrack,
     searchFilteredLocalTracksByPid: Map<Pid, Set<TrackIndex>> | null
   ): boolean {
-    if (!track.pid || searchFilteredLocalTracksByPid === null) {
+    if (
+      !('pid' in track) ||
+      !track.pid ||
+      searchFilteredLocalTracksByPid === null
+    ) {
       return false;
     }
 
@@ -516,7 +517,6 @@ class TimelineTrackContextMenuImpl extends PureComponent<
           preventClose={true}
           data={{ trackIndex }}
           onClick={this._toggleGlobalTrackVisibility}
-          role="menuitemcheckbox"
           attributes={{
             className: classNames('timelineTrackContextMenuItem', {
               checkable: true,
@@ -605,7 +605,6 @@ class TimelineTrackContextMenuImpl extends PureComponent<
           preventClose={true}
           data={{ pid, trackIndex, globalTrackIndex }}
           onClick={this._toggleLocalTrackVisibility}
-          role="menuitemcheckbox"
           attributes={{
             className: classNames('checkable indented', {
               checked: isChecked,
@@ -1040,7 +1039,9 @@ class TimelineTrackContextMenuImpl extends PureComponent<
         }
 
         const globalTrack = globalTracks[globalTrackIndex];
-        if (globalTrack.mainThreadIndex !== null) {
+        const mainThreadIndex =
+          'mainThreadIndex' in globalTrack ? globalTrack.mainThreadIndex : null;
+        if (mainThreadIndex !== null) {
           // We only need to check the global tracks without main threads.
           continue;
         }
@@ -1170,7 +1171,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     this.setState({ searchFilter: '' });
   };
 
-  render() {
+  override render() {
     const {
       threads,
       globalTrackOrder,
@@ -1313,7 +1314,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
 export const TimelineTrackContextMenu = explicitConnect<
   {},
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state: State) => ({
     threads: getThreads(state),
