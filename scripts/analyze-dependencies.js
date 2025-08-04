@@ -22,12 +22,7 @@ function findFiles() {
 
       if (stat.isDirectory()) {
         // Skip test directories, libdef directories, and node_modules
-        if (
-          !file.includes('test') &&
-          file !== 'libdef' &&
-          file !== '@types' &&
-          file !== 'node_modules'
-        ) {
+        if (file !== 'libdef' && file !== '@types' && file !== 'node_modules') {
           walkDir(fullPath);
         }
       } else if (stat.isFile()) {
@@ -44,10 +39,7 @@ function findFiles() {
         }
 
         // Skip test files and libdef files
-        if (
-          relativePath.includes('/test/') ||
-          relativePath.includes('/libdef/')
-        ) {
+        if (file.endsWith('.test.js') || relativePath.includes('/libdef/')) {
           continue;
         }
 
