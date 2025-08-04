@@ -1,9 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
-import React from 'react';
+// React imported for JSX
 import SplitterLayout from 'react-splitter-layout';
 
 import { Details } from './Details';
@@ -20,12 +18,12 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './DetailsContainer.css';
 
 type StateProps = {
-  +selectedTab: TabSlug,
-  +isSidebarOpen: boolean,
+  readonly selectedTab: TabSlug;
+  readonly isSidebarOpen: boolean;
 };
 
 type DispatchProps = {
-  +invalidatePanelLayout: typeof invalidatePanelLayout,
+  readonly invalidatePanelLayout: typeof invalidatePanelLayout;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
