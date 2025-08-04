@@ -2,9 +2,7 @@
  * license, v. 2.0. if a copy of the mpl was not distributed with this
  * file, you can obtain one at http://mozilla.org/mpl/2.0/. */
 
-// @flow
-
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import { DetailsContainer } from './DetailsContainer';
@@ -44,25 +42,25 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './ProfileViewer.css';
 
 type StateProps = {
-  +hasZipFile: boolean,
-  +timelineHeight: CssPixels | null,
-  +uploadProgress: number,
-  +isUploading: boolean,
-  +isHidingStaleProfile: boolean,
-  +hasSanitizedProfile: boolean,
-  +icons: IconsWithClassNames,
-  +isBottomBoxOpen: boolean,
+  readonly hasZipFile: boolean;
+  readonly timelineHeight: CssPixels | null;
+  readonly uploadProgress: number;
+  readonly isUploading: boolean;
+  readonly isHidingStaleProfile: boolean;
+  readonly hasSanitizedProfile: boolean;
+  readonly icons: IconsWithClassNames;
+  readonly isBottomBoxOpen: boolean;
 };
 
 type DispatchProps = {
-  +returnToZipFileList: typeof returnToZipFileList,
-  +invalidatePanelLayout: typeof invalidatePanelLayout,
+  readonly returnToZipFileList: typeof returnToZipFileList;
+  readonly invalidatePanelLayout: typeof invalidatePanelLayout;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class ProfileViewerImpl extends PureComponent<Props> {
-  render() {
+  override render() {
     const {
       hasZipFile,
       returnToZipFileList,
@@ -100,9 +98,9 @@ class ProfileViewerImpl extends PureComponent<Props> {
           style={
             timelineHeight === null
               ? {}
-              : {
+              : ({
                   '--profile-viewer-splitter-max-height': `${timelineHeight}px`,
-                }
+                } as React.CSSProperties)
           }
         >
           <div id="screenshot-hover"></div>
