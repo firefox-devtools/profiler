@@ -2,9 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 import classNames from 'classnames';
 import { Localized } from '@fluent/react';
 
@@ -37,14 +35,14 @@ import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import './Details.css';
 
 type StateProps = {
-  +visibleTabs: $ReadOnlyArray<TabSlug>,
-  +selectedTab: TabSlug,
-  +isSidebarOpen: boolean,
+  readonly visibleTabs: ReadonlyArray<TabSlug>;
+  readonly selectedTab: TabSlug;
+  readonly isSidebarOpen: boolean;
 };
 
 type DispatchProps = {
-  +changeSelectedTab: typeof changeSelectedTab,
-  +changeSidebarOpenState: typeof changeSidebarOpenState,
+  readonly changeSelectedTab: typeof changeSelectedTab;
+  readonly changeSidebarOpenState: typeof changeSidebarOpenState;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -66,7 +64,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
     changeSidebarOpenState(selectedTab, !isSidebarOpen);
   };
 
-  componentDidMount() {
+  override componentDidMount() {
     const width = window.innerWidth;
     const { selectedTab, isSidebarOpen, changeSidebarOpenState } = this.props;
 
@@ -75,7 +73,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
     }
   }
 
-  render() {
+  override render() {
     const { visibleTabs, selectedTab, isSidebarOpen } = this.props;
     const hasSidebar = selectSidebar(selectedTab) !== null;
     return (
