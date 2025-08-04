@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import type { ReactLocalization } from '@fluent/react';
-import type * as JSZip from 'jszip';
+import type JSZip from 'jszip';
 import type {
   Profile,
   RawThread,

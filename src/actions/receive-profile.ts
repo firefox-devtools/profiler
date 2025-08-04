@@ -859,7 +859,7 @@ export function waitingForProfileFromUrl(profileUrl?: string): Action {
 export function receiveZipFile(zip: JSZip): Action {
   return {
     type: 'RECEIVE_ZIP_FILE',
-    zip: zip as any,
+    zip,
   };
 }
 

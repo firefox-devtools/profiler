@@ -1,6 +1,6 @@
 {
-  "timestamp": "2025-08-04T23:11:25.093Z",
-  "totalUsages": 118,
+  "timestamp": "2025-08-04T23:15:31.764Z",
+  "totalUsages": 117,
   "totalFiles": 43,
   "usages": [
     {
@@ -27,11 +27,6 @@
       "file": "src/actions/receive-profile.ts",
       "line": 837,
       "content": "const profile = processGeckoProfile(unpackedProfile as any);"
-    },
-    {
-      "file": "src/actions/receive-profile.ts",
-      "line": 862,
-      "content": "zip: zip as any,"
     },
     {
       "file": "src/actions/receive-profile.ts",
