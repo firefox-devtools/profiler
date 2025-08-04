@@ -2,9 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 import { FullTimeline } from 'firefox-profiler/components/timeline/FullTimeline';
 
 type TimelineProps = {};
@@ -51,23 +49,23 @@ export class Timeline extends PureComponent<TimelineProps> {
     // doesn't do what they expect and instead zooms in the page, which is distracting.
     existingRef.addEventListener('wheel', this.preventPinchToZoom, {
       passive: false,
-    });
+    } as AddEventListenerOptions);
 
     this._removeWheelListener = () => {
       existingRef.removeEventListener('wheel', this.preventPinchToZoom, {
         passive: false,
-      });
+      } as EventListenerOptions);
     };
   };
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     if (this._removeWheelListener) {
       this._removeWheelListener();
       this._removeWheelListener = null;
     }
   }
 
-  render() {
+  override render() {
     return <FullTimeline innerElementRef={this._onTimelineMountWithRef} />;
   }
 }
