@@ -178,10 +178,8 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
   copyMarkerCause = () => {
     const { marker } = this.props;
 
-    if (marker.data && (marker.data as any).cause) {
-      const stack = this._convertStackToString(
-        (marker.data as any).cause.stack
-      );
+    if (marker.data && 'cause' in marker.data && marker.data.cause) {
+      const stack = this._convertStackToString(marker.data.cause.stack);
       if (stack) {
         copy(stack);
       } else {
@@ -484,7 +482,7 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
             Copy description
           </Localized>
         </MenuItem>
-        {data && (data as any).cause ? (
+        {data && 'cause' in data && data.cause ? (
           <MenuItem onClick={this.copyMarkerCause}>
             <span className="react-contextmenu-icon markerContextMenuIconCopyStack" />
             <Localized id="MarkerContextMenu--copy-call-stack">
