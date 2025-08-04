@@ -55,14 +55,14 @@ function loadBaseline() {
     console.log(
       '⚠️  No baseline found. Run `yarn track-as-any --baseline` first.'
     );
-    process.exit(1);
+    throw process.exit(1);
   }
 
   try {
     return JSON.parse(fs.readFileSync(BASELINE_FILE, 'utf8'));
   } catch (error) {
     console.error(`❌ Error loading baseline: ${error.message}`);
-    process.exit(1);
+    throw process.exit(1);
   }
 }
 
