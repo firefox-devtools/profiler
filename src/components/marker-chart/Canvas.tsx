@@ -1,13 +1,10 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import { GREY_20, GREY_30, BLUE_60, BLUE_80 } from 'photon-colors';
 import * as React from 'react';
 import {
   withChartViewport,
-  type WithChartViewport,
   type Viewport,
 } from 'firefox-profiler/components/shared/chart/Viewport';
 import { ChartCanvas } from 'firefox-profiler/components/shared/chart/Canvas';
@@ -15,12 +12,17 @@ import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
 import TextMeasurement from 'firefox-profiler/utils/text-measurement';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import memoize from 'memoize-immutable';
-import {
-  typeof updatePreviewSelection as UpdatePreviewSelection,
-  typeof changeRightClickedMarker as ChangeRightClickedMarker,
-  typeof changeMouseTimePosition as ChangeMouseTimePosition,
-  typeof changeSelectedMarker as ChangeSelectedMarker,
+import type {
+  updatePreviewSelection,
+  changeRightClickedMarker,
+  changeMouseTimePosition,
+  changeSelectedMarker,
 } from 'firefox-profiler/actions/profile-view';
+
+type UpdatePreviewSelection = typeof updatePreviewSelection;
+type ChangeRightClickedMarker = typeof changeRightClickedMarker;
+type ChangeMouseTimePosition = typeof changeMouseTimePosition;
+type ChangeSelectedMarker = typeof changeSelectedMarker;
 import { TIMELINE_MARGIN_LEFT } from 'firefox-profiler/app-logic/constants';
 import type {
   Milliseconds,
@@ -42,38 +44,37 @@ import type {
 import type { WrapFunctionInDispatch } from 'firefox-profiler/utils/connect';
 
 type MarkerDrawingInformation = {
-  +x: CssPixels,
-  +y: CssPixels,
-  +w: CssPixels,
-  +h: CssPixels,
-  +isInstantMarker: boolean,
-  +markerIndex: MarkerIndex,
+  readonly x: CssPixels;
+  readonly y: CssPixels;
+  readonly w: CssPixels;
+  readonly h: CssPixels;
+  readonly isInstantMarker: boolean;
+  readonly markerIndex: MarkerIndex;
 };
 
 type OwnProps = {
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +markerTimingAndBuckets: MarkerTimingAndBuckets,
-  +rowHeight: CssPixels,
-  +getMarker: (MarkerIndex) => Marker,
-  +getMarkerLabel: (MarkerIndex) => string,
-  +markerListLength: number,
-  +threadsKey: ThreadsKey,
-  +updatePreviewSelection: WrapFunctionInDispatch<UpdatePreviewSelection>,
-  +changeMouseTimePosition: ChangeMouseTimePosition,
-  +changeSelectedMarker: ChangeSelectedMarker,
-  +changeRightClickedMarker: ChangeRightClickedMarker,
-  +marginLeft: CssPixels,
-  +marginRight: CssPixels,
-  +selectedMarkerIndex: MarkerIndex | null,
-  +rightClickedMarkerIndex: MarkerIndex | null,
-  +shouldDisplayTooltips: () => boolean,
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly markerTimingAndBuckets: MarkerTimingAndBuckets;
+  readonly rowHeight: CssPixels;
+  readonly getMarker: (param: MarkerIndex) => Marker;
+  readonly getMarkerLabel: (param: MarkerIndex) => string;
+  readonly markerListLength: number;
+  readonly threadsKey: ThreadsKey;
+  readonly updatePreviewSelection: WrapFunctionInDispatch<UpdatePreviewSelection>;
+  readonly changeMouseTimePosition: ChangeMouseTimePosition;
+  readonly changeSelectedMarker: ChangeSelectedMarker;
+  readonly changeRightClickedMarker: ChangeRightClickedMarker;
+  readonly marginLeft: CssPixels;
+  readonly marginRight: CssPixels;
+  readonly selectedMarkerIndex: MarkerIndex | null;
+  readonly rightClickedMarkerIndex: MarkerIndex | null;
+  readonly shouldDisplayTooltips: () => boolean;
 };
 
-type Props = {
-  ...OwnProps,
+type Props = OwnProps & {
   // Bring in the viewport props from the higher order Viewport component.
-  +viewport: Viewport,
+  readonly viewport: Viewport;
 };
 
 const TEXT_OFFSET_TOP = 11;
@@ -169,7 +170,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     }
   };
 
-  highlightRow = (ctx, row) => {
+  highlightRow = (ctx: CanvasRenderingContext2D, row: number) => {
     const {
       rowHeight,
       viewport: { viewportTop, containerWidth },
@@ -581,7 +582,12 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       }
       // Draw the marker name.
       const { name } = markerTiming;
-      if (rowIndex > 0 && name === markerTimingAndBuckets[rowIndex - 1].name) {
+      const prevItem = markerTimingAndBuckets[rowIndex - 1];
+      if (
+        rowIndex > 0 &&
+        typeof prevItem !== 'string' &&
+        name === prevItem.name
+      ) {
         continue;
       }
 
@@ -674,7 +680,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
 
     // This is a small utility function to define if some marker timing is in
     // our hit test range.
-    const isMarkerTimingInDotRadius = (index) =>
+    const isMarkerTimingInDotRadius = (index: number) =>
       markerTiming.start[index] < xInTime + dotRadiusInTime &&
       markerTiming.end[index] > xInTime - dotRadiusInTime;
 
@@ -786,7 +792,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     changeRightClickedMarker(threadsKey, markerIndex);
   };
 
-  getHoveredMarkerInfo = (markerIndex: MarkerIndex): React.Node => {
+  getHoveredMarkerInfo = (markerIndex: MarkerIndex): React.ReactNode => {
     if (!this.props.shouldDisplayTooltips() || markerIndex === null) {
       return null;
     }
@@ -802,7 +808,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     );
   };
 
-  render() {
+  override render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
 
     return (
@@ -826,7 +832,4 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   }
 }
 
-export const MarkerChartCanvas = (withChartViewport: WithChartViewport<
-  OwnProps,
-  Props,
->)(MarkerChartCanvasImpl);
+export const MarkerChartCanvas = withChartViewport(MarkerChartCanvasImpl);
