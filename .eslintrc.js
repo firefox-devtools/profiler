@@ -126,7 +126,7 @@ module.exports = {
       rules: {
         // Use `import type` everywhere we can.
         '@typescript-eslint/consistent-type-imports': 'error',
-        // We want to have the option to use `as any`
+        // Allow existing `as any` during Phase 4 cleanup, but warn in IDE
         '@typescript-eslint/no-explicit-any': 'off',
         // Need to find a better solution for ConnectedProps<{}, StateProps, {}>
         '@typescript-eslint/no-empty-object-type': 'off',

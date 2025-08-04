@@ -45,7 +45,7 @@
     "start-docs": "ws -d docs-user/ -p 3000",
     "start-photon": "node res/photon/server",
     "test": "node bin/output-fixing-commands.js cross-env LC_ALL=C TZ=UTC NODE_ENV=test jest --silent",
-    "test-all": "run-p --max-parallel 4 typecheck license-check lint test test-alex test-lockfile",
+    "test-all": "run-p --max-parallel 4 typecheck check-as-any license-check lint test test-alex test-lockfile",
     "test-all:ci": "run-p --max-parallel 4 typecheck license-check lint test test-alex test-lockfile",
     "test-all-flow": "run-p --max-parallel 4 flow license-check lint test test-alex test-lockfile",
     "test-all-migration-done": "run-p --max-parallel 4 typecheck-all license-check lint test test-alex test-lockfile",
@@ -55,6 +55,8 @@
     "test-alex": "alex ./docs-* CODE_OF_CONDUCT.md CONTRIBUTING.md README.md",
     "test-lockfile": "lockfile-lint --path yarn.lock --allowed-hosts yarn --validate-https",
     "test-debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "track-as-any": "node scripts/track-as-any.js",
+    "check-as-any": "node scripts/check-as-any-increase.js",
     "postinstall": "patch-package"
   },
   "license": "MPL-2.0",
