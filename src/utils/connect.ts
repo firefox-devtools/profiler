@@ -72,13 +72,7 @@ type WrapThunkActionCreator<Args extends any[], Returns> = (
  * removes the (Dispatch, GetState) part of a ThunkAction.
  */
 export type WrapDispatchProps<DispatchProps extends Record<string, any>> = {
-  [K in keyof DispatchProps]: DispatchProps[K] extends (
-    ...args: infer Args
-  ) => ThunkAction<infer Returns>
-    ? (...args: Args) => Returns
-    : DispatchProps[K] extends (...args: infer Args) => Action
-      ? (...args: Args) => Action
-      : DispatchProps[K];
+  [K in keyof DispatchProps]: WrapFunctionInDispatch<DispatchProps[K]>;
 };
 
 /**
@@ -117,7 +111,7 @@ export type ConnectedProps<
   OwnProps extends Record<string, any>,
   StateProps extends Record<string, any>,
   DispatchProps extends Record<string, any>,
-> = Readonly<OwnProps & StateProps & DispatchProps>;
+> = Readonly<OwnProps & StateProps & WrapDispatchProps<DispatchProps>>;
 
 export type ConnectedComponent<
   OwnProps extends Record<string, any>,

@@ -65,14 +65,10 @@ class ProfileLoaderImpl extends PureComponent<Props> {
       case 'local':
         break;
       case 'public':
-        (retrieveProfileFromStore(hash) as any).catch((e: any) =>
-          console.error(e)
-        );
+        retrieveProfileFromStore(hash).catch((e) => console.error(e));
         break;
       case 'from-url':
-        (retrieveProfileOrZipFromUrl(profileUrl) as any).catch((e: any) =>
-          console.error(e)
-        );
+        retrieveProfileOrZipFromUrl(profileUrl).catch((e) => console.error(e));
         break;
       case 'compare':
         if (profilesToCompare) {
