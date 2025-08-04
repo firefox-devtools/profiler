@@ -17,7 +17,7 @@ type StyleDefProps = {
 };
 
 export class StyleDef extends PureComponent<StyleDefProps> {
-  _dom: HTMLStyleElement | null;
+  _dom: HTMLStyleElement | null = null;
 
   override componentDidMount() {
     const dom = document.createElement('style');

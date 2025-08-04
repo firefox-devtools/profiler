@@ -121,7 +121,7 @@ const ZipFileRow = explicitConnect<
 class ZipFileViewerImpl extends React.PureComponent<Props> {
   _fixedColumns = [];
   _mainColumn = { propName: 'name', titleL10nId: '', component: ZipFileRow };
-  _treeView: TreeView<ZipDisplayData> | null;
+  _treeView: TreeView<ZipDisplayData> | null = null;
   _takeTreeViewRef = (treeView: TreeView<ZipDisplayData> | null) =>
     (this._treeView = treeView);
 

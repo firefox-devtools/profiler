@@ -114,7 +114,7 @@ function snapValueToMultipleOf(
 }
 
 class FlameGraphCanvasImpl extends React.PureComponent<Props> {
-  _textMeasurement: null | TextMeasurement;
+  _textMeasurement: TextMeasurement | null = null;
   _textMeasurementCssToDeviceScale: number = 1;
 
   override componentDidUpdate(prevProps: Props) {

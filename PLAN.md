@@ -74,7 +74,6 @@ const ga = window.ga;
 
 ### Phase 7: Enable Additional Checks (Planned)
 - Enable `strictFunctionTypes`
-- Enable `strictPropertyInitialization`
 - Enable `useUnknownInCatchVariables`
 - Enable `alwaysStrict`
 

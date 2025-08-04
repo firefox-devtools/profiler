@@ -89,7 +89,7 @@ export class ChartCanvas<Item> extends React.Component<
   // Indicates if move threshold breached. Checked at mouse up event
   // to prevent it from being interpreted as a click.
   _mouseMovedWhileClicked: boolean = false;
-  _ctx: CanvasRenderingContext2D;
+  _ctx: CanvasRenderingContext2D | null = null;
   _canvas: HTMLCanvasElement | null = null;
   _isDrawScheduled: boolean = false;
 
@@ -121,13 +121,13 @@ export class ChartCanvas<Item> extends React.Component<
     });
   }
 
-  _prepCanvas() {
+  _prepCanvas(): CanvasRenderingContext2D | null {
     const canvas = this._canvas;
     const { containerWidth, containerHeight, scaleCtxToCssPixels } = this.props;
     const { devicePixelRatio } = window;
 
     if (!canvas) {
-      return;
+      return null;
     }
 
     let ctx = this._ctx;
@@ -171,6 +171,8 @@ export class ChartCanvas<Item> extends React.Component<
       }
       this._devicePixelRatio = devicePixelRatio;
     }
+
+    return ctx;
   }
 
   _doDrawCanvas(
@@ -179,12 +181,12 @@ export class ChartCanvas<Item> extends React.Component<
   ) {
     const { className, drawCanvas, scaleCtxToCssPixels } = this.props;
     const { hoveredItem } = this.state;
-    if (this._canvas) {
-      timeCode(`${className} render`, () => {
-        this._prepCanvas();
+    timeCode(`${className} render`, () => {
+      const ctx = this._prepCanvas();
+      if (ctx !== null) {
         const scale = this._devicePixelRatio;
         drawCanvas(
-          this._ctx,
+          ctx,
           {
             cssToDeviceScale: scale,
             cssToUserScale: scaleCtxToCssPixels ? 1 : scale,
@@ -195,8 +197,8 @@ export class ChartCanvas<Item> extends React.Component<
             isHoveredOnlyDifferent,
           }
         );
-      });
-    }
+      }
+    });
   }
 
   _onMouseDown = (

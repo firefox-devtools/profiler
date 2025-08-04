@@ -28,7 +28,7 @@ export function withSize<Props>(
 ): React.ComponentType<Props> {
   return class WithSizeWrapper extends React.PureComponent<Props, State> {
     override state = { width: 0, height: 0 };
-    _container: HTMLElement | null;
+    _container: HTMLElement | null = null;
 
     override componentDidMount() {
       const container = findDOMNode(this) as HTMLElement; // eslint-disable-line react/no-find-dom-node

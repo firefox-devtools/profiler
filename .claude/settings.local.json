@@ -38,7 +38,9 @@
       "Bash(yarn add:*)",
       "Bash(yarn analyze-deps:*)",
       "Bash(yarn convert:*)",
-      "Bash(yarn build:quiet:*)"
+      "Bash(yarn build:quiet:*)",
+      "Bash(yarn track-as-any:*)",
+      "Bash(yarn check-as-any:*)"
     ],
     "deny": []
   }

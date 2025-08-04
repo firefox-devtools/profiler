@@ -84,7 +84,7 @@ const LABEL_PADDING = 5;
 const MARKER_BORDER_COLOR = '#2c77d1';
 
 class MarkerChartCanvasImpl extends React.PureComponent<Props> {
-  _textMeasurement: null | TextMeasurement;
+  _textMeasurement: TextMeasurement | null = null;
 
   drawCanvas = (
     ctx: CanvasRenderingContext2D,

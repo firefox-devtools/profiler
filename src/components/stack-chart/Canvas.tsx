@@ -99,7 +99,7 @@ const FONT_SIZE = 10;
 const BORDER_OPACITY = 0.4;
 
 class StackChartCanvasImpl extends React.PureComponent<Props> {
-  _textMeasurement: null | TextMeasurement;
+  _textMeasurement: TextMeasurement | null = null;
   _textMeasurementCssToDeviceScale: number = 1;
 
   // When the user checks the "use same widths for each stack" checkbox, some
@@ -109,10 +109,10 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
   // The index at viewport start is the index of the first visible block inside
   // the viewport (the margins excluded). It's used for hit testing as the
   // start offset.
-  _sameWidthsIndexAtViewportStart: null | number;
+  _sameWidthsIndexAtViewportStart: number | null = null;
   // The range length is how many "blocks" are present in the viewport
   // (excluding the margins).
-  _sameWidthsRangeLength: null | number;
+  _sameWidthsRangeLength: number | null = null;
 
   override componentDidUpdate(prevProps: Props) {
     // We want to scroll the selection into view when this component

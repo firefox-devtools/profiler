@@ -93,7 +93,7 @@ class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
   override state = {
     hasFirstDraw: false,
   };
-  _textMeasurement: null | TextMeasurement;
+  _textMeasurement: TextMeasurement | null = null;
   _textMeasurementCssToDeviceScale: number = 1;
 
   /**

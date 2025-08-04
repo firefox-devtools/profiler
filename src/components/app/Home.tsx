@@ -52,7 +52,7 @@ class ActionButtons extends React.PureComponent<
   ActionButtonsProps,
   ActionButtonsState
 > {
-  _fileInput: HTMLInputElement | null;
+  _fileInput: HTMLInputElement | null = null;
 
   override state = {
     isLoadFromUrlPressed: false,

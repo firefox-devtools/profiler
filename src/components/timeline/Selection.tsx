@@ -62,7 +62,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
     mouseClickHandler: MouseHandler;
   } | null = null;
 
-  _container: HTMLElement | null;
+  _container: HTMLElement | null = null;
 
   _containerCreated = (element: HTMLElement | null) => {
     this._container = element;

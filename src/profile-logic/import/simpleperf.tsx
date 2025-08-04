@@ -354,10 +354,10 @@ class FirefoxProfile {
 
   fileMap: Map<number, report.IFile> = new Map();
 
-  eventTypes: string[];
-  cpuClockEventId: number;
+  eventTypes: string[] = [];
+  cpuClockEventId: number = -1;
 
-  appPackageName: string | null | null;
+  appPackageName: string | null = null;
   sampleCount: number = 0;
   lostCount: number = 0;
 
