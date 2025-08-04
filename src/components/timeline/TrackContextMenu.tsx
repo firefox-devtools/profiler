@@ -21,7 +21,7 @@ import {
   hideProvidedTracks,
 } from 'firefox-profiler/actions/profile-view';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { assertExhaustiveCheck, ensureExists } from 'firefox-profiler/utils/flow';
 import {
   getThreads,
   getRightClickedTrack,
@@ -341,9 +341,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
         track = globalTracks[rightClickedTrack.trackIndex];
         break;
       default:
-        throw new Error(
-          `Unhandled rightClickedTrack type: ${(rightClickedTrack as any).type}`
-        );
+        throw assertExhaustiveCheck(rightClickedTrack);
     }
 
     return track.type;
