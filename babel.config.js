@@ -18,6 +18,7 @@ module.exports = function (api) {
             '@babel/preset-react',
             {
               useSpread: true,
+              runtime: 'automatic',
             },
           ],
           [
@@ -43,6 +44,7 @@ module.exports = function (api) {
             '@babel/preset-react',
             {
               useSpread: true,
+              runtime: 'automatic',
             },
           ],
           [

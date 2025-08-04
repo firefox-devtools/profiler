@@ -37,7 +37,8 @@
       "Bash(node:*)",
       "Bash(yarn add:*)",
       "Bash(yarn analyze-deps:*)",
-      "Bash(yarn convert:*)"
+      "Bash(yarn convert:*)",
+      "Bash(yarn build:quiet:*)"
     ],
     "deny": []
   }
