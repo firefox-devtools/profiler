@@ -15,7 +15,7 @@ import {
 import { ChartCanvas } from 'firefox-profiler/components/shared/chart/Canvas';
 import TextMeasurement from 'firefox-profiler/utils/text-measurement';
 import { FastFillStyle } from 'firefox-profiler/utils';
-import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
+import type { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { BLUE_40 } from 'firefox-profiler/utils/colors';
 
 import type {

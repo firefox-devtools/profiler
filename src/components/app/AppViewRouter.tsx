@@ -130,9 +130,11 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
         return null;
       case 'ROUTE_NOT_FOUND':
       default:
-        // Assert with TypeScript that we've handled all the cases, as the only thing left
-        // should be 'ROUTE_NOT_FOUND' or 'PROFILE_LOADED'.
-        phase as 'ROUTE_NOT_FOUND';
+        if (phase !== 'ROUTE_NOT_FOUND') {
+          // Assert with TypeScript that we've handled all the cases, as the only thing left
+          // should be 'ROUTE_NOT_FOUND'.
+          throw assertExhaustiveCheck(phase);
+        }
         return (
           <Localized
             id="AppViewRouter--route-not-found--home"

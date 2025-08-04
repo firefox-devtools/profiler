@@ -33,6 +33,7 @@ import type {
 } from 'firefox-profiler/profile-logic/zip-files';
 
 import './ZipFileViewer.css';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 type StateProps = {
   readonly zipFileState: ZipFileState;
@@ -315,8 +316,7 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
       case 'VIEW_PROFILE_IN_ZIP_FILE':
         return <ProfileViewer />;
       default:
-        phase as never;
-        throw new Error('Unknown zip file phase.');
+        throw assertExhaustiveCheck(phase);
     }
   }
 }
