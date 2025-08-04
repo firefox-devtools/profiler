@@ -202,12 +202,17 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
     const { marker, innerWindowIDToPageMap } = this.props;
     const { data } = marker;
 
-    if (!data || !(data as any).innerWindowID || !innerWindowIDToPageMap) {
+    if (
+      !data ||
+      !('innerWindowID' in data) ||
+      !data.innerWindowID ||
+      !innerWindowIDToPageMap
+    ) {
       // Marker doesn't contain any page information. Do not do anything.
       return;
     }
 
-    const page = innerWindowIDToPageMap.get((data as any).innerWindowID);
+    const page = innerWindowIDToPageMap.get(data.innerWindowID);
     if (!page) {
       // Page couldn't be found. Do not do anything.
       return;

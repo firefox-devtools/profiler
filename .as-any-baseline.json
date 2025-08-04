@@ -1,6 +1,6 @@
 {
-  "timestamp": "2025-08-04T23:16:25.158Z",
-  "totalUsages": 116,
+  "timestamp": "2025-08-04T23:17:22.538Z",
+  "totalUsages": 114,
   "totalFiles": 43,
   "usages": [
     {
@@ -95,22 +95,12 @@
     },
     {
       "file": "src/components/shared/MarkerContextMenu.tsx",
-      "line": 205,
-      "content": "if (!data || !(data as any).innerWindowID || !innerWindowIDToPageMap) {"
-    },
-    {
-      "file": "src/components/shared/MarkerContextMenu.tsx",
-      "line": 210,
-      "content": "const page = innerWindowIDToPageMap.get((data as any).innerWindowID);"
-    },
-    {
-      "file": "src/components/shared/MarkerContextMenu.tsx",
-      "line": 313,
-      "content": "if (!data || !(data as any).innerWindowID || !innerWindowIDToPageMap) {"
-    },
-    {
-      "file": "src/components/shared/MarkerContextMenu.tsx",
       "line": 318,
+      "content": "if (!data || !(data as any).innerWindowID || !innerWindowIDToPageMap) {"
+    },
+    {
+      "file": "src/components/shared/MarkerContextMenu.tsx",
+      "line": 323,
       "content": "const page = innerWindowIDToPageMap.get((data as any).innerWindowID);"
     },
     {
