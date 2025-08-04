@@ -150,18 +150,17 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     const localTracksByPidToShow = new Map(searchFilteredLocalTracksByPid);
     for (const globalTrackIndex of searchFilteredGlobalTracks) {
       const globalTrack = globalTracks[globalTrackIndex];
-      if (!('pid' in globalTrack) || !globalTrack.pid) {
+      if (globalTrack.type !== 'process' || !globalTrack.pid) {
         // There is no local track for this one, skip it.
         continue;
       }
 
       // Get all the local tracks and provided ones.
-      const pid = 'pid' in globalTrack ? globalTrack.pid : '';
       const localTracks = ensureExists(
-        localTracksByPid.get(pid),
+        localTracksByPid.get(globalTrack.pid),
         'Expected to find local tracks for the given pid'
       );
-      const localTracksToShow = localTracksByPidToShow.get(pid);
+      const localTracksToShow = localTracksByPidToShow.get(globalTrack.pid);
       // Check if their lengths are the same. If not, we must add all the local
       // track indexes.
       if (
@@ -169,7 +168,10 @@ class TimelineTrackContextMenuImpl extends PureComponent<
         localTracks.length !== localTracksToShow.size
       ) {
         // If they don't match, automatically show all the local tracks.
-        localTracksByPidToShow.set(pid, new Set(localTracks.keys()));
+        localTracksByPidToShow.set(
+          globalTrack.pid,
+          new Set(localTracks.keys())
+        );
       }
     }
 
