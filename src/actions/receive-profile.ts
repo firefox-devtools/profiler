@@ -70,7 +70,7 @@ import {
   hasUsefulSamples,
 } from 'firefox-profiler/profile-logic/profile-data';
 
-import {
+import type {
   RequestedLib,
   ImplementationFilter,
   TransformStacksPerThread,
@@ -84,7 +84,7 @@ import {
   MixedObject,
 } from 'firefox-profiler/types';
 
-import {
+import type {
   FuncToFuncsMap,
   SymbolicationStepInfo,
 } from '../profile-logic/symbolication';
@@ -94,7 +94,7 @@ import {
   BrowserConnection,
   BrowserConnectionStatus,
 } from '../app-logic/browser-connection';
-import { LibSymbolicationRequest } from '../profile-logic/symbol-store';
+import type { LibSymbolicationRequest } from '../profile-logic/symbol-store';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the

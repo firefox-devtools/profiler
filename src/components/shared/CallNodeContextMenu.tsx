@@ -119,7 +119,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   //    To avoid this problem we use this `setTimeout` call to delay the reset
   //    just a bit, just in case we get a `_onShow` call right after that.
   _onShow = () => {
-    if (this._hidingTimeout) clearTimeout(this._hidingTimeout);
+    if (this._hidingTimeout) {clearTimeout(this._hidingTimeout);}
     this.props.setContextMenuVisibility(true);
   };
 

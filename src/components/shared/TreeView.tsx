@@ -1,9 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// This file uses extensive use of Object generic trait bounds, which is a false
-// positive for this rule.
-/* eslint-disable flowtype/no-weak-types */
 
 import * as React from 'react';
 import classNames from 'classnames';

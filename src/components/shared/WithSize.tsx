@@ -25,15 +25,7 @@ export type SizeProps = Readonly<State>;
  */
 export function withSize<Props>(
   Wrapped: React.ComponentType<Props & SizeProps>
-): React.ComponentType<
-  // The component that is returned does not accept width and height parameters, as
-  // they are injected by this higher order component.
-  Readonly<Omit<Props, keyof SizeProps>>
-> {
-  // An existential type in a generic is a bit tricky to remove. Perhaps this can
-  // use a hook instead.
-  // See: https://github.com/firefox-devtools/profiler/issues/3062
-  // eslint-disable-next-line flowtype/no-existential-type
+): React.ComponentType<Props> {
   return class WithSizeWrapper extends React.PureComponent<Props, State> {
     override state = { width: 0, height: 0 };
     _container: HTMLElement | null;

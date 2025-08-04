@@ -72,31 +72,27 @@ export const DATABASE_VERSION = 3;
 
 async function reallyOpen(): Promise<IDBPDatabase> {
   const db = await openDB(DATABASE_NAME, DATABASE_VERSION, {
-    upgrade(db, oldVersion, newVersion, transaction) {
-      // In the following switch block, we don't "break" for each case block
-      // because we want to run all migration steps in sequence, starting with
-      // the right step.
-      /* eslint-disable no-fallthrough */
-      if (oldVersion <= 0) {
+    upgrade(db, oldVersion, _newVersion, transaction) {
+      // Run all migration steps in sequence.
+      if (oldVersion < 1) {
         // Version 1: this is the first version of the DB.
         const store = db.createObjectStore(OBJECTSTORE_NAME, {
           keyPath: 'profileToken',
         });
         store.createIndex('originHostname', 'originHostname');
       }
-      if (oldVersion <= 1) {
+      if (oldVersion < 2) {
         // Version 2: we create a new index to allow retrieving the values
         // ordered by date.
         const store = transaction.objectStore(OBJECTSTORE_NAME);
         store.createIndex('publishedDate', 'publishedDate');
       }
-      if (oldVersion <= 2) {
+      if (oldVersion < 3) {
         // Version 3: we remove the originHostname index that was used by the
         // active tab view since it's been removed.
         const store = transaction.objectStore(OBJECTSTORE_NAME);
         store.deleteIndex('originHostname');
       }
-      /* eslint-enable */
     },
   });
 

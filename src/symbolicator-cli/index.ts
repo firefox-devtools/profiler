@@ -13,7 +13,8 @@
  *
  */
 
-const fs = require('fs');
+import fs from 'fs';
+import minimist from 'minimist';
 
 import { unserializeProfileOfArbitraryFormat } from '../profile-logic/process-profile';
 import { SymbolStore } from '../profile-logic/symbol-store';
@@ -167,7 +168,7 @@ export async function run(options: CliOptions) {
 }
 
 export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
-  const argv = require('minimist')(processArgv.slice(2));
+  const argv = minimist(processArgv.slice(2));
 
   if (!('input' in argv && typeof argv.input === 'string')) {
     throw new Error(

@@ -7,13 +7,8 @@ module.exports = {
     node: true,
   },
   parser: '@babel/eslint-parser',
-  plugins: ['@babel', 'react', 'flowtype', 'import'],
-  extends: [
-    'eslint:recommended',
-    'plugin:react/recommended',
-    'plugin:flowtype/recommended',
-    'prettier',
-  ],
+  plugins: ['@babel', 'react', 'import'],
+  extends: ['eslint:recommended', 'plugin:react/recommended', 'prettier'],
   parserOptions: {
     ecmaVersion: '2017',
     ecmaFeatures: {
@@ -83,21 +78,6 @@ module.exports = {
     'no-self-compare': 'error',
     'no-throw-literal': 'error',
     'no-unmodified-loop-condition': 'error',
-    // We use the version from the flowtype plugin so that flow assertions don't
-    // output an error.
-    'flowtype/no-unused-expressions': 'error',
-    // The Object type and Function type aren't particularly useful, and usually hide
-    // type errors. It also blocks a migration to TypeScript. Disable this rule if
-    // using the Object or Function as generic type bounds.
-    'flowtype/no-weak-types': [
-      'error',
-      {
-        any: false,
-        Object: true,
-        Function: true,
-      },
-    ],
-    'flowtype/no-existential-type': 'error',
     'no-useless-call': 'error',
     'no-useless-computed-key': 'error',
     'no-useless-concat': 'error',
@@ -136,6 +116,62 @@ module.exports = {
       },
     },
   },
+  overrides: [
+    {
+      // TypeScript files
+      files: ['**/*.ts', '**/*.tsx'],
+      plugins: ['@typescript-eslint'],
+      extends: ['plugin:@typescript-eslint/recommended'],
+      parser: '@typescript-eslint/parser',
+      rules: {
+        // We want to have the option to use `as any`
+        '@typescript-eslint/no-explicit-any': 'off',
+        // Need to find a better solution for ConnectedProps<{}, StateProps, {}>
+        '@typescript-eslint/no-empty-object-type': 'off',
+        // Should enable this soon, mostly finds `catch (e)` with unused e
+        '@typescript-eslint/no-unused-vars': 'off',
+        // TypeScript imports react-jsx into .tsx files for us
+        'react/react-in-jsx-scope': 'off',
+        // Allow @ts-ignore annotations with descriptions
+        '@typescript-eslint/ban-ts-comment': [
+          'error',
+          {
+            'ts-expect-error': 'allow-with-description',
+            'ts-ignore': 'allow-with-description',
+            'ts-nocheck': 'allow-with-description',
+            'ts-check': false, // allow even without description
+          },
+        ],
+        // I made Claude turn all `import type`s into `import`s and now I'm paying the price
+        'import/no-duplicates': 'off',
+      },
+    },
+    {
+      // Flow JS files
+      files: ['**/*.js'],
+      plugins: ['flowtype'],
+      extends: ['plugin:flowtype/recommended'],
+      parser: '@babel/eslint-parser',
+      rules: {
+        // We use the version from the flowtype plugin so that flow assertions don't
+        // output an error.
+        'flowtype/no-unused-expressions': 'error',
+        // The Object type and Function type aren't particularly useful, and usually hide
+        // type errors. It also blocks a migration to TypeScript. Disable this rule if
+        // using the Object or Function as generic type bounds.
+        'flowtype/no-weak-types': [
+          'error',
+          {
+            any: false,
+            Object: true,
+            Function: true,
+          },
+        ],
+        'flowtype/no-existential-type': 'error',
+        'flowtype/generic-spacing': 'off', // I don't know wtf this is talking about
+      },
+    },
+  ],
   globals: {
     AVAILABLE_STAGING_LOCALES: true,
   },

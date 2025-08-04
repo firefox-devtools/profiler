@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import * as React from 'react';
-import { coerce } from '../../utils/flow';
 import classNames from 'classnames';
 
 import './KeyboardShortcut.css';
@@ -28,7 +27,7 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
     isOpen: false,
     // The eslint error is a false positive due to how it's used, see the line:
     //  `focusAfterClosed.focus()`
-    focusAfterClosed: null, // eslint-disable-line react/no-unused-state
+    focusAfterClosed: null,
   };
 
   _focusArea = React.createRef<HTMLDivElement>();
@@ -52,32 +51,28 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
     });
   }
 
-  _open = (state: State): Partial<State> => {
-    if (state.isOpen) {
-      // Do nothing.
-      return {};
-    }
+  _open = (state: State): Pick<State, 'focusAfterClosed' | 'isOpen'> => {
     const focusAfterClosed = document.activeElement as HTMLElement | null;
-    this._trapFocus();
-    this._focus();
+    if (!state.isOpen) {
+      this._trapFocus();
+      this._focus();
+    }
     return { isOpen: true, focusAfterClosed };
   };
 
-  _close = (state: State): Partial<State> => {
+  _close = (state: State): Pick<State, 'focusAfterClosed' | 'isOpen'> => {
     const { focusAfterClosed, isOpen } = state;
 
-    if (!isOpen) {
-      // Do nothing.
-      return {};
-    }
-    this._untrapFocus();
-    if (focusAfterClosed) {
-      requestAnimationFrame(() => {
-        // Restore focus, but not during a React setState call, otherwise this triggers
-        // a React warning:
-        // "unstable_flushDiscreteUpdates: Cannot flush updates when React is already rendering."
-        focusAfterClosed.focus();
-      });
+    if (isOpen) {
+      this._untrapFocus();
+      if (focusAfterClosed) {
+        requestAnimationFrame(() => {
+          // Restore focus, but not during a React setState call, otherwise this triggers
+          // a React warning:
+          // "unstable_flushDiscreteUpdates: Cannot flush updates when React is already rendering."
+          focusAfterClosed.focus();
+        });
+      }
     }
 
     return { isOpen: false, focusAfterClosed: null };
@@ -97,7 +92,7 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
   };
 
   _handleKeyPress = (event: KeyboardEvent) => {
-    const target = coerce<EventTarget, HTMLElement>(event.target!);
+    const target = event.target! as HTMLElement;
     switch (event.key) {
       case '?': {
         if (
@@ -110,37 +105,14 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
           return;
         }
         // Toggle the state.
-        if (this.state.isOpen) {
-          // Close logic
-          const focusAfterClosed = this.state.focusAfterClosed;
-          this._untrapFocus();
-          this.setState({ isOpen: false, focusAfterClosed: null });
-          if (focusAfterClosed && 'focus' in focusAfterClosed) {
-            requestAnimationFrame(() => {
-              (focusAfterClosed as HTMLElement).focus();
-            });
-          }
-        } else {
-          // Open logic
-          const focusAfterClosed = document.activeElement as HTMLElement | null;
-          this._trapFocus();
-          this._focus();
-          this.setState({ isOpen: true, focusAfterClosed });
-        }
+        this.setState((state) =>
+          state.isOpen ? this._close(state) : this._open(state)
+        );
         break;
       }
       case 'Escape': {
         // Unconditionally run close on escape, which is a noop if it's not open.
-        if (this.state.isOpen) {
-          const focusAfterClosed = this.state.focusAfterClosed;
-          this._untrapFocus();
-          this.setState({ isOpen: false, focusAfterClosed: null });
-          if (focusAfterClosed && 'focus' in focusAfterClosed) {
-            requestAnimationFrame(() => {
-              (focusAfterClosed as HTMLElement).focus();
-            });
-          }
-        }
+        this.setState(this._close);
         break;
       }
       default:
@@ -168,7 +140,7 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
     if (!div) {
       return;
     }
-    if (!div.contains(coerce<EventTarget, Node>(event.target!))) {
+    if (!div.contains(event.target! as Node)) {
       // TODO - This does not handle shift-tabbing going to the last focusable
       // element in the list.
       div.focus();

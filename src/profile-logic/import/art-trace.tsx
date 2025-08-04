@@ -29,13 +29,13 @@ type GeckoThreadVersion11 = {
   name: string;
   registerTime: number;
   unregisterTime: number | null;
-  // eslint-disable-next-line flowtype/no-weak-types
+  // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
   markers: Object;
-  // eslint-disable-next-line flowtype/no-weak-types
+  // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
   samples: Object;
-  // eslint-disable-next-line flowtype/no-weak-types
+  // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
   frameTable: Object;
-  // eslint-disable-next-line flowtype/no-weak-types
+  // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
   stackTable: Object;
   stringTable: string[];
 };
@@ -56,12 +56,12 @@ type GeckoProfileVersion11 = {
     presymbolicated: true;
     categories: GeckoCategoryVersion11[];
   };
-  // eslint-disable-next-line flowtype/no-weak-types
+  // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
   libs: Object[];
   threads: GeckoThreadVersion11[];
-  // eslint-disable-next-line flowtype/no-weak-types
+  // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
   processes: Object[];
-  // eslint-disable-next-line flowtype/no-weak-types
+  // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
   pausedRanges: Object[];
 };
 

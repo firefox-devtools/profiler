@@ -46,7 +46,6 @@ export class BlobUrlLink extends React.PureComponent<Props, State> {
 
   override render() {
     const {
-      // eslint-disable-next-line no-unused-vars
       blob,
       children,
       ...rest

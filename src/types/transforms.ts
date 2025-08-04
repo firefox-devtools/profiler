@@ -348,7 +348,7 @@ export type TransformDefinitions = {
 export type Transform = TransformDefinitions[keyof TransformDefinitions];
 
 // This pulls the string value out of { type } for a transform.
-// @ts-ignore
+// @ts-ignore Currently unused but expect to be used when the migration is complete
 type ExtractType<T extends string, S extends { readonly type: T }> = (
   transform: S
 ) => T;

@@ -12,7 +12,6 @@ export type ExtractReturnType<V> = (...args: any[]) => V;
  * one type of index into another type of index. This is similar to how we use the
  * Map<K,V> type, but with the Array.
  */
-// eslint-disable-next-line no-unused-vars
 export type IndexedArray<_IndexType, Value> = Array<Value>;
 
 /**

@@ -24,8 +24,8 @@ type $Exact<T> = T;
 type $Diff<A, B> = Omit<A, keyof B>;
 type $Rest<A, B> = Omit<A, keyof B>;
 
-// Firefox Profiler specific globals
-declare var AVAILABLE_STAGING_LOCALES: string[] | null;
+// Firefox Profiler specific globals, added by webpack's DefinePlugin
+declare const AVAILABLE_STAGING_LOCALES: string[] | null;
 
 // Web Workers
 interface Worker {

@@ -263,7 +263,7 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
             elems={{ strong: <strong /> }}
           >
             <>
-              Select the receiver thread "
+              Select the receiver thread “
               <strong>{data.recvThreadName ?? ''}</strong>”
             </>
           </Localized>
@@ -287,8 +287,8 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
             elems={{ strong: <strong /> }}
           >
             <>
-              Select the sender thread "
-              <strong>{data.sendThreadName ?? ''}</strong>"
+              Select the sender thread “
+              <strong>{data.sendThreadName ?? ''}</strong>”
             </>
           </Localized>
         );
@@ -367,7 +367,7 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
   };
 
   _onShow = () => {
-    if (this._hidingTimeout) clearTimeout(this._hidingTimeout);
+    if (this._hidingTimeout) {clearTimeout(this._hidingTimeout);}
     this.props.setContextMenuVisibility(true);
   };
 

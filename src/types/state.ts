@@ -32,7 +32,7 @@ import { Attempt } from '../utils/errors';
 import { TransformStacksPerThread } from './transforms';
 import * as JSZip from 'jszip';
 import { IndexIntoZipFileTable } from '../profile-logic/zip-files';
-import { PathSet } from '../utils/path.js';
+import { PathSet } from '../utils/path';
 import { UploadedProfileInformation as ImportedUploadedProfileInformation } from '../app-logic/uploaded-profiles-db';
 import { BrowserConnectionStatus } from '../app-logic/browser-connection';
 

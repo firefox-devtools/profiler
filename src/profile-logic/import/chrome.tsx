@@ -294,11 +294,7 @@ function findEvent<T extends TracingEventUnion>(
   return events ? events.find(f) : undefined;
 }
 
-function findEvents<
-  // False positive, generic type bounds:
-  // eslint-disable-next-line flowtype/no-weak-types
-  T extends Record<string, any>,
->(
+function findEvents<T extends Record<string, any>>(
   eventsByName: Map<string, TracingEventUnion[]>,
   name: string,
   f: (param: T) => boolean

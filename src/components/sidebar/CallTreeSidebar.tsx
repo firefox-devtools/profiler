@@ -20,7 +20,7 @@ import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
 import { shouldDisplaySubcategoryInfoForCategory } from 'firefox-profiler/profile-logic/profile-data';
 import { CanSelectContent } from './CanSelectContent';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import {
   ThreadsKey,
   CategoryList,
