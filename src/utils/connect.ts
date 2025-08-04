@@ -11,22 +11,16 @@ import type {
   Action,
 } from 'firefox-profiler/types';
 
-type MapStateToProps<
-  OwnProps extends Record<string, any>,
-  StateProps extends Record<string, any>,
-> = (state: State, ownProps: OwnProps) => StateProps;
+type MapStateToProps<OwnProps, StateProps> = (
+  state: State,
+  ownProps: OwnProps
+) => StateProps;
 
-type MapDispatchToProps<
-  OwnProps extends Record<string, any>,
-  DispatchProps extends Record<string, any>,
-> = ((dispatch: Dispatch, ownProps: OwnProps) => DispatchProps) | DispatchProps;
+type MapDispatchToProps<OwnProps, DispatchProps> =
+  | ((dispatch: Dispatch, ownProps: OwnProps) => DispatchProps)
+  | DispatchProps;
 
-type MergeProps<
-  StateProps,
-  DispatchProps extends Record<string, any>,
-  OwnProps extends Record<string, any>,
-  Props extends Record<string, any>,
-> = (
+type MergeProps<StateProps, DispatchProps, OwnProps, Props> = (
   stateProps: StateProps,
   dispatchProps: DispatchProps,
   ownProps: OwnProps
@@ -71,7 +65,7 @@ type WrapThunkActionCreator<Args extends any[], Returns> = (
  * automatically. It leaves normal action creators alone, but with ThunkActions it
  * removes the (Dispatch, GetState) part of a ThunkAction.
  */
-export type WrapDispatchProps<DispatchProps extends Record<string, any>> = {
+export type WrapDispatchProps<DispatchProps> = {
   [K in keyof DispatchProps]: WrapFunctionInDispatch<DispatchProps[K]>;
 };
 
@@ -88,11 +82,7 @@ export type WrapFunctionInDispatch<Fn> = Fn extends (
     ? (...args: Args) => Action
     : Fn;
 
-type ExplicitConnectOptions<
-  OwnProps extends Record<string, any>,
-  StateProps extends Record<string, any>,
-  DispatchProps extends Record<string, any>,
-> = {
+type ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps?: MapStateToProps<OwnProps, StateProps>;
   mapDispatchToProps?: MapDispatchToProps<OwnProps, DispatchProps>;
   mergeProps?: MergeProps<
@@ -107,17 +97,11 @@ type ExplicitConnectOptions<
   >;
 };
 
-export type ConnectedProps<
-  OwnProps extends Record<string, any>,
-  StateProps extends Record<string, any>,
-  DispatchProps extends Record<string, any>,
-> = Readonly<OwnProps & StateProps & WrapDispatchProps<DispatchProps>>;
+export type ConnectedProps<OwnProps, StateProps, DispatchProps> = Readonly<
+  OwnProps & StateProps & WrapDispatchProps<DispatchProps>
+>;
 
-export type ConnectedComponent<
-  OwnProps extends Record<string, any>,
-  StateProps extends Record<string, any>,
-  DispatchProps extends Record<string, any>,
-> =
+export type ConnectedComponent<OwnProps, StateProps, DispatchProps> =
   | React.ComponentType<ConnectedProps<OwnProps, StateProps, DispatchProps>>
   | React.FunctionComponent<
       ConnectedProps<OwnProps, StateProps, DispatchProps>
@@ -128,11 +112,7 @@ export type ConnectedComponent<
  * is a wrapper to simplify the typing of connect and make it more explicit, and
  * less magical.
  */
-export default function explicitConnect<
-  OwnProps extends Record<string, any>,
-  StateProps extends Record<string, any>,
-  DispatchProps extends Record<string, any>,
->(
+export default function explicitConnect<OwnProps, StateProps, DispatchProps>(
   connectOptions: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps>
 ): React.ComponentType<OwnProps> {
   const {
@@ -155,9 +135,9 @@ export default function explicitConnect<
 }
 
 export function explicitConnectWithForwardRef<
-  OwnProps extends Record<string, any>,
-  StateProps extends Record<string, any>,
-  DispatchProps extends Record<string, any>,
+  OwnProps,
+  StateProps,
+  DispatchProps,
   RefInterface,
 >(
   connectOptions: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps>
