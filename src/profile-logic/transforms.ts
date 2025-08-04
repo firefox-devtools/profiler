@@ -55,22 +55,27 @@ import type { StringTable } from 'firefox-profiler/utils/string-table';
  * to profile data.
  */
 
+const TRANSFORM_OBJ: { [key in TransformType]: true } = {
+  'focus-subtree': true,
+  'focus-function': true,
+  'merge-call-node': true,
+  'merge-function': true,
+  'drop-function': true,
+  'collapse-resource': true,
+  'collapse-direct-recursion': true,
+  'collapse-recursion': true,
+  'collapse-function-subtree': true,
+  'focus-category': true,
+  'filter-samples': true,
+};
+export const ALL_TRANSFORM_TYPES: TransformType[] = Object.keys(
+  TRANSFORM_OBJ
+) as TransformType[];
+
 // Create mappings from a transform name, to a url-friendly short name.
 const TRANSFORM_TO_SHORT_KEY: Partial<{ [TT in TransformType]: string }> = {};
 const SHORT_KEY_TO_TRANSFORM: { [TT: string]: TransformType } = {};
-[
-  'focus-subtree',
-  'focus-function',
-  'focus-category',
-  'merge-call-node',
-  'merge-function',
-  'drop-function',
-  'collapse-resource',
-  'collapse-direct-recursion',
-  'collapse-recursion',
-  'collapse-function-subtree',
-  'filter-samples',
-].forEach((transform: TransformType) => {
+ALL_TRANSFORM_TYPES.forEach((transform: TransformType) => {
   // This is kind of an awkward switch, but it ensures we've exhaustively checked that
   // we have a mapping for every transform.
   let shortKey;

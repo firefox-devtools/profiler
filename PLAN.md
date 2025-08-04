@@ -73,7 +73,6 @@ const ga = window.ga;
 - Only after all application code is fully type-safe
 
 ### Phase 7: Enable Additional Checks (Planned)
-- Enable `strictFunctionTypes`
 - Enable `useUnknownInCatchVariables`
 - Enable `alwaysStrict`
 

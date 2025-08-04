@@ -19,7 +19,7 @@
     "strict": true,
 
     // Exceptions to strictness, consider enabling in the future
-    "strictFunctionTypes": false, // Seems desirable
+    "strictFunctionTypes": true, // Seems desirable
     "useUnknownInCatchVariables": false, // Sounds fine, enforces `} catch (e) { if (e instanceof Error) {` etc
     "alwaysStrict": false, // Affects runtime behavior, I think - need to check what we had with Flow
     "exactOptionalPropertyTypes": false, // Benefit unclear

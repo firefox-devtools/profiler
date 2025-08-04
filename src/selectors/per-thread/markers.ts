@@ -31,6 +31,7 @@ import type {
   CollectedCustomMarkerSamples,
   IndexIntoSamplesTable,
   IndexIntoStringTable,
+  State,
 } from 'firefox-profiler/types';
 
 /**
@@ -87,7 +88,7 @@ export function getMarkerSelectorsPerThread(
    * very start of our marker pipeline. */
   const getDerivedMarkerInfo: Selector<DerivedMarkerInfo> = createSelector(
     _getRawMarkerTable,
-    (state) => ProfileSelectors.getProfile(state).shared.stringArray,
+    (state: State) => ProfileSelectors.getProfile(state).shared.stringArray,
     _getThreadId,
     threadSelectors.getThreadRange,
     ProfileSelectors.getIPCMarkerCorrelations,
@@ -226,7 +227,7 @@ export function getMarkerSelectorsPerThread(
       getCommittedRangeFilteredMarkerIndexes,
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
-      () => 'timeline-overview',
+      () => 'timeline-overview' as const,
       MarkerData.filterMarkerByDisplayLocation
     );
 
@@ -395,7 +396,7 @@ export function getMarkerSelectorsPerThread(
     ProfileSelectors.getMarkerSchemaByName,
     ProfileSelectors.getCategories,
     ProfileSelectors.getStringTable,
-    () => 'tooltipLabel',
+    () => 'tooltipLabel' as const,
     getLabelGetter
   );
 
@@ -410,7 +411,7 @@ export function getMarkerSelectorsPerThread(
     ProfileSelectors.getMarkerSchemaByName,
     ProfileSelectors.getCategories,
     ProfileSelectors.getStringTable,
-    () => 'tableLabel',
+    () => 'tableLabel' as const,
     getLabelGetter
   );
 
@@ -425,7 +426,7 @@ export function getMarkerSelectorsPerThread(
     ProfileSelectors.getMarkerSchemaByName,
     ProfileSelectors.getCategories,
     ProfileSelectors.getStringTable,
-    () => 'chartLabel',
+    () => 'chartLabel' as const,
     getLabelGetter
   );
 
@@ -442,7 +443,7 @@ export function getMarkerSelectorsPerThread(
     ProfileSelectors.getMarkerSchemaByName,
     ProfileSelectors.getCategories,
     ProfileSelectors.getStringTable,
-    () => 'copyLabel',
+    () => 'copyLabel' as const,
     getLabelGetter
   );
 
@@ -469,7 +470,7 @@ export function getMarkerSelectorsPerThread(
       getCommittedRangeFilteredMarkerIndexes,
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
-      () => 'timeline-fileio',
+      () => 'timeline-fileio' as const,
       // Custom filtering in addition to the schema logic:
       () => MarkerData.isOnThreadFileIoMarker,
       MarkerData.filterMarkerByDisplayLocation
@@ -484,7 +485,7 @@ export function getMarkerSelectorsPerThread(
       getCommittedRangeFilteredMarkerIndexes,
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
-      () => 'timeline-memory',
+      () => 'timeline-memory' as const,
       MarkerData.filterMarkerByDisplayLocation
     );
 
@@ -496,7 +497,7 @@ export function getMarkerSelectorsPerThread(
     getCommittedRangeFilteredMarkerIndexes,
     ProfileSelectors.getMarkerSchema,
     ProfileSelectors.getMarkerSchemaByName,
-    () => 'timeline-ipc',
+    () => 'timeline-ipc' as const,
     MarkerData.filterMarkerByDisplayLocation
   );
 

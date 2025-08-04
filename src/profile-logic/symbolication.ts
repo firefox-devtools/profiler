@@ -913,7 +913,7 @@ export function applyFuncSubstitutionToCallPath(
   oldFuncToNewFuncsMap: FuncToFuncsMap,
   path: CallNodePath
 ): CallNodePath {
-  return path.reduce((accum, oldFunc) => {
+  return path.reduce<CallNodePath>((accum, oldFunc) => {
     const newFuncs = oldFuncToNewFuncsMap.get(oldFunc);
     return newFuncs === undefined
       ? [...accum, oldFunc]

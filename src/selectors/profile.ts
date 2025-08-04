@@ -216,12 +216,13 @@ const getMarkerSchemaGecko: Selector<MarkerSchema[]> = (state) =>
 
 // Get the samples table units. They can be different depending on their platform.
 // See SampleUnits type definition for more information.
-export const getSampleUnits: Selector<SampleUnits | void> = (state) =>
+export const getSampleUnits: Selector<SampleUnits | undefined> = (state) =>
   getMeta(state).sampleUnits;
 
 // Get all extensions in the profile metadata.
-export const getExtensionTable: Selector<ExtensionTable | void> = (state) =>
-  getMeta(state).extensions;
+export const getExtensionTable: Selector<ExtensionTable | undefined> = (
+  state
+) => getMeta(state).extensions;
 
 /**
  * Firefox profiles will always have categories. However, imported profiles may not
@@ -236,7 +237,7 @@ export const getCategories: Selector<CategoryList> = createSelector(
 );
 
 export const getStringTable: Selector<StringTable> = createSelector(
-  (state) => getRawProfileSharedData(state).stringArray,
+  (state: State) => getRawProfileSharedData(state).stringArray,
   (stringArray) => StringTable.withBackingArray(stringArray as string[])
 );
 

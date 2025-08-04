@@ -42,6 +42,7 @@ import type {
   ThreadWithReservedFunctions,
   IndexIntoResourceTable,
   IndexIntoFuncTable,
+  State,
 } from 'firefox-profiler/types';
 
 import type { TransformLabeL10nIds } from 'firefox-profiler/profile-logic/transforms';
@@ -112,8 +113,8 @@ export function getBasicThreadSelectorsPerThread(
       ProfileSelectors.getProfileInterval(state)
     );
   const getStackTable: Selector<StackTable> = createSelector(
-    (state) => getRawThread(state).stackTable,
-    (state) => getRawThread(state).frameTable,
+    (state: State) => getRawThread(state).stackTable,
+    (state: State) => getRawThread(state).frameTable,
     ProfileSelectors.getDefaultCategory,
     ProfileData.computeStackTableFromRawStackTable
   );

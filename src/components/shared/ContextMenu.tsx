@@ -17,7 +17,7 @@ export class ContextMenu extends PureComponent<Props> {
     this._contextMenu = contextMenu;
   };
 
-  _mouseDownHandler(event: MouseEvent): void {
+  _mouseDownHandler(event: Event): void {
     // This prevents from stealing the focus from where it was.
     event.preventDefault();
   }
