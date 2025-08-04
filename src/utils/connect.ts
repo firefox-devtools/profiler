@@ -143,7 +143,9 @@ export default function explicitConnect<
     component,
   } = connectOptions;
 
-  // Opt out of the flow-typed definition of react-redux's connect, and use our own.
+  // Opt out of the TypeScript definition of react-redux's connect.
+  // If want to figure out how to align their types with ours, feel free
+  // but don't get your hopes up.
   return (connect as any)(
     mapStateToProps,
     mapDispatchToProps,
