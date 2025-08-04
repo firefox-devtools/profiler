@@ -2,9 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import { ProfileViewer } from './ProfileViewer';
@@ -27,7 +25,7 @@ import type { AppViewState, State, DataSource } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { Localized } from '@fluent/react';
 
-const ERROR_MESSAGES_L10N_ID: { [string]: string } = Object.freeze({
+const ERROR_MESSAGES_L10N_ID: { [key: string]: string } = Object.freeze({
   'from-browser': 'AppViewRouter--error-unpublished',
   'from-post-message': 'AppViewRouter--error-from-post-message',
   unpublished: 'AppViewRouter--error-unpublished',
@@ -39,16 +37,16 @@ const ERROR_MESSAGES_L10N_ID: { [string]: string } = Object.freeze({
 });
 
 type AppViewRouterStateProps = {
-  +view: AppViewState,
-  +dataSource: DataSource,
-  +profilesToCompare: string[] | null,
-  +hasZipFile: boolean,
+  readonly view: AppViewState;
+  readonly dataSource: DataSource;
+  readonly profilesToCompare: string[] | null;
+  readonly hasZipFile: boolean;
 };
 
 type AppViewRouterProps = ConnectedProps<{}, AppViewRouterStateProps, {}>;
 
 class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
-  render() {
+  override render() {
     const { view, dataSource, profilesToCompare, hasZipFile } = this.props;
     const phase = view.phase;
 
@@ -132,9 +130,9 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
         return null;
       case 'ROUTE_NOT_FOUND':
       default:
-        // Assert with Flow that we've handled all the cases, as the only thing left
+        // Assert with TypeScript that we've handled all the cases, as the only thing left
         // should be 'ROUTE_NOT_FOUND' or 'PROFILE_LOADED'.
-        (phase: 'ROUTE_NOT_FOUND');
+        phase as 'ROUTE_NOT_FOUND';
         return (
           <Localized
             id="AppViewRouter--route-not-found--home"
