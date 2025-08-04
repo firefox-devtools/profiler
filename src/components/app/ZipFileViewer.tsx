@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import * as React from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { DragAndDropOverlay } from './DragAndDrop';
@@ -37,42 +35,42 @@ import type {
 import './ZipFileViewer.css';
 
 type StateProps = {
-  +zipFileState: ZipFileState,
-  +pathInZipFile: string | null,
-  +zipFileTree: ZipFileTree,
-  +zipFileMaxDepth: number,
-  +selectedZipFileIndex: IndexIntoZipFileTable | null,
+  readonly zipFileState: ZipFileState;
+  readonly pathInZipFile: string | null;
+  readonly zipFileTree: ZipFileTree;
+  readonly zipFileMaxDepth: number;
+  readonly selectedZipFileIndex: IndexIntoZipFileTable | null;
   // In practice this should never contain null, but needs to support the
   // TreeView interface.
-  +expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
-  +zipFileErrorMessage: null | string,
+  readonly expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>;
+  readonly zipFileErrorMessage: null | string;
 };
 
 type DispatchProps = {
-  +changeSelectedZipFile: typeof changeSelectedZipFile,
-  +changeExpandedZipFile: typeof changeExpandedZipFile,
-  +viewProfileFromZip: typeof viewProfileFromZip,
-  +viewProfileFromPathInZipFile: typeof viewProfileFromPathInZipFile,
-  +returnToZipFileList: typeof returnToZipFileList,
+  readonly changeSelectedZipFile: typeof changeSelectedZipFile;
+  readonly changeExpandedZipFile: typeof changeExpandedZipFile;
+  readonly viewProfileFromZip: typeof viewProfileFromZip;
+  readonly viewProfileFromPathInZipFile: typeof viewProfileFromPathInZipFile;
+  readonly returnToZipFileList: typeof returnToZipFileList;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 type ZipFileRowDispatchProps = {
-  +viewProfileFromZip: typeof viewProfileFromZip,
+  readonly viewProfileFromZip: typeof viewProfileFromZip;
 };
 type ZipFileRowOwnProps = {
-  +displayData: ZipDisplayData,
+  readonly displayData: ZipDisplayData;
 };
 
 type ZipFileRowProps = ConnectedProps<
   ZipFileRowOwnProps,
   {},
-  ZipFileRowDispatchProps,
+  ZipFileRowDispatchProps
 >;
 
 class ZipFileRowImpl extends React.PureComponent<ZipFileRowProps> {
-  _handleClick = (event: SyntheticMouseEvent<HTMLElement>) => {
+  _handleClick = (event: React.MouseEvent<HTMLElement>) => {
     if (event.metaKey || event.ctrlKey) {
       return;
     }
@@ -85,7 +83,7 @@ class ZipFileRowImpl extends React.PureComponent<ZipFileRowProps> {
       viewProfileFromZip(zipTableIndex);
     }
   };
-  render() {
+  override render() {
     const { name, url } = this.props.displayData;
     if (!url) {
       return name;
@@ -102,7 +100,7 @@ class ZipFileRowImpl extends React.PureComponent<ZipFileRowProps> {
 const ZipFileRow = explicitConnect<
   ZipFileRowOwnProps,
   {},
-  ZipFileRowDispatchProps,
+  ZipFileRowDispatchProps
 >({
   // ZipFileRow is implemented as a connected component, only to provide access to
   // dispatch-wrapped actions. Please consider the performance impact of using
@@ -122,10 +120,11 @@ const ZipFileRow = explicitConnect<
 class ZipFileViewerImpl extends React.PureComponent<Props> {
   _fixedColumns = [];
   _mainColumn = { propName: 'name', titleL10nId: '', component: ZipFileRow };
-  _treeView: ?TreeView<ZipDisplayData>;
-  _takeTreeViewRef = (treeView) => (this._treeView = treeView);
+  _treeView: TreeView<ZipDisplayData> | null;
+  _takeTreeViewRef = (treeView: TreeView<ZipDisplayData> | null) =>
+    (this._treeView = treeView);
 
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
     const { expandedZipFileIndexes, zipFileTree, changeExpandedZipFile } =
       this.props;
@@ -134,9 +133,9 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
     }
   }
 
-  componentDidMount() {
+  override componentDidMount() {
     const { zipFileState, pathInZipFile, zipFileTree } = this.props;
-    if (zipFileState.phase === 'NONE' && pathInZipFile) {
+    if (zipFileState.phase === 'NO_ZIP_FILE' && pathInZipFile) {
       // Most likely the UrlState was deserialized from the URL, but the zip file
       // still hasn't actually been decompressed yet.
       if (!zipFileTree) {
@@ -155,7 +154,7 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
    * method is what keeps the ZipFileViewer and ZipFileState in sync
    * with the UrlState.
    */
-  componentDidUpdate(prevProps: Props) {
+  override componentDidUpdate(prevProps: Props) {
     const {
       pathInZipFile,
       zipFileState,
@@ -192,7 +191,7 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
     }
   }
 
-  _renderMessage(message: React.Node) {
+  _renderMessage(message: React.ReactNode) {
     return (
       <section className="zipFileViewer">
         <div className="zipFileViewerSection">
@@ -224,7 +223,7 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
     this.props.viewProfileFromZip(zipTableIndex);
   };
 
-  render() {
+  override render() {
     const {
       zipFileState,
       zipFileTree,
@@ -316,7 +315,7 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
       case 'VIEW_PROFILE_IN_ZIP_FILE':
         return <ProfileViewer />;
       default:
-        (phase: empty);
+        phase as never;
         throw new Error('Unknown zip file phase.');
     }
   }
