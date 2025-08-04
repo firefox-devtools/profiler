@@ -270,17 +270,17 @@ export class Reorderable extends React.PureComponent<Props, State> {
     return (
       <TagName className={className} ref={innerElementRef}>
         {orderedChildren.map((child, childIndex) => {
-          const style = {
+          const style: React.CSSProperties = {
             transition: '200ms ease-in-out transform',
             willChange: 'transform',
             position: 'relative',
-            zIndex: '1',
+            zIndex: 1,
             transform: '',
           };
           if (childIndex === manipulatingIndex) {
-            style.zIndex = '2';
+            style.zIndex = 2;
             if (phase === 'MANIPULATING') {
-              delete (style as any).transition;
+              delete style.transition;
               style.transform = `${xy.translateXY}(${this.state.manipulationDelta}px)`;
             } else {
               style.transform = `${xy.translateXY}(${this.state.finalOffset}px)`;

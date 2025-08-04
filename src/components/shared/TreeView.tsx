@@ -796,7 +796,7 @@ export class TreeView<
     const { tree, selectedNodeId, mainColumn } = this.props;
     if (selectedNodeId) {
       const displayData = tree.getDisplayData(selectedNodeId);
-      const clipboardData: DataTransfer = (event as any).clipboardData;
+      const clipboardData: DataTransfer = event.clipboardData!;
       clipboardData.setData('text/plain', displayData[mainColumn.propName]);
     }
   };
