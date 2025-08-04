@@ -47,7 +47,7 @@ export function objectShallowEquals<
   for (const key in a) {
     if (Object.prototype.hasOwnProperty.call(a, key)) {
       aLength++;
-      if ((a as any)[key] !== (b as any)[key]) {
+      if (a[key] !== (b as any)[key]) {
         return false;
       }
     }
