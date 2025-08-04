@@ -1,25 +1,21 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import { GREY_30 } from 'photon-colors';
 import * as React from 'react';
 import { TIMELINE_MARGIN_RIGHT } from '../../app-logic/constants';
-import {
-  withChartViewport,
-  type WithChartViewport,
-  type Viewport,
-} from '../shared/chart/Viewport';
+import { withChartViewport, type Viewport } from '../shared/chart/Viewport';
 import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
 import { formatMilliseconds } from '../../utils/format-numbers';
 import { bisectionLeft, bisectionRight } from '../../utils/bisect';
-import {
+import type {
   updatePreviewSelection,
-  typeof changeMouseTimePosition as ChangeMouseTimePosition,
+  changeMouseTimePosition,
 } from '../../actions/profile-view';
+
+type ChangeMouseTimePosition = typeof changeMouseTimePosition;
 import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
 import { TooltipCallNode } from '../tooltip/CallNode';
 import { TooltipMarker } from '../tooltip/Marker';
@@ -56,41 +52,42 @@ import type {
 import type { WrapFunctionInDispatch } from '../../utils/connect';
 
 type OwnProps = {
-  +thread: Thread,
-  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-  +threadsKey: ThreadsKey,
-  +interval: Milliseconds,
-  +weightType: WeightType,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +combinedTimingRows: CombinedTimingRows,
-  +sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap,
-  +stackFrameHeight: CssPixels,
-  +updatePreviewSelection: WrapFunctionInDispatch<
-    typeof updatePreviewSelection,
-  >,
-  +changeMouseTimePosition: ChangeMouseTimePosition,
-  +getMarker: (MarkerIndex) => Marker,
-  +categories: CategoryList,
-  +callNodeInfo: CallNodeInfo,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
-  +onRightClick: (IndexIntoCallNodeTable | null) => void,
-  +shouldDisplayTooltips: () => boolean,
-  +scrollToSelectionGeneration: number,
-  +marginLeft: CssPixels,
-  +displayStackType: boolean,
-  +useStackChartSameWidths: boolean,
+  readonly thread: Thread;
+  readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null;
+  readonly threadsKey: ThreadsKey;
+  readonly interval: Milliseconds;
+  readonly weightType: WeightType;
+  readonly rangeStart: Milliseconds;
+  readonly rangeEnd: Milliseconds;
+  readonly combinedTimingRows: CombinedTimingRows;
+  readonly sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap;
+  readonly stackFrameHeight: CssPixels;
+  readonly updatePreviewSelection: WrapFunctionInDispatch<
+    typeof updatePreviewSelection
+  >;
+  readonly changeMouseTimePosition: ChangeMouseTimePosition;
+  readonly getMarker: (param: MarkerIndex) => Marker;
+  readonly categories: CategoryList;
+  readonly callNodeInfo: CallNodeInfo;
+  readonly selectedCallNodeIndex: IndexIntoCallNodeTable | null;
+  readonly onSelectionChange: (param: IndexIntoCallNodeTable | null) => void;
+  readonly onRightClick: (param: IndexIntoCallNodeTable | null) => void;
+  readonly shouldDisplayTooltips: () => boolean;
+  readonly scrollToSelectionGeneration: number;
+  readonly marginLeft: CssPixels;
+  readonly displayStackType: boolean;
+  readonly useStackChartSameWidths: boolean;
 };
 
-type Props = $ReadOnly<{
-  ...OwnProps,
-  +viewport: Viewport,
-}>;
+type Props = Readonly<
+  OwnProps & {
+    readonly viewport: Viewport;
+  }
+>;
 
 type HoveredStackTiming = {
-  +depth: StackTimingDepth,
-  +stackTimingIndex: IndexIntoStackTiming,
+  readonly depth: StackTimingDepth;
+  readonly stackTimingIndex: IndexIntoStackTiming;
 };
 
 import './Canvas.css';
@@ -117,7 +114,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
   // (excluding the margins).
   _sameWidthsRangeLength: null | number;
 
-  componentDidUpdate(prevProps) {
+  override componentDidUpdate(prevProps: Props) {
     // We want to scroll the selection into view when this component
     // is mounted, but using componentDidMount won't work here as the
     // viewport will not have completed setting its size by
@@ -373,6 +370,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         // Only draw boxes that overlap with the canvas.
         const isTimingBoxBeforeCanvas =
           useStackChartSameWidths &&
+          'sameWidthsEnd' in stackTiming &&
           stackTiming.sameWidthsEnd &&
           sameWidthsIndexAtCanvasStart !== null
             ? stackTiming.sameWidthsEnd[i] < sameWidthsIndexAtCanvasStart
@@ -383,6 +381,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
         const isTimingBoxAfterCanvas =
           useStackChartSameWidths &&
+          'sameWidthsStart' in stackTiming &&
           stackTiming.sameWidthsStart &&
           sameWidthsIndexAtCanvasEnd !== null
             ? stackTiming.sameWidthsStart[i] > sameWidthsIndexAtCanvasEnd
@@ -411,6 +410,8 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         let floatW: DevicePixels;
         if (
           useStackChartSameWidths &&
+          'sameWidthsStart' in stackTiming &&
+          'sameWidthsEnd' in stackTiming &&
           stackTiming.sameWidthsStart &&
           stackTiming.sameWidthsEnd &&
           this._sameWidthsRangeLength !== null &&
@@ -477,7 +478,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
         // Look up information about this stack frame.
         let text, category, isSelected;
-        if (stackTiming.callNode) {
+        if ('callNode' in stackTiming && stackTiming.callNode) {
           const callNodeIndex = stackTiming.callNode[i];
           const funcIndex = callNodeTable.func[callNodeIndex];
           const funcNameIndex = thread.funcTable.name[funcIndex];
@@ -485,13 +486,18 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
           const categoryIndex = callNodeTable.category[callNodeIndex];
           category = categories[categoryIndex];
           isSelected = selectedCallNodeIndex === callNodeIndex;
-        } else {
+        } else if ('index' in stackTiming) {
           const markerIndex = stackTiming.index[i];
-          const markerPayload = ((getMarker(markerIndex)
-            .data: any): UserTimingMarkerPayload);
+          const markerPayload = getMarker(markerIndex)
+            .data as UserTimingMarkerPayload;
           text = markerPayload.name;
           category = categories[categoryForUserTiming];
           isSelected = selectedCallNodeIndex === markerIndex;
+        } else {
+          // Fallback case
+          text = 'Unknown';
+          category = categories[0];
+          isSelected = false;
         }
 
         const isHovered =
@@ -564,7 +570,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
   _getHoveredStackInfo = ({
     depth,
     stackTimingIndex,
-  }: HoveredStackTiming): React.Node | null => {
+  }: HoveredStackTiming): React.ReactNode | null => {
     const {
       thread,
       weightType,
@@ -588,7 +594,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       return null;
     }
 
-    if (timing.index) {
+    if ('index' in timing && timing.index) {
       const markerIndex = timing.index[stackTimingIndex];
 
       return (
@@ -601,6 +607,9 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       );
     }
 
+    if (!('callNode' in timing) || !timing.callNode) {
+      return null;
+    }
     const callNodeIndex = timing.callNode[stackTimingIndex];
     if (callNodeIndex === undefined) {
       return null;
@@ -641,7 +650,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
   _getCallNodeIndexOrMarkerIndexFromHoveredItem(
     hoveredItem: HoveredStackTiming | null
-  ): { index: number, type: 'marker' | 'call-node' } | null {
+  ): { index: number; type: 'marker' | 'call-node' } | null {
     if (hoveredItem === null) {
       return null;
     }
@@ -649,14 +658,18 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     const { depth, stackTimingIndex } = hoveredItem;
     const { combinedTimingRows } = this.props;
 
-    if (combinedTimingRows[depth].callNode) {
-      const callNodeIndex =
-        combinedTimingRows[depth].callNode[stackTimingIndex];
+    const timing = combinedTimingRows[depth];
+    if ('callNode' in timing && timing.callNode) {
+      const callNodeIndex = timing.callNode[stackTimingIndex];
       return { index: callNodeIndex, type: 'call-node' };
     }
 
-    const index = combinedTimingRows[depth].index[stackTimingIndex];
-    return { index, type: 'marker' };
+    if ('index' in timing && timing.index) {
+      const index = timing.index[stackTimingIndex];
+      return { index, type: 'marker' };
+    }
+
+    return null;
   }
 
   _onSelectItem = (hoveredItem: HoveredStackTiming | null) => {
@@ -737,7 +750,12 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       return null;
     }
 
-    if (!stackTiming.sameWidthsStart || !stackTiming.sameWidthsEnd) {
+    if (
+      !('sameWidthsStart' in stackTiming) ||
+      !('sameWidthsEnd' in stackTiming) ||
+      !stackTiming.sameWidthsStart ||
+      !stackTiming.sameWidthsEnd
+    ) {
       // Probably a user timing marker
       return this._hitTest(x, y);
     }
@@ -760,9 +778,11 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       (xMinusMargin / innerContainerWidth) * this._sameWidthsRangeLength +
       this._sameWidthsIndexAtViewportStart;
 
+    // At this point we know stackTiming has sameWidths properties
+    const stackTimingWithSameWidths = stackTiming as any;
     for (let i = 0; i < stackTiming.length; i++) {
-      const start = stackTiming.sameWidthsStart[i];
-      const end = stackTiming.sameWidthsEnd[i];
+      const start = stackTimingWithSameWidths.sameWidthsStart[i];
+      const end = stackTimingWithSameWidths.sameWidthsEnd[i];
       if (start < hoveredBox && end > hoveredBox) {
         return { depth, stackTimingIndex: i };
       }
@@ -801,7 +821,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     this.props.changeMouseTimePosition(null);
   };
 
-  render() {
+  override render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
     const { useStackChartSameWidths } = this.props;
 
@@ -827,7 +847,4 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
   }
 }
 
-export const StackChartCanvas = (withChartViewport: WithChartViewport<
-  OwnProps,
-  Props,
->)(StackChartCanvasImpl);
+export const StackChartCanvas = withChartViewport(StackChartCanvasImpl);
