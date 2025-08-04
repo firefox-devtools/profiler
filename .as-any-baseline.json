@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-04T23:26:45.739Z",
-  "totalUsages": 106,
-  "totalFiles": 40,
+  "timestamp": "2025-08-04T23:34:07.686Z",
+  "totalUsages": 105,
+  "totalFiles": 39,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -412,11 +412,6 @@
       "file": "src/profile-logic/tracks.ts",
       "line": 578,
       "content": "const data: ScreenshotPayload = markers.data[markerIndex] as any;"
-    },
-    {
-      "file": "src/reducers/url-state.ts",
-      "line": 709,
-      "content": "profileSpecific: profileSpecific(undefined, state as any),"
     },
     {
       "file": "src/selectors/per-thread/index.ts",
