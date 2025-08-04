@@ -16,6 +16,7 @@ import type {
   Dispatch,
   GetState,
 } from 'firefox-profiler/types';
+import { connect } from 'react-redux';
 
 // Use this any value to create fake variables as a type. Consider using
 // `declare var myVariables: MyType;` instead. However, it can sometimes be clearer to
@@ -29,6 +30,30 @@ function markUsed<T>(_a: T) {}
 /**
  * These type tests create various values that should all type check correctly to show
  * that the react-redux system is working correctly.
+ *
+ * We are catching the following mistakes at the type level:
+ *
+ *                            explicitConnect           plain connect
+ * mapStateToProps:
+ * - missing prop             yes                       yes
+ * - prop with wrong type     yes                       yes
+ * - extra prop               no (was yes with Flow)    no
+ *
+ * mapDispatchToProps:
+ * - missing prop             yes                       yes
+ * - action wrong type        yes                       yes
+ * - thunk action wrong type  yes                       yes
+ * - extra prop               no (was yes with Flow)    no
+ *
+ * OwnProps:
+ * - missing prop             yes                       yes
+ * - prop with wrong type     yes                       yes
+ * - extra prop               yes                       yes
+ *
+ * In summary, we lost the ability to detect unused state props and unused
+ * dispatch props when we migrated to TypeScript. On the other hand,
+ * explicitConnect now catches the same mistakes as plain connect, so we
+ * can migrate to plain connect at any time without losing type coverage.
  */
 
 type OwnProps = {
@@ -131,13 +156,11 @@ const ConnectedExampleComponent = explicitConnect<
 }
 
 {
-  // Test that mapStateToProps will error out if provided an extra value.
+  // Test that mapStateToProps will error out if a value is missing
   explicitConnect<OwnProps, StateProps, DispatchProps>({
-    // $FlowExpectError
+    // @ts-expect-error - Should detect missing statePropNumber
     mapStateToProps: (_state) => ({
       statePropString: 'string',
-      statePropNumber: 0,
-      extraValue: null,
     }),
     mapDispatchToProps: validDispatchToProps,
     component: ExampleComponent,
@@ -145,12 +168,25 @@ const ConnectedExampleComponent = explicitConnect<
 }
 
 {
-  // Test that mapStateToProps will error if provided an extra value.
+  // Test that mapStateToProps will error if if provided a property with the wrong type.
   explicitConnect<OwnProps, StateProps, DispatchProps>({
     // @ts-expect-error - string not assignable to number
     mapStateToProps: (_state) => ({
       statePropString: 'string',
       statePropNumber: 'not a number',
+    }),
+    mapDispatchToProps: validDispatchToProps,
+    component: ExampleComponent,
+  });
+}
+
+{
+  // Test that mapStateToProps will error out if provided an extra value... It will not :(
+  explicitConnect<OwnProps, StateProps, DispatchProps>({
+    mapStateToProps: (_state) => ({
+      statePropString: 'string',
+      statePropNumber: 0,
+      extraValue: null, // would be nice if this caused an error
     }),
     mapDispatchToProps: validDispatchToProps,
     component: ExampleComponent,
@@ -170,7 +206,7 @@ const ConnectedExampleComponent = explicitConnect<
 }
 
 {
-  // Test that mapDispatchToProps will error if a variable type definition is wrong.
+  // Test that mapDispatchToProps will error if a string is given where an action is expected.
   explicitConnect<OwnProps, StateProps, DispatchProps>({
     mapStateToProps: validMapStateToProps,
     // @ts-expect-error - a string is not an Action
@@ -183,10 +219,22 @@ const ConnectedExampleComponent = explicitConnect<
 }
 
 {
-  // Test that mapDispatchToProps will error if an extra property is given.
+  // Test that mapDispatchToProps will error if a ThunkAction of the wrong type is given.
   explicitConnect<OwnProps, StateProps, DispatchProps>({
     mapStateToProps: validMapStateToProps,
-    // $FlowExpectError
+    // @ts-expect-error - ThunkAction<string> is not ThunkAction<number>
+    mapDispatchToProps: ANY_VALUE as {
+      readonly dispatchString: (string: string) => Action;
+      readonly dispatchThunk: (string: string) => ThunkAction<string>;
+    },
+    component: ExampleComponent,
+  });
+}
+
+{
+  // Test that mapDispatchToProps will error if an extra property is given... it will not. :(
+  explicitConnect<OwnProps, StateProps, DispatchProps>({
+    mapStateToProps: validMapStateToProps,
     mapDispatchToProps: ANY_VALUE as typeof validDispatchToProps & {
       readonly extraProperty: (string: string) => string;
     },
@@ -216,7 +264,7 @@ const ConnectedExampleComponent = explicitConnect<
 }
 
 {
-  // It throws an error when an OwnProps is incorrect.
+  // It detects an error when an OwnProps is incorrect.
   const x = (
     <ConnectedExampleComponent
       // @ts-expect-error - number not assignable to string
@@ -228,8 +276,163 @@ const ConnectedExampleComponent = explicitConnect<
 }
 
 {
-  // It throws an error if no OwnProps are provided.
+  // It detects an error if no OwnProps are provided.
   // @ts-expect-error - missing ownPropString, ownPropNumber
   const x = <ConnectedExampleComponent />;
+  markUsed(x);
+}
+
+// -----------
+
+// Now let's try to use regular connect.
+
+const connector = connect(validMapStateToProps, validDispatchToProps);
+const PlainConnectedExampleComponent = connector(ExampleComponent);
+
+const checkPlainType: React.ComponentType<OwnProps> =
+  PlainConnectedExampleComponent;
+markUsed(checkPlainType);
+
+{
+  // Test that mapStateToProps will error if a property is missing.
+  const connector = connect(
+    (_state) => ({
+      statePropString: 'string',
+    }),
+    validDispatchToProps
+  );
+  const Comp = connector(ExampleComponent);
+
+  // @ts-expect-error - statePropNumber is missing
+  const x = <Comp ownPropString="string" ownPropNumber={0} />;
+  markUsed(x);
+
+  // @ts-expect-error - statePropNumber is missing
+  const compCheck: React.ComponentType<OwnProps> = Comp;
+  markUsed(compCheck);
+}
+
+{
+  // Test that mapStateToProps will error if provided a property with the wrong type.
+  const connector = connect(
+    (_state) => ({
+      statePropString: 'string',
+      statePropNumber: 'not a number',
+    }),
+    validDispatchToProps
+  );
+  // @ts-expect-error - string not assignable to number
+  connector(ExampleComponent);
+}
+
+{
+  // Test that mapStateToProps will error out if provided an extra value... it will not. :(
+  const connector = connect(
+    (_state) => ({
+      statePropString: 'string',
+      statePropNumber: 0,
+      extraValue: null, // would be nice if this caused an error
+    }),
+    validDispatchToProps
+  );
+  connector(ExampleComponent);
+}
+
+{
+  // Test that mapDispatchToProps will error if a value is omitted.
+  const connector = connect(
+    validMapStateToProps,
+    ANY_VALUE as {
+      readonly dispatchThunk: (string: string) => ThunkAction<number>;
+    }
+  );
+  const Comp = connector(ExampleComponent);
+
+  // @ts-expect-error - dispatchString is missing
+  const x = <Comp ownPropString="string" ownPropNumber={0} />;
+  markUsed(x);
+
+  // @ts-expect-error - dispatchString is missing
+  const compCheck: React.ComponentType<OwnProps> = Comp;
+  markUsed(compCheck);
+}
+
+{
+  // Test that mapDispatchToProps will error if a string is given where an action is expected.
+  const connector = connect(
+    validMapStateToProps,
+    ANY_VALUE as {
+      readonly dispatchString: (string: string) => string;
+      readonly dispatchThunk: (string: string) => ThunkAction<number>;
+    }
+  );
+  // @ts-expect-error - a string is not an Action
+  const Comp = connector(ExampleComponent);
+  markUsed(Comp);
+}
+
+{
+  // Test that mapDispatchToProps will error if a ThunkAction of the wrong type is given.
+  const connector = connect(
+    validMapStateToProps,
+    ANY_VALUE as {
+      readonly dispatchString: (string: string) => Action;
+      readonly dispatchThunk: (string: string) => ThunkAction<string>;
+    }
+  );
+  // @ts-expect-error - string is not assignable to number
+  const Comp = connector(ExampleComponent);
+  markUsed(Comp);
+}
+
+{
+  // Test that mapDispatchToProps will error if an extra property is given... it will not. :(
+  const connector = connect(
+    validMapStateToProps,
+    ANY_VALUE as typeof validDispatchToProps & {
+      readonly extraProperty: (string: string) => string; // would be nice if this caused an error
+    }
+  );
+  const Comp = connector(ExampleComponent);
+  markUsed(Comp);
+}
+
+{
+  // The connected component correctly takes OwnProps.
+  const x = (
+    <PlainConnectedExampleComponent ownPropString="string" ownPropNumber={0} />
+  );
+  markUsed(x);
+}
+
+{
+  // The connected component must not accept more props.
+  const x = (
+    <PlainConnectedExampleComponent
+      ownPropString="string"
+      ownPropNumber={0}
+      // @ts-expect-error - ownPropsExtra does not exist on type ...
+      ownPropsExtra={0}
+    />
+  );
+  markUsed(x);
+}
+
+{
+  // It detects an error when an OwnProps is incorrect.
+  const x = (
+    <PlainConnectedExampleComponent
+      // @ts-expect-error - number not assignable to string
+      ownPropString={0}
+      ownPropNumber={0}
+    />
+  );
+  markUsed(x);
+}
+
+{
+  // It detects an error if no OwnProps are provided.
+  // @ts-expect-error - missing ownPropString, ownPropNumber
+  const x = <PlainConnectedExampleComponent />;
   markUsed(x);
 }
