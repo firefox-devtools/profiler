@@ -2,16 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { Milliseconds, Microseconds, Seconds, Bytes } from './units';
-import { GeckoMarkerStack } from './gecko-profile';
-import {
+import type { Milliseconds, Microseconds, Seconds, Bytes } from './units';
+import type { GeckoMarkerStack } from './gecko-profile';
+import type {
   IndexIntoStackTable,
   IndexIntoStringTable,
   Tid,
   Pid,
   GraphColor,
 } from './profile';
-import { ObjectMap, MixedObject } from './utils';
+import type { ObjectMap, MixedObject } from './utils';
 
 // Provide different formatting options for strings.
 

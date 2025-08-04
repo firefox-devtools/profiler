@@ -17,7 +17,7 @@ import {
 } from 'firefox-profiler/utils/format-numbers';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import {
+import type {
   NetworkHttpVersion,
   NetworkPayload,
   NetworkStatus,

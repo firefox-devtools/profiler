@@ -67,7 +67,7 @@
  *      - func:D nativeSymbol:F address:0x435 (inlineDepth:1)
  */
 
-import {
+import type {
   FrameTable,
   FuncTable,
   StackTable,
@@ -80,7 +80,7 @@ import {
 } from 'firefox-profiler/types';
 
 import { getMatchingAncestorStackForInvertedCallNode } from './profile-data';
-import { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
+import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
 
 /**
  * For each stack in `stackTable`, and one specific native symbol, compute the

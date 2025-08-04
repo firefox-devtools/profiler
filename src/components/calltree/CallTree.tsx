@@ -32,7 +32,7 @@ import {
 } from 'firefox-profiler/actions/profile-view';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import {
+import type {
   State,
   ImplementationFilter,
   ThreadsKey,
@@ -43,14 +43,14 @@ import {
   TableViewOptions,
   SelectionContext,
 } from 'firefox-profiler/types';
-import { CallTree as CallTreeType } from 'firefox-profiler/profile-logic/call-tree';
-import { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
+import type { CallTree as CallTreeType } from 'firefox-profiler/profile-logic/call-tree';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
-import {
+import type {
   Column,
   MaybeResizableColumn,
 } from 'firefox-profiler/components/shared/TreeView';
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './CallTree.css';
 

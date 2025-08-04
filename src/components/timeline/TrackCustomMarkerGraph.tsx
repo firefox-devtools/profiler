@@ -21,7 +21,7 @@ import {
   TRACK_MARKER_LINE_WIDTH,
 } from 'firefox-profiler/app-logic/constants';
 
-import {
+import type {
   ThreadIndex,
   Milliseconds,
   CssPixels,
@@ -36,8 +36,8 @@ import {
 
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import { SizeProps } from 'firefox-profiler/components/shared/WithSize';
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 
 import './TrackCustomMarker.css';

@@ -13,7 +13,7 @@ import {
   getPageFaviconsViaWebChannel,
   showFunctionInDevtoolsViaWebChannel,
 } from './web-channel';
-import {
+import type {
   Milliseconds,
   FaviconData,
   MixedObject,

@@ -12,9 +12,9 @@ import { ProfileRootMessage } from 'firefox-profiler/components/app/ProfileRootM
 import { getView } from 'firefox-profiler/selectors/app';
 import { getDataSource } from 'firefox-profiler/selectors/url-state';
 
-import { AppViewState, State, DataSource } from 'firefox-profiler/types';
+import type { AppViewState, State, DataSource } from 'firefox-profiler/types';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 const LOADING_MESSAGES_L10N_ID: { [key: string]: string } = Object.freeze({
   'from-browser': 'ProfileLoaderAnimation--loading-unpublished',

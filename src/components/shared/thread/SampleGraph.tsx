@@ -18,7 +18,7 @@ import { SampleTooltipContents } from 'firefox-profiler/components/shared/Sample
 
 import './SampleGraph.css';
 
-import {
+import type {
   Thread,
   CategoryList,
   IndexIntoSamplesTable,
@@ -28,8 +28,8 @@ import {
   TimelineType,
   ImplementationFilter,
 } from 'firefox-profiler/types';
-import { SizeProps } from 'firefox-profiler/components/shared/WithSize';
-import { CpuRatioInTimeRange } from './ActivityGraphFills';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { CpuRatioInTimeRange } from './ActivityGraphFills';
 
 export type HoveredPixelState = {
   readonly sample: IndexIntoSamplesTable | null;

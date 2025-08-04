@@ -13,8 +13,8 @@ import { getTabFilter } from '../../selectors/url-state';
 import { getProfileFilterSortedPageData } from 'firefox-profiler/selectors/profile';
 import { Icon } from 'firefox-profiler/components/shared/Icon';
 
-import { TabID, SortedTabPageData } from 'firefox-profiler/types';
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { TabID, SortedTabPageData } from 'firefox-profiler/types';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {
   readonly tabFilter: TabID | null;

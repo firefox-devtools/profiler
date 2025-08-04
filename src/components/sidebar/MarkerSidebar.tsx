@@ -10,8 +10,8 @@ import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
 import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
-import { ThreadsKey, Marker, MarkerIndex } from 'firefox-profiler/types';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ThreadsKey, Marker, MarkerIndex } from 'firefox-profiler/types';
 
 type StateProps = {
   readonly selectedThreadsKey: ThreadsKey;

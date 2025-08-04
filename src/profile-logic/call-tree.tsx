@@ -10,7 +10,7 @@ import {
 } from './profile-data';
 import { resourceTypes } from './data-structures';
 import { getFunctionName } from './function-info';
-import {
+import type {
   CategoryList,
   Thread,
   IndexIntoFuncTable,
@@ -33,8 +33,8 @@ import ExtensionIcon from '../../res/img/svg/extension.svg';
 import { formatCallNodeNumber, formatPercent } from '../utils/format-numbers';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import * as ProfileData from './profile-data';
-import { CallTreeSummaryStrategy } from '../types/actions';
-import { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
+import type { CallTreeSummaryStrategy } from '../types/actions';
+import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 

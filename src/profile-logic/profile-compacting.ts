@@ -4,7 +4,7 @@
 
 import { computeStringIndexMarkerFieldsByDataType } from './marker-schema';
 
-import {
+import type {
   Profile,
   RawThread,
   RawProfileSharedData,

@@ -7,9 +7,9 @@ import {
   getEmptySamplesTableWithEventDelay,
   getEmptyRawMarkerTable,
 } from './data-structures';
-import { StringTable } from '../utils/string-table';
+import type { StringTable } from '../utils/string-table';
 import { ensureExists } from '../utils/flow';
-import {
+import type {
   JsTracerTable,
   IndexIntoStringTable,
   IndexIntoJsTracerEvents,

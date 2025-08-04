@@ -23,7 +23,7 @@ import { FilterNavigatorBar } from 'firefox-profiler/components/shared/FilterNav
 import { Icon } from 'firefox-profiler/components/shared/Icon';
 import { TabSelectorMenu } from '../shared/TabSelectorMenu';
 
-import {
+import type {
   ProfileFilterPageData,
   StartEndRange,
   TabID,

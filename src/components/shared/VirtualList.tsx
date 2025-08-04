@@ -36,7 +36,7 @@ import classNames from 'classnames';
 import range from 'array-range';
 import { getResizeObserverWrapper } from 'firefox-profiler/utils/resize-observer-wrapper';
 
-import { CssPixels } from 'firefox-profiler/types';
+import type { CssPixels } from 'firefox-profiler/types';
 
 type RenderItem<Item> = (
   item: Item,

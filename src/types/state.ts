@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import {
+import type {
   Action,
   DataSource,
   PreviewSelection,
@@ -15,11 +15,17 @@ import {
   Localization,
   LastNonShiftClickInformation,
 } from './actions';
-import { TabSlug } from '../app-logic/tabs-handling';
-import { StartEndRange, CssPixels, Milliseconds, Address } from './units';
-import { Profile, ThreadIndex, Pid, TabID, IndexIntoLibs } from './profile';
+import type { TabSlug } from '../app-logic/tabs-handling';
+import type { StartEndRange, CssPixels, Milliseconds, Address } from './units';
+import type {
+  Profile,
+  ThreadIndex,
+  Pid,
+  TabID,
+  IndexIntoLibs,
+} from './profile';
 
-import {
+import type {
   CallNodePath,
   GlobalTrack,
   LocalTrack,
@@ -28,13 +34,13 @@ import {
   ThreadsKey,
   NativeSymbolInfo,
 } from './profile-derived';
-import { Attempt } from '../utils/errors';
-import { TransformStacksPerThread } from './transforms';
-import * as JSZip from 'jszip';
-import { IndexIntoZipFileTable } from '../profile-logic/zip-files';
-import { PathSet } from '../utils/path';
-import { UploadedProfileInformation as ImportedUploadedProfileInformation } from '../app-logic/uploaded-profiles-db';
-import { BrowserConnectionStatus } from '../app-logic/browser-connection';
+import type { Attempt } from '../utils/errors';
+import type { TransformStacksPerThread } from './transforms';
+import type * as JSZip from 'jszip';
+import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
+import type { PathSet } from '../utils/path';
+import type { UploadedProfileInformation as ImportedUploadedProfileInformation } from '../app-logic/uploaded-profiles-db';
+import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
 
 export type Reducer<T> = (state: T | undefined, action: Action) => T;
 

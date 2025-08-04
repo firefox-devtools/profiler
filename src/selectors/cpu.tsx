@@ -5,7 +5,7 @@ import { createSelector } from 'reselect';
 
 import { getThreads, getSampleUnits, getMeta, getCounters } from './profile';
 
-import { Selector } from 'firefox-profiler/types';
+import type { Selector } from 'firefox-profiler/types';
 
 export const getIsCPUUtilizationProvided: Selector<boolean> = createSelector(
   getSampleUnits,

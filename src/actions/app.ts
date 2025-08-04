@@ -37,7 +37,7 @@ import {
   getAreThereAnyProcessCPUCounters,
 } from 'firefox-profiler/selectors/cpu';
 
-import {
+import type {
   Profile,
   ThreadsKey,
   CssPixels,
@@ -47,8 +47,8 @@ import {
   UploadedProfileInformation,
   IndexIntoCategoryList,
 } from 'firefox-profiler/types';
-import { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
-import {
+import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
+import type {
   BrowserConnection,
   BrowserConnectionStatus,
 } from 'firefox-profiler/app-logic/browser-connection';

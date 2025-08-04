@@ -15,18 +15,16 @@ import {
   getInclusiveSampleIndexRangeForSelection,
   computeTabToThreadIndexesMap,
 } from '../profile-logic/profile-data';
-import {
-  IPCMarkerCorrelations,
-  correlateIPCMarkers,
-} from '../profile-logic/marker-data';
+import type { IPCMarkerCorrelations } from '../profile-logic/marker-data';
+import { correlateIPCMarkers } from '../profile-logic/marker-data';
 import { markerSchemaFrontEndOnly } from '../profile-logic/marker-schema';
 import { getDefaultCategories } from 'firefox-profiler/profile-logic/data-structures';
 import * as CommittedRanges from '../profile-logic/committed-ranges';
 import { defaultTableViewOptions } from '../reducers/profile-view';
 import { StringTable } from '../utils/string-table';
-import { TabSlug } from '../app-logic/tabs-handling';
+import type { TabSlug } from '../app-logic/tabs-handling';
 
-import {
+import type {
   Profile,
   RawProfileSharedData,
   CategoryList,
@@ -76,7 +74,7 @@ import {
   TimelineUnit,
 } from 'firefox-profiler/types';
 
-import { ThreadActivityScore } from '../profile-logic/tracks';
+import type { ThreadActivityScore } from '../profile-logic/tracks';
 
 export const getProfileView: Selector<ProfileViewState> = (state) =>
   state.profileView;

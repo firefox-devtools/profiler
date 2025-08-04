@@ -2,12 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import {
+import type {
   SamplesLikeTable,
   Milliseconds,
   IndexIntoCallNodeTable,
 } from 'firefox-profiler/types';
-import { CallNodeInfo } from './call-node-info';
+import type { CallNodeInfo } from './call-node-info';
 
 /**
  * The StackTimingByDepth data structure organizes stack frames by their depth, and start

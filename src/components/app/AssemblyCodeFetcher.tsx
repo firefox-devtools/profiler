@@ -19,12 +19,12 @@ import {
 } from 'firefox-profiler/actions/code';
 import { fetchAssembly } from 'firefox-profiler/utils/fetch-assembly';
 import { RegularExternalCommunicationDelegate } from 'firefox-profiler/utils/query-api';
-import { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
+import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
-import {
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type {
   AssemblyCodeStatus,
   Profile,
   NativeSymbolInfo,

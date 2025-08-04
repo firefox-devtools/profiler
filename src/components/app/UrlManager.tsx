@@ -25,11 +25,11 @@ type RetrieveProfileAction = typeof retrieveProfileForRawUrl;
 import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import {
+import type {
   ConnectedProps,
   WrapFunctionInDispatch,
 } from 'firefox-profiler/utils/connect';
-import { UrlState, Phase, UrlSetupPhase } from 'firefox-profiler/types';
+import type { UrlState, Phase, UrlSetupPhase } from 'firefox-profiler/types';
 
 type StateProps = {
   readonly phase: Phase;

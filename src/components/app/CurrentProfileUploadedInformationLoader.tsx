@@ -20,7 +20,7 @@ import { setCurrentProfileUploadedInformation } from 'firefox-profiler/actions/a
 import { retrieveUploadedProfileInformationFromDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {
   readonly hash: string;

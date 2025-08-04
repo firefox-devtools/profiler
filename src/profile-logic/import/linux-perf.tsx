@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { MixedObject } from 'firefox-profiler/types';
+import type { MixedObject } from 'firefox-profiler/types';
 
 /**
  * The "perf script" format is the plain text format that is output by an

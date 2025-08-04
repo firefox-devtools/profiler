@@ -5,9 +5,9 @@ import * as React from 'react';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { mapGetKeyWithMaxValue } from 'firefox-profiler/utils';
-import { LineTimings } from 'firefox-profiler/types';
+import type { LineTimings } from 'firefox-profiler/types';
 
-import { SourceViewEditor } from './SourceView-codemirror';
+import type { SourceViewEditor } from './SourceView-codemirror';
 
 import './CodeView.css';
 

@@ -6,14 +6,14 @@ import { getProfileUrl } from './url-state';
 import { ensureExists } from '../utils/flow';
 import * as ZipFiles from '../profile-logic/zip-files';
 
-import {
+import type {
   ZipFileState,
   ZippedProfilesState,
   Selector,
 } from 'firefox-profiler/types';
 
-import { IndexIntoZipFileTable } from '../profile-logic/zip-files';
-import JSZip from 'jszip';
+import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
+import type JSZip from 'jszip';
 
 /**
  * Simple selectors into the ZippedProfilesState.

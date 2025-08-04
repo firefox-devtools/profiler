@@ -17,7 +17,7 @@ import { GREY_50 } from 'photon-colors';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
 
-import {
+import type {
   CounterIndex,
   Counter,
   Thread,
@@ -28,8 +28,8 @@ import {
   IndexIntoSamplesTable,
 } from 'firefox-profiler/types';
 
-import { SizeProps } from 'firefox-profiler/components/shared/WithSize';
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackProcessCPU.css';
 

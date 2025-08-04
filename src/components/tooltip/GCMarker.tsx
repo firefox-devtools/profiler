@@ -13,7 +13,7 @@ import {
 
 import { TooltipDetail, type TooltipDetailComponent } from './TooltipDetails';
 
-import {
+import type {
   Microseconds,
   PhaseTimes,
   GCMinorMarkerPayload,

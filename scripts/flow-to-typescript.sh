@@ -53,11 +53,7 @@ echo "🔧 Applying Flow→TypeScript transformations..."
 # 1. Remove @flow directive
 apply_transform 's|^// @flow$||g' "Remove @flow directive"
 
-# 2. Convert import type statements
-apply_transform 's/^import type {/import {/g' "Convert import type (object imports)"
-apply_transform 's/^import type \([^{].*\) from/import \1 from/g' "Convert import type (default imports)"
-
-# NEW: Handle typeof imports (common pattern for Redux actions)
+# 2. Handle typeof imports (common pattern for Redux actions)
 # Convert: typeof func as FuncType → (separate import and type declaration)
 # This requires manual handling as it needs to restructure imports
 

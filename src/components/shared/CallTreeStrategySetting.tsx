@@ -19,7 +19,7 @@ import explicitConnect, {
 
 import './PanelSettingsList.css';
 
-import { CallTreeSummaryStrategy } from 'firefox-profiler/types';
+import type { CallTreeSummaryStrategy } from 'firefox-profiler/types';
 
 type OwnProps = {
   labelL10nId?: string;

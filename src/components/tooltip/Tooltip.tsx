@@ -4,7 +4,7 @@
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import classNames from 'classnames';
-import { CssPixels } from 'firefox-profiler/types';
+import type { CssPixels } from 'firefox-profiler/types';
 
 import {
   ensureExists,

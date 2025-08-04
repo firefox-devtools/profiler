@@ -8,7 +8,7 @@ import { Localized } from '@fluent/react';
 import { AppHeader } from './AppHeader';
 import { changeProfilesToCompare } from 'firefox-profiler/actions/app';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './CompareHome.css';
 
 type DispatchProps = {

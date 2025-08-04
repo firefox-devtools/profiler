@@ -24,7 +24,7 @@ import {
   YELLOW_60,
 } from 'photon-colors';
 
-import { GraphColor } from 'firefox-profiler/types';
+import type { GraphColor } from 'firefox-profiler/types';
 
 export function getStrokeColor(color: GraphColor) {
   switch (color) {

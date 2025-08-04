@@ -90,7 +90,7 @@ import type {
 } from '../profile-logic/symbolication';
 import { assertExhaustiveCheck } from '../utils/flow';
 import { bytesToBase64DataUrl } from 'firefox-profiler/utils/base64';
-import {
+import type {
   BrowserConnection,
   BrowserConnectionStatus,
 } from '../app-logic/browser-connection';

@@ -3,9 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // TypeScript types
 
-import { Store as ReduxStore } from 'redux';
-import { Action } from './actions';
-import { State } from './state';
+import type { Store as ReduxStore } from 'redux';
+import type { Action } from './actions';
+import type { State } from './state';
 
 /**
  * This file contains type definitions for the Redux store. Unlike the definitions

@@ -38,8 +38,8 @@ import { Reorderable } from 'firefox-profiler/components/shared/Reorderable';
 import { TRACK_PROCESS_BLANK_HEIGHT } from 'firefox-profiler/app-logic/constants';
 import { getTrackSelectionModifiers } from 'firefox-profiler/utils';
 
-import { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
-import {
+import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
+import type {
   GlobalTrackReference,
   Pid,
   ProgressGraphData,
@@ -49,7 +49,7 @@ import {
   InitialSelectedTrackReference,
 } from 'firefox-profiler/types';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {
   readonly trackReference: GlobalTrackReference;

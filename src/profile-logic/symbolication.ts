@@ -10,7 +10,7 @@ import {
 } from './data-structures';
 import { SymbolsNotFoundError } from './errors';
 
-import {
+import type {
   Profile,
   RawProfileSharedData,
   RawThread,
@@ -24,7 +24,7 @@ import {
   CallNodePath,
   Lib,
 } from 'firefox-profiler/types';
-import {
+import type {
   AbstractSymbolStore,
   AddressResult,
   LibSymbolicationRequest,

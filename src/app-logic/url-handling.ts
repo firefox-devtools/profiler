@@ -23,7 +23,7 @@ import {
   toValidCallTreeSummaryStrategy,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { oneLine } from 'common-tags';
-import {
+import type {
   UrlState,
   DataSource,
   Pid,

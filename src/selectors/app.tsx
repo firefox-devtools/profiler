@@ -26,7 +26,7 @@ import {
   TRACK_MARKER_HEIGHT,
 } from '../app-logic/constants';
 
-import {
+import type {
   AppState,
   AppViewState,
   UrlSetupPhase,
@@ -36,8 +36,8 @@ import {
   ExperimentalFlags,
   UploadedProfileInformation,
 } from 'firefox-profiler/types';
-import { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
-import {
+import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
+import type {
   BrowserConnectionStatus,
   BrowserConnection,
 } from 'firefox-profiler/app-logic/browser-connection';

@@ -22,7 +22,7 @@
 // always be represented accurately by a JS number, because libraries are always
 // small enough.
 
-import { LibMapping } from 'firefox-profiler/types';
+import type { LibMapping } from 'firefox-profiler/types';
 
 export class AddressLocator {
   _libs: LibMapping[];

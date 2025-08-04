@@ -23,7 +23,7 @@ import {
   filterRawThreadSamplesToRange,
   filterCounterSamplesToRange,
 } from './profile-data';
-import {
+import type {
   Profile,
   RawThread,
   ThreadIndex,

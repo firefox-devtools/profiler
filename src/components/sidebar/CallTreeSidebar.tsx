@@ -21,7 +21,7 @@ import { shouldDisplaySubcategoryInfoForCategory } from 'firefox-profiler/profil
 import { CanSelectContent } from './CanSelectContent';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import {
+import type {
   ThreadsKey,
   CategoryList,
   IndexIntoCallNodeTable,
@@ -30,7 +30,7 @@ import {
   IndexIntoCategoryList,
 } from 'firefox-profiler/types';
 
-import {
+import type {
   BreakdownByCategory,
   TimingsForPath,
 } from 'firefox-profiler/profile-logic/profile-data';

@@ -4,7 +4,8 @@
 
 // This file implements functions that we can use in fluent translation files.
 
-import { FluentDateTime, FluentValue } from '@fluent/bundle';
+import type { FluentValue } from '@fluent/bundle';
+import { FluentDateTime } from '@fluent/bundle';
 
 // These types come from Fluent's typescript types. We'll be able to remove them
 // and directly import Fluent's types when we switch to Typescript.

@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import * as React from 'react';
 import { findDOMNode } from 'react-dom';
-import { CssPixels } from 'firefox-profiler/types';
+import type { CssPixels } from 'firefox-profiler/types';
 import { getResizeObserverWrapper } from 'firefox-profiler/utils/resize-observer-wrapper';
 
 type State = {

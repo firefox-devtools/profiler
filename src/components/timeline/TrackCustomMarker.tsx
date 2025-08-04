@@ -8,11 +8,11 @@ import { getCommittedRange } from 'firefox-profiler/selectors/profile';
 import { TrackCustomMarkerGraph } from './TrackCustomMarkerGraph';
 import { TRACK_MARKER_HEIGHT } from 'firefox-profiler/app-logic/constants';
 
-import { ThreadIndex, Milliseconds } from 'firefox-profiler/types';
-import { MarkerSchema } from 'firefox-profiler/types/markers';
-import { IndexIntoStringTable } from 'firefox-profiler/types/profile';
+import type { ThreadIndex, Milliseconds } from 'firefox-profiler/types';
+import type { MarkerSchema } from 'firefox-profiler/types/markers';
+import type { IndexIntoStringTable } from 'firefox-profiler/types/profile';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackCustomMarker.css';
 

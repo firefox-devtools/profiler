@@ -9,8 +9,8 @@ import { Warning } from '../shared/Warning';
 import explicitConnect from '../../utils/connect';
 import { getMeta } from '../../selectors/profile';
 
-import { ProfileMeta } from 'firefox-profiler/types';
-import { ConnectedProps } from '../../utils/connect';
+import type { ProfileMeta } from 'firefox-profiler/types';
+import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {
   readonly meta: ProfileMeta;

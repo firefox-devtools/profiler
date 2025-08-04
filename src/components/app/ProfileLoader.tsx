@@ -20,9 +20,9 @@ import {
 import { getBrowserConnectionStatus } from 'firefox-profiler/selectors/app';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
-import { DataSource } from 'firefox-profiler/types';
-import { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { DataSource } from 'firefox-profiler/types';
+import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
 
 type StateProps = {
   readonly dataSource: DataSource;

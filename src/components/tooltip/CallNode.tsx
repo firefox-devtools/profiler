@@ -11,7 +11,7 @@ import { Icon } from 'firefox-profiler/components/shared/Icon';
 import { getCategoryPairLabel } from 'firefox-profiler/profile-logic/profile-data';
 import { countPositiveValues } from 'firefox-profiler/utils';
 
-import {
+import type {
   Thread,
   CategoryList,
   IndexIntoCallNodeTable,
@@ -25,12 +25,12 @@ import {
   IndexIntoSubcategoryListForCategory,
 } from 'firefox-profiler/types';
 
-import {
+import type {
   TimingsForPath,
   ItemTimings,
   OneCategoryBreakdown,
 } from 'firefox-profiler/profile-logic/profile-data';
-import { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import './CallNode.css';
 import classNames from 'classnames';

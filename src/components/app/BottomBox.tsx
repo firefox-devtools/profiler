@@ -31,8 +31,8 @@ import {
 import { getPreviewSelection } from 'firefox-profiler/selectors/profile';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
-import {
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type {
   LineTimings,
   AddressTimings,
   SourceCodeStatus,
@@ -41,7 +41,7 @@ import {
   SourceCodeLoadingError,
   ApiQueryError,
 } from 'firefox-profiler/types';
-import { CodeErrorOverlayProps } from './CodeErrorOverlay';
+import type { CodeErrorOverlayProps } from './CodeErrorOverlay';
 
 import { Localized } from '@fluent/react';
 

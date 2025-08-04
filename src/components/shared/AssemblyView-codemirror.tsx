@@ -24,7 +24,7 @@ import { syntaxHighlighting } from '@codemirror/language';
 import { classHighlighter } from '@lezer/highlight';
 import clamp from 'clamp';
 
-import {
+import type {
   AddressTimings,
   Address,
   LineTimings,

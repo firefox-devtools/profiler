@@ -1,14 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-import {
+import type {
   UnitIntervalOfProfileRange,
   CallNodeTable,
   FuncTable,
   IndexIntoCallNodeTable,
 } from 'firefox-profiler/types';
-import { StringTable } from 'firefox-profiler/utils/string-table';
-import { CallTreeTimingsNonInverted } from './call-tree';
+import type { StringTable } from 'firefox-profiler/utils/string-table';
+import type { CallTreeTimingsNonInverted } from './call-tree';
 
 import { bisectionRightByStrKey } from 'firefox-profiler/utils/bisect';
 

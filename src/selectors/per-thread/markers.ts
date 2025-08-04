@@ -12,8 +12,8 @@ import { getRightClickedMarkerInfo } from '../right-clicked-marker';
 import { getLabelGetter } from '../../profile-logic/marker-schema';
 import { getInclusiveSampleIndexRangeForSelection } from '../../profile-logic/profile-data';
 
-import { BasicThreadSelectorsPerThread } from './thread';
-import {
+import type { BasicThreadSelectorsPerThread } from './thread';
+import type {
   RawMarkerTable,
   ThreadIndex,
   MarkerIndex,

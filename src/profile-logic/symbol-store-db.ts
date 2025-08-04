@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { IDBDatabase, IDBObjectStore } from 'firefox-profiler/types';
+import type { IDBDatabase, IDBObjectStore } from 'firefox-profiler/types';
 import { SymbolsNotFoundError } from './errors';
 
 // Contains a symbol table, which can be used to map addresses to strings.

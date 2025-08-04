@@ -2,9 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import * as React from 'react';
+import type * as React from 'react';
 import { connect } from 'react-redux';
-import { Dispatch, State, ThunkAction, Action } from 'firefox-profiler/types';
+import type {
+  Dispatch,
+  State,
+  ThunkAction,
+  Action,
+} from 'firefox-profiler/types';
 
 type MapStateToProps<
   OwnProps extends Record<string, any>,

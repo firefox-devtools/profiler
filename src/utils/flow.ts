@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { TabSlug } from '../app-logic/tabs-handling';
-import { TransformType } from 'firefox-profiler/types';
+import type { TabSlug } from '../app-logic/tabs-handling';
+import type { TransformType } from 'firefox-profiler/types';
 
 /**
  * This file contains utils that help Flow understand things better. Occasionally

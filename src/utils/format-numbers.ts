@@ -5,7 +5,12 @@
 import memoize from 'memoize-immutable';
 import NamedTupleMap from 'namedtuplemap';
 
-import { Microseconds, Milliseconds, Nanoseconds, WeightType } from '../types';
+import type {
+  Microseconds,
+  Milliseconds,
+  Nanoseconds,
+  WeightType,
+} from '../types';
 import { assertExhaustiveCheck } from './flow';
 
 // Calling `toLocalestring` repeatedly in a tight loop can be a performance

@@ -27,7 +27,7 @@ import { rust } from '@codemirror/lang-rust';
 import { javascript } from '@codemirror/lang-javascript';
 import clamp from 'clamp';
 
-import { LineTimings } from 'firefox-profiler/types';
+import type { LineTimings } from 'firefox-profiler/types';
 import {
   timingsExtension,
   updateTimingsEffect,

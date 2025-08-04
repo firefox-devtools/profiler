@@ -43,7 +43,7 @@ import { EmptyThreadIndicator } from './EmptyThreadIndicator';
 import { getTrackSelectionModifiers } from 'firefox-profiler/utils';
 import './TrackThread.css';
 
-import {
+import type {
   TimelineType,
   Thread,
   ThreadIndex,
@@ -57,9 +57,9 @@ import {
   State,
   ThreadsKey,
 } from 'firefox-profiler/types';
-import { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {
   readonly threadsKey: ThreadsKey;

@@ -16,7 +16,7 @@ import {
 } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import { formatSeconds } from 'firefox-profiler/utils/format-numbers';
 
-import { StartEndRange } from 'firefox-profiler/types/units';
+import type { StartEndRange } from 'firefox-profiler/types/units';
 
 import './ListOfPublishedProfiles.css';
 

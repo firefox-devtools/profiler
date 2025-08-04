@@ -31,7 +31,7 @@ import {
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 
-import {
+import type {
   CssPixels,
   ThreadIndex,
   Marker,
@@ -42,8 +42,8 @@ import {
   Page,
 } from 'firefox-profiler/types';
 
-import { SizeProps } from 'firefox-profiler/components/shared/WithSize';
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackNetwork.css';
 

@@ -22,11 +22,11 @@ import {
   symbolicateProfile,
   applySymbolicationSteps,
 } from '../profile-logic/symbolication';
-import { SymbolicationStepInfo } from '../profile-logic/symbolication';
-import { SymbolTableAsTuple } from '../profile-logic/symbol-store-db';
+import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
+import type { SymbolTableAsTuple } from '../profile-logic/symbol-store-db';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
 import { SymbolsNotFoundError } from '../profile-logic/errors';
-import { ThreadIndex } from '../types';
+import type { ThreadIndex } from '../types';
 
 /**
  * Simple 'in-memory' symbol DB that conforms to the same interface as SymbolStoreDB but

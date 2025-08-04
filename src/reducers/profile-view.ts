@@ -7,7 +7,7 @@ import * as Transforms from '../profile-logic/transforms';
 import * as ProfileData from '../profile-logic/profile-data';
 import { arePathsEqual, PathSet } from '../utils/path';
 
-import {
+import type {
   Profile,
   Pid,
   LocalTrack,
@@ -34,7 +34,7 @@ import {
   applyFuncSubstitutionToCallPath,
   applyFuncSubstitutionToPathSetAndIncludeNewAncestors,
 } from '../profile-logic/symbolication';
-import { TabSlug } from '../app-logic/tabs-handling';
+import type { TabSlug } from '../app-logic/tabs-handling';
 
 import { objectMap } from '../utils/flow';
 

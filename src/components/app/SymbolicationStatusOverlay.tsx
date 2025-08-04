@@ -9,8 +9,8 @@ import {
 } from 'firefox-profiler/selectors/profile';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
-import { RequestedLib, State } from 'firefox-profiler/types';
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { RequestedLib, State } from 'firefox-profiler/types';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './SymbolicationStatusOverlay.css';
 

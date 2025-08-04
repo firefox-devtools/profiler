@@ -35,7 +35,7 @@ import { TRACK_BANDWIDTH_DEFAULT_COLOR } from 'firefox-profiler/app-logic/consta
 import { getSampleIndexRangeForSelection } from 'firefox-profiler/profile-logic/profile-data';
 import { co2 } from '@tgwf/co2';
 
-import {
+import type {
   CounterIndex,
   Counter,
   Thread,
@@ -48,8 +48,8 @@ import {
   IndexIntoSamplesTable,
 } from 'firefox-profiler/types';
 
-import { SizeProps } from 'firefox-profiler/components/shared/WithSize';
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackBandwidth.css';
 

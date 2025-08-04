@@ -6,14 +6,14 @@ import { PureComponent } from 'react';
 import { ThreadHeightGraph } from './HeightGraph';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 
-import {
+import type {
   Thread,
   CategoryList,
   IndexIntoSamplesTable,
   Milliseconds,
   SelectedState,
 } from 'firefox-profiler/types';
-import { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 type Props = {
   readonly className: string;

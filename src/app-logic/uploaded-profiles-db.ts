@@ -5,14 +5,15 @@
 // This file contains the code responsible for storing informations about
 // published profiles.
 
-import { openDB, deleteDB, IDBPDatabase } from 'idb';
+import type { IDBPDatabase } from 'idb';
+import { openDB, deleteDB } from 'idb';
 import { stripIndent } from 'common-tags';
 import {
   stateFromLocation,
   urlFromState,
 } from 'firefox-profiler/app-logic/url-handling';
 
-import { StartEndRange } from 'firefox-profiler/types';
+import type { StartEndRange } from 'firefox-profiler/types';
 
 // This type is closely tied to the IndexedDB operation. Indeed it represents
 // the data we store and retrieve in the local DB. That's especially why it's

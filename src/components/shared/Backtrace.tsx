@@ -5,7 +5,7 @@
 import classNames from 'classnames';
 import { getBacktraceItemsForStack } from 'firefox-profiler/profile-logic/transforms';
 
-import {
+import type {
   CategoryList,
   Thread,
   IndexIntoStackTable,

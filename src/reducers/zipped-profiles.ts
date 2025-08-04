@@ -5,9 +5,9 @@
 import { combineReducers } from 'redux';
 import { oneLine } from 'common-tags';
 import { ensureExists } from '../utils/flow';
-import * as ZipFiles from '../profile-logic/zip-files';
+import type * as ZipFiles from '../profile-logic/zip-files';
 
-import {
+import type {
   ZipFileState,
   Reducer,
   ZippedProfilesState,

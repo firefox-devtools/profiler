@@ -5,7 +5,11 @@ import { createSelector } from 'reselect';
 
 import { getProfileViewOptions } from './profile';
 
-import { ThreadsKey, CallNodePath, Selector } from 'firefox-profiler/types';
+import type {
+  ThreadsKey,
+  CallNodePath,
+  Selector,
+} from 'firefox-profiler/types';
 
 export type RightClickedCallNodeInfo = {
   readonly threadsKey: ThreadsKey;

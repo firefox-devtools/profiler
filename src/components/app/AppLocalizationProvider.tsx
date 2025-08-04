@@ -13,7 +13,7 @@ import {
   getRequestedLocales,
   getPseudoStrategy,
 } from 'firefox-profiler/selectors/l10n';
-import type { State } from 'firefox-profiler/types';
+import type { State , Localization } from 'firefox-profiler/types';
 import { requestL10n, receiveL10n } from 'firefox-profiler/actions/l10n';
 import {
   AVAILABLE_LOCALES,
@@ -24,8 +24,7 @@ import {
 } from 'firefox-profiler/app-logic/l10n';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
-import { Localization } from 'firefox-profiler/types';
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type FetchProps = {
   readonly requestedLocales: null | string[];

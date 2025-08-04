@@ -23,14 +23,14 @@ import { Draggable } from 'firefox-profiler/components/shared/Draggable';
 import { getFormattedTimelineValue } from 'firefox-profiler/profile-logic/committed-ranges';
 import './Selection.css';
 
-import {
+import type {
   Milliseconds,
   CssPixels,
   StartEndRange,
   PreviewSelection,
 } from 'firefox-profiler/types';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type MouseHandler = (event: MouseEvent) => void;
 

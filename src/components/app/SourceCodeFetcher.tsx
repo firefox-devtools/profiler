@@ -20,12 +20,12 @@ import {
 import { fetchSource } from 'firefox-profiler/utils/fetch-source';
 import { RegularExternalCommunicationDelegate } from 'firefox-profiler/utils/query-api';
 import { findAddressProofForFile } from 'firefox-profiler/profile-logic/profile-data';
-import { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
+import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
-import { SourceCodeStatus, Profile } from 'firefox-profiler/types';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { SourceCodeStatus, Profile } from 'firefox-profiler/types';
 
 type StateProps = {
   readonly sourceViewFile: string | null;

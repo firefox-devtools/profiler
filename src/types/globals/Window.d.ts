@@ -2,10 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { IDBFactory, IDBKeyRange } from '../indexeddb';
-import { SymbolTableAsTuple } from '../../profile-logic/symbol-store-db';
-import { GoogleAnalytics } from '../../utils/analytics';
-import { FetchMockJest } from '@fetch-mock/jest';
+import type { IDBFactory, IDBKeyRange } from '../indexeddb';
+import type { SymbolTableAsTuple } from '../../profile-logic/symbol-store-db';
+import type { GoogleAnalytics } from '../../utils/analytics';
+import type { FetchMockJest } from '@fetch-mock/jest';
 
 declare global {
   type TypedArray =

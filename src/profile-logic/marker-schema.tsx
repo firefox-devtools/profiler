@@ -15,7 +15,7 @@ import {
   formatNanoseconds,
 } from '../utils/format-numbers';
 import { ensureExists } from '../utils/flow';
-import {
+import type {
   CategoryList,
   MarkerFormatType,
   MarkerSchema,
@@ -26,7 +26,7 @@ import {
   Tid,
   Pid,
 } from 'firefox-profiler/types';
-import { StringTable } from '../utils/string-table';
+import type { StringTable } from '../utils/string-table';
 
 /**
  * The marker schema comes from Gecko, and is embedded in the profile. However,

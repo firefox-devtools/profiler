@@ -4,23 +4,23 @@
  * */
 import * as React from 'react';
 import { InView } from 'react-intersection-observer';
+import type {
+  ActivityFillGraphQuerier, CategoryDrawStyles } from './ActivityGraphFills';
 import {
-  ActivityFillGraphQuerier,
   computeActivityGraphFills,
 } from './ActivityGraphFills';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import { mapCategoryColorNameToStyles } from 'firefox-profiler/utils/colors';
 
-import {
+import type {
   Thread,
   Milliseconds,
   SelectedState,
   IndexIntoSamplesTable,
   CategoryList,
 } from 'firefox-profiler/types';
-import { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 
-import { CategoryDrawStyles } from './ActivityGraphFills';
 
 type CanvasProps = {
   readonly className: string;

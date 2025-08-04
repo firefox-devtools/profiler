@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
-import { SourceCodeLoadingError } from 'firefox-profiler/types';
+import type { SourceCodeLoadingError } from 'firefox-profiler/types';
 import { Localized } from '@fluent/react';
 
 export type CodeErrorOverlayProps = {

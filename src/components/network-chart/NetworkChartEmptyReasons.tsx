@@ -8,9 +8,10 @@ import { EmptyReasons } from '../shared/EmptyReasons';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { oneLine } from 'common-tags';
 
-import explicitConnect, { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
+import explicitConnect from '../../utils/connect';
 
-import { State } from 'firefox-profiler/types';
+import type { State } from 'firefox-profiler/types';
 
 type StateProps = {
   readonly threadName: string;

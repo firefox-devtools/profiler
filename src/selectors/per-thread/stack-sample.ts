@@ -11,7 +11,7 @@ import * as ProfileData from '../../profile-logic/profile-data';
 import * as StackTiming from '../../profile-logic/stack-timing';
 import * as FlameGraph from '../../profile-logic/flame-graph';
 import * as CallTree from '../../profile-logic/call-tree';
-import { PathSet } from '../../utils/path';
+import type { PathSet } from '../../utils/path';
 import * as ProfileSelectors from '../profile';
 import { getRightClickedCallNodeInfo } from '../right-clicked-call-node';
 import {
@@ -23,7 +23,7 @@ import {
   getAddressTimings,
 } from '../../profile-logic/address-timings';
 
-import {
+import type {
   Thread,
   ThreadIndex,
   IndexIntoSamplesTable,
@@ -43,10 +43,10 @@ import {
   SelfAndTotal,
   CallNodeSelfAndSummary,
 } from 'firefox-profiler/types';
-import { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
-import { ThreadSelectorsPerThread } from './thread';
-import { MarkerSelectorsPerThread } from './markers';
+import type { ThreadSelectorsPerThread } from './thread';
+import type { MarkerSelectorsPerThread } from './markers';
 
 /**
  * Infer the return type from the getStackAndSampleSelectorsPerThread function. This

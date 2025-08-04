@@ -4,7 +4,7 @@
 
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import { Localized } from '@fluent/react';
-import { CodeLoadingSource } from 'firefox-profiler/types/state';
+import type { CodeLoadingSource } from 'firefox-profiler/types/state';
 
 type CodeLoadingOverlayProps = {
   source: CodeLoadingSource;

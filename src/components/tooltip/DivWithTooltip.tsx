@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import * as React from 'react';
 import { Tooltip } from './Tooltip';
-import { CssPixels } from 'firefox-profiler/types';
+import type { CssPixels } from 'firefox-profiler/types';
 
 // This isn't an exact object on purpose, because we'll pass all other props to
 // the underlying <div>.

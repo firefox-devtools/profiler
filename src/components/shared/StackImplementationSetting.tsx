@@ -16,7 +16,7 @@ import explicitConnect, {
 import './PanelSettingsList.css';
 import './StackImplementationSetting.css';
 
-import { ImplementationFilter } from 'firefox-profiler/types';
+import type { ImplementationFilter } from 'firefox-profiler/types';
 
 type OwnProps = {
   labelL10nId?: string;

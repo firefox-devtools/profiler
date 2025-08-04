@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { ProfileMeta } from 'firefox-profiler/types';
+import type { ProfileMeta } from 'firefox-profiler/types';
 
 // This extracts the version number out of the 'misc' value we have in the
 // profile.

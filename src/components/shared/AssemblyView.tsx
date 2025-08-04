@@ -4,14 +4,14 @@
 import * as React from 'react';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
-import {
+import type {
   AddressTimings,
   NativeSymbolInfo,
   DecodedInstruction,
 } from 'firefox-profiler/types';
 import { mapGetKeyWithMaxValue } from 'firefox-profiler/utils';
 
-import { AssemblyViewEditor } from './AssemblyView-codemirror';
+import type { AssemblyViewEditor } from './AssemblyView-codemirror';
 
 import './CodeView.css';
 

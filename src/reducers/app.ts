@@ -5,9 +5,9 @@
 import { combineReducers } from 'redux';
 import { tabSlugs } from '../app-logic/tabs-handling';
 
-import { TabSlug } from '../app-logic/tabs-handling';
-import { BrowserConnectionStatus } from '../app-logic/browser-connection';
-import {
+import type { TabSlug } from '../app-logic/tabs-handling';
+import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
+import type {
   AppState,
   AppViewState,
   IsOpenPerPanelState,

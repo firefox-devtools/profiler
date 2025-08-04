@@ -12,11 +12,11 @@ import {
 import { SampleTooltipContents } from 'firefox-profiler/components/shared/SampleTooltipContents';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 
-import { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 
 import './ActivityGraph.css';
 
-import {
+import type {
   Thread,
   CategoryList,
   ImplementationFilter,
@@ -26,7 +26,7 @@ import {
   CssPixels,
   TimelineType,
 } from 'firefox-profiler/types';
-import {
+import type {
   ActivityFillGraphQuerier,
   CpuRatioInTimeRange,
 } from './ActivityGraphFills';

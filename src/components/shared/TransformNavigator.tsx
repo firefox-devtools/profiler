@@ -7,8 +7,8 @@ import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { FilterNavigatorBar } from './FilterNavigatorBar';
 import { popTransformsFromStack } from 'firefox-profiler/actions/profile-view';
 
-import { State } from 'firefox-profiler/types';
-import { ComponentProps } from 'react';
+import type { State } from 'firefox-profiler/types';
+import type { ComponentProps } from 'react';
 
 import './TransformNavigator.css';
 

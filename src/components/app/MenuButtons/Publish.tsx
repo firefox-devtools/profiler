@@ -36,7 +36,7 @@ import explicitConnect, {
 
 import WarningImage from 'firefox-profiler-res/img/svg/warning.svg';
 
-import {
+import type {
   Profile,
   CheckedSharingOptions,
   StartEndRange,

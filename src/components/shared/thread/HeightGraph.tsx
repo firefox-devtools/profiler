@@ -10,7 +10,7 @@ import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
 import './HeightGraph.css';
 
-import {
+import type {
   Thread,
   CategoryList,
   IndexIntoSamplesTable,

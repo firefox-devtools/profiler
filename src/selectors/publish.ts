@@ -27,7 +27,7 @@ import { ensureExists } from '../utils/flow';
 import { formatNumber } from '../utils/format-numbers';
 import { getHiddenGlobalTracks, getHiddenLocalTracksByPid } from './url-state';
 
-import {
+import type {
   PublishState,
   UploadState,
   UploadPhase,

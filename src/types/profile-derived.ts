@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { Milliseconds, StartEndRange, Address, Bytes } from './units';
-import { MarkerPayload, MarkerSchema } from './markers';
-import {
+import type { Milliseconds, StartEndRange, Address, Bytes } from './units';
+import type { MarkerPayload, MarkerSchema } from './markers';
+import type {
   ThreadIndex,
   Pid,
   IndexIntoFuncTable,
@@ -33,9 +33,9 @@ import {
   IndexIntoFrameTable,
   IndexIntoSubcategoryListForCategory,
 } from './profile';
-import { IndexedArray } from './utils';
-import { StackTiming } from '../profile-logic/stack-timing';
-import { StringTable } from '../utils/string-table';
+import type { IndexedArray } from './utils';
+import type { StackTiming } from '../profile-logic/stack-timing';
+import type { StringTable } from '../utils/string-table';
 export type IndexIntoCallNodeTable = number;
 
 /**

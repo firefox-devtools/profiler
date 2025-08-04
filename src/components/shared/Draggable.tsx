@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import * as React from 'react';
-import { Milliseconds } from 'firefox-profiler/types';
+import type { Milliseconds } from 'firefox-profiler/types';
 
 export type OnMove = (
   originalValue: {

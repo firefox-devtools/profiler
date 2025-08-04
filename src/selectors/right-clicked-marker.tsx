@@ -4,7 +4,7 @@
 import { createSelector } from 'reselect';
 import { getProfileViewOptions } from './profile';
 
-import { Selector, MarkerReference } from 'firefox-profiler/types';
+import type { Selector, MarkerReference } from 'firefox-profiler/types';
 
 export const getRightClickedMarkerInfo: Selector<MarkerReference | null> =
   createSelector(

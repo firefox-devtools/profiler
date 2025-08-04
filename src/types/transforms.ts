@@ -14,13 +14,13 @@
  * This combination of information will provide a stable reference to a call node for a
  * given view into a call tree.
  */
-import {
+import type {
   IndexIntoFuncTable,
   IndexIntoResourceTable,
   IndexIntoCategoryList,
 } from './profile';
-import { CallNodePath, ThreadsKey } from './profile-derived';
-import { ImplementationFilter } from './actions';
+import type { CallNodePath, ThreadsKey } from './profile-derived';
+import type { ImplementationFilter } from './actions';
 
 /**
  * This type represents the filter types for the 'filter-samples' transform.

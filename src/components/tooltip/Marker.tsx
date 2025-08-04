@@ -39,7 +39,7 @@ import {
 } from 'firefox-profiler/profile-logic/marker-schema';
 import { computeScreenshotSize } from 'firefox-profiler/profile-logic/marker-data';
 
-import {
+import type {
   CategoryList,
   Milliseconds,
   Marker,
@@ -55,7 +55,7 @@ import {
   Tid,
 } from 'firefox-profiler/types';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import {
   getGCMinorDetails,
   getGCMajorDetails,

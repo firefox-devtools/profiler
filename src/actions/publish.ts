@@ -29,7 +29,7 @@ import { extractProfileTokenFromJwt } from 'firefox-profiler/utils/jwt';
 import { withHistoryReplaceStateSync } from 'firefox-profiler/app-logic/url-handling';
 import { persistUploadedProfileInformationToDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 
-import {
+import type {
   Action,
   ThunkAction,
   CheckedSharingOptions,

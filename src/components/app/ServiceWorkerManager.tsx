@@ -14,10 +14,13 @@ import {
 } from 'firefox-profiler/selectors/url-state';
 import { getView } from 'firefox-profiler/selectors/app';
 import { getSymbolicationStatus } from 'firefox-profiler/selectors/profile';
-import type { State as AppState } from 'firefox-profiler/types';
+import type { State as AppState ,
+  DataSource,
+  Phase,
+  SymbolicationStatus,
+} from 'firefox-profiler/types';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
-import { DataSource, Phase, SymbolicationStatus } from 'firefox-profiler/types';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './ServiceWorkerManager.css';
 

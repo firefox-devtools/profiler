@@ -25,8 +25,8 @@ import {
   changeRightClickedMarker,
   changeHoveredMarker,
 } from '../../actions/profile-view';
-import { SizeProps } from '../shared/WithSize';
-import {
+import type { SizeProps } from '../shared/WithSize';
+import type {
   NetworkPayload,
   Marker,
   MarkerIndex,
@@ -35,7 +35,7 @@ import {
   SelectionContext,
 } from 'firefox-profiler/types';
 
-import { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 import './index.css';
 

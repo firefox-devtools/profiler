@@ -4,8 +4,8 @@
 // @flow
 
 import { ensureIsValidTabSlug, objectEntries } from '../utils/flow';
-import JSZip from 'jszip';
-import { JSZipObject } from 'jszip';
+import type JSZip from 'jszip';
+import type { JSZipObject } from 'jszip';
 export type IndexIntoZipFileTable = number;
 
 /**

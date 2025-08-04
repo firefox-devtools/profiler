@@ -13,7 +13,11 @@ import {
 
 import './Ruler.css';
 
-import { Milliseconds, CssPixels, TimelineUnit } from 'firefox-profiler/types';
+import type {
+  Milliseconds,
+  CssPixels,
+  TimelineUnit,
+} from 'firefox-profiler/types';
 
 type Props = {
   readonly zeroAt: Milliseconds;

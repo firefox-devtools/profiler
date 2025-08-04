@@ -26,7 +26,7 @@ import { formatSeconds, formatTimestamp } from '../../utils/format-numbers';
 
 import './index.css';
 
-import {
+import type {
   ThreadsKey,
   Marker,
   MarkerIndex,
@@ -36,7 +36,7 @@ import {
   SelectionContext,
 } from 'firefox-profiler/types';
 
-import { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 // Limit how many characters in the description get sent to the DOM.
 const MAX_DESCRIPTION_CHARACTERS = 500;

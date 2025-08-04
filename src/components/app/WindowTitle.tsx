@@ -15,8 +15,8 @@ import {
   getZipFileState,
 } from 'firefox-profiler/selectors';
 
-import { Profile, DataSource } from 'firefox-profiler/types';
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { Profile, DataSource } from 'firefox-profiler/types';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {
   readonly profile: Profile | null;

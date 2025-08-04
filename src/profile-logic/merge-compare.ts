@@ -35,7 +35,7 @@ import { computeStringIndexMarkerFieldsByDataType } from './marker-schema';
 import { ensureExists, getFirstItemFromSet } from '../utils/flow';
 import { StringTable } from '../utils/string-table';
 
-import {
+import type {
   Profile,
   RawThread,
   IndexIntoCategoryList,

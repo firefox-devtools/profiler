@@ -15,14 +15,14 @@ import {
   formatPercent,
 } from 'firefox-profiler/utils/format-numbers';
 
-import {
+import type {
   ImplementationFilter,
   IndexIntoSamplesTable,
   CategoryList,
   Thread,
   Milliseconds,
 } from 'firefox-profiler/types';
-import { CpuRatioInTimeRange } from './thread/ActivityGraphFills';
+import type { CpuRatioInTimeRange } from './thread/ActivityGraphFills';
 
 type CPUProps = CpuRatioInTimeRange;
 

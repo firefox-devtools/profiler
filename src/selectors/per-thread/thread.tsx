@@ -19,7 +19,7 @@ import {
   getFirstItemFromSet,
 } from '../../utils/flow';
 
-import {
+import type {
   Thread,
   RawThread,
   ThreadIndex,
@@ -44,8 +44,8 @@ import {
   IndexIntoFuncTable,
 } from 'firefox-profiler/types';
 
-import { TransformLabeL10nIds } from 'firefox-profiler/profile-logic/transforms';
-import { MarkerSelectorsPerThread } from './markers';
+import type { TransformLabeL10nIds } from 'firefox-profiler/profile-logic/transforms';
+import type { MarkerSelectorsPerThread } from './markers';
 
 import { mergeThreads } from '../../profile-logic/merge-compare';
 import { defaultThreadViewOptions } from '../../reducers/profile-view';

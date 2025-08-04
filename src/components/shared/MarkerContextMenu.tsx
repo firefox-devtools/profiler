@@ -23,7 +23,7 @@ import {
 import { getRightClickedMarkerInfo } from 'firefox-profiler/selectors/right-clicked-marker';
 import copy from 'copy-to-clipboard';
 
-import {
+import type {
   Marker,
   MarkerIndex,
   StartEndRange,
@@ -37,7 +37,7 @@ import {
   Page,
 } from 'firefox-profiler/types';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { getImplementationFilter } from 'firefox-profiler/selectors/url-state';
 
 import { getBacktraceItemsForStack } from 'firefox-profiler/profile-logic/transforms';
@@ -367,7 +367,9 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
   };
 
   _onShow = () => {
-    if (this._hidingTimeout) {clearTimeout(this._hidingTimeout);}
+    if (this._hidingTimeout) {
+      clearTimeout(this._hidingTimeout);
+    }
     this.props.setContextMenuVisibility(true);
   };
 

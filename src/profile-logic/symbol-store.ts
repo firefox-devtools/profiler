@@ -5,8 +5,8 @@
 import SymbolStoreDB from './symbol-store-db';
 import { SymbolsNotFoundError } from './errors';
 
-import { RequestedLib, ISymbolStoreDB } from 'firefox-profiler/types';
-import { SymbolTableAsTuple } from './symbol-store-db';
+import type { RequestedLib, ISymbolStoreDB } from 'firefox-profiler/types';
+import type { SymbolTableAsTuple } from './symbol-store-db';
 import { ensureExists } from '../utils/flow';
 
 import { bisectionRight } from 'firefox-profiler/utils/bisect';

@@ -45,11 +45,7 @@ export class BlobUrlLink extends React.PureComponent<Props, State> {
   }
 
   override render() {
-    const {
-      blob,
-      children,
-      ...rest
-    } = this.props;
+    const { blob, children, ...rest } = this.props;
 
     // This component must be an <a> rather than a <button> as the download attribute
     // allows users to download the profile.

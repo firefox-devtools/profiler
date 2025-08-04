@@ -17,7 +17,7 @@ import { ServiceWorkerManager } from './ServiceWorkerManager';
 import { WindowTitle } from './WindowTitle';
 import { AppLocalizationProvider } from 'firefox-profiler/components/app/AppLocalizationProvider';
 
-import { Store } from 'firefox-profiler/types';
+import type { Store } from 'firefox-profiler/types';
 
 import './Root.css';
 

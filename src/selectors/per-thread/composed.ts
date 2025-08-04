@@ -11,7 +11,7 @@ import {
 
 import { getRawProfileSharedData } from '../profile';
 
-import {
+import type {
   Selector,
   $ReturnType,
   RawThread,
@@ -21,7 +21,7 @@ import {
   MarkerTiming,
 } from 'firefox-profiler/types';
 
-import {
+import type {
   StackTiming,
   StackTimingByDepth,
 } from '../../profile-logic/stack-timing';

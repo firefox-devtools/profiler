@@ -5,7 +5,7 @@
 import * as React from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { getUploadPhase } from 'firefox-profiler/selectors/publish';
 
 type StateProps = {

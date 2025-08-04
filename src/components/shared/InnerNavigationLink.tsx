@@ -6,11 +6,10 @@ import * as React from 'react';
 
 import { setDataSource } from 'firefox-profiler/actions/profile-view';
 
-import explicitConnect, {
-  ConnectedProps,
-} from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 
-import { DataSource } from 'firefox-profiler/types/actions';
+import type { DataSource } from 'firefox-profiler/types/actions';
 
 type OwnProps = {
   readonly className?: string;

@@ -17,7 +17,7 @@ import {
   markerPayloadMatchesSearch,
 } from './marker-schema';
 
-import {
+import type {
   SamplesTable,
   RawThread,
   RawProfileSharedData,

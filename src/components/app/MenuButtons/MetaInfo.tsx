@@ -25,12 +25,12 @@ import {
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
-import {
+import type {
   Profile,
   SymbolicationStatus,
   ExtraProfileInfoSection,
 } from 'firefox-profiler/types';
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 
 import './MetaInfo.css';

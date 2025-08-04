@@ -6,7 +6,7 @@ import { timeCode } from 'firefox-profiler/utils/time-code';
 import classNames from 'classnames';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 
-import { CssPixels, DevicePixels } from 'firefox-profiler/types';
+import type { CssPixels, DevicePixels } from 'firefox-profiler/types';
 
 type Props<Item> = {
   readonly containerWidth: CssPixels;

@@ -7,7 +7,7 @@ import { oneLine } from 'common-tags';
 import { objectEntries } from '../utils/flow';
 import { tabSlugs } from '../app-logic/tabs-handling';
 
-import {
+import type {
   ThreadIndex,
   Pid,
   TrackIndex,
@@ -25,7 +25,7 @@ import {
   TabID,
 } from 'firefox-profiler/types';
 
-import { TabSlug } from '../app-logic/tabs-handling';
+import type { TabSlug } from '../app-logic/tabs-handling';
 
 /*
  * This state file governs the state that comes from, and alters, the window

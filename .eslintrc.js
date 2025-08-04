@@ -124,6 +124,8 @@ module.exports = {
       extends: ['plugin:@typescript-eslint/recommended'],
       parser: '@typescript-eslint/parser',
       rules: {
+        // Use `import type` everywhere we can.
+        '@typescript-eslint/consistent-type-imports': 'error',
         // We want to have the option to use `as any`
         '@typescript-eslint/no-explicit-any': 'off',
         // Need to find a better solution for ConnectedProps<{}, StateProps, {}>
@@ -142,8 +144,6 @@ module.exports = {
             'ts-check': false, // allow even without description
           },
         ],
-        // I made Claude turn all `import type`s into `import`s and now I'm paying the price
-        'import/no-duplicates': 'off',
       },
     },
     {

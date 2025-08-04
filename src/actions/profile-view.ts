@@ -46,7 +46,7 @@ import {
   getTrackReferenceFromThreadIndex,
 } from 'firefox-profiler/profile-logic/tracks';
 
-import {
+import type {
   PreviewSelection,
   ImplementationFilter,
   CallTreeSummaryStrategy,
@@ -79,8 +79,8 @@ import {
   funcHasRecursiveCall,
 } from '../profile-logic/transforms';
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
-import { TabSlug } from '../app-logic/tabs-handling';
-import { CallNodeInfo } from '../profile-logic/call-node-info';
+import type { TabSlug } from '../app-logic/tabs-handling';
+import type { CallNodeInfo } from '../profile-logic/call-node-info';
 import { intersectSets } from 'firefox-profiler/utils/set';
 
 /**

@@ -6,7 +6,7 @@ import { ensureExists } from 'firefox-profiler/utils/flow';
 
 import './ActivityGraph.css';
 
-import {
+import type {
   IndexIntoSamplesTable,
   IndexIntoCategoryList,
   Thread,
@@ -15,7 +15,7 @@ import {
   DevicePixels,
   CssPixels,
 } from 'firefox-profiler/types';
-import { HoveredPixelState } from './ActivityGraph';
+import type { HoveredPixelState } from './ActivityGraph';
 
 /**
  * This type contains the values that were used to render the ThreadActivityGraph's React

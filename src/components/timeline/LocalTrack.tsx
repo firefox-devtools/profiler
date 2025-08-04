@@ -32,14 +32,14 @@ import { TrackIPC } from './TrackIPC';
 import { TrackProcessCPU } from './TrackProcessCPU';
 import { TrackPower } from './TrackPower';
 import { getTrackSelectionModifiers } from 'firefox-profiler/utils';
-import {
+import type {
   TrackReference,
   Pid,
   TrackIndex,
   LocalTrack,
 } from 'firefox-profiler/types';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { TrackCustomMarker } from './TrackCustomMarker';
 
 type OwnProps = {

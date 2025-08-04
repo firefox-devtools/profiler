@@ -4,7 +4,7 @@
 
 import { PureComponent } from 'react';
 import { ContextMenuTrigger as ReactContextMenuTrigger } from '@firefox-devtools/react-contextmenu';
-import { MixedObject } from 'firefox-profiler/types';
+import type { MixedObject } from 'firefox-profiler/types';
 
 export class ContextMenuTrigger extends PureComponent<MixedObject> {
   override render() {

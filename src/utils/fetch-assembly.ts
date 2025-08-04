@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { assertExhaustiveCheck } from './flow';
-import {
+import type {
   NativeSymbolInfo,
   Lib,
   MixedObject,
@@ -11,7 +11,7 @@ import {
   DecodedInstruction,
 } from 'firefox-profiler/types';
 import { queryApiWithFallback } from './query-api';
-import { ExternalCommunicationDelegate } from './query-api';
+import type { ExternalCommunicationDelegate } from './query-api';
 import { isLocalURL } from './url';
 
 export type FetchAssemblyResult =

@@ -15,7 +15,7 @@ import { PanelSearch } from './PanelSearch';
 import { StackImplementationSetting } from 'firefox-profiler/components/shared/StackImplementationSetting';
 import { MarkerFiltersContextMenu } from './MarkerFiltersContextMenu';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import 'firefox-profiler/components/shared/PanelSettingsList.css';
 import './MarkerSettings.css';

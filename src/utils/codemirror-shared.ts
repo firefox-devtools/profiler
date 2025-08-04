@@ -9,14 +9,10 @@ import {
   gutter,
   gutterLineClass,
 } from '@codemirror/view';
-import {
-  EditorState,
-  StateField,
-  StateEffect,
-  RangeSet,
-} from '@codemirror/state';
+import type { EditorState } from '@codemirror/state';
+import { StateField, StateEffect, RangeSet } from '@codemirror/state';
 
-import { LineTimings } from 'firefox-profiler/types';
+import type { LineTimings } from 'firefox-profiler/types';
 
 import { emptyLineTimings } from 'firefox-profiler/profile-logic/line-timings';
 

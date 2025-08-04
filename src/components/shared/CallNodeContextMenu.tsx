@@ -47,7 +47,7 @@ import {
 } from 'firefox-profiler/selectors/profile';
 import { getBrowserConnectionStatus } from 'firefox-profiler/selectors/app';
 
-import {
+import type {
   TransformType,
   ImplementationFilter,
   IndexIntoCallNodeTable,
@@ -59,10 +59,10 @@ import {
   Page,
 } from 'firefox-profiler/types';
 
-import { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
-import { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
-import { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
+import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
+import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
 
 type StateProps = {
   readonly thread: Thread | null;
@@ -119,7 +119,9 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   //    To avoid this problem we use this `setTimeout` call to delay the reset
   //    just a bit, just in case we get a `_onShow` call right after that.
   _onShow = () => {
-    if (this._hidingTimeout) {clearTimeout(this._hidingTimeout);}
+    if (this._hidingTimeout) {
+      clearTimeout(this._hidingTimeout);
+    }
     this.props.setContextMenuVisibility(true);
   };
 

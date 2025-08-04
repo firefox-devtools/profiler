@@ -11,7 +11,7 @@ import publish from './publish';
 import l10n from './l10n';
 import code from './code';
 import { combineReducers } from 'redux';
-import { Reducer, State } from 'firefox-profiler/types';
+import type { Reducer, State } from 'firefox-profiler/types';
 
 /**
  * This function provides a mechanism to swap out to an old state that we have

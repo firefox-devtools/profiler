@@ -16,20 +16,18 @@ import {
   getProfileInterval,
   getMeta,
 } from 'firefox-profiler/selectors/profile';
-import type { State } from 'firefox-profiler/types';
 import { getSampleIndexRangeForSelection } from 'firefox-profiler/profile-logic/profile-data';
-
 import { TooltipDetails, TooltipDetail } from './TooltipDetails';
 
-import {
+import type {
+  State,
   Counter,
   Milliseconds,
   PreviewSelection,
   StartEndRange,
   ProfileMeta,
 } from 'firefox-profiler/types';
-
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {
   counter: Counter;

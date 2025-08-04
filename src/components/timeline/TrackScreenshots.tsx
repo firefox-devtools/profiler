@@ -18,7 +18,7 @@ import { createPortal } from 'react-dom';
 import { computeScreenshotSize } from 'firefox-profiler/profile-logic/marker-data';
 import { FULL_TRACK_SCREENSHOT_HEIGHT } from 'firefox-profiler/app-logic/constants';
 
-import {
+import type {
   ScreenshotPayload,
   ThreadIndex,
   Thread,
@@ -26,7 +26,7 @@ import {
   Milliseconds,
 } from 'firefox-profiler/types';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import './TrackScreenshots.css';

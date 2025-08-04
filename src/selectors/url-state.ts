@@ -12,7 +12,7 @@ import { SYMBOL_SERVER_URL } from '../app-logic/constants';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { isLocalURL } from '../utils/url';
 
-import {
+import type {
   ThreadIndex,
   Pid,
   TransformStack,
@@ -32,8 +32,8 @@ import {
   TabID,
 } from 'firefox-profiler/types';
 
-import { TabSlug } from '../app-logic/tabs-handling';
-import { MarkerRegExps } from '../profile-logic/marker-data';
+import type { TabSlug } from '../app-logic/tabs-handling';
+import type { MarkerRegExps } from '../profile-logic/marker-data';
 
 import urlStateReducer from '../reducers/url-state';
 import { formatMetaInfoString } from '../profile-logic/profile-metainfo';

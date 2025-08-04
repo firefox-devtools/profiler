@@ -13,8 +13,8 @@ import {
 } from 'firefox-profiler/selectors/url-state';
 import { addTransformToStack } from 'firefox-profiler/actions/profile-view';
 
-import { ThreadsKey } from 'firefox-profiler/types';
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ThreadsKey } from 'firefox-profiler/types';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {
   readonly onShow: () => void;

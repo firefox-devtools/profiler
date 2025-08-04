@@ -23,7 +23,7 @@ import { TooltipTrackPower } from 'firefox-profiler/components/tooltip/TrackPowe
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
 import { TRACK_POWER_DEFAULT_COLOR } from 'firefox-profiler/app-logic/constants';
 
-import {
+import type {
   CounterIndex,
   Counter,
   Thread,
@@ -34,8 +34,8 @@ import {
   IndexIntoSamplesTable,
 } from 'firefox-profiler/types';
 
-import { SizeProps } from 'firefox-profiler/components/shared/WithSize';
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 
 import './TrackPower.css';

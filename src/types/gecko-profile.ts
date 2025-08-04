@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import {
+import type {
   IndexIntoStringTable,
   IndexIntoCategoryList,
   PausedRange,
@@ -14,13 +14,13 @@ import {
   ProfilerConfiguration,
   SampleUnits,
 } from './profile';
-import {
+import type {
   MarkerPayload_Gecko,
   MarkerDisplayLocation,
   MarkerFormatType,
   MarkerGraph,
 } from './markers';
-import { Milliseconds, Nanoseconds, MemoryOffset, Bytes } from './units';
+import type { Milliseconds, Nanoseconds, MemoryOffset, Bytes } from './units';
 
 export type IndexIntoGeckoFrameTable = number;
 export type IndexIntoGeckoStackTable = number;

@@ -6,7 +6,7 @@ import { DivWithTooltip } from 'firefox-profiler/components/tooltip/DivWithToolt
 import { displayNiceUrl } from 'firefox-profiler/utils';
 import { formatSeconds } from 'firefox-profiler/utils/format-numbers';
 
-import {
+import type {
   Marker,
   MarkerIndex,
   Milliseconds,

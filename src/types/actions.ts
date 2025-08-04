@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { ReactLocalization } from '@fluent/react';
-import * as JSZip from 'jszip';
-import {
+import type { ReactLocalization } from '@fluent/react';
+import type * as JSZip from 'jszip';
+import type {
   Profile,
   RawThread,
   ThreadIndex,
@@ -14,7 +14,7 @@ import {
   IndexIntoLibs,
   PageList,
 } from './profile';
-import {
+import type {
   Thread,
   CallNodePath,
   GlobalTrack,
@@ -24,13 +24,13 @@ import {
   ThreadsKey,
   NativeSymbolInfo,
 } from './profile-derived';
-import { FuncToFuncsMap } from '../profile-logic/symbolication';
-import { TemporaryError } from '../utils/errors';
-import { Transform, TransformStacksPerThread } from './transforms';
-import { IndexIntoZipFileTable } from '../profile-logic/zip-files';
-import { CallNodeInfo } from '../profile-logic/call-node-info';
-import { TabSlug } from '../app-logic/tabs-handling';
-import {
+import type { FuncToFuncsMap } from '../profile-logic/symbolication';
+import type { TemporaryError } from '../utils/errors';
+import type { Transform, TransformStacksPerThread } from './transforms';
+import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
+import type { CallNodeInfo } from '../profile-logic/call-node-info';
+import type { TabSlug } from '../app-logic/tabs-handling';
+import type {
   PseudoStrategy,
   UrlState,
   UploadState,
@@ -41,8 +41,8 @@ import {
   TableViewOptions,
   DecodedInstruction,
 } from './state';
-import { CssPixels, StartEndRange, Milliseconds } from './units';
-import { BrowserConnectionStatus } from '../app-logic/browser-connection';
+import type { CssPixels, StartEndRange, Milliseconds } from './units';
+import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
 
 export type DataSource =
   | 'none'

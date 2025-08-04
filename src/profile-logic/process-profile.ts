@@ -38,7 +38,7 @@ import {
 import { computeStringIndexMarkerFieldsByDataType } from '../profile-logic/marker-schema';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
 
-import {
+import type {
   Profile,
   RawProfileSharedData,
   RawThread,

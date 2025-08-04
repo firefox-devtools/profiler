@@ -12,9 +12,9 @@ import {
   TRACK_VISUAL_PROGRESS_HEIGHT,
 } from 'firefox-profiler/app-logic/constants';
 
-import { ProgressGraphData, Milliseconds } from 'firefox-profiler/types';
+import type { ProgressGraphData, Milliseconds } from 'firefox-profiler/types';
 
-import { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackVisualProgress.css';
 
