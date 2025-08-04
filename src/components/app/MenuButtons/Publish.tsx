@@ -493,11 +493,11 @@ class DownloadButton extends React.PureComponent<
       });
       return (
         <BlobUrlLink
-          {...({
+          {...{
             blob,
             download: `${downloadFileName}.gz`,
             className,
-          } as any)}
+          }}
         >
           <span className="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgDownload" />
           <Localized id="MenuButtons--publish--download">Download</Localized>{' '}
