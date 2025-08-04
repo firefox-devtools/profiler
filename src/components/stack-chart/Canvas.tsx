@@ -778,11 +778,9 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       (xMinusMargin / innerContainerWidth) * this._sameWidthsRangeLength +
       this._sameWidthsIndexAtViewportStart;
 
-    // At this point we know stackTiming has sameWidths properties
-    const stackTimingWithSameWidths = stackTiming as any;
     for (let i = 0; i < stackTiming.length; i++) {
-      const start = stackTimingWithSameWidths.sameWidthsStart[i];
-      const end = stackTimingWithSameWidths.sameWidthsEnd[i];
+      const start = stackTiming.sameWidthsStart[i];
+      const end = stackTiming.sameWidthsEnd[i];
       if (start < hoveredBox && end > hoveredBox) {
         return { depth, stackTimingIndex: i };
       }
