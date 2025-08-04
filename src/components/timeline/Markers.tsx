@@ -390,7 +390,9 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
       this.setState({ mouseDownMarker });
 
       if (mouseDownMarker !== null) {
-        // Disabling Flow type checking because Flow doesn't know about setCapture.
+        // Disabling type checking because TypeScript doesn't know about setCapture.
+        // TODO: We should convert this to use pointer events rather than mouse events.
+        // Those provide setCapture on the event rather than on the element.
         const canvas = e.currentTarget as any;
         if (canvas.setCapture) {
           // This retargets all mouse events to this element. This is useful
