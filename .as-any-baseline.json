@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-05T13:50:12.908Z",
-  "totalUsages": 86,
-  "totalFiles": 37,
+  "timestamp": "2025-08-05T21:23:01.778Z",
+  "totalUsages": 91,
+  "totalFiles": 39,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -281,7 +281,7 @@
     {
       "file": "src/test/fixtures/custom-assertions.ts",
       "line": 11,
-      "content": "expect(array).toEqual(expect.arrayContaining((expected as any)));"
+      "content": "expect(array).toEqual(expect.arrayContaining(expected as any));"
     },
     {
       "file": "src/test/fixtures/mocks/canvas-context.ts",
@@ -331,17 +331,32 @@
     {
       "file": "src/test/fixtures/mocks/element-size.ts",
       "line": 80,
-      "content": "} as any);"
+      "content": "} as any;"
     },
     {
       "file": "src/test/fixtures/mocks/intersection-observer.ts",
-      "line": 49,
+      "line": 55,
       "content": "(window as any).IntersectionObserver = jest.fn((cb, options = {}) => {"
     },
     {
       "file": "src/test/fixtures/mocks/intersection-observer.ts",
-      "line": 84,
+      "line": 90,
       "content": "delete (window as any).IntersectionObserver;"
+    },
+    {
+      "file": "src/test/fixtures/mocks/resize-observer.ts",
+      "line": 48,
+      "content": "(window as any).ResizeObserver = jest.fn((cb) => {"
+    },
+    {
+      "file": "src/test/fixtures/mocks/resize-observer.ts",
+      "line": 75,
+      "content": "delete (window as any).ResizeObserver;"
+    },
+    {
+      "file": "src/test/fixtures/mocks/resize-observer.ts",
+      "line": 127,
+      "content": "} as any);"
     },
     {
       "file": "src/test/fixtures/mocks/web-channel.ts",
@@ -354,18 +369,28 @@
       "content": "} as any);"
     },
     {
+      "file": "src/test/setup.ts",
+      "line": 22,
+      "content": "(global as any).fetchMock = fetchMock;"
+    },
+    {
+      "file": "src/test/setup.ts",
+      "line": 27,
+      "content": "const { __shutdownWorkers } = WorkerFactory as any;"
+    },
+    {
       "file": "src/test/types/utils.ts",
-      "line": 16,
+      "line": 14,
       "content": "const coerceC: CoerceC = coerce<CoerceA, CoerceB>(coerceA) as any;"
     },
     {
       "file": "src/test/types/utils.ts",
-      "line": 18,
+      "line": 16,
       "content": "const coerceB2: CoerceB = coerce<CoerceA, CoerceB>(coerceB) as any;"
     },
     {
       "file": "src/test/types/utils.ts",
-      "line": 24,
+      "line": 22,
       "content": "const coerceMatchingShape3 = coerceMatchingShape<CoerceB>({ time: 0 } as any);"
     },
     {
