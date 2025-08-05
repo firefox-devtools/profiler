@@ -44,38 +44,38 @@ import { fireEvent, screen } from '@testing-library/react';
  */
 
 type FakeMouseEventInit = $Shape<{
-  altKey: boolean,
-  button: 0 | 1 | 2 | 3 | 4,
-  buttons: number,
-  clientX: number,
-  clientY: number,
-  ctrlKey: boolean,
-  metaKey: boolean,
-  movementX: number,
-  movementY: number,
-  offsetX: number,
-  offsetY: number,
-  pageX: number,
-  pageY: number,
-  screenX: number,
-  screenY: number,
-  shiftKey: boolean,
-  x: number,
-  y: number,
+  altKey: boolean;
+  button: 0 | 1 | 2 | 3 | 4;
+  buttons: number;
+  clientX: number;
+  clientY: number;
+  ctrlKey: boolean;
+  metaKey: boolean;
+  movementX: number;
+  movementY: number;
+  offsetX: number;
+  offsetY: number;
+  pageX: number;
+  pageY: number;
+  screenX: number;
+  screenY: number;
+  shiftKey: boolean;
+  x: number;
+  y: number;
 
   // From UIEventInit
-  detail: number,
+  detail: number;
 
   // From EventInit
-  bubbles: boolean,
-  cancelable: boolean,
-  composed: boolean,
+  bubbles: boolean;
+  cancelable: boolean;
+  composed: boolean;
 }>;
 
 class FakeMouseEvent extends MouseEvent {
   constructor(type: string, values: FakeMouseEventInit) {
     const { pageX, pageY, offsetX, offsetY, x, y, ...mouseValues } = values;
-    super(type, (mouseValues as any));
+    super(type, mouseValues as any);
 
     Object.defineProperties(this, {
       offsetX: {
@@ -393,7 +393,7 @@ export function removeScreenshotHoverElement() {
  * Usage:
  * changeSelect({ from: 'Timing Data', to: 'Deallocations' });
  */
-export function changeSelect({ from, to }: { from: string, to: string }) {
+export function changeSelect({ from, to }: { from: string; to: string }) {
   // Look up the <option> with the text label.
   const option = screen.getByText(to);
   // Fire a change event to the select.
@@ -408,7 +408,7 @@ export function changeSelect({ from, to }: { from: string, to: string }) {
 export function findFillTextPositionFromDrawLog(
   drawLog: any[],
   fillText: string
-): { x: number, y: number } {
+): { x: number; y: number } {
   const positions = drawLog
     .filter(([cmd, text]) => cmd === 'fillText' && text === fillText)
     .map(([, , x, y]) => ({ x, y }));
