@@ -30,7 +30,7 @@ import {
   addIPCMarkerPairToThreads,
 } from '../fixtures/profiles/processed-profile';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
-import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect.js';
+import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import {
   autoMockElementSize,
