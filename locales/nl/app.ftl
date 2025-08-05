@@ -733,6 +733,8 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = Alle frames
     .title = De stackframes niet filteren
+StackSettings--implementation-script = Script
+    .title = Alleen de stackframes gerelateerd aan scriptuitvoering tonen
 StackSettings--implementation-native2 = Ingebouwd
     .title = Alleen de stackframes voor ingebouwde code tonen
 # This label is displayed in the marker chart and marker table panels only.
