@@ -842,8 +842,8 @@ export function computeCallTreeTimings(
 }
 
 /**
- * This computes all of the count and timing information displayed in the calltree.
- * It takes into account both the normal tree, and the inverted tree.
+ * This computes all of the count and timing information displayed in the
+ * regular (non-inverted) calltree.
  */
 export function computeCallTreeTimingsNonInverted(
   callNodeInfo: CallNodeInfo,
