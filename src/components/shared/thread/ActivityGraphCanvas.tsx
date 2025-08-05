@@ -5,10 +5,10 @@
 import * as React from 'react';
 import { InView } from 'react-intersection-observer';
 import type {
-  ActivityFillGraphQuerier, CategoryDrawStyles } from './ActivityGraphFills';
-import {
-  computeActivityGraphFills,
+  ActivityFillGraphQuerier,
+  CategoryDrawStyles,
 } from './ActivityGraphFills';
+import { computeActivityGraphFills } from './ActivityGraphFills';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import { mapCategoryColorNameToStyles } from 'firefox-profiler/utils/colors';
 
@@ -20,7 +20,6 @@ import type {
   CategoryList,
 } from 'firefox-profiler/types';
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
-
 
 type CanvasProps = {
   readonly className: string;
