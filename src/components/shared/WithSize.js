@@ -35,7 +35,7 @@ export function withSize<Props>(
     State,
   > {
     state = { width: 0, height: 0 };
-    _container: HTMLElement | null;
+    _container: HTMLElement | null = null;
 
     componentDidMount() {
       const container = findDOMNode(this); // eslint-disable-line react/no-find-dom-node
