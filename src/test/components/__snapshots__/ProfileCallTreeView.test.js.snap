@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS allocations 1`] = `
 <div
@@ -34,16 +34,16 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"
@@ -800,16 +800,16 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"
@@ -1584,16 +1584,16 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"
@@ -2368,16 +2368,16 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"
@@ -3140,16 +3140,16 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"
@@ -3760,16 +3760,16 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"
@@ -3901,16 +3901,16 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"
@@ -4042,16 +4042,16 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
           checked=""
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"
@@ -4229,16 +4229,16 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"
@@ -4969,16 +4969,16 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"
@@ -5708,16 +5708,16 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree with filen
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"
@@ -6231,16 +6231,16 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"
@@ -6970,16 +6970,16 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"
@@ -7637,16 +7637,16 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"
@@ -8304,16 +8304,16 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"
@@ -8828,16 +8828,16 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"
@@ -9352,16 +9352,16 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"

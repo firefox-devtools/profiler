@@ -108,7 +108,7 @@ export function getStackTimingByDepth(
   maxDepthPlusOne: number,
   interval: Milliseconds
 ): StackTimingByDepthWithMap {
-  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+  const callNodeTable = callNodeInfo.getCallNodeTable();
   const {
     prefix: callNodeTablePrefixColumn,
     subtreeRangeEnd: callNodeTableSubtreeRangeEndColumn,
