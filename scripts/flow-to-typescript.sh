@@ -32,6 +32,15 @@ fi
 
 echo "🔄 Converting $INPUT_FILE → $OUTPUT_FILE"
 
+# Check if destination file already exists
+if [ -f "$OUTPUT_FILE" ]; then
+    echo "Error: Destination file '$OUTPUT_FILE' already exists"
+    echo "Has the file already been converted?"
+    echo "If you really want to discard the existing conversion,"
+    echo "manually remove the file and run this script again."
+    exit 1
+fi
+
 # Copy the file first
 cp "$INPUT_FILE" "$OUTPUT_FILE"
 TEMP_FILE="${OUTPUT_FILE}.tmp"
