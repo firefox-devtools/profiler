@@ -35,6 +35,7 @@ function findFiles() {
           file === 'simpleperf_report.js' ||
           file === 'webpack.config.js' ||
           file === 'custom-environment.js' ||
+          file === 'src/test/setup.js' ||
           file === '.eslintrc.js'
         ) {
           continue;
