@@ -645,6 +645,8 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = Tutti i frame
     .title = Non filtrare gli stack frame
+StackSettings--implementation-script = Script
+    .title = Mostra solo gli stack frame relativi all’esecuzione di script
 StackSettings--implementation-native2 = Nativo
     .title = Mostra solo gli stack frame per il codice nativo
 # This label is displayed in the marker chart and marker table panels only.
