@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-05T00:02:20.126Z",
-  "totalUsages": 100,
-  "totalFiles": 35,
+  "timestamp": "2025-08-05T00:30:19.181Z",
+  "totalUsages": 99,
+  "totalFiles": 34,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -402,11 +402,6 @@
       "file": "src/profile-logic/profile-data.ts",
       "line": 1490,
       "content": "* Checks if a sample table has any useful samples."
-    },
-    {
-      "file": "src/profile-logic/sanitize.ts",
-      "line": 107,
-      "content": "favicon: null as any,"
     },
     {
       "file": "src/profile-logic/tracks.ts",

@@ -104,7 +104,7 @@ export function sanitizePII(
         ...page,
         url: removeURLs(page.url, `<Page #${pageIndex}>`),
         // Remove the favicon data as it could reveal the url.
-        favicon: null as any,
+        favicon: null,
       }));
     }
   }
