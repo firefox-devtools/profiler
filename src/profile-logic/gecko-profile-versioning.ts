@@ -1488,6 +1488,16 @@ const _upgraders: {
     // marker data with the new field types data, and no modification is needed in the
     // frontend to display older formats.
   },
+  [32]: (_) => {
+    // This version bump changes the frameTable location string to include
+    // optional sourceIndexes for the JS frames and adds optional source table
+    // to profile.sources.
+    // Older frontends will not be able to display these fields.
+    // No upgrade is needed:
+    // - There is no change to the JSON structure, the information is embedded
+    //   within the existing location string.
+    // - The source ID is optional, so v31 profiles are valid v32 profiles.
+  },
 
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
