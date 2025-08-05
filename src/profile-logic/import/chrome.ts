@@ -12,10 +12,7 @@ import type {
   MixedObject,
 } from 'firefox-profiler/types';
 
-import {
-  getEmptyProfile,
-  getEmptyThread,
-} from '../../profile-logic/data-structures';
+import { getEmptyProfile, getEmptyThread } from '../data-structures';
 import { StringTable } from '../../utils/string-table';
 import { ensureExists, coerce } from '../../utils/flow';
 import {
@@ -25,10 +22,7 @@ import {
   INTERVAL_END,
 } from 'firefox-profiler/app-logic/constants';
 
-import {
-  getOrCreateURIResource,
-  getTimeRangeForThread,
-} from '../../profile-logic/profile-data';
+import { getOrCreateURIResource, getTimeRangeForThread } from '../profile-data';
 
 // Chrome Tracing Event Spec:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
