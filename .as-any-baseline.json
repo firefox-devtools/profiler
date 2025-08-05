@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-04T23:48:42.126Z",
-  "totalUsages": 101,
-  "totalFiles": 36,
+  "timestamp": "2025-08-05T00:02:20.126Z",
+  "totalUsages": 100,
+  "totalFiles": 35,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -482,11 +482,6 @@
       "file": "src/utils/flow.ts",
       "line": 147,
       "content": "const result: { [K in Key]: Return } = {} as any;"
-    },
-    {
-      "file": "src/utils/format-numbers.ts",
-      "line": 36,
-      "content": "cache: new NamedTupleMap() as any,"
     },
     {
       "file": "src/utils/index.ts",

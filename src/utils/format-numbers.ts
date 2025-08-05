@@ -24,7 +24,7 @@ function _getNumberFormat({
 }: {
   places: number;
   style: 'decimal' | 'percent';
-}) {
+}): Intl.NumberFormat {
   return new Intl.NumberFormat(undefined, {
     minimumFractionDigits: places,
     maximumFractionDigits: places,
@@ -33,7 +33,7 @@ function _getNumberFormat({
 }
 
 const _memoizedGetNumberFormat = memoize(_getNumberFormat, {
-  cache: new NamedTupleMap() as any,
+  cache: new NamedTupleMap(),
 });
 
 /**
