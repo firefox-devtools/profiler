@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 /*
  * Tests don't have access to the requestionAnimationFrame API, so this file
  * provides a mock for it.
@@ -15,7 +13,7 @@ import { stripIndent } from 'common-tags';
 import { act } from 'firefox-profiler/test/fixtures/testing-library';
 
 function stripThisFileFromErrorStack(error: Error): string[] {
-  const stacks = error.stack.split('\n');
+  const stacks = error.stack!.split('\n');
   const filteredStacks = stacks.filter(
     (stack) => !stack.includes('/request-animation-frame.js')
   );
@@ -31,13 +29,11 @@ function stripThisFileFromErrorStack(error: Error): string[] {
  */
 function buildErrorWithMessageAndStacks(
   message: string,
-  stacks: $ReadOnlyArray<string>
+  stacks: ReadonlyArray<string>
 ): Error {
   const error = new Error();
-  stacks = stacks.slice();
-  stacks.unshift(`Error: ${message}`);
   error.message = message;
-  error.stack = stacks.join('\n');
+  error.stack = [`Error: ${message}`].concat(stacks).join('\n');
   return error;
 }
 
@@ -71,16 +67,17 @@ function buildErrorWithMessageAndStacks(
  */
 
 export function mockRaf() {
-  let requests = [];
+  let requests: { func: FrameRequestCallback; stacks: string[] }[] = [];
   jest.spyOn(window, 'requestAnimationFrame').mockImplementation((fn) => {
     requests.push({
       func: fn,
       stacks: stripThisFileFromErrorStack(new Error()),
     });
+    return 0;
   });
 
   return function flushRafCalls(
-    { timestamps, once }: $Shape<{ timestamps: number[], once: boolean }> = {
+    { timestamps, once }: { timestamps: number[]; once?: boolean } = {
       timestamps: [],
       once: false,
     }
@@ -91,8 +88,8 @@ export function mockRaf() {
       requests = [];
 
       while (oldrequests.length) {
-        const request = oldrequests.shift();
-        const arg = timestamps.shift();
+        const request = oldrequests.shift()!;
+        const arg = timestamps.shift()!;
         act(() => {
           request.func.call(null, arg);
         });
@@ -113,7 +110,7 @@ export function mockRaf() {
 
       // More than 1 request.
 
-      const lastRequest = requests.pop();
+      const lastRequest = requests.pop()!;
       const remainingRequestFirstStacks = requests.map(({ stacks }, i) => {
         const firstLineFromProject = stacks.find((line) =>
           line.includes('/src/')
