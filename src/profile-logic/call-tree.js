@@ -241,7 +241,6 @@ class CallTreeInternalInverted implements CallTreeInternal {
   _callNodeTable: CallNodeTable;
   _callNodeSelf: Float64Array;
   _rootNodes: IndexIntoCallNodeTable[];
-  _funcCount: number;
   _totalPerRootFunc: Float64Array;
   _hasChildrenPerRootFunc: Uint8Array;
   _totalAndHasChildrenPerNonRootNode: Map<
