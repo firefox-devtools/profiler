@@ -164,12 +164,15 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
     return null;
   }
 
-  const { dhatFileVersion } = json as any;
-  if (typeof dhatFileVersion !== 'number') {
+  if (
+    !('dhatFileVersion' in json) ||
+    typeof json.dhatFileVersion !== 'number'
+  ) {
     // This is not a dhat file.
     return null;
   }
 
+  const { dhatFileVersion } = json;
   if (dhatFileVersion !== 2) {
     throw new Error(
       `This importer only supports dhat version 2. The file provided was version ${dhatFileVersion}.`

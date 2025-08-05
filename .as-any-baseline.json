@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-05T01:02:53.271Z",
-  "totalUsages": 67,
-  "totalFiles": 29,
+  "timestamp": "2025-08-05T01:05:59.453Z",
+  "totalUsages": 66,
+  "totalFiles": 28,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -134,7 +134,7 @@
       "content": "addDataToWindowObject(store.getState, store.dispatch as any);"
     },
     {
-      "file": "src/profile-logic/call-tree.tsx",
+      "file": "src/profile-logic/call-tree.ts",
       "line": 702,
       "content": "// The inverted call node has children if it has any inverted child nodes"
     },
@@ -142,11 +142,6 @@
       "file": "src/profile-logic/errors.ts",
       "line": 18,
       "content": "(this as any).__proto__ = SymbolsNotFoundError.prototype;"
-    },
-    {
-      "file": "src/profile-logic/import/dhat.tsx",
-      "line": 167,
-      "content": "const { dhatFileVersion } = json as any;"
     },
     {
       "file": "src/profile-logic/js-tracer.tsx",
