@@ -44,8 +44,8 @@ export class ThreadStackGraph extends PureComponent<Props> {
       return null;
     }
 
-    const nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
-    return nonInvertedCallNodeTable.depth[nonInvertedCallNodeIndex];
+    const callNodeTable = callNodeInfo.getCallNodeTable();
+    return callNodeTable.depth[nonInvertedCallNodeIndex];
   };
 
   render() {
@@ -61,12 +61,12 @@ export class ThreadStackGraph extends PureComponent<Props> {
       trackName,
       onSampleClick,
     } = this.props;
-    const nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+    const callNodeTable = callNodeInfo.getCallNodeTable();
 
     let maxDepth = 0;
-    for (let i = 0; i < nonInvertedCallNodeTable.depth.length; i++) {
-      if (nonInvertedCallNodeTable.depth[i] > maxDepth) {
-        maxDepth = nonInvertedCallNodeTable.depth[i];
+    for (let i = 0; i < callNodeTable.depth.length; i++) {
+      if (callNodeTable.depth[i] > maxDepth) {
+        maxDepth = callNodeTable.depth[i];
       }
     }
 

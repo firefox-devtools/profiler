@@ -45,7 +45,7 @@ export function withSize<
   // eslint-disable-next-line flowtype/no-existential-type
   return class WithSizeWrapper extends React.PureComponent<*, State> {
     state = { width: 0, height: 0 };
-    _container: HTMLElement | null;
+    _container: HTMLElement | null = null;
 
     componentDidMount() {
       const container = findDOMNode(this); // eslint-disable-line react/no-find-dom-node

@@ -85,7 +85,7 @@ class StackImplementationSettingImpl extends PureComponent<Props> {
           'combined'
         )}
         {this._renderImplementationRadioButton(
-          'StackSettings--implementation-javascript2',
+          'StackSettings--implementation-script',
           'js'
         )}
         {this._renderImplementationRadioButton(
