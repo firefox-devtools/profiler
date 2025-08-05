@@ -1,6 +1,6 @@
 {
-  "timestamp": "2025-08-05T00:56:21.476Z",
-  "totalUsages": 70,
+  "timestamp": "2025-08-05T01:01:46.713Z",
+  "totalUsages": 69,
   "totalFiles": 30,
   "usages": [
     {
@@ -155,32 +155,27 @@
     },
     {
       "file": "src/profile-logic/marker-data.ts",
-      "line": 666,
-      "content": "] as any;"
-    },
-    {
-      "file": "src/profile-logic/marker-data.ts",
-      "line": 1417,
+      "line": 1415,
       "content": "[key]: removeURLs((markerPayload as any)[key]),"
     },
     {
       "file": "src/profile-logic/marker-data.ts",
-      "line": 1418,
+      "line": 1416,
       "content": "} as any;"
     },
     {
       "file": "src/profile-logic/marker-data.ts",
-      "line": 1422,
+      "line": 1420,
       "content": "[key]: removeFilePath((markerPayload as any)[key]),"
     },
     {
       "file": "src/profile-logic/marker-data.ts",
-      "line": 1423,
+      "line": 1421,
       "content": "} as any;"
     },
     {
       "file": "src/profile-logic/marker-data.ts",
-      "line": 1428,
+      "line": 1426,
       "content": "} as any;"
     },
     {

@@ -661,9 +661,7 @@ export function deriveMarkersFromRawMarkerTable(
               openNetworkMarkers.delete(data.id);
 
               // We know this startIndex points to a Network marker.
-              const startData: NetworkPayload = rawMarkers.data[
-                startIndex
-              ] as any;
+              const startData = rawMarkers.data[startIndex] as NetworkPayload;
 
               const startStartTime = ensureExists(
                 rawMarkers.startTime[startIndex],
