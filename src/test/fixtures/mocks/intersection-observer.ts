@@ -1,35 +1,41 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @ts-nocheck
+// @ts-nocheck Complex DOM mock with intricate typing that would require extensive work to properly type
 
 /**
  * Creating a mock intersection observer type because Flow's IntersectionObserver
  * type is not completely correct in this version.
  */
 type MockIntersectionObserver = {
-  thresholds: number[],
-  root: HTMLElement | Document,
-  rootMargin: string,
-  observe: (param: HTMLElement) => void,
-  unobserve: (param: HTMLElement) => void,
-  disconnect: () => void,
-  takeRecords: () => void,
+  thresholds: number[];
+  root: HTMLElement | Document;
+  rootMargin: string;
+  observe: (param: HTMLElement) => void;
+  unobserve: (param: HTMLElement) => void;
+  disconnect: () => void;
+  takeRecords: () => void;
 };
 
 /**
  * Type of the item we are going to keep for tracking observers.
  */
 type Item = {
-  callback: (param: IntersectionObserverEntry[], MockIntersectionObserver) => void,
-  elements: Set<HTMLElement>,
-  created: number,
+  callback: (
+    param: IntersectionObserverEntry[],
+    MockIntersectionObserver
+  ) => void;
+  elements: Set<HTMLElement>;
+  created: number;
 };
 
 /**
  * Tracked observers during the testing.
  */
-const observers: Map<MockIntersectionObserver, Item> = new Map<unknown, unknown>();
+const observers: Map<MockIntersectionObserver, Item> = new Map<
+  unknown,
+  unknown
+>();
 
 /**
  * Call this function inside a `describe` block to automatically define the
@@ -123,7 +129,7 @@ function triggerSingleObserver(
 export function triggerIntersectionObservers({
   isIntersecting = true,
 }: {
-  isIntersecting?: boolean,
+  isIntersecting?: boolean;
 }) {
   for (const [observer, item] of observers) {
     triggerSingleObserver(observer, item, isIntersecting);

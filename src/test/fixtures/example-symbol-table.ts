@@ -32,7 +32,9 @@ export type ExampleSymbolTable = {
   getAddressResult: (address: number) => AddressResult | null;
 };
 
-function _makeSymbolTableAsTuple(syms: ExampleSymbolTableSymbols): SymbolTableAsTuple {
+function _makeSymbolTableAsTuple(
+  syms: ExampleSymbolTableSymbols
+): SymbolTableAsTuple {
   const index = [0];
   let accum = 0;
   for (const { name } of syms) {

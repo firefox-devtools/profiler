@@ -8,5 +8,5 @@ export function assertSetContainsOnly<T>(set: Iterable<T>, expected: Array<T>) {
   expect(array).toHaveLength(expected.length);
   // Because expect.arrayContaining expects Array<mixed>, Flow doesn't accept
   // this Array<T>. Hence disabling Flow check with `any`.
-  expect(array).toEqual(expect.arrayContaining((expected as any)));
+  expect(array).toEqual(expect.arrayContaining(expected as any));
 }

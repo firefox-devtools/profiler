@@ -91,7 +91,11 @@ function mockCanvasContext() {
     } as Record<string | symbol, any>,
     {
       // Record what values are set on the context.
-      set(target: Record<string | symbol, any>, property: string | symbol, value: any) {
+      set(
+        target: Record<string | symbol, any>,
+        property: string | symbol,
+        value: any
+      ) {
         target[property] = value;
         log.push(['set ' + String(property), value]);
         return true;

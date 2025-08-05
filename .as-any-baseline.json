@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-05T01:05:59.453Z",
-  "totalUsages": 66,
-  "totalFiles": 28,
+  "timestamp": "2025-08-05T13:50:12.908Z",
+  "totalUsages": 86,
+  "totalFiles": 37,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -267,6 +267,106 @@
       "file": "src/selectors/per-thread/markers.ts",
       "line": 663,
       "content": "const val = (data as any)[keys[i]];"
+    },
+    {
+      "file": "src/test/custom-environment.ts",
+      "line": 27,
+      "content": "this.global.TextDecoder = TextDecoder as any;"
+    },
+    {
+      "file": "src/test/custom-environment.ts",
+      "line": 28,
+      "content": "this.global.TextEncoder = TextEncoder as any;"
+    },
+    {
+      "file": "src/test/fixtures/custom-assertions.ts",
+      "line": 11,
+      "content": "expect(array).toEqual(expect.arrayContaining((expected as any)));"
+    },
+    {
+      "file": "src/test/fixtures/mocks/canvas-context.ts",
+      "line": 12,
+      "content": ".mockImplementation(() => ctx as any);"
+    },
+    {
+      "file": "src/test/fixtures/mocks/canvas-context.ts",
+      "line": 25,
+      "content": "delete (window as any).Path2D;"
+    },
+    {
+      "file": "src/test/fixtures/mocks/canvas-context.ts",
+      "line": 26,
+      "content": "delete (window as any).__flushDrawLog;"
+    },
+    {
+      "file": "src/test/fixtures/mocks/canvas-context.ts",
+      "line": 31,
+      "content": "return (window as any).__flushDrawLog();"
+    },
+    {
+      "file": "src/test/fixtures/mocks/canvas-context.ts",
+      "line": 43,
+      "content": "return (jest.fn as any)((...args: any[]) => {"
+    },
+    {
+      "file": "src/test/fixtures/mocks/date.ts",
+      "line": 64,
+      "content": "if (typeof (Date as any).mockRestore === 'function') {"
+    },
+    {
+      "file": "src/test/fixtures/mocks/date.ts",
+      "line": 65,
+      "content": "(Date as any).mockRestore();"
+    },
+    {
+      "file": "src/test/fixtures/mocks/domrect.ts",
+      "line": 42,
+      "content": "global.DOMRect = DOMRect as any;"
+    },
+    {
+      "file": "src/test/fixtures/mocks/domrect.ts",
+      "line": 49,
+      "content": "delete (global as any).DOMRect;"
+    },
+    {
+      "file": "src/test/fixtures/mocks/element-size.ts",
+      "line": 80,
+      "content": "} as any);"
+    },
+    {
+      "file": "src/test/fixtures/mocks/intersection-observer.ts",
+      "line": 49,
+      "content": "(window as any).IntersectionObserver = jest.fn((cb, options = {}) => {"
+    },
+    {
+      "file": "src/test/fixtures/mocks/intersection-observer.ts",
+      "line": 84,
+      "content": "delete (window as any).IntersectionObserver;"
+    },
+    {
+      "file": "src/test/fixtures/mocks/web-channel.ts",
+      "line": 113,
+      "content": "} as any);"
+    },
+    {
+      "file": "src/test/fixtures/mocks/web-channel.ts",
+      "line": 119,
+      "content": "} as any);"
+    },
+    {
+      "file": "src/test/types/utils.ts",
+      "line": 16,
+      "content": "const coerceC: CoerceC = coerce<CoerceA, CoerceB>(coerceA) as any;"
+    },
+    {
+      "file": "src/test/types/utils.ts",
+      "line": 18,
+      "content": "const coerceB2: CoerceB = coerce<CoerceA, CoerceB>(coerceB) as any;"
+    },
+    {
+      "file": "src/test/types/utils.ts",
+      "line": 24,
+      "content": "const coerceMatchingShape3 = coerceMatchingShape<CoerceB>({ time: 0 } as any);"
     },
     {
       "file": "src/utils/__mocks__/worker-factory.ts",

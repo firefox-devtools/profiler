@@ -1,15 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @ts-nocheck
+// @ts-nocheck We just need enough here to pass tests.
 
 type Size = {
-  readonly width: number,
-  readonly height: number,
+  readonly width: number;
+  readonly height: number;
   // offsetX and offsetY will define values for left/right/x/y/top/bottom,
   // taking into account width and height as well.
-  readonly offsetX?: number,
-  readonly offsetY?: number,
+  readonly offsetX?: number;
+  readonly offsetY?: number;
 };
 
 // This function returns an object suitable to be returned from
@@ -73,11 +73,11 @@ export function setMockedElementSize(sizeInformation: Size) {
 // Use this function to get a very fake HTMLElement with some sizing methods and
 // properties.
 export function getElementWithFixedSize(sizeInformation: Size): HTMLElement {
-  const mockEl = ({
+  const mockEl = {
     getBoundingClientRect: () => getBoundingBox(sizeInformation),
     offsetWidth: sizeInformation.width,
     offsetHeight: sizeInformation.height,
-  } as any);
+  } as any;
 
   return mockEl;
 }
