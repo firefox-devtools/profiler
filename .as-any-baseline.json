@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-05T00:30:19.181Z",
-  "totalUsages": 99,
-  "totalFiles": 34,
+  "timestamp": "2025-08-05T00:30:53.821Z",
+  "totalUsages": 98,
+  "totalFiles": 33,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -402,11 +402,6 @@
       "file": "src/profile-logic/profile-data.ts",
       "line": 1490,
       "content": "* Checks if a sample table has any useful samples."
-    },
-    {
-      "file": "src/profile-logic/tracks.ts",
-      "line": 578,
-      "content": "const data: ScreenshotPayload = markers.data[markerIndex] as any;"
     },
     {
       "file": "src/selectors/per-thread/index.ts",

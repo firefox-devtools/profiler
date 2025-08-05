@@ -575,7 +575,7 @@ export function computeGlobalTracks(
         if (markers.name[markerIndex] === screenshotNameIndex) {
           // Coerce the payload to a screenshot one. Don't do a runtime check that
           // this is correct.
-          const data: ScreenshotPayload = markers.data[markerIndex] as any;
+          const data = markers.data[markerIndex] as ScreenshotPayload;
           ids.add(data.windowID);
         }
       }
