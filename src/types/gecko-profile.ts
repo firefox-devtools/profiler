@@ -303,7 +303,7 @@ export type GeckoCounter = {
       count: 1;
       number: 2;
     };
-    data: readonly [number, number, number][];
+    data: Array<[number, number, number]>;
   };
 };
 
