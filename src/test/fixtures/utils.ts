@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
+
 import {
   getCallTree,
   computeCallNodeSelfAndSummary,
@@ -75,7 +75,7 @@ type FakeMouseEventInit = $Shape<{
 class FakeMouseEvent extends MouseEvent {
   constructor(type: string, values: FakeMouseEventInit) {
     const { pageX, pageY, offsetX, offsetY, x, y, ...mouseValues } = values;
-    super(type, (mouseValues: any));
+    super(type, (mouseValues as any));
 
     Object.defineProperties(this, {
       offsetX: {
@@ -134,7 +134,7 @@ export function getMouseEvent(
 export function computeThreadFromRawThread(
   rawThread: RawThread,
   shared: RawProfileSharedData,
-  sampleUnits: SampleUnits | void,
+  sampleUnits: SampleUnits | undefined,
   referenceCPUDeltaPerMs: number,
   defaultCategory: IndexIntoCategoryList
 ): Thread {
@@ -268,7 +268,7 @@ export function formatStack(
   const { stackTable, frameTable, funcTable, stringTable, resourceTable } =
     thread;
   for (
-    let stackIndex = stack;
+    let stackIndex: IndexIntoStackTable | null = stack;
     stackIndex !== null;
     stackIndex = stackTable.prefix[stackIndex]
   ) {
@@ -300,7 +300,7 @@ export function formatStack(
  */
 export function waitUntilState(
   store: Store,
-  predicate: (State) => boolean
+  predicate: (param: State) => boolean
 ): Promise<void> {
   if (predicate(store.getState())) {
     return Promise.resolve();
@@ -484,7 +484,7 @@ export function fireFullContextMenu(
  */
 export function fireFullKeyPress(
   element: HTMLElement,
-  options: { key: string, ... }
+  options: { key: string }
 ) {
   // Since this is test code, only use QWERTY layout keyboards.
   // Note the key is always converted to lowercase here.

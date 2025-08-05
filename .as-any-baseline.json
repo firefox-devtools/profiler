@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-05T21:23:01.778Z",
-  "totalUsages": 91,
-  "totalFiles": 39,
+  "timestamp": "2025-08-05T21:49:16.587Z",
+  "totalUsages": 95,
+  "totalFiles": 41,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -367,6 +367,26 @@
       "file": "src/test/fixtures/mocks/web-channel.ts",
       "line": 119,
       "content": "} as any);"
+    },
+    {
+      "file": "src/test/fixtures/profiles/processed-profile.ts",
+      "line": 181,
+      "content": "const maybeEndTime = (tuple as any)[2] || null;"
+    },
+    {
+      "file": "src/test/fixtures/profiles/processed-profile.ts",
+      "line": 182,
+      "content": "const maybePayload: MarkerPayload | null | void = (tuple as any)[3];"
+    },
+    {
+      "file": "src/test/fixtures/profiles/processed-profile.ts",
+      "line": 202,
+      "content": "markersTable.data.push(payload as any);"
+    },
+    {
+      "file": "src/test/fixtures/utils.ts",
+      "line": 78,
+      "content": "super(type, (mouseValues as any));"
     },
     {
       "file": "src/test/setup.ts",

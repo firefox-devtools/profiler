@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import {
   getEmptyProfile,
   getEmptyThread,
@@ -51,6 +49,7 @@ import type {
   CallNodePath,
   Pid,
   MarkerSchema,
+  MixedObject,
 } from 'firefox-profiler/types';
 import {
   deriveMarkersFromRawMarkerTable,
@@ -76,7 +75,8 @@ type MarkerTime = Milliseconds;
 //
 // The definition uses a union, becaus as far
 // as I can tell, Flow doesn't support multiple arity tuples.
-export type TestDefinedMarkers = Array<
+export type TestDefinedMarkers = TestDefinedMarker[];
+export type TestDefinedMarker =
   // Instant marker, payload defaulting to { type: MarkerName }:
   | [MarkerName, MarkerTime]
   // Interval marker:
@@ -91,17 +91,16 @@ export type TestDefinedMarkers = Array<
       MarkerTime, // start time
       MarkerTime | null, // end time
       MixedObject | null, // data payload
-    ],
->;
+    ];
 
 // This type is used when needing to create a specific RawMarkerTable.
 export type TestDefinedRawMarker = {
-  +name?: string,
-  +startTime: Milliseconds | null,
-  +endTime: Milliseconds | null,
-  +phase: MarkerPhase,
-  +category?: IndexIntoCategoryList,
-  +data?: MarkerPayload | null,
+  readonly name?: string;
+  readonly startTime: Milliseconds | null;
+  readonly endTime: Milliseconds | null;
+  readonly phase: MarkerPhase;
+  readonly category?: IndexIntoCategoryList;
+  readonly data?: MarkerPayload | null;
 };
 
 export type TestDefinedJsTracerEvent = [
@@ -142,7 +141,7 @@ function _replaceUniqueStringFieldValuesWithStringIndexesInMarkerPayload(
   markerSchemas: MarkerSchema[],
   stringTable: StringTable
 ) {
-  if (payload === null) {
+  if (payload === null || !('type' in payload)) {
     return;
   }
   const markerType = payload.type;
@@ -158,7 +157,7 @@ function _replaceUniqueStringFieldValuesWithStringIndexesInMarkerPayload(
       continue;
     }
     const { key } = fieldSchema;
-    if (typeof payload[key] === 'string') {
+    if (key in payload && typeof payload[key] === 'string') {
       // Replace string with string index
       payload[key] = stringTable.indexForString(payload[key]);
     }
@@ -173,14 +172,14 @@ export function addMarkersToThreadWithCorrespondingSamples(
 ) {
   const stringTable = StringTable.withBackingArray(shared.stringArray);
   const markersTable = thread.markers;
-  const allTimes = new Set();
+  const allTimes = new Set<number>();
 
   markers.forEach((tuple) => {
     const name = tuple[0];
     const startTime = tuple[1];
     // Flow doesn't support variadic tuple types.
-    const maybeEndTime = (tuple: any)[2] || null;
-    const maybePayload: MarkerPayload | null | void = (tuple: any)[3];
+    const maybeEndTime = (tuple as any)[2] || null;
+    const maybePayload: MarkerPayload | null | void = (tuple as any)[3];
     const payload = maybePayload === undefined ? { type: name } : maybePayload;
 
     markersTable.name.push(stringTable.indexForString(name));
@@ -200,7 +199,7 @@ export function addMarkersToThreadWithCorrespondingSamples(
       markerSchemaForTests,
       stringTable
     );
-    markersTable.data.push((payload: any));
+    markersTable.data.push(payload as any);
     markersTable.category.push(0);
     markersTable.length++;
   });
@@ -382,11 +381,11 @@ export function getUserTiming(
     'UserTiming',
     startTime,
     endTime,
-    ({
+    {
       type: 'UserTiming',
       name,
       entryType,
-    }: UserTimingMarkerPayload),
+    } as UserTimingMarkerPayload,
   ];
 }
 
@@ -414,86 +413,86 @@ export function getProfileWithMarkers(
  * real-world values.
  */
 export function getMarkerTableProfile() {
-  return getProfileWithMarkers(
+  const markers: TestDefinedMarker[] = [
     [
-      [
-        'UserTiming',
-        12.5,
-        12.5,
-        {
-          type: 'UserTiming',
-          name: 'foobar',
-          entryType: 'mark',
-        },
-      ],
-      [
-        'NotifyDidPaint',
-        14.5,
-        null,
-        {
-          type: 'tracing',
-          category: 'Paint',
-        },
-      ],
-      [
-        'setTimeout',
-        165.87091900000001,
-        165.871503,
-        {
-          type: 'Text',
-          name: '5.5',
-        },
-      ],
-      [
-        'IPC',
-        120,
-        120,
-        {
-          type: 'IPC',
-          startTime: 120,
-          endTime: 120,
-          otherPid: '2222',
-          messageType: 'PContent::Msg_PreferenceUpdate',
-          messageSeqno: 1,
-          side: 'parent',
-          direction: 'sending',
-          phase: 'endpoint',
-          sync: false,
-          niceDirection: 'sending to 2222',
-        },
-      ],
-      [
-        'LogMessages',
-        170,
-        null,
-        {
-          type: 'Log',
-          name: 'nsJARChannel::nsJARChannel [this=0x87f1ec80]\n',
-          module: 'nsJarProtocol',
-        },
-      ],
-      [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eget magna sed magna vehicula congue id id nulla. Ut convallis, neque consequat aliquam egestas, dui urna interdum quam, id semper magna erat et nisi. Vivamus molestie quis ligula eget aliquam. Sed facilisis, turpis sed facilisis posuere, risus odio convallis velit, vitae vehicula justo risus at ipsum. Proin non porttitor neque. Vivamus fringilla ex nec iaculis cursus. Vestibulum suscipit mauris sem, vitae gravida ipsum fermentum id. Quisque pulvinar blandit ullamcorper. Donec id justo at metus scelerisque pulvinar. Proin suscipit suscipit nisi, quis tempus ipsum vulputate quis. Pellentesque sodales rutrum eros, eget pulvinar ante condimentum a. Donec accumsan, ante ut facilisis cursus, nibh quam congue eros, vitae placerat tortor magna vel lacus. Etiam odio diam, venenatis eu sollicitudin non, ultrices ut urna. Aliquam vehicula diam eu eros eleifend, ac vulputate purus faucibus.',
-        165.87091900000001,
-        165.871503,
-        {
-          type: 'Text',
-          name: '5.5',
-        },
-      ],
-      [
-        'FileIO',
-        174,
-        175,
-        {
-          type: 'FileIO',
-          source: 'PoisonIOInterposer',
-          filename: '/foo/bar',
-          operation: 'create/open',
-        },
-      ],
-    ].sort((a, b) => a[1] - b[1])
-  );
+      'UserTiming',
+      12.5,
+      12.5,
+      {
+        type: 'UserTiming',
+        name: 'foobar',
+        entryType: 'mark',
+      },
+    ],
+    [
+      'NotifyDidPaint',
+      14.5,
+      null,
+      {
+        type: 'tracing',
+        category: 'Paint',
+      },
+    ],
+    [
+      'setTimeout',
+      165.87091900000001,
+      165.871503,
+      {
+        type: 'Text',
+        name: '5.5',
+      },
+    ],
+    [
+      'IPC',
+      120,
+      120,
+      {
+        type: 'IPC',
+        startTime: 120,
+        endTime: 120,
+        otherPid: '2222',
+        messageType: 'PContent::Msg_PreferenceUpdate',
+        messageSeqno: 1,
+        side: 'parent',
+        direction: 'sending',
+        phase: 'endpoint',
+        sync: false,
+        niceDirection: 'sending to 2222',
+      },
+    ],
+    [
+      'LogMessages',
+      170,
+      null,
+      {
+        type: 'Log',
+        name: 'nsJARChannel::nsJARChannel [this=0x87f1ec80]\n',
+        module: 'nsJarProtocol',
+      },
+    ],
+    [
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eget magna sed magna vehicula congue id id nulla. Ut convallis, neque consequat aliquam egestas, dui urna interdum quam, id semper magna erat et nisi. Vivamus molestie quis ligula eget aliquam. Sed facilisis, turpis sed facilisis posuere, risus odio convallis velit, vitae vehicula justo risus at ipsum. Proin non porttitor neque. Vivamus fringilla ex nec iaculis cursus. Vestibulum suscipit mauris sem, vitae gravida ipsum fermentum id. Quisque pulvinar blandit ullamcorper. Donec id justo at metus scelerisque pulvinar. Proin suscipit suscipit nisi, quis tempus ipsum vulputate quis. Pellentesque sodales rutrum eros, eget pulvinar ante condimentum a. Donec accumsan, ante ut facilisis cursus, nibh quam congue eros, vitae placerat tortor magna vel lacus. Etiam odio diam, venenatis eu sollicitudin non, ultrices ut urna. Aliquam vehicula diam eu eros eleifend, ac vulputate purus faucibus.',
+      165.87091900000001,
+      165.871503,
+      {
+        type: 'Text',
+        name: '5.5',
+      },
+    ],
+    [
+      'FileIO',
+      174,
+      175,
+      {
+        type: 'FileIO',
+        source: 'PoisonIOInterposer',
+        filename: '/foo/bar',
+        operation: 'create/open',
+      },
+    ],
+  ];
+  markers.sort((a, b) => a[1] - b[1]);
+  return getProfileWithMarkers(markers);
 }
 
 export function getProfileWithNamedThreads(threadNames: string[]): Profile {
@@ -503,13 +502,13 @@ export function getProfileWithNamedThreads(threadNames: string[]): Profile {
 }
 
 export type ProfileWithDicts = {
-  profile: Profile,
-  derivedThreads: Thread[],
-  stringTable: StringTable,
-  funcNamesPerThread: Array<string[]>,
-  funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
-  nativeSymbolsDictPerThread: Array<{ [nativeSymbolName: string]: number }>,
-  defaultCategory: IndexIntoCategoryList,
+  profile: Profile;
+  derivedThreads: Thread[];
+  stringTable: StringTable;
+  funcNamesPerThread: Array<string[]>;
+  funcNamesDictPerThread: Array<{ [funcName: string]: number }>;
+  nativeSymbolsDictPerThread: Array<{ [nativeSymbolName: string]: number }>;
+  defaultCategory: IndexIntoCategoryList;
 };
 
 /**
@@ -667,7 +666,7 @@ export function getProfileFromTextSamples(
     }
 
     // Flatten the textOnlyStacks into into a list of function names.
-    const funcNamesSet = new Set();
+    const funcNamesSet = new Set<string>();
     const removeModifiers = /\[.*/;
     for (let i = 0; i < textOnlyStacks.length; i++) {
       const textOnlyStack = textOnlyStacks[i];
@@ -697,7 +696,10 @@ export function getProfileFromTextSamples(
   return getProfileWithDicts(profile);
 }
 
-function _getAllMatchRanges(regex, str): Array<{ start: number, end: number }> {
+function _getAllMatchRanges(
+  regex: RegExp,
+  str: string
+): Array<{ start: number; end: number }> {
   const ranges = [];
 
   let match;
@@ -711,8 +713,8 @@ function _getAllMatchRanges(regex, str): Array<{ start: number, end: number }> {
   return ranges;
 }
 
-function _getColumnPositions(line): number[] {
-  const lineWithoutIndent = line.trimLeft();
+function _getColumnPositions(line: string): number[] {
+  const lineWithoutIndent = line.trimStart();
   const indent = line.length - lineWithoutIndent.length;
   const trimmedLine = line.trim();
 
@@ -772,7 +774,7 @@ function _parseTextSamples(textSamples: string): Array<string[]> {
   });
 }
 
-function _isJsFunctionName(funcName) {
+function _isJsFunctionName(funcName: string) {
   return funcName.endsWith('js');
 }
 
@@ -858,7 +860,7 @@ function _findInlineDepthFromFuncName(
 
 function _findNativeSymbolNameFromFuncName(
   funcNameWithModifier: string
-): { name: string, address: Address, functionSize: Bytes | null } | null {
+): { name: string; address: Address; functionSize: Bytes | null } | null {
   const findNativeSymbolResult = /\[sym:([^\]]+)\]/.exec(funcNameWithModifier);
   if (findNativeSymbolResult) {
     const s = findNativeSymbolResult[1];
@@ -909,11 +911,11 @@ function _buildThreadFromTextOnlyStacks(
   });
 
   // This map caches resource indexes for library names.
-  const resourceIndexCache = {};
+  const resourceIndexCache = new Map<string, number>();
 
   // Create the samples, stacks, and frames.
   textOnlyStacks.forEach((column, columnIndex) => {
-    let prefix = null;
+    let prefix: IndexIntoStackTable | null = null;
     column.forEach((funcNameWithModifier) => {
       const funcName = funcNameWithModifier.replace(/\[.*/, '');
       const funcIndex = funcTable.name.indexOf(
@@ -925,8 +927,8 @@ function _buildThreadFromTextOnlyStacks(
       let resourceIndex = -1;
       let libIndex = null;
       if (libraryName) {
-        resourceIndex = resourceIndexCache[libraryName];
-        if (resourceIndex === undefined) {
+        resourceIndex = resourceIndexCache.get(libraryName) ?? -1;
+        if (resourceIndex === -1) {
           libIndex = globalDataCollector.indexForLib({
             arch: '',
             name: libraryName,
@@ -943,7 +945,7 @@ function _buildThreadFromTextOnlyStacks(
           resourceTable.host.push(null);
           resourceIndex = resourceTable.length++;
 
-          resourceIndexCache[libraryName] = resourceIndex;
+          resourceIndexCache.set(libraryName, resourceIndex);
         } else {
           libIndex = resourceTable.lib[resourceIndex];
         }
@@ -1060,13 +1062,15 @@ function _buildThreadFromTextOnlyStacks(
   return thread;
 }
 
+export type FuncNamesDict = { [funcName: string]: number };
+
 export function getFuncNamesDictForThread(thread: Thread): {
-  funcNames: string[],
-  funcNamesDict: { [funcName: string]: number },
+  funcNames: string[];
+  funcNamesDict: FuncNamesDict;
 } {
   const { funcTable, stringTable } = thread;
   const funcNames = [];
-  const funcNamesDict = {};
+  const funcNamesDict: FuncNamesDict = {};
   for (let i = 0; i < funcTable.length; i++) {
     const funcName = stringTable.getString(funcTable.name[i]);
     funcNames[i] = funcName;
@@ -1075,11 +1079,15 @@ export function getFuncNamesDictForThread(thread: Thread): {
   return { funcNames, funcNamesDict };
 }
 
-export function getNativeSymbolsDictForThread(thread: Thread): {
-  [nativeSymbolName: string]: number,
-} {
+export type NativeSymbolsDict = {
+  [nativeSymbolName: string]: number;
+};
+
+export function getNativeSymbolsDictForThread(
+  thread: Thread
+): NativeSymbolsDict {
   const { nativeSymbols, stringTable } = thread;
-  const nativeSymbolsDict = {};
+  const nativeSymbolsDict: NativeSymbolsDict = {};
   for (let i = 0; i < nativeSymbols.length; i++) {
     const name = stringTable.getString(nativeSymbols.name[i]);
     nativeSymbolsDict[name] = i;
@@ -1131,8 +1139,8 @@ export function getProfileWithDicts(profile: Profile): ProfileWithDicts {
 export function getMergedProfileFromTextSamples(
   profileStrings: string[],
   cpuValuesPerProfile: Array<{
-    threadCPUDelta: Array<number | null>,
-    threadCPUDeltaUnit: ThreadCPUDeltaUnit,
+    threadCPUDelta: Array<number | null>;
+    threadCPUDeltaUnit: ThreadCPUDeltaUnit;
   } | null> = []
 ): ProfileWithDicts {
   const profilesAndFuncNames = profileStrings.map((str) =>
@@ -1162,15 +1170,17 @@ export function getMergedProfileFromTextSamples(
 }
 
 type NetworkMarkersOptions = {
-  uri: string,
-  id: number,
-  startTime: number,
-  fetchStart: number,
-  endTime: number,
-  payload: $Shape<NetworkPayload>,
+  uri: string;
+  id: number;
+  startTime: number;
+  fetchStart: number;
+  endTime: number;
+  payload: Partial<NetworkPayload>;
 };
 
-export function getNetworkMarkers(options: $Shape<NetworkMarkersOptions> = {}) {
+export function getNetworkMarkers(
+  options: Partial<NetworkMarkersOptions> = {}
+): TestDefinedMarker[] {
   // Default values
   const { uri, id, startTime, fetchStart, endTime, payload } = {
     uri: 'https://mozilla.org',
@@ -1223,15 +1233,16 @@ export function getNetworkMarkers(options: $Shape<NetworkMarkersOptions> = {}) {
  * This generates 10 network markers ranged 3-4 ms on their start times.
  */
 export function getNetworkTrackProfile() {
-  const arrayOfNetworkMarkers = Array(10)
-    .fill()
+  const arrayOfNetworkMarkers: TestDefinedMarker[] = Array(10)
+    .fill(undefined)
     .map((_, i) =>
       getNetworkMarkers({
         id: i,
         startTime: 3 + 0.1 * i,
       })
-    );
-  const profile = getProfileWithMarkers([].concat(...arrayOfNetworkMarkers));
+    )
+    .flat();
+  const profile = getProfileWithMarkers(arrayOfNetworkMarkers);
 
   const tabID = 123123;
   const innerWindowID = 1;
@@ -1266,18 +1277,18 @@ export function getNetworkTrackProfile() {
       'Load',
       4,
       6,
-      ({
+      {
         ...loadPayloadBase,
-      }: NavigationMarkerPayload),
+      } as NavigationMarkerPayload,
     ],
     ['TTI', 6],
     [
       'Navigation::Start',
       7,
       null,
-      ({
+      {
         ...domContentLoadedBase,
-      }: NavigationMarkerPayload),
+      } as NavigationMarkerPayload,
     ],
     ['Navigation::Start', 8],
     ['FirstContentfulPaint', 7, 8],
@@ -1285,9 +1296,9 @@ export function getNetworkTrackProfile() {
       'DOMContentLoaded',
       6,
       7,
-      ({
+      {
         ...domContentLoadedBase,
-      }: NavigationMarkerPayload),
+      } as NavigationMarkerPayload,
     ],
   ]);
 
@@ -1295,19 +1306,19 @@ export function getNetworkTrackProfile() {
 }
 
 type IPCMarkersOptions = {
-  startTime: number,
-  endTime: number,
-  otherPid: Pid,
-  messageType: string,
-  messageSeqno: number,
-  side: 'parent' | 'child',
-  direction: 'sending' | 'receiving',
-  phase: 'endpoint' | 'transferStart' | 'transferEnd',
-  sync: boolean,
+  startTime: number;
+  endTime: number;
+  otherPid: Pid;
+  messageType: string;
+  messageSeqno: number;
+  side: 'parent' | 'child';
+  direction: 'sending' | 'receiving';
+  phase: 'endpoint' | 'transferStart' | 'transferEnd';
+  sync: boolean;
 };
 
 function _getIPCMarkers(
-  options: $Shape<IPCMarkersOptions> = {}
+  options: Partial<IPCMarkersOptions> = {}
 ): TestDefinedMarkers {
   const payload: IPCMarkerPayload = {
     type: 'IPC',
@@ -1339,14 +1350,15 @@ function _getIPCMarkers(
 
 export function getIPCTrackProfile() {
   const arrayOfIPCMarkers = Array(10)
-    .fill()
+    .fill(undefined)
     .map((_, i) =>
       _getIPCMarkers({
         messageSeqno: i,
         startTime: 3 + 0.1 * i,
       })
-    );
-  return getProfileWithMarkers([].concat(...arrayOfIPCMarkers));
+    )
+    .flat();
+  return getProfileWithMarkers(arrayOfIPCMarkers);
 }
 
 export function getScreenshotMarkersForWindowId(
@@ -1354,7 +1366,7 @@ export function getScreenshotMarkersForWindowId(
   count: number
 ): TestDefinedMarkers {
   return Array(count)
-    .fill()
+    .fill(undefined)
     .map((_, i) => [
       'CompositorScreenshot',
       i,
@@ -1392,7 +1404,7 @@ export function getScreenshotTrackProfile() {
  * This is a helper function to make it easy to add it to both threads.
  */
 export function addIPCMarkerPairToThreads(
-  payload: $Shape<IPCMarkerPayload>,
+  payload: Partial<IPCMarkerPayload>,
   senderThread: RawThread,
   receiverThread: RawThread,
   shared: RawProfileSharedData
@@ -1401,10 +1413,10 @@ export function addIPCMarkerPairToThreads(
     direction: 'sending' | 'receiving',
     isParent: boolean,
     otherThread: RawThread
-  ) => [
+  ): TestDefinedMarker => [
     'IPC',
-    payload.startTime,
-    payload.endTime,
+    payload.startTime!,
+    payload.endTime!,
     {
       type: 'IPC',
       startTime: 1,
@@ -1517,7 +1529,7 @@ export function getProfileWithJsTracerEvents(
 export function getCounterForThread(
   thread: RawThread,
   mainThreadIndex: ThreadIndex,
-  config: { hasCountNumber: boolean } = {}
+  config: { hasCountNumber?: boolean } = {}
 ): RawCounter {
   const sampleTimes = computeTimeColumnForRawSamplesTable(thread.samples);
   const counter: RawCounter = {
@@ -1547,10 +1559,10 @@ export function getCounterForThreadWithSamples(
   thread: RawThread,
   mainThreadIndex: ThreadIndex,
   samples: {
-    time?: number[],
-    number?: number[],
-    count?: number[],
-    length: number,
+    time?: number[];
+    number?: number[];
+    count?: number[];
+    length: number;
   },
   name?: string,
   category?: string
@@ -2028,7 +2040,7 @@ function getStackIndexForCallNodePath(
  */
 export function addInnerWindowIdToStacks(
   thread: RawThread,
-  listOfOperations: Array<{ innerWindowID: number, callNodes: CallNodePath[] }>,
+  listOfOperations: Array<{ innerWindowID: number; callNodes: CallNodePath[] }>,
   callNodesToDupe?: CallNodePath[]
 ) {
   const { stackTable, frameTable, samples } = thread;
@@ -2052,7 +2064,10 @@ export function addInnerWindowIdToStacks(
     // original comes from a non-private browsing window, while the dupe comes
     // from a private browsing window.
 
-    const mapStackIndexToDupe = new Map();
+    const mapStackIndexToDupe = new Map<
+      IndexIntoStackTable | null,
+      IndexIntoStackTable
+    >();
 
     for (const callNode of callNodesToDupe) {
       const stackIndex = getStackIndexForCallNodePath(thread, callNode);
@@ -2118,7 +2133,7 @@ export function addInnerWindowIdToStacks(
  * Creates a profile that includes a thread with threadCPUDelta values.
  */
 export function getProfileWithThreadCPUDelta(
-  threadCPUDeltaPerThread: Array<Array<number | null> | void>,
+  threadCPUDeltaPerThread: Array<Array<number | null> | undefined>,
   unit: ThreadCPUDeltaUnit = 'ns',
   interval: Milliseconds = 1
 ): Profile {
