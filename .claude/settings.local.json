@@ -40,7 +40,11 @@
       "Bash(yarn convert:*)",
       "Bash(yarn build:quiet:*)",
       "Bash(yarn track-as-any:*)",
-      "Bash(yarn check-as-any:*)"
+      "Bash(yarn check-as-any:*)",
+      "Bash(cat:*)",
+      "Bash(prettier:*)",
+      "Bash(npx prettier:*)",
+      "Bash(yarn prettier-run:*)"
     ],
     "deny": []
   }
