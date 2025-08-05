@@ -1,87 +1,73 @@
 # Flow to TypeScript Migration Plan & Status
 
-## 🎯 CURRENT FOCUS: Phase 4 - `as any` Cleanup (August 2025)
+## 🎯 CURRENT FOCUS: Phase 5 - Test Utility Conversion (August 2025)
 
-**Status**: All 295 application files converted to TypeScript ✅ Now reducing type escape hatches.
+**Status**: Application code conversion complete ✅ `as any` cleanup achieved ✅ Ready for test utilities.
 
-**Current Goal**: Systematically reduce 130 `as any` usages across 50 files to improve type safety.
+**Phase 4 Completed**: Successfully reduced `as any` usage from 130 → 66 usages (49% reduction) across 50 → 28 files.
+
+**Current Goal**: Convert test utility files from Flow to TypeScript to enable full test suite migration.
 
 ### Progress Tracking Commands
 ```bash
-yarn track-as-any           # Show current usage and progress
-yarn track-as-any --detail  # Show breakdown by file
-yarn test-all               # Includes as-any regression check
+yarn analyze-deps          # Show conversion progress and dependency analysis
+yarn track-as-any          # Monitor type safety progress (66 usages remaining)
+yarn test-all              # Full validation including tests
 ```
 
-## Priority Files for Cleanup
+## Current Priority: Test Utility Files
 
-**High-usage files** (work on these first):
-1. `src/profile-logic/import/chrome.tsx` - 18 usages
-2. `src/actions/receive-profile.ts` - 9 usages  
-3. `src/profile-logic/marker-data.ts` - 8 usages
-4. `src/profile-logic/import/art-trace.tsx` - 7 usages
-5. `src/components/shared/MarkerContextMenu.tsx` - 7 usages
+**Ready for conversion** (24 independent files):
+1. `src/test/fixtures/mocks/` - Mock implementations (8 files)
+2. `src/test/types/` - Type utilities (2 files) 
+3. `src/test/fixtures/profiles/` - Test profiles (4 files)
+4. `src/test/fixtures/` - Test helpers (10 files)
 
-## Common `as any` Patterns to Fix
+**Conversion Strategy**: Start with smallest mock files, then utilities, then larger profile fixtures.
 
-### 1. MarkerPayload Union Properties
+## Test Utility Conversion Guidelines
+
+### Key Considerations
+1. **Flow Types → TypeScript**: Convert Flow syntax (`// @flow`, `type Props = {...}`)
+2. **Import/Export**: Update module syntax to TypeScript standards
+3. **Type Definitions**: Add proper TypeScript type annotations
+4. **Jest/Testing Types**: Ensure compatibility with testing framework types
+
+### Conversion Patterns
 ```typescript
-// Current (as any escape hatch)
-const data: MarkerPayload = payload as any;
-const value = (data as any).specificField;
+// Flow (before)
+// @flow
+import type { Profile } from '../types/profile';
 
-// Better (type narrowing)
-function isSpecificMarker(data: MarkerPayload): data is SpecificMarkerPayload {
-  return data.type === 'specific';
-}
-if (isSpecificMarker(data)) {
-  const value = data.specificField; // No as any needed
-}
+// TypeScript (after) 
+import type { Profile } from '../types/profile';
+// Note: Remove @flow, keep import type syntax
 ```
 
-### 2. Tree/Selector Type Mismatches
-```typescript
-// Current
-tree={tree as any}
-
-// Better - fix generic constraints
-tree={tree as TreeView<MarkerDisplayData>}
-```
-
-### 3. Window Extensions
-```typescript
-// Current  
-const ga = (self as any).ga;
-
-// Better
-declare global {
-  interface Window {
-    ga?: GoogleAnalytics;
-  }
-}
-const ga = window.ga;
-```
+### Mock File Strategy
+- Start with simple mocks (file-mock.js, style-mock.js) 
+- Progress to complex mocks (canvas-context.js, web-channel.js)
+- Ensure all mocks maintain their testing functionality
 
 ## Remaining Migration Phases
 
-### Phase 5: Test Utilities (Planned)
-- Convert test utility files in `src/test/` that use Flow syntax
-- Prepare test infrastructure for main test conversion
-
-### Phase 6: Test Files (Planned)  
+### Phase 6: Test Files (Next)  
 - Convert 120+ test files from Flow to TypeScript
-- Only after all application code is fully type-safe
+- Depends on completing test utility conversion first
+- Will enable full TypeScript test coverage
 
-### Phase 7: Enable Additional Checks (Planned)
+### Phase 7: Enhanced Type Safety (Final)
+- Continue reducing remaining `as any` usages (66 → 0)
 - Enable `useUnknownInCatchVariables`
-- Enable `alwaysStrict`
+- Enable `alwaysStrict` 
+- Remove Flow entirely from the codebase
 
 ## Key Technical Context
 
 ### Type System Status
-- **TypeScript**: All application code converted (295 files)
-- **Flow**: Being phased out (test files still use Flow)
-- **Type Coverage**: Reduced due to `as any` usage during migration
+- **TypeScript**: All application code converted (297 files)
+- **Flow**: Being phased out (32 test utility files remaining)  
+- **Type Coverage**: Significantly improved (49% reduction in `as any` usage)
 
 ### Build Commands
 ```bash
@@ -98,4 +84,4 @@ yarn test-all     # Full validation + as-any check
 
 ---
 
-**Focus**: Replace `as any` with proper type narrowing, guards, and declarations. Each reduction improves type safety and catches potential runtime errors at compile time.
+**Focus**: Convert test utility files from Flow to TypeScript. This enables conversion of the main test suite and moves us toward complete TypeScript migration.
