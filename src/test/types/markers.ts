@@ -22,9 +22,9 @@ expectType<ReplaceCauseWithStack<ObjectWithOptionalCause>>({ a: 0, stack });
 
 // @ts-expect-error 'cause' does not exist in type
 expectType<ReplaceCauseWithStack<ObjectWithCause>>({ a: 0, stack, cause });
-// @ts-expect-error 'cause' does not exist in type
 expectType<ReplaceCauseWithStack<ObjectWithOptionalCause>>({
   a: 0,
   stack,
+  // @ts-expect-error 'cause' does not exist in type
   cause,
 });
