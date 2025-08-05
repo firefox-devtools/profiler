@@ -33,7 +33,8 @@ function findFiles() {
         if (
           file === 'node-worker-contents.js' ||
           file === 'simpleperf_report.js' ||
-          file === 'webpack.config.js'
+          file === 'webpack.config.js' ||
+          file === '.eslintrc.js'
         ) {
           continue;
         }
