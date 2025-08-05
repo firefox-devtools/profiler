@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-05T01:01:46.713Z",
-  "totalUsages": 69,
-  "totalFiles": 30,
+  "timestamp": "2025-08-05T01:02:53.271Z",
+  "totalUsages": 67,
+  "totalFiles": 29,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -277,16 +277,6 @@
       "file": "src/utils/__mocks__/worker-factory.ts",
       "line": 28,
       "content": "const nodeVersion = (process as any).versions.node;"
-    },
-    {
-      "file": "src/utils/analytics.ts",
-      "line": 51,
-      "content": "const ga: GoogleAnalytics | null = (self as any).ga;"
-    },
-    {
-      "file": "src/utils/analytics.ts",
-      "line": 58,
-      "content": "const ga: GoogleAnalytics | null = (self as any).ga;"
     },
     {
       "file": "src/utils/connect.ts",

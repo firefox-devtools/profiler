@@ -48,14 +48,14 @@ type _Exception = (
 export type GoogleAnalytics = _Send & _Exception;
 
 export function sendAnalytics(payload: GAPayload) {
-  const ga: GoogleAnalytics | null = (self as any).ga;
+  const ga: GoogleAnalytics | undefined = self.ga;
   if (ga) {
     ga('send', payload);
   }
 }
 
 export function reportError(errorPayload: GAErrorPayload) {
-  const ga: GoogleAnalytics | null = (self as any).ga;
+  const ga: GoogleAnalytics | undefined = self.ga;
   if (ga) {
     ga('send', 'exception', errorPayload);
   }
