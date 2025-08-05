@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-05T00:49:27.667Z",
-  "totalUsages": 73,
-  "totalFiles": 31,
+  "timestamp": "2025-08-05T00:56:21.476Z",
+  "totalUsages": 70,
+  "totalFiles": 30,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -147,21 +147,6 @@
       "file": "src/profile-logic/import/dhat.tsx",
       "line": 167,
       "content": "const { dhatFileVersion } = json as any;"
-    },
-    {
-      "file": "src/profile-logic/import/linux-perf.tsx",
-      "line": 125,
-      "content": "(stackTable.data as any[]).push([prefix, frame]);"
-    },
-    {
-      "file": "src/profile-logic/import/linux-perf.tsx",
-      "line": 160,
-      "content": "(frameTable.data as any[]).push(["
-    },
-    {
-      "file": "src/profile-logic/import/linux-perf.tsx",
-      "line": 190,
-      "content": "(samples.data as any[]).push([stack, time, responsiveness]);"
     },
     {
       "file": "src/profile-logic/js-tracer.tsx",

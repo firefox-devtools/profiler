@@ -91,7 +91,7 @@ export function convertPerfScriptProfile(
         time: 1,
         responsiveness: 2,
       },
-      data: [],
+      data: [] as Array<[number | null, number, number]>,
     };
     const frameTable = {
       schema: {
@@ -105,31 +105,33 @@ export function convertPerfScriptProfile(
         category: 7,
         subcategory: 8,
       },
-      data: [],
+      data: [] as Array<
+        [number, boolean, number, null, null, null, null, number, null]
+      >,
     };
     const stackTable = {
       schema: {
         prefix: 0,
         frame: 1,
       },
-      data: [],
+      data: [] as Array<[number | null, number]>,
     };
     const stringTable: string[] = [];
 
     const stackMap = new Map();
-    function getOrCreateStack(frame: string, prefix: string | null) {
+    function getOrCreateStack(frame: number, prefix: number | null) {
       const key = prefix === null ? `${frame}` : `${frame},${prefix}`;
       let stack = stackMap.get(key);
       if (stack === undefined) {
         stack = stackTable.data.length;
-        (stackTable.data as any[]).push([prefix, frame]);
+        stackTable.data.push([prefix, frame]);
         stackMap.set(key, stack);
       }
       return stack;
     }
 
     const frameMap = new Map();
-    function getOrCreateFrame(frameString: string) {
+    function getOrCreateFrame(frameString: string): number {
       let frame = frameMap.get(frameString);
       if (frame === undefined) {
         frame = frameTable.data.length;
@@ -157,7 +159,7 @@ export function convertPerfScriptProfile(
         const subcategory = null;
         const innerWindowID = 0;
         const column = null;
-        (frameTable.data as any[]).push([
+        frameTable.data.push([
           location,
           relevantForJS,
           innerWindowID,
@@ -180,14 +182,14 @@ export function convertPerfScriptProfile(
       if (name !== threadName) {
         name = threadName;
       }
-      const stack = stackArray.reduce((prefix, stackFrame) => {
+      const stack = stackArray.reduce<number | null>((prefix, stackFrame) => {
         const frame = getOrCreateFrame(stackFrame);
         return getOrCreateStack(frame, prefix);
       }, null);
       // We don't have this information, so simulate that there's no latency at
       // all in processing events.
       const responsiveness = 0;
-      (samples.data as any[]).push([stack, time, responsiveness]);
+      samples.data.push([stack, time, responsiveness]);
     }
 
     return {
@@ -210,7 +212,7 @@ export function convertPerfScriptProfile(
     };
   }
 
-  const threadMap = new Map();
+  const threadMap = new Map<number, any>();
 
   function _addThreadSample(
     pid: number,
@@ -350,7 +352,7 @@ export function convertPerfScriptProfile(
   for (const thread of threadArray) {
     // The samples are not guaranteed to be in order, sort them so that they are.
     const key = thread.samples.schema.time;
-    (thread.samples.data as Array<any>).sort((a, b) => a[key] - b[key]);
+    thread.samples.data.sort((a: any, b: any) => a[key] - b[key]);
   }
 
   return {
