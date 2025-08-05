@@ -222,5 +222,5 @@ export const FullTimeline = explicitConnect<
     changeGlobalTrackOrder,
     changeRightClickedTrack,
   },
-  component: withSize<Props>(FullTimelineImpl),
+  component: withSize(FullTimelineImpl),
 });

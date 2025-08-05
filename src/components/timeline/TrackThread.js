@@ -384,5 +384,5 @@ export const TimelineTrackThread = explicitConnect<
     selectSelfCallNode,
     reportTrackThreadHeight,
   },
-  component: withSize<Props>(TimelineTrackThreadImpl),
+  component: withSize(TimelineTrackThreadImpl),
 });
