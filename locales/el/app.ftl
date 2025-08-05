@@ -728,8 +728,6 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = Όλα τα καρέ
     .title = Να μην γίνεται φιλτράρισμα των καρέ στοίβας
-StackSettings--implementation-javascript2 = JavaScript
-    .title = Εμφάνιση μόνο των καρέ στοίβας που σχετίζονται με την εκτέλεση της JavaScript
 StackSettings--implementation-native2 = Εγγενές
     .title = Εμφάνιση μόνο των καρέ στοίβας για εγγενή κώδικα
 # This label is displayed in the marker chart and marker table panels only.

@@ -562,8 +562,6 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = Tüm çerçeveler
     .title = Yığın çerçevelerini filtreleme
-StackSettings--implementation-javascript2 = JavaScript
-    .title = Yalnızca JavaScript yürütmesiyle ilgili yığın çerçevelerini göster
 # This label is displayed in the marker chart and marker table panels only.
 StackSettings--stack-implementation-label = Yığın filtresi:
 StackSettings--use-data-source-label = Veri kaynağı:

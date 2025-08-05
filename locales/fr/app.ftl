@@ -654,8 +654,6 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = Toutes les trames
     .title = Ne pas filtrer les trames de pile
-StackSettings--implementation-javascript2 = JavaScript
-    .title = Afficher uniquement les trames de pile liées à l’exécution JavaScript
 StackSettings--implementation-native2 = Natif
     .title = Afficher uniquement les trames de pile pour le code natif
 # This label is displayed in the marker chart and marker table panels only.

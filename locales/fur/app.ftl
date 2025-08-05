@@ -693,8 +693,6 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = Ducj i ricuadris
     .title = No sta filtrâ i ricuadris dal stack
-StackSettings--implementation-javascript2 = JavaScript
-    .title = Mostre dome i ricuadris dal stack corelâts ae esecuzion di JavaScript
 StackSettings--implementation-native2 = Natîf
     .title = Mostre dome i ricuadris dal stack pal codiç natîf
 # This label is displayed in the marker chart and marker table panels only.

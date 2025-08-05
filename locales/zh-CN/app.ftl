@@ -636,8 +636,6 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = 所有帧
     .title = 不过滤栈上的帧
-StackSettings--implementation-javascript2 = JavaScript
-    .title = 仅显示栈上需要执行的 JavaScript 帧
 StackSettings--implementation-native2 = 原生
     .title = 仅显示栈上的原生代码帧
 # This label is displayed in the marker chart and marker table panels only.

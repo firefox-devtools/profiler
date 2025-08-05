@@ -635,8 +635,6 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = 所有堆疊框
     .title = 不過濾堆疊框
-StackSettings--implementation-javascript2 = JavaScript
-    .title = 僅顯示與執行 JavaScript 有關的堆疊框
 StackSettings--implementation-native2 = 原生
     .title = 僅顯示原生程式碼相關的堆疊框
 # This label is displayed in the marker chart and marker table panels only.

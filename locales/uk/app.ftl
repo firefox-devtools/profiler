@@ -740,8 +740,6 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = Усі фрейми
     .title = Не фільтрувати фрейми стека
-StackSettings--implementation-javascript2 = JavaScript
-    .title = Показувати лише фрейми стека, пов'язані з виконанням JavaScript
 StackSettings--implementation-native2 = Вбудовані
     .title = Показувати лише фрейми стека для власного коду
 # This label is displayed in the marker chart and marker table panels only.

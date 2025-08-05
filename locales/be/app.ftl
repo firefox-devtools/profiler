@@ -731,8 +731,6 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = Усе кадры
     .title = Не фільтраваць кадры стэка
-StackSettings--implementation-javascript2 = JavaScript
-    .title = Паказваць толькі кадры стэка, звязаныя з выкананнем JavaScript
 StackSettings--implementation-native2 = Убудаваны
     .title = Паказваць толькі кадры стэка для платформна-залежнага кода
 # This label is displayed in the marker chart and marker table panels only.
