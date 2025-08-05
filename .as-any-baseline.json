@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-05T00:39:24.056Z",
-  "totalUsages": 91,
-  "totalFiles": 32,
+  "timestamp": "2025-08-05T00:49:27.667Z",
+  "totalUsages": 73,
+  "totalFiles": 31,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -142,96 +142,6 @@
       "file": "src/profile-logic/errors.ts",
       "line": 18,
       "content": "(this as any).__proto__ = SymbolsNotFoundError.prototype;"
-    },
-    {
-      "file": "src/profile-logic/import/chrome.tsx",
-      "line": 269,
-      "content": "list.push(tracingEvent as any);"
-    },
-    {
-      "file": "src/profile-logic/import/chrome.tsx",
-      "line": 293,
-      "content": "const events: T[] | undefined = eventsByName.get(name) as any;"
-    },
-    {
-      "file": "src/profile-logic/import/chrome.tsx",
-      "line": 302,
-      "content": "const events: T[] | undefined = eventsByName.get(name) as any;"
-    },
-    {
-      "file": "src/profile-logic/import/chrome.tsx",
-      "line": 513,
-      "content": "(eventsByName.get('Profile') as any) || [];"
-    },
-    {
-      "file": "src/profile-logic/import/chrome.tsx",
-      "line": 518,
-      "content": ") as any;"
-    },
-    {
-      "file": "src/profile-logic/import/chrome.tsx",
-      "line": 544,
-      "content": "(profileEvent.args.data.startTime as any) / 1000;"
-    },
-    {
-      "file": "src/profile-logic/import/chrome.tsx",
-      "line": 588,
-      "content": "parent = node.parent as any;"
-    },
-    {
-      "file": "src/profile-logic/import/chrome.tsx",
-      "line": 593,
-      "content": "const children: number[] = node.children as any;"
-    },
-    {
-      "file": "src/profile-logic/import/chrome.tsx",
-      "line": 729,
-      "content": "eventsByName.get('Screenshot') as any"
-    },
-    {
-      "file": "src/profile-logic/import/chrome.tsx",
-      "line": 986,
-      "content": "const time: number = (event.ts as any) / 1000;"
-    },
-    {
-      "file": "src/profile-logic/import/chrome.tsx",
-      "line": 997,
-      "content": "if ((event as any).args && typeof (event as any).args === 'object') {"
-    },
-    {
-      "file": "src/profile-logic/import/chrome.tsx",
-      "line": 998,
-      "content": "argData = ((event as any).args as any).data || null;"
-    },
-    {
-      "file": "src/profile-logic/import/chrome.tsx",
-      "line": 1003,
-      "content": "if (argData && 'type' in (argData as any)) {"
-    },
-    {
-      "file": "src/profile-logic/import/chrome.tsx",
-      "line": 1004,
-      "content": "(argData as any).type2 = (argData as any).type;"
-    },
-    {
-      "file": "src/profile-logic/import/chrome.tsx",
-      "line": 1006,
-      "content": "if (argData && 'category' in (argData as any)) {"
-    },
-    {
-      "file": "src/profile-logic/import/chrome.tsx",
-      "line": 1007,
-      "content": "(argData as any).category2 = (argData as any).category;"
-    },
-    {
-      "file": "src/profile-logic/import/chrome.tsx",
-      "line": 1011,
-      "content": "...(argData as any),"
-    },
-    {
-      "file": "src/profile-logic/import/chrome.tsx",
-      "line": 1022,
-      "content": "const duration: number = (event.dur as any) / 1000;"
     },
     {
       "file": "src/profile-logic/import/dhat.tsx",
