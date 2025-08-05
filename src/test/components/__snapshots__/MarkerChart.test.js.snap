@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`MarkerChart EmptyReasons shows a reason when a profile has no markers 1`] = `
 <div
@@ -191,6 +191,17 @@ exports[`MarkerChart persists the selected marker tooltips properly 1`] = `
       <div
         class="tooltipLabel"
       >
+        Description
+        :
+      </div>
+      <div
+        class="tooltipDetailsDescription"
+      >
+        UserTiming is created using the DOM APIs performance.mark() and performance.measure().
+      </div>
+      <div
+        class="tooltipLabel"
+      >
         Name
         :
       </div>
@@ -202,17 +213,6 @@ exports[`MarkerChart persists the selected marker tooltips properly 1`] = `
         :
       </div>
       measure
-      <div
-        class="tooltipLabel"
-      >
-        Description
-        :
-      </div>
-      <div
-        class="tooltipDetailsDescription"
-      >
-        UserTiming is created using the DOM APIs performance.mark() and performance.measure().
-      </div>
       <div
         class="tooltipLabel"
       >
@@ -374,6 +374,17 @@ exports[`MarkerChart renders the hoveredItem markers properly 2`] = `
       <div
         class="tooltipLabel"
       >
+        Description
+        :
+      </div>
+      <div
+        class="tooltipDetailsDescription"
+      >
+        UserTiming is created using the DOM APIs performance.mark() and performance.measure().
+      </div>
+      <div
+        class="tooltipLabel"
+      >
         Name
         :
       </div>
@@ -385,17 +396,6 @@ exports[`MarkerChart renders the hoveredItem markers properly 2`] = `
         :
       </div>
       measure
-      <div
-        class="tooltipLabel"
-      >
-        Description
-        :
-      </div>
-      <div
-        class="tooltipDetailsDescription"
-      >
-        UserTiming is created using the DOM APIs performance.mark() and performance.measure().
-      </div>
       <div
         class="tooltipLabel"
       >
@@ -447,16 +447,16 @@ exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"

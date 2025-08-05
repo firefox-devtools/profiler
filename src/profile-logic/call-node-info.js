@@ -37,7 +37,7 @@ export interface CallNodeInfo {
 
   // Returns the non-inverted call node table.
   // This is always the non-inverted call node table, regardless of isInverted().
-  getNonInvertedCallNodeTable(): CallNodeTable;
+  getCallNodeTable(): CallNodeTable;
 
   // Returns a mapping from the stack table to the non-inverted call node table.
   // The Int32Array should be used as if it were a
@@ -122,7 +122,7 @@ export class CallNodeInfoNonInverted implements CallNodeInfo {
     return null;
   }
 
-  getNonInvertedCallNodeTable(): CallNodeTable {
+  getCallNodeTable(): CallNodeTable {
     return this._callNodeTable;
   }
 
@@ -507,7 +507,7 @@ type SuffixOrderForInvertedRoots = {|
  * nodes can be very high, e.g. ~3 million for https://share.firefox.dev/3N56qMu
  */
 function _computeSuffixOrderForInvertedRoots(
-  nonInvertedCallNodeTable: CallNodeTable,
+  callNodeTable: CallNodeTable,
   funcCount: number
 ): SuffixOrderForInvertedRoots {
   // Rather than using Array.prototype.sort, this function uses the technique
@@ -524,8 +524,8 @@ function _computeSuffixOrderForInvertedRoots(
 
   // Pass 1: Compute, per func, how many non-inverted call nodes end in this func.
   const nodeCountPerFunc = new Uint32Array(funcCount);
-  const callNodeCount = nonInvertedCallNodeTable.length;
-  const callNodeTableFuncCol = nonInvertedCallNodeTable.func;
+  const callNodeCount = callNodeTable.length;
+  const callNodeTableFuncCol = callNodeTable.func;
   for (let i = 0; i < callNodeCount; i++) {
     const func = callNodeTableFuncCol[i];
     nodeCountPerFunc[func]++;
@@ -931,13 +931,13 @@ export class CallNodeInfoInverted implements CallNodeInfo {
   // from sample counts.
   _rootCount: number;
 
-  // This is a Map<SuffixOrderIndex, IndexIntoNonInvertedCallNodeTable>.
+  // This is a Map<SuffixOrderIndex, IndexIntoCallNodeTable>.
   // It lists the non-inverted call nodes in "suffix order", i.e. ordered by
   // comparing their call paths from back to front.
   _suffixOrderedCallNodes: Uint32Array;
 
   // This is the inverse of _suffixOrderedCallNodes; i.e. it is a
-  // Map<IndexIntoNonInvertedCallNodeTable, SuffixOrderIndex>.
+  // Map<IndexIntoCallNodeTable, SuffixOrderIndex>.
   _suffixOrderIndexes: Uint32Array;
 
   // The default category (usually "Other"), used when creating new inverted
@@ -993,7 +993,7 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     return this;
   }
 
-  getNonInvertedCallNodeTable(): CallNodeTable {
+  getCallNodeTable(): CallNodeTable {
     return this._callNodeTable;
   }
 
@@ -1001,7 +1001,7 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     return this._stackIndexToNonInvertedCallNodeIndex;
   }
 
-  // Get a mapping SuffixOrderIndex -> IndexIntoNonInvertedCallNodeTable.
+  // Get a mapping SuffixOrderIndex -> IndexIntoCallNodeTable.
   // This array contains all non-inverted call node indexes, ordered by
   // call path suffix. See "suffix order" in the documentation above.
   // Note that the contents of this array will be mutated by CallNodeInfoInverted
@@ -1013,7 +1013,7 @@ export class CallNodeInfoInverted implements CallNodeInfo {
   }
 
   // Returns the inverse of getSuffixOrderedCallNodes(), i.e. a mapping
-  // IndexIntoNonInvertedCallNodeTable -> SuffixOrderIndex.
+  // IndexIntoCallNodeTable -> SuffixOrderIndex.
   // Note that the contents of this array will be mutated by CallNodeInfoInverted
   // when new inverted nodes are created on demand (e.g. during a call to
   // getChildren or to getCallNodeIndexFromPath). So callers should not hold on
