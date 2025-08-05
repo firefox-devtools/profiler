@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-05T00:30:53.821Z",
-  "totalUsages": 98,
-  "totalFiles": 33,
+  "timestamp": "2025-08-05T00:39:24.056Z",
+  "totalUsages": 91,
+  "totalFiles": 32,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -142,41 +142,6 @@
       "file": "src/profile-logic/errors.ts",
       "line": 18,
       "content": "(this as any).__proto__ = SymbolsNotFoundError.prototype;"
-    },
-    {
-      "file": "src/profile-logic/import/art-trace.tsx",
-      "line": 277,
-      "content": "(summaryDetails as any)[headerInfoLabel] = headerInfoValue;"
-    },
-    {
-      "file": "src/profile-logic/import/art-trace.tsx",
-      "line": 819,
-      "content": "(this._stackTable.data as any).push([frame, prefix]);"
-    },
-    {
-      "file": "src/profile-logic/import/art-trace.tsx",
-      "line": 839,
-      "content": "(this._stringTable as any).push(methodString);"
-    },
-    {
-      "file": "src/profile-logic/import/art-trace.tsx",
-      "line": 842,
-      "content": "(this._frameTable.data as any).push(["
-    },
-    {
-      "file": "src/profile-logic/import/art-trace.tsx",
-      "line": 884,
-      "content": "(this._samples.data as any).push(["
-    },
-    {
-      "file": "src/profile-logic/import/art-trace.tsx",
-      "line": 905,
-      "content": "(this._samples.data as any).push(["
-    },
-    {
-      "file": "src/profile-logic/import/art-trace.tsx",
-      "line": 1005,
-      "content": "} as any,"
     },
     {
       "file": "src/profile-logic/import/chrome.tsx",

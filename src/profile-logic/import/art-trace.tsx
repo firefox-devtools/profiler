@@ -49,6 +49,7 @@ type GeckoProfileVersion11 = {
     interval: number;
     processType: 0;
     product: string;
+    importedFrom?: string;
     pid?: string;
     stackwalk: 1;
     startTime: number;
@@ -173,11 +174,13 @@ export type ArtTraceMethod = {
   signature: string;
 };
 
+type ArtTraceSummaryDetails = {
+  clock: string;
+  pid?: string;
+};
+
 type ArtTrace = {
-  summaryDetails: {
-    clock: string;
-    pid?: string;
-  };
+  summaryDetails: ArtTraceSummaryDetails;
   startTimeInUsecSinceBoot: number;
   threads: ArtTraceThread[];
   methods: ArtTraceMethod[];
@@ -267,14 +270,16 @@ function parseSummary(reader: ByteReader) {
   const summaryVersion = +reader.getLine();
   validateVersion(summaryVersion);
 
-  const summaryDetails = { summaryVersion, clock: 'thread-cpu' };
+  const summaryDetails: ArtTraceSummaryDetails & Record<string, string> = {
+    clock: 'thread-cpu',
+  };
   while (true) {
     line = reader.getLine();
     if (!line || line.startsWith('*')) {
       break;
     }
     const [headerInfoLabel, headerInfoValue] = line.split('=');
-    (summaryDetails as any)[headerInfoLabel] = headerInfoValue;
+    summaryDetails[headerInfoLabel] = headerInfoValue;
   }
   return { summaryVersion, summaryDetails, lineAfterSummary: line };
 }
@@ -749,7 +754,7 @@ class ThreadBuilder {
       time: 1,
       data: 2,
     },
-    data: [],
+    data: [] as Array<[number, number, any]>,
   };
   _samples = {
     schema: {
@@ -759,7 +764,7 @@ class ThreadBuilder {
       rss: 3,
       uss: 4,
     },
-    data: [],
+    data: [] as Array<[number | null, number]>,
   };
   _frameTable = {
     schema: {
@@ -769,18 +774,18 @@ class ThreadBuilder {
       line: 3,
       category: 4,
     },
-    data: [],
+    data: [] as Array<[number, null, null, null, number]>,
   };
   _stackTable = {
     schema: {
       frame: 0,
       prefix: 1,
     },
-    data: [],
+    data: [] as Array<[number, number | null]>,
   };
-  _stringTable = [];
+  _stringTable = [] as Array<string>;
 
-  _currentStack = null;
+  _currentStack: number | null = null;
   _nextSampleTimestamp = 0;
   _stackMap = new Map();
   _frameMap = new Map();
@@ -816,7 +821,7 @@ class ThreadBuilder {
     let stack = this._stackMap.get(key);
     if (stack === undefined) {
       stack = this._stackTable.data.length;
-      (this._stackTable.data as any).push([frame, prefix]);
+      this._stackTable.data.push([frame, prefix]);
       this._stackMap.set(key, stack);
     }
     return stack;
@@ -836,16 +841,10 @@ class ThreadBuilder {
         methodString = className + '.' + methodName;
       }
       const stringIndex = this._stringTable.length;
-      (this._stringTable as any).push(methodString);
+      this._stringTable.push(methodString);
       const category = this._categoryInfo.inferJavaCategory(methodString);
       frame = this._frameTable.data.length;
-      (this._frameTable.data as any).push([
-        stringIndex,
-        null,
-        null,
-        null,
-        category,
-      ]);
+      this._frameTable.data.push([stringIndex, null, null, null, category]);
       this._frameMap.set(methodId, frame);
     }
     return frame;
@@ -881,10 +880,7 @@ class ThreadBuilder {
     // such gaps with evenly-spaced synthesized samples at the interval that
     // was divined earlier.
     while (this._nextSampleTimestamp < timestampInMSSinceStartTime) {
-      (this._samples.data as any).push([
-        this._currentStack,
-        this._nextSampleTimestamp,
-      ]);
+      this._samples.data.push([this._currentStack, this._nextSampleTimestamp]);
       if (this._honorOriginalSamplingTimestamps) {
         // Only use this loop to fill up any gaps that are at least 2 * interval wide.
         // When less than 2 * interval remains, snap to the original next timestamp.
@@ -902,10 +898,7 @@ class ThreadBuilder {
 
   finish(): GeckoThreadVersion11 {
     if (this._nextSampleTimestamp !== null) {
-      (this._samples.data as any).push([
-        this._currentStack,
-        this._nextSampleTimestamp,
-      ]);
+      this._samples.data.push([this._currentStack, this._nextSampleTimestamp]);
     }
     return {
       tid: this._tid,
@@ -1002,7 +995,7 @@ export function convertArtTraceProfile(
       version: 11,
       presymbolicated: true,
       categories: categoryInfo.categories,
-    } as any,
+    },
     libs: [],
     threads: threadArray,
     processes: [],
