@@ -29,6 +29,7 @@ export class CanSelectContent extends React.PureComponent<Props> {
       tagName ?? 'div',
       {
         className: classNames(className, 'can-select-content'),
+        title: `${content}\n(click to select)`,
       },
       <input
         value={content}
