@@ -34,6 +34,7 @@ function findFiles() {
           file === 'node-worker-contents.js' ||
           file === 'simpleperf_report.js' ||
           file === 'webpack.config.js' ||
+          file === 'custom-environment.js' ||
           file === '.eslintrc.js'
         ) {
           continue;
