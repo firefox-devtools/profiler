@@ -16,9 +16,9 @@ echo "========================================"
 
 # Get list of files with 0 JS dependencies and < 100 lines (good candidates)
 # Focus on actual source files, not type declarations
-CANDIDATES=$(./scripts/analyze-dependencies.sh | grep "🟢 0 deps" | grep -E "src/(components|utils|profile-logic)" | awk '{
-    # Extract line count (field 4 should be the number)
-    linecount = $4;
+CANDIDATES=$(./scripts/analyze-dependencies.sh | grep "🟢 0 trans" | awk '{
+    # Extract line count (field 6 should be the number)
+    linecount = $6;
     # Extract filename (last field)
     filename = $NF;
     if (linecount < 100 && linecount > 20) print filename;
@@ -46,7 +46,7 @@ for file in $CANDIDATES; do
     # Try conversion
     if ./scripts/flow-to-typescript.sh "$file"; then
         # Get the output file name
-        if [[ "$file" == *"react"* ]] || grep -q "React\|JSX" "$file" 2>/dev/null; then
+        if grep -q -E ' from .react.;' "$file"; then
             output_file="${file%.js}.tsx"
         else
             output_file="${file%.js}.ts"
@@ -69,7 +69,7 @@ for file in $CANDIDATES; do
                 echo -e "  ${GREEN}✅ Removed original file${NC}"
                 
                 # Format with prettier
-                yarn prettier-fix > /dev/null 2>&1
+                yarn lint-fix > /dev/null 2>&1
                 
                 CONVERTED=$((CONVERTED + 1))
                 echo -e "  ${GREEN}🎉 Successfully converted $file${NC}"
