@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-06T04:30:06.339Z",
-  "totalUsages": 96,
-  "totalFiles": 42,
+  "timestamp": "2025-08-06T04:51:39.295Z",
+  "totalUsages": 105,
+  "totalFiles": 45,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -279,6 +279,41 @@
       "content": "expect((event as any).returnValue).toBeTruthy();"
     },
     {
+      "file": "src/test/components/BlobUrlLink.test.tsx",
+      "line": 13,
+      "content": "(URL as any).createObjectURL = jest.fn(() => `mockCreateObjectUrl${i++}`);"
+    },
+    {
+      "file": "src/test/components/BlobUrlLink.test.tsx",
+      "line": 14,
+      "content": "(URL as any).revokeObjectURL = jest.fn(() => {});"
+    },
+    {
+      "file": "src/test/components/BlobUrlLink.test.tsx",
+      "line": 18,
+      "content": "delete (URL as any).createObjectURL;"
+    },
+    {
+      "file": "src/test/components/BlobUrlLink.test.tsx",
+      "line": 19,
+      "content": "delete (URL as any).revokeObjectURL;"
+    },
+    {
+      "file": "src/test/components/BlobUrlLink.test.tsx",
+      "line": 79,
+      "content": "(URL.createObjectURL as any).mockReset();"
+    },
+    {
+      "file": "src/test/components/FooterLinks.test.tsx",
+      "line": 74,
+      "content": "}) as any;"
+    },
+    {
+      "file": "src/test/components/FooterLinks.test.tsx",
+      "line": 86,
+      "content": "})) as any;"
+    },
+    {
       "file": "src/test/components/StackSettings.test.tsx",
       "line": 42,
       "content": "return (element as any).checked;"
@@ -402,6 +437,16 @@
       "file": "src/test/integration/symbolicator-cli/symbolicator-cli.test.ts",
       "line": 37,
       "content": "new Response(symbolsJson as any)"
+    },
+    {
+      "file": "src/test/setup.ts",
+      "line": 24,
+      "content": "(global as any).fetchMock = fetchMock;"
+    },
+    {
+      "file": "src/test/setup.ts",
+      "line": 29,
+      "content": "const { __shutdownWorkers } = WorkerFactory as any;"
     },
     {
       "file": "src/test/types/utils.ts",

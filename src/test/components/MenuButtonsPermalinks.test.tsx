@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-import * as React from 'react';
 import { Provider } from 'react-redux';
 
 import {
@@ -18,7 +16,10 @@ import { ensureExists } from '../../utils/flow';
 import { fireFullClick } from '../fixtures/utils';
 
 describe('<Permalink>', function () {
-  function setup(search = '', injectedUrlShortener) {
+  function setup(
+    search = '',
+    injectedUrlShortener?: (url: string) => Promise<string>
+  ) {
     jest.useFakeTimers();
 
     const store = storeWithProfile();
@@ -47,7 +48,7 @@ describe('<Permalink>', function () {
 
     const getPermalinkButton = () => screen.getByText('Permalink');
     const queryInput = () => screen.queryByTestId('MenuButtonsPermalink-input');
-    const clickAndRunTimers = (where) => {
+    const clickAndRunTimers = (where: HTMLElement) => {
       fireFullClick(where);
       act(() => {
         jest.runAllTimers();

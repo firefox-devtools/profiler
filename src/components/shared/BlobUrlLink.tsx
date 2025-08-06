@@ -5,7 +5,6 @@
 import * as React from 'react';
 
 type Props = {
-  // Do not make these props exact, the extra props are passed to the anchor element.
   readonly blob: Blob;
   readonly children: React.ReactNode;
 };
@@ -21,7 +20,10 @@ type State = {
  * does the proper thing of cleaning up after itself as the component
  * is mounted, updated, and unmounted.
  */
-export class BlobUrlLink extends React.PureComponent<Props, State> {
+export class BlobUrlLink extends React.PureComponent<
+  Props & React.AnchorHTMLAttributes<HTMLElement>,
+  State
+> {
   override state: State = {
     url: '',
     prevBlob: null,

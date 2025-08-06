@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-import * as React from 'react';
 import { Provider } from 'react-redux';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
@@ -37,7 +35,7 @@ describe('app/DetailsContainer', function () {
     return { store };
   }
 
-  const expectedSidebar: { [TabSlug]: boolean } = {
+  const expectedSidebar: { [slug in TabSlug]: boolean } = {
     calltree: true,
     'flame-graph': true,
     'stack-chart': false,

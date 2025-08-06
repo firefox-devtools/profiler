@@ -123,7 +123,7 @@
     "@babel/preset-typescript": "^7.27.1",
     "@fetch-mock/jest": "^0.2.16",
     "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^16.3.0",
     "@types/clamp": "^1.0.3",
     "@types/common-tags": "^1.8.4",
@@ -220,7 +220,7 @@
     },
     "setupFilesAfterEnv": [
       "jest-extended/all",
-      "./src/test/setup.js"
+      "./src/test/setup.ts"
     ],
     "globals": {
       "AVAILABLE_STAGING_LOCALES": null

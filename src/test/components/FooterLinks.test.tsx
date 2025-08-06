@@ -1,10 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import fs from 'fs';
-import * as React from 'react';
+
 import { Provider } from 'react-redux';
 import { FooterLinks } from 'firefox-profiler/components/app/FooterLinks';
 import { AppLocalizationProvider } from 'firefox-profiler/components/app/AppLocalizationProvider';
@@ -18,11 +16,11 @@ beforeEach(() => {
   const fetchUrlRe = /\/locales\/(?<language>[^/]+)\/app.ftl$/;
   window.fetchMock
     .catch(404) // catchall
-    .get(fetchUrlRe, ({ url }) => {
+    .get(fetchUrlRe, ({ url }: { url: string }) => {
       const matchUrlResult = fetchUrlRe.exec(url);
       if (matchUrlResult) {
         // $FlowExpectError Our Flow doesn't know about named groups.
-        const { language } = matchUrlResult.groups;
+        const { language } = matchUrlResult.groups!;
         const path = `locales/${language}/app.ftl`;
         if (fs.existsSync(path)) {
           return fs.readFileSync(path);
@@ -71,9 +69,9 @@ it('makes it possible to switch the language and persists it', async () => {
   const select = await screen.findByRole('combobox', {
     name: 'Change language',
   });
-  const option: HTMLOptionElement = (screen.getByRole('option', {
+  const option: HTMLOptionElement = screen.getByRole('option', {
     name: 'Deutsch',
-  }): any);
+  }) as any;
   option.selected = true;
   fireEvent.change(select);
   expect(await screen.findByText('Rechtliches')).toBeInTheDocument();
@@ -85,6 +83,6 @@ it('uses the previously requested locale at startup', async () => {
   setup();
   const option: HTMLOptionElement = (await screen.findByRole('option', {
     name: 'Français',
-  }): any);
-  expect(option.selected).toBeTrue();
+  })) as any;
+  expect(option.selected).toBe(true);
 });

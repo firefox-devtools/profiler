@@ -1,10 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
-import * as React from 'react';
-
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { BlobUrlLink } from '../../components/shared/BlobUrlLink';
 import { ensureExists } from '../../utils/flow';
@@ -14,13 +10,13 @@ describe('shared/BlobUrlLink', () => {
     // jsdom does not have URL.createObjectURL.
     // See https://github.com/jsdom/jsdom/issues/1721
     let i = 1;
-    (URL: any).createObjectURL = jest.fn(() => `mockCreateObjectUrl${i++}`);
-    (URL: any).revokeObjectURL = jest.fn(() => {});
+    (URL as any).createObjectURL = jest.fn(() => `mockCreateObjectUrl${i++}`);
+    (URL as any).revokeObjectURL = jest.fn(() => {});
   });
 
   afterAll(async () => {
-    delete URL.createObjectURL;
-    delete URL.revokeObjectURL;
+    delete (URL as any).createObjectURL;
+    delete (URL as any).revokeObjectURL;
   });
 
   it('injects a blob url into a link', () => {
@@ -80,7 +76,7 @@ describe('shared/BlobUrlLink', () => {
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('mockCreateObjectUrl1');
     expect(a).toHaveAttribute('href', 'mockCreateObjectUrl2');
 
-    URL.createObjectURL.mockReset();
+    (URL.createObjectURL as any).mockReset();
     result.unmount();
     expect(URL.createObjectURL).toHaveBeenCalledTimes(0);
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('mockCreateObjectUrl1');

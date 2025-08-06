@@ -21,12 +21,12 @@ if (process.env.TZ !== 'UTC') {
 }
 
 fetchMock.mockGlobal();
-global.fetchMock = fetchMock;
+(global as any).fetchMock = fetchMock;
 
 afterEach(function () {
   // This `__shutdownWorkers` function only exists in the mocked test environment,
   // do not use flow typing on it.
-  const { __shutdownWorkers } = WorkerFactory;
+  const { __shutdownWorkers } = WorkerFactory as any;
   __shutdownWorkers();
 });
 
