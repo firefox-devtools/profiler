@@ -348,5 +348,5 @@ export const TrackVisualProgressGraph = explicitConnect<
       interval: getProfileInterval(state),
     };
   },
-  component: withSize<Props>(TrackVisualProgressGraphImpl),
+  component: withSize(TrackVisualProgressGraphImpl),
 });

@@ -199,4 +199,6 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
   }
 }
 
-export const ThreadActivityGraph = withSize<Props>(ThreadActivityGraphImpl);
+export const ThreadActivityGraph = withSize<$Diff<Props, SizeProps>>(
+  ThreadActivityGraphImpl
+);

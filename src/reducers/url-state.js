@@ -707,7 +707,7 @@ const wrapReducerInResetter = (
         // Invalidate all information that would be specific to an individual profile.
         return {
           ...regularUrlStateReducer(state, action),
-          profileSpecific: profileSpecific(undefined, state),
+          profileSpecific: profileSpecific(undefined, action),
           selectedTab: selectedTab(undefined, action),
         };
       default:
