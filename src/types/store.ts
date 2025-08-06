@@ -1,9 +1,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// TypeScript types
 
 import type { Store as ReduxStore } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
 import type { Action } from './actions';
 import type { State } from './state';
 
@@ -55,8 +55,6 @@ export type DangerousSelectorWithArguments<T, A1, A2 = void, A3 = void> = (
   arg3: A3
 ) => T;
 
-type ThunkDispatch = <Returns>(action: ThunkAction<Returns>) => Returns;
-type PlainDispatch = (action: Action) => Action;
 export type GetState = () => State;
 
 /**
@@ -72,10 +70,10 @@ export type ThunkAction<Returns> = (
  * This is similar to a type `(action: Action | ThunkAction) => any` except this
  * allows to type the return value as well.
  */
-export type Dispatch = PlainDispatch & ThunkDispatch;
+export type Dispatch = ThunkDispatch<State, undefined, Action>;
 
 /**
  * Export a store that is opinionated about our State definition, and the union
  * of all Actions, as well as specific Dispatch behavior.
  */
-export type Store = ReduxStore<State, Action, Dispatch>;
+export type Store = ReduxStore<State, Action> & { dispatch: Dispatch };

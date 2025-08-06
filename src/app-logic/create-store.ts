@@ -2,11 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { createStore, applyMiddleware } from 'redux';
-import { thunk } from 'redux-thunk';
+import { createStore, applyMiddleware, type Middleware } from 'redux';
+import { thunk, type ThunkMiddleware } from 'redux-thunk';
 import { createLogger } from 'redux-logger';
 import reducers from 'firefox-profiler/reducers';
-import type { Store } from 'firefox-profiler/types';
+import type { Action, State, Store } from 'firefox-profiler/types';
 
 /**
  * Isolate the store creation into a function, so that it can be used outside of the
@@ -14,21 +14,20 @@ import type { Store } from 'firefox-profiler/types';
  * @return {object} Redux store.
  */
 export default function initializeStore(): Store {
-  const middlewares = [thunk];
-
+  let loggerMiddleware: Middleware<Action> | null = null;
   if (process.env.NODE_ENV === 'development') {
-    middlewares.push(
-      createLogger({
-        collapsed: true,
-        titleFormatter: (action, time, duration) =>
-          `[action]    ${action.type} (in ${duration.toFixed(2)} ms)`,
-        logErrors: false,
-        duration: true,
-      })
-    );
+    loggerMiddleware = createLogger({
+      collapsed: true,
+      titleFormatter: (action, time, duration) =>
+        `[action]    ${action.type} (in ${duration.toFixed(2)} ms)`,
+      logErrors: false,
+      duration: true,
+    });
   }
 
-  const store = createStore(reducers, applyMiddleware(...middlewares));
-
-  return store as any;
+  const thunkMiddleware: ThunkMiddleware<State, Action> = thunk;
+  const enhancer = loggerMiddleware
+    ? applyMiddleware(thunkMiddleware, loggerMiddleware)
+    : applyMiddleware(thunkMiddleware);
+  return createStore<State, Action>(reducers, enhancer);
 }
