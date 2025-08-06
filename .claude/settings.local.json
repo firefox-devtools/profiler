@@ -44,7 +44,8 @@
       "Bash(cat:*)",
       "Bash(prettier:*)",
       "Bash(npx prettier:*)",
-      "Bash(yarn prettier-run:*)"
+      "Bash(yarn prettier-run:*)",
+      "Bash(yarn lint:*)"
     ],
     "deny": []
   }

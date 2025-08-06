@@ -1,9 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
-import React from 'react';
 import { Provider } from 'react-redux';
 
 import {
@@ -63,7 +61,7 @@ describe('app/CurrentProfileUploadedInformationLoader', () => {
     // component will bail out if the indexedDB object is missing. This test
     // tests for this behavior.
 
-    window.indexedDB = undefined;
+    (window as any).indexedDB = undefined;
     const { nextTick } = setup();
 
     // All IndexedDB behavior is asynchronous, and errors themselves will be

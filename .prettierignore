@@ -10,3 +10,4 @@ taskcluster/
 .taskcluster.yml
 PLAN.md
 .as-any-baseline.json
+.claude

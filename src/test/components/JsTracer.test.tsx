@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-import * as React from 'react';
 import { Provider } from 'react-redux';
 
 import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
@@ -48,8 +46,8 @@ describe('StackChart', function () {
     skipLoadingScreen,
     events,
   }: {
-    skipLoadingScreen: boolean,
-    events: TestDefinedJsTracerEvent[],
+    skipLoadingScreen: boolean;
+    events: TestDefinedJsTracerEvent[];
   }) {
     const flushRafCalls = mockRaf();
 
@@ -83,7 +81,7 @@ describe('StackChart', function () {
     };
   }
 
-  const simpleTracerEvents = [
+  const simpleTracerEvents: TestDefinedJsTracerEvent[] = [
     ['https://mozilla.org', 0, 20],
     ['Interpreter', 1, 19],
     ['IonMonkey', 2, 18],

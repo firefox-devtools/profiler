@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import {
   enableMenuButton,
   queryIsMenuButtonEnabled,
@@ -56,13 +54,11 @@ describe('event handlers for Firefox WebChannel events', function () {
     const responseForTrue = queryIsMenuButtonEnabled();
 
     // Trigger the response from the browser.
-    triggerResponse(
-      ({
-        type: 'STATUS_RESPONSE',
-        requestId: getLastRequestId(),
-        menuButtonIsEnabled: true,
-      }: any)
-    );
+    triggerResponse({
+      type: 'STATUS_RESPONSE',
+      requestId: getLastRequestId(),
+      menuButtonIsEnabled: true,
+    } as any);
 
     const isMenuButtonEnabledForTrue = await responseForTrue;
     expect(isMenuButtonEnabledForTrue).toBe(true);
@@ -71,13 +67,11 @@ describe('event handlers for Firefox WebChannel events', function () {
     const responseForFalse = queryIsMenuButtonEnabled();
 
     // Trigger the response from the browser.
-    triggerResponse(
-      ({
-        type: 'STATUS_RESPONSE',
-        requestId: getLastRequestId(),
-        menuButtonIsEnabled: false,
-      }: any)
-    );
+    triggerResponse({
+      type: 'STATUS_RESPONSE',
+      requestId: getLastRequestId(),
+      menuButtonIsEnabled: false,
+    } as any);
 
     const isMenuButtonEnabledForFalse = await responseForFalse;
     expect(isMenuButtonEnabledForFalse).toBe(false);
@@ -92,12 +86,10 @@ describe('event handlers for Firefox WebChannel events', function () {
     const response = enableMenuButton();
 
     // Trigger the response from the browser.
-    triggerResponse(
-      ({
-        type: 'ENABLE_MENU_BUTTON_DONE',
-        requestId: getLastRequestId(),
-      }: any)
-    );
+    triggerResponse({
+      type: 'ENABLE_MENU_BUTTON_DONE',
+      requestId: getLastRequestId(),
+    } as any);
 
     await expect(response).resolves.toBe(undefined);
   });
@@ -134,7 +126,7 @@ describe('event handlers for Firefox WebChannel events', function () {
 
     // The triggerResponse doesn't allow unknown message types, so coerce it
     // into a Function to test the error path.
-    (triggerResponse: any)('Invalid message');
+    (triggerResponse as any)('Invalid message');
 
     await expect(response).rejects.toEqual(
       new Error('A malformed WebChannel event was received.')

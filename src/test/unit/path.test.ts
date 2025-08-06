@@ -2,15 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
+import type { CallNodePath } from 'firefox-profiler/types';
 import { PathSet, arePathsEqual, hashPath } from '../../utils/path';
 
 describe('PathSet', function () {
   const sampleValues = [[1], [1, 3], [2, 3, 9]];
 
   it('implements the constructor', function () {
-    let set;
+    let set: PathSet;
 
     // Default constructor
     set = new PathSet();
@@ -87,9 +86,11 @@ describe('PathSet', function () {
   it('implements .forEach', function () {
     const set = new PathSet(sampleValues);
 
-    const resultValues = [];
+    const resultValues: CallNodePath[] = [];
     set.forEach(function (value1, value2, thisSet) {
-      expect(this).toBe(undefined); // eslint-disable-line @babel/no-invalid-this
+      // @ts-ignore TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
+      // eslint-disable-next-line @babel/no-invalid-this
+      expect(this).toBe(undefined);
       expect(value1).toBe(value2);
       expect(thisSet).toBe(set);
       resultValues.push(value1);
@@ -98,6 +99,7 @@ describe('PathSet', function () {
 
     const context = {};
     set.forEach(function () {
+      // @ts-ignore TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
       expect(this).toBe(context);
     }, context);
   });
@@ -105,9 +107,11 @@ describe('PathSet', function () {
   it('implements iterable, .values, .entries', function () {
     const set = new PathSet(sampleValues);
     expect(Array.from(set)).toEqual(sampleValues);
-    expect(Array.from(set.values())).toEqual(sampleValues);
+    // @ts-ignore The TypeScript definition of Array.from only accepts Iterable, not Iterator - not sure what's correct here
+    expect(Array.from<CallNodePath>(set.values())).toEqual(sampleValues);
 
     const expectedEntries = sampleValues.map((val) => [val, val]);
+    // @ts-ignore The TypeScript definition of Array.from only accepts Iterable, not Iterator - not sure what's correct here
     expect(Array.from(set.entries())).toEqual(expectedEntries);
   });
 });

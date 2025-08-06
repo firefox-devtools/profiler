@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-06T05:08:56.461Z",
-  "totalUsages": 110,
-  "totalFiles": 47,
+  "timestamp": "2025-08-06T14:53:48.964Z",
+  "totalUsages": 120,
+  "totalFiles": 51,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -304,6 +304,11 @@
       "content": "(URL.createObjectURL as any).mockReset();"
     },
     {
+      "file": "src/test/components/CurrentProfileUploadedInformationLoader.test.tsx",
+      "line": 64,
+      "content": "(window as any).indexedDB = undefined;"
+    },
+    {
       "file": "src/test/components/FooterLinks.test.tsx",
       "line": 74,
       "content": "}) as any;"
@@ -312,6 +317,11 @@
       "file": "src/test/components/FooterLinks.test.tsx",
       "line": 86,
       "content": "})) as any;"
+    },
+    {
+      "file": "src/test/components/Home.test.tsx",
+      "line": 30,
+      "content": "(Object.defineProperty as any)(window.navigator, 'userAgent', {"
     },
     {
       "file": "src/test/components/StackSettings.test.tsx",
@@ -449,6 +459,26 @@
       "content": "const { __shutdownWorkers } = WorkerFactory as any;"
     },
     {
+      "file": "src/test/store/icons.test.ts",
+      "line": 24,
+      "content": "(window as any).Image = mock.Image;"
+    },
+    {
+      "file": "src/test/store/icons.test.ts",
+      "line": 28,
+      "content": "delete (window as any).Image;"
+    },
+    {
+      "file": "src/test/store/icons.test.ts",
+      "line": 92,
+      "content": "imageInstances.forEach((instance) => (instance as any).onload());"
+    },
+    {
+      "file": "src/test/store/icons.test.ts",
+      "line": 120,
+      "content": "(imageInstances[0] as any).onerror();"
+    },
+    {
       "file": "src/test/store/profile-view.test.ts",
       "line": 951,
       "content": "const markerPayload: MixedObject = getMarker(0).data as any;"
@@ -487,6 +517,26 @@
       "file": "src/test/unit/symbol-store-db.test.ts",
       "line": 25,
       "content": "delete (window as any).IDBKeyRange;"
+    },
+    {
+      "file": "src/test/unit/web-channel.test.ts",
+      "line": 61,
+      "content": "} as any);"
+    },
+    {
+      "file": "src/test/unit/web-channel.test.ts",
+      "line": 74,
+      "content": "} as any);"
+    },
+    {
+      "file": "src/test/unit/web-channel.test.ts",
+      "line": 92,
+      "content": "} as any);"
+    },
+    {
+      "file": "src/test/unit/web-channel.test.ts",
+      "line": 129,
+      "content": "(triggerResponse as any)('Invalid message');"
     },
     {
       "file": "src/utils/__mocks__/worker-factory.ts",

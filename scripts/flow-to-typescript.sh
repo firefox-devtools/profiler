@@ -187,7 +187,6 @@ apply_transform 's/^    componentDidUpdate(/    override componentDidUpdate(/g' 
 apply_transform 's/^    componentWillUnmount(/    override componentWillUnmount(/g' "Add override to componentWillUnmount (4-space)"
 apply_transform 's/^    componentDidCatch(/    override componentDidCatch(/g' "Add override to componentDidCatch (4-space)"
 apply_transform 's/^    getSnapshotBeforeUpdate(/    override getSnapshotBeforeUpdate(/g' "Add override to getSnapshotBeforeUpdate (4-space)"
-apply_transform 's/^    render(/    override render(/g' "Add override to render method (4-space)"
 
 # 10. Convert Flow type annotations in various contexts
 apply_transform 's/return (\([^:)]*\): \([^)]*\));/return \1 as \2;/g' "Convert return type annotations"

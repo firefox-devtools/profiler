@@ -1,10 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
-
-import * as React from 'react';
 import { Provider } from 'react-redux';
 import { fireEvent } from '@testing-library/react';
 
@@ -38,7 +34,7 @@ const GRAPH_HEIGHT = 10;
 
 function getSamplesPixelPosition(
   sampleIndex: IndexIntoSamplesTable,
-  samplePosition
+  samplePosition: number
 ): CssPixels {
   // Compute the pixel position of the center of a given sample.
   return sampleIndex * PIXELS_PER_SAMPLE + PIXELS_PER_SAMPLE * samplePosition;
@@ -77,7 +73,7 @@ describe('TrackEventDelay', function () {
       document.querySelector('.timelineTrackEventDelayTooltip');
     const getEventDelayDot = () =>
       container.querySelector('.timelineTrackEventDelayGraphDot');
-    const moveMouseAtEventDelay = (index, pos) =>
+    const moveMouseAtEventDelay = (index: number, pos: number) =>
       fireEvent(
         canvas,
         getMouseEvent('mousemove', {

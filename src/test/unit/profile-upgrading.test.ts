@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
+
 import {
   unserializeProfileOfArbitraryFormat,
   serializeProfile,
@@ -50,7 +50,7 @@ import {
 // Only add new test files when necessary, as described in step 4.
 
 describe('upgrading gecko profiles', function () {
-  function testProfileUpgrading(profile) {
+  function testProfileUpgrading(profile: any) {
     upgradeGeckoProfileToCurrentVersion(profile);
     expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
     expect(profile).toMatchSnapshot();
@@ -74,7 +74,7 @@ describe('upgrading gecko profiles', function () {
 });
 
 describe('upgrading processed profiles', function () {
-  async function testProfileUpgrading(profile) {
+  async function testProfileUpgrading(profile: any) {
     const upgradedProfile = await unserializeProfileOfArbitraryFormat(profile);
     expect(upgradedProfile.meta.preprocessedProfileVersion).toEqual(
       PROCESSED_PROFILE_VERSION
@@ -113,8 +113,8 @@ describe('upgrading processed profiles', function () {
 describe('importing perf profile', function () {
   it('should import a perf profile', async function () {
     try {
-      const fs = require('fs');
-      const zlib = require('zlib');
+      const fs = await import('fs');
+      const zlib = await import('zlib');
       const buffer = fs.readFileSync('src/test/fixtures/upgrades/test.perf.gz');
       const decompressedArrayBuffer = zlib.gunzipSync(buffer);
       const text = decompressedArrayBuffer.toString('utf8');

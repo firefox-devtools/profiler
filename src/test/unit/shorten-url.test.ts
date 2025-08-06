@@ -2,9 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import { shortenUrl, expandUrl } from 'firefox-profiler/utils/shorten-url';
+import type { CallLog } from 'fetch-mock';
 
 // This implements some base checks and behavior to mock the fetch API when
 // testing functions dealing with this API.
@@ -12,12 +11,12 @@ function mockFetchForBitly({
   endpointUrl,
   responseFromRequestPayload,
 }: {
-  endpointUrl: string,
-  responseFromRequestPayload: (any) => any,
+  endpointUrl: string;
+  responseFromRequestPayload: (arg: any) => any;
 }) {
   window.fetchMock
     .catch(404) // catch all
-    .route(endpointUrl, async ({ options }) => {
+    .route(endpointUrl, async ({ options }: CallLog) => {
       const { method, headers, body } = options;
 
       if (method !== 'post') {
@@ -28,6 +27,8 @@ function mockFetchForBitly({
       }
 
       if (
+        !headers ||
+        !('content-type' in headers) ||
         headers['content-type'] !== 'application/json' ||
         headers.accept !== 'application/vnd.firefox-profiler+json;version=1.0'
       ) {
@@ -37,13 +38,13 @@ function mockFetchForBitly({
         });
       }
 
-      const payload = JSON.parse(body);
+      const payload = JSON.parse(body as string);
       return responseFromRequestPayload(payload);
     });
 }
 
 describe('shortenUrl', () => {
-  function mockFetchWith(returnedHash) {
+  function mockFetchWith(returnedHash: string) {
     mockFetchForBitly({
       endpointUrl: 'https://api.profiler.firefox.com/shorten',
       responseFromRequestPayload: () => {
@@ -64,6 +65,8 @@ describe('shortenUrl', () => {
     const shortUrl = await shortenUrl(longUrl);
 
     expect(shortUrl).toBe(expectedShortUrl);
+    // @ts-ignore TODO: fetch-mock's TypeScript types for toHaveFetched do
+    //                  not recognize the body property, not sure why
     expect(window.fetch).toHaveFetched({ body: { longUrl } });
   });
 
@@ -81,12 +84,14 @@ describe('shortenUrl', () => {
 
     const shortUrl = await shortenUrl(longUrl);
     expect(shortUrl).toBe(expectedShortUrl);
+    // @ts-ignore TODO: fetch-mock's TypeScript types for toHaveFetched do
+    //                  not recognize the body property, not sure why
     expect(window.fetch).toHaveFetched({ body: { longUrl: expectedLongUrl } });
   });
 });
 
 describe('expandUrl', () => {
-  function mockFetchWith(returnedLongUrl) {
+  function mockFetchWith(returnedLongUrl: string) {
     mockFetchForBitly({
       endpointUrl: 'https://api.profiler.firefox.com/expand',
       responseFromRequestPayload: () => {
@@ -105,6 +110,8 @@ describe('expandUrl', () => {
 
     const longUrl = await expandUrl(shortUrl);
     expect(longUrl).toBe(returnedLongUrl);
+    // @ts-ignore TODO: fetch-mock's TypeScript types for toHaveFetched do
+    //                  not recognize the body property, not sure why
     expect(window.fetch).toHaveFetched({ body: { shortUrl } });
   });
 

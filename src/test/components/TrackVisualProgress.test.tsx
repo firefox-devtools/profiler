@@ -2,11 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import type { IndexIntoSamplesTable, CssPixels } from 'firefox-profiler/types';
-
-import * as React from 'react';
 import { Provider } from 'react-redux';
 import { fireEvent } from '@testing-library/react';
 
@@ -81,7 +77,7 @@ describe('TrackVisualProgress', function () {
       document.querySelector('.timelineTrackVisualProgressTooltip');
     const getVisualProgressDot = () =>
       container.querySelector('.timelineTrackVisualProgressGraphDot');
-    const moveMouseAtCounter = (index) =>
+    const moveMouseAtCounter = (index: number) =>
       fireEvent(
         canvas,
         getMouseEvent('mousemove', { pageX: getSamplesPixelPosition(index) })

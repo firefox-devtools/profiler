@@ -13,6 +13,9 @@ module.exports = {
     // This rule isn't useful because use Flow.
     'jest/valid-title': 0,
 
+    // Allow require(), for example for tests
+    '@typescript-eslint/no-require-imports': 'off',
+
     // Adding more errors now
     'testing-library/no-manual-cleanup': 'error',
     'testing-library/no-wait-for-snapshot': 'error',

@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-import * as React from 'react';
 import { Provider } from 'react-redux';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
@@ -26,10 +24,10 @@ const SAFARI =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/603.3.8 (KHTML, like Gecko) Version/10.1.2 Safari/603.3.8';
 const CHROME =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/603.3.8 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
-let userAgent;
+let userAgent: string | undefined;
 
 // Flow doesn't understand Object.defineProperty. Use the "any" type to use it anyway.
-(Object.defineProperty: any)(window.navigator, 'userAgent', {
+(Object.defineProperty as any)(window.navigator, 'userAgent', {
   get: () => userAgent,
 });
 
