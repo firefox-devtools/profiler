@@ -388,9 +388,7 @@ function analyzeFiles() {
 
   console.log(`📊 File statistics:`);
   console.log(`   JavaScript files remaining: ${jsFiles.length}`);
-  console.log(
-    `   TypeScript files converted: ${tsFiles.length} (${excludedFiles.size} not passing strict)`
-  );
+  console.log(`   TypeScript files converted: ${tsFiles.length}`);
   console.log(`   Total files analyzed: ${allFiles.size}\n`);
 
   const graph = buildDependencyGraph(allFiles, excludedFiles);
@@ -453,22 +451,13 @@ function analyzeFiles() {
   });
 
   console.log(
-    '🎯 Files ordered by ease of fixing (transitive unfinished deps : direct unfinished deps : lines : file):'
+    '🎯 Files ordered by ease of fixing (transitive deps : direct deps : lines : file):'
   );
   console.log(
     '   Note: "Direct dependencies" = files imported directly by this file'
   );
   console.log(
-    '   Note: "Transitive dependencies" = all unfinished files this file depends on (directly or indirectly)\n'
-  );
-  console.log(
-    '🔧  For [JS] files, "unfinished" means that the file needs to be converted.'
-  );
-  console.log(
-    '    For [TS] files, "unfinished" means that the file has strict typechecking issues that need'
-  );
-  console.log(
-    '    to be fixed before the file can be removed from the strict "exclude" list.\n'
+    '   Note: "Transitive dependencies" = all unconverted files this file depends on (directly or indirectly)\n'
   );
 
   for (const analysis of fileAnalysis) {
@@ -500,28 +489,12 @@ function analyzeFiles() {
         .map((dep) => path.relative(process.cwd(), dep))
         .join(', ');
       if (directDepsStr) {
-        console.log(`   └─ Direct unfinished deps: ${directDepsStr}`);
+        console.log(`   └─ Direct deps: ${directDepsStr}`);
       }
     }
   }
 
-  console.log('\n🚀 Recommended conversion strategy:');
-  console.log(
-    '   1. Convert 🟢 files first (no transitive unfinished dependencies)'
-  );
-  console.log('   2. Then convert 🟡 files (few transitive dependencies)');
-  console.log('   3. Convert 🟠 files next (moderate dependencies)');
-  console.log('   4. Save 🔴 files for last (many dependencies)');
-  console.log('\n💡 Tips:');
-  console.log(
-    '   • Convert smaller files within each category first for easier testing'
-  );
-  console.log(
-    '   • [TS] files may still need fixes to pass strict type checking'
-  );
-  console.log(
-    '   • Focus on direct dependencies to maximize impact on other files'
-  );
+  console.log('Convert 🟢 files first (no dependencies)');
 
   // Summary statistics
   const readyFiles = fileAnalysis.filter(
@@ -532,9 +505,6 @@ function analyzeFiles() {
 
   console.log('\n📈 Summary:');
   console.log(`   • ${jsReadyFiles.length} JS files ready for conversion`);
-  console.log(
-    `   • ${tsNeedingFixes.length} TS files may need strict type checking fixes`
-  );
   console.log(
     `   • ${fileAnalysis.length - readyFiles.length} files blocked by dependencies`
   );

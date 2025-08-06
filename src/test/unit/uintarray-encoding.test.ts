@@ -2,15 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import {
   decodeUintArrayFromUrlComponent,
   encodeUintArrayForUrlComponent,
 } from '../../utils/uintarray-encoding';
 
 describe('UintArray encoding', function () {
-  const checks = [
+  const checks: Array<[number[], string]> = [
     // [array, encoding]
     [[0], '0'],
     [[9, 10], '9a'],
@@ -32,7 +30,7 @@ describe('UintArray encoding', function () {
     }
   });
 
-  function roundTripEncoded(s) {
+  function roundTripEncoded(s: string) {
     return encodeUintArrayForUrlComponent(decodeUintArrayFromUrlComponent(s));
   }
 
