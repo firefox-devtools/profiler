@@ -2,10 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
-import * as React from 'react';
-
 import {
   render,
   screen,
@@ -36,7 +32,7 @@ jest.mock('../../components/app/ListOfPublishedProfiles', () => ({
 // AppLocalizationProvider calls a async function in componentDidMount()
 // The tests related to it are in separate file.
 jest.mock('../../components/app/AppLocalizationProvider', () => ({
-  AppLocalizationProvider: ({ children }) => {
+  AppLocalizationProvider: ({ children }: React.PropsWithChildren<{}>) => {
     const { L10nContext } = require('firefox-profiler/contexts/L10nContext');
     return (
       <L10nContext.Provider
@@ -53,7 +49,7 @@ jest.mock('../../components/app/AppLocalizationProvider', () => ({
 
 describe('Root with history', function () {
   type TestConfig = {
-    profileHash?: string,
+    profileHash?: string;
   };
 
   autoMockFullNavigation();
@@ -88,8 +84,8 @@ describe('Root with history', function () {
       name,
       selected,
     }: {
-      +name: string,
-      +selected: boolean,
+      readonly name: string;
+      readonly selected: boolean;
     }): Promise<HTMLElement> {
       // This uses `findByText` instead of `findbyRole` because this is a lot
       // faster in our use case where there's a lot of DOM nodes.

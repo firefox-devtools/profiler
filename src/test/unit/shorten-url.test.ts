@@ -65,7 +65,7 @@ describe('shortenUrl', () => {
     const shortUrl = await shortenUrl(longUrl);
 
     expect(shortUrl).toBe(expectedShortUrl);
-    // @ts-ignore TODO: fetch-mock's TypeScript types for toHaveFetched do
+    // @ts-expect-error TODO: fetch-mock's TypeScript types for toHaveFetched do
     //                  not recognize the body property, not sure why
     expect(window.fetch).toHaveFetched({ body: { longUrl } });
   });
@@ -84,7 +84,7 @@ describe('shortenUrl', () => {
 
     const shortUrl = await shortenUrl(longUrl);
     expect(shortUrl).toBe(expectedShortUrl);
-    // @ts-ignore TODO: fetch-mock's TypeScript types for toHaveFetched do
+    // @ts-expect-error TODO: fetch-mock's TypeScript types for toHaveFetched do
     //                  not recognize the body property, not sure why
     expect(window.fetch).toHaveFetched({ body: { longUrl: expectedLongUrl } });
   });
@@ -110,7 +110,7 @@ describe('expandUrl', () => {
 
     const longUrl = await expandUrl(shortUrl);
     expect(longUrl).toBe(returnedLongUrl);
-    // @ts-ignore TODO: fetch-mock's TypeScript types for toHaveFetched do
+    // @ts-expect-error TODO: fetch-mock's TypeScript types for toHaveFetched do
     //                  not recognize the body property, not sure why
     expect(window.fetch).toHaveFetched({ body: { shortUrl } });
   });

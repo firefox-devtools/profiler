@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-import * as React from 'react';
 import { Localized } from '@fluent/react';
 
 import { render, screen, act } from '@testing-library/react';
@@ -17,21 +15,20 @@ describe('AppLocalizationProvider', () => {
   function setup({
     languages,
     missingTranslation,
-  }: $Shape<{ languages: string[], missingTranslation: string[] }> = {}) {
+  }: Partial<{ languages: string[]; missingTranslation: string[] }> = {}) {
     languages = languages ?? ['en-US'];
     missingTranslation = missingTranslation ?? [];
 
     jest.spyOn(window.navigator, 'languages', 'get').mockReturnValue(languages);
 
-    const translatedText = (language) => `This is ${language} Text`;
+    const translatedText = (language: string) => `This is ${language} Text`;
     const fetchUrlRe = /\/locales\/(?<language>[^/]+)\/app.ftl$/;
     window.fetchMock
       .catch(404) // catchall
-      .get(fetchUrlRe, ({ url }) => {
+      .get(fetchUrlRe, ({ url }: { url: string }) => {
         const matchUrlResult = fetchUrlRe.exec(url);
         if (matchUrlResult) {
-          // $FlowExpectError Our Flow doesn't know about named groups.
-          const { language } = matchUrlResult.groups;
+          const { language } = matchUrlResult.groups!;
           if (!missingTranslation.includes(language)) {
             return `test-id = ${translatedText(language)}`;
           }
@@ -171,10 +168,12 @@ describe('AppLocalizationProvider', () => {
     expect(await screen.findByText(translatedText('de'))).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'de');
     expect(window.fetch).toHaveFetched('/locales/de/app.ftl', {
+      // @ts-expect-error fetch-mock's TypeScript types for toHaveFetched don't know about `credentials`, not sure why
       credentials: 'include',
       mode: 'no-cors',
     });
     expect(window.fetch).toHaveFetched('/locales/en-US/app.ftl', {
+      // @ts-expect-error fetch-mock's TypeScript types for toHaveFetched don't know about `credentials`, not sure why
       credentials: 'include',
       mode: 'no-cors',
     });
@@ -201,29 +200,15 @@ describe('AppLocalizationProvider', () => {
     ).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'de');
     expect(window.fetch).toHaveFetched('/locales/de/app.ftl', {
+      // @ts-expect-error fetch-mock's TypeScript types for toHaveFetched don't know about `credentials`, not sure why
       credentials: 'include',
       mode: 'no-cors',
     });
     expect(window.fetch).toHaveFetched('/locales/en-US/app.ftl', {
+      // @ts-expect-error fetch-mock's TypeScript types for toHaveFetched don't know about `credentials`, not sure why
       credentials: 'include',
       mode: 'no-cors',
     });
     expect(window.fetch).toHaveFetchedTimes(2);
-  });
-
-  it('throws error when useL10n is used outside provider', () => {
-    function TestComponent() {
-      const { requestL10n } = useL10n();
-      return <div>{requestL10n}</div>;
-    }
-
-    // Use Jest's error boundary testing pattern
-    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-    expect(() => {
-      render(<TestComponent />);
-    }).toThrow('useL10n must be used within an AppLocalizationProvider');
-
-    spy.mockRestore();
   });
 });

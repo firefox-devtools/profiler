@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`shared/ButtonWithPanel opens the panel when the button is clicked and closes the panel by clicking outside the panel 1`] = `
 <div

@@ -1,10 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
-
-import React from 'react';
 import { Provider } from 'react-redux';
 import { stripIndent } from 'common-tags';
 
@@ -32,10 +28,13 @@ jest.mock('../../components/timeline', () => ({
 describe('BottomBox', () => {
   autoMockDomRect();
   afterEach(() => {
+    // @ts-expect-error TODO: Our tsconfig includes "DOM" in compilerOptions.lib;
+    // maybe tests should not have it in there and instead use jsdom's types?
     delete Range.prototype.getClientRects;
   });
 
   function setup() {
+    // @ts-expect-error see above
     if (Range.prototype.getClientRects) {
       throw new Error(
         'jsdom now implements Range.prototype.getClientRects, please update this test.'
@@ -43,7 +42,7 @@ describe('BottomBox', () => {
     }
 
     // @codemirror/view uses getClientRects when scrolling.
-    // $FlowExpectError because Flow doesn't accept assigning a function to getClientRects.
+    // @ts-expect-error TS2322: Type '() => DOMRect[]' is not assignable to type '() => DOMRectList'.
     Range.prototype.getClientRects = () => {
       return [new DOMRect(0, 0, 1024, 768)];
     };
@@ -110,8 +109,9 @@ describe('BottomBox', () => {
     );
 
     return {
-      sourceView: () => document.querySelector('.sourceView'),
-      assemblyView: () => document.querySelector('.assemblyView'),
+      sourceView: () => document.querySelector('.sourceView') as HTMLElement,
+      assemblyView: () =>
+        document.querySelector('.assemblyView') as HTMLElement,
     };
   }
 
@@ -154,7 +154,7 @@ describe('BottomBox', () => {
 
     const asmViewShowButton = ensureExists(
       document.querySelector('.bottom-assembly-button')
-    );
+    ) as HTMLElement;
     fireFullClick(asmViewShowButton);
 
     expect(sourceView()).toBeInTheDocument();
@@ -175,7 +175,7 @@ describe('BottomBox', () => {
     // Click the toggle button again and make sure the assembly view hides.
     const asmViewHideButton = ensureExists(
       document.querySelector('.bottom-assembly-button')
-    );
+    ) as HTMLElement;
     fireFullClick(asmViewHideButton);
 
     expect(assemblyView()).not.toBeInTheDocument();

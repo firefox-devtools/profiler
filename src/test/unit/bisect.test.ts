@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import {
   bisectionLeft,
   bisectionRight,
@@ -133,7 +131,7 @@ describe('bisectionRightByStrKey', function () {
     { name: 'a9' },
   ];
 
-  function getName(x): string {
+  function getName(x: { name: string }): string {
     return x.name;
   }
 

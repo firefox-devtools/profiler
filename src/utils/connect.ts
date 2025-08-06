@@ -37,29 +37,6 @@ type ConnectOptions = {
 };
 
 /**
- * This function type describes the operation of taking a simple action creator, and
- * just returning it.
- */
-// @ts-ignore Currently unused but expect to be used when the migration is complete
-type WrapActionCreator<Args extends any[]> = (
-  actionCreator: (...args: Args) => Action
-) => (...args: Args) => Action;
-
-/**
- * This function type describes the operation of removing the (Dispatch, GetState) from
- * a thunk action creator.
- * For instance:
- *   (...Args) => (Dispatch, GetState) => Returns
- *
- * Gets transformed into:
- *   (...Args) => Returns
- */
-// @ts-ignore Currently unused but expect to be used when the migration is complete
-type WrapThunkActionCreator<Args extends any[], Returns> = (
-  thunkActionCreator: (...args: Args) => ThunkAction<Returns>
-) => (...args: Args) => Returns;
-
-/**
  * This type takes a Props object and wraps each function in Redux's connect function.
  * It is primarily exported for testing as explicitConnect should do this for us
  * automatically. It leaves normal action creators alone, but with ThunkActions it

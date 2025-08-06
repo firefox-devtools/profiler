@@ -2,19 +2,57 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { stripIndent, oneLine } from 'common-tags';
-import type { GetState, Dispatch, MixedObject } from 'firefox-profiler/types';
+import type {
+  GetState,
+  Dispatch,
+  MixedObject,
+  Profile,
+  Thread,
+  Marker,
+} from 'firefox-profiler/types';
 import { selectorsForConsole } from 'firefox-profiler/selectors';
 import actions from 'firefox-profiler/actions';
 import { shortenUrl } from 'firefox-profiler/utils/shorten-url';
 import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { formatTimestamp } from 'firefox-profiler/utils/format-numbers';
 import { togglePseudoStrategy } from 'firefox-profiler/components/app/AppLocalizationProvider';
+import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still
 // special-cases the `value` property: if it's missing it throws an error. Using
 // this indirection seems to work around this issue.
 // See https://github.com/facebook/flow/issues/285
 const defineProperty = Object.defineProperty;
+
+export type ExtraPropertiesOnWindowForConsole = {
+  profile: Profile;
+  filteredThread: Thread;
+  callTree: CallTree;
+  filteredMarkers: Marker[];
+  selectedMarker: Marker | null;
+  experimental: {
+    enableEventDelayTracks(): void;
+    enableCPUGraphs(): void;
+    enableProcessCPUTracks(): void;
+  };
+  togglePseudoLocalization: (pseudoStrategy?: string) => void;
+  toggleTimelineType: (timelineType?: string) => void;
+  retrieveRawProfileDataFromBrowser: () => Promise<
+    MixedObject | ArrayBuffer | null
+  >;
+  saveToDisk: (
+    unknownObject: ArrayBuffer | unknown,
+    filename?: string
+  ) => Promise<void>;
+  extractGeckoLogs: () => string;
+  totalMarkerDuration: (markers: any) => number;
+  shortenUrl: typeof shortenUrl;
+  getState: GetState;
+  selectors: typeof selectorsForConsole;
+  dispatch: Dispatch;
+  actions: typeof actions;
+  persistTooltips: boolean;
+};
 
 /**
  * This function adds various values from the Redux Store to the window object so that
@@ -23,8 +61,8 @@ const defineProperty = Object.defineProperty;
 export function addDataToWindowObject(
   getState: GetState,
   dispatch: Dispatch,
-  target: MixedObject = window as unknown as MixedObject
-) {
+  target: Partial<ExtraPropertiesOnWindowForConsole> = window as {}
+): ExtraPropertiesOnWindowForConsole {
   defineProperty(target, 'profile', {
     enumerable: true,
     get() {
@@ -301,6 +339,8 @@ export function addDataToWindowObject(
   // For debugging purposes, allow tooltips to persist. This aids in inspecting
   // the DOM structure.
   target.persistTooltips = false;
+
+  return target as any;
 }
 
 export function logFriendlyPreamble() {

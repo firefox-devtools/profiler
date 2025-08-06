@@ -6,8 +6,11 @@
  * but then handles all cleanup after running the callback function that actually
  * holds the test.
  */
-export function withAnalyticsMock(callback: () => void) {
-  self.ga = jest.fn();
-  callback();
+export function withAnalyticsMock(
+  callback: (mock: jest.MockContext<any, any>) => void
+) {
+  const mockedGa = jest.fn();
+  self.ga = mockedGa;
+  callback(mockedGa.mock);
   delete self.ga;
 }

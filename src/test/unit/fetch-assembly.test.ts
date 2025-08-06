@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import { fetchAssembly } from 'firefox-profiler/utils/fetch-assembly';
 import { ensureExists } from '../../utils/flow';
 import type { NativeSymbolInfo, Lib } from 'firefox-profiler/types';
@@ -59,12 +57,12 @@ describe('fetchAssembly', function () {
 
   it('fetches from symbol server', async function () {
     let observedUrl = null;
-    let observedPostData = null;
+    let observedPostData: string | null = null;
     expect(
       await fetchAssembly(nativeSymbolInfo, lib, 'http://127.0.0.1:8000/api', {
         fetchUrlResponse: async (url: string, postData?: string) => {
           observedUrl = url;
-          observedPostData = postData;
+          observedPostData = postData ?? null;
           const r = new Response(exampleResponse, {
             status: 200,
           });
@@ -110,7 +108,7 @@ describe('fetchAssembly', function () {
     });
     expect(observedUrl).toBe('http://127.0.0.1:8000/api/asm/v1');
     expect(observedPostData).not.toBeNull();
-    expect(JSON.parse(ensureExists(observedPostData))).toEqual({
+    expect(JSON.parse(ensureExists<string>(observedPostData))).toEqual({
       debugName: 'xul.pdb',
       debugId: 'F0530E7AD96BB6ED4C4C44205044422E1',
       name: 'xul.dll',
@@ -152,8 +150,9 @@ describe('fetchAssembly', function () {
       ).type
     ).toEqual('SUCCESS');
     expect(
-      JSON.parse(ensureExists(observedPostData)).continueUntilFunctionEnd
-    ).toBeTrue();
+      JSON.parse(ensureExists<string>(observedPostData))
+        .continueUntilFunctionEnd
+    ).toBe(true);
   });
 
   it('fetches assembly from the browser', async function () {

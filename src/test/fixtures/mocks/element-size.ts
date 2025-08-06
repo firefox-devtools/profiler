@@ -1,7 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @ts-nocheck We just need enough here to pass tests.
 
 type Size = {
   readonly width: number;
@@ -15,10 +14,16 @@ type Size = {
 // This function returns an object suitable to be returned from
 // getBoundingClientRect. Generally you don't need to call it directly, but
 // rather use autoMockElementSize and setMockedElementSize.
-export function getBoundingBox({ width, height, offsetX, offsetY }: Size) {
+export function getBoundingBox({
+  width,
+  height,
+  offsetX,
+  offsetY,
+}: Size): DOMRect {
   offsetX = offsetX || 0;
   offsetY = offsetY || 0;
 
+  // @ts-expect-error Missing property toJSON
   return {
     width,
     height,
@@ -49,7 +54,7 @@ export function autoMockElementSize(sizeInformation: Size) {
 
 // Use this function to change the auto mocked size from autoMockElementSize.
 export function setMockedElementSize(sizeInformation: Size) {
-  HTMLElement.prototype.getBoundingClientRect.mockImplementation(() =>
+  (HTMLElement.prototype.getBoundingClientRect as any).mockImplementation(() =>
     getBoundingBox(sizeInformation)
   );
 
@@ -58,6 +63,7 @@ export function setMockedElementSize(sizeInformation: Size) {
     'offsetWidth'
   );
   if (offsetWidthDescriptor && offsetWidthDescriptor.get) {
+    // @ts-expect-error Property mockImplementation doesn't exist
     offsetWidthDescriptor.get.mockImplementation(() => sizeInformation.width);
   }
 
@@ -66,6 +72,7 @@ export function setMockedElementSize(sizeInformation: Size) {
     'offsetHeight'
   );
   if (offsetHeightDescriptor && offsetHeightDescriptor.get) {
+    // @ts-expect-error Property mockImplementation doesn't exist
     offsetHeightDescriptor.get.mockImplementation(() => sizeInformation.height);
   }
 }

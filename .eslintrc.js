@@ -134,13 +134,17 @@ module.exports = {
         '@typescript-eslint/no-unused-vars': 'off',
         // TypeScript imports react-jsx into .tsx files for us
         'react/react-in-jsx-scope': 'off',
-        // Allow @ts-ignore annotations with descriptions
+        // Allow @ts-expect-error annotations with descriptions.
         '@typescript-eslint/ban-ts-comment': [
           'error',
           {
+            // Allow @ts-expect-error annotations with descriptions.
             'ts-expect-error': 'allow-with-description',
-            'ts-ignore': 'allow-with-description',
-            'ts-nocheck': 'allow-with-description',
+            // Don't allow @ts-ignore or @ts-nocheck because we want to be notified
+            // when the error goes away so we can remove the annotation - use
+            // @ts-expect-error instead
+            'ts-ignore': true,
+            'ts-nocheck': true,
             'ts-check': false, // allow even without description
           },
         ],

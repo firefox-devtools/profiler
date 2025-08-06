@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-import React from 'react';
 import { Provider } from 'react-redux';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
@@ -20,9 +18,10 @@ import {
   changeCallTreeSummaryStrategy,
 } from '../../actions/profile-view';
 import { ensureExists } from '../../utils/flow';
+import type { Profile } from 'firefox-profiler/types';
 
 describe('TooltipCallNode', function () {
-  function setup(profile) {
+  function setup(profile: Profile) {
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
 
@@ -82,9 +81,9 @@ describe('TooltipCallNode', function () {
       iframeUrl,
       isPrivateBrowsing,
     }: {
-      pageUrl: string,
-      iframeUrl?: string,
-      isPrivateBrowsing?: boolean,
+      pageUrl: string;
+      iframeUrl?: string;
+      isPrivateBrowsing?: boolean;
     }) {
       const {
         profile,

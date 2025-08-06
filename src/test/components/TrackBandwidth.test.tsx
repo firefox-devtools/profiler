@@ -2,16 +2,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import type { IndexIntoSamplesTable, CssPixels } from 'firefox-profiler/types';
-
-import * as React from 'react';
 import { Provider } from 'react-redux';
 import { fireEvent } from '@testing-library/react';
 
-import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
-import { TrackProcessCPU } from '../../components/timeline/TrackProcessCPU';
+import {
+  render,
+  screen,
+  act,
+} from 'firefox-profiler/test/fixtures/testing-library';
+
+import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
+import { TrackBandwidth } from '../../components/timeline/TrackBandwidth';
 import { ensureExists } from '../../utils/flow';
 
 import {
@@ -33,23 +35,23 @@ import { autoMockElementSize } from '../fixtures/mocks/element-size';
 import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
 
 // The following constants determine the size of the drawn graph.
-const SAMPLE_COUNT = 8;
+const SAMPLE_COUNT = 12;
 const PIXELS_PER_SAMPLE = 10;
 const GRAPH_WIDTH = PIXELS_PER_SAMPLE * SAMPLE_COUNT;
 const GRAPH_HEIGHT = 10;
 
 function getSamplesPixelPosition(
   sampleIndex: IndexIntoSamplesTable,
-  samplePosition
+  samplePosition: number
 ): CssPixels {
   // Compute the pixel position of the center of a given sample.
   return sampleIndex * PIXELS_PER_SAMPLE + PIXELS_PER_SAMPLE * samplePosition;
 }
 
 /**
- * This test verifies that the process CPU track can draw a graph of the process CPU.
+ * This test verifies that the bandwidth track can draw a graph.
  */
-describe('TrackProcessCPU', function () {
+describe('TrackBandwidth', function () {
   function setup() {
     const { profile } = getProfileFromTextSamples(
       Array(SAMPLE_COUNT).fill('A').join('  ')
@@ -59,18 +61,26 @@ describe('TrackProcessCPU', function () {
     const sampleTimes = ensureExists(thread.samples.time);
     // Changing one of the sample times, so we can test different intervals.
     sampleTimes[1] = 1.5; // It was 1 before.
+    // Ensure some samples are very close to each other, to exercise
+    // the max min decimation algorithm.
+    for (let i = 7; i < thread.samples.length - 1; ++i) {
+      sampleTimes[i] = 7 + i / 100;
+    }
     profile.counters = [
       getCounterForThreadWithSamples(
         thread,
         threadIndex,
         {
           time: sampleTimes.slice(),
-          // CPU usage numbers for the per-process CPU.
-          count: [100, 400, 500, 1000, 200, 500, 300, 100],
+          // Bandwidth usage numbers. They are bytes.
+          count: [
+            10000, 40000, 50000, 100000, 2000000, 5000000, 30000, 1000000,
+            20000, 1, 12000, 100000,
+          ],
           length: SAMPLE_COUNT,
         },
-        'processCPU',
-        'CPU'
+        'SystemBandwidth',
+        'bandwidth'
       ),
     ];
     const store = storeWithProfile(profile);
@@ -79,7 +89,7 @@ describe('TrackProcessCPU', function () {
 
     const renderResult = render(
       <Provider store={store}>
-        <TrackProcessCPU counterIndex={0} />
+        <TrackBandwidth counterIndex={0} />
       </Provider>
     );
     const { container } = renderResult;
@@ -88,14 +98,14 @@ describe('TrackProcessCPU', function () {
     flushRafCalls();
 
     const canvas = ensureExists(
-      container.querySelector('.timelineTrackProcessCPUCanvas'),
-      `Couldn't find the process CPU canvas, with selector .timelineTrackProcessCPUCanvas`
+      container.querySelector('.timelineTrackBandwidthCanvas'),
+      `Couldn't find the bandwidth canvas, with selector .timelineTrackBandwidthCanvas`
     );
     const getTooltipContents = () =>
-      document.querySelector('.timelineTrackProcessCPUTooltip');
-    const getProcessCPUDot = () =>
-      container.querySelector('.timelineTrackProcessCPUGraphDot');
-    const moveMouseAtCounter = (index, pos) =>
+      document.querySelector('.timelineTrackBandwidthTooltip');
+    const getBandwidthDot = () =>
+      container.querySelector('.timelineTrackBandwidthGraphDot');
+    const moveMouseAtCounter = (index: number, pos: number) =>
       fireEvent(
         canvas,
         getMouseEvent('mousemove', {
@@ -115,7 +125,7 @@ describe('TrackProcessCPU', function () {
       getTooltipContents,
       moveMouseAtCounter,
       flushRafCalls,
-      getProcessCPUDot,
+      getBandwidthDot,
     };
   }
 
@@ -145,43 +155,83 @@ describe('TrackProcessCPU', function () {
     expect(getTooltipContents()).toBeFalsy();
   });
 
-  it('has a tooltip that matches the snapshot', function () {
-    const { moveMouseAtCounter, getTooltipContents } = setup();
-    // We are hovering exactly between 4th and 5th counter. That's why it should
-    // show the 5th counter.
+  it('has a tooltip that has all the necessary information', function () {
+    const { moveMouseAtCounter } = setup();
     moveMouseAtCounter(4, 0.5);
-    expect(getTooltipContents()).toMatchSnapshot();
+
+    // Note: Fluent adds isolation characters \u2068 and \u2069 around variables.
+    expect(
+      screen.getByText('Transfer speed for this sample:')
+    ).toBeInTheDocument();
+    expect(screen.getByText(/speed/).nextSibling).toHaveTextContent(
+      '4.66GB\u2069 per second'
+    );
+
+    expect(
+      screen.getByText('read/write operations since the previous sample:')
+    ).toBeInTheDocument();
+    expect(screen.getByText(/operations/).nextSibling).toHaveTextContent('0');
+
+    expect(
+      screen.getByText('Data transferred up to this time:')
+    ).toBeInTheDocument();
+    expect(screen.getByText(/transferred up to/).nextSibling).toHaveTextContent(
+      /6.86MB\u2069 \(\u2068\d+(\.\d+)?\u2069 g CO₂e\)/
+    );
+
+    expect(
+      screen.getByText('Data transferred in the visible range:')
+    ).toBeInTheDocument();
+    expect(screen.getByText(/visible range/).nextSibling).toHaveTextContent(
+      /7.97MB\u2069 \(\u2068\d+(\.\d+)?\u2069 g CO₂e\)/
+    );
   });
 
   it('draws a dot on the graph', function () {
-    const { moveMouseAtCounter, getProcessCPUDot } = setup();
-    expect(getProcessCPUDot()).toBeFalsy();
+    const { moveMouseAtCounter, getBandwidthDot } = setup();
+    expect(getBandwidthDot()).toBeFalsy();
     moveMouseAtCounter(1, 0.5);
-    expect(getProcessCPUDot()).toBeTruthy();
+    expect(getBandwidthDot()).toBeTruthy();
   });
 
   it('can draw a dot on both extremes of the graph', function () {
-    const { moveMouseAtCounter, getProcessCPUDot } = setup();
-    expect(getProcessCPUDot()).toBeFalsy();
+    const { moveMouseAtCounter, getBandwidthDot } = setup();
+    expect(getBandwidthDot()).toBeFalsy();
     moveMouseAtCounter(0, 0.25);
-    expect(getProcessCPUDot()).toBeTruthy();
+    expect(getBandwidthDot()).toBeTruthy();
     moveMouseAtCounter(7, 0);
-    expect(getProcessCPUDot()).toBeTruthy();
+    expect(getBandwidthDot()).toBeTruthy();
   });
 
   it('draws a dot that matches the snapshot', function () {
-    const { moveMouseAtCounter, getProcessCPUDot } = setup();
+    const { moveMouseAtCounter, getBandwidthDot } = setup();
     moveMouseAtCounter(1, 0.5);
-    expect(getProcessCPUDot()).toMatchSnapshot();
+    expect(getBandwidthDot()).toMatchSnapshot();
   });
 
-  it('accounts the real sample times correctly', function () {
-    const { moveMouseAtCounter } = setup();
-    moveMouseAtCounter(2, 0);
-    // 2nd index has 500 value in it. Without thinking about the intervals, it
-    // should be 50% CPU ratio since the highest value is 1000. But if we look
-    // at the intervals, we can see that the interval of this sample is 0.5ms
-    // therefore, the CPU usage should be 100% instead.
-    expect(screen.getByText(/CPU:/)).toHaveTextContent('100%');
+  it('shows a tooltip with bandwidth information', function () {
+    const { dispatch, moveMouseAtCounter } = setup();
+    act(() => {
+      dispatch(
+        updatePreviewSelection({
+          hasSelection: true,
+          isModifying: false,
+          selectionStart: 5,
+          selectionEnd: 6,
+        })
+      );
+    });
+
+    moveMouseAtCounter(3, 0);
+    // Note: Fluent adds isolation characters \u2068 and \u2069 around variables.
+    expect(screen.getByText(/speed/).nextSibling).toHaveTextContent(
+      '95.4MB\u2069 per second'
+    );
+    expect(screen.getByText(/visible range:/).nextSibling).toHaveTextContent(
+      /7.97MB\u2069 \(\u2068\d+(\.\d+)?\u2069 g CO₂e\)/
+    );
+    expect(
+      screen.getByText(/current selection:/).nextSibling
+    ).toHaveTextContent(/4.77MB\u2069 \(\u2068\d+(\.\d+)?\u2069 g CO₂e\)/);
   });
 });

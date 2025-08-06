@@ -1,10 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
-
-import * as React from 'react';
 import { Provider } from 'react-redux';
 
 import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
@@ -15,9 +11,10 @@ import {
 } from '../../actions/profile-view';
 
 import { storeWithProfile } from '../fixtures/stores';
+import type { FuncNamesDict } from '../fixtures/profiles/processed-profile';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
-import type { CallNodePath } from 'firefox-profiler/types';
+import type { CallNodePath, Profile } from 'firefox-profiler/types';
 import { ensureExists } from '../../utils/flow';
 import { fireFullClick } from '../fixtures/utils';
 
@@ -65,7 +62,13 @@ describe('CallTreeSidebar', function () {
     return result;
   }
 
-  function setup({ profile, funcNamesDictPerThread }) {
+  function setup({
+    profile,
+    funcNamesDictPerThread,
+  }: {
+    profile: Profile;
+    funcNamesDictPerThread: FuncNamesDict[];
+  }) {
     const store = storeWithProfile(profile);
 
     const selectNode = (nodePath: CallNodePath) => {

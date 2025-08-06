@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-06T14:53:48.964Z",
-  "totalUsages": 120,
-  "totalFiles": 51,
+  "timestamp": "2025-08-06T17:27:22.990Z",
+  "totalUsages": 128,
+  "totalFiles": 52,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -385,7 +385,12 @@
     },
     {
       "file": "src/test/fixtures/mocks/element-size.ts",
-      "line": 80,
+      "line": 57,
+      "content": "(HTMLElement.prototype.getBoundingClientRect as any).mockImplementation(() =>"
+    },
+    {
+      "file": "src/test/fixtures/mocks/element-size.ts",
+      "line": 87,
       "content": "} as any;"
     },
     {
@@ -539,18 +544,48 @@
       "content": "(triggerResponse as any)('Invalid message');"
     },
     {
+      "file": "src/test/unit/window-console.test.ts",
+      "line": 20,
+      "content": "expect((window as any).profile).toBeUndefined();"
+    },
+    {
+      "file": "src/test/unit/window-console.test.ts",
+      "line": 21,
+      "content": "expect((window as any).filteredProfile).toBeUndefined();"
+    },
+    {
+      "file": "src/test/unit/window-console.test.ts",
+      "line": 22,
+      "content": "expect((window as any).callTree).toBeUndefined();"
+    },
+    {
+      "file": "src/test/unit/window-console.test.ts",
+      "line": 42,
+      "content": "(console as any).log = mockedLog;"
+    },
+    {
+      "file": "src/test/unit/window-console.test.ts",
+      "line": 46,
+      "content": "(console as any).log = log;"
+    },
+    {
+      "file": "src/test/unit/window-console.test.ts",
+      "line": 75,
+      "content": "const result = (target as any).extractGeckoLogs();"
+    },
+    {
       "file": "src/utils/__mocks__/worker-factory.ts",
       "line": 28,
       "content": "const nodeVersion = (process as any).versions.node;"
     },
     {
       "file": "src/utils/connect.ts",
-      "line": 129,
+      "line": 106,
       "content": "return (connect as any)("
     },
     {
       "file": "src/utils/connect.ts",
-      "line": 154,
+      "line": 131,
       "content": "return (connect as any)("
     },
     {
@@ -590,18 +625,23 @@
     },
     {
       "file": "src/utils/window-console.ts",
-      "line": 257,
+      "line": 295,
       "content": "(data as any).module &&"
     },
     {
       "file": "src/utils/window-console.ts",
-      "line": 258,
+      "line": 296,
       "content": "(data as any).name"
     },
     {
       "file": "src/utils/window-console.ts",
-      "line": 263,
+      "line": 301,
       "content": "const statement = `${strTimestamp} - [${processName} ${thread.pid}: ${thread.name}]: D/${(data as any).module} ${(data as any).name.trim()}`;"
+    },
+    {
+      "file": "src/utils/window-console.ts",
+      "line": 343,
+      "content": "return target as any;"
     }
   ]
 }

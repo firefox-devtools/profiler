@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import {
   selectedThreadSelectors,
   getSelectedThreadsKey,
@@ -15,6 +13,7 @@ import {
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { formatTree } from '../fixtures/utils';
+import type { CallNodePath } from 'firefox-profiler/types';
 
 describe('thread merging', function () {
   function setup() {
@@ -145,7 +144,7 @@ describe('thread merging', function () {
     const { dispatch, getState, func } = setup();
 
     // Some simple helpers to make this test more terse:
-    const changePath = (path) =>
+    const changePath = (path: CallNodePath) =>
       dispatch(changeSelectedCallNode(getSelectedThreadsKey(getState()), path));
     const getPath = () =>
       selectedThreadSelectors.getSelectedCallNodePath(getState());
@@ -153,7 +152,7 @@ describe('thread merging', function () {
     const singleThread = new Set([0]);
     const mergedThreads = new Set([0, 1]);
 
-    const noPath = [];
+    const noPath: CallNodePath = [];
     const singlePath = [func.A, func.B];
     const mergedPath = [func.F, func.G];
 

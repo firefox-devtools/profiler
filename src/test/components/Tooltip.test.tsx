@@ -2,10 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
-import React from 'react';
-
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import {
   addRootOverlayElement,
@@ -155,11 +151,15 @@ describe('shared/Tooltip', () => {
   });
 });
 
-type Size = { width: number, height: number };
-type Position = { x: number, y: number };
+type Size = { width: number; height: number };
+type Position = { x: number; y: number };
 type Setup = {
-  box: Size,
-  mouse: Position,
+  box: Size;
+  mouse: Position;
+};
+type SetupWithMaybeBox = {
+  box?: Size;
+  mouse: Position;
 };
 
 function setup({ box, mouse }: Setup) {
@@ -184,13 +184,13 @@ function setup({ box, mouse }: Setup) {
     return ensureExists(
       document.querySelector('.tooltip'),
       `Couldn't find the tooltip element, with selector .tooltip`
-    );
+    ) as HTMLElement;
   }
 
-  function getTooltipStyle() {
+  function getTooltipStyle(): Record<string, string> {
     const tooltip = getTooltip();
     const style = tooltip.style;
-    const result = {};
+    const result: Record<string, string> = {};
     for (let i = 0; i < style.length; i++) {
       const prop = style.item(i);
       const value = style.getPropertyValue(prop);
@@ -200,7 +200,7 @@ function setup({ box, mouse }: Setup) {
   }
 
   return {
-    rerender: ({ mouse, box: newBox }: $Shape<Setup>) => {
+    rerender: ({ mouse, box: newBox }: SetupWithMaybeBox) => {
       if (newBox) {
         box.width = newBox.width;
         box.height = newBox.height;

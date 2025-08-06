@@ -1,34 +1,44 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
+
 import {
   uploadBinaryProfileData,
   deleteProfileOnServer,
 } from 'firefox-profiler/profile-logic/profile-store';
+import type { UserRouteConfig } from 'fetch-mock';
 
 describe('profile upload', () => {
   function setup() {
-    function fakeXMLHttpRequest() {
-      // eslint-disable-next-line @babel/no-invalid-this
-      Object.assign(this, {
-        abort: jest.fn(),
-        upload: {},
-        open: jest.fn(),
-        setRequestHeader: jest.fn(),
-        send: jest.fn(),
-      });
+    class FakeXMLHttpRequest {
+      static instances: FakeXMLHttpRequest[] = [];
 
-      // eslint-disable-next-line @babel/no-invalid-this
-      fakeXMLHttpRequest.instances.push(this);
+      abort = jest.fn();
+      open = jest.fn();
+      setRequestHeader = jest.fn();
+      send = jest.fn();
+
+      upload: { onprogress?: (e: ProgressEvent<EventTarget>) => void } = {};
+      onload: (() => void) | undefined;
+      onerror: (() => void) | undefined;
+
+      status: number | undefined;
+      statusText: string | undefined;
+      responseText: string | undefined;
     }
-    fakeXMLHttpRequest.instances = [];
 
-    jest.spyOn(window, 'XMLHttpRequest').mockImplementation(fakeXMLHttpRequest);
+    jest
+      .spyOn(window, 'XMLHttpRequest')
+      .mockImplementation(() => {
+        const mockInstance = new FakeXMLHttpRequest();
+        FakeXMLHttpRequest.instances.push(mockInstance);
+        // @ts-expect-error FakeXMLHttpRequest is not a fully qualified XMLHttpRequest
+        return mockInstance as XMLHttpRequest;
+      });
 
     function getLastXhr() {
       const xhr =
-        fakeXMLHttpRequest.instances[fakeXMLHttpRequest.instances.length - 1];
+        FakeXMLHttpRequest.instances[FakeXMLHttpRequest.instances.length - 1];
       if (!xhr) {
         throw new Error(`No XHR has been created yet.`);
       }
@@ -38,7 +48,7 @@ describe('profile upload', () => {
     return {
       getLastXhr,
 
-      sendProgress({ loaded, total }) {
+      sendProgress({ loaded, total }: { loaded: number; total: number }) {
         const e = new ProgressEvent('progress', {
           lengthComputable: true,
           loaded,
@@ -56,9 +66,9 @@ describe('profile upload', () => {
         statusText,
         responseText,
       }: {
-        status: number,
-        statusText?: string,
-        responseText?: string,
+        status: number;
+        statusText?: string;
+        responseText?: string;
       }) {
         const xhr = getLastXhr();
         xhr.status = status;
@@ -170,12 +180,12 @@ describe('profile deletion', () => {
     endpointUrl,
     jwtToken,
   }: {
-    endpointUrl: string,
-    jwtToken: string,
+    endpointUrl: string;
+    jwtToken: string;
   }) {
     window.fetchMock
       .catch(404) // catchall
-      .route(endpointUrl, async ({ options }) => {
+      .route(endpointUrl, async ({ options }: { options: UserRouteConfig }) => {
         const { method, headers } = options;
 
         if (method !== 'delete') {
@@ -186,8 +196,9 @@ describe('profile deletion', () => {
         }
 
         if (
-          headers['content-type'] !== 'application/json' ||
-          headers.accept !== 'application/vnd.firefox-profiler+json;version=1.0'
+          headers!['content-type'] !== 'application/json' ||
+          headers!.accept !==
+            'application/vnd.firefox-profiler+json;version=1.0'
         ) {
           return new Response(null, {
             status: 406,
@@ -195,7 +206,7 @@ describe('profile deletion', () => {
           });
         }
 
-        if (headers.authorization !== `Bearer ${jwtToken}`) {
+        if (headers!.authorization !== `Bearer ${jwtToken}`) {
           return new Response(null, {
             status: 401,
             statusText: 'Forbidden',

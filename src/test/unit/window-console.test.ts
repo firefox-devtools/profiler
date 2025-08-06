@@ -1,31 +1,35 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import { stripIndent } from 'common-tags';
 
+import type { ExtraPropertiesOnWindowForConsole } from '../../utils/window-console';
 import {
   addDataToWindowObject,
   logFriendlyPreamble,
 } from '../../utils/window-console';
 import { storeWithSimpleProfile, storeWithProfile } from '../fixtures/stores';
 import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
+import type { MixedObject } from 'firefox-profiler/types';
 
 describe('console-accessible values on the window object', function () {
   // Coerce the window into a generic object, as these values aren't defined
   // in the flow type definition.
 
   it('does not have the values initially', function () {
-    expect((window: any).profile).toBeUndefined();
-    expect((window: any).filteredProfile).toBeUndefined();
-    expect((window: any).callTree).toBeUndefined();
+    expect((window as any).profile).toBeUndefined();
+    expect((window as any).filteredProfile).toBeUndefined();
+    expect((window as any).callTree).toBeUndefined();
   });
 
   it('adds values to the console', function () {
     const store = storeWithSimpleProfile();
-    const target = {};
-    addDataToWindowObject(store.getState, store.dispatch, target);
+    const targetWin: Partial<ExtraPropertiesOnWindowForConsole> = {};
+    const target = addDataToWindowObject(
+      store.getState,
+      store.dispatch,
+      targetWin
+    );
     expect(target.profile).toBeTruthy();
     expect(target.filteredThread).toBeTruthy();
     expect(target.callTree).toBeTruthy();
@@ -34,11 +38,12 @@ describe('console-accessible values on the window object', function () {
 
   it('logs a friendly message', function () {
     const log = console.log;
-    (console: any).log = jest.fn();
+    const mockedLog = jest.fn();
+    (console as any).log = mockedLog;
     logFriendlyPreamble();
-    expect(console.log.mock.calls.length).toEqual(2);
-    expect(console.log.mock.calls).toMatchSnapshot();
-    (console: any).log = log;
+    expect(mockedLog.mock.calls.length).toEqual(2);
+    expect(mockedLog.mock.calls).toMatchSnapshot();
+    (console as any).log = log;
   });
 
   it('can extract gecko logs', function () {
@@ -65,9 +70,9 @@ describe('console-accessible values on the window object', function () {
       ],
     ]);
     const store = storeWithProfile(profile);
-    const target = {};
+    const target: MixedObject = {};
     addDataToWindowObject(store.getState, store.dispatch, target);
-    const result = target.extractGeckoLogs();
+    const result = (target as any).extractGeckoLogs();
     expect(result).toBe(stripIndent`
       1970-01-01 00:00:00.170000000 UTC - [Unknown Process 0: Empty]: D/nsHttp ParentChannelListener::ParentChannelListener [this=7fb5e19b98d0, next=7fb5f48f2320]
       1970-01-01 00:00:00.190000000 UTC - [Unknown Process 0: Empty]: D/nsJarProtocol nsJARChannel::nsJARChannel [this=0x87f1ec80]
@@ -75,14 +80,12 @@ describe('console-accessible values on the window object', function () {
   });
 
   describe('totalMarkerDuration', function () {
-    function setup() {
+    function setup(): ExtraPropertiesOnWindowForConsole {
       jest.spyOn(console, 'log').mockImplementation(() => {});
 
       const store = storeWithSimpleProfile();
-      const target = {};
-      addDataToWindowObject(store.getState, store.dispatch, target);
-
-      return target;
+      const targetWin: Partial<ExtraPropertiesOnWindowForConsole> = {};
+      return addDataToWindowObject(store.getState, store.dispatch, targetWin);
     }
     beforeEach(function () {});
 

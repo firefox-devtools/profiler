@@ -88,7 +88,7 @@ describe('PathSet', function () {
 
     const resultValues: CallNodePath[] = [];
     set.forEach(function (value1, value2, thisSet) {
-      // @ts-ignore TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
+      // @ts-expect-error TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
       // eslint-disable-next-line @babel/no-invalid-this
       expect(this).toBe(undefined);
       expect(value1).toBe(value2);
@@ -99,7 +99,7 @@ describe('PathSet', function () {
 
     const context = {};
     set.forEach(function () {
-      // @ts-ignore TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
+      // @ts-expect-error TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
       expect(this).toBe(context);
     }, context);
   });
@@ -107,11 +107,11 @@ describe('PathSet', function () {
   it('implements iterable, .values, .entries', function () {
     const set = new PathSet(sampleValues);
     expect(Array.from(set)).toEqual(sampleValues);
-    // @ts-ignore The TypeScript definition of Array.from only accepts Iterable, not Iterator - not sure what's correct here
+    // @ts-expect-error The TypeScript definition of Array.from only accepts Iterable, not Iterator - not sure what's correct here
     expect(Array.from<CallNodePath>(set.values())).toEqual(sampleValues);
 
     const expectedEntries = sampleValues.map((val) => [val, val]);
-    // @ts-ignore The TypeScript definition of Array.from only accepts Iterable, not Iterator - not sure what's correct here
+    // @ts-expect-error The TypeScript definition of Array.from only accepts Iterable, not Iterator - not sure what's correct here
     expect(Array.from(set.entries())).toEqual(expectedEntries);
   });
 });
