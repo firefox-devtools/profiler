@@ -62,6 +62,9 @@ echo "🔧 Applying Flow→TypeScript transformations..."
 # 1. Remove @flow directive
 apply_transform 's|^// @flow$||g' "Remove @flow directive"
 
+apply_transform "s|^import \* as React from 'react';$||g" "Remove react import"
+apply_transform "s|^import React from 'react';$||g" "Remove react import"
+
 # 2. withSize<Props>(...) → withSize(...)
 apply_transform 's/withSize<[^>]+>/withSize/g' "Remove explicit Props argument from withSize call"
 
@@ -322,14 +325,4 @@ echo "   - Fix trailing commas in multiline type definitions"
 echo "   - Convert commas to semicolons in type/interface definitions ONLY"
 echo "   - Keep commas in regular object literals (className={...}, state={...})"
 echo ""
-echo "✨ Automated improvements in this version:"
-echo "   ✅ React override modifiers (render, componentDidMount, state)"
-echo "   ✅ HTML boolean attributes → React boolean props" 
-echo "   ✅ TimeoutID/IntervalID → NodeJS.Timeout type mapping"
-echo "   ✅ Improved function parameter name handling (avoids void function issues)"
-echo "   ✅ Enhanced React event type conversions (SyntheticFocusEvent, form events)"
-echo "   🆕 Flow utility types (\$PropertyType, \$Diff, \$Exact)"
-echo "   🆕 More React synthetic events (SyntheticDragEvent, SyntheticInputEvent)"
-echo "   🆕 Complex generic syntax (TreeView | null<T> → TreeView<T> | null)"
-echo "   🆕 Better Set/Map constructor detection"
-echo "   🆕 Component method parameter typing (componentDidUpdate)"
+echo "$OUTPUT_FILE"

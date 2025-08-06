@@ -41,8 +41,8 @@ function findFiles() {
           continue;
         }
 
-        // Skip test files and libdef files
-        if (file.endsWith('.test.js') || relativePath.includes('/libdef/')) {
+        // Skip libdef files
+        if (relativePath.includes('/libdef/')) {
           continue;
         }
 
