@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-06T17:27:22.990Z",
-  "totalUsages": 128,
-  "totalFiles": 52,
+  "timestamp": "2025-08-06T20:09:35.143Z",
+  "totalUsages": 135,
+  "totalFiles": 54,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -319,9 +319,44 @@
       "content": "})) as any;"
     },
     {
+      "file": "src/test/components/GlobalTrack.test.tsx",
+      "line": 254,
+      "content": "['Task 1', 0, 10, { type: 'task' } as any],"
+    },
+    {
+      "file": "src/test/components/GlobalTrack.test.tsx",
+      "line": 255,
+      "content": "['Task 2', 20, 30, { type: 'task' } as any],"
+    },
+    {
+      "file": "src/test/components/GlobalTrack.test.tsx",
+      "line": 256,
+      "content": "['Task 3', 40, 50, { type: 'task' } as any],"
+    },
+    {
+      "file": "src/test/components/GlobalTrack.test.tsx",
+      "line": 257,
+      "content": "['Task 4', 60, 70, { type: 'task' } as any],"
+    },
+    {
       "file": "src/test/components/Home.test.tsx",
       "line": 30,
       "content": "(Object.defineProperty as any)(window.navigator, 'userAgent', {"
+    },
+    {
+      "file": "src/test/components/Root.test.tsx",
+      "line": 176,
+      "content": "(retrieveProfileFromBrowser as any).mockImplementation(() => async () => {});"
+    },
+    {
+      "file": "src/test/components/Root.test.tsx",
+      "line": 177,
+      "content": "(retrieveProfileFromStore as any).mockImplementation(() => async () => {});"
+    },
+    {
+      "file": "src/test/components/Root.test.tsx",
+      "line": 178,
+      "content": "(retrieveProfilesToCompare as any).mockImplementation(() => async () => {});"
     },
     {
       "file": "src/test/components/StackSettings.test.tsx",
@@ -455,12 +490,12 @@
     },
     {
       "file": "src/test/setup.ts",
-      "line": 24,
+      "line": 27,
       "content": "(global as any).fetchMock = fetchMock;"
     },
     {
       "file": "src/test/setup.ts",
-      "line": 29,
+      "line": 32,
       "content": "const { __shutdownWorkers } = WorkerFactory as any;"
     },
     {

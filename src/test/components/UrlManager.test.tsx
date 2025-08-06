@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-import * as React from 'react';
 import { Provider } from 'react-redux';
 
 import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
@@ -30,6 +28,7 @@ import { getProfileOrNull } from '../../selectors/profile';
 jest.mock('../../profile-logic/symbol-store');
 
 import { simulateOldWebChannelAndFrameScript } from '../fixtures/mocks/web-channel';
+import type { UrlSetupPhase } from 'firefox-profiler/types';
 
 describe('UrlManager', function () {
   autoMockFullNavigation();
@@ -38,7 +37,7 @@ describe('UrlManager', function () {
     return getProfileFromTextSamples('A').profile;
   }
 
-  function setup(urlPath: ?string) {
+  function setup(urlPath?: string) {
     jest
       .spyOn(navigator, 'userAgent', 'get')
       .mockReturnValue(
@@ -57,7 +56,7 @@ describe('UrlManager', function () {
         </Provider>
       );
 
-    const waitUntilUrlSetupPhase = (phase) =>
+    const waitUntilUrlSetupPhase = (phase: UrlSetupPhase) =>
       act(() =>
         waitUntilState(store, (state) => getUrlSetupPhase(state) === phase)
       );
@@ -79,6 +78,7 @@ describe('UrlManager', function () {
   });
 
   afterEach(function () {
+    // @ts-expect-error geckoProfilerPromise not optional
     delete window.geckoProfilerPromise;
   });
 
@@ -343,13 +343,13 @@ describe('UrlManager', function () {
     await waitUntilUrlSetupPhase('done');
 
     await new Promise((resolve) => {
-      function listener({ data }) {
+      function listener({ data }: MessageEvent) {
         if (
           data &&
           typeof data === 'object' &&
           data.name === 'ready:response'
         ) {
-          resolve();
+          resolve(undefined);
           window.removeEventListener('message', listener);
         }
       }

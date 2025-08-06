@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`timeline/LocalTrack with a memory track matches the snapshot of the memory track 1`] = `
 <li

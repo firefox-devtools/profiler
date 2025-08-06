@@ -2,16 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import type {
   TrackReference,
   Store,
   ThreadIndex,
   LocalTrack,
 } from 'firefox-profiler/types';
-
-import * as React from 'react';
 import { Provider } from 'react-redux';
 
 import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
@@ -206,12 +202,12 @@ function setup(
     ensureExists(
       container.querySelector('.timelineTrackLabel'),
       `Couldn't find the track label with selector .timelineTrackLabel`
-    );
+    ) as HTMLElement;
   const getLocalTrackRow = () =>
     ensureExists(
       container.querySelector('.timelineTrackLocalRow'),
       `Couldn't find the track local row with selector .timelineTrackLocalRow`
-    );
+    ) as HTMLElement;
 
   return {
     ...renderResult,
@@ -242,7 +238,7 @@ function setupThreadTrack() {
   const trackIndex = 0;
   const profile = getProfileWithNiceTracks();
   const store = storeWithProfile(profile);
-  const trackReference = { type: 'local', pid: PID, trackIndex };
+  const trackReference = { type: 'local' as const, pid: PID, trackIndex };
   const localTrack = getLocalTrackFromReference(
     store.getState(),
     trackReference
@@ -261,7 +257,7 @@ function setupWithNetworkProfile() {
   profile.threads[0].pid = PID;
 
   const store = storeWithProfile(profile);
-  const trackReference = { type: 'local', pid: PID, trackIndex };
+  const trackReference = { type: 'local' as const, pid: PID, trackIndex };
   const localTrack = getLocalTrackFromReference(
     store.getState(),
     trackReference
@@ -291,7 +287,7 @@ function setupWithIPC() {
   profile.threads[0].pid = PID;
 
   const store = storeWithProfile(profile);
-  const trackReference = { type: 'local', pid: PID, trackIndex };
+  const trackReference = { type: 'local' as const, pid: PID, trackIndex };
   const localTrack = getLocalTrackFromReference(
     store.getState(),
     trackReference

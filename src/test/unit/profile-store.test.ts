@@ -27,14 +27,12 @@ describe('profile upload', () => {
       responseText: string | undefined;
     }
 
-    jest
-      .spyOn(window, 'XMLHttpRequest')
-      .mockImplementation(() => {
-        const mockInstance = new FakeXMLHttpRequest();
-        FakeXMLHttpRequest.instances.push(mockInstance);
-        // @ts-expect-error FakeXMLHttpRequest is not a fully qualified XMLHttpRequest
-        return mockInstance as XMLHttpRequest;
-      });
+    jest.spyOn(window, 'XMLHttpRequest').mockImplementation(() => {
+      const mockInstance = new FakeXMLHttpRequest();
+      FakeXMLHttpRequest.instances.push(mockInstance);
+      // @ts-expect-error FakeXMLHttpRequest is not a fully qualified XMLHttpRequest
+      return mockInstance as XMLHttpRequest;
+    });
 
     function getLastXhr() {
       const xhr =

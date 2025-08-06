@@ -46,7 +46,7 @@ import { fireEvent, screen } from '@testing-library/react';
  * to supply these properties.
  */
 
-type FakeMouseEventInit = $Shape<{
+export type FakeMouseEventInit = $Shape<{
   altKey: boolean;
   button: 0 | 1 | 2 | 3 | 4;
   buttons: number;

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`EmptyThreadIndicator rendering matches the snapshot when rendering all three types of indicators 1`] = `
 <div

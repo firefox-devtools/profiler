@@ -2,11 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import type { Profile, FileIoPayload } from 'firefox-profiler/types';
-
-import * as React from 'react';
 import { Provider } from 'react-redux';
 import { oneLine } from 'common-tags';
 
@@ -27,11 +23,13 @@ import {
 } from '../fixtures/mocks/canvas-context';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
+import type { FakeMouseEventInit } from '../fixtures/utils';
 import {
   addRootOverlayElement,
   removeRootOverlayElement,
   fireFullClick,
 } from '../fixtures/utils';
+import type { TestDefinedMarker } from '../fixtures/profiles/processed-profile';
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
@@ -66,7 +64,7 @@ describe('timeline/TrackThread', function () {
   }
 
   function getMarkersProfile(
-    testMarkers = [
+    testMarkers: TestDefinedMarker[] = [
       ['Marker A', 0],
       ['Marker B', 1],
       ['Marker C', 2],
@@ -87,7 +85,7 @@ describe('timeline/TrackThread', function () {
     const threadIndex = 0;
     const flushRafCalls = mockRaf();
 
-    type Coordinate = { pageX: number, pageY: number };
+    type Coordinate = { pageX: number; pageY: number };
 
     // Look through the draw log and find the center of a specific fillRect
     // call. This is a good way to know where the canvas drew something.
@@ -128,7 +126,7 @@ describe('timeline/TrackThread', function () {
       ensureExists(
         container.querySelector('.threadStackGraphCanvas'),
         `Couldn't find the stack graph canvas, with selector .threadStackGraphCanvas`
-      );
+      ) as HTMLElement;
     const markerCanvas = () =>
       ensureExists(
         container.querySelector(oneLine`
@@ -136,7 +134,7 @@ describe('timeline/TrackThread', function () {
           .timelineMarkersCanvas
         `),
         `Couldn't find the marker canvas`
-      );
+      ) as HTMLElement;
 
     return {
       ...renderResult,
@@ -214,7 +212,7 @@ describe('timeline/TrackThread', function () {
             profile.shared.stringArray[thread.funcTable.name[funcIndex]]
         );
 
-    function changeInvertCallstackAndGetDrawLog(value) {
+    function changeInvertCallstackAndGetDrawLog(value: boolean) {
       // We don't want a selected stack graph to change fillRect ordering.
       act(() => {
         dispatch(changeSelectedCallNode(0, []));
@@ -258,7 +256,7 @@ describe('timeline/TrackThread', function () {
 
     const log = flushDrawLog();
 
-    function clickAndGetMarkerName(event) {
+    function clickAndGetMarkerName(event: FakeMouseEventInit) {
       fireFullClick(markerCanvas(), event);
       return getPreviewSelection(getState());
     }
@@ -266,7 +264,7 @@ describe('timeline/TrackThread', function () {
     // Currently markers are drawn with 3 fillRects, the middle of the three is the
     // big interesting one. If this test breaks, likely the drawing strategy
     // has changed.
-    const determineIndex = (i) => i * 3 + 1;
+    const determineIndex = (i: number) => i * 3 + 1;
 
     expect(
       clickAndGetMarkerName(getFillRectCenterByIndex(log, determineIndex(0)))
@@ -284,23 +282,23 @@ describe('timeline/TrackThread', function () {
   });
 
   it('does not add disk io markers if none are present', function () {
-    const noMarkers = [];
+    const noMarkers: TestDefinedMarker[] = [];
     const { queryByTestId } = setup(getMarkersProfile(noMarkers));
     expect(queryByTestId('TimelineMarkersFileIo')).not.toBeInTheDocument();
   });
 
   it('adds file io markers if they are present', function () {
-    const fileIoMarker = [
+    const fileIoMarker: TestDefinedMarker[] = [
       [
         'FileIO',
         2,
         3,
-        ({
+        {
           type: 'FileIO',
           source: 'PoisionOIInterposer',
           filename: '/foo/bar/',
           operation: 'read/write',
-        }: FileIoPayload),
+        } as FileIoPayload,
       ],
     ];
     const { getByTestId } = setup(getMarkersProfile(fileIoMarker));
@@ -308,18 +306,18 @@ describe('timeline/TrackThread', function () {
   });
 
   it('does not add off-thread file io markers even if they are present', function () {
-    const fileIoMarker = [
+    const fileIoMarker: TestDefinedMarker[] = [
       [
         'FileIO',
         2,
         3,
-        ({
+        {
           type: 'FileIO',
           source: 'PoisionOIInterposer',
           filename: '/foo/bar/',
           operation: 'read/write',
           threadId: 123,
-        }: FileIoPayload),
+        } as FileIoPayload,
       ],
     ];
     const { queryByTestId } = setup(getMarkersProfile(fileIoMarker));

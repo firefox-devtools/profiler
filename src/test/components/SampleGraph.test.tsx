@@ -1,10 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
-
-import * as React from 'react';
 import { Provider } from 'react-redux';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
@@ -97,7 +93,7 @@ describe('SampleGraph', function () {
     const sampleGraphCanvas = ensureExists(
       document.querySelector('.threadSampleGraphCanvas'),
       `Couldn't find the sample graph canvas, with selector .threadSampleGraphCanvas`
-    );
+    ) as HTMLElement;
     const thread = profile.threads[0];
     const { stringArray } = profile.shared;
 
@@ -278,7 +274,7 @@ describe('SampleGraph with intersection observer', function () {
     /**
      * Coordinate the flushing of the requestAnimationFrame and the draw calls.
      */
-    function getContextDrawCalls() {
+    function getContextDrawCalls(): string[] {
       flushRafCalls();
       return flushDrawLog();
     }

@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 // We want to test these components in isolation and tightly control the actions
 // dispatched and avoid any side-effects.  That's why we mock this module and
 // return dummy thunk actions that return a Promise.
@@ -36,8 +34,6 @@ jest.mock('../../components/app/CompareHome', () => ({
 jest.mock('../../components/app/ListOfPublishedProfiles', () => ({
   ListOfPublishedProfiles: 'list-of-published-profiles',
 }));
-
-import * as React from 'react';
 import { Provider } from 'react-redux';
 
 import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
@@ -65,6 +61,7 @@ import { TemporaryError } from '../../utils/errors';
 
 import { blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import type { Action } from 'firefox-profiler/types';
 
 describe('app/AppViewRouter', function () {
   it('renders an initial home', function () {
@@ -176,9 +173,9 @@ function setup() {
   // Let's silence the error output to the console
   jest.spyOn(console, 'error').mockImplementation(() => {});
   // Flow doesn't know these actions are jest mocks.
-  (retrieveProfileFromBrowser: any).mockImplementation(() => async () => {});
-  (retrieveProfileFromStore: any).mockImplementation(() => async () => {});
-  (retrieveProfilesToCompare: any).mockImplementation(() => async () => {});
+  (retrieveProfileFromBrowser as any).mockImplementation(() => async () => {});
+  (retrieveProfileFromStore as any).mockImplementation(() => async () => {});
+  (retrieveProfilesToCompare as any).mockImplementation(() => async () => {});
 
   const store = blankStore();
   const renderResult = render(
@@ -190,7 +187,7 @@ function setup() {
     </Provider>
   );
 
-  function actAndDispatch(what) {
+  function actAndDispatch(what: Action) {
     act(() => {
       store.dispatch(what);
     });

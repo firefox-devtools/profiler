@@ -4,11 +4,7 @@
 
 // based on the TrackMemory test
 
-// @flow
-
 import type { CssPixels } from 'firefox-profiler/types';
-
-import * as React from 'react';
 import { Provider } from 'react-redux';
 import { fireEvent } from '@testing-library/react';
 
@@ -77,7 +73,7 @@ function setup() {
     ],
   });
   const addMarker = (startTime: number, first: number, second: number) => {
-    // $FlowExpectError - Invalid payload by our type system
+    // @ts-expect-error - Invalid payload by our type system
     thread.markers.data.push({ type: 'Marker', first: first, second: second });
     thread.markers.name.push(markerStringIndex);
     thread.markers.startTime.push(startTime);
@@ -96,7 +92,7 @@ function setup() {
   /**
    * Coordinate the flushing of the requestAnimationFrame and the draw calls.
    */
-  function getContextDrawCalls() {
+  function getContextDrawCalls(): string[] {
     flushRafCalls();
     return flushDrawLog();
   }
@@ -124,7 +120,7 @@ function setup() {
   const getTooltipContents = () => document.querySelector('.tooltipMarker');
   const getMarkerDot = () =>
     container.querySelector('.timelineTrackCustomMarkerGraphDot');
-  const moveMouseAtMarker = (time) =>
+  const moveMouseAtMarker = (time: number) =>
     fireEvent(
       canvas,
       getMouseEvent('mousemove', {

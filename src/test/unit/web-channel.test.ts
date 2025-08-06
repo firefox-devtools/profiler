@@ -55,10 +55,11 @@ describe('event handlers for Firefox WebChannel events', function () {
 
     // Trigger the response from the browser.
     triggerResponse({
+      // @ts-expect-error unknown STATUS_RESPONSE (our types don't cover the pre-93 messages variants)
       type: 'STATUS_RESPONSE',
       requestId: getLastRequestId(),
       menuButtonIsEnabled: true,
-    } as any);
+    });
 
     const isMenuButtonEnabledForTrue = await responseForTrue;
     expect(isMenuButtonEnabledForTrue).toBe(true);
@@ -68,10 +69,11 @@ describe('event handlers for Firefox WebChannel events', function () {
 
     // Trigger the response from the browser.
     triggerResponse({
+      // @ts-expect-error unknown STATUS_RESPONSE (our types don't cover the pre-93 messages variants)
       type: 'STATUS_RESPONSE',
       requestId: getLastRequestId(),
       menuButtonIsEnabled: false,
-    } as any);
+    });
 
     const isMenuButtonEnabledForFalse = await responseForFalse;
     expect(isMenuButtonEnabledForFalse).toBe(false);
@@ -87,9 +89,10 @@ describe('event handlers for Firefox WebChannel events', function () {
 
     // Trigger the response from the browser.
     triggerResponse({
+      // @ts-expect-error unknown STATUS_RESPONSE (our types don't cover the pre-93 messages variants)
       type: 'ENABLE_MENU_BUTTON_DONE',
       requestId: getLastRequestId(),
-    } as any);
+    });
 
     await expect(response).resolves.toBe(undefined);
   });

@@ -6,6 +6,9 @@
 // Importing this here makes it work everywhere.
 import '@testing-library/jest-dom';
 
+// Importing this inside a setup.ts file makes the types available everywhere.
+import 'jest-extended';
+
 // This installs jest matchers as a side effect as well.
 import fetchMock from '@fetch-mock/jest';
 import crypto from 'crypto';

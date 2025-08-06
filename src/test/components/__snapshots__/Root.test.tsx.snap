@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`app/AppViewRouter does not try to retrieve a profile when moving from from-browser to public 1`] = `<profile-viewer />`;
 

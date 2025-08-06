@@ -2,11 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import type { IndexIntoSamplesTable, CssPixels } from 'firefox-profiler/types';
-
-import * as React from 'react';
 import { Provider } from 'react-redux';
 import { fireEvent } from '@testing-library/react';
 
@@ -47,7 +43,7 @@ const GRAPH_HEIGHT = 10;
 
 function getSamplesPixelPosition(
   sampleIndex: IndexIntoSamplesTable,
-  samplePosition
+  samplePosition: number
 ): CssPixels {
   // Compute the pixel position of the center of a given sample.
   return sampleIndex * PIXELS_PER_SAMPLE + PIXELS_PER_SAMPLE * samplePosition;
@@ -58,7 +54,7 @@ function getSamplesPixelPosition(
  */
 describe('TrackMemory', function () {
   function setup(
-    counterConfig: $Shape<{ hasCountNumber: boolean }> = {
+    counterConfig: Partial<{ hasCountNumber: boolean }> = {
       hasCountNumber: true,
     }
   ) {
@@ -92,7 +88,7 @@ describe('TrackMemory', function () {
       document.querySelector('.timelineTrackMemoryTooltip');
     const getMemoryDot = () =>
       container.querySelector('.timelineTrackMemoryGraphDot');
-    const moveMouseAtCounter = (index, pos) =>
+    const moveMouseAtCounter = (index: number, pos: number) =>
       fireEvent(
         canvas,
         getMouseEvent('mousemove', {

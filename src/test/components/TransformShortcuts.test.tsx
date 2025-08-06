@@ -2,11 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-import * as React from 'react';
 import { Provider } from 'react-redux';
 
 import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
+import type { FuncNamesDict } from '../fixtures/profiles/processed-profile';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -26,18 +25,19 @@ import type {
   IndexIntoFuncTable,
   IndexIntoResourceTable,
   IndexIntoCategoryList,
+  Store,
 } from 'firefox-profiler/types';
 
-type KeyPressOptions = { key: string, ... };
+type KeyPressOptions = { key: string; ctrlKey?: boolean; metaKey?: boolean };
 
 type TestSetup = {
-  getTransform: () => null | Transform,
-  pressKey: (options: KeyPressOptions) => void,
-  expectedCallNodePath: CallNodePath,
+  getTransform: () => null | Transform;
+  pressKey: (options: KeyPressOptions) => void;
+  expectedCallNodePath: CallNodePath;
   // This should be expectedCallNodePath[expectedCallNodePath.length - 1], but this simplifies tests a bit.
-  expectedFuncIndex: IndexIntoFuncTable,
-  expectedResourceIndex: IndexIntoResourceTable,
-  expectedCategory: IndexIntoCategoryList,
+  expectedFuncIndex: IndexIntoFuncTable;
+  expectedResourceIndex: IndexIntoResourceTable;
+  expectedCategory: IndexIntoCategoryList;
 };
 
 function testTransformKeyboardShortcuts(setup: () => TestSetup) {
@@ -141,7 +141,7 @@ function testTransformKeyboardShortcuts(setup: () => TestSetup) {
 }
 
 // This is a generic setup that's used in all of our testcases.
-function setupStore(childrenToRender) {
+function setupStore(childrenToRender: React.ReactNode) {
   const {
     profile,
     funcNamesDictPerThread: [funcNames],
@@ -178,11 +178,11 @@ function setupStore(childrenToRender) {
 
 // This returns a function that makes it easy to simulate a keypress on a
 // specific element identified by a class name.
-const pressKeyBuilder = (className) => (options: KeyPressOptions) => {
+const pressKeyBuilder = (className: string) => (options: KeyPressOptions) => {
   const div = ensureExists(
     document.querySelector('.' + className),
     `Couldn't find the content div with selector .${className}`
-  );
+  ) as HTMLElement;
   fireFullKeyPress(div, options);
 };
 
@@ -191,7 +191,10 @@ const pressKeyBuilder = (className) => (options: KeyPressOptions) => {
 // these expectations will run in a test block later.
 // These actions will be used to generate use cases for each of the supported panels.
 const actions = {
-  'a selected node': ({ dispatch, getState }, { A, B }) => {
+  'a selected node': (
+    { dispatch, getState }: Store,
+    { A, B }: FuncNamesDict
+  ) => {
     act(() => {
       dispatch(changeSelectedCallNode(0, [A, B]));
     });
@@ -205,7 +208,10 @@ const actions = {
       selectedThreadSelectors.getRightClickedCallNodeIndex(getState())
     ).toBeNull();
   },
-  'a right clicked node': ({ dispatch, getState }, { A, B }) => {
+  'a right clicked node': (
+    { dispatch, getState }: Store,
+    { A, B }: FuncNamesDict
+  ) => {
     act(() => {
       dispatch(changeSelectedCallNode(0, []));
     });
@@ -223,8 +229,8 @@ const actions = {
     ).not.toBeNull();
   },
   'both a selected and a right clicked node': (
-    { dispatch, getState },
-    { A, B, H }
+    { dispatch, getState }: Store,
+    { A, B, H }: FuncNamesDict
   ) => {
     act(() => {
       dispatch(changeSelectedCallNode(0, [A, B, B, B, H]));

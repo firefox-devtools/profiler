@@ -27,7 +27,7 @@ export function autoMockCanvasContext() {
   });
 }
 
-export function flushDrawLog() {
+export function flushDrawLog(): string[] {
   return (window as any).__flushDrawLog();
 }
 

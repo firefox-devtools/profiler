@@ -1,10 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
-
-import * as React from 'react';
 import { Provider } from 'react-redux';
 import { stripIndent } from 'common-tags';
 
@@ -110,7 +106,7 @@ describe('timeline/GlobalTrack', function () {
   ) {
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
-    const trackReference = { type: 'global', trackIndex };
+    const trackReference = { type: 'global' as const, trackIndex };
     const tracks = getGlobalTracks(getState());
     const track = tracks[trackIndex];
     const setInitialSelected = () => {};
@@ -142,12 +138,12 @@ describe('timeline/GlobalTrack', function () {
       ensureExists(
         container.querySelector('.timelineTrackLabel'),
         `Couldn't find the track label with selector .timelineTrackLabel`
-      );
+      ) as HTMLElement;
     const getGlobalTrackRow = () =>
       ensureExists(
         container.querySelector('.timelineTrackGlobalRow'),
         `Couldn't find the track global row with selector .timelineTrackGlobalRow`
-      );
+      ) as HTMLElement;
 
     return {
       ...renderResult,
@@ -253,12 +249,12 @@ describe('timeline/GlobalTrack', function () {
     expect(container.querySelector('.timelineTrack')).toBeFalsy();
   });
 
-  function getTaskProfile(showMarkersInTimeline) {
+  function getTaskProfile(showMarkersInTimeline: boolean) {
     const profile = getProfileWithMarkers([
-      ['Task 1', 0, 10, ({ type: 'task' }: any)],
-      ['Task 2', 20, 30, ({ type: 'task' }: any)],
-      ['Task 3', 40, 50, ({ type: 'task' }: any)],
-      ['Task 4', 60, 70, ({ type: 'task' }: any)],
+      ['Task 1', 0, 10, { type: 'task' }],
+      ['Task 2', 20, 30, { type: 'task' }],
+      ['Task 3', 40, 50, { type: 'task' }],
+      ['Task 4', 60, 70, { type: 'task' }],
     ]);
     profile.meta.markerSchema = [
       {
