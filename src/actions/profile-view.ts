@@ -303,12 +303,12 @@ function getInformationFromTrackReference(
         trackReference.pid
       );
       const commonLocalProperties = {
-        type: 'local',
+        type: 'local' as const,
         trackReference,
         pid: trackReference.pid,
         globalTrackIndex,
         localTrackIndex: trackReference.trackIndex,
-      } as const;
+      };
 
       // Go through each type, and determine the tab slug and thread index.
       switch (localTrack.type) {
@@ -419,7 +419,7 @@ function toggleOneTrack(
         clickedTrack: trackInformation.trackReference,
         selection: selectedThreadIndexes,
       },
-    } as Action);
+    });
   };
 }
 
@@ -1067,7 +1067,7 @@ export function isolateProcess(
     const localTracks = getLocalTracks(getState(), globalTrack.pid);
 
     // Carry over the old selected thread indexes to the new ones.
-    const newSelectedThreadIndexes = new Set();
+    const newSelectedThreadIndexes = new Set<ThreadIndex>();
     {
       // Consider the global track
       if (
@@ -1123,7 +1123,7 @@ export function isolateProcess(
       ),
       isolatedTrackIndex,
       selectedThreadIndexes: newSelectedThreadIndexes,
-    } as Action);
+    });
   };
 }
 
@@ -1163,7 +1163,7 @@ export function isolateScreenshot(
     dispatch({
       type: 'ISOLATE_SCREENSHOT_TRACK',
       hiddenGlobalTracks,
-    } as Action);
+    });
   };
 }
 
@@ -1457,7 +1457,7 @@ export function isolateLocalTrack(
     const localTrackIndexes = getLocalTrackOrder(getState(), pid);
 
     // Try to find a selected thread index.
-    const selectedThreadIndexes = new Set();
+    const selectedThreadIndexes = new Set<ThreadIndex>();
     if (localTrackToIsolate.type === 'thread') {
       selectedThreadIndexes.add(localTrackToIsolate.threadIndex);
     } else if (
@@ -1489,7 +1489,7 @@ export function isolateLocalTrack(
         localTrackIndexes.filter((i) => i !== isolatedTrackIndex)
       ),
       selectedThreadIndexes,
-    } as Action);
+    });
   };
 }
 
