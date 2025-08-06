@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-import * as React from 'react';
 import { fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
@@ -46,8 +44,8 @@ describe('app/BeforeUnloadManager', () => {
     // $FlowExpectError
     event.preventDefault = jest.fn();
 
-    fireEvent((window: any), event);
-    expect((event: any).returnValue).toBeTruthy();
+    fireEvent(window as any, event);
+    expect((event as any).returnValue).toBeTruthy();
     expect(event.preventDefault).toHaveBeenCalled();
   });
 });
