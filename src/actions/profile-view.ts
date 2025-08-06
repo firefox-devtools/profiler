@@ -180,7 +180,7 @@ export function selectSelfCallNode(
     // We're not calling callNodeInfo.getCallNodePathFromIndex here because we
     // only have a non-inverted call node index, which wouldn't be accepted by
     // the inverted call node info.
-    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const callNodePath = [];
     let cni = nonInvertedSelfCallNode;
     while (cni !== -1) {
@@ -1971,7 +1971,7 @@ export function handleCallNodeTransformShortcut(
     const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
     const category = callNodeInfo.categoryForNode(callNodeIndex);
 
-    const nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+    const callNodeTable = callNodeInfo.getCallNodeTable();
 
     switch (event.key) {
       case 'F':
@@ -2030,7 +2030,7 @@ export function handleCallNodeTransformShortcut(
         break;
       }
       case 'r': {
-        if (funcHasRecursiveCall(nonInvertedCallNodeTable, funcIndex)) {
+        if (funcHasRecursiveCall(callNodeTable, funcIndex)) {
           dispatch(
             addTransformToStack(threadsKey, {
               type: 'collapse-recursion',
@@ -2041,7 +2041,7 @@ export function handleCallNodeTransformShortcut(
         break;
       }
       case 'R': {
-        if (funcHasDirectRecursiveCall(nonInvertedCallNodeTable, funcIndex)) {
+        if (funcHasDirectRecursiveCall(callNodeTable, funcIndex)) {
           dispatch(
             addTransformToStack(threadsKey, {
               type: 'collapse-direct-recursion',

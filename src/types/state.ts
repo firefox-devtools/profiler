@@ -12,7 +12,6 @@ import type {
   TrackReference,
   TimelineType,
   CheckedSharingOptions,
-  Localization,
   LastNonShiftClickInformation,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -365,13 +364,6 @@ export type UrlState = {
  * Localization State
  */
 export type PseudoStrategy = null | 'bidi' | 'accented';
-export type L10nState = {
-  readonly requestedLocales: string[] | null;
-  readonly pseudoStrategy: PseudoStrategy;
-  readonly localization: Localization;
-  readonly primaryLocale: string | null;
-  readonly direction: 'ltr' | 'rtl';
-};
 
 /**
  * Map of icons to their class names
@@ -390,6 +382,5 @@ export type State = {
   readonly icons: IconsWithClassNames;
   readonly zippedProfiles: ZippedProfilesState;
   readonly publish: PublishState;
-  readonly l10n: L10nState;
   readonly code: CodeState;
 };

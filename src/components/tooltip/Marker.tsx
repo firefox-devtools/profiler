@@ -240,6 +240,17 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       // Add the details for the markers based on their Marker schema.
       const schema = getSchemaFromMarker(markerSchemaByName, marker.data);
       if (schema) {
+        if (schema.description) {
+          const key = schema.name + '-description';
+          details.push(
+            <TooltipDetail key={key} label="Description">
+              <div className="tooltipDetailsDescription">
+                {schema.description}
+              </div>
+            </TooltipDetail>
+          );
+        }
+
         for (const field of schema.fields) {
           if (field.hidden) {
             // Do not include hidden fields.
@@ -264,17 +275,6 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
                 threadIdToNameMap,
                 processIdToNameMap
               )}
-            </TooltipDetail>
-          );
-        }
-
-        if (schema.description) {
-          const key = schema.name + '-description';
-          details.push(
-            <TooltipDetail key={key} label="Description">
-              <div className="tooltipDetailsDescription">
-                {schema.description}
-              </div>
             </TooltipDetail>
           );
         }

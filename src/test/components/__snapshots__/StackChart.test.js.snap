@@ -34,16 +34,16 @@ exports[`CombinedChart renders combined stack chart 1`] = `
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"
@@ -530,16 +530,16 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"
@@ -869,6 +869,17 @@ exports[`MarkerChart shows a tooltip when hovering 1`] = `
       <div
         class="tooltipLabel"
       >
+        Description
+        :
+      </div>
+      <div
+        class="tooltipDetailsDescription"
+      >
+        UserTiming is created using the DOM APIs performance.mark() and performance.measure().
+      </div>
+      <div
+        class="tooltipLabel"
+      >
         Name
         :
       </div>
@@ -880,17 +891,6 @@ exports[`MarkerChart shows a tooltip when hovering 1`] = `
         :
       </div>
       measure
-      <div
-        class="tooltipLabel"
-      >
-        Description
-        :
-      </div>
-      <div
-        class="tooltipDetailsDescription"
-      >
-        UserTiming is created using the DOM APIs performance.mark() and performance.measure().
-      </div>
       <div
         class="tooltipLabel"
       >
@@ -936,6 +936,17 @@ exports[`MarkerChart shows a tooltip when hovering 2`] = `
       <div
         class="tooltipLabel"
       >
+        Description
+        :
+      </div>
+      <div
+        class="tooltipDetailsDescription"
+      >
+        UserTiming is created using the DOM APIs performance.mark() and performance.measure().
+      </div>
+      <div
+        class="tooltipLabel"
+      >
         Name
         :
       </div>
@@ -947,17 +958,6 @@ exports[`MarkerChart shows a tooltip when hovering 2`] = `
         :
       </div>
       measure
-      <div
-        class="tooltipLabel"
-      >
-        Description
-        :
-      </div>
-      <div
-        class="tooltipDetailsDescription"
-      >
-        UserTiming is created using the DOM APIs performance.mark() and performance.measure().
-      </div>
       <div
         class="tooltipLabel"
       >
@@ -1060,16 +1060,16 @@ exports[`StackChart matches the snapshot and can display a tooltip with the same
             <input
               class="photon-radio photon-radio-micro"
               id="implementation-radio-js"
-              title="Show only the stack frames related to JavaScript execution"
+              title="Show only the stack frames related to script execution"
               type="radio"
               value="js"
             />
             <label
               class="photon-label photon-label-micro photon-label-horiz-padding"
               for="implementation-radio-js"
-              title="Show only the stack frames related to JavaScript execution"
+              title="Show only the stack frames related to script execution"
             >
-              JavaScript
+              Script
             </label>
             <input
               class="photon-radio photon-radio-micro"
@@ -1757,16 +1757,16 @@ exports[`StackChart matches the snapshot and can display a tooltip: dom 1`] = `
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"
@@ -2259,16 +2259,16 @@ exports[`StackChart works when the user selects the JS allocations option 1`] = 
             <input
               class="photon-radio photon-radio-micro"
               id="implementation-radio-js"
-              title="Show only the stack frames related to JavaScript execution"
+              title="Show only the stack frames related to script execution"
               type="radio"
               value="js"
             />
             <label
               class="photon-label photon-label-micro photon-label-horiz-padding"
               for="implementation-radio-js"
-              title="Show only the stack frames related to JavaScript execution"
+              title="Show only the stack frames related to script execution"
             >
-              JavaScript
+              Script
             </label>
             <input
               class="photon-radio photon-radio-micro"

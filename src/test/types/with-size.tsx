@@ -20,7 +20,7 @@ function expectType<T>(_a: T) {}
 function markUsed<T>(_a: T) {}
 
 class ExampleComponent extends React.PureComponent<Props> {
-  render() {
+  override render() {
     expectType<'a'>(this.props.ownPropA);
     expectType<'b'>(this.props.ownPropB);
     // @ts-expect-error  - There is no "ownPropC"
@@ -81,7 +81,7 @@ type NoSizingProps = {
 };
 
 class NoSizing extends React.PureComponent<NoSizingProps> {
-  render() {
+  override render() {
     return null;
   }
 }

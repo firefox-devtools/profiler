@@ -51,28 +51,32 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
     });
   }
 
-  _open = (state: State): Pick<State, 'focusAfterClosed' | 'isOpen'> => {
-    const focusAfterClosed = document.activeElement as HTMLElement | null;
-    if (!state.isOpen) {
-      this._trapFocus();
-      this._focus();
+  _open = (state: State): State => {
+    if (state.isOpen) {
+      // Do nothing.
+      return state;
     }
+    const focusAfterClosed = document.activeElement as HTMLElement;
+    this._trapFocus();
+    this._focus();
     return { isOpen: true, focusAfterClosed };
   };
 
-  _close = (state: State): Pick<State, 'focusAfterClosed' | 'isOpen'> => {
+  _close = (state: State): State => {
     const { focusAfterClosed, isOpen } = state;
 
-    if (isOpen) {
-      this._untrapFocus();
-      if (focusAfterClosed) {
-        requestAnimationFrame(() => {
-          // Restore focus, but not during a React setState call, otherwise this triggers
-          // a React warning:
-          // "unstable_flushDiscreteUpdates: Cannot flush updates when React is already rendering."
-          focusAfterClosed.focus();
-        });
-      }
+    if (!isOpen) {
+      // Do nothing.
+      return state;
+    }
+    this._untrapFocus();
+    if (focusAfterClosed) {
+      requestAnimationFrame(() => {
+        // Restore focus, but not during a React setState call, otherwise this triggers
+        // a React warning:
+        // "unstable_flushDiscreteUpdates: Cannot flush updates when React is already rendering."
+        focusAfterClosed.focus();
+      });
     }
 
     return { isOpen: false, focusAfterClosed: null };

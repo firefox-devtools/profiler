@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import type { ReactLocalization } from '@fluent/react';
 import type JSZip from 'jszip';
 import type {
   Profile,
@@ -31,7 +30,6 @@ import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { CallNodeInfo } from '../profile-logic/call-node-info';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type {
-  PseudoStrategy,
   UrlState,
   UploadState,
   State,
@@ -154,8 +152,6 @@ export type CheckedSharingOptions = {
   includePreferenceValues: boolean;
   includePrivateBrowsingData: boolean;
 };
-
-export type Localization = ReactLocalization;
 
 // This type is used when selecting tracks in the timeline. Ctrl and Meta are
 // stored in the same property to accommodate all OSes.
@@ -658,22 +654,6 @@ type CurrentProfileUploadedInformationAction = {
   readonly uploadedProfileInformation: UploadedProfileInformation | null;
 };
 
-type L10nAction =
-  | {
-      readonly type: 'REQUEST_L10N';
-      readonly locales: string[];
-    }
-  | {
-      readonly type: 'RECEIVE_L10N';
-      readonly localization: Localization;
-      readonly primaryLocale: string;
-      readonly direction: 'ltr' | 'rtl';
-    }
-  | {
-      readonly type: 'TOGGLE_PSEUDO_STRATEGY';
-      readonly pseudoStrategy: PseudoStrategy;
-    };
-
 type SourcesAction =
   | {
       readonly type: 'SOURCE_CODE_LOADING_BEGIN_URL';
@@ -733,7 +713,6 @@ export type Action =
   | PublishAction
   | DragAndDropAction
   | CurrentProfileUploadedInformationAction
-  | L10nAction
   | SourcesAction
   | AssemblyAction
   | AppAction;

@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 export * from './app';
-export * from './l10n';
 export * from './per-thread';
 export * from './profile';
 export * from './url-state';
@@ -22,7 +21,6 @@ import * as urlState from './url-state';
 import * as icons from './icons';
 import * as publish from './publish';
 import * as zippedProfiles from './zipped-profiles';
-import * as l10n from './l10n';
 import * as cpu from './cpu';
 import * as code from './code';
 
@@ -35,7 +33,6 @@ const _selectorsForConsole = {
   zippedProfiles,
   selectedThread,
   selectedNode,
-  l10n,
   cpu,
   code,
 };

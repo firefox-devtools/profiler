@@ -41,6 +41,8 @@ import './index.css';
 
 const ROW_HEIGHT = 16;
 
+type OwnProps = {};
+
 // The SizeProps are injected by the WithSize higher order component.
 type DispatchProps = {
   readonly changeSelectedNetworkMarker: typeof changeSelectedNetworkMarker;
@@ -60,9 +62,7 @@ type StateProps = {
   readonly scrollToSelectionGeneration: number;
 };
 
-type OwnProps = SizeProps;
-
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps> & SizeProps;
 
 class NetworkChartImpl extends React.PureComponent<Props> {
   _virtualListRef = React.createRef<VirtualList<MarkerIndex>>();
@@ -366,33 +366,33 @@ class NetworkChartImpl extends React.PureComponent<Props> {
  * Wrap the component in the WithSize higher order component, as well as the redux
  * connected component.
  */
-const ConnectedComponent = explicitConnect<OwnProps, StateProps, DispatchProps>(
-  {
-    mapStateToProps: (state) => ({
-      markerIndexes:
-        selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(state),
-      scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
-      getMarker: selectedThreadSelectors.getMarkerGetter(state),
-      selectedNetworkMarkerIndex:
-        selectedThreadSelectors.getSelectedNetworkMarkerIndex(state),
-      rightClickedMarkerIndex:
-        selectedThreadSelectors.getRightClickedMarkerIndex(state),
-      hoveredMarkerIndexFromState:
-        selectedThreadSelectors.getHoveredMarkerIndex(state),
-      timeRange: getPreviewSelectionRange(state),
-      disableOverscan: getPreviewSelection(state).isModifying,
-      threadsKey: getSelectedThreadsKey(state),
-    }),
-    mapDispatchToProps: {
-      changeSelectedNetworkMarker,
-      changeRightClickedMarker,
-      changeHoveredMarker,
-    },
-    component: NetworkChartImpl,
-  }
-);
-
-export const NetworkChart = withSize(ConnectedComponent);
+export const NetworkChart = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
+  mapStateToProps: (state) => ({
+    markerIndexes:
+      selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(state),
+    scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
+    getMarker: selectedThreadSelectors.getMarkerGetter(state),
+    selectedNetworkMarkerIndex:
+      selectedThreadSelectors.getSelectedNetworkMarkerIndex(state),
+    rightClickedMarkerIndex:
+      selectedThreadSelectors.getRightClickedMarkerIndex(state),
+    hoveredMarkerIndexFromState:
+      selectedThreadSelectors.getHoveredMarkerIndex(state),
+    timeRange: getPreviewSelectionRange(state),
+    disableOverscan: getPreviewSelection(state).isModifying,
+    threadsKey: getSelectedThreadsKey(state),
+  }),
+  mapDispatchToProps: {
+    changeSelectedNetworkMarker,
+    changeRightClickedMarker,
+    changeHoveredMarker,
+  },
+  component: withSize(NetworkChartImpl),
+});
 
 /**
  * Our definition of markers does not currently have the ability to refine

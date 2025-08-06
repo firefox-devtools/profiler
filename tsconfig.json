@@ -13,6 +13,7 @@
 
     "noFallthroughCasesInSwitch": false, // Already checked by eslint, with opt-out
     "noUnusedLocals": true,
+    "noImplicitOverride": true,
     "noUnusedParameters": false, // Should enable in the future
 
     // Default to strict, with the exceptions below

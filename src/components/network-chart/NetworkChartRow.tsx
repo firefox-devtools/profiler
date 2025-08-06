@@ -393,9 +393,11 @@ export class NetworkChartRow extends React.PureComponent<
 
   // Remove `Load 123: ` from markers.name
   _cropNameToUrl(name: string): string {
-    const index = this._findIndexOfLoadid(name);
-    const url = name.slice((index ?? -1) + 2);
-    return url;
+    const colonPos = this._findIndexOfLoadid(name);
+    if (colonPos === null) {
+      return '';
+    }
+    return name.slice(colonPos + 2);
   }
 
   _extractURI(url: string): URL | null {

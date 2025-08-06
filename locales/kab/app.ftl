@@ -6,12 +6,6 @@
 ### Localization for the App UI of Profiler
 
 
-# Naming convention for l10n IDs: "ComponentName--string-summary".
-# This allows us to minimize the risk of conflicting IDs throughout the app.
-# Please sort alphabetically by (component name), and
-# keep strings in order of appearance.
-
-
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
@@ -67,17 +61,6 @@ CallNodeContextMenu--copy-script-url = Nɣel URL n usekript
 CallNodeContextMenu--copy-stack = Nqel tanebdant
 CallNodeContextMenu--show-the-function-in-devtools = Sken tawuri deg yifecka n usnefli
 
-## CallTree
-## This is the component for Call Tree panel.
-
-
-## Call tree "badges" (icons) with tooltips
-##
-## These inlining badges are displayed in the call tree in front of some
-## functions for native code (C / C++ / Rust). They're a small "inl" icon with
-## a tooltip.
-
-
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
@@ -110,11 +93,6 @@ CompareHome--form-label-profile2 = Amaɣnu 2:
 CompareHome--submit-button =
     .value = Err-d imaɣunen
 
-## DebugWarning
-## This is displayed at the top of the analysis page when the loaded profile is
-## a debug build of Firefox.
-
-
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
 ## used at the bottom part of the UI.
@@ -123,11 +101,6 @@ Details--open-sidebar-button =
     .title = Ldi afeggag adisan
 Details--close-sidebar-button =
     .title = Mdel agalis adisan
-
-## ErrorBoundary
-## This component is shown when an unexpected error is encountered in the application.
-## Note that the localization won't be always applied in this component.
-
 
 ## Footer Links
 
@@ -175,10 +148,6 @@ Home--install-chrome-extension = Sbedd aseɣẓan  n Chrome
 IdleSearchField--search-input =
     .placeholder = Sekcem awalen n yimsizdeg
 
-## JsTracerSettings
-## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
-
-
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
@@ -215,19 +184,6 @@ MarkerContextMenu--copy-call-stack = Nɣel tanebdant n usiwel
 MarkerContextMenu--copy-url = Nɣel URL
 MarkerContextMenu--copy-page-url = Nɣel URL n usebter
 MarkerContextMenu--copy-as-json = Nɣel am JSON
-
-## MarkerFiltersContextMenu
-## This is the menu when filter icon is clicked in Marker Chart and Marker Table
-## panels.
-
-
-## MarkerSettings
-## This is used in all panels related to markers.
-
-
-## MarkerSidebar
-## This is the sidebar component that is used in Marker Table panel.
-
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
@@ -341,10 +297,6 @@ MenuButtons--publish--message-try-again = Ɛreḍ tikelt-nniḍen
 MenuButtons--publish--download = Sader
 MenuButtons--publish--compressing = Tussda…
 
-## NetworkSettings
-## This is used in the network chart.
-
-
 ## Timestamp formatting primitive
 
 # This displays a date in a shorter rendering, depending on the proximity of the
@@ -358,10 +310,6 @@ MenuButtons--publish--compressing = Tussda…
 # Variables:
 #   $date (Date) - The date to display in a shorter way
 NumberFormat--short-date = { SHORTDATE($date) }
-
-## PanelSearch
-## The component that is used for all the search input hints in the application.
-
 
 ## Profile Name Button
 
@@ -399,10 +347,6 @@ ProfileDeletePanel--dialog-deleting-button =
 # This message is displayed when a profile has been successfully deleted.
 ProfileDeletePanel--message-success = Isefka i d-yulin ttwakksen akken iwata
 
-## ProfileFilterNavigator
-## This is used at the top of the profile analysis UI.
-
-
 ## Profile Loader Animation
 
 ProfileLoaderAnimation--loading-unpublished = Aktar n umaɣnu srid seg { -firefox-brand-name }…
@@ -417,9 +361,6 @@ ProfileLoaderAnimation--loading-view-not-found = Ur tettwaf ara teskant
 
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Uɣal ɣer ugejdan
-
-## Root
-
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
@@ -444,12 +385,6 @@ StackSettings--show-user-timing = Sken tanzagt n useqdac
 
 TabBar--calltree-tab = Aseklu n usiwel
 TabBar--network-tab = Aẓeṭṭa
-
-## TabSelectorMenu
-## This component is a context menu that's opened when you click on the root
-## range at the top left corner for profiler analysis view. It's used to switch
-## between tabs that were captured in the profile.
-
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
@@ -495,18 +430,6 @@ TrackMemoryGraph--relative-memory-at-this-time = takatut tamassaɣt deg wakud-a
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Power
-
-## TrackBandwidth
-## This is used to show how much data was transfered over time.
-## For the strings in this group, the carbon dioxide equivalent is estimated
-## from the amount of data transfered.
-## The carbon dioxide equivalent represents the equivalent amount
-## of CO₂ to achieve the same level of global warming potential.
-
-
-## TrackSearchField
-## The component that is used for the search input in the track context menu.
-
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -598,9 +521,6 @@ SourceView--not-in-archive-error-when-obtaining-source = Afaylu { $pathInArchive
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = Aḥraz deg { $url } ur yezmir ara ad yettwasleḍ: { $parsingErrorMessage }
-
-## Toggle buttons in the top right corner of the bottom box
-
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

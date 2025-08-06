@@ -298,7 +298,7 @@ class ChartViewport<OwnProps> extends React.PureComponent<
     }, 1000);
   }
 
-  UNSAFE_componentWillReceiveProps(newProps: ViewportProps<OwnProps>) {
+  override UNSAFE_componentWillReceiveProps(newProps: ViewportProps<OwnProps>) {
     if (
       this.props.viewportProps.viewportNeedsUpdate(
         this.props.chartProps,
@@ -765,7 +765,7 @@ class ChartViewport<OwnProps> extends React.PureComponent<
     });
   };
 
-  componentDidMount() {
+  override componentDidMount() {
     // The first _setSize ensures that the screen does not blip when mounting
     // the component, while the second ensures that it lays out correctly if the DOM
     // is not fully layed out correctly yet.
@@ -780,7 +780,7 @@ class ChartViewport<OwnProps> extends React.PureComponent<
     }
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     window.removeEventListener('resize', this._setSizeNextFrame, false);
     window.removeEventListener('mousemove', this._mouseMoveListener, true);
     window.removeEventListener('mouseup', this._mouseUpListener, true);
@@ -791,7 +791,7 @@ class ChartViewport<OwnProps> extends React.PureComponent<
     }
   }
 
-  render() {
+  override render() {
     const {
       chartProps,
       hasZoomedViaMousewheel,

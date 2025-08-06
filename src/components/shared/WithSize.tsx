@@ -13,6 +13,8 @@ type State = {
 
 export type SizeProps = Readonly<State>;
 
+export type PropsWithSize<Props> = Props & SizeProps;
+
 /**
  * Wraps a React component and makes 'width' and 'height' available in the
  * wrapped component's props. These props start out at zero and are updated to
@@ -24,7 +26,7 @@ export type SizeProps = Readonly<State>;
  * for reasons other than a window resize.
  */
 export function withSize<Props>(
-  Wrapped: React.ComponentType<Props & SizeProps>
+  Wrapped: React.ComponentType<PropsWithSize<Props>>
 ): React.ComponentType<Props> {
   return class WithSizeWrapper extends React.PureComponent<Props, State> {
     override state = { width: 0, height: 0 };

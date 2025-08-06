@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`StackSettings matches the snapshot 1`] = `
 <div>
@@ -29,16 +29,16 @@ exports[`StackSettings matches the snapshot 1`] = `
         <input
           class="photon-radio photon-radio-micro"
           id="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
           type="radio"
           value="js"
         />
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
           for="implementation-radio-js"
-          title="Show only the stack frames related to JavaScript execution"
+          title="Show only the stack frames related to script execution"
         >
-          JavaScript
+          Script
         </label>
         <input
           class="photon-radio photon-radio-micro"

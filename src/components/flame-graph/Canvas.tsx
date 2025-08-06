@@ -155,7 +155,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       return;
     }
 
-    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const depth = callNodeTable.depth[selectedCallNodeIndex];
     const y = (maxStackDepthPlusOne - depth - 1) * ROW_HEIGHT;
 
@@ -229,7 +229,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     fastFillStyle.set('#ffffff');
     ctx.fillRect(0, 0, deviceContainerWidth, deviceContainerHeight);
 
-    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+    const callNodeTable = callNodeInfo.getCallNodeTable();
 
     const startDepth = Math.floor(
       maxStackDepthPlusOne - viewportBottom / stackFrameHeight

@@ -217,7 +217,7 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
         this._requestedAnimationFrame = false;
         const c = this._canvas.current;
         if (c) {
-          timeCode('TimelineMarkersImplementation render', () => {
+          timeCode('TimelineMarkers render', () => {
             this.drawCanvas(c);
           });
         }
@@ -311,7 +311,7 @@ type State = {
   mouseY: CssPixels;
 };
 
-class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
+class TimelineMarkers extends React.PureComponent<Props, State> {
   override state = {
     hoveredMarkerIndex: null,
     mouseDownMarker: null,
@@ -503,12 +503,6 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
 }
 
 /**
- * Combine the base implementation of the TimelineMarkers with the
- * WithSize component.
- */
-export const TimelineMarkers = withSize(TimelineMarkersImplementation);
-
-/**
  * Memoize the isSelected result of the markers since this is user multiple times.
  */
 const _getTimelineMarkersIsSelected = memoize(
@@ -540,7 +534,7 @@ export const TimelineMarkersJank = explicitConnect<
     };
   },
   mapDispatchToProps: { changeRightClickedMarker },
-  component: TimelineMarkers,
+  component: withSize(TimelineMarkers),
 });
 
 /**
@@ -569,7 +563,7 @@ export const TimelineMarkersOverview = explicitConnect<
     };
   },
   mapDispatchToProps: { changeRightClickedMarker },
-  component: TimelineMarkers,
+  component: withSize(TimelineMarkers),
 });
 
 /**
@@ -595,7 +589,7 @@ export const TimelineMarkersFileIo = explicitConnect<
     };
   },
   mapDispatchToProps: { changeRightClickedMarker },
-  component: TimelineMarkers,
+  component: withSize(TimelineMarkers),
 });
 
 /**
@@ -622,7 +616,7 @@ export const TimelineMarkersMemory = explicitConnect<
     };
   },
   mapDispatchToProps: { changeRightClickedMarker },
-  component: TimelineMarkers,
+  component: withSize(TimelineMarkers),
 });
 
 /**
@@ -649,5 +643,5 @@ export const TimelineMarkersIPC = explicitConnect<
     };
   },
   mapDispatchToProps: { changeRightClickedMarker },
-  component: TimelineMarkers,
+  component: withSize(TimelineMarkers),
 });
