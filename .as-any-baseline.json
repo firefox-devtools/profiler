@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-05T21:49:16.587Z",
-  "totalUsages": 95,
-  "totalFiles": 41,
+  "timestamp": "2025-08-06T04:30:06.339Z",
+  "totalUsages": 96,
+  "totalFiles": 42,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -39,9 +39,9 @@
       "content": "(otherWindow as any).postMessage({ name: 'ready:response' }, '*');"
     },
     {
-      "file": "src/app-logic/create-store.ts",
-      "line": 33,
-      "content": "return store as any;"
+      "file": "src/components/app/LanguageSwitcher.tsx",
+      "line": 44,
+      "content": "{(AVAILABLE_LOCALES_TO_LOCALIZED_NAMES as any)[locale] ?? locale}"
     },
     {
       "file": "src/components/calltree/CallTree.tsx",
@@ -125,7 +125,7 @@
     },
     {
       "file": "src/components/tooltip/Marker.tsx",
-      "line": 251,
+      "line": 262,
       "content": "const value = (data as any)[key];"
     },
     {
@@ -135,7 +135,7 @@
     },
     {
       "file": "src/profile-logic/call-tree.ts",
-      "line": 702,
+      "line": 757,
       "content": "// The inverted call node has children if it has any inverted child nodes"
     },
     {
@@ -250,7 +250,7 @@
     },
     {
       "file": "src/profile-logic/profile-data.ts",
-      "line": 1490,
+      "line": 1577,
       "content": "* Checks if a sample table has any useful samples."
     },
     {
@@ -269,14 +269,24 @@
       "content": "const val = (data as any)[keys[i]];"
     },
     {
-      "file": "src/test/custom-environment.ts",
-      "line": 27,
-      "content": "this.global.TextDecoder = TextDecoder as any;"
+      "file": "src/test/components/BeforeUnloadManager.test.tsx",
+      "line": 47,
+      "content": "fireEvent(window as any, event);"
     },
     {
-      "file": "src/test/custom-environment.ts",
-      "line": 28,
-      "content": "this.global.TextEncoder = TextEncoder as any;"
+      "file": "src/test/components/BeforeUnloadManager.test.tsx",
+      "line": 48,
+      "content": "expect((event as any).returnValue).toBeTruthy();"
+    },
+    {
+      "file": "src/test/components/StackSettings.test.tsx",
+      "line": 42,
+      "content": "return (element as any).checked;"
+    },
+    {
+      "file": "src/test/components/StackSettings.test.tsx",
+      "line": 83,
+      "content": "const input: HTMLInputElement = getByLabelText(/Filter stacks/) as any;"
     },
     {
       "file": "src/test/fixtures/custom-assertions.ts",
@@ -385,18 +395,13 @@
     },
     {
       "file": "src/test/fixtures/utils.ts",
-      "line": 78,
-      "content": "super(type, (mouseValues as any));"
+      "line": 81,
+      "content": "super(type, mouseValues as any);"
     },
     {
-      "file": "src/test/setup.ts",
-      "line": 22,
-      "content": "(global as any).fetchMock = fetchMock;"
-    },
-    {
-      "file": "src/test/setup.ts",
-      "line": 27,
-      "content": "const { __shutdownWorkers } = WorkerFactory as any;"
+      "file": "src/test/integration/symbolicator-cli/symbolicator-cli.test.ts",
+      "line": 37,
+      "content": "new Response(symbolsJson as any)"
     },
     {
       "file": "src/test/types/utils.ts",
@@ -465,17 +470,17 @@
     },
     {
       "file": "src/utils/window-console.ts",
-      "line": 256,
+      "line": 257,
       "content": "(data as any).module &&"
     },
     {
       "file": "src/utils/window-console.ts",
-      "line": 257,
+      "line": 258,
       "content": "(data as any).name"
     },
     {
       "file": "src/utils/window-console.ts",
-      "line": 262,
+      "line": 263,
       "content": "const statement = `${strTimestamp} - [${processName} ${thread.pid}: ${thread.name}]: D/${(data as any).module} ${(data as any).name.trim()}`;"
     }
   ]

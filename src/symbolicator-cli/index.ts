@@ -71,7 +71,7 @@ export class InMemorySymbolDB {
   async close(): Promise<void> {}
 }
 
-interface CliOptions {
+export interface CliOptions {
   input: string;
   output: string;
   server: string;
