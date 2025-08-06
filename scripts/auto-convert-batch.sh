@@ -22,7 +22,7 @@ CANDIDATES=$(./scripts/analyze-dependencies.sh | grep "🟢 0 trans" | awk '{
     # Extract filename (last field)
     filename = $NF;
     if (linecount < 100 && linecount > 20) print filename;
-}' | head -3)
+}' | head -20)
 
 if [ -z "$CANDIDATES" ]; then
     echo "❌ No good candidates found for batch conversion"

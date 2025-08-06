@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-import * as React from 'react';
 import { fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
@@ -40,8 +38,8 @@ describe('StackSettings', function () {
   /**
    * Get around the type constraints of refining an HTMLElement into a radio input.
    */
-  function getCheckedState(element: HTMLElement): mixed {
-    return (element: any).checked;
+  function getCheckedState(element: HTMLElement): unknown {
+    return (element as any).checked;
   }
 
   it('can change the implementation filter to script', async function () {
@@ -82,7 +80,7 @@ describe('StackSettings', function () {
     const { getByLabelText, getState } = setup();
     expect(getCurrentSearchString(getState())).toEqual('');
     const searchText = 'some search';
-    const input: HTMLInputElement = (getByLabelText(/Filter stacks/): any);
+    const input: HTMLInputElement = getByLabelText(/Filter stacks/) as any;
 
     fireEvent.change(input, {
       target: { value: searchText },
