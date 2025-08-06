@@ -152,10 +152,10 @@ export function loadProfile(
     dispatch({
       type: 'PROFILE_LOADED',
       profile,
-      pathInZipFile: config.pathInZipFile,
-      implementationFilter: config.implementationFilter,
-      transformStacks: config.transformStacks,
-    } as Action);
+      pathInZipFile: config.pathInZipFile ?? null,
+      implementationFilter: config.implementationFilter ?? null,
+      transformStacks: config.transformStacks ?? null,
+    });
 
     // During initial load, we are upgrading the URL and generating the UrlState
     // before finalizing profile view. That's why we are dispatching this action
