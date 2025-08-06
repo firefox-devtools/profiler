@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import { makeBitSet, setBit, clearBit, checkBit } from '../../utils/bitset';
 
 describe('BitSet', function () {
@@ -23,42 +21,42 @@ describe('BitSet', function () {
   it('works in simple cases', function () {
     const bitset = makeBitSet(7);
     setBit(bitset, 3);
-    expect(checkBit(bitset, 0)).toBeFalse();
-    expect(checkBit(bitset, 3)).toBeTrue();
-    expect(checkBit(bitset, 4)).toBeFalse();
+    expect(checkBit(bitset, 0)).toBe(false);
+    expect(checkBit(bitset, 3)).toBe(true);
+    expect(checkBit(bitset, 4)).toBe(false);
     setBit(bitset, 5);
-    expect(checkBit(bitset, 3)).toBeTrue();
-    expect(checkBit(bitset, 5)).toBeTrue();
+    expect(checkBit(bitset, 3)).toBe(true);
+    expect(checkBit(bitset, 5)).toBe(true);
     setBit(bitset, 3);
-    expect(checkBit(bitset, 3)).toBeTrue();
-    expect(checkBit(bitset, 5)).toBeTrue();
+    expect(checkBit(bitset, 3)).toBe(true);
+    expect(checkBit(bitset, 5)).toBe(true);
     clearBit(bitset, 5);
-    expect(checkBit(bitset, 3)).toBeTrue();
-    expect(checkBit(bitset, 5)).toBeFalse();
+    expect(checkBit(bitset, 3)).toBe(true);
+    expect(checkBit(bitset, 5)).toBe(false);
     clearBit(bitset, 3);
-    expect(checkBit(bitset, 3)).toBeFalse();
-    expect(checkBit(bitset, 5)).toBeFalse();
+    expect(checkBit(bitset, 3)).toBe(false);
+    expect(checkBit(bitset, 5)).toBe(false);
   });
 
   it('works when it has to touch the sign bit', function () {
     const bitset = makeBitSet(65);
     setBit(bitset, 30);
-    expect(checkBit(bitset, 30)).toBeTrue();
-    expect(checkBit(bitset, 31)).toBeFalse();
+    expect(checkBit(bitset, 30)).toBe(true);
+    expect(checkBit(bitset, 31)).toBe(false);
     setBit(bitset, 31);
-    expect(checkBit(bitset, 30)).toBeTrue();
-    expect(checkBit(bitset, 31)).toBeTrue();
-    expect(checkBit(bitset, 32)).toBeFalse();
+    expect(checkBit(bitset, 30)).toBe(true);
+    expect(checkBit(bitset, 31)).toBe(true);
+    expect(checkBit(bitset, 32)).toBe(false);
     setBit(bitset, 32);
     setBit(bitset, 63);
-    expect(checkBit(bitset, 32)).toBeTrue();
-    expect(checkBit(bitset, 62)).toBeFalse();
-    expect(checkBit(bitset, 63)).toBeTrue();
-    expect(checkBit(bitset, 64)).toBeFalse();
+    expect(checkBit(bitset, 32)).toBe(true);
+    expect(checkBit(bitset, 62)).toBe(false);
+    expect(checkBit(bitset, 63)).toBe(true);
+    expect(checkBit(bitset, 64)).toBe(false);
     clearBit(bitset, 31);
-    expect(checkBit(bitset, 30)).toBeTrue();
-    expect(checkBit(bitset, 31)).toBeFalse();
-    expect(checkBit(bitset, 32)).toBeTrue();
-    expect(checkBit(bitset, 63)).toBeTrue();
+    expect(checkBit(bitset, 30)).toBe(true);
+    expect(checkBit(bitset, 31)).toBe(false);
+    expect(checkBit(bitset, 32)).toBe(true);
+    expect(checkBit(bitset, 63)).toBe(true);
   });
 });
