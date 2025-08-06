@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import SymbolStoreDB from '../../profile-logic/symbol-store-db';
 import { completeSymbolTableAsTuple } from '../fixtures/example-symbol-table';
 // fake-indexeddb no longer includes a structuredClone polyfill, so we need to
@@ -18,13 +16,13 @@ describe('SymbolStoreDB', function () {
 
   beforeAll(function () {
     // The SymbolStore requires IndexedDB, otherwise symbolication will be skipped.
-    window.indexedDB = indexedDB;
-    window.IDBKeyRange = IDBKeyRange;
+    (window as any).indexedDB = indexedDB;
+    (window as any).IDBKeyRange = IDBKeyRange;
   });
 
   afterAll(function () {
-    delete window.indexedDB;
-    delete window.IDBKeyRange;
+    delete (window as any).indexedDB;
+    delete (window as any).IDBKeyRange;
   });
 
   it('should respect the maximum number of tables limit', async function () {

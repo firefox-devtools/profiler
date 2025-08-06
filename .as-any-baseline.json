@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-06T04:51:39.295Z",
-  "totalUsages": 105,
-  "totalFiles": 45,
+  "timestamp": "2025-08-06T04:56:11.024Z",
+  "totalUsages": 109,
+  "totalFiles": 46,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -462,6 +462,26 @@
       "file": "src/test/types/utils.ts",
       "line": 22,
       "content": "const coerceMatchingShape3 = coerceMatchingShape<CoerceB>({ time: 0 } as any);"
+    },
+    {
+      "file": "src/test/unit/symbol-store-db.test.ts",
+      "line": 19,
+      "content": "(window as any).indexedDB = indexedDB;"
+    },
+    {
+      "file": "src/test/unit/symbol-store-db.test.ts",
+      "line": 20,
+      "content": "(window as any).IDBKeyRange = IDBKeyRange;"
+    },
+    {
+      "file": "src/test/unit/symbol-store-db.test.ts",
+      "line": 24,
+      "content": "delete (window as any).indexedDB;"
+    },
+    {
+      "file": "src/test/unit/symbol-store-db.test.ts",
+      "line": 25,
+      "content": "delete (window as any).IDBKeyRange;"
     },
     {
       "file": "src/utils/__mocks__/worker-factory.ts",
