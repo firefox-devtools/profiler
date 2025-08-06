@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-06T04:56:11.024Z",
-  "totalUsages": 109,
-  "totalFiles": 46,
+  "timestamp": "2025-08-06T05:08:56.461Z",
+  "totalUsages": 110,
+  "totalFiles": 47,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -447,6 +447,11 @@
       "file": "src/test/setup.ts",
       "line": 29,
       "content": "const { __shutdownWorkers } = WorkerFactory as any;"
+    },
+    {
+      "file": "src/test/store/profile-view.test.ts",
+      "line": 951,
+      "content": "const markerPayload: MixedObject = getMarker(0).data as any;"
     },
     {
       "file": "src/test/types/utils.ts",

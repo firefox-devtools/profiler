@@ -136,7 +136,7 @@ export function changeSelectedCallNode(
 export function changeRightClickedCallNode(
   threadsKey: ThreadsKey,
   callNodePath: CallNodePath | null
-) {
+): Action {
   return {
     type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
     threadsKey,

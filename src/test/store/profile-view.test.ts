@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import type { TabSlug } from '../../app-logic/tabs-handling';
 
 import {
@@ -55,6 +53,9 @@ import type {
   Milliseconds,
   RawThread,
   StartEndRange,
+  Marker,
+  MixedObject,
+  CallNodePath,
 } from 'firefox-profiler/types';
 
 describe('call node paths on implementation filter change', function () {
@@ -171,7 +172,13 @@ describe('call node paths on implementation filter change', function () {
 });
 
 describe('getJankMarkersForHeader', function () {
-  function setupWithResponsiveness({ sampleCount, responsiveness }) {
+  function setupWithResponsiveness({
+    sampleCount,
+    responsiveness,
+  }: {
+    sampleCount: number;
+    responsiveness: Array<number | null>;
+  }) {
     const { profile } = getProfileFromTextSamples(
       Array(sampleCount).fill('A').join('  ')
     );
@@ -184,7 +191,7 @@ describe('getJankMarkersForHeader', function () {
       .map(getMarker);
   }
 
-  function setupWithEventDelay(eventDelay) {
+  function setupWithEventDelay(eventDelay: number[]) {
     const profile = getProfileWithEventDelays(eventDelay);
     const { getState } = storeWithProfile(profile);
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
@@ -210,7 +217,7 @@ describe('getJankMarkersForHeader', function () {
     expect(jankInstances).toEqual([]);
   });
 
-  function getJankInstantDuration(marker) {
+  function getJankInstantDuration(marker: Marker) {
     return (
       ensureExists(marker.end, 'Jank markers are assumed to have an end.') -
       marker.start
@@ -325,9 +332,13 @@ describe('actions/ProfileView', function () {
      *    '  - show [thread Style]',
      *  ]
      */
-    const parentTrackReference = { type: 'global', trackIndex: 0 };
-    const tabTrackReference = { type: 'global', trackIndex: 1 };
-    const workerTrackReference = { type: 'local', trackIndex: 0, pid: '222' };
+    const parentTrackReference = { type: 'global' as const, trackIndex: 0 };
+    const tabTrackReference = { type: 'global' as const, trackIndex: 1 };
+    const workerTrackReference = {
+      type: 'local' as const,
+      trackIndex: 0,
+      pid: '222',
+    };
 
     function storeWithTab(tabSlug: TabSlug) {
       const profile = getProfileWithNiceTracks();
@@ -466,7 +477,11 @@ describe('actions/ProfileView', function () {
     });
 
     describe('with a memory track', function () {
-      const memoryTrackReference = { type: 'local', trackIndex: 0, pid: '111' };
+      const memoryTrackReference = {
+        type: 'local' as const,
+        trackIndex: 0,
+        pid: '111',
+      };
 
       function setup() {
         const profile = getProfileWithNiceTracks();
@@ -535,11 +550,11 @@ describe('actions/ProfileView', function () {
     describe('with a comparison profile', function () {
       it('selects the calltree tab when selecting the diffing track', function () {
         const firstTrackReference = {
-          type: 'global',
+          type: 'global' as const,
           trackIndex: 0,
         };
         const diffingTrackReference = {
-          type: 'global',
+          type: 'global' as const,
           trackIndex: 2,
         };
 
@@ -933,11 +948,11 @@ describe('actions/ProfileView', function () {
       ).toHaveLength(2);
 
       const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-      const markerPayload: MixedObject = (getMarker(0).data: any);
+      const markerPayload: MixedObject = getMarker(0).data as any;
       expect(typeof markerPayload.string).toBe('string');
       expect(typeof markerPayload.uniqueString).toBe('number');
 
-      function getMarkerIndexesForSearch(searchString) {
+      function getMarkerIndexesForSearch(searchString: string) {
         dispatch(ProfileView.changeMarkersSearchString(searchString));
         return selectedThreadSelectors.getSearchFilteredMarkerIndexes(
           getState()
@@ -1847,7 +1862,7 @@ describe('snapshots of selectors/profile', function () {
     const samplesDerivedThread = selectedThreadSelectors.getThread(getState());
 
     const mergeFunction = {
-      type: 'merge-function',
+      type: 'merge-function' as const,
       funcIndex: C,
     };
     dispatch(ProfileView.addTransformToStack(0, mergeFunction));
@@ -2206,7 +2221,7 @@ describe('getTimingsForSidebar', () => {
     const threadLength = profile.threads[0].samples.length;
     store.dispatch(ProfileView.commitRange(1, threadLength));
 
-    const getTimingsForPath = (path) => {
+    const getTimingsForPath = (path: CallNodePath) => {
       store.dispatch(ProfileView.changeSelectedCallNode(0, path));
       return selectedNodeSelectors.getTimingsForSidebar(store.getState());
     };
@@ -2586,7 +2601,7 @@ describe('getTimingsForSidebar', () => {
   });
 
   describe('for an inverted tree', function () {
-    function setupForInvertedTree(profileString) {
+    function setupForInvertedTree(profileString?: string) {
       const setupResult = setup(profileString);
       const { dispatch } = setupResult;
 
@@ -2675,10 +2690,7 @@ describe('getTimingsForSidebar', () => {
       let timings = getTimingsForPath([H]);
       expect(timings).toEqual({
         forPath: {
-          selfTime: {
-            ...EMPTY_TIMING,
-            value: 1,
-          },
+          selfTime: { ...EMPTY_TIMING, value: 1 },
           totalTime: {
             value: 1,
             breakdownByCategory: withSingleSubcategory([
@@ -2931,7 +2943,7 @@ describe('getTimingsForSidebar', () => {
       const store = storeWithProfile(profile);
       store.dispatch(ProfileView.changeSelectedThreads(new Set([2])));
 
-      const getTimingsForPath = (path) => {
+      const getTimingsForPath = (path: CallNodePath) => {
         store.dispatch(ProfileView.changeSelectedCallNode(2, path));
         return selectedNodeSelectors.getTimingsForSidebar(store.getState());
       };
@@ -2976,7 +2988,7 @@ describe('getTimingsForSidebar', () => {
         ProfileView.changeCallTreeSummaryStrategy('native-allocations')
       );
 
-      const getTimingsForPath = (path) => {
+      const getTimingsForPath = (path: CallNodePath) => {
         store.dispatch(ProfileView.changeSelectedCallNode(0, path));
         return selectedNodeSelectors.getTimingsForSidebar(store.getState());
       };
@@ -3009,7 +3021,7 @@ describe('getTimingsForSidebar', () => {
 // Verify that getFriendlyThreadName gives the expected names for threads with or without processName.
 describe('getFriendlyThreadName', function () {
   // Setup a profile with threads based on the given overrides.
-  function setup(threadOverrides: Array<$Shape<RawThread>>) {
+  function setup(threadOverrides: Array<Partial<RawThread>>) {
     const profile = getEmptyProfile();
     for (const threadOverride of threadOverrides) {
       profile.threads.push(getEmptyThread(threadOverride));
@@ -3347,7 +3359,7 @@ describe('traced timing', function () {
     {
       inverted,
       previewSelection,
-    }: { inverted: boolean, previewSelection?: StartEndRange },
+    }: { inverted: boolean; previewSelection?: StartEndRange },
     textSamples: string
   ) {
     const { profile, funcNamesDictPerThread } =
@@ -3379,7 +3391,7 @@ describe('traced timing', function () {
 
     return {
       funcNames: funcNamesDictPerThread[0],
-      getSelfAndTotal: (...callNodePath) => {
+      getSelfAndTotal: (...callNodePath: CallNodePath) => {
         const callNodeIndex = ensureExists(
           callNodeInfo.getCallNodeIndexFromPath(callNodePath)
         );
@@ -3496,7 +3508,7 @@ describe('traced timing', function () {
 // Verify that getProcessedEventDelays gives the correct values for event delays.
 describe('getProcessedEventDelays', function () {
   // Setup a profile with meaningful event delay values.
-  function setup(eventDelay: ?Array<?Milliseconds>) {
+  function setup(eventDelay?: Array<Milliseconds | null>) {
     const profile = getEmptyProfile();
 
     // Create event delay values.

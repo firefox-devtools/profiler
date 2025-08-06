@@ -181,9 +181,6 @@ apply_transform 's/^  componentWillUnmount(/  override componentWillUnmount(/g' 
 apply_transform 's/^  componentDidCatch(/  override componentDidCatch(/g' "Add override to componentDidCatch"
 apply_transform 's/^  getSnapshotBeforeUpdate(/  override getSnapshotBeforeUpdate(/g' "Add override to getSnapshotBeforeUpdate"
 
-# Add override to render method
-apply_transform 's/^  render(/  override render(/g' "Add override to render method"
-
 # Handle 4-space indentation as well
 apply_transform 's/^    componentDidMount(/    override componentDidMount(/g' "Add override to componentDidMount (4-space)"
 apply_transform 's/^    componentDidUpdate(/    override componentDidUpdate(/g' "Add override to componentDidUpdate (4-space)"
