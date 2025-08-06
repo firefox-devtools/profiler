@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-import * as React from 'react';
 import { stripIndent } from 'common-tags';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
@@ -21,7 +19,7 @@ describe('app/NonLocalizedErrorBoundary', function () {
     throw new Error(technicalErrorMessage);
   };
 
-  function setupComponent(childComponent) {
+  function setupComponent(childComponent: React.ReactNode) {
     const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
     const results = render(
       <NonLocalizedErrorBoundary message={friendlyErrorMessage}>
@@ -62,7 +60,7 @@ describe('app/NonLocalizedErrorBoundary', function () {
           new RegExp(stripIndent`
               Error: This is an error\\.
 
-                  at ThrowingComponent \\(.*[/\\\\]ErrorBoundary.test.js:.*\\)
+                  at ThrowingComponent \\(.*[/\\\\]ErrorBoundary.test.tsx:.*\\)
                   at ErrorBoundaryInternal \\(.*[/\\\\]ErrorBoundary.tsx:.*\\)
                   at NonLocalizedErrorBoundary
                   at LocalizationProvider \\(.*[/\\\\]@fluent[/\\\\]react[/\\\\]index.js:.*\\)
@@ -81,7 +79,7 @@ describe('app/LocalizedErrorBoundary', function () {
     throw new Error(technicalErrorMessage);
   };
 
-  function setupComponent(childComponent) {
+  function setupComponent(childComponent: React.ReactNode) {
     const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
     const results = render(
       <LocalizedErrorBoundary message={friendlyErrorMessage}>
