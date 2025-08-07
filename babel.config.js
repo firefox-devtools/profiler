@@ -21,12 +21,6 @@ module.exports = function (api) {
               runtime: 'automatic',
             },
           ],
-          [
-            '@babel/preset-flow',
-            {
-              all: true,
-            },
-          ],
         ],
       },
       {

@@ -73,9 +73,7 @@ jest.mock('firefox-profiler/utils/gz');
 beforeEach(() => {
   const realModule = jest.requireActual('firefox-profiler/utils/gz');
   const { compress, decompress } = require('firefox-profiler/utils/gz');
-  // $FlowExpectError Flow doesn't know about Jest mocks.
   compress.mockImplementation(realModule.compress);
-  // $FlowExpectError Flow doesn't know about Jest mocks.
   decompress.mockImplementation(realModule.decompress);
 });
 
@@ -180,7 +178,7 @@ describe('app/MenuButtons', function () {
         // result of startUpload, so any rejection will be handled there.
       });
 
-      // Flow doesn't know uploadBinaryProfileData is a jest mock.
+      // TypeScript doesn't know uploadBinaryProfileData is a jest mock.
       (uploadBinaryProfileData as any).mockImplementation(() => ({
         abortUpload: () => {
           // In the real implementation, we call xhr.abort, which in turn

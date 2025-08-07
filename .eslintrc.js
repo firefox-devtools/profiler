@@ -1,4 +1,3 @@
-// @flow
 module.exports = {
   env: {
     browser: true,
@@ -46,10 +45,6 @@ module.exports = {
     'react/no-unused-state': 'error',
     'react/jsx-no-bind': 'error',
     'react/jsx-no-leaked-render': 'error',
-    // no-dupe-keys crashes with recent eslint. See
-    // https://github.com/gajus/eslint-plugin-flowtype/pull/266 and
-    // https://github.com/gajus/eslint-plugin-flowtype/pull/302
-    // 'flowtype/no-dupe-keys': 'error',
 
     // overriding recommended rules
     'no-constant-condition': ['error', { checkLoops: false }],
@@ -104,7 +99,6 @@ module.exports = {
     react: {
       pragma: 'React',
       version: '17.0',
-      flowVersion: '0.96.0',
     },
     'import/resolver': {
       alias: {
@@ -148,31 +142,6 @@ module.exports = {
             'ts-check': false, // allow even without description
           },
         ],
-      },
-    },
-    {
-      // Flow JS files
-      files: ['**/*.js'],
-      plugins: ['flowtype'],
-      extends: ['plugin:flowtype/recommended'],
-      parser: '@babel/eslint-parser',
-      rules: {
-        // We use the version from the flowtype plugin so that flow assertions don't
-        // output an error.
-        'flowtype/no-unused-expressions': 'error',
-        // The Object type and Function type aren't particularly useful, and usually hide
-        // type errors. It also blocks a migration to TypeScript. Disable this rule if
-        // using the Object or Function as generic type bounds.
-        'flowtype/no-weak-types': [
-          'error',
-          {
-            any: false,
-            Object: true,
-            Function: true,
-          },
-        ],
-        'flowtype/no-existential-type': 'error',
-        'flowtype/generic-spacing': 'off', // I don't know wtf this is talking about
       },
     },
   ],
