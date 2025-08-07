@@ -131,53 +131,47 @@ export type Viewport = {
   readonly isSizeSet: boolean;
 };
 
-export type ViewportExtraProps = {
-  readonly viewport: Viewport;
-};
-
-type ViewportStateProps<ChartProps> = {
+type ChartViewportImplStateProps = {
   readonly panelLayoutGeneration: number;
   readonly hasZoomedViaMousewheel?: boolean;
-  readonly chartComponent: React.ComponentType<ChartProps & ViewportExtraProps>;
 };
 
-type ViewportDispatchProps = {
+type ChartViewportImplDispatchProps = {
   readonly updatePreviewSelection: typeof updatePreviewSelection;
   readonly setHasZoomedViaMousewheel?: typeof setHasZoomedViaMousewheel;
 };
 
-// These are the props consumed by this Higher-Order Component (HOC), but can be
-// optionally used by the wrapped component.
-type ViewportOwnProps<ChartProps> = {
-  readonly viewportProps: {
-    // The "committed range", whose endpoints correspond to 0 and 1.
-    readonly timeRange: StartEndRange;
-    // The preview selection, whose endpoints correspond to viewportLeft and viewportRight.
-    readonly previewSelection: PreviewSelection;
-    // The left margin. Margins are outside the viewport but inside containerWidth.
-    readonly marginLeft: CssPixels;
-    // The right margin. Margins are outside the viewport but inside containerWidth.
-    readonly marginRight: CssPixels;
+type ViewportProps<ChartProps> = {
+  // The "committed range", whose endpoints correspond to 0 and 1.
+  readonly timeRange: StartEndRange;
+  // The preview selection, whose endpoints correspond to viewportLeft and viewportRight.
+  readonly previewSelection: PreviewSelection;
+  // The left margin. Margins are outside the viewport but inside containerWidth.
+  readonly marginLeft: CssPixels;
+  // The right margin. Margins are outside the viewport but inside containerWidth.
+  readonly marginRight: CssPixels;
 
-    readonly maxViewportHeight: number;
-    readonly startsAtBottom?: boolean;
-    readonly maximumZoom: UnitIntervalOfProfileRange;
-    readonly disableHorizontalMovement?: boolean;
-    readonly className?: string;
-    readonly containerRef?: (param: HTMLDivElement | null) => void;
-    // These props are defined by the generic variables passed into to the type
-    // WithChartViewport when calling withChartViewport. This is how the relationship
-    // is guaranteed. e.g. here with OwnProps:
-    //
-    //   (withChartViewport: WithChartViewport<OwnProps, Props>)(
-    //     MarkerChartCanvas
-    //   )
-    readonly viewportNeedsUpdate: (
-      prevProps: ChartProps,
-      nextProps: ChartProps
-    ) => boolean;
-  };
+  readonly maxViewportHeight: number;
+  readonly startsAtBottom?: boolean;
+  readonly maximumZoom: UnitIntervalOfProfileRange;
+  readonly disableHorizontalMovement?: boolean;
+  readonly className?: string;
+  readonly containerRef?: (container: HTMLDivElement | null) => void;
+  readonly viewportNeedsUpdate: (
+    prevProps: ChartProps,
+    nextProps: ChartProps
+  ) => boolean;
+};
+
+// These are the props consumed by the ViewportImpl component.
+type ChartViewportImplOwnProps<ChartProps> = {
+  readonly viewportProps: ViewportProps<ChartProps>;
+  readonly chart: React.ComponentType<ChartPropsPlusViewport<ChartProps>>;
   readonly chartProps: ChartProps;
+};
+
+export type ChartPropsPlusViewport<ChartProps> = ChartProps & {
+  viewport: Viewport;
 };
 
 type HorizontalViewport = {
@@ -201,12 +195,6 @@ type State = {
   isSizeSet: boolean;
 };
 
-type ViewportProps<ChartProps> = ConnectedProps<
-  ViewportOwnProps<ChartProps>,
-  ViewportStateProps<ChartProps>,
-  ViewportDispatchProps
->;
-
 import './Viewport.css';
 
 // The overall zoom speed for shift and pinch zooming.
@@ -214,8 +202,14 @@ const ZOOM_SPEED = 1.003;
 // This value makes the pinch zooming faster than shift+scroll zooming.
 const PINCH_ZOOM_FACTOR = 3;
 
-class ChartViewport<OwnProps> extends React.PureComponent<
-  ViewportProps<OwnProps>,
+type ChartViewportImplProps<ChartProps> = ConnectedProps<
+  ChartViewportImplOwnProps<ChartProps>,
+  ChartViewportImplStateProps,
+  ChartViewportImplDispatchProps
+>;
+
+class ChartViewportImpl<OwnProps> extends React.PureComponent<
+  ChartViewportImplProps<OwnProps>,
   State
 > {
   zoomScrollId: number = 0;
@@ -235,7 +229,7 @@ class ChartViewport<OwnProps> extends React.PureComponent<
   _dragX: number = 0;
   _dragY: number = 0;
 
-  constructor(props: ViewportProps<OwnProps>) {
+  constructor(props: ChartViewportImplProps<OwnProps>) {
     super(props);
     this.state = this.getDefaultState(props);
   }
@@ -258,7 +252,7 @@ class ChartViewport<OwnProps> extends React.PureComponent<
     };
   }
 
-  getDefaultState(props: ViewportProps<OwnProps>) {
+  getDefaultState(props: ChartViewportImplProps<OwnProps>) {
     const { previewSelection, timeRange } = props.viewportProps;
     const horizontalViewport = this.getHorizontalViewport(
       previewSelection,
@@ -298,7 +292,9 @@ class ChartViewport<OwnProps> extends React.PureComponent<
     }, 1000);
   }
 
-  override UNSAFE_componentWillReceiveProps(newProps: ViewportProps<OwnProps>) {
+  override UNSAFE_componentWillReceiveProps(
+    newProps: ChartViewportImplProps<OwnProps>
+  ) {
     if (
       this.props.viewportProps.viewportNeedsUpdate(
         this.props.chartProps,
@@ -793,6 +789,7 @@ class ChartViewport<OwnProps> extends React.PureComponent<
 
   override render() {
     const {
+      chart,
       chartProps,
       hasZoomedViaMousewheel,
       viewportProps: { className },
@@ -834,6 +831,11 @@ class ChartViewport<OwnProps> extends React.PureComponent<
       isSizeSet,
     };
 
+    const Chart = chart;
+    const chartPropsWithViewport = {
+      ...chartProps,
+      viewport,
+    };
     return (
       <div
         className={viewportClassName}
@@ -844,7 +846,7 @@ class ChartViewport<OwnProps> extends React.PureComponent<
         ref={this._takeContainerRef}
         tabIndex={0}
       >
-        <this.props.chartComponent {...chartProps} viewport={viewport} />
+        <Chart {...chartPropsWithViewport} />
         <div className={scrollClassName}>
           Zoom Chart:
           <kbd className="chartViewportScrollKbd">Ctrl + Scroll</kbd>or
@@ -855,24 +857,47 @@ class ChartViewport<OwnProps> extends React.PureComponent<
   }
 }
 
+export type ChartViewportProps<ChartProps> = {
+  readonly viewportProps: ViewportProps<ChartProps>;
+  readonly chartProps: ChartProps;
+};
+
+// const MyChartOuter = withChartViewport<ChartProps>(MyChartInner);
+//
+// The outer component has props { chartProps, viewportProps }.
+//   <MyChartOuter chartProps={{ color: 'blue' }} viewportProps={{...}} />
+// The inner component must have props { ...chartProps, viewport }.
+//   <MyChartInner color={blue} viewport={{...}} />
 export function withChartViewport<ChartProps>(
-  chartComponent: React.ComponentType<ChartProps & ViewportExtraProps>
-): React.ComponentType<ViewportOwnProps<ChartProps>> {
+  chart: React.ComponentType<ChartPropsPlusViewport<ChartProps>>
+): React.ComponentType<ChartViewportProps<ChartProps>> {
   // Connect this component so that it knows whether or not to nag the user to use ctrl
   // for zooming on range selections.
-  return explicitConnect<
-    ViewportOwnProps<ChartProps>,
-    ViewportStateProps<ChartProps>,
-    ViewportDispatchProps
+  const ConnectedChartViewport = explicitConnect<
+    ChartViewportImplOwnProps<ChartProps>,
+    ChartViewportImplStateProps,
+    ChartViewportImplDispatchProps
   >({
     mapStateToProps: (state) => ({
       panelLayoutGeneration: getPanelLayoutGeneration(state),
       hasZoomedViaMousewheel: getHasZoomedViaMousewheel(state),
-      chartComponent,
     }),
     mapDispatchToProps: { setHasZoomedViaMousewheel, updatePreviewSelection },
-    component: ChartViewport,
+    component: ChartViewportImpl,
   });
+
+  return function ChartViewportFunctionComponent({
+    chartProps,
+    viewportProps,
+  }: ChartViewportProps<ChartProps>) {
+    return (
+      <ConnectedChartViewport
+        chart={chart}
+        chartProps={chartProps}
+        viewportProps={viewportProps}
+      />
+    );
+  };
 }
 
 function clamp(min: number, max: number, value: number) {

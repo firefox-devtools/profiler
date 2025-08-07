@@ -655,4 +655,4 @@ class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
   }
 }
 
-export const JsTracerCanvas = withChartViewport(JsTracerCanvasImpl);
+export const JsTracerCanvas = withChartViewport<OwnProps>(JsTracerCanvasImpl);

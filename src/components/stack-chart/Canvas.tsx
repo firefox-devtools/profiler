@@ -845,4 +845,5 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
   }
 }
 
-export const StackChartCanvas = withChartViewport(StackChartCanvasImpl);
+export const StackChartCanvas =
+  withChartViewport<OwnProps>(StackChartCanvasImpl);

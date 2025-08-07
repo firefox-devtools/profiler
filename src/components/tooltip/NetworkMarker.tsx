@@ -15,121 +15,28 @@ import {
   formatNumber,
   formatMilliseconds,
 } from 'firefox-profiler/utils/format-numbers';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import {
+  getLatestPreconnectPhaseAndValue,
+  getMatchingPhaseValues,
+  getHumanReadableDataStatus,
+  getHumanReadablePriority,
+  getHumanReadableHttpVersion,
+  PRECONNECT_PHASES_IN_ORDER,
+  REQUEST_PHASES_IN_ORDER,
+  ALL_NETWORK_PHASES_IN_ORDER,
+} from 'firefox-profiler/profile-logic/network';
 
 import type {
-  NetworkHttpVersion,
   NetworkPayload,
-  NetworkStatus,
+  NetworkPhaseName,
+  NetworkPhaseAndValue,
   Milliseconds,
 } from 'firefox-profiler/types';
 
 import './NetworkMarker.css';
 
-function _getHumanReadablePriority(priority: number): string | null {
-  if (typeof priority !== 'number') {
-    return null;
-  }
-
-  let prioLabel = null;
-
-  // https://searchfox.org/mozilla-central/source/xpcom/threads/nsISupportsPriority.idl#24-28
-  if (priority < -10) {
-    prioLabel = 'Highest';
-  } else if (priority >= -10 && priority < 0) {
-    prioLabel = 'High';
-  } else if (priority === 0) {
-    prioLabel = 'Normal';
-  } else if (priority <= 10 && priority > 0) {
-    prioLabel = 'Low';
-  } else if (priority > 10) {
-    prioLabel = 'Lowest';
-  }
-
-  if (!prioLabel) {
-    return null;
-  }
-
-  return prioLabel + '(' + priority + ')';
-}
-
-function _getHumanReadableDataStatus(status: NetworkStatus): string {
-  switch (status) {
-    case 'STATUS_START':
-      return 'Waiting for response';
-    case 'STATUS_STOP':
-      return 'Response received';
-    case 'STATUS_REDIRECT':
-      return 'Redirecting request';
-    case 'STATUS_CANCEL':
-      return 'Request was canceled';
-    default:
-      throw assertExhaustiveCheck(status);
-  }
-}
-
-function _getHumanReadableHttpVersion(httpVersion: NetworkHttpVersion): string {
-  switch (httpVersion) {
-    case 'h3':
-      return '3';
-    case 'h2':
-      return '2';
-    case 'http/1.0':
-      return '1.0';
-    case 'http/1.1':
-      return '1.1';
-    default:
-      throw assertExhaustiveCheck(
-        httpVersion,
-        `Unknown received HTTP version ${httpVersion}`
-      );
-  }
-}
-
-type NetworkPhaseName =
-  | 'startTime'
-  | 'domainLookupStart'
-  | 'domainLookupEnd'
-  | 'connectStart'
-  | 'tcpConnectEnd'
-  | 'secureConnectionStart'
-  | 'connectEnd'
-  | 'requestStart'
-  | 'responseStart'
-  | 'responseEnd'
-  | 'endTime';
-
-/* The preconnect phase may only contain these properties. */
-const PRECONNECT_PROPERTIES_IN_ORDER: NetworkPhaseName[] = [
-  'domainLookupStart',
-  'domainLookupEnd',
-  'connectStart',
-  'tcpConnectEnd',
-  'secureConnectionStart',
-  'connectEnd',
-];
-
-/* A marker without a preconnect phase may contain all these properties. */
-const ALL_NETWORK_PROPERTIES_IN_ORDER: NetworkPhaseName[] = [
-  'startTime',
-  ...PRECONNECT_PROPERTIES_IN_ORDER,
-  'requestStart',
-  'responseStart',
-  'responseEnd',
-  'endTime',
-];
-
-/* For a marker with a preconnect phase, the second displayed diagram may only
- * contain these properties.
- * We use `splice` to generate this list out of the previous arrays, taking
- * ALL_NETWORK_PROPERTIES_IN_ORDER as source, then removing all the properties
- * of PRECONNECT_PROPERTIES_IN_ORDER.
- */
-const REQUEST_PROPERTIES_IN_ORDER = ALL_NETWORK_PROPERTIES_IN_ORDER.slice();
-REQUEST_PROPERTIES_IN_ORDER.splice(1, PRECONNECT_PROPERTIES_IN_ORDER.length);
-
 /* The labels are for the duration between _this_ label and the next label. */
-const PROPERTIES_HUMAN_LABELS: Record<NetworkPhaseName, string> = {
+const HUMAN_LABEL_FOR_PHASE: Record<NetworkPhaseName, string> = {
   startTime: 'Waiting for socket thread',
   domainLookupStart: 'DNS request',
   domainLookupEnd: 'After DNS request',
@@ -143,7 +50,7 @@ const PROPERTIES_HUMAN_LABELS: Record<NetworkPhaseName, string> = {
   endTime: 'End',
 };
 
-const NETWORK_PROPERTY_OPACITIES: Record<NetworkPhaseName, number> = {
+const OPACITY_FOR_PHASE: Record<NetworkPhaseName, number> = {
   startTime: 0,
   domainLookupStart: 0.5,
   domainLookupEnd: 0.5,
@@ -164,22 +71,17 @@ type NetworkPhaseProps = {
   readonly phaseDuration: Milliseconds;
 };
 
-type NetworkPhaseAndValue = {
-  phase: NetworkPhaseName;
-  value: number;
-};
-
 class NetworkPhase extends React.PureComponent<NetworkPhaseProps> {
   override render() {
     const { startPosition, dur, propertyName, phaseDuration } = this.props;
     const startPositionPercent = (startPosition / dur) * 100;
     const durationPercent = Math.max(0.3, (phaseDuration / dur) * 100);
-    const opacity = NETWORK_PROPERTY_OPACITIES[propertyName];
+    const opacity = OPACITY_FOR_PHASE[propertyName];
 
     return (
       <React.Fragment>
         <div className="tooltipLabel">
-          {PROPERTIES_HUMAN_LABELS[propertyName]}:
+          {HUMAN_LABEL_FOR_PHASE[propertyName]}:
         </div>
         <div
           aria-label={`Starting at ${formatNumber(
@@ -212,7 +114,7 @@ type Props = {
 };
 
 export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
-  _getPhasesForProperties(
+  _renderPhases(
     properties: NetworkPhaseAndValue[],
     sectionDuration: Milliseconds,
     startTime: Milliseconds
@@ -246,25 +148,6 @@ export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
     return phases;
   }
 
-  /**
-   * Properties `connectEnd` and `domainLookupEnd` aren't always present. This
-   * function returns the value for the latest one so that we can determine if
-   * these phases happen in a preconnect session.
-   */
-  _getLatestPreconnectValue(): number | null {
-    const { payload } = this.props;
-
-    if (typeof payload.connectEnd === 'number') {
-      return payload.connectEnd;
-    }
-
-    if (typeof payload.domainLookupEnd === 'number') {
-      return payload.domainLookupEnd;
-    }
-
-    return null;
-  }
-
   _renderPreconnectPhases(): React.ReactNode {
     const { payload, zeroAt } = this.props;
     const preconnectStart = payload.domainLookupStart;
@@ -276,10 +159,13 @@ export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
     // The preconnect bar goes from the start to the end of the whole preconnect
     // operation, that includes both the domain lookup and the connection
     // process. Therefore we want the value that represents the latest phase.
-    const preconnectEnd = this._getLatestPreconnectValue();
-    if (preconnectEnd === null) {
+    const preconnectEndPhase = getLatestPreconnectPhaseAndValue(
+      this.props.payload
+    );
+    if (preconnectEndPhase === null) {
       return null;
     }
+    const preconnectEnd = preconnectEndPhase.value;
 
     // If the latest phase ends before the start of the marker, we'll display a
     // separate preconnect section.
@@ -291,19 +177,13 @@ export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
       return null;
     }
 
-    const preconnectProperties: NetworkPhaseAndValue[] = [];
-    for (const phase of PRECONNECT_PROPERTIES_IN_ORDER) {
-      if (typeof payload[phase] === 'number') {
-        preconnectProperties.push({ phase, value: payload[phase] });
-      }
-    }
+    const preconnectValues = getMatchingPhaseValues(
+      payload,
+      PRECONNECT_PHASES_IN_ORDER
+    );
     const dur = preconnectEnd - preconnectStart;
 
-    const phases = this._getPhasesForProperties(
-      preconnectProperties,
-      dur,
-      preconnectStart
-    );
+    const phases = this._renderPhases(preconnectValues, dur, preconnectStart);
 
     return (
       <>
@@ -327,24 +207,18 @@ export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
     }
 
     const preconnectPhases = this._renderPreconnectPhases();
-    const networkProperties = preconnectPhases
-      ? REQUEST_PROPERTIES_IN_ORDER
-      : ALL_NETWORK_PROPERTIES_IN_ORDER;
+    const availablePhases = getMatchingPhaseValues(
+      payload,
+      preconnectPhases ? REQUEST_PHASES_IN_ORDER : ALL_NETWORK_PHASES_IN_ORDER
+    );
 
-    const availableProperties: NetworkPhaseAndValue[] = [];
-    for (const phase of networkProperties) {
-      if (typeof payload[phase] === 'number') {
-        availableProperties.push({ phase, value: payload[phase] });
-      }
-    }
-
-    if (availableProperties.length === 0 || availableProperties.length === 1) {
+    if (availablePhases.length === 0 || availablePhases.length === 1) {
       // This shouldn't happen as we should always have both startTime and endTime.
       return null;
     }
 
     const dur = payload.endTime - payload.startTime;
-    if (availableProperties.length === 2) {
+    if (availablePhases.length === 2) {
       // We only have startTime and endTime.
       return (
         <div className={`tooltipNetworkPhases ${markerColorClass}`}>
@@ -358,9 +232,9 @@ export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
       );
     }
 
-    // Looks like availableProperties.length >= 3.
-    const phases = this._getPhasesForProperties(
-      availableProperties,
+    // Looks like availablePhases.length >= 3.
+    const renderedPhases = this._renderPhases(
+      availablePhases,
       dur,
       payload.startTime
     );
@@ -375,7 +249,7 @@ export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
             <h3 className="tooltipNetworkTitle3">Actual request</h3>
           </>
         ) : null}
-        {phases}
+        {renderedPhases}
       </div>
     );
   }
@@ -399,7 +273,7 @@ export function getNetworkMarkerDetails(
 
   details.push(
     <TooltipDetail label="Status" key="Network-Status">
-      {_getHumanReadableDataStatus(payload.status)}
+      {getHumanReadableDataStatus(payload.status)}
     </TooltipDetail>
   );
   if (payload.redirectType !== undefined) {
@@ -430,7 +304,7 @@ export function getNetworkMarkerDetails(
 
   details.push(
     <TooltipDetail label="Priority" key="Network-Priority">
-      {_getHumanReadablePriority(payload.pri)}
+      {getHumanReadablePriority(payload.pri)}
     </TooltipDetail>
   );
 
@@ -467,7 +341,7 @@ export function getNetworkMarkerDetails(
   if (payload.httpVersion) {
     details.push(
       <TooltipDetail label="HTTP Version" key="Network-HTTP Version">
-        {_getHumanReadableHttpVersion(payload.httpVersion)}
+        {getHumanReadableHttpVersion(payload.httpVersion)}
       </TooltipDetail>
     );
   }

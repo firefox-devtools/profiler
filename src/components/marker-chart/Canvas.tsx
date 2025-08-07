@@ -832,4 +832,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   }
 }
 
-export const MarkerChartCanvas = withChartViewport(MarkerChartCanvasImpl);
+export const MarkerChartCanvas = withChartViewport<OwnProps>(
+  MarkerChartCanvasImpl
+);
