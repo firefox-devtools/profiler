@@ -54,10 +54,10 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
     });
   }
 
-  _open = (state: State): $Shape<State> => {
+  _open = (state: State): State => {
     if (state.isOpen) {
       // Do nothing.
-      return {};
+      return state;
     }
     const focusAfterClosed = document.activeElement;
     this._trapFocus();
@@ -65,12 +65,12 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
     return { isOpen: true, focusAfterClosed };
   };
 
-  _close = (state: State): $Shape<State> => {
+  _close = (state: State): State => {
     const { focusAfterClosed, isOpen } = state;
 
     if (!isOpen) {
       // Do nothing.
-      return {};
+      return state;
     }
     this._untrapFocus();
     if (focusAfterClosed) {

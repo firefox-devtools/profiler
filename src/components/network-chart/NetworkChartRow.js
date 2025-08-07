@@ -13,6 +13,10 @@ import {
   guessMimeTypeFromNetworkMarker,
   getColorClassNameForMimeType,
 } from '../../profile-logic/marker-data';
+import {
+  getLatestPreconnectPhaseAndValue,
+  getMatchingPhaseValues,
+} from '../../profile-logic/network';
 import { formatNumber } from '../../utils/format-numbers';
 import {
   TIMELINE_MARGIN_LEFT,
@@ -28,6 +32,7 @@ import type {
   Marker,
   MarkerIndex,
   NetworkPayload,
+  NetworkPhaseName,
   MixedObject,
 } from 'firefox-profiler/types';
 
@@ -65,14 +70,14 @@ const PATH_SPLIT_RE = /(.*)(\/[^/]+\/?)$/;
 // `endTime` is the timestamp when the response is delivered to the caller. It's
 // not present in this array as it's implicit in the component logic.
 // They may be all missing in a specific marker, that's fine.
-const PROPERTIES_IN_ORDER = [
+const PHASE_NAMES_IN_ORDER: NetworkPhaseName[] = [
   'domainLookupStart',
   'requestStart',
   'responseStart',
   'responseEnd',
 ];
 
-const PHASE_OPACITIES = PROPERTIES_IN_ORDER.reduce(
+const PHASE_OPACITIES = PHASE_NAMES_IN_ORDER.reduce(
   (result, property, i, { length }) => {
     result[property] = length > 1 ? i / (length - 1) : 0;
     return result;
@@ -81,8 +86,8 @@ const PHASE_OPACITIES = PROPERTIES_IN_ORDER.reduce(
 );
 
 type NetworkPhaseProps = {|
-  +name: string,
-  +previousName: string,
+  +name: NetworkPhaseName,
+  +previousName: NetworkPhaseName,
   +value: number | string,
   +duration: Milliseconds,
   +style: MixedObject,
@@ -141,25 +146,6 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
   }
 
   /**
-   * Properties `connectEnd` and `domainLookupEnd` aren't always present. This
-   * function returns the latest one so that we can determine if these phases
-   * happen in a preconnect session.
-   */
-  _getLatestPreconnectEndProperty(): 'connectEnd' | 'domainLookupEnd' | null {
-    const { networkPayload } = this.props;
-
-    if (typeof networkPayload.connectEnd === 'number') {
-      return 'connectEnd';
-    }
-
-    if (typeof networkPayload.domainLookupEnd === 'number') {
-      return 'domainLookupEnd';
-    }
-
-    return null;
-  }
-
-  /**
    * This returns the preconnect component, or null if there's no preconnect
    * operation for this marker.
    */
@@ -175,15 +161,14 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
     // The preconnect bar goes from the start to the end of the whole preconnect
     // operation, that includes both the domain lookup and the connection
     // process. Therefore we want the property that represents the latest phase.
-    const latestPreconnectEndProperty = this._getLatestPreconnectEndProperty();
+    const latestPreconnectEndProperty = getLatestPreconnectPhaseAndValue(
+      this.props.networkPayload
+    );
     if (!latestPreconnectEndProperty) {
       return null;
     }
 
-    // We force-coerce the value into a number just to appease Flow. Indeed
-    // the previous find operation ensures that all values are numbers but
-    // Flow can't know that.
-    const preconnectEnd = +networkPayload[latestPreconnectEndProperty];
+    const preconnectEnd = latestPreconnectEndProperty.value;
 
     // If the latest phase ends before the start of the marker, we'll display a
     // separate preconnect bar.
@@ -201,7 +186,7 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
     const preconnectWidth = preconnectEndPosition - preconnectStartPosition;
 
     const preconnectPhase = {
-      name: latestPreconnectEndProperty,
+      name: latestPreconnectEndProperty.phase,
       previousName: 'domainLookupStart',
       value: preconnectEnd,
       duration: preconnectDuration,
@@ -243,16 +228,11 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
     const preconnectComponent = this._preconnectComponent();
 
     // Compute the phases for this marker.
-
-    // If there's a preconnect phase, we remove `domainLookupStart` from the
-    // main bar, but we'll draw a separate bar to represent it.
-    const mainBarProperties = preconnectComponent
-      ? PROPERTIES_IN_ORDER.slice(1)
-      : PROPERTIES_IN_ORDER;
-
-    // Not all properties are always present.
-    const availableProperties = mainBarProperties.filter(
-      (property) => typeof networkPayload[property] === 'number'
+    const availablePhases = getMatchingPhaseValues(
+      networkPayload,
+      // If there's a preconnect phase, we remove `domainLookupStart` from the
+      // main bar, but we'll draw a separate bar to represent it.
+      preconnectComponent ? PHASE_NAMES_IN_ORDER.slice(1) : PHASE_NAMES_IN_ORDER
     );
 
     const mainBarPhases = [];
@@ -260,13 +240,9 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
     let previousName = 'startTime';
 
     // In this loop we add the various phases to the array.
-    availableProperties.forEach((property, i) => {
-      // We force-coerce the value into a number just to appease Flow. Indeed the
-      // previous filter ensures that all values are numbers but Flow can't know
-      // that.
-      const value = +networkPayload[property];
+    availablePhases.forEach(({ phase, value }, i) => {
       mainBarPhases.push({
-        name: property,
+        name: phase,
         previousName,
         value,
         duration: value - previousValue,
@@ -274,11 +250,11 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
           left: ((previousValue - start) / dur) * markerWidth,
           width: Math.max(((value - previousValue) / dur) * markerWidth, 1),
           // The first phase is always transparent because this represents the wait time.
-          opacity: i === 0 ? 0 : PHASE_OPACITIES[property],
+          opacity: i === 0 ? 0 : PHASE_OPACITIES[phase],
         },
       });
       previousValue = value;
-      previousName = property;
+      previousName = phase;
     });
 
     // The last part isn't generally colored (opacity is 0) unless it's the only
@@ -395,6 +371,10 @@ export class NetworkChartRow extends React.PureComponent<
 
   // Remove `Load 123: ` from markers.name
   _cropNameToUrl(name: string): string {
+    const colonPos = this._findIndexOfLoadid(name);
+    if (colonPos === null) {
+      return '';
+    }
     const url = name.slice(this._findIndexOfLoadid(name) + 2);
     return url;
   }
