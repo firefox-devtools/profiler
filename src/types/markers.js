@@ -12,6 +12,11 @@ import type {
   Pid,
   GraphColor,
 } from './profile';
+import type {
+  NetworkHttpVersion,
+  NetworkStatus,
+  NetworkRedirectType,
+} from './network';
 import type { ObjectMap } from './utils';
 
 // Provide different formatting options for strings.
@@ -494,14 +499,6 @@ export type GCSliceMarkerPayload_Gecko = {|
  * be included depending on what states happen during the load.  Also note
  * that redirects are logged as well.
  */
-
-export type NetworkHttpVersion = 'h3' | 'h2' | 'http/1.1' | 'http/1.0';
-export type NetworkStatus =
-  | 'STATUS_START'
-  | 'STATUS_STOP'
-  | 'STATUS_REDIRECT'
-  | 'STATUS_CANCEL';
-export type NetworkRedirectType = 'Permanent' | 'Temporary' | 'Internal';
 export type NetworkPayload = {|
   type: 'Network',
   innerWindowID?: number,

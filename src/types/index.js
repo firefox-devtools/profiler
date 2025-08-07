@@ -9,6 +9,7 @@ export * from './indexeddb';
 export * from './markers';
 export * from './profile-derived';
 export * from './profile';
+export * from './network';
 export * from './state';
 export * from './store';
 export * from './symbolication';
