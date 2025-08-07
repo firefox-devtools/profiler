@@ -15,6 +15,8 @@ type State = {|
 
 export type SizeProps = $ReadOnly<State>;
 
+export type PropsWithSize<Props> = {| ...Props, ...SizeProps |};
+
 /**
  * Wraps a React component and makes 'width' and 'height' available in the
  * wrapped component's props. These props start out at zero and are updated to
@@ -24,28 +26,16 @@ export type SizeProps = $ReadOnly<State>;
  *
  * Note that the props are *not* updated if the size of the element changes
  * for reasons other than a window resize.
- *
- * Usage: withSize must be used with explicit type arguments.
- *
- * Correct: withSize<Props>(ComponentClass)
- * Incorrect: withSize(ComponentClass)
  */
-export function withSize<
-  // The SizeProps act as a bounds on the generic props. This ensures that the props
-  // that passed in take into account they are being given the width and height.
-  Props: $ReadOnly<{ ...SizeProps }>,
->(Wrapped: React.ComponentType<Props>): React.ComponentType<
-  // The component that is returned does not accept width and height parameters, as
-  // they are injected by this higher order component.
-  $ReadOnly<$Diff<Props, SizeProps>>,
-> {
-  // An existential type in a generic is a bit tricky to remove. Perhaps this can
-  // use a hook instead.
-  // See: https://github.com/firefox-devtools/profiler/issues/3062
-  // eslint-disable-next-line flowtype/no-existential-type
-  return class WithSizeWrapper extends React.PureComponent<*, State> {
+export function withSize<Props>(
+  Wrapped: React.ComponentType<PropsWithSize<Props>>
+): React.ComponentType<Props> {
+  return class WithSizeWrapper<Props> extends React.PureComponent<
+    Props,
+    State,
+  > {
     state = { width: 0, height: 0 };
-    _container: HTMLElement | null;
+    _container: HTMLElement | null = null;
 
     componentDidMount() {
       const container = findDOMNode(this); // eslint-disable-line react/no-find-dom-node

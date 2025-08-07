@@ -380,5 +380,5 @@ export const TrackEventDelayGraph = explicitConnect<
       eventDelays: selectors.getProcessedEventDelays(state),
     };
   },
-  component: withSize<Props>(TrackEventDelayGraphImpl),
+  component: withSize(TrackEventDelayGraphImpl),
 });

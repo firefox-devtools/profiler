@@ -27,7 +27,7 @@ type State = {|
 |};
 
 export class MenuButtonsPermalink extends React.PureComponent<Props, State> {
-  _permalinkTextField: HTMLInputElement | null;
+  _permalinkTextField: HTMLInputElement | null = null;
   _takePermalinkTextFieldRef = (elem: HTMLInputElement | null) => {
     this._permalinkTextField = elem;
   };
