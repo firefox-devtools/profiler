@@ -82,6 +82,7 @@
     "common-tags": "^1.8.2",
     "copy-to-clipboard": "^3.3.3",
     "core-js": "^3.44.0",
+    "devtools-reps": "^0.24.0",
     "escape-string-regexp": "^4.0.0",
     "gecko-profiler-demangle": "^0.3.3",
     "idb": "^8.0.3",
@@ -189,8 +190,11 @@
       "js",
       "jsx"
     ],
+    "transform": {
+      "\\.([jt]sx?|mjs)$": "babel-jest"
+    },
     "transformIgnorePatterns": [
-      "/node_modules/(?!(query-string|decode-uri-component|split-on-first|filter-obj|@fetch-mock/jest|fetch-mock)/)"
+      "/node_modules/(?!(query-string|decode-uri-component|split-on-first|filter-obj|@fetch-mock/jest|fetch-mock|devtools-reps)/)"
     ],
     "moduleNameMapper": {
       "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ftl)$": "<rootDir>/src/test/fixtures/mocks/file-mock.js",

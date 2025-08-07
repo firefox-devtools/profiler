@@ -1727,6 +1727,13 @@ export function filterThreadSamplesToRange(
     );
   }
 
+  if (samples.argumentValues) {
+    newSamples.argumentValues = samples.argumentValues.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  }
+
   if (samples.threadId) {
     newSamples.threadId = samples.threadId.slice(
       beginSampleIndex,
@@ -1853,6 +1860,13 @@ export function filterRawThreadSamplesToRange(
     );
   }
 
+  if (samples.argumentValues) {
+    newSamples.argumentValues = samples.argumentValues.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  }
+
   if (samples.threadId) {
     newSamples.threadId = samples.threadId.slice(
       beginSampleIndex,
@@ -1958,6 +1972,9 @@ export function filterCounterSamplesToRange(
     count: samples.count.slice(beginSampleIndex, endSampleIndex),
     number: samples.number
       ? samples.number.slice(beginSampleIndex, endSampleIndex)
+      : undefined,
+    argumentValues: samples.argumentValues
+      ? samples.argumentValues.slice(beginSampleIndex, endSampleIndex)
       : undefined,
   };
 
@@ -2283,6 +2300,7 @@ export function computeSamplesTableFromRawSamplesTable(
   const {
     responsiveness,
     eventDelay,
+    argumentValues,
     stack,
     weight,
     weightType,
@@ -2309,6 +2327,7 @@ export function computeSamplesTableFromRawSamplesTable(
     // These fields are copied from the raw samples table:
     responsiveness,
     eventDelay,
+    argumentValues,
     stack,
     weight,
     weightType,
@@ -2328,7 +2347,8 @@ export function createThreadFromDerivedTables(
   rawThread: RawThread,
   samples: SamplesTable,
   stackTable: StackTable,
-  stringTable: StringTable
+  stringTable: StringTable,
+  tracedValuesBuffer: ArrayBuffer | null
 ): Thread {
   const {
     processType,
@@ -2355,6 +2375,7 @@ export function createThreadFromDerivedTables(
     jsTracer,
     isPrivateBrowsing,
     userContextId,
+    tracedObjectShapes,
   } = rawThread;
 
   const thread: Thread = {
@@ -2383,11 +2404,13 @@ export function createThreadFromDerivedTables(
     jsTracer,
     isPrivateBrowsing,
     userContextId,
+    tracedObjectShapes,
 
     // These fields are derived:
     samples,
     stackTable,
     stringTable,
+    tracedValuesBuffer: tracedValuesBuffer || undefined,
   };
   return thread;
 }

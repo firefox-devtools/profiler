@@ -22,6 +22,7 @@ import {
 } from 'firefox-profiler/profile-logic/profile-data';
 import { getProfileWithDicts } from './profiles/processed-profile';
 import { StringTable } from '../../utils/string-table';
+import { base64StringToBytes } from '../../utils/base64';
 
 import type {
   IndexIntoCallNodeTable,
@@ -152,11 +153,15 @@ export function computeThreadFromRawThread(
     sampleUnits,
     referenceCPUDeltaPerMs
   );
+  const tracedValuesBuffer = rawThread.tracedValuesBuffer
+    ? base64StringToBytes(rawThread.tracedValuesBuffer)
+    : null;
   return createThreadFromDerivedTables(
     rawThread,
     samples,
     stackTable,
-    stringTable
+    stringTable,
+    tracedValuesBuffer
   );
 }
 
