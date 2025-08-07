@@ -501,7 +501,6 @@ function analyzeFiles() {
     (f) => f.transitiveUnfinishedDependencies === 0
   );
   const jsReadyFiles = readyFiles.filter((f) => !f.isConverted);
-  const tsNeedingFixes = readyFiles.filter((f) => f.isConverted);
 
   console.log('\n📈 Summary:');
   console.log(`   • ${jsReadyFiles.length} JS files ready for conversion`);

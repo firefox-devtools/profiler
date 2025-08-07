@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-06T20:09:35.143Z",
-  "totalUsages": 135,
-  "totalFiles": 54,
+  "timestamp": "2025-08-07T01:55:47.797Z",
+  "totalUsages": 156,
+  "totalFiles": 64,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -319,29 +319,49 @@
       "content": "})) as any;"
     },
     {
-      "file": "src/test/components/GlobalTrack.test.tsx",
-      "line": 254,
-      "content": "['Task 1', 0, 10, { type: 'task' } as any],"
-    },
-    {
-      "file": "src/test/components/GlobalTrack.test.tsx",
-      "line": 255,
-      "content": "['Task 2', 20, 30, { type: 'task' } as any],"
-    },
-    {
-      "file": "src/test/components/GlobalTrack.test.tsx",
-      "line": 256,
-      "content": "['Task 3', 40, 50, { type: 'task' } as any],"
-    },
-    {
-      "file": "src/test/components/GlobalTrack.test.tsx",
-      "line": 257,
-      "content": "['Task 4', 60, 70, { type: 'task' } as any],"
-    },
-    {
       "file": "src/test/components/Home.test.tsx",
       "line": 30,
       "content": "(Object.defineProperty as any)(window.navigator, 'userAgent', {"
+    },
+    {
+      "file": "src/test/components/ListOfPublishedProfiles.test.tsx",
+      "line": 354,
+      "content": "fireFullClick(window as any);"
+    },
+    {
+      "file": "src/test/components/ListOfPublishedProfiles.test.tsx",
+      "line": 415,
+      "content": "fireFullClick(window as any);"
+    },
+    {
+      "file": "src/test/components/MenuButtons.test.tsx",
+      "line": 184,
+      "content": "(uploadBinaryProfileData as any).mockImplementation(() => ({"
+    },
+    {
+      "file": "src/test/components/MenuButtons.test.tsx",
+      "line": 263,
+      "content": "(sha1 as any).mockImplementation((_data: Uint8Array) =>"
+    },
+    {
+      "file": "src/test/components/MenuButtons.test.tsx",
+      "line": 267,
+      "content": "(shortenUrl as any).mockImplementation(() =>"
+    },
+    {
+      "file": "src/test/components/MenuButtons.test.tsx",
+      "line": 272,
+      "content": "(URL as any).createObjectURL = () => 'mockCreateObjectUrl';"
+    },
+    {
+      "file": "src/test/components/MenuButtons.test.tsx",
+      "line": 273,
+      "content": "(URL as any).revokeObjectURL = () => {};"
+    },
+    {
+      "file": "src/test/components/MenuButtons.test.tsx",
+      "line": 621,
+      "content": "expect((buildIdElement as any).href).toBe(profile.meta.sourceURL);"
     },
     {
       "file": "src/test/components/Root.test.tsx",
@@ -359,6 +379,31 @@
       "content": "(retrieveProfilesToCompare as any).mockImplementation(() => async () => {});"
     },
     {
+      "file": "src/test/components/ServiceWorkerManager.test.tsx",
+      "line": 45,
+      "content": "delete (window as any).location;"
+    },
+    {
+      "file": "src/test/components/ServiceWorkerManager.test.tsx",
+      "line": 56,
+      "content": "(navigator as any).serviceWorker = {};"
+    },
+    {
+      "file": "src/test/components/ServiceWorkerManager.test.tsx",
+      "line": 65,
+      "content": "delete (navigator as any).serviceWorker;"
+    },
+    {
+      "file": "src/test/components/ServiceWorkerManager.test.tsx",
+      "line": 148,
+      "content": "const instance = (WorkboxModule.Workbox as any).mock.results[0].value;"
+    },
+    {
+      "file": "src/test/components/StackChart.test.tsx",
+      "line": 602,
+      "content": "return (element as any).checked;"
+    },
+    {
       "file": "src/test/components/StackSettings.test.tsx",
       "line": 42,
       "content": "return (element as any).checked;"
@@ -367,6 +412,21 @@
       "file": "src/test/components/StackSettings.test.tsx",
       "line": 83,
       "content": "const input: HTMLInputElement = getByLabelText(/Filter stacks/) as any;"
+    },
+    {
+      "file": "src/test/components/ThreadActivityGraph.test.tsx",
+      "line": 124,
+      "content": "return (window as any).__flushDrawLog();"
+    },
+    {
+      "file": "src/test/components/ThreadActivityGraph.test.tsx",
+      "line": 458,
+      "content": "return (window as any).__flushDrawLog();"
+    },
+    {
+      "file": "src/test/components/TrackNetwork.test.tsx",
+      "line": 387,
+      "content": "return (window as any).__flushDrawLog();"
     },
     {
       "file": "src/test/fixtures/custom-assertions.ts",
@@ -390,12 +450,12 @@
     },
     {
       "file": "src/test/fixtures/mocks/canvas-context.ts",
-      "line": 31,
+      "line": 50,
       "content": "return (window as any).__flushDrawLog();"
     },
     {
       "file": "src/test/fixtures/mocks/canvas-context.ts",
-      "line": 43,
+      "line": 62,
       "content": "return (jest.fn as any)((...args: any[]) => {"
     },
     {
@@ -465,17 +525,17 @@
     },
     {
       "file": "src/test/fixtures/profiles/processed-profile.ts",
-      "line": 181,
+      "line": 180,
       "content": "const maybeEndTime = (tuple as any)[2] || null;"
     },
     {
       "file": "src/test/fixtures/profiles/processed-profile.ts",
-      "line": 182,
+      "line": 181,
       "content": "const maybePayload: MarkerPayload | null | void = (tuple as any)[3];"
     },
     {
       "file": "src/test/fixtures/profiles/processed-profile.ts",
-      "line": 202,
+      "line": 201,
       "content": "markersTable.data.push(payload as any);"
     },
     {
@@ -519,9 +579,24 @@
       "content": "(imageInstances[0] as any).onerror();"
     },
     {
+      "file": "src/test/store/markers.test.ts",
+      "line": 224,
+      "content": "const any = null as any;"
+    },
+    {
       "file": "src/test/store/profile-view.test.ts",
       "line": 951,
       "content": "const markerPayload: MixedObject = getMarker(0).data as any;"
+    },
+    {
+      "file": "src/test/store/publish.test.ts",
+      "line": 255,
+      "content": "(uploadBinaryProfileData as any).mockImplementationOnce(initUploadProcess);"
+    },
+    {
+      "file": "src/test/store/symbolication.test.ts",
+      "line": 314,
+      "content": "const firstMarkerCause = ensureExists((firstMarkerData as any).cause);"
     },
     {
       "file": "src/test/types/utils.ts",
@@ -537,6 +612,51 @@
       "file": "src/test/types/utils.ts",
       "line": 22,
       "content": "const coerceMatchingShape3 = coerceMatchingShape<CoerceB>({ time: 0 } as any);"
+    },
+    {
+      "file": "src/test/unit/fetch-source.test.ts",
+      "line": 60,
+      "content": "return r as any;"
+    },
+    {
+      "file": "src/test/unit/fetch-source.test.ts",
+      "line": 226,
+      "content": "return r as any;"
+    },
+    {
+      "file": "src/test/unit/fetch-source.test.ts",
+      "line": 231,
+      "content": "return r as any;"
+    },
+    {
+      "file": "src/test/unit/fetch-source.test.ts",
+      "line": 276,
+      "content": "return r as any;"
+    },
+    {
+      "file": "src/test/unit/fetch-source.test.ts",
+      "line": 281,
+      "content": "return r as any;"
+    },
+    {
+      "file": "src/test/unit/fetch-source.test.ts",
+      "line": 324,
+      "content": "return r as any;"
+    },
+    {
+      "file": "src/test/unit/fetch-source.test.ts",
+      "line": 329,
+      "content": "return r as any;"
+    },
+    {
+      "file": "src/test/unit/merge-compare.test.ts",
+      "line": 605,
+      "content": "(ensureExists(mergedMarkers.data[0]) as any).fieldWithUniqueString"
+    },
+    {
+      "file": "src/test/unit/merge-compare.test.ts",
+      "line": 608,
+      "content": "(ensureExists(mergedMarkers.data[1]) as any).fieldWithUniqueString"
     },
     {
       "file": "src/test/unit/symbol-store-db.test.ts",
@@ -560,22 +680,7 @@
     },
     {
       "file": "src/test/unit/web-channel.test.ts",
-      "line": 61,
-      "content": "} as any);"
-    },
-    {
-      "file": "src/test/unit/web-channel.test.ts",
-      "line": 74,
-      "content": "} as any);"
-    },
-    {
-      "file": "src/test/unit/web-channel.test.ts",
-      "line": 92,
-      "content": "} as any);"
-    },
-    {
-      "file": "src/test/unit/web-channel.test.ts",
-      "line": 129,
+      "line": 132,
       "content": "(triggerResponse as any)('Invalid message');"
     },
     {

@@ -59,7 +59,7 @@ export type AddressInlineFrame = {
   line?: number;
 };
 
-interface SymbolProvider {
+export interface SymbolProvider {
   // Cheap, should be called first.
   requestSymbolsFromServer(
     requests: LibSymbolicationRequest[]

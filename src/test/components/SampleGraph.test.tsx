@@ -8,6 +8,7 @@ import { fireEvent } from '@testing-library/react';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { TimelineTrackThread } from 'firefox-profiler/components/timeline/TrackThread';
+import type { DrawOperation } from '../fixtures/mocks/canvas-context';
 import {
   autoMockCanvasContext,
   flushDrawLog,
@@ -274,7 +275,7 @@ describe('SampleGraph with intersection observer', function () {
     /**
      * Coordinate the flushing of the requestAnimationFrame and the draw calls.
      */
-    function getContextDrawCalls(): string[] {
+    function getContextDrawCalls(): DrawOperation[] {
       flushRafCalls();
       return flushDrawLog();
     }

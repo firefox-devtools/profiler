@@ -27,7 +27,26 @@ export function autoMockCanvasContext() {
   });
 }
 
-export function flushDrawLog(): string[] {
+export type BeginPathOperation = ['beginPath'];
+export type MoveToOperation = ['moveTo', number, number];
+export type LineToOperation = ['lineTo', number, number];
+export type RectOperation = ['rect', number, number, number, number];
+export type SetFillStyleOperation = ['set fillStyle', string];
+export type FillRectOperation = ['fillRect', number, number, number, number];
+export type ClearRectOperation = ['clearRect', number, number, number, number];
+export type FillTextOperation = ['fillText', string];
+
+export type DrawOperation =
+  | BeginPathOperation
+  | MoveToOperation
+  | LineToOperation
+  | RectOperation
+  | SetFillStyleOperation
+  | FillRectOperation
+  | ClearRectOperation
+  | FillTextOperation;
+
+export function flushDrawLog(): DrawOperation[] {
   return (window as any).__flushDrawLog();
 }
 

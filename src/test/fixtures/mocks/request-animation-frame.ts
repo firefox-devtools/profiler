@@ -37,6 +37,11 @@ function buildErrorWithMessageAndStacks(
   return error;
 }
 
+export type FlushRafCalls = (options?: {
+  timestamps: number[];
+  once?: boolean;
+}) => void;
+
 /**
  * This function provides a mock for requestAnimationFrame. It holds on to all
  * queued calls, and the returned function will flush and execute all of the
@@ -66,7 +71,7 @@ function buildErrorWithMessageAndStacks(
  *
  */
 
-export function mockRaf() {
+export function mockRaf(): FlushRafCalls {
   let requests: { func: FrameRequestCallback; stacks: string[] }[] = [];
   jest.spyOn(window, 'requestAnimationFrame').mockImplementation((fn) => {
     requests.push({

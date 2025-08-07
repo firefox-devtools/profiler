@@ -75,7 +75,6 @@ type MarkerTime = Milliseconds;
 //
 // The definition uses a union, becaus as far
 // as I can tell, Flow doesn't support multiple arity tuples.
-export type TestDefinedMarkers = TestDefinedMarker[];
 export type TestDefinedMarker =
   // Instant marker, payload defaulting to { type: MarkerName }:
   | [MarkerName, MarkerTime]
@@ -164,11 +163,11 @@ function _replaceUniqueStringFieldValuesWithStringIndexesInMarkerPayload(
   }
 }
 
-// This is used in tests, with TestDefinedMarkers.
+// This is used in tests, with TestDefinedMarker[].
 export function addMarkersToThreadWithCorrespondingSamples(
   thread: RawThread,
   shared: RawProfileSharedData,
-  markers: TestDefinedMarkers
+  markers: TestDefinedMarker[]
 ) {
   const stringTable = StringTable.withBackingArray(shared.stringArray);
   const markersTable = thread.markers;
@@ -258,7 +257,7 @@ export function addMarkersToThreadWithCorrespondingSamples(
 
 export function getThreadWithMarkers(
   shared: RawProfileSharedData,
-  markers: TestDefinedMarkers
+  markers: TestDefinedMarker[]
 ) {
   const thread = getEmptyThread();
   addMarkersToThreadWithCorrespondingSamples(thread, shared, markers);
@@ -374,7 +373,7 @@ export function getUserTiming(
   name: string,
   startTime: Milliseconds,
   duration: Milliseconds | null = null
-) {
+): TestDefinedMarker {
   const endTime = duration === null ? null : startTime + duration;
   const entryType = duration === null ? 'mark' : 'measure';
   return [
@@ -390,7 +389,7 @@ export function getUserTiming(
 }
 
 export function getProfileWithMarkers(
-  ...markersPerThread: TestDefinedMarkers[]
+  ...markersPerThread: TestDefinedMarker[][]
 ): Profile {
   const profile = getEmptyProfile();
   // Provide a useful marker schema, rather than an empty one.
@@ -1319,7 +1318,7 @@ type IPCMarkersOptions = {
 
 function _getIPCMarkers(
   options: Partial<IPCMarkersOptions> = {}
-): TestDefinedMarkers {
+): TestDefinedMarker[] {
   const payload: IPCMarkerPayload = {
     type: 'IPC',
     startTime: 0,
@@ -1364,7 +1363,7 @@ export function getIPCTrackProfile() {
 export function getScreenshotMarkersForWindowId(
   windowID: string,
   count: number
-): TestDefinedMarkers {
+): TestDefinedMarker[] {
   return Array(count)
     .fill(undefined)
     .map((_, i) => [

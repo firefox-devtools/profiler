@@ -7,6 +7,8 @@ import fs from 'fs';
 import { LocalizationProvider, ReactLocalization } from '@fluent/react';
 import { lazilyParsedBundles } from '../../app-logic/l10n';
 
+export type CustomRenderResult = ReturnType<typeof customRender>;
+
 function customRender(children: React.ReactElement<any>, ...args: any) {
   const messages = fs.readFileSync('./locales/en-US/app.ftl', 'utf8');
   const bundles = lazilyParsedBundles([['en-US', messages]]);
@@ -38,3 +40,4 @@ export * from '@testing-library/react';
 
 // override render method
 export { customRender as render };
+export type { CustomRenderResult as RenderResult };

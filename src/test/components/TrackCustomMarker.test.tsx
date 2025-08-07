@@ -12,6 +12,7 @@ import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { TrackCustomMarker } from '../../components/timeline/TrackCustomMarker';
 import { ensureExists } from '../../utils/flow';
 
+import type { DrawOperation } from '../fixtures/mocks/canvas-context';
 import {
   autoMockCanvasContext,
   flushDrawLog,
@@ -92,7 +93,7 @@ function setup() {
   /**
    * Coordinate the flushing of the requestAnimationFrame and the draw calls.
    */
-  function getContextDrawCalls(): string[] {
+  function getContextDrawCalls(): DrawOperation[] {
     flushRafCalls();
     return flushDrawLog();
   }
