@@ -10,6 +10,7 @@ import type {
   CodeState,
 } from 'firefox-profiler/types';
 import { combineReducers } from 'redux';
+import { getSourceCodeCacheKey } from '../utils/fetch-source';
 
 const sourceCodeCache: Reducer<Map<string, SourceCodeStatus>> = (
   state = new Map(),
@@ -19,28 +20,32 @@ const sourceCodeCache: Reducer<Map<string, SourceCodeStatus>> = (
     case 'SOURCE_CODE_LOADING_BEGIN_URL': {
       const { file, url } = action;
       const newState = new Map(state);
+      // URL-based source loading doesn't have source IDs, so use file path as cache key
       newState.set(file, { type: 'LOADING', source: { type: 'URL', url } });
       return newState;
     }
     case 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION': {
-      const { file } = action;
+      const { file, globalJSSourceId } = action;
       const newState = new Map(state);
-      newState.set(file, {
+      const cacheKey = getSourceCodeCacheKey(file, globalJSSourceId);
+      newState.set(cacheKey, {
         type: 'LOADING',
         source: { type: 'BROWSER_CONNECTION' },
       });
       return newState;
     }
     case 'SOURCE_CODE_LOADING_SUCCESS': {
-      const { file, code } = action;
+      const { file, globalJSSourceId, code } = action;
       const newState = new Map(state);
-      newState.set(file, { type: 'AVAILABLE', code });
+      const cacheKey = getSourceCodeCacheKey(file, globalJSSourceId);
+      newState.set(cacheKey, { type: 'AVAILABLE', code });
       return newState;
     }
     case 'SOURCE_CODE_LOADING_ERROR': {
-      const { file, errors } = action;
+      const { file, globalJSSourceId, errors } = action;
       const newState = new Map(state);
-      newState.set(file, { type: 'ERROR', errors });
+      const cacheKey = getSourceCodeCacheKey(file, globalJSSourceId);
+      newState.set(cacheKey, { type: 'ERROR', errors });
       return newState;
     }
     default:

@@ -5,6 +5,7 @@
 // @flow
 
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import type { GlobalJSSourceId } from 'firefox-profiler/types';
 
 export type ParsedFileNameFromSymbolication =
   | {|
@@ -47,6 +48,11 @@ export type ParsedFileNameFromSymbolication =
 export type SourceFileDownloadRecipe =
   | { type: 'CORS_ENABLED_SINGLE_FILE', url: string }
   | { type: 'CORS_ENABLED_ARCHIVE', archiveUrl: string, pathInArchive: string }
+  | {
+      type: 'JS_SOURCE_VIA_WEBCHANNEL',
+      globalJSSourceId: GlobalJSSourceId,
+      url: string,
+    }
   | { type: 'NO_KNOWN_CORS_URL' };
 
 // For native code, the symbolication API returns special filenames that allow
@@ -145,8 +151,9 @@ export function parseFileNameFromSymbolication(
 // to send permissive CORS headers.
 // Some files cannot be obtained from the internet at all. Others can only be
 // obtained as part of an archive.
-export function getDownloadRecipeForSourceFile(
-  parsedFile: ParsedFileNameFromSymbolication
+export function getDownloadRecipeForSourceFileAndId(
+  parsedFile: ParsedFileNameFromSymbolication,
+  globalJSSourceId: GlobalJSSourceId | null
 ): SourceFileDownloadRecipe {
   switch (parsedFile.type) {
     case 'hg': {
@@ -210,6 +217,13 @@ export function getDownloadRecipeForSourceFile(
       };
     }
     case 'normal': {
+      if (globalJSSourceId !== null) {
+        return {
+          type: 'JS_SOURCE_VIA_WEBCHANNEL',
+          globalJSSourceId: globalJSSourceId,
+          url: parsedFile.path,
+        };
+      }
       return { type: 'NO_KNOWN_CORS_URL' };
     }
     default:

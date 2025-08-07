@@ -418,7 +418,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 57,
+    "preprocessedProfileVersion": 58,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -426,7 +426,7 @@ Object {
     "startTime": 0,
     "symbolicated": true,
     "toolkit": "",
-    "version": 31,
+    "version": 32,
   },
   "pages": Array [
     Object {
@@ -664,6 +664,7 @@ Object {
         "length": 0,
         "lib": Array [],
         "name": Array [],
+        "sourceId": Array [],
         "type": Array [],
       },
       "samples": Object {
@@ -1040,6 +1041,7 @@ Object {
         "length": 0,
         "lib": Array [],
         "name": Array [],
+        "sourceId": Array [],
         "type": Array [],
       },
       "samples": Object {
@@ -1276,6 +1278,7 @@ Array [
       "length": 0,
       "lib": Array [],
       "name": Array [],
+      "sourceId": Array [],
       "type": Array [],
     },
     "samples": Object {
@@ -1652,6 +1655,7 @@ Array [
       "length": 0,
       "lib": Array [],
       "name": Array [],
+      "sourceId": Array [],
       "type": Array [],
     },
     "samples": Object {
@@ -2850,6 +2854,7 @@ CallTree {
       "length": 0,
       "lib": Array [],
       "name": Array [],
+      "sourceId": Array [],
       "type": Array [],
     },
     "samples": Object {
@@ -3179,6 +3184,7 @@ Object {
     "length": 0,
     "lib": Array [],
     "name": Array [],
+    "sourceId": Array [],
     "type": Array [],
   },
   "samples": Object {
@@ -3586,6 +3592,7 @@ Object {
     "length": 0,
     "lib": Array [],
     "name": Array [],
+    "sourceId": Array [],
     "type": Array [],
   },
   "samples": Object {
@@ -3907,6 +3914,7 @@ Object {
     "length": 0,
     "lib": Array [],
     "name": Array [],
+    "sourceId": Array [],
     "type": Array [],
   },
   "samples": Object {
@@ -4234,6 +4242,7 @@ Object {
     "length": 0,
     "lib": Array [],
     "name": Array [],
+    "sourceId": Array [],
     "type": Array [],
   },
   "samples": Object {

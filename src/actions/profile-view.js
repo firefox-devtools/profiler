@@ -1893,7 +1893,7 @@ export function changeTableViewOptions(
 
 export function updateBottomBoxContentsAndMaybeOpen(
   currentTab: TabSlug,
-  { libIndex, sourceFile, nativeSymbols }: BottomBoxInfo
+  { libIndex, globalJSSourceId, sourceFile, nativeSymbols }: BottomBoxInfo
 ): Action {
   // TODO: If the set has more than one element, pick the native symbol with
   // the highest total sample count
@@ -1902,6 +1902,7 @@ export function updateBottomBoxContentsAndMaybeOpen(
   return {
     type: 'UPDATE_BOTTOM_BOX',
     libIndex,
+    globalJSSourceId,
     sourceFile,
     nativeSymbol,
     allNativeSymbolsForInitiatingCallNode: nativeSymbols,

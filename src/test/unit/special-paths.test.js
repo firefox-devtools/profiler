@@ -6,7 +6,7 @@
 
 import {
   parseFileNameFromSymbolication,
-  getDownloadRecipeForSourceFile,
+  getDownloadRecipeForSourceFileAndId,
 } from '../../utils/special-paths';
 
 describe('parseFileNameFromSymbolication', function () {
@@ -171,9 +171,12 @@ describe('parseFileNameFromSymbolication', function () {
   });
 });
 
-describe('getDownloadRecipeForSourceFile', function () {
+describe('getDownloadRecipeForSourceFileAndId', function () {
   function getUrl(path) {
-    return getDownloadRecipeForSourceFile(parseFileNameFromSymbolication(path));
+    return getDownloadRecipeForSourceFileAndId(
+      parseFileNameFromSymbolication(path),
+      null
+    );
   }
 
   it('finds the correct URLs for hg paths', function () {
