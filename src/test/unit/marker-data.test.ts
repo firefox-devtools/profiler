@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import {
   getThreadSelectors,
   selectedThreadSelectors,
@@ -22,6 +20,7 @@ import {
 import {
   createGeckoProfile,
   createGeckoProfileWithMarkers,
+  type TestDefinedGeckoMarker,
 } from '../fixtures/profiles/gecko-profile';
 import {
   getTestFriendlyDerivedMarkerInfo,
@@ -38,11 +37,13 @@ import { storeWithProfile } from '../fixtures/stores';
 import type {
   IndexIntoRawMarkerTable,
   Milliseconds,
+  NetworkPayload,
   RawProfileSharedData,
+  ScreenshotPayload,
 } from 'firefox-profiler/types';
 
 describe('Derive markers from Gecko phase markers', function () {
-  function setupWithTestDefinedMarkers(markers) {
+  function setupWithTestDefinedMarkers(markers: TestDefinedGeckoMarker[]) {
     const profile = processGeckoProfile(createGeckoProfileWithMarkers(markers));
     profile.meta.symbolicated = true; // Avoid symbolication.
     const { getState } = storeWithProfile(profile);
@@ -283,12 +284,12 @@ describe('Derive markers from Gecko phase markers', function () {
 
   it('has special handling for CompositorScreenshot', function () {
     const basePayload = {
-      type: 'CompositorScreenshot',
+      type: 'CompositorScreenshot' as const,
       url: 16,
       windowWidth: 1280,
       windowHeight: 1000,
     };
-    const payloadsForWindowA = [
+    const payloadsForWindowA: ScreenshotPayload[] = [
       {
         ...basePayload,
         windowID: '0xAAAAAAAAA',
@@ -780,9 +781,9 @@ describe('deriveMarkersFromRawMarkerTable', function () {
 
 describe('filterRawMarkerTableToRange', () => {
   type TestConfig = {
-    start: Milliseconds,
-    end: Milliseconds,
-    markers: Array<TestDefinedRawMarker>,
+    start: Milliseconds;
+    end: Milliseconds;
+    markers: Array<TestDefinedRawMarker>;
   };
 
   function setup({ start, end, markers }: TestConfig) {
@@ -935,7 +936,7 @@ describe('filterRawMarkerTableToRange', () => {
   });
 
   it('filters network markers', () => {
-    const rest = {
+    const rest: Omit<NetworkPayload, 'id' | 'status'> = {
       type: 'Network',
       URI: 'https://example.com',
       pri: 0,
@@ -1023,8 +1024,8 @@ describe('filterRawMarkerTableToRange', () => {
     expect(
       processedMarkers.map((marker) => [
         marker.name,
-        marker.data && (marker.data: any).id,
-        marker.data && (marker.data: any).status,
+        marker.data && (marker.data as any).id,
+        marker.data && (marker.data as any).status,
         marker.start,
         marker.end,
       ])
@@ -1036,7 +1037,7 @@ describe('filterRawMarkerTableToRange', () => {
   });
 
   it('filters network markers with only a start marker', () => {
-    const rest = {
+    const rest: Omit<NetworkPayload, 'id' | 'status'> = {
       type: 'Network',
       URI: 'https://example.com',
       pri: 0,
@@ -1095,7 +1096,7 @@ describe('filterRawMarkerTableToRange', () => {
 
     const result = processedMarkers.map((marker) => [
       marker.name,
-      marker.data && (marker.data: any).id,
+      marker.data && (marker.data as any).id,
     ]);
 
     expect(result).toEqual([
@@ -1108,7 +1109,7 @@ describe('filterRawMarkerTableToRange', () => {
   });
 
   it('filters network markers with only an end marker', () => {
-    const rest = {
+    const rest: Omit<NetworkPayload, 'id' | 'status'> = {
       type: 'Network',
       URI: 'https://example.com',
       pri: 0,
@@ -1168,7 +1169,7 @@ describe('filterRawMarkerTableToRange', () => {
     expect(
       processedMarkers.map((marker) => [
         marker.name,
-        marker.data && (marker.data: any).id,
+        marker.data && (marker.data as any).id,
       ])
     ).toEqual([
       ['Load 2', 2],
@@ -1180,7 +1181,7 @@ describe('filterRawMarkerTableToRange', () => {
   });
 
   it('filters network markers based on their ids', () => {
-    const rest = {
+    const rest: Omit<NetworkPayload, 'id' | 'status'> = {
       type: 'Network',
       URI: 'https://example.com',
       pri: 0,
@@ -1257,7 +1258,7 @@ describe('filterRawMarkerTableToRange', () => {
     expect(
       processedMarkers.map((marker) => [
         marker.name,
-        marker.data && (marker.data: any).id,
+        marker.data && (marker.data as any).id,
       ])
     ).toEqual([
       ['Load 1', 0x0000000100000001],
@@ -1272,9 +1273,9 @@ describe('filterRawMarkerTableToRange', () => {
 // tested in `filterRawMarkerTableToRange` tests.
 describe('filterRawMarkerTableToRangeWithMarkersToDelete', () => {
   type TestConfig = {
-    timeRange: { start: Milliseconds, end: Milliseconds } | null,
-    markersToDelete: Set<IndexIntoRawMarkerTable>,
-    markers: Array<TestDefinedRawMarker>,
+    timeRange: { start: Milliseconds; end: Milliseconds } | null;
+    markersToDelete: Set<IndexIntoRawMarkerTable>;
+    markers: Array<TestDefinedRawMarker>;
   };
 
   function setup({ timeRange, markersToDelete, markers }: TestConfig) {

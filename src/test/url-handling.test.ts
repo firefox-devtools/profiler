@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import { oneLineTrim } from 'common-tags';
 import * as urlStateSelectors from '../selectors/url-state';
 import {
@@ -39,6 +37,7 @@ import type {
   StartEndRange,
   Store,
   State,
+  ThreadIndex,
 } from 'firefox-profiler/types';
 import getNiceProfile from './fixtures/profiles/call-nodes';
 import queryString from 'query-string';
@@ -56,13 +55,15 @@ import { getProfile } from '../selectors/profile';
 import { SYMBOL_SERVER_URL } from '../app-logic/constants';
 import { getThreadsKey } from '../profile-logic/profile-data';
 
+type StoreUrlSettings = {
+  pathname?: string;
+  search?: string;
+  hash?: string;
+  v?: number | false; // If v is false, do not add a v parameter to the search string.
+};
+
 function _getStoreWithURL(
-  settings: {
-    pathname?: string,
-    search?: string,
-    hash?: string,
-    v?: number | false, // If v is false, do not add a v parameter to the search string.
-  } = {},
+  settings: StoreUrlSettings = {},
   profile: Profile | null = getNiceProfile()
 ) {
   const { pathname, hash, search, v } = Object.assign(
@@ -133,7 +134,10 @@ function _getStoreFromStateAfterUrlRoundtrip(state: State): Store {
 }
 
 describe('selectedThread', function () {
-  function dispatchUrlWithThread(store, threadIndexSet) {
+  function dispatchUrlWithThread(
+    store: Store,
+    threadIndexSet: Set<ThreadIndex>
+  ) {
     const serializedSelectedThreads =
       encodeUintSetForUrlComponent(threadIndexSet);
     const newUrlState = stateFromLocation({
@@ -147,7 +151,7 @@ describe('selectedThread', function () {
     });
   }
 
-  function setup(threadIndexSet) {
+  function setup(threadIndexSet: Set<ThreadIndex>) {
     const store = blankStore();
     dispatchUrlWithThread(store, threadIndexSet);
 
@@ -441,7 +445,11 @@ describe('search strings', function () {
 
     dispatch(changeCallTreeSearchString(callTreeSearchString));
 
-    ['calltree', 'stack-chart', 'flame-graph'].forEach((tabSlug) => {
+    [
+      'calltree' as const,
+      'stack-chart' as const,
+      'flame-graph' as const,
+    ].forEach((tabSlug) => {
       dispatch(changeSelectedTab(tabSlug));
       const queryString = getQueryStringFromState(getState());
       expect(queryString).toContain(
@@ -457,7 +465,7 @@ describe('search strings', function () {
 
     dispatch(changeMarkersSearchString(markerSearchString));
 
-    ['marker-chart', 'marker-table'].forEach((tabSlug) => {
+    ['marker-chart' as const, 'marker-table' as const].forEach((tabSlug) => {
       dispatch(changeSelectedTab(tabSlug));
       const queryString = getQueryStringFromState(getState());
       expect(queryString).toContain(`markerSearch=${markerSearchString}`);
@@ -627,7 +635,7 @@ describe('committed ranges', function () {
 
   describe('serializing and parsing', () => {
     function getQueryStringForRanges(
-      ranges: $ReadOnlyArray<StartEndRange>
+      ranges: ReadonlyArray<StartEndRange>
     ): string {
       const { getState, dispatch } = _getStoreWithURL();
 
@@ -636,7 +644,7 @@ describe('committed ranges', function () {
       return getQueryStringFromState(getState());
     }
 
-    function setup(ranges: $ReadOnlyArray<StartEndRange>) {
+    function setup(ranges: ReadonlyArray<StartEndRange>) {
       const queryString = getQueryStringForRanges(ranges);
 
       return _getStoreWithURL({
@@ -685,7 +693,7 @@ describe('committed ranges', function () {
 });
 
 describe('implementation', function () {
-  function setup(settings, profile) {
+  function setup(settings?: StoreUrlSettings, profile?: Profile) {
     const store = _getStoreWithURL(settings, profile);
 
     function getQueryString() {
@@ -708,7 +716,7 @@ describe('implementation', function () {
       expect(getQueryString()).not.toContain('implementation=');
     });
 
-    it.each(['js', 'cpp'])(
+    it.each(['js' as const, 'cpp' as const])(
       'can serialize the value "%s"',
       (implementationFilter) => {
         const { getQueryString, dispatch } = setup();
@@ -1693,6 +1701,7 @@ describe('symbolServerUrl', function () {
     expect(queryString).toContain(
       'symbolServer=https%3A%2F%2Fsymbolication.services.mozilla.com.example.com%2Fsymbols'
     );
+    // @ts-expect-error - Property 'mock' does not exist
     expect(console.error.mock.calls).toMatchSnapshot();
   });
 
@@ -1700,6 +1709,7 @@ describe('symbolServerUrl', function () {
     const { symbolServerUrl, queryString } = setup('?symbolServer=invalid');
     expect(symbolServerUrl).toEqual(SYMBOL_SERVER_URL);
     expect(queryString).toContain('symbolServer=invalid');
+    // @ts-expect-error - Property 'mock' does not exist
     expect(console.error.mock.calls).toMatchSnapshot();
   });
 
@@ -1711,6 +1721,7 @@ describe('symbolServerUrl', function () {
     expect(queryString).toContain(
       'symbolServer=http%3A%2F%2Fsymbolication.services.mozilla.com%2F'
     );
+    // @ts-expect-error - Property 'mock' does not exist
     expect(console.error.mock.calls).toMatchSnapshot();
   });
 
@@ -1724,6 +1735,7 @@ describe('symbolServerUrl', function () {
     expect(queryString).toContain(
       'symbolServer=https%3A%2F%2Fsymbolication.services.mozilla.com'
     );
+    // @ts-expect-error - Property 'mock' does not exist
     expect(console.error.mock.calls).toMatchSnapshot();
   });
 
@@ -1737,6 +1749,7 @@ describe('symbolServerUrl', function () {
     expect(queryString).toContain(
       'symbolServer=https%3A%2F%2Fsymbolication.services.mozilla.com%2F'
     );
+    // @ts-expect-error - Property 'mock' does not exist
     expect(console.error.mock.calls).toMatchSnapshot();
   });
 
@@ -1750,6 +1763,7 @@ describe('symbolServerUrl', function () {
     expect(queryString).toContain(
       'symbolServer=https%3A%2F%2Fsymbolication.services.mozilla.com%2Fsubdir%2F'
     );
+    // @ts-expect-error - Property 'mock' does not exist
     expect(console.error.mock.calls).toMatchSnapshot();
   });
 });

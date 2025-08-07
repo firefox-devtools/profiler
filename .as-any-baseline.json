@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-08-07T01:55:47.797Z",
-  "totalUsages": 156,
-  "totalFiles": 64,
+  "timestamp": "2025-08-07T02:51:37.717Z",
+  "totalUsages": 174,
+  "totalFiles": 68,
   "usages": [
     {
       "file": "src/actions/receive-profile.ts",
@@ -424,6 +424,16 @@
       "content": "return (window as any).__flushDrawLog();"
     },
     {
+      "file": "src/test/components/Timeline.test.tsx",
+      "line": 213,
+      "content": ") as any;"
+    },
+    {
+      "file": "src/test/components/Timeline.test.tsx",
+      "line": 249,
+      "content": ") as any;"
+    },
+    {
       "file": "src/test/components/TrackNetwork.test.tsx",
       "line": 387,
       "content": "return (window as any).__flushDrawLog();"
@@ -594,8 +604,58 @@
       "content": "(uploadBinaryProfileData as any).mockImplementationOnce(initUploadProcess);"
     },
     {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 84,
+      "content": "(SymbolStoreDB as any).mockImplementation(() => ({"
+    },
+    {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 343,
+      "content": "}) as any"
+    },
+    {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 879,
+      "content": "(callback) => (process.nextTick(callback), 0 as any)"
+    },
+    {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 1025,
+      "content": "(callback) => (process.nextTick(callback), 0 as any)"
+    },
+    {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 1337,
+      "content": "return file as any;"
+    },
+    {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 1344,
+      "content": "const payload = (mockFile as any)._payload;"
+    },
+    {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 1467,
+      "content": "(view as any).error"
+    },
+    {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 1512,
+      "content": "(view as any).error"
+    },
+    {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 1605,
+      "content": "(view as any).error"
+    },
+    {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 1656,
+      "content": "(expandUrl as any).mockImplementation((shortUrl: string) => {"
+    },
+    {
       "file": "src/test/store/symbolication.test.ts",
-      "line": 314,
+      "line": 313,
       "content": "const firstMarkerCause = ensureExists((firstMarkerData as any).cause);"
     },
     {
@@ -649,6 +709,31 @@
       "content": "return r as any;"
     },
     {
+      "file": "src/test/unit/marker-data.test.ts",
+      "line": 1027,
+      "content": "marker.data && (marker.data as any).id,"
+    },
+    {
+      "file": "src/test/unit/marker-data.test.ts",
+      "line": 1028,
+      "content": "marker.data && (marker.data as any).status,"
+    },
+    {
+      "file": "src/test/unit/marker-data.test.ts",
+      "line": 1099,
+      "content": "marker.data && (marker.data as any).id,"
+    },
+    {
+      "file": "src/test/unit/marker-data.test.ts",
+      "line": 1172,
+      "content": "marker.data && (marker.data as any).id,"
+    },
+    {
+      "file": "src/test/unit/marker-data.test.ts",
+      "line": 1261,
+      "content": "marker.data && (marker.data as any).id,"
+    },
+    {
       "file": "src/test/unit/merge-compare.test.ts",
       "line": 605,
       "content": "(ensureExists(mergedMarkers.data[0]) as any).fieldWithUniqueString"
@@ -657,6 +742,11 @@
       "file": "src/test/unit/merge-compare.test.ts",
       "line": 608,
       "content": "(ensureExists(mergedMarkers.data[1]) as any).fieldWithUniqueString"
+    },
+    {
+      "file": "src/test/unit/process-profile.test.ts",
+      "line": 637,
+      "content": "expect((processedSamples as any)[fieldName][i]).toBe("
     },
     {
       "file": "src/test/unit/symbol-store-db.test.ts",

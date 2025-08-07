@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-import * as React from 'react';
 import { Provider } from 'react-redux';
 
 import {
@@ -13,7 +11,10 @@ import {
   act,
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { Timeline } from '../../components/timeline';
-import { computeTimeColumnForRawSamplesTable } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  computeTimeColumnForRawSamplesTable,
+  filterRawThreadSamplesToRange,
+} from 'firefox-profiler/profile-logic/profile-data';
 import {
   selectedThreadSelectors,
   getRightClickedTrack,
@@ -41,6 +42,7 @@ import {
   fireFullClick,
   fireFullKeyPress,
   fireFullContextMenu,
+  type FakeMouseEventInit,
 } from '../fixtures/utils';
 import ReactDOM from 'react-dom';
 import {
@@ -205,10 +207,10 @@ describe('Timeline multiple thread selection', function () {
       '  - show [thread Style]',
     ]);
 
-    const activityGraph: HTMLElement = (ensureExists(
+    const activityGraph: HTMLElement = ensureExists(
       getByText('Activity Graph for DOM Worker').closest('canvas'),
       'Could not find the canvas.'
-    ): any);
+    ) as any;
 
     expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
       null
@@ -241,10 +243,10 @@ describe('Timeline multiple thread selection', function () {
       '  - show [thread Style]',
     ]);
 
-    const activityGraphForStyle: HTMLElement = (ensureExists(
+    const activityGraphForStyle: HTMLElement = ensureExists(
       getByText('Activity Graph for Style').closest('canvas'),
       'Could not find the canvas.'
-    ): any);
+    ) as any;
 
     expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
       null
@@ -1227,22 +1229,7 @@ function _getProfileWithDroppedSamples(): Profile {
   thread2.name = 'Thread with dropped samples';
 
   // Remove the samples that contain 'x' and 'e'.
-  {
-    const samples = thread2.samples;
-    for (const key in samples) {
-      if (
-        Object.prototype.hasOwnProperty.call(samples, key) &&
-        Array.isArray(samples[key])
-      ) {
-        // Slice just the stacks we care about, simulating a thread that was started
-        // later, and with dropped data in its buffer.
-        samples[key] = samples[key].slice(4, 7);
-      }
-    }
-  }
-  thread2.samples.length = thread2.samples.stack.length;
-
-  profile.threads.push(thread2);
+  profile.threads.push(filterRawThreadSamplesToRange(thread2, 4, 7));
   return profile;
 }
 
@@ -1334,10 +1321,10 @@ describe('Timeline', function () {
 
   describe('TimelineInitialSettings', () => {
     function setup(config: {
-      initialVisibleThreads?: ThreadIndex[],
-      initialSelectedThreads?: ThreadIndex[],
-      keepProfileThreadOrder?: boolean,
-      swapDOMWorkerAndStyleThread?: boolean,
+      initialVisibleThreads?: ThreadIndex[];
+      initialSelectedThreads?: ThreadIndex[];
+      keepProfileThreadOrder?: boolean;
+      swapDOMWorkerAndStyleThread?: boolean;
     }) {
       const profile = getProfileWithNiceTracks();
       profile.meta.initialSelectedThreads = config.initialSelectedThreads;
@@ -1410,7 +1397,7 @@ describe('Timeline', function () {
 });
 
 describe('TimelineSelection', () => {
-  function setup({ profileLength }: { profileLength: number } = {}) {
+  function setup({ profileLength }: { profileLength?: number } = {}) {
     const flushRafCalls = mockRaf();
     // Default to 10 samples in the profile.
     profileLength = profileLength ?? 10;
@@ -1427,10 +1414,11 @@ describe('TimelineSelection', () => {
     // getBoundingClientRect is already mocked by autoMockElementSize.
     jest
       .spyOn(HTMLElement.prototype, 'getClientRects')
-      .mockImplementation(() => {
+      .mockImplementation((): DOMRectList => {
         const result = [
           new DOMRect(LEFT, TOP, TRACK_WIDTH, FULL_TRACK_SCREENSHOT_HEIGHT),
         ];
+        // @ts-expect-error - missing "item"
         return result;
       });
 
@@ -1444,7 +1432,7 @@ describe('TimelineSelection', () => {
     // This is necessary to make sure the sizing is correct.
     flushRafCalls();
 
-    function moveMouseOnThreadCanvas(mouseEventOptions) {
+    function moveMouseOnThreadCanvas(mouseEventOptions: FakeMouseEventInit) {
       const threadCanvas = ensureExists(
         document.querySelector('.threadActivityGraphCanvas'),
         'Expected that a thread activity graph canvas is present.'
@@ -1457,7 +1445,7 @@ describe('TimelineSelection', () => {
       const positionLine = ensureExists(
         document.querySelector('.timelineSelectionHoverLine'),
         'Expected that the vertical line indicating the time position is present.'
-      );
+      ) as HTMLElement;
       return parseInt(positionLine.style.left);
     }
 

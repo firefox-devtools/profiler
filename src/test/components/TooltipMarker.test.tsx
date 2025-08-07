@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-import React from 'react';
 import { Provider } from 'react-redux';
 
 import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
@@ -17,13 +15,18 @@ import {
   getProfileWithEventDelays,
   addTabInformationToProfile,
   markTabIdsAsPrivateBrowsing,
+  type TestDefinedMarker,
+  type NetworkMarkersOptions,
 } from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
 import { changeSelectedThreads } from 'firefox-profiler/actions/profile-view';
 import { getEmptyThread } from '../../profile-logic/data-structures';
 import { ensureExists } from 'firefox-profiler/utils/flow';
-import type { NetworkPayload } from 'firefox-profiler/types';
+import type {
+  NetworkPayload,
+  NetworkRedirectType,
+} from 'firefox-profiler/types';
 
 describe('TooltipMarker', function () {
   it('renders tooltips for various markers', () => {
@@ -554,7 +557,7 @@ describe('TooltipMarker', function () {
   // In this setup function, we'll render only the first derived marker. But
   // there can be several raw markers as sources, that will be merged in our
   // processing pipeline.
-  function setupWithPayload(markers) {
+  function setupWithPayload(markers: TestDefinedMarker[]) {
     const profile = getProfileWithMarkers(markers);
     const { secondTabTabID } = addTabInformationToProfile(profile);
     markTabIdsAsPrivateBrowsing(profile, [secondTabTabID]);
@@ -585,11 +588,13 @@ describe('TooltipMarker', function () {
   function getValueForProperty(propertyName: string): string {
     const labelElement = screen.getByText(propertyName + ':');
     const valueElement = ensureExists(labelElement.nextSibling);
-    return valueElement.textContent;
+    return valueElement.textContent!;
   }
 
   describe('renders properly redirect network markers', () => {
-    function redirectMarker(payloadOverrides?: $Shape<NetworkPayload>) {
+    function redirectMarker(
+      payloadOverrides?: Partial<NetworkPayload>
+    ): NetworkMarkersOptions {
       return {
         id: 1234,
         startTime: 10.5,
@@ -603,7 +608,7 @@ describe('TooltipMarker', function () {
           count: 0,
           RedirectURI:
             'http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625',
-          contentType: ('': null | string),
+          contentType: '',
           ...payloadOverrides,
         },
       };
@@ -617,17 +622,19 @@ describe('TooltipMarker', function () {
       expect(container.firstChild).toMatchSnapshot();
     });
 
-    ['Permanent', 'Internal', 'Temporary'].forEach((redirectType) => {
-      it(`for a ${redirectType} redirection`, () => {
-        const { container } = setupWithPayload(
-          getNetworkMarkers(
-            redirectMarker({ redirectType, isHttpToHttpsRedirect: false })
-          )
-        );
+    (['Permanent', 'Internal', 'Temporary'] as NetworkRedirectType[]).forEach(
+      (redirectType) => {
+        it(`for a ${redirectType} redirection`, () => {
+          const { container } = setupWithPayload(
+            getNetworkMarkers(
+              redirectMarker({ redirectType, isHttpToHttpsRedirect: false })
+            )
+          );
 
-        expect(container.firstChild).toMatchSnapshot();
-      });
-    });
+          expect(container.firstChild).toMatchSnapshot();
+        });
+      }
+    );
 
     it('for an internal redirection from a HSTS header', () => {
       const { container } = setupWithPayload(

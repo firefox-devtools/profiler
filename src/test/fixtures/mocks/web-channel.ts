@@ -129,7 +129,7 @@ export function simulateOldWebChannelAndFrameScript(
 }
 
 export function simulateWebChannel(
-  profileGetter: () => ArrayBuffer | MixedObject,
+  profileGetter: () => Promise<ArrayBuffer | MixedObject>,
   faviconsGetter?: () => Promise<Array<FaviconData | null>>
 ) {
   const webChannel = mockWebChannel();

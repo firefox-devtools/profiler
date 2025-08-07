@@ -1168,7 +1168,7 @@ export function getMergedProfileFromTextSamples(
   return getProfileWithDicts(profile);
 }
 
-type NetworkMarkersOptions = {
+export type NetworkMarkersOptions = {
   uri: string;
   id: number;
   startTime: number;

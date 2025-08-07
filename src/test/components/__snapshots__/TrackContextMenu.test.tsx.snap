@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`timeline/TrackContextMenu when a global track is right clicked matches the snapshot of a global non-process track 1`] = `
 <nav

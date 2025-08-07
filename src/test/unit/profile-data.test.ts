@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
+
 import {
   symbolicateProfile,
   applySymbolicationSteps,
@@ -48,7 +48,17 @@ import {
   getBacktraceItemsForStack,
 } from '../../profile-logic/transforms';
 
-import type { Thread, IndexIntoStackTable } from 'firefox-profiler/types';
+import type {
+  Thread,
+  IndexIntoStackTable,
+  IndexIntoSamplesTable,
+  CallNodePath,
+  LibMapping,
+  Profile,
+  RawThread,
+  RawProfileSharedData,
+  IndexIntoFrameTable,
+} from 'firefox-profiler/types';
 
 describe('string-table', function () {
   const u = StringTable.withBackingArray(['foo', 'bar', 'baz']);
@@ -84,7 +94,9 @@ describe('data-table-utils', function () {
       order: [13, 0.7, 2, -0.2, 100, 20.1],
       wordLength: [1, 2, 3, 4, 5, 6],
     };
-    const dt = JSON.parse(JSON.stringify(originalDataTable));
+    const dt: typeof originalDataTable = JSON.parse(
+      JSON.stringify(originalDataTable)
+    );
 
     it('test preparation', function () {
       // verify copy
@@ -261,7 +273,7 @@ describe('process-profile', function () {
     it('nudges return addresses but not sampled instruction pointer values', function () {
       const profile = processGeckoProfile(createGeckoProfile());
       const thread = profile.threads[0];
-      function getFrameAddressesForSampleIndex(sample) {
+      function getFrameAddressesForSampleIndex(sample: IndexIntoSamplesTable) {
         const addresses = [];
         let stack = thread.samples.stack[sample];
         while (stack !== null) {
@@ -327,7 +339,7 @@ describe('process-profile', function () {
         // from the parent process.
         const geckoSubprocess = createGeckoSubprocessProfile(geckoProfile);
         const childProcessThread = geckoSubprocess.threads[0];
-        const jsTracerDictionary = [];
+        const jsTracerDictionary: string[] = [];
         const stringTable = StringTable.withBackingArray(jsTracerDictionary);
         const jsTracer = getJsTracerTable(stringTable, [
           ['jsTracerA', 0, 10],
@@ -481,7 +493,7 @@ describe('profile-data', function () {
     }
     const { prefix } = thread.stackTable;
     const stackList = [];
-    let nextStack = stackIndex;
+    let nextStack: IndexIntoStackTable | null = stackIndex;
     while (nextStack !== null) {
       if (typeof nextStack !== 'number') {
         throw new Error('nextStack must be a number');
@@ -573,7 +585,7 @@ describe('profile-data', function () {
 });
 
 describe('getInvertedCallNodeInfo', function () {
-  function setup(plaintextSamples) {
+  function setup(plaintextSamples: string) {
     const { derivedThreads, funcNamesDictPerThread, defaultCategory } =
       getProfileFromTextSamples(plaintextSamples);
 
@@ -598,7 +610,7 @@ describe('getInvertedCallNodeInfo', function () {
     // order index range".
     // These are the nodes whose call paths, if inverted, would correspond to
     // inverted call nodes that are descendants of X.
-    function nodesWithSuffix(callPathSuffix) {
+    function nodesWithSuffix(callPathSuffix: CallNodePath) {
       const invertedNodeForSuffix = ensureExists(
         invertedCallNodeInfo.getCallNodeIndexFromPath(
           [...callPathSuffix].reverse()
@@ -610,7 +622,7 @@ describe('getInvertedCallNodeInfo', function () {
         );
       const suffixOrderedCallNodes =
         invertedCallNodeInfo.getSuffixOrderedCallNodes();
-      const nonInvertedCallNodes = new Set();
+      const nonInvertedCallNodes = new Set<unknown>();
       for (let i = rangeStart; i < rangeEnd; i++) {
         nonInvertedCallNodes.add(suffixOrderedCallNodes[i]);
       }
@@ -672,7 +684,7 @@ describe('getInvertedCallNodeInfo', function () {
 
 describe('symbolication', function () {
   describe('AddressLocator', function () {
-    const libs = [
+    const libs: LibMapping[] = [
       { start: 0, end: 0x20, name: 'first' },
       { start: 0x20, end: 0x40, name: 'second' },
       { start: 0x40, end: 0x50, name: 'third' },
@@ -692,7 +704,7 @@ describe('symbolication', function () {
     });
 
     // Help flow out here.
-    function getLibName(lib) {
+    function getLibName(lib: LibMapping | null) {
       if (lib) {
         return lib.name;
       }
@@ -742,18 +754,18 @@ describe('symbolication', function () {
   });
 
   describe('symbolicateProfile', function () {
-    let unsymbolicatedProfile = null;
-    let symbolicatedProfile = null;
+    let unsymbolicatedProfile: Profile | null = null;
+    let symbolicatedProfile: Profile | null = null;
 
     beforeAll(function () {
       unsymbolicatedProfile = processGeckoProfile(createGeckoProfile());
-      const symbolTable = new Map();
+      const symbolTable = new Map<number, string>();
       symbolTable.set(0, 'first symbol');
       symbolTable.set(0xf00, 'second symbol');
       symbolTable.set(0x1a00, 'third symbol');
       symbolTable.set(0x2000, 'last symbol');
       const symbolStore = new FakeSymbolStore(
-        new Map([
+        new Map<string, Map<number, string>>([
           ['firefox', symbolTable],
           ['firefox-webcontent', symbolTable],
         ])
@@ -780,7 +792,11 @@ describe('symbolication', function () {
     });
 
     it('should assign correct symbols to frames', function () {
-      function functionNameForFrameInThread(thread, shared, frameIndex) {
+      function functionNameForFrameInThread(
+        thread: RawThread,
+        shared: RawProfileSharedData,
+        frameIndex: IndexIntoFrameTable
+      ) {
         const funcIndex = thread.frameTable.func[frameIndex];
         const funcNameStringIndex = thread.funcTable.name[funcIndex];
         return shared.stringArray[funcNameStringIndex];
@@ -829,7 +845,10 @@ describe('filter-by-implementation', function () {
   const { derivedThreads } = getProfileWithDicts(profile);
   const [thread] = derivedThreads;
 
-  function stackIsJS(filteredThread, stackIndex) {
+  function stackIsJS(
+    filteredThread: Thread,
+    stackIndex: IndexIntoStackTable | null
+  ) {
     if (stackIndex === null) {
       throw new Error('stackIndex cannot be null');
     }
@@ -888,7 +907,7 @@ describe('get-sample-index-closest-to-time', function () {
 });
 
 describe('funcHasDirectRecursiveCall and funcHasRecursiveCall', function () {
-  function setup(textSamples) {
+  function setup(textSamples: string) {
     const {
       derivedThreads,
       funcNamesPerThread: [funcNames],
@@ -949,7 +968,7 @@ describe('funcHasDirectRecursiveCall and funcHasRecursiveCall', function () {
 });
 
 describe('getSamplesSelectedStates', function () {
-  function setup(textSamples) {
+  function setup(textSamples: string) {
     const {
       derivedThreads,
       funcNamesDictPerThread: [funcNamesDict],
@@ -1545,7 +1564,10 @@ describe('getNativeSymbolInfo', function () {
 });
 
 describe('getBacktraceItemsForStack', function () {
-  function getBacktraceString(thread, sampleIndex): string {
+  function getBacktraceString(
+    thread: Thread,
+    sampleIndex: IndexIntoSamplesTable
+  ): string {
     return getBacktraceItemsForStack(
       ensureExists(thread.samples.stack[sampleIndex]),
       'combined',

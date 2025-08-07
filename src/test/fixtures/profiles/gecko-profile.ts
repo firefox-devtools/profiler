@@ -331,7 +331,7 @@ export function createGeckoProfile(): GeckoProfile {
   return profile;
 }
 
-type TestDefinedGeckoMarker = {
+export type TestDefinedGeckoMarker = {
   readonly name?: string;
   readonly startTime: Milliseconds | null;
   readonly endTime: Milliseconds | null;

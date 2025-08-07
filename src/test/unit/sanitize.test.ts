@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import { processGeckoProfile } from '../../profile-logic/process-profile';
 import { sanitizePII } from '../../profile-logic/sanitize';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
@@ -28,14 +26,18 @@ import {
   callTreeFromProfile,
   formatTree,
 } from 'firefox-profiler/test/fixtures/utils';
-import type { RemoveProfileInformation } from 'firefox-profiler/types';
+import type {
+  MarkerSchemaByName,
+  RawThread,
+  RemoveProfileInformation,
+} from 'firefox-profiler/types';
 
 describe('sanitizePII', function () {
   function setup(
-    piiConfig: $Shape<RemoveProfileInformation>,
+    piiConfig: Partial<RemoveProfileInformation>,
     originalProfile = processGeckoProfile(createGeckoProfile())
   ) {
-    const defaultsPii = {
+    const defaultsPii: RemoveProfileInformation = {
       shouldRemoveThreads: new Set(),
       shouldRemoveCounters: new Set(),
       shouldRemoveThreadsWithScreenshots: new Set(),
@@ -46,7 +48,7 @@ describe('sanitizePII', function () {
       shouldRemovePrivateBrowsingData: false,
     };
 
-    const PIIToRemove = {
+    const PIIToRemove: RemoveProfileInformation = {
       ...defaultsPii,
       ...piiConfig,
     };
@@ -71,7 +73,7 @@ describe('sanitizePII', function () {
       }
     );
 
-    const markerSchemaByName = {
+    const markerSchemaByName: MarkerSchemaByName = {
       FileIO: {
         name: 'FileIO',
         display: ['marker-chart', 'marker-table', 'timeline-fileio'],
@@ -277,7 +279,7 @@ describe('sanitizePII', function () {
       originalProfile
     );
 
-    function isInTimeRange(thread) {
+    function isInTimeRange(thread: RawThread) {
       return (
         thread.registerTime < timeRangeForFirstThread.end &&
         (!thread.unregisterTime ||
@@ -308,7 +310,7 @@ describe('sanitizePII', function () {
       originalProfile
     );
 
-    function isInTimeRange(thread) {
+    function isInTimeRange(thread: RawThread) {
       return (
         thread.registerTime < timeRangeForLastThread.end &&
         (!thread.unregisterTime ||
@@ -797,7 +799,14 @@ describe('sanitizePII', function () {
     // to handle this case, but otherwise we do no check on it.
 
     // Marker filename fields should be there in the 2 first markers.
-    if (!marker1 || !marker1.filename || !marker2 || !marker2.filename) {
+    if (
+      !marker1 ||
+      !('filename' in marker1) ||
+      !marker1.filename ||
+      !marker2 ||
+      !('filename' in marker2) ||
+      !marker2.filename
+    ) {
       throw new Error('Failed to find filename property in the payload');
     }
 
@@ -830,7 +839,7 @@ describe('sanitizePII', function () {
     const marker = thread.markers.data[0];
 
     // The url fields should still be there
-    if (!marker || !marker.url) {
+    if (!marker || !('url' in marker) || !marker.url) {
       throw new Error('Failed to find url property in the payload');
     }
 
@@ -864,7 +873,7 @@ describe('sanitizePII', function () {
     const marker = thread.markers.data[0];
 
     // The host fields should still be there
-    if (!marker || !marker.host) {
+    if (!marker || !('host' in marker) || !marker.host) {
       throw new Error('Failed to find host property in the payload');
     }
 

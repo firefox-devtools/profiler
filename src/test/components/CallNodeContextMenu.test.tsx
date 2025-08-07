@@ -27,6 +27,7 @@ import { createBrowserConnection } from '../../app-logic/browser-connection';
 import { updateBrowserConnectionStatus } from 'firefox-profiler/actions/app';
 import { simulateWebChannel } from '../fixtures/mocks/web-channel';
 import { retrieveProfileFromBrowser } from '../../actions/receive-profile';
+import type { GeckoProfile } from 'firefox-profiler/types';
 
 describe('calltree/CallNodeContextMenu', function () {
   // Provide a store with a useful profile to assert context menu operations off of.
@@ -212,9 +213,9 @@ describe('calltree/CallNodeContextMenu', function () {
 
     describe('Show the function in DevTools item', function () {
       async function setupWithBrowserConnection(
-        profile = createGeckoProfileWithJsTimings()
+        profile: GeckoProfile = createGeckoProfileWithJsTimings()
       ) {
-        simulateWebChannel(() => profile);
+        simulateWebChannel(async () => profile);
         const browserConnectionStatus =
           await createBrowserConnection('Firefox/136.0');
         const store = blankStore();

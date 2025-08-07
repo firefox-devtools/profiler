@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import {
   extractFuncsAndResourcesFromFrameLocations,
   processGeckoProfile,
@@ -32,6 +30,9 @@ import type {
   RawProfileSharedData,
   RawThread,
   Pid,
+  GeckoSubprocessProfile,
+  IndexIntoStackTable,
+  GeckoSamples,
 } from 'firefox-profiler/types';
 
 describe('extract functions and resource from location strings', function () {
@@ -85,7 +86,7 @@ describe('extract functions and resource from location strings', function () {
       breakpadId: '',
     },
   ];
-  const geckoThreadStringArray = [];
+  const geckoThreadStringArray: string[] = [];
   const geckoThreadStringTable = StringTable.withBackingArray(
     geckoThreadStringArray
   );
@@ -175,14 +176,16 @@ describe('extract functions and resource from location strings', function () {
 
 describe('gecko counters processing', function () {
   function setup(): {
-    parentGeckoProfile: GeckoProfile,
-    parentPid: Pid,
-    childPid: Pid,
-    parentCounter: GeckoCounter,
-    childCounter: GeckoCounter,
+    parentGeckoProfile: GeckoProfile;
+    parentPid: Pid;
+    childPid: Pid;
+    parentCounter: GeckoCounter;
+    childCounter: GeckoCounter;
   } {
     // Create a gecko profile with counters.
-    const findMainThread = (profile): GeckoThread =>
+    const findMainThread = (
+      profile: GeckoProfile | GeckoSubprocessProfile
+    ): GeckoThread =>
       ensureExists(
         profile.threads.find((thread) => thread.name === 'GeckoMain'),
         'There should be a GeckoMain thread in the Gecko profile'
@@ -203,7 +206,7 @@ describe('gecko counters processing', function () {
 
     // It's possible that no sample has been collected during our capture
     // session, ignore this counter if that's the case.
-    const emptyCounterEntry = {
+    const emptyCounterEntry: GeckoCounter = {
       name: 'Empty counter',
       category: 'Some category',
       description: 'Some description',
@@ -260,7 +263,7 @@ describe('gecko counters processing', function () {
     const originalTime = [0, 1, 2, 3, 4, 5, 6];
     const offsetTime = originalTime.map((n) => n + 1000);
 
-    const extractTime = (counter) => {
+    const extractTime = (counter: GeckoCounter) => {
       if (counter.samples.data.length === 0) {
         return [];
       }
@@ -284,14 +287,14 @@ describe('gecko counters processing', function () {
 
 describe('gecko profilerOverhead processing', function () {
   function setup(): {
-    parentGeckoProfile: GeckoProfile,
-    parentPid: Pid,
-    childPid: Pid,
-    parentOverhead: GeckoProfilerOverhead,
-    childOverhead: GeckoProfilerOverhead,
+    parentGeckoProfile: GeckoProfile;
+    parentPid: Pid;
+    childPid: Pid;
+    parentOverhead: GeckoProfilerOverhead;
+    childOverhead: GeckoProfilerOverhead;
   } {
     // Create a gecko profile with profilerOverhead.
-    const findMainThread = (profile) =>
+    const findMainThread = (profile: GeckoProfile | GeckoSubprocessProfile) =>
       ensureExists(
         profile.threads.find((thread) => thread.name === 'GeckoMain'),
         'There should be a GeckoMain thread in the Gecko profile'
@@ -355,7 +358,7 @@ describe('gecko profilerOverhead processing', function () {
     const processedTime = originalTime.map((n) => n / 1000);
     const offsetTime = processedTime.map((n) => n + 1000);
 
-    const extractTime = (overhead) =>
+    const extractTime = (overhead: GeckoProfilerOverhead) =>
       overhead.samples.data.map((tuple) => tuple[0]);
 
     // The original times are not offset and in microseconds.
@@ -395,7 +398,13 @@ describe('serializeProfile', function () {
 describe('js allocation processing', function () {
   function getAllocationMarkerHelper(geckoThread: GeckoThread) {
     let time = 0;
-    return ({ byteSize, stackIndex }) => {
+    return ({
+      byteSize,
+      stackIndex,
+    }: {
+      byteSize: number;
+      stackIndex: IndexIntoStackTable | null;
+    }) => {
       const thisTime = time++;
       // Opt out of type checking, due to the schema look-up not being type checkable.
       const markerTuple: any = [];
@@ -419,7 +428,10 @@ describe('js allocation processing', function () {
       geckoThread.markers.data.push(markerTuple);
     };
   }
-  function getFrameAddressesForStack(thread, stackIndex) {
+  function getFrameAddressesForStack(
+    thread: RawThread,
+    stackIndex: IndexIntoStackTable | null
+  ) {
     const addresses = [];
     let stack = stackIndex;
     while (stack !== null) {
@@ -480,9 +492,9 @@ describe('js allocation processing', function () {
 });
 
 describe('native allocation processing', function () {
-  type CreateAllocation = ({
-    byteSize: number,
-    stackIndex: number | null,
+  type CreateAllocation = (options: {
+    byteSize: number;
+    stackIndex: number | null;
   }) => void;
 
   // This helper will create a function that can be used to easily add allocations to
@@ -572,7 +584,7 @@ describe('gecko samples table processing', function () {
       [9, 8];
     const hardcodedEventDelay: Milliseconds[] = [0, 1];
     const hardcodedThreadCPUDelta: Array<number | null> = [0.1, 0.2];
-    const hardcodedSamplesTable = [
+    const hardcodedSamplesTable: GeckoSamples['data'] = [
       [
         hardcodedStack[0],
         hardcodedTime[0],
@@ -618,10 +630,11 @@ describe('gecko samples table processing', function () {
         // expected to change.
         continue;
       }
-      const fieldIndex = geckoSamples.schema[fieldName];
+      const fieldIndex =
+        geckoSamples.schema[fieldName as keyof GeckoSamples['schema']];
 
       for (let i = 0; i < processedSamples.length; i++) {
-        expect(processedSamples[fieldName][i]).toBe(
+        expect((processedSamples as any)[fieldName][i]).toBe(
           geckoSamples.data[i][fieldIndex]
         );
       }
@@ -634,7 +647,7 @@ describe('threadCPUDelta processing', function () {
     const geckoProfile = createGeckoProfile();
     const geckoSamples = geckoProfile.threads[0].samples;
     const geckoSchema = geckoSamples.schema;
-    if (!geckoSchema.threadCPUDelta) {
+    if (!('threadCPUDelta' in geckoSchema) || !geckoSchema.threadCPUDelta) {
       throw new Error(
         'This test works with threads that can contain threadCPUDelta data.'
       );
@@ -658,7 +671,7 @@ describe('threadCPUDelta processing', function () {
     const geckoProfile = createGeckoProfile();
     const geckoSamples = geckoProfile.threads[0].samples;
     const geckoSchema = geckoSamples.schema;
-    if (!geckoSchema.threadCPUDelta) {
+    if (!('threadCPUDelta' in geckoSchema) || !geckoSchema.threadCPUDelta) {
       throw new Error(
         'This test works with threads that can contain threadCPUDelta data.'
       );
@@ -728,9 +741,9 @@ describe('visualMetrics processing', function () {
     thread: RawThread,
     shared: RawProfileSharedData,
     metrics: Array<{
-      name: string,
-      hasProgressMarker: boolean,
-      changeMarkerLength: number,
+      name: string;
+      hasProgressMarker: boolean;
+      changeMarkerLength: number;
     }>
   ) {
     for (const { name, hasProgressMarker, changeMarkerLength } of metrics) {

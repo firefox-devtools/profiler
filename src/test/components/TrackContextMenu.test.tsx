@@ -1,10 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
-
-import * as React from 'react';
 import { Provider } from 'react-redux';
 import { showMenu } from '@firefox-devtools/react-contextmenu';
 
@@ -57,7 +53,7 @@ describe('timeline/TrackContextMenu', function () {
   const clickTracksWithExpectation = async (
     matchers: Array<string | RegExp>,
     expectations: {
-      +checked: boolean,
+      readonly checked: boolean;
     }
   ) => {
     const elements = matchers.map((matcher) =>
@@ -596,12 +592,12 @@ describe('timeline/TrackContextMenu', function () {
   });
 
   describe('when a global track is right clicked', function () {
-    function setupGlobalTrack(profile, trackIndex = 1) {
+    function setupGlobalTrack(profile?: Profile, trackIndex = 1) {
       const results = setup(profile);
       const { dispatch, getState } = results;
 
       const trackReference = {
-        type: 'global',
+        type: 'global' as const,
         trackIndex: trackIndex,
       };
       const track = getGlobalTracks(getState())[trackIndex];
@@ -763,7 +759,7 @@ describe('timeline/TrackContextMenu', function () {
   });
 
   describe('when a local track is right clicked', function () {
-    function setupLocalTrack(profile) {
+    function setupLocalTrack(profile?: Profile) {
       const results = setup(profile);
       const { dispatch, getState } = results;
 
@@ -773,7 +769,7 @@ describe('timeline/TrackContextMenu', function () {
       const pid = '222';
       const trackIndex = 0;
       const trackReference = {
-        type: 'local',
+        type: 'local' as const,
         pid,
         trackIndex,
       };
@@ -899,9 +895,9 @@ describe('timeline/TrackContextMenu', function () {
     // This runs 2 tests: the first right clicks a global track, the second
     // right clicks the local track.
     it.each([
-      { type: 'global', trackIndex: 0 },
+      { type: 'global' as const, trackIndex: 0 },
       {
-        type: 'local',
+        type: 'local' as const,
         pid: '1000',
         trackIndex: 0,
       },
@@ -1010,7 +1006,7 @@ describe('timeline/TrackContextMenu', function () {
 
       const trackIndex = 1;
       const trackReference = {
-        type: 'global',
+        type: 'global' as const,
         trackIndex: trackIndex,
       };
       const track = getGlobalTracks(getState())[trackIndex];
@@ -1264,11 +1260,14 @@ describe('timeline/TrackContextMenu', function () {
       }
 
       const localTrackWithTypeReference = {
-        type: 'local',
+        type: 'local' as const,
         pid: '1001',
         trackIndex: 3,
       };
-      const globalTrackWithTypeReference = { type: 'global', trackIndex: 4 };
+      const globalTrackWithTypeReference = {
+        type: 'global' as const,
+        trackIndex: 4,
+      };
 
       return {
         ...store,
