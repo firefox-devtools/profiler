@@ -7,7 +7,6 @@ import { GREY_20, GREY_30, BLUE_60, BLUE_80 } from 'photon-colors';
 import * as React from 'react';
 import {
   withChartViewport,
-  type WithChartViewport,
   type Viewport,
 } from 'firefox-profiler/components/shared/chart/Viewport';
 import { ChartCanvas } from 'firefox-profiler/components/shared/chart/Canvas';
@@ -826,7 +825,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   }
 }
 
-export const MarkerChartCanvas = (withChartViewport: WithChartViewport<
-  OwnProps,
-  Props,
->)(MarkerChartCanvasImpl);
+export const MarkerChartCanvas = withChartViewport<OwnProps>(
+  MarkerChartCanvasImpl
+);

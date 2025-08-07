@@ -6,11 +6,7 @@
 import { GREY_30 } from 'photon-colors';
 import * as React from 'react';
 import { TIMELINE_MARGIN_RIGHT } from '../../app-logic/constants';
-import {
-  withChartViewport,
-  type WithChartViewport,
-  type Viewport,
-} from '../shared/chart/Viewport';
+import { withChartViewport, type Viewport } from '../shared/chart/Viewport';
 import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
@@ -827,7 +823,5 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
   }
 }
 
-export const StackChartCanvas = (withChartViewport: WithChartViewport<
-  OwnProps,
-  Props,
->)(StackChartCanvasImpl);
+export const StackChartCanvas =
+  withChartViewport<OwnProps>(StackChartCanvasImpl);
