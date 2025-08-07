@@ -1,0 +1,63 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`getTimelineVerticalMarkers gets the appropriate markers 1`] = `
+Array [
+  Object {
+    "category": 0,
+    "data": Object {
+      "category": "Navigation",
+      "eventType": "load",
+      "innerWindowID": 1,
+      "type": "tracing",
+    },
+    "end": 6,
+    "name": "Load",
+    "start": 4,
+    "threadId": null,
+  },
+  Object {
+    "category": 0,
+    "data": Object {
+      "type": "TTI",
+    },
+    "end": null,
+    "name": "TTI",
+    "start": 6,
+    "threadId": null,
+  },
+  Object {
+    "category": 0,
+    "data": Object {
+      "category": "Navigation",
+      "innerWindowID": 1,
+      "type": "tracing",
+    },
+    "end": 7,
+    "name": "DOMContentLoaded",
+    "start": 6,
+    "threadId": null,
+  },
+  Object {
+    "category": 0,
+    "data": Object {
+      "category": "Navigation",
+      "innerWindowID": 1,
+      "type": "tracing",
+    },
+    "end": null,
+    "name": "Navigation::Start",
+    "start": 7,
+    "threadId": null,
+  },
+  Object {
+    "category": 0,
+    "data": Object {
+      "type": "FirstContentfulPaint",
+    },
+    "end": 8,
+    "name": "FirstContentfulPaint",
+    "start": 7,
+    "threadId": null,
+  },
+]
+`;

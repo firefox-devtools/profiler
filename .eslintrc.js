@@ -1,4 +1,3 @@
-// @flow
 module.exports = {
   env: {
     browser: true,
@@ -7,13 +6,8 @@ module.exports = {
     node: true,
   },
   parser: '@babel/eslint-parser',
-  plugins: ['@babel', 'react', 'flowtype', 'import'],
-  extends: [
-    'eslint:recommended',
-    'plugin:react/recommended',
-    'plugin:flowtype/recommended',
-    'prettier',
-  ],
+  plugins: ['@babel', 'react', 'import'],
+  extends: ['eslint:recommended', 'plugin:react/recommended', 'prettier'],
   parserOptions: {
     ecmaVersion: '2017',
     ecmaFeatures: {
@@ -51,15 +45,6 @@ module.exports = {
     'react/no-unused-state': 'error',
     'react/jsx-no-bind': 'error',
     'react/jsx-no-leaked-render': 'error',
-    'flowtype/require-valid-file-annotation': [
-      'error',
-      'always',
-      { annotationStyle: 'line' },
-    ],
-    // no-dupe-keys crashes with recent eslint. See
-    // https://github.com/gajus/eslint-plugin-flowtype/pull/266 and
-    // https://github.com/gajus/eslint-plugin-flowtype/pull/302
-    // 'flowtype/no-dupe-keys': 'error',
 
     // overriding recommended rules
     'no-constant-condition': ['error', { checkLoops: false }],
@@ -88,21 +73,6 @@ module.exports = {
     'no-self-compare': 'error',
     'no-throw-literal': 'error',
     'no-unmodified-loop-condition': 'error',
-    // We use the version from the flowtype plugin so that flow assertions don't
-    // output an error.
-    'flowtype/no-unused-expressions': 'error',
-    // The Object type and Function type aren't particularly useful, and usually hide
-    // type errors. It also blocks a migration to TypeScript. Disable this rule if
-    // using the Object or Function as generic type bounds.
-    'flowtype/no-weak-types': [
-      'error',
-      {
-        any: false,
-        Object: true,
-        Function: true,
-      },
-    ],
-    'flowtype/no-existential-type': 'error',
     'no-useless-call': 'error',
     'no-useless-computed-key': 'error',
     'no-useless-concat': 'error',
@@ -129,7 +99,6 @@ module.exports = {
     react: {
       pragma: 'React',
       version: '17.0',
-      flowVersion: '0.96.0',
     },
     'import/resolver': {
       alias: {
@@ -137,10 +106,45 @@ module.exports = {
           ['firefox-profiler', './src'],
           ['firefox-profiler-res', './res'],
         ],
-        extensions: ['.js', '.jpg'],
+        extensions: ['.js', '.ts', '.tsx', '.jpg'],
       },
     },
   },
+  overrides: [
+    {
+      // TypeScript files
+      files: ['**/*.ts', '**/*.tsx'],
+      plugins: ['@typescript-eslint'],
+      extends: ['plugin:@typescript-eslint/recommended'],
+      parser: '@typescript-eslint/parser',
+      rules: {
+        // Use `import type` everywhere we can.
+        '@typescript-eslint/consistent-type-imports': 'error',
+        // Allow `as any` escape hatches
+        '@typescript-eslint/no-explicit-any': 'off',
+        // Disable a rule that the TypeScript FAQ disapproves of
+        '@typescript-eslint/no-empty-object-type': 'off',
+        // Should enable this soon, mostly finds `catch (e)` with unused e
+        '@typescript-eslint/no-unused-vars': 'off',
+        // TypeScript imports react-jsx into .tsx files for us
+        'react/react-in-jsx-scope': 'off',
+        // Allow @ts-expect-error annotations with descriptions.
+        '@typescript-eslint/ban-ts-comment': [
+          'error',
+          {
+            // Allow @ts-expect-error annotations with descriptions.
+            'ts-expect-error': 'allow-with-description',
+            // Don't allow @ts-ignore or @ts-nocheck because we want to be notified
+            // when the error goes away so we can remove the annotation - use
+            // @ts-expect-error instead
+            'ts-ignore': true,
+            'ts-nocheck': true,
+            'ts-check': false, // allow even without description
+          },
+        ],
+      },
+    },
+  ],
   globals: {
     AVAILABLE_STAGING_LOCALES: true,
   },

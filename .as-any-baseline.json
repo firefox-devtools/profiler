@@ -1,0 +1,877 @@
+{
+  "timestamp": "2025-08-07T02:51:37.717Z",
+  "totalUsages": 174,
+  "totalFiles": 68,
+  "usages": [
+    {
+      "file": "src/actions/receive-profile.ts",
+      "line": 805,
+      "content": "const meta = (unpackedProfile as any).meta;"
+    },
+    {
+      "file": "src/actions/receive-profile.ts",
+      "line": 816,
+      "content": "tracks as any,"
+    },
+    {
+      "file": "src/actions/receive-profile.ts",
+      "line": 817,
+      "content": "unpackedProfile as any"
+    },
+    {
+      "file": "src/actions/receive-profile.ts",
+      "line": 828,
+      "content": "unpackedProfile as any"
+    },
+    {
+      "file": "src/actions/receive-profile.ts",
+      "line": 837,
+      "content": "const profile = processGeckoProfile(unpackedProfile as any);"
+    },
+    {
+      "file": "src/actions/receive-profile.ts",
+      "line": 1202,
+      "content": "reader.onload = () => resolve(reader.result as any);"
+    },
+    {
+      "file": "src/actions/receive-profile.ts",
+      "line": 1463,
+      "content": "(otherWindow as any).postMessage({ name: 'ready:response' }, '*');"
+    },
+    {
+      "file": "src/components/app/LanguageSwitcher.tsx",
+      "line": 44,
+      "content": "{(AVAILABLE_LOCALES_TO_LOCALIZED_NAMES as any)[locale] ?? locale}"
+    },
+    {
+      "file": "src/components/calltree/CallTree.tsx",
+      "line": 134,
+      "content": "component: Icon as any,"
+    },
+    {
+      "file": "src/components/calltree/CallTree.tsx",
+      "line": 164,
+      "content": "component: Icon as any,"
+    },
+    {
+      "file": "src/components/calltree/CallTree.tsx",
+      "line": 194,
+      "content": "component: Icon as any,"
+    },
+    {
+      "file": "src/components/marker-table/index.tsx",
+      "line": 272,
+      "content": "tree={tree as any}"
+    },
+    {
+      "file": "src/components/network-chart/NetworkChartRow.tsx",
+      "line": 75,
+      "content": "(result as any)[property] = length > 1 ? i / (length - 1) : 0;"
+    },
+    {
+      "file": "src/components/network-chart/NetworkChartRow.tsx",
+      "line": 184,
+      "content": "const preconnectEnd = +(networkPayload as any)[latestPreconnectEndProperty];"
+    },
+    {
+      "file": "src/components/network-chart/NetworkChartRow.tsx",
+      "line": 209,
+      "content": "opacity: (PHASE_OPACITIES as any).requestStart,"
+    },
+    {
+      "file": "src/components/network-chart/NetworkChartRow.tsx",
+      "line": 253,
+      "content": "(property) => typeof (networkPayload as any)[property] === 'number'"
+    },
+    {
+      "file": "src/components/network-chart/NetworkChartRow.tsx",
+      "line": 265,
+      "content": "const value = +(networkPayload as any)[property];"
+    },
+    {
+      "file": "src/components/network-chart/NetworkChartRow.tsx",
+      "line": 275,
+      "content": "opacity: i === 0 ? 0 : (PHASE_OPACITIES as any)[property],"
+    },
+    {
+      "file": "src/components/shared/chart/Viewport.tsx",
+      "line": 387,
+      "content": "// fact that, as of 2019 [1][2], `preventDefault()` no longer has any effect"
+    },
+    {
+      "file": "src/components/timeline/Markers.tsx",
+      "line": 396,
+      "content": "const canvas = e.currentTarget as any;"
+    },
+    {
+      "file": "src/components/timeline/TrackContextMenu.tsx",
+      "line": 517,
+      "content": "const MenuItemAsAny = MenuItem as any; // https://github.com/firefox-devtools/react-contextmenu/issues/334"
+    },
+    {
+      "file": "src/components/timeline/TrackContextMenu.tsx",
+      "line": 607,
+      "content": "const MenuItemAsAny = MenuItem as any; // https://github.com/firefox-devtools/react-contextmenu/issues/334"
+    },
+    {
+      "file": "src/components/timeline/TrackScreenshots.tsx",
+      "line": 143,
+      "content": "payload = screenshots[screenshotIndex].data as any;"
+    },
+    {
+      "file": "src/components/timeline/TrackScreenshots.tsx",
+      "line": 359,
+      "content": ".data as any;"
+    },
+    {
+      "file": "src/components/tooltip/Marker.tsx",
+      "line": 262,
+      "content": "const value = (data as any)[key];"
+    },
+    {
+      "file": "src/index.tsx",
+      "line": 105,
+      "content": "addDataToWindowObject(store.getState, store.dispatch as any);"
+    },
+    {
+      "file": "src/profile-logic/call-tree.ts",
+      "line": 757,
+      "content": "// The inverted call node has children if it has any inverted child nodes"
+    },
+    {
+      "file": "src/profile-logic/errors.ts",
+      "line": 18,
+      "content": "(this as any).__proto__ = SymbolsNotFoundError.prototype;"
+    },
+    {
+      "file": "src/profile-logic/js-tracer.tsx",
+      "line": 628,
+      "content": "(unmatchedEventIndexes as any)[unmatchedIndex] = tracerEventIndex;"
+    },
+    {
+      "file": "src/profile-logic/marker-data.ts",
+      "line": 1415,
+      "content": "[key]: removeURLs((markerPayload as any)[key]),"
+    },
+    {
+      "file": "src/profile-logic/marker-data.ts",
+      "line": 1416,
+      "content": "} as any;"
+    },
+    {
+      "file": "src/profile-logic/marker-data.ts",
+      "line": 1420,
+      "content": "[key]: removeFilePath((markerPayload as any)[key]),"
+    },
+    {
+      "file": "src/profile-logic/marker-data.ts",
+      "line": 1421,
+      "content": "} as any;"
+    },
+    {
+      "file": "src/profile-logic/marker-data.ts",
+      "line": 1426,
+      "content": "} as any;"
+    },
+    {
+      "file": "src/profile-logic/marker-schema.tsx",
+      "line": 225,
+      "content": "const value = (marker.data as any)[payloadKey];"
+    },
+    {
+      "file": "src/profile-logic/marker-schema.tsx",
+      "line": 634,
+      "content": "let value = (data as any)[payloadField.key];"
+    },
+    {
+      "file": "src/profile-logic/merge-compare.ts",
+      "line": 105,
+      "content": "if (profiles.every((profile) => (profile.meta as any)[key] === value)) {"
+    },
+    {
+      "file": "src/profile-logic/merge-compare.ts",
+      "line": 106,
+      "content": "(resultProfile.meta as any)[key] = value;"
+    },
+    {
+      "file": "src/profile-logic/merge-compare.ts",
+      "line": 591,
+      "content": "const stringIndex = (data as any)[fieldKey];"
+    },
+    {
+      "file": "src/profile-logic/merge-compare.ts",
+      "line": 605,
+      "content": "} as any;"
+    },
+    {
+      "file": "src/profile-logic/merge-compare.ts",
+      "line": 1404,
+      "content": "* as well as any CompositorScreenshot markers found on any other threads."
+    },
+    {
+      "file": "src/profile-logic/process-profile.ts",
+      "line": 956,
+      "content": "const data: MarkerPayload = payload as any;"
+    },
+    {
+      "file": "src/profile-logic/process-profile.ts",
+      "line": 971,
+      "content": "const stringIndex = (data as any)[fieldKey];"
+    },
+    {
+      "file": "src/profile-logic/process-profile.ts",
+      "line": 976,
+      "content": "} as any;"
+    },
+    {
+      "file": "src/profile-logic/process-profile.ts",
+      "line": 1609,
+      "content": "const geckoMarker = marker as any as GeckoMarkerTuple;"
+    },
+    {
+      "file": "src/profile-logic/process-profile.ts",
+      "line": 1984,
+      "content": "let arrayBuffer: ArrayBufferLike = arbitraryFormat as any;"
+    },
+    {
+      "file": "src/profile-logic/profile-compacting.ts",
+      "line": 169,
+      "content": "const stringIndex = (data as any)[fieldKey];"
+    },
+    {
+      "file": "src/profile-logic/profile-compacting.ts",
+      "line": 201,
+      "content": "const stringIndex = (data as any)[fieldKey];"
+    },
+    {
+      "file": "src/profile-logic/profile-compacting.ts",
+      "line": 212,
+      "content": "newDataCol[i] = newData as any;"
+    },
+    {
+      "file": "src/profile-logic/profile-data.ts",
+      "line": 1577,
+      "content": "* Checks if a sample table has any useful samples."
+    },
+    {
+      "file": "src/selectors/per-thread/index.ts",
+      "line": 203,
+      "content": "(getThreadSelectors(UrlState.getSelectedThreadIndexes(state)) as any)["
+    },
+    {
+      "file": "src/selectors/per-thread/index.ts",
+      "line": 207,
+      "content": "const result2: ThreadSelectors = result as any;"
+    },
+    {
+      "file": "src/selectors/per-thread/markers.ts",
+      "line": 663,
+      "content": "const val = (data as any)[keys[i]];"
+    },
+    {
+      "file": "src/test/components/BeforeUnloadManager.test.tsx",
+      "line": 47,
+      "content": "fireEvent(window as any, event);"
+    },
+    {
+      "file": "src/test/components/BeforeUnloadManager.test.tsx",
+      "line": 48,
+      "content": "expect((event as any).returnValue).toBeTruthy();"
+    },
+    {
+      "file": "src/test/components/BlobUrlLink.test.tsx",
+      "line": 13,
+      "content": "(URL as any).createObjectURL = jest.fn(() => `mockCreateObjectUrl${i++}`);"
+    },
+    {
+      "file": "src/test/components/BlobUrlLink.test.tsx",
+      "line": 14,
+      "content": "(URL as any).revokeObjectURL = jest.fn(() => {});"
+    },
+    {
+      "file": "src/test/components/BlobUrlLink.test.tsx",
+      "line": 18,
+      "content": "delete (URL as any).createObjectURL;"
+    },
+    {
+      "file": "src/test/components/BlobUrlLink.test.tsx",
+      "line": 19,
+      "content": "delete (URL as any).revokeObjectURL;"
+    },
+    {
+      "file": "src/test/components/BlobUrlLink.test.tsx",
+      "line": 79,
+      "content": "(URL.createObjectURL as any).mockReset();"
+    },
+    {
+      "file": "src/test/components/CurrentProfileUploadedInformationLoader.test.tsx",
+      "line": 64,
+      "content": "(window as any).indexedDB = undefined;"
+    },
+    {
+      "file": "src/test/components/FooterLinks.test.tsx",
+      "line": 74,
+      "content": "}) as any;"
+    },
+    {
+      "file": "src/test/components/FooterLinks.test.tsx",
+      "line": 86,
+      "content": "})) as any;"
+    },
+    {
+      "file": "src/test/components/Home.test.tsx",
+      "line": 30,
+      "content": "(Object.defineProperty as any)(window.navigator, 'userAgent', {"
+    },
+    {
+      "file": "src/test/components/ListOfPublishedProfiles.test.tsx",
+      "line": 354,
+      "content": "fireFullClick(window as any);"
+    },
+    {
+      "file": "src/test/components/ListOfPublishedProfiles.test.tsx",
+      "line": 415,
+      "content": "fireFullClick(window as any);"
+    },
+    {
+      "file": "src/test/components/MenuButtons.test.tsx",
+      "line": 184,
+      "content": "(uploadBinaryProfileData as any).mockImplementation(() => ({"
+    },
+    {
+      "file": "src/test/components/MenuButtons.test.tsx",
+      "line": 263,
+      "content": "(sha1 as any).mockImplementation((_data: Uint8Array) =>"
+    },
+    {
+      "file": "src/test/components/MenuButtons.test.tsx",
+      "line": 267,
+      "content": "(shortenUrl as any).mockImplementation(() =>"
+    },
+    {
+      "file": "src/test/components/MenuButtons.test.tsx",
+      "line": 272,
+      "content": "(URL as any).createObjectURL = () => 'mockCreateObjectUrl';"
+    },
+    {
+      "file": "src/test/components/MenuButtons.test.tsx",
+      "line": 273,
+      "content": "(URL as any).revokeObjectURL = () => {};"
+    },
+    {
+      "file": "src/test/components/MenuButtons.test.tsx",
+      "line": 621,
+      "content": "expect((buildIdElement as any).href).toBe(profile.meta.sourceURL);"
+    },
+    {
+      "file": "src/test/components/Root.test.tsx",
+      "line": 176,
+      "content": "(retrieveProfileFromBrowser as any).mockImplementation(() => async () => {});"
+    },
+    {
+      "file": "src/test/components/Root.test.tsx",
+      "line": 177,
+      "content": "(retrieveProfileFromStore as any).mockImplementation(() => async () => {});"
+    },
+    {
+      "file": "src/test/components/Root.test.tsx",
+      "line": 178,
+      "content": "(retrieveProfilesToCompare as any).mockImplementation(() => async () => {});"
+    },
+    {
+      "file": "src/test/components/ServiceWorkerManager.test.tsx",
+      "line": 45,
+      "content": "delete (window as any).location;"
+    },
+    {
+      "file": "src/test/components/ServiceWorkerManager.test.tsx",
+      "line": 56,
+      "content": "(navigator as any).serviceWorker = {};"
+    },
+    {
+      "file": "src/test/components/ServiceWorkerManager.test.tsx",
+      "line": 65,
+      "content": "delete (navigator as any).serviceWorker;"
+    },
+    {
+      "file": "src/test/components/ServiceWorkerManager.test.tsx",
+      "line": 148,
+      "content": "const instance = (WorkboxModule.Workbox as any).mock.results[0].value;"
+    },
+    {
+      "file": "src/test/components/StackChart.test.tsx",
+      "line": 602,
+      "content": "return (element as any).checked;"
+    },
+    {
+      "file": "src/test/components/StackSettings.test.tsx",
+      "line": 42,
+      "content": "return (element as any).checked;"
+    },
+    {
+      "file": "src/test/components/StackSettings.test.tsx",
+      "line": 83,
+      "content": "const input: HTMLInputElement = getByLabelText(/Filter stacks/) as any;"
+    },
+    {
+      "file": "src/test/components/ThreadActivityGraph.test.tsx",
+      "line": 124,
+      "content": "return (window as any).__flushDrawLog();"
+    },
+    {
+      "file": "src/test/components/ThreadActivityGraph.test.tsx",
+      "line": 458,
+      "content": "return (window as any).__flushDrawLog();"
+    },
+    {
+      "file": "src/test/components/Timeline.test.tsx",
+      "line": 213,
+      "content": ") as any;"
+    },
+    {
+      "file": "src/test/components/Timeline.test.tsx",
+      "line": 249,
+      "content": ") as any;"
+    },
+    {
+      "file": "src/test/components/TrackNetwork.test.tsx",
+      "line": 387,
+      "content": "return (window as any).__flushDrawLog();"
+    },
+    {
+      "file": "src/test/fixtures/custom-assertions.ts",
+      "line": 11,
+      "content": "expect(array).toEqual(expect.arrayContaining(expected as any));"
+    },
+    {
+      "file": "src/test/fixtures/mocks/canvas-context.ts",
+      "line": 12,
+      "content": ".mockImplementation(() => ctx as any);"
+    },
+    {
+      "file": "src/test/fixtures/mocks/canvas-context.ts",
+      "line": 25,
+      "content": "delete (window as any).Path2D;"
+    },
+    {
+      "file": "src/test/fixtures/mocks/canvas-context.ts",
+      "line": 26,
+      "content": "delete (window as any).__flushDrawLog;"
+    },
+    {
+      "file": "src/test/fixtures/mocks/canvas-context.ts",
+      "line": 50,
+      "content": "return (window as any).__flushDrawLog();"
+    },
+    {
+      "file": "src/test/fixtures/mocks/canvas-context.ts",
+      "line": 62,
+      "content": "return (jest.fn as any)((...args: any[]) => {"
+    },
+    {
+      "file": "src/test/fixtures/mocks/date.ts",
+      "line": 64,
+      "content": "if (typeof (Date as any).mockRestore === 'function') {"
+    },
+    {
+      "file": "src/test/fixtures/mocks/date.ts",
+      "line": 65,
+      "content": "(Date as any).mockRestore();"
+    },
+    {
+      "file": "src/test/fixtures/mocks/domrect.ts",
+      "line": 42,
+      "content": "global.DOMRect = DOMRect as any;"
+    },
+    {
+      "file": "src/test/fixtures/mocks/domrect.ts",
+      "line": 49,
+      "content": "delete (global as any).DOMRect;"
+    },
+    {
+      "file": "src/test/fixtures/mocks/element-size.ts",
+      "line": 57,
+      "content": "(HTMLElement.prototype.getBoundingClientRect as any).mockImplementation(() =>"
+    },
+    {
+      "file": "src/test/fixtures/mocks/element-size.ts",
+      "line": 87,
+      "content": "} as any;"
+    },
+    {
+      "file": "src/test/fixtures/mocks/intersection-observer.ts",
+      "line": 55,
+      "content": "(window as any).IntersectionObserver = jest.fn((cb, options = {}) => {"
+    },
+    {
+      "file": "src/test/fixtures/mocks/intersection-observer.ts",
+      "line": 90,
+      "content": "delete (window as any).IntersectionObserver;"
+    },
+    {
+      "file": "src/test/fixtures/mocks/resize-observer.ts",
+      "line": 48,
+      "content": "(window as any).ResizeObserver = jest.fn((cb) => {"
+    },
+    {
+      "file": "src/test/fixtures/mocks/resize-observer.ts",
+      "line": 75,
+      "content": "delete (window as any).ResizeObserver;"
+    },
+    {
+      "file": "src/test/fixtures/mocks/resize-observer.ts",
+      "line": 127,
+      "content": "} as any);"
+    },
+    {
+      "file": "src/test/fixtures/mocks/web-channel.ts",
+      "line": 113,
+      "content": "} as any);"
+    },
+    {
+      "file": "src/test/fixtures/mocks/web-channel.ts",
+      "line": 119,
+      "content": "} as any);"
+    },
+    {
+      "file": "src/test/fixtures/profiles/processed-profile.ts",
+      "line": 180,
+      "content": "const maybeEndTime = (tuple as any)[2] || null;"
+    },
+    {
+      "file": "src/test/fixtures/profiles/processed-profile.ts",
+      "line": 181,
+      "content": "const maybePayload: MarkerPayload | null | void = (tuple as any)[3];"
+    },
+    {
+      "file": "src/test/fixtures/profiles/processed-profile.ts",
+      "line": 201,
+      "content": "markersTable.data.push(payload as any);"
+    },
+    {
+      "file": "src/test/fixtures/utils.ts",
+      "line": 81,
+      "content": "super(type, mouseValues as any);"
+    },
+    {
+      "file": "src/test/integration/symbolicator-cli/symbolicator-cli.test.ts",
+      "line": 37,
+      "content": "new Response(symbolsJson as any)"
+    },
+    {
+      "file": "src/test/setup.ts",
+      "line": 27,
+      "content": "(global as any).fetchMock = fetchMock;"
+    },
+    {
+      "file": "src/test/setup.ts",
+      "line": 32,
+      "content": "const { __shutdownWorkers } = WorkerFactory as any;"
+    },
+    {
+      "file": "src/test/store/icons.test.ts",
+      "line": 24,
+      "content": "(window as any).Image = mock.Image;"
+    },
+    {
+      "file": "src/test/store/icons.test.ts",
+      "line": 28,
+      "content": "delete (window as any).Image;"
+    },
+    {
+      "file": "src/test/store/icons.test.ts",
+      "line": 92,
+      "content": "imageInstances.forEach((instance) => (instance as any).onload());"
+    },
+    {
+      "file": "src/test/store/icons.test.ts",
+      "line": 120,
+      "content": "(imageInstances[0] as any).onerror();"
+    },
+    {
+      "file": "src/test/store/markers.test.ts",
+      "line": 224,
+      "content": "const any = null as any;"
+    },
+    {
+      "file": "src/test/store/profile-view.test.ts",
+      "line": 951,
+      "content": "const markerPayload: MixedObject = getMarker(0).data as any;"
+    },
+    {
+      "file": "src/test/store/publish.test.ts",
+      "line": 255,
+      "content": "(uploadBinaryProfileData as any).mockImplementationOnce(initUploadProcess);"
+    },
+    {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 84,
+      "content": "(SymbolStoreDB as any).mockImplementation(() => ({"
+    },
+    {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 343,
+      "content": "}) as any"
+    },
+    {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 879,
+      "content": "(callback) => (process.nextTick(callback), 0 as any)"
+    },
+    {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 1025,
+      "content": "(callback) => (process.nextTick(callback), 0 as any)"
+    },
+    {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 1337,
+      "content": "return file as any;"
+    },
+    {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 1344,
+      "content": "const payload = (mockFile as any)._payload;"
+    },
+    {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 1467,
+      "content": "(view as any).error"
+    },
+    {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 1512,
+      "content": "(view as any).error"
+    },
+    {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 1605,
+      "content": "(view as any).error"
+    },
+    {
+      "file": "src/test/store/receive-profile.test.ts",
+      "line": 1656,
+      "content": "(expandUrl as any).mockImplementation((shortUrl: string) => {"
+    },
+    {
+      "file": "src/test/store/symbolication.test.ts",
+      "line": 313,
+      "content": "const firstMarkerCause = ensureExists((firstMarkerData as any).cause);"
+    },
+    {
+      "file": "src/test/types/utils.ts",
+      "line": 14,
+      "content": "const coerceC: CoerceC = coerce<CoerceA, CoerceB>(coerceA) as any;"
+    },
+    {
+      "file": "src/test/types/utils.ts",
+      "line": 16,
+      "content": "const coerceB2: CoerceB = coerce<CoerceA, CoerceB>(coerceB) as any;"
+    },
+    {
+      "file": "src/test/types/utils.ts",
+      "line": 22,
+      "content": "const coerceMatchingShape3 = coerceMatchingShape<CoerceB>({ time: 0 } as any);"
+    },
+    {
+      "file": "src/test/unit/fetch-source.test.ts",
+      "line": 60,
+      "content": "return r as any;"
+    },
+    {
+      "file": "src/test/unit/fetch-source.test.ts",
+      "line": 226,
+      "content": "return r as any;"
+    },
+    {
+      "file": "src/test/unit/fetch-source.test.ts",
+      "line": 231,
+      "content": "return r as any;"
+    },
+    {
+      "file": "src/test/unit/fetch-source.test.ts",
+      "line": 276,
+      "content": "return r as any;"
+    },
+    {
+      "file": "src/test/unit/fetch-source.test.ts",
+      "line": 281,
+      "content": "return r as any;"
+    },
+    {
+      "file": "src/test/unit/fetch-source.test.ts",
+      "line": 324,
+      "content": "return r as any;"
+    },
+    {
+      "file": "src/test/unit/fetch-source.test.ts",
+      "line": 329,
+      "content": "return r as any;"
+    },
+    {
+      "file": "src/test/unit/marker-data.test.ts",
+      "line": 1027,
+      "content": "marker.data && (marker.data as any).id,"
+    },
+    {
+      "file": "src/test/unit/marker-data.test.ts",
+      "line": 1028,
+      "content": "marker.data && (marker.data as any).status,"
+    },
+    {
+      "file": "src/test/unit/marker-data.test.ts",
+      "line": 1099,
+      "content": "marker.data && (marker.data as any).id,"
+    },
+    {
+      "file": "src/test/unit/marker-data.test.ts",
+      "line": 1172,
+      "content": "marker.data && (marker.data as any).id,"
+    },
+    {
+      "file": "src/test/unit/marker-data.test.ts",
+      "line": 1261,
+      "content": "marker.data && (marker.data as any).id,"
+    },
+    {
+      "file": "src/test/unit/merge-compare.test.ts",
+      "line": 605,
+      "content": "(ensureExists(mergedMarkers.data[0]) as any).fieldWithUniqueString"
+    },
+    {
+      "file": "src/test/unit/merge-compare.test.ts",
+      "line": 608,
+      "content": "(ensureExists(mergedMarkers.data[1]) as any).fieldWithUniqueString"
+    },
+    {
+      "file": "src/test/unit/process-profile.test.ts",
+      "line": 637,
+      "content": "expect((processedSamples as any)[fieldName][i]).toBe("
+    },
+    {
+      "file": "src/test/unit/symbol-store-db.test.ts",
+      "line": 19,
+      "content": "(window as any).indexedDB = indexedDB;"
+    },
+    {
+      "file": "src/test/unit/symbol-store-db.test.ts",
+      "line": 20,
+      "content": "(window as any).IDBKeyRange = IDBKeyRange;"
+    },
+    {
+      "file": "src/test/unit/symbol-store-db.test.ts",
+      "line": 24,
+      "content": "delete (window as any).indexedDB;"
+    },
+    {
+      "file": "src/test/unit/symbol-store-db.test.ts",
+      "line": 25,
+      "content": "delete (window as any).IDBKeyRange;"
+    },
+    {
+      "file": "src/test/unit/web-channel.test.ts",
+      "line": 132,
+      "content": "(triggerResponse as any)('Invalid message');"
+    },
+    {
+      "file": "src/test/unit/window-console.test.ts",
+      "line": 20,
+      "content": "expect((window as any).profile).toBeUndefined();"
+    },
+    {
+      "file": "src/test/unit/window-console.test.ts",
+      "line": 21,
+      "content": "expect((window as any).filteredProfile).toBeUndefined();"
+    },
+    {
+      "file": "src/test/unit/window-console.test.ts",
+      "line": 22,
+      "content": "expect((window as any).callTree).toBeUndefined();"
+    },
+    {
+      "file": "src/test/unit/window-console.test.ts",
+      "line": 42,
+      "content": "(console as any).log = mockedLog;"
+    },
+    {
+      "file": "src/test/unit/window-console.test.ts",
+      "line": 46,
+      "content": "(console as any).log = log;"
+    },
+    {
+      "file": "src/test/unit/window-console.test.ts",
+      "line": 75,
+      "content": "const result = (target as any).extractGeckoLogs();"
+    },
+    {
+      "file": "src/utils/__mocks__/worker-factory.ts",
+      "line": 28,
+      "content": "const nodeVersion = (process as any).versions.node;"
+    },
+    {
+      "file": "src/utils/connect.ts",
+      "line": 106,
+      "content": "return (connect as any)("
+    },
+    {
+      "file": "src/utils/connect.ts",
+      "line": 131,
+      "content": "return (connect as any)("
+    },
+    {
+      "file": "src/utils/errors.ts",
+      "line": 16,
+      "content": "(this as any).__proto__ = TemporaryError.prototype;"
+    },
+    {
+      "file": "src/utils/flow.ts",
+      "line": 109,
+      "content": "return item as any;"
+    },
+    {
+      "file": "src/utils/flow.ts",
+      "line": 116,
+      "content": "return item as any;"
+    },
+    {
+      "file": "src/utils/flow.ts",
+      "line": 126,
+      "content": "return Object.values(object) as any;"
+    },
+    {
+      "file": "src/utils/flow.ts",
+      "line": 136,
+      "content": "return Object.entries(object) as any;"
+    },
+    {
+      "file": "src/utils/flow.ts",
+      "line": 147,
+      "content": "const result: { [K in Key]: Return } = {} as any;"
+    },
+    {
+      "file": "src/utils/index.ts",
+      "line": 50,
+      "content": "if (a[key] !== (b as any)[key]) {"
+    },
+    {
+      "file": "src/utils/window-console.ts",
+      "line": 295,
+      "content": "(data as any).module &&"
+    },
+    {
+      "file": "src/utils/window-console.ts",
+      "line": 296,
+      "content": "(data as any).name"
+    },
+    {
+      "file": "src/utils/window-console.ts",
+      "line": 301,
+      "content": "const statement = `${strTimestamp} - [${processName} ${thread.pid}: ${thread.name}]: D/${(data as any).module} ${(data as any).name.trim()}`;"
+    },
+    {
+      "file": "src/utils/window-console.ts",
+      "line": 343,
+      "content": "return target as any;"
+    }
+  ]
+}

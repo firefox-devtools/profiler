@@ -1,8 +1,11 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-//
+
+// DO NOT MIGRATE THIS FILE TO TYPESCRIPT
+// This file is executed as-is in a node Worker and is not preprocessed.
+// As such, it cannot use TypeScript syntax.
+
 const { parentPort, workerData } = require('worker_threads');
 const fs = require('fs');
 const vm = require('vm');

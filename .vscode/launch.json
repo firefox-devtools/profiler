@@ -14,6 +14,17 @@
       "request": "launch",
       "outputCapture": "std",
       "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Run script",
+      "type": "node",
+      "runtimeExecutable": "node",
+      "args": ["${file}"],
+      "cwd": "${workspaceFolder}",
+      "internalConsoleOptions": "openOnSessionStart",
+      "request": "launch",
+      "outputCapture": "std",
+      "skipFiles": ["<node_internals>/**"]
     }
   ]
 }

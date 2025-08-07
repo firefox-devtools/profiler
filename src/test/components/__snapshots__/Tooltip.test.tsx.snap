@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`shared/Tooltip is rendered appropriately 1`] = `
+<div
+  class="tooltip"
+  data-testid="tooltip"
+  style="left: 11px; top: 11px;"
+>
+  <p>
+    Lorem ipsum
+  </p>
+</div>
+`;

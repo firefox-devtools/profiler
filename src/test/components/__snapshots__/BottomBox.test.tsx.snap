@@ -1,0 +1,179 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`BottomBox should show the assembly view when pressing the toggle button 1`] = `
+<div
+  aria-multiline="true"
+  aria-readonly="true"
+  autocapitalize="off"
+  autocorrect="off"
+  class="cm-content"
+  contenteditable="false"
+  role="textbox"
+  spellcheck="false"
+  style="tab-size: 4;"
+  translate="no"
+  writingsuggestions="false"
+>
+  <div
+    class="cm-line"
+  >
+    push rsi
+  </div>
+  <div
+    class="cm-line"
+  >
+    push rdi
+  </div>
+  <div
+    class="cm-line"
+  >
+    push rbx
+  </div>
+  <div
+    class="cm-line"
+  >
+    sub rsp, 0x20
+  </div>
+  <div
+    class="cm-line"
+  >
+    mov rsi, rcx
+  </div>
+  <div
+    class="cm-line"
+  >
+    mov rdi, qword [rcx + 0x58]
+  </div>
+  <div
+    class="cm-line"
+  >
+    mov ebx, edi
+  </div>
+  <div
+    class="cm-nonZeroLine cm-line"
+  >
+    and ebx, 0x1400
+  </div>
+  <div
+    class="cm-line"
+  >
+    call 0x16c5d35
+  </div>
+</div>
+`;
+
+exports[`BottomBox should show the source view when a line in the tree view is double-clicked 1`] = `
+<div
+  aria-multiline="true"
+  autocapitalize="off"
+  autocorrect="off"
+  class="cm-content"
+  contenteditable="false"
+  data-language="cpp"
+  role="textbox"
+  spellcheck="false"
+  style="tab-size: 4;"
+  tabindex="0"
+  translate="no"
+  writingsuggestions="false"
+>
+  <div
+    class="cm-line"
+  >
+    <span
+      class="tok-typeName"
+    >
+      line 
+    </span>
+    <span
+      class="tok-number"
+    >
+      1
+    </span>
+  </div>
+  <div
+    class="cm-line"
+  >
+    <span
+      class="tok-variableName"
+    >
+      line 
+    </span>
+    <span
+      class="tok-number"
+    >
+      2
+    </span>
+  </div>
+  <div
+    class="cm-line"
+  >
+    <span
+      class="tok-typeName"
+    >
+      line 
+    </span>
+    <span
+      class="tok-number"
+    >
+      3
+    </span>
+  </div>
+  <div
+    class="cm-nonZeroLine cm-line"
+  >
+    <span
+      class="tok-variableName"
+    >
+      line 
+    </span>
+    <span
+      class="tok-number"
+    >
+      4
+    </span>
+  </div>
+  <div
+    class="cm-line"
+  >
+    <span
+      class="tok-typeName"
+    >
+      line 
+    </span>
+    <span
+      class="tok-number"
+    >
+      5
+    </span>
+  </div>
+  <div
+    class="cm-line"
+  >
+    <span
+      class="tok-variableName"
+    >
+      line 
+    </span>
+    <span
+      class="tok-number"
+    >
+      6
+    </span>
+  </div>
+  <div
+    class="cm-line"
+  >
+    <span
+      class="tok-variableName"
+    >
+      line 
+    </span>
+    <span
+      class="tok-number"
+    >
+      7
+    </span>
+  </div>
+</div>
+`;
