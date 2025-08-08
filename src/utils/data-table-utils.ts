@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
 /**
  * A "data table" is a JS object of the form:
  * {
@@ -13,8 +12,8 @@
  */
 
 type DataTable = {
-  [key: string]: mixed[],
-  length: number,
+  length: number;
+  [key: string]: unknown[] | number;
 };
 
 type compareFn<T> = { (a: T, b: T): number };
@@ -41,11 +40,11 @@ export function sortDataTable<KeyColumnElementType>(
   keyColumn: KeyColumnElementType[],
   comparator: compareFn<KeyColumnElementType>
 ): DataTable {
-  function swap(i, j) {
+  function swap(i: number, j: number) {
     if (i !== j) {
       for (const columnName in table) {
         if (columnName !== 'length') {
-          const column = table[columnName];
+          const column = table[columnName] as unknown[];
           const temp = column[i];
           column[i] = column[j];
           column[j] = temp;
@@ -59,7 +58,7 @@ export function sortDataTable<KeyColumnElementType>(
   // are < pivotValue, the elements at k for partitionIndex < k <= right
   // are >= pivotValue, and the element at partitionIndex is == pivotValue.
   // If the range is already sorted, no swaps are performed.
-  function partition(pivot, left, right) {
+  function partition(pivot: number, left: number, right: number) {
     const pivotValue = keyColumn[pivot];
 
     // At the end of each iteration, the following is true:
@@ -87,7 +86,7 @@ export function sortDataTable<KeyColumnElementType>(
     return partitionIndex;
   }
 
-  function quickSort(left, right) {
+  function quickSort(left: number, right: number) {
     if (left < right) {
       // QuickSort's effectiveness depends on its ability to partition the
       // sequence being sorted into two subsequences of roughly equal length:

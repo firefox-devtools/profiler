@@ -2,9 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
-export const localhostHostnames: $ReadOnlyArray<string> = [
+export const localhostHostnames: readonly string[] = [
   'localhost',
   '127.0.0.1',
   '::1',

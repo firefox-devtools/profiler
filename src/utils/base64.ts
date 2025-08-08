@@ -1,18 +1,17 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
 /**
- * Encode the ArrayBuffer{,View} bytes into a base64 data url.
+ * Encode the ArrayBuffer bytes into a base64 data url.
  */
 export async function bytesToBase64DataUrl(
-  bytes: $ArrayBufferView | ArrayBuffer,
+  bytes: ArrayBuffer,
   type: string = 'application/octet-stream'
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = Object.assign(new FileReader(), {
-      onload: () => resolve((reader.result: any)),
+      onload: () => resolve(reader.result as string),
       onerror: () => reject(reader.error),
     });
     reader.readAsDataURL(new Blob([bytes], { type }));

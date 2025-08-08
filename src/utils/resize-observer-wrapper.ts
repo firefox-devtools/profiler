@@ -1,26 +1,25 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
 // This implements a wrapper to the ResizeObserver API, so that only one copy of
 // a ResizeObserver exists. This is much more performant than having one
 // ResizeObserver for each use.
 // This was inspired by the code in https://github.com/jaredLunde/react-hook/blob/master/packages/resize-observer/src/index.tsx
 
-export type ResizeObserverCallback = (DOMRectReadOnly) => mixed;
-export type ResizeObserverWrapper = {|
-  subscribe: (elt: HTMLElement, ResizeObserverCallback) => void,
-  unsubscribe: (elt: HTMLElement, ResizeObserverCallback) => void,
-|};
+export type ResizeObserverCallback = (rect: DOMRectReadOnly) => unknown;
+export type ResizeObserverWrapper = {
+  subscribe: (elt: HTMLElement, callback: ResizeObserverCallback) => void;
+  unsubscribe: (elt: HTMLElement, callback: ResizeObserverCallback) => void;
+};
 
-function createResizeObserverWrapper() {
+function createResizeObserverWrapper(): ResizeObserverWrapper {
   // This keeps the list of callbacks for each observed element.
   const callbacks: Map<Element, Set<ResizeObserverCallback>> = new Map();
   // This keeps the list of changes while the tab is hidden.
   const dirtyChanges: Map<Element, DOMRectReadOnly> = new Map();
 
-  let _resizeObserver = null;
+  let _resizeObserver: ResizeObserver | null = null;
 
   function notifyListenersForElement(element: Element, rect: DOMRectReadOnly) {
     const callbacksForElement = callbacks.get(element);
@@ -29,7 +28,7 @@ function createResizeObserverWrapper() {
     }
   }
 
-  function resizeObserverCallback(entries) {
+  function resizeObserverCallback(entries: ResizeObserverEntry[]) {
     for (const entry of entries) {
       if (document.hidden) {
         dirtyChanges.set(entry.target, entry.contentRect);

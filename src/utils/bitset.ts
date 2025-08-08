@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 // A packed alternative to Array<boolean>.
 // Created with makeBitSet.
 // All 32 bits in each array element are utilized, though of course the last
