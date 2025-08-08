@@ -733,6 +733,8 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = All frames
     .title = Do not filter the stack frames
+StackSettings--implementation-script = Script
+    .title = Show only the stack frames related to script execution
 StackSettings--implementation-native2 = Native
     .title = Show only the stack frames for native code
 # This label is displayed in the marker chart and marker table panels only.
@@ -753,6 +755,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Deallocation Site
 StackSettings--invert-call-stack = Invert call stack
     .title = Sort by the time spent in a call node, ignoring its children.
 StackSettings--show-user-timing = Show user timing
+StackSettings--use-stack-chart-same-widths = Use the same width for each stack
 StackSettings--panel-search =
     .label = Filter stacks:
     .title = Only display stacks which contain a function whose name matches this substring
