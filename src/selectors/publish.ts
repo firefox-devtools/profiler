@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
 import { createSelector } from 'reselect';
 import clamp from 'clamp';
 
@@ -37,6 +36,8 @@ import type {
   CheckedSharingOptions,
   RemoveProfileInformation,
   DerivedMarkerInfo,
+  ThreadIndex,
+  CounterIndex,
 } from 'firefox-profiler/types';
 import { getThreadSelectors } from './per-thread';
 
@@ -53,7 +54,7 @@ export const getFilenameString: Selector<string> = createSelector(
     const { startTime, product } = profile.meta;
 
     // Pad single digit numbers with a 0.
-    const pad = (x) => (x < 10 ? `0${x}` : `${x}`);
+    const pad = (x: number) => (x < 10 ? `0${x}` : `${x}`);
 
     // Compute the date string.
     const date = new Date(startTime + rootRange.start);
@@ -92,7 +93,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
       containsPrivateBrowsingInformation
     ) => {
       let isIncludingEverything = true;
-      for (const prop in checkedSharingOptions) {
+      for (const [prop, value] of Object.entries(checkedSharingOptions)) {
         // Do not include preference values or private browsing checkboxes if
         // they're hidden. Even though `includePreferenceValues` is not taken
         // into account, it is false, if the profile updateChannel is not
@@ -106,8 +107,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
         ) {
           continue;
         }
-        isIncludingEverything =
-          isIncludingEverything && checkedSharingOptions[prop];
+        isIncludingEverything = isIncludingEverything && value;
       }
       if (isIncludingEverything) {
         // No sanitization is happening, bail out early.
@@ -115,8 +115,8 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
       }
 
       // Find all of the thread indexes that are hidden.
-      const shouldRemoveThreads = new Set();
-      const shouldRemoveCounters = new Set();
+      const shouldRemoveThreads = new Set<ThreadIndex>();
+      const shouldRemoveCounters = new Set<CounterIndex>();
       if (!checkedSharingOptions.includeHiddenThreads) {
         for (const globalTrackIndex of hiddenGlobalTracks) {
           const globalTrack = globalTracks[globalTrackIndex];
@@ -149,7 +149,10 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
             const localTrack = localTracks[hiddenLocalTrackIndex];
             if (localTrack.type === 'thread') {
               shouldRemoveThreads.add(localTrack.threadIndex);
-            } else if (typeof localTrack.counterIndex === 'number') {
+            } else if (
+              'counterIndex' in localTrack &&
+              typeof localTrack.counterIndex === 'number'
+            ) {
               shouldRemoveCounters.add(localTrack.counterIndex);
             }
           }
@@ -161,10 +164,12 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
           ? null
           : committedRange,
         shouldRemoveUrls: !checkedSharingOptions.includeUrls,
-        shouldRemoveThreadsWithScreenshots: new Set(
+        shouldRemoveThreadsWithScreenshots: new Set<ThreadIndex>(
           checkedSharingOptions.includeScreenshots
             ? []
-            : profile.threads.map((_, threadIndex) => threadIndex)
+            : profile.threads.map(
+                (_: any, threadIndex: ThreadIndex) => threadIndex
+              )
         ),
         shouldRemoveThreads,
         shouldRemoveCounters,
@@ -184,14 +189,15 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
  * and to the individual threads. This function therefore implements some simple
  * memoization behavior on the current list of threads.
  */
-let _threads = null;
-let _derivedMarkerInfo = null;
+let _threads: any = null;
+let _derivedMarkerInfo: DerivedMarkerInfo[] | null = null;
 function getDerivedMarkerInfoForAllThreads(state: State): DerivedMarkerInfo[] {
   const threads = getThreads(state);
   if (_threads !== threads || _derivedMarkerInfo === null) {
     _threads = threads;
-    _derivedMarkerInfo = getThreads(state).map((_, threadIndex) =>
-      getThreadSelectors(threadIndex).getDerivedMarkerInfo(state)
+    _derivedMarkerInfo = getThreads(state).map(
+      (_: any, threadIndex: ThreadIndex) =>
+        getThreadSelectors(threadIndex).getDerivedMarkerInfo(state)
     );
   }
   return _derivedMarkerInfo;
@@ -220,13 +226,14 @@ export const getSanitizedProfile: Selector<SanitizeProfileResult> =
  * Due to this memoization strategy, one copy of the data is retained in memory and
  * never freed.
  */
-export const getSanitizedProfileData: Selector<Promise<Uint8Array>> =
-  createSelector(getSanitizedProfile, ({ profile }) =>
-    // We use a Promise.resolve() call first so that the calls to compress and
-    // serializeProfile are out of React's rendering pipeline. We avoid crashes
-    // due to memory issues thanks to that.
-    Promise.resolve().then(() => compress(serializeProfile(profile)))
-  );
+export const getSanitizedProfileData: Selector<
+  Promise<Uint8Array<ArrayBuffer>>
+> = createSelector(getSanitizedProfile, ({ profile }) =>
+  // We use a Promise.resolve() call first so that the calls to compress and
+  // serializeProfile are out of React's rendering pipeline. We avoid crashes
+  // due to memory issues thanks to that.
+  Promise.resolve().then(() => compress(serializeProfile(profile)))
+);
 
 export const getUploadState: Selector<UploadState> = (state) =>
   getPublishState(state).upload;
@@ -247,7 +254,7 @@ export const getUploadProgress: Selector<number> = createSelector(
     clamp(uploadProgress, 0.1, 0.95)
 );
 
-export const getUploadError: Selector<Error | mixed> = (state) =>
+export const getUploadError: Selector<Error | unknown> = (state) =>
   getUploadState(state).error;
 
 export const getUploadProgressString: Selector<string> = createSelector(

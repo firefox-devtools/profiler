@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import { createSelector } from 'reselect';
 import { stripIndent } from 'common-tags';
 
@@ -33,6 +31,7 @@ import type {
   CollectedCustomMarkerSamples,
   IndexIntoSamplesTable,
   IndexIntoStringTable,
+  State,
 } from 'firefox-profiler/types';
 
 /**
@@ -41,7 +40,7 @@ import type {
  * definition for the type of the selector.
  */
 export type MarkerSelectorsPerThread = $ReturnType<
-  typeof getMarkerSelectorsPerThread,
+  typeof getMarkerSelectorsPerThread
 >;
 
 /**
@@ -49,7 +48,7 @@ export type MarkerSelectorsPerThread = $ReturnType<
  */
 export function getMarkerSelectorsPerThread(
   threadSelectors: BasicThreadSelectorsPerThread,
-  threadIndexes: Set<ThreadIndex>,
+  _threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
 ) {
   const _getRawMarkerTable: Selector<RawMarkerTable> = (state) =>
@@ -89,7 +88,7 @@ export function getMarkerSelectorsPerThread(
    * very start of our marker pipeline. */
   const getDerivedMarkerInfo: Selector<DerivedMarkerInfo> = createSelector(
     _getRawMarkerTable,
-    (state) => ProfileSelectors.getProfile(state).shared.stringArray,
+    (state: State) => ProfileSelectors.getProfile(state).shared.stringArray,
     _getThreadId,
     threadSelectors.getThreadRange,
     ProfileSelectors.getIPCMarkerCorrelations,
@@ -102,7 +101,7 @@ export function getMarkerSelectorsPerThread(
   );
 
   const getMarkerIndexToRawMarkerIndexes: Selector<
-    IndexedArray<MarkerIndex, IndexIntoRawMarkerTable[]>,
+    IndexedArray<MarkerIndex, IndexIntoRawMarkerTable[]>
   > = createSelector(
     getDerivedMarkerInfo,
     ({ markerIndexToRawMarkerIndexes }) => markerIndexToRawMarkerIndexes
@@ -148,20 +147,21 @@ export function getMarkerSelectorsPerThread(
    * encapsulated and handles the case where a marker object isn't found (which
    * means the marker index is incorrect).
    */
-  const getMarkerGetter: Selector<(MarkerIndex) => Marker> = createSelector(
-    getFullMarkerList,
-    (markerList) =>
-      (markerIndex: MarkerIndex): Marker => {
-        const marker = markerList[markerIndex];
-        if (!marker) {
-          throw new Error(stripIndent`
+  const getMarkerGetter: Selector<(actionOrActionList: MarkerIndex) => Marker> =
+    createSelector(
+      getFullMarkerList,
+      (markerList) =>
+        (markerIndex: MarkerIndex): Marker => {
+          const marker = markerList[markerIndex];
+          if (!marker) {
+            throw new Error(stripIndent`
           Tried to get marker index ${markerIndex} but it's not in the full list.
           This is a programming error.
         `);
+          }
+          return marker;
         }
-        return marker;
-      }
-  );
+    );
 
   /**
    * This returns the list of all marker indexes. This is simply a sequence
@@ -190,9 +190,9 @@ export function getMarkerSelectorsPerThread(
    *  );
    */
   const filterMarkerIndexesCreator =
-    (filterFunc: (Marker) => boolean) =>
+    (filterFunc: (param: Marker) => boolean) =>
     (
-      getMarker: (MarkerIndex) => Marker,
+      getMarker: (param: MarkerIndex) => Marker,
       markerIndexes: MarkerIndex[]
     ): MarkerIndex[] =>
       MarkerData.filterMarkerIndexes(getMarker, markerIndexes, filterFunc);
@@ -227,7 +227,7 @@ export function getMarkerSelectorsPerThread(
       getCommittedRangeFilteredMarkerIndexes,
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
-      () => 'timeline-overview',
+      () => 'timeline-overview' as const,
       MarkerData.filterMarkerByDisplayLocation
     );
 
@@ -388,60 +388,64 @@ export function getMarkerSelectorsPerThread(
   /**
    * This getter uses the marker schema to decide on the labels for tooltips.
    */
-  const getMarkerTooltipLabelGetter: Selector<(MarkerIndex) => string> =
-    createSelector(
-      getMarkerGetter,
-      ProfileSelectors.getMarkerSchema,
-      ProfileSelectors.getMarkerSchemaByName,
-      ProfileSelectors.getCategories,
-      ProfileSelectors.getStringTable,
-      () => 'tooltipLabel',
-      getLabelGetter
-    );
+  const getMarkerTooltipLabelGetter: Selector<
+    (actionOrActionList: MarkerIndex) => string
+  > = createSelector(
+    getMarkerGetter,
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    ProfileSelectors.getCategories,
+    ProfileSelectors.getStringTable,
+    () => 'tooltipLabel' as const,
+    getLabelGetter
+  );
 
   /**
    * This getter uses the marker schema to decide on the labels for the marker table.
    */
-  const getMarkerTableLabelGetter: Selector<(MarkerIndex) => string> =
-    createSelector(
-      getMarkerGetter,
-      ProfileSelectors.getMarkerSchema,
-      ProfileSelectors.getMarkerSchemaByName,
-      ProfileSelectors.getCategories,
-      ProfileSelectors.getStringTable,
-      () => 'tableLabel',
-      getLabelGetter
-    );
+  const getMarkerTableLabelGetter: Selector<
+    (actionOrActionList: MarkerIndex) => string
+  > = createSelector(
+    getMarkerGetter,
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    ProfileSelectors.getCategories,
+    ProfileSelectors.getStringTable,
+    () => 'tableLabel' as const,
+    getLabelGetter
+  );
 
   /**
    * This getter uses the marker schema to decide on the labels for the marker chart.
    */
-  const getMarkerChartLabelGetter: Selector<(MarkerIndex) => string> =
-    createSelector(
-      getMarkerGetter,
-      ProfileSelectors.getMarkerSchema,
-      ProfileSelectors.getMarkerSchemaByName,
-      ProfileSelectors.getCategories,
-      ProfileSelectors.getStringTable,
-      () => 'chartLabel',
-      getLabelGetter
-    );
+  const getMarkerChartLabelGetter: Selector<
+    (actionOrActionList: MarkerIndex) => string
+  > = createSelector(
+    getMarkerGetter,
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    ProfileSelectors.getCategories,
+    ProfileSelectors.getStringTable,
+    () => 'chartLabel' as const,
+    getLabelGetter
+  );
 
   /**
    * This selector is used by the generic marker context menu to decide what to copy.
    * Currently we want to copy the same thing that is displayed as a description
    * in the marker table.
    */
-  const getMarkerLabelToCopyGetter: Selector<(MarkerIndex) => string> =
-    createSelector(
-      getMarkerGetter,
-      ProfileSelectors.getMarkerSchema,
-      ProfileSelectors.getMarkerSchemaByName,
-      ProfileSelectors.getCategories,
-      ProfileSelectors.getStringTable,
-      () => 'copyLabel',
-      getLabelGetter
-    );
+  const getMarkerLabelToCopyGetter: Selector<
+    (actionOrActionList: MarkerIndex) => string
+  > = createSelector(
+    getMarkerGetter,
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    ProfileSelectors.getCategories,
+    ProfileSelectors.getStringTable,
+    () => 'copyLabel' as const,
+    getLabelGetter
+  );
 
   /**
    * This organizes the result of the previous selector in rows to be nicely
@@ -466,7 +470,7 @@ export function getMarkerSelectorsPerThread(
       getCommittedRangeFilteredMarkerIndexes,
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
-      () => 'timeline-fileio',
+      () => 'timeline-fileio' as const,
       // Custom filtering in addition to the schema logic:
       () => MarkerData.isOnThreadFileIoMarker,
       MarkerData.filterMarkerByDisplayLocation
@@ -481,7 +485,7 @@ export function getMarkerSelectorsPerThread(
       getCommittedRangeFilteredMarkerIndexes,
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
-      () => 'timeline-memory',
+      () => 'timeline-memory' as const,
       MarkerData.filterMarkerByDisplayLocation
     );
 
@@ -493,7 +497,7 @@ export function getMarkerSelectorsPerThread(
     getCommittedRangeFilteredMarkerIndexes,
     ProfileSelectors.getMarkerSchema,
     ProfileSelectors.getMarkerSchemaByName,
-    () => 'timeline-ipc',
+    () => 'timeline-ipc' as const,
     MarkerData.filterMarkerByDisplayLocation
   );
 
@@ -504,6 +508,7 @@ export function getMarkerSelectorsPerThread(
   const getNetworkTrackTiming: Selector<MarkerTiming[]> = createSelector(
     getMarkerGetter,
     getNetworkMarkerIndexes,
+    () => null,
     MarkerTimingLogic.getMarkerTiming
   );
 
@@ -514,6 +519,7 @@ export function getMarkerSelectorsPerThread(
   const getUserTimingMarkerTiming: Selector<MarkerTiming[]> = createSelector(
     getMarkerGetter,
     getUserTimingMarkerIndexes,
+    () => null,
     MarkerTimingLogic.getMarkerTiming
   );
 
@@ -593,8 +599,11 @@ export function getMarkerSelectorsPerThread(
     }
   );
 
-  type MarkerTrackSelectors = $ReturnType<typeof _createMarkerTrackSelectors>;
-  const _markerTrackSelectors = {};
+  type MarkerTrackSelectors = ReturnType<typeof _createMarkerTrackSelectors>;
+  const _markerTrackSelectors: Record<
+    string,
+    Record<IndexIntoStringTable, MarkerTrackSelectors>
+  > = {};
   const getMarkerTrackSelectors = (
     markerSchema: MarkerSchema,
     markerName: IndexIntoStringTable
@@ -631,10 +640,10 @@ export function getMarkerSelectorsPerThread(
               `No graphs for marker ${markerName}. This shouldn't happen.`
             );
           }
-          const markerIndexes = [];
+          const markerIndexes: MarkerIndex[] = [];
           let minNumber = Infinity;
           let maxNumber = -Infinity;
-          const numbersPerLine = [];
+          const numbersPerLine: number[][] = [];
           const { graphs, name: schemaName } = markerSchema;
           const keys = graphs.map((graph) => {
             numbersPerLine.push([]);
@@ -651,7 +660,7 @@ export function getMarkerSelectorsPerThread(
             ) {
               markerIndexes.push(index);
               for (let i = 0; i < keys.length; ++i) {
-                const val = data[keys[i]];
+                const val = (data as any)[keys[i]];
                 numbersPerLine[i].push(val);
                 if (val < minNumber) {
                   minNumber = val;
@@ -673,7 +682,7 @@ export function getMarkerSelectorsPerThread(
       );
 
     const getCommittedRangeMarkerSampleRange: Selector<
-      [IndexIntoSamplesTable, IndexIntoSamplesTable],
+      [IndexIntoSamplesTable, IndexIntoSamplesTable]
     > = createSelector(
       getCollectedCustomMarkerSamples,
       ProfileSelectors.getCommittedRange,
