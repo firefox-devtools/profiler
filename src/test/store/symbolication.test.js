@@ -10,7 +10,7 @@ import {
 } from '../fixtures/example-symbol-table';
 import type { ExampleSymbolTable } from '../fixtures/example-symbol-table';
 import type { MarkerPayload } from 'firefox-profiler/types';
-import { SymbolStore } from '../../profile-logic/symbol-store.js';
+import { SymbolStore } from '../../profile-logic/symbol-store';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { INTERVAL } from 'firefox-profiler/app-logic/constants';

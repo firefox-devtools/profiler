@@ -40,7 +40,7 @@ import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
 import type JSZip from 'jszip';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
-import type { PathSet } from '../utils/path.js';
+import type { PathSet } from '../utils/path';
 import type { UploadedProfileInformation as ImportedUploadedProfileInformation } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
 

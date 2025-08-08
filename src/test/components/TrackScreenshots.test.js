@@ -38,7 +38,7 @@ import {
 import { getScreenshotTrackProfile } from '../fixtures/profiles/processed-profile';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { getPreviewSelection } from '../../selectors/profile';
-import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect.js';
+import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect';
 import {
   autoMockElementSize,
   setMockedElementSize,

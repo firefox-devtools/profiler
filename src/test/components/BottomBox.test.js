@@ -22,7 +22,7 @@ import {
 import { blankStore } from 'firefox-profiler/test/fixtures/stores';
 import { getProfileFromTextSamples } from 'firefox-profiler/test/fixtures/profiles/processed-profile';
 import { fireFullClick } from 'firefox-profiler/test/fixtures/utils';
-import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect.js';
+import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect';
 
 // We're not interested in the timeline in this test
 jest.mock('../../components/timeline', () => ({

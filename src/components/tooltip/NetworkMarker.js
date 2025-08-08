@@ -26,7 +26,7 @@ import {
   PRECONNECT_PHASES_IN_ORDER,
   REQUEST_PHASES_IN_ORDER,
   ALL_NETWORK_PHASES_IN_ORDER,
-} from 'firefox-profiler/profile-logic/network.js';
+} from 'firefox-profiler/profile-logic/network';
 
 import type {
   NetworkPayload,
