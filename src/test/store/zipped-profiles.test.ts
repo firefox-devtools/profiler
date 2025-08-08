@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import {
   formatZipFileTable,
   storeWithZipFile,
@@ -17,6 +15,7 @@ import JSZip from 'jszip';
 import * as ZippedProfilesActions from '../../actions/zipped-profiles';
 import * as ReceiveProfileActions from '../../actions/receive-profile';
 import * as ProfileViewActions from '../../actions/profile-view';
+import type { PreviewSelection } from 'firefox-profiler/types';
 
 describe('reducer zipFileState', function () {
   it('can store the zip file in the reducer', async function () {
@@ -119,7 +118,9 @@ describe('reducer zipFileState', function () {
       'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE'
     );
     // console error was called.
+    // @ts-expect-error - 'mock does not exist on type'
     expect(console.error.mock.calls.length >= 1).toEqual(true);
+    // @ts-expect-error - 'mock does not exist on type'
     expect(console.error.mock.calls).toMatchSnapshot();
   });
 
@@ -248,7 +249,7 @@ describe('profile state invalidation when switching between profiles', function 
       'profile2.json',
     ]);
 
-    const viewProfile = (path) =>
+    const viewProfile = (path: string) =>
       dispatch(ZippedProfilesActions.viewProfileFromPathInZipFile(path));
 
     return { dispatch, getState, viewProfile };
@@ -280,12 +281,13 @@ describe('profile state invalidation when switching between profiles', function 
     // Create new copies of the selection on each assertion and change, so
     // that we are not relying on strict equality.
     const getNoSelection = () => ({ hasSelection: false, isModifying: false });
-    const getSomeSelection = () => ({
-      hasSelection: true,
-      isModifying: true,
-      selectionStart: 0,
-      selectionEnd: 10,
-    });
+    const getSomeSelection = () =>
+      ({
+        hasSelection: true,
+        isModifying: true,
+        selectionStart: 0,
+        selectionEnd: 10,
+      }) as PreviewSelection;
 
     // It starts with no selection.
     expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual(

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`actions/receive-profile _fetchProfile fails if a bad profile JSON is passed in 1`] = `[Error: The profile’s JSON could not be decoded. The full error information has been printed out to the DevTool’s console.]`;
 

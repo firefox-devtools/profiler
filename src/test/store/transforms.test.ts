@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import {
   getProfileFromTextSamples,
   getProfileWithUnbalancedNativeAllocations,
@@ -308,15 +306,15 @@ describe('"merge-call-node" transform', function () {
     const A = funcNames.indexOf('a.js');
 
     const mergeJSPathAB = {
-      type: 'merge-call-node',
+      type: 'merge-call-node' as const,
       callNodePath: [ON_LOAD, A],
-      implementation: 'js',
+      implementation: 'js' as const,
     };
 
     const mergeCombinedPathToA = {
-      type: 'merge-call-node',
+      type: 'merge-call-node' as const,
       callNodePath: [RUN_SCRIPT, ON_LOAD, A],
-      implementation: 'combined',
+      implementation: 'combined' as const,
     };
 
     it('starts as an untransformed call tree', function () {
@@ -968,10 +966,10 @@ describe('"collapse-resource" transform', function () {
       throw new Error('Unable to find the firefox resource');
     }
     const collapseTransform = {
-      type: 'collapse-resource',
+      type: 'collapse-resource' as const,
       resourceIndex: firefoxResourceIndex,
       collapsedFuncIndex: thread.funcTable.length,
-      implementation: 'cpp',
+      implementation: 'cpp' as const,
     };
 
     it('starts as an unfiltered call tree', function () {
@@ -1054,7 +1052,7 @@ describe('"collapse-function-subtree" transform', function () {
   `);
   const threadIndex = 0;
   const collapseTransform = {
-    type: 'collapse-function-subtree',
+    type: 'collapse-function-subtree' as const,
     funcIndex: funcNames.indexOf('C'),
   };
 
@@ -1181,9 +1179,9 @@ describe('"collapse-direct-recursion" transform', function () {
     const B = funcNames.indexOf('B');
     const threadIndex = 0;
     const collapseDirectRecursion = {
-      type: 'collapse-direct-recursion',
+      type: 'collapse-direct-recursion' as const,
       funcIndex: B,
-      implementation: 'combined',
+      implementation: 'combined' as const,
     };
 
     it('starts as an unfiltered call tree', function () {
@@ -1297,9 +1295,9 @@ describe('"collapse-direct-recursion" transform', function () {
     const B = funcNames.indexOf('B.js');
     const threadIndex = 0;
     const collapseDirectRecursion = {
-      type: 'collapse-direct-recursion',
+      type: 'collapse-direct-recursion' as const,
       funcIndex: B,
-      implementation: 'js',
+      implementation: 'js' as const,
     };
 
     it('starts as an unfiltered call tree', function () {
@@ -1364,7 +1362,7 @@ describe('"collapse-recursion" transform', function () {
     const B = funcNames.indexOf('B');
     const threadIndex = 0;
     const collapseRecursion = {
-      type: 'collapse-recursion',
+      type: 'collapse-recursion' as const,
       funcIndex: B,
     };
 
@@ -1474,7 +1472,7 @@ describe('"collapse-recursion" transform', function () {
     const B = funcNames.indexOf('B');
     const threadIndex = 0;
     const collapseRecursion = {
-      type: 'collapse-recursion',
+      type: 'collapse-recursion' as const,
       funcIndex: B,
     };
 
@@ -1598,7 +1596,7 @@ describe('"collapse-recursion" transform', function () {
     const B = funcNames.indexOf('B');
     const threadIndex = 0;
     const collapseRecursion = {
-      type: 'collapse-recursion',
+      type: 'collapse-recursion' as const,
       funcIndex: B,
     };
 
@@ -1728,7 +1726,7 @@ describe('"collapse-recursion" transform', function () {
     const B = funcNames.indexOf('B.js');
     const threadIndex = 0;
     const collapseRecursion = {
-      type: 'collapse-recursion',
+      type: 'collapse-recursion' as const,
       funcIndex: B,
     };
 
@@ -1798,7 +1796,7 @@ describe('"collapse-recursion" transform', function () {
     const B = funcNames.indexOf('B.js');
     const threadIndex = 0;
     const collapseRecursion = {
-      type: 'collapse-recursion',
+      type: 'collapse-recursion' as const,
       funcIndex: B,
     };
 

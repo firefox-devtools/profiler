@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import { createImageMock } from '../fixtures/mocks/image';
 import { blankStore } from '../fixtures/stores';
 import * as iconsAccessors from '../../selectors/icons';
@@ -18,16 +16,16 @@ describe('actions/icons', function () {
   const expectedClasses = ['favicon-1', 'favicon-2'];
   const invalidIcon = 'https://invalid.icon.example.org/favicon.ico';
 
-  let imageInstances: Image[] = [];
+  let imageInstances: HTMLImageElement[] = [];
 
   beforeEach(() => {
     const mock = createImageMock();
     imageInstances = mock.instances;
-    (window: any).Image = mock.Image;
+    (window as any).Image = mock.Image;
   });
 
   afterEach(() => {
-    delete (window: any).Image;
+    delete (window as any).Image;
     imageInstances = [];
     iconsActions._resetIconCounter();
   });
@@ -91,21 +89,21 @@ describe('actions/icons', function () {
         expect(instance.src).toEqual(validIcons[i]);
         expect(instance.referrerPolicy).toEqual('no-referrer');
       });
-      imageInstances.forEach((instance) => (instance: any).onload());
+      imageInstances.forEach((instance) => (instance as any).onload());
       await Promise.all(promises);
 
       const state = getState();
-      let subject = iconsAccessors.getIconsWithClassNames(state);
-      expect([...subject]).toEqual(
+      const subjects = iconsAccessors.getIconsWithClassNames(state);
+      expect([...subjects]).toEqual(
         validIcons.map((icon, i) => [icon, expectedClasses[i]])
       );
 
       validIcons.forEach((icon, i) => {
-        subject = iconsAccessors.getIconClassName(
+        const iconClass = iconsAccessors.getIconClassName(
           state,
           _createCallNodeWithIcon(icon).icon
         );
-        expect(subject).toEqual(expectedClasses[i]);
+        expect(iconClass).toEqual(expectedClasses[i]);
       });
     });
   });
@@ -119,19 +117,19 @@ describe('actions/icons', function () {
       // Wait until we have 2 image instances after calling iconStartLoading.
       await waitFor(() => expect(imageInstances.length).toBe(1));
       expect(imageInstances.length).toBe(1);
-      (imageInstances[0]: any).onerror();
+      (imageInstances[0] as any).onerror();
 
       await actionPromise;
 
       const state = getState();
-      let subject = iconsAccessors.getIconsWithClassNames(state);
-      expect([...subject]).toEqual([]);
+      const subjects = iconsAccessors.getIconsWithClassNames(state);
+      expect([...subjects]).toEqual([]);
 
-      subject = iconsAccessors.getIconClassName(
+      const iconClass = iconsAccessors.getIconClassName(
         state,
         _createCallNodeWithIcon(invalidIcon).icon
       );
-      expect(subject).toBe('');
+      expect(iconClass).toBe('');
     });
   });
 });

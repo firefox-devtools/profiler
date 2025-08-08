@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import { storeWithProfile } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import * as UrlStateSelectors from '../../selectors/url-state';
@@ -28,6 +26,7 @@ import {
   INTERVAL_START,
   INTERVAL_END,
 } from '../../app-logic/constants';
+import type { State, Store } from 'firefox-profiler/types';
 
 describe('selectors/getStackTimingByDepth', function () {
   /**
@@ -198,7 +197,7 @@ describe('selectors/getFlameGraphTiming', function () {
    *
    * "FunctionName1 (StartTime:EndTime) | FunctionName2 (StartTime:EndTime)"
    */
-  function getHumanReadableFlameGraphRanges(store, funcNames) {
+  function getHumanReadableFlameGraphRanges(store: Store, funcNames: string[]) {
     const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(
       store.getState()
     );
@@ -229,7 +228,10 @@ describe('selectors/getFlameGraphTiming', function () {
    *
    * "FunctionName1 (SelfTimeRelative) | ..."
    */
-  function getHumanReadableFlameGraphTimings(store, funcNames) {
+  function getHumanReadableFlameGraphTimings(
+    store: Store,
+    funcNames: string[]
+  ) {
     const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(
       store.getState()
     );
@@ -464,7 +466,7 @@ describe('actions/changeInvertCallstack', function () {
       D  G  J  J  J  J
          H           K
     `);
-  const toFuncIndex = (funcName) => funcNames.indexOf(funcName);
+  const toFuncIndex = (funcName: string) => funcNames.indexOf(funcName);
   const threadIndex = 0;
 
   // The assumptions in this tests is that we are going between these two call node
@@ -474,7 +476,7 @@ describe('actions/changeInvertCallstack', function () {
 
   // Make tests more readable by grabbing the relevant paths, and transforming
   // them to their function names, rather than indexes.
-  const getPaths = (state) => ({
+  const getPaths = (state: State) => ({
     selectedCallNodePath: selectedThreadSelectors
       .getSelectedCallNodePath(state)
       .map((index) => funcNames[index]),

@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import { storeWithSimpleProfile, storeWithProfile } from '../fixtures/stores';
 import * as UrlStateSelectors from '../../selectors/url-state';
 import * as AppSelectors from '../../selectors/app';
@@ -25,10 +23,10 @@ describe('app actions', function () {
     });
 
     it('records an analytics event when changing tabs', function () {
-      withAnalyticsMock(() => {
+      withAnalyticsMock((gaMock) => {
         const { dispatch } = storeWithSimpleProfile();
         dispatch(AppActions.changeSelectedTab('stack-chart'));
-        expect(self.ga.mock.calls).toEqual([
+        expect(gaMock.calls).toEqual([
           [
             'send',
             {
@@ -50,10 +48,10 @@ describe('app actions', function () {
     });
 
     it('records analytics events for pageview and datasource', function () {
-      withAnalyticsMock(() => {
+      withAnalyticsMock((gaMock) => {
         const { dispatch } = storeWithSimpleProfile();
         dispatch(AppActions.urlSetupDone());
-        expect(self.ga.mock.calls).toEqual([
+        expect(gaMock.calls).toEqual([
           [
             'send',
             {

@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
+
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import * as UrlStateSelectors from '../../selectors/url-state';
@@ -23,11 +23,11 @@ import { ensureExists } from '../../utils/flow';
 import type { Profile, Thread } from 'firefox-profiler/types';
 
 function getProfileWithNiceAddresses(): {
-  profile: Profile,
-  derivedThreads: Thread[],
-  funcNamesPerThread: Array<string[]>,
-  funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
-  nativeSymbolsDictPerThread: Array<{ [nativeSymbolName: string]: number }>,
+  profile: Profile;
+  derivedThreads: Thread[];
+  funcNamesPerThread: Array<string[]>;
+  funcNamesDictPerThread: Array<{ [funcName: string]: number }>;
+  nativeSymbolsDictPerThread: Array<{ [nativeSymbolName: string]: number }>;
 } {
   return getProfileFromTextSamples(`
     A[lib:one][address:20][sym:Asym:20:][file:ab.cpp][line:20]          A[lib:one][address:30][sym:Asym:20:][file:ab.cpp][line:22]          A[lib:one][address:20][sym:Asym:20:][file:ab.cpp][line:20]  A[lib:one][address:20][sym:Asym:20:][file:ab.cpp][line:20]

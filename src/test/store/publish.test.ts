@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import {
   attemptToPublish,
   resetUploadState,
@@ -59,7 +57,7 @@ import {
   listAllUploadedProfileInformationFromDb,
 } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 
-import type { Store } from 'firefox-profiler/types';
+import type { Store, UploadPhase } from 'firefox-profiler/types';
 
 import { autoMockIndexedDB } from 'firefox-profiler/test/fixtures/mocks/indexeddb';
 autoMockIndexedDB();
@@ -221,13 +219,13 @@ describe('attemptToPublish', function () {
   const BARE_PROFILE_TOKEN = 'FAKEHASH';
 
   function setupFakeUpload() {
-    let updateUploadProgress;
+    let updateUploadProgress: ((progress: number) => void) | undefined;
 
-    // These 2 functions get rewritten right away, but flow doesn't know that
-    // and thinks they can be undefined.
-    let resolveUpload = jest.fn();
-    let rejectUpload = jest.fn();
-    const promise = new Promise((resolve, reject) => {
+    // Create a promise with the resolve function outside of it.
+    // const { promise, resolve: resolveUpload, reject: rejectUpload } = Promise.withResolvers();
+    let resolveUpload: (param: any) => void,
+      rejectUpload: (reason?: any) => void;
+    const promise = new Promise<string>((resolve, reject) => {
       resolveUpload = resolve;
       rejectUpload = reject;
     });
@@ -249,12 +247,12 @@ describe('attemptToPublish', function () {
         rejectUpload(new UploadAbortedError());
         abortFunction();
       },
-      startUpload: (data, callback) => {
+      startUpload: (_data, callback) => {
         updateUploadProgress = callback;
         return promise;
       },
     });
-    (uploadBinaryProfileData: any).mockImplementationOnce(initUploadProcess);
+    (uploadBinaryProfileData as any).mockImplementationOnce(initUploadProcess);
 
     function getUpdateUploadProgress() {
       return ensureExists(
@@ -264,7 +262,12 @@ describe('attemptToPublish', function () {
     }
 
     return {
+      // @ts-expect-error - TS2454: Variable 'resolveUpload' is used before being assigned.
+      // This is incorrect; new Promise runs its callback synchronously so these variables
+      // are already assigned. Anyway, once we can use Promise.withResolvers, that'll be
+      // the more straightforward solution.
       resolveUpload,
+      // @ts-expect-error - same as above
       rejectUpload,
       abortFunction,
       getUpdateUploadProgress,
@@ -272,10 +275,10 @@ describe('attemptToPublish', function () {
   }
 
   function setupFakeUploadsWithStore(store: Store) {
-    jest.spyOn(window, 'open').mockImplementation(() => {});
+    jest.spyOn(window, 'open').mockImplementation(() => null);
     const fakeUploadResult = setupFakeUpload();
 
-    function waitUntilPhase(phase) {
+    function waitUntilPhase(phase: UploadPhase) {
       return waitUntilState(store, (state) => getUploadPhase(state) === phase);
     }
 
