@@ -1,15 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import type { CliOptions } from '../../../symbolicator-cli';
 import { run } from '../../../symbolicator-cli';
 
 describe('symbolicator-cli tool', function () {
-  async function runToTempFileAndReturnOutput(options) {
+  async function runToTempFileAndReturnOutput(options: CliOptions) {
     const tempDir = fs.mkdtempSync(
       path.join(os.tmpdir(), 'symbolicator-cli-test')
     );
@@ -35,7 +34,7 @@ describe('symbolicator-cli tool', function () {
 
     window.fetchMock.post(
       'http://symbol.server/symbolicate/v5',
-      new Response(symbolsJson)
+      new Response(symbolsJson as any)
     );
 
     const options = {
