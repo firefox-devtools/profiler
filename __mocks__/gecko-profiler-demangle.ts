@@ -12,8 +12,6 @@
 // [1] https://medium.com/@giltayar/native-es-modules-in-nodejs-status-and-future-directions-part-i-ee5ea3001f71
 // [2] https://github.com/rustwasm/wasm-bindgen/issues/233
 
-// @flow
-
 // There's only one exported function.
 // Do the simplest thing possible: no demangling.
 export function demangle_any(s: string): string {
