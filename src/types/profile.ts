@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import type { Milliseconds, Address, Microseconds, Bytes } from './units';
 import type { MarkerPayload, MarkerSchema, MarkerFormatType } from './markers';
 import type { MarkerPhase, ProfilingLog } from './gecko-profile';
@@ -55,11 +53,11 @@ export type Pid = string;
  * shared prefix; storing these stacks as a tree saves a lot of space compared
  * to storing them as actual lists of frames.
  */
-export type RawStackTable = {|
-  frame: IndexIntoFrameTable[],
-  prefix: Array<IndexIntoStackTable | null>,
-  length: number,
-|};
+export type RawStackTable = {
+  frame: IndexIntoFrameTable[];
+  prefix: Array<IndexIntoStackTable | null>;
+  length: number;
+};
 
 /**
  * Profile samples can come in a variety of forms and represent different information.
@@ -105,23 +103,23 @@ export type WeightType = 'samples' | 'tracing-ms' | 'bytes';
  * information that is needed to represent that sampled function. Most of the entries
  * are indices into other tables.
  */
-export type RawSamplesTable = {|
+export type RawSamplesTable = {
   // Responsiveness is the older version of eventDelay. It injects events every 16ms.
   // This is optional because newer profiles don't have that field anymore.
-  responsiveness?: Array<?Milliseconds>,
+  responsiveness?: Array<Milliseconds | null>;
   // Event delay is the newer version of responsiveness. It allow us to get a finer-grained
   // view of jank by inferring what would be the delay of a hypothetical input event at
   // any point in time. It requires a pre-processing to be able to visualize properly.
   // This is optional because older profiles didn't have that field.
-  eventDelay?: Array<?Milliseconds>,
-  stack: Array<IndexIntoStackTable | null>,
-  time?: Milliseconds[],
+  eventDelay?: Array<Milliseconds | null>;
+  stack: Array<IndexIntoStackTable | null>;
+  time?: Milliseconds[];
   // If the `time` column is not present, then the `timeDeltas` column must be present.
-  timeDeltas?: Milliseconds[],
+  timeDeltas?: Milliseconds[];
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
-  weight: null | number[],
-  weightType: WeightType,
+  weight: null | number[];
+  weightType: WeightType;
   // CPU usage value of the current thread. Its values are null only if the back-end
   // fails to get the CPU usage from operating system.
   // It's landed in Firefox 86, and it is optional because older profile
@@ -129,53 +127,53 @@ export type RawSamplesTable = {|
   // written for this change because it's a completely new data source.
   // The first value is ignored - it's not meaningful because there is no previous
   // sample.
-  threadCPUDelta?: Array<number | null>,
+  threadCPUDelta?: Array<number | null>;
   // This property isn't present in normal threads. However it's present for
   // merged threads, so that we know the origin thread for these samples.
-  threadId?: Tid[],
-  length: number,
-|};
+  threadId?: Tid[];
+  length: number;
+};
 
 /**
  * JS allocations are recorded as a marker payload, but in profile processing they
  * are moved to the Thread. This allows them to be part of the stack processing pipeline.
  */
-export type JsAllocationsTable = {|
-  time: Milliseconds[],
-  className: string[],
-  typeName: string[], // Currently only 'JSObject'
-  coarseType: string[], // Currently only 'Object',
+export type JsAllocationsTable = {
+  time: Milliseconds[];
+  className: string[];
+  typeName: string[]; // Currently only 'JSObject'
+  coarseType: string[]; // Currently only 'Object',
   // "weight" is used here rather than "bytes", so that this type will match the
   // SamplesLikeTableShape.
-  weight: Bytes[],
-  weightType: 'bytes',
-  inNursery: boolean[],
-  stack: Array<IndexIntoStackTable | null>,
-  length: number,
-|};
+  weight: Bytes[];
+  weightType: 'bytes';
+  inNursery: boolean[];
+  stack: Array<IndexIntoStackTable | null>;
+  length: number;
+};
 
 /**
  * This variant is the original version of the table, before the memory address
  * and threadId were added.
  */
-export type UnbalancedNativeAllocationsTable = {|
-  time: Milliseconds[],
+export type UnbalancedNativeAllocationsTable = {
+  time: Milliseconds[];
   // "weight" is used here rather than "bytes", so that this type will match the
   // SamplesLikeTableShape.
-  weight: Bytes[],
-  weightType: 'bytes',
-  stack: Array<IndexIntoStackTable | null>,
-  length: number,
-|};
+  weight: Bytes[];
+  weightType: 'bytes';
+  stack: Array<IndexIntoStackTable | null>;
+  length: number;
+};
 
 /**
  * The memory address and thread ID were added later.
  */
-export type BalancedNativeAllocationsTable = {|
-  ...UnbalancedNativeAllocationsTable,
-  memoryAddress: number[],
-  threadId: number[],
-|};
+export type BalancedNativeAllocationsTable =
+  UnbalancedNativeAllocationsTable & {
+    memoryAddress: number[];
+    threadId: number[];
+  };
 
 /**
  * Native allocations are recorded as a marker payload, but in profile processing they
@@ -199,24 +197,24 @@ export type NativeAllocationsTable =
  * create markers with durations, or even take a string-only marker and parse
  * it into a structured marker.
  */
-export type RawMarkerTable = {|
-  data: Array<MarkerPayload | null>,
-  name: IndexIntoStringTable[],
-  startTime: Array<number | null>,
-  endTime: Array<number | null>,
-  phase: MarkerPhase[],
-  category: IndexIntoCategoryList[],
+export type RawMarkerTable = {
+  data: Array<MarkerPayload | null>;
+  name: IndexIntoStringTable[];
+  startTime: Array<number | null>;
+  endTime: Array<number | null>;
+  phase: MarkerPhase[];
+  category: IndexIntoCategoryList[];
   // This property isn't present in normal threads. However it's present for
   // merged threads, so that we know the origin thread for these markers.
-  threadId?: Tid[],
-  length: number,
-|};
+  threadId?: Array<Tid | null>;
+  length: number;
+};
 
 /**
  * Frames contain the context information about the function execution at the moment in
  * time. The caller/callee relationship between frames is defined by the StackTable.
  */
-export type FrameTable = {|
+export type FrameTable = {
   // If this is a frame for native code, the address is the address of the frame's
   // assembly instruction,  relative to the native library that contains it.
   //
@@ -228,7 +226,7 @@ export type FrameTable = {|
   //
   // The library which this address is relative to is given by the frame's nativeSymbol:
   // frame -> nativeSymbol -> lib.
-  address: Array<Address | -1>,
+  address: Array<Address | -1>;
 
   // The inline depth for this frame. If there is an inline stack at an address,
   // we create multiple frames with the same address, one for each depth.
@@ -256,29 +254,29 @@ export type FrameTable = {|
   //
   // The frames of an inline stack at an address all have the same address and the same
   // nativeSymbol, but each has a different func and line.
-  inlineDepth: number[],
+  inlineDepth: number[];
 
   // The category of the frame. This is used to calculate the category of the stack nodes
   // which use this frame:
   // - If the frame has a null category, the stack node inherits its parent node's category
   //   and subcategory. If there is no parent node, we use the "default category" (see ProfileMeta.categories).
   // - If the frame has a non-null category, this category and subcategory is used for the stack node.
-  category: (IndexIntoCategoryList | null)[],
+  category: (IndexIntoCategoryList | null)[];
 
   // The subcategory of a frame. This is used to calculate the subcategory of the stack nodes
   // which use this frame.
   // Must be non-null if the frame's category is non-null.
   // Ignored if the frame's category is null.
   // 0 is always a valid value and refers to the "Other" subcategory (see Category.subcategories).
-  subcategory: (IndexIntoSubcategoryListForCategory | null)[],
+  subcategory: (IndexIntoSubcategoryListForCategory | null)[];
 
   // The frame's function.
-  func: IndexIntoFuncTable[],
+  func: IndexIntoFuncTable[];
 
   // The symbol index (referring into this thread's nativeSymbols table) corresponding
   // to symbol that covers the frame address of this frame. Only non-null for native
   // frames (e.g. C / C++ / Rust code). Null before symbolication.
-  nativeSymbol: (IndexIntoNativeSymbolTable | null)[],
+  nativeSymbol: (IndexIntoNativeSymbolTable | null)[];
 
   // Inner window ID of JS frames. JS frames can be correlated to a Page through this value.
   // It's used to determine which JS frame belongs to which web page so we can display
@@ -287,12 +285,12 @@ export type FrameTable = {|
   // because that's what Firefox platform DOM side assigns when it fails to get the ID or
   // something bad happens during that process. It's not `null` or `-1` because that information
   // is being stored as `uint64_t` there.
-  innerWindowID: (InnerWindowID | null)[],
+  innerWindowID: (InnerWindowID | null)[];
 
-  line: (number | null)[],
-  column: (number | null)[],
-  length: number,
-|};
+  line: (number | null)[];
+  column: (number | null)[];
+  length: number;
+};
 
 /**
  * The funcTable stores the functions that were called in the profile.
@@ -311,34 +309,34 @@ export type FrameTable = {|
  * were created upfront to become orphaned, as the frames that originally referred
  * to them get reassigned to the canonical func for their actual function.
  */
-export type FuncTable = {|
+export type FuncTable = {
   // The function name.
-  name: Array<IndexIntoStringTable>,
+  name: Array<IndexIntoStringTable>;
 
   // isJS and relevantForJS describe the function type. Non-JavaScript functions
   // can be marked as "relevant for JS" so that for example DOM API label functions
   // will show up in any JavaScript stack views.
   // It may be worth combining these two fields into one:
   // https://github.com/firefox-devtools/profiler/issues/2543
-  isJS: Array<boolean>,
-  relevantForJS: Array<boolean>,
+  isJS: Array<boolean>;
+  relevantForJS: Array<boolean>;
 
   // The resource describes "Which bag of code did this function come from?".
   // For JS functions, the resource is of type addon, webhost, otherhost, or url.
   // For native functions, the resource is of type library.
   // For labels and for other unidentified functions, we set the resource to -1.
-  resource: Array<IndexIntoResourceTable | -1>,
+  resource: Array<IndexIntoResourceTable | -1>;
 
   // These are non-null for JS functions only. The line and column describe the
   // location of the *start* of the JS function. As for the information about which
   // which lines / columns inside the function were actually hit during execution,
   // that information is stored in the frameTable, not in the funcTable.
-  fileName: Array<IndexIntoStringTable | null>,
-  lineNumber: Array<number | null>,
-  columnNumber: Array<number | null>,
+  fileName: Array<IndexIntoStringTable | null>;
+  lineNumber: Array<number | null>;
+  columnNumber: Array<number | null>;
 
-  length: number,
-|};
+  length: number;
+};
 
 /**
  * The nativeSymbols table stores the addresses and symbol names for all symbols
@@ -350,30 +348,30 @@ export type FuncTable = {|
  * contains *all* symbols of a given library. But this table only contains a
  * subset of those symbols, and mixes symbols from multiple libraries.
  */
-export type NativeSymbolTable = {|
+export type NativeSymbolTable = {
   // The library that this native symbol is in.
-  libIndex: Array<IndexIntoLibs>,
+  libIndex: Array<IndexIntoLibs>;
   // The library-relative offset of this symbol.
-  address: Array<Address>,
+  address: Array<Address>;
   // The symbol name, demangled.
-  name: Array<IndexIntoStringTable>,
+  name: Array<IndexIntoStringTable>;
   // The size of the function's machine code (if known), in bytes.
-  functionSize: Array<Bytes | null>,
+  functionSize: Array<Bytes | null>;
 
-  length: number,
-|};
+  length: number;
+};
 
 /**
  * The ResourceTable holds additional information about functions. It tends to contain
  * sparse arrays. Multiple functions can point to the same resource.
  */
-export type ResourceTable = {|
-  length: number,
-  lib: Array<IndexIntoLibs | null>,
-  name: Array<IndexIntoStringTable>,
-  host: Array<IndexIntoStringTable | null>,
-  type: resourceTypeEnum[],
-|};
+export type ResourceTable = {
+  length: number;
+  lib: Array<IndexIntoLibs | null>;
+  name: Array<IndexIntoStringTable>;
+  host: Array<IndexIntoStringTable | null>;
+  type: resourceTypeEnum[];
+};
 
 /**
  * Information about the shared libraries that were loaded into the processes in
@@ -381,13 +379,13 @@ export type ResourceTable = {|
  * the symbolication API requires a debugName + breakpadId for each set of
  * unsymbolicated addresses, to know where to obtain symbols for those addresses.
  */
-export type Lib = {|
-  arch: string, // e.g. "x86_64"
-  name: string, // e.g. "firefox"
-  path: string, // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
-  debugName: string, // e.g. "firefox", or "firefox.pdb" on Windows
-  debugPath: string, // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
-  breakpadId: string, // e.g. "E54D3AF274383256B9F6144F83F3F7510"
+export type Lib = {
+  arch: string; // e.g. "x86_64"
+  name: string; // e.g. "firefox"
+  path: string; // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
+  debugName: string; // e.g. "firefox", or "firefox.pdb" on Windows
+  debugPath: string; // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
+  breakpadId: string; // e.g. "E54D3AF274383256B9F6144F83F3F7510"
 
   // The codeId is currently always null.
   // In the future, it will have the following values:
@@ -400,8 +398,8 @@ export type Lib = {|
   //  - On Windows, it will be the codeId for the binary (.exe / .dll), as used
   //    by Windows symbol servers. This will allow us to get assembly code for
   //    Windows system libraries for profiles which were captured on another machine.
-  codeId: string | null, // e.g. "6132B96B70fd000"
-|};
+  codeId: string | null; // e.g. "6132B96B70fd000"
+};
 
 // The list of available category colors.
 //
@@ -423,18 +421,18 @@ export type CategoryColor =
   | 'grey'; // <-- "grey" marks the default category
 
 // A category in profile.meta.categories, used for stack frames and call nodes.
-export type Category = {|
+export type Category = {
   // The category name.
-  name: string,
+  name: string;
 
   // The category color. Must be picked from the CategoryColor list. At least one
   // category with color "grey" must be present in the category list.
-  color: CategoryColor,
+  color: CategoryColor;
 
   // The list of subcategories. Must always have at least one element; subcategory
   // zero must be the "Other" subcategory and is used to refer to the category itself.
-  subcategories: string[],
-|};
+  subcategories: string[];
+};
 
 export type CategoryList = Array<Category>;
 
@@ -447,65 +445,65 @@ export type CategoryList = Array<Category>;
  *
  * The unique field for a page is innerWindowID.
  */
-export type Page = {|
+export type Page = {
   // Tab ID of the page. This ID is the same for all the pages inside a tab's
   // session history.
-  tabID: TabID,
+  tabID: TabID;
   // ID of the JS `window` object in a `Document`. It's unique for every page.
-  innerWindowID: InnerWindowID,
+  innerWindowID: InnerWindowID;
   // Url of this page.
-  url: string,
+  url: string;
   // Each page describes a frame in websites. A frame can either be the top-most
   // one or inside of another one. For the children frames, `embedderInnerWindowID`
   // points to the innerWindowID of the parent (embedder). It's `0` if there is
   // no embedder, which means that it's the top-most frame. That way all pages
   // can create a tree of pages that can be navigated.
-  embedderInnerWindowID: number,
+  embedderInnerWindowID: number;
   // If true, this page has been opened in a private browsing window.
   // It's optional because it appeared in Firefox 98, and is absent before when
   // capturing was disabled when a private browsing window was open.
   // The property is always present in Firefox 98+.
-  isPrivateBrowsing?: boolean,
+  isPrivateBrowsing?: boolean;
   // Favicon data of the page if it was successfully retrieved from Firefox.
   // It's a base64 encoded URI string when available.
   // It's null when Firefox can't get the favicon.
   // This is added in Firefox 134, earlier profiles will not have it.
-  favicon?: string | null,
-|};
+  favicon?: string | null;
+};
 
 export type PageList = Array<Page>;
 
 /**
  * Information about a period of time during which no samples were collected.
  */
-export type PausedRange = {|
+export type PausedRange = {
   // null if the profiler was already paused at the beginning of the period of
   // time that was present in the profile buffer
-  startTime: Milliseconds | null,
+  startTime: Milliseconds | null;
   // null if the profiler was still paused when the profile was captured
-  endTime: Milliseconds | null,
-  reason: 'profiler-paused' | 'collecting',
-|};
+  endTime: Milliseconds | null;
+  reason: 'profiler-paused' | 'collecting';
+};
 
-export type JsTracerTable = {|
-  events: Array<IndexIntoStringTable>,
-  timestamps: Array<Microseconds>,
-  durations: Array<Microseconds | null>,
-  line: Array<number | null>, // Line number.
-  column: Array<number | null>, // Column number.
-  length: number,
-|};
+export type JsTracerTable = {
+  events: Array<IndexIntoStringTable>;
+  timestamps: Array<Microseconds>;
+  durations: Array<Microseconds | null>;
+  line: Array<number | null>; // Line number.
+  column: Array<number | null>; // Column number.
+  length: number;
+};
 
-export type RawCounterSamplesTable = {|
-  time?: Milliseconds[],
-  timeDeltas?: Milliseconds[],
+export type RawCounterSamplesTable = {
+  time?: Milliseconds[];
+  timeDeltas?: Milliseconds[];
   // The number of times the Counter's "number" was changed since the previous sample.
   // This property was mandatory until the format version 42, it was made optional in 43.
-  number?: number[],
+  number?: number[];
   // The count of the data, for instance for memory this would be bytes.
-  count: number[],
-  length: number,
-|};
+  count: number[];
+  length: number;
+};
 
 export type GraphColor =
   | 'blue'
@@ -519,61 +517,61 @@ export type GraphColor =
   | 'teal'
   | 'yellow';
 
-export type RawCounter = {|
-  name: string,
-  category: string,
-  description: string,
-  color?: GraphColor,
-  pid: Pid,
-  mainThreadIndex: ThreadIndex,
-  samples: RawCounterSamplesTable,
-|};
+export type RawCounter = {
+  name: string;
+  category: string;
+  description: string;
+  color?: GraphColor;
+  pid: Pid;
+  mainThreadIndex: ThreadIndex;
+  samples: RawCounterSamplesTable;
+};
 
 /**
  * The statistics about profiler overhead. It includes max/min/mean values of
  * individual and overall overhead timings.
  */
-export type ProfilerOverheadStats = {|
-  maxCleaning: Microseconds,
-  maxCounter: Microseconds,
-  maxInterval: Microseconds,
-  maxLockings: Microseconds,
-  maxOverhead: Microseconds,
-  maxThread: Microseconds,
-  meanCleaning: Microseconds,
-  meanCounter: Microseconds,
-  meanInterval: Microseconds,
-  meanLockings: Microseconds,
-  meanOverhead: Microseconds,
-  meanThread: Microseconds,
-  minCleaning: Microseconds,
-  minCounter: Microseconds,
-  minInterval: Microseconds,
-  minLockings: Microseconds,
-  minOverhead: Microseconds,
-  minThread: Microseconds,
-  overheadDurations: Microseconds,
-  overheadPercentage: Microseconds,
-  profiledDuration: Microseconds,
-  samplingCount: Microseconds,
-|};
+export type ProfilerOverheadStats = {
+  maxCleaning: Microseconds;
+  maxCounter: Microseconds;
+  maxInterval: Microseconds;
+  maxLockings: Microseconds;
+  maxOverhead: Microseconds;
+  maxThread: Microseconds;
+  meanCleaning: Microseconds;
+  meanCounter: Microseconds;
+  meanInterval: Microseconds;
+  meanLockings: Microseconds;
+  meanOverhead: Microseconds;
+  meanThread: Microseconds;
+  minCleaning: Microseconds;
+  minCounter: Microseconds;
+  minInterval: Microseconds;
+  minLockings: Microseconds;
+  minOverhead: Microseconds;
+  minThread: Microseconds;
+  overheadDurations: Microseconds;
+  overheadPercentage: Microseconds;
+  profiledDuration: Microseconds;
+  samplingCount: Microseconds;
+};
 
 /**
  * This object represents the configuration of the profiler when the profile was recorded.
  */
-export type ProfilerConfiguration = {|
-  threads: string[],
-  features: string[],
-  capacity: Bytes,
-  duration?: number,
+export type ProfilerConfiguration = {
+  threads: string[];
+  features: string[];
+  capacity: Bytes;
+  duration?: number;
   // Optional because that field is introduced in Firefox 72.
   // Active Tab ID indicates a Firefox tab.
   // `0` means null value. Firefox only outputs `0` and not null, that's why we
   // should take care of this case while we are consuming it. If it's `0`, we
   // should revert back to the full view since there isn't enough data to show
   // the active tab view.
-  activeTabID?: TabID,
-|};
+  activeTabID?: TabID;
+};
 
 /**
  * Gecko Profiler records profiler overhead samples of specific tasks that take time.
@@ -582,27 +580,27 @@ export type ProfilerConfiguration = {|
  * lockings: Time spent during acquiring locks.
  * threads: Time spent during threads sampling and marker collection.
  */
-export type ProfilerOverheadSamplesTable = {|
-  counters: Array<Microseconds>,
-  expiredMarkerCleaning: Array<Microseconds>,
-  locking: Array<Microseconds>,
-  threads: Array<Microseconds>,
-  time: Array<Milliseconds>,
-  length: number,
-|};
+export type ProfilerOverheadSamplesTable = {
+  counters: Array<Microseconds>;
+  expiredMarkerCleaning: Array<Microseconds>;
+  locking: Array<Microseconds>;
+  threads: Array<Microseconds>;
+  time: Array<Milliseconds>;
+  length: number;
+};
 
 /**
  * Information about profiler overhead. It includes overhead timings for
  * counters, expired marker cleanings, mutex locking and threads. Also it
  * includes statistics about those individual and overall overhead.
  */
-export type ProfilerOverhead = {|
-  samples: ProfilerOverheadSamplesTable,
+export type ProfilerOverhead = {
+  samples: ProfilerOverheadSamplesTable;
   // There is no statistics object if there is no sample.
-  statistics?: ProfilerOverheadStats,
-  pid: Pid,
-  mainThreadIndex: ThreadIndex,
-|};
+  statistics?: ProfilerOverheadStats;
+  pid: Pid;
+  mainThreadIndex: ThreadIndex;
+};
 
 // This list of process types is defined here:
 // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/xpcom/build/nsXULAppAPI.h#383
@@ -630,67 +628,67 @@ export type ProcessType =
  *
  * There is also a derived `Thread` type, see profile-derived.js.
  */
-export type RawThread = {|
-  processType: ProcessType,
-  processStartupTime: Milliseconds,
-  processShutdownTime: Milliseconds | null,
-  registerTime: Milliseconds,
-  unregisterTime: Milliseconds | null,
-  pausedRanges: PausedRange[],
-  showMarkersInTimeline?: boolean,
-  name: string,
-  isMainThread: boolean,
+export type RawThread = {
+  processType: ProcessType;
+  processStartupTime: Milliseconds;
+  processShutdownTime: Milliseconds | null;
+  registerTime: Milliseconds;
+  unregisterTime: Milliseconds | null;
+  pausedRanges: PausedRange[];
+  showMarkersInTimeline?: boolean;
+  name: string;
+  isMainThread: boolean;
   // The eTLD+1 of the isolated content process if provided by the back-end.
   // It will be undefined if:
   // - Fission is not enabled.
   // - It's not an isolated content process.
   // - It's a sanitized profile.
   // - It's a profile from an older Firefox which doesn't include this field (introduced in Firefox 80).
-  'eTLD+1'?: string,
-  processName?: string,
-  isJsTracer?: boolean,
-  pid: Pid,
-  tid: Tid,
-  samples: RawSamplesTable,
-  jsAllocations?: JsAllocationsTable,
-  nativeAllocations?: NativeAllocationsTable,
-  markers: RawMarkerTable,
-  stackTable: RawStackTable,
-  frameTable: FrameTable,
-  funcTable: FuncTable,
-  resourceTable: ResourceTable,
-  nativeSymbols: NativeSymbolTable,
-  jsTracer?: JsTracerTable,
+  'eTLD+1'?: string;
+  processName?: string;
+  isJsTracer?: boolean;
+  pid: Pid;
+  tid: Tid;
+  samples: RawSamplesTable;
+  jsAllocations?: JsAllocationsTable;
+  nativeAllocations?: NativeAllocationsTable;
+  markers: RawMarkerTable;
+  stackTable: RawStackTable;
+  frameTable: FrameTable;
+  funcTable: FuncTable;
+  resourceTable: ResourceTable;
+  nativeSymbols: NativeSymbolTable;
+  jsTracer?: JsTracerTable;
   // If present and true, this thread was launched for a private browsing session only.
   // When false, it can still contain private browsing data if the profile was
   // captured in a non-fission browser.
   // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
   // had no extra attribute at all.
-  isPrivateBrowsing?: boolean,
+  isPrivateBrowsing?: boolean;
   // If present and non-0, the number represents the container this thread was loaded in.
   // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
   // had no extra attribute at all.
-  userContextId?: number,
-|};
+  userContextId?: number;
+};
 
-export type ExtensionTable = {|
-  baseURL: string[],
-  id: string[],
-  name: string[],
-  length: number,
-|};
+export type ExtensionTable = {
+  baseURL: string[];
+  id: string[];
+  name: string[];
+  length: number;
+};
 
 /**
  * Visual progress describes the visual progression during page load. A sample is generated
  * everytime the visual completeness of the webpage changes.
  */
-export type ProgressGraphData = {|
+export type ProgressGraphData = {
   // A percentage that describes the visual completeness of the webpage, ranging from 0% - 100%
-  percent: number,
+  percent: number;
   // The time in milliseconds which the sample was taken.
   // This can be null due to https://github.com/sitespeedio/browsertime/issues/1746.
-  timestamp: Milliseconds | null,
-|};
+  timestamp: Milliseconds | null;
+};
 
 /**
  * Visual metrics are performance metrics that measure above-the-fold webpage visual performance,
@@ -709,25 +707,25 @@ export type ProgressGraphData = {|
  * and https://github.com/sitespeedio/browsertime/blob/6e88284930c1d3ded8d9d95252d2e13c252d361c/lib/core/engine/iteration.js#L261-L264.
  * Finally they're inserted into the JSON profile in https://github.com/sitespeedio/browsertime/blob/6e88284930c1d3ded8d9d95252d2e13c252d361c/lib/firefox/webdriver/firefox.js#L215-L230
  */
-export type VisualMetrics = {|
-  FirstVisualChange: number,
-  LastVisualChange: number,
-  SpeedIndex: number,
-  VisualProgress: ProgressGraphData[],
+export type VisualMetrics = {
+  FirstVisualChange: number;
+  LastVisualChange: number;
+  SpeedIndex: number;
+  VisualProgress: ProgressGraphData[];
   // Contentful and Perceptual values may be missing. They're generated only if
   // the user specifies the options --visualMetricsContentful and
   // --visualMetricsPerceptual in addition to --visualMetrics.
-  ContentfulSpeedIndex?: number,
-  ContentfulSpeedIndexProgress?: ProgressGraphData[],
-  PerceptualSpeedIndex?: number,
-  PerceptualSpeedIndexProgress?: ProgressGraphData[],
+  ContentfulSpeedIndex?: number;
+  ContentfulSpeedIndexProgress?: ProgressGraphData[];
+  PerceptualSpeedIndex?: number;
+  PerceptualSpeedIndexProgress?: ProgressGraphData[];
   // VisualReadiness and VisualCompleteXX values are generated in
   // https://github.com/sitespeedio/browsertime/blob/main/lib/video/postprocessing/visualmetrics/extraMetrics.js
-  VisualReadiness: number,
-  VisualComplete85: number,
-  VisualComplete95: number,
-  VisualComplete99: number,
-|};
+  VisualReadiness: number;
+  VisualComplete85: number;
+  VisualComplete95: number;
+  VisualComplete99: number;
+};
 
 // Units of ThreadCPUDelta values for different platforms.
 export type ThreadCPUDeltaUnit = 'ns' | 'µs' | 'variable CPU cycles';
@@ -738,70 +736,70 @@ export type TimelineUnit = 'ms' | 'bytes';
 // Object that holds the units of samples table values. Some of the values can be
 // different depending on the platform, e.g. threadCPUDelta.
 // See https://searchfox.org/mozilla-central/rev/851bbbd9d9a38c2785a24c13b6412751be8d3253/tools/profiler/core/platform.cpp#2601-2606
-export type SampleUnits = {|
-  +time: TimelineUnit,
-  +eventDelay: 'ms',
-  +threadCPUDelta: ThreadCPUDeltaUnit,
-|};
+export type SampleUnits = Readonly<{
+  time: TimelineUnit;
+  eventDelay: 'ms';
+  threadCPUDelta: ThreadCPUDeltaUnit;
+}>;
 
-export type ExtraProfileInfoSection = {|
+export type ExtraProfileInfoSection = {
   // section label
-  label: string,
-  entries: Array<{|
-    label: string,
-    format: MarkerFormatType,
+  label: string;
+  entries: Array<{
+    label: string;
+    format: MarkerFormatType;
     // any value valid for the formatter
-    value: any,
-  |}>,
-|};
+    value: any;
+  }>;
+};
 
 /**
  * Meta information associated for the entire profile.
  */
-export type ProfileMeta = {|
+export type ProfileMeta = {
   // The interval at which the threads are sampled.
-  interval: Milliseconds,
+  interval: Milliseconds;
   // When the main process started. Timestamp expressed in milliseconds since
   // midnight January 1, 1970 GMT.
-  startTime: Milliseconds,
-  startTimeAsClockMonotonicNanosecondsSinceBoot?: number,
-  startTimeAsMachAbsoluteTimeNanoseconds?: number,
-  startTimeAsQueryPerformanceCounterValue?: number,
+  startTime: Milliseconds;
+  startTimeAsClockMonotonicNanosecondsSinceBoot?: number;
+  startTimeAsMachAbsoluteTimeNanoseconds?: number;
+  startTimeAsQueryPerformanceCounterValue?: number;
   // The number of milliseconds since midnight January 1, 1970 GMT.
-  endTime?: Milliseconds,
+  endTime?: Milliseconds;
   // When the recording started (in milliseconds after startTime).
-  profilingStartTime?: Milliseconds,
+  profilingStartTime?: Milliseconds;
   // When the recording ended (in milliseconds after startTime).
-  profilingEndTime?: Milliseconds,
+  profilingEndTime?: Milliseconds;
   // The process type where the Gecko profiler was started. This is the raw enum
   // numeric value as defined here:
   // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/xpcom/build/nsXULAppAPI.h#365
-  processType: number,
+  processType: number;
   // The extensions property landed in Firefox 60, and is only optional because older
   // processed profile versions may not have it. No upgrader was written for this change.
-  extensions?: ExtensionTable,
+  extensions?: ExtensionTable;
   // The list of categories used in this profile. If present, it must contain at least the
   // "default category" which is defined as the first category whose color is "grey" - this
   // category usually has the name "Other".
   // If meta.categories is not present, a default list is substituted.
-  categories?: CategoryList,
+  categories?: CategoryList;
   // The name of the product, most likely "Firefox".
-  product: 'Firefox' | string,
+  product: 'Firefox' | string;
   // This value represents a boolean, but for some reason is written out as an int value.
   // It's 0 for the stack walking feature being turned off, and 1 for stackwalking being
   // turned on.
-  stackwalk: 0 | 1,
+  stackwalk: 0 | 1;
   // A boolean flag indicating whether the profiled application is using a debug build.
   // It's false for opt builds, and true for debug builds.
   // This property is optional because older processed profiles don't have this but
   // this property was added to Firefox a long time ago. It should work on older Firefox
   // versions without any problem.
-  debug?: boolean,
+  debug?: boolean;
   // This is the Gecko profile format version (the unprocessed version received directly
   // from the browser.)
-  version: number,
+  version: number;
   // This is the processed profile format version.
-  preprocessedProfileVersion: number,
+  preprocessedProfileVersion: number;
 
   // The following fields are most likely included in Gecko profiles, but are marked
   // optional for imported or converted profiles.
@@ -809,15 +807,15 @@ export type ProfileMeta = {|
   // The XPCOM ABI (Application Binary Interface) name, taking the form:
   // {CPU_ARCH}-{TARGET_COMPILER_ABI} e.g. "x86_64-gcc3"
   // See https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/XPCOM_ABI
-  abi?: string,
+  abi?: string;
   // The "misc" value of the browser's user agent, typically the revision of the browser.
   // e.g. "rv:63.0", which would be Firefox 63.0
   // See https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/netwerk/protocol/http/nsHttpHandler.h#543
-  misc?: string,
+  misc?: string;
   // The OS and CPU. e.g. "Intel Mac OS X"
-  oscpu?: string,
+  oscpu?: string;
   // The size of the main memory in bytes
-  mainMemory?: Bytes,
+  mainMemory?: Bytes;
   // The current platform, as taken from the user agent string.
   // See https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/netwerk/protocol/http/nsHttpHandler.cpp#992
   platform?:
@@ -826,11 +824,11 @@ export type ProfileMeta = {|
     | 'Macintosh'
     // X11 is used for historic reasons, but this value means that it is a Unix platform.
     | 'X11'
-    | string,
+    | string;
   // The widget toolkit used for GUI rendering.
   // Older versions of Firefox for Linux had the 2 flavors gtk2/gtk3, and so
   // we could find the value "gtk3".
-  toolkit?: 'gtk' | 'gtk3' | 'windows' | 'cocoa' | 'android' | string,
+  toolkit?: 'gtk' | 'gtk3' | 'windows' | 'cocoa' | 'android' | string;
 
   // The appBuildID, sourceURL, physicalCPUs and logicalCPUs properties landed
   // in Firefox 62, and are optional because older processed profile
@@ -838,26 +836,26 @@ export type ProfileMeta = {|
   // The CPUName property landed in Firefox 108.
 
   // The build ID/date of the application.
-  appBuildID?: string,
+  appBuildID?: string;
   // Arguments to the program (currently only used for imported profiles)
-  arguments?: string,
+  arguments?: string;
   // The URL to the source revision for this build of the application.
-  sourceURL?: string,
+  sourceURL?: string;
   // The physical number of CPU cores for the machine.
-  physicalCPUs?: number,
+  physicalCPUs?: number;
   // The amount of logically available CPU cores for the program.
-  logicalCPUs?: number,
+  logicalCPUs?: number;
   // The name of the CPU (typically a string of up to 48 characters).
-  CPUName?: string,
+  CPUName?: string;
   // A boolean flag indicating whether we symbolicated this profile. If this is
   // false we'll start a symbolication process when the profile is loaded.
   // A missing property means that it's an older profile, it stands for an
   // "unknown" state.  For now we don't do much with it but we may want to
   // propose a manual symbolication in the future.
-  symbolicated?: boolean,
+  symbolicated?: boolean;
   // A boolean flag indicating that symbolication is not supported
   // Used for imported profiles that cannot be symbolicated
-  symbolicationNotSupported?: boolean,
+  symbolicationNotSupported?: boolean;
   // The Update channel for this build of the application.
   // This property is landed in Firefox 67, and is optional because older
   // processed profile versions may not have them. No upgrader was necessary.
@@ -869,82 +867,82 @@ export type ProfileMeta = {|
     | 'beta'
     | 'release'
     | 'esr' // Extended Support Release channel
-    | string,
+    | string;
   // Visual metrics contains additional performance metrics such as Speed Index,
   // Perceptual Speed Index, and ContentfulSpeedIndex. This is optional because only
   // profiles generated by browsertime will have this property. Source code for
   // browsertime can be found at https://github.com/sitespeedio/browsertime.
-  visualMetrics?: VisualMetrics,
+  visualMetrics?: VisualMetrics;
   // The configuration of the profiler at the time of recording. Optional since older
   // versions of Firefox did not include it.
-  configuration?: ProfilerConfiguration,
+  configuration?: ProfilerConfiguration;
   // Markers are displayed in the UI according to a schema definition. See the
   // MarkerSchema type for more information.
-  markerSchema: MarkerSchema[],
+  markerSchema: MarkerSchema[];
   // Units of samples table values.
   // The sampleUnits property landed in Firefox 86, and is only optional because
   // older profile versions may not have it. No upgrader was written for this change.
-  sampleUnits?: SampleUnits,
+  sampleUnits?: SampleUnits;
   // Information of the device that profile is captured from.
   // Currently it's only present for Android devices and it includes brand and
   // model names of that device.
   // It's optional because profiles from non-Android devices and from older
   // Firefox versions may not have it.
   // This property landed in Firefox 88.
-  device?: string,
+  device?: string;
   // Profile importers can optionally add information about where they are imported from.
   // They also use the "product" field in the meta information, but this is somewhat
   // ambiguous. This field, if present, is unambiguous that it was imported.
-  importedFrom?: string,
+  importedFrom?: string;
 
   // The following are settings that are used to configure the views for
   // imported profiles, as some features do not make sense for them
 
   // Do not distinguish between different stack types?
-  usesOnlyOneStackType?: boolean,
+  usesOnlyOneStackType?: boolean;
   // Hide the "Look up the function name on Searchfox" menu entry?
-  sourceCodeIsNotOnSearchfox?: boolean,
+  sourceCodeIsNotOnSearchfox?: boolean;
   // Extra information about the profile, not shown in the "Profile Info" panel,
   // but in the more info panel
-  extra?: ExtraProfileInfoSection[],
+  extra?: ExtraProfileInfoSection[];
   // Indexes of the threads that are initially visible in the UI.
   // This is useful for imported profiles for which the internal visibility score
   // ranking does not make sense.
-  initialVisibleThreads?: ThreadIndex[],
+  initialVisibleThreads?: ThreadIndex[];
   // Indexes of the threads that are initially selected in the UI.
   // This is also most useful for imported profiles where just using the first thread
   // of each process might not make sense.
-  initialSelectedThreads?: ThreadIndex[],
+  initialSelectedThreads?: ThreadIndex[];
   // Keep the defined thread order
-  keepProfileThreadOrder?: boolean,
+  keepProfileThreadOrder?: boolean;
 
   // Grams of CO2 equivalent per kWh. Used to display power track tooltips.
   // Will fallback to the global average if this is missing.
-  gramsOfCO2ePerKWh?: number,
-|};
+  gramsOfCO2ePerKWh?: number;
+};
 
-export type RawProfileSharedData = {|
+export type RawProfileSharedData = {
   // Strings for profiles are collected into a single table, and are referred to by
   // their index by other tables.
-  stringArray: string[],
-|};
+  stringArray: string[];
+};
 
 /**
  * All of the data for a processed profile.
  */
-export type Profile = {|
-  meta: ProfileMeta,
-  libs: Lib[],
-  pages?: PageList,
+export type Profile = {
+  meta: ProfileMeta;
+  libs: Lib[];
+  pages?: PageList;
   // The counters list is optional only because old profilers may not have them.
   // An upgrader could be written to make this non-optional.
-  counters?: RawCounter[],
+  counters?: RawCounter[];
   // The profilerOverhead list is optional only because old profilers may not
   // have them. An upgrader could be written to make this non-optional.
   // This is list because there is a profiler overhead per process.
-  profilerOverhead?: ProfilerOverhead[],
-  shared: RawProfileSharedData,
-  threads: RawThread[],
-  profilingLog?: ProfilingLog,
-  profileGatheringLog?: ProfilingLog,
-|};
+  profilerOverhead?: ProfilerOverhead[];
+  shared: RawProfileSharedData;
+  threads: RawThread[];
+  profilingLog?: ProfilingLog;
+  profileGatheringLog?: ProfilingLog;
+};
