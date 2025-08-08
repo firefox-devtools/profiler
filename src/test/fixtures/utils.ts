@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
+
 import {
   getCallTree,
   computeCallNodeSelfAndSummary,
@@ -46,39 +46,39 @@ import { fireEvent, screen } from '@testing-library/react';
  * to supply these properties.
  */
 
-type FakeMouseEventInit = $Shape<{
-  altKey: boolean,
-  button: 0 | 1 | 2 | 3 | 4,
-  buttons: number,
-  clientX: number,
-  clientY: number,
-  ctrlKey: boolean,
-  metaKey: boolean,
-  movementX: number,
-  movementY: number,
-  offsetX: number,
-  offsetY: number,
-  pageX: number,
-  pageY: number,
-  screenX: number,
-  screenY: number,
-  shiftKey: boolean,
-  x: number,
-  y: number,
+export type FakeMouseEventInit = Partial<{
+  altKey: boolean;
+  button: 0 | 1 | 2 | 3 | 4;
+  buttons: number;
+  clientX: number;
+  clientY: number;
+  ctrlKey: boolean;
+  metaKey: boolean;
+  movementX: number;
+  movementY: number;
+  offsetX: number;
+  offsetY: number;
+  pageX: number;
+  pageY: number;
+  screenX: number;
+  screenY: number;
+  shiftKey: boolean;
+  x: number;
+  y: number;
 
   // From UIEventInit
-  detail: number,
+  detail: number;
 
   // From EventInit
-  bubbles: boolean,
-  cancelable: boolean,
-  composed: boolean,
+  bubbles: boolean;
+  cancelable: boolean;
+  composed: boolean;
 }>;
 
 class FakeMouseEvent extends MouseEvent {
   constructor(type: string, values: FakeMouseEventInit) {
     const { pageX, pageY, offsetX, offsetY, x, y, ...mouseValues } = values;
-    super(type, (mouseValues: any));
+    super(type, mouseValues as any);
 
     Object.defineProperties(this, {
       offsetX: {
@@ -137,7 +137,7 @@ export function getMouseEvent(
 export function computeThreadFromRawThread(
   rawThread: RawThread,
   shared: RawProfileSharedData,
-  sampleUnits: SampleUnits | void,
+  sampleUnits: SampleUnits | undefined,
   referenceCPUDeltaPerMs: number,
   defaultCategory: IndexIntoCategoryList
 ): Thread {
@@ -319,7 +319,7 @@ export function formatStack(
   const { stackTable, frameTable, funcTable, stringTable, resourceTable } =
     thread;
   for (
-    let stackIndex = stack;
+    let stackIndex: IndexIntoStackTable | null = stack;
     stackIndex !== null;
     stackIndex = stackTable.prefix[stackIndex]
   ) {
@@ -351,7 +351,7 @@ export function formatStack(
  */
 export function waitUntilState(
   store: Store,
-  predicate: (State) => boolean
+  predicate: (param: State) => boolean
 ): Promise<void> {
   if (predicate(store.getState())) {
     return Promise.resolve();
@@ -444,7 +444,7 @@ export function removeScreenshotHoverElement() {
  * Usage:
  * changeSelect({ from: 'Timing Data', to: 'Deallocations' });
  */
-export function changeSelect({ from, to }: {| from: string, to: string |}) {
+export function changeSelect({ from, to }: { from: string; to: string }) {
   // Look up the <option> with the text label.
   const option = screen.getByText(to);
   // Fire a change event to the select.
@@ -459,7 +459,7 @@ export function changeSelect({ from, to }: {| from: string, to: string |}) {
 export function findFillTextPositionFromDrawLog(
   drawLog: any[],
   fillText: string
-): {| x: number, y: number |} {
+): { x: number; y: number } {
   const positions = drawLog
     .filter(([cmd, text]) => cmd === 'fillText' && text === fillText)
     .map(([, , x, y]) => ({ x, y }));
@@ -535,7 +535,7 @@ export function fireFullContextMenu(
  */
 export function fireFullKeyPress(
   element: HTMLElement,
-  options: { key: string, ... }
+  options: { key: string }
 ) {
   // Since this is test code, only use QWERTY layout keyboards.
   // Note the key is always converted to lowercase here.

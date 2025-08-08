@@ -210,8 +210,8 @@
       "/node_modules/(?!(query-string|decode-uri-component|split-on-first|filter-obj|@fetch-mock/jest|fetch-mock)/)"
     ],
     "moduleNameMapper": {
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ftl)$": "<rootDir>/src/test/fixtures/mocks/file-mock.js",
-      "\\.(css|less)$": "<rootDir>/src/test/fixtures/mocks/style-mock.js"
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ftl)$": "<rootDir>/src/test/fixtures/mocks/file-mock.ts",
+      "\\.(css|less)$": "<rootDir>/src/test/fixtures/mocks/style-mock.ts"
     },
     "setupFilesAfterEnv": [
       "jest-extended/all",

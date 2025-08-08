@@ -2,24 +2,28 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
-type Size = {|
-  +width: number,
-  +height: number,
+type Size = {
+  readonly width: number;
+  readonly height: number;
   // offsetX and offsetY will define values for left/right/x/y/top/bottom,
   // taking into account width and height as well.
-  +offsetX?: number,
-  +offsetY?: number,
-|};
+  readonly offsetX?: number;
+  readonly offsetY?: number;
+};
 
 // This function returns an object suitable to be returned from
 // getBoundingClientRect. Generally you don't need to call it directly, but
 // rather use autoMockElementSize and setMockedElementSize.
-export function getBoundingBox({ width, height, offsetX, offsetY }: Size) {
+export function getBoundingBox({
+  width,
+  height,
+  offsetX,
+  offsetY,
+}: Size): DOMRect {
   offsetX = offsetX || 0;
   offsetY = offsetY || 0;
 
+  // @ts-expect-error Missing property toJSON
   return {
     width,
     height,
@@ -50,7 +54,7 @@ export function autoMockElementSize(sizeInformation: Size) {
 
 // Use this function to change the auto mocked size from autoMockElementSize.
 export function setMockedElementSize(sizeInformation: Size) {
-  HTMLElement.prototype.getBoundingClientRect.mockImplementation(() =>
+  (HTMLElement.prototype.getBoundingClientRect as any).mockImplementation(() =>
     getBoundingBox(sizeInformation)
   );
 
@@ -59,6 +63,7 @@ export function setMockedElementSize(sizeInformation: Size) {
     'offsetWidth'
   );
   if (offsetWidthDescriptor && offsetWidthDescriptor.get) {
+    // @ts-expect-error Property mockImplementation doesn't exist
     offsetWidthDescriptor.get.mockImplementation(() => sizeInformation.width);
   }
 
@@ -67,6 +72,7 @@ export function setMockedElementSize(sizeInformation: Size) {
     'offsetHeight'
   );
   if (offsetHeightDescriptor && offsetHeightDescriptor.get) {
+    // @ts-expect-error Property mockImplementation doesn't exist
     offsetHeightDescriptor.get.mockImplementation(() => sizeInformation.height);
   }
 }
@@ -74,11 +80,11 @@ export function setMockedElementSize(sizeInformation: Size) {
 // Use this function to get a very fake HTMLElement with some sizing methods and
 // properties.
 export function getElementWithFixedSize(sizeInformation: Size): HTMLElement {
-  const mockEl = ({
+  const mockEl = {
     getBoundingClientRect: () => getBoundingBox(sizeInformation),
     offsetWidth: sizeInformation.width,
     offsetHeight: sizeInformation.height,
-  }: any);
+  } as any;
 
   return mockEl;
 }

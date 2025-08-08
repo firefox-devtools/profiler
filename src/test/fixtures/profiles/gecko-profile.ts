@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import type {
   LibMapping,
   ProfilerOverheadStats,
@@ -22,6 +20,7 @@ import type {
   IPCMarkerPayload_Gecko,
   GeckoMarkerTuple,
   VisualMetrics,
+  Nanoseconds,
 } from 'firefox-profiler/types';
 
 import {
@@ -50,8 +49,8 @@ export function createGeckoMarkerStack({
   stackIndex,
   time,
 }: {
-  stackIndex: number | null,
-  time: number,
+  stackIndex: number | null;
+  time: number;
 }): GeckoMarkerStack {
   const markerStack = {
     registerTime: null,
@@ -60,14 +59,14 @@ export function createGeckoMarkerStack({
     tid: 1111,
     pid: 2222,
     markers: getEmptyMarkers(),
-    name: 'SyncProfile',
+    name: 'SyncProfile' as const,
     samples: {
       schema: {
-        stack: 0,
-        time: 1,
-        responsiveness: 2,
+        stack: 0 as const,
+        time: 1 as const,
+        responsiveness: 2 as const,
       },
-      data: [],
+      data: [] as Array<[number | null, number, number]>,
     },
   };
 
@@ -320,7 +319,7 @@ export function createGeckoProfile(): GeckoProfile {
     profilerOverhead: parentProcessOverhead,
     pausedRanges: [],
     threads: parentProcessThreads,
-    processes: [],
+    processes: [] as GeckoSubprocessProfile[],
   };
 
   const contentProcessProfile = createGeckoSubprocessProfile(profile, [
@@ -332,14 +331,14 @@ export function createGeckoProfile(): GeckoProfile {
   return profile;
 }
 
-type TestDefinedGeckoMarker = {|
-  +name?: string,
-  +startTime: Milliseconds | null,
-  +endTime: Milliseconds | null,
-  +phase: MarkerPhase,
-  +category?: IndexIntoCategoryList,
-  +data?: MarkerPayload_Gecko | null,
-|};
+export type TestDefinedGeckoMarker = {
+  readonly name?: string;
+  readonly startTime: Milliseconds | null;
+  readonly endTime: Milliseconds | null;
+  readonly phase: MarkerPhase;
+  readonly category?: IndexIntoCategoryList;
+  readonly data?: MarkerPayload_Gecko | null;
+};
 
 function _createGeckoThreadWithMarkers(
   markers: TestDefinedGeckoMarker[]
@@ -398,6 +397,13 @@ function _createIPCMarker({
   side,
   direction,
   phase,
+}: {
+  time: number;
+  otherPid: number;
+  messageSeqno: number;
+  side: 'parent' | 'child';
+  direction: 'sending' | 'receiving';
+  phase: 'endpoint' | 'transferStart' | 'transferEnd' | undefined;
 }): GeckoMarkerTuple {
   return [
     18, // IPC: see string table in _createGeckoThread
@@ -405,7 +411,7 @@ function _createIPCMarker({
     null, // End time
     INSTANT,
     0, // Other
-    ({
+    {
       type: 'IPC',
       startTime: time,
       endTime: time,
@@ -416,7 +422,7 @@ function _createIPCMarker({
       direction,
       phase,
       sync: false,
-    }: IPCMarkerPayload_Gecko),
+    } as IPCMarkerPayload_Gecko,
   ];
 }
 
@@ -429,6 +435,15 @@ function _createIPCMarkerSet({
   recvEndTime,
   endTime,
   messageSeqno,
+}: {
+  srcPid: number;
+  destPid: number;
+  startTime: number;
+  sendStartTime: number;
+  sendEndTime: number;
+  recvEndTime: number;
+  endTime: number;
+  messageSeqno: number;
 }): GeckoMarkerTuple[] {
   return [
     _createIPCMarker({
@@ -474,7 +489,9 @@ function _createIPCMarkerSet({
   ];
 }
 
-function _createGeckoThread(extraMarkers = []): GeckoThread {
+function _createGeckoThread(
+  extraMarkers: GeckoMarkerTuple[] = []
+): GeckoThread {
   return {
     name: 'Unnamed',
     registerTime: 0,
@@ -1020,7 +1037,7 @@ function _createGeckoThreadWithJsTimings(name: string): GeckoThread {
 }
 
 export function createGeckoCounter(thread: GeckoThread): GeckoCounter {
-  const geckoCounter = {
+  const geckoCounter: GeckoCounter = {
     name: 'My Counter',
     category: 'My Category',
     description: 'My Description',
@@ -1074,7 +1091,9 @@ export function createGeckoProfilerOverhead(
   const threads = new ProfilerStats();
 
   // Fill the profiler overhead data.
-  const data = [];
+  const data: Array<
+    [Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds]
+  > = [];
   for (let i = 0; i < thread.samples.data.length; i++) {
     // Go through all the thread samples and create a corresponding counter entry.
     const time = thread.samples.data[i][1] * 1000;

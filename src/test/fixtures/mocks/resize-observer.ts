@@ -2,41 +2,42 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import { act } from 'firefox-profiler/test/fixtures/testing-library';
 
 /**
  * Creating a mock resize observer type because Flow's ResizeObserver
  * type is a bit obsolete.
  */
-type MockResizeObserver = {|
-  observe: (HTMLElement, ResizeObserverOptions) => void,
-  unobserve: (HTMLElement) => void,
-  disconnect: () => void,
-|};
+type MockResizeObserver = {
+  observe: (element: HTMLElement, options: ResizeObserverOptions) => void;
+  unobserve: (element: HTMLElement) => void;
+  disconnect: () => void;
+};
 
 type ResizeObserverBoxOptions =
   | 'border-box'
   | 'content-box'
   | 'device-pixel-content-box';
-type ResizeObserverOptions = {|
-  box?: ResizeObserverBoxOptions,
-|};
+type ResizeObserverOptions = {
+  box?: ResizeObserverBoxOptions;
+};
 
 /**
  * Type of the item we are going to keep for tracking observers.
  */
-type Item = {|
-  callback: (ResizeObserverEntry[], MockResizeObserver) => void,
-  elements: Set<HTMLElement>,
-  scheduledElements: Set<HTMLElement> | null,
-|};
+type Item = {
+  callback: (
+    entries: ResizeObserverEntry[],
+    observer: MockResizeObserver
+  ) => void;
+  elements: Set<HTMLElement>;
+  scheduledElements: Set<HTMLElement> | null;
+};
 
 /**
  * Tracked observers during the testing.
  */
-const observers: Map<MockResizeObserver, Item> = new Map();
+const observers = new Map<MockResizeObserver, Item>();
 
 /**
  * Call this function inside a `describe` block to automatically define the
@@ -44,10 +45,10 @@ const observers: Map<MockResizeObserver, Item> = new Map();
  */
 export function autoMockResizeObserver() {
   beforeEach(() => {
-    (window: any).ResizeObserver = jest.fn((cb) => {
+    (window as any).ResizeObserver = jest.fn((cb) => {
       const item = {
         callback: cb,
-        elements: new Set(),
+        elements: new Set<HTMLElement>(),
         scheduledElements: null,
       };
 
@@ -71,7 +72,7 @@ export function autoMockResizeObserver() {
   });
 
   afterEach(() => {
-    delete (window: any).ResizeObserver;
+    delete (window as any).ResizeObserver;
     observers.clear();
   });
 }
@@ -112,20 +113,18 @@ function triggerSingleObserver(
     }
 
     const size = newSize ?? element.getBoundingClientRect();
-    entries.push(
-      ({
-        borderBoxSize: [{ blockSize: size.height, inlineSize: size.width }],
-        contentBoxSize: [{ blockSize: size.height, inlineSize: size.width }],
-        devicePixelContentBoxSize: [
-          {
-            blockSize: size.height,
-            inlineSize: size.width,
-          },
-        ],
-        contentRect: size,
-        target: element,
-      }: any)
-    );
+    entries.push({
+      borderBoxSize: [{ blockSize: size.height, inlineSize: size.width }],
+      contentBoxSize: [{ blockSize: size.height, inlineSize: size.width }],
+      devicePixelContentBoxSize: [
+        {
+          blockSize: size.height,
+          inlineSize: size.width,
+        },
+      ],
+      contentRect: size,
+      target: element,
+    } as any);
   }
 
   // Trigger the ResizeObserver callback with all the entries.
@@ -141,9 +140,9 @@ function triggerSingleObserver(
  */
 export function triggerResizeObservers({
   newSize,
-}: {|
-  newSize?: DOMRectReadOnly,
-|} = {}) {
+}: {
+  newSize?: DOMRectReadOnly;
+} = {}) {
   for (const [observer, item] of observers) {
     triggerSingleObserver(observer, item, item.elements, newSize);
   }
