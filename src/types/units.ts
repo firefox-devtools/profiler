@@ -1,7 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
 export type Nanoseconds = number;
 export type Microseconds = number;
@@ -32,12 +31,12 @@ export type UnitIntervalOfProfileRange = number;
  * For the a viewport into the profile range.
  */
 export type HorizontalViewport = {
-  left: UnitIntervalOfProfileRange,
-  right: UnitIntervalOfProfileRange,
-  length: UnitIntervalOfProfileRange,
+  left: UnitIntervalOfProfileRange;
+  right: UnitIntervalOfProfileRange;
+  length: UnitIntervalOfProfileRange;
 };
 
-export type StartEndRange = {| start: Milliseconds, end: Milliseconds |};
+export type StartEndRange = { start: Milliseconds; end: Milliseconds };
 
 // An absolute address that was valid in the (virtual memory) address space of
 // the profiled process, in bytes.

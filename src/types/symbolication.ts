@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 export interface ISymbolStoreDB {
   /**
    * Store the symbol table for a given library.
@@ -34,3 +32,9 @@ export interface ISymbolStoreDB {
 
   close(): Promise<void>;
 }
+
+export type SymbolTableAsTuple = [
+  Uint32Array, // addrs
+  Uint32Array, // index
+  Uint8Array, // buffer
+];
