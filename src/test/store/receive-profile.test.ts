@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import { oneLineTrim } from 'common-tags';
 import JSZip from 'jszip';
 import { indexedDB } from 'fake-indexeddb';
@@ -53,7 +51,13 @@ import { dataUrlToBytes } from 'firefox-profiler/utils/base64';
 
 import { compress } from '../../utils/gz';
 
-import type { Profile, FaviconData } from 'firefox-profiler/types';
+import type {
+  Profile,
+  FaviconData,
+  Store,
+  State,
+  Phase,
+} from 'firefox-profiler/types';
 
 // Mocking SymbolStoreDB. By default the functions will return undefined, which
 // will make the symbolication move forward with some bogus information.
@@ -77,7 +81,7 @@ import {
 function simulateSymbolStoreHasNoCache() {
   // SymbolStoreDB is a mock, but Flow doesn't know this. That's why we use
   // `any` so that we can use `mockImplementation`.
-  (SymbolStoreDB: any).mockImplementation(() => ({
+  (SymbolStoreDB as any).mockImplementation(() => ({
     getSymbolTable: jest
       .fn()
       .mockImplementation((debugName, breakpadId) =>
@@ -99,6 +103,7 @@ describe('actions/receive-profile', function () {
   });
 
   afterEach(() => {
+    // @ts-expect-error property must be optional
     delete window.indexedDB;
   });
 
@@ -111,8 +116,11 @@ describe('actions/receive-profile', function () {
    * @returns {Promise<State[]>} All states that happened while waiting for
    * the end of func.
    */
-  async function observeStoreStateChanges(store, func) {
-    const states = [];
+  async function observeStoreStateChanges(
+    store: Store,
+    func: () => Promise<any>
+  ) {
+    const states: State[] = [];
     const unsubscribe = store.subscribe(() => {
       states.push(store.getState());
     });
@@ -123,7 +131,7 @@ describe('actions/receive-profile', function () {
     return states;
   }
 
-  function encode(string) {
+  function encode(string: string): Uint8Array {
     return new TextEncoder().encode(string);
   }
 
@@ -328,9 +336,11 @@ describe('actions/receive-profile', function () {
     it('will not hide audio tracks if they have at least one sample', function () {
       const store = blankStore();
 
-      const idleThread: Array<string> = (Array.from({
-        length: 100,
-      }): any).fill('idle[cat:Idle]');
+      const idleThread: Array<string> = (
+        Array.from({
+          length: 100,
+        }) as any
+      ).fill('idle[cat:Idle]');
       const idleThreadString = idleThread.join('  ');
 
       // We want 1 work sample in 100 samples for each thread.
@@ -552,7 +562,7 @@ describe('actions/receive-profile', function () {
           const thread = profile.threads[i];
           const cpuDeltaSum = ensureExists(
             thread.samples.threadCPUDelta
-          ).reduce((accum, delta) => accum + (delta ?? 0), 0);
+          ).reduce<number>((accum, delta) => accum + (delta ?? 0), 0);
           thread.processName = 'Single Process';
           thread.pid = '0';
           thread.name = `Thread with ${cpuDeltaSum} CPU`;
@@ -612,7 +622,7 @@ describe('actions/receive-profile', function () {
           const thread = profile.threads[i];
           const cpuDeltaSum = ensureExists(
             thread.samples.threadCPUDelta
-          ).reduce((accum, delta) => accum + (delta ?? 0), 0);
+          ).reduce<number>((accum, delta) => accum + (delta ?? 0), 0);
           thread.processName = 'Single Process';
           thread.pid = '0';
           thread.name = `Thread with ${cpuDeltaSum} CPU`;
@@ -660,7 +670,7 @@ describe('actions/receive-profile', function () {
   });
 
   describe('retrieveProfileFromBrowser', function () {
-    function toUint8Array(json) {
+    function toUint8Array(json: any) {
       return encode(JSON.stringify(json));
     }
 
@@ -673,9 +683,10 @@ describe('actions/receive-profile', function () {
           case 'json':
             return profileJSON;
           case 'arraybuffer':
-            return toUint8Array(profileJSON).buffer;
+            return toUint8Array(profileJSON).buffer as ArrayBuffer;
           case 'gzip':
-            return (await compress(toUint8Array(profileJSON))).buffer;
+            return (await compress(toUint8Array(profileJSON)))
+              .buffer as ArrayBuffer;
           default:
             throw new Error('unknown profiler format');
         }
@@ -755,10 +766,11 @@ describe('actions/receive-profile', function () {
     }
 
     afterEach(function () {
+      // @ts-expect-error property must be optional
       delete window.geckoProfilerPromise;
     });
 
-    for (const setupWith of ['frame-script', 'web-channel']) {
+    for (const setupWith of ['frame-script' as const, 'web-channel' as const]) {
       for (const profileAs of ['json', 'arraybuffer', 'gzip']) {
         it(`can retrieve a profile from the browser as ${profileAs} using ${setupWith}`, async function () {
           const setupFn = {
@@ -862,7 +874,9 @@ describe('actions/receive-profile', function () {
       // (instead of waiting for the timeout).
       jest
         .spyOn(window, 'setTimeout')
-        .mockImplementation((callback) => process.nextTick(callback));
+        .mockImplementation(
+          (callback) => (process.nextTick(callback), 0 as any)
+        );
     });
 
     it('can retrieve a profile from the web and save it to state', async function () {
@@ -1006,7 +1020,9 @@ describe('actions/receive-profile', function () {
       // (instead of waiting for the timeout).
       jest
         .spyOn(window, 'setTimeout')
-        .mockImplementation((callback) => process.nextTick(callback));
+        .mockImplementation(
+          (callback) => (process.nextTick(callback), 0 as any)
+        );
     });
 
     it('can retrieve a profile from the web and save it to state', async function () {
@@ -1131,9 +1147,9 @@ describe('actions/receive-profile', function () {
      * as well and response headers.
      */
     async function configureFetch(obj: {
-      url: string,
-      contentType?: string,
-      content: 'generated-zip' | 'generated-json' | Uint8Array,
+      url: string;
+      contentType?: string;
+      content: 'generated-zip' | 'generated-json' | Uint8Array;
     }) {
       const { url, contentType, content } = obj;
       const stringProfile = serializeProfile(_getSimpleProfile());
@@ -1310,27 +1326,28 @@ describe('actions/receive-profile', function () {
     /**
      * Bypass all of Flow's checks, and mock out the file interface.
      */
-    function mockFile({ type, payload }): File {
+    type MockFileOptions = { type: string; payload: unknown };
+    function mockFile({ type, payload }: MockFileOptions): File {
       const file = {
         name: '',
         type,
         _payload: payload,
       };
-      return (file: any);
+      return file as any;
     }
 
     /**
      * Bypass all of Flow's checks, and mock out the file reader.
      */
     function mockFileReader(mockFile: File) {
-      const payload = (mockFile: any)._payload;
+      const payload = (mockFile as any)._payload;
       return {
-        asText: () => Promise.resolve((payload: string)),
-        asArrayBuffer: () => Promise.resolve((payload: ArrayBuffer)),
+        asText: () => Promise.resolve(payload as string),
+        asArrayBuffer: () => Promise.resolve(payload as ArrayBuffer),
       };
     }
 
-    async function setupTestWithFile(mockFileOptions) {
+    async function setupTestWithFile(mockFileOptions: MockFileOptions) {
       // Load a profile from the supplied mockFileOptions.
       const file = mockFile(mockFileOptions);
       const { dispatch, getState } = blankStore();
@@ -1446,7 +1463,7 @@ describe('actions/receive-profile', function () {
 
       expect(
         // Coerce into an any to access the error property.
-        (view: any).error
+        (view as any).error
       ).toMatchSnapshot();
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
@@ -1491,7 +1508,7 @@ describe('actions/receive-profile', function () {
 
       expect(
         // Coerce into the object to access the error property.
-        (view: any).error
+        (view as any).error
       ).toMatchSnapshot();
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
@@ -1584,7 +1601,7 @@ describe('actions/receive-profile', function () {
       expect(view.phase).toBe('FATAL_ERROR');
       expect(
         // Coerce into an any to access the error property.
-        (view: any).error
+        (view as any).error
       ).toMatchSnapshot();
     });
   });
@@ -1603,15 +1620,15 @@ describe('actions/receive-profile', function () {
       return { profile1, profile2 };
     }
 
-    type SetupProfileParams = {|
-      profile1: Profile,
-      profile2: Profile,
-    |};
+    type SetupProfileParams = {
+      profile1: Profile;
+      profile2: Profile;
+    };
 
-    type SetupUrlSearchParams = {|
-      urlSearch1: string,
-      urlSearch2: string,
-    |};
+    type SetupUrlSearchParams = {
+      urlSearch1: string;
+      urlSearch2: string;
+    };
 
     function setupWithLongUrl(
       profiles: SetupProfileParams,
@@ -1635,7 +1652,7 @@ describe('actions/receive-profile', function () {
       const shortUrl1 = 'https://perfht.ml/FAKEBITLYHASH1';
       const shortUrl2 = 'https://bit.ly/FAKEBITLYHASH2';
 
-      (expandUrl: any).mockImplementation((shortUrl) => {
+      (expandUrl as any).mockImplementation((shortUrl: string) => {
         switch (shortUrl) {
           case shortUrl1:
             return longUrl1;
@@ -1658,14 +1675,14 @@ describe('actions/receive-profile', function () {
       };
     }
 
-    type SetupUrlParams = {|
-      url1: string,
-      url2: string,
-    |};
+    type SetupUrlParams = {
+      url1: string;
+      url2: string;
+    };
 
-    type SetupOptionsParams = $Shape<{|
-      +skipMarkers: boolean,
-    |}>;
+    type SetupOptionsParams = Partial<{
+      readonly skipMarkers: boolean;
+    }>;
 
     async function setup(
       { profile1, profile2 }: SetupProfileParams,
@@ -1960,7 +1977,7 @@ describe('actions/receive-profile', function () {
 
   describe('retrieveProfileForRawUrl', function () {
     async function setup(
-      location: $Shape<Location>,
+      location: Partial<Location>,
       requiredProfile: number = 1
     ) {
       const profile = _getSimpleProfile();
@@ -1995,7 +2012,7 @@ describe('actions/receive-profile', function () {
           : null;
 
       await store.dispatch(
-        retrieveProfileForRawUrl(location, browserConnectionStatus)
+        retrieveProfileForRawUrl(location as Location, browserConnectionStatus)
       );
 
       // To find stupid mistakes more easily, check that we didn't get a fatal
@@ -2005,7 +2022,7 @@ describe('actions/receive-profile', function () {
         throw view.error;
       }
 
-      const waitUntilPhase = (phase) =>
+      const waitUntilPhase = (phase: Phase) =>
         waitUntilState(store, (state) => getView(state).phase === phase);
 
       const waitUntilSymbolication = () =>
@@ -2032,6 +2049,7 @@ describe('actions/receive-profile', function () {
     });
 
     afterEach(function () {
+      // @ts-expect-error property must be optional
       delete window.geckoProfilerPromise;
     });
 

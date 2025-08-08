@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
+
 import {
   getScreenshotTrackProfile,
   getNetworkTrackProfile,
@@ -32,6 +32,7 @@ import {
   isolateLocalTrack,
   isolateProcessMainThread,
 } from '../../actions/profile-view';
+import type { MarkerSchema } from 'firefox-profiler/types';
 
 describe('ordering and hiding', function () {
   function init(profile = getProfileWithNiceTracks()) {
@@ -133,7 +134,7 @@ describe('ordering and hiding', function () {
       ['NoGraphMarker', 3, 4, { type: 'NoGraphMarker', first: 6 }],
     ]);
 
-    const extraMarkerSchemas = [
+    const extraMarkerSchemas: MarkerSchema[] = [
       {
         name: 'Marker',
         display: ['marker-chart', 'marker-table', 'timeline-memory'],

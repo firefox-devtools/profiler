@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
+
 import { selectedThreadSelectors } from 'firefox-profiler/selectors';
 import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
 import { ensureExists } from 'firefox-profiler/utils/flow';
@@ -10,13 +10,14 @@ import {
   getUserTiming,
   getProfileWithMarkers,
   getNetworkTrackProfile,
-  type TestDefinedMarkers,
+  type TestDefinedMarker,
   getNetworkMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
+import type { Profile, Selector } from 'firefox-profiler/types';
 
 describe('selectors/getMarkerChartTimingAndBuckets', function () {
-  function getMarkerChartTimingAndBuckets(testMarkers: TestDefinedMarkers) {
+  function getMarkerChartTimingAndBuckets(testMarkers: TestDefinedMarker[]) {
     const profile = getProfileWithMarkers(testMarkers);
     const { getState } = storeWithProfile(profile);
     return selectedThreadSelectors.getMarkerChartTimingAndBuckets(getState());
@@ -122,7 +123,9 @@ describe('selectors/getMarkerChartTimingAndBuckets', function () {
   });
 
   describe('network markers', function () {
-    function getTimingAndBucketsForNetworkMarkers(testMarkers) {
+    function getTimingAndBucketsForNetworkMarkers(
+      testMarkers: TestDefinedMarker[]
+    ) {
       const profile = getProfileWithMarkers(testMarkers);
 
       // Let's monkey patch the returned profile to set the Network category on
@@ -218,7 +221,7 @@ describe('memory markers', function () {
   function setup() {
     // GC markers have some complicated data structures that are just mocked here with
     // this "any".
-    const any = (null: any);
+    const any = null as any;
 
     return storeWithProfile(
       getProfileWithMarkers([
@@ -325,11 +328,11 @@ describe('Marker schema filtering', function () {
     return profile;
   }
 
-  function setup(profile) {
+  function setup(profile: Profile) {
     const { getState } = storeWithProfile(profile);
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
 
-    function getMarkerNames(selector): string[] {
+    function getMarkerNames(selector: Selector<number[]>): string[] {
       return selector(getState())
         .map(getMarker)
         .map((marker) => marker.name);
@@ -845,9 +848,9 @@ describe('profile upgrading and markers', () => {
     const derivedMarkers = selectedThreadSelectors
       .getFullMarkerListIndexes(getState())
       .map(getMarker);
-    // $FlowExpectError ignore Flow errors for simplicity.
+    // @ts-expect-error - ignore type errors for simplicity.
     expect(derivedMarkers[2].data.cause.time).toEqual(1001); // This hasn't changed, as expected.
-    // $FlowExpectError
+    // @ts-expect-error - ignore type errors for simplicity.
     expect(derivedMarkers[3].data.cause.time).toEqual(1010); // This changed, as expected.
   });
 });

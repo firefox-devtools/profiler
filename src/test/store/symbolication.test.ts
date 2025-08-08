@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
+
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
@@ -9,7 +9,13 @@ import {
   partialSymbolTable,
 } from '../fixtures/example-symbol-table';
 import type { ExampleSymbolTable } from '../fixtures/example-symbol-table';
-import type { MarkerPayload } from 'firefox-profiler/types';
+import type { MarkerPayload, RequestedLib } from 'firefox-profiler/types';
+import type {
+  AddressResult,
+  LibSymbolicationRequest,
+  LibSymbolicationResponse,
+  SymbolProvider,
+} from '../../profile-logic/symbol-store';
 import { SymbolStore } from '../../profile-logic/symbol-store';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
@@ -48,7 +54,9 @@ describe('doSymbolicateProfile', function () {
   });
 
   afterAll(async function () {
+    // @ts-expect-error property must be optional
     delete window.indexedDB;
+    // @ts-expect-error property must be optional
     delete window.IDBKeyRange;
     await _deleteDatabase(`${symbolStoreName}-symbol-tables`);
   });
@@ -73,13 +81,13 @@ describe('doSymbolicateProfile', function () {
       symbolicationProviderMode = newMode;
     }
 
-    const symbolProvider = {
-      requestSymbolsFromServer: async (requests) =>
-        requests.map((request) => {
+    const symbolProvider: SymbolProvider = {
+      requestSymbolsFromServer: async (requests: LibSymbolicationRequest[]) =>
+        requests.map<LibSymbolicationResponse>((request) => {
           const { lib, addresses } = request;
           if (lib.debugName !== 'firefox.pdb') {
             return {
-              type: 'ERROR',
+              type: 'ERROR' as const,
               request,
               error: new SymbolsNotFoundError(
                 'Should only have lib called firefox.pdb',
@@ -90,7 +98,7 @@ describe('doSymbolicateProfile', function () {
 
           if (symbolicationProviderMode !== 'from-server') {
             return {
-              type: 'ERROR',
+              type: 'ERROR' as const,
               request,
               error: new SymbolsNotFoundError(
                 'Not in from-server mode, try requestSymbolTableFromBrowser.',
@@ -99,7 +107,7 @@ describe('doSymbolicateProfile', function () {
             };
           }
 
-          const map = new Map();
+          const map = new Map<number, AddressResult>();
           for (const address of addresses) {
             const addressResult = symbolTable.getAddressResult(address);
             if (addressResult !== null) {
@@ -109,11 +117,13 @@ describe('doSymbolicateProfile', function () {
           return { type: 'SUCCESS', lib, results: map };
         }),
 
-      requestSymbolsFromBrowser: async (_path, _requestJson) => {
+      requestSymbolsFromBrowser: async (
+        _requests: LibSymbolicationRequest[]
+      ) => {
         throw new Error('requestSymbolsFromBrowser unsupported in this test');
       },
 
-      requestSymbolTableFromBrowser: async (lib) => {
+      requestSymbolTableFromBrowser: async (lib: RequestedLib) => {
         if (lib.debugName !== 'firefox.pdb') {
           throw new SymbolsNotFoundError(
             'Should only have libs called firefox.pdb',
@@ -298,7 +308,7 @@ describe('doSymbolicateProfile', function () {
       // table, and so stack indexes have to be updated.
       const firstMarkerData = ensureExists(thread.markers.data[0]);
       expect(firstMarkerData.type).toBe('Text');
-      const firstMarkerCause = ensureExists((firstMarkerData: any).cause);
+      const firstMarkerCause = ensureExists((firstMarkerData as any).cause);
       expect(formatStack(thread, firstMarkerCause.stack)).toBe(stripIndent`
         first symbol (first_and_last.cpp:14)
         second symbol (second_and_third.rs:37)
@@ -563,9 +573,9 @@ describe('doSymbolicateProfile', function () {
     dispatch({
       type: 'PROFILE_LOADED',
       profile: newProfile,
-      implementationFilter: undefined,
-      pathInZipFile: undefined,
-      transformStacks: undefined,
+      implementationFilter: null,
+      pathInZipFile: null,
+      transformStacks: null,
     });
     profile = ProfileViewSelectors.getProfile(getState());
     expect(profile).toBe(newProfile);
@@ -654,7 +664,7 @@ function _createUnsymbolicatedProfile() {
 function _deleteDatabase(dbName: string) {
   return new Promise((resolve, reject) => {
     const req = indexedDB.deleteDatabase(dbName);
-    req.onsuccess = () => resolve();
+    req.onsuccess = () => resolve(undefined);
     req.onerror = () => reject(req.error);
   });
 }
