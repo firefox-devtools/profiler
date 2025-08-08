@@ -37,7 +37,6 @@ class MaybeFlameGraphImpl extends React.PureComponent<Props> {
   override componentDidMount() {
     const flameGraph = this._flameGraph.current;
     if (flameGraph) {
-      console.log('flamegraph ref', flameGraph);
       flameGraph.focus();
     }
   }

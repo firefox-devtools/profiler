@@ -41,7 +41,7 @@ yarn install
 yarn start
 ```
 
-[Flow](https://flow.org/) is used for type checking. VSCode users can install the ["Flow Language Support" extension](https://marketplace.visualstudio.com/items?itemName=flowtype.flow-for-vscode), and disable VSCode's built-in TypeScript extension in the workspace via the [setup instructions here](https://github.com/flow/flow-for-vscode#setup).
+This project uses [TypeScript](https://www.typescriptlang.org/).
 
 You can also develop the Firefox Profiler online in a pre-configured development environment.
 
