@@ -1,18 +1,17 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import type {
   Action,
   ThunkAction,
   IconWithClassName,
 } from 'firefox-profiler/types';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-export function iconHasLoaded(iconWithClassName: {|
-  +icon: string,
-  +className: string,
-|}): Action {
+export function iconHasLoaded(iconWithClassName: {
+  readonly icon: string;
+  readonly className: string;
+}): Action {
   return {
     type: 'ICON_HAS_LOADED',
     iconWithClassName,
@@ -26,15 +25,15 @@ export function iconIsInError(icon: string): Action {
   };
 }
 
-const icons: Set<string> = new Set();
+const icons: Set<string> = new Set<string>();
 let iconCounter = 0;
 
 type IconRequestResult =
-  | {| type: 'error' | 'cached' |}
-  | {|
-      type: 'loaded',
-      iconWithClassName: IconWithClassName,
-    |};
+  | { type: 'error' | 'cached' }
+  | {
+      type: 'loaded';
+      iconWithClassName: IconWithClassName;
+    };
 
 async function _getIcon(icon: string): Promise<IconRequestResult> {
   if (icons.has(icon)) {
@@ -47,7 +46,7 @@ async function _getIcon(icon: string): Promise<IconRequestResult> {
   // just increment the icon counter and return that string.
   const className = `favicon-${++iconCounter}`;
 
-  const result = new Promise((resolve) => {
+  const result = new Promise<IconRequestResult>((resolve) => {
     const image = new Image();
     image.src = icon;
     image.referrerPolicy = 'no-referrer';
@@ -76,7 +75,7 @@ export function iconStartLoading(icon: string): ThunkAction<Promise<void>> {
           // nothing to do
           break;
         default:
-          throw new Error(`Unknown icon load result ${result.type}`);
+          throw assertExhaustiveCheck(result, 'Unknown icon load result');
       }
     });
   };

@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import { oneLine } from 'common-tags';
 import queryString from 'query-string';
 import JSZip from 'jszip';
@@ -83,6 +81,7 @@ import type {
   ThreadIndex,
   TabID,
   PageList,
+  MixedObject,
 } from 'firefox-profiler/types';
 
 import type {
@@ -121,13 +120,13 @@ export function waitingForProfileFromBrowser(): Action {
  */
 export function loadProfile(
   profile: Profile,
-  config: $Shape<{|
-    pathInZipFile: string,
-    implementationFilter: ImplementationFilter,
-    transformStacks: TransformStacksPerThread,
-    browserConnection: BrowserConnection | null,
-    skipSymbolication: boolean, // Please use this in tests only.
-  |}> = {},
+  config: Partial<{
+    pathInZipFile: string;
+    implementationFilter: ImplementationFilter;
+    transformStacks: TransformStacksPerThread;
+    browserConnection: BrowserConnection | null;
+    skipSymbolication: boolean; // Please use this in tests only.
+  }> = {},
   initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
   return async (dispatch) => {
@@ -153,9 +152,9 @@ export function loadProfile(
     dispatch({
       type: 'PROFILE_LOADED',
       profile,
-      pathInZipFile: config.pathInZipFile,
-      implementationFilter: config.implementationFilter,
-      transformStacks: config.transformStacks,
+      pathInZipFile: config.pathInZipFile ?? null,
+      implementationFilter: config.implementationFilter ?? null,
+      transformStacks: config.transformStacks ?? null,
     });
 
     // During initial load, we are upgrading the URL and generating the UrlState
@@ -400,13 +399,13 @@ export function resymbolicateProfile(): ThunkAction<Promise<void>> {
 // `loadProfile`) and wait until symbolication finishes.
 export function viewProfile(
   profile: Profile,
-  config: $Shape<{|
-    pathInZipFile: string,
-    implementationFilter: ImplementationFilter,
-    transformStacks: TransformStacksPerThread,
-    skipSymbolication: boolean,
-    browserConnection: BrowserConnection | null,
-  |}> = {}
+  config: Partial<{
+    pathInZipFile: string;
+    implementationFilter: ImplementationFilter;
+    transformStacks: TransformStacksPerThread;
+    skipSymbolication: boolean;
+    browserConnection: BrowserConnection | null;
+  }> = {}
 ): ThunkAction<Promise<void>> {
   return async (dispatch) => {
     await dispatch(loadProfile(profile, config, false));
@@ -476,7 +475,7 @@ export function bulkProcessSymbolicationSteps(
 let requestIdleCallbackPolyfill: (
   callback: () => void,
   _opts?: { timeout: number }
-) => mixed;
+) => void;
 
 if (typeof window === 'object' && window.requestIdleCallback) {
   requestIdleCallbackPolyfill = window.requestIdleCallback;
@@ -500,7 +499,7 @@ class SymbolicationStepQueue {
     this._requestedUpdate = false;
   }
 
-  _scheduleUpdate(dispatch) {
+  _scheduleUpdate(dispatch: Dispatch) {
     // Only request an update if one hasn't already been scheduled.
     if (!this._requestedUpdate) {
       requestIdleCallbackPolyfill(() => this._dispatchUpdate(dispatch), {
@@ -510,7 +509,7 @@ class SymbolicationStepQueue {
     }
   }
 
-  _dispatchUpdate(dispatch) {
+  _dispatchUpdate(dispatch: Dispatch) {
     const updates = this._updates;
     const observers = this._updateObservers;
     this._updates = new Map();
@@ -549,12 +548,12 @@ const _symbolicationStepQueueSingleton = new SymbolicationStepQueue();
  */
 async function _unpackGeckoProfileFromBrowser(
   profile: ArrayBuffer | MixedObject
-): MixedObject {
+): Promise<unknown> {
   // Note: the following check will work for array buffers coming from another
   // global. This happens especially with tests but could happen in the future
   // in Firefox too.
   if (Object.prototype.toString.call(profile) === '[object ArrayBuffer]') {
-    return _extractJsonFromArrayBuffer(profile);
+    return _extractJsonFromArrayBuffer(profile as ArrayBuffer);
   }
   return profile;
 }
@@ -573,7 +572,7 @@ function getSymbolStore(
   async function requestSymbolsWithCallback(
     symbolSupplierName: string,
     requests: LibSymbolicationRequest[],
-    callback: (path: string, requestJson: string) => Promise<MixedObject>
+    callback: (path: string, requestJson: string) => Promise<unknown>
   ) {
     for (const { lib } of requests) {
       dispatch(requestingSymbolTable(lib));
@@ -667,7 +666,7 @@ export async function doSymbolicateProfile(
 ) {
   dispatch(startSymbolicating());
 
-  const completionPromises = [];
+  const completionPromises: Promise<unknown>[] = [];
 
   await symbolicateProfile(
     profile,
@@ -682,7 +681,7 @@ export async function doSymbolicateProfile(
             dispatch,
             threadIndex,
             symbolicationStepInfo,
-            resolve
+            () => resolve(undefined)
           );
         })
       );
@@ -767,7 +766,7 @@ export function unwrapBrowserConnection(
     case 'TIMED_OUT':
       throw new Error('Timed out when waiting for reply to WebChannel message');
     default:
-      throw assertExhaustiveCheck(browserConnectionStatus.status);
+      throw assertExhaustiveCheck(browserConnectionStatus as never);
   }
 
   // Now we know that browserConnectionStatus.status === 'ESTABLISHED'.
@@ -803,7 +802,7 @@ export function retrieveProfileFromBrowser(
       });
       const unpackedProfile =
         await _unpackGeckoProfileFromBrowser(rawGeckoProfile);
-      const meta = unpackedProfile.meta;
+      const meta = (unpackedProfile as any).meta;
       if (meta.configuration && meta.configuration.features.includes('power')) {
         try {
           await Promise.all([
@@ -813,7 +812,10 @@ export function retrieveProfileFromBrowser(
                 meta.startTime + meta.profilingEndTime
               )
               .then((tracks) =>
-                insertExternalPowerCountersIntoProfile(tracks, unpackedProfile)
+                insertExternalPowerCountersIntoProfile(
+                  tracks as any,
+                  unpackedProfile as any
+                )
               ),
             browserConnection
               .getExternalMarkers(
@@ -821,7 +823,10 @@ export function retrieveProfileFromBrowser(
                 meta.startTime + meta.profilingEndTime
               )
               .then((markers) =>
-                insertExternalMarkersIntoProfile(markers, unpackedProfile)
+                insertExternalMarkersIntoProfile(
+                  markers,
+                  unpackedProfile as any
+                )
               ),
           ]);
         } catch (error) {
@@ -829,7 +834,7 @@ export function retrieveProfileFromBrowser(
           console.error(error);
         }
       }
-      const profile = processGeckoProfile(unpackedProfile);
+      const profile = processGeckoProfile(unpackedProfile as any);
       await dispatch(loadProfile(profile, { browserConnection }, initialLoad));
     } catch (error) {
       dispatch(fatalError(error));
@@ -847,7 +852,7 @@ export function waitingForProfileFromStore(): Action {
 export function waitingForProfileFromUrl(profileUrl?: string): Action {
   return {
     type: 'WAITING_FOR_PROFILE_FROM_URL',
-    profileUrl,
+    profileUrl: profileUrl ?? null,
   };
 }
 
@@ -887,19 +892,19 @@ function _loadProbablyFailedDueToSafariLocalhostHTTPRestriction(
 }
 
 class SafariLocalhostHTTPLoadError extends Error {
-  name = 'SafariLocalhostHTTPLoadError';
+  override name = 'SafariLocalhostHTTPLoadError';
 }
 
 type FetchProfileArgs = {
-  url: string,
-  onTemporaryError: (TemporaryError) => void,
+  url: string;
+  onTemporaryError: (param: TemporaryError) => void;
   // Allow tests to capture the reported error, but normally use console.error.
-  reportError?: (...data: Array<any>) => void,
+  reportError?: (...data: Array<any>) => void;
 };
 
 type ProfileOrZip =
-  | {| responseType: 'PROFILE', profile: mixed |}
-  | {| responseType: 'ZIP', zip: JSZip |};
+  | { responseType: 'PROFILE'; profile: unknown }
+  | { responseType: 'ZIP'; zip: JSZip };
 
 /**
  * Tries to fetch a profile on `url`. If the profile is not found,
@@ -1059,8 +1064,8 @@ async function _extractZipFromResponse(
  */
 async function _extractJsonFromArrayBuffer(
   arrayBuffer: ArrayBuffer
-): Promise<MixedObject> {
-  let profileBytes = new Uint8Array(arrayBuffer);
+): Promise<unknown> {
+  let profileBytes: Uint8Array<ArrayBufferLike> = new Uint8Array(arrayBuffer);
   // Check for the gzip magic number in the header.
   if (isGzip(profileBytes)) {
     profileBytes = await decompress(profileBytes);
@@ -1077,7 +1082,7 @@ async function _extractJsonFromResponse(
   response: Response,
   reportError: (...data: Array<any>) => void,
   fileType: 'application/json' | null
-): Promise<MixedObject> {
+): Promise<unknown> {
   let arrayBuffer: ArrayBuffer | null = null;
   try {
     // await before returning so that we can catch JSON parse errors.
@@ -1171,7 +1176,7 @@ export function retrieveProfileOrZipFromUrl(
         }
         default:
           throw assertExhaustiveCheck(
-            response.responseType,
+            response as never,
             'Expected to receive an archive or profile from _fetchProfile.'
           );
       }
@@ -1194,19 +1199,19 @@ function _fileReader(input: File) {
     // reader.result very well, as its definition is <string | ArrayBuffer>.
     // Here we ensure type safety by returning the proper Promise type from the
     // methods below.
-    reader.onload = () => resolve((reader.result: any));
+    reader.onload = () => resolve(reader.result as any);
     reader.onerror = () => reject(reader.error);
   });
 
   return {
     asText(): Promise<string> {
       reader.readAsText(input);
-      return promise;
+      return promise as Promise<string>;
     },
 
     asArrayBuffer(): Promise<ArrayBuffer> {
       reader.readAsArrayBuffer(input);
-      return promise;
+      return promise as Promise<ArrayBuffer>;
     },
   };
 }
@@ -1424,7 +1429,12 @@ export function retrieveProfileForRawUrl(
           arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
         });
         if (Array.isArray(query.profiles)) {
-          await dispatch(retrieveProfilesToCompare(query.profiles, true));
+          await dispatch(
+            retrieveProfilesToCompare(
+              query.profiles.filter((p): p is string => p !== null),
+              true
+            )
+          );
         }
         break;
       }
@@ -1450,7 +1460,7 @@ export function retrieveProfileForRawUrl(
                 'Responding via postMessage that the profiler is ready.'
               );
               const otherWindow = event.source ?? window;
-              otherWindow.postMessage({ name: 'ready:response' }, '*');
+              (otherWindow as any).postMessage({ name: 'ready:response' }, '*');
               break;
             }
             default:
@@ -1462,7 +1472,6 @@ export function retrieveProfileForRawUrl(
       }
       case 'uploaded-recordings':
       case 'none':
-      case 'from-file':
       case 'local':
       case 'unpublished':
         // There is no profile to download for these datasources.
