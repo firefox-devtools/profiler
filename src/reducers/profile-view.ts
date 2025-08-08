@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
 import { combineReducers } from 'redux';
 import * as Transforms from '../profile-logic/transforms';
 import * as ProfileData from '../profile-logic/profile-data';
@@ -156,7 +155,7 @@ function _getThreadViewOptions(
 function _updateThreadViewOptions(
   state: ThreadViewOptionsPerThreads,
   threadsKey: ThreadsKey,
-  updates: $Shape<ThreadViewOptions>
+  updates: Partial<ThreadViewOptions>
 ): ThreadViewOptionsPerThreads {
   const newState = { ...state };
   newState[threadsKey] = {
@@ -167,7 +166,7 @@ function _updateThreadViewOptions(
 }
 
 const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
-  state = ({}: ThreadViewOptionsPerThreads),
+  state = {} as ThreadViewOptionsPerThreads,
   action
 ): ThreadViewOptionsPerThreads => {
   switch (action.type) {
@@ -484,7 +483,7 @@ export const defaultTableViewOptions: TableViewOptions = {
 function _updateTableViewOptions(
   state: TableViewOptionsPerTab,
   tab: TabSlug,
-  updates: $Shape<TableViewOptions>
+  updates: Partial<TableViewOptions>
 ): TableViewOptionsPerTab {
   const newState = { ...state };
   newState[tab] = {
@@ -495,7 +494,7 @@ function _updateTableViewOptions(
 }
 
 const tableViewOptionsPerTab: Reducer<TableViewOptionsPerTab> = (
-  state = ({}: TableViewOptionsPerTab),
+  state = {} as TableViewOptionsPerTab,
   action
 ): TableViewOptionsPerTab => {
   switch (action.type) {

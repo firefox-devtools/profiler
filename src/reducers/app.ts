@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
 import { combineReducers } from 'redux';
 import { tabSlugs } from '../app-logic/tabs-handling';
 
@@ -83,8 +82,8 @@ const hasZoomedViaMousewheel: Reducer<boolean> = (state = false, action) => {
   }
 };
 
-function _getSidebarInitialState() {
-  const state = {};
+function _getSidebarInitialState(): IsOpenPerPanelState {
+  const state = {} as IsOpenPerPanelState;
   tabSlugs.forEach((tabSlug) => (state[tabSlug] = false));
   state.calltree = true;
   state['marker-table'] = true;
@@ -295,7 +294,7 @@ const processCPUTracks: Reducer<boolean> = (state = false, action) => {
  * its uploaded information in the IndexedDB.
  */
 const currentProfileUploadedInformation: Reducer<
-  UploadedProfileInformation | null,
+  UploadedProfileInformation | null
 > = (state = null, action) => {
   switch (action.type) {
     case 'SET_CURRENT_PROFILE_UPLOADED_INFORMATION':

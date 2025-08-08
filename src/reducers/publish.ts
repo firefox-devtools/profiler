@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
 import { combineReducers } from 'redux';
 import { getShouldSanitizeByDefault } from '../profile-logic/sanitize';
 
@@ -114,7 +113,7 @@ const uploadProgress: Reducer<number> = (state = 0, action) => {
   }
 };
 
-const error: Reducer<Error | mixed> = (state = null, action) => {
+const error: Reducer<Error | unknown> = (state = null, action) => {
   switch (action.type) {
     case 'UPLOAD_FAILED':
       return action.error;
