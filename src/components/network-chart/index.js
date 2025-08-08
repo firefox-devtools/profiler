@@ -14,6 +14,10 @@ import { withSize } from '../shared/WithSize';
 import { NetworkChartEmptyReasons } from './NetworkChartEmptyReasons';
 import { NetworkChartRow } from './NetworkChartRow';
 import { ContextMenuTrigger } from '../shared/ContextMenuTrigger';
+import {
+  TIMELINE_MARGIN_LEFT,
+  TIMELINE_MARGIN_RIGHT,
+} from '../../app-logic/constants';
 
 import {
   getScrollToSelectionGeneration,
@@ -26,6 +30,7 @@ import {
   changeSelectedNetworkMarker,
   changeRightClickedMarker,
   changeHoveredMarker,
+  changeMouseTimePosition,
 } from '../../actions/profile-view';
 import type { SizeProps } from '../shared/WithSize';
 import type {
@@ -49,6 +54,7 @@ type DispatchProps = {|
   +changeSelectedNetworkMarker: typeof changeSelectedNetworkMarker,
   +changeRightClickedMarker: typeof changeRightClickedMarker,
   +changeHoveredMarker: typeof changeHoveredMarker,
+  +changeMouseTimePosition: typeof changeMouseTimePosition,
 |};
 
 type StateProps = {|
@@ -259,6 +265,37 @@ class NetworkChartImpl extends React.PureComponent<Props> {
     changeHoveredMarker(threadsKey, null);
   };
 
+  _onMouseMove = (event: SyntheticMouseEvent<Element>) => {
+    const { timeRange, width, changeMouseTimePosition } = this.props;
+
+    // Calculate the mouse position relative to the chart area
+    if (!event.currentTarget) {
+      return;
+    }
+    const rect = event.currentTarget.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+
+    // Account for timeline margins (similar to marker chart logic)
+    const chartWidth = width - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
+    const adjustedMouseX = mouseX - TIMELINE_MARGIN_LEFT;
+
+    // Calculate the time position
+    const { start: rangeStart, end: rangeEnd } = timeRange;
+    const rangeLength = rangeEnd - rangeStart;
+    const xInUnitInterval = adjustedMouseX / chartWidth;
+
+    if (xInUnitInterval < 0 || xInUnitInterval > 1) {
+      changeMouseTimePosition(null);
+    } else {
+      const xInTime = rangeStart + xInUnitInterval * rangeLength;
+      changeMouseTimePosition(xInTime);
+    }
+  };
+
+  _onMouseLeave = () => {
+    this.props.changeMouseTimePosition(null);
+  };
+
   _shouldDisplayTooltips = () => this.props.rightClickedMarkerIndex === null;
 
   _renderRow = (markerIndex: MarkerIndex, index: number): React.Node => {
@@ -327,6 +364,8 @@ class NetworkChartImpl extends React.PureComponent<Props> {
         id="network-chart-tab"
         role="tabpanel"
         aria-labelledby="network-chart-tab-button"
+        onMouseMove={this._onMouseMove}
+        onMouseLeave={this._onMouseLeave}
       >
         <NetworkSettings />
         {markerIndexes.length === 0 ? (
@@ -394,6 +433,7 @@ export const NetworkChart = explicitConnect<
     changeSelectedNetworkMarker,
     changeRightClickedMarker,
     changeHoveredMarker,
+    changeMouseTimePosition,
   },
   component: withSize(NetworkChartImpl),
 });
