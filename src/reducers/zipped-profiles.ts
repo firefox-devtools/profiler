@@ -2,11 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
 import { combineReducers } from 'redux';
 import { oneLine } from 'common-tags';
 import { ensureExists } from '../utils/flow';
-import * as ZipFiles from '../profile-logic/zip-files';
+import type * as ZipFiles from '../profile-logic/zip-files';
 
 import type {
   ZipFileState,
@@ -169,7 +168,7 @@ function _validateStateTransition(
       expectedNextPhases = ['LIST_FILES_IN_ZIP_FILE'];
       break;
     default:
-      throw new Error(`Unhandled ZipFileState “${(prevPhase: empty)}”`);
+      throw new Error(`Unhandled ZipFileState "${prevPhase}"`);
   }
   if (!expectedNextPhases.includes(next.phase)) {
     console.error('Previous ZipFileState:', prev);
@@ -198,7 +197,7 @@ const selectedZipFileIndex: Reducer<null | ZipFiles.IndexIntoZipFileTable> = (
 };
 
 const expandedZipFileIndexes: Reducer<
-  Array<ZipFiles.IndexIntoZipFileTable | null>,
+  Array<ZipFiles.IndexIntoZipFileTable | null>
 > = (
   // In practice this should never contain null, but needs to support the
   // TreeView interface.
