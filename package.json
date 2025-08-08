@@ -30,7 +30,7 @@
     "prettier-run": "node bin/output-fixing-commands.js prettier --check . --cache --cache-strategy content --cache-location .prettiercache",
     "prettier-fix": "prettier --write . --cache --cache-strategy content --cache-location .prettiercache",
     "typecheck": "tsc --noEmit",
-    "protoc": "npx -p protobufjs-cli pbjs -t static-module -w commonjs -o ./src/profile-logic/import/proto/simpleperf_report.js ./src/profile-logic/import/proto/simpleperf_report.proto",
+    "protoc": "npx -p protobufjs-cli pbjs -t static-module -w commonjs -o ./src/profile-logic/import/proto/simpleperf_report.js ./src/profile-logic/import/proto/simpleperf_report.proto && npx -p protobufjs-cli pbts -o ./src/profile-logic/import/proto/simpleperf_report.d.ts ./src/profile-logic/import/proto/simpleperf_report.js",
     "license-check": "devtools-license-check",
     "preinstall": "node bin/pre-install.js",
     "publish": "rimraf public_html && cp -r dist public_html",
