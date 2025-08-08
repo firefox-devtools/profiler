@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import * as React from 'react';
 import {
   TIMELINE_MARGIN_LEFT,
@@ -40,23 +38,23 @@ import './index.css';
 
 const ROW_HEIGHT: CssPixels = 16;
 
-type OwnProps = {|
-  +jsTracerTable: JsTracerTable,
-  +showJsTracerSummary: boolean,
-  +doFadeIn: boolean,
-|};
+type OwnProps = {
+  readonly jsTracerTable: JsTracerTable;
+  readonly showJsTracerSummary: boolean;
+  readonly doFadeIn: boolean;
+};
 
-type DispatchProps = {|
-  +updatePreviewSelection: typeof updatePreviewSelection,
-|};
+type DispatchProps = {
+  readonly updatePreviewSelection: typeof updatePreviewSelection;
+};
 
-type StateProps = {|
-  +jsTracerTimingRows: JsTracerTiming[],
-  +stringTable: StringTable,
-  +timeRange: StartEndRange,
-  +threadsKey: ThreadsKey,
-  +previewSelection: PreviewSelection,
-|};
+type StateProps = {
+  readonly jsTracerTimingRows: JsTracerTiming[];
+  readonly stringTable: StringTable;
+  readonly timeRange: StartEndRange;
+  readonly threadsKey: ThreadsKey;
+  readonly previewSelection: PreviewSelection;
+};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
@@ -76,7 +74,7 @@ class JsTracerExpensiveChartImpl extends React.PureComponent<Props> {
     return JS_TRACER_MAXIMUM_CHART_ZOOM / (end - start);
   }
 
-  render() {
+  override render() {
     const {
       timeRange,
       threadsKey,
@@ -121,8 +119,8 @@ class JsTracerExpensiveChartImpl extends React.PureComponent<Props> {
 
 // This function is given the JsTracerCanvas's chartProps.
 function viewportNeedsUpdate(
-  prevProps: { +jsTracerTimingRows: JsTracerTiming[] },
-  newProps: { +jsTracerTimingRows: JsTracerTiming[] }
+  prevProps: { readonly jsTracerTimingRows: JsTracerTiming[] },
+  newProps: { readonly jsTracerTimingRows: JsTracerTiming[] }
 ) {
   return prevProps.jsTracerTimingRows !== newProps.jsTracerTimingRows;
 }
@@ -133,7 +131,7 @@ function viewportNeedsUpdate(
 const JsTracerExpensiveChart = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps,
+  DispatchProps
 >({
   mapStateToProps: (state, ownProps) => ({
     timeRange: getCommittedRange(state),
@@ -151,16 +149,16 @@ const JsTracerExpensiveChart = explicitConnect<
   component: JsTracerExpensiveChartImpl,
 });
 
-type ChartLoaderProps = {|
-  +profile: Profile,
-  +jsTracerTable: JsTracerTable,
-  +showJsTracerSummary: boolean,
-  +keyString: string,
-|};
+type ChartLoaderProps = {
+  readonly profile: Profile;
+  readonly jsTracerTable: JsTracerTable;
+  readonly showJsTracerSummary: boolean;
+  readonly keyString: string;
+};
 
-type ChartLoaderState = {|
-  readyToRenderExpensiveChart: boolean,
-|};
+type ChartLoaderState = {
+  readyToRenderExpensiveChart: boolean;
+};
 
 // Keep track of all the React keys seen for a component. If everything is correctly
 // memoized, then it should only be slow and expensive to compute the timing information
@@ -176,9 +174,9 @@ const _seenChartKeysPerProfile: WeakMap<Profile, Set<string>> = new WeakMap();
  */
 class JsTracerChartLoader extends React.PureComponent<
   ChartLoaderProps,
-  ChartLoaderState,
+  ChartLoaderState
 > {
-  state = {
+  override state = {
     // The loader needs to be mounted before rendering the chart, as it has expensive
     // selectors.
     readyToRenderExpensiveChart: false,
@@ -192,7 +190,7 @@ class JsTracerChartLoader extends React.PureComponent<
     // Look up the seenChartKeys per-profile. If not found, create a new Set.
     let seenChartKeys = _seenChartKeysPerProfile.get(props.profile);
     if (seenChartKeys === undefined) {
-      seenChartKeys = new Set();
+      seenChartKeys = new Set<string>();
       _seenChartKeysPerProfile.set(props.profile, seenChartKeys);
     }
 
@@ -204,7 +202,7 @@ class JsTracerChartLoader extends React.PureComponent<
     }
   }
 
-  componentDidMount() {
+  override componentDidMount() {
     if (this._doFadeIn) {
       // Let the screen render at least once, then start computing the expensive chart.
       requestAnimationFrame(() => {
@@ -215,7 +213,7 @@ class JsTracerChartLoader extends React.PureComponent<
     }
   }
 
-  render() {
+  override render() {
     const { jsTracerTable, showJsTracerSummary } = this.props;
     return this.state.readyToRenderExpensiveChart || !this._doFadeIn ? (
       <JsTracerExpensiveChart
@@ -233,12 +231,12 @@ class JsTracerChartLoader extends React.PureComponent<
   }
 }
 
-type ChartProps = {|
-  +profile: Profile,
-  +jsTracerTable: JsTracerTable,
-  +showJsTracerSummary: boolean,
-  +threadsKey: ThreadsKey,
-|};
+type ChartProps = {
+  readonly profile: Profile;
+  readonly jsTracerTable: JsTracerTable;
+  readonly showJsTracerSummary: boolean;
+  readonly threadsKey: ThreadsKey;
+};
 
 /**
  * This component enforces that the JsTracerChartLoader has a correct key in order
@@ -251,7 +249,7 @@ type ChartProps = {|
  * See: https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#recommendation-fully-uncontrolled-component-with-a-key
  */
 export class JsTracerChart extends React.PureComponent<ChartProps> {
-  render() {
+  override render() {
     const { profile, jsTracerTable, showJsTracerSummary, threadsKey } =
       this.props;
     const key = `${threadsKey}-${showJsTracerSummary ? 'true' : 'false'}`;

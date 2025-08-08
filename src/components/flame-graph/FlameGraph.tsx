@@ -1,11 +1,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import * as React from 'react';
 
-import explicitConnect from '../../utils/connect';
+import { explicitConnectWithForwardRef } from '../../utils/connect';
 import { FlameGraphCanvas } from './Canvas';
 
 import {
@@ -68,47 +66,54 @@ const STACK_FRAME_HEIGHT = 16;
  */
 const SELECTABLE_THRESHOLD = 0.001;
 
-type StateProps = {|
-  +thread: Thread,
-  +weightType: WeightType,
-  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-  +unfilteredThread: Thread,
-  +ctssSampleIndexOffset: number,
-  +maxStackDepthPlusOne: number,
-  +timeRange: StartEndRange,
-  +previewSelection: PreviewSelection,
-  +flameGraphTiming: FlameGraphTiming,
-  +callTree: CallTree,
-  +callNodeInfo: CallNodeInfo,
-  +threadsKey: ThreadsKey,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +scrollToSelectionGeneration: number,
-  +categories: CategoryList,
-  +interval: Milliseconds,
-  +isInverted: boolean,
-  +callTreeSummaryStrategy: CallTreeSummaryStrategy,
-  +ctssSamples: SamplesLikeTable,
-  +unfilteredCtssSamples: SamplesLikeTable,
-  +tracedTiming: CallTreeTimings | null,
-  +displayStackType: boolean,
-|};
-type DispatchProps = {|
-  +changeSelectedCallNode: typeof changeSelectedCallNode,
-  +changeRightClickedCallNode: typeof changeRightClickedCallNode,
-  +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
-  +updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen,
-|};
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type StateProps = {
+  readonly thread: Thread;
+  readonly weightType: WeightType;
+  readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null;
+  readonly unfilteredThread: Thread;
+  readonly ctssSampleIndexOffset: number;
+  readonly maxStackDepthPlusOne: number;
+  readonly timeRange: StartEndRange;
+  readonly previewSelection: PreviewSelection;
+  readonly flameGraphTiming: FlameGraphTiming;
+  readonly callTree: CallTree;
+  readonly callNodeInfo: CallNodeInfo;
+  readonly threadsKey: ThreadsKey;
+  readonly selectedCallNodeIndex: IndexIntoCallNodeTable | null;
+  readonly rightClickedCallNodeIndex: IndexIntoCallNodeTable | null;
+  readonly scrollToSelectionGeneration: number;
+  readonly categories: CategoryList;
+  readonly interval: Milliseconds;
+  readonly isInverted: boolean;
+  readonly callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  readonly ctssSamples: SamplesLikeTable;
+  readonly unfilteredCtssSamples: SamplesLikeTable;
+  readonly tracedTiming: CallTreeTimings | null;
+  readonly displayStackType: boolean;
+};
+type DispatchProps = {
+  readonly changeSelectedCallNode: typeof changeSelectedCallNode;
+  readonly changeRightClickedCallNode: typeof changeRightClickedCallNode;
+  readonly handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut;
+  readonly updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen;
+};
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
-class FlameGraphImpl extends React.PureComponent<Props> {
+export interface FlameGraphHandle {
+  focus(): void;
+}
+
+class FlameGraphImpl
+  extends React.PureComponent<Props>
+  implements FlameGraphHandle
+{
   _viewport: HTMLDivElement | null = null;
 
-  componentDidMount() {
+  override componentDidMount() {
     document.addEventListener('copy', this._onCopy, false);
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     document.removeEventListener('copy', this._onCopy, false);
   }
 
@@ -209,7 +214,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
     return callNodeIndex;
   };
 
-  _handleKeyDown = (event: SyntheticKeyboardEvent<HTMLElement>) => {
+  _handleKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
     const {
       threadsKey,
       callTree,
@@ -311,12 +316,12 @@ class FlameGraphImpl extends React.PureComponent<Props> {
         const funcName = thread.stringTable.getString(
           thread.funcTable.name[funcIndex]
         );
-        event.clipboardData.setData('text/plain', funcName);
+        event.clipboardData!.setData('text/plain', funcName);
       }
     }
   };
 
-  render() {
+  override render() {
     const {
       thread,
       unfilteredThread,
@@ -424,7 +429,12 @@ function viewportNeedsUpdate() {
   return false;
 }
 
-export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
+export const FlameGraph = explicitConnectWithForwardRef<
+  {},
+  StateProps,
+  DispatchProps,
+  FlameGraphHandle
+>({
   mapStateToProps: (state) => ({
     thread: selectedThreadSelectors.getFilteredThread(state),
     unfilteredThread: selectedThreadSelectors.getThread(state),

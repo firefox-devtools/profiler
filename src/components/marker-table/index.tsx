@@ -2,9 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 import memoize from 'memoize-immutable';
 
 import explicitConnect from '../../utils/connect';
@@ -43,27 +41,27 @@ import type { ConnectedProps } from '../../utils/connect';
 // Limit how many characters in the description get sent to the DOM.
 const MAX_DESCRIPTION_CHARACTERS = 500;
 
-type MarkerDisplayData = {|
-  start: string,
-  duration: string | null,
-  name: string,
-  details: string,
-|};
+type MarkerDisplayData = {
+  start: string;
+  duration: string | null;
+  name: string;
+  details: string;
+};
 
 class MarkerTree {
-  _getMarker: (MarkerIndex) => Marker;
+  _getMarker: (param: MarkerIndex) => Marker;
   _markerIndexes: MarkerIndex[];
   _zeroAt: Milliseconds;
   _displayDataByIndex: Map<MarkerIndex, MarkerDisplayData>;
   _markerSchemaByName: MarkerSchemaByName;
-  _getMarkerLabel: (MarkerIndex) => string;
+  _getMarkerLabel: (param: MarkerIndex) => string;
 
   constructor(
-    getMarker: (MarkerIndex) => Marker,
+    getMarker: (param: MarkerIndex) => Marker,
     markerIndexes: MarkerIndex[],
     zeroAt: Milliseconds,
     markerSchemaByName: MarkerSchemaByName,
-    getMarkerLabel: (MarkerIndex) => string
+    getMarkerLabel: (param: MarkerIndex) => string
   ) {
     this._getMarker = getMarker;
     this._markerIndexes = markerIndexes;
@@ -129,30 +127,30 @@ class MarkerTree {
   }
 }
 
-function _formatStart(start: number, zeroAt) {
+function _formatStart(start: number, zeroAt: number) {
   return formatSeconds(start - zeroAt);
 }
 
-type StateProps = {|
-  +threadsKey: ThreadsKey,
-  +getMarker: (MarkerIndex) => Marker,
-  +markerIndexes: MarkerIndex[],
-  +selectedMarker: MarkerIndex | null,
-  +rightClickedMarkerIndex: MarkerIndex | null,
-  +zeroAt: Milliseconds,
-  +scrollToSelectionGeneration: number,
-  +markerSchemaByName: MarkerSchemaByName,
-  +getMarkerLabel: (MarkerIndex) => string,
-  +tableViewOptions: TableViewOptions,
-|};
+type StateProps = {
+  readonly threadsKey: ThreadsKey;
+  readonly getMarker: (param: MarkerIndex) => Marker;
+  readonly markerIndexes: MarkerIndex[];
+  readonly selectedMarker: MarkerIndex | null;
+  readonly rightClickedMarkerIndex: MarkerIndex | null;
+  readonly zeroAt: Milliseconds;
+  readonly scrollToSelectionGeneration: number;
+  readonly markerSchemaByName: MarkerSchemaByName;
+  readonly getMarkerLabel: (param: MarkerIndex) => string;
+  readonly tableViewOptions: TableViewOptions;
+};
 
-type DispatchProps = {|
-  +changeSelectedMarker: typeof changeSelectedMarker,
-  +changeRightClickedMarker: typeof changeRightClickedMarker,
-  +onTableViewOptionsChange: (TableViewOptions) => any,
-|};
+type DispatchProps = {
+  readonly changeSelectedMarker: typeof changeSelectedMarker;
+  readonly changeRightClickedMarker: typeof changeRightClickedMarker;
+  readonly onTableViewOptionsChange: (param: TableViewOptions) => any;
+};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class MarkerTableImpl extends PureComponent<Props> {
   _fixedColumns = [
@@ -181,19 +179,36 @@ class MarkerTableImpl extends PureComponent<Props> {
   _mainColumn = { propName: 'details', titleL10nId: 'MarkerTable--details' };
   _expandedNodeIds: Array<MarkerIndex | null> = [];
   _onExpandedNodeIdsChange = () => {};
-  _treeView: ?TreeView<MarkerDisplayData>;
-  _takeTreeViewRef = (treeView) => (this._treeView = treeView);
+  _treeView: TreeView<MarkerDisplayData> | null = null;
+  _takeTreeViewRef = (treeView: TreeView<MarkerDisplayData> | null) =>
+    (this._treeView = treeView);
 
-  getMarkerTree = memoize((...args) => new MarkerTree(...args), { limit: 1 });
+  getMarkerTree = memoize(
+    (
+      getMarker: any,
+      markerIndexes: any,
+      zeroAt: any,
+      markerSchemaByName: any,
+      getMarkerLabel: any
+    ) =>
+      new MarkerTree(
+        getMarker,
+        markerIndexes,
+        zeroAt,
+        markerSchemaByName,
+        getMarkerLabel
+      ),
+    { limit: 1 }
+  );
 
-  componentDidMount() {
+  override componentDidMount() {
     this.focus();
     if (this._treeView) {
       this._treeView.scrollSelectionIntoView();
     }
   }
 
-  componentDidUpdate(prevProps) {
+  override componentDidUpdate(prevProps: Props) {
     if (
       this.props.scrollToSelectionGeneration >
       prevProps.scrollToSelectionGeneration
@@ -224,7 +239,7 @@ class MarkerTableImpl extends PureComponent<Props> {
     changeRightClickedMarker(threadsKey, selectedMarker);
   };
 
-  render() {
+  override render() {
     const {
       getMarker,
       markerIndexes,
@@ -254,7 +269,7 @@ class MarkerTableImpl extends PureComponent<Props> {
         ) : (
           <TreeView
             maxNodeDepth={0}
-            tree={tree}
+            tree={tree as any}
             fixedColumns={this._fixedColumns}
             mainColumn={this._mainColumn}
             onSelectionChange={this._onSelectionChange}
@@ -276,7 +291,7 @@ class MarkerTableImpl extends PureComponent<Props> {
   }
 }
 
-export const MarkerTable = explicitConnect<{||}, StateProps, DispatchProps>({
+export const MarkerTable = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     threadsKey: getSelectedThreadsKey(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),

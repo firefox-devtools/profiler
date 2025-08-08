@@ -1,9 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
-import * as React from 'react';
+import React from 'react';
 import classNames from 'classnames';
 
 import { TooltipMarker } from '../tooltip/Marker';
@@ -33,7 +32,6 @@ import type {
   MarkerIndex,
   NetworkPayload,
   NetworkPhaseName,
-  MixedObject,
 } from 'firefox-profiler/types';
 
 // This regexp is used to split a pathname into a directory path and a filename.
@@ -79,19 +77,19 @@ const PHASE_NAMES_IN_ORDER: NetworkPhaseName[] = [
 
 const PHASE_OPACITIES = PHASE_NAMES_IN_ORDER.reduce(
   (result, property, i, { length }) => {
-    result[property] = length > 1 ? i / (length - 1) : 0;
+    (result as any)[property] = length > 1 ? i / (length - 1) : 0;
     return result;
   },
-  {}
+  {} as { [key: string]: number }
 );
 
-type NetworkPhaseProps = {|
-  +name: NetworkPhaseName,
-  +previousName: NetworkPhaseName,
-  +value: number | string,
-  +duration: Milliseconds,
-  +style: MixedObject,
-|};
+type NetworkPhaseProps = {
+  readonly name: NetworkPhaseName;
+  readonly previousName: NetworkPhaseName;
+  readonly value: number | string;
+  readonly duration: Milliseconds;
+  readonly style: React.CSSProperties;
+};
 
 function NetworkPhase({
   name,
@@ -115,14 +113,14 @@ function NetworkPhase({
   );
 }
 
-export type NetworkChartRowBarProps = {|
-  +marker: Marker,
-  +width: CssPixels,
-  +timeRange: StartEndRange,
+export type NetworkChartRowBarProps = {
+  readonly marker: Marker;
+  readonly width: CssPixels;
+  readonly timeRange: StartEndRange;
   // Pass the payload in as well, since our types can't express a Marker with
   // a specific payload.
-  +networkPayload: NetworkPayload,
-|};
+  readonly networkPayload: NetworkPayload;
+};
 
 // This component splits a network marker duration in different phases,
 // and renders each phase as a differently colored bar.
@@ -149,7 +147,7 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
    * This returns the preconnect component, or null if there's no preconnect
    * operation for this marker.
    */
-  _preconnectComponent(): React.Node {
+  _preconnectComponent(): React.ReactNode {
     const { networkPayload, marker } = this.props;
 
     const preconnectStart = networkPayload.domainLookupStart;
@@ -187,7 +185,7 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
 
     const preconnectPhase = {
       name: latestPreconnectEndProperty.phase,
-      previousName: 'domainLookupStart',
+      previousName: 'domainLookupStart' as const,
       value: preconnectEnd,
       duration: preconnectDuration,
       style: {
@@ -207,7 +205,7 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
     );
   }
 
-  render() {
+  override render() {
     const { marker, networkPayload } = this.props;
     const start = marker.start;
     const end = ensureExists(
@@ -235,9 +233,9 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
       preconnectComponent ? PHASE_NAMES_IN_ORDER.slice(1) : PHASE_NAMES_IN_ORDER
     );
 
-    const mainBarPhases = [];
+    const mainBarPhases: NetworkPhaseProps[] = [];
     let previousValue = start;
-    let previousName = 'startTime';
+    let previousName: NetworkPhaseName = 'startTime';
 
     // In this loop we add the various phases to the array.
     availablePhases.forEach(({ phase, value }, i) => {
@@ -287,42 +285,42 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
   }
 }
 
-type NetworkChartRowProps = {|
-  +index: number,
-  +marker: Marker,
-  +markerIndex: MarkerIndex,
+type NetworkChartRowProps = {
+  readonly index: number;
+  readonly marker: Marker;
+  readonly markerIndex: MarkerIndex;
   // Pass the payload in as well, since our types can't express a Marker with
   // a specific payload.
-  +networkPayload: NetworkPayload,
-  +timeRange: StartEndRange,
-  +width: CssPixels,
-  +threadsKey: ThreadsKey,
-  +isRightClicked: boolean,
-  +isSelected: boolean,
-  +isHoveredFromState: boolean,
-  +onLeftClick?: (MarkerIndex) => mixed,
-  +onRightClick?: (MarkerIndex) => mixed,
-  +onHover?: (MarkerIndex | null) => mixed,
-  +shouldDisplayTooltips: () => boolean,
-|};
+  readonly networkPayload: NetworkPayload;
+  readonly timeRange: StartEndRange;
+  readonly width: CssPixels;
+  readonly threadsKey: ThreadsKey;
+  readonly isRightClicked: boolean;
+  readonly isSelected: boolean;
+  readonly isHoveredFromState: boolean;
+  readonly onLeftClick?: (param: MarkerIndex) => void;
+  readonly onRightClick?: (param: MarkerIndex) => void;
+  readonly onHover?: (param: MarkerIndex | null) => void;
+  readonly shouldDisplayTooltips: () => boolean;
+};
 
-type State = {|
-  pageX: CssPixels,
-  pageY: CssPixels,
-  hovered: ?boolean,
-|};
+type State = {
+  pageX: CssPixels;
+  pageY: CssPixels;
+  hovered: boolean | null;
+};
 
 export class NetworkChartRow extends React.PureComponent<
   NetworkChartRowProps,
-  State,
+  State
 > {
-  state = {
+  override state = {
     pageX: 0,
     pageY: 0,
     hovered: false,
   };
 
-  _hoverIn = (event: SyntheticMouseEvent<>) => {
+  _hoverIn = (event: React.MouseEvent<HTMLDivElement>) => {
     const pageX = event.pageX;
     const pageY = event.pageY;
 
@@ -347,7 +345,7 @@ export class NetworkChartRow extends React.PureComponent<
     }
   };
 
-  _onMouseDown = (e: SyntheticMouseEvent<>) => {
+  _onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     const { markerIndex, onLeftClick, onRightClick } = this.props;
     if (e.button === 0) {
       if (onLeftClick) {
@@ -375,8 +373,7 @@ export class NetworkChartRow extends React.PureComponent<
     if (colonPos === null) {
       return '';
     }
-    const url = name.slice(this._findIndexOfLoadid(name) + 2);
-    return url;
+    return name.slice(colonPos + 2);
   }
 
   _extractURI(url: string): URL | null {
@@ -390,7 +387,7 @@ export class NetworkChartRow extends React.PureComponent<
 
   // Split markers.name in loadID and parts of URL to highlight domain
   // and filename, shorten the rest if needed.
-  _splitsURI(name: string): React.Node {
+  _splitsURI(name: string): React.ReactNode {
     // Extract URI from markers.name
     const uri = this._extractURI(name);
     if (uri !== null) {
@@ -440,7 +437,7 @@ export class NetworkChartRow extends React.PureComponent<
     return getColorClassNameForMimeType(mimeType);
   }
 
-  render() {
+  override render() {
     const {
       index,
       markerIndex,

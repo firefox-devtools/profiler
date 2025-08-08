@@ -1,16 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import * as React from 'react';
 
-import explicitConnect from '../../utils/connect';
+import { explicitConnectWithForwardRef } from 'firefox-profiler/utils/connect';
 import { getInvertCallstack } from '../../selectors/url-state';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { changeInvertCallstack } from '../../actions/profile-view';
 import { FlameGraphEmptyReasons } from './FlameGraphEmptyReasons';
-import { FlameGraph } from './FlameGraph';
+import { FlameGraph, type FlameGraphHandle } from './FlameGraph';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
@@ -20,30 +18,30 @@ import './MaybeFlameGraph.css';
 // is "flame-graph", `invertCallstack` will be `false`. <MaybeFlameGraph /> is
 // only used in the "flame-graph" tab.
 
-type StateProps = {|
-  +isPreviewSelectionEmpty: boolean,
-  +invertCallstack: boolean,
-|};
-type DispatchProps = {|
-  +changeInvertCallstack: typeof changeInvertCallstack,
-|};
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type StateProps = {
+  readonly isPreviewSelectionEmpty: boolean;
+  readonly invertCallstack: boolean;
+};
+type DispatchProps = {
+  readonly changeInvertCallstack: typeof changeInvertCallstack;
+};
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class MaybeFlameGraphImpl extends React.PureComponent<Props> {
-  _flameGraph: {| current: HTMLDivElement | null |} = React.createRef();
+  _flameGraph: React.RefObject<FlameGraphHandle> = React.createRef();
 
   _onSwitchToNormalCallstackClick = () => {
     this.props.changeInvertCallstack(false);
   };
 
-  componentDidMount() {
+  override componentDidMount() {
     const flameGraph = this._flameGraph.current;
     if (flameGraph) {
       flameGraph.focus();
     }
   }
 
-  render() {
+  override render() {
     const { isPreviewSelectionEmpty, invertCallstack } = this.props;
 
     if (isPreviewSelectionEmpty) {
@@ -70,18 +68,21 @@ class MaybeFlameGraphImpl extends React.PureComponent<Props> {
   }
 }
 
-export const MaybeFlameGraph = explicitConnect<{||}, StateProps, DispatchProps>(
-  {
-    mapStateToProps: (state) => {
-      return {
-        invertCallstack: getInvertCallstack(state),
-        isPreviewSelectionEmpty:
-          !selectedThreadSelectors.getHasPreviewFilteredCtssSamples(state),
-      };
-    },
-    mapDispatchToProps: {
-      changeInvertCallstack,
-    },
-    component: MaybeFlameGraphImpl,
-  }
-);
+export const MaybeFlameGraph = explicitConnectWithForwardRef<
+  {},
+  StateProps,
+  DispatchProps,
+  MaybeFlameGraphImpl
+>({
+  mapStateToProps: (state) => {
+    return {
+      invertCallstack: getInvertCallstack(state),
+      isPreviewSelectionEmpty:
+        !selectedThreadSelectors.getHasPreviewFilteredCtssSamples(state),
+    };
+  },
+  mapDispatchToProps: {
+    changeInvertCallstack,
+  },
+  component: MaybeFlameGraphImpl,
+});
