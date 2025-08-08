@@ -1,7 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
 /**
  * Space-efficient url component compatible encoding for arrays of 32bit
@@ -78,19 +77,19 @@ export function encodeUintArrayForUrlComponent(numbers: number[]): string {
 }
 
 export function decodeUintArrayFromUrlComponent(s: string): number[] {
-  const array = [];
+  const array: number[] = [];
   let i = 0;
   while (i < s.length) {
     const { value, hasLeadingZero, nextI } = decodeUint(s, i);
     if (hasLeadingZero && array.length >= 1) {
-      const startValue = array[array.length - 1];
-      const endValue = value;
+      const startValue: number = array[array.length - 1];
+      const endValue: number = value;
       if (endValue > startValue) {
-        for (let x = startValue + 1; x < endValue; x++) {
+        for (let x: number = startValue + 1; x < endValue; x++) {
           array.push(x);
         }
       } else {
-        for (let x = startValue - 1; x > endValue; x--) {
+        for (let x: number = startValue - 1; x > endValue; x--) {
           array.push(x);
         }
       }
@@ -306,15 +305,15 @@ function bitsFromEncodingDigit(x: string): number {
 function decodeUint(
   s: string,
   start: number
-): {|
+): {
   // The decoded number.
-  value: number,
+  value: number;
   // Whether the encoding of this number started with a "leading zero" digit.
   // Our caller uses this as a "consecutive range" marker.
-  hasLeadingZero: boolean,
+  hasLeadingZero: boolean;
   // The end of the variable-length encoding; the next number starts at s[nextI].
-  nextI: number,
-|} {
+  nextI: number;
+} {
   let i = start;
   let bits = bitsFromEncodingDigit(s[i]);
   let continuationBit = bits & 0b100000;

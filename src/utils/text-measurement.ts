@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 /**
  * Measure the size of text for drawing within a 2d context. This will allow text
  * to be drawn in a constrained space. This class uses a variety of heuristics and
@@ -76,10 +74,10 @@ class TextMeasurement {
 
     // Returns the actual width of a string composed of the n first characters
     // of the text variable.
-    const getWidth = (n) => this.getTextWidth(text.substring(0, n));
+    const getWidth = (n: number) => this.getTextWidth(text.substring(0, n));
     // Estimate how many characters can still be added after taking into account
     // the space used by the n first characters. The result can be negative.
-    const getRemainingCharacterCount = (n) =>
+    const getRemainingCharacterCount = (n: number) =>
       Math.round((availableWidth - getWidth(n)) / this._averageCharWidth);
 
     // Approximate the number of characters to truncate to,
