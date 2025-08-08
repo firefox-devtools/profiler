@@ -12,7 +12,6 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 import {
   withChartViewport,
-  type WithChartViewport,
   type Viewport,
 } from 'firefox-profiler/components/shared/chart/Viewport';
 import { ChartCanvas } from 'firefox-profiler/components/shared/chart/Canvas';
@@ -657,7 +656,4 @@ class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
   }
 }
 
-export const JsTracerCanvas = (withChartViewport: WithChartViewport<
-  OwnProps,
-  Props,
->)(JsTracerCanvasImpl);
+export const JsTracerCanvas = withChartViewport<OwnProps>(JsTracerCanvasImpl);
