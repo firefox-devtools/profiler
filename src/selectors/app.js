@@ -12,7 +12,7 @@ import {
   getHiddenLocalTracksByPid,
 } from './url-state';
 import { getGlobalTracks, getLocalTracksByPid } from './profile';
-import { getZipFileState } from './zipped-profiles.js';
+import { getZipFileState } from './zipped-profiles';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import {
   FULL_TRACK_SCREENSHOT_HEIGHT,
