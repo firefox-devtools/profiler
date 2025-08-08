@@ -87,7 +87,7 @@ When working on a new feature and code changes, it's important that things work 
   - `yarn test-all` - Test all the things!
   - `yarn test` - Run the tests in [`./src/test/`](./src/test/).
   - `yarn lint` - Run prettier, stylelint, and eslint to check for correct code formatting.
-  - `yarn typecheck` - Check for TypeScript type correctness.
+  - `yarn ts` - Check for TypeScript type correctness.
   - `yarn license-check` - Check the dependencies' licenses.
 - `git push` and `git commit`
   - We have [husky](https://www.npmjs.com/package/husky) installed to run automated checks when committing and pushing.
