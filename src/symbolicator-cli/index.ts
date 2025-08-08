@@ -1,5 +1,3 @@
-// @flow
-
 /*
  * This implements a simple CLI to symbolicate profiles captured by the profiler
  * or by samply.
@@ -15,7 +13,8 @@
  *
  */
 
-const fs = require('fs');
+import fs from 'fs';
+import minimist from 'minimist';
 
 import { unserializeProfileOfArbitraryFormat } from '../profile-logic/process-profile';
 import { SymbolStore } from '../profile-logic/symbol-store';
@@ -72,7 +71,7 @@ export class InMemorySymbolDB {
   async close(): Promise<void> {}
 }
 
-interface CliOptions {
+export interface CliOptions {
   input: string;
   output: string;
   server: string;
@@ -169,7 +168,7 @@ export async function run(options: CliOptions) {
 }
 
 export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
-  const argv = require('minimist')(processArgv.slice(2));
+  const argv = minimist(processArgv.slice(2));
 
   if (!('input' in argv && typeof argv.input === 'string')) {
     throw new Error(
