@@ -67,7 +67,7 @@ jobs:
     resource_class: large
     steps:
       - checkout-and-dependencies
-      - run: yarn typecheck
+      - run: yarn ts
 
   alex:
     executor: node
