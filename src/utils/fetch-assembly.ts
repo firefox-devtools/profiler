@@ -2,22 +2,21 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import { assertExhaustiveCheck } from './flow';
 import type {
   ApiQueryError,
   DecodedInstruction,
   NativeSymbolInfo,
   Lib,
+  MixedObject,
 } from 'firefox-profiler/types';
 import { queryApiWithFallback } from './query-api';
 import type { ExternalCommunicationDelegate } from './query-api';
 import { isLocalURL } from './url';
 
 export type FetchAssemblyResult =
-  | { type: 'SUCCESS', instructions: DecodedInstruction[] }
-  | { type: 'ERROR', errors: ApiQueryError[] };
+  | { type: 'SUCCESS'; instructions: DecodedInstruction[] }
+  | { type: 'ERROR'; errors: ApiQueryError[] };
 
 /**
  * Fetch a native function's assembly instructions, using the symbolication
@@ -66,7 +65,7 @@ export async function fetchAssembly(
       return { type: 'ERROR', errors: queryResult.errors };
     }
     default:
-      throw assertExhaustiveCheck(queryResult.type);
+      throw assertExhaustiveCheck(queryResult, 'queryResult.type');
   }
 }
 
@@ -98,11 +97,11 @@ function convertJsonInstructions(
     throw new Error('The instructions field in asm response is not an array');
   }
   const { startAddress, instructions } = responseJSON;
-  const startAddressNum = parseInt(startAddress, 16);
+  const startAddressNum = parseInt(startAddress as string, 16);
   if (isNaN(startAddressNum)) {
     throw new Error('Invalid startAddress value in asm response');
   }
-  return instructions.map((instructionData) => {
+  return instructions.map((instructionData: unknown) => {
     if (!Array.isArray(instructionData)) {
       throw new Error('Invalid instruction data (not an array)');
     }
