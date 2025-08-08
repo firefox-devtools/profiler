@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import * as profileViewSelectors from '../../../selectors/profile';
 import * as urlStateSelectors from '../../../selectors/url-state';
 import {
@@ -118,8 +116,7 @@ export function getHumanReadableTracks(state: State): string[] {
 
         const hiddenText = hiddenTracks.has(trackIndex) ? 'hide' : 'show';
         const selected =
-          track.threadIndex !== undefined &&
-          selectedThreadIndexes.has(track.threadIndex)
+          'threadIndex' in track && selectedThreadIndexes.has(track.threadIndex)
             ? ' SELECTED'
             : '';
 
@@ -290,7 +287,7 @@ export function getStoreWithMemoryTrack(pid: Pid = '222') {
   );
   const threadIndex = 0;
   const trackIndex = 0;
-  const trackReference = { type: 'local', pid, trackIndex };
+  const trackReference = { type: 'local' as const, pid, trackIndex };
 
   {
     // Modify the thread to include the counter.

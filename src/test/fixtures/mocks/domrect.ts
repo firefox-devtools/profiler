@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 // This can be removed when JSDOM gets a DOMRect implementation.
 // See https://github.com/jsdom/jsdom/pull/2926
 
@@ -41,14 +39,14 @@ class DOMRect {
 
 export function autoMockDomRect() {
   beforeEach(() => {
-    global.DOMRect = DOMRect;
+    global.DOMRect = DOMRect as any;
   });
 
   afterEach(() => {
     if (originalDOMRect) {
       global.DOMRect = originalDOMRect;
     } else {
-      delete global.DOMRect;
+      delete (global as any).DOMRect;
     }
   });
 }

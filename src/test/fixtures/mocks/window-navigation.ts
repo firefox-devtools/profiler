@@ -1,8 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
+// @ts-nocheck Complex window/history mock with extensive DOM API manipulation that requires intricate typing
 
 /**
  * jsdom leaves the history in place after every test, so the history will
@@ -66,7 +65,7 @@ function mockWindowLocation(location: string = 'http://localhost') {
   delete window.location;
 
   const property = {
-    get(): $Shape<Location> {
+    get(): Partial<Location> {
       return {
         toString: () => url.toString(),
         ancestorOrigins: [],
@@ -261,7 +260,7 @@ function mockWindowHistory() {
 // for more information.
 export function mockFullNavigation({
   initialUrl,
-}: $Shape<{ initialUrl: string }> = {}): () => void {
+}: Partial<{ initialUrl: string }> = {}): () => void {
   const restoreLocation = mockWindowLocation(initialUrl);
   const restoreHistory = mockWindowHistory();
 

@@ -1,40 +1,40 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import type { SymbolTableAsTuple } from '../../profile-logic/symbol-store-db';
 import type {
   AddressResult,
   AddressInlineFrame,
 } from '../../profile-logic/symbol-store';
 
-export type LineRange = {|
-  startAddress: number,
-  line: number,
-  inlinedCall?: InlinedCall,
-|};
+export type LineRange = {
+  startAddress: number;
+  line: number;
+  inlinedCall?: InlinedCall;
+};
 
-export type InlinedCall = {|
-  name: string,
-  file: string,
-  lineRanges: LineRange[],
-|};
+export type InlinedCall = {
+  name: string;
+  file: string;
+  lineRanges: LineRange[];
+};
 
-export type ExampleSymbolTableSymbols = Array<{|
-  address: number,
-  name: string,
-  file?: string,
-  lineRanges?: LineRange[],
-|}>;
+export type ExampleSymbolTableSymbols = Array<{
+  address: number;
+  name: string;
+  file?: string;
+  lineRanges?: LineRange[];
+}>;
 
-export type ExampleSymbolTable = {|
-  symbols: ExampleSymbolTableSymbols,
-  asTuple: SymbolTableAsTuple,
-  getAddressResult: (number) => AddressResult | null,
-|};
+export type ExampleSymbolTable = {
+  symbols: ExampleSymbolTableSymbols;
+  asTuple: SymbolTableAsTuple;
+  getAddressResult: (address: number) => AddressResult | null;
+};
 
-function _makeSymbolTableAsTuple(syms): SymbolTableAsTuple {
+function _makeSymbolTableAsTuple(
+  syms: ExampleSymbolTableSymbols
+): SymbolTableAsTuple {
   const index = [0];
   let accum = 0;
   for (const { name } of syms) {
@@ -54,7 +54,7 @@ function _makeSymbolTableAsTuple(syms): SymbolTableAsTuple {
 // API will put into the `inlines` property of the AddressResult.
 // This function is part of the simulated symbolication API for testing.
 function _getInlinesRecursive(
-  inlinedCall?: InlinedCall,
+  inlinedCall: InlinedCall | undefined,
   address: number
 ): AddressInlineFrame[] {
   if (!inlinedCall) {
@@ -79,9 +79,9 @@ function _getInlinesRecursive(
 // and inline stack at that address.
 // This function is part of the simulated symbolication API for testing.
 function _getLineAndInlines(
-  lineRanges?: LineRange[],
+  lineRanges: LineRange[] | undefined,
   address: number
-): { line?: number, inlines?: AddressInlineFrame[] } {
+): { line?: number; inlines?: AddressInlineFrame[] } {
   if (!lineRanges) {
     return {};
   }
@@ -110,7 +110,7 @@ function _getLineAndInlines(
 
 function _makeGetAddressResultFunction(
   syms: ExampleSymbolTableSymbols
-): (number) => AddressResult | null {
+): (address: number) => AddressResult | null {
   return function getAddressResult(address: number) {
     for (let i = syms.length - 1; i >= 0; i--) {
       const { address: symbolAddress, name, file, lineRanges } = syms[i];

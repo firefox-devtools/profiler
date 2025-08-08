@@ -1,16 +1,16 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import { getProfileFromTextSamples } from '../../fixtures/profiles/processed-profile';
 import { serializeProfile } from '../../../profile-logic/process-profile';
 import { receiveZipFile } from '../../../actions/receive-profile';
 import { setDataSource } from '../../../actions/profile-view';
-import type { ZipFileTable } from '../../../profile-logic/zip-files';
+import type {
+  IndexIntoZipFileTable,
+  ZipFileTable,
+} from '../../../profile-logic/zip-files';
 import createStore from '../../../app-logic/create-store';
 import JSZip from 'jszip';
-import { objectValues } from '../../../utils/flow';
 
 /**
  * Puts a blank profile at each given path in a zip file.
@@ -24,7 +24,7 @@ export function getZippedProfiles(files: string[] = []): JSZip {
     zip.file(fileName, profileText);
   });
 
-  for (const file of objectValues(zip.files)) {
+  for (const file of Object.values(zip.files)) {
     // The date for files, and directories defaults to the current time,
     // which breaks snapshot tests.
     file.date = new Date('1997-08-29T05:14:14.617Z');
@@ -58,7 +58,7 @@ export function formatZipFileTable(zipFileTable: ZipFileTable): string[] {
     return [];
   }
   // Remember a computed depth, given an index.
-  const indexToDepth = new Map();
+  const indexToDepth = new Map<IndexIntoZipFileTable | null, number>();
   // If no prefix, start at -1, so that the next depth gets computed to 0.
   indexToDepth.set(null, -1);
   const result = [];
@@ -69,7 +69,7 @@ export function formatZipFileTable(zipFileTable: ZipFileTable): string[] {
     const type = zipFileTable.file[i] ? 'file' : 'dir';
 
     // Compute the depth and whitespace
-    const prefixDepth = indexToDepth.get(prefix);
+    const prefixDepth = indexToDepth.get(prefix)!;
     const depth = prefixDepth + 1;
     const whitespace = ''.padStart(depth * 2);
 

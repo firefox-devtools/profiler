@@ -1,32 +1,30 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 import type {
   ResponseFromBrowser,
   MessageFromBrowser,
   MessageToBrowser,
 } from '../../../app-logic/web-channel';
-import type { FaviconData } from 'firefox-profiler/types';
+import type { FaviconData, MixedObject } from 'firefox-profiler/types';
 
 /**
  * Mock out the WebChannel, a Firefox internal mechanism that allows us to
  * post messages from content pages to privileged contexts.
  */
 export function mockWebChannel() {
-  const messagesSentToBrowser = [];
-  const listeners = [];
+  const messagesSentToBrowser: { message: MessageToBrowser }[] = [];
+  const listeners: EventListener[] = [];
   const originalAddEventListener = window.addEventListener;
   const originalRemoveEventListener = window.removeEventListener;
   const originalDispatchEvent = window.dispatchEvent;
-  let onMessageToChrome = null;
+  let onMessageToChrome: ((param: MessageToBrowser) => void) | null = null;
 
   jest
     .spyOn(window, 'addEventListener')
     .mockImplementation((name, listener, options) => {
       if (name === 'WebChannelMessageToContent') {
-        listeners.push(listener);
+        listeners.push(listener as EventListener);
       }
       originalAddEventListener.call(window, name, listener, options);
     });
@@ -35,7 +33,7 @@ export function mockWebChannel() {
     .spyOn(window, 'removeEventListener')
     .mockImplementation((name, listener, options) => {
       if (name === 'WebChannelMessageToContent') {
-        const index = listeners.indexOf(listener);
+        const index = listeners.indexOf(listener as EventListener);
         if (index !== -1) {
           listeners.splice(index, 1);
         }
@@ -55,9 +53,10 @@ export function mockWebChannel() {
     } else {
       originalDispatchEvent.call(window, event);
     }
+    return false;
   });
 
-  function triggerResponse<R: ResponseFromBrowser>(
+  function triggerResponse<R extends ResponseFromBrowser>(
     message: MessageFromBrowser<R>
   ) {
     for (const listener of listeners.slice()) {
@@ -66,12 +65,12 @@ export function mockWebChannel() {
           id: 'profiler.firefox.com',
           message,
         },
-      });
+      } as CustomEvent);
     }
   }
 
   function registerMessageToChromeListener(
-    listener: (MessageToBrowser) => void
+    listener: (param: MessageToBrowser) => void
   ): void {
     onMessageToChrome = listener;
   }
@@ -107,21 +106,17 @@ export function simulateOldWebChannelAndFrameScript(
   registerMessageToChromeListener((message) => {
     switch (message.type) {
       case 'STATUS_QUERY': {
-        triggerResponse(
-          ({
-            type: 'STATUS_RESPONSE',
-            requestId: message.requestId,
-            menuButtonIsEnabled: true,
-          }: any)
-        );
+        triggerResponse({
+          type: 'STATUS_RESPONSE',
+          requestId: message.requestId,
+          menuButtonIsEnabled: true,
+        } as any);
         break;
       }
       default: {
-        triggerResponse(
-          ({
-            error: `Unexpected message ${message.type}`,
-          }: any)
-        );
+        triggerResponse({
+          error: `Unexpected message ${message.type}`,
+        } as any);
         break;
       }
     }
@@ -134,13 +129,13 @@ export function simulateOldWebChannelAndFrameScript(
 }
 
 export function simulateWebChannel(
-  profileGetter: () => mixed,
+  profileGetter: () => Promise<ArrayBuffer | MixedObject>,
   faviconsGetter?: () => Promise<Array<FaviconData | null>>
 ) {
   const webChannel = mockWebChannel();
 
   const { registerMessageToChromeListener, triggerResponse } = webChannel;
-  async function simulateBrowserSide(message) {
+  async function simulateBrowserSide(message: MessageToBrowser) {
     switch (message.type) {
       case 'STATUS_QUERY': {
         triggerResponse({
@@ -192,7 +187,7 @@ export function simulateWebChannel(
         triggerResponse({
           type: 'SUCCESS_RESPONSE',
           requestId: message.requestId,
-          response: ([]: MixedObject[]),
+          response: [] as unknown[],
         });
         break;
       }
@@ -217,11 +212,6 @@ export function simulateWebChannel(
       }
 
       default: {
-        triggerResponse({
-          type: 'ERROR_RESPONSE',
-          requestId: message.requestId,
-          error: `Unexpected message ${message.type}`,
-        });
         break;
       }
     }

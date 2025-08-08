@@ -1,36 +1,41 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
+// @ts-nocheck Complex DOM mock with intricate typing that would require extensive work to properly type
 
 /**
  * Creating a mock intersection observer type because Flow's IntersectionObserver
  * type is not completely correct in this version.
  */
-type MockIntersectionObserver = {|
-  thresholds: number[],
-  root: HTMLElement | Document,
-  rootMargin: string,
-  observe: (HTMLElement) => void,
-  unobserve: (HTMLElement) => void,
-  disconnect: () => void,
-  takeRecords: () => void,
-|};
+type MockIntersectionObserver = {
+  thresholds: number[];
+  root: HTMLElement | Document;
+  rootMargin: string;
+  observe: (param: HTMLElement) => void;
+  unobserve: (param: HTMLElement) => void;
+  disconnect: () => void;
+  takeRecords: () => void;
+};
 
 /**
  * Type of the item we are going to keep for tracking observers.
  */
-type Item = {|
-  callback: (IntersectionObserverEntry[], MockIntersectionObserver) => void,
-  elements: Set<HTMLElement>,
-  created: number,
-|};
+type Item = {
+  callback: (
+    param: IntersectionObserverEntry[],
+    MockIntersectionObserver
+  ) => void;
+  elements: Set<HTMLElement>;
+  created: number;
+};
 
 /**
  * Tracked observers during the testing.
  */
-const observers: Map<MockIntersectionObserver, Item> = new Map();
+const observers: Map<MockIntersectionObserver, Item> = new Map<
+  unknown,
+  unknown
+>();
 
 /**
  * Call this function inside a `describe` block to automatically define the
@@ -47,7 +52,7 @@ const observers: Map<MockIntersectionObserver, Item> = new Map();
  */
 export function autoMockIntersectionObserver(autoTrigger?: boolean = true) {
   beforeEach(() => {
-    (window: any).IntersectionObserver = jest.fn((cb, options = {}) => {
+    (window as any).IntersectionObserver = jest.fn((cb, options = {}) => {
       const item = {
         callback: cb,
         elements: new Set(),
@@ -82,7 +87,7 @@ export function autoMockIntersectionObserver(autoTrigger?: boolean = true) {
   });
 
   afterEach(() => {
-    delete (window: any).IntersectionObserver;
+    delete (window as any).IntersectionObserver;
     observers.clear();
   });
 }
@@ -123,9 +128,9 @@ function triggerSingleObserver(
  */
 export function triggerIntersectionObservers({
   isIntersecting = true,
-}: {|
-  isIntersecting?: boolean,
-|}) {
+}: {
+  isIntersecting?: boolean;
+}) {
   for (const [observer, item] of observers) {
     triggerSingleObserver(observer, item, isIntersecting);
   }

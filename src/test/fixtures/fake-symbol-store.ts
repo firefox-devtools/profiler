@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-//@flow
-
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 
 import type { RequestedLib } from 'firefox-profiler/types';
@@ -14,7 +12,7 @@ import type {
 } from '../../profile-logic/symbol-store';
 
 export class FakeSymbolStore implements AbstractSymbolStore {
-  _symbolTables: Map<string, {| addrs: Uint32Array, syms: string[] |}>;
+  _symbolTables: Map<string, { addrs: Uint32Array; syms: string[] }>;
 
   constructor(symbolTables: Map<string, Map<number, string>>) {
     this._symbolTables = new Map();
@@ -30,8 +28,8 @@ export class FakeSymbolStore implements AbstractSymbolStore {
 
   async getSymbols(
     requests: LibSymbolicationRequest[],
-    successCb: (RequestedLib, Map<number, AddressResult>) => void,
-    errorCb: (LibSymbolicationRequest, Error) => void
+    successCb: (lib: RequestedLib, table: Map<number, AddressResult>) => void,
+    errorCb: (request: LibSymbolicationRequest, err: Error) => void
   ): Promise<void> {
     // Make sure that the callbacks are never called synchronously, by enforcing
     // a dummy roundtrip to the microtask queue.
@@ -41,7 +39,7 @@ export class FakeSymbolStore implements AbstractSymbolStore {
       const { lib, addresses } = request;
       const symbolTable = this._symbolTables.get(lib.debugName);
       if (symbolTable) {
-        const results = new Map();
+        const results = new Map<number, AddressResult>();
         for (const address of addresses) {
           const index = bisectionRight(symbolTable.addrs, address) - 1;
           results.set(address, {

@@ -1,9 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
-type MaybeFn = ((any) => any) | void;
+type MaybeFn = ((...args: any[]) => any) | void;
 const identity = () => {};
 
 export function autoMockCanvasContext() {
@@ -11,7 +9,7 @@ export function autoMockCanvasContext() {
     const ctx = mockCanvasContext();
     jest
       .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
+      .mockImplementation(() => ctx as any);
 
     const anyWindow: any = window;
     if (anyWindow.Path2D) {
@@ -24,13 +22,32 @@ export function autoMockCanvasContext() {
   });
 
   afterEach(() => {
-    delete (window: any).Path2D;
-    delete (window: any).__flushDrawLog;
+    delete (window as any).Path2D;
+    delete (window as any).__flushDrawLog;
   });
 }
 
-export function flushDrawLog() {
-  return (window: any).__flushDrawLog();
+export type BeginPathOperation = ['beginPath'];
+export type MoveToOperation = ['moveTo', number, number];
+export type LineToOperation = ['lineTo', number, number];
+export type RectOperation = ['rect', number, number, number, number];
+export type SetFillStyleOperation = ['set fillStyle', string];
+export type FillRectOperation = ['fillRect', number, number, number, number];
+export type ClearRectOperation = ['clearRect', number, number, number, number];
+export type FillTextOperation = ['fillText', string];
+
+export type DrawOperation =
+  | BeginPathOperation
+  | MoveToOperation
+  | LineToOperation
+  | RectOperation
+  | SetFillStyleOperation
+  | FillRectOperation
+  | ClearRectOperation
+  | FillTextOperation;
+
+export function flushDrawLog(): DrawOperation[] {
+  return (window as any).__flushDrawLog();
 }
 
 function mockCanvasContext() {
@@ -42,7 +59,7 @@ function mockCanvasContext() {
    */
   function spyLog(name: string, fn: MaybeFn = identity) {
     // This function is extremely polymorphic and defies typing.
-    return (jest.fn: any)((...args) => {
+    return (jest.fn as any)((...args: any[]) => {
       if (
         (name === 'fill' || name === 'stroke') &&
         args[0] instanceof MockPath2D
@@ -80,7 +97,7 @@ function mockCanvasContext() {
       stroke: spyLog('stroke'),
       rect: spyLog('rect'),
       arc: spyLog('arc'),
-      measureText: spyLog('measureText', (text) => ({
+      measureText: spyLog('measureText', (text: string) => ({
         width: text.length * 5,
       })),
       createLinearGradient: spyLog('createLinearGradient', () => ({
@@ -90,12 +107,16 @@ function mockCanvasContext() {
       __flushDrawLog: (): Array<any> => {
         return log.splice(0, log.length);
       },
-    },
+    } as Record<string | symbol, any>,
     {
       // Record what values are set on the context.
-      set(target, property, value) {
+      set(
+        target: Record<string | symbol, any>,
+        property: string | symbol,
+        value: any
+      ) {
         target[property] = value;
-        log.push(['set ' + property, value]);
+        log.push(['set ' + String(property), value]);
         return true;
       },
     }
@@ -107,17 +128,17 @@ function mockCanvasContext() {
 // Only the function that we use so far are implemented here. Please add some
 // more when needed.
 class MockPath2D {
-  __operations = [];
-  moveTo(...args) {
+  __operations: any[] = [];
+  moveTo(...args: any[]) {
     this.__operations.push(['moveTo', ...args]);
   }
-  lineTo(...args) {
+  lineTo(...args: any[]) {
     this.__operations.push(['lineTo', ...args]);
   }
-  arc(...args) {
+  arc(...args: any[]) {
     this.__operations.push(['arc', ...args]);
   }
-  rect(...args) {
+  rect(...args: any[]) {
     this.__operations.push(['rect', ...args]);
   }
 }
