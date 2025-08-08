@@ -1,0 +1,255 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`TimelineMarkers renders correctly memory markers 1`] = `
+<div
+  class="timelineMarkers timelineMarkersMemory selected"
+  data-testid="TimelineMarkersMemory"
+>
+  <div
+    class="react-contextmenu-wrapper"
+  >
+    <div>
+      <canvas
+        class="timelineMarkersCanvas"
+        height="300"
+        width="200"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TimelineMarkers renders correctly memory markers 2`] = `
+Array [
+  Array [
+    "clearRect",
+    0,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffc600",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    66.66666666666666,
+    6,
+  ],
+  Array [
+    "set fillStyle",
+    "#ff9400",
+  ],
+  Array [
+    "fillRect",
+    67,
+    0,
+    66.66666666666666,
+    6,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+]
+`;
+
+exports[`TimelineMarkers renders correctly overview markers 1`] = `
+<div
+  class="timelineMarkers selected"
+  data-testid="TimelineMarkersOverview"
+>
+  <div
+    class="react-contextmenu-wrapper"
+  >
+    <div>
+      <canvas
+        class="timelineMarkersCanvas"
+        height="300"
+        width="200"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TimelineMarkers renders correctly overview markers 2`] = `
+Array [
+  Array [
+    "clearRect",
+    0,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "black",
+  ],
+  Array [
+    "fillRect",
+    1,
+    0,
+    131.33333333333331,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    1,
+    133.33333333333331,
+    4,
+  ],
+  Array [
+    "fillRect",
+    1,
+    5,
+    131.33333333333331,
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "black",
+  ],
+  Array [
+    "fillRect",
+    1,
+    0,
+    131.33333333333331,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    1,
+    133.33333333333331,
+    4,
+  ],
+  Array [
+    "fillRect",
+    1,
+    5,
+    131.33333333333331,
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "black",
+  ],
+  Array [
+    "fillRect",
+    28,
+    0,
+    144.66666666666666,
+    1,
+  ],
+  Array [
+    "fillRect",
+    27,
+    1,
+    146.66666666666666,
+    4,
+  ],
+  Array [
+    "fillRect",
+    28,
+    5,
+    144.66666666666666,
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "black",
+  ],
+  Array [
+    "fillRect",
+    28,
+    0,
+    51.333333333333336,
+    1,
+  ],
+  Array [
+    "fillRect",
+    27,
+    1,
+    53.333333333333336,
+    4,
+  ],
+  Array [
+    "fillRect",
+    28,
+    5,
+    51.333333333333336,
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "black",
+  ],
+  Array [
+    "fillRect",
+    68,
+    0,
+    131.33333333333331,
+    1,
+  ],
+  Array [
+    "fillRect",
+    67,
+    1,
+    133.33333333333331,
+    4,
+  ],
+  Array [
+    "fillRect",
+    68,
+    5,
+    131.33333333333331,
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "black",
+  ],
+  Array [
+    "fillRect",
+    81,
+    0,
+    24.666666666666668,
+    1,
+  ],
+  Array [
+    "fillRect",
+    80,
+    1,
+    26.666666666666668,
+    4,
+  ],
+  Array [
+    "fillRect",
+    81,
+    5,
+    24.666666666666668,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+]
+`;

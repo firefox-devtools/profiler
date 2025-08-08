@@ -1,0 +1,10777 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`ThreadActivityGraph matches the 2d canvas draw snapshot 1`] = `
+Array [
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#b1b1b360",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#b1b1b360",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#b1b1b360",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#b1b1b360",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#b1b1b360",
+          ],
+          Array [
+            0.25,
+            "#b1b1b360",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#b1b1b360",
+          ],
+          Array [
+            0.75,
+            "#b1b1b360",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "transparent",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#6200a460",
+          ],
+          Array [
+            0.25,
+            "#6200a460",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#6200a460",
+          ],
+          Array [
+            0.75,
+            "#6200a460",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#ffe90070",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#ffe90070",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#ffe90070",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#ffe90070",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#ffe90070",
+          ],
+          Array [
+            0.25,
+            "#ffe90070",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#ffe90070",
+          ],
+          Array [
+            0.75,
+            "#ffe90070",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#ff940060",
+          ],
+          Array [
+            0.25,
+            "#ff940060",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#ff940060",
+          ],
+          Array [
+            0.75,
+            "#ff940060",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#45a1ff60",
+          ],
+          Array [
+            0.25,
+            "#45a1ff60",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#45a1ff60",
+          ],
+          Array [
+            0.75,
+            "#45a1ff60",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#12bc0060",
+          ],
+          Array [
+            0.25,
+            "#12bc0060",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#12bc0060",
+          ],
+          Array [
+            0.75,
+            "#12bc0060",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#0060df60",
+          ],
+          Array [
+            0.25,
+            "#0060df60",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#0060df60",
+          ],
+          Array [
+            0.75,
+            "#0060df60",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "set globalCompositeOperation",
+    "lighter",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b3",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe129",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a4",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc00",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff9400",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    -0.4,
+    0,
+    0.8,
+    0,
+  ],
+  Array [
+    "set globalCompositeOperation",
+    "lighter",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b3",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe129",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a4",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    8,
+    10,
+  ],
+  Array [
+    "lineTo",
+    9,
+    10,
+  ],
+  Array [
+    "lineTo",
+    10,
+    10,
+  ],
+  Array [
+    "lineTo",
+    11,
+    10,
+  ],
+  Array [
+    "lineTo",
+    12,
+    10,
+  ],
+  Array [
+    "lineTo",
+    13,
+    10,
+  ],
+  Array [
+    "lineTo",
+    14,
+    10,
+  ],
+  Array [
+    "lineTo",
+    15,
+    10,
+  ],
+  Array [
+    "lineTo",
+    16,
+    10,
+  ],
+  Array [
+    "lineTo",
+    17,
+    10,
+  ],
+  Array [
+    "lineTo",
+    18,
+    10,
+  ],
+  Array [
+    "lineTo",
+    19,
+    10,
+  ],
+  Array [
+    "lineTo",
+    20,
+    10,
+  ],
+  Array [
+    "lineTo",
+    21,
+    10,
+  ],
+  Array [
+    "lineTo",
+    22,
+    10,
+  ],
+  Array [
+    "lineTo",
+    23,
+    10,
+  ],
+  Array [
+    "lineTo",
+    24,
+    10,
+  ],
+  Array [
+    "lineTo",
+    25,
+    10,
+  ],
+  Array [
+    "lineTo",
+    26,
+    10,
+  ],
+  Array [
+    "lineTo",
+    27,
+    10,
+  ],
+  Array [
+    "lineTo",
+    28,
+    10,
+  ],
+  Array [
+    "lineTo",
+    29,
+    10,
+  ],
+  Array [
+    "lineTo",
+    30,
+    10,
+  ],
+  Array [
+    "lineTo",
+    31,
+    10,
+  ],
+  Array [
+    "lineTo",
+    32,
+    10,
+  ],
+  Array [
+    "lineTo",
+    33,
+    10,
+  ],
+  Array [
+    "lineTo",
+    34,
+    10,
+  ],
+  Array [
+    "lineTo",
+    35,
+    10,
+  ],
+  Array [
+    "lineTo",
+    36,
+    10,
+  ],
+  Array [
+    "lineTo",
+    37,
+    10,
+  ],
+  Array [
+    "lineTo",
+    38,
+    10,
+  ],
+  Array [
+    "lineTo",
+    39,
+    10,
+  ],
+  Array [
+    "lineTo",
+    40,
+    10,
+  ],
+  Array [
+    "lineTo",
+    41,
+    10,
+  ],
+  Array [
+    "lineTo",
+    42,
+    10,
+  ],
+  Array [
+    "lineTo",
+    43,
+    10,
+  ],
+  Array [
+    "lineTo",
+    44,
+    10,
+  ],
+  Array [
+    "lineTo",
+    45,
+    10,
+  ],
+  Array [
+    "lineTo",
+    46,
+    10,
+  ],
+  Array [
+    "lineTo",
+    47,
+    10,
+  ],
+  Array [
+    "lineTo",
+    48,
+    10,
+  ],
+  Array [
+    "lineTo",
+    49,
+    10,
+  ],
+  Array [
+    "lineTo",
+    50,
+    10,
+  ],
+  Array [
+    "lineTo",
+    51,
+    10,
+  ],
+  Array [
+    "lineTo",
+    52,
+    10,
+  ],
+  Array [
+    "lineTo",
+    53,
+    10,
+  ],
+  Array [
+    "lineTo",
+    54,
+    10,
+  ],
+  Array [
+    "lineTo",
+    55,
+    10,
+  ],
+  Array [
+    "lineTo",
+    56,
+    10,
+  ],
+  Array [
+    "lineTo",
+    57,
+    10,
+  ],
+  Array [
+    "lineTo",
+    58,
+    10,
+  ],
+  Array [
+    "lineTo",
+    59,
+    10,
+  ],
+  Array [
+    "lineTo",
+    60,
+    10,
+  ],
+  Array [
+    "lineTo",
+    61,
+    10,
+  ],
+  Array [
+    "lineTo",
+    62,
+    10,
+  ],
+  Array [
+    "lineTo",
+    63,
+    10,
+  ],
+  Array [
+    "lineTo",
+    64,
+    10,
+  ],
+  Array [
+    "lineTo",
+    65,
+    10,
+  ],
+  Array [
+    "lineTo",
+    66,
+    10,
+  ],
+  Array [
+    "lineTo",
+    67,
+    10,
+  ],
+  Array [
+    "lineTo",
+    68,
+    10,
+  ],
+  Array [
+    "lineTo",
+    69,
+    10,
+  ],
+  Array [
+    "lineTo",
+    70,
+    10,
+  ],
+  Array [
+    "lineTo",
+    71,
+    10,
+  ],
+  Array [
+    "lineTo",
+    72,
+    10,
+  ],
+  Array [
+    "lineTo",
+    71,
+    9.942857138812542,
+  ],
+  Array [
+    "lineTo",
+    70,
+    9.771428555250168,
+  ],
+  Array [
+    "lineTo",
+    69,
+    9.428571425378323,
+  ],
+  Array [
+    "lineTo",
+    68,
+    8.85714277625084,
+  ],
+  Array [
+    "lineTo",
+    67,
+    7.999999970197678,
+  ],
+  Array [
+    "lineTo",
+    66,
+    6.914285719394684,
+  ],
+  Array [
+    "lineTo",
+    65,
+    5.657142698764801,
+  ],
+  Array [
+    "lineTo",
+    64,
+    4.342857003211975,
+  ],
+  Array [
+    "lineTo",
+    63,
+    3.0857139825820923,
+  ],
+  Array [
+    "lineTo",
+    62,
+    1.9999998807907104,
+  ],
+  Array [
+    "lineTo",
+    61,
+    1.1428570747375488,
+  ],
+  Array [
+    "lineTo",
+    60,
+    0.5714285373687744,
+  ],
+  Array [
+    "lineTo",
+    59,
+    0.22857129573822021,
+  ],
+  Array [
+    "lineTo",
+    58,
+    0.05714297294616699,
+  ],
+  Array [
+    "lineTo",
+    57,
+    0,
+  ],
+  Array [
+    "lineTo",
+    56,
+    0,
+  ],
+  Array [
+    "lineTo",
+    55,
+    0,
+  ],
+  Array [
+    "lineTo",
+    54,
+    0,
+  ],
+  Array [
+    "lineTo",
+    53,
+    0,
+  ],
+  Array [
+    "lineTo",
+    52,
+    0,
+  ],
+  Array [
+    "lineTo",
+    51,
+    0,
+  ],
+  Array [
+    "lineTo",
+    50,
+    0,
+  ],
+  Array [
+    "lineTo",
+    49,
+    0,
+  ],
+  Array [
+    "lineTo",
+    48,
+    0,
+  ],
+  Array [
+    "lineTo",
+    47,
+    0,
+  ],
+  Array [
+    "lineTo",
+    46,
+    0,
+  ],
+  Array [
+    "lineTo",
+    45,
+    0,
+  ],
+  Array [
+    "lineTo",
+    44,
+    0,
+  ],
+  Array [
+    "lineTo",
+    43,
+    0,
+  ],
+  Array [
+    "lineTo",
+    42,
+    0,
+  ],
+  Array [
+    "lineTo",
+    41,
+    0,
+  ],
+  Array [
+    "lineTo",
+    40,
+    0,
+  ],
+  Array [
+    "lineTo",
+    39,
+    0,
+  ],
+  Array [
+    "lineTo",
+    38,
+    0,
+  ],
+  Array [
+    "lineTo",
+    37,
+    0,
+  ],
+  Array [
+    "lineTo",
+    36,
+    0,
+  ],
+  Array [
+    "lineTo",
+    35,
+    0,
+  ],
+  Array [
+    "lineTo",
+    34,
+    0,
+  ],
+  Array [
+    "lineTo",
+    33,
+    0,
+  ],
+  Array [
+    "lineTo",
+    32,
+    0,
+  ],
+  Array [
+    "lineTo",
+    31,
+    0,
+  ],
+  Array [
+    "lineTo",
+    30,
+    0,
+  ],
+  Array [
+    "lineTo",
+    29,
+    0,
+  ],
+  Array [
+    "lineTo",
+    28,
+    0,
+  ],
+  Array [
+    "lineTo",
+    27,
+    0,
+  ],
+  Array [
+    "lineTo",
+    26,
+    0,
+  ],
+  Array [
+    "lineTo",
+    25,
+    0,
+  ],
+  Array [
+    "lineTo",
+    24,
+    0,
+  ],
+  Array [
+    "lineTo",
+    23,
+    0,
+  ],
+  Array [
+    "lineTo",
+    22,
+    0,
+  ],
+  Array [
+    "lineTo",
+    21,
+    0.05714297294616699,
+  ],
+  Array [
+    "lineTo",
+    20,
+    0.22857129573822021,
+  ],
+  Array [
+    "lineTo",
+    19,
+    0.5714285373687744,
+  ],
+  Array [
+    "lineTo",
+    18,
+    1.1428570747375488,
+  ],
+  Array [
+    "lineTo",
+    17,
+    1.9999998807907104,
+  ],
+  Array [
+    "lineTo",
+    16,
+    3.0857139825820923,
+  ],
+  Array [
+    "lineTo",
+    15,
+    4.342857003211975,
+  ],
+  Array [
+    "lineTo",
+    14,
+    5.657142698764801,
+  ],
+  Array [
+    "lineTo",
+    13,
+    6.914285719394684,
+  ],
+  Array [
+    "lineTo",
+    12,
+    7.999999970197678,
+  ],
+  Array [
+    "lineTo",
+    11,
+    8.85714277625084,
+  ],
+  Array [
+    "lineTo",
+    10,
+    9.428571425378323,
+  ],
+  Array [
+    "lineTo",
+    9,
+    9.771428555250168,
+  ],
+  Array [
+    "lineTo",
+    8,
+    9.942857138812542,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc00",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    10,
+  ],
+  Array [
+    "lineTo",
+    1,
+    10,
+  ],
+  Array [
+    "lineTo",
+    2,
+    10,
+  ],
+  Array [
+    "lineTo",
+    3,
+    10,
+  ],
+  Array [
+    "lineTo",
+    4,
+    10,
+  ],
+  Array [
+    "lineTo",
+    5,
+    10,
+  ],
+  Array [
+    "lineTo",
+    6,
+    10,
+  ],
+  Array [
+    "lineTo",
+    7,
+    10,
+  ],
+  Array [
+    "lineTo",
+    8,
+    9.942857138812542,
+  ],
+  Array [
+    "lineTo",
+    9,
+    9.771428555250168,
+  ],
+  Array [
+    "lineTo",
+    10,
+    9.428571425378323,
+  ],
+  Array [
+    "lineTo",
+    11,
+    8.85714277625084,
+  ],
+  Array [
+    "lineTo",
+    12,
+    7.999999970197678,
+  ],
+  Array [
+    "lineTo",
+    13,
+    6.914285719394684,
+  ],
+  Array [
+    "lineTo",
+    14,
+    5.657142698764801,
+  ],
+  Array [
+    "lineTo",
+    15,
+    4.342857003211975,
+  ],
+  Array [
+    "lineTo",
+    16,
+    3.0857139825820923,
+  ],
+  Array [
+    "lineTo",
+    17,
+    1.9999998807907104,
+  ],
+  Array [
+    "lineTo",
+    18,
+    1.1428570747375488,
+  ],
+  Array [
+    "lineTo",
+    19,
+    0.5714285373687744,
+  ],
+  Array [
+    "lineTo",
+    20,
+    0.22857129573822021,
+  ],
+  Array [
+    "lineTo",
+    21,
+    0.05714297294616699,
+  ],
+  Array [
+    "lineTo",
+    22,
+    0,
+  ],
+  Array [
+    "lineTo",
+    21,
+    0,
+  ],
+  Array [
+    "lineTo",
+    20,
+    0,
+  ],
+  Array [
+    "lineTo",
+    19,
+    0,
+  ],
+  Array [
+    "lineTo",
+    18,
+    0,
+  ],
+  Array [
+    "lineTo",
+    17,
+    0,
+  ],
+  Array [
+    "lineTo",
+    16,
+    0,
+  ],
+  Array [
+    "lineTo",
+    15,
+    0,
+  ],
+  Array [
+    "lineTo",
+    14,
+    0,
+  ],
+  Array [
+    "lineTo",
+    13,
+    0,
+  ],
+  Array [
+    "lineTo",
+    12,
+    0,
+  ],
+  Array [
+    "lineTo",
+    11,
+    0.05714297294616699,
+  ],
+  Array [
+    "lineTo",
+    10,
+    0.22857129573822021,
+  ],
+  Array [
+    "lineTo",
+    9,
+    0.5714285373687744,
+  ],
+  Array [
+    "lineTo",
+    8,
+    1.1428570747375488,
+  ],
+  Array [
+    "lineTo",
+    7,
+    1.9999998807907104,
+  ],
+  Array [
+    "lineTo",
+    6,
+    3.0857139825820923,
+  ],
+  Array [
+    "lineTo",
+    5,
+    4.342857003211975,
+  ],
+  Array [
+    "lineTo",
+    4,
+    5.657142698764801,
+  ],
+  Array [
+    "lineTo",
+    3,
+    6.914285719394684,
+  ],
+  Array [
+    "lineTo",
+    2,
+    7.999999970197678,
+  ],
+  Array [
+    "lineTo",
+    1,
+    8.85714277625084,
+  ],
+  Array [
+    "lineTo",
+    0,
+    9.428571425378323,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    58,
+    0.05714297294616699,
+  ],
+  Array [
+    "lineTo",
+    59,
+    0.22857129573822021,
+  ],
+  Array [
+    "lineTo",
+    60,
+    0.5714285373687744,
+  ],
+  Array [
+    "lineTo",
+    61,
+    1.1428570747375488,
+  ],
+  Array [
+    "lineTo",
+    62,
+    1.9999998807907104,
+  ],
+  Array [
+    "lineTo",
+    63,
+    3.0857139825820923,
+  ],
+  Array [
+    "lineTo",
+    64,
+    4.342857003211975,
+  ],
+  Array [
+    "lineTo",
+    65,
+    5.657142698764801,
+  ],
+  Array [
+    "lineTo",
+    66,
+    6.914285719394684,
+  ],
+  Array [
+    "lineTo",
+    67,
+    7.999999970197678,
+  ],
+  Array [
+    "lineTo",
+    68,
+    8.85714277625084,
+  ],
+  Array [
+    "lineTo",
+    69,
+    9.428571425378323,
+  ],
+  Array [
+    "lineTo",
+    70,
+    9.771428555250168,
+  ],
+  Array [
+    "lineTo",
+    71,
+    9.942857138812542,
+  ],
+  Array [
+    "lineTo",
+    72,
+    10,
+  ],
+  Array [
+    "lineTo",
+    73,
+    10,
+  ],
+  Array [
+    "lineTo",
+    74,
+    10,
+  ],
+  Array [
+    "lineTo",
+    75,
+    10,
+  ],
+  Array [
+    "lineTo",
+    76,
+    10,
+  ],
+  Array [
+    "lineTo",
+    77,
+    10,
+  ],
+  Array [
+    "lineTo",
+    78,
+    10,
+  ],
+  Array [
+    "lineTo",
+    79,
+    10,
+  ],
+  Array [
+    "lineTo",
+    79,
+    9.428571425378323,
+  ],
+  Array [
+    "lineTo",
+    78,
+    8.85714277625084,
+  ],
+  Array [
+    "lineTo",
+    77,
+    7.999999970197678,
+  ],
+  Array [
+    "lineTo",
+    76,
+    6.914285719394684,
+  ],
+  Array [
+    "lineTo",
+    75,
+    5.657142698764801,
+  ],
+  Array [
+    "lineTo",
+    74,
+    4.342857003211975,
+  ],
+  Array [
+    "lineTo",
+    73,
+    3.0857139825820923,
+  ],
+  Array [
+    "lineTo",
+    72,
+    1.9999998807907104,
+  ],
+  Array [
+    "lineTo",
+    71,
+    1.1428570747375488,
+  ],
+  Array [
+    "lineTo",
+    70,
+    0.5714285373687744,
+  ],
+  Array [
+    "lineTo",
+    69,
+    0.22857129573822021,
+  ],
+  Array [
+    "lineTo",
+    68,
+    0.05714297294616699,
+  ],
+  Array [
+    "lineTo",
+    67,
+    0,
+  ],
+  Array [
+    "lineTo",
+    66,
+    0,
+  ],
+  Array [
+    "lineTo",
+    65,
+    0,
+  ],
+  Array [
+    "lineTo",
+    64,
+    0,
+  ],
+  Array [
+    "lineTo",
+    63,
+    0,
+  ],
+  Array [
+    "lineTo",
+    62,
+    0,
+  ],
+  Array [
+    "lineTo",
+    61,
+    0,
+  ],
+  Array [
+    "lineTo",
+    60,
+    0,
+  ],
+  Array [
+    "lineTo",
+    59,
+    0,
+  ],
+  Array [
+    "lineTo",
+    58,
+    0,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff9400",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    -5,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "fillRect",
+    5,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "fillRect",
+    15,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "fillRect",
+    25,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "fillRect",
+    35,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "fillRect",
+    45,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "fillRect",
+    55,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "fillRect",
+    65,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    80,
+    10,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+]
+`;
+
+exports[`ThreadActivityGraph matches the 2d canvas draw snapshot with CPU values 1`] = `
+Array [
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#b1b1b360",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#b1b1b360",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#b1b1b360",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#b1b1b360",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#b1b1b360",
+          ],
+          Array [
+            0.25,
+            "#b1b1b360",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#b1b1b360",
+          ],
+          Array [
+            0.75,
+            "#b1b1b360",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "transparent",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#6200a460",
+          ],
+          Array [
+            0.25,
+            "#6200a460",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#6200a460",
+          ],
+          Array [
+            0.75,
+            "#6200a460",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#ffe90070",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#ffe90070",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#ffe90070",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#ffe90070",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#ffe90070",
+          ],
+          Array [
+            0.25,
+            "#ffe90070",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#ffe90070",
+          ],
+          Array [
+            0.75,
+            "#ffe90070",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#ff940060",
+          ],
+          Array [
+            0.25,
+            "#ff940060",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#ff940060",
+          ],
+          Array [
+            0.75,
+            "#ff940060",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#45a1ff60",
+          ],
+          Array [
+            0.25,
+            "#45a1ff60",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#45a1ff60",
+          ],
+          Array [
+            0.75,
+            "#45a1ff60",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#12bc0060",
+          ],
+          Array [
+            0.25,
+            "#12bc0060",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#12bc0060",
+          ],
+          Array [
+            0.75,
+            "#12bc0060",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#0060df60",
+          ],
+          Array [
+            0.25,
+            "#0060df60",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#0060df60",
+          ],
+          Array [
+            0.75,
+            "#0060df60",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "set globalCompositeOperation",
+    "lighter",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b3",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe129",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a4",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc00",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff9400",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    -0.4,
+    0,
+    0.8,
+    0,
+  ],
+  Array [
+    "set globalCompositeOperation",
+    "lighter",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b3",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe129",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a4",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    8,
+    10,
+  ],
+  Array [
+    "lineTo",
+    9,
+    10,
+  ],
+  Array [
+    "lineTo",
+    10,
+    10,
+  ],
+  Array [
+    "lineTo",
+    11,
+    10,
+  ],
+  Array [
+    "lineTo",
+    12,
+    10,
+  ],
+  Array [
+    "lineTo",
+    13,
+    10,
+  ],
+  Array [
+    "lineTo",
+    14,
+    10,
+  ],
+  Array [
+    "lineTo",
+    15,
+    10,
+  ],
+  Array [
+    "lineTo",
+    16,
+    10,
+  ],
+  Array [
+    "lineTo",
+    17,
+    10,
+  ],
+  Array [
+    "lineTo",
+    18,
+    10,
+  ],
+  Array [
+    "lineTo",
+    19,
+    10,
+  ],
+  Array [
+    "lineTo",
+    20,
+    10,
+  ],
+  Array [
+    "lineTo",
+    21,
+    10,
+  ],
+  Array [
+    "lineTo",
+    22,
+    10,
+  ],
+  Array [
+    "lineTo",
+    23,
+    10,
+  ],
+  Array [
+    "lineTo",
+    24,
+    10,
+  ],
+  Array [
+    "lineTo",
+    25,
+    10,
+  ],
+  Array [
+    "lineTo",
+    26,
+    10,
+  ],
+  Array [
+    "lineTo",
+    27,
+    10,
+  ],
+  Array [
+    "lineTo",
+    28,
+    10,
+  ],
+  Array [
+    "lineTo",
+    29,
+    10,
+  ],
+  Array [
+    "lineTo",
+    30,
+    10,
+  ],
+  Array [
+    "lineTo",
+    31,
+    10,
+  ],
+  Array [
+    "lineTo",
+    32,
+    10,
+  ],
+  Array [
+    "lineTo",
+    33,
+    10,
+  ],
+  Array [
+    "lineTo",
+    34,
+    10,
+  ],
+  Array [
+    "lineTo",
+    35,
+    10,
+  ],
+  Array [
+    "lineTo",
+    36,
+    10,
+  ],
+  Array [
+    "lineTo",
+    37,
+    10,
+  ],
+  Array [
+    "lineTo",
+    38,
+    10,
+  ],
+  Array [
+    "lineTo",
+    39,
+    10,
+  ],
+  Array [
+    "lineTo",
+    40,
+    10,
+  ],
+  Array [
+    "lineTo",
+    41,
+    10,
+  ],
+  Array [
+    "lineTo",
+    42,
+    10,
+  ],
+  Array [
+    "lineTo",
+    43,
+    10,
+  ],
+  Array [
+    "lineTo",
+    44,
+    10,
+  ],
+  Array [
+    "lineTo",
+    45,
+    10,
+  ],
+  Array [
+    "lineTo",
+    46,
+    10,
+  ],
+  Array [
+    "lineTo",
+    47,
+    10,
+  ],
+  Array [
+    "lineTo",
+    48,
+    10,
+  ],
+  Array [
+    "lineTo",
+    49,
+    10,
+  ],
+  Array [
+    "lineTo",
+    50,
+    10,
+  ],
+  Array [
+    "lineTo",
+    51,
+    10,
+  ],
+  Array [
+    "lineTo",
+    52,
+    10,
+  ],
+  Array [
+    "lineTo",
+    53,
+    10,
+  ],
+  Array [
+    "lineTo",
+    54,
+    10,
+  ],
+  Array [
+    "lineTo",
+    55,
+    10,
+  ],
+  Array [
+    "lineTo",
+    56,
+    10,
+  ],
+  Array [
+    "lineTo",
+    57,
+    10,
+  ],
+  Array [
+    "lineTo",
+    58,
+    10,
+  ],
+  Array [
+    "lineTo",
+    59,
+    10,
+  ],
+  Array [
+    "lineTo",
+    60,
+    10,
+  ],
+  Array [
+    "lineTo",
+    61,
+    10,
+  ],
+  Array [
+    "lineTo",
+    62,
+    10,
+  ],
+  Array [
+    "lineTo",
+    63,
+    10,
+  ],
+  Array [
+    "lineTo",
+    64,
+    10,
+  ],
+  Array [
+    "lineTo",
+    65,
+    10,
+  ],
+  Array [
+    "lineTo",
+    66,
+    10,
+  ],
+  Array [
+    "lineTo",
+    67,
+    10,
+  ],
+  Array [
+    "lineTo",
+    68,
+    10,
+  ],
+  Array [
+    "lineTo",
+    69,
+    10,
+  ],
+  Array [
+    "lineTo",
+    70,
+    10,
+  ],
+  Array [
+    "lineTo",
+    71,
+    10,
+  ],
+  Array [
+    "lineTo",
+    72,
+    10,
+  ],
+  Array [
+    "lineTo",
+    73,
+    10,
+  ],
+  Array [
+    "lineTo",
+    72,
+    9.999999999318804,
+  ],
+  Array [
+    "lineTo",
+    71,
+    9.982857139548287,
+  ],
+  Array [
+    "lineTo",
+    70,
+    9.93142856284976,
+  ],
+  Array [
+    "lineTo",
+    69,
+    9.828571416437626,
+  ],
+  Array [
+    "lineTo",
+    68,
+    9.657142832875252,
+  ],
+  Array [
+    "lineTo",
+    67,
+    9.399999976158142,
+  ],
+  Array [
+    "lineTo",
+    66,
+    9.04571421444416,
+  ],
+  Array [
+    "lineTo",
+    65,
+    8.582857102155685,
+  ],
+  Array [
+    "lineTo",
+    64,
+    8.017142713069916,
+  ],
+  Array [
+    "lineTo",
+    63,
+    7.354285717010498,
+  ],
+  Array [
+    "lineTo",
+    62,
+    6.599999964237213,
+  ],
+  Array [
+    "lineTo",
+    61,
+    5.799999833106995,
+  ],
+  Array [
+    "lineTo",
+    60,
+    5,
+  ],
+  Array [
+    "lineTo",
+    59,
+    4.2399996519088745,
+  ],
+  Array [
+    "lineTo",
+    58,
+    3.5600000619888306,
+  ],
+  Array [
+    "lineTo",
+    57,
+    3.0000001192092896,
+  ],
+  Array [
+    "lineTo",
+    56,
+    2.605714201927185,
+  ],
+  Array [
+    "lineTo",
+    55,
+    2.4228572845458984,
+  ],
+  Array [
+    "lineTo",
+    54,
+    2.457142472267151,
+  ],
+  Array [
+    "lineTo",
+    53,
+    2.7142852544784546,
+  ],
+  Array [
+    "lineTo",
+    52,
+    3.1999999284744263,
+  ],
+  Array [
+    "lineTo",
+    51,
+    3.8514280319213867,
+  ],
+  Array [
+    "lineTo",
+    50,
+    4.6057140827178955,
+  ],
+  Array [
+    "lineTo",
+    49,
+    5.394285619258881,
+  ],
+  Array [
+    "lineTo",
+    48,
+    6.1485713720321655,
+  ],
+  Array [
+    "lineTo",
+    47,
+    6.800000071525574,
+  ],
+  Array [
+    "lineTo",
+    46,
+    7.319999933242798,
+  ],
+  Array [
+    "lineTo",
+    45,
+    7.67999991774559,
+  ],
+  Array [
+    "lineTo",
+    44,
+    7.919999957084656,
+  ],
+  Array [
+    "lineTo",
+    43,
+    8.0799999833107,
+  ],
+  Array [
+    "lineTo",
+    42,
+    8.199999928474426,
+  ],
+  Array [
+    "lineTo",
+    41,
+    8.308571428060532,
+  ],
+  Array [
+    "lineTo",
+    40,
+    8.434285670518875,
+  ],
+  Array [
+    "lineTo",
+    39,
+    8.565714210271835,
+  ],
+  Array [
+    "lineTo",
+    38,
+    8.691428452730179,
+  ],
+  Array [
+    "lineTo",
+    37,
+    8.799999952316284,
+  ],
+  Array [
+    "lineTo",
+    36,
+    8.862857073545456,
+  ],
+  Array [
+    "lineTo",
+    35,
+    8.851428553462029,
+  ],
+  Array [
+    "lineTo",
+    34,
+    8.748571425676346,
+  ],
+  Array [
+    "lineTo",
+    33,
+    8.537142872810364,
+  ],
+  Array [
+    "lineTo",
+    32,
+    8.199999928474426,
+  ],
+  Array [
+    "lineTo",
+    31,
+    7.765714228153229,
+  ],
+  Array [
+    "lineTo",
+    30,
+    7.262856960296631,
+  ],
+  Array [
+    "lineTo",
+    29,
+    6.73714280128479,
+  ],
+  Array [
+    "lineTo",
+    28,
+    6.234285533428192,
+  ],
+  Array [
+    "lineTo",
+    27,
+    5.799999833106995,
+  ],
+  Array [
+    "lineTo",
+    26,
+    5.428571403026581,
+  ],
+  Array [
+    "lineTo",
+    25,
+    5.11428564786911,
+  ],
+  Array [
+    "lineTo",
+    24,
+    4.805713891983032,
+  ],
+  Array [
+    "lineTo",
+    23,
+    4.451428651809692,
+  ],
+  Array [
+    "lineTo",
+    22,
+    3.999999761581421,
+  ],
+  Array [
+    "lineTo",
+    21,
+    3.514285683631897,
+  ],
+  Array [
+    "lineTo",
+    20,
+    3.0571430921554565,
+  ],
+  Array [
+    "lineTo",
+    19,
+    2.742857336997986,
+  ],
+  Array [
+    "lineTo",
+    18,
+    2.685714364051819,
+  ],
+  Array [
+    "lineTo",
+    17,
+    3.0000001192092896,
+  ],
+  Array [
+    "lineTo",
+    16,
+    3.6571431159973145,
+  ],
+  Array [
+    "lineTo",
+    15,
+    4.628571271896362,
+  ],
+  Array [
+    "lineTo",
+    14,
+    5.771428644657135,
+  ],
+  Array [
+    "lineTo",
+    13,
+    6.942857205867767,
+  ],
+  Array [
+    "lineTo",
+    12,
+    7.999999970197678,
+  ],
+  Array [
+    "lineTo",
+    11,
+    8.85714277625084,
+  ],
+  Array [
+    "lineTo",
+    10,
+    9.428571425378323,
+  ],
+  Array [
+    "lineTo",
+    9,
+    9.771428555250168,
+  ],
+  Array [
+    "lineTo",
+    8,
+    9.942857138812542,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc00",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    10,
+  ],
+  Array [
+    "lineTo",
+    1,
+    10,
+  ],
+  Array [
+    "lineTo",
+    2,
+    10,
+  ],
+  Array [
+    "lineTo",
+    3,
+    10,
+  ],
+  Array [
+    "lineTo",
+    4,
+    10,
+  ],
+  Array [
+    "lineTo",
+    5,
+    10,
+  ],
+  Array [
+    "lineTo",
+    6,
+    10,
+  ],
+  Array [
+    "lineTo",
+    7,
+    10,
+  ],
+  Array [
+    "lineTo",
+    8,
+    9.942857138812542,
+  ],
+  Array [
+    "lineTo",
+    9,
+    9.771428555250168,
+  ],
+  Array [
+    "lineTo",
+    10,
+    9.428571425378323,
+  ],
+  Array [
+    "lineTo",
+    11,
+    8.85714277625084,
+  ],
+  Array [
+    "lineTo",
+    12,
+    7.999999970197678,
+  ],
+  Array [
+    "lineTo",
+    13,
+    6.942857205867767,
+  ],
+  Array [
+    "lineTo",
+    14,
+    5.771428644657135,
+  ],
+  Array [
+    "lineTo",
+    15,
+    4.628571271896362,
+  ],
+  Array [
+    "lineTo",
+    16,
+    3.6571431159973145,
+  ],
+  Array [
+    "lineTo",
+    17,
+    3.0000001192092896,
+  ],
+  Array [
+    "lineTo",
+    18,
+    2.685714364051819,
+  ],
+  Array [
+    "lineTo",
+    19,
+    2.742857336997986,
+  ],
+  Array [
+    "lineTo",
+    20,
+    3.0571430921554565,
+  ],
+  Array [
+    "lineTo",
+    21,
+    3.514285683631897,
+  ],
+  Array [
+    "lineTo",
+    22,
+    3.999999761581421,
+  ],
+  Array [
+    "lineTo",
+    21,
+    3.45714271068573,
+  ],
+  Array [
+    "lineTo",
+    20,
+    2.8285717964172363,
+  ],
+  Array [
+    "lineTo",
+    19,
+    2.1714287996292114,
+  ],
+  Array [
+    "lineTo",
+    18,
+    1.54285728931427,
+  ],
+  Array [
+    "lineTo",
+    17,
+    1.000000238418579,
+  ],
+  Array [
+    "lineTo",
+    16,
+    0.6057143211364746,
+  ],
+  Array [
+    "lineTo",
+    15,
+    0.42285680770874023,
+  ],
+  Array [
+    "lineTo",
+    14,
+    0.45714259147644043,
+  ],
+  Array [
+    "lineTo",
+    13,
+    0.7142853736877441,
+  ],
+  Array [
+    "lineTo",
+    12,
+    1.2000000476837158,
+  ],
+  Array [
+    "lineTo",
+    11,
+    1.874285340309143,
+  ],
+  Array [
+    "lineTo",
+    10,
+    2.6971429586410522,
+  ],
+  Array [
+    "lineTo",
+    9,
+    3.6228573322296143,
+  ],
+  Array [
+    "lineTo",
+    8,
+    4.6057140827178955,
+  ],
+  Array [
+    "lineTo",
+    7,
+    5.600000023841858,
+  ],
+  Array [
+    "lineTo",
+    6,
+    6.548571288585663,
+  ],
+  Array [
+    "lineTo",
+    5,
+    7.394285798072815,
+  ],
+  Array [
+    "lineTo",
+    4,
+    8.125714212656021,
+  ],
+  Array [
+    "lineTo",
+    3,
+    8.731428533792496,
+  ],
+  Array [
+    "lineTo",
+    2,
+    9.200000017881393,
+  ],
+  Array [
+    "lineTo",
+    1,
+    9.542857147753239,
+  ],
+  Array [
+    "lineTo",
+    0,
+    9.771428555250168,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    58,
+    3.5600000619888306,
+  ],
+  Array [
+    "lineTo",
+    59,
+    4.2399996519088745,
+  ],
+  Array [
+    "lineTo",
+    60,
+    5,
+  ],
+  Array [
+    "lineTo",
+    61,
+    5.799999833106995,
+  ],
+  Array [
+    "lineTo",
+    62,
+    6.599999964237213,
+  ],
+  Array [
+    "lineTo",
+    63,
+    7.354285717010498,
+  ],
+  Array [
+    "lineTo",
+    64,
+    8.017142713069916,
+  ],
+  Array [
+    "lineTo",
+    65,
+    8.582857102155685,
+  ],
+  Array [
+    "lineTo",
+    66,
+    9.04571421444416,
+  ],
+  Array [
+    "lineTo",
+    67,
+    9.399999976158142,
+  ],
+  Array [
+    "lineTo",
+    68,
+    9.657142832875252,
+  ],
+  Array [
+    "lineTo",
+    69,
+    9.828571416437626,
+  ],
+  Array [
+    "lineTo",
+    70,
+    9.93142856284976,
+  ],
+  Array [
+    "lineTo",
+    71,
+    9.982857139548287,
+  ],
+  Array [
+    "lineTo",
+    72,
+    9.999999999318804,
+  ],
+  Array [
+    "lineTo",
+    73,
+    10,
+  ],
+  Array [
+    "lineTo",
+    74,
+    10,
+  ],
+  Array [
+    "lineTo",
+    75,
+    10,
+  ],
+  Array [
+    "lineTo",
+    76,
+    10,
+  ],
+  Array [
+    "lineTo",
+    77,
+    10,
+  ],
+  Array [
+    "lineTo",
+    78,
+    10,
+  ],
+  Array [
+    "lineTo",
+    79,
+    10,
+  ],
+  Array [
+    "lineTo",
+    79,
+    9.828571416437626,
+  ],
+  Array [
+    "lineTo",
+    78,
+    9.657142832875252,
+  ],
+  Array [
+    "lineTo",
+    77,
+    9.399999976158142,
+  ],
+  Array [
+    "lineTo",
+    76,
+    9.074285700917244,
+  ],
+  Array [
+    "lineTo",
+    75,
+    8.697142750024796,
+  ],
+  Array [
+    "lineTo",
+    74,
+    8.302856981754303,
+  ],
+  Array [
+    "lineTo",
+    73,
+    7.9257141053676605,
+  ],
+  Array [
+    "lineTo",
+    72,
+    7.599999904632568,
+  ],
+  Array [
+    "lineTo",
+    71,
+    7.342856824398041,
+  ],
+  Array [
+    "lineTo",
+    70,
+    7.171428203582764,
+  ],
+  Array [
+    "lineTo",
+    69,
+    7.068571150302887,
+  ],
+  Array [
+    "lineTo",
+    68,
+    7.017142474651337,
+  ],
+  Array [
+    "lineTo",
+    67,
+    6.9999998807907104,
+  ],
+  Array [
+    "lineTo",
+    66,
+    6.971428394317627,
+  ],
+  Array [
+    "lineTo",
+    65,
+    6.8857142329216,
+  ],
+  Array [
+    "lineTo",
+    64,
+    6.714285612106323,
+  ],
+  Array [
+    "lineTo",
+    63,
+    6.428571343421936,
+  ],
+  Array [
+    "lineTo",
+    62,
+    5.999999940395355,
+  ],
+  Array [
+    "lineTo",
+    61,
+    5.45714259147644,
+  ],
+  Array [
+    "lineTo",
+    60,
+    4.828571677207947,
+  ],
+  Array [
+    "lineTo",
+    59,
+    4.171428084373474,
+  ],
+  Array [
+    "lineTo",
+    58,
+    3.5428571701049805,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff9400",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    -5,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "fillRect",
+    5,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "fillRect",
+    15,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "fillRect",
+    25,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "fillRect",
+    35,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "fillRect",
+    45,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "fillRect",
+    55,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "fillRect",
+    65,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    80,
+    10,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+]
+`;
+
+exports[`ThreadActivityGraph matches the 2d canvas draw snapshot with CPU values with missing samples 1`] = `
+Array [
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#b1b1b360",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#b1b1b360",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#b1b1b360",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#b1b1b360",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#b1b1b360",
+          ],
+          Array [
+            0.25,
+            "#b1b1b360",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#b1b1b360",
+          ],
+          Array [
+            0.75,
+            "#b1b1b360",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "transparent",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#6200a460",
+          ],
+          Array [
+            0.25,
+            "#6200a460",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#6200a460",
+          ],
+          Array [
+            0.75,
+            "#6200a460",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#ffe90070",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#ffe90070",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#ffe90070",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#ffe90070",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#ffe90070",
+          ],
+          Array [
+            0.25,
+            "#ffe90070",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#ffe90070",
+          ],
+          Array [
+            0.75,
+            "#ffe90070",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#ff940060",
+          ],
+          Array [
+            0.25,
+            "#ff940060",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#ff940060",
+          ],
+          Array [
+            0.75,
+            "#ff940060",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#45a1ff60",
+          ],
+          Array [
+            0.25,
+            "#45a1ff60",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#45a1ff60",
+          ],
+          Array [
+            0.75,
+            "#45a1ff60",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#12bc0060",
+          ],
+          Array [
+            0.25,
+            "#12bc0060",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#12bc0060",
+          ],
+          Array [
+            0.75,
+            "#12bc0060",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#0060df60",
+          ],
+          Array [
+            0.25,
+            "#0060df60",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#0060df60",
+          ],
+          Array [
+            0.75,
+            "#0060df60",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "set globalCompositeOperation",
+    "lighter",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b3",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe129",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a4",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc00",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff9400",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    -0.4,
+    0,
+    0.8,
+    0,
+  ],
+  Array [
+    "set globalCompositeOperation",
+    "lighter",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b3",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe129",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a4",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    3,
+    10,
+  ],
+  Array [
+    "lineTo",
+    4,
+    10,
+  ],
+  Array [
+    "lineTo",
+    5,
+    10,
+  ],
+  Array [
+    "lineTo",
+    6,
+    10,
+  ],
+  Array [
+    "lineTo",
+    7,
+    10,
+  ],
+  Array [
+    "lineTo",
+    8,
+    10,
+  ],
+  Array [
+    "lineTo",
+    9,
+    10,
+  ],
+  Array [
+    "lineTo",
+    10,
+    10,
+  ],
+  Array [
+    "lineTo",
+    11,
+    10,
+  ],
+  Array [
+    "lineTo",
+    12,
+    10,
+  ],
+  Array [
+    "lineTo",
+    13,
+    10,
+  ],
+  Array [
+    "lineTo",
+    14,
+    10,
+  ],
+  Array [
+    "lineTo",
+    15,
+    10,
+  ],
+  Array [
+    "lineTo",
+    16,
+    10,
+  ],
+  Array [
+    "lineTo",
+    17,
+    10,
+  ],
+  Array [
+    "lineTo",
+    18,
+    10,
+  ],
+  Array [
+    "lineTo",
+    19,
+    10,
+  ],
+  Array [
+    "lineTo",
+    20,
+    10,
+  ],
+  Array [
+    "lineTo",
+    21,
+    10,
+  ],
+  Array [
+    "lineTo",
+    22,
+    10,
+  ],
+  Array [
+    "lineTo",
+    23,
+    10,
+  ],
+  Array [
+    "lineTo",
+    24,
+    10,
+  ],
+  Array [
+    "lineTo",
+    25,
+    10,
+  ],
+  Array [
+    "lineTo",
+    26,
+    10,
+  ],
+  Array [
+    "lineTo",
+    27,
+    10,
+  ],
+  Array [
+    "lineTo",
+    28,
+    10,
+  ],
+  Array [
+    "lineTo",
+    29,
+    10,
+  ],
+  Array [
+    "lineTo",
+    30,
+    10,
+  ],
+  Array [
+    "lineTo",
+    31,
+    10,
+  ],
+  Array [
+    "lineTo",
+    32,
+    10,
+  ],
+  Array [
+    "lineTo",
+    33,
+    10,
+  ],
+  Array [
+    "lineTo",
+    34,
+    10,
+  ],
+  Array [
+    "lineTo",
+    35,
+    10,
+  ],
+  Array [
+    "lineTo",
+    36,
+    10,
+  ],
+  Array [
+    "lineTo",
+    37,
+    10,
+  ],
+  Array [
+    "lineTo",
+    38,
+    10,
+  ],
+  Array [
+    "lineTo",
+    39,
+    10,
+  ],
+  Array [
+    "lineTo",
+    40,
+    10,
+  ],
+  Array [
+    "lineTo",
+    41,
+    10,
+  ],
+  Array [
+    "lineTo",
+    42,
+    10,
+  ],
+  Array [
+    "lineTo",
+    43,
+    10,
+  ],
+  Array [
+    "lineTo",
+    44,
+    10,
+  ],
+  Array [
+    "lineTo",
+    45,
+    10,
+  ],
+  Array [
+    "lineTo",
+    46,
+    10,
+  ],
+  Array [
+    "lineTo",
+    47,
+    10,
+  ],
+  Array [
+    "lineTo",
+    48,
+    10,
+  ],
+  Array [
+    "lineTo",
+    49,
+    10,
+  ],
+  Array [
+    "lineTo",
+    50,
+    10,
+  ],
+  Array [
+    "lineTo",
+    51,
+    10,
+  ],
+  Array [
+    "lineTo",
+    52,
+    10,
+  ],
+  Array [
+    "lineTo",
+    53,
+    10,
+  ],
+  Array [
+    "lineTo",
+    54,
+    10,
+  ],
+  Array [
+    "lineTo",
+    55,
+    10,
+  ],
+  Array [
+    "lineTo",
+    56,
+    10,
+  ],
+  Array [
+    "lineTo",
+    57,
+    10,
+  ],
+  Array [
+    "lineTo",
+    58,
+    10,
+  ],
+  Array [
+    "lineTo",
+    59,
+    10,
+  ],
+  Array [
+    "lineTo",
+    60,
+    10,
+  ],
+  Array [
+    "lineTo",
+    61,
+    10,
+  ],
+  Array [
+    "lineTo",
+    62,
+    10,
+  ],
+  Array [
+    "lineTo",
+    63,
+    10,
+  ],
+  Array [
+    "lineTo",
+    64,
+    10,
+  ],
+  Array [
+    "lineTo",
+    65,
+    10,
+  ],
+  Array [
+    "lineTo",
+    66,
+    10,
+  ],
+  Array [
+    "lineTo",
+    67,
+    10,
+  ],
+  Array [
+    "lineTo",
+    68,
+    10,
+  ],
+  Array [
+    "lineTo",
+    69,
+    10,
+  ],
+  Array [
+    "lineTo",
+    70,
+    10,
+  ],
+  Array [
+    "lineTo",
+    71,
+    10,
+  ],
+  Array [
+    "lineTo",
+    72,
+    10,
+  ],
+  Array [
+    "lineTo",
+    73,
+    10,
+  ],
+  Array [
+    "lineTo",
+    74,
+    10,
+  ],
+  Array [
+    "lineTo",
+    75,
+    10,
+  ],
+  Array [
+    "lineTo",
+    76,
+    10,
+  ],
+  Array [
+    "lineTo",
+    77,
+    10,
+  ],
+  Array [
+    "lineTo",
+    78,
+    10,
+  ],
+  Array [
+    "lineTo",
+    77,
+    9.999999999318804,
+  ],
+  Array [
+    "lineTo",
+    76,
+    9.982857139548287,
+  ],
+  Array [
+    "lineTo",
+    75,
+    9.93142856284976,
+  ],
+  Array [
+    "lineTo",
+    74,
+    9.828571416437626,
+  ],
+  Array [
+    "lineTo",
+    73,
+    9.638095200061798,
+  ],
+  Array [
+    "lineTo",
+    72,
+    9.314285665750504,
+  ],
+  Array [
+    "lineTo",
+    71,
+    8.845714181661606,
+  ],
+  Array [
+    "lineTo",
+    70,
+    8.220952302217484,
+  ],
+  Array [
+    "lineTo",
+    69,
+    7.445714175701141,
+  ],
+  Array [
+    "lineTo",
+    68,
+    6.563809514045715,
+  ],
+  Array [
+    "lineTo",
+    67,
+    5.638095140457153,
+  ],
+  Array [
+    "lineTo",
+    66,
+    4.767618775367737,
+  ],
+  Array [
+    "lineTo",
+    65,
+    4.060952067375183,
+  ],
+  Array [
+    "lineTo",
+    64,
+    3.5923808813095093,
+  ],
+  Array [
+    "lineTo",
+    63,
+    3.417142629623413,
+  ],
+  Array [
+    "lineTo",
+    62,
+    3.580952286720276,
+  ],
+  Array [
+    "lineTo",
+    61,
+    4.022856950759888,
+  ],
+  Array [
+    "lineTo",
+    60,
+    4.664762020111084,
+  ],
+  Array [
+    "lineTo",
+    59,
+    5.415237843990326,
+  ],
+  Array [
+    "lineTo",
+    58,
+    6.182857155799866,
+  ],
+  Array [
+    "lineTo",
+    57,
+    6.8761903047561646,
+  ],
+  Array [
+    "lineTo",
+    56,
+    7.457142770290375,
+  ],
+  Array [
+    "lineTo",
+    55,
+    7.893333286046982,
+  ],
+  Array [
+    "lineTo",
+    54,
+    8.21333333849907,
+  ],
+  Array [
+    "lineTo",
+    53,
+    8.443809449672699,
+  ],
+  Array [
+    "lineTo",
+    52,
+    8.60761895775795,
+  ],
+  Array [
+    "lineTo",
+    51,
+    8.727619051933289,
+  ],
+  Array [
+    "lineTo",
+    50,
+    8.828571364283562,
+  ],
+  Array [
+    "lineTo",
+    49,
+    8.904761895537376,
+  ],
+  Array [
+    "lineTo",
+    48,
+    8.954285681247711,
+  ],
+  Array [
+    "lineTo",
+    47,
+    8.982857093214989,
+  ],
+  Array [
+    "lineTo",
+    46,
+    8.996190428733826,
+  ],
+  Array [
+    "lineTo",
+    45,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    44,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    43,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    42,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    41,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    40,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    39,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    38,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    37,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    36,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    35,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    34,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    33,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    32,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    31,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    30,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    29,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    28,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    27,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    26,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    25,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    24,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    23,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    22,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    21,
+    8.999999985098839,
+  ],
+  Array [
+    "lineTo",
+    20,
+    8.982857093214989,
+  ],
+  Array [
+    "lineTo",
+    19,
+    8.897142857313156,
+  ],
+  Array [
+    "lineTo",
+    18,
+    8.69142860174179,
+  ],
+  Array [
+    "lineTo",
+    17,
+    8.314285576343536,
+  ],
+  Array [
+    "lineTo",
+    16,
+    7.7714285254478455,
+  ],
+  Array [
+    "lineTo",
+    15,
+    7.102856934070587,
+  ],
+  Array [
+    "lineTo",
+    14,
+    6.417142748832703,
+  ],
+  Array [
+    "lineTo",
+    13,
+    5.8399999141693115,
+  ],
+  Array [
+    "lineTo",
+    12,
+    5.5314284563064575,
+  ],
+  Array [
+    "lineTo",
+    11,
+    5.537142753601074,
+  ],
+  Array [
+    "lineTo",
+    10,
+    5.885714292526245,
+  ],
+  Array [
+    "lineTo",
+    9,
+    6.5142858028411865,
+  ],
+  Array [
+    "lineTo",
+    8,
+    7.3257142305374146,
+  ],
+  Array [
+    "lineTo",
+    7,
+    8.154285699129105,
+  ],
+  Array [
+    "lineTo",
+    6,
+    8.89142856001854,
+  ],
+  Array [
+    "lineTo",
+    5,
+    9.428571425378323,
+  ],
+  Array [
+    "lineTo",
+    4,
+    9.771428555250168,
+  ],
+  Array [
+    "lineTo",
+    3,
+    9.942857138812542,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc00",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    10,
+  ],
+  Array [
+    "lineTo",
+    1,
+    10,
+  ],
+  Array [
+    "lineTo",
+    2,
+    10,
+  ],
+  Array [
+    "lineTo",
+    3,
+    9.942857138812542,
+  ],
+  Array [
+    "lineTo",
+    4,
+    9.771428555250168,
+  ],
+  Array [
+    "lineTo",
+    5,
+    9.428571425378323,
+  ],
+  Array [
+    "lineTo",
+    6,
+    8.89142856001854,
+  ],
+  Array [
+    "lineTo",
+    7,
+    8.154285699129105,
+  ],
+  Array [
+    "lineTo",
+    8,
+    7.3257142305374146,
+  ],
+  Array [
+    "lineTo",
+    9,
+    6.5142858028411865,
+  ],
+  Array [
+    "lineTo",
+    10,
+    5.885714292526245,
+  ],
+  Array [
+    "lineTo",
+    11,
+    5.537142753601074,
+  ],
+  Array [
+    "lineTo",
+    12,
+    5.5314284563064575,
+  ],
+  Array [
+    "lineTo",
+    13,
+    5.8399999141693115,
+  ],
+  Array [
+    "lineTo",
+    14,
+    6.417142748832703,
+  ],
+  Array [
+    "lineTo",
+    15,
+    7.102856934070587,
+  ],
+  Array [
+    "lineTo",
+    16,
+    7.7714285254478455,
+  ],
+  Array [
+    "lineTo",
+    17,
+    8.314285576343536,
+  ],
+  Array [
+    "lineTo",
+    16,
+    7.71428570151329,
+  ],
+  Array [
+    "lineTo",
+    15,
+    6.874285340309143,
+  ],
+  Array [
+    "lineTo",
+    14,
+    5.845714211463928,
+  ],
+  Array [
+    "lineTo",
+    13,
+    4.7200000286102295,
+  ],
+  Array [
+    "lineTo",
+    12,
+    3.6342859268188477,
+  ],
+  Array [
+    "lineTo",
+    11,
+    2.7257144451141357,
+  ],
+  Array [
+    "lineTo",
+    10,
+    2.1219050884246826,
+  ],
+  Array [
+    "lineTo",
+    9,
+    1.9314289093017578,
+  ],
+  Array [
+    "lineTo",
+    8,
+    2.182856798171997,
+  ],
+  Array [
+    "lineTo",
+    7,
+    2.81333327293396,
+  ],
+  Array [
+    "lineTo",
+    6,
+    3.7371426820755005,
+  ],
+  Array [
+    "lineTo",
+    5,
+    4.841904640197754,
+  ],
+  Array [
+    "lineTo",
+    4,
+    5.984761714935303,
+  ],
+  Array [
+    "lineTo",
+    3,
+    7.055237889289856,
+  ],
+  Array [
+    "lineTo",
+    2,
+    7.973333299160004,
+  ],
+  Array [
+    "lineTo",
+    1,
+    8.75809520483017,
+  ],
+  Array [
+    "lineTo",
+    0,
+    9.314285665750504,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    63,
+    3.417142629623413,
+  ],
+  Array [
+    "lineTo",
+    64,
+    3.5923808813095093,
+  ],
+  Array [
+    "lineTo",
+    65,
+    4.060952067375183,
+  ],
+  Array [
+    "lineTo",
+    66,
+    4.767618775367737,
+  ],
+  Array [
+    "lineTo",
+    67,
+    5.638095140457153,
+  ],
+  Array [
+    "lineTo",
+    68,
+    6.563809514045715,
+  ],
+  Array [
+    "lineTo",
+    69,
+    7.445714175701141,
+  ],
+  Array [
+    "lineTo",
+    70,
+    8.220952302217484,
+  ],
+  Array [
+    "lineTo",
+    71,
+    8.845714181661606,
+  ],
+  Array [
+    "lineTo",
+    72,
+    9.314285665750504,
+  ],
+  Array [
+    "lineTo",
+    73,
+    9.638095200061798,
+  ],
+  Array [
+    "lineTo",
+    74,
+    9.828571416437626,
+  ],
+  Array [
+    "lineTo",
+    75,
+    9.93142856284976,
+  ],
+  Array [
+    "lineTo",
+    76,
+    9.982857139548287,
+  ],
+  Array [
+    "lineTo",
+    77,
+    9.999999999318804,
+  ],
+  Array [
+    "lineTo",
+    78,
+    10,
+  ],
+  Array [
+    "lineTo",
+    79,
+    10,
+  ],
+  Array [
+    "lineTo",
+    79,
+    9.537142850458622,
+  ],
+  Array [
+    "lineTo",
+    78,
+    9.222857132554054,
+  ],
+  Array [
+    "lineTo",
+    77,
+    8.822857141494751,
+  ],
+  Array [
+    "lineTo",
+    76,
+    8.434285670518875,
+  ],
+  Array [
+    "lineTo",
+    75,
+    8.051428496837616,
+  ],
+  Array [
+    "lineTo",
+    74,
+    7.708571255207062,
+  ],
+  Array [
+    "lineTo",
+    73,
+    7.4095237255096436,
+  ],
+  Array [
+    "lineTo",
+    72,
+    7.142857015132904,
+  ],
+  Array [
+    "lineTo",
+    71,
+    6.874285340309143,
+  ],
+  Array [
+    "lineTo",
+    70,
+    6.558095216751099,
+  ],
+  Array [
+    "lineTo",
+    69,
+    6.1485713720321655,
+  ],
+  Array [
+    "lineTo",
+    68,
+    5.638095140457153,
+  ],
+  Array [
+    "lineTo",
+    67,
+    5.038095116615295,
+  ],
+  Array [
+    "lineTo",
+    66,
+    4.424761533737183,
+  ],
+  Array [
+    "lineTo",
+    65,
+    3.88952374458313,
+  ],
+  Array [
+    "lineTo",
+    64,
+    3.523809313774109,
+  ],
+  Array [
+    "lineTo",
+    63,
+    3.399999737739563,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff9400",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    -3.3333333333333335,
+    0,
+    6.666666666666667,
+    10,
+  ],
+  Array [
+    "fillRect",
+    3.3333333333333335,
+    0,
+    6.666666666666667,
+    10,
+  ],
+  Array [
+    "fillRect",
+    10,
+    0,
+    6.666666666666667,
+    10,
+  ],
+  Array [
+    "fillRect",
+    43.333333333333336,
+    0,
+    6.666666666666667,
+    10,
+  ],
+  Array [
+    "fillRect",
+    50,
+    0,
+    6.666666666666667,
+    10,
+  ],
+  Array [
+    "fillRect",
+    56.666666666666664,
+    0,
+    6.666666666666667,
+    10,
+  ],
+  Array [
+    "fillRect",
+    63.333333333333336,
+    0,
+    6.666666666666667,
+    10,
+  ],
+  Array [
+    "fillRect",
+    70.00000000000001,
+    0,
+    6.666666666666667,
+    10,
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    80,
+    10,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+]
+`;
+
+exports[`ThreadActivityGraph matches the 2d canvas draw snapshot with only one CPU usage value 1`] = `
+Array [
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#b1b1b360",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#b1b1b360",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#b1b1b360",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#b1b1b360",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#b1b1b360",
+          ],
+          Array [
+            0.25,
+            "#b1b1b360",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#b1b1b360",
+          ],
+          Array [
+            0.75,
+            "#b1b1b360",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "transparent",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#6200a460",
+          ],
+          Array [
+            0.25,
+            "#6200a460",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#6200a460",
+          ],
+          Array [
+            0.75,
+            "#6200a460",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#ffe90070",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#ffe90070",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#ffe90070",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#ffe90070",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#ffe90070",
+          ],
+          Array [
+            0.25,
+            "#ffe90070",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#ffe90070",
+          ],
+          Array [
+            0.75,
+            "#ffe90070",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#ff940060",
+          ],
+          Array [
+            0.25,
+            "#ff940060",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#ff940060",
+          ],
+          Array [
+            0.75,
+            "#ff940060",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#45a1ff60",
+          ],
+          Array [
+            0.25,
+            "#45a1ff60",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#45a1ff60",
+          ],
+          Array [
+            0.75,
+            "#45a1ff60",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#12bc0060",
+          ],
+          Array [
+            0.25,
+            "#12bc0060",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#12bc0060",
+          ],
+          Array [
+            0.75,
+            "#12bc0060",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#0060df60",
+          ],
+          Array [
+            0.25,
+            "#0060df60",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#0060df60",
+          ],
+          Array [
+            0.75,
+            "#0060df60",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "set globalCompositeOperation",
+    "lighter",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b3",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe129",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a4",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc00",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff9400",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    -0.4,
+    0,
+    0.8,
+    0,
+  ],
+  Array [
+    "set globalCompositeOperation",
+    "lighter",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b3",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    10,
+  ],
+  Array [
+    "lineTo",
+    1,
+    10,
+  ],
+  Array [
+    "lineTo",
+    2,
+    10,
+  ],
+  Array [
+    "lineTo",
+    3,
+    10,
+  ],
+  Array [
+    "lineTo",
+    4,
+    10,
+  ],
+  Array [
+    "lineTo",
+    5,
+    10,
+  ],
+  Array [
+    "lineTo",
+    6,
+    10,
+  ],
+  Array [
+    "lineTo",
+    7,
+    10,
+  ],
+  Array [
+    "lineTo",
+    8,
+    10,
+  ],
+  Array [
+    "lineTo",
+    9,
+    10,
+  ],
+  Array [
+    "lineTo",
+    10,
+    10,
+  ],
+  Array [
+    "lineTo",
+    11,
+    10,
+  ],
+  Array [
+    "lineTo",
+    12,
+    10,
+  ],
+  Array [
+    "lineTo",
+    13,
+    10,
+  ],
+  Array [
+    "lineTo",
+    14,
+    10,
+  ],
+  Array [
+    "lineTo",
+    15,
+    10,
+  ],
+  Array [
+    "lineTo",
+    16,
+    10,
+  ],
+  Array [
+    "lineTo",
+    17,
+    10,
+  ],
+  Array [
+    "lineTo",
+    18,
+    10,
+  ],
+  Array [
+    "lineTo",
+    19,
+    10,
+  ],
+  Array [
+    "lineTo",
+    20,
+    10,
+  ],
+  Array [
+    "lineTo",
+    21,
+    10,
+  ],
+  Array [
+    "lineTo",
+    22,
+    10,
+  ],
+  Array [
+    "lineTo",
+    23,
+    10,
+  ],
+  Array [
+    "lineTo",
+    24,
+    10,
+  ],
+  Array [
+    "lineTo",
+    25,
+    10,
+  ],
+  Array [
+    "lineTo",
+    26,
+    10,
+  ],
+  Array [
+    "lineTo",
+    27,
+    10,
+  ],
+  Array [
+    "lineTo",
+    28,
+    10,
+  ],
+  Array [
+    "lineTo",
+    29,
+    10,
+  ],
+  Array [
+    "lineTo",
+    30,
+    10,
+  ],
+  Array [
+    "lineTo",
+    31,
+    10,
+  ],
+  Array [
+    "lineTo",
+    32,
+    10,
+  ],
+  Array [
+    "lineTo",
+    33,
+    10,
+  ],
+  Array [
+    "lineTo",
+    34,
+    10,
+  ],
+  Array [
+    "lineTo",
+    35,
+    10,
+  ],
+  Array [
+    "lineTo",
+    36,
+    10,
+  ],
+  Array [
+    "lineTo",
+    37,
+    10,
+  ],
+  Array [
+    "lineTo",
+    38,
+    10,
+  ],
+  Array [
+    "lineTo",
+    39,
+    10,
+  ],
+  Array [
+    "lineTo",
+    40,
+    10,
+  ],
+  Array [
+    "lineTo",
+    41,
+    10,
+  ],
+  Array [
+    "lineTo",
+    42,
+    10,
+  ],
+  Array [
+    "lineTo",
+    43,
+    10,
+  ],
+  Array [
+    "lineTo",
+    44,
+    10,
+  ],
+  Array [
+    "lineTo",
+    45,
+    10,
+  ],
+  Array [
+    "lineTo",
+    46,
+    10,
+  ],
+  Array [
+    "lineTo",
+    47,
+    10,
+  ],
+  Array [
+    "lineTo",
+    48,
+    10,
+  ],
+  Array [
+    "lineTo",
+    49,
+    10,
+  ],
+  Array [
+    "lineTo",
+    50,
+    10,
+  ],
+  Array [
+    "lineTo",
+    51,
+    10,
+  ],
+  Array [
+    "lineTo",
+    52,
+    10,
+  ],
+  Array [
+    "lineTo",
+    53,
+    10,
+  ],
+  Array [
+    "lineTo",
+    54,
+    10,
+  ],
+  Array [
+    "lineTo",
+    55,
+    10,
+  ],
+  Array [
+    "lineTo",
+    56,
+    10,
+  ],
+  Array [
+    "lineTo",
+    57,
+    10,
+  ],
+  Array [
+    "lineTo",
+    58,
+    10,
+  ],
+  Array [
+    "lineTo",
+    59,
+    10,
+  ],
+  Array [
+    "lineTo",
+    60,
+    10,
+  ],
+  Array [
+    "lineTo",
+    61,
+    10,
+  ],
+  Array [
+    "lineTo",
+    62,
+    10,
+  ],
+  Array [
+    "lineTo",
+    63,
+    10,
+  ],
+  Array [
+    "lineTo",
+    64,
+    10,
+  ],
+  Array [
+    "lineTo",
+    65,
+    10,
+  ],
+  Array [
+    "lineTo",
+    66,
+    10,
+  ],
+  Array [
+    "lineTo",
+    67,
+    10,
+  ],
+  Array [
+    "lineTo",
+    66,
+    9.942857138812542,
+  ],
+  Array [
+    "lineTo",
+    65,
+    9.771428555250168,
+  ],
+  Array [
+    "lineTo",
+    64,
+    9.428571425378323,
+  ],
+  Array [
+    "lineTo",
+    63,
+    8.85714277625084,
+  ],
+  Array [
+    "lineTo",
+    62,
+    7.999999970197678,
+  ],
+  Array [
+    "lineTo",
+    61,
+    6.914285719394684,
+  ],
+  Array [
+    "lineTo",
+    60,
+    5.657142698764801,
+  ],
+  Array [
+    "lineTo",
+    59,
+    4.342857003211975,
+  ],
+  Array [
+    "lineTo",
+    58,
+    3.0857139825820923,
+  ],
+  Array [
+    "lineTo",
+    57,
+    1.9999998807907104,
+  ],
+  Array [
+    "lineTo",
+    56,
+    1.1428570747375488,
+  ],
+  Array [
+    "lineTo",
+    55,
+    0.5714285373687744,
+  ],
+  Array [
+    "lineTo",
+    54,
+    0.22857129573822021,
+  ],
+  Array [
+    "lineTo",
+    53,
+    0.05714297294616699,
+  ],
+  Array [
+    "lineTo",
+    52,
+    0,
+  ],
+  Array [
+    "lineTo",
+    51,
+    0,
+  ],
+  Array [
+    "lineTo",
+    50,
+    0,
+  ],
+  Array [
+    "lineTo",
+    49,
+    0,
+  ],
+  Array [
+    "lineTo",
+    48,
+    0,
+  ],
+  Array [
+    "lineTo",
+    47,
+    0,
+  ],
+  Array [
+    "lineTo",
+    46,
+    0,
+  ],
+  Array [
+    "lineTo",
+    45,
+    0,
+  ],
+  Array [
+    "lineTo",
+    44,
+    0,
+  ],
+  Array [
+    "lineTo",
+    43,
+    0,
+  ],
+  Array [
+    "lineTo",
+    42,
+    0,
+  ],
+  Array [
+    "lineTo",
+    41,
+    0,
+  ],
+  Array [
+    "lineTo",
+    40,
+    0,
+  ],
+  Array [
+    "lineTo",
+    39,
+    0,
+  ],
+  Array [
+    "lineTo",
+    38,
+    0,
+  ],
+  Array [
+    "lineTo",
+    37,
+    0,
+  ],
+  Array [
+    "lineTo",
+    36,
+    0,
+  ],
+  Array [
+    "lineTo",
+    35,
+    0,
+  ],
+  Array [
+    "lineTo",
+    34,
+    0,
+  ],
+  Array [
+    "lineTo",
+    33,
+    0,
+  ],
+  Array [
+    "lineTo",
+    32,
+    0,
+  ],
+  Array [
+    "lineTo",
+    31,
+    0,
+  ],
+  Array [
+    "lineTo",
+    30,
+    0,
+  ],
+  Array [
+    "lineTo",
+    29,
+    0,
+  ],
+  Array [
+    "lineTo",
+    28,
+    0,
+  ],
+  Array [
+    "lineTo",
+    27,
+    0,
+  ],
+  Array [
+    "lineTo",
+    26,
+    0,
+  ],
+  Array [
+    "lineTo",
+    25,
+    0,
+  ],
+  Array [
+    "lineTo",
+    24,
+    0,
+  ],
+  Array [
+    "lineTo",
+    23,
+    0,
+  ],
+  Array [
+    "lineTo",
+    22,
+    0,
+  ],
+  Array [
+    "lineTo",
+    21,
+    0,
+  ],
+  Array [
+    "lineTo",
+    20,
+    0,
+  ],
+  Array [
+    "lineTo",
+    19,
+    0,
+  ],
+  Array [
+    "lineTo",
+    18,
+    0,
+  ],
+  Array [
+    "lineTo",
+    17,
+    0,
+  ],
+  Array [
+    "lineTo",
+    16,
+    0,
+  ],
+  Array [
+    "lineTo",
+    15,
+    0,
+  ],
+  Array [
+    "lineTo",
+    14,
+    0,
+  ],
+  Array [
+    "lineTo",
+    13,
+    0,
+  ],
+  Array [
+    "lineTo",
+    12,
+    0,
+  ],
+  Array [
+    "lineTo",
+    11,
+    0,
+  ],
+  Array [
+    "lineTo",
+    10,
+    0,
+  ],
+  Array [
+    "lineTo",
+    9,
+    0,
+  ],
+  Array [
+    "lineTo",
+    8,
+    0,
+  ],
+  Array [
+    "lineTo",
+    7,
+    0,
+  ],
+  Array [
+    "lineTo",
+    6,
+    0.05714297294616699,
+  ],
+  Array [
+    "lineTo",
+    5,
+    0.22857129573822021,
+  ],
+  Array [
+    "lineTo",
+    4,
+    0.5714285373687744,
+  ],
+  Array [
+    "lineTo",
+    3,
+    1.314285397529602,
+  ],
+  Array [
+    "lineTo",
+    2,
+    2.4571430683135986,
+  ],
+  Array [
+    "lineTo",
+    1,
+    4.399999976158142,
+  ],
+  Array [
+    "lineTo",
+    0,
+    6.228571236133575,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe129",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a4",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc00",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff9400",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    -5,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "fillRect",
+    35,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    80,
+    10,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "set globalCompositeOperation",
+    "lighter",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b3",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    9,
+    10,
+  ],
+  Array [
+    "lineTo",
+    10,
+    10,
+  ],
+  Array [
+    "lineTo",
+    11,
+    10,
+  ],
+  Array [
+    "lineTo",
+    12,
+    10,
+  ],
+  Array [
+    "lineTo",
+    13,
+    10,
+  ],
+  Array [
+    "lineTo",
+    14,
+    10,
+  ],
+  Array [
+    "lineTo",
+    15,
+    10,
+  ],
+  Array [
+    "lineTo",
+    16,
+    10,
+  ],
+  Array [
+    "lineTo",
+    17,
+    10,
+  ],
+  Array [
+    "lineTo",
+    18,
+    10,
+  ],
+  Array [
+    "lineTo",
+    19,
+    10,
+  ],
+  Array [
+    "lineTo",
+    20,
+    10,
+  ],
+  Array [
+    "lineTo",
+    21,
+    10,
+  ],
+  Array [
+    "lineTo",
+    22,
+    10,
+  ],
+  Array [
+    "lineTo",
+    23,
+    10,
+  ],
+  Array [
+    "lineTo",
+    24,
+    10,
+  ],
+  Array [
+    "lineTo",
+    25,
+    10,
+  ],
+  Array [
+    "lineTo",
+    26,
+    10,
+  ],
+  Array [
+    "lineTo",
+    27,
+    10,
+  ],
+  Array [
+    "lineTo",
+    28,
+    10,
+  ],
+  Array [
+    "lineTo",
+    29,
+    10,
+  ],
+  Array [
+    "lineTo",
+    30,
+    10,
+  ],
+  Array [
+    "lineTo",
+    31,
+    10,
+  ],
+  Array [
+    "lineTo",
+    32,
+    10,
+  ],
+  Array [
+    "lineTo",
+    33,
+    10,
+  ],
+  Array [
+    "lineTo",
+    34,
+    10,
+  ],
+  Array [
+    "lineTo",
+    35,
+    10,
+  ],
+  Array [
+    "lineTo",
+    36,
+    10,
+  ],
+  Array [
+    "lineTo",
+    37,
+    10,
+  ],
+  Array [
+    "lineTo",
+    38,
+    10,
+  ],
+  Array [
+    "lineTo",
+    39,
+    10,
+  ],
+  Array [
+    "lineTo",
+    40,
+    10,
+  ],
+  Array [
+    "lineTo",
+    41,
+    10,
+  ],
+  Array [
+    "lineTo",
+    42,
+    10,
+  ],
+  Array [
+    "lineTo",
+    43,
+    10,
+  ],
+  Array [
+    "lineTo",
+    44,
+    10,
+  ],
+  Array [
+    "lineTo",
+    45,
+    10,
+  ],
+  Array [
+    "lineTo",
+    46,
+    10,
+  ],
+  Array [
+    "lineTo",
+    47,
+    10,
+  ],
+  Array [
+    "lineTo",
+    48,
+    10,
+  ],
+  Array [
+    "lineTo",
+    49,
+    10,
+  ],
+  Array [
+    "lineTo",
+    50,
+    10,
+  ],
+  Array [
+    "lineTo",
+    51,
+    10,
+  ],
+  Array [
+    "lineTo",
+    52,
+    10,
+  ],
+  Array [
+    "lineTo",
+    53,
+    10,
+  ],
+  Array [
+    "lineTo",
+    54,
+    10,
+  ],
+  Array [
+    "lineTo",
+    55,
+    10,
+  ],
+  Array [
+    "lineTo",
+    56,
+    10,
+  ],
+  Array [
+    "lineTo",
+    57,
+    10,
+  ],
+  Array [
+    "lineTo",
+    58,
+    10,
+  ],
+  Array [
+    "lineTo",
+    59,
+    10,
+  ],
+  Array [
+    "lineTo",
+    60,
+    10,
+  ],
+  Array [
+    "lineTo",
+    61,
+    10,
+  ],
+  Array [
+    "lineTo",
+    62,
+    10,
+  ],
+  Array [
+    "lineTo",
+    63,
+    10,
+  ],
+  Array [
+    "lineTo",
+    64,
+    10,
+  ],
+  Array [
+    "lineTo",
+    65,
+    10,
+  ],
+  Array [
+    "lineTo",
+    66,
+    10,
+  ],
+  Array [
+    "lineTo",
+    65,
+    9.945864658802748,
+  ],
+  Array [
+    "lineTo",
+    64,
+    9.780451115220785,
+  ],
+  Array [
+    "lineTo",
+    63,
+    9.446616545319557,
+  ],
+  Array [
+    "lineTo",
+    62,
+    8.8872180134058,
+  ],
+  Array [
+    "lineTo",
+    61,
+    8.045112788677216,
+  ],
+  Array [
+    "lineTo",
+    60,
+    6.971428394317627,
+  ],
+  Array [
+    "lineTo",
+    59,
+    5.723308324813843,
+  ],
+  Array [
+    "lineTo",
+    58,
+    4.412029981613159,
+  ],
+  Array [
+    "lineTo",
+    57,
+    3.151879906654358,
+  ],
+  Array [
+    "lineTo",
+    56,
+    2.0571428537368774,
+  ],
+  Array [
+    "lineTo",
+    55,
+    1.1879700422286987,
+  ],
+  Array [
+    "lineTo",
+    54,
+    0.601503849029541,
+  ],
+  Array [
+    "lineTo",
+    53,
+    0.24661660194396973,
+  ],
+  Array [
+    "lineTo",
+    52,
+    0.06616532802581787,
+  ],
+  Array [
+    "lineTo",
+    51,
+    0.003007650375366211,
+  ],
+  Array [
+    "lineTo",
+    50,
+    0,
+  ],
+  Array [
+    "lineTo",
+    49,
+    0,
+  ],
+  Array [
+    "lineTo",
+    48,
+    0,
+  ],
+  Array [
+    "lineTo",
+    47,
+    0,
+  ],
+  Array [
+    "lineTo",
+    46,
+    0,
+  ],
+  Array [
+    "lineTo",
+    45,
+    0,
+  ],
+  Array [
+    "lineTo",
+    44,
+    0,
+  ],
+  Array [
+    "lineTo",
+    43,
+    0,
+  ],
+  Array [
+    "lineTo",
+    42,
+    0,
+  ],
+  Array [
+    "lineTo",
+    41,
+    0,
+  ],
+  Array [
+    "lineTo",
+    40,
+    0,
+  ],
+  Array [
+    "lineTo",
+    39,
+    0,
+  ],
+  Array [
+    "lineTo",
+    38,
+    0,
+  ],
+  Array [
+    "lineTo",
+    37,
+    0,
+  ],
+  Array [
+    "lineTo",
+    36,
+    0,
+  ],
+  Array [
+    "lineTo",
+    35,
+    0,
+  ],
+  Array [
+    "lineTo",
+    34,
+    0,
+  ],
+  Array [
+    "lineTo",
+    33,
+    0,
+  ],
+  Array [
+    "lineTo",
+    32,
+    0,
+  ],
+  Array [
+    "lineTo",
+    31,
+    0,
+  ],
+  Array [
+    "lineTo",
+    30,
+    0,
+  ],
+  Array [
+    "lineTo",
+    29,
+    0,
+  ],
+  Array [
+    "lineTo",
+    28,
+    0,
+  ],
+  Array [
+    "lineTo",
+    27,
+    0,
+  ],
+  Array [
+    "lineTo",
+    26,
+    0,
+  ],
+  Array [
+    "lineTo",
+    25,
+    0,
+  ],
+  Array [
+    "lineTo",
+    24,
+    0,
+  ],
+  Array [
+    "lineTo",
+    23,
+    0.04812002182006836,
+  ],
+  Array [
+    "lineTo",
+    22,
+    0.20150363445281982,
+  ],
+  Array [
+    "lineTo",
+    21,
+    0.5172932147979736,
+  ],
+  Array [
+    "lineTo",
+    20,
+    1.0526317358016968,
+  ],
+  Array [
+    "lineTo",
+    19,
+    1.8646615743637085,
+  ],
+  Array [
+    "lineTo",
+    18,
+    2.914285659790039,
+  ],
+  Array [
+    "lineTo",
+    17,
+    4.1443610191345215,
+  ],
+  Array [
+    "lineTo",
+    16,
+    5.449624061584473,
+  ],
+  Array [
+    "lineTo",
+    15,
+    6.715789437294006,
+  ],
+  Array [
+    "lineTo",
+    14,
+    7.8285714983940125,
+  ],
+  Array [
+    "lineTo",
+    13,
+    8.721804469823837,
+  ],
+  Array [
+    "lineTo",
+    12,
+    9.33834582567215,
+  ],
+  Array [
+    "lineTo",
+    11,
+    9.717293232679367,
+  ],
+  Array [
+    "lineTo",
+    10,
+    9.915789477527142,
+  ],
+  Array [
+    "lineTo",
+    9,
+    9.990977443521842,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b360",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe129",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a4",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc00",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff9400",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    32.89473684210527,
+    0,
+    10,
+    10,
+  ],
+]
+`;
+
+exports[`ThreadActivityGraph matches the component snapshot 1`] = `
+<div
+  class="timelineTrackThread expanded"
+>
+  <div
+    class="timelineMarkers selected"
+    data-testid="TimelineMarkersJank"
+  >
+    <div
+      class="react-contextmenu-wrapper"
+    >
+      <div>
+        <canvas
+          class="timelineMarkersCanvas"
+          height="10"
+          width="80"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    class="threadActivityGraph"
+  >
+    <div>
+      <canvas
+        class="threadActivityGraphCanvas threadActivityGraphCanvas"
+        height="10"
+        width="80"
+      >
+        <h2>
+          Activity Graph for 
+          Test Track
+        </h2>
+        <p>
+          This graph shows a visual chart of thread activity.
+        </p>
+      </canvas>
+    </div>
+  </div>
+  <div
+    class="threadSampleGraph"
+  >
+    <div>
+      <canvas
+        class="threadSampleGraphCanvas threadSampleGraphCanvas"
+        height="10"
+        width="80"
+      >
+        <h2>
+          Stack Graph for 
+          Test Track
+        </h2>
+        <p>
+          This graph charts the stack height of each sample.
+        </p>
+      </canvas>
+    </div>
+  </div>
+  <div
+    class="timelineEmptyThreadIndicator"
+  />
+</div>
+`;

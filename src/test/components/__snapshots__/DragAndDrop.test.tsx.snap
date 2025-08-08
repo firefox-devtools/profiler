@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`app/DragAndDrop matches the snapshot with custom overlay 1`] = `
+<div
+  class="dragAndDropArea"
+>
+  Target area here
+  <div
+    class="dragAndDropOverlayWrapper"
+  >
+    <div
+      class="dragAndDropOverlay"
+    >
+      Drop a saved profile here
+    </div>
+  </div>
+</div>
+`;
+
+exports[`app/DragAndDrop matches the snapshot with default overlay 1`] = `
+<div
+  class="dragAndDropArea"
+>
+  Target area here
+</div>
+`;
+
+exports[`app/DragAndDrop matches the snapshot with default overlay 2`] = `
+<div
+  class="dragAndDropOverlayWrapper"
+>
+  <div
+    class="dragAndDropOverlay"
+  >
+    Drop a saved profile here
+  </div>
+</div>
+`;

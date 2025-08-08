@@ -1,0 +1,138 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`TrackProcessCPU draws a dot that matches the snapshot 1`] = `
+<div
+  class="timelineTrackProcessCPUGraphDot"
+  style="left: 15px; top: 18.6px;"
+/>
+`;
+
+exports[`TrackProcessCPU has a tooltip that matches the snapshot 1`] = `
+<div
+  class="timelineTrackProcessCPUTooltip"
+>
+  <div
+    class="timelineTrackProcessCPUTooltipLine"
+  >
+    CPU:
+     
+    <span
+      class="timelineTrackProcessCPUTooltipNumber"
+    >
+      50%
+    </span>
+  </div>
+</div>
+`;
+
+exports[`TrackProcessCPU matches the 2d canvas draw snapshot 1`] = `
+Array [
+  Array [
+    "clearRect",
+    0,
+    0,
+    80,
+    25,
+  ],
+  Array [
+    "set lineWidth",
+    2,
+  ],
+  Array [
+    "set lineJoin",
+    "bevel",
+  ],
+  Array [
+    "set strokeStyle",
+    "#737373",
+  ],
+  Array [
+    "set fillStyle",
+    "#73737388",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    24,
+  ],
+  Array [
+    "lineTo",
+    15,
+    17.866666666666667,
+  ],
+  Array [
+    "lineTo",
+    20,
+    1,
+  ],
+  Array [
+    "lineTo",
+    30,
+    1,
+  ],
+  Array [
+    "lineTo",
+    40,
+    19.4,
+  ],
+  Array [
+    "lineTo",
+    50,
+    12.5,
+  ],
+  Array [
+    "lineTo",
+    60,
+    17.1,
+  ],
+  Array [
+    "lineTo",
+    70,
+    21.7,
+  ],
+  Array [
+    "lineTo",
+    80,
+    21.7,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "lineTo",
+    80,
+    25,
+  ],
+  Array [
+    "lineTo",
+    0,
+    25,
+  ],
+  Array [
+    "fill",
+  ],
+]
+`;
+
+exports[`TrackProcessCPU matches the component snapshot 1`] = `
+<div
+  class="timelineTrackProcessCPU"
+  style="height: 25px; --graph-height: 25px;"
+>
+  <div
+    class="timelineTrackProcessCPUGraph"
+  >
+    <canvas
+      class="timelineTrackProcessCPUCanvas"
+      height="25"
+      width="80"
+    />
+    <div
+      class="timelineEmptyThreadIndicator"
+    />
+  </div>
+</div>
+`;
