@@ -1,21 +1,58 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 import { stripIndent, oneLine } from 'common-tags';
-import type { GetState, Dispatch, MixedObject } from 'firefox-profiler/types';
+import type {
+  GetState,
+  Dispatch,
+  MixedObject,
+  Profile,
+  Thread,
+  Marker,
+} from 'firefox-profiler/types';
 import { selectorsForConsole } from 'firefox-profiler/selectors';
 import actions from 'firefox-profiler/actions';
 import { shortenUrl } from 'firefox-profiler/utils/shorten-url';
 import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { formatTimestamp } from 'firefox-profiler/utils/format-numbers';
 import { togglePseudoStrategy } from 'firefox-profiler/components/app/AppLocalizationProvider';
+import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still
 // special-cases the `value` property: if it's missing it throws an error. Using
 // this indirection seems to work around this issue.
 // See https://github.com/facebook/flow/issues/285
 const defineProperty = Object.defineProperty;
+
+export type ExtraPropertiesOnWindowForConsole = {
+  profile: Profile;
+  filteredThread: Thread;
+  callTree: CallTree;
+  filteredMarkers: Marker[];
+  selectedMarker: Marker | null;
+  experimental: {
+    enableEventDelayTracks(): void;
+    enableCPUGraphs(): void;
+    enableProcessCPUTracks(): void;
+  };
+  togglePseudoLocalization: (pseudoStrategy?: string) => void;
+  toggleTimelineType: (timelineType?: string) => void;
+  retrieveRawProfileDataFromBrowser: () => Promise<
+    MixedObject | ArrayBuffer | null
+  >;
+  saveToDisk: (
+    unknownObject: ArrayBuffer | unknown,
+    filename?: string
+  ) => Promise<void>;
+  extractGeckoLogs: () => string;
+  totalMarkerDuration: (markers: any) => number;
+  shortenUrl: typeof shortenUrl;
+  getState: GetState;
+  selectors: typeof selectorsForConsole;
+  dispatch: Dispatch;
+  actions: typeof actions;
+  persistTooltips: boolean;
+};
 
 /**
  * This function adds various values from the Redux Store to the window object so that
@@ -24,8 +61,8 @@ const defineProperty = Object.defineProperty;
 export function addDataToWindowObject(
   getState: GetState,
   dispatch: Dispatch,
-  target: MixedObject = window
-) {
+  target: Partial<ExtraPropertiesOnWindowForConsole> = window as {}
+): ExtraPropertiesOnWindowForConsole {
   defineProperty(target, 'profile', {
     enumerable: true,
     get() {
@@ -157,7 +194,7 @@ export function addDataToWindowObject(
   };
 
   target.retrieveRawProfileDataFromBrowser = async function (): Promise<
-    MixedObject | ArrayBuffer | null,
+    MixedObject | ArrayBuffer | null
   > {
     // Note that a new connection is created instead of reusing the one in the
     // redux state, as an attempt to make it work even in the worst situations.
@@ -181,7 +218,7 @@ export function addDataToWindowObject(
   };
 
   target.saveToDisk = async function (
-    unknownObject: ArrayBuffer | mixed,
+    unknownObject: ArrayBuffer | unknown,
     filename?: string
   ) {
     if (unknownObject === undefined || unknownObject === null) {
@@ -192,7 +229,7 @@ export function addDataToWindowObject(
     const arrayBufferOrString =
       typeof unknownObject === 'string' ||
       String(unknownObject) === '[object ArrayBuffer]'
-        ? unknownObject
+        ? (unknownObject as string | ArrayBuffer)
         : JSON.stringify(unknownObject);
 
     const blob = new Blob([arrayBufferOrString], {
@@ -214,12 +251,12 @@ export function addDataToWindowObject(
   // using the MOZ_LOG canonical format. All logs are saved as a debug log
   // because the log level information isn't saved in these markers.
   target.extractGeckoLogs = function () {
-    function pad(p, c) {
+    function pad(p: string | number, c: number) {
       return String(p).padStart(c, '0');
     }
 
     // This transforms a timestamp to a string as output by mozlog usually.
-    function d2s(ts) {
+    function d2s(ts: number) {
       const d = new Date(ts);
       // new Date rounds down the timestamp (in milliseconds) to the lower integer,
       // let's get the microseconds and nanoseconds differently.
@@ -246,18 +283,24 @@ export function addDataToWindowObject(
         if (
           startTime !== null &&
           markers.data[i] &&
-          markers.data[i].type === 'Log' &&
+          markers.data[i]?.type === 'Log' &&
           startTime >= range.start &&
           startTime <= range.end
         ) {
           const data = markers.data[i];
-          const strTimestamp = d2s(
-            profile.meta.startTime + markers.startTime[i]
-          );
-          const processName = thread.processName ?? 'Unknown Process';
-          // TODO: lying about the log level as it's not available yet in the markers
-          const statement = `${strTimestamp} - [${processName} ${thread.pid}: ${thread.name}]: D/${data.module} ${data.name.trim()}`;
-          logs.push(statement);
+          const markerStartTime = markers.startTime[i];
+          if (
+            data &&
+            markerStartTime !== null &&
+            (data as any).module &&
+            (data as any).name
+          ) {
+            const strTimestamp = d2s(profile.meta.startTime + markerStartTime);
+            const processName = thread.processName ?? 'Unknown Process';
+            // TODO: lying about the log level as it's not available yet in the markers
+            const statement = `${strTimestamp} - [${processName} ${thread.pid}: ${thread.name}]: D/${(data as any).module} ${(data as any).name.trim()}`;
+            logs.push(statement);
+          }
         }
       }
     }
@@ -265,7 +308,7 @@ export function addDataToWindowObject(
     return logs.sort().join('\n');
   };
 
-  target.totalMarkerDuration = function (markers) {
+  target.totalMarkerDuration = function (markers: any) {
     if (!Array.isArray(markers)) {
       console.error('totalMarkerDuration expects an array of markers');
       return 0;
@@ -296,6 +339,8 @@ export function addDataToWindowObject(
   // For debugging purposes, allow tooltips to persist. This aids in inspecting
   // the DOM structure.
   target.persistTooltips = false;
+
+  return target as any;
 }
 
 export function logFriendlyPreamble() {

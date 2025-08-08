@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
-
 // Import all global css. Ensure that this is these CSS imports happen before any
 // JS imports happen, as this determines the rule order. Global CSS should be easy
 // to overwrite with a simple class name.
@@ -16,7 +14,7 @@ import '../res/css/categories.css';
 import '../res/css/network.css';
 import 'react-splitter-layout/lib/index.css';
 
-import React from 'react';
+// React imported for JSX in Root component
 import { createRoot } from 'react-dom/client';
 import { Root } from './components/app/Root';
 import createStore from './app-logic/create-store';
@@ -32,7 +30,7 @@ import { ensureExists } from './utils/flow';
 // Note that ga isn't included nowadays. We still keep this code because we
 // intend to replace ga with Glean in the future, and this will still be useful.
 if (process.env.NODE_ENV === 'development') {
-  window.ga = (event: string, ...payload: mixed[]) => {
+  window.ga = (event: string, ...payload: unknown[]) => {
     const style = 'color: #FF6D00; font-weight: bold';
     console.log(`[analytics] %c"${event}"`, style, ...payload);
   };
@@ -104,7 +102,7 @@ const root = createRoot(
 );
 root.render(<Root store={store} />);
 
-addDataToWindowObject(store.getState, store.dispatch);
+addDataToWindowObject(store.getState, store.dispatch as any);
 if (process.env.NODE_ENV === 'production') {
   // Don't clutter the console in development mode.
   logFriendlyPreamble();
