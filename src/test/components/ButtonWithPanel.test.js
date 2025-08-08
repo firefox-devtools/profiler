@@ -44,7 +44,7 @@ describe('shared/ButtonWithPanel', () => {
       <ButtonWithPanel
         className="button"
         label="My Button"
-        initialOpen={true}
+        open={true}
         panelClassName="panel"
         panelContent={<div>Panel content</div>}
       />
@@ -73,7 +73,7 @@ describe('shared/ButtonWithPanel', () => {
         <ButtonWithPanel
           className="button"
           label="My Button"
-          initialOpen={true}
+          open={true}
           panelContent={<div data-testid="panel-content">Panel content</div>}
         />
       );
