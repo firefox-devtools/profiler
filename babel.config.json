@@ -1,33 +1,65 @@
 {
-  "presets": [
-    [
-      "@babel/preset-env",
-      {
-        // Allow `@babel/preset-env` to import polyfills from core-js as needed.
-        "useBuiltIns": "usage",
-        // Help `@babel/preset-env` make use of the correct core-js polyfills.
-        "corejs": "3.9",
-        // Perform transforms closest to targets defined in `.browserslistrc`.
-        "bugfixes": true
-      }
-    ],
-    [
-      "@babel/preset-react",
-      {
-        // When spreading props, use inline object with spread elements
-        // directly instead of Babel's `extend` helper or `Object.assign`.
-        "useSpread": true
-      }
-    ],
-    // The "all" property is needed for Flow to properly parse the syntax.
-    // It has trouble understanding when the flow comment is the second comment.
-    // See: https://github.com/babel/babel/issues/9845
-    [
-      "@babel/preset-flow",
-      {
-        "all": true
-      }
-    ]
+  "overrides": [
+    {
+      "test": "**/*.js",
+      "presets": [
+        [
+          "@babel/preset-env",
+          {
+            // Allow `@babel/preset-env` to import polyfills from core-js as needed.
+            "useBuiltIns": "usage",
+            // Help `@babel/preset-env` make use of the correct core-js polyfills.
+            "corejs": "3.9",
+            // Perform transforms closest to targets defined in `.browserslistrc`.
+            "bugfixes": true
+          }
+        ],
+        [
+          "@babel/preset-react",
+          {
+            // When spreading props, use inline object with spread elements
+            // directly instead of Babel's `extend` helper or `Object.assign`.
+            "useSpread": true
+          }
+        ],
+        // The "all" property is needed for Flow to properly parse the syntax.
+        // It has trouble understanding when the flow comment is the second comment.
+        // See: https://github.com/babel/babel/issues/9845
+        [
+          "@babel/preset-flow",
+          {
+            "all": true
+          }
+        ]
+      ]
+    },
+    {
+      "test": ["**/*.ts", "**/*.tsx"],
+      "presets": [
+        [
+          "@babel/preset-env",
+          {
+            "useBuiltIns": "usage",
+            "corejs": "3.9",
+            "bugfixes": true
+          }
+        ],
+        [
+          "@babel/preset-react",
+          {
+            "useSpread": true,
+            "runtime": "automatic"
+          }
+        ],
+        [
+          "@babel/preset-typescript",
+          {
+            "isTSX": true,
+            "allExtensions": true
+          }
+        ]
+      ]
+    }
   ],
   "plugins": [
     // Though `@babel/plugin-transform-class-properties` is already included
