@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import { oneLine } from 'common-tags';
 import { getLastVisibleThreadTabSlug } from 'firefox-profiler/selectors/app';
 import {
@@ -138,7 +136,7 @@ export function changeSelectedCallNode(
 export function changeRightClickedCallNode(
   threadsKey: ThreadsKey,
   callNodePath: CallNodePath | null
-) {
+): Action {
   return {
     type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
     threadsKey,
@@ -223,27 +221,27 @@ export function changeSelectedThreads(
 
 // This structure contains information needed to find the selected track from a
 // track reference.
-type TrackInformation = {|
-  type: 'global' | 'local',
+type TrackInformation = {
+  type: 'global' | 'local';
   // This is the thread index for this specific track reference. This is null if
   // this track isn't a thread track.
-  threadIndex: null | ThreadIndex,
+  threadIndex: null | ThreadIndex;
   // This is the thread index for the thread related to this track.
-  relatedThreadIndex: ThreadIndex,
+  relatedThreadIndex: ThreadIndex;
   // This is the track index for the global track where this track is located.
-  globalTrackIndex: TrackIndex,
+  globalTrackIndex: TrackIndex;
   // This is the PID for the process that this track belongs to.
-  pid: Pid,
+  pid: Pid;
   // This is the track index of the local track in its process group. This is
   // null for global tracks.
-  localTrackIndex: null | TrackIndex,
+  localTrackIndex: null | TrackIndex;
   // This is the tab that should be selected from this track. `null` if this
   // track doesn't have a prefered tab.
-  relatedTab: null | TabSlug,
+  relatedTab: null | TabSlug;
   // This is the track reference that was passed to
   // getInformationFromTrackReference to generate this structure.
-  trackReference: TrackReference,
-|};
+  trackReference: TrackReference;
+};
 
 /**
  * This function collects some information about a track by requesting
@@ -305,7 +303,7 @@ function getInformationFromTrackReference(
         trackReference.pid
       );
       const commonLocalProperties = {
-        type: 'local',
+        type: 'local' as const,
         trackReference,
         pid: trackReference.pid,
         globalTrackIndex,
@@ -433,7 +431,7 @@ function toggleOneTrack(
  *   0   => if trackA and trackB represent the same track
  */
 function compareTrackOrder(
-  state,
+  state: State,
   trackA: TrackInformation,
   trackB: TrackInformation
 ): number {
@@ -442,7 +440,8 @@ function compareTrackOrder(
     // Then we need to look at their local order
     // If one is a global track, its localTrackIndex is null, and therefore the
     // indexOf operation will return -1, which is exactly what we want.
-    const localTrackOrder = getLocalTrackOrder(state, trackA.pid);
+    const localTrackOrder: ReadonlyArray<TrackIndex | null> =
+      getLocalTrackOrder(state, trackA.pid);
     const orderA = localTrackOrder.indexOf(trackA.localTrackIndex);
     const orderB = localTrackOrder.indexOf(trackB.localTrackIndex);
     return orderA - orderB;
@@ -505,9 +504,10 @@ function findThreadsBetweenTracks(
       // all tracks.
       if (fromTrack.type === 'local') {
         shouldAddStartGlobalTrack = false;
-        localTrackOrderStart = localTrackOrder.indexOf(
-          fromTrack.localTrackIndex
-        );
+        localTrackOrderStart =
+          fromTrack.localTrackIndex === null
+            ? -1
+            : localTrackOrder.indexOf(fromTrack.localTrackIndex);
       }
     }
 
@@ -518,7 +518,10 @@ function findThreadsBetweenTracks(
         // No local track should be added
         localTrackOrderEnd = -1;
       } else {
-        localTrackOrderEnd = localTrackOrder.indexOf(toTrack.localTrackIndex);
+        localTrackOrderEnd =
+          toTrack.localTrackIndex === null
+            ? -1
+            : localTrackOrder.indexOf(toTrack.localTrackIndex);
       }
     }
 
@@ -624,7 +627,7 @@ function selectRangeOfTracks(
  */
 export function selectTrackWithModifiers(
   trackReference: TrackReference,
-  modifiers: $Shape<KeyboardModifiers> = {}
+  modifiers: Partial<KeyboardModifiers> = {}
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     // These get assigned based on the track type.
@@ -698,7 +701,10 @@ export function selectTrackFromTid(tid: Tid): ThunkAction<void> {
         break;
       }
       default:
-        throw assertExhaustiveCheck(trackReference.type);
+        throw assertExhaustiveCheck(
+          trackReference,
+          'Unhandled TrackReference type.'
+        );
     }
 
     dispatch(selectTrackWithModifiers(trackReference));
@@ -880,7 +886,11 @@ export function showProvidedTracks(
     // their children are going to be made visible.
     const globalTracks = getGlobalTracks(getState());
     for (const [globalTrackIndex, globalTrack] of globalTracks.entries()) {
-      if (globalTrack.pid && localTracksByPidToShow.has(globalTrack.pid)) {
+      if (
+        globalTrack.type === 'process' &&
+        globalTrack.pid &&
+        localTracksByPidToShow.has(globalTrack.pid)
+      ) {
         globalTracksToShow.add(globalTrackIndex);
       }
     }
@@ -962,7 +972,10 @@ export function hideProvidedTracks(
           pid
         );
 
-        if (globalTrack.mainThreadIndex === null) {
+        if (
+          globalTrack.type === 'process' &&
+          globalTrack.mainThreadIndex === null
+        ) {
           // Since the process has no main thread, the entire process should be hidden.
           dispatch(hideGlobalTrack(globalTrackIndex));
         }
@@ -1054,7 +1067,7 @@ export function isolateProcess(
     const localTracks = getLocalTracks(getState(), globalTrack.pid);
 
     // Carry over the old selected thread indexes to the new ones.
-    const newSelectedThreadIndexes = new Set();
+    const newSelectedThreadIndexes = new Set<ThreadIndex>();
     {
       // Consider the global track
       if (
@@ -1066,6 +1079,7 @@ export function isolateProcess(
       // Now look at all of the local tracks
       for (const localTrack of localTracks) {
         if (
+          localTrack.type === 'thread' &&
           localTrack.threadIndex !== undefined &&
           oldSelectedThreadIndexes.has(localTrack.threadIndex)
         ) {
@@ -1104,7 +1118,7 @@ export function isolateProcess(
 
     dispatch({
       type: 'ISOLATE_PROCESS',
-      hiddenGlobalTracks: new Set(
+      hiddenGlobalTracks: new Set<TrackIndex>(
         trackIndexes.filter((i) => i !== isolatedTrackIndex)
       ),
       isolatedTrackIndex,
@@ -1131,7 +1145,9 @@ export function isolateScreenshot(
       // Make sure that a thread really exists.
       return;
     }
-    const hiddenGlobalTracks = new Set(getHiddenGlobalTracks(getState()));
+    const hiddenGlobalTracks = new Set<TrackIndex>(
+      getHiddenGlobalTracks(getState())
+    );
     for (let i = 0; i < globalTracks.length; i++) {
       const track = globalTracks[i];
       if (track.type === 'screenshots' && i !== isolatedTrackIndex) {
@@ -1318,7 +1334,10 @@ export function hideLocalTrack(
       //       local tracks.
       //   2.) There is no main thread for the process, attempt to hide the
       //       processes' global track.
-      if (globalTrack.mainThreadIndex === null) {
+      if (
+        globalTrack.type === 'process' &&
+        globalTrack.mainThreadIndex === null
+      ) {
         // Since the process has no main thread, the entire process should be hidden.
         dispatch(hideGlobalTrack(globalTrackIndex));
         return;
@@ -1351,6 +1370,7 @@ export function hideLocalTrack(
 
       if (
         newSelectedThreadIndexes.size === 0 &&
+        globalTrack.type === 'process' &&
         globalTrack.mainThreadIndex !== null &&
         globalTrack.mainThreadIndex !== undefined
       ) {
@@ -1437,7 +1457,7 @@ export function isolateLocalTrack(
     const localTrackIndexes = getLocalTrackOrder(getState(), pid);
 
     // Try to find a selected thread index.
-    const selectedThreadIndexes = new Set();
+    const selectedThreadIndexes = new Set<ThreadIndex>();
     if (localTrackToIsolate.type === 'thread') {
       selectedThreadIndexes.add(localTrackToIsolate.threadIndex);
     } else if (
@@ -1462,10 +1482,10 @@ export function isolateLocalTrack(
     dispatch({
       type: 'ISOLATE_LOCAL_TRACK',
       pid,
-      hiddenGlobalTracks: new Set(
+      hiddenGlobalTracks: new Set<TrackIndex>(
         globalTrackIndexes.filter((i) => i !== globalTrackIndex)
       ),
-      hiddenLocalTracks: new Set(
+      hiddenLocalTracks: new Set<TrackIndex>(
         localTrackIndexes.filter((i) => i !== isolatedTrackIndex)
       ),
       selectedThreadIndexes,
@@ -1934,7 +1954,7 @@ export function closeBottomBox(): ThunkAction<void> {
 }
 
 export function handleCallNodeTransformShortcut(
-  event: SyntheticKeyboardEvent<>,
+  event: React.KeyboardEvent<HTMLElement>,
   threadsKey: ThreadsKey,
   callNodeIndex: IndexIntoCallNodeTable
 ): ThunkAction<void> {

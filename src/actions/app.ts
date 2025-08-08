@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import { oneLine } from 'common-tags';
 import {
   getSelectedTab,
@@ -19,6 +17,7 @@ import {
   getLocalTracksByPid,
   getThreads,
   getCounters,
+  getProfile,
 } from 'firefox-profiler/selectors/profile';
 import { sendAnalytics } from 'firefox-profiler/utils/analytics';
 import {
@@ -109,7 +108,7 @@ export function changeSidebarOpenState(tab: TabSlug, isOpen: boolean): Action {
 }
 
 export function invalidatePanelLayout(): Action {
-  return { type: 'INCREMENT_PANEL_LAYOUT_GENERATION' };
+  return { type: 'INCREMENT_PANEL_LAYOUT_GENERATION' as const };
 }
 
 /**
@@ -117,7 +116,7 @@ export function invalidatePanelLayout(): Action {
  * time a user does this, the hint goes away.
  */
 export function setHasZoomedViaMousewheel() {
-  return { type: 'HAS_ZOOMED_VIA_MOUSEWHEEL' };
+  return { type: 'HAS_ZOOMED_VIA_MOUSEWHEEL' as const };
 }
 
 /**
@@ -204,7 +203,7 @@ export function reportTrackThreadHeight(
  * uploads a profile. We only want to remember this when we fist open the profile.
  */
 export function dismissNewlyPublished(): Action {
-  return { type: 'DISMISS_NEWLY_PUBLISHED' };
+  return { type: 'DISMISS_NEWLY_PUBLISHED' as const };
 }
 
 /**
@@ -212,14 +211,14 @@ export function dismissNewlyPublished(): Action {
  * profiles with the drag and drop component.
  */
 export function startDragging(): Action {
-  return { type: 'START_DRAGGING' };
+  return { type: 'START_DRAGGING' as const };
 }
 
 /**
  * Called when a user has stopped dragging a file.
  */
 export function stopDragging(): Action {
-  return { type: 'STOP_DRAGGING' };
+  return { type: 'STOP_DRAGGING' as const };
 }
 
 /**
@@ -227,14 +226,14 @@ export function stopDragging(): Action {
  * the app know that we shouldn't create a default overlay.
  */
 export function registerDragAndDropOverlay(): Action {
-  return { type: 'REGISTER_DRAG_AND_DROP_OVERLAY' };
+  return { type: 'REGISTER_DRAG_AND_DROP_OVERLAY' as const };
 }
 
 /**
  * Called when a custom drag and drop overlay is unmounted.
  */
 export function unregisterDragAndDropOverlay(): Action {
-  return { type: 'UNREGISTER_DRAG_AND_DROP_OVERLAY' };
+  return { type: 'UNREGISTER_DRAG_AND_DROP_OVERLAY' as const };
 }
 
 /*
@@ -273,7 +272,8 @@ export function enableEventDelayTracks(): ThunkAction<boolean> {
     const localTrackOrderByPid = initializeLocalTrackOrderByPid(
       getLocalTrackOrderByPid(getState()),
       localTracksByPid,
-      null
+      null,
+      getProfile(getState())
     );
     dispatch({
       type: 'ENABLE_EVENT_DELAY_TRACKS',
@@ -355,7 +355,8 @@ export function enableExperimentalProcessCPUTracks(): ThunkAction<boolean> {
     const localTrackOrderByPid = initializeLocalTrackOrderByPid(
       getLocalTrackOrderByPid(getState()),
       localTracksByPid,
-      null
+      null,
+      getProfile(getState())
     );
 
     dispatch({
@@ -383,13 +384,16 @@ export function setCurrentProfileUploadedInformation(
 export function profileRemotelyDeleted(): Action {
   // Ideally we should store the current profile data in a local indexeddb, and
   // set the URL to /local/<indexeddb-key>.
-  return { type: 'PROFILE_REMOTELY_DELETED' };
+  return { type: 'PROFILE_REMOTELY_DELETED' as const };
 }
 
 export function updateBrowserConnectionStatus(
   browserConnectionStatus: BrowserConnectionStatus
 ): Action {
-  return { type: 'UPDATE_BROWSER_CONNECTION_STATUS', browserConnectionStatus };
+  return {
+    type: 'UPDATE_BROWSER_CONNECTION_STATUS',
+    browserConnectionStatus,
+  };
 }
 
 export function toggleOpenCategoryInSidebar(

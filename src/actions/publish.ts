@@ -1,12 +1,11 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import { stripIndent } from 'common-tags';
 
 import { uploadBinaryProfileData } from 'firefox-profiler/profile-logic/profile-store';
 import { sendAnalytics } from 'firefox-profiler/utils/analytics';
+import type { SanitizeProfileResult } from 'firefox-profiler/profile-logic/sanitize';
 import {
   getUploadGeneration,
   getSanitizedProfile,
@@ -40,7 +39,7 @@ import type {
 } from 'firefox-profiler/types';
 
 export function toggleCheckedSharingOptions(
-  slug: $Keys<CheckedSharingOptions>
+  slug: keyof CheckedSharingOptions
 ): Action {
   return {
     type: 'TOGGLE_CHECKED_SHARING_OPTION',
@@ -78,7 +77,7 @@ export function updateUploadProgress(uploadProgress: number): Action {
 /**
  * A profile upload failed.
  */
-export function uploadFailed(error: mixed): Action {
+export function uploadFailed(error: unknown): Action {
   return { type: 'UPLOAD_FAILED', error };
 }
 
@@ -91,7 +90,7 @@ export function uploadFailed(error: mixed): Action {
 async function persistJustUploadedProfileInformationToDb(
   profileToken: string,
   jwtToken: string | null,
-  sanitizedInformation,
+  sanitizedInformation: SanitizeProfileResult,
   prepublishedState: State
 ): Promise<void> {
   if (process.env.NODE_ENV === 'test' && !window.indexedDB) {
@@ -103,7 +102,7 @@ async function persistJustUploadedProfileInformationToDb(
   }
 
   const zeroAt = getZeroAt(prepublishedState);
-  const adjustRange = (range) => ({
+  const adjustRange = (range: StartEndRange) => ({
     start: range.start - zeroAt,
     end: range.end - zeroAt,
   });
@@ -243,8 +242,7 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
       dispatch(uploadCompressionStarted(abortfunction));
 
       const sanitizedInformation = getSanitizedProfile(prePublishedState);
-      const gzipData: Uint8Array =
-        await getSanitizedProfileData(prePublishedState);
+      const gzipData = await getSanitizedProfileData(prePublishedState);
 
       // The previous line was async, check to make sure that this request is still valid.
       // The upload could have been aborted while we were compressing the data.
