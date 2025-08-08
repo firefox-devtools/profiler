@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import * as React from 'react';
 import {
   TIMELINE_MARGIN_RIGHT,
@@ -66,38 +64,38 @@ import './index.css';
 
 const STACK_FRAME_HEIGHT = 16;
 
-type StateProps = {|
-  +thread: Thread,
-  +weightType: WeightType,
-  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-  +combinedTimingRows: CombinedTimingRows,
-  +sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap,
-  +timeRange: StartEndRange,
-  +interval: Milliseconds,
-  +previewSelection: PreviewSelection,
-  +threadsKey: ThreadsKey,
-  +callNodeInfo: CallNodeInfo,
-  +categories: CategoryList,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +scrollToSelectionGeneration: number,
-  +getMarker: (MarkerIndex) => Marker,
-  +userTimings: MarkerIndex[],
-  +displayStackType: boolean,
-  +hasFilteredCtssSamples: boolean,
-  +useStackChartSameWidths: boolean,
-|};
+type StateProps = {
+  readonly thread: Thread;
+  readonly weightType: WeightType;
+  readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null;
+  readonly combinedTimingRows: CombinedTimingRows;
+  readonly sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap;
+  readonly timeRange: StartEndRange;
+  readonly interval: Milliseconds;
+  readonly previewSelection: PreviewSelection;
+  readonly threadsKey: ThreadsKey;
+  readonly callNodeInfo: CallNodeInfo;
+  readonly categories: CategoryList;
+  readonly selectedCallNodeIndex: IndexIntoCallNodeTable | null;
+  readonly rightClickedCallNodeIndex: IndexIntoCallNodeTable | null;
+  readonly scrollToSelectionGeneration: number;
+  readonly getMarker: (param: MarkerIndex) => Marker;
+  readonly userTimings: MarkerIndex[];
+  readonly displayStackType: boolean;
+  readonly hasFilteredCtssSamples: boolean;
+  readonly useStackChartSameWidths: boolean;
+};
 
-type DispatchProps = {|
-  +changeSelectedCallNode: typeof changeSelectedCallNode,
-  +changeRightClickedCallNode: typeof changeRightClickedCallNode,
-  +updatePreviewSelection: typeof updatePreviewSelection,
-  +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
-  +updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen,
-  +changeMouseTimePosition: typeof changeMouseTimePosition,
-|};
+type DispatchProps = {
+  readonly changeSelectedCallNode: typeof changeSelectedCallNode;
+  readonly changeRightClickedCallNode: typeof changeRightClickedCallNode;
+  readonly updatePreviewSelection: typeof updatePreviewSelection;
+  readonly handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut;
+  readonly updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen;
+  readonly changeMouseTimePosition: typeof changeMouseTimePosition;
+};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class StackChartImpl extends React.PureComponent<Props> {
   _viewport: HTMLDivElement | null = null;
@@ -146,7 +144,7 @@ class StackChartImpl extends React.PureComponent<Props> {
     }
   };
 
-  _handleKeyDown = (event: SyntheticKeyboardEvent<HTMLElement>) => {
+  _handleKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
     const {
       threadsKey,
       thread,
@@ -187,21 +185,23 @@ class StackChartImpl extends React.PureComponent<Props> {
         const funcName = thread.stringTable.getString(
           thread.funcTable.name[funcIndex]
         );
-        event.clipboardData.setData('text/plain', funcName);
+        if (event.clipboardData) {
+          event.clipboardData.setData('text/plain', funcName);
+        }
       }
     }
   };
 
-  componentDidMount() {
+  override componentDidMount() {
     document.addEventListener('copy', this._onCopy, false);
     this._focusViewport();
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     document.removeEventListener('copy', this._onCopy, false);
   }
 
-  render() {
+  override render() {
     const {
       thread,
       threadsKey,
@@ -293,7 +293,7 @@ class StackChartImpl extends React.PureComponent<Props> {
   }
 }
 
-export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
+export const StackChart = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => {
     const showUserTimings = getShowUserTimings(state);
     const combinedTimingRows = showUserTimings
@@ -340,8 +340,8 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
 
 // This function is given the StackChartCanvas's chartProps.
 function viewportNeedsUpdate(
-  prevProps: { +combinedTimingRows: CombinedTimingRows },
-  newProps: { +combinedTimingRows: CombinedTimingRows }
+  prevProps: { readonly combinedTimingRows: CombinedTimingRows },
+  newProps: { readonly combinedTimingRows: CombinedTimingRows }
 ) {
   return prevProps.combinedTimingRows !== newProps.combinedTimingRows;
 }

@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import * as React from 'react';
 import memoize from 'memoize-immutable';
 import { withChartViewport, type Viewport } from '../shared/chart/Viewport';
@@ -49,44 +47,43 @@ import type {
   CallTreeTimingsNonInverted,
 } from 'firefox-profiler/profile-logic/call-tree';
 
-export type OwnProps = {|
-  +thread: Thread,
-  +weightType: WeightType,
-  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-  +unfilteredThread: Thread,
-  +ctssSampleIndexOffset: number,
-  +maxStackDepthPlusOne: number,
-  +flameGraphTiming: FlameGraphTiming,
-  +callNodeInfo: CallNodeInfo,
-  +callTree: CallTree,
-  +stackFrameHeight: CssPixels,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
-  +onRightClick: (IndexIntoCallNodeTable | null) => void,
-  +onDoubleClick: (IndexIntoCallNodeTable | null) => void,
-  +shouldDisplayTooltips: () => boolean,
-  +scrollToSelectionGeneration: number,
-  +categories: CategoryList,
-  +interval: Milliseconds,
-  +isInverted: boolean,
-  +callTreeSummaryStrategy: CallTreeSummaryStrategy,
-  +ctssSamples: SamplesLikeTable,
-  +unfilteredCtssSamples: SamplesLikeTable,
-  +tracedTiming: CallTreeTimingsNonInverted | null,
-  +displayStackType: boolean,
-|};
+export type OwnProps = {
+  readonly thread: Thread;
+  readonly weightType: WeightType;
+  readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null;
+  readonly unfilteredThread: Thread;
+  readonly ctssSampleIndexOffset: number;
+  readonly maxStackDepthPlusOne: number;
+  readonly flameGraphTiming: FlameGraphTiming;
+  readonly callNodeInfo: CallNodeInfo;
+  readonly callTree: CallTree;
+  readonly stackFrameHeight: CssPixels;
+  readonly selectedCallNodeIndex: IndexIntoCallNodeTable | null;
+  readonly rightClickedCallNodeIndex: IndexIntoCallNodeTable | null;
+  readonly onSelectionChange: (param: IndexIntoCallNodeTable | null) => void;
+  readonly onRightClick: (param: IndexIntoCallNodeTable | null) => void;
+  readonly onDoubleClick: (param: IndexIntoCallNodeTable | null) => void;
+  readonly shouldDisplayTooltips: () => boolean;
+  readonly scrollToSelectionGeneration: number;
+  readonly categories: CategoryList;
+  readonly interval: Milliseconds;
+  readonly isInverted: boolean;
+  readonly callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  readonly ctssSamples: SamplesLikeTable;
+  readonly unfilteredCtssSamples: SamplesLikeTable;
+  readonly tracedTiming: CallTreeTimingsNonInverted | null;
+  readonly displayStackType: boolean;
+};
 
-type Props = {|
-  ...OwnProps,
+type Props = OwnProps & {
   // Bring in the viewport props from the higher order Viewport component.
-  +viewport: Viewport,
-|};
+  readonly viewport: Viewport;
+};
 
-type HoveredStackTiming = {|
-  +depth: FlameGraphDepth,
-  +flameGraphTimingIndex: IndexIntoFlameGraphTiming,
-|};
+type HoveredStackTiming = {
+  readonly depth: FlameGraphDepth;
+  readonly flameGraphTimingIndex: IndexIntoFlameGraphTiming;
+};
 
 import './Canvas.css';
 
@@ -117,10 +114,10 @@ function snapValueToMultipleOf(
 }
 
 class FlameGraphCanvasImpl extends React.PureComponent<Props> {
-  _textMeasurement: null | TextMeasurement;
+  _textMeasurement: TextMeasurement | null = null;
   _textMeasurementCssToDeviceScale: number = 1;
 
-  componentDidUpdate(prevProps) {
+  override componentDidUpdate(prevProps: Props) {
     // If the stack depth changes (say, when changing the time range
     // selection or applying a transform), move the viewport
     // vertically so that its offset from the base of the flame graph
@@ -351,7 +348,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
   _getHoveredStackInfo = ({
     depth,
     flameGraphTimingIndex,
-  }: HoveredStackTiming): React.Node => {
+  }: HoveredStackTiming): React.ReactNode => {
     const {
       thread,
       unfilteredThread,
@@ -499,7 +496,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     return null;
   };
 
-  render() {
+  override render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
 
     return (
