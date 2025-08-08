@@ -2,11 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
 import { sendAnalytics } from './analytics';
 
 const MAX_TIMINGS_PER_LABEL = 3;
-const _timingsPerLabel = {};
+const _timingsPerLabel: Record<string, number> = {};
 let _performanceMeasureGeneration = 0;
 
 /**
@@ -15,7 +14,7 @@ let _performanceMeasureGeneration = 0;
  */
 export function timeCode<T>(label: string, codeAsACallback: () => T): T {
   if (typeof performance !== 'undefined') {
-    let markName;
+    let markName: string | undefined;
     if (process.env.NODE_ENV === 'development') {
       if (performance.mark) {
         markName = `time-code-${_performanceMeasureGeneration++}`;
@@ -30,7 +29,7 @@ export function timeCode<T>(label: string, codeAsACallback: () => T): T {
     // Only log timing information in development mode.
     if (process.env.NODE_ENV === 'development') {
       // Record a UserTiming for this timeCode call.
-      if (performance.measure) {
+      if (performance.measure && markName) {
         performance.measure(`TimeCode: ${label}`, markName);
       }
       const style = 'font-weight: bold; color: #f0a';
