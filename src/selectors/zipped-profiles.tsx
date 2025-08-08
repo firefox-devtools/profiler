@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import { createSelector } from 'reselect';
 import { getProfileUrl } from './url-state';
 import { ensureExists } from '../utils/flow';
@@ -26,7 +24,7 @@ export const getSelectedZipFileIndex: Selector<IndexIntoZipFileTable | null> = (
   state
 ) => getZippedProfilesState(state).selectedZipFileIndex;
 export const getExpandedZipFileIndexes: Selector<
-  Array<IndexIntoZipFileTable | null>,
+  Array<IndexIntoZipFileTable | null>
 > = (state) => getZippedProfilesState(state).expandedZipFileIndexes;
 export const getZipFileState: Selector<ZipFileState> = (state) =>
   getZippedProfilesState(state).zipFile;

@@ -1,8 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-// @flow
 import { createSelector } from 'reselect';
 
 import {
@@ -15,7 +13,6 @@ import { getRawProfileSharedData } from '../profile';
 
 import type {
   Selector,
-  $ReturnType,
   RawThread,
   JsTracerTable,
   MarkerTimingRows,
@@ -35,8 +32,8 @@ import { hasUsefulSamples } from '../../profile-logic/profile-data';
  * is done that so that the local type definition with `Selector<T>` is the canonical
  * definition for the type of the selector.
  */
-export type ComposedSelectorsPerThread = $ReturnType<
-  typeof getComposedSelectorsPerThread,
+export type ComposedSelectorsPerThread = ReturnType<
+  typeof getComposedSelectorsPerThread
 >;
 
 /**
@@ -45,11 +42,11 @@ export type ComposedSelectorsPerThread = $ReturnType<
  * elements that we don't use here, and that's OK.
  */
 type NeededThreadSelectors = {
-  getRawThread: Selector<RawThread>,
-  getIsNetworkChartEmptyInFullRange: Selector<boolean>,
-  getJsTracerTable: Selector<JsTracerTable | null>,
-  getUserTimingMarkerTiming: Selector<MarkerTimingRows>,
-  getStackTimingByDepth: Selector<StackTimingByDepth>,
+  getRawThread: Selector<RawThread>;
+  getIsNetworkChartEmptyInFullRange: Selector<boolean>;
+  getJsTracerTable: Selector<JsTracerTable | null>;
+  getUserTimingMarkerTiming: Selector<MarkerTimingRows>;
+  getStackTimingByDepth: Selector<StackTimingByDepth>;
 };
 
 /**
@@ -63,7 +60,7 @@ export function getComposedSelectorsPerThread(
    * effort is made to not show a tab when there is no data available for it or
    * when it's absurd.
    */
-  const getUsefulTabs: Selector<$ReadOnlyArray<TabSlug>> = createSelector(
+  const getUsefulTabs: Selector<ReadonlyArray<TabSlug>> = createSelector(
     getRawProfileSharedData,
     threadSelectors.getRawThread,
     threadSelectors.getIsNetworkChartEmptyInFullRange,
