@@ -1,7 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
 import {
   EditorView,
@@ -10,12 +9,8 @@ import {
   gutter,
   gutterLineClass,
 } from '@codemirror/view';
-import {
-  EditorState,
-  StateField,
-  StateEffect,
-  RangeSet,
-} from '@codemirror/state';
+import type { EditorState } from '@codemirror/state';
+import { StateField, StateEffect, RangeSet } from '@codemirror/state';
 
 import type { LineTimings } from 'firefox-profiler/types';
 
@@ -23,7 +18,7 @@ import { emptyLineTimings } from 'firefox-profiler/profile-logic/line-timings';
 
 // This gutter marker applies the "cm-nonZeroLine" class to gutter elements.
 const nonZeroLineGutterMarker = new (class extends GutterMarker {
-  elementClass = 'cm-nonZeroLine';
+  override elementClass = 'cm-nonZeroLine';
 })();
 
 // This "decoration" applies the "cm-nonZeroLine" class to the line of assembly
@@ -58,7 +53,7 @@ const timingsField = StateField.define<LineTimings>({
 // Then they are sorted, because our caller wants to have a sorted list.
 function getSortedStartPositionsOfNonZeroLines(state: EditorState): number[] {
   const timings = state.field(timingsField);
-  const nonZeroLines = new Set();
+  const nonZeroLines = new Set<number>();
   for (const lineNumber of timings.totalLineHits.keys()) {
     nonZeroLines.add(lineNumber);
   }
@@ -66,7 +61,7 @@ function getSortedStartPositionsOfNonZeroLines(state: EditorState): number[] {
     nonZeroLines.add(lineNumber);
   }
   const lineCount = state.doc.lines;
-  const positions = [...nonZeroLines]
+  const positions = Array.from(nonZeroLines)
     .filter((l) => l >= 1 && l <= lineCount)
     .map((lineNumber) => state.doc.line(lineNumber).from);
   positions.sort((a, b) => a - b);
@@ -111,7 +106,7 @@ export class StringMarker extends GutterMarker {
     this._s = s;
   }
 
-  toDOM() {
+  override toDOM() {
     return document.createTextNode(this._s);
   }
 }
@@ -125,7 +120,7 @@ const totalTimingsGutter = gutter({
     const lineNumber = view.state.doc.lineAt(line.from).number;
     const timings = view.state.field(timingsField);
     const totalTime = timings.totalLineHits.get(lineNumber);
-    return totalTime !== undefined ? new StringMarker(totalTime) : null;
+    return totalTime !== undefined ? new StringMarker(String(totalTime)) : null;
   },
   lineMarkerChange(update) {
     // Return true if the update affects the total timings in the gutter.
@@ -144,7 +139,7 @@ const selfTimingsGutter = gutter({
     const lineNumber = view.state.doc.lineAt(line.from).number;
     const timings = view.state.field(timingsField);
     const selfTime = timings.selfLineHits.get(lineNumber);
-    return selfTime !== undefined ? new StringMarker(selfTime) : null;
+    return selfTime !== undefined ? new StringMarker(String(selfTime)) : null;
   },
   lineMarkerChange(update) {
     // Return true if the update affects the self timings in the gutter.

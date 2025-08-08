@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// @flow
-
 import { assertExhaustiveCheck } from './flow';
 import {
   getDownloadRecipeForSourceFile,
@@ -20,8 +18,8 @@ import type {
 } from 'firefox-profiler/types';
 
 export type FetchSourceResult =
-  | { type: 'SUCCESS', source: string }
-  | { type: 'ERROR', errors: SourceCodeLoadingError[] };
+  | { type: 'SUCCESS'; source: string }
+  | { type: 'ERROR'; errors: SourceCodeLoadingError[] };
 
 /**
  * Fetch the source code for a file path from the web.
@@ -83,7 +81,7 @@ export async function fetchSource(
         break;
       }
       default:
-        throw assertExhaustiveCheck(queryResult.type);
+        throw assertExhaustiveCheck(queryResult);
     }
   }
 
@@ -171,12 +169,12 @@ export async function fetchSource(
     }
 
     default:
-      throw assertExhaustiveCheck(downloadRecipe.type);
+      throw assertExhaustiveCheck(downloadRecipe);
   }
   return { type: 'ERROR', errors };
 }
 
-function convertResponseJsonToSourceCode(responseJson: MixedObject): string {
+function convertResponseJsonToSourceCode(responseJson: any): string {
   if (!('source' in responseJson) || typeof responseJson.source !== 'string') {
     throw new Error('No string "source" property on API response');
   }
