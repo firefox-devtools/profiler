@@ -33,7 +33,7 @@
     // Module Resolution
     "resolveJsonModule": true,
     "baseUrl": ".",
-    "typeRoots": [],
+    "typeRoots": ["node_modules/@types"],
     "paths": {
       "firefox-profiler/*": ["./src/*"],
       "firefox-profiler-res/*": ["./res/*"]
