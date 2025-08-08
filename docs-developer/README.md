@@ -1,6 +1,6 @@
 # Firefox Profiler development docs
 
-[profiler.firefox.com](https://profiler.firefox.com) is a client for reading profiles from the profiler component built inside of Firefox, known as the Gecko Profiler. It also can read in formats from [a variety of sources](./loading-in-profiles.md). The front-end client is written using JavaScript and [Flow types](https://flow.org/) using [React](https://facebook.github.io/react/) for the UI components and [Redux](http://redux.js.org/) for the state management. Firefox can interact with this client by directly injecting profiles into the webpage via a WebChannel mechanism. This code lives in Mozilla Central under [devtools/client/performance-new](https://searchfox.org/mozilla-central/source/devtools/client/performance-new)
+[profiler.firefox.com](https://profiler.firefox.com) is a client for reading profiles from the profiler component built inside of Firefox, known as the Gecko Profiler. It also can read in formats from [a variety of sources](./loading-in-profiles.md). The front-end client is written in [TypeScript](https://www.typescriptlang.org/) using [React](https://facebook.github.io/react/) for the UI components and [Redux](http://redux.js.org/) for the state management. Firefox can interact with this client by directly injecting profiles into the webpage via a WebChannel mechanism. This code lives in Mozilla Central under [devtools/client/performance-new](https://searchfox.org/mozilla-central/source/devtools/client/performance-new)
 
 ## The Docs
 
@@ -14,7 +14,7 @@
     - [React component testing](../src/test/components)
     - [Redux store testing](../src/test/store)
     - [Unit testing](../src/test/unit)
-  - [Flow types - `/src/types`](../src/types)
+  - [Types - `/src/types`](../src/types)
   - [Utility files - `/src/utils`](../src/utils)
 - [Profiler architecture](./architecture.md)
 - [Loading in profiles from various sources](./loading-in-profiles.md)

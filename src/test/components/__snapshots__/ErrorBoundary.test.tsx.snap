@@ -1,0 +1,80 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`app/LocalizedErrorBoundary matches the snapshot 1`] = `
+<body>
+  <div>
+    <div
+      class="appErrorBoundary"
+    >
+      <div
+        class="appErrorBoundaryContents"
+      >
+        <div
+          class="photon-message-bar photon-message-bar-error photon-message-bar-inner-content"
+        >
+          <div
+            class="photon-message-bar-inner-text appErrorBoundaryInnerText"
+          >
+            <p>
+              Oops, there was an error
+            </p>
+            <p>
+              Error: This is an error.
+              .
+            </p>
+            <p>
+              Please report this issue to the developers, including the full
+error as displayed in the Developer Tools’ Web Console.
+            </p>
+          </div>
+          <a
+            class="photon-button photon-button-micro photon-message-bar-action-button"
+            href="https://github.com/firefox-devtools/profiler/issues/new?title=An%20error%20occurred%20in%20Firefox%20Profiler"
+            rel="noreferrer"
+            target="_blank"
+          >
+            Report the error on GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+`;
+
+exports[`app/NonLocalizedErrorBoundary matches the snapshot 1`] = `
+<div
+  class="appErrorBoundary"
+>
+  <div
+    class="appErrorBoundaryContents"
+  >
+    <div
+      class="photon-message-bar photon-message-bar-error photon-message-bar-inner-content"
+    >
+      <div
+        class="photon-message-bar-inner-text appErrorBoundaryInnerText"
+      >
+        <p>
+          Oops, there was an error
+        </p>
+        <p>
+          Error: This is an error.
+          .
+        </p>
+        <p>
+          Please report this error to the developers, including the full error as displayed in the Developer Tools’ Web Console.
+        </p>
+      </div>
+      <a
+        class="photon-button photon-button-micro photon-message-bar-action-button"
+        href="https://github.com/firefox-devtools/profiler/issues/new?title=An%20error%20occurred%20in%20Firefox%20Profiler"
+        rel="noreferrer"
+        target="_blank"
+      >
+        Report the error on GitHub
+      </a>
+    </div>
+  </div>
+</div>
+`;

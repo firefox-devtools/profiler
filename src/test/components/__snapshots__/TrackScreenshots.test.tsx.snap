@@ -1,0 +1,119 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
+<div
+  class="timelineTrackScreenshot"
+  style="height: 50px;"
+>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 0px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 37.5px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 75px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 112.5px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 150px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 187.5px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 225px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 262.5px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 300px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 337.5px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 375px; width: 25px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+</div>
+`;

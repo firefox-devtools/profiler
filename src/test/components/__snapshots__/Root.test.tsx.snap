@@ -1,0 +1,243 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`app/AppViewRouter does not try to retrieve a profile when moving from from-browser to public 1`] = `<profile-viewer />`;
+
+exports[`app/AppViewRouter renders an home when the user pressed back after an error 1`] = `
+<div
+  class="rootMessageContainer"
+>
+  <div
+    class="rootMessage"
+  >
+    <h1
+      class="rootMessageTitle"
+    >
+      Firefox Profiler
+    </h1>
+    <div
+      class="rootMessageText"
+    >
+      <p>
+        Could not download the profile.
+      </p>
+    </div>
+    <div
+      class="rootMessageAdditional"
+    >
+      <p>
+        Error: Error while loading profile
+      </p>
+      <p>
+        The full stack has been written to the Web Console.
+      </p>
+    </div>
+    <div
+      class="rootBackHomeLink"
+    >
+      <a
+        href="/"
+      >
+        Back to home
+      </a>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`app/AppViewRouter renders an home when the user pressed back after an error 2`] = `<home />`;
+
+exports[`app/AppViewRouter renders an initial home 1`] = `<home />`;
+
+exports[`app/AppViewRouter renders temporary errors 1`] = `
+<div
+  class="rootMessageContainer"
+>
+  <div
+    class="rootMessage"
+  >
+    <h1
+      class="rootMessageTitle"
+    >
+      Firefox Profiler
+    </h1>
+    <div
+      class="rootMessageText"
+    >
+      <p>
+        Downloading and processing the profile…
+      </p>
+    </div>
+    <div
+      class="rootMessageAdditional"
+    >
+      <p>
+        This is a temporary error, wait a bit more.
+      </p>
+      <p>
+        Tried 3 times out of 10.
+      </p>
+    </div>
+    <div
+      class="rootBackHomeLink"
+    >
+      <a
+        href="/"
+      >
+        Back to home
+      </a>
+    </div>
+    <div
+      class="loading"
+    >
+      <div
+        class="loading-div loading-div-1 loading-row-1"
+      />
+      <div
+        class="loading-div loading-div-2 loading-row-2"
+      />
+      <div
+        class="loading-div loading-div-3 loading-row-3"
+      />
+      <div
+        class="loading-div loading-div-4 loading-row-3"
+      />
+      <div
+        class="loading-div loading-div-5 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-6 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-7 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-8 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-9 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-10 loading-row-4"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`app/AppViewRouter renders the addon loading page, and the profile view after capturing 1`] = `
+<div
+  class="rootMessageContainer"
+>
+  <div
+    class="rootMessage"
+  >
+    <h1
+      class="rootMessageTitle"
+    >
+      Firefox Profiler
+    </h1>
+    <div
+      class="rootMessageText"
+    >
+      <p>
+        Importing the profile directly from ⁨Firefox⁩…
+      </p>
+    </div>
+    <div
+      class="loading"
+    >
+      <div
+        class="loading-div loading-div-1 loading-row-1"
+      />
+      <div
+        class="loading-div loading-div-2 loading-row-2"
+      />
+      <div
+        class="loading-div loading-div-3 loading-row-3"
+      />
+      <div
+        class="loading-div loading-div-4 loading-row-3"
+      />
+      <div
+        class="loading-div loading-div-5 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-6 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-7 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-8 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-9 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-10 loading-row-4"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`app/AppViewRouter renders the addon loading page, and the profile view after capturing 2`] = `<profile-viewer />`;
+
+exports[`app/AppViewRouter renders the profile view 1`] = `
+<div
+  class="rootMessageContainer"
+>
+  <div
+    class="rootMessage"
+  >
+    <h1
+      class="rootMessageTitle"
+    >
+      Firefox Profiler
+    </h1>
+    <div
+      class="rootMessageText"
+    >
+      <p>
+        Downloading and processing the profile…
+      </p>
+    </div>
+    <div
+      class="loading"
+    >
+      <div
+        class="loading-div loading-div-1 loading-row-1"
+      />
+      <div
+        class="loading-div loading-div-2 loading-row-2"
+      />
+      <div
+        class="loading-div loading-div-3 loading-row-3"
+      />
+      <div
+        class="loading-div loading-div-4 loading-row-3"
+      />
+      <div
+        class="loading-div loading-div-5 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-6 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-7 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-8 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-9 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-10 loading-row-4"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`app/AppViewRouter renders the profile view 2`] = `<profile-viewer />`;

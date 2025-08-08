@@ -1,4 +1,3 @@
-// @noflow
 // MIT © Sindre Sorhus - sindresorhus.com
 // via https://gist.github.com/sindresorhus/7996717
 
