@@ -1,10 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
 
 // Importing this here makes it work everywhere.
 import '@testing-library/jest-dom';
+
+// Importing this inside a setup.ts file makes the types available everywhere.
+import 'jest-extended';
 
 // This installs jest matchers as a side effect as well.
 import fetchMock from '@fetch-mock/jest';
@@ -21,12 +23,11 @@ if (process.env.TZ !== 'UTC') {
 }
 
 fetchMock.mockGlobal();
-global.fetchMock = fetchMock;
+(global as any).fetchMock = fetchMock;
 
 afterEach(function () {
-  // This `__shutdownWorkers` function only exists in the mocked test environment,
-  // do not use flow typing on it.
-  const { __shutdownWorkers } = (WorkerFactory: any);
+  // This `__shutdownWorkers` function only exists in the mocked test environment.
+  const { __shutdownWorkers } = WorkerFactory as any;
   __shutdownWorkers();
 });
 
@@ -69,7 +70,6 @@ expect.extend({
 
 Object.defineProperty(global.self, 'crypto', {
   value: {
-    // $FlowExpectError This flow version doesn't know about webcrypto
     subtle: crypto.webcrypto.subtle,
   },
 });

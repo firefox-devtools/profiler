@@ -214,7 +214,7 @@
     },
     "setupFilesAfterEnv": [
       "jest-extended/all",
-      "./src/test/setup.js"
+      "./src/test/setup.ts"
     ],
     "globals": {
       "AVAILABLE_STAGING_LOCALES": null
