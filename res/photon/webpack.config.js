@@ -1,4 +1,3 @@
-// @noflow
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const projectRoot = path.join(__dirname, '../..');
