@@ -63,7 +63,7 @@ describe('app/NonLocalizedErrorBoundary', function () {
               Error: This is an error\\.
 
                   at ThrowingComponent \\(.*[/\\\\]ErrorBoundary.test.js:.*\\)
-                  at ErrorBoundaryInternal \\(.*[/\\\\]ErrorBoundary.js:.*\\)
+                  at ErrorBoundaryInternal \\(.*[/\\\\]ErrorBoundary.tsx:.*\\)
                   at NonLocalizedErrorBoundary
                   at LocalizationProvider \\(.*[/\\\\]@fluent[/\\\\]react[/\\\\]index.js:.*\\)
           `)
