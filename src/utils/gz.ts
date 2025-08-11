@@ -2,9 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// This worker is imported as WebWorker since it's conflicting with the Worker
-// global type.
-import WebWorker from './worker-factory';
+import zeeWorkerPath from 'firefox-profiler-res/zee-worker.js';
 
 const zeeCallbacks: Array<{
   success: (data: any) => void;
@@ -29,11 +27,11 @@ function workerOnMessage(zeeWorker: Worker) {
 }
 
 // Neuters data's buffer, if data is a typed array.
-export function compress(
+export async function compress(
   data: string | Uint8Array,
   compressionLevel?: number
 ): Promise<Uint8Array<ArrayBuffer>> {
-  const zeeWorker = new WebWorker('zee-worker') as Worker;
+  const zeeWorker = new Worker(zeeWorkerPath);
   workerOnMessage(zeeWorker);
 
   const arrayData =
@@ -56,9 +54,9 @@ export function compress(
 }
 
 // Neuters data's buffer, if data is a typed array.
-export function decompress(data: Uint8Array): Promise<Uint8Array> {
+export async function decompress(data: Uint8Array): Promise<Uint8Array> {
+  const zeeWorker = new Worker(zeeWorkerPath);
   return new Promise(function (resolve, reject) {
-    const zeeWorker = new WebWorker('zee-worker') as Worker;
     workerOnMessage(zeeWorker);
     zeeWorker.postMessage(
       {

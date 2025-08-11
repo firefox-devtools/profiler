@@ -38,13 +38,13 @@ const config = {
     rules: [
       {
         test: /\.js$/,
-        use: ['babel-loader'],
-        include: includes.concat(es6modulePaths),
+        use: ['file-loader'],
+        include: [path.join(__dirname, 'res')],
       },
       {
-        test: /\.(ts|tsx)$/,
+        test: /\.(js|ts|tsx)$/,
         use: ['babel-loader'],
-        include: includes,
+        include: [path.join(__dirname, 'src')],
       },
       {
         test: /\.json$/,
