@@ -36,9 +36,8 @@ type Props = {|
   +label: string,
   +panelContent: React.Node,
   +panelClassName?: string,
-  // This prop tells the panel to be open by default, but the open/close state is fully
-  // managed by the ButtonWithPanel component.
-  +initialOpen?: boolean,
+  // Setting this prop to true opens the panel.
+  +open?: boolean,
   // The class name of the button input element.
   +buttonClassName?: string,
   +onPanelOpen?: () => mixed,
@@ -57,7 +56,7 @@ export class ButtonWithPanel extends React.PureComponent<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.state = { open: !!props.initialOpen };
+    this.state = { open: !!props.open };
   }
 
   componentDidMount() {
@@ -66,6 +65,14 @@ export class ButtonWithPanel extends React.PureComponent<Props, State> {
     // the panel can be closed by pressing the Esc key
     window.addEventListener('keydown', this._onKeyDown);
     if (this.state.open) {
+      this.openPanel();
+    }
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    // Open the panel when the open prop becomes true.
+    if (!prevProps.open && this.props.open) {
+      this.setState({ open: true });
       this.openPanel();
     }
   }
