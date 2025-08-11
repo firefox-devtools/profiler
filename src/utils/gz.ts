@@ -31,6 +31,20 @@ export async function compress(
   data: string | Uint8Array,
   compressionLevel?: number
 ): Promise<Uint8Array<ArrayBuffer>> {
+  if (!(typeof window === 'object' && 'Worker' in window)) {
+    // Try to fall back to Node's zlib library.
+    const zlib = await import('zlib');
+    return new Promise((resolve, reject) => {
+      zlib.gzip(data, (errorOrNull, result) => {
+        if (errorOrNull) {
+          reject(errorOrNull);
+        } else {
+          resolve(new Uint8Array(result.buffer as ArrayBuffer));
+        }
+      });
+    });
+  }
+
   const zeeWorker = new Worker(zeeWorkerPath);
   workerOnMessage(zeeWorker);
 
@@ -55,6 +69,24 @@ export async function compress(
 
 // Neuters data's buffer, if data is a typed array.
 export async function decompress(data: Uint8Array): Promise<Uint8Array> {
+  if (!(typeof window === 'object' && 'Worker' in window)) {
+    // Handle the case where we're not running in the browser, e.g. when
+    // this code is used as part of a library in a Node project.
+    // We don't get here when running Firefox profiler tests, because our
+    // tests create a mock window with a mock Worker class.
+    // Try to fall back to Node's zlib library.
+    const zlib = await import('zlib');
+    return new Promise((resolve, reject) => {
+      zlib.gunzip(data, (errorOrNull, result) => {
+        if (errorOrNull) {
+          reject(errorOrNull);
+        } else {
+          resolve(new Uint8Array(result.buffer as ArrayBuffer));
+        }
+      });
+    });
+  }
+
   const zeeWorker = new Worker(zeeWorkerPath);
   return new Promise(function (resolve, reject) {
     workerOnMessage(zeeWorker);

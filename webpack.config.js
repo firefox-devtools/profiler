@@ -32,6 +32,7 @@ const config = {
       // that Jest can profit from it too.
       'firefox-profiler-res': path.resolve(__dirname, 'res'),
     },
+    fallback: { zlib: false },
   },
   devtool: 'source-map',
   module: {
