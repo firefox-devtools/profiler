@@ -656,6 +656,8 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = Todos os frames
     .title = Não filtrar frames de pilha
+StackSettings--implementation-script = Script
+    .title = Mostrar somente os frames de pilhas relacionados a execução de scripts
 StackSettings--implementation-native2 = Nativo
     .title = Mostrar apenas os frames de pilha de código nativo
 # This label is displayed in the marker chart and marker table panels only.
