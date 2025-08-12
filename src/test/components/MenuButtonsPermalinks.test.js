@@ -88,4 +88,31 @@ describe('<Permalink>', function () {
     );
     expect(input).toHaveValue(shortUrl);
   });
+
+  it('opens the permalink panel when isNewlyPublished changes to true', async function () {
+    const { dispatch, queryInput, shortUrl, shortUrlPromise } = setup();
+
+    // Initially the panel should not be open
+    expect(queryInput()).toBeFalsy();
+
+    // Simulate a profile being published/re-uploaded by dispatching PROFILE_PUBLISHED
+    act(() => {
+      dispatch({
+        type: 'PROFILE_PUBLISHED',
+        hash: 'newhash',
+        profileName: 'test',
+        prePublishedState: null,
+      });
+    });
+
+    // Wait for the async operations to complete
+    await act(() => shortUrlPromise);
+
+    // The input should now be visible, indicating the panel opened automatically
+    const input = ensureExists(
+      queryInput(),
+      'Expected the permalink panel to open automatically after publishing'
+    );
+    expect(input).toHaveValue(shortUrl);
+  });
 });
