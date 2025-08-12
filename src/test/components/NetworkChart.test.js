@@ -777,4 +777,38 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
       initialScrollGeneration
     );
   });
+
+  it('changes the mouse time position when the mouse moves', function () {
+    const { getState, container } = setupWithPayload(getNetworkMarkers());
+
+    // Expect the mouseTimePosition to not be set at the beginning of the test.
+    expect(getState().profileView.viewOptions.mouseTimePosition).toBeNull();
+
+    const networkChart = ensureExists(
+      container.querySelector('.networkChart'),
+      'Could not find the network chart element'
+    );
+
+    // Move the mouse over the network chart, ensure mouseTimePosition is set.
+    fireEvent.mouseMove(networkChart, {
+      clientX: TIMELINE_MARGIN_LEFT + 100, // Position within the chart area
+      clientY: 100,
+    });
+    const mouseTimePosition =
+      getState().profileView.viewOptions.mouseTimePosition;
+    expect(typeof mouseTimePosition).toEqual('number');
+
+    // Move the mouse to a different position, ensure mouseTimePosition changed.
+    fireEvent.mouseMove(networkChart, {
+      clientX: TIMELINE_MARGIN_LEFT + 150, // Different position within chart area
+      clientY: 100,
+    });
+    expect(getState().profileView.viewOptions.mouseTimePosition).not.toEqual(
+      mouseTimePosition
+    );
+
+    // Move the mouse out of the network chart, ensure mouseTimePosition is no longer set.
+    fireEvent.mouseLeave(networkChart);
+    expect(getState().profileView.viewOptions.mouseTimePosition).toBeNull();
+  });
 });
