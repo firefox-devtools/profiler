@@ -32,6 +32,9 @@ import type {
 } from 'firefox-profiler/profile-logic/profile-data';
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
+import { REPS, MODE } from 'devtools-reps';
+const { Rep } = REPS;
+
 import './CallNode.css';
 import classNames from 'classnames';
 
@@ -129,6 +132,7 @@ type Props = {|
   +timings?: TimingsForPath,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +displayStackType: boolean,
+  +argumentValues?: Array<{ ... }>,
 |};
 
 /**
@@ -358,6 +362,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       thread,
       durationText,
       categories,
+      argumentValues,
       displayData,
       timings,
       callTreeSummaryStrategy,
@@ -421,6 +426,29 @@ export class TooltipCallNode extends React.PureComponent<Props> {
         </div>,
         thread.stringTable.getString(resourceNameIndex),
       ];
+    }
+
+    let argumentsElement = null;
+    if (argumentValues) {
+      if (argumentValues.length === 0) {
+        argumentsElement = <div className="arguments">No arguments.</div>;
+      } else {
+        const argumentValuesEl = [];
+        for (const previewObject of argumentValues) {
+          argumentValuesEl.push(
+            Rep({
+              object: previewObject,
+              mode: MODE.LONG,
+            })
+          );
+        }
+        argumentsElement = (
+          <div className="arguments">
+            <div className="argumentsLabel">Arguments</div>
+            {argumentValuesEl}
+          </div>
+        );
+      }
     }
 
     // Finding current frame and parent frame URL(if there is).
@@ -539,6 +567,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             {resource}
           </div>
           {this._renderCategoryTimings(timings)}
+          {argumentsElement}
         </div>
       </div>
     );

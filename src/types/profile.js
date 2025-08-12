@@ -118,6 +118,7 @@ export type RawSamplesTable = {|
   time?: Milliseconds[],
   // If the `time` column is not present, then the `timeDeltas` column must be present.
   timeDeltas?: Milliseconds[],
+  argumentValues?: Array<number | null>,
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
   weight: null | number[],
@@ -133,6 +134,7 @@ export type RawSamplesTable = {|
   // This property isn't present in normal threads. However it's present for
   // merged threads, so that we know the origin thread for these samples.
   threadId?: Tid[],
+  argumentValues?: Array<number | null>,
   length: number,
 |};
 
@@ -165,6 +167,7 @@ export type UnbalancedNativeAllocationsTable = {|
   weight: Bytes[],
   weightType: 'bytes',
   stack: Array<IndexIntoStackTable | null>,
+  argumentValues?: Array<number | null>,
   length: number,
 |};
 
@@ -504,6 +507,7 @@ export type RawCounterSamplesTable = {|
   number?: number[],
   // The count of the data, for instance for memory this would be bytes.
   count: number[],
+  argumentValues?: Array<number | null>,
   length: number,
 |};
 
@@ -671,6 +675,8 @@ export type RawThread = {|
   // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
   // had no extra attribute at all.
   userContextId?: number,
+  tracedValuesBuffer?: string,
+  tracedObjectShapes?: Array<?Array<string>>,
 |};
 
 export type ExtensionTable = {|
