@@ -13,8 +13,13 @@ import {
   querySymbolicationApiViaWebChannel,
   getPageFaviconsViaWebChannel,
   showFunctionInDevtoolsViaWebChannel,
+  getJSSourcesViaWebChannel,
 } from './web-channel';
-import type { Milliseconds, FaviconData } from 'firefox-profiler/types';
+import type {
+  Milliseconds,
+  FaviconData,
+  GlobalJSSourceId,
+} from 'firefox-profiler/types';
 
 /**
  * This file manages the communication between the profiler and the browser.
@@ -79,6 +84,8 @@ export interface BrowserConnection {
     line: number | null,
     column: number | null
   ): Promise<void>;
+
+  getJSSource(source: GlobalJSSourceId): Promise<string | null>;
 }
 
 /**
@@ -94,6 +101,7 @@ class BrowserConnectionImpl implements BrowserConnection {
   _webChannelSupportsGetExternalMarkers: boolean;
   _webChannelSupportsGetPageFavicons: boolean;
   _webChannelSupportsOpenDebuggerInTab: boolean;
+  _webChannelSupportsGetJSSource: boolean;
   _geckoProfiler: $GeckoProfiler | void;
 
   constructor(webChannelVersion: number) {
@@ -102,6 +110,7 @@ class BrowserConnectionImpl implements BrowserConnection {
     this._webChannelSupportsGetExternalMarkers = webChannelVersion >= 3;
     this._webChannelSupportsGetPageFavicons = webChannelVersion >= 4;
     this._webChannelSupportsOpenDebuggerInTab = webChannelVersion >= 5;
+    this._webChannelSupportsGetJSSource = webChannelVersion >= 6;
   }
 
   // Only called when we must obtain the profile from the browser, i.e. if we
@@ -221,6 +230,20 @@ class BrowserConnectionImpl implements BrowserConnection {
     }
 
     return [];
+  }
+
+  async getJSSource(source: GlobalJSSourceId): Promise<string | null> {
+    if (!this._webChannelSupportsGetJSSource) {
+      throw new Error(
+        "Can't use getJSSource in Firefox versions with the old WebChannel."
+      );
+    }
+
+    // Even though the WebChannel request for fetching JS sources supports
+    // fetching multiple sources, we only fetch one at a time currently.
+    // TODO: Change this to fetch multiple JS sources at the load time or while
+    // we share the profile.
+    return getJSSourcesViaWebChannel([source]).then((sources) => sources[0]);
   }
 }
 

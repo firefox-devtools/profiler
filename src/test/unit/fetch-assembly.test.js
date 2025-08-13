@@ -6,7 +6,11 @@
 
 import { fetchAssembly } from 'firefox-profiler/utils/fetch-assembly';
 import { ensureExists } from '../../utils/flow';
-import type { NativeSymbolInfo, Lib } from 'firefox-profiler/types';
+import type {
+  NativeSymbolInfo,
+  Lib,
+  GlobalJSSourceId,
+} from 'firefox-profiler/types';
 
 describe('fetchAssembly', function () {
   const nativeSymbolInfo: NativeSymbolInfo = {
@@ -74,6 +78,9 @@ describe('fetchAssembly', function () {
           _path: string,
           _requestJson: string
         ) => {
+          throw new Error('No browser connection');
+        },
+        fetchJSSourceFromBrowser: async (_sourceId: GlobalJSSourceId) => {
           throw new Error('No browser connection');
         },
       })
@@ -147,6 +154,9 @@ describe('fetchAssembly', function () {
             ) => {
               throw new Error('No browser connection');
             },
+            fetchJSSourceFromBrowser: async (_sourceId: GlobalJSSourceId) => {
+              throw new Error('No browser connection');
+            },
           }
         )
       ).type
@@ -176,6 +186,9 @@ describe('fetchAssembly', function () {
               }
               return exampleResponse;
             },
+            fetchJSSourceFromBrowser: async (_sourceId: GlobalJSSourceId) => {
+              throw new Error('No browser connection');
+            },
           }
         )
       ).type
@@ -192,6 +205,9 @@ describe('fetchAssembly', function () {
           _path: string,
           _requestJson: string
         ) => {
+          throw new Error('No browser connection');
+        },
+        fetchJSSourceFromBrowser: async (_sourceId: GlobalJSSourceId) => {
           throw new Error('No browser connection');
         },
       })
@@ -231,6 +247,9 @@ describe('fetchAssembly', function () {
               _requestJson: string
             ) => {
               return exampleResponse;
+            },
+            fetchJSSourceFromBrowser: async (_sourceId: GlobalJSSourceId) => {
+              throw new Error('No browser connection');
             },
           }
         )

@@ -6,7 +6,7 @@
 
 import { assertExhaustiveCheck } from './flow';
 import {
-  getDownloadRecipeForSourceFile,
+  getDownloadRecipeForSourceFileAndId,
   parseFileNameFromSymbolication,
 } from './special-paths';
 import { isGzip, decompress } from './gz';
@@ -17,6 +17,7 @@ import type { ExternalCommunicationDelegate } from './query-api';
 import type {
   SourceCodeLoadingError,
   AddressProof,
+  GlobalJSSourceId,
 } from 'firefox-profiler/types';
 
 export type FetchSourceResult =
@@ -42,7 +43,8 @@ export async function fetchSource(
   symbolServerUrl: string,
   addressProof: AddressProof | null,
   archiveCache: Map<string, Promise<Uint8Array>>,
-  delegate: ExternalCommunicationDelegate
+  delegate: ExternalCommunicationDelegate,
+  globalJSSourceId: GlobalJSSourceId | null
 ): Promise<FetchSourceResult> {
   const errors: SourceCodeLoadingError[] = [];
 
@@ -90,7 +92,10 @@ export async function fetchSource(
   // Try to obtain the source by downloading a file from the web.
 
   const parsedName = parseFileNameFromSymbolication(file);
-  const downloadRecipe = getDownloadRecipeForSourceFile(parsedName);
+  const downloadRecipe = getDownloadRecipeForSourceFileAndId(
+    parsedName,
+    globalJSSourceId
+  );
 
   switch (downloadRecipe.type) {
     case 'CORS_ENABLED_SINGLE_FILE': {
@@ -165,6 +170,33 @@ export async function fetchSource(
       break;
     }
 
+    case 'JS_SOURCE_VIA_WEBCHANNEL': {
+      const { globalJSSourceId } = downloadRecipe;
+
+      try {
+        const response =
+          await delegate.fetchJSSourceFromBrowser(globalJSSourceId);
+        if (response) {
+          return {
+            type: 'SUCCESS',
+            source: response,
+          };
+        }
+
+        errors.push({
+          type: 'NOT_PRESENT_IN_BROWSER',
+          globalJSSourceId,
+          url: file,
+        });
+      } catch (e) {
+        errors.push({
+          type: 'BROWSER_API_ERROR',
+          apiErrorMessage: e.message,
+        });
+      }
+      break;
+    }
+
     case 'NO_KNOWN_CORS_URL': {
       errors.push({ type: 'NO_KNOWN_CORS_URL' });
       break;
@@ -190,4 +222,20 @@ function convertResponseJsonToSourceCode(responseJson: MixedObject): string {
 // This check can be removed once it adds support for /source/v1.
 function _serverMightSupportSource(symbolServerUrl: string): boolean {
   return isLocalURL(symbolServerUrl);
+}
+
+/**
+ * Generate a cache key for source code caching.
+ *
+ * When globalJSSourceId is provided, it creates a unique cache key that includes
+ * the file path, process ID, and source ID to distinguish between different
+ * sources of the same file across processes.
+ */
+export function getSourceCodeCacheKey(
+  file: string,
+  globalJSSourceId: GlobalJSSourceId | null
+): string {
+  return globalJSSourceId
+    ? `${file}-${globalJSSourceId.pid}-${globalJSSourceId.sourceId}`
+    : file;
 }

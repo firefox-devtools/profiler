@@ -8,6 +8,7 @@ import type {
   SourceCodeLoadingError,
   ApiQueryError,
   DecodedInstruction,
+  GlobalJSSourceId,
 } from 'firefox-profiler/types';
 
 export function beginLoadingSourceCodeFromUrl(
@@ -18,20 +19,30 @@ export function beginLoadingSourceCodeFromUrl(
 }
 
 export function beginLoadingSourceCodeFromBrowserConnection(
-  file: string
+  file: string,
+  globalJSSourceId: GlobalJSSourceId | null
 ): Action {
-  return { type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION', file };
+  return {
+    type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION',
+    file,
+    globalJSSourceId,
+  };
 }
 
-export function finishLoadingSourceCode(file: string, code: string): Action {
-  return { type: 'SOURCE_CODE_LOADING_SUCCESS', file, code };
+export function finishLoadingSourceCode(
+  file: string,
+  globalJSSourceId: GlobalJSSourceId | null,
+  code: string
+): Action {
+  return { type: 'SOURCE_CODE_LOADING_SUCCESS', file, globalJSSourceId, code };
 }
 
 export function failLoadingSourceCode(
   file: string,
+  globalJSSourceId: GlobalJSSourceId | null,
   errors: SourceCodeLoadingError[]
 ): Action {
-  return { type: 'SOURCE_CODE_LOADING_ERROR', file, errors };
+  return { type: 'SOURCE_CODE_LOADING_ERROR', file, globalJSSourceId, errors };
 }
 
 export function beginLoadingAssemblyCodeFromUrl(

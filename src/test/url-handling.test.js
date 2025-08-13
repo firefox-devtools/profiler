@@ -1771,6 +1771,7 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
       'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
     const bottomBoxInfo = {
       libIndex: 0,
+      globalJSSourceId: null,
       sourceFile,
       nativeSymbols: [],
     };
@@ -1802,6 +1803,7 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
       'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
     const bottomBoxInfo = {
       libIndex: 0,
+      globalJSSourceId: null,
       sourceFile,
       nativeSymbols: [],
     };
@@ -1830,6 +1832,7 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     };
     const bottomBoxInfo = {
       libIndex: 0,
+      globalJSSourceId: null,
       sourceFile: null,
       nativeSymbols: [nativeSymbolInfo],
     };
@@ -1871,6 +1874,7 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     };
     const bottomBoxInfo = {
       libIndex: 0,
+      globalJSSourceId: null,
       sourceFile: sourceFile,
       nativeSymbols: [nativeSymbolInfo],
     };

@@ -171,6 +171,7 @@ type BaseQuery = {|
   implementation: string,
   timelineType: string,
   sourceView: string,
+  sourceId: string,
   assemblyView: string,
 |};
 
@@ -345,6 +346,12 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         if (sourceView.sourceFile !== null) {
           query.sourceView = sourceView.sourceFile;
         }
+        if (sourceView.globalJSSourceId !== null) {
+          query.sourceId =
+            sourceView.globalJSSourceId.pid +
+            '-' +
+            sourceView.globalJSSourceId.sourceId;
+        }
         if (assemblyView.isOpen && assemblyView.nativeSymbol !== null) {
           query.assemblyView = stringifyAssemblyViewSymbol(
             assemblyView.nativeSymbol
@@ -501,6 +508,7 @@ export function stateFromLocation(
   const sourceView: SourceViewState = {
     scrollGeneration: 0,
     libIndex: null,
+    globalJSSourceId: null,
     sourceFile: null,
   };
   const assemblyView: AssemblyViewState = {
@@ -513,6 +521,10 @@ export function stateFromLocation(
   tabSlugs.forEach((tabSlug) => (isBottomBoxOpenPerPanel[tabSlug] = false));
   if (query.sourceView) {
     sourceView.sourceFile = query.sourceView;
+    if (query.sourceId) {
+      const [pid, sourceId] = query.sourceId.split('-');
+      sourceView.globalJSSourceId = { pid, sourceId: Number(sourceId) };
+    }
     isBottomBoxOpenPerPanel[selectedTab] = true;
   }
   if (query.assemblyView) {

@@ -9,6 +9,7 @@ import type {
   MixedObject,
   ExternalMarkersData,
   FaviconData,
+  GlobalJSSourceId,
 } from 'firefox-profiler/types';
 
 /**
@@ -30,7 +31,8 @@ export type Request =
   | GetSymbolTableRequest
   | QuerySymbolicationApiRequest
   | GetPageFaviconsRequest
-  | OpenScriptInTabDebuggerRequest;
+  | OpenScriptInTabDebuggerRequest
+  | GetJSSourcesRequest;
 
 type StatusQueryRequest = {| type: 'STATUS_QUERY' |};
 type EnableMenuButtonRequest = {| type: 'ENABLE_MENU_BUTTON' |};
@@ -65,6 +67,10 @@ type OpenScriptInTabDebuggerRequest = {|
   scriptUrl: string,
   line: number | null,
   column: number | null,
+|};
+type GetJSSourcesRequest = {|
+  type: 'GET_JS_SOURCES',
+  sources: Array<GlobalJSSourceId>,
 |};
 
 export type MessageFromBrowser<R: ResponseFromBrowser> =
@@ -130,6 +136,10 @@ type StatusQueryResponse = {|
   //  Shipped in Firefox 136.
   //  Adds support for showing the JS script in DevTools debugger.
   //    - OPEN_SCRIPT_IN_DEBUGGER
+  // Version 6:
+  //  Shipped in Firefox 143.
+  //  Adds support for fetching JS sources.
+  //    - GET_JS_SOURCES
   version?: number,
 |};
 type EnableMenuButtonResponse = void;
@@ -140,6 +150,7 @@ type GetSymbolTableResponse = SymbolTableAsTuple;
 type QuerySymbolicationApiResponse = string;
 type GetPageFaviconsResponse = Array<FaviconData | null>;
 type OpenScriptInTabDebuggerResponse = void;
+type GetJSSourcesResponse = Array<string | null>;
 
 // Manually declare all pairs of request + response for Flow.
 /* eslint-disable no-redeclare */
@@ -170,6 +181,9 @@ declare function _sendMessageWithResponse(
 declare function _sendMessageWithResponse(
   OpenScriptInTabDebuggerRequest
 ): Promise<OpenScriptInTabDebuggerResponse>;
+declare function _sendMessageWithResponse(
+  GetJSSourcesRequest
+): Promise<GetJSSourcesResponse>;
 /* eslint-enable no-redeclare */
 
 /**
@@ -279,6 +293,15 @@ export async function showFunctionInDevtoolsViaWebChannel(
     scriptUrl,
     line,
     column,
+  });
+}
+
+export async function getJSSourcesViaWebChannel(
+  sources: Array<GlobalJSSourceId>
+): Promise<Array<string | null>> {
+  return _sendMessageWithResponse({
+    type: 'GET_JS_SOURCES',
+    sources,
   });
 }
 

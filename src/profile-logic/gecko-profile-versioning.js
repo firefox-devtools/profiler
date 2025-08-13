@@ -1487,6 +1487,13 @@ const _upgraders = {
     // marker data with the new field types data, and no modification is needed in the
     // frontend to display older formats.
   },
+  [32]: (_) => {
+    // This version bump changes the frameTable location string to include
+    // optional sourceIds for the JS frames.
+    // Older frontends will not be able to display these fields.
+    // No upgrade is needed as the older gecko profile version don't have this
+    // information.
+  },
 
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.

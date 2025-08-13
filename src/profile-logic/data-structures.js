@@ -211,6 +211,7 @@ export function getEmptyResourceTable(): ResourceTable {
     name: [],
     host: [],
     type: [],
+    sourceId: [],
     length: 0,
   };
 }

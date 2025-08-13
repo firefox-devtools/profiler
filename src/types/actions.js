@@ -24,6 +24,7 @@ import type {
   MarkerIndex,
   ThreadsKey,
   NativeSymbolInfo,
+  GlobalJSSourceId,
 } from './profile-derived';
 import type { FuncToFuncsMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
@@ -343,6 +344,7 @@ type ProfileAction =
   | {|
       +type: 'UPDATE_BOTTOM_BOX',
       +libIndex: IndexIntoLibs | null,
+      +globalJSSourceId: GlobalJSSourceId | null,
       +sourceFile: string | null,
       +nativeSymbol: NativeSymbolInfo | null,
       +allNativeSymbolsForInitiatingCallNode: NativeSymbolInfo[],
@@ -621,11 +623,21 @@ type CurrentProfileUploadedInformationAction = {|
 
 type SourcesAction =
   | {| +type: 'SOURCE_CODE_LOADING_BEGIN_URL', file: string, url: string |}
-  | {| +type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION', file: string |}
-  | {| +type: 'SOURCE_CODE_LOADING_SUCCESS', file: string, code: string |}
+  | {|
+      +type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION',
+      file: string,
+      globalJSSourceId: GlobalJSSourceId | null,
+    |}
+  | {|
+      +type: 'SOURCE_CODE_LOADING_SUCCESS',
+      file: string,
+      globalJSSourceId: GlobalJSSourceId | null,
+      code: string,
+    |}
   | {|
       +type: 'SOURCE_CODE_LOADING_ERROR',
       file: string,
+      globalJSSourceId: GlobalJSSourceId | null,
       errors: SourceCodeLoadingError[],
     |};
 

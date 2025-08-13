@@ -562,7 +562,12 @@ const profileName: Reducer<string | null> = (state = null, action) => {
 };
 
 const sourceView: Reducer<SourceViewState> = (
-  state = { scrollGeneration: 0, libIndex: null, sourceFile: null },
+  state = {
+    scrollGeneration: 0,
+    libIndex: null,
+    globalJSSourceId: null,
+    sourceFile: null,
+  },
   action
 ) => {
   switch (action.type) {
@@ -570,6 +575,7 @@ const sourceView: Reducer<SourceViewState> = (
       return {
         scrollGeneration: state.scrollGeneration + 1,
         libIndex: action.libIndex,
+        globalJSSourceId: action.globalJSSourceId,
         sourceFile: action.sourceFile,
       };
     }

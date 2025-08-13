@@ -10,6 +10,7 @@ import {
   getSourceViewCode,
   getBrowserConnection,
   getSourceViewFile,
+  getSourceViewSourceId,
   getSymbolServerUrl,
 } from 'firefox-profiler/selectors';
 import {
@@ -26,10 +27,15 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import type { SourceCodeStatus, Profile } from 'firefox-profiler/types';
+import type {
+  SourceCodeStatus,
+  Profile,
+  GlobalJSSourceId,
+} from 'firefox-profiler/types';
 
 type StateProps = {|
   +sourceViewFile: string | null,
+  +sourceViewJSSourceId: GlobalJSSourceId | null,
   +sourceViewCode: SourceCodeStatus | void,
   +symbolServerUrl: string,
   +profile: Profile | null,
@@ -72,6 +78,7 @@ class SourceCodeFetcherImpl extends React.PureComponent<Props> {
       symbolServerUrl,
       profile,
       browserConnection,
+      sourceViewJSSourceId,
     } = this.props;
 
     const addressProof =
@@ -84,7 +91,10 @@ class SourceCodeFetcherImpl extends React.PureComponent<Props> {
           beginLoadingSourceCodeFromUrl(file, url);
         },
         onBeginBrowserConnectionQuery: () => {
-          beginLoadingSourceCodeFromBrowserConnection(file);
+          beginLoadingSourceCodeFromBrowserConnection(
+            file,
+            sourceViewJSSourceId
+          );
         },
       }
     );
@@ -94,15 +104,24 @@ class SourceCodeFetcherImpl extends React.PureComponent<Props> {
       symbolServerUrl,
       addressProof,
       this._archiveCache,
-      delegate
+      delegate,
+      sourceViewJSSourceId
     );
 
     switch (fetchSourceResult.type) {
       case 'SUCCESS':
-        finishLoadingSourceCode(file, fetchSourceResult.source);
+        finishLoadingSourceCode(
+          file,
+          sourceViewJSSourceId,
+          fetchSourceResult.source
+        );
         break;
       case 'ERROR':
-        failLoadingSourceCode(file, fetchSourceResult.errors);
+        failLoadingSourceCode(
+          file,
+          sourceViewJSSourceId,
+          fetchSourceResult.errors
+        );
         break;
       default:
         throw assertExhaustiveCheck(fetchSourceResult.type);
@@ -121,6 +140,7 @@ export const SourceCodeFetcher = explicitConnect<
 >({
   mapStateToProps: (state) => ({
     sourceViewFile: getSourceViewFile(state),
+    sourceViewJSSourceId: getSourceViewSourceId(state),
     sourceViewCode: getSourceViewCode(state),
     symbolServerUrl: getSymbolServerUrl(state),
     profile: getProfileOrNull(state),
