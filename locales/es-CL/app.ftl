@@ -660,6 +660,8 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = Todos los cuadros
     .title = No filtrar las pilas de cuadros
+StackSettings--implementation-script = Script
+    .title = Mostrar solo los cuadros apilados relacionados a la ejecución del script
 StackSettings--implementation-native2 = Nativo
     .title = Mostrar solo las pilas de cuadros para el código nativo
 # This label is displayed in the marker chart and marker table panels only.
