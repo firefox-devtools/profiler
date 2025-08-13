@@ -193,6 +193,7 @@ export function callTreeFromProfile(
     thread,
     callNodeInfo,
     ensureExists(profile.meta.categories),
+    thread.samples,
     callTreeTimings,
     'samples'
   );

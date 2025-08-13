@@ -342,6 +342,7 @@ export function getStackAndSampleSelectorsPerThread(
     threadSelectors.getFilteredThread,
     getCallNodeInfo,
     ProfileSelectors.getCategories,
+    threadSelectors.getPreviewFilteredCtssSamples,
     getCallTreeTimings,
     getWeightTypeForCallTree,
     CallTree.getCallTree
