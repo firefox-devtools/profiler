@@ -447,7 +447,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
         >
           Buffer capacity:
         </span>
-        1GB
+        1 GiB
       </div>
       <div
         class="metaInfoRow"
@@ -846,7 +846,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
         >
           Buffer capacity:
         </span>
-        8MB
+        8 MiB
       </div>
       <div
         class="metaInfoRow"
@@ -1208,7 +1208,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with uptime 1`] = 
         >
           Buffer capacity:
         </span>
-        8MB
+        8 MiB
       </div>
       <div
         class="metaInfoRow"
@@ -1651,7 +1651,7 @@ exports[`app/MenuButtons <MetaInfoPanel> with no statistics object should not ma
         >
           Buffer capacity:
         </span>
-        8MB
+        8 MiB
       </div>
       <div
         class="metaInfoRow"
@@ -1905,7 +1905,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for a compression error 
       class="menuButtonsPublishInfoDescription"
     >
       Upload your profile and make it accessible to anyone with the link.
-       
+
       By default, your personal data is removed.
     </p>
     <h3
@@ -2132,7 +2132,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
       class="menuButtonsPublishInfoDescription"
     >
       Upload your profile and make it accessible to anyone with the link.
-       
+
       By default, your personal data is removed.
     </p>
     <h3
@@ -2206,7 +2206,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
           class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgDownload"
         />
         Download
-         
+
         <span
           class="menuButtonsDownloadSize"
         >
@@ -2245,7 +2245,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
       class="menuButtonsPublishInfoDescription"
     >
       Upload your profile and make it accessible to anyone with the link.
-       
+
       This profile is from ⁨Firefox Nightly⁩, so by default most information is included.
     </p>
     <h3
@@ -2324,7 +2324,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgDownload"
         />
         Download
-         
+
         <span
           class="menuButtonsDownloadSize"
         >
@@ -2363,7 +2363,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
       class="menuButtonsPublishInfoDescription"
     >
       Upload your profile and make it accessible to anyone with the link.
-       
+
       By default, your personal data is removed.
     </p>
     <h3
@@ -2437,7 +2437,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgDownload"
         />
         Download
-         
+
         <span
           class="menuButtonsDownloadSize"
         >
