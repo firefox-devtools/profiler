@@ -31,7 +31,6 @@
 
     // Module Resolution
     "resolveJsonModule": true,
-    "baseUrl": ".",
     "typeRoots": ["node_modules/@types", "src/types/@types"],
     "paths": {
       "firefox-profiler/*": ["./src/*"],
