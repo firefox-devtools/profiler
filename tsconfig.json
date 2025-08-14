@@ -20,7 +20,6 @@
 
     // Exceptions to strictness, consider enabling in the future
     "useUnknownInCatchVariables": false, // Sounds fine, enforces `} catch (e) { if (e instanceof Error) {` etc
-    "alwaysStrict": false, // Affects runtime behavior, I think - need to check what we had with Flow
     "exactOptionalPropertyTypes": false, // Benefit unclear
 
     // Build & Performance
