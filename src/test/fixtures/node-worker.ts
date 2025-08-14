@@ -2,7 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { Worker as NodeWorkerClass } from 'worker_threads';
+import {
+  Worker as NodeWorkerClass,
+  isMarkedAsUntransferable,
+} from 'worker_threads';
 
 function getWorkerScript(file: string): string {
   return `
@@ -52,7 +55,11 @@ export class NodeWorker {
     if (+major < 11 || (+major === 11 && +minor < 12)) {
       payload = { data: message };
     }
-    this._instance?.postMessage(payload, transfer);
+    // See https://github.com/nodejs/node/issues/55593
+    const actualTransfer = (transfer ?? []).filter(
+      (buf) => !isMarkedAsUntransferable(buf)
+    );
+    this._instance?.postMessage(payload, actualTransfer);
   }
 
   onMessage = (message: unknown) => {

@@ -2001,7 +2001,7 @@ export async function unserializeProfileOfArbitraryFormat(
         arbitraryFormat = convertSimpleperfTraceProfile(arrayBuffer);
       } else {
         try {
-          const textDecoder = new TextDecoder();
+          const textDecoder = new TextDecoder(undefined, { fatal: true });
           arbitraryFormat = await textDecoder.decode(arrayBuffer);
         } catch (e) {
           console.error('Source exception:', e);
