@@ -2,7 +2,7 @@
 
 This file documents all changes in the profiler gecko and processed formats.
 
-Note that this is not an exhaustive list. Processed profile format upgraders can be found in [processed-profile-versioning.js](../src/profile-logic/processed-profile-versioning.js) and gecko profile format upgraders can be found in [gecko-profile-versioning.js](../src/profile-logic/gecko-profile-versioning.js). Please refer to them for older upgraders or for exact implementations.
+Note that this is not an exhaustive list. Processed profile format upgraders can be found in [processed-profile-versioning.jt](../src/profile-logic/processed-profile-versioning.ts) and gecko profile format upgraders can be found in [gecko-profile-versioning.jt](../src/profile-logic/gecko-profile-versioning.ts). Please refer to them for older upgraders or for exact implementations.
 
 ## Processed profile format
 
@@ -118,7 +118,7 @@ We've also cleaned up the ResourceTable format:
 
 ### Older Versions
 
-Older versions are not documented in this changelog but can be found in [processed-profile-versioning.js](../src/profile-logic/processed-profile-versioning.js).
+Older versions are not documented in this changelog but can be found in [processed-profile-versioning.jt](../src/profile-logic/processed-profile-versioning.ts).
 
 ## Gecko profile format
 
@@ -149,4 +149,4 @@ The `searchable` property is implemented in the marker schema. Previously all th
 
 ### Older Versions
 
-Older versions are not documented in this changelog but can be found in [gecko-profile-versioning.js](../src/profile-logic/gecko-profile-versioning.js).
+Older versions are not documented in this changelog but can be found in [gecko-profile-versioning.jt](../src/profile-logic/gecko-profile-versioning.ts).

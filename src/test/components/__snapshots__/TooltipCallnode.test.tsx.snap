@@ -1,0 +1,202 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`TooltipCallNode handles native allocations 1`] = `
+<div
+  class="tooltipCallNode"
+>
+  <div
+    class="tooltipOneLine tooltipHeader"
+  >
+    <div
+      class="tooltipTiming"
+    >
+      Fake Duration Text
+    </div>
+    <div
+      class="tooltipTitle"
+    >
+      Gjs
+    </div>
+    <div
+      class="tooltipIcon"
+    />
+  </div>
+  <div
+    class="tooltipCallNodeDetails"
+  >
+    <div
+      class="tooltipDetails tooltipCallNodeDetailsLeft"
+    >
+      <div
+        class="tooltipLabel"
+      >
+        Total Bytes:
+      </div>
+      <div>
+        12 bytes
+      </div>
+      <div
+        class="tooltipLabel"
+      >
+        Self Bytes:
+      </div>
+      <div>
+        5 bytes
+      </div>
+    </div>
+    <div
+      class="tooltipDetails tooltipCallNodeDetailsLeft"
+    >
+      <div
+        class="tooltipLabel"
+      >
+        Stack Type:
+      </div>
+      <div>
+        JavaScript
+      </div>
+      <div
+        class="tooltipLabel"
+      >
+        Category:
+      </div>
+      <div>
+        <span
+          class="colored-square category-color-yellow"
+        />
+        JavaScript
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TooltipCallNode with page information displays Page URL for iframe pages 1`] = `
+<div
+  class="tooltipCallNode"
+>
+  <div
+    class="tooltipOneLine tooltipHeader"
+  >
+    <div
+      class="tooltipTiming"
+    >
+      Fake Duration Text
+    </div>
+    <div
+      class="tooltipTitle"
+    >
+      Cjs
+    </div>
+    <div
+      class="tooltipIcon"
+    />
+  </div>
+  <div
+    class="tooltipCallNodeDetails"
+  >
+    <div
+      class="tooltipDetails tooltipCallNodeDetailsLeft"
+    >
+      <div
+        class="tooltipLabel"
+      >
+        Stack Type:
+      </div>
+      <div>
+        JavaScript
+      </div>
+      <div
+        class="tooltipLabel"
+      >
+        Category:
+      </div>
+      <div>
+        <span
+          class="colored-square category-color-yellow"
+        />
+        JavaScript
+      </div>
+      <div
+        class="tooltipLabel"
+      >
+        iframe URL:
+      </div>
+      <div
+        class="tooltipDetailsUrl"
+      >
+        https://iframe.example.com/
+      </div>
+      <div
+        class="tooltipLabel"
+      >
+        Page URL:
+      </div>
+      <div>
+        https://developer.mozilla.org/en-US/
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TooltipCallNode with page information displays Page URL for non-iframe pages 1`] = `
+<div
+  class="tooltipCallNode"
+>
+  <div
+    class="tooltipOneLine tooltipHeader"
+  >
+    <div
+      class="tooltipTiming"
+    >
+      Fake Duration Text
+    </div>
+    <div
+      class="tooltipTitle"
+    >
+      Cjs
+    </div>
+    <div
+      class="tooltipIcon"
+    />
+  </div>
+  <div
+    class="tooltipCallNodeDetails"
+  >
+    <div
+      class="tooltipDetails tooltipCallNodeDetailsLeft"
+    >
+      <div
+        class="tooltipLabel"
+      >
+        Stack Type:
+      </div>
+      <div>
+        JavaScript
+      </div>
+      <div
+        class="tooltipLabel"
+      >
+        Category:
+      </div>
+      <div>
+        <span
+          class="colored-square category-color-yellow"
+        />
+        JavaScript
+      </div>
+      <div
+        class="tooltipLabel"
+      >
+        Page URL:
+      </div>
+      <div
+        class="tooltipDetailsUrl"
+      >
+        https://developer.mozilla.org/en-US/
+      </div>
+    </div>
+  </div>
+</div>
+`;

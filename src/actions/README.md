@@ -4,7 +4,7 @@ This folder contains all of the [Redux actions](http://redux.js.org/docs/basics/
 
 # Action type definitions
 
-All actions in the Firefox Profiler are fully typed using [Flow](https://flow.org/). These types are located in [`/src/types/actions.js`](../types/actions.js) and are built using a [union](https://flow.org/en/docs/types/unions/) of the action objects.
+All actions in the Firefox Profiler are fully typed. These types are located in [`/src/types/actions.ts`](../types/actions.ts).
 
 # Preferred practices for actions
 

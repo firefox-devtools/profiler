@@ -50,7 +50,7 @@ module.exports = function (config, serverConfig) {
 };
 ```
 
-[Flow](https://flow.org/) is used for type checking. VSCode users can install the ["Flow Language Support" extension](https://marketplace.visualstudio.com/items?itemName=flowtype.flow-for-vscode), and disable VSCode's built-in TypeScript extension in the workspace via the [setup instructions here](https://github.com/flow/flow-for-vscode#setup).
+This project uses [TypeScript](https://www.typescriptlang.org/).
 
 ## Using Gitpod
 
@@ -87,7 +87,7 @@ When working on a new feature and code changes, it's important that things work 
   - `yarn test-all` - Test all the things!
   - `yarn test` - Run the tests in [`./src/test/`](./src/test/).
   - `yarn lint` - Run prettier, stylelint, and eslint to check for correct code formatting.
-  - `yarn flow` - Check the [Flow types](https://flow.org/) for correctness.
+  - `yarn ts` - Check for TypeScript type correctness.
   - `yarn license-check` - Check the dependencies' licenses.
 - `git push` and `git commit`
   - We have [husky](https://www.npmjs.com/package/husky) installed to run automated checks when committing and pushing.

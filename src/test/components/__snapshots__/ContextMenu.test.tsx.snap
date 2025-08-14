@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`ContextMenu correctly renders the context-menu with the props that were passed through 1`] = `
+<nav
+  class="react-contextmenu context-menu"
+  role="menu"
+  style="position: fixed; opacity: 0; pointer-events: none;"
+  tabindex="-1"
+>
+  <div />
+</nav>
+`;

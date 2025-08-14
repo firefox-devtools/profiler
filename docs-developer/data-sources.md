@@ -26,7 +26,7 @@ Samples don't record every event that happens within the system, so some informa
 The Gecko Profiler records marker data, but it doesn't include all of the markers available in the system. There is a competing implementation of markers used exclusively by the Firefox Devtools that are recorded per DocShell. These are not currently integrated into the Firefox Profiler.
 
 - [Timeline C++ Implementation](https://dxr.mozilla.org/mozilla-central/source/docshell/base/timeline)
-- [Timeline Devtools JS Server](https://dxr.mozilla.org/mozilla-central/source/devtools/server/performance/timeline.js)
+- [Timeline Devtools JS Server](https://dxr.mozilla.org/mozilla-central/source/devtools/server/performance/timeline.ts)
 
 ## Tracelogger (unused in the Firefox Profiler)
 

@@ -1,0 +1,223 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`app/ServiceWorkerManager in the home, with the \`none\` datasource shows a notice when the SW is updated, and the user can close it 1`] = `
+<div
+  class="serviceworker-ready-notice-wrapper"
+>
+  <div
+    class="photon-message-bar serviceworker-ready-notice"
+  >
+    <div
+      class="photon-message-bar-inner-content"
+    >
+      <div
+        class="photon-message-bar-inner-text"
+      >
+        A new version of the application has been downloaded and is ready to use.
+      </div>
+      <button
+        class="photon-button photon-button-micro photon-message-bar-action-button"
+        type="button"
+      >
+        Apply and reload
+      </button>
+    </div>
+    <button
+      aria-label="Hide the reload notice"
+      class="photon-button photon-message-bar-close-button"
+      title="Hide the reload notice"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`app/ServiceWorkerManager in the home, with the \`none\` datasource shows a notice when the SW is updated, and the user can close it 2`] = `
+<div
+  class="serviceworker-ready-notice-wrapper"
+>
+  <div
+    class="photon-message-bar serviceworker-ready-notice"
+  >
+    <div
+      class="photon-message-bar-inner-content"
+    >
+      <div
+        class="photon-message-bar-inner-text"
+      >
+        A new version of the application has been downloaded and is ready to use.
+      </div>
+      <button
+        class="photon-button photon-button-micro photon-message-bar-action-button"
+        type="button"
+      >
+        Reload the application
+      </button>
+    </div>
+    <button
+      aria-label="Hide the reload notice"
+      class="photon-button photon-message-bar-close-button"
+      title="Hide the reload notice"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`app/ServiceWorkerManager in the home, with the \`none\` datasource shows a notice when the SW is updated, and the user can close it 3`] = `
+<div
+  class="serviceworker-ready-notice-wrapper"
+>
+  <div
+    class="photon-message-bar serviceworker-ready-notice"
+  >
+    <div
+      class="photon-message-bar-inner-content"
+    >
+      <div
+        class="photon-message-bar-inner-text"
+      >
+        A new version of the application has been downloaded and is ready to use.
+      </div>
+      <button
+        class="photon-button photon-button-micro photon-message-bar-action-button"
+        type="button"
+      >
+        Apply and reload
+      </button>
+    </div>
+    <button
+      aria-label="Hide the reload notice"
+      class="photon-button photon-message-bar-close-button"
+      title="Hide the reload notice"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`app/ServiceWorkerManager with the \`from-browser\` datasource shows a warning notice if updated before we were ready 1`] = `
+<div
+  class="serviceworker-ready-notice-wrapper"
+>
+  <div
+    class="photon-message-bar photon-message-bar-warning serviceworker-ready-notice"
+  >
+    <div
+      class="photon-message-bar-inner-content"
+    >
+      <div
+        class="photon-message-bar-inner-text"
+      >
+        A new version of the application was applied before this page
+was fully loaded. You might see malfunctions.
+      </div>
+    </div>
+    <button
+      aria-label="Hide the reload notice"
+      class="photon-button photon-message-bar-close-button"
+      title="Hide the reload notice"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`app/ServiceWorkerManager with the \`from-url\` datasource shows a notice when the SW is updated 1`] = `
+<body>
+  <div>
+    <div
+      class="serviceworker-ready-notice-wrapper"
+    >
+      <div
+        class="photon-message-bar serviceworker-ready-notice"
+      >
+        <div
+          class="photon-message-bar-inner-content"
+        >
+          <div
+            class="photon-message-bar-inner-text"
+          >
+            A new version of the application has been downloaded and is ready to use.
+          </div>
+          <button
+            class="photon-button photon-button-micro photon-message-bar-action-button"
+            type="button"
+          >
+            Apply and reload
+          </button>
+        </div>
+        <button
+          aria-label="Hide the reload notice"
+          class="photon-button photon-message-bar-close-button"
+          title="Hide the reload notice"
+          type="button"
+        />
+      </div>
+    </div>
+  </div>
+</body>
+`;
+
+exports[`app/ServiceWorkerManager with the \`public\` datasource shows a notice when the SW is updated 1`] = `
+<body>
+  <div>
+    <div
+      class="serviceworker-ready-notice-wrapper"
+    >
+      <div
+        class="photon-message-bar serviceworker-ready-notice"
+      >
+        <div
+          class="photon-message-bar-inner-content"
+        >
+          <div
+            class="photon-message-bar-inner-text"
+          >
+            A new version of the application has been downloaded and is ready to use.
+          </div>
+          <button
+            class="photon-button photon-button-micro photon-message-bar-action-button"
+            type="button"
+          >
+            Apply and reload
+          </button>
+        </div>
+        <button
+          aria-label="Hide the reload notice"
+          class="photon-button photon-message-bar-close-button"
+          title="Hide the reload notice"
+          type="button"
+        />
+      </div>
+    </div>
+  </div>
+</body>
+`;
+
+exports[`app/ServiceWorkerManager with the \`public\` datasource shows a warning notice if the SW was updated before we were ready 1`] = `
+<div
+  class="serviceworker-ready-notice-wrapper"
+>
+  <div
+    class="photon-message-bar photon-message-bar-warning serviceworker-ready-notice"
+  >
+    <div
+      class="photon-message-bar-inner-content"
+    >
+      <div
+        class="photon-message-bar-inner-text"
+      >
+        A new version of the application was applied before this page
+was fully loaded. You might see malfunctions.
+      </div>
+    </div>
+    <button
+      aria-label="Hide the reload notice"
+      class="photon-button photon-message-bar-close-button"
+      title="Hide the reload notice"
+      type="button"
+    />
+  </div>
+</div>
+`;

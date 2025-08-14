@@ -16,16 +16,16 @@
       {
         // When spreading props, use inline object with spread elements
         // directly instead of Babel's `extend` helper or `Object.assign`.
-        "useSpread": true
+        "useSpread": true,
+        // Automatically import 'react' into .tsx files.
+        "runtime": "automatic"
       }
     ],
-    // The "all" property is needed for Flow to properly parse the syntax.
-    // It has trouble understanding when the flow comment is the second comment.
-    // See: https://github.com/babel/babel/issues/9845
     [
-      "@babel/preset-flow",
+      "@babel/preset-typescript",
       {
-        "all": true
+        "isTSX": true,
+        "allExtensions": true
       }
     ]
   ],

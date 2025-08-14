@@ -62,12 +62,12 @@ jobs:
       - checkout-and-dependencies
       - run: yarn license-check
 
-  flow:
+  typecheck:
     executor: node
     resource_class: large
     steps:
       - checkout-and-dependencies
-      - run: yarn flow:ci
+      - run: yarn ts
 
   alex:
     executor: node
@@ -110,7 +110,7 @@ workflows:
       - tests
       - lint
       - build-prod
-      - flow
+      - typecheck
       - licence-check
       - alex
       - yarn_lock

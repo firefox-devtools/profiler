@@ -1,0 +1,101 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`MarkerSidebar matches the snapshots when displaying data about the currently selected node 1`] = `
+<aside
+  class="sidebar sidebar-marker-table"
+>
+  <div
+    class="sidebar-contents-wrapper"
+  >
+    <div
+      class="tooltipMarker"
+    >
+      <div
+        class="tooltipHeader"
+      >
+        <div
+          class="tooltipOneLine"
+        >
+          <div
+            class="tooltipTiming"
+          >
+            unknown duration
+          </div>
+          <div
+            class="tooltipTitle"
+          >
+            IPC — sent to 2222
+          </div>
+        </div>
+      </div>
+      <div
+        class="tooltipDetails"
+      >
+        <div
+          class="tooltipLabel"
+        >
+          Type
+          :
+        </div>
+        PContent::Msg_PreferenceUpdate
+        <div
+          class="tooltipLabel"
+        >
+          Sync
+          :
+        </div>
+        false
+        <div
+          class="tooltipLabel"
+        >
+          From
+          :
+        </div>
+        Empty (Thread ID: 0)
+        <div
+          class="tooltipLabel"
+        >
+          Other Pid
+          :
+        </div>
+        PID: 2222
+        <div
+          class="tooltipLabel"
+        >
+          Send Thread Latency
+          :
+        </div>
+        unknown
+        <div
+          class="tooltipLabel"
+        >
+          IPC Send Duration
+          :
+        </div>
+        unknown
+        <div
+          class="tooltipLabel"
+        >
+          IPC Recv Latency
+          :
+        </div>
+        unknown
+        <div
+          class="tooltipLabel"
+        >
+          Recv Thread Latency
+          :
+        </div>
+        unknown
+        <div
+          class="tooltipLabel"
+        >
+          Track
+          :
+        </div>
+        Empty
+      </div>
+    </div>
+  </div>
+</aside>
+`;
