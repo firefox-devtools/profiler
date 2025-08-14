@@ -79,8 +79,8 @@ export interface CliOptions {
 
 export async function run(options: CliOptions) {
   console.log(`Loading profile from ${options.input}`);
-  const serializedProfile = JSON.parse(fs.readFileSync(options.input, 'utf8'));
-  const profile = await unserializeProfileOfArbitraryFormat(serializedProfile);
+  const buffer = fs.readFileSync(options.input, null).buffer;
+  const profile = await unserializeProfileOfArbitraryFormat(buffer);
   if (profile === undefined) {
     throw new Error('Unable to parse the profile.');
   }

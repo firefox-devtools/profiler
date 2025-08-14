@@ -48,4 +48,29 @@ describe('symbolicator-cli tool', function () {
     expect(console.warn).not.toHaveBeenCalled();
     expect(result).toMatchSnapshot();
   });
+
+  it('is symbolicating a .json.gz trace correctly', async function () {
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const symbolsJson = fs.readFileSync(
+      'src/test/integration/symbolicator-cli/symbol-server-response.json'
+    );
+
+    window.fetchMock.post(
+      'http://symbol.server/symbolicate/v5',
+      new Response(symbolsJson as any)
+    );
+
+    const options = {
+      input: 'src/test/integration/symbolicator-cli/unsymbolicated.json.gz',
+      output: '',
+      server: 'http://symbol.server',
+    };
+
+    const result = await runToTempFileAndReturnOutput(options);
+
+    expect(console.warn).not.toHaveBeenCalled();
+    expect(result).toMatchSnapshot();
+  });
 });
