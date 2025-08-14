@@ -8,7 +8,7 @@ import {
   removeRootOverlayElement,
 } from '../fixtures/utils';
 
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 
 import {
   Tooltip,

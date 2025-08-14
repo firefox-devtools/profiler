@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { fireEvent } from '@testing-library/react';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import { TimelineTrackThread } from 'firefox-profiler/components/timeline/TrackThread';
 import type { DrawOperation } from '../fixtures/mocks/canvas-context';
 import {

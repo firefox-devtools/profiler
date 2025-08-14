@@ -22,7 +22,7 @@ import {
   getLocalTracksByPid,
 } from 'firefox-profiler/selectors';
 import { FULL_TRACK_SCREENSHOT_HEIGHT } from 'firefox-profiler/app-logic/constants';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import { showLocalTrack } from 'firefox-profiler/actions/profile-view';
 
 import { storeWithProfile } from '../fixtures/stores';

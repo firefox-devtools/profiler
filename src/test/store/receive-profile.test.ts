@@ -5,7 +5,7 @@ import { oneLineTrim } from 'common-tags';
 import JSZip from 'jszip';
 import { indexedDB } from 'fake-indexeddb';
 
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import { getEmptyProfile } from '../../profile-logic/data-structures';
 import { getTimeRangeForThread } from '../../profile-logic/profile-data';
 import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';

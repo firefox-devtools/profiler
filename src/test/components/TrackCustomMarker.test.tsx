@@ -10,7 +10,7 @@ import { fireEvent } from '@testing-library/react';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { TrackCustomMarker } from '../../components/timeline/TrackCustomMarker';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 
 import type { DrawOperation } from '../fixtures/mocks/canvas-context';
 import {

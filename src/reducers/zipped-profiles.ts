@@ -4,7 +4,7 @@
 
 import { combineReducers } from 'redux';
 import { oneLine } from 'common-tags';
-import { ensureExists } from '../utils/flow';
+import { ensureExists } from '../utils/types';
 import type * as ZipFiles from '../profile-logic/zip-files';
 
 import type {

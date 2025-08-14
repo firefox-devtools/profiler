@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { ensureIsValidTabSlug, objectEntries } from '../utils/flow';
+import { ensureIsValidTabSlug, objectEntries } from '../utils/types';
 import type JSZip from 'jszip';
 import type { JSZipObject } from 'jszip';
 export type IndexIntoZipFileTable = number;

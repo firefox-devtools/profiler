@@ -11,7 +11,7 @@ import {
 } from './url-state';
 import { getGlobalTracks, getLocalTracksByPid } from './profile';
 import { getZipFileState } from './zipped-profiles';
-import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
+import { assertExhaustiveCheck, ensureExists } from '../utils/types';
 import {
   FULL_TRACK_SCREENSHOT_HEIGHT,
   TRACK_NETWORK_HEIGHT,

@@ -6,7 +6,7 @@ import { fireEvent } from '@testing-library/react';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { TrackEventDelay } from '../../components/timeline/TrackEventDelay';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import { enableEventDelayTracks } from '../../actions/app';
 
 import {

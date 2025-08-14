@@ -8,7 +8,7 @@ import { ProfileViewer } from 'firefox-profiler/components/app/ProfileViewer';
 import { updateUrlState } from 'firefox-profiler/actions/app';
 import { viewProfile } from 'firefox-profiler/actions/receive-profile';
 import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 
 import {
   render,

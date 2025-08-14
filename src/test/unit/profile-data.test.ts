@@ -35,7 +35,7 @@ import {
 import { StringTable } from '../../utils/string-table';
 import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
 import { sortDataTable } from '../../utils/data-table-utils';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import getCallNodeProfile from '../fixtures/profiles/call-nodes';
 import {
   getProfileFromTextSamples,

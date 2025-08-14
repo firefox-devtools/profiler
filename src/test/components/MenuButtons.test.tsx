@@ -28,7 +28,7 @@ import { loadProfile } from 'firefox-profiler/actions/receive-profile';
 
 import { getHash, getDataSource } from 'firefox-profiler/selectors/url-state';
 
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,

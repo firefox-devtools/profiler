@@ -38,7 +38,7 @@ import {
   assertExhaustiveCheck,
   getFirstItemFromSet,
   ensureExists,
-} from 'firefox-profiler/utils/flow';
+} from 'firefox-profiler/utils/types';
 import { sendAnalytics } from 'firefox-profiler/utils/analytics';
 import { objectShallowEquals } from 'firefox-profiler/utils/index';
 import {

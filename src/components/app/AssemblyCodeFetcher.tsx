@@ -20,7 +20,7 @@ import {
 import { fetchAssembly } from 'firefox-profiler/utils/fetch-assembly';
 import { RegularExternalCommunicationDelegate } from 'firefox-profiler/utils/query-api';
 import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';

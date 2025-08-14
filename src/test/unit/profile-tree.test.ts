@@ -26,7 +26,7 @@ import {
   formatTree,
   formatTreeIncludeCategories,
 } from '../fixtures/utils';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import type { CallNodePath } from 'firefox-profiler/types';
 
 describe('unfiltered call tree', function () {

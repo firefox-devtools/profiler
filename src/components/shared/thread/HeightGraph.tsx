@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { PureComponent } from 'react';
 import classNames from 'classnames';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import { getSampleIndexClosestToStartTime } from 'firefox-profiler/profile-logic/profile-data';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';

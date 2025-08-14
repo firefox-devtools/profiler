@@ -23,7 +23,7 @@ import {
   getShouldSanitizeByDefault as getShouldSanitizeByDefaultImpl,
   type SanitizeProfileResult,
 } from '../profile-logic/sanitize';
-import { ensureExists } from '../utils/flow';
+import { ensureExists } from '../utils/types';
 import { formatNumber } from '../utils/format-numbers';
 import { getHiddenGlobalTracks, getHiddenLocalTracksByPid } from './url-state';
 

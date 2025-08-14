@@ -7,7 +7,7 @@ import { Localized } from '@fluent/react';
 
 import { ContextMenu } from './ContextMenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
 import {
   setContextMenuVisibility,

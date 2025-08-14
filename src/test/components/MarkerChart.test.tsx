@@ -23,7 +23,7 @@ import { MarkerChart } from '../../components/marker-chart';
 import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import { changeSelectedTab } from '../../actions/app';
 import { getPreviewSelection } from '../../selectors/profile';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import type {
   DrawOperation,

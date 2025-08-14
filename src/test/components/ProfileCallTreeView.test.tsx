@@ -17,7 +17,7 @@ import { getScrollToSelectionGeneration } from 'firefox-profiler/selectors/profi
 import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';
 import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
 import { processGeckoProfile } from '../../profile-logic/process-profile';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import {
   getEmptyThread,
   getEmptyProfile,

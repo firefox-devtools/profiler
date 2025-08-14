@@ -8,7 +8,7 @@ import { fireEvent } from '@testing-library/react';
 
 import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { TrackProcessCPU } from '../../components/timeline/TrackProcessCPU';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 
 import {
   autoMockCanvasContext,

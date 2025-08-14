@@ -14,7 +14,7 @@ import {
 } from '../../actions/profile-view';
 import { FlameGraph } from '../../components/flame-graph';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors';
-import { ensureExists, objectEntries } from '../../utils/flow';
+import { ensureExists, objectEntries } from '../../utils/types';
 import { fireFullKeyPress } from '../fixtures/utils';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';

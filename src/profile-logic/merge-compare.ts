@@ -32,7 +32,7 @@ import {
   correlateIPCMarkers,
 } from './marker-data';
 import { computeStringIndexMarkerFieldsByDataType } from './marker-schema';
-import { ensureExists, getFirstItemFromSet } from '../utils/flow';
+import { ensureExists, getFirstItemFromSet } from '../utils/types';
 import { StringTable } from '../utils/string-table';
 
 import type {

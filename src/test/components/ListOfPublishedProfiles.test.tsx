@@ -17,7 +17,7 @@ import {
 import { changeProfileName } from 'firefox-profiler/actions/profile-view';
 import { updateUrlState } from 'firefox-profiler/actions/app';
 import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 
 import { blankStore } from 'firefox-profiler/test/fixtures/stores';
 import { mockDate } from 'firefox-profiler/test/fixtures/mocks/date';

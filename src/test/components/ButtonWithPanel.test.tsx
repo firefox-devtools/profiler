@@ -10,7 +10,7 @@ import {
   act,
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { ButtonWithPanel } from '../../components/shared/ButtonWithPanel';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import { fireFullClick } from '../fixtures/utils';
 
 beforeEach(() => {

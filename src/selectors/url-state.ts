@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { createSelector } from 'reselect';
-import { ensureExists, getFirstItemFromSet } from '../utils/flow';
+import { ensureExists, getFirstItemFromSet } from '../utils/types';
 import { urlFromState } from '../app-logic/url-handling';
 import { getThreadsKey } from '../profile-logic/profile-data';
 import { stringsToMarkerRegExps } from '../profile-logic/marker-data';

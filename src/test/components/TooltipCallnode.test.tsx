@@ -17,7 +17,7 @@ import {
   changeSelectedCallNode,
   changeCallTreeSummaryStrategy,
 } from '../../actions/profile-view';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import type { Profile } from 'firefox-profiler/types';
 
 describe('TooltipCallNode', function () {

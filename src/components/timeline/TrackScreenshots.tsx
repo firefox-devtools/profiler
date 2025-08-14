@@ -28,7 +28,7 @@ import type {
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import './TrackScreenshots.css';
 
 type OwnProps = {

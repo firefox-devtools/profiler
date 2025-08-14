@@ -35,7 +35,7 @@ import {
 } from '../../actions/profile-view';
 import { changeSelectedTab } from '../../actions/app';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 
 import {
   autoMockCanvasContext,

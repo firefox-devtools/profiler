@@ -36,7 +36,7 @@ import {
 } from '../profile-logic/symbolication';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
-import { objectMap } from '../utils/flow';
+import { objectMap } from '../utils/types';
 
 const profile: Reducer<Profile | null> = (state = null, action) => {
   switch (action.type) {

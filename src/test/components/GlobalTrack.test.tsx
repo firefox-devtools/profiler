@@ -16,7 +16,7 @@ import {
 import { TimelineGlobalTrack } from '../../components/timeline/GlobalTrack';
 import { getGlobalTracks, getRightClickedTrack } from '../../selectors/profile';
 import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import {
   autoMockCanvasContext,
   flushDrawLog,

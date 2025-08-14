@@ -5,7 +5,7 @@
 import {
   ensureExists,
   assertExhaustiveCheck,
-} from 'firefox-profiler/utils/flow';
+} from 'firefox-profiler/utils/types';
 import { numberSeriesToDeltas } from 'firefox-profiler/utils/number-series';
 
 import type {

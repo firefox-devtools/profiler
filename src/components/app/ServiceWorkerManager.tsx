@@ -7,7 +7,7 @@ import { Workbox } from 'workbox-window';
 
 import { isLocalURL } from 'firefox-profiler/utils/url';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import {
   getDataSource,
   getProfileUrl,

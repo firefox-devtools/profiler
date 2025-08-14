@@ -33,7 +33,7 @@ import type {
 } from 'firefox-profiler/profile-logic/zip-files';
 
 import './ZipFileViewer.css';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
 type StateProps = {
   readonly zipFileState: ZipFileState;

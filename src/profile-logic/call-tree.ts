@@ -32,7 +32,7 @@ import type {
 
 import ExtensionIcon from '../../res/img/svg/extension.svg';
 import { formatCallNodeNumber, formatPercent } from '../utils/format-numbers';
-import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
+import { assertExhaustiveCheck, ensureExists } from '../utils/types';
 import { checkBit } from '../utils/bitset';
 import * as ProfileData from './profile-data';
 import type { CallTreeSummaryStrategy } from '../types/actions';

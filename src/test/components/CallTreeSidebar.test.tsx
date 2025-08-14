@@ -15,7 +15,7 @@ import type { FuncNamesDict } from '../fixtures/profiles/processed-profile';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
 import type { CallNodePath, Profile } from 'firefox-profiler/types';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import { fireFullClick } from '../fixtures/utils';
 
 describe('CallTreeSidebar', function () {

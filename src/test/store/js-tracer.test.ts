@@ -4,7 +4,7 @@
 
 import { storeWithProfile } from '../fixtures/stores';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import { changeShowJsTracerSummary } from '../../actions/profile-view';
 import {
   convertJsTracerToThread,

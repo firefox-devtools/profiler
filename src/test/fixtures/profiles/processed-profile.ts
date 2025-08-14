@@ -15,7 +15,7 @@ import { computeReferenceCPUDeltaPerMs } from '../../../profile-logic/cpu';
 import { stateFromLocation } from '../../../app-logic/url-handling';
 import { StringTable } from '../../../utils/string-table';
 import { computeThreadFromRawThread } from '../utils';
-import { ensureExists } from '../../../utils/flow';
+import { ensureExists } from '../../../utils/types';
 import {
   INTERVAL,
   INSTANT,

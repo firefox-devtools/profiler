@@ -18,7 +18,7 @@ import {
   getProfilesToCompare,
 } from 'firefox-profiler/selectors/url-state';
 import { getBrowserConnectionStatus } from 'firefox-profiler/selectors/app';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type { DataSource } from 'firefox-profiler/types';

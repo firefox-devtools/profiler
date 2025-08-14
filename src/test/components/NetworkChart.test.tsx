@@ -20,7 +20,7 @@ import {
 import { NetworkChart } from '../../components/network-chart';
 import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import { changeSelectedTab } from '../../actions/app';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,

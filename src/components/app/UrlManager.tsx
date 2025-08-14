@@ -21,7 +21,7 @@ import {
 import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { retrieveProfileForRawUrl } from 'firefox-profiler/actions/receive-profile';
 import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type { UrlState, Phase, UrlSetupPhase } from 'firefox-profiler/types';

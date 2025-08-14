@@ -22,7 +22,7 @@ import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
 import { changeSelectedThreads } from 'firefox-profiler/actions/profile-view';
 import { getEmptyThread } from '../../profile-logic/data-structures';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import type {
   NetworkPayload,
   NetworkRedirectType,

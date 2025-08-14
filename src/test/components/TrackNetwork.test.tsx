@@ -20,7 +20,7 @@ import {
   TRACK_NETWORK_ROW_HEIGHT,
   TRACK_NETWORK_ROW_REPEAT,
 } from 'firefox-profiler/app-logic/constants';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { changeSelectedNetworkMarker } from 'firefox-profiler/actions/profile-view';
 

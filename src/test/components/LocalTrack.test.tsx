@@ -22,7 +22,7 @@ import {
   getLocalTrackFromReference,
   getProfile,
 } from '../../selectors/profile';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import {

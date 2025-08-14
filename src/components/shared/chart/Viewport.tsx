@@ -24,7 +24,7 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import {
   getObjectValuesAsUnion,
   assertExhaustiveCheck,
-} from 'firefox-profiler/utils/flow';
+} from 'firefox-profiler/utils/types';
 
 /**
  * Viewport terminology:

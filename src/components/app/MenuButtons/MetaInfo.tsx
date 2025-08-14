@@ -22,7 +22,7 @@ import {
   formatPlatform,
 } from 'firefox-profiler/profile-logic/profile-metainfo';
 
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type {

@@ -24,7 +24,7 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   assertExhaustiveCheck,
   ensureExists,
-} from 'firefox-profiler/utils/flow';
+} from 'firefox-profiler/utils/types';
 import {
   getThreads,
   getRightClickedTrack,

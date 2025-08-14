@@ -28,7 +28,7 @@ import {
   updateBottomBoxContentsAndMaybeOpen,
 } from 'firefox-profiler/actions/profile-view';
 import { extractNonInvertedCallTreeTimings } from 'firefox-profiler/profile-logic/call-tree';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 
 import type {
   Thread,

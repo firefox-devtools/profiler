@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import { TimelineTrackThread } from 'firefox-profiler/components/timeline/TrackThread';
 import { changeImplementationFilter as actionChangeImplementationFilter } from 'firefox-profiler/actions/profile-view';
 import { render, screen, fireEvent, act } from '../fixtures/testing-library';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getProfileFromTextSamples,

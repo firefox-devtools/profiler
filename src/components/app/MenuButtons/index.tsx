@@ -42,7 +42,7 @@ import {
   getUploadPhase,
   getHasPrePublishedState,
 } from 'firefox-profiler/selectors/publish';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
 import type {
   StartEndRange,

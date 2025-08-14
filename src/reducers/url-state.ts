@@ -4,7 +4,7 @@
 
 import { combineReducers } from 'redux';
 import { oneLine } from 'common-tags';
-import { objectEntries } from '../utils/flow';
+import { objectEntries } from '../utils/types';
 import { tabSlugs } from '../app-logic/tabs-handling';
 
 import type {

@@ -15,7 +15,7 @@ import { ProfileFilterNavigator } from '../../components/app/ProfileFilterNaviga
 import * as ProfileView from '../../actions/profile-view';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 
 describe('shared/FilterNavigatorBar', () => {
   it(`pops the item unless the last one is clicked`, () => {

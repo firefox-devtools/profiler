@@ -23,7 +23,7 @@ import {
   logFriendlyPreamble,
   logDevelopmentTips,
 } from './utils/window-console';
-import { ensureExists } from './utils/flow';
+import { ensureExists } from './utils/types';
 
 // Mock out Google Analytics for anything that's not production so that we have run-time
 // code coverage in development and testing.

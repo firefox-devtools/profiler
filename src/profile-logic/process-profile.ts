@@ -15,7 +15,7 @@ import {
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyNativeSymbolTable,
 } from './data-structures';
-import { immutableUpdate, ensureExists } from '../utils/flow';
+import { immutableUpdate, ensureExists } from '../utils/types';
 import { verifyMagic, SIMPLEPERF as SIMPLEPERF_MAGIC } from '../utils/magic';
 import { attemptToUpgradeProcessedProfileThroughMutation } from './processed-profile-versioning';
 import { upgradeGeckoProfileToCurrentVersion } from './gecko-profile-versioning';

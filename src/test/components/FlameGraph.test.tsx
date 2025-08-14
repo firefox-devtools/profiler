@@ -15,7 +15,7 @@ import {
   getInvertCallstack,
   getSourceViewFile,
 } from '../../selectors/url-state';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import {
   getEmptyThread,
   getEmptyProfile,

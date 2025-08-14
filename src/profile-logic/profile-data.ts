@@ -28,7 +28,10 @@ import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
 import { makeBitSet } from 'firefox-profiler/utils/bitset';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import { StringTable } from 'firefox-profiler/utils/string-table';
-import { ensureExists, getFirstItemFromSet } from 'firefox-profiler/utils/flow';
+import {
+  ensureExists,
+  getFirstItemFromSet,
+} from 'firefox-profiler/utils/types';
 import {
   numberSeriesFromDeltas,
   numberSeriesToDeltas,

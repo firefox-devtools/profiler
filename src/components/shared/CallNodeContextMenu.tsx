@@ -40,7 +40,7 @@ import { oneLine } from 'common-tags';
 import {
   convertToTransformType,
   assertExhaustiveCheck,
-} from 'firefox-profiler/utils/flow';
+} from 'firefox-profiler/utils/types';
 
 import {
   getShouldDisplaySearchfox,

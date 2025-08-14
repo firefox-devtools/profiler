@@ -24,7 +24,7 @@ import {
 import { intersectSets, subtractSets } from '../utils/set';
 import { StringTable } from '../utils/string-table';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
-import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
+import { ensureExists, assertExhaustiveCheck } from '../utils/types';
 
 export type TracksWithOrder = {
   readonly globalTracks: GlobalTrack[];

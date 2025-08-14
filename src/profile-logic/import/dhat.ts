@@ -17,7 +17,7 @@ import {
 } from 'firefox-profiler/profile-logic/data-structures';
 
 import { StringTable } from 'firefox-profiler/utils/string-table';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 
 /**
  * DHAT is a heap memory analysis tool in valgrind. It's also available as rust component.

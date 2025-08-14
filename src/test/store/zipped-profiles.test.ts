@@ -9,7 +9,7 @@ import * as ProfileViewSelectors from '../../selectors/profile';
 import * as ZippedProfilesSelectors from '../../selectors/zipped-profiles';
 import * as UrlStateSelectors from '../../selectors/url-state';
 import createStore from '../../app-logic/create-store';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import JSZip from 'jszip';
 
 import * as ZippedProfilesActions from '../../actions/zipped-profiles';

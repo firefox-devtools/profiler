@@ -6,7 +6,7 @@ import {
   getProfileWithThreadCPUDelta,
   getProfileWithDicts,
 } from '../fixtures/profiles/processed-profile';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 
 import type { ThreadCPUDeltaUnit, Milliseconds } from 'firefox-profiler/types';
 

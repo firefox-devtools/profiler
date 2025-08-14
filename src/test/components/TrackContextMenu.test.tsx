@@ -11,7 +11,7 @@ import {
   fireEvent,
   act,
 } from 'firefox-profiler/test/fixtures/testing-library';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import {
   changeSelectedThreads,
   changeRightClickedTrack,

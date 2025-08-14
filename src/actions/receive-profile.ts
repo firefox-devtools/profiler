@@ -88,7 +88,7 @@ import type {
   FuncToFuncsMap,
   SymbolicationStepInfo,
 } from '../profile-logic/symbolication';
-import { assertExhaustiveCheck } from '../utils/flow';
+import { assertExhaustiveCheck } from '../utils/types';
 import { bytesToBase64DataUrl } from 'firefox-profiler/utils/base64';
 import type {
   BrowserConnection,

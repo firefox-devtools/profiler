@@ -12,7 +12,7 @@ import {
   getCallNodeInfo,
   getInvertedCallNodeInfo,
 } from '../../profile-logic/profile-data';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import type {
   CallNodePath,
   Thread,

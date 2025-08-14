@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { fetchAssembly } from 'firefox-profiler/utils/fetch-assembly';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import type { NativeSymbolInfo, Lib } from 'firefox-profiler/types';
 
 describe('fetchAssembly', function () {

@@ -15,7 +15,7 @@ import {
 import { changeSidebarOpenState } from '../../actions/app';
 
 import explicitConnect from '../../utils/connect';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import {

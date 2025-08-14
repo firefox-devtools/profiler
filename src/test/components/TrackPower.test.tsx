@@ -10,7 +10,7 @@ import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 
 import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { TrackPower } from '../../components/timeline/TrackPower';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 
 import {
   autoMockCanvasContext,

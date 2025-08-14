@@ -8,7 +8,7 @@ import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import createStore from 'firefox-profiler/app-logic/create-store';
 import { KeyboardShortcut } from 'firefox-profiler/components/app/KeyboardShortcut';
 import { fireFullKeyPress } from 'firefox-profiler/test/fixtures/utils';
-import { coerce } from 'firefox-profiler/utils/flow';
+import { coerce } from 'firefox-profiler/utils/types';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 
 describe('app/KeyboardShortcut', function () {

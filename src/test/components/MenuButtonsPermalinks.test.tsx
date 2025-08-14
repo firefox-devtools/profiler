@@ -12,7 +12,7 @@ import {
 import { MenuButtons } from '../../components/app/MenuButtons';
 import { storeWithProfile } from '../fixtures/stores';
 import { stateFromLocation } from '../../app-logic/url-handling';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import { fireFullClick } from '../fixtures/utils';
 
 describe('<Permalink>', function () {

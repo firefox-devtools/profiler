@@ -42,7 +42,7 @@ import {
   getHumanReadableTracks,
 } from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import { waitUntilData, waitUntilState, formatTree } from '../fixtures/utils';
 import { storeWithZipFile } from '../fixtures/profiles/zip-file';
 import { selectedThreadSelectors } from '../../selectors/per-thread';

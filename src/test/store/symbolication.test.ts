@@ -32,7 +32,7 @@ import {
 import { formatTree, formatStack } from '../fixtures/utils';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 import { StringTable } from '../../utils/string-table';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 
 // fake-indexeddb no longer includes a structuredClone polyfill, so we need to
 // import it explicitly.

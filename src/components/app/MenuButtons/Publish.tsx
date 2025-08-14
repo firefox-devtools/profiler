@@ -27,7 +27,7 @@ import {
   getShouldSanitizeByDefault,
 } from 'firefox-profiler/selectors/publish';
 import { BlobUrlLink } from 'firefox-profiler/components/shared/BlobUrlLink';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import prettyBytes from 'firefox-profiler/utils/pretty-bytes';
 
 import explicitConnect, {

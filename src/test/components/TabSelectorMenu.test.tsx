@@ -14,7 +14,7 @@ import {
 import { storeWithProfile } from '../fixtures/stores';
 import { fireFullClick } from '../fixtures/utils';
 import { getTabFilter } from '../../selectors/url-state';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import { removeURLs } from 'firefox-profiler/utils/string';
 
 describe('app/TabSelectorMenu', () => {

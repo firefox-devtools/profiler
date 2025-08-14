@@ -29,7 +29,7 @@ import {
   getEmptyNativeSymbolTable,
 } from 'firefox-profiler/profile-logic/data-structures';
 import { StringTable } from 'firefox-profiler/utils/string-table';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import {
   verifyMagic,
   SIMPLEPERF as SIMPLEPERF_MAGIC,

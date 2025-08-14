@@ -23,7 +23,7 @@ import {
   selectTrackWithModifiers,
 } from '../../actions/profile-view';
 import { changeSelectedTab } from 'firefox-profiler/actions/app';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import { getEmptyThread } from 'firefox-profiler/profile-logic/data-structures';
 
 import { storeWithProfile } from '../fixtures/stores';

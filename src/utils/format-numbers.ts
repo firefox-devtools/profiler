@@ -11,7 +11,7 @@ import type {
   Nanoseconds,
   WeightType,
 } from '../types';
-import { assertExhaustiveCheck } from './flow';
+import { assertExhaustiveCheck } from './types';
 
 // Calling `toLocalestring` repeatedly in a tight loop can be a performance
 // problem. It's much better to reuse an instance of `Intl.NumberFormat`.

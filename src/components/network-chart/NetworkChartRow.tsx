@@ -21,7 +21,7 @@ import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 
 import type {
   CssPixels,

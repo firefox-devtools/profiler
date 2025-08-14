@@ -21,7 +21,7 @@ import {
 } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSourceViewFile } from '../../selectors/url-state';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import { fireFullClick } from '../fixtures/utils';
 import { createBrowserConnection } from '../../app-logic/browser-connection';
 import { updateBrowserConnectionStatus } from 'firefox-profiler/actions/app';

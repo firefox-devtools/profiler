@@ -7,7 +7,7 @@ import { SymbolsNotFoundError } from './errors';
 
 import type { RequestedLib, ISymbolStoreDB } from 'firefox-profiler/types';
 import type { SymbolTableAsTuple } from './symbol-store-db';
-import { ensureExists } from '../utils/flow';
+import { ensureExists } from '../utils/types';
 
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 

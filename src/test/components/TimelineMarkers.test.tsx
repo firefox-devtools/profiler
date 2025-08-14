@@ -20,7 +20,7 @@ import {
 } from '../../components/timeline/Markers';
 import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import { overlayFills } from '../../profile-logic/marker-styles';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 
 import type { FillRectOperation } from '../fixtures/mocks/canvas-context';
 import {

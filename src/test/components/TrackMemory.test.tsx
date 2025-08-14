@@ -8,7 +8,7 @@ import { fireEvent } from '@testing-library/react';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { TrackMemory } from '../../components/timeline/TrackMemory';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 
 import {
   autoMockCanvasContext,

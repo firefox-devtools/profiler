@@ -13,7 +13,7 @@ import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getTimelineType, getSelectedTab } from '../../selectors/url-state';
 import { getLastVisibleThreadTabSlug } from '../../selectors/app';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import { TimelineTrackThread } from '../../components/timeline/TrackThread';
 import { commitRange } from '../../actions/profile-view';
 import { changeSelectedTab } from '../../actions/app';

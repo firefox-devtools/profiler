@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { createSelector } from 'reselect';
 import { getProfileUrl } from './url-state';
-import { ensureExists } from '../utils/flow';
+import { ensureExists } from '../utils/types';
 import * as ZipFiles from '../profile-logic/zip-files';
 
 import type {

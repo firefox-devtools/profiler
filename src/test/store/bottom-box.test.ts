@@ -19,7 +19,7 @@ import {
   closeBottomBox,
 } from '../../actions/profile-view';
 import { changeSelectedTab } from '../../actions/app';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import type { Profile, Thread } from 'firefox-profiler/types';
 
 function getProfileWithNiceAddresses(): {

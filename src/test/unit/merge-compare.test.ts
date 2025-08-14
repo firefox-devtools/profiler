@@ -13,7 +13,7 @@ import {
   addMarkersToThreadWithCorrespondingSamples,
 } from '../fixtures/profiles/processed-profile';
 import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import { getTimeRangeIncludingAllThreads } from 'firefox-profiler/profile-logic/profile-data';
 import type {
   RawThread,

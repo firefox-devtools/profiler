@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { enableExperimentalCPUGraphs } from 'firefox-profiler/actions/app';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import { TimelineTrackThread } from 'firefox-profiler/components/timeline/TrackThread';
 import {
   autoMockCanvasContext,

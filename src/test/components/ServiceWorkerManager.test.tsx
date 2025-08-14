@@ -20,7 +20,7 @@ import {
 } from '../../actions/receive-profile';
 import { fatalError } from '../../actions/errors';
 
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 
 import { blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';

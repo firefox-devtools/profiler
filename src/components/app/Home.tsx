@@ -22,7 +22,7 @@ import {
   enableMenuButton,
 } from 'firefox-profiler/app-logic/web-channel';
 import { getBrowserConnection } from 'firefox-profiler/selectors/app';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 

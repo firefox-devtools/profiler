@@ -13,7 +13,7 @@ import {
   addInnerWindowIdToStacks,
   getNetworkMarkers,
 } from '../fixtures/profiles/processed-profile';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import {
   correlateIPCMarkers,
   deriveMarkersFromRawMarkerTable,

@@ -5,7 +5,7 @@ import { createSelector } from 'reselect';
 import * as Tracks from '../profile-logic/tracks';
 import * as CPU from '../profile-logic/cpu';
 import * as UrlState from './url-state';
-import { ensureExists } from '../utils/flow';
+import { ensureExists } from '../utils/types';
 import {
   accumulateCounterSamples,
   extractProfileFilterPageData,

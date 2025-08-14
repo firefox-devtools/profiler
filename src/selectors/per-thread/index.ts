@@ -32,7 +32,7 @@ import {
   getAddressTimings,
 } from '../../profile-logic/address-timings';
 import * as ProfileSelectors from '../profile';
-import { ensureExists, getFirstItemFromSet } from '../../utils/flow';
+import { ensureExists, getFirstItemFromSet } from '../../utils/types';
 
 import type {
   Thread,

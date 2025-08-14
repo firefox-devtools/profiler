@@ -14,7 +14,7 @@ import {
   getLocaleDirection,
 } from 'firefox-profiler/app-logic/l10n';
 
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import type { PseudoStrategy } from 'firefox-profiler/types';
 import { L10nContext } from 'firefox-profiler/contexts/L10nContext';
 import type { L10nContextType } from 'firefox-profiler/contexts/L10nContext';

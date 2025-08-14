@@ -30,7 +30,7 @@ import {
   changeTableViewOptions,
   updateBottomBoxContentsAndMaybeOpen,
 } from 'firefox-profiler/actions/profile-view';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
 import type {
   State,

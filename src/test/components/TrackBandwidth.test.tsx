@@ -14,7 +14,7 @@ import {
 
 import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { TrackBandwidth } from '../../components/timeline/TrackBandwidth';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 
 import {
   autoMockCanvasContext,

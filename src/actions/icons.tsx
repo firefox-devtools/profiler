@@ -6,7 +6,7 @@ import type {
   ThunkAction,
   IconWithClassName,
 } from 'firefox-profiler/types';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
 export function iconHasLoaded(iconWithClassName: {
   readonly icon: string;

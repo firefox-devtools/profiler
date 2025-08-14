@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at <http://mozilla.org/MPL/2.0/>. */
 
-import { coerce, coerceMatchingShape } from 'firefox-profiler/utils/flow';
+import { coerce, coerceMatchingShape } from 'firefox-profiler/utils/types';
 
 type CoerceA = { startTime: number };
 type CoerceB = { startTime: number; endTime: number };

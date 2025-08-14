@@ -14,7 +14,7 @@ import {
   formatMicroseconds,
   formatNanoseconds,
 } from '../utils/format-numbers';
-import { ensureExists } from '../utils/flow';
+import { ensureExists } from '../utils/types';
 import type {
   CategoryList,
   MarkerFormatType,

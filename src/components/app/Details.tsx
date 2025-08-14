@@ -27,7 +27,7 @@ import { getIsSidebarOpen } from 'firefox-profiler/selectors/app';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { CallNodeContextMenu } from 'firefox-profiler/components/shared/CallNodeContextMenu';
 import { MaybeMarkerContextMenu } from 'firefox-profiler/components/shared/MarkerContextMenu';
-import { toValidTabSlug } from 'firefox-profiler/utils/flow';
+import { toValidTabSlug } from 'firefox-profiler/utils/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';

@@ -18,7 +18,7 @@ import {
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
 import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 
 import type { StringTable } from 'firefox-profiler/utils/string-table';
 import type {

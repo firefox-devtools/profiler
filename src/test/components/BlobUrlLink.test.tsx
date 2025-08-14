@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { BlobUrlLink } from '../../components/shared/BlobUrlLink';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 
 describe('shared/BlobUrlLink', () => {
   beforeEach(async () => {

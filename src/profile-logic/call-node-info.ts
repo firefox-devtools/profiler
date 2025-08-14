@@ -7,7 +7,7 @@ import {
   concatHash,
   hashPathSingleFunc,
 } from 'firefox-profiler/utils/path';
-import { ensureExists } from '../utils/flow';
+import { ensureExists } from '../utils/types';
 import { bisectionRightByKey } from '../utils/bisect';
 
 import type {

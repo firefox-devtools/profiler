@@ -17,7 +17,7 @@ import {
   assertExhaustiveCheck,
   ensureExists,
   getFirstItemFromSet,
-} from '../../utils/flow';
+} from '../../utils/types';
 
 import type {
   Thread,

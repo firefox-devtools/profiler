@@ -9,7 +9,7 @@ import type { CssPixels } from 'firefox-profiler/types';
 import {
   ensureExists,
   assertExhaustiveCheck,
-} from 'firefox-profiler/utils/flow';
+} from 'firefox-profiler/utils/types';
 import './Tooltip.css';
 
 export const MOUSE_OFFSET = 11;

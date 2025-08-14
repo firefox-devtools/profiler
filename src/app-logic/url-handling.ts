@@ -17,7 +17,7 @@ import {
   toValidTabSlug,
   coerce,
   ensureExists,
-} from 'firefox-profiler/utils/flow';
+} from 'firefox-profiler/utils/types';
 import {
   getThreadsKey,
   toValidCallTreeSummaryStrategy,

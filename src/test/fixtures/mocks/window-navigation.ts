@@ -35,7 +35,7 @@
  * you _must_ call after your test ends.
  */
 
-import { coerceMatchingShape } from '../../../utils/flow';
+import { coerceMatchingShape } from '../../../utils/types';
 
 // This symbol will be used in the mock for window.location so that the mock for
 // window.history can change the inner location directly.

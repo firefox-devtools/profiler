@@ -18,7 +18,7 @@ import {
 } from 'firefox-profiler/selectors/url-state';
 import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
 import { UploadedRecordingsHome } from './UploadedRecordingsHome';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
 import type { AppViewState, State, DataSource } from 'firefox-profiler/types';
 

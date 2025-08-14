@@ -14,7 +14,7 @@ import { completeSymbolTableAsTuple } from '../fixtures/example-symbol-table';
 import 'core-js/stable/structured-clone';
 import { indexedDB, IDBKeyRange } from 'fake-indexeddb';
 import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import type { RequestedLib } from 'firefox-profiler/types';
 
 describe('SymbolStore', function () {

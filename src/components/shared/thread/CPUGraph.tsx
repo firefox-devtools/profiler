@@ -4,7 +4,7 @@
 import { PureComponent } from 'react';
 
 import { ThreadHeightGraph } from './HeightGraph';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 
 import type {
   Thread,

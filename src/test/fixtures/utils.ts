@@ -36,7 +36,7 @@ import type {
   SampleUnits,
 } from 'firefox-profiler/types';
 
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import { fireEvent, screen } from '@testing-library/react';
 
 /**

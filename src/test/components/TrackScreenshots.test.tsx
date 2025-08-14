@@ -19,7 +19,7 @@ import { commitRange } from '../../actions/profile-view';
 import { TimelineTrackScreenshots } from '../../components/timeline/TrackScreenshots';
 import { Timeline } from '../../components/timeline';
 import { StringTable } from '../../utils/string-table';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import { FULL_TRACK_SCREENSHOT_HEIGHT } from '../../app-logic/constants';
 
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';

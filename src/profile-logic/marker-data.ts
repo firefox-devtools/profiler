@@ -5,7 +5,7 @@ import { getEmptyRawMarkerTable } from './data-structures';
 import { getFriendlyThreadName } from './profile-data';
 import { removeFilePath, removeURLs, stringsToRegExp } from '../utils/string';
 import { StringTable } from '../utils/string-table';
-import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
+import { ensureExists, assertExhaustiveCheck } from '../utils/types';
 import {
   INSTANT,
   INTERVAL,

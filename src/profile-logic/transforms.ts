@@ -14,7 +14,7 @@ import {
   getOriginAnnotationForFunc,
 } from './profile-data';
 import { timeCode } from '../utils/time-code';
-import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
+import { assertExhaustiveCheck, convertToTransformType } from '../utils/types';
 import { canonicalizeRangeSet } from '../utils/range-set';
 import {
   getSearchFilteredMarkerIndexes,

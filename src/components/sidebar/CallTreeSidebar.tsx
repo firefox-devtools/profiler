@@ -7,7 +7,7 @@ import memoize from 'memoize-immutable';
 import { Localized } from '@fluent/react';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import {
   selectedThreadSelectors,
   selectedNodeSelectors,

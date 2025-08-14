@@ -14,7 +14,7 @@ import type {
 
 import { getEmptyProfile, getEmptyThread } from '../data-structures';
 import { StringTable } from '../../utils/string-table';
-import { ensureExists, coerce } from '../../utils/flow';
+import { ensureExists, coerce } from '../../utils/types';
 import {
   INSTANT,
   INTERVAL,

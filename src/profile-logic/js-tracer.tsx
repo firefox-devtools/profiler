@@ -8,7 +8,7 @@ import {
   getEmptyRawMarkerTable,
 } from './data-structures';
 import type { StringTable } from '../utils/string-table';
-import { ensureExists } from '../utils/flow';
+import { ensureExists } from '../utils/types';
 import type {
   JsTracerTable,
   IndexIntoStringTable,

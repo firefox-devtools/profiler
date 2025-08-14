@@ -4,7 +4,7 @@
 
 import { selectedThreadSelectors } from 'firefox-profiler/selectors';
 import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/types';
 
 import {
   getUserTiming,

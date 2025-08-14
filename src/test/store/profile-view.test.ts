@@ -41,7 +41,7 @@ import {
   selectedNodeSelectors,
   getThreadSelectors,
 } from '../../selectors/per-thread';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from '../../utils/types';
 import {
   processCounter,
   type BreakdownByCategory,
