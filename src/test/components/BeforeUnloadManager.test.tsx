@@ -38,10 +38,8 @@ describe('app/BeforeUnloadManager', () => {
     const event = new Event('beforeunload');
 
     /* Because of the current jsdom implementation, we need to mock
-       preventDefault(). To prevent a Flow error when assigning jest.fn()
-       to event.preventDefault (not writeable), we add the following line.
+       preventDefault().
     */
-    // $FlowExpectError
     event.preventDefault = jest.fn();
 
     fireEvent(window as any, event);

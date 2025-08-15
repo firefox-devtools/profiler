@@ -43,7 +43,6 @@ describe('app/ServiceWorkerManager', () => {
 
     // It seems node v8 doesn't let us change the value unless we delete it before.
     delete (window as any).location;
-    // $FlowExpectError because the value we pass isn't a proper Location object.
     Object.defineProperty(window, 'location', {
       value: { reload: jest.fn() },
       writable: true,
