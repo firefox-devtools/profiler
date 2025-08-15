@@ -137,13 +137,14 @@ export const getTableViewOptionSelectors: (
   return options || defaultTableViewOptions;
 };
 
-export const getPreviewSelection: Selector<PreviewSelection> = (state) =>
+export const getPreviewSelection: Selector<PreviewSelection | null> = (state) =>
   getProfileViewOptions(state).previewSelection;
 
 export const getPreviewSelectionIsBeingModified: Selector<boolean> = (
   state
 ) => {
-  return getPreviewSelection(state).isModifying;
+  const previewSelection = getPreviewSelection(state);
+  return previewSelection ? previewSelection.isModifying : false;
 };
 
 /**
@@ -154,7 +155,7 @@ export const getPreviewSelectionRange: Selector<StartEndRange> = createSelector(
   getCommittedRange,
   getPreviewSelection,
   (committedRange, previewSelection) => {
-    if (previewSelection.hasSelection) {
+    if (previewSelection) {
       return {
         start: previewSelection.selectionStart,
         end: previewSelection.selectionEnd,

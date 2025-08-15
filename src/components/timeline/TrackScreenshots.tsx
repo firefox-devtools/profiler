@@ -117,7 +117,6 @@ class Screenshots extends PureComponent<Props, State> {
       return;
     }
     updatePreviewSelection({
-      hasSelection: true,
       isModifying: false,
       selectionStart: start,
       selectionEnd: end,

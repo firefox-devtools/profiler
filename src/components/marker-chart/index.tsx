@@ -56,7 +56,7 @@ type StateProps = {
   readonly markerListLength: number;
   readonly timeRange: StartEndRange;
   readonly threadsKey: ThreadsKey;
-  readonly previewSelection: PreviewSelection;
+  readonly previewSelection: PreviewSelection | null;
   readonly rightClickedMarkerIndex: MarkerIndex | null;
   readonly selectedMarkerIndex: MarkerIndex | null;
 };

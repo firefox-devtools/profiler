@@ -153,7 +153,6 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
   _onMarkerSelect = (start: Milliseconds, end: Milliseconds) => {
     const { rangeStart, rangeEnd, updatePreviewSelection } = this.props;
     updatePreviewSelection({
-      hasSelection: true,
       isModifying: false,
       selectionStart: Math.max(rangeStart, start),
       selectionEnd: Math.min(rangeEnd, end),

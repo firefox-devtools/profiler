@@ -392,7 +392,6 @@ describe('selectors/getHasPreviewFilteredCtssSamples', function () {
 
     store.dispatch(
       updatePreviewSelection({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 1.1,
         selectionEnd: 1.7,
@@ -428,14 +427,10 @@ describe('actions/updatePreviewSelection', function () {
     const initialSelection = ProfileViewSelectors.getPreviewSelection(
       store.getState()
     );
-    expect(initialSelection).toEqual({
-      hasSelection: false,
-      isModifying: false,
-    });
+    expect(initialSelection).toBe(null);
 
     store.dispatch(
       updatePreviewSelection({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 100,
         selectionEnd: 200,
@@ -446,7 +441,6 @@ describe('actions/updatePreviewSelection', function () {
       store.getState()
     );
     expect(secondSelection).toEqual({
-      hasSelection: true,
       isModifying: false,
       selectionStart: 100,
       selectionEnd: 200,

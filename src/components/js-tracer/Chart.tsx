@@ -53,7 +53,7 @@ type StateProps = {
   readonly stringTable: StringTable;
   readonly timeRange: StartEndRange;
   readonly threadsKey: ThreadsKey;
-  readonly previewSelection: PreviewSelection;
+  readonly previewSelection: PreviewSelection | null;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
