@@ -1042,7 +1042,7 @@ export function filterRawMarkerTableToRange(
  * that make up that marker.
  */
 export function filterRawMarkerTableIndexesToRange(
-  markerTable: RawMarkerTable,
+  _markerTable: RawMarkerTable,
   derivedMarkerInfo: DerivedMarkerInfo,
   rangeStart: number,
   rangeEnd: number
@@ -1458,7 +1458,7 @@ export function filterMarkerByDisplayLocation(
   getMarker: (markerIndex: MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   markerSchema: MarkerSchema[],
-  markerSchemaByName: MarkerSchemaByName,
+  _markerSchemaByName: MarkerSchemaByName,
   displayLocation: MarkerDisplayLocation,
   // This argument allows a filtering function to customize the result, without having
   // to loop through all of the markers again. Return a boolean if making a decision,

@@ -181,7 +181,7 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
               onChangeOrder={changeGlobalTrackOrder}
               innerElementRef={innerElementRef}
             >
-              {globalTracks.map((globalTrack, trackIndex) => (
+              {globalTracks.map((_globalTrack, trackIndex) => (
                 <TimelineGlobalTrack
                   key={trackIndex}
                   trackIndex={trackIndex}

@@ -149,7 +149,6 @@ export class AssemblyView extends React.PureComponent<AssemblyViewProps> {
       const { AssemblyViewEditor } = codeMirrorModule;
       const editor = new AssemblyViewEditor(
         this._getAssemblyCodeOrFallback(),
-        this.props.nativeSymbol,
         this.props.timings,
         domParent
       );

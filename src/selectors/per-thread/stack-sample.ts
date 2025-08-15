@@ -25,7 +25,6 @@ import {
 
 import type {
   Thread,
-  ThreadIndex,
   IndexIntoSamplesTable,
   WeightType,
   CallNodePath,
@@ -76,7 +75,6 @@ const createSelectorWithTwoCacheSlots = createSelectorCreator(defaultMemoize, {
  */
 export function getStackAndSampleSelectorsPerThread(
   threadSelectors: ThreadAndMarkerSelectorsPerThread,
-  threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
 ) {
   /**

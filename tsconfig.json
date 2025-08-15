@@ -11,7 +11,7 @@
 
     "noUnusedLocals": true,
     "noImplicitOverride": true,
-    "noUnusedParameters": false, // Should enable in the future
+    "noUnusedParameters": true,
 
     // Default to strict, with the exceptions below
     "strict": true,

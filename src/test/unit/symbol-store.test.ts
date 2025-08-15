@@ -83,7 +83,7 @@ describe('SymbolStore', function () {
     const errorCallback = jest.fn((_request, _error) => {});
     await symbolStore.getSymbols(
       [{ lib: lib1, addresses: new Set([0xf01, 0x1a50]) }],
-      (request, results) => {
+      (_request, results) => {
         secondAndThirdSymbol = results;
       },
       errorCallback
@@ -108,7 +108,7 @@ describe('SymbolStore', function () {
     let firstAndLastSymbol = new Map<unknown, unknown>();
     await symbolStore.getSymbols(
       [{ lib: lib2, addresses: new Set([0x33, 0x2000]) }],
-      (request, results) => {
+      (_request, results) => {
         firstAndLastSymbol = results;
       },
       errorCallback
