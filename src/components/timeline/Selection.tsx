@@ -264,44 +264,55 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
     this.props.changeMouseTimePosition(null);
   };
 
-  _makeOnMove =
-    (fun: (dx: number) => { startDelta: number; endDelta: number }) =>
-    (
-      originalSelection: {
-        readonly selectionStart: number;
-        readonly selectionEnd: number;
-      },
+  _makeOnMove = (
+    fun: (dx: number) => { startDelta: number; endDelta: number }
+  ) => {
+    return (
+      originalSelection: PreviewSelection,
       dx: number,
-      dy: number,
+      _dy: number,
       isModifying: boolean
     ) => {
-      const { committedRange, width, updatePreviewSelection } = this.props;
-      const delta = (dx / width) * (committedRange.end - committedRange.start);
-      const selectionDeltas = fun(delta);
-      let selectionStart = clamp(
-        originalSelection.selectionStart + selectionDeltas.startDelta,
-        committedRange.start,
-        committedRange.end
-      );
-      let selectionEnd = clamp(
-        originalSelection.selectionEnd + selectionDeltas.endDelta,
-        committedRange.start,
-        committedRange.end
-      );
-      let draggingStart = isModifying && !!selectionDeltas.startDelta;
-      let draggingEnd = isModifying && !!selectionDeltas.endDelta;
-      if (selectionStart > selectionEnd) {
-        [selectionStart, selectionEnd] = [selectionEnd, selectionStart];
-        [draggingStart, draggingEnd] = [draggingEnd, draggingStart];
-      }
-      updatePreviewSelection({
-        isModifying,
-        selectionStart,
-        selectionEnd,
-        draggingStart,
-        draggingEnd,
-      });
+      this._onMove(originalSelection, fun, dx, isModifying);
     };
+  };
+
+  _onMove(
+    originalSelection: PreviewSelection,
+    selectionDeltasForDx: (dx: number) => {
+      startDelta: number;
+      endDelta: number;
+    },
+    dx: number,
+    isModifying: boolean
+  ) {
+    const { committedRange, width, updatePreviewSelection } = this.props;
+    const delta = (dx / width) * (committedRange.end - committedRange.start);
+    const selectionDeltas = selectionDeltasForDx(delta);
+    let selectionStart = clamp(
+      originalSelection.selectionStart + selectionDeltas.startDelta,
+      committedRange.start,
+      committedRange.end
+    );
+    let selectionEnd = clamp(
+      originalSelection.selectionEnd + selectionDeltas.endDelta,
+      committedRange.start,
+      committedRange.end
+    );
+    let draggingStart = isModifying && !!selectionDeltas.startDelta;
+    let draggingEnd = isModifying && !!selectionDeltas.endDelta;
+    if (selectionStart > selectionEnd) {
+      [selectionStart, selectionEnd] = [selectionEnd, selectionStart];
+      [draggingStart, draggingEnd] = [draggingEnd, draggingStart];
+    }
+    updatePreviewSelection({
+      isModifying,
+      selectionStart,
+      selectionEnd,
+      draggingStart,
+      draggingEnd,
+    });
+  }
 
   _rangeStartOnMove = this._makeOnMove((delta) => ({
     startDelta: delta,
