@@ -140,6 +140,12 @@ export const getTableViewOptionSelectors: (
 export const getPreviewSelection: Selector<PreviewSelection> = (state) =>
   getProfileViewOptions(state).previewSelection;
 
+export const getPreviewSelectionIsBeingModified: Selector<boolean> = (
+  state
+) => {
+  return getPreviewSelection(state).isModifying;
+};
+
 /**
  * This selector returns the current range, taking into account the current
  * preview selection if any.
