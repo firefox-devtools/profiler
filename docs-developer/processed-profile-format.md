@@ -4,4 +4,4 @@ The Gecko Profiler emits JSON profiles that Firefox Profiler can display. This o
 
 ## Processed profile documentation
 
-The documentation for this format is provided in the [Flow](https://flow.org/) type definition located at [src/types/profile.js](../src/types/profile.js). Eventually the plan is to have the documentation here, but the docs generators for JS Doc with Flow are currently buggy and not producing valid output.
+The documentation for this format is provided in the TypeScript type definition located at [src/types/profile.ts](../src/types/profile.ts). Eventually the plan is to have the documentation here; now that we've switched to TypeScript we might be able to autogenerate some nice docs.

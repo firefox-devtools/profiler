@@ -8,8 +8,6 @@
 // have to be at the project root directory to run it.
 // Run with '-y' to automatically skip the prompts.
 
-// @flow
-
 const cp = require('child_process');
 const readline = require('readline');
 const { promisify } = require('util');

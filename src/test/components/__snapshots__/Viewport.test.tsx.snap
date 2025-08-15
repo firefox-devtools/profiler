@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Viewport matches the component snapshot 1`] = `
+<div
+  class="chartViewport"
+  tabindex="0"
+>
+  <div
+    id="dummy-chart"
+  />
+  <div
+    class="chartViewportScroll hidden"
+  >
+    Zoom Chart:
+    <kbd
+      class="chartViewportScrollKbd"
+    >
+      Ctrl + Scroll
+    </kbd>
+    or
+    <kbd
+      class="chartViewportScrollKbd"
+    >
+      Shift + Scroll
+    </kbd>
+  </div>
+</div>
+`;

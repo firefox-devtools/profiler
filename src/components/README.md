@@ -17,8 +17,7 @@ export default connect(
   // The first parameter's function receives the Redux state. Use the selectors located
   // in the src/selectors directory to select the relevant information from the state.
   // Selectors are often memoized, and so as these functions are run multiple times,
-  // their results will still pass a strict equality test for component updates. In
-  // addition notice how the state object is Flow typed.
+  // their results will still pass a strict equality test for component updates.
   (state: State) => ({
     profile: getProfile(state),
     dataSource: getDataSource(state),

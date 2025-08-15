@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "es2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "es2022",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": false,
+    "noUncheckedSideEffectImports": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "noFallthroughCasesInSwitch": false, // Already checked by eslint, with opt-out
+    "noUnusedLocals": true,
+    "noImplicitOverride": true,
+    "noUnusedParameters": false, // Should enable in the future
+
+    // Default to strict, with the exceptions below
+    "strict": true,
+
+    // Exceptions to strictness, consider enabling in the future
+    "useUnknownInCatchVariables": false, // Sounds fine, enforces `} catch (e) { if (e instanceof Error) {` etc
+    "exactOptionalPropertyTypes": false, // Benefit unclear
+
+    // Build & Performance
+    "isolatedModules": true, // May want to change this once we start using const enum
+    "listFiles": false,
+    "noEmit": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
+
+    // Module Resolution
+    "resolveJsonModule": true,
+    "typeRoots": ["node_modules/@types", "src/types/@types"],
+    "paths": {
+      "firefox-profiler/*": ["./src/*"],
+      "firefox-profiler-res/*": ["./res/*"]
+    },
+
+    // React & JSX
+    "jsx": "react-jsx"
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules", "dist", "src/types/libdef"]
+}

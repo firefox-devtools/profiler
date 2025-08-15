@@ -1,4 +1,3 @@
-// @flow
 module.exports = {
   env: {
     jest: true,
@@ -13,6 +12,25 @@ module.exports = {
     'react/jsx-no-bind': 0,
     // This rule isn't useful because use Flow.
     'jest/valid-title': 0,
+
+    // Allow require(), for example for importing JSON files.
+    '@typescript-eslint/no-require-imports': 'off',
+
+    // Override the project-wide config to allow @ts-nocheck.
+    // We really just need this for our mocks.
+    '@typescript-eslint/ban-ts-comment': [
+      'error',
+      {
+        // Allow @ts-expect-error and @ts-no-check annotations with descriptions.
+        'ts-expect-error': 'allow-with-description',
+        'ts-nocheck': 'allow-with-description',
+        // Don't allow @ts-ignore because we want to be notified
+        // when the error goes away so we can remove the annotation - use
+        // @ts-expect-error instead
+        'ts-ignore': true,
+        'ts-check': false,
+      },
+    ],
 
     // Adding more errors now
     'testing-library/no-manual-cleanup': 'error',

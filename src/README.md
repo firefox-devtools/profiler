@@ -10,5 +10,5 @@ Welcome to the source code for [profiler.firefox.com](https://profiler.firefox.c
 | [`/src/profile-logic`](./profile-logic) | All of the files that deal with modifying and analyzing profiles. |
 | [`/src/reducers`](./reducers)           | The Redux reducers                                                |
 | [`/src/test`](./test)                   | A collection of all of the project's test files                   |
-| [`/src/types`](./types)                 | [Flow](https://flow.org/) type definitions                        |
+| [`/src/types`](./types)                 | TypeScript type definitions                                       |
 | [`/src/utils`](./utils)                 | Utility files that are generally well contained                   |
