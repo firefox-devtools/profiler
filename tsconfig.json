@@ -39,5 +39,5 @@
     "jsx": "react-jsx"
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "dist", "src/types/libdef"]
+  "exclude": ["node_modules", "dist"]
 }
