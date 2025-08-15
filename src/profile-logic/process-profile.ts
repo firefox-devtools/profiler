@@ -422,7 +422,7 @@ function _extractUnsymbolicatedFunction(
         libToResourceIndex.set(libIndex, resourceIndex);
       }
     }
-  } catch (e) {
+  } catch (_e) {
     // Probably a hex parse error. Ignore.
   }
   // Add the function to the funcTable.

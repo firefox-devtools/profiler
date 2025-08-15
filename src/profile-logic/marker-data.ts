@@ -1264,7 +1264,7 @@ export function guessMimeTypeFromNetworkMarker(
   let uri;
   try {
     uri = new URL(payload.URI);
-  } catch (e) {
+  } catch (_e) {
     return null;
   }
 

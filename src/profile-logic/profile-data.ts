@@ -3337,7 +3337,7 @@ export function extractProfileFilterPageData(
           : page.hostname;
 
       pageData.origin = page.origin;
-    } catch (e) {
+    } catch (_e) {
       // Error while extracting the hostname and favicon from the page url.
       // It's likely that it's because sanitization removed the urls. Just
       // ignore it and default to the initial sanitized url.
@@ -3375,7 +3375,7 @@ export function getOrCreateURIResource(
     }
     origin = url.origin;
     host = url.host;
-  } catch (e) {
+  } catch (_e) {
     origin = scriptURI;
     host = null;
   }
