@@ -165,8 +165,6 @@ export default [
           'ts-check': false, // allow even without description
         },
       ],
-      // TODO: Re-enable for src when we update to eslint and switch to the new
-      // config format
       '@typescript-eslint/no-require-imports': 'off',
     },
     linterOptions: {
@@ -176,6 +174,14 @@ export default [
       // outputs errors, but the property is useful so that we have the information
       // directly in editors.
       reportUnusedDisableDirectives: true,
+    },
+  },
+
+  // Source files - enable stricter TypeScript rules
+  {
+    files: ['src/**/*.ts', 'src/**/*.tsx'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'error',
     },
   },
 
