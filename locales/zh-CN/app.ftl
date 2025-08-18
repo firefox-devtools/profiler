@@ -636,6 +636,8 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = 所有帧
     .title = 不过滤栈上的帧
+StackSettings--implementation-script = 脚本
+    .title = 只显示与执行脚本相关的栈帧
 StackSettings--implementation-native2 = 原生
     .title = 仅显示栈上的原生代码帧
 # This label is displayed in the marker chart and marker table panels only.
@@ -656,6 +658,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = 释放的位置
 StackSettings--invert-call-stack = 反转调用栈
     .title = 按照调用节点中所用时间排序，并忽略其 children。
 StackSettings--show-user-timing = 显示用户计时
+StackSettings--use-stack-chart-same-widths = 所有栈使用相同宽度显示
 StackSettings--panel-search =
     .label = 过滤栈：
     .title = 只显示包含匹配的子字符串的函数名称的相关栈
