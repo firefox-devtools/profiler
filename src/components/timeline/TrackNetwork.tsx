@@ -369,6 +369,9 @@ class Network extends PureComponent<Props, State> {
       >
         <ContextMenuTrigger
           id="MarkerContextMenu"
+          disable={
+            hoveredMarkerIndex === null && rightClickedMarkerIndex === null
+          }
           attributes={{
             className: 'treeViewContextMenu',
           }}

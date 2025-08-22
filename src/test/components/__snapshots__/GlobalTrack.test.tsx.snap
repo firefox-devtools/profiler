@@ -5,10 +5,10 @@ exports[`timeline/GlobalTrack matches the snapshot of a global process track 1`]
   class="timelineTrack"
 >
   <div
-    class="timelineTrackRow timelineTrackGlobalRow"
+    class="react-contextmenu-wrapper timelineTrackRow timelineTrackGlobalRow"
   >
     <div
-      class="react-contextmenu-wrapper timelineTrackLabel timelineTrackGlobalGrippy"
+      class="timelineTrackLabel timelineTrackGlobalGrippy"
       title="Content Process
 Thread: \\"GeckoMain\\" (22)
 Process: \\"tab\\" (222)"
@@ -136,10 +136,10 @@ Process: \\"tab\\" (222)"
       class="timelineTrack timelineTrackLocal"
     >
       <div
-        class="timelineTrackRow timelineTrackLocalRow selected"
+        class="react-contextmenu-wrapper timelineTrackRow timelineTrackLocalRow selected"
       >
         <div
-          class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+          class="timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
           title="DOM Worker
 Thread: \\"DOM Worker\\" (33)
 Process: \\"tab\\" (222)"
@@ -227,10 +227,10 @@ Process: \\"tab\\" (222)"
       class="timelineTrack timelineTrackLocal"
     >
       <div
-        class="timelineTrackRow timelineTrackLocalRow"
+        class="react-contextmenu-wrapper timelineTrackRow timelineTrackLocalRow"
       >
         <div
-          class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+          class="timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
           title="Style
 Thread: \\"Style\\" (44)
 Process: \\"tab\\" (222)"
@@ -323,10 +323,10 @@ exports[`timeline/GlobalTrack matches the snapshot of a global process track wit
   class="timelineTrack"
 >
   <div
-    class="timelineTrackRow timelineTrackGlobalRow"
+    class="react-contextmenu-wrapper timelineTrackRow timelineTrackGlobalRow"
   >
     <div
-      class="react-contextmenu-wrapper timelineTrackLabel timelineTrackGlobalGrippy"
+      class="timelineTrackLabel timelineTrackGlobalGrippy"
       title="Content Process
 Thread: \\"GeckoMain\\" (22)
 Process: \\"tab\\" (0)"
@@ -449,10 +449,10 @@ exports[`timeline/GlobalTrack matches the snapshot of a global process track wit
   class="timelineTrack"
 >
   <div
-    class="timelineTrackRow timelineTrackGlobalRow"
+    class="react-contextmenu-wrapper timelineTrackRow timelineTrackGlobalRow"
   >
     <div
-      class="react-contextmenu-wrapper timelineTrackLabel timelineTrackGlobalGrippy"
+      class="timelineTrackLabel timelineTrackGlobalGrippy"
     >
       <button
         class="timelineTrackNameButton"
@@ -482,10 +482,10 @@ exports[`timeline/GlobalTrack matches the snapshot of a global process track wit
       class="timelineTrack timelineTrackLocal"
     >
       <div
-        class="timelineTrackRow timelineTrackLocalRow"
+        class="react-contextmenu-wrapper timelineTrackRow timelineTrackLocalRow"
       >
         <div
-          class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+          class="timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
           title="NoMain
 Thread: \\"NoMain\\" (0)
 Process: \\"default\\" (5555)"
@@ -578,10 +578,10 @@ exports[`timeline/GlobalTrack will not render markers to the timeline-overview w
   class="timelineTrack"
 >
   <div
-    class="timelineTrackRow timelineTrackGlobalRow"
+    class="react-contextmenu-wrapper timelineTrackRow timelineTrackGlobalRow"
   >
     <div
-      class="react-contextmenu-wrapper timelineTrackLabel timelineTrackGlobalGrippy"
+      class="timelineTrackLabel timelineTrackGlobalGrippy"
     >
       <button
         class="timelineTrackNameButton"
@@ -611,10 +611,10 @@ exports[`timeline/GlobalTrack will not render markers to the timeline-overview w
       class="timelineTrack timelineTrackLocal"
     >
       <div
-        class="timelineTrackRow timelineTrackLocalRow selected"
+        class="react-contextmenu-wrapper timelineTrackRow timelineTrackLocalRow selected"
       >
         <div
-          class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+          class="timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
           title="Task Thread
 Thread: \\"Task Thread\\" (0)
 Process: \\"default\\" (0)"
@@ -2129,10 +2129,10 @@ exports[`timeline/GlobalTrack will render markers with a timeline-overview schem
   class="timelineTrack"
 >
   <div
-    class="timelineTrackRow timelineTrackGlobalRow"
+    class="react-contextmenu-wrapper timelineTrackRow timelineTrackGlobalRow"
   >
     <div
-      class="react-contextmenu-wrapper timelineTrackLabel timelineTrackGlobalGrippy"
+      class="timelineTrackLabel timelineTrackGlobalGrippy"
     >
       <button
         class="timelineTrackNameButton"
@@ -2162,10 +2162,10 @@ exports[`timeline/GlobalTrack will render markers with a timeline-overview schem
       class="timelineTrack timelineTrackLocal"
     >
       <div
-        class="timelineTrackRow timelineTrackLocalRow selected"
+        class="react-contextmenu-wrapper timelineTrackRow timelineTrackLocalRow selected"
       >
         <div
-          class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+          class="timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
           title="Task Thread
 Thread: \\"Task Thread\\" (0)
 Process: \\"default\\" (0)"
