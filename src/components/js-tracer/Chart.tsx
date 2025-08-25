@@ -104,7 +104,6 @@ class JsTracerExpensiveChartImpl extends React.PureComponent<Props> {
         chartProps={{
           jsTracerTimingRows,
           jsTracerTable,
-          // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
           updatePreviewSelection,
           rangeStart: timeRange.start,
           rangeEnd: timeRange.end,

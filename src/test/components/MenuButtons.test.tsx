@@ -416,7 +416,6 @@ describe('app/MenuButtons', function () {
 
     it('matches the snapshot for a compression error', async () => {
       const { compress } = require('firefox-profiler/utils/gz');
-      // $FlowExpectError Flow doesn't know about Jest mocks
       compress.mockRejectedValue(new Error('Compression error'));
       jest.spyOn(console, 'error').mockImplementation(() => {});
       const { getPanel, openPublishPanel } = setupForPublish();

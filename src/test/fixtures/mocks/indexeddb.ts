@@ -9,9 +9,8 @@ import { IDBFactory } from 'fake-indexeddb';
 
 function resetIndexedDb() {
   // This is the recommended way to reset the IDB state between test runs, but
-  // neither flow nor eslint like that we assign to indexedDB directly, for
-  // different reasons.
-  /* $FlowExpectError */ /* eslint-disable-next-line no-global-assign */
+  // eslint does not like that we assign to indexedDB directly.
+  /* eslint-disable-next-line no-global-assign */
   indexedDB = new IDBFactory();
 }
 

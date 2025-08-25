@@ -101,18 +101,11 @@ function triggerSingleObserver(
 
   for (const element of item.elements) {
     entries.push({
-      // $FlowExpectError Flow thinks they are different but they are both DOMRectReadOnly.
       boundingClientRect: element.getBoundingClientRect(),
       intersectionRatio: 1,
-      // $FlowExpectError Flow thinks they are different but they are both DOMRectReadOnly.
       intersectionRect: element.getBoundingClientRect(),
       isIntersecting: isIntersecting,
-      rootBounds: observer.root
-        ? // $FlowExpectError Flow thinks they are different but they are both DOMRectReadOnly.
-          observer.root.getBoundingClientRect()
-        : // $FlowExpectError We don't know anything, so putting null instead.
-          null,
-
+      rootBounds: observer.root ? observer.root.getBoundingClientRect() : null,
       target: element,
       time: Date.now() - item.created,
     });

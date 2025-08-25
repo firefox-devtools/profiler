@@ -70,7 +70,6 @@ describe('AppLocalizationProvider', () => {
       await screen.findByText(translatedText('en-US'))
     ).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'en-US');
-    // $FlowExpectError Our version of flow doesn't know about document.dir
     expect(document.dir).toBe('ltr');
 
     // Now we're testing the LTR pseudo-localization.
@@ -79,7 +78,6 @@ describe('AppLocalizationProvider', () => {
     });
     expect(await screen.findByText('Ŧħīş īş ḗḗƞ-ŬŞ Ŧḗḗẋŧ')).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'en-US');
-    // $FlowExpectError Our version of flow doesn't know about document.dir
     expect(document.dir).toBe('ltr');
 
     // And now the RTL pseudo-localization.
@@ -88,7 +86,6 @@ describe('AppLocalizationProvider', () => {
     });
     expect(await screen.findByText(/⊥ɥıs ıs ǝu-∩S ⊥ǝxʇ/)).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'en-US');
-    // $FlowExpectError Our version of flow doesn't know about document.dir
     expect(document.dir).toBe('rtl');
 
     // Back to no pseudo-localization
@@ -99,7 +96,6 @@ describe('AppLocalizationProvider', () => {
       await screen.findByText(translatedText('en-US'))
     ).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'en-US');
-    // $FlowExpectError Our version of flow doesn't know about document.dir
     expect(document.dir).toBe('ltr');
   });
 
@@ -136,7 +132,6 @@ describe('AppLocalizationProvider', () => {
       await screen.findByText(translatedText('en-US'))
     ).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'en-US');
-    // $FlowExpectError Our version of flow doesn't know about document.dir
     expect(document.dir).toBe('ltr');
 
     // Switch to german
@@ -146,7 +141,6 @@ describe('AppLocalizationProvider', () => {
     });
     expect(await screen.findByText(translatedText('de'))).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'de');
-    // $FlowExpectError Our version of flow doesn't know about document.dir
     expect(document.dir).toBe('ltr');
   });
 

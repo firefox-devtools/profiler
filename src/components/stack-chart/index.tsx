@@ -266,7 +266,6 @@ class StackChartImpl extends React.PureComponent<Props> {
                   combinedTimingRows,
                   sameWidthsIndexToTimestampMap,
                   getMarker,
-                  // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                   updatePreviewSelection,
                   changeMouseTimePosition,
                   rangeStart: timeRange.start,
