@@ -37,13 +37,13 @@ export default [
     languageOptions: {
       globals: {
         ...globals.browser,
-        ...globals.es2020,
+        ...globals.es2024,
         ...globals.node,
         AVAILABLE_STAGING_LOCALES: true,
       },
       parser: tsParser,
       parserOptions: {
-        ecmaVersion: 2022,
+        ecmaVersion: 2024,
         sourceType: 'module',
         ecmaFeatures: {
           jsx: true,
