@@ -19,7 +19,6 @@ describe('symbolicator-cli tool', function () {
       await run(options);
       return JSON.parse(fs.readFileSync(tempFile, 'utf-8'));
     } finally {
-      // $FlowExpectError Flow doesn't know about the rmSync API despite it's been implemented in node v16. Sigh
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
   }

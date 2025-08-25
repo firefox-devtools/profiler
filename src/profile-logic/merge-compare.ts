@@ -1363,9 +1363,6 @@ function mergeMarkers(
           );
         }
 
-        // Flow doesn't know well how to handle the spread operator with our
-        // MarkerPayload type.
-        // $FlowExpectError
         newMarkerTable.data.push({
           ...oldData,
           cause: {
