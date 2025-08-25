@@ -58,7 +58,7 @@ export default [
     settings: {
       react: {
         pragma: 'React',
-        version: '17.0',
+        version: '18.0',
       },
       'import/resolver': {
         alias: {
