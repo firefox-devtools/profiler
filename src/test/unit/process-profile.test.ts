@@ -655,7 +655,6 @@ describe('threadCPUDelta processing', function () {
 
     // Fill the threadCPUDelta with null values.
     for (const item of geckoSamples.data) {
-      // $FlowExpectError because Flow thinks this access can be out of bounds, but it is not.
       item[geckoSchema.threadCPUDelta] = null;
     }
 
@@ -679,10 +678,8 @@ describe('threadCPUDelta processing', function () {
 
     // Fill the threadCPUDelta with null values except the first.
     for (const item of geckoSamples.data) {
-      // $FlowExpectError because Flow thinks this access can be out of bounds, but it is not.
       item[geckoSchema.threadCPUDelta] = null;
     }
-    // $FlowExpectError same reason as above
     geckoSamples.data[0][geckoSchema.threadCPUDelta] = 2;
 
     // Process the profile.

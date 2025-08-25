@@ -83,11 +83,11 @@ export class PathSet implements Iterable<CallNodePath> {
     return this._table.delete(hashPath(path));
   }
 
-  *values(): Iterator<CallNodePath> {
+  *values(): IterableIterator<CallNodePath> {
     yield* this._table.values();
   }
 
-  *entries(): Iterator<[CallNodePath, CallNodePath]> {
+  *entries(): IterableIterator<[CallNodePath, CallNodePath]> {
     for (const entry of this) {
       yield [entry, entry];
     }

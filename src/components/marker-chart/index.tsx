@@ -153,7 +153,6 @@ class MarkerChartImpl extends React.PureComponent<Props> {
                 getMarker,
                 getMarkerLabel,
                 markerListLength,
-                // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                 updatePreviewSelection,
                 changeMouseTimePosition,
                 changeRightClickedMarker,

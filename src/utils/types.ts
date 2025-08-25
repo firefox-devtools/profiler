@@ -113,7 +113,7 @@ export function coerce<A, B>(item: A): B {
  * It can be helpful to coerce one type that matches the shape of another.
  */
 export function coerceMatchingShape<T>(item: Partial<T>): T {
-  return item as any;
+  return item as T;
 }
 
 /**

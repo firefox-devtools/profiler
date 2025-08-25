@@ -142,7 +142,6 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
     );
 
     return (
-      // $FlowExpectError our version of Flow doesn't understand Fragments very well.
       <>
         {this._formatPowerValue(
           powerSumForPreviewRange,
