@@ -64,7 +64,7 @@
 .appKeyboardShortcutsContent {
   display: grid;
   margin: 40px;
-  grid-gap: 80px;
+  gap: 80px;
   grid-template-columns: 1fr 1fr;
 }
 
