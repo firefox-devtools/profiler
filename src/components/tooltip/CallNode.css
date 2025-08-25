@@ -7,7 +7,7 @@
   align-items: center;
   padding-bottom: 10px;
   border-top: 1px solid var(--grey-40);
-  grid-gap: 4px;
+  gap: 4px;
   grid-template-columns: repeat(4, min-content);
 }
 
