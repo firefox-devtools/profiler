@@ -9,6 +9,7 @@ import classNames from 'classnames';
 import { SourceView } from '../shared/SourceView';
 import { AssemblyView } from '../shared/AssemblyView';
 import { AssemblyViewToggleButton } from './AssemblyViewToggleButton';
+import { IonGraphView } from '../shared/IonGraphView';
 import { CodeLoadingOverlay } from './CodeLoadingOverlay';
 import { CodeErrorOverlay } from './CodeErrorOverlay';
 import {
@@ -177,6 +178,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       assemblyViewCode && assemblyViewCode.type === 'AVAILABLE'
         ? assemblyViewCode.instructions
         : [];
+    const sourceIsIonGraph = path !== null && path.endsWith('iongraph.json');
 
     // The bottom box has one or more side-by-side panes.
     // At the moment it always has either one or two panes:
@@ -212,15 +214,23 @@ class BottomBoxImpl extends React.PureComponent<Props> {
             </div>
             <div className="bottom-sourceview-wrapper">
               {sourceViewFile !== null ? (
-                <SourceView
-                  disableOverscan={disableOverscan}
-                  timings={globalLineTimings}
-                  sourceCode={sourceCode}
-                  filePath={path}
-                  scrollToHotSpotGeneration={sourceViewScrollGeneration}
-                  hotSpotTimings={selectedCallNodeLineTimings}
-                  ref={this._sourceView}
-                />
+                sourceIsIonGraph ? (
+                  <IonGraphView
+                    timings={globalLineTimings}
+                    hotSpotTimings={selectedCallNodeLineTimings}
+                    sourceCode={sourceCode}
+                  />
+                ) : (
+                  <SourceView
+                    disableOverscan={disableOverscan}
+                    timings={globalLineTimings}
+                    sourceCode={sourceCode}
+                    filePath={path}
+                    scrollToHotSpotGeneration={sourceViewScrollGeneration}
+                    hotSpotTimings={selectedCallNodeLineTimings}
+                    ref={this._sourceView}
+                  />
+                )
               ) : null}
               {sourceViewCode !== undefined &&
               sourceViewCode.type === 'LOADING' ? (
