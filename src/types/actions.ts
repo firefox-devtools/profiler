@@ -22,6 +22,7 @@ import type {
   MarkerIndex,
   ThreadsKey,
   NativeSymbolInfo,
+  IndexIntoFlowTable,
 } from './profile-derived';
 import type { FuncToFuncsMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
@@ -224,6 +225,10 @@ type ProfileAction =
       readonly type: 'CHANGE_HOVERED_MARKER';
       readonly threadsKey: ThreadsKey;
       readonly markerIndex: MarkerIndex | null;
+    }
+  | {
+      readonly type: 'CHANGE_ACTIVE_FLOWS';
+      readonly activeFlows: IndexIntoFlowTable[];
     }
   | {
       readonly type: 'UPDATE_PREVIEW_SELECTION';
