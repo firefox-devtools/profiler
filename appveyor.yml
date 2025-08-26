@@ -27,7 +27,7 @@ test_script:
   # Output useful info for debugging.
   - yarn versions
   # run tests
-  - yarn test-all:ci
+  - yarn test-all
   - yarn build-prod:quiet
 
 cache:

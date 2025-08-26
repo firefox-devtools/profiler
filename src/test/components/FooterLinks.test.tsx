@@ -19,7 +19,6 @@ beforeEach(() => {
     .get(fetchUrlRe, ({ url }: { url: string }) => {
       const matchUrlResult = fetchUrlRe.exec(url);
       if (matchUrlResult) {
-        // $FlowExpectError Our Flow doesn't know about named groups.
         const { language } = matchUrlResult.groups!;
         const path = `locales/${language}/app.ftl`;
         if (fs.existsSync(path)) {
