@@ -107,11 +107,9 @@ describe('PathSet', function () {
   it('implements iterable, .values, .entries', function () {
     const set = new PathSet(sampleValues);
     expect(Array.from(set)).toEqual(sampleValues);
-    // @ts-expect-error The TypeScript definition of Array.from only accepts Iterable, not Iterator - not sure what's correct here
-    expect(Array.from<CallNodePath>(set.values())).toEqual(sampleValues);
+    expect(Array.from(set.values())).toEqual(sampleValues);
 
     const expectedEntries = sampleValues.map((val) => [val, val]);
-    // @ts-expect-error The TypeScript definition of Array.from only accepts Iterable, not Iterator - not sure what's correct here
     expect(Array.from(set.entries())).toEqual(expectedEntries);
   });
 });

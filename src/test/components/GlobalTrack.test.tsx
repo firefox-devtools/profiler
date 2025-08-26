@@ -180,7 +180,6 @@ describe('timeline/GlobalTrack', function () {
   it('displays the private browsing status of a fission thread', () => {
     setup(PRIVATE_TRACK_INDEX);
     const track = screen.getByText('Private');
-    // $FlowExpectError The parent element is an HTML Element but Flow doesn't know that.
     expect(ensureExists(track.parentElement).title).toBe(stripIndent`
       Private
       Thread: "Private" (6666)
@@ -192,7 +191,6 @@ describe('timeline/GlobalTrack', function () {
   it('displays the container status of a fission thread', () => {
     setup(CONTAINER_TRACK_INDEX);
     const track = screen.getByText('InContainer');
-    // $FlowExpectError The parent element is an HTML Element but Flow doesn't know that.
     expect(ensureExists(track.parentElement).title).toBe(stripIndent`
       InContainer
       Thread: "InContainer" (7777)

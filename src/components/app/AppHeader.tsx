@@ -22,7 +22,6 @@ export class AppHeader extends React.PureComponent<{}> {
             id="AppHeader--app-header"
             elems={{
               header: (
-                // $FlowExpectError Flow doesn't know about this fluent rule for react component.
                 <InnerNavigationLink
                   dataSource="none"
                   className="appHeaderLink"

@@ -660,7 +660,6 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
                 id="Home--compare-recordings-info"
                 elems={{
                   a: (
-                    // $FlowExpectError Flow doesn't know about this fluent rule for react component.
                     <InnerNavigationLink dataSource="compare">
                       Compare
                     </InnerNavigationLink>

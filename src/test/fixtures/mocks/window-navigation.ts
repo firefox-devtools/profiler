@@ -1,7 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @ts-nocheck Complex window/history mock with extensive DOM API manipulation that requires intricate typing
 
 /**
  * jsdom leaves the history in place after every test, so the history will
@@ -41,9 +40,18 @@ import { coerceMatchingShape } from '../../../utils/types';
 // window.history can change the inner location directly.
 const internalLocationAssign = Symbol.for('internalLocationAssign');
 
+type LocationMock = Location & {
+  assign: (newUrl: string) => void;
+  [internalLocationAssign]: (newUrl: string) => void;
+};
+
 // This symbol will be used in the mock for window.history so that we can reset
 // it from tests.
 const internalHistoryReset = Symbol.for('internalHistoryReset');
+
+type HistoryMock = History & {
+  [internalHistoryReset]: () => void;
+};
 
 /**
  * This mock creates a location API that allows for assigning to the location,
@@ -59,15 +67,17 @@ function mockWindowLocation(location: string = 'http://localhost') {
     url = new URL(newUrl.toString(), url);
   }
 
-  const nativeLocation = Object.getOwnPropertyDescriptor(window, 'location');
+  const nativeLocation = Object.getOwnPropertyDescriptor(window, 'location')!;
 
   // It seems node v8 doesn't let us change the value unless we delete it before.
+  // @ts-expect-error - property must be optional
   delete window.location;
 
   const property = {
-    get(): Partial<Location> {
+    get(): LocationMock {
       return {
         toString: () => url.toString(),
+        // @ts-expect-error - array is not a fully-featured DOMStringList
         ancestorOrigins: [],
         get href() {
           return url.toString();
@@ -134,7 +144,6 @@ function mockWindowLocation(location: string = 'http://localhost') {
           newUrl.hash = v;
           this.assign(newUrl.toString());
         },
-        // $FlowExpectError Flow doesn't know about symbol properties sadly.
         [internalLocationAssign]: internalSetLocation,
         assign: (newUrl: string) => window.history.pushState(null, '', newUrl),
         reload: jest.fn(),
@@ -148,15 +157,14 @@ function mockWindowLocation(location: string = 'http://localhost') {
     },
   };
 
-  // $FlowExpectError because the value we pass isn't a proper Location object.
   Object.defineProperty(window, 'location', property);
 
   // Return a function that resets the mock.
   return () => {
     // This "delete" call doesn't seem to be necessary, but better do it so that
     // we don't have surprises in the future.
+    // @ts-expect-error - property not optional
     delete window.location;
-    // $FlowExpectError because nativeLocation doesn't match the type expected by Flow.
     Object.defineProperty(window, 'location', nativeLocation);
   };
 }
@@ -165,9 +173,11 @@ function mockWindowLocation(location: string = 'http://localhost') {
  * This mock creates a history API that can be thrown away after every use.
  */
 function mockWindowHistory() {
-  const originalHistory = Object.getOwnPropertyDescriptor(window, 'history');
+  const originalHistory = Object.getOwnPropertyDescriptor(window, 'history')!;
 
-  let states, urls, index;
+  let states = [null];
+  let urls = [window.location.href];
+  let index = 0;
 
   function reset() {
     states = [null];
@@ -181,7 +191,7 @@ function mockWindowHistory() {
     get length() {
       return states.length;
     },
-    scrollRestoration: 'auto',
+    scrollRestoration: 'auto' as const,
     get state() {
       return states[index] ?? null;
     },
@@ -190,8 +200,7 @@ function mockWindowHistory() {
         return;
       }
       index--;
-      // $FlowExpectError Flow doesn't know about this internal property.
-      window.location[internalLocationAssign](urls[index]);
+      (window.location as LocationMock)[internalLocationAssign](urls[index]);
       window.dispatchEvent(new Event('popstate'));
     },
     forward() {
@@ -200,8 +209,7 @@ function mockWindowHistory() {
       }
       index++;
 
-      // $FlowExpectError Flow doesn't know about this internal property.
-      window.location[internalLocationAssign](urls[index]);
+      (window.location as LocationMock)[internalLocationAssign](urls[index]);
       window.dispatchEvent(new Event('popstate'));
     },
     go() {
@@ -212,8 +220,7 @@ function mockWindowHistory() {
         // Let's assign the URL to the window.location mock. This should also
         // make the URL correct if it's relative, we'll get an absolute URL when
         // retrieving later through window.location.href.
-        // $FlowExpectError Flow doesn't know about this internal property.
-        window.location[internalLocationAssign](url);
+        (window.location as LocationMock)[internalLocationAssign](url);
       }
 
       urls = urls.slice(0, index + 1);
@@ -226,19 +233,18 @@ function mockWindowHistory() {
     replaceState(newState: any, _title: string, url?: string) {
       if (url) {
         // Let's assign the URL to the window.location mock.
-        // $FlowExpectError Flow doesn't know about this internal property.
-        window.location[internalLocationAssign](url);
+        (window.location as LocationMock)[internalLocationAssign](url);
         urls[index] = window.location.href;
       }
 
       states[index] = newState;
     },
-    // $FlowExpectError Flow doesn't know about symbol properties sadly.
     [internalHistoryReset]: reset,
   };
 
   // This "delete" call doesn't seem to be necessary, but better do it so that
   // we don't have surprises in the future.
+  // @ts-expect-error - property not optional
   delete window.history;
   Object.defineProperty(window, 'history', {
     value: coerceMatchingShape<History>(history),
@@ -250,8 +256,8 @@ function mockWindowHistory() {
     // For unknown reasons, we can't assign back the old descriptor without
     // deleting the current one first... Not deleting would keep the mock
     // without throwing any error.
+    // @ts-expect-error - property not optional
     delete window.history;
-    // $FlowExpectError - Flow can't handle getOwnPropertyDescriptor being used on defineProperty.
     Object.defineProperty(window, 'history', originalHistory);
   };
 }
@@ -274,7 +280,7 @@ export function mockFullNavigation({
 // window.history for each test. Take a look at the top of this file for more
 // information about how to use this.
 export function autoMockFullNavigation() {
-  let cleanup;
+  let cleanup: ReturnType<typeof mockFullNavigation> | null = null;
   beforeEach(() => {
     cleanup = mockFullNavigation();
   });
@@ -288,8 +294,6 @@ export function autoMockFullNavigation() {
 }
 
 export function resetHistoryWithUrl(url: string = window.location.href) {
-  // $FlowExpectError Flow doesn't know about this internal property.
-  window.location[internalLocationAssign](url);
-  // $FlowExpectError Flow doesn't know about this internal property.
-  window.history[internalHistoryReset]();
+  (window.location as LocationMock)[internalLocationAssign](url);
+  (window.history as HistoryMock)[internalHistoryReset]();
 }

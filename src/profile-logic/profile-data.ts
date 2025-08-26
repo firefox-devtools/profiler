@@ -85,7 +85,7 @@ import type {
   CallTreeSummaryStrategy,
   EventDelayInfo,
   ThreadsKey,
-  resourceTypeEnum,
+  ResourceTypeEnum,
   MarkerPayload,
   Address,
   AddressProof,
@@ -2822,7 +2822,7 @@ export function getThreadProcessDetails(
 function _shouldShowBothOriginAndFileName(
   fileName: string,
   origin: string,
-  resourceType: resourceTypeEnum | null
+  resourceType: ResourceTypeEnum | null
 ): boolean {
   // If the origin string is just a URL prefix that's part of the
   // filename, it doesn't add any useful information, so only show
