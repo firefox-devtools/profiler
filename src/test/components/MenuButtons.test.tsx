@@ -437,7 +437,6 @@ describe('app/MenuButtons', function () {
       jest.spyOn(Date.prototype, 'toLocaleString').mockImplementation(function (
         this: Date
       ) {
-        // eslint-disable-next-line @babel/no-invalid-this
         return 'toLocaleString ' + this.toUTCString();
       });
 
