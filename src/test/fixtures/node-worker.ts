@@ -2,20 +2,44 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { Worker } from 'worker_threads';
+import {
+  Worker as NodeWorkerClass,
+  isMarkedAsUntransferable,
+} from 'worker_threads';
 
-class NodeWorker {
-  _instance: Worker | null;
+function getWorkerScript(file: string): string {
+  return `
+    const { parentPort } = require('worker_threads');
+    const fs = require('fs');
+    const vm = require('vm');
+
+    const scriptContent = fs.readFileSync("${file}", 'utf8');
+
+    const sandbox = {
+      importScripts: function () {
+        throw new Error('The function "importScripts" is not implemented.');
+      },
+      postMessage: parentPort.postMessage.bind(parentPort),
+      onmessage: function () {},
+    };
+
+    vm.runInNewContext(scriptContent, sandbox, { filename: "${file}" });
+
+    parentPort.onmessage = sandbox.onmessage.bind(null);
+  `;
+}
+
+export class NodeWorker {
+  _instance: NodeWorkerClass | null;
   onmessage: ((event: MessageEvent) => unknown) | null;
 
   constructor(file: string) {
-    const worker = new Worker(__dirname + '/node-worker-contents.mjs', {
-      workerData: file,
-    });
+    const worker = new NodeWorkerClass(getWorkerScript(file), { eval: true });
     worker.on('message', this.onMessage);
     worker.on('error', this.onError);
     this._instance = worker;
     this.onmessage = null;
+    workerInstances.push(worker);
   }
 
   postMessage(message: unknown, transfer?: any[]) {
@@ -31,7 +55,11 @@ class NodeWorker {
     if (+major < 11 || (+major === 11 && +minor < 12)) {
       payload = { data: message };
     }
-    this._instance?.postMessage(payload, transfer);
+    // See https://github.com/nodejs/node/issues/55593
+    const actualTransfer = (transfer ?? []).filter(
+      (buf) => !isMarkedAsUntransferable(buf)
+    );
+    this._instance?.postMessage(payload, actualTransfer);
   }
 
   onMessage = (message: unknown) => {
@@ -53,23 +81,13 @@ class NodeWorker {
   }
 }
 
-const workerConfigs: { [key: string]: string } = {
-  'zee-worker': './res/zee-worker.js',
-};
+const workerInstances: NodeWorkerClass[] = [];
 
-const workerInstances: NodeWorker[] = [];
-
-export default function (file: string): NodeWorker {
-  const path = workerConfigs[file];
-  const worker = new NodeWorker(path);
-  workerInstances.push(worker);
-  return worker;
-}
-
-/**
- * This function allows for stopping the workers, and is only part of the mock.
- */
+// Called after running each test (see setup.js), otherwise Jest won't shut down.
 export function __shutdownWorkers() {
-  workerInstances.forEach((worker) => worker.terminate());
+  workerInstances.forEach((worker) => {
+    worker.terminate();
+    worker.unref();
+  });
   workerInstances.length = 0;
 }

@@ -65,7 +65,8 @@
       "module-resolver",
       {
         "alias": {
-          "firefox-profiler": "./src"
+          "firefox-profiler": "./src",
+          "firefox-profiler-res": "./res"
         }
       }
     ]
