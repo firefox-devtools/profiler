@@ -4,7 +4,7 @@
 
 import type { SymbolTableAsTuple } from '../../profile-logic/symbol-store-db';
 import type { GoogleAnalytics } from '../../utils/analytics';
-import type FetchMockJest from '@fetch-mock/jest';
+import type FetchMock from 'fetch-mock';
 
 declare global {
   // Because this type isn't an existing Global type, but still it's useful to
@@ -36,6 +36,6 @@ declare global {
     persistTooltips?: boolean;
 
     // Test-only
-    fetchMock: typeof FetchMockJest;
+    fetchMock: typeof FetchMock;
   }
 }
