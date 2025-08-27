@@ -228,6 +228,8 @@ describe('profile deletion', () => {
       profileToken: PROFILE_TOKEN,
       jwtToken: JWT_TOKEN,
     });
-    expect(window.fetch).toHaveFetched(endpointUrl, expect.anything());
+    expect(
+      window.fetchMock.callHistory.lastCall(endpointUrl)
+    ).not.toBeUndefined();
   });
 });

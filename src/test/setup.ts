@@ -9,7 +9,7 @@ import '@testing-library/jest-dom';
 import 'jest-extended';
 
 // This installs jest matchers as a side effect as well.
-import fetchMock from '@fetch-mock/jest';
+import fetchMock from 'fetch-mock';
 import crypto from 'crypto';
 
 import { NodeWorker, __shutdownWorkers } from './fixtures/node-worker';
@@ -48,7 +48,8 @@ afterEach(() => {
   jest.useRealTimers();
 
   // Do the same with fetch mocks
-  fetchMock.mockReset();
+  fetchMock.removeRoutes();
+  fetchMock.clearHistory();
 });
 
 expect.extend({

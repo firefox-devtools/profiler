@@ -65,9 +65,11 @@ describe('shortenUrl', () => {
     const shortUrl = await shortenUrl(longUrl);
 
     expect(shortUrl).toBe(expectedShortUrl);
-    // @ts-expect-error TODO: fetch-mock's TypeScript types for toHaveFetched do
-    //                  not recognize the body property, not sure why
-    expect(window.fetch).toHaveFetched({ body: { longUrl } });
+    expect(window.fetchMock.callHistory.lastCall()?.options).toEqual(
+      expect.objectContaining({
+        body: JSON.stringify({ longUrl }),
+      })
+    );
   });
 
   it('changes the requested url if is not the main URL', async () => {
@@ -84,9 +86,11 @@ describe('shortenUrl', () => {
 
     const shortUrl = await shortenUrl(longUrl);
     expect(shortUrl).toBe(expectedShortUrl);
-    // @ts-expect-error TODO: fetch-mock's TypeScript types for toHaveFetched do
-    //                  not recognize the body property, not sure why
-    expect(window.fetch).toHaveFetched({ body: { longUrl: expectedLongUrl } });
+    expect(window.fetchMock.callHistory.lastCall()?.options).toEqual(
+      expect.objectContaining({
+        body: JSON.stringify({ longUrl: expectedLongUrl }),
+      })
+    );
   });
 });
 
@@ -110,9 +114,11 @@ describe('expandUrl', () => {
 
     const longUrl = await expandUrl(shortUrl);
     expect(longUrl).toBe(returnedLongUrl);
-    // @ts-expect-error TODO: fetch-mock's TypeScript types for toHaveFetched do
-    //                  not recognize the body property, not sure why
-    expect(window.fetch).toHaveFetched({ body: { shortUrl } });
+    expect(window.fetchMock.callHistory.lastCall()?.options).toEqual(
+      expect.objectContaining({
+        body: JSON.stringify({ shortUrl }),
+      })
+    );
   });
 
   it('forwards errors', async () => {
