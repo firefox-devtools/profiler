@@ -145,7 +145,7 @@ type ViewportProps<ChartProps> = {
   // The "committed range", whose endpoints correspond to 0 and 1.
   readonly timeRange: StartEndRange;
   // The preview selection, whose endpoints correspond to viewportLeft and viewportRight.
-  readonly previewSelection: PreviewSelection;
+  readonly previewSelection: PreviewSelection | null;
   // The left margin. Margins are outside the viewport but inside containerWidth.
   readonly marginLeft: CssPixels;
   // The right margin. Margins are outside the viewport but inside containerWidth.
@@ -214,7 +214,7 @@ class ChartViewportImpl<OwnProps> extends React.PureComponent<
 > {
   zoomScrollId: number = 0;
   _pendingPreviewSelectionUpdates: Array<
-    (horizontalViewport: HorizontalViewport) => PreviewSelection
+    (horizontalViewport: HorizontalViewport) => PreviewSelection | null
   > = [];
   _container: HTMLDivElement | null = null;
   _takeContainerRef = (container: HTMLDivElement) => {
@@ -235,10 +235,10 @@ class ChartViewportImpl<OwnProps> extends React.PureComponent<
   }
 
   getHorizontalViewport(
-    previewSelection: PreviewSelection,
+    previewSelection: PreviewSelection | null,
     timeRange: StartEndRange
   ) {
-    if (previewSelection.hasSelection) {
+    if (previewSelection) {
       const { selectionStart, selectionEnd } = previewSelection;
       const timeRangeLength = timeRange.end - timeRange.start;
       return {
@@ -433,7 +433,7 @@ class ChartViewportImpl<OwnProps> extends React.PureComponent<
    * processes all queued updates from a requestAnimationFrame callback.
    */
   _addBatchedPreviewSelectionUpdate(
-    callback: (param: HorizontalViewport) => PreviewSelection
+    callback: (param: HorizontalViewport) => PreviewSelection | null
   ) {
     if (this._pendingPreviewSelectionUpdates.length === 0) {
       requestAnimationFrame(() => this._flushPendingPreviewSelectionUpdates());
@@ -532,14 +532,10 @@ class ChartViewportImpl<OwnProps> extends React.PureComponent<
           viewportProps: { timeRange },
         } = this.props;
         if (newViewportLeft === 0 && newViewportRight === 1) {
-          return {
-            hasSelection: false,
-            isModifying: false,
-          };
+          return null;
         }
         const timeRangeLength = timeRange.end - timeRange.start;
         return {
-          hasSelection: true,
           isModifying: false,
           selectionStart: timeRange.start + timeRangeLength * newViewportLeft,
           selectionEnd: timeRange.start + timeRangeLength * newViewportRight,
@@ -722,10 +718,7 @@ class ChartViewportImpl<OwnProps> extends React.PureComponent<
           // Calculate left and right in terms of the unit interval of the profile range.
           const viewportLength = viewportRight - viewportLeft;
           if (viewportLength >= 1) {
-            return {
-              hasSelection: false,
-              isModifying: false,
-            };
+            return null;
           }
           const viewportPixelWidth = containerWidth - marginLeft - marginRight;
           const unitOffsetX = offsetX * (viewportLength / viewportPixelWidth);
@@ -742,7 +735,6 @@ class ChartViewportImpl<OwnProps> extends React.PureComponent<
 
           const timeRangeLength = timeRange.end - timeRange.start;
           return {
-            hasSelection: true,
             isModifying: false,
             selectionStart: timeRange.start + timeRangeLength * newViewportLeft,
             selectionEnd: timeRange.start + timeRangeLength * newViewportRight,

@@ -226,7 +226,6 @@ describe('Native allocation call trees', function () {
     dispatch(commitRange(0, 1.5));
     dispatch(
       updatePreviewSelection({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 0,
         selectionEnd: 1,

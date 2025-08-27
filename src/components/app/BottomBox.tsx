@@ -28,7 +28,7 @@ import {
   getSourceViewCode,
   getAssemblyViewCode,
 } from 'firefox-profiler/selectors/code';
-import { getPreviewSelection } from 'firefox-profiler/selectors/profile';
+import { getPreviewSelectionIsBeingModified } from 'firefox-profiler/selectors/profile';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -295,7 +295,7 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
       selectedNodeSelectors.getAssemblyViewAddressTimings(state),
     assemblyViewScrollGeneration: getAssemblyViewScrollGeneration(state),
     assemblyViewIsOpen: getAssemblyViewIsOpen(state),
-    disableOverscan: getPreviewSelection(state).isModifying,
+    disableOverscan: getPreviewSelectionIsBeingModified(state),
   }),
   mapDispatchToProps: {
     closeBottomBox,

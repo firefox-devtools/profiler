@@ -129,7 +129,6 @@ describe('StackChart', function () {
     act(() =>
       dispatch(
         updatePreviewSelection({
-          hasSelection: true,
           isModifying: false,
           selectionStart: 3.1,
           selectionEnd: 3.4,

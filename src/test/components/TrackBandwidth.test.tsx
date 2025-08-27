@@ -214,7 +214,6 @@ describe('TrackBandwidth', function () {
     act(() => {
       dispatch(
         updatePreviewSelection({
-          hasSelection: true,
           isModifying: false,
           selectionStart: 5,
           selectionEnd: 6,

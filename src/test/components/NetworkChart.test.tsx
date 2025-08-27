@@ -288,7 +288,6 @@ describe('NetworkChartRowBar phase calculations', function () {
     act(() => {
       dispatch(
         updatePreviewSelection({
-          hasSelection: true,
           isModifying: false,
           selectionStart: 20,
           selectionEnd: 40,

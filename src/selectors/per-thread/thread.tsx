@@ -473,7 +473,7 @@ export function getThreadSelectorsWithMarkersPerThread(
     getFilteredThread,
     ProfileSelectors.getPreviewSelection,
     (thread, previewSelection): Thread => {
-      if (!previewSelection.hasSelection) {
+      if (!previewSelection) {
         return thread;
       }
       const { selectionStart, selectionEnd } = previewSelection;
@@ -521,7 +521,7 @@ export function getThreadSelectorsWithMarkersPerThread(
       ProfileSelectors.getPreviewSelection,
       threadSelectors.getFilteredCtssSampleIndexOffset,
       (samples, previewSelection, sampleIndexFromCommittedRange) => {
-        if (!previewSelection.hasSelection) {
+        if (!previewSelection) {
           return sampleIndexFromCommittedRange;
         }
 

@@ -279,7 +279,7 @@ export function getMarkerSelectorsPerThread(
       getSearchFilteredMarkerIndexes,
       ProfileSelectors.getPreviewSelection,
       (getMarker, markerIndexes, previewSelection) => {
-        if (!previewSelection.hasSelection) {
+        if (!previewSelection) {
           return markerIndexes;
         }
         const { selectionStart, selectionEnd } = previewSelection;

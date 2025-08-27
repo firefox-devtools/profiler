@@ -3,24 +3,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import * as React from 'react';
-import type { Milliseconds } from 'firefox-profiler/types';
 
-export type OnMove = (
-  originalValue: {
-    readonly selectionEnd: Milliseconds;
-    readonly selectionStart: Milliseconds;
-  },
+export type OnMove<T> = (
+  originalValue: T,
   dx: number,
   dy: number,
   isModifying: boolean
 ) => void;
 
-type Props = {
-  value: {
-    readonly selectionStart: Milliseconds;
-    readonly selectionEnd: Milliseconds;
-  };
-  onMove: OnMove;
+type Props<T> = {
+  value: T;
+  onMove: OnMove<T>;
   className: string;
   children?: React.ReactNode;
 };
@@ -37,7 +30,7 @@ type State = {
  * x and y deltas compared to the mouse position at mousedown.
  * During the drag, the additional className 'dragging' is set on the element.
  */
-export class Draggable extends React.PureComponent<Props, State> {
+export class Draggable<T> extends React.PureComponent<Props<T>, State> {
   _container: HTMLDivElement | null = null;
   _handlers: {
     mouseMoveHandler: (param: MouseEvent) => void;

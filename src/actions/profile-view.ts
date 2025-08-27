@@ -1749,13 +1749,17 @@ export function changeShowJsTracerSummary(
 }
 
 export function updatePreviewSelection(
-  previewSelection: PreviewSelection
+  previewSelection: PreviewSelection | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
+    // Only dispatch if the selection changes. This function can fire in a tight loop,
+    // and this check saves a dispatch.
     const currentPreviewSelection = getPreviewSelection(getState());
-    if (!objectShallowEquals(currentPreviewSelection, previewSelection)) {
-      // Only dispatch if the selection changes. This function can fire in a tight loop,
-      // and this check saves a dispatch.
+    if (
+      !currentPreviewSelection ||
+      !previewSelection ||
+      !objectShallowEquals(currentPreviewSelection, previewSelection)
+    ) {
       dispatch({
         type: 'UPDATE_PREVIEW_SELECTION',
         previewSelection,

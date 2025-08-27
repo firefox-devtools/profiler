@@ -775,7 +775,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     );
 
     updatePreviewSelection({
-      hasSelection: true,
       isModifying: false,
       selectionStart: start,
       selectionEnd: end,

@@ -14,7 +14,7 @@ import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { getPreviewSelection } from 'firefox-profiler/selectors/profile';
+import { getPreviewSelectionIsBeingModified } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per-thread';
 import { getSelectedThreadIndexes } from 'firefox-profiler/selectors/url-state';
 import { changeRightClickedMarker } from 'firefox-profiler/actions/profile-view';
@@ -528,7 +528,7 @@ export const TimelineMarkersJank = explicitConnect<
       // These don't use marker schema as they are derived.
       markerIndexes: selectors.getTimelineJankMarkerIndexes(state),
       isSelected: _getTimelineMarkersIsSelected(selectedThreads, threadsKey),
-      isModifyingSelection: getPreviewSelection(state).isModifying,
+      isModifyingSelection: getPreviewSelectionIsBeingModified(state),
       testId: 'TimelineMarkersJank',
       rightClickedMarker: selectors.getRightClickedMarker(state),
     };
@@ -557,7 +557,7 @@ export const TimelineMarkersOverview = explicitConnect<
       getMarker: selectors.getMarkerGetter(state),
       markerIndexes: selectors.getTimelineOverviewMarkerIndexes(state),
       isSelected: _getTimelineMarkersIsSelected(selectedThreads, threadsKey),
-      isModifyingSelection: getPreviewSelection(state).isModifying,
+      isModifyingSelection: getPreviewSelectionIsBeingModified(state),
       testId: 'TimelineMarkersOverview',
       rightClickedMarker: selectors.getRightClickedMarker(state),
     };
@@ -583,7 +583,7 @@ export const TimelineMarkersFileIo = explicitConnect<
       getMarker: selectors.getMarkerGetter(state),
       markerIndexes: selectors.getTimelineFileIoMarkerIndexes(state),
       isSelected: _getTimelineMarkersIsSelected(selectedThreads, threadsKey),
-      isModifyingSelection: getPreviewSelection(state).isModifying,
+      isModifyingSelection: getPreviewSelectionIsBeingModified(state),
       testId: 'TimelineMarkersFileIo',
       rightClickedMarker: selectors.getRightClickedMarker(state),
     };
@@ -609,7 +609,7 @@ export const TimelineMarkersMemory = explicitConnect<
       getMarker: selectors.getMarkerGetter(state),
       markerIndexes: selectors.getTimelineMemoryMarkerIndexes(state),
       isSelected: _getTimelineMarkersIsSelected(selectedThreads, threadsKey),
-      isModifyingSelection: getPreviewSelection(state).isModifying,
+      isModifyingSelection: getPreviewSelectionIsBeingModified(state),
       additionalClassName: 'timelineMarkersMemory',
       testId: 'TimelineMarkersMemory',
       rightClickedMarker: selectors.getRightClickedMarker(state),
@@ -636,7 +636,7 @@ export const TimelineMarkersIPC = explicitConnect<
       getMarker: selectors.getMarkerGetter(state),
       markerIndexes: selectors.getTimelineIPCMarkerIndexes(state),
       isSelected: _getTimelineMarkersIsSelected(selectedThreads, threadsKey),
-      isModifyingSelection: getPreviewSelection(state).isModifying,
+      isModifyingSelection: getPreviewSelectionIsBeingModified(state),
       additionalClassName: 'timelineMarkersIPC',
       testId: 'TimelineMarkersIPC',
       rightClickedMarker: selectors.getRightClickedMarker(state),

@@ -201,7 +201,6 @@ describe('FlameGraph', function () {
     act(() => {
       dispatch(
         updatePreviewSelection({
-          hasSelection: true,
           isModifying: false,
           selectionStart: 1.3,
           selectionEnd: 5,
@@ -246,7 +245,6 @@ describe('FlameGraph', function () {
       act(() => {
         dispatch(
           updatePreviewSelection({
-            hasSelection: true,
             isModifying: false,
             selectionStart: 5,
             selectionEnd: 10,

@@ -87,7 +87,7 @@ export type ProfileViewState = {
     perThread: ThreadViewOptionsPerThreads;
     symbolicationStatus: SymbolicationStatus;
     waitingForLibs: Set<RequestedLib>;
-    previewSelection: PreviewSelection;
+    previewSelection: PreviewSelection | null;
     scrollToSelectionGeneration: number;
     focusCallTreeGeneration: number;
     rootRange: StartEndRange;

@@ -83,16 +83,13 @@ export type DataSource =
   | 'uploaded-recordings';
 
 export type TimelineType = 'stack' | 'category' | 'cpu-category';
-export type PreviewSelection =
-  | { readonly hasSelection: false; readonly isModifying: false }
-  | {
-      readonly hasSelection: true;
-      readonly isModifying: boolean;
-      readonly selectionStart: number;
-      readonly selectionEnd: number;
-      readonly draggingStart?: boolean;
-      readonly draggingEnd?: boolean;
-    };
+export type PreviewSelection = {
+  readonly isModifying: boolean;
+  readonly selectionStart: number;
+  readonly selectionEnd: number;
+  readonly draggingStart?: boolean;
+  readonly draggingEnd?: boolean;
+};
 
 /**
  * The counts for how many tracks are hidden in the timeline.
@@ -227,7 +224,7 @@ type ProfileAction =
     }
   | {
       readonly type: 'UPDATE_PREVIEW_SELECTION';
-      readonly previewSelection: PreviewSelection;
+      readonly previewSelection: PreviewSelection | null;
     }
   | {
       readonly type: 'CHANGE_SELECTED_ZIP_FILE';
