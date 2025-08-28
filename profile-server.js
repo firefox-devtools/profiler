@@ -8,7 +8,7 @@ const path = require('path');
 module.exports = {
   serveAndOpen(host, profilerUrl, profilePath, openOptions) {
     // Create a simple http server serving the profile file.
-    const profileServer = http.createServer((req, res) => {
+    const profileServer = http.createServer((_req, res) => {
       res.setHeader('Access-Control-Allow-Origin', profilerUrl);
       const fileStream = fs.createReadStream(profilePath);
       fileStream.pipe(res);

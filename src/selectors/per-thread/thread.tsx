@@ -409,7 +409,6 @@ type BasicThreadAndMarkerSelectorsPerThread = BasicThreadSelectorsPerThread &
 
 export function getThreadSelectorsWithMarkersPerThread(
   threadSelectors: BasicThreadAndMarkerSelectorsPerThread,
-  threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
 ) {
   // It becomes very expensive to apply each transform over and over again as they

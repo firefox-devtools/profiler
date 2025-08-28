@@ -29,7 +29,6 @@ import type {
   Address,
   LineTimings,
   LineNumber,
-  NativeSymbolInfo,
   DecodedInstruction,
 } from 'firefox-profiler/types';
 
@@ -179,7 +178,6 @@ export class AssemblyViewEditor {
   // Create a CodeMirror editor and add it as a child element of domParent.
   constructor(
     initialAssemblyCode: DecodedInstruction[],
-    nativeSymbol: NativeSymbolInfo,
     addressTimings: AddressTimings,
     domParent: Element
   ) {

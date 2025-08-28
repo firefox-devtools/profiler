@@ -140,14 +140,25 @@ export default [
       'no-else-return': 'error',
       'no-nested-ternary': 'error',
 
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          args: 'all',
+          argsIgnorePattern: '^_',
+          caughtErrors: 'all',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+        },
+      ],
+
       // Use `import type` everywhere we can.
       '@typescript-eslint/consistent-type-imports': 'error',
       // Allow `as any` escape hatches
       '@typescript-eslint/no-explicit-any': 'off',
       // Disable a rule that the TypeScript FAQ disapproves of
       '@typescript-eslint/no-empty-object-type': 'off',
-      // Should enable this soon, mostly finds `catch (e)` with unused e
-      '@typescript-eslint/no-unused-vars': 'off',
       // TypeScript imports react-jsx into .tsx files for us
       'react/react-in-jsx-scope': 'off',
       // Allow @ts-expect-error annotations with descriptions.

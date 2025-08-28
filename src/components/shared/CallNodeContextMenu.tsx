@@ -282,7 +282,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   }
 
   _handleClick = (
-    event: React.ChangeEvent<HTMLElement>,
+    _event: React.ChangeEvent<HTMLElement>,
     data: { type: string }
   ): void => {
     const { type } = data;

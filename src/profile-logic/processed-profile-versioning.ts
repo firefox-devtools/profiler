@@ -382,7 +382,7 @@ const _upgraders: {
             }
             origin = url.origin;
             host = url.host;
-          } catch (e) {
+          } catch (_e) {
             origin = scriptURI;
             host = null;
           }

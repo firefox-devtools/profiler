@@ -208,7 +208,7 @@ function detectArtTraceFormat(
     if (/\*version\n[1-3]\n/.test(firstTwoLinesString)) {
       return 'regular';
     }
-  } catch (e) {
+  } catch (_e) {
     // Ignore exception and fall through
   }
 
@@ -218,7 +218,7 @@ function detectArtTraceFormat(
     if (magic === TRACE_MAGIC) {
       return 'streaming';
     }
-  } catch (e) {
+  } catch (_e) {
     // Ignore exception and fall through
   }
 

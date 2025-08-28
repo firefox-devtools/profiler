@@ -422,7 +422,6 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
             ? this._getTimingsForCallNodeIndex(
                 callNodeIndex,
                 callNodeInfo,
-                interval,
                 unfilteredThread,
                 ctssSampleIndexOffset,
                 categories,

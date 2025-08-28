@@ -159,7 +159,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
     });
   };
 
-  override componentDidUpdate(prevProps: Props) {
+  override componentDidUpdate() {
     const { threadsKey, height, reportTrackThreadHeight } = this.props;
     // Most likely this track height shouldn't change, but if it does, report it.
     // The action will only dispatch on changed values.
