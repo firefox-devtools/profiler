@@ -529,21 +529,20 @@ const waitingForLibs: Reducer<Set<RequestedLib>> = (
   }
 };
 
-const previewSelection: Reducer<PreviewSelection> = (
-  state = { hasSelection: false, isModifying: false },
+const previewSelection: Reducer<PreviewSelection | null> = (
+  state = null,
   action
 ) => {
   switch (action.type) {
     case 'UPDATE_PREVIEW_SELECTION':
       return action.previewSelection;
     case 'COMMIT_RANGE':
-      return { hasSelection: false, isModifying: false };
+      return null;
     case 'POP_COMMITTED_RANGES':
       if (!action.committedRange) {
-        return { hasSelection: false, isModifying: false };
+        return null;
       }
       return {
-        hasSelection: true,
         isModifying: false,
         selectionStart: action.committedRange.start,
         selectionEnd: action.committedRange.end,

@@ -280,19 +280,15 @@ describe('profile state invalidation when switching between profiles', function 
 
     // Create new copies of the selection on each assertion and change, so
     // that we are not relying on strict equality.
-    const getNoSelection = () => ({ hasSelection: false, isModifying: false });
     const getSomeSelection = () =>
       ({
-        hasSelection: true,
         isModifying: true,
         selectionStart: 0,
         selectionEnd: 10,
       }) as PreviewSelection;
 
     // It starts with no selection.
-    expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual(
-      getNoSelection()
-    );
+    expect(ProfileViewSelectors.getPreviewSelection(getState())).toBe(null);
 
     // Add a selection.
     dispatch(ProfileViewActions.updatePreviewSelection(getSomeSelection()));
@@ -303,8 +299,6 @@ describe('profile state invalidation when switching between profiles', function 
     viewProfile('profile2.json');
 
     // It no longer has a selection when viewing another profile.
-    expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual(
-      getNoSelection()
-    );
+    expect(ProfileViewSelectors.getPreviewSelection(getState())).toBe(null);
   });
 });

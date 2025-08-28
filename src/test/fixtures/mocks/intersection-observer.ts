@@ -1,29 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @ts-nocheck Complex DOM mock with intricate typing that would require extensive work to properly type
-
-/**
- * Creating a mock intersection observer type because Flow's IntersectionObserver
- * type is not completely correct in this version.
- */
-type MockIntersectionObserver = {
-  thresholds: number[];
-  root: HTMLElement | Document;
-  rootMargin: string;
-  observe: (param: HTMLElement) => void;
-  unobserve: (param: HTMLElement) => void;
-  disconnect: () => void;
-  takeRecords: () => void;
-};
 
 /**
  * Type of the item we are going to keep for tracking observers.
  */
 type Item = {
   callback: (
-    param: IntersectionObserverEntry[],
-    MockIntersectionObserver
+    entries: IntersectionObserverEntry[],
+    observer: IntersectionObserver
   ) => void;
   elements: Set<HTMLElement>;
   created: number;
@@ -32,10 +17,7 @@ type Item = {
 /**
  * Tracked observers during the testing.
  */
-const observers: Map<MockIntersectionObserver, Item> = new Map<
-  unknown,
-  unknown
->();
+const observers: Map<IntersectionObserver, Item> = new Map();
 
 /**
  * Call this function inside a `describe` block to automatically define the
@@ -50,16 +32,16 @@ const observers: Map<MockIntersectionObserver, Item> = new Map<
  * give you a better control over the intersection observer and is used mostly
  * when you want to test the intersection observer behavior.
  */
-export function autoMockIntersectionObserver(autoTrigger?: boolean = true) {
+export function autoMockIntersectionObserver(autoTrigger: boolean = true) {
   beforeEach(() => {
     (window as any).IntersectionObserver = jest.fn((cb, options = {}) => {
-      const item = {
+      const item: Item = {
         callback: cb,
         elements: new Set(),
         created: Date.now(),
       };
 
-      const instance: MockIntersectionObserver = {
+      const instance: IntersectionObserver = {
         thresholds: Array.isArray(options.threshold)
           ? options.threshold
           : [options.threshold ?? 0],
@@ -93,7 +75,7 @@ export function autoMockIntersectionObserver(autoTrigger?: boolean = true) {
 }
 
 function triggerSingleObserver(
-  observer: MockIntersectionObserver,
+  observer: IntersectionObserver,
   item: Item,
   isIntersecting: boolean = true
 ) {
@@ -105,7 +87,12 @@ function triggerSingleObserver(
       intersectionRatio: 1,
       intersectionRect: element.getBoundingClientRect(),
       isIntersecting: isIntersecting,
-      rootBounds: observer.root ? observer.root.getBoundingClientRect() : null,
+      // `root` is `Element | Document | null`. We can call getBoundingClientRect
+      // only if it's an Element.
+      rootBounds:
+        observer.root && observer.root instanceof Element
+          ? observer.root.getBoundingClientRect()
+          : null,
       target: element,
       time: Date.now() - item.created,
     });

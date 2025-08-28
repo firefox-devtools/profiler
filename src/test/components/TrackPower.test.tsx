@@ -190,7 +190,6 @@ describe('TrackPower', function () {
     const { dispatch, moveMouseAtCounter } = setup();
     dispatch(
       updatePreviewSelection({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 5,
         selectionEnd: 6,
@@ -220,7 +219,6 @@ describe('TrackPower', function () {
     const { dispatch, moveMouseAtCounter } = setup();
     dispatch(
       updatePreviewSelection({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 6,
         selectionEnd: 6,

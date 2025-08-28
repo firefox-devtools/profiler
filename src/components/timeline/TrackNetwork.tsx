@@ -14,7 +14,7 @@ import {
   getCommittedRange,
   getZeroAt,
   getInnerWindowIDToPageMap,
-  getPreviewSelection,
+  getPreviewSelectionIsBeingModified,
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
@@ -432,7 +432,7 @@ export const TrackNetwork = explicitConnect<
       rangeStart: start,
       rangeEnd: end,
       zeroAt: getZeroAt(state),
-      isModifyingSelection: getPreviewSelection(state).isModifying,
+      isModifyingSelection: getPreviewSelectionIsBeingModified(state),
       verticalMarkerIndexes: selectors.getTimelineVerticalMarkerIndexes(state),
       rightClickedMarkerIndex: selectors.getRightClickedMarkerIndex(state),
       selectedNetworkMarkerIndex:

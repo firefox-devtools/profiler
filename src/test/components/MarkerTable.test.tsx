@@ -99,7 +99,6 @@ describe('MarkerTable', function () {
     act(() => {
       dispatch(
         updatePreviewSelection({
-          hasSelection: true,
           isModifying: false,
           selectionStart: 10,
           selectionEnd: 20,

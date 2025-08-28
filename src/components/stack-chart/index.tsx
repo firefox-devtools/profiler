@@ -72,7 +72,7 @@ type StateProps = {
   readonly sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap;
   readonly timeRange: StartEndRange;
   readonly interval: Milliseconds;
-  readonly previewSelection: PreviewSelection;
+  readonly previewSelection: PreviewSelection | null;
   readonly threadsKey: ThreadsKey;
   readonly callNodeInfo: CallNodeInfo;
   readonly categories: CategoryList;

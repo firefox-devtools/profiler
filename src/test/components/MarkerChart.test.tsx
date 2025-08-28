@@ -650,7 +650,6 @@ describe('MarkerChart', function () {
 
       clickOnMenuItem(/start.*start/i);
       expect(getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 2,
         selectionEnd: 11,
@@ -658,7 +657,6 @@ describe('MarkerChart', function () {
 
       clickOnMenuItem(/start.*end/i);
       expect(getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 8,
         selectionEnd: 11,
@@ -667,7 +665,6 @@ describe('MarkerChart', function () {
       // This one doesn't work because it's disabled.
       clickOnMenuItem(/end.*start/i);
       expect(getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 8,
         selectionEnd: 11,
@@ -677,7 +674,6 @@ describe('MarkerChart', function () {
       rightClick(findFillTextPosition('UserTiming A'));
       clickOnMenuItem(/start.*start/i);
       expect(getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 0,
         selectionEnd: 11,
@@ -687,7 +683,6 @@ describe('MarkerChart', function () {
 
       clickOnMenuItem(/end.*start/i);
       expect(getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 0,
         selectionEnd: 2,
@@ -695,7 +690,6 @@ describe('MarkerChart', function () {
 
       clickOnMenuItem(/end.*end/i);
       expect(getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 0,
         selectionEnd: 8,
@@ -710,7 +704,6 @@ describe('MarkerChart', function () {
       rightClick(findFillTextPosition('UserTiming B'));
       clickOnMenuItem(/duration/);
       expect(getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 2,
         selectionEnd: 8,
@@ -719,7 +712,6 @@ describe('MarkerChart', function () {
       rightClick(findFillTextPosition('UserTiming A'));
       clickOnMenuItem(/duration/);
       expect(getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 0,
         selectionEnd: 10,

@@ -115,7 +115,6 @@ describe('app/ProfileFilterNavigator', () => {
     act(() => {
       dispatch(
         ProfileView.updatePreviewSelection({
-          hasSelection: true,
           isModifying: false,
           selectionStart: 10,
           selectionEnd: 10.1,
