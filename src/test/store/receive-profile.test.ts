@@ -813,8 +813,11 @@ describe('actions/receive-profile', function () {
         expect.any(String)
       );
 
-      expect(window.fetch).toHaveFetched(
-        'https://symbolication.services.mozilla.com/symbolicate/v5',
+      expect(
+        window.fetchMock.callHistory.lastCall(
+          'https://symbolication.services.mozilla.com/symbolicate/v5'
+        )?.options
+      ).toEqual(
         expect.objectContaining({
           body: expect.stringMatching(/memoryMap.*firefox/),
         })
@@ -828,8 +831,11 @@ describe('actions/receive-profile', function () {
         await createBrowserConnection('Firefox/123.0');
       await dispatch(retrieveProfileFromBrowser(browserConnectionStatus));
 
-      expect(window.fetch).toHaveFetched(
-        'https://symbolication.services.mozilla.com/symbolicate/v5',
+      expect(
+        window.fetchMock.callHistory.lastCall(
+          'https://symbolication.services.mozilla.com/symbolicate/v5'
+        )?.options
+      ).toEqual(
         expect.objectContaining({
           body: expect.stringMatching(/memoryMap.*firefox/),
         })
@@ -917,8 +923,11 @@ describe('actions/receive-profile', function () {
       const store = blankStore();
       await store.dispatch(retrieveProfileFromStore('FAKEHASH'));
 
-      expect(window.fetch).toHaveLastFetched(
-        'https://symbolication.services.mozilla.com/symbolicate/v5',
+      expect(
+        window.fetchMock.callHistory.lastCall(
+          'https://symbolication.services.mozilla.com/symbolicate/v5'
+        )?.options
+      ).toEqual(
         expect.objectContaining({
           body: expect.stringMatching(/memoryMap.*libxul/),
         })
@@ -1414,8 +1423,11 @@ describe('actions/receive-profile', function () {
         payload: profile,
       });
 
-      expect(window.fetch).toHaveFetched(
-        'https://symbolication.services.mozilla.com/symbolicate/v5',
+      expect(
+        window.fetchMock.callHistory.lastCall(
+          'https://symbolication.services.mozilla.com/symbolicate/v5'
+        )?.options
+      ).toEqual(
         expect.objectContaining({
           body: expect.stringMatching(/memoryMap.*firefox/),
         })
