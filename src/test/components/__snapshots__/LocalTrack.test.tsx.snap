@@ -5,10 +5,10 @@ exports[`timeline/LocalTrack with a memory track matches the snapshot of the mem
   class="timelineTrack timelineTrackLocal"
 >
   <div
-    class="timelineTrackRow timelineTrackLocalRow"
+    class="react-contextmenu-wrapper timelineTrackRow timelineTrackLocalRow"
   >
     <div
-      class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+      class="timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
       title="My Description"
     >
       <button
@@ -71,10 +71,10 @@ exports[`timeline/LocalTrack with a network track matches the snapshot of the ne
   class="timelineTrack timelineTrackLocal"
 >
   <div
-    class="timelineTrackRow timelineTrackLocalRow"
+    class="react-contextmenu-wrapper timelineTrackRow timelineTrackLocalRow"
   >
     <div
-      class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+      class="timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
     >
       <button
         class="timelineTrackNameButton"
@@ -145,10 +145,10 @@ exports[`timeline/LocalTrack with a thread track matches the snapshot of a local
   class="timelineTrack timelineTrackLocal"
 >
   <div
-    class="timelineTrackRow timelineTrackLocalRow"
+    class="react-contextmenu-wrapper timelineTrackRow timelineTrackLocalRow"
   >
     <div
-      class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+      class="timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
       title="DOM Worker
 Thread: \\"DOM Worker\\" (33)
 Process: \\"tab\\" (222)"
@@ -239,10 +239,10 @@ exports[`timeline/LocalTrack with an IPC track matches the snapshot of the IPC t
   class="timelineTrack timelineTrackLocal"
 >
   <div
-    class="timelineTrackRow timelineTrackLocalRow"
+    class="react-contextmenu-wrapper timelineTrackRow timelineTrackLocalRow"
   >
     <div
-      class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+      class="timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
     >
       <button
         class="timelineTrackNameButton"

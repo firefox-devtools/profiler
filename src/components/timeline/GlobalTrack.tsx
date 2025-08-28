@@ -63,7 +63,7 @@ type StateProps = {
   readonly globalTrack: GlobalTrack;
   readonly isSelected: boolean;
   readonly isHidden: boolean;
-  readonly titleText: string | null;
+  readonly titleText: string | undefined;
   readonly localTrackOrder: TrackIndex[];
   readonly localTracks: LocalTrack[];
   readonly pid: Pid | null;
@@ -257,20 +257,20 @@ class GlobalTrackComponent extends PureComponent<Props> {
         className="timelineTrack"
         style={style as React.CSSProperties}
       >
-        <div
-          className={classNames('timelineTrackRow timelineTrackGlobalRow', {
-            selected: isSelected,
-          })}
-          onClick={this._selectCurrentTrack}
+        <ContextMenuTrigger
+          id="TimelineTrackContextMenu"
+          renderTag="div"
+          attributes={{
+            className: classNames('timelineTrackRow timelineTrackGlobalRow', {
+              selected: isSelected,
+            }),
+            onContextMenu: this._onContextMenu,
+          }}
         >
-          <ContextMenuTrigger
-            id="TimelineTrackContextMenu"
-            renderTag="div"
-            attributes={{
-              title: titleText,
-              className: 'timelineTrackLabel timelineTrackGlobalGrippy',
-              onContextMenu: this._onContextMenu,
-            }}
+          <div
+            className="timelineTrackLabel timelineTrackGlobalGrippy"
+            title={titleText}
+            onClick={this._selectCurrentTrack}
           >
             <button type="button" className="timelineTrackNameButton">
               {trackName}
@@ -301,9 +301,14 @@ class GlobalTrackComponent extends PureComponent<Props> {
                 onClick={this._hideCurrentTrack}
               />
             </Localized>
-          </ContextMenuTrigger>
-          <div className="timelineTrackTrack">{this.renderTrack()}</div>
-        </div>
+          </div>
+          <div
+            className="timelineTrackTrack"
+            onClick={this._selectCurrentTrack}
+          >
+            {this.renderTrack()}
+          </div>
+        </ContextMenuTrigger>
         {localTracks.length > 0 && pid !== null
           ? this.renderLocalTracks(pid)
           : null}
@@ -329,7 +334,7 @@ export const TimelineGlobalTrack = explicitConnect<
     // These get assigned based on the track type.
     let threadIndex = null;
     let isSelected = false;
-    let titleText = null;
+    let titleText;
 
     let localTrackOrder = EMPTY_TRACK_ORDER;
     let localTracks = EMPTY_LOCAL_TRACKS;
