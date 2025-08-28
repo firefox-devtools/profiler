@@ -17,7 +17,7 @@ type IonGraphViewProps = {
 };
 
 export function IonGraphView(props: IonGraphViewProps) {
-  let func = useMemo(() => {
+  const func = useMemo(() => {
     if (props.sourceCode.trim() === '') {
       return null;
     }

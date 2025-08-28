@@ -179,6 +179,8 @@ class BottomBoxImpl extends React.PureComponent<Props> {
         ? assemblyViewCode.instructions
         : [];
     const sourceIsIonGraph = path !== null && path.endsWith('iongraph.json');
+    const displaySourceView = sourceViewFile !== null && !sourceIsIonGraph;
+    const displayIonGraph = sourceViewFile !== null && sourceIsIonGraph;
 
     // The bottom box has one or more side-by-side panes.
     // At the moment it always has either one or two panes:
@@ -213,24 +215,23 @@ class BottomBoxImpl extends React.PureComponent<Props> {
               {assemblyViewIsOpen ? null : trailingHeaderButtons}
             </div>
             <div className="bottom-sourceview-wrapper">
-              {sourceViewFile !== null ? (
-                sourceIsIonGraph ? (
-                  <IonGraphView
-                    timings={globalLineTimings}
-                    hotSpotTimings={selectedCallNodeLineTimings}
-                    sourceCode={sourceCode}
-                  />
-                ) : (
-                  <SourceView
-                    disableOverscan={disableOverscan}
-                    timings={globalLineTimings}
-                    sourceCode={sourceCode}
-                    filePath={path}
-                    scrollToHotSpotGeneration={sourceViewScrollGeneration}
-                    hotSpotTimings={selectedCallNodeLineTimings}
-                    ref={this._sourceView}
-                  />
-                )
+              {displayIonGraph ? (
+                <IonGraphView
+                  timings={globalLineTimings}
+                  hotSpotTimings={selectedCallNodeLineTimings}
+                  sourceCode={sourceCode}
+                />
+              ) : null}
+              {displaySourceView ? (
+                <SourceView
+                  disableOverscan={disableOverscan}
+                  timings={globalLineTimings}
+                  sourceCode={sourceCode}
+                  filePath={path}
+                  scrollToHotSpotGeneration={sourceViewScrollGeneration}
+                  hotSpotTimings={selectedCallNodeLineTimings}
+                  ref={this._sourceView}
+                />
               ) : null}
               {sourceViewCode !== undefined &&
               sourceViewCode.type === 'LOADING' ? (
