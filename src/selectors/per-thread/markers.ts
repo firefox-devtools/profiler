@@ -15,7 +15,6 @@ import { getInclusiveSampleIndexRangeForSelection } from '../../profile-logic/pr
 import type { BasicThreadSelectorsPerThread } from './thread';
 import type {
   RawMarkerTable,
-  ThreadIndex,
   MarkerIndex,
   Marker,
   MarkerSchema,
@@ -47,7 +46,6 @@ export type MarkerSelectorsPerThread = ReturnType<
  */
 export function getMarkerSelectorsPerThread(
   threadSelectors: BasicThreadSelectorsPerThread,
-  _threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
 ) {
   const _getRawMarkerTable: Selector<RawMarkerTable> = (state) =>

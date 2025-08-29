@@ -7,11 +7,6 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
 const includes = [path.join(__dirname, 'src'), path.join(__dirname, 'res')];
 
-const es6modules = ['pretty-bytes'];
-const es6modulePaths = es6modules.map((module) => {
-  return path.join(__dirname, 'node_modules', module);
-});
-
 // If L10N env variable is set, we read all the locale directories and use
 // whatever we have there. This is done to make the l10n branch work with staging
 // locales, so localizers can see the result of their translations immediately.

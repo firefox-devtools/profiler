@@ -162,26 +162,18 @@ function _buildThreadSelectors(
   // 2. The marker selectors.
   selectors = {
     ...selectors,
-    ...getMarkerSelectorsPerThread(selectors, threadIndexes, threadsKey),
+    ...getMarkerSelectorsPerThread(selectors, threadsKey),
   };
   // 3. The thread selectors that need marker selectors.
   selectors = {
     ...selectors,
-    ...getThreadSelectorsWithMarkersPerThread(
-      selectors,
-      threadIndexes,
-      threadsKey
-    ),
+    ...getThreadSelectorsWithMarkersPerThread(selectors, threadsKey),
   };
   // 4. Stack, sample selectors that need the previous selectors for their
   // own definition.
   selectors = {
     ...selectors,
-    ...getStackAndSampleSelectorsPerThread(
-      selectors,
-      threadIndexes,
-      threadsKey
-    ),
+    ...getStackAndSampleSelectorsPerThread(selectors, threadsKey),
   };
   // 5. Other selectors that need selectors from different files to be defined.
   selectors = {
@@ -266,7 +258,6 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
   const getTimingsForSidebar: Selector<TimingsForPath> = createSelector(
     selectedThreadSelectors.getSelectedCallNodePath,
     selectedThreadSelectors.getCallNodeInfo,
-    ProfileSelectors.getProfileInterval,
     selectedThreadSelectors.getThread,
     selectedThreadSelectors.getPreviewFilteredCtssSampleIndexOffset,
     ProfileSelectors.getCategories,

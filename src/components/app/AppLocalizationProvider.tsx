@@ -137,7 +137,7 @@ class AppLocalizationInit extends React.PureComponent<InitProps> {
         console.warn(
           `The stored locale information (${strPreviouslyRequestedLocales}) looks incorrect.`
         );
-      } catch (e) {
+      } catch (_e) {
         console.warn(
           `We got an error when trying to parse the previously stored locale information (${strPreviouslyRequestedLocales}).`
         );

@@ -22,7 +22,7 @@ function customRender(children: React.ReactElement<any>, ...args: any) {
   );
 
   // Rerender function should also wrap the children with the LocalizationProvider.
-  const rerender = (children: React.ReactElement<any>, ...args: any) =>
+  const rerender = (children: React.ReactElement<any>, ..._args: any) =>
     renderResult.rerender(
       <LocalizationProvider l10n={localization}>
         {children}

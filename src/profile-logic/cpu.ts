@@ -10,7 +10,6 @@ import { numberSeriesToDeltas } from 'firefox-profiler/utils/number-series';
 
 import type {
   RawThread,
-  SampleUnits,
   Profile,
   RawSamplesTable,
 } from 'firefox-profiler/types';
@@ -105,7 +104,6 @@ export function computeReferenceCPUDeltaPerMs(profile: Profile): number {
  */
 export function computeThreadCPURatio(
   samples: RawSamplesTable,
-  sampleUnits: SampleUnits,
   timeDeltas: number[],
   referenceCPUDeltaPerMs: number
 ): Float64Array | undefined {

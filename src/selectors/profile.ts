@@ -424,7 +424,7 @@ export const getGlobalTracks: Selector<GlobalTrack[]> = (state) =>
  */
 export const getGlobalTrackReferences: Selector<GlobalTrackReference[]> =
   createSelector(getGlobalTracks, (globalTracks) =>
-    globalTracks.map((globalTrack, trackIndex) => ({
+    globalTracks.map((_globalTrack, trackIndex) => ({
       type: 'global',
       trackIndex,
     }))

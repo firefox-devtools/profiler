@@ -11,12 +11,12 @@ type CoerceC = number;
 const coerceA: CoerceA = { startTime: 0 };
 const coerceB: CoerceB = coerce<CoerceA, CoerceB>(coerceA);
 // @ts-expect-error - The coercion produces the correct value.
-const coerceC: CoerceC = coerce<CoerceA, CoerceB>(coerceA) as any;
+const _coerceC: CoerceC = coerce<CoerceA, CoerceB>(coerceA) as any;
 // @ts-expect-error - The coercion must take the correct value.
-const coerceB2: CoerceB = coerce<CoerceA, CoerceB>(coerceB) as any;
+const _coerceB2: CoerceB = coerce<CoerceA, CoerceB>(coerceB) as any;
 
 // These variables test type coercion behavior
 coerceMatchingShape<CoerceA>({ startTime: 0 });
 coerceMatchingShape<CoerceB>({ startTime: 0 });
 // @ts-expect-error - The coercion must take the correct value.
-const coerceMatchingShape3 = coerceMatchingShape<CoerceB>({ time: 0 } as any);
+const _coerceMatchingShape3 = coerceMatchingShape<CoerceB>({ time: 0 } as any);

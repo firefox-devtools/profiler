@@ -154,7 +154,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
             </div>
           </TooltipDetail>
         );
-      } catch (error) {
+      } catch (_error) {
         // Could not parse the URL. Just display the entire thing
         let url = page.url;
         if (innerWindowIDSuffix) {
