@@ -80,6 +80,7 @@
     "escape-string-regexp": "^4.0.0",
     "gecko-profiler-demangle": "^0.3.3",
     "idb": "^8.0.3",
+    "iongraph-web": "0.1.4",
     "jszip": "^3.10.1",
     "long": "^5.3.2",
     "memoize-immutable": "^3.0.0",
@@ -206,7 +207,7 @@
       "tsx"
     ],
     "transformIgnorePatterns": [
-      "/node_modules/(?!(query-string|decode-uri-component|split-on-first|filter-obj|@fetch-mock/jest|fetch-mock)/)"
+      "/node_modules/(?!(query-string|decode-uri-component|iongraph-web|split-on-first|filter-obj|@fetch-mock/jest|fetch-mock)/)"
     ],
     "moduleNameMapper": {
       "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ftl)$": "<rootDir>/src/test/fixtures/mocks/file-mock.ts",
