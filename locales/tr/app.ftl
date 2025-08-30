@@ -64,6 +64,15 @@ CallNodeContextMenu--transform-focus-function = Fonksiyona odaklan
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Fonksiyona odaklan (tersine)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource = <strong>{ $nameForResource }</strong> kaynağını daralt
+    .title = Bir kaynağı daraltmak, o kaynağa yapılan bütün çağrıların tek bir çağrı düğümünde bir araya getirir.
+CallNodeContextMenu--transform-collapse-recursion = Özyinelemeyi daralt
+    .title = Özyinelemeyi daraltmak devamlı aynı fonksiyona dönen çağrıları kaldırır (yığındaki ara fonksiyonlar dahil).
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Yalnızca direkt özyinelemeyi daralt
+    .title = Direkt özyinelemeyi daraltmak, devamlı aynı fonksiyona yapılan ama yığında ara fonksiyonları olmayan çağrıları kaldırır.
 CallNodeContextMenu--transform-drop-function = Bu fonksiyonu taşıyan örnekleri at
     .title =
         Atılan örneklerin süreleri profilden kaldırılır. Bu işlem, analizle ilgili olmayan
@@ -821,6 +830,11 @@ TransformNavigator--merge-call-node = Düğümü birleştir: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--merge-function = Birleştir: { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Bırak: { $item }
 # "Collapse recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
