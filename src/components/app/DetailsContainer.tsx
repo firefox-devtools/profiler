@@ -6,7 +6,6 @@ import { Details } from './Details';
 import { ResizableWithSplitter } from 'firefox-profiler/components/shared/ResizableWithSplitter';
 import { selectSidebar } from 'firefox-profiler/components/sidebar';
 
-import { invalidatePanelLayout } from 'firefox-profiler/actions/app';
 import { getSelectedTab } from 'firefox-profiler/selectors/url-state';
 import { getIsSidebarOpen } from 'firefox-profiler/selectors/app';
 import explicitConnect from 'firefox-profiler/utils/connect';
@@ -21,11 +20,7 @@ type StateProps = {
   readonly isSidebarOpen: boolean;
 };
 
-type DispatchProps = {
-  readonly invalidatePanelLayout: typeof invalidatePanelLayout;
-};
-
-type Props = ConnectedProps<{}, StateProps, DispatchProps>;
+type Props = ConnectedProps<{}, StateProps, {}>;
 
 function DetailsContainerImpl({ selectedTab, isSidebarOpen }: Props) {
   const Sidebar = selectSidebar(selectedTab);
@@ -48,13 +43,10 @@ function DetailsContainerImpl({ selectedTab, isSidebarOpen }: Props) {
   );
 }
 
-export const DetailsContainer = explicitConnect<{}, StateProps, DispatchProps>({
+export const DetailsContainer = explicitConnect<{}, StateProps, {}>({
   mapStateToProps: (state) => ({
     selectedTab: getSelectedTab(state),
     isSidebarOpen: getIsSidebarOpen(state),
   }),
-  mapDispatchToProps: {
-    invalidatePanelLayout,
-  },
   component: DetailsContainerImpl,
 });

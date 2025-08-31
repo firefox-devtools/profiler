@@ -11,7 +11,6 @@ import './OverflowEdgeIndicator.css';
 type Props = {
   className: string;
   children: React.ReactNode;
-  panelLayoutGeneration: number;
   initialSelected: InitialSelectedTrackReference | null;
   forceLayoutGeneration?: number;
 };

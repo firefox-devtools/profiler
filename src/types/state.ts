@@ -178,7 +178,6 @@ export type AppState = {
   readonly hasZoomedViaMousewheel: boolean;
   readonly isSidebarOpenPerPanel: IsOpenPerPanelState;
   readonly sidebarOpenCategories: Map<string, Set<number>>;
-  readonly panelLayoutGeneration: number;
   readonly lastVisibleThreadTabSlug: TabSlug;
   readonly trackThreadHeights: Record<ThreadsKey, CssPixels>;
   readonly isNewlyPublished: boolean;
