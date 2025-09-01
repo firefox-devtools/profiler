@@ -81,7 +81,6 @@ import type {
   IndexIntoCallNodeTable,
   AccumulatedCounterSamples,
   SamplesLikeTable,
-  SelectedState,
   ProfileFilterPageData,
   Milliseconds,
   StartEndRange,
@@ -102,6 +101,7 @@ import type {
   IndexIntoSourceTable,
   TransformOutput,
 } from 'firefox-profiler/types';
+import { SelectedState } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
 
 /**
@@ -919,12 +919,12 @@ function _getSamplesSelectedStatesForNoSelection(
     // because everything is unselected. So let's pretend that
     // everything is selected so that anything not filtered out will be nicely
     // visible.
-    let sampleSelectedState = 'SELECTED';
+    let sampleSelectedState = SelectedState.Selected;
 
     // But we still want to display filtered-out samples differently.
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex === null) {
-      sampleSelectedState = 'FILTERED_OUT_BY_TRANSFORM';
+      sampleSelectedState = SelectedState.FilteredOutByTransform;
     }
 
     result[sampleIndex] = sampleSelectedState;
@@ -990,19 +990,19 @@ function _getSamplesSelectedStatesNonInverted(
   const sampleCount = sampleCallNodes.length;
   const samplesSelectedStates = new Array(sampleCount);
   for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
-    let sampleSelectedState: SelectedState = 'SELECTED';
+    let sampleSelectedState: SelectedState = SelectedState.Selected;
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
       if (callNodeIndex < selectedCallNodeIndex) {
-        sampleSelectedState = 'UNSELECTED_ORDERED_BEFORE_SELECTED';
+        sampleSelectedState = SelectedState.UnselectedOrderedBeforeSelected;
       } else if (callNodeIndex < selectedCallNodeDescendantsEndIndex) {
-        sampleSelectedState = 'SELECTED';
+        sampleSelectedState = SelectedState.Selected;
       } else {
-        sampleSelectedState = 'UNSELECTED_ORDERED_AFTER_SELECTED';
+        sampleSelectedState = SelectedState.UnselectedOrderedAfterSelected;
       }
     } else {
       // This sample was filtered out.
-      sampleSelectedState = 'FILTERED_OUT_BY_TRANSFORM';
+      sampleSelectedState = SelectedState.FilteredOutByTransform;
     }
     samplesSelectedStates[sampleIndex] = sampleSelectedState;
   }
@@ -1027,18 +1027,18 @@ function _getSamplesSelectedStatesInverted(
   const sampleCount = sampleNonInvertedCallNodes.length;
   const samplesSelectedStates = new Array(sampleCount);
   for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
-    let sampleSelectedState: SelectedState = 'SELECTED';
+    let sampleSelectedState: SelectedState = SelectedState.Selected;
     const callNodeIndex = sampleNonInvertedCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
       const suffixOrderIndex = suffixOrderIndexes[callNodeIndex];
       if (suffixOrderIndex < selectedSubtreeRangeStart) {
-        sampleSelectedState = 'UNSELECTED_ORDERED_BEFORE_SELECTED';
+        sampleSelectedState = SelectedState.UnselectedOrderedBeforeSelected;
       } else if (suffixOrderIndex >= selectedSubtreeRangeEnd) {
-        sampleSelectedState = 'UNSELECTED_ORDERED_AFTER_SELECTED';
+        sampleSelectedState = SelectedState.UnselectedOrderedAfterSelected;
       }
     } else {
       // This sample was filtered out.
-      sampleSelectedState = 'FILTERED_OUT_BY_TRANSFORM';
+      sampleSelectedState = SelectedState.FilteredOutByTransform;
     }
     samplesSelectedStates[sampleIndex] = sampleSelectedState;
   }

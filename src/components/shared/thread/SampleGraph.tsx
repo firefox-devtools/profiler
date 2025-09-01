@@ -24,11 +24,11 @@ import type {
   CategoryList,
   IndexIntoSamplesTable,
   Milliseconds,
-  SelectedState,
   CssPixels,
   TimelineType,
   ImplementationFilter,
 } from 'firefox-profiler/types';
+import { SelectedState } from 'firefox-profiler/types';
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type { CpuRatioInTimeRange } from './ActivityGraphFills';
 import { lightDark } from 'firefox-profiler/utils/dark-mode';
@@ -197,7 +197,7 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
       let samplesBucket;
       if (
         samplesSelectedStates !== null &&
-        samplesSelectedStates[i] === 'SELECTED'
+        samplesSelectedStates[i] === SelectedState.Selected
       ) {
         samplesBucket = highlightedSamples;
       } else {

@@ -10,11 +10,11 @@ import type {
   IndexIntoSamplesTable,
   IndexIntoCategoryList,
   Thread,
-  SelectedState,
   Milliseconds,
   DevicePixels,
   CssPixels,
 } from 'firefox-profiler/types';
+import { SelectedState } from 'firefox-profiler/types';
 import type { HoveredPixelState } from './ActivityGraph';
 
 /**
@@ -357,13 +357,13 @@ export class ActivityGraphFillComputer {
       return percentageBuffers.selectedPercentageAtPixel;
     }
     switch (samplesSelectedStates[sampleIndex]) {
-      case 'FILTERED_OUT_BY_TRANSFORM':
+      case SelectedState.FilteredOutByTransform:
         return percentageBuffers.filteredOutByTransformPercentageAtPixel;
-      case 'UNSELECTED_ORDERED_BEFORE_SELECTED':
+      case SelectedState.UnselectedOrderedBeforeSelected:
         return percentageBuffers.beforeSelectedPercentageAtPixel;
-      case 'SELECTED':
+      case SelectedState.Selected:
         return percentageBuffers.selectedPercentageAtPixel;
-      case 'UNSELECTED_ORDERED_AFTER_SELECTED':
+      case SelectedState.UnselectedOrderedAfterSelected:
         return percentageBuffers.afterSelectedPercentageAtPixel;
       default:
         throw new Error('Unexpected samplesSelectedStates value');
@@ -768,10 +768,10 @@ function _createSelectedPercentageAtPixelBuffers({
  * For each category, create a fill style for each of 4 draw states. These fill styles
  * are sorted by their gravity.
  *
- * 'UNSELECTED_ORDERED_BEFORE_SELECTED',
- * 'SELECTED',
- * 'UNSELECTED_ORDERED_AFTER_SELECTED',
- * 'FILTERED_OUT_BY_TRANSFORM'
+ * SelectedState.UnselectedOrderedBeforeSelected,
+ * SelectedState.Selected,
+ * SelectedState.UnselectedOrderedAfterSelected,
+ * SelectedState.FilteredOutByTransform
  */
 function _getCategoryFills(
   categoryDrawStyles: CategoryDrawStyles,

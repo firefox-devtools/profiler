@@ -64,6 +64,7 @@ import type {
   IndexIntoCategoryList,
   IndexIntoNativeSymbolTable,
 } from 'firefox-profiler/types';
+import { SelectedState } from 'firefox-profiler/types';
 
 describe('string-table', function () {
   const u = StringTable.withBackingArray(['foo', 'bar', 'baz']);
@@ -1051,38 +1052,38 @@ describe('getSamplesSelectedStates', function () {
       expect(
         getSamplesSelectedStates(callNodeInfo, sampleCallNodes, A_B)
       ).toEqual([
-        'SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        SelectedState.Selected,
+        SelectedState.UnselectedOrderedAfterSelected,
+        SelectedState.Selected,
+        SelectedState.UnselectedOrderedAfterSelected,
+        SelectedState.UnselectedOrderedAfterSelected,
       ]);
       expect(
         getSamplesSelectedStates(callNodeInfo, sampleCallNodes, A_D)
       ).toEqual([
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'SELECTED',
-        'SELECTED',
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.Selected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.Selected,
+        SelectedState.Selected,
       ]);
       expect(
         getSamplesSelectedStates(callNodeInfo, sampleCallNodes, A_B_F)
       ).toEqual([
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedAfterSelected,
+        SelectedState.Selected,
+        SelectedState.UnselectedOrderedAfterSelected,
+        SelectedState.UnselectedOrderedAfterSelected,
       ]);
       expect(
         getSamplesSelectedStates(callNodeInfo, sampleCallNodes, A_D_E)
       ).toEqual([
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.Selected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedAfterSelected,
+        SelectedState.UnselectedOrderedBeforeSelected,
       ]);
     });
 
@@ -1147,39 +1148,39 @@ describe('getSamplesSelectedStates', function () {
       expect(
         getSamplesSelectedStates(callNodeInfoInverted, sampleCallNodes, inBA)
       ).toEqual([
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'SELECTED',
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.Selected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedAfterSelected,
+        SelectedState.UnselectedOrderedAfterSelected,
+        SelectedState.Selected,
       ]);
       // Test C <- B <- A <- ...
       // Only sample 5 has a stack ending in ... -> A -> B -> C
       expect(
         getSamplesSelectedStates(callNodeInfoInverted, sampleCallNodes, inCBA)
       ).toEqual([
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.Selected,
+        SelectedState.UnselectedOrderedBeforeSelected,
       ]);
       // Test B <- ...
       // Only samples 2 and 6 have stacks ending in ... -> B
       expect(
         getSamplesSelectedStates(callNodeInfoInverted, sampleCallNodes, inB)
       ).toEqual([
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'SELECTED',
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.Selected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedAfterSelected,
+        SelectedState.UnselectedOrderedAfterSelected,
+        SelectedState.Selected,
       ]);
     });
 
