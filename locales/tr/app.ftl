@@ -60,10 +60,20 @@ CallNodeContextMenu--transform-merge-call-node = Yalnızca düğümü birleştir
         fonksiyonun düğümüne atar. Fonksiyonu yalnızca ağacın o belirli
         bölümünden kaldırır. Fonksiyonun çağrıldığı diğer yerler
         profilde kalacaktır.
+# This is used as the context menu item title for "Focus on function" and "Focus
+# on function (inverted)" transforms.
+CallNodeContextMenu--transform-focus-function-title = Bir fonksiyona odaklanmak, o fonksiyonu içermeyen örnekleri kaldıracaktır. Buna ek olarak, çağrı ağacının kökünü yeniden belirleyerek  ağacın tek kökünün fonksiyon olmasını sağlayacaktır. Bu işlem, bir profilde bulunan birçok fonksiyon çağrı alanını birleştirip tek bir çağrı düğümünde toplayabilir.
 CallNodeContextMenu--transform-focus-function = Fonksiyona odaklan
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Fonksiyona odaklan (tersine)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-subtree = Yalnızca alt ağaca odaklan
+    .title = Alt ağaca odaklanmak, çağrı ağacının belirtilen bölgesini içermeyen her örneği kaldıracaktır. Bu işlem, çağrı ağacının bir dalını koparır ama bunu yalnızca belirtilen çağrı düğümü için yapar. Fonksiyonun yaptığı diğer çağrılar görmezden gelinir.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = <strong>{ $categoryName }</strong> kategorisine odaklan
+    .title = Seçilen düğümle aynı kategorideki düğümlere odaklanarak diğer kategorilere ait tüm düğümleri birleştirir.
 # This is used as the context menu item to apply the "Collapse resource" transform.
 # Variables:
 #   $nameForResource (String) - Name of the resource to collapse.
