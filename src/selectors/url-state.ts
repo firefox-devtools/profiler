@@ -331,6 +331,7 @@ function _shouldAllowSymbolServerUrl(symbolServerUrl: string) {
     const otherAllowedHostnames = [
       'symbols.mozilla.org',
       'symbolication.services.mozilla.com',
+      'mozilla.symbols.samplyprofiler.com',
     ];
     if (!otherAllowedHostnames.includes(url.hostname)) {
       console.error(

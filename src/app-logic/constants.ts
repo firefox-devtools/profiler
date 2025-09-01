@@ -121,7 +121,7 @@ export const PROFILER_SERVER_ORIGIN = 'https://api.profiler.firefox.com';
 // [1] https://github.com/mstange/profiler-symbol-server/
 
 // This is the default server.
-export const SYMBOL_SERVER_URL = 'https://symbolication.services.mozilla.com';
+export const SYMBOL_SERVER_URL = 'https://mozilla.symbols.samplyprofiler.com';
 
 // See the MarkerPhase type for more information.
 export const INSTANT: MarkerPhase = 0;
