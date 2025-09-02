@@ -109,7 +109,7 @@
   padding: 1px;
   border: 0;
   border-radius: 2px;
-  background: url(../../../res/img/svg/close-dark.svg) no-repeat center;
+  background: url(firefox-profiler-res/img/svg/close-dark.svg) no-repeat center;
   background-origin: content-box;
   background-size: contain;
   color: transparent;
@@ -217,7 +217,7 @@
   @media (prefers-color-scheme: dark) {
     /* We need to adapt the cross icon in dark mode so it still visible */
     .timelineTrackCloseButton {
-      background-image: url(../../../res/img/svg/close-light.svg);
+      background-image: url(firefox-profiler-res/img/svg/close-light.svg);
     }
   }
 }

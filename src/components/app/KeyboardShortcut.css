@@ -95,8 +95,8 @@
 
   /* Allow for the photon focus ring to fit in the space by using a 4px margin. */
   margin: 4px;
-  background: url(../../../res/img/svg/searchfield-cancel.svg) 10px center
-    no-repeat;
+  background: url(firefox-profiler-res/img/svg/searchfield-cancel.svg) 10px
+    center no-repeat;
   cursor: pointer;
   font-size: inherit;
 }
