@@ -9,6 +9,7 @@ import classNames from 'classnames';
 import { SourceView } from '../shared/SourceView';
 import { AssemblyView } from '../shared/AssemblyView';
 import { AssemblyViewToggleButton } from './AssemblyViewToggleButton';
+import { IonGraphView } from '../shared/IonGraphView';
 import { CodeLoadingOverlay } from './CodeLoadingOverlay';
 import { CodeErrorOverlay } from './CodeErrorOverlay';
 import {
@@ -177,6 +178,9 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       assemblyViewCode && assemblyViewCode.type === 'AVAILABLE'
         ? assemblyViewCode.instructions
         : [];
+    const sourceIsIonGraph = path !== null && path.endsWith('iongraph.json');
+    const displaySourceView = sourceViewFile !== null && !sourceIsIonGraph;
+    const displayIonGraph = sourceViewFile !== null && sourceIsIonGraph;
 
     // The bottom box has one or more side-by-side panes.
     // At the moment it always has either one or two panes:
@@ -211,7 +215,14 @@ class BottomBoxImpl extends React.PureComponent<Props> {
               {assemblyViewIsOpen ? null : trailingHeaderButtons}
             </div>
             <div className="bottom-sourceview-wrapper">
-              {sourceViewFile !== null ? (
+              {displayIonGraph ? (
+                <IonGraphView
+                  timings={globalLineTimings}
+                  hotSpotTimings={selectedCallNodeLineTimings}
+                  sourceCode={sourceCode}
+                />
+              ) : null}
+              {displaySourceView ? (
                 <SourceView
                   disableOverscan={disableOverscan}
                   timings={globalLineTimings}
