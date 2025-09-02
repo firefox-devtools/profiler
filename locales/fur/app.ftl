@@ -693,6 +693,8 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = Ducj i ricuadris
     .title = No sta filtrâ i ricuadris dal stack
+StackSettings--implementation-script = Script
+    .title = Mostre dome lis istantaniis dal stack relativis ae esecuzion dal script
 StackSettings--implementation-native2 = Natîf
     .title = Mostre dome i ricuadris dal stack pal codiç natîf
 # This label is displayed in the marker chart and marker table panels only.
@@ -713,6 +715,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Sîts disassegnâ
 StackSettings--invert-call-stack = Invertìs stack di clamade
     .title = Ordene in base al timp doprât intun grop di clamade, ignorant i fîs.
 StackSettings--show-user-timing = Mostre timp utent
+StackSettings--use-stack-chart-same-widths = Dopre la stesse largjece par ogni stack
 StackSettings--panel-search =
     .label = Filtre stacks:
     .title = Visualize dome i stacks che a contegnin une funzion là che il so non al corispuint a cheste sotstringhe
