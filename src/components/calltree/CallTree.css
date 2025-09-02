@@ -32,5 +32,5 @@
 
 .treeBadge.inlined,
 .treeBadge.divergent-inlining {
-  background: url(../../../res/img/svg/inlined-icon.svg);
+  background: url(firefox-profiler-res/img/svg/inlined-icon.svg);
 }
