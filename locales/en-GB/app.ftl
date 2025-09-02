@@ -733,8 +733,8 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = All frames
     .title = Do not filter the stack frames
-StackSettings--implementation-javascript2 = JavaScript
-    .title = Show only the stack frames related to JavaScript execution
+StackSettings--implementation-script = Script
+    .title = Show only the stack frames related to script execution
 StackSettings--implementation-native2 = Native
     .title = Show only the stack frames for native code
 # This label is displayed in the marker chart and marker table panels only.

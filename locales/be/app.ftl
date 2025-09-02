@@ -731,8 +731,8 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = Усе кадры
     .title = Не фільтраваць кадры стэка
-StackSettings--implementation-javascript2 = JavaScript
-    .title = Паказваць толькі кадры стэка, звязаныя з выкананнем JavaScript
+StackSettings--implementation-script = Скрыпт
+    .title = Паказваць толькі фрэймы стэку, датычныя выканання скрыпта
 StackSettings--implementation-native2 = Убудаваны
     .title = Паказваць толькі кадры стэка для платформна-залежнага кода
 # This label is displayed in the marker chart and marker table panels only.
@@ -753,6 +753,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Вызвален�
 StackSettings--invert-call-stack = Інвертаваць стэк выклікаў
     .title = Сартаваць па часе, праведзенаму ў вузле выкліку, ігнаруючы яго даччыныя вузлы.
 StackSettings--show-user-timing = Паказаць таймінгі карыстальніка
+StackSettings--use-stack-chart-same-widths = Выкарыстоўваць аднолькавую шырыню для кожнага стэка
 StackSettings--panel-search =
     .label = Фільтр стэкаў:
     .title = Паказаць толькі стэкі, якія змяшчаюць функцыю, назва якой адпавядае гэтаму падрадку
