@@ -24,9 +24,6 @@ if (process.env.TZ !== 'UTC') {
 fetchMock.mockGlobal();
 (global as any).fetchMock = fetchMock;
 
-// Mock the effects of the file-loader which our Webpack config defines
-// for JS files under res: The "default export" is the path to the file.
-jest.mock('firefox-profiler-res/zee-worker.js', () => './res/zee-worker.js');
 // Install a Worker class which is similar to the DOM Worker class.
 (global as any).Worker = NodeWorker;
 

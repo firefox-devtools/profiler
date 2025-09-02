@@ -39,5 +39,7 @@ export default class CustomTestEnvironment extends TestEnvironment {
     this.global.Request = Request;
     this.global.Response = Response;
     this.global.ReadableStream = ReadableStream;
+    this.global.CompressionStream = CompressionStream;
+    this.global.DecompressionStream = DecompressionStream;
   }
 }
