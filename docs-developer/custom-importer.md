@@ -9,17 +9,17 @@ The Firefox Profiler supports a few [external profile formats](../src/profile-lo
 
 ## Useful code links
 
-- [Gecko profile format type definition](../src/types/gecko-profile.js)
-- [processed profile format type definition](../src/types/profile.js)
-- [marker payload type definitions](../src/types/markers.js)
-- [profiler data structure utilities](../src/profile-logic/data-structures.js)
+- [Gecko profile format type definition](../src/types/gecko-profile.ts)
+- [processed profile format type definition](../src/types/profile.ts)
+- [marker payload type definitions](../src/types/markers.ts)
+- [profiler data structure utilities](../src/profile-logic/data-structures.ts)
 - [existing importers](../src/profile-logic/import)
 
 ## How to write a profile converter
 
 The rest of this guide will assume you are targeting the processed profile format. From a high level point of view, the profile is broken down into the basic profile, with meta information, and a list of threads. These threads are grouped in the UI by their PID. The UI also dynamically generates a few "tracks" from other data sources, like the memory track or screenshot track. This guide primarily documents working with threads.
 
-A good place to start would probably be to view some of the existing [blank profile generating functions](../src/profile-logic/data-structures.js).
+A good place to start would probably be to view some of the existing [blank profile generating functions](../src/profile-logic/data-structures.ts).
 
 ## Some concepts used in the data structures
 
@@ -62,7 +62,7 @@ It is probably a good iea to read up some on profile format docs for more inform
 
 - Ensure that the `pid` value points to the proper threads to nest threads in the timeline.
 - Processed profiles have their timestamps adjusted so that all processes use the same timeline.
-- Make sure and adjust the timing for child processes. During profile processing, the Firefox Profiler adjusts Gecko profiles timings, so that markers and samples take into account the differences in start time (via `geckoProfile.meta.startTime`). See [src/profile-logic/process-profile.js](https://github.com/firefox-devtools/profiler/blob/3067dda9cbf5807948aef149e18caf4e8870ed25/src/profile-logic/process-profile.js#L997-L1010) for some examples.
+- Make sure and adjust the timing for child processes. During profile processing, the Firefox Profiler adjusts Gecko profiles timings, so that markers and samples take into account the differences in start time (via `geckoProfile.meta.startTime`). See [src/profile-logic/process-profile.ts](https://github.com/firefox-devtools/profiler/blob/3067dda9cbf5807948aef149e18caf4e8870ed25/src/profile-logic/process-profile.js#L997-L1010) for some examples.
 
 ## Samples
 

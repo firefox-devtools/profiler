@@ -29,7 +29,7 @@ The profile version number is stored in `profile.meta.version`, and is an intege
 
 When [profiler.firefox.com] receives a profile, as a first step it will run it through an upgrade process: If the profile is in a format version that's older than the most recent version known to it, a number of "upgrader" functions get applied to it, and at the end of that process the result can be treated as a profile of the most recent version. This way, most of the client's code can pretend that it only receives up-to-date profiles, and the compatibility concerns are constrained to a dedicated file.
 
-This dedicated file is [gecko-profile-versioning.js](../src/profile-logic/gecko-profile-versioning.js). It hosts the upgrader functions. These upgrader functions are also a great place to document format changes.
+This dedicated file is [gecko-profile-versioning.ts](../src/profile-logic/gecko-profile-versioning.ts). It hosts the upgrader functions. These upgrader functions are also a great place to document format changes.
 
 ### No forwards compatibility
 
@@ -55,7 +55,7 @@ We want to be able to display profiles that were saved at any point in the past.
 
 Consequently, the same versioning concerns as for the Gecko profile format also apply to the processed profile format.
 
-The processed profile version is stored in the field `profile.meta.preprocessedProfileVersion`, and the upgraders for processed profiles live in the file [processed-profile-versioning.js](../src/profile-logic/processed-profile-versioning.js).
+The processed profile version is stored in the field `profile.meta.preprocessedProfileVersion`, and the upgraders for processed profiles live in the file [processed-profile-versioning.ts](../src/profile-logic/processed-profile-versioning.ts).
 
 `processProfile` should output the latest version of the processed profile format at all times. Combined with the fact that it can treat its input as being a Gecko profile of the latest Gecko profile format version, this keeps `processProfile` uncomplicated.
 
@@ -64,17 +64,17 @@ The processed profile version is stored in the field `profile.meta.preprocessedP
 When the Gecko profile format changes (due to a change in Gecko):
 
 - The version number (`profile.meta.version`) needs to be incremented in Gecko.
-- In [app-logic/constants.js](../src/app-logic/constants.js), `GECKO_PROFILE_VERSION` needs to be set to that new version number, and a conversion function from the old to the new version needs to be added to `_updaters`.
+- In [app-logic/constants.ts](../src/app-logic/constants.ts), `GECKO_PROFILE_VERSION` needs to be set to that new version number, and a conversion function from the old to the new version needs to be added to `_updaters`.
 - Profile processing may need to be adjusted to parse the new Gecko profile format version.
 
 When the processed profile format changes (e.g. because a different data format seems adequate, or because new data from the Gecko profile needs to be accommodated):
 
 - `processProfile` needs to be changed to output the new format.
-- In [app-logic/constants.js](../src/app-logic/constants.js), `PROCESSED_PROFILE_VERSION` needs to be incremented and an update function needs to be added to `_updaters`.
+- In [app-logic/constants.ts](../src/app-logic/constants.ts), `PROCESSED_PROFILE_VERSION` needs to be incremented and an update function needs to be added to `_updaters`.
 
 At all times, `processProfile` only has code that converts the latest version
 of the Gecko profile format into the latest version of the processed profile
 format. All compatibility code is hosted outside of process-profile.js, in
-the respective `*-profile-versioning.js` file.
+the respective `*-profile-versioning.ts` file.
 
 [profiler.firefox.com]: https://profiler.firefox.com

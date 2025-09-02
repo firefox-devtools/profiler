@@ -716,8 +716,8 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = Tote le structuras
     .title = Non filtrar le structuras de pila
-StackSettings--implementation-javascript2 = JavaScript
-    .title = Monstrar solo le structuras de pila correlate a execution JavaScript
+StackSettings--implementation-script = Script
+    .title = Solo monstrar le pannellos de pila relative a execution de script
 StackSettings--implementation-native2 = Native
     .title = Monstrar solo le structuras de pila pro codice native
 # This label is displayed in the marker chart and marker table panels only.

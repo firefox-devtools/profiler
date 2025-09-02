@@ -742,8 +742,8 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = Все фреймы
     .title = Не фильтровать стек фреймов
-StackSettings--implementation-javascript2 = JavaScript
-    .title = Отображать только стек фреймов, относящихся к выполнению JavaScript
+StackSettings--implementation-script = Скрипт
+    .title = Показывать только фреймы стека, связанные с выполнением скрипта
 StackSettings--implementation-native2 = Собственные
     .title = Отображать только стек фреймов для собственного кода
 # This label is displayed in the marker chart and marker table panels only.

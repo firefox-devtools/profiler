@@ -21,7 +21,7 @@
   display: grid;
   align-content: start; /* the grid isn't vertically stretched */
   align-items: center;
-  grid-gap: 2px 5px;
+  gap: 2px 5px;
   grid-template-columns:
     /* Label */
     1fr
@@ -51,7 +51,7 @@
 
 .sidebar-title-label {
   display: grid;
-  grid-gap: 5px;
+  gap: 5px;
   grid-template-columns: min-content 1fr;
 }
 

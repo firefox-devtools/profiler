@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`reducer zipFileState will fail when trying to load an invalid profile 1`] = `
+Array [
+  Array [
+    "UnserializationError:",
+    [SyntaxError: Unexpected token 'o', "not a profile" is not valid JSON],
+  ],
+  Array [
+    "Failed to process the profile in the archive with the following error:",
+  ],
+  Array [
+    [Error: Unserializing the profile failed: SyntaxError: Unexpected token 'o', "not a profile" is not valid JSON],
+  ],
+]
+`;

@@ -1,0 +1,1012 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`FlameGraph EmptyReasons matches the snapshot when a profile has no samples 1`] = `
+<div
+  class="EmptyReasons"
+>
+  <h3>
+    The 
+    flame graph
+     is empty for “
+    Empty Thread
+    ”
+  </h3>
+  <p>
+    This thread has no samples.
+  </p>
+</div>
+`;
+
+exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] = `
+<div
+  class="tooltip"
+  data-testid="tooltip"
+  style="left: 14px; top: 306px;"
+>
+  <div
+    class="tooltipCallNode"
+  >
+    <div
+      class="tooltipOneLine tooltipHeader"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        3.0ms (100%)
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        A
+      </div>
+      <div
+        class="tooltipIcon"
+      />
+    </div>
+    <div
+      class="tooltipCallNodeDetails"
+    >
+      <div
+        class="tooltipDetails tooltipCallNodeDetailsLeft"
+      >
+        <div
+          class="tooltipLabel"
+        >
+          Stack Type:
+        </div>
+        <div>
+          Native
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Category:
+        </div>
+        <div>
+          <span
+            class="colored-square category-color-blue"
+          />
+          DOM
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          File:
+        </div>
+        <div
+          class="tooltipDetailsUrl"
+        >
+          path/to/file:10:100
+        </div>
+      </div>
+      <div
+        class="tooltipCallNodeCategory"
+      >
+        <div />
+        <div
+          class="tooltipCallNodeHeader"
+        />
+        <div
+          class="tooltipCallNodeHeader"
+        >
+          <span
+            class="tooltipCallNodeHeaderSwatchRunning"
+          />
+          Running
+        </div>
+        <div
+          class="tooltipCallNodeHeader"
+        >
+          <span
+            class="tooltipCallNodeHeaderSwatchSelf"
+          />
+          Self
+        </div>
+        <div
+          class="tooltipLabel tooltipCategoryLabel tooltipCategoryRowHeader"
+        >
+          Overall
+        </div>
+        <div
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
+        >
+          <div
+            aria-label="Total samples overall"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="3"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%; background: var(--blue-40);"
+            />
+          </div>
+          <div
+            aria-label="Self samples overall"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="0"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
+          />
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
+        >
+          3 samples
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
+        >
+          —
+        </div>
+        <div
+          class="tooltipCallNodeName tooltipLabel tooltipCategoryRowHeader"
+        >
+          Network
+        </div>
+        <div
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
+        >
+          <div
+            aria-label="Total samples for Network"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="1"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 33.33333333333333%; background: var(--category-color-lightblue);"
+            />
+          </div>
+          <div
+            aria-label="Self samples for Network"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="0"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
+          />
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          1 sample
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          —
+        </div>
+        <div
+          class="tooltipCallNodeName tooltipLabel tooltipCategoryRowHeader"
+        >
+          Graphics
+        </div>
+        <div
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
+        >
+          <div
+            aria-label="Total samples for Graphics"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="2"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 66.66666666666666%; background: var(--category-color-green);"
+            />
+          </div>
+          <div
+            aria-label="Self samples for Graphics"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="0"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
+          />
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          2 samples
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          —
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`FlameGraph has a tooltip that matches the snapshot with categories when a preview selection is applied 1`] = `
+<div
+  class="tooltip"
+  data-testid="tooltip"
+  style="left: 14px; top: 306px;"
+>
+  <div
+    class="tooltipCallNode"
+  >
+    <div
+      class="tooltipOneLine tooltipHeader"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        1.0ms (100%)
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        A
+      </div>
+      <div
+        class="tooltipIcon"
+      />
+    </div>
+    <div
+      class="tooltipCallNodeDetails"
+    >
+      <div
+        class="tooltipDetails tooltipCallNodeDetailsLeft"
+      >
+        <div
+          class="tooltipLabel"
+        >
+          Stack Type:
+        </div>
+        <div>
+          Native
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Category:
+        </div>
+        <div>
+          <span
+            class="colored-square category-color-blue"
+          />
+          DOM
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          File:
+        </div>
+        <div
+          class="tooltipDetailsUrl"
+        >
+          path/to/file:10:100
+        </div>
+      </div>
+      <div
+        class="tooltipCallNodeCategory"
+      >
+        <div />
+        <div
+          class="tooltipCallNodeHeader"
+        />
+        <div
+          class="tooltipCallNodeHeader"
+        >
+          <span
+            class="tooltipCallNodeHeaderSwatchRunning"
+          />
+          Running
+        </div>
+        <div
+          class="tooltipCallNodeHeader"
+        >
+          <span
+            class="tooltipCallNodeHeaderSwatchSelf"
+          />
+          Self
+        </div>
+        <div
+          class="tooltipLabel tooltipCategoryLabel tooltipCategoryRowHeader"
+        >
+          Overall
+        </div>
+        <div
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
+        >
+          <div
+            aria-label="Total samples overall"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%; background: var(--blue-40);"
+            />
+          </div>
+          <div
+            aria-label="Self samples overall"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="0"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
+          />
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
+        >
+          1 sample
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
+        >
+          —
+        </div>
+        <div
+          class="tooltipCallNodeName tooltipLabel tooltipCategoryRowHeader"
+        >
+          Network
+        </div>
+        <div
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
+        >
+          <div
+            aria-label="Total samples for Network"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%; background: var(--category-color-lightblue);"
+            />
+          </div>
+          <div
+            aria-label="Self samples for Network"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="0"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
+          />
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          1 sample
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          —
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`FlameGraph matches the snapshot 1`] = `
+<div
+  aria-labelledby="flame-graph-tab-button"
+  class="flameGraph"
+  id="flame-graph-tab"
+  role="tabpanel"
+>
+  <div
+    class="stackSettings"
+  >
+    <ul
+      class="panelSettingsList"
+    >
+      <li
+        class="panelSettingsListItem"
+      >
+        <input
+          checked=""
+          class="photon-radio photon-radio-micro"
+          id="implementation-radio-combined"
+          title="Do not filter the stack frames"
+          type="radio"
+          value="combined"
+        />
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+          for="implementation-radio-combined"
+          title="Do not filter the stack frames"
+        >
+          All frames
+        </label>
+        <input
+          class="photon-radio photon-radio-micro"
+          id="implementation-radio-js"
+          title="Show only the stack frames related to script execution"
+          type="radio"
+          value="js"
+        />
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+          for="implementation-radio-js"
+          title="Show only the stack frames related to script execution"
+        >
+          Script
+        </label>
+        <input
+          class="photon-radio photon-radio-micro"
+          id="implementation-radio-cpp"
+          title="Show only the stack frames for native code"
+          type="radio"
+          value="cpp"
+        />
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+          for="implementation-radio-cpp"
+          title="Show only the stack frames for native code"
+        >
+          Native
+        </label>
+      </li>
+    </ul>
+    <div
+      class="panelSearchField stackSettingsSearchField"
+    >
+      <label
+        class="panelSearchFieldLabel"
+      >
+        Filter stacks: 
+        <form
+          class="idleSearchField panelSearchFieldInput"
+        >
+          <input
+            class="idleSearchFieldInput photon-input"
+            name="search"
+            placeholder="Enter filter terms"
+            required=""
+            title="Only display stacks which contain a function whose name matches this substring"
+            type="search"
+            value=""
+          />
+          <input
+            class="idleSearchFieldButton"
+            tabindex="-1"
+            type="reset"
+          />
+        </form>
+      </label>
+      <div
+        class="panelSearchFieldIntroduction isHidden"
+      >
+        Did you know you can use the comma (,) to search using several terms?
+      </div>
+    </div>
+  </div>
+  <ol
+    class="filterNavigatorBar calltreeTransformNavigator"
+  >
+    <li
+      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    >
+      <span
+        class="filterNavigatorBarItemContent"
+      >
+        Complete “⁨Empty⁩”
+      </span>
+    </li>
+  </ol>
+  <div
+    class="flameGraphContent"
+  >
+    <div
+      class="react-contextmenu-wrapper treeViewContextMenu"
+    >
+      <div
+        class="chartViewport"
+        tabindex="0"
+      >
+        <div>
+          <canvas
+            class="chartCanvas flameGraphCanvas"
+            height="300"
+            style="width: 200px; height: 300px;"
+            width="200"
+          />
+        </div>
+        <div
+          class="chartViewportScroll hidden"
+        >
+          Zoom Chart:
+          <kbd
+            class="chartViewportScrollKbd"
+          >
+            Ctrl + Scroll
+          </kbd>
+          or
+          <kbd
+            class="chartViewportScrollKbd"
+          >
+            Shift + Scroll
+          </kbd>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`FlameGraph matches the snapshot 2`] = `
+Array [
+  Array [
+    "set font",
+    "10px sans-serif",
+  ],
+  Array [
+    "measureText",
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
+  ],
+  Array [
+    "measureText",
+    "…",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "fillRect",
+    0,
+    284,
+    199.2,
+    15,
+  ],
+  Array [
+    "measureText",
+    "A",
+  ],
+  Array [
+    "set fillStyle",
+    "#000",
+  ],
+  Array [
+    "fillText",
+    "A",
+    3,
+    295,
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "fillRect",
+    0,
+    268,
+    199.2,
+    15,
+  ],
+  Array [
+    "measureText",
+    "B",
+  ],
+  Array [
+    "set fillStyle",
+    "#000",
+  ],
+  Array [
+    "fillText",
+    "B",
+    3,
+    279,
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "fillRect",
+    0,
+    252,
+    133.2,
+    15,
+  ],
+  Array [
+    "measureText",
+    "C",
+  ],
+  Array [
+    "set fillStyle",
+    "#000",
+  ],
+  Array [
+    "fillText",
+    "C",
+    3,
+    263,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "fillRect",
+    134,
+    252,
+    65.19999999999999,
+    15,
+  ],
+  Array [
+    "measureText",
+    "H",
+  ],
+  Array [
+    "set fillStyle",
+    "#000",
+  ],
+  Array [
+    "fillText",
+    "H",
+    137,
+    263,
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "fillRect",
+    0,
+    236,
+    65.2,
+    15,
+  ],
+  Array [
+    "measureText",
+    "D",
+  ],
+  Array [
+    "set fillStyle",
+    "#000",
+  ],
+  Array [
+    "fillText",
+    "D",
+    3,
+    247,
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "fillRect",
+    66,
+    236,
+    67.19999999999999,
+    15,
+  ],
+  Array [
+    "measureText",
+    "F",
+  ],
+  Array [
+    "set fillStyle",
+    "#000",
+  ],
+  Array [
+    "fillText",
+    "F",
+    69,
+    247,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "fillRect",
+    134,
+    236,
+    65.19999999999999,
+    15,
+  ],
+  Array [
+    "measureText",
+    "I",
+  ],
+  Array [
+    "set fillStyle",
+    "#000",
+  ],
+  Array [
+    "fillText",
+    "I",
+    137,
+    247,
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "fillRect",
+    0,
+    220,
+    65.2,
+    15,
+  ],
+  Array [
+    "measureText",
+    "E",
+  ],
+  Array [
+    "set fillStyle",
+    "#000",
+  ],
+  Array [
+    "fillText",
+    "E",
+    3,
+    231,
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "fillRect",
+    66,
+    220,
+    67.19999999999999,
+    15,
+  ],
+  Array [
+    "measureText",
+    "G",
+  ],
+  Array [
+    "set fillStyle",
+    "#000",
+  ],
+  Array [
+    "fillText",
+    "G",
+    69,
+    231,
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "fillRect",
+    66,
+    204,
+    67.19999999999999,
+    15,
+  ],
+  Array [
+    "measureText",
+    "J",
+  ],
+  Array [
+    "set fillStyle",
+    "#000",
+  ],
+  Array [
+    "fillText",
+    "J",
+    69,
+    215,
+  ],
+]
+`;
+
+exports[`FlameGraph shows a tooltip with the resource information with categories 1`] = `
+<div
+  class="tooltip"
+  data-testid="tooltip"
+  style="left: 80px; top: 226px;"
+>
+  <div
+    class="tooltipCallNode"
+  >
+    <div
+      class="tooltipOneLine tooltipHeader"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        1.0ms (33%)
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        J
+      </div>
+      <div
+        class="tooltipIcon"
+      />
+    </div>
+    <div
+      class="tooltipCallNodeDetails"
+    >
+      <div
+        class="tooltipDetails tooltipCallNodeDetailsLeft"
+      >
+        <div
+          class="tooltipLabel"
+        >
+          Stack Type:
+        </div>
+        <div>
+          Native
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Category:
+        </div>
+        <div>
+          <span
+            class="colored-square category-color-green"
+          />
+          Graphics
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          File:
+        </div>
+        <div
+          class="tooltipDetailsUrl"
+        >
+          widget/cocoa/nsAppShell.mm:17:107
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Resource:
+        </div>
+        libxul.so
+      </div>
+      <div
+        class="tooltipCallNodeCategory"
+      >
+        <div />
+        <div
+          class="tooltipCallNodeHeader"
+        />
+        <div
+          class="tooltipCallNodeHeader"
+        >
+          <span
+            class="tooltipCallNodeHeaderSwatchRunning"
+          />
+          Running
+        </div>
+        <div
+          class="tooltipCallNodeHeader"
+        >
+          <span
+            class="tooltipCallNodeHeaderSwatchSelf"
+          />
+          Self
+        </div>
+        <div
+          class="tooltipLabel tooltipCategoryLabel tooltipCategoryRowHeader"
+        >
+          Overall
+        </div>
+        <div
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
+        >
+          <div
+            aria-label="Total samples overall"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%; background: var(--blue-40);"
+            />
+          </div>
+          <div
+            aria-label="Self samples overall"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%; background: var(--blue-40);"
+            />
+          </div>
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
+        >
+          1 sample
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
+        >
+          1 sample
+        </div>
+        <div
+          class="tooltipCallNodeName tooltipLabel tooltipCategoryRowHeader"
+        >
+          Graphics
+        </div>
+        <div
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
+        >
+          <div
+            aria-label="Total samples for Graphics"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%; background: var(--category-color-green);"
+            />
+          </div>
+          <div
+            aria-label="Self samples for Graphics"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%; background: var(--category-color-green);"
+            />
+          </div>
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          1 sample
+        </div>
+        <div
+          class="tooltipCallNodeTiming tooltipCategoryRowHeader"
+        >
+          1 sample
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

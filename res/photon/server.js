@@ -1,4 +1,3 @@
-// @noflow
 const WebpackDevServer = require('webpack-dev-server');
 const config = require('./webpack.config.js');
 const webpack = require('webpack');
