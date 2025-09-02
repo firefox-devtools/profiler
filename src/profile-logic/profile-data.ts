@@ -959,7 +959,6 @@ export type TimingsForPath = {
 export function getTimingsForPath(
   needlePath: CallNodePath,
   callNodeInfo: CallNodeInfo,
-  interval: Milliseconds,
   unfilteredThread: Thread,
   sampleIndexOffset: number,
   categories: CategoryList,
@@ -969,7 +968,6 @@ export function getTimingsForPath(
   return getTimingsForCallNodeIndex(
     callNodeInfo.getCallNodeIndexFromPath(needlePath),
     callNodeInfo,
-    interval,
     unfilteredThread,
     sampleIndexOffset,
     categories,
@@ -989,7 +987,6 @@ export function getTimingsForPath(
 export function getTimingsForCallNodeIndex(
   needleNodeIndex: IndexIntoCallNodeTable | null,
   callNodeInfo: CallNodeInfo,
-  interval: Milliseconds,
   unfilteredThread: Thread,
   sampleIndexOffset: number,
   categories: CategoryList,
@@ -2291,12 +2288,7 @@ export function computeSamplesTableFromRawSamplesTable(
       : ensureExists(rawSamples.timeDeltas);
   const threadCPURatio =
     sampleUnits !== undefined
-      ? computeThreadCPURatio(
-          rawSamples,
-          sampleUnits,
-          timeDeltas,
-          referenceCPUDeltaPerMs
-        )
+      ? computeThreadCPURatio(rawSamples, timeDeltas, referenceCPUDeltaPerMs)
       : undefined;
   const time = computeTimeColumnForRawSamplesTable(rawSamples);
 
@@ -3339,7 +3331,7 @@ export function extractProfileFilterPageData(
           : page.hostname;
 
       pageData.origin = page.origin;
-    } catch (e) {
+    } catch (_e) {
       // Error while extracting the hostname and favicon from the page url.
       // It's likely that it's because sanitization removed the urls. Just
       // ignore it and default to the initial sanitized url.
@@ -3377,7 +3369,7 @@ export function getOrCreateURIResource(
     }
     origin = url.origin;
     host = url.host;
-  } catch (e) {
+  } catch (_e) {
     origin = scriptURI;
     host = null;
   }

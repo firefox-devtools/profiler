@@ -140,14 +140,25 @@ export default [
       'no-else-return': 'error',
       'no-nested-ternary': 'error',
 
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          args: 'all',
+          argsIgnorePattern: '^_',
+          caughtErrors: 'all',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+        },
+      ],
+
       // Use `import type` everywhere we can.
       '@typescript-eslint/consistent-type-imports': 'error',
       // Allow `as any` escape hatches
       '@typescript-eslint/no-explicit-any': 'off',
       // Disable a rule that the TypeScript FAQ disapproves of
       '@typescript-eslint/no-empty-object-type': 'off',
-      // Should enable this soon, mostly finds `catch (e)` with unused e
-      '@typescript-eslint/no-unused-vars': 'off',
       // TypeScript imports react-jsx into .tsx files for us
       'react/react-in-jsx-scope': 'off',
       // Allow @ts-expect-error annotations with descriptions.
@@ -214,22 +225,6 @@ export default [
 
       // Allow require(), for example for importing JSON files.
       '@typescript-eslint/no-require-imports': 'off',
-
-      // Override the project-wide config to allow @ts-nocheck.
-      // We really just need this for our mocks.
-      '@typescript-eslint/ban-ts-comment': [
-        'error',
-        {
-          // Allow @ts-expect-error and @ts-no-check annotations with descriptions.
-          'ts-expect-error': 'allow-with-description',
-          'ts-nocheck': 'allow-with-description',
-          // Don't allow @ts-ignore because we want to be notified
-          // when the error goes away so we can remove the annotation - use
-          // @ts-expect-error instead
-          'ts-ignore': true,
-          'ts-check': false,
-        },
-      ],
 
       // Adding more errors now
       'testing-library/no-manual-cleanup': 'error',

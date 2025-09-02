@@ -1464,20 +1464,15 @@ describe('actions/ProfileView', function () {
       const { profile } = getProfileFromTextSamples('A');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
-        hasSelection: false,
-        isModifying: false,
-      });
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toBe(null);
       dispatch(
         ProfileView.updatePreviewSelection({
-          hasSelection: true,
           isModifying: false,
           selectionStart: 0,
           selectionEnd: 1,
         })
       );
       expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 0,
         selectionEnd: 1,
@@ -1526,7 +1521,6 @@ describe('actions/ProfileView', function () {
       dispatch(ProfileView.commitRange(0, 10));
       dispatch(
         ProfileView.updatePreviewSelection({
-          hasSelection: true,
           isModifying: false,
           selectionStart: 1,
           selectionEnd: 9,
@@ -1536,7 +1530,6 @@ describe('actions/ProfileView', function () {
         { start: 0, end: 10 },
       ]);
       expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 1,
         selectionEnd: 9,
@@ -1553,10 +1546,7 @@ describe('actions/ProfileView', function () {
         { start: 0, end: 10 },
         { start: 2, end: 8 },
       ]);
-      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
-        hasSelection: false,
-        isModifying: false,
-      });
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toBe(null);
       expect(ProfileViewSelectors.getPreviewSelectionRange(getState())).toEqual(
         {
           start: 2,
@@ -1596,14 +1586,12 @@ describe('actions/ProfileView', function () {
       const { getState, dispatch } = setupStore();
       dispatch(
         ProfileView.updatePreviewSelection({
-          hasSelection: true,
           isModifying: false,
           selectionStart: 1,
           selectionEnd: 9,
         })
       );
       expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
         isModifying: false,
         selectionEnd: 9,
         selectionStart: 1,
@@ -1621,7 +1609,6 @@ describe('actions/ProfileView', function () {
         { start: 1, end: 9 },
       ]);
       expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 3,
         selectionEnd: 7,
@@ -1643,17 +1630,13 @@ describe('actions/ProfileView', function () {
         { start: 1, end: 9 },
       ]);
       expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 3,
         selectionEnd: 7,
       });
 
       dispatch(ProfileView.popCommittedRanges(2));
-      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
-        hasSelection: false,
-        isModifying: false,
-      });
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toBe(null);
     });
   });
 
@@ -1872,7 +1855,6 @@ describe('snapshots of selectors/profile', function () {
     dispatch(ProfileView.commitRange(3, 7)); // Reminder: upper bound "7" is exclusive.
     dispatch(
       ProfileView.updatePreviewSelection({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 4,
         selectionEnd: 6,
@@ -2382,7 +2364,6 @@ describe('getTimingsForSidebar', () => {
 
       dispatch(
         ProfileView.updatePreviewSelection({
-          hasSelection: true,
           isModifying: false,
           selectionStart: 3,
           selectionEnd: 5,
@@ -2767,7 +2748,6 @@ describe('getTimingsForSidebar', () => {
 
       dispatch(
         ProfileView.updatePreviewSelection({
-          hasSelection: true,
           isModifying: false,
           selectionStart: 3,
           selectionEnd: 5,
@@ -3374,7 +3354,6 @@ describe('traced timing', function () {
       const { start, end } = previewSelection;
       dispatch(
         ProfileView.updatePreviewSelection({
-          hasSelection: true,
           isModifying: false,
           selectionStart: start,
           selectionEnd: end,

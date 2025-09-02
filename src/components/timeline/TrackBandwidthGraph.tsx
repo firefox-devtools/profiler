@@ -316,7 +316,7 @@ type StateProps = {
   readonly interval: Milliseconds;
   readonly filteredThread: Thread;
   readonly unfilteredSamplesRange: StartEndRange | null;
-  readonly previewSelection: PreviewSelection;
+  readonly previewSelection: PreviewSelection | null;
 };
 
 type DispatchProps = {};
@@ -509,7 +509,7 @@ class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
     const unitGraphCount = samples.count[counterIndex] / sampleTimeDeltaInMs;
 
     let rangeTotal = 0;
-    if (previewSelection.hasSelection) {
+    if (previewSelection) {
       const [beginIndex, endIndex] = getSampleIndexRangeForSelection(
         samples,
         previewSelection.selectionStart,
@@ -556,7 +556,7 @@ class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
               countRange,
               'TrackBandwidthGraph--total-bandwidth-in-graph'
             )}
-            {previewSelection.hasSelection
+            {previewSelection
               ? this._formatDataTransferValue(
                   rangeTotal,
                   'TrackBandwidthGraph--total-bandwidth-in-range'

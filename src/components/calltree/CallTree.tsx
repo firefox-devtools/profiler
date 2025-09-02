@@ -16,7 +16,7 @@ import {
 import {
   getScrollToSelectionGeneration,
   getFocusCallTreeGeneration,
-  getPreviewSelection,
+  getPreviewSelectionIsBeingModified,
   getCategories,
   getCurrentTableViewOptions,
 } from 'firefox-profiler/selectors/profile';
@@ -410,7 +410,7 @@ export const CallTree = explicitConnect<{}, StateProps, DispatchProps>({
     expandedCallNodeIndexes:
       selectedThreadSelectors.getExpandedCallNodeIndexes(state),
     searchStringsRegExp: getSearchStringsAsRegExp(state),
-    disableOverscan: getPreviewSelection(state).isModifying,
+    disableOverscan: getPreviewSelectionIsBeingModified(state),
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
     // Use the filtered call node max depth, rather than the preview filtered call node

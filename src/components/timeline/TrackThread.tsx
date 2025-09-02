@@ -153,14 +153,13 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
   _onMarkerSelect = (start: Milliseconds, end: Milliseconds) => {
     const { rangeStart, rangeEnd, updatePreviewSelection } = this.props;
     updatePreviewSelection({
-      hasSelection: true,
       isModifying: false,
       selectionStart: Math.max(rangeStart, start),
       selectionEnd: Math.min(rangeEnd, end),
     });
   };
 
-  override componentDidUpdate(prevProps: Props) {
+  override componentDidUpdate() {
     const { threadsKey, height, reportTrackThreadHeight } = this.props;
     // Most likely this track height shouldn't change, but if it does, report it.
     // The action will only dispatch on changed values.

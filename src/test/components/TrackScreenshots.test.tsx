@@ -88,7 +88,6 @@ describe('timeline/TrackScreenshots', function () {
     screenshotClick(LEFT);
 
     const expectedPreviewSelection = {
-      hasSelection: true,
       isModifying: false,
       selectionEnd: 1,
       selectionStart: 0,

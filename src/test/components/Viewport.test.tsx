@@ -631,7 +631,7 @@ function setup(profileOverrides: MixedObject = {}) {
   };
 
   type StateProps = {
-    previewSelection: PreviewSelection;
+    previewSelection: PreviewSelection | null;
     timeRange: StartEndRange;
   };
 

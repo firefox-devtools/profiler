@@ -299,7 +299,7 @@ const fallbacks: Record<LabelKey, (marker: any) => string> = {
 export function getLabelGetter(
   getMarker: (markerIndex: MarkerIndex) => Marker,
   markerSchemaList: MarkerSchema[],
-  markerSchemaByName: MarkerSchemaByName,
+  _markerSchemaByName: MarkerSchemaByName,
   categoryList: CategoryList,
   stringTable: StringTable,
   labelKey: LabelKey
@@ -582,7 +582,7 @@ export function formatMarkupFromMarkerSchema(
       }
       return (
         <ul className="marker-list-value">
-          {value.map((entry, i) => (
+          {value.map((_entry, i) => (
             <li key={i}>
               {formatFromMarkerSchema(
                 markerType,

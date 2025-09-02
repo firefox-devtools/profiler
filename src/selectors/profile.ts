@@ -137,8 +137,15 @@ export const getTableViewOptionSelectors: (
   return options || defaultTableViewOptions;
 };
 
-export const getPreviewSelection: Selector<PreviewSelection> = (state) =>
+export const getPreviewSelection: Selector<PreviewSelection | null> = (state) =>
   getProfileViewOptions(state).previewSelection;
+
+export const getPreviewSelectionIsBeingModified: Selector<boolean> = (
+  state
+) => {
+  const previewSelection = getPreviewSelection(state);
+  return previewSelection ? previewSelection.isModifying : false;
+};
 
 /**
  * This selector returns the current range, taking into account the current
@@ -148,7 +155,7 @@ export const getPreviewSelectionRange: Selector<StartEndRange> = createSelector(
   getCommittedRange,
   getPreviewSelection,
   (committedRange, previewSelection) => {
-    if (previewSelection.hasSelection) {
+    if (previewSelection) {
       return {
         start: previewSelection.selectionStart,
         end: previewSelection.selectionEnd,
@@ -417,7 +424,7 @@ export const getGlobalTracks: Selector<GlobalTrack[]> = (state) =>
  */
 export const getGlobalTrackReferences: Selector<GlobalTrackReference[]> =
   createSelector(getGlobalTracks, (globalTracks) =>
-    globalTracks.map((globalTrack, trackIndex) => ({
+    globalTracks.map((_globalTrack, trackIndex) => ({
       type: 'global',
       trackIndex,
     }))

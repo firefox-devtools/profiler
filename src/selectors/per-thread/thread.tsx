@@ -409,7 +409,6 @@ type BasicThreadAndMarkerSelectorsPerThread = BasicThreadSelectorsPerThread &
 
 export function getThreadSelectorsWithMarkersPerThread(
   threadSelectors: BasicThreadAndMarkerSelectorsPerThread,
-  threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
 ) {
   // It becomes very expensive to apply each transform over and over again as they
@@ -473,7 +472,7 @@ export function getThreadSelectorsWithMarkersPerThread(
     getFilteredThread,
     ProfileSelectors.getPreviewSelection,
     (thread, previewSelection): Thread => {
-      if (!previewSelection.hasSelection) {
+      if (!previewSelection) {
         return thread;
       }
       const { selectionStart, selectionEnd } = previewSelection;
@@ -521,7 +520,7 @@ export function getThreadSelectorsWithMarkersPerThread(
       ProfileSelectors.getPreviewSelection,
       threadSelectors.getFilteredCtssSampleIndexOffset,
       (samples, previewSelection, sampleIndexFromCommittedRange) => {
-        if (!previewSelection.hasSelection) {
+        if (!previewSelection) {
           return sampleIndexFromCommittedRange;
         }
 
