@@ -16,7 +16,7 @@ import {
   getEmptyNativeSymbolTable,
 } from './data-structures';
 import { immutableUpdate, ensureExists } from '../utils/types';
-import { verifyMagic, SIMPLEPERF as SIMPLEPERF_MAGIC } from '../utils/magic';
+import { SIMPLEPERF_MAGIC } from '../utils/magic';
 import { attemptToUpgradeProcessedProfileThroughMutation } from './processed-profile-versioning';
 import { upgradeGeckoProfileToCurrentVersion } from './gecko-profile-versioning';
 import {
@@ -1943,6 +1943,14 @@ function attemptToFixProcessedProfileThroughMutation(
   return profile;
 }
 
+function verifySimpleperfMagic(traceBuffer: ArrayBufferLike): boolean {
+  return (
+    new TextDecoder('utf8').decode(
+      traceBuffer.slice(0, SIMPLEPERF_MAGIC.length)
+    ) === SIMPLEPERF_MAGIC
+  );
+}
+
 /**
  * Take some arbitrary profile file from some data source, and turn it into
  * the processed profile format.
@@ -1977,7 +1985,7 @@ export async function unserializeProfileOfArbitraryFormat(
 
       if (isArtTraceFormat(arrayBuffer)) {
         arbitraryFormat = convertArtTraceProfile(arrayBuffer);
-      } else if (verifyMagic(SIMPLEPERF_MAGIC, arrayBuffer)) {
+      } else if (verifySimpleperfMagic(arrayBuffer)) {
         const { convertSimpleperfTraceProfile } = await import(
           './import/simpleperf'
         );
