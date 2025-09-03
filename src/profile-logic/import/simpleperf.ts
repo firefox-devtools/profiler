@@ -31,10 +31,7 @@ import {
 } from 'firefox-profiler/profile-logic/data-structures';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 import { ensureExists } from 'firefox-profiler/utils/types';
-import {
-  verifyMagic,
-  SIMPLEPERF as SIMPLEPERF_MAGIC,
-} from 'firefox-profiler/utils/magic';
+import { SIMPLEPERF_MAGIC } from 'firefox-profiler/utils/magic';
 
 import Long from 'long';
 
@@ -506,7 +503,11 @@ export class SimpleperfReportConverter {
   }
 
   readMagic() {
-    if (!verifyMagic(SIMPLEPERF_MAGIC, this.buffer)) {
+    if (
+      new TextDecoder('utf8').decode(
+        this.buffer.slice(0, SIMPLEPERF_MAGIC.length)
+      ) !== SIMPLEPERF_MAGIC
+    ) {
       throw new Error('Invalid simpleperf file');
     }
     this.bufferOffset += SIMPLEPERF_MAGIC.length;
