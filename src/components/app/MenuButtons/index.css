@@ -92,23 +92,23 @@
   width: 12px;
   height: 12px;
   padding-left: 4px;
-  background: url(firefox-profiler-res/img/svg/open-in-new-12.svg) no-repeat
-    right / 12px;
+  background: url(../../../../res/img/svg/open-in-new-12.svg) no-repeat right /
+    12px;
 }
 
 /* These classes define respective states for the metainfo button. They change
  * the icon whose generic styles are defined above. */
 .menuButtonsMetaInfoButtonButton::before {
-  background-image: url(firefox-profiler-res/img/svg/info-12.svg);
+  background-image: url(../../../../res/img/svg/info-12.svg);
 }
 
 /* This is the revert button, appearing after publishing a profile. */
 .menuButtonsRevertButton::before {
-  background-image: url(firefox-profiler-res/img/svg/undo-dark-12.svg);
+  background-image: url(../../../../res/img/svg/undo-dark-12.svg);
 }
 
 .menuButtonsRevertToFullView::before {
-  background-image: url(firefox-profiler-res/img/svg/maximize-dark-12.svg);
+  background-image: url(../../../../res/img/svg/maximize-dark-12.svg);
 }
 
 .profileInfoUploadedActions {
@@ -135,8 +135,8 @@
   display: block;
   width: 32px;
   height: 32px;
-  background: url(firefox-profiler-res/img/svg/cloud-dark-12.svg) no-repeat
-    left / 32px;
+  background: url(../../../../res/img/svg/cloud-dark-12.svg) no-repeat left /
+    32px;
   content: '';
   opacity: 0.5;
 }
