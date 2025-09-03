@@ -28,7 +28,7 @@ test_script:
   - yarn versions
   # run tests
   - yarn test-all
-  - yarn build-prod:quiet
+  - yarn build-prod
 
 cache:
   - node_modules
