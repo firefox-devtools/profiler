@@ -53,8 +53,8 @@ jobs:
     resource_class: large
     steps:
       - checkout-and-dependencies
-      - run: yarn build-prod:quiet
-      - run: yarn build-symbolicator-cli:quiet
+      - run: yarn build-prod
+      - run: yarn build-symbolicator-cli
 
   licence-check:
     executor: node

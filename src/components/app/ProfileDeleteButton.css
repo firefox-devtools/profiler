@@ -6,8 +6,8 @@
   /* Note: 20px is: 16px (icon width) + 4px (distance from the text) */
   padding-left: 20px;
   margin: 0;
-  background: url(firefox-profiler-res/img/svg/check-dark.svg) no-repeat left /
-    16px 16px;
+  background: url(../../../res/img/svg/check-dark.svg) no-repeat left / 16px
+    16px;
   white-space: nowrap;
 }
 
@@ -16,8 +16,8 @@
   padding-left: 24px;
 
   /* The icon is 4px below the top */
-  background: url(firefox-profiler-res/img/svg/error-red.svg) no-repeat 0 4px /
-    16px 16px;
+  background: url(../../../res/img/svg/error-red.svg) no-repeat 0 4px / 16px
+    16px;
   color: var(--red-60);
   overflow-wrap: break-word;
 }
