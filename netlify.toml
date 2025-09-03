@@ -1,2 +1,2 @@
 [context.l10n]
-  command = "yarn build-l10n-prod:quiet"
+  command = "yarn build-l10n-prod"
