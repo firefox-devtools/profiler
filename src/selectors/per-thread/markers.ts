@@ -695,9 +695,57 @@ export function getMarkerSelectorsPerThread(
         )
     );
 
+    const getCommittedRangeCollectedCustomMarkerSamples: Selector<CollectedCustomMarkerSamples> =
+      createSelector(
+        getCollectedCustomMarkerSamples,
+        getCommittedRangeMarkerSampleRange,
+        (collectedSamples, sampleRange) => {
+          const { numbersPerLine, markerIndexes } = collectedSamples;
+          const [sampleStart, sampleEnd] = sampleRange;
+          let minNumber = Infinity;
+          let maxNumber = -Infinity;
+
+          // Calculate min/max only from samples in the committed range
+          if (sampleStart < sampleEnd) {
+            for (
+              let sampleIndex = sampleStart;
+              sampleIndex < sampleEnd;
+              sampleIndex++
+            ) {
+              for (
+                let graphIndex = 0;
+                graphIndex < numbersPerLine.length;
+                graphIndex++
+              ) {
+                const val = numbersPerLine[graphIndex][sampleIndex];
+                if (val < minNumber) {
+                  minNumber = val;
+                }
+                if (val > maxNumber) {
+                  maxNumber = val;
+                }
+              }
+            }
+          } else {
+            // Handle edge case where there are no samples in range
+            minNumber = 0;
+            maxNumber = 0;
+          }
+
+          // Return the same structure but with min/max calculated from committed range
+          return {
+            minNumber,
+            maxNumber,
+            numbersPerLine,
+            markerIndexes,
+          };
+        }
+      );
+
     return {
       getCollectedCustomMarkerSamples,
       getCommittedRangeMarkerSampleRange,
+      getCommittedRangeCollectedCustomMarkerSamples,
     };
   }
 
