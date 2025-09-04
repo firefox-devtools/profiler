@@ -6,10 +6,7 @@ import * as React from 'react';
 import classNames from 'classnames';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { getResizeObserverWrapper } from 'firefox-profiler/utils/resize-observer-wrapper';
-import {
-  getHasZoomedViaMousewheel,
-  getPanelLayoutGeneration,
-} from 'firefox-profiler/selectors/app';
+import { getHasZoomedViaMousewheel } from 'firefox-profiler/selectors/app';
 import { setHasZoomedViaMousewheel } from 'firefox-profiler/actions/app';
 import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 
@@ -132,7 +129,6 @@ export type Viewport = {
 };
 
 type ChartViewportImplStateProps = {
-  readonly panelLayoutGeneration: number;
   readonly hasZoomedViaMousewheel?: boolean;
 };
 
@@ -316,10 +312,6 @@ class ChartViewportImpl<OwnProps> extends React.PureComponent<
       this.setState({
         horizontalViewport,
       });
-    } else if (
-      this.props.panelLayoutGeneration !== newProps.panelLayoutGeneration
-    ) {
-      this._setSizeNextFrame();
     }
   }
 
@@ -871,7 +863,6 @@ export function withChartViewport<ChartProps>(
     ChartViewportImplDispatchProps
   >({
     mapStateToProps: (state) => ({
-      panelLayoutGeneration: getPanelLayoutGeneration(state),
       hasZoomedViaMousewheel: getHasZoomedViaMousewheel(state),
     }),
     mapDispatchToProps: { setHasZoomedViaMousewheel, updatePreviewSelection },
