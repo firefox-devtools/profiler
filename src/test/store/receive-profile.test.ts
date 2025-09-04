@@ -131,7 +131,7 @@ describe('actions/receive-profile', function () {
     return states;
   }
 
-  function encode(string: string): Uint8Array {
+  function encode(string: string): Uint8Array<ArrayBuffer> {
     return new TextEncoder().encode(string);
   }
 

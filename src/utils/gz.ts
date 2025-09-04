@@ -32,20 +32,8 @@ async function readableStreamToBuffer(
   return result;
 }
 
-// The Streams API doesn't support SAB, and so we need to copy from these to
-// use these API's.
-function copyBufferIfShared(buffer: Uint8Array): Uint8Array<ArrayBuffer> {
-  // Check if the buffer is a view into a larger ArrayBuffer (shared)
-  if (buffer.buffer instanceof SharedArrayBuffer) {
-    // Create a new buffer with its own ArrayBuffer
-    return new Uint8Array(buffer);
-  }
-  // Return the original buffer if it's not shared
-  return buffer as Uint8Array<ArrayBuffer>;
-}
-
 export async function compress(
-  data: string | Uint8Array
+  data: string | Uint8Array<ArrayBuffer>
 ): Promise<Uint8Array<ArrayBuffer>> {
   // Encode the data if it's a string
   const arrayData =
@@ -56,7 +44,7 @@ export async function compress(
 
   // Write the data to the compression stream
   const writer = compressionStream.writable.getWriter();
-  writer.write(copyBufferIfShared(arrayData));
+  writer.write(arrayData);
   writer.close();
 
   // Read the compressed data back into a buffer
@@ -64,14 +52,14 @@ export async function compress(
 }
 
 export async function decompress(
-  data: Uint8Array
+  data: Uint8Array<ArrayBuffer>
 ): Promise<Uint8Array<ArrayBuffer>> {
   // Create a gzip compression stream
   const decompressionStream = new DecompressionStream('gzip');
 
   // Write the data to the compression stream
   const writer = decompressionStream.writable.getWriter();
-  writer.write(copyBufferIfShared(data));
+  writer.write(data);
   writer.close();
 
   // Read the compressed data back into a buffer
