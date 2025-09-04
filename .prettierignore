@@ -3,7 +3,6 @@ src/types/libdef/npm
 docs-user/js
 docs-user/css
 src/test/fixtures/upgrades
-res/zee-worker.js
 dist
 coverage
 taskcluster/

@@ -2,107 +2,80 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import zeeWorkerPath from 'firefox-profiler-res/zee-worker.js';
-
-const zeeCallbacks: Array<{
-  success: (data: any) => void;
-  error: (error: any) => void;
-} | null> = [];
-
-type ZeeWorkerData = {
-  callbackID: number;
-  type: 'success' | 'error';
-  data: any;
-};
-
-function workerOnMessage(zeeWorker: Worker) {
-  zeeWorker.onmessage = function (msg: MessageEvent) {
-    const data = msg.data as ZeeWorkerData;
-    const callbacks = zeeCallbacks[data.callbackID];
-    if (callbacks) {
-      callbacks[data.type](data.data);
-      zeeCallbacks[data.callbackID] = null;
-    }
-  };
-}
-
-// Neuters data's buffer, if data is a typed array.
-export async function compress(
-  data: string | Uint8Array,
-  compressionLevel?: number
+async function readableStreamToBuffer(
+  stream: ReadableStream<Uint8Array<ArrayBuffer>>
 ): Promise<Uint8Array<ArrayBuffer>> {
-  if (!(typeof window === 'object' && 'Worker' in window)) {
-    // Try to fall back to Node's zlib library.
-    const zlib = await import('zlib');
-    return new Promise((resolve, reject) => {
-      zlib.gzip(data, (errorOrNull, result) => {
-        if (errorOrNull) {
-          reject(errorOrNull);
-        } else {
-          resolve(new Uint8Array(result.buffer as ArrayBuffer));
-        }
-      });
-    });
+  const reader = stream.getReader();
+  const chunks: Uint8Array[] = [];
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) {
+        chunks.push(value);
+      }
+    }
+  } finally {
+    reader.releaseLock();
   }
 
-  const zeeWorker = new Worker(zeeWorkerPath);
-  workerOnMessage(zeeWorker);
+  // Calculate total length and combine chunks
+  const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+  const result = new Uint8Array(totalLength);
+  let offset = 0;
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.length;
+  }
 
+  return result;
+}
+
+// The Streams API doesn't support SAB, and so we need to copy from these to
+// use these API's.
+function copyBufferIfShared(buffer: Uint8Array): Uint8Array<ArrayBuffer> {
+  // Check if the buffer is a view into a larger ArrayBuffer (shared)
+  if (buffer.buffer instanceof SharedArrayBuffer) {
+    // Create a new buffer with its own ArrayBuffer
+    return new Uint8Array(buffer);
+  }
+  // Return the original buffer if it's not shared
+  return buffer as Uint8Array<ArrayBuffer>;
+}
+
+export async function compress(
+  data: string | Uint8Array
+): Promise<Uint8Array<ArrayBuffer>> {
+  // Encode the data if it's a string
   const arrayData =
     typeof data === 'string' ? new TextEncoder().encode(data) : data;
-  return new Promise(function (resolve, reject) {
-    zeeWorker.postMessage(
-      {
-        request: 'compress',
-        data: arrayData,
-        compressionLevel: compressionLevel,
-        callbackID: zeeCallbacks.length,
-      },
-      [arrayData.buffer]
-    );
-    zeeCallbacks.push({
-      success: resolve,
-      error: reject,
-    });
-  });
+
+  // Create a gzip compression stream
+  const compressionStream = new CompressionStream('gzip');
+
+  // Write the data to the compression stream
+  const writer = compressionStream.writable.getWriter();
+  writer.write(copyBufferIfShared(arrayData));
+  writer.close();
+
+  // Read the compressed data back into a buffer
+  return readableStreamToBuffer(compressionStream.readable);
 }
 
-// Neuters data's buffer, if data is a typed array.
-export async function decompress(data: Uint8Array): Promise<Uint8Array> {
-  if (!(typeof window === 'object' && 'Worker' in window)) {
-    // Handle the case where we're not running in the browser, e.g. when
-    // this code is used as part of a library in a Node project.
-    // We don't get here when running Firefox profiler tests, because our
-    // tests create a mock window with a mock Worker class.
-    // Try to fall back to Node's zlib library.
-    const zlib = await import('zlib');
-    return new Promise((resolve, reject) => {
-      zlib.gunzip(data, (errorOrNull, result) => {
-        if (errorOrNull) {
-          reject(errorOrNull);
-        } else {
-          resolve(new Uint8Array(result.buffer as ArrayBuffer));
-        }
-      });
-    });
-  }
+export async function decompress(
+  data: Uint8Array
+): Promise<Uint8Array<ArrayBuffer>> {
+  // Create a gzip compression stream
+  const decompressionStream = new DecompressionStream('gzip');
 
-  const zeeWorker = new Worker(zeeWorkerPath);
-  return new Promise(function (resolve, reject) {
-    workerOnMessage(zeeWorker);
-    zeeWorker.postMessage(
-      {
-        request: 'decompress',
-        data: data,
-        callbackID: zeeCallbacks.length,
-      },
-      [data.buffer]
-    );
-    zeeCallbacks.push({
-      success: resolve,
-      error: reject,
-    });
-  });
+  // Write the data to the compression stream
+  const writer = decompressionStream.writable.getWriter();
+  writer.write(copyBufferIfShared(data));
+  writer.close();
+
+  // Read the compressed data back into a buffer
+  return readableStreamToBuffer(decompressionStream.readable);
 }
 
 export function isGzip(data: Uint8Array): boolean {
