@@ -40,7 +40,7 @@ exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 2`] 
     </button>
   </li>
   <li
-    class="filterNavigatorBarItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem filterNavigatorBarTransition-enter filterNavigatorBarTransition-enter-active"
+    class="filterNavigatorBarItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
   >
     <span
       class="filterNavigatorBarItemContent"
@@ -70,7 +70,7 @@ exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 3`] 
     </button>
   </li>
   <li
-    class="filterNavigatorBarItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem filterNavigatorBarTransition-enter filterNavigatorBarTransition-enter-active"
+    class="filterNavigatorBarItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
   >
     <button
       class="filterNavigatorBarItemContent"
@@ -80,7 +80,7 @@ exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 3`] 
     </button>
   </li>
   <li
-    class="filterNavigatorBarItem filterNavigatorBarUncommittedItem filterNavigatorBarLeafItem filterNavigatorBarUncommittedTransition-enter filterNavigatorBarUncommittedTransition-enter-active"
+    class="filterNavigatorBarItem filterNavigatorBarUncommittedItem filterNavigatorBarLeafItem"
     title="100μs"
   >
     <span
