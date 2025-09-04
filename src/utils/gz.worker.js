@@ -3,31 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 async function readableStreamToBuffer(stream) {
-  const reader = stream.getReader();
-  const chunks = [];
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (value) {
-        chunks.push(value);
-      }
-    }
-  } finally {
-    reader.releaseLock();
-  }
-
-  // Calculate total length and combine chunks
-  const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
-  const result = new Uint8Array(totalLength);
-  let offset = 0;
-  for (const chunk of chunks) {
-    result.set(chunk, offset);
-    offset += chunk.length;
-  }
-
-  return result;
+  return new Uint8Array(await new Response(stream).arrayBuffer());
 }
 
 onmessage = async (e) => {
