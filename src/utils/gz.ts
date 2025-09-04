@@ -2,68 +2,45 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-async function readableStreamToBuffer(
-  stream: ReadableStream<Uint8Array<ArrayBuffer>>
+import gzWorkerPath from 'firefox-profiler-res/gz-worker.js';
+
+function runGzWorker(
+  kind: 'compress' | 'decompress',
+  arrayData: Uint8Array<ArrayBuffer>
 ): Promise<Uint8Array<ArrayBuffer>> {
-  const reader = stream.getReader();
-  const chunks: Uint8Array[] = [];
+  return new Promise((resolve, reject) => {
+    // On-demand spawn the worker. If this is too slow we can look into keeping
+    // a pool of workers around.
+    const worker = new Worker(gzWorkerPath);
 
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (value) {
-        chunks.push(value);
-      }
-    }
-  } finally {
-    reader.releaseLock();
-  }
+    worker.onmessage = (e) => {
+      resolve(e.data as Uint8Array<ArrayBuffer>);
+      worker.terminate();
+    };
 
-  // Calculate total length and combine chunks
-  const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
-  const result = new Uint8Array(totalLength);
-  let offset = 0;
-  for (const chunk of chunks) {
-    result.set(chunk, offset);
-    offset += chunk.length;
-  }
+    worker.onerror = (e) => {
+      reject(e.error);
+      worker.terminate();
+    };
 
-  return result;
+    worker.postMessage({ kind, arrayData }, [arrayData.buffer]);
+  });
 }
 
+// This will transfer `data` if it is an array buffer.
 export async function compress(
   data: string | Uint8Array<ArrayBuffer>
 ): Promise<Uint8Array<ArrayBuffer>> {
   // Encode the data if it's a string
   const arrayData =
     typeof data === 'string' ? new TextEncoder().encode(data) : data;
-
-  // Create a gzip compression stream
-  const compressionStream = new CompressionStream('gzip');
-
-  // Write the data to the compression stream
-  const writer = compressionStream.writable.getWriter();
-  writer.write(arrayData);
-  writer.close();
-
-  // Read the compressed data back into a buffer
-  return readableStreamToBuffer(compressionStream.readable);
+  return runGzWorker('compress', arrayData);
 }
 
 export async function decompress(
   data: Uint8Array<ArrayBuffer>
 ): Promise<Uint8Array<ArrayBuffer>> {
-  // Create a gzip compression stream
-  const decompressionStream = new DecompressionStream('gzip');
-
-  // Write the data to the compression stream
-  const writer = decompressionStream.writable.getWriter();
-  writer.write(data);
-  writer.close();
-
-  // Read the compressed data back into a buffer
-  return readableStreamToBuffer(decompressionStream.readable);
+  return runGzWorker('decompress', data);
 }
 
 export function isGzip(data: Uint8Array): boolean {
