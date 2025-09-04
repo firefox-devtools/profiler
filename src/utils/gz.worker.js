@@ -31,7 +31,7 @@ async function readableStreamToBuffer(stream) {
 }
 
 onmessage = async (e) => {
-  let data = e.data;
+  const data = e.data;
   if (data.kind === 'compress') {
     // Create a gzip compression stream
     const compressionStream = new CompressionStream('gzip');
@@ -42,7 +42,7 @@ onmessage = async (e) => {
     writer.close();
 
     // Read the compressed data back into a buffer
-    let result = await readableStreamToBuffer(compressionStream.readable);
+    const result = await readableStreamToBuffer(compressionStream.readable);
     postMessage(result, [result.buffer]);
   } else if (data.kind === 'decompress') {
     // Create a gzip compression stream
@@ -54,7 +54,7 @@ onmessage = async (e) => {
     writer.close();
 
     // Read the compressed data back into a buffer
-    let result = await readableStreamToBuffer(decompressionStream.readable);
+    const result = await readableStreamToBuffer(decompressionStream.readable);
     postMessage(result, [result.buffer]);
   } else {
     throw new Error('unknown message');

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import gzWorkerPath from 'firefox-profiler-res/gz-worker.js';
+import gzWorkerPath from './gz.worker.js';
 
 function runGzWorker(
   kind: 'compress' | 'decompress',
