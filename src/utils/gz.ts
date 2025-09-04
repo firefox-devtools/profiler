@@ -4,7 +4,10 @@
 
 import gzWorkerPath from 'firefox-profiler-res/gz-worker.js';
 
-function runGzWorker(kind: "compress" | "decompress", arrayData: Uint8Array<ArrayBuffer>): Promise<Uint8Array<ArrayBuffer>> {
+function runGzWorker(
+  kind: 'compress' | 'decompress',
+  arrayData: Uint8Array<ArrayBuffer>
+): Promise<Uint8Array<ArrayBuffer>> {
   return new Promise((resolve, reject) => {
     // On-demand spawn the worker. If this is too slow we can look into keeping
     // a pool of workers around.
@@ -20,7 +23,7 @@ function runGzWorker(kind: "compress" | "decompress", arrayData: Uint8Array<Arra
       worker.terminate();
     };
 
-    worker.postMessage({kind, arrayData }, [arrayData.buffer]);
+    worker.postMessage({ kind, arrayData }, [arrayData.buffer]);
   });
 }
 
@@ -31,13 +34,13 @@ export async function compress(
   // Encode the data if it's a string
   const arrayData =
     typeof data === 'string' ? new TextEncoder().encode(data) : data;
-  return runGzWorker("compress", arrayData);
+  return runGzWorker('compress', arrayData);
 }
 
 export async function decompress(
   data: Uint8Array<ArrayBuffer>
 ): Promise<Uint8Array<ArrayBuffer>> {
-  return runGzWorker("decompress", data);
+  return runGzWorker('decompress', data);
 }
 
 export function isGzip(data: Uint8Array): boolean {
