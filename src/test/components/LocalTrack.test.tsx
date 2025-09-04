@@ -78,7 +78,7 @@ describe('timeline/LocalTrack', function () {
       expect(getLocalTrackRow()).toHaveClass('selected');
     });
 
-    it('can right click a thread', () => {
+    it('can right click a thread on the label', () => {
       const { getState, getLocalTrackLabel, threadIndex, trackReference } =
         setupThreadTrack();
 
@@ -87,11 +87,21 @@ describe('timeline/LocalTrack', function () {
       expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
     });
 
-    it('can select a thread by clicking the row', () => {
-      const { getState, getLocalTrackRow, threadIndex } = setupThreadTrack();
+    it('can select a thread by clicking the track content', () => {
+      const { getState, getLocalTrackContent, threadIndex } =
+        setupThreadTrack();
       expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
-      fireFullClick(getLocalTrackRow());
+      fireFullClick(getLocalTrackContent());
       expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
+    });
+
+    it('can right click a thread on the track content', () => {
+      const { getState, getLocalTrackContent, threadIndex, trackReference } =
+        setupThreadTrack();
+
+      fireFullContextMenu(getLocalTrackContent());
+      expect(getRightClickedTrack(getState())).toEqual(trackReference);
+      expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
     });
 
     it('will render a stub div if the track is hidden', () => {
@@ -203,6 +213,11 @@ function setup(
       container.querySelector('.timelineTrackLabel'),
       `Couldn't find the track label with selector .timelineTrackLabel`
     ) as HTMLElement;
+  const getLocalTrackContent = () =>
+    ensureExists(
+      container.querySelector('.timelineTrackTrack'),
+      `Couldn't find the track content with selector .timelineTrackTrack`
+    ) as HTMLElement;
   const getLocalTrackRow = () =>
     ensureExists(
       container.querySelector('.timelineTrackLocalRow'),
@@ -219,6 +234,7 @@ function setup(
     threadIndex,
     pid: PID,
     getLocalTrackLabel,
+    getLocalTrackContent,
     getLocalTrackRow,
     flushRafCalls,
   };

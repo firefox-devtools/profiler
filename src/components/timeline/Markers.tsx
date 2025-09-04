@@ -470,7 +470,10 @@ class TimelineMarkers extends React.PureComponent<Props, State> {
           isSelected ? 'selected' : null
         )}
       >
-        <ContextMenuTrigger id="MarkerContextMenu">
+        <ContextMenuTrigger
+          id="MarkerContextMenu"
+          disable={hoveredMarkerIndex === null && rightClickedMarker === null}
+        >
           <TimelineMarkersCanvas
             width={this.props.width}
             height={this.props.height}

@@ -54,7 +54,7 @@ type StateProps = {
   readonly trackName: string;
   readonly isSelected: boolean;
   readonly isHidden: boolean;
-  readonly titleText: string | null;
+  readonly titleText: string | undefined;
 };
 
 type DispatchProps = {
@@ -151,21 +151,20 @@ class LocalTrackComponent extends PureComponent<Props> {
     return (
       <li className="timelineTrack timelineTrackLocal" style={style}>
         {/* This next div is used to mirror the structure of the TimelineGlobalTrack */}
-        <div
-          className={classNames('timelineTrackRow timelineTrackLocalRow', {
-            selected: isSelected,
-          })}
-          onClick={this._selectCurrentTrack}
+        <ContextMenuTrigger
+          id="TimelineTrackContextMenu"
+          renderTag="div"
+          attributes={{
+            className: classNames('timelineTrackRow timelineTrackLocalRow', {
+              selected: isSelected,
+            }),
+            onContextMenu: this._onContextMenu,
+          }}
         >
-          <ContextMenuTrigger
-            id="TimelineTrackContextMenu"
-            renderTag="div"
-            attributes={{
-              title: titleText,
-              className:
-                'timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy',
-              onContextMenu: this._onContextMenu,
-            }}
+          <div
+            className="timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+            title={titleText}
+            onClick={this._selectCurrentTrack}
           >
             <button type="button" className="timelineTrackNameButton">
               {trackName}
@@ -178,9 +177,14 @@ class LocalTrackComponent extends PureComponent<Props> {
                 onClick={this._hideCurrentTrack}
               />
             </Localized>
-          </ContextMenuTrigger>
-          <div className="timelineTrackTrack">{this.renderTrack()}</div>
-        </div>
+          </div>
+          <div
+            className="timelineTrackTrack"
+            onClick={this._selectCurrentTrack}
+          >
+            {this.renderTrack()}
+          </div>
+        </ContextMenuTrigger>
       </li>
     );
   }
@@ -193,7 +197,7 @@ export const TimelineLocalTrack = explicitConnect<
 >({
   mapStateToProps: (state, { pid, localTrack, trackIndex }) => {
     // These get assigned based on the track type.
-    let titleText = null;
+    let titleText;
     let isSelected = false;
 
     const selectedThreadIndexes = getSelectedThreadIndexes(state);
