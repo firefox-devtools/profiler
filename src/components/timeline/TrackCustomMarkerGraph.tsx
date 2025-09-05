@@ -619,7 +619,9 @@ export const TrackCustomMarkerGraph = explicitConnect<
       markerSampleRanges:
         markerTrackSelectors.getCommittedRangeMarkerSampleRange(state),
       collectedSamples:
-        markerTrackSelectors.getCollectedCustomMarkerSamples(state),
+        markerTrackSelectors.getCommittedRangeCollectedCustomMarkerSamples(
+          state
+        ),
       rangeStart: start,
       rangeEnd: end,
       getMarker: selectors.getMarkerGetter(state),
