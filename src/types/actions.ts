@@ -354,6 +354,9 @@ type ProfileAction =
   | {
       readonly type: 'CLOSE_BOTTOM_BOX_FOR_TAB';
       readonly tab: TabSlug;
+    }
+  | {
+      readonly type: 'TOGGLE_BOTTOM_BOX_FULLSCREEN';
     };
 
 type ReceiveProfileAction =

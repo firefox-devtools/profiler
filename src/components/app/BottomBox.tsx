@@ -8,6 +8,7 @@ import classNames from 'classnames';
 
 import { SourceView } from '../shared/SourceView';
 import { AssemblyView } from '../shared/AssemblyView';
+import { FullscreenToggleButton } from './FullscreenToggleButton';
 import { AssemblyViewToggleButton } from './AssemblyViewToggleButton';
 import { IonGraphView } from '../shared/IonGraphView';
 import { CodeLoadingOverlay } from './CodeLoadingOverlay';
@@ -18,6 +19,7 @@ import {
   getAssemblyViewIsOpen,
   getAssemblyViewNativeSymbol,
   getAssemblyViewScrollGeneration,
+  getIsBottomBoxFullscreen,
 } from 'firefox-profiler/selectors/url-state';
 import {
   selectedThreadSelectors,
@@ -52,6 +54,7 @@ import { Localized } from '@fluent/react';
 import './BottomBox.css';
 
 type StateProps = {
+  readonly isFullscreen: boolean;
   readonly sourceViewFile: string | null;
   readonly sourceViewCode: SourceCodeStatus | void;
   readonly sourceViewScrollGeneration: number;
@@ -157,6 +160,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
 
   override render() {
     const {
+      isFullscreen,
       sourceViewFile,
       sourceViewCode,
       globalLineTimings,
@@ -195,6 +199,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     // These trailing header buttons go into the bottom-box-bar of the last pane.
     const trailingHeaderButtons = (
       <div className="bottom-box-header-trailing-buttons">
+        <FullscreenToggleButton />
         <AssemblyViewToggleButton />
         <Localized id="SourceView--close-button" attrs={{ title: true }}>
           <button
@@ -212,8 +217,13 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     );
 
     return (
-      <div className="bottom-box">
-        <SplitterLayout customClassName="bottom-box" percentage>
+      <div
+        className={classNames(
+          'bottom-box',
+          isFullscreen ? 'bottom-box-fullscreen' : null
+        )}
+      >
+        <SplitterLayout percentage>
           <div className="bottom-box-pane">
             <div className="bottom-box-bar">
               <h3 className="bottom-box-title">{path ?? '(no source file)'}</h3>
@@ -299,6 +309,7 @@ function convertErrors(errors: ApiQueryError[]): SourceCodeLoadingError[] {
 
 export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
+    isFullscreen: getIsBottomBoxFullscreen(state),
     sourceViewFile: getSourceViewFile(state),
     sourceViewCode: getSourceViewCode(state),
     globalLineTimings: selectedThreadSelectors.getSourceViewLineTimings(state),
