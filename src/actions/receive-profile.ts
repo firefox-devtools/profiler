@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { oneLine } from 'common-tags';
 import queryString from 'query-string';
-import JSZip from 'jszip';
+import type JSZip from 'jszip';
 import {
   insertExternalMarkersIntoProfile,
   insertExternalPowerCountersIntoProfile,
@@ -1045,6 +1045,7 @@ async function _extractZipFromResponse(
   // that comes from this realm.
   const typedBuffer = new Uint8Array(buffer);
   try {
+    const JSZip = await import('jszip');
     const zip = await JSZip.loadAsync(typedBuffer);
     // Catch the error if unable to load the zip.
     return zip;
@@ -1235,6 +1236,7 @@ export function retrieveProfileFromFile(
       if (_deduceContentType(file.name, file.type) === 'application/zip') {
         // Open a zip file in the zip file viewer
         const buffer = await fileReader(file).asArrayBuffer();
+        const JSZip = await import('jszip');
         const zip = await JSZip.loadAsync(buffer);
         await dispatch(receiveZipFile(zip));
       } else {
