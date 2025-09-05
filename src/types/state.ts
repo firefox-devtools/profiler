@@ -334,6 +334,7 @@ export type ProfileSpecificUrlState = {
   sourceView: SourceViewState;
   assemblyView: AssemblyViewState;
   isBottomBoxOpenPerPanel: IsOpenPerPanelState;
+  isBottomBoxFullscreen: boolean;
   globalTrackOrder: TrackIndex[];
   hiddenGlobalTracks: Set<TrackIndex>;
   hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>;

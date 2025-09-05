@@ -643,6 +643,16 @@ const isBottomBoxOpenPerPanel: Reducer<IsOpenPerPanelState> = (
   }
 };
 
+const isBottomBoxFullscreen: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'TOGGLE_BOTTOM_BOX_FULLSCREEN': {
+      return !state;
+    }
+    default:
+      return state;
+  }
+};
+
 /**
  * This value is only set from the URL and never changed.
  */
@@ -668,6 +678,7 @@ const profileSpecific = combineReducers({
   sourceView,
   assemblyView,
   isBottomBoxOpenPerPanel,
+  isBottomBoxFullscreen,
   timelineType,
   globalTrackOrder,
   hiddenGlobalTracks,

@@ -531,6 +531,7 @@ export function stateFromLocation(
       isBottomBoxOpenPerPanel[selectedTab] = true;
     }
   }
+  const isBottomBoxFullscreen = false;
 
   const localTrackOrderByPid = convertLocalTrackOrderByPidFromString(
     query.localTrackOrderByPid
@@ -563,6 +564,7 @@ export function stateFromLocation(
       sourceView,
       assemblyView,
       isBottomBoxOpenPerPanel,
+      isBottomBoxFullscreen,
       timelineType: validateTimelineType(query.timelineType),
       showJsTracerSummary: query.summary === undefined ? false : true,
       globalTrackOrder: convertGlobalTrackOrderFromString(
