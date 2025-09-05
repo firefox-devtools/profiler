@@ -1980,9 +1980,7 @@ export async function unserializeProfileOfArbitraryFormat(
     // object is constructed from an ArrayBuffer in a different context... which
     // happens in our tests.
     if (String(arbitraryFormat) === '[object ArrayBuffer]') {
-      // Obviously Flow doesn't understand that this is correct, so let's help
-      // Flow here.
-      let arrayBuffer: ArrayBufferLike = arbitraryFormat as any;
+      let arrayBuffer = arbitraryFormat as ArrayBuffer;
 
       // Check for the gzip magic number in the header. If we find it, decompress
       // the data first.

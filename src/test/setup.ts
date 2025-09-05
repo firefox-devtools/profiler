@@ -26,7 +26,8 @@ fetchMock.mockGlobal();
 
 // Mock the effects of the file-loader which our Webpack config defines
 // for JS files under res: The "default export" is the path to the file.
-jest.mock('firefox-profiler-res/zee-worker.js', () => './res/zee-worker.js');
+jest.mock('firefox-profiler-res/gz-worker.js', () => './res/gz-worker.js');
+
 // Install a Worker class which is similar to the DOM Worker class.
 (global as any).Worker = NodeWorker;
 
