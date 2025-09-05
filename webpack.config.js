@@ -99,7 +99,7 @@ const config = {
       patterns: [
         'res/_headers',
         'res/_redirects',
-        'res/zee-worker.js',
+        'res/gz-worker.js',
         'res/contribute.json',
         'res/robots.txt',
         'res/service-worker-compat.js',

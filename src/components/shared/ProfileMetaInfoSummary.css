@@ -20,32 +20,34 @@
 
 .profileMetaInfoSummaryProductAndVersion {
   padding-left: 1.4em; /* 1 (for the background image) + 0.4 */
-  background: url(../../../res/img/svg/info.svg) left center / 1em no-repeat;
+  background: url(firefox-profiler-res/img/svg/info.svg) left center / 1em
+    no-repeat;
 }
 
 .profileMetaInfoSummaryProductAndVersion[data-product^='Firefox'],
 .profileMetaInfoSummaryProductAndVersion[data-product='Fennec'] {
-  background-image: url(../../../res/img/svg/brands/firefoxbrowser.svg);
+  background-image: url(firefox-profiler-res/img/svg/brands/firefoxbrowser.svg);
 }
 
 .profileMetaInfoSummaryPlatform {
   padding-left: 1.4em; /* 1 (for the background image) + 0.4 */
   margin-left: 1em;
-  background: url(../../../res/img/svg/info.svg) left center / 1em no-repeat;
+  background: url(firefox-profiler-res/img/svg/info.svg) left center / 1em
+    no-repeat;
 }
 
 .profileMetaInfoSummaryPlatform[data-toolkit^='macOS'] {
-  background-image: url(../../../res/img/svg/brands/apple.svg);
+  background-image: url(firefox-profiler-res/img/svg/brands/apple.svg);
 }
 
 .profileMetaInfoSummaryPlatform[data-toolkit^='Windows'] {
-  background-image: url(../../../res/img/svg/brands/windows.svg);
+  background-image: url(firefox-profiler-res/img/svg/brands/windows.svg);
 }
 
 .profileMetaInfoSummaryPlatform[data-toolkit^='Linux'] {
-  background-image: url(../../../res/img/svg/brands/linux.svg);
+  background-image: url(firefox-profiler-res/img/svg/brands/linux.svg);
 }
 
 .profileMetaInfoSummaryPlatform[data-toolkit^='Android'] {
-  background-image: url(../../../res/img/svg/brands/android.svg);
+  background-image: url(firefox-profiler-res/img/svg/brands/android.svg);
 }
