@@ -160,7 +160,7 @@
 .timelineSelectionOverlayZoomButton::before {
   position: absolute;
   display: grid;
-  content: url(firefox-profiler-res/img/svg/zoom-icon.svg);
+  content: url(../../../res/img/svg/zoom-icon.svg);
   inset: 0;
   place-content: center;
 }
