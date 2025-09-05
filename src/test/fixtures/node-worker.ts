@@ -23,6 +23,7 @@ function getWorkerScript(file: string): string {
       onmessage: function () {},
       DecompressionStream,
       CompressionStream,
+      Response,
     };
 
     vm.runInNewContext(scriptContent, sandbox, { filename: "${file}" });
