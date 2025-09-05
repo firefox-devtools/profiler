@@ -7,7 +7,7 @@ exports[`symbolServerUrl will allow an allowed https host 1`] = `Array []`;
 exports[`symbolServerUrl will error when switching to an allowed but non-https host 1`] = `
 Array [
   Array [
-    "HTTPS is required for non-localhost symbol servers. Rejecting http://symbolication.services.mozilla.com/ and defaulting to https://symbolication.services.mozilla.com.",
+    "HTTPS is required for non-localhost symbol servers. Rejecting http://symbolication.services.mozilla.com/ and defaulting to https://mozilla.symbols.samplyprofiler.com.",
   ],
 ]
 `;
@@ -15,7 +15,7 @@ Array [
 exports[`symbolServerUrl will error when switching to an invalid host 1`] = `
 Array [
   Array [
-    "The symbol server URL was not valid. Rejecting invalid and defaulting to https://symbolication.services.mozilla.com.",
+    "The symbol server URL was not valid. Rejecting invalid and defaulting to https://mozilla.symbols.samplyprofiler.com.",
     [TypeError: Invalid URL: invalid],
   ],
 ]
@@ -24,7 +24,7 @@ Array [
 exports[`symbolServerUrl will error when switching to an unknown host 1`] = `
 Array [
   Array [
-    "The symbol server URL was not in the list of allowed domains. Rejecting https://symbolication.services.mozilla.com.example.com/symbols and defaulting to https://symbolication.services.mozilla.com.",
+    "The symbol server URL was not in the list of allowed domains. Rejecting https://symbolication.services.mozilla.com.example.com/symbols and defaulting to https://mozilla.symbols.samplyprofiler.com.",
   ],
 ]
 `;
