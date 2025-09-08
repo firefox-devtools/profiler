@@ -38,12 +38,14 @@ import type {
   State,
 } from 'firefox-profiler/types';
 
-export function toggleCheckedSharingOptions(
-  slug: keyof CheckedSharingOptions
+export function updateSharingOption(
+  slug: keyof CheckedSharingOptions,
+  value: boolean
 ): Action {
   return {
-    type: 'TOGGLE_CHECKED_SHARING_OPTION',
+    type: 'UPDATE_SHARING_OPTION',
     slug,
+    value,
   };
 }
 

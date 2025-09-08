@@ -5,7 +5,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import {
-  toggleCheckedSharingOptions,
+  updateSharingOption,
   attemptToPublish,
   resetUploadState,
 } from 'firefox-profiler/actions/publish';
@@ -67,7 +67,7 @@ type StateProps = {
 };
 
 type DispatchProps = {
-  readonly toggleCheckedSharingOptions: typeof toggleCheckedSharingOptions;
+  readonly updateSharingOption: typeof updateSharingOption;
   readonly attemptToPublish: typeof attemptToPublish;
   readonly resetUploadState: typeof resetUploadState;
 };
@@ -86,7 +86,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
 
   _onCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const sharingOption = e.target.name as keyof CheckedSharingOptions;
-    this.props.toggleCheckedSharingOptions(sharingOption);
+    this.props.updateSharingOption(sharingOption, e.target.checked);
   }
 
   _renderCheckbox(
@@ -384,7 +384,7 @@ export const MenuButtonsPublish = explicitConnect<
     abortFunction: getAbortFunction(state),
   }),
   mapDispatchToProps: {
-    toggleCheckedSharingOptions,
+    updateSharingOption,
     attemptToPublish,
     resetUploadState,
   },

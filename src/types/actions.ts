@@ -598,8 +598,9 @@ type SidebarAction = {
 
 type PublishAction =
   | {
-      readonly type: 'TOGGLE_CHECKED_SHARING_OPTION';
+      readonly type: 'UPDATE_SHARING_OPTION';
       readonly slug: keyof CheckedSharingOptions;
+      readonly value: boolean;
     }
   | {
       readonly type: 'UPLOAD_STARTED';
