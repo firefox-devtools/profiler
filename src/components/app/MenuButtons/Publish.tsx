@@ -83,23 +83,11 @@ class MenuButtonsPublishImpl extends React.PureComponent<
   PublishState
 > {
   override state = { compressError: null, prevCompressedPromise: null };
-  _toggles: { [K in keyof CheckedSharingOptions]: () => void } = {
-    includeHiddenThreads: () =>
-      this.props.toggleCheckedSharingOptions('includeHiddenThreads'),
-    includeAllTabs: () =>
-      this.props.toggleCheckedSharingOptions('includeAllTabs'),
-    includeFullTimeRange: () =>
-      this.props.toggleCheckedSharingOptions('includeFullTimeRange'),
-    includeScreenshots: () =>
-      this.props.toggleCheckedSharingOptions('includeScreenshots'),
-    includeUrls: () => this.props.toggleCheckedSharingOptions('includeUrls'),
-    includeExtension: () =>
-      this.props.toggleCheckedSharingOptions('includeExtension'),
-    includePreferenceValues: () =>
-      this.props.toggleCheckedSharingOptions('includePreferenceValues'),
-    includePrivateBrowsingData: () =>
-      this.props.toggleCheckedSharingOptions('includePrivateBrowsingData'),
-  };
+
+  _onCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const sharingOption = e.target.name as keyof CheckedSharingOptions;
+    this.props.toggleCheckedSharingOptions(sharingOption);
+  }
 
   _renderCheckbox(
     slug: keyof CheckedSharingOptions,
@@ -107,14 +95,13 @@ class MenuButtonsPublishImpl extends React.PureComponent<
     additionalContent?: React.ReactNode
   ) {
     const { checkedSharingOptions } = this.props;
-    const toggle = this._toggles[slug];
     return (
       <label className="photon-label menuButtonsPublishDataChoicesLabel">
         <input
           type="checkbox"
           className="photon-checkbox photon-checkbox-default"
           name={slug}
-          onChange={toggle}
+          onChange={this._onCheckboxChange}
           checked={checkedSharingOptions[slug]}
         />
         <Localized id={labelL10nId} />
