@@ -21,6 +21,8 @@ function getWorkerScript(file: string): string {
       },
       postMessage: parentPort.postMessage.bind(parentPort),
       onmessage: function () {},
+      DecompressionStream,
+      CompressionStream,
     };
 
     vm.runInNewContext(scriptContent, sandbox, { filename: "${file}" });

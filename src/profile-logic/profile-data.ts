@@ -1538,7 +1538,7 @@ export function filterThreadToSearchString(
     }
   }
 
-  const stackMatchesSearch = makeBitSet(funcTable.length);
+  const stackMatchesSearch = makeBitSet(stackTable.length);
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
     if (prefix !== null && checkBit(stackMatchesSearch, prefix)) {

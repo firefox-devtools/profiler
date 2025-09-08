@@ -1065,7 +1065,7 @@ async function _extractZipFromResponse(
 async function _extractJsonFromArrayBuffer(
   arrayBuffer: ArrayBuffer
 ): Promise<unknown> {
-  let profileBytes: Uint8Array<ArrayBufferLike> = new Uint8Array(arrayBuffer);
+  let profileBytes = new Uint8Array(arrayBuffer);
   // Check for the gzip magic number in the header.
   if (isGzip(profileBytes)) {
     profileBytes = await decompress(profileBytes);

@@ -403,7 +403,7 @@ exports[`TooltipMarker renders properly network markers where content type is bl
     <div
       class="tooltipLabel"
     >
-      Waiting to transmit the response
+      Waiting for main thread
       :
     </div>
     <div
@@ -589,7 +589,7 @@ exports[`TooltipMarker renders properly network markers where content type is mi
     <div
       class="tooltipLabel"
     >
-      Waiting to transmit the response
+      Waiting for main thread
       :
     </div>
     <div
@@ -849,7 +849,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part 2
     <div
       class="tooltipLabel"
     >
-      Waiting to transmit the response
+      Waiting for main thread
       :
     </div>
     <div
@@ -1045,7 +1045,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part c
     <div
       class="tooltipLabel"
     >
-      Waiting to transmit the response
+      Waiting for main thread
       :
     </div>
     <div
@@ -1299,7 +1299,7 @@ exports[`TooltipMarker renders properly normal network markers 1`] = `
     <div
       class="tooltipLabel"
     >
-      Waiting to transmit the response
+      Waiting for main thread
       :
     </div>
     <div

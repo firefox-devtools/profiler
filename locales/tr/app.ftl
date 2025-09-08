@@ -131,12 +131,22 @@ CallTreeSidebar--traced-running-time =
     .label = İzlenen çalışma süresi
 CallTreeSidebar--running-time =
     .label = Çalışma süresi
+CallTreeSidebar--self-time =
+    .label = Kendi süresi
 CallTreeSidebar--running-samples =
     .label = Çalışan örnekler
+CallTreeSidebar--self-samples =
+    .label = Kendi örnekleri
 CallTreeSidebar--running-size =
     .label = Çalışma boyutu
+CallTreeSidebar--self-size =
+    .label = Kendi boyutu
 CallTreeSidebar--categories = Kategoriler
 CallTreeSidebar--implementation = Yürütme
+CallTreeSidebar--running-milliseconds = Çalışma milisaniyesi
+CallTreeSidebar--self-milliseconds = Kendi milisaniyesi
+CallTreeSidebar--self-sample-count = Kendi örnek sayısı
+CallTreeSidebar--self-bytes = Kendi baytı
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -151,6 +161,15 @@ CompareHome--form-label-profile1 = Profil 1:
 CompareHome--form-label-profile2 = Profil 2:
 CompareHome--submit-button =
     .value = Profilleri getir
+
+## DebugWarning
+## This is displayed at the top of the analysis page when the loaded profile is
+## a debug build of Firefox.
+
+DebugWarning--warning-message =
+    .message =
+        Bu profil, sürüm optimizasyonları yapılmamış bir derlemede kaydedildi.
+        Performans gözlemleri sürüm popülasyonu için geçerli olmayabilir.
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
@@ -205,6 +224,10 @@ Home--load-from-url-submit-button =
     .value = Yükle
 Home--documentation-button = Dokümantasyon
 Home--menu-button = { -profiler-brand-name } menü düğmesini etkinleştir
+Home--menu-button-instructions = Performans kaydetmeye başlamak için { -firefox-brand-name }’ta profilleyici menü düğmesini etkinleştirin, ardından profili analiz edin ve profiler.firefox.com ile paylaşın.
+Home--profile-firefox-android-instructions =
+    { -firefox-android-brand-name }’ta da profilleme yapabilirsiniz. Daha fazla bilgi almak için lütfen bu belgeye bakın:
+    <a>Doğrudan cihaz üzerinde { -firefox-android-brand-name } profilleme</a>.
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
 # of the "Enable Firefox Profiler menu button" button.
@@ -221,6 +244,11 @@ Home--additional-content-content = Profil dosyasını buraya <strong>sürükleyi
 Home--compare-recordings-info = Ayrıca kayıtları karşılaştırabilirsiniz. <a>Karşılaştırma arayüzünü aç.</a>
 Home--your-recent-uploaded-recordings-title = Son yüklediğiniz kayıtlar
 Home--install-chrome-extension = Chrome uzantısını yükle
+Home--chrome-extension-instructions = Chrome’daki performans profillerini kaydedip { -profiler-brand-name }’da analiz etmek için <a>Chrome { -profiler-brand-name } uzantısını</a> kullanabilirsiniz. Uzantıyı Chrome Web Store'dan yükleyebilirsiniz.
+Home--chrome-extension-recording-instructions =
+    Uzantıyı yükledikten sonra profillemeyi başlatmak ve durdurmak için uzantının
+    araç çubuğu simgesini veya kısayolları kullanabilirsiniz. İsterseniz
+    profilleri dışa aktarabilir ve ayrıntılı analiz için buraya yükleyebilirsiniz.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -327,6 +355,8 @@ MenuButtons--index--profile-info-uploaded-label = Yüklenme tarihi:
 MenuButtons--index--profile-info-uploaded-actions = Sil
 MenuButtons--index--metaInfo-subtitle = Profil Bilgileri
 MenuButtons--metaInfo--symbols = Semboller:
+MenuButtons--metaInfo--profile-symbolicated = Profil sembolleştirilmiştir
+MenuButtons--metaInfo--symbolicate-profile = Profili sembolleştir
 MenuButtons--metaInfo--cpu-model = İşlemci modeli:
 MenuButtons--metaInfo--cpu-cores = İşlemci çekirdekleri:
 MenuButtons--metaInfo--main-memory = Ana bellek:
@@ -424,10 +454,14 @@ MenuButtons--metaOverheadStatistics-max = Maksimum
 MenuButtons--metaOverheadStatistics-min = Minimum
 MenuButtons--metaOverheadStatistics-statkeys-overhead = Ek yük
     .title = Tüm iş parçacıklarını örnekleme süresi.
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = Temizleme
+    .title = Süresi geçmiş verileri temizleme süresi.
 MenuButtons--metaOverheadStatistics-statkeys-counter = Sayaç
     .title = Tüm sayaçları toplama süresi.
 MenuButtons--metaOverheadStatistics-statkeys-interval = Aralık
     .title = İki örnek arasındaki gözlenen aralık.
+MenuButtons--metaOverheadStatistics-statkeys-lockings = Kilitlemeler
+    .title = Örneklemeden önce kilidi elde etme süresi.
 MenuButtons--metaOverheadStatistics-overhead-duration = Ek yük süreleri:
 MenuButtons--metaOverheadStatistics-overhead-percentage = Ek yük yüzdesi:
 MenuButtons--metaOverheadStatistics-profiled-duration = Profillenen süre:
@@ -581,6 +615,10 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = Tüm çerçeveler
     .title = Yığın çerçevelerini filtreleme
+StackSettings--implementation-script = Betik
+    .title = Yalnızca script çalışmasına ilişkin yığın çerçevelerini göster
+StackSettings--implementation-native2 = Yerel
+    .title = Yalnızca yerel kod için yığın çerçevelerini göster
 # This label is displayed in the marker chart and marker table panels only.
 StackSettings--stack-implementation-label = Yığın filtresi:
 StackSettings--use-data-source-label = Veri kaynağı:
