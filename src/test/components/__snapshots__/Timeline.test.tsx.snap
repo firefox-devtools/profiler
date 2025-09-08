@@ -51,7 +51,7 @@ exports[`TimelineSelection does not crash when there are no samples or markers 1
           class="overflowEdgeIndicatorEdge leftEdge"
         />
         <div
-          class="overflowEdgeIndicatorScrollbox tracksContainer timelineOverflowEdgeIndicatorScrollbox"
+          class="overflowEdgeIndicatorScrollbox"
         >
           <div
             class="overflowEdgeIndicatorContentsWrapper"
@@ -385,7 +385,7 @@ exports[`TimelineSelection renders the vertical line indicating the time positio
           class="overflowEdgeIndicatorEdge leftEdge"
         />
         <div
-          class="overflowEdgeIndicatorScrollbox tracksContainer timelineOverflowEdgeIndicatorScrollbox"
+          class="overflowEdgeIndicatorScrollbox"
         >
           <div
             class="overflowEdgeIndicatorContentsWrapper"

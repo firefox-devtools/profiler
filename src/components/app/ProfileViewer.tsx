@@ -5,6 +5,7 @@
 import { PureComponent } from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
+import { ResizableWithSplitter } from 'firefox-profiler/components/shared/ResizableWithSplitter';
 import { DetailsContainer } from './DetailsContainer';
 import { SourceCodeFetcher } from './SourceCodeFetcher';
 import { AssemblyCodeFetcher } from './AssemblyCodeFetcher';
@@ -20,8 +21,6 @@ import { KeyboardShortcut } from './KeyboardShortcut';
 import { returnToZipFileList } from 'firefox-profiler/actions/zipped-profiles';
 import { Timeline } from 'firefox-profiler/components/timeline';
 import { getHasZipFile } from 'firefox-profiler/selectors/zipped-profiles';
-import SplitterLayout from 'react-splitter-layout';
-import { invalidatePanelLayout } from 'firefox-profiler/actions/app';
 import { getTimelineHeight } from 'firefox-profiler/selectors/app';
 import { getIsBottomBoxOpen } from 'firefox-profiler/selectors/url-state';
 import {
@@ -54,7 +53,6 @@ type StateProps = {
 
 type DispatchProps = {
   readonly returnToZipFileList: typeof returnToZipFileList;
-  readonly invalidatePanelLayout: typeof invalidatePanelLayout;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -64,7 +62,6 @@ class ProfileViewerImpl extends PureComponent<Props> {
     const {
       hasZipFile,
       returnToZipFileList,
-      invalidatePanelLayout,
       timelineHeight,
       isUploading,
       uploadProgress,
@@ -129,30 +126,26 @@ class ProfileViewerImpl extends PureComponent<Props> {
               />
             ) : null}
           </div>
-          <SplitterLayout
-            customClassName="profileViewerSplitter"
-            vertical
-            percentage={false}
-            // The DetailsContainer is primary.
-            primaryIndex={1}
-            // The Timeline is secondary.
-            secondaryInitialSize={270}
-            onDragEnd={invalidatePanelLayout}
+          <ResizableWithSplitter
+            splitterPosition="end"
+            controlledProperty="max-height"
+            percent={false}
+            initialSize="270px"
           >
             <Timeline />
-            <SplitterLayout
-              vertical
-              percentage={true}
-              // The DetailsContainer is primary.
-              primaryIndex={0}
-              // The BottomBox is secondary.
-              secondaryInitialSize={40}
-              onDragEnd={invalidatePanelLayout}
+          </ResizableWithSplitter>
+          <DetailsContainer />
+          {isBottomBoxOpen ? (
+            <ResizableWithSplitter
+              className=""
+              splitterPosition="start"
+              controlledProperty="height"
+              percent={true}
+              initialSize="40%"
             >
-              <DetailsContainer />
-              {isBottomBoxOpen ? <BottomBox /> : null}
-            </SplitterLayout>
-          </SplitterLayout>
+              <BottomBox />
+            </ResizableWithSplitter>
+          ) : null}
           <SymbolicationStatusOverlay />
           <BeforeUnloadManager />
           <DebugWarning />
@@ -178,7 +171,6 @@ export const ProfileViewer = explicitConnect<{}, StateProps, DispatchProps>({
   }),
   mapDispatchToProps: {
     returnToZipFileList,
-    invalidatePanelLayout,
   },
   component: ProfileViewerImpl,
 });
