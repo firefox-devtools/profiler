@@ -33,8 +33,17 @@ import type {
   MarkerTiming,
   MarkerTimingAndBuckets,
   MarkerIndex,
+  MarkerSchemaByName,
+  GraphColor,
 } from 'firefox-profiler/types';
 import { getStartEndRangeForMarker } from 'firefox-profiler/utils';
+import {
+  getStrokeColor,
+  getFillColor,
+  getDotColor,
+  isValidGraphColor,
+} from 'firefox-profiler/profile-logic/graph-color';
+import { getSchemaFromMarker } from 'firefox-profiler/profile-logic/marker-schema';
 
 import type {
   ChartCanvasScale,
@@ -59,6 +68,7 @@ type OwnProps = {
   readonly rowHeight: CssPixels;
   readonly getMarker: (param: MarkerIndex) => Marker;
   readonly getMarkerLabel: (param: MarkerIndex) => string;
+  readonly markerSchemaByName: MarkerSchemaByName;
   readonly markerListLength: number;
   readonly threadsKey: ThreadsKey;
   readonly updatePreviewSelection: WrapFunctionInDispatch<UpdatePreviewSelection>;
@@ -82,9 +92,63 @@ const TEXT_OFFSET_START = 3;
 const MARKER_DOT_RADIUS = 0.25;
 const LABEL_PADDING = 5;
 const MARKER_BORDER_COLOR = '#2c77d1';
+const DEFAULT_FILL_COLOR = '#8ac4ff'; // Light blue for non-highlighted
 
 class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   _textMeasurement: TextMeasurement | null = null;
+
+  /**
+   * Get the fill and stroke colors for a marker based on its schema and data.
+   * If the marker schema has a colorField, use that field's value.
+   * Fall back to default blue if no color is specified.
+   */
+  _getMarkerColors(
+    markerIndex: MarkerIndex,
+    isHighlighted: boolean
+  ): {
+    fillColor: string;
+    strokeColor: string;
+  } {
+    const { getMarker, markerSchemaByName } = this.props;
+    const marker = getMarker(markerIndex);
+
+    let color: GraphColor | null = null;
+
+    // Try to get color from the marker schema's colorField
+    const schema = getSchemaFromMarker(markerSchemaByName, marker.data);
+
+    if (
+      schema &&
+      schema.colorField &&
+      marker.data &&
+      typeof marker.data === 'object'
+    ) {
+      // Use type assertion to safely access dynamic property
+      const fieldValue = (marker.data as any)[schema.colorField];
+      // Validate that the field value is a valid GraphColor
+      if (typeof fieldValue === 'string' && isValidGraphColor(fieldValue)) {
+        color = fieldValue as GraphColor;
+      }
+    }
+
+    if (color) {
+      if (isHighlighted) {
+        return {
+          fillColor: getStrokeColor(color),
+          strokeColor: getDotColor(color),
+        };
+      }
+      return {
+        fillColor: getFillColor(color),
+        strokeColor: getStrokeColor(color),
+      };
+    }
+    // Fall back to default blue colors
+    return {
+      fillColor: isHighlighted ? BLUE_60 : DEFAULT_FILL_COLOR,
+      strokeColor: isHighlighted ? BLUE_80 : MARKER_BORDER_COLOR,
+    };
+  }
 
   drawCanvas = (
     ctx: CanvasRenderingContext2D,
@@ -232,7 +296,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     isHighlighted: boolean = false
   ) {
     if (isInstantMarker) {
-      this.drawOneInstantMarker(ctx, x, y, h, isHighlighted);
+      this.drawOneInstantMarker(ctx, x, y, h, markerIndex, isHighlighted);
     } else {
       this.drawOneIntervalMarker(ctx, x, y, w, h, markerIndex, isHighlighted);
     }
@@ -248,6 +312,10 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     isHighlighted: boolean
   ) {
     const { marginLeft, getMarkerLabel } = this.props;
+    const { fillColor, strokeColor } = this._getMarkerColors(
+      markerIndex,
+      isHighlighted
+    );
 
     if (w <= 2) {
       // This is an interval marker small enough that if we drew it as a
@@ -255,7 +323,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       // the rectangle-with-borders would only be borders. With less than 2
       // pixels, the borders would collapse.
       // So let's draw it directly as a rect.
-      ctx.fillStyle = isHighlighted ? BLUE_80 : MARKER_BORDER_COLOR;
+      ctx.fillStyle = strokeColor;
 
       // w is rounded in the caller, but let's make sure it's at least 1.
       w = Math.max(w, 1);
@@ -264,8 +332,8 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       // This is a bigger interval marker.
       const textMeasurement = this._getTextMeasurement(ctx);
 
-      ctx.fillStyle = isHighlighted ? BLUE_60 : '#8ac4ff';
-      ctx.strokeStyle = isHighlighted ? BLUE_80 : MARKER_BORDER_COLOR;
+      ctx.fillStyle = fillColor;
+      ctx.strokeStyle = strokeColor;
 
       ctx.beginPath();
 
@@ -312,10 +380,15 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     x: CssPixels,
     y: CssPixels,
     h: CssPixels,
+    markerIndex: MarkerIndex,
     isHighlighted: boolean
   ) {
-    ctx.fillStyle = isHighlighted ? BLUE_60 : '#8ac4ff';
-    ctx.strokeStyle = isHighlighted ? BLUE_80 : MARKER_BORDER_COLOR;
+    const { fillColor, strokeColor } = this._getMarkerColors(
+      markerIndex,
+      isHighlighted
+    );
+    ctx.fillStyle = fillColor;
+    ctx.strokeStyle = strokeColor;
 
     // We're drawing a diamond shape, whose height is h - 2, and width is h / 2.
     ctx.beginPath();
