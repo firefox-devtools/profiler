@@ -12,6 +12,7 @@ import type {
   UploadPhase,
   Reducer,
   State,
+  SanitizedProfileEncodingState,
 } from 'firefox-profiler/types';
 
 function _getSanitizingSharingOptions(): CheckedSharingOptions {
@@ -212,8 +213,43 @@ const hasSanitizedProfile: Reducer<boolean> = (state = false, action) => {
   }
 };
 
+const sanitizedProfileEncodingState: Reducer<SanitizedProfileEncodingState> = (
+  state = { phase: 'INITIAL' },
+  action
+): SanitizedProfileEncodingState => {
+  switch (action.type) {
+    case 'SANITIZED_PROFILE_ENCODING_STARTED': {
+      const { sanitizedProfile } = action;
+      return { phase: 'ENCODING', sanitizedProfile };
+    }
+    case 'SANITIZED_PROFILE_ENCODING_COMPLETED': {
+      const { sanitizedProfile, profileData } = action;
+      if (
+        state.phase === 'ENCODING' &&
+        state.sanitizedProfile === sanitizedProfile
+      ) {
+        return { phase: 'DONE', sanitizedProfile, profileData };
+      }
+      return state; // Ignore updates from earlier encodings.
+    }
+    case 'SANITIZED_PROFILE_ENCODING_FAILED': {
+      const { sanitizedProfile, error } = action;
+      if (
+        state.phase === 'ENCODING' &&
+        state.sanitizedProfile === sanitizedProfile
+      ) {
+        return { phase: 'ERROR', sanitizedProfile, error };
+      }
+      return state; // Ignore updates from earlier encodings.
+    }
+    default:
+      return state;
+  }
+};
+
 const publishReducer: Reducer<PublishState> = combineReducers({
   checkedSharingOptions,
+  sanitizedProfileEncodingState,
   upload,
   isHidingStaleProfile,
   hasSanitizedProfile,

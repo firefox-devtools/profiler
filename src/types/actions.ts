@@ -603,6 +603,20 @@ type PublishAction =
       readonly value: boolean;
     }
   | {
+      readonly type: 'SANITIZED_PROFILE_ENCODING_STARTED';
+      readonly sanitizedProfile: Profile;
+    }
+  | {
+      readonly type: 'SANITIZED_PROFILE_ENCODING_COMPLETED';
+      readonly sanitizedProfile: Profile;
+      readonly profileData: Blob;
+    }
+  | {
+      readonly type: 'SANITIZED_PROFILE_ENCODING_FAILED';
+      readonly sanitizedProfile: Profile;
+      readonly error: Error;
+    }
+  | {
       readonly type: 'UPLOAD_STARTED';
     }
   | {
