@@ -4,10 +4,12 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
+import type { InflightProfileEncoding } from 'firefox-profiler/actions/publish';
 import {
   updateSharingOption,
   attemptToPublish,
   resetUploadState,
+  encodeSanitizedProfile,
 } from 'firefox-profiler/actions/publish';
 import {
   getProfile,
@@ -19,12 +21,12 @@ import {
   getAbortFunction,
   getCheckedSharingOptions,
   getFilenameString,
-  getSanitizedProfileData,
   getUploadPhase,
   getUploadProgress,
   getUploadProgressString,
   getUploadError,
   getShouldSanitizeByDefault,
+  getSanitizedProfileEncodingState,
 } from 'firefox-profiler/selectors/publish';
 import { BlobUrlLink } from 'firefox-profiler/components/shared/BlobUrlLink';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
@@ -41,6 +43,7 @@ import type {
   CheckedSharingOptions,
   StartEndRange,
   UploadPhase,
+  SanitizedProfileEncodingState,
 } from 'firefox-profiler/types';
 
 import './Publish.css';
@@ -56,7 +59,7 @@ type StateProps = {
   readonly shouldShowPreferenceOption: boolean;
   readonly profileContainsPrivateBrowsingInformation: boolean;
   readonly checkedSharingOptions: CheckedSharingOptions;
-  readonly sanitizedProfileDataPromise: Promise<Uint8Array>;
+  readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
   readonly downloadFileName: string;
   readonly uploadPhase: UploadPhase;
   readonly uploadProgress: number;
@@ -68,23 +71,28 @@ type StateProps = {
 
 type DispatchProps = {
   readonly updateSharingOption: typeof updateSharingOption;
+  readonly encodeSanitizedProfile: typeof encodeSanitizedProfile;
   readonly attemptToPublish: typeof attemptToPublish;
   readonly resetUploadState: typeof resetUploadState;
 };
 
 type PublishProps = ConnectedProps<OwnProps, StateProps, DispatchProps>;
-type PublishState = {
-  compressError: Error | string | null;
-  prevCompressedPromise: Promise<Uint8Array> | null;
-};
 
-class PublishPanelImpl extends React.PureComponent<PublishProps, PublishState> {
-  override state = { compressError: null, prevCompressedPromise: null };
+class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
+  _inflightEncoding: InflightProfileEncoding | undefined;
+
+  override componentDidMount(): void {
+    this._inflightEncoding = this.props.encodeSanitizedProfile();
+  }
 
   _onCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const sharingOption = e.target.name as keyof CheckedSharingOptions;
     this.props.updateSharingOption(sharingOption, e.target.checked);
-  }
+
+    this._inflightEncoding = this.props.encodeSanitizedProfile(
+      this._inflightEncoding
+    );
+  };
 
   _renderCheckbox(
     slug: keyof CheckedSharingOptions,
@@ -107,30 +115,15 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, PublishState> {
     );
   }
 
-  static getDerivedStateFromProps(
-    props: PublishProps,
-    state: PublishState
-  ): Partial<PublishState> | null {
-    if (state.prevCompressedPromise !== props.sanitizedProfileDataPromise) {
-      return {
-        // Invalidate the old error info
-        prevCompressedPromise: props.sanitizedProfileDataPromise,
-        compressError: null,
-      };
-    }
-    return null;
-  }
-
-  _onCompressError = (error: Error | string) => {
-    this.setState({ compressError: error });
+  _onSubmit = () => {
+    this.props.attemptToPublish(this._inflightEncoding);
   };
 
   _renderPublishPanel() {
     const {
       shouldShowPreferenceOption,
       profileContainsPrivateBrowsingInformation,
-      sanitizedProfileDataPromise,
-      attemptToPublish,
+      sanitizedProfileEncodingState,
       downloadFileName,
       shouldSanitizeByDefault,
       isRepublish,
@@ -140,7 +133,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, PublishState> {
       <div data-testid="PublishPanel-container">
         <form
           className="publishPanelContent photon-body-10"
-          onSubmit={attemptToPublish}
+          onSubmit={this._onSubmit}
         >
           <h1 className="publishPanelTitle photon-title-40">
             {isRepublish ? (
@@ -218,7 +211,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, PublishState> {
                 )
               : null}
           </div>
-          {this.state.compressError ? (
+          {sanitizedProfileEncodingState.phase === 'ERROR' ? (
             <div className="photon-message-bar photon-message-bar-error photon-message-bar-inner-content">
               <div className="photon-message-bar-inner-text">
                 <Localized id="MenuButtons--publish--error-while-compressing">
@@ -231,13 +224,12 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, PublishState> {
           <div className="publishPanelButtons">
             <DownloadButton
               downloadFileName={downloadFileName}
-              sanitizedProfileDataPromise={sanitizedProfileDataPromise}
-              onCompressError={this._onCompressError}
+              sanitizedProfileEncodingState={sanitizedProfileEncodingState}
             />
             <button
               type="submit"
               className="photon-button photon-button-primary publishPanelButton publishPanelButtonsUpload"
-              disabled={!!this.state.compressError}
+              disabled={sanitizedProfileEncodingState.phase === 'ERROR'}
             >
               <span className="publishPanelButtonsSvg publishPanelButtonsSvgUpload" />
               <Localized id="MenuButtons--publish--button-upload">
@@ -256,7 +248,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, PublishState> {
       uploadProgressString,
       abortFunction,
       downloadFileName,
-      sanitizedProfileDataPromise,
+      sanitizedProfileEncodingState,
     } = this.props;
 
     return (
@@ -283,8 +275,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, PublishState> {
         <div className="publishPanelButtons">
           <DownloadButton
             downloadFileName={downloadFileName}
-            sanitizedProfileDataPromise={sanitizedProfileDataPromise}
-            onCompressError={this._onCompressError}
+            sanitizedProfileEncodingState={sanitizedProfileEncodingState}
           />
           <button
             type="button"
@@ -372,7 +363,7 @@ export const PublishPanel = explicitConnect<
       getContainsPrivateBrowsingInformation(state),
     checkedSharingOptions: getCheckedSharingOptions(state),
     downloadFileName: getFilenameString(state),
-    sanitizedProfileDataPromise: getSanitizedProfileData(state),
+    sanitizedProfileEncodingState: getSanitizedProfileEncodingState(state),
     uploadPhase: getUploadPhase(state),
     uploadProgress: getUploadProgress(state),
     uploadProgressString: getUploadProgressString(state),
@@ -382,6 +373,7 @@ export const PublishPanel = explicitConnect<
   }),
   mapDispatchToProps: {
     updateSharingOption,
+    encodeSanitizedProfile,
     attemptToPublish,
     resetUploadState,
   },
@@ -389,126 +381,58 @@ export const PublishPanel = explicitConnect<
 });
 
 type DownloadButtonProps = {
-  readonly sanitizedProfileDataPromise: Promise<Uint8Array>;
+  readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
   readonly downloadFileName: string;
-  readonly onCompressError: (param: Error | string) => void;
-};
-
-type DownloadButtonState = {
-  sanitizedProfileData: Uint8Array | null;
-  prevPromise: Promise<Uint8Array> | null;
-  error: Error | string | null;
 };
 
 /**
  * The DownloadButton handles unpacking the compressed profile promise.
  */
-class DownloadButton extends React.PureComponent<
-  DownloadButtonProps,
-  DownloadButtonState
-> {
-  _isMounted: boolean = false;
-  override state = {
-    sanitizedProfileData: null,
-    prevPromise: null,
-    error: null,
-  };
-
-  static getDerivedStateFromProps(
-    props: DownloadButtonProps,
-    state: DownloadButtonState
-  ): Partial<DownloadButtonState> | null {
-    if (state.prevPromise !== props.sanitizedProfileDataPromise) {
-      return {
-        // Invalidate the old download size.
-        sanitizedProfileData: null,
-        prevPromise: props.sanitizedProfileDataPromise,
-        error: null,
-      };
-    }
-    return null;
-  }
-
-  _unwrapPromise() {
-    const { sanitizedProfileDataPromise } = this.props;
-    sanitizedProfileDataPromise.then(
-      (sanitizedProfileData) => {
-        if (this._isMounted) {
-          this.setState({ sanitizedProfileData, error: null });
-        }
-      },
-      (error) => {
-        if (this._isMounted) {
-          this.props.onCompressError(error);
-          console.error('Error while compressing the profile data', error);
-          this.setState({ sanitizedProfileData: null, error });
-        }
-      }
-    );
-  }
-
-  override componentDidMount() {
-    this._isMounted = true;
-    this._unwrapPromise();
-  }
-
-  override componentDidUpdate(prevProps: DownloadButtonProps) {
-    if (
-      prevProps.sanitizedProfileDataPromise !==
-      this.props.sanitizedProfileDataPromise
-    ) {
-      this._unwrapPromise();
-    }
-  }
-
-  override componentWillUnmount() {
-    this._isMounted = false;
-  }
-
+class DownloadButton extends React.PureComponent<DownloadButtonProps, {}> {
   override render() {
-    const { downloadFileName } = this.props;
-    const { sanitizedProfileData, error } = this.state;
+    const { sanitizedProfileEncodingState, downloadFileName } = this.props;
     const className =
       'photon-button publishPanelButton publishPanelButtonsDownload';
 
-    if (sanitizedProfileData) {
-      const blob = new Blob([sanitizedProfileData], {
-        type: 'application/octet-binary',
-      });
-      return (
-        <BlobUrlLink
-          {...{
-            blob,
-            download: `${downloadFileName}.gz`,
-            className,
-          }}
-        >
-          <span className="publishPanelButtonsSvg publishPanelButtonsSvgDownload" />
-          <Localized id="MenuButtons--publish--download">Download</Localized>{' '}
-          <span className="menuButtonsDownloadSize">
-            ({prettyBytes(blob.size)})
-          </span>
-        </BlobUrlLink>
-      );
+    switch (sanitizedProfileEncodingState.phase) {
+      case 'DONE': {
+        const { profileData } = sanitizedProfileEncodingState;
+        return (
+          <BlobUrlLink
+            blob={profileData}
+            download={`${downloadFileName}.gz`}
+            className={className}
+          >
+            <span className="publishPanelButtonsSvg publishPanelButtonsSvgDownload" />
+            <Localized id="MenuButtons--publish--download">Download</Localized>{' '}
+            <span className="menuButtonsDownloadSize">
+              ({prettyBytes(profileData.size)})
+            </span>
+          </BlobUrlLink>
+        );
+      }
+      case 'ERROR': {
+        return (
+          <button type="button" className={className} disabled>
+            <Localized id="MenuButtons--publish--download">Download</Localized>
+          </button>
+        );
+      }
+      case 'INITIAL':
+      case 'ENCODING': {
+        return (
+          <button
+            type="button"
+            className={classNames(className, 'publishPanelButtonDisabled')}
+          >
+            <Localized id="MenuButtons--publish--compressing">
+              Compressing…
+            </Localized>
+          </button>
+        );
+      }
+      default:
+        throw assertExhaustiveCheck(sanitizedProfileEncodingState);
     }
-
-    if (error) {
-      return (
-        <button type="button" className={className} disabled>
-          <Localized id="MenuButtons--publish--download">Download</Localized>
-        </button>
-      );
-    }
-
-    return (
-      <button
-        type="button"
-        className={classNames(className, 'publishPanelButtonDisabled')}
-      >
-        <Localized id="MenuButtons--publish--compressing">
-          Compressing…
-        </Localized>
-      </button>
-    );
   }
 }

@@ -204,8 +204,21 @@ export type UploadState = {
   generation: number;
 };
 
+export type SanitizedProfileEncodingState =
+  | {
+      phase: 'INITIAL';
+    }
+  | { phase: 'ENCODING'; sanitizedProfile: Profile }
+  | {
+      phase: 'DONE';
+      sanitizedProfile: Profile;
+      profileData: Blob;
+    }
+  | { phase: 'ERROR'; sanitizedProfile: Profile; error: Error };
+
 export type PublishState = {
   readonly checkedSharingOptions: CheckedSharingOptions;
+  readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
   readonly upload: UploadState;
   readonly isHidingStaleProfile: boolean;
   readonly hasSanitizedProfile: boolean;
