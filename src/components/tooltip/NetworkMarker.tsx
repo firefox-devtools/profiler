@@ -46,7 +46,7 @@ const HUMAN_LABEL_FOR_PHASE: Record<NetworkPhaseName, string> = {
   connectEnd: 'Waiting for HTTP request',
   requestStart: 'HTTP request and waiting for response',
   responseStart: 'HTTP response',
-  responseEnd: 'Waiting to transmit the response',
+  responseEnd: 'Waiting for main thread',
   endTime: 'End',
 };
 
