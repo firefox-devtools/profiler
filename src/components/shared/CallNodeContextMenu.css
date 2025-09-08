@@ -16,19 +16,19 @@
 }
 
 .callNodeContextMenuIconMerge {
-  background-image: url(firefox-profiler-res/img/svg/merge-icon.svg);
+  background-image: url(../../../res/img/svg/merge-icon.svg);
 }
 
 .callNodeContextMenuIconCollapse {
-  background-image: url(firefox-profiler-res/img/svg/collapse-icon.svg);
+  background-image: url(../../../res/img/svg/collapse-icon.svg);
 }
 
 .callNodeContextMenuIconFocus {
-  background-image: url(firefox-profiler-res/img/svg/focus-icon.svg);
+  background-image: url(../../../res/img/svg/focus-icon.svg);
 }
 
 .callNodeContextMenuIconDrop {
-  background-image: url(firefox-profiler-res/img/svg/drop-icon.svg);
+  background-image: url(../../../res/img/svg/drop-icon.svg);
 }
 
 .callNodeContextMenuShortcut {

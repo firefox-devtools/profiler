@@ -10,45 +10,45 @@
 
 /* Here are all icons for the marker context menu. */
 .markerContextMenuIconSetSelectionFromMarker {
-  background-image: url(firefox-profiler-res/img/svg/set-selection-from-marker.svg);
+  background-image: url(../../../res/img/svg/set-selection-from-marker.svg);
 }
 
 .markerContextMenuIconStartSelectionHere, /* <- for dot markers */
 .markerContextMenuIconStartSelectionAtMarkerStart /* <- for interval markers */ {
-  background-image: url(firefox-profiler-res/img/svg/start-selection-at-marker-start.svg);
+  background-image: url(../../../res/img/svg/start-selection-at-marker-start.svg);
 }
 
 .markerContextMenuIconStartSelectionAtMarkerEnd {
-  background-image: url(firefox-profiler-res/img/svg/start-selection-at-marker-end.svg);
+  background-image: url(../../../res/img/svg/start-selection-at-marker-end.svg);
 }
 
 .markerContextMenuIconEndSelectionAtMarkerStart {
-  background-image: url(firefox-profiler-res/img/svg/end-selection-at-marker-start.svg);
+  background-image: url(../../../res/img/svg/end-selection-at-marker-start.svg);
 }
 
 .markerContextMenuIconEndSelectionHere, /* <- for dot markers */
 .markerContextMenuIconEndSelectionAtMarkerEnd /* <- for interval markers */ {
-  background-image: url(firefox-profiler-res/img/svg/end-selection-at-marker-end.svg);
+  background-image: url(../../../res/img/svg/end-selection-at-marker-end.svg);
 }
 
 .markerContextMenuIconCopyDescription {
-  background-image: url(firefox-profiler-res/img/svg/copy-dark.svg);
+  background-image: url(../../../res/img/svg/copy-dark.svg);
 }
 
 .markerContextMenuIconCopyStack {
-  background-image: url(firefox-profiler-res/img/svg/copy-marker-stack.svg);
+  background-image: url(../../../res/img/svg/copy-marker-stack.svg);
 }
 
 .markerContextMenuIconCopyUrl {
-  background-image: url(firefox-profiler-res/img/svg/globe-dark.svg);
+  background-image: url(../../../res/img/svg/globe-dark.svg);
 }
 
 .markerContextMenuIconCopyPayload {
-  background-image: url(firefox-profiler-res/img/svg/copy-marker-payload.svg);
+  background-image: url(../../../res/img/svg/copy-marker-payload.svg);
 }
 
 .markerContextMenuSelectThread {
-  background-image: url(firefox-profiler-res/img/svg/select-thread.svg);
+  background-image: url(../../../res/img/svg/select-thread.svg);
 }
 
 /* These icons don't look nice when selected, unless if we invert them. However
