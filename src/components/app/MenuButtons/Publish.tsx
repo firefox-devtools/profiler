@@ -78,10 +78,7 @@ type PublishState = {
   prevCompressedPromise: Promise<Uint8Array> | null;
 };
 
-class MenuButtonsPublishImpl extends React.PureComponent<
-  PublishProps,
-  PublishState
-> {
+class PublishPanelImpl extends React.PureComponent<PublishProps, PublishState> {
   override state = { compressError: null, prevCompressedPromise: null };
 
   _onCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,7 +93,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
   ) {
     const { checkedSharingOptions } = this.props;
     return (
-      <label className="photon-label menuButtonsPublishDataChoicesLabel">
+      <label className="photon-label publishPanelDataChoicesLabel">
         <input
           type="checkbox"
           className="photon-checkbox photon-checkbox-default"
@@ -140,12 +137,12 @@ class MenuButtonsPublishImpl extends React.PureComponent<
     } = this.props;
 
     return (
-      <div data-testid="MenuButtonsPublish-container">
+      <div data-testid="PublishPanel-container">
         <form
-          className="menuButtonsPublishContent photon-body-10"
+          className="publishPanelContent photon-body-10"
           onSubmit={attemptToPublish}
         >
-          <h1 className="menuButtonsPublishTitle photon-title-40">
+          <h1 className="publishPanelTitle photon-title-40">
             {isRepublish ? (
               <Localized id="MenuButtons--publish--reupload-performance-profile">
                 Re-upload Performance Profile
@@ -156,7 +153,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
               </Localized>
             )}
           </h1>
-          <p className="menuButtonsPublishInfoDescription">
+          <p className="publishPanelInfoDescription">
             <Localized id="MenuButtons--publish--info-description">
               Upload your profile and make it accessible to anyone with the
               link.
@@ -177,7 +174,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
               Include additional data that may be identifiable
             </Localized>
           </h3>
-          <div className="menuButtonsPublishDataChoices">
+          <div className="publishPanelDataChoices">
             {this._renderCheckbox(
               'includeHiddenThreads',
               'MenuButtons--publish--renderCheckbox-label-hidden-threads'
@@ -213,7 +210,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
                     attrs={{ title: true }}
                   >
                     <img
-                      className="menuButtonsPublishDataChoicesIndicator"
+                      className="publishPanelDataChoicesIndicator"
                       src={WarningImage}
                       title="This profile contains private browsing data"
                     />
@@ -231,7 +228,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
               </div>
             </div>
           ) : null}
-          <div className="menuButtonsPublishButtons">
+          <div className="publishPanelButtons">
             <DownloadButton
               downloadFileName={downloadFileName}
               sanitizedProfileDataPromise={sanitizedProfileDataPromise}
@@ -239,10 +236,10 @@ class MenuButtonsPublishImpl extends React.PureComponent<
             />
             <button
               type="submit"
-              className="photon-button photon-button-primary menuButtonsPublishButton menuButtonsPublishButtonsUpload"
+              className="photon-button photon-button-primary publishPanelButton publishPanelButtonsUpload"
               disabled={!!this.state.compressError}
             >
-              <span className="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgUpload" />
+              <span className="publishPanelButtonsSvg publishPanelButtonsSvgUpload" />
               <Localized id="MenuButtons--publish--button-upload">
                 Upload
               </Localized>
@@ -264,26 +261,26 @@ class MenuButtonsPublishImpl extends React.PureComponent<
 
     return (
       <div
-        className="menuButtonsPublishUpload photon-body-10"
-        data-testid="MenuButtonsPublish-container"
+        className="publishPanelUpload photon-body-10"
+        data-testid="PublishPanel-container"
       >
-        <div className="menuButtonsPublishUploadTop">
-          <div className="menuButtonsPublishUploadTitle photon-title-20">
+        <div className="publishPanelUploadTop">
+          <div className="publishPanelUploadTitle photon-title-20">
             <Localized id="MenuButtons--publish--upload-title">
               Uploading profile…
             </Localized>
           </div>
-          <div className="menuButtonsPublishUploadPercentage">
+          <div className="publishPanelUploadPercentage">
             {uploadProgressString}
           </div>
-          <div className="menuButtonsPublishUploadBar">
+          <div className="publishPanelUploadBar">
             <div
-              className="menuButtonsPublishUploadBarInner"
+              className="publishPanelUploadBarInner"
               style={{ width: `${uploadProgress * 100}%` }}
             />
           </div>
         </div>
-        <div className="menuButtonsPublishButtons">
+        <div className="publishPanelButtons">
           <DownloadButton
             downloadFileName={downloadFileName}
             sanitizedProfileDataPromise={sanitizedProfileDataPromise}
@@ -291,7 +288,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
           />
           <button
             type="button"
-            className="photon-button photon-button-default menuButtonsPublishButton menuButtonsPublishButtonsCancelUpload"
+            className="photon-button photon-button-default publishPanelButton publishPanelButtonsCancelUpload"
             onClick={abortFunction}
           >
             <Localized id="MenuButtons--publish--cancel-upload">
@@ -321,8 +318,8 @@ class MenuButtonsPublishImpl extends React.PureComponent<
 
     return (
       <div
-        className="menuButtonsPublishUpload photon-body-10"
-        data-testid="MenuButtonsPublish-container"
+        className="publishPanelUpload photon-body-10"
+        data-testid="PublishPanel-container"
       >
         <div className="photon-message-bar photon-message-bar-error photon-message-bar-inner-content">
           <div className="photon-message-bar-inner-text">
@@ -340,7 +337,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
             </Localized>
           </button>
         </div>
-        <div className="menuButtonsPublishError">{message}</div>
+        <div className="publishPanelError">{message}</div>
       </div>
     );
   }
@@ -362,7 +359,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
   }
 }
 
-export const MenuButtonsPublish = explicitConnect<
+export const PublishPanel = explicitConnect<
   OwnProps,
   StateProps,
   DispatchProps
@@ -388,7 +385,7 @@ export const MenuButtonsPublish = explicitConnect<
     attemptToPublish,
     resetUploadState,
   },
-  component: MenuButtonsPublishImpl,
+  component: PublishPanelImpl,
 });
 
 type DownloadButtonProps = {
@@ -472,7 +469,7 @@ class DownloadButton extends React.PureComponent<
     const { downloadFileName } = this.props;
     const { sanitizedProfileData, error } = this.state;
     const className =
-      'photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload';
+      'photon-button publishPanelButton publishPanelButtonsDownload';
 
     if (sanitizedProfileData) {
       const blob = new Blob([sanitizedProfileData], {
@@ -486,7 +483,7 @@ class DownloadButton extends React.PureComponent<
             className,
           }}
         >
-          <span className="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgDownload" />
+          <span className="publishPanelButtonsSvg publishPanelButtonsSvgDownload" />
           <Localized id="MenuButtons--publish--download">Download</Localized>{' '}
           <span className="menuButtonsDownloadSize">
             ({prettyBytes(blob.size)})
@@ -506,7 +503,7 @@ class DownloadButton extends React.PureComponent<
     return (
       <button
         type="button"
-        className={classNames(className, 'menuButtonsPublishButtonDisabled')}
+        className={classNames(className, 'publishPanelButtonDisabled')}
       >
         <Localized id="MenuButtons--publish--compressing">
           Compressing…

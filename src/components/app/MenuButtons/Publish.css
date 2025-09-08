@@ -30,18 +30,18 @@
   background-image: url(../../../../res/img/svg/error.svg);
 }
 
-.menuButtonsPublishPanel {
+.publishPanelPanel {
   --width: 510px;
 }
 
-.menuButtonsPublishContent {
+.publishPanelContent {
   position: relative;
 
   /* This aligns all content, except the big icon. */
   padding-left: 70px;
 }
 
-.menuButtonsPublishTitle {
+.publishPanelTitle {
   /* "60px" This is the value to put the background image at the right location.
    * This background image is 44x44, so this puts it 16px left of the text. */
   padding-left: 60px;
@@ -50,32 +50,32 @@
   line-height: 44px; /* This is the height of the background image */
 }
 
-.menuButtonsPublishInfoDescription {
+.publishPanelInfoDescription {
   flex: 1;
   margin-bottom: 1em;
   line-height: 1.5;
 }
 
-.menuButtonsPublishDataChoices {
+.publishPanelDataChoices {
   margin-left: 10px;
 }
 
-.menuButtonsPublishDataChoicesLabel {
+.publishPanelDataChoicesLabel {
   display: flex;
   margin: 4px 0;
 }
 
-.menuButtonsPublishDataChoicesIndicator {
+.publishPanelDataChoicesIndicator {
   margin-left: 8px;
 }
 
-.menuButtonsPublishButtons {
+.publishPanelButtons {
   display: flex;
   justify-content: right;
   margin-top: 20px;
 }
 
-.menuButtonsPublishButton {
+.publishPanelButton {
   display: inline-flex;
   min-width: 132px;
   box-sizing: content-box;
@@ -87,16 +87,16 @@
   text-decoration: none;
 }
 
-.menuButtonsPublishButtonDisabled {
+.publishPanelButtonDisabled {
   opacity: 0.6;
 }
 
-.menuButtonsPublishButtonDisabled:hover,
-.menuButtonsPublishButtonDisabled:active:hover {
+.publishPanelButtonDisabled:hover,
+.publishPanelButtonDisabled:active:hover {
   background-color: var(--grey-90-a10);
 }
 
-.menuButtonsPublishButtonsSvg {
+.publishPanelButtonsSvg {
   position: relative;
   top: 4px;
   display: inline-block;
@@ -104,13 +104,13 @@
   margin-right: 5px;
 }
 
-.menuButtonsPublishButtonsSvgUpload {
+.publishPanelButtonsSvgUpload {
   width: 20px;
   height: 20px;
   background: url(../../../../res/img/svg/upload.svg) center center no-repeat;
 }
 
-.menuButtonsPublishButtonsSvgDownload {
+.publishPanelButtonsSvgDownload {
   width: 20px;
   height: 20px;
   background: url(../../../../res/img/svg/download.svg) center center no-repeat;
@@ -122,28 +122,28 @@
   font-size: 11px;
 }
 
-.menuButtonsPublishUpload {
+.publishPanelUpload {
   position: relative;
   padding: 10px 0;
 }
 
-.menuButtonsPublishUploadTop {
+.publishPanelUploadTop {
   margin: 10px;
 }
 
-.menuButtonsPublishUploadPercentage {
+.publishPanelUploadPercentage {
   margin: 10px 0;
   color: var(--blue-60);
 }
 
-.menuButtonsPublishUploadBar {
+.publishPanelUploadBar {
   overflow: hidden;
   height: 5px;
   border-radius: 2px;
   background-color: var(--grey-40);
 }
 
-.menuButtonsPublishUploadBarInner {
+.publishPanelUploadBarInner {
   position: absolute;
   top: 0;
   height: 3px;
@@ -173,13 +173,13 @@
   }
 }
 
-.menuButtonsPublishError {
+.publishPanelError {
   margin: 10px 0;
 }
 
 /* Do not animate the publish animation for stripes at the top loading bar. */
 @media (prefers-reduced-motion) {
-  .menuButtonsPublishUploadBarInner {
+  .publishPanelUploadBarInner {
     animation: none;
   }
 }
