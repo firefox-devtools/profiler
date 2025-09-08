@@ -52,10 +52,10 @@ const checkedSharingOptions: Reducer<CheckedSharingOptions> = (
         : _getMostlyNonSanitizingSharingOptions();
       return newState;
     }
-    case 'TOGGLE_CHECKED_SHARING_OPTION':
+    case 'UPDATE_SHARING_OPTION':
       return {
         ...state,
-        [action.slug]: !state[action.slug],
+        [action.slug]: action.value,
       };
     default:
       return state;

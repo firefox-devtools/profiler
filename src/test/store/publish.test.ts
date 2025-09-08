@@ -5,7 +5,7 @@
 import {
   attemptToPublish,
   resetUploadState,
-  toggleCheckedSharingOptions,
+  updateSharingOption,
   revertToPrePublishedState,
 } from '../../actions/publish';
 import { changeSelectedTab } from '../../actions/app';
@@ -127,8 +127,8 @@ describe('getCheckedSharingOptions', function () {
     });
   });
 
-  describe('toggleCheckedSharingOptions', function () {
-    it('can toggle options', function () {
+  describe('updateSharingOption', function () {
+    it('can update options', function () {
       const { profile } = getProfileFromTextSamples('A');
       // This will cause the profile to be sanitized by default when uploading.
       profile.meta.updateChannel = 'release';
@@ -138,13 +138,13 @@ describe('getCheckedSharingOptions', function () {
         includeHiddenThreads: false,
       });
 
-      dispatch(toggleCheckedSharingOptions('includeHiddenThreads'));
+      dispatch(updateSharingOption('includeHiddenThreads', true));
 
       expect(getCheckedSharingOptions(getState())).toMatchObject({
         includeHiddenThreads: true,
       });
 
-      dispatch(toggleCheckedSharingOptions('includeHiddenThreads'));
+      dispatch(updateSharingOption('includeHiddenThreads', false));
 
       expect(getCheckedSharingOptions(getState())).toMatchObject({
         includeHiddenThreads: false,
@@ -160,7 +160,7 @@ describe('getRemoveProfileInformation', function () {
     expect(getHasPreferenceMarkers(getState())).toEqual(false);
 
     // Setting includePreferenceValues option to false
-    dispatch(toggleCheckedSharingOptions('includePreferenceValues'));
+    dispatch(updateSharingOption('includePreferenceValues', false));
     expect(
       getCheckedSharingOptions(getState()).includePreferenceValues
     ).toEqual(false);
@@ -202,8 +202,8 @@ describe('getRemoveProfileInformation', function () {
       '  - show [thread Thread <3>]',
     ]);
 
-    // Toggle the preference to remove hidden tracks
-    dispatch(toggleCheckedSharingOptions('includeHiddenThreads'));
+    // Change the preference to remove hidden tracks
+    dispatch(updateSharingOption('includeHiddenThreads', false));
     // Note: Jest doesn't check Set values with toMatchObject, so we're checking the
     // properties individually. See https://github.com/facebook/jest/issues/11250
     expect(
@@ -474,10 +474,7 @@ describe('attemptToPublish', function () {
     expect(getSelectedTab(getState())).toEqual(originalTab);
 
     // Ensure we are sanitizing something.
-    const sharingOptions = getCheckedSharingOptions(getState());
-    if (sharingOptions.includeUrls) {
-      dispatch(toggleCheckedSharingOptions('includeUrls'));
-    }
+    dispatch(updateSharingOption('includeUrls', false));
 
     // Now upload.
     const publishAttempt = dispatch(attemptToPublish());
@@ -776,7 +773,7 @@ describe('attemptToPublish', function () {
       abortFunction();
 
       // Then we check new options to sanitize the profile, and attempt a new publish.
-      dispatch(toggleCheckedSharingOptions('includeFullTimeRange'));
+      dispatch(updateSharingOption('includeFullTimeRange', false));
       expect(getRemoveProfileInformation(getState())).toMatchObject({
         shouldFilterToCommittedRange: { start: 1, end: 4 },
       });
