@@ -124,7 +124,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
             <MenuButtons />
             {isUploading ? (
               <div
-                className="menuButtonsPublishUploadBarInner"
+                className="publishPanelUploadBarInner"
                 style={{ width: `${uploadProgress * 100}%` }}
               />
             ) : null}
