@@ -24,6 +24,7 @@ import {
   YELLOW_60,
 } from 'photon-colors';
 
+import { mapCategoryColorNameToStyles } from 'firefox-profiler/utils/colors';
 import type { GraphColor } from 'firefox-profiler/types';
 
 export function getStrokeColor(color: GraphColor) {
@@ -83,6 +84,16 @@ export function getDotColor(color: GraphColor) {
     default:
       throw new Error('Unexpected track color: ' + color);
   }
+}
+
+/**
+ * Get the appropriate text color for a graph color background to ensure readability.
+ * Uses mapCategoryColorNameToStyles from colors.ts to get the predefined text colors.
+ */
+export function getTextColor(color: GraphColor): string {
+  // Most GraphColor values exist as keys in STYLE_MAP in colors.ts
+  const colorStyles = mapCategoryColorNameToStyles(color);
+  return colorStyles.selectedTextColor;
 }
 
 /**
