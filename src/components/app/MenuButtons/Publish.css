@@ -5,11 +5,11 @@
 /* These two background images build on the generic styles defined in
  * MenuButtons/index.css when using an icon. */
 .menuButtonsShareButtonButton::before {
-  background-image: url(firefox-profiler-res/img/svg/share-dark-12.svg);
+  background-image: url(../../../../res/img/svg/share-dark-12.svg);
 }
 
 .menuButtonsShareButtonButton-uploading::before {
-  background-image: url(firefox-profiler-res/img/svg/sharing-animated-dark-12.svg);
+  background-image: url(../../../../res/img/svg/sharing-animated-dark-12.svg);
 }
 
 .menuButtonsShareButtonError {
@@ -27,7 +27,7 @@
 }
 
 .menuButtonsShareButtonError::before {
-  background-image: url(firefox-profiler-res/img/svg/error.svg);
+  background-image: url(../../../../res/img/svg/error.svg);
 }
 
 .menuButtonsPublishPanel {
@@ -46,7 +46,7 @@
    * This background image is 44x44, so this puts it 16px left of the text. */
   padding-left: 60px;
   margin: 0 0 0 -60px;
-  background: url(firefox-profiler-res/img/svg/info.svg) left center no-repeat;
+  background: url(../../../../res/img/svg/info.svg) left center no-repeat;
   line-height: 44px; /* This is the height of the background image */
 }
 
@@ -107,15 +107,13 @@
 .menuButtonsPublishButtonsSvgUpload {
   width: 20px;
   height: 20px;
-  background: url(firefox-profiler-res/img/svg/upload.svg) center center
-    no-repeat;
+  background: url(../../../../res/img/svg/upload.svg) center center no-repeat;
 }
 
 .menuButtonsPublishButtonsSvgDownload {
   width: 20px;
   height: 20px;
-  background: url(firefox-profiler-res/img/svg/download.svg) center center
-    no-repeat;
+  background: url(../../../../res/img/svg/download.svg) center center no-repeat;
 }
 
 .menuButtonsDownloadSize {
