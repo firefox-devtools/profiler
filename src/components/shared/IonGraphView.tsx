@@ -25,5 +25,7 @@ export function IonGraphView(props: IonGraphViewProps) {
   if (!ionJSON?.functions[0]) {
     return <div />;
   }
-  return <GraphViewer func={ionJSON.functions[0]} sampleCounts={props.timings} />;
+  return (
+    <GraphViewer func={ionJSON.functions[0]} sampleCounts={props.timings} />
+  );
 }
