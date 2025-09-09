@@ -5,7 +5,7 @@
 /* This background image builds on the generic styles defined in
  * MenuButtons/index.css when using an icon. */
 .menuButtonsPermalinkButtonButton::before {
-  background-image: url(firefox-profiler-res/img/svg/link-dark-12.svg);
+  background-image: url(../../../../res/img/svg/link-dark-12.svg);
 }
 
 .menuButtonsPermalinkPanel .arrowPanelContent {

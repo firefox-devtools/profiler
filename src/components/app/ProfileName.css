@@ -26,7 +26,7 @@
 
 .profileNameButton::before {
   flex-shrink: 0;
-  background-image: url(firefox-profiler-res/img/svg/edit-name-profiler.svg);
+  background-image: url(../../../res/img/svg/edit-name-profiler.svg);
 }
 
 /* Using the style for links rather than for normal inputs, because we don't

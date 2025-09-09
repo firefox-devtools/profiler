@@ -84,3 +84,22 @@ export function getDotColor(color: GraphColor) {
       throw new Error('Unexpected track color: ' + color);
   }
 }
+
+/**
+ * Check if a string is a valid GraphColor value.
+ */
+export function isValidGraphColor(value: string): value is GraphColor {
+  const validColors: GraphColor[] = [
+    'blue',
+    'green',
+    'grey',
+    'ink',
+    'magenta',
+    'orange',
+    'purple',
+    'red',
+    'teal',
+    'yellow',
+  ];
+  return validColors.includes(value as GraphColor);
+}
