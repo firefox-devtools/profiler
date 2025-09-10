@@ -41,6 +41,7 @@ import {
   getStrokeColor,
   getFillColor,
   getDotColor,
+  getTextColor,
   isValidGraphColor,
 } from 'firefox-profiler/profile-logic/graph-color';
 import { getSchemaFromMarker } from 'firefox-profiler/profile-logic/marker-schema';
@@ -98,7 +99,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   _textMeasurement: TextMeasurement | null = null;
 
   /**
-   * Get the fill and stroke colors for a marker based on its schema and data.
+   * Get the fill, stroke, and text colors for a marker based on its schema and data.
    * If the marker schema has a colorField, use that field's value.
    * Fall back to default blue if no color is specified.
    */
@@ -108,6 +109,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   ): {
     fillColor: string;
     strokeColor: string;
+    textColor: string;
   } {
     const { getMarker, markerSchemaByName } = this.props;
     const marker = getMarker(markerIndex);
@@ -136,17 +138,20 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         return {
           fillColor: getStrokeColor(color),
           strokeColor: getDotColor(color),
+          textColor: getTextColor(color), // Use appropriate contrast color when highlighted
         };
       }
       return {
         fillColor: getFillColor(color),
         strokeColor: getStrokeColor(color),
+        textColor: '#000', // Always use black text for unselected markers
       };
     }
     // Fall back to default blue colors
     return {
       fillColor: isHighlighted ? BLUE_60 : DEFAULT_FILL_COLOR,
       strokeColor: isHighlighted ? BLUE_80 : MARKER_BORDER_COLOR,
+      textColor: isHighlighted ? 'white' : 'black', // White text on dark blue, black text on light blue
     };
   }
 
@@ -312,7 +317,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     isHighlighted: boolean
   ) {
     const { marginLeft, getMarkerLabel } = this.props;
-    const { fillColor, strokeColor } = this._getMarkerColors(
+    const { fillColor, strokeColor, textColor } = this._getMarkerColors(
       markerIndex,
       isHighlighted
     );
@@ -365,7 +370,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
           w2
         );
         if (fittedText) {
-          ctx.fillStyle = isHighlighted ? 'white' : 'black';
+          ctx.fillStyle = textColor;
           ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
         }
       }
