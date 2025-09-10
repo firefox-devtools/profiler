@@ -14,6 +14,7 @@ import { MarkerSettings } from 'firefox-profiler/components/shared/MarkerSetting
 import {
   getCommittedRange,
   getPreviewSelection,
+  getMarkerSchemaByName,
 } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
@@ -28,6 +29,7 @@ import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMe
 import type {
   Marker,
   MarkerIndex,
+  MarkerSchemaByName,
   MarkerTimingAndBuckets,
   UnitIntervalOfProfileRange,
   StartEndRange,
@@ -51,6 +53,7 @@ type DispatchProps = {
 type StateProps = {
   readonly getMarker: (param: MarkerIndex) => Marker;
   readonly getMarkerLabel: (param: MarkerIndex) => string;
+  readonly markerSchemaByName: MarkerSchemaByName;
   readonly markerTimingAndBuckets: MarkerTimingAndBuckets;
   readonly maxMarkerRows: number;
   readonly markerListLength: number;
@@ -106,6 +109,7 @@ class MarkerChartImpl extends React.PureComponent<Props> {
       markerTimingAndBuckets,
       getMarker,
       getMarkerLabel,
+      markerSchemaByName,
       previewSelection,
       updatePreviewSelection,
       changeMouseTimePosition,
@@ -152,6 +156,7 @@ class MarkerChartImpl extends React.PureComponent<Props> {
                 markerTimingAndBuckets,
                 getMarker,
                 getMarkerLabel,
+                markerSchemaByName,
                 markerListLength,
                 updatePreviewSelection,
                 changeMouseTimePosition,
@@ -190,6 +195,7 @@ export const MarkerChart = explicitConnect<{}, StateProps, DispatchProps>({
     return {
       getMarker: selectedThreadSelectors.getMarkerGetter(state),
       getMarkerLabel: selectedThreadSelectors.getMarkerChartLabelGetter(state),
+      markerSchemaByName: getMarkerSchemaByName(state),
       markerTimingAndBuckets,
       maxMarkerRows: markerTimingAndBuckets.length,
       markerListLength: selectedThreadSelectors.getMarkerListLength(state),

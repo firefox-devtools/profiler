@@ -2,107 +2,45 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import zeeWorkerPath from 'firefox-profiler-res/zee-worker.js';
+import gzWorkerPath from 'firefox-profiler-res/gz-worker.js';
 
-const zeeCallbacks: Array<{
-  success: (data: any) => void;
-  error: (error: any) => void;
-} | null> = [];
+function runGzWorker(
+  kind: 'compress' | 'decompress',
+  arrayData: Uint8Array<ArrayBuffer>
+): Promise<Uint8Array<ArrayBuffer>> {
+  return new Promise((resolve, reject) => {
+    // On-demand spawn the worker. If this is too slow we can look into keeping
+    // a pool of workers around.
+    const worker = new Worker(gzWorkerPath);
 
-type ZeeWorkerData = {
-  callbackID: number;
-  type: 'success' | 'error';
-  data: any;
-};
+    worker.onmessage = (e) => {
+      resolve(e.data as Uint8Array<ArrayBuffer>);
+      worker.terminate();
+    };
 
-function workerOnMessage(zeeWorker: Worker) {
-  zeeWorker.onmessage = function (msg: MessageEvent) {
-    const data = msg.data as ZeeWorkerData;
-    const callbacks = zeeCallbacks[data.callbackID];
-    if (callbacks) {
-      callbacks[data.type](data.data);
-      zeeCallbacks[data.callbackID] = null;
-    }
-  };
+    worker.onerror = (e) => {
+      reject(e.error);
+      worker.terminate();
+    };
+
+    worker.postMessage({ kind, arrayData }, [arrayData.buffer]);
+  });
 }
 
-// Neuters data's buffer, if data is a typed array.
+// This will transfer `data` if it is an array buffer.
 export async function compress(
-  data: string | Uint8Array,
-  compressionLevel?: number
+  data: string | Uint8Array<ArrayBuffer>
 ): Promise<Uint8Array<ArrayBuffer>> {
-  if (!(typeof window === 'object' && 'Worker' in window)) {
-    // Try to fall back to Node's zlib library.
-    const zlib = await import('zlib');
-    return new Promise((resolve, reject) => {
-      zlib.gzip(data, (errorOrNull, result) => {
-        if (errorOrNull) {
-          reject(errorOrNull);
-        } else {
-          resolve(new Uint8Array(result.buffer as ArrayBuffer));
-        }
-      });
-    });
-  }
-
-  const zeeWorker = new Worker(zeeWorkerPath);
-  workerOnMessage(zeeWorker);
-
+  // Encode the data if it's a string
   const arrayData =
     typeof data === 'string' ? new TextEncoder().encode(data) : data;
-  return new Promise(function (resolve, reject) {
-    zeeWorker.postMessage(
-      {
-        request: 'compress',
-        data: arrayData,
-        compressionLevel: compressionLevel,
-        callbackID: zeeCallbacks.length,
-      },
-      [arrayData.buffer]
-    );
-    zeeCallbacks.push({
-      success: resolve,
-      error: reject,
-    });
-  });
+  return runGzWorker('compress', arrayData);
 }
 
-// Neuters data's buffer, if data is a typed array.
-export async function decompress(data: Uint8Array): Promise<Uint8Array> {
-  if (!(typeof window === 'object' && 'Worker' in window)) {
-    // Handle the case where we're not running in the browser, e.g. when
-    // this code is used as part of a library in a Node project.
-    // We don't get here when running Firefox profiler tests, because our
-    // tests create a mock window with a mock Worker class.
-    // Try to fall back to Node's zlib library.
-    const zlib = await import('zlib');
-    return new Promise((resolve, reject) => {
-      zlib.gunzip(data, (errorOrNull, result) => {
-        if (errorOrNull) {
-          reject(errorOrNull);
-        } else {
-          resolve(new Uint8Array(result.buffer as ArrayBuffer));
-        }
-      });
-    });
-  }
-
-  const zeeWorker = new Worker(zeeWorkerPath);
-  return new Promise(function (resolve, reject) {
-    workerOnMessage(zeeWorker);
-    zeeWorker.postMessage(
-      {
-        request: 'decompress',
-        data: data,
-        callbackID: zeeCallbacks.length,
-      },
-      [data.buffer]
-    );
-    zeeCallbacks.push({
-      success: resolve,
-      error: reject,
-    });
-  });
+export async function decompress(
+  data: Uint8Array<ArrayBuffer>
+): Promise<Uint8Array<ArrayBuffer>> {
+  return runGzWorker('decompress', data);
 }
 
 export function isGzip(data: Uint8Array): boolean {

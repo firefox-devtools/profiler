@@ -17,6 +17,8 @@ export default [
     ignores: [
       'src/profile-logic/import/proto/**',
       'src/types/libdef/npm/**',
+      'res/**',
+      'dist/**',
       'docs-user/**',
       'coverage/**',
     ],

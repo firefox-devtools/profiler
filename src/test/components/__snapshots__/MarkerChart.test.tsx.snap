@@ -512,25 +512,27 @@ exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`
       title="Marker Filters"
       type="button"
     />
-    <nav
-      class="react-contextmenu markerFiltersContextMenu"
-      role="menu"
-      style="position: fixed; opacity: 0; pointer-events: none;"
-      tabindex="-1"
-    >
-      <div
-        aria-disabled="false"
-        class="react-contextmenu-item"
-        role="menuitem"
+    <div>
+      <nav
+        class="react-contextmenu markerFiltersContextMenu"
+        role="menu"
+        style="position: fixed; opacity: 0; pointer-events: none;"
         tabindex="-1"
       >
-        Drop samples outside of markers matching “
-        <strong>
-          ⁨⁩
-        </strong>
-        ”
-      </div>
-    </nav>
+        <div
+          aria-disabled="false"
+          class="react-contextmenu-item"
+          role="menuitem"
+          tabindex="-1"
+        >
+          Drop samples outside of markers matching “
+          <strong>
+            ⁨⁩
+          </strong>
+          ”
+        </div>
+      </nav>
+    </div>
   </div>
   <div
     class="react-contextmenu-wrapper treeViewContextMenu"

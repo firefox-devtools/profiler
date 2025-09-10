@@ -20,7 +20,7 @@
   flex: none;
   padding-right: 30px;
   margin: 0 4px;
-  background-image: url(firefox-profiler-res/img/svg/filter.svg);
+  background-image: url(../../../res/img/svg/filter.svg);
   background-position: 4px center;
   background-repeat: no-repeat;
 }
