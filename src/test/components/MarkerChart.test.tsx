@@ -4,6 +4,7 @@
 
 import { Provider } from 'react-redux';
 import { BLUE_60 } from 'photon-colors';
+import { getFillColor } from 'firefox-profiler/profile-logic/graph-color';
 
 // This module is mocked.
 import copy from 'copy-to-clipboard';
@@ -52,6 +53,9 @@ import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 import type { CssPixels, Profile } from 'firefox-profiler/types';
+
+// Constants matching those in Canvas.tsx
+const DEFAULT_FILL_COLOR = '#8ac4ff'; // Light blue for non-highlighted
 
 const MARKERS: TestDefinedMarker[] = [
   ['Marker A', 0, 10],
@@ -778,6 +782,127 @@ describe('MarkerChart', function () {
         dispatch(changeMarkersSearchString('MATCH_NOTHING'));
       });
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+    });
+  });
+
+  describe('Colored markers', () => {
+    function setupColoredMarkerTest(markers: TestDefinedMarker[]) {
+      const profile = getProfileWithMarkers(markers);
+
+      // Add marker schema with colorField to the profile
+      profile.meta.markerSchema = [
+        {
+          name: 'Test',
+          display: ['marker-chart', 'marker-table'],
+          fields: [
+            { key: 'status', label: 'Status', format: 'string' },
+            {
+              key: 'statusColor',
+              label: 'Color',
+              format: 'string',
+              hidden: true,
+            },
+          ],
+          colorField: 'statusColor',
+        },
+      ];
+
+      const { flushRafCalls } = setupWithProfile(profile);
+      flushRafCalls();
+      const drawLog = flushDrawLog();
+
+      // Find fillStyle operations in the draw log
+      const fillStyleOps = drawLog.filter(
+        (op: any) => Array.isArray(op) && op[0] === 'set fillStyle'
+      );
+
+      return fillStyleOps.map((op: any) => op[1]);
+    }
+
+    it('renders markers with colors specified in schema colorField', () => {
+      const markersWithColors: TestDefinedMarker[] = [
+        [
+          'Green Test',
+          0,
+          5,
+          {
+            type: 'Test',
+            status: 'success',
+            statusColor: 'green',
+          },
+        ],
+        [
+          'Red Test',
+          6,
+          10,
+          {
+            type: 'Test',
+            status: 'failure',
+            statusColor: 'red',
+          },
+        ],
+        [
+          'Yellow Test',
+          11,
+          15,
+          {
+            type: 'Test',
+            status: 'warning',
+            statusColor: 'yellow',
+          },
+        ],
+      ];
+
+      const fillColors = setupColoredMarkerTest(markersWithColors);
+
+      // The colors should include our marker colors with transparency
+      expect(fillColors).toEqual(
+        expect.arrayContaining([
+          getFillColor('green'),
+          getFillColor('red'),
+          getFillColor('yellow'),
+        ])
+      );
+    });
+
+    it('falls back to default blue for markers without color data', () => {
+      const markersWithoutColors: TestDefinedMarker[] = [
+        [
+          'Test without color',
+          0,
+          5,
+          {
+            type: 'Test',
+            status: 'unknown',
+            // No statusColor field
+          },
+        ],
+      ];
+
+      const fillColors = setupColoredMarkerTest(markersWithoutColors);
+
+      // Should use default blue color
+      expect(fillColors).toEqual(expect.arrayContaining([DEFAULT_FILL_COLOR]));
+    });
+
+    it('ignores invalid color values', () => {
+      const markersWithInvalidColors: TestDefinedMarker[] = [
+        [
+          'Invalid color test',
+          0,
+          5,
+          {
+            type: 'Test',
+            status: 'unknown',
+            statusColor: 'not-a-valid-color',
+          },
+        ],
+      ];
+
+      const fillColors = setupColoredMarkerTest(markersWithInvalidColors);
+
+      // Should fall back to default blue since the color is invalid
+      expect(fillColors).toEqual(expect.arrayContaining([DEFAULT_FILL_COLOR]));
     });
   });
 });
