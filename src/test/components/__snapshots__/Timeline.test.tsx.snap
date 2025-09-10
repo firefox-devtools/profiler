@@ -63,10 +63,10 @@ exports[`TimelineSelection does not crash when there are no samples or markers 1
                 class="timelineTrack"
               >
                 <div
-                  class="timelineTrackRow timelineTrackGlobalRow"
+                  class="react-contextmenu-wrapper timelineTrackRow timelineTrackGlobalRow"
                 >
                   <div
-                    class="react-contextmenu-wrapper timelineTrackLabel timelineTrackGlobalGrippy"
+                    class="timelineTrackLabel timelineTrackGlobalGrippy"
                   >
                     <button
                       class="timelineTrackNameButton"
@@ -96,10 +96,10 @@ exports[`TimelineSelection does not crash when there are no samples or markers 1
                     class="timelineTrack timelineTrackLocal"
                   >
                     <div
-                      class="timelineTrackRow timelineTrackLocalRow selected"
+                      class="react-contextmenu-wrapper timelineTrackRow timelineTrackLocalRow selected"
                     >
                       <div
-                        class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+                        class="timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
                         title="Empty
 Thread: \\"Empty\\" (0)
 Process: \\"default\\" (0)"
@@ -397,10 +397,10 @@ exports[`TimelineSelection renders the vertical line indicating the time positio
                 class="timelineTrack"
               >
                 <div
-                  class="timelineTrackRow timelineTrackGlobalRow"
+                  class="react-contextmenu-wrapper timelineTrackRow timelineTrackGlobalRow"
                 >
                   <div
-                    class="react-contextmenu-wrapper timelineTrackLabel timelineTrackGlobalGrippy"
+                    class="timelineTrackLabel timelineTrackGlobalGrippy"
                   >
                     <button
                       class="timelineTrackNameButton"
@@ -430,10 +430,10 @@ exports[`TimelineSelection renders the vertical line indicating the time positio
                     class="timelineTrack timelineTrackLocal"
                   >
                     <div
-                      class="timelineTrackRow timelineTrackLocalRow selected"
+                      class="react-contextmenu-wrapper timelineTrackRow timelineTrackLocalRow selected"
                     >
                       <div
-                        class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+                        class="timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
                         title="Empty
 Thread: \\"Empty\\" (0)
 Process: \\"default\\" (0)"
