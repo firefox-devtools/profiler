@@ -74,6 +74,8 @@ CallNodeContextMenu--transform-focus-subtree = Yalnızca alt ağaca odaklan
 #   $categoryName (String) - Name of the category to focus on.
 CallNodeContextMenu--transform-focus-category = <strong>{ $categoryName }</strong> kategorisine odaklan
     .title = Seçilen düğümle aynı kategorideki düğümlere odaklanarak diğer kategorilere ait tüm düğümleri birleştirir.
+CallNodeContextMenu--transform-collapse-function-subtree = Fonksiyonu daralt
+    .title = Bir fonksiyonu daraltmak o fonksiyonun çağırdığı her şeyi kaldıracak ve bütün süreyi fonskiyona atayacaktır. Bu işlem, analiz edilmesi gerekmeyen kodlara çağrı yapan bir profilin basitleştirilmesini sağlayabilir.
 # This is used as the context menu item to apply the "Collapse resource" transform.
 # Variables:
 #   $nameForResource (String) - Name of the resource to collapse.
@@ -95,6 +97,12 @@ CallNodeContextMenu--copy-function-name = Fonksiyon adını kopyala
 CallNodeContextMenu--copy-script-url = Betik URL’sini kopyala
 CallNodeContextMenu--copy-stack = Yığını kopyala
 CallNodeContextMenu--show-the-function-in-devtools = Fonksiyonu geliştirici araçlarında göster
+
+## CallTree
+## This is the component for Call Tree panel.
+
+CallTree--tracing-ms-total = Çalışma süresi (ms)
+    .title = “Toplam” çalışma süresi, bu fonksiyonun yığında gözlemlendiği tüm sürenin özetini içerir. Bu süre, fonksiyonun kendisinin çalıştığı süreyi ve bu fonksiyondan çağırılanların sürelerini içerir.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -255,6 +263,12 @@ Home--chrome-extension-recording-instructions =
 
 IdleSearchField--search-input =
     .placeholder = Filtre terimlerini girin
+
+## JsTracerSettings
+## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
+
+JsTracerSettings--show-only-self-time = Yalnızca öz süreyi göster
+    .title = Yalnızca çağrı düğümünde harcanan zamanı göster, alt düğümleri göz ardı et.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
@@ -687,7 +701,9 @@ TrackNameButton--hide-process =
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
+TrackMemoryGraph--relative-memory-at-this-time = bu süredeki göreli bellek
 TrackMemoryGraph--memory-range-in-graph = grafikteki bellek aralığı
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = önceki örnekten beri yapılan atamalar ve serbest bırakmalar
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
