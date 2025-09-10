@@ -91,7 +91,9 @@ export function getDotColor(color: GraphColor) {
  * Uses mapCategoryColorNameToStyles from colors.ts to get the predefined text colors.
  */
 export function getTextColor(color: GraphColor): string {
-  // Most GraphColor values exist as keys in STYLE_MAP in colors.ts
+  // There is some overlap between GraphColor and the valid category color
+  // values. For other values, mapCategoryColorNameToStyles defaults to gray.
+  // This is good enough for now.
   const colorStyles = mapCategoryColorNameToStyles(color);
   return colorStyles.selectedTextColor;
 }
