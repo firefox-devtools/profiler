@@ -1356,7 +1356,8 @@ function mergeMarkers(
       if (oldData && 'cause' in oldData && oldData.cause) {
         // The old data has a cause, we need to convert the stack.
         const oldStack = oldData.cause.stack;
-        const newStack = translationMapForStacks.get(oldStack);
+        const newStack =
+          oldStack !== null ? translationMapForStacks.get(oldStack) : null;
         if (newStack === undefined) {
           throw new Error(
             `Missing old stack entry ${oldStack} in the translation map.`

@@ -2465,17 +2465,14 @@ export function updateThreadStacks(
     oldData: MarkerPayload | null
   ): MarkerPayload | null {
     if (oldData && 'cause' in oldData && oldData.cause) {
-      const stack = convertStack(oldData.cause.stack);
-      if (stack) {
-        // Replace the cause with the right stack index.
-        return {
-          ...oldData,
-          cause: {
-            ...oldData.cause,
-            stack,
-          },
-        };
-      }
+      // Replace the cause with the right stack index.
+      return {
+        ...oldData,
+        cause: {
+          ...oldData.cause,
+          stack: convertStack(oldData.cause.stack),
+        },
+      };
     }
     return oldData;
   }
@@ -2536,17 +2533,14 @@ export function updateRawThreadStacksSeparate(
     oldData: MarkerPayload | null
   ): MarkerPayload | null {
     if (oldData && 'cause' in oldData && oldData.cause) {
-      const stack = convertSyncBacktraceStack(oldData.cause.stack);
-      if (stack) {
-        // Replace the cause with the right stack index.
-        return {
-          ...oldData,
-          cause: {
-            ...oldData.cause,
-            stack,
-          },
-        };
-      }
+      // Replace the cause with the right stack index.
+      return {
+        ...oldData,
+        cause: {
+          ...oldData.cause,
+          stack: convertSyncBacktraceStack(oldData.cause.stack),
+        },
+      };
     }
     return oldData;
   }

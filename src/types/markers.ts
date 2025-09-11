@@ -201,7 +201,7 @@ export type CauseBacktrace = {
   // No upgrader was written for this change.
   tid?: Tid;
   time?: Milliseconds;
-  stack: IndexIntoStackTable;
+  stack: IndexIntoStackTable | null;
 };
 
 /**
