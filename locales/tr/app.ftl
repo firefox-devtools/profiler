@@ -103,6 +103,8 @@ CallNodeContextMenu--show-the-function-in-devtools = Fonksiyonu geliştirici ara
 
 CallTree--tracing-ms-total = Çalışma süresi (ms)
     .title = “Toplam” çalışma süresi, bu fonksiyonun yığında gözlemlendiği tüm sürenin özetini içerir. Bu süre, fonksiyonun kendisinin çalıştığı süreyi ve bu fonksiyondan çağırılanların sürelerini içerir.
+CallTree--tracing-ms-self = Öz (ms)
+    .title = “Öz” süre yalnızca fonksiyonun yığının sonunda olduğu süreyi içerir. Eğer fonksiyon başka fonksiyonları çağırmışsa diğer fonksiyonların süresi dahil değildir. Öz süre, programda asıl nerede zaman harcandığını anlamak için faydalıdır.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -137,6 +139,8 @@ CallTreeSidebar--call-node-details = Çağrı düğümü ayrıntıları
 
 CallTreeSidebar--traced-running-time =
     .label = İzlenen çalışma süresi
+CallTreeSidebar--traced-self-time =
+    .label = İzlenen öz süre
 CallTreeSidebar--running-time =
     .label = Çalışma süresi
 CallTreeSidebar--self-time =
@@ -241,6 +245,13 @@ Home--profile-firefox-android-instructions =
 # of the "Enable Firefox Profiler menu button" button.
 Home--enable-button-unavailable =
     .title = Bu profilleyici örneği WebChannel’a bağlanamadığı için profilleyici menü düğmesini etkinleştiremez.
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable = Bu profilleyici örneği WebChannel’a bağlanamadı. Genellikle bunun sebebi, <code>devtools.performance.recording.ui-base-url</code> tercihinde belirtilenden farklı bir sunucuda çalışmasıdır. Bu örnekle yeni profiller kaydetmek ve profilleyici menü düğmesinin programatik kontrolünü bu örneğe vermek isterseniz <code>about:config</code> adresine gidip tercihinizi değiştirebilirsiniz.
+Home--record-instructions =
+    Profillemeyi başlatmak için profilleme düğmesine tıklayın veya
+    klavye kısayollarını kullanın. Profil kaydedilirken simge maviye dönüşür.
+    Verileri profiler.firefox.com’a yüklemek için <kbd>Kaydet</kbd>’e tıklayın.
 Home--instructions-content =
     Performans profilleri yalnızca <a>{ -firefox-brand-name }</a> ile kaydedilebilir.
     Ancak mevcut profiller herhangi bir modern tarayıcıda görüntülenebilir.
@@ -251,6 +262,9 @@ Home--additional-content-title = Mevcut profilleri yükleyin
 Home--additional-content-content = Profil dosyasını buraya <strong>sürükleyip bırakarak</strong> yükleyebilirsiniz ya da:
 Home--compare-recordings-info = Ayrıca kayıtları karşılaştırabilirsiniz. <a>Karşılaştırma arayüzünü aç.</a>
 Home--your-recent-uploaded-recordings-title = Son yüklediğiniz kayıtlar
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools2 = { -profiler-brand-name } ayrıca <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, Chrome performans paneli, <androidstudio>Android Studio</androidstudio> gibi diğer profilleyicilerden ve <dhat>dhat biçimini</dhat> veya <traceevent>Google’ın trace etkinliğini biçimini</traceevent> kullanan herhangi bir dosyadan profilleri içe aktarabilir. <write>Kendi içe aktarıcınızı yazmayı öğrenin.</write>
 Home--install-chrome-extension = Chrome uzantısını yükle
 Home--chrome-extension-instructions = Chrome’daki performans profillerini kaydedip { -profiler-brand-name }’da analiz etmek için <a>Chrome { -profiler-brand-name } uzantısını</a> kullanabilirsiniz. Uzantıyı Chrome Web Store'dan yükleyebilirsiniz.
 Home--chrome-extension-recording-instructions =
