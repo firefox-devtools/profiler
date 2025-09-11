@@ -145,10 +145,10 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
     return !marker || marker.end === null;
   }
 
-  _convertStackToString(stack: IndexIntoStackTable): string {
+  _convertStackToString(stack: IndexIntoStackTable | null): string {
     const { thread, implementationFilter } = this.props;
 
-    if (thread === null) {
+    if (thread === null || stack === null) {
       return '';
     }
 

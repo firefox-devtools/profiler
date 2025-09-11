@@ -423,40 +423,43 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       categories,
     } = this.props;
     const { data, start } = marker;
-    if (data && 'cause' in data && data.cause) {
-      const { cause } = data;
-      const causeAge = cause.time !== undefined ? start - cause.time : 0;
-      return [
-        <TooltipDetailSeparator key="backtrace-separator" />,
-        <TooltipDetail label="Stack" key="backtrace">
-          <div className="tooltipDetailsBackTrace">
-            {
-              /* The cause's time might be later than the marker's start. For
+    if (!data || !('cause' in data) || !data.cause) {
+      return null;
+    }
+    const { time, stack } = data.cause;
+    if (stack === null) {
+      return null;
+    }
+    const causeAge = time !== undefined ? start - time : 0;
+    return [
+      <TooltipDetailSeparator key="backtrace-separator" />,
+      <TooltipDetail label="Stack" key="backtrace">
+        <div className="tooltipDetailsBackTrace">
+          {
+            /* The cause's time might be later than the marker's start. For
                 example this happens in some usual cases when the cause is
                 captured right when setting the end marker for tracing pairs of
                 markers. */
-              causeAge > 0 ? (
-                <h2 className="tooltipBackTraceTitle">
-                  {data.type === 'Styles' || marker.name === 'Reflow'
-                    ? `First invalidated ${formatTimestamp(
-                        causeAge
-                      )} before the flush, at:`
-                    : `Triggered ${formatTimestamp(causeAge)} ago, at:`}
-                </h2>
-              ) : null
-            }
-            <Backtrace
-              maxStacks={restrictHeightWidth ? 20 : Infinity}
-              stackIndex={cause.stack}
-              thread={thread}
-              implementationFilter={implementationFilter}
-              categories={categories}
-            />
-          </div>
-        </TooltipDetail>,
-      ];
-    }
-    return null;
+            causeAge > 0 ? (
+              <h2 className="tooltipBackTraceTitle">
+                {data.type === 'Styles' || marker.name === 'Reflow'
+                  ? `First invalidated ${formatTimestamp(
+                      causeAge
+                    )} before the flush, at:`
+                  : `Triggered ${formatTimestamp(causeAge)} ago, at:`}
+              </h2>
+            ) : null
+          }
+          <Backtrace
+            maxStacks={restrictHeightWidth ? 20 : Infinity}
+            stackIndex={stack}
+            thread={thread}
+            implementationFilter={implementationFilter}
+            categories={categories}
+          />
+        </div>
+      </TooltipDetail>,
+    ];
   }
 
   _maybeRenderNetworkPhases() {
