@@ -25,7 +25,7 @@ import {
  * so that the CSS rules are in the correct order. */
 import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
 import { MetaInfoPanel } from './MetaInfo';
-import { MenuButtonsPublish } from './Publish';
+import { PublishPanel } from './Publish';
 import { MenuButtonsPermalink } from './Permalink';
 import {
   ProfileDeletePanel,
@@ -285,10 +285,10 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
               menuButtonsShareButtonError: isError,
             }
           )}
-          panelClassName="menuButtonsPublishPanel"
+          panelClassName="publishPanelPanel"
           // The value for the label following will be replaced
           label=""
-          panelContent={<MenuButtonsPublish isRepublish={isRepublish} />}
+          panelContent={<PublishPanel isRepublish={isRepublish} />}
         />
       </Localized>
     );

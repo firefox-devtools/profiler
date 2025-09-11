@@ -16,8 +16,6 @@ import {
   getThreads,
   getMarkerSchemaByName,
 } from './profile';
-import { compress } from '../utils/gz';
-import { serializeProfile } from '../profile-logic/process-profile';
 import {
   sanitizePII,
   getShouldSanitizeByDefault as getShouldSanitizeByDefaultImpl,
@@ -38,6 +36,7 @@ import type {
   DerivedMarkerInfo,
   ThreadIndex,
   CounterIndex,
+  SanitizedProfileEncodingState,
 } from 'firefox-profiler/types';
 import { getThreadSelectors } from './per-thread';
 
@@ -217,23 +216,9 @@ export const getSanitizedProfile: Selector<SanitizeProfileResult> =
     sanitizePII
   );
 
-/**
- * Computing the compressed data for a profile is a potentially slow operation. This
- * selector and its consumers perform that operation asynchronously. It can be called
- * multiple times while adjust the PII sanitization, but should happen in the background.
- * It happens in the selector so that it can be shared across components and actions.
- *
- * Due to this memoization strategy, one copy of the data is retained in memory and
- * never freed.
- */
-export const getSanitizedProfileData: Selector<
-  Promise<Uint8Array<ArrayBuffer>>
-> = createSelector(getSanitizedProfile, ({ profile }) =>
-  // We use a Promise.resolve() call first so that the calls to compress and
-  // serializeProfile are out of React's rendering pipeline. We avoid crashes
-  // due to memory issues thanks to that.
-  Promise.resolve().then(() => compress(serializeProfile(profile)))
-);
+export const getSanitizedProfileEncodingState: Selector<
+  SanitizedProfileEncodingState
+> = (state) => getPublishState(state).sanitizedProfileEncodingState;
 
 export const getUploadState: Selector<UploadState> = (state) =>
   getPublishState(state).upload;

@@ -226,7 +226,7 @@ describe('app/MenuButtons', function () {
         screen.getByRole('checkbox', {
           name: /Include the data from other tabs/,
         });
-      const getPanel = () => screen.getByTestId('MenuButtonsPublish-container');
+      const getPanel = () => screen.getByTestId('PublishPanel-container');
       const openPublishPanel = async () => {
         fireFullClick(getPublishButton());
         await screen.findByText(/^(Share|Re-upload) Performance Profile$/);
