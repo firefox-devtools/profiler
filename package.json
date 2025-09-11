@@ -78,7 +78,7 @@
     "copy-to-clipboard": "^3.3.3",
     "core-js": "^3.45.1",
     "escape-string-regexp": "^4.0.0",
-    "gecko-profiler-demangle": "^0.3.3",
+    "gecko-profiler-demangle": "^0.4.0",
     "idb": "^8.0.3",
     "iongraph-web": "0.1.15",
     "jszip": "^3.10.1",
