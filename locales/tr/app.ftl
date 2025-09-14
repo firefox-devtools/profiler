@@ -264,7 +264,7 @@ Home--compare-recordings-info = Ayrıca kayıtları karşılaştırabilirsiniz. 
 Home--your-recent-uploaded-recordings-title = Son yüklediğiniz kayıtlar
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
-Home--load-files-from-other-tools2 = { -profiler-brand-name } ayrıca <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, Chrome performans paneli, <androidstudio>Android Studio</androidstudio> gibi diğer profilleyicilerden ve <dhat>dhat biçimini</dhat> veya <traceevent>Google’ın trace etkinliğini biçimini</traceevent> kullanan herhangi bir dosyadan profilleri içe aktarabilir. <write>Kendi içe aktarıcınızı yazmayı öğrenin.</write>
+Home--load-files-from-other-tools2 = { -profiler-brand-name } ayrıca <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, Chrome performans paneli, <androidstudio>Android Studio</androidstudio> gibi diğer profilleyicilerden ve <dhat>dhat biçimini</dhat> veya <traceevent>Google’ın trace etkinliği biçimini</traceevent> kullanan herhangi bir dosyadan profilleri içe aktarabilir. <write>Kendi içe aktarıcınızı yazmayı öğrenin.</write>
 Home--install-chrome-extension = Chrome uzantısını yükle
 Home--chrome-extension-instructions = Chrome’daki performans profillerini kaydedip { -profiler-brand-name }’da analiz etmek için <a>Chrome { -profiler-brand-name } uzantısını</a> kullanabilirsiniz. Uzantıyı Chrome Web Store'dan yükleyebilirsiniz.
 Home--chrome-extension-recording-instructions =
