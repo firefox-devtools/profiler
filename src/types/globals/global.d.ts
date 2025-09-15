@@ -5,7 +5,7 @@
 // Added by webpack's DefinePlugin
 declare const AVAILABLE_STAGING_LOCALES: string[] | null;
 
-declare module 'firefox-profiler-res/*.js' {
+declare module '*.worker.js' {
   const content: string;
   export default content;
 }
