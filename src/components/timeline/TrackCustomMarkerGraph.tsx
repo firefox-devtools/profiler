@@ -29,6 +29,7 @@ import type {
   IndexIntoStringTable,
   MarkerSchema,
   CollectedCustomMarkerSamples,
+  ValueBounds,
   MarkerGraphType,
   MarkerIndex,
   Marker,
@@ -51,6 +52,7 @@ type CanvasProps = {
   readonly markerSchema: MarkerSchema;
   readonly markerSampleRanges: [IndexIntoSamplesTable, IndexIntoSamplesTable];
   readonly collectedSamples: CollectedCustomMarkerSamples;
+  readonly valueBounds: ValueBounds;
   readonly width: CssPixels;
   readonly height: CssPixels;
   readonly getMarker: (param: MarkerIndex) => Marker;
@@ -101,6 +103,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
       markerSchema,
       markerSampleRanges,
       collectedSamples,
+      valueBounds,
       height,
       width,
       getMarker,
@@ -136,7 +139,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
       throw new Error('No lines for marker ' + name);
     }
 
-    const { minNumber, maxNumber } = collectedSamples;
+    const { minNumber, maxNumber } = valueBounds;
     const [sampleStart, sampleEnd] = markerSampleRanges;
 
     {
@@ -336,6 +339,7 @@ type StateProps = {
   readonly rangeEnd: Milliseconds;
   readonly markerSampleRanges: [IndexIntoSamplesTable, IndexIntoSamplesTable];
   readonly collectedSamples: CollectedCustomMarkerSamples;
+  readonly valueBounds: ValueBounds;
   readonly getMarker: (param: MarkerIndex) => Marker;
 };
 
@@ -484,6 +488,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
       graphHeight,
       width,
       collectedSamples,
+      valueBounds,
       getMarker,
     } = this.props;
 
@@ -506,7 +511,8 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
 
     const left = (width * (sampleTime - rangeStart)) / rangeLength;
 
-    const { minNumber, maxNumber, numbersPerLine } = collectedSamples;
+    const { minNumber, maxNumber } = valueBounds;
+    const { numbersPerLine } = collectedSamples;
 
     const dots = [];
 
@@ -572,6 +578,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
       graphHeight,
       width,
       collectedSamples,
+      valueBounds,
       getMarker,
     } = this.props;
 
@@ -589,6 +596,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
           height={graphHeight}
           width={width}
           collectedSamples={collectedSamples}
+          valueBounds={valueBounds}
           getMarker={getMarker}
         />
         {hoveredCounter === null ? null : (
@@ -620,6 +628,8 @@ export const TrackCustomMarkerGraph = explicitConnect<
         markerTrackSelectors.getCommittedRangeMarkerSampleRange(state),
       collectedSamples:
         markerTrackSelectors.getCollectedCustomMarkerSamples(state),
+      valueBounds:
+        markerTrackSelectors.getCommittedRangeMarkerSampleValueBounds(state),
       rangeStart: start,
       rangeEnd: end,
       getMarker: selectors.getMarkerGetter(state),
