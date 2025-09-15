@@ -6,7 +6,7 @@ import { PureComponent } from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getCommittedRange,
-  getPreviewSelection,
+  getPreviewSelectionIsBeingModified,
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
@@ -117,7 +117,6 @@ class Screenshots extends PureComponent<Props, State> {
       return;
     }
     updatePreviewSelection({
-      hasSelection: true,
       isModifying: false,
       selectionStart: start,
       selectionEnd: end,
@@ -190,7 +189,6 @@ export const TimelineTrackScreenshots = explicitConnect<
     const { threadIndex, windowId } = ownProps;
     const selectors = getThreadSelectors(threadIndex);
     const { start, end } = getCommittedRange(state);
-    const previewSelection = getPreviewSelection(state);
     return {
       thread: selectors.getRangeFilteredThread(state),
       screenshots:
@@ -199,8 +197,7 @@ export const TimelineTrackScreenshots = explicitConnect<
       threadName: selectors.getFriendlyThreadName(state),
       rangeStart: start,
       rangeEnd: end,
-      isMakingPreviewSelection:
-        previewSelection.hasSelection && previewSelection.isModifying,
+      isMakingPreviewSelection: getPreviewSelectionIsBeingModified(state),
     };
   },
   mapDispatchToProps: {

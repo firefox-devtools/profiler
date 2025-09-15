@@ -4,7 +4,6 @@
 
 import { PureComponent } from 'react';
 import type { ComponentProps } from 'react';
-import ReactDOM from 'react-dom';
 import { ContextMenu as ReactContextMenu } from '@firefox-devtools/react-contextmenu';
 
 import './ContextMenu.css';
@@ -12,44 +11,18 @@ import './ContextMenu.css';
 type Props = ComponentProps<typeof ReactContextMenu>;
 
 export class ContextMenu extends PureComponent<Props> {
-  _contextMenu: any = null;
-  _takeContextMenuRef = (contextMenu: any) => {
-    this._contextMenu = contextMenu;
-  };
-
-  _mouseDownHandler(event: Event): void {
+  _mouseDownHandler = (event: React.MouseEvent<HTMLDivElement>): void => {
     // This prevents from stealing the focus from where it was.
     event.preventDefault();
-  }
-
-  override componentDidMount() {
-    if (this._contextMenu) {
-      // The context menu component does not expose a reference to its internal
-      // DOM node so using findDOMNode is currently unavoidable.
-      // eslint-disable-next-line react/no-find-dom-node
-      const contextMenuNode = ReactDOM.findDOMNode(this._contextMenu);
-      if (contextMenuNode) {
-        // There's no need to remove this event listener since the component is
-        // never unmounted. Duplicate event listeners will also be discarded
-        // automatically so we don't need to handle that.
-        contextMenuNode.addEventListener('mousedown', this._mouseDownHandler);
-      }
-    }
-  }
-
-  override componentWillUnmount() {
-    // eslint-disable-next-line react/no-find-dom-node
-    const contextMenuNode = ReactDOM.findDOMNode(this._contextMenu);
-    if (contextMenuNode) {
-      contextMenuNode.removeEventListener('mousedown', this._mouseDownHandler);
-    }
-  }
+  };
 
   override render() {
     return (
-      <ReactContextMenu ref={this._takeContextMenuRef} {...this.props}>
-        {this.props.children ? this.props.children : <div />}
-      </ReactContextMenu>
+      <div onMouseDown={this._mouseDownHandler}>
+        <ReactContextMenu {...this.props}>
+          {this.props.children ? this.props.children : <div />}
+        </ReactContextMenu>
+      </div>
     );
   }
 }

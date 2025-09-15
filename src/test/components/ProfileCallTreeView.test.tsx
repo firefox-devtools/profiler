@@ -433,7 +433,7 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
     // ms. This is a good way to control the order we'll get in the call tree
     // view: function "name1" will be first, etc.
     const profileString = Array.from({ length: 100 }).reduce<string>(
-      (result, func, i, array) => {
+      (result, _func, i, array) => {
         const funcName = `name${i + 1}  `;
         result += funcName.repeat(array.length - i);
         return result;

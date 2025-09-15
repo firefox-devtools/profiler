@@ -137,7 +137,7 @@ export class RegularExternalCommunicationDelegate
     const requestInit: RequestInit =
       postData !== undefined
         ? {
-            body: JSON.stringify(postData),
+            body: postData,
             method: 'POST',
             mode: 'cors',
             credentials: 'omit',

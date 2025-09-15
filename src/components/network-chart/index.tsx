@@ -19,7 +19,7 @@ import {
 
 import {
   getScrollToSelectionGeneration,
-  getPreviewSelection,
+  getPreviewSelectionIsBeingModified,
   getPreviewSelectionRange,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
@@ -422,7 +422,7 @@ export const NetworkChart = explicitConnect<
     hoveredMarkerIndexFromState:
       selectedThreadSelectors.getHoveredMarkerIndex(state),
     timeRange: getPreviewSelectionRange(state),
-    disableOverscan: getPreviewSelection(state).isModifying,
+    disableOverscan: getPreviewSelectionIsBeingModified(state),
     threadsKey: getSelectedThreadsKey(state),
   }),
   mapDispatchToProps: {

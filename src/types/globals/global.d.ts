@@ -5,6 +5,11 @@
 // Added by webpack's DefinePlugin
 declare const AVAILABLE_STAGING_LOCALES: string[] | null;
 
+declare module 'firefox-profiler-res/*.js' {
+  const content: string;
+  export default content;
+}
+
 declare module '*.css' {}
 
 declare module '*.svg' {

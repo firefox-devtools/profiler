@@ -94,7 +94,7 @@ function extractFaviconFromLibname(libname: string): string | null {
       url.protocol = 'https:';
     }
     return url.href;
-  } catch (e) {
+  } catch (_e) {
     console.error(
       'Error while extracing the favicon from the libname',
       libname

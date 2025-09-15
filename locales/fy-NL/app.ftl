@@ -733,8 +733,8 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = Alle frames
     .title = De stackframes net filterje
-StackSettings--implementation-javascript2 = JavaScript
-    .title = Allinnich de stackframes relatearre oan útfiering fan JavaScript toane
+StackSettings--implementation-script = Script
+    .title = Allinnich de stackframes relatearre oan scriptútfiering toane
 StackSettings--implementation-native2 = Ynboud
     .title = Allinnich de stackframes foar ynboude koade toane
 # This label is displayed in the marker chart and marker table panels only.

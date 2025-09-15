@@ -422,7 +422,7 @@ function _extractUnsymbolicatedFunction(
         libToResourceIndex.set(libIndex, resourceIndex);
       }
     }
-  } catch (e) {
+  } catch (_e) {
     // Probably a hex parse error. Ignore.
   }
   // Add the function to the funcTable.
@@ -1980,9 +1980,7 @@ export async function unserializeProfileOfArbitraryFormat(
     // object is constructed from an ArrayBuffer in a different context... which
     // happens in our tests.
     if (String(arbitraryFormat) === '[object ArrayBuffer]') {
-      // Obviously Flow doesn't understand that this is correct, so let's help
-      // Flow here.
-      let arrayBuffer: ArrayBufferLike = arbitraryFormat as any;
+      let arrayBuffer = arbitraryFormat as ArrayBuffer;
 
       // Check for the gzip magic number in the header. If we find it, decompress
       // the data first.
@@ -2001,7 +1999,7 @@ export async function unserializeProfileOfArbitraryFormat(
         arbitraryFormat = convertSimpleperfTraceProfile(arrayBuffer);
       } else {
         try {
-          const textDecoder = new TextDecoder();
+          const textDecoder = new TextDecoder(undefined, { fatal: true });
           arbitraryFormat = await textDecoder.decode(arrayBuffer);
         } catch (e) {
           console.error('Source exception:', e);

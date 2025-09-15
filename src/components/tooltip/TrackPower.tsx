@@ -38,7 +38,7 @@ type StateProps = {
   interval: Milliseconds;
   meta: ProfileMeta;
   committedRange: StartEndRange;
-  previewSelection: PreviewSelection;
+  previewSelection: PreviewSelection | null;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, {}>;
@@ -123,9 +123,9 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
   }
 
   maybeRenderForPreviewSelection(
-    previewSelection: PreviewSelection
+    previewSelection: PreviewSelection | null
   ): React.ReactElement<any> | null {
-    if (!previewSelection.hasSelection) {
+    if (!previewSelection) {
       return null;
     }
 
@@ -142,7 +142,6 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
     );
 
     return (
-      // $FlowExpectError our version of Flow doesn't understand Fragments very well.
       <>
         {this._formatPowerValue(
           powerSumForPreviewRange,

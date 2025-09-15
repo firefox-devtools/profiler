@@ -380,7 +380,7 @@ export class NetworkChartRow extends React.PureComponent<
     try {
       const uri = new URL(this._cropNameToUrl(url));
       return uri;
-    } catch (e) {
+    } catch (_e) {
       return null;
     }
   }

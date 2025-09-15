@@ -52,7 +52,7 @@ type OwnProps = {
 type StateProps = {
   readonly marker: Marker;
   readonly markerIndex: MarkerIndex;
-  readonly previewSelection: PreviewSelection;
+  readonly previewSelection: PreviewSelection | null;
   readonly committedRange: StartEndRange;
   readonly thread: Thread | null;
   readonly implementationFilter: ImplementationFilter;
@@ -74,12 +74,11 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
     const { updatePreviewSelection, previewSelection, committedRange } =
       this.props;
 
-    const selectionEnd = previewSelection.hasSelection
+    const selectionEnd = previewSelection
       ? previewSelection.selectionEnd
       : committedRange.end;
 
     updatePreviewSelection({
-      hasSelection: true,
       isModifying: false,
       selectionStart,
       selectionEnd,
@@ -90,7 +89,7 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
     const { updatePreviewSelection, committedRange, previewSelection } =
       this.props;
 
-    const selectionStart = previewSelection.hasSelection
+    const selectionStart = previewSelection
       ? previewSelection.selectionStart
       : committedRange.start;
 
@@ -102,7 +101,6 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
     }
 
     updatePreviewSelection({
-      hasSelection: true,
       isModifying: false,
       selectionStart,
       selectionEnd,
@@ -137,7 +135,6 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
     }
 
     updatePreviewSelection({
-      hasSelection: true,
       isModifying: false,
       selectionStart: marker.start,
       selectionEnd: marker.end,
@@ -148,10 +145,10 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
     return !marker || marker.end === null;
   }
 
-  _convertStackToString(stack: IndexIntoStackTable): string {
+  _convertStackToString(stack: IndexIntoStackTable | null): string {
     const { thread, implementationFilter } = this.props;
 
-    if (thread === null) {
+    if (thread === null || stack === null) {
       return '';
     }
 
@@ -385,11 +382,11 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
     const { marker, previewSelection, committedRange } = this.props;
     const { data } = marker;
 
-    const selectionEnd = previewSelection.hasSelection
+    const selectionEnd = previewSelection
       ? previewSelection.selectionEnd
       : committedRange.end;
 
-    const selectionStart = previewSelection.hasSelection
+    const selectionStart = previewSelection
       ? previewSelection.selectionStart
       : committedRange.start;
 

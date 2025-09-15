@@ -17,7 +17,7 @@ export function CodeLoadingOverlay({ source }: CodeLoadingOverlayProps) {
       let host;
       try {
         host = new URL(url).host;
-      } catch (e) {
+      } catch (_e) {
         host = url;
       }
       return (

@@ -66,7 +66,7 @@
 
 .tooltipDetails {
   display: grid;
-  grid-gap: 2px 5px;
+  gap: 2px 5px;
 
   /* Make the right column "definitely" sized (ignore its intrinsic size) by setting a min-width of 0.
    * This stops long contents from overflowing the tooltip. */
@@ -129,7 +129,7 @@
 .sidebar .tooltipDetails {
   /* Force the details to the max-width, even if they have long pieces of text. */
   overflow: hidden;
-  grid-gap: 2px 0;
+  gap: 2px 0;
 
   /* Don't let the width overflow for long pieces of text */
   grid-template-columns: minmax(0, 1fr);

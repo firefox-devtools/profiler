@@ -17,7 +17,7 @@ export type IndexIntoLibs = number;
 export type IndexIntoNativeSymbolTable = number;
 export type IndexIntoCategoryList = number;
 export type IndexIntoSubcategoryListForCategory = number;
-export type resourceTypeEnum = number;
+export type ResourceTypeEnum = number;
 export type ThreadIndex = number;
 // The Tid is most often a number. However in some cases such as merged profiles
 // we could generate a string.
@@ -370,7 +370,7 @@ export type ResourceTable = {
   lib: Array<IndexIntoLibs | null>;
   name: Array<IndexIntoStringTable>;
   host: Array<IndexIntoStringTable | null>;
-  type: resourceTypeEnum[];
+  type: ResourceTypeEnum[];
 };
 
 /**

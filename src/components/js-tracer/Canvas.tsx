@@ -608,7 +608,6 @@ class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
     // const { markers, updatePreviewSelection } = this.props;
     // const marker = markers[eventIndex];
     // updatePreviewSelection({
-    //   hasSelection: true,
     //   isModifying: false,
     //   selectionStart: marker.start,
     //   selectionEnd: marker.start + marker.dur,

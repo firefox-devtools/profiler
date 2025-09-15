@@ -623,8 +623,6 @@ function setup(profileOverrides: MixedObject = {}) {
 
   // Hook up a dummy chart with a viewport.
   const DummyChart = jest.fn((_props) => <div id="dummy-chart" />);
-  // Flow's internal structures for React don't recognize our mock function as a
-  // valid stateless component. $FlowExpectError
   const ChartWithViewport = withChartViewport(DummyChart);
 
   type OwnProps = {
@@ -633,7 +631,7 @@ function setup(profileOverrides: MixedObject = {}) {
   };
 
   type StateProps = {
-    previewSelection: PreviewSelection;
+    previewSelection: PreviewSelection | null;
     timeRange: StartEndRange;
   };
 

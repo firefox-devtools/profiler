@@ -27,6 +27,7 @@ import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { blankStore, storeWithProfile } from '../fixtures/stores';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
+import { formatTree } from '../fixtures/utils';
 
 import * as App from '../../actions/app';
 import * as ProfileView from '../../actions/profile-view';
@@ -750,6 +751,175 @@ describe('actions/ProfileView', function () {
         });
       });
     });
+
+    function setup() {
+      // Create a profile which has more than 32 stacks, so that, if any parts of the implementation
+      // use a BitSet to keep track of something that's per-stack (such as whether a stack matches
+      // the search filter), the BitSet needs at least two 32-bit slots.
+      const { profile } = getProfileFromTextSamples(`
+        A[lib:K][file:S]  A[lib:K][file:S]   A[lib:K][file:S]   D[lib:nNn][file:uV]  C[lib:m][file:t]
+        B[lib:L][file:t]  B[lib:L][file:t]   E[lib:O][file:Pq]
+        A[lib:K][file:S]  C[lib:m][file:t]
+        B[lib:L][file:t]  D[lib:n][file:uV]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+        B[lib:L][file:t]
+      `);
+
+      const { dispatch, getState } = storeWithProfile(profile);
+      return { dispatch, getState, profile };
+    }
+
+    it('starts as an unfiltered call tree', function () {
+      const { getState } = setup();
+      const originalCallTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(originalCallTree)).toEqual([
+        '- A (total: 3, self: —)',
+        '  - B (total: 2, self: —)',
+        '    - A (total: 1, self: —)',
+        '      - B (total: 1, self: —)',
+        '        - B (total: 1, self: —)',
+        '          - B (total: 1, self: —)',
+        '            - B (total: 1, self: —)',
+        '              - B (total: 1, self: —)',
+        '                - B (total: 1, self: —)',
+        '                  - B (total: 1, self: —)',
+        '                    - B (total: 1, self: —)',
+        '                      - B (total: 1, self: —)',
+        '                        - B (total: 1, self: —)',
+        '                          - B (total: 1, self: —)',
+        '                            - B (total: 1, self: —)',
+        '                              - B (total: 1, self: —)',
+        '                                - B (total: 1, self: —)',
+        '                                  - B (total: 1, self: —)',
+        '                                    - B (total: 1, self: —)',
+        '                                      - B (total: 1, self: —)',
+        '                                        - B (total: 1, self: —)',
+        '                                          - B (total: 1, self: —)',
+        '                                            - B (total: 1, self: —)',
+        '                                              - B (total: 1, self: —)',
+        '                                                - B (total: 1, self: —)',
+        '                                                  - B (total: 1, self: —)',
+        '                                                    - B (total: 1, self: —)',
+        '                                                      - B (total: 1, self: —)',
+        '                                                        - B (total: 1, self: —)',
+        '                                                          - B (total: 1, self: —)',
+        '                                                            - B (total: 1, self: —)',
+        '                                                              - B (total: 1, self: —)',
+        '                                                                - B (total: 1, self: —)',
+        '                                                                  - B (total: 1, self: 1)',
+        '    - C (total: 1, self: —)',
+        '      - D (total: 1, self: 1)',
+        '  - E (total: 1, self: 1)',
+        '- D (total: 1, self: 1)',
+        '- C (total: 1, self: 1)',
+      ]);
+    });
+
+    it('filters out all samples if there is no match', function () {
+      const { dispatch, getState } = setup();
+      dispatch(ProfileView.changeCallTreeSearchString('F'));
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([]);
+    });
+
+    it('filters based on function names', function () {
+      const { dispatch, getState } = setup();
+      dispatch(ProfileView.changeCallTreeSearchString('c'));
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      // Keep all stacks which include function C
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: —)',
+        '      - D (total: 1, self: 1)',
+        '- C (total: 1, self: 1)',
+      ]);
+
+      // Also test with uppercase 'C'
+      dispatch(ProfileView.changeCallTreeSearchString('C'));
+      const callTree2 = selectedThreadSelectors.getCallTree(getState());
+      // Keep all stacks which include function C
+      expect(formatTree(callTree2)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: —)',
+        '      - D (total: 1, self: 1)',
+        '- C (total: 1, self: 1)',
+      ]);
+    });
+
+    it('filters based on filenames', function () {
+      const { dispatch, getState } = setup();
+      dispatch(ProfileView.changeCallTreeSearchString('u'));
+      const callTree_u = selectedThreadSelectors.getCallTree(getState());
+      // Keep all stacks which include function D, which has filename uV
+      expect(formatTree(callTree_u)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: —)',
+        '      - D (total: 1, self: 1)',
+        '- D (total: 1, self: 1)',
+      ]);
+      dispatch(ProfileView.changeCallTreeSearchString('pQ'));
+      const callTree_pQ = selectedThreadSelectors.getCallTree(getState());
+      // Keep all stacks which include function E, which has filename Pq
+      expect(formatTree(callTree_pQ)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - E (total: 1, self: 1)',
+      ]);
+    });
+
+    it('filters based on library names', function () {
+      const { dispatch, getState } = setup();
+      dispatch(ProfileView.changeCallTreeSearchString('M'));
+      const callTree_M = selectedThreadSelectors.getCallTree(getState());
+      // Keep all stacks which include function C, which has lib name m
+      expect(formatTree(callTree_M)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: —)',
+        '      - D (total: 1, self: 1)',
+        '- C (total: 1, self: 1)',
+      ]);
+      dispatch(ProfileView.changeCallTreeSearchString('NN'));
+      const callTree_NN = selectedThreadSelectors.getCallTree(getState());
+      // Keep all stacks which include function D, which has filename nNn
+      expect(formatTree(callTree_NN)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: —)',
+        '      - D (total: 1, self: 1)',
+        '- D (total: 1, self: 1)',
+      ]);
+    });
   });
 
   /**
@@ -1464,20 +1634,15 @@ describe('actions/ProfileView', function () {
       const { profile } = getProfileFromTextSamples('A');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
-        hasSelection: false,
-        isModifying: false,
-      });
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toBe(null);
       dispatch(
         ProfileView.updatePreviewSelection({
-          hasSelection: true,
           isModifying: false,
           selectionStart: 0,
           selectionEnd: 1,
         })
       );
       expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 0,
         selectionEnd: 1,
@@ -1526,7 +1691,6 @@ describe('actions/ProfileView', function () {
       dispatch(ProfileView.commitRange(0, 10));
       dispatch(
         ProfileView.updatePreviewSelection({
-          hasSelection: true,
           isModifying: false,
           selectionStart: 1,
           selectionEnd: 9,
@@ -1536,7 +1700,6 @@ describe('actions/ProfileView', function () {
         { start: 0, end: 10 },
       ]);
       expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 1,
         selectionEnd: 9,
@@ -1553,10 +1716,7 @@ describe('actions/ProfileView', function () {
         { start: 0, end: 10 },
         { start: 2, end: 8 },
       ]);
-      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
-        hasSelection: false,
-        isModifying: false,
-      });
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toBe(null);
       expect(ProfileViewSelectors.getPreviewSelectionRange(getState())).toEqual(
         {
           start: 2,
@@ -1596,14 +1756,12 @@ describe('actions/ProfileView', function () {
       const { getState, dispatch } = setupStore();
       dispatch(
         ProfileView.updatePreviewSelection({
-          hasSelection: true,
           isModifying: false,
           selectionStart: 1,
           selectionEnd: 9,
         })
       );
       expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
         isModifying: false,
         selectionEnd: 9,
         selectionStart: 1,
@@ -1621,7 +1779,6 @@ describe('actions/ProfileView', function () {
         { start: 1, end: 9 },
       ]);
       expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 3,
         selectionEnd: 7,
@@ -1643,17 +1800,13 @@ describe('actions/ProfileView', function () {
         { start: 1, end: 9 },
       ]);
       expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 3,
         selectionEnd: 7,
       });
 
       dispatch(ProfileView.popCommittedRanges(2));
-      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
-        hasSelection: false,
-        isModifying: false,
-      });
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toBe(null);
     });
   });
 
@@ -1872,7 +2025,6 @@ describe('snapshots of selectors/profile', function () {
     dispatch(ProfileView.commitRange(3, 7)); // Reminder: upper bound "7" is exclusive.
     dispatch(
       ProfileView.updatePreviewSelection({
-        hasSelection: true,
         isModifying: false,
         selectionStart: 4,
         selectionEnd: 6,
@@ -2382,7 +2534,6 @@ describe('getTimingsForSidebar', () => {
 
       dispatch(
         ProfileView.updatePreviewSelection({
-          hasSelection: true,
           isModifying: false,
           selectionStart: 3,
           selectionEnd: 5,
@@ -2767,7 +2918,6 @@ describe('getTimingsForSidebar', () => {
 
       dispatch(
         ProfileView.updatePreviewSelection({
-          hasSelection: true,
           isModifying: false,
           selectionStart: 3,
           selectionEnd: 5,
@@ -3374,7 +3524,6 @@ describe('traced timing', function () {
       const { start, end } = previewSelection;
       dispatch(
         ProfileView.updatePreviewSelection({
-          hasSelection: true,
           isModifying: false,
           selectionStart: start,
           selectionEnd: end,

@@ -7,11 +7,6 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
 const includes = [path.join(__dirname, 'src'), path.join(__dirname, 'res')];
 
-const es6modules = ['pretty-bytes'];
-const es6modulePaths = es6modules.map((module) => {
-  return path.join(__dirname, 'node_modules', module);
-});
-
 // If L10N env variable is set, we read all the locale directories and use
 // whatever we have there. This is done to make the l10n branch work with staging
 // locales, so localizers can see the result of their translations immediately.
@@ -32,19 +27,20 @@ const config = {
       // that Jest can profit from it too.
       'firefox-profiler-res': path.resolve(__dirname, 'res'),
     },
+    fallback: { zlib: false },
   },
   devtool: 'source-map',
   module: {
     rules: [
       {
         test: /\.js$/,
-        use: ['babel-loader'],
-        include: includes.concat(es6modulePaths),
+        use: ['file-loader'],
+        include: [path.join(__dirname, 'res')],
       },
       {
-        test: /\.(ts|tsx)$/,
+        test: /\.(js|ts|tsx)$/,
         use: ['babel-loader'],
-        include: includes,
+        include: [path.join(__dirname, 'src')],
       },
       {
         test: /\.json$/,
@@ -62,6 +58,7 @@ const config = {
           ...includes,
           path.join(__dirname, 'node_modules', 'photon-colors'),
           path.join(__dirname, 'node_modules', 'react-splitter-layout'),
+          path.join(__dirname, 'node_modules', 'iongraph-web'),
         ],
       },
       {
@@ -102,7 +99,7 @@ const config = {
       patterns: [
         'res/_headers',
         'res/_redirects',
-        'res/zee-worker.js',
+        'res/gz-worker.js',
         'res/contribute.json',
         'res/robots.txt',
         'res/service-worker-compat.js',

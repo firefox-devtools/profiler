@@ -15,7 +15,6 @@ import { getInclusiveSampleIndexRangeForSelection } from '../../profile-logic/pr
 import type { BasicThreadSelectorsPerThread } from './thread';
 import type {
   RawMarkerTable,
-  ThreadIndex,
   MarkerIndex,
   Marker,
   MarkerSchema,
@@ -28,6 +27,7 @@ import type {
   ThreadsKey,
   Tid,
   CollectedCustomMarkerSamples,
+  ValueBounds,
   IndexIntoSamplesTable,
   IndexIntoStringTable,
   State,
@@ -47,7 +47,6 @@ export type MarkerSelectorsPerThread = ReturnType<
  */
 export function getMarkerSelectorsPerThread(
   threadSelectors: BasicThreadSelectorsPerThread,
-  _threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
 ) {
   const _getRawMarkerTable: Selector<RawMarkerTable> = (state) =>
@@ -279,7 +278,7 @@ export function getMarkerSelectorsPerThread(
       getSearchFilteredMarkerIndexes,
       ProfileSelectors.getPreviewSelection,
       (getMarker, markerIndexes, previewSelection) => {
-        if (!previewSelection.hasSelection) {
+        if (!previewSelection) {
           return markerIndexes;
         }
         const { selectionStart, selectionEnd } = previewSelection;
@@ -640,8 +639,6 @@ export function getMarkerSelectorsPerThread(
             );
           }
           const markerIndexes: MarkerIndex[] = [];
-          let minNumber = Infinity;
-          let maxNumber = -Infinity;
           const numbersPerLine: number[][] = [];
           const { graphs, name: schemaName } = markerSchema;
           const keys = graphs.map((graph) => {
@@ -661,19 +658,11 @@ export function getMarkerSelectorsPerThread(
               for (let i = 0; i < keys.length; ++i) {
                 const val = (data as any)[keys[i]];
                 numbersPerLine[i].push(val);
-                if (val < minNumber) {
-                  minNumber = val;
-                }
-                if (val > maxNumber) {
-                  maxNumber = val;
-                }
               }
             }
           });
 
           return {
-            minNumber,
-            maxNumber,
             numbersPerLine,
             markerIndexes,
           };
@@ -697,9 +686,50 @@ export function getMarkerSelectorsPerThread(
         )
     );
 
+    const getCommittedRangeMarkerSampleValueBounds: Selector<ValueBounds> =
+      createSelector(
+        getCollectedCustomMarkerSamples,
+        getCommittedRangeMarkerSampleRange,
+        (collectedSamples, sampleRange) => {
+          const [sampleStart, sampleEnd] = sampleRange;
+          const { numbersPerLine } = collectedSamples;
+
+          // Handle edge case where there are no samples in range
+          if (sampleStart >= sampleEnd) {
+            return { minNumber: 0, maxNumber: 0 };
+          }
+
+          let minNumber = Infinity;
+          let maxNumber = -Infinity;
+
+          for (
+            let sampleIndex = sampleStart;
+            sampleIndex < sampleEnd;
+            sampleIndex++
+          ) {
+            for (
+              let graphIndex = 0;
+              graphIndex < numbersPerLine.length;
+              graphIndex++
+            ) {
+              const val = numbersPerLine[graphIndex][sampleIndex];
+              if (val < minNumber) {
+                minNumber = val;
+              }
+              if (val > maxNumber) {
+                maxNumber = val;
+              }
+            }
+          }
+
+          return { minNumber, maxNumber };
+        }
+      );
+
     return {
       getCollectedCustomMarkerSamples,
       getCommittedRangeMarkerSampleRange,
+      getCommittedRangeMarkerSampleValueBounds,
     };
   }
 

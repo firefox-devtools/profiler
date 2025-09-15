@@ -14,6 +14,7 @@ import { MarkerSettings } from 'firefox-profiler/components/shared/MarkerSetting
 import {
   getCommittedRange,
   getPreviewSelection,
+  getMarkerSchemaByName,
 } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
@@ -28,6 +29,7 @@ import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMe
 import type {
   Marker,
   MarkerIndex,
+  MarkerSchemaByName,
   MarkerTimingAndBuckets,
   UnitIntervalOfProfileRange,
   StartEndRange,
@@ -51,12 +53,13 @@ type DispatchProps = {
 type StateProps = {
   readonly getMarker: (param: MarkerIndex) => Marker;
   readonly getMarkerLabel: (param: MarkerIndex) => string;
+  readonly markerSchemaByName: MarkerSchemaByName;
   readonly markerTimingAndBuckets: MarkerTimingAndBuckets;
   readonly maxMarkerRows: number;
   readonly markerListLength: number;
   readonly timeRange: StartEndRange;
   readonly threadsKey: ThreadsKey;
-  readonly previewSelection: PreviewSelection;
+  readonly previewSelection: PreviewSelection | null;
   readonly rightClickedMarkerIndex: MarkerIndex | null;
   readonly selectedMarkerIndex: MarkerIndex | null;
 };
@@ -106,6 +109,7 @@ class MarkerChartImpl extends React.PureComponent<Props> {
       markerTimingAndBuckets,
       getMarker,
       getMarkerLabel,
+      markerSchemaByName,
       previewSelection,
       updatePreviewSelection,
       changeMouseTimePosition,
@@ -152,8 +156,8 @@ class MarkerChartImpl extends React.PureComponent<Props> {
                 markerTimingAndBuckets,
                 getMarker,
                 getMarkerLabel,
+                markerSchemaByName,
                 markerListLength,
-                // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                 updatePreviewSelection,
                 changeMouseTimePosition,
                 changeRightClickedMarker,
@@ -191,6 +195,7 @@ export const MarkerChart = explicitConnect<{}, StateProps, DispatchProps>({
     return {
       getMarker: selectedThreadSelectors.getMarkerGetter(state),
       getMarkerLabel: selectedThreadSelectors.getMarkerChartLabelGetter(state),
+      markerSchemaByName: getMarkerSchemaByName(state),
       markerTimingAndBuckets,
       maxMarkerRows: markerTimingAndBuckets.length,
       markerListLength: selectedThreadSelectors.getMarkerListLength(state),

@@ -8,12 +8,10 @@
     "esModuleInterop": true,
     "verbatimModuleSyntax": false,
     "noUncheckedSideEffectImports": true,
-    "forceConsistentCasingInFileNames": true,
 
-    "noFallthroughCasesInSwitch": false, // Already checked by eslint, with opt-out
     "noUnusedLocals": true,
     "noImplicitOverride": true,
-    "noUnusedParameters": false, // Should enable in the future
+    "noUnusedParameters": true,
 
     // Default to strict, with the exceptions below
     "strict": true,
@@ -41,5 +39,5 @@
     "jsx": "react-jsx"
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "dist", "src/types/libdef"]
+  "exclude": ["node_modules", "dist"]
 }

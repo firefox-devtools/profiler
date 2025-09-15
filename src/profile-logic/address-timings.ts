@@ -132,7 +132,7 @@ import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
 export function getStackAddressInfo(
   stackTable: StackTable,
   frameTable: FrameTable,
-  funcTable: FuncTable,
+  _funcTable: FuncTable,
   nativeSymbol: IndexIntoNativeSymbolTable
 ): StackAddressInfo {
   // "self address" == "the address which a stack's self time is contributed to"

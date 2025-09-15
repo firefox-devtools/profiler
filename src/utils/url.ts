@@ -16,7 +16,7 @@ export function isLocalURL(url: string | URL): boolean {
   try {
     const parsedUrl = url instanceof URL ? url : new URL(url);
     return localhostHostnames.includes(parsedUrl.hostname);
-  } catch (e) {
+  } catch (_e) {
     return false;
   }
 }

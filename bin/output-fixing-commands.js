@@ -16,12 +16,20 @@ const fixingCommands = {
 };
 
 const command = process.argv.slice(2);
+const currentScriptName = process.env.npm_lifecycle_event;
+
+// Redirect the main lint command, but not individual commands.
+if (currentScriptName === 'lint' && command.includes('--fix')) {
+  console.log(`🔧 Detected --fix flag, running: yarn lint-fix`);
+  const result = cp.spawnSync('yarn', ['lint-fix'], { stdio: 'inherit' });
+  process.exitCode = result.status;
+  process.exit();
+}
 
 const result = cp.spawnSync(command[0], command.slice(1), { stdio: 'inherit' });
 
 if (result.status !== 0) {
   process.exitCode = result.status;
-  const currentScriptName = process.env.npm_lifecycle_event;
   if (currentScriptName && currentScriptName in fixingCommands) {
     console.log(
       '💡 You might be able to fix the error by running `yarn ' +

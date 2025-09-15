@@ -89,7 +89,7 @@ export class ArrowPanel extends React.PureComponent<Props, State> {
 
   // We're calling open and close callbacks in componentDidUpdate because they
   // often run side-effects, so we want them out of the render phase.
-  override componentDidUpdate(prevProps: Props, prevState: State) {
+  override componentDidUpdate(_prevProps: Props, prevState: State) {
     if (!prevState.open && this.state.open) {
       // Opening
       this.props.onOpen();

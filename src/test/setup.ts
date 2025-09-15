@@ -9,11 +9,10 @@ import '@testing-library/jest-dom';
 import 'jest-extended';
 
 // This installs jest matchers as a side effect as well.
-import fetchMock from '@fetch-mock/jest';
+import fetchMock from 'fetch-mock';
 import crypto from 'crypto';
 
-jest.mock('../utils/worker-factory');
-import * as WorkerFactory from '../utils/worker-factory';
+import { NodeWorker, __shutdownWorkers } from './fixtures/node-worker';
 import { autoMockResizeObserver } from './fixtures/mocks/resize-observer';
 
 autoMockResizeObserver();
@@ -25,9 +24,16 @@ if (process.env.TZ !== 'UTC') {
 fetchMock.mockGlobal();
 (global as any).fetchMock = fetchMock;
 
+// Mock the effects of the file-loader which our Webpack config defines
+// for JS files under res: The "default export" is the path to the file.
+jest.mock('firefox-profiler-res/gz-worker.js', () => './res/gz-worker.js');
+
+// Install a Worker class which is similar to the DOM Worker class.
+(global as any).Worker = NodeWorker;
+
 afterEach(function () {
-  // This `__shutdownWorkers` function only exists in the mocked test environment.
-  const { __shutdownWorkers } = WorkerFactory as any;
+  // All node workers must be shut down at the end of the test run,
+  // otherwise Jest won't exit.
   __shutdownWorkers();
 });
 
@@ -43,7 +49,8 @@ afterEach(() => {
   jest.useRealTimers();
 
   // Do the same with fetch mocks
-  fetchMock.mockReset();
+  fetchMock.removeRoutes();
+  fetchMock.clearHistory();
 });
 
 expect.extend({

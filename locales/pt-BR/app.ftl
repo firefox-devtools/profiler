@@ -656,8 +656,8 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = Todos os frames
     .title = Não filtrar frames de pilha
-StackSettings--implementation-javascript2 = JavaScript
-    .title = Mostrar apenas os frames de pilha relacionados à execução JavaScript
+StackSettings--implementation-script = Script
+    .title = Mostrar somente os frames de pilhas relacionados a execução de scripts
 StackSettings--implementation-native2 = Nativo
     .title = Mostrar apenas os frames de pilha de código nativo
 # This label is displayed in the marker chart and marker table panels only.
@@ -678,6 +678,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Locais de desaloc
 StackSettings--invert-call-stack = Inverter pilha de chamadas
     .title = Ordenar pelo tempo gasto em um node de chamadas, ignorando seus filhos.
 StackSettings--show-user-timing = Mostrar tempo do usuário
+StackSettings--use-stack-chart-same-widths = Usar a mesma largura em cada pilha
 StackSettings--panel-search =
     .label = Filtrar pilhas:
     .title = Só exibir pilhas que contêm uma função cujo nome corresponde a esta substring

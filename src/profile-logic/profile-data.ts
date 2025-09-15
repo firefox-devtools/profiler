@@ -25,7 +25,7 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
-import { makeBitSet } from 'firefox-profiler/utils/bitset';
+import { checkBit, makeBitSet, setBit } from 'firefox-profiler/utils/bitset';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 import {
@@ -85,7 +85,7 @@ import type {
   CallTreeSummaryStrategy,
   EventDelayInfo,
   ThreadsKey,
-  resourceTypeEnum,
+  ResourceTypeEnum,
   MarkerPayload,
   Address,
   AddressProof,
@@ -959,7 +959,6 @@ export type TimingsForPath = {
 export function getTimingsForPath(
   needlePath: CallNodePath,
   callNodeInfo: CallNodeInfo,
-  interval: Milliseconds,
   unfilteredThread: Thread,
   sampleIndexOffset: number,
   categories: CategoryList,
@@ -969,7 +968,6 @@ export function getTimingsForPath(
   return getTimingsForCallNodeIndex(
     callNodeInfo.getCallNodeIndexFromPath(needlePath),
     callNodeInfo,
-    interval,
     unfilteredThread,
     sampleIndexOffset,
     categories,
@@ -989,7 +987,6 @@ export function getTimingsForPath(
 export function getTimingsForCallNodeIndex(
   needleNodeIndex: IndexIntoCallNodeTable | null,
   callNodeInfo: CallNodeInfo,
-  interval: Milliseconds,
   unfilteredThread: Thread,
   sampleIndexOffset: number,
   categories: CategoryList,
@@ -1507,7 +1504,7 @@ export function filterThreadToSearchString(
   const { funcTable, frameTable, stackTable, stringTable, resourceTable } =
     thread;
 
-  function computeFuncMatchesFilter(func: IndexIntoFuncTable) {
+  function computeFuncMatchesSearch(func: IndexIntoFuncTable) {
     const nameIndex = funcTable.name[func];
     const nameString = stringTable.getString(nameIndex);
     if (nameString.toLowerCase().includes(lowercaseSearchString)) {
@@ -1534,38 +1531,32 @@ export function filterThreadToSearchString(
     return false;
   }
 
-  const funcMatchesFilterCache = new Map();
-  function funcMatchesFilter(func: IndexIntoFuncTable) {
-    let result = funcMatchesFilterCache.get(func);
-    if (result === undefined) {
-      result = computeFuncMatchesFilter(func);
-      funcMatchesFilterCache.set(func, result);
+  const funcMatchesSearch = makeBitSet(funcTable.length);
+  for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
+    if (computeFuncMatchesSearch(funcIndex)) {
+      setBit(funcMatchesSearch, funcIndex);
     }
-    return result;
   }
 
-  const stackMatchesFilterCache = new Map();
-  function stackMatchesFilter(stackIndex: IndexIntoStackTable | null) {
-    if (stackIndex === null) {
-      return false;
-    }
-    let result = stackMatchesFilterCache.get(stackIndex);
-    if (result === undefined) {
-      const prefix = stackTable.prefix[stackIndex];
-      if (stackMatchesFilter(prefix)) {
-        result = true;
-      } else {
-        const frame = stackTable.frame[stackIndex];
-        const func = frameTable.func[frame];
-        result = funcMatchesFilter(func);
+  const stackMatchesSearch = makeBitSet(stackTable.length);
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const prefix = stackTable.prefix[stackIndex];
+    if (prefix !== null && checkBit(stackMatchesSearch, prefix)) {
+      setBit(stackMatchesSearch, stackIndex);
+    } else {
+      const funcIndex = frameTable.func[stackTable.frame[stackIndex]];
+      if (checkBit(funcMatchesSearch, funcIndex)) {
+        setBit(stackMatchesSearch, stackIndex);
       }
-      stackMatchesFilterCache.set(stackIndex, result);
     }
-    return result;
   }
 
+  // Set any stacks which don't include the search string to null.
+  // TODO: This includes stacks in markers; maybe we shouldn't clear marker stacks?
   return updateThreadStacks(thread, stackTable, (stackIndex) =>
-    stackMatchesFilter(stackIndex) ? stackIndex : null
+    stackIndex !== null && checkBit(stackMatchesSearch, stackIndex)
+      ? stackIndex
+      : null
   );
 }
 
@@ -2297,12 +2288,7 @@ export function computeSamplesTableFromRawSamplesTable(
       : ensureExists(rawSamples.timeDeltas);
   const threadCPURatio =
     sampleUnits !== undefined
-      ? computeThreadCPURatio(
-          rawSamples,
-          sampleUnits,
-          timeDeltas,
-          referenceCPUDeltaPerMs
-        )
+      ? computeThreadCPURatio(rawSamples, timeDeltas, referenceCPUDeltaPerMs)
       : undefined;
   const time = computeTimeColumnForRawSamplesTable(rawSamples);
 
@@ -2479,17 +2465,14 @@ export function updateThreadStacks(
     oldData: MarkerPayload | null
   ): MarkerPayload | null {
     if (oldData && 'cause' in oldData && oldData.cause) {
-      const stack = convertStack(oldData.cause.stack);
-      if (stack) {
-        // Replace the cause with the right stack index.
-        return {
-          ...oldData,
-          cause: {
-            ...oldData.cause,
-            stack,
-          },
-        };
-      }
+      // Replace the cause with the right stack index.
+      return {
+        ...oldData,
+        cause: {
+          ...oldData.cause,
+          stack: convertStack(oldData.cause.stack),
+        },
+      };
     }
     return oldData;
   }
@@ -2550,17 +2533,14 @@ export function updateRawThreadStacksSeparate(
     oldData: MarkerPayload | null
   ): MarkerPayload | null {
     if (oldData && 'cause' in oldData && oldData.cause) {
-      const stack = convertSyncBacktraceStack(oldData.cause.stack);
-      if (stack) {
-        // Replace the cause with the right stack index.
-        return {
-          ...oldData,
-          cause: {
-            ...oldData.cause,
-            stack,
-          },
-        };
-      }
+      // Replace the cause with the right stack index.
+      return {
+        ...oldData,
+        cause: {
+          ...oldData.cause,
+          stack: convertSyncBacktraceStack(oldData.cause.stack),
+        },
+      };
     }
     return oldData;
   }
@@ -2822,7 +2802,7 @@ export function getThreadProcessDetails(
 function _shouldShowBothOriginAndFileName(
   fileName: string,
   origin: string,
-  resourceType: resourceTypeEnum | null
+  resourceType: ResourceTypeEnum | null
 ): boolean {
   // If the origin string is just a URL prefix that's part of the
   // filename, it doesn't add any useful information, so only show
@@ -3345,7 +3325,7 @@ export function extractProfileFilterPageData(
           : page.hostname;
 
       pageData.origin = page.origin;
-    } catch (e) {
+    } catch (_e) {
       // Error while extracting the hostname and favicon from the page url.
       // It's likely that it's because sanitization removed the urls. Just
       // ignore it and default to the initial sanitized url.
@@ -3383,7 +3363,7 @@ export function getOrCreateURIResource(
     }
     origin = url.origin;
     host = url.host;
-  } catch (e) {
+  } catch (_e) {
     origin = scriptURI;
     host = null;
   }

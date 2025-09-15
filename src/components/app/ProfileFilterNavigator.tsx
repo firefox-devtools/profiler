@@ -187,7 +187,7 @@ export const ProfileFilterNavigator = explicitConnect<
     const items = getCommittedRangeLabels(state);
     const previewSelection = getPreviewSelection(state);
     const profileTimelineUnit = getProfileTimelineUnit(state);
-    const uncommittedItem = previewSelection.hasSelection
+    const uncommittedItem = previewSelection
       ? getFormattedTimelineValue(
           previewSelection.selectionEnd - previewSelection.selectionStart,
           profileTimelineUnit

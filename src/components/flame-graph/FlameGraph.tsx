@@ -74,7 +74,7 @@ type StateProps = {
   readonly ctssSampleIndexOffset: number;
   readonly maxStackDepthPlusOne: number;
   readonly timeRange: StartEndRange;
-  readonly previewSelection: PreviewSelection;
+  readonly previewSelection: PreviewSelection | null;
   readonly flameGraphTiming: FlameGraphTiming;
   readonly callTree: CallTree;
   readonly callNodeInfo: CallNodeInfo;

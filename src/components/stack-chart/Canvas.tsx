@@ -641,7 +641,6 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     const { depth, stackTimingIndex } = hoveredItem;
     const { combinedTimingRows, updatePreviewSelection } = this.props;
     updatePreviewSelection({
-      hasSelection: true,
       isModifying: false,
       selectionStart: combinedTimingRows[depth].start[stackTimingIndex],
       selectionEnd: combinedTimingRows[depth].end[stackTimingIndex],

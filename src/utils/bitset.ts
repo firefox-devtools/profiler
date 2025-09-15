@@ -21,17 +21,35 @@ export function makeBitSet(length: number): BitSet {
 export function setBit(bitSet: BitSet, bitIndex: number) {
   const q = bitIndex >> 5;
   const r = bitIndex & 0b11111;
+  if (q >= bitSet.length) {
+    throw new BitSetOutOfBoundsError(bitIndex);
+  }
   bitSet[q] |= 1 << r;
 }
 
 export function clearBit(bitSet: BitSet, bitIndex: number) {
   const q = bitIndex >> 5;
   const r = bitIndex & 0b11111;
+  if (q >= bitSet.length) {
+    throw new BitSetOutOfBoundsError(bitIndex);
+  }
   bitSet[q] &= ~(1 << r);
 }
 
 export function checkBit(bitSet: BitSet, bitIndex: number): boolean {
   const q = bitIndex >> 5;
   const r = bitIndex & 0b11111;
+  if (q >= bitSet.length) {
+    throw new BitSetOutOfBoundsError(bitIndex);
+  }
   return (bitSet[q] & (1 << r)) !== 0;
+}
+
+export class BitSetOutOfBoundsError extends Error {
+  override name = 'BitSetOutOfBoundsError';
+  bitIndex: number;
+  constructor(bitIndex: number) {
+    super(`Bit index ${bitIndex} is out of bounds`);
+    this.bitIndex = bitIndex;
+  }
 }

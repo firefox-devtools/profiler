@@ -584,12 +584,15 @@ export type AccumulatedCounterSamples = {
  * A collection of the data for all configured lines for a given marker
  */
 export type CollectedCustomMarkerSamples = {
-  readonly minNumber: number;
-  readonly maxNumber: number;
   // This value holds the number per configured line
   // selection. The array will share the indexes of the range filtered marker samples.
   readonly numbersPerLine: number[][];
   readonly markerIndexes: MarkerIndex[];
+};
+
+export type ValueBounds = {
+  readonly minNumber: number;
+  readonly maxNumber: number;
 };
 
 export type StackType = 'js' | 'native' | 'unsymbolicated';

@@ -72,7 +72,7 @@ type StateProps = {
   readonly sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap;
   readonly timeRange: StartEndRange;
   readonly interval: Milliseconds;
-  readonly previewSelection: PreviewSelection;
+  readonly previewSelection: PreviewSelection | null;
   readonly threadsKey: ThreadsKey;
   readonly callNodeInfo: CallNodeInfo;
   readonly categories: CategoryList;
@@ -266,7 +266,6 @@ class StackChartImpl extends React.PureComponent<Props> {
                   combinedTimingRows,
                   sameWidthsIndexToTimestampMap,
                   getMarker,
-                  // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                   updatePreviewSelection,
                   changeMouseTimePosition,
                   rangeStart: timeRange.start,

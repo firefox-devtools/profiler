@@ -79,8 +79,21 @@ export interface CliOptions {
 
 export async function run(options: CliOptions) {
   console.log(`Loading profile from ${options.input}`);
-  const serializedProfile = JSON.parse(fs.readFileSync(options.input, 'utf8'));
-  const profile = await unserializeProfileOfArbitraryFormat(serializedProfile);
+
+  // Read the raw bytes from the file. It might be a JSON file, but it could also
+  // be a binary file, e.g. a .json.gz file, or any of the binary formats supported
+  // by our importers.
+  const bytes = fs.readFileSync(options.input, null);
+
+  // bytes is a Uint8Array whose underlying ArrayBuffer can be longer than bytes.length.
+  // Copy the contents into a new ArrayBuffer which is sized correctly, so that we
+  // don't include uninitialized data from the extra parts of the underlying buffer.
+  // Alternatively, we could make unserializeProfileOfArbitraryFormat support
+  // Uint8Array or Buffer in addition to ArrayBuffer.
+  const byteBufferCopy = Uint8Array.prototype.slice.call(bytes).buffer;
+
+  // Load the profile.
+  const profile = await unserializeProfileOfArbitraryFormat(byteBufferCopy);
   if (profile === undefined) {
     throw new Error('Unable to parse the profile.');
   }

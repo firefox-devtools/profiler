@@ -728,8 +728,8 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = Alla ramar
     .title = Filtrera inte stackramar
-StackSettings--implementation-javascript2 = JavaScript
-    .title = Visa endast stackramar relaterade till JavaScript-körning
+StackSettings--implementation-script = Skript
+    .title = Visa endast stackramar relaterade till skriptkörning
 StackSettings--implementation-native2 = Intern
     .title = Visa bara stackramar för intern kod
 # This label is displayed in the marker chart and marker table panels only.

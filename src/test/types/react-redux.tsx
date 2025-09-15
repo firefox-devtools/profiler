@@ -138,11 +138,11 @@ const ConnectedExampleComponent = explicitConnect<
 
 {
   // Test that WrapFunctionInDispatch works to strip off the return action.
-  const exampleAction = (string: string) => ANY_VALUE as Action;
+  const exampleAction = (_string: string) => ANY_VALUE as Action;
   const exampleThunkAction =
-    (string: string) => (dispatch: Dispatch, getState: GetState) =>
+    (_string: string) => (_dispatch: Dispatch, _getState: GetState) =>
       ANY_VALUE as number;
-  const exampleThunkActionWrapped = (string: string) => 5;
+  const exampleThunkActionWrapped = (_string: string) => 5;
   markUsed(exampleThunkActionWrapped);
 
   expectType<WrapFunctionInDispatch<ExampleActionCreator>>(exampleAction);
