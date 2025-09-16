@@ -139,6 +139,11 @@ describe('timeline/GlobalTrack', function () {
         container.querySelector('.timelineTrackLabel'),
         `Couldn't find the track label with selector .timelineTrackLabel`
       ) as HTMLElement;
+    const getGlobalTrackContent = () =>
+      ensureExists(
+        container.querySelector('.timelineTrackTrack'),
+        `Couldn't find the track content with selector .timelineTrackTrack`
+      ) as HTMLElement;
     const getGlobalTrackRow = () =>
       ensureExists(
         container.querySelector('.timelineTrackGlobalRow'),
@@ -155,6 +160,7 @@ describe('timeline/GlobalTrack', function () {
       trackIndex,
       threadIndex,
       getGlobalTrackLabel,
+      getGlobalTrackContent,
       getGlobalTrackRow,
     };
   }
@@ -222,7 +228,7 @@ describe('timeline/GlobalTrack', function () {
     expect(getGlobalTrackRow()).toHaveClass('selected');
   });
 
-  it('can right click a thread', () => {
+  it('can right click a thread on the label', () => {
     const { getState, getGlobalTrackLabel, threadIndex, trackReference } =
       setup();
 
@@ -231,11 +237,20 @@ describe('timeline/GlobalTrack', function () {
     expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
   });
 
-  it('can select a thread by clicking the row', () => {
-    const { getState, getGlobalTrackRow, threadIndex } = setup();
+  it('can select a thread by clicking the track content', () => {
+    const { getState, getGlobalTrackContent, threadIndex } = setup();
     expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
-    fireFullClick(getGlobalTrackRow());
+    fireFullClick(getGlobalTrackContent());
     expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
+  });
+
+  it('can right click a thread on the track content', () => {
+    const { getState, getGlobalTrackContent, threadIndex, trackReference } =
+      setup();
+
+    fireFullContextMenu(getGlobalTrackContent());
+    expect(getRightClickedTrack(getState())).toEqual(trackReference);
+    expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
   });
 
   it('will render a stub div if the track is hidden', () => {

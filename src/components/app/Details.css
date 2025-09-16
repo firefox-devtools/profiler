@@ -26,9 +26,9 @@
 }
 
 .sidebar-open-close-button-isopen {
-  background-image: url(firefox-profiler-res/img/svg/pane-collapse.svg);
+  background-image: url(../../../res/img/svg/pane-collapse.svg);
 }
 
 .sidebar-open-close-button-isclosed {
-  background-image: url(firefox-profiler-res/img/svg/pane-expand.svg);
+  background-image: url(../../../res/img/svg/pane-expand.svg);
 }

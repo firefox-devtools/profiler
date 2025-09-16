@@ -80,8 +80,8 @@
   margin: 3px 0 3px 3px;
 
   /* Other */
-  background: var(--green-50) url(firefox-profiler-res/img/svg/back-arrow.svg)
-    center center no-repeat;
+  background: var(--green-50) url(../../../res/img/svg/back-arrow.svg) center
+    center no-repeat;
   color: #000;
 }
 

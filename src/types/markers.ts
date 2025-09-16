@@ -171,6 +171,11 @@ export type MarkerSchema = {
   // if present, give the marker its own local track
   graphs?: Array<MarkerGraph>;
 
+  // If present, specifies the key of a marker field that contains the marker's color.
+  // The field should contain one of the GraphColor values.
+  // This allows individual markers to have different colors based on their data.
+  colorField?: string;
+
   // If set to true, markers of this type are assumed to be well-nested with all
   // other stack-based markers on the same thread. Stack-based markers may
   // be displayed in a different part of the marker chart than non-stack-based
@@ -196,7 +201,7 @@ export type CauseBacktrace = {
   // No upgrader was written for this change.
   tid?: Tid;
   time?: Milliseconds;
-  stack: IndexIntoStackTable;
+  stack: IndexIntoStackTable | null;
 };
 
 /**

@@ -3,29 +3,29 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import type { LineTimings } from 'firefox-profiler/types';
 
-import { GraphViewer } from 'iongraph-web';
-import type { Func } from 'iongraph-web';
+import { GraphViewer, migrate } from 'iongraph-web';
 import 'iongraph-web/dist/style.css';
 
 import { useMemo } from 'react';
 
 type IonGraphViewProps = {
   readonly sourceCode: string;
-  // TODO: use these when https://github.com/mozilla-spidermonkey/iongraph-web/issues/3 is resolved.
   readonly timings: LineTimings;
   readonly hotSpotTimings: LineTimings;
 };
 
 export function IonGraphView(props: IonGraphViewProps) {
-  const func = useMemo(() => {
+  const ionJSON = useMemo(() => {
     if (props.sourceCode.trim() === '') {
       return null;
     }
-    return JSON.parse(props.sourceCode) as Func;
+    return migrate(JSON.parse(props.sourceCode));
   }, [props.sourceCode]);
 
-  if (!func) {
+  if (!ionJSON?.functions[0]) {
     return <div />;
   }
-  return <GraphViewer func={func} />;
+  return (
+    <GraphViewer func={ionJSON.functions[0]} sampleCounts={props.timings} />
+  );
 }

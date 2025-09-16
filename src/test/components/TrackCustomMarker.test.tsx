@@ -6,9 +6,11 @@
 
 import type { CssPixels } from 'firefox-profiler/types';
 import { Provider } from 'react-redux';
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, act } from '@testing-library/react';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { commitRange } from 'firefox-profiler/actions/profile-view';
+import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { TrackCustomMarker } from '../../components/timeline/TrackCustomMarker';
 import { ensureExists } from '../../utils/types';
 
@@ -46,9 +48,13 @@ function getMarkerPixelPosition(time: number): CssPixels {
   return (time * GRAPH_WIDTH) / SAMPLE_COUNT;
 }
 
-function setup() {
+function setup(
+  values: number[] = Array(SAMPLE_COUNT)
+    .fill(0)
+    .map((_, i) => i)
+) {
   const { profile, stringTable } = getProfileFromTextSamples(
-    Array(SAMPLE_COUNT).fill('A').join('  ')
+    Array(values.length).fill('A').join('  ')
   );
   const markerStringIndex = stringTable.indexForString('Marker');
   const threadIndex = 0;
@@ -83,9 +89,10 @@ function setup() {
     thread.markers.category.push(4);
     thread.markers.length++;
   };
-  for (let i = 0; i < SAMPLE_COUNT; i++) {
-    addMarker(i, i, i * 2);
-  }
+
+  values.forEach((value, index) => {
+    addMarker(index, value, value * 2);
+  });
   const store = storeWithProfile(profile);
   const { getState, dispatch } = store;
   const flushRafCalls = mockRaf();
@@ -142,6 +149,7 @@ function setup() {
     flushRafCalls,
     getMarkerDot,
     getContextDrawCalls,
+    markerStringIndex,
   };
 }
 
@@ -298,5 +306,91 @@ describe('TrackCustomMarker with intersection observer', function () {
     expect(drawCalls.some(([operation]) => operation === 'clearRect')).toBe(
       true
     );
+  });
+});
+
+describe('TrackCustomMarker with committed range scaling', function () {
+  autoMockCanvasContext();
+  autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
+  autoMockIntersectionObserver();
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
+
+  it('uses the committed range scaling selector correctly', function () {
+    // Create markers with values: [1, 100, 2, 3] at times 0, 1, 2, 3
+    // Full range min/max would be 1-100, but committed range 2-3 should be 2-3
+    const { profile, dispatch, getState, markerStringIndex } = setup([
+      1, 100, 2, 3,
+    ]);
+
+    // Get the selectors to test them directly
+    const state = getState();
+    const threadSelectors = getThreadSelectors(0);
+    const markerSchema = ensureExists(
+      profile.meta.markerSchema.find((schema) => schema.name === 'Marker')
+    );
+    const markerTrackSelectors = threadSelectors.getMarkerTrackSelectors(
+      markerSchema,
+      markerStringIndex
+    );
+
+    // Get initial samples (full range) - should have min=1, max=200 (because second line = first * 2)
+    const fullRangeSamples =
+      markerTrackSelectors.getCollectedCustomMarkerSamples(state);
+    const fullRangeValueBounds =
+      markerTrackSelectors.getCommittedRangeMarkerSampleValueBounds(state);
+    expect(fullRangeValueBounds.minNumber).toBe(1);
+    expect(fullRangeValueBounds.maxNumber).toBe(200); // 100 * 2 from second line
+
+    // Commit range from 2ms to 3.5ms to include only the markers at times 2ms and 3ms.
+    // The 2.1 value is to exclude from the range the end of the marker at 1ms.
+    act(() => {
+      dispatch(commitRange(2.1, 3.5));
+    });
+
+    // Get committed range samples - should include markers at 2ms[2,4] and 3ms[3,6]
+    const newState = getState();
+    const committedRangeSamples =
+      markerTrackSelectors.getCollectedCustomMarkerSamples(newState);
+    const committedRangeValueBounds =
+      markerTrackSelectors.getCommittedRangeMarkerSampleValueBounds(newState);
+    expect(committedRangeValueBounds.minNumber).toBe(2);
+    expect(committedRangeValueBounds.maxNumber).toBe(6);
+
+    // Verify the arrays are the same length (same structure)
+    expect(committedRangeSamples.numbersPerLine).toHaveLength(
+      fullRangeSamples.numbersPerLine.length
+    );
+    expect(committedRangeSamples.markerIndexes).toHaveLength(
+      fullRangeSamples.markerIndexes.length
+    );
+  });
+
+  it('handles edge case where committed range has identical values', function () {
+    // Create markers with identical values in the committed range
+    const { profile, dispatch, getState, markerStringIndex } = setup([
+      1, 100, 5, 5,
+    ]);
+
+    const threadSelectors = getThreadSelectors(0);
+    const markerSchema = ensureExists(
+      profile.meta.markerSchema.find((schema) => schema.name === 'Marker')
+    );
+    const markerTrackSelectors = threadSelectors.getMarkerTrackSelectors(
+      markerSchema,
+      markerStringIndex
+    );
+
+    // Focus on the range with identical values at times 2ms and 3ms (values [5,10] and [5,10])
+    act(() => {
+      dispatch(commitRange(2.1, 3.5));
+    });
+
+    // Should not crash when min === max - both markers have first=5, second=10
+    const state = getState();
+    const committedRangeValueBounds =
+      markerTrackSelectors.getCommittedRangeMarkerSampleValueBounds(state);
+    expect(committedRangeValueBounds.minNumber).toBe(5);
+    expect(committedRangeValueBounds.maxNumber).toBe(10); // 5 * 2 from second line
   });
 });

@@ -3,35 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 async function readableStreamToBuffer(stream) {
-  const reader = stream.getReader();
-  const chunks = [];
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (value) {
-        chunks.push(value);
-      }
-    }
-  } finally {
-    reader.releaseLock();
-  }
-
-  // Calculate total length and combine chunks
-  const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
-  const result = new Uint8Array(totalLength);
-  let offset = 0;
-  for (const chunk of chunks) {
-    result.set(chunk, offset);
-    offset += chunk.length;
-  }
-
-  return result;
+  return new Uint8Array(await new Response(stream).arrayBuffer());
 }
 
 onmessage = async (e) => {
-  let data = e.data;
+  const data = e.data;
   if (data.kind === 'compress') {
     // Create a gzip compression stream
     const compressionStream = new CompressionStream('gzip');
@@ -42,7 +18,7 @@ onmessage = async (e) => {
     writer.close();
 
     // Read the compressed data back into a buffer
-    let result = await readableStreamToBuffer(compressionStream.readable);
+    const result = await readableStreamToBuffer(compressionStream.readable);
     postMessage(result, [result.buffer]);
   } else if (data.kind === 'decompress') {
     // Create a gzip compression stream
@@ -54,7 +30,7 @@ onmessage = async (e) => {
     writer.close();
 
     // Read the compressed data back into a buffer
-    let result = await readableStreamToBuffer(decompressionStream.readable);
+    const result = await readableStreamToBuffer(decompressionStream.readable);
     postMessage(result, [result.buffer]);
   } else {
     throw new Error('unknown message');
