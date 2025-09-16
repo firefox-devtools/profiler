@@ -33,14 +33,14 @@ const config = {
   module: {
     rules: [
       {
-        test: /\.js$/,
-        use: ['file-loader'],
-        include: [path.join(__dirname, 'res')],
-      },
-      {
         test: /\.(js|ts|tsx)$/,
         use: ['babel-loader'],
-        include: [path.join(__dirname, 'src')],
+        include: includes,
+      },
+      {
+        test: /\.worker\.js$/,
+        use: ['file-loader'],
+        include: includes,
       },
       {
         test: /\.json$/,
@@ -99,7 +99,6 @@ const config = {
       patterns: [
         'res/_headers',
         'res/_redirects',
-        'res/gz-worker.js',
         'res/contribute.json',
         'res/robots.txt',
         'res/service-worker-compat.js',
