@@ -7,19 +7,24 @@ import type {
   Lib,
   SourceCodeStatus,
   Selector,
+  IndexIntoSourceTable,
 } from 'firefox-profiler/types';
-import { getSourceViewFile, getAssemblyViewNativeSymbol } from './url-state';
+import {
+  getSourceViewSourceIndex,
+  getAssemblyViewNativeSymbol,
+} from './url-state';
 import { getProfileOrNull } from './profile';
 
-export const getSourceCodeCache: Selector<Map<string, SourceCodeStatus>> = (
-  state
-) => state.code.sourceCodeCache;
+export const getSourceCodeCache: Selector<
+  Map<IndexIntoSourceTable, SourceCodeStatus>
+> = (state) => state.code.sourceCodeCache;
 
 export const getSourceViewCode: Selector<SourceCodeStatus | void> =
   createSelector(
     getSourceCodeCache,
-    getSourceViewFile,
-    (sourceCodeCache, file) => (file ? sourceCodeCache.get(file) : undefined)
+    getSourceViewSourceIndex,
+    (sourceCodeCache, sourceIndex) =>
+      sourceIndex !== null ? sourceCodeCache.get(sourceIndex) : undefined
   );
 
 export const getAssemblyCodeCache: Selector<Map<string, AssemblyCodeStatus>> = (

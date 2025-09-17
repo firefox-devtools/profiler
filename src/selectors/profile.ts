@@ -916,3 +916,26 @@ export const getProfileUsesMultipleStackTypes: Selector<boolean> = (state) => {
 
 export const getProfileExtraInfo: Selector<ExtraProfileInfoSection[]> =
   createSelector(getProfile, (profile) => profile.meta.extra || []);
+
+export const getSourceViewFile: Selector<string | null> = createSelector(
+  getSourceTable,
+  getStringTable,
+  UrlState.getSourceViewSourceIndex,
+  (sources, stringTable, sourceIndex) => {
+    if (sourceIndex === null) {
+      return null;
+    }
+
+    const fileNameStrIndex = sources.filename[sourceIndex];
+    return fileNameStrIndex !== null
+      ? stringTable.getString(fileNameStrIndex)
+      : null;
+  }
+);
+
+export const getSourceViewSourceUuid: Selector<string | null> = createSelector(
+  getSourceTable,
+  UrlState.getSourceViewSourceIndex,
+  (sources, sourceIndex) =>
+    sourceIndex !== null ? sources.uuid[sourceIndex] : null
+);

@@ -21,7 +21,7 @@ import {
   setContextMenuVisibility,
 } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSourceViewFile } from '../../selectors/url-state';
+import { getSourceViewFile } from '../../selectors/profile';
 import { ensureExists } from '../../utils/types';
 import { createBrowserConnection } from '../../app-logic/browser-connection';
 import { updateBrowserConnectionStatus } from 'firefox-profiler/actions/app';

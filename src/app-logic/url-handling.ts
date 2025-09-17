@@ -171,7 +171,7 @@ type BaseQuery = {
   view: string;
   implementation: string;
   timelineType: string;
-  sourceView: string;
+  sourceViewIndex: number;
   assemblyView: string;
 };
 
@@ -208,7 +208,7 @@ type Query = BaseQuery & {
   invertCallstack?: null | undefined;
   ctSummary?: string;
   transforms?: string;
-  sourceView?: string;
+  sourceViewIndex?: number;
   assemblyView?: string;
 
   // StackChart specific
@@ -349,8 +349,8 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         urlState.profileSpecific;
 
       if (isBottomBoxOpenPerPanel[selectedTab]) {
-        if (sourceView.sourceFile !== null) {
-          query.sourceView = sourceView.sourceFile;
+        if (sourceView.sourceIndex !== null) {
+          query.sourceViewIndex = sourceView.sourceIndex;
         }
         if (assemblyView.isOpen && assemblyView.nativeSymbol !== null) {
           query.assemblyView = stringifyAssemblyViewSymbol(
@@ -508,7 +508,7 @@ export function stateFromLocation(
   const sourceView: SourceViewState = {
     scrollGeneration: 0,
     libIndex: null,
-    sourceFile: null,
+    sourceIndex: null,
   };
   const assemblyView: AssemblyViewState = {
     isOpen: false,
@@ -518,8 +518,8 @@ export function stateFromLocation(
   };
   const isBottomBoxOpenPerPanel: any = {};
   tabSlugs.forEach((tabSlug) => (isBottomBoxOpenPerPanel[tabSlug] = false));
-  if (query.sourceView) {
-    sourceView.sourceFile = query.sourceView;
+  if (query.sourceViewIndex !== undefined) {
+    sourceView.sourceIndex = Number(query.sourceViewIndex);
     isBottomBoxOpenPerPanel[selectedTab] = true;
   }
   if (query.assemblyView) {
