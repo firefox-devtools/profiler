@@ -6,6 +6,10 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 58
+
+A new `SourceTable` has been added to `profile.shared.sources` to centralize all source file information. The `FuncTable.fileName` field has been replaced with `FuncTable.source`, which references indices in the shared sources table. This change allows storing a UUID per JS source, which will be used for fetching sources.
+
 ### Version 57
 
 The `searchable` property in marker schemas, originally added in version 44, is now removed again. Now all marker fields are searchable.
