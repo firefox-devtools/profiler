@@ -2211,7 +2211,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
           class="menuButtonsDownloadSize"
         >
           (
-          1.56 kB
+          1.58 kB
           )
         </span>
       </a>
@@ -2329,7 +2329,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           class="menuButtonsDownloadSize"
         >
           (
-          1.54 kB
+          1.56 kB
           )
         </span>
       </a>
@@ -2442,7 +2442,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           class="menuButtonsDownloadSize"
         >
           (
-          1.56 kB
+          1.58 kB
           )
         </span>
       </a>
