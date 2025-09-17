@@ -955,7 +955,10 @@ function _buildThreadFromTextOnlyStacks(
       // Find the file name from the function name
       const fileName = _findFileNameFromFuncName(funcNameWithModifier);
       if (fileName) {
-        funcTable.source[funcIndex] = globalDataCollector.indexForSource(null, fileName);
+        funcTable.source[funcIndex] = globalDataCollector.indexForSource(
+          null,
+          fileName
+        );
       }
 
       const category = _findCategoryFromFuncName(
