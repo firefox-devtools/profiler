@@ -22,6 +22,7 @@ import type {
   Pid,
   TabID,
   IndexIntoLibs,
+  IndexIntoSourceTable,
 } from './profile';
 
 import type {
@@ -243,9 +244,9 @@ export type SourceViewState = {
   // for example if the source view was opened via the URL (the source URL param
   // currently discards the libIndex).
   libIndex: IndexIntoLibs | null;
-  // The path to the source file. Null if a function without a file path was
-  // double clicked.
-  sourceFile: string | null;
+  // Index into source table. Contains information (filename and uuid) about the
+  // source. Null if a function without a file path was double clicked.
+  sourceIndex: IndexIntoSourceTable | null;
 };
 
 export type AssemblyViewState = {
@@ -384,7 +385,7 @@ export type PseudoStrategy = null | 'bidi' | 'accented';
 export type IconsWithClassNames = Map<string, string>;
 
 export type CodeState = {
-  readonly sourceCodeCache: Map<string, SourceCodeStatus>;
+  readonly sourceCodeCache: Map<IndexIntoSourceTable, SourceCodeStatus>;
   readonly assemblyCodeCache: Map<string, AssemblyCodeStatus>;
 };
 

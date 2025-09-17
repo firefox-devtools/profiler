@@ -271,30 +271,24 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
   const getSourceViewStackLineInfo: Selector<StackLineInfo | null> =
     createSelector(
       selectedThreadSelectors.getFilteredThread,
-      UrlState.getSourceViewFile,
+      UrlState.getSourceViewSourceIndex,
       selectedThreadSelectors.getCallNodeInfo,
       selectedThreadSelectors.getSelectedCallNodeIndex,
-      ProfileSelectors.getSourceTable,
       (
-        { stackTable, frameTable, funcTable, stringTable }: Thread,
-        sourceViewFile,
+        { stackTable, frameTable, funcTable }: Thread,
+        sourceViewSourceIndex,
         callNodeInfo,
-        selectedCallNodeIndex,
-        sources
+        selectedCallNodeIndex
       ): StackLineInfo | null => {
-        if (sourceViewFile === null || selectedCallNodeIndex === null) {
+        if (sourceViewSourceIndex === null || selectedCallNodeIndex === null) {
           return null;
         }
         const selectedFunc = callNodeInfo.funcForNode(selectedCallNodeIndex);
-        const sourceIndex = funcTable.source[selectedFunc];
-        let selectedFuncFile = null;
-        if (sourceIndex !== null && sources) {
-          const urlIndex = sources.filename[sourceIndex];
-          selectedFuncFile =
-            urlIndex !== null ? stringTable.getString(urlIndex) : null;
-        }
-        // TODO: Instead of checking the file name with a string comparison, check the source index.
-        if (selectedFuncFile === null || selectedFuncFile !== sourceViewFile) {
+        const selectedSourceIndex = funcTable.source[selectedFunc];
+        if (
+          selectedSourceIndex === null ||
+          selectedSourceIndex !== sourceViewSourceIndex
+        ) {
           return null;
         }
         return getStackLineInfoForCallNode(

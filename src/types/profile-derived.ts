@@ -33,6 +33,7 @@ import type {
   IndexIntoFrameTable,
   IndexIntoSubcategoryListForCategory,
   SourceTable,
+  IndexIntoSourceTable,
 } from './profile';
 import type { IndexedArray } from './utils';
 import type { BitSet } from '../utils/bitset';
@@ -772,7 +773,7 @@ export type NativeSymbolInfo = {
  */
 export type BottomBoxInfo = {
   libIndex: IndexIntoLibs | null;
-  sourceFile: string | null;
+  sourceIndex: IndexIntoSourceTable | null;
   nativeSymbols: NativeSymbolInfo[];
 };
 

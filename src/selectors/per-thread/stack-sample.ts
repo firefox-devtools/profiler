@@ -140,7 +140,7 @@ export function getStackAndSampleSelectorsPerThread(
   const getSourceViewStackLineInfo: Selector<StackLineInfo | null> =
     createSelector(
       threadSelectors.getFilteredThread,
-      UrlState.getSourceViewFile,
+      ProfileSelectors.getSourceViewFile,
       ProfileSelectors.getSourceTable,
       (
         { stackTable, frameTable, funcTable, stringTable }: Thread,

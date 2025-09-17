@@ -11,10 +11,8 @@ import copy from 'copy-to-clipboard';
 import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import { FlameGraph } from '../../components/flame-graph';
 import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
-import {
-  getInvertCallstack,
-  getSourceViewFile,
-} from '../../selectors/url-state';
+import { getInvertCallstack } from '../../selectors/url-state';
+import { getSourceViewFile } from '../../selectors/profile';
 import { ensureExists } from '../../utils/types';
 import {
   getEmptyThread,

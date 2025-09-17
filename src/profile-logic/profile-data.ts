@@ -27,7 +27,6 @@ import { timeCode } from 'firefox-profiler/utils/time-code';
 import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
 import { checkBit, makeBitSet, setBit } from 'firefox-profiler/utils/bitset';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
-import { StringTable } from 'firefox-profiler/utils/string-table';
 import {
   ensureExists,
   getFirstItemFromSet,
@@ -39,6 +38,7 @@ import {
 import ExtensionFavicon from '../../res/img/svg/extension-outline.svg';
 import DefaultLinkFavicon from '../../res/img/svg/globe.svg';
 
+import type { StringTable } from 'firefox-profiler/utils/string-table';
 import type {
   Profile,
   RawProfileSharedData,
@@ -96,6 +96,7 @@ import type {
   ThreadWithReservedFunctions,
   TabID,
   SourceTable,
+  IndexIntoSourceTable,
 } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
 
@@ -3778,29 +3779,12 @@ export function nudgeReturnAddresses(thread: RawThread): RawThread {
  */
 export function findAddressProofForFile(
   profile: Profile,
-  file: string
+  sourceIndex: IndexIntoSourceTable
 ): AddressProof | null {
   const { libs } = profile;
-  const { stringArray, sources } = profile.shared;
-  const stringTable = StringTable.withBackingArray(stringArray);
   for (const thread of profile.threads) {
     const { frameTable, funcTable, resourceTable } = thread;
-    const fileStringIndex = stringTable.indexForString(file);
-
-    // Find func by searching through sources table
-    let func = -1;
-    if (sources) {
-      for (let i = 0; i < funcTable.length; i++) {
-        const sourceIndex = funcTable.source[i];
-        if (sourceIndex !== null) {
-          const urlIndex = sources.filename[sourceIndex];
-          if (urlIndex === fileStringIndex) {
-            func = i;
-            break;
-          }
-        }
-      }
-    }
+    const func = funcTable.source.indexOf(sourceIndex);
     if (func === -1) {
       continue;
     }
@@ -3989,17 +3973,10 @@ export function getBottomBoxInfoForCallNode(
     stringTable,
     resourceTable,
     nativeSymbols,
-    sources,
   } = thread;
 
   const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
   const sourceIndex = funcTable.source[funcIndex];
-  let sourceFile = null;
-  if (sourceIndex !== null) {
-    const fileNameIndex = sources.filename[sourceIndex];
-    sourceFile =
-      fileNameIndex !== null ? stringTable.getString(fileNameIndex) : null;
-  }
   const resource = funcTable.resource[funcIndex];
   const libIndex =
     resource !== -1 && resourceTable.type[resource] === resourceTypes.library
@@ -4023,7 +4000,7 @@ export function getBottomBoxInfoForCallNode(
 
   return {
     libIndex,
-    sourceFile,
+    sourceIndex,
     nativeSymbols: nativeSymbolInfosForCallNode,
   };
 }
