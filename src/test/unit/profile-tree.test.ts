@@ -25,6 +25,7 @@ import {
   functionListTreeFromProfile,
   formatTree,
   formatTreeIncludeCategories,
+  addSourceToTable,
 } from '../fixtures/utils';
 import { ensureExists } from 'firefox-profiler/utils/types';
 import type { CallNodePath } from 'firefox-profiler/types';
@@ -669,9 +670,7 @@ describe('diffing trees', function () {
 
 describe('origin annotation', function () {
   const {
-    profile: {
-      threads: [thread],
-    },
+    profile,
     stringTable,
     funcNamesPerThread: [funcNames],
   } = getProfileFromTextSamples(`
@@ -680,6 +679,9 @@ describe('origin annotation', function () {
     C
     D
   `);
+  const {
+    threads: [thread],
+  } = profile;
 
   function addResource(
     funcName: string,
@@ -690,8 +692,11 @@ describe('origin annotation', function () {
     const resourceIndex = thread.resourceTable.length;
     const funcIndex = funcNames.indexOf(funcName);
     thread.funcTable.resource[funcIndex] = resourceIndex;
-    thread.funcTable.fileName[funcIndex] = location
-      ? stringTable.indexForString(location)
+    thread.funcTable.source[funcIndex] = location
+      ? addSourceToTable(
+          profile.shared.sources,
+          stringTable.indexForString(location)
+        )
       : null;
     thread.resourceTable.lib.push(-1);
     thread.resourceTable.name.push(stringTable.indexForString(name));
@@ -724,7 +729,8 @@ describe('origin annotation', function () {
       funcNames.indexOf(funcName),
       thread.funcTable,
       thread.resourceTable,
-      stringTable
+      stringTable,
+      profile.shared.sources
     );
   }
 

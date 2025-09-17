@@ -34,6 +34,7 @@ import type {
   RawThread,
   IndexIntoCategoryList,
   SampleUnits,
+  SourceTable,
 } from 'firefox-profiler/types';
 
 import { ensureExists } from 'firefox-profiler/utils/types';
@@ -317,8 +318,14 @@ export function formatStack(
   stack: IndexIntoStackTable
 ): string {
   const lines = [];
-  const { stackTable, frameTable, funcTable, stringTable, resourceTable } =
-    thread;
+  const {
+    stackTable,
+    frameTable,
+    funcTable,
+    stringTable,
+    resourceTable,
+    sources,
+  } = thread;
   for (
     let stackIndex: IndexIntoStackTable | null = stack;
     stackIndex !== null;
@@ -334,6 +341,7 @@ export function formatStack(
       funcTable,
       resourceTable,
       stringTable,
+      sources,
       frameLine,
       frameColumn
     );
@@ -608,4 +616,30 @@ function isControlInput(element: HTMLElement): boolean {
     (element instanceof HTMLInputElement &&
       ['button', 'submit', 'clear'].includes(element.type || ''))
   );
+}
+
+/**
+ * Adds a source entry to the sources table and returns the index.
+ * If a source with the same URL already exists, returns the existing index.
+ * This is a test utility for setting up test profiles.
+ */
+export function addSourceToTable(
+  sources: SourceTable,
+  urlStringIndex: number,
+  uuid: string | null = null
+): number {
+  // Check if source already exists
+  for (let i = 0; i < sources.filename.length; i++) {
+    if (sources.filename[i] === urlStringIndex && sources.uuid[i] === uuid) {
+      return i;
+    }
+  }
+
+  // Add new source entry
+  const sourceIndex = sources.filename.length;
+  sources.filename.push(urlStringIndex);
+  sources.uuid.push(uuid);
+  sources.length = sources.filename.length;
+
+  return sourceIndex;
 }

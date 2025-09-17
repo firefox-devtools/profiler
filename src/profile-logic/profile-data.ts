@@ -95,6 +95,7 @@ import type {
   Bytes,
   ThreadWithReservedFunctions,
   TabID,
+  SourceTable,
 } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
 
@@ -1489,7 +1490,11 @@ export function filterThreadToSearchStrings(
       return thread;
     }
 
-    return searchStrings.reduce(filterThreadToSearchString, thread);
+    return searchStrings.reduce(
+      (accThread, searchString) =>
+        filterThreadToSearchString(accThread, searchString),
+      thread
+    );
   });
 }
 
@@ -1501,8 +1506,14 @@ export function filterThreadToSearchString(
     return thread;
   }
   const lowercaseSearchString = searchString.toLowerCase();
-  const { funcTable, frameTable, stackTable, stringTable, resourceTable } =
-    thread;
+  const {
+    funcTable,
+    frameTable,
+    stackTable,
+    stringTable,
+    resourceTable,
+    sources,
+  } = thread;
 
   function computeFuncMatchesSearch(func: IndexIntoFuncTable) {
     const nameIndex = funcTable.name[func];
@@ -1511,9 +1522,10 @@ export function filterThreadToSearchString(
       return true;
     }
 
-    const fileNameIndex = funcTable.fileName[func];
-    if (fileNameIndex !== null) {
-      const fileNameString = stringTable.getString(fileNameIndex);
+    const sourceIndex = funcTable.source[func];
+    if (sourceIndex !== null) {
+      const urlIndex = sources.filename[sourceIndex];
+      const fileNameString = stringTable.getString(urlIndex);
       if (fileNameString.toLowerCase().includes(lowercaseSearchString)) {
         return true;
       }
@@ -2833,6 +2845,7 @@ export function getOriginAnnotationForFunc(
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   stringTable: StringTable,
+  sources: SourceTable,
   frameLineNumber: number | null = null,
   frameColumnNumber: number | null = null
 ): string {
@@ -2845,11 +2858,14 @@ export function getOriginAnnotationForFunc(
     origin = stringTable.getString(resourceNameIndex);
   }
 
-  const fileNameIndex = funcTable.fileName[funcIndex];
+  const sourceIndex = funcTable.source[funcIndex];
   let fileName;
-  if (fileNameIndex !== null) {
-    fileName = stringTable.getString(fileNameIndex);
+  if (sourceIndex !== null) {
+    const urlIndex = sources.filename[sourceIndex];
+    fileName = stringTable.getString(urlIndex);
+  }
 
+  if (fileName) {
     // Strip off any filename decorations from symbolication. It could be a path
     // (potentially using "special path" syntax, e.g. hg:...), or it could be a
     // URL, if the function is a JS function. If it's a path from symbolication,
@@ -2919,13 +2935,12 @@ export function reserveFunctionsInThread(
     const resourceType = resourceTable.type[resourceIndex];
     const name = resourceTable.name[resourceIndex];
     const isJS = jsResourceTypes.includes(resourceType);
-    const fileName = resourceType === resourceTypes.url ? name : null;
     const funcIndex = funcTable.length;
     funcTable.isJS.push(isJS);
     funcTable.relevantForJS.push(isJS);
     funcTable.name.push(name);
     funcTable.resource.push(resourceIndex);
-    funcTable.fileName.push(fileName);
+    funcTable.source.push(null);
     funcTable.lineNumber.push(null);
     funcTable.columnNumber.push(null);
     funcTable.length++;
@@ -3766,12 +3781,26 @@ export function findAddressProofForFile(
   file: string
 ): AddressProof | null {
   const { libs } = profile;
-  const { stringArray } = profile.shared;
+  const { stringArray, sources } = profile.shared;
   const stringTable = StringTable.withBackingArray(stringArray);
   for (const thread of profile.threads) {
     const { frameTable, funcTable, resourceTable } = thread;
     const fileStringIndex = stringTable.indexForString(file);
-    const func = funcTable.fileName.indexOf(fileStringIndex);
+
+    // Find func by searching through sources table
+    let func = -1;
+    if (sources) {
+      for (let i = 0; i < funcTable.length; i++) {
+        const sourceIndex = funcTable.source[i];
+        if (sourceIndex !== null) {
+          const urlIndex = sources.filename[sourceIndex];
+          if (urlIndex === fileStringIndex) {
+            func = i;
+            break;
+          }
+        }
+      }
+    }
     if (func === -1) {
       continue;
     }
@@ -3960,11 +3989,17 @@ export function getBottomBoxInfoForCallNode(
     stringTable,
     resourceTable,
     nativeSymbols,
+    sources,
   } = thread;
 
   const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
-  const fileName = funcTable.fileName[funcIndex];
-  const sourceFile = fileName !== null ? stringTable.getString(fileName) : null;
+  const sourceIndex = funcTable.source[funcIndex];
+  let sourceFile = null;
+  if (sourceIndex !== null) {
+    const fileNameIndex = sources.filename[sourceIndex];
+    sourceFile =
+      fileNameIndex !== null ? stringTable.getString(fileNameIndex) : null;
+  }
   const resource = funcTable.resource[funcIndex];
   const libIndex =
     resource !== -1 && resourceTable.type[resource] === resourceTypes.library

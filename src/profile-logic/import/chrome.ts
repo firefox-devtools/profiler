@@ -13,7 +13,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import { getEmptyProfile, getEmptyThread } from '../data-structures';
-import { StringTable } from '../../utils/string-table';
+import type { StringTable } from '../../utils/string-table';
 import { ensureExists, coerce } from '../../utils/types';
 import {
   INSTANT,
@@ -23,6 +23,7 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 
 import { getOrCreateURIResource, getTimeRangeForThread } from '../profile-data';
+import { GlobalDataCollector } from '../global-data-collector';
 
 // Chrome Tracing Event Spec:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
@@ -501,7 +502,8 @@ async function processTracingEvents(
   // new samples on our target interval of 500us.
   profile.meta.interval = 0.5;
 
-  const stringTable = StringTable.withBackingArray(profile.shared.stringArray);
+  const globalDataCollector = new GlobalDataCollector();
+  const stringTable = globalDataCollector.getStringTable();
 
   let profileEvents: (ProfileEvent | CpuProfileEvent)[] = (eventsByName.get(
     'Profile'
@@ -639,8 +641,8 @@ async function processTracingEvents(
                   )
                 : -1
             );
-            funcTable.fileName.push(
-              isJS ? stringTable.indexForString(url || '<unknown>') : null
+            funcTable.source.push(
+              isJS && url ? globalDataCollector.indexForSource(null, url) : null
             );
             funcTable.lineNumber.push(
               lineNumber === undefined ? null : lineNumber
@@ -718,14 +720,16 @@ async function processTracingEvents(
     threadInfoByThread,
     eventsByName,
     profile,
-    (eventsByName.get('Screenshot') ?? []) as ScreenshotEvent[]
+    (eventsByName.get('Screenshot') ?? []) as ScreenshotEvent[],
+    stringTable
   );
 
   extractMarkers(
     threadInfoByPidAndTid,
     threadInfoByThread,
     eventsByName,
-    profile
+    profile,
+    stringTable
   );
 
   // Figure out the profiling start and end times if they haven't been found yet.
@@ -800,6 +804,10 @@ async function processTracingEvents(
     return threadInfoA.tieBreakerIndex - threadInfoB.tieBreakerIndex;
   });
 
+  // Add string array and sources from globalDataCollector to the profile
+  const { shared } = globalDataCollector.finish();
+  profile.shared = shared;
+
   return profile;
 }
 
@@ -808,7 +816,8 @@ async function extractScreenshots(
   threadInfoByThread: Map<RawThread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile,
-  screenshots: ScreenshotEvent[]
+  screenshots: ScreenshotEvent[],
+  stringTable: StringTable
 ): Promise<void> {
   if (screenshots.length === 0) {
     // No screenshots were found, exit early.
@@ -821,8 +830,6 @@ async function extractScreenshots(
     profile,
     screenshots[0]
   );
-
-  const stringTable = StringTable.withBackingArray(profile.shared.stringArray);
 
   const graphicsIndex = ensureExists(profile.meta.categories).findIndex(
     (category) => category.name === 'Graphics'
@@ -904,7 +911,8 @@ function extractMarkers(
   threadInfoByPidAndTid: Map<string, ThreadInfo>,
   threadInfoByThread: Map<RawThread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
-  profile: Profile
+  profile: Profile,
+  stringTable: StringTable
 ) {
   const otherCategoryIndex = ensureExists(profile.meta.categories).findIndex(
     (category) => category.name === 'Other'
@@ -912,8 +920,6 @@ function extractMarkers(
   if (otherCategoryIndex === -1) {
     throw new Error('No "Other" category in empty profile category list');
   }
-
-  const stringTable = StringTable.withBackingArray(profile.shared.stringArray);
 
   profile.meta.markerSchema = [
     {

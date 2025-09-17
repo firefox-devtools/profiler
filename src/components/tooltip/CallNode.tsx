@@ -375,8 +375,11 @@ export class TooltipCallNode extends React.PureComponent<Props> {
 
     let fileName = null;
 
-    const fileNameIndex = thread.funcTable.fileName[funcIndex];
-    if (fileNameIndex !== null) {
+    const sourceIndex = thread.funcTable.source[funcIndex];
+
+    const { sources } = thread;
+    if (sourceIndex !== null) {
+      const fileNameIndex = sources.filename[sourceIndex];
       let fileNameURL = thread.stringTable.getString(fileNameIndex);
       // fileNameURL could be a path from symbolication (potentially using "special path"
       // syntax, e.g. hg:...), or it could be a URL, if the function is a JS function.

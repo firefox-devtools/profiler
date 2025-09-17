@@ -14,6 +14,7 @@ import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu
 import { storeWithProfile, blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfileWithJsTimings } from '../fixtures/profiles/gecko-profile';
+import { addSourceToTable, fireFullClick } from '../fixtures/utils';
 import {
   changeRightClickedCallNode,
   changeExpandedCallNodes,
@@ -22,7 +23,6 @@ import {
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSourceViewFile } from '../../selectors/url-state';
 import { ensureExists } from '../../utils/types';
-import { fireFullClick } from '../fixtures/utils';
 import { createBrowserConnection } from '../../app-logic/browser-connection';
 import { updateBrowserConnectionStatus } from 'firefox-profiler/actions/app';
 import { simulateWebChannel } from '../fixtures/mocks/web-channel';
@@ -67,13 +67,16 @@ describe('calltree/CallNodeContextMenu', function () {
       'https://example.com/script.js'
     );
 
+    // Create a source entry
+    const sourceIndex = addSourceToTable(profile.shared.sources, fileNameIndex);
+
     const funcIndexA = funcNames.indexOf('A.js');
-    thread.funcTable.fileName[funcIndexA] = fileNameIndex;
+    thread.funcTable.source[funcIndexA] = sourceIndex;
     thread.funcTable.lineNumber[funcIndexA] = 1;
     thread.funcTable.columnNumber[funcIndexA] = 111;
 
     const funcIndexB = funcNames.indexOf('B.js');
-    thread.funcTable.fileName[funcIndexB] = fileNameIndex;
+    thread.funcTable.source[funcIndexB] = sourceIndex;
     thread.funcTable.lineNumber[funcIndexB] = 2;
     thread.funcTable.columnNumber[funcIndexB] = 222;
 

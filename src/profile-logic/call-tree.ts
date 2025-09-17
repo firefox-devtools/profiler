@@ -605,7 +605,8 @@ export class CallTree {
       funcIndex,
       this._thread.funcTable,
       this._thread.resourceTable,
-      this._thread.stringTable
+      this._thread.stringTable,
+      this._thread.sources
     );
   }
 

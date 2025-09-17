@@ -17,6 +17,7 @@ import type {
   CallNodePath,
   Thread,
   IndexIntoCategoryList,
+  SourceTable,
 } from 'firefox-profiler/types';
 
 describe('getStackLineInfo', function () {
@@ -35,7 +36,8 @@ describe('getStackLineInfo', function () {
       stackTable,
       frameTable,
       funcTable,
-      fileOne
+      fileOne,
+      profile.shared.sources
     );
 
     // Expect the returned arrays to have the same length as the stackTable.
@@ -46,14 +48,15 @@ describe('getStackLineInfo', function () {
 });
 
 describe('getLineTimings for getStackLineInfo', function () {
-  function getTimings(thread: Thread, file: string) {
+  function getTimings(thread: Thread, file: string, sources: SourceTable) {
     const { stackTable, frameTable, funcTable, samples, stringTable } = thread;
     const fileStringIndex = stringTable.indexForString(file);
     const stackLineInfo = getStackLineInfo(
       stackTable,
       frameTable,
       funcTable,
-      fileStringIndex
+      fileStringIndex,
+      sources
     );
     return getLineTimings(stackLineInfo, samples);
   }
@@ -66,7 +69,7 @@ describe('getLineTimings for getStackLineInfo', function () {
       B[file:file.js][line:30]
     `);
     const [thread] = derivedThreads;
-    const lineTimings = getTimings(thread, 'file.js');
+    const lineTimings = getTimings(thread, 'file.js', profile.shared.sources);
     expect(lineTimings.totalLineHits.get(20)).toBe(1);
     expect(lineTimings.totalLineHits.get(30)).toBe(1);
     expect(lineTimings.totalLineHits.size).toBe(2); // no other hits
@@ -84,7 +87,7 @@ describe('getLineTimings for getStackLineInfo', function () {
     `);
     const [thread] = derivedThreads;
 
-    const lineTimingsOne = getTimings(thread, 'one.js');
+    const lineTimingsOne = getTimings(thread, 'one.js', profile.shared.sources);
     expect(lineTimingsOne.totalLineHits.get(20)).toBe(2);
     expect(lineTimingsOne.totalLineHits.get(21)).toBe(1);
     // one.js line 30 was hit in every sample, twice in the first sample
@@ -98,7 +101,7 @@ describe('getLineTimings for getStackLineInfo', function () {
     expect(lineTimingsOne.selfLineHits.get(30)).toBe(1);
     expect(lineTimingsOne.selfLineHits.size).toBe(1); // no other hits
 
-    const lineTimingsTwo = getTimings(thread, 'two.js');
+    const lineTimingsTwo = getTimings(thread, 'two.js', profile.shared.sources);
     expect(lineTimingsTwo.totalLineHits.get(10)).toBe(1);
     expect(lineTimingsTwo.totalLineHits.get(11)).toBe(1);
     expect(lineTimingsTwo.totalLineHits.get(40)).toBe(1);

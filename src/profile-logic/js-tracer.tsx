@@ -20,6 +20,7 @@ import type {
   CategoryList,
   JsTracerTiming,
   Microseconds,
+  SourceTable,
 } from 'firefox-profiler/types';
 
 // See the function below for more information.
@@ -33,7 +34,8 @@ type ScriptLocationToFuncIndex = Map<string, IndexIntoFuncTable | null>;
  */
 function getScriptLocationToFuncIndex(
   thread: RawThread,
-  stringTable: StringTable
+  stringTable: StringTable,
+  sources: SourceTable
 ): ScriptLocationToFuncIndex {
   const { funcTable } = thread;
   const scriptLocationToFuncIndex = new Map();
@@ -43,9 +45,10 @@ function getScriptLocationToFuncIndex(
     }
     const line = funcTable.lineNumber[funcIndex];
     const column = funcTable.columnNumber[funcIndex];
-    const fileNameIndex = funcTable.fileName[funcIndex];
-    if (column !== null && line !== null && fileNameIndex !== null) {
-      const fileName = stringTable.getString(fileNameIndex);
+    const sourceIndex = funcTable.source[funcIndex];
+    if (column !== null && line !== null && sourceIndex !== null) {
+      const urlIndex = sources.filename[sourceIndex];
+      const fileName = stringTable.getString(urlIndex);
       const key = `${fileName}:${line}:${column}`;
       if (scriptLocationToFuncIndex.has(key)) {
         // Multiple functions map to this script location.
@@ -76,7 +79,8 @@ function getScriptLocationToFuncIndex(
 export function getJsTracerTiming(
   jsTracer: JsTracerTable,
   thread: RawThread,
-  stringTable: StringTable
+  stringTable: StringTable,
+  sources: SourceTable
 ): JsTracerTiming[] {
   const jsTracerTiming: JsTracerTiming[] = [];
   const { funcTable } = thread;
@@ -86,7 +90,8 @@ export function getJsTracerTiming(
   // Just recompute it.
   const scriptLocationToFuncIndex = getScriptLocationToFuncIndex(
     thread,
-    stringTable
+    stringTable,
+    sources
   );
 
   // Go through all of the events.
@@ -496,7 +501,8 @@ export function convertJsTracerToThreadWithoutSamples(
   fromThread: RawThread,
   stringTable: StringTable,
   jsTracer: JsTracerFixed,
-  categories: CategoryList
+  categories: CategoryList,
+  sources: SourceTable
 ): {
   thread: RawThread;
   stackMap: Map<IndexIntoJsTracerEvents, IndexIntoStackTable>;
@@ -541,7 +547,8 @@ export function convertJsTracerToThreadWithoutSamples(
   }
   const scriptLocationToFuncIndex = getScriptLocationToFuncIndex(
     thread,
-    stringTable
+    stringTable,
+    sources
   );
 
   // Go through all of the JS tracer events, and build up the func, stack, and
@@ -579,7 +586,7 @@ export function convertJsTracerToThreadWithoutSamples(
         funcTable.isJS.push(false);
         funcTable.resource.push(-1);
         funcTable.relevantForJS.push(true);
-        funcTable.fileName.push(null);
+        funcTable.source.push(null);
         funcTable.lineNumber.push(null);
         funcTable.columnNumber.push(null);
 
@@ -737,14 +744,16 @@ export function convertJsTracerToThread(
   fromThread: RawThread,
   jsTracer: JsTracerTable,
   categories: CategoryList,
-  stringTable: StringTable
+  stringTable: StringTable,
+  sources: SourceTable
 ): RawThread {
   const jsTracerFixed = getJsTracerFixed(jsTracer);
   const { thread, stackMap } = convertJsTracerToThreadWithoutSamples(
     fromThread,
     stringTable,
     jsTracerFixed,
-    categories
+    categories,
+    sources
   );
   thread.samples = getSelfTimeSamplesFromJsTracer(
     stringTable,

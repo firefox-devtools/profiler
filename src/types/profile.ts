@@ -332,7 +332,7 @@ export type FuncTable = {
   // location of the *start* of the JS function. As for the information about which
   // which lines / columns inside the function were actually hit during execution,
   // that information is stored in the frameTable, not in the funcTable.
-  fileName: Array<IndexIntoStringTable | null>;
+  source: Array<IndexIntoSourceTable | null>;
   lineNumber: Array<number | null>;
   columnNumber: Array<number | null>;
 

@@ -43,6 +43,7 @@ import {
   fireFullClick,
   fireFullContextMenu,
   findFillTextPositionFromDrawLog,
+  addSourceToTable,
 } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
@@ -293,18 +294,30 @@ function setupFlameGraph() {
   // Add some file and line number to the profile so that tooltips generate
   // an interesting snapshot.
   const { funcTable } = profile.threads[0];
+
+  // Create source entries.
+  const defaultFileIndex = stringTable.indexForString('path/to/file');
+  const defaultSourceIndex = addSourceToTable(
+    profile.shared.sources,
+    defaultFileIndex
+  );
+
+  const bFileIndex = stringTable.indexForString('path/for/B');
+  const bSourceIndex = addSourceToTable(profile.shared.sources, bFileIndex);
+
+  const jFileIndex = stringTable.indexForString(
+    'hg:hg.mozilla.org/mozilla-central:widget/cocoa/nsAppShell.mm:997f00815e6bc28806b75448c8829f0259d2cb28'
+  );
+  const jSourceIndex = addSourceToTable(profile.shared.sources, jFileIndex);
+
   for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
     funcTable.lineNumber[funcIndex] = funcIndex + 10;
     funcTable.columnNumber[funcIndex] = funcIndex + 100;
-    funcTable.fileName[funcIndex] = stringTable.indexForString('path/to/file');
+    funcTable.source[funcIndex] = defaultSourceIndex;
   }
 
-  funcTable.fileName[funcNamesDict.B] =
-    stringTable.indexForString('path/for/B');
-
-  funcTable.fileName[funcNamesDict.J] = stringTable.indexForString(
-    'hg:hg.mozilla.org/mozilla-central:widget/cocoa/nsAppShell.mm:997f00815e6bc28806b75448c8829f0259d2cb28'
-  );
+  funcTable.source[funcNamesDict.B] = bSourceIndex;
+  funcTable.source[funcNamesDict.J] = jSourceIndex;
 
   const store = storeWithProfile(profile);
   store.dispatch(changeSelectedTab('flame-graph'));

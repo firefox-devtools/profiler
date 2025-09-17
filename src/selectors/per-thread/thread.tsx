@@ -339,10 +339,16 @@ export function getBasicThreadSelectorsPerThread(
       getJsTracerTable,
       getRawThread,
       ProfileSelectors.getStringTable,
-      (jsTracerTable, thread, stringTable) =>
+      ProfileSelectors.getSourceTable,
+      (jsTracerTable, thread, stringTable, sources) =>
         jsTracerTable === null
           ? null
-          : JsTracer.getJsTracerTiming(jsTracerTable, thread, stringTable)
+          : JsTracer.getJsTracerTiming(
+              jsTracerTable,
+              thread,
+              stringTable,
+              sources
+            )
     );
 
   /**
@@ -466,6 +472,7 @@ export function getThreadSelectorsWithMarkersPerThread(
   const getFilteredThread: Selector<Thread> = createSelector(
     _getImplementationFilteredThread,
     UrlState.getSearchStrings,
+    ProfileSelectors.getSourceTable,
     ProfileData.filterThreadToSearchStrings
   );
 

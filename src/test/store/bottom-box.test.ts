@@ -58,6 +58,7 @@ describe('bottom box', function () {
       funcNames: funcNamesPerThread[0],
       funcNamesDict: funcNamesDictPerThread[0],
       nativeSymbolsDict: nativeSymbolsDictPerThread[0],
+      sources: profile.shared.sources,
     };
   }
 

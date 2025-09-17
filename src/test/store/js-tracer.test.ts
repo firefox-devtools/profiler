@@ -12,7 +12,7 @@ import {
 } from '../../profile-logic/js-tracer';
 import { getEmptyProfile } from '../../profile-logic/data-structures';
 import { StringTable } from '../../utils/string-table';
-import { formatTree } from '../fixtures/utils';
+import { formatTree, addSourceToTable } from '../fixtures/utils';
 import {
   getProfileFromTextSamples,
   getProfileWithJsTracerEvents,
@@ -137,7 +137,8 @@ describe('convertJsTracerToThread', function () {
         existingThread,
         jsTracer,
         categories,
-        stringTable
+        stringTable,
+        profile.shared.sources
       ),
     ];
     const { getState } = storeWithProfile(profile);
@@ -354,26 +355,23 @@ describe('selectors/getJsTracerTiming', function () {
         const fooColumn = 5;
         thread.funcTable.lineNumber[foo] = fooLine;
         thread.funcTable.columnNumber[foo] = fooColumn;
-        thread.funcTable.fileName[foo] = stringTable.indexForString(
-          'https://mozilla.org'
-        );
+        const fooUrlIndex = stringTable.indexForString('https://mozilla.org');
+        thread.funcTable.source[foo] = addSourceToTable(profile.shared.sources, fooUrlIndex);
 
         const bar = funcNamesDict['Bar.js'];
         const barLine = 7;
         const barColumn = 11;
         thread.funcTable.lineNumber[bar] = barLine;
         thread.funcTable.columnNumber[bar] = barColumn;
-        thread.funcTable.fileName[bar] = stringTable.indexForString(
-          'https://mozilla.org'
-        );
+        const barUrlIndex = stringTable.indexForString('https://mozilla.org');
+        thread.funcTable.source[bar] = addSourceToTable(profile.shared.sources, barUrlIndex);
 
         const baz = funcNamesDict['Baz.js'];
         // Use bar's line and column information.
         thread.funcTable.lineNumber[baz] = barLine;
         thread.funcTable.columnNumber[baz] = barColumn;
-        thread.funcTable.fileName[baz] = stringTable.indexForString(
-          'https://mozilla.org'
-        );
+        const bazUrlIndex = stringTable.indexForString('https://mozilla.org');
+        thread.funcTable.source[baz] = addSourceToTable(profile.shared.sources, bazUrlIndex);
 
         // Manually update the JS tracer events to point to the right column numbers.
         jsTracer.line[2] = fooLine;
