@@ -7,7 +7,10 @@ import type {
   Lib,
   LibMapping,
   IndexIntoLibs,
+  IndexIntoStringTable,
+  IndexIntoSourceTable,
   RawProfileSharedData,
+  SourceTable,
 } from 'firefox-profiler/types';
 
 /**
@@ -23,6 +26,10 @@ export class GlobalDataCollector {
   _libKeyToLibIndex: Map<string, IndexIntoLibs> = new Map();
   _stringArray: string[] = [];
   _stringTable: StringTable = StringTable.withBackingArray(this._stringArray);
+  _sources: SourceTable = { length: 0, uuid: [], filename: [] };
+  _uuidToSourceIndex: Map<string, IndexIntoSourceTable> = new Map();
+  _filenameToSourceIndex: Map<IndexIntoStringTable, IndexIntoSourceTable> =
+    new Map();
 
   // Return the global index for this library, adding it to the global list if
   // necessary.
@@ -47,8 +54,46 @@ export class GlobalDataCollector {
     return index;
   }
 
+  // Return the global index for this source, adding it to the global list if
+  // necessary.
+  indexForSource(uuid: string | null, filename: string): IndexIntoSourceTable {
+    let index: IndexIntoSourceTable | undefined;
+
+    if (uuid !== null) {
+      index = this._uuidToSourceIndex.get(uuid);
+    } else {
+      // For null UUIDs, use filename-based lookup
+      const filenameIndex = this._stringTable.indexForString(filename);
+      index = this._filenameToSourceIndex.get(filenameIndex);
+    }
+
+    if (index === undefined) {
+      index = this._sources.length;
+      const filenameIndex = this._stringTable.indexForString(filename);
+      this._sources.uuid[index] = uuid;
+      this._sources.filename[index] = filenameIndex;
+      this._sources.length++;
+
+      if (uuid !== null) {
+        this._uuidToSourceIndex.set(uuid, index);
+      } else {
+        this._filenameToSourceIndex.set(filenameIndex, index);
+      }
+    }
+    return index;
+  }
+
+  // Get the processed source index by UUID
+  getSourceIndexByUuid(uuid: string): IndexIntoSourceTable | null {
+    return this._uuidToSourceIndex.get(uuid) ?? null;
+  }
+
   getStringTable(): StringTable {
     return this._stringTable;
+  }
+
+  getSources(): SourceTable {
+    return this._sources;
   }
 
   // Package up all de-duplicated global tables so that they can be embedded in
@@ -56,6 +101,7 @@ export class GlobalDataCollector {
   finish(): { libs: Lib[]; shared: RawProfileSharedData } {
     const shared: RawProfileSharedData = {
       stringArray: this._stringArray,
+      sources: this._sources,
     };
 
     return { libs: this._libs, shared };

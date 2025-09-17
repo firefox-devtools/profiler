@@ -82,8 +82,23 @@ function _createProfileWithTranslatedStringIndexes(
     )
   );
 
+  // Update sources table with translated string indexes
+  const newSources = {
+    ...profile.shared.sources,
+    filename: profile.shared.sources.filename.map((oldUrlIndex) => {
+      const newIndexPlusOne = oldStringToNewStringPlusOne[oldUrlIndex];
+      if (newIndexPlusOne === 0) {
+        throw new Error(
+          `String index ${oldUrlIndex} was not found in the translation map`
+        );
+      }
+      return newIndexPlusOne - 1;
+    }),
+  };
+
   const newShared: RawProfileSharedData = {
     stringArray: newStringArray,
+    sources: newSources,
   };
 
   const newProfile: Profile = {

@@ -1628,6 +1628,37 @@ export function processGeckoOrDevToolsProfile(json: unknown): Profile {
 }
 
 /**
+ * Process source table from all processes and populate the global data
+ * collector with UUID-to-index mappings.
+ */
+function _processSourceTable(
+  geckoProfile: GeckoProfile,
+  globalDataCollector: GlobalDataCollector
+): void {
+  // Process the main process sources table if it exists
+  if (geckoProfile.sources) {
+    const schema = geckoProfile.sources.schema;
+    for (const data of geckoProfile.sources.data) {
+      const uuid = data[schema.uuid];
+      const filename = data[schema.filename];
+      globalDataCollector.indexForSource(uuid, filename);
+    }
+  }
+
+  // Process sources from all subprocesses
+  for (const subprocessProfile of geckoProfile.processes) {
+    if (subprocessProfile.sources) {
+      const schema = subprocessProfile.sources.schema;
+      for (const data of subprocessProfile.sources.data) {
+        const uuid = data[schema.uuid];
+        const filename = data[schema.filename];
+        globalDataCollector.indexForSource(uuid, filename);
+      }
+    }
+  }
+}
+
+/**
  * Convert a profile from the Gecko format into the processed format.
  * Throws an exception if it encounters an incompatible profile.
  * For a description of the processed format, look at docs-developer/gecko-profile-format.md
@@ -1648,6 +1679,9 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     : getEmptyExtensions();
 
   const globalDataCollector = new GlobalDataCollector();
+
+  // Process sources from all processes (main + subprocesses)
+  _processSourceTable(geckoProfile, globalDataCollector);
 
   for (const thread of geckoProfile.threads) {
     threads.push(

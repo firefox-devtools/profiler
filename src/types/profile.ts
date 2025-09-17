@@ -17,6 +17,7 @@ export type IndexIntoLibs = number;
 export type IndexIntoNativeSymbolTable = number;
 export type IndexIntoCategoryList = number;
 export type IndexIntoSubcategoryListForCategory = number;
+export type IndexIntoSourceTable = number;
 export type ResourceTypeEnum = number;
 export type ThreadIndex = number;
 // The Tid is most often a number. However in some cases such as merged profiles
@@ -921,10 +922,27 @@ export type ProfileMeta = {
   gramsOfCO2ePerKWh?: number;
 };
 
+/**
+ * Table containing source code file references in the processed profile format.
+ * Maps UUIDs to filenames for JavaScript sources, while native code sources
+ * have null UUIDs. Native code sources are added during the symbolication process.
+ * This allows the profiler to display source code context when viewing frames.
+ * This is an expanded version of GeckoSourceTable that includes native code sources
+ * in addition to JavaScript sources.
+ */
+export type SourceTable = {
+  length: number;
+  uuid: Array<string | null>;
+  filename: Array<IndexIntoStringTable>;
+};
+
 export type RawProfileSharedData = {
   // Strings for profiles are collected into a single table, and are referred to by
   // their index by other tables.
   stringArray: string[];
+  // Optional sources table for JS source UUID to URL mapping.
+  // Added for UUID-based source fetching.
+  sources: SourceTable;
 };
 
 /**
