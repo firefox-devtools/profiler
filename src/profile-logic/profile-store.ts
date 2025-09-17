@@ -29,7 +29,7 @@ export function uploadBinaryProfileData() {
       xhr.abort();
     },
     startUpload: (
-      data: ArrayBufferView<ArrayBuffer>,
+      data: ArrayBufferView<ArrayBuffer> | Blob,
       progressChangeCallback?: (param: number) => unknown
     ): Promise<string> =>
       new Promise((resolve, reject) => {

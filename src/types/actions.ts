@@ -598,8 +598,23 @@ type SidebarAction = {
 
 type PublishAction =
   | {
-      readonly type: 'TOGGLE_CHECKED_SHARING_OPTION';
+      readonly type: 'UPDATE_SHARING_OPTION';
       readonly slug: keyof CheckedSharingOptions;
+      readonly value: boolean;
+    }
+  | {
+      readonly type: 'SANITIZED_PROFILE_ENCODING_STARTED';
+      readonly sanitizedProfile: Profile;
+    }
+  | {
+      readonly type: 'SANITIZED_PROFILE_ENCODING_COMPLETED';
+      readonly sanitizedProfile: Profile;
+      readonly profileData: Blob;
+    }
+  | {
+      readonly type: 'SANITIZED_PROFILE_ENCODING_FAILED';
+      readonly sanitizedProfile: Profile;
+      readonly error: Error;
     }
   | {
       readonly type: 'UPLOAD_STARTED';

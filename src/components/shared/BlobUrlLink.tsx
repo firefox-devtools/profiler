@@ -3,16 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import * as React from 'react';
+import { useState, useEffect } from 'react';
 
 type Props = {
   readonly blob: Blob;
   readonly children: React.ReactNode;
-};
-
-type State = {
-  url: string;
-  prevBlob: Blob | null;
-};
+} & React.HTMLProps<HTMLAnchorElement>;
 
 /**
  * This component is responsible for converting a Blob into an
@@ -20,41 +16,20 @@ type State = {
  * does the proper thing of cleaning up after itself as the component
  * is mounted, updated, and unmounted.
  */
-export class BlobUrlLink extends React.PureComponent<
-  Props & React.AnchorHTMLAttributes<HTMLElement>,
-  State
-> {
-  override state: State = {
-    url: '',
-    prevBlob: null,
-  };
+export const BlobUrlLink = ({ blob, children, ...linkProps }: Props) => {
+  const [blobUrl, setBlobUrl] = useState('');
 
-  static getDerivedStateFromProps(props: Props, state: State) {
-    if (props.blob === state.prevBlob) {
-      return null;
-    }
-    if (state.prevBlob) {
-      URL.revokeObjectURL(state.url);
-    }
-    return {
-      url: URL.createObjectURL(props.blob),
-      prevBlob: props.blob,
-    };
-  }
+  useEffect(() => {
+    const newUrl = URL.createObjectURL(blob);
+    setBlobUrl(newUrl);
+    return () => URL.revokeObjectURL(newUrl);
+  }, [blob]);
 
-  override componentWillUnmount() {
-    URL.revokeObjectURL(this.state.url);
-  }
-
-  override render() {
-    const { blob, children, ...rest } = this.props;
-
-    // This component must be an <a> rather than a <button> as the download attribute
-    // allows users to download the profile.
-    return (
-      <a href={this.state.url} {...rest}>
-        {children}
-      </a>
-    );
-  }
-}
+  // This component must be an <a> rather than a <button> as the download attribute
+  // allows users to download the profile.
+  return (
+    <a href={blobUrl} {...linkProps}>
+      {children}
+    </a>
+  );
+};
