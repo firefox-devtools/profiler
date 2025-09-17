@@ -241,7 +241,8 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
   const getLib: Selector<string> = createSelector(
     selectedThreadSelectors.getSelectedCallNodePath,
     selectedThreadSelectors.getFilteredThread,
-    (selectedPath, { stringTable, funcTable, resourceTable }) => {
+    ProfileSelectors.getSourceTable,
+    (selectedPath, { stringTable, funcTable, resourceTable }, sources) => {
       if (!selectedPath.length) {
         return '';
       }
@@ -250,7 +251,8 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
         ProfileData.getLeafFuncIndex(selectedPath),
         funcTable,
         resourceTable,
-        stringTable
+        stringTable,
+        sources
       );
     }
   );
@@ -272,21 +274,27 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
       UrlState.getSourceViewFile,
       selectedThreadSelectors.getCallNodeInfo,
       selectedThreadSelectors.getSelectedCallNodeIndex,
+      ProfileSelectors.getSourceTable,
       (
         { stackTable, frameTable, funcTable, stringTable }: Thread,
         sourceViewFile,
         callNodeInfo,
-        selectedCallNodeIndex
+        selectedCallNodeIndex,
+        sources
       ): StackLineInfo | null => {
         if (sourceViewFile === null || selectedCallNodeIndex === null) {
           return null;
         }
         const selectedFunc = callNodeInfo.funcForNode(selectedCallNodeIndex);
-        const selectedFuncFile = funcTable.fileName[selectedFunc];
-        if (
-          selectedFuncFile === null ||
-          stringTable.getString(selectedFuncFile) !== sourceViewFile
-        ) {
+        const sourceIndex = funcTable.source[selectedFunc];
+        let selectedFuncFile = null;
+        if (sourceIndex !== null && sources) {
+          const urlIndex = sources.filename[sourceIndex];
+          selectedFuncFile =
+            urlIndex !== null ? stringTable.getString(urlIndex) : null;
+        }
+        // TODO: Instead of checking the file name with a string comparison, check the source index.
+        if (selectedFuncFile === null || selectedFuncFile !== sourceViewFile) {
           return null;
         }
         return getStackLineInfoForCallNode(

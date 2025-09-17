@@ -112,9 +112,13 @@ describe('extract functions and resource from location strings', function () {
         geckoThreadStringArray,
         libs,
         extensions,
-        globalDataCollector
+        globalDataCollector,
+        undefined
       );
 
+    const {
+      shared: { sources },
+    } = globalDataCollector.finish();
     const stringTable = globalDataCollector.getStringTable();
 
     expect(
@@ -125,7 +129,9 @@ describe('extract functions and resource from location strings', function () {
         const funcName = stringTable.getString(funcTable.name[funcIndex]);
         const resourceIndex = funcTable.resource[funcIndex];
         const isJS = funcTable.isJS[funcIndex];
-        const fileNameIndex = funcTable.fileName[funcIndex];
+        const sourceIndex = funcTable.source[funcIndex];
+        const fileNameIndex =
+          sourceIndex !== null ? sources.filename[sourceIndex] : null;
         const fileName =
           fileNameIndex === null ? null : stringTable.getString(fileNameIndex);
         const lineNumber = funcTable.lineNumber[funcIndex];

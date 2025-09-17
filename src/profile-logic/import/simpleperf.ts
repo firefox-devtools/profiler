@@ -130,7 +130,7 @@ class FirefoxFuncTable {
       this.funcTable.isJS.push(false);
       this.funcTable.relevantForJS.push(false);
       this.funcTable.resource.push(resourceIndex);
-      this.funcTable.fileName.push(null);
+      this.funcTable.source.push(null);
       this.funcTable.lineNumber.push(null);
       this.funcTable.columnNumber.push(null);
 

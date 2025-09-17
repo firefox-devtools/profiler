@@ -12,6 +12,7 @@ import type {
   StackLineInfo,
   LineTimings,
   LineNumber,
+  SourceTable,
 } from 'firefox-profiler/types';
 
 import { getMatchingAncestorStackForInvertedCallNode } from './profile-data';
@@ -58,7 +59,8 @@ export function getStackLineInfo(
   stackTable: StackTable,
   frameTable: FrameTable,
   funcTable: FuncTable,
-  fileNameStringIndex: IndexIntoStringTable
+  fileNameStringIndex: IndexIntoStringTable,
+  sources: SourceTable
 ): StackLineInfo {
   // "self line" == "the line which a stack's self time is contributed to"
   const selfLineForAllStacks = [];
@@ -74,7 +76,9 @@ export function getStackLineInfo(
     const frame = stackTable.frame[stackIndex];
     const prefixStack = stackTable.prefix[stackIndex];
     const func = frameTable.func[frame];
-    const fileNameStringIndexOfThisStack = funcTable.fileName[func];
+    const sourceIndex = funcTable.source[func];
+    const fileNameStringIndexOfThisStack =
+      sourceIndex !== null ? (sources.filename[sourceIndex] ?? null) : null;
 
     let selfLine: LineNumber | null = null;
     let totalLines: Set<LineNumber> | null =

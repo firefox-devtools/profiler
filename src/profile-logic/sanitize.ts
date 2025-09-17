@@ -481,7 +481,7 @@ function sanitizeThreadPII(
           newFuncTable.isJS.push(funcTable.isJS[funcIndex]);
           newFuncTable.relevantForJS.push(funcTable.isJS[funcIndex]);
           newFuncTable.resource.push(-1);
-          newFuncTable.fileName.push(null);
+          newFuncTable.source.push(null);
           newFuncTable.lineNumber.push(null);
           newFuncTable.columnNumber.push(null);
           newFuncTable.length++;
@@ -496,7 +496,7 @@ function sanitizeThreadPII(
           const name = stringTable.indexForString(`<Func #${funcIndex}>`);
           newFuncTable.name[funcIndex] = name;
 
-          newFuncTable.fileName[funcIndex] = null;
+          newFuncTable.source[funcIndex] = null;
           if (newFuncTable.resource[funcIndex] >= 0) {
             resourcesToBeSanitized.add(newFuncTable.resource[funcIndex]);
           }

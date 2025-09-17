@@ -261,7 +261,11 @@ describe('process-profile', function () {
       expect(funcTableNames[2]).toEqual('0x100001a45');
       expect(funcTableNames[3]).toEqual('Startup::XRE_Main');
       expect(funcTableNames[4]).toEqual('frobnicate');
-      const chromeStringIndex = thread.funcTable.fileName[4];
+      const chromeSourceIndex = thread.funcTable.source[4];
+      const chromeStringIndex =
+        chromeSourceIndex !== null
+          ? profile.shared.sources.filename[chromeSourceIndex]
+          : null;
       if (typeof chromeStringIndex !== 'number') {
         throw new Error('chromeStringIndex must be a number');
       }

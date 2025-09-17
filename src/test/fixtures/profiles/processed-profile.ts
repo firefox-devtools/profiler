@@ -900,7 +900,7 @@ function _buildThreadFromTextOnlyStacks(
   // Create the FuncTable.
   funcNames.forEach((funcName) => {
     funcTable.name.push(stringTable.indexForString(funcName));
-    funcTable.fileName.push(null);
+    funcTable.source.push(null);
     funcTable.relevantForJS.push(funcName.endsWith('-relevantForJS'));
     funcTable.isJS.push(_isJsFunctionName(funcName));
     funcTable.lineNumber.push(null);
@@ -955,7 +955,7 @@ function _buildThreadFromTextOnlyStacks(
       // Find the file name from the function name
       const fileName = _findFileNameFromFuncName(funcNameWithModifier);
       if (fileName) {
-        funcTable.fileName[funcIndex] = stringTable.indexForString(fileName);
+        funcTable.source[funcIndex] = globalDataCollector.indexForSource(null, fileName);
       }
 
       const category = _findCategoryFromFuncName(

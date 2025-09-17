@@ -204,9 +204,9 @@ export function mergeProfilesForDiffing(
         thread.funcTable.name,
         translationMapForStrings[i]
       ),
-      fileName: adjustNullableStringIndexes(
-        thread.funcTable.fileName,
-        translationMapForStrings[i]
+      source: adjustNullableSourceIndexes(
+        thread.funcTable.source,
+        translationMapForSources[i]
       ),
     };
     thread.resourceTable = {
@@ -693,6 +693,27 @@ function adjustNullableStringIndexes(
   });
 }
 
+function adjustNullableSourceIndexes(
+  sourceIndexes: ReadonlyArray<IndexIntoSourceTable | null>,
+  translationMap: TranslationMapForSources
+): Array<IndexIntoSourceTable | null> {
+  return sourceIndexes.map((sourceIndex) => {
+    if (sourceIndex === null) {
+      return null;
+    }
+    const newSourceIndex = translationMap.get(sourceIndex);
+    if (newSourceIndex === undefined) {
+      throw new Error(
+        stripIndent`
+          Source with index ${sourceIndex} hasn't been found in the translation map.
+          This shouldn't happen and indicates a bug in the profiler's code.
+        `
+      );
+    }
+    return newSourceIndex;
+  });
+}
+
 /**
  * This combines the library lists from multiple profiles. It returns a merged
  * Lib array, along with a translation maps that can be used in other functions
@@ -844,7 +865,7 @@ function combineFuncTables(
     const resourceTranslationMap = translationMapsForResources[threadIndex];
 
     for (let i = 0; i < funcTable.length; i++) {
-      const fileNameIndex = funcTable.fileName[i];
+      const sourceIndex = funcTable.source[i];
       const resourceIndex = funcTable.resource[i];
       const newResourceIndex =
         resourceIndex >= 0
@@ -880,7 +901,7 @@ function combineFuncTables(
       newFuncTable.name.push(nameIndex);
       newFuncTable.resource.push(newResourceIndex);
       newFuncTable.relevantForJS.push(funcTable.relevantForJS[i]);
-      newFuncTable.fileName.push(fileNameIndex);
+      newFuncTable.source.push(sourceIndex);
       newFuncTable.lineNumber.push(lineNumber);
       newFuncTable.columnNumber.push(funcTable.columnNumber[i]);
 
