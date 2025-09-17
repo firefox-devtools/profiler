@@ -9,6 +9,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         'hg:hg.mozilla.org/mozilla-central:widget/cocoa/nsAppShell.mm:997f00815e6bc28806b75448c8829f0259d2cb28',
+        null,
         'https://symbolication.services.mozilla.com',
         null,
         new Map(),
@@ -72,6 +73,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         'cargo:github.com-1ecc6299db9ec823:addr2line-0.17.0:src/lib.rs',
+        null,
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
@@ -90,6 +92,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         'cargo:github.com-1ecc6299db9ec823:addr2line-0.17.0:src/function.rs',
+        null,
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
@@ -106,6 +109,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         'cargo:github.com-1ecc6299db9ec823:addr2line-0.17.0:src/nonexist.rs',
+        null,
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
@@ -129,6 +133,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         'hg:hg.mozilla.org/mozilla-central:widget/cocoa/nsAppShell.mm:997f00815e6bc28806b75448c8829f0259d2cb28',
+        null,
         'https://symbolication.services.mozilla.com',
         null,
         new Map(),
@@ -161,6 +166,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs',
+        null,
         'https://symbolication.services.mozilla.com',
         {
           debugName: 'FAKE_DEBUGNAME',
@@ -199,6 +205,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs',
+        null,
         'http://127.0.0.1:3000',
         {
           debugName: 'FAKE_DEBUGNAME',
@@ -249,6 +256,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         'git:github.com/rust-lang/rust:library/core/src/intrinsics.rs:acbe4443cc4c9695c0b74a7b64b60333c990a400',
+        null,
         'http://127.0.0.1:3001',
         {
           debugName: 'FAKE_DEBUGNAME',
@@ -299,6 +307,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         'git:github.com/rust-lang/rust:library/core/src/intrinsics.rs:acbe4443cc4c9695c0b74a7b64b60333c990a400',
+        null,
         'http://127.0.0.1:3002',
         {
           debugName: 'FAKE_DEBUGNAME',
@@ -347,6 +356,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         'git:github.com/rust-lang/rust:library/core/src/intrinsics.rs:acbe4443cc4c9695c0b74a7b64b60333c990a400',
+        null,
         'http://127.0.0.1:3003',
         {
           debugName: 'FAKE_DEBUGNAME',
@@ -391,6 +401,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         'git:git.iximeow.net/yaxpeax-arm:src/armv8/a64.rs:0663147eacdef847cc1bdc07cf89eed14b1aeaca',
+        null,
         'https://symbolication.services.mozilla.com',
         null,
         new Map(),
@@ -416,6 +427,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs',
+        null,
         'https://symbolication.services.mozilla.com',
         {
           debugName: 'FAKE_DEBUGNAME',
@@ -456,6 +468,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs',
+        null,
         'https://symbolication.services.mozilla.com',
         {
           debugName: 'FAKE_DEBUGNAME',
