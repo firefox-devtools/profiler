@@ -33,6 +33,7 @@ import {
   makeEndMarker,
 } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
+import { getEmptySourceTable } from '../../profile-logic/data-structures';
 
 import type {
   IndexIntoRawMarkerTable,
@@ -789,6 +790,7 @@ describe('filterRawMarkerTableToRange', () => {
   function setup({ start, end, markers }: TestConfig) {
     const shared: RawProfileSharedData = {
       stringArray: [],
+      sources: getEmptySourceTable(),
     };
     const thread = getThreadWithRawMarkers(shared, markers);
 
@@ -1281,6 +1283,7 @@ describe('filterRawMarkerTableToRangeWithMarkersToDelete', () => {
   function setup({ timeRange, markersToDelete, markers }: TestConfig) {
     const shared: RawProfileSharedData = {
       stringArray: [],
+      sources: getEmptySourceTable(),
     };
 
     const thread = getThreadWithRawMarkers(shared, markers);

@@ -129,6 +129,7 @@ export function sanitizePII(
     pages: pages,
     shared: {
       stringArray,
+      sources: profile.shared.sources,
     },
     threads: profile.threads.reduce<RawThread[]>((acc, thread, threadIndex) => {
       const newThread: RawThread | null = sanitizeThreadPII(

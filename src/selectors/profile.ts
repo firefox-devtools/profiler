@@ -71,6 +71,7 @@ import type {
   ExtensionTable,
   SortedTabPageData,
   TimelineUnit,
+  SourceTable,
 } from 'firefox-profiler/types';
 
 import type { ThreadActivityScore } from '../profile-logic/tracks';
@@ -246,6 +247,9 @@ export const getStringTable: Selector<StringTable> = createSelector(
   (state: State) => getRawProfileSharedData(state).stringArray,
   (stringArray) => StringTable.withBackingArray(stringArray as string[])
 );
+
+export const getSourceTable: Selector<SourceTable> = (state: State) =>
+  getRawProfileSharedData(state).sources;
 
 // Combine the marker schema from Gecko and the front-end. This allows the front-end
 // to generate markers such as the Jank markers, and display them.
