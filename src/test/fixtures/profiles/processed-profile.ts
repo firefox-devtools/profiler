@@ -60,7 +60,7 @@ import {
   computeTimeColumnForRawSamplesTable,
 } from '../../../profile-logic/profile-data';
 import { markerSchemaForTests } from './marker-schema';
-import { GlobalDataCollector } from 'firefox-profiler/profile-logic/process-profile';
+import { GlobalDataCollector } from 'firefox-profiler/profile-logic/global-data-collector';
 import { getVisualMetrics } from './gecko-profile';
 
 // Array<[MarkerName, Milliseconds, Data]>

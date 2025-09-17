@@ -6,8 +6,8 @@ import {
   processGeckoProfile,
   serializeProfile,
   unserializeProfileOfArbitraryFormat,
-  GlobalDataCollector,
 } from '../../profile-logic/process-profile';
+import { GlobalDataCollector } from 'firefox-profiler/profile-logic/global-data-collector';
 import { computeTimeColumnForRawSamplesTable } from '../../profile-logic/profile-data';
 import { StringTable } from '../../utils/string-table';
 import {

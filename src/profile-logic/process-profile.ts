@@ -4,7 +4,7 @@
 import { attemptToConvertChromeProfile } from './import/chrome';
 import { attemptToConvertDhat } from './import/dhat';
 import { AddressLocator } from './address-locator';
-import { StringTable } from '../utils/string-table';
+import { GlobalDataCollector } from './global-data-collector';
 import {
   resourceTypes,
   getEmptyExtensions,
@@ -38,9 +38,9 @@ import {
 import { computeStringIndexMarkerFieldsByDataType } from '../profile-logic/marker-schema';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
 
+import type { StringTable } from '../utils/string-table';
 import type {
   Profile,
-  RawProfileSharedData,
   RawThread,
   RawCounter,
   ExtensionTable,
@@ -49,7 +49,6 @@ import type {
   RawSamplesTable,
   RawStackTable,
   RawMarkerTable,
-  Lib,
   LibMapping,
   FuncTable,
   ResourceTable,
@@ -175,54 +174,6 @@ function _cleanFunctionName(functionName: string): string {
     return functionName.substr(ignoredPrefix.length);
   }
   return functionName;
-}
-
-/**
- * GlobalDataCollector collects data which is global in the processed profile
- * format but per-process or per-thread in the Gecko profile format. It
- * de-duplicates elements and builds one shared list of each type.
- * For now it only de-duplicates libraries, but in the future we may move more
- * tables to be global.
- * You could also call this class an "interner".
- */
-export class GlobalDataCollector {
-  _libs: Lib[] = [];
-  _libKeyToLibIndex: Map<string, IndexIntoLibs> = new Map();
-  _stringArray: string[] = [];
-  _stringTable: StringTable = StringTable.withBackingArray(this._stringArray);
-
-  // Return the global index for this library, adding it to the global list if
-  // necessary.
-  indexForLib(libMapping: LibMapping | Lib): IndexIntoLibs {
-    const { debugName, breakpadId } = libMapping;
-    const libKey = `${debugName}/${breakpadId}`;
-    let index = this._libKeyToLibIndex.get(libKey);
-    if (index === undefined) {
-      index = this._libs.length;
-      const { arch, name, path, debugPath, codeId } = libMapping;
-      this._libs.push({
-        arch,
-        name,
-        path,
-        debugName,
-        debugPath,
-        breakpadId,
-        codeId: codeId ?? null,
-      });
-      this._libKeyToLibIndex.set(libKey, index);
-    }
-    return index;
-  }
-
-  getStringTable(): StringTable {
-    return this._stringTable;
-  }
-
-  // Package up all de-duplicated global tables so that they can be embedded in
-  // the profile.
-  finish(): { libs: Lib[]; shared: RawProfileSharedData } {
-    return { libs: this._libs, shared: { stringArray: this._stringArray } };
-  }
 }
 
 type ExtractionInfo = {
