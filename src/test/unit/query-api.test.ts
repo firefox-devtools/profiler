@@ -271,6 +271,7 @@ describe('RegularExternalCommunicationDelegate', function () {
             getSymbolTable: jest.fn(bcOverrides.getSymbolTable),
             getPageFavicons: jest.fn(bcOverrides.getPageFavicons),
             showFunctionInDevtools: jest.fn(bcOverrides.showFunctionInDevtools),
+            getJSSource: jest.fn(bcOverrides.getJSSource),
           }
         : null;
 
