@@ -140,23 +140,15 @@ export function getStackAndSampleSelectorsPerThread(
   const getSourceViewStackLineInfo: Selector<StackLineInfo | null> =
     createSelector(
       threadSelectors.getFilteredThread,
-      ProfileSelectors.getSourceViewFile,
-      ProfileSelectors.getSourceTable,
+      UrlState.getSourceViewSourceIndex,
       (
-        { stackTable, frameTable, funcTable, stringTable }: Thread,
-        sourceViewFile,
-        sources
+        { stackTable, frameTable, funcTable }: Thread,
+        sourceIndex
       ): StackLineInfo | null => {
-        if (sourceViewFile === null) {
+        if (sourceIndex === null) {
           return null;
         }
-        return getStackLineInfo(
-          stackTable,
-          frameTable,
-          funcTable,
-          stringTable.indexForString(sourceViewFile),
-          sources
-        );
+        return getStackLineInfo(stackTable, frameTable, funcTable, sourceIndex);
       }
     );
 

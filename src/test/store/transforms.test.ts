@@ -26,7 +26,6 @@ import {
   changeCallTreeSummaryStrategy,
 } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import * as ProfileSelectors from '../../selectors/profile';
 
 describe('"focus-subtree" transform', function () {
   describe('on a call tree', function () {
@@ -1224,13 +1223,13 @@ describe('"collapse-direct-recursion" transform', function () {
       const { stackTable, frameTable, funcTable, samples, stringTable } =
         filteredThread;
       const fileStringIndex = stringTable.indexForString('b');
-      const sources = ProfileSelectors.getSourceTable(getState());
+      const fileSourceIndex =
+        filteredThread.sources.filename.indexOf(fileStringIndex);
       const stackLineInfo = getStackLineInfo(
         stackTable,
         frameTable,
         funcTable,
-        fileStringIndex,
-        sources
+        fileSourceIndex
       );
       const lineTimings = getLineTimings(stackLineInfo, samples);
 
@@ -1408,13 +1407,13 @@ describe('"collapse-recursion" transform', function () {
       const { stackTable, frameTable, funcTable, samples, stringTable } =
         filteredThread;
       const fileStringIndex = stringTable.indexForString('b');
-      const sources = ProfileSelectors.getSourceTable(getState());
+      const fileSourceIndex =
+        filteredThread.sources.filename.indexOf(fileStringIndex);
       const stackLineInfo = getStackLineInfo(
         stackTable,
         frameTable,
         funcTable,
-        fileStringIndex,
-        sources
+        fileSourceIndex
       );
       const lineTimings = getLineTimings(stackLineInfo, samples);
 
@@ -1521,13 +1520,13 @@ describe('"collapse-recursion" transform', function () {
       const { stackTable, frameTable, funcTable, samples, stringTable } =
         filteredThread;
       const fileStringIndex = stringTable.indexForString('b');
-      const sources = ProfileSelectors.getSourceTable(getState());
+      const fileSourceIndex =
+        filteredThread.sources.filename.indexOf(fileStringIndex);
       const stackLineInfo = getStackLineInfo(
         stackTable,
         frameTable,
         funcTable,
-        fileStringIndex,
-        sources
+        fileSourceIndex
       );
       const lineTimings = getLineTimings(stackLineInfo, samples);
 
@@ -1657,13 +1656,13 @@ describe('"collapse-recursion" transform', function () {
       const { stackTable, frameTable, funcTable, samples, stringTable } =
         filteredThread;
       const fileStringIndex = stringTable.indexForString('b');
-      const sources = ProfileSelectors.getSourceTable(getState());
+      const fileSourceIndex =
+        filteredThread.sources.filename.indexOf(fileStringIndex);
       const stackLineInfo = getStackLineInfo(
         stackTable,
         frameTable,
         funcTable,
-        fileStringIndex,
-        sources
+        fileSourceIndex
       );
       const lineTimings = getLineTimings(stackLineInfo, samples);
 
