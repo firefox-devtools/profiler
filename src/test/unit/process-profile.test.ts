@@ -897,3 +897,112 @@ describe('visualMetrics processing', function () {
     );
   });
 });
+
+describe('source table processing', function () {
+  it('should create a global source table during profile processing', function () {
+    const geckoProfile = createGeckoProfile();
+    const processedProfile = processGeckoProfile(geckoProfile);
+
+    // Check that the global source table has the expected structure
+    expect(processedProfile.shared.sources.filename).toBeArray();
+    expect(processedProfile.shared.sources.uuid).toBeArray();
+    expect(processedProfile.shared.sources.length).toBeNumber();
+
+    // Check that source indexes are consistent
+    expect(processedProfile.shared.sources.filename.length).toBe(
+      processedProfile.shared.sources.length
+    );
+    expect(processedProfile.shared.sources.uuid.length).toBe(
+      processedProfile.shared.sources.length
+    );
+
+    // Should have at least one source from the test profile
+    expect(processedProfile.shared.sources.length).toBeGreaterThan(0);
+
+    // All filename indexes should be valid string table indexes
+    for (const filenameIndex of processedProfile.shared.sources.filename) {
+      expect(filenameIndex).toBeGreaterThanOrEqual(0);
+      expect(filenameIndex).toBeLessThan(
+        processedProfile.shared.stringArray.length
+      );
+    }
+  });
+
+  it('should properly construct the source references', function () {
+    const geckoProfile = createGeckoProfile();
+    const processedProfile = processGeckoProfile(geckoProfile);
+
+    // Check that all threads have correct funcTable.source values
+    expect(processedProfile.threads.length).toBeGreaterThan(0);
+    for (const thread of processedProfile.threads) {
+      expect(thread.funcTable.source).toBeArray();
+
+      // Should have at least some functions in the test profile
+      expect(thread.funcTable.length).toBeGreaterThan(0);
+
+      // Verify that source indexes are valid
+      for (let i = 0; i < thread.funcTable.length; i++) {
+        const sourceIndex = thread.funcTable.source[i];
+        if (sourceIndex === null) {
+          // Skip the native functions that don't have sources yet. They are
+          // added during symbolication.
+          continue;
+        }
+
+        expect(sourceIndex).toBeGreaterThanOrEqual(0);
+        expect(sourceIndex).toBeLessThan(
+          processedProfile.shared.sources.length
+        );
+
+        // Verify that the source points to a valid filename
+        const filenameIndex =
+          processedProfile.shared.sources.filename[sourceIndex];
+        expect(filenameIndex).toBeGreaterThanOrEqual(0);
+        expect(filenameIndex).toBeLessThan(
+          processedProfile.shared.stringArray.length
+        );
+
+        // Verify the filename string is not empty
+        const filename = processedProfile.shared.stringArray[filenameIndex];
+        expect(filename).toBeString();
+        expect(filename.length).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('should handle sources with null UUIDs correctly', function () {
+    const geckoProfile = createGeckoProfile();
+    const processedProfile = processGeckoProfile(geckoProfile);
+
+    // Most sources in the test profile should have null UUIDs
+    const { sources } = processedProfile.shared;
+    for (let i = 0; i < sources.length; i++) {
+      // UUIDs can be null or string
+      expect(
+        sources.uuid[i] === null || typeof sources.uuid[i] === 'string'
+      ).toBe(true);
+    }
+  });
+
+  it('should deduplicate sources with same filename and UUID', function () {
+    const geckoProfile = createGeckoProfile();
+    const processedProfile = processGeckoProfile(geckoProfile);
+
+    // Count unique source files - verify no exact duplicates exist
+    const { sources } = processedProfile.shared;
+    const filenameSet = new Set();
+
+    for (let i = 0; i < sources.length; i++) {
+      const filename = processedProfile.shared.stringArray[sources.filename[i]];
+      const uuid = sources.uuid[i];
+      const key = `${filename}:${uuid}`;
+
+      // Should not have exact duplicates
+      expect(filenameSet.has(key)).toBe(false);
+      filenameSet.add(key);
+    }
+
+    // The test profile should have at least one source
+    expect(sources.length).toBeGreaterThan(0);
+  });
+});
