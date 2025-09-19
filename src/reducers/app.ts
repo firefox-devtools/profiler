@@ -180,7 +180,7 @@ const lastVisibleThreadTabSlug: Reducer<TabSlug> = (
   }
 };
 
-const trackThreadHeights: Reducer<{ [key: ThreadsKey]: CssPixels }> = (
+const trackThreadHeights: Reducer<Partial<Record<ThreadsKey, CssPixels>>> = (
   state = {},
   action
 ) => {
