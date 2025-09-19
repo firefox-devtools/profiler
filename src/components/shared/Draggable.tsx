@@ -36,7 +36,7 @@ export class Draggable<T> extends React.PureComponent<Props<T>, State> {
     mouseMoveHandler: (param: MouseEvent) => void;
     mouseUpHandler: (param: MouseEvent) => void;
   } | null = null;
-  override state = {
+  override state: State = {
     dragging: false,
   };
 

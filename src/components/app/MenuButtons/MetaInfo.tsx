@@ -58,7 +58,7 @@ type Props = ConnectedProps<{}, StateProps, DispatchProps>;
  * This component formats the profile's meta information into a dropdown panel.
  */
 class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
-  override state = { showsMoreInfo: false };
+  override state: State = { showsMoreInfo: false };
 
   /**
    * This method provides information about the symbolication status, and a button

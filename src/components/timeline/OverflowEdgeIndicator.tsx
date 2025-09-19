@@ -28,7 +28,7 @@ class OverflowEdgeIndicator extends React.PureComponent<Props, State> {
   _contentsWrapper: HTMLDivElement | null = null;
   _scrolledToInitialSelected: boolean = false;
 
-  override state = {
+  override state: State = {
     overflowsOnTop: false,
     overflowsOnRight: false,
     overflowsOnBottom: false,

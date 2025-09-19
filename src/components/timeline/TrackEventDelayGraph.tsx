@@ -197,7 +197,7 @@ type State = {
  *
  */
 class TrackEventDelayGraphImpl extends React.PureComponent<Props, State> {
-  override state = {
+  override state: State = {
     hoveredDelay: null,
     mouseX: 0,
     mouseY: 0,

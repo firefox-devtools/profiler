@@ -37,7 +37,7 @@ type State = {
  * state), and then when active, it switches to an input, which is only fixed in size.
  */
 class ProfileNameImpl extends React.PureComponent<Props, State> {
-  override state = {
+  override state: State = {
     focusedWithKey: null,
     focusGeneration: 0,
   };

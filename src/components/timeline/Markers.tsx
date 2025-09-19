@@ -312,7 +312,7 @@ type State = {
 };
 
 class TimelineMarkers extends React.PureComponent<Props, State> {
-  override state = {
+  override state: State = {
     hoveredMarkerIndex: null,
     mouseDownMarker: null,
     mouseX: 0,

@@ -42,7 +42,7 @@ type State = {
 };
 
 class MarkerSettingsImpl extends PureComponent<Props, State> {
-  override state = {
+  override state: State = {
     isMarkerFiltersMenuVisible: false,
     isFilterMenuVisibleOnMouseDown: false,
   };
