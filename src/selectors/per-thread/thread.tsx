@@ -146,6 +146,7 @@ export function getBasicThreadSelectorsPerThread(
     getSamplesTable,
     getStackTable,
     ProfileSelectors.getStringTable,
+    ProfileSelectors.getSourceTable,
     ProfileData.createThreadFromDerivedTables
   );
 

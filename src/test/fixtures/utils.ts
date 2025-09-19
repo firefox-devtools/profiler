@@ -156,7 +156,8 @@ export function computeThreadFromRawThread(
     rawThread,
     samples,
     stackTable,
-    stringTable
+    stringTable,
+    shared.sources
   );
 }
 
