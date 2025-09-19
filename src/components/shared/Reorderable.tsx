@@ -65,7 +65,7 @@ export class Reorderable extends React.PureComponent<Props, State> {
     },
   };
 
-  override state = {
+  override state: State = {
     phase: 'RESTING' as const,
     manipulatingIndex: -1,
     destinationIndex: -1,

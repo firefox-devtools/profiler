@@ -54,7 +54,7 @@ type State = {
 };
 
 class Screenshots extends PureComponent<Props, State> {
-  override state = {
+  override state: State = {
     offsetX: null,
     pageX: null,
     containerTop: null,

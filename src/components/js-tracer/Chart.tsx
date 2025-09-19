@@ -175,7 +175,7 @@ class JsTracerChartLoader extends React.PureComponent<
   ChartLoaderProps,
   ChartLoaderState
 > {
-  override state = {
+  override state: ChartLoaderState = {
     // The loader needs to be mounted before rendering the chart, as it has expensive
     // selectors.
     readyToRenderExpensiveChart: false,

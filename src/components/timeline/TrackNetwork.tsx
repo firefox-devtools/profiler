@@ -277,7 +277,7 @@ type State = {
 };
 
 class Network extends PureComponent<Props, State> {
-  override state = { hoveredMarkerIndex: null, mouseX: 0, mouseY: 0 };
+  override state: State = { hoveredMarkerIndex: null, mouseX: 0, mouseY: 0 };
 
   _onHoveredMarkerChange = (
     hoveredMarkerIndex: MarkerIndex | null,
