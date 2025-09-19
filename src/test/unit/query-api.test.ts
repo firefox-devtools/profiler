@@ -29,6 +29,12 @@ describe('queryApiWithFallback', function () {
             throw new Error('Not implemented');
           })
       ),
+      fetchJSSourceFromBrowser: jest.fn(
+        overrides.fetchJSSourceFromBrowser ??
+          (async () => {
+            throw new Error('Not implemented');
+          })
+      ),
     };
   }
 
@@ -271,6 +277,7 @@ describe('RegularExternalCommunicationDelegate', function () {
             getSymbolTable: jest.fn(bcOverrides.getSymbolTable),
             getPageFavicons: jest.fn(bcOverrides.getPageFavicons),
             showFunctionInDevtools: jest.fn(bcOverrides.showFunctionInDevtools),
+            getJSSource: jest.fn(bcOverrides.getJSSource),
           }
         : null;
 

@@ -58,6 +58,7 @@ import type {
   RawThread,
   RawProfileSharedData,
   IndexIntoFrameTable,
+  IndexIntoSourceTable,
 } from 'firefox-profiler/types';
 
 describe('string-table', function () {
@@ -261,7 +262,11 @@ describe('process-profile', function () {
       expect(funcTableNames[2]).toEqual('0x100001a45');
       expect(funcTableNames[3]).toEqual('Startup::XRE_Main');
       expect(funcTableNames[4]).toEqual('frobnicate');
-      const chromeStringIndex = thread.funcTable.fileName[4];
+      const chromeSourceIndex = thread.funcTable.source[4];
+      const chromeStringIndex =
+        chromeSourceIndex !== null
+          ? profile.shared.sources.filename[chromeSourceIndex]
+          : null;
       if (typeof chromeStringIndex !== 'number') {
         throw new Error('chromeStringIndex must be a number');
       }
@@ -1378,9 +1383,22 @@ describe('findAddressProofForFile', function () {
       webrender::renderer::shade::LazilyCompiledShader::bind[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/shade.rs][line:150][address:4a9f89b]
     `);
 
+    const getSourceIndex = (sourceFile: string): IndexIntoSourceTable => {
+      const stringTable = StringTable.withBackingArray(
+        profile.shared.stringArray
+      );
+
+      const sourceFileIndex = stringTable.indexForString(sourceFile);
+      return profile.shared.sources.filename.findIndex(
+        (fileIndex) => fileIndex === sourceFileIndex
+      );
+    };
+
     const addressProof1 = findAddressProofForFile(
       profile,
-      '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs'
+      getSourceIndex(
+        '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs'
+      )
     );
     expect(addressProof1).toEqual({
       debugName: 'XUL',
@@ -1390,7 +1408,9 @@ describe('findAddressProofForFile', function () {
 
     const addressProof2 = findAddressProofForFile(
       profile,
-      '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/shade.rs'
+      getSourceIndex(
+        '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/shade.rs'
+      )
     );
     expect(addressProof2).toEqual({
       debugName: 'XUL',
@@ -1400,7 +1420,9 @@ describe('findAddressProofForFile', function () {
 
     const missingAddressProof = findAddressProofForFile(
       profile,
-      '/Users/mstange/code/mozilla/xpcom/threads/nsThreadUtils.cpp'
+      getSourceIndex(
+        '/Users/mstange/code/mozilla/xpcom/threads/nsThreadUtils.cpp'
+      )
     );
     expect(missingAddressProof).toBeNull();
   });

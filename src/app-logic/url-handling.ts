@@ -48,7 +48,7 @@ import {
 } from '../utils/uintarray-encoding';
 import { tabSlugs } from '../app-logic/tabs-handling';
 
-export const CURRENT_URL_VERSION = 11;
+export const CURRENT_URL_VERSION = 12;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -171,7 +171,7 @@ type BaseQuery = {
   view: string;
   implementation: string;
   timelineType: string;
-  sourceView: string;
+  sourceViewIndex: number;
   assemblyView: string;
 };
 
@@ -208,7 +208,7 @@ type Query = BaseQuery & {
   invertCallstack?: null | undefined;
   ctSummary?: string;
   transforms?: string;
-  sourceView?: string;
+  sourceViewIndex?: number;
   assemblyView?: string;
 
   // StackChart specific
@@ -349,8 +349,8 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         urlState.profileSpecific;
 
       if (isBottomBoxOpenPerPanel[selectedTab]) {
-        if (sourceView.sourceFile !== null) {
-          query.sourceView = sourceView.sourceFile;
+        if (sourceView.sourceIndex !== null) {
+          query.sourceViewIndex = sourceView.sourceIndex;
         }
         if (assemblyView.isOpen && assemblyView.nativeSymbol !== null) {
           query.assemblyView = stringifyAssemblyViewSymbol(
@@ -508,7 +508,7 @@ export function stateFromLocation(
   const sourceView: SourceViewState = {
     scrollGeneration: 0,
     libIndex: null,
-    sourceFile: null,
+    sourceIndex: null,
   };
   const assemblyView: AssemblyViewState = {
     isOpen: false,
@@ -518,8 +518,8 @@ export function stateFromLocation(
   };
   const isBottomBoxOpenPerPanel: any = {};
   tabSlugs.forEach((tabSlug) => (isBottomBoxOpenPerPanel[tabSlug] = false));
-  if (query.sourceView) {
-    sourceView.sourceFile = query.sourceView;
+  if (query.sourceViewIndex !== undefined) {
+    sourceView.sourceIndex = Number(query.sourceViewIndex);
     isBottomBoxOpenPerPanel[selectedTab] = true;
   }
   if (query.assemblyView) {
@@ -1161,6 +1161,34 @@ const _upgraders: {
       // Clear EVERYTHING in the query. Let it compute everything for the full view.
       processedLocation.query = {};
     }
+  },
+  [12]: (
+    processedLocation: ProcessedLocationBeforeUpgrade,
+    profile?: Profile
+  ) => {
+    // This version changes the source view parameter from 'sourceView' (filename
+    // string) to 'sourceViewIndex' (IndexIntoSourceTable). If we can't convert
+    // the filename to a source index, so we just remove the sourceView parameter.
+    const { query } = processedLocation;
+    if (!('sourceView' in query) || !profile || !profile.shared.sources) {
+      return;
+    }
+
+    // Try to find the source index for the given filename
+    const filename = query.sourceView;
+    const { sources, stringArray } = profile.shared;
+
+    // Find the filename string index
+    const filenameStringIndex = stringArray.indexOf(filename);
+    if (filenameStringIndex !== -1) {
+      // Find the source index with this filename
+      const sourceIndex = sources.filename.indexOf(filenameStringIndex);
+      if (sourceIndex !== -1) {
+        query.sourceViewIndex = sourceIndex;
+      }
+    }
+    // Remove the old sourceView parameter regardless of whether we found a match
+    delete query.sourceView;
   },
 };
 

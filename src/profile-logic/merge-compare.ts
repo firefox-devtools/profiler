@@ -48,6 +48,7 @@ import type {
   IndexIntoStackTable,
   IndexIntoSamplesTable,
   IndexIntoStringTable,
+  IndexIntoSourceTable,
   FuncTable,
   FrameTable,
   Lib,
@@ -55,6 +56,7 @@ import type {
   ResourceTable,
   RawSamplesTable,
   RawStackTable,
+  SourceTable,
   UrlState,
   ImplementationFilter,
   TransformStacksPerThread,
@@ -144,6 +146,13 @@ export function mergeProfilesForDiffing(
     translationMaps: translationMapForStrings,
   } = mergeStringArrays(profiles.map((profile) => profile.shared.stringArray));
 
+  // Then merge sources.
+  const { sources: newSources, translationMaps: translationMapForSources } =
+    mergeSources(
+      profiles.map((profile) => profile.shared.sources ?? null),
+      translationMapForStrings
+    );
+
   // Then merge libs.
   const { libs: newLibs, translationMaps: translationMapsForLibs } = mergeLibs(
     profiles.map((profile) => profile.libs)
@@ -152,6 +161,7 @@ export function mergeProfilesForDiffing(
 
   resultProfile.shared = {
     stringArray: newStringArray,
+    sources: newSources,
   };
 
   // Then we loop over all profiles and do the necessary changes according
@@ -194,9 +204,9 @@ export function mergeProfilesForDiffing(
         thread.funcTable.name,
         translationMapForStrings[i]
       ),
-      fileName: adjustNullableStringIndexes(
-        thread.funcTable.fileName,
-        translationMapForStrings[i]
+      source: adjustNullableSourceIndexes(
+        thread.funcTable.source,
+        translationMapForSources[i]
       ),
     };
     thread.resourceTable = {
@@ -416,6 +426,7 @@ type TranslationMapForFrames = Map<IndexIntoFrameTable, IndexIntoFrameTable>;
 type TranslationMapForStacks = Map<IndexIntoStackTable, IndexIntoStackTable>;
 type TranslationMapForLibs = Map<IndexIntoLibs, IndexIntoLibs>;
 type TranslationMapForStrings = Map<IndexIntoStringTable, IndexIntoStringTable>;
+type TranslationMapForSources = Map<IndexIntoSourceTable, IndexIntoSourceTable>;
 type TranslationMapForSamples = Map<
   IndexIntoSamplesTable,
   IndexIntoSamplesTable
@@ -479,6 +490,58 @@ function mergeStringArrays(stringArraysPerProfile: Array<string[]>): {
   });
 
   return { stringArray: newStringArray, translationMaps };
+}
+
+function mergeSources(
+  sourcesPerProfile: Array<SourceTable | null>,
+  translationMapsForStrings: TranslationMapForStrings[]
+): {
+  sources: SourceTable;
+  translationMaps: TranslationMapForSources[];
+} {
+  const newSources: SourceTable = { length: 0, uuid: [], filename: [] };
+  const mapOfInsertedSources: Map<string, IndexIntoSourceTable> = new Map();
+
+  const translationMaps = sourcesPerProfile.map((sources, profileIndex) => {
+    const translationMap = new Map();
+    if (!sources) {
+      return translationMap;
+    }
+
+    const stringTranslationMap = translationMapsForStrings[profileIndex];
+
+    for (let i = 0; i < sources.length; i++) {
+      const uuid = sources.uuid[i];
+      const originalUrlIndex = sources.filename[i];
+      const newUrlIndex = stringTranslationMap.get(originalUrlIndex);
+
+      if (newUrlIndex === undefined) {
+        throw new Error(
+          `String index ${originalUrlIndex} not found in translation map`
+        );
+      }
+
+      const sourceKey = uuid ?? `null-uuid-${newUrlIndex}`;
+      let insertedSourceIndex = mapOfInsertedSources.get(sourceKey);
+      if (insertedSourceIndex === undefined) {
+        // Add new source
+        insertedSourceIndex = newSources.length;
+        newSources.uuid[insertedSourceIndex] = uuid;
+        newSources.filename[insertedSourceIndex] = newUrlIndex;
+        newSources.length++;
+        mapOfInsertedSources.set(sourceKey, insertedSourceIndex);
+      }
+
+      translationMap.set(i, insertedSourceIndex);
+    }
+
+    return translationMap;
+  });
+
+  return {
+    sources: newSources,
+    translationMaps,
+  };
 }
 
 /**
@@ -627,6 +690,27 @@ function adjustNullableStringIndexes(
       );
     }
     return newStringIndex;
+  });
+}
+
+function adjustNullableSourceIndexes(
+  sourceIndexes: ReadonlyArray<IndexIntoSourceTable | null>,
+  translationMap: TranslationMapForSources
+): Array<IndexIntoSourceTable | null> {
+  return sourceIndexes.map((sourceIndex) => {
+    if (sourceIndex === null) {
+      return null;
+    }
+    const newSourceIndex = translationMap.get(sourceIndex);
+    if (newSourceIndex === undefined) {
+      throw new Error(
+        stripIndent`
+          Source with index ${sourceIndex} hasn't been found in the translation map.
+          This shouldn't happen and indicates a bug in the profiler's code.
+        `
+      );
+    }
+    return newSourceIndex;
   });
 }
 
@@ -781,7 +865,7 @@ function combineFuncTables(
     const resourceTranslationMap = translationMapsForResources[threadIndex];
 
     for (let i = 0; i < funcTable.length; i++) {
-      const fileNameIndex = funcTable.fileName[i];
+      const sourceIndex = funcTable.source[i];
       const resourceIndex = funcTable.resource[i];
       const newResourceIndex =
         resourceIndex >= 0
@@ -817,7 +901,7 @@ function combineFuncTables(
       newFuncTable.name.push(nameIndex);
       newFuncTable.resource.push(newResourceIndex);
       newFuncTable.relevantForJS.push(funcTable.relevantForJS[i]);
-      newFuncTable.fileName.push(fileNameIndex);
+      newFuncTable.source.push(sourceIndex);
       newFuncTable.lineNumber.push(lineNumber);
       newFuncTable.columnNumber.push(funcTable.columnNumber[i]);
 

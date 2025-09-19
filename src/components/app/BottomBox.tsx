@@ -13,7 +13,6 @@ import { IonGraphView } from '../shared/IonGraphView';
 import { CodeLoadingOverlay } from './CodeLoadingOverlay';
 import { CodeErrorOverlay } from './CodeErrorOverlay';
 import {
-  getSourceViewFile,
   getSourceViewScrollGeneration,
   getAssemblyViewIsOpen,
   getAssemblyViewNativeSymbol,
@@ -29,7 +28,10 @@ import {
   getSourceViewCode,
   getAssemblyViewCode,
 } from 'firefox-profiler/selectors/code';
-import { getPreviewSelectionIsBeingModified } from 'firefox-profiler/selectors/profile';
+import {
+  getPreviewSelectionIsBeingModified,
+  getSourceViewFile,
+} from 'firefox-profiler/selectors/profile';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';

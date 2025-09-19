@@ -27,6 +27,7 @@ import {
   getEmptySamplesTable,
   getEmptyRawMarkerTable,
   getEmptyNativeSymbolTable,
+  getEmptySourceTable,
 } from 'firefox-profiler/profile-logic/data-structures';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 import { ensureExists } from 'firefox-profiler/utils/types';
@@ -129,7 +130,7 @@ class FirefoxFuncTable {
       this.funcTable.isJS.push(false);
       this.funcTable.relevantForJS.push(false);
       this.funcTable.resource.push(resourceIndex);
-      this.funcTable.fileName.push(null);
+      this.funcTable.source.push(null);
       this.funcTable.lineNumber.push(null);
       this.funcTable.columnNumber.push(null);
 
@@ -370,6 +371,7 @@ class FirefoxProfile {
       libs: [],
       shared: {
         stringArray: this.stringArray,
+        sources: getEmptySourceTable(),
       },
       threads: this.threads.map((thread) => thread.toJson()),
     };

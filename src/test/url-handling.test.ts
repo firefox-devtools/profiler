@@ -38,6 +38,7 @@ import type {
   Store,
   State,
   ThreadIndex,
+  IndexIntoSourceTable,
 } from 'firefox-profiler/types';
 import getNiceProfile from './fixtures/profiles/call-nodes';
 import queryString from 'query-string';
@@ -54,6 +55,7 @@ import {
 import { getProfile } from '../selectors/profile';
 import { SYMBOL_SERVER_URL } from '../app-logic/constants';
 import { getThreadsKey } from '../profile-logic/profile-data';
+import { StringTable } from 'firefox-profiler/utils/string-table';
 
 type StoreUrlSettings = {
   pathname?: string;
@@ -1771,21 +1773,35 @@ describe('symbolServerUrl', function () {
 describe('URL persistence of bottom box (source view and assembly view)', function () {
   function setup() {
     const store = _getStoreWithURL();
-    return store;
+
+    const getSourceIndex = (sourceFile: string): IndexIntoSourceTable => {
+      const profile = getProfile(store.getState());
+      const stringTable = StringTable.withBackingArray(
+        profile.shared.stringArray
+      );
+
+      const sourceFileIndex = stringTable.indexForString(sourceFile);
+      return profile.shared.sources.filename.findIndex(
+        (fileIndex) => fileIndex === sourceFileIndex
+      );
+    };
+
+    return { ...store, getSourceIndex };
   }
 
   it('persists the source file shown in the source view to the URL', function () {
-    const { dispatch, getState } = setup();
+    const { dispatch, getState, getSourceIndex } = setup();
     expect(urlStateSelectors.getSelectedTab(getState())).toBe('calltree');
     expect(urlStateSelectors.getIsBottomBoxOpen(getState())).toBeFalse();
-    expect(urlStateSelectors.getSourceViewFile(getState())).toBeNull();
+    expect(urlStateSelectors.getSourceViewSourceIndex(getState())).toBeNull();
 
     // Open the source view for 'xpcom/threads/nsThread.cpp'.
     const sourceFile =
       'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
+    const sourceIndex = getSourceIndex(sourceFile);
     const bottomBoxInfo = {
       libIndex: 0,
-      sourceFile,
+      sourceIndex,
       nativeSymbols: [],
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
@@ -1794,9 +1810,9 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     expect(
       urlStateSelectors.getIsBottomBoxOpen(newStore.getState())
     ).toBeTrue();
-    expect(urlStateSelectors.getSourceViewFile(newStore.getState())).toBe(
-      sourceFile
-    );
+    expect(
+      urlStateSelectors.getSourceViewSourceIndex(newStore.getState())
+    ).toBe(sourceIndex);
     expect(
       urlStateSelectors.getAssemblyViewIsOpen(newStore.getState())
     ).toBeFalse();
@@ -1806,17 +1822,18 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
   });
 
   it('keeps a closed bottom box closed, even if a source file was loaded before', function () {
-    const { dispatch, getState } = setup();
+    const { dispatch, getState, getSourceIndex } = setup();
     expect(urlStateSelectors.getSelectedTab(getState())).toBe('calltree');
     expect(urlStateSelectors.getIsBottomBoxOpen(getState())).toBeFalse();
-    expect(urlStateSelectors.getSourceViewFile(getState())).toBeNull();
+    expect(urlStateSelectors.getSourceViewSourceIndex(getState())).toBeNull();
 
     // Open the source view for 'xpcom/threads/nsThread.cpp'.
     const sourceFile =
       'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
+    const sourceIndex = getSourceIndex(sourceFile);
     const bottomBoxInfo = {
       libIndex: 0,
-      sourceFile,
+      sourceIndex,
       nativeSymbols: [],
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
@@ -1844,7 +1861,7 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     };
     const bottomBoxInfo = {
       libIndex: 0,
-      sourceFile: null,
+      sourceIndex: null,
       nativeSymbols: [nativeSymbolInfo],
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
@@ -1862,10 +1879,10 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
   });
 
   it('only opens the assembly view on reload if it was open before', function () {
-    const { dispatch, getState } = setup();
+    const { dispatch, getState, getSourceIndex } = setup();
     expect(urlStateSelectors.getSelectedTab(getState())).toBe('calltree');
     expect(urlStateSelectors.getIsBottomBoxOpen(getState())).toBeFalse();
-    expect(urlStateSelectors.getSourceViewFile(getState())).toBeNull();
+    expect(urlStateSelectors.getSourceViewSourceIndex(getState())).toBeNull();
     expect(urlStateSelectors.getAssemblyViewIsOpen(getState())).toBeFalse();
 
     // Open the source view for 'xpcom/threads/nsThread.cpp' and initialize the
@@ -1876,6 +1893,7 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     // closed even if we have a native symbol.
     const sourceFile =
       'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
+    const sourceIndex = getSourceIndex(sourceFile);
     const nativeSymbolInfo = {
       libIndex: 0,
       name: 'MySymbol',
@@ -1885,7 +1903,7 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     };
     const bottomBoxInfo = {
       libIndex: 0,
-      sourceFile: sourceFile,
+      sourceIndex,
       nativeSymbols: [nativeSymbolInfo],
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
@@ -1894,9 +1912,9 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     expect(
       urlStateSelectors.getIsBottomBoxOpen(newStore.getState())
     ).toBeTrue();
-    expect(urlStateSelectors.getSourceViewFile(newStore.getState())).toBe(
-      sourceFile
-    );
+    expect(
+      urlStateSelectors.getSourceViewSourceIndex(newStore.getState())
+    ).toBe(sourceIndex);
     // The assembly view should remain closed.
     expect(
       urlStateSelectors.getAssemblyViewIsOpen(newStore.getState())

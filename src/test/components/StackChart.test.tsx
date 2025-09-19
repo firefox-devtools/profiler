@@ -12,6 +12,7 @@ import {
   within,
 } from 'firefox-profiler/test/fixtures/testing-library';
 import * as UrlStateSelectors from '../../selectors/url-state';
+import * as ProfileSelectors from '../../selectors/profile';
 
 // This module is mocked.
 import copy from 'copy-to-clipboard';
@@ -195,11 +196,12 @@ describe('StackChart', function () {
       dispatch(changeSelectedCallNode(0, [funcNames.indexOf('A')]));
     });
 
-    expect(UrlStateSelectors.getSourceViewFile(getState())).toBeNull();
+    expect(UrlStateSelectors.getSourceViewSourceIndex(getState())).toBeNull();
     fireFullKeyPress(stackChartCanvas, { key: 'Enter' });
-    expect(UrlStateSelectors.getSourceViewFile(getState())).toBe(
-      sourceViewFile
-    );
+    expect(
+      UrlStateSelectors.getSourceViewSourceIndex(getState())
+    ).not.toBeNull();
+    expect(ProfileSelectors.getSourceViewFile(getState())).toBe(sourceViewFile);
   });
 
   it('can display a context menu when right clicking the chart', function () {

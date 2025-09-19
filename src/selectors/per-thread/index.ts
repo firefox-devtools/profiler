@@ -241,7 +241,8 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
   const getLib: Selector<string> = createSelector(
     selectedThreadSelectors.getSelectedCallNodePath,
     selectedThreadSelectors.getFilteredThread,
-    (selectedPath, { stringTable, funcTable, resourceTable }) => {
+    ProfileSelectors.getSourceTable,
+    (selectedPath, { stringTable, funcTable, resourceTable }, sources) => {
       if (!selectedPath.length) {
         return '';
       }
@@ -250,7 +251,8 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
         ProfileData.getLeafFuncIndex(selectedPath),
         funcTable,
         resourceTable,
-        stringTable
+        stringTable,
+        sources
       );
     }
   );
@@ -269,23 +271,23 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
   const getSourceViewStackLineInfo: Selector<StackLineInfo | null> =
     createSelector(
       selectedThreadSelectors.getFilteredThread,
-      UrlState.getSourceViewFile,
+      UrlState.getSourceViewSourceIndex,
       selectedThreadSelectors.getCallNodeInfo,
       selectedThreadSelectors.getSelectedCallNodeIndex,
       (
-        { stackTable, frameTable, funcTable, stringTable }: Thread,
-        sourceViewFile,
+        { stackTable, frameTable, funcTable }: Thread,
+        sourceViewSourceIndex,
         callNodeInfo,
         selectedCallNodeIndex
       ): StackLineInfo | null => {
-        if (sourceViewFile === null || selectedCallNodeIndex === null) {
+        if (sourceViewSourceIndex === null || selectedCallNodeIndex === null) {
           return null;
         }
         const selectedFunc = callNodeInfo.funcForNode(selectedCallNodeIndex);
-        const selectedFuncFile = funcTable.fileName[selectedFunc];
+        const selectedSourceIndex = funcTable.source[selectedFunc];
         if (
-          selectedFuncFile === null ||
-          stringTable.getString(selectedFuncFile) !== sourceViewFile
+          selectedSourceIndex === null ||
+          selectedSourceIndex !== sourceViewSourceIndex
         ) {
           return null;
         }

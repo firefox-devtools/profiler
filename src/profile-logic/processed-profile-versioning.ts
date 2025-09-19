@@ -2637,6 +2637,68 @@ const _upgraders: {
       }
     }
   },
+  [58]: (profile) => {
+    // Add sources table to profile.shared.sources to gather all the sources.
+    // The function table's fileName field is replaced with a source field that
+    // references the sources table.
+
+    // Create the sources table
+    const sourceTable = {
+      length: 0,
+      uuid: [] as Array<string | null>,
+      filename: [] as Array<number>,
+    };
+
+    // Map from fileName string to source index
+    const fileNameToSourceIndex = new Map();
+
+    const stringTable = StringTable.withBackingArray(
+      profile.shared.stringArray
+    );
+
+    // Process all threads to migrate fileName to source references
+    for (const thread of profile.threads) {
+      const { funcTable } = thread;
+
+      // Create the new source field array
+      const sourceField = new Array(funcTable.length);
+
+      // Process each function
+      for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
+        const fileNameIndex = funcTable.fileName[funcIndex];
+
+        if (fileNameIndex === null) {
+          sourceField[funcIndex] = null;
+        } else {
+          const fileName = stringTable.getString(fileNameIndex);
+
+          // Check if we already have this fileName in the sources table
+          let sourceIndex = fileNameToSourceIndex.get(fileName);
+
+          if (sourceIndex === undefined) {
+            // Add new entry to sources table
+            sourceIndex = sourceTable.length;
+            sourceTable.uuid.push(null);
+            sourceTable.filename.push(fileNameIndex);
+            sourceTable.length++;
+            fileNameToSourceIndex.set(fileName, sourceIndex);
+          }
+
+          sourceField[funcIndex] = sourceIndex;
+        }
+      }
+
+      // Replace fileName field with source field
+      funcTable.source = sourceField;
+      delete funcTable.fileName;
+    }
+
+    // Add sources table to profile.shared
+    if (!profile.shared) {
+      profile.shared = {};
+    }
+    profile.shared.sources = sourceTable;
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

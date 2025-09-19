@@ -5,6 +5,7 @@
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import * as UrlStateSelectors from '../../selectors/url-state';
+import * as ProfileSelectors from '../../selectors/profile';
 import {
   selectedThreadSelectors,
   selectedNodeSelectors,
@@ -65,7 +66,7 @@ describe('bottom box', function () {
     const { getState } = setup();
     expect(UrlStateSelectors.getIsBottomBoxOpen(getState())).toBeFalse();
     expect(UrlStateSelectors.getSelectedTab(getState())).toBe('calltree');
-    expect(UrlStateSelectors.getSourceViewFile(getState())).toBeNull();
+    expect(UrlStateSelectors.getSourceViewSourceIndex(getState())).toBeNull();
     expect(UrlStateSelectors.getAssemblyViewIsOpen(getState())).toBeFalse();
     expect(
       UrlStateSelectors.getAssemblyViewNativeSymbol(getState())
@@ -102,7 +103,7 @@ describe('bottom box', function () {
     // Now the source view should be displayed and the assembly view should be
     // initialized but closed.
     expect(UrlStateSelectors.getIsBottomBoxOpen(getState())).toBeTrue();
-    expect(UrlStateSelectors.getSourceViewFile(getState())).toBe('cde.cpp');
+    expect(ProfileSelectors.getSourceViewFile(getState())).toBe('cde.cpp');
     expect(UrlStateSelectors.getAssemblyViewIsOpen(getState())).toBeFalse();
     expect(UrlStateSelectors.getAssemblyViewNativeSymbol(getState())).toEqual(
       nativeSymbolInfoD
@@ -126,7 +127,7 @@ describe('bottom box', function () {
     dispatch(changeSelectedTab('flame-graph'));
     expect(UrlStateSelectors.getSelectedTab(getState())).toBe('flame-graph');
     expect(UrlStateSelectors.getIsBottomBoxOpen(getState())).toBeFalse();
-    expect(UrlStateSelectors.getSourceViewFile(getState())).toBe('cde.cpp');
+    expect(ProfileSelectors.getSourceViewFile(getState())).toBe('cde.cpp');
     expect(UrlStateSelectors.getAssemblyViewNativeSymbol(getState())).toEqual(
       nativeSymbolInfoD
     );
@@ -188,7 +189,7 @@ describe('bottom box', function () {
 
     // Now the assembly view should be opened because there's no source to display.
     expect(UrlStateSelectors.getIsBottomBoxOpen(getState())).toBeTrue();
-    expect(UrlStateSelectors.getSourceViewFile(getState())).toBeNull();
+    expect(ProfileSelectors.getSourceViewFile(getState())).toBeNull();
     expect(UrlStateSelectors.getAssemblyViewIsOpen(getState())).toBeTrue();
     expect(UrlStateSelectors.getAssemblyViewNativeSymbol(getState())).toEqual(
       nativeSymbolInfoF
@@ -198,7 +199,7 @@ describe('bottom box', function () {
     // Double-click a node with source information again. The assembly view should remain open.
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfoD));
     expect(UrlStateSelectors.getIsBottomBoxOpen(getState())).toBeTrue();
-    expect(UrlStateSelectors.getSourceViewFile(getState())).toBe('cde.cpp');
+    expect(ProfileSelectors.getSourceViewFile(getState())).toBe('cde.cpp');
     expect(UrlStateSelectors.getAssemblyViewIsOpen(getState())).toBeTrue();
     expect(UrlStateSelectors.getAssemblyViewNativeSymbol(getState())).toEqual(
       nativeSymbolInfoD
@@ -242,7 +243,7 @@ describe('bottom box', function () {
     // initialized but closed. The assembly view should show one of the two
     // native symbols.
     expect(UrlStateSelectors.getIsBottomBoxOpen(getState())).toBeTrue();
-    expect(UrlStateSelectors.getSourceViewFile(getState())).toBe('cde.cpp');
+    expect(ProfileSelectors.getSourceViewFile(getState())).toBe('cde.cpp');
     expect(UrlStateSelectors.getAssemblyViewIsOpen(getState())).toBeFalse();
     expect(
       ensureExists(UrlStateSelectors.getAssemblyViewNativeSymbol(getState()))

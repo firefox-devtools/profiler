@@ -17,11 +17,12 @@ import type {
   CallNodePath,
   Thread,
   IndexIntoCategoryList,
+  Profile,
 } from 'firefox-profiler/types';
 
 describe('getStackLineInfo', function () {
   it('computes results for all stacks', function () {
-    const { derivedThreads } = getProfileFromTextSamples(`
+    const { profile, derivedThreads } = getProfileFromTextSamples(`
       A[file:one.js][line:20]  A[file:one.js][line:21]  A[file:one.js][line:20]
       B[file:one.js][line:30]  B[file:one.js][line:30]  B[file:one.js][line:30]
       C[file:two.js][line:10]  C[file:two.js][line:11]  D[file:two.js][line:40]
@@ -30,12 +31,14 @@ describe('getStackLineInfo', function () {
     const [thread] = derivedThreads;
     const { stackTable, frameTable, funcTable, stringTable } = thread;
 
-    const fileOne = stringTable.indexForString('one.js');
+    const fileOneStringIndex = stringTable.indexForString('one.js');
+    const fileOneSourceIndex =
+      profile.shared.sources.filename.indexOf(fileOneStringIndex);
     const stackLineInfoOne = getStackLineInfo(
       stackTable,
       frameTable,
       funcTable,
-      fileOne
+      fileOneSourceIndex
     );
 
     // Expect the returned arrays to have the same length as the stackTable.
@@ -46,14 +49,16 @@ describe('getStackLineInfo', function () {
 });
 
 describe('getLineTimings for getStackLineInfo', function () {
-  function getTimings(thread: Thread, file: string) {
+  function getTimings(profile: Profile, thread: Thread, file: string) {
     const { stackTable, frameTable, funcTable, samples, stringTable } = thread;
     const fileStringIndex = stringTable.indexForString(file);
+    const fileSourceIndex =
+      profile.shared.sources.filename.indexOf(fileStringIndex);
     const stackLineInfo = getStackLineInfo(
       stackTable,
       frameTable,
       funcTable,
-      fileStringIndex
+      fileSourceIndex
     );
     return getLineTimings(stackLineInfo, samples);
   }
@@ -61,12 +66,12 @@ describe('getLineTimings for getStackLineInfo', function () {
   it('passes a basic test', function () {
     // In this example, there's one self line hit in line 30.
     // Both line 20 and line 30 have one total time hit.
-    const { derivedThreads } = getProfileFromTextSamples(`
+    const { profile, derivedThreads } = getProfileFromTextSamples(`
       A[file:file.js][line:20]
       B[file:file.js][line:30]
     `);
     const [thread] = derivedThreads;
-    const lineTimings = getTimings(thread, 'file.js');
+    const lineTimings = getTimings(profile, thread, 'file.js');
     expect(lineTimings.totalLineHits.get(20)).toBe(1);
     expect(lineTimings.totalLineHits.get(30)).toBe(1);
     expect(lineTimings.totalLineHits.size).toBe(2); // no other hits
@@ -76,7 +81,7 @@ describe('getLineTimings for getStackLineInfo', function () {
   });
 
   it('passes a test with two files and recursion', function () {
-    const { derivedThreads } = getProfileFromTextSamples(`
+    const { profile, derivedThreads } = getProfileFromTextSamples(`
       A[file:one.js][line:20]  A[file:one.js][line:21]  A[file:one.js][line:20]
       B[file:one.js][line:30]  B[file:one.js][line:30]  B[file:one.js][line:30]
       C[file:two.js][line:10]  C[file:two.js][line:11]  D[file:two.js][line:40]
@@ -84,7 +89,7 @@ describe('getLineTimings for getStackLineInfo', function () {
     `);
     const [thread] = derivedThreads;
 
-    const lineTimingsOne = getTimings(thread, 'one.js');
+    const lineTimingsOne = getTimings(profile, thread, 'one.js');
     expect(lineTimingsOne.totalLineHits.get(20)).toBe(2);
     expect(lineTimingsOne.totalLineHits.get(21)).toBe(1);
     // one.js line 30 was hit in every sample, twice in the first sample
@@ -98,7 +103,7 @@ describe('getLineTimings for getStackLineInfo', function () {
     expect(lineTimingsOne.selfLineHits.get(30)).toBe(1);
     expect(lineTimingsOne.selfLineHits.size).toBe(1); // no other hits
 
-    const lineTimingsTwo = getTimings(thread, 'two.js');
+    const lineTimingsTwo = getTimings(profile, thread, 'two.js');
     expect(lineTimingsTwo.totalLineHits.get(10)).toBe(1);
     expect(lineTimingsTwo.totalLineHits.get(11)).toBe(1);
     expect(lineTimingsTwo.totalLineHits.get(40)).toBe(1);

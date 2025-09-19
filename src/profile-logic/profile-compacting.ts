@@ -12,6 +12,7 @@ import type {
   FuncTable,
   ResourceTable,
   NativeSymbolTable,
+  SourceTable,
 } from 'firefox-profiler/types';
 
 export type CompactedProfileWithTranslationMaps = {
@@ -59,7 +60,8 @@ function _gatherStringReferencesInProfile(
     _gatherStringReferencesInThread(
       thread,
       referencedStrings,
-      stringIndexMarkerFieldsByDataType
+      stringIndexMarkerFieldsByDataType,
+      profile.shared.sources ?? null
     );
   }
 
@@ -82,8 +84,23 @@ function _createProfileWithTranslatedStringIndexes(
     )
   );
 
+  // Update sources table with translated string indexes
+  const newSources = {
+    ...profile.shared.sources,
+    filename: profile.shared.sources.filename.map((oldUrlIndex) => {
+      const newIndexPlusOne = oldStringToNewStringPlusOne[oldUrlIndex];
+      if (newIndexPlusOne === 0) {
+        throw new Error(
+          `String index ${oldUrlIndex} was not found in the translation map`
+        );
+      }
+      return newIndexPlusOne - 1;
+    }),
+  };
+
   const newShared: RawProfileSharedData = {
     stringArray: newStringArray,
+    sources: newSources,
   };
 
   const newProfile: Profile = {
@@ -101,7 +118,8 @@ function _createProfileWithTranslatedStringIndexes(
 function _gatherStringReferencesInThread(
   thread: RawThread,
   referencedStrings: Uint8Array,
-  stringIndexMarkerFieldsByDataType: Map<string, string[]>
+  stringIndexMarkerFieldsByDataType: Map<string, string[]>,
+  sources: SourceTable
 ) {
   _gatherReferencesInMarkers(
     thread.markers,
@@ -109,7 +127,7 @@ function _gatherStringReferencesInThread(
     stringIndexMarkerFieldsByDataType
   );
 
-  _gatherReferencesInFuncTable(thread.funcTable, referencedStrings);
+  _gatherReferencesInFuncTable(thread.funcTable, referencedStrings, sources);
   _gatherReferencesInResourceTable(thread.resourceTable, referencedStrings);
   _gatherReferencesInNativeSymbols(thread.nativeSymbols, referencedStrings);
 }
@@ -221,14 +239,18 @@ function _createMarkersWithTranslatedStringIndexes(
 
 function _gatherReferencesInFuncTable(
   funcTable: FuncTable,
-  referencedStrings: Uint8Array
+  referencedStrings: Uint8Array,
+  sources: SourceTable
 ) {
   for (let i = 0; i < funcTable.length; i++) {
     referencedStrings[funcTable.name[i]] = 1;
 
-    const fileNameIndex = funcTable.fileName[i];
-    if (fileNameIndex !== null) {
-      referencedStrings[fileNameIndex] = 1;
+    const sourceIndex = funcTable.source[i];
+    if (sourceIndex !== null && sources) {
+      const urlIndex = sources.filename[sourceIndex];
+      if (urlIndex !== null) {
+        referencedStrings[urlIndex] = 1;
+      }
     }
   }
 }
@@ -238,20 +260,19 @@ function _createFuncTableWithTranslatedStringIndexes(
   oldStringToNewStringPlusOne: Int32Array
 ): FuncTable {
   const newFuncTableNameCol = funcTable.name.slice();
-  const newFuncTableFileNameCol = funcTable.fileName.slice();
+  const newFuncTableSourceCol = funcTable.source.slice();
   for (let i = 0; i < funcTable.length; i++) {
     const name = funcTable.name[i];
     newFuncTableNameCol[i] = oldStringToNewStringPlusOne[name] - 1;
 
-    const fileName = funcTable.fileName[i];
-    newFuncTableFileNameCol[i] =
-      fileName !== null ? oldStringToNewStringPlusOne[fileName] - 1 : null;
+    // Note: source indexes don't need translation as they point to sources table, not strings
+    // Source table will be handled separately in _createSourcesTableWithTranslatedStringIndexes
   }
 
   const newFuncTable = {
     ...funcTable,
     name: newFuncTableNameCol,
-    fileName: newFuncTableFileNameCol,
+    source: newFuncTableSourceCol,
   };
   return newFuncTable;
 }
