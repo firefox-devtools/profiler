@@ -193,6 +193,14 @@ export default defineConfig(
       // (it can make `yarn ts` fail after `yarn lint-fix`)
       '@typescript-eslint/no-unnecessary-type-assertion': 'off',
 
+      '@typescript-eslint/no-unnecessary-condition': [
+        'error',
+        {
+          allowConstantLoopConditions: 'only-allowed-literals',
+          checkTypePredicates: true,
+        },
+      ],
+
       // Consider enabling these in the future
       '@typescript-eslint/unbound-method': 'off',
       '@typescript-eslint/only-throw-error': 'off',
