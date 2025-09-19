@@ -334,7 +334,7 @@ type State = {
  * graph in the timeline.
  */
 class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
-  override state = {
+  override state: State = {
     hoveredCounter: null,
     mouseX: 0,
     mouseY: 0,

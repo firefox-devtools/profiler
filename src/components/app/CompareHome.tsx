@@ -23,7 +23,7 @@ type State = {
 };
 
 class CompareHomeImpl extends PureComponent<Props, State> {
-  override state = { profile1: '', profile2: '' };
+  override state: State = { profile1: '', profile2: '' };
 
   handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;

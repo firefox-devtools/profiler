@@ -90,7 +90,7 @@ const ROW_LABEL_OFFSET_LEFT: CssPixels = 5;
 const FONT_SIZE: CssPixels = 10;
 
 class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
-  override state = {
+  override state: State = {
     hasFirstDraw: false,
   };
   _textMeasurement: TextMeasurement | null = null;

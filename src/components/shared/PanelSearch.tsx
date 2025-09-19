@@ -19,7 +19,7 @@ type Props = {
 type State = { searchFieldFocused: boolean };
 
 export class PanelSearch extends React.PureComponent<Props, State> {
-  override state = { searchFieldFocused: false };
+  override state: State = { searchFieldFocused: false };
   _onSearchFieldIdleAfterChange = (value: string) => {
     this.props.onSearch(value);
   };

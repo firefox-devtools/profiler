@@ -18,7 +18,7 @@ type State = {
 };
 
 export class Warning extends PureComponent<Props, State> {
-  override state = { isNoticeDisplayed: true };
+  override state: State = { isNoticeDisplayed: true };
 
   _onHideClick = () => {
     this.setState({
