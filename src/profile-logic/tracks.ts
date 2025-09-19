@@ -144,10 +144,7 @@ function _getDefaultLocalTrackOrder(
     if (tracks[a].type === 'thread' && tracks[b].type === 'thread' && profile) {
       const idxA = tracks[a].threadIndex;
       const idxB = tracks[b].threadIndex;
-      if (idxA === undefined || idxB === undefined) {
-        return -1;
-      }
-      if (profile && profile.meta.keepProfileThreadOrder) {
+      if (profile.meta.keepProfileThreadOrder) {
         return idxA - idxB;
       }
       const nameA = profile.threads[idxA].name;
