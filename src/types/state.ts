@@ -72,7 +72,7 @@ export type TableViewOptions = {
   readonly fixedColumnWidths: Array<CssPixels> | null;
 };
 
-export type TableViewOptionsPerTab = { [K in TabSlug]: TableViewOptions };
+export type TableViewOptionsPerTab = Partial<Record<TabSlug, TableViewOptions>>;
 
 export type RightClickedCallNode = {
   readonly threadsKey: ThreadsKey;
