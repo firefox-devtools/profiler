@@ -180,7 +180,7 @@ export type AppState = {
   readonly sidebarOpenCategories: Map<string, Set<number>>;
   readonly panelLayoutGeneration: number;
   readonly lastVisibleThreadTabSlug: TabSlug;
-  readonly trackThreadHeights: Record<ThreadsKey, CssPixels>;
+  readonly trackThreadHeights: Partial<Record<ThreadsKey, CssPixels>>;
   readonly isNewlyPublished: boolean;
   readonly isDragAndDropDragging: boolean;
   readonly isDragAndDropOverlayRegistered: boolean;
