@@ -2315,7 +2315,8 @@ export function createThreadFromDerivedTables(
   rawThread: RawThread,
   samples: SamplesTable,
   stackTable: StackTable,
-  stringTable: StringTable
+  stringTable: StringTable,
+  sources: SourceTable
 ): Thread {
   const {
     processType,
@@ -2375,6 +2376,7 @@ export function createThreadFromDerivedTables(
     samples,
     stackTable,
     stringTable,
+    sources,
   };
   return thread;
 }
