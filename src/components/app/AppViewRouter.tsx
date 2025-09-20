@@ -98,6 +98,8 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
           }
         }
 
+        const showBackHomeLink = dataSource === 'from-file';
+
         return (
           <Localized
             id={message}
@@ -116,7 +118,7 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
             <ProfileRootMessage
               additionalMessage={additionalMessage}
               showLoader={false}
-              showBackHomeLink={true}
+              showBackHomeLink={showBackHomeLink}
             >{`missing translation for ${message}`}</ProfileRootMessage>
           </Localized>
         );
