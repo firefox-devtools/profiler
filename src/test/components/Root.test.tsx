@@ -149,11 +149,7 @@ describe('app/AppViewRouter', function () {
   });
 
   it('does not render back home link when not opened with from-file', function () {
-    const {
-      container,
-      dispatch,
-      navigateToStoreLoadingPage,
-    } = setup();
+    const { container, dispatch, navigateToStoreLoadingPage } = setup();
 
     navigateToStoreLoadingPage();
     dispatch(fatalError(new Error('Error while loading profile')));
