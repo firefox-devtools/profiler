@@ -1,5 +1,38 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
+exports[`app/AppViewRouter does not render back home link when not opened with from-file 1`] = `
+<div
+  class="rootMessageContainer"
+>
+  <div
+    class="rootMessage"
+  >
+    <h1
+      class="rootMessageTitle"
+    >
+      Firefox Profiler
+    </h1>
+    <div
+      class="rootMessageText"
+    >
+      <p>
+        Could not download the profile.
+      </p>
+    </div>
+    <div
+      class="rootMessageAdditional"
+    >
+      <p>
+        Error: Error while loading profile
+      </p>
+      <p>
+        The full stack has been written to the Web Console.
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`app/AppViewRouter does not try to retrieve a profile when moving from from-browser to public 1`] = `<profile-viewer />`;
 
 exports[`app/AppViewRouter renders an home when the user pressed back after an error 1`] = `
@@ -18,7 +51,7 @@ exports[`app/AppViewRouter renders an home when the user pressed back after an e
       class="rootMessageText"
     >
       <p>
-        Could not download the profile.
+        Couldn’t read the file or parse the profile in it.
       </p>
     </div>
     <div
@@ -76,15 +109,6 @@ exports[`app/AppViewRouter renders temporary errors 1`] = `
       <p>
         Tried 3 times out of 10.
       </p>
-    </div>
-    <div
-      class="rootBackHomeLink"
-    >
-      <a
-        href="/"
-      >
-        Back to home
-      </a>
     </div>
     <div
       class="loading"
