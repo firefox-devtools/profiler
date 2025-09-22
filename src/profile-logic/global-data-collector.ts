@@ -83,11 +83,6 @@ export class GlobalDataCollector {
     return index;
   }
 
-  // Get the processed source index by UUID
-  getSourceIndexByUuid(uuid: string): IndexIntoSourceTable | null {
-    return this._uuidToSourceIndex.get(uuid) ?? null;
-  }
-
   getStringTable(): StringTable {
     return this._stringTable;
   }
