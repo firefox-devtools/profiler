@@ -335,6 +335,7 @@ export type SourceCodeLoadingError =
       type: 'NOT_PRESENT_IN_BROWSER';
       sourceUuid: string;
       url: string;
+      errorMessage: string;
     };
 
 export type ProfileSpecificUrlState = {

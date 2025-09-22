@@ -85,7 +85,7 @@ export interface BrowserConnection {
     column: number | null
   ): Promise<void>;
 
-  getJSSource(sourceUuid: string): Promise<string | null>;
+  getJSSource(sourceUuid: string): Promise<string>;
 }
 
 /**
@@ -236,7 +236,7 @@ class BrowserConnectionImpl implements BrowserConnection {
    * Fetches JavaScript source code from the browser using the source UUID.
    * This method requires WebChannel version 6 or higher (Firefox 145+).
    */
-  async getJSSource(sourceUuid: string): Promise<string | null> {
+  async getJSSource(sourceUuid: string): Promise<string> {
     if (!this._webChannelSupportsGetJSSource) {
       throw new Error(
         "Can't use getJSSource in Firefox versions with the old WebChannel."
@@ -247,9 +247,14 @@ class BrowserConnectionImpl implements BrowserConnection {
     // fetching multiple sources, we only fetch one at a time currently.
     // TODO: Change this to fetch multiple JS sources at the load time or while
     // we share the profile.
-    return getJSSourcesViaWebChannel([sourceUuid]).then(
-      (sources) => sources[0]
-    );
+    return getJSSourcesViaWebChannel([sourceUuid]).then((sources) => {
+      const source = sources[0];
+      if ('error' in source) {
+        throw new Error(source.error);
+      }
+
+      return source.sourceText;
+    });
   }
 }
 

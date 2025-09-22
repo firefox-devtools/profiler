@@ -1248,8 +1248,9 @@ SourceView--archive-parsing-error-when-obtaining-source =
 # Variables:
 #   $url (String) - The URL of the JS source file.
 #   $sourceUuid (number) - The UUID of the JS source file.
+#   $errorMessage (String) - The raw internal error message, not localized
 SourceView--not-in-browser-error-when-obtaining-js-source =
-    The browser was unable to obtain the source file for { $url } with sourceUuid { $sourceUuid }.
+    The browser was unable to obtain the source file for { $url } with sourceUuid { $sourceUuid }: { $errorMessage }.
 
 ## Toggle buttons in the top right corner of the bottom box
 

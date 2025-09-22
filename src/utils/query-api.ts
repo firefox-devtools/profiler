@@ -24,7 +24,7 @@ export interface ExternalCommunicationDelegate {
     requestJson: string
   ): Promise<string>;
 
-  fetchJSSourceFromBrowser(source: string): Promise<string | null>;
+  fetchJSSourceFromBrowser(source: string): Promise<string>;
 }
 
 export type ApiQueryResult<T> =
@@ -163,7 +163,7 @@ export class RegularExternalCommunicationDelegate
     return browserConnection.querySymbolicationApi(path, requestJson);
   }
 
-  fetchJSSourceFromBrowser(source: string): Promise<string | null> {
+  fetchJSSourceFromBrowser(source: string): Promise<string> {
     const browserConnection = this._browserConnection;
     if (browserConnection === null) {
       throw new Error('No connection to the browser.');

@@ -99,16 +99,12 @@ export async function fetchSource(
           source: response,
         };
       }
-
+    } catch (e) {
       errors.push({
         type: 'NOT_PRESENT_IN_BROWSER',
         sourceUuid,
         url: file,
-      });
-    } catch (e) {
-      errors.push({
-        type: 'BROWSER_API_ERROR',
-        apiErrorMessage: e.message,
+        errorMessage: e.toString(),
       });
     }
   }

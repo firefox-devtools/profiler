@@ -147,7 +147,8 @@ type GetSymbolTableResponse = SymbolTableAsTuple;
 type QuerySymbolicationApiResponse = string;
 type GetPageFaviconsResponse = Array<FaviconData | null>;
 type OpenScriptInTabDebuggerResponse = void;
-type GetJSSourcesResponse = Array<string | null>;
+type GetJSSourceReponseItem = { sourceText: string } | { error: string };
+type GetJSSourcesResponse = Array<GetJSSourceReponseItem>;
 
 // TypeScript function overloads for request/response pairs.
 function _sendMessageWithResponse(
@@ -387,7 +388,7 @@ export async function showFunctionInDevtoolsViaWebChannel(
 
 export async function getJSSourcesViaWebChannel(
   sourceUuids: Array<string>
-): Promise<Array<string | null>> {
+): Promise<Array<GetJSSourceReponseItem>> {
   return _sendMessageWithResponse({
     type: 'GET_JS_SOURCES',
     sourceUuids,

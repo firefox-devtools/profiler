@@ -618,8 +618,10 @@ describe('fetchSource', function () {
       type: 'ERROR',
       errors: [
         {
-          type: 'BROWSER_API_ERROR',
-          apiErrorMessage: `Source not found for source with ID: ${TEST_SOURCE_UUID}`,
+          type: 'NOT_PRESENT_IN_BROWSER',
+          sourceUuid: 'ff6d24c3-b8f5-45cd-a7d3-b643b3292e41',
+          url: '/path/to/script.js',
+          errorMessage: `Error: Source not found for source with ID: ${TEST_SOURCE_UUID}`,
         },
         {
           type: 'NO_KNOWN_CORS_URL',

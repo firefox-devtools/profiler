@@ -113,13 +113,13 @@ export function CodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
             );
           }
           case 'NOT_PRESENT_IN_BROWSER': {
-            const { sourceUuid, url } = error;
+            const { sourceUuid, url, errorMessage } = error;
             return (
               <Localized
                 id="SourceView--not-in-browser-error-when-obtaining-js-source"
-                vars={{ url, sourceUuid }}
+                vars={{ url, sourceUuid, errorMessage }}
               >
-                <li>{`The browser was unable to obtain the source file for ${url} with sourceUuid ${sourceUuid}`}</li>
+                <li>{`The browser was unable to obtain the source file for ${url} with sourceUuid ${sourceUuid}: ${errorMessage}`}</li>
               </Localized>
             );
           }
