@@ -23,7 +23,7 @@ type State = {
  * Display a list of shortcuts that overlays the screen.
  */
 export class KeyboardShortcut extends React.PureComponent<Props, State> {
-  override state = {
+  override state: State = {
     isOpen: false,
     // The eslint error is a false positive due to how it's used, see the line:
     //  `focusAfterClosed.focus()`

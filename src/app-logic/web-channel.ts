@@ -101,6 +101,7 @@ export type ResponseFromBrowser =
   | GetSymbolTableResponse
   | QuerySymbolicationApiResponse
   | GetPageFaviconsResponse
+  // eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
   | OpenScriptInTabDebuggerResponse;
 
 type StatusQueryResponse = {

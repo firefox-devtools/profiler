@@ -2788,15 +2788,11 @@ export function getThreadProcessDetails(
 ): string {
   let label = `${friendlyThreadName}\n`;
   label += `Thread: "${thread.name}"`;
-  if (thread.tid !== undefined) {
-    label += ` (${thread.tid})`;
-  }
+  label += ` (${thread.tid})`;
 
   if (thread.processType) {
     label += `\nProcess: "${thread.processType}"`;
-    if (thread.pid !== undefined) {
-      label += ` (${thread.pid})`;
-    }
+    label += ` (${thread.pid})`;
   }
 
   if (thread.isPrivateBrowsing) {

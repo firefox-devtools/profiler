@@ -485,7 +485,7 @@ export class TreeView<
     initialWidth: CssPixels;
   } | null = null;
 
-  override state = {
+  override state: TreeViewState = {
     // This contains the current widths, while or after the user resizes them.
     fixedColumnWidths: null,
 

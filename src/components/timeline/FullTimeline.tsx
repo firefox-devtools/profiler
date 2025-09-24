@@ -123,7 +123,7 @@ class TimelineSettingsHiddenTracks extends React.PureComponent<{
 }
 
 class FullTimelineImpl extends React.PureComponent<Props, State> {
-  override state = {
+  override state: State = {
     initialSelected: null,
   };
 
