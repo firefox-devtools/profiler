@@ -1206,4 +1206,57 @@ describe('sanitizePII', function () {
       ]);
     });
   });
+
+  it('should compact the source table when threads are removed', function () {
+    // Create a profile with multiple threads that reference different sources
+    const { profile } = getProfileFromTextSamples(
+      `A[file:file1.js]`,
+      `B[file:file2.js]`,
+      `C[file:file3.js]`
+    );
+
+    const originalSourcesLength = profile.shared.sources.length;
+
+    // Verify we have sources for each thread
+    expect(originalSourcesLength).toEqual(3);
+
+    // Verify that different threads reference different sources
+    const thread0SourceIndex = profile.threads[0].funcTable.source[0];
+    const thread1SourceIndex = profile.threads[1].funcTable.source[0];
+    const thread2SourceIndex = profile.threads[2].funcTable.source[0];
+
+    expect(thread0SourceIndex).not.toBe(thread1SourceIndex);
+    expect(thread1SourceIndex).not.toBe(thread2SourceIndex);
+
+    // Remove threads 0 and 2, keeping only thread 1.
+    const { sanitizedProfile } = setup(
+      {
+        shouldRemoveThreads: new Set([0, 2]),
+      },
+      profile
+    );
+
+    // The source table should be compacted to only contain sources referenced
+    // by remaining threads
+    expect(sanitizedProfile.shared.sources.length).toBeLessThan(
+      originalSourcesLength
+    );
+    expect(sanitizedProfile.shared.sources.length).toEqual(1);
+
+    // The remaining thread should still have a valid source reference
+    const remainingSourceIndex =
+      sanitizedProfile.threads[0].funcTable.source[0];
+    expect(remainingSourceIndex).not.toBeNull();
+    expect(remainingSourceIndex).toBeLessThan(
+      sanitizedProfile.shared.sources.length
+    );
+
+    // Verify that the filename string is still accessible
+    expect(remainingSourceIndex).not.toBeNull();
+    const filenameStringIndex =
+      sanitizedProfile.shared.sources.filename[remainingSourceIndex!];
+    expect(sanitizedProfile.shared.stringArray[filenameStringIndex]).toContain(
+      'file2.js'
+    );
+  });
 });

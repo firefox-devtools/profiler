@@ -58,7 +58,7 @@ type StateProps = {
   readonly implementationFilter: ImplementationFilter;
   readonly getMarkerLabelToCopy: (param: MarkerIndex) => string;
   readonly profiledThreadIds: Set<Tid>;
-  innerWindowIDToPageMap: Map<InnerWindowID, Page> | null;
+  readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null;
 };
 
 type DispatchProps = {

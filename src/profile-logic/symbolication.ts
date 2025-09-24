@@ -538,7 +538,7 @@ function _partiallyApplySymbolicationStep(
     IndexIntoFrameTable[]
   >
 ): RawThread {
-  const { stringArray } = shared;
+  const { stringArray, sources } = shared;
   const {
     frameTable: oldFrameTable,
     funcTable: oldFuncTable,
@@ -731,7 +731,11 @@ function _partiallyApplySymbolicationStep(
     let addressResult = resultsForLib.get(address);
     if (addressResult === undefined) {
       const symbolName = nativeSymbols.name[nativeSymbolIndex];
-      const fileNameIndex = funcTable.fileName[oldFunc];
+      let fileNameIndex = null;
+      const sourceIndex = funcTable.source[oldFunc];
+      if (sourceIndex !== null) {
+        fileNameIndex = sources.filename[sourceIndex];
+      }
       addressResult = {
         symbolAddress: nativeSymbols.address[nativeSymbolIndex],
         name: stringTable.getString(symbolName),
@@ -778,14 +782,36 @@ function _partiallyApplySymbolicationStep(
           funcTable.isJS[funcIndex] = false;
           funcTable.relevantForJS[funcIndex] = false;
           funcTable.resource[funcIndex] = resourceIndex;
-          funcTable.fileName[funcIndex] = null;
+          funcTable.source[funcIndex] = null;
           funcTable.lineNumber[funcIndex] = null;
           funcTable.columnNumber[funcIndex] = null;
           // The name field will be filled below.
           funcTable.length++;
         }
         funcTable.name[funcIndex] = functionStringIndex;
-        funcTable.fileName[funcIndex] = fileNameStringIndex;
+        // Store filename in sources table if we have one
+        if (fileNameStringIndex !== null) {
+          // Find or create source entry
+          let sourceIndex = null;
+          for (let i = 0; i < sources.filename.length; i++) {
+            if (
+              sources.filename[i] === fileNameStringIndex &&
+              sources.uuid[i] === null
+            ) {
+              sourceIndex = i;
+              break;
+            }
+          }
+          if (sourceIndex === null) {
+            sourceIndex = sources.filename.length;
+            sources.filename.push(fileNameStringIndex);
+            sources.uuid.push(null);
+            sources.length++;
+          }
+          funcTable.source[funcIndex] = sourceIndex;
+        } else {
+          funcTable.source[funcIndex] = null;
+        }
         funcKeyToFuncMap.set(funcKey, funcIndex);
       }
       inlineExpansionFuncIndexes.push(funcIndex);

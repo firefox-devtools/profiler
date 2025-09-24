@@ -4,11 +4,14 @@
 
 import { fetchSource } from 'firefox-profiler/utils/fetch-source';
 
+const TEST_SOURCE_UUID = 'ff6d24c3-b8f5-45cd-a7d3-b643b3292e41';
+
 describe('fetchSource', function () {
   it('fetches single files', async function () {
     expect(
       await fetchSource(
         'hg:hg.mozilla.org/mozilla-central:widget/cocoa/nsAppShell.mm:997f00815e6bc28806b75448c8829f0259d2cb28',
+        null,
         'https://symbolication.services.mozilla.com',
         null,
         new Map(),
@@ -23,6 +26,9 @@ describe('fetchSource', function () {
             _path: string,
             _requestJson: string
           ) => {
+            throw new Error('No browser connection');
+          },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
             throw new Error('No browser connection');
           },
         }
@@ -66,16 +72,24 @@ describe('fetchSource', function () {
     ) => {
       throw new Error('No browser connection');
     };
+    const fetchJSSourceFromBrowser = async (_sourceUuid: string) => {
+      throw new Error('No browser connection');
+    };
 
     const archiveCache = new Map<string, Promise<Uint8Array>>();
 
     expect(
       await fetchSource(
         'cargo:github.com-1ecc6299db9ec823:addr2line-0.17.0:src/lib.rs',
+        null,
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
-        { fetchUrlResponse, queryBrowserSymbolicationApi }
+        {
+          fetchUrlResponse,
+          queryBrowserSymbolicationApi,
+          fetchJSSourceFromBrowser,
+        }
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -90,10 +104,15 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         'cargo:github.com-1ecc6299db9ec823:addr2line-0.17.0:src/function.rs',
+        null,
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
-        { fetchUrlResponse, queryBrowserSymbolicationApi }
+        {
+          fetchUrlResponse,
+          queryBrowserSymbolicationApi,
+          fetchJSSourceFromBrowser,
+        }
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -106,10 +125,15 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         'cargo:github.com-1ecc6299db9ec823:addr2line-0.17.0:src/nonexist.rs',
+        null,
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
-        { fetchUrlResponse, queryBrowserSymbolicationApi }
+        {
+          fetchUrlResponse,
+          queryBrowserSymbolicationApi,
+          fetchJSSourceFromBrowser,
+        }
       )
     ).toEqual({
       type: 'ERROR',
@@ -129,6 +153,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         'hg:hg.mozilla.org/mozilla-central:widget/cocoa/nsAppShell.mm:997f00815e6bc28806b75448c8829f0259d2cb28',
+        null,
         'https://symbolication.services.mozilla.com',
         null,
         new Map(),
@@ -141,6 +166,9 @@ describe('fetchSource', function () {
             _requestJson: string
           ) => {
             // Shouldn't be called anyway because we're not providing an AddressProof.
+            throw new Error('No browser connection');
+          },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
             throw new Error('No browser connection');
           },
         }
@@ -161,6 +189,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs',
+        null,
         'https://symbolication.services.mozilla.com',
         {
           debugName: 'FAKE_DEBUGNAME',
@@ -186,6 +215,9 @@ describe('fetchSource', function () {
               source: `Fake source from browser symbolication API, for request JSON ${requestJson}`,
             });
           },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -199,6 +231,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs',
+        null,
         'http://127.0.0.1:3000',
         {
           debugName: 'FAKE_DEBUGNAME',
@@ -236,6 +269,9 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -249,6 +285,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         'git:github.com/rust-lang/rust:library/core/src/intrinsics.rs:acbe4443cc4c9695c0b74a7b64b60333c990a400',
+        null,
         'http://127.0.0.1:3001',
         {
           debugName: 'FAKE_DEBUGNAME',
@@ -286,6 +323,9 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -299,6 +339,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         'git:github.com/rust-lang/rust:library/core/src/intrinsics.rs:acbe4443cc4c9695c0b74a7b64b60333c990a400',
+        null,
         'http://127.0.0.1:3002',
         {
           debugName: 'FAKE_DEBUGNAME',
@@ -334,6 +375,9 @@ describe('fetchSource', function () {
           ) => {
             throw new Error('No browser connection');
           },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -347,6 +391,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         'git:github.com/rust-lang/rust:library/core/src/intrinsics.rs:acbe4443cc4c9695c0b74a7b64b60333c990a400',
+        null,
         'http://127.0.0.1:3003',
         {
           debugName: 'FAKE_DEBUGNAME',
@@ -362,6 +407,9 @@ describe('fetchSource', function () {
             _path: string,
             _requestJson: string
           ) => {
+            throw new Error('No browser connection');
+          },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
             throw new Error('No browser connection');
           },
         }
@@ -391,6 +439,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         'git:git.iximeow.net/yaxpeax-arm:src/armv8/a64.rs:0663147eacdef847cc1bdc07cf89eed14b1aeaca',
+        null,
         'https://symbolication.services.mozilla.com',
         null,
         new Map(),
@@ -402,6 +451,9 @@ describe('fetchSource', function () {
             _path: string,
             _requestJson: string
           ) => {
+            throw new Error('No browser connection');
+          },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
             throw new Error('No browser connection');
           },
         }
@@ -416,6 +468,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs',
+        null,
         'https://symbolication.services.mozilla.com',
         {
           debugName: 'FAKE_DEBUGNAME',
@@ -435,6 +488,9 @@ describe('fetchSource', function () {
               throw new Error(`Unrecognized API path ${path}`);
             }
             return '[Invalid \\ JSON}';
+          },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
+            throw new Error('No browser connection');
           },
         }
       )
@@ -456,6 +512,7 @@ describe('fetchSource', function () {
     expect(
       await fetchSource(
         '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs',
+        null,
         'https://symbolication.services.mozilla.com',
         {
           debugName: 'FAKE_DEBUGNAME',
@@ -481,6 +538,9 @@ describe('fetchSource', function () {
               hahaYouThoughtThereWouldBeSourceHereButNo: 42,
             });
           },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -494,6 +554,113 @@ describe('fetchSource', function () {
           type: 'NO_KNOWN_CORS_URL',
         },
       ],
+    });
+  });
+
+  it('fetches JS source from browser with sourceUuid', async function () {
+    expect(
+      await fetchSource(
+        '/path/to/script.js',
+        TEST_SOURCE_UUID,
+        'https://symbolication.services.mozilla.com',
+        null,
+        new Map(),
+        {
+          fetchUrlResponse: async (_url: string, _postData?: string) => {
+            throw new Error('Should not fetch from URL');
+          },
+          queryBrowserSymbolicationApi: async (
+            _path: string,
+            _requestJson: string
+          ) => {
+            throw new Error('Should not query TEST_SOURCE_UUID API');
+          },
+          fetchJSSourceFromBrowser: async (sourceUuid: string) => {
+            if (sourceUuid === TEST_SOURCE_UUID) {
+              return `console.log("Hello from browser with sourceUuid ${sourceUuid}");`;
+            }
+            throw new Error(`Unexpected source: ${sourceUuid}`);
+          },
+        }
+      )
+    ).toEqual({
+      type: 'SUCCESS',
+      source: `console.log("Hello from browser with sourceUuid ${TEST_SOURCE_UUID}");`,
+    });
+  });
+
+  it('handles fetch JS source from browser with invalid sourceUuid', async function () {
+    expect(
+      await fetchSource(
+        '/path/to/script.js',
+        TEST_SOURCE_UUID,
+        'https://symbolication.services.mozilla.com',
+        null,
+        new Map(),
+        {
+          fetchUrlResponse: async (_url: string, _postData?: string) => {
+            throw new Error('Should not fetch from URL');
+          },
+          queryBrowserSymbolicationApi: async (
+            _path: string,
+            _requestJson: string
+          ) => {
+            throw new Error('Should not query symbolication API');
+          },
+          fetchJSSourceFromBrowser: async (sourceUuid: string) => {
+            throw new Error(
+              `Source not found for source with ID: ${sourceUuid}`
+            );
+          },
+        }
+      )
+    ).toEqual({
+      type: 'ERROR',
+      errors: [
+        {
+          type: 'NOT_PRESENT_IN_BROWSER',
+          sourceUuid: 'ff6d24c3-b8f5-45cd-a7d3-b643b3292e41',
+          url: '/path/to/script.js',
+          errorMessage: `Error: Source not found for source with ID: ${TEST_SOURCE_UUID}`,
+        },
+        {
+          type: 'NO_KNOWN_CORS_URL',
+        },
+      ],
+    });
+  });
+
+  it('falls back to other methods when fetchJSSourceFromBrowser fails', async function () {
+    expect(
+      await fetchSource(
+        'hg:hg.mozilla.org/mozilla-central:widget/cocoa/nsAppShell.mm:997f00815e6bc28806b75448c8829f0259d2cb28',
+        // Should still try browser first but fall back to URL fetch
+        TEST_SOURCE_UUID,
+        'https://symbolication.services.mozilla.com',
+        null,
+        new Map(),
+        {
+          fetchUrlResponse: async (url: string, _postData?: string) => {
+            const r = new Response(`Fallback response from ${url}`, {
+              status: 200,
+            });
+            return r;
+          },
+          queryBrowserSymbolicationApi: async (
+            _path: string,
+            _requestJson: string
+          ) => {
+            throw new Error('No browser connection');
+          },
+          fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
+            throw new Error('Source not found in browser');
+          },
+        }
+      )
+    ).toEqual({
+      type: 'SUCCESS',
+      source:
+        'Fallback response from https://hg.mozilla.org/mozilla-central/raw-file/997f00815e6bc28806b75448c8829f0259d2cb28/widget/cocoa/nsAppShell.mm',
     });
   });
 });

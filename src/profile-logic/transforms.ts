@@ -1601,7 +1601,7 @@ export function getBacktraceItemsForStack(
   implementationFilter: ImplementationFilter,
   thread: Thread
 ): BacktraceItem[] {
-  const { funcTable, stringTable, resourceTable } = thread;
+  const { funcTable, stringTable, resourceTable, sources } = thread;
 
   const { stackTable, frameTable } = thread;
   const unfilteredPath = [];
@@ -1633,6 +1633,7 @@ export function getBacktraceItemsForStack(
         funcTable,
         resourceTable,
         stringTable,
+        sources,
         frameLine,
         frameColumn
       ),
