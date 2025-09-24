@@ -211,6 +211,7 @@ type Query = BaseQuery & {
   transforms?: string;
   sourceViewIndex?: number;
   assemblyView?: string;
+  bottomFullscreen?: boolean;
 
   // StackChart specific
   showUserTimings?: null | undefined;
@@ -346,8 +347,12 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         'timing'
           ? undefined
           : urlState.profileSpecific.lastSelectedCallTreeSummaryStrategy;
-      const { sourceView, assemblyView, isBottomBoxOpenPerPanel } =
-        urlState.profileSpecific;
+      const {
+        sourceView,
+        assemblyView,
+        isBottomBoxOpenPerPanel,
+        isBottomBoxFullscreen,
+      } = urlState.profileSpecific;
 
       if (isBottomBoxOpenPerPanel[selectedTab]) {
         if (sourceView.sourceIndex !== null) {
@@ -358,6 +363,9 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
             assemblyView.nativeSymbol
           );
         }
+      }
+      if (isBottomBoxFullscreen) {
+        query.bottomFullscreen = true;
       }
       break;
     }
@@ -532,7 +540,6 @@ export function stateFromLocation(
       isBottomBoxOpenPerPanel[selectedTab] = true;
     }
   }
-  const isBottomBoxFullscreen = false;
 
   const localTrackOrderByPid = convertLocalTrackOrderByPidFromString(
     query.localTrackOrderByPid
@@ -565,7 +572,7 @@ export function stateFromLocation(
       sourceView,
       assemblyView,
       isBottomBoxOpenPerPanel,
-      isBottomBoxFullscreen,
+      isBottomBoxFullscreen: query.bottomFullscreen || false,
       timelineType: validateTimelineType(query.timelineType),
       showJsTracerSummary: query.summary === undefined ? false : true,
       globalTrackOrder: convertGlobalTrackOrderFromString(
