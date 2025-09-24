@@ -1191,11 +1191,11 @@ BottomBox--assembly-code-not-available-text =
 
 # The toggle button for making the bottom box fullscreen.
 BottomBox--hide-fullscreen =
-    .title = Minimize the source and assembly views to no longer be fullscreen.
+    .title = Exit fullscreen
 
 # The toggle button for making the bottom box fullscreen.
 BottomBox--show-fullscreen =
-    .title = Expand the source and assembly views to be fullscreen.
+    .title = Show fullscreen
 
 SourceView--close-button =
     .title = Close the source view
