@@ -40,7 +40,7 @@ class FullscreenToggleButtonImpl extends React.PureComponent<Props> {
             'photon-button-ghost',
             'photon-button-ghost--checked'
           )}
-          title="Minimize the source and assembly views to no longer be fullscreen."
+          title="Exit fullscreen"
           type="button"
           onClick={this._onClick}
         />
@@ -53,7 +53,7 @@ class FullscreenToggleButtonImpl extends React.PureComponent<Props> {
             'photon-button',
             'photon-button-ghost'
           )}
-          title="Expand the source and assembly views to be fullscreen."
+          title="Show fullscreen"
           type="button"
           onClick={this._onClick}
         />
