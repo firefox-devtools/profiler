@@ -25,7 +25,10 @@ import {
   selectedThreadSelectors,
   selectedNodeSelectors,
 } from 'firefox-profiler/selectors/per-thread';
-import { closeBottomBox } from 'firefox-profiler/actions/profile-view';
+import {
+  closeBottomBox,
+  toggleBottomBoxFullscreen,
+} from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
   getSourceViewCode,
@@ -72,6 +75,7 @@ type StateProps = {
 
 type DispatchProps = {
   readonly closeBottomBox: typeof closeBottomBox;
+  readonly toggleBottomBoxFullscreen: typeof toggleBottomBoxFullscreen;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -153,6 +157,25 @@ export function AssemblyCodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
 class BottomBoxImpl extends React.PureComponent<Props> {
   _sourceView = React.createRef<SourceView>();
   _assemblyView = React.createRef<AssemblyView>();
+
+  constructor(props: Props) {
+    super(props);
+    this._onKeyDown = this._onKeyDown.bind(this);
+  }
+
+  override componentDidMount() {
+    document.addEventListener('keydown', this._onKeyDown);
+  }
+
+  override componentWillUnmount() {
+    document.removeEventListener('keydown', this._onKeyDown);
+  }
+
+  _onKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Escape' && this.props.isFullscreen) {
+      this.props.toggleBottomBoxFullscreen();
+    }
+  }
 
   _onClickCloseButton = () => {
     this.props.closeBottomBox();
@@ -329,6 +352,7 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
   }),
   mapDispatchToProps: {
     closeBottomBox,
+    toggleBottomBoxFullscreen,
   },
   component: BottomBoxImpl,
 });
