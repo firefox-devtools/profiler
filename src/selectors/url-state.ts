@@ -30,6 +30,7 @@ import type {
   ProfileSpecificUrlState,
   NativeSymbolInfo,
   TabID,
+  IndexIntoSourceTable,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -69,8 +70,9 @@ export const getShowUserTimings: Selector<boolean> = (state) =>
   getProfileSpecificState(state).showUserTimings;
 export const getStackChartSameWidths: Selector<boolean> = (state) =>
   getProfileSpecificState(state).stackChartSameWidths;
-export const getSourceViewFile: Selector<string | null> = (state) =>
-  getProfileSpecificState(state).sourceView.sourceFile;
+export const getSourceViewSourceIndex: Selector<IndexIntoSourceTable | null> = (
+  state
+) => getProfileSpecificState(state).sourceView.sourceIndex;
 export const getSourceViewScrollGeneration: Selector<number> = (state) =>
   getProfileSpecificState(state).sourceView.scrollGeneration;
 export const getAssemblyViewIsOpen: Selector<boolean> = (state) =>

@@ -8,8 +8,10 @@ import {
   getProfileOrNull,
   getSourceViewCode,
   getBrowserConnection,
-  getSourceViewFile,
   getSymbolServerUrl,
+  getSourceViewFile,
+  getSourceViewSourceIndex,
+  getSourceViewSourceUuid,
 } from 'firefox-profiler/selectors';
 import {
   beginLoadingSourceCodeFromUrl,
@@ -25,10 +27,16 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import type { SourceCodeStatus, Profile } from 'firefox-profiler/types';
+import type {
+  SourceCodeStatus,
+  Profile,
+  IndexIntoSourceTable,
+} from 'firefox-profiler/types';
 
 type StateProps = {
   readonly sourceViewFile: string | null;
+  readonly sourceViewSourceIndex: IndexIntoSourceTable | null;
+  readonly sourceViewSourceUuid: string | null;
   readonly sourceViewCode: SourceCodeStatus | void;
   readonly symbolServerUrl: string;
   readonly profile: Profile | null;
@@ -55,15 +63,12 @@ class SourceCodeFetcherImpl extends React.PureComponent<Props> {
     this._triggerSourceLoadingIfNeeded();
   }
 
-  _triggerSourceLoadingIfNeeded() {
-    const { sourceViewFile, sourceViewCode } = this.props;
-    if (sourceViewFile && !sourceViewCode) {
-      this._fetchSourceForFile(sourceViewFile);
-    }
-  }
-
-  async _fetchSourceForFile(file: string) {
+  async _triggerSourceLoadingIfNeeded() {
     const {
+      sourceViewSourceIndex,
+      sourceViewCode,
+      sourceViewFile,
+      sourceViewSourceUuid,
       beginLoadingSourceCodeFromUrl,
       beginLoadingSourceCodeFromBrowserConnection,
       finishLoadingSourceCode,
@@ -73,23 +78,34 @@ class SourceCodeFetcherImpl extends React.PureComponent<Props> {
       browserConnection,
     } = this.props;
 
-    const addressProof =
-      profile !== null ? findAddressProofForFile(profile, file) : null;
+    if (sourceViewSourceIndex === null || sourceViewCode || !sourceViewFile) {
+      return;
+    }
+
+    if (!profile) {
+      return;
+    }
+
+    const addressProof = findAddressProofForFile(
+      profile,
+      sourceViewSourceIndex
+    );
 
     const delegate = new RegularExternalCommunicationDelegate(
       browserConnection,
       {
         onBeginUrlRequest: (url: string) => {
-          beginLoadingSourceCodeFromUrl(file, url);
+          beginLoadingSourceCodeFromUrl(sourceViewSourceIndex, url);
         },
         onBeginBrowserConnectionQuery: () => {
-          beginLoadingSourceCodeFromBrowserConnection(file);
+          beginLoadingSourceCodeFromBrowserConnection(sourceViewSourceIndex);
         },
       }
     );
 
     const fetchSourceResult = await fetchSource(
-      file,
+      sourceViewFile,
+      sourceViewSourceUuid,
       symbolServerUrl,
       addressProof,
       this._archiveCache,
@@ -98,10 +114,13 @@ class SourceCodeFetcherImpl extends React.PureComponent<Props> {
 
     switch (fetchSourceResult.type) {
       case 'SUCCESS':
-        finishLoadingSourceCode(file, fetchSourceResult.source);
+        finishLoadingSourceCode(
+          sourceViewSourceIndex,
+          fetchSourceResult.source
+        );
         break;
       case 'ERROR':
-        failLoadingSourceCode(file, fetchSourceResult.errors);
+        failLoadingSourceCode(sourceViewSourceIndex, fetchSourceResult.errors);
         break;
       default:
         throw assertExhaustiveCheck(fetchSourceResult);
@@ -116,7 +135,9 @@ class SourceCodeFetcherImpl extends React.PureComponent<Props> {
 export const SourceCodeFetcher = explicitConnect<{}, StateProps, DispatchProps>(
   {
     mapStateToProps: (state) => ({
+      sourceViewSourceIndex: getSourceViewSourceIndex(state),
       sourceViewFile: getSourceViewFile(state),
+      sourceViewSourceUuid: getSourceViewSourceUuid(state),
       sourceViewCode: getSourceViewCode(state),
       symbolServerUrl: getSymbolServerUrl(state),
       profile: getProfileOrNull(state),
