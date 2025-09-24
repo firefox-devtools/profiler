@@ -35,7 +35,7 @@ class FullscreenToggleButtonImpl extends React.PureComponent<Props> {
       <Localized id="BottomBox--hide-fullscreen" attrs={{ title: true }}>
         <button
           className={classNames(
-            'bottom-fullscreen-button',
+            'bottom-fullscreen-hide-button',
             'photon-button',
             'photon-button-ghost',
             'photon-button-ghost--checked'
@@ -49,7 +49,7 @@ class FullscreenToggleButtonImpl extends React.PureComponent<Props> {
       <Localized id="BottomBox--show-fullscreen" attrs={{ title: true }}>
         <button
           className={classNames(
-            'bottom-fullscreen-button',
+            'bottom-fullscreen-show-button',
             'photon-button',
             'photon-button-ghost'
           )}

@@ -72,7 +72,8 @@
 
 .bottom-close-button,
 .bottom-assembly-button,
-.bottom-fullscreen-button {
+.bottom-fullscreen-hide-button,
+.bottom-fullscreen-show-button {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
@@ -89,8 +90,12 @@
   background-image: url(../../../res/img/svg/asm-icon.svg);
 }
 
-.bottom-fullscreen-button {
-  background-image: url(firefox-profiler-res/img/svg/open-in-new-12.svg);
+.bottom-fullscreen-show-button {
+  background-image: url(firefox-profiler-res/img/svg/maximise.svg);
+}
+
+.bottom-fullscreen-hide-button {
+  background-image: url(firefox-profiler-res/img/svg/minimise.svg);
 }
 
 .codeLoadingOverlay,
