@@ -181,15 +181,16 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     const {
       callNodeIndex,
-      thread: { stringTable, funcTable },
+      thread: { stringTable, funcTable, sources },
       callNodeInfo,
     } = rightClickedCallNodeInfo;
 
     const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
-    const stringIndex = funcTable.fileName[funcIndex];
-    if (stringIndex === null) {
+    const sourceIndex = funcTable.source[funcIndex];
+    if (sourceIndex === null) {
       return null;
     }
+    const stringIndex = sources.filename[sourceIndex];
     return stringTable.getString(stringIndex);
   }
 
@@ -252,7 +253,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     const {
       callNodeIndex,
-      thread: { funcTable, resourceTable, stringTable },
+      thread: { funcTable, resourceTable, stringTable, sources },
       callNodeInfo,
     } = rightClickedCallNodeInfo;
 
@@ -272,7 +273,8 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
           funcIndex,
           funcTable,
           resourceTable,
-          stringTable
+          stringTable,
+          sources
         );
         return funcName + (originAnnotation ? ` [${originAnnotation}]` : '');
       })
@@ -502,7 +504,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     const {
       callNodePath,
-      thread: { funcTable, stringTable, resourceTable },
+      thread: { funcTable, stringTable, resourceTable, sources },
     } = rightClickedCallNodeInfo;
 
     const funcIndex = callNodePath[callNodePath.length - 1];
@@ -512,10 +514,13 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const isJS = funcTable.isJS[funcIndex];
 
     if (isJS) {
-      const fileNameIndex = funcTable.fileName[funcIndex];
-      return fileNameIndex === null
-        ? null
-        : stringTable.getString(fileNameIndex);
+      const sourceIndex = funcTable.source[funcIndex];
+      if (sourceIndex === null) {
+        return null;
+      }
+
+      const fileNameIndex = sources.filename[sourceIndex];
+      return stringTable.getString(fileNameIndex);
     }
     const resourceIndex = funcTable.resource[funcIndex];
     if (resourceIndex === -1) {

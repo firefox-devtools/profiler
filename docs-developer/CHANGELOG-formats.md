@@ -6,6 +6,10 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 58
+
+A new `SourceTable` has been added to `profile.shared.sources` to centralize all source file information. The `FuncTable.fileName` field has been replaced with `FuncTable.source`, which references indices in the shared sources table. This change allows storing a UUID per JS source, which will be used for fetching sources.
+
 ### Version 57
 
 The `searchable` property in marker schemas, originally added in version 44, is now removed again. Now all marker fields are searchable.
@@ -121,6 +125,10 @@ We've also cleaned up the ResourceTable format:
 Older versions are not documented in this changelog but can be found in [processed-profile-versioning.jt](../src/profile-logic/processed-profile-versioning.ts).
 
 ## Gecko profile format
+
+### Version 32
+
+`frameTable` `location` string field was changed to include an optional `sourceIndex` at the end of the string inside brackets for JS sources. For example, new JS frames look like this: `functionName (http://script.url/:1234:1234)[1234]` with the last number being its `sourceIndex`. This index references entries in the shared `SourceTable` in `profile.sources` (added in in the same version) which centralizes all source file information.
 
 ### Version 31
 

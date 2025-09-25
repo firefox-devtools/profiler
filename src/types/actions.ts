@@ -12,6 +12,7 @@ import type {
   IndexIntoCategoryList,
   IndexIntoLibs,
   PageList,
+  IndexIntoSourceTable,
 } from './profile';
 import type {
   Thread,
@@ -336,7 +337,7 @@ type ProfileAction =
   | {
       readonly type: 'UPDATE_BOTTOM_BOX';
       readonly libIndex: IndexIntoLibs | null;
-      readonly sourceFile: string | null;
+      readonly sourceIndex: IndexIntoSourceTable | null;
       readonly nativeSymbol: NativeSymbolInfo | null;
       readonly allNativeSymbolsForInitiatingCallNode: NativeSymbolInfo[];
       readonly currentTab: TabSlug;
@@ -669,21 +670,21 @@ type CurrentProfileUploadedInformationAction = {
 type SourcesAction =
   | {
       readonly type: 'SOURCE_CODE_LOADING_BEGIN_URL';
-      readonly file: string;
+      readonly sourceIndex: IndexIntoSourceTable;
       readonly url: string;
     }
   | {
       readonly type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION';
-      readonly file: string;
+      readonly sourceIndex: IndexIntoSourceTable;
     }
   | {
       readonly type: 'SOURCE_CODE_LOADING_SUCCESS';
-      readonly file: string;
+      readonly sourceIndex: IndexIntoSourceTable;
       readonly code: string;
     }
   | {
       readonly type: 'SOURCE_CODE_LOADING_ERROR';
-      readonly file: string;
+      readonly sourceIndex: IndexIntoSourceTable;
       readonly errors: SourceCodeLoadingError[];
     };
 

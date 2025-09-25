@@ -28,6 +28,8 @@ export type FetchSourceResult =
  * then this will call `callbacks.fetchUrlResponse("https://hg.mozilla.org/mozilla-central/raw-file/997f00815e6bc28806b75448c8829f0259d2cb28/widget/cocoa/nsAppShell.mm")`.
  *
  * @param file - The path of the file that should be fetched
+ * @param sourceUUid - The optional UUID of the JS source file that should be
+ *    fetched. It's null for non-JS files.
  * @param symbolServerUrl - The symbol server URL, used for getting source code
  *    from local servers via the symbolication API /source/v1.
  * @param addressProof - An "address proof" for the requested file, if known. Otherwise null.
@@ -37,6 +39,7 @@ export type FetchSourceResult =
  */
 export async function fetchSource(
   file: string,
+  sourceUuid: string | null,
   symbolServerUrl: string,
   addressProof: AddressProof | null,
   archiveCache: Map<string, Promise<Uint8Array>>,
@@ -82,6 +85,27 @@ export async function fetchSource(
       }
       default:
         throw assertExhaustiveCheck(queryResult);
+    }
+  }
+
+  // Try to obtain the source by downloading a file from the browser if it's a
+  // JS source.
+  if (sourceUuid !== null) {
+    try {
+      const response = await delegate.fetchJSSourceFromBrowser(sourceUuid);
+      if (response) {
+        return {
+          type: 'SUCCESS',
+          source: response,
+        };
+      }
+    } catch (e) {
+      errors.push({
+        type: 'NOT_PRESENT_IN_BROWSER',
+        sourceUuid,
+        url: file,
+        errorMessage: e.toString(),
+      });
     }
   }
 

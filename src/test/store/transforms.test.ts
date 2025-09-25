@@ -1223,11 +1223,13 @@ describe('"collapse-direct-recursion" transform', function () {
       const { stackTable, frameTable, funcTable, samples, stringTable } =
         filteredThread;
       const fileStringIndex = stringTable.indexForString('b');
+      const fileSourceIndex =
+        filteredThread.sources.filename.indexOf(fileStringIndex);
       const stackLineInfo = getStackLineInfo(
         stackTable,
         frameTable,
         funcTable,
-        fileStringIndex
+        fileSourceIndex
       );
       const lineTimings = getLineTimings(stackLineInfo, samples);
 
@@ -1405,11 +1407,13 @@ describe('"collapse-recursion" transform', function () {
       const { stackTable, frameTable, funcTable, samples, stringTable } =
         filteredThread;
       const fileStringIndex = stringTable.indexForString('b');
+      const fileSourceIndex =
+        filteredThread.sources.filename.indexOf(fileStringIndex);
       const stackLineInfo = getStackLineInfo(
         stackTable,
         frameTable,
         funcTable,
-        fileStringIndex
+        fileSourceIndex
       );
       const lineTimings = getLineTimings(stackLineInfo, samples);
 
@@ -1516,11 +1520,13 @@ describe('"collapse-recursion" transform', function () {
       const { stackTable, frameTable, funcTable, samples, stringTable } =
         filteredThread;
       const fileStringIndex = stringTable.indexForString('b');
+      const fileSourceIndex =
+        filteredThread.sources.filename.indexOf(fileStringIndex);
       const stackLineInfo = getStackLineInfo(
         stackTable,
         frameTable,
         funcTable,
-        fileStringIndex
+        fileSourceIndex
       );
       const lineTimings = getLineTimings(stackLineInfo, samples);
 
@@ -1650,11 +1656,13 @@ describe('"collapse-recursion" transform', function () {
       const { stackTable, frameTable, funcTable, samples, stringTable } =
         filteredThread;
       const fileStringIndex = stringTable.indexForString('b');
+      const fileSourceIndex =
+        filteredThread.sources.filename.indexOf(fileStringIndex);
       const stackLineInfo = getStackLineInfo(
         stackTable,
         frameTable,
         funcTable,
-        fileStringIndex
+        fileSourceIndex
       );
       const lineTimings = getLineTimings(stackLineInfo, samples);
 

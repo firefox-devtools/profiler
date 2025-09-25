@@ -30,12 +30,14 @@ describe('getStackLineInfo', function () {
     const [thread] = derivedThreads;
     const { stackTable, frameTable, funcTable, stringTable } = thread;
 
-    const fileOne = stringTable.indexForString('one.js');
+    const fileOneStringIndex = stringTable.indexForString('one.js');
+    const fileOneSourceIndex =
+      thread.sources.filename.indexOf(fileOneStringIndex);
     const stackLineInfoOne = getStackLineInfo(
       stackTable,
       frameTable,
       funcTable,
-      fileOne
+      fileOneSourceIndex
     );
 
     // Expect the returned arrays to have the same length as the stackTable.
@@ -49,11 +51,12 @@ describe('getLineTimings for getStackLineInfo', function () {
   function getTimings(thread: Thread, file: string) {
     const { stackTable, frameTable, funcTable, samples, stringTable } = thread;
     const fileStringIndex = stringTable.indexForString(file);
+    const fileSourceIndex = thread.sources.filename.indexOf(fileStringIndex);
     const stackLineInfo = getStackLineInfo(
       stackTable,
       frameTable,
       funcTable,
-      fileStringIndex
+      fileSourceIndex
     );
     return getLineTimings(stackLineInfo, samples);
   }
