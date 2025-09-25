@@ -651,6 +651,7 @@ StackSettings--implementation-native2 = Yerel
 StackSettings--stack-implementation-label = Yığın filtresi:
 StackSettings--use-data-source-label = Veri kaynağı:
 StackSettings--show-user-timing = Kullanıcı zamanlamasını göster
+StackSettings--use-stack-chart-same-widths = Her yığın için aynı genişliği kullan
 StackSettings--panel-search =
     .label = Yığınları filtrele:
     .title = Yalnızca adı bu alt dizgiyle eşleşen bir fonksiyon içeren yığınları görüntüler
