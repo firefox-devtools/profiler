@@ -32,6 +32,8 @@ import type {
   WeightType,
   IndexIntoFrameTable,
   IndexIntoSubcategoryListForCategory,
+  SourceTable,
+  IndexIntoSourceTable,
 } from './profile';
 import type { IndexedArray } from './utils';
 import type { BitSet } from '../utils/bitset';
@@ -100,6 +102,9 @@ export type Thread = {
   // Strings for profiles are collected into a single table, and are referred to by
   // their index by other tables.
   stringTable: StringTable;
+  // Sources for profiles are collected into a single table, containing file sources
+  // with their UUIDs and filenames.
+  sources: SourceTable;
   // The stack samples collected for this thread. This field is different from
   // RawThread in that the `time` column is always present.
   samples: SamplesTable;
@@ -768,7 +773,7 @@ export type NativeSymbolInfo = {
  */
 export type BottomBoxInfo = {
   libIndex: IndexIntoLibs | null;
-  sourceFile: string | null;
+  sourceIndex: IndexIntoSourceTable | null;
   nativeSymbols: NativeSymbolInfo[];
 };
 

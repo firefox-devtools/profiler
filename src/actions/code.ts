@@ -6,30 +6,34 @@ import type {
   SourceCodeLoadingError,
   ApiQueryError,
   DecodedInstruction,
+  IndexIntoSourceTable,
 } from 'firefox-profiler/types';
 
 export function beginLoadingSourceCodeFromUrl(
-  file: string,
+  sourceIndex: IndexIntoSourceTable,
   url: string
 ): Action {
-  return { type: 'SOURCE_CODE_LOADING_BEGIN_URL', file, url };
+  return { type: 'SOURCE_CODE_LOADING_BEGIN_URL', sourceIndex, url };
 }
 
 export function beginLoadingSourceCodeFromBrowserConnection(
-  file: string
+  sourceIndex: IndexIntoSourceTable
 ): Action {
-  return { type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION', file };
+  return { type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION', sourceIndex };
 }
 
-export function finishLoadingSourceCode(file: string, code: string): Action {
-  return { type: 'SOURCE_CODE_LOADING_SUCCESS', file, code };
+export function finishLoadingSourceCode(
+  sourceIndex: IndexIntoSourceTable,
+  code: string
+): Action {
+  return { type: 'SOURCE_CODE_LOADING_SUCCESS', sourceIndex, code };
 }
 
 export function failLoadingSourceCode(
-  file: string,
+  sourceIndex: IndexIntoSourceTable,
   errors: SourceCodeLoadingError[]
 ): Action {
-  return { type: 'SOURCE_CODE_LOADING_ERROR', file, errors };
+  return { type: 'SOURCE_CODE_LOADING_ERROR', sourceIndex, errors };
 }
 
 export function beginLoadingAssemblyCodeFromUrl(

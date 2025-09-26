@@ -2004,10 +2004,10 @@
   dependencies:
     "@babel/runtime" "^7.12.5"
 
-"@tgwf/co2@^0.16.8":
-  version "0.16.8"
-  resolved "https://registry.yarnpkg.com/@tgwf/co2/-/co2-0.16.8.tgz#dc49b9aec23438c918cb664b6367486be4af5fd3"
-  integrity sha512-o0NPZVaB65Y9Unqi6i+RmwtPrkAf11MhagpCc/b99PPBGNChu7jlgAhlo/B1ZiklPvAL+d0Z719GJYssSWeGBQ==
+"@tgwf/co2@^0.16.9":
+  version "0.16.9"
+  resolved "https://registry.yarnpkg.com/@tgwf/co2/-/co2-0.16.9.tgz#629dfcc7bc3b5980047793932d9254b9b9578371"
+  integrity sha512-+nuT7HS5r22lbW4MdgSPHhirYBjHR6Q8sz5kX6dKdK+yIkRukLAGaH6L/toZwVEOuEeeIRfWYJuaJIoxEGDMXg==
 
 "@tootallnate/once@1":
   version "1.1.2"
@@ -2316,10 +2316,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@>=13.7.0", "@types/node@^22.18.5":
-  version "22.18.5"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.18.5.tgz#6b90a0087660cce4e956c3932c7f4357ef06bccf"
-  integrity sha512-g9BpPfJvxYBXUWI9bV37j6d6LTMNQ88hPwdWWUeYZnMhlo66FIg9gCc1/DZb15QylJSKwOZjwrckvOTWpOiChg==
+"@types/node@*", "@types/node@>=13.7.0", "@types/node@^22.18.6":
+  version "22.18.6"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.18.6.tgz#38172ef0b65e09d1a4fc715eb09a7d5decfdc748"
+  integrity sha512-r8uszLPpeIWbNKtvWRt/DbVi5zbqZyj1PTmhRMqBMvDnaz1QpmSKujUtJLrqGZeoM8v72MfYggDceY4K1itzWQ==
   dependencies:
     undici-types "~6.21.0"
 
@@ -3625,10 +3625,10 @@ caniuse-api@^3.0.0:
     lodash.memoize "^4.1.2"
     lodash.uniq "^4.5.0"
 
-caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001702, caniuse-lite@^1.0.30001731, caniuse-lite@^1.0.30001737:
-  version "1.0.30001741"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001741.tgz#67fb92953edc536442f3c9da74320774aa523143"
-  integrity sha512-QGUGitqsc8ARjLdgAfxETDhRbJ0REsP6O3I96TAth/mVjh2cYzN2u+3AzPP3aVSm2FehEItaJw1xd+IGBXWeSw==
+caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001702, caniuse-lite@^1.0.30001737, caniuse-lite@^1.0.30001743:
+  version "1.0.30001743"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001743.tgz#50ff91a991220a1ee2df5af00650dd5c308ea7cd"
+  integrity sha512-e6Ojr7RV14Un7dz6ASD0aZDmQPT/A+eZU+nuTNfjqmRrmkmQlnTNWH0SKmqagx9PeW87UVqapSurtAXifmtdmw==
 
 ccount@^2.0.0:
   version "2.0.1"

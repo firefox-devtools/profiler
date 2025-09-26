@@ -7,39 +7,43 @@ import type {
   SourceCodeStatus,
   AssemblyCodeStatus,
   CodeState,
+  IndexIntoSourceTable,
 } from 'firefox-profiler/types';
 import { combineReducers } from 'redux';
 
-const sourceCodeCache: Reducer<Map<string, SourceCodeStatus>> = (
+const sourceCodeCache: Reducer<Map<IndexIntoSourceTable, SourceCodeStatus>> = (
   state = new Map(),
   action
 ) => {
   switch (action.type) {
     case 'SOURCE_CODE_LOADING_BEGIN_URL': {
-      const { file, url } = action;
+      const { sourceIndex, url } = action;
       const newState = new Map(state);
-      newState.set(file, { type: 'LOADING', source: { type: 'URL', url } });
+      newState.set(sourceIndex, {
+        type: 'LOADING',
+        source: { type: 'URL', url },
+      });
       return newState;
     }
     case 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION': {
-      const { file } = action;
+      const { sourceIndex } = action;
       const newState = new Map(state);
-      newState.set(file, {
+      newState.set(sourceIndex, {
         type: 'LOADING',
         source: { type: 'BROWSER_CONNECTION' },
       });
       return newState;
     }
     case 'SOURCE_CODE_LOADING_SUCCESS': {
-      const { file, code } = action;
+      const { sourceIndex, code } = action;
       const newState = new Map(state);
-      newState.set(file, { type: 'AVAILABLE', code });
+      newState.set(sourceIndex, { type: 'AVAILABLE', code });
       return newState;
     }
     case 'SOURCE_CODE_LOADING_ERROR': {
-      const { file, errors } = action;
+      const { sourceIndex, errors } = action;
       const newState = new Map(state);
-      newState.set(file, { type: 'ERROR', errors });
+      newState.set(sourceIndex, { type: 'ERROR', errors });
       return newState;
     }
     default:

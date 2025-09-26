@@ -548,6 +548,28 @@ export type ProfilingLog = {
   [pid: number]: ProcessProfilingLog;
 };
 
+/**
+ * Table containing source code file references in the Gecko profile format.
+ * Each entry maps a unique UUID to a filename, allowing frames to reference
+ * their source files for displaying source code context in the profiler UI.
+ * This table is optional and only present in newer Firefox versions.
+ *
+ * Note: In Gecko profiles, this table only contains sources for JavaScript code.
+ * The processed profile format expands this to include native code sources as well.
+ */
+export type GeckoSourceTable = {
+  schema: {
+    uuid: 0;
+    filename: 1;
+  };
+  data: Array<
+    [
+      string, // UUID for the source
+      string, // Filename of the source
+    ]
+  >;
+};
+
 export type GeckoProfileWithMeta<Meta> = {
   counters?: GeckoCounter[];
   // Optional because older Firefox versions may not have that data and
@@ -556,6 +578,8 @@ export type GeckoProfileWithMeta<Meta> = {
   meta: Meta;
   libs: LibMapping[];
   pages?: PageList;
+  // Optional because older Firefox versions may not have this table.
+  sources?: GeckoSourceTable;
   threads: GeckoThread[];
   pausedRanges: PausedRange[];
   processes: GeckoSubprocessProfile[];
