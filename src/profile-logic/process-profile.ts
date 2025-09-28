@@ -99,6 +99,7 @@ import type {
   Pid,
   GeckoMarkerSchema,
   GeckoSourceTable,
+  IndexIntoCategoryList,
 } from 'firefox-profiler/types';
 import { decompress, isGzip } from 'firefox-profiler/utils/gz';
 
@@ -1548,7 +1549,7 @@ export function insertExternalMarkersIntoProfile(
     }
   }
 
-  const categoryMap = new Map();
+  const categoryMap = new Map<IndexIntoCategoryList, IndexIntoCategoryList>();
   for (let i = 0; i < externalMarkers.categories.length; ++i) {
     const cat = externalMarkers.categories[i];
     let index = geckoProfile.meta.categories.findIndex(

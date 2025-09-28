@@ -115,7 +115,7 @@ function getV5ResultForLibRequest(
     );
   }
 
-  const results = new Map();
+  const results = new Map<number, AddressResult>();
   for (let i = 0; i < addressInfo.length; i++) {
     const address = addressArray[i];
     const info = addressInfo[i];

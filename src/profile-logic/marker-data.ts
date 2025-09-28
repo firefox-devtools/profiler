@@ -484,7 +484,7 @@ export function correlateIPCMarkers(
       recvThreadName: formatThreadName(recvTid),
     };
 
-    const addedThreadIds = new Set();
+    const addedThreadIds = new Set<number>();
     if (startEndpointMarker) {
       addedThreadIds.add(startEndpointMarker.tid);
       correlations.set(
@@ -1331,7 +1331,7 @@ export function groupScreenshotsById(
   getMarker: (markerIndex: MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[]
 ): Map<string, Marker[]> {
-  const idToScreenshotMarkers = new Map();
+  const idToScreenshotMarkers = new Map<string, Marker[]>();
   for (const markerIndex of markerIndexes) {
     const marker = getMarker(markerIndex);
     const { data } = marker;
