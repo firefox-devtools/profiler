@@ -3,6 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // Parses the ART trace format and converts it to the Gecko profile format.
 
+import type {
+  IndexIntoFrameTable,
+  IndexIntoStackTable,
+} from 'firefox-profiler/types';
+
 // These profiles are obtained from Android in two ways:
 //  - Programmatically, from the Debug API: https://developer.android.com/studio/profile/cpu-profiler#debug-api
 //  - Or via the profiler UI in Android Studio.
@@ -562,7 +567,7 @@ function procureSamplingInterval(trace: ArtTrace) {
 
   // Gather up to 500 time deltas between method actions on a thread.
   const deltas: number[] = [];
-  const previousTimestampByThread = new Map();
+  const previousTimestampByThread: Map<number, number> = new Map();
   const numberOfActionsToConsider = Math.min(500, methodActions.length);
   for (let i = 0; i < numberOfActionsToConsider; i++) {
     const { tid, globalTime } = methodActions[i];
@@ -617,7 +622,7 @@ export function getSpecialCategory(
     return s.substring(0, firstPeriodPos);
   }
 
-  const significantSegmentCounter = new Map();
+  const significantSegmentCounter: Map<string, number> = new Map();
   for (let i = 0; i < methods.length; i++) {
     const significantSegment = getSignificantNamespaceSegment(
       methods[i].className
@@ -787,8 +792,8 @@ class ThreadBuilder {
 
   _currentStack: number | null = null;
   _nextSampleTimestamp = 0;
-  _stackMap = new Map();
-  _frameMap = new Map();
+  _stackMap: Map<string, IndexIntoStackTable> = new Map();
+  _frameMap: Map<number, IndexIntoFrameTable> = new Map();
   _registerTime = 0;
   _name;
   _pid;
@@ -939,7 +944,7 @@ export function convertArtTraceProfile(
   const { summaryDetails, threads, methods, methodActions } = trace;
   const categoryInfo = new CategoryInfo(methods);
   const methodMap = new Map(methods.map((m) => [m.methodId, m]));
-  const threadBuilderMap = new Map();
+  const threadBuilderMap: Map<number, ThreadBuilder> = new Map();
 
   if (methodActions.length > 0) {
     for (let i = 0; i < methodActions.length; i++) {
