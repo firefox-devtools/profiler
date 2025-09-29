@@ -74,10 +74,11 @@ export const getZipFileMaxDepth: Selector<number> = createSelector(
  * render a file picker to load profiles from the zip file.
  */
 export const getZipFileTreeOrNull: Selector<ZipFiles.ZipFileTree | null> =
-  createSelector(getZipFileTable, getProfileUrl, (zipFileTable, zipFileUrl) =>
-    zipFileTable === null
-      ? null
-      : new ZipFiles.ZipFileTree(zipFileTable, zipFileUrl)
+  createSelector(
+    getZipFileTable,
+    getProfileUrl,
+    (zipFileTable, zipFileUrl) =>
+      new ZipFiles.ZipFileTree(zipFileTable, zipFileUrl)
   );
 
 /**

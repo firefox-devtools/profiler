@@ -350,4 +350,6 @@ export type Transform = TransformDefinitions[keyof TransformDefinitions];
 export type TransformType = Transform['type'];
 
 export type TransformStack = Transform[];
-export type TransformStacksPerThread = { [key: ThreadsKey]: TransformStack };
+export type TransformStacksPerThread = Partial<
+  Record<ThreadsKey, TransformStack>
+>;

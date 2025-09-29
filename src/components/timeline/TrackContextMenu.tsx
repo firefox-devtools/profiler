@@ -107,7 +107,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
   TimelineTrackContextMenuProps,
   TimelineTrackContextMenuState
 > {
-  override state = { searchFilter: '' };
+  override state: TimelineTrackContextMenuState = { searchFilter: '' };
   _globalTrackClickTimeout: NodeJS.Timeout | null = null;
   _trackSearchFieldElem: { current: TrackSearchField | null } =
     React.createRef();

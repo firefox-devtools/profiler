@@ -893,7 +893,7 @@ const _upgraders: {
     // will not be preserved.
     const transforms = parseTransforms(query.transforms);
 
-    if (!transforms || transforms.length === 0) {
+    if (transforms.length === 0) {
       // We don't have any transforms to upgrade.
       return;
     }

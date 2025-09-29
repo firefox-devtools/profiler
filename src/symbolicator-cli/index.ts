@@ -94,9 +94,6 @@ export async function run(options: CliOptions) {
 
   // Load the profile.
   const profile = await unserializeProfileOfArbitraryFormat(byteBufferCopy);
-  if (profile === undefined) {
-    throw new Error('Unable to parse the profile.');
-  }
 
   const symbolStoreDB = new InMemorySymbolDB();
 
