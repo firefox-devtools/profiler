@@ -1027,6 +1027,13 @@ SourceView--not-in-archive-error-when-obtaining-source = 下載自 { $url } 的�
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = 無法剖析下載自 { $url } 的封存檔：{ $parsingErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a JS file could not be found in
+# the browser.
+# Variables:
+#   $url (String) - The URL of the JS source file.
+#   $sourceUuid (number) - The UUID of the JS source file.
+#   $errorMessage (String) - The raw internal error message, not localized
+SourceView--not-in-browser-error-when-obtaining-js-source = 瀏覽器無法取得 sourceUuid 為 { $sourceUuid }，位於 { $url } 的原始碼檔案：{ $errorMessage }。
 
 ## Toggle buttons in the top right corner of the bottom box
 
