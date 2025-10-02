@@ -1,26 +1,29 @@
-.DetailsContainer .layout-pane > * {
-  width: 100%;
-  height: 100%;
+.DetailsContainer {
+  position: relative;
+  z-index: 0;
+  display: flex;
   box-sizing: border-box;
+  flex: 1;
+  flex-flow: row nowrap;
+  contain: size;
 }
 
-.DetailsContainer .layout-pane:not(.layout-pane-primary) {
+.DetailsContainer .resizableWithSplitterInner > * {
+  min-width: 0;
+  flex: 1;
+}
+
+.DetailsContainerResizableSidebarWrapper {
   max-width: 600px;
 }
 
-/* overriding defaults from splitter-layout */
-.DetailsContainer {
-  /* SplitterLayout injects position: absolute, this conflicts with our using
-   * Flex Layout. */
-  position: unset;
-}
-
-.DetailsContainer .layout-splitter {
+/* overriding defaults from ResizableWithSplitter.css */
+.DetailsContainer .resizableWithSplitterSplitter {
   border-top: 1px solid var(--grey-30);
   border-left: 1px solid var(--grey-30);
   background: var(--grey-10); /* Same background as sidebars */
 }
 
-.DetailsContainer .layout-splitter:hover {
+.DetailsContainer .resizableWithSplitterSplitter:hover {
   background: var(--grey-30); /* same as the border above */
 }
