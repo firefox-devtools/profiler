@@ -1383,7 +1383,10 @@ export function focusInvertedSubtree(
       return null;
     }
 
-    const oldStackToNewStack = new Map();
+    const oldStackToNewStack: Map<
+      IndexIntoStackTable | null,
+      IndexIntoStackTable | null
+    > = new Map();
     // A root stack's prefix will be null. Maintain that relationship from old to new
     // stacks by mapping from null to null.
     oldStackToNewStack.set(null, null);

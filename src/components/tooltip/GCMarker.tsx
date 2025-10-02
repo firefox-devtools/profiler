@@ -466,7 +466,7 @@ function _filterInterestingPhaseTimes(
   /*
    * Build the tree.
    */
-  const tree = new Map();
+  const tree: Map<string, PhaseTreeNode> = new Map();
   for (const phase of phaseTimes) {
     const components = phase.name.split('.');
     _treeInsert(tree, components, phase);
