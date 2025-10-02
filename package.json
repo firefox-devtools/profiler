@@ -77,6 +77,7 @@
     "common-tags": "^1.8.2",
     "copy-to-clipboard": "^3.3.3",
     "core-js": "^3.45.1",
+    "devtools-reps": "^0.24.0",
     "escape-string-regexp": "^4.0.0",
     "gecko-profiler-demangle": "^0.4.0",
     "idb": "^8.0.3",
@@ -206,8 +207,11 @@
       "ts",
       "tsx"
     ],
+    "transform": {
+      "\\.([jt]sx?|mjs)$": "babel-jest"
+    },
     "transformIgnorePatterns": [
-      "/node_modules/(?!(query-string|decode-uri-component|iongraph-web|split-on-first|filter-obj|fetch-mock)/)"
+      "/node_modules/(?!(query-string|decode-uri-component|iongraph-web|split-on-first|filter-obj|fetch-mock|devtools-reps)/)"
     ],
     "moduleNameMapper": {
       "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ftl)$": "<rootDir>/src/test/fixtures/mocks/file-mock.ts",
