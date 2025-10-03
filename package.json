@@ -80,7 +80,7 @@
     "escape-string-regexp": "^4.0.0",
     "gecko-profiler-demangle": "^0.4.0",
     "idb": "^8.0.3",
-    "iongraph-web": "0.1.15",
+    "iongraph-web": "0.1.16",
     "jszip": "^3.10.1",
     "long": "^5.3.2",
     "memoize-immutable": "^3.0.0",
