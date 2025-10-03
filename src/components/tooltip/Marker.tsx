@@ -20,6 +20,7 @@ import {
   getProcessIdToNameMap,
   getThreadSelectorsFromThreadsKey,
 } from 'firefox-profiler/selectors';
+import { changeMarkersSearchString } from 'firefox-profiler/actions/profile-view';
 
 import {
   TooltipNetworkMarkerPhases,
@@ -99,7 +100,11 @@ type StateProps = {
   readonly categories: CategoryList;
 };
 
-type Props = ConnectedProps<OwnProps, StateProps, {}>;
+type DispatchProps = {
+  readonly changeMarkersSearchString: typeof changeMarkersSearchString;
+};
+
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 // Maximum image size of a tooltip field.
 const MAXIMUM_IMAGE_SIZE = 350;
@@ -473,10 +478,12 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
     return null;
   }
 
-  _renderTitle(): string {
-    const { markerIndex, getMarkerLabel } = this.props;
-    return getMarkerLabel(markerIndex);
-  }
+  _onFilterButtonClick = () => {
+    const { markerIndex, getMarkerLabel, changeMarkersSearchString } =
+      this.props;
+    const markerLabel = getMarkerLabel(markerIndex);
+    changeMarkersSearchString(markerLabel);
+  };
 
   /**
    * Often-times component logic is split out into several different components. This
@@ -501,13 +508,30 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
    * a short list of rendering strategies, in the order they appear.
    */
   override render() {
-    const { className } = this.props;
+    const { className, markerIndex, getMarkerLabel } = this.props;
+    const markerLabel = getMarkerLabel(markerIndex);
+    const filterButtonTitle = `Only show "${markerLabel}" markers`;
     return (
       <div className={classNames('tooltipMarker', className)}>
         <div className="tooltipHeader">
           <div className="tooltipOneLine">
             {this._maybeRenderMarkerDuration()}
-            <div className="tooltipTitle">{this._renderTitle()}</div>
+            <div className="tooltipTitle">
+              {markerLabel.includes(' ') ? (
+                markerLabel
+              ) : (
+                <>
+                  <span className="tooltipTitleText">{markerLabel}</span>
+                  <button
+                    className="tooltipTitleFilterButton"
+                    type="button"
+                    title={filterButtonTitle}
+                    aria-label={filterButtonTitle}
+                    onClick={this._onFilterButtonClick}
+                  />
+                </>
+              )}
+            </div>
           </div>
         </div>
         <TooltipDetails>
@@ -522,7 +546,11 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
   }
 }
 
-export const TooltipMarker = explicitConnect<OwnProps, StateProps, {}>({
+export const TooltipMarker = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state, props) => {
     const selectors = getThreadSelectorsFromThreadsKey(props.threadsKey);
     return {
@@ -539,5 +567,6 @@ export const TooltipMarker = explicitConnect<OwnProps, StateProps, {}>({
       categories: getCategories(state),
     };
   },
+  mapDispatchToProps: { changeMarkersSearchString },
   component: MarkerTooltipContents,
 });

@@ -1894,7 +1894,17 @@ exports[`TooltipMarker renders the tooltip of CompositorScreenshotWindowDestroye
           <div
             class="tooltipTitle"
           >
-            CompositorScreenshotWindowDestroyed
+            <span
+              class="tooltipTitleText"
+            >
+              CompositorScreenshotWindowDestroyed
+            </span>
+            <button
+              aria-label="Only show \\"CompositorScreenshotWindowDestroyed\\" markers"
+              class="tooltipTitleFilterButton"
+              title="Only show \\"CompositorScreenshotWindowDestroyed\\" markers"
+              type="button"
+            />
           </div>
         </div>
       </div>
@@ -1972,7 +1982,17 @@ exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
       <div
         class="tooltipTitle"
       >
-        Bailout
+        <span
+          class="tooltipTitleText"
+        >
+          Bailout
+        </span>
+        <button
+          aria-label="Only show \\"Bailout\\" markers"
+          class="tooltipTitleFilterButton"
+          title="Only show \\"Bailout\\" markers"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -2627,7 +2647,17 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
       <div
         class="tooltipTitle"
       >
-        FileIO
+        <span
+          class="tooltipTitleText"
+        >
+          FileIO
+        </span>
+        <button
+          aria-label="Only show \\"FileIO\\" markers"
+          class="tooltipTitleFilterButton"
+          title="Only show \\"FileIO\\" markers"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -2945,7 +2975,17 @@ exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = 
       <div
         class="tooltipTitle"
       >
-        GCMajor
+        <span
+          class="tooltipTitleText"
+        >
+          GCMajor
+        </span>
+        <button
+          aria-label="Only show \\"GCMajor\\" markers"
+          class="tooltipTitleFilterButton"
+          title="Only show \\"GCMajor\\" markers"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3102,7 +3142,17 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
       <div
         class="tooltipTitle"
       >
-        GCMinor
+        <span
+          class="tooltipTitleText"
+        >
+          GCMinor
+        </span>
+        <button
+          aria-label="Only show \\"GCMinor\\" markers"
+          class="tooltipTitleFilterButton"
+          title="Only show \\"GCMinor\\" markers"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3217,7 +3267,17 @@ exports[`TooltipMarker renders tooltips for various markers: GCSlice-17.5 1`] = 
       <div
         class="tooltipTitle"
       >
-        GCSlice
+        <span
+          class="tooltipTitleText"
+        >
+          GCSlice
+        </span>
+        <button
+          aria-label="Only show \\"GCSlice\\" markers"
+          class="tooltipTitleFilterButton"
+          title="Only show \\"GCSlice\\" markers"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3413,7 +3473,17 @@ exports[`TooltipMarker renders tooltips for various markers: Invalidate-10 1`] =
       <div
         class="tooltipTitle"
       >
-        Invalidate
+        <span
+          class="tooltipTitleText"
+        >
+          Invalidate
+        </span>
+        <button
+          aria-label="Only show \\"Invalidate\\" markers"
+          class="tooltipTitleFilterButton"
+          title="Only show \\"Invalidate\\" markers"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3451,7 +3521,17 @@ exports[`TooltipMarker renders tooltips for various markers: Log-21.7 1`] = `
       <div
         class="tooltipTitle"
       >
-        Log
+        <span
+          class="tooltipTitleText"
+        >
+          Log
+        </span>
+        <button
+          aria-label="Only show \\"Log\\" markers"
+          class="tooltipTitleFilterButton"
+          title="Only show \\"Log\\" markers"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3496,7 +3576,17 @@ exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-14.5
       <div
         class="tooltipTitle"
       >
-        NotifyDidPaint
+        <span
+          class="tooltipTitleText"
+        >
+          NotifyDidPaint
+        </span>
+        <button
+          aria-label="Only show \\"NotifyDidPaint\\" markers"
+          class="tooltipTitleFilterButton"
+          title="Only show \\"NotifyDidPaint\\" markers"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3539,7 +3629,17 @@ exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-112.
       <div
         class="tooltipTitle"
       >
-        NotifyDidPaint
+        <span
+          class="tooltipTitleText"
+        >
+          NotifyDidPaint
+        </span>
+        <button
+          aria-label="Only show \\"NotifyDidPaint\\" markers"
+          class="tooltipTitleFilterButton"
+          title="Only show \\"NotifyDidPaint\\" markers"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3577,7 +3677,17 @@ exports[`TooltipMarker renders tooltips for various markers: PlayAudio-115 1`] =
       <div
         class="tooltipTitle"
       >
-        PlayAudio
+        <span
+          class="tooltipTitleText"
+        >
+          PlayAudio
+        </span>
+        <button
+          aria-label="Only show \\"PlayAudio\\" markers"
+          class="tooltipTitleFilterButton"
+          title="Only show \\"PlayAudio\\" markers"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3622,7 +3732,17 @@ exports[`TooltipMarker renders tooltips for various markers: PreferenceRead-114.
       <div
         class="tooltipTitle"
       >
-        PreferenceRead
+        <span
+          class="tooltipTitleText"
+        >
+          PreferenceRead
+        </span>
+        <button
+          aria-label="Only show \\"PreferenceRead\\" markers"
+          class="tooltipTitleFilterButton"
+          title="Only show \\"PreferenceRead\\" markers"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3686,7 +3806,17 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
       <div
         class="tooltipTitle"
       >
-        RefreshObserver
+        <span
+          class="tooltipTitleText"
+        >
+          RefreshObserver
+        </span>
+        <button
+          aria-label="Only show \\"RefreshObserver\\" markers"
+          class="tooltipTitleFilterButton"
+          title="Only show \\"RefreshObserver\\" markers"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3990,7 +4120,17 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
       <div
         class="tooltipTitle"
       >
-        Styles
+        <span
+          class="tooltipTitleText"
+        >
+          Styles
+        </span>
+        <button
+          aria-label="Only show \\"Styles\\" markers"
+          class="tooltipTitleFilterButton"
+          title="Only show \\"Styles\\" markers"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -4299,7 +4439,17 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
       <div
         class="tooltipTitle"
       >
-        Styles
+        <span
+          class="tooltipTitleText"
+        >
+          Styles
+        </span>
+        <button
+          aria-label="Only show \\"Styles\\" markers"
+          class="tooltipTitleFilterButton"
+          title="Only show \\"Styles\\" markers"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -4674,7 +4824,17 @@ exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`]
       <div
         class="tooltipTitle"
       >
-        foobar
+        <span
+          class="tooltipTitleText"
+        >
+          foobar
+        </span>
+        <button
+          aria-label="Only show \\"foobar\\" markers"
+          class="tooltipTitleFilterButton"
+          title="Only show \\"foobar\\" markers"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -4782,7 +4942,17 @@ exports[`TooltipMarker shows image of CompositorScreenshot markers 1`] = `
       <div
         class="tooltipTitle"
       >
-        CompositorScreenshot
+        <span
+          class="tooltipTitleText"
+        >
+          CompositorScreenshot
+        </span>
+        <button
+          aria-label="Only show \\"CompositorScreenshot\\" markers"
+          class="tooltipTitleFilterButton"
+          title="Only show \\"CompositorScreenshot\\" markers"
+          type="button"
+        />
       </div>
     </div>
   </div>
