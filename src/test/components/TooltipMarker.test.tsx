@@ -4,7 +4,11 @@
 
 import { Provider } from 'react-redux';
 
-import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  screen,
+  fireEvent,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import { TooltipMarker } from '../../components/tooltip/Marker';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -19,7 +23,10 @@ import {
   type NetworkMarkersOptions,
 } from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
+import {
+  getSelectedThreadsKey,
+  getMarkersSearchString,
+} from 'firefox-profiler/selectors/url-state';
 import { changeSelectedThreads } from 'firefox-profiler/actions/profile-view';
 import { getEmptyThread } from '../../profile-logic/data-structures';
 import { ensureExists } from 'firefox-profiler/utils/types';
@@ -1323,5 +1330,104 @@ describe('TooltipMarker', function () {
     const trackTitle = screen.getByText('Track:');
     const trackInfo = trackTitle.nextSibling;
     expect(trackInfo).toHaveTextContent(tab2Domain);
+  });
+
+  describe('filter button', () => {
+    it('shows the filter button for markers without spaces in the label', () => {
+      // Tooltip label: "Reflow"
+      const profile = getProfileWithMarkers([
+        ['Reflow', 1, 2, { type: 'tracing', category: 'Paint' }],
+      ]);
+      const store = storeWithProfile(profile);
+      const state = store.getState();
+      const getMarker = selectedThreadSelectors.getMarkerGetter(state);
+      const markerIndexes =
+        selectedThreadSelectors.getFullMarkerListIndexes(state);
+
+      render(
+        <Provider store={store}>
+          <TooltipMarker
+            markerIndex={markerIndexes[0]}
+            marker={getMarker(markerIndexes[0])}
+            threadsKey={0}
+            restrictHeightWidth={true}
+          />
+        </Provider>
+      );
+
+      const filterButton = screen.getByRole('button', {
+        name: /only show markers matching: “\u2068Reflow\u2069”/i,
+      });
+      expect(filterButton).toBeInTheDocument();
+    });
+
+    it('shows the filter button and uses the first field for markers with multiple fields', () => {
+      // Tooltip label: "click — DOMEvent"
+      // The filter button should use just the first field "click" as the search term
+      const profile = getProfileWithMarkers([
+        ['DOMEvent', 1, 2, { type: 'DOMEvent', eventType: 'click' }],
+      ]);
+      const store = storeWithProfile(profile);
+      const state = store.getState();
+      const getMarker = selectedThreadSelectors.getMarkerGetter(state);
+      const markerIndexes =
+        selectedThreadSelectors.getFullMarkerListIndexes(state);
+
+      render(
+        <Provider store={store}>
+          <TooltipMarker
+            markerIndex={markerIndexes[0]}
+            marker={getMarker(markerIndexes[0])}
+            threadsKey={0}
+            restrictHeightWidth={true}
+          />
+        </Provider>
+      );
+
+      // The filter button should be present and use the first field "click"
+      const filterButton = screen.getByRole('button', {
+        name: /only show markers matching: “\u2068click\u2069”/i,
+      });
+      expect(filterButton).toBeInTheDocument();
+
+      // Verify clicking the button sets the search string to just "click"
+      fireEvent.click(filterButton);
+      expect(getMarkersSearchString(store.getState())).toBe('click');
+    });
+
+    it('sets the marker search string when the filter button is clicked', () => {
+      const profile = getProfileWithMarkers([
+        ['Reflow', 1, 2, { type: 'tracing', category: 'Paint' }],
+      ]);
+      const store = storeWithProfile(profile);
+      const state = store.getState();
+      const getMarker = selectedThreadSelectors.getMarkerGetter(state);
+      const markerIndexes =
+        selectedThreadSelectors.getFullMarkerListIndexes(state);
+
+      render(
+        <Provider store={store}>
+          <TooltipMarker
+            markerIndex={markerIndexes[0]}
+            marker={getMarker(markerIndexes[0])}
+            threadsKey={0}
+            restrictHeightWidth={true}
+          />
+        </Provider>
+      );
+
+      const filterButton = screen.getByRole('button', {
+        name: /only show markers matching: “\u2068Reflow\u2069”/i,
+      });
+
+      // Initially, the search string should be empty
+      expect(getMarkersSearchString(store.getState())).toBe('');
+
+      // Click the filter button
+      fireEvent.click(filterButton);
+
+      // The search string should now be set to the marker label
+      expect(getMarkersSearchString(store.getState())).toBe('Reflow');
+    });
   });
 });
