@@ -91,6 +91,17 @@ export class IdleSearchField extends PureComponent<Props, State> {
   _onFormSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
   }
+
+  override componentDidUpdate(prevProps: Props) {
+    // When the defaultValue prop changes externally (e.g., from Redux),
+    // getDerivedStateFromProps will update the state value. We need to sync
+    // _previouslyNotifiedValue to match so that subsequent changes are detected
+    // correctly by _notifyIfChanged.
+    if (prevProps.defaultValue !== this.props.defaultValue) {
+      this._previouslyNotifiedValue = this.state.value;
+    }
+  }
+
   static getDerivedStateFromProps(props: Props, state: State) {
     if (props.defaultValue !== state.previousDefaultValue) {
       return {
