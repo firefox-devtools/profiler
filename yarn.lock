@@ -6414,10 +6414,10 @@ interpret@^3.1.1:
   resolved "https://registry.yarnpkg.com/interpret/-/interpret-3.1.1.tgz#5be0ceed67ca79c6c4bc5cf0d7ee843dcea110c4"
   integrity sha512-6xwYfHbajpoF0xLW+iwLkhwgvLoZDfjYfoFNu8ftMoXINzwuymNLd9u/KmwtdT2GbR+/Cz66otEGEVVUHX9QLQ==
 
-iongraph-web@0.1.15:
-  version "0.1.15"
-  resolved "https://registry.yarnpkg.com/iongraph-web/-/iongraph-web-0.1.15.tgz#8d39240cbfaf476ff7e0f3f14b0301eff33477d7"
-  integrity sha512-9QRt32bVk9Uskwb0NYgrrGBo3p7gI2pIuwMgq/ifR3jzyfgKQeICZfngW6GM2Wvivxdxb0y8MxIzJ4Kh3cWZuQ==
+iongraph-web@0.1.16:
+  version "0.1.16"
+  resolved "https://registry.yarnpkg.com/iongraph-web/-/iongraph-web-0.1.16.tgz#c6bc3b4497212c2dcca5d487250498179159efba"
+  integrity sha512-nGKsH4igN2ixiHaxpYuz62SVorRWMi/4aYc1at7uQJxgfqyEWyvBpOI2vo8oHmeEfS+0u3J4OEy5dfknqmWkWg==
 
 ipaddr.js@1.9.1:
   version "1.9.1"
