@@ -236,6 +236,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
                   scrollToHotSpotGeneration={sourceViewScrollGeneration}
                   scrollToLineNumber={sourceViewLineNumber}
                   hotSpotTimings={selectedCallNodeLineTimings}
+                  highlightedLine={sourceViewLineNumber}
                   ref={this._sourceView}
                 />
               ) : null}
