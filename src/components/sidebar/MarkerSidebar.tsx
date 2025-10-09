@@ -9,19 +9,38 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
 import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
+import { updateBottomBoxContentsAndMaybeOpen } from 'firefox-profiler/actions/profile-view';
+import { getBottomBoxInfoForStackFrame } from 'firefox-profiler/profile-logic/profile-data';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import type { ThreadsKey, Marker, MarkerIndex } from 'firefox-profiler/types';
+import type {
+  ThreadsKey,
+  Marker,
+  MarkerIndex,
+  IndexIntoStackTable,
+  Thread,
+} from 'firefox-profiler/types';
 
 type StateProps = {
   readonly selectedThreadsKey: ThreadsKey;
   readonly marker: Marker | null;
   readonly markerIndex: MarkerIndex | null;
+  readonly thread: Thread;
 };
 
-type Props = ConnectedProps<{}, StateProps, {}>;
+type DispatchProps = {
+  readonly updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen;
+};
+
+type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class MarkerSidebarImpl extends React.PureComponent<Props> {
+  _onStackFrameClick = (stackIndex: IndexIntoStackTable) => {
+    const { thread, updateBottomBoxContentsAndMaybeOpen } = this.props;
+    const bottomBoxInfo = getBottomBoxInfoForStackFrame(stackIndex, thread);
+    updateBottomBoxContentsAndMaybeOpen('marker-table', bottomBoxInfo);
+  };
+
   override render() {
     const { marker, markerIndex, selectedThreadsKey } = this.props;
 
@@ -45,6 +64,7 @@ class MarkerSidebarImpl extends React.PureComponent<Props> {
             marker={marker}
             threadsKey={selectedThreadsKey}
             restrictHeightWidth={false}
+            onStackFrameClick={this._onStackFrameClick}
           />
         </div>
       </aside>
@@ -52,11 +72,15 @@ class MarkerSidebarImpl extends React.PureComponent<Props> {
   }
 }
 
-export const MarkerSidebar = explicitConnect<{}, StateProps, {}>({
+export const MarkerSidebar = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     marker: selectedThreadSelectors.getSelectedMarker(state),
     markerIndex: selectedThreadSelectors.getSelectedMarkerIndex(state),
     selectedThreadsKey: getSelectedThreadsKey(state),
+    thread: selectedThreadSelectors.getThread(state),
   }),
+  mapDispatchToProps: {
+    updateBottomBoxContentsAndMaybeOpen,
+  },
   component: MarkerSidebarImpl,
 });
