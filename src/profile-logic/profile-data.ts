@@ -4006,6 +4006,53 @@ export function getBottomBoxInfoForCallNode(
 }
 
 /**
+ * Get bottom box info for a stack frame. This is similar to
+ * getBottomBoxInfoForCallNode but works directly with stack indexes.
+ */
+export function getBottomBoxInfoForStackFrame(
+  stackIndex: IndexIntoStackTable,
+  thread: Thread
+): BottomBoxInfo {
+  const {
+    stackTable,
+    frameTable,
+    funcTable,
+    resourceTable,
+    nativeSymbols,
+    stringTable,
+  } = thread;
+
+  const frameIndex = stackTable.frame[stackIndex];
+  const funcIndex = frameTable.func[frameIndex];
+  const sourceIndex = funcTable.source[funcIndex];
+  const resource = funcTable.resource[funcIndex];
+  const libIndex =
+    resource !== -1 && resourceTable.type[resource] === resourceTypes.library
+      ? resourceTable.lib[resource]
+      : null;
+
+  // Get native symbol for this frame
+  const nativeSymbol = frameTable.nativeSymbol[frameIndex];
+  const nativeSymbolInfos =
+    nativeSymbol !== null
+      ? [
+          getNativeSymbolInfo(
+            nativeSymbol,
+            nativeSymbols,
+            frameTable,
+            stringTable
+          ),
+        ]
+      : [];
+
+  return {
+    libIndex,
+    sourceIndex,
+    nativeSymbols: nativeSymbolInfos,
+  };
+}
+
+/**
  * Determines the timeline type by looking at the profile data.
  *
  * There are three options:
