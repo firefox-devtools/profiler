@@ -23,6 +23,7 @@ import {
   changeRightClickedMarker,
   changeMouseTimePosition,
   changeSelectedMarker,
+  updateBottomBoxContentsAndMaybeOpen,
 } from 'firefox-profiler/actions/profile-view';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 
@@ -35,6 +36,7 @@ import type {
   StartEndRange,
   PreviewSelection,
   ThreadsKey,
+  Thread,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -48,6 +50,7 @@ type DispatchProps = {
   readonly changeRightClickedMarker: typeof changeRightClickedMarker;
   readonly changeMouseTimePosition: typeof changeMouseTimePosition;
   readonly changeSelectedMarker: typeof changeSelectedMarker;
+  readonly updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen;
 };
 
 type StateProps = {
@@ -62,6 +65,7 @@ type StateProps = {
   readonly previewSelection: PreviewSelection | null;
   readonly rightClickedMarkerIndex: MarkerIndex | null;
   readonly selectedMarkerIndex: MarkerIndex | null;
+  readonly thread: Thread;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -171,6 +175,9 @@ class MarkerChartImpl extends React.PureComponent<Props> {
                 selectedMarkerIndex,
                 rightClickedMarkerIndex,
                 shouldDisplayTooltips: this._shouldDisplayTooltips,
+                thread: this.props.thread,
+                updateBottomBoxContentsAndMaybeOpen:
+                  this.props.updateBottomBoxContentsAndMaybeOpen,
               }}
             />
           </ContextMenuTrigger>
@@ -206,6 +213,7 @@ export const MarkerChart = explicitConnect<{}, StateProps, DispatchProps>({
         selectedThreadSelectors.getRightClickedMarkerIndex(state),
       selectedMarkerIndex:
         selectedThreadSelectors.getSelectedMarkerIndex(state),
+      thread: selectedThreadSelectors.getThread(state),
     };
   },
   mapDispatchToProps: {
@@ -213,6 +221,7 @@ export const MarkerChart = explicitConnect<{}, StateProps, DispatchProps>({
     changeMouseTimePosition,
     changeRightClickedMarker,
     changeSelectedMarker,
+    updateBottomBoxContentsAndMaybeOpen,
   },
   component: MarkerChartImpl,
 });

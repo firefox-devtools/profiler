@@ -17,6 +17,7 @@ import type {
   changeRightClickedMarker,
   changeMouseTimePosition,
   changeSelectedMarker,
+  updateBottomBoxContentsAndMaybeOpen,
 } from 'firefox-profiler/actions/profile-view';
 
 type UpdatePreviewSelection = typeof updatePreviewSelection;
@@ -35,6 +36,8 @@ import type {
   MarkerIndex,
   MarkerSchemaByName,
   GraphColor,
+  Thread,
+  IndexIntoStackTable,
 } from 'firefox-profiler/types';
 import { getStartEndRangeForMarker } from 'firefox-profiler/utils';
 import {
@@ -45,6 +48,7 @@ import {
   isValidGraphColor,
 } from 'firefox-profiler/profile-logic/graph-color';
 import { getSchemaFromMarker } from 'firefox-profiler/profile-logic/marker-schema';
+import { getBottomBoxInfoForStackFrame } from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
   ChartCanvasScale,
@@ -81,6 +85,8 @@ type OwnProps = {
   readonly selectedMarkerIndex: MarkerIndex | null;
   readonly rightClickedMarkerIndex: MarkerIndex | null;
   readonly shouldDisplayTooltips: () => boolean;
+  readonly thread: Thread;
+  readonly updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen;
 };
 
 type Props = OwnProps & {
@@ -869,6 +875,12 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     changeRightClickedMarker(threadsKey, markerIndex);
   };
 
+  _onStackFrameClick = (stackIndex: IndexIntoStackTable) => {
+    const { thread, updateBottomBoxContentsAndMaybeOpen } = this.props;
+    const bottomBoxInfo = getBottomBoxInfoForStackFrame(stackIndex, thread);
+    updateBottomBoxContentsAndMaybeOpen('marker-chart', bottomBoxInfo);
+  };
+
   getHoveredMarkerInfo = (markerIndex: MarkerIndex): React.ReactNode => {
     if (!this.props.shouldDisplayTooltips() || markerIndex === null) {
       return null;
@@ -881,6 +893,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         marker={marker}
         threadsKey={this.props.threadsKey}
         restrictHeightWidth={true}
+        onStackFrameClick={this._onStackFrameClick}
       />
     );
   };
