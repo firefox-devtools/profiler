@@ -14,6 +14,7 @@ import { CodeLoadingOverlay } from './CodeLoadingOverlay';
 import { CodeErrorOverlay } from './CodeErrorOverlay';
 import {
   getSourceViewScrollGeneration,
+  getSourceViewLineNumber,
   getAssemblyViewIsOpen,
   getAssemblyViewNativeSymbol,
   getAssemblyViewScrollGeneration,
@@ -54,6 +55,7 @@ type StateProps = {
   readonly sourceViewFile: string | null;
   readonly sourceViewCode: SourceCodeStatus | void;
   readonly sourceViewScrollGeneration: number;
+  readonly sourceViewLineNumber?: number;
   readonly globalLineTimings: LineTimings;
   readonly selectedCallNodeLineTimings: LineTimings;
   readonly assemblyViewIsOpen: boolean;
@@ -160,6 +162,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       globalLineTimings,
       disableOverscan,
       sourceViewScrollGeneration,
+      sourceViewLineNumber,
       selectedCallNodeLineTimings,
       assemblyViewIsOpen,
       assemblyViewScrollGeneration,
@@ -183,6 +186,19 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     const sourceIsIonGraph = path !== null && path.endsWith('iongraph.json');
     const displaySourceView = sourceViewFile !== null && !sourceIsIonGraph;
     const displayIonGraph = sourceViewFile !== null && sourceIsIonGraph;
+
+    // When we have a specific line number to scroll to (e.g., from a crash marker)
+    // but no timing data, create synthetic timings to highlight that line.
+    let timings = globalLineTimings;
+    if (
+      sourceViewLineNumber !== undefined &&
+      selectedCallNodeLineTimings.totalLineHits.size === 0
+    ) {
+      timings = {
+        totalLineHits: new Map([[sourceViewLineNumber, 1]]),
+        selfLineHits: new Map([[sourceViewLineNumber, 1]]),
+      };
+    }
 
     // The bottom box has one or more side-by-side panes.
     // At the moment it always has either one or two panes:
@@ -219,7 +235,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
             <div className="bottom-sourceview-wrapper">
               {displayIonGraph ? (
                 <IonGraphView
-                  timings={globalLineTimings}
+                  timings={timings}
                   hotSpotTimings={selectedCallNodeLineTimings}
                   sourceCode={sourceCode}
                 />
@@ -227,10 +243,11 @@ class BottomBoxImpl extends React.PureComponent<Props> {
               {displaySourceView ? (
                 <SourceView
                   disableOverscan={disableOverscan}
-                  timings={globalLineTimings}
+                  timings={timings}
                   sourceCode={sourceCode}
                   filePath={path}
                   scrollToHotSpotGeneration={sourceViewScrollGeneration}
+                  scrollToLineNumber={sourceViewLineNumber}
                   hotSpotTimings={selectedCallNodeLineTimings}
                   ref={this._sourceView}
                 />
@@ -300,6 +317,7 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
     selectedCallNodeLineTimings:
       selectedNodeSelectors.getSourceViewLineTimings(state),
     sourceViewScrollGeneration: getSourceViewScrollGeneration(state),
+    sourceViewLineNumber: getSourceViewLineNumber(state),
     assemblyViewNativeSymbol: getAssemblyViewNativeSymbol(state),
     assemblyViewCode: getAssemblyViewCode(state),
     globalAddressTimings:

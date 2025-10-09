@@ -81,6 +81,9 @@ class AssemblyCodeFetcherImpl extends React.PureComponent<Props> {
     }
 
     const lib = profile.libs[nativeSymbol.libIndex];
+    if (!lib) {
+      return;
+    }
     const { debugName, breakpadId } = lib;
     const hexAddress = nativeSymbol.address.toString(16);
     const nativeSymbolKey = `${debugName}/${breakpadId}/${hexAddress}`;

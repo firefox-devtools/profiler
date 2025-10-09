@@ -22,16 +22,39 @@ type Props = {
   readonly stackIndex: IndexIntoStackTable;
   readonly implementationFilter: ImplementationFilter;
   readonly categories: CategoryList;
+  readonly onStackFrameClick?: (stackIndex: IndexIntoStackTable) => void;
 };
 
 export function Backtrace(props: Props) {
-  const { stackIndex, thread, implementationFilter, maxStacks, categories } =
-    props;
+  const {
+    stackIndex,
+    thread,
+    implementationFilter,
+    maxStacks,
+    categories,
+    onStackFrameClick,
+  } = props;
   const funcNamesAndOrigins = getBacktraceItemsForStack(
     stackIndex,
     implementationFilter,
     thread
   );
+
+  // Build a mapping from filtered frame index to stack index
+  const { stackTable } = thread;
+  const stackIndices: IndexIntoStackTable[] = [];
+  for (
+    let currentStackIndex: IndexIntoStackTable | null = stackIndex;
+    currentStackIndex !== null;
+    currentStackIndex = stackTable.prefix[currentStackIndex]
+  ) {
+    stackIndices.push(currentStackIndex);
+  }
+
+  // Create event handlers for each stack frame to avoid arrow functions in JSX
+  const stackFrameHandlers = onStackFrameClick
+    ? stackIndices.map((stackIdx) => () => onStackFrameClick(stackIdx))
+    : [];
 
   if (funcNamesAndOrigins.length) {
     return (
@@ -39,21 +62,35 @@ export function Backtrace(props: Props) {
         {funcNamesAndOrigins
           // Truncate the stacks
           .slice(0, maxStacks)
-          .map(({ funcName, origin, isFrameLabel, category }, i) => (
-            <li
-              key={i}
-              className={classNames('backtraceStackFrame', {
-                backtraceStackFrame_isFrameLabel: isFrameLabel,
-              })}
-            >
-              <span
-                className={`colored-border category-color-${categories[category].color}`}
-                title={categories[category].name}
-              />
-              {funcName}
-              <em className="backtraceStackFrameOrigin">{origin}</em>
-            </li>
-          ))}
+          .map(
+            ({ funcName, origin, isFrameLabel, category, inlineDepth }, i) => {
+              return (
+                <li
+                  key={i}
+                  className={classNames('backtraceStackFrame', {
+                    backtraceStackFrame_isFrameLabel: isFrameLabel,
+                    backtraceStackFrame_clickable:
+                      onStackFrameClick !== undefined,
+                  })}
+                  onDoubleClick={
+                    onStackFrameClick ? stackFrameHandlers[i] : undefined
+                  }
+                >
+                  <span
+                    className={`colored-border category-color-${categories[category].color}`}
+                    title={categories[category].name}
+                  />
+                  {inlineDepth > 0 ? (
+                    <span className="backtraceInlineBadge" title="inlined">
+                      (inlined)
+                    </span>
+                  ) : null}
+                  {funcName}
+                  <em className="backtraceStackFrameOrigin">{origin}</em>
+                </li>
+              );
+            }
+          )}
         {funcNamesAndOrigins.length > maxStacks
           ? [
               <span
