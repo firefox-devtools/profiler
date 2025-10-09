@@ -4045,10 +4045,14 @@ export function getBottomBoxInfoForStackFrame(
         ]
       : [];
 
+  // Extract line number from the frame
+  const lineNumber = frameTable.line[frameIndex] ?? undefined;
+
   return {
     libIndex,
     sourceIndex,
     nativeSymbols: nativeSymbolInfos,
+    lineNumber,
   };
 }
 
