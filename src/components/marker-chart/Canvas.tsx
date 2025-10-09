@@ -884,8 +884,27 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     updateBottomBoxContentsAndMaybeOpen(selectedTab, bottomBoxInfo);
   };
 
+  isMarkerVisible = (markerIndex: MarkerIndex): boolean => {
+    const { markerTimingAndBuckets } = this.props;
+    // Check if the marker appears in the visible marker timing data
+    for (const markerTiming of markerTimingAndBuckets) {
+      if (typeof markerTiming === 'string') {
+        continue;
+      }
+      if (markerTiming.index.includes(markerIndex)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   getHoveredMarkerInfo = (markerIndex: MarkerIndex): React.ReactNode => {
     if (!this.props.shouldDisplayTooltips() || markerIndex === null) {
+      return null;
+    }
+
+    // Check if the marker is visible (not filtered out)
+    if (!this.isMarkerVisible(markerIndex)) {
       return null;
     }
 
