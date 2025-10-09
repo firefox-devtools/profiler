@@ -45,6 +45,7 @@ type SourceViewProps = {
   readonly scrollToHotSpotGeneration: number;
   readonly scrollToLineNumber?: number;
   readonly hotSpotTimings: LineTimings;
+  readonly highlightedLine?: number;
 };
 
 let editorModulePromise: Promise<any> | null = null;
@@ -141,6 +142,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
         this._getSourceCodeOrFallback(),
         this.props.filePath,
         this.props.timings,
+        this.props.highlightedLine ?? null,
         domParent
       );
       this._editor = editor;
@@ -190,6 +192,10 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
 
     if (this.props.timings !== prevProps.timings) {
       this._editor.setTimings(this.props.timings);
+    }
+
+    if (this.props.highlightedLine !== prevProps.highlightedLine) {
+      this._editor.setHighlightedLine(this.props.highlightedLine ?? null);
     }
   }
 }

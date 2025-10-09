@@ -31,11 +31,15 @@ import type { LineTimings } from 'firefox-profiler/types';
 import {
   timingsExtension,
   updateTimingsEffect,
+  createHighlightedLineExtension,
 } from 'firefox-profiler/utils/codemirror-shared';
 
 // This "compartment" allows us to swap the syntax highlighting language when
 // the file path changes.
 const languageConf = new Compartment();
+
+// This "compartment" allows us to swap the highlighted line when it changes.
+const highlightedLineConf = new Compartment();
 
 // Detect the right language based on the file extension.
 function _languageExtForPath(
@@ -89,6 +93,7 @@ export class SourceViewEditor {
     initialText: string,
     path: string,
     timings: LineTimings,
+    highlightedLine: number | null,
     domParent: Element
   ) {
     let state = EditorState.create({
@@ -97,6 +102,7 @@ export class SourceViewEditor {
         timingsExtension,
         lineNumbers(),
         languageConf.of(_languageExtForPath(path)),
+        highlightedLineConf.of(createHighlightedLineExtension(highlightedLine)),
         syntaxHighlighting(classHighlighter),
         codeViewerExtension,
       ],
@@ -134,6 +140,15 @@ export class SourceViewEditor {
     // Update the value of the timings field by dispatching an updateTimingsEffect.
     this._view.dispatch({
       effects: updateTimingsEffect.of(timings),
+    });
+  }
+
+  setHighlightedLine(lineNumber: number | null) {
+    // Update the highlighted line by reconfiguring the compartment.
+    this._view.dispatch({
+      effects: highlightedLineConf.reconfigure(
+        createHighlightedLineExtension(lineNumber)
+      ),
     });
   }
 
