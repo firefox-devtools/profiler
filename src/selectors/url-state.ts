@@ -75,6 +75,8 @@ export const getSourceViewSourceIndex: Selector<IndexIntoSourceTable | null> = (
 ) => getProfileSpecificState(state).sourceView.sourceIndex;
 export const getSourceViewScrollGeneration: Selector<number> = (state) =>
   getProfileSpecificState(state).sourceView.scrollGeneration;
+export const getSourceViewLineNumber: Selector<number | undefined> = (state) =>
+  getProfileSpecificState(state).sourceView.lineNumber;
 export const getAssemblyViewIsOpen: Selector<boolean> = (state) =>
   getProfileSpecificState(state).assemblyView.isOpen;
 export const getAssemblyViewNativeSymbol: Selector<NativeSymbolInfo | null> = (

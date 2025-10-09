@@ -43,6 +43,7 @@ type SourceViewProps = {
   readonly disableOverscan: boolean;
   readonly filePath: string | null;
   readonly scrollToHotSpotGeneration: number;
+  readonly scrollToLineNumber?: number;
   readonly hotSpotTimings: LineTimings;
 };
 
@@ -143,7 +144,12 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
         domParent
       );
       this._editor = editor;
-      this._scrollToHotSpot(this.props.hotSpotTimings);
+      // If an explicit line number is provided, scroll to it. Otherwise, scroll to the hotspot.
+      if (this.props.scrollToLineNumber !== undefined) {
+        this._scrollToLine(Math.max(1, this.props.scrollToLineNumber - 5));
+      } else {
+        this._scrollToHotSpot(this.props.hotSpotTimings);
+      }
     })();
   }
 
@@ -174,7 +180,12 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
       this.props.scrollToHotSpotGeneration !==
         prevProps.scrollToHotSpotGeneration
     ) {
-      this._scrollToHotSpot(this.props.hotSpotTimings);
+      // If an explicit line number is provided, scroll to it. Otherwise, scroll to the hotspot.
+      if (this.props.scrollToLineNumber !== undefined) {
+        this._scrollToLine(Math.max(1, this.props.scrollToLineNumber - 5));
+      } else {
+        this._scrollToHotSpot(this.props.hotSpotTimings);
+      }
     }
 
     if (this.props.timings !== prevProps.timings) {
