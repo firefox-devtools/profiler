@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import * as React from 'react';
 import classNames from 'classnames';
 import { Localized } from '@fluent/react';
 import { getBacktraceItemsForStack } from 'firefox-profiler/profile-logic/transforms';
@@ -24,68 +25,115 @@ type Props = {
   readonly stackIndex: IndexIntoStackTable;
   readonly implementationFilter: ImplementationFilter;
   readonly categories: CategoryList;
+  readonly onStackFrameClick?: (stackIndex: IndexIntoStackTable) => void;
 };
 
-export function Backtrace(props: Props) {
-  const { stackIndex, thread, implementationFilter, maxStacks, categories } =
-    props;
-  const funcNamesAndOrigins = getBacktraceItemsForStack(
-    stackIndex,
-    implementationFilter,
-    thread
-  );
+export class Backtrace extends React.PureComponent<Props> {
+  _handleStackFrameClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    const stackIdx = event.currentTarget.getAttribute('data-stackindex');
+    this.props.onStackFrameClick!(Number(stackIdx));
+  };
 
-  if (funcNamesAndOrigins.length) {
-    return (
-      <ul className="backtrace">
-        {funcNamesAndOrigins
-          // Truncate the stacks
-          .slice(0, maxStacks)
-          .map(
-            ({ funcName, origin, isFrameLabel, category, inlineDepth }, i) => (
-              <li
-                key={i}
-                className={classNames('backtraceStackFrame', {
-                  backtraceStackFrame_isFrameLabel: isFrameLabel,
-                })}
-              >
-                <span
-                  className={`colored-border category-color-${categories[category].color}`}
-                  title={categories[category].name}
-                />
-                {inlineDepth > 0 ? (
-                  <Localized
-                    id="Backtrace--inlining-badge"
-                    vars={{ function: getFunctionName(funcName) }}
-                    attrs={{ title: true }}
+  override render() {
+    const {
+      stackIndex,
+      thread,
+      implementationFilter,
+      maxStacks,
+      categories,
+      onStackFrameClick,
+    } = this.props;
+    const backtraceItems = getBacktraceItemsForStack(
+      stackIndex,
+      implementationFilter,
+      thread
+    );
+
+    if (backtraceItems.length) {
+      return (
+        <ul className="backtrace">
+          {backtraceItems
+            // Truncate the stacks
+            .slice(0, maxStacks)
+            .map(
+              (
+                {
+                  funcName,
+                  origin,
+                  isFrameLabel,
+                  category,
+                  inlineDepth,
+                  stackIndex,
+                },
+                i
+              ) => {
+                const frameContent = (
+                  <>
+                    <span
+                      className={`colored-border category-color-${categories[category].color}`}
+                      title={categories[category].name}
+                    />
+                    {inlineDepth > 0 ? (
+                      <Localized
+                        id="Backtrace--inlining-badge"
+                        vars={{ function: getFunctionName(funcName) }}
+                        attrs={{ title: true }}
+                      >
+                        <span
+                          className="backtraceBadge inlined"
+                          title="inlined"
+                        >
+                          (inlined)
+                        </span>
+                      </Localized>
+                    ) : null}
+                    {funcName}
+                    <em className="backtraceStackFrameOrigin">{origin}</em>
+                  </>
+                );
+
+                return (
+                  <li
+                    key={i}
+                    className={classNames('backtraceStackFrame', {
+                      backtraceStackFrame_isFrameLabel: isFrameLabel,
+                    })}
                   >
-                    <span className="backtraceBadge inlined" title="inlined">
-                      (inlined)
-                    </span>
-                  </Localized>
-                ) : null}
-                {funcName}
-                <em className="backtraceStackFrameOrigin">{origin}</em>
-              </li>
-            )
-          )}
-        {funcNamesAndOrigins.length > maxStacks
-          ? [
-              <span
-                key={funcNamesAndOrigins.length}
-                className="colored-border ellipsis"
-              />,
-              '…',
-            ]
-          : null}
-      </ul>
+                    {onStackFrameClick && stackIndex !== null ? (
+                      <a
+                        href=""
+                        className="backtraceStackFrame_link"
+                        data-stackindex={stackIndex}
+                        onClick={this._handleStackFrameClick}
+                      >
+                        {frameContent}
+                      </a>
+                    ) : (
+                      frameContent
+                    )}
+                  </li>
+                );
+              }
+            )}
+          {backtraceItems.length > maxStacks
+            ? [
+                <span
+                  key={backtraceItems.length}
+                  className="colored-border ellipsis"
+                />,
+                '…',
+              ]
+            : null}
+        </ul>
+      );
+    }
+    return (
+      <div className="backtrace">
+        (The stack is empty because all of its frames are filtered out by the
+        implementation filter. Switch the implementation filter in the call tree
+        to see more frames.)
+      </div>
     );
   }
-  return (
-    <div className="backtrace">
-      (The stack is empty because all of its frames are filtered out by the
-      implementation filter. Switch the implementation filter in the call tree
-      to see more frames.)
-    </div>
-  );
 }
