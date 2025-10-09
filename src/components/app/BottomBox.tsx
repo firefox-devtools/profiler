@@ -187,6 +187,19 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     const displaySourceView = sourceViewFile !== null && !sourceIsIonGraph;
     const displayIonGraph = sourceViewFile !== null && sourceIsIonGraph;
 
+    // When we have a specific line number to scroll to (e.g., from a crash marker)
+    // but no timing data, create synthetic timings to highlight that line.
+    let timings = globalLineTimings;
+    if (
+      sourceViewLineNumber !== undefined &&
+      selectedCallNodeLineTimings.totalLineHits.size === 0
+    ) {
+      timings = {
+        totalLineHits: new Map([[sourceViewLineNumber, 1]]),
+        selfLineHits: new Map([[sourceViewLineNumber, 1]]),
+      };
+    }
+
     // The bottom box has one or more side-by-side panes.
     // At the moment it always has either one or two panes:
     //  - It always has the source view pane
@@ -222,7 +235,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
             <div className="bottom-sourceview-wrapper">
               {displayIonGraph ? (
                 <IonGraphView
-                  timings={globalLineTimings}
+                  timings={timings}
                   hotSpotTimings={selectedCallNodeLineTimings}
                   sourceCode={sourceCode}
                 />
@@ -230,7 +243,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
               {displaySourceView ? (
                 <SourceView
                   disableOverscan={disableOverscan}
-                  timings={globalLineTimings}
+                  timings={timings}
                   sourceCode={sourceCode}
                   filePath={path}
                   scrollToHotSpotGeneration={sourceViewScrollGeneration}
