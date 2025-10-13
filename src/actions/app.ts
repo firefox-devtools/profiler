@@ -107,10 +107,6 @@ export function changeSidebarOpenState(tab: TabSlug, isOpen: boolean): Action {
   return { type: 'CHANGE_SIDEBAR_OPEN_STATE', tab, isOpen };
 }
 
-export function invalidatePanelLayout(): Action {
-  return { type: 'INCREMENT_PANEL_LAYOUT_GENERATION' as const };
-}
-
 /**
  * The viewport component provides a hint to use shift to zoom scroll. The first
  * time a user does this, the hint goes away.

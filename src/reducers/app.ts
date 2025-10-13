@@ -111,47 +111,6 @@ const isSidebarOpenPerPanel: Reducer<IsOpenPerPanelState> = (
 };
 
 /**
- * The panels that make up the timeline, details view, and sidebar can all change
- * their sizes depending on the state that is fed to them. In order to control
- * the invalidations of this sizing information, provide a "generation" value that
- * increases monotonically for any change that potentially changes the sizing of
- * any of the panels. This provides a mechanism for subscribing components to
- * deterministically update their sizing correctly.
- */
-const panelLayoutGeneration: Reducer<number> = (state = 0, action) => {
-  switch (action.type) {
-    case 'INCREMENT_PANEL_LAYOUT_GENERATION':
-    // Sidebar: (fallthrough)
-    case 'CHANGE_SIDEBAR_OPEN_STATE':
-    // Timeline: (fallthrough)
-    case 'HIDE_GLOBAL_TRACK':
-    case 'SHOW_ALL_TRACKS':
-    case 'SHOW_PROVIDED_TRACKS':
-    case 'HIDE_PROVIDED_TRACKS':
-    case 'SHOW_GLOBAL_TRACK':
-    case 'SHOW_GLOBAL_TRACK_INCLUDING_LOCAL_TRACKS':
-    case 'ISOLATE_PROCESS':
-    case 'ISOLATE_PROCESS_MAIN_THREAD':
-    case 'HIDE_LOCAL_TRACK':
-    case 'SHOW_LOCAL_TRACK':
-    case 'ISOLATE_LOCAL_TRACK':
-    case 'TOGGLE_RESOURCES_PANEL':
-    case 'ENABLE_EXPERIMENTAL_CPU_GRAPHS':
-    case 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS':
-    case 'CHANGE_TAB_FILTER':
-    // Committed range changes: (fallthrough)
-    case 'COMMIT_RANGE':
-    case 'POP_COMMITTED_RANGES':
-    // Bottom box: (fallthrough)
-    case 'UPDATE_BOTTOM_BOX':
-    case 'CLOSE_BOTTOM_BOX_FOR_TAB':
-      return state + 1;
-    default:
-      return state;
-  }
-};
-
-/**
  * Clicking on tracks can switch between different tabs. This piece of state holds
  * on to the last relevant thread-based tab that was viewed. This makes the UX nicer
  * for when a user clicks on a Network track, and gets taken to the Network
@@ -361,7 +320,6 @@ const appStateReducer: Reducer<AppState> = combineReducers({
   urlSetupPhase,
   hasZoomedViaMousewheel,
   isSidebarOpenPerPanel,
-  panelLayoutGeneration,
   lastVisibleThreadTabSlug,
   trackThreadHeights,
   isNewlyPublished,

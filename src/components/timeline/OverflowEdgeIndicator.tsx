@@ -11,7 +11,6 @@ import './OverflowEdgeIndicator.css';
 type Props = {
   className: string;
   children: React.ReactNode;
-  panelLayoutGeneration: number;
   initialSelected: InitialSelectedTrackReference | null;
   forceLayoutGeneration?: number;
 };
@@ -113,10 +112,7 @@ class OverflowEdgeIndicator extends React.PureComponent<Props, State> {
         <div className="overflowEdgeIndicatorEdge bottomEdge" />
         <div className="overflowEdgeIndicatorEdge leftEdge" />
         <div
-          className={classNames(
-            'overflowEdgeIndicatorScrollbox',
-            `${className}Scrollbox`
-          )}
+          className="overflowEdgeIndicatorScrollbox"
           onScroll={this._onScroll}
           ref={this._takeContainerRef}
         >
