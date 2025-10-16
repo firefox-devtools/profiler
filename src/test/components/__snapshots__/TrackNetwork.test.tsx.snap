@@ -56,7 +56,17 @@ exports[`timeline/TrackNetwork draws differently a request and displays a toolti
         <div
           class="tooltipTitle"
         >
-          Load 0: https://mozilla.org
+          <span
+            class="tooltipTitleText"
+          >
+            Load 0: https://mozilla.org
+          </span>
+          <button
+            aria-label="Only show \\"⁨Load 0: https://mozilla.org⁩\\" markers"
+            class="tooltipTitleFilterButton"
+            title="Only show \\"⁨Load 0: https://mozilla.org⁩\\" markers"
+            type="button"
+          />
         </div>
       </div>
     </div>
