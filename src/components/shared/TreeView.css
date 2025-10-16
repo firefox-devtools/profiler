@@ -132,7 +132,8 @@
   flex: none;
 }
 
-.treeBadge {
+.treeBadge,
+.backtraceBadge {
   display: inline-block;
   overflow: hidden;
   width: 12px;
