@@ -3,7 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import classNames from 'classnames';
+import { Localized } from '@fluent/react';
 import { getBacktraceItemsForStack } from 'firefox-profiler/profile-logic/transforms';
+import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
 
 import type {
   CategoryList,
@@ -39,21 +41,34 @@ export function Backtrace(props: Props) {
         {funcNamesAndOrigins
           // Truncate the stacks
           .slice(0, maxStacks)
-          .map(({ funcName, origin, isFrameLabel, category }, i) => (
-            <li
-              key={i}
-              className={classNames('backtraceStackFrame', {
-                backtraceStackFrame_isFrameLabel: isFrameLabel,
-              })}
-            >
-              <span
-                className={`colored-border category-color-${categories[category].color}`}
-                title={categories[category].name}
-              />
-              {funcName}
-              <em className="backtraceStackFrameOrigin">{origin}</em>
-            </li>
-          ))}
+          .map(
+            ({ funcName, origin, isFrameLabel, category, inlineDepth }, i) => (
+              <li
+                key={i}
+                className={classNames('backtraceStackFrame', {
+                  backtraceStackFrame_isFrameLabel: isFrameLabel,
+                })}
+              >
+                <span
+                  className={`colored-border category-color-${categories[category].color}`}
+                  title={categories[category].name}
+                />
+                {inlineDepth > 0 ? (
+                  <Localized
+                    id="Backtrace--inlining-badge"
+                    vars={{ function: getFunctionName(funcName) }}
+                    attrs={{ title: true }}
+                  >
+                    <span className="backtraceBadge inlined" title="inlined">
+                      (inlined)
+                    </span>
+                  </Localized>
+                ) : null}
+                {funcName}
+                <em className="backtraceStackFrameOrigin">{origin}</em>
+              </li>
+            )
+          )}
         {funcNamesAndOrigins.length > maxStacks
           ? [
               <span
