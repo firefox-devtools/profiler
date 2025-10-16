@@ -2,6 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+.bottom-box-fullscreen {
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .bottom-box-pane {
   display: flex;
   height: 100%; /* direct child of SplitterLayout */
@@ -62,7 +71,9 @@
 }
 
 .bottom-close-button,
-.bottom-assembly-button {
+.bottom-assembly-button,
+.bottom-fullscreen-hide-button,
+.bottom-fullscreen-show-button {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
@@ -77,6 +88,14 @@
 
 .bottom-assembly-button {
   background-image: url(../../../res/img/svg/asm-icon.svg);
+}
+
+.bottom-fullscreen-show-button {
+  background-image: url(firefox-profiler-res/img/svg/maximise.svg);
+}
+
+.bottom-fullscreen-hide-button {
+  background-image: url(firefox-profiler-res/img/svg/minimise.svg);
 }
 
 .codeLoadingOverlay,
