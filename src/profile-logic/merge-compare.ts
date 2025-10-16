@@ -444,7 +444,7 @@ function mergeCategories(categoriesPerProfile: Array<CategoryList | void>): {
   const newCategoryIndexByName: Map<string, IndexIntoCategoryList> = new Map();
 
   const translationMaps = categoriesPerProfile.map((categories) => {
-    const translationMap = new Map();
+    const translationMap: TranslationMapForCategories = new Map();
 
     if (!categories) {
       // Profiles that are imported may not have categories. Ignore it when attempting
@@ -482,7 +482,7 @@ function mergeStringArrays(stringArraysPerProfile: Array<string[]>): {
   const newStringTable = StringTable.withBackingArray(newStringArray);
 
   const translationMaps = stringArraysPerProfile.map((stringArray) => {
-    const translationMap = new Map();
+    const translationMap: TranslationMapForStrings = new Map();
     for (let i = 0; i < stringArray.length; i++) {
       translationMap.set(i, newStringTable.indexForString(stringArray[i]));
     }
@@ -503,7 +503,7 @@ function mergeSources(
   const mapOfInsertedSources: Map<string, IndexIntoSourceTable> = new Map();
 
   const translationMaps = sourcesPerProfile.map((sources, profileIndex) => {
-    const translationMap = new Map();
+    const translationMap: TranslationMapForSources = new Map();
     if (!sources) {
       return translationMap;
     }
@@ -725,11 +725,11 @@ function mergeLibs(libsPerProfile: Lib[][]): {
 } {
   const mapOfInsertedLibs: Map<string, IndexIntoLibs> = new Map();
 
-  const translationMaps: Array<Map<IndexIntoLibs, IndexIntoLibs>> = [];
+  const translationMaps: Array<TranslationMapForLibs> = [];
   const newLibTable: Lib[] = [];
 
   for (const libs of libsPerProfile) {
-    const translationMap = new Map();
+    const translationMap: TranslationMapForLibs = new Map();
 
     libs.forEach((lib, i) => {
       const insertedLibKey = [lib.name, lib.debugName].join('#');
@@ -765,7 +765,7 @@ function combineResourceTables(threads: ReadonlyArray<RawThread>): {
   const newResourceTable = getEmptyResourceTable();
 
   threads.forEach((thread) => {
-    const translationMap = new Map();
+    const translationMap: TranslationMapForResources = new Map();
     const { resourceTable } = thread;
 
     for (let i = 0; i < resourceTable.length; i++) {
@@ -811,7 +811,7 @@ function combineNativeSymbolTables(threads: ReadonlyArray<RawThread>): {
   const newNativeSymbols = getEmptyNativeSymbolTable();
 
   threads.forEach((thread) => {
-    const translationMap = new Map();
+    const translationMap: TranslationMapForNativeSymbols = new Map();
     const { nativeSymbols } = thread;
 
     for (let i = 0; i < nativeSymbols.length; i++) {
@@ -861,7 +861,7 @@ function combineFuncTables(
 
   threads.forEach((thread, threadIndex) => {
     const { funcTable } = thread;
-    const translationMap = new Map();
+    const translationMap: TranslationMapForFuncs = new Map();
     const resourceTranslationMap = translationMapsForResources[threadIndex];
 
     for (let i = 0; i < funcTable.length; i++) {
@@ -931,7 +931,7 @@ function combineFrameTables(
 
   threads.forEach((thread, threadIndex) => {
     const { frameTable } = thread;
-    const translationMap = new Map();
+    const translationMap: TranslationMapForFrames = new Map();
     const funcTranslationMap = translationMapsForFuncs[threadIndex];
     const nativeSymbolTranslationMap =
       translationMapsForNativeSymbols[threadIndex];
@@ -993,7 +993,7 @@ function combineStackTables(
 
   threads.forEach((thread, threadIndex) => {
     const { stackTable } = thread;
-    const translationMap = new Map();
+    const translationMap: TranslationMapForStacks = new Map();
     const frameTranslationMap = translationMapsForFrames[threadIndex];
 
     for (let i = 0; i < stackTable.length; i++) {
@@ -1042,7 +1042,7 @@ function combineSamplesDiffing(
     ThreadAndWeightMultiplier,
   ]
 ): { samples: RawSamplesTable; translationMaps: TranslationMapForSamples[] } {
-  const translationMaps = [new Map(), new Map()];
+  const translationMaps: TranslationMapForSamples[] = [new Map(), new Map()];
   const [
     {
       thread: { samples: samples1, tid: tid1 },
@@ -1427,7 +1427,7 @@ function mergeMarkers(
 
   threads.forEach((thread, threadIndex) => {
     const translationMapForStacks = translationMapsForStacks[threadIndex];
-    const translationMap = new Map();
+    const translationMap: TranslationMapForMarkers = new Map();
     const { markers } = thread;
 
     for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {

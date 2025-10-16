@@ -635,7 +635,7 @@ function convertHiddenLocalTracksByPidFromString(
     return new Map();
   }
 
-  const hiddenLocalTracksByPid = new Map();
+  const hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>> = new Map();
 
   for (const stringPart of rawText.split('~')) {
     if (!stringPart.includes('-')) {
@@ -679,7 +679,7 @@ function convertLocalTrackOrderByPidFromString(
     return new Map();
   }
 
-  const localTrackOrderByPid = new Map();
+  const localTrackOrderByPid: Map<Pid, TrackIndex[]> = new Map();
 
   for (const stringPart of rawText.split('~')) {
     if (!stringPart.includes('-')) {
@@ -1018,12 +1018,10 @@ const _upgraders: {
         .join('~');
     }
     if (query.thread) {
-      const selectedThreads = new Set(
+      const selectedThreads: Set<number> = new Set(
         query.thread.split(',').map((n: string) => +n)
       );
-      query.thread = encodeUintSetForUrlComponent(
-        selectedThreads as Set<number>
-      );
+      query.thread = encodeUintSetForUrlComponent(selectedThreads);
     }
 
     // In this version, uintarray-encoding started supporting a range syntax:
