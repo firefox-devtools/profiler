@@ -9,6 +9,7 @@ import {
   formatTimestamp,
 } from 'firefox-profiler/utils/format-numbers';
 import explicitConnect from 'firefox-profiler/utils/connect';
+import { useAltKey } from 'firefox-profiler/hooks/useAltKey';
 import {
   getCategories,
   getMarkerSchemaByName,
@@ -83,6 +84,7 @@ type OwnProps = {
   // the layout to be huge. This option when set to true will restrict the
   // height of things like stacks, and the width of long things like URLs.
   readonly restrictHeightWidth: boolean;
+  readonly showKeys?: boolean;
 };
 
 type StateProps = {
@@ -265,8 +267,10 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
             continue;
           }
 
+          // When Alt is pressed (showKeys is true), display the field key instead of label
+          const displayLabel = this.props.showKeys ? key : label || key;
           details.push(
-            <TooltipDetail key={schema.name + '-' + key} label={label || key}>
+            <TooltipDetail key={schema.name + '-' + key} label={displayLabel}>
               {formatMarkupFromMarkerSchema(
                 schema.name,
                 format,
@@ -522,7 +526,11 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
   }
 }
 
-export const TooltipMarker = explicitConnect<OwnProps, StateProps, {}>({
+const ConnectedMarkerTooltipContents = explicitConnect<
+  OwnProps,
+  StateProps,
+  {}
+>({
   mapStateToProps: (state, props) => {
     const selectors = getThreadSelectorsFromThreadsKey(props.threadsKey);
     return {
@@ -541,3 +549,9 @@ export const TooltipMarker = explicitConnect<OwnProps, StateProps, {}>({
   },
   component: MarkerTooltipContents,
 });
+
+// Wrapper component that provides the Alt key state
+export function TooltipMarker(props: OwnProps) {
+  const showKeys = useAltKey();
+  return <ConnectedMarkerTooltipContents {...props} showKeys={showKeys} />;
+}
