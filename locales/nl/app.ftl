@@ -42,6 +42,14 @@ AppViewRouter--error-from-localhost-url-safari =
 AppViewRouter--route-not-found--home =
     .specialMessage = De URL die u probeerde te bereiken, werd niet herkend.
 
+## Backtrace
+## This is used to display a backtrace (call stack) for a marker or sample.
+
+# Variables:
+#   $function (String) - Name of the function that was inlined.
+Backtrace--inlining-badge = (inline geplaatst)
+    .title = { $function } is door de compiler inline in de aanroepomgeving geplaatst
+
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
