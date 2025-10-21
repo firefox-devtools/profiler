@@ -39,6 +39,14 @@ AppViewRouter--error-from-localhost-url-safari = 由於 <a>Safari 的特殊限�
 AppViewRouter--route-not-found--home =
     .specialMessage = 無法處理您嘗試開啟的網址。
 
+## Backtrace
+## This is used to display a backtrace (call stack) for a marker or sample.
+
+# Variables:
+#   $function (String) - Name of the function that was inlined.
+Backtrace--inlining-badge = （內聯）
+    .title = 編譯器將 { $function } 內聯到呼叫它的函式中。
+
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
@@ -1027,6 +1035,13 @@ SourceView--not-in-archive-error-when-obtaining-source = 下載自 { $url } 的�
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = 無法剖析下載自 { $url } 的封存檔：{ $parsingErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a JS file could not be found in
+# the browser.
+# Variables:
+#   $url (String) - The URL of the JS source file.
+#   $sourceUuid (number) - The UUID of the JS source file.
+#   $errorMessage (String) - The raw internal error message, not localized
+SourceView--not-in-browser-error-when-obtaining-js-source = 瀏覽器無法取得 sourceUuid 為 { $sourceUuid }，位於 { $url } 的原始碼檔案：{ $errorMessage }。
 
 ## Toggle buttons in the top right corner of the bottom box
 
