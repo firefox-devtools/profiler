@@ -39,6 +39,14 @@ AppViewRouter--error-from-localhost-url-safari = Aufgrund einer <a>spezifischen 
 AppViewRouter--route-not-found--home =
     .specialMessage = Die URL, die Sie erreichen wollten, wurde nicht erkannt.
 
+## Backtrace
+## This is used to display a backtrace (call stack) for a marker or sample.
+
+# Variables:
+#   $function (String) - Name of the function that was inlined.
+Backtrace--inlining-badge = (inlined)
+    .title = { $function } wurde durch den Compiler zur Inline-Funktion ihres Aufrufers.
+
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
@@ -1101,6 +1109,13 @@ SourceView--not-in-archive-error-when-obtaining-source = Die Datei { $pathInArch
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = Das Archiv unter { $url } konnte nicht geparst werden: { $parsingErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a JS file could not be found in
+# the browser.
+# Variables:
+#   $url (String) - The URL of the JS source file.
+#   $sourceUuid (number) - The UUID of the JS source file.
+#   $errorMessage (String) - The raw internal error message, not localized
+SourceView--not-in-browser-error-when-obtaining-js-source = Der Browser konnte die Quelltextdatei für { $url } mit der sourceUuid { $sourceUuid } nicht abrufen: { $errorMessage }.
 
 ## Toggle buttons in the top right corner of the bottom box
 
