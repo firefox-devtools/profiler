@@ -16,7 +16,7 @@ import {
   getEmptyUnbalancedNativeAllocationsTable,
 } from 'firefox-profiler/profile-logic/data-structures';
 
-import { StringTable } from 'firefox-profiler/utils/string-table';
+import { GlobalDataCollector } from 'firefox-profiler/profile-logic/global-data-collector';
 import { ensureExists } from 'firefox-profiler/utils/types';
 
 /**
@@ -183,7 +183,8 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
   const profile = getEmptyProfile();
   profile.meta.product = dhat.cmd + ' (dhat)';
   profile.meta.importedFrom = `dhat`;
-  const stringTable = StringTable.withBackingArray(profile.shared.stringArray);
+  const globalDataCollector = new GlobalDataCollector();
+  const stringTable = globalDataCollector.getStringTable();
 
   const allocationsTable = getEmptyUnbalancedNativeAllocationsTable();
   const { funcTable, stackTable, frameTable } = getEmptyThread();
@@ -200,7 +201,7 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
   funcTable.isJS.push(false);
   funcTable.relevantForJS.push(false);
   funcTable.resource.push(-1);
-  funcTable.fileName.push(null);
+  funcTable.source.push(null);
   funcTable.lineNumber.push(null);
   funcTable.columnNumber.push(null);
   const rootFuncIndex = funcTable.length++;
@@ -269,7 +270,7 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
       funcTable.isJS.push(false);
       funcTable.relevantForJS.push(false);
       funcTable.resource.push(-1);
-      funcTable.fileName.push(stringTable.indexForString(fileName));
+      funcTable.source.push(globalDataCollector.indexForSource(null, fileName));
       funcTable.lineNumber.push(line);
       funcTable.columnNumber.push(column);
       funcIndex = funcTable.length++;
@@ -379,7 +380,7 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
     thread.funcTable.isJS = funcTable.isJS.slice();
     thread.funcTable.relevantForJS = funcTable.relevantForJS.slice();
     thread.funcTable.resource = funcTable.resource.slice();
-    thread.funcTable.fileName = funcTable.fileName.slice();
+    thread.funcTable.source = funcTable.source.slice();
     thread.funcTable.lineNumber = funcTable.lineNumber.slice();
     thread.funcTable.columnNumber = funcTable.columnNumber.slice();
     thread.funcTable.length = funcTable.length;
@@ -407,6 +408,10 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
 
     return thread;
   });
+
+  // Get the final shared data from GlobalDataCollector
+  const { shared } = globalDataCollector.finish();
+  profile.shared = shared;
 
   return profile;
 }

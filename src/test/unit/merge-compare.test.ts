@@ -15,6 +15,7 @@ import {
 import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
 import { ensureExists } from 'firefox-profiler/utils/types';
 import { getTimeRangeIncludingAllThreads } from 'firefox-profiler/profile-logic/profile-data';
+import { StringTable } from '../../utils/string-table';
 import type {
   RawThread,
   RawProfileSharedData,
@@ -610,5 +611,205 @@ describe('mergeThreads function', function () {
 
     expect(string1AfterMerge).toBe(uniqueString1);
     expect(string2AfterMerge).toBe(uniqueString2);
+  });
+});
+
+describe('mergeProfilesForDiffing with source tables', function () {
+  it('should merge source tables from multiple profiles correctly', function () {
+    // Create first profile with some sources
+    const profileA = getProfileFromTextSamples(`
+      A[file:one.js]  A[file:one.js]
+      B[file:two.js]  C[file:three.js]
+    `);
+
+    // Create second profile with overlapping and unique sources
+    const profileB = getProfileFromTextSamples(`
+      X[file:two.js]  X[file:two.js]
+      Y[file:four.js] Z[file:one.js]
+    `);
+
+    const profileState = stateFromLocation({
+      pathname: '/public/fakehash1/',
+      search: '?thread=0&v=3',
+      hash: '',
+    });
+
+    const { profile: mergedProfile } = mergeProfilesForDiffing(
+      [profileA.profile, profileB.profile],
+      [profileState, profileState]
+    );
+
+    const { sources } = mergedProfile.shared;
+    const stringTable = StringTable.withBackingArray(
+      mergedProfile.shared.stringArray
+    );
+
+    expect(sources.length).toBe(4);
+    // Check that all unique sources are present
+    const sourceFilenames = sources.filename.map((index) =>
+      stringTable.getString(index)
+    );
+
+    expect(sourceFilenames).toHaveLength(4);
+    expect(sourceFilenames).toEqual(
+      expect.arrayContaining(['one.js', 'two.js', 'three.js', 'four.js'])
+    );
+
+    // Check that UUIDs are properly handled (should all be null for text samples)
+    expect(sources.uuid).toEqual([null, null, null, null]);
+
+    // Verify each filename index points to a valid string
+    for (const filenameIndex of sources.filename) {
+      expect(filenameIndex).toBeGreaterThanOrEqual(0);
+      expect(filenameIndex).toBeLessThan(stringTable.getBackingArray().length);
+      const filename = stringTable.getString(filenameIndex);
+      expect(filename).toBeString();
+      expect(filename.endsWith('.js')).toBe(true);
+    }
+  });
+
+  it('should handle profiles with different UUID patterns', function () {
+    // Create profiles with sources that have different UUIDs
+    const profileA = getProfileFromTextSamples(`
+      A[file:script.js]
+    `);
+
+    const profileB = getProfileFromTextSamples(`
+      B[file:script.js]
+    `);
+
+    // Manually modify the source tables to have UUIDs
+    profileA.profile.shared.sources.uuid[0] = 'uuid-a';
+    profileB.profile.shared.sources.uuid[0] = 'uuid-b';
+
+    const profileState = stateFromLocation({
+      pathname: '/public/fakehash1/',
+      search: '?thread=0&v=3',
+      hash: '',
+    });
+
+    const { profile: mergedProfile } = mergeProfilesForDiffing(
+      [profileA.profile, profileB.profile],
+      [profileState, profileState]
+    );
+
+    const { sources } = mergedProfile.shared;
+    const stringTable = StringTable.withBackingArray(
+      mergedProfile.shared.stringArray
+    );
+
+    // Should have two separate entries for the same filename with different UUIDs
+    const sourceFilenames = sources.filename.map((index) =>
+      stringTable.getString(index)
+    );
+
+    expect(sources.length).toBe(2);
+    expect(sourceFilenames.filter((name) => name === 'script.js')).toHaveLength(
+      2
+    );
+    expect(sources.uuid).toHaveLength(2);
+    expect(sources.uuid).toEqual(expect.arrayContaining(['uuid-a', 'uuid-b']));
+
+    // Both should point to the same filename string
+    const filenameIndexes = sources.filename;
+    expect(stringTable.getString(filenameIndexes[0])).toBe('script.js');
+    expect(stringTable.getString(filenameIndexes[1])).toBe('script.js');
+  });
+
+  it('should correctly update funcTable source references after merging', function () {
+    const profileA = getProfileFromTextSamples(`
+      A[file:first.js]
+      B[file:second.js]
+    `);
+
+    const profileB = getProfileFromTextSamples(`
+      C[file:second.js]
+      D[file:third.js]
+    `);
+
+    const profileState = stateFromLocation({
+      pathname: '/public/fakehash1/',
+      search: '?thread=0&v=3',
+      hash: '',
+    });
+
+    const { profile: mergedProfile } = mergeProfilesForDiffing(
+      [profileA.profile, profileB.profile],
+      [profileState, profileState]
+    );
+
+    // Check that all threads have valid source references
+    for (const thread of mergedProfile.threads) {
+      for (let i = 0; i < thread.funcTable.length; i++) {
+        const sourceIndex = thread.funcTable.source[i];
+        // Source index should be valid
+        expect(sourceIndex).not.toBeNull();
+        expect(sourceIndex).toBeGreaterThanOrEqual(0);
+        expect(sourceIndex).toBeLessThan(mergedProfile.shared.sources.length);
+
+        // Should reference a valid filename in the string table
+        const filenameIndex =
+          mergedProfile.shared.sources.filename[ensureExists(sourceIndex)];
+        expect(filenameIndex).toBeGreaterThanOrEqual(0);
+        expect(filenameIndex).toBeLessThan(
+          mergedProfile.shared.stringArray.length
+        );
+      }
+    }
+  });
+
+  it('should preserve source information in empty profiles', function () {
+    // Create minimal empty profiles manually since getProfileFromTextSamples doesn't handle empty strings
+    const emptyProfileA = getProfileFromTextSamples('A').profile;
+    const emptyProfileB = getProfileFromTextSamples('B').profile;
+
+    // Clear the threads to make them effectively empty
+    emptyProfileA.threads[0].samples.length = 0;
+    emptyProfileA.threads[0].samples.stack = [];
+    emptyProfileB.threads[0].samples.length = 0;
+    emptyProfileB.threads[0].samples.stack = [];
+
+    const profileState = stateFromLocation({
+      pathname: '/public/fakehash1/',
+      search: '?thread=0&v=3',
+      hash: '',
+    });
+
+    const { profile: mergedProfile } = mergeProfilesForDiffing(
+      [emptyProfileA, emptyProfileB],
+      [profileState, profileState]
+    );
+
+    // Should still have some sources from the profile structure
+    expect(mergedProfile.shared.sources.filename).toBeArray();
+    expect(mergedProfile.shared.sources.uuid).toBeArray();
+    expect(mergedProfile.shared.sources.length).toBeNumber();
+    expect(mergedProfile.shared.sources.length).toBeGreaterThanOrEqual(0);
+  });
+
+  it('should handle single profile merge correctly', function () {
+    const singleProfile = getProfileFromTextSamples(`
+      A[file:single.js]
+      B[file:single.js]
+    `);
+
+    const originalSourcesLength = singleProfile.profile.shared.sources.length;
+
+    const profileState = stateFromLocation({
+      pathname: '/public/fakehash1/',
+      search: '?thread=0&v=3',
+      hash: '',
+    });
+
+    const { profile: mergedProfile } = mergeProfilesForDiffing(
+      [singleProfile.profile],
+      [profileState]
+    );
+
+    // Should preserve original source table
+    expect(mergedProfile.shared.sources.length).toBe(originalSourcesLength);
+    expect(mergedProfile.shared.sources).toEqual(
+      singleProfile.profile.shared.sources
+    );
   });
 });

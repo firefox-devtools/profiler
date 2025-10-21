@@ -1589,6 +1589,8 @@ export type BacktraceItem = {
   // library instead.
   // May also be empty.
   origin: string;
+  // The inline depth of this frame. Frames with inline depth > 0 are inlined.
+  inlineDepth: number;
 };
 
 /**
@@ -1601,7 +1603,7 @@ export function getBacktraceItemsForStack(
   implementationFilter: ImplementationFilter,
   thread: Thread
 ): BacktraceItem[] {
-  const { funcTable, stringTable, resourceTable } = thread;
+  const { funcTable, stringTable, resourceTable, sources } = thread;
 
   const { stackTable, frameTable } = thread;
   const unfilteredPath = [];
@@ -1616,6 +1618,7 @@ export function getBacktraceItemsForStack(
       funcIndex: frameTable.func[frameIndex],
       frameLine: frameTable.line[frameIndex],
       frameColumn: frameTable.column[frameIndex],
+      inlineDepth: frameTable.inlineDepth[frameIndex],
     });
   }
 
@@ -1623,21 +1626,25 @@ export function getBacktraceItemsForStack(
   const path = unfilteredPath.filter(({ funcIndex }) =>
     funcMatchesImplementation(thread, funcIndex)
   );
-  return path.map(({ category, funcIndex, frameLine, frameColumn }) => {
-    return {
-      funcName: stringTable.getString(funcTable.name[funcIndex]),
-      category: category,
-      isFrameLabel: funcTable.resource[funcIndex] === -1,
-      origin: getOriginAnnotationForFunc(
-        funcIndex,
-        funcTable,
-        resourceTable,
-        stringTable,
-        frameLine,
-        frameColumn
-      ),
-    };
-  });
+  return path.map(
+    ({ category, funcIndex, frameLine, frameColumn, inlineDepth }) => {
+      return {
+        funcName: stringTable.getString(funcTable.name[funcIndex]),
+        category,
+        isFrameLabel: funcTable.resource[funcIndex] === -1,
+        origin: getOriginAnnotationForFunc(
+          funcIndex,
+          funcTable,
+          resourceTable,
+          stringTable,
+          sources,
+          frameLine,
+          frameColumn
+        ),
+        inlineDepth,
+      };
+    }
+  );
 }
 
 /**

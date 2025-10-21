@@ -26,6 +26,7 @@ import type {
   CategoryList,
   JsTracerTable,
   CallNodeTable,
+  SourceTable,
 } from 'firefox-profiler/types';
 
 /**
@@ -160,7 +161,7 @@ export function getEmptyFuncTable(): FuncTable {
     relevantForJS: [],
     name: [],
     resource: [],
-    fileName: [],
+    source: [],
     lineNumber: [],
     columnNumber: [],
     length: 0,
@@ -177,7 +178,7 @@ export function shallowCloneFuncTable(funcTable: FuncTable): FuncTable {
     relevantForJS: funcTable.relevantForJS.slice(),
     name: funcTable.name.slice(),
     resource: funcTable.resource.slice(),
-    fileName: funcTable.fileName.slice(),
+    source: funcTable.source.slice(),
     lineNumber: funcTable.lineNumber.slice(),
     columnNumber: funcTable.columnNumber.slice(),
     length: funcTable.length,
@@ -370,6 +371,18 @@ export function getEmptyJsTracerTable(): JsTracerTable {
   };
 }
 
+export function getEmptySourceTable(): SourceTable {
+  return {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    uuid: [],
+    filename: [],
+    length: 0,
+  };
+}
+
 export function getEmptyThread(overrides?: Partial<RawThread>): RawThread {
   const defaultThread: RawThread = {
     processType: 'default',
@@ -427,6 +440,7 @@ export function getEmptyProfile(): Profile {
     pages: [],
     shared: {
       stringArray: [],
+      sources: getEmptySourceTable(),
     },
     threads: [],
   };

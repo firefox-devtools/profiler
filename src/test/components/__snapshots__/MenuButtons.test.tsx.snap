@@ -1891,18 +1891,18 @@ exports[`app/MenuButtons <Publish> can publish and revert 1`] = `
 
 exports[`app/MenuButtons <Publish> matches the snapshot for a compression error 1`] = `
 <div
-  data-testid="MenuButtonsPublish-container"
+  data-testid="PublishPanel-container"
 >
   <form
-    class="menuButtonsPublishContent photon-body-10"
+    class="publishPanelContent photon-body-10"
   >
     <h1
-      class="menuButtonsPublishTitle photon-title-40"
+      class="publishPanelTitle photon-title-40"
     >
       Share Performance Profile
     </h1>
     <p
-      class="menuButtonsPublishInfoDescription"
+      class="publishPanelInfoDescription"
     >
       Upload your profile and make it accessible to anyone with the link.
        
@@ -1914,10 +1914,10 @@ exports[`app/MenuButtons <Publish> matches the snapshot for a compression error 
       Include additional data that may be identifiable
     </h3>
     <div
-      class="menuButtonsPublishDataChoices"
+      class="publishPanelDataChoices"
     >
       <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
+        class="photon-label publishPanelDataChoicesLabel"
       >
         <input
           class="photon-checkbox photon-checkbox-default"
@@ -1927,7 +1927,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for a compression error 
         Include hidden threads
       </label>
       <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
+        class="photon-label publishPanelDataChoicesLabel"
       >
         <input
           class="photon-checkbox photon-checkbox-default"
@@ -1937,7 +1937,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for a compression error 
         Include hidden time range
       </label>
       <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
+        class="photon-label publishPanelDataChoicesLabel"
       >
         <input
           class="photon-checkbox photon-checkbox-default"
@@ -1947,7 +1947,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for a compression error 
         Include screenshots
       </label>
       <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
+        class="photon-label publishPanelDataChoicesLabel"
       >
         <input
           class="photon-checkbox photon-checkbox-default"
@@ -1957,7 +1957,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for a compression error 
         Include resource URLs and paths
       </label>
       <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
+        class="photon-label publishPanelDataChoicesLabel"
       >
         <input
           class="photon-checkbox photon-checkbox-default"
@@ -1977,22 +1977,22 @@ exports[`app/MenuButtons <Publish> matches the snapshot for a compression error 
       </div>
     </div>
     <div
-      class="menuButtonsPublishButtons"
+      class="publishPanelButtons"
     >
       <button
-        class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload"
+        class="photon-button publishPanelButton publishPanelButtonsDownload"
         disabled=""
         type="button"
       >
         Download
       </button>
       <button
-        class="photon-button photon-button-primary menuButtonsPublishButton menuButtonsPublishButtonsUpload"
+        class="photon-button photon-button-primary publishPanelButton publishPanelButtonsUpload"
         disabled=""
         type="submit"
       >
         <span
-          class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgUpload"
+          class="publishPanelButtonsSvg publishPanelButtonsSvgUpload"
         />
         Upload
       </button>
@@ -2003,8 +2003,8 @@ exports[`app/MenuButtons <Publish> matches the snapshot for a compression error 
 
 exports[`app/MenuButtons <Publish> matches the snapshot for an upload error 1`] = `
 <div
-  class="menuButtonsPublishUpload photon-body-10"
-  data-testid="MenuButtonsPublish-container"
+  class="publishPanelUpload photon-body-10"
+  data-testid="PublishPanel-container"
 >
   <div
     class="photon-message-bar photon-message-bar-error photon-message-bar-inner-content"
@@ -2022,7 +2022,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for an upload error 1`] 
     </button>
   </div>
   <div
-    class="menuButtonsPublishError"
+    class="publishPanelError"
   >
     This is a mock error
   </div>
@@ -2118,18 +2118,18 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
 
 exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and the opened panel for an already uploaded profile 2`] = `
 <div
-  data-testid="MenuButtonsPublish-container"
+  data-testid="PublishPanel-container"
 >
   <form
-    class="menuButtonsPublishContent photon-body-10"
+    class="publishPanelContent photon-body-10"
   >
     <h1
-      class="menuButtonsPublishTitle photon-title-40"
+      class="publishPanelTitle photon-title-40"
     >
       Re-upload Performance Profile
     </h1>
     <p
-      class="menuButtonsPublishInfoDescription"
+      class="publishPanelInfoDescription"
     >
       Upload your profile and make it accessible to anyone with the link.
        
@@ -2141,10 +2141,10 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
       Include additional data that may be identifiable
     </h3>
     <div
-      class="menuButtonsPublishDataChoices"
+      class="publishPanelDataChoices"
     >
       <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
+        class="photon-label publishPanelDataChoicesLabel"
       >
         <input
           class="photon-checkbox photon-checkbox-default"
@@ -2154,7 +2154,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
         Include hidden threads
       </label>
       <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
+        class="photon-label publishPanelDataChoicesLabel"
       >
         <input
           class="photon-checkbox photon-checkbox-default"
@@ -2164,7 +2164,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
         Include hidden time range
       </label>
       <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
+        class="photon-label publishPanelDataChoicesLabel"
       >
         <input
           class="photon-checkbox photon-checkbox-default"
@@ -2174,7 +2174,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
         Include screenshots
       </label>
       <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
+        class="photon-label publishPanelDataChoicesLabel"
       >
         <input
           class="photon-checkbox photon-checkbox-default"
@@ -2184,7 +2184,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
         Include resource URLs and paths
       </label>
       <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
+        class="photon-label publishPanelDataChoicesLabel"
       >
         <input
           class="photon-checkbox photon-checkbox-default"
@@ -2195,15 +2195,15 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
       </label>
     </div>
     <div
-      class="menuButtonsPublishButtons"
+      class="publishPanelButtons"
     >
       <a
-        class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload"
+        class="photon-button publishPanelButton publishPanelButtonsDownload"
         download="Firefox 1970-01-01 00.00 profile.json.gz"
         href="mockCreateObjectUrl"
       >
         <span
-          class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgDownload"
+          class="publishPanelButtonsSvg publishPanelButtonsSvgDownload"
         />
         Download
          
@@ -2211,16 +2211,16 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
           class="menuButtonsDownloadSize"
         >
           (
-          1.56 kB
+          1.58 kB
           )
         </span>
       </a>
       <button
-        class="photon-button photon-button-primary menuButtonsPublishButton menuButtonsPublishButtonsUpload"
+        class="photon-button photon-button-primary publishPanelButton publishPanelButtonsUpload"
         type="submit"
       >
         <span
-          class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgUpload"
+          class="publishPanelButtonsSvg publishPanelButtonsSvgUpload"
         />
         Upload
       </button>
@@ -2231,18 +2231,18 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
 
 exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for a nightly profile 1`] = `
 <div
-  data-testid="MenuButtonsPublish-container"
+  data-testid="PublishPanel-container"
 >
   <form
-    class="menuButtonsPublishContent photon-body-10"
+    class="publishPanelContent photon-body-10"
   >
     <h1
-      class="menuButtonsPublishTitle photon-title-40"
+      class="publishPanelTitle photon-title-40"
     >
       Share Performance Profile
     </h1>
     <p
-      class="menuButtonsPublishInfoDescription"
+      class="publishPanelInfoDescription"
     >
       Upload your profile and make it accessible to anyone with the link.
        
@@ -2254,10 +2254,10 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
       Include additional data that may be identifiable
     </h3>
     <div
-      class="menuButtonsPublishDataChoices"
+      class="publishPanelDataChoices"
     >
       <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
+        class="photon-label publishPanelDataChoicesLabel"
       >
         <input
           checked=""
@@ -2268,7 +2268,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
         Include hidden threads
       </label>
       <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
+        class="photon-label publishPanelDataChoicesLabel"
       >
         <input
           checked=""
@@ -2279,7 +2279,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
         Include hidden time range
       </label>
       <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
+        class="photon-label publishPanelDataChoicesLabel"
       >
         <input
           checked=""
@@ -2290,7 +2290,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
         Include screenshots
       </label>
       <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
+        class="photon-label publishPanelDataChoicesLabel"
       >
         <input
           checked=""
@@ -2301,7 +2301,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
         Include resource URLs and paths
       </label>
       <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
+        class="photon-label publishPanelDataChoicesLabel"
       >
         <input
           checked=""
@@ -2313,128 +2313,15 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
       </label>
     </div>
     <div
-      class="menuButtonsPublishButtons"
+      class="publishPanelButtons"
     >
       <a
-        class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload"
+        class="photon-button publishPanelButton publishPanelButtonsDownload"
         download="Firefox 1970-01-01 00.00 profile.json.gz"
         href="mockCreateObjectUrl"
       >
         <span
-          class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgDownload"
-        />
-        Download
-         
-        <span
-          class="menuButtonsDownloadSize"
-        >
-          (
-          1.54 kB
-          )
-        </span>
-      </a>
-      <button
-        class="photon-button photon-button-primary menuButtonsPublishButton menuButtonsPublishButtonsUpload"
-        type="submit"
-      >
-        <span
-          class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgUpload"
-        />
-        Upload
-      </button>
-    </div>
-  </form>
-</div>
-`;
-
-exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for a release profile 1`] = `
-<div
-  data-testid="MenuButtonsPublish-container"
->
-  <form
-    class="menuButtonsPublishContent photon-body-10"
-  >
-    <h1
-      class="menuButtonsPublishTitle photon-title-40"
-    >
-      Share Performance Profile
-    </h1>
-    <p
-      class="menuButtonsPublishInfoDescription"
-    >
-      Upload your profile and make it accessible to anyone with the link.
-       
-      By default, your personal data is removed.
-    </p>
-    <h3
-      class="photon-title-10"
-    >
-      Include additional data that may be identifiable
-    </h3>
-    <div
-      class="menuButtonsPublishDataChoices"
-    >
-      <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
-      >
-        <input
-          class="photon-checkbox photon-checkbox-default"
-          name="includeHiddenThreads"
-          type="checkbox"
-        />
-        Include hidden threads
-      </label>
-      <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
-      >
-        <input
-          class="photon-checkbox photon-checkbox-default"
-          name="includeFullTimeRange"
-          type="checkbox"
-        />
-        Include hidden time range
-      </label>
-      <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
-      >
-        <input
-          class="photon-checkbox photon-checkbox-default"
-          name="includeScreenshots"
-          type="checkbox"
-        />
-        Include screenshots
-      </label>
-      <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
-      >
-        <input
-          class="photon-checkbox photon-checkbox-default"
-          name="includeUrls"
-          type="checkbox"
-        />
-        Include resource URLs and paths
-      </label>
-      <label
-        class="photon-label menuButtonsPublishDataChoicesLabel"
-      >
-        <input
-          class="photon-checkbox photon-checkbox-default"
-          name="includeExtension"
-          type="checkbox"
-        />
-        Include extension information
-      </label>
-    </div>
-    <div
-      class="menuButtonsPublishButtons"
-    >
-      <a
-        class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload"
-        download="Firefox 1970-01-01 00.00 profile.json.gz"
-        href="mockCreateObjectUrl"
-      >
-        <span
-          class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgDownload"
+          class="publishPanelButtonsSvg publishPanelButtonsSvgDownload"
         />
         Download
          
@@ -2447,11 +2334,124 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
         </span>
       </a>
       <button
-        class="photon-button photon-button-primary menuButtonsPublishButton menuButtonsPublishButtonsUpload"
+        class="photon-button photon-button-primary publishPanelButton publishPanelButtonsUpload"
         type="submit"
       >
         <span
-          class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgUpload"
+          class="publishPanelButtonsSvg publishPanelButtonsSvgUpload"
+        />
+        Upload
+      </button>
+    </div>
+  </form>
+</div>
+`;
+
+exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for a release profile 1`] = `
+<div
+  data-testid="PublishPanel-container"
+>
+  <form
+    class="publishPanelContent photon-body-10"
+  >
+    <h1
+      class="publishPanelTitle photon-title-40"
+    >
+      Share Performance Profile
+    </h1>
+    <p
+      class="publishPanelInfoDescription"
+    >
+      Upload your profile and make it accessible to anyone with the link.
+       
+      By default, your personal data is removed.
+    </p>
+    <h3
+      class="photon-title-10"
+    >
+      Include additional data that may be identifiable
+    </h3>
+    <div
+      class="publishPanelDataChoices"
+    >
+      <label
+        class="photon-label publishPanelDataChoicesLabel"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="includeHiddenThreads"
+          type="checkbox"
+        />
+        Include hidden threads
+      </label>
+      <label
+        class="photon-label publishPanelDataChoicesLabel"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="includeFullTimeRange"
+          type="checkbox"
+        />
+        Include hidden time range
+      </label>
+      <label
+        class="photon-label publishPanelDataChoicesLabel"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="includeScreenshots"
+          type="checkbox"
+        />
+        Include screenshots
+      </label>
+      <label
+        class="photon-label publishPanelDataChoicesLabel"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="includeUrls"
+          type="checkbox"
+        />
+        Include resource URLs and paths
+      </label>
+      <label
+        class="photon-label publishPanelDataChoicesLabel"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="includeExtension"
+          type="checkbox"
+        />
+        Include extension information
+      </label>
+    </div>
+    <div
+      class="publishPanelButtons"
+    >
+      <a
+        class="photon-button publishPanelButton publishPanelButtonsDownload"
+        download="Firefox 1970-01-01 00.00 profile.json.gz"
+        href="mockCreateObjectUrl"
+      >
+        <span
+          class="publishPanelButtonsSvg publishPanelButtonsSvgDownload"
+        />
+        Download
+         
+        <span
+          class="menuButtonsDownloadSize"
+        >
+          (
+          1.58 kB
+          )
+        </span>
+      </a>
+      <button
+        class="photon-button photon-button-primary publishPanelButton publishPanelButtonsUpload"
+        type="submit"
+      >
+        <span
+          class="publishPanelButtonsSvg publishPanelButtonsSvgUpload"
         />
         Upload
       </button>

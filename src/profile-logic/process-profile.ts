@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { attemptToConvertChromeProfile } from './import/chrome';
 import { attemptToConvertDhat } from './import/dhat';
+import { GlobalDataCollector } from './global-data-collector';
 import { AddressLocator } from './address-locator';
-import { StringTable } from '../utils/string-table';
 import {
   resourceTypes,
   getEmptyExtensions,
@@ -38,9 +38,9 @@ import {
 import { computeStringIndexMarkerFieldsByDataType } from '../profile-logic/marker-schema';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
 
+import type { StringTable } from '../utils/string-table';
 import type {
   Profile,
-  RawProfileSharedData,
   RawThread,
   RawCounter,
   ExtensionTable,
@@ -49,7 +49,6 @@ import type {
   RawSamplesTable,
   RawStackTable,
   RawMarkerTable,
-  Lib,
   LibMapping,
   FuncTable,
   ResourceTable,
@@ -99,6 +98,7 @@ import type {
   MarkerPhase,
   Pid,
   GeckoMarkerSchema,
+  GeckoSourceTable,
 } from 'firefox-profiler/types';
 import { decompress, isGzip } from 'firefox-profiler/utils/gz';
 
@@ -177,54 +177,6 @@ function _cleanFunctionName(functionName: string): string {
   return functionName;
 }
 
-/**
- * GlobalDataCollector collects data which is global in the processed profile
- * format but per-process or per-thread in the Gecko profile format. It
- * de-duplicates elements and builds one shared list of each type.
- * For now it only de-duplicates libraries, but in the future we may move more
- * tables to be global.
- * You could also call this class an "interner".
- */
-export class GlobalDataCollector {
-  _libs: Lib[] = [];
-  _libKeyToLibIndex: Map<string, IndexIntoLibs> = new Map();
-  _stringArray: string[] = [];
-  _stringTable: StringTable = StringTable.withBackingArray(this._stringArray);
-
-  // Return the global index for this library, adding it to the global list if
-  // necessary.
-  indexForLib(libMapping: LibMapping | Lib): IndexIntoLibs {
-    const { debugName, breakpadId } = libMapping;
-    const libKey = `${debugName}/${breakpadId}`;
-    let index = this._libKeyToLibIndex.get(libKey);
-    if (index === undefined) {
-      index = this._libs.length;
-      const { arch, name, path, debugPath, codeId } = libMapping;
-      this._libs.push({
-        arch,
-        name,
-        path,
-        debugName,
-        debugPath,
-        breakpadId,
-        codeId: codeId ?? null,
-      });
-      this._libKeyToLibIndex.set(libKey, index);
-    }
-    return index;
-  }
-
-  getStringTable(): StringTable {
-    return this._stringTable;
-  }
-
-  // Package up all de-duplicated global tables so that they can be embedded in
-  // the profile.
-  finish(): { libs: Lib[]; shared: RawProfileSharedData } {
-    return { libs: this._libs, shared: { stringArray: this._stringArray } };
-  }
-}
-
 type ExtractionInfo = {
   funcTable: FuncTable;
   resourceTable: ResourceTable;
@@ -239,6 +191,7 @@ type ExtractionInfo = {
     { funcIndex: IndexIntoFuncTable; frameAddress: Address | null }
   >;
   globalDataCollector: GlobalDataCollector;
+  geckoSourceTable: GeckoSourceTable | undefined;
 };
 
 /**
@@ -255,7 +208,8 @@ export function extractFuncsAndResourcesFromFrameLocations(
   geckoThreadStringArray: string[],
   libs: LibMapping[],
   extensions: ExtensionTable = getEmptyExtensions(),
-  globalDataCollector: GlobalDataCollector
+  globalDataCollector: GlobalDataCollector,
+  geckoSourceTable: GeckoSourceTable | undefined
 ): {
   funcTable: FuncTable;
   resourceTable: ResourceTable;
@@ -284,6 +238,7 @@ export function extractFuncsAndResourcesFromFrameLocations(
     libNameToResourceIndex: new Map(),
     stringToNewFuncIndexAndFrameAddress: new Map(),
     globalDataCollector,
+    geckoSourceTable,
   };
 
   for (let i = 0; i < extensions.length; i++) {
@@ -431,7 +386,7 @@ function _extractUnsymbolicatedFunction(
   funcTable.resource[funcIndex] = resourceIndex;
   funcTable.relevantForJS[funcIndex] = false;
   funcTable.isJS[funcIndex] = false;
-  funcTable.fileName[funcIndex] = null;
+  funcTable.source[funcIndex] = null;
   funcTable.lineNumber[funcIndex] = null;
   funcTable.columnNumber[funcIndex] = null;
   return { funcIndex, frameAddress: addressRelativeToLib };
@@ -494,7 +449,7 @@ function _extractCppFunction(
   funcTable.resource[newFuncIndex] = resourceIndex;
   funcTable.relevantForJS[newFuncIndex] = false;
   funcTable.isJS[newFuncIndex] = false;
-  funcTable.fileName[newFuncIndex] = null;
+  funcTable.source[newFuncIndex] = null;
   funcTable.lineNumber[newFuncIndex] = null;
   funcTable.columnNumber[newFuncIndex] = null;
 
@@ -539,23 +494,32 @@ function _extractJsFunction(
 ): IndexIntoFuncTable | null {
   // Check for a JS location string.
   const jsMatch: RegExpResult =
-    // Given:   "functionName (http://script.url/:1234:1234)"
-    // Captures: 1^^^^^^^^^^  2^^^^^^^^^^^^^^^^^^ 3^^^ 4^^^
-    /^(.*) \((.+?):([0-9]+)(?::([0-9]+))?\)$/.exec(locationString) ||
-    // Given:   "http://script.url/:1234:1234"
-    // Captures: 2^^^^^^^^^^^^^^^^^ 3^^^ 4^^^
-    /^()(.+?):([0-9]+)(?::([0-9]+))?$/.exec(locationString);
+    // Given:   "functionName (http://script.url/:1234:1234)" or "functionName (:1234:1234)[5]"
+    // Captures: 1^^^^^^^^^^  2^^^^^^^^^^^^^^^^^^ 3^^^ 4^^^ 5^^^
+    /^(.*) \((.+?):([0-9]+)(?::([0-9]+))?\)(?:\[(\d+)\])?$/.exec(
+      locationString
+    ) ||
+    // Given:   "http://script.url/:1234:1234" or "(:1234:1234)[5]"
+    // Captures: 2^^^^^^^^^^^^^^^^^ 3^^^ 4^^^ 5^^^
+    /^()(.+?):([0-9]+)(?::([0-9]+))?(?:\[(\d+)\])?$/.exec(locationString);
 
   if (!jsMatch) {
     return null;
   }
 
-  const { funcTable, stringTable, resourceTable, originToResourceIndex } =
-    extractionInfo;
+  const {
+    funcTable,
+    stringTable,
+    resourceTable,
+    originToResourceIndex,
+    globalDataCollector,
+    geckoSourceTable,
+  } = extractionInfo;
 
   // Case 4: JS function - A match was found in the location string in the format
   // of a JS function.
-  const [, funcName, rawScriptURI] = jsMatch;
+  const [, funcName, rawScriptURI, lineNoStr, columnNoStr, sourceIndex] =
+    jsMatch;
   const scriptURI = _getRealScriptURI(rawScriptURI);
 
   const resourceIndex = getOrCreateURIResource(
@@ -564,6 +528,25 @@ function _extractJsFunction(
     stringTable,
     originToResourceIndex
   );
+
+  // Process the source index if it's provided.
+  let processedSourceIndex = null;
+  if (sourceIndex !== undefined) {
+    const geckoSourceIdx = parseInt(sourceIndex, 10);
+    // Look up the UUID for this source index from the process's sources table
+    if (geckoSourceTable && geckoSourceIdx < geckoSourceTable.data.length) {
+      const uuidIndex = geckoSourceTable.schema.uuid;
+      const filenameIndex = geckoSourceTable.schema.filename;
+      const uuid = geckoSourceTable.data[geckoSourceIdx][uuidIndex];
+      const filename = geckoSourceTable.data[geckoSourceIdx][filenameIndex];
+      processedSourceIndex = globalDataCollector.indexForSource(uuid, filename);
+    }
+  }
+
+  // If we don't have a source index from the sources table, create one using null uuid.
+  if (processedSourceIndex === null) {
+    processedSourceIndex = globalDataCollector.indexForSource(null, scriptURI);
+  }
 
   let funcNameIndex;
   if (funcName) {
@@ -575,9 +558,8 @@ function _extractJsFunction(
     // name.
     funcNameIndex = stringTable.indexForString(`(root scope) ${scriptURI}`);
   }
-  const fileName = stringTable.indexForString(scriptURI);
-  const lineNumber = parseInt(jsMatch[3], 10);
-  const columnNumber = jsMatch[4] ? parseInt(jsMatch[4], 10) : null;
+  const lineNumber = parseInt(lineNoStr, 10);
+  const columnNumber = columnNoStr ? parseInt(columnNoStr, 10) : null;
 
   // Add the function to the funcTable.
   const funcIndex = funcTable.length++;
@@ -585,7 +567,7 @@ function _extractJsFunction(
   funcTable.resource[funcIndex] = resourceIndex;
   funcTable.relevantForJS[funcIndex] = false;
   funcTable.isJS[funcIndex] = true;
-  funcTable.fileName[funcIndex] = fileName;
+  funcTable.source[funcIndex] = processedSourceIndex;
   funcTable.lineNumber[funcIndex] = lineNumber;
   funcTable.columnNumber[funcIndex] = columnNumber;
 
@@ -605,7 +587,7 @@ function _extractUnknownFunctionType(
   funcTable.resource[index] = -1;
   funcTable.relevantForJS[index] = relevantForJS;
   funcTable.isJS[index] = false;
-  funcTable.fileName[index] = null;
+  funcTable.source[index] = null;
   funcTable.lineNumber[index] = null;
   funcTable.columnNumber[index] = null;
   return index;
@@ -1195,7 +1177,7 @@ function _processThread(
     _sortMarkers(thread.markers)
   );
 
-  const { libs, pausedRanges, meta } = processProfile;
+  const { libs, pausedRanges, meta, sources } = processProfile;
   const { shutdownTime } = meta;
 
   const { funcTable, resourceTable, frameFuncs, frameAddresses } =
@@ -1205,7 +1187,8 @@ function _processThread(
       thread.stringTable,
       libs,
       extensions,
-      globalDataCollector
+      globalDataCollector,
+      sources
     );
   const nativeSymbols = getEmptyNativeSymbolTable();
   const frameTable: FrameTable = _processFrameTable(
@@ -1850,6 +1833,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   const profileGatheringLog = { ...(geckoProfile.profileGatheringLog || {}) };
 
   const stringTable = globalDataCollector.getStringTable();
+  const sources = globalDataCollector.getSources();
 
   // Convert JS tracer information into their own threads. This mutates
   // the threads array.
@@ -1861,7 +1845,8 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
         thread,
         jsTracer,
         geckoProfile.meta.categories,
-        stringTable
+        stringTable,
+        sources
       );
       jsTracerThread.isJsTracer = true;
       jsTracerThread.name = `JS Tracer of ${friendlyThreadName}`;

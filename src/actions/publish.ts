@@ -9,9 +9,9 @@ import type { SanitizeProfileResult } from 'firefox-profiler/profile-logic/sanit
 import {
   getUploadGeneration,
   getSanitizedProfile,
-  getSanitizedProfileData,
   getRemoveProfileInformation,
   getPrePublishedState,
+  getSanitizedProfileEncodingState,
 } from 'firefox-profiler/selectors/publish';
 import {
   getDataSource,
@@ -36,14 +36,50 @@ import type {
   StartEndRange,
   ThreadIndex,
   State,
+  Profile,
 } from 'firefox-profiler/types';
+import { compress } from 'firefox-profiler/utils/gz';
+import { serializeProfile } from 'firefox-profiler/profile-logic/process-profile';
 
-export function toggleCheckedSharingOptions(
-  slug: keyof CheckedSharingOptions
+export function updateSharingOption(
+  slug: keyof CheckedSharingOptions,
+  value: boolean
 ): Action {
   return {
-    type: 'TOGGLE_CHECKED_SHARING_OPTION',
+    type: 'UPDATE_SHARING_OPTION',
     slug,
+    value,
+  };
+}
+
+export function sanitizedProfileEncodingStarted(
+  sanitizedProfile: Profile
+): Action {
+  return {
+    type: 'SANITIZED_PROFILE_ENCODING_STARTED',
+    sanitizedProfile,
+  };
+}
+
+export function sanitizedProfileEncodingCompleted(
+  sanitizedProfile: Profile,
+  profileData: Blob
+): Action {
+  return {
+    type: 'SANITIZED_PROFILE_ENCODING_COMPLETED',
+    sanitizedProfile,
+    profileData,
+  };
+}
+
+export function sanitizedProfileEncodingFailed(
+  sanitizedProfile: Profile,
+  error: Error
+): Action {
+  return {
+    type: 'SANITIZED_PROFILE_ENCODING_FAILED',
+    sanitizedProfile,
+    error,
   };
 }
 
@@ -196,6 +232,90 @@ async function persistJustUploadedProfileInformationToDb(
   }
 }
 
+export type ProfileEncodingResult =
+  | {
+      type: 'SUCCESS';
+      profileData: Blob;
+    }
+  | { type: 'ERROR'; error: Error };
+
+function unwrapEncodedProfile(encodingResult: ProfileEncodingResult): Blob {
+  if (encodingResult.type === 'ERROR') {
+    throw encodingResult.error;
+  }
+  return encodingResult.profileData;
+}
+
+export type InflightProfileEncoding = {
+  sanitizedProfile: Profile;
+  encodingPromise: Promise<ProfileEncodingResult>;
+};
+
+/**
+ * Kick off "encoding" of the sanitized profile. Specifically this means:
+ * - Compute the sanitized profile
+ * - Serialize the profile to a buffer
+ * - Kick off the asynchronous compression of the buffer
+ *
+ * The asynchronous compression can take a few seconds, so we want to kick
+ * it off immediately when the profile publishing panel is opened. We also
+ * want to be able to make use of the current in-flight compression if the
+ * user clicks the upload button before compression is done. This is why
+ * we return an `InflightProfileEncoding` object from this action; it contains
+ * a promise which lets other parts of the publishing pipeline wait on the
+ * compressed results.
+ *
+ * This thunk action is synchronous.
+ */
+export function encodeSanitizedProfile(
+  previousInflightEncoding?: InflightProfileEncoding
+): ThunkAction<InflightProfileEncoding> {
+  return (dispatch, getState): InflightProfileEncoding => {
+    const state = getState();
+    const sanitizedProfile = getSanitizedProfile(state).profile;
+
+    if (previousInflightEncoding?.sanitizedProfile === sanitizedProfile) {
+      // No need to kick of another compression. The current encoding may still
+      // be in-flight, and returning the original promise allows the caller to
+      // await it.
+      return previousInflightEncoding;
+    }
+
+    const encodingState = getSanitizedProfileEncodingState(state);
+    if (
+      encodingState.phase === 'DONE' &&
+      encodingState.sanitizedProfile === sanitizedProfile
+    ) {
+      // We already have an encoded version of this profile in our state! Use it.
+      return {
+        sanitizedProfile,
+        encodingPromise: Promise.resolve({
+          type: 'SUCCESS',
+          profileData: encodingState.profileData,
+        }),
+      };
+    }
+
+    // Kick off a new encoding for this profile. Don't await the promise,
+    // just return it as part of the InflightProfileEncoding.
+    const encodingPromise: Promise<ProfileEncodingResult> = (async function () {
+      try {
+        dispatch(sanitizedProfileEncodingStarted(sanitizedProfile));
+        const gzipData = await compress(serializeProfile(sanitizedProfile));
+        const blob = new Blob([gzipData], { type: 'application/octet-binary' });
+        dispatch(sanitizedProfileEncodingCompleted(sanitizedProfile, blob));
+        return { type: 'SUCCESS', profileData: blob };
+      } catch (error) {
+        dispatch(sanitizedProfileEncodingFailed(sanitizedProfile, error));
+        console.error('Error while compressing the profile data', error);
+        return { type: 'ERROR', error };
+      }
+    })();
+
+    return { sanitizedProfile, encodingPromise };
+  };
+}
+
 /**
  * This function starts the profile sharing process. Takes an optional argument that
  * indicates if the share attempt is being made for the second time. We have two share
@@ -208,7 +328,9 @@ async function persistJustUploadedProfileInformationToDb(
  * The return value is used for tests to determine if the request went all the way
  * through (true) or was quit early due to the generation value being invalidated (false).
  */
-export function attemptToPublish(): ThunkAction<Promise<boolean>> {
+export function attemptToPublish(
+  previousInflightEncoding?: InflightProfileEncoding
+): ThunkAction<Promise<boolean>> {
   return async (dispatch, getState) => {
     try {
       sendAnalytics({
@@ -242,7 +364,10 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
       dispatch(uploadCompressionStarted(abortfunction));
 
       const sanitizedInformation = getSanitizedProfile(prePublishedState);
-      const gzipData = await getSanitizedProfileData(prePublishedState);
+      const profileEncoding = dispatch(
+        encodeSanitizedProfile(previousInflightEncoding)
+      );
+      const encodingResult = await profileEncoding.encodingPromise;
 
       // The previous line was async, check to make sure that this request is still valid.
       // The upload could have been aborted while we were compressing the data.
@@ -250,13 +375,18 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         return false;
       }
 
+      const encodedProfile = unwrapEncodedProfile(encodingResult);
+
       dispatch(uploadStarted());
 
       // Upload the profile, and notify it with the amount of data that has been
       // uploaded.
-      const hashOrToken = await startUpload(gzipData, (uploadProgress) => {
-        dispatch(updateUploadProgress(uploadProgress));
-      });
+      const hashOrToken = await startUpload(
+        encodedProfile,
+        (uploadProgress) => {
+          dispatch(updateUploadProgress(uploadProgress));
+        }
+      );
 
       const hash = extractProfileTokenFromJwt(hashOrToken);
 

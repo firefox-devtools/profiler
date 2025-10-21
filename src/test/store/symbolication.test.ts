@@ -276,7 +276,16 @@ describe('doSymbolicateProfile', function () {
 
       const thread = getThread(getState());
       const { frameTable, funcTable, stringTable } = thread;
+      const sources = ProfileViewSelectors.getSourceTable(getState());
       expect(funcTable.length).toBeGreaterThanOrEqual(4);
+
+      // Helper function to get filename from source index
+      const getFileName = (funcIndex: number): string | null => {
+        const sourceIndex = funcTable.source[funcIndex];
+        if (sourceIndex === null) return null;
+        const urlIndex = sources.filename[sourceIndex];
+        return stringTable.getString(urlIndex);
+      };
 
       const [
         firstSymbolFuncIndex,
@@ -315,27 +324,19 @@ describe('doSymbolicateProfile', function () {
         last symbol (first_and_last.cpp)`);
 
       // The first and last symbol function should have the filename first_and_last.cpp.
-      expect(funcTable.fileName[firstSymbolFuncIndex]).toBe(
-        funcTable.fileName[lastSymbolFuncIndex]
+      expect(getFileName(firstSymbolFuncIndex)).toBe(
+        getFileName(lastSymbolFuncIndex)
       );
-      let fileNameStringIndex = funcTable.fileName[firstSymbolFuncIndex];
-      expect(fileNameStringIndex).not.toBeNull();
-      let fileName =
-        fileNameStringIndex !== null
-          ? stringTable.getString(fileNameStringIndex)
-          : '<null>';
+      let fileName = getFileName(firstSymbolFuncIndex);
+      expect(fileName).not.toBeNull();
       expect(fileName).toBe('first_and_last.cpp');
 
       // The second and third symbol function should have the filename second_and_third.rs.
-      expect(funcTable.fileName[secondSymbolFuncIndex]).toBe(
-        funcTable.fileName[thirdSymbolFuncIndex]
+      expect(getFileName(secondSymbolFuncIndex)).toBe(
+        getFileName(thirdSymbolFuncIndex)
       );
-      fileNameStringIndex = funcTable.fileName[secondSymbolFuncIndex];
-      expect(fileNameStringIndex).not.toBeNull();
-      fileName =
-        fileNameStringIndex !== null
-          ? stringTable.getString(fileNameStringIndex)
-          : '<null>';
+      fileName = getFileName(secondSymbolFuncIndex);
+      expect(fileName).not.toBeNull();
       expect(fileName).toBe('second_and_third.rs');
 
       // Check line numbers.
