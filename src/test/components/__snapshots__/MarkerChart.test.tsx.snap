@@ -181,7 +181,17 @@ exports[`MarkerChart persists the selected marker tooltips properly 1`] = `
         <div
           class="tooltipTitle"
         >
-          Marker B
+          <span
+            class="tooltipTitleText"
+          >
+            Marker B
+          </span>
+          <button
+            aria-label="Only show markers matching: “⁨Marker B⁩”"
+            class="tooltipTitleFilterButton"
+            title="Only show markers matching: “⁨Marker B⁩”"
+            type="button"
+          />
         </div>
       </div>
     </div>
@@ -364,7 +374,17 @@ exports[`MarkerChart renders the hoveredItem markers properly 2`] = `
         <div
           class="tooltipTitle"
         >
-          Marker B
+          <span
+            class="tooltipTitleText"
+          >
+            Marker B
+          </span>
+          <button
+            aria-label="Only show markers matching: “⁨Marker B⁩”"
+            class="tooltipTitleFilterButton"
+            title="Only show markers matching: “⁨Marker B⁩”"
+            type="button"
+          />
         </div>
       </div>
     </div>
