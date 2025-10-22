@@ -16,3 +16,20 @@
 .marker-table-value th {
   text-align: start;
 }
+
+.tooltipTitleFilterButton {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  background-image: url(../../../res/img/svg/filter.svg);
+  cursor: pointer;
+  margin-inline-start: 6px;
+  opacity: 0.6;
+}
+
+.tooltipTitleFilterButton:hover {
+  opacity: 1;
+}

@@ -20,6 +20,7 @@ import type {
   MarkerFormatType,
   MarkerSchema,
   MarkerSchemaByName,
+  MarkerSchemaField,
   Marker,
   MarkerIndex,
   MarkerPayload,
@@ -364,6 +365,111 @@ export function getLabelGetter(
 
     return label;
   };
+}
+
+/**
+ * Extract the value of the first field from a marker's tooltipLabel schema.
+ * This is used for filtering markers by their primary identifying value.
+ * Falls back to the marker name if no tooltipLabel is defined in the schema.
+ *
+ * This function should only be used behind a selector.
+ */
+export function getSearchTermGetter(
+  getMarker: (markerIndex: MarkerIndex) => Marker,
+  markerSchemaByName: MarkerSchemaByName,
+  stringTable: StringTable
+): (markerIndex: MarkerIndex) => string {
+  // Cache the search terms as they are created.
+  const markerIndexToSearchTerm: Map<MarkerIndex, string> = new Map();
+
+  return (markerIndex: MarkerIndex) => {
+    let searchTerm: string | undefined | null =
+      markerIndexToSearchTerm.get(markerIndex);
+
+    if (searchTerm === undefined) {
+      const marker = getMarker(markerIndex);
+      const schemaName = marker.data ? marker.data.type : null;
+
+      if (schemaName) {
+        const schema = markerSchemaByName[schemaName];
+        if (schema?.tooltipLabel) {
+          // Extract the first field from the tooltipLabel
+          // e.g., "{marker.data.eventType} - DOMEvent" -> extract marker.data.eventType value
+          searchTerm = parseFirstField(
+            marker,
+            schema,
+            stringTable,
+            schema.tooltipLabel
+          );
+        }
+      }
+
+      // Fall back to the marker name if no schema, tooltipLabel, or extraction failed
+      if (!searchTerm) {
+        searchTerm = marker.name;
+      }
+
+      // Cache this result.
+      markerIndexToSearchTerm.set(markerIndex, searchTerm);
+    }
+
+    return searchTerm;
+  };
+}
+
+/**
+ * Parse the first field from a label string and extract its value from the marker.
+ * Returns null if no field is found or if the field is not a data field (marker.data.*).
+ *
+ * e.g., "{marker.data.eventType} - DOMEvent" extracts the value of marker.data.eventType
+ */
+function parseFirstField(
+  marker: Marker,
+  markerSchema: MarkerSchema,
+  stringTable: StringTable,
+  label: string
+): string | null {
+  // Split the label on the "{key}" capture groups.
+  const splits = label.split(/{([^}]+)}/);
+
+  if (splits.length < 2) {
+    // No fields in the label
+    return null;
+  }
+
+  // The first field is at index 1 (even indices are literal strings)
+  const firstField = splits[1].trim();
+  const keys = firstField.split('.');
+
+  // We only extract from marker.data.* fields (3 parts: marker, data, key)
+  if (keys.length !== 3) {
+    return null;
+  }
+
+  const [markerStr, markerKey, payloadKey] = keys;
+  if (markerStr !== 'marker' || markerKey !== 'data' || !payloadKey) {
+    return null;
+  }
+
+  // Access the payload data
+  const field = markerSchema.fields?.find(
+    (f: MarkerSchemaField) => f.key === payloadKey
+  );
+  if (!field) {
+    return null;
+  }
+
+  const payload = marker.data;
+  if (!payload) {
+    return null;
+  }
+
+  const value = (payload as any)[payloadKey];
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  return formatFromMarkerSchema(payload.type, field.format, value, stringTable);
 }
 
 /**
