@@ -39,6 +39,14 @@ AppViewRouter--error-from-localhost-url-safari = 由于 <a>Safari 浏览器的�
 AppViewRouter--route-not-found--home =
     .specialMessage = 无法识别您尝试访问的 URL。
 
+## Backtrace
+## This is used to display a backtrace (call stack) for a marker or sample.
+
+# Variables:
+#   $function (String) - Name of the function that was inlined.
+Backtrace--inlining-badge = （已内联）
+    .title = 编译器已将 { $function } 内联至其调用方。
+
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
