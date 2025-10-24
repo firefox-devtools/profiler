@@ -29,6 +29,16 @@ const nonZeroLineDecoration = Decoration.line({ class: 'cm-nonZeroLine' });
 // of the timingsField state field.
 export const updateTimingsEffect = StateEffect.define<LineTimings>();
 
+// Gutter marker for highlighting a specific line.
+const highlightedLineGutterMarker = new (class extends GutterMarker {
+  override elementClass = 'cm-highlightedLine';
+})();
+
+// Decoration for highlighting a specific line.
+const highlightedLineDecoration = Decoration.line({
+  class: 'cm-highlightedLine',
+});
+
 // A "state field" for the timings.
 const timingsField = StateField.define<LineTimings>({
   create() {
@@ -95,6 +105,31 @@ const nonZeroLineDecorationHighlighter = EditorView.decorations.compute(
   }
 );
 
+// Creates extensions for highlighting a specific line number.
+function createHighlightedLineExtension(lineNumber: number | null) {
+  if (lineNumber === null) {
+    return [];
+  }
+  const gutterHighlighter = gutterLineClass.compute(['doc'], (state) => {
+    if (lineNumber < 1 || lineNumber > state.doc.lines) {
+      return RangeSet.empty;
+    }
+    const pos = state.doc.line(lineNumber).from;
+    return RangeSet.of([highlightedLineGutterMarker.range(pos)]);
+  });
+  const decorationHighlighter = EditorView.decorations.compute(
+    ['doc'],
+    (state) => {
+      if (lineNumber < 1 || lineNumber > state.doc.lines) {
+        return RangeSet.empty;
+      }
+      const pos = state.doc.line(lineNumber).from;
+      return RangeSet.of([highlightedLineDecoration.range(pos)]);
+    }
+  );
+  return [gutterHighlighter, decorationHighlighter];
+}
+
 // This is a "gutter marker" which renders just a string and nothing else.
 // It is used for the AddressTimings annotations, i.e. for the numbers in the
 // gutter.
@@ -157,3 +192,5 @@ export const timingsExtension = [
   nonZeroLineGutterHighlighter,
   nonZeroLineDecorationHighlighter,
 ];
+
+export { createHighlightedLineExtension };

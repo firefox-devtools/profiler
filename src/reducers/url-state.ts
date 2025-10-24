@@ -570,6 +570,7 @@ const sourceView: Reducer<SourceViewState> = (
         scrollGeneration: state.scrollGeneration + 1,
         libIndex: action.libIndex,
         sourceIndex: action.sourceIndex,
+        lineNumber: action.lineNumber,
       };
     }
     default:
