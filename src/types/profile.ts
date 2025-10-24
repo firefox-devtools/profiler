@@ -934,6 +934,9 @@ export type SourceTable = {
   length: number;
   uuid: Array<string | null>;
   filename: Array<IndexIntoStringTable>;
+  // Index into the string table for the source code content.
+  // Null if the source code hasn't been downloaded yet.
+  sourceCode: Array<IndexIntoStringTable | null>;
 };
 
 export type RawProfileSharedData = {

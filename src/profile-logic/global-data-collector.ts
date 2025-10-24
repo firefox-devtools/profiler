@@ -26,7 +26,7 @@ export class GlobalDataCollector {
   _libKeyToLibIndex: Map<string, IndexIntoLibs> = new Map();
   _stringArray: string[] = [];
   _stringTable: StringTable = StringTable.withBackingArray(this._stringArray);
-  _sources: SourceTable = { length: 0, uuid: [], filename: [] };
+  _sources: SourceTable = { length: 0, uuid: [], filename: [], sourceCode: [] };
   _uuidToSourceIndex: Map<string, IndexIntoSourceTable> = new Map();
   _filenameToSourceIndex: Map<IndexIntoStringTable, IndexIntoSourceTable> =
     new Map();
@@ -72,6 +72,7 @@ export class GlobalDataCollector {
       const filenameIndex = this._stringTable.indexForString(filename);
       this._sources.uuid[index] = uuid;
       this._sources.filename[index] = filenameIndex;
+      this._sources.sourceCode[index] = null; // Initially no source code
       this._sources.length++;
 
       if (uuid !== null) {

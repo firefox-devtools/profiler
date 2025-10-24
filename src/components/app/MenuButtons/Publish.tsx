@@ -210,6 +210,10 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
                   </Localized>
                 )
               : null}
+            {this._renderCheckbox(
+              'includeJSSources',
+              'MenuButtons--publish--renderCheckbox-label-js-sources'
+            )}
           </div>
           {sanitizedProfileEncodingState.phase === 'ERROR' ? (
             <div className="photon-message-bar photon-message-bar-error photon-message-bar-inner-content">

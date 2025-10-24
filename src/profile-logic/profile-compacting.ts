@@ -398,6 +398,7 @@ function _createCompactedSourceTable(
   let nextIndex = 0;
   const newUuid = [];
   const newFilename = [];
+  const newSourceCode = [];
 
   for (let i = 0; i < sourceTable.length; i++) {
     if (referencedSources[i] === 0) {
@@ -418,6 +419,21 @@ function _createCompactedSourceTable(
     }
     newFilename[newIndex] = newFilenameIndexPlusOne - 1;
 
+    // Translate the source code string index
+    const oldSourceCodeIndex = sourceTable.sourceCode[i];
+    if (oldSourceCodeIndex !== null) {
+      const newSourceCodeIndexPlusOne =
+        oldStringToNewStringPlusOne[oldSourceCodeIndex];
+      if (newSourceCodeIndexPlusOne === 0) {
+        throw new Error(
+          `String index ${oldSourceCodeIndex} was not found in the translation map`
+        );
+      }
+      newSourceCode[newIndex] = newSourceCodeIndexPlusOne - 1;
+    } else {
+      newSourceCode[newIndex] = null;
+    }
+
     oldSourceToNewSourcePlusOne[i] = newIndex + 1;
   }
 
@@ -425,6 +441,7 @@ function _createCompactedSourceTable(
     length: nextIndex,
     uuid: newUuid,
     filename: newFilename,
+    sourceCode: newSourceCode,
   };
 
   return { newSources, oldSourceToNewSourcePlusOne };

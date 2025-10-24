@@ -109,7 +109,9 @@ class SourceCodeFetcherImpl extends React.PureComponent<Props> {
       symbolServerUrl,
       addressProof,
       this._archiveCache,
-      delegate
+      delegate,
+      profile,
+      sourceViewSourceIndex
     );
 
     switch (fetchSourceResult.type) {

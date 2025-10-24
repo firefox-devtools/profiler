@@ -46,6 +46,7 @@ describe('sanitizePII', function () {
       shouldRemoveExtensions: false,
       shouldRemovePreferenceValues: false,
       shouldRemovePrivateBrowsingData: false,
+      shouldRemoveJSSources: false,
     };
 
     const PIIToRemove: RemoveProfileInformation = {

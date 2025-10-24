@@ -177,6 +177,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
           !checkedSharingOptions.includePreferenceValues,
         shouldRemovePrivateBrowsingData:
           !checkedSharingOptions.includePrivateBrowsingData,
+        shouldRemoveJSSources: !checkedSharingOptions.includeJSSources,
       };
     }
   );

@@ -664,6 +664,7 @@ MenuButtons--publish--renderCheckbox-label-preference = Include preference value
 MenuButtons--publish--renderCheckbox-label-private-browsing = Include the data from private browsing windows
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = This profile contains private browsing data
+MenuButtons--publish--renderCheckbox-label-js-sources = Include JavaScript source code
 MenuButtons--publish--reupload-performance-profile = Re-upload Performance Profile
 MenuButtons--publish--share-performance-profile = Share Performance Profile
 MenuButtons--publish--info-description = Upload your profile and make it accessible to anyone with the link.
