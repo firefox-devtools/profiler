@@ -149,7 +149,7 @@ function addressTimingsToLineTimings(
   addressTimings: AddressTimings,
   map: AddressToLineMap
 ): LineTimings {
-  const totalLineHits = new Map();
+  const totalLineHits: Map<LineNumber, number> = new Map();
   for (const [address, hitCount] of addressTimings.totalAddressHits) {
     const line = map.addressToLine(address);
     if (line !== null) {
@@ -158,7 +158,7 @@ function addressTimingsToLineTimings(
     }
   }
 
-  const selfLineHits = new Map();
+  const selfLineHits: Map<LineNumber, number> = new Map();
   for (const [address, hitCount] of addressTimings.selfAddressHits) {
     const line = map.addressToLine(address);
     if (line !== null) {

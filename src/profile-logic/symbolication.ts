@@ -240,8 +240,8 @@ type ThreadSymbolicationInfo = Map<LibKey, ThreadLibSymbolicationInfo>;
 function makeConsensusMap<K, V>(
   iterableOfEntryPairs: Iterable<[K, V]>
 ): Map<K, V> {
-  const consensusMap = new Map();
-  const divergentKeys = new Set();
+  const consensusMap: Map<K, V> = new Map();
+  const divergentKeys: Set<K> = new Set();
   for (const [key, value] of iterableOfEntryPairs) {
     if (divergentKeys.has(key)) {
       continue;
@@ -270,7 +270,7 @@ function getThreadSymbolicationInfo(
 ): ThreadSymbolicationInfo {
   const { frameTable, funcTable, nativeSymbols, resourceTable } = thread;
 
-  const map = new Map();
+  const map: ThreadSymbolicationInfo = new Map();
   for (
     let resourceIndex = 0;
     resourceIndex < resourceTable.length;
@@ -292,7 +292,7 @@ function getThreadSymbolicationInfo(
     }
 
     // Collect the set of funcs for this library in this thread.
-    const allFuncsForThisLib = new Set();
+    const allFuncsForThisLib: Set<IndexIntoFuncTable> = new Set();
     for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
       if (funcTable.resource[funcIndex] !== resourceIndex) {
         continue;
@@ -301,7 +301,8 @@ function getThreadSymbolicationInfo(
     }
 
     // Collect the set of native symbols for this library in this thread.
-    const allNativeSymbolsForThisLib = new Set();
+    const allNativeSymbolsForThisLib: Set<IndexIntoNativeSymbolTable> =
+      new Set();
     for (
       let nativeSymbolIndex = 0;
       nativeSymbolIndex < nativeSymbols.length;
@@ -343,7 +344,7 @@ function getThreadSymbolicationInfo(
 function buildLibSymbolicationRequestsForAllThreads(
   symbolicationInfo: ThreadSymbolicationInfo[]
 ): LibSymbolicationRequest[] {
-  const libKeyToAddressesMap = new Map();
+  const libKeyToAddressesMap: Map<string, Set<number>> = new Map();
   for (const threadSymbolicationInfo of symbolicationInfo) {
     for (const [libKey, { frameAddresses }] of threadSymbolicationInfo) {
       let addressSet = libKeyToAddressesMap.get(libKey);
@@ -478,10 +479,13 @@ export function applySymbolicationSteps(
   shared: RawProfileSharedData,
   symbolicationSteps: SymbolicationStepInfo[]
 ): { thread: RawThread; oldFuncToNewFuncsMap: FuncToFuncsMap } {
-  const oldFuncToNewFuncsMap = new Map();
+  const oldFuncToNewFuncsMap: FuncToFuncsMap = new Map();
   const frameCount = oldThread.frameTable.length;
   const shouldStacksWithThisFrameBeRemoved = new Uint8Array(frameCount);
-  const frameIndexToInlineExpansionFrames = new Map();
+  const frameIndexToInlineExpansionFrames: Map<
+    IndexIntoFrameTable,
+    IndexIntoFrameTable[]
+  > = new Map();
   let thread = oldThread;
   for (const symbolicationStep of symbolicationSteps) {
     thread = _partiallyApplySymbolicationStep(
@@ -716,7 +720,7 @@ function _partiallyApplySymbolicationStep(
   const availableFuncIter = availableFuncs.values();
 
   // funcKey -> funcIndex, where funcKey = `${nameStringIndex}:${fileStringIndex}`
-  const funcKeyToFuncMap = new Map();
+  const funcKeyToFuncMap: Map<string, IndexIntoFuncTable> = new Map();
 
   const availableFrameIter = inlinedFrames.values();
   const oldFuncToNewFuncsEntries: Array<[IndexIntoFuncTable, string]> = [];

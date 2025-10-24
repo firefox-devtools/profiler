@@ -2920,7 +2920,10 @@ export function reserveFunctionsInThread(
   thread: Thread
 ): ThreadWithReservedFunctions {
   const funcTable = shallowCloneFuncTable(thread.funcTable);
-  const reservedFunctionsForResources = new Map();
+  const reservedFunctionsForResources: Map<
+    IndexIntoResourceTable,
+    IndexIntoFuncTable
+  > = new Map();
   const jsResourceTypes = [
     resourceTypes.addon,
     resourceTypes.url,
@@ -3271,7 +3274,7 @@ export function extractProfileFilterPageData(
     return new Map();
   }
 
-  const pageDataByTabID = new Map();
+  const pageDataByTabID: Map<TabID, ProfileFilterPageData> = new Map();
   for (const [tabID, pages] of pagesMapByTabID) {
     let topMostPages = pages.filter(
       (page) =>
@@ -3643,7 +3646,7 @@ export function nudgeReturnAddresses(thread: RawThread): RawThread {
   // These are the top ("self") frames of stacks from sampling.
   // In the variable names below, ip means "instruction pointer".
   const oldIpFrameToNewIpFrame = new Uint32Array(frameTable.length);
-  const ipFrames = new Set();
+  const ipFrames: Set<IndexIntoFrameTable> = new Set();
   for (const stack of samplingSelfStacks) {
     const frame = stackTable.frame[stack];
     oldIpFrameToNewIpFrame[frame] = frame;
@@ -3728,8 +3731,14 @@ export function nudgeReturnAddresses(thread: RawThread): RawThread {
 
   // Make a new stack table which refers to the adjusted frames.
   const newStackTable = getEmptyRawStackTable();
-  const mapForSamplingSelfStacks = new Map();
-  const mapForBacktraceSelfStacks = new Map();
+  const mapForSamplingSelfStacks: Map<
+    null | IndexIntoStackTable,
+    null | IndexIntoStackTable
+  > = new Map();
+  const mapForBacktraceSelfStacks: Map<
+    null | IndexIntoStackTable,
+    null | IndexIntoStackTable
+  > = new Map();
   const prefixMap = new Uint32Array(stackTable.length);
   for (let stack = 0; stack < stackTable.length; stack++) {
     const frame = stackTable.frame[stack];
@@ -4043,7 +4052,7 @@ export function computeTabToThreadIndexesMap(
   threads: RawThread[],
   innerWindowIDToTabMap: Map<InnerWindowID, TabID> | null
 ): Map<TabID, Set<ThreadIndex>> {
-  const tabToThreadIndexesMap = new Map();
+  const tabToThreadIndexesMap: Map<TabID, Set<ThreadIndex>> = new Map();
   if (!innerWindowIDToTabMap) {
     // There is no pages information in the profile, return an empty map.
     return tabToThreadIndexesMap;
