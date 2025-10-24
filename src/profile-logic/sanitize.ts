@@ -117,6 +117,18 @@ export function sanitizePII(
   }
   const stringTable = StringTable.withBackingArray(stringArray);
 
+  // Handle JS source removal if requested
+  let sources = profile.shared.sources;
+  if (PIIToBeRemoved.shouldRemoveJSSources) {
+    // Create a new sources table with sourceCode set to null for all entries
+    sources = {
+      length: sources.length,
+      uuid: sources.uuid.slice(),
+      filename: sources.filename.slice(),
+      sourceCode: sources.sourceCode.map(() => null),
+    };
+  }
+
   let removingCounters = false;
   const newProfile: Profile = {
     ...profile,
@@ -129,7 +141,7 @@ export function sanitizePII(
     pages: pages,
     shared: {
       stringArray,
-      sources: profile.shared.sources,
+      sources,
     },
     threads: profile.threads.reduce<RawThread[]>((acc, thread, threadIndex) => {
       const newThread: RawThread | null = sanitizeThreadPII(

@@ -499,7 +499,12 @@ function mergeSources(
   sources: SourceTable;
   translationMaps: TranslationMapForSources[];
 } {
-  const newSources: SourceTable = { length: 0, uuid: [], filename: [] };
+  const newSources: SourceTable = {
+    length: 0,
+    uuid: [],
+    filename: [],
+    sourceCode: [],
+  };
   const mapOfInsertedSources: Map<string, IndexIntoSourceTable> = new Map();
 
   const translationMaps = sourcesPerProfile.map((sources, profileIndex) => {

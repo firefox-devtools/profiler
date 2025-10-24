@@ -379,6 +379,7 @@ export function getEmptySourceTable(): SourceTable {
     // be caught by the type system.
     uuid: [],
     filename: [],
+    sourceCode: [],
     length: 0,
   };
 }

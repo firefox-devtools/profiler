@@ -15,6 +15,8 @@ import type { ExternalCommunicationDelegate } from './query-api';
 import type {
   SourceCodeLoadingError,
   AddressProof,
+  Profile,
+  IndexIntoSourceTable,
 } from 'firefox-profiler/types';
 
 export type FetchSourceResult =
@@ -36,6 +38,8 @@ export type FetchSourceResult =
  * @param archiveCache - A map which allows reusing the bytes of the archive file.
  *    Stores promises to the bytes of uncompressed tar files.
  * @param delegate - An object which handles web requests and browser connection queries.
+ * @param profile - The profile, used to check if source code is already downloaded.
+ * @param sourceIndex - The index into the sources table, used to check if source code is already downloaded.
  */
 export async function fetchSource(
   file: string,
@@ -43,9 +47,24 @@ export async function fetchSource(
   symbolServerUrl: string,
   addressProof: AddressProof | null,
   archiveCache: Map<string, Promise<Uint8Array>>,
-  delegate: ExternalCommunicationDelegate
+  delegate: ExternalCommunicationDelegate,
+  profile: Profile | null = null,
+  sourceIndex: IndexIntoSourceTable | null = null
 ): Promise<FetchSourceResult> {
   const errors: SourceCodeLoadingError[] = [];
+
+  // First, check if we already have the source code in the profile
+  if (
+    profile !== null &&
+    sourceIndex !== null &&
+    sourceIndex < profile.shared.sources.length
+  ) {
+    const sourceCodeIndex = profile.shared.sources.sourceCode[sourceIndex];
+    if (sourceCodeIndex !== null) {
+      const sourceCode = profile.shared.stringArray[sourceCodeIndex];
+      return { type: 'SUCCESS', source: sourceCode };
+    }
+  }
 
   if (addressProof !== null) {
     // Prepare a request to /source/v1. The API format for this endpoint is documented

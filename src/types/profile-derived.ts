@@ -664,6 +664,8 @@ export type RemoveProfileInformation = {
   readonly shouldRemovePreferenceValues: boolean;
   // Remove the private browsing data if it's true.
   readonly shouldRemovePrivateBrowsingData: boolean;
+  // Remove the JavaScript sources if it's true.
+  readonly shouldRemoveJSSources: boolean;
 };
 
 /**

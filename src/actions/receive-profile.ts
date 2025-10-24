@@ -95,6 +95,7 @@ import type {
   BrowserConnectionStatus,
 } from '../app-logic/browser-connection';
 import type { LibSymbolicationRequest } from '../profile-logic/symbol-store';
+import { getJSSourcesViaWebChannel } from '../app-logic/web-channel';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -212,6 +213,15 @@ export function finalizeProfileView(
       );
     }
 
+    // Download all JS sources from the browser and store them in the profile
+    let jsSourcesPromise = null;
+    if (browserConnection) {
+      jsSourcesPromise = downloadJSSourcesFromBrowser(
+        profile,
+        browserConnection
+      );
+    }
+
     // Note we kick off symbolication only for the profiles we know for sure
     // that they weren't symbolicated.
     // We can skip the symbolication in tests if needed.
@@ -233,7 +243,11 @@ export function finalizeProfileView(
       }
     }
 
-    await Promise.all([faviconsPromise, symbolicationPromise]);
+    await Promise.all([
+      faviconsPromise,
+      jsSourcesPromise,
+      symbolicationPromise,
+    ]);
   };
 }
 
@@ -739,6 +753,84 @@ export async function retrievePageFaviconsFromBrowser(
     type: 'UPDATE_PAGES',
     newPages,
   });
+}
+
+/**
+ * Download all JavaScript sources from the browser and store them in the profile's
+ * string table. This is called during profile loading to pre-fetch all JS sources.
+ */
+export async function downloadJSSourcesFromBrowser(
+  profile: Profile,
+  _browserConnection: BrowserConnection
+): Promise<void> {
+  const { shared } = profile;
+  const { sources } = shared;
+
+  // Collect all unique source UUIDs that don't already have source code
+  const uuidsToFetch: string[] = [];
+  const sourceIndexByUuid: Map<string, number> = new Map();
+
+  for (let i = 0; i < sources.length; i++) {
+    const uuid = sources.uuid[i];
+    const sourceCode = sources.sourceCode[i];
+
+    // Only fetch if we have a UUID and don't already have the source code
+    if (uuid !== null && sourceCode === null) {
+      uuidsToFetch.push(uuid);
+      sourceIndexByUuid.set(uuid, i);
+    }
+  }
+
+  if (uuidsToFetch.length === 0) {
+    // No sources to fetch
+    console.log('No JS sources to download from browser');
+    return;
+  }
+
+  console.log(
+    `Starting to download ${uuidsToFetch.length} JS source(s) from browser...`
+  );
+
+  try {
+    // Fetch all JS sources at once using the WebChannel
+    const results = await getJSSourcesViaWebChannel(uuidsToFetch);
+
+    // Store the fetched sources in the string table
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i];
+      const uuid = uuidsToFetch[i];
+      const sourceIndex = sourceIndexByUuid.get(uuid);
+
+      if (sourceIndex === undefined) {
+        continue;
+      }
+
+      if ('error' in result) {
+        // Log the error but continue with other sources
+        console.warn(
+          `Failed to fetch JS source for UUID ${uuid}: ${result.error}`
+        );
+        errorCount++;
+        continue;
+      }
+
+      // Add the source code to the string table and update the sources table
+      const sourceCodeIndex = shared.stringArray.length;
+      shared.stringArray.push(result.sourceText);
+      sources.sourceCode[sourceIndex] = sourceCodeIndex;
+      successCount++;
+    }
+
+    console.log(
+      `Finished downloading JS sources: ${successCount} succeeded, ${errorCount} failed`
+    );
+  } catch (error) {
+    // Log the error but don't fail the entire profile load
+    console.error('Failed to download JS sources from browser:', error);
+  }
 }
 
 // From a BrowserConnectionStatus, this unwraps the included browserConnection
