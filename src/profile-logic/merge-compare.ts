@@ -19,6 +19,7 @@ import {
   getEmptyRawMarkerTable,
   getEmptySamplesTableWithEventDelay,
   shallowCloneRawMarkerTable,
+  getEmptySourceTable,
 } from './data-structures';
 import {
   filterRawThreadSamplesToRange,
@@ -499,7 +500,7 @@ function mergeSources(
   sources: SourceTable;
   translationMaps: TranslationMapForSources[];
 } {
-  const newSources: SourceTable = { length: 0, uuid: [], filename: [] };
+  const newSources = getEmptySourceTable();
   const mapOfInsertedSources: Map<string, IndexIntoSourceTable> = new Map();
 
   const translationMaps = sourcesPerProfile.map((sources, profileIndex) => {

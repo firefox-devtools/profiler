@@ -3,6 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { StringTable } from '../utils/string-table';
+import { getEmptySourceTable } from './data-structures';
+
 import type {
   Lib,
   LibMapping,
@@ -26,7 +28,7 @@ export class GlobalDataCollector {
   _libKeyToLibIndex: Map<string, IndexIntoLibs> = new Map();
   _stringArray: string[] = [];
   _stringTable: StringTable = StringTable.withBackingArray(this._stringArray);
-  _sources: SourceTable = { length: 0, uuid: [], filename: [] };
+  _sources: SourceTable = getEmptySourceTable();
   _uuidToSourceIndex: Map<string, IndexIntoSourceTable> = new Map();
   _filenameToSourceIndex: Map<IndexIntoStringTable, IndexIntoSourceTable> =
     new Map();
