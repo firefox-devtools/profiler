@@ -1195,9 +1195,12 @@ SourceView--close-button =
 ## The string IDs here currently all start with SourceView for historical reasons.
 
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
-# know which URL to request source code from.
-SourceView--no-known-cors-url =
-    There is no known cross-origin-accessible URL for this file.
+# know which URL to request source code from. This can happen for JavaScript
+# files when the "JavaScript Sources" feature is not enabled.
+SourceView--no-known-cors-url1 =
+    There is no known cross-origin-accessible URL for this file. If this is a
+    JavaScript file, you may need to enable the “JavaScript Sources” feature in
+    about:profiling.
 
 # Displayed below SourceView--cannot-obtain-source, if there was a network error
 # when fetching the source code for a file.
