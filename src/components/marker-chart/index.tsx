@@ -23,6 +23,7 @@ import {
   changeRightClickedMarker,
   changeMouseTimePosition,
   changeSelectedMarker,
+  activateFlowsForMarker,
 } from 'firefox-profiler/actions/profile-view';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 
@@ -48,6 +49,7 @@ type DispatchProps = {
   readonly changeRightClickedMarker: typeof changeRightClickedMarker;
   readonly changeMouseTimePosition: typeof changeMouseTimePosition;
   readonly changeSelectedMarker: typeof changeSelectedMarker;
+  readonly activateFlowsForMarker: typeof activateFlowsForMarker;
 };
 
 type StateProps = {
@@ -114,6 +116,7 @@ class MarkerChartImpl extends React.PureComponent<Props> {
       updatePreviewSelection,
       changeMouseTimePosition,
       changeRightClickedMarker,
+      activateFlowsForMarker,
       rightClickedMarkerIndex,
       selectedMarkerIndex,
       changeSelectedMarker,
@@ -124,12 +127,7 @@ class MarkerChartImpl extends React.PureComponent<Props> {
     const maxViewportHeight = maxMarkerRows * ROW_HEIGHT;
 
     return (
-      <div
-        className="markerChart"
-        id="marker-chart-tab"
-        role="tabpanel"
-        aria-labelledby="marker-chart-tab-button"
-      >
+      <div className="markerChart">
         <MarkerSettings />
         {maxMarkerRows === 0 ? (
           <MarkerChartEmptyReasons />
@@ -161,6 +159,7 @@ class MarkerChartImpl extends React.PureComponent<Props> {
                 updatePreviewSelection,
                 changeMouseTimePosition,
                 changeRightClickedMarker,
+                activateFlowsForMarker,
                 rangeStart: timeRange.start,
                 rangeEnd: timeRange.end,
                 rowHeight: ROW_HEIGHT,
@@ -213,6 +212,7 @@ export const MarkerChart = explicitConnect<{}, StateProps, DispatchProps>({
     changeMouseTimePosition,
     changeRightClickedMarker,
     changeSelectedMarker,
+    activateFlowsForMarker,
   },
   component: MarkerChartImpl,
 });
