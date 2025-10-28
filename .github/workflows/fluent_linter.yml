@@ -1,0 +1,33 @@
+name: Lint Reference Files
+on:
+  push:
+    paths:
+      - 'locales/en-US/*.ftl'
+      - '.github/workflows/fluent_linter.yaml'
+    branches:
+      - main
+  pull_request:
+    paths:
+      - 'en/**.ftl'
+      - 'locales/en-US/*.ftl'
+      - '.github/workflows/fluent_linter.yaml'
+    branches:
+      - masmainter
+  workflow_dispatch:
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v5
+      - name: Set up Python 3
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install Python dependencies
+        run: |
+          pip install moz-fluent-linter==0.4.9
+      - name: Lint reference
+        run: |
+          moz-fluent-lint ./locales/en-US --config .github/fluent_linter_config.yml
