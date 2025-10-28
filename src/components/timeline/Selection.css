@@ -17,6 +17,7 @@
   position: relative;
   display: flex;
   width: var(--content-width);
+  min-height: 0;
   flex: 1;
   flex-direction: column;
   margin-left: var(--thread-label-column-width);

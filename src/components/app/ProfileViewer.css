@@ -45,6 +45,10 @@
 }
 
 .profileViewer {
+  /* Create a stacking context, so that the KeyboardShortcut can overlay the profile
+     viewer. */
+  position: relative;
+  z-index: 0;
   display: flex;
   min-width: 0; /* This allows Flexible Layout to shrink this further than its min-content */
   flex: 1;
@@ -87,21 +91,6 @@
 
 .profileViewerZipButton:hover {
   border-color: #000;
-}
-
-.profileViewerSplitter {
-  /* Create a stacking context, so that the KeyboardShortcut can overlay the profile
-     viewer. In addition, the built-in class uses position: absolute, which is not
-     appropriate here. */
-  position: relative;
-  z-index: 0;
-}
-
-.profileViewerSplitter > .layout-pane:not(.layout-pane-primary) {
-  display: flex;
-  overflow: hidden;
-  max-height: var(--profile-viewer-splitter-max-height);
-  flex-direction: column;
 }
 
 .profileViewerTopBar {

@@ -21,7 +21,6 @@ import {
   getGlobalTrackReferences,
   getHiddenTrackCount,
   getGlobalTrackOrder,
-  getPanelLayoutGeneration,
 } from 'firefox-profiler/selectors';
 import { TimelineTrackContextMenu } from './TrackContextMenu';
 
@@ -57,7 +56,6 @@ type StateProps = {
   readonly globalTracks: GlobalTrack[];
   readonly globalTrackOrder: TrackIndex[];
   readonly globalTrackReferences: GlobalTrackReference[];
-  readonly panelLayoutGeneration: number;
   readonly zeroAt: Milliseconds;
   readonly profileTimelineUnit: TimelineUnit;
   readonly hiddenTrackCount: HiddenTrackCount;
@@ -145,7 +143,6 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
       profileTimelineUnit,
       width,
       globalTrackReferences,
-      panelLayoutGeneration,
       hiddenTrackCount,
       changeRightClickedTrack,
       innerElementRef,
@@ -169,7 +166,6 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
           </div>
           <OverflowEdgeIndicator
             className="tracksContainer timelineOverflowEdgeIndicator"
-            panelLayoutGeneration={panelLayoutGeneration}
             initialSelected={this.state.initialSelected}
           >
             <Reorderable
@@ -210,7 +206,6 @@ export const FullTimeline = explicitConnect<
     committedRange: getCommittedRange(state),
     zeroAt: getZeroAt(state),
     profileTimelineUnit: getProfileTimelineUnit(state),
-    panelLayoutGeneration: getPanelLayoutGeneration(state),
     hiddenTrackCount: getHiddenTrackCount(state),
   }),
   mapDispatchToProps: {

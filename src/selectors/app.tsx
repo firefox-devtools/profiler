@@ -54,8 +54,6 @@ export const getHasZoomedViaMousewheel: Selector<boolean> = (state) => {
 };
 export const getIsSidebarOpen: Selector<boolean> = (state) =>
   getApp(state).isSidebarOpenPerPanel[getSelectedTab(state)];
-export const getPanelLayoutGeneration: Selector<number> = (state) =>
-  getApp(state).panelLayoutGeneration;
 export const getLastVisibleThreadTabSlug: Selector<TabSlug> = (state) =>
   getApp(state).lastVisibleThreadTabSlug;
 export const getTrackThreadHeights: Selector<{

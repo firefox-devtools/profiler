@@ -95,7 +95,6 @@
     "react-dom": "^18.3.1",
     "react-intersection-observer": "^9.16.0",
     "react-redux": "^9.2.0",
-    "react-splitter-layout": "^4.0.0",
     "react-transition-group": "^4.4.5",
     "redux": "^5.0.1",
     "redux-logger": "^3.0.6",

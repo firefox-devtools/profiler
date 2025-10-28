@@ -12,15 +12,23 @@ export type OnMove<T> = (
 ) => void;
 
 type Props<T> = {
-  value: T;
+  value?: T;
+  getInitialValue?: () => T;
   onMove: OnMove<T>;
   className: string;
   children?: React.ReactNode;
 };
 
-type State = {
-  dragging: boolean;
-};
+type State<T> =
+  | {
+      dragging: false;
+    }
+  | {
+      dragging: true;
+      startValue: T;
+      startX: number;
+      startY: number;
+    };
 
 /**
  * A component that reports mouse dragging (left mouse button only) in its
@@ -30,13 +38,9 @@ type State = {
  * x and y deltas compared to the mouse position at mousedown.
  * During the drag, the additional className 'dragging' is set on the element.
  */
-export class Draggable<T> extends React.PureComponent<Props<T>, State> {
+export class Draggable<T> extends React.PureComponent<Props<T>, State<T>> {
   _container: HTMLDivElement | null = null;
-  _handlers: {
-    mouseMoveHandler: (param: MouseEvent) => void;
-    mouseUpHandler: (param: MouseEvent) => void;
-  } | null = null;
-  override state = {
+  override state: State<T> = {
     dragging: false,
   };
 
@@ -44,79 +48,61 @@ export class Draggable<T> extends React.PureComponent<Props<T>, State> {
     this._container = c;
   };
 
-  _onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  _getInitialValue = (): T => {
+    if (this.props.value !== undefined) {
+      return this.props.value;
+    }
+    if (this.props.getInitialValue !== undefined) {
+      return this.props.getInitialValue();
+    }
+    throw new Error('Missing value in Draggable');
+  };
+
+  _onPointerDown = (e: React.PointerEvent<HTMLElement>) => {
     if (!this._container || e.button !== 0) {
       return;
     }
 
     e.stopPropagation();
     e.preventDefault();
-    this.setState({ dragging: true });
 
-    const mouseDownX = e.pageX;
-    const mouseDownY = e.pageY;
-    const startValue = this.props.value;
-
-    const mouseMoveHandler = (e: MouseEvent) => {
-      this.props.onMove(
-        startValue,
-        e.pageX - mouseDownX,
-        e.pageY - mouseDownY,
-        true
-      );
-      // Note: no stopPropagation, so that other handlers (eg: screenshot
-      // hovers) can also get the event and handle it.
-      e.preventDefault();
-    };
-
-    const mouseUpHandler = (e: MouseEvent) => {
-      this.props.onMove(
-        startValue,
-        e.pageX - mouseDownX,
-        e.pageY - mouseDownY,
-        false
-      );
-      e.stopPropagation();
-      e.preventDefault();
-      this._uninstallMoveAndUpHandlers();
-      this.setState({ dragging: false });
-    };
-
-    this._installMoveAndUpHandlers(mouseMoveHandler, mouseUpHandler);
+    this._container?.setPointerCapture(e.pointerId);
+    this.setState({
+      dragging: true,
+      startValue: this._getInitialValue(),
+      startX: e.pageX,
+      startY: e.pageY,
+    });
   };
 
-  _installMoveAndUpHandlers(
-    mouseMoveHandler: (param: MouseEvent) => void,
-    mouseUpHandler: (param: MouseEvent) => void
-  ) {
-    // Unregister any leftover old handlers, in case we didn't get a mouseup for the previous
-    // drag (e.g. when tab switching during a drag, or when ctrl+clicking on macOS).
-    this._uninstallMoveAndUpHandlers();
-
-    this._handlers = { mouseMoveHandler, mouseUpHandler };
-    window.addEventListener('mousemove', mouseMoveHandler, true);
-    window.addEventListener('mouseup', mouseUpHandler, true);
-  }
-
-  _uninstallMoveAndUpHandlers() {
-    if (this._handlers) {
-      const { mouseMoveHandler, mouseUpHandler } = this._handlers;
-      window.removeEventListener('mousemove', mouseMoveHandler, true);
-      window.removeEventListener('mouseup', mouseUpHandler, true);
-      this._handlers = null;
+  _onPointerMove = (e: React.PointerEvent<HTMLElement>) => {
+    if (!this.state.dragging) {
+      return;
     }
-  }
 
-  override componentWillUnmount() {
-    this._uninstallMoveAndUpHandlers();
-  }
+    const { startValue, startX, startY } = this.state;
+    this.props.onMove(startValue, e.pageX - startX, e.pageY - startY, true);
+  };
+
+  _onPointerUp = (e: React.PointerEvent<HTMLElement>) => {
+    if (!this.state.dragging) {
+      return;
+    }
+
+    const { startValue, startX, startY } = this.state;
+    this.props.onMove(startValue, e.pageX - startX, e.pageY - startY, false);
+    this.setState({ dragging: false });
+  };
 
   override render() {
     const { children, className } = this.props;
+    const { dragging } = this.state;
     return (
       <div
         className={this.state.dragging ? className + ' dragging' : className}
-        onMouseDown={this._onMouseDown}
+        onPointerDown={this._onPointerDown}
+        onPointerMove={dragging ? this._onPointerMove : undefined}
+        onPointerUp={this._onPointerUp}
         ref={this._takeContainerRef}
       >
         {children}
