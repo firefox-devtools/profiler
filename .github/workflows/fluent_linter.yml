@@ -3,16 +3,16 @@ on:
   push:
     paths:
       - 'locales/en-US/*.ftl'
-      - '.github/workflows/fluent_linter.yaml'
+      - '.github/workflows/fluent_linter.yml'
     branches:
       - main
   pull_request:
     paths:
       - 'en/**.ftl'
       - 'locales/en-US/*.ftl'
-      - '.github/workflows/fluent_linter.yaml'
+      - '.github/workflows/fluent_linter.yml'
     branches:
-      - masmainter
+      - main
   workflow_dispatch:
 jobs:
   linter:
