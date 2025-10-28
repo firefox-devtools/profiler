@@ -27,7 +27,7 @@ jobs:
           cache: 'pip'
       - name: Install Python dependencies
         run: |
-          pip install moz-fluent-linter==0.4.9
+          pip install -r .github/requirements.txt
       - name: Lint reference
         run: |
           moz-fluent-lint ./locales/en-US --config .github/fluent_linter_config.yml
