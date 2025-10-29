@@ -106,7 +106,7 @@ export function readSymbolsFromSymbolTable(
   // the symbolTableIndex array.
   // Both addressArray and symbolTableAddrs are sorted in ascending order.
   const decoder = new TextDecoder();
-  const results = new Map();
+  const results: Map<number, AddressResult> = new Map();
   let currentSymbolIndex = undefined;
   let currentSymbol = '';
   let currentSymbolFunctionSize = undefined;
