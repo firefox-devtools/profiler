@@ -6,6 +6,7 @@ import React from 'react';
 import classNames from 'classnames';
 
 import { getAssemblyViewIsOpen } from 'firefox-profiler/selectors/url-state';
+import { getIsAssemblyViewAvailable } from 'firefox-profiler/selectors/code';
 import {
   openAssemblyView,
   closeAssemblyView,
@@ -18,6 +19,7 @@ import { Localized } from '@fluent/react';
 
 type StateProps = {
   readonly assemblyViewIsOpen: boolean;
+  readonly isAssemblyViewAvailable: boolean;
 };
 
 type DispatchProps = {
@@ -37,7 +39,7 @@ class AssemblyViewToggleButtonImpl extends React.PureComponent<Props> {
   };
 
   override render() {
-    const { assemblyViewIsOpen } = this.props;
+    const { assemblyViewIsOpen, isAssemblyViewAvailable } = this.props;
 
     return assemblyViewIsOpen ? (
       <Localized id="AssemblyView--hide-button" attrs={{ title: true }}>
@@ -51,6 +53,7 @@ class AssemblyViewToggleButtonImpl extends React.PureComponent<Props> {
           title="Hide the assembly view"
           type="button"
           onClick={this._onClick}
+          disabled={!isAssemblyViewAvailable}
         />
       </Localized>
     ) : (
@@ -64,6 +67,7 @@ class AssemblyViewToggleButtonImpl extends React.PureComponent<Props> {
           title="Show the assembly view"
           type="button"
           onClick={this._onClick}
+          disabled={!isAssemblyViewAvailable}
         />
       </Localized>
     );
@@ -77,6 +81,7 @@ export const AssemblyViewToggleButton = explicitConnect<
 >({
   mapStateToProps: (state) => ({
     assemblyViewIsOpen: getAssemblyViewIsOpen(state),
+    isAssemblyViewAvailable: getIsAssemblyViewAvailable(state),
   }),
   mapDispatchToProps: {
     openAssemblyView,

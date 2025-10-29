@@ -55,6 +55,7 @@ import type {
   Page,
   Pid,
   Tid,
+  IndexIntoStackTable,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -85,6 +86,8 @@ type OwnProps = {
   // the layout to be huge. This option when set to true will restrict the
   // height of things like stacks, and the width of long things like URLs.
   readonly restrictHeightWidth: boolean;
+  // Optional callback for when a stack frame is clicked in the backtrace.
+  readonly onStackFrameClick?: (stackIndex: IndexIntoStackTable) => void;
 };
 
 type StateProps = {
@@ -428,6 +431,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       implementationFilter,
       restrictHeightWidth,
       categories,
+      onStackFrameClick,
     } = this.props;
     const { data, start } = marker;
     if (!data || !('cause' in data) || !data.cause) {
@@ -463,6 +467,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
             thread={thread}
             implementationFilter={implementationFilter}
             categories={categories}
+            onStackFrameClick={onStackFrameClick}
           />
         </div>
       </TooltipDetail>,
