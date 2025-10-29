@@ -10,6 +10,7 @@ import {
   formatTimestamp,
 } from 'firefox-profiler/utils/format-numbers';
 import explicitConnect from 'firefox-profiler/utils/connect';
+import { useAltKey } from 'firefox-profiler/hooks/useAltKey';
 import {
   getCategories,
   getMarkerSchemaByName,
@@ -88,6 +89,7 @@ type OwnProps = {
   readonly restrictHeightWidth: boolean;
   // Optional callback for when a stack frame is clicked in the backtrace.
   readonly onStackFrameClick?: (stackIndex: IndexIntoStackTable) => void;
+  readonly showKeys?: boolean;
 };
 
 type StateProps = {
@@ -275,8 +277,10 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
             continue;
           }
 
+          // When Alt is pressed (showKeys is true), display the field key instead of label
+          const displayLabel = this.props.showKeys ? key : label || key;
           details.push(
-            <TooltipDetail key={schema.name + '-' + key} label={label || key}>
+            <TooltipDetail key={schema.name + '-' + key} label={displayLabel}>
               {formatMarkupFromMarkerSchema(
                 schema.name,
                 format,
@@ -554,7 +558,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
   }
 }
 
-export const TooltipMarker = explicitConnect<
+const ConnectedMarkerTooltipContents = explicitConnect<
   OwnProps,
   StateProps,
   DispatchProps
@@ -579,3 +583,9 @@ export const TooltipMarker = explicitConnect<
   mapDispatchToProps: { changeMarkersSearchString },
   component: MarkerTooltipContents,
 });
+
+// Wrapper component that provides the Alt key state
+export function TooltipMarker(props: OwnProps) {
+  const showKeys = useAltKey();
+  return <ConnectedMarkerTooltipContents {...props} showKeys={showKeys} />;
+}
