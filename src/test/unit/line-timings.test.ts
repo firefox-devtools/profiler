@@ -112,6 +112,40 @@ describe('getLineTimings for getStackLineInfo', function () {
     expect(lineTimingsTwo.selfLineHits.get(40)).toBe(1);
     expect(lineTimingsTwo.selfLineHits.size).toBe(2); // no other hits
   });
+
+  it('falls back to funcTable.lineNumber when frameTable.line is null', function () {
+    // Create a profile with frames that have null line numbers
+    const { derivedThreads } = getProfileFromTextSamples(`
+      A[file:file.js][line:20]
+      B[file:file.js][line:30]
+    `);
+    const [thread] = derivedThreads;
+    const { stackTable, frameTable, funcTable, samples, stringTable } = thread;
+
+    // Manually set frameTable.line to null for the leaf frame
+    // to simulate a case where frame line info is missing
+    const leafFrame = stackTable.frame[stackTable.length - 1];
+    frameTable.line[leafFrame] = null;
+
+    // Set funcTable.lineNumber to a value for the func of that frame
+    const func = frameTable.func[leafFrame];
+    funcTable.lineNumber[func] = 35;
+
+    const fileStringIndex = stringTable.indexForString('file.js');
+    const fileSourceIndex = thread.sources.filename.indexOf(fileStringIndex);
+    const stackLineInfo = getStackLineInfo(
+      stackTable,
+      frameTable,
+      funcTable,
+      fileSourceIndex
+    );
+    const lineTimings = getLineTimings(stackLineInfo, samples);
+
+    // The fallback should use funcTable.lineNumber[func] = 35
+    expect(lineTimings.selfLineHits.get(35)).toBe(1);
+    expect(lineTimings.totalLineHits.get(20)).toBe(1);
+    expect(lineTimings.totalLineHits.get(35)).toBe(1);
+  });
 });
 
 describe('getLineTimings for getStackLineInfoForCallNode', function () {
@@ -141,6 +175,7 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
     const stackLineInfo = getStackLineInfoForCallNode(
       stackTable,
       frameTable,
+      funcTable,
       callNodeIndex,
       callNodeInfo
     );
@@ -267,5 +302,34 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
     expect(lineTimingsDBA.totalLineHits.get(20)).toBe(1);
     expect(lineTimingsDBA.totalLineHits.size).toBe(1); // no other hits
     expect(lineTimingsDC.selfLineHits.size).toBe(0); // no self line hits
+  });
+
+  it('falls back to funcTable.lineNumber when frameTable.line is null', function () {
+    const { derivedThreads, funcNamesDictPerThread, defaultCategory } =
+      getProfileFromTextSamples(`
+      A[file:file.js][line:20]
+      B[file:file.js][line:30]
+    `);
+
+    const [{ A, B }] = funcNamesDictPerThread;
+    const [thread] = derivedThreads;
+    const { stackTable, frameTable, funcTable } = thread;
+
+    // Manually set frameTable.line to null for the leaf frame
+    // to simulate a case where frame line info is missing
+    const leafFrame = stackTable.frame[stackTable.length - 1];
+    frameTable.line[leafFrame] = null;
+
+    // Set funcTable.lineNumber to a value for the func of that frame
+    const func = frameTable.func[leafFrame];
+    funcTable.lineNumber[func] = 35;
+
+    // Compute the line timings for the child call node.
+    // The fallback should use funcTable.lineNumber[func] = 35
+    const lineTimingsChild = getTimings(thread, [A, B], defaultCategory, false);
+    expect(lineTimingsChild.totalLineHits.get(35)).toBe(1);
+    expect(lineTimingsChild.totalLineHits.size).toBe(1); // no other hits
+    expect(lineTimingsChild.selfLineHits.get(35)).toBe(1);
+    expect(lineTimingsChild.selfLineHits.size).toBe(1); // no other hits
   });
 });
