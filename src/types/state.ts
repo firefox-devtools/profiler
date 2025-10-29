@@ -247,6 +247,9 @@ export type SourceViewState = {
   // Index into source table. Contains information (filename and uuid) about the
   // source. Null if a function without a file path was double clicked.
   sourceIndex: IndexIntoSourceTable | null;
+  // Optional line number to scroll to in the source view.
+  // If not specified, the source view will scroll to the hottest line.
+  lineNumber?: number;
 };
 
 export type AssemblyViewState = {
