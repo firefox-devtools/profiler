@@ -1591,6 +1591,7 @@ export type BacktraceItem = {
   origin: string;
   // The inline depth of this frame. Frames with inline depth > 0 are inlined.
   inlineDepth: number;
+  stackIndex: IndexIntoStackTable;
 };
 
 /**
@@ -1619,6 +1620,7 @@ export function getBacktraceItemsForStack(
       frameLine: frameTable.line[frameIndex],
       frameColumn: frameTable.column[frameIndex],
       inlineDepth: frameTable.inlineDepth[frameIndex],
+      stackIndex,
     });
   }
 
@@ -1627,7 +1629,14 @@ export function getBacktraceItemsForStack(
     funcMatchesImplementation(thread, funcIndex)
   );
   return path.map(
-    ({ category, funcIndex, frameLine, frameColumn, inlineDepth }) => {
+    ({
+      category,
+      funcIndex,
+      frameLine,
+      frameColumn,
+      inlineDepth,
+      stackIndex,
+    }) => {
       return {
         funcName: stringTable.getString(funcTable.name[funcIndex]),
         category,
@@ -1642,6 +1651,7 @@ export function getBacktraceItemsForStack(
           frameColumn
         ),
         inlineDepth,
+        stackIndex,
       };
     }
   );
