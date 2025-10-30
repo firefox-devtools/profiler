@@ -16,7 +16,6 @@ import {
   triggerLoadingFromUrl,
 } from 'firefox-profiler/actions/receive-profile';
 import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import {
   queryIsMenuButtonEnabled,
   enableMenuButton,
@@ -182,15 +181,8 @@ function DocsButton() {
   );
 }
 
-function InstructionTransition(props: { children: React.ReactNode }) {
-  return (
-    <CSSTransition
-      {...props}
-      classNames="homeTransition"
-      timeout={300}
-      exit={false}
-    />
-  );
+function InstructionTransition({ children }: { children: React.ReactNode }) {
+  return <div className="homeTransition-entered">{children}</div>;
 }
 
 type OwnHomeProps = {
@@ -590,9 +582,9 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
               faster.
             </p>
           </Localized>
-          <TransitionGroup className="homeInstructionsTransitionGroup">
+          <div className="homeInstructionsTransitionGroup">
             {this._renderInstructions()}
-          </TransitionGroup>
+          </div>
           <section className="homeAdditionalContent">
             {/* Grid container: homeAdditionalContent */}
             <h2 className="homeAdditionalContentTitle protocol-display-xs">
