@@ -1966,10 +1966,17 @@ export async function unserializeProfileOfArbitraryFormat(
     // happens in our tests.
     if (String(arbitraryFormat) === '[object ArrayBuffer]') {
       const arrayBuffer = arbitraryFormat as ArrayBuffer;
+      arbitraryFormat = new Uint8Array(arrayBuffer);
+    }
 
+    // Handle binary formats.
+    if (
+      arbitraryFormat instanceof Uint8Array ||
+      (globalThis.Buffer && arbitraryFormat instanceof globalThis.Buffer)
+    ) {
       // Check for the gzip magic number in the header. If we find it, decompress
       // the data first.
-      let profileBytes = new Uint8Array(arrayBuffer);
+      let profileBytes = arbitraryFormat as Uint8Array<ArrayBuffer>;
       if (isGzip(profileBytes)) {
         profileBytes = await decompress(profileBytes);
       }
