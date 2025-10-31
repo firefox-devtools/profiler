@@ -1965,27 +1965,26 @@ export async function unserializeProfileOfArbitraryFormat(
     // object is constructed from an ArrayBuffer in a different context... which
     // happens in our tests.
     if (String(arbitraryFormat) === '[object ArrayBuffer]') {
-      let arrayBuffer = arbitraryFormat as ArrayBuffer;
+      const arrayBuffer = arbitraryFormat as ArrayBuffer;
 
       // Check for the gzip magic number in the header. If we find it, decompress
       // the data first.
-      const profileBytes = new Uint8Array(arrayBuffer);
+      let profileBytes = new Uint8Array(arrayBuffer);
       if (isGzip(profileBytes)) {
-        const decompressedProfile = await decompress(profileBytes);
-        arrayBuffer = decompressedProfile.buffer;
+        profileBytes = await decompress(profileBytes);
       }
 
-      if (isArtTraceFormat(arrayBuffer)) {
-        arbitraryFormat = convertArtTraceProfile(arrayBuffer);
-      } else if (verifyMagic(SIMPLEPERF_MAGIC, arrayBuffer)) {
+      if (isArtTraceFormat(profileBytes)) {
+        arbitraryFormat = convertArtTraceProfile(profileBytes);
+      } else if (verifyMagic(SIMPLEPERF_MAGIC, profileBytes)) {
         const { convertSimpleperfTraceProfile } = await import(
           './import/simpleperf'
         );
-        arbitraryFormat = convertSimpleperfTraceProfile(arrayBuffer);
+        arbitraryFormat = convertSimpleperfTraceProfile(profileBytes);
       } else {
         try {
           const textDecoder = new TextDecoder(undefined, { fatal: true });
-          arbitraryFormat = await textDecoder.decode(arrayBuffer);
+          arbitraryFormat = await textDecoder.decode(profileBytes);
         } catch (e) {
           console.error('Source exception:', e);
           throw new Error(
