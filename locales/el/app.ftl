@@ -42,6 +42,14 @@ AppViewRouter--error-from-localhost-url-safari =
 AppViewRouter--route-not-found--home =
     .specialMessage = Δεν αναγνωρίστηκε το URL που προσπαθήσατε να μεταβείτε.
 
+## Backtrace
+## This is used to display a backtrace (call stack) for a marker or sample.
+
+# Variables:
+#   $function (String) - Name of the function that was inlined.
+Backtrace--inlining-badge = (ενσωματωμένη)
+    .title = Η συνάρτηση «{ $function }» ενσωματώθηκε στο καλούν στοιχείο από τον μεταγλωττιστή.
+
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
@@ -437,6 +445,16 @@ MarkerTable--start = Έναρξη
 MarkerTable--duration = Διάρκεια
 MarkerTable--name = Όνομα
 MarkerTable--details = Λεπτομέρειες
+
+## MarkerTooltip
+## This is the component for Marker Tooltip panel.
+
+# This is used as the tooltip for the filter button in marker tooltips.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerTooltip--filter-button-tooltip =
+    .title = Εμφάνιση μόνο των αντίστοιχων δεικτών: «{ $filter }»
+    .aria-label = Εμφάνιση μόνο των αντίστοιχων δεικτών: «{ $filter }»
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
