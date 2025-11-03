@@ -11,7 +11,7 @@ import {
 import { Root } from '../../components/app/Root';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { fireFullClick } from '../fixtures/utils';
-import { getProfileUrlForHash } from '../../actions/receive-profile';
+import { getProfileUrlForHash } from '../../utils/profile-fetch';
 import { blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
