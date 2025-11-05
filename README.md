@@ -43,22 +43,20 @@ yarn start
 
 This project uses [TypeScript](https://www.typescriptlang.org/).
 
-You can also develop the Firefox Profiler online in a pre-configured development environment.
+You can also develop the Firefox Profiler online in a pre-configured development environment using [GitHub Codespaces](https://github.com/features/codespaces).
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/firefox-devtools/profiler)
-
-Please look at our [gitpod documentation](./docs-user/gitpod.md) for more information.
+Please look at our [GitHub Codespaces documentation](./docs-developer/codespaces.md) for more information.
 
 For more detailed information on getting started contributing. We have plenty of docs available to get you started.
 
-|                                                                |                                                                                                       |
-| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| [Contributing](./CONTRIBUTING.md)                              | Find out in detail how to get started and get your local development environment configured.          |
-| [Code of Conduct](./CODE_OF_CONDUCT.md)                        | We want to create an open and inclusive community, we have a few guidelines to help us out.           |
-| [Developer Documentation](./docs-developer)                    | Want to know how this whole thing works? Get started here.                                            |
-| [Source Files](./src)                                          | Dive into the inner workings of the code. Most folders have a `README.md` providing more information. |
-| [End-User Documentation](https://profiler.firefox.com/docs/#/) | These docs are customized for actual users of the profiler, not just folks contributing.              |
-| [Gitpod documentatation](./docs-user/gitpod.md)                | Start here if you want to set up a work space on gitpod.                                              |
+|                                                                   |                                                                                                       |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| [Contributing](./CONTRIBUTING.md)                                 | Find out in detail how to get started and get your local development environment configured.          |
+| [Code of Conduct](./CODE_OF_CONDUCT.md)                           | We want to create an open and inclusive community, we have a few guidelines to help us out.           |
+| [Developer Documentation](./docs-developer)                       | Want to know how this whole thing works? Get started here.                                            |
+| [Source Files](./src)                                             | Dive into the inner workings of the code. Most folders have a `README.md` providing more information. |
+| [End-User Documentation](https://profiler.firefox.com/docs/#/)    | These docs are customized for actual users of the profiler, not just folks contributing.              |
+| [GitHub Codespaces documentation](./docs-developer/codespaces.md) | Start here if you want to set up a workspace on GitHub Codespaces.                                    |
 
 ### Discussion
 
