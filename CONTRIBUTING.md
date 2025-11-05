@@ -91,7 +91,7 @@ When working on a new feature and code changes, it's important that things work 
   - We have [husky](https://www.npmjs.com/package/husky) installed to run automated checks when committing and pushing.
   - Run git commands with `--no-verify` to skip this step. This is useful for submitting broken PRs for feedback.
 - Continuous integration for pull requests
-  - We use CircleCI to run our tests for every PR that is submitted. This gives reviewers a great way to know if things are still working as expected.
+  - We use GitHub Actions to run our tests for every PR that is submitted. This gives reviewers a great way to know if things are still working as expected.
 
 ### Updating snapshots
 
