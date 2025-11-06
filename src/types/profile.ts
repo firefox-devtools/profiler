@@ -895,6 +895,10 @@ export type ProfileMeta = {
   // They also use the "product" field in the meta information, but this is somewhat
   // ambiguous. This field, if present, is unambiguous that it was imported.
   importedFrom?: string;
+  // For size profiles, the name of the file being profiled.
+  fileName?: string;
+  // For size profiles, the total size of the file in bytes.
+  fileSize?: Bytes;
 
   // The following are settings that are used to configure the views for
   // imported profiles, as some features do not make sense for them
