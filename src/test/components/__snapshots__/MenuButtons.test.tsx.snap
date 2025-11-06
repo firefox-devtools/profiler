@@ -167,14 +167,6 @@ exports[`app/MenuButtons <MetaInfoPanel> deleting a profile displays the delete 
         release
       </div>
     </div>
-    <h2
-      class="metaInfoSubTitle"
-    >
-      Platform
-    </h2>
-    <div
-      class="metaInfoSection"
-    />
   </div>
 </div>
 `;
@@ -286,14 +278,6 @@ exports[`app/MenuButtons <MetaInfoPanel> deleting a profile displays the delete 
         release
       </div>
     </div>
-    <h2
-      class="metaInfoSubTitle"
-    >
-      Platform
-    </h2>
-    <div
-      class="metaInfoSection"
-    />
   </div>
 </div>
 `;
@@ -379,14 +363,6 @@ exports[`app/MenuButtons <MetaInfoPanel> deleting a profile does not display the
         release
       </div>
     </div>
-    <h2
-      class="metaInfoSubTitle"
-    >
-      Platform
-    </h2>
-    <div
-      class="metaInfoSection"
-    />
   </div>
 </div>
 `;

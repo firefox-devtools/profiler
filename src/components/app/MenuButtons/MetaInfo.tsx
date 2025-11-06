@@ -9,6 +9,7 @@ import {
   getProfile,
   getSymbolicationStatus,
   getProfileExtraInfo,
+  getProfileTimelineUnit,
 } from 'firefox-profiler/selectors/profile';
 import { resymbolicateProfile } from 'firefox-profiler/actions/receive-profile';
 import { formatFromMarkerSchema } from 'firefox-profiler/profile-logic/marker-schema';
@@ -29,6 +30,7 @@ import type {
   Profile,
   SymbolicationStatus,
   ExtraProfileInfoSection,
+  TimelineUnit,
 } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { StringTable } from 'firefox-profiler/utils/string-table';
@@ -43,6 +45,7 @@ type StateProps = Readonly<{
   profile: Profile;
   symbolicationStatus: SymbolicationStatus;
   profileExtraInfo: ExtraProfileInfoSection[];
+  timelineUnit: TimelineUnit;
 }>;
 
 type DispatchProps = Readonly<{
@@ -186,138 +189,151 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
     );
   }
 
-  override render() {
-    const { meta, profilerOverhead } = this.props.profile;
+  _renderRecordingInfo() {
+    const { meta } = this.props.profile;
     const { configuration } = meta;
+    const { timelineUnit } = this.props;
 
-    const platformInformation = formatPlatform(meta);
+    return (
+      <div className="metaInfoSection">
+        {meta.profilingStartTime !== undefined && meta.startTime ? (
+          <div className="metaInfoRow">
+            <span className="metaInfoLabel">
+              <Localized id="MenuButtons--metaInfo--profiling-started">
+                Recording started:
+              </Localized>
+            </span>
+            {_formatDate(meta.startTime + meta.profilingStartTime)}
+          </div>
+        ) : null}
+        {meta.profilingStartTime !== undefined && meta.profilingEndTime ? (
+          <div className="metaInfoRow">
+            <span className="metaInfoLabel">
+              <Localized id="MenuButtons--metaInfo--profiling-session">
+                Recording length:
+              </Localized>
+            </span>
+            {formatTimestamp(meta.profilingEndTime - meta.profilingStartTime)}
+          </div>
+        ) : null}
+        {meta.fileName ? (
+          <div className="metaInfoRow">
+            <span className="metaInfoLabel">
+              <Localized id="MenuButtons--metaInfo--file-name">
+                File name:
+              </Localized>
+            </span>
+            {meta.fileName}
+          </div>
+        ) : null}
+        {meta.fileSize ? (
+          <div className="metaInfoRow">
+            <span className="metaInfoLabel">
+              <Localized id="MenuButtons--metaInfo--file-size">
+                File size:
+              </Localized>
+            </span>
+            {formatBytes(meta.fileSize)}
+          </div>
+        ) : null}
+        {meta.profilingStartTime === undefined && meta.startTime ? (
+          <div className="metaInfoRow">
+            <span className="metaInfoLabel">
+              <Localized id="MenuButtons--metaInfo--main-process-started">
+                Main process started:
+              </Localized>
+            </span>
+            {_formatDate(meta.startTime)}
+          </div>
+        ) : null}
+        {meta.endTime ? (
+          <div className="metaInfoRow">
+            <span className="metaInfoLabel">
+              <Localized id="MenuButtons--metaInfo--main-process-ended">
+                Main process ended:
+              </Localized>
+            </span>
+            {_formatDate(meta.endTime)}
+          </div>
+        ) : null}
+        {meta.interval ? (
+          <div className="metaInfoRow">
+            <span className="metaInfoLabel">
+              <Localized id="MenuButtons--metaInfo--interval">
+                Interval:
+              </Localized>
+            </span>
+            {timelineUnit === 'bytes'
+              ? formatBytes(meta.interval)
+              : formatTimestamp(meta.interval, 4, 1)}
+          </div>
+        ) : null}
+        {configuration ? (
+          <>
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--buffer-capacity">
+                  Buffer capacity:
+                </Localized>
+              </span>
+              {
+                /* The capacity is expressed in "entries", where 1 entry == 8 bytes. */
+                formatBytes(configuration.capacity * 8, 0)
+              }
+            </div>
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--buffer-duration">
+                  Buffer duration:
+                </Localized>
+              </span>
+              {configuration.duration ? (
+                <Localized
+                  id="MenuButtons--metaInfo--buffer-duration-seconds"
+                  vars={{ configurationDuration: configuration.duration }}
+                >
+                  {'{$configurationDuration} seconds'}
+                </Localized>
+              ) : (
+                <Localized id="MenuButtons--metaInfo--buffer-duration-unlimited">
+                  Unlimited
+                </Localized>
+              )}
+            </div>
+            <div className="metaInfoSection">
+              {_renderRowOfList(
+                'MenuButtons--metaInfo-renderRowOfList-label-features',
+                configuration.features
+              )}
+              {_renderRowOfList(
+                'MenuButtons--metaInfo-renderRowOfList-label-threads-filter',
+                configuration.threads
+              )}
+            </div>
+          </>
+        ) : null}
+        {this.renderSymbolication()}
+      </div>
+    );
+  }
 
-    let cpuCount = null;
-    if (meta.physicalCPUs && meta.logicalCPUs) {
-      cpuCount = (
-        <Localized
-          id="MenuButtons--metaInfo--physical-and-logical-cpu"
-          vars={{
-            physicalCPUs: meta.physicalCPUs,
-            logicalCPUs: meta.logicalCPUs,
-          }}
-        />
-      );
-    } else if (meta.physicalCPUs) {
-      cpuCount = (
-        <Localized
-          id="MenuButtons--metaInfo--physical-cpu"
-          vars={{ physicalCPUs: meta.physicalCPUs }}
-        />
-      );
-    } else if (meta.logicalCPUs) {
-      cpuCount = (
-        <Localized
-          id="MenuButtons--metaInfo--logical-cpu"
-          vars={{ logicalCPUs: meta.logicalCPUs }}
-        />
-      );
+  _renderApplicationSection() {
+    const { meta } = this.props.profile;
+
+    if (
+      !meta.product &&
+      !meta.profilingStartTime &&
+      !meta.updateChannel &&
+      !meta.appBuildID &&
+      meta.debug === undefined &&
+      !meta.extensions &&
+      !meta.arguments
+    ) {
+      return null;
     }
 
     return (
       <>
-        <div className="metaInfoSection">
-          {meta.profilingStartTime !== undefined && meta.startTime ? (
-            <div className="metaInfoRow">
-              <span className="metaInfoLabel">
-                <Localized id="MenuButtons--metaInfo--profiling-started">
-                  Recording started:
-                </Localized>
-              </span>
-              {_formatDate(meta.startTime + meta.profilingStartTime)}
-            </div>
-          ) : null}
-          {meta.profilingStartTime !== undefined && meta.profilingEndTime ? (
-            <div className="metaInfoRow">
-              <span className="metaInfoLabel">
-                <Localized id="MenuButtons--metaInfo--profiling-session">
-                  Recording length:
-                </Localized>
-              </span>
-              {formatTimestamp(meta.profilingEndTime - meta.profilingStartTime)}
-            </div>
-          ) : null}
-          {meta.profilingStartTime === undefined && meta.startTime ? (
-            <div className="metaInfoRow">
-              <span className="metaInfoLabel">
-                <Localized id="MenuButtons--metaInfo--main-process-started">
-                  Main process started:
-                </Localized>
-              </span>
-              {_formatDate(meta.startTime)}
-            </div>
-          ) : null}
-          {meta.endTime ? (
-            <div className="metaInfoRow">
-              <span className="metaInfoLabel">
-                <Localized id="MenuButtons--metaInfo--main-process-ended">
-                  Main process ended:
-                </Localized>
-              </span>
-              {_formatDate(meta.endTime)}
-            </div>
-          ) : null}
-          {meta.interval ? (
-            <div className="metaInfoRow">
-              <span className="metaInfoLabel">
-                <Localized id="MenuButtons--metaInfo--interval">
-                  Interval:
-                </Localized>
-              </span>
-              {formatTimestamp(meta.interval, 4, 1)}
-            </div>
-          ) : null}
-          {configuration ? (
-            <>
-              <div className="metaInfoRow">
-                <span className="metaInfoLabel">
-                  <Localized id="MenuButtons--metaInfo--buffer-capacity">
-                    Buffer capacity:
-                  </Localized>
-                </span>
-                {
-                  /* The capacity is expressed in "entries", where 1 entry == 8 bytes. */
-                  formatBytes(configuration.capacity * 8, 0)
-                }
-              </div>
-              <div className="metaInfoRow">
-                <span className="metaInfoLabel">
-                  <Localized id="MenuButtons--metaInfo--buffer-duration">
-                    Buffer duration:
-                  </Localized>
-                </span>
-                {configuration.duration ? (
-                  <Localized
-                    id="MenuButtons--metaInfo--buffer-duration-seconds"
-                    vars={{ configurationDuration: configuration.duration }}
-                  >
-                    {'{$configurationDuration} seconds'}
-                  </Localized>
-                ) : (
-                  <Localized id="MenuButtons--metaInfo--buffer-duration-unlimited">
-                    Unlimited
-                  </Localized>
-                )}
-              </div>
-              <div className="metaInfoSection">
-                {_renderRowOfList(
-                  'MenuButtons--metaInfo-renderRowOfList-label-features',
-                  configuration.features
-                )}
-                {_renderRowOfList(
-                  'MenuButtons--metaInfo-renderRowOfList-label-threads-filter',
-                  configuration.threads
-                )}
-              </div>
-            </>
-          ) : null}
-          {this.renderSymbolication()}
-        </div>
         <h2 className="metaInfoSubTitle">
           <Localized id="MenuButtons--metaInfo--application">
             Application
@@ -408,6 +424,57 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
             </div>
           ) : null}
         </div>
+      </>
+    );
+  }
+
+  _renderPlatformSection() {
+    const { meta } = this.props.profile;
+
+    if (
+      !meta.device &&
+      !meta.oscpu &&
+      !meta.platform &&
+      !meta.abi &&
+      !meta.CPUName &&
+      !meta.physicalCPUs &&
+      !meta.logicalCPUs &&
+      !meta.mainMemory
+    ) {
+      return null;
+    }
+
+    const platformInformation = formatPlatform(meta);
+
+    let cpuCount = null;
+    if (meta.physicalCPUs && meta.logicalCPUs) {
+      cpuCount = (
+        <Localized
+          id="MenuButtons--metaInfo--physical-and-logical-cpu"
+          vars={{
+            physicalCPUs: meta.physicalCPUs,
+            logicalCPUs: meta.logicalCPUs,
+          }}
+        />
+      );
+    } else if (meta.physicalCPUs) {
+      cpuCount = (
+        <Localized
+          id="MenuButtons--metaInfo--physical-cpu"
+          vars={{ physicalCPUs: meta.physicalCPUs }}
+        />
+      );
+    } else if (meta.logicalCPUs) {
+      cpuCount = (
+        <Localized
+          id="MenuButtons--metaInfo--logical-cpu"
+          vars={{ logicalCPUs: meta.logicalCPUs }}
+        />
+      );
+    }
+
+    return (
+      <>
         <h2 className="metaInfoSubTitle">
           <Localized id="MenuButtons--metaInfo--platform">Platform</Localized>
         </h2>
@@ -469,45 +536,67 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
             </div>
           ) : null}
         </div>
-        {meta.visualMetrics ? (
-          <>
-            <h2 className="metaInfoSubTitle">
-              <Localized id="MenuButtons--metaInfo--visual-metrics">
-                Visual metrics
+      </>
+    );
+  }
+
+  _renderVisualMetricsSection() {
+    const { meta } = this.props.profile;
+
+    if (!meta.visualMetrics) {
+      return null;
+    }
+
+    return (
+      <>
+        <h2 className="metaInfoSubTitle">
+          <Localized id="MenuButtons--metaInfo--visual-metrics">
+            Visual metrics
+          </Localized>
+        </h2>
+        <div className="metaInfoSection">
+          <div className="metaInfoRow">
+            <span className="visualMetricsLabel">
+              <Localized id="MenuButtons--metaInfo--speed-index">
+                Speed Index:
               </Localized>
-            </h2>
-            <div className="metaInfoSection">
-              <div className="metaInfoRow">
-                <span className="visualMetricsLabel">
-                  <Localized id="MenuButtons--metaInfo--speed-index">
-                    Speed Index:
-                  </Localized>
-                </span>
-                {meta.visualMetrics.SpeedIndex}
-              </div>
-              <div className="metaInfoRow">
-                <span className="visualMetricsLabel">
-                  <Localized id="MenuButtons--metaInfo--perceptual-speed-index">
-                    Perceptual Speed Index:
-                  </Localized>
-                </span>
-                {meta.visualMetrics.PerceptualSpeedIndex}
-              </div>
-              <div className="metaInfoRow">
-                <span className="visualMetricsLabel">
-                  <Localized id="MenuButtons--metaInfo--contentful-speed-Index">
-                    Contentful Speed Index:
-                  </Localized>
-                </span>
-                {meta.visualMetrics.ContentfulSpeedIndex}
-              </div>
-            </div>
-          </>
-        ) : null}
+            </span>
+            {meta.visualMetrics.SpeedIndex}
+          </div>
+          <div className="metaInfoRow">
+            <span className="visualMetricsLabel">
+              <Localized id="MenuButtons--metaInfo--perceptual-speed-index">
+                Perceptual Speed Index:
+              </Localized>
+            </span>
+            {meta.visualMetrics.PerceptualSpeedIndex}
+          </div>
+          <div className="metaInfoRow">
+            <span className="visualMetricsLabel">
+              <Localized id="MenuButtons--metaInfo--contentful-speed-Index">
+                Contentful Speed Index:
+              </Localized>
+            </span>
+            {meta.visualMetrics.ContentfulSpeedIndex}
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  override render() {
+    const { profilerOverhead } = this.props.profile;
+
+    return (
+      <>
+        {this._renderRecordingInfo()}
+        {this._renderApplicationSection()}
+        {this._renderPlatformSection()}
+        {this._renderVisualMetricsSection()}
         {/*
-              Older profiles(before FF 70) don't have any overhead info.
-              Don't show anything if that's the case.
-            */}
+          Older profiles(before FF 70) don't have any overhead info.
+          Don't show anything if that's the case.
+        */}
         {profilerOverhead ? (
           <MetaOverheadStatistics profilerOverhead={profilerOverhead} />
         ) : null}
@@ -559,6 +648,7 @@ export const MetaInfoPanel = explicitConnect<{}, StateProps, DispatchProps>({
     profile: getProfile(state),
     symbolicationStatus: getSymbolicationStatus(state),
     profileExtraInfo: getProfileExtraInfo(state),
+    timelineUnit: getProfileTimelineUnit(state),
   }),
   mapDispatchToProps: {
     resymbolicateProfile,
