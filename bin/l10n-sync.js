@@ -89,7 +89,7 @@ function logAndPipeExec(...commands /*: string[][] */) /*: string */ {
 /**
  * Pause with a message and wait for the enter as a confirmation.
  * The prompt will not be displayed if the `-y` argument is given to the script.
- * This is mainly used by the CircleCI automation.
+ * This is mainly used by the GitHub Actions automation.
  */
 async function pauseWithMessageIfNecessary(
   message /*: string */ = ''
