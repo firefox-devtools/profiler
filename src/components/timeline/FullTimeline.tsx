@@ -155,10 +155,14 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
       <>
         <TimelineSelection width={width}>
           <div className="timelineHeader">
-            <TimelineSettingsHiddenTracks
-              hiddenTrackCount={hiddenTrackCount}
-              changeRightClickedTrack={changeRightClickedTrack}
-            />
+            {hiddenTrackCount.total > 1 ? (
+              <TimelineSettingsHiddenTracks
+                hiddenTrackCount={hiddenTrackCount}
+                changeRightClickedTrack={changeRightClickedTrack}
+              />
+            ) : (
+              <div className="timelineSettingsHiddenTracksSpacer" />
+            )}
             <TimelineRuler
               zeroAt={zeroAt}
               rangeStart={committedRange.start}
@@ -192,7 +196,7 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
             </Reorderable>
           </OverflowEdgeIndicator>
         </TimelineSelection>
-        <TimelineTrackContextMenu />
+        {hiddenTrackCount.total > 1 ? <TimelineTrackContextMenu /> : null}
       </>
     );
   }
