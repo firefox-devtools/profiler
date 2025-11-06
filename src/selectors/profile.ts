@@ -56,7 +56,7 @@ import type {
   TrackReference,
   LastNonShiftClickInformation,
   PreviewSelection,
-  HiddenTrackCount,
+  TrackCount,
   Selector,
   DangerousSelectorWithArguments,
   State,
@@ -609,7 +609,7 @@ export const getLocalTrackName = (
  * then all its children are as well. This function walks all of the data to determine
  * the correct hidden counts.
  */
-export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
+export const getTrackCount: Selector<TrackCount> = createSelector(
   getGlobalTracks,
   getLocalTracksByPid,
   UrlState.getHiddenLocalTracksByPid,

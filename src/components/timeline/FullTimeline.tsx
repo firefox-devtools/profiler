@@ -19,7 +19,7 @@ import {
   getProfileTimelineUnit,
   getGlobalTracks,
   getGlobalTrackReferences,
-  getHiddenTrackCount,
+  getTrackCount,
   getGlobalTrackOrder,
   getPanelLayoutGeneration,
 } from 'firefox-profiler/selectors';
@@ -39,7 +39,7 @@ import type {
   GlobalTrack,
   InitialSelectedTrackReference,
   GlobalTrackReference,
-  HiddenTrackCount,
+  TrackCount,
   Milliseconds,
   StartEndRange,
   TimelineUnit,
@@ -60,7 +60,7 @@ type StateProps = {
   readonly panelLayoutGeneration: number;
   readonly zeroAt: Milliseconds;
   readonly profileTimelineUnit: TimelineUnit;
-  readonly hiddenTrackCount: HiddenTrackCount;
+  readonly trackCount: TrackCount;
 };
 
 type DispatchProps = {
@@ -75,7 +75,7 @@ type State = {
 };
 
 class TimelineSettingsHiddenTracks extends React.PureComponent<{
-  readonly hiddenTrackCount: HiddenTrackCount;
+  readonly trackCount: TrackCount;
   readonly changeRightClickedTrack: typeof changeRightClickedTrack;
 }> {
   _showMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -90,7 +90,7 @@ class TimelineSettingsHiddenTracks extends React.PureComponent<{
   };
 
   override render() {
-    const { hiddenTrackCount } = this.props;
+    const { trackCount } = this.props;
 
     return (
       <Localized
@@ -99,8 +99,8 @@ class TimelineSettingsHiddenTracks extends React.PureComponent<{
           span: <span className="timelineSettingsHiddenTracksNumber" />,
         }}
         vars={{
-          visibleTrackCount: hiddenTrackCount.total - hiddenTrackCount.hidden,
-          totalTrackCount: hiddenTrackCount.total,
+          visibleTrackCount: trackCount.total - trackCount.hidden,
+          totalTrackCount: trackCount.total,
         }}
       >
         <button
@@ -109,11 +109,11 @@ class TimelineSettingsHiddenTracks extends React.PureComponent<{
           className="timelineSettingsHiddenTracks"
         >
           <span className="timelineSettingsHiddenTracksNumber">
-            {hiddenTrackCount.total - hiddenTrackCount.hidden}
+            {trackCount.total - trackCount.hidden}
           </span>
           {' / '}
           <span className="timelineSettingsHiddenTracksNumber">
-            {hiddenTrackCount.total}{' '}
+            {trackCount.total}{' '}
           </span>
           tracks
         </button>
@@ -146,7 +146,7 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
       width,
       globalTrackReferences,
       panelLayoutGeneration,
-      hiddenTrackCount,
+      trackCount,
       changeRightClickedTrack,
       innerElementRef,
     } = this.props;
@@ -155,9 +155,9 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
       <>
         <TimelineSelection width={width}>
           <div className="timelineHeader">
-            {hiddenTrackCount.total > 1 ? (
+            {trackCount.total > 1 ? (
               <TimelineSettingsHiddenTracks
-                hiddenTrackCount={hiddenTrackCount}
+                trackCount={trackCount}
                 changeRightClickedTrack={changeRightClickedTrack}
               />
             ) : (
@@ -196,7 +196,7 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
             </Reorderable>
           </OverflowEdgeIndicator>
         </TimelineSelection>
-        {hiddenTrackCount.total > 1 ? <TimelineTrackContextMenu /> : null}
+        {trackCount.total > 1 ? <TimelineTrackContextMenu /> : null}
       </>
     );
   }
@@ -215,7 +215,7 @@ export const FullTimeline = explicitConnect<
     zeroAt: getZeroAt(state),
     profileTimelineUnit: getProfileTimelineUnit(state),
     panelLayoutGeneration: getPanelLayoutGeneration(state),
-    hiddenTrackCount: getHiddenTrackCount(state),
+    trackCount: getTrackCount(state),
   }),
   mapDispatchToProps: {
     changeGlobalTrackOrder,
