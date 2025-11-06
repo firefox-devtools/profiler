@@ -31,17 +31,22 @@
   list-style: none;
 }
 
+.timelineSettingsHiddenTracks,
+.timelineSettingsHiddenTracksSpacer {
+  width: var(--thread-label-column-width);
+  box-sizing: border-box;
+
+  /* Separator line between tracks menu button and timeline ruler */
+  border-right: 1px solid var(--grey-30);
+}
+
 .timelineSettingsHiddenTracks {
   /* Make sure and override all rules that have to do with button defaults. */
   position: relative;
-  width: var(--thread-label-column-width);
 
   /* 8px is intentional to align this text with the text above. */
   padding: 0 20px 0 8px;
   border: 0;
-
-  /* Separator line between tracks menu button and timeline ruler */
-  border-right: 1px solid var(--grey-30);
   background: none;
   color: inherit;
   font: inherit;
