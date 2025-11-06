@@ -12,19 +12,16 @@ const cp = require('child_process');
 const readline = require('readline');
 const { promisify } = require('util');
 
-/*::
-  type ExecFilePromiseResult = {|
-    stdout: string | Buffer,
-    stderr: string | Buffer
-  |};
+/**
+ * @typeef {Object} ExecFilePromiseResult
+ * @property {string | Buffer} stdout
+ * @property {string | Buffer} stderr
+ */
 
-  type ExecFile = (
-    command: string,
-    args?: string[]
-  ) => Promise<ExecFilePromiseResult>;
-*/
-
-const execFile /*: ExecFile */ = promisify(cp.execFile);
+/**
+ * @type {(command: string, args?: string[]) => Promise<ExecFilePromiseResult>}
+ */
+const execFile = promisify(cp.execFile);
 
 const DATE_FORMAT = new Intl.DateTimeFormat('en-US', {
   month: 'long',
@@ -39,12 +36,12 @@ const MERGE_COMMIT_MESSAGE = '🔃 Daily sync: main -> l10n';
  * Logs the command to be executed first, and spawns a shell then executes the
  * command. Returns the stdout of the executed command.
  *
+ * @param {string} executable
+ * @param {...string} args
+ * @returns {Promise<ExecFilePromiseResult>}
  * @throws Will throw an error if executed command fails.
  */
-async function logAndExec(
-  executable /*: string */,
-  ...args /*: string[] */
-) /*: Promise<ExecFilePromiseResult> */ {
+async function logAndExec(executable, ...args) {
   console.log('[exec]', executable, args.join(' '));
   const result = await execFile(executable, args);
 
@@ -64,9 +61,11 @@ async function logAndExec(
  * and pipes the stdout of them to the next one. In the end, returns the stdout
  * of the last piped command.
  *
+ * @param {...string[]} commands
+ * @returns {string}
  * @throws Will throw an error if one of the executed commands fails.
  */
-function logAndPipeExec(...commands /*: string[][] */) /*: string */ {
+function logAndPipeExec(...commands) {
   console.log(
     '[exec]',
     commands.map((command) => command.join(' ')).join(' | ')
@@ -89,11 +88,12 @@ function logAndPipeExec(...commands /*: string[][] */) /*: string */ {
 /**
  * Pause with a message and wait for the enter as a confirmation.
  * The prompt will not be displayed if the `-y` argument is given to the script.
- * This is mainly used by the CircleCI automation.
+ * This is mainly used by the GitHub Actions automation.
+ *
+ * @param {string} [message='']
+ * @returns {Promise<void>}
  */
-async function pauseWithMessageIfNecessary(
-  message /*: string */ = ''
-) /*: Promise<void> */ {
+async function pauseWithMessageIfNecessary(message = '') {
   if (SKIP_PROMPTS) {
     return;
   }
@@ -115,9 +115,10 @@ async function pauseWithMessageIfNecessary(
 /**
  * Check if Git workspace is clean.
  *
+ * @returns {Promise<void>}
  * @throws Will throw an error if workspace is not clean.
  */
-async function checkIfWorkspaceClean() /*: Promise<void> */ {
+async function checkIfWorkspaceClean() {
   console.log('>>> Checking if the workspace is clean for the operations.');
   // git status --porcelain --ignore-submodules -unormal
   const statusResult = await logAndExec(
@@ -140,9 +141,10 @@ async function checkIfWorkspaceClean() /*: Promise<void> */ {
 /**
  * Finds the Git upstream remote and returns it.
  *
+ * @returns {Promise<string>}
  * @throws Will throw an error if it can't find an upstream remote.
  */
-async function findUpstream() /*: Promise<string> */ {
+async function findUpstream() {
   console.log('>>> Finding the upstream remote.');
   try {
     const gitRemoteResult = await logAndExec('git', 'remote', '-v');
@@ -178,19 +180,21 @@ async function findUpstream() /*: Promise<string> */ {
  * Fails if the `compareBranch` has changes from the files that doesn't match
  * the `allowedRegexp`.
  *
+ * @param {Object} options
+ * @param {string} options.upstream
+ * @param {string} options.compareBranch
+ * @param {string} options.baseBranch
+ * @param {RegExp} options.allowedRegexp
+ * @returns {Promise<void>}
  * @throws Will throw an error if `compareBranch` has changes from the files
  * that doesn't match the `allowedRegexp`.
  */
-async function checkAllowedPaths(
-  { upstream, compareBranch, baseBranch, allowedRegexp } /*:
-  {|
-    upstream: string,
-    compareBranch: string,
-    baseBranch: string ,
-    allowedRegexp: RegExp
-  |}
-  */
-) {
+async function checkAllowedPaths({
+  upstream,
+  compareBranch,
+  baseBranch,
+  allowedRegexp,
+}) {
   console.log(
     `>>> Checking if ${compareBranch} branch has changes from the files that are not allowed.`
   );
@@ -224,8 +228,11 @@ async function checkAllowedPaths(
  * It's a pretty simple hack and would be good to have a more sophisticated
  * (localized?) API function. But it's not really worth for a deployment only
  * script.
+ *
+ * @param {number} count
+ * @returns {string}
  */
-function fewTimes(count /*: number */) /*: string */ {
+function fewTimes(count) {
   switch (count) {
     case 1:
       return 'once';
@@ -239,9 +246,11 @@ function fewTimes(count /*: number */) /*: string */ {
 /**
  * Tries to sync the l10n branch and retries for 3 times if it fails to sync.
  *
+ * @param {string} upstream
+ * @returns {Promise<void>}
  * @throws Will throw an error if it fails to sync for more than 3 times.
  */
-async function tryToSync(upstream /*: string */) /*: Promise<void> */ {
+async function tryToSync(upstream) {
   console.log('>>> Syncing the l10n branch with main.');
   // RegExp for matching only the vendored locales.
   // It matches the files in `locales` directory but excludes `en-US` which is the
@@ -268,7 +277,8 @@ async function tryToSync(upstream /*: string */) /*: Promise<void> */ {
   // changes and try again. Nevertheless, we should have a hard cap on the try
   // count for safety.
   const totalTryCount = 3;
-  let error /*: Error | null */ = null;
+  /** @type {Error | null} */
+  let error = null;
   let tryCount = 0;
 
   // Try to sync and retry for `totalTryCount` times if it fails.
@@ -341,9 +351,10 @@ async function tryToSync(upstream /*: string */) /*: Promise<void> */ {
 /**
  * Main function to be executed in the global scope.
  *
+ * @returns {Promise<void>}
  * @throws Will throw an error if any of the functions it calls throw.
  */
-async function main() /*: Promise<void> */ {
+async function main() {
   const args = process.argv.slice(2);
 
   if (args.includes('-y')) {
@@ -363,8 +374,13 @@ async function main() /*: Promise<void> */ {
   console.log('>>> Done!');
 }
 
-main().catch((error /*: Error */) => {
-  // Print the error to the console and exit if an error is caught.
-  console.error(error);
-  process.exitCode = 1;
-});
+main().catch(
+  /**
+   * @param {Error} error
+   */
+  (error) => {
+    // Print the error to the console and exit if an error is caught.
+    console.error(error);
+    process.exitCode = 1;
+  }
+);
