@@ -364,6 +364,16 @@ MarkerTable--duration = 持续时间
 MarkerTable--name = 名称
 MarkerTable--details = 详情
 
+## MarkerTooltip
+## This is the component for Marker Tooltip panel.
+
+# This is used as the tooltip for the filter button in marker tooltips.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerTooltip--filter-button-tooltip =
+    .title = 仅显示匹配“{ $filter }”的标记
+    .aria-label = 仅显示匹配“{ $filter }”的标记
+
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
