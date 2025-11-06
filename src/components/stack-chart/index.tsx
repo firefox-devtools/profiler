@@ -17,6 +17,7 @@ import {
   getCategories,
   getInnerWindowIDToPageMap,
   getProfileUsesMultipleStackTypes,
+  getProfileTimelineUnit,
 } from '../../selectors/profile';
 import {
   getStackChartSameWidths,
@@ -55,6 +56,7 @@ import type {
   ThreadsKey,
   InnerWindowID,
   Page,
+  TimelineUnit,
 } from 'firefox-profiler/types';
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
@@ -84,6 +86,7 @@ type StateProps = {
   readonly displayStackType: boolean;
   readonly hasFilteredCtssSamples: boolean;
   readonly useStackChartSameWidths: boolean;
+  readonly timelineUnit: TimelineUnit;
 };
 
 type DispatchProps = {
@@ -223,6 +226,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       displayStackType,
       hasFilteredCtssSamples,
       useStackChartSameWidths,
+      timelineUnit,
     } = this.props;
 
     const maxViewportHeight = combinedTimingRows.length * STACK_FRAME_HEIGHT;
@@ -282,6 +286,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   marginLeft: TIMELINE_MARGIN_LEFT,
                   displayStackType: displayStackType,
                   useStackChartSameWidths,
+                  timelineUnit,
                 }}
               />
             </div>
@@ -324,6 +329,7 @@ export const StackChart = explicitConnect<{}, StateProps, DispatchProps>({
       hasFilteredCtssSamples:
         selectedThreadSelectors.getHasFilteredCtssSamples(state),
       useStackChartSameWidths: getStackChartSameWidths(state),
+      timelineUnit: getProfileTimelineUnit(state),
     };
   },
   mapDispatchToProps: {
