@@ -95,7 +95,7 @@ export type PreviewSelection = {
 /**
  * The counts for how many tracks are hidden in the timeline.
  */
-export type HiddenTrackCount = {
+export type TrackCount = {
   readonly hidden: number;
   readonly total: number;
 };
