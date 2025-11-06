@@ -52,13 +52,11 @@ module.exports = function (config, serverConfig) {
 
 This project uses [TypeScript](https://www.typescriptlang.org/).
 
-## Using Gitpod
+## Using GitHub Codespaces
 
-Alternatively, you can also develop the Firefox Profiler online in a pre-configured development environment:
+Alternatively, you can also develop the Firefox Profiler online in a pre-configured development environment using [GitHub Codespaces](https://github.com/features/codespaces).
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/firefox-devtools/profiler)
-
-Gitpod will automatically install all dependencies; start the webpack server for you; and open the web app in a new browser tab. Please look at our [gitpod documentation](./docs-user/gitpod.md) for more information.
+GitHub Codespaces will automatically install all dependencies, start the webpack server for you, and forward port 4242 so you can access the web app. Please look at our [GitHub Codespaces documentation](./docs-developer/codespaces.md) for more information.
 
 ## Loading in profiles for development
 

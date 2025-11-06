@@ -29,7 +29,7 @@ config.cache = {
   type: 'filesystem',
 };
 const serverConfig = {
-  allowedHosts: ['localhost', '.gitpod.io'],
+  allowedHosts: ['localhost', '.app.github.dev'],
   host,
   port,
   // We disable hot reloading because this takes lot of CPU and memory in the
