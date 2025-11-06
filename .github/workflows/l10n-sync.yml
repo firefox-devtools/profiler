@@ -1,0 +1,44 @@
+name: L10n Sync
+
+on:
+  schedule:
+    # Runs at 8 AM UTC every day
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/setup-node-and-install
+
+      - name: Run tests
+        run: yarn test --logHeapUsage -w=4
+
+  l10n-sync:
+    runs-on: ubuntu-latest
+    needs: tests
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          ssh-key: ${{ secrets.L10N_SYNC_SSH_KEY }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22.14'
+          cache: 'yarn'
+
+      - name: Configure git
+        run: |
+          git config user.email "perf-html@mozilla.com"
+          git config user.name "Firefox Profiler [bot]"
+
+      - name: Run l10n sync
+        run: node ./bin/l10n-sync.js -y
