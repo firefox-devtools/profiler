@@ -70,6 +70,7 @@ type StateProps = {
   readonly selectedTab: TabSlug;
   readonly processesWithMemoryTrack: Set<Pid>;
   readonly progressGraphData: ProgressGraphData[] | null;
+  readonly totalTrackCount: number;
 };
 
 type DispatchProps = {
@@ -243,6 +244,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
       localTracks,
       pid,
       globalTrack,
+      totalTrackCount,
     } = this.props;
 
     if (isHidden) {
@@ -290,17 +292,19 @@ class GlobalTrackComponent extends PureComponent<Props> {
                 </div>
               ) : null}
             </button>
-            <Localized
-              id="TrackNameButton--hide-process"
-              attrs={{ title: true }}
-            >
-              <button
-                type="button"
-                className="timelineTrackCloseButton"
-                title="Hide process"
-                onClick={this._hideCurrentTrack}
-              />
-            </Localized>
+            {totalTrackCount > 1 ? (
+              <Localized
+                id="TrackNameButton--hide-process"
+                attrs={{ title: true }}
+              >
+                <button
+                  type="button"
+                  className="timelineTrackCloseButton"
+                  title="Hide process"
+                  onClick={this._hideCurrentTrack}
+                />
+              </Localized>
+            ) : null}
           </div>
           <div
             className="timelineTrackTrack"
@@ -388,6 +392,7 @@ export const TimelineGlobalTrack = explicitConnect<
       selectedTab,
       processesWithMemoryTrack: getProcessesWithMemoryTrack(state),
       progressGraphData,
+      totalTrackCount: globalTracks.length,
     };
   },
   mapDispatchToProps: {

@@ -8,7 +8,7 @@ import { withChartViewport, type Viewport } from '../shared/chart/Viewport';
 import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
-import { formatMilliseconds } from '../../utils/format-numbers';
+import { formatMilliseconds, formatBytes } from '../../utils/format-numbers';
 import { bisectionLeft, bisectionRight } from '../../utils/bisect';
 import type {
   updatePreviewSelection,
@@ -36,6 +36,7 @@ import type {
   Marker,
   InnerWindowID,
   Page,
+  TimelineUnit,
 } from 'firefox-profiler/types';
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
@@ -77,6 +78,7 @@ type OwnProps = {
   readonly marginLeft: CssPixels;
   readonly displayStackType: boolean;
   readonly useStackChartSameWidths: boolean;
+  readonly timelineUnit: TimelineUnit;
 };
 
 type Props = Readonly<
@@ -617,6 +619,12 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     const duration =
       timing.end[stackTimingIndex] - timing.start[stackTimingIndex];
 
+    const { timelineUnit } = this.props;
+    const durationText =
+      timelineUnit === 'bytes'
+        ? formatBytes(duration)
+        : formatMilliseconds(duration);
+
     return (
       <TooltipCallNode
         thread={thread}
@@ -628,7 +636,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         categories={categories}
         // The stack chart doesn't support other call tree summary types.
         callTreeSummaryStrategy="timing"
-        durationText={formatMilliseconds(duration)}
+        durationText={durationText}
         displayStackType={displayStackType}
       />
     );

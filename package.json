@@ -140,7 +140,6 @@
     "browserslist": "^4.27.0",
     "caniuse-lite": "^1.0.30001751",
     "circular-dependency-plugin": "^5.2.1",
-    "codecov": "^3.8.3",
     "copy-webpack-plugin": "^13.0.1",
     "cross-env": "^10.1.0",
     "css-loader": "^7.1.2",
