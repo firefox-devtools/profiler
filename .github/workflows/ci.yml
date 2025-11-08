@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - production
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/setup-node-and-install
+
+      - name: Run lint
+        run: yarn lint
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/setup-node-and-install
+
+      - name: Run tests
+        # We use workerIdleMemoryLimit to work around a memory issue with node.
+        # See https://github.com/facebook/jest/issues/11956
+        run: yarn test --coverage --logHeapUsage -w=4 --workerIdleMemoryLimit=1.5G
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          fail_ci_if_error: false
+
+  build-prod:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/setup-node-and-install
+
+      - name: Build production
+        run: yarn build-prod:quiet
+
+      - name: Build symbolicator CLI
+        run: yarn build-symbolicator-cli:quiet
+
+  licence-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/setup-node-and-install
+
+      - name: Run license check
+        run: yarn license-check
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/setup-node-and-install
+
+      - name: Run TypeScript check
+        run: yarn ts
+
+  alex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/setup-node-and-install
+
+      - name: Run alex
+        run: yarn test-alex
+
+  yarn-lock:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/setup-node-and-install
+
+      - name: Check yarn.lock
+        run: yarn test-lockfile
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './bin'

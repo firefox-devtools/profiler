@@ -1,0 +1,31 @@
+{
+  "name": "Firefox Profiler",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    }
+  },
+  "forwardPorts": [4242],
+  "portsAttributes": {
+    "4242": {
+      "label": "Firefox Profiler",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "postCreateCommand": "yarn install",
+  "postStartCommand": "FX_PROFILER_HOST=\"0.0.0.0\" yarn start",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "stylelint.vscode-stylelint"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+      }
+    }
+  }
+}
