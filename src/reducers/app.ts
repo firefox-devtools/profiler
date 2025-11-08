@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { combineReducers } from 'redux';
-import { tabSlugs } from '../app-logic/tabs-handling';
+import { tabSlugs, tabsShowingSampleData } from '../app-logic/tabs-handling';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
@@ -170,6 +170,10 @@ const lastVisibleThreadTabSlug: Reducer<TabSlug> = (
       }
       return state;
     case 'FOCUS_CALL_TREE':
+      if (tabsShowingSampleData.includes(state)) {
+        // Don't switch to call tree if the tab is already showing sample data.
+        return state;
+      }
       return 'calltree';
     default:
       return state;
