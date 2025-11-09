@@ -836,7 +836,7 @@ TrackContextMenu--hide-all-matching-tracks = Скрыть все совпада�
 # any track.
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
-TrackContextMenu--no-results-found = Не найдено результатов для «<span>{ $searchFilter }</span>»
+TrackContextMenu--no-results-found = Не найдено результатов по запросу «<span>{ $searchFilter }</span>»
 # This button appears when hovering a track name and is displayed as an X icon.
 TrackNameButton--hide-track =
     .title = Скрыть трек
