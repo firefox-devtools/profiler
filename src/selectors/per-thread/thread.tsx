@@ -50,6 +50,8 @@ import type { MarkerSelectorsPerThread } from './markers';
 
 import { mergeThreads } from '../../profile-logic/merge-compare';
 import { defaultThreadViewOptions } from '../../reducers/profile-view';
+import type { SliceTree } from '../../utils/slice-tree';
+import { getSlices } from '../../utils/slice-tree';
 
 /**
  * Infer the return type from the getBasicThreadSelectorsPerThread and
@@ -99,6 +101,17 @@ export function getBasicThreadSelectorsPerThread(
     ProfileSelectors.getSampleUnits,
     ProfileSelectors.getReferenceCPUDeltaPerMs,
     ProfileData.computeSamplesTableFromRawSamplesTable
+  );
+  const getActivitySlices: Selector<SliceTree | null> = createSelector(
+    getSamplesTable,
+    (samples) =>
+      samples.threadCPURatio
+        ? getSlices(
+            [0.05, 0.2, 0.4, 0.6, 0.8],
+            samples.threadCPURatio,
+            samples.time
+          )
+        : null
   );
   const getNativeAllocations: Selector<NativeAllocationsTable | void> = (
     state
@@ -169,6 +182,22 @@ export function getBasicThreadSelectorsPerThread(
       return ProfileData.filterThreadSamplesToRange(thread, start, end);
     }
   );
+
+  /**
+   * Get activity slices for the range-filtered thread (respecting zoom).
+   * This shows CPU activity only for the samples within the committed range.
+   */
+  const getRangeFilteredActivitySlices: Selector<SliceTree | null> =
+    createSelector(getRangeFilteredThread, (thread) => {
+      const samples = thread.samples;
+      return samples.threadCPURatio
+        ? getSlices(
+            [0.05, 0.2, 0.4, 0.6, 0.8],
+            samples.threadCPURatio,
+            samples.time
+          )
+        : null;
+    });
 
   /**
    * The CallTreeSummaryStrategy determines how the call tree summarizes the
@@ -386,6 +415,8 @@ export function getBasicThreadSelectorsPerThread(
     getRawThread,
     getThread,
     getSamplesTable,
+    getActivitySlices,
+    getRangeFilteredActivitySlices,
     getSamplesWeightType,
     getNativeAllocations,
     getJsAllocations,

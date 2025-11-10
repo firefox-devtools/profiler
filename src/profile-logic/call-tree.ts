@@ -389,6 +389,10 @@ export class CallTree {
     this._weightType = weightType;
   }
 
+  getTotal(): number {
+    return this._rootTotalSummary;
+  }
+
   getRoots() {
     return this._roots;
   }

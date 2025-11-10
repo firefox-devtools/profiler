@@ -21,6 +21,9 @@
     "build-photon": "webpack --config res/photon/webpack.config.js",
     "build-symbolicator-cli": "yarn build-symbolicator-cli:quiet --progress",
     "build-symbolicator-cli:quiet": "yarn build:clean && cross-env NODE_ENV=production webpack --config src/symbolicator-cli/webpack.config.js",
+    "build-profile-query": "yarn build-profile-query:quiet --progress",
+    "build-profile-query:quiet": "yarn build:clean && cross-env NODE_ENV=production webpack --config src/profile-query/webpack.config.js",
+    "build-profile-query-cli": "rimraf src/profile-query-cli/dist && mkdirp src/profile-query-cli/dist && cross-env NODE_ENV=production webpack --config src/profile-query-cli/webpack.config.js && chmod +x src/profile-query-cli/dist/pq.js",
     "lint": "node bin/output-fixing-commands.js run-p lint-js lint-css prettier-run",
     "lint-fix": "run-p lint-fix-js lint-fix-css prettier-fix",
     "lint-js": "node bin/output-fixing-commands.js eslint . --report-unused-disable-directives --cache --cache-strategy content",
@@ -29,7 +32,7 @@
     "lint-fix-css": "yarn lint-css --fix",
     "prettier-run": "node bin/output-fixing-commands.js prettier --check . --cache --cache-strategy content --cache-location .prettiercache",
     "prettier-fix": "prettier --write . --cache --cache-strategy content --cache-location .prettiercache",
-    "ts": "tsc",
+    "ts": "tsc && true",
     "protoc": "npx -p protobufjs-cli pbjs -t static-module -w commonjs -o ./src/profile-logic/import/proto/simpleperf_report.js ./src/profile-logic/import/proto/simpleperf_report.proto && npx -p protobufjs-cli pbts -o ./src/profile-logic/import/proto/simpleperf_report.d.ts ./src/profile-logic/import/proto/simpleperf_report.js",
     "license-check": "devtools-license-check",
     "preinstall": "node bin/pre-install.js",
@@ -43,13 +46,14 @@
     "start-docs": "ws -d docs-user/ -p 3000",
     "start-photon": "node res/photon/server",
     "test": "node bin/output-fixing-commands.js cross-env LC_ALL=C TZ=UTC NODE_ENV=test jest",
-    "test-all": "run-p --max-parallel 4 ts license-check lint test test-alex test-lockfile",
+    "test-all": "run-p --max-parallel 4 ts license-check lint test test-alex test-lockfile && yarn test:cli",
     "test-build-coverage": "yarn test --coverage --coverageReporters=html",
     "test-serve-coverage": "ws -d coverage/ -p 4343",
     "test-coverage": "run-s test-build-coverage test-serve-coverage",
     "test-alex": "alex ./docs-* CODE_OF_CONDUCT.md CONTRIBUTING.md README.md",
     "test-lockfile": "lockfile-lint --path yarn.lock --allowed-hosts yarn --validate-https",
     "test-debug": "cross-env LC_ALL=C TZ=UTC NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:cli": "yarn build-profile-query-cli && jest --selectProjects=cli",
     "postinstall": "patch-package"
   },
   "license": "MPL-2.0",
@@ -193,39 +197,6 @@
   "resolutions": {
     "@types/react-splitter-layout/@types/react": "^18.3.26",
     "@types/trusted-types": "^2.0.7"
-  },
-  "jest": {
-    "collectCoverageFrom": [
-      "src/**/*.{js,jsx,ts,tsx}",
-      "!**/node_modules/**",
-      "!src/types/libdef/**"
-    ],
-    "moduleFileExtensions": [
-      "js",
-      "jsx",
-      "ts",
-      "tsx"
-    ],
-    "transformIgnorePatterns": [
-      "/node_modules/(?!(query-string|decode-uri-component|iongraph-web|split-on-first|filter-obj|fetch-mock)/)"
-    ],
-    "moduleNameMapper": {
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ftl)$": "<rootDir>/src/test/fixtures/mocks/file-mock.ts",
-      "\\.(css|less)$": "<rootDir>/src/test/fixtures/mocks/style-mock.ts"
-    },
-    "setupFilesAfterEnv": [
-      "jest-extended/all",
-      "./src/test/setup.ts"
-    ],
-    "globals": {
-      "AVAILABLE_STAGING_LOCALES": null
-    },
-    "snapshotFormat": {
-      "escapeString": true,
-      "printBasicPrototype": true
-    },
-    "testEnvironment": "./src/test/custom-environment",
-    "verbose": false
   },
   "husky": {
     "hooks": {

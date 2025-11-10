@@ -2,6 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { oneLine } from 'common-tags';
+import {
+  fetchProfile,
+  getProfileUrlForHash,
+  type ProfileOrZip,
+  deduceContentType,
+  extractJsonFromArrayBuffer,
+} from 'firefox-profiler/utils/profile-fetch';
 import queryString from 'query-string';
 import type JSZip from 'jszip';
 import {
@@ -17,10 +24,8 @@ import {
 } from 'firefox-profiler/profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from 'firefox-profiler/profile-logic/mozilla-symbolication-api';
 import { mergeProfilesForDiffing } from 'firefox-profiler/profile-logic/merge-compare';
-import { decompress, isGzip } from 'firefox-profiler/utils/gz';
 import { expandUrl } from 'firefox-profiler/utils/shorten-url';
 import { TemporaryError } from 'firefox-profiler/utils/errors';
-import { isLocalURL } from 'firefox-profiler/utils/url';
 import {
   getSelectedThreadIndexesOrNull,
   getGlobalTrackOrder,
@@ -64,7 +69,6 @@ import {
 import { setDataSource } from './profile-view';
 import { fatalError } from './errors';
 import { batchLoadDataUrlIcons } from './icons';
-import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 import {
   determineTimelineType,
   hasUsefulSamples,
@@ -553,7 +557,7 @@ async function _unpackGeckoProfileFromBrowser(
   // global. This happens especially with tests but could happen in the future
   // in Firefox too.
   if (Object.prototype.toString.call(profile) === '[object ArrayBuffer]') {
-    return _extractJsonFromArrayBuffer(profile as ArrayBuffer);
+    return extractJsonFromArrayBuffer(profile as ArrayBuffer);
   }
   return profile;
 }
@@ -563,9 +567,9 @@ function getSymbolStore(
   symbolServerUrl: string,
   browserConnection: BrowserConnection | null
 ): SymbolStore | null {
-  if (!window.indexedDB) {
-    // We could be running in a test environment with no indexedDB support. Do not
-    // return a symbol store in this case.
+  if (typeof window === 'undefined' || !window.indexedDB) {
+    // We could be running in a test environment or Node.js with no indexedDB support.
+    // Do not return a symbol store in this case.
     return null;
   }
 
@@ -870,265 +874,6 @@ export function temporaryError(error: TemporaryError): Action {
   };
 }
 
-function _wait(delayMs: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, delayMs));
-}
-
-function _loadProbablyFailedDueToSafariLocalhostHTTPRestriction(
-  url: string,
-  error: Error
-): boolean {
-  if (!navigator.userAgent.match(/Safari\/\d+\.\d+/)) {
-    return false;
-  }
-  // Check if Safari considers this mixed content.
-  const parsedUrl = new URL(url);
-  return (
-    error.name === 'TypeError' &&
-    parsedUrl.protocol === 'http:' &&
-    isLocalURL(parsedUrl) &&
-    location.protocol === 'https:'
-  );
-}
-
-class SafariLocalhostHTTPLoadError extends Error {
-  override name = 'SafariLocalhostHTTPLoadError';
-}
-
-type FetchProfileArgs = {
-  url: string;
-  onTemporaryError: (param: TemporaryError) => void;
-  // Allow tests to capture the reported error, but normally use console.error.
-  reportError?: (...data: Array<any>) => void;
-};
-
-type ProfileOrZip =
-  | { responseType: 'PROFILE'; profile: unknown }
-  | { responseType: 'ZIP'; zip: JSZip };
-
-/**
- * Tries to fetch a profile on `url`. If the profile is not found,
- * `onTemporaryError` is called with an appropriate error, we wait 1 second, and
- * then tries again. If we still can't find the profile after 11 tries, the
- * returned promise is rejected with a fatal error.
- * If we can retrieve the profile properly, the returned promise is resolved
- * with the JSON.parsed profile.
- */
-export async function _fetchProfile(
-  args: FetchProfileArgs
-): Promise<ProfileOrZip> {
-  const MAX_WAIT_SECONDS = 10;
-  let i = 0;
-  const { url, onTemporaryError } = args;
-  // Allow tests to capture the reported error, but normally use console.error.
-  const reportError = args.reportError || console.error;
-
-  while (true) {
-    let response;
-    try {
-      response = await fetch(url);
-    } catch (e) {
-      // Case 1: Exception.
-      if (_loadProbablyFailedDueToSafariLocalhostHTTPRestriction(url, e)) {
-        throw new SafariLocalhostHTTPLoadError();
-      }
-      throw e;
-    }
-
-    // Case 2: successful answer.
-    if (response.ok) {
-      return _extractProfileOrZipFromResponse(url, response, reportError);
-    }
-
-    // case 3: unrecoverable error.
-    if (response.status !== 403) {
-      throw new Error(oneLine`
-          Could not fetch the profile on remote server.
-          Response was: ${response.status} ${response.statusText}.
-        `);
-    }
-
-    // case 4: 403 errors can be transient while a profile is uploaded.
-
-    if (i++ === MAX_WAIT_SECONDS) {
-      // In the last iteration we don't send a temporary error because we'll
-      // throw an error right after the while loop.
-      break;
-    }
-
-    onTemporaryError(
-      new TemporaryError(
-        'Profile not found on remote server.',
-        { count: i, total: MAX_WAIT_SECONDS + 1 } // 11 tries during 10 seconds
-      )
-    );
-
-    await _wait(1000);
-  }
-
-  throw new Error(oneLine`
-    Could not fetch the profile on remote server:
-    still not found after ${MAX_WAIT_SECONDS} seconds.
-  `);
-}
-
-/**
- * Deduce the file type from a url and content type. Third parties can give us
- * arbitrary information, so make sure that we try out best to extract the proper
- * information about it.
- */
-function _deduceContentType(
-  url: string,
-  contentType: string | null
-): 'application/json' | 'application/zip' | null {
-  if (contentType === 'application/zip' || contentType === 'application/json') {
-    return contentType;
-  }
-  if (url.match(/\.zip$/)) {
-    return 'application/zip';
-  }
-  if (url.match(/\.json/)) {
-    return 'application/json';
-  }
-  return null;
-}
-
-/**
- * This function guesses the correct content-type (even if one isn't sent) and then
- * attempts to use the proper method to extract the response.
- */
-async function _extractProfileOrZipFromResponse(
-  url: string,
-  response: Response,
-  reportError: (...data: Array<any>) => void
-): Promise<ProfileOrZip> {
-  const contentType = _deduceContentType(
-    url,
-    response.headers.get('content-type')
-  );
-  switch (contentType) {
-    case 'application/zip':
-      return {
-        responseType: 'ZIP',
-        zip: await _extractZipFromResponse(response, reportError),
-      };
-    case 'application/json':
-    case null:
-      // The content type is null if it is unknown, or an unsupported type. Go ahead
-      // and try to process it as a profile.
-      return {
-        responseType: 'PROFILE',
-        profile: await _extractJsonFromResponse(
-          response,
-          reportError,
-          contentType
-        ),
-      };
-    default:
-      throw assertExhaustiveCheck(contentType);
-  }
-}
-
-/**
- * Attempt to load a zip file from a third party. This process can fail, so make sure
- * to handle and report the error if it does.
- */
-async function _extractZipFromResponse(
-  response: Response,
-  reportError: (...data: Array<any>) => void
-): Promise<JSZip> {
-  const buffer = await response.arrayBuffer();
-  // Workaround for https://github.com/Stuk/jszip/issues/941
-  // When running this code in tests, `buffer` doesn't inherits from _this_
-  // realm's ArrayBuffer object, and this breaks JSZip which doesn't account for
-  // this case. We workaround the issue by wrapping the buffer in an Uint8Array
-  // that comes from this realm.
-  const typedBuffer = new Uint8Array(buffer);
-  try {
-    const JSZip = await import('jszip');
-    const zip = await JSZip.loadAsync(typedBuffer);
-    // Catch the error if unable to load the zip.
-    return zip;
-  } catch (error) {
-    const message = 'Unable to open the archive file.';
-    reportError(message);
-    reportError('Error:', error);
-    reportError('Fetch response:', response);
-    throw new Error(
-      `${message} The full error information has been printed out to the DevTool’s console.`
-    );
-  }
-}
-
-/**
- * Parse JSON from an optionally gzipped array buffer.
- */
-async function _extractJsonFromArrayBuffer(
-  arrayBuffer: ArrayBuffer
-): Promise<unknown> {
-  let profileBytes = new Uint8Array(arrayBuffer);
-  // Check for the gzip magic number in the header.
-  if (isGzip(profileBytes)) {
-    profileBytes = await decompress(profileBytes);
-  }
-
-  const textDecoder = new TextDecoder();
-  return JSON.parse(textDecoder.decode(profileBytes));
-}
-
-/**
- * Don't trust third party responses, try and handle a variety of responses gracefully.
- */
-async function _extractJsonFromResponse(
-  response: Response,
-  reportError: (...data: Array<any>) => void,
-  fileType: 'application/json' | null
-): Promise<unknown> {
-  let arrayBuffer: ArrayBuffer | null = null;
-  try {
-    // await before returning so that we can catch JSON parse errors.
-    arrayBuffer = await response.arrayBuffer();
-    return await _extractJsonFromArrayBuffer(arrayBuffer);
-  } catch (error) {
-    // Change the error message depending on the circumstance:
-    let message;
-    if (error && typeof error === 'object' && error.name === 'AbortError') {
-      message = 'The network request to load the profile was aborted.';
-    } else if (fileType === 'application/json') {
-      message = 'The profile’s JSON could not be decoded.';
-    } else if (fileType === null && arrayBuffer !== null) {
-      // If the content type is not specified, use a raw array buffer
-      // to fallback to other supported profile formats.
-      return arrayBuffer;
-    } else {
-      message = oneLine`
-        The profile could not be downloaded and decoded. This does not look like a supported file
-        type.
-      `;
-    }
-
-    // Provide helpful debugging information to the console.
-    reportError(message);
-    reportError('JSON parsing error:', error);
-    reportError('Fetch response:', response);
-
-    throw new Error(
-      `${message} The full error information has been printed out to the DevTool’s console.`
-    );
-  }
-}
-
-export function getProfileUrlForHash(hash: string): string {
-  // See https://cloud.google.com/storage/docs/access-public-data
-  // The URL is https://storage.googleapis.com/<BUCKET>/<FILEPATH>.
-  // https://<BUCKET>.storage.googleapis.com/<FILEPATH> seems to also work but
-  // is not documented nowadays.
-
-  // By convention, "profile-store" is the name of our bucket, and the file path
-  // is the hash we receive in the URL.
-  return `https://storage.googleapis.com/${GOOGLE_STORAGE_BUCKET}/${hash}`;
-}
-
 export function retrieveProfileFromStore(
   hash: string,
   initialLoad: boolean = false
@@ -1149,7 +894,7 @@ export function retrieveProfileOrZipFromUrl(
     dispatch(waitingForProfileFromUrl(profileUrl));
 
     try {
-      const response: ProfileOrZip = await _fetchProfile({
+      const response: ProfileOrZip = await fetchProfile({
         url: profileUrl,
         onTemporaryError: (e: TemporaryError) => {
           dispatch(temporaryError(e));
@@ -1178,7 +923,7 @@ export function retrieveProfileOrZipFromUrl(
         default:
           throw assertExhaustiveCheck(
             response as never,
-            'Expected to receive an archive or profile from _fetchProfile.'
+            'Expected to receive an archive or profile from fetchProfile.'
           );
       }
     } catch (error) {
@@ -1233,7 +978,7 @@ export function retrieveProfileFromFile(
     dispatch(waitingForProfileFromFile());
 
     try {
-      if (_deduceContentType(file.name, file.type) === 'application/zip') {
+      if (deduceContentType(file.name, file.type) === 'application/zip') {
         // Open a zip file in the zip file viewer
         const buffer = await fileReader(file).asArrayBuffer();
         const JSZip = await import('jszip');
@@ -1332,14 +1077,14 @@ export function retrieveProfilesToCompare(
                 'Only public uploaded profiles are supported by the comparison function.'
               );
           }
-          const response: ProfileOrZip = await _fetchProfile({
+          const response: ProfileOrZip = await fetchProfile({
             url: profileUrl,
             onTemporaryError: (e: TemporaryError) => {
               dispatch(temporaryError(e));
             },
           });
           if (response.responseType !== 'PROFILE') {
-            throw new Error('Expected to receive a profile from _fetchProfile');
+            throw new Error('Expected to receive a profile from fetchProfile');
           }
           const serializedProfile = response.profile;
 
