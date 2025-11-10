@@ -28,6 +28,9 @@ jobs:
         uses: actions/checkout@v5
         with:
           ssh-key: ${{ secrets.L10N_SYNC_SSH_KEY }}
+          # Fetch the full git history since we are going to need it to do some
+          # git operations between the main and l10n branches.
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
