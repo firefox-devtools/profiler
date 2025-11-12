@@ -35,11 +35,21 @@ const getAssemblyViewNativeSymbolLib: Selector<Lib | null> = createSelector(
   getAssemblyViewNativeSymbol,
   getProfileOrNull,
   (nativeSymbol, profile) => {
-    if (profile === null || nativeSymbol === null) {
+    if (
+      profile === null ||
+      nativeSymbol === null ||
+      profile.libs.length === 0
+    ) {
       return null;
     }
     return profile.libs[nativeSymbol.libIndex];
   }
+);
+
+export const getIsAssemblyViewAvailable: Selector<boolean> = createSelector(
+  getAssemblyViewNativeSymbol,
+  getAssemblyViewNativeSymbolLib,
+  (nativeSymbol, lib) => nativeSymbol !== null && lib !== null
 );
 
 export const getAssemblyViewCode: Selector<AssemblyCodeStatus | void> =

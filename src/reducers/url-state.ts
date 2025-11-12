@@ -5,7 +5,7 @@
 import { combineReducers } from 'redux';
 import { oneLine } from 'common-tags';
 import { objectEntries } from '../utils/types';
-import { tabSlugs } from '../app-logic/tabs-handling';
+import { tabSlugs, tabsShowingSampleData } from '../app-logic/tabs-handling';
 
 import type {
   ThreadIndex,
@@ -98,6 +98,10 @@ const selectedTab: Reducer<TabSlug> = (state = 'calltree', action) => {
     case 'CHANGE_TAB_FILTER':
       return action.selectedTab;
     case 'FOCUS_CALL_TREE':
+      if (tabsShowingSampleData.includes(state)) {
+        // Don't switch to call tree if the tab is already showing sample data.
+        return state;
+      }
       return 'calltree';
     default:
       return state;
@@ -570,6 +574,7 @@ const sourceView: Reducer<SourceViewState> = (
         scrollGeneration: state.scrollGeneration + 1,
         libIndex: action.libIndex,
         sourceIndex: action.sourceIndex,
+        lineNumber: action.lineNumber,
       };
     }
     default:
