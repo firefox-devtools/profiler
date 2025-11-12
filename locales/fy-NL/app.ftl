@@ -451,6 +451,16 @@ MarkerTable--duration = Doer
 MarkerTable--name = Namme
 MarkerTable--details = Details
 
+## MarkerTooltip
+## This is the component for Marker Tooltip panel.
+
+# This is used as the tooltip for the filter button in marker tooltips.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerTooltip--filter-button-tooltip =
+    .title = Allinnich markearringen toane dy’t oerienkomme mei: ‘{ $filter }’
+    .aria-label = Allinnich markearringen toane dy’t oerienkomme mei: ‘{ $filter }’
+
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
@@ -527,6 +537,8 @@ MenuButtons--metaInfo--profiling-started = Opname start:
 MenuButtons--metaInfo--profiling-session = Opnamedoer:
 MenuButtons--metaInfo--main-process-started = Haadproses start:
 MenuButtons--metaInfo--main-process-ended = Haadproses stoppe:
+MenuButtons--metaInfo--file-name = Bestânsnamme:
+MenuButtons--metaInfo--file-size = Bestânsgrutte:
 MenuButtons--metaInfo--interval = Ynterfal:
 MenuButtons--metaInfo--buffer-capacity = Bufferkapasiteit:
 MenuButtons--metaInfo--buffer-duration = Bufferdoer:
