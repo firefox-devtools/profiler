@@ -816,6 +816,8 @@ function _partiallyApplySymbolicationStep(
             sourceIndex = sources.filename.length;
             sources.filename.push(fileNameStringIndex);
             sources.uuid.push(null);
+            sources.startLine.push(1);
+            sources.startColumn.push(1);
             sources.length++;
           }
           funcTable.source[funcIndex] = sourceIndex;

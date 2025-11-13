@@ -766,6 +766,8 @@ function _createCompactedSources(
     newSources.filename[newIndex] =
       oldStringToNewStringPlusOne[sources.filename[i]] - 1;
     newSources.uuid[newIndex] = sources.uuid[i];
+    newSources.startLine[newIndex] = sources.startLine[i];
+    newSources.startColumn[newIndex] = sources.startColumn[i];
 
     oldSourceToNewSourcePlusOne[i] = newIndex + 1;
   }

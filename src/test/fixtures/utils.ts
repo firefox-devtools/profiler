@@ -649,7 +649,9 @@ function isControlInput(element: HTMLElement): boolean {
 export function addSourceToTable(
   sources: SourceTable,
   urlStringIndex: number,
-  uuid: string | null = null
+  uuid: string | null = null,
+  startLine: number = 1,
+  startColumn: number = 1
 ): number {
   // Check if source already exists
   for (let i = 0; i < sources.filename.length; i++) {
@@ -662,6 +664,8 @@ export function addSourceToTable(
   const sourceIndex = sources.filename.length;
   sources.filename.push(urlStringIndex);
   sources.uuid.push(uuid);
+  sources.startLine.push(startLine);
+  sources.startColumn.push(startColumn);
   sources.length = sources.filename.length;
 
   return sourceIndex;

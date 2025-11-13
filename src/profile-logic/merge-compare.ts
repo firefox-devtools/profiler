@@ -567,6 +567,8 @@ function mergeSources(
         insertedSourceIndex = newSources.length;
         newSources.uuid[insertedSourceIndex] = uuid;
         newSources.filename[insertedSourceIndex] = newUrlIndex;
+        newSources.startLine[insertedSourceIndex] = sources.startLine[i];
+        newSources.startColumn[insertedSourceIndex] = sources.startColumn[i];
         newSources.length++;
         mapOfInsertedSources.set(sourceKey, insertedSourceIndex);
       }

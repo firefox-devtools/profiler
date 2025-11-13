@@ -2490,6 +2490,8 @@ Object {
     "sources": Object {
       "filename": Array [],
       "length": 0,
+      "startColumn": Array [],
+      "startLine": Array [],
       "uuid": Array [],
     },
     "stackTable": Object {

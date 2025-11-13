@@ -431,13 +431,23 @@ function _extractJsFunction(
   let processedSourceIndex = null;
   if (sourceIndex !== undefined) {
     const geckoSourceIdx = parseInt(sourceIndex, 10);
-    // Look up the UUID for this source index from the process's sources table
+    // Look up the UUID for this source index from the process's sources table.
     if (geckoSourceIdx < geckoSourceTable.data.length) {
       const uuidIndex = geckoSourceTable.schema.uuid;
       const filenameIndex = geckoSourceTable.schema.filename;
+      const startLineIndex = geckoSourceTable.schema.startLine;
+      const startColumnIndex = geckoSourceTable.schema.startColumn;
       const uuid = geckoSourceTable.data[geckoSourceIdx][uuidIndex];
       const filename = geckoSourceTable.data[geckoSourceIdx][filenameIndex];
-      processedSourceIndex = globalDataCollector.indexForSource(uuid, filename);
+      const startLine = geckoSourceTable.data[geckoSourceIdx][startLineIndex];
+      const startColumn =
+        geckoSourceTable.data[geckoSourceIdx][startColumnIndex];
+      processedSourceIndex = globalDataCollector.indexForSource(
+        uuid,
+        filename,
+        startLine,
+        startColumn
+      );
     }
   }
 

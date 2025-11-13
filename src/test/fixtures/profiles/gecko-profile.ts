@@ -51,6 +51,8 @@ export function getEmptySourceTable(): GeckoSourceTable {
     schema: {
       uuid: 0 as const,
       filename: 1 as const,
+      startLine: 2 as const,
+      startColumn: 3 as const,
     },
     data: [],
   };

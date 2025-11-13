@@ -115,13 +115,18 @@ export class GlobalDataCollector {
 
   // Return the global index for this source, adding it to the global list if
   // necessary.
-  indexForSource(uuid: string | null, filename: string): IndexIntoSourceTable {
+  indexForSource(
+    uuid: string | null,
+    filename: string,
+    startLine: number = 1,
+    startColumn: number = 1
+  ): IndexIntoSourceTable {
     let index: IndexIntoSourceTable | undefined;
 
     if (uuid !== null) {
       index = this._uuidToSourceIndex.get(uuid);
     } else {
-      // For null UUIDs, use filename-based lookup
+      // For null UUIDs, use filename-based lookup.
       const filenameIndex = this._stringTable.indexForString(filename);
       index = this._filenameToSourceIndex.get(filenameIndex);
     }
@@ -131,6 +136,8 @@ export class GlobalDataCollector {
       const filenameIndex = this._stringTable.indexForString(filename);
       this._sources.uuid[index] = uuid;
       this._sources.filename[index] = filenameIndex;
+      this._sources.startLine[index] = startLine;
+      this._sources.startColumn[index] = startColumn;
       this._sources.length++;
 
       if (uuid !== null) {

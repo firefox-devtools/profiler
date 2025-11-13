@@ -589,11 +589,15 @@ export type GeckoSourceTable = {
   schema: {
     uuid: 0;
     filename: 1;
+    startLine: 2;
+    startColumn: 3;
   };
   data: Array<
     [
-      string, // UUID for the source
-      string, // Filename of the source
+      string, // UUID for the source.
+      string, // Filename of the source.
+      number, // Start line of the source (1-based).
+      number, // Start column of the source (1-based).
     ]
   >;
 };
