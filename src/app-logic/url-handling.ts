@@ -363,9 +363,9 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
             assemblyView.nativeSymbol
           );
         }
-      }
-      if (isBottomBoxFullscreen) {
-        query.bottomFullscreen = true;
+        if (isBottomBoxFullscreen) {
+          query.bottomFullscreen = true;
+        }
       }
       break;
     }

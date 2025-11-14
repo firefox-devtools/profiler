@@ -170,10 +170,14 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     if (event.key === 'Escape' && this.props.isFullscreen) {
       this.props.toggleBottomBoxFullscreen();
     }
-  }
+  };
 
   _onClickCloseButton = () => {
     this.props.closeBottomBox();
+    // Close the fullscreen if we're closing the bottom box
+    if (this.props.isFullscreen) {
+      this.props.toggleBottomBoxFullscreen();
+    }
   };
 
   override render() {
