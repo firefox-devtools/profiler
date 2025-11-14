@@ -222,8 +222,8 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     // These trailing header buttons go into the bottom-box-bar of the last pane.
     const trailingHeaderButtons = (
       <div className="bottom-box-header-trailing-buttons">
-        <FullscreenToggleButton />
         <AssemblyViewToggleButton />
+        <FullscreenToggleButton />
         <Localized id="SourceView--close-button" attrs={{ title: true }}>
           <button
             className={classNames(
