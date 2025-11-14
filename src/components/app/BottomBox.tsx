@@ -158,11 +158,6 @@ class BottomBoxImpl extends React.PureComponent<Props> {
   _sourceView = React.createRef<SourceView>();
   _assemblyView = React.createRef<AssemblyView>();
 
-  constructor(props: Props) {
-    super(props);
-    this._onKeyDown = this._onKeyDown.bind(this);
-  }
-
   override componentDidMount() {
     document.addEventListener('keydown', this._onKeyDown);
   }
@@ -171,7 +166,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     document.removeEventListener('keydown', this._onKeyDown);
   }
 
-  _onKeyDown(event: KeyboardEvent) {
+  _onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Escape' && this.props.isFullscreen) {
       this.props.toggleBottomBoxFullscreen();
     }
