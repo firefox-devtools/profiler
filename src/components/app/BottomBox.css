@@ -91,11 +91,11 @@
 }
 
 .bottom-fullscreen-show-button {
-  background-image: url(firefox-profiler-res/img/svg/maximise.svg);
+  background-image: url(firefox-profiler-res/img/svg/fullscreen.svg);
 }
 
 .bottom-fullscreen-hide-button {
-  background-image: url(firefox-profiler-res/img/svg/minimise.svg);
+  background-image: url(firefox-profiler-res/img/svg/fullscreen-exit.svg);
 }
 
 .codeLoadingOverlay,
