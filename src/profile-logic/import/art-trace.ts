@@ -194,12 +194,12 @@ type ArtTrace = {
 };
 
 function detectArtTraceFormat(
-  traceBuffer: ArrayBufferLike
+  traceBuffer: Uint8Array
 ): 'regular' | 'streaming' | 'unrecognized' {
   try {
     const lengthOfExpectedFirstTwoLinesOfSummarySection = '*version\nX\n'
       .length;
-    const firstTwoLinesBuffer = traceBuffer.slice(
+    const firstTwoLinesBuffer = traceBuffer.subarray(
       0,
       lengthOfExpectedFirstTwoLinesOfSummarySection
     );
@@ -213,7 +213,11 @@ function detectArtTraceFormat(
   }
 
   try {
-    const dataView = new DataView(traceBuffer);
+    const dataView = new DataView(
+      traceBuffer.buffer,
+      traceBuffer.byteOffset,
+      traceBuffer.byteLength
+    );
     const magic = dataView.getUint32(0, true);
     if (magic === TRACE_MAGIC) {
       return 'streaming';
@@ -523,9 +527,9 @@ function parseStreamingFormat(reader: ByteReader) {
   };
 }
 
-function parseArtTrace(buffer: ArrayBufferLike): ArtTrace {
+function parseArtTrace(buffer: Uint8Array): ArtTrace {
   try {
-    const reader = new ByteReader(new Uint8Array(buffer));
+    const reader = new ByteReader(buffer);
     switch (detectArtTraceFormat(buffer)) {
       case 'regular':
         return parseRegularFormat(reader);
@@ -915,13 +919,13 @@ class ThreadBuilder {
   }
 }
 
-export function isArtTraceFormat(traceBuffer: ArrayBufferLike) {
+export function isArtTraceFormat(traceBuffer: Uint8Array) {
   return detectArtTraceFormat(traceBuffer) !== 'unrecognized';
 }
 
 // Convert an ART trace to the Gecko profile format.
 export function convertArtTraceProfile(
-  traceBuffer: ArrayBufferLike
+  traceBuffer: Uint8Array
 ): GeckoProfileVersion11 {
   const trace = parseArtTrace(traceBuffer);
   const originalIntervalInUsec = procureSamplingInterval(trace);

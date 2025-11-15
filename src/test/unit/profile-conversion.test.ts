@@ -245,9 +245,8 @@ describe('converting Google Chrome profile', function () {
       'src/test/fixtures/upgrades/chrome-tracing.json.gz'
     );
     const decompressedBuffer = zlib.gunzipSync(compressedBuffer);
-    const profile = await unserializeProfileOfArbitraryFormat(
-      decompressedBuffer.buffer
-    );
+    const profile =
+      await unserializeProfileOfArbitraryFormat(decompressedBuffer);
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
@@ -263,9 +262,8 @@ describe('converting Google Chrome profile', function () {
       'src/test/fixtures/upgrades/chrome-trace-issue-5429.json.gz'
     );
     const decompressedBuffer = zlib.gunzipSync(compressedBuffer);
-    const profile = await unserializeProfileOfArbitraryFormat(
-      decompressedBuffer.buffer
-    );
+    const profile =
+      await unserializeProfileOfArbitraryFormat(decompressedBuffer);
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
@@ -425,8 +423,9 @@ describe('converting ART trace', function () {
     const buffer = fs.readFileSync(
       'src/test/fixtures/upgrades/art-trace-regular.trace.gz'
     );
-    const arrayBuffer = zlib.gunzipSync(buffer).buffer;
-    const profile = await unserializeProfileOfArbitraryFormat(arrayBuffer);
+    const uncompressedBytes = zlib.gunzipSync(buffer);
+    const profile =
+      await unserializeProfileOfArbitraryFormat(uncompressedBytes);
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
@@ -440,8 +439,9 @@ describe('converting ART trace', function () {
     const buffer = fs.readFileSync(
       'src/test/fixtures/upgrades/art-trace-streaming.trace.gz'
     );
-    const arrayBuffer = zlib.gunzipSync(buffer).buffer;
-    const profile = await unserializeProfileOfArbitraryFormat(arrayBuffer);
+    const uncompressedBytes = zlib.gunzipSync(buffer);
+    const profile =
+      await unserializeProfileOfArbitraryFormat(uncompressedBytes);
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
@@ -457,8 +457,9 @@ describe('converting Simpleperf trace', function () {
     const buffer = fs.readFileSync(
       'src/test/fixtures/upgrades/simpleperf-task-clock.trace.gz'
     );
-    const arrayBuffer = zlib.gunzipSync(buffer).buffer;
-    const profile = await unserializeProfileOfArbitraryFormat(arrayBuffer);
+    const uncompressedBytes = zlib.gunzipSync(buffer);
+    const profile =
+      await unserializeProfileOfArbitraryFormat(uncompressedBytes);
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
@@ -472,8 +473,9 @@ describe('converting Simpleperf trace', function () {
     const buffer = fs.readFileSync(
       'src/test/fixtures/upgrades/simpleperf-cpu-clock.trace.gz'
     );
-    const arrayBuffer = zlib.gunzipSync(buffer).buffer;
-    const profile = await unserializeProfileOfArbitraryFormat(arrayBuffer);
+    const uncompressedBytes = zlib.gunzipSync(buffer);
+    const profile =
+      await unserializeProfileOfArbitraryFormat(uncompressedBytes);
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
