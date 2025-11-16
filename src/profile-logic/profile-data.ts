@@ -1267,9 +1267,13 @@ function _getTimeRangeForThread(
       }
       result.end = accumTime + interval;
     }
-  } else if (markers.length) {
-    // Looking at the markers only if there are no samples in the profile.
-    // We need to look at those because it can be a marker only profile(no-sampling mode).
+  }
+
+  if (markers.length) {
+    // Also check markers to ensure the timeline extends to cover all marker data.
+    // This is necessary both for marker-only profiles (no-sampling mode) and for
+    // profiles where markers may extend beyond the last sample.
+
     // Finding start and end times sadly requires looping through all markers :(
     for (let i = 0; i < markers.length; i++) {
       const maybeStartTime = markers.startTime[i];
