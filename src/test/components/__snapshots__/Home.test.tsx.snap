@@ -62,50 +62,54 @@ exports[`app/Home renders a button to enable the popup in Firefox 1`] = `
       class="homeInstructionsTransitionGroup"
     >
       <div
-        class="homeInstructions"
-        data-testid="home-enable-popup-instructions"
+        class="homeTransition-entered"
       >
-        <img
-          alt="screenshot of profiler.firefox.com"
-          class="homeSectionScreenshot"
-          src="test-file-stub"
-        />
-        <div>
-          <button
-            class="homeSectionButton"
-            type="button"
-          >
-            <span
-              class="homeSectionPlus"
+        <div
+          class="homeInstructions"
+          data-testid="home-enable-popup-instructions"
+        >
+          <img
+            alt="screenshot of profiler.firefox.com"
+            class="homeSectionScreenshot"
+            src="test-file-stub"
+          />
+          <div>
+            <button
+              class="homeSectionButton"
+              type="button"
             >
-              +
-            </span>
-            Enable ⁨Firefox Profiler⁩ Menu Button
-          </button>
-          <a
-            class="homeSectionButton"
-            href="/docs/"
-          >
-            <span
-              class="homeSectionDocsIcon"
-            />
-            Documentation
-          </a>
-          <p>
-            Enable the profiler menu button to start recording a performance
+              <span
+                class="homeSectionPlus"
+              >
+                +
+              </span>
+              Enable ⁨Firefox Profiler⁩ Menu Button
+            </button>
+            <a
+              class="homeSectionButton"
+              href="/docs/"
+            >
+              <span
+                class="homeSectionDocsIcon"
+              />
+              Documentation
+            </a>
+            <p>
+              Enable the profiler menu button to start recording a performance
 profile in ⁨Firefox⁩, then analyze it and share it with profiler.firefox.com.
-          </p>
-          <p>
-            You can also profile ⁨Firefox for Android⁩. For more
+            </p>
+            <p>
+              You can also profile ⁨Firefox for Android⁩. For more
 information, please consult this documentation:
 
-            <a
-              href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device"
-            >
-              Profiling ⁨Firefox for Android⁩ directly on device
-            </a>
-            .
-          </p>
+              <a
+                href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device"
+              >
+                Profiling ⁨Firefox for Android⁩ directly on device
+              </a>
+              .
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -310,86 +314,90 @@ exports[`app/Home renders the Chrome extension instructions for Chromium based b
       class="homeInstructionsTransitionGroup"
     >
       <div
-        class="homeInstructions"
-        data-testid="home-enable-popup-instructions"
+        class="homeTransition-entered"
       >
-        <img
-          alt="screenshot of profiler.firefox.com"
-          class="homeSectionScreenshot"
-          src="test-file-stub"
-        />
-        <div>
-          <a
-            class="homeSectionButton"
-            href="https://chromewebstore.google.com/detail/firefox-profiler/ljmahpnflmbkgaipnfbpgjipcnahlghn"
-            rel="noreferrer"
-            target="_blank"
-          >
-            <span
-              class="homeSectionPlus"
-            >
-              +
-            </span>
-            Install the Chrome extension
-          </a>
-          <a
-            class="homeSectionButton"
-            href="/docs/"
-          >
-            <span
-              class="homeSectionDocsIcon"
-            />
-            Documentation
-          </a>
-          <p>
-            Use the 
+        <div
+          class="homeInstructions"
+          data-testid="home-enable-popup-instructions"
+        >
+          <img
+            alt="screenshot of profiler.firefox.com"
+            class="homeSectionScreenshot"
+            src="test-file-stub"
+          />
+          <div>
             <a
+              class="homeSectionButton"
               href="https://chromewebstore.google.com/detail/firefox-profiler/ljmahpnflmbkgaipnfbpgjipcnahlghn"
               rel="noreferrer"
               target="_blank"
             >
-              ⁨Firefox Profiler⁩ extension for Chrome
+              <span
+                class="homeSectionPlus"
+              >
+                +
+              </span>
+              Install the Chrome extension
             </a>
-            
+            <a
+              class="homeSectionButton"
+              href="/docs/"
+            >
+              <span
+                class="homeSectionDocsIcon"
+              />
+              Documentation
+            </a>
+            <p>
+              Use the 
+              <a
+                href="https://chromewebstore.google.com/detail/firefox-profiler/ljmahpnflmbkgaipnfbpgjipcnahlghn"
+                rel="noreferrer"
+                target="_blank"
+              >
+                ⁨Firefox Profiler⁩ extension for Chrome
+              </a>
+              
 to capture performance profiles in Chrome and analyze them in the
 ⁨Firefox Profiler⁩. Install the extension from the Chrome Web Store.
-          </p>
-          <p>
-            Once installed, use the extension’s
+            </p>
+            <p>
+              Once installed, use the extension’s
 toolbar icon or the shortcuts to start and stop profiling. You can also
 export profiles and load them here for detailed analysis.
-          </p>
-          <div>
-            <p>
-              <kbd>
-                Ctrl
-              </kbd>
-              +
-              <kbd>
-                Shift
-              </kbd>
-              +
-              <kbd>
-                1
-              </kbd>
-               
-              Stop and start profiling
             </p>
-            <p>
-              <kbd>
-                Ctrl
-              </kbd>
-              +
-              <kbd>
-                Shift
-              </kbd>
-              +
-              <kbd>
-                2
-              </kbd>
-               
-              Capture and load profile
-            </p>
+            <div>
+              <p>
+                <kbd>
+                  Ctrl
+                </kbd>
+                +
+                <kbd>
+                  Shift
+                </kbd>
+                +
+                <kbd>
+                  1
+                </kbd>
+                 
+                Stop and start profiling
+              </p>
+              <p>
+                <kbd>
+                  Ctrl
+                </kbd>
+                +
+                <kbd>
+                  Shift
+                </kbd>
+                +
+                <kbd>
+                  2
+                </kbd>
+                 
+                Capture and load profile
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -577,45 +585,49 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
       class="homeInstructionsTransitionGroup"
     >
       <div
-        class="homeInstructions"
-        data-testid="home-other-browser-instructions"
+        class="homeTransition-entered"
       >
-        <img
-          alt="screenshot of profiler.firefox.com"
-          class="homeSectionScreenshot"
-          src="test-file-stub"
-        />
-        <div>
-          <a
-            class="homeSectionButton"
-            href="/docs/"
-          >
-            <span
-              class="homeSectionDocsIcon"
-            />
-            Documentation
-          </a>
-          <p>
-            Recording performance profiles requires 
+        <div
+          class="homeInstructions"
+          data-testid="home-other-browser-instructions"
+        >
+          <img
+            alt="screenshot of profiler.firefox.com"
+            class="homeSectionScreenshot"
+            src="test-file-stub"
+          />
+          <div>
             <a
-              href="https://www.mozilla.org/en-US/firefox/new/"
+              class="homeSectionButton"
+              href="/docs/"
             >
-              ⁨Firefox⁩
+              <span
+                class="homeSectionDocsIcon"
+              />
+              Documentation
             </a>
-            .
+            <p>
+              Recording performance profiles requires 
+              <a
+                href="https://www.mozilla.org/en-US/firefox/new/"
+              >
+                ⁨Firefox⁩
+              </a>
+              .
 However, existing profiles can be viewed in any modern browser.
-          </p>
-          <p>
-            You can also profile ⁨Firefox for Android⁩. For more
+            </p>
+            <p>
+              You can also profile ⁨Firefox for Android⁩. For more
 information, please consult this documentation:
 
-            <a
-              href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device"
-            >
-              Profiling ⁨Firefox for Android⁩ directly on device
-            </a>
-            .
-          </p>
+              <a
+                href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device"
+              >
+                Profiling ⁨Firefox for Android⁩ directly on device
+              </a>
+              .
+            </p>
+          </div>
         </div>
       </div>
     </div>

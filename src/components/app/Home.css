@@ -172,17 +172,22 @@
 
 /* Only show the home transition when reduced motion is not preferred */
 @media (prefers-reduced-motion: no-preference) {
-  .homeTransition-enter {
+  .homeTransition-preEnter {
     opacity: 0.1;
     transform: translateX(100px);
   }
 
-  .homeTransition-enter.homeTransition-enter-active {
+  .homeTransition-entering {
     opacity: 1;
     transform: translateX(0);
     transition:
       opacity 300ms ease-out,
       transform 300ms ease-out;
+  }
+
+  .homeTransition-entered {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
