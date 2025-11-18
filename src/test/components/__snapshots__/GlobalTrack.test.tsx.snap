@@ -589,11 +589,6 @@ exports[`timeline/GlobalTrack will not render markers to the timeline-overview w
       >
         Process 0
       </button>
-      <button
-        class="timelineTrackCloseButton"
-        title="Hide process"
-        type="button"
-      />
     </div>
     <div
       class="timelineTrackTrack"
@@ -2140,11 +2135,6 @@ exports[`timeline/GlobalTrack will render markers with a timeline-overview schem
       >
         Process 0
       </button>
-      <button
-        class="timelineTrackCloseButton"
-        title="Hide process"
-        type="button"
-      />
     </div>
     <div
       class="timelineTrackTrack"

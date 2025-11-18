@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import * as v from 'valibot';
 import type {
   AddressResult,
   LibSymbolicationRequest,
@@ -28,156 +29,68 @@ export type QuerySymbolicationApiCallback = (
   requestJson: string
 ) => Promise<unknown>;
 
-type APIFoundModulesV5 = {
-  // For every requested library in the memoryMap, this object contains a string
-  // key of the form `${debugName}/${breakpadId}`. The value is null if no
-  // address with the module index was requested, and otherwise a boolean that
-  // says whether the symbol server had symbols for this library.
-  [key: string]: null | boolean;
-};
+// Valibot schemas for API response validation
 
-type APIInlineFrameInfoV5 = {
+// For every requested library in the memoryMap, this object contains a string
+// key of the form `${debugName}/${breakpadId}`. The value is null if no
+// address with the module index was requested, and otherwise a boolean that
+// says whether the symbol server had symbols for this library.
+const APIFoundModulesV5Schema = v.record(v.string(), v.nullable(v.boolean()));
+
+// Information about functions that were inlined at this address.
+const APIInlineFrameInfoV5Schema = v.object({
   // The name of the function this inline frame was in, if known.
-  function?: string;
+  function: v.optional(v.string()),
   // The path of the file that contains the function this inline frame was in, optional.
-  file?: string;
+  file: v.optional(v.string()),
   // The line number that contains the source code for this inline frame that
   // contributed to the instruction at the looked-up address, optional.
   // e.g. 543
-  line?: number;
-};
+  line: v.optional(v.number()),
+});
 
-type APIFrameInfoV5 = {
+const APIFrameInfoV5Schema = v.object({
   // The hex version of the address that we requested (e.g. "0x5ab").
-  module_offset: string;
+  module_offset: v.string(),
   // The debugName of the library that this frame was in.
-  module: string;
+  module: v.string(),
   // The index of this APIFrameInfo in its enclosing APIStack.
-  frame: number;
+  frame: v.number(),
   // The name of the function this frame was in, if symbols were found.
-  function?: string;
+  function: v.optional(v.string()),
   // The hex offset between the requested address and the start of the function,
   // e.g. "0x3c".
-  function_offset?: string;
+  function_offset: v.optional(v.string()),
   // An optional size, in bytes, of the machine code of the outer function that
   // this address belongs to, as a hex string, e.g. "0x270".
-  function_size?: string;
+  function_size: v.optional(v.string()),
   // The path of the file that contains the function this frame was in, optional.
-  // As of June 2021, this is only supported on the staging symbolication server
-  // ("Eliot") but not on the implementation that's currently in production ("Tecken").
-  // e.g. "hg:hg.mozilla.org/mozilla-central:js/src/vm/Interpreter.cpp:24938c537a55f9db3913072d33b178b210e7d6b5"
-  file?: string;
+  file: v.optional(v.string()),
   // The line number that contains the source code that generated the instructions at the address, optional.
-  // (Same support as file.)
-  // e.g. 543
-  line?: number;
+  line: v.optional(v.number()),
   // Information about functions that were inlined at this address.
   // Ordered from inside to outside.
-  // As of November 2021, this is only supported by profiler-symbol-server.
-  // Adding this functionality to the Mozilla symbol server is tracked in
-  // https://bugzilla.mozilla.org/show_bug.cgi?id=1636194
-  inlines?: APIInlineFrameInfoV5[];
-};
+  inlines: v.optional(v.array(APIInlineFrameInfoV5Schema)),
+});
 
-type APIStackV5 = APIFrameInfoV5[];
+const APIStackV5Schema = v.array(APIFrameInfoV5Schema);
 
-type APIJobResultV5 = {
-  found_modules: APIFoundModulesV5;
-  stacks: APIStackV5[];
-};
+const APIJobResultV5Schema = v.object({
+  found_modules: APIFoundModulesV5Schema,
+  stacks: v.array(APIStackV5Schema),
+});
 
-type APIResultV5 = {
-  results: APIJobResultV5[];
-};
+const APIResultV5Schema = v.object({
+  results: v.array(APIJobResultV5Schema),
+});
 
-// Make sure that the JSON blob we receive from the API conforms to our flow
-// type definition.
+type APIJobResultV5 = v.InferOutput<typeof APIJobResultV5Schema>;
+type APIResultV5 = v.InferOutput<typeof APIResultV5Schema>;
+
+// Make sure that the JSON blob we receive from the API conforms to our
+// type definition using valibot validation.
 function _ensureIsAPIResultV5(result: unknown): APIResultV5 {
-  // It's possible (especially when running tests with Jest) that the parameter
-  // inherits from a `Object` global from another realm. By using toString
-  // this issue is solved wherever the parameter comes from.
-  const isObject = (subject: unknown) =>
-    Object.prototype.toString.call(subject) === '[object Object]';
-
-  if (!isObject(result) || !('results' in (result as object))) {
-    throw new Error('Expected an object with property `results`');
-  }
-  const results = (result as { results: unknown }).results;
-  if (!Array.isArray(results)) {
-    throw new Error('Expected `results` to be an array');
-  }
-  for (const jobResult of results) {
-    if (
-      !isObject(jobResult) ||
-      !('found_modules' in jobResult) ||
-      !('stacks' in jobResult)
-    ) {
-      throw new Error(
-        'Expected jobResult to have `found_modules` and `stacks` properties'
-      );
-    }
-    const found_modules = jobResult.found_modules;
-    if (!isObject(found_modules)) {
-      throw new Error('Expected `found_modules` to be an object');
-    }
-    const stacks = jobResult.stacks;
-    if (!Array.isArray(stacks)) {
-      throw new Error('Expected `stacks` to be an array');
-    }
-    for (const stack of stacks) {
-      if (!Array.isArray(stack)) {
-        throw new Error('Expected `stack` to be an array');
-      }
-      for (const frameInfo of stack) {
-        if (!isObject(frameInfo)) {
-          throw new Error('Expected `frameInfo` to be an object');
-        }
-        if (
-          !('module_offset' in frameInfo) ||
-          !('module' in frameInfo) ||
-          !('frame' in frameInfo)
-        ) {
-          throw new Error(
-            'Expected frameInfo to have `module_offset`, `module` and `frame` properties'
-          );
-        }
-        if ('file' in frameInfo && typeof frameInfo.file !== 'string') {
-          throw new Error('Expected frameInfo.file to be a string, if present');
-        }
-        if ('line' in frameInfo && typeof frameInfo.line !== 'number') {
-          throw new Error('Expected frameInfo.line to be a number, if present');
-        }
-        if (
-          'function_offset' in frameInfo &&
-          typeof frameInfo.function_offset !== 'string'
-        ) {
-          throw new Error(
-            'Expected frameInfo.function_offset to be a string, if present'
-          );
-        }
-        if (
-          'function_size' in frameInfo &&
-          typeof frameInfo.function_size !== 'string'
-        ) {
-          throw new Error(
-            'Expected frameInfo.function_size to be a string, if present'
-          );
-        }
-        if ('inlines' in frameInfo) {
-          const inlines = frameInfo.inlines;
-          if (!Array.isArray(inlines)) {
-            throw new Error('Expected `inlines` to be an array');
-          }
-          for (const inlineFrame of inlines) {
-            if (!isObject(inlineFrame)) {
-              throw new Error('Expected `inlineFrame` to be an object');
-            }
-          }
-        }
-      }
-    }
-  }
-  return result as APIResultV5;
+  return v.parse(APIResultV5Schema, result);
 }
 
 function getV5ResultForLibRequest(

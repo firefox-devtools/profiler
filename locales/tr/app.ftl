@@ -357,6 +357,16 @@ MarkerTable--duration = Süre
 MarkerTable--name = Ad
 MarkerTable--details = Ayrıntılar
 
+## MarkerTooltip
+## This is the component for Marker Tooltip panel.
+
+# This is used as the tooltip for the filter button in marker tooltips.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerTooltip--filter-button-tooltip =
+    .title = Yalnızca şununla eşleşen işaretleri göster: “{ $filter }”
+    .aria-label = Yalnızca şununla eşleşen işaretleri göster: “{ $filter }”
+
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 

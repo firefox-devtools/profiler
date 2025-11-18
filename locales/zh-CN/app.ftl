@@ -39,6 +39,14 @@ AppViewRouter--error-from-localhost-url-safari = 由于 <a>Safari 浏览器的�
 AppViewRouter--route-not-found--home =
     .specialMessage = 无法识别您尝试访问的 URL。
 
+## Backtrace
+## This is used to display a backtrace (call stack) for a marker or sample.
+
+# Variables:
+#   $function (String) - Name of the function that was inlined.
+Backtrace--inlining-badge = （已内联）
+    .title = 编译器已将 { $function } 内联至其调用方。
+
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
@@ -332,7 +340,7 @@ MarkerContextMenu--select-the-sender-thread = 选择 Sender 线程“<strong>{ $
 # This string is used on the marker filters menu item when clicked on the filter icon.
 # Variables:
 #   $filter (String) - Search string that will be used to filter the markers.
-MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = 不用标记过滤器“<strong>{ $filter }</strong>”标记此样本
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = 丢弃与标记（匹配条件：“<strong>{ $filter }</strong>”）不相关的样本
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -355,6 +363,16 @@ MarkerTable--start = 开始
 MarkerTable--duration = 持续时间
 MarkerTable--name = 名称
 MarkerTable--details = 详情
+
+## MarkerTooltip
+## This is the component for Marker Tooltip panel.
+
+# This is used as the tooltip for the filter button in marker tooltips.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerTooltip--filter-button-tooltip =
+    .title = 仅显示匹配“{ $filter }”的标记
+    .aria-label = 仅显示匹配“{ $filter }”的标记
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -939,7 +957,7 @@ TransformNavigator--collapse-function-subtree = 折叠子树：{ $item }
 # "Drop samples outside of markers matching ..." transform.
 # Variables:
 #   $item (String) - Search filter of the markers that transform will apply to.
-TransformNavigator--drop-samples-outside-of-markers-matching = 不用过滤器 “{ $item }” 标记该样本
+TransformNavigator--drop-samples-outside-of-markers-matching = 丢弃与标记（匹配条件：“{ $item }”）不相关的样本
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI

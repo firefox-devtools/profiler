@@ -449,6 +449,16 @@ MarkerTable--duration = Длительность
 MarkerTable--name = Имя
 MarkerTable--details = Подробности
 
+## MarkerTooltip
+## This is the component for Marker Tooltip panel.
+
+# This is used as the tooltip for the filter button in marker tooltips.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerTooltip--filter-button-tooltip =
+    .title = Показать только подходящие маркеры: «{ $filter }»
+    .aria-label = Показать только подходящие маркеры: «{ $filter }»
+
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
@@ -535,6 +545,8 @@ MenuButtons--metaInfo--profiling-started = Запись началась:
 MenuButtons--metaInfo--profiling-session = Длина записи:
 MenuButtons--metaInfo--main-process-started = Основной процесс запущен:
 MenuButtons--metaInfo--main-process-ended = Основной процесс завершен:
+MenuButtons--metaInfo--file-name = Имя файла:
+MenuButtons--metaInfo--file-size = Размер файла:
 MenuButtons--metaInfo--interval = Интервал:
 MenuButtons--metaInfo--buffer-capacity = Емкость буфера:
 MenuButtons--metaInfo--buffer-duration = Длительность буфера:
@@ -824,7 +836,7 @@ TrackContextMenu--hide-all-matching-tracks = Скрыть все совпада�
 # any track.
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
-TrackContextMenu--no-results-found = Не найдено результатов для «<span>{ $searchFilter }</span>»
+TrackContextMenu--no-results-found = Не найдено результатов по запросу «<span>{ $searchFilter }</span>»
 # This button appears when hovering a track name and is displayed as an X icon.
 TrackNameButton--hide-track =
     .title = Скрыть трек

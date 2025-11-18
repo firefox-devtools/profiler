@@ -446,6 +446,16 @@ MarkerTable--duration = Längd
 MarkerTable--name = Namn
 MarkerTable--details = Detaljer
 
+## MarkerTooltip
+## This is the component for Marker Tooltip panel.
+
+# This is used as the tooltip for the filter button in marker tooltips.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerTooltip--filter-button-tooltip =
+    .title = Visa endast markörer som matchar: "{ $filter }"
+    .aria-label = Visa endast markörer som matchar: "{ $filter }"
+
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
@@ -522,6 +532,8 @@ MenuButtons--metaInfo--profiling-started = Inspelningen startade:
 MenuButtons--metaInfo--profiling-session = Inspelningslängd:
 MenuButtons--metaInfo--main-process-started = Huvudprocessen startade:
 MenuButtons--metaInfo--main-process-ended = Huvudprocessen avslutad:
+MenuButtons--metaInfo--file-name = Filnamn:
+MenuButtons--metaInfo--file-size = Filstorlek:
 MenuButtons--metaInfo--interval = Intervall:
 MenuButtons--metaInfo--buffer-capacity = Buffertkapacitet:
 MenuButtons--metaInfo--buffer-duration = Buffertlängd:

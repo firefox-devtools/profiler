@@ -85,15 +85,8 @@ export async function run(options: CliOptions) {
   // by our importers.
   const bytes = fs.readFileSync(options.input, null);
 
-  // bytes is a Uint8Array whose underlying ArrayBuffer can be longer than bytes.length.
-  // Copy the contents into a new ArrayBuffer which is sized correctly, so that we
-  // don't include uninitialized data from the extra parts of the underlying buffer.
-  // Alternatively, we could make unserializeProfileOfArbitraryFormat support
-  // Uint8Array or Buffer in addition to ArrayBuffer.
-  const byteBufferCopy = Uint8Array.prototype.slice.call(bytes).buffer;
-
   // Load the profile.
-  const profile = await unserializeProfileOfArbitraryFormat(byteBufferCopy);
+  const profile = await unserializeProfileOfArbitraryFormat(bytes);
   if (profile === undefined) {
     throw new Error('Unable to parse the profile.');
   }
