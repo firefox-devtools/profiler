@@ -159,7 +159,6 @@
     "fake-indexeddb": "^6.2.5",
     "fetch-mock": "^12.6.0",
     "file-loader": "^6.2.0",
-    "glob": "^12.0.0",
     "globals": "^16.5.0",
     "html-webpack-plugin": "^5.6.5",
     "husky": "^4.3.8",
