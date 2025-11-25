@@ -176,7 +176,6 @@
     "postcss-loader": "^8.2.0",
     "postinstall-postinstall": "^2.1.0",
     "prettier": "^3.6.2",
-    "raw-loader": "^4.0.2",
     "rimraf": "^6.1.0",
     "style-loader": "^4.0.0",
     "stylelint": "^16.25.0",
