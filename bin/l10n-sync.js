@@ -13,7 +13,7 @@ const readline = require('readline');
 const { promisify } = require('util');
 
 /**
- * @typeef {Object} ExecFilePromiseResult
+ * @typedef {Object} ExecFilePromiseResult
  * @property {string | Buffer} stdout
  * @property {string | Buffer} stderr
  */
