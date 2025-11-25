@@ -13,12 +13,13 @@
     "build:clean": "rimraf dist && mkdirp dist",
     "build:quiet": "yarn build:clean && cross-env NODE_ENV=development webpack",
     "build": "yarn build:quiet --progress",
-    "build-prod:quiet": "yarn build:clean && yarn build-photon && cross-env NODE_ENV=production webpack",
-    "build-prod": "yarn build-prod:quiet --progress",
+    "build-prod:quiet": "yarn build:clean && yarn build-photon && cross-env NODE_ENV=production webpack && yarn build-sw",
+    "build-prod": "yarn build:clean && yarn build-photon && cross-env NODE_ENV=production webpack --progress && yarn build-sw",
     "build-l10n": "yarn build:clean && cross-env NODE_ENV=development L10N=1 webpack --progress",
-    "build-l10n-prod:quiet": "yarn build:clean && yarn build-photon && cross-env NODE_ENV=production L10N=1 webpack",
-    "build-l10n-prod": "yarn build-l10n-prod:quiet --progress",
+    "build-l10n-prod:quiet": "yarn build:clean && yarn build-photon && cross-env NODE_ENV=production L10N=1 webpack && yarn build-sw",
+    "build-l10n-prod": "yarn build:clean && yarn build-photon && cross-env NODE_ENV=production L10N=1 webpack --progress && yarn build-sw",
     "build-photon": "webpack --config res/photon/webpack.config.js",
+    "build-sw": "workbox generateSW workbox-config.js",
     "build-symbolicator-cli": "yarn build-symbolicator-cli:quiet --progress",
     "build-symbolicator-cli:quiet": "yarn build:clean && cross-env NODE_ENV=production webpack --config src/symbolicator-cli/webpack.config.js",
     "lint": "node bin/output-fixing-commands.js run-p lint-js lint-css prettier-run",
@@ -159,7 +160,7 @@
     "fake-indexeddb": "^6.2.4",
     "fetch-mock": "^12.5.5",
     "file-loader": "^6.2.0",
-    "glob": "^11.0.3",
+    "glob": "^12.0.0",
     "globals": "^16.5.0",
     "html-webpack-plugin": "^5.6.4",
     "husky": "^4.3.8",
@@ -187,45 +188,12 @@
     "webpack": "^5.102.1",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2",
-    "workbox-webpack-plugin": "^7.3.0",
+    "workbox-cli": "^7.3.0",
     "yargs": "^18.0.0"
   },
   "resolutions": {
     "@types/react-splitter-layout/@types/react": "^18.3.26",
     "@types/trusted-types": "^2.0.7"
-  },
-  "jest": {
-    "collectCoverageFrom": [
-      "src/**/*.{js,jsx,ts,tsx}",
-      "!**/node_modules/**",
-      "!src/types/libdef/**"
-    ],
-    "moduleFileExtensions": [
-      "js",
-      "jsx",
-      "ts",
-      "tsx"
-    ],
-    "transformIgnorePatterns": [
-      "/node_modules/(?!(query-string|decode-uri-component|iongraph-web|split-on-first|filter-obj|fetch-mock)/)"
-    ],
-    "moduleNameMapper": {
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ftl)$": "<rootDir>/src/test/fixtures/mocks/file-mock.ts",
-      "\\.(css|less)$": "<rootDir>/src/test/fixtures/mocks/style-mock.ts"
-    },
-    "setupFilesAfterEnv": [
-      "jest-extended/all",
-      "./src/test/setup.ts"
-    ],
-    "globals": {
-      "AVAILABLE_STAGING_LOCALES": null
-    },
-    "snapshotFormat": {
-      "escapeString": true,
-      "printBasicPrototype": true
-    },
-    "testEnvironment": "./src/test/custom-environment",
-    "verbose": false
   },
   "husky": {
     "hooks": {
