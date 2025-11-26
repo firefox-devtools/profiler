@@ -103,7 +103,7 @@
     "redux-thunk": "^3.1.0",
     "reselect": "^4.1.8",
     "url": "^0.11.4",
-    "valibot": "^1.1.0",
+    "valibot": "^1.2.0",
     "weaktuplemap": "^1.0.0",
     "workbox-window": "^7.3.0"
   },
