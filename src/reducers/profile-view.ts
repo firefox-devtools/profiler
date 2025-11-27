@@ -139,6 +139,7 @@ export const defaultThreadViewOptions: ThreadViewOptions = {
   expandedInvertedCallNodePaths: new PathSet(),
   selectedMarker: null,
   selectedNetworkMarker: null,
+  lastSeenTransformCount: 0,
 };
 
 function _getThreadViewOptions(
@@ -378,11 +379,15 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         threadViewOptions.expandedInvertedCallNodePaths
       );
 
+      const lastSeenTransformCount =
+        threadViewOptions.lastSeenTransformCount + 1;
+
       return _updateThreadViewOptions(state, threadsKey, {
         selectedNonInvertedCallNodePath,
         selectedInvertedCallNodePath,
         expandedNonInvertedCallNodePaths,
         expandedInvertedCallNodePaths,
+        lastSeenTransformCount,
       });
     }
     case 'POP_TRANSFORMS_FROM_STACK': {
@@ -394,6 +399,38 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         selectedInvertedCallNodePath: [],
         expandedNonInvertedCallNodePaths: new PathSet(),
         expandedInvertedCallNodePaths: new PathSet(),
+        lastSeenTransformCount: 0,
+      });
+    }
+    case 'UPDATE_URL_STATE': {
+      // When the URL state changes (e.g., via browser back button), check if the
+      // transform stack has been popped for each thread. If so, reset the stored paths
+      // because they may reference call nodes that only exist in a transformed tree.
+      // See: https://github.com/firefox-devtools/profiler/issues/5689
+      if (!action.newUrlState) {
+        return state;
+      }
+
+      const { transforms } = action.newUrlState.profileSpecific;
+      return objectMap(state, (viewOptions, threadsKey) => {
+        const transformStack = transforms[threadsKey] || [];
+        const newTransformCount = transformStack.length;
+        const oldTransformCount = viewOptions.lastSeenTransformCount;
+
+        // If transform count changed, reset the paths.
+        if (newTransformCount < oldTransformCount) {
+          return {
+            ...viewOptions,
+            selectedNonInvertedCallNodePath: [],
+            selectedInvertedCallNodePath: [],
+            expandedNonInvertedCallNodePaths: new PathSet(),
+            expandedInvertedCallNodePaths: new PathSet(),
+            lastSeenTransformCount: newTransformCount,
+          };
+        }
+
+        // No change needed.
+        return viewOptions;
       });
     }
     case 'CHANGE_IMPLEMENTATION_FILTER': {
