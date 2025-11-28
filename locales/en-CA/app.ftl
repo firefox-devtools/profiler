@@ -42,6 +42,14 @@ AppViewRouter--error-from-localhost-url-safari =
 AppViewRouter--route-not-found--home =
     .specialMessage = The URL you tried to reach was not recognized.
 
+## Backtrace
+## This is used to display a backtrace (call stack) for a marker or sample.
+
+# Variables:
+#   $function (String) - Name of the function that was inlined.
+Backtrace--inlining-badge = (inlined)
+    .title = { $function } was inlined into its caller by the compiler.
+
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
@@ -443,6 +451,16 @@ MarkerTable--duration = Duration
 MarkerTable--name = Name
 MarkerTable--details = Details
 
+## MarkerTooltip
+## This is the component for Marker Tooltip panel.
+
+# This is used as the tooltip for the filter button in marker tooltips.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerTooltip--filter-button-tooltip =
+    .title = Only show markers matching: “{ $filter }”
+    .aria-label = Only show markers matching: “{ $filter }”
+
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
@@ -519,6 +537,7 @@ MenuButtons--metaInfo--profiling-started = Recording started:
 MenuButtons--metaInfo--profiling-session = Recording length:
 MenuButtons--metaInfo--main-process-started = Main process started:
 MenuButtons--metaInfo--main-process-ended = Main process ended:
+MenuButtons--metaInfo--file-name = File name:
 MenuButtons--metaInfo--file-size = File size:
 MenuButtons--metaInfo--interval = Interval:
 MenuButtons--metaInfo--buffer-capacity = Buffer capacity:
