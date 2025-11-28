@@ -519,6 +519,7 @@ MenuButtons--metaInfo--profiling-started = Recording started:
 MenuButtons--metaInfo--profiling-session = Recording length:
 MenuButtons--metaInfo--main-process-started = Main process started:
 MenuButtons--metaInfo--main-process-ended = Main process ended:
+MenuButtons--metaInfo--file-size = File size:
 MenuButtons--metaInfo--interval = Interval:
 MenuButtons--metaInfo--buffer-capacity = Buffer capacity:
 MenuButtons--metaInfo--buffer-duration = Buffer duration:
