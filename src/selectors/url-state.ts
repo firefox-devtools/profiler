@@ -219,6 +219,10 @@ export const getIsBottomBoxOpen: Selector<boolean> = (state) => {
   return getProfileSpecificState(state).isBottomBoxOpenPerPanel[tab];
 };
 
+export const getIsBottomBoxFullscreen: Selector<boolean> = (state) => {
+  return getProfileSpecificState(state).isBottomBoxFullscreen;
+};
+
 /**
  * The URL predictor is used to generate a link for an uploaded profile, to predict
  * what the URL will be.
