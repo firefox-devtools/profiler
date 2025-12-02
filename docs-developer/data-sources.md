@@ -21,13 +21,6 @@ Samples don't record every event that happens within the system, so some informa
 
 - [Profile Data Format](./profile-data)
 
-## Timeline - DocShell Markers (unused in the Firefox Profiler)
-
-The Gecko Profiler records marker data, but it doesn't include all of the markers available in the system. There is a competing implementation of markers used exclusively by the Firefox Devtools that are recorded per DocShell. These are not currently integrated into the Firefox Profiler.
-
-- [Timeline C++ Implementation](https://dxr.mozilla.org/mozilla-central/source/docshell/base/timeline)
-- [Timeline Devtools JS Server](https://dxr.mozilla.org/mozilla-central/source/devtools/server/performance/timeline.ts)
-
 ## Tracelogger (unused in the Firefox Profiler)
 
 While the previous performance tools collect information about how Gecko runs as a whole, Tracelogger is specific to the SpiderMonkey engine. Tracelogger is not sample based, therefore it records every step that the SpiderMonkey engine performs to run a given chunk of JavaScript code. It's primarily used by JavaScript engineers, and includes a firehose of information often reaching into the several gigs of information. There is no current integration of this information with the Firefox Profiler.
