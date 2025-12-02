@@ -19,9 +19,3 @@ Samples don't record every event that happens within the system, so some informa
 - [nsIProfiler.idl](https://searchfox.org/firefox-main/source/tools/profiler/gecko/nsIProfiler.idl)
 - [ProfileBufferEntry.h](https://searchfox.org/firefox-main/rev/5ccf4a7d77a329f237d3a41e400049f9c47dc71f/tools/profiler/core/ProfileBufferEntry.h#433-566)
 - [Gecko Profile Data Format](./gecko-profile-format.md)
-
-## Tracelogger (unused in the Firefox Profiler)
-
-While the previous performance tools collect information about how Gecko runs as a whole, Tracelogger is specific to the SpiderMonkey engine. Tracelogger is not sample based, therefore it records every step that the SpiderMonkey engine performs to run a given chunk of JavaScript code. It's primarily used by JavaScript engineers, and includes a firehose of information often reaching into the several gigs of information. There is no current integration of this information with the Firefox Profiler.
-
-- [Tracelogger on GitHub](https://github.com/h4writer/tracelogger)
