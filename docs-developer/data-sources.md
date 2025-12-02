@@ -16,9 +16,8 @@ Samples don't record every event that happens within the system, so some informa
 
 ### More Documentation on the Gecko Profiler:
 
-- [nsIProfiler.idl](https://dxr.mozilla.org/mozilla-central/source/tools/profiler/gecko/nsIProfiler.idl)
-- [ProfileEntry.h](https://dxr.mozilla.org/mozilla-central/rev/b043233ec04f06768d59dcdfb9e928142280f3cc/tools/profiler/core/ProfileBufferEntry.h#322-411)
-
+- [nsIProfiler.idl](https://searchfox.org/firefox-main/source/tools/profiler/gecko/nsIProfiler.idl)
+- [ProfileBufferEntry.h](https://searchfox.org/firefox-main/rev/5ccf4a7d77a329f237d3a41e400049f9c47dc71f/tools/profiler/core/ProfileBufferEntry.h#433-566)
 - [Profile Data Format](./profile-data)
 
 ## Tracelogger (unused in the Firefox Profiler)
