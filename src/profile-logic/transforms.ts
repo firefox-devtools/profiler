@@ -600,7 +600,7 @@ function _dropFunctionInCallNodePath(
   return callNodePath.includes(funcIndex) ? [] : callNodePath;
 }
 
-// removes all functions that are not in the category from the callNodePath
+// Removes all functions that are not in the category from the callNodePath
 function _removeOtherCategoryFunctionsInNodePathWithFunction(
   category: IndexIntoCategoryList,
   callNodePath: CallNodePath,
