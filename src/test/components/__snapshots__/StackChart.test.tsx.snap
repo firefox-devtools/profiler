@@ -1,5 +1,102 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
+exports[`ArgumentValues shows argument values when a profile has them 1`] = `
+<div
+  class="tooltip"
+  data-testid="tooltip"
+  style="left: 165.28698319239052px; top: 70px;"
+>
+  <div
+    class="tooltipCallNode"
+  >
+    <div
+      class="tooltipOneLine tooltipHeader"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        36ms
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        bar
+      </div>
+      <div
+        class="tooltipIcon"
+      />
+    </div>
+    <div
+      class="tooltipCallNodeDetails"
+    >
+      <div
+        class="tooltipDetails tooltipCallNodeDetailsLeft"
+      >
+        <div
+          class="tooltipLabel"
+        >
+          Stack Type:
+        </div>
+        <div>
+          JavaScript
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Category:
+        </div>
+        <div>
+          <span
+            class="colored-square category-color-yellow"
+          />
+          JavaScript: JIT (baseline)
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Page URL:
+        </div>
+        <div
+          class="tooltipDetailsUrl"
+        >
+          file://&lt;Page #15&gt;
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          File:
+        </div>
+        <div
+          class="tooltipDetailsUrl"
+        >
+          file://&lt;URL&gt;:11:13
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Resource:
+        </div>
+        file://&lt;URL&gt;
+      </div>
+      <div
+        class="arguments"
+      >
+        <div
+          class="argumentsLabel"
+        >
+          Arguments
+        </div>
+        <span
+          class="objectBox objectBox-number"
+        >
+          0
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`CombinedChart renders combined stack chart 1`] = `
 <div
   aria-labelledby="stack-chart-tab-button"
