@@ -113,6 +113,7 @@ function setup(
           profile.meta.markerSchema[profile.meta.markerSchema.length - 1]
         }
         markerName={markerStringIndex}
+        shouldUseEnlargedHeight={false}
       />
     </Provider>
   );
