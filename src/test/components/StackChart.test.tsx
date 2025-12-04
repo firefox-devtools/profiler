@@ -318,13 +318,11 @@ describe('ArgumentValues', () => {
   it('shows argument values when a profile has them', () => {
     const profile = require('../fixtures/upgrades/argument-values.json');
     const store = storeWithProfile(profile);
-    const {getTooltip, moveMouse, findFillTextPosition} = setup(store);
+    const { getTooltip, moveMouse, findFillTextPosition } = setup(store);
 
     moveMouse(findFillTextPosition('bar'));
-    let tooltip = getTooltip();
-    expect(
-      within(ensureExists(tooltip)).getByText('bar')
-    ).toBeInTheDocument();
+    const tooltip = getTooltip();
+    expect(within(ensureExists(tooltip)).getByText('bar')).toBeInTheDocument();
     expect(tooltip).toMatchSnapshot();
   });
 });

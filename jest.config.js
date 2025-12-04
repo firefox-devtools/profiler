@@ -19,7 +19,7 @@ module.exports = {
   ],
 
   transform: {
-    "\\.([jt]sx?|mjs)$": "babel-jest"
+    '\\.([jt]sx?|mjs)$': 'babel-jest',
   },
 
   // Transform ESM modules to CommonJS for Jest
