@@ -4393,6 +4393,7 @@ Object {
       ],
     },
   },
+  "lastSeenTransformCount": 1,
   "selectedInvertedCallNodePath": Array [],
   "selectedMarker": 1,
   "selectedNetworkMarker": null,

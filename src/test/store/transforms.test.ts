@@ -25,6 +25,8 @@ import {
   changeSelectedCallNode,
   changeCallTreeSummaryStrategy,
 } from '../../actions/profile-view';
+import * as AppActions from '../../actions/app';
+import * as UrlStateSelectors from '../../selectors/url-state';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 
 describe('"focus-subtree" transform', function () {
@@ -817,6 +819,70 @@ describe('"focus-category" transform', function () {
       const selectedCallNodePath =
         selectedThreadSelectors.getSelectedCallNodePath(getState());
       expect(selectedCallNodePath).toEqual([A, A]);
+    });
+  });
+
+  describe('browser back button behavior', function () {
+    // This test ensures that when using browser back button after applying
+    // a focus-category transform, re-applying the transform doesn't fail.
+    // The bug occurred because expanded paths from the transformed tree
+    // weren't being reset when the URL state changed via browser navigation.
+    const { threadIndex, categoryIndex, funcNamesDict, getState, dispatch } =
+      setup(`
+        A[cat:Other]  A[cat:Other]
+        B[cat:Other]  B[cat:Other]
+        C[cat:Graphics]  C[cat:Graphics]
+        D[cat:Graphics]  D[cat:Graphics]
+        E[cat:Graphics]  F[cat:Graphics]
+      `);
+
+    it('can re-apply transform after browser back without error', function () {
+      const { C, D, E } = funcNamesDict;
+
+      // Apply focus-category transform.
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'focus-category',
+          category: categoryIndex,
+        })
+      );
+
+      // Select a deep node in the transformed tree, which expands paths.
+      // In the transformed tree, C becomes a root since A and B are filtered out.
+      dispatch(changeSelectedCallNode(threadIndex, [C, D, E]));
+
+      expect(
+        selectedThreadSelectors.getSelectedCallNodePath(getState())
+      ).toEqual([C, D, E]);
+
+      // Capture the current URL state with transforms.
+      const urlStateWithTransforms = UrlStateSelectors.getUrlState(getState());
+
+      // Simulate browser back button by creating a URL state without transforms.
+      const urlStateWithoutTransforms = {
+        ...urlStateWithTransforms,
+        profileSpecific: {
+          ...urlStateWithTransforms.profileSpecific,
+          transforms: {},
+        },
+      };
+
+      // Apply the URL state change (simulating browser back).
+      dispatch(AppActions.updateUrlState(urlStateWithoutTransforms));
+
+      // Re-apply the same transform. This should not throw an error.
+      expect(() => {
+        dispatch(
+          addTransformToStack(threadIndex, {
+            type: 'focus-category',
+            category: categoryIndex,
+          })
+        );
+      }).not.toThrow();
+
+      expect(
+        selectedThreadSelectors.getSelectedCallNodePath(getState())
+      ).toEqual([]);
     });
   });
 });
