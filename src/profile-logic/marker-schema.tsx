@@ -780,7 +780,7 @@ export function markerPayloadMatchesSearch(
 export function computeStringIndexMarkerFieldsByDataType(
   markerSchemas: MarkerSchema[]
 ): Map<string, string[]> {
-  const stringIndexMarkerFieldsByDataType = new Map();
+  const stringIndexMarkerFieldsByDataType = new Map<string, string[]>();
 
   // 'CompositorScreenshot' markers currently don't have a schema (#5303),
   // hardcode the url field (which is a string index) until they do.

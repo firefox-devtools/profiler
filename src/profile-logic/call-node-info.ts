@@ -1161,7 +1161,7 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     // Pass 1: Count the deep nodes per func, and build up a list of funcs.
     // We will need to create a child for each deep node func, and each child will
     // need to know how many deep nodes it has.
-    const deepNodeCountPerFunc = new Map();
+    const deepNodeCountPerFunc = new Map<IndexIntoFuncTable, number>();
     const callNodeTable = this._callNodeTable;
     for (let i = 0; i < parentDeepNodeCount; i++) {
       const selfNode = parentSelfNodes[i];
@@ -1212,7 +1212,7 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     // partitions; one partition per child, in the right order.
     const startIndexPerChild = new Uint32Array(childCount);
     const deepNodeCountPerChild = new Uint32Array(childCount);
-    const funcToChildIndex = new Map();
+    const funcToChildIndex = new Map<IndexIntoFuncTable, number>();
 
     let nextChildStartIndex = 0;
     for (let childIndex = 0; childIndex < childCount; childIndex++) {
