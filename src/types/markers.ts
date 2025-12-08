@@ -500,6 +500,9 @@ export type NetworkPayload = {
   RedirectURI?: string;
   id: number;
   pri: number; // priority of the load; always included as it can change
+  // The Priority header value from the HTTP response.
+  // This property is optional because older versions of Gecko do not include it.
+  priorityHeader?: string;
   count?: number; // Total size of transfer, if any
   // See all possible values in tools/profiler/core/platform.cpp
   status: NetworkStatus;
