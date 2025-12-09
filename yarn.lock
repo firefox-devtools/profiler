@@ -2031,10 +2031,10 @@
   dependencies:
     "@babel/runtime" "^7.12.5"
 
-"@tgwf/co2@^0.16.9":
-  version "0.16.9"
-  resolved "https://registry.yarnpkg.com/@tgwf/co2/-/co2-0.16.9.tgz#629dfcc7bc3b5980047793932d9254b9b9578371"
-  integrity sha512-+nuT7HS5r22lbW4MdgSPHhirYBjHR6Q8sz5kX6dKdK+yIkRukLAGaH6L/toZwVEOuEeeIRfWYJuaJIoxEGDMXg==
+"@tgwf/co2@^0.17.0":
+  version "0.17.0"
+  resolved "https://registry.yarnpkg.com/@tgwf/co2/-/co2-0.17.0.tgz#e9034dce60d94725e791e53747b882d3b9fa729e"
+  integrity sha512-OGdIeI56TJtwC+CEPf6zg/n+urPRw/XP4YObYHRVgJKeubnxyFNfUHLUgsQMmGyrGYqTNXuQxX6/qrbT5aMFtw==
 
 "@tootallnate/once@2":
   version "2.0.0"
