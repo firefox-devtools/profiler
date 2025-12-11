@@ -1,8 +1,0 @@
-ports:
-  - port: 4242
-tasks:
-  - before: nvm install 22
-    init: yarn install
-    command: FX_PROFILER_HOST="0.0.0.0" yarn start
-  - openMode: split-right
-    command: printf "\nFirefox Profiler ❤ Gitpod\nWelcome to this virtual environment.\nYou can type your commands in this terminal.\n\n"

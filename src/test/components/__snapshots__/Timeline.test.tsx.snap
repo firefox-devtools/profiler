@@ -74,11 +74,6 @@ exports[`TimelineSelection does not crash when there are no samples or markers 1
                     >
                       Process 0
                     </button>
-                    <button
-                      class="timelineTrackCloseButton"
-                      title="Hide process"
-                      type="button"
-                    />
                   </div>
                   <div
                     class="timelineTrackTrack"
@@ -408,11 +403,6 @@ exports[`TimelineSelection renders the vertical line indicating the time positio
                     >
                       Process 0
                     </button>
-                    <button
-                      class="timelineTrackCloseButton"
-                      title="Hide process"
-                      type="button"
-                    />
                   </div>
                   <div
                     class="timelineTrackTrack"

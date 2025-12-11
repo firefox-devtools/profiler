@@ -1271,9 +1271,10 @@ function _findOtherVisibleThread(
     const localTracks = getLocalTracks(getState(), globalTrack.pid);
     const localTrackOrder = getLocalTrackOrder(getState(), globalTrack.pid);
     const hiddenLocalTracks = getHiddenLocalTracks(getState(), globalTrack.pid);
-    const localTrackIndexesToIgnore = localTrackIndexesToIgnoreByPid
-      ? (localTrackIndexesToIgnoreByPid.get(globalTrack.pid) ?? new Set())
-      : new Set();
+    const localTrackIndexesToIgnore: Set<TrackIndex> =
+      localTrackIndexesToIgnoreByPid
+        ? (localTrackIndexesToIgnoreByPid.get(globalTrack.pid) ?? new Set())
+        : new Set();
 
     for (const trackIndex of localTrackOrder) {
       const track = localTracks[trackIndex];
@@ -1917,7 +1918,7 @@ export function changeTableViewOptions(
 
 export function updateBottomBoxContentsAndMaybeOpen(
   currentTab: TabSlug,
-  { libIndex, sourceIndex, nativeSymbols }: BottomBoxInfo
+  { libIndex, sourceIndex, nativeSymbols, lineNumber }: BottomBoxInfo
 ): Action {
   // TODO: If the set has more than one element, pick the native symbol with
   // the highest total sample count
@@ -1932,6 +1933,7 @@ export function updateBottomBoxContentsAndMaybeOpen(
     currentTab,
     shouldOpenBottomBox: sourceIndex !== null || nativeSymbol !== null,
     shouldOpenAssemblyView: sourceIndex === null && nativeSymbol !== null,
+    lineNumber,
   };
 }
 

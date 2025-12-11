@@ -859,7 +859,17 @@ exports[`MarkerChart shows a tooltip when hovering 1`] = `
         <div
           class="tooltipTitle"
         >
-          componentB
+          <span
+            class="tooltipTitleText"
+          >
+            componentB
+          </span>
+          <button
+            aria-label="Only show markers matching: “⁨componentB⁩”"
+            class="tooltipTitleFilterButton"
+            title="Only show markers matching: “⁨componentB⁩”"
+            type="button"
+          />
         </div>
       </div>
     </div>
@@ -926,7 +936,17 @@ exports[`MarkerChart shows a tooltip when hovering 2`] = `
         <div
           class="tooltipTitle"
         >
-          componentA
+          <span
+            class="tooltipTitleText"
+          >
+            componentA
+          </span>
+          <button
+            aria-label="Only show markers matching: “⁨componentA⁩”"
+            class="tooltipTitleFilterButton"
+            title="Only show markers matching: “⁨componentA⁩”"
+            type="button"
+          />
         </div>
       </div>
     </div>

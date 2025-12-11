@@ -15,6 +15,7 @@ import { CodeLoadingOverlay } from './CodeLoadingOverlay';
 import { CodeErrorOverlay } from './CodeErrorOverlay';
 import {
   getSourceViewScrollGeneration,
+  getSourceViewLineNumber,
   getAssemblyViewIsOpen,
   getAssemblyViewNativeSymbol,
   getAssemblyViewScrollGeneration,
@@ -60,6 +61,7 @@ type StateProps = {
   readonly sourceViewFile: string | null;
   readonly sourceViewCode: SourceCodeStatus | void;
   readonly sourceViewScrollGeneration: number;
+  readonly sourceViewLineNumber?: number;
   readonly globalLineTimings: LineTimings;
   readonly selectedCallNodeLineTimings: LineTimings;
   readonly assemblyViewIsOpen: boolean;
@@ -186,6 +188,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       globalLineTimings,
       disableOverscan,
       sourceViewScrollGeneration,
+      sourceViewLineNumber,
       selectedCallNodeLineTimings,
       assemblyViewIsOpen,
       assemblyViewScrollGeneration,
@@ -263,7 +266,9 @@ class BottomBoxImpl extends React.PureComponent<Props> {
                   sourceCode={sourceCode}
                   filePath={path}
                   scrollToHotSpotGeneration={sourceViewScrollGeneration}
+                  scrollToLineNumber={sourceViewLineNumber}
                   hotSpotTimings={selectedCallNodeLineTimings}
+                  highlightedLine={sourceViewLineNumber}
                   ref={this._sourceView}
                 />
               ) : null}
@@ -333,6 +338,7 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
     selectedCallNodeLineTimings:
       selectedNodeSelectors.getSourceViewLineTimings(state),
     sourceViewScrollGeneration: getSourceViewScrollGeneration(state),
+    sourceViewLineNumber: getSourceViewLineNumber(state),
     assemblyViewNativeSymbol: getAssemblyViewNativeSymbol(state),
     assemblyViewCode: getAssemblyViewCode(state),
     globalAddressTimings:

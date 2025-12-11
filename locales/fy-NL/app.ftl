@@ -42,6 +42,14 @@ AppViewRouter--error-from-localhost-url-safari =
 AppViewRouter--route-not-found--home =
     .specialMessage = De URL dy’t jo probearre te berikken, waard net werkend.
 
+## Backtrace
+## This is used to display a backtrace (call stack) for a marker or sample.
+
+# Variables:
+#   $function (String) - Name of the function that was inlined.
+Backtrace--inlining-badge = (inline pleatst)
+    .title = { $function } is troch de compiler inline yn de oanropomjouwing pleatst
+
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
@@ -443,6 +451,16 @@ MarkerTable--duration = Doer
 MarkerTable--name = Namme
 MarkerTable--details = Details
 
+## MarkerTooltip
+## This is the component for Marker Tooltip panel.
+
+# This is used as the tooltip for the filter button in marker tooltips.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerTooltip--filter-button-tooltip =
+    .title = Allinnich markearringen toane dy’t oerienkomme mei: ‘{ $filter }’
+    .aria-label = Allinnich markearringen toane dy’t oerienkomme mei: ‘{ $filter }’
+
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
@@ -519,6 +537,8 @@ MenuButtons--metaInfo--profiling-started = Opname start:
 MenuButtons--metaInfo--profiling-session = Opnamedoer:
 MenuButtons--metaInfo--main-process-started = Haadproses start:
 MenuButtons--metaInfo--main-process-ended = Haadproses stoppe:
+MenuButtons--metaInfo--file-name = Bestânsnamme:
+MenuButtons--metaInfo--file-size = Bestânsgrutte:
 MenuButtons--metaInfo--interval = Ynterfal:
 MenuButtons--metaInfo--buffer-capacity = Bufferkapasiteit:
 MenuButtons--metaInfo--buffer-duration = Bufferdoer:
@@ -1125,6 +1145,13 @@ SourceView--not-in-archive-error-when-obtaining-source = It bestân { $pathInArc
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = It argyf op { $url } koe net ferwurke wurde: { $parsingErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a JS file could not be found in
+# the browser.
+# Variables:
+#   $url (String) - The URL of the JS source file.
+#   $sourceUuid (number) - The UUID of the JS source file.
+#   $errorMessage (String) - The raw internal error message, not localized
+SourceView--not-in-browser-error-when-obtaining-js-source = De browser koe it boarnebestân foar { $url } mei sourceUuid { $sourceUuid } net krije: { $errorMessage }.
 
 ## Toggle buttons in the top right corner of the bottom box
 

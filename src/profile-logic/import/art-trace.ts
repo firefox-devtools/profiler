@@ -3,6 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // Parses the ART trace format and converts it to the Gecko profile format.
 
+import type {
+  IndexIntoFrameTable,
+  IndexIntoStackTable,
+} from 'firefox-profiler/types';
+
 // These profiles are obtained from Android in two ways:
 //  - Programmatically, from the Debug API: https://developer.android.com/studio/profile/cpu-profiler#debug-api
 //  - Or via the profiler UI in Android Studio.
@@ -194,12 +199,12 @@ type ArtTrace = {
 };
 
 function detectArtTraceFormat(
-  traceBuffer: ArrayBufferLike
+  traceBuffer: Uint8Array
 ): 'regular' | 'streaming' | 'unrecognized' {
   try {
     const lengthOfExpectedFirstTwoLinesOfSummarySection = '*version\nX\n'
       .length;
-    const firstTwoLinesBuffer = traceBuffer.slice(
+    const firstTwoLinesBuffer = traceBuffer.subarray(
       0,
       lengthOfExpectedFirstTwoLinesOfSummarySection
     );
@@ -213,7 +218,11 @@ function detectArtTraceFormat(
   }
 
   try {
-    const dataView = new DataView(traceBuffer);
+    const dataView = new DataView(
+      traceBuffer.buffer,
+      traceBuffer.byteOffset,
+      traceBuffer.byteLength
+    );
     const magic = dataView.getUint32(0, true);
     if (magic === TRACE_MAGIC) {
       return 'streaming';
@@ -523,9 +532,9 @@ function parseStreamingFormat(reader: ByteReader) {
   };
 }
 
-function parseArtTrace(buffer: ArrayBufferLike): ArtTrace {
+function parseArtTrace(buffer: Uint8Array): ArtTrace {
   try {
-    const reader = new ByteReader(new Uint8Array(buffer));
+    const reader = new ByteReader(buffer);
     switch (detectArtTraceFormat(buffer)) {
       case 'regular':
         return parseRegularFormat(reader);
@@ -562,7 +571,7 @@ function procureSamplingInterval(trace: ArtTrace) {
 
   // Gather up to 500 time deltas between method actions on a thread.
   const deltas: number[] = [];
-  const previousTimestampByThread = new Map();
+  const previousTimestampByThread = new Map<number, number>();
   const numberOfActionsToConsider = Math.min(500, methodActions.length);
   for (let i = 0; i < numberOfActionsToConsider; i++) {
     const { tid, globalTime } = methodActions[i];
@@ -617,7 +626,7 @@ export function getSpecialCategory(
     return s.substring(0, firstPeriodPos);
   }
 
-  const significantSegmentCounter = new Map();
+  const significantSegmentCounter = new Map<string, number>();
   for (let i = 0; i < methods.length; i++) {
     const significantSegment = getSignificantNamespaceSegment(
       methods[i].className
@@ -787,8 +796,8 @@ class ThreadBuilder {
 
   _currentStack: number | null = null;
   _nextSampleTimestamp = 0;
-  _stackMap = new Map();
-  _frameMap = new Map();
+  _stackMap = new Map<string, IndexIntoStackTable>();
+  _frameMap = new Map<number, IndexIntoFrameTable>();
   _registerTime = 0;
   _name;
   _pid;
@@ -915,13 +924,13 @@ class ThreadBuilder {
   }
 }
 
-export function isArtTraceFormat(traceBuffer: ArrayBufferLike) {
+export function isArtTraceFormat(traceBuffer: Uint8Array) {
   return detectArtTraceFormat(traceBuffer) !== 'unrecognized';
 }
 
 // Convert an ART trace to the Gecko profile format.
 export function convertArtTraceProfile(
-  traceBuffer: ArrayBufferLike
+  traceBuffer: Uint8Array
 ): GeckoProfileVersion11 {
   const trace = parseArtTrace(traceBuffer);
   const originalIntervalInUsec = procureSamplingInterval(trace);
@@ -939,7 +948,7 @@ export function convertArtTraceProfile(
   const { summaryDetails, threads, methods, methodActions } = trace;
   const categoryInfo = new CategoryInfo(methods);
   const methodMap = new Map(methods.map((m) => [m.methodId, m]));
-  const threadBuilderMap = new Map();
+  const threadBuilderMap = new Map<number, ThreadBuilder>();
 
   if (methodActions.length > 0) {
     for (let i = 0; i < methodActions.length; i++) {

@@ -42,6 +42,14 @@ AppViewRouter--error-from-localhost-url-safari =
 AppViewRouter--route-not-found--home =
     .specialMessage = Webbadressen du försökte nå kändes inte igen.
 
+## Backtrace
+## This is used to display a backtrace (call stack) for a marker or sample.
+
+# Variables:
+#   $function (String) - Name of the function that was inlined.
+Backtrace--inlining-badge = (infogad)
+    .title = { $function } infogades i sin anropare av kompilatorn.
+
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
@@ -438,6 +446,16 @@ MarkerTable--duration = Längd
 MarkerTable--name = Namn
 MarkerTable--details = Detaljer
 
+## MarkerTooltip
+## This is the component for Marker Tooltip panel.
+
+# This is used as the tooltip for the filter button in marker tooltips.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerTooltip--filter-button-tooltip =
+    .title = Visa endast markörer som matchar: "{ $filter }"
+    .aria-label = Visa endast markörer som matchar: "{ $filter }"
+
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
@@ -514,6 +532,8 @@ MenuButtons--metaInfo--profiling-started = Inspelningen startade:
 MenuButtons--metaInfo--profiling-session = Inspelningslängd:
 MenuButtons--metaInfo--main-process-started = Huvudprocessen startade:
 MenuButtons--metaInfo--main-process-ended = Huvudprocessen avslutad:
+MenuButtons--metaInfo--file-name = Filnamn:
+MenuButtons--metaInfo--file-size = Filstorlek:
 MenuButtons--metaInfo--interval = Intervall:
 MenuButtons--metaInfo--buffer-capacity = Buffertkapacitet:
 MenuButtons--metaInfo--buffer-duration = Buffertlängd:
@@ -1120,6 +1140,13 @@ SourceView--not-in-archive-error-when-obtaining-source = Filen { $pathInArchive 
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = Arkivet på { $url } kunde inte analyseras: { $parsingErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a JS file could not be found in
+# the browser.
+# Variables:
+#   $url (String) - The URL of the JS source file.
+#   $sourceUuid (number) - The UUID of the JS source file.
+#   $errorMessage (String) - The raw internal error message, not localized
+SourceView--not-in-browser-error-when-obtaining-js-source = Webbläsaren kunde inte hämta källfilen för { $url } med sourceUuid { $sourceUuid }: { $errorMessage }.
 
 ## Toggle buttons in the top right corner of the bottom box
 

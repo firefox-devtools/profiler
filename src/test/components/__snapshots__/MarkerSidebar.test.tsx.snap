@@ -24,7 +24,17 @@ exports[`MarkerSidebar matches the snapshots when displaying data about the curr
           <div
             class="tooltipTitle"
           >
-            IPC — sent to 2222
+            <span
+              class="tooltipTitleText"
+            >
+              IPC — sent to 2222
+            </span>
+            <button
+              aria-label="Only show markers matching: “⁨IPCOut⁩”"
+              class="tooltipTitleFilterButton"
+              title="Only show markers matching: “⁨IPCOut⁩”"
+              type="button"
+            />
           </div>
         </div>
       </div>

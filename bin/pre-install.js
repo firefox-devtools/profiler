@@ -2,7 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/*:: type AgentsVersion = { [agentName: string]: string }; */
+/**
+ * @typedef {Object.<string, string>} AgentsVersion
+ */
 
 /*
  * This file is run when a user runs `yarn install`, before doing anything else.
@@ -21,13 +23,12 @@ function checkVersions() {
     return;
   }
 
-  const agents /*: AgentsVersion */ = userAgent
-    .split(' ')
-    .reduce((agents, agent) => {
-      const [key, value] = agent.split('/');
-      agents[key] = value;
-      return agents;
-    }, {});
+  /** @type {AgentsVersion} */
+  const agents = userAgent.split(' ').reduce((agents, agent) => {
+    const [key, value] = agent.split('/');
+    agents[key] = value;
+    return agents;
+  }, {});
 
   const checks = [checkNode(agents), checkYarn(agents)];
 
@@ -47,7 +48,10 @@ function versionCompare(a, b) {
   return a.localeCompare(b, undefined, { numeric: true });
 }
 
-function checkNode(agents /*: AgentsVersion */) {
+/**
+ * @param {AgentsVersion} agents
+ */
+function checkNode(agents) {
   // Node versions usually have a starting `v`.
   const nodeVersion = agents.node.replace(/^v/, '');
   const expectedNodeVersion = parseExpectedNodeVersion();
@@ -75,7 +79,10 @@ function checkNode(agents /*: AgentsVersion */) {
   return true;
 }
 
-function checkYarn(agents /*: AgentsVersion */) {
+/**
+ * @param {AgentsVersion} agents
+ */
+function checkYarn(agents) {
   if (!('yarn' in agents)) {
     console.error(
       'This project uses Yarn instead of npm, please run `yarn install` instead of `npm install`.\n'
@@ -98,15 +105,18 @@ function checkYarn(agents /*: AgentsVersion */) {
 }
 
 function parseExpectedNodeVersion() {
-  // Let's fetch our minimal version from circleci's file
+  // Let's fetch our minimal version from GitHub Actions composite action file
   const fs = require('fs');
-  const circleConfig = fs.readFileSync('.circleci/config.yml', {
-    encoding: 'utf8',
-  });
-  const expectedNodeVersion = /image: cimg\/node:([\d.]+)/.exec(circleConfig);
+  const actionConfig = fs.readFileSync(
+    '.github/actions/setup-node-and-install/action.yml',
+    {
+      encoding: 'utf8',
+    }
+  );
+  const expectedNodeVersion = /node-version:\s*'([\d.]+)'/.exec(actionConfig);
   if (!expectedNodeVersion) {
     throw new Error(
-      `Couldn't extract the node version from .circleci/config.yml.`
+      `Couldn't extract the node version from .github/actions/setup-node-and-install/action.yml.`
     );
   }
   return expectedNodeVersion[1];

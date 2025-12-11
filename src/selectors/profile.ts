@@ -56,7 +56,7 @@ import type {
   TrackReference,
   LastNonShiftClickInformation,
   PreviewSelection,
-  HiddenTrackCount,
+  TrackCount,
   Selector,
   DangerousSelectorWithArguments,
   State,
@@ -575,7 +575,7 @@ export const getLocalTrackNamesByPid: Selector<Map<Pid, string[]>> =
     getRawProfileSharedData,
     getCounters,
     (localTracksByPid, threads, shared, counters) => {
-      const localTrackNamesByPid = new Map();
+      const localTrackNamesByPid = new Map<Pid, string[]>();
       for (const [pid, localTracks] of localTracksByPid) {
         localTrackNamesByPid.set(
           pid,
@@ -609,7 +609,7 @@ export const getLocalTrackName = (
  * then all its children are as well. This function walks all of the data to determine
  * the correct hidden counts.
  */
-export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
+export const getTrackCount: Selector<TrackCount> = createSelector(
   getGlobalTracks,
   getLocalTracksByPid,
   UrlState.getHiddenLocalTracksByPid,
@@ -749,7 +749,7 @@ export const getInnerWindowIDSetByTabID: Selector<Map<
     return null;
   }
 
-  const innerWindowIDSetByTabID = new Map();
+  const innerWindowIDSetByTabID = new Map<TabID, Set<InnerWindowID>>();
   for (const [tabID, pages] of pagesMap) {
     innerWindowIDSetByTabID.set(
       tabID,
@@ -765,7 +765,7 @@ export const getExtensionIdToNameMap: Selector<Map<string, string> | null> =
       return null;
     }
 
-    const extensionIDtoNameMap = new Map();
+    const extensionIDtoNameMap = new Map<string, string>();
     for (let i = 0; i < extensions.length; i++) {
       extensionIDtoNameMap.set(extensions.baseURL[i], extensions.name[i]);
     }
@@ -834,7 +834,7 @@ export const getProfileFilterSortedPageData: Selector<SortedTabPageData> =
 export const getThreadIdToNameMap: Selector<Map<Tid, string>> = createSelector(
   getThreads,
   (threads) => {
-    const threadIdToNameMap = new Map();
+    const threadIdToNameMap = new Map<Tid, string>();
     for (const thread of threads) {
       threadIdToNameMap.set(thread.tid, getFriendlyThreadName(threads, thread));
     }
@@ -845,7 +845,7 @@ export const getThreadIdToNameMap: Selector<Map<Tid, string>> = createSelector(
 export const getProcessIdToNameMap: Selector<Map<Pid, string>> = createSelector(
   getThreads,
   (threads) => {
-    const processIdToNameMap = new Map();
+    const processIdToNameMap = new Map<Pid, string>();
     for (const thread of threads) {
       if (!thread.isMainThread || !thread.pid) {
         continue;

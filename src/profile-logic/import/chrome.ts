@@ -396,10 +396,10 @@ function getThreadInfo(
 
   profile.threads.push(thread);
 
-  const nodeIdToStackId = new Map();
+  const nodeIdToStackId = new Map<number | void, IndexIntoStackTable | null>();
   nodeIdToStackId.set(undefined, null);
 
-  const threadInfo = {
+  const threadInfo: ThreadInfo = {
     thread,
     nodeIdToStackId,
     funcKeyToFuncId: new Map(),
@@ -518,8 +518,8 @@ async function processTracingEvents(
     ensureExists(profile.meta.categories)
   );
 
-  const threadInfoByPidAndTid = new Map();
-  const threadInfoByThread = new Map();
+  const threadInfoByPidAndTid = new Map<string, ThreadInfo>();
+  const threadInfoByThread = new Map<RawThread, ThreadInfo>();
   for (const profileEvent of profileEvents) {
     // The thread info is all of the data that makes it possible to process an
     // individual thread.
@@ -574,7 +574,7 @@ async function processTracingEvents(
       } = thread;
 
       if (nodes) {
-        const parentMap = new Map();
+        const parentMap = new Map<number, number>();
         for (const node of nodes) {
           const { callFrame, id: nodeIndex } = node;
           let parent: number | void = undefined;

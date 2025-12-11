@@ -1,0 +1,14 @@
+name: 'Setup Node.js and Install Dependencies'
+description: 'Setup Node.js with caching and install dependencies'
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: '22.14'
+        cache: 'yarn'
+
+    - name: Install dependencies
+      shell: bash
+      run: yarn install --frozen-lockfile

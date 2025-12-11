@@ -58,6 +58,10 @@ export type ThreadViewOptions = {
   readonly expandedInvertedCallNodePaths: PathSet;
   readonly selectedMarker: MarkerIndex | null;
   readonly selectedNetworkMarker: MarkerIndex | null;
+  // Track the number of transforms to detect when they change via browser
+  // navigation. This helps us know when to reset paths that may be invalid
+  // in the new transform state.
+  readonly lastSeenTransformCount: number;
 };
 
 export type ThreadViewOptionsPerThreads = {
@@ -247,6 +251,9 @@ export type SourceViewState = {
   // Index into source table. Contains information (filename and uuid) about the
   // source. Null if a function without a file path was double clicked.
   sourceIndex: IndexIntoSourceTable | null;
+  // Optional line number to scroll to in the source view.
+  // If not specified, the source view will scroll to the hottest line.
+  lineNumber?: number;
 };
 
 export type AssemblyViewState = {

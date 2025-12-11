@@ -18,7 +18,17 @@ exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 
       <div
         class="tooltipTitle"
       >
-        FileIO (non-main thread)
+        <span
+          class="tooltipTitleText"
+        >
+          FileIO (non-main thread)
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨FileIO (non-main thread)⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨FileIO (non-main thread)⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -164,7 +174,17 @@ exports[`TooltipMarker renders properly network markers that were aborted 1`] = 
       <div
         class="tooltipTitle"
       >
-        Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+        <span
+          class="tooltipTitleText"
+        >
+          Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -267,7 +287,17 @@ exports[`TooltipMarker renders properly network markers where content type is bl
       <div
         class="tooltipTitle"
       >
-        Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+        <span
+          class="tooltipTitleText"
+        >
+          Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -438,7 +468,17 @@ exports[`TooltipMarker renders properly network markers where content type is mi
       <div
         class="tooltipTitle"
       >
-        Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+        <span
+          class="tooltipTitleText"
+        >
+          Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -634,7 +674,17 @@ exports[`TooltipMarker renders properly network markers with a preconnect part 2
       <div
         class="tooltipTitle"
       >
-        Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+        <span
+          class="tooltipTitleText"
+        >
+          Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -894,7 +944,17 @@ exports[`TooltipMarker renders properly network markers with a preconnect part c
       <div
         class="tooltipTitle"
       >
-        Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+        <span
+          class="tooltipTitleText"
+        >
+          Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -1080,7 +1140,17 @@ exports[`TooltipMarker renders properly normal network markers 1`] = `
       <div
         class="tooltipTitle"
       >
-        Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+        <span
+          class="tooltipTitleText"
+        >
+          Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -1334,7 +1404,17 @@ exports[`TooltipMarker renders properly redirect network markers for a Internal 
       <div
         class="tooltipTitle"
       >
-        Load 1234: http://www.wikia.com/
+        <span
+          class="tooltipTitleText"
+        >
+          Load 1234: http://www.wikia.com/
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨Load 1234: http://www.wikia.com/⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨Load 1234: http://www.wikia.com/⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -1447,7 +1527,17 @@ exports[`TooltipMarker renders properly redirect network markers for a Permanent
       <div
         class="tooltipTitle"
       >
-        Load 1234: http://www.wikia.com/
+        <span
+          class="tooltipTitleText"
+        >
+          Load 1234: http://www.wikia.com/
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨Load 1234: http://www.wikia.com/⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨Load 1234: http://www.wikia.com/⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -1560,7 +1650,17 @@ exports[`TooltipMarker renders properly redirect network markers for a Temporary
       <div
         class="tooltipTitle"
       >
-        Load 1234: http://www.wikia.com/
+        <span
+          class="tooltipTitleText"
+        >
+          Load 1234: http://www.wikia.com/
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨Load 1234: http://www.wikia.com/⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨Load 1234: http://www.wikia.com/⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -1673,7 +1773,17 @@ exports[`TooltipMarker renders properly redirect network markers for an internal
       <div
         class="tooltipTitle"
       >
-        Load 1234: http://www.wikia.com/
+        <span
+          class="tooltipTitleText"
+        >
+          Load 1234: http://www.wikia.com/
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨Load 1234: http://www.wikia.com/⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨Load 1234: http://www.wikia.com/⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -1786,7 +1896,17 @@ exports[`TooltipMarker renders properly redirect network markers without additio
       <div
         class="tooltipTitle"
       >
-        Load 1234: http://www.wikia.com/
+        <span
+          class="tooltipTitleText"
+        >
+          Load 1234: http://www.wikia.com/
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨Load 1234: http://www.wikia.com/⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨Load 1234: http://www.wikia.com/⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -1894,7 +2014,17 @@ exports[`TooltipMarker renders the tooltip of CompositorScreenshotWindowDestroye
           <div
             class="tooltipTitle"
           >
-            CompositorScreenshotWindowDestroyed
+            <span
+              class="tooltipTitleText"
+            >
+              CompositorScreenshotWindowDestroyed
+            </span>
+            <button
+              aria-label="Only show markers matching: “⁨CompositorScreenshotWindowDestroyed⁩”"
+              class="tooltipTitleFilterButton"
+              title="Only show markers matching: “⁨CompositorScreenshotWindowDestroyed⁩”"
+              type="button"
+            />
           </div>
         </div>
       </div>
@@ -1941,7 +2071,17 @@ exports[`TooltipMarker renders tooltips for various markers: Bailout_ShapeGuard 
       <div
         class="tooltipTitle"
       >
-        Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -&gt; resource://bar.js:3662
+        <span
+          class="tooltipTitleText"
+        >
+          Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -&gt; resource://bar.js:3662
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -> resource://bar.js:3662⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -> resource://bar.js:3662⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -1972,7 +2112,17 @@ exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
       <div
         class="tooltipTitle"
       >
-        Bailout
+        <span
+          class="tooltipTitleText"
+        >
+          Bailout
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨Bailout⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨Bailout⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -2010,7 +2160,17 @@ exports[`TooltipMarker renders tooltips for various markers: BailoutKind::Argume
       <div
         class="tooltipTitle"
       >
-        BailoutKind::ArgumentCheck at Uninitialized on line 388 of self-hosted:388
+        <span
+          class="tooltipTitleText"
+        >
+          BailoutKind::ArgumentCheck at Uninitialized on line 388 of self-hosted:388
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨BailoutKind::ArgumentCheck at Uninitialized on line 388 of self-hosted:388⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨BailoutKind::ArgumentCheck at Uninitialized on line 388 of self-hosted:388⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -2046,7 +2206,17 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] =
       <div
         class="tooltipTitle"
       >
-        commandupdate — DOMEvent
+        <span
+          class="tooltipTitleText"
+        >
+          commandupdate — DOMEvent
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨commandupdate⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨commandupdate⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -2110,7 +2280,17 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.6 1`] =
       <div
         class="tooltipTitle"
       >
-        load — DOMEvent
+        <span
+          class="tooltipTitleText"
+        >
+          load — DOMEvent
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨load⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨load⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -2172,7 +2352,17 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.7 1`] =
       <div
         class="tooltipTitle"
       >
-        load — DOMEvent
+        <span
+          class="tooltipTitleText"
+        >
+          load — DOMEvent
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨load⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨load⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -2234,7 +2424,17 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.8 1`] =
       <div
         class="tooltipTitle"
       >
-        load — DOMEvent
+        <span
+          class="tooltipTitleText"
+        >
+          load — DOMEvent
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨load⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨load⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -2297,7 +2497,17 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
       <div
         class="tooltipTitle"
       >
-        FileIO (non-profiled thread)
+        <span
+          class="tooltipTitleText"
+        >
+          FileIO (non-profiled thread)
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨FileIO (non-profiled thread)⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨FileIO (non-profiled thread)⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -2627,7 +2837,17 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
       <div
         class="tooltipTitle"
       >
-        FileIO
+        <span
+          class="tooltipTitleText"
+        >
+          FileIO
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨FileIO⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨FileIO⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -2945,7 +3165,17 @@ exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = 
       <div
         class="tooltipTitle"
       >
-        GCMajor
+        <span
+          class="tooltipTitleText"
+        >
+          GCMajor
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨GCMajor⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨GCMajor⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3102,7 +3332,17 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
       <div
         class="tooltipTitle"
       >
-        GCMinor
+        <span
+          class="tooltipTitleText"
+        >
+          GCMinor
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨GCMinor⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨GCMinor⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3217,7 +3457,17 @@ exports[`TooltipMarker renders tooltips for various markers: GCSlice-17.5 1`] = 
       <div
         class="tooltipTitle"
       >
-        GCSlice
+        <span
+          class="tooltipTitleText"
+        >
+          GCSlice
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨GCSlice⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨GCSlice⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3295,7 +3545,17 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-120 1`] = `
       <div
         class="tooltipTitle"
       >
-        IPC — sent to 2222
+        <span
+          class="tooltipTitleText"
+        >
+          IPC — sent to 2222
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨IPCOut⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨IPCOut⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3382,7 +3642,17 @@ exports[`TooltipMarker renders tooltips for various markers: Invalidate http://m
       <div
         class="tooltipTitle"
       >
-        Invalidate http://mozilla.com/script.js:1234
+        <span
+          class="tooltipTitleText"
+        >
+          Invalidate http://mozilla.com/script.js:1234
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨Invalidate http://mozilla.com/script.js:1234⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨Invalidate http://mozilla.com/script.js:1234⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3413,7 +3683,17 @@ exports[`TooltipMarker renders tooltips for various markers: Invalidate-10 1`] =
       <div
         class="tooltipTitle"
       >
-        Invalidate
+        <span
+          class="tooltipTitleText"
+        >
+          Invalidate
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨Invalidate⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨Invalidate⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3451,7 +3731,17 @@ exports[`TooltipMarker renders tooltips for various markers: Log-21.7 1`] = `
       <div
         class="tooltipTitle"
       >
-        Log
+        <span
+          class="tooltipTitleText"
+        >
+          Log
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨Log⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨Log⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3496,7 +3786,17 @@ exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-14.5
       <div
         class="tooltipTitle"
       >
-        NotifyDidPaint
+        <span
+          class="tooltipTitleText"
+        >
+          NotifyDidPaint
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨NotifyDidPaint⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨NotifyDidPaint⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3539,7 +3839,17 @@ exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-112.
       <div
         class="tooltipTitle"
       >
-        NotifyDidPaint
+        <span
+          class="tooltipTitleText"
+        >
+          NotifyDidPaint
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨NotifyDidPaint⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨NotifyDidPaint⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3577,7 +3887,17 @@ exports[`TooltipMarker renders tooltips for various markers: PlayAudio-115 1`] =
       <div
         class="tooltipTitle"
       >
-        PlayAudio
+        <span
+          class="tooltipTitleText"
+        >
+          PlayAudio
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨PlayAudio⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨PlayAudio⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3622,7 +3942,17 @@ exports[`TooltipMarker renders tooltips for various markers: PreferenceRead-114.
       <div
         class="tooltipTitle"
       >
-        PreferenceRead
+        <span
+          class="tooltipTitleText"
+        >
+          PreferenceRead
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨PreferenceRead⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨PreferenceRead⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3686,7 +4016,17 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
       <div
         class="tooltipTitle"
       >
-        RefreshObserver
+        <span
+          class="tooltipTitleText"
+        >
+          RefreshObserver
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨RefreshObserver⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨RefreshObserver⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -3990,7 +4330,17 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
       <div
         class="tooltipTitle"
       >
-        Styles
+        <span
+          class="tooltipTitleText"
+        >
+          Styles
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨Styles⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨Styles⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -4299,7 +4649,17 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
       <div
         class="tooltipTitle"
       >
-        Styles
+        <span
+          class="tooltipTitleText"
+        >
+          Styles
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨Styles⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨Styles⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -4631,7 +4991,17 @@ exports[`TooltipMarker renders tooltips for various markers: TimeToFirstInteract
       <div
         class="tooltipTitle"
       >
-        TimeToFirstInteractive (TTFI)
+        <span
+          class="tooltipTitleText"
+        >
+          TimeToFirstInteractive (TTFI)
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨TimeToFirstInteractive (TTFI)⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨TimeToFirstInteractive (TTFI)⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -4674,7 +5044,17 @@ exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`]
       <div
         class="tooltipTitle"
       >
-        foobar
+        <span
+          class="tooltipTitleText"
+        >
+          foobar
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨foobar⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨foobar⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -4735,7 +5115,17 @@ exports[`TooltipMarker shows a tooltip for Jank markers 1`] = `
       <div
         class="tooltipTitle"
       >
-        Jank – event processing delay
+        <span
+          class="tooltipTitleText"
+        >
+          Jank – event processing delay
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨Jank⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨Jank⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -4782,7 +5172,17 @@ exports[`TooltipMarker shows image of CompositorScreenshot markers 1`] = `
       <div
         class="tooltipTitle"
       >
-        CompositorScreenshot
+        <span
+          class="tooltipTitleText"
+        >
+          CompositorScreenshot
+        </span>
+        <button
+          aria-label="Only show markers matching: “⁨CompositorScreenshot⁩”"
+          class="tooltipTitleFilterButton"
+          title="Only show markers matching: “⁨CompositorScreenshot⁩”"
+          type="button"
+        />
       </div>
     </div>
   </div>
@@ -4855,7 +5255,17 @@ exports[`TooltipMarker shows the source thread for markers from a merged thread 
           <div
             class="tooltipTitle"
           >
-            click — DOMEvent
+            <span
+              class="tooltipTitleText"
+            >
+              click — DOMEvent
+            </span>
+            <button
+              aria-label="Only show markers matching: “⁨click⁩”"
+              class="tooltipTitleFilterButton"
+              title="Only show markers matching: “⁨click⁩”"
+              type="button"
+            />
           </div>
         </div>
       </div>
@@ -4923,7 +5333,17 @@ exports[`TooltipMarker shows the source thread for markers from a merged thread 
           <div
             class="tooltipTitle"
           >
-            pageload — DOMEvent
+            <span
+              class="tooltipTitleText"
+            >
+              pageload — DOMEvent
+            </span>
+            <button
+              aria-label="Only show markers matching: “⁨pageload⁩”"
+              class="tooltipTitleFilterButton"
+              title="Only show markers matching: “⁨pageload⁩”"
+              type="button"
+            />
           </div>
         </div>
       </div>

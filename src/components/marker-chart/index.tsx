@@ -17,12 +17,16 @@ import {
   getMarkerSchemaByName,
 } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
+import {
+  getSelectedThreadsKey,
+  getSelectedTab,
+} from 'firefox-profiler/selectors/url-state';
 import {
   updatePreviewSelection,
   changeRightClickedMarker,
   changeMouseTimePosition,
   changeSelectedMarker,
+  updateBottomBoxContentsAndMaybeOpen,
 } from 'firefox-profiler/actions/profile-view';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 
@@ -35,7 +39,9 @@ import type {
   StartEndRange,
   PreviewSelection,
   ThreadsKey,
+  Thread,
 } from 'firefox-profiler/types';
+import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
@@ -48,6 +54,7 @@ type DispatchProps = {
   readonly changeRightClickedMarker: typeof changeRightClickedMarker;
   readonly changeMouseTimePosition: typeof changeMouseTimePosition;
   readonly changeSelectedMarker: typeof changeSelectedMarker;
+  readonly updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen;
 };
 
 type StateProps = {
@@ -62,6 +69,8 @@ type StateProps = {
   readonly previewSelection: PreviewSelection | null;
   readonly rightClickedMarkerIndex: MarkerIndex | null;
   readonly selectedMarkerIndex: MarkerIndex | null;
+  readonly thread: Thread;
+  readonly selectedTab: TabSlug;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -171,6 +180,10 @@ class MarkerChartImpl extends React.PureComponent<Props> {
                 selectedMarkerIndex,
                 rightClickedMarkerIndex,
                 shouldDisplayTooltips: this._shouldDisplayTooltips,
+                thread: this.props.thread,
+                updateBottomBoxContentsAndMaybeOpen:
+                  this.props.updateBottomBoxContentsAndMaybeOpen,
+                selectedTab: this.props.selectedTab,
               }}
             />
           </ContextMenuTrigger>
@@ -206,6 +219,8 @@ export const MarkerChart = explicitConnect<{}, StateProps, DispatchProps>({
         selectedThreadSelectors.getRightClickedMarkerIndex(state),
       selectedMarkerIndex:
         selectedThreadSelectors.getSelectedMarkerIndex(state),
+      thread: selectedThreadSelectors.getThread(state),
+      selectedTab: getSelectedTab(state),
     };
   },
   mapDispatchToProps: {
@@ -213,6 +228,7 @@ export const MarkerChart = explicitConnect<{}, StateProps, DispatchProps>({
     changeMouseTimePosition,
     changeRightClickedMarker,
     changeSelectedMarker,
+    updateBottomBoxContentsAndMaybeOpen,
   },
   component: MarkerChartImpl,
 });

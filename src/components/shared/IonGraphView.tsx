@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import type { LineTimings } from 'firefox-profiler/types';
 
-import { GraphViewer, migrate } from 'iongraph-web';
-import 'iongraph-web/dist/style.css';
+import { GraphViewer, migrate } from 'iongraph-web/react';
+import 'iongraph-web/style.css';
 
 import { useMemo } from 'react';
 

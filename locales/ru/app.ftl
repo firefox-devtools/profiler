@@ -42,6 +42,14 @@ AppViewRouter--error-from-localhost-url-safari =
 AppViewRouter--route-not-found--home =
     .specialMessage = URL-адрес, который вы пытались открыть, не был распознан.
 
+## Backtrace
+## This is used to display a backtrace (call stack) for a marker or sample.
+
+# Variables:
+#   $function (String) - Name of the function that was inlined.
+Backtrace--inlining-badge = (встроенный)
+    .title = { $function } был встроен компилятором в вызывающий объект.
+
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
@@ -441,6 +449,16 @@ MarkerTable--duration = Длительность
 MarkerTable--name = Имя
 MarkerTable--details = Подробности
 
+## MarkerTooltip
+## This is the component for Marker Tooltip panel.
+
+# This is used as the tooltip for the filter button in marker tooltips.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerTooltip--filter-button-tooltip =
+    .title = Показать только подходящие маркеры: «{ $filter }»
+    .aria-label = Показать только подходящие маркеры: «{ $filter }»
+
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
@@ -527,6 +545,8 @@ MenuButtons--metaInfo--profiling-started = Запись началась:
 MenuButtons--metaInfo--profiling-session = Длина записи:
 MenuButtons--metaInfo--main-process-started = Основной процесс запущен:
 MenuButtons--metaInfo--main-process-ended = Основной процесс завершен:
+MenuButtons--metaInfo--file-name = Имя файла:
+MenuButtons--metaInfo--file-size = Размер файла:
 MenuButtons--metaInfo--interval = Интервал:
 MenuButtons--metaInfo--buffer-capacity = Емкость буфера:
 MenuButtons--metaInfo--buffer-duration = Длительность буфера:
@@ -816,7 +836,7 @@ TrackContextMenu--hide-all-matching-tracks = Скрыть все совпада�
 # any track.
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
-TrackContextMenu--no-results-found = Не найдено результатов для «<span>{ $searchFilter }</span>»
+TrackContextMenu--no-results-found = Не найдено результатов по запросу «<span>{ $searchFilter }</span>»
 # This button appears when hovering a track name and is displayed as an X icon.
 TrackNameButton--hide-track =
     .title = Скрыть трек
@@ -1134,6 +1154,13 @@ SourceView--not-in-archive-error-when-obtaining-source = Файл { $pathInArchi
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = Архив по адресу { $url } не может быть проанализирован: { $parsingErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a JS file could not be found in
+# the browser.
+# Variables:
+#   $url (String) - The URL of the JS source file.
+#   $sourceUuid (number) - The UUID of the JS source file.
+#   $errorMessage (String) - The raw internal error message, not localized
+SourceView--not-in-browser-error-when-obtaining-js-source = Браузер не смог получить исходный файл для { $url } с sourceUuid { $sourceUuid }: { $errorMessage }.
 
 ## Toggle buttons in the top right corner of the bottom box
 

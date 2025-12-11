@@ -82,6 +82,10 @@ export function getStackLineInfo(
 
     if (sourceIndexOfThisStack === sourceViewSourceIndex) {
       selfLine = frameTable.line[frame];
+      // Fallback to func line info if frame line info is not available
+      if (selfLine === null) {
+        selfLine = funcTable.lineNumber[func];
+      }
       if (selfLine !== null) {
         // Add this stack's line to this stack's totalLines. The rest of this stack's
         // totalLines is the same as for the parent stack.
@@ -120,6 +124,7 @@ export function getStackLineInfo(
 export function getStackLineInfoForCallNode(
   stackTable: StackTable,
   frameTable: FrameTable,
+  funcTable: FuncTable,
   callNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfo
 ): StackLineInfo {
@@ -128,12 +133,14 @@ export function getStackLineInfoForCallNode(
     ? getStackLineInfoForCallNodeInverted(
         stackTable,
         frameTable,
+        funcTable,
         callNodeIndex,
         callNodeInfoInverted
       )
     : getStackLineInfoForCallNodeNonInverted(
         stackTable,
         frameTable,
+        funcTable,
         callNodeIndex,
         callNodeInfo
       );
@@ -205,6 +212,7 @@ export function getStackLineInfoForCallNode(
 export function getStackLineInfoForCallNodeNonInverted(
   stackTable: StackTable,
   frameTable: FrameTable,
+  funcTable: FuncTable,
   callNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfo
 ): StackLineInfo {
@@ -229,6 +237,11 @@ export function getStackLineInfoForCallNodeNonInverted(
       // the same as the given call node's func and file.
       const frame = stackTable.frame[stackIndex];
       selfLine = frameTable.line[frame];
+      // Fallback to func line info if frame line info is not available
+      if (selfLine === null) {
+        const func = frameTable.func[frame];
+        selfLine = funcTable.lineNumber[func];
+      }
       if (selfLine !== null) {
         totalLines = new Set([selfLine]);
       }
@@ -280,6 +293,7 @@ export function getStackLineInfoForCallNodeNonInverted(
 export function getStackLineInfoForCallNodeInverted(
   stackTable: StackTable,
   frameTable: FrameTable,
+  funcTable: FuncTable,
   callNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfoInverted
 ): StackLineInfo {
@@ -318,7 +332,12 @@ export function getStackLineInfoForCallNodeInverted(
       // This stack contributes to the call node's total time.
       // We don't need to check the stack's func or file because it'll be
       // the same as the given call node's func and file.
-      const line = frameTable.line[frameForCallNode];
+      let line = frameTable.line[frameForCallNode];
+      // Fallback to func line info if frame line info is not available
+      if (line === null) {
+        const func = frameTable.func[frameForCallNode];
+        line = funcTable.lineNumber[func];
+      }
       if (line !== null) {
         totalLines = new Set([line]);
         if (callNodeIsRootOfInvertedTree) {

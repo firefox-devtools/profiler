@@ -308,6 +308,14 @@ export function getNetworkMarkerDetails(
     </TooltipDetail>
   );
 
+  if (payload.priorityHeader) {
+    details.push(
+      <TooltipDetail label="Priority Header" key="Network-Priority-Header">
+        {payload.priorityHeader}
+      </TooltipDetail>
+    );
+  }
+
   if (mimeType) {
     details.push(
       <TooltipDetail label={mimeTypeLabel} key={'Network-' + mimeTypeLabel}>

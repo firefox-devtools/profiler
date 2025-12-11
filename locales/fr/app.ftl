@@ -368,6 +368,16 @@ MarkerTable--duration = Durée
 MarkerTable--name = Nom
 MarkerTable--details = Détails
 
+## MarkerTooltip
+## This is the component for Marker Tooltip panel.
+
+# This is used as the tooltip for the filter button in marker tooltips.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerTooltip--filter-button-tooltip =
+    .title = Afficher uniquement les marqueurs correspondant à « { $filter } »
+    .aria-label = Afficher uniquement les marqueurs correspondant à « { $filter } »
+
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
@@ -444,6 +454,8 @@ MenuButtons--metaInfo--profiling-started = Enregistrement commencé :
 MenuButtons--metaInfo--profiling-session = Durée d’enregistrement :
 MenuButtons--metaInfo--main-process-started = Processus principal démarré :
 MenuButtons--metaInfo--main-process-ended = Processus principal terminé :
+MenuButtons--metaInfo--file-name = Nom du fichier :
+MenuButtons--metaInfo--file-size = Taille du fichier :
 MenuButtons--metaInfo--interval = Intervalle :
 MenuButtons--metaInfo--buffer-capacity = Capacité de la mémoire tampon :
 MenuButtons--metaInfo--buffer-duration = Durée de la mémoire tampon :
@@ -1046,6 +1058,13 @@ SourceView--not-in-archive-error-when-obtaining-source = Le fichier { $pathInArc
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = L’archive à l’adresse { $url } n’a pas pu être analysée : { $parsingErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a JS file could not be found in
+# the browser.
+# Variables:
+#   $url (String) - The URL of the JS source file.
+#   $sourceUuid (number) - The UUID of the JS source file.
+#   $errorMessage (String) - The raw internal error message, not localized
+SourceView--not-in-browser-error-when-obtaining-js-source = Le navigateur n’a pas pu obtenir le fichier source pour { $url } avec l’identifiant sourceUuid { $sourceUuid } : { $errorMessage }.
 
 ## Toggle buttons in the top right corner of the bottom box
 

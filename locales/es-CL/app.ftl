@@ -39,6 +39,14 @@ AppViewRouter--error-from-localhost-url-safari = Debido a una <a>limitación esp
 AppViewRouter--route-not-found--home =
     .specialMessage = La URL a la que intentaste acceder no fue reconocida.
 
+## Backtrace
+## This is used to display a backtrace (call stack) for a marker or sample.
+
+# Variables:
+#   $function (String) - Name of the function that was inlined.
+Backtrace--inlining-badge = (incorporadas)
+    .title = { $function } fue incorporada en la función que lo llamó por el compilador.
+
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
@@ -373,6 +381,16 @@ MarkerTable--start = Inicio
 MarkerTable--duration = Duración
 MarkerTable--name = Nombre
 MarkerTable--details = Detalles
+
+## MarkerTooltip
+## This is the component for Marker Tooltip panel.
+
+# This is used as the tooltip for the filter button in marker tooltips.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerTooltip--filter-button-tooltip =
+    .title = Mostrar solo marcadores que coincidan con: “{ $filter }”
+    .aria-label = Mostrar solo marcadores que coincidan con: “{ $filter }”
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -1052,6 +1070,13 @@ SourceView--not-in-archive-error-when-obtaining-source = El documento { $pathInA
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = El archivo de { $url } no pudo ser analizado: { $parsingErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a JS file could not be found in
+# the browser.
+# Variables:
+#   $url (String) - The URL of the JS source file.
+#   $sourceUuid (number) - The UUID of the JS source file.
+#   $errorMessage (String) - The raw internal error message, not localized
+SourceView--not-in-browser-error-when-obtaining-js-source = El navegador no pudo obtener el archivo fuente de { $url } con sourceUuid { $sourceUuid }: { $errorMessage }.
 
 ## Toggle buttons in the top right corner of the bottom box
 

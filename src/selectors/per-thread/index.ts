@@ -294,6 +294,7 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
         return getStackLineInfoForCallNode(
           stackTable,
           frameTable,
+          funcTable,
           selectedCallNodeIndex,
           callNodeInfo
         );

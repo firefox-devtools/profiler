@@ -35,6 +35,7 @@ import type {
   ThreadsKey,
   ExperimentalFlags,
   UploadedProfileInformation,
+  Pid,
 } from 'firefox-profiler/types';
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type {
@@ -148,7 +149,7 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
     }
 
     // Figure out which PIDs are hidden.
-    const hiddenPids = new Set();
+    const hiddenPids = new Set<Pid>();
     for (const trackIndex of hiddenGlobalTracks) {
       const globalTrack = globalTracks[trackIndex];
       if (globalTrack.type === 'process') {

@@ -264,7 +264,7 @@ describe('ThreadActivityGraph', function () {
     expect(getCallNodePath()).toEqual([]);
   });
 
-  it('when clicking a stack, this selects the call tree panel', function () {
+  it('when clicking a stack while on a tab that does not show sample data, this selects the call tree panel', function () {
     const { dispatch, getState, clickActivityGraph } = setup();
 
     expect(getSelectedTab(getState())).toBe('calltree');
@@ -275,6 +275,19 @@ describe('ThreadActivityGraph', function () {
     clickActivityGraph(1, 0.2);
     expect(getSelectedTab(getState())).toBe('calltree');
     expect(getLastVisibleThreadTabSlug(getState())).toBe('calltree');
+  });
+
+  it('when clicking a stack while on a tab that shows sample data, it should not change the selected panel', function () {
+    const { dispatch, getState, clickActivityGraph } = setup();
+
+    expect(getSelectedTab(getState())).toBe('calltree');
+    dispatch(changeSelectedTab('flame-graph'));
+
+    // The full call node at this sample is:
+    //  A -> B -> C -> F -> G
+    clickActivityGraph(1, 0.2);
+    expect(getSelectedTab(getState())).toBe('flame-graph');
+    expect(getLastVisibleThreadTabSlug(getState())).toBe('flame-graph');
   });
 
   it(`when clicking outside of the graph, this doesn't select the call tree panel`, function () {

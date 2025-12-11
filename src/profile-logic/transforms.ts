@@ -600,7 +600,7 @@ function _dropFunctionInCallNodePath(
   return callNodePath.includes(funcIndex) ? [] : callNodePath;
 }
 
-// removes all functions that are not in the category from the callNodePath
+// Removes all functions that are not in the category from the callNodePath
 function _removeOtherCategoryFunctionsInNodePathWithFunction(
   category: IndexIntoCategoryList,
   callNodePath: CallNodePath,
@@ -1383,7 +1383,10 @@ export function focusInvertedSubtree(
       return null;
     }
 
-    const oldStackToNewStack = new Map();
+    const oldStackToNewStack = new Map<
+      IndexIntoStackTable | null,
+      IndexIntoStackTable | null
+    >();
     // A root stack's prefix will be null. Maintain that relationship from old to new
     // stacks by mapping from null to null.
     oldStackToNewStack.set(null, null);
@@ -1589,6 +1592,9 @@ export type BacktraceItem = {
   // library instead.
   // May also be empty.
   origin: string;
+  // The inline depth of this frame. Frames with inline depth > 0 are inlined.
+  inlineDepth: number;
+  stackIndex: IndexIntoStackTable;
 };
 
 /**
@@ -1616,6 +1622,8 @@ export function getBacktraceItemsForStack(
       funcIndex: frameTable.func[frameIndex],
       frameLine: frameTable.line[frameIndex],
       frameColumn: frameTable.column[frameIndex],
+      inlineDepth: frameTable.inlineDepth[frameIndex],
+      stackIndex,
     });
   }
 
@@ -1623,22 +1631,33 @@ export function getBacktraceItemsForStack(
   const path = unfilteredPath.filter(({ funcIndex }) =>
     funcMatchesImplementation(thread, funcIndex)
   );
-  return path.map(({ category, funcIndex, frameLine, frameColumn }) => {
-    return {
-      funcName: stringTable.getString(funcTable.name[funcIndex]),
-      category: category,
-      isFrameLabel: funcTable.resource[funcIndex] === -1,
-      origin: getOriginAnnotationForFunc(
-        funcIndex,
-        funcTable,
-        resourceTable,
-        stringTable,
-        sources,
-        frameLine,
-        frameColumn
-      ),
-    };
-  });
+  return path.map(
+    ({
+      category,
+      funcIndex,
+      frameLine,
+      frameColumn,
+      inlineDepth,
+      stackIndex,
+    }) => {
+      return {
+        funcName: stringTable.getString(funcTable.name[funcIndex]),
+        category,
+        isFrameLabel: funcTable.resource[funcIndex] === -1,
+        origin: getOriginAnnotationForFunc(
+          funcIndex,
+          funcTable,
+          resourceTable,
+          stringTable,
+          sources,
+          frameLine,
+          frameColumn
+        ),
+        inlineDepth,
+        stackIndex,
+      };
+    }
+  );
 }
 
 /**

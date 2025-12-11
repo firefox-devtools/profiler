@@ -2,7 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import type { MixedObject } from 'firefox-profiler/types';
+import type {
+  IndexIntoFrameTable,
+  IndexIntoStackTable,
+  MixedObject,
+} from 'firefox-profiler/types';
 
 /**
  * The "perf script" format is the plain text format that is output by an
@@ -118,7 +122,7 @@ export function convertPerfScriptProfile(
     };
     const stringTable: string[] = [];
 
-    const stackMap = new Map();
+    const stackMap = new Map<string, IndexIntoStackTable>();
     function getOrCreateStack(frame: number, prefix: number | null) {
       const key = prefix === null ? `${frame}` : `${frame},${prefix}`;
       let stack = stackMap.get(key);
@@ -130,7 +134,7 @@ export function convertPerfScriptProfile(
       return stack;
     }
 
-    const frameMap = new Map();
+    const frameMap = new Map<string, IndexIntoFrameTable>();
     function getOrCreateFrame(frameString: string): number {
       let frame = frameMap.get(frameString);
       if (frame === undefined) {

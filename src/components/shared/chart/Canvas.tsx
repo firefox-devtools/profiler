@@ -370,13 +370,13 @@ export class ChartCanvas<Item> extends React.Component<
         this.state.selectedItem !== null &&
         prevState.selectedItem === this.state.selectedItem
       ) {
-        // The props have changed but not the selectedItem. This mean that the
-        // selected item can get out of sync. Invalidate it to make sure that
-        // it's always fresh. This setState will cause a rerender, but we have
-        // to do it to prevent any crashes or incorrect tooltip positions.
-        // This is okay to do it because the main `prevProps !== this.props`
-        // check above will return false and will not schedule additional drawing.
-        this.setState({ selectedItem: null });
+        // The props have changed but not the selectedItem. Check if it's still valid
+        // by attempting to get its info. If it returns null, the item is no longer
+        // valid (e.g., filtered out).
+        const info = this.props.getHoveredItemInfo(this.state.selectedItem);
+        if (info === null) {
+          this.setState({ selectedItem: null });
+        }
       }
       this._scheduleDraw();
     } else if (

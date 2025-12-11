@@ -95,7 +95,7 @@ export type PreviewSelection = {
 /**
  * The counts for how many tracks are hidden in the timeline.
  */
-export type HiddenTrackCount = {
+export type TrackCount = {
   readonly hidden: number;
   readonly total: number;
 };
@@ -343,6 +343,7 @@ type ProfileAction =
       readonly currentTab: TabSlug;
       readonly shouldOpenBottomBox: boolean;
       readonly shouldOpenAssemblyView: boolean;
+      readonly lineNumber?: number;
     }
   | {
       readonly type: 'OPEN_ASSEMBLY_VIEW';

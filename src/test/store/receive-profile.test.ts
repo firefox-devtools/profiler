@@ -937,7 +937,7 @@ describe('actions/receive-profile', function () {
         expect.objectContaining({
           message:
             'Could not obtain symbols for libxul/SOMETHING_FAKE.\n' +
-            ' - Error: There was a problem with the symbolication API request to the symbol server: Expected an object with property `results`\n' +
+            ' - Error: There was a problem with the symbolication API request to the symbol server: Invalid key: Expected "results" but received undefined\n' +
             ' - Error: No connection to the browser, cannot run querySymbolicationApi\n' +
             ' - Error: No connection to the browser, cannot obtain symbol tables',
         })

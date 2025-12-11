@@ -9,7 +9,10 @@ import * as MarkerData from '../../profile-logic/marker-data';
 import * as MarkerTimingLogic from '../../profile-logic/marker-timing';
 import * as ProfileSelectors from '../profile';
 import { getRightClickedMarkerInfo } from '../right-clicked-marker';
-import { getLabelGetter } from '../../profile-logic/marker-schema';
+import {
+  getLabelGetter,
+  getSearchTermGetter,
+} from '../../profile-logic/marker-schema';
 import { getInclusiveSampleIndexRangeForSelection } from '../../profile-logic/profile-data';
 
 import type { BasicThreadSelectorsPerThread } from './thread';
@@ -446,6 +449,20 @@ export function getMarkerSelectorsPerThread(
   );
 
   /**
+   * This getter extracts the first field value from a marker's tooltipLabel schema
+   * to use as a search term for filtering. Falls back to the marker name if no
+   * tooltipLabel is defined.
+   */
+  const getMarkerSearchTermGetter: Selector<
+    (markerIndex: MarkerIndex) => string
+  > = createSelector(
+    getMarkerGetter,
+    ProfileSelectors.getMarkerSchemaByName,
+    ProfileSelectors.getStringTable,
+    getSearchTermGetter
+  );
+
+  /**
    * This organizes the result of the previous selector in rows to be nicely
    * displayed in the marker chart.
    */
@@ -750,6 +767,7 @@ export function getMarkerSelectorsPerThread(
     getMarkerTooltipLabelGetter,
     getMarkerTableLabelGetter,
     getMarkerLabelToCopyGetter,
+    getMarkerSearchTermGetter,
     getMarkerChartTimingAndBuckets,
     getCommittedRangeFilteredMarkerIndexes,
     getTimelineOverviewMarkerIndexes,
