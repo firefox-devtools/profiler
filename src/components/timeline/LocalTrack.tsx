@@ -55,6 +55,7 @@ type StateProps = {
   readonly isSelected: boolean;
   readonly isHidden: boolean;
   readonly titleText: string | undefined;
+  readonly shouldUseEnlargedHeight: boolean;
 };
 
 type DispatchProps = {
@@ -94,7 +95,7 @@ class LocalTrackComponent extends PureComponent<Props> {
   };
 
   renderTrack() {
-    const { localTrack, trackName } = this.props;
+    const { localTrack, trackName, shouldUseEnlargedHeight } = this.props;
     switch (localTrack.type) {
       case 'thread':
         return (
@@ -124,6 +125,7 @@ class LocalTrackComponent extends PureComponent<Props> {
             threadIndex={localTrack.threadIndex}
             markerSchema={localTrack.markerSchema}
             markerName={localTrack.markerName}
+            shouldUseEnlargedHeight={shouldUseEnlargedHeight}
           />
         );
       default:
@@ -199,6 +201,7 @@ export const TimelineLocalTrack = explicitConnect<
     // These get assigned based on the track type.
     let titleText;
     let isSelected = false;
+    let shouldUseEnlargedHeight = false;
 
     const selectedThreadIndexes = getSelectedThreadIndexes(state);
 
@@ -213,23 +216,28 @@ export const TimelineLocalTrack = explicitConnect<
           selectedThreadIndexes.has(threadIndex) &&
           selectedTab !== 'network-chart';
         titleText = selectors.getThreadProcessDetails(state);
+        shouldUseEnlargedHeight = selectors.getShouldHideActivityGraph(state);
         break;
       }
       case 'network': {
         const threadIndex = localTrack.threadIndex;
         const selectedTab = getSelectedTab(state);
+        const selectors = getThreadSelectors(threadIndex);
         isSelected =
           selectedThreadIndexes.has(threadIndex) &&
           selectedTab === 'network-chart';
+        shouldUseEnlargedHeight = selectors.getShouldHideActivityGraph(state);
         break;
       }
       case 'marker':
       case 'ipc': {
         const threadIndex = localTrack.threadIndex;
         const selectedTab = getSelectedTab(state);
+        const selectors = getThreadSelectors(threadIndex);
         isSelected =
           selectedThreadIndexes.has(threadIndex) &&
           selectedTab === 'marker-chart';
+        shouldUseEnlargedHeight = selectors.getShouldHideActivityGraph(state);
         break;
       }
       case 'event-delay': {
@@ -239,6 +247,7 @@ export const TimelineLocalTrack = explicitConnect<
         isSelected = selectedThreadIndexes.has(threadIndex);
         titleText =
           'Event Delay of ' + selectors.getThreadProcessDetails(state);
+        shouldUseEnlargedHeight = selectors.getShouldHideActivityGraph(state);
         break;
       }
       case 'memory':
@@ -248,6 +257,9 @@ export const TimelineLocalTrack = explicitConnect<
         titleText = getCounterSelectors(localTrack.counterIndex).getDescription(
           state
         );
+        // For counter-based tracks, we don't have a thread directly.
+        // These are always false for now as they don't have a direct thread association.
+        shouldUseEnlargedHeight = false;
         break;
       }
       default:
@@ -259,6 +271,7 @@ export const TimelineLocalTrack = explicitConnect<
       titleText,
       isSelected,
       isHidden: getHiddenLocalTracks(state, pid).has(trackIndex),
+      shouldUseEnlargedHeight,
     };
   },
   mapDispatchToProps: {
