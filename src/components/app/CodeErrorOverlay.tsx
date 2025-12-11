@@ -17,7 +17,7 @@ export function CodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
         switch (error.type) {
           case 'NO_KNOWN_CORS_URL': {
             return (
-              <Localized key={key} id="SourceView--no-known-cors-url">
+              <Localized key={key} id="SourceView--no-known-cors-url1">
                 <li>No known cross-origin-accessible URL.</li>
               </Localized>
             );
