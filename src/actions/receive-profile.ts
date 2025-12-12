@@ -1400,9 +1400,10 @@ export function retrieveProfileForRawUrl(
     }
 
     let dataSource = ensureIsValidDataSource(possibleDataSource);
-    if (dataSource === 'from-file') {
-      // Redirect to 'none' if `dataSource` is 'from-file' since initial urls can't
-      // be 'from-file' and needs to be redirected to home page.
+    // Redirect to 'none' for from-file and unpublished data sources since initial
+    // urls can't be 'from-file' or 'unpublished' and need to be redirected to
+    // home page. 'unpublished' is a transient state after profile deletion.
+    if (dataSource === 'from-file' || dataSource === 'unpublished') {
       dataSource = 'none';
     }
     dispatch(setDataSource(dataSource));
@@ -1475,7 +1476,6 @@ export function retrieveProfileForRawUrl(
       case 'uploaded-recordings':
       case 'none':
       case 'local':
-      case 'unpublished':
         // There is no profile to download for these datasources.
         break;
       default:
