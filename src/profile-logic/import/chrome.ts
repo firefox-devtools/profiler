@@ -967,11 +967,6 @@ function extractMarkers(
     },
   ];
 
-  // Map to store begin event detail field for pairing with end events.
-  // For async events (b/e), key is "pid:tid:id:name"
-  // For duration events (B/E), key is "pid:tid:name"
-  const beginEventDetail: Map<string, string> = new Map();
-
   // Track whether we've added the EventWithDetail schema
   let hasEventWithDetailSchema = false;
 
@@ -1038,20 +1033,6 @@ function extractMarkers(
           }
         }
 
-        // For end events (E/e), try to use the detail from the corresponding begin event
-        if ((event.ph === 'E' || event.ph === 'e') && !argData) {
-          // Generate key for looking up the begin event detail
-          // For async events (b/e), use id; for duration events (B/E), use name only
-          const key =
-            event.ph === 'e' && 'id' in event
-              ? `${event.pid}:${event.tid}:${event.id}:${name}`
-              : `${event.pid}:${event.tid}:${name}`;
-          const detail = beginEventDetail.get(key);
-          if (detail) {
-            argData = { detail };
-          }
-        }
-
         markers.name.push(stringTable.indexForString(name));
 
         if (argData && 'type' in argData) {
@@ -1114,15 +1095,6 @@ function extractMarkers(
           markers.startTime.push(time);
           markers.endTime.push(null);
           markers.phase.push(INTERVAL_START);
-
-          // Store the detail field from begin event so it can be used for the corresponding end event
-          if (argData?.detail) {
-            const key =
-              event.ph === 'b' && 'id' in event
-                ? `${event.pid}:${event.tid}:${event.id}:${name}`
-                : `${event.pid}:${event.tid}:${name}`;
-            beginEventDetail.set(key, argData.detail);
-          }
         } else if (event.ph === 'E' || event.ph === 'e') {
           // Duration or Async Event End
           // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.nso4gcezn7n1
@@ -1130,13 +1102,6 @@ function extractMarkers(
           markers.startTime.push(null);
           markers.endTime.push(time);
           markers.phase.push(INTERVAL_END);
-
-          // Clean up the stored begin event detail
-          const key =
-            event.ph === 'e' && 'id' in event
-              ? `${event.pid}:${event.tid}:${event.id}:${name}`
-              : `${event.pid}:${event.tid}:${name}`;
-          beginEventDetail.delete(key);
         } else {
           // Instant Event
           // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.lenwiilchoxp
