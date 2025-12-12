@@ -150,8 +150,12 @@ export function setupInitialUrlState(
       return;
     }
 
-    // Validate the initial URL state. We can't refresh on a from-file URL.
-    if (urlState.dataSource === 'from-file') {
+    // Validate the initial URL state. We can't refresh on from-file or
+    // unpublished URLs.
+    if (
+      urlState.dataSource === 'from-file' ||
+      urlState.dataSource === 'unpublished'
+    ) {
       urlState = null;
     }
 
