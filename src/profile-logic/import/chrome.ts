@@ -1084,10 +1084,12 @@ function extractMarkers(
           hasEventWithDetailSchema = true;
         }
 
-        const newData = {
-          ...argData,
-          type: argData?.detail ? 'EventWithDetail' : name,
-        };
+        const newData = argData
+          ? {
+              ...argData,
+              type: argData?.detail ? 'EventWithDetail' : name,
+            }
+          : null;
 
         // Store the category in the markers.category array.
         const categoryIndex = event.cat
