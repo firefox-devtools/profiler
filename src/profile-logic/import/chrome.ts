@@ -922,6 +922,32 @@ function extractMarkers(
     throw new Error('No "Other" category in empty profile category list');
   }
 
+  // Map to track category names to their indices.
+  const categoryNameToIndex = new Map<string, number>();
+  const categories = ensureExists(profile.meta.categories);
+  for (let i = 0; i < categories.length; i++) {
+    categoryNameToIndex.set(categories[i].name, i);
+  }
+
+  // Helper function to get or create a category index for a given category name.
+  function getOrCreateCategoryIndex(categoryName: string): number {
+    const existing = categoryNameToIndex.get(categoryName);
+    if (existing !== undefined) {
+      return existing;
+    }
+
+    // Create a new category with a default color. The colors are not important
+    // since we don't visualize the marker colors yet.
+    const newIndex = categories.length;
+    categories.push({
+      name: categoryName,
+      color: 'grey',
+      subcategories: ['Other'],
+    });
+    categoryNameToIndex.set(categoryName, newIndex);
+    return newIndex;
+  }
+
   profile.meta.markerSchema = [
     {
       name: 'EventDispatch',
@@ -1027,7 +1053,6 @@ function extractMarkers(
         }
 
         markers.name.push(stringTable.indexForString(name));
-        markers.category.push(otherCategoryIndex);
 
         if (argData && 'type' in argData) {
           argData.type2 = argData.type;
@@ -1062,8 +1087,13 @@ function extractMarkers(
         const newData = {
           ...argData,
           type: argData?.detail ? 'EventWithDetail' : name,
-          category: event.cat,
         };
+
+        // Store the category in the markers.category array.
+        const categoryIndex = event.cat
+          ? getOrCreateCategoryIndex(event.cat)
+          : otherCategoryIndex;
+        markers.category.push(categoryIndex);
 
         // @ts-expect-error Opt out of type checking for this one.
         markers.data.push(newData);
