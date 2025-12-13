@@ -30,12 +30,6 @@ exports[`TrackCustomMarker has a tooltip that matches the snapshot 1`] = `
         >
           Marker
         </span>
-        <button
-          aria-label="Only show markers matching: “⁨Marker⁩”"
-          class="tooltipTitleFilterButton"
-          title="Only show markers matching: “⁨Marker⁩”"
-          type="button"
-        />
       </div>
     </div>
   </div>
