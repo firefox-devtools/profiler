@@ -15,6 +15,7 @@ import {
   getLocalTracksByPid,
   getThreads,
   getLastNonShiftClick,
+  getProfile,
 } from 'firefox-profiler/selectors/profile';
 import {
   getThreadSelectors,
@@ -356,6 +357,23 @@ function getInformationFromTrackReference(
             ...commonLocalProperties,
             threadIndex: null,
             relatedThreadIndex: counter.mainThreadIndex,
+            relatedTab: null,
+          };
+        }
+        case 'sampling-interval': {
+          // Find the first thread for this PID to use as related thread.
+          // If no thread is found, use the first thread in the profile as fallback.
+          const profile = getProfile(state);
+          const pidThread = profile.threads.find(
+            (thread: { pid: Pid }) => thread.pid === localTrack.pid
+          );
+          const relatedThreadIndex = pidThread
+            ? profile.threads.indexOf(pidThread)
+            : 0;
+          return {
+            ...commonLocalProperties,
+            threadIndex: null,
+            relatedThreadIndex,
             relatedTab: null,
           };
         }

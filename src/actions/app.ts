@@ -12,6 +12,7 @@ import {
   getIsEventDelayTracksEnabled,
   getIsExperimentalCPUGraphsEnabled,
   getIsExperimentalProcessCPUTracksEnabled,
+  getIsExperimentalSamplingIntervalTracksEnabled,
 } from 'firefox-profiler/selectors/app';
 import {
   getLocalTracksByPid,
@@ -30,6 +31,7 @@ import {
   addEventDelayTracksForThreads,
   initializeLocalTrackOrderByPid,
   addProcessCPUTracksForProcess,
+  addSamplingIntervalTracksForProcess,
 } from 'firefox-profiler/profile-logic/tracks';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
@@ -361,6 +363,58 @@ export function enableExperimentalProcessCPUTracks(): ThunkAction<boolean> {
 
     dispatch({
       type: 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS',
+      localTracksByPid,
+      localTrackOrderByPid,
+    });
+
+    return true;
+  };
+}
+
+/*
+ * This action enables the sampling interval tracks. They are hidden by default
+ * and are useful for visualizing the actual sampling intervals per process.
+ * There is no UI that triggers this action in the profiler interface. Instead,
+ * users have to enable this from the developer console by writing this line:
+ * `experimental.enableSamplingIntervalTracks()`
+ */
+export function enableExperimentalSamplingIntervalTracks(): ThunkAction<boolean> {
+  return (dispatch, getState) => {
+    if (getIsExperimentalSamplingIntervalTracksEnabled(getState())) {
+      console.error(
+        'Tried to enable the sampling interval tracks, but they are already enabled.'
+      );
+      return false;
+    }
+
+    const profile = getProfile(getState());
+
+    // Check if there are any threads with samples
+    const hasThreadsWithSamples = profile.threads.some(
+      (thread) => thread.samples.length > 0
+    );
+
+    if (!hasThreadsWithSamples) {
+      console.error(
+        'Tried to enable the sampling interval tracks, but this profile does not have any threads with samples.'
+      );
+      return false;
+    }
+
+    const oldLocalTracks = getLocalTracksByPid(getState());
+    const localTracksByPid = addSamplingIntervalTracksForProcess(
+      profile,
+      oldLocalTracks
+    );
+    const localTrackOrderByPid = initializeLocalTrackOrderByPid(
+      getLocalTrackOrderByPid(getState()),
+      localTracksByPid,
+      null,
+      profile
+    );
+
+    dispatch({
+      type: 'ENABLE_EXPERIMENTAL_SAMPLING_INTERVAL_TRACKS',
       localTracksByPid,
       localTrackOrderByPid,
     });

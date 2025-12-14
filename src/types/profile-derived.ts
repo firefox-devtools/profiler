@@ -628,6 +628,7 @@ export type LocalTrack =
   | { readonly type: 'event-delay'; readonly threadIndex: ThreadIndex }
   | { readonly type: 'process-cpu'; readonly counterIndex: CounterIndex }
   | { readonly type: 'power'; readonly counterIndex: CounterIndex }
+  | { readonly type: 'sampling-interval'; readonly pid: Pid }
   | {
       readonly type: 'marker';
       readonly threadIndex: ThreadIndex;
