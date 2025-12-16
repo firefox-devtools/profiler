@@ -2,10 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import SymbolStoreDB from './symbol-store-db';
 import { SymbolsNotFoundError } from './errors';
 
-import type { RequestedLib, ISymbolStoreDB } from 'firefox-profiler/types';
+import type { RequestedLib } from 'firefox-profiler/types';
 import type { SymbolTableAsTuple } from './symbol-store-db';
 import { ensureExists } from '../utils/types';
 
@@ -72,7 +71,10 @@ export interface SymbolProvider {
 
   // Expensive, should be called if the other two options were unsuccessful.
   // Does not carry file + line + inlines information.
-  requestSymbolTableFromBrowser(lib: RequestedLib): Promise<SymbolTableAsTuple>;
+  requestSymbolsViaSymbolTableFromBrowser(
+    request: LibSymbolicationRequest,
+    ignoreCache: boolean
+  ): Promise<Map<number, AddressResult>>;
 }
 
 export interface AbstractSymbolStore {
@@ -193,31 +195,6 @@ function _partitionIntoChunksOfMaxValue<T>(
   return chunks.map(({ elements }) => elements);
 }
 
-type DemangleFunction = (name: string) => string;
-
-/**
- * This function returns a function that can demangle function name using a
- * WebAssembly module, but falls back on the identity function if the
- * WebAssembly module isn't available for some reason.
- */
-async function _getDemangleCallback(): Promise<DemangleFunction> {
-  try {
-    // When this module imports some WebAssembly module, Webpack's mechanism
-    // invokes the WebAssembly object which might be absent in some browsers,
-    // therefore `import` can throw. Also some browsers might refuse to load a
-    // wasm module because of our CSP.
-    // See webpack bug https://github.com/webpack/webpack/issues/8517
-    const { demangle_any } = await import('gecko-profiler-demangle');
-    return demangle_any;
-  } catch (error) {
-    // Module loading can fail (for example in browsers without WebAssembly
-    // support, or due to bad server configuration), so we will fall back
-    // to a pass-through function if that happens.
-    console.error('Demangling module could not be imported.', error);
-    return (mangledString) => mangledString;
-  }
-}
-
 /**
  * The SymbolStore implements efficient lookup of symbols for a set of addresses.
  * It consults multiple sources of symbol information and caches some results.
@@ -226,44 +203,9 @@ async function _getDemangleCallback(): Promise<DemangleFunction> {
  */
 export class SymbolStore {
   _symbolProvider: SymbolProvider;
-  _db: ISymbolStoreDB;
 
-  constructor(
-    dbNamePrefixOrDB: string | ISymbolStoreDB,
-    symbolProvider: SymbolProvider
-  ) {
+  constructor(symbolProvider: SymbolProvider) {
     this._symbolProvider = symbolProvider;
-    if (typeof dbNamePrefixOrDB === 'string') {
-      this._db = new SymbolStoreDB(`${dbNamePrefixOrDB}-symbol-tables`);
-    } else {
-      this._db = dbNamePrefixOrDB;
-    }
-  }
-
-  async closeDb() {
-    await this._db.close();
-  }
-
-  // Store a symbol table in the database. This is only used for symbol tables
-  // and not for partial symbol results. Symbol tables are obtained from the
-  // browser via the geckoProfiler object which is defined in a frame script:
-  // https://searchfox.org/mozilla-central/rev/a9db89754fb507254cb8422e5a00af7c10d98264/devtools/client/performance-new/frame-script.js#67-81
-  //
-  // We do not store results from the Mozilla symbolication API, because those
-  // only contain the symbols we requested and not all the symbols of a given
-  // library.
-  _storeSymbolTableInDB(
-    lib: RequestedLib,
-    symbolTable: SymbolTableAsTuple
-  ): Promise<void> {
-    return this._db
-      .storeSymbolTable(lib.debugName, lib.breakpadId, symbolTable)
-      .catch((error) => {
-        console.log(
-          `Failed to store the symbol table for ${lib.debugName} in the database:`,
-          error
-        );
-      });
   }
 
   /**
@@ -283,8 +225,7 @@ export class SymbolStore {
     // it. We try all options in order, advancing to the next option on failure.
     // Option 1: Obtain symbols from the symbol server, using the symbolication API.
     // Option 2: Obtain symbols from the browser, using the symbolication API.
-    // Option 3: Symbol tables cached in the database, this._db.
-    // Option 4: Obtain symbols from the browser, via individual symbol tables.
+    // Option 3: Obtain symbols from the browser, via individual symbol tables.
     //
     // Symbol tables provide less information than the symbolication API (no inlines
     // and no file / line information) so we try the API before we check for cached
@@ -377,55 +318,30 @@ export class SymbolStore {
             return;
           }
 
+          // Some libraries are still remaining, try option 3 for them.
+          // Option 3: Request a symbol table from the browser.
           // Now we've reached the stage where we check for symbol tables.
-          // Check this._db first, and then call this._getSymbolsViaBrowserSymbolTables
-          // for the remainder.
-
-          // We also need a demangling function for this, which is in an async module.
-          const demangleCallback = await _getDemangleCallback();
-
-          const requestsRemainingAfterCacheCheck: LibSymbolicationRequest[] =
-            [];
-          if (ignoreCache) {
-            requestsRemainingAfterCacheCheck.push(
-              ...requestsRemainingAfterBrowserAPI
-            );
-          } else {
-            await Promise.all(
+          const responsesPromise: Promise<LibSymbolicationResponse[]> =
+            Promise.all(
               requestsRemainingAfterBrowserAPI.map(async (request) => {
-                const { lib, addresses } = request;
-                const { debugName, breakpadId } = lib;
-                const symbolTable = await this._db.getSymbolTable(
-                  debugName,
-                  breakpadId
-                );
-                if (symbolTable !== null) {
-                  // Option 3 was successful!
-                  const results = readSymbolsFromSymbolTable(
-                    addresses,
-                    symbolTable,
-                    demangleCallback
-                  );
-                  successCb(lib, results);
-                } else {
-                  requestsRemainingAfterCacheCheck.push(request);
+                try {
+                  const { lib } = request;
+                  const results =
+                    await this._symbolProvider.requestSymbolsViaSymbolTableFromBrowser(
+                      request,
+                      ignoreCache
+                    );
+                  return { type: 'SUCCESS', lib, results };
+                } catch (error) {
+                  return { type: 'ERROR', request, error };
                 }
               })
-            );
-          }
-
-          // Some libraries are still remaining, try option 4 for them.
-          // Option 4: Request a symbol table from the browser.
-          const responsePromiseViaSymbolTable =
-            this._getSymbolsViaBrowserSymbolTables(
-              requestsRemainingAfterCacheCheck,
-              demangleCallback
             );
 
           const failedRequests =
             await this._processSuccessfulResponsesAndReturnRemaining(
-              requestsRemainingAfterCacheCheck,
-              responsePromiseViaSymbolTable,
+              requestsRemainingAfterBrowserAPI,
+              responsesPromise,
               errorMap,
               successCb
             );
@@ -491,41 +407,5 @@ export class SymbolStore {
       }
       return requests;
     }
-  }
-
-  // Try to get individual symbol tables from the browser, for any libraries
-  // which couldn't be symbolicated with the symbolication API.
-  // This is needed for two cases:
-  //  1. Firefox 95 and earlier, which didn't have a querySymbolicationApi
-  //     WebChannel access point, and only supports symbol tables.
-  //  2. Android system libraries, even in modern versions of Firefox. We don't
-  //     support querySymbolicationApi for them yet, see
-  //     https://bugzilla.mozilla.org/show_bug.cgi?id=1735897
-  async _getSymbolsViaBrowserSymbolTables(
-    requests: LibSymbolicationRequest[],
-    demangleCallback: DemangleFunction
-  ): Promise<LibSymbolicationResponse[]> {
-    return Promise.all(
-      requests.map(async (request) => {
-        const { lib, addresses } = request;
-        try {
-          // This call will throw if the browser cannot obtain the symbol table.
-          const symbolTable =
-            await this._symbolProvider.requestSymbolTableFromBrowser(lib);
-
-          // Store the symbol table in the database.
-          await this._storeSymbolTableInDB(lib, symbolTable);
-
-          const results = readSymbolsFromSymbolTable(
-            addresses,
-            symbolTable,
-            demangleCallback
-          );
-          return { type: 'SUCCESS', lib, results };
-        } catch (error) {
-          return { type: 'ERROR', request, error };
-        }
-      })
-    );
   }
 }

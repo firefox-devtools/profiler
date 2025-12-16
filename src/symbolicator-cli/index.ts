@@ -23,45 +23,8 @@ import {
   applySymbolicationSteps,
 } from '../profile-logic/symbolication';
 import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
-import type { SymbolTableAsTuple } from '../profile-logic/symbol-store-db';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
 import type { ThreadIndex } from '../types';
-
-/**
- * Simple 'in-memory' symbol DB that conforms to the same interface as SymbolStoreDB but
- * just stores everything in a simple dictionary instead of IndexedDB. The composite key
- * [debugName, breakpadId] is flattened to a string "debugName:breakpadId" to use as the
- * map key.
- */
-export class InMemorySymbolDB {
-  _store: Map<string, SymbolTableAsTuple>;
-
-  constructor() {
-    this._store = new Map();
-  }
-
-  _makeKey(debugName: string, breakpadId: string): string {
-    return `${debugName}:${breakpadId}`;
-  }
-
-  async storeSymbolTable(
-    debugName: string,
-    breakpadId: string,
-    symbolTable: SymbolTableAsTuple
-  ): Promise<void> {
-    this._store.set(this._makeKey(debugName, breakpadId), symbolTable);
-  }
-
-  async getSymbolTable(
-    debugName: string,
-    breakpadId: string
-  ): Promise<SymbolTableAsTuple | null> {
-    const key = this._makeKey(debugName, breakpadId);
-    return this._store.get(key) ?? null;
-  }
-
-  async close(): Promise<void> {}
-}
 
 export interface CliOptions {
   input: string;
@@ -83,14 +46,12 @@ export async function run(options: CliOptions) {
     throw new Error('Unable to parse the profile.');
   }
 
-  const symbolStoreDB = new InMemorySymbolDB();
-
   /**
    * SymbolStore implementation which just forwards everything to the symbol server in
    * MozillaSymbolicationAPI format. No support for getting symbols from 'the browser' as
    * there is no browser in this context.
    */
-  const symbolStore = new SymbolStore(symbolStoreDB, {
+  const symbolStore = new SymbolStore({
     requestSymbolsFromServer: async (requests) => {
       for (const { lib } of requests) {
         console.log(`  Loading symbols for ${lib.debugName}`);
@@ -118,7 +79,7 @@ export async function run(options: CliOptions) {
       return [];
     },
 
-    requestSymbolTableFromBrowser: async () => {
+    requestSymbolsViaSymbolTableFromBrowser: async () => {
       throw new Error('Not supported in this context');
     },
   });
