@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import * as React from 'react';
 import { oneLine } from 'common-tags';
 import {
   formatNumber,
@@ -474,8 +473,6 @@ function parseFirstField(
 
 /**
  * This function formats a string from a marker type and a value.
- * If you wish to get markup instead, have a look at
- * formatMarkupFromMarkerSchema below.
  */
 export function formatFromMarkerSchema(
   markerType: string,
@@ -589,134 +586,6 @@ export function formatFromMarkerSchema(
         )}`
       );
       return value;
-  }
-}
-
-// This regexp is used to test for URLs and remove their scheme for display.
-const URL_SCHEME_REGEXP = /^http(s?):\/\//;
-
-/**
- * This function may return structured markup for some types suchs as table,
- * list, or urls. For other types this falls back to formatFromMarkerSchema
- * above.
- */
-export function formatMarkupFromMarkerSchema(
-  markerType: string,
-  format: MarkerFormatType,
-  value: any,
-  stringTable: StringTable,
-  threadIdToNameMap?: Map<Tid, string>,
-  processIdToNameMap?: Map<Pid, string>
-): React.ReactElement | string {
-  if (value === undefined || value === null) {
-    console.warn(`Formatting ${value} for ${JSON.stringify(markerType)}`);
-    return '(empty)';
-  }
-  if (format !== 'url' && typeof format !== 'object' && format !== 'list') {
-    return formatFromMarkerSchema(
-      markerType,
-      format,
-      value,
-      stringTable,
-      threadIdToNameMap,
-      processIdToNameMap
-    );
-  }
-  if (typeof format === 'object') {
-    switch (format.type) {
-      case 'table': {
-        const { columns } = format;
-        if (!(value instanceof Array)) {
-          throw new Error('Expected an array for table type');
-        }
-        const hasHeader = columns.some((column) => column.label);
-        return (
-          <table className="marker-table-value">
-            {hasHeader ? (
-              <thead>
-                <tr>
-                  {columns.map((col, i) => (
-                    <th key={i}>{col.label || ''}</th>
-                  ))}
-                </tr>
-              </thead>
-            ) : null}
-            <tbody>
-              {value.map((row, i) => {
-                if (!(row instanceof Array)) {
-                  throw new Error('Expected an array for table row');
-                }
-
-                if (row.length !== columns.length) {
-                  throw new Error(
-                    `Row ${i} length doesn't match column count (row: ${row.length}, cols: ${columns.length})`
-                  );
-                }
-                return (
-                  <tr key={i}>
-                    {row.map((cell, i) => {
-                      return (
-                        <td key={i}>
-                          {formatMarkupFromMarkerSchema(
-                            markerType,
-                            columns[i].type || 'string',
-                            cell,
-                            stringTable,
-                            threadIdToNameMap,
-                            processIdToNameMap
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        );
-      }
-      default:
-        throw new Error(
-          `Unknown format type ${JSON.stringify(format as never)}`
-        );
-    }
-  }
-  switch (format) {
-    case 'list':
-      if (!(value instanceof Array)) {
-        throw new Error('Expected an array for list format');
-      }
-      return (
-        <ul className="marker-list-value">
-          {value.map((_entry, i) => (
-            <li key={i}>
-              {formatFromMarkerSchema(
-                markerType,
-                'string',
-                value[i],
-                stringTable
-              )}
-            </li>
-          ))}
-        </ul>
-      );
-    case 'url': {
-      if (!URL_SCHEME_REGEXP.test(value)) {
-        return value;
-      }
-      return (
-        <a
-          href={value}
-          target="_blank"
-          rel="noreferrer"
-          className="marker-link-value"
-        >
-          {value.replace(URL_SCHEME_REGEXP, '')}
-        </a>
-      );
-    }
-    default:
-      throw new Error(`Unknown format type ${JSON.stringify(format as never)}`);
   }
 }
 
