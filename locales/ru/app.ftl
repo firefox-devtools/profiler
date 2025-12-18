@@ -28,8 +28,8 @@ AppViewRouter--error-from-post-message = Не удалось импортиро�
 AppViewRouter--error-unpublished = Не удалось получить профиль из { -firefox-brand-name }.
 AppViewRouter--error-from-file = Не удалось прочитать файл или проанализировать профиль в нем.
 AppViewRouter--error-local = Пока не реализовано.
-AppViewRouter--error-public = Не удалось загрузить профиль.
-AppViewRouter--error-from-url = Не удалось загрузить профиль.
+AppViewRouter--error-public = Не удалось скачать профиль.
+AppViewRouter--error-from-url = Не удалось скачать профиль.
 AppViewRouter--error-compare = Не удалось получить профили.
 # This error message is displayed when a Safari-specific error state is encountered.
 # Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
@@ -637,7 +637,7 @@ MenuButtons--publish--upload-title = Выгрузка профиля…
 MenuButtons--publish--cancel-upload = Отменить выгрузку
 MenuButtons--publish--message-something-went-wrong = Ой, что-то пошло не так при загрузке профиля.
 MenuButtons--publish--message-try-again = Попробовать снова
-MenuButtons--publish--download = Загрузить
+MenuButtons--publish--download = Скачать
 MenuButtons--publish--compressing = Сжатие…
 MenuButtons--publish--error-while-compressing = Ошибка при сжатии, попробуйте снять некоторые флажки, чтобы уменьшить размер профиля.
 
@@ -726,8 +726,8 @@ ProfileLoaderAnimation--loading-from-post-message = Импорт и обрабо
 ProfileLoaderAnimation--loading-unpublished = Импорт профиля напрямую из { -firefox-brand-name }…
 ProfileLoaderAnimation--loading-from-file = Чтение файла и обработка профиля…
 ProfileLoaderAnimation--loading-local = Пока не реализовано.
-ProfileLoaderAnimation--loading-public = Загрузка и обработка профиля…
-ProfileLoaderAnimation--loading-from-url = Загрузка и обработка профиля…
+ProfileLoaderAnimation--loading-public = Скачивание и обработка профиля…
+ProfileLoaderAnimation--loading-from-url = Скачивание и обработка профиля…
 ProfileLoaderAnimation--loading-compare = Чтение и обработка профилей…
 ProfileLoaderAnimation--loading-view-not-found = Вид не найден
 
@@ -751,7 +751,7 @@ ServiceWorkerManager--installed-button = Перезагрузить прилож
 ServiceWorkerManager--updated-while-not-ready =
     Перед полной загрузки это страницы была применена новая
     версия приложения. Вы можете столкнуться с неисправностями.
-ServiceWorkerManager--new-version-is-ready = Новая версия приложения загружена и готова к использованию.
+ServiceWorkerManager--new-version-is-ready = Новая версия приложения скачана и готова к использованию.
 ServiceWorkerManager--hide-notice-button =
     .title = Скрыть уведомление о перезагрузке
     .aria-label = Скрыть уведомление о перезагрузке
