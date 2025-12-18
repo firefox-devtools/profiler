@@ -339,7 +339,8 @@ function getThreadInfo(
   if (threadNameEvent) {
     thread.name = threadNameEvent.args.name;
     thread.isMainThread =
-      thread.name.startsWith('Cr') && thread.name.endsWith('Main');
+      (thread.name.startsWith('Cr') && thread.name.endsWith('Main')) ||
+      (!!chunk.pid && chunk.pid === chunk.tid);
   }
 
   const processNameEvent = findEvent<ProcessNameEvent>(
@@ -396,10 +397,10 @@ function getThreadInfo(
 
   profile.threads.push(thread);
 
-  const nodeIdToStackId = new Map();
+  const nodeIdToStackId = new Map<number | void, IndexIntoStackTable | null>();
   nodeIdToStackId.set(undefined, null);
 
-  const threadInfo = {
+  const threadInfo: ThreadInfo = {
     thread,
     nodeIdToStackId,
     funcKeyToFuncId: new Map(),
@@ -518,8 +519,8 @@ async function processTracingEvents(
     ensureExists(profile.meta.categories)
   );
 
-  const threadInfoByPidAndTid = new Map();
-  const threadInfoByThread = new Map();
+  const threadInfoByPidAndTid = new Map<string, ThreadInfo>();
+  const threadInfoByThread = new Map<RawThread, ThreadInfo>();
   for (const profileEvent of profileEvents) {
     // The thread info is all of the data that makes it possible to process an
     // individual thread.
@@ -574,7 +575,7 @@ async function processTracingEvents(
       } = thread;
 
       if (nodes) {
-        const parentMap = new Map();
+        const parentMap = new Map<number, number>();
         for (const node of nodes) {
           const { callFrame, id: nodeIndex } = node;
           let parent: number | void = undefined;
@@ -940,6 +941,14 @@ function extractMarkers(
     },
   ];
 
+  // Map to store begin event detail field for pairing with end events.
+  // For async events (b/e), key is "pid:tid:id:name"
+  // For duration events (B/E), key is "pid:tid:name"
+  const beginEventDetail: Map<string, string> = new Map();
+
+  // Track whether we've added the EventWithDetail schema
+  let hasEventWithDetailSchema = false;
+
   for (const [name, events] of eventsByName.entries()) {
     if (
       name === 'Profile' ||
@@ -988,11 +997,35 @@ function extractMarkers(
         const { thread } = threadInfo;
         const { markers } = thread;
         let argData:
-          | (object & { type2?: unknown; category2?: unknown })
+          | (object & { type2?: unknown; category2?: unknown; detail?: string })
           | null = null;
         if ('args' in event && event.args && typeof event.args === 'object') {
-          argData = event.args.data || null;
+          // Some trace events have args.data, but others have args fields directly
+          // (e.g., "Source" markers have args.detail).
+          if (event.args.data) {
+            argData = event.args.data;
+          } else if (
+            'detail' in event.args &&
+            typeof event.args.detail === 'string'
+          ) {
+            argData = { detail: event.args.detail };
+          }
         }
+
+        // For end events (E/e), try to use the detail from the corresponding begin event
+        if ((event.ph === 'E' || event.ph === 'e') && !argData) {
+          // Generate key for looking up the begin event detail
+          // For async events (b/e), use id; for duration events (B/E), use name only
+          const key =
+            event.ph === 'e' && 'id' in event
+              ? `${event.pid}:${event.tid}:${event.id}:${name}`
+              : `${event.pid}:${event.tid}:${name}`;
+          const detail = beginEventDetail.get(key);
+          if (detail) {
+            argData = { detail };
+          }
+        }
+
         markers.name.push(stringTable.indexForString(name));
         markers.category.push(otherCategoryIndex);
 
@@ -1003,9 +1036,32 @@ function extractMarkers(
           argData.category2 = argData.category;
         }
 
+        // Add EventWithDetail schema the first time we encounter a detail field
+        if (argData?.detail && !hasEventWithDetailSchema) {
+          profile.meta.markerSchema.push({
+            // Generic schema for Chrome trace event markers with a detail field.
+            // This is used when compiling with clang -ftime-trace=file.json, which
+            // generates Source markers, ParseDeclarationOrFunctionDefinition markers,
+            // and similar compiler events with file paths or location details.
+            name: 'EventWithDetail',
+            chartLabel: '{marker.data.detail}',
+            tooltipLabel: '{marker.name}: {marker.data.detail}',
+            tableLabel: '{marker.data.detail}',
+            display: ['marker-chart', 'marker-table'],
+            fields: [
+              {
+                key: 'detail',
+                label: 'Details',
+                format: 'string',
+              },
+            ],
+          });
+          hasEventWithDetailSchema = true;
+        }
+
         const newData = {
           ...argData,
-          type: name,
+          type: argData?.detail ? 'EventWithDetail' : name,
           category: event.cat,
         };
 
@@ -1026,6 +1082,15 @@ function extractMarkers(
           markers.startTime.push(time);
           markers.endTime.push(null);
           markers.phase.push(INTERVAL_START);
+
+          // Store the detail field from begin event so it can be used for the corresponding end event
+          if (argData?.detail) {
+            const key =
+              event.ph === 'b' && 'id' in event
+                ? `${event.pid}:${event.tid}:${event.id}:${name}`
+                : `${event.pid}:${event.tid}:${name}`;
+            beginEventDetail.set(key, argData.detail);
+          }
         } else if (event.ph === 'E' || event.ph === 'e') {
           // Duration or Async Event End
           // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.nso4gcezn7n1
@@ -1033,6 +1098,13 @@ function extractMarkers(
           markers.startTime.push(null);
           markers.endTime.push(time);
           markers.phase.push(INTERVAL_END);
+
+          // Clean up the stored begin event detail
+          const key =
+            event.ph === 'e' && 'id' in event
+              ? `${event.pid}:${event.tid}:${event.id}:${name}`
+              : `${event.pid}:${event.tid}:${name}`;
+          beginEventDetail.delete(key);
         } else {
           // Instant Event
           // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.lenwiilchoxp

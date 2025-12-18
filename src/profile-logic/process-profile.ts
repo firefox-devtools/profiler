@@ -23,6 +23,10 @@ import {
   isPerfScriptFormat,
   convertPerfScriptProfile,
 } from './import/linux-perf';
+import {
+  isFlameGraphFormat,
+  convertFlameGraphProfile,
+} from './import/flame-graph';
 import { isArtTraceFormat, convertArtTraceProfile } from './import/art-trace';
 import {
   PROCESSED_PROFILE_VERSION,
@@ -99,6 +103,7 @@ import type {
   Pid,
   GeckoMarkerSchema,
   GeckoSourceTable,
+  IndexIntoCategoryList,
 } from 'firefox-profiler/types';
 import { decompress, isGzip } from 'firefox-profiler/utils/gz';
 
@@ -1548,7 +1553,7 @@ export function insertExternalMarkersIntoProfile(
     }
   }
 
-  const categoryMap = new Map();
+  const categoryMap = new Map<IndexIntoCategoryList, IndexIntoCategoryList>();
   for (let i = 0; i < externalMarkers.categories.length; ++i) {
     const cat = externalMarkers.categories[i];
     let index = geckoProfile.meta.categories.findIndex(
@@ -1965,27 +1970,32 @@ export async function unserializeProfileOfArbitraryFormat(
     // object is constructed from an ArrayBuffer in a different context... which
     // happens in our tests.
     if (String(arbitraryFormat) === '[object ArrayBuffer]') {
-      let arrayBuffer = arbitraryFormat as ArrayBuffer;
+      const arrayBuffer = arbitraryFormat as ArrayBuffer;
+      arbitraryFormat = new Uint8Array(arrayBuffer);
+    }
 
+    // Handle binary formats.
+    if (
+      arbitraryFormat instanceof Uint8Array ||
+      (globalThis.Buffer && arbitraryFormat instanceof globalThis.Buffer)
+    ) {
       // Check for the gzip magic number in the header. If we find it, decompress
       // the data first.
-      const profileBytes = new Uint8Array(arrayBuffer);
+      let profileBytes = arbitraryFormat as Uint8Array<ArrayBuffer>;
       if (isGzip(profileBytes)) {
-        const decompressedProfile = await decompress(profileBytes);
-        arrayBuffer = decompressedProfile.buffer;
+        profileBytes = await decompress(profileBytes);
       }
 
-      if (isArtTraceFormat(arrayBuffer)) {
-        arbitraryFormat = convertArtTraceProfile(arrayBuffer);
-      } else if (verifyMagic(SIMPLEPERF_MAGIC, arrayBuffer)) {
-        const { convertSimpleperfTraceProfile } = await import(
-          './import/simpleperf'
-        );
-        arbitraryFormat = convertSimpleperfTraceProfile(arrayBuffer);
+      if (isArtTraceFormat(profileBytes)) {
+        arbitraryFormat = convertArtTraceProfile(profileBytes);
+      } else if (verifyMagic(SIMPLEPERF_MAGIC, profileBytes)) {
+        const { convertSimpleperfTraceProfile } =
+          await import('./import/simpleperf');
+        arbitraryFormat = convertSimpleperfTraceProfile(profileBytes);
       } else {
         try {
           const textDecoder = new TextDecoder(undefined, { fatal: true });
-          arbitraryFormat = await textDecoder.decode(arrayBuffer);
+          arbitraryFormat = await textDecoder.decode(profileBytes);
         } catch (e) {
           console.error('Source exception:', e);
           throw new Error(
@@ -1999,6 +2009,8 @@ export async function unserializeProfileOfArbitraryFormat(
       // The profile could be JSON or the output from `perf script`. Try `perf script` first.
       if (isPerfScriptFormat(arbitraryFormat)) {
         arbitraryFormat = convertPerfScriptProfile(arbitraryFormat);
+      } else if (isFlameGraphFormat(arbitraryFormat)) {
+        arbitraryFormat = convertFlameGraphProfile(arbitraryFormat);
       } else {
         // Try parsing as JSON.
         arbitraryFormat = JSON.parse(arbitraryFormat);

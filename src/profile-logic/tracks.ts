@@ -239,7 +239,7 @@ export function initializeLocalTrackOrderByPid(
   legacyThreadOrder: ThreadIndex[] | null,
   profile: Profile | null
 ): Map<Pid, TrackIndex[]> {
-  const trackOrderByPid = new Map();
+  const trackOrderByPid = new Map<Pid, TrackIndex[]>();
 
   if (legacyThreadOrder === null) {
     // Go through each set of tracks, determine the sort order.
@@ -310,7 +310,7 @@ export function computeLocalTracksByPid(
   profile: Profile,
   availableGlobalTracks: GlobalTrack[]
 ): Map<Pid, LocalTrack[]> {
-  const localTracksByPid = new Map();
+  const localTracksByPid = new Map<Pid, LocalTrack[]>();
 
   // Create a new set of available pids, so we can filter out the local tracks
   // if their globalTracks are also filtered out by the tab selector.
@@ -448,7 +448,7 @@ export function addEventDelayTracksForThreads(
   threads: RawThread[],
   localTracksByPid: Map<Pid, LocalTrack[]>
 ): Map<Pid, LocalTrack[]> {
-  const newLocalTracksByPid = new Map();
+  const newLocalTracksByPid = new Map<Pid, LocalTrack[]>();
 
   for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
     const thread = threads[threadIndex];
@@ -909,7 +909,7 @@ export function tryInitializeHiddenTracksFromUrl(
     urlHiddenGlobalTracks
   );
 
-  const hiddenLocalTracksByPid = new Map();
+  const hiddenLocalTracksByPid = new Map<Pid, Set<TrackIndex>>();
   for (const [pid, localTrackOrder] of tracksWithOrder.localTrackOrderByPid) {
     const localTracks = new Set(localTrackOrder);
     const hiddenLocalTracks = intersectSets(
@@ -987,7 +987,7 @@ function _computeHiddenTracksForVisibleThreads(
     })
   );
 
-  const hiddenLocalTracksByPid = new Map();
+  const hiddenLocalTracksByPid = new Map<Pid, Set<ThreadIndex>>();
   for (const [pid, localTrackOrder] of tracksWithOrder.localTrackOrderByPid) {
     if (!visiblePids.has(pid)) {
       // Hide all local tracks.
@@ -1520,7 +1520,7 @@ export function getSearchFilteredLocalTracksByPid(
     return null;
   }
 
-  const searchFilteredLocalTracksByPid = new Map();
+  const searchFilteredLocalTracksByPid = new Map<Pid, Set<TrackIndex>>();
   for (const [pid, tracks] of localTracksByPid) {
     const searchFilteredLocalTracks = new Set<TrackIndex>();
     const localTrackNames = localTrackNamesByPid.get(pid);
@@ -1640,7 +1640,7 @@ export function getTypeFilteredLocalTracksByPid(
     return null;
   }
 
-  const typeFilteredLocalTracksByPid = new Map();
+  const typeFilteredLocalTracksByPid = new Map<Pid, Set<TrackIndex>>();
   for (const [pid, tracks] of localTracksByPid) {
     const typeFilteredLocalTracks = new Set<TrackIndex>();
 

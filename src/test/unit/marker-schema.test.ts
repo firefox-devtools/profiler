@@ -4,10 +4,10 @@
 
 import {
   formatFromMarkerSchema,
-  formatMarkupFromMarkerSchema,
   parseLabel,
   markerSchemaFrontEndOnly,
 } from '../../profile-logic/marker-schema';
+import { renderMarkerFieldValue } from 'firefox-profiler/components/tooltip/Marker';
 import type {
   MarkerSchema,
   Marker,
@@ -432,7 +432,7 @@ describe('marker schema formatting', function () {
       entries.map(([format, value]: [MarkerFormatType, any]): string[][] => [
         format,
         value,
-        formatMarkupFromMarkerSchema('none', format, value, stringTable),
+        renderMarkerFieldValue('none', format, value, stringTable),
         formatFromMarkerSchema('none', format, value, stringTable),
       ])
     ).toMatchSnapshot();

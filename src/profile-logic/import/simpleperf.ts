@@ -474,13 +474,17 @@ class FirefoxProfile {
 }
 
 export class SimpleperfReportConverter {
-  buffer: ArrayBufferLike;
+  buffer: Uint8Array;
   bufferView: DataView;
   bufferOffset: number = 0;
 
-  constructor(buffer: ArrayBufferLike) {
+  constructor(buffer: Uint8Array) {
     this.buffer = buffer;
-    this.bufferView = new DataView(buffer);
+    this.bufferView = new DataView(
+      buffer.buffer,
+      buffer.byteOffset,
+      buffer.byteLength
+    );
   }
 
   readUint16LE() {
@@ -509,11 +513,10 @@ export class SimpleperfReportConverter {
   }
 
   readRecord(recordSize: number): report.Record {
-    const recordBuffer = this.buffer.slice(
+    const recordArray = this.buffer.subarray(
       this.bufferOffset,
       this.bufferOffset + recordSize
     );
-    const recordArray = new Uint8Array(recordBuffer);
     this.bufferOffset += recordSize;
 
     return report.Record.decode(recordArray);
@@ -577,7 +580,7 @@ export class SimpleperfReportConverter {
 }
 
 export function convertSimpleperfTraceProfile(
-  traceBuffer: ArrayBufferLike
+  traceBuffer: Uint8Array
 ): Profile {
   return new SimpleperfReportConverter(traceBuffer).process();
 }

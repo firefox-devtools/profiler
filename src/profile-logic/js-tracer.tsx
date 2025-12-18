@@ -38,7 +38,7 @@ function getScriptLocationToFuncIndex(
   sources: SourceTable
 ): ScriptLocationToFuncIndex {
   const { funcTable } = thread;
-  const scriptLocationToFuncIndex = new Map();
+  const scriptLocationToFuncIndex: ScriptLocationToFuncIndex = new Map();
   for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
     if (!funcTable.isJS[funcIndex]) {
       continue;
