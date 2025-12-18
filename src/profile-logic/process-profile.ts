@@ -1985,9 +1985,8 @@ export async function unserializeProfileOfArbitraryFormat(
       if (isArtTraceFormat(profileBytes)) {
         arbitraryFormat = convertArtTraceProfile(profileBytes);
       } else if (verifyMagic(SIMPLEPERF_MAGIC, profileBytes)) {
-        const { convertSimpleperfTraceProfile } = await import(
-          './import/simpleperf'
-        );
+        const { convertSimpleperfTraceProfile } =
+          await import('./import/simpleperf');
         arbitraryFormat = convertSimpleperfTraceProfile(profileBytes);
       } else {
         try {

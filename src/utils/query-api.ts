@@ -120,9 +120,7 @@ export interface ExternalCommunicationCallbacks {
  *
  * It also takes an object with callbacks, for loading indicators.
  */
-export class RegularExternalCommunicationDelegate
-  implements ExternalCommunicationDelegate
-{
+export class RegularExternalCommunicationDelegate implements ExternalCommunicationDelegate {
   _browserConnection: BrowserConnection | null;
   _callbacks: ExternalCommunicationCallbacks;
 
