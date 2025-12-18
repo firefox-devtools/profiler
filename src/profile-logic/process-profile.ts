@@ -23,6 +23,10 @@ import {
   isPerfScriptFormat,
   convertPerfScriptProfile,
 } from './import/linux-perf';
+import {
+  isFlameGraphFormat,
+  convertFlameGraphProfile,
+} from './import/flame-graph';
 import { isArtTraceFormat, convertArtTraceProfile } from './import/art-trace';
 import {
   PROCESSED_PROFILE_VERSION,
@@ -2005,6 +2009,8 @@ export async function unserializeProfileOfArbitraryFormat(
       // The profile could be JSON or the output from `perf script`. Try `perf script` first.
       if (isPerfScriptFormat(arbitraryFormat)) {
         arbitraryFormat = convertPerfScriptProfile(arbitraryFormat);
+      } else if (isFlameGraphFormat(arbitraryFormat)) {
+        arbitraryFormat = convertFlameGraphProfile(arbitraryFormat);
       } else {
         // Try parsing as JSON.
         arbitraryFormat = JSON.parse(arbitraryFormat);
