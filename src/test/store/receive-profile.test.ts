@@ -2190,6 +2190,20 @@ describe('actions/receive-profile', function () {
         });
       }
     );
+
+    it('redirects unpublished initial URLs to home page', async function () {
+      const { getState } = await setup({
+        pathname: '/unpublished/',
+        search: '',
+        hash: '',
+      });
+
+      // The data source should be redirected from 'unpublished' to 'none'.
+      expect(UrlStateSelectors.getDataSource(getState())).toEqual('none');
+
+      // No profile should be loaded.
+      expect(ProfileViewSelectors.getProfileOrNull(getState())).toEqual(null);
+    });
   });
 });
 

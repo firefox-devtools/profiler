@@ -60,9 +60,9 @@ class ProfileLoaderAnimationImpl extends PureComponent<ProfileLoaderAnimationPro
     const showLoader = Boolean(loadingMessage);
     const showBackHomeLink = Boolean(
       'additionalData' in view &&
-        view.additionalData &&
-        view.additionalData.message &&
-        dataSource === 'from-file'
+      view.additionalData &&
+      view.additionalData.message &&
+      dataSource === 'from-file'
     );
 
     return (

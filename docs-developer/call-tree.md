@@ -67,9 +67,9 @@ One key point of the aggregation done in the call tree is that it's focused on w
 
 Imagine this simplified example of 3 samples of mixed C++, JavaScript Code (js), and JIT optimized JavaScript (JIT). The functions are all labeled as to their implementation.
 
-| Sample index | Sample's stack                                                                                 |
-| ------------ | ---------------------------------------------------------------------------------------------- |
-| 0            | `JS::RunScript [c++]  ➡  onLoad [js]  ➡  a [js]  ➡  b [js]`                                 |
+| Sample index | Sample's stack                                                                             |
+| ------------ | ------------------------------------------------------------------------------------------ |
+| 0            | `JS::RunScript [c++]  ➡  onLoad [js]  ➡  a [js]  ➡  b [js]`                                |
 | 1            | `JS::RunScript [c++]  ➡  onLoad [js]  ➡  js::jit::IonCannon [c++]  ➡  a [JIT]  ➡  b [JIT]` |
 | 2            | `JS::RunScript [c++]  ➡  onLoad [js]  ➡  js::jit::IonCannon [c++]  ➡  a [JIT]  ➡  b [JIT]` |
 
@@ -113,8 +113,8 @@ Now, taking the stacks and building a call tree produces the following:
 
 This is the correct tree of what you would want to see. But since we are mixing languages together into the same stack system, it might be nice to view only JS functions. In order to do that we hide any C++ stacks, and assign them to the nearest JS stack. Our tables would be updated to look like the following.
 
-| Sample index | Sample's stack                          |
-| ------------ | --------------------------------------- |
+| Sample index | Sample's stack                        |
+| ------------ | ------------------------------------- |
 | 0            | `onLoad [js]  ➡  a [js]  ➡  b [js]`   |
 | 1            | `onLoad [js]  ➡  a [JIT]  ➡  b [JIT]` |
 | 2            | `onLoad [js]  ➡  a [JIT]  ➡  b [JIT]` |
