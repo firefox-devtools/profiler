@@ -239,6 +239,23 @@ describe('MarkerTable', function () {
     );
   });
 
+  it('can override the zero at timing using the context menu', () => {
+    const { getRowElement } = setup();
+
+    const startNode = ensureExists(
+      getRowElement(/setTimeout/).querySelector('.start')
+    );
+    expect(startNode).toHaveTextContent('0.153s');
+
+    fireFullContextMenu(getRowElement(/setTimeout/) as HTMLElement);
+    fireFullClick(screen.getByText('Override zero at marker’s start'));
+
+    const startNode2 = ensureExists(
+      getRowElement(/setTimeout/).querySelector('.start')
+    );
+    expect(startNode2).toHaveTextContent('0s');
+  });
+
   describe('EmptyReasons', () => {
     it('shows reasons when a profile has no non-network markers', () => {
       const { profile } = getProfileFromTextSamples('A'); // Just a simple profile without any marker.
