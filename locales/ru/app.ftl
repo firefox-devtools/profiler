@@ -380,7 +380,7 @@ ListOfPublishedProfiles--uploaded-profile-information-list-empty = Профил�
 # This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
 #   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
-ListOfPublishedProfiles--uploaded-profile-information-label = Просматривайте и управляйте всеми своими записями (еще { $profilesRestCount })
+ListOfPublishedProfiles--uploaded-profile-information-label = Просматривайте и управляйте всеми своими записями (ещё { $profilesRestCount })
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
 #   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
@@ -773,7 +773,7 @@ StackSettings--call-tree-strategy-timing = Тайминги
     .title = Суммировать, используя выборочные стеки выполняемого кода с течением времени
 StackSettings--call-tree-strategy-js-allocations = Распределения JavaScript
     .title = Суммировать, используя выделенные байты JavaScript (без отмены выделения)
-StackSettings--call-tree-strategy-native-retained-allocations = Сохраненная память
+StackSettings--call-tree-strategy-native-retained-allocations = Сохранённая память
     .title = Суммировать, используя байты памяти, которые были выделены и никогда не освобождались при текущем выборе предварительного просмотра
 StackSettings--call-tree-native-allocations = Выделенная память
     .title = Суммировать, используя выделенные байты памяти
