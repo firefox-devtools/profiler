@@ -109,6 +109,11 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
         </label>
       </li>
     </ul>
+    <button
+      class="copyTableButton photon-button photon-button-ghost"
+      title="Copy table as text"
+      type="button"
+    />
     <div
       class="panelSearchField markerSettingsSearchField"
     >
@@ -165,6 +170,31 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
             ⁨⁩
           </strong>
           ”
+        </div>
+      </nav>
+    </div>
+    <div>
+      <nav
+        class="react-contextmenu markerCopyTableContextMenu"
+        role="menu"
+        style="position: fixed; opacity: 0; pointer-events: none;"
+        tabindex="-1"
+      >
+        <div
+          aria-disabled="false"
+          class="react-contextmenu-item"
+          role="menuitem"
+          tabindex="-1"
+        >
+          Copy marker table as plain text
+        </div>
+        <div
+          aria-disabled="false"
+          class="react-contextmenu-item"
+          role="menuitem"
+          tabindex="-1"
+        >
+          Copy marker table as Markdown
         </div>
       </nav>
     </div>

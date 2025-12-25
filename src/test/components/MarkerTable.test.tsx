@@ -515,6 +515,54 @@ describe('MarkerTable', function () {
       expect(firstColumn).toHaveStyle({ width: '90px' });
     });
   });
+
+  it('can copy the table as plain text', () => {
+    const { container } = setup();
+
+    const button = ensureExists(
+      container.querySelector('.copyTableButton')
+    ) as HTMLElement;
+    fireFullClick(button);
+
+    const menu = ensureExists(
+      container.querySelector('.markerCopyTableContextMenu')
+    ) as HTMLElement;
+
+    const items = menu.querySelectorAll('[role="menuitem"]');
+    expect(items.length).toBe(2);
+
+    fireFullClick(items[0] as HTMLElement);
+
+    const pattern = new RegExp(
+      '^ +Start +Duration +Name +Details\\n +0s +0s +UserTiming +foobar\\n'
+    );
+    expect(copy).toHaveBeenLastCalledWith(expect.stringMatching(pattern));
+  });
+
+  it('can copy the table as markdown', () => {
+    const { container } = setup();
+
+    const button = ensureExists(
+      container.querySelector('.copyTableButton')
+    ) as HTMLElement;
+    fireFullClick(button);
+
+    const menu = ensureExists(
+      container.querySelector('.markerCopyTableContextMenu')
+    ) as HTMLElement;
+
+    const items = menu.querySelectorAll('[role="menuitem"]');
+    expect(items.length).toBe(2);
+
+    fireFullClick(items[1] as HTMLElement);
+
+    const pattern = new RegExp(
+      '^\\| +Start +\\| +Duration +\\| +Name +\\| +Details +\\|\\n' +
+        '\\|-+:\\|-+:\\|-+:\\|-+\\|\\n' +
+        '\\| +0s +\\| +0s +\\| +UserTiming +\\| +foobar +\\|\\n'
+    );
+    expect(copy).toHaveBeenLastCalledWith(expect.stringMatching(pattern));
+  });
 });
 
 function getReflowMarker(
