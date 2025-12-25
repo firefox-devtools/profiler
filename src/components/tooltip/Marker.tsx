@@ -85,7 +85,7 @@ type OwnProps = {
   readonly marker: Marker;
   readonly threadsKey: ThreadsKey;
   readonly className?: string;
-  readonly showFilterButton?: boolean;
+  readonly hideFilterButton?: boolean;
   // In tooltips it can be awkward for really long and tall things to force
   // the layout to be huge. This option when set to true will restrict the
   // height of things like stacks, and the width of long things like URLs.
@@ -527,7 +527,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       markerIndex,
       getMarkerLabel,
       getMarkerSearchTerm,
-      showFilterButton = true,
+      hideFilterButton,
     } = this.props;
     const markerLabel = getMarkerLabel(markerIndex);
     const searchTerm = getMarkerSearchTerm(markerIndex);
@@ -538,7 +538,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
             {this._maybeRenderMarkerDuration()}
             <div className="tooltipTitle">
               <span className="tooltipTitleText">{markerLabel}</span>
-              {showFilterButton ? (
+              {!hideFilterButton ? (
                 <Localized
                   id="MarkerTooltip--filter-button-tooltip"
                   vars={{ filter: searchTerm }}

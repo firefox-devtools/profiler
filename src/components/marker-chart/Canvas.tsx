@@ -915,7 +915,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         marker={marker}
         threadsKey={this.props.threadsKey}
         restrictHeightWidth={true}
-        showFilterButton={true}
         onStackFrameClick={this._onStackFrameClick}
       />
     );

@@ -471,7 +471,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
           marker={marker}
           threadsKey={threadIndex}
           restrictHeightWidth={true}
-          showFilterButton={false}
+          hideFilterButton={true}
         />
       </Tooltip>
     );

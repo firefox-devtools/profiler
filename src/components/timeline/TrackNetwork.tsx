@@ -409,7 +409,7 @@ class Network extends PureComponent<Props, State> {
                 marker={hoveredMarker}
                 threadsKey={threadIndex}
                 restrictHeightWidth={true}
-                showFilterButton={false}
+                hideFilterButton={true}
               />
             </Tooltip>
           ) : null}
