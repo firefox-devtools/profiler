@@ -120,7 +120,6 @@ class ProfileViewerImpl extends PureComponent<Props> {
               // of space in the top bar. It will shrink away before any of the items
               // with actual content in them do.
             }
-            <div className="profileViewerSpacer" />
             <MenuButtons />
             {isUploading ? (
               <div
