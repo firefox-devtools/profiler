@@ -81,6 +81,7 @@ beforeEach(() => {
 import { shortenUrl } from '../../utils/shorten-url';
 jest.mock('../../utils/shorten-url');
 
+import { compress } from 'firefox-profiler/utils/gz';
 import { symbolicateProfile } from 'firefox-profiler/profile-logic/symbolication';
 jest.mock('firefox-profiler/profile-logic/symbolication');
 
@@ -161,6 +162,12 @@ describe('app/MenuButtons', function () {
   }
 
   describe('<Publish>', function () {
+    const FIXED_GZIP_BYTES = 1580;
+
+    beforeEach(() => {
+      (compress as any).mockResolvedValue(new Uint8Array(FIXED_GZIP_BYTES));
+    });
+
     function mockUpload() {
       // Create a promise with the resolve function outside of it.
       // const { promise, resolve: resolveUpload, reject: rejectUpload } = Promise.withResolvers();

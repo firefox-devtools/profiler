@@ -498,6 +498,9 @@ export class NetworkChartRow extends React.PureComponent<
               marker={marker}
               threadsKey={this.props.threadsKey}
               restrictHeightWidth={true}
+              // Network Chart doesn't have sticky tooltips yet. But we should convert it
+              // to false once we implement sticky tooltips for the network chart.
+              hideFilterButton={true}
             />
           </Tooltip>
         ) : null}
