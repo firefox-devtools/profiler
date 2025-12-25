@@ -1,10 +1,10 @@
-.DetailsContainer .layout-pane > * {
+.DetailsContainer > .layout-pane > * {
   width: 100%;
   height: 100%;
   box-sizing: border-box;
 }
 
-.DetailsContainer .layout-pane:not(.layout-pane-primary) {
+.DetailsContainer > .layout-pane:not(.layout-pane-primary) {
   max-width: 600px;
 }
 
@@ -15,12 +15,12 @@
   position: unset;
 }
 
-.DetailsContainer .layout-splitter {
+.DetailsContainer > .layout-splitter {
   border-top: 1px solid var(--grey-30);
   border-left: 1px solid var(--grey-30);
   background: var(--grey-10); /* Same background as sidebars */
 }
 
-.DetailsContainer .layout-splitter:hover {
+.DetailsContainer > .layout-splitter:hover {
   background: var(--grey-30); /* same as the border above */
 }
