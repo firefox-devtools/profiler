@@ -65,13 +65,172 @@ type Props = {
   readonly uncommittedItem?: string;
 };
 
-export class FilterNavigatorBar extends React.PureComponent<Props> {
+type StateProps = {
+  readonly canScrollLeft: boolean;
+  readonly canScrollRight: boolean;
+};
+
+export class FilterNavigatorBar extends React.PureComponent<Props, StateProps> {
+  _scrollContent: HTMLElement | null = null;
+  _scrollParent: HTMLElement | null = null;
+  _scrollLeft = 0;
+  _autoScrollVelocity = 0;
+  _autoScrollStopping = false;
+  _autoScrollTimer: NodeJS.Timeout | null = null;
+
+  override state = {
+    canScrollLeft: false,
+    canScrollRight: false,
+  };
+
+  _takeScrollParentRef = (scrollParent: HTMLElement | null) => {
+    this._scrollParent = scrollParent;
+  };
+  _takeScrollContentRef = (scrollContent: HTMLElement | null) => {
+    this._scrollContent = scrollContent;
+  };
+
+  _onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      this._scrollBy(e.deltaX);
+    } else {
+      this._scrollBy(e.deltaY);
+    }
+  };
+
+  _onScrollLeftMouseDown = () => {
+    this._startAutoScroll(-10);
+  };
+  _onScrollRightMouseDown = () => {
+    this._startAutoScroll(10);
+  };
+
+  _onScrollMouseUp = () => {
+    this._stopAutoScroll();
+  };
+  _onScrollMouseLeave = () => {
+    this._stopAutoScroll();
+  };
+
+  _startAutoScroll = (velocity: number) => {
+    this._autoScrollVelocity = velocity;
+    this._autoScrollStopping = false;
+    if (!this._autoScrollTimer) {
+      this._autoScrollTimer = setInterval(this._autoScroll, 10);
+    }
+    this._scrollBy(this._autoScrollVelocity);
+  };
+  _stopAutoScroll = () => {
+    this._autoScrollStopping = true;
+  };
+  _clearAutoScrollTimer = () => {
+    this._autoScrollStopping = false;
+    this._autoScrollVelocity = 0;
+    if (this._autoScrollTimer) {
+      clearInterval(this._autoScrollTimer);
+      this._autoScrollTimer = null;
+    }
+  };
+
+  _autoScroll = () => {
+    const stopped = this._scrollBy(this._autoScrollVelocity);
+    if (stopped) {
+      this._clearAutoScrollTimer();
+      return;
+    }
+
+    if (!this._autoScrollStopping) {
+      return;
+    }
+
+    this._autoScrollVelocity = this._autoScrollVelocity * 0.9;
+    if (Math.abs(this._autoScrollVelocity) < 1) {
+      this._clearAutoScrollTimer();
+    }
+  };
+
+  _scrollBy = (delta: number): boolean => {
+    if (!this._scrollContent || !this._scrollParent) {
+      return true;
+    }
+    let stopped = false;
+    const contentWidth = this._scrollContent.getBoundingClientRect().width;
+    const parentWidth = this._scrollParent.getBoundingClientRect().width;
+    if (contentWidth <= parentWidth) {
+      this._scrollLeft = 0;
+      stopped = true;
+      this._updateScrollButtonState();
+    } else {
+      this._scrollLeft -= delta;
+      if (this._scrollLeft > 0) {
+        this._scrollLeft = 0;
+        stopped = true;
+        this._updateScrollButtonState();
+      }
+      if (this._scrollLeft + contentWidth < parentWidth) {
+        this._scrollLeft = parentWidth - contentWidth;
+        stopped = true;
+        this._updateScrollButtonState();
+      }
+    }
+    this._scrollContent.style.left = this._scrollLeft + 'px';
+    return stopped;
+  };
+
+  _updateScrollButtonState = () => {
+    if (!this._scrollContent || !this._scrollParent) {
+      return;
+    }
+
+    let canScrollLeft = true;
+    let canScrollRight = true;
+
+    if (this._scrollLeft === 0) {
+      canScrollLeft = false;
+    }
+
+    const contentWidth = this._scrollContent.getBoundingClientRect().width;
+    const parentWidth = this._scrollParent.getBoundingClientRect().width;
+
+    if (contentWidth <= parentWidth) {
+      canScrollLeft = false;
+      canScrollRight = false;
+    }
+
+    if (this._scrollLeft + contentWidth <= parentWidth) {
+      canScrollRight = false;
+    }
+
+    if (
+      canScrollLeft === this.state.canScrollLeft &&
+      canScrollRight === this.state.canScrollRight
+    ) {
+      return;
+    }
+
+    this.setState({
+      canScrollLeft,
+      canScrollRight,
+    });
+  };
+
+  override componentDidUpdate = (prevProps: Props) => {
+    this._updateScrollButtonState();
+
+    const currentItems = this.props.items;
+    const prevItems = prevProps.items;
+    if (prevItems.length !== currentItems.length) {
+      this._startAutoScroll(100);
+    }
+  };
+
   override render() {
     const { className, items, selectedItem, uncommittedItem, onPop } =
       this.props;
+    const { canScrollLeft, canScrollRight } = this.state;
 
-    return (
-      <ol className={classNames('filterNavigatorBar', className)}>
+    const bar = (
+      <ol className="filterNavigatorBar">
         {items.map((item, i) => (
           <FilterNavigatorBarListItem
             key={i}
@@ -97,6 +256,55 @@ export class FilterNavigatorBar extends React.PureComponent<Props> {
           </FilterNavigatorBarListItem>
         ) : null}
       </ol>
+    );
+
+    const canScroll = canScrollLeft || canScrollRight;
+
+    return (
+      <div className="filterNavigatorBarScrollContainer">
+        {canScroll ? (
+          <button
+            type="button"
+            className={
+              'filterNavigatorBarScrollButton' +
+              (canScrollLeft ? '' : ' disabled')
+            }
+            onMouseDown={this._onScrollLeftMouseDown}
+            onMouseUp={this._onScrollMouseUp}
+            onMouseLeave={this._onScrollMouseLeave}
+            disabled={!canScrollLeft}
+          >
+            &lt;
+          </button>
+        ) : null}
+        <div
+          className={classNames('filterNavigatorBarScrollParent', className)}
+          onWheel={this._onWheel}
+          ref={this._takeScrollParentRef}
+        >
+          <div
+            className="filterNavigatorBarScrollContent"
+            ref={this._takeScrollContentRef}
+          >
+            {bar}
+          </div>
+        </div>
+        {canScroll ? (
+          <button
+            type="button"
+            className={
+              'filterNavigatorBarScrollButton' +
+              (canScrollRight ? '' : ' disabled')
+            }
+            onMouseDown={this._onScrollRightMouseDown}
+            onMouseUp={this._onScrollMouseUp}
+            onMouseLeave={this._onScrollMouseLeave}
+            disabled={!canScrollRight}
+          >
+            &gt;
+          </button>
+        ) : null}
+      </div>
     );
   }
 }
