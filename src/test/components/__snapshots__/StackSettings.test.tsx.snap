@@ -11,48 +11,57 @@ exports[`StackSettings matches the snapshot 1`] = `
       <li
         class="panelSettingsListItem"
       >
-        <input
-          checked=""
-          class="photon-radio photon-radio-micro"
-          id="implementation-radio-combined"
-          title="Do not filter the stack frames"
-          type="radio"
-          value="combined"
-        />
         <label
-          class="photon-label photon-label-micro photon-label-horiz-padding"
+          class="photon-label photon-label-micro"
           for="implementation-radio-combined"
-          title="Do not filter the stack frames"
         >
-          All frames
+          <input
+            checked=""
+            class="photon-radio photon-radio-micro"
+            id="implementation-radio-combined"
+            title="Do not filter the stack frames"
+            type="radio"
+            value="combined"
+          />
+          <span
+            class="photon-label-horiz-padding"
+          >
+            All frames
+          </span>
         </label>
-        <input
-          class="photon-radio photon-radio-micro"
-          id="implementation-radio-js"
-          title="Show only the stack frames related to script execution"
-          type="radio"
-          value="js"
-        />
         <label
-          class="photon-label photon-label-micro photon-label-horiz-padding"
+          class="photon-label photon-label-micro"
           for="implementation-radio-js"
-          title="Show only the stack frames related to script execution"
         >
-          Script
+          <input
+            class="photon-radio photon-radio-micro"
+            id="implementation-radio-js"
+            title="Show only the stack frames related to script execution"
+            type="radio"
+            value="js"
+          />
+          <span
+            class="photon-label-horiz-padding"
+          >
+            Script
+          </span>
         </label>
-        <input
-          class="photon-radio photon-radio-micro"
-          id="implementation-radio-cpp"
-          title="Show only the stack frames for native code"
-          type="radio"
-          value="cpp"
-        />
         <label
-          class="photon-label photon-label-micro photon-label-horiz-padding"
+          class="photon-label photon-label-micro"
           for="implementation-radio-cpp"
-          title="Show only the stack frames for native code"
         >
-          Native
+          <input
+            class="photon-radio photon-radio-micro"
+            id="implementation-radio-cpp"
+            title="Show only the stack frames for native code"
+            type="radio"
+            value="cpp"
+          />
+          <span
+            class="photon-label-horiz-padding"
+          >
+            Native
+          </span>
         </label>
       </li>
       <li
