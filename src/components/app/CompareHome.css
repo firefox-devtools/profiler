@@ -9,7 +9,7 @@
   margin: auto;
 
   /* Other */
-  background: #fff;
+  background: var(--base-border-color);
   box-shadow: 0 5px 25px #0b1f50;
   font-size: 130%;
 }
