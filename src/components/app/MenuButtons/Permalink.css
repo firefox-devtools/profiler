@@ -4,8 +4,20 @@
 
 /* This background image builds on the generic styles defined in
  * MenuButtons/index.css when using an icon. */
+.menuButtonsPermalinkButtonButton {
+  --internal-icon: url(../../../../res/img/svg/link-dark-12.svg);
+}
+
+@supports (color-scheme: dark) {
+  @media (prefers-color-scheme: dark) {
+    .menuButtonsPermalinkButtonButton {
+      --internal-icon: url(../../../../res/img/svg/link-light-12.svg);
+    }
+  }
+}
+
 .menuButtonsPermalinkButtonButton::before {
-  background-image: url(../../../../res/img/svg/link-dark-12.svg);
+  background-image: var(--internal-icon);
 }
 
 .menuButtonsPermalinkPanel .arrowPanelContent {
