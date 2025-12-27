@@ -32,20 +32,20 @@
 
 @supports (color-scheme: dark) {
   @media (prefers-color-scheme: dark) {
-.react-contextmenu {
-  --internal-shadow-color1: rgb(0 0 0 / 0.2);
-  --internal-shadow-color2: rgb(0 0 0 / 0.4);
-  --internal-separator-color: var(--base-border-color);
-  --internal-divider-color: rgb(237 237 240 / 0.15);
-  --internal-active-foreground-color: var(--grey-20);
-  --internal-active-background-color: var(--blue-70);
-  --internal-disabled-foreground-color: var(--grey-50);
-  --internal-selected-disabled-background-color: var(--blue-60-a30);
-  --internal-highlight-foreground-color: var(--grey-30);
+    .react-contextmenu {
+      --internal-shadow-color1: rgb(0 0 0 / 0.2);
+      --internal-shadow-color2: rgb(0 0 0 / 0.4);
+      --internal-separator-color: var(--base-border-color);
+      --internal-divider-color: rgb(237 237 240 / 0.15);
+      --internal-active-foreground-color: var(--grey-20);
+      --internal-active-background-color: var(--blue-70);
+      --internal-disabled-foreground-color: var(--grey-50);
+      --internal-selected-disabled-background-color: var(--blue-60-a30);
+      --internal-highlight-foreground-color: var(--grey-30);
 
-  border: 1px solid var(--base-border-color);
-}
-}
+      border: 1px solid var(--base-border-color);
+    }
+  }
 }
 
 .react-contextmenu-separator {

@@ -69,12 +69,12 @@
 
 @supports (color-scheme: dark) {
   @media (prefers-color-scheme: dark) {
-.markerContextMenuIconCopyDescription,
-.markerContextMenuIconCopyUrl,
-.markerContextMenuIconCopyStack,
-.markerContextMenuIconCopyPayload,
-.markerContextMenuSelectThread {
-  filter: invert(1);
-}
-}
+    .markerContextMenuIconCopyDescription,
+    .markerContextMenuIconCopyUrl,
+    .markerContextMenuIconCopyStack,
+    .markerContextMenuIconCopyPayload,
+    .markerContextMenuSelectThread {
+      filter: invert(1);
+    }
+  }
 }

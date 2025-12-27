@@ -51,16 +51,15 @@
 
 @supports (color-scheme: dark) {
   @media (prefers-color-scheme: dark) {
-.callNodeContextMenu .react-contextmenu-icon,
-.callNodeContextMenu .react-contextmenu-icon {
-  filter: invert(1);
-}
+    .callNodeContextMenu .react-contextmenu-icon {
+      filter: invert(1);
+    }
 
-.callNodeContextMenuShortcut {
-  --internal-background-color: #d7d7dbc0;
-  --internal-shadow-color: #b1b1b380;
-}
-}
+    .callNodeContextMenuShortcut {
+      --internal-background-color: #d7d7dbc0;
+      --internal-shadow-color: #b1b1b380;
+    }
+  }
 }
 
 @media (forced-colors: active) {
