@@ -34,6 +34,7 @@ export type ExtraPropertiesOnWindowForConsole = {
     enableEventDelayTracks(): void;
     enableCPUGraphs(): void;
     enableProcessCPUTracks(): void;
+    enableSamplingIntervalTracks(): void;
   };
   togglePseudoLocalization: (pseudoStrategy?: string) => void;
   toggleTimelineType: (timelineType?: string) => void;
@@ -139,6 +140,19 @@ export function addDataToWindowObject(
       if (areExperimentalProcessCPUTracksEnabled) {
         console.log(stripIndent`
           ✅ The process CPU tracks are now enabled and should be displayed in the timeline.
+          👉 Note that this is an experimental feature that might still have bugs.
+          💡 As an experimental feature their presence isn't persisted as a URL parameter like the other things.
+        `);
+      }
+    },
+
+    enableSamplingIntervalTracks() {
+      const areExperimentalSamplingIntervalTracksEnabled = dispatch(
+        actions.enableExperimentalSamplingIntervalTracks()
+      );
+      if (areExperimentalSamplingIntervalTracksEnabled) {
+        console.log(stripIndent`
+          ✅ The sampling interval tracks are now enabled and should be displayed in the timeline.
           👉 Note that this is an experimental feature that might still have bugs.
           💡 As an experimental feature their presence isn't persisted as a URL parameter like the other things.
         `);
