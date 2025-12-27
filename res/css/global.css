@@ -2,6 +2,37 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+:root {
+  --base-foreground-color: #000;
+  --base-background-color: #fff;
+  --link-foreground-color: var(--blue-60);
+  --link-visited-foreground-color: var(--purple-70);
+  --link-active-foreground-color: var(--red-50);
+
+  background-color: var(--base-background-color);
+  color: var(--base-foreground-color);
+}
+
+:root.dark-mode {
+  --base-foreground-color: var(--grey-20);
+  --base-background-color: var(--ink-90);
+  --link-foreground-color: var(--blue-40);
+  --link-visited-foreground-color: var(--purple-40);
+  --link-active-foreground-color: var(--red-50);
+}
+
+a {
+  color: var(--link-foreground-color);
+}
+
+a:visited {
+  color: var(--link-visited-foreground-color);
+}
+
+a:active {
+  color: var(--link-active-foreground-color);
+}
+
 /**
  * This class should be used to create a small colored square. It's used
  * especially for categories and network mime types.
