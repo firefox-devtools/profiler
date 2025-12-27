@@ -3,6 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .appKeyboardShortcuts {
+  --internal-fade-color: #000a;
+  --internal-fade-from-color: #0000;
+  --internal-shadow-color: rgb(0 0 0 / 0.4);
+
   position: absolute;
   top: 0;
   left: 0;
@@ -12,7 +16,7 @@
   box-sizing: border-box;
   padding: 20px;
   animation: appKeyboardShortcutsFadeIn 0.2s;
-  background: #000a;
+  background: var(--internal-fade-color);
 }
 
 .appKeyboardShortcuts.open {
@@ -29,9 +33,17 @@
   border-radius: 5px;
   margin: 0 auto;
   animation: arrowPanelAppear 0.2s cubic-bezier(0.07, 0.95, 0, 1);
-  background: #fff;
-  filter: drop-shadow(0 0 0.5px rgb(0 0 0 / 0.4))
-    drop-shadow(0 4px 5px rgb(0 0 0 / 0.4));
+  background: var(--base-background-color);
+  filter: drop-shadow(0 0 0.5px var(--internal-shadow-color))
+    drop-shadow(0 4px 5px var(--internal-shadow-color));
+}
+
+@supports (color-scheme: dark) {
+  @media (prefers-color-scheme: dark) {
+    .appKeyboardShortcutsBox {
+      border: 1px solid var(--base-border-color);
+    }
+  }
 }
 
 .appKeyboardShortcutsScroll {
@@ -51,14 +63,26 @@
 }
 
 .appKeyboardShortcutsShortcut {
+  --internal-background-color: rgb(222 222 227 / 0.79);
+  --internal-shadow-color: rgb(0 0 0 / 0.27);
+
   display: inline-flex;
   align-items: center;
   padding: 0 5px;
   border-radius: 3px;
-  background: rgb(222 222 227 / 0.79);
-  box-shadow: 1px 1px rgb(0 0 0 / 0.27);
-  color: #000;
+  background: var(--internal-background-color);
+  box-shadow: 1px 1px var(--internal-shadow-color);
+  color: var(--base-foreground-color);
   margin-inline-start: 6px;
+}
+
+@supports (color-scheme: dark) {
+  @media (prefers-color-scheme: dark) {
+    .appKeyboardShortcutsShortcut {
+      --internal-background-color: var(--ink-70);
+      --internal-shadow-color: #b1b1b380;
+    }
+  }
 }
 
 .appKeyboardShortcutsContent {
@@ -77,10 +101,20 @@
 }
 
 .appKeyboardShortcutsHeader {
+  --internal-background-color: var(--grey-20);
+
   display: flex;
-  border-bottom: 1px solid var(--grey-30);
-  background: var(--grey-20);
+  border-bottom: 1px solid var(--base-border-color);
+  background: var(--internal-background-color);
   font-size: 13px;
+}
+
+@supports (color-scheme: dark) {
+  @media (prefers-color-scheme: dark) {
+    .appKeyboardShortcutsHeader {
+      --internal-background-color: var(--ink-80);
+    }
+  }
 }
 
 .appKeyboardShortcutsHeaderTitle {
@@ -89,20 +123,33 @@
 }
 
 .appKeyboardShortcutsHeaderClose {
+  --internal-cancel-icon: url(../../../res/img/svg/searchfield-cancel.svg);
+  --internal-hover-background-color: var(--grey-30);
+
   padding: 6px 6px 6px 30px;
   border: 0;
   border-radius: 3px;
 
   /* Allow for the photon focus ring to fit in the space by using a 4px margin. */
   margin: 4px;
-  background: url(../../../res/img/svg/searchfield-cancel.svg) 10px center
-    no-repeat;
+  background: var(--internal-cancel-icon) 10px center no-repeat;
+  color: var(--base-foreground-color);
   cursor: pointer;
   font-size: inherit;
 }
 
+@supports (color-scheme: dark) {
+  @media (prefers-color-scheme: dark) {
+    .appKeyboardShortcutsHeaderClose {
+      --internal-hover-background-color: var(
+        --clickable-ghost-hover-background-color
+      );
+    }
+  }
+}
+
 .appKeyboardShortcutsHeaderClose:hover {
-  background-color: var(--grey-30);
+  background-color: var(--internal-hover-background-color);
 }
 
 .appKeyboardShortcutsNoInteract {
@@ -111,11 +158,11 @@
 
 @keyframes appKeyboardShortcutsFadeIn {
   from {
-    background: #0000;
+    background: var(--internal-fade-from-color);
   }
 
   to {
-    background: #000a;
+    background: var(--internal-fade-color);
   }
 }
 
