@@ -7,7 +7,11 @@ import { withChartViewport, type Viewport } from '../shared/chart/Viewport';
 import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
-import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
+import {
+  mapCategoryColorNameToStackChartStyles,
+  getForegroundColor,
+  getBackgroundColor,
+} from '../../utils/colors';
 import {
   formatCallNodeNumberWithUnit,
   formatPercent,
@@ -226,7 +230,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       TEXT_OFFSET_START * cssToDeviceScale
     );
 
-    fastFillStyle.set('#ffffff');
+    fastFillStyle.set(getBackgroundColor());
     ctx.fillRect(0, 0, deviceContainerWidth, deviceContainerHeight);
 
     const callNodeTable = callNodeInfo.getCallNodeTable();
@@ -304,8 +308,8 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         );
 
         const background = isHighlighted
-          ? colorStyles.selectedFillStyle
-          : colorStyles.unselectedFillStyle;
+          ? colorStyles.getSelectedFillStyle()
+          : colorStyles.getUnselectedFillStyle();
 
         fastFillStyle.set(background);
         ctx.fillRect(
@@ -329,8 +333,8 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
           );
           if (fittedText) {
             const foreground = isHighlighted
-              ? colorStyles.selectedTextColor
-              : '#000';
+              ? colorStyles.getSelectedTextColor()
+              : getForegroundColor();
             fastFillStyle.set(foreground);
             // TODO - L10N RTL.
             ctx.fillText(fittedText, deviceTextLeft, deviceTextTop);

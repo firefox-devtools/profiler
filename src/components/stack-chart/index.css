@@ -12,5 +12,5 @@
 .stackChartContent {
   display: flex;
   flex: 1;
-  border-top: 1px solid var(--grey-30);
+  border-top: 1px solid var(--base-border-color);
 }

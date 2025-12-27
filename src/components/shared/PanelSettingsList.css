@@ -13,13 +13,23 @@
 }
 
 .panelSettingsListItem {
+  --internal-border-color: var(--grey-20);
+
   display: flex;
   align-items: center;
   padding: 0;
   margin: 0 5px;
 }
 
+@supports (color-scheme: dark) {
+  @media (prefers-color-scheme: dark) {
+    .panelSettingsListItem {
+      --internal-border-color: var(--grey-80);
+    }
+  }
+}
+
 .panelSettingsListItem:not(:first-child) {
   padding-left: 10px;
-  border-left: 1px solid var(--grey-20);
+  border-left: 1px solid var(--internal-border-color);
 }

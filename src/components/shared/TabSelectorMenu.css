@@ -3,6 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .TabSelectorMenu {
+  background-color: var(--base-background-color);
+  color: var(--base-foreground-color);
+
   /* Make it scrollable if the tab list is too long. */
   overflow-y: auto;
 }

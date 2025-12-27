@@ -31,7 +31,7 @@
 .timelineTrackMemoryTooltipNumber {
   display: inline-block;
   min-width: 60px;
-  color: var(--grey-60);
+  color: var(--tooltip-number-foreground-color);
   font-weight: bold;
 }
 

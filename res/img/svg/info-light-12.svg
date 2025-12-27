@@ -1,0 +1,8 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<svg width="12px" height="12px" version="1.1" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
+ <rect x="5" y="5" width="2" height="4" ry="1" fill="#ededf0" fill-opacity=".8"/>
+ <rect x="5" y="3" width="2" height="1" ry="0.5" fill="#ededf0" fill-opacity=".8"/>
+ <ellipse cx="6" cy="6" rx="5.25" ry="5.25" fill="none" stroke="#ededf0" stroke-opacity=".8" stroke-width="1.5"/>
+</svg>

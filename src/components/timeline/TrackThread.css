@@ -17,5 +17,5 @@
   width: 100%;
   height: var(--timeline-track-thread-blank-height);
   padding-left: 1px;
-  background-color: #fff;
+  background-color: var(--base-background-color);
 }
