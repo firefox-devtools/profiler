@@ -25,6 +25,15 @@
      we have removed this animation in the meantime */
 }
 
+@supports (color-scheme: dark) {
+  @media (prefers-color-scheme: dark) {
+    .filterNavigatorBar {
+      --internal-selected-color: var(--selected-color, var(--blue-40));
+      --internal-separator-img: url(../../../res/img/svg/scope-bar-separator-light.svg);
+    }
+  }
+}
+
 .filterNavigatorBarItem {
   position: relative;
   display: flex;
