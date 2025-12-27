@@ -3,13 +3,23 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .jsTracerSettings {
+  --internal-foreground-color: var(--ink-70);
+
   display: flex;
   height: 25px;
   flex-flow: row nowrap;
   padding: 0;
-  border-bottom: 1px solid var(--grey-30);
-  color: var(--ink-70);
+  border-bottom: 1px solid var(--base-border-color);
+  color: var(--internal-foreground-color);
   line-height: 25px;
+}
+
+@supports (color-scheme: dark) {
+  @media (prefers-color-scheme: dark) {
+    .jsTracerSettings {
+      --internal-foreground-color: var(--grey-30);
+    }
+  }
 }
 
 .jsTracerSettingsList {
@@ -39,9 +49,19 @@
 }
 
 .jsTracerSettingsFilter {
+  --internal-border-color: var(--grey-20);
+
   padding-right: 10px;
   border-right: 1px solid var(--grey-20);
   white-space: nowrap;
+}
+
+@supports (color-scheme: dark) {
+  @media (prefers-color-scheme: dark) {
+    .jsTracerSettingsFilter {
+      --internal-border-color: var(--grey-80);
+    }
+  }
 }
 
 .jsTracerSettingsFilterLabel {
