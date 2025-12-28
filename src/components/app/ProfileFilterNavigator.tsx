@@ -9,13 +9,19 @@ import { showMenu } from '@firefox-devtools/react-contextmenu';
 import classNames from 'classnames';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { popCommittedRanges } from 'firefox-profiler/actions/profile-view';
+import {
+  popCommittedRanges,
+  updatePreviewSelection,
+  commitRange,
+} from 'firefox-profiler/actions/profile-view';
 import {
   getPreviewSelection,
   getProfileFilterPageDataByTabID,
   getProfileRootRange,
   getProfileTimelineUnit,
+  getCommittedRange,
   getCommittedRangeLabels,
+  getZeroAt,
 } from 'firefox-profiler/selectors/profile';
 import { getTabFilter } from 'firefox-profiler/selectors/url-state';
 import { getFormattedTimelineValue } from 'firefox-profiler/profile-logic/committed-ranges';
@@ -40,6 +46,8 @@ type Props = {
 
 type DispatchProps = {
   readonly onPop: Props['onPop'];
+  readonly updatePreviewSelection?: Props['updatePreviewSelection'];
+  readonly commitRange?: Props['commitRange'];
 };
 
 type StateProps = Readonly<Omit<Props, keyof DispatchProps>>;
@@ -79,6 +87,12 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
       pageDataByTabID,
       tabFilter,
       profileTimelineUnit,
+      committedRange,
+      previewSelection,
+      updatePreviewSelection,
+      commitRange,
+      uncommittedInputFieldRef,
+      zeroAt,
     } = this.props;
 
     let firstItem;
@@ -169,6 +183,12 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
           selectedItem={selectedItem}
           uncommittedItem={uncommittedItem}
           onPop={onPop}
+          committedRange={committedRange}
+          previewSelection={previewSelection}
+          updatePreviewSelection={updatePreviewSelection}
+          commitRange={commitRange}
+          uncommittedInputFieldRef={uncommittedInputFieldRef}
+          zeroAt={zeroAt}
         />
         {pageDataByTabID && pageDataByTabID.size > 0 ? (
           <TabSelectorMenu />
@@ -178,12 +198,17 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
   }
 }
 
+type OwnProps = {
+  readonly uncommittedInputFieldRef?: React.RefObject<HTMLInputElement>;
+};
+
 export const ProfileFilterNavigator = explicitConnect<
-  {},
+  OwnProps,
   StateProps,
   DispatchProps
 >({
   mapStateToProps: (state) => {
+    const committedRange = getCommittedRange(state);
     const items = getCommittedRangeLabels(state);
     const previewSelection = getPreviewSelection(state);
     const profileTimelineUnit = getProfileTimelineUnit(state);
@@ -193,6 +218,7 @@ export const ProfileFilterNavigator = explicitConnect<
           profileTimelineUnit
         )
       : undefined;
+    const zeroAt = getZeroAt(state);
 
     const pageDataByTabID = getProfileFilterPageDataByTabID(state);
     const tabFilter = getTabFilter(state);
@@ -208,10 +234,15 @@ export const ProfileFilterNavigator = explicitConnect<
       tabFilter,
       rootRange,
       profileTimelineUnit,
+      committedRange,
+      previewSelection,
+      zeroAt,
     };
   },
   mapDispatchToProps: {
     onPop: popCommittedRanges,
+    updatePreviewSelection,
+    commitRange,
   },
   component: ProfileFilterNavigatorBarImpl,
 });

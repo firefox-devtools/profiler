@@ -2,7 +2,7 @@
  * license, v. 2.0. if a copy of the mpl was not distributed with this
  * file, you can obtain one at http://mozilla.org/mpl/2.0/. */
 
-import { PureComponent } from 'react';
+import * as React from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import { DetailsContainer } from './DetailsContainer';
@@ -59,7 +59,16 @@ type DispatchProps = {
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
-class ProfileViewerImpl extends PureComponent<Props> {
+class ProfileViewerImpl extends React.PureComponent<Props> {
+  uncommittedInputFieldRef = React.createRef<HTMLInputElement>();
+
+  _onSelectionMove = () => {
+    if (!this.uncommittedInputFieldRef.current) {
+      return;
+    }
+    this.uncommittedInputFieldRef.current.blur();
+  };
+
   override render() {
     const {
       hasZipFile,
@@ -114,7 +123,9 @@ class ProfileViewerImpl extends PureComponent<Props> {
               />
             ) : null}
             <ProfileName />
-            <ProfileFilterNavigator />
+            <ProfileFilterNavigator
+              uncommittedInputFieldRef={this.uncommittedInputFieldRef}
+            />
             {
               // Define a spacer in the middle that will shrink based on the availability
               // of space in the top bar. It will shrink away before any of the items
@@ -139,7 +150,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
             secondaryInitialSize={270}
             onDragEnd={invalidatePanelLayout}
           >
-            <Timeline />
+            <Timeline onSelectionMove={this._onSelectionMove} />
             <SplitterLayout
               vertical
               percentage={true}
