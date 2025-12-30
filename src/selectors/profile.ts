@@ -14,6 +14,7 @@ import {
   processCounter,
   getInclusiveSampleIndexRangeForSelection,
   computeTabToThreadIndexesMap,
+  hasUsefulSamples,
 } from '../profile-logic/profile-data';
 import type { IPCMarkerCorrelations } from '../profile-logic/marker-data';
 import { correlateIPCMarkers } from '../profile-logic/marker-data';
@@ -189,6 +190,89 @@ export const getThreads: Selector<RawThread[]> = (state) =>
   getProfile(state).threads;
 export const getThreadNames: Selector<string[]> = (state) =>
   getProfile(state).threads.map((t) => t.name);
+
+/**
+ * Returns a Set of ThreadIndexes for threads that should hide their activity graph.
+ * This applies to threads that:
+ * 1. Are the only thread in their process
+ * 2. Are not the main thread
+ * 3. Have no useful samples
+ * 4. Have no CPU usage information
+ */
+export const getThreadIndexesThatShouldHideActivityGraph: Selector<
+  Set<ThreadIndex>
+> = createSelector(
+  getThreads,
+  getRawProfileSharedData,
+  (threads, shared): Set<ThreadIndex> => {
+    const result = new Set<ThreadIndex>();
+
+    // Group threads by PID
+    const threadsByPid = new Map<Pid, ThreadIndex[]>();
+    for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
+      const thread = threads[threadIndex];
+      const threadsForPid = threadsByPid.get(thread.pid) || [];
+      threadsForPid.push(threadIndex);
+      threadsByPid.set(thread.pid, threadsForPid);
+    }
+
+    console.log('[DEBUG] Threads by PID:', threadsByPid);
+
+    // Check each thread
+    for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
+      const thread = threads[threadIndex];
+      const threadsInProcess = threadsByPid.get(thread.pid) || [];
+
+      console.log(
+        `[DEBUG] Thread ${threadIndex} (${thread.name}, PID ${thread.pid}):`,
+        {
+          threadsInProcessCount: threadsInProcess.length,
+          isMainThread: thread.isMainThread,
+          hasSamples: [
+            thread.samples,
+            thread.jsAllocations,
+            thread.nativeAllocations,
+          ].some((table) => hasUsefulSamples(table?.stack, thread, shared)),
+          hasCPUUsage: thread.samples.threadCPUDelta !== undefined,
+        }
+      );
+
+      // Check condition 1: Only thread in process
+      if (threadsInProcess.length !== 1) {
+        continue;
+      }
+
+      // Check condition 2: Not main thread
+      if (thread.isMainThread) {
+        continue;
+      }
+
+      // Check condition 3: No useful samples
+      const { samples, jsAllocations, nativeAllocations } = thread;
+      const hasSamples = [samples, jsAllocations, nativeAllocations].some(
+        (table) => hasUsefulSamples(table?.stack, thread, shared)
+      );
+      if (hasSamples) {
+        continue;
+      }
+
+      // Check condition 4: No CPU usage information
+      const hasCPUUsage = thread.samples.threadCPUDelta !== undefined;
+      if (hasCPUUsage) {
+        continue;
+      }
+
+      // All conditions met - hide activity graph
+      console.log(
+        `[DEBUG] ✓ Thread ${threadIndex} (${thread.name}) SHOULD HIDE activity graph`
+      );
+      result.add(threadIndex);
+    }
+
+    console.log('[DEBUG] Threads that should hide activity graph:', result);
+    return result;
+  }
+);
 export const getLastNonShiftClick: Selector<
   LastNonShiftClickInformation | null
 > = (state) => getProfileViewOptions(state).lastNonShiftClick;
