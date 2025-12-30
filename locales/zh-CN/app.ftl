@@ -443,6 +443,7 @@ MenuButtons--metaInfo--profiling-session = 记录长度：
 MenuButtons--metaInfo--main-process-started = 主进程开始：
 MenuButtons--metaInfo--main-process-ended = 主进程结束：
 MenuButtons--metaInfo--file-name = 文件名：
+MenuButtons--metaInfo--file-size = 文件大小：
 MenuButtons--metaInfo--interval = 间隔：
 MenuButtons--metaInfo--buffer-capacity = 缓冲容量：
 MenuButtons--metaInfo--buffer-duration = 缓冲间隔：
