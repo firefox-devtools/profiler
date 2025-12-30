@@ -52,6 +52,10 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
     }
   );
 
+  _onFirstItemClick = (event: React.MouseEvent<HTMLElement>) => {
+    this._showTabSelectorMenu(event);
+  };
+
   _showTabSelectorMenu = (event: React.MouseEvent<HTMLElement>) => {
     if (this.props.items.length > 0 || this.props.uncommittedItem) {
       // Do nothing if there are committed ranges. We only allow users to change
@@ -82,6 +86,7 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
     } = this.props;
 
     let firstItem;
+    let isFirstItemClickable = false;
     if (pageDataByTabID && pageDataByTabID.size > 0) {
       const pageData =
         tabFilter !== null ? pageDataByTabID.get(tabFilter) : null;
@@ -114,18 +119,18 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
       );
 
       if (items.length === 0 && !uncommittedItem) {
-        // It should be a clickable button if there are no committed ranges.
+        // It should be clickable if there are no committed ranges.
+        isFirstItemClickable = true;
         firstItem = (
-          <button
-            type="button"
-            onClick={this._showTabSelectorMenu}
+          <span
             className={classNames(
               'filterNavigatorBarItemContent',
-              'profileFilterNavigator--tab-selector'
+              'profileFilterNavigator--tab-selector',
+              'button'
             )}
           >
             {itemContents}
-          </button>
+          </span>
         );
       } else {
         // There are committed ranges, don't make it button because this will
@@ -169,6 +174,9 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
           selectedItem={selectedItem}
           uncommittedItem={uncommittedItem}
           onPop={onPop}
+          onFirstItemClick={
+            isFirstItemClickable ? this._onFirstItemClick : undefined
+          }
         />
         {pageDataByTabID && pageDataByTabID.size > 0 ? (
           <TabSelectorMenu />
