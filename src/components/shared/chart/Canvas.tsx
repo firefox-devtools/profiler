@@ -378,6 +378,20 @@ export class ChartCanvas<Item> extends React.Component<
           this.setState({ selectedItem: null });
         }
       }
+
+      if (
+        this._canvas &&
+        this._canvas.width !== 0 &&
+        this.props.containerWidth === 0
+      ) {
+        // This is a temporary default state triggered by Viewport,
+        // for the viewportNeedsUpdate condition.
+        //
+        // Another setState call with the updated containerWidth/containerHeight
+        // will be performed and componentDidUpdate will be called again.
+        // We should ignore this update, in order to avoid an unnecessary flash.
+        return;
+      }
       this._scheduleDraw();
     } else if (
       !hoveredItemsAreEqual(prevState.hoveredItem, this.state.hoveredItem)
