@@ -326,13 +326,14 @@ describe('SymbolStore', function () {
     );
 
     // The symbolStore should already have a cached symbol table for lib2 now,
-    // so requestSymbolsFromServer should only have been called for one request.
+    // but the cache is only checked after the API requests, so both libraries
+    // are sent to requestSymbolsFromServer.
     expect(symbolProvider.requestSymbolsFromServer).toHaveBeenCalledTimes(2);
-    expect(symbolsForAddressesRequestCount).toEqual(3);
+    expect(symbolsForAddressesRequestCount).toEqual(4);
     expect(errorCallback).not.toHaveBeenCalled();
 
-    // requestSymbolsFromServer should have succeeded for that one request,
-    // so requestSymbolTableFromBrowser should not have been called again.
+    // requestSymbolsFromServer should have succeeded for lib1 and failed for lib2.
+    // lib2 is then found in the cache, so requestSymbolTableFromBrowser is not called again.
     expect(symbolProvider.requestSymbolTableFromBrowser).toHaveBeenCalledTimes(
       1
     );
@@ -452,7 +453,7 @@ describe('SymbolStore', function () {
     // Empty debugNames or breakpadIds should cause errors. And if symbols are
     // not available from any source, all errors along the way should be included
     // in the reported error.
-    expect(failedLibs.size).toBe(3);
+    expect([...failedLibs]).toBeArrayOfSize(3);
     expect(failedLibs.get('empty-breakpadid')).toEqual(
       expect.objectContaining({
         message: expect.stringContaining('Invalid debugName or breakpadId'),
