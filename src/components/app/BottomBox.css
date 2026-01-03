@@ -97,6 +97,8 @@
 .codeLoadingOverlay,
 .sourceCodeErrorOverlay,
 .assemblyCodeErrorOverlay {
+  --internal-background-color: rgb(240 240 240 / 0.8);
+
   /**
    * Put the overlay on top of everything in .bottom-main, but centered
    * horizontally and vertically. We center using margin: auto, and enforce
@@ -114,10 +116,20 @@
   padding: 15px;
   border-radius: 10px;
   margin: auto;
-  background-color: rgb(240 240 240 / 0.8);
+  background-color: var(--internal-background-color);
   gap: 15px;
   inset: 0;
   overflow-wrap: break-word;
+}
+
+@supports (color-scheme: dark) {
+  @media (prefers-color-scheme: dark) {
+    .codeLoadingOverlay,
+    .sourceCodeErrorOverlay,
+    .assemblyCodeErrorOverlay {
+      --internal-background-color: rgb(16 16 16 / 0.8);
+    }
+  }
 }
 
 /* Use ::before to add a loading spinner image */
