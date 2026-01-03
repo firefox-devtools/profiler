@@ -144,7 +144,7 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
             // Make sure and use the profile name and focus generation to support the
             // back button invalidating the state
             key={key}
-            className="profileNameInput"
+            className="profileNameInput photon-input"
             style={{
               display: isFocused ? undefined : 'none',
             }}

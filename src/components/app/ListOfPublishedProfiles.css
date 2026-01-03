@@ -35,6 +35,8 @@
 }
 
 .publishedProfilesListItem {
+  --internal-hover-shadow-color: var(--blue-60);
+
   display: flex;
   justify-content: space-between;
 
@@ -45,22 +47,44 @@
   margin: -2px 0;
 }
 
+@supports (color-scheme: dark) {
+  @media (prefers-color-scheme: dark) {
+    .publishedProfilesListItem {
+      --internal-hover-shadow-color: var(--blue-70);
+    }
+  }
+}
+
 .publishedProfilesLink {
+  --internal-hover-background-color: var(--grey-90-a05);
+
   display: flex;
   min-width: 0;
   flex: auto;
   padding: 4px 8px; /* 4px as vertical padding so that it's 8 when added up, and 8px for the left and right padddings */
-  color: inherit;
+  color: var(--base-foreground-color);
   text-decoration: none;
 }
 
+@supports (color-scheme: dark) {
+  @media (prefers-color-scheme: dark) {
+    .publishedProfilesLink {
+      --internal-hover-background-color: var(--grey-10-a10);
+    }
+  }
+}
+
+.publishedProfilesLink:visited {
+  color: var(--base-foreground-color);
+}
+
 .publishedProfilesLink:hover {
-  background: var(--grey-90-a05);
+  background: var(--internal-hover-background-color);
 }
 
 .publishedProfilesListItem_ConfirmDialogIsOpen,
 .publishedProfilesListItem:focus-within {
-  box-shadow: -3px 0 0 var(--blue-60); /* This is a border that doesn't move the content. */
+  box-shadow: -3px 0 0 var(--internal-hover-shadow-color); /* This is a border that doesn't move the content. */
 }
 
 .publishedProfilesDate {

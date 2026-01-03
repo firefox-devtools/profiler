@@ -15,13 +15,15 @@
 }
 
 .timelineTrackEventDelayGraphDot {
+  --internal-background-color: var(--orange-60);
+
   position: absolute;
   width: 6px;
   height: 6px;
   border-radius: 3px;
   margin-top: -3px;
   margin-left: -3px;
-  background-color: var(--orange-60);
+  background-color: var(--internal-background-color);
   pointer-events: none;
 }
 
@@ -32,6 +34,6 @@
 .timelineTrackEventDelayTooltipNumber {
   display: inline-block;
   min-width: 60px;
-  color: var(--grey-60);
+  color: var(--tooltip-number-foreground-color);
   font-weight: bold;
 }
