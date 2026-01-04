@@ -94,7 +94,12 @@ import type {
   BrowserConnection,
   BrowserConnectionStatus,
 } from '../app-logic/browser-connection';
-import type { LibSymbolicationRequest } from '../profile-logic/symbol-store';
+import type {
+  LibSymbolicationRequest,
+  LibSymbolicationResponse,
+  SymbolProvider,
+} from '../profile-logic/symbol-store';
+import type { SymbolTableAsTuple } from 'firefox-profiler/profile-logic/symbol-store-db';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -569,13 +574,44 @@ function getSymbolStore(
     return null;
   }
 
-  async function requestSymbolsWithCallback(
+  const symbolProvider = new RegularSymbolProvider(
+    dispatch,
+    symbolServerUrl,
+    browserConnection
+  );
+
+  // Note, the database name still references the old project name, "perf.html". It was
+  // left the same as to not invalidate user's information.
+  return new SymbolStore('perf-html-async-storage', symbolProvider);
+}
+
+/**
+ * The regular implementation of the SymbolProvider interface: Symbols are requested
+ * from a server via fetch, and from the browser via a BrowserConnection (if present).
+ * State changes are notified via redux actions to the provided `dispatch` function.
+ */
+class RegularSymbolProvider implements SymbolProvider {
+  _dispatch: Dispatch;
+  _symbolServerUrl: string;
+  _browserConnection: BrowserConnection | null;
+
+  constructor(
+    dispatch: Dispatch,
+    symbolServerUrl: string,
+    browserConnection: BrowserConnection | null
+  ) {
+    this._dispatch = dispatch;
+    this._symbolServerUrl = symbolServerUrl;
+    this._browserConnection = browserConnection;
+  }
+
+  async _makeSymbolicationAPIRequestWithCallback(
     symbolSupplierName: string,
     requests: LibSymbolicationRequest[],
     callback: (path: string, requestJson: string) => Promise<unknown>
   ) {
     for (const { lib } of requests) {
-      dispatch(requestingSymbolTable(lib));
+      this._dispatch(requestingSymbolTable(lib));
     }
     try {
       return await MozillaSymbolicationAPI.requestSymbols(
@@ -589,73 +625,74 @@ function getSymbolStore(
       );
     } finally {
       for (const { lib } of requests) {
-        dispatch(receivedSymbolTableReply(lib));
+        this._dispatch(receivedSymbolTableReply(lib));
       }
     }
   }
 
-  // Note, the database name still references the old project name, "perf.html". It was
-  // left the same as to not invalidate user's information.
-  const symbolStore = new SymbolStore('perf-html-async-storage', {
-    requestSymbolsFromServer: (requests) =>
-      requestSymbolsWithCallback(
-        'symbol server',
-        requests,
-        async (path, json) => {
-          const response = await fetch(symbolServerUrl + path, {
-            body: json,
-            method: 'POST',
-            mode: 'cors',
-            // Use a profiler-specific user agent, so that the symbolication server knows
-            // what's making this request.
-            headers: new Headers({
-              'User-Agent': `FirefoxProfiler/1.0 (+${location.origin})`,
-            }),
-          });
-          return response.json();
-        }
-      ),
-
-    requestSymbolsFromBrowser: async (requests) => {
-      if (browserConnection === null) {
-        throw new Error(
-          'No connection to the browser, cannot run querySymbolicationApi'
-        );
+  requestSymbolsFromServer(
+    requests: LibSymbolicationRequest[]
+  ): Promise<LibSymbolicationResponse[]> {
+    return this._makeSymbolicationAPIRequestWithCallback(
+      'symbol server',
+      requests,
+      async (path, json) => {
+        const response = await fetch(this._symbolServerUrl + path, {
+          body: json,
+          method: 'POST',
+          mode: 'cors',
+          // Use a profiler-specific user agent, so that the symbolication server knows
+          // what's making this request.
+          headers: new Headers({
+            'User-Agent': `FirefoxProfiler/1.0 (+${location.origin})`,
+          }),
+        });
+        return response.json();
       }
+    );
+  }
 
-      const bc = browserConnection;
-      return requestSymbolsWithCallback(
-        'browser',
-        requests,
-        async (path, json) =>
-          JSON.parse(await bc.querySymbolicationApi(path, json))
+  async requestSymbolsFromBrowser(
+    requests: LibSymbolicationRequest[]
+  ): Promise<LibSymbolicationResponse[]> {
+    if (this._browserConnection === null) {
+      throw new Error(
+        'No connection to the browser, cannot run querySymbolicationApi'
       );
-    },
+    }
 
-    requestSymbolTableFromBrowser: async (lib) => {
-      if (browserConnection === null) {
-        throw new Error(
-          'No connection to the browser, cannot obtain symbol tables'
-        );
-      }
+    const bc = this._browserConnection;
+    return this._makeSymbolicationAPIRequestWithCallback(
+      'browser',
+      requests,
+      async (path, json) =>
+        JSON.parse(await bc.querySymbolicationApi(path, json))
+    );
+  }
 
-      const { debugName, breakpadId } = lib;
-      dispatch(requestingSymbolTable(lib));
-      try {
-        const symbolTable = await browserConnection.getSymbolTable(
-          debugName,
-          breakpadId
-        );
-        dispatch(receivedSymbolTableReply(lib));
-        return symbolTable;
-      } catch (error) {
-        dispatch(receivedSymbolTableReply(lib));
-        throw error;
-      }
-    },
-  });
+  async requestSymbolTableFromBrowser(
+    lib: RequestedLib
+  ): Promise<SymbolTableAsTuple> {
+    if (this._browserConnection === null) {
+      throw new Error(
+        'No connection to the browser, cannot obtain symbol tables'
+      );
+    }
 
-  return symbolStore;
+    const { debugName, breakpadId } = lib;
+    this._dispatch(requestingSymbolTable(lib));
+    try {
+      const symbolTable = await this._browserConnection.getSymbolTable(
+        debugName,
+        breakpadId
+      );
+      this._dispatch(receivedSymbolTableReply(lib));
+      return symbolTable;
+    } catch (error) {
+      this._dispatch(receivedSymbolTableReply(lib));
+      throw error;
+    }
+  }
 }
 
 export async function doSymbolicateProfile(
