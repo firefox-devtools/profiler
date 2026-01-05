@@ -378,7 +378,7 @@ export class SymbolStore {
           }
 
           // Now we've reached the stage where we check for symbol tables.
-          // Check this._db first, and then call this._getSymbolTablesFromBrowser
+          // Check this._db first, and then call this._getSymbolsViaBrowserSymbolTables
           // for the remainder.
 
           // We also need a demangling function for this, which is in an async module.
@@ -424,14 +424,39 @@ export class SymbolStore {
           }
 
           // Some libraries are still remaining, try option 4 for them.
-          // Option 4 is symbolProvider.requestSymbolTableFromBrowser.
-          await this._getSymbolTablesFromBrowser(
-            requestsRemainingAfterCacheCheck,
-            errorMap,
-            demangleCallback,
-            successCb,
-            errorCb
-          );
+          // Option 4: Request a symbol table from the browser.
+          const responsePromiseViaSymbolTable =
+            this._getSymbolsViaBrowserSymbolTables(
+              requestsRemainingAfterCacheCheck,
+              demangleCallback
+            );
+
+          const failedRequests =
+            await this._processSuccessfulResponsesAndReturnRemaining(
+              requestsRemainingAfterCacheCheck,
+              responsePromiseViaSymbolTable,
+              errorMap,
+              successCb
+            );
+
+          if (failedRequests.length === 0) {
+            // Done!
+            return;
+          }
+
+          for (const request of failedRequests) {
+            const { lib } = request;
+            // None of the symbolication methods were successful.
+            // Call the error callback with all accumulated errors.
+            errorCb(
+              request,
+              new SymbolsNotFoundError(
+                `Could not obtain symbols for ${lib.debugName}/${lib.breakpadId}.`,
+                lib,
+                ...(errorMap.get(request) ?? [])
+              )
+            );
+          }
         }
       )
     );
@@ -485,42 +510,31 @@ export class SymbolStore {
   //  2. Android system libraries, even in modern versions of Firefox. We don't
   //     support querySymbolicationApi for them yet, see
   //     https://bugzilla.mozilla.org/show_bug.cgi?id=1735897
-  async _getSymbolTablesFromBrowser(
+  async _getSymbolsViaBrowserSymbolTables(
     requests: LibSymbolicationRequest[],
-    errorMap: Map<LibSymbolicationRequest, Error[]>,
-    demangleCallback: DemangleFunction,
-    successCb: (lib: RequestedLib, results: Map<number, AddressResult>) => void,
-    errorCb: (request: LibSymbolicationRequest, error: Error) => void
-  ): Promise<void> {
-    for (const request of requests) {
-      const { lib, addresses } = request;
-      try {
-        // Option 4: Request a symbol table from the browser.
-        // This call will throw if the browser cannot obtain the symbol table.
-        const symbolTable =
-          await this._symbolProvider.requestSymbolTableFromBrowser(lib);
+    demangleCallback: DemangleFunction
+  ): Promise<LibSymbolicationResponse[]> {
+    return Promise.all(
+      requests.map(async (request) => {
+        const { lib, addresses } = request;
+        try {
+          // This call will throw if the browser cannot obtain the symbol table.
+          const symbolTable =
+            await this._symbolProvider.requestSymbolTableFromBrowser(lib);
 
-        // Did not throw, option 4 was successful!
-        successCb(
-          lib,
-          readSymbolsFromSymbolTable(addresses, symbolTable, demangleCallback)
-        );
+          // Store the symbol table in the database.
+          await this._storeSymbolTableInDB(lib, symbolTable);
 
-        // Store the symbol table in the database.
-        await this._storeSymbolTableInDB(lib, symbolTable);
-      } catch (lastError) {
-        // None of the symbolication methods were successful.
-        // Call the error callback with all accumulated errors.
-        errorCb(
-          request,
-          new SymbolsNotFoundError(
-            `Could not obtain symbols for ${lib.debugName}/${lib.breakpadId}.`,
-            lib,
-            ...(errorMap.get(request) ?? []),
-            lastError
-          )
-        );
-      }
-    }
+          const results = readSymbolsFromSymbolTable(
+            addresses,
+            symbolTable,
+            demangleCallback
+          );
+          return { type: 'SUCCESS', lib, results };
+        } catch (error) {
+          return { type: 'ERROR', request, error };
+        }
+      })
+    );
   }
 }
