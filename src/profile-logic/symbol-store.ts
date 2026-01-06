@@ -395,28 +395,19 @@ export class SymbolStore {
               requestsRemainingAfterBrowserAPI.map(async (request) => {
                 const { lib, addresses } = request;
                 const { debugName, breakpadId } = lib;
-                try {
-                  // Try to get the symbol table from the database.
-                  // This call will throw if the symbol table is not present.
-                  const symbolTable = await this._db.getSymbolTable(
-                    debugName,
-                    breakpadId
+                const symbolTable = await this._db.getSymbolTable(
+                  debugName,
+                  breakpadId
+                );
+                if (symbolTable !== null) {
+                  // Option 3 was successful!
+                  const results = readSymbolsFromSymbolTable(
+                    addresses,
+                    symbolTable,
+                    demangleCallback
                   );
-
-                  // Did not throw, option 3 was successful!
-                  successCb(
-                    lib,
-                    readSymbolsFromSymbolTable(
-                      addresses,
-                      symbolTable,
-                      demangleCallback
-                    )
-                  );
-                } catch (e) {
-                  if (!(e instanceof SymbolsNotFoundError)) {
-                    // rethrow JavaScript programming error
-                    throw e;
-                  }
+                  successCb(lib, results);
+                } else {
                   requestsRemainingAfterCacheCheck.push(request);
                 }
               })

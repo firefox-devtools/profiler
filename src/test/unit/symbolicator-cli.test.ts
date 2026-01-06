@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { InMemorySymbolDB, makeOptionsFromArgv } from '../../symbolicator-cli';
 import { completeSymbolTableAsTuple } from '../fixtures/example-symbol-table';
-import { SymbolsNotFoundError } from '../../profile-logic/errors';
 
 describe('makeOptionsFromArgv', function () {
   const commonArgs = ['/path/to/node', '/path/to/symbolicator-cli.js'];
@@ -120,8 +119,7 @@ describe('InMemorySymbolDB', function () {
   it('should throw when getting a SymbolTable that was not set', async function () {
     const db = new InMemorySymbolDB();
 
-    await expect(async () => {
-      await db.getSymbolTable(debugName, breakpadId);
-    }).rejects.toThrow(SymbolsNotFoundError);
+    const tableOrNull = await db.getSymbolTable(debugName, breakpadId);
+    await expect(tableOrNull).toBeNull();
   });
 });

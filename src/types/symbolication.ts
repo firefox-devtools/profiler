@@ -19,16 +19,16 @@ export interface ISymbolStoreDB {
 
   /**
    * Retrieve the symbol table for the given library.
-   * @param {string}      The debugName of the library.
-   * @param {string}      The breakpadId of the library.
-   * @return              A promise that resolves with the symbol table (in
-   *                      SymbolTableAsTuple format), or fails if we couldn't
-   *                      find a symbol table for the requested library.
+   * @param {string} debugName  The debugName of the library.
+   * @param {string} breakpadId The breakpadId of the library.
+   * @return A promise that resolves with the symbol table (in
+   *         SymbolTableAsTuple format), with null if we couldn't
+   *         find a symbol table for the requested library.
    */
   getSymbolTable(
     debugName: string,
     breakpadId: string
-  ): Promise<SymbolTableAsTuple>;
+  ): Promise<SymbolTableAsTuple | null>;
 
   close(): Promise<void>;
 }

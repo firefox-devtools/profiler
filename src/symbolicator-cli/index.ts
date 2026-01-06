@@ -25,7 +25,6 @@ import {
 import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
 import type { SymbolTableAsTuple } from '../profile-logic/symbol-store-db';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
-import { SymbolsNotFoundError } from '../profile-logic/errors';
 import type { ThreadIndex } from '../types';
 
 /**
@@ -56,16 +55,9 @@ export class InMemorySymbolDB {
   async getSymbolTable(
     debugName: string,
     breakpadId: string
-  ): Promise<SymbolTableAsTuple> {
+  ): Promise<SymbolTableAsTuple | null> {
     const key = this._makeKey(debugName, breakpadId);
-    const value = this._store.get(key);
-    if (typeof value !== 'undefined') {
-      return value;
-    }
-    throw new SymbolsNotFoundError(
-      'The requested library does not exist in the database.',
-      { debugName, breakpadId }
-    );
+    return this._store.get(key) ?? null;
   }
 
   async close(): Promise<void> {}
