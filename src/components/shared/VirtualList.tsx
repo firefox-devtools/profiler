@@ -260,7 +260,7 @@ export class VirtualList<Item> extends React.PureComponent<
   VirtualListState
 > {
   _container: { current: HTMLDivElement | null } = React.createRef();
-  override state = { scrollTop: 0, containerHeight: 0 };
+  override state: VirtualListState = { scrollTop: 0, containerHeight: 0 };
 
   override componentDidMount() {
     document.addEventListener('copy', this._onCopy, false);

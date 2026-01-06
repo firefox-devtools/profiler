@@ -29,7 +29,7 @@ export function withSize<Props>(
   Wrapped: React.ComponentType<PropsWithSize<Props>>
 ): React.ComponentType<Props> {
   return class WithSizeWrapper extends React.PureComponent<Props, State> {
-    override state = { width: 0, height: 0 };
+    override state: State = { width: 0, height: 0 };
     _container: HTMLElement | null = null;
 
     override componentDidMount() {

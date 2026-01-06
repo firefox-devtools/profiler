@@ -30,7 +30,7 @@ export class MenuButtonsPermalink extends React.PureComponent<Props, State> {
     this._permalinkTextField = elem;
   };
 
-  override state = {
+  override state: State = {
     fullUrl: '',
     shortUrl: '',
   };

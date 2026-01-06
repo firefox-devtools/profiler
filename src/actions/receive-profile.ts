@@ -1096,7 +1096,7 @@ async function _extractJsonFromResponse(
       message = 'The network request to load the profile was aborted.';
     } else if (fileType === 'application/json') {
       message = 'The profile’s JSON could not be decoded.';
-    } else if (fileType === null && arrayBuffer !== null) {
+    } else if (arrayBuffer !== null) {
       // If the content type is not specified, use a raw array buffer
       // to fallback to other supported profile formats.
       return arrayBuffer;
@@ -1163,10 +1163,6 @@ export function retrieveProfileOrZipFromUrl(
             serializedProfile,
             profileUrl
           );
-          if (profile === undefined) {
-            throw new Error('Unable to parse the profile.');
-          }
-
           await dispatch(loadProfile(profile, {}, initialLoad));
           break;
         }

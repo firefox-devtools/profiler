@@ -22,7 +22,7 @@ type State = {
  * a div.
  */
 export class DivWithTooltip extends React.PureComponent<Props, State> {
-  override state = {
+  override state: State = {
     isMouseOver: false,
     mouseX: 0,
     mouseY: 0,

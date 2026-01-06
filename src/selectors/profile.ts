@@ -278,7 +278,7 @@ export const getMarkerSchemaByName: Selector<MarkerSchemaByName> =
 
 type CounterSelectors = ReturnType<typeof _createCounterSelectors>;
 
-const _counterSelectors: { [key: number]: CounterSelectors } = {};
+const _counterSelectors: Partial<Record<number, CounterSelectors>> = {};
 export const getCounterSelectors = (index: CounterIndex): CounterSelectors => {
   let selectors = _counterSelectors[index];
   if (!selectors) {
@@ -633,11 +633,6 @@ export const getTrackCount: Selector<TrackCount> = createSelector(
       if (globalTrackIndex === -1) {
         throw new Error('Unable to find a global track from the given pid.');
       }
-      if (!hiddenLocalTracks) {
-        throw new Error(
-          'Unable to find the hidden local tracks from the given pid'
-        );
-      }
 
       if (hiddenGlobalTracks.has(globalTrackIndex)) {
         // The entire process group is hidden, count all of the tracks.
@@ -809,10 +804,6 @@ export const getProfileFilterSortedPageData: Selector<SortedTabPageData> =
         }
         for (const threadIndex of threadIndexes.values()) {
           const threadScore = threadActivityScores[threadIndex];
-          if (!threadScore) {
-            throw new Error('Failed to find the thread score!');
-          }
-
           tabScore += threadScore.boostedSampleScore;
         }
         pageDataWithScore.push({

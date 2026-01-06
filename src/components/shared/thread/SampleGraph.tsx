@@ -243,7 +243,7 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
 }
 
 export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
-  override state = {
+  override state: State = {
     hoveredPixelState: null,
     mouseX: 0,
     mouseY: 0,

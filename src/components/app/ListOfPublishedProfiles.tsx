@@ -49,7 +49,7 @@ class PublishedProfile extends React.PureComponent<
   PublishedProfileProps,
   PublishedProfileState
 > {
-  override state = {
+  override state: PublishedProfileState = {
     confirmDialogIsOpen: false,
   };
 
@@ -162,7 +162,7 @@ type State = {
 export class ListOfPublishedProfiles extends PureComponent<Props, State> {
   _isMounted = false;
 
-  override state = {
+  override state: State = {
     uploadedProfileInformationList: null,
   };
 

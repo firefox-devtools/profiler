@@ -15,7 +15,7 @@ export class FooterLinks extends PureComponent<{}, State> {
     this.setState({ hide: true });
   };
 
-  override state = {
+  override state: State = {
     hide: false,
   };
 

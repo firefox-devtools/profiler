@@ -72,7 +72,7 @@ export type TableViewOptions = {
   readonly fixedColumnWidths: Array<CssPixels> | null;
 };
 
-export type TableViewOptionsPerTab = { [K in TabSlug]: TableViewOptions };
+export type TableViewOptionsPerTab = Partial<Record<TabSlug, TableViewOptions>>;
 
 export type RightClickedCallNode = {
   readonly threadsKey: ThreadsKey;
@@ -185,7 +185,7 @@ export type AppState = {
   readonly sidebarOpenCategories: Map<string, Set<number>>;
   readonly panelLayoutGeneration: number;
   readonly lastVisibleThreadTabSlug: TabSlug;
-  readonly trackThreadHeights: Record<ThreadsKey, CssPixels>;
+  readonly trackThreadHeights: Partial<Record<ThreadsKey, CssPixels>>;
   readonly isNewlyPublished: boolean;
   readonly isDragAndDropDragging: boolean;
   readonly isDragAndDropOverlayRegistered: boolean;

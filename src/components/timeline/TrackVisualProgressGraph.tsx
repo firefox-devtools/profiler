@@ -197,7 +197,7 @@ type State = {
  * graph in the timeline.
  */
 class TrackVisualProgressGraphImpl extends React.PureComponent<Props, State> {
-  override state = {
+  override state: State = {
     hoveredVisualProgress: null,
     mouseX: 0,
     mouseY: 0,

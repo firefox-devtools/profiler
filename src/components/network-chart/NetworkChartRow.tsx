@@ -314,7 +314,7 @@ export class NetworkChartRow extends React.PureComponent<
   NetworkChartRowProps,
   State
 > {
-  override state = {
+  override state: State = {
     pageX: 0,
     pageY: 0,
     hovered: false,

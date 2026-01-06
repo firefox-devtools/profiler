@@ -27,7 +27,7 @@ type State = {
 
 export class ArrowPanel extends React.PureComponent<Props, State> {
   closeTimeout: NodeJS.Timeout | null = null;
-  override state = {
+  override state: State = {
     open: false,
     isClosing: false,
     openGeneration: 0,

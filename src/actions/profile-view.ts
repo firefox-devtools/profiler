@@ -1080,7 +1080,6 @@ export function isolateProcess(
       for (const localTrack of localTracks) {
         if (
           localTrack.type === 'thread' &&
-          localTrack.threadIndex !== undefined &&
           oldSelectedThreadIndexes.has(localTrack.threadIndex)
         ) {
           newSelectedThreadIndexes.add(localTrack.threadIndex);
