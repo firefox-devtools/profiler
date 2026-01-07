@@ -497,6 +497,7 @@ class TimelineMarkers extends React.PureComponent<Props, State> {
               marker={hoveredMarker}
               threadsKey={threadsKey}
               restrictHeightWidth={true}
+              hideFilterButton={true}
             />
           </Tooltip>
         ) : null}

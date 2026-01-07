@@ -85,6 +85,7 @@ type OwnProps = {
   readonly marker: Marker;
   readonly threadsKey: ThreadsKey;
   readonly className?: string;
+  readonly hideFilterButton?: boolean;
   // In tooltips it can be awkward for really long and tall things to force
   // the layout to be huge. This option when set to true will restrict the
   // height of things like stacks, and the width of long things like URLs.
@@ -521,8 +522,13 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
    * a short list of rendering strategies, in the order they appear.
    */
   override render() {
-    const { className, markerIndex, getMarkerLabel, getMarkerSearchTerm } =
-      this.props;
+    const {
+      className,
+      markerIndex,
+      getMarkerLabel,
+      getMarkerSearchTerm,
+      hideFilterButton,
+    } = this.props;
     const markerLabel = getMarkerLabel(markerIndex);
     const searchTerm = getMarkerSearchTerm(markerIndex);
     return (
@@ -532,19 +538,21 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
             {this._maybeRenderMarkerDuration()}
             <div className="tooltipTitle">
               <span className="tooltipTitleText">{markerLabel}</span>
-              <Localized
-                id="MarkerTooltip--filter-button-tooltip"
-                vars={{ filter: searchTerm }}
-                attrs={{ title: true, 'aria-label': true }}
-              >
-                <button
-                  className="tooltipTitleFilterButton"
-                  type="button"
-                  title={`Only show markers matching: “${searchTerm}”`}
-                  aria-label={`Only show markers matching: “${searchTerm}”`}
-                  onClick={this._onFilterButtonClick}
-                />
-              </Localized>
+              {!hideFilterButton ? (
+                <Localized
+                  id="MarkerTooltip--filter-button-tooltip"
+                  vars={{ filter: searchTerm }}
+                  attrs={{ title: true, 'aria-label': true }}
+                >
+                  <button
+                    className="tooltipTitleFilterButton"
+                    type="button"
+                    title={`Only show markers matching: “${searchTerm}”`}
+                    aria-label={`Only show markers matching: “${searchTerm}”`}
+                    onClick={this._onFilterButtonClick}
+                  />
+                </Localized>
+              ) : null}
             </div>
           </div>
         </div>
