@@ -2046,8 +2046,10 @@ export function addInnerWindowIdToStacks(
   callNodesToDupe?: CallNodePath[]
 ) {
   const { stackTable, frameTable, samples } = thread;
+  const usedInnerWindowIDsSet = new Set<number>();
 
   for (const { innerWindowID, callNodes } of listOfOperations) {
+    usedInnerWindowIDsSet.add(innerWindowID);
     for (const callNode of callNodes) {
       const stackIndex = getStackIndexForCallNodePath(thread, callNode);
       const foundFrameIndex = stackTable.frame[stackIndex];
@@ -2128,6 +2130,10 @@ export function addInnerWindowIdToStacks(
       }
       samples.length++;
     }
+  }
+
+  if (usedInnerWindowIDsSet.size !== 0) {
+    thread.usedInnerWindowIDs = Array.from(usedInnerWindowIDsSet);
   }
 }
 
