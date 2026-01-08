@@ -670,6 +670,10 @@ export type RawThread = {
   // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
   // had no extra attribute at all.
   userContextId?: number;
+  // If present, contains the list of innerWindowIDs for pages that this thread is
+  // related to (or, in practice, whose code may be executing in this thread).
+  // It's absent in profiles that don't use inner window IDs.
+  usedInnerWindowIDs?: InnerWindowID[];
 };
 
 export type ExtensionTable = {
