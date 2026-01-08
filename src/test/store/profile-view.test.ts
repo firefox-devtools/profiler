@@ -1979,6 +1979,7 @@ describe('snapshots of selectors/profile', function () {
         samplesThread.frameTable.innerWindowID[frameIdx] = innerWindowID;
       }
     }
+    samplesThread.usedInnerWindowIDs = [innerWindowID];
 
     // Add in a thread with markers
     const markersThread = getThreadWithMarkers(profile.shared, [

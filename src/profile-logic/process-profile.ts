@@ -1214,6 +1214,29 @@ function _processThread(
   );
   const samples = _processSamples(geckoSamples);
 
+  // Compute usedInnerWindowIDs from the frameTable and the markers.
+  let usedInnerWindowIDs: number[] | undefined;
+  const usedInnerWindowIDsSet = new Set<number>();
+  for (let i = 0; i < frameTable.length; i++) {
+    const innerWindowID = frameTable.innerWindowID[i];
+    if (innerWindowID !== null && innerWindowID !== 0) {
+      usedInnerWindowIDsSet.add(innerWindowID);
+    }
+  }
+  for (let i = 0; i < markers.length; i++) {
+    const data = markers.data[i];
+    if (!data || !('innerWindowID' in data)) {
+      continue;
+    }
+    const innerWindowID = data.innerWindowID;
+    if (typeof innerWindowID === 'number' && innerWindowID !== 0) {
+      usedInnerWindowIDsSet.add(innerWindowID);
+    }
+  }
+  if (usedInnerWindowIDsSet.size !== 0) {
+    usedInnerWindowIDs = Array.from(usedInnerWindowIDsSet);
+  }
+
   const newThread: RawThread = {
     name: thread.name,
     isMainThread: thread.name === 'GeckoMain',
@@ -1247,6 +1270,10 @@ function _processThread(
 
   if (thread.userContextId !== undefined) {
     newThread.userContextId = thread.userContextId;
+  }
+
+  if (usedInnerWindowIDs !== undefined) {
+    newThread.usedInnerWindowIDs = usedInnerWindowIDs;
   }
 
   if (jsAllocations) {
