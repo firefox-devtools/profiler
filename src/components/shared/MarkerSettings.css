@@ -13,20 +13,30 @@
   white-space: nowrap;
 }
 
-.filterMarkersButton {
+.filterMarkersButton,
+.copyTableButton {
   position: relative;
   width: 24px;
   height: 24px;
   flex: none;
   padding-right: 30px;
   margin: 0 4px;
-  background-image: url(../../../res/img/svg/filter.svg);
   background-position: 4px center;
   background-repeat: no-repeat;
 }
 
+.filterMarkersButton {
+  background-image: url(../../../res/img/svg/filter.svg);
+}
+
+.copyTableButton {
+  margin-right: 16px;
+  background-image: url(../../../res/img/svg/copy-dark.svg);
+}
+
 /* This is the dropdown arrow on the right of the button. */
-.filterMarkersButton::after {
+.filterMarkersButton::after,
+.copyTableButton::after {
   position: absolute;
   top: 2px;
   right: 2px;
@@ -39,4 +49,24 @@
   margin-left: 4px;
   color: var(--grey-90);
   content: '';
+}
+
+.copyTableButtonWarningWrapper {
+  /* Position */
+  position: fixed;
+  z-index: 4;
+  top: 0;
+  right: 0;
+  left: 0;
+
+  /* Box */
+  display: flex;
+
+  /* Other */
+  pointer-events: none;
+}
+
+.copyTableButtonWarning {
+  margin: 0 auto;
+  pointer-events: auto;
 }
