@@ -122,7 +122,9 @@
 }
 
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):hover,
-.filterNavigatorBarItem:has(button.profileFilterNavigator--tab-selector):hover {
+.filterNavigatorBarItem:has(
+    .profileFilterNavigator--tab-selector.button
+  ):hover {
   background-color: var(--internal-hover-background-color);
   color: var(--internal-hover-color);
 }
@@ -168,7 +170,7 @@
 
   /* When the tab selector is active, we want the item to look like a button */
   .filterNavigatorBarSelectedItem:has(
-    button.profileFilterNavigator--tab-selector
+    .profileFilterNavigator--tab-selector.button
   ) {
     background-color: ButtonFace;
     color: ButtonText;
