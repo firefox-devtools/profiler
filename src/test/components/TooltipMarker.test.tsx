@@ -1333,6 +1333,49 @@ describe('TooltipMarker', function () {
   });
 
   describe('filter button', () => {
+    function setupFilterButton(hideFilterButton: boolean) {
+      const profile = getProfileWithMarkers([
+        ['Reflow', 1, 2, { type: 'tracing', category: 'Paint' }],
+      ]);
+      const store = storeWithProfile(profile);
+      const state = store.getState();
+      const getMarker = selectedThreadSelectors.getMarkerGetter(state);
+      const markerIndexes =
+        selectedThreadSelectors.getFullMarkerListIndexes(state);
+
+      render(
+        <Provider store={store}>
+          <TooltipMarker
+            markerIndex={markerIndexes[0]}
+            marker={getMarker(markerIndexes[0])}
+            threadsKey={0}
+            restrictHeightWidth={true}
+            hideFilterButton={hideFilterButton}
+          />
+        </Provider>
+      );
+    }
+
+    it('hides the filter button when hideFilterButton is true', () => {
+      setupFilterButton(true);
+
+      expect(
+        screen.queryByRole('button', {
+          name: /only show markers matching:/i,
+        })
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows the filter button when hideFilterButton is false', () => {
+      setupFilterButton(false);
+
+      expect(
+        screen.getByRole('button', {
+          name: /only show markers matching:/i,
+        })
+      ).toBeInTheDocument();
+    });
+
     it('shows the filter button for markers without spaces in the label', () => {
       // Tooltip label: "Reflow"
       const profile = getProfileWithMarkers([
