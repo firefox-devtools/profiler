@@ -140,7 +140,7 @@
     "babel-loader": "^10.0.0",
     "babel-plugin-module-resolver": "^5.0.2",
     "browserslist": "^4.28.1",
-    "caniuse-lite": "^1.0.30001760",
+    "caniuse-lite": "^1.0.30001762",
     "circular-dependency-plugin": "^5.2.1",
     "copy-webpack-plugin": "^13.0.1",
     "cross-env": "^10.1.0",
