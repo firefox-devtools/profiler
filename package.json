@@ -9,6 +9,9 @@
       "version": ">= 22 < 23"
     }
   },
+  "browser": {
+    "./src/utils/gz.ts": "./src/utils/gz.browser.ts"
+  },
   "scripts": {
     "build:clean": "rimraf dist && mkdirp dist",
     "build:quiet": "yarn build:clean && cross-env NODE_ENV=development webpack",
@@ -44,6 +47,7 @@
     "start-docs": "ws -d docs-user/ -p 3000",
     "start-photon": "node res/photon/server",
     "test": "node bin/output-fixing-commands.js cross-env LC_ALL=C TZ=UTC NODE_ENV=test jest",
+    "test-node": "node bin/output-fixing-commands.js cross-env LC_ALL=C TZ=UTC NODE_ENV=test JEST_ENVIRONMENT=node jest",
     "test-all": "run-p --max-parallel 4 ts license-check lint test test-alex test-lockfile",
     "test-build-coverage": "yarn test --coverage --coverageReporters=html",
     "test-serve-coverage": "ws -d coverage/ -p 4343",
