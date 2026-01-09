@@ -175,6 +175,7 @@ export type ExperimentalFlags = {
   readonly eventDelayTracks: boolean;
   readonly cpuGraphs: boolean;
   readonly processCPUTracks: boolean;
+  readonly samplingIntervalTracks: boolean;
 };
 
 export type AppState = {
