@@ -13,14 +13,6 @@
   color: var(--base-foreground-color);
 }
 
-:root.dark-mode {
-  .bottom-box-pane {
-    --internal-sourceview-background-color: var(--ink-80);
-    --internal-close-icon: url(../../../res/img/svg/close-light.svg);
-    --internal-assembly-icon: url(../../../res/img/svg/asm-icon-light.svg);
-  }
-}
-
 .bottom-sourceview-wrapper,
 .bottom-assemblyview-wrapper {
   position: relative; /* containing block for status overlay */
@@ -95,6 +87,8 @@
 .codeLoadingOverlay,
 .sourceCodeErrorOverlay,
 .assemblyCodeErrorOverlay {
+  --internal-background-color: rgb(240 240 240 / 0.8);
+
   /**
    * Put the overlay on top of everything in .bottom-main, but centered
    * horizontally and vertically. We center using margin: auto, and enforce
@@ -112,7 +106,7 @@
   padding: 15px;
   border-radius: 10px;
   margin: auto;
-  background-color: rgb(240 240 240 / 0.8);
+  background-color: var(--internal-background-color);
   gap: 15px;
   inset: 0;
   overflow-wrap: break-word;
@@ -144,4 +138,18 @@
 
 .codeErrorOverlay {
   padding-left: 20px;
+}
+
+:root.dark-mode {
+  .bottom-box-pane {
+    --internal-sourceview-background-color: var(--ink-80);
+    --internal-close-icon: url(../../../res/img/svg/close-light.svg);
+    --internal-assembly-icon: url(../../../res/img/svg/asm-icon-light.svg);
+  }
+
+  .codeLoadingOverlay,
+  .sourceCodeErrorOverlay,
+  .assemblyCodeErrorOverlay {
+    --internal-background-color: rgb(16 16 16 / 0.8);
+  }
 }
