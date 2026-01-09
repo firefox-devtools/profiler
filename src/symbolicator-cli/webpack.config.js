@@ -12,6 +12,7 @@ module.exports = {
   output: {
     path: path.resolve(projectRoot, 'dist'),
     filename: 'symbolicator-cli.js',
+    asyncChunks: false,
   },
   entry: './src/symbolicator-cli/index.ts',
   module: {
