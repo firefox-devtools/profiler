@@ -94,6 +94,7 @@ type StateProps = {
   readonly callTreeVisible: boolean;
   readonly zeroAt: Milliseconds;
   readonly profileTimelineUnit: string;
+  readonly shouldHideActivityGraph: boolean;
 };
 
 type DispatchProps = {
@@ -192,7 +193,12 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       implementationFilter,
       zeroAt,
       profileTimelineUnit,
+      shouldHideActivityGraph,
     } = this.props;
+
+    console.log(
+      `[DEBUG TrackThread] threadsKey=${threadsKey}, shouldHideActivityGraph=${shouldHideActivityGraph}, timelineType=${timelineType}, isJsTracer=${filteredThread.isJsTracer}`
+    );
 
     const processType = filteredThread.processType;
     const displayJank = processType !== 'plugin';
@@ -225,7 +231,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
             onSelect={this._onMarkerSelect}
           />
         ) : null}
-        {displayJank ? (
+        {displayJank && !shouldHideActivityGraph ? (
           <TimelineMarkersJank
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
@@ -242,76 +248,78 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
           />
         ) : null}
 
-        {(timelineType === 'category' || timelineType === 'cpu-category') &&
-        !filteredThread.isJsTracer ? (
-          <>
-            <ThreadActivityGraph
-              className="threadActivityGraph"
-              trackName={trackName}
-              interval={interval}
-              fullThread={fullThread}
-              rangeFilteredThread={rangeFilteredThread}
-              rangeStart={rangeStart}
-              rangeEnd={rangeEnd}
-              sampleIndexOffset={sampleIndexOffset}
-              onSampleClick={this._onSampleClick}
-              categories={categories}
-              samplesSelectedStates={samplesSelectedStates}
-              treeOrderSampleComparator={treeOrderSampleComparator}
-              enableCPUUsage={enableCPUUsage}
-              implementationFilter={implementationFilter}
-              timelineType={timelineType}
-              zeroAt={zeroAt}
-              profileTimelineUnit={profileTimelineUnit}
-            />
-            {trackType === 'expanded' ? (
-              <ThreadSampleGraph
-                className="threadSampleGraph"
+        {!shouldHideActivityGraph ? (
+          (timelineType === 'category' || timelineType === 'cpu-category') &&
+          !filteredThread.isJsTracer ? (
+            <>
+              <ThreadActivityGraph
+                className="threadActivityGraph"
                 trackName={trackName}
                 interval={interval}
-                thread={filteredThread}
+                fullThread={fullThread}
+                rangeFilteredThread={rangeFilteredThread}
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
-                samplesSelectedStates={samplesSelectedStates}
-                categories={categories}
+                sampleIndexOffset={sampleIndexOffset}
                 onSampleClick={this._onSampleClick}
-                timelineType={timelineType}
+                categories={categories}
+                samplesSelectedStates={samplesSelectedStates}
+                treeOrderSampleComparator={treeOrderSampleComparator}
+                enableCPUUsage={enableCPUUsage}
                 implementationFilter={implementationFilter}
+                timelineType={timelineType}
                 zeroAt={zeroAt}
                 profileTimelineUnit={profileTimelineUnit}
               />
-            ) : null}
-            {isExperimentalCPUGraphsEnabled &&
-            rangeFilteredThread.samples.threadCPURatio !== undefined ? (
-              <ThreadCPUGraph
-                className="threadCPUGraph"
-                trackName={trackName}
-                interval={interval}
-                thread={filteredThread}
-                rangeStart={rangeStart}
-                rangeEnd={rangeEnd}
-                callNodeInfo={callNodeInfo}
-                samplesSelectedStates={samplesSelectedStates}
-                categories={categories}
-                onSampleClick={this._onSampleClick}
-              />
-            ) : null}
-          </>
-        ) : (
-          <ThreadStackGraph
-            className="threadStackGraph"
-            trackName={trackName}
-            interval={interval}
-            thread={filteredThread}
-            rangeStart={rangeStart}
-            rangeEnd={rangeEnd}
-            callNodeInfo={callNodeInfo}
-            sampleNonInvertedCallNodes={sampleNonInvertedCallNodes}
-            samplesSelectedStates={samplesSelectedStates}
-            categories={categories}
-            onSampleClick={this._onSampleClick}
-          />
-        )}
+              {trackType === 'expanded' ? (
+                <ThreadSampleGraph
+                  className="threadSampleGraph"
+                  trackName={trackName}
+                  interval={interval}
+                  thread={filteredThread}
+                  rangeStart={rangeStart}
+                  rangeEnd={rangeEnd}
+                  samplesSelectedStates={samplesSelectedStates}
+                  categories={categories}
+                  onSampleClick={this._onSampleClick}
+                  timelineType={timelineType}
+                  implementationFilter={implementationFilter}
+                  zeroAt={zeroAt}
+                  profileTimelineUnit={profileTimelineUnit}
+                />
+              ) : null}
+              {isExperimentalCPUGraphsEnabled &&
+              rangeFilteredThread.samples.threadCPURatio !== undefined ? (
+                <ThreadCPUGraph
+                  className="threadCPUGraph"
+                  trackName={trackName}
+                  interval={interval}
+                  thread={filteredThread}
+                  rangeStart={rangeStart}
+                  rangeEnd={rangeEnd}
+                  callNodeInfo={callNodeInfo}
+                  samplesSelectedStates={samplesSelectedStates}
+                  categories={categories}
+                  onSampleClick={this._onSampleClick}
+                />
+              ) : null}
+            </>
+          ) : (
+            <ThreadStackGraph
+              className="threadStackGraph"
+              trackName={trackName}
+              interval={interval}
+              thread={filteredThread}
+              rangeStart={rangeStart}
+              rangeEnd={rangeEnd}
+              callNodeInfo={callNodeInfo}
+              sampleNonInvertedCallNodes={sampleNonInvertedCallNodes}
+              samplesSelectedStates={samplesSelectedStates}
+              categories={categories}
+              onSampleClick={this._onSampleClick}
+            />
+          )
+        ) : null}
         <EmptyThreadIndicator
           thread={filteredThread}
           interval={interval}
@@ -369,6 +377,7 @@ export const TimelineTrackThread = explicitConnect<
       callTreeVisible: selectors.getUsefulTabs(state).includes('calltree'),
       zeroAt: getZeroAt(state),
       profileTimelineUnit: getProfileTimelineUnit(state),
+      shouldHideActivityGraph: selectors.getShouldHideActivityGraph(state),
     };
   },
   mapDispatchToProps: {
