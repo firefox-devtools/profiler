@@ -58,6 +58,7 @@ import type {
   CategoryList,
   InnerWindowID,
   Page,
+  SamplesLikeTable,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
@@ -68,6 +69,7 @@ import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser
 type StateProps = {
   readonly thread: Thread | null;
   readonly threadsKey: ThreadsKey | null;
+  readonly previewFilteredCtssSamples: SamplesLikeTable | null;
   readonly categories: CategoryList;
   readonly callNodeInfo: CallNodeInfo | null;
   readonly rightClickedCallNodePath: CallNodePath | null;
@@ -226,11 +228,13 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       );
     }
 
-    const { callNodeIndex, thread, callNodeInfo } = rightClickedCallNodeInfo;
+    const { callNodeIndex, thread, callNodeInfo, previewFilteredCtssSamples } =
+      rightClickedCallNodeInfo;
     const bottomBoxInfo = getBottomBoxInfoForCallNode(
       callNodeIndex,
       callNodeInfo,
-      thread
+      thread,
+      previewFilteredCtssSamples
     );
     updateBottomBoxContentsAndMaybeOpen(selectedTab, bottomBoxInfo);
   }
@@ -533,6 +537,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   getRightClickedCallNodeInfo(): null | {
     readonly thread: Thread;
     readonly threadsKey: ThreadsKey;
+    readonly previewFilteredCtssSamples: SamplesLikeTable;
     readonly callNodeInfo: CallNodeInfo;
     readonly callNodePath: CallNodePath;
     readonly callNodeIndex: IndexIntoCallNodeTable;
@@ -540,6 +545,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const {
       thread,
       threadsKey,
+      previewFilteredCtssSamples,
       callNodeInfo,
       rightClickedCallNodePath,
       rightClickedCallNodeIndex,
@@ -548,6 +554,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     if (
       thread &&
       threadsKey !== null &&
+      previewFilteredCtssSamples !== null &&
       callNodeInfo &&
       rightClickedCallNodePath &&
       typeof rightClickedCallNodeIndex === 'number'
@@ -555,6 +562,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       return {
         thread,
         threadsKey,
+        previewFilteredCtssSamples,
         callNodeInfo,
         callNodePath: rightClickedCallNodePath,
         callNodeIndex: rightClickedCallNodeIndex,
@@ -897,6 +905,7 @@ export const CallNodeContextMenu = explicitConnect<
 
     let thread = null;
     let threadsKey = null;
+    let previewFilteredCtssSamples = null;
     let callNodeInfo = null;
     let rightClickedCallNodePath = null;
     let rightClickedCallNodeIndex = null;
@@ -908,6 +917,8 @@ export const CallNodeContextMenu = explicitConnect<
 
       thread = selectors.getFilteredThread(state);
       threadsKey = rightClickedCallNodeInfo.threadsKey;
+      previewFilteredCtssSamples =
+        selectors.getPreviewFilteredCtssSamples(state);
       callNodeInfo = selectors.getCallNodeInfo(state);
       rightClickedCallNodePath = rightClickedCallNodeInfo.callNodePath;
       rightClickedCallNodeIndex = selectors.getRightClickedCallNodeIndex(state);
@@ -916,6 +927,7 @@ export const CallNodeContextMenu = explicitConnect<
     return {
       thread,
       threadsKey,
+      previewFilteredCtssSamples,
       categories: getCategories(state),
       callNodeInfo,
       rightClickedCallNodePath,

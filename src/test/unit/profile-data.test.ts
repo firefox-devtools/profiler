@@ -1473,22 +1473,24 @@ describe('getNativeSymbolsForCallNode', function () {
 
     // Both the call path [funA, funB] and the call path [funA, funB, funC] end
     // up at a call node with native symbol symB.
-    expect(
-      getNativeSymbolsForCallNode(
+    expect([
+      ...getNativeSymbolsForCallNode(
         ensureExists(ab),
         callNodeInfo,
         thread.stackTable,
-        thread.frameTable
-      )
-    ).toEqual([symB]);
-    expect(
-      getNativeSymbolsForCallNode(
+        thread.frameTable,
+        thread.samples
+      ).keys(),
+    ]).toEqual([symB]);
+    expect([
+      ...getNativeSymbolsForCallNode(
         ensureExists(abc),
         callNodeInfo,
         thread.stackTable,
-        thread.frameTable
-      )
-    ).toEqual([symB]);
+        thread.frameTable,
+        thread.samples
+      ).keys(),
+    ]).toEqual([symB]);
   });
 
   it('finds multiple symbols', function () {
@@ -1529,8 +1531,9 @@ describe('getNativeSymbolsForCallNode', function () {
           ensureExists(c),
           callNodeInfo,
           thread.stackTable,
-          thread.frameTable
-        )
+          thread.frameTable,
+          thread.samples
+        ).keys()
       )
     ).toEqual(new Set([symB, symD]));
   });
