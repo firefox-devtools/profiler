@@ -413,6 +413,14 @@ MarkerSettings--panel-search =
     .title = Nur Markierungen anzeigen, die zu einem bestimmten Namen passen
 MarkerSettings--marker-filters =
     .title = Filter für Markierungen
+MarkerSettings--copy-table =
+    .title = Tabelle als Text kopieren
+# This string is used when the user tries to copy a marker table with
+# more than 10000 rows.
+# Variable:
+#   $rows (Number) - Number of rows the marker table has
+#   $maxRows (Number) - Number of maximum rows that can be copied
+MarkerSettings--copy-table-exceeed-max-rows = Die Anzahl der Zeilen überschreitet das Limit: { $rows } > { $maxRows }. Nur die ersten { $maxRows } Zeilen werden kopiert.
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
