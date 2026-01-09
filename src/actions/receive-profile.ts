@@ -85,7 +85,6 @@ import type {
   TabID,
   PageList,
   MixedObject,
-  ISymbolStoreDB,
 } from 'firefox-profiler/types';
 
 import type {
@@ -602,11 +601,11 @@ class RegularSymbolProvider implements SymbolProvider {
   _dispatch: Dispatch;
   _symbolServerUrl: string;
   _browserConnection: BrowserConnection | null;
-  _symbolDb: ISymbolStoreDB;
+  _symbolDb: SymbolStoreDB;
   _demangleCallback: DemangleFunction | null = null;
 
   constructor(
-    dbNamePrefixOrDB: string | ISymbolStoreDB,
+    dbNamePrefix: string,
     dispatch: Dispatch,
     symbolServerUrl: string,
     browserConnection: BrowserConnection | null
@@ -614,12 +613,7 @@ class RegularSymbolProvider implements SymbolProvider {
     this._dispatch = dispatch;
     this._symbolServerUrl = symbolServerUrl;
     this._browserConnection = browserConnection;
-
-    if (typeof dbNamePrefixOrDB === 'string') {
-      this._symbolDb = new SymbolStoreDB(`${dbNamePrefixOrDB}-symbol-tables`);
-    } else {
-      this._symbolDb = dbNamePrefixOrDB;
-    }
+    this._symbolDb = new SymbolStoreDB(`${dbNamePrefix}-symbol-tables`);
   }
 
   async _makeSymbolicationAPIRequestWithCallback(
