@@ -16,11 +16,11 @@
 }
 
 .DetailsContainer .layout-splitter {
-  border-top: 1px solid var(--grey-30);
-  border-left: 1px solid var(--grey-30);
-  background: var(--grey-10); /* Same background as sidebars */
+  border-top: 1px solid var(--panel-border-color);
+  border-left: 1px solid var(--panel-border-color);
+  background: var(--panel-background-color);
 }
 
 .DetailsContainer .layout-splitter:hover {
-  background: var(--grey-30); /* same as the border above */
+  background: var(--panel-background-color);
 }
