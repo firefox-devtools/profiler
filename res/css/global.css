@@ -20,6 +20,12 @@
   --clickable-checked-active-background-color: var(--blue-80);
   --focus-border-color: var(--blue-50);
   --focus-shadow-color: var(--blue-50-a30);
+  --kbd-foreground-color: var(--base-foreground-color);
+  --kbd-background-color: #f6f6f6;
+  --kbd-border-color: #ccc;
+  --kbd-shadow-color: #bbb;
+  --home-border-color: #ccc;
+  --home-shadow-color: #0b1f50;
 
   background-color: var(--base-background-color);
   color: var(--base-foreground-color);
@@ -43,6 +49,11 @@
   --clickable-checked-active-background-color: var(--blue-70);
   --focus-border-color: var(--blue-40);
   --focus-shadow-color: var(--blue-50-a30);
+  --kbd-background-color: var(--ink-70);
+  --kbd-border-color: var(--ink-60);
+  --kbd-shadow-color: var(--ink-50);
+  --home-border-color: var(--ink-70);
+  --home-shadow-color: var(--ink-90);
 }
 
 a {
