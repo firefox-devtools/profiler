@@ -37,3 +37,15 @@ export function maybeLightDark(value: string | [string, string]): string {
   }
   return lightDark(value[0], value[1]);
 }
+
+export function setDarkMode() {
+  _isDarkMode = true;
+  window.localStorage.setItem('theme', 'dark');
+  document.documentElement.classList.add('dark-mode');
+}
+
+export function setLightMode() {
+  _isDarkMode = false;
+  window.localStorage.removeItem('theme');
+  document.documentElement.classList.remove('dark-mode');
+}

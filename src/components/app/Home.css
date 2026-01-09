@@ -88,6 +88,16 @@
   grid-column: 1 / -1; /* from start to end */
 }
 
+.homeDarkModeBox {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+}
+
+#home-dark-mode {
+  vertical-align: middle;
+}
+
 .homeActions > p:first-child,
 .homeRecentUploadedRecordingsTitle {
   margin-top: 0;

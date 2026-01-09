@@ -31,14 +31,6 @@ function initTheme() {
     document.documentElement.classList.add('dark-mode');
   }
 }
-window.useDarkMode = function () {
-  window.localStorage.setItem('theme', 'dark');
-  document.documentElement.classList.add('dark-mode');
-};
-window.useLightMode = function () {
-  window.localStorage.removeItem('theme');
-  document.documentElement.classList.remove('dark-mode');
-};
 try {
   initTheme();
 } catch (e) {
