@@ -25,6 +25,26 @@ import {
 } from './utils/window-console';
 import { ensureExists } from './utils/types';
 
+function initTheme() {
+  const theme = window.localStorage.getItem('theme');
+  if (theme === 'dark') {
+    document.documentElement.classList.add('dark-mode');
+  }
+}
+window.useDarkMode = function () {
+  window.localStorage.setItem('theme', 'dark');
+  document.documentElement.classList.add('dark-mode');
+};
+window.useLightMode = function () {
+  window.localStorage.removeItem('theme');
+  document.documentElement.classList.remove('dark-mode');
+};
+try {
+  initTheme();
+} catch (e) {
+  console.log('initTheme failed', e);
+}
+
 // Mock out Google Analytics for anything that's not production so that we have run-time
 // code coverage in development and testing.
 // Note that ga isn't included nowadays. We still keep this code because we
