@@ -34,6 +34,7 @@
   --panel-border-color: var(--grey-30);
   --track-selected-background-color: #edf6ff;
   --tooltip-number-foreground-color: var(--grey-60);
+  --colored-border-color: rgb(0 0 0 / 0.1);
 
   background-color: var(--base-background-color);
   color: var(--base-foreground-color);
@@ -78,6 +79,7 @@
     var(--teal-50) 20%
   );
   --tooltip-number-foreground-color: var(--grey-40);
+  --colored-border-color: rgb(237 237 240 / 0.1);
 }
 
 a {
@@ -101,7 +103,7 @@ a:active {
   width: 9px;
   height: 9px;
   box-sizing: border-box;
-  border: 0.5px solid rgb(0 0 0 / 0.1);
+  border: 0.5px solid var(--colored-border-color);
   margin-right: 3px;
 
   /* Opt-out of forced colors so the color is applied */
@@ -109,7 +111,7 @@ a:active {
 }
 
 .colored-border {
-  border: 2px solid rgb(0 0 0 / 0.1);
+  border: 2px solid var(--colored-border-color);
   margin-right: 3px;
 
   /* Opt-out of forced colors so the color is applied */
