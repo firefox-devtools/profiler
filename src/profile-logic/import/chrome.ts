@@ -922,6 +922,32 @@ function extractMarkers(
     throw new Error('No "Other" category in empty profile category list');
   }
 
+  // Map to track category names to their indices.
+  const categoryNameToIndex = new Map<string, number>();
+  const categories = ensureExists(profile.meta.categories);
+  for (let i = 0; i < categories.length; i++) {
+    categoryNameToIndex.set(categories[i].name, i);
+  }
+
+  // Helper function to get or create a category index for a given category name.
+  function getOrCreateCategoryIndex(categoryName: string): number {
+    const existing = categoryNameToIndex.get(categoryName);
+    if (existing !== undefined) {
+      return existing;
+    }
+
+    // Create a new category with a default color. The colors are not important
+    // since we don't visualize the marker colors yet.
+    const newIndex = categories.length;
+    categories.push({
+      name: categoryName,
+      color: 'grey',
+      subcategories: ['Other'],
+    });
+    categoryNameToIndex.set(categoryName, newIndex);
+    return newIndex;
+  }
+
   profile.meta.markerSchema = [
     {
       name: 'EventDispatch',
@@ -940,11 +966,6 @@ function extractMarkers(
       ],
     },
   ];
-
-  // Map to store begin event detail field for pairing with end events.
-  // For async events (b/e), key is "pid:tid:id:name"
-  // For duration events (B/E), key is "pid:tid:name"
-  const beginEventDetail: Map<string, string> = new Map();
 
   // Track whether we've added the EventWithDetail schema
   let hasEventWithDetailSchema = false;
@@ -1012,22 +1033,7 @@ function extractMarkers(
           }
         }
 
-        // For end events (E/e), try to use the detail from the corresponding begin event
-        if ((event.ph === 'E' || event.ph === 'e') && !argData) {
-          // Generate key for looking up the begin event detail
-          // For async events (b/e), use id; for duration events (B/E), use name only
-          const key =
-            event.ph === 'e' && 'id' in event
-              ? `${event.pid}:${event.tid}:${event.id}:${name}`
-              : `${event.pid}:${event.tid}:${name}`;
-          const detail = beginEventDetail.get(key);
-          if (detail) {
-            argData = { detail };
-          }
-        }
-
         markers.name.push(stringTable.indexForString(name));
-        markers.category.push(otherCategoryIndex);
 
         if (argData && 'type' in argData) {
           argData.type2 = argData.type;
@@ -1059,11 +1065,18 @@ function extractMarkers(
           hasEventWithDetailSchema = true;
         }
 
-        const newData = {
-          ...argData,
-          type: argData?.detail ? 'EventWithDetail' : name,
-          category: event.cat,
-        };
+        const newData = argData
+          ? {
+              ...argData,
+              type: argData?.detail ? 'EventWithDetail' : name,
+            }
+          : null;
+
+        // Store the category in the markers.category array.
+        const categoryIndex = event.cat
+          ? getOrCreateCategoryIndex(event.cat)
+          : otherCategoryIndex;
+        markers.category.push(categoryIndex);
 
         // @ts-expect-error Opt out of type checking for this one.
         markers.data.push(newData);
@@ -1082,15 +1095,6 @@ function extractMarkers(
           markers.startTime.push(time);
           markers.endTime.push(null);
           markers.phase.push(INTERVAL_START);
-
-          // Store the detail field from begin event so it can be used for the corresponding end event
-          if (argData?.detail) {
-            const key =
-              event.ph === 'b' && 'id' in event
-                ? `${event.pid}:${event.tid}:${event.id}:${name}`
-                : `${event.pid}:${event.tid}:${name}`;
-            beginEventDetail.set(key, argData.detail);
-          }
         } else if (event.ph === 'E' || event.ph === 'e') {
           // Duration or Async Event End
           // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.nso4gcezn7n1
@@ -1098,13 +1102,6 @@ function extractMarkers(
           markers.startTime.push(null);
           markers.endTime.push(time);
           markers.phase.push(INTERVAL_END);
-
-          // Clean up the stored begin event detail
-          const key =
-            event.ph === 'e' && 'id' in event
-              ? `${event.pid}:${event.tid}:${event.id}:${name}`
-              : `${event.pid}:${event.tid}:${name}`;
-          beginEventDetail.delete(key);
         } else {
           // Instant Event
           // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.lenwiilchoxp
