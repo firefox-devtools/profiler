@@ -25,6 +25,13 @@
      we have removed this animation in the meantime */
 }
 
+:root.dark-mode {
+  .filterNavigatorBar {
+    --internal-selected-color: var(--selected-color, var(--blue-40));
+    --internal-separator-img: url(../../../res/img/svg/scope-bar-separator-light.svg);
+  }
+}
+
 .filterNavigatorBarItem {
   position: relative;
   display: flex;

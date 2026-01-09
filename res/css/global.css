@@ -28,6 +28,9 @@
   --home-border-color: #ccc;
   --home-shadow-color: #0b1f50;
   --row-odd-background-color: #f5f5f5;
+  --panel-foreground-color: var(--ink-70);
+  --panel-background-color: var(--grey-10);
+  --panel-border-color: var(--grey-30);
 
   background-color: var(--base-background-color);
   color: var(--base-foreground-color);
@@ -62,6 +65,9 @@
     var(--ink-80) 50%,
     var(--ink-90) 50%
   );
+  --panel-foreground-color: var(--grey-20);
+  --panel-background-color: var(--ink-80);
+  --panel-border-color: var(--ink-60);
 }
 
 a {
