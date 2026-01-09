@@ -8,6 +8,18 @@
   --link-foreground-color: var(--blue-60);
   --link-visited-foreground-color: var(--purple-70);
   --link-active-foreground-color: var(--red-50);
+  --clickable-foreground-color: var(--grey-90);
+  --clickable-background-color: var(--grey-90-a10);
+  --clickable-border-color: var(--grey-90-a30);
+  --clickable-hover-background-color: var(--grey-90-a20);
+  --clickable-active-background-color: var(--grey-90-a30);
+  --clickable-ghost-hover-background-color: var(--grey-90-a10);
+  --clickable-ghost-active-background-color: var(--grey-90-a20);
+  --clickable-checked-background-color: var(--blue-60);
+  --clickable-checked-hover-background-color: var(--blue-70);
+  --clickable-checked-active-background-color: var(--blue-80);
+  --focus-border-color: var(--blue-50);
+  --focus-shadow-color: var(--blue-50-a30);
 
   background-color: var(--base-background-color);
   color: var(--base-foreground-color);
@@ -19,6 +31,18 @@
   --link-foreground-color: var(--blue-40);
   --link-visited-foreground-color: var(--purple-40);
   --link-active-foreground-color: var(--red-50);
+  --clickable-foreground-color: var(--grey-20);
+  --clickable-background-color: var(--grey-10-a10);
+  --clickable-border-color: var(--grey-10-a40);
+  --clickable-hover-background-color: var(--grey-10-a20);
+  --clickable-active-background-color: var(--grey-10-a40);
+  --clickable-ghost-hover-background-color: var(--grey-10-a10);
+  --clickable-ghost-active-background-color: var(--grey-10-a20);
+  --clickable-checked-background-color: var(--blue-50);
+  --clickable-checked-hover-background-color: var(--blue-60);
+  --clickable-checked-active-background-color: var(--blue-70);
+  --focus-border-color: var(--blue-40);
+  --focus-shadow-color: var(--blue-50-a30);
 }
 
 a {
