@@ -11,7 +11,7 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import { changeTabFilter } from 'firefox-profiler/actions/receive-profile';
 import { getTabFilter } from '../../selectors/url-state';
 import { getProfileFilterSortedPageData } from 'firefox-profiler/selectors/profile';
-import { Icon } from 'firefox-profiler/components/shared/Icon';
+import { PageSelectorIcon } from 'firefox-profiler/components/shared/PageSelectorIcon';
 
 import type { TabID, SortedTabPageData } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -73,7 +73,10 @@ class TabSelectorMenuImpl extends React.PureComponent<Props> {
               'aria-checked': tabFilter === tabID ? 'false' : 'true',
             }}
           >
-            <Icon iconUrl={pageData.favicon} />
+            <PageSelectorIcon
+              favicon={pageData.favicon}
+              origin={pageData.origin}
+            />
             {pageData.hostname}
           </MenuItem>
         ))}

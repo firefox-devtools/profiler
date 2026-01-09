@@ -20,7 +20,7 @@ import {
 import { getTabFilter } from 'firefox-profiler/selectors/url-state';
 import { getFormattedTimelineValue } from 'firefox-profiler/profile-logic/committed-ranges';
 import { FilterNavigatorBar } from 'firefox-profiler/components/shared/FilterNavigatorBar';
-import { Icon } from 'firefox-profiler/components/shared/Icon';
+import { PageSelectorIcon } from 'firefox-profiler/components/shared/PageSelectorIcon';
 import { TabSelectorMenu } from '../shared/TabSelectorMenu';
 
 import type {
@@ -94,7 +94,10 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
       const itemContents = pageData ? (
         <>
           {/* Show the page data if the profile is filtered by tab */}
-          {pageData.favicon ? <Icon iconUrl={pageData.favicon} /> : null}
+          <PageSelectorIcon
+            favicon={pageData.favicon}
+            origin={pageData.origin}
+          />
           <span title={pageData.origin}>
             {pageData.hostname} (
             {getFormattedTimelineValue(
