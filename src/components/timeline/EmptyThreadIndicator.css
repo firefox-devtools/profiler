@@ -8,6 +8,7 @@
 
   /* The following color is based off grey-20, but uses opacity instead. */
   --shutdown-startup-color: rgb(0 0 50 / 0.07);
+  --shutdown-startup-shadow-color: rgb(0 0 0 / 0.05);
 }
 
 .timelineEmptyThreadIndicatorBlock {
@@ -22,13 +23,13 @@
 .timelineEmptyThreadIndicatorStartup {
   border-right: solid 1px var(--grey-30);
   background-color: var(--shutdown-startup-color);
-  box-shadow: inset -4px 0 4px rgb(0 0 0 / 0.05);
+  box-shadow: inset -4px 0 4px var(--shutdown-startup-shadow-color);
 }
 
 .timelineEmptyThreadIndicatorShutdown {
   border-left: solid 1px var(--grey-30);
   background-color: var(--shutdown-startup-color);
-  box-shadow: inset 4px 0 4px rgb(0 0 0 / 0.05);
+  box-shadow: inset 4px 0 4px var(--shutdown-startup-shadow-color);
 }
 
 .timelineEmptyThreadIndicatorEmptyBuffer {

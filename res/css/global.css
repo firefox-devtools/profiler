@@ -6,6 +6,7 @@
   --base-foreground-color: #000;
   --base-background-color: #fff;
   --base-border-color: var(--grey-30);
+  --base-shadow-color: rgb(0 0 0 / 0.2);
   --link-foreground-color: var(--blue-60);
   --link-visited-foreground-color: var(--purple-70);
   --link-active-foreground-color: var(--red-50);
@@ -31,6 +32,8 @@
   --panel-foreground-color: var(--ink-70);
   --panel-background-color: var(--grey-10);
   --panel-border-color: var(--grey-30);
+  --track-selected-background-color: #edf6ff;
+  --tooltip-number-foreground-color: var(--grey-60);
 
   background-color: var(--base-background-color);
   color: var(--base-foreground-color);
@@ -40,6 +43,7 @@
   --base-foreground-color: var(--grey-20);
   --base-background-color: var(--ink-90);
   --base-border-color: var(--grey-50);
+  --base-shadow-color: rgb(0 0 0 / 0.4);
   --link-foreground-color: var(--blue-40);
   --link-visited-foreground-color: var(--purple-40);
   --link-active-foreground-color: var(--red-50);
@@ -68,6 +72,12 @@
   --panel-foreground-color: var(--grey-20);
   --panel-background-color: var(--ink-80);
   --panel-border-color: var(--ink-60);
+  --selected-track-background-color: color-mix(
+    in hsl,
+    var(--ink-90) 80%,
+    var(--teal-50) 20%
+  );
+  --tooltip-number-foreground-color: var(--grey-40);
 }
 
 a {
