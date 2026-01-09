@@ -405,6 +405,13 @@ MarkerContextMenu--select-the-sender-thread = Absender-Thread „<strong>{ $thre
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Stichproben außerhalb der Markierungen verwerfen, die mit „<strong>{ $filter }</strong>“ übereinstimmen
 
+## MarkerCopyTableContextMenu
+## This is the menu when the copy icon is clicked in Marker Chart and Marker
+## Table panels.
+
+MarkerCopyTableContextMenu--copy-table-as-plain = Markierungstabelle als Reintext kopieren
+MarkerCopyTableContextMenu--copy-table-as-markdown = Markierungstabelle als Markdown kopieren
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
