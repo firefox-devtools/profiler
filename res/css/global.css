@@ -5,6 +5,7 @@
 :root {
   --base-foreground-color: #000;
   --base-background-color: #fff;
+  --base-border-color: var(--grey-30);
   --link-foreground-color: var(--blue-60);
   --link-visited-foreground-color: var(--purple-70);
   --link-active-foreground-color: var(--red-50);
@@ -26,6 +27,7 @@
   --kbd-shadow-color: #bbb;
   --home-border-color: #ccc;
   --home-shadow-color: #0b1f50;
+  --row-odd-background-color: #f5f5f5;
 
   background-color: var(--base-background-color);
   color: var(--base-foreground-color);
@@ -34,6 +36,7 @@
 :root.dark-mode {
   --base-foreground-color: var(--grey-20);
   --base-background-color: var(--ink-90);
+  --base-border-color: var(--grey-50);
   --link-foreground-color: var(--blue-40);
   --link-visited-foreground-color: var(--purple-40);
   --link-active-foreground-color: var(--red-50);
@@ -54,6 +57,11 @@
   --kbd-shadow-color: var(--ink-50);
   --home-border-color: var(--ink-70);
   --home-shadow-color: var(--ink-90);
+  --row-odd-background-color: color-mix(
+    in hsl,
+    var(--ink-80) 50%,
+    var(--ink-90) 50%
+  );
 }
 
 a {
