@@ -83,7 +83,7 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
             category: categoryIndex,
             filteredOutByTransformFillStyle: _createDiagonalStripePattern(
               ctx,
-              styles.unselectedFillStyle
+              styles.getUnselectedFillStyle()
             ),
           };
         }
