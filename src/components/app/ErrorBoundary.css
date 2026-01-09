@@ -1,4 +1,6 @@
 .appErrorBoundary {
+  --internal-background-color: var(--grey-20);
+
   display: flex;
   overflow: hidden;
   box-sizing: border-box;
@@ -7,7 +9,13 @@
   align-items: center;
   justify-content: center;
   padding: 10px;
-  background-color: var(--grey-20);
+  background-color: var(--internal-background-color);
+}
+
+:root.dark-mode {
+  .appErrorBoundary {
+    --internal-background-color: var(--ink-80);
+  }
 }
 
 .appErrorBoundaryContents {
