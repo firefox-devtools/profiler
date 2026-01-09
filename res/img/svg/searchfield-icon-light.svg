@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="11" height="11" viewBox="0 0 11 11">
+  <style>
+    circle {
+      fill: none;
+    }
+    
+    circle, line {
+      stroke: rgba(237,237,240.65);
+      stroke-width: 0.8px;
+    }
+  </style>
+
+  <circle cx="4.65" cy="4.15" r="3.85"/>
+  <line x1="7.5" y1="7" x2="10.5" y2="10"/>
+</svg>
