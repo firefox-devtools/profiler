@@ -341,6 +341,13 @@ MarkerContextMenu--select-the-sender-thread = 選擇傳送執行緒「<strong>{ 
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = 丟棄不符合「<strong>{ $filter }</strong>」標記的取樣
 
+## MarkerCopyTableContextMenu
+## This is the menu when the copy icon is clicked in Marker Chart and Marker
+## Table panels.
+
+MarkerCopyTableContextMenu--copy-table-as-plain = 用純文字格式複製標記表
+MarkerCopyTableContextMenu--copy-table-as-markdown = 用 Markdown 格式複製標記表
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
@@ -349,6 +356,14 @@ MarkerSettings--panel-search =
     .title = 只顯示符合特定名稱的標記
 MarkerSettings--marker-filters =
     .title = 標記過濾器
+MarkerSettings--copy-table =
+    .title = 用純文字複製表格
+# This string is used when the user tries to copy a marker table with
+# more than 10000 rows.
+# Variable:
+#   $rows (Number) - Number of rows the marker table has
+#   $maxRows (Number) - Number of maximum rows that can be copied
+MarkerSettings--copy-table-exceeed-max-rows = 資料列數超過限制：{ $rows } > { $maxRows }，只複製最前 { $maxRows } 列。
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
