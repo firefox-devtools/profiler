@@ -225,9 +225,9 @@
   }
 
   .timelineSelection {
-    --grippy-range-background-color: ButtonText;
-    --grippy-range-border-color: ButtonBorder;
-    --grippy-range-hover-background-color: SelectedItem;
+    --grippy-range-background-color: ButtonText !important;
+    --grippy-range-border-color: ButtonBorder !important;
+    --grippy-range-hover-background-color: SelectedItem !important;
     --selection-outbound-opacity: 0.6;
   }
 

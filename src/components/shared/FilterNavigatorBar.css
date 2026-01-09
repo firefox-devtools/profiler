@@ -162,13 +162,13 @@
 
 @media (forced-colors: active) {
   .filterNavigatorBar {
-    --internal-background-color: ButtonFace;
-    --internal-hover-background-color: SelectedItemText;
-    --internal-hover-color: SelectedItem;
-    --internal-active-background-color: SelectedItemText;
-    --internal-selected-background-color: SelectedItem;
-    --internal-selected-color: SelectedItemText;
-    --internal-separator-img: url(../../../res/img/svg/scope-bar-separator-hcm-light.svg);
+    --internal-background-color: ButtonFace !important;
+    --internal-hover-background-color: SelectedItemText !important;
+    --internal-hover-color: SelectedItem !important;
+    --internal-active-background-color: SelectedItemText !important;
+    --internal-selected-background-color: SelectedItem !important;
+    --internal-selected-color: SelectedItemText !important;
+    --internal-separator-img: url(../../../res/img/svg/scope-bar-separator-hcm-light.svg) !important;
   }
 
   .filterNavigatorBarItem {
