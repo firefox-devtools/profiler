@@ -3,11 +3,24 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .codeView {
+  --codeview-foreground-color: #000;
+  --codeview-background-color: white;
+  --codeview-header-background-color: white;
+  --codeview-header-border-color: var(--grey-30);
+  --codeview-header-sep-color: #e5e5e5;
+  --codeview-gutter-foreground-color: black;
+  --codeview-gutter-background-color: white;
+  --codeview-gutter-border-color: var(--grey-30);
+  --codeview-linenum-foreground-color: ##aaa;
+  --codeview-nonzero-background-color: #edf6ff;
+  --codeview-highlight-background-color: #fffbcc;
+
   display: flex;
   min-height: 0;
   flex: 1;
   flex-flow: column;
-  background: white;
+  background: var(--codeview-background-color);
+  color: var(--codeview-foreground-color);
 
   /* Extra intermediate colors which Photon doesn't have, from
      https://searchfox.org/mozilla-central/rev/8012bca692dddb307c2787bac1d4dd48cb0d8243/devtools/client/themes/variables.css#34-100 */
@@ -24,13 +37,36 @@
   --theme-highlight-punctuation: var(--grey-70);
 }
 
+:root.dark-mode {
+  .codeView {
+    --codeview-foreground-color: var(--grey-20);
+    --codeview-background-color: var(--ink-90);
+    --codeview-header-background-color: var(--ink-90);
+    --codeview-header-border-color: var(--grey-50);
+    --codeview-header-sep-color: var(--grey-50);
+    --codeview-gutter-foreground-color: var(--grey-30);
+    --codeview-gutter-background-color: var(--ink-90);
+    --codeview-gutter-border-color: var(--grey-50);
+    --codeview-linenum-foreground-color: var(--grey-30);
+    --codeview-nonzero-background-color: var(--ink-80);
+    --codeview-highlight-background-color: var(--yellow-90);
+    --theme-highlight-keyword: var(--magenta-65);
+    --theme-highlight-type: var(--purple-40);
+    --theme-highlight-variable: var(--blue-40);
+    --theme-highlight-method: var(--green-60);
+    --theme-highlight-literal: var(--teal-60);
+    --theme-highlight-comment: var(--grey-40);
+    --theme-highlight-punctuation: var(--grey-50);
+  }
+}
+
 .codeViewHeader {
   display: flex;
   height: 16px;
   flex-flow: row;
   padding: 1px 0;
-  border-bottom: 1px solid var(--grey-30);
-  background: white;
+  border-bottom: 1px solid var(--codeview-header-border-color);
+  background: var(--codeview-header-background-color);
 }
 
 .codeMirrorContainer {
@@ -52,7 +88,7 @@
 
 .cm-gutters {
   border-right: 0 !important;
-  background-color: white !important;
+  background-color: var(--codeview-gutter-background-color) !important;
 }
 
 .codeViewHeaderMainColumn {
@@ -74,7 +110,7 @@
   right: 0;
   bottom: 3px;
   width: 1px;
-  background: #e5e5e5;
+  background: var(--codeview-header-sep-color);
   content: '';
 }
 
@@ -88,12 +124,12 @@
 
 .cm-total-timings-gutter,
 .cm-self-timings-gutter {
-  border-right: 1px solid var(--grey-30);
-  color: black;
+  border-right: 1px solid var(--codeview-gutter-border-color);
+  color: var(--codeview-gutter-foreground-color);
 }
 
 .cm-lineNumbers {
-  color: #aaa;
+  color: var(--codeview-linenum-foreground-color);
   font-variant-numeric: tabular-nums;
 }
 
@@ -102,7 +138,7 @@
 }
 
 .cm-instruction-address-gutter {
-  color: #aaa;
+  color: var(--codeview-linenum-foreground-color);
   font-family: ui-monospace, 'Roboto Mono', monospace;
   font-variant-numeric: tabular-nums;
 }
@@ -122,11 +158,11 @@
 }
 
 .cm-nonZeroLine {
-  background-color: #edf6ff;
+  background-color: var(--codeview-nonzero-background-color);
 }
 
 .cm-highlightedLine {
-  background-color: #fffbcc;
+  background-color: var(--codeview-highlight-background-color);
 }
 
 .cm-content {
