@@ -4,7 +4,10 @@
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  fireEvent,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import { ProfileViewer } from 'firefox-profiler/components/app/ProfileViewer';
 import { getTimelineHeight } from 'firefox-profiler/selectors/app';
 import { updateUrlState } from 'firefox-profiler/actions/app';
@@ -67,5 +70,137 @@ describe('ProfileViewer', function () {
 
     // Note: You should update this total height if you changed the height calculation algorithm.
     expect(getTimelineHeight(getState())).toBe(1224);
+  });
+
+  it('unfocuses the uncommited input field on selection move', () => {
+    const { container } = setup();
+
+    const selection = container.querySelector('.timelineSelection')!;
+
+    jest.spyOn(Element.prototype, 'getClientRects').mockImplementation(
+      jest.fn(function () {
+        return {
+          item() {
+            return { x: 0, y: 0, width: 100, height: 100 } as DOMRect;
+          },
+          length: 1,
+          '0': { x: 0, y: 0, width: 100, height: 100 } as DOMRect,
+          [Symbol.iterator]() {
+            // The iterator is not used.
+            // Defined here just to make the tsc happy.
+            return {
+              next() {
+                return {
+                  done: true,
+                };
+              },
+            } as ArrayIterator<DOMRect>;
+          },
+        } as DOMRectList;
+      })
+    );
+
+    fireEvent.mouseDown(selection, {
+      button: 0,
+      buttons: 1,
+      clientX: 10,
+      clientY: 10,
+    });
+
+    fireEvent.mouseMove(selection, {
+      button: 0,
+      buttons: 1,
+      clientX: 20,
+      clientY: 10,
+    });
+
+    fireEvent.mouseUp(selection, {
+      button: 0,
+      buttons: 1,
+      clientX: 20,
+      clientY: 10,
+    });
+
+    const uncommittedItem = container.querySelector(
+      '.filterNavigatorBarItemUncommittedFieldInput'
+    )! as HTMLInputElement;
+    expect(uncommittedItem.value).toBe('100μs');
+
+    fireEvent.focus(uncommittedItem);
+
+    fireEvent.change(uncommittedItem, {
+      target: { value: '200us' },
+    });
+    expect(uncommittedItem.value).toBe('200us');
+
+    const blur = jest.fn();
+    jest.spyOn(HTMLElement.prototype, 'blur').mockImplementation(blur);
+
+    fireEvent.mouseDown(selection, {
+      button: 0,
+      buttons: 1,
+      clientX: 10,
+      clientY: 10,
+    });
+
+    fireEvent.mouseMove(selection, {
+      button: 0,
+      buttons: 1,
+      clientX: 50,
+      clientY: 10,
+    });
+
+    fireEvent.mouseUp(selection, {
+      button: 0,
+      buttons: 1,
+      clientX: 50,
+      clientY: 10,
+    });
+
+    // Due to the restriction on the mock, blur() call does not trigger
+    // blur event.
+    expect(blur).toHaveBeenCalled();
+    fireEvent.blur(uncommittedItem);
+
+    expect(uncommittedItem.value).toBe('400μs');
+
+    fireEvent.focus(uncommittedItem);
+
+    fireEvent.change(uncommittedItem, {
+      target: { value: '200us' },
+    });
+    expect(uncommittedItem.value).toBe('200us');
+
+    const grip = container.querySelector(
+      '.timelineSelectionGrippyRangeStart'
+    ) as HTMLElement;
+
+    fireEvent.mouseDown(grip, {
+      button: 0,
+      buttons: 1,
+      clientX: 10,
+      clientY: 10,
+    });
+
+    fireEvent.mouseMove(grip, {
+      button: 0,
+      buttons: 1,
+      clientX: 50,
+      clientY: 10,
+    });
+
+    fireEvent.mouseUp(grip, {
+      button: 0,
+      buttons: 1,
+      clientX: 50,
+      clientY: 10,
+    });
+
+    // Due to the restriction on the mock, blur() call does not trigger
+    // blur event.
+    expect(blur).toHaveBeenCalled();
+    fireEvent.blur(uncommittedItem);
+
+    expect(uncommittedItem.value).toBe('67μs');
   });
 });
