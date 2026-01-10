@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { SymbolsNotFoundError } from './errors';
-
 // Contains a symbol table, which can be used to map addresses to strings.
 // Symbol tables of this format are created within Firefox's implementation of
 // the geckoProfiler WebExtension API, at
@@ -182,16 +180,16 @@ export default class SymbolStoreDB {
 
   /**
    * Retrieve the symbol table for the given library.
-   * @param {string}      The debugName of the library.
-   * @param {string}      The breakpadId of the library.
-   * @return              A promise that resolves with the symbol table (in
-   *                      SymbolTableAsTuple format), or fails if we couldn't
-   *                      find a symbol table for the requested library.
+   * @param {string} debugName  The debugName of the library.
+   * @param {string} breakpadId The breakpadId of the library.
+   * @return A promise that resolves with the symbol table (in
+   *         SymbolTableAsTuple format), with null if we couldn't
+   *         find a symbol table for the requested library.
    */
   getSymbolTable(
     debugName: string,
     breakpadId: string
-  ): Promise<SymbolTableAsTuple> {
+  ): Promise<SymbolTableAsTuple | null> {
     return this._getDB().then((db) => {
       return new Promise((resolve, reject) => {
         const transaction = db.transaction('symbol-tables', 'readwrite');
@@ -207,12 +205,7 @@ export default class SymbolStoreDB {
             const { addrs, index, buffer } = value;
             updateDateReq.onsuccess = () => resolve([addrs, index, buffer]);
           } else {
-            reject(
-              new SymbolsNotFoundError(
-                'The requested library does not exist in the database.',
-                { debugName, breakpadId }
-              )
-            );
+            resolve(null);
           }
         };
       });

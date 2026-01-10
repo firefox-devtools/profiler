@@ -9,14 +9,17 @@ import {
   partialSymbolTable,
 } from '../fixtures/example-symbol-table';
 import type { ExampleSymbolTable } from '../fixtures/example-symbol-table';
-import type { MarkerPayload, RequestedLib } from 'firefox-profiler/types';
+import type { MarkerPayload } from 'firefox-profiler/types';
 import type {
   AddressResult,
   LibSymbolicationRequest,
   LibSymbolicationResponse,
   SymbolProvider,
 } from '../../profile-logic/symbol-store';
-import { SymbolStore } from '../../profile-logic/symbol-store';
+import {
+  readSymbolsFromSymbolTable,
+  SymbolStore,
+} from '../../profile-logic/symbol-store';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { INTERVAL } from 'firefox-profiler/app-logic/constants';
@@ -34,10 +37,6 @@ import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 import { StringTable } from '../../utils/string-table';
 import { ensureExists } from 'firefox-profiler/utils/types';
 
-// fake-indexeddb no longer includes a structuredClone polyfill, so we need to
-// import it explicitly.
-import 'core-js/stable/structured-clone';
-import { indexedDB, IDBKeyRange } from 'fake-indexeddb';
 import { stripIndent } from 'common-tags';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
 
@@ -46,21 +45,6 @@ import { SymbolsNotFoundError } from '../../profile-logic/errors';
  * its own file.
  */
 describe('doSymbolicateProfile', function () {
-  const symbolStoreName = 'test-db';
-  beforeAll(function () {
-    // The SymbolStore requires IndexedDB, otherwise symbolication will be skipped.
-    window.indexedDB = indexedDB;
-    window.IDBKeyRange = IDBKeyRange;
-  });
-
-  afterAll(async function () {
-    // @ts-expect-error property must be optional
-    delete window.indexedDB;
-    // @ts-expect-error property must be optional
-    delete window.IDBKeyRange;
-    await _deleteDatabase(`${symbolStoreName}-symbol-tables`);
-  });
-
   // Initialize a store, an unsymbolicated profile, and helper functions.
   function init() {
     // The rejection in `requestSymbolsFromServer` outputs an error log, let's
@@ -101,7 +85,7 @@ describe('doSymbolicateProfile', function () {
               type: 'ERROR' as const,
               request,
               error: new SymbolsNotFoundError(
-                'Not in from-server mode, try requestSymbolTableFromBrowser.',
+                'Not in from-server mode, try requestSymbolsViaSymbolTableFromBrowser.',
                 lib
               ),
             };
@@ -123,7 +107,11 @@ describe('doSymbolicateProfile', function () {
         throw new Error('requestSymbolsFromBrowser unsupported in this test');
       },
 
-      requestSymbolTableFromBrowser: async (lib: RequestedLib) => {
+      requestSymbolsViaSymbolTableFromBrowser: async (
+        request: LibSymbolicationRequest,
+        _ignoreCache: boolean
+      ) => {
+        const { lib, addresses } = request;
         if (lib.debugName !== 'firefox.pdb') {
           throw new SymbolsNotFoundError(
             'Should only have libs called firefox.pdb',
@@ -132,11 +120,14 @@ describe('doSymbolicateProfile', function () {
         }
         if (symbolicationProviderMode !== 'from-browser') {
           throw new Error(
-            'should not call requestSymbolTableFromBrowser if requestSymbolsFromServer is successful'
+            'should not call requestSymbolsViaSymbolTableFromBrowser if requestSymbolsFromServer is successful'
           );
         }
-
-        return symbolTable.asTuple;
+        return readSymbolsFromSymbolTable(
+          addresses,
+          symbolTable.asTuple,
+          (s: string) => s
+        );
       },
     };
 
@@ -155,7 +146,7 @@ describe('doSymbolicateProfile', function () {
         }),
       switchSymbolTable,
       switchSymbolProviderMode,
-      symbolStore: new SymbolStore(symbolStoreName, symbolProvider),
+      symbolStore: new SymbolStore(symbolProvider),
     };
   }
 
@@ -193,18 +184,13 @@ describe('doSymbolicateProfile', function () {
       ]);
     });
 
-    it('uses the cache when available', async () => {
-      // This reuses the db from the previous test
+    it('does different merging depending on available symbols', async () => {
       const {
         store: { dispatch, getState },
         profile,
         symbolStore,
         switchSymbolTable,
       } = init();
-
-      // This partial symbol table should not be used, because the db cache is
-      // used instead.
-      switchSymbolTable(partialSymbolTable);
 
       await doSymbolicateProfile(dispatch, profile, symbolStore);
       expect(formatTree(getCallTree(getState()))).toEqual([
@@ -215,7 +201,8 @@ describe('doSymbolicateProfile', function () {
         '- second symbol (total: 1, self: 1)',
       ]);
 
-      // But the partial symbol table should be used when ignoring the cache.
+      // Now re-symbolicate with the partial symbol table.
+      switchSymbolTable(partialSymbolTable);
       await doSymbolicateProfile(
         dispatch,
         profile,
@@ -226,25 +213,9 @@ describe('doSymbolicateProfile', function () {
         '- overencompassing first symbol (total: 4, self: 2)',
         '  - last symbol (total: 2, self: 2)',
       ]);
-
-      // And then the cache should have been overwritten, let's check this by
-      // switching the symbol table again.
-      switchSymbolTable(completeSymbolTable);
-      // This time do not ignore the cache.
-      await doSymbolicateProfile(dispatch, profile, symbolStore);
-      // The result should be the same despite that the complete symbol table
-      // has been configured, this means the incomplete symbol table is in the
-      // DB cache.
-      expect(formatTree(getCallTree(getState()))).toEqual([
-        '- overencompassing first symbol (total: 4, self: 2)',
-        '  - last symbol (total: 2, self: 2)',
-      ]);
     });
 
     it('can symbolicate a profile when symbols come from-server', async () => {
-      // Get rid of any cached symbol tables from the previous test.
-      await _deleteDatabase(`${symbolStoreName}-symbol-tables`);
-
       const {
         store: { dispatch, getState },
         profile,
@@ -402,7 +373,6 @@ describe('doSymbolicateProfile', function () {
 
   describe('merging of functions with different memory addresses, but in the same function', () => {
     it('starts with expanded call nodes of multiple memory addresses', async function () {
-      // Don't use the mocks on this test, as no SymbolStore database is needed.
       const {
         store: { dispatch, getState },
         funcNamesToFuncIndexes,
@@ -465,9 +435,6 @@ describe('doSymbolicateProfile', function () {
   });
 
   it('can symbolicate a profile with a partial symbol table and re-symbolicate it with a complete symbol table', async () => {
-    // Get rid of any cached symbol tables from the previous tests.
-    await _deleteDatabase(`${symbolStoreName}-symbol-tables`);
-
     const {
       store: { dispatch, getState },
       symbolStore,
@@ -514,9 +481,6 @@ describe('doSymbolicateProfile', function () {
   });
 
   it('can re-symbolicate a partially-symbolicated profile even if it needs to add funcs to the funcTable', async () => {
-    // Get rid of any cached symbol tables from the previous tests.
-    await _deleteDatabase(`${symbolStoreName}-symbol-tables`);
-
     const {
       store: { dispatch, getState },
       symbolStore,
@@ -660,12 +624,4 @@ function _createUnsymbolicatedProfile() {
   thread.markers = markers;
 
   return profile;
-}
-
-function _deleteDatabase(dbName: string) {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.deleteDatabase(dbName);
-    req.onsuccess = () => resolve(undefined);
-    req.onerror = () => reject(req.error);
-  });
 }

@@ -35,8 +35,6 @@ import {
   numberSeriesFromDeltas,
   numberSeriesToDeltas,
 } from 'firefox-profiler/utils/number-series';
-import ExtensionFavicon from '../../res/img/svg/extension-outline.svg';
-import DefaultLinkFavicon from '../../res/img/svg/globe.svg';
 
 import type { StringTable } from 'firefox-profiler/utils/string-table';
 import type {
@@ -3307,7 +3305,7 @@ export function extractProfileFilterPageData(
       pageDataByTabID.set(tabID, {
         origin: pageUrl,
         hostname: pageUrl,
-        favicon: DefaultLinkFavicon,
+        favicon: null,
       });
       continue;
     }
@@ -3321,12 +3319,11 @@ export function extractProfileFilterPageData(
     // moz-extension:// protocol on platforms outside of Firefox. Only Firefox
     // can parse it properly. Chrome and node will output a URL with no `origin`.
     const isExtension = pageUrl.startsWith('moz-extension://');
-    const defaultFavicon = isExtension ? ExtensionFavicon : DefaultLinkFavicon;
     const pageData: ProfileFilterPageData = {
       // These will be used as a fallback if the urls have been sanitized.
       origin: pageUrl,
       hostname: pageUrl,
-      favicon: currentPage.favicon ?? defaultFavicon,
+      favicon: currentPage.favicon ?? null,
     };
 
     try {
