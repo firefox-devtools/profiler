@@ -31,6 +31,10 @@
   background-image: url(../../../res/img/svg/end-selection-at-marker-end.svg);
 }
 
+.markerContextMenuIconOverrideZeroAtMarkerStart {
+  background-image: url(../../../res/img/svg/override-zero-at-marker-start.svg);
+}
+
 .markerContextMenuIconCopyDescription {
   background-image: url(../../../res/img/svg/copy-dark.svg);
 }

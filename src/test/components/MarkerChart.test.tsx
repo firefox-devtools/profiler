@@ -652,14 +652,14 @@ describe('MarkerChart', function () {
 
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
-      clickOnMenuItem(/start.*start/i);
+      clickOnMenuItem(/^start.*start/i);
       expect(getPreviewSelection(getState())).toEqual({
         isModifying: false,
         selectionStart: 2,
         selectionEnd: 11,
       });
 
-      clickOnMenuItem(/start.*end/i);
+      clickOnMenuItem(/^start.*end/i);
       expect(getPreviewSelection(getState())).toEqual({
         isModifying: false,
         selectionStart: 8,
@@ -676,7 +676,7 @@ describe('MarkerChart', function () {
 
       // Reset the selection by using the other marker.
       rightClick(findFillTextPosition('UserTiming A'));
-      clickOnMenuItem(/start.*start/i);
+      clickOnMenuItem(/^start.*start/i);
       expect(getPreviewSelection(getState())).toEqual({
         isModifying: false,
         selectionStart: 0,

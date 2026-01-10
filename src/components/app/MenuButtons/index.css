@@ -111,6 +111,15 @@
   background-image: url(../../../../res/img/svg/maximize-dark-12.svg);
 }
 
+.menuButtonsResetZeroAtButton::before {
+  background-image: url(../../../../res/img/svg/undo-dark-12.svg);
+}
+
+.menuButtonsZeroAtTimestamp {
+  font-weight: bold;
+  margin-inline-start: 0.3em;
+}
+
 .profileInfoUploadedActions {
   padding: 8px 0 8px 40px; /* The 40px padding leaves the room for the cloud image */
   border-bottom: 1px solid rgb(0 0 0 / 0.05);
