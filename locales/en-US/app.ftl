@@ -438,6 +438,8 @@ MarkerContextMenu--end-selection-at-marker-start =
     End selection at marker’s <strong>start</strong>
 MarkerContextMenu--end-selection-at-marker-end =
     End selection at marker’s <strong>end</strong>
+MarkerContextMenu--align-timeline-start-with-marker-start =
+    Align the timeline start with the marker start
 MarkerContextMenu--copy-description = Copy description
 MarkerContextMenu--copy-call-stack = Copy call stack
 MarkerContextMenu--copy-url = Copy URL
@@ -701,6 +703,12 @@ MenuButtons--publish--message-try-again = Try again
 MenuButtons--publish--download = Download
 MenuButtons--publish--compressing = Compressing…
 MenuButtons--publish--error-while-compressing = Error while compressing, try unchecking some checkboxes to reduce the profile size.
+
+# This string is the button's label, where the button is shown when the
+# timeline start is aligned to certain marker.
+# Variables:
+#   $zeroAt (String) - The timestamp of the starting point
+MenuButtons--starting-point-moved = Starting point moved to <span>{ $zeroAt }</span>
 
 ## NetworkSettings
 ## This is used in the network chart.

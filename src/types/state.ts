@@ -103,6 +103,7 @@ export type ProfileViewState = {
     hoveredMarker: MarkerReference | null;
     mouseTimePosition: Milliseconds | null;
     perTab: TableViewOptionsPerTab;
+    overrideZeroAt: number | null;
   };
   readonly profile: Profile | null;
   globalTracks: GlobalTrack[];

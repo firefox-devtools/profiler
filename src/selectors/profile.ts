@@ -6,6 +6,7 @@ import * as Tracks from '../profile-logic/tracks';
 import * as CPU from '../profile-logic/cpu';
 import * as UrlState from './url-state';
 import { ensureExists } from '../utils/types';
+import { formatTimestamp } from '../utils/format-numbers';
 import {
   accumulateCounterSamples,
   extractProfileFilterPageData,
@@ -96,8 +97,23 @@ export const getScrollToSelectionGeneration: Selector<number> = (state) =>
   getProfileViewOptions(state).scrollToSelectionGeneration;
 export const getFocusCallTreeGeneration: Selector<number> = (state) =>
   getProfileViewOptions(state).focusCallTreeGeneration;
-export const getZeroAt: Selector<Milliseconds> = (state) =>
-  getProfileRootRange(state).start;
+export const getZeroAt: Selector<Milliseconds> = (state) => {
+  const viewOptions = getProfileViewOptions(state);
+  if (viewOptions.overrideZeroAt !== null) {
+    return viewOptions.overrideZeroAt;
+  }
+  return getProfileRootRange(state).start;
+};
+export const getOverriddenZeroAtTimestamp: Selector<string | null> = (
+  state
+) => {
+  const viewOptions = getProfileViewOptions(state);
+  if (viewOptions.overrideZeroAt === null) {
+    return null;
+  }
+  const offset = viewOptions.overrideZeroAt - getProfileRootRange(state).start;
+  return formatTimestamp(offset);
+};
 export const getProfileTimelineUnit: Selector<TimelineUnit> = (state) => {
   const { sampleUnits } = getProfile(state).meta;
   return sampleUnits ? sampleUnits.time : 'ms';

@@ -824,6 +824,15 @@ const mouseTimePosition: Reducer<Milliseconds | null> = (
   }
 };
 
+const overrideZeroAt: Reducer<Milliseconds | null> = (state = null, action) => {
+  switch (action.type) {
+    case 'OVERRIDE_ZERO_AT':
+      return action.zeroAt;
+    default:
+      return state;
+  }
+};
+
 /**
  * Provide a mechanism to wrap the reducer in a special function that can reset
  * the state to the default values. This is useful when viewing multiple profiles
@@ -864,6 +873,7 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       hoveredMarker,
       mouseTimePosition,
       perTab: tableViewOptionsPerTab,
+      overrideZeroAt,
     }),
     profile,
     globalTracks,
