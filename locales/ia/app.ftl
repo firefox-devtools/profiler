@@ -419,6 +419,7 @@ MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Depone spec
 ## Table panels.
 
 MarkerCopyTableContextMenu--copy-table-as-plain = Copiar tabella del marcatores como testo normal
+MarkerCopyTableContextMenu--copy-table-as-markdown = Copiar tabella del marcatores como Markdown
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -428,6 +429,14 @@ MarkerSettings--panel-search =
     .title = Solo monstra marcatores que concorda con un certe nomine
 MarkerSettings--marker-filters =
     .title = Filtros de marcatores
+MarkerSettings--copy-table =
+    .title = Copiar tabella como texto
+# This string is used when the user tries to copy a marker table with
+# more than 10000 rows.
+# Variable:
+#   $rows (Number) - Number of rows the marker table has
+#   $maxRows (Number) - Number of maximum rows that can be copied
+MarkerSettings--copy-table-exceeed-max-rows = Le numero de rangos supera le limite: { $rows } > { $maxRows }. Sera copiate solo le prime { $maxRows } rangos.
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
