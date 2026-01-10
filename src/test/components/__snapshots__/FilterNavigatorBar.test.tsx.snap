@@ -83,11 +83,14 @@ exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 3`] 
     class="filterNavigatorBarItem filterNavigatorBarUncommittedItem filterNavigatorBarLeafItem"
     title="100μs"
   >
-    <span
-      class="filterNavigatorBarItemContent"
-    >
-      100μs
-    </span>
+    <form>
+      <input
+        aria-label="Range duration"
+        class="filterNavigatorBarItemUncommittedFieldInput photon-input"
+        title="Edit the range duration"
+        value="100μs"
+      />
+    </form>
   </li>
 </ol>
 `;
