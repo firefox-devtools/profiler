@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import { lightDark, maybeLightDark } from './dark-mode';
+
 /**
  * These are the colors from Photon. They are inlined to provide easy access. If updating
  * please change the CSS variables as well.
@@ -74,97 +76,142 @@ export const INK_80 = '#202340';
 export const INK_90 = '#0f1126';
 
 type ColorStyles = {
-  readonly selectedFillStyle: string;
-  readonly unselectedFillStyle: string;
-  readonly selectedTextColor: string;
+  readonly _selectedFillStyle: string | [string, string];
+  readonly _unselectedFillStyle: string | [string, string];
+  readonly _selectedTextColor: string | [string, string];
+  readonly getSelectedFillStyle: () => string;
+  readonly getUnselectedFillStyle: () => string;
+  readonly getSelectedTextColor: () => string;
   readonly gravity: number;
 };
 
-const GRAY_STYLE = {
-  selectedFillStyle: GREY_40,
-  unselectedFillStyle: GREY_40 + '60',
-  selectedTextColor: '#000',
+const DEFAULT_STYLE: ColorStyles = {
+  _selectedFillStyle: ['#ffffff', '#0f1126'],
+  _unselectedFillStyle: ['#ffffff60', '#0f112660'],
+  _selectedTextColor: ['#000000', GREY_20],
+  getSelectedFillStyle: function () {
+    return maybeLightDark(this._selectedFillStyle);
+  },
+  getUnselectedFillStyle: function () {
+    return maybeLightDark(this._unselectedFillStyle);
+  },
+  getSelectedTextColor: function () {
+    return maybeLightDark(this._selectedTextColor);
+  },
+  gravity: 0,
+};
+
+const PSEUDO_TRANSPARENT_STYLE: ColorStyles = {
+  ...DEFAULT_STYLE,
+  _selectedFillStyle: [GREY_30, GREY_70],
+  _unselectedFillStyle: [GREY_30 + '60', GREY_70 + '60'],
+  _selectedTextColor: ['#000', GREY_20],
+  gravity: 8,
+};
+
+const GRAY_STYLE: ColorStyles = {
+  ...DEFAULT_STYLE,
+  _selectedFillStyle: [GREY_40, GREY_50],
+  _unselectedFillStyle: [GREY_40 + '60', GREY_50 + '60'],
+  _selectedTextColor: ['#000', GREY_20],
   gravity: 10,
 };
-const DARK_GRAY_STYLE = {
-  selectedFillStyle: GREY_50,
-  unselectedFillStyle: GREY_50 + '60',
-  selectedTextColor: '#fff',
+const DARK_GRAY_STYLE: ColorStyles = {
+  ...DEFAULT_STYLE,
+  _selectedFillStyle: [GREY_50, GREY_60],
+  _unselectedFillStyle: [GREY_50 + '60', GREY_60 + '60'],
+  _selectedTextColor: '#fff',
   gravity: 11,
 };
 const STYLE_MAP: { [key: string]: ColorStyles } = {
   transparent: {
-    selectedFillStyle: 'transparent',
-    unselectedFillStyle: 'transparent',
-    selectedTextColor: '#000',
+    ...DEFAULT_STYLE,
+    _selectedFillStyle: 'transparent',
+    _unselectedFillStyle: 'transparent',
+    _selectedTextColor: ['#000', GREY_20],
     gravity: 0,
   },
   lightblue: {
-    selectedFillStyle: BLUE_40,
+    ...DEFAULT_STYLE,
+    _selectedFillStyle: BLUE_40,
     // Colors are assumed to have the form #RRGGBB, so concatenating 2 more digits to
     // the end defines the transparency #RRGGBBAA.
-    unselectedFillStyle: BLUE_40 + '60',
-    selectedTextColor: '#000',
+    _unselectedFillStyle: BLUE_40 + '60',
+    _selectedTextColor: ['#000', GREY_20],
     gravity: 1,
   },
   red: {
-    selectedFillStyle: RED_60,
-    unselectedFillStyle: RED_60 + '60',
-    selectedTextColor: '#fff',
+    ...DEFAULT_STYLE,
+    _selectedFillStyle: RED_60,
+    _unselectedFillStyle: RED_60 + '60',
+    _selectedTextColor: '#fff',
     gravity: 1,
   },
   lightred: {
-    selectedFillStyle: RED_70 + '60',
-    unselectedFillStyle: RED_70 + '30',
-    selectedTextColor: '#000',
+    ...DEFAULT_STYLE,
+    _selectedFillStyle: RED_70 + '60',
+    _unselectedFillStyle: RED_70 + '30',
+    _selectedTextColor: ['#000', GREY_20],
     gravity: 1,
   },
   orange: {
-    selectedFillStyle: ORANGE_50,
-    unselectedFillStyle: ORANGE_50 + '60',
-    selectedTextColor: '#fff',
+    ...DEFAULT_STYLE,
+    _selectedFillStyle: [ORANGE_50, ORANGE_60],
+    _unselectedFillStyle: [ORANGE_50 + '60', ORANGE_60 + '60'],
+    _selectedTextColor: '#fff',
     gravity: 2,
   },
   blue: {
-    selectedFillStyle: BLUE_60,
-    unselectedFillStyle: BLUE_60 + '60',
-    selectedTextColor: '#fff',
+    ...DEFAULT_STYLE,
+    _selectedFillStyle: BLUE_60,
+    _unselectedFillStyle: BLUE_60 + '60',
+    _selectedTextColor: '#fff',
     gravity: 3,
   },
   green: {
-    selectedFillStyle: GREEN_60,
-    unselectedFillStyle: GREEN_60 + '60',
-    selectedTextColor: '#fff',
+    ...DEFAULT_STYLE,
+    _selectedFillStyle: [GREEN_60, GREEN_80],
+    _unselectedFillStyle: [GREEN_60 + '60', GREEN_80 + '60'],
+    _selectedTextColor: '#fff',
     gravity: 4,
   },
   purple: {
-    selectedFillStyle: PURPLE_70,
-    unselectedFillStyle: PURPLE_70 + '60',
-    selectedTextColor: '#fff',
+    ...DEFAULT_STYLE,
+    _selectedFillStyle: [PURPLE_70, PURPLE_60],
+    _unselectedFillStyle: [PURPLE_70 + '60', PURPLE_60 + '60'],
+    _selectedTextColor: '#fff',
     gravity: 5,
   },
   yellow: {
-    selectedFillStyle: '#ffe129', // This yellow has more contrast than YELLOW_50.
-    unselectedFillStyle: YELLOW_50 + '70',
-    selectedTextColor: '#000',
+    ...DEFAULT_STYLE,
+    _selectedFillStyle: [
+      // This yellow has more contrast than YELLOW_50.
+      '#ffe129',
+      YELLOW_70,
+    ],
+    _unselectedFillStyle: [YELLOW_50 + '70', YELLOW_60 + '70'],
+    _selectedTextColor: ['#000', GREY_20],
     gravity: 6,
   },
   brown: {
-    selectedFillStyle: ORANGE_70,
-    unselectedFillStyle: ORANGE_70 + '60',
-    selectedTextColor: '#fff',
+    ...DEFAULT_STYLE,
+    _selectedFillStyle: ORANGE_70,
+    _unselectedFillStyle: ORANGE_70 + '60',
+    _selectedTextColor: '#fff',
     gravity: 7,
   },
   magenta: {
-    selectedFillStyle: MAGENTA_60,
-    unselectedFillStyle: MAGENTA_60 + '60',
-    selectedTextColor: '#fff',
+    ...DEFAULT_STYLE,
+    _selectedFillStyle: [MAGENTA_60, MAGENTA_70],
+    _unselectedFillStyle: [MAGENTA_60 + '60', MAGENTA_70 + '60'],
+    _selectedTextColor: '#fff',
     gravity: 8,
   },
   lightgreen: {
-    selectedFillStyle: GREEN_50,
-    unselectedFillStyle: GREEN_50 + '60',
-    selectedTextColor: '#fff',
+    ...DEFAULT_STYLE,
+    _selectedFillStyle: [GREEN_50, GREEN_70],
+    _unselectedFillStyle: [GREEN_50 + '60', GREEN_70 + '60'],
+    _selectedTextColor: '#fff',
     gravity: 9,
   },
   gray: GRAY_STYLE,
@@ -200,12 +247,15 @@ export function mapCategoryColorNameToStackChartStyles(
   colorName: string
 ): ColorStyles {
   if (colorName === 'transparent') {
-    return {
-      selectedFillStyle: GREY_30,
-      unselectedFillStyle: GREY_30 + '60',
-      selectedTextColor: '#000',
-      gravity: 8,
-    };
+    return PSEUDO_TRANSPARENT_STYLE;
   }
   return mapCategoryColorNameToStyles(colorName);
+}
+
+export function getForegroundColor(): string {
+  return lightDark('#000000', GREY_20);
+}
+
+export function getBackgroundColor(): string {
+  return lightDark('#ffffff', INK_90);
 }

@@ -9,6 +9,10 @@
 }
 
 .dragAndDropOverlayWrapper {
+  --internal-foreground-color: #666;
+  --internal-background-color: rgb(255 255 255 / 0.9);
+  --internal-border-color: #888;
+
   position: absolute;
   top: 0;
   left: 0;
@@ -19,10 +23,18 @@
   align-items: stretch;
   justify-content: center;
   padding: 1em;
-  background-color: rgb(255 255 255 / 0.9);
+  background-color: var(--internal-background-color);
   opacity: 0;
   pointer-events: none;
   transition: opacity 200ms;
+}
+
+:root.dark-mode {
+  .dragAndDropOverlayWrapper {
+    --internal-foreground-color: var(--grey-40);
+    --internal-background-color: rgb(0 0 0 / 0.9);
+    --internal-border-color: var(--grey-30);
+  }
 }
 
 .dragAndDropOverlayWrapper.dragging {
@@ -34,9 +46,9 @@
   width: 100%;
   align-items: center;
   justify-content: center;
-  border: 2px dashed #888;
+  border: 2px dashed var(--internal-border-color);
   border-radius: 10px;
-  color: #666;
+  color: var(--internal-foreground-color);
   font-size: 30px;
   text-align: center;
 }

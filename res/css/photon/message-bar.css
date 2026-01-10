@@ -4,6 +4,26 @@
 
 /* See https://design.firefox.com/photon/components/message-bars.html */
 .photon-message-bar {
+  --internal-foreground-color: var(--grey-90);
+  --internal-background-color: var(--grey-20);
+  --internal-error-foreground-color: #fff;
+  --internal-error-background-color: var(--red-60);
+  --internal-warning-foreground-color: var(--yellow-90);
+  --internal-warning-background-color: var(--yellow-50);
+  --internal-error-action-foreground-color: #fff;
+  --internal-error-action-background-color: var(--red-70);
+  --internal-error-action-hover-background-color: var(--red-80);
+  --internal-error-action-active-background-color: var(--red-90);
+  --internal-warning-action-background-color: var(--yellow-60);
+  --internal-warning-action-hover-forekground-color: #fff;
+  --internal-warning-action-hover-background-color: var(--yellow-70);
+  --internal-warning-action-active-background-color: var(--yellow-80);
+  --internal-close-icon: url(../../img/svg/close-dark.svg);
+  --internal-error-close-icon: url(../../img/svg/close-light.svg);
+  --internal-icon: url(../../img/svg/info-icon.svg);
+  --internal-error-icon: url(../../img/svg/error.svg);
+  --internal-warning-icon: url(../../img/svg/warning.svg);
+
   display: flex;
   min-height: 32px;
   box-sizing: border-box;
@@ -18,12 +38,51 @@
   /* Note: 8px is: 4px (left padding for the message bar) + 4px (left padding
    * for the icon). And same for the top positioning, because we want the icon
    * to stick at the top when the text is multiline */
-  background: url(../../img/svg/info-icon.svg) no-repeat 8px 8px / 16px 16px
-    var(--grey-20);
-  color: var(--grey-90);
+  background: var(--internal-icon) no-repeat 8px 8px / 16px 16px
+    var(--internal-background-color);
+  color: var(--internal-foreground-color);
   font-size: 13px;
   font-weight: 400;
   line-height: 1.4;
+}
+
+:root.dark-mode {
+  .photon-message-bar {
+    --internal-foreground-color: var(--grey-20);
+    --internal-background-color: var(--ink-60);
+    --internal-error-foreground-color: var(--grey-20);
+    --internal-error-background-color: var(--red-60);
+    --internal-warning-foreground-color: var(--grey-20);
+    --internal-warning-background-color: var(--yellow-70);
+    --internal-error-action-foreground-color: var(--grey-20);
+    --internal-error-action-background-color: var(--red-70);
+    --internal-error-action-hover-background-color: color-mix(
+      in hsl,
+      var(--red-70) 90%,
+      white 10%
+    );
+    --internal-error-action-active-background-color: color-mix(
+      in hsl,
+      var(--red-70) 50%,
+      var(--red-80) 50%
+    );
+    --internal-warning-action-background-color: var(--yellow-80);
+    --internal-warning-action-hover-forekground-color: var(--grey-20);
+    --internal-warning-action-hover-background-color: color-mix(
+      in hsl,
+      var(--yellow-80) 90%,
+      white 10%
+    );
+    --internal-warning-action-active-background-color: color-mix(
+      in hsl,
+      var(--yellow-80) 50%,
+      var(--yellow-90) 50%
+    );
+    --internal-close-icon: url(../../img/svg/close-light.svg);
+    --internal-error-close-icon: url(../../img/svg/close-light.svg);
+    --internal-icon: url(../../img/svg/info-icon-light.svg);
+    --internal-warning-icon: url(../../img/svg/warning-light.svg);
+  }
 }
 
 .photon-message-bar-action-button {
@@ -35,7 +94,7 @@
   height: 24px;
   flex: none;
   margin-left: auto;
-  background: url(../../img/svg/close-dark.svg) no-repeat center / 16px 16px;
+  background: var(--internal-close-icon) no-repeat center / 16px 16px;
 }
 
 .photon-message-bar-inner-content {
@@ -59,57 +118,57 @@
 }
 
 .photon-message-bar-error {
-  background-color: var(--red-60);
-  background-image: url(../../img/svg/error.svg);
-  color: #fff;
+  background-color: var(--internal-error-background-color);
+  background-image: var(--internal-error-icon);
+  color: var(--internal-error-foreground-color);
 }
 
 .photon-message-bar-warning {
-  background-color: var(--yellow-50);
-  background-image: url(../../img/svg/warning.svg);
-  color: var(--yellow-90);
+  background-color: var(--internal-warning-background-color);
+  background-image: var(--internal-warning-icon);
+  color: var(--internal-warning-foreground-color);
 }
 
 .photon-message-bar-error .photon-message-bar-close-button {
-  background-image: url(../../img/svg/close-light.svg);
+  background-image: var(--internal-error-close-icon);
 }
 
 /* The default styles for this button are copied from the ghost button, mostly
  * for ease of usage. */
 .photon-message-bar-close-button:hover {
-  background-color: var(--grey-90-a10);
+  background-color: var(--clickable-ghost-hover-background-color);
 }
 
 .photon-message-bar-error .photon-message-bar-action-button,
 .photon-message-bar-error .photon-message-bar-close-button:hover {
-  background-color: var(--red-70);
-  color: #fff;
+  background-color: var(--internal-error-action-background-color);
+  color: var(photon-message-bar-error-action-foreground-color);
 }
 
 .photon-message-bar-warning .photon-message-bar-action-button,
 .photon-message-bar-warning .photon-message-bar-close-button:hover {
-  background-color: var(--yellow-60);
+  background-color: var(--internal-warning-action-background-color);
 }
 
 .photon-message-bar-close-button:hover:active {
-  background-color: var(--grey-90-a20);
+  background-color: var(--clickable-ghost-active-background-color);
 }
 
 .photon-message-bar-error .photon-message-bar-action-button:hover,
 .photon-message-bar-error .photon-message-bar-close-button:hover:active {
-  background-color: var(--red-80);
+  background-color: var(--internal-error-action-hover-background-color);
 }
 
 .photon-message-bar-warning .photon-message-bar-action-button:hover,
 .photon-message-bar-warning .photon-message-bar-close-button:hover:active {
-  background-color: var(--yellow-70);
-  color: #fff;
+  background-color: var(--internal-warning-action-hover-background-color);
+  color: var(--internal-warning-action-hover-forekground-color);
 }
 
 .photon-message-bar-error .photon-message-bar-action-button:hover:active {
-  background-color: var(--red-90);
+  background-color: var(--internal-error-action-active-background-color);
 }
 
 .photon-message-bar-warning .photon-message-bar-action-button:hover:active {
-  background-color: var(--yellow-80);
+  background-color: var(--internal-warning-action-active-background-color);
 }

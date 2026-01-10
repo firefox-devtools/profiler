@@ -11,6 +11,8 @@
 }
 
 .overflowEdgeIndicatorEdge {
+  --internal-shadow-color: rgb(0 0 0 / 0.4);
+
   position: absolute;
   z-index: 3;
   opacity: 0;
@@ -18,6 +20,12 @@
   transition: 150ms ease-in-out;
   transition-property: opacity, visibility;
   visibility: hidden;
+}
+
+:root.dark-mode {
+  .overflowEdgeIndicatorEdge {
+    --internal-shadow-color: rgb(0 0 0 / 0.5);
+  }
 }
 
 .overflowEdgeIndicatorEdge.topEdge,
@@ -57,7 +65,7 @@
 .overflowEdgeIndicatorEdge.topEdge {
   background: radial-gradient(
     ellipse at center top,
-    rgb(0 0 0 / 0.4),
+    var(--internal-shadow-color),
     transparent 60%
   );
 }
@@ -65,7 +73,7 @@
 .overflowEdgeIndicatorEdge.rightEdge {
   background: radial-gradient(
     ellipse at right center,
-    rgb(0 0 0 / 0.4),
+    var(--internal-shadow-color),
     transparent 60%
   );
 }
@@ -73,7 +81,7 @@
 .overflowEdgeIndicatorEdge.bottomEdge {
   background: radial-gradient(
     ellipse at center bottom,
-    rgb(0 0 0 / 0.4),
+    var(--internal-shadow-color),
     transparent 60%
   );
 }
@@ -81,7 +89,7 @@
 .overflowEdgeIndicatorEdge.leftEdge {
   background: radial-gradient(
     ellipse at left center,
-    rgb(0 0 0 / 0.4),
+    var(--internal-shadow-color),
     transparent 60%
   );
 }

@@ -3,7 +3,19 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .timelineRuler {
+  --internal-foreground-color: var(--grey-50);
+  --internal-notch-color1: var(--grey-30);
+  --internal-notch-color2: #d7d7db66; /* --grey-30 + 66 */
+
   height: var(--timeline-ruler-height);
+}
+
+:root.dark-mode {
+  .timelineRuler {
+    --internal-foreground-color: var(--grey-40);
+    --internal-notch-color1: var(--grey-40);
+    --internal-notch-color2: #b1b1b366; /* --grey-50 + 66 */
+  }
 }
 
 .timelineRulerContainer {
@@ -16,7 +28,7 @@
   height: 20px;
   padding: 0;
   margin: 0;
-  color: var(--grey-50);
+  color: var(--internal-foreground-color);
   cursor: default;
   font-size: 9px;
   line-height: 20px;
@@ -37,9 +49,9 @@
   margin-left: -1px;
   background: linear-gradient(
     transparent,
-    var(--grey-30) 19px,
-    var(--grey-30) 20px,
-    #d7d7db66 0
+    var(--internal-notch-color1) 19px,
+    var(--internal-notch-color1) 20px,
+    var(--internal-notch-color2) 0
   );
   text-align: right;
   white-space: nowrap;

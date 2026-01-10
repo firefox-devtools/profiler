@@ -5,10 +5,10 @@
 .photon-checkbox {
   position: relative;
   padding: 0;
-  border: 1px solid var(--grey-90-a30);
+  border: 1px solid var(--clickable-border-color);
   border-radius: 2px;
   appearance: none;
-  background-color: var(--grey-90-a10);
+  background-color: var(--clickable-background-color);
 }
 
 /* Remove the border, as it compets with box-shadow styles applied with focus.css */
@@ -31,16 +31,16 @@
 }
 
 .photon-checkbox:hover:not([disabled]) {
-  background-color: var(--grey-90-a20);
+  background-color: var(--clickable-hover-background-color);
 }
 
 .photon-checkbox:checked:not([disabled]) {
   border: none;
-  background-color: var(--blue-60);
+  background-color: var(--clickable-checked-background-color);
 }
 
 .photon-checkbox:hover:active:not([disabled]) {
-  background-color: var(--grey-90-a30);
+  background-color: var(--clickable-active-background-color);
 }
 
 .photon-checkbox-default:checked:not([disabled]) {
@@ -52,9 +52,9 @@
 }
 
 .photon-checkbox:checked:hover:not([disabled]) {
-  background-color: var(--blue-70);
+  background-color: var(--clickable-checked-hover-background-color);
 }
 
 .photon-checkbox:checked:hover:active:not([disabled]) {
-  background-color: var(--blue-80);
+  background-color: var(--clickable-checked-hover-background-color);
 }

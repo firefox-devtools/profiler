@@ -2,6 +2,98 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+:root {
+  --base-foreground-color: #000;
+  --base-background-color: #fff;
+  --base-border-color: var(--grey-30);
+  --base-shadow-color: rgb(0 0 0 / 0.2);
+  --link-foreground-color: var(--blue-60);
+  --link-visited-foreground-color: var(--purple-70);
+  --link-active-foreground-color: var(--red-50);
+  --clickable-foreground-color: var(--grey-90);
+  --clickable-background-color: var(--grey-90-a10);
+  --clickable-border-color: var(--grey-90-a30);
+  --clickable-hover-background-color: var(--grey-90-a20);
+  --clickable-active-background-color: var(--grey-90-a30);
+  --clickable-ghost-hover-background-color: var(--grey-90-a10);
+  --clickable-ghost-active-background-color: var(--grey-90-a20);
+  --clickable-checked-background-color: var(--blue-60);
+  --clickable-checked-hover-background-color: var(--blue-70);
+  --clickable-checked-active-background-color: var(--blue-80);
+  --focus-border-color: var(--blue-50);
+  --focus-shadow-color: var(--blue-50-a30);
+  --kbd-foreground-color: var(--base-foreground-color);
+  --kbd-background-color: #f6f6f6;
+  --kbd-border-color: #ccc;
+  --kbd-shadow-color: #bbb;
+  --home-border-color: #ccc;
+  --home-shadow-color: #0b1f50;
+  --row-odd-background-color: #f5f5f5;
+  --panel-foreground-color: var(--ink-70);
+  --panel-background-color: var(--grey-10);
+  --panel-border-color: var(--grey-30);
+  --track-selected-background-color: #edf6ff;
+  --tooltip-number-foreground-color: var(--grey-60);
+  --colored-border-color: rgb(0 0 0 / 0.1);
+
+  background-color: var(--base-background-color);
+  color: var(--base-foreground-color);
+}
+
+:root.dark-mode {
+  --base-foreground-color: var(--grey-20);
+  --base-background-color: var(--ink-90);
+  --base-border-color: var(--grey-50);
+  --base-shadow-color: rgb(0 0 0 / 0.4);
+  --link-foreground-color: var(--blue-40);
+  --link-visited-foreground-color: var(--purple-40);
+  --link-active-foreground-color: var(--red-50);
+  --clickable-foreground-color: var(--grey-20);
+  --clickable-background-color: var(--grey-10-a10);
+  --clickable-border-color: var(--grey-10-a40);
+  --clickable-hover-background-color: var(--grey-10-a20);
+  --clickable-active-background-color: var(--grey-10-a40);
+  --clickable-ghost-hover-background-color: var(--grey-10-a10);
+  --clickable-ghost-active-background-color: var(--grey-10-a20);
+  --clickable-checked-background-color: var(--blue-50);
+  --clickable-checked-hover-background-color: var(--blue-60);
+  --clickable-checked-active-background-color: var(--blue-70);
+  --focus-border-color: var(--blue-40);
+  --focus-shadow-color: var(--blue-50-a30);
+  --kbd-background-color: var(--ink-70);
+  --kbd-border-color: var(--ink-60);
+  --kbd-shadow-color: var(--ink-50);
+  --home-border-color: var(--ink-70);
+  --home-shadow-color: var(--ink-90);
+  --row-odd-background-color: color-mix(
+    in hsl,
+    var(--ink-80) 50%,
+    var(--ink-90) 50%
+  );
+  --panel-foreground-color: var(--grey-20);
+  --panel-background-color: var(--ink-80);
+  --panel-border-color: var(--ink-60);
+  --selected-track-background-color: color-mix(
+    in hsl,
+    var(--ink-90) 80%,
+    var(--teal-50) 20%
+  );
+  --tooltip-number-foreground-color: var(--grey-40);
+  --colored-border-color: rgb(237 237 240 / 0.1);
+}
+
+a {
+  color: var(--link-foreground-color);
+}
+
+a:visited {
+  color: var(--link-visited-foreground-color);
+}
+
+a:active {
+  color: var(--link-active-foreground-color);
+}
+
 /**
  * This class should be used to create a small colored square. It's used
  * especially for categories and network mime types.
@@ -11,7 +103,7 @@
   width: 9px;
   height: 9px;
   box-sizing: border-box;
-  border: 0.5px solid rgb(0 0 0 / 0.1);
+  border: 0.5px solid var(--colored-border-color);
   margin-right: 3px;
 
   /* Opt-out of forced colors so the color is applied */
@@ -19,7 +111,7 @@
 }
 
 .colored-border {
-  border: 2px solid rgb(0 0 0 / 0.1);
+  border: 2px solid var(--colored-border-color);
   margin-right: 3px;
 
   /* Opt-out of forced colors so the color is applied */

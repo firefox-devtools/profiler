@@ -1,7 +1,10 @@
 .sidebar {
+  --internal-dimmed-foreground-color: var(--grey-50);
+
   overflow: auto;
-  border-top: 1px solid var(--grey-30);
-  background: var(--grey-10);
+  border-top: 1px solid var(--panel-border-color);
+  background: var(--panel-background-color);
+  color: var(--base-foreground-color);
   font-size: 11px;
 
   --sidebar-indent: 16px;
@@ -56,7 +59,7 @@
 }
 
 .sidebar-title-label > :nth-child(2) {
-  color: var(--grey-50);
+  color: var(--internal-dimmed-foreground-color);
   text-align: end;
 }
 
@@ -90,7 +93,7 @@
 }
 
 .sidebar-subtitle {
-  color: var(--grey-50);
+  color: var(--internal-dimmed-foreground-color);
   font-size: inherit; /* reset browser styles */
 }
 
@@ -108,7 +111,7 @@
 }
 
 .sidebar-label {
-  color: var(--grey-50);
+  color: var(--internal-dimmed-foreground-color);
   grid-column-start: 1;
   margin-inline-start: var(--sidebar-indent);
   white-space: nowrap;
@@ -125,7 +128,11 @@
 }
 
 .sidebar-histogram-bar {
-  background-color: var(--grey-30);
+  --internal-background-color: var(--grey-30);
+  --internal-transparent-color: var(--grey-50);
+  --internal-grey-color: var(--grey-50);
+
+  background-color: var(--internal-background-color);
   grid-column-start: span 3;
   margin-inline-start: var(--sidebar-indent);
 }
@@ -136,19 +143,22 @@
 
 .sidebar-histogram-bar-color.category-color-transparent {
   /* A white bar does not show up well here */
-  background-color: var(--grey-50);
+  background-color: var(--internal-transparent-color);
 }
 
 .sidebar-histogram-bar-color.category-color-grey {
   /* The grey category color is the same our background color, choose a darker grey instead. */
-  background-color: var(--grey-50);
+  background-color: var(--internal-grey-color);
 }
 
 .sidebar-toggle {
+  --internal-focus-foreground-color: var(--blue-60);
+  --internal-active-foreground-color: var(--grey-60);
+
   padding: 0;
   border: 0;
   background: 0;
-  color: var(--grey-50);
+  color: var(--internal-dimmed-foreground-color);
   font-size: inherit;
 }
 
@@ -158,7 +168,7 @@
   border: 0;
   border-radius: 2px;
   box-shadow: none;
-  color: var(--blue-60);
+  color: var(--internal-focus-foreground-color);
   text-decoration: underline;
 }
 
@@ -183,7 +193,7 @@
 }
 
 .sidebar-toggle:active:hover {
-  color: var(--grey-60);
+  color: var(--internal-active-foreground-color);
 }
 
 .sidebar-toggle.expanded::before {
@@ -203,5 +213,21 @@
   .sidebar-label:hover .sidebar-toggle,
   .sidebar-label:hover .sidebar-toggle::before {
     color: SelectedItem;
+  }
+}
+
+:root.dark-mode {
+  .sidebar {
+    --internal-dimmed-foreground-color: var(--grey-40);
+  }
+
+  .sidebar-histogram-bar {
+    --internal-background-color: var(--ink-70);
+    --internal-transparent-color: var(--ink-50);
+  }
+
+  .sidebar-toggle {
+    --internal-focus-foreground-color: var(--blue-40);
+    --internal-active-foreground-color: var(--grey-30);
   }
 }

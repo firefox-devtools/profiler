@@ -3,10 +3,21 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .idleSearchField {
+  --internal-search-icon: url(../../../res/img/svg/searchfield-icon.svg);
+  --internal-cancel-icon: url(../../../res/img/svg/searchfield-cancel.svg);
+  --internal-border-color: #aaa;
+
   position: relative; /* to properly position the button */
   display: inline-flex;
   flex-flow: row nowrap;
   align-items: center;
+}
+
+:root.dark-mode {
+  .idleSearchField {
+    --internal-search-icon: url(../../../res/img/svg/searchfield-icon-light.svg);
+    --internal-border-color: var(--grey-70);
+  }
 }
 
 .photon-input.idleSearchFieldInput {
@@ -14,15 +25,14 @@
   to override the styling for the photon-input class */
   height: 19px;
   padding: 0 18px 0 17px; /* right padding for the reset button, left padding for the search icon */
-  border: 0.5px solid #aaa;
+  border: 0.5px solid var(--internal-border-color);
 }
 
 .idleSearchFieldInput {
   position: relative;
   flex: 1;
   margin: 0;
-  background: url(../../../res/img/svg/searchfield-icon.svg) 3px center
-    no-repeat white;
+  background: var(--internal-search-icon) 3px center no-repeat;
   background-size: 11px 11px;
 }
 
@@ -34,8 +44,7 @@
   height: 11px;
   padding: 0;
   border: 0;
-  background: url(../../../res/img/svg/searchfield-cancel.svg) top left
-    no-repeat;
+  background: var(--internal-cancel-icon) top left no-repeat;
   background-size: contain;
   color: transparent;
   -moz-user-focus: ignore;

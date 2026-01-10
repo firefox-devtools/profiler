@@ -9,19 +9,29 @@
 }
 
 .jsTracerLoader {
+  --internal-background-color: var(--grey-20);
+  --internal-border-color: var(--grey-10);
+
   display: flex;
   flex: 1;
   flex-flow: column;
   align-items: center;
   justify-content: center;
-  border-top: solid 1px var(--grey-20);
-  background-color: var(--grey-10);
+  border-top: solid 1px var(--internal-border-color);
+  background-color: var(--internal-background-color);
   font-size: 12px;
   vertical-align: middle;
 }
 
+:root.dark-mode {
+  .jsTracerLoader {
+    --internal-background-color: var(--ink-80);
+    --internal-border-color: var(--grey-80);
+  }
+}
+
 .jsTracerCanvasFadeIn {
-  background-color: #fff;
+  background-color: var(--base-background-color);
   opacity: 0;
 }
 
