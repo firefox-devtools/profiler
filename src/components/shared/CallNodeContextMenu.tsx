@@ -52,7 +52,6 @@ import type {
   TransformType,
   ImplementationFilter,
   IndexIntoCallNodeTable,
-  CallNodePath,
   Thread,
   ThreadsKey,
   CategoryList,
@@ -70,7 +69,6 @@ type StateProps = {
   readonly threadsKey: ThreadsKey | null;
   readonly categories: CategoryList;
   readonly callNodeInfo: CallNodeInfo | null;
-  readonly rightClickedCallNodePath: CallNodePath | null;
   readonly rightClickedCallNodeIndex: IndexIntoCallNodeTable | null;
   readonly implementation: ImplementationFilter;
   readonly inverted: boolean;
@@ -337,9 +335,10 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       );
     }
 
-    const { threadsKey, callNodePath, thread, callNodeIndex, callNodeInfo } =
+    const { threadsKey, thread, callNodeIndex, callNodeInfo } =
       rightClickedCallNodeInfo;
-    const selectedFunc = callNodePath[callNodePath.length - 1];
+    const selectedFunc = callNodeInfo.funcForNode(callNodeIndex);
+    const callNodePath = callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
     const category = callNodeInfo.categoryForNode(callNodeIndex);
     switch (type) {
       case 'focus-subtree':
@@ -503,11 +502,12 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     }
 
     const {
-      callNodePath,
+      callNodeInfo,
+      callNodeIndex,
       thread: { funcTable, stringTable, resourceTable, sources },
     } = rightClickedCallNodeInfo;
 
-    const funcIndex = callNodePath[callNodePath.length - 1];
+    const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
     if (funcIndex === undefined) {
       return null;
     }
@@ -534,29 +534,21 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     readonly thread: Thread;
     readonly threadsKey: ThreadsKey;
     readonly callNodeInfo: CallNodeInfo;
-    readonly callNodePath: CallNodePath;
     readonly callNodeIndex: IndexIntoCallNodeTable;
   } {
-    const {
-      thread,
-      threadsKey,
-      callNodeInfo,
-      rightClickedCallNodePath,
-      rightClickedCallNodeIndex,
-    } = this.props;
+    const { thread, threadsKey, callNodeInfo, rightClickedCallNodeIndex } =
+      this.props;
 
     if (
       thread &&
       threadsKey !== null &&
       callNodeInfo &&
-      rightClickedCallNodePath &&
-      typeof rightClickedCallNodeIndex === 'number'
+      rightClickedCallNodeIndex !== null
     ) {
       return {
         thread,
         threadsKey,
         callNodeInfo,
-        callNodePath: rightClickedCallNodePath,
         callNodeIndex: rightClickedCallNodeIndex,
       };
     }
@@ -898,7 +890,6 @@ export const CallNodeContextMenu = explicitConnect<
     let thread = null;
     let threadsKey = null;
     let callNodeInfo = null;
-    let rightClickedCallNodePath = null;
     let rightClickedCallNodeIndex = null;
 
     if (rightClickedCallNodeInfo !== null) {
@@ -909,7 +900,6 @@ export const CallNodeContextMenu = explicitConnect<
       thread = selectors.getFilteredThread(state);
       threadsKey = rightClickedCallNodeInfo.threadsKey;
       callNodeInfo = selectors.getCallNodeInfo(state);
-      rightClickedCallNodePath = rightClickedCallNodeInfo.callNodePath;
       rightClickedCallNodeIndex = selectors.getRightClickedCallNodeIndex(state);
     }
 
@@ -918,7 +908,6 @@ export const CallNodeContextMenu = explicitConnect<
       threadsKey,
       categories: getCategories(state),
       callNodeInfo,
-      rightClickedCallNodePath,
       rightClickedCallNodeIndex,
       implementation: getImplementationFilter(state),
       inverted: getInvertCallstack(state),
