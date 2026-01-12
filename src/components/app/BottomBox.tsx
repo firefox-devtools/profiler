@@ -29,10 +29,7 @@ import {
   getSourceViewCode,
   getAssemblyViewCode,
 } from 'firefox-profiler/selectors/code';
-import {
-  getPreviewSelectionIsBeingModified,
-  getSourceViewFile,
-} from 'firefox-profiler/selectors/profile';
+import { getSourceViewFile } from 'firefox-profiler/selectors/profile';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -64,7 +61,6 @@ type StateProps = {
   readonly assemblyViewScrollGeneration: number;
   readonly globalAddressTimings: AddressTimings;
   readonly selectedCallNodeAddressTimings: AddressTimings;
-  readonly disableOverscan: boolean;
 };
 
 type DispatchProps = {
@@ -160,7 +156,6 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       sourceViewFile,
       sourceViewCode,
       globalLineTimings,
-      disableOverscan,
       sourceViewScrollGeneration,
       sourceViewLineNumber,
       selectedCallNodeLineTimings,
@@ -229,7 +224,6 @@ class BottomBoxImpl extends React.PureComponent<Props> {
               ) : null}
               {displaySourceView ? (
                 <SourceView
-                  disableOverscan={disableOverscan}
                   timings={globalLineTimings}
                   sourceCode={sourceCode}
                   filePath={path}
@@ -264,7 +258,6 @@ class BottomBoxImpl extends React.PureComponent<Props> {
               <div className="bottom-assemblyview-wrapper">
                 {assemblyViewNativeSymbol !== null ? (
                   <AssemblyView
-                    disableOverscan={disableOverscan}
                     timings={globalAddressTimings}
                     assemblyCode={assemblyCode}
                     nativeSymbol={assemblyViewNativeSymbol}
@@ -314,7 +307,6 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
       selectedNodeSelectors.getAssemblyViewAddressTimings(state),
     assemblyViewScrollGeneration: getAssemblyViewScrollGeneration(state),
     assemblyViewIsOpen: getAssemblyViewIsOpen(state),
-    disableOverscan: getPreviewSelectionIsBeingModified(state),
   }),
   mapDispatchToProps: {
     closeBottomBox,

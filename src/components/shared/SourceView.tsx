@@ -40,7 +40,6 @@ for understanding where time was actually spent in a program."
 type SourceViewProps = {
   readonly timings: LineTimings;
   readonly sourceCode: string;
-  readonly disableOverscan: boolean;
   readonly filePath: string | null;
   readonly scrollToHotSpotGeneration: number;
   readonly scrollToLineNumber?: number;
