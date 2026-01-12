@@ -1918,8 +1918,16 @@ export function changeTableViewOptions(
 
 export function updateBottomBoxContentsAndMaybeOpen(
   currentTab: TabSlug,
-  { libIndex, sourceIndex, nativeSymbols, lineNumber }: BottomBoxInfo
+  bottomBoxInfo: BottomBoxInfo
 ): Action {
+  const {
+    libIndex,
+    sourceIndex,
+    scrollToLineNumber,
+    highlightLineNumber,
+    nativeSymbols,
+  } = bottomBoxInfo;
+
   const haveSource = sourceIndex !== null;
   const haveAssembly = nativeSymbols.length !== 0;
 
@@ -1944,7 +1952,8 @@ export function updateBottomBoxContentsAndMaybeOpen(
     currentTab,
     shouldOpenBottomBox,
     shouldOpenAssemblyView,
-    lineNumber,
+    scrollToLineNumber,
+    highlightLineNumber,
   };
 }
 

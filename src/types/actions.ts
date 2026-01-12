@@ -343,7 +343,8 @@ type ProfileAction =
       readonly currentTab: TabSlug;
       readonly shouldOpenBottomBox: boolean;
       readonly shouldOpenAssemblyView: boolean;
-      readonly lineNumber?: number;
+      readonly scrollToLineNumber?: number;
+      readonly highlightLineNumber?: number;
     }
   | {
       readonly type: 'OPEN_ASSEMBLY_VIEW';
