@@ -14,10 +14,7 @@ import {
   funcHasRecursiveCall,
 } from 'firefox-profiler/profile-logic/transforms';
 import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
-import {
-  getBottomBoxInfoForCallNode,
-  getOriginAnnotationForFunc,
-} from 'firefox-profiler/profile-logic/profile-data';
+import { getOriginAnnotationForFunc } from 'firefox-profiler/profile-logic/profile-data';
 import { getCategories } from 'firefox-profiler/selectors';
 
 import copy from 'copy-to-clipboard';
@@ -89,6 +86,7 @@ type DispatchProps = {
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 import './CallNodeContextMenu.css';
+import { getBottomBoxInfoForCallNode } from 'firefox-profiler/profile-logic/bottom-box';
 
 class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   _hidingTimeout: NodeJS.Timeout | null = null;

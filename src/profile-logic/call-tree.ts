@@ -6,7 +6,6 @@ import { timeCode } from '../utils/time-code';
 import {
   getOriginAnnotationForFunc,
   getCategoryPairLabel,
-  getBottomBoxInfoForCallNode,
 } from './profile-data';
 import { resourceTypes } from './data-structures';
 import { getFunctionName } from './function-info';
@@ -37,6 +36,7 @@ import { checkBit } from '../utils/bitset';
 import * as ProfileData from './profile-data';
 import type { CallTreeSummaryStrategy } from '../types/actions';
 import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
+import { getBottomBoxInfoForCallNode } from './bottom-box';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 

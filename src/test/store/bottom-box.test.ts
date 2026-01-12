@@ -11,7 +11,7 @@ import {
   selectedNodeSelectors,
 } from '../../selectors/per-thread';
 import { emptyAddressTimings } from '../../profile-logic/address-timings';
-import { getBottomBoxInfoForCallNode } from '../../profile-logic/profile-data';
+import { getBottomBoxInfoForCallNode } from '../../profile-logic/bottom-box';
 import {
   changeSelectedCallNode,
   updateBottomBoxContentsAndMaybeOpen,
