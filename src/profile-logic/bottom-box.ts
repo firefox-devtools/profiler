@@ -13,6 +13,7 @@ import type {
 } from 'firefox-profiler/types';
 import type { CallNodeInfo } from './call-node-info';
 import {
+  getCallNodeFramePerStack,
   getNativeSymbolInfo,
   getNativeSymbolsForCallNode,
 } from './profile-data';
@@ -56,10 +57,13 @@ export function getBottomBoxInfoForCallNode(
     resource !== -1 && resourceTable.type[resource] === resourceTypes.library
       ? resourceTable.lib[resource]
       : null;
-  const nativeSymbolsForCallNode = getNativeSymbolsForCallNode(
+  const callNodeFramePerStack = getCallNodeFramePerStack(
     callNodeIndex,
     callNodeInfo,
-    stackTable,
+    stackTable
+  );
+  const nativeSymbolsForCallNode = getNativeSymbolsForCallNode(
+    callNodeFramePerStack,
     frameTable
   );
 
