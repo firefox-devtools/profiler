@@ -570,11 +570,15 @@ const sourceView: Reducer<SourceViewState> = (
 ) => {
   switch (action.type) {
     case 'UPDATE_BOTTOM_BOX': {
+      const shouldScroll = action.scrollToLineNumber !== undefined;
       return {
-        scrollGeneration: state.scrollGeneration + 1,
+        scrollGeneration: shouldScroll
+          ? state.scrollGeneration + 1
+          : state.scrollGeneration,
         libIndex: action.libIndex,
         sourceIndex: action.sourceIndex,
-        lineNumber: action.lineNumber,
+        scrollToLineNumber: action.scrollToLineNumber,
+        highlightedLine: action.highlightLineNumber,
       };
     }
     default:

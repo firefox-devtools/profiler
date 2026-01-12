@@ -14,7 +14,8 @@ import { CodeLoadingOverlay } from './CodeLoadingOverlay';
 import { CodeErrorOverlay } from './CodeErrorOverlay';
 import {
   getSourceViewScrollGeneration,
-  getSourceViewLineNumber,
+  getSourceViewScrollToLineNumber,
+  getSourceViewHighlightedLine,
   getAssemblyViewIsOpen,
   getAssemblyViewNativeSymbol,
   getAssemblyViewScrollGeneration,
@@ -52,7 +53,8 @@ type StateProps = {
   readonly sourceViewFile: string | null;
   readonly sourceViewCode: SourceCodeStatus | void;
   readonly sourceViewScrollGeneration: number;
-  readonly sourceViewLineNumber?: number;
+  readonly sourceViewScrollToLineNumber?: number;
+  readonly sourceViewHighlightedLine?: number;
   readonly globalLineTimings: LineTimings;
   readonly selectedCallNodeLineTimings: LineTimings;
   readonly assemblyViewIsOpen: boolean;
@@ -157,8 +159,9 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       sourceViewCode,
       globalLineTimings,
       sourceViewScrollGeneration,
-      sourceViewLineNumber,
       selectedCallNodeLineTimings,
+      sourceViewScrollToLineNumber,
+      sourceViewHighlightedLine,
       assemblyViewIsOpen,
       assemblyViewScrollGeneration,
       assemblyViewNativeSymbol,
@@ -228,9 +231,9 @@ class BottomBoxImpl extends React.PureComponent<Props> {
                   sourceCode={sourceCode}
                   filePath={path}
                   scrollToHotSpotGeneration={sourceViewScrollGeneration}
-                  scrollToLineNumber={sourceViewLineNumber}
                   hotSpotTimings={selectedCallNodeLineTimings}
-                  highlightedLine={sourceViewLineNumber}
+                  scrollToLineNumber={sourceViewScrollToLineNumber}
+                  highlightedLine={sourceViewHighlightedLine}
                   ref={this._sourceView}
                 />
               ) : null}
@@ -298,7 +301,8 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
     selectedCallNodeLineTimings:
       selectedNodeSelectors.getSourceViewLineTimings(state),
     sourceViewScrollGeneration: getSourceViewScrollGeneration(state),
-    sourceViewLineNumber: getSourceViewLineNumber(state),
+    sourceViewScrollToLineNumber: getSourceViewScrollToLineNumber(state),
+    sourceViewHighlightedLine: getSourceViewHighlightedLine(state),
     assemblyViewNativeSymbol: getAssemblyViewNativeSymbol(state),
     assemblyViewCode: getAssemblyViewCode(state),
     globalAddressTimings:

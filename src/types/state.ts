@@ -253,7 +253,9 @@ export type SourceViewState = {
   sourceIndex: IndexIntoSourceTable | null;
   // Optional line number to scroll to in the source view.
   // If not specified, the source view will scroll to the hottest line.
-  lineNumber?: number;
+  scrollToLineNumber?: number;
+  // Optional line number of the highlighted in the source view.
+  highlightedLine?: number;
 };
 
 export type AssemblyViewState = {

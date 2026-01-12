@@ -4058,7 +4058,8 @@ export function getBottomBoxInfoForStackFrame(
     libIndex,
     sourceIndex,
     nativeSymbols: nativeSymbolInfos,
-    lineNumber,
+    scrollToLineNumber: lineNumber,
+    highlightLineNumber: lineNumber,
   };
 }
 
