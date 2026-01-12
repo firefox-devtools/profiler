@@ -777,7 +777,8 @@ export type BottomBoxInfo = {
   nativeSymbols: NativeSymbolInfo[];
   // Optional line number to scroll to in the source view.
   // If not specified, the source view will scroll to the hottest line.
-  lineNumber?: number;
+  scrollToLineNumber?: number;
+  highlightLineNumber?: number;
 };
 
 /**
