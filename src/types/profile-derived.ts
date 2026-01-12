@@ -399,6 +399,11 @@ export type AddressTimings = {
   selfAddressHits: Map<Address, number>;
 };
 
+export type CallNodeTimings = {
+  totalPerAddress: Map<Address, number>;
+  totalPerLine: Map<LineNumber, number>;
+};
+
 // Stores the information that's needed to prove to the symbolication API that
 // we are authorized to request the source code for a specific file.
 // This "address proof" makes it easy for the browser (or local symbol server)

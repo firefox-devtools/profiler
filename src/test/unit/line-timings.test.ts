@@ -5,10 +5,11 @@
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
   getStackLineInfo,
-  getStackLineInfoForCallNode,
   getLineTimings,
+  getLineTimingsForCallNode,
 } from 'firefox-profiler/profile-logic/line-timings';
 import {
+  getCallNodeFramePerStack,
   getCallNodeInfo,
   getInvertedCallNodeInfo,
 } from '../../profile-logic/profile-data';
@@ -172,14 +173,19 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
       callNodeInfo.getCallNodeIndexFromPath(callNodePath),
       'invalid call node path'
     );
-    const stackLineInfo = getStackLineInfoForCallNode(
-      stackTable,
-      frameTable,
-      funcTable,
+    const callNodeFramePerStack = getCallNodeFramePerStack(
       callNodeIndex,
-      callNodeInfo
+      callNodeInfo,
+      stackTable
     );
-    return getLineTimings(stackLineInfo, samples);
+    const funcLine =
+      funcTable.lineNumber[callNodeInfo.funcForNode(callNodeIndex)];
+    return getLineTimingsForCallNode(
+      samples,
+      callNodeFramePerStack,
+      frameTable,
+      funcLine
+    );
   }
 
   it('passes a basic test', function () {
@@ -195,17 +201,14 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
     // Compute the line timings for the root call node.
     // No self line hit, one total line hit in line 20.
     const lineTimingsRoot = getTimings(thread, [A], defaultCategory, false);
-    expect(lineTimingsRoot.totalLineHits.get(20)).toBe(1);
-    expect(lineTimingsRoot.totalLineHits.size).toBe(1); // no other hits
-    expect(lineTimingsRoot.selfLineHits.size).toBe(0); // no self hits
+    expect(lineTimingsRoot.get(20)).toBe(1);
+    expect(lineTimingsRoot.size).toBe(1); // no other hits
 
     // Compute the line timings for the child call node.
     // One self line hit in line 30, which is also the only total line hit.
     const lineTimingsChild = getTimings(thread, [A, B], defaultCategory, false);
-    expect(lineTimingsChild.totalLineHits.get(30)).toBe(1);
-    expect(lineTimingsChild.totalLineHits.size).toBe(1); // no other hits
-    expect(lineTimingsChild.selfLineHits.get(30)).toBe(1);
-    expect(lineTimingsChild.selfLineHits.size).toBe(1); // no other hits
+    expect(lineTimingsChild.get(30)).toBe(1);
+    expect(lineTimingsChild.size).toBe(1); // no other hits
   });
 
   it('passes a basic test with recursion', function () {
@@ -222,9 +225,8 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
     // Compute the line timings for the root call node.
     // No self line hit, one total line hit in line 20.
     const lineTimingsRoot = getTimings(thread, [A], defaultCategory, false);
-    expect(lineTimingsRoot.totalLineHits.get(20)).toBe(1);
-    expect(lineTimingsRoot.totalLineHits.size).toBe(1); // no other hits
-    expect(lineTimingsRoot.selfLineHits.size).toBe(0); // no self hits
+    expect(lineTimingsRoot.get(20)).toBe(1);
+    expect(lineTimingsRoot.size).toBe(1); // no other hits
 
     // Compute the line timings for the leaf call node.
     // One self line hit in line 21, which is also the only total line hit.
@@ -236,10 +238,8 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
       defaultCategory,
       false
     );
-    expect(lineTimingsChild.totalLineHits.get(21)).toBe(1);
-    expect(lineTimingsChild.totalLineHits.size).toBe(1); // no other hits
-    expect(lineTimingsChild.selfLineHits.get(21)).toBe(1);
-    expect(lineTimingsChild.selfLineHits.size).toBe(1); // no other hits
+    expect(lineTimingsChild.get(21)).toBe(1);
+    expect(lineTimingsChild.size).toBe(1); // no other hits
   });
 
   it('passes a test where the same function is called via different call paths', function () {
@@ -260,11 +260,9 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
       defaultCategory,
       false
     );
-    expect(lineTimingsABC.totalLineHits.get(10)).toBe(1);
-    expect(lineTimingsABC.totalLineHits.get(12)).toBe(1);
-    expect(lineTimingsABC.totalLineHits.size).toBe(2); // no other hits
-    expect(lineTimingsABC.selfLineHits.get(10)).toBe(1);
-    expect(lineTimingsABC.selfLineHits.size).toBe(1); // no other hits
+    expect(lineTimingsABC.get(10)).toBe(1);
+    expect(lineTimingsABC.get(12)).toBe(1);
+    expect(lineTimingsABC.size).toBe(2); // no other hits
   });
 
   it('passes a test with an inverted thread', function () {
@@ -281,27 +279,22 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
 
     // For the root D of the inverted tree, we have 3 self line hits.
     const lineTimingsD = getTimings(thread, [D], defaultCategory, true);
-    expect(lineTimingsD.totalLineHits.get(51)).toBe(2);
-    expect(lineTimingsD.totalLineHits.get(52)).toBe(1);
-    expect(lineTimingsD.totalLineHits.size).toBe(2); // no other hits
-    expect(lineTimingsD.selfLineHits.get(51)).toBe(2);
-    expect(lineTimingsD.selfLineHits.get(52)).toBe(1);
-    expect(lineTimingsD.selfLineHits.size).toBe(2); // no other hits
+    expect(lineTimingsD.get(51)).toBe(2);
+    expect(lineTimingsD.get(52)).toBe(1);
+    expect(lineTimingsD.size).toBe(2); // no other hits
 
     // For the C call node which is a child (direct caller) of D, we have
     // no self line hit and one hit in line 12.
     const lineTimingsDC = getTimings(thread, [D, C], defaultCategory, true);
-    expect(lineTimingsDC.totalLineHits.get(12)).toBe(1);
-    expect(lineTimingsDC.totalLineHits.size).toBe(1); // no other hits
-    expect(lineTimingsDC.selfLineHits.size).toBe(0); // no self line hits
+    expect(lineTimingsDC.get(12)).toBe(1);
+    expect(lineTimingsDC.size).toBe(1); // no other hits
 
     // For the D <- B <- A call node, we have no self line hit, and one total
     // hit in line 20. (No self line hit because that sample's self time is
     // spent in D, not in A.)
     const lineTimingsDBA = getTimings(thread, [D, B, A], defaultCategory, true);
-    expect(lineTimingsDBA.totalLineHits.get(20)).toBe(1);
-    expect(lineTimingsDBA.totalLineHits.size).toBe(1); // no other hits
-    expect(lineTimingsDC.selfLineHits.size).toBe(0); // no self line hits
+    expect(lineTimingsDBA.get(20)).toBe(1);
+    expect(lineTimingsDBA.size).toBe(1); // no other hits
   });
 
   it('falls back to funcTable.lineNumber when frameTable.line is null', function () {
@@ -327,9 +320,7 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
     // Compute the line timings for the child call node.
     // The fallback should use funcTable.lineNumber[func] = 35
     const lineTimingsChild = getTimings(thread, [A, B], defaultCategory, false);
-    expect(lineTimingsChild.totalLineHits.get(35)).toBe(1);
-    expect(lineTimingsChild.totalLineHits.size).toBe(1); // no other hits
-    expect(lineTimingsChild.selfLineHits.get(35)).toBe(1);
-    expect(lineTimingsChild.selfLineHits.size).toBe(1); // no other hits
+    expect(lineTimingsChild.get(35)).toBe(1);
+    expect(lineTimingsChild.size).toBe(1); // no other hits
   });
 });

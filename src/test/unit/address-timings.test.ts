@@ -5,10 +5,11 @@
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
   getStackAddressInfo,
-  getStackAddressInfoForCallNode,
+  getAddressTimingsForCallNode,
   getAddressTimings,
 } from 'firefox-profiler/profile-logic/address-timings';
 import {
+  getCallNodeFramePerStack,
   getCallNodeInfo,
   getInvertedCallNodeInfo,
 } from '../../profile-logic/profile-data';
@@ -176,14 +177,17 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
       callNodeInfo.getCallNodeIndexFromPath(callNodePath),
       'invalid call node path'
     );
-    const stackLineInfo = getStackAddressInfoForCallNode(
-      stackTable,
-      frameTable,
+    const callNodeFramePerStack = getCallNodeFramePerStack(
       callNodeIndex,
       callNodeInfo,
+      stackTable
+    );
+    return getAddressTimingsForCallNode(
+      samples,
+      callNodeFramePerStack,
+      frameTable,
       nativeSymbol
     );
-    return getAddressTimings(stackLineInfo, samples);
   }
 
   it('passes a basic test', function () {
@@ -209,9 +213,8 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
       Asym,
       false
     );
-    expect(addressTimingsRoot.totalAddressHits.get(0x20)).toBe(1);
-    expect(addressTimingsRoot.totalAddressHits.size).toBe(1); // no other hits
-    expect(addressTimingsRoot.selfAddressHits.size).toBe(0); // no self hits
+    expect(addressTimingsRoot.get(0x20)).toBe(1);
+    expect(addressTimingsRoot.size).toBe(1); // no other hits
 
     // Compute the address timings for the child call node.
     // One self address hit at address 0x30, which is also the only total address hit.
@@ -222,10 +225,8 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
       Bsym,
       false
     );
-    expect(addressTimingsChild.totalAddressHits.get(0x30)).toBe(1);
-    expect(addressTimingsChild.totalAddressHits.size).toBe(1); // no other hits
-    expect(addressTimingsChild.selfAddressHits.get(0x30)).toBe(1);
-    expect(addressTimingsChild.selfAddressHits.size).toBe(1); // no other hits
+    expect(addressTimingsChild.get(0x30)).toBe(1);
+    expect(addressTimingsChild.size).toBe(1); // no other hits
   });
 
   it('passes a basic test with recursion', function () {
@@ -253,9 +254,8 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
       Asym,
       false
     );
-    expect(addressTimingsRoot.totalAddressHits.get(0x20)).toBe(1);
-    expect(addressTimingsRoot.totalAddressHits.size).toBe(1); // no other hits
-    expect(addressTimingsRoot.selfAddressHits.size).toBe(0); // no self hits
+    expect(addressTimingsRoot.get(0x20)).toBe(1);
+    expect(addressTimingsRoot.size).toBe(1); // no other hits
 
     // Compute the address timings for the leaf call node.
     // One self address hit at address 0x21, which is also the only total address hit.
@@ -268,10 +268,8 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
       Asym,
       false
     );
-    expect(addressTimingsChild.totalAddressHits.get(0x21)).toBe(1);
-    expect(addressTimingsChild.totalAddressHits.size).toBe(1); // no other hits
-    expect(addressTimingsChild.selfAddressHits.get(0x21)).toBe(1);
-    expect(addressTimingsChild.selfAddressHits.size).toBe(1); // no other hits
+    expect(addressTimingsChild.get(0x21)).toBe(1);
+    expect(addressTimingsChild.size).toBe(1); // no other hits
   });
 
   it('passes a test where the same function is called via different call paths', function () {
@@ -298,11 +296,9 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
       Csym,
       false
     );
-    expect(addressTimingsABC.totalAddressHits.get(0x10)).toBe(1);
-    expect(addressTimingsABC.totalAddressHits.get(0x12)).toBe(1);
-    expect(addressTimingsABC.totalAddressHits.size).toBe(2); // no other hits
-    expect(addressTimingsABC.selfAddressHits.get(0x10)).toBe(1);
-    expect(addressTimingsABC.selfAddressHits.size).toBe(1); // no other hits
+    expect(addressTimingsABC.get(0x10)).toBe(1);
+    expect(addressTimingsABC.get(0x12)).toBe(1);
+    expect(addressTimingsABC.size).toBe(2); // no other hits
   });
 
   it('passes a test with an inverted thread', function () {
@@ -329,12 +325,9 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
       Dsym,
       true
     );
-    expect(addressTimingsD.totalAddressHits.get(0x51)).toBe(2);
-    expect(addressTimingsD.totalAddressHits.get(0x52)).toBe(1);
-    expect(addressTimingsD.totalAddressHits.size).toBe(2); // no other hits
-    expect(addressTimingsD.selfAddressHits.get(0x51)).toBe(2);
-    expect(addressTimingsD.selfAddressHits.get(0x52)).toBe(1);
-    expect(addressTimingsD.selfAddressHits.size).toBe(2); // no other hits
+    expect(addressTimingsD.get(0x51)).toBe(2);
+    expect(addressTimingsD.get(0x52)).toBe(1);
+    expect(addressTimingsD.size).toBe(2); // no other hits
 
     // For the C call node which is a child (direct caller) of D, we have
     // no self address hit and one hit at address 0x12.
@@ -345,9 +338,8 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
       Csym,
       true
     );
-    expect(addressTimingsDC.totalAddressHits.get(0x12)).toBe(1);
-    expect(addressTimingsDC.totalAddressHits.size).toBe(1); // no other hits
-    expect(addressTimingsDC.selfAddressHits.size).toBe(0); // no self address hits
+    expect(addressTimingsDC.get(0x12)).toBe(1);
+    expect(addressTimingsDC.size).toBe(1); // no other hits
   });
 
   it('passes a test where a function is present in two different native symbols', function () {
@@ -386,10 +378,8 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
       Bsym,
       false
     );
-    expect(addressTimingsABCForBsym.totalAddressHits.get(0x40)).toBe(1);
-    expect(addressTimingsABCForBsym.totalAddressHits.get(0x45)).toBe(1);
-    expect(addressTimingsABCForBsym.totalAddressHits.size).toBe(2); // no other hits
-    expect(addressTimingsABCForBsym.selfAddressHits.get(0x40)).toBe(1);
-    expect(addressTimingsABCForBsym.selfAddressHits.size).toBe(1); // no other hits
+    expect(addressTimingsABCForBsym.get(0x40)).toBe(1);
+    expect(addressTimingsABCForBsym.get(0x45)).toBe(1);
+    expect(addressTimingsABCForBsym.size).toBe(2); // no other hits
   });
 });

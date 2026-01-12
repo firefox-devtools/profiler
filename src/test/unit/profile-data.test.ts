@@ -25,6 +25,7 @@ import {
   getNativeSymbolsForCallNode,
   getNativeSymbolInfo,
   computeTimeColumnForRawSamplesTable,
+  getCallNodeFramePerStack,
 } from '../../profile-logic/profile-data';
 import { resourceTypes } from '../../profile-logic/data-structures';
 import {
@@ -1473,21 +1474,22 @@ describe('getNativeSymbolsForCallNode', function () {
 
     // Both the call path [funA, funB] and the call path [funA, funB, funC] end
     // up at a call node with native symbol symB.
+    const callNodeFramePerStackAB = getCallNodeFramePerStack(
+      ensureExists(ab),
+      callNodeInfo,
+      thread.stackTable
+    );
     expect(
-      getNativeSymbolsForCallNode(
-        ensureExists(ab),
-        callNodeInfo,
-        thread.stackTable,
-        thread.frameTable
-      )
+      getNativeSymbolsForCallNode(callNodeFramePerStackAB, thread.frameTable)
     ).toEqual([symB]);
+
+    const callNodeFramePerStackABC = getCallNodeFramePerStack(
+      ensureExists(abc),
+      callNodeInfo,
+      thread.stackTable
+    );
     expect(
-      getNativeSymbolsForCallNode(
-        ensureExists(abc),
-        callNodeInfo,
-        thread.stackTable,
-        thread.frameTable
-      )
+      getNativeSymbolsForCallNode(callNodeFramePerStackABC, thread.frameTable)
     ).toEqual([symB]);
   });
 
@@ -1523,14 +1525,14 @@ describe('getNativeSymbolsForCallNode', function () {
     // is called by funB and one sample where it's called by funD. The call to
     // funC was inlined into each of those functions. So the call node has two
     // native symbols, B and D.
+    const callNodeFramePerStackC = getCallNodeFramePerStack(
+      ensureExists(c),
+      callNodeInfo,
+      thread.stackTable
+    );
     expect(
       new Set(
-        getNativeSymbolsForCallNode(
-          ensureExists(c),
-          callNodeInfo,
-          thread.stackTable,
-          thread.frameTable
-        )
+        getNativeSymbolsForCallNode(callNodeFramePerStackC, thread.frameTable)
       )
     ).toEqual(new Set([symB, symD]));
   });
