@@ -39,7 +39,7 @@ import {
   changeMouseTimePosition,
 } from '../../actions/profile-view';
 
-import { getBottomBoxInfoForCallNode } from '../../profile-logic/profile-data';
+import { getBottomBoxInfoForCallNode } from '../../profile-logic/bottom-box';
 
 import type {
   Thread,
