@@ -72,15 +72,11 @@ import type {
   FuncTable,
   StackTable,
   SamplesLikeTable,
-  IndexIntoCallNodeTable,
   IndexIntoNativeSymbolTable,
   StackAddressInfo,
   AddressTimings,
   Address,
 } from 'firefox-profiler/types';
-
-import { getMatchingAncestorStackForInvertedCallNode } from './profile-data';
-import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
 
 /**
  * For each stack in `stackTable`, and one specific native symbol, compute the
@@ -180,312 +176,6 @@ export function getStackAddressInfo(
   };
 }
 
-/**
- * Gathers the addresses which are hit by a given call node.
- * This is different from `getStackAddressInfo`: `getStackAddressInfo` counts
- * address hits anywhere in the stack, and this function only counts hits *in
- * the given call node*.
- *
- * This is useful when opening the assembly view from a call node: We can
- * directly jump to the place in the assembly where *this particular call node*
- * spends its time.
- *
- * Returns a StackAddressInfo object for the given stackTable and for the library
- * which contains the call node's func.
- */
-export function getStackAddressInfoForCallNode(
-  stackTable: StackTable,
-  frameTable: FrameTable,
-  callNodeIndex: IndexIntoCallNodeTable,
-  callNodeInfo: CallNodeInfo,
-  nativeSymbol: IndexIntoNativeSymbolTable
-): StackAddressInfo {
-  const callNodeInfoInverted = callNodeInfo.asInverted();
-  return callNodeInfoInverted !== null
-    ? getStackAddressInfoForCallNodeInverted(
-        stackTable,
-        frameTable,
-        callNodeIndex,
-        callNodeInfoInverted,
-        nativeSymbol
-      )
-    : getStackAddressInfoForCallNodeNonInverted(
-        stackTable,
-        frameTable,
-        callNodeIndex,
-        callNodeInfo,
-        nativeSymbol
-      );
-}
-
-/**
- * This function handles the non-inverted case of getStackAddressInfoForCallNode.
- *
- * Gathers the addresses which are hit by a given call node in a given native
- * symbol.
- *
- * This is best explained with an example. We first start with a case that does
- * not have any inlining, because this is already complicated enough.
- *
- * Let the call node be the node for the call path [A, B, C].
- * Let the native symbol be C.
- * Let every frame have inlineDepth:0.
- * Let there be a native symbol for every func, with the same name as the func.
- * Let this be the stack tree:
- *
- *  - stack 1, func A
- *    - stack 2, func B
- *      - stack 3, func C, address 0x30
- *      - stack 4, func C, address 0x40
- *    - stack 5, func B
- *      - stack 6, func C, address 0x60
- *      - stack 7, func C, address 0x70
- *        - stack 8, func D
- *      - stack 9, func E
- *    - stack 10, func F
- *
- * This maps to the following call tree:
- *
- *  - call node 1, func A
- *    - call node 2, func B
- *      - call node 3, func C
- *        - call node 4, func D
- *      - call node 5, func E
- *   - call node 6, func F
- *
- * The call path [A, B, C] uniquely identifies call node 3.
- * The following stacks all "collapse into" ("map to") call node 3:
- * stack 3, 4, 6 and 7.
- * Stack 8 maps to call node 4, which is a child of call node 3.
- * Stacks 1, 2, 5, 9 and 10 are outside the call path [A, B, C].
- *
- * In this function, we only compute "address hits" that are contributed to
- * the given call node.
- * Stacks 3, 4, 6 and 7 all contribute their time both as "self time"
- * and as "total time" to call node 3, at the addresses 0x30, 0x40, 0x60,
- * and 0x70, respectively.
- * Stack 8 also hits call node 3 at address 0x70, but does not contribute to
- * call node 3's "self time", it only contributes to its "total time".
- * Stacks 1, 2, 5, 9 and 10 don't contribute to call node 3's self or total time.
- *
- * Now here's an example *with* inlining.
- *
- * Let the call node be the node for the call path [A, B, C].
- * Let the native symbol be B.
- * Let this be the stack tree:
- *
- *  - stack 1, func A, nativeSymbol A
- *    - stack 2, func B, nativeSymbol B, address 0x40
- *      - stack 3, func C, nativeSymbol B, address 0x40, inlineDepth 1
- *    - stack 4, func B, nativeSymbol B, address 0x45
- *      - stack 5, func C, nativeSymbol B, address 0x45, inlineDepth 1
- *        - stack 6, func D, nativeSymbol D
- *    - stack 7, func E, nativeSymbol E
- *  - stack 8, func A, nativeSymbol A, address 0x30
- *    - stack 9, func B, nativeSymbol A, address 0x30, inlineDepth 1
- *      - stack 10, func C, nativeSymbol A, address 0x30, inlineDepth 2
- *
- * This maps to the following call tree:
- *
- *  - call node 1, func A
- *    - call node 2, func B
- *      - call node 3, func C
- *        - call node 4, func D
- *    - call node 5, func E
- *
- * The funky part here is that call node 3 has frames from two different native
- * symbols: Two from native symbol B, and one from native symbol A. That's
- * because B is present both as its own native symbol (separate outer function)
- * and as an inlined call from A. In other words, C has been inlined both into
- * a standalone B and also into another copy of B which was inlined into A.
- *
- * This means that, if the user double clicks call node 3, there are two
- * different symbols for which we may want to display the assembly code. And
- * depending on whether the assembly for A or for B is displayed, we want to
- * call this function for a different native symbol.
- *
- * In this example, we call this function for native symbol B.
- *
- * The call path [A, B, C] uniquely identifies call node 3.
- * The following stacks all "collapse into" ("map to") call node 3:
- * stack 3, 5 and 10. However, only stacks 3 and 5 belong to native symbol B;
- * stack 10 belongs to native symbol A.
- * Stack 6 maps to call node 4, which is a child of call node 3.
- * Stacks 1, 2, 4, 7, 8 and 9 are outside the call path [A, B, C].
- *
- * Stacks 3 and 5 both contribute their time both as "self time" and as "total
- * time" to call node 3 and native symbol B, at the addresses 0x40 and 0x45,
- * respectively. Stack 10 has the right call node but the wrong native symbol,
- * so it contributes to neither self nor total time.
- * Stack 6 also hits call node 3 at address 0x45, but does not contribute to
- * call node 3's "self time", it only contributes to its "total time".
- * Stacks 1, 2, 4, 7, 8 and 9 don't contribute to call node 3's self or total time.
- *
- * ---
- *
- * All stacks can contribute no more than one address in the given call node.
- * This is different from the getStackAddressInfo function above, where each
- * stack can hit many addresses of the same native symbol, because all of the ancestor
- * stacks are taken into account, rather than just one of them. Concretely,
- * this means that in the returned StackAddressInfo, each stackAddresses[stack]
- * set will only contain at most one element.
- *
- * The returned StackAddressInfo is computed as follows:
- *   selfAddress[stack]:
- *     For stacks that map to the given call node and whose nativeSymbol is the
- *     given native symbol, this is stack.frame.address.
- *     For all other stacks this is null.
- *   stackAddresses[stack]:
- *     For stacks that map to the given call node or one of its descendant
- *     call nodes, and whose nativeSymbol is the given native symbol, this is a
- *     set containing one element, which is ancestorStack.frame.address, where
- *     ancestorStack maps to the given call node.
- *     For all other stacks, this is null.
- */
-export function getStackAddressInfoForCallNodeNonInverted(
-  stackTable: StackTable,
-  frameTable: FrameTable,
-  callNodeIndex: IndexIntoCallNodeTable,
-  callNodeInfo: CallNodeInfo,
-  nativeSymbol: IndexIntoNativeSymbolTable
-): StackAddressInfo {
-  const stackIndexToCallNodeIndex =
-    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
-
-  // "self address" == "the address which a stack's self time is contributed to"
-  const callNodeSelfAddressForAllStacks = [];
-  // "total addresses" == "the set of addresses whose total time this stack contributes to"
-  // Either null or a single-element set.
-  const callNodeTotalAddressesForAllStacks: Array<Set<Address> | null> = [];
-
-  // This loop takes advantage of the fact that the stack table is topologically ordered:
-  // Prefix stacks are always visited before their descendants.
-  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    let selfAddress: Address | null = null;
-    let totalAddresses: Set<Address> | null = null;
-    const frame = stackTable.frame[stackIndex];
-
-    if (
-      stackIndexToCallNodeIndex[stackIndex] === callNodeIndex &&
-      frameTable.nativeSymbol[frame] === nativeSymbol
-    ) {
-      // This stack contributes to the call node's self time for the right
-      // native symbol. We needed to check both, because multiple stacks for the
-      // same call node can have different native symbols.
-      selfAddress = frameTable.address[frame];
-      if (selfAddress !== -1) {
-        totalAddresses = new Set([selfAddress]);
-      }
-    } else {
-      // This stack does not map to the given call node or has the wrong native
-      // symbol. So this stack contributes no self time to the call node for the
-      // requested native symbol, and we leave selfAddress at null.
-      // As for totalTime, this stack contributes to the same address's totalTime
-      // as its parent stack: If it is a descendant of a stack X which maps to
-      // the given call node, then it contributes to stack X's address's totalTime,
-      // otherwise it contributes to no address's totalTime.
-      // In the example above, this is how stack 8 contributes to call node 3's
-      // totalTime.
-      const prefixStack = stackTable.prefix[stackIndex];
-      totalAddresses =
-        prefixStack !== null
-          ? callNodeTotalAddressesForAllStacks[prefixStack]
-          : null;
-    }
-
-    callNodeSelfAddressForAllStacks.push(selfAddress);
-    callNodeTotalAddressesForAllStacks.push(totalAddresses);
-  }
-  return {
-    selfAddress: callNodeSelfAddressForAllStacks,
-    stackAddresses: callNodeTotalAddressesForAllStacks,
-  };
-}
-
-/**
- * This handles the inverted case of getStackAddressInfoForCallNode.
- *
- * The returned StackAddressInfo is computed as follows:
- *   selfAddress[stack]:
- *     For (inverted thread) root stack nodes that map to the given call node
- *     and whose stack.frame.nativeSymbol is the given symbol, this is stack.frame.address.
- *     For (inverted thread) root stack nodes whose frame with a different symbol,
- *     or which don't map to the given call node, this is null.
- *     For (inverted thread) *non-root* stack nodes, this is the same as the selfAddress
- *     of the stack's prefix. This way, the selfAddress is always inherited from the
- *     subtree root.
- *   stackAddresses[stack]:
- *     For stacks that map to the given call node or one of its (inverted tree)
- *     descendant call nodes, this is a set containing one element, which is
- *     ancestorStack.frame.address, where ancestorStack maps to the given call
- *     node.
- *     For all other stacks, this is null.
- */
-export function getStackAddressInfoForCallNodeInverted(
-  stackTable: StackTable,
-  frameTable: FrameTable,
-  callNodeIndex: IndexIntoCallNodeTable,
-  callNodeInfo: CallNodeInfoInverted,
-  nativeSymbol: IndexIntoNativeSymbolTable
-): StackAddressInfo {
-  const depth = callNodeInfo.depthForNode(callNodeIndex);
-  const [rangeStart, rangeEnd] =
-    callNodeInfo.getSuffixOrderIndexRangeForCallNode(callNodeIndex);
-  const callNodeIsRootOfInvertedTree = callNodeInfo.isRoot(callNodeIndex);
-  const stackIndexToCallNodeIndex =
-    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
-  const stackTablePrefixCol = stackTable.prefix;
-  const suffixOrderIndexes = callNodeInfo.getSuffixOrderIndexes();
-
-  // "self address" == "the address which a stack's self time is contributed to"
-  const callNodeSelfAddressForAllStacks = [];
-  // "total addresses" == "the set of addresses whose total time this stack contributes to"
-  // Either null or a single-element set.
-  const callNodeTotalAddressesForAllStacks = [];
-
-  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    let selfAddress: Address | null = null;
-    let totalAddresses: Set<Address> | null = null;
-
-    const stackForCallNode = getMatchingAncestorStackForInvertedCallNode(
-      stackIndex,
-      rangeStart,
-      rangeEnd,
-      suffixOrderIndexes,
-      depth,
-      stackIndexToCallNodeIndex,
-      stackTablePrefixCol
-    );
-    if (stackForCallNode !== null) {
-      const frameForCallNode = stackTable.frame[stackForCallNode];
-      if (frameTable.nativeSymbol[frameForCallNode] === nativeSymbol) {
-        // This stack contributes to the call node's total time for the right
-        // native symbol. We needed to check both, because multiple stacks for the
-        // same call node can have different native symbols.
-        const address = frameTable.address[frameForCallNode];
-        if (address !== -1) {
-          totalAddresses = new Set([address]);
-          if (callNodeIsRootOfInvertedTree) {
-            // This is a root of the inverted tree, and it is the given
-            // call node. That means that we have a self address.
-            selfAddress = address;
-          } else {
-            // This is not a root stack node, so no self time is spent
-            // in the given call node for this stack node.
-          }
-        }
-      }
-    }
-
-    callNodeSelfAddressForAllStacks.push(selfAddress);
-    callNodeTotalAddressesForAllStacks.push(totalAddresses);
-  }
-  return {
-    selfAddress: callNodeSelfAddressForAllStacks,
-    stackAddresses: callNodeTotalAddressesForAllStacks,
-  };
-}
-
 // An AddressTimings instance without any hits.
 export const emptyAddressTimings: AddressTimings = {
   totalAddressHits: new Map(),
@@ -531,33 +221,49 @@ export function getAddressTimings(
   return { totalAddressHits, selfAddressHits };
 }
 
-// Like getAddressTimings, but computes only the totalAddressHits.
-export function getTotalAddressTimings(
-  stackAddressInfo: StackAddressInfo | null,
-  samples: SamplesLikeTable
+// Returns the addresses which are hit within the specified native
+// symbol in a specific call node, along with the total of the
+// sample weights per address.
+// callNodeFramePerStack needs to be a mapping from stackIndex to the
+// corresponding frame in the call node of interest.
+export function getTotalAddressTimingsForCallNode(
+  samples: SamplesLikeTable,
+  callNodeFramePerStack: Int32Array,
+  frameTable: FrameTable,
+  nativeSymbol: IndexIntoNativeSymbolTable | null
 ): Map<Address, number> {
-  if (stackAddressInfo === null) {
+  if (nativeSymbol === null) {
     return new Map<Address, number>();
   }
-  const { stackAddresses } = stackAddressInfo;
-  const totalAddressHits: Map<Address, number> = new Map();
 
-  // Iterate over all the samples, and aggregate the sample's weight into the
-  // addresses which are hit by the sample's stack.
-  // TODO: Maybe aggregate sample count per stack first, and then visit each stack only once?
+  const totalPerAddress = new Map<Address, number>();
   for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
-    const stackIndex = samples.stack[sampleIndex];
-    if (stackIndex === null) {
+    const stack = samples.stack[sampleIndex];
+    if (stack === null) {
       continue;
     }
-    const weight = samples.weight ? samples.weight[sampleIndex] : 1;
-    const setOfHitAddresses = stackAddresses[stackIndex];
-    if (setOfHitAddresses !== null) {
-      for (const address of setOfHitAddresses) {
-        const oldHitCount = totalAddressHits.get(address) ?? 0;
-        totalAddressHits.set(address, oldHitCount + weight);
-      }
+    const callNodeFrame = callNodeFramePerStack[stack];
+    if (callNodeFrame === -1) {
+      // This sample does not contribute to the call node's total. Ignore.
+      continue;
     }
+
+    if (frameTable.nativeSymbol[callNodeFrame] !== nativeSymbol) {
+      continue;
+    }
+
+    const address = frameTable.address[callNodeFrame];
+    if (address === -1) {
+      continue;
+    }
+
+    const sampleWeight =
+      samples.weight !== null ? samples.weight[sampleIndex] : 1;
+    totalPerAddress.set(
+      address,
+      (totalPerAddress.get(address) ?? 0) + sampleWeight
+    );
   }
-  return totalAddressHits;
+
+  return totalPerAddress;
 }

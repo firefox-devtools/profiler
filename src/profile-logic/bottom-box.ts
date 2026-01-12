@@ -17,15 +17,9 @@ import {
   getNativeSymbolInfo,
   getNativeSymbolsForCallNode,
 } from './profile-data';
-import {
-  getStackLineInfoForCallNode,
-  getTotalLineTimings,
-} from './line-timings';
 import { mapGetKeyWithMaxValue } from 'firefox-profiler/utils';
-import {
-  getStackAddressInfoForCallNode,
-  getTotalAddressTimings,
-} from './address-timings';
+import { getTotalLineTimingsForCallNode } from './line-timings';
+import { getTotalAddressTimingsForCallNode } from './address-timings';
 
 /**
  * Calculate the BottomBoxInfo for a call node, i.e. information about which
@@ -83,33 +77,25 @@ export function getBottomBoxInfoForCallNode(
       )
   );
 
-  // Compute the hottest line, so we can ask the source view to scroll to it.
-  const stackLineInfo = getStackLineInfoForCallNode(
-    stackTable,
+  // Compute the hottest line and instruction address, so we can ask the
+  // source and assembly view to scroll those into view.
+  const funcLine = funcTable.lineNumber[funcIndex];
+  const lineTimings = getTotalLineTimingsForCallNode(
+    samples,
+    callNodeFramePerStack,
     frameTable,
-    funcTable,
-    callNodeIndex,
-    callNodeInfo
+    funcLine
   );
-  const callNodeLineTimings = getTotalLineTimings(stackLineInfo, samples);
-  const hottestLine = mapGetKeyWithMaxValue(callNodeLineTimings);
-
-  // Compute the hottest instruction, so we can ask the assembly view to scroll to it.
-  let hottestInstructionAddress;
-  if (initialNativeSymbol !== null) {
-    const stackAddressInfo = getStackAddressInfoForCallNode(
-      stackTable,
-      frameTable,
-      callNodeIndex,
-      callNodeInfo,
-      nativeSymbolsForCallNode[initialNativeSymbol]
-    );
-    const callNodeAddressTimings = getTotalAddressTimings(
-      stackAddressInfo,
-      samples
-    );
-    hottestInstructionAddress = mapGetKeyWithMaxValue(callNodeAddressTimings);
-  }
+  const hottestLine = mapGetKeyWithMaxValue(lineTimings);
+  const addressTimings = getTotalAddressTimingsForCallNode(
+    samples,
+    callNodeFramePerStack,
+    frameTable,
+    initialNativeSymbol !== null
+      ? nativeSymbolsForCallNode[initialNativeSymbol]
+      : null
+  );
+  const hottestInstructionAddress = mapGetKeyWithMaxValue(addressTimings);
 
   return {
     libIndex,

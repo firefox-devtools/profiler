@@ -5,11 +5,11 @@
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
   getStackLineInfo,
-  getStackLineInfoForCallNode,
   getLineTimings,
-  getTotalLineTimings,
+  getTotalLineTimingsForCallNode,
 } from 'firefox-profiler/profile-logic/line-timings';
 import {
+  getCallNodeFramePerStack,
   getCallNodeInfo,
   getInvertedCallNodeInfo,
 } from '../../profile-logic/profile-data';
@@ -150,7 +150,7 @@ describe('getLineTimings for getStackLineInfo', function () {
   });
 });
 
-describe('getLineTimings for getStackLineInfoForCallNode', function () {
+describe('getTotalLineTimingsForCallNode', function () {
   function getTimings(
     thread: Thread,
     callNodePath: CallNodePath,
@@ -174,14 +174,19 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
       callNodeInfo.getCallNodeIndexFromPath(callNodePath),
       'invalid call node path'
     );
-    const stackLineInfo = getStackLineInfoForCallNode(
-      stackTable,
-      frameTable,
-      funcTable,
+    const callNodeFramePerStack = getCallNodeFramePerStack(
       callNodeIndex,
-      callNodeInfo
+      callNodeInfo,
+      stackTable
     );
-    return getTotalLineTimings(stackLineInfo, samples);
+    const funcLine =
+      funcTable.lineNumber[callNodeInfo.funcForNode(callNodeIndex)];
+    return getTotalLineTimingsForCallNode(
+      samples,
+      callNodeFramePerStack,
+      frameTable,
+      funcLine
+    );
   }
 
   it('passes a basic test', function () {

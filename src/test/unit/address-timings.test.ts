@@ -5,11 +5,11 @@
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
   getStackAddressInfo,
-  getStackAddressInfoForCallNode,
+  getTotalAddressTimingsForCallNode,
   getAddressTimings,
-  getTotalAddressTimings,
 } from 'firefox-profiler/profile-logic/address-timings';
 import {
+  getCallNodeFramePerStack,
   getCallNodeInfo,
   getInvertedCallNodeInfo,
 } from '../../profile-logic/profile-data';
@@ -153,7 +153,7 @@ describe('getAddressTimings for getStackAddressInfo', function () {
   });
 });
 
-describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
+describe('getTotalAddressTimingsForCallNode', function () {
   function getTimings(
     thread: Thread,
     callNodePath: CallNodePath,
@@ -178,14 +178,17 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
       callNodeInfo.getCallNodeIndexFromPath(callNodePath),
       'invalid call node path'
     );
-    const stackLineInfo = getStackAddressInfoForCallNode(
-      stackTable,
-      frameTable,
+    const callNodeFramePerStack = getCallNodeFramePerStack(
       callNodeIndex,
       callNodeInfo,
+      stackTable
+    );
+    return getTotalAddressTimingsForCallNode(
+      samples,
+      callNodeFramePerStack,
+      frameTable,
       nativeSymbol
     );
-    return getTotalAddressTimings(stackLineInfo, samples);
   }
 
   it('passes a basic test', function () {
