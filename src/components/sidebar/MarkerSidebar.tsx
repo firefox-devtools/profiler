@@ -13,7 +13,7 @@ import {
 } from 'firefox-profiler/selectors/url-state';
 import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
 import { updateBottomBoxContentsAndMaybeOpen } from 'firefox-profiler/actions/profile-view';
-import { getBottomBoxInfoForStackFrame } from 'firefox-profiler/profile-logic/profile-data';
+import { getBottomBoxInfoForStackFrame } from 'firefox-profiler/profile-logic/bottom-box';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type {
