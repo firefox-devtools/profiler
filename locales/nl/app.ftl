@@ -429,6 +429,13 @@ MarkerContextMenu--select-the-sender-thread = Selecteer de afzenderthread ‘<st
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Samples buiten markeringen overeenkomend met ‘<strong>{ $filter }</strong>’ buiten beschouwing laten
 
+## MarkerCopyTableContextMenu
+## This is the menu when the copy icon is clicked in Marker Chart and Marker
+## Table panels.
+
+MarkerCopyTableContextMenu--copy-table-as-plain = Markeringstabel als platte tekst kopiëren
+MarkerCopyTableContextMenu--copy-table-as-markdown = Markeringstabel als Markdown kopiëren
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
@@ -437,6 +444,14 @@ MarkerSettings--panel-search =
     .title = Alleen markeringen tonen die overeenkomen met een bepaalde naam
 MarkerSettings--marker-filters =
     .title = Markeringsfilters
+MarkerSettings--copy-table =
+    .title = Tabel als tekst kopiëren
+# This string is used when the user tries to copy a marker table with
+# more than 10000 rows.
+# Variable:
+#   $rows (Number) - Number of rows the marker table has
+#   $maxRows (Number) - Number of maximum rows that can be copied
+MarkerSettings--copy-table-exceeed-max-rows = Het aantal rijen overschrijdt de limiet: { $rows } > { $maxRows }. Alleen de eerste { $maxRows } rijen worden gekopieerd.
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
