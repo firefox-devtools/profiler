@@ -1920,19 +1920,30 @@ export function updateBottomBoxContentsAndMaybeOpen(
   currentTab: TabSlug,
   { libIndex, sourceIndex, nativeSymbols, lineNumber }: BottomBoxInfo
 ): Action {
-  // TODO: If the set has more than one element, pick the native symbol with
-  // the highest total sample count
-  const nativeSymbol = nativeSymbols.length !== 0 ? nativeSymbols[0] : null;
+  const haveSource = sourceIndex !== null;
+  const haveAssembly = nativeSymbols.length !== 0;
+
+  const shouldOpenBottomBox = haveSource || haveAssembly;
+
+  // By default, only open the source view and keep the assembly
+  // view closed - unless the only thing we have is assembly.
+  const shouldOpenAssemblyView = !haveSource && haveAssembly;
+
+  // If we have at least one native symbol to show assembly for, pick
+  // the first one arbitrarily.
+  // TODO: If the we have more than one native symbol, pick the one
+  // with the highest total sample count.
+  const currentNativeSymbol = nativeSymbols.length !== 0 ? 0 : null;
 
   return {
     type: 'UPDATE_BOTTOM_BOX',
     libIndex,
     sourceIndex,
-    nativeSymbol,
-    allNativeSymbolsForInitiatingCallNode: nativeSymbols,
+    nativeSymbols,
+    currentNativeSymbol,
     currentTab,
-    shouldOpenBottomBox: sourceIndex !== null || nativeSymbol !== null,
-    shouldOpenAssemblyView: sourceIndex === null && nativeSymbol !== null,
+    shouldOpenBottomBox,
+    shouldOpenAssemblyView,
     lineNumber,
   };
 }
