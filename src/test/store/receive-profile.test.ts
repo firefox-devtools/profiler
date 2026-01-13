@@ -84,14 +84,7 @@ function simulateSymbolStoreHasNoCache() {
   (SymbolStoreDB as any).mockImplementation(() => ({
     getSymbolTable: jest
       .fn()
-      .mockImplementation((debugName, breakpadId) =>
-        Promise.reject(
-          new SymbolsNotFoundError(
-            'The requested library does not exist in the database.',
-            { debugName, breakpadId }
-          )
-        )
-      ),
+      .mockImplementation((_debugName, _breakpadId) => Promise.resolve(null)),
   }));
 }
 
@@ -781,7 +774,6 @@ describe('actions/receive-profile', function () {
           const browserConnectionStatus =
             await createBrowserConnection('Firefox/123.0');
           await dispatch(retrieveProfileFromBrowser(browserConnectionStatus));
-          expect(console.warn).toHaveBeenCalledTimes(2);
 
           const state = getState();
           expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });

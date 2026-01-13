@@ -128,4 +128,21 @@ describe('app/ProfileFilterNavigator', () => {
     const { getByText } = setup();
     expect(getByText(/Full Range/)).toBeInTheDocument();
   });
+
+  it('opens a menu when the first item is clicked', () => {
+    const { getByText } = setup();
+
+    const item = getByText(/Full Range/).closest('.filterNavigatorBarItem');
+
+    const listener = jest.fn();
+    window.addEventListener('REACT_CONTEXTMENU_SHOW', listener);
+    fireEvent.click(item!);
+    window.removeEventListener('REACT_CONTEXTMENU_SHOW', listener);
+
+    expect(listener).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'REACT_CONTEXTMENU_SHOW',
+      })
+    );
+  });
 });

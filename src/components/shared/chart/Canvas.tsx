@@ -327,6 +327,17 @@ export class ChartCanvas<Item> extends React.Component<
 
   _onDoubleClick = () => {
     this.props.onDoubleClickItem(this.state.hoveredItem);
+
+    if (this.props.stickyTooltips) {
+      // The double click is received as a sequence of click + click + dblclick.
+      // The each click sets the selectedItem inside _onClick.
+      //
+      // Unset the selectedItem here to differentiate the behavior between
+      // the single click vs the double clicks.
+      this.setState(() => ({
+        selectedItem: null,
+      }));
+    }
   };
 
   _getHoveredItemInfo = (): React.ReactNode => {
