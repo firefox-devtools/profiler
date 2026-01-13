@@ -43,7 +43,7 @@ export async function compress(
         if (errorOrNull) {
           reject(errorOrNull);
         } else {
-          resolve(new Uint8Array(result.buffer as ArrayBuffer));
+          resolve(result);
         }
       });
     });
@@ -67,7 +67,7 @@ export async function decompress(
         if (errorOrNull) {
           reject(errorOrNull);
         } else {
-          resolve(new Uint8Array(result.buffer as ArrayBuffer));
+          resolve(result);
         }
       });
     });
