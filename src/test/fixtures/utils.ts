@@ -491,11 +491,18 @@ export function findFillTextPositionFromDrawLog(
  */
 export function fireFullClick(
   element: HTMLElement,
-  options?: FakeMouseEventInit
+  options?: FakeMouseEventInit,
+  dblClick?: boolean
 ) {
   fireEvent(element, getMouseEvent('mousedown', options));
   fireEvent(element, getMouseEvent('mouseup', options));
   fireEvent(element, getMouseEvent('click', options));
+  if (dblClick) {
+    fireEvent(element, getMouseEvent('mousedown', options));
+    fireEvent(element, getMouseEvent('mouseup', options));
+    fireEvent(element, getMouseEvent('click', options));
+    fireEvent(element, getMouseEvent('dblclick', options));
+  }
 }
 
 /**
