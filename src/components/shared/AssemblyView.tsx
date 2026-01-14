@@ -9,7 +9,6 @@ import type {
   NativeSymbolInfo,
   DecodedInstruction,
 } from 'firefox-profiler/types';
-import { mapGetKeyWithMaxValue } from 'firefox-profiler/utils';
 
 import type { AssemblyViewEditor } from './AssemblyView-codemirror';
 
@@ -45,8 +44,9 @@ type AssemblyViewProps = {
   readonly timings: AddressTimings;
   readonly assemblyCode: DecodedInstruction[];
   readonly nativeSymbol: NativeSymbolInfo | null;
-  readonly scrollToHotSpotGeneration: number;
-  readonly hotSpotTimings: AddressTimings;
+  readonly scrollGeneration: number;
+  readonly scrollToInstructionAddress?: number;
+  readonly highlightedInstruction?: number;
 };
 
 let editorModulePromise: Promise<any> | null = null;
@@ -54,36 +54,6 @@ let editorModulePromise: Promise<any> | null = null;
 export class AssemblyView extends React.PureComponent<AssemblyViewProps> {
   _ref = React.createRef<HTMLDivElement>();
   _editor: AssemblyViewEditor | null = null;
-
-  /**
-   * Scroll to the line with the most hits, based on the timings in
-   * timingsForScrolling.
-   *
-   * How is timingsForScrolling different from this.props.timings?
-   * In the current implementation, this.props.timings are always the "global"
-   * timings, i.e. they show the line hits for all samples in the current view,
-   * regardless of the selected call node. However, when opening the assembly
-   * view from a specific call node, you really want to see the code that's
-   * relevant to that specific call node, or at least that specific function.
-   * So timingsForScrolling are the timings that indicate just the line hits
-   * in the selected call node. This means that the "hotspot" will be somewhere
-   * in the selected function, and it will even be in the line that's most
-   * relevant to that specific call node.
-   *
-   * Sometimes, timingsForScrolling can be completely empty. This happens, for
-   * example, when the assembly view is showing a different file than the
-   * selected call node's function's file, for example because we just loaded
-   * from a URL and ended up with an arbitrary selected call node.
-   * In that case, pick the hotspot from the global line timings.
-   */
-  _scrollToHotSpot(timingsForScrolling: AddressTimings) {
-    const heaviestAddress =
-      mapGetKeyWithMaxValue(timingsForScrolling.totalAddressHits) ??
-      mapGetKeyWithMaxValue(this.props.timings.totalAddressHits);
-    if (heaviestAddress !== undefined) {
-      this._scrollToAddressWithSpaceOnTop(heaviestAddress, 5);
-    }
-  }
 
   _scrollToAddressWithSpaceOnTop(address: number, topSpaceLines: number) {
     if (this._editor) {
@@ -152,7 +122,12 @@ export class AssemblyView extends React.PureComponent<AssemblyViewProps> {
         domParent
       );
       this._editor = editor;
-      this._scrollToHotSpot(this.props.hotSpotTimings);
+      if (this.props.scrollToInstructionAddress !== undefined) {
+        this._scrollToAddressWithSpaceOnTop(
+          this.props.scrollToInstructionAddress,
+          5
+        );
+      }
     })();
   }
 
@@ -176,10 +151,14 @@ export class AssemblyView extends React.PureComponent<AssemblyViewProps> {
 
     if (
       contentsChanged ||
-      this.props.scrollToHotSpotGeneration !==
-        prevProps.scrollToHotSpotGeneration
+      this.props.scrollGeneration !== prevProps.scrollGeneration
     ) {
-      this._scrollToHotSpot(this.props.hotSpotTimings);
+      if (this.props.scrollToInstructionAddress !== undefined) {
+        this._scrollToAddressWithSpaceOnTop(
+          this.props.scrollToInstructionAddress,
+          5
+        );
+      }
     }
 
     if (this.props.timings !== prevProps.timings) {

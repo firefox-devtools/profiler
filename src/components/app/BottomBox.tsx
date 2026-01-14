@@ -19,11 +19,10 @@ import {
   getAssemblyViewIsOpen,
   getAssemblyViewNativeSymbol,
   getAssemblyViewScrollGeneration,
+  getAssemblyViewScrollToInstructionAddress,
+  getAssemblyViewHighlightedInstruction,
 } from 'firefox-profiler/selectors/url-state';
-import {
-  selectedThreadSelectors,
-  selectedNodeSelectors,
-} from 'firefox-profiler/selectors/per-thread';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { closeBottomBox } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
@@ -60,8 +59,9 @@ type StateProps = {
   readonly assemblyViewNativeSymbol: NativeSymbolInfo | null;
   readonly assemblyViewCode: AssemblyCodeStatus | void;
   readonly assemblyViewScrollGeneration: number;
+  readonly assemblyViewScrollToInstructionAddress?: number;
+  readonly assemblyViewHighlightedInstruction?: number;
   readonly globalAddressTimings: AddressTimings;
-  readonly selectedCallNodeAddressTimings: AddressTimings;
 };
 
 type DispatchProps = {
@@ -162,10 +162,11 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       sourceViewHighlightedLine,
       assemblyViewIsOpen,
       assemblyViewScrollGeneration,
+      assemblyViewScrollToInstructionAddress,
+      assemblyViewHighlightedInstruction,
       assemblyViewNativeSymbol,
       assemblyViewCode,
       globalAddressTimings,
-      selectedCallNodeAddressTimings,
     } = this.props;
     const sourceCode =
       sourceViewCode && sourceViewCode.type === 'AVAILABLE'
@@ -260,8 +261,11 @@ class BottomBoxImpl extends React.PureComponent<Props> {
                     timings={globalAddressTimings}
                     assemblyCode={assemblyCode}
                     nativeSymbol={assemblyViewNativeSymbol}
-                    scrollToHotSpotGeneration={assemblyViewScrollGeneration}
-                    hotSpotTimings={selectedCallNodeAddressTimings}
+                    scrollGeneration={assemblyViewScrollGeneration}
+                    scrollToInstructionAddress={
+                      assemblyViewScrollToInstructionAddress
+                    }
+                    highlightedInstruction={assemblyViewHighlightedInstruction}
                     ref={this._assemblyView}
                   />
                 ) : null}
@@ -301,9 +305,11 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
     assemblyViewCode: getAssemblyViewCode(state),
     globalAddressTimings:
       selectedThreadSelectors.getAssemblyViewAddressTimings(state),
-    selectedCallNodeAddressTimings:
-      selectedNodeSelectors.getAssemblyViewAddressTimings(state),
     assemblyViewScrollGeneration: getAssemblyViewScrollGeneration(state),
+    assemblyViewScrollToInstructionAddress:
+      getAssemblyViewScrollToInstructionAddress(state),
+    assemblyViewHighlightedInstruction:
+      getAssemblyViewHighlightedInstruction(state),
     assemblyViewIsOpen: getAssemblyViewIsOpen(state),
   }),
   mapDispatchToProps: {

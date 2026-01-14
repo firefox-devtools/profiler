@@ -775,9 +775,11 @@ export type BottomBoxInfo = {
   libIndex: IndexIntoLibs | null;
   sourceIndex: IndexIntoSourceTable | null;
   nativeSymbols: NativeSymbolInfo[];
-  // Optional line number to scroll to in the source view.
+  initialNativeSymbol: number | null; // index into `nativeSymbols`
   scrollToLineNumber?: number;
   highlightLineNumber?: number;
+  scrollToInstructionAddress?: number;
+  highlightInstructionAddress?: number;
 };
 
 /**
