@@ -119,6 +119,7 @@ export class AssemblyView extends React.PureComponent<AssemblyViewProps> {
       const editor = new AssemblyViewEditor(
         this._getAssemblyCodeOrFallback(),
         this.props.timings,
+        this.props.highlightedInstruction ?? null,
         domParent
       );
       this._editor = editor;
@@ -163,6 +164,14 @@ export class AssemblyView extends React.PureComponent<AssemblyViewProps> {
 
     if (this.props.timings !== prevProps.timings) {
       this._editor.setTimings(this.props.timings);
+    }
+
+    if (
+      this.props.highlightedInstruction !== prevProps.highlightedInstruction
+    ) {
+      this._editor.setHighlightedInstruction(
+        this.props.highlightedInstruction ?? null
+      );
     }
   }
 }
