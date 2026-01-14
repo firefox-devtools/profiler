@@ -471,6 +471,7 @@ export function getMarkerSelectorsPerThread(
       getMarkerGetter,
       getMarkerChartMarkerIndexes,
       ProfileSelectors.getCategories,
+      ProfileSelectors.getMarkerSchemaByName,
       MarkerTimingLogic.getMarkerTimingAndBuckets
     );
 
@@ -523,7 +524,6 @@ export function getMarkerSelectorsPerThread(
   const getNetworkTrackTiming: Selector<MarkerTiming[]> = createSelector(
     getMarkerGetter,
     getNetworkMarkerIndexes,
-    () => null,
     MarkerTimingLogic.getMarkerTiming
   );
 
@@ -534,7 +534,6 @@ export function getMarkerSelectorsPerThread(
   const getUserTimingMarkerTiming: Selector<MarkerTiming[]> = createSelector(
     getMarkerGetter,
     getUserTimingMarkerIndexes,
-    () => null,
     MarkerTimingLogic.getMarkerTiming
   );
 

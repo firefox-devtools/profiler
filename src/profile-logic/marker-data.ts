@@ -6,6 +6,7 @@ import { getFriendlyThreadName } from './profile-data';
 import { removeFilePath, removeURLs, stringsToRegExp } from '../utils/string';
 import { StringTable } from '../utils/string-table';
 import { ensureExists, assertExhaustiveCheck } from '../utils/types';
+import { bisectionRightByKey } from '../utils/bisect';
 import {
   INSTANT,
   INTERVAL,
@@ -41,6 +42,18 @@ import type {
   MarkerSchemaByName,
   MarkerDisplayLocation,
   Tid,
+  Milliseconds,
+  ThreadIndex,
+  FlowMarker,
+  FlowSchemasByName,
+  ProfileFlowInfo,
+  FlowTiming,
+  IndexIntoFlowTable,
+  ConnectedFlowInfo,
+  FlowTimingRow,
+  FlowTimingRowType,
+  FlowTimingRowMarkerTable,
+  FlowTimingArrow,
 } from 'firefox-profiler/types';
 
 /**
@@ -1583,3 +1596,741 @@ export const stringsToMarkerRegExps = (
     fieldMap,
   };
 };
+
+class MinHeap<V> {
+  _keys: number[] = [];
+  _values: V[] = [];
+
+  size(): number {
+    return this._values.length;
+  }
+  insert(key: number, value: V) {
+    this._keys.push(key);
+    this._values.push(value);
+  }
+  delete(handle: number) {
+    this._keys.splice(handle, 1);
+    this._values.splice(handle, 1);
+  }
+  first(): number | null {
+    if (this._values.length === 0) {
+      return null;
+    }
+
+    let minI = 0;
+    let minKey = this._keys[0];
+    for (let i = 1; i < this._keys.length; i++) {
+      const k = this._keys[i];
+      if (k < minKey) {
+        minI = i;
+        minKey = k;
+      }
+    }
+    return minI;
+  }
+  get(handle: number): V {
+    return this._values[handle];
+  }
+  reorder(handle: number, newKey: number) {
+    this._keys[handle] = newKey;
+  }
+}
+
+export function computeFlowSchemasByName(
+  markerSchemas: MarkerSchema[]
+): FlowSchemasByName {
+  const flowSchemasByName = new Map();
+  for (const schema of markerSchemas) {
+    const flowFields = [];
+    for (const field of schema.fields) {
+      const key = field.key;
+      if (field.format === 'flow-id') {
+        flowFields.push({ key, isTerminating: false });
+      } else if (field.format === 'terminating-flow-id') {
+        flowFields.push({ key, isTerminating: true });
+      }
+    }
+    if (flowFields.length !== 0) {
+      flowSchemasByName.set(schema.name, {
+        flowFields,
+        isStackBased: schema.isStackBased === true,
+      });
+    }
+  }
+  return flowSchemasByName;
+}
+
+export function computeFlowMarkers(
+  fullMarkerList: Marker[],
+  stringArray: string[],
+  flowSchemasByName: FlowSchemasByName
+): FlowMarker[] {
+  const flowMarkers: FlowMarker[] = [];
+  const currentContextFlowMarkers: number[] = [];
+  const currentContextEndTimes: Milliseconds[] = [];
+  for (
+    let markerIndex = 0;
+    markerIndex < fullMarkerList.length;
+    markerIndex++
+  ) {
+    const marker = fullMarkerList[markerIndex];
+    const markerData = marker.data;
+    if (!markerData) {
+      continue;
+    }
+    const schemaName = markerData.type;
+    if (!schemaName) {
+      continue;
+    }
+    const flowSchema = flowSchemasByName.get(schemaName);
+    if (flowSchema === undefined) {
+      continue;
+    }
+
+    const startTime = marker.start;
+    const endTime = marker.end;
+
+    while (
+      currentContextEndTimes.length !== 0 &&
+      currentContextEndTimes[currentContextEndTimes.length - 1] < startTime
+    ) {
+      currentContextEndTimes.pop();
+      currentContextFlowMarkers.pop();
+    }
+
+    const flowIDs = [];
+    for (const { key, isTerminating } of flowSchema.flowFields) {
+      const flowIDStringIndex = (markerData as any)[key];
+      if (flowIDStringIndex !== undefined && flowIDStringIndex !== null) {
+        const flowID = stringArray[flowIDStringIndex];
+        flowIDs.push({ flowID, isTerminating });
+      }
+    }
+    if (flowIDs.length === 0) {
+      continue;
+    }
+
+    const thisFlowMarkerIndex = flowMarkers.length;
+    const parentContextFlowMarker =
+      currentContextFlowMarkers.length !== 0
+        ? currentContextFlowMarkers[currentContextFlowMarkers.length - 1]
+        : null;
+    flowMarkers.push({
+      parentContextFlowMarker,
+      childContextFlowMarkers: [],
+      flowIDs,
+      startTime,
+      endTime,
+      markerIndex,
+    });
+    if (flowSchema.isStackBased || marker.end === null) {
+      if (parentContextFlowMarker !== null) {
+        flowMarkers[parentContextFlowMarker].childContextFlowMarkers.push(
+          thisFlowMarkerIndex
+        );
+      }
+    }
+    if (flowSchema.isStackBased && marker.end !== null) {
+      currentContextEndTimes.push(marker.end);
+      currentContextFlowMarkers.push(thisFlowMarkerIndex);
+    }
+  }
+  return flowMarkers;
+}
+
+export function computeProfileFlowInfo(
+  fullMarkerListPerThread: Marker[][],
+  threads: RawThread[],
+  markerSchemas: MarkerSchema[],
+  shared: RawProfileSharedData
+): ProfileFlowInfo {
+  const flowSchemasByName = computeFlowSchemasByName(markerSchemas);
+  const { stringArray } = shared;
+
+  const flowMarkersPerThread: FlowMarker[][] = fullMarkerListPerThread.map(
+    (fullMarkerList) => {
+      return computeFlowMarkers(fullMarkerList, stringArray, flowSchemasByName);
+    }
+  );
+
+  const threadCount = flowMarkersPerThread.length;
+  const nextEntryHeap = new MinHeap<{
+    threadIndex: number;
+    nextIndex: number;
+  }>();
+  for (let threadIndex = 0; threadIndex < threadCount; threadIndex++) {
+    const flowMarkers = flowMarkersPerThread[threadIndex];
+    if (flowMarkers.length !== 0) {
+      nextEntryHeap.insert(flowMarkers[0].startTime, {
+        threadIndex,
+        nextIndex: 0,
+      });
+    }
+  }
+
+  const flowMarkerFlowsPerThread: IndexIntoFlowTable[][][] =
+    flowMarkersPerThread.map(() => []);
+
+  const flowTable = [];
+  const currentActiveFlows = new Map<string, IndexIntoFlowTable>();
+  const flowsByID = new Map<string, IndexIntoFlowTable[]>();
+
+  while (true) {
+    const handle = nextEntryHeap.first();
+    if (handle === null) {
+      break;
+    }
+
+    const nextEntry = nextEntryHeap.get(handle);
+    const { threadIndex, nextIndex } = nextEntry;
+    const flowMarkerIndex = nextIndex;
+    const flowMarkers = flowMarkersPerThread[threadIndex];
+    const flowMarker = flowMarkers[nextIndex];
+
+    const { markerIndex, flowIDs } = flowMarker;
+    const { start, end } = fullMarkerListPerThread[threadIndex][markerIndex];
+    const flowMarkerHandle = { threadIndex, flowMarkerIndex };
+    const flowsForThisFlowMarker = [];
+    for (const { flowID, isTerminating } of flowIDs) {
+      let flowIndex = currentActiveFlows.get(flowID);
+      if (flowIndex === undefined) {
+        flowIndex = flowTable.length;
+        flowTable.push({
+          id: flowID,
+          startTime: start,
+          endTime: end ?? start,
+          flowMarkers: [flowMarkerHandle],
+        });
+        if (!isTerminating) {
+          currentActiveFlows.set(flowID, flowIndex);
+        }
+        const flowsByIDEntry = flowsByID.get(flowID);
+        if (flowsByIDEntry === undefined) {
+          flowsByID.set(flowID, [flowIndex]);
+        } else {
+          flowsByIDEntry.push(flowIndex);
+        }
+      } else {
+        const flow = flowTable[flowIndex];
+        flow.flowMarkers.push(flowMarkerHandle);
+        flow.endTime = end ?? start;
+        if (isTerminating) {
+          currentActiveFlows.delete(flowID);
+        }
+      }
+      flowsForThisFlowMarker.push(flowIndex);
+    }
+    sortAndDedup(flowsForThisFlowMarker);
+    flowMarkerFlowsPerThread[threadIndex][flowMarkerIndex] =
+      flowsForThisFlowMarker;
+
+    const newNextIndex = nextIndex + 1;
+    if (newNextIndex < flowMarkers.length) {
+      nextEntry.nextIndex = newNextIndex;
+      nextEntryHeap.reorder(handle, flowMarkers[newNextIndex].startTime);
+    } else {
+      nextEntryHeap.delete(handle);
+    }
+  }
+
+  return {
+    flowTable,
+    flowsByID,
+    flowMarkersPerThread,
+    flowMarkerFlowsPerThread,
+    flowSchemasByName,
+  };
+}
+
+export function getConnectedFlowInfo(
+  flowIndex: IndexIntoFlowTable,
+  profileFlowInfo: ProfileFlowInfo
+): ConnectedFlowInfo {
+  const { flowTable, flowMarkersPerThread, flowMarkerFlowsPerThread } =
+    profileFlowInfo;
+  const directlyConnectedFlows: IndexIntoFlowTable[] = [];
+  const incomingContextFlows: IndexIntoFlowTable[] = [];
+  const outgoingContextFlows: IndexIntoFlowTable[] = [];
+
+  const flow = flowTable[flowIndex];
+  for (const { threadIndex, flowMarkerIndex } of flow.flowMarkers) {
+    const thisMarkerFlows =
+      flowMarkerFlowsPerThread[threadIndex][flowMarkerIndex];
+    for (const directlyConnectedFlowIndex of thisMarkerFlows) {
+      if (directlyConnectedFlowIndex !== flowIndex) {
+        directlyConnectedFlows.push(directlyConnectedFlowIndex);
+      }
+    }
+
+    const flowMarker: FlowMarker =
+      flowMarkersPerThread[threadIndex][flowMarkerIndex];
+
+    const incomingFlowMarkerIndex = flowMarker.parentContextFlowMarker;
+    if (incomingFlowMarkerIndex !== null) {
+      const incomingMarkerFlows =
+        flowMarkerFlowsPerThread[threadIndex][incomingFlowMarkerIndex];
+      for (const incomingContextFlowIndex of incomingMarkerFlows) {
+        if (incomingContextFlowIndex !== flowIndex) {
+          incomingContextFlows.push(incomingContextFlowIndex);
+        }
+      }
+    }
+
+    for (const outgoingFlowMarkerIndex of flowMarker.childContextFlowMarkers) {
+      const outgoingMarkerFlows =
+        flowMarkerFlowsPerThread[threadIndex][outgoingFlowMarkerIndex];
+      for (const outgoingContextFlowIndex of outgoingMarkerFlows) {
+        if (outgoingContextFlowIndex !== flowIndex) {
+          outgoingContextFlows.push(outgoingContextFlowIndex);
+        }
+      }
+    }
+  }
+  sortAndDedup(directlyConnectedFlows);
+  sortAndDedup(incomingContextFlows);
+  sortAndDedup(outgoingContextFlows);
+  return {
+    directlyConnectedFlows,
+    incomingContextFlows,
+    outgoingContextFlows,
+  };
+}
+
+export function lookupFlow(
+  flowID: string,
+  time: Milliseconds,
+  profileFlowInfo: ProfileFlowInfo
+): IndexIntoFlowTable | null {
+  const { flowsByID, flowTable } = profileFlowInfo;
+  const candidateFlows = flowsByID.get(flowID);
+  if (candidateFlows === undefined) {
+    return null;
+  }
+  const index =
+    bisectionRightByKey(
+      candidateFlows,
+      time,
+      (flowIndex) => flowTable[flowIndex].startTime
+    ) - 1;
+  if (index === -1) {
+    return null;
+  }
+  return candidateFlows[index];
+}
+
+export function computeMarkerFlows(
+  threadIndex: number,
+  markerIndex: MarkerIndex,
+  profileFlowInfo: ProfileFlowInfo,
+  fullMarkerListPerThread: Marker[][],
+  stringTable: StringTable
+): IndexIntoFlowTable[] | null {
+  const marker = fullMarkerListPerThread[threadIndex][markerIndex];
+  const markerData = marker.data;
+  if (!markerData) {
+    return null;
+  }
+  const markerType = markerData.type;
+  if (!markerType) {
+    return null;
+  }
+  const flowSchema = profileFlowInfo.flowSchemasByName.get(markerType);
+  if (flowSchema === undefined) {
+    return null;
+  }
+
+  const flowIndexes = [];
+  for (const { key } of flowSchema.flowFields) {
+    const fieldValue = (markerData as any)[key];
+    if (fieldValue === undefined || fieldValue === null) {
+      continue;
+    }
+    const flowID = stringTable.getString(fieldValue);
+    const flowIndex = lookupFlow(flowID, marker.start, profileFlowInfo);
+    if (flowIndex === null) {
+      console.error(
+        `Could not find flow for ID ${flowID} at time ${marker.start}!`
+      );
+      continue;
+    }
+    flowIndexes.push(flowIndex);
+  }
+  dedupConsecutive(flowIndexes);
+  return flowIndexes.length !== 0 ? flowIndexes : null;
+}
+
+function sortAndDedup(array: number[]) {
+  array.sort((a, b) => a - b);
+  dedupConsecutive(array);
+}
+
+function dedupConsecutive<T>(array: T[]) {
+  if (array.length === 0) {
+    return;
+  }
+
+  let prev = array[0];
+  for (let i = 1; i < array.length; i++) {
+    const curr = array[i];
+    if (prev === curr) {
+      array.splice(i, 1);
+      i--;
+    } else {
+      prev = curr;
+    }
+  }
+}
+
+export function printMarkerFlows(
+  markerThreadIndex: number,
+  markerIndex: MarkerIndex,
+  profileFlowInfo: ProfileFlowInfo,
+  threads: RawThread[],
+  fullMarkerListPerThread: Marker[][],
+  stringTable: StringTable
+) {
+  const markerFlows = computeMarkerFlows(
+    markerThreadIndex,
+    markerIndex,
+    profileFlowInfo,
+    fullMarkerListPerThread,
+    stringTable
+  );
+  if (markerFlows === null) {
+    console.log('This marker is not part of any flows.');
+    return;
+  }
+
+  const { flowTable } = profileFlowInfo;
+  const flowCount = markerFlows.length;
+  if (flowCount === 1) {
+    const flowIndex = markerFlows[0];
+    console.log(
+      `This marker is part of one flow: ${flowTable[flowIndex].id} (index ${flowIndex})`
+    );
+  } else {
+    console.log(
+      `This marker is part of ${flowCount} flows:`,
+      markerFlows.map((flowIndex) => flowTable[flowIndex].id)
+    );
+  }
+
+  for (const flowIndex of markerFlows) {
+    printFlow(flowIndex, profileFlowInfo, threads, fullMarkerListPerThread);
+  }
+}
+
+export function printFlow(
+  flowIndex: IndexIntoFlowTable,
+  profileFlowInfo: ProfileFlowInfo,
+  threads: RawThread[],
+  fullMarkerListPerThread: Marker[][]
+) {
+  const { flowTable, flowMarkersPerThread, flowMarkerFlowsPerThread } =
+    profileFlowInfo;
+
+  const flow = flowTable[flowIndex];
+  console.log(`Flow ${flow.id} (index ${flowIndex}):`, flow);
+  console.log(`This flow contains ${flow.flowMarkers.length} markers:`);
+  for (const { threadIndex, flowMarkerIndex } of flow.flowMarkers) {
+    const flowMarker = flowMarkersPerThread[threadIndex][flowMarkerIndex];
+    const otherMarkerIndex = flowMarker.markerIndex;
+    const thread = threads[threadIndex];
+    const marker = fullMarkerListPerThread[threadIndex][otherMarkerIndex];
+    console.log(
+      ` - marker ${otherMarkerIndex} (thread index: ${threadIndex}) at time ${flowMarker.startTime} on thread ${thread.name} (pid: ${thread.pid}, tid: ${thread.tid}):`,
+      marker
+    );
+    const directlyConnectedFlows = flowMarkerFlowsPerThread[threadIndex][
+      flowMarkerIndex
+    ].filter((otherFlowIndex) => otherFlowIndex !== flowIndex);
+    const incomingContextFlows =
+      flowMarker.parentContextFlowMarker !== null
+        ? flowMarkerFlowsPerThread[threadIndex][
+            flowMarker.parentContextFlowMarker
+          ].filter((otherFlowIndex) => otherFlowIndex !== flowIndex)
+        : [];
+    const outgoingContextFlows = [];
+    for (const childFlowMarkerIndex of flowMarker.childContextFlowMarkers) {
+      for (const outgoingFlow of flowMarkerFlowsPerThread[threadIndex][
+        childFlowMarkerIndex
+      ]) {
+        if (outgoingFlow !== flowIndex) {
+          outgoingContextFlows.push(outgoingFlow);
+        }
+      }
+    }
+    sortAndDedup(outgoingContextFlows);
+    if (directlyConnectedFlows.length !== 0) {
+      console.log(
+        `Directly connected flows on this marker: ${directlyConnectedFlows.join(', ')}`
+      );
+    }
+    if (incomingContextFlows.length !== 0) {
+      console.log(
+        `Incoming context flows on this marker: ${incomingContextFlows.join(', ')}`
+      );
+    }
+    if (outgoingContextFlows.length !== 0) {
+      console.log(
+        `Outgoing context flows on this marker: ${outgoingContextFlows.join(', ')}`
+      );
+    }
+  }
+
+  // const connections = getConnectedFlowInfo(flowIndex, profileFlowInfo);
+  // if (connections.directlyConnectedFlows.length !== 0) {
+  //   console.log(
+  //     `Directly connected flows: ${connections.directlyConnectedFlows.join(', ')}`
+  //   );
+  // }
+  // if (connections.incomingContextFlows.length !== 0) {
+  //   console.log(
+  //     `Incoming context flows: ${connections.incomingContextFlows.join(', ')}`
+  //   );
+  // }
+  // if (connections.outgoingContextFlows.length !== 0) {
+  //   console.log(
+  //     `Outgoing context flows: ${connections.outgoingContextFlows.join(', ')}`
+  //   );
+  // }
+}
+
+export function computeFlowTiming(
+  profileFlowInfo: ProfileFlowInfo,
+  activeFlows: IndexIntoFlowTable[]
+): FlowTiming {
+  let incomingContextFlows = [];
+  let directlyConnectedFlows = [];
+  let outgoingContextFlows = [];
+
+  for (const flow of activeFlows) {
+    const connectedFlows = getConnectedFlowInfo(flow, profileFlowInfo);
+    incomingContextFlows.push(...connectedFlows.incomingContextFlows);
+    directlyConnectedFlows.push(...connectedFlows.directlyConnectedFlows);
+    outgoingContextFlows.push(...connectedFlows.outgoingContextFlows);
+  }
+  sortAndDedup(incomingContextFlows);
+  sortAndDedup(directlyConnectedFlows);
+  sortAndDedup(outgoingContextFlows);
+
+  directlyConnectedFlows = directlyConnectedFlows.filter(
+    (icf) => activeFlows.indexOf(icf) === -1
+  );
+  incomingContextFlows = incomingContextFlows.filter(
+    (icf) =>
+      activeFlows.indexOf(icf) === -1 &&
+      directlyConnectedFlows.indexOf(icf) === -1
+  );
+  outgoingContextFlows = outgoingContextFlows.filter(
+    (icf) =>
+      activeFlows.indexOf(icf) === -1 &&
+      directlyConnectedFlows.indexOf(icf) === -1 &&
+      incomingContextFlows.indexOf(icf) === -1
+  );
+
+  const rawRows: Array<[FlowTimingRowType, IndexIntoFlowTable]> = [
+    ...incomingContextFlows.map<[FlowTimingRowType, IndexIntoFlowTable]>(
+      (flowIndex) => ['INCOMING_CONTEXT', flowIndex]
+    ),
+    ...activeFlows.map<[FlowTimingRowType, IndexIntoFlowTable]>((flowIndex) => [
+      'ACTIVE',
+      flowIndex,
+    ]),
+    ...directlyConnectedFlows.map<[FlowTimingRowType, IndexIntoFlowTable]>(
+      (flowIndex) => ['DIRECTLY_CONNECTED', flowIndex]
+    ),
+    ...outgoingContextFlows.map<[FlowTimingRowType, IndexIntoFlowTable]>(
+      (flowIndex) => ['OUTGOING_CONTEXT', flowIndex]
+    ),
+  ];
+
+  const rows: FlowTimingRow[] = [];
+
+  const { flowTable, flowMarkersPerThread } = profileFlowInfo;
+
+  const flowIndexToRowIndex = new Map();
+
+  for (let rowIndex = 0; rowIndex < rawRows.length; rowIndex++) {
+    const [rowType, flowIndex] = rawRows[rowIndex];
+    flowIndexToRowIndex.set(flowIndex, rowIndex);
+
+    const flow = flowTable[flowIndex];
+    const { flowMarkers, startTime, endTime } = flow;
+    const flowMarkerCount = flowMarkers.length;
+
+    const markers: FlowTimingRowMarkerTable = {
+      length: flowMarkerCount,
+      threadIndex: new Int32Array(flowMarkerCount),
+      markerIndex: new Int32Array(flowMarkerCount),
+      flowMarkerIndex: new Int32Array(flowMarkerCount),
+      startTime: new Float64Array(flowMarkerCount),
+      endTime: new Float64Array(flowMarkerCount),
+      isInstant: new Uint8Array(flowMarkerCount),
+    };
+
+    for (let i = 0; i < flowMarkerCount; i++) {
+      const { threadIndex, flowMarkerIndex } = flowMarkers[i];
+      const flowMarker = flowMarkersPerThread[threadIndex][flowMarkerIndex];
+      const { markerIndex, startTime, endTime } = flowMarker;
+      markers.threadIndex[i] = threadIndex;
+      markers.markerIndex[i] = markerIndex;
+      markers.flowMarkerIndex[i] = flowMarkerIndex;
+      markers.startTime[i] = startTime;
+      if (endTime === null) {
+        markers.endTime[i] = startTime;
+        markers.isInstant[i] = 1;
+      } else {
+        markers.endTime[i] = endTime;
+      }
+    }
+
+    rows.push({
+      label: `Flow ${flowIndex}`,
+      rowType,
+      flowIndex,
+      flowStart: startTime,
+      flowEnd: ensureExists(endTime),
+      markers,
+    });
+  }
+
+  return { rows, flowIndexToRowIndex, profileFlowInfo };
+}
+
+function _arrowForMarker(
+  flowMarkerIndex: number,
+  flowIndexToRowIndex: Map<IndexIntoFlowTable, number>,
+  flowMarkers: FlowMarker[],
+  flowMarkerFlows: IndexIntoFlowTable[][]
+): FlowTimingArrow | null {
+  const { startTime, parentContextFlowMarker } = flowMarkers[flowMarkerIndex];
+
+  const rowIndexesFrom = [];
+  const rowIndexesTo = [];
+  let minRowIndex = -1;
+  let maxRowIndex = -1;
+  if (parentContextFlowMarker !== null) {
+    for (const flowIndex of flowMarkerFlows[parentContextFlowMarker]) {
+      const rowIndex = flowIndexToRowIndex.get(flowIndex);
+      if (rowIndex !== undefined) {
+        rowIndexesFrom.push(rowIndex);
+        if (minRowIndex === -1) {
+          minRowIndex = rowIndex;
+          maxRowIndex = rowIndex;
+        } else {
+          if (rowIndex < minRowIndex) {
+            minRowIndex = rowIndex;
+          }
+          if (rowIndex > maxRowIndex) {
+            maxRowIndex = rowIndex;
+          }
+        }
+      }
+    }
+  }
+  for (const flowIndex of flowMarkerFlows[flowMarkerIndex]) {
+    const rowIndex = flowIndexToRowIndex.get(flowIndex);
+    if (rowIndex !== undefined) {
+      rowIndexesTo.push(rowIndex);
+      if (minRowIndex === -1) {
+        minRowIndex = rowIndex;
+        maxRowIndex = rowIndex;
+      } else {
+        if (rowIndex < minRowIndex) {
+          minRowIndex = rowIndex;
+        }
+        if (rowIndex > maxRowIndex) {
+          maxRowIndex = rowIndex;
+        }
+      }
+    }
+  }
+  if (minRowIndex === maxRowIndex) {
+    return null;
+  }
+  return {
+    time: startTime,
+    rowIndexesFrom,
+    rowIndexesTo,
+    minRowIndex,
+    maxRowIndex,
+  };
+}
+
+export function computeArrowsRelatedToMarker(
+  threadIndex: ThreadIndex,
+  flowMarkerIndex: number,
+  flowTiming: FlowTiming
+  // flowIndexToRowIndex: Map<IndexIntoFlowTable, number>,
+  // profileFlowInfo: ProfileFlowInfo
+): FlowTimingArrow[] {
+  // We have marker-shared-between-flows "arrows" (or actually connections)
+  // And we have marker-has-this-parent arrows.
+
+  // For shared-between-flows marker, as we iterate over a flow's flow markers, we find (threadIndex, flowMarkerIndex) pairs.
+  // From the flow marekr, we can get its "flow marker flows", which has the flow indexes for all the flows it is part of.
+  // In this function, we make it so that we add the arrows for the shared flows only when we encounter the marker in the first flow of the set.
+  // We also only do it for the activeFlows and not for the context flows. For the context flows we might not have all the directly-connected flows present in the rows, specifically we may not have the flow with the minimum index.
+
+  const { flowIndexToRowIndex, profileFlowInfo } = flowTiming;
+  const { flowMarkersPerThread, flowMarkerFlowsPerThread } = profileFlowInfo;
+  const flowMarkers = flowMarkersPerThread[threadIndex];
+  const flowMarkerFlows = flowMarkerFlowsPerThread[threadIndex];
+
+  const arrows: FlowTimingArrow[] = [];
+
+  const flowMarker = flowMarkersPerThread[threadIndex][flowMarkerIndex];
+  let incomingFlowMarkerIndex = flowMarkerIndex;
+  let incomingFlowMarker = flowMarker;
+  while (true) {
+    const { parentContextFlowMarker } = incomingFlowMarker;
+    const arrow = _arrowForMarker(
+      incomingFlowMarkerIndex,
+      flowIndexToRowIndex,
+      flowMarkers,
+      flowMarkerFlows
+    );
+    if (arrow === null) {
+      break;
+    }
+    arrows.push(arrow);
+    if (parentContextFlowMarker === null) {
+      break;
+    }
+    incomingFlowMarkerIndex = parentContextFlowMarker;
+    incomingFlowMarker = flowMarkers[incomingFlowMarkerIndex];
+  }
+
+  const stack = [
+    {
+      childMarkers: flowMarker.childContextFlowMarkers,
+      currentIndex: 0,
+    },
+  ];
+  while (stack.length > 0) {
+    const stackTop = stack[stack.length - 1];
+    const { currentIndex, childMarkers } = stackTop;
+    if (currentIndex >= childMarkers.length) {
+      stack.pop();
+      continue;
+    }
+    const currentFlowMarkerIndex = childMarkers[currentIndex];
+    stackTop.currentIndex = currentIndex + 1;
+    const arrow = _arrowForMarker(
+      currentFlowMarkerIndex,
+      flowIndexToRowIndex,
+      flowMarkers,
+      flowMarkerFlows
+    );
+    if (arrow !== null) {
+      arrows.push(arrow);
+      const children =
+        flowMarkers[currentFlowMarkerIndex].childContextFlowMarkers;
+      if (children.length !== 0) {
+        stack.push({ childMarkers: children, currentIndex: 0 });
+      }
+    }
+  }
+  return arrows;
+}
