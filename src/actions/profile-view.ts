@@ -1925,6 +1925,9 @@ export function updateBottomBoxContentsAndMaybeOpen(
     sourceIndex,
     scrollToLineNumber,
     highlightLineNumber,
+    initialNativeSymbol,
+    scrollToInstructionAddress,
+    highlightInstructionAddress,
     nativeSymbols,
   } = bottomBoxInfo;
 
@@ -1937,23 +1940,19 @@ export function updateBottomBoxContentsAndMaybeOpen(
   // view closed - unless the only thing we have is assembly.
   const shouldOpenAssemblyView = !haveSource && haveAssembly;
 
-  // If we have at least one native symbol to show assembly for, pick
-  // the first one arbitrarily.
-  // TODO: If we have more than one native symbol, pick the one
-  // with the highest total sample count.
-  const currentNativeSymbol = nativeSymbols.length !== 0 ? 0 : null;
-
   return {
     type: 'UPDATE_BOTTOM_BOX',
     libIndex,
     sourceIndex,
     nativeSymbols,
-    currentNativeSymbol,
+    currentNativeSymbol: initialNativeSymbol,
     currentTab,
     shouldOpenBottomBox,
     shouldOpenAssemblyView,
     scrollToLineNumber,
     highlightLineNumber,
+    scrollToInstructionAddress,
+    highlightInstructionAddress,
   };
 }
 

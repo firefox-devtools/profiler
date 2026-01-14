@@ -345,6 +345,8 @@ type ProfileAction =
       readonly shouldOpenAssemblyView: boolean;
       readonly scrollToLineNumber?: number;
       readonly highlightLineNumber?: number;
+      readonly scrollToInstructionAddress?: number;
+      readonly highlightInstructionAddress?: number;
     }
   | {
       readonly type: 'OPEN_ASSEMBLY_VIEW';

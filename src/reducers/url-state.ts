@@ -599,11 +599,16 @@ const assemblyView: Reducer<AssemblyViewState> = (
     case 'UPDATE_BOTTOM_BOX': {
       const { nativeSymbols, currentNativeSymbol, shouldOpenAssemblyView } =
         action;
+      const shouldScroll = action.scrollToInstructionAddress !== undefined;
       return {
-        scrollGeneration: state.scrollGeneration + 1,
+        scrollGeneration: shouldScroll
+          ? state.scrollGeneration + 1
+          : state.scrollGeneration,
         nativeSymbols,
         currentNativeSymbol,
         isOpen: state.isOpen || shouldOpenAssemblyView,
+        scrollToInstructionAddress: action.scrollToInstructionAddress,
+        highlightedInstruction: action.highlightInstructionAddress,
       };
     }
     case 'OPEN_ASSEMBLY_VIEW': {

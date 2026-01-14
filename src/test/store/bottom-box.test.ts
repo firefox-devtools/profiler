@@ -6,10 +6,7 @@ import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profil
 import { storeWithProfile } from '../fixtures/stores';
 import * as UrlStateSelectors from '../../selectors/url-state';
 import * as ProfileSelectors from '../../selectors/profile';
-import {
-  selectedThreadSelectors,
-  selectedNodeSelectors,
-} from '../../selectors/per-thread';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { emptyAddressTimings } from '../../profile-logic/address-timings';
 import { getBottomBoxInfoForCallNode } from '../../profile-logic/bottom-box';
 import {
@@ -249,8 +246,12 @@ describe('bottom box', function () {
     // has 2 samples in line 62 and only 1 sample in line 60.
     expect(UrlStateSelectors.getIsBottomBoxOpen(getState())).toBeTrue();
     expect(ProfileSelectors.getSourceViewFile(getState())).toBe('cde.cpp');
-    expect(UrlStateSelectors.getSourceViewScrollToLineNumber(getState())).toBe(62);
-    expect(UrlStateSelectors.getSourceViewHighlightedLine(getState())).toBe(undefined);
+    expect(UrlStateSelectors.getSourceViewScrollToLineNumber(getState())).toBe(
+      62
+    );
+    expect(UrlStateSelectors.getSourceViewHighlightedLine(getState())).toBe(
+      undefined
+    );
     expect(UrlStateSelectors.getAssemblyViewIsOpen(getState())).toBeFalse();
     expect(
       ensureExists(UrlStateSelectors.getAssemblyViewNativeSymbol(getState()))
@@ -270,43 +271,78 @@ describe('bottom box', function () {
     // is what the call tree usually does on its own), and then we open the bottom
     // box with that info.
     dispatch(changeSelectedCallNode(threadsKey, [A, B, C, D]));
-    const bottomBoxInfoABC = getBottomBoxInfoForCallNode(
+    const bottomBoxInfoABCD = getBottomBoxInfoForCallNode(
       ensureExists(callNodeInfo.getCallNodeIndexFromPath([A, B, C, D])),
+      callNodeInfo,
+      thread,
+      thread.samples
+    );
+    dispatch(
+      updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfoABCD)
+    );
+
+    // Check the assembly view state, including address timings.
+    expect(UrlStateSelectors.getAssemblyViewNativeSymbol(getState())).toEqual({
+      libIndex: 0,
+      address: 0x40,
+      name: 'Dsym',
+      functionSize: 18,
+      functionSizeIsKnown: false,
+    });
+    expect(
+      selectedThreadSelectors.getAssemblyViewAddressTimings(getState())
+        .totalAddressHits
+    ).toEqual(new Map([[0x51, 1]]));
+    expect(
+      UrlStateSelectors.getAssemblyViewHighlightedInstruction(getState())
+    ).toBe(undefined);
+    expect(
+      UrlStateSelectors.getAssemblyViewScrollToInstructionAddress(getState())
+    ).toBe(0x51);
+
+    // Select the call node at [A, B, C].
+    // The global timings should still remain the same.
+    dispatch(changeSelectedCallNode(threadsKey, [A, B, C]));
+    expect(
+      selectedThreadSelectors.getAssemblyViewAddressTimings(getState())
+        .totalAddressHits
+    ).toEqual(new Map([[0x51, 1]]));
+
+    // Change the selection back to call node [A, B, C, D], and then open the
+    // bottom box for the call node [A, B, C]. This simulates opening the
+    // bottom box from the context menu.
+    dispatch(changeSelectedCallNode(threadsKey, [A, B, C, D]));
+    const bottomBoxInfoABC = getBottomBoxInfoForCallNode(
+      ensureExists(callNodeInfo.getCallNodeIndexFromPath([A, B, C])),
       callNodeInfo,
       thread,
       thread.samples
     );
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfoABC));
 
-    // Check the assembly view address timings, both the (thread-)global timings
-    // and the timings for the selected call node.
-    // Note the difference between "selectedThreadSelectors" and "selectedNodeSelectors" below.
-    // Both timings should be identical here because Dsym is selected and because
-    // there is no recursion on Dsym.
+    // Check the assembly view state again.
+    expect(UrlStateSelectors.getAssemblyViewNativeSymbol(getState())).toEqual({
+      libIndex: 0,
+      address: 0x30,
+      name: 'Bsym',
+      functionSize: 22,
+      functionSizeIsKnown: false,
+    });
     expect(
       selectedThreadSelectors.getAssemblyViewAddressTimings(getState())
         .totalAddressHits
-    ).toEqual(new Map([[0x51, 1]]));
+    ).toEqual(
+      new Map([
+        [0x40, 1],
+        [0x45, 1],
+      ])
+    );
     expect(
-      selectedNodeSelectors.getAssemblyViewAddressTimings(getState())
-        .totalAddressHits
-    ).toEqual(new Map([[0x51, 1]]));
-
-    // Select the call node at [A, B, C].
-    dispatch(changeSelectedCallNode(threadsKey, [A, B, C]));
-
-    // The global timings should still remain the same.
+      UrlStateSelectors.getAssemblyViewHighlightedInstruction(getState())
+    ).toBe(undefined);
     expect(
-      selectedThreadSelectors.getAssemblyViewAddressTimings(getState())
-        .totalAddressHits
-    ).toEqual(new Map([[0x51, 1]]));
-
-    // The timings for the selected call node should have dropped to zero,
-    // because the call node at [A, B, C] does not have any frames in Dsym.
-    expect(
-      selectedNodeSelectors.getAssemblyViewAddressTimings(getState())
-        .totalAddressHits
-    ).toEqual(new Map());
+      UrlStateSelectors.getAssemblyViewScrollToInstructionAddress(getState())
+    ).toBeOneOf([0x40, 0x45]);
   });
 
   // Further ideas for tests:

@@ -144,8 +144,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
 
     if (
       contentsChanged ||
-      this.props.scrollGeneration !==
-        prevProps.scrollGeneration
+      this.props.scrollGeneration !== prevProps.scrollGeneration
     ) {
       // If an explicit line number is provided, scroll to it. Otherwise, scroll to the hotspot.
       if (this.props.scrollToLineNumber !== undefined) {

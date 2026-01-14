@@ -18,6 +18,10 @@ import {
 } from './profile-data';
 import { getLineTimings, getStackLineInfoForCallNode } from './line-timings';
 import { mapGetKeyWithMaxValue } from 'firefox-profiler/utils';
+import {
+  getAddressTimings,
+  getStackAddressInfoForCallNode,
+} from './address-timings';
 
 /**
  * Calculate the BottomBoxInfo for a call node, i.e. information about which
@@ -55,6 +59,13 @@ export function getBottomBoxInfoForCallNode(
     stackTable,
     frameTable
   );
+
+  // If we have at least one native symbol to show assembly for, pick
+  // the first one arbitrarily.
+  // TODO: If the we have more than one native symbol, pick the one
+  // with the highest total sample count.
+  const initialNativeSymbol = nativeSymbolsForCallNode.length !== 0 ? 0 : null;
+
   const nativeSymbolInfosForCallNode = nativeSymbolsForCallNode.map(
     (nativeSymbolIndex) =>
       getNativeSymbolInfo(
@@ -65,7 +76,7 @@ export function getBottomBoxInfoForCallNode(
       )
   );
 
-  // Compute the hottest line, and ask the source view to scroll to it.
+  // Compute the hottest line, so we can ask the source view to scroll to it.
   const stackLineInfo = getStackLineInfoForCallNode(
     stackTable,
     frameTable,
@@ -76,11 +87,29 @@ export function getBottomBoxInfoForCallNode(
   const callNodeLineTimings = getLineTimings(stackLineInfo, samples);
   const hottestLine = mapGetKeyWithMaxValue(callNodeLineTimings.totalLineHits);
 
+  // Compute the hottest instruction, so we can ask the assembly view to scroll to it.
+  let hottestInstructionAddress;
+  if (initialNativeSymbol !== null) {
+    const stackAddressInfo = getStackAddressInfoForCallNode(
+      stackTable,
+      frameTable,
+      callNodeIndex,
+      callNodeInfo,
+      nativeSymbolsForCallNode[initialNativeSymbol]
+    );
+    const callNodeAddressTimings = getAddressTimings(stackAddressInfo, samples);
+    hottestInstructionAddress = mapGetKeyWithMaxValue(
+      callNodeAddressTimings.totalAddressHits
+    );
+  }
+
   return {
     libIndex,
     sourceIndex,
     nativeSymbols: nativeSymbolInfosForCallNode,
+    initialNativeSymbol,
     scrollToLineNumber: hottestLine,
+    scrollToInstructionAddress: hottestInstructionAddress,
   };
 }
 
@@ -124,6 +153,9 @@ export function getBottomBoxInfoForStackFrame(
         ]
       : [];
 
+  const instructionAddress =
+    nativeSymbol !== null ? frameTable.address[frameIndex] : undefined;
+
   // Extract line number from the frame
   const lineNumber = frameTable.line[frameIndex] ?? undefined;
 
@@ -131,7 +163,10 @@ export function getBottomBoxInfoForStackFrame(
     libIndex,
     sourceIndex,
     nativeSymbols: nativeSymbolInfos,
+    initialNativeSymbol: 0,
     scrollToLineNumber: lineNumber,
     highlightLineNumber: lineNumber,
+    scrollToInstructionAddress: instructionAddress,
+    highlightInstructionAddress: instructionAddress,
   };
 }

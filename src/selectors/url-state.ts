@@ -94,6 +94,14 @@ export const getAssemblyViewNativeSymbol: Selector<NativeSymbolInfo | null> = (
 };
 export const getAssemblyViewScrollGeneration: Selector<number> = (state) =>
   getProfileSpecificState(state).assemblyView.scrollGeneration;
+export const getAssemblyViewScrollToInstructionAddress: Selector<
+  number | undefined
+> = (state) =>
+  getProfileSpecificState(state).assemblyView.scrollToInstructionAddress;
+export const getAssemblyViewHighlightedInstruction: Selector<
+  number | undefined
+> = (state) =>
+  getProfileSpecificState(state).assemblyView.highlightedInstruction;
 export const getShowJsTracerSummary: Selector<boolean> = (state) =>
   getProfileSpecificState(state).showJsTracerSummary;
 

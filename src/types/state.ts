@@ -263,6 +263,10 @@ export type AssemblyViewState = {
   isOpen: boolean;
   // When this is incremented, the assembly view scrolls to the "hotspot" line.
   scrollGeneration: number;
+  // Optional instruction address to scroll to in the assembly view.
+  scrollToInstructionAddress?: number;
+  // Optional address of the highlighted instruction in the assembly view.
+  highlightedInstruction?: number;
   // The list of native symbols whose assembly code should be accessible in the
   // assembly view. Often empty or just one element, but sometimes this can have
   // multiple elements, for example the different JIT compilations of one JS function.
