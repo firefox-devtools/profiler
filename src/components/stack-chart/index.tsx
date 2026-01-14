@@ -39,7 +39,7 @@ import {
   changeMouseTimePosition,
 } from '../../actions/profile-view';
 
-import { getBottomBoxInfoForCallNode } from '../../profile-logic/profile-data';
+import { getBottomBoxInfoForCallNode } from '../../profile-logic/bottom-box';
 
 import type {
   Thread,
@@ -170,7 +170,8 @@ class StackChartImpl extends React.PureComponent<Props> {
       const bottomBoxInfo = getBottomBoxInfoForCallNode(
         nodeIndex,
         callNodeInfo,
-        thread
+        thread,
+        thread.samples
       );
       updateBottomBoxContentsAndMaybeOpen('stack-chart', bottomBoxInfo);
       return;

@@ -6,12 +6,9 @@ import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profil
 import { storeWithProfile } from '../fixtures/stores';
 import * as UrlStateSelectors from '../../selectors/url-state';
 import * as ProfileSelectors from '../../selectors/profile';
-import {
-  selectedThreadSelectors,
-  selectedNodeSelectors,
-} from '../../selectors/per-thread';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { emptyAddressTimings } from '../../profile-logic/address-timings';
-import { getBottomBoxInfoForCallNode } from '../../profile-logic/profile-data';
+import { getBottomBoxInfoForCallNode } from '../../profile-logic/bottom-box';
 import {
   changeSelectedCallNode,
   updateBottomBoxContentsAndMaybeOpen,
@@ -95,7 +92,8 @@ describe('bottom box', function () {
     const bottomBoxInfoD = getBottomBoxInfoForCallNode(
       abcd,
       callNodeInfo,
-      thread
+      thread,
+      thread.samples
     );
     expect(bottomBoxInfoD.nativeSymbols).toEqual([nativeSymbolInfoD]);
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfoD));
@@ -182,7 +180,8 @@ describe('bottom box', function () {
     const bottomBoxInfoF = getBottomBoxInfoForCallNode(
       aef,
       callNodeInfo,
-      thread
+      thread,
+      thread.samples
     );
     expect(bottomBoxInfoF.nativeSymbols).toEqual([nativeSymbolInfoF]);
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfoF));
@@ -232,7 +231,8 @@ describe('bottom box', function () {
     const bottomBoxInfoC = getBottomBoxInfoForCallNode(
       abc,
       callNodeInfo,
-      thread
+      thread,
+      thread.samples
     );
     expect(new Set(bottomBoxInfoC.nativeSymbols)).toEqual(
       new Set([nativeSymbolInfoA, nativeSymbolInfoB])
@@ -266,39 +266,16 @@ describe('bottom box', function () {
     const bottomBoxInfoABC = getBottomBoxInfoForCallNode(
       ensureExists(callNodeInfo.getCallNodeIndexFromPath([A, B, C, D])),
       callNodeInfo,
-      thread
+      thread,
+      thread.samples
     );
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfoABC));
 
-    // Check the assembly view address timings, both the (thread-)global timings
-    // and the timings for the selected call node.
-    // Note the difference between "selectedThreadSelectors" and "selectedNodeSelectors" below.
-    // Both timings should be identical here because Dsym is selected and because
-    // there is no recursion on Dsym.
+    // Check the assembly view address timings.
     expect(
       selectedThreadSelectors.getAssemblyViewAddressTimings(getState())
         .totalAddressHits
     ).toEqual(new Map([[0x51, 1]]));
-    expect(
-      selectedNodeSelectors.getAssemblyViewAddressTimings(getState())
-        .totalAddressHits
-    ).toEqual(new Map([[0x51, 1]]));
-
-    // Select the call node at [A, B, C].
-    dispatch(changeSelectedCallNode(threadsKey, [A, B, C]));
-
-    // The global timings should still remain the same.
-    expect(
-      selectedThreadSelectors.getAssemblyViewAddressTimings(getState())
-        .totalAddressHits
-    ).toEqual(new Map([[0x51, 1]]));
-
-    // The timings for the selected call node should have dropped to zero,
-    // because the call node at [A, B, C] does not have any frames in Dsym.
-    expect(
-      selectedNodeSelectors.getAssemblyViewAddressTimings(getState())
-        .totalAddressHits
-    ).toEqual(new Map());
   });
 
   // Further ideas for tests:

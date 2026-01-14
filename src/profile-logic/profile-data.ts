@@ -89,7 +89,6 @@ import type {
   AddressProof,
   TimelineType,
   NativeSymbolInfo,
-  BottomBoxInfo,
   Bytes,
   ThreadWithReservedFunctions,
   TabID,
@@ -3858,21 +3857,24 @@ export function getNativeSymbolsForCallNode(
   callNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfo,
   stackTable: StackTable,
-  frameTable: FrameTable
-): IndexIntoNativeSymbolTable[] {
+  frameTable: FrameTable,
+  samples: SamplesLikeTable
+): Map<IndexIntoNativeSymbolTable, number> {
   const callNodeInfoInverted = callNodeInfo.asInverted();
   return callNodeInfoInverted !== null
     ? getNativeSymbolsForCallNodeInverted(
         callNodeIndex,
         callNodeInfoInverted,
         stackTable,
-        frameTable
+        frameTable,
+        samples
       )
     : getNativeSymbolsForCallNodeNonInverted(
         callNodeIndex,
         callNodeInfo,
         stackTable,
-        frameTable
+        frameTable,
+        samples
       );
 }
 
@@ -3880,29 +3882,60 @@ export function getNativeSymbolsForCallNodeNonInverted(
   callNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfo,
   stackTable: StackTable,
-  frameTable: FrameTable
-): IndexIntoNativeSymbolTable[] {
+  frameTable: FrameTable,
+  samples: SamplesLikeTable
+): Map<IndexIntoNativeSymbolTable, number> {
   const stackIndexToCallNodeIndex =
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
-  const set: Set<IndexIntoNativeSymbolTable> = new Set();
+  const map = new Map<IndexIntoNativeSymbolTable, number>();
+
+  const nativeSymbolForStack = new Int32Array(stackTable.length);
+
+  // First, iterate over the entire stack table so that we find all native
+  // symbols belonging to `callNodeIndex`, even those which aren't hit by samples
+  // in the current preview range.
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    if (stackIndexToCallNodeIndex[stackIndex] === callNodeIndex) {
+    const thisStackCallNodeIndex = stackIndexToCallNodeIndex[stackIndex];
+    let thisStackNativeSymbol = -1;
+    if (thisStackCallNodeIndex === callNodeIndex) {
       const frame = stackTable.frame[stackIndex];
       const nativeSymbol = frameTable.nativeSymbol[frame];
       if (nativeSymbol !== null) {
-        set.add(nativeSymbol);
+        map.set(nativeSymbol, 0);
+        thisStackNativeSymbol = nativeSymbol;
+      }
+    } else {
+      const prefix = stackTable.prefix[stackIndex];
+      if (prefix !== null) {
+        thisStackNativeSymbol = nativeSymbolForStack[prefix];
       }
     }
+    nativeSymbolForStack[stackIndex] = thisStackNativeSymbol;
   }
-  return [...set];
+
+  // Then, iterate over the samples and accumulate the weight per native symbol.
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const stackIndex = samples.stack[sampleIndex];
+    if (stackIndex === null) {
+      continue;
+    }
+    const nativeSymbol = nativeSymbolForStack[stackIndex];
+    if (nativeSymbol !== -1) {
+      const oldValue = ensureExists(map.get(nativeSymbol));
+      const weight = samples.weight !== null ? samples.weight[sampleIndex] : 1;
+      map.set(nativeSymbol, oldValue + weight);
+    }
+  }
+  return map;
 }
 
 export function getNativeSymbolsForCallNodeInverted(
   callNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfoInverted,
   stackTable: StackTable,
-  frameTable: FrameTable
-): IndexIntoNativeSymbolTable[] {
+  frameTable: FrameTable,
+  samples: SamplesLikeTable
+): Map<IndexIntoNativeSymbolTable, number> {
   const depth = callNodeInfo.depthForNode(callNodeIndex);
   const [rangeStart, rangeEnd] =
     callNodeInfo.getSuffixOrderIndexRangeForCallNode(callNodeIndex);
@@ -3910,7 +3943,15 @@ export function getNativeSymbolsForCallNodeInverted(
   const stackIndexToCallNodeIndex =
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
   const suffixOrderIndexes = callNodeInfo.getSuffixOrderIndexes();
-  const set: Set<IndexIntoNativeSymbolTable> = new Set();
+
+  // First, iterate over the entire stack table so that we find all native
+  // symbols belonging to `callNodeIndex`, even those which aren't hit by samples
+  // in the current preview range.
+  const nativeSymbolForStack = new Map<
+    IndexIntoStackTable,
+    IndexIntoNativeSymbolTable
+  >();
+  const map = new Map();
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const stackForNode = getMatchingAncestorStackForInvertedCallNode(
       stackIndex,
@@ -3925,11 +3966,42 @@ export function getNativeSymbolsForCallNodeInverted(
       const frame = stackTable.frame[stackForNode];
       const nativeSymbol = frameTable.nativeSymbol[frame];
       if (nativeSymbol !== null) {
+        nativeSymbolForStack.set(stackIndex, nativeSymbol);
+        map.set(nativeSymbol, 0);
+      }
+    }
+  }
+
+  // Then, iterate over the samples and accumulate the weight per native symbol.
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const stackIndex = samples.stack[sampleIndex];
+    if (stackIndex === null) {
+      continue;
+    }
+    const nativeSymbol = nativeSymbolForStack.get(stackIndex);
+    if (nativeSymbol !== undefined) {
+      const oldValue = ensureExists(map.get(nativeSymbol));
+      const weight = samples.weight !== null ? samples.weight[sampleIndex] : 1;
+      map.set(nativeSymbol, oldValue + weight);
+    }
+  }
+  return map;
+}
+
+export function getNativeSymbolsForFunc(
+  funcIndex: IndexIntoFuncTable,
+  frameTable: FrameTable
+): Set<IndexIntoNativeSymbolTable> {
+  const set = new Set<IndexIntoNativeSymbolTable>();
+  for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
+    if (frameTable.func[frameIndex] === funcIndex) {
+      const nativeSymbol = frameTable.nativeSymbol[frameIndex];
+      if (nativeSymbol !== null) {
         set.add(nativeSymbol);
       }
     }
   }
-  return [...set];
+  return set;
 }
 
 /**
@@ -3956,109 +4028,6 @@ export function getNativeSymbolInfo(
     name: stringTable.getString(nativeSymbols.name[nativeSymbol]),
     functionSize,
     functionSizeIsKnown: functionSizeOrNull !== null,
-  };
-}
-
-/**
- * Calculate the BottomBoxInfo for a call node, i.e. information about which
- * things should be shown in the profiler UI's "bottom box" when this call node
- * is double-clicked.
- *
- * We always want to update all panes in the bottom box when a new call node is
- * double-clicked, so that we don't show inconsistent information side-by-side.
- */
-export function getBottomBoxInfoForCallNode(
-  callNodeIndex: IndexIntoCallNodeTable,
-  callNodeInfo: CallNodeInfo,
-  thread: Thread
-): BottomBoxInfo {
-  const {
-    stackTable,
-    frameTable,
-    funcTable,
-    stringTable,
-    resourceTable,
-    nativeSymbols,
-  } = thread;
-
-  const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
-  const sourceIndex = funcTable.source[funcIndex];
-  const resource = funcTable.resource[funcIndex];
-  const libIndex =
-    resource !== -1 && resourceTable.type[resource] === resourceTypes.library
-      ? resourceTable.lib[resource]
-      : null;
-  const nativeSymbolsForCallNode = getNativeSymbolsForCallNode(
-    callNodeIndex,
-    callNodeInfo,
-    stackTable,
-    frameTable
-  );
-  const nativeSymbolInfosForCallNode = nativeSymbolsForCallNode.map(
-    (nativeSymbolIndex) =>
-      getNativeSymbolInfo(
-        nativeSymbolIndex,
-        nativeSymbols,
-        frameTable,
-        stringTable
-      )
-  );
-
-  return {
-    libIndex,
-    sourceIndex,
-    nativeSymbols: nativeSymbolInfosForCallNode,
-  };
-}
-
-/**
- * Get bottom box info for a stack frame. This is similar to
- * getBottomBoxInfoForCallNode but works directly with stack indexes.
- */
-export function getBottomBoxInfoForStackFrame(
-  stackIndex: IndexIntoStackTable,
-  thread: Thread
-): BottomBoxInfo {
-  const {
-    stackTable,
-    frameTable,
-    funcTable,
-    resourceTable,
-    nativeSymbols,
-    stringTable,
-  } = thread;
-
-  const frameIndex = stackTable.frame[stackIndex];
-  const funcIndex = frameTable.func[frameIndex];
-  const sourceIndex = funcTable.source[funcIndex];
-  const resource = funcTable.resource[funcIndex];
-  const libIndex =
-    resource !== -1 && resourceTable.type[resource] === resourceTypes.library
-      ? resourceTable.lib[resource]
-      : null;
-
-  // Get native symbol for this frame
-  const nativeSymbol = frameTable.nativeSymbol[frameIndex];
-  const nativeSymbolInfos =
-    nativeSymbol !== null
-      ? [
-          getNativeSymbolInfo(
-            nativeSymbol,
-            nativeSymbols,
-            frameTable,
-            stringTable
-          ),
-        ]
-      : [];
-
-  // Extract line number from the frame
-  const lineNumber = frameTable.line[frameIndex] ?? undefined;
-
-  return {
-    libIndex,
-    sourceIndex,
-    nativeSymbols: nativeSymbolInfos,
-    lineNumber,
   };
 }
 
