@@ -304,7 +304,7 @@ export type GeckoThread = {
   stringTable: string[];
   jsTracerEvents?: JsTracerTable;
   tracedValues?: string;
-  tracedObjectShapes?: Array<Array<string>>;
+  tracedObjectShapes?: Array<string[] | null>;
 };
 
 export type GeckoExtensionMeta = {

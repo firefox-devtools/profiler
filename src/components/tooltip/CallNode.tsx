@@ -433,7 +433,9 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     let argumentsElement = null;
     if (argumentValues) {
       if (argumentValues.length === 0) {
-        argumentsElement = <div className="arguments">No arguments.</div>;
+        argumentsElement = (
+          <div className="tooltipArguments">No arguments.</div>
+        );
       } else {
         const argumentValuesEl = [];
         for (const previewObject of argumentValues) {
@@ -444,12 +446,14 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             })
           );
         }
-        argumentsElement = (
-          <div className="arguments">
-            <div className="argumentsLabel">Arguments</div>
+        argumentsElement = [
+          <div className="tooltipLabel" key="arguments">
+            Arguments:
+          </div>,
+          <div className="tooltipArguments" key="argumentsVal">
             {argumentValuesEl}
-          </div>
-        );
+          </div>,
+        ];
       }
     }
 
@@ -567,9 +571,9 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             {pageAndParentPageURL}
             {fileName}
             {resource}
+            {argumentsElement}
           </div>
           {this._renderCategoryTimings(timings)}
-          {argumentsElement}
         </div>
       </div>
     );

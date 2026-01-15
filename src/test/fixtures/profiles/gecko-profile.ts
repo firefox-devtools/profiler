@@ -934,6 +934,8 @@ function _createGeckoThread(
       'RefreshDriverTick', // 21
       'Navigation::Start', // 22
     ],
+    tracedObjectShapes: [['Test']],
+    tracedValues: 'SSdtIGEgbGl0dGxlIHRlYWN1cA==',
   };
 }
 
