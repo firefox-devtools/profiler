@@ -23,6 +23,6 @@ declare module 'devtools-reps' {
       valuesBuffer: ArrayBuffer,
       shapes: Array<string[] | null>,
       valuesBufferIndex: number
-    ) => any;
+    ) => Array<object> | string;
   };
 }

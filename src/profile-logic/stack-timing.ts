@@ -87,6 +87,8 @@ export type StackTiming = {
   sameWidthsStart: number[];
   sameWidthsEnd: number[];
   callNode: IndexIntoCallNodeTable[];
+  // argumentValues is used by the JS Execution Tracing setting and allows
+  // displaying function calls' argument values.
   argumentValues?: number[];
   length: number;
 };

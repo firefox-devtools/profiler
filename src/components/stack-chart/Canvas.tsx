@@ -626,13 +626,23 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         : formatMilliseconds(duration);
     let argumentSummaries = undefined;
     if (timing.argumentValues) {
-      const argumentValues = timing.argumentValues[stackTimingIndex];
-      if (argumentValues !== -1) {
-        argumentSummaries = ValueSummaryReader.getArgumentSummaries(
-          thread.tracedValuesBuffer as ArrayBuffer,
-          thread.tracedObjectShapes as Array<string[] | null>,
-          argumentValues
+      const argumentValuesIndex = timing.argumentValues[stackTimingIndex];
+      if (
+        argumentValuesIndex !== -1 &&
+        thread.tracedValuesBuffer &&
+        thread.tracedObjectShapes
+      ) {
+        const argSummaries = ValueSummaryReader.getArgumentSummaries(
+          thread.tracedValuesBuffer,
+          thread.tracedObjectShapes,
+          argumentValuesIndex
         );
+        // The API maybe needs work - getArgumentSummaries can return a string indicating
+        // that the argument summaries for a given call were missing (this can happen if they
+        // were overwritten in the underlying ring buffer)
+        if (typeof argSummaries !== 'string') {
+          argumentSummaries = argSummaries;
+        }
       }
     }
 

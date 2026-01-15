@@ -411,6 +411,9 @@ function sanitizeThreadPII(
     delete newThread['eTLD+1'];
   }
 
+  delete newThread.tracedValuesBuffer;
+  delete newThread.tracedObjectShapes;
+
   if (windowIdFromPrivateBrowsing.size > 0) {
     // In this block, we'll remove everything related to frame table entries
     // that have a innerWindowID with a isPrivateBrowsing flag.

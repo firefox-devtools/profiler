@@ -77,20 +77,20 @@ exports[`ArgumentValues shows argument values when a profile has them 1`] = `
           Resource:
         </div>
         file://&lt;URL&gt;
-      </div>
-      <div
-        class="arguments"
-      >
         <div
-          class="argumentsLabel"
+          class="tooltipLabel"
         >
-          Arguments
+          Arguments:
         </div>
-        <span
-          class="objectBox objectBox-number"
+        <div
+          class="tooltipArguments"
         >
-          0
-        </span>
+          <span
+            class="objectBox objectBox-number"
+          >
+            0
+          </span>
+        </div>
       </div>
     </div>
   </div>
