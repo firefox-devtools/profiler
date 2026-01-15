@@ -4032,8 +4032,8 @@ export function calculateFunctionSizeLowerBound(
 export function getNativeSymbolsForCallNode(
   callNodeFramePerStack: Int32Array,
   frameTable: FrameTable
-): IndexIntoNativeSymbolTable[] {
-  const set: Set<IndexIntoNativeSymbolTable> = new Set();
+): Set<IndexIntoNativeSymbolTable> {
+  const set = new Set<IndexIntoNativeSymbolTable>();
   for (
     let stackIndex = 0;
     stackIndex < callNodeFramePerStack.length;
@@ -4047,7 +4047,7 @@ export function getNativeSymbolsForCallNode(
       }
     }
   }
-  return [...set];
+  return set;
 }
 
 /**

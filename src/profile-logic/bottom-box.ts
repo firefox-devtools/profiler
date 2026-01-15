@@ -60,14 +60,16 @@ export function getBottomBoxInfoForCallNode(
     callNodeFramePerStack,
     frameTable
   );
+  const nativeSymbolsForCallNodeArr = [...nativeSymbolsForCallNode];
 
   // If we have at least one native symbol to show assembly for, pick
   // the first one arbitrarily.
-  // TODO: If the we have more than one native symbol, pick the one
+  // TODO: If we have more than one native symbol, pick the one
   // with the highest total sample count.
-  const initialNativeSymbol = nativeSymbolsForCallNode.length !== 0 ? 0 : null;
+  const initialNativeSymbol =
+    nativeSymbolsForCallNodeArr.length !== 0 ? 0 : null;
 
-  const nativeSymbolInfosForCallNode = nativeSymbolsForCallNode.map(
+  const nativeSymbolInfosForCallNode = nativeSymbolsForCallNodeArr.map(
     (nativeSymbolIndex) =>
       getNativeSymbolInfo(
         nativeSymbolIndex,

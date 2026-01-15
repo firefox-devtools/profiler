@@ -1481,7 +1481,7 @@ describe('getNativeSymbolsForCallNode', function () {
     );
     expect(
       getNativeSymbolsForCallNode(callNodeFramePerStackAB, thread.frameTable)
-    ).toEqual([symB]);
+    ).toEqual(new Set([symB]));
 
     const callNodeFramePerStackABC = getCallNodeFramePerStack(
       ensureExists(abc),
@@ -1490,7 +1490,7 @@ describe('getNativeSymbolsForCallNode', function () {
     );
     expect(
       getNativeSymbolsForCallNode(callNodeFramePerStackABC, thread.frameTable)
-    ).toEqual([symB]);
+    ).toEqual(new Set([symB]));
   });
 
   it('finds multiple symbols', function () {
@@ -1531,9 +1531,7 @@ describe('getNativeSymbolsForCallNode', function () {
       thread.stackTable
     );
     expect(
-      new Set(
-        getNativeSymbolsForCallNode(callNodeFramePerStackC, thread.frameTable)
-      )
+      getNativeSymbolsForCallNode(callNodeFramePerStackC, thread.frameTable)
     ).toEqual(new Set([symB, symD]));
   });
 });
