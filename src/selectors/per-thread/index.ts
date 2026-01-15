@@ -23,26 +23,13 @@ import {
   getComposedSelectorsPerThread,
   type ComposedSelectorsPerThread,
 } from './composed';
-import {
-  getStackLineInfoForCallNode,
-  getLineTimings,
-} from '../../profile-logic/line-timings';
-import {
-  getStackAddressInfoForCallNode,
-  getAddressTimings,
-} from '../../profile-logic/address-timings';
 import * as ProfileSelectors from '../profile';
 import { ensureExists, getFirstItemFromSet } from '../../utils/types';
 
 import type {
-  Thread,
   ThreadIndex,
   Selector,
   ThreadsKey,
-  StackLineInfo,
-  LineTimings,
-  StackAddressInfo,
-  AddressTimings,
   State,
 } from 'firefox-profiler/types';
 
@@ -205,10 +192,6 @@ export type NodeSelectors = {
   readonly getIsJS: Selector<boolean>;
   readonly getLib: Selector<string>;
   readonly getTimingsForSidebar: Selector<TimingsForPath>;
-  readonly getSourceViewStackLineInfo: Selector<StackLineInfo | null>;
-  readonly getSourceViewLineTimings: Selector<LineTimings>;
-  readonly getAssemblyViewStackAddressInfo: Selector<StackAddressInfo | null>;
-  readonly getAssemblyViewAddressTimings: Selector<AddressTimings>;
 };
 
 export const selectedNodeSelectors: NodeSelectors = (() => {
@@ -268,85 +251,10 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     ProfileData.getTimingsForPath
   );
 
-  const getSourceViewStackLineInfo: Selector<StackLineInfo | null> =
-    createSelector(
-      selectedThreadSelectors.getFilteredThread,
-      UrlState.getSourceViewSourceIndex,
-      selectedThreadSelectors.getCallNodeInfo,
-      selectedThreadSelectors.getSelectedCallNodeIndex,
-      (
-        { stackTable, frameTable, funcTable }: Thread,
-        sourceViewSourceIndex,
-        callNodeInfo,
-        selectedCallNodeIndex
-      ): StackLineInfo | null => {
-        if (sourceViewSourceIndex === null || selectedCallNodeIndex === null) {
-          return null;
-        }
-        const selectedFunc = callNodeInfo.funcForNode(selectedCallNodeIndex);
-        const selectedSourceIndex = funcTable.source[selectedFunc];
-        if (
-          selectedSourceIndex === null ||
-          selectedSourceIndex !== sourceViewSourceIndex
-        ) {
-          return null;
-        }
-        return getStackLineInfoForCallNode(
-          stackTable,
-          frameTable,
-          funcTable,
-          selectedCallNodeIndex,
-          callNodeInfo
-        );
-      }
-    );
-
-  const getSourceViewLineTimings: Selector<LineTimings> = createSelector(
-    getSourceViewStackLineInfo,
-    selectedThreadSelectors.getPreviewFilteredCtssSamples,
-    getLineTimings
-  );
-
-  const getAssemblyViewStackAddressInfo: Selector<StackAddressInfo | null> =
-    createSelector(
-      selectedThreadSelectors.getFilteredThread,
-      selectedThreadSelectors.getAssemblyViewNativeSymbolIndex,
-      selectedThreadSelectors.getCallNodeInfo,
-      selectedThreadSelectors.getSelectedCallNodeIndex,
-      (
-        { stackTable, frameTable }: Thread,
-        nativeSymbolIndex,
-        callNodeInfo,
-        selectedCallNodeIndex
-      ): StackAddressInfo | null => {
-        if (nativeSymbolIndex === null || selectedCallNodeIndex === null) {
-          return null;
-        }
-        return getStackAddressInfoForCallNode(
-          stackTable,
-          frameTable,
-          selectedCallNodeIndex,
-          callNodeInfo,
-          nativeSymbolIndex
-        );
-      }
-    );
-
-  const getAssemblyViewAddressTimings: Selector<AddressTimings> =
-    createSelector(
-      getAssemblyViewStackAddressInfo,
-      selectedThreadSelectors.getPreviewFilteredCtssSamples,
-      getAddressTimings
-    );
-
   return {
     getName,
     getIsJS,
     getLib,
     getTimingsForSidebar,
-    getSourceViewStackLineInfo,
-    getSourceViewLineTimings,
-    getAssemblyViewStackAddressInfo,
-    getAssemblyViewAddressTimings,
   };
 })();

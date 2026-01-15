@@ -19,7 +19,12 @@
  *    width of the editor, it covers both the gutter and the main area.
  */
 import { EditorView, gutter } from '@codemirror/view';
-import { EditorState, StateField, StateEffect } from '@codemirror/state';
+import {
+  EditorState,
+  StateField,
+  StateEffect,
+  Compartment,
+} from '@codemirror/state';
 import { syntaxHighlighting } from '@codemirror/language';
 import { classHighlighter } from '@lezer/highlight';
 import clamp from 'clamp';
@@ -37,11 +42,15 @@ import {
   timingsExtension,
   updateTimingsEffect,
   StringMarker,
+  createHighlightedLineExtension,
 } from 'firefox-profiler/utils/codemirror-shared';
 
 // An "effect" is like a redux action. This effect is used to replace the value
 // of the state field addressToLineMapField.
 const updateAddressToLineMapEffect = StateEffect.define<AddressToLineMap>();
+
+// This "compartment" allows us to swap the highlighted line when it changes.
+const highlightedLineConf = new Compartment();
 
 // This "state field" stores the current AddressToLineMap. This field allows the
 // instructionAddressGutter to map line numbers to addresses.
@@ -174,23 +183,31 @@ export class AssemblyViewEditor {
   _view: EditorView;
   _addressToLineMap: AddressToLineMap;
   _addressTimings: AddressTimings;
+  _highlightedAddress: Address | null;
 
   // Create a CodeMirror editor and add it as a child element of domParent.
   constructor(
     initialAssemblyCode: DecodedInstruction[],
     addressTimings: AddressTimings,
+    highlightedAddress: Address | null,
     domParent: Element
   ) {
     this._addressToLineMap = new AddressToLineMap(
       getInstructionAddresses(initialAssemblyCode)
     );
     this._addressTimings = addressTimings;
+    this._highlightedAddress = highlightedAddress;
+    const highlightedLine =
+      highlightedAddress !== null
+        ? this._addressToLineMap.addressToLine(highlightedAddress)
+        : null;
     let state = EditorState.create({
       doc: instructionsToText(initialAssemblyCode),
       extensions: [
         timingsExtension,
         addressToLineMapField,
         instructionAddressGutter,
+        highlightedLineConf.of(createHighlightedLineExtension(highlightedLine)),
         syntaxHighlighting(classHighlighter),
         EditorState.readOnly.of(true),
         EditorView.editable.of(false),
@@ -220,6 +237,11 @@ export class AssemblyViewEditor {
       this._addressTimings,
       this._addressToLineMap
     );
+    // Recalculate the highlighted line based on the new address-to-line mapping.
+    const highlightedLine =
+      this._highlightedAddress !== null
+        ? this._addressToLineMap.addressToLine(this._highlightedAddress)
+        : null;
     // The CodeMirror way of replacing the entire contents is to insert new text
     // and overwrite the full range of existing text.
     const text = instructionsToText(assemblyCode);
@@ -236,6 +258,9 @@ export class AssemblyViewEditor {
       effects: [
         updateAddressToLineMapEffect.of(this._addressToLineMap),
         updateTimingsEffect.of(lineTimings),
+        highlightedLineConf.reconfigure(
+          createHighlightedLineExtension(highlightedLine)
+        ),
       ],
     });
   }
@@ -279,5 +304,19 @@ export class AssemblyViewEditor {
     if (lineNumber !== null) {
       this.scrollToLine(lineNumber - topSpaceLines);
     }
+  }
+
+  setHighlightedInstruction(address: Address | null) {
+    // Store the highlighted address so we can recalculate the line number
+    // when the address-to-line mapping changes.
+    this._highlightedAddress = address;
+    // Convert the address to a line number and update the highlighted line.
+    const lineNumber =
+      address !== null ? this._addressToLineMap.addressToLine(address) : null;
+    this._view.dispatch({
+      effects: highlightedLineConf.reconfigure(
+        createHighlightedLineExtension(lineNumber)
+      ),
+    });
   }
 }
