@@ -4045,8 +4045,8 @@ export function calculateFunctionSizeLowerBound(
 export function getNativeSymbolsForCallNode(
   callNodeFramePerStack: Int32Array,
   frameTable: FrameTable
-): IndexIntoNativeSymbolTable[] {
-  const set: Set<IndexIntoNativeSymbolTable> = new Set();
+): Set<IndexIntoNativeSymbolTable> {
+  const set = new Set<IndexIntoNativeSymbolTable>();
   for (
     let stackIndex = 0;
     stackIndex < callNodeFramePerStack.length;
@@ -4060,7 +4060,39 @@ export function getNativeSymbolsForCallNode(
       }
     }
   }
-  return [...set];
+  return set;
+}
+
+export function getNativeSymbolTimingsForCallNode(
+  samples: SamplesLikeTable,
+  callNodeFramePerStack: Int32Array,
+  frameTable: FrameTable
+): Map<IndexIntoNativeSymbolTable, number> {
+  const totalPerNativeSymbol = new Map<Address, number>();
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const stack = samples.stack[sampleIndex];
+    if (stack === null) {
+      continue;
+    }
+    const callNodeFrame = callNodeFramePerStack[stack];
+    if (callNodeFrame === -1) {
+      // This sample does not contribute to the call node's total. Ignore.
+      continue;
+    }
+
+    const sampleWeight =
+      samples.weight !== null ? samples.weight[sampleIndex] : 1;
+
+    const nativeSymbol = frameTable.nativeSymbol[callNodeFrame];
+    if (nativeSymbol !== null) {
+      totalPerNativeSymbol.set(
+        nativeSymbol,
+        (totalPerNativeSymbol.get(nativeSymbol) ?? 0) + sampleWeight
+      );
+    }
+  }
+
+  return totalPerNativeSymbol;
 }
 
 /**
