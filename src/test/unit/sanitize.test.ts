@@ -883,6 +883,22 @@ describe('sanitizePII', function () {
     expect(marker.flags).toBe('0xf00ba4');
   });
 
+  it('should sanitize traced argument values', function () {
+    const { originalProfile, sanitizedProfile } = setup({});
+    expect(
+      originalProfile.threads.filter((t) => t.tracedValuesBuffer).length
+    ).toBeGreaterThan(0);
+    expect(
+      originalProfile.threads.filter((t) => t.tracedValuesBuffer).length
+    ).toBeGreaterThan(0);
+    expect(
+      sanitizedProfile.threads.filter((t) => t.tracedValuesBuffer).length
+    ).toBe(0);
+    expect(
+      sanitizedProfile.threads.filter((t) => t.tracedObjectShapes).length
+    ).toBe(0);
+  });
+
   it('should sanitize the eTLD+1 field if urls are supposed to be sanitized', function () {
     // Create a simple profile with eTLD+1 field in its thread.
     const { profile } = getProfileFromTextSamples('A');
