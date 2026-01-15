@@ -66,8 +66,10 @@ export function getBottomBoxInfoForCallNode(
   // the first one arbitrarily.
   // TODO: If we have more than one native symbol, pick the one
   // with the highest total sample count.
-  const initialNativeSymbol =
-    nativeSymbolsForCallNodeArr.length !== 0 ? 0 : null;
+  let initialNativeSymbol = null;
+  if (nativeSymbolsForCallNodeArr.length !== 0) {
+    initialNativeSymbol = nativeSymbolsForCallNodeArr[0];
+  }
 
   const nativeSymbolInfosForCallNode = nativeSymbolsForCallNodeArr.map(
     (nativeSymbolIndex) =>
@@ -93,9 +95,7 @@ export function getBottomBoxInfoForCallNode(
     samples,
     callNodeFramePerStack,
     frameTable,
-    initialNativeSymbol !== null
-      ? nativeSymbolsForCallNode[initialNativeSymbol]
-      : null
+    initialNativeSymbol
   );
   const hottestInstructionAddress = mapGetKeyWithMaxValue(addressTimings);
 
@@ -103,7 +103,10 @@ export function getBottomBoxInfoForCallNode(
     libIndex,
     sourceIndex,
     nativeSymbols: nativeSymbolInfosForCallNode,
-    initialNativeSymbol,
+    initialNativeSymbol:
+      initialNativeSymbol !== null
+        ? nativeSymbolsForCallNodeArr.indexOf(initialNativeSymbol)
+        : null,
     scrollToLineNumber: hottestLine,
     scrollToInstructionAddress: hottestInstructionAddress,
     highlightedLineNumber: null,
