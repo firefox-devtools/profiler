@@ -4051,6 +4051,46 @@ export function getNativeSymbolsForCallNode(
 }
 
 /**
+ * Return the total of the sample weights per native symbol, by
+ * accumulating the weight from samples which contribute to the
+ * call node of interest's total time.
+ * callNodeFramePerStack needs to be a mapping from stackIndex to the
+ * corresponding frame in the call node of interest.
+ */
+export function getTotalNativeSymbolTimingsForCallNode(
+  samples: SamplesLikeTable,
+  callNodeFramePerStack: Int32Array,
+  frameTable: FrameTable
+): Map<IndexIntoNativeSymbolTable, number> {
+  const totalPerNativeSymbol = new Map<IndexIntoNativeSymbolTable, number>();
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const stack = samples.stack[sampleIndex];
+    if (stack === null) {
+      continue;
+    }
+    const callNodeFrame = callNodeFramePerStack[stack];
+    if (callNodeFrame === -1) {
+      // This sample does not contribute to the call node's total. Ignore.
+      continue;
+    }
+
+    const nativeSymbol = frameTable.nativeSymbol[callNodeFrame];
+    if (nativeSymbol === null) {
+      continue;
+    }
+
+    const sampleWeight =
+      samples.weight !== null ? samples.weight[sampleIndex] : 1;
+    totalPerNativeSymbol.set(
+      nativeSymbol,
+      (totalPerNativeSymbol.get(nativeSymbol) ?? 0) + sampleWeight
+    );
+  }
+
+  return totalPerNativeSymbol;
+}
+
+/**
  * Convert a native symbol index into a NativeSymbolInfo object, to create
  * something that's meaningful outside of its associated thread.
  */
