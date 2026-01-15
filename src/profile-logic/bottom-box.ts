@@ -16,6 +16,7 @@ import {
   getCallNodeFramePerStack,
   getNativeSymbolInfo,
   getNativeSymbolsForCallNode,
+  getTotalNativeSymbolTimingsForCallNode,
 } from './profile-data';
 import { mapGetKeyWithMaxValue } from 'firefox-profiler/utils';
 import { getTotalLineTimingsForCallNode } from './line-timings';
@@ -56,18 +57,33 @@ export function getBottomBoxInfoForCallNode(
     callNodeInfo,
     stackTable
   );
+
+  // If we have at least one native symbol to show assembly for, pick
+  // the one with the highest total. But first, create the full list of
+  // native symbols for this call node, including even those symbols
+  // that aren't hit by any samples in the current view, so that the
+  // list is stable regardless of the current preview selection.
   const nativeSymbolsForCallNode = getNativeSymbolsForCallNode(
     callNodeFramePerStack,
     frameTable
   );
-  const nativeSymbolsForCallNodeArr = [...nativeSymbolsForCallNode];
-
-  // If we have at least one native symbol to show assembly for, pick
-  // the first one arbitrarily.
-  // TODO: If we have more than one native symbol, pick the one
-  // with the highest total sample count.
   let initialNativeSymbol = null;
-  if (nativeSymbolsForCallNodeArr.length !== 0) {
+  const nativeSymbolTimings = getTotalNativeSymbolTimingsForCallNode(
+    samples,
+    callNodeFramePerStack,
+    frameTable
+  );
+  const hottestNativeSymbol = mapGetKeyWithMaxValue(nativeSymbolTimings);
+  if (hottestNativeSymbol !== undefined) {
+    nativeSymbolsForCallNode.add(hottestNativeSymbol);
+    initialNativeSymbol = hottestNativeSymbol;
+  }
+  const nativeSymbolsForCallNodeArr = [...nativeSymbolsForCallNode];
+  nativeSymbolsForCallNodeArr.sort((a, b) => a - b);
+  if (
+    nativeSymbolsForCallNodeArr.length !== 0 &&
+    initialNativeSymbol === null
+  ) {
     initialNativeSymbol = nativeSymbolsForCallNodeArr[0];
   }
 
