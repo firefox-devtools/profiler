@@ -66,6 +66,11 @@ import './index.css';
 
 const STACK_FRAME_HEIGHT = 16;
 
+type OwnProps = {
+  readonly filterScrollPos?: number;
+  readonly setFilterScrollPos?: (pos: number) => void;
+};
+
 type StateProps = {
   readonly thread: Thread;
   readonly weightType: WeightType;
@@ -98,7 +103,7 @@ type DispatchProps = {
   readonly changeMouseTimePosition: typeof changeMouseTimePosition;
 };
 
-type Props = ConnectedProps<{}, StateProps, DispatchProps>;
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class StackChartImpl extends React.PureComponent<Props> {
   _viewport: HTMLDivElement | null = null;
@@ -227,6 +232,8 @@ class StackChartImpl extends React.PureComponent<Props> {
       hasFilteredCtssSamples,
       useStackChartSameWidths,
       timelineUnit,
+      filterScrollPos,
+      setFilterScrollPos,
     } = this.props;
 
     const maxViewportHeight = combinedTimingRows.length * STACK_FRAME_HEIGHT;
@@ -239,7 +246,10 @@ class StackChartImpl extends React.PureComponent<Props> {
         aria-labelledby="stack-chart-tab-button"
       >
         <StackSettings hideInvertCallstack={true} />
-        <TransformNavigator />
+        <TransformNavigator
+          filterScrollPos={filterScrollPos}
+          setFilterScrollPos={setFilterScrollPos}
+        />
         {!hasFilteredCtssSamples && userTimings.length === 0 ? (
           <StackChartEmptyReasons />
         ) : (
@@ -297,7 +307,7 @@ class StackChartImpl extends React.PureComponent<Props> {
   }
 }
 
-export const StackChart = explicitConnect<{}, StateProps, DispatchProps>({
+export const StackChart = explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state) => {
     const showUserTimings = getShowUserTimings(state);
     const combinedTimingRows = showUserTimings
