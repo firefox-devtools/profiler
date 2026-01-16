@@ -4,6 +4,15 @@
 
 /* See https://design.firefox.com/photon/components/buttons.html for the spec */
 .photon-button {
+  --internal-primary-foreground-color: #fff;
+  --internal-primary-background-color: var(--blue-60);
+  --internal-primary-hover-background-color: var(--blue-70);
+  --internal-primary-active-background-color: var(--blue-80);
+  --internal-destructive-foreground-color: #fff;
+  --internal-destructive-background-color: var(--red-60);
+  --internal-destructive-hover-background-color: var(--red-70);
+  --internal-destructive-active-background-color: var(--red-80);
+
   /* These flex and sizing properties aren't necessary when a real <button> is used,
    * but they are when a <a> element is used as a button. */
   display: inline-flex;
@@ -19,8 +28,8 @@
   background: none;
 
   /* photon styles */
-  background-color: var(--grey-90-a10);
-  color: var(--grey-90);
+  background-color: var(--clickable-background-color);
+  color: var(--clickable-foreground-color);
   cursor: initial; /* reset the defaut link style when used as a button */
   font: inherit;
   text-decoration: none; /* reset the defaut link style when used as a button */
@@ -40,11 +49,40 @@
 /* Note: we're using :not(:disabled) instead of :enabled so that this can apply
  * to non-input elements too. */
 .photon-button:hover:not(:disabled) {
-  background-color: var(--grey-90-a20);
+  background-color: var(--clickable-hover-background-color);
+}
+
+:root.dark-mode {
+  .photon-button {
+    --internal-primary-foreground-color: var(--grey-20);
+    --internal-primary-background-color: var(--blue-60);
+    --internal-primary-hover-background-color: color-mix(
+      in hsl,
+      var(--blue-60) 90%,
+      white 10%
+    );
+    --internal-primary-active-background-color: color-mix(
+      in hsl,
+      var(--blue-60) 50%,
+      var(--blue-70) 50%
+    );
+    --internal-destructive-foreground-color: #fff;
+    --internal-destructive-background-color: var(--red-60);
+    --internal-destructive-hover-background-color: color-mix(
+      in hsl,
+      var(--red-60) 90%,
+      white 10%
+    );
+    --internal-destructive-active-background-color: color-mix(
+      in hsl,
+      var(--red-60) 50%,
+      var(--red-70) 50%
+    );
+  }
 }
 
 .photon-button:hover:active:not(:disabled) {
-  background-color: var(--grey-90-a30);
+  background-color: var(--clickable-active-background-color);
 }
 
 .photon-button-primary,
@@ -57,30 +95,30 @@
 }
 
 .photon-button-primary {
-  background-color: var(--blue-60);
-  color: #fff;
+  background-color: var(--internal-primary-background-color);
+  color: var(--internal-primary-foreground-color);
 }
 
 .photon-button-primary:hover:not(:disabled) {
-  background-color: var(--blue-70);
+  background-color: var(--internal-primary-hover-background-color);
 }
 
 .photon-button-primary:hover:active:not(:disabled) {
-  background-color: var(--blue-80);
+  background-color: var(--internal-primary-active-background-color);
 }
 
 /* Use this class for destructive actions only. */
 .photon-button-destructive {
-  background-color: var(--red-60);
-  color: #fff;
+  background-color: var(--internal-destructive-background-color);
+  color: var(--internal-destructive-foreground-color);
 }
 
 .photon-button-destructive:hover:not(:disabled) {
-  background-color: var(--red-70);
+  background-color: var(--internal-destructive-hover-background-color);
 }
 
 .photon-button-destructive:hover:active:not(:disabled) {
-  background-color: var(--red-80);
+  background-color: var(--internal-destructive-active-background-color);
 }
 
 .photon-button-ghost {
@@ -91,11 +129,11 @@
 
 .photon-button-ghost:hover:not(:disabled),
 .photon-button-ghost--checked {
-  background-color: var(--grey-90-a10);
+  background-color: var(--clickable-ghost-hover-background-color);
 }
 
 .photon-button-ghost:hover:active:not(:disabled) {
-  background-color: var(--grey-90-a20);
+  background-color: var(--clickable-ghost-active-background-color);
 }
 
 .photon-button-micro {

@@ -7,6 +7,8 @@
   height: 25px;
   flex-flow: row nowrap;
   padding: 0;
+  background-color: var(--base-background-color);
+  color: var(--base-foreground-color);
   line-height: 25px;
 }
 

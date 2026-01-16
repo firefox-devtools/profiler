@@ -16,7 +16,11 @@ import type {
 } from '../../actions/profile-view';
 
 type ChangeMouseTimePosition = typeof changeMouseTimePosition;
-import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
+import {
+  mapCategoryColorNameToStackChartStyles,
+  getForegroundColor,
+  getBackgroundColor,
+} from '../../utils/colors';
 import { TooltipCallNode } from '../tooltip/CallNode';
 import { TooltipMarker } from '../tooltip/Marker';
 
@@ -224,7 +228,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     const devicePixelsWidth = containerWidth * cssToDeviceScale;
     const devicePixelsHeight = containerHeight * cssToDeviceScale;
 
-    fastFillStyle.set('#ffffff');
+    fastFillStyle.set(getBackgroundColor());
     ctx.fillRect(0, 0, devicePixelsWidth, devicePixelsHeight);
 
     const viewportDevicePixelsTop = viewportTop * cssToDeviceScale;
@@ -513,8 +517,8 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         // Draw the box.
         fastFillStyle.set(
           isHovered || isSelected
-            ? colorStyles.selectedFillStyle
-            : colorStyles.unselectedFillStyle
+            ? colorStyles.getSelectedFillStyle()
+            : colorStyles.getUnselectedFillStyle()
         );
         ctx.fillRect(
           intX,
@@ -544,8 +548,8 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
           if (fittedText) {
             fastFillStyle.set(
               isHovered || isSelected
-                ? colorStyles.selectedTextColor
-                : '#000000'
+                ? colorStyles.getSelectedTextColor()
+                : getForegroundColor()
             );
             ctx.fillText(fittedText, textX, intY + textDevicePixelsOffsetTop);
           }

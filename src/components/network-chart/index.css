@@ -6,12 +6,13 @@
   display: flex;
   flex: 1;
   flex-flow: column nowrap;
+  color: var(--base-foreground-color);
   cursor: default;
   user-select: none;
 }
 
 .networkChart .treeViewBody {
-  border-top: 1px solid var(--grey-30);
+  border-top: 1px solid var(--base-border-color);
 }
 
 .networkChart .treeViewBody .treeViewBodyInnerWrapper {
@@ -20,6 +21,10 @@
 }
 
 .networkChartRowItem {
+  --internal-selected-background-color: #bbe0f6;
+  --internal-item-bar-background-color: var(--grey-20);
+  --internal-item-uri-optional-foreground-color: var(--grey-40);
+
   position: relative;
   display: block;
   width: 100%;
@@ -27,14 +32,21 @@
 }
 
 .networkChartRowItem.odd {
-  background-color: #f5f5f5;
+  background-color: var(--row-odd-background-color);
 }
 
 .networkChartRowItem:hover,
 .networkChartRowItem.isRightClicked,
 .networkChartRowItem.isSelected,
 .networkChartRowItem.isHovered {
-  background-color: #bbe0f6;
+  background-color: var(--internal-selected-background-color);
+}
+
+:root.dark-mode {
+  .networkChartRowItem {
+    --internal-selected-background-color: var(--teal-80);
+    --internal-item-uri-optional-foreground-color: var(--grey-50);
+  }
 }
 
 .networkChartRowItemLabel {
@@ -60,7 +72,7 @@
   margin: 1px 0; /* Because the line's height is 16px, this margin vertically centers the bar */
 
   /* styling properties */
-  background-color: var(--grey-20);
+  background-color: var(--internal-item-bar-background-color);
   box-shadow: 0 0 0 1px inset var(--marker-color);
   opacity: 0.7;
 }
@@ -75,7 +87,7 @@
   display: inline-block;
   overflow: hidden;
   max-width: 90px;
-  color: var(--grey-40);
+  color: var(--internal-item-uri-optional-foreground-color);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -84,6 +96,7 @@
   display: inline-block;
   overflow: hidden;
   max-width: 35%;
+  color: var(--internal-item-uri-required-foreground-color);
   text-overflow: ellipsis;
   white-space: nowrap;
 }

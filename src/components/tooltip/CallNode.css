@@ -2,20 +2,42 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+.tooltipCallNodeDetails {
+  --internal-category-border-color: var(--grey-40);
+  --internal-header-foreground-color: var(--grey-50);
+  --internal-graph-meter-border-color: var(--grey-50);
+  --internal-graph-meter-background-color: var(--grey-90-a10);
+  --internal-swatch-border-color: rgb(0 0 0 / 0.1);
+  --internal-swatch-running-background-color: var(--blue-40);
+  --internal-swatch-self-background-color: var(--blue-60);
+}
+
+:root.dark-mode {
+  .tooltipCallNodeDetails {
+    --internal-category-border-color: var(--grey-40);
+    --internal-header-foreground-color: var(--grey-20);
+    --internal-graph-meter-border-color: var(--grey-50);
+    --internal-graph-meter-background-color: var(--grey-10-a10);
+    --internal-swatch-border-color: rgb(237 237 240 / 0.1);
+    --internal-swatch-running-background-color: var(--blue-50);
+    --internal-swatch-self-background-color: var(--blue-70);
+  }
+}
+
 .tooltipCallNodeCategory {
   display: grid;
   align-items: center;
   padding-bottom: 10px;
-  border-top: 1px solid var(--grey-40);
+  border-top: 1px solid var(--internal-category-border-color);
   gap: 4px;
   grid-template-columns: repeat(4, min-content);
 }
 
 .tooltipCallNodeHeader {
   padding: 0 5px;
-  border-right: 1px solid var(--grey-30);
+  border-right: 1px solid var(--base-border-color);
   margin-top: 5px;
-  color: var(--grey-50);
+  color: var(--internal-header-foreground-color);
   white-space: nowrap;
 }
 
@@ -39,7 +61,7 @@
   height: 0;
   flex: 1;
   appearance: none;
-  background: var(--grey-90-a10);
+  background: var(--internal-graph-meter-background-color);
 }
 
 /* This is the bar inside the meter. */
@@ -49,7 +71,7 @@
 
   /* Some colors don't have enough contrast (yellow for JavaScript, white for
    * Idle), therefore adding a border improves accessibility. */
-  border-inline-end: 1px solid var(--grey-50);
+  border-inline-end: 1px solid var(--internal-graph-meter-border-color);
 }
 
 .tooltipCallNodeCategory .tooltipCategoryRowHeader {
@@ -69,16 +91,16 @@
   width: 9px;
   height: 9px;
   box-sizing: border-box;
-  border: 0.5px solid rgb(0 0 0 / 0.1);
+  border: 0.5px solid var(--internal-swatch-border-color);
   margin-right: 3px;
 }
 
 .tooltipCallNodeHeaderSwatchRunning {
-  background-color: var(--blue-40);
+  background-color: var(--internal-swatch-running-background-color);
 }
 
 .tooltipCallNodeHeaderSwatchSelf {
-  background-color: var(--blue-60);
+  background-color: var(--internal-swatch-self-background-color);
 }
 
 .tooltipCallNodeCategory .tooltipCallNodeHeaderSwatchSelf,

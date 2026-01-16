@@ -8,13 +8,13 @@
   max-width: 900px;
   box-sizing: border-box;
   padding: 3em 1em;
-  border: 1px solid #ccc;
+  border: 1px solid var(--home-border-color);
   border-radius: 3px;
   margin: auto;
 
   /* Other */
-  background: #fff;
-  box-shadow: 0 5px 25px #0b1f50;
+  background: var(--base-background-color);
+  box-shadow: 0 5px 25px var(--home-shadow-color);
   font-size: 13px;
   line-height: 1.5;
 }

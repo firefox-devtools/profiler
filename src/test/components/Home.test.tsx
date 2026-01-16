@@ -4,7 +4,7 @@
 
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import { Home } from '../../components/app/Home';
 import createStore from '../../app-logic/create-store';
 import { mockWebChannel } from '../fixtures/mocks/web-channel';
@@ -115,5 +115,37 @@ describe('app/Home', function () {
     );
 
     expect(webChannelUnavailableMessage).toMatchSnapshot();
+  });
+
+  it('allows switching between the dark mode', async () => {
+    const { getByText } = setup(SAFARI);
+
+    const setItem = jest.fn();
+    jest.spyOn(Storage.prototype, 'setItem').mockImplementation(setItem);
+    const removeItem = jest.fn();
+    jest.spyOn(Storage.prototype, 'removeItem').mockImplementation(removeItem);
+
+    const darkModeSpan = getByText('Dark mode');
+    const darkModeLabel = darkModeSpan.closest('label')!;
+    const darkModeCheckbox = darkModeLabel.querySelector('input')!;
+    expect(darkModeCheckbox.checked).toBe(false);
+
+    act(() => {
+      darkModeCheckbox.click();
+    });
+
+    expect(darkModeCheckbox.checked).toBe(true);
+    expect(setItem).toHaveBeenCalledWith('theme', 'dark');
+
+    expect(document.documentElement.className).toBe('dark-mode');
+
+    act(() => {
+      darkModeCheckbox.click();
+    });
+
+    expect(darkModeCheckbox.checked).toBe(false);
+    expect(removeItem).toHaveBeenCalledWith('theme');
+
+    expect(document.documentElement.className).toBe('');
   });
 });

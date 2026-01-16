@@ -3,18 +3,22 @@
  * file, you can obtain one at http://mozilla.org/mpl/2.0/. */
 
 .profileNameInput {
+  --internal-foreground-color: var(--grey-60);
+
   height: 17px;
   padding: 0 6px;
   border: none;
   border-radius: 1px;
   margin: 4px;
-  color: var(--grey-60);
+  color: var(--internal-foreground-color);
   font: inherit;
   font-weight: 700;
   line-height: 17px;
 }
 
 .profileNameButton {
+  --internal-icon: url(../../../res/img/svg/edit-name-profiler.svg);
+
   overflow: hidden;
   min-width: 80px;
   padding: 0 9px;
@@ -24,16 +28,17 @@
   white-space: nowrap;
 }
 
-.profileNameButton::before {
-  flex-shrink: 0;
-  background-image: url(../../../res/img/svg/edit-name-profiler.svg);
+:root.dark-mode {
+  .profileNameInput {
+    --internal-foreground-color: var(--base-foreground-color);
+  }
+
+  .profileNameButton {
+    --internal-icon: url(../../../res/img/svg/edit-name-profiler-light.svg);
+  }
 }
 
-/* Using the style for links rather than for normal inputs, because we don't
- * want to trigger a border that would move things around. */
-.profileNameInput:focus-visible {
-  box-shadow:
-    0 0 0 2px var(--blue-50),
-    0 0 0 4px var(--blue-50-a30);
-  outline: 0;
+.profileNameButton::before {
+  flex-shrink: 0;
+  background-image: var(--internal-icon);
 }

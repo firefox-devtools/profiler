@@ -3,25 +3,45 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .treeView {
-  --tree-row-toggle-button-color: #888;
-  --tree-row-toggle-button-active-color: var(--grey-60);
-  --selected-tree-row-toggle-button-color: #fff;
-  --selected-tree-row-toggle-button-active-color: rgb(255 255 255 / 0.7);
+  --internal-row-right-clicked-background-color: var(--blue-50-a30);
+  --internal-row-selected-foreground-color: #000;
+  --internal-row-selected-background-color: var(--grey-30);
+  --internal-highlighting-foreground-color: #000;
+  --internal-highlighting-background-color: #cbe8fe;
+  --internal-highlighting-shadow-color1: rgb(0 0 0 / 0.05);
+  --internal-highlighting-shadow-color2: rgb(0 0 0 / 0.3);
+  --internal-row-toggle-button-color: #888;
+  --internal-row-toggle-button-active-color: var(--grey-60);
+  --internal-selected-row-toggle-button-color: #fff;
+  --internal-selected-row-toggle-button-active-color: rgb(255 255 255 / 0.7);
 
   display: flex;
   flex: 1;
   flex-flow: column nowrap;
-  border-top: 1px solid var(--grey-30);
+  border-top: 1px solid var(--base-border-color);
   cursor: default;
   user-select: none;
 }
 
+:root.dark-mode {
+  .treeView {
+    --internal-row-right-clicked-background-color: var(--blue-50-a30);
+    --internal-row-selected-foreground-color: var(--grey-10);
+    --internal-row-selected-background-color: var(--ink-70);
+    --internal-highlighting-foreground-color: var(--grey-10);
+    --internal-highlighting-background-color: var(--teal-60);
+    --internal-row-toggle-button-color: var(--grey-50);
+    --internal-row-toggle-button-active-color: var(--grey-60);
+    --internal-selected-row-toggle-button-color: var(--grey-10);
+  }
+}
+
 @media (forced-colors: active) {
   .treeView {
-    --tree-row-toggle-button-color: ButtonText;
-    --tree-row-toggle-button-active-color: SelectedItem;
-    --selected-tree-row-toggle-button-color: SelectedItemText;
-    --selected-tree-row-toggle-button-active-color: ButtonText;
+    --internal-row-toggle-button-color: ButtonText !important;
+    --internal-row-toggle-button-active-color: SelectedItem !important;
+    --internal-selected-row-toggle-button-color: SelectedItemText !important;
+    --internal-selected-row-toggle-button-active-color: ButtonText !important;
   }
 }
 
@@ -40,8 +60,9 @@
 .treeViewHeader {
   height: 15px;
   padding: 4px 0;
-  border-bottom: 1px solid var(--grey-30);
-  background: white;
+  border-bottom: 1px solid var(--base-border-color);
+  background: var(--base-background-color);
+  color: var(--base-foreground-color);
 }
 
 .treeViewHeaderMainColumn {
@@ -86,7 +107,8 @@
 
 .treeViewBodyInner {
   overflow: hidden;
-  background: white;
+  background: var(--base-background-color);
+  color: var(--base-foreground-color);
 }
 
 .treeViewHeaderColumn {
@@ -116,13 +138,13 @@
 }
 
 .treeViewColumnDivider::before {
-  border-right: 1px solid var(--grey-30);
+  border-right: 1px solid var(--base-border-color);
   content: '';
 }
 
 .treeViewColumnDivider.isResizable::before {
   width: 1px;
-  border-left: 1px solid var(--grey-30);
+  border-left: 1px solid var(--base-border-color);
 }
 
 .treeViewHeaderColumn.treeViewFixedColumn {
@@ -153,21 +175,21 @@
 }
 
 .treeViewRow.even {
-  background-color: #fff;
+  background-color: var(--base-background-color);
 }
 
 .treeViewRow.odd {
-  background-color: #f5f5f5;
+  background-color: var(--row-odd-background-color);
 }
 
 /* Note that `isRightClicked` is present before `isSelected` so that it can be overriden. */
 .treeViewRow.isRightClicked {
-  background-color: var(--blue-50-a30);
+  background-color: var(--internal-row-right-clicked-background-color);
 }
 
 .treeViewRow.isSelected {
-  background-color: var(--grey-30);
-  color: black;
+  background-color: var(--internal-row-selected-background-color);
+  color: var(--internal-row-selected-foreground-color);
 }
 
 .treeViewMainColumn.dim {
@@ -204,11 +226,10 @@
   * covers the underlying background. There's an underlying background when the
   * line is selected. */
   margin: -1px 0;
-  background: #cbe8fe;
-  box-shadow:
-    0 0 0 0.5px rgb(0 0 0 / 0.05),
-    0 1px 1px rgb(0 0 0 / 0.3);
-  color: #000;
+  background: var(--internal-highlighting-background-color);
+  box-shadow: 0 0 0 0.5px var(--internal-highlighting-shadow-color1) 0 1px 1px
+    var(--internal-highlighting-shadow-color2);
+  color: var(--internal-highlighting-foreground-color);
 }
 
 .treeRowToggleButton {
@@ -219,7 +240,7 @@
   border-bottom: 5px solid transparent;
   border-left: 8px solid;
   margin-left: 8px;
-  color: var(--tree-row-toggle-button-color);
+  color: var(--internal-row-toggle-button-color);
 
   /* Opt-out of forced colors so the transparent borders aren't turned into opaque ones */
   forced-color-adjust: none;
@@ -236,17 +257,17 @@
 }
 
 .treeRowToggleButton:active:hover {
-  color: var(--tree-row-toggle-button-active-color);
+  color: var(--internal-row-toggle-button-active-color);
 }
 
 .treeViewBody:focus .treeViewRow.isSelected > .treeRowToggleButton {
-  color: var(--selected-tree-row-toggle-button-color);
+  color: var(--internal-selected-row-toggle-button-color);
 }
 
 .treeViewBody:focus
   .treeViewRow.isSelected
   > .treeRowToggleButton:active:hover {
-  color: var(--selected-tree-row-toggle-button-active-color);
+  color: var(--internal-selected-row-toggle-button-active-color);
 }
 
 .treeRowToggleButton.leaf {

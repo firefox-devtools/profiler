@@ -7,15 +7,23 @@
 }
 
 .tooltipNetworkPhases {
+  --internal-border-color: var(--grey-40);
+
   display: grid;
   padding-top: 4px;
-  border-top: 1px solid var(--grey-40);
+  border-top: 1px solid var(--internal-border-color);
   margin-top: 4px;
   gap: 2px 5px;
 
   /* When changing the number of columns, don't forget to change the span values
    * in grid-column-start properties. */
   grid-template-columns: min-content min-content auto;
+}
+
+:root.dark-mode {
+  .tooltipNetworkPhases {
+    --internal-border-color: var(--base-border-color);
+  }
 }
 
 .tooltipNetworkTitle3 {
@@ -38,7 +46,7 @@
 }
 
 .tooltipNetworkPhaseEmpty {
-  background-color: white;
+  background-color: var(--base-background-color);
   box-shadow: 0 0 0 1px inset var(--marker-color);
   opacity: 0.5;
 }

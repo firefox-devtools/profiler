@@ -6,7 +6,7 @@
   display: inline-flex;
   align-items: center;
   padding: 3px 0;
-  color: var(--grey-90);
+  color: var(--clickable-foreground-color);
 }
 
 /* Use this class with the photon-label for the canonical photon styling. */
