@@ -2,6 +2,63 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+.filterNavigatorBarScrollContainer {
+  position: relative;
+  height: 24px;
+}
+
+.filterNavigatorBarScrollParent {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 24px;
+  flex: 1;
+}
+
+.filterNavigatorBarScrollContent {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  padding: 0 24px;
+}
+
+.filterNavigatorBarScrollButtonLeft,
+.filterNavigatorBarScrollButtonRight {
+  position: absolute;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border: 1px solid var(--grey-30);
+  background: var(--grey-10);
+  color: var(--grey-80);
+}
+
+.filterNavigatorBarScrollButtonLeft {
+  top: 0px;
+  left: 0px;
+}
+
+.filterNavigatorBarScrollButtonRight {
+  top: 0px;
+  right: 0px;
+}
+
+.filterNavigatorBarScrollButtonLeft.disabled,
+.filterNavigatorBarScrollButtonRight.disabled {
+  color: var(--grey-40);
+}
+
+.filterNavigatorBarScrollButtonLeft:not(.disabled):hover,
+.filterNavigatorBarScrollButtonRight:not(.disabled):hover {
+  background: var(--grey-20);
+}
+
+.filterNavigatorBarScrollButtonLeft:not(.disabled):active,
+.filterNavigatorBarScrollButtonRight:not(.disabled):active {
+  background: var(--grey-30);
+}
+
 .filterNavigatorBar {
   --internal-background-color: transparent;
   --internal-hover-background-color: rgb(0 0 0 / 0.1);

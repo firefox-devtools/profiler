@@ -115,7 +115,7 @@
   background: var(--grey-10);
 }
 
-.profileViewerSpacer {
+.profileViewerTopBar .filterNavigatorBarScrollContainer {
   flex: 1;
 }
 
