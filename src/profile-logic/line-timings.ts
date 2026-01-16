@@ -12,7 +12,9 @@ import type {
   LineTimings,
   LineNumber,
   IndexIntoSourceTable,
+  IndexIntoLineSetTable,
 } from 'firefox-profiler/types';
+import { IntSetTableBuilder } from 'firefox-profiler/utils/intset-table';
 
 import { getMatchingAncestorStackForInvertedCallNode } from './profile-data';
 import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
@@ -60,53 +62,35 @@ export function getStackLineInfo(
   funcTable: FuncTable,
   sourceViewSourceIndex: IndexIntoSourceTable
 ): StackLineInfo {
-  // "self line" == "the line which a stack's self time is contributed to"
-  const selfLineForAllStacks = [];
-  // "total lines" == "the set of lines whose total time this stack contributes to"
-  const totalLinesForAllStacks: Array<Set<LineNumber> | null> = [];
+  const builder = new IntSetTableBuilder();
+  const stackIndexToLineSetIndex = new Int32Array(stackTable.length);
 
-  // This loop takes advantage of the fact that the stack table is topologically ordered:
-  // Prefix stacks are always visited before their descendants.
-  // Each stack inherits the "total" lines from its parent stack, and then adds its
-  // self line to that set. If the stack doesn't have a self line in the file, we just
-  // re-use the prefix's set object without copying it.
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    const frame = stackTable.frame[stackIndex];
     const prefixStack = stackTable.prefix[stackIndex];
+    const prefixLineSet: IndexIntoLineSetTable | -1 =
+      prefixStack !== null ? stackIndexToLineSetIndex[prefixStack] : -1;
+
+    const frame = stackTable.frame[stackIndex];
     const func = frameTable.func[frame];
     const sourceIndexOfThisStack = funcTable.source[func];
+    const matchesSource = sourceIndexOfThisStack === sourceViewSourceIndex;
+    if (prefixLineSet === -1 && !matchesSource) {
+      stackIndexToLineSetIndex[stackIndex] = -1;
+    } else {
+      const selfLineOrNull = matchesSource
+        ? (frameTable.line[frame] ?? funcTable.lineNumber[func])
+        : null;
 
-    let selfLine: LineNumber | null = null;
-    let totalLines: Set<LineNumber> | null =
-      prefixStack !== null ? totalLinesForAllStacks[prefixStack] : null;
-
-    if (sourceIndexOfThisStack === sourceViewSourceIndex) {
-      selfLine = frameTable.line[frame];
-      // Fallback to func line info if frame line info is not available
-      if (selfLine === null) {
-        selfLine = funcTable.lineNumber[func];
-      }
-      if (selfLine !== null) {
-        // Add this stack's line to this stack's totalLines. The rest of this stack's
-        // totalLines is the same as for the parent stack.
-        // We avoid creating new Set objects unless the new set is actually
-        // different.
-        if (totalLines === null) {
-          // None of the ancestor stack nodes have hit a line in the given file.
-          totalLines = new Set([selfLine]);
-        } else if (!totalLines.has(selfLine)) {
-          totalLines = new Set(totalLines);
-          totalLines.add(selfLine);
-        }
-      }
+      stackIndexToLineSetIndex[stackIndex] =
+        builder.indexForSetWithParentAndSelf(
+          prefixLineSet !== -1 ? prefixLineSet : null,
+          selfLineOrNull !== null ? selfLineOrNull : -1
+        );
     }
-
-    selfLineForAllStacks.push(selfLine);
-    totalLinesForAllStacks.push(totalLines);
   }
   return {
-    selfLine: selfLineForAllStacks,
-    stackLines: totalLinesForAllStacks,
+    stackIndexToLineSetIndex,
+    lineSetTable: builder.finish(),
   };
 }
 
@@ -376,30 +360,57 @@ export function getLineTimings(
   if (stackLineInfo === null) {
     return emptyLineTimings;
   }
-  const { selfLine, stackLines } = stackLineInfo;
-  const totalLineHits: Map<LineNumber, number> = new Map();
-  const selfLineHits: Map<LineNumber, number> = new Map();
+  const { stackIndexToLineSetIndex, lineSetTable } = stackLineInfo;
 
-  // Iterate over all the samples, and aggregate the sample's weight into the
-  // lines which are hit by the sample's stack.
-  // TODO: Maybe aggregate sample count per stack first, and then visit each stack only once?
+  console.log('lineSetTable.length:', lineSetTable.length);
+
+  // Iterate over all the samples, and aggregate the sample's weight into
+  // selfPerLineSet.
+  const selfPerLineSet = new Float64Array(lineSetTable.length);
   for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
     const stackIndex = samples.stack[sampleIndex];
     if (stackIndex === null) {
       continue;
     }
-    const weight = samples.weight ? samples.weight[sampleIndex] : 1;
-    const setOfHitLines = stackLines[stackIndex];
-    if (setOfHitLines !== null) {
-      for (const line of setOfHitLines) {
-        const oldHitCount = totalLineHits.get(line) ?? 0;
-        totalLineHits.set(line, oldHitCount + weight);
+    const lineSetIndex = stackIndexToLineSetIndex[stackIndex];
+    if (lineSetIndex !== -1) {
+      const weight = samples.weight ? samples.weight[sampleIndex] : 1;
+      selfPerLineSet[lineSetIndex] += weight;
+    }
+  }
+
+  const totalLineHits: Map<LineNumber, number> = new Map();
+  const selfLineHits: Map<LineNumber, number> = new Map();
+  const selfSumOfLineSetDescendants = new Float64Array(lineSetTable.length);
+
+  for (
+    let lineSetIndex = lineSetTable.length - 1;
+    lineSetIndex >= 0;
+    lineSetIndex--
+  ) {
+    const selfWeight = selfPerLineSet[lineSetIndex];
+    if (selfWeight !== 0) {
+      const selfLine = lineSetTable.self[lineSetIndex];
+      if (selfLine !== -1) {
+        const oldHitCount = selfLineHits.get(selfLine) ?? 0;
+        selfLineHits.set(selfLine, oldHitCount + selfWeight);
       }
     }
-    const line = selfLine[stackIndex];
-    if (line !== null) {
-      const oldHitCount = selfLineHits.get(line) ?? 0;
-      selfLineHits.set(line, oldHitCount + weight);
+
+    const selfSumOfThisLineSetDescendants =
+      selfSumOfLineSetDescendants[lineSetIndex];
+    const thisLineSetWeight = selfWeight + selfSumOfThisLineSetDescendants;
+    const lineSetPrefix = lineSetTable.prefix[lineSetIndex];
+    if (lineSetPrefix !== null) {
+      selfSumOfLineSetDescendants[lineSetPrefix] += thisLineSetWeight;
+    }
+
+    if (thisLineSetWeight !== 0) {
+      const line = lineSetTable.value[lineSetIndex];
+      if (line !== -1) {
+        const oldHitCount = totalLineHits.get(line) ?? 0;
+        totalLineHits.set(line, oldHitCount + thisLineSetWeight);
+      }
     }
   }
   return { totalLineHits, selfLineHits };
