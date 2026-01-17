@@ -45,6 +45,25 @@ export function checkBit(bitSet: BitSet, bitIndex: number): boolean {
   return (bitSet[q] & (1 << r)) !== 0;
 }
 
+export function makeBitSetFromBoolArray(arr: boolean[]): BitSet {
+  const length = arr.length;
+  const bitset = makeBitSet(length);
+  for (let chunkStart = 0; chunkStart < length; chunkStart += 32) {
+    let chunkVal = 0;
+    for (let bitIndex = 0; bitIndex < 32; bitIndex++) {
+      const index = chunkStart + bitIndex;
+      if (index >= length) {
+        break;
+      }
+      if (arr[index]) {
+        chunkVal |= 1 << bitIndex;
+      }
+    }
+    bitset[chunkStart >> 5] = chunkVal;
+  }
+  return bitset;
+}
+
 export class BitSetOutOfBoundsError extends Error {
   override name = 'BitSetOutOfBoundsError';
   bitIndex: number;
