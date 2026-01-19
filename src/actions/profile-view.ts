@@ -1918,8 +1918,19 @@ export function changeTableViewOptions(
 
 export function updateBottomBoxContentsAndMaybeOpen(
   currentTab: TabSlug,
-  { libIndex, sourceIndex, nativeSymbols, lineNumber }: BottomBoxInfo
+  bottomBoxInfo: BottomBoxInfo
 ): Action {
+  const {
+    libIndex,
+    sourceIndex,
+    nativeSymbols,
+    initialNativeSymbol,
+    scrollToLineNumber,
+    scrollToInstructionAddress,
+    highlightedLineNumber,
+    highlightedInstructionAddress,
+  } = bottomBoxInfo;
+
   const haveSource = sourceIndex !== null;
   const haveAssembly = nativeSymbols.length !== 0;
 
@@ -1929,22 +1940,19 @@ export function updateBottomBoxContentsAndMaybeOpen(
   // view closed - unless the only thing we have is assembly.
   const shouldOpenAssemblyView = !haveSource && haveAssembly;
 
-  // If we have at least one native symbol to show assembly for, pick
-  // the first one arbitrarily.
-  // TODO: If we have more than one native symbol, pick the one
-  // with the highest total sample count.
-  const currentNativeSymbol = nativeSymbols.length !== 0 ? 0 : null;
-
   return {
     type: 'UPDATE_BOTTOM_BOX',
     libIndex,
     sourceIndex,
     nativeSymbols,
-    currentNativeSymbol,
+    currentNativeSymbol: initialNativeSymbol,
     currentTab,
     shouldOpenBottomBox,
     shouldOpenAssemblyView,
-    lineNumber,
+    scrollToLineNumber,
+    scrollToInstructionAddress,
+    highlightedLineNumber,
+    highlightedInstructionAddress,
   };
 }
 

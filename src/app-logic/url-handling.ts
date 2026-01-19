@@ -511,12 +511,14 @@ export function stateFromLocation(
     scrollGeneration: 0,
     libIndex: null,
     sourceIndex: null,
+    highlightedLine: null,
   };
   const assemblyView: AssemblyViewState = {
     isOpen: false,
     scrollGeneration: 0,
     nativeSymbols: [],
     currentNativeSymbol: null,
+    highlightedInstruction: null,
   };
   const isBottomBoxOpenPerPanel: any = {};
   tabSlugs.forEach((tabSlug) => (isBottomBoxOpenPerPanel[tabSlug] = false));

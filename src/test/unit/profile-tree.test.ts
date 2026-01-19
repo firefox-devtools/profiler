@@ -456,6 +456,7 @@ describe('inverted call tree', function () {
       thread,
       callNodeInfo,
       ensureExists(profile.meta.categories),
+      thread.samples,
       callTreeTimings,
       'samples'
     );
@@ -497,6 +498,7 @@ describe('inverted call tree', function () {
       thread,
       invertedCallNodeInfo,
       ensureExists(profile.meta.categories),
+      thread.samples,
       invertedCallTreeTimings,
       'samples'
     );
