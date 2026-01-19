@@ -41,7 +41,7 @@ describe('SymbolStoreDB', function () {
     for (let i = 0; i < 5; i++) {
       await expect(
         symbolStoreDB.getSymbolTable(libs[i].debugName, libs[i].breakpadId)
-      ).rejects.toBeInstanceOf(Error);
+      ).resolves.toBeNull();
       //        .rejects.toMatch('does not exist in the database'); // TODO Some future verison of jest should make this work
     }
 
@@ -61,8 +61,7 @@ describe('SymbolStoreDB', function () {
     for (let i = 0; i < 5; i++) {
       await expect(
         symbolStoreDB.getSymbolTable(libs[i].debugName, libs[i].breakpadId)
-      ).rejects.toBeInstanceOf(Error);
-      //        .rejects.toMatch('does not exist in the database'); // TODO Some future verison of jest should make this work
+      ).resolves.toBeNull();
     }
 
     for (let i = 5; i < 10; i++) {
@@ -85,8 +84,7 @@ describe('SymbolStoreDB', function () {
     for (let i = 0; i < 10; i++) {
       await expect(
         symbolStoreDB.getSymbolTable(libs[i].debugName, libs[i].breakpadId)
-      ).rejects.toBeInstanceOf(Error);
-      //        .rejects.toMatch('does not exist in the database'); // TODO Some future verison of jest should make this work
+      ).resolves.toBeNull();
     }
 
     await symbolStoreDB.close();

@@ -28,7 +28,7 @@
   inset-inline-start: 4px;
 }
 
-span.profileFilterNavigator--tab-selector::before {
+.profileFilterNavigator--tab-selector:not(.button)::before {
   /* Disabled tab selector indicates this with a grayed out arrow. */
   color: var(--grey-30);
 }
@@ -38,7 +38,7 @@ span.profileFilterNavigator--tab-selector::before {
     color: currentcolor;
   }
 
-  span.profileFilterNavigator--tab-selector::before {
+  .profilefilternavigator--tab-selector:not(.button)::before {
     color: GrayText;
   }
 }

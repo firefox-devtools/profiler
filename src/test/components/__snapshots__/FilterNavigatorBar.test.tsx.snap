@@ -7,16 +7,16 @@ exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 1`] 
   <li
     class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
   >
-    <span
+    <button
       class="filterNavigatorBarItemContent"
+      type="button"
     >
-      <button
-        class="filterNavigatorBarItemContent profileFilterNavigator--tab-selector"
-        type="button"
+      <span
+        class="filterNavigatorBarItemContent profileFilterNavigator--tab-selector button"
       >
         Full Range (⁨51ms⁩)
-      </button>
-    </span>
+      </span>
+    </button>
   </li>
 </ol>
 `;
