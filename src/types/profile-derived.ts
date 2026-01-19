@@ -776,10 +776,13 @@ export type BottomBoxInfo = {
   sourceIndex: IndexIntoSourceTable | null;
   nativeSymbols: NativeSymbolInfo[];
   initialNativeSymbol: number | null; // index into `nativeSymbols`
+  // Optional line number + instruction address to scroll into view.
   scrollToLineNumber?: number;
-  highlightLineNumber?: number;
   scrollToInstructionAddress?: number;
-  highlightInstructionAddress?: number;
+  // Which lines / instructions to highlight (or none). This is used when clicking
+  // a stack frame in a marker stack.
+  highlightedLineNumber: number | null;
+  highlightedInstructionAddress: number | null;
 };
 
 /**

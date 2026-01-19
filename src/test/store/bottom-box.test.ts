@@ -250,7 +250,7 @@ describe('bottom box', function () {
       62
     );
     expect(UrlStateSelectors.getSourceViewHighlightedLine(getState())).toBe(
-      undefined
+      null
     );
     expect(UrlStateSelectors.getAssemblyViewIsOpen(getState())).toBeFalse();
     expect(
@@ -295,7 +295,7 @@ describe('bottom box', function () {
     ).toEqual(new Map([[0x51, 1]]));
     expect(
       UrlStateSelectors.getAssemblyViewHighlightedInstruction(getState())
-    ).toBe(undefined);
+    ).toBe(null);
     expect(
       UrlStateSelectors.getAssemblyViewScrollToInstructionAddress(getState())
     ).toBe(0x51);
@@ -339,7 +339,7 @@ describe('bottom box', function () {
     );
     expect(
       UrlStateSelectors.getAssemblyViewHighlightedInstruction(getState())
-    ).toBe(undefined);
+    ).toBe(null);
     expect(
       UrlStateSelectors.getAssemblyViewScrollToInstructionAddress(getState())
     ).toBeOneOf([0x40, 0x45]);

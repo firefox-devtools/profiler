@@ -1923,12 +1923,12 @@ export function updateBottomBoxContentsAndMaybeOpen(
   const {
     libIndex,
     sourceIndex,
-    scrollToLineNumber,
-    highlightLineNumber,
-    initialNativeSymbol,
-    scrollToInstructionAddress,
-    highlightInstructionAddress,
     nativeSymbols,
+    initialNativeSymbol,
+    scrollToLineNumber,
+    scrollToInstructionAddress,
+    highlightedLineNumber,
+    highlightedInstructionAddress,
   } = bottomBoxInfo;
 
   const haveSource = sourceIndex !== null;
@@ -1950,9 +1950,9 @@ export function updateBottomBoxContentsAndMaybeOpen(
     shouldOpenBottomBox,
     shouldOpenAssemblyView,
     scrollToLineNumber,
-    highlightLineNumber,
     scrollToInstructionAddress,
-    highlightInstructionAddress,
+    highlightedLineNumber,
+    highlightedInstructionAddress,
   };
 }
 

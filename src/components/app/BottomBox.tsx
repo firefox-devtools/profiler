@@ -53,14 +53,14 @@ type StateProps = {
   readonly sourceViewCode: SourceCodeStatus | void;
   readonly sourceViewScrollGeneration: number;
   readonly sourceViewScrollToLineNumber?: number;
-  readonly sourceViewHighlightedLine?: number;
+  readonly sourceViewHighlightedLine: number | null;
   readonly globalLineTimings: LineTimings;
   readonly assemblyViewIsOpen: boolean;
   readonly assemblyViewNativeSymbol: NativeSymbolInfo | null;
   readonly assemblyViewCode: AssemblyCodeStatus | void;
   readonly assemblyViewScrollGeneration: number;
   readonly assemblyViewScrollToInstructionAddress?: number;
-  readonly assemblyViewHighlightedInstruction?: number;
+  readonly assemblyViewHighlightedInstruction: number | null;
   readonly globalAddressTimings: AddressTimings;
 };
 

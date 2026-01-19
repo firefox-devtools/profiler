@@ -39,6 +39,7 @@ import type {
   State,
   ThreadIndex,
   IndexIntoSourceTable,
+  BottomBoxInfo,
 } from 'firefox-profiler/types';
 import getNiceProfile from './fixtures/profiles/call-nodes';
 import queryString from 'query-string';
@@ -1797,11 +1798,13 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     const sourceFile =
       'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
     const sourceIndex = getSourceIndex(sourceFile);
-    const bottomBoxInfo = {
+    const bottomBoxInfo: BottomBoxInfo = {
       libIndex: 0,
       sourceIndex,
       nativeSymbols: [],
       initialNativeSymbol: null,
+      highlightedLineNumber: null,
+      highlightedInstructionAddress: null,
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
     const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
@@ -1830,11 +1833,13 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     const sourceFile =
       'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
     const sourceIndex = getSourceIndex(sourceFile);
-    const bottomBoxInfo = {
+    const bottomBoxInfo: BottomBoxInfo = {
       libIndex: 0,
       sourceIndex,
       nativeSymbols: [],
       initialNativeSymbol: null,
+      highlightedLineNumber: null,
+      highlightedInstructionAddress: null,
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
     dispatch(closeBottomBox());
@@ -1859,11 +1864,13 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
       functionSize: 14,
       functionSizeIsKnown: false,
     };
-    const bottomBoxInfo = {
+    const bottomBoxInfo: BottomBoxInfo = {
       libIndex: 0,
       sourceIndex: null,
       nativeSymbols: [nativeSymbolInfo],
       initialNativeSymbol: 0,
+      highlightedLineNumber: null,
+      highlightedInstructionAddress: null,
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
     const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
@@ -1902,11 +1909,13 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
       functionSize: 14,
       functionSizeIsKnown: false,
     };
-    const bottomBoxInfo = {
+    const bottomBoxInfo: BottomBoxInfo = {
       libIndex: 0,
       sourceIndex,
       nativeSymbols: [nativeSymbolInfo],
       initialNativeSymbol: 0,
+      highlightedLineNumber: null,
+      highlightedInstructionAddress: null,
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
     const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());

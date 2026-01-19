@@ -565,7 +565,12 @@ const profileName: Reducer<string | null> = (state = null, action) => {
 };
 
 const sourceView: Reducer<SourceViewState> = (
-  state = { scrollGeneration: 0, libIndex: null, sourceIndex: null },
+  state = {
+    scrollGeneration: 0,
+    libIndex: null,
+    sourceIndex: null,
+    highlightedLine: null,
+  },
   action
 ) => {
   switch (action.type) {
@@ -578,7 +583,7 @@ const sourceView: Reducer<SourceViewState> = (
         libIndex: action.libIndex,
         sourceIndex: action.sourceIndex,
         scrollToLineNumber: action.scrollToLineNumber,
-        highlightedLine: action.highlightLineNumber,
+        highlightedLine: action.highlightedLineNumber,
       };
     }
     default:
@@ -588,10 +593,11 @@ const sourceView: Reducer<SourceViewState> = (
 
 const assemblyView: Reducer<AssemblyViewState> = (
   state = {
+    isOpen: false,
     scrollGeneration: 0,
+    highlightedInstruction: null,
     nativeSymbols: [],
     currentNativeSymbol: null,
-    isOpen: false,
   },
   action
 ) => {
@@ -608,7 +614,7 @@ const assemblyView: Reducer<AssemblyViewState> = (
         currentNativeSymbol,
         isOpen: state.isOpen || shouldOpenAssemblyView,
         scrollToInstructionAddress: action.scrollToInstructionAddress,
-        highlightedInstruction: action.highlightInstructionAddress,
+        highlightedInstruction: action.highlightedInstructionAddress,
       };
     }
     case 'OPEN_ASSEMBLY_VIEW': {

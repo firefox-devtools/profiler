@@ -42,7 +42,7 @@ type SourceViewProps = {
   readonly filePath: string | null;
   readonly scrollGeneration: number;
   readonly scrollToLineNumber?: number;
-  readonly highlightedLine?: number;
+  readonly highlightedLine: number | null;
 };
 
 let editorModulePromise: Promise<any> | null = null;
@@ -109,7 +109,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
         this._getSourceCodeOrFallback(),
         this.props.filePath,
         this.props.timings,
-        this.props.highlightedLine ?? null,
+        this.props.highlightedLine,
         domParent
       );
       this._editor = editor;
@@ -157,7 +157,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
     }
 
     if (this.props.highlightedLine !== prevProps.highlightedLine) {
-      this._editor.setHighlightedLine(this.props.highlightedLine ?? null);
+      this._editor.setHighlightedLine(this.props.highlightedLine);
     }
   }
 }

@@ -78,9 +78,8 @@ export const getSourceViewScrollGeneration: Selector<number> = (state) =>
 export const getSourceViewScrollToLineNumber: Selector<number | undefined> = (
   state
 ) => getProfileSpecificState(state).sourceView.scrollToLineNumber;
-export const getSourceViewHighlightedLine: Selector<number | undefined> = (
-  state
-) => getProfileSpecificState(state).sourceView.highlightedLine;
+export const getSourceViewHighlightedLine: Selector<number | null> = (state) =>
+  getProfileSpecificState(state).sourceView.highlightedLine;
 export const getAssemblyViewIsOpen: Selector<boolean> = (state) =>
   getProfileSpecificState(state).assemblyView.isOpen;
 export const getAssemblyViewNativeSymbol: Selector<NativeSymbolInfo | null> = (
@@ -98,10 +97,9 @@ export const getAssemblyViewScrollToInstructionAddress: Selector<
   number | undefined
 > = (state) =>
   getProfileSpecificState(state).assemblyView.scrollToInstructionAddress;
-export const getAssemblyViewHighlightedInstruction: Selector<
-  number | undefined
-> = (state) =>
-  getProfileSpecificState(state).assemblyView.highlightedInstruction;
+export const getAssemblyViewHighlightedInstruction: Selector<number | null> = (
+  state
+) => getProfileSpecificState(state).assemblyView.highlightedInstruction;
 export const getShowJsTracerSummary: Selector<boolean> = (state) =>
   getProfileSpecificState(state).showJsTracerSummary;
 

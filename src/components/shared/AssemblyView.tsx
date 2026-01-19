@@ -46,7 +46,7 @@ type AssemblyViewProps = {
   readonly nativeSymbol: NativeSymbolInfo | null;
   readonly scrollGeneration: number;
   readonly scrollToInstructionAddress?: number;
-  readonly highlightedInstruction?: number;
+  readonly highlightedInstruction: number | null;
 };
 
 let editorModulePromise: Promise<any> | null = null;
@@ -119,7 +119,7 @@ export class AssemblyView extends React.PureComponent<AssemblyViewProps> {
       const editor = new AssemblyViewEditor(
         this._getAssemblyCodeOrFallback(),
         this.props.timings,
-        this.props.highlightedInstruction ?? null,
+        this.props.highlightedInstruction,
         domParent
       );
       this._editor = editor;
@@ -169,9 +169,7 @@ export class AssemblyView extends React.PureComponent<AssemblyViewProps> {
     if (
       this.props.highlightedInstruction !== prevProps.highlightedInstruction
     ) {
-      this._editor.setHighlightedInstruction(
-        this.props.highlightedInstruction ?? null
-      );
+      this._editor.setHighlightedInstruction(this.props.highlightedInstruction);
     }
   }
 }

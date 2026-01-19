@@ -110,6 +110,8 @@ export function getBottomBoxInfoForCallNode(
     initialNativeSymbol,
     scrollToLineNumber: hottestLine,
     scrollToInstructionAddress: hottestInstructionAddress,
+    highlightedLineNumber: null,
+    highlightedInstructionAddress: null,
   };
 }
 
@@ -154,19 +156,21 @@ export function getBottomBoxInfoForStackFrame(
       : [];
 
   const instructionAddress =
-    nativeSymbol !== null ? frameTable.address[frameIndex] : undefined;
+    nativeSymbol !== null ? frameTable.address[frameIndex] : -1;
 
   // Extract line number from the frame
-  const lineNumber = frameTable.line[frameIndex] ?? undefined;
+  const lineNumber = frameTable.line[frameIndex];
 
   return {
     libIndex,
     sourceIndex,
     nativeSymbols: nativeSymbolInfos,
     initialNativeSymbol: 0,
-    scrollToLineNumber: lineNumber,
-    highlightLineNumber: lineNumber,
-    scrollToInstructionAddress: instructionAddress,
-    highlightInstructionAddress: instructionAddress,
+    scrollToLineNumber: lineNumber ?? undefined,
+    highlightedLineNumber: lineNumber,
+    scrollToInstructionAddress:
+      instructionAddress !== -1 ? instructionAddress : undefined,
+    highlightedInstructionAddress:
+      instructionAddress !== -1 ? instructionAddress : null,
   };
 }
