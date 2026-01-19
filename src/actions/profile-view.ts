@@ -1931,7 +1931,7 @@ export function updateBottomBoxContentsAndMaybeOpen(
 
   // If we have at least one native symbol to show assembly for, pick
   // the first one arbitrarily.
-  // TODO: If the we have more than one native symbol, pick the one
+  // TODO: If we have more than one native symbol, pick the one
   // with the highest total sample count.
   const currentNativeSymbol = nativeSymbols.length !== 0 ? 0 : null;
 
