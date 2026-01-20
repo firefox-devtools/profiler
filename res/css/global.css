@@ -32,7 +32,7 @@
   --panel-foreground-color: var(--ink-70);
   --panel-background-color: var(--grey-10);
   --panel-border-color: var(--grey-30);
-  --track-selected-background-color: #edf6ff;
+  --selected-track-background-color: #edf6ff;
   --tooltip-number-foreground-color: var(--grey-60);
   --colored-border-color: rgb(0 0 0 / 0.1);
 
