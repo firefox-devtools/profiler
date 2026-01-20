@@ -7,9 +7,9 @@
   --base-background-color: #fff;
   --base-border-color: var(--grey-30);
   --base-shadow-color: rgb(0 0 0 / 0.2);
-  --link-foreground-color: var(--blue-60);
-  --link-visited-foreground-color: var(--purple-70);
-  --link-active-foreground-color: var(--red-50);
+  --link-foreground-color: LinkText;
+  --link-visited-foreground-color: VisitedText;
+  --link-active-foreground-color: ActiveText;
   --clickable-foreground-color: var(--grey-90);
   --clickable-background-color: var(--grey-90-a10);
   --clickable-border-color: var(--grey-90-a30);
