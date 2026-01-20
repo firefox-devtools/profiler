@@ -3,9 +3,19 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .timelineTrackScreenshot {
+  --internal-backgrond-color: var(--grey-20);
+  --internal-img-backgrond-color: var(--grey-30);
+
   position: relative;
   overflow: hidden;
-  background: var(--grey-20);
+  background: var(--internal-backgrond-color);
+}
+
+:root.dark-mode {
+  .timelineTrackScreenshot {
+    --internal-backgrond-color: var(--ink-90);
+    --internal-img-backgrond-color: var(--ink-80);
+  }
 }
 
 .timelineTrackScreenshotImgContainer {
@@ -22,7 +32,7 @@
   right: 0;
   width: 1px;
   height: 100%;
-  background: var(--grey-30);
+  background: var(--internal-img-backgrond-color);
 
   /* Create a border on the right of the container */
   content: '';
@@ -37,7 +47,7 @@
 
 .timelineTrackScreenshotHoverImg {
   padding: 0.5px;
-  border: 0.5px solid rgb(0 0 0 / 0.2);
+  border: 0.5px solid var(--base-shadow-color);
   border-radius: 5px;
-  box-shadow: 0 2px 4px rgb(0 0 0 / 0.2);
+  box-shadow: 0 2px 4px var(--base-shadow-color);
 }

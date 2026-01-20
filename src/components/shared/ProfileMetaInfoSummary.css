@@ -5,10 +5,28 @@
 /* We use em in this CSS file so that it will adjust with the inherited font-size. */
 
 .profileMetaInfoSummary {
+  --internal-info-icon: url(../../../res/img/svg/info.svg);
+  --internal-firefox-icon: url(../../../res/img/svg/brands/firefoxbrowser.svg);
+  --internal-apple-icon: url(../../../res/img/svg/brands/apple.svg);
+  --internal-windows-icon: url(../../../res/img/svg/brands/windows.svg);
+  --internal-linux-icon: url(../../../res/img/svg/brands/linux.svg);
+  --internal-android-icon: url(../../../res/img/svg/brands/android.svg);
+
   display: flex;
   overflow: hidden;
   min-width: 0;
   align-items: stretch;
+}
+
+:root.dark-mode {
+  .profileMetaInfoSummary {
+    --internal-info-icon: url(../../../res/img/svg/info-light.svg);
+    --internal-firefox-icon: url(../../../res/img/svg/brands/firefoxbrowser-light.svg);
+    --internal-apple-icon: url(../../../res/img/svg/brands/apple-light.svg);
+    --internal-windows-icon: url(../../../res/img/svg/brands/windows-light.svg);
+    --internal-linux-icon: url(../../../res/img/svg/brands/linux-light.svg);
+    --internal-android-icon: url(../../../res/img/svg/brands/android-light.svg);
+  }
 }
 
 .profileMetaInfoSummaryProductAndVersion,
@@ -20,32 +38,32 @@
 
 .profileMetaInfoSummaryProductAndVersion {
   padding-left: 1.4em; /* 1 (for the background image) + 0.4 */
-  background: url(../../../res/img/svg/info.svg) left center / 1em no-repeat;
+  background: var(--internal-info-icon) left center / 1em no-repeat;
 }
 
 .profileMetaInfoSummaryProductAndVersion[data-product^='Firefox'],
 .profileMetaInfoSummaryProductAndVersion[data-product='Fennec'] {
-  background-image: url(../../../res/img/svg/brands/firefoxbrowser.svg);
+  background-image: var(--internal-firefox-icon);
 }
 
 .profileMetaInfoSummaryPlatform {
   padding-left: 1.4em; /* 1 (for the background image) + 0.4 */
   margin-left: 1em;
-  background: url(../../../res/img/svg/info.svg) left center / 1em no-repeat;
+  background: var(--internal-info-icon) left center / 1em no-repeat;
 }
 
 .profileMetaInfoSummaryPlatform[data-toolkit^='macOS'] {
-  background-image: url(../../../res/img/svg/brands/apple.svg);
+  background-image: var(--internal-apple-icon);
 }
 
 .profileMetaInfoSummaryPlatform[data-toolkit^='Windows'] {
-  background-image: url(../../../res/img/svg/brands/windows.svg);
+  background-image: var(--internal-windows-icon);
 }
 
 .profileMetaInfoSummaryPlatform[data-toolkit^='Linux'] {
-  background-image: url(../../../res/img/svg/brands/linux.svg);
+  background-image: var(--internal-linux-icon);
 }
 
 .profileMetaInfoSummaryPlatform[data-toolkit^='Android'] {
-  background-image: url(../../../res/img/svg/brands/android.svg);
+  background-image: var(--internal-android-icon);
 }

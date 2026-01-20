@@ -15,13 +15,15 @@
 }
 
 .timelineTrackProcessCPUGraphDot {
+  --internal-background-color: var(--grey-50);
+
   position: absolute;
   width: 6px;
   height: 6px;
   border-radius: 3px;
   margin-top: -3px;
   margin-left: -3px;
-  background-color: var(--grey-50);
+  background-color: var(--internal-background-color);
   pointer-events: none;
 }
 
@@ -32,6 +34,6 @@
 .timelineTrackProcessCPUTooltipNumber {
   display: inline-block;
   min-width: 60px;
-  color: var(--grey-60);
+  color: var(--tooltip-number-foreground-color);
   font-weight: bold;
 }

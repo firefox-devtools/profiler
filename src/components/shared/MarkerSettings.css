@@ -3,14 +3,26 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .markerSettings {
+  --internal-filter-icon: url(../../../res/img/svg/filter.svg);
+  --internal-copy-icon: url(../../../res/img/svg/copy-dark.svg);
+
   display: flex;
   overflow: auto hidden;
   height: 25px;
   flex-flow: row nowrap;
   padding: 0;
+  background-color: var(--base-background-color);
+  color: var(--base-foreground-color);
   line-height: 25px;
   scrollbar-width: none;
   white-space: nowrap;
+}
+
+:root.dark-mode {
+  .markerSettings {
+    --internal-filter-icon: url(../../../res/img/svg/filter-light.svg);
+    --internal-copy-icon: url(../../../res/img/svg/copy-light.svg);
+  }
 }
 
 .filterMarkersButton,
@@ -26,12 +38,12 @@
 }
 
 .filterMarkersButton {
-  background-image: url(../../../res/img/svg/filter.svg);
+  background-image: var(--internal-filter-icon);
 }
 
 .copyTableButton {
   margin-right: 16px;
-  background-image: url(../../../res/img/svg/copy-dark.svg);
+  background-image: var(--internal-copy-icon);
 }
 
 /* This is the dropdown arrow on the right of the button. */
@@ -47,7 +59,7 @@
   margin-top: 7px;
   margin-right: 4px;
   margin-left: 4px;
-  color: var(--grey-90);
+  color: var(--clickable-foreground-color);
   content: '';
 }
 

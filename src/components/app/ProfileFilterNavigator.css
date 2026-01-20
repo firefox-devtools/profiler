@@ -3,12 +3,20 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .profileFilterNavigator--tab-selector {
+  --internal-disabled-arrow-color: var(--grey-30);
+
   display: flex;
   align-items: center;
   column-gap: 5px;
 
   /* Padding for the arrow on the left side and a bit on the other for hover. */
   padding-inline: 20px 5px;
+}
+
+:root.dark-mode {
+  .profileFilterNavigator--tab-selector {
+    --internal-disabled-arrow-color: var(--grey-60);
+  }
 }
 
 /* This is the dropdown arrow on the left of the button. */
@@ -30,7 +38,7 @@
 
 .profileFilterNavigator--tab-selector:not(.button)::before {
   /* Disabled tab selector indicates this with a grayed out arrow. */
-  color: var(--grey-30);
+  color: var(--internal-disabled-arrow-color);
 }
 
 @media (forced-colors: active) {

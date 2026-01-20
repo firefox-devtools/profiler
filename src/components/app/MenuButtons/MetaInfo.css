@@ -3,14 +3,25 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .metaInfoPanel {
+  --internal-label-foreground-color: var(--grey-50);
+  --internal-subtitle-border-color: rgb(0 0 0 / 0.05);
+
   width: 350px;
+  color: var(--base-foreground-color);
   font-size: 12px;
   line-height: 20px;
 }
 
 .metaInfoPanel,
 .metaInfoPanel .arrowPanelArrow::before {
-  background-color: white;
+  background-color: var(--base-background-color);
+}
+
+:root.dark-mode {
+  .metaInfoPanel {
+    --internal-label-foreground-color: var(--grey-40);
+    --internal-subtitle-border-color: rgb(237 237 240 / 0.05);
+  }
 }
 
 .metaInfoSection {
@@ -22,7 +33,7 @@
 .metaInfoWideLabel {
   display: inline-block;
   width: 120px;
-  color: var(--grey-50);
+  color: var(--internal-label-foreground-color);
 }
 
 .metaInfoLargeContent {
@@ -38,7 +49,7 @@
 .visualMetricsLabel {
   display: inline-block;
   width: 145px;
-  color: var(--grey-50);
+  color: var(--internal-label-foreground-color);
 }
 
 .metaInfoList {
@@ -62,7 +73,7 @@
 .metaInfoSubTitle {
   padding-top: 4px;
   padding-bottom: 4px;
-  border-bottom: 1px solid rgb(0 0 0 / 0.05);
+  border-bottom: 1px solid var(--internal-subtitle-border-color);
   margin: 0;
   font-size: 1.2em;
   font-weight: 700;
