@@ -16,11 +16,14 @@ import {
   getNativeSymbolInfo,
   getNativeSymbolsForCallNode,
 } from './profile-data';
-import { getLineTimings, getStackLineInfoForCallNode } from './line-timings';
+import {
+  getStackLineInfoForCallNode,
+  getTotalLineTimings,
+} from './line-timings';
 import { mapGetKeyWithMaxValue } from 'firefox-profiler/utils';
 import {
-  getAddressTimings,
   getStackAddressInfoForCallNode,
+  getTotalAddressTimings,
 } from './address-timings';
 
 /**
@@ -84,8 +87,8 @@ export function getBottomBoxInfoForCallNode(
     callNodeIndex,
     callNodeInfo
   );
-  const callNodeLineTimings = getLineTimings(stackLineInfo, samples);
-  const hottestLine = mapGetKeyWithMaxValue(callNodeLineTimings.totalLineHits);
+  const callNodeLineTimings = getTotalLineTimings(stackLineInfo, samples);
+  const hottestLine = mapGetKeyWithMaxValue(callNodeLineTimings);
 
   // Compute the hottest instruction, so we can ask the assembly view to scroll to it.
   let hottestInstructionAddress;
@@ -97,10 +100,11 @@ export function getBottomBoxInfoForCallNode(
       callNodeInfo,
       nativeSymbolsForCallNode[initialNativeSymbol]
     );
-    const callNodeAddressTimings = getAddressTimings(stackAddressInfo, samples);
-    hottestInstructionAddress = mapGetKeyWithMaxValue(
-      callNodeAddressTimings.totalAddressHits
+    const callNodeAddressTimings = getTotalAddressTimings(
+      stackAddressInfo,
+      samples
     );
+    hottestInstructionAddress = mapGetKeyWithMaxValue(callNodeAddressTimings);
   }
 
   return {

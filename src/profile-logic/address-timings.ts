@@ -530,3 +530,34 @@ export function getAddressTimings(
   }
   return { totalAddressHits, selfAddressHits };
 }
+
+// Like getAddressTimings, but computes only the totalAddressHits.
+export function getTotalAddressTimings(
+  stackAddressInfo: StackAddressInfo | null,
+  samples: SamplesLikeTable
+): Map<Address, number> {
+  if (stackAddressInfo === null) {
+    return new Map<Address, number>();
+  }
+  const { stackAddresses } = stackAddressInfo;
+  const totalAddressHits: Map<Address, number> = new Map();
+
+  // Iterate over all the samples, and aggregate the sample's weight into the
+  // addresses which are hit by the sample's stack.
+  // TODO: Maybe aggregate sample count per stack first, and then visit each stack only once?
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const stackIndex = samples.stack[sampleIndex];
+    if (stackIndex === null) {
+      continue;
+    }
+    const weight = samples.weight ? samples.weight[sampleIndex] : 1;
+    const setOfHitAddresses = stackAddresses[stackIndex];
+    if (setOfHitAddresses !== null) {
+      for (const address of setOfHitAddresses) {
+        const oldHitCount = totalAddressHits.get(address) ?? 0;
+        totalAddressHits.set(address, oldHitCount + weight);
+      }
+    }
+  }
+  return totalAddressHits;
+}

@@ -404,3 +404,34 @@ export function getLineTimings(
   }
   return { totalLineHits, selfLineHits };
 }
+
+// Like getLineTimings, but computes only the totalLineHits.
+export function getTotalLineTimings(
+  stackLineInfo: StackLineInfo | null,
+  samples: SamplesLikeTable
+): Map<LineNumber, number> {
+  if (stackLineInfo === null) {
+    return new Map<LineNumber, number>();
+  }
+  const { stackLines } = stackLineInfo;
+  const totalLineHits: Map<LineNumber, number> = new Map();
+
+  // Iterate over all the samples, and aggregate the sample's weight into the
+  // lines which are hit by the sample's stack.
+  // TODO: Maybe aggregate sample count per stack first, and then visit each stack only once?
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const stackIndex = samples.stack[sampleIndex];
+    if (stackIndex === null) {
+      continue;
+    }
+    const weight = samples.weight ? samples.weight[sampleIndex] : 1;
+    const setOfHitLines = stackLines[stackIndex];
+    if (setOfHitLines !== null) {
+      for (const line of setOfHitLines) {
+        const oldHitCount = totalLineHits.get(line) ?? 0;
+        totalLineHits.set(line, oldHitCount + weight);
+      }
+    }
+  }
+  return totalLineHits;
+}
