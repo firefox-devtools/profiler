@@ -6,12 +6,9 @@ import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profil
 import { storeWithProfile } from '../fixtures/stores';
 import * as UrlStateSelectors from '../../selectors/url-state';
 import * as ProfileSelectors from '../../selectors/profile';
-import {
-  selectedThreadSelectors,
-  selectedNodeSelectors,
-} from '../../selectors/per-thread';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { emptyAddressTimings } from '../../profile-logic/address-timings';
-import { getBottomBoxInfoForCallNode } from '../../profile-logic/profile-data';
+import { getBottomBoxInfoForCallNode } from '../../profile-logic/bottom-box';
 import {
   changeSelectedCallNode,
   updateBottomBoxContentsAndMaybeOpen,
@@ -33,7 +30,7 @@ function getProfileWithNiceAddresses(): {
   return getProfileFromTextSamples(`
     A[lib:one][address:20][sym:Asym:20:][file:ab.cpp][line:20]          A[lib:one][address:30][sym:Asym:20:][file:ab.cpp][line:22]          A[lib:one][address:20][sym:Asym:20:][file:ab.cpp][line:20]  A[lib:one][address:20][sym:Asym:20:][file:ab.cpp][line:20]
     B[lib:one][address:40][sym:Bsym:30:][file:ab.cpp][line:40]          B[lib:one][address:30][sym:Asym:20:][file:ab.cpp][line:40][inl:1]   B[lib:one][address:45][sym:Bsym:30:][file:ab.cpp][line:43]  E[lib:one][address:31][sym:Esym:30:][file:cde.cpp][line:90]
-    C[lib:one][address:40][sym:Bsym:30:][file:cde.cpp][line:60][inl:1]  C[lib:one][address:30][sym:Asym:20:][file:cde.cpp][line:62][inl:2]  C[lib:one][address:45][sym:Bsym:30:][file:cde.cpp][line:63] F[lib:two][address:15][sym:Fsym:12:]
+    C[lib:one][address:40][sym:Bsym:30:][file:cde.cpp][line:60][inl:1]  C[lib:one][address:30][sym:Asym:20:][file:cde.cpp][line:62][inl:2]  C[lib:one][address:45][sym:Bsym:30:][file:cde.cpp][line:62] F[lib:two][address:15][sym:Fsym:12:]
                                                                                                                                             D[lib:one][address:51][sym:Dsym:40:][file:cde.cpp][line:80]
   `);
 }
@@ -95,7 +92,8 @@ describe('bottom box', function () {
     const bottomBoxInfoD = getBottomBoxInfoForCallNode(
       abcd,
       callNodeInfo,
-      thread
+      thread,
+      thread.samples
     );
     expect(bottomBoxInfoD.nativeSymbols).toEqual([nativeSymbolInfoD]);
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfoD));
@@ -182,7 +180,8 @@ describe('bottom box', function () {
     const bottomBoxInfoF = getBottomBoxInfoForCallNode(
       aef,
       callNodeInfo,
-      thread
+      thread,
+      thread.samples
     );
     expect(bottomBoxInfoF.nativeSymbols).toEqual([nativeSymbolInfoF]);
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfoF));
@@ -232,7 +231,8 @@ describe('bottom box', function () {
     const bottomBoxInfoC = getBottomBoxInfoForCallNode(
       abc,
       callNodeInfo,
-      thread
+      thread,
+      thread.samples
     );
     expect(new Set(bottomBoxInfoC.nativeSymbols)).toEqual(
       new Set([nativeSymbolInfoA, nativeSymbolInfoB])
@@ -242,8 +242,16 @@ describe('bottom box', function () {
     // Now the source view should be displayed and the assembly view should be
     // initialized but closed. The assembly view should show one of the two
     // native symbols.
+    // The source view should scroll to line 62 because the call node [A, B, C]
+    // has 2 samples in line 62 and only 1 sample in line 60.
     expect(UrlStateSelectors.getIsBottomBoxOpen(getState())).toBeTrue();
     expect(ProfileSelectors.getSourceViewFile(getState())).toBe('cde.cpp');
+    expect(UrlStateSelectors.getSourceViewScrollToLineNumber(getState())).toBe(
+      62
+    );
+    expect(UrlStateSelectors.getSourceViewHighlightedLine(getState())).toBe(
+      null
+    );
     expect(UrlStateSelectors.getAssemblyViewIsOpen(getState())).toBeFalse();
     expect(
       ensureExists(UrlStateSelectors.getAssemblyViewNativeSymbol(getState()))
@@ -263,42 +271,78 @@ describe('bottom box', function () {
     // is what the call tree usually does on its own), and then we open the bottom
     // box with that info.
     dispatch(changeSelectedCallNode(threadsKey, [A, B, C, D]));
-    const bottomBoxInfoABC = getBottomBoxInfoForCallNode(
+    const bottomBoxInfoABCD = getBottomBoxInfoForCallNode(
       ensureExists(callNodeInfo.getCallNodeIndexFromPath([A, B, C, D])),
       callNodeInfo,
-      thread
+      thread,
+      thread.samples
+    );
+    dispatch(
+      updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfoABCD)
+    );
+
+    // Check the assembly view state, including address timings.
+    expect(UrlStateSelectors.getAssemblyViewNativeSymbol(getState())).toEqual({
+      libIndex: 0,
+      address: 0x40,
+      name: 'Dsym',
+      functionSize: 18,
+      functionSizeIsKnown: false,
+    });
+    expect(
+      selectedThreadSelectors.getAssemblyViewAddressTimings(getState())
+        .totalAddressHits
+    ).toEqual(new Map([[0x51, 1]]));
+    expect(
+      UrlStateSelectors.getAssemblyViewHighlightedInstruction(getState())
+    ).toBe(null);
+    expect(
+      UrlStateSelectors.getAssemblyViewScrollToInstructionAddress(getState())
+    ).toBe(0x51);
+
+    // Select the call node at [A, B, C].
+    // The global timings should still remain the same.
+    dispatch(changeSelectedCallNode(threadsKey, [A, B, C]));
+    expect(
+      selectedThreadSelectors.getAssemblyViewAddressTimings(getState())
+        .totalAddressHits
+    ).toEqual(new Map([[0x51, 1]]));
+
+    // Change the selection back to call node [A, B, C, D], and then open the
+    // bottom box for the call node [A, B, C]. This simulates opening the
+    // bottom box from the context menu.
+    dispatch(changeSelectedCallNode(threadsKey, [A, B, C, D]));
+    const bottomBoxInfoABC = getBottomBoxInfoForCallNode(
+      ensureExists(callNodeInfo.getCallNodeIndexFromPath([A, B, C])),
+      callNodeInfo,
+      thread,
+      thread.samples
     );
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfoABC));
 
-    // Check the assembly view address timings, both the (thread-)global timings
-    // and the timings for the selected call node.
-    // Note the difference between "selectedThreadSelectors" and "selectedNodeSelectors" below.
-    // Both timings should be identical here because Dsym is selected and because
-    // there is no recursion on Dsym.
+    // Check the assembly view state again.
+    expect(UrlStateSelectors.getAssemblyViewNativeSymbol(getState())).toEqual({
+      libIndex: 0,
+      address: 0x30,
+      name: 'Bsym',
+      functionSize: 22,
+      functionSizeIsKnown: false,
+    });
     expect(
       selectedThreadSelectors.getAssemblyViewAddressTimings(getState())
         .totalAddressHits
-    ).toEqual(new Map([[0x51, 1]]));
+    ).toEqual(
+      new Map([
+        [0x40, 1],
+        [0x45, 1],
+      ])
+    );
     expect(
-      selectedNodeSelectors.getAssemblyViewAddressTimings(getState())
-        .totalAddressHits
-    ).toEqual(new Map([[0x51, 1]]));
-
-    // Select the call node at [A, B, C].
-    dispatch(changeSelectedCallNode(threadsKey, [A, B, C]));
-
-    // The global timings should still remain the same.
+      UrlStateSelectors.getAssemblyViewHighlightedInstruction(getState())
+    ).toBe(null);
     expect(
-      selectedThreadSelectors.getAssemblyViewAddressTimings(getState())
-        .totalAddressHits
-    ).toEqual(new Map([[0x51, 1]]));
-
-    // The timings for the selected call node should have dropped to zero,
-    // because the call node at [A, B, C] does not have any frames in Dsym.
-    expect(
-      selectedNodeSelectors.getAssemblyViewAddressTimings(getState())
-        .totalAddressHits
-    ).toEqual(new Map());
+      UrlStateSelectors.getAssemblyViewScrollToInstructionAddress(getState())
+    ).toBeOneOf([0x40, 0x45]);
   });
 
   // Further ideas for tests:
