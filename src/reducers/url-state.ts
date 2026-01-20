@@ -565,16 +565,25 @@ const profileName: Reducer<string | null> = (state = null, action) => {
 };
 
 const sourceView: Reducer<SourceViewState> = (
-  state = { scrollGeneration: 0, libIndex: null, sourceIndex: null },
+  state = {
+    scrollGeneration: 0,
+    libIndex: null,
+    sourceIndex: null,
+    highlightedLine: null,
+  },
   action
 ) => {
   switch (action.type) {
     case 'UPDATE_BOTTOM_BOX': {
+      const shouldScroll = action.scrollToLineNumber !== undefined;
       return {
-        scrollGeneration: state.scrollGeneration + 1,
+        scrollGeneration: shouldScroll
+          ? state.scrollGeneration + 1
+          : state.scrollGeneration,
         libIndex: action.libIndex,
         sourceIndex: action.sourceIndex,
-        lineNumber: action.lineNumber,
+        scrollToLineNumber: action.scrollToLineNumber,
+        highlightedLine: action.highlightedLineNumber,
       };
     }
     default:
@@ -584,21 +593,28 @@ const sourceView: Reducer<SourceViewState> = (
 
 const assemblyView: Reducer<AssemblyViewState> = (
   state = {
-    scrollGeneration: 0,
-    nativeSymbol: null,
-    allNativeSymbolsForInitiatingCallNode: [],
     isOpen: false,
+    scrollGeneration: 0,
+    highlightedInstruction: null,
+    nativeSymbols: [],
+    currentNativeSymbol: null,
   },
   action
 ) => {
   switch (action.type) {
     case 'UPDATE_BOTTOM_BOX': {
+      const { nativeSymbols, currentNativeSymbol, shouldOpenAssemblyView } =
+        action;
+      const shouldScroll = action.scrollToInstructionAddress !== undefined;
       return {
-        scrollGeneration: state.scrollGeneration + 1,
-        nativeSymbol: action.nativeSymbol,
-        allNativeSymbolsForInitiatingCallNode:
-          action.allNativeSymbolsForInitiatingCallNode,
-        isOpen: state.isOpen || action.shouldOpenAssemblyView,
+        scrollGeneration: shouldScroll
+          ? state.scrollGeneration + 1
+          : state.scrollGeneration,
+        nativeSymbols,
+        currentNativeSymbol,
+        isOpen: state.isOpen || shouldOpenAssemblyView,
+        scrollToInstructionAddress: action.scrollToInstructionAddress,
+        highlightedInstruction: action.highlightedInstructionAddress,
       };
     }
     case 'OPEN_ASSEMBLY_VIEW': {

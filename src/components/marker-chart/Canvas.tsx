@@ -63,7 +63,7 @@ import {
   isValidGraphColor,
 } from 'firefox-profiler/profile-logic/graph-color';
 import { getSchemaFromMarker } from 'firefox-profiler/profile-logic/marker-schema';
-import { getBottomBoxInfoForStackFrame } from 'firefox-profiler/profile-logic/profile-data';
+import { getBottomBoxInfoForStackFrame } from 'firefox-profiler/profile-logic/bottom-box';
 
 import type {
   ChartCanvasScale,

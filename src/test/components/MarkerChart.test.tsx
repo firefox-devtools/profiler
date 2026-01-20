@@ -319,7 +319,7 @@ describe('MarkerChart', function () {
     // No tooltip displayed yet
     expect(document.querySelector('.tooltip')).toBeFalsy();
 
-    function leftClick(pos: { x: CssPixels; y: CssPixels }) {
+    function leftClick(pos: { x: CssPixels; y: CssPixels }, dblClick = false) {
       const positioningOptions = {
         offsetX: pos.x,
         offsetY: pos.y,
@@ -333,7 +333,7 @@ describe('MarkerChart', function () {
       // Because different components listen to different events, we trigger
       // all the right events, to be as close as possible to the real stuff.
       fireMouseEvent('mousemove', positioningOptions);
-      fireFullClick(canvas, positioningOptions);
+      fireFullClick(canvas, positioningOptions, dblClick);
       flushRafCalls();
     }
 
@@ -364,6 +364,20 @@ describe('MarkerChart', function () {
     leftClick({ x: 0, y: 0 });
 
     // Now the tooltip should not be displayed.
+    expect(document.querySelector('.tooltip')).toBeFalsy();
+
+    // The tooltip should be displayed also on double click.
+    leftClick(position, true);
+
+    // Move the mouse outside of the marker.
+    fireMouseEvent('mousemove', {
+      offsetX: 0,
+      offsetY: 0,
+      pageX: 0,
+      pageY: 0,
+    });
+
+    // The double click shouldn't make the tooltip persisted.
     expect(document.querySelector('.tooltip')).toBeFalsy();
   });
 

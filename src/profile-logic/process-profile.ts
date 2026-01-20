@@ -1449,6 +1449,7 @@ function _convertGeckoMarkerSchema(
     display,
     data,
     graphs,
+    colorField,
     isStackBased,
   } = markerSchema;
 
@@ -1494,6 +1495,7 @@ function _convertGeckoMarkerSchema(
     fields,
     description,
     graphs,
+    colorField,
     isStackBased,
   };
 }
