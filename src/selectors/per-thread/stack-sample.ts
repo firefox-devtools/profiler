@@ -340,6 +340,7 @@ export function getStackAndSampleSelectorsPerThread(
     threadSelectors.getFilteredThread,
     getCallNodeInfo,
     ProfileSelectors.getCategories,
+    threadSelectors.getPreviewFilteredCtssSamples,
     getCallTreeTimings,
     getWeightTypeForCallTree,
     ProfileSelectors.getSourceTable,
@@ -350,12 +351,14 @@ export function getStackAndSampleSelectorsPerThread(
     threadSelectors.getFilteredThread,
     _getInvertedCallNodeInfo,
     ProfileSelectors.getCategories,
+    threadSelectors.getPreviewFilteredCtssSamples,
     getFunctionListTimings,
     getWeightTypeForCallTree,
     (
       thread,
       callNodeInfoInverted,
       categories,
+      previewFilteredCtssSamples,
       functionListTimings,
       weightType
     ) =>
@@ -363,6 +366,7 @@ export function getStackAndSampleSelectorsPerThread(
         thread,
         callNodeInfoInverted,
         categories,
+        previewFilteredCtssSamples,
         { type: 'FUNCTION_LIST', timings: functionListTimings },
         weightType
       )
