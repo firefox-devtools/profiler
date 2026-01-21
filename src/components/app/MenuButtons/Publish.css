@@ -4,34 +4,72 @@
 
 /* These two background images build on the generic styles defined in
  * MenuButtons/index.css when using an icon. */
+.menuButtonsShareButtonButton {
+  --internal-share-icon: url(../../../../res/img/svg/share-dark-12.svg);
+  --internal-uploading-icon: url(../../../../res/img/svg/sharing-animated-dark-12.svg);
+}
+
 .menuButtonsShareButtonButton::before {
-  background-image: url(../../../../res/img/svg/share-dark-12.svg);
+  background-image: var(--internal-share-icon);
 }
 
 .menuButtonsShareButtonButton-uploading::before {
-  background-image: url(../../../../res/img/svg/sharing-animated-dark-12.svg);
+  background-image: var(--internal-uploading-icon);
 }
 
 .menuButtonsShareButtonError {
-  background-color: var(--red-60);
-  color: white;
+  --internal-error-foreground-color: white;
+  --internal-error-background-color: var(--red-60);
+  --internal-error-hover-background-color: var(--red-70);
+  --internal-error-active-background-color: var(--red-80);
+  --internal-error-icon: url(../../../../res/img/svg/error.svg);
+
+  background-color: var(--internal-error-background-color);
+  color: var(--internal-error-foreground-color);
 }
 
 .menuButtonsShareButtonError:hover {
-  background-color: var(--red-70);
+  background-color: var(--internal-error-hover-background-color);
 }
 
 .buttonWithPanel.open > .menuButtonsShareButtonError,
 .menuButtonsShareButtonError:hover:active {
-  background-color: var(--red-80);
+  background-color: var(--internal-error-active-background-color);
 }
 
 .menuButtonsShareButtonError::before {
-  background-image: url(../../../../res/img/svg/error.svg);
+  background-image: var(--internal-error-icon);
 }
 
 .publishPanelPanel {
   --width: 510px;
+  --internal-info-icon: url(../../../../res/img/svg/info.svg);
+  --internal-button-disabled-hover-background-color: var(--grey-90-a10);
+  --internal-upload-icon: url(../../../../res/img/svg/upload.svg);
+  --internal-download-icon: url(../../../../res/img/svg/download.svg);
+  --internal-upload-percentage-foreground-color: var(--blue-60);
+  --internal-upload-bar-background-color: var(--grey-40);
+  --internal-upload-bar-inner-background-color: var(--blue-50);
+}
+
+:root.dark-mode {
+  .menuButtonsShareButtonButton {
+    --internal-share-icon: url(../../../../res/img/svg/share-light-12.svg);
+    --internal-uploading-icon: url(../../../../res/img/svg/sharing-animated-dark-12.svg);
+  }
+
+  .menuButtonsShareButtonError {
+    --internal-error-foreground-color: var(--grey-20);
+  }
+
+  .publishPanelPanel {
+    --internal-info-icon: url(../../../../res/img/svg/info-light.svg);
+    --internal-button-disabled-hover-background-color: var(--grey-10-a10);
+    --internal-download-icon: url(../../../../res/img/svg/download-light.svg);
+    --internal-upload-percentage-foreground-color: var(--blue-60);
+    --internal-upload-bar-background-color: var(--grey-40);
+    --internal-upload-bar-inner-background-color: var(--blue-50);
+  }
 }
 
 .publishPanelContent {
@@ -46,7 +84,7 @@
    * This background image is 44x44, so this puts it 16px left of the text. */
   padding-left: 60px;
   margin: 0 0 0 -60px;
-  background: url(../../../../res/img/svg/info.svg) left center no-repeat;
+  background: var(--internal-info-icon) left center no-repeat;
   line-height: 44px; /* This is the height of the background image */
 }
 
@@ -93,7 +131,7 @@
 
 .publishPanelButtonDisabled:hover,
 .publishPanelButtonDisabled:active:hover {
-  background-color: var(--grey-90-a10);
+  background-color: var(--internal-button-disabled-hover-background-color);
 }
 
 .publishPanelButtonsSvg {
@@ -107,13 +145,13 @@
 .publishPanelButtonsSvgUpload {
   width: 20px;
   height: 20px;
-  background: url(../../../../res/img/svg/upload.svg) center center no-repeat;
+  background: var(--internal-upload-icon) center center no-repeat;
 }
 
 .publishPanelButtonsSvgDownload {
   width: 20px;
   height: 20px;
-  background: url(../../../../res/img/svg/download.svg) center center no-repeat;
+  background: var(--internal-download-icon) center center no-repeat;
 }
 
 .menuButtonsDownloadSize {
@@ -133,14 +171,14 @@
 
 .publishPanelUploadPercentage {
   margin: 10px 0;
-  color: var(--blue-60);
+  color: var(--internal-upload-percentage-foreground-color);
 }
 
 .publishPanelUploadBar {
   overflow: hidden;
   height: 5px;
   border-radius: 2px;
-  background-color: var(--grey-40);
+  background-color: var(--internal-upload-bar-background-color);
 }
 
 .publishPanelUploadBarInner {
@@ -149,7 +187,7 @@
   height: 3px;
   border-radius: 0 2px 2px 0;
   animation: animate-stripes 1s linear infinite;
-  background-color: var(--blue-50);
+  background-color: var(--internal-upload-bar-inner-background-color);
   background-image: linear-gradient(
     135deg,
     transparent 20%,

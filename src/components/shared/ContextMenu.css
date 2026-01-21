@@ -3,6 +3,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .react-contextmenu {
+  --internal-shadow-color1: rgb(0 0 0 / 0.1);
+  --internal-shadow-color2: rgb(0 0 0 / 0.3);
+  --internal-separator-color: #ddd;
+  --internal-divider-color: rgb(0 0 0 / 0.15);
+  --internal-active-foreground-color: #fff;
+  --internal-active-background-color: var(--blue-60);
+  --internal-disabled-foreground-color: #888;
+  --internal-selected-disabled-background-color: var(--blue-50-a30);
+  --internal-highlight-foreground-color: var(--grey-70);
+
   z-index: 4; /* needs to be on a higher level than .overflowEdgeIndicatorEdge */
   display: none;
   min-width: 160px;
@@ -10,18 +20,34 @@
   padding: 5px 0;
   border-radius: 3px;
   margin: 2px 0 0;
-  background-color: #fff;
+  background-color: var(--base-background-color);
   box-shadow:
-    0 0 0 0.5px rgb(0 0 0 / 0.1),
-    0 10px 12px rgb(0 0 0 / 0.3);
-  color: #000;
+    0 0 0 0.5px var(--internal-shadow-color1),
+    0 10px 12px var(--internal-shadow-color2);
+  color: var(--base-foreground-color);
   font-size: 12px;
   text-align: left;
   user-select: none;
 }
 
+:root.dark-mode {
+  .react-contextmenu {
+    --internal-shadow-color1: rgb(0 0 0 / 0.2);
+    --internal-shadow-color2: rgb(0 0 0 / 0.4);
+    --internal-separator-color: var(--base-border-color);
+    --internal-divider-color: rgb(237 237 240 / 0.15);
+    --internal-active-foreground-color: var(--grey-20);
+    --internal-active-background-color: var(--blue-70);
+    --internal-disabled-foreground-color: var(--grey-50);
+    --internal-selected-disabled-background-color: var(--blue-60-a30);
+    --internal-highlight-foreground-color: var(--grey-30);
+
+    border: 1px solid var(--base-border-color);
+  }
+}
+
 .react-contextmenu-separator {
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--internal-separator-color);
   margin: 6px 0;
 }
 
@@ -44,21 +70,21 @@
 
 .react-contextmenu-item.react-contextmenu-item--active,
 .react-contextmenu-item--selected {
-  border-color: var(--blue-60);
-  background-color: var(--blue-60);
-  color: #fff;
+  border-color: var(--internal-active-background-color);
+  background-color: var(--internal-active-background-color);
+  color: var(--internal-active-foreground-color);
   text-decoration: none;
 }
 
 .react-contextmenu-item.react-contextmenu-item--disabled,
 .react-contextmenu-item.react-contextmenu-item--disabled:hover {
   background-color: transparent;
-  color: #888;
+  color: var(--internal-disabled-foreground-color);
 }
 
 .react-contextmenu-item--divider {
   padding: 2px 0;
-  border-bottom: 1px solid rgb(0 0 0 / 0.15);
+  border-bottom: 1px solid var(--internal-divider-color);
   margin-bottom: 3px;
 }
 
@@ -71,7 +97,7 @@
   width: 0;
   height: 0;
   border: 6px solid transparent;
-  border-left-color: #000;
+  border-left-color: var(--base-foreground-color);
   content: '';
 }
 
@@ -99,7 +125,7 @@
   display: block;
   width: 3px;
   height: 6px;
-  border: solid #000;
+  border: solid var(--base-foreground-color);
   border-width: 0 2px 2px 0;
   content: '';
   transform: rotate(45deg);
@@ -107,18 +133,18 @@
 
 .react-contextmenu-item.react-contextmenu-item--active.checked,
 .react-contextmenu-item--selected.checked {
-  border-color: #fff;
+  border-color: var(--internal-active-foreground-color);
 }
 
 .react-contextmenu-item--disabled.react-contextmenu-item--selected {
-  background-color: var(--blue-50-a30);
+  background-color: var(--internal-selected-disabled-background-color);
 }
 
 .react-contextmenu-item--selected.checked:not(
     .react-contextmenu-item--disabled
   )::before {
   /* Invert the colors of the checkmark when selected */
-  border-color: #fff;
+  border-color: var(--internal-active-foreground-color);
 }
 
 /* Use this wrapper for a content that needs to take the available space or if
@@ -142,11 +168,11 @@
 
 /* Soften a bit the style of highlighted words */
 .react-contextmenu-item > strong {
-  color: #38383d;
+  color: var(--internal-highlight-foreground-color);
 }
 
 .react-contextmenu-item--selected > strong {
-  color: #fff;
+  color: var(--internal-active-foreground-color);
 }
 
 @media (forced-colors: active) {

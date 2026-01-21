@@ -8,8 +8,21 @@
     <meta name="viewport" content="initial-scale=1" />
     <title>Firefox Profiler</title>
     <link rel="preload" href="/locales/en-US/app.ftl" as="fetch" />
+    <style>
+      :root {
+        --body-background-color: #363959; /* --ink-70 */
+      }
+
+      :root.dark-mode {
+        --body-background-color: #202340; /* --ink-80 */
+      }
+
+      body {
+        background-color: var(--body-background-color);
+      }
+    </style>
   </head>
-  <body style="background-color: #363959; /* ink-70 */">
+  <body>
     <svg id="svg-filters"></svg>
     <div id="root"></div>
     <div id="root-overlay"></div>
