@@ -335,6 +335,7 @@ Home--additional-content-title = Загрузить существующие п�
 Home--additional-content-content = Вы можете <strong>перетащить</strong> сюда файл профиля, чтобы загрузить его, или:
 Home--compare-recordings-info = Вы также можете сравнить записи. <a>Откройте интерфейс сравнения.</a>
 Home--your-recent-uploaded-recordings-title = Ваши последние загруженные записи
+Home--dark-mode-title = Тёмная тема
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 =
