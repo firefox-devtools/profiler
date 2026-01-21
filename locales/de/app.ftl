@@ -315,6 +315,7 @@ Home--additional-content-title = Bestehende Profile laden
 Home--additional-content-content = Sie können eine Profildatei per <strong>Ziehen und Ablegen</strong> hierher bewegen, um sie zu laden, oder:
 Home--compare-recordings-info = Sie können auch Aufnahmen vergleichen. <a>Öffnen Sie die Vergleichsschnittstelle.</a>
 Home--your-recent-uploaded-recordings-title = Ihre kürzlich hochgeladenen Aufzeichnungen
+Home--dark-mode-title = Dunkler Modus
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 =
