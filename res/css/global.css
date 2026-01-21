@@ -29,22 +29,34 @@
   --home-border-color: #ccc;
   --home-shadow-color: #0b1f50;
   --row-odd-background-color: #f5f5f5;
-  --panel-foreground-color: var(--ink-70);
+  --menu-foreground-color: #000;
+  --menu-background-color: #fff;
+  --lowered-foreground-color: #000;
+  --lowered-background-color: var(--grey-10);
+  --raised-foreground-color: #000;
+  --raised-background-color: #fff;
+  --panel-foreground-color: var(--grey-70);
   --panel-background-color: var(--grey-10);
   --panel-border-color: var(--grey-30);
   --selected-track-background-color: #edf6ff;
   --tooltip-number-foreground-color: var(--grey-60);
   --colored-border-color: rgb(0 0 0 / 0.1);
+  --wide-splitter-color: #ccc;
+  --wide-splitter-hover-color: #bbb;
+  --wide-splitter-pressed-color: #aaa;
 
   background-color: var(--base-background-color);
   color: var(--base-foreground-color);
 }
 
 :root.dark-mode {
+  color-scheme: dark;
+
+  --grey-85: color-mix(var(--grey-80) 60%, var(--grey-90));
   --base-foreground-color: var(--grey-20);
-  --base-background-color: var(--ink-90);
-  --base-border-color: var(--grey-50);
-  --base-shadow-color: rgb(0 0 0 / 0.4);
+  --base-background-color: #18181a;
+  --base-border-color: var(--grey-70);
+  --base-shadow-color: rgb(0 0 0 / 0.5);
   --link-foreground-color: var(--blue-40);
   --link-visited-foreground-color: var(--purple-40);
   --link-active-foreground-color: var(--red-50);
@@ -60,26 +72,31 @@
   --clickable-checked-active-background-color: var(--blue-70);
   --focus-border-color: var(--blue-40);
   --focus-shadow-color: var(--blue-50-a30);
-  --kbd-background-color: var(--ink-70);
-  --kbd-border-color: var(--ink-60);
-  --kbd-shadow-color: var(--ink-50);
-  --home-border-color: var(--ink-70);
-  --home-shadow-color: var(--ink-90);
-  --row-odd-background-color: color-mix(
-    in hsl,
-    var(--ink-80) 50%,
-    var(--ink-90) 50%
-  );
+  --kbd-background-color: var(--grey-70);
+  --kbd-border-color: var(--grey-60);
+  --kbd-shadow-color: var(--grey-50);
+  --home-border-color: var(--grey-70);
+  --home-shadow-color: var(--grey-90);
+  --row-odd-background-color: var(--raised-background-color);
+  --menu-foreground-color: var(--grey-20);
+  --menu-background-color: var(--grey-80);
+  --lowered-foreground-color: var(--grey-40);
+  --lowered-background-color: var(--grey-90);
+  --raised-foreground-color: var(--grey-20);
+  --raised-background-color: #232327;
   --panel-foreground-color: var(--grey-20);
-  --panel-background-color: var(--ink-80);
-  --panel-border-color: var(--ink-60);
+  --panel-background-color: var(--raised-background-color);
+  --panel-border-color: var(--grey-60);
   --selected-track-background-color: color-mix(
     in hsl,
-    var(--ink-90) 80%,
-    var(--teal-50) 20%
+    var(--grey-90) 60%,
+    var(--teal-50)
   );
   --tooltip-number-foreground-color: var(--grey-40);
   --colored-border-color: rgb(237 237 240 / 0.1);
+  --wide-splitter-color: var(--grey-70);
+  --wide-splitter-hover-color: var(--grey-60);
+  --wide-splitter-pressed-color: var(--grey-60);
 }
 
 a {
@@ -120,4 +137,16 @@ a:active {
 
 .colored-border.ellipsis {
   opacity: 0;
+}
+
+.splitter-layout.splitter-layout > .layout-splitter {
+  background-color: var(--wide-splitter-color);
+}
+
+.splitter-layout.splitter-layout > .layout-splitter:hover {
+  background-color: var(--wide-splitter-hover-color);
+}
+
+.splitter-layout.splitter-layout.layout-changing > .layout-splitter {
+  background-color: var(--wide-splitter-pressed-color);
 }

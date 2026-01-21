@@ -31,7 +31,7 @@
 
 :root.dark-mode {
   .symbolicationStatusOverlay {
-    --internal-background-color: var(--ink-80);
+    --internal-background-color: var(--grey-80);
   }
 }
 

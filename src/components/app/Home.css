@@ -23,13 +23,13 @@
 
 :root.dark-mode {
   .home {
-    --internal-special-background-color: var(--ink-70);
-    --internal-special-border-color: var(--ink-40);
-    --internal-screenshot-border-color: var(--ink-40);
-    --internal-screenshot-shadow-color: var(--ink-90);
+    --internal-special-background-color: var(--grey-70);
+    --internal-special-border-color: var(--grey-40);
+    --internal-screenshot-border-color: var(--grey-40);
+    --internal-screenshot-shadow-color: var(--grey-90);
     --internal-button-disabled-foreground-color: var(--grey-10-a40);
     --internal-button-enabled-foreground-color: var(--blue-40);
-    --internal-button-enabled-hover-background-color: var(--ink-50);
+    --internal-button-enabled-hover-background-color: var(--grey-50);
     --internal-docs-icon: url(../../../res/img/svg/help-blue-light.svg);
   }
 }

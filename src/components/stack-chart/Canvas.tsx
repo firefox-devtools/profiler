@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-import { GREY_30 } from 'photon-colors';
+import { GREY_30, GREY_70 } from 'photon-colors';
 import * as React from 'react';
 import { TIMELINE_MARGIN_RIGHT } from '../../app-logic/constants';
 import { withChartViewport, type Viewport } from '../shared/chart/Viewport';
@@ -97,6 +97,7 @@ type HoveredStackTiming = {
 };
 
 import './Canvas.css';
+import { lightDark } from 'firefox-profiler/utils/dark-mode';
 
 const ROW_CSS_PIXELS_HEIGHT = 16;
 const TEXT_CSS_PIXELS_OFFSET_START = 3;
@@ -558,7 +559,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     }
 
     // Draw the borders on the left and right.
-    fastFillStyle.set(GREY_30);
+    fastFillStyle.set(lightDark(GREY_30, GREY_70));
     ctx.fillRect(
       pixelAtViewportPosition(0),
       0,

@@ -4,15 +4,11 @@
 import {
   GREY_20,
   GREY_30,
-  GREY_50,
   GREY_60,
   GREY_90,
   BLUE_60,
   BLUE_80,
-  TEAL_60,
-  TEAL_80,
-  TEAL_50,
-  TEAL_70,
+  GREY_70,
 } from 'photon-colors';
 import { getForegroundColor, getBackgroundColor } from '../../utils/colors';
 import { isDarkMode, lightDark } from '../../utils/dark-mode';
@@ -118,15 +114,15 @@ const MARKER_BORDER_COLOR = '#2c77d1';
 const DEFAULT_FILL_COLOR = '#8ac4ff'; // Light blue for non-highlighted
 
 function getSeparatorColor() {
-  return lightDark(GREY_20, GREY_60);
+  return lightDark(GREY_20, GREY_70);
 }
 
 function getBucketBackgroundColor() {
-  return lightDark(GREY_20, GREY_60);
+  return lightDark(GREY_20, GREY_70);
 }
 
 function getBucketBorderColor() {
-  return lightDark(GREY_30, GREY_50);
+  return lightDark(GREY_30, GREY_60);
 }
 
 function getHighlightRowBackgroundColor() {
@@ -136,8 +132,8 @@ function getHighlightRowBackgroundColor() {
 function getDefaultMarkerColors(isHighlighted: boolean) {
   if (isDarkMode()) {
     return {
-      fillColor: isHighlighted ? TEAL_60 : TEAL_80,
-      strokeColor: isHighlighted ? TEAL_50 : TEAL_70,
+      fillColor: isHighlighted ? 'hsl(208, 81%, 52%)' : 'hsl(208, 88%, 32%)',
+      strokeColor: isHighlighted ? 'hsl(208, 82%, 58%)' : 'hsl(208, 71%, 40%)',
       textColor: isHighlighted ? GREY_90 : GREY_20,
     };
   }

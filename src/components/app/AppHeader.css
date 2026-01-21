@@ -17,7 +17,7 @@
 
 :root.dark-mode {
   .appHeader {
-    --internal-border-color: var(--ink-60);
+    --internal-border-color: var(--grey-60);
   }
 }
 
