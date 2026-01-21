@@ -77,6 +77,7 @@ import {
   simulateOldWebChannelAndFrameScript,
   simulateWebChannel,
 } from '../fixtures/mocks/web-channel';
+import { SYMBOL_SERVER_URL } from 'firefox-profiler/app-logic/constants';
 
 function simulateSymbolStoreHasNoCache() {
   // SymbolStoreDB is a mock, but Flow doesn't know this. That's why we use
@@ -824,7 +825,7 @@ describe('actions/receive-profile', function () {
 
       expect(
         window.fetchMock.callHistory.lastCall(
-          'https://symbolication.services.mozilla.com/symbolicate/v5'
+          `${SYMBOL_SERVER_URL}/symbolicate/v5`
         )?.options
       ).toEqual(
         expect.objectContaining({
@@ -842,7 +843,7 @@ describe('actions/receive-profile', function () {
 
       expect(
         window.fetchMock.callHistory.lastCall(
-          'https://symbolication.services.mozilla.com/symbolicate/v5'
+          `${SYMBOL_SERVER_URL}/symbolicate/v5`
         )?.options
       ).toEqual(
         expect.objectContaining({
@@ -922,7 +923,7 @@ describe('actions/receive-profile', function () {
           'https://storage.googleapis.com/profile-store/FAKEHASH',
           unsymbolicatedProfile
         )
-        .post('https://symbolication.services.mozilla.com/symbolicate/v5', {});
+        .post(`${SYMBOL_SERVER_URL}/symbolicate/v5`, {});
 
       simulateSymbolStoreHasNoCache();
 
@@ -934,7 +935,7 @@ describe('actions/receive-profile', function () {
 
       expect(
         window.fetchMock.callHistory.lastCall(
-          'https://symbolication.services.mozilla.com/symbolicate/v5'
+          `${SYMBOL_SERVER_URL}/symbolicate/v5`
         )?.options
       ).toEqual(
         expect.objectContaining({
@@ -1434,7 +1435,7 @@ describe('actions/receive-profile', function () {
 
       expect(
         window.fetchMock.callHistory.lastCall(
-          'https://symbolication.services.mozilla.com/symbolicate/v5'
+          `${SYMBOL_SERVER_URL}/symbolicate/v5`
         )?.options
       ).toEqual(
         expect.objectContaining({
