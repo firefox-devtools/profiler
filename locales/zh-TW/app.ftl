@@ -259,6 +259,7 @@ Home--additional-content-title = 載入現有檢測檔
 Home--additional-content-content = 您可以將效能檢測檔<strong>拖曳</strong>到此處，或：
 Home--compare-recordings-info = 您也可以比較紀錄內容。<a>開啟比較介面。</a>
 Home--your-recent-uploaded-recordings-title = 您近期上傳的紀錄
+Home--dark-mode-title = 暗色模式
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 =

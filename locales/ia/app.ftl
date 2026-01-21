@@ -328,6 +328,7 @@ Home--additional-content-title = Cargar profilos existente
 Home--additional-content-content = Tu pote <strong>traher e deponer</strong> hic un file profilo pro cargar lo, o:
 Home--compare-recordings-info = Tu pote alsi comparar registrationes. <a>Aperir le interfacie de comparation.</a>
 Home--your-recent-uploaded-recordings-title = Tu registrationes incargate recentemente
+Home--dark-mode-title = Modo obscur
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 =
