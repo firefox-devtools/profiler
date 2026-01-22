@@ -63,6 +63,7 @@ const LOCAL_TRACK_INDEX_ORDER = {
   power: 6,
   marker: 7,
   bandwidth: 8,
+  'sampling-interval': 9,
 };
 const LOCAL_TRACK_DISPLAY_ORDER = {
   network: 0,
@@ -77,7 +78,8 @@ const LOCAL_TRACK_DISPLAY_ORDER = {
   thread: 5,
   'event-delay': 6,
   'process-cpu': 7,
-  marker: 8,
+  'sampling-interval': 8,
+  marker: 9,
 };
 
 const GLOBAL_TRACK_INDEX_ORDER = {
@@ -497,6 +499,37 @@ export function addProcessCPUTracksForProcess(
 
     // Do not mutate the current state.
     localTracks = [...localTracks, { type: 'process-cpu', counterIndex }];
+    newLocalTracksByPid.set(pid, localTracks);
+  }
+
+  return newLocalTracksByPid;
+}
+
+/**
+ * Take global tracks and add the experimental sampling interval tracks. Return the new
+ * localTracksByPid map. This creates one track per process that shows the sampling
+ * intervals for all threads in that process.
+ */
+export function addSamplingIntervalTracksForProcess(
+  profile: Profile,
+  localTracksByPid: Map<Pid, LocalTrack[]>
+): Map<Pid, LocalTrack[]> {
+  const newLocalTracksByPid = new Map(localTracksByPid);
+  const pidsWithSamples = new Set<Pid>();
+
+  // Find all PIDs that have threads with samples
+  for (const thread of profile.threads) {
+    if (thread.samples.length > 0) {
+      pidsWithSamples.add(thread.pid);
+    }
+  }
+
+  // Add a sampling-interval track for each PID that has samples
+  for (const pid of pidsWithSamples) {
+    let localTracks = newLocalTracksByPid.get(pid) ?? [];
+
+    // Do not mutate the current state.
+    localTracks = [...localTracks, { type: 'sampling-interval', pid }];
     newLocalTracksByPid.set(pid, localTracks);
   }
 
@@ -1134,6 +1167,8 @@ export function getLocalTrackName(
       return 'Process CPU';
     case 'power':
       return counters[localTrack.counterIndex].name;
+    case 'sampling-interval':
+      return 'Sampling Intervals';
     case 'marker':
       return shared.stringArray[localTrack.markerName];
     default:
@@ -1583,7 +1618,8 @@ export function getSearchFilteredLocalTracksByPid(
         case 'ipc':
         case 'event-delay':
         case 'power':
-        case 'process-cpu': {
+        case 'process-cpu':
+        case 'sampling-interval': {
           const { type } = localTrack;
           if (searchRegExp.test(type)) {
             searchFilteredLocalTracks.add(trackIndex);
@@ -1783,6 +1819,9 @@ function _isLocalTrackVisible(
     // be visible by default whenever they're included in a profile. (fallthrough)
     case 'power':
       // Keep non-thread local tracks visible.
+      return true;
+    case 'sampling-interval':
+      // Sampling interval tracks are experimental and shown only when enabled.
       return true;
     case 'ipc':
       // IPC tracks are not always useful to the users. So we are making them hidden
