@@ -29,6 +29,8 @@
   --home-border-color: #ccc;
   --home-shadow-color: #0b1f50;
   --row-odd-background-color: #f5f5f5;
+  --home-foreground-color: #000;
+  --home-background-color: #fff;
   --menu-foreground-color: #000;
   --menu-background-color: #fff;
   --lowered-foreground-color: #000;
@@ -45,7 +47,6 @@
   --wide-splitter-hover-color: #bbb;
   --wide-splitter-pressed-color: #aaa;
 
-  background-color: var(--base-background-color);
   color: var(--base-foreground-color);
 }
 
@@ -75,9 +76,11 @@
   --kbd-background-color: var(--grey-70);
   --kbd-border-color: var(--grey-60);
   --kbd-shadow-color: var(--grey-50);
-  --home-border-color: var(--grey-70);
-  --home-shadow-color: var(--grey-90);
+  --home-border-color: var(--ink-70);
+  --home-shadow-color: var(--ink-90);
   --row-odd-background-color: var(--raised-background-color);
+  --home-foreground-color: var(--grey-20);
+  --home-background-color: var(--ink-90);
   --menu-foreground-color: var(--grey-20);
   --menu-background-color: var(--grey-80);
   --lowered-foreground-color: var(--grey-40);

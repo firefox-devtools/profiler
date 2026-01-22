@@ -52,7 +52,7 @@
   padding: 4em 8em;
   border: 1px solid var(--home-border-color);
   border-radius: 3px;
-  background-color: var(--base-background-color);
+  background-color: var(--home-background-color);
   box-shadow: 0 5px 25px var(--home-shadow-color);
   font-size: 130%;
 }
