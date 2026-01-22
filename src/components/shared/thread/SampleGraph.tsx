@@ -9,7 +9,7 @@ import { timeCode } from 'firefox-profiler/utils/time-code';
 import { getSampleIndexClosestToCenteredTime } from 'firefox-profiler/profile-logic/profile-data';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
-import { BLUE_70, BLUE_40 } from 'photon-colors';
+import { BLUE_40, BLUE_50, BLUE_70, BLUE_80 } from 'photon-colors';
 import {
   Tooltip,
   MOUSE_OFFSET,
@@ -30,6 +30,7 @@ import type {
 } from 'firefox-profiler/types';
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type { CpuRatioInTimeRange } from './ActivityGraphFills';
+import { lightDark } from 'firefox-profiler/utils/dark-mode';
 
 export type HoveredPixelState = {
   readonly sample: IndexIntoSamplesTable | null;
@@ -216,9 +217,9 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
 
     // Draw the samples in multiple passes, separated by color. This reduces the calls
     // to ctx.fillStyle, which saves on time that's spent parsing color strings.
-    const lighterBlue = '#c5e1fe';
-    drawSamples(regularSamples, BLUE_40);
-    drawSamples(highlightedSamples, BLUE_70);
+    const lighterBlue = lightDark('#c5e1fe', BLUE_80);
+    drawSamples(regularSamples, lightDark(BLUE_40, BLUE_70));
+    drawSamples(highlightedSamples, lightDark(BLUE_70, BLUE_50));
     drawSamples(idleSamples, lighterBlue);
   }
 

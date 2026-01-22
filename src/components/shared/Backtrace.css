@@ -45,7 +45,7 @@
 
 .backtraceStackFrame_link {
   display: block;
-  color: inherit;
+  color: inherit !important;
   text-decoration: none;
 }
 

@@ -53,7 +53,7 @@
   flex-flow: column nowrap;
   animation-duration: 200ms;
   animation-name: profileViewerFadeIn;
-  background-color: var(--base-background-color);
+  background-color: var(--panel-background-color);
 }
 
 .profileViewerFadeOut {
@@ -98,12 +98,12 @@
 
 :root.dark-mode {
   .profileViewerWrapper {
-    --internal-background-color: var(--ink-70);
+    --internal-background-color: var(--grey-70);
   }
 
   .profileViewerZipButton {
-    --internal-background-color: var(--ink-50);
-    --internal-border-color: var(--ink-60);
+    --internal-background-color: var(--grey-50);
+    --internal-border-color: var(--grey-60);
     --internal-icon: url(../../../res/img/svg/back-arrow-light.svg);
     --internal-hover-border-color: var(--grey-20);
   }
@@ -132,8 +132,8 @@
   padding: 0;
   border-bottom: 1px solid var(--base-border-color);
   margin: 0;
-  background: var(--base-background-color);
-  color: var(--base-foreground-color);
+  background: var(--lowered-background-color);
+  color: var(--lowered-foreground-color);
 }
 
 .profileViewerSpacer {

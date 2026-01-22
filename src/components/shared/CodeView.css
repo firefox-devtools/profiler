@@ -40,15 +40,15 @@
 :root.dark-mode {
   .codeView {
     --codeview-foreground-color: var(--grey-20);
-    --codeview-background-color: var(--ink-90);
-    --codeview-header-background-color: var(--ink-90);
+    --codeview-background-color: var(--grey-90);
+    --codeview-header-background-color: var(--grey-90);
     --codeview-header-border-color: var(--grey-50);
     --codeview-header-sep-color: var(--grey-50);
     --codeview-gutter-foreground-color: var(--grey-30);
-    --codeview-gutter-background-color: var(--ink-90);
+    --codeview-gutter-background-color: var(--grey-90);
     --codeview-gutter-border-color: var(--grey-50);
     --codeview-linenum-foreground-color: var(--grey-30);
-    --codeview-nonzero-background-color: var(--ink-80);
+    --codeview-nonzero-background-color: var(--grey-80);
     --codeview-highlight-background-color: var(--yellow-90);
     --theme-highlight-keyword: var(--magenta-65);
     --theme-highlight-type: var(--purple-40);
