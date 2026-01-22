@@ -332,6 +332,7 @@ Home--additional-content-title = Ladda befintliga profiler
 Home--additional-content-content = Du kan <strong>dra och släppa</strong> en profilfil här för att ladda den, eller:
 Home--compare-recordings-info = Du kan också jämföra inspelningar.<a>Öppna gränssnitt för att jämföra.</a>
 Home--your-recent-uploaded-recordings-title = Dina senaste uppladdade inspelningar
+Home--dark-mode-title = Mörkt läge
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 =
