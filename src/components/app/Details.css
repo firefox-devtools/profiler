@@ -10,7 +10,7 @@
 
 /* contains the tabbar and, if present, the sidebar button */
 .Details-top-bar {
-  --internal-background-color: var(--grey-10);
+  --internal-background-color: var(--lowered-background-color);
 
   display: flex;
   flex-flow: row nowrap;
@@ -26,10 +26,6 @@
   .Details {
     --internal-sidebar-collapse-icon: url(../../../res/img/svg/pane-collapse-light.svg);
     --internal-sidebar-expand-icon: url(../../../res/img/svg/pane-expand-light.svg);
-  }
-
-  .Details-top-bar {
-    --internal-background-color: var(--base-background-color);
   }
 }
 

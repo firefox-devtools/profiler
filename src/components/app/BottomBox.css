@@ -142,7 +142,7 @@
 
 :root.dark-mode {
   .bottom-box-pane {
-    --internal-sourceview-background-color: var(--ink-80);
+    --internal-sourceview-background-color: var(--grey-80);
     --internal-close-icon: url(../../../res/img/svg/close-light.svg);
     --internal-assembly-icon: url(../../../res/img/svg/asm-icon-light.svg);
   }

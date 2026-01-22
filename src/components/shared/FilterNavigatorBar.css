@@ -29,6 +29,9 @@
   .filterNavigatorBar {
     --internal-selected-color: var(--selected-color, var(--blue-40));
     --internal-separator-img: url(../../../res/img/svg/scope-bar-separator-light.svg);
+    --internal-hover-background-color: rgb(255 255 255 / 0.1);
+    --internal-hover-color: var(--base-foreground-color);
+    --internal-active-background-color: rgb(255 255 255 / 0.2);
   }
 }
 
@@ -110,14 +113,6 @@
   background-size: 24px 24px;
 }
 
-.filterNavigatorBarItem:not(
-    .filterNavigatorBarRootItem,
-    .filterNavigatorBarLeafItem
-  )::before,
-.filterNavigatorBarItem:not(.filterNavigatorBarLeafItem)::after {
-  border-color: var(--internal-background-color);
-}
-
 .filterNavigatorBarItem.filterNavigatorBarSelectedItem {
   background-color: var(--internal-selected-background-color);
   color: var(--internal-selected-color);
@@ -145,7 +140,7 @@
 }
 
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):active:hover {
-  background-color: var(--internal-hover-background-color);
+  background-color: var(--internal-active-background-color);
 }
 
 .filterNavigatorBarItem:not(
@@ -153,7 +148,7 @@
     .filterNavigatorBarLeafItem
   ):active:hover::before,
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):active:hover::after {
-  border-color: var(--internal-hover-background-color);
+  border-color: var(--internal-active-background-color);
 }
 
 .filterNavigatorBarUncommittedItem {

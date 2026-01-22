@@ -15,12 +15,12 @@
   position: unset;
 }
 
-.DetailsContainer .layout-splitter {
+.DetailsContainer.splitter-layout > .layout-splitter {
   border-top: 1px solid var(--panel-border-color);
   border-left: 1px solid var(--panel-border-color);
   background: var(--panel-background-color);
 }
 
-.DetailsContainer .layout-splitter:hover {
+.DetailsContainer.splitter-layout > .layout-splitter:hover {
   background: var(--panel-background-color);
 }

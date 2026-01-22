@@ -169,12 +169,12 @@
   }
 
   .appKeyboardShortcutsShortcut {
-    --internal-background-color: var(--ink-70);
+    --internal-background-color: var(--grey-70);
     --internal-shadow-color: #b1b1b380;
   }
 
   .appKeyboardShortcutsHeader {
-    --internal-background-color: var(--ink-80);
+    --internal-background-color: var(--grey-80);
   }
 
   .appKeyboardShortcutsHeaderClose {

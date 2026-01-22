@@ -82,6 +82,6 @@
 
 :root.dark-mode {
   .zipFileViewerUntrustedFilePath {
-    --internal-background-color: var(--ink-70);
+    --internal-background-color: var(--grey-70);
   }
 }

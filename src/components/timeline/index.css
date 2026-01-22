@@ -115,8 +115,8 @@
 
   /* This div needs to be apaque so that it can properly hide the hidden tracks
    * container border below */
-  background: var(--base-background-color);
-  color: var(--base-foreground-color);
+  background: var(--raised-background-color);
+  color: var(--raised-foreground-color);
 }
 
 .tracksContainer {
@@ -152,13 +152,13 @@
 
 :root.dark-mode {
   .timelineOverflowEdgeIndicatorScrollbox {
-    --internal-background-stop1-color: var(--ink-80);
-    --internal-background-stop2-color: var(--ink-70);
+    --internal-background-stop1-color: var(--grey-80);
+    --internal-background-stop2-color: var(--grey-70);
   }
 
   .timelineThreadList {
-    --internal-background-color: var(--ink-80);
-    --internal-shadow-color: var(--ink-90);
+    --internal-background-color: var(--grey-80);
+    --internal-shadow-color: var(--grey-90);
   }
 
   .timelineSettingsHiddenTracks {

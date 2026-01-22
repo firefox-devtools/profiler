@@ -20,12 +20,12 @@
 
 :root.dark-mode {
   .timelineTrack {
-    --internal-row-selected-border-color: var(--blue-60);
+    --internal-row-selected-border-color: var(--blue-50);
     --internal-label-details-foreground-color: var(--grey-40);
     --internal-close-icon: url(../../../res/img/svg/close-light.svg);
     --internal-close-hover-background-color: rgb(255 255 255 / 0.15);
     --internal-close-active-background-color: rgb(255 255 255 / 0.3);
-    --internal-local-background-color: var(--ink-80);
+    --internal-local-background-color: var(--grey-90);
   }
 }
 
@@ -43,8 +43,8 @@
 
   display: flex;
   flex-flow: row nowrap;
-  background-color: var(--base-background-color);
-  color: var(--base-foreground-color);
+  background-color: var(--raised-background-color);
+  color: var(--raised-foreground-color);
 }
 
 .timelineTrackRow.selected {

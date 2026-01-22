@@ -7,14 +7,14 @@
   --internal-subtitle-border-color: rgb(0 0 0 / 0.05);
 
   width: 350px;
-  color: var(--base-foreground-color);
+  color: var(--menu-foreground-color);
   font-size: 12px;
   line-height: 20px;
 }
 
 .metaInfoPanel,
 .metaInfoPanel .arrowPanelArrow::before {
-  background-color: var(--base-background-color);
+  background-color: var(--menu-background-color);
 }
 
 :root.dark-mode {
