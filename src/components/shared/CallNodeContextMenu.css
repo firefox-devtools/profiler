@@ -27,6 +27,10 @@
   background-image: url(../../../res/img/svg/focus-icon.svg);
 }
 
+.callNodeContextMenuIconFocusSelf {
+  background-image: url(../../../res/img/svg/focus-self-icon.svg);
+}
+
 .callNodeContextMenuIconDrop {
   background-image: url(../../../res/img/svg/drop-icon.svg);
 }

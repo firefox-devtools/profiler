@@ -74,6 +74,18 @@ Merging takes a call node and removes it from the call tree. Any self time for t
 
 Focusing on a function or call node removes all of the ancestor call nodes—the children call nodes remain. If a stack does not contain that function or node, then it is removed. This effectively focuses on a subtree or a set of subtrees on the call tree.
 
+### Focus on Function Self
+
+Focus on function self is similar to focus on function, but more restrictive: it only keeps samples where the focused function is the innermost implementation-filtered frame. This helps you analyze where within a function the self time is being spent, by removing samples where the function is calling other code.
+
+For example, if you focus-self on a JavaScript function with the JS implementation filter, you'll only see samples where that JS function has self time, and any native (C++) calls below it will be shown as descendants. This is particularly useful for:
+
+- Finding which parts of a function are slow (by looking at the assembly or source lines)
+- Understanding what engine internals are being called by a JS function (by switching implementation filter after focusing)
+- Eliminating noise from code your function calls, to concentrate on the function's own execution
+
+If the same function appears multiple times in a stack (recursion), only the innermost instance is kept as the root.
+
 ### Focus on Category
 
 Focusing on the nodes that belong to the same category as the selected node, thereby merging all nodes that belong to another category.

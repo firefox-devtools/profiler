@@ -357,6 +357,13 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
           funcIndex: selectedFunc,
         });
         break;
+      case 'focus-self':
+        addTransformToStack(threadsKey, {
+          type: 'focus-self',
+          funcIndex: selectedFunc,
+          implementation,
+        });
+        break;
       case 'merge-call-node':
         addTransformToStack(threadsKey, {
           type: 'merge-call-node',
@@ -679,6 +686,16 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
           transform: 'focus-subtree',
           title: '',
           content: 'Focus on subtree only',
+        })}
+
+        {this.renderTransformMenuItem({
+          l10nId: 'CallNodeContextMenu--transform-focus-self',
+          shortcut: 'S',
+          icon: 'FocusSelf',
+          onClick: this._handleClick,
+          transform: 'focus-self',
+          title: '',
+          content: 'Focus on self only',
         })}
 
         {hasCategory
