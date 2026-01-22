@@ -55,6 +55,11 @@ export const TRACK_MARKER_HEIGHT = 25;
 export const TRACK_MARKER_LINE_WIDTH = 2;
 export const TRACK_MARKER_DEFAULT_COLOR = 'grey';
 
+// Height for local tracks when the activity graph is hidden.
+// This provides more visual prominence for marker and counter tracks when they're
+// the only visualization for a thread.
+export const TRACK_LOCAL_HEIGHT_WITHOUT_ACTIVITYGRAPH = 40;
+
 // Height of the blank area in process track.
 export const TRACK_PROCESS_BLANK_HEIGHT = 30;
 

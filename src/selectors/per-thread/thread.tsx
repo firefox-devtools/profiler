@@ -92,6 +92,27 @@ export function getBasicThreadSelectorsPerThread(
       ? ProfileSelectors.getProfile(state).threads[singleThreadIndex]
       : getMergedRawThread(state);
 
+  /**
+   * Check if this thread should hide its activity graph.
+   * This applies to single non-main threads in a process with no samples and no CPU usage.
+   */
+  const getShouldHideActivityGraph: Selector<boolean> = createSelector(
+    ProfileSelectors.getThreadIndexesThatShouldHideActivityGraph,
+    (threadIndexesThatShouldHide) => {
+      // For merged threads, if any of the threads should hide, then hide
+      if (singleThreadIndex !== null) {
+        return threadIndexesThatShouldHide.has(singleThreadIndex);
+      }
+      // For merged threads, only hide if all threads should hide
+      for (const threadIndex of threadIndexes) {
+        if (!threadIndexesThatShouldHide.has(threadIndex)) {
+          return false;
+        }
+      }
+      return threadIndexes.size > 0;
+    }
+  );
+
   const getRawSamplesTable: Selector<RawSamplesTable> = (state) =>
     getRawThread(state).samples;
   const getSamplesTable: Selector<SamplesTable> = createSelector(
@@ -407,6 +428,7 @@ export function getBasicThreadSelectorsPerThread(
     getCanShowRetainedMemory,
     getFunctionsReservedThread,
     getProcessedEventDelays,
+    getShouldHideActivityGraph,
     getCallTreeSummaryStrategy,
   };
 }
