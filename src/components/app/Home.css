@@ -9,6 +9,7 @@
   --internal-screenshot-shadow-color: #ddd;
   --internal-button-disabled-foreground-color: var(--grey-50);
   --internal-button-enabled-foreground-color: var(--blue-60);
+  --internal-button-enabled-hover-foreground-color: #fff;
   --internal-button-enabled-hover-background-color: var(--blue-60);
   --internal-docs-icon: url(../../../res/img/svg/help-blue.svg);
 
@@ -29,7 +30,6 @@
     --internal-screenshot-shadow-color: var(--grey-90);
     --internal-button-disabled-foreground-color: var(--grey-10-a40);
     --internal-button-enabled-foreground-color: var(--blue-40);
-    --internal-button-enabled-hover-background-color: var(--grey-50);
     --internal-docs-icon: url(../../../res/img/svg/help-blue-light.svg);
   }
 }
@@ -160,7 +160,7 @@
 .homeSectionButton:not(:disabled):hover,
 .homeSectionButton:not(:disabled)[aria-expanded='true'] {
   background-color: var(--internal-button-enabled-hover-background-color);
-  color: var(--base-foreground-color);
+  color: var(--internal-button-enabled-hover-foreground-color);
 }
 
 .homeSectionPlus {
