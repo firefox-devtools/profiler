@@ -14,7 +14,7 @@
 
 :root.dark-mode {
   .appErrorBoundary {
-    --internal-background-color: var(--ink-80);
+    --internal-background-color: var(--grey-80);
   }
 }
 

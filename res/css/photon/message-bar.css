@@ -49,7 +49,7 @@
 :root.dark-mode {
   .photon-message-bar {
     --internal-foreground-color: var(--grey-20);
-    --internal-background-color: var(--ink-60);
+    --internal-background-color: var(--grey-60);
     --internal-error-foreground-color: var(--grey-20);
     --internal-error-background-color: var(--red-60);
     --internal-warning-foreground-color: var(--grey-20);

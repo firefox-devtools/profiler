@@ -4,8 +4,8 @@
 
 .timelineTrackContextMenu {
   max-height: 43.5vh;
-  background-color: var(--base-background-color);
-  color: var(--base-foreground-color);
+  background-color: var(--menu-background-color);
+  color: var(--menu-foreground-color);
   overflow-y: auto;
 }
 
@@ -29,7 +29,7 @@
 }
 
 .react-contextmenu-item--selected .timelineTrackContextMenuPid {
-  color: var(--base-foreground-color);
+  color: var(--menu-foreground-color);
 }
 
 .trackContextMenuSearchFilter {

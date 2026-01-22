@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .jsTracerSettings {
-  --internal-foreground-color: var(--ink-70);
+  --internal-foreground-color: var(--grey-70);
 
   display: flex;
   height: 25px;

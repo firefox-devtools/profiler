@@ -11,14 +11,16 @@
   border: none;
   margin: 0;
   background: none;
-  color: var(--base-foreground-color);
+  color: inherit;
   font: inherit;
   text-overflow: ellipsis;
 }
 
 .tabBarTabWrapper {
+  --internal-foreground-color: var(--lowered-foreground-color);
+  --internal-selected-background-color: var(--raised-background-color);
   --internal-selected-highlight-color: var(--blue-50);
-  --internal-selected-foreground-color: var(--blue-60);
+  --internal-selected-foreground-color: var(--raised-foreground-color);
   --internal-hover-highlight-color: var(--grey-40);
   --internal-hover-background-color: var(--grey-20);
 
@@ -35,10 +37,8 @@
 
 :root.dark-mode {
   .tabBarTabWrapper {
-    --internal-selected-highlight-color: var(--blue-50);
-    --internal-selected-foreground-color: var(--blue-60);
-    --internal-hover-highlight-color: var(--ink-70);
-    --internal-hover-background-color: var(--ink-90);
+    --internal-hover-highlight-color: var(--grey-60);
+    --internal-hover-background-color: var(--grey-80);
   }
 }
 
@@ -50,10 +50,12 @@
   border-width: 0 1px;
   margin: 0 -0.5px 1px; /* The -0.5px horizontal margin makes the 1px border between adjacent tabs overlap. The 1px bottom margin makes space for the .Details-top-bar bottom border. */
   background-clip: padding-box;
+  color: var(--internal-foreground-color);
   cursor: default;
   font-size: 12px;
   text-align: center;
   transition:
+    color 200ms,
     background-color 200ms,
     border-color 200ms;
   transition-timing-function: var(--animation-timing);
@@ -84,6 +86,7 @@
 .tabBarTab:not(.selected):hover {
   border-color: var(--internal-hover-background-color);
   background-color: var(--internal-hover-background-color);
+  color: var(--internal-selected-foreground-color);
 }
 
 .tabBarTab:not(.selected):hover::before {
@@ -95,7 +98,7 @@
   padding: 6px 4px;
   border-color: var(--base-border-color);
   margin: 0 -0.5px; /* No bottom margin, so that this tab covers the .Details-top-bar bottom border. */
-  background: var(--base-background-color);
+  background: var(--internal-selected-background-color);
   color: var(--internal-selected-foreground-color);
   transition: none; /* Switch the background color instantly when a tab is selected */
 }
