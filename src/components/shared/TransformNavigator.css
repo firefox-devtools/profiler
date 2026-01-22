@@ -14,8 +14,8 @@
 
 :root.dark-mode {
   .calltreeTransformNavigator {
-    --internal-foreground-color: var(--base-foreground-color);
+    --internal-foreground-color: var(--lowered-foreground-color);
     --internal-border-color: var(--base-border-color);
-    --internal-background-color: var(--base-background-color);
+    --internal-background-color: var(--lowered-background-color);
   }
 }

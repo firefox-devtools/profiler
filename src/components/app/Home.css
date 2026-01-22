@@ -9,6 +9,7 @@
   --internal-screenshot-shadow-color: #ddd;
   --internal-button-disabled-foreground-color: var(--grey-50);
   --internal-button-enabled-foreground-color: var(--blue-60);
+  --internal-button-enabled-hover-foreground-color: #fff;
   --internal-button-enabled-hover-background-color: var(--blue-60);
   --internal-docs-icon: url(../../../res/img/svg/help-blue.svg);
 
@@ -23,13 +24,12 @@
 
 :root.dark-mode {
   .home {
-    --internal-special-background-color: var(--ink-70);
-    --internal-special-border-color: var(--ink-40);
-    --internal-screenshot-border-color: var(--ink-40);
-    --internal-screenshot-shadow-color: var(--ink-90);
+    --internal-special-background-color: var(--grey-70);
+    --internal-special-border-color: var(--grey-40);
+    --internal-screenshot-border-color: var(--grey-40);
+    --internal-screenshot-shadow-color: var(--grey-90);
     --internal-button-disabled-foreground-color: var(--grey-10-a40);
     --internal-button-enabled-foreground-color: var(--blue-40);
-    --internal-button-enabled-hover-background-color: var(--ink-50);
     --internal-docs-icon: url(../../../res/img/svg/help-blue-light.svg);
   }
 }
@@ -52,7 +52,7 @@
   padding: 4em 8em;
   border: 1px solid var(--home-border-color);
   border-radius: 3px;
-  background-color: var(--base-background-color);
+  background-color: var(--home-background-color);
   box-shadow: 0 5px 25px var(--home-shadow-color);
   font-size: 130%;
 }
@@ -60,12 +60,12 @@
 .homeSection kbd {
   display: inline-block;
   padding: 0 0.5em;
-  border: 1px solid var(--internal-kbd-border-color);
+  border: 1px solid var(--kbd-border-color);
   border-radius: 0.2em;
   margin: 0 0.2em;
-  background-color: var(--internal-kbd-background-color);
-  box-shadow: 0.1em 0.1em 0 var(--internal-kbd-shadow-color);
-  color: var(--internal-kbd-foreground-color);
+  background-color: var(--kbd-background-color);
+  box-shadow: 0.1em 0.1em 0 var(--kbd-shadow-color);
+  color: var(--kbd-foreground-color);
 }
 
 .homeSectionItems {
@@ -160,7 +160,7 @@
 .homeSectionButton:not(:disabled):hover,
 .homeSectionButton:not(:disabled)[aria-expanded='true'] {
   background-color: var(--internal-button-enabled-hover-background-color);
-  color: var(--base-foreground-color);
+  color: var(--internal-button-enabled-hover-foreground-color);
 }
 
 .homeSectionPlus {

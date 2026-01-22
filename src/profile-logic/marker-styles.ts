@@ -21,7 +21,7 @@ type MarkerStyle = {
 const defaultStyle: MarkerStyle = {
   top: 0,
   height: 6,
-  _background: ['black', '#ededf0'],
+  _background: ['black', colors.GREY_40],
   getBackground: function () {
     return maybeLightDark(this._background);
   },
@@ -154,7 +154,7 @@ const markerStyles: { readonly [styleName: string]: MarkerStyle } = {
   },
   Jank: {
     ...defaultStyle,
-    _background: 'hsl(347, 100%, 60%)',
+    _background: ['hsl(347, 100%, 60%)', 'hsl(347, 75%, 50%)'],
     borderLeft: colors.RED_50,
     borderRight: colors.RED_50,
     squareCorners: true,
@@ -163,7 +163,7 @@ const markerStyles: { readonly [styleName: string]: MarkerStyle } = {
   // unavailable. Let's style them like Jank markers.
   'BHR-detected hang': {
     ...defaultStyle,
-    _background: 'hsl(347, 100%, 60%)',
+    _background: ['hsl(347, 100%, 60%)', 'hsl(347, 75%, 50%)'],
     borderLeft: colors.RED_50,
     borderRight: colors.RED_50,
     squareCorners: true,
