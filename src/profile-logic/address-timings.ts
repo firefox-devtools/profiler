@@ -77,7 +77,9 @@ import type {
   StackAddressInfo,
   AddressTimings,
   Address,
+  IndexIntoAddressSetTable,
 } from 'firefox-profiler/types';
+import { IntSetTableBuilder } from 'firefox-profiler/utils/intset-table';
 
 import { getMatchingAncestorStackForInvertedCallNode } from './profile-data';
 import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
@@ -135,48 +137,32 @@ export function getStackAddressInfo(
   _funcTable: FuncTable,
   nativeSymbol: IndexIntoNativeSymbolTable
 ): StackAddressInfo {
-  // "self address" == "the address which a stack's self time is contributed to"
-  const selfAddressForAllStacks = [];
-  // "total addresses" == "the set of addresses whose total time this stack contributes to"
-  const totalAddressesForAllStacks: Array<Set<Address> | null> = [];
+  const builder = new IntSetTableBuilder();
+  const stackIndexToAddressSetIndex = new Int32Array(stackTable.length);
 
-  // This loop takes advantage of the fact that the stack table is topologically ordered:
-  // Prefix stacks are always visited before their descendants.
-  // Each stack inherits the "total" addresses from its parent stack, and then adds its
-  // self address to that set. If the stack doesn't have a self address in the library, we just
-  // re-use the prefix's set object without copying it.
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    const frame = stackTable.frame[stackIndex];
     const prefixStack = stackTable.prefix[stackIndex];
+    const prefixAddressSet: IndexIntoAddressSetTable | -1 =
+      prefixStack !== null ? stackIndexToAddressSetIndex[prefixStack] : -1;
+
+    const frame = stackTable.frame[stackIndex];
     const nativeSymbolOfThisStack = frameTable.nativeSymbol[frame];
+    const matchesNativeSymbol = nativeSymbolOfThisStack === nativeSymbol;
+    if (prefixAddressSet === -1 && !matchesNativeSymbol) {
+      stackIndexToAddressSetIndex[stackIndex] = -1;
+    } else {
+      const selfAddress = matchesNativeSymbol ? frameTable.address[frame] : -1;
 
-    let selfAddress: Address | null = null;
-    let totalAddresses: Set<Address> | null =
-      prefixStack !== null ? totalAddressesForAllStacks[prefixStack] : null;
-
-    if (nativeSymbolOfThisStack === nativeSymbol) {
-      selfAddress = frameTable.address[frame];
-      if (selfAddress !== -1) {
-        // Add this stack's address to this stack's totalAddresses. The rest of this stack's
-        // totalAddresses is the same as for the parent stack.
-        // We avoid creating new Set objects unless the new set is actually
-        // different.
-        if (totalAddresses === null) {
-          // None of the ancestor stack nodes have hit a address in the given library.
-          totalAddresses = new Set([selfAddress]);
-        } else if (!totalAddresses.has(selfAddress)) {
-          totalAddresses = new Set(totalAddresses);
-          totalAddresses.add(selfAddress);
-        }
-      }
+      stackIndexToAddressSetIndex[stackIndex] =
+        builder.indexForSetWithParentAndSelf(
+          prefixAddressSet !== -1 ? prefixAddressSet : null,
+          selfAddress
+        );
     }
-
-    selfAddressForAllStacks.push(selfAddress);
-    totalAddressesForAllStacks.push(totalAddresses);
   }
   return {
-    selfAddress: selfAddressForAllStacks,
-    stackAddresses: totalAddressesForAllStacks,
+    stackIndexToAddressSetIndex,
+    addressSetTable: builder.finish(),
   };
 }
 
@@ -502,30 +488,58 @@ export function getAddressTimings(
   if (stackAddressInfo === null) {
     return emptyAddressTimings;
   }
-  const { selfAddress, stackAddresses } = stackAddressInfo;
-  const totalAddressHits: Map<Address, number> = new Map();
-  const selfAddressHits: Map<Address, number> = new Map();
 
-  // Iterate over all the samples, and aggregate the sample's weight into the
-  // addresses which are hit by the sample's stack.
-  // TODO: Maybe aggregate sample count per stack first, and then visit each stack only once?
+  const { stackIndexToAddressSetIndex, addressSetTable } = stackAddressInfo;
+  // Iterate over all the samples, and aggregate the sample's weight into
+  // selfPerAddressSet.
+  const selfPerAddressSet = new Float64Array(addressSetTable.length);
   for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
     const stackIndex = samples.stack[sampleIndex];
     if (stackIndex === null) {
       continue;
     }
-    const weight = samples.weight ? samples.weight[sampleIndex] : 1;
-    const setOfHitAddresses = stackAddresses[stackIndex];
-    if (setOfHitAddresses !== null) {
-      for (const address of setOfHitAddresses) {
-        const oldHitCount = totalAddressHits.get(address) ?? 0;
-        totalAddressHits.set(address, oldHitCount + weight);
+    const addressSetIndex = stackIndexToAddressSetIndex[stackIndex];
+    if (addressSetIndex !== -1) {
+      const weight = samples.weight ? samples.weight[sampleIndex] : 1;
+      selfPerAddressSet[addressSetIndex] += weight;
+    }
+  }
+
+  const totalAddressHits: Map<Address, number> = new Map();
+  const selfAddressHits: Map<Address, number> = new Map();
+  const selfSumOfAddressSetDescendants = new Float64Array(
+    addressSetTable.length
+  );
+
+  for (
+    let addressSetIndex = addressSetTable.length - 1;
+    addressSetIndex >= 0;
+    addressSetIndex--
+  ) {
+    const selfWeight = selfPerAddressSet[addressSetIndex];
+    if (selfWeight !== 0) {
+      const selfAddress = addressSetTable.self[addressSetIndex];
+      if (selfAddress !== -1) {
+        const oldHitCount = selfAddressHits.get(selfAddress) ?? 0;
+        selfAddressHits.set(selfAddress, oldHitCount + selfWeight);
       }
     }
-    const address = selfAddress[stackIndex];
-    if (address !== null) {
-      const oldHitCount = selfAddressHits.get(address) ?? 0;
-      selfAddressHits.set(address, oldHitCount + weight);
+
+    const selfSumOfThisAddressSetDescendants =
+      selfSumOfAddressSetDescendants[addressSetIndex];
+    const thisAddressSetWeight =
+      selfWeight + selfSumOfThisAddressSetDescendants;
+    const AddressSetPrefix = addressSetTable.prefix[addressSetIndex];
+    if (AddressSetPrefix !== null) {
+      selfSumOfAddressSetDescendants[AddressSetPrefix] += thisAddressSetWeight;
+    }
+
+    if (thisAddressSetWeight !== 0) {
+      const address = addressSetTable.value[addressSetIndex];
+      if (address !== -1) {
+        const oldHitCount = totalAddressHits.get(address) ?? 0;
+        totalAddressHits.set(address, oldHitCount + thisAddressSetWeight);
+      }
     }
   }
   return { totalAddressHits, selfAddressHits };
