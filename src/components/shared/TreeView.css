@@ -215,6 +215,11 @@
 }
 /* stylelint-enable order/properties-order, declaration-block-no-duplicate-properties, value-keyword-case */
 
+/* Override opacity level of appendage column when selected for better a11y */
+.treeViewBody:focus .treeViewRow.isSelected .treeViewAppendageColumn {
+  opacity: 0.9;
+}
+
 .treeViewBody:focus .treeViewRow.isSelected a {
   color: inherit;
 }
