@@ -425,7 +425,19 @@ export function formatTimestamp(
   maxFractionalDigits: number = 3,
   // precision is the minimum required precision.
   precision: Milliseconds = Infinity
-) {
+): string {
+  if (time < 0) {
+    return (
+      '-' +
+      formatTimestamp(
+        Math.abs(time),
+        significantDigits,
+        maxFractionalDigits,
+        precision
+      )
+    );
+  }
+
   if (precision !== Infinity) {
     // Round the values to display nicer numbers when the extra precision
     // isn't useful. (eg. show 3h52min10s instead of 3h52min14s)

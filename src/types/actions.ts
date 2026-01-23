@@ -554,6 +554,10 @@ type UrlStateAction =
       readonly mouseTimePosition: Milliseconds | null;
     }
   | {
+      readonly type: 'OVERRIDE_ZERO_AT';
+      readonly zeroAt: Milliseconds | null;
+    }
+  | {
       readonly type: 'CHANGE_TABLE_VIEW_OPTIONS';
       readonly tab: TabSlug;
       readonly tableViewOptions: TableViewOptions;
