@@ -257,5 +257,5 @@ export function getForegroundColor(): string {
 }
 
 export function getBackgroundColor(): string {
-  return lightDark('#ffffff', INK_90);
+  return lightDark('#ffffff', '#18181a');
 }

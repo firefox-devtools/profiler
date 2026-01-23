@@ -13,8 +13,8 @@
 
 :root.dark-mode {
   .timelineTrackScreenshot {
-    --internal-backgrond-color: var(--ink-90);
-    --internal-img-backgrond-color: var(--ink-80);
+    --internal-backgrond-color: var(--grey-90);
+    --internal-img-backgrond-color: var(--grey-80);
   }
 }
 

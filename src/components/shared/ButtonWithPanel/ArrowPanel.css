@@ -49,9 +49,9 @@
 
 :root.dark-mode {
   .arrowPanel {
-    --internal-background-color: var(--ink-70);
+    --internal-background-color: var(--menu-background-color);
     --internal-border-color: var(--grey-60);
-    --internal-shadow-color: rgb(0 0 0 / 0.35);
+    --internal-shadow-color: rgb(0 0 0 / 0.4);
   }
 }
 
