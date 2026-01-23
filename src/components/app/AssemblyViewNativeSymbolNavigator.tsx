@@ -60,9 +60,12 @@ class AssemblyViewNativeSymbolNavigatorImpl extends React.PureComponent<Props> {
 
     return (
       <>
-        <h3 className="bottom-box-title-trailer">
-          {index !== null && count > 1 ? `${index + 1} of ${count}` : ''}
-        </h3>
+        <Localized
+          id="AssemblyView--position-label"
+          vars={{ current: index + 1, total: count }}
+        >
+          <h3 className="bottom-box-title-trailer" />
+        </Localized>
         <Localized id="AssemblyView--prev-button" attrs={{ title: true }}>
           <button
             className={classNames(

@@ -198,7 +198,9 @@ describe('BottomBox', () => {
     expect(assemblyView()).toBeInTheDocument();
 
     // Verify we're showing "1 of 2"
-    const titleTrailer = await screen.findByText('1 of 2');
+    const titleTrailer = await screen.findByText(
+      '\u20681\u2069 of \u20682\u2069'
+    );
     expect(titleTrailer).toBeInTheDocument();
 
     // Find the prev and next buttons
@@ -217,7 +219,9 @@ describe('BottomBox', () => {
     fireFullClick(nextButton);
 
     // Now we should see "2 of 2"
-    expect(await screen.findByText('2 of 2')).toBeInTheDocument();
+    expect(
+      await screen.findByText('\u20682\u2069 of \u20682\u2069')
+    ).toBeInTheDocument();
 
     // Now prev should be enabled and next should be disabled
     expect(prevButton).toBeEnabled();
@@ -227,7 +231,9 @@ describe('BottomBox', () => {
     fireFullClick(prevButton);
 
     // We should be back to "1 of 2"
-    expect(await screen.findByText('1 of 2')).toBeInTheDocument();
+    expect(
+      await screen.findByText('\u20681\u2069 of \u20682\u2069')
+    ).toBeInTheDocument();
     expect(prevButton).toBeDisabled();
     expect(nextButton).toBeEnabled();
   });
