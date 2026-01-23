@@ -16,11 +16,7 @@ import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
 import { ensureExists } from 'firefox-profiler/utils/types';
 import { getTimeRangeIncludingAllThreads } from 'firefox-profiler/profile-logic/profile-data';
 import { StringTable } from '../../utils/string-table';
-import type {
-  RawThread,
-  RawProfileSharedData,
-  Profile,
-} from 'firefox-profiler/types';
+import type { RawProfileSharedData, Profile } from 'firefox-profiler/types';
 
 describe('mergeProfilesForDiffing function', function () {
   it('merges the various tables properly in the diffing profile', function () {
@@ -41,10 +37,9 @@ describe('mergeProfilesForDiffing function', function () {
     );
     expect(mergedProfile.threads).toHaveLength(3);
 
-    const mergedThread = mergedProfile.threads[2];
     const mergedLibs = mergedProfile.libs;
-    const mergedResources = mergedThread.resourceTable;
-    const mergedFunctions = mergedThread.funcTable;
+    const mergedResources = mergedProfile.shared.resourceTable;
+    const mergedFunctions = mergedProfile.shared.funcTable;
     const stringArray = mergedProfile.shared.stringArray;
 
     expect(mergedLibs).toHaveLength(3);
@@ -197,12 +192,10 @@ describe('mergeProfilesForDiffing function', function () {
       'Z[lib:libB]  W[lib:libB]'
     );
 
-    const threadA = sampleProfileA.profile.threads[0];
-    const threadB = sampleProfileB.profile.threads[0];
     const stringTableA = sampleProfileA.stringTable;
     const stringTableB = sampleProfileB.stringTable;
 
-    threadA.nativeSymbols = {
+    sampleProfileA.profile.shared.nativeSymbols = {
       length: 2,
       name: [
         stringTableA.indexForString('X'),
@@ -213,7 +206,7 @@ describe('mergeProfilesForDiffing function', function () {
       functionSize: [null, null],
     };
 
-    threadB.nativeSymbols = {
+    sampleProfileB.profile.shared.nativeSymbols = {
       length: 2,
       name: [
         stringTableB.indexForString('Z'),
@@ -234,14 +227,9 @@ describe('mergeProfilesForDiffing function', function () {
       [profileState, profileState]
     );
 
-    // The merged profile has a single merged libs list, so the two threads
-    // should now be referring to different libIndexes.
-    const mergedProfileThreadA = mergedProfile.threads[0];
-    const mergedProfileThreadB = mergedProfile.threads[1];
-    const mergedThread = mergedProfile.threads[2];
-    expect(mergedProfileThreadA.nativeSymbols.libIndex).toEqual([0, 0]);
-    expect(mergedProfileThreadB.nativeSymbols.libIndex).toEqual([1, 1]);
-    expect(mergedThread.nativeSymbols.libIndex).toEqual([0, 0, 1, 1]);
+    // The merged profile has a single merged libs list, so the native symbols
+    // should now be merged with updated libIndexes.
+    expect(mergedProfile.shared.nativeSymbols.libIndex).toEqual([0, 0, 1, 1]);
   });
 
   it('should use marker timing if there are no samples', () => {
@@ -278,11 +266,8 @@ describe('mergeProfilesForDiffing function', function () {
 });
 
 describe('mergeThreads function', function () {
-  function getFriendlyFuncLibResources(
-    thread: RawThread,
-    shared: RawProfileSharedData
-  ): string[] {
-    const { funcTable, resourceTable } = thread;
+  function getFriendlyFuncLibResources(shared: RawProfileSharedData): string[] {
+    const { funcTable, resourceTable } = shared;
     const strings = [];
     for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
       const funcName = shared.stringArray[funcTable.name[funcIndex]];
@@ -304,10 +289,10 @@ describe('mergeThreads function', function () {
       'A[lib:libA]  A[lib:libB]  C[lib:libC]'
     );
 
-    const mergedThread = mergeThreads(profile.threads);
+    mergeThreads(profile.threads);
 
-    const mergedResources = mergedThread.resourceTable;
-    const mergedFunctions = mergedThread.funcTable;
+    const mergedResources = profile.shared.resourceTable;
+    const mergedFunctions = profile.shared.funcTable;
 
     expect(profile.libs).toHaveLength(3);
     expect(mergedResources).toHaveLength(3);
@@ -316,7 +301,7 @@ describe('mergeThreads function', function () {
     // Now check that all functions are linked to the right resources.
     // We should have 2 A functions, linked to 2 different resources.
     // And we should have 1 B function, and 1 C function.
-    expect(getFriendlyFuncLibResources(mergedThread, profile.shared)).toEqual([
+    expect(getFriendlyFuncLibResources(profile.shared)).toEqual([
       'A [libA]',
       'B [libA]',
       'A [libB]',
@@ -331,10 +316,10 @@ describe('mergeThreads function', function () {
       'A[lib:libA]  A[lib:libB]  D[lib:libD]'
     );
 
-    const mergedThread = mergeThreads(profile.threads);
+    mergeThreads(profile.threads);
 
-    const mergedResources = mergedThread.resourceTable;
-    const mergedFunctions = mergedThread.funcTable;
+    const mergedResources = profile.shared.resourceTable;
+    const mergedFunctions = profile.shared.funcTable;
 
     expect(profile.libs).toHaveLength(4);
     expect(mergedResources).toHaveLength(4);
@@ -343,7 +328,7 @@ describe('mergeThreads function', function () {
     // Now check that all functions are linked to the right resources.
     // We should have 2 A functions, linked to 2 different resources.
     // And we should have 1 B function, 1 C function and 1 D function.
-    expect(getFriendlyFuncLibResources(mergedThread, profile.shared)).toEqual([
+    expect(getFriendlyFuncLibResources(profile.shared)).toEqual([
       'A [libA]',
       'B [libA]',
       'A [libB]',
@@ -484,9 +469,10 @@ describe('mergeThreads function', function () {
     // The stack from the marker in the first thread shouldn't have been touched
     expect(markerStacksAfterMerge[0]).toBe(markerStacksBeforeMerge[0]);
     // But the stack from the marker in the second thread was touched and was
-    // offset by the size of the first thread's stack table.
+    // offset by the size of the stack table at merge time.
+    // Since stackTable is now shared, this test may need adjustment.
     expect(markerStacksAfterMerge[1]).toBe(
-      markerStacksBeforeMerge[1] + profile.threads[0].stackTable.length
+      markerStacksBeforeMerge[1] + profile.shared.stackTable.length
     );
   });
 
@@ -738,23 +724,21 @@ describe('mergeProfilesForDiffing with source tables', function () {
       [profileState, profileState]
     );
 
-    // Check that all threads have valid source references
-    for (const thread of mergedProfile.threads) {
-      for (let i = 0; i < thread.funcTable.length; i++) {
-        const sourceIndex = thread.funcTable.source[i];
-        // Source index should be valid
-        expect(sourceIndex).not.toBeNull();
-        expect(sourceIndex).toBeGreaterThanOrEqual(0);
-        expect(sourceIndex).toBeLessThan(mergedProfile.shared.sources.length);
+    // Check that all source references in the funcTable are valid
+    for (let i = 0; i < mergedProfile.shared.funcTable.length; i++) {
+      const sourceIndex = mergedProfile.shared.funcTable.source[i];
+      // Source index should be valid
+      expect(sourceIndex).not.toBeNull();
+      expect(sourceIndex).toBeGreaterThanOrEqual(0);
+      expect(sourceIndex).toBeLessThan(mergedProfile.shared.sources.length);
 
-        // Should reference a valid filename in the string table
-        const filenameIndex =
-          mergedProfile.shared.sources.filename[ensureExists(sourceIndex)];
-        expect(filenameIndex).toBeGreaterThanOrEqual(0);
-        expect(filenameIndex).toBeLessThan(
-          mergedProfile.shared.stringArray.length
-        );
-      }
+      // Should reference a valid filename in the string table
+      const filenameIndex =
+        mergedProfile.shared.sources.filename[ensureExists(sourceIndex)];
+      expect(filenameIndex).toBeGreaterThanOrEqual(0);
+      expect(filenameIndex).toBeLessThan(
+        mergedProfile.shared.stringArray.length
+      );
     }
   });
 

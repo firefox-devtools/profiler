@@ -11,7 +11,6 @@ import {
   getJsTracerFixed,
 } from '../../profile-logic/js-tracer';
 import { getEmptyProfile } from '../../profile-logic/data-structures';
-import { StringTable } from '../../utils/string-table';
 import { formatTree, addSourceToTable } from '../fixtures/utils';
 import {
   getProfileFromTextSamples,
@@ -129,16 +128,12 @@ describe('convertJsTracerToThread', function () {
     const profile = getEmptyProfile();
     profile.shared.stringArray = existingProfile.shared.stringArray;
     const jsTracer = ensureExists(existingThread.jsTracer);
-    const stringTable = StringTable.withBackingArray(
-      profile.shared.stringArray
-    );
     profile.threads = [
       convertJsTracerToThread(
         existingThread,
+        profile.shared,
         jsTracer,
-        categories,
-        stringTable,
-        profile.shared.sources
+        categories
       ),
     ];
     const { getState } = storeWithProfile(profile);
@@ -353,10 +348,10 @@ describe('selectors/getJsTracerTiming', function () {
         const foo = funcNamesDict['Foo.js'];
         const fooLine = 3;
         const fooColumn = 5;
-        thread.funcTable.lineNumber[foo] = fooLine;
-        thread.funcTable.columnNumber[foo] = fooColumn;
+        profile.shared.funcTable.lineNumber[foo] = fooLine;
+        profile.shared.funcTable.columnNumber[foo] = fooColumn;
         const fooUrlIndex = stringTable.indexForString('https://mozilla.org');
-        thread.funcTable.source[foo] = addSourceToTable(
+        profile.shared.funcTable.source[foo] = addSourceToTable(
           profile.shared.sources,
           fooUrlIndex
         );
@@ -364,20 +359,20 @@ describe('selectors/getJsTracerTiming', function () {
         const bar = funcNamesDict['Bar.js'];
         const barLine = 7;
         const barColumn = 11;
-        thread.funcTable.lineNumber[bar] = barLine;
-        thread.funcTable.columnNumber[bar] = barColumn;
+        profile.shared.funcTable.lineNumber[bar] = barLine;
+        profile.shared.funcTable.columnNumber[bar] = barColumn;
         const barUrlIndex = stringTable.indexForString('https://mozilla.org');
-        thread.funcTable.source[bar] = addSourceToTable(
+        profile.shared.funcTable.source[bar] = addSourceToTable(
           profile.shared.sources,
           barUrlIndex
         );
 
         const baz = funcNamesDict['Baz.js'];
         // Use bar's line and column information.
-        thread.funcTable.lineNumber[baz] = barLine;
-        thread.funcTable.columnNumber[baz] = barColumn;
+        profile.shared.funcTable.lineNumber[baz] = barLine;
+        profile.shared.funcTable.columnNumber[baz] = barColumn;
         const bazUrlIndex = stringTable.indexForString('https://mozilla.org');
-        thread.funcTable.source[baz] = addSourceToTable(
+        profile.shared.funcTable.source[baz] = addSourceToTable(
           profile.shared.sources,
           bazUrlIndex
         );
