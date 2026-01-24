@@ -623,6 +623,12 @@ const assemblyView: Reducer<AssemblyViewState> = (
         isOpen: true,
       };
     }
+    case 'CHANGE_ASSEMBLY_VIEW_NATIVE_SYMBOL_ENTRY_INDEX': {
+      return {
+        ...state,
+        currentNativeSymbol: action.entryIndex,
+      };
+    }
     case 'CLOSE_ASSEMBLY_VIEW': {
       return {
         ...state,
