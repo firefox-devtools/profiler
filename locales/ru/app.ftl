@@ -1188,6 +1188,12 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = Скрыть вид сборки
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = Предыдущее
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = Далее
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
