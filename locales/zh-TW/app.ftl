@@ -1081,6 +1081,17 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = 隱藏機器碼畫面
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = 上一個
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = 下一個
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = 第 { $current } 個，共 { $total } 個
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
