@@ -1194,6 +1194,11 @@ AssemblyView--prev-button =
 # The "▶" button above the assembly view.
 AssemblyView--next-button =
     .title = Далее
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = { $current } из { $total }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
