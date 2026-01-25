@@ -28,12 +28,12 @@
   /* Box */
   box-sizing: border-box;
   flex-direction: column;
-  border: 1px solid #ccc;
+  border: 1px solid var(--home-border-color);
   border-radius: 3px;
 
   /* Other */
-  background-color: #fff;
-  box-shadow: 0 5px 25px #0b1f50;
+  background-color: var(--base-background-color);
+  box-shadow: 0 5px 25px var(--home-shadow-color);
 }
 
 .zipFileViewerSection > .treeView {
@@ -51,10 +51,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-top: 1px solid var(--grey-30);
+  border-top: 1px solid var(--base-border-color);
 
   /* Other */
-  background-color: #f5f5f5;
+  background-color: var(--row-odd-background-color);
   font-size: 14px;
 }
 
@@ -63,6 +63,8 @@
 }
 
 .zipFileViewerUntrustedFilePath {
+  --internal-background-color: var(--grey-30);
+
   display: inline-block;
   overflow: hidden;
 
@@ -73,7 +75,13 @@
   max-width: 70%;
   padding: 0 5px;
   border-radius: 3px;
-  background-color: var(--grey-30);
+  background-color: var(--internal-background-color);
   font-family: monospace;
   text-overflow: ellipsis;
+}
+
+:root.dark-mode {
+  .zipFileViewerUntrustedFilePath {
+    --internal-background-color: var(--grey-70);
+  }
 }

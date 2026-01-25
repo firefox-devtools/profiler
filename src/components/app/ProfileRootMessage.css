@@ -19,10 +19,10 @@
   max-width: 600px;
   box-sizing: border-box;
   padding: 3em;
-  border: 1px solid #ccc;
+  border: 1px solid var(--home-border-color);
   border-radius: 3px;
-  background-color: #fff;
-  box-shadow: 0 5px 25px #0b1f50;
+  background-color: var(--home-background-color);
+  box-shadow: 0 5px 25px var(--home-shadow-color);
   font-size: 130%;
 }
 
@@ -38,7 +38,7 @@
 
 .rootMessageAdditional {
   padding-top: 1em;
-  border-top: 1px solid #ccc;
+  border-top: 1px solid var(--home-border-color);
   margin-top: 1em;
   font-size: 12px;
 }

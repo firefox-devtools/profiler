@@ -226,6 +226,23 @@ own importer
         Drop a saved profile here
       </div>
     </div>
+    <div
+      class="homeDarkModeBox"
+    >
+      <label
+        class="photon-label"
+        for="home-dark-mode"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          id="home-dark-mode"
+          type="checkbox"
+        />
+        <span>
+          Dark mode
+        </span>
+      </label>
+    </div>
   </main>
 </div>
 `;
@@ -511,6 +528,23 @@ own importer
         Drop a saved profile here
       </div>
     </div>
+    <div
+      class="homeDarkModeBox"
+    >
+      <label
+        class="photon-label"
+        for="home-dark-mode"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          id="home-dark-mode"
+          type="checkbox"
+        />
+        <span>
+          Dark mode
+        </span>
+      </label>
+    </div>
   </main>
 </div>
 `;
@@ -735,6 +769,23 @@ own importer
       >
         Drop a saved profile here
       </div>
+    </div>
+    <div
+      class="homeDarkModeBox"
+    >
+      <label
+        class="photon-label"
+        for="home-dark-mode"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          id="home-dark-mode"
+          type="checkbox"
+        />
+        <span>
+          Dark mode
+        </span>
+      </label>
     </div>
   </main>
 </div>

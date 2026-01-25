@@ -6,6 +6,16 @@
  * This overrides most browser styles, for both links and buttons. */
 /* stylelint-disable order/properties-order */
 .menuButtonsButton {
+  --internal-hover-background-color: rgb(0 0 0 / 0.1);
+  --internal-active-background-color: rgb(0 0 0 / 0.2);
+  --internal-open-in-new-icon: url(../../../../res/img/svg/open-in-new-12.svg);
+  --internal-info-icon: url(../../../../res/img/svg/info-12.svg);
+  --internal-revert-icon: url(../../../../res/img/svg/undo-dark-12.svg);
+  --internal-full-view-icon: url(../../../../res/img/svg/maximize-dark-12.svg);
+  --internal-upload-foreground-color: var(--grey-50);
+  --internal-upload-border-color: rgb(0 0 0 / 0.05);
+  --internal-upload-icon: url(../../../../res/img/svg/cloud-dark-12.svg);
+
   position: relative; /* This allows to absolutely position its children */
   display: flex;
   height: 100%;
@@ -18,7 +28,7 @@
 
   /* Inherit some properties values from the environment, rather than using the
    * browser default for buttons or links. */
-  color: inherit;
+  color: inherit !important;
   font-size: inherit;
 
   /* These 2 styles are specific for links. */
@@ -28,12 +38,26 @@
 /* stylelint-enable order/properties-order */
 
 .menuButtonsButton:hover {
-  background-color: rgb(0 0 0 / 0.1);
+  background-color: var(--internal-hover-background-color);
+}
+
+:root.dark-mode {
+  .menuButtonsButton {
+    --internal-hover-background-color: rgb(255 255 255 / 0.1);
+    --internal-active-background-color: rgb(255 255 255 / 0.2);
+    --internal-open-in-new-icon: url(../../../../res/img/svg/open-in-new-light-12.svg);
+    --internal-info-icon: url(../../../../res/img/svg/info-light-12.svg);
+    --internal-revert-icon: url(../../../../res/img/svg/undo-light-12.svg);
+    --internal-full-view-icon: url(../../../../res/img/svg/maximize-light-12.svg);
+    --internal-upload-foreground-color: var(--grey-50);
+    --internal-upload-border-color: rgb(255 255 255 / 0.05);
+    --internal-upload-icon: url(../../../../res/img/svg/cloud-light-12.svg);
+  }
 }
 
 .buttonWithPanel.open > .menuButtonsButton,
 .menuButtonsButton:hover:active {
-  background-color: rgb(0 0 0 / 0.2);
+  background-color: var(--internal-active-background-color);
 }
 
 /* Use this class if a button has an icon */
@@ -69,7 +93,7 @@
   top: 4px;
   width: 1px;
   height: calc(100% - 8px);
-  background: var(--grey-30);
+  background: var(--base-border-color);
   content: '';
 }
 
@@ -92,34 +116,33 @@
   width: 12px;
   height: 12px;
   padding-left: 4px;
-  background: url(../../../../res/img/svg/open-in-new-12.svg) no-repeat right /
-    12px;
+  background: var(--internal-open-in-new-icon) no-repeat right / 12px;
 }
 
 /* These classes define respective states for the metainfo button. They change
  * the icon whose generic styles are defined above. */
 .menuButtonsMetaInfoButtonButton::before {
-  background-image: url(../../../../res/img/svg/info-12.svg);
+  background-image: var(--internal-info-icon);
 }
 
 /* This is the revert button, appearing after publishing a profile. */
 .menuButtonsRevertButton::before {
-  background-image: url(../../../../res/img/svg/undo-dark-12.svg);
+  background-image: var(--internal-revert-icon);
 }
 
 .menuButtonsRevertToFullView::before {
-  background-image: url(../../../../res/img/svg/maximize-dark-12.svg);
+  background-image: var(--internal-full-view-icon);
 }
 
 .profileInfoUploadedActions {
   padding: 8px 0 8px 40px; /* The 40px padding leaves the room for the cloud image */
-  border-bottom: 1px solid rgb(0 0 0 / 0.05);
+  border-bottom: 1px solid var(--internal-upload-border-color);
   font-size: 13px;
 }
 
 .profileInfoUploadedLabel {
   padding-right: 8px;
-  color: var(--grey-50);
+  color: var(--internal-upload-foreground-color);
 }
 
 .profileInfoUploadedDate {
@@ -135,8 +158,7 @@
   display: block;
   width: 32px;
   height: 32px;
-  background: url(../../../../res/img/svg/cloud-dark-12.svg) no-repeat left /
-    32px;
+  background: var(--internal-upload-icon) no-repeat left / 32px;
   content: '';
   opacity: 0.5;
 }

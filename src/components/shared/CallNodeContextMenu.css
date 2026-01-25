@@ -32,17 +32,32 @@
 }
 
 .callNodeContextMenuShortcut {
-  padding: 0 5px;
-  border-radius: 3px;
+  --internal-foreground-color: #000;
 
   /* This color is based off of photon grey, but adjusted to have a nice visual look
      when hovering. */
-  background: #dedee3c9;
-  box-shadow: 1px 1px #0004;
+  --internal-background-color: #dedee3c9;
+  --internal-shadow-color: #0004;
+
+  padding: 0 5px;
+  border-radius: 3px;
+  background: var(--internal-background-color);
+  box-shadow: 1px 1px var(--internal-shadow-color);
 
   /* Override the hover color. */
-  color: #000;
+  color: var(--internal-foreground-color);
   margin-inline-start: 12px;
+}
+
+:root.dark-mode {
+  .callNodeContextMenu .react-contextmenu-icon {
+    filter: invert(1);
+  }
+
+  .callNodeContextMenuShortcut {
+    --internal-background-color: #d7d7dbc0;
+    --internal-shadow-color: #b1b1b380;
+  }
 }
 
 @media (forced-colors: active) {

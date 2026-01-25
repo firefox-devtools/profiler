@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-import { GREY_30 } from 'photon-colors';
+import { GREY_30, GREY_70 } from 'photon-colors';
 import * as React from 'react';
 import { TIMELINE_MARGIN_RIGHT } from '../../app-logic/constants';
 import { withChartViewport, type Viewport } from '../shared/chart/Viewport';
@@ -16,7 +16,11 @@ import type {
 } from '../../actions/profile-view';
 
 type ChangeMouseTimePosition = typeof changeMouseTimePosition;
-import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
+import {
+  mapCategoryColorNameToStackChartStyles,
+  getForegroundColor,
+  getBackgroundColor,
+} from '../../utils/colors';
 import { TooltipCallNode } from '../tooltip/CallNode';
 import { TooltipMarker } from '../tooltip/Marker';
 
@@ -93,6 +97,7 @@ type HoveredStackTiming = {
 };
 
 import './Canvas.css';
+import { lightDark } from 'firefox-profiler/utils/dark-mode';
 
 const ROW_CSS_PIXELS_HEIGHT = 16;
 const TEXT_CSS_PIXELS_OFFSET_START = 3;
@@ -224,7 +229,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     const devicePixelsWidth = containerWidth * cssToDeviceScale;
     const devicePixelsHeight = containerHeight * cssToDeviceScale;
 
-    fastFillStyle.set('#ffffff');
+    fastFillStyle.set(getBackgroundColor());
     ctx.fillRect(0, 0, devicePixelsWidth, devicePixelsHeight);
 
     const viewportDevicePixelsTop = viewportTop * cssToDeviceScale;
@@ -513,8 +518,8 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         // Draw the box.
         fastFillStyle.set(
           isHovered || isSelected
-            ? colorStyles.selectedFillStyle
-            : colorStyles.unselectedFillStyle
+            ? colorStyles.getSelectedFillStyle()
+            : colorStyles.getUnselectedFillStyle()
         );
         ctx.fillRect(
           intX,
@@ -544,8 +549,8 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
           if (fittedText) {
             fastFillStyle.set(
               isHovered || isSelected
-                ? colorStyles.selectedTextColor
-                : '#000000'
+                ? colorStyles.getSelectedTextColor()
+                : getForegroundColor()
             );
             ctx.fillText(fittedText, textX, intY + textDevicePixelsOffsetTop);
           }
@@ -554,7 +559,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     }
 
     // Draw the borders on the left and right.
-    fastFillStyle.set(GREY_30);
+    fastFillStyle.set(lightDark(GREY_30, GREY_70));
     ctx.fillRect(
       pixelAtViewportPosition(0),
       0,
