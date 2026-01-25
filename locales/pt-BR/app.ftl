@@ -272,6 +272,7 @@ Home--additional-content-title = Carregar profiles existentes
 Home--additional-content-content = Você pode <strong>arrastar e soltar</strong> aqui um arquivo de profile para carregar, ou:
 Home--compare-recordings-info = Você também pode comparar gravações. <a>Abra a interface de comparação.</a>
 Home--your-recent-uploaded-recordings-title = Suas gravações enviadas recentemente
+Home--dark-mode-title = Modo escuro
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 = O { -profiler-brand-name } também pode importar profiles de outros criadores de profile, como o <perf>Linux perf</perf>, o <simpleperf>Android SimplePerf</simpleperf>, o painel de desempenho do Chrome, o <androidstudio>Android Studio</androidstudio>, ou qualquer arquivo nos formatos <dhat>dhat</dhat> ou <traceevent>Trace Event do Google</traceevent>. <write>Saiba como criar seu próprio importador</write>.
@@ -1101,6 +1102,17 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = Ocultar a exibição em assembly
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = Anterior
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = Próximo
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = { $current } de { $total }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
