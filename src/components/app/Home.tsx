@@ -9,11 +9,6 @@ import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNav
 import { ListOfPublishedProfiles } from './ListOfPublishedProfiles';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
-import {
-  isDarkMode,
-  setLightMode,
-  setDarkMode,
-} from 'firefox-profiler/utils/dark-mode';
 import PerfScreenshot from 'firefox-profiler-res/img/jpg/perf-screenshot-2021-05-06.jpg';
 import FirefoxPopupScreenshot from 'firefox-profiler-res/img/jpg/firefox-profiler-button-2021-05-06.jpg';
 import {
@@ -219,7 +214,6 @@ type HomeProps = ConnectedProps<
 
 type HomeState = {
   popupInstallPhase: PopupInstallPhase;
-  darkMode: boolean;
 };
 
 type PopupInstallPhase =
@@ -262,7 +256,6 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
 
     this.state = {
       popupInstallPhase: popupInstallPhase as PopupInstallPhase,
-      darkMode: isDarkMode(),
     };
   }
 
@@ -581,18 +574,8 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
     this.props.triggerLoadingFromUrl(url);
   };
 
-  _onDarkModeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.checked) {
-      setDarkMode();
-    } else {
-      setLightMode();
-    }
-    this.setState({ darkMode: isDarkMode() });
-  };
-
   override render() {
     const { specialMessage } = this.props;
-    const { darkMode } = this.state;
 
     return (
       <div className="home">
@@ -703,20 +686,6 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
             {/* End of grid container */}
           </section>
           <DragAndDropOverlay />
-          <div className="homeDarkModeBox">
-            <label className="photon-label" htmlFor="home-dark-mode">
-              <input
-                id="home-dark-mode"
-                className="photon-checkbox photon-checkbox-default"
-                type="checkbox"
-                checked={darkMode}
-                onChange={this._onDarkModeChange}
-              />
-              <Localized id="Home--dark-mode-title">
-                <span>Dark mode</span>
-              </Localized>
-            </label>
-          </div>
         </main>
       </div>
     );
