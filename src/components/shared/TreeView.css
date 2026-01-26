@@ -194,6 +194,11 @@
 }
 
 .treeViewMainColumn.dim {
+  opacity: 0.7;
+}
+
+/* Override dimming level when selected for better a11y */
+.treeViewBody:focus .treeViewRow.isSelected .treeViewMainColumn.dim {
   opacity: 0.9;
 }
 
