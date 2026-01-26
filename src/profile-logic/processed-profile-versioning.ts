@@ -20,6 +20,20 @@ import { timeCode } from '../utils/time-code';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 import type { Profile } from 'firefox-profiler/types';
 
+export type ProfileUpgradeInfo = {
+  v60?: ProfileV60UpgradeInfo;
+};
+
+export type ProfileV60UpgradeInfo = {
+  threadMappings: ProfileV60UpgradeThreadMappings[];
+  newFuncCount: number;
+};
+
+export type ProfileV60UpgradeThreadMappings = {
+  funcTableIndexMap: Int32Array;
+  resourceTableIndexMap: Int32Array;
+};
+
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
 const UNANNOTATED_VERSION = 0;
@@ -30,7 +44,8 @@ const UNANNOTATED_VERSION = 0;
  * to be a processed profile, then return null.
  */
 export function attemptToUpgradeProcessedProfileThroughMutation(
-  profile: any
+  profile: any,
+  upgradeInfo: ProfileUpgradeInfo
 ): Profile | null {
   if (!profile || typeof profile !== 'object') {
     return null;
@@ -84,7 +99,7 @@ export function attemptToUpgradeProcessedProfileThroughMutation(
     destVersion++
   ) {
     if (destVersion in _upgraders) {
-      _upgraders[destVersion](profile);
+      _upgraders[destVersion](profile, upgradeInfo);
     }
   }
 
@@ -244,7 +259,10 @@ function _guessMarkerCategories(profile: any) {
   }
 }
 
-type ProcessedProfileUpgrader = (profile: any) => void;
+type ProcessedProfileUpgrader = (
+  profile: any,
+  upgradeInfo: ProfileUpgradeInfo
+) => void;
 
 // _upgraders[i] converts from version i - 1 to version i.
 // Every "upgrader" takes the profile as its single argument and mutates it.
@@ -2716,7 +2734,7 @@ const _upgraders: {
       }
     }
   },
-  [60]: (profile) => {
+  [60]: (profile, upgradeInfo: ProfileUpgradeInfo) => {
     // The following tables are now shared across all threads:
     // - stackTable
     // - frameTable
@@ -2768,7 +2786,13 @@ const _upgraders: {
       functionSize: [] as Array<number | null>,
       length: 0,
     };
-    for (const thread of profile.threads) {
+    const threadMappings = [];
+    for (
+      let threadIndex = 0;
+      threadIndex < profile.threads.length;
+      threadIndex++
+    ) {
+      const thread = profile.threads[threadIndex];
       const {
         stackTable,
         frameTable,
@@ -2915,12 +2939,17 @@ const _upgraders: {
       delete thread.funcTable;
       delete thread.resourceTable;
       delete thread.nativeSymbols;
+      threadMappings[threadIndex] = {
+        funcTableIndexMap,
+        resourceTableIndexMap,
+      };
     }
     profile.shared.stackTable = newStackTable;
     profile.shared.frameTable = newFrameTable;
     profile.shared.funcTable = newFuncTable;
     profile.shared.resourceTable = newResourceTable;
     profile.shared.nativeSymbols = newNativeSymbols;
+    upgradeInfo.v60 = { threadMappings, newFuncCount: newFuncTable.length };
   },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.

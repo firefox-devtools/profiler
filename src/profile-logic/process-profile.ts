@@ -14,6 +14,7 @@ import {
 import { immutableUpdate, ensureExists } from '../utils/types';
 import { verifyMagic, SIMPLEPERF as SIMPLEPERF_MAGIC } from '../utils/magic';
 import { attemptToUpgradeProcessedProfileThroughMutation } from './processed-profile-versioning';
+import type { ProfileUpgradeInfo } from './processed-profile-versioning';
 import { upgradeGeckoProfileToCurrentVersion } from './gecko-profile-versioning';
 import {
   isPerfScriptFormat,
@@ -1905,7 +1906,8 @@ function attemptToFixProcessedProfileThroughMutation(
  */
 export async function unserializeProfileOfArbitraryFormat(
   arbitraryFormat: unknown,
-  profileUrl?: string
+  profileUrl?: string,
+  upgradeInfo: ProfileUpgradeInfo = {}
 ): Promise<Profile> {
   try {
     // We used to use `instanceof ArrayBuffer`, but this doesn't work when the
@@ -1964,8 +1966,10 @@ export async function unserializeProfileOfArbitraryFormat(
 
     const possiblyFixedProfile =
       attemptToFixProcessedProfileThroughMutation(json);
-    const processedProfile =
-      attemptToUpgradeProcessedProfileThroughMutation(possiblyFixedProfile);
+    const processedProfile = attemptToUpgradeProcessedProfileThroughMutation(
+      possiblyFixedProfile,
+      upgradeInfo
+    );
     if (processedProfile) {
       return processedProfile;
     }

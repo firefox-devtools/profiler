@@ -48,8 +48,9 @@ import {
 } from '../utils/uintarray-encoding';
 import { tabSlugs } from '../app-logic/tabs-handling';
 import { StringTable } from 'firefox-profiler/utils/string-table';
+import type { ProfileUpgradeInfo } from 'firefox-profiler/profile-logic/processed-profile-versioning';
 
-export const CURRENT_URL_VERSION = 13;
+export const CURRENT_URL_VERSION = 14;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -452,7 +453,8 @@ type Location = {
  */
 export function stateFromLocation(
   location: Location,
-  profile?: Profile | null
+  profile?: Profile | null,
+  profileUpgradeInfo?: ProfileUpgradeInfo
 ): UrlState {
   const { pathname, query } = upgradeLocationToCurrentVersion(
     {
@@ -462,7 +464,8 @@ export function stateFromLocation(
         arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
       }),
     },
-    profile
+    profile,
+    profileUpgradeInfo
   );
 
   const pathParts = pathname.split('/').filter((d) => d);
@@ -744,7 +747,8 @@ type ProcessedLocationBeforeUpgrade = {
 // URL upgrading is performed if the profile argument is missing (undefined) or if it's an actual profile.
 export function upgradeLocationToCurrentVersion(
   processedLocation: ProcessedLocationBeforeUpgrade,
-  profile?: Profile | null
+  profile?: Profile | null,
+  profileUpgradeInfo?: ProfileUpgradeInfo
 ): ProcessedLocation {
   // Forward /from-addon to /from-browser immediately, outside of the versioning process.
   // This ensures compatibility with Firefox versions < 93.
@@ -779,7 +783,7 @@ export function upgradeLocationToCurrentVersion(
   ) {
     if (destVersion in _upgraders) {
       const upgrader = _upgraders[destVersion];
-      upgrader(processedLocation, profile);
+      upgrader(processedLocation, profile, profileUpgradeInfo);
     }
   }
 
@@ -789,7 +793,8 @@ export function upgradeLocationToCurrentVersion(
 
 type ProcessedLocationUpgrader = (
   location: ProcessedLocationBeforeUpgrade,
-  profile?: Profile
+  profile?: Profile,
+  profileUpgradeInfo?: ProfileUpgradeInfo
 ) => void;
 
 // _upgraders[i] converts from version i - 1 to version i.
@@ -1190,6 +1195,127 @@ const _upgraders: {
   },
   [13]: (_) => {
     // just added the focus-self transform
+  },
+  [14]: (
+    processedLocation: ProcessedLocationBeforeUpgrade,
+    _profile?: Profile,
+    profileUpgradeInfo?: ProfileUpgradeInfo
+  ) => {
+    if (!profileUpgradeInfo || !profileUpgradeInfo.v60) {
+      return;
+    }
+
+    const { v60 } = profileUpgradeInfo;
+
+    const { query } = processedLocation;
+    if (!query.transforms) {
+      return; // Nothing to upgrade - all func and resource indexes are in the transforms
+    }
+
+    const selectedThreads = decodeUintArrayFromUrlComponent(query.thread);
+    if (selectedThreads.length !== 1) {
+      return;
+    }
+
+    const [threadIndex] = selectedThreads;
+
+    if (!(threadIndex in v60.threadMappings)) {
+      return;
+    }
+
+    const threadMappings = v60.threadMappings[threadIndex];
+    const newFuncCount = v60.newFuncCount;
+
+    function translateFuncIndex(funcIndex: number): number {
+      if (funcIndex in threadMappings.funcTableIndexMap) {
+        return threadMappings.funcTableIndexMap[funcIndex];
+      }
+      const resourceIndex = funcIndex - threadMappings.funcTableIndexMap.length;
+      if (resourceIndex in threadMappings.resourceTableIndexMap) {
+        return (
+          newFuncCount + threadMappings.resourceTableIndexMap[resourceIndex]
+        );
+      }
+      return funcIndex;
+    }
+
+    function translateStrFuncIndex(rawFuncIndex: string): string {
+      const funcIndex = parseInt(rawFuncIndex, 10);
+      if (!isNaN(funcIndex)) {
+        return '' + translateFuncIndex(funcIndex);
+      }
+      return rawFuncIndex;
+    }
+
+    function translateStrResourceIndex(rawResourceIndex: string): string {
+      const resourceIndex = parseInt(rawResourceIndex, 10);
+      if (resourceIndex in threadMappings.resourceTableIndexMap) {
+        return '' + threadMappings.resourceTableIndexMap[resourceIndex];
+      }
+      return rawResourceIndex;
+    }
+
+    function mapIndexesInTransform(s: string): string {
+      const tuple = s.split('-');
+      const shortKey = tuple[0];
+      switch (shortKey) {
+        case 'cr': {
+          // collapse-resource
+          // e.g. "cr-js-325-8"
+          const [, implementation, oldResourceIndex, oldFuncIndex] = tuple;
+          const newResourceIndex = translateStrResourceIndex(oldResourceIndex);
+          const newFuncIndex = translateStrFuncIndex(oldFuncIndex);
+          return [
+            shortKey,
+            implementation,
+            newResourceIndex,
+            newFuncIndex,
+          ].join('-');
+        }
+        case 'drec': {
+          // collapse-direct-recursion
+          // e.g. "drec-js-325"
+          const [, implementation, oldFuncIndex] = tuple;
+          const newFuncIndex = translateStrFuncIndex(oldFuncIndex);
+          return [shortKey, implementation, newFuncIndex].join('-');
+        }
+        case 'rec': // collapse-recursion
+        case 'mf': // 'merge-function'
+        case 'ff': // 'focus-function':
+        case 'df': // 'drop-function':
+        case 'cfs': {
+          // 'collapse-function-subtree':
+          // e.g. "mf-325"
+          const [, oldFuncIndex] = tuple;
+          const newFuncIndex = translateStrFuncIndex(oldFuncIndex);
+          return [shortKey, newFuncIndex].join('-');
+        }
+        case 'f': // 'focus-subtree':
+        case 'mcn': {
+          // 'merge-call-node':
+          // e.g. "f-js-xFFpUMl-i" or "f-cpp-0KV4KV5KV61KV7KV8K"
+          const [, implementation, oldCallNodePathRaw, isInverted] = tuple;
+          const oldCallNodePath =
+            decodeUintArrayFromUrlComponent(oldCallNodePathRaw);
+          const newCallNodePath = oldCallNodePath.map(translateFuncIndex);
+          const newCallNodePathRaw =
+            encodeUintArrayForUrlComponent(newCallNodePath);
+          return [
+            shortKey,
+            implementation,
+            newCallNodePathRaw,
+            isInverted,
+          ].join('-');
+        }
+        default:
+          return s;
+      }
+    }
+
+    query.transforms = query.transforms
+      .split('~')
+      .map(mapIndexesInTransform)
+      .join('~');
   },
 };
 
