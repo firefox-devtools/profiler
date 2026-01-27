@@ -10,10 +10,7 @@ import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
 import { formatMilliseconds, formatBytes } from '../../utils/format-numbers';
 import { bisectionLeft, bisectionRight } from '../../utils/bisect';
-import type {
-  updatePreviewSelection,
-  changeMouseTimePosition,
-} from '../../actions/profile-view';
+import type { changeMouseTimePosition } from '../../actions/profile-view';
 
 type ChangeMouseTimePosition = typeof changeMouseTimePosition;
 import {
@@ -54,7 +51,6 @@ import type {
   IndexIntoStackTiming,
   SameWidthsIndexToTimestampMap,
 } from '../../profile-logic/stack-timing';
-import type { WrapFunctionInDispatch } from '../../utils/connect';
 
 type OwnProps = {
   readonly thread: Thread;
@@ -67,14 +63,12 @@ type OwnProps = {
   readonly combinedTimingRows: CombinedTimingRows;
   readonly sameWidthsIndexToTimestampMap: SameWidthsIndexToTimestampMap;
   readonly stackFrameHeight: CssPixels;
-  readonly updatePreviewSelection: WrapFunctionInDispatch<
-    typeof updatePreviewSelection
-  >;
   readonly changeMouseTimePosition: ChangeMouseTimePosition;
   readonly getMarker: (param: MarkerIndex) => Marker;
   readonly categories: CategoryList;
   readonly callNodeInfo: CallNodeInfo;
   readonly selectedCallNodeIndex: IndexIntoCallNodeTable | null;
+  readonly onDoubleClick: (param: IndexIntoCallNodeTable | null) => void;
   readonly onSelectionChange: (param: IndexIntoCallNodeTable | null) => void;
   readonly onRightClick: (param: IndexIntoCallNodeTable | null) => void;
   readonly shouldDisplayTooltips: () => boolean;
@@ -648,16 +642,14 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
   };
 
   _onDoubleClickStack = (hoveredItem: HoveredStackTiming | null) => {
-    if (hoveredItem === null) {
-      return;
+    if (!hoveredItem) return;
+
+    const result =
+      this._getCallNodeIndexOrMarkerIndexFromHoveredItem(hoveredItem);
+
+    if (result && result.type === 'call-node') {
+      this.props.onDoubleClick(result.index);
     }
-    const { depth, stackTimingIndex } = hoveredItem;
-    const { combinedTimingRows, updatePreviewSelection } = this.props;
-    updatePreviewSelection({
-      isModifying: false,
-      selectionStart: combinedTimingRows[depth].start[stackTimingIndex],
-      selectionEnd: combinedTimingRows[depth].end[stackTimingIndex],
-    });
   };
 
   _getCallNodeIndexOrMarkerIndexFromHoveredItem(
