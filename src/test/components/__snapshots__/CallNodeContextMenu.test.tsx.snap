@@ -99,6 +99,27 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
       tabindex="-1"
     >
       <span
+        class="react-contextmenu-icon callNodeContextMenuIconFocusSelf"
+      />
+      <div
+        class="react-contextmenu-item-content"
+        title="Focusing on self is similar to focusing on a function, but only keeps samples that contribute to the function’s self time. Samples in callees are dropped, and the call tree is re-rooted to the focused function."
+      >
+        Focus on self only
+      </div>
+      <kbd
+        class="callNodeContextMenuShortcut"
+      >
+        S
+      </kbd>
+    </div>
+    <div
+      aria-disabled="false"
+      class="react-contextmenu-item"
+      role="menuitem"
+      tabindex="-1"
+    >
+      <span
         class="react-contextmenu-icon callNodeContextMenuIconFocus"
       />
       <div
