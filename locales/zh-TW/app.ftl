@@ -259,6 +259,7 @@ Home--additional-content-title = 載入現有檢測檔
 Home--additional-content-content = 您可以將效能檢測檔<strong>拖曳</strong>到此處，或：
 Home--compare-recordings-info = 您也可以比較紀錄內容。<a>開啟比較介面。</a>
 Home--your-recent-uploaded-recordings-title = 您近期上傳的紀錄
+Home--dark-mode-title = 暗色模式
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 =
@@ -341,6 +342,13 @@ MarkerContextMenu--select-the-sender-thread = 選擇傳送執行緒「<strong>{ 
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = 丟棄不符合「<strong>{ $filter }</strong>」標記的取樣
 
+## MarkerCopyTableContextMenu
+## This is the menu when the copy icon is clicked in Marker Chart and Marker
+## Table panels.
+
+MarkerCopyTableContextMenu--copy-table-as-plain = 用純文字格式複製標記表
+MarkerCopyTableContextMenu--copy-table-as-markdown = 用 Markdown 格式複製標記表
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
@@ -349,6 +357,14 @@ MarkerSettings--panel-search =
     .title = 只顯示符合特定名稱的標記
 MarkerSettings--marker-filters =
     .title = 標記過濾器
+MarkerSettings--copy-table =
+    .title = 用純文字複製表格
+# This string is used when the user tries to copy a marker table with
+# more than 10000 rows.
+# Variable:
+#   $rows (Number) - Number of rows the marker table has
+#   $maxRows (Number) - Number of maximum rows that can be copied
+MarkerSettings--copy-table-exceeed-max-rows = 資料列數超過限制：{ $rows } > { $maxRows }，只複製最前 { $maxRows } 列。
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -1065,6 +1081,17 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = 隱藏機器碼畫面
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = 上一個
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = 下一個
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = 第 { $current } 個，共 { $total } 個
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

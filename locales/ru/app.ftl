@@ -81,7 +81,7 @@ CallNodeContextMenu--transform-focus-function-inverted = Сфокусирова�
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-subtree = Сфокусироваться только на поддереве
     .title =
-        Фокусировка на поддереве приведет к удалению любого сэмпла, который не включает эту
+        Фокусировка на поддереве приведёт к удалению любого сэмпла, который не включает эту
         конкретную часть дерева вызовов. Она извлекает ветвь дерева вызовов,
         однако делает это только для этого единственного узла вызова. Все остальные вызовы
         функции игнорируются.
@@ -94,7 +94,7 @@ CallNodeContextMenu--transform-focus-category = Сфокусироваться �
         тем самым объединяя все узлы, принадлежащие к другой категории.
 CallNodeContextMenu--transform-collapse-function-subtree = Свернуть функцию
     .title =
-        Сворачивание функции приведет к удалению всего, что она вызвала, и назначению
+        Сворачивание функции приведёт к удалению всего, что она вызвала, и назначению
         функции всего времени. Это может помочь упростить профиль, который
         вызывает код, не нуждающийся в анализе.
 # This is used as the context menu item to apply the "Collapse resource" transform.
@@ -102,8 +102,8 @@ CallNodeContextMenu--transform-collapse-function-subtree = Свернуть фу
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Свернуть <strong>{ $nameForResource }</strong>
     .title =
-        Сворачивание ресурса сведет все вызовы к этому
-        ресурсу в один свернутый узел вызова.
+        Сворачивание ресурса сведёт все вызовы к этому
+        ресурсу в один свёрнутый узел вызова.
 CallNodeContextMenu--transform-collapse-recursion = Свернуть рекурсию
     .title =
         Сворачивание рекурсии удаляет вызовы, которые многократно рекурсируют в
@@ -335,6 +335,7 @@ Home--additional-content-title = Загрузить существующие п�
 Home--additional-content-content = Вы можете <strong>перетащить</strong> сюда файл профиля, чтобы загрузить его, или:
 Home--compare-recordings-info = Вы также можете сравнить записи. <a>Откройте интерфейс сравнения.</a>
 Home--your-recent-uploaded-recordings-title = Ваши последние загруженные записи
+Home--dark-mode-title = Тёмная тема
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 =
@@ -380,7 +381,7 @@ ListOfPublishedProfiles--uploaded-profile-information-list-empty = Профил�
 # This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
 #   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
-ListOfPublishedProfiles--uploaded-profile-information-label = Просматривайте и управляйте всеми своими записями (еще { $profilesRestCount })
+ListOfPublishedProfiles--uploaded-profile-information-label = Просматривайте и управляйте всеми своими записями (ещё { $profilesRestCount })
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
 #   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
@@ -427,6 +428,13 @@ MarkerContextMenu--select-the-sender-thread = Выберите цепочку о
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Отбрасывать семплы вне маркеров, соответствующих «<strong>{ $filter }</strong>».
 
+## MarkerCopyTableContextMenu
+## This is the menu when the copy icon is clicked in Marker Chart and Marker
+## Table panels.
+
+MarkerCopyTableContextMenu--copy-table-as-plain = Копировать таблицу маркеров как простой текст
+MarkerCopyTableContextMenu--copy-table-as-markdown = Копировать таблицу маркеров как Markdown
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
@@ -435,6 +443,14 @@ MarkerSettings--panel-search =
     .title = Отображать только маркеры, совпадающие с определённым именем
 MarkerSettings--marker-filters =
     .title = Фильтры маркеров
+MarkerSettings--copy-table =
+    .title = Копировать таблицу как текст
+# This string is used when the user tries to copy a marker table with
+# more than 10000 rows.
+# Variable:
+#   $rows (Number) - Number of rows the marker table has
+#   $maxRows (Number) - Number of maximum rows that can be copied
+MarkerSettings--copy-table-exceeed-max-rows = Число строк превышает лимит: { $rows } > { $maxRows }. Будут скопированы только первые { $maxRows } строк.
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -773,7 +789,7 @@ StackSettings--call-tree-strategy-timing = Тайминги
     .title = Суммировать, используя выборочные стеки выполняемого кода с течением времени
 StackSettings--call-tree-strategy-js-allocations = Распределения JavaScript
     .title = Суммировать, используя выделенные байты JavaScript (без отмены выделения)
-StackSettings--call-tree-strategy-native-retained-allocations = Сохраненная память
+StackSettings--call-tree-strategy-native-retained-allocations = Сохранённая память
     .title = Суммировать, используя байты памяти, которые были выделены и никогда не освобождались при текущем выборе предварительного просмотра
 StackSettings--call-tree-native-allocations = Выделенная память
     .title = Суммировать, используя выделенные байты памяти
@@ -1172,6 +1188,17 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = Скрыть вид сборки
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = Предыдущее
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = Далее
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = { $current } из { $total }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
