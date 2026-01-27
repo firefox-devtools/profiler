@@ -25,9 +25,6 @@ declare global {
   }
 
   interface Window {
-    useDarkMode?: () => void;
-    useLightMode?: () => void;
-
     // Google Analytics
     ga?: GoogleAnalytics;
     // profiler.firefox.com and globals injected via frame scripts.

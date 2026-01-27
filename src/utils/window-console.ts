@@ -16,6 +16,11 @@ import { shortenUrl } from 'firefox-profiler/utils/shorten-url';
 import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { formatTimestamp } from 'firefox-profiler/utils/format-numbers';
 import { togglePseudoStrategy } from 'firefox-profiler/components/app/AppLocalizationProvider';
+import {
+  isDarkMode,
+  setDarkMode,
+  setLightMode,
+} from 'firefox-profiler/utils/dark-mode';
 import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still
@@ -37,6 +42,7 @@ export type ExtraPropertiesOnWindowForConsole = {
   };
   togglePseudoLocalization: (pseudoStrategy?: string) => void;
   toggleTimelineType: (timelineType?: string) => void;
+  toggleDarkMode: () => void;
   retrieveRawProfileDataFromBrowser: () => Promise<
     MixedObject | ArrayBuffer | null
   >;
@@ -191,6 +197,20 @@ export function addDataToWindowObject(
     console.log(stripIndent`
       ✅ The timeline type "${timelineType}" is now enabled for the timeline.
     `);
+  };
+
+  target.toggleDarkMode = function () {
+    if (isDarkMode()) {
+      setLightMode();
+      console.log(stripIndent`
+        ✅ Light mode is now enabled.
+      `);
+    } else {
+      setDarkMode();
+      console.log(stripIndent`
+        ✅ Dark mode is now enabled.
+      `);
+    }
   };
 
   target.retrieveRawProfileDataFromBrowser = async function (): Promise<
@@ -392,6 +412,7 @@ export function logFriendlyPreamble() {
       %cwindow.experimental%c - The object that holds flags of all the experimental features.
       %cwindow.togglePseudoLocalization%c - Enable pseudo localizations by passing "accented" or "bidi" to this function, or disable using no parameters.
       %cwindow.toggleTimelineType%c - Toggle timeline graph type by passing "cpu-category", "category", or "stack".
+      %cwindow.toggleDarkMode%c - Toggle between dark mode and light mode.
       %cwindow.retrieveRawProfileDataFromBrowser%c - Retrieve the profile attached to the current tab and returns it. Use "await" to call it, and use saveToDisk to save it.
       %cwindow.extractGeckoLogs%c - Retrieve recorded logs in the current range, using the MOZ_LOG format. Use with "copy" or "saveToDisk".
       %cwindow.saveToDisk%c - Saves to a file the parameter passed to it, with an optional filename parameter. You can use that to save the profile returned by "retrieveRawProfileDataFromBrowser" or the data returned by "extractGeckoLogs".
@@ -442,6 +463,9 @@ export function logFriendlyPreamble() {
     bold,
     reset,
     // "window.toggleTimelineType"
+    bold,
+    reset,
+    // "window.toggleDarkMode"
     bold,
     reset,
     // "window.retrieveRawProfileDataFromBrowser"

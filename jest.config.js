@@ -6,6 +6,9 @@ module.exports = {
   testMatch: ['<rootDir>/src/**/*.test.{js,jsx,ts,tsx}'],
   moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx'],
 
+  // Use custom resolver that respects the "browser" field in package.json
+  resolver: './jest-resolver.js',
+
   testEnvironment: './src/test/custom-environment',
   setupFilesAfterEnv: ['jest-extended/all', './src/test/setup.ts'],
 
