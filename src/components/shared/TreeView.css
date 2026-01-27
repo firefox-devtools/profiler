@@ -197,6 +197,11 @@
   opacity: 0.7;
 }
 
+/* Override dimming level when selected for better a11y */
+.treeViewBody:focus .treeViewRow.isSelected .treeViewMainColumn.dim {
+  opacity: 0.9;
+}
+
 /* stylelint-disable order/properties-order, declaration-block-no-duplicate-properties, value-keyword-case */
 .treeViewBody:focus .treeViewRow.isSelected {
   /* Fallback for browsers that don't support SelectedItem */
@@ -214,6 +219,11 @@
   color: SelectedItemText;
 }
 /* stylelint-enable order/properties-order, declaration-block-no-duplicate-properties, value-keyword-case */
+
+/* Override opacity level of appendage column when selected for better a11y */
+.treeViewBody:focus .treeViewRow.isSelected .treeViewAppendageColumn {
+  opacity: 0.9;
+}
 
 .treeViewBody:focus .treeViewRow.isSelected a {
   color: inherit;
