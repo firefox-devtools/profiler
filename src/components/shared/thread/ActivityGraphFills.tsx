@@ -67,10 +67,13 @@ type CategoryFill = {
 export type CategoryDrawStyles = ReadonlyArray<{
   readonly category: number;
   readonly gravity: number;
-  readonly selectedFillStyle: string;
-  readonly unselectedFillStyle: string;
+  readonly _selectedFillStyle: string | [string, string];
+  readonly _unselectedFillStyle: string | [string, string];
+  readonly _selectedTextColor: string | [string, string];
+  readonly getSelectedFillStyle: () => string;
+  readonly getUnselectedFillStyle: () => string;
+  readonly getSelectedTextColor: () => string;
   readonly filteredOutByTransformFillStyle: CanvasPattern;
-  readonly selectedTextColor: string;
 }>;
 
 type SelectedPercentageAtPixelBuffers = {
@@ -328,7 +331,7 @@ export class ActivityGraphFillComputer {
     const categoryDrawStyle = categoryDrawStyles[category];
     const percentageBuffers = this.mutablePercentageBuffers[category];
 
-    if (categoryDrawStyle.selectedFillStyle === 'transparent') {
+    if (categoryDrawStyle.getSelectedFillStyle() === 'transparent') {
       return;
     }
 
@@ -796,7 +799,7 @@ function _getCategoryFills(
       return [
         {
           category: categoryDrawStyle.category,
-          fillStyle: categoryDrawStyle.unselectedFillStyle,
+          fillStyle: categoryDrawStyle.getUnselectedFillStyle(),
           perPixelContribution: buffer.beforeSelectedPercentageAtPixel,
           accumulatedUpperEdge: new Float32Array(
             buffer.beforeSelectedPercentageAtPixel.length
@@ -804,7 +807,7 @@ function _getCategoryFills(
         },
         {
           category: categoryDrawStyle.category,
-          fillStyle: categoryDrawStyle.selectedFillStyle,
+          fillStyle: categoryDrawStyle.getSelectedFillStyle(),
           perPixelContribution: buffer.selectedPercentageAtPixel,
           accumulatedUpperEdge: new Float32Array(
             buffer.beforeSelectedPercentageAtPixel.length
@@ -812,7 +815,7 @@ function _getCategoryFills(
         },
         {
           category: categoryDrawStyle.category,
-          fillStyle: categoryDrawStyle.unselectedFillStyle,
+          fillStyle: categoryDrawStyle.getUnselectedFillStyle(),
           perPixelContribution: buffer.afterSelectedPercentageAtPixel,
           accumulatedUpperEdge: new Float32Array(
             buffer.beforeSelectedPercentageAtPixel.length

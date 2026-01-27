@@ -9,30 +9,28 @@ import classNames from 'classnames';
 import { SourceView } from '../shared/SourceView';
 import { AssemblyView } from '../shared/AssemblyView';
 import { AssemblyViewToggleButton } from './AssemblyViewToggleButton';
+import { AssemblyViewNativeSymbolNavigator } from './AssemblyViewNativeSymbolNavigator';
 import { IonGraphView } from '../shared/IonGraphView';
 import { CodeLoadingOverlay } from './CodeLoadingOverlay';
 import { CodeErrorOverlay } from './CodeErrorOverlay';
 import {
   getSourceViewScrollGeneration,
-  getSourceViewLineNumber,
+  getSourceViewScrollToLineNumber,
+  getSourceViewHighlightedLine,
   getAssemblyViewIsOpen,
   getAssemblyViewNativeSymbol,
   getAssemblyViewScrollGeneration,
+  getAssemblyViewScrollToInstructionAddress,
+  getAssemblyViewHighlightedInstruction,
 } from 'firefox-profiler/selectors/url-state';
-import {
-  selectedThreadSelectors,
-  selectedNodeSelectors,
-} from 'firefox-profiler/selectors/per-thread';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { closeBottomBox } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
   getSourceViewCode,
   getAssemblyViewCode,
 } from 'firefox-profiler/selectors/code';
-import {
-  getPreviewSelectionIsBeingModified,
-  getSourceViewFile,
-} from 'firefox-profiler/selectors/profile';
+import { getSourceViewFile } from 'firefox-profiler/selectors/profile';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -55,16 +53,16 @@ type StateProps = {
   readonly sourceViewFile: string | null;
   readonly sourceViewCode: SourceCodeStatus | void;
   readonly sourceViewScrollGeneration: number;
-  readonly sourceViewLineNumber?: number;
+  readonly sourceViewScrollToLineNumber?: number;
+  readonly sourceViewHighlightedLine: number | null;
   readonly globalLineTimings: LineTimings;
-  readonly selectedCallNodeLineTimings: LineTimings;
   readonly assemblyViewIsOpen: boolean;
   readonly assemblyViewNativeSymbol: NativeSymbolInfo | null;
   readonly assemblyViewCode: AssemblyCodeStatus | void;
   readonly assemblyViewScrollGeneration: number;
+  readonly assemblyViewScrollToInstructionAddress?: number;
+  readonly assemblyViewHighlightedInstruction: number | null;
   readonly globalAddressTimings: AddressTimings;
-  readonly selectedCallNodeAddressTimings: AddressTimings;
-  readonly disableOverscan: boolean;
 };
 
 type DispatchProps = {
@@ -160,16 +158,16 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       sourceViewFile,
       sourceViewCode,
       globalLineTimings,
-      disableOverscan,
       sourceViewScrollGeneration,
-      sourceViewLineNumber,
-      selectedCallNodeLineTimings,
+      sourceViewScrollToLineNumber,
+      sourceViewHighlightedLine,
       assemblyViewIsOpen,
       assemblyViewScrollGeneration,
+      assemblyViewScrollToInstructionAddress,
+      assemblyViewHighlightedInstruction,
       assemblyViewNativeSymbol,
       assemblyViewCode,
       globalAddressTimings,
-      selectedCallNodeAddressTimings,
     } = this.props;
     const sourceCode =
       sourceViewCode && sourceViewCode.type === 'AVAILABLE'
@@ -195,6 +193,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     // These trailing header buttons go into the bottom-box-bar of the last pane.
     const trailingHeaderButtons = (
       <div className="bottom-box-header-trailing-buttons">
+        {assemblyViewIsOpen ? <AssemblyViewNativeSymbolNavigator /> : null}
         <AssemblyViewToggleButton />
         <Localized id="SourceView--close-button" attrs={{ title: true }}>
           <button
@@ -223,20 +222,17 @@ class BottomBoxImpl extends React.PureComponent<Props> {
               {displayIonGraph ? (
                 <IonGraphView
                   timings={globalLineTimings}
-                  hotSpotTimings={selectedCallNodeLineTimings}
                   sourceCode={sourceCode}
                 />
               ) : null}
               {displaySourceView ? (
                 <SourceView
-                  disableOverscan={disableOverscan}
                   timings={globalLineTimings}
                   sourceCode={sourceCode}
                   filePath={path}
-                  scrollToHotSpotGeneration={sourceViewScrollGeneration}
-                  scrollToLineNumber={sourceViewLineNumber}
-                  hotSpotTimings={selectedCallNodeLineTimings}
-                  highlightedLine={sourceViewLineNumber}
+                  scrollGeneration={sourceViewScrollGeneration}
+                  scrollToLineNumber={sourceViewScrollToLineNumber}
+                  highlightedLine={sourceViewHighlightedLine}
                   ref={this._sourceView}
                 />
               ) : null}
@@ -264,12 +260,14 @@ class BottomBoxImpl extends React.PureComponent<Props> {
               <div className="bottom-assemblyview-wrapper">
                 {assemblyViewNativeSymbol !== null ? (
                   <AssemblyView
-                    disableOverscan={disableOverscan}
                     timings={globalAddressTimings}
                     assemblyCode={assemblyCode}
                     nativeSymbol={assemblyViewNativeSymbol}
-                    scrollToHotSpotGeneration={assemblyViewScrollGeneration}
-                    hotSpotTimings={selectedCallNodeAddressTimings}
+                    scrollGeneration={assemblyViewScrollGeneration}
+                    scrollToInstructionAddress={
+                      assemblyViewScrollToInstructionAddress
+                    }
+                    highlightedInstruction={assemblyViewHighlightedInstruction}
                     ref={this._assemblyView}
                   />
                 ) : null}
@@ -302,19 +300,19 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
     sourceViewFile: getSourceViewFile(state),
     sourceViewCode: getSourceViewCode(state),
     globalLineTimings: selectedThreadSelectors.getSourceViewLineTimings(state),
-    selectedCallNodeLineTimings:
-      selectedNodeSelectors.getSourceViewLineTimings(state),
     sourceViewScrollGeneration: getSourceViewScrollGeneration(state),
-    sourceViewLineNumber: getSourceViewLineNumber(state),
+    sourceViewScrollToLineNumber: getSourceViewScrollToLineNumber(state),
+    sourceViewHighlightedLine: getSourceViewHighlightedLine(state),
     assemblyViewNativeSymbol: getAssemblyViewNativeSymbol(state),
     assemblyViewCode: getAssemblyViewCode(state),
     globalAddressTimings:
       selectedThreadSelectors.getAssemblyViewAddressTimings(state),
-    selectedCallNodeAddressTimings:
-      selectedNodeSelectors.getAssemblyViewAddressTimings(state),
     assemblyViewScrollGeneration: getAssemblyViewScrollGeneration(state),
+    assemblyViewScrollToInstructionAddress:
+      getAssemblyViewScrollToInstructionAddress(state),
+    assemblyViewHighlightedInstruction:
+      getAssemblyViewHighlightedInstruction(state),
     assemblyViewIsOpen: getAssemblyViewIsOpen(state),
-    disableOverscan: getPreviewSelectionIsBeingModified(state),
   }),
   mapDispatchToProps: {
     closeBottomBox,

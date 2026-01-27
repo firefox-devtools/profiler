@@ -46,9 +46,9 @@ body {
     * These variable can be declared in any rule, as long as their value is still
     * a valid color (which means we can use `light-dark()` or any other color functions).
     * The colors can be applied on SVG icons with `filter: url(#--var-name)` */
-    --button-icon-color: ButtonText;
-    --button-icon-hover-color: SelectedItem;
-    --button-icon-active-color: SelectedItem;
+    --button-icon-color: ButtonText !important;
+    --button-icon-hover-color: SelectedItem !important;
+    --button-icon-active-color: SelectedItem !important;
   }
 }
 

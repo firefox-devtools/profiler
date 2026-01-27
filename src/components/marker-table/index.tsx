@@ -23,6 +23,8 @@ import {
 } from '../../actions/profile-view';
 import { MarkerSettings } from '../shared/MarkerSettings';
 import { formatSeconds, formatTimestamp } from '../../utils/format-numbers';
+import { assertExhaustiveCheck } from '../../utils/types';
+import copy from 'copy-to-clipboard';
 
 import './index.css';
 
@@ -70,6 +72,100 @@ class MarkerTree {
     this._markerSchemaByName = markerSchemaByName;
     this._getMarkerLabel = getMarkerLabel;
   }
+
+  copyTable = (
+    format: 'plain' | 'markdown',
+    onExceeedMaxCopyRows: (rows: number, maxRows: number) => void
+  ) => {
+    const lines = [];
+
+    const startLabel = 'Start';
+    const durationLabel = 'Duration';
+    const nameLabel = 'Name';
+    const detailsLabel = 'Details';
+
+    const header = [startLabel, durationLabel, nameLabel, detailsLabel];
+
+    let maxStartLength = startLabel.length;
+    let maxDurationLength = durationLabel.length;
+    let maxNameLength = nameLabel.length;
+
+    const MAX_COPY_ROWS = 10000;
+
+    let roots = this.getRoots();
+    if (roots.length > MAX_COPY_ROWS) {
+      onExceeedMaxCopyRows(roots.length, MAX_COPY_ROWS);
+      roots = roots.slice(0, MAX_COPY_ROWS);
+    }
+
+    for (const index of roots) {
+      const data = this.getDisplayData(index);
+      const duration = data.duration ?? '';
+
+      maxStartLength = Math.max(data.start.length, maxStartLength);
+      maxDurationLength = Math.max(duration.length, maxDurationLength);
+      maxNameLength = Math.max(data.name.length, maxNameLength);
+
+      lines.push([
+        data.start,
+        // Use "u" instead, to make the table aligned with fixed-width text.
+        duration.replace(/μ/g, 'u'),
+        data.name,
+        data.details,
+      ]);
+    }
+
+    let text = '';
+    switch (format) {
+      case 'plain': {
+        const formatter = ([start, duration, name, details]: string[]) => {
+          const line = [
+            start.padStart(maxStartLength, ' '),
+            duration.padStart(maxDurationLength, ' '),
+            name.padStart(maxNameLength, ' '),
+          ];
+          if (details) {
+            line.push(details);
+          }
+          return line.join('  ');
+        };
+
+        text += formatter(header) + '\n' + lines.map(formatter).join('\n');
+        break;
+      }
+      case 'markdown': {
+        const formatter = ([start, duration, name, details]: string[]) => {
+          const line = [
+            start.padStart(maxStartLength, ' '),
+            duration.padStart(maxDurationLength, ' '),
+            name.padStart(maxNameLength, ' '),
+            details,
+          ];
+          return '| ' + line.join(' | ') + ' |';
+        };
+        const sep =
+          '|' +
+          [
+            '-'.repeat(maxStartLength + 1) + ':',
+            '-'.repeat(maxDurationLength + 1) + ':',
+            '-'.repeat(maxNameLength + 1) + ':',
+            '-'.repeat(9),
+          ].join('|') +
+          '|';
+        text =
+          formatter(header) +
+          '\n' +
+          sep +
+          '\n' +
+          lines.map(formatter).join('\n');
+        break;
+      }
+      default:
+        throw assertExhaustiveCheck(format);
+    }
+
+    copy(text);
+  };
 
   getRoots(): MarkerIndex[] {
     return this._markerIndexes;
@@ -263,7 +359,7 @@ class MarkerTableImpl extends PureComponent<Props> {
         role="tabpanel"
         aria-labelledby="marker-table-tab-button"
       >
-        <MarkerSettings />
+        <MarkerSettings copyTable={tree.copyTable} />
         {markerIndexes.length === 0 ? (
           <MarkerTableEmptyReasons />
         ) : (

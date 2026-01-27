@@ -407,6 +407,13 @@ MarkerContextMenu--select-the-sender-thread = Выберыце паток-адп
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Адкідваць сэмплы па-за межамі маркераў, якія адпавядаюць «<strong>{ $filter }</strong>»
 
+## MarkerCopyTableContextMenu
+## This is the menu when the copy icon is clicked in Marker Chart and Marker
+## Table panels.
+
+MarkerCopyTableContextMenu--copy-table-as-plain = Скапіяваць табліцу маркераў як звычайны тэкст
+MarkerCopyTableContextMenu--copy-table-as-markdown = Скапіяваць табліцу маркераў як Markdown
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
@@ -415,6 +422,14 @@ MarkerSettings--panel-search =
     .title = Паказваць толькі маркеры, якія адпавядаюць пэўнаму імені
 MarkerSettings--marker-filters =
     .title = Фільтры маркераў
+MarkerSettings--copy-table =
+    .title = Скапіяваць табліцу як тэкст
+# This string is used when the user tries to copy a marker table with
+# more than 10000 rows.
+# Variable:
+#   $rows (Number) - Number of rows the marker table has
+#   $maxRows (Number) - Number of maximum rows that can be copied
+MarkerSettings--copy-table-exceeed-max-rows = Колькасць радкоў перавышае ліміт: { $rows } > { $maxRows }. Будуць скапіяваныя толькі першыя ({ $maxRows }) радкі.
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -535,6 +550,8 @@ MenuButtons--metaInfo--profiling-started = Запіс пачаўся:
 MenuButtons--metaInfo--profiling-session = Працягласць запісу:
 MenuButtons--metaInfo--main-process-started = Асноўны працэс пачаўся:
 MenuButtons--metaInfo--main-process-ended = Асноўны працэс скончыўся:
+MenuButtons--metaInfo--file-name = Назва файла:
+MenuButtons--metaInfo--file-size = Памер файла:
 MenuButtons--metaInfo--interval = Інтэрвал:
 MenuButtons--metaInfo--buffer-capacity = Ёмістасць буфера:
 MenuButtons--metaInfo--buffer-duration = Працягласць буфера:

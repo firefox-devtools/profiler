@@ -11,7 +11,7 @@ exports[`ProfileName matches the snapshot 1`] = `
   </button>
   <input
     aria-label="Profile name"
-    class="profileNameInput"
+    class="profileNameInput photon-input"
     style="display: none;"
     title="Edit the profile name"
     value="Firefox – macOS 10.14"

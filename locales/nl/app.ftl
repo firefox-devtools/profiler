@@ -337,6 +337,7 @@ Home--additional-content-title = Bestaande profielen laden
 Home--additional-content-content = U kunt een profielbestand hierheen <strong>verslepen</strong> om het te laden, of:
 Home--compare-recordings-info = U kunt ook opnamen vergelijken. <a>De vergelijkingsinterface openen.</a>
 Home--your-recent-uploaded-recordings-title = Uw onlangs geüploade opnamen
+Home--dark-mode-title = Donkere modus
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 =
@@ -429,6 +430,13 @@ MarkerContextMenu--select-the-sender-thread = Selecteer de afzenderthread ‘<st
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Samples buiten markeringen overeenkomend met ‘<strong>{ $filter }</strong>’ buiten beschouwing laten
 
+## MarkerCopyTableContextMenu
+## This is the menu when the copy icon is clicked in Marker Chart and Marker
+## Table panels.
+
+MarkerCopyTableContextMenu--copy-table-as-plain = Markeringstabel als platte tekst kopiëren
+MarkerCopyTableContextMenu--copy-table-as-markdown = Markeringstabel als Markdown kopiëren
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
@@ -437,6 +445,14 @@ MarkerSettings--panel-search =
     .title = Alleen markeringen tonen die overeenkomen met een bepaalde naam
 MarkerSettings--marker-filters =
     .title = Markeringsfilters
+MarkerSettings--copy-table =
+    .title = Tabel als tekst kopiëren
+# This string is used when the user tries to copy a marker table with
+# more than 10000 rows.
+# Variable:
+#   $rows (Number) - Number of rows the marker table has
+#   $maxRows (Number) - Number of maximum rows that can be copied
+MarkerSettings--copy-table-exceeed-max-rows = Het aantal rijen overschrijdt de limiet: { $rows } > { $maxRows }. Alleen de eerste { $maxRows } rijen worden gekopieerd.
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -1163,6 +1179,17 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = De samenstellingsweergave verbergen
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = Vorige
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = Volgende
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = { $current } van { $total }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

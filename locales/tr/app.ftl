@@ -262,6 +262,7 @@ Home--additional-content-title = Mevcut profilleri yükleyin
 Home--additional-content-content = Profil dosyasını buraya <strong>sürükleyip bırakarak</strong> yükleyebilirsiniz ya da:
 Home--compare-recordings-info = Ayrıca kayıtları karşılaştırabilirsiniz. <a>Karşılaştırma arayüzünü aç.</a>
 Home--your-recent-uploaded-recordings-title = Son yüklediğiniz kayıtlar
+Home--dark-mode-title = Koyu mod
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 = { -profiler-brand-name } ayrıca <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, Chrome performans paneli, <androidstudio>Android Studio</androidstudio> gibi diğer profilleyicilerden ve <dhat>dhat biçimini</dhat> veya <traceevent>Google’ın trace etkinliği biçimini</traceevent> kullanan herhangi bir dosyadan profilleri içe aktarabilir. <write>Kendi içe aktarıcınızı yazmayı öğrenin.</write>
@@ -335,6 +336,13 @@ MarkerContextMenu--select-the-receiver-thread = “<strong>{ $threadName }</stro
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = “<strong>{ $threadName }</strong>” gönderen iş parçacığını seç
 
+## MarkerCopyTableContextMenu
+## This is the menu when the copy icon is clicked in Marker Chart and Marker
+## Table panels.
+
+MarkerCopyTableContextMenu--copy-table-as-plain = İşaretçi tablosunu düz metin olarak kopyala
+MarkerCopyTableContextMenu--copy-table-as-markdown = İşaretçi tablosunu Markdown olarak kopyala
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
@@ -343,6 +351,8 @@ MarkerSettings--panel-search =
     .title = Yalnızca belirli bir adla eşleşen işaretçileri görüntüler
 MarkerSettings--marker-filters =
     .title = İşaretçi filtreleri
+MarkerSettings--copy-table =
+    .title = Tabloyu metin olarak kopyala
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -394,7 +404,10 @@ MenuButtons--index--profile-info-uploaded-actions = Sil
 MenuButtons--index--metaInfo-subtitle = Profil Bilgileri
 MenuButtons--metaInfo--symbols = Semboller:
 MenuButtons--metaInfo--profile-symbolicated = Profil sembolleştirilmiştir
+MenuButtons--metaInfo--profile-not-symbolicated = Profil sembolleştirilmemiş
+MenuButtons--metaInfo--resymbolicate-profile = Profili yeniden sembolleştir
 MenuButtons--metaInfo--symbolicate-profile = Profili sembolleştir
+MenuButtons--metaInfo--attempting-resymbolicate = Profil yeniden sembolleştirilmeye çalışılıyor
 MenuButtons--metaInfo--cpu-model = İşlemci modeli:
 MenuButtons--metaInfo--cpu-cores = İşlemci çekirdekleri:
 MenuButtons--metaInfo--main-memory = Ana bellek:
@@ -439,6 +452,8 @@ MenuButtons--metaInfo--profiling-started = Kayıt başlama tarihi:
 MenuButtons--metaInfo--profiling-session = Kaydın uzunluğu:
 MenuButtons--metaInfo--main-process-started = Ana işlemin başlama tarihi:
 MenuButtons--metaInfo--main-process-ended = Ana işlemin bitiş tarihi:
+MenuButtons--metaInfo--file-name = Dosya adı:
+MenuButtons--metaInfo--file-size = Dosya boyutu:
 MenuButtons--metaInfo--interval = Aralık:
 MenuButtons--metaInfo--buffer-capacity = Tampon kapasitesi:
 MenuButtons--metaInfo--buffer-duration = Tampon süresi:

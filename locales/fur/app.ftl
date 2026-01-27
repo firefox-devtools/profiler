@@ -42,6 +42,14 @@ AppViewRouter--error-from-localhost-url-safari =
 AppViewRouter--route-not-found--home =
     .specialMessage = L’URL che tu âs cirût di contatâ nol è stât ricognossût.
 
+## Backtrace
+## This is used to display a backtrace (call stack) for a marker or sample.
+
+# Variables:
+#   $function (String) - Name of the function that was inlined.
+Backtrace--inlining-badge = (incorporade)
+    .title = Il compiladôr al veve incorporade la funzion { $function } in chel che le clamave.
+
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
@@ -407,6 +415,16 @@ MarkerTable--duration = Durade
 MarkerTable--name = Non
 MarkerTable--details = Detais
 
+## MarkerTooltip
+## This is the component for Marker Tooltip panel.
+
+# This is used as the tooltip for the filter button in marker tooltips.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerTooltip--filter-button-tooltip =
+    .title = Mostre nome i marcadôrs che a corispuindin a: “{ $filter }”
+    .aria-label = Mostre nome i marcadôrs che a corispuindin a: “{ $filter }”
+
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
@@ -483,6 +501,8 @@ MenuButtons--metaInfo--profiling-started = Regjistrazion scomençade:
 MenuButtons--metaInfo--profiling-session = Lungjece regjistrazion:
 MenuButtons--metaInfo--main-process-started = Procès principâl inviât:
 MenuButtons--metaInfo--main-process-ended = Procès principâl completât:
+MenuButtons--metaInfo--file-name = Non dal file:
+MenuButtons--metaInfo--file-size = Dimension dal file:
 MenuButtons--metaInfo--interval = Interval:
 MenuButtons--metaInfo--buffer-capacity = Capacitât buffer:
 MenuButtons--metaInfo--buffer-duration = Durade buffer:

@@ -332,6 +332,7 @@ Home--additional-content-title = Ladda befintliga profiler
 Home--additional-content-content = Du kan <strong>dra och släppa</strong> en profilfil här för att ladda den, eller:
 Home--compare-recordings-info = Du kan också jämföra inspelningar.<a>Öppna gränssnitt för att jämföra.</a>
 Home--your-recent-uploaded-recordings-title = Dina senaste uppladdade inspelningar
+Home--dark-mode-title = Mörkt läge
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 =
@@ -424,6 +425,13 @@ MarkerContextMenu--select-the-sender-thread = Välj avsändartråden "<strong>{ 
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Kasta prover utanför markörer som matchar "<strong>{ $filter }</strong>"
 
+## MarkerCopyTableContextMenu
+## This is the menu when the copy icon is clicked in Marker Chart and Marker
+## Table panels.
+
+MarkerCopyTableContextMenu--copy-table-as-plain = Kopiera markörtabell som vanlig text
+MarkerCopyTableContextMenu--copy-table-as-markdown = Kopiera markörtabell som Markdown
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
@@ -432,6 +440,14 @@ MarkerSettings--panel-search =
     .title = Visa endast markörer som matchar ett visst namn
 MarkerSettings--marker-filters =
     .title = Markörfilter
+MarkerSettings--copy-table =
+    .title = Kopiera tabell som text
+# This string is used when the user tries to copy a marker table with
+# more than 10000 rows.
+# Variable:
+#   $rows (Number) - Number of rows the marker table has
+#   $maxRows (Number) - Number of maximum rows that can be copied
+MarkerSettings--copy-table-exceeed-max-rows = Antalet rader överskrider gränsen: { $rows } > { $maxRows }. Endast de första { $maxRows } raderna kommer att kopieras.
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -1158,6 +1174,17 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = Dölj assembly-vyn
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = Föregående
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = Nästa
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = { $current } av { $total }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

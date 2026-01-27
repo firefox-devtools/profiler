@@ -337,6 +337,7 @@ Home--additional-content-title = Load existing profiles
 Home--additional-content-content = You can <strong>drag and drop</strong> a profile file here to load it, or:
 Home--compare-recordings-info = You can also compare recordings. <a>Open the comparing interface.</a>
 Home--your-recent-uploaded-recordings-title = Your recent uploaded recordings
+Home--dark-mode-title = Dark mode
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 =
@@ -429,6 +430,13 @@ MarkerContextMenu--select-the-sender-thread = Select the sender thread “<stron
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Drop samples outside of markers matching “<strong>{ $filter }</strong>”
 
+## MarkerCopyTableContextMenu
+## This is the menu when the copy icon is clicked in Marker Chart and Marker
+## Table panels.
+
+MarkerCopyTableContextMenu--copy-table-as-plain = Copy marker table as plain text
+MarkerCopyTableContextMenu--copy-table-as-markdown = Copy marker table as Markdown
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
@@ -437,6 +445,14 @@ MarkerSettings--panel-search =
     .title = Only display markers that match a certain name
 MarkerSettings--marker-filters =
     .title = Marker Filters
+MarkerSettings--copy-table =
+    .title = Copy table as text
+# This string is used when the user tries to copy a marker table with
+# more than 10000 rows.
+# Variable:
+#   $rows (Number) - Number of rows the marker table has
+#   $maxRows (Number) - Number of maximum rows that can be copied
+MarkerSettings--copy-table-exceeed-max-rows = The number of rows exceeds the limit: { $rows } > { $maxRows }. Only the first { $maxRows } rows will be copied.
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -1163,6 +1179,17 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = Hide the assembly view
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = Previous
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = Next
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = { $current } of { $total }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

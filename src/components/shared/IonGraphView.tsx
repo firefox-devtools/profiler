@@ -11,7 +11,6 @@ import { useMemo } from 'react';
 type IonGraphViewProps = {
   readonly sourceCode: string;
   readonly timings: LineTimings;
-  readonly hotSpotTimings: LineTimings;
 };
 
 export function IonGraphView(props: IonGraphViewProps) {

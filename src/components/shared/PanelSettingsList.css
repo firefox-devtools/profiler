@@ -13,6 +13,8 @@
 }
 
 .panelSettingsListItem {
+  --internal-border-color: var(--grey-20);
+
   display: flex;
   align-items: center;
   padding: 0;
@@ -21,5 +23,11 @@
 
 .panelSettingsListItem:not(:first-child) {
   padding-left: 10px;
-  border-left: 1px solid var(--grey-20);
+  border-left: 1px solid var(--internal-border-color);
+}
+
+:root.dark-mode {
+  .panelSettingsListItem {
+    --internal-border-color: var(--grey-80);
+  }
 }

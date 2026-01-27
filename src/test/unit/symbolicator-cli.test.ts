@@ -1,9 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-import { InMemorySymbolDB, makeOptionsFromArgv } from '../../symbolicator-cli';
-import { completeSymbolTableAsTuple } from '../fixtures/example-symbol-table';
-import { SymbolsNotFoundError } from '../../profile-logic/errors';
+import { makeOptionsFromArgv } from '../../symbolicator-cli';
 
 describe('makeOptionsFromArgv', function () {
   const commonArgs = ['/path/to/node', '/path/to/symbolicator-cli.js'];
@@ -97,31 +95,5 @@ describe('makeOptionsFromArgv', function () {
         '--server',
       ])
     ).toThrow();
-  });
-});
-
-describe('InMemorySymbolDB', function () {
-  const debugName = 'debugName';
-  const breakpadId = 'breakpadId';
-
-  it('should get a SymbolTable that was set', async function () {
-    const db = new InMemorySymbolDB();
-
-    await db.storeSymbolTable(
-      debugName,
-      breakpadId,
-      completeSymbolTableAsTuple
-    );
-
-    const table = await db.getSymbolTable(debugName, breakpadId);
-    expect(table).toEqual(completeSymbolTableAsTuple);
-  });
-
-  it('should throw when getting a SymbolTable that was not set', async function () {
-    const db = new InMemorySymbolDB();
-
-    await expect(async () => {
-      await db.getSymbolTable(debugName, breakpadId);
-    }).rejects.toThrow(SymbolsNotFoundError);
   });
 });

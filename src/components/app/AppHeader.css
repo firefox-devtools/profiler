@@ -3,23 +3,33 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .appHeader {
+  --internal-border-color: #ddd;
+
   display: flex;
   justify-content: space-between;
   padding-bottom: 0.5em;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--internal-border-color);
 
   /* Negative margin is here to compensate for the children's margins */
   margin: 0 -0.2em 0.5em;
   font-size: 1.5em;
 }
 
-.appHeaderLink {
-  color: inherit;
+:root.dark-mode {
+  .appHeader {
+    --internal-border-color: var(--grey-60);
+  }
+}
+
+.appHeaderLink,
+.appHeaderLink:visited {
+  color: var(--base-foreground-color);
   text-decoration: none;
 }
 
 /* Note that :focus-visible styles are defined in focus.css */
 .appHeaderLink:hover {
+  color: var(--base-foreground-color);
   text-decoration: underline;
 }
 
@@ -42,4 +52,8 @@
 
 .appHeaderGithubIcon:hover {
   opacity: 0.5;
+}
+
+.octicon-mark-github {
+  fill: var(--base-foreground-color);
 }

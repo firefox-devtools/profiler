@@ -338,15 +338,22 @@ type ProfileAction =
       readonly type: 'UPDATE_BOTTOM_BOX';
       readonly libIndex: IndexIntoLibs | null;
       readonly sourceIndex: IndexIntoSourceTable | null;
-      readonly nativeSymbol: NativeSymbolInfo | null;
-      readonly allNativeSymbolsForInitiatingCallNode: NativeSymbolInfo[];
+      readonly nativeSymbols: NativeSymbolInfo[];
+      readonly currentNativeSymbol: number | null;
       readonly currentTab: TabSlug;
       readonly shouldOpenBottomBox: boolean;
       readonly shouldOpenAssemblyView: boolean;
-      readonly lineNumber?: number;
+      readonly scrollToLineNumber?: number;
+      readonly scrollToInstructionAddress?: number;
+      readonly highlightedLineNumber: number | null;
+      readonly highlightedInstructionAddress: number | null;
     }
   | {
       readonly type: 'OPEN_ASSEMBLY_VIEW';
+    }
+  | {
+      readonly type: 'CHANGE_ASSEMBLY_VIEW_NATIVE_SYMBOL_ENTRY_INDEX';
+      readonly entryIndex: number;
     }
   | {
       readonly type: 'CLOSE_ASSEMBLY_VIEW';

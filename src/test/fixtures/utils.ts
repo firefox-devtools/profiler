@@ -195,6 +195,7 @@ export function callTreeFromProfile(
     thread,
     callNodeInfo,
     ensureExists(profile.meta.categories),
+    thread.samples,
     callTreeTimings,
     'samples'
   );
@@ -243,6 +244,7 @@ export function functionListTreeFromProfile(
     thread,
     invertedCallNodeInfo,
     ensureExists(profile.meta.categories),
+    thread.samples,
     { type: 'FUNCTION_LIST', timings: functionListTimings },
     'samples'
   );
@@ -491,11 +493,18 @@ export function findFillTextPositionFromDrawLog(
  */
 export function fireFullClick(
   element: HTMLElement,
-  options?: FakeMouseEventInit
+  options?: FakeMouseEventInit,
+  dblClick?: boolean
 ) {
   fireEvent(element, getMouseEvent('mousedown', options));
   fireEvent(element, getMouseEvent('mouseup', options));
   fireEvent(element, getMouseEvent('click', options));
+  if (dblClick) {
+    fireEvent(element, getMouseEvent('mousedown', options));
+    fireEvent(element, getMouseEvent('mouseup', options));
+    fireEvent(element, getMouseEvent('click', options));
+    fireEvent(element, getMouseEvent('dblclick', options));
+  }
 }
 
 /**

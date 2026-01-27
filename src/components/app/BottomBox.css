@@ -3,9 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .bottom-box-pane {
+  --internal-sourceview-background-color: var(--grey-20);
+  --internal-close-icon: url(../../../res/img/svg/close-dark.svg);
+  --internal-assembly-icon: url(../../../res/img/svg/asm-icon.svg);
+
   display: flex;
   height: 100%; /* direct child of SplitterLayout */
   flex-flow: column nowrap;
+  color: var(--base-foreground-color);
 }
 
 .bottom-sourceview-wrapper,
@@ -15,14 +20,14 @@
   min-height: 0;
   flex: 1;
   flex-flow: column;
-  background: var(--grey-20);
+  background: var(--internal-sourceview-background-color);
 }
 
 .bottom-box .layout-splitter {
   position: relative; /* containing block for absolute ::before */
   width: 1px;
   border: none;
-  background-color: var(--grey-30) !important;
+  background-color: var(--base-border-color) !important;
 }
 
 /* Provide 3px extra grabbable surface on each side of the splitter */
@@ -41,17 +46,22 @@
   flex-flow: row;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--grey-30);
-  background: var(--grey-10);
+  border-bottom: 1px solid var(--panel-border-color);
+  background: var(--panel-background-color);
   line-height: 18px;
 }
 
-.bottom-box-title {
+.bottom-box-title,
+.bottom-box-title-trailer {
   overflow: hidden;
   margin: 0 8px;
   font: inherit;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.bottom-box-title-trailer {
+  margin: 0;
 }
 
 .bottom-box-header-trailing-buttons {
@@ -62,7 +72,9 @@
 }
 
 .bottom-close-button,
-.bottom-assembly-button {
+.bottom-assembly-button,
+.bottom-prev-button,
+.bottom-next-button {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
@@ -71,17 +83,29 @@
   background-size: 16px 16px;
 }
 
+.bottom-prev-button,
+.bottom-next-button {
+  width: 16px;
+  font-size: 9px;
+}
+
+.bottom-next-button {
+  margin-right: 8px;
+}
+
 .bottom-close-button {
-  background-image: url(../../../res/img/svg/close-dark.svg);
+  background-image: var(--internal-close-icon);
 }
 
 .bottom-assembly-button {
-  background-image: url(../../../res/img/svg/asm-icon.svg);
+  background-image: var(--internal-assembly-icon);
 }
 
 .codeLoadingOverlay,
 .sourceCodeErrorOverlay,
 .assemblyCodeErrorOverlay {
+  --internal-background-color: rgb(240 240 240 / 0.8);
+
   /**
    * Put the overlay on top of everything in .bottom-main, but centered
    * horizontally and vertically. We center using margin: auto, and enforce
@@ -99,7 +123,7 @@
   padding: 15px;
   border-radius: 10px;
   margin: auto;
-  background-color: rgb(240 240 240 / 0.8);
+  background-color: var(--internal-background-color);
   gap: 15px;
   inset: 0;
   overflow-wrap: break-word;
@@ -131,4 +155,18 @@
 
 .codeErrorOverlay {
   padding-left: 20px;
+}
+
+:root.dark-mode {
+  .bottom-box-pane {
+    --internal-sourceview-background-color: var(--grey-80);
+    --internal-close-icon: url(../../../res/img/svg/close-light.svg);
+    --internal-assembly-icon: url(../../../res/img/svg/asm-icon-light.svg);
+  }
+
+  .codeLoadingOverlay,
+  .sourceCodeErrorOverlay,
+  .assemblyCodeErrorOverlay {
+    --internal-background-color: rgb(16 16 16 / 0.8);
+  }
 }

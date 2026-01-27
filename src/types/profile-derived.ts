@@ -696,7 +696,7 @@ export type InitialSelectedTrackReference = HTMLElement;
 export type ProfileFilterPageData = {
   origin: string;
   hostname: string;
-  favicon: string;
+  favicon: string | null;
 };
 
 /**
@@ -775,9 +775,14 @@ export type BottomBoxInfo = {
   libIndex: IndexIntoLibs | null;
   sourceIndex: IndexIntoSourceTable | null;
   nativeSymbols: NativeSymbolInfo[];
-  // Optional line number to scroll to in the source view.
-  // If not specified, the source view will scroll to the hottest line.
-  lineNumber?: number;
+  initialNativeSymbol: number | null; // index into `nativeSymbols`
+  // Optional line number + instruction address to scroll into view.
+  scrollToLineNumber?: number;
+  scrollToInstructionAddress?: number;
+  // Which lines / instructions to highlight (or none). This is used when clicking
+  // a stack frame in a marker stack.
+  highlightedLineNumber: number | null;
+  highlightedInstructionAddress: number | null;
 };
 
 /**

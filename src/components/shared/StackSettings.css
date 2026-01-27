@@ -9,6 +9,8 @@
   flex-flow: row nowrap;
   align-items: stretch;
   padding: 0;
+  background-color: var(--raised-background-color);
+  color: var(--raised-foreground-color);
   scrollbar-width: none;
   white-space: nowrap;
 }
