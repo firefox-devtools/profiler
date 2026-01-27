@@ -747,7 +747,7 @@ function _createCompactedSources(
   translationMaps: TranslationMaps
 ): SourceTable {
   const {
-    oldNativeSymbolToNewNativeSymbolPlusOne,
+    oldSourceToNewSourcePlusOne,
     oldStringToNewStringPlusOne,
   } = translationMaps;
   const newSources = getEmptySourceTable();
@@ -761,7 +761,7 @@ function _createCompactedSources(
       oldStringToNewStringPlusOne[sources.filename[i]] - 1;
     newSources.uuid[newIndex] = sources.uuid[i];
 
-    oldNativeSymbolToNewNativeSymbolPlusOne[i] = newIndex + 1;
+    oldSourceToNewSourcePlusOne[i] = newIndex + 1;
   }
 
   return newSources;
