@@ -35,15 +35,14 @@
 
 :root.dark-mode {
   .timelineSelection {
-    --grippy-range-background-color: var(--ink-40);
+    --selection-outbound-opacity: 0.4;
+    --grippy-range-background-color: var(--grey-40);
     --grippy-range-border-color: var(--grey-40);
-    --grippy-range-hover-background-color: var(--ink-60);
+    --grippy-range-hover-background-color: var(--grey-60);
     --internal-hover-line-color: rgb(237 237 240 / 0.4);
     --internal-overlay-time-foreground-color: var(--grey-20);
-    --internal-overlay-time-background-color: var(--ink-70);
-    --internal-dimmed-color: rgb(
-      237 237 240 / var(--selection-outbound-opacity)
-    );
+    --internal-overlay-time-background-color: var(--grey-70);
+    --internal-dimmed-color: rgb(0 0 0 / var(--selection-outbound-opacity));
     --internal-range-background-color: var(--blue-60);
     --internal-zoom-background-color: rgb(54 57 89 / 0.6);
     --internal-zoom-border-color: rgb(237 237 240 / 0.5);

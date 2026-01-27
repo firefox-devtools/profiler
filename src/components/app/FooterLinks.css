@@ -45,13 +45,13 @@
 
 :root.dark-mode {
   .appFooterLinks {
-    --internal-background-color: var(--ink-90);
-    --internal-border-color: var(--ink-70);
+    --internal-background-color: var(--grey-90);
+    --internal-border-color: var(--grey-70);
   }
 
   .appFooterLinksLanguageSwitcher {
-    --internal-background-color: var(--ink-60);
-    --internal-boreder-color: var(--ink-40);
+    --internal-background-color: var(--grey-60);
+    --internal-boreder-color: var(--grey-40);
 
     border: 1px solid var(--internal-boreder-color);
     border-radius: 4px;

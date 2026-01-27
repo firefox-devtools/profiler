@@ -28,7 +28,7 @@
 
   /* Inherit some properties values from the environment, rather than using the
    * browser default for buttons or links. */
-  color: inherit;
+  color: inherit !important;
   font-size: inherit;
 
   /* These 2 styles are specific for links. */

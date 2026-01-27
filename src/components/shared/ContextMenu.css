@@ -18,13 +18,13 @@
   min-width: 160px;
   max-width: 600px;
   padding: 5px 0;
-  border-radius: 3px;
+  border-radius: 5px;
   margin: 2px 0 0;
-  background-color: var(--base-background-color);
+  background-color: var(--menu-background-color);
   box-shadow:
     0 0 0 0.5px var(--internal-shadow-color1),
     0 10px 12px var(--internal-shadow-color2);
-  color: var(--base-foreground-color);
+  color: var(--menu-foreground-color);
   font-size: 12px;
   text-align: left;
   user-select: none;
@@ -32,8 +32,8 @@
 
 :root.dark-mode {
   .react-contextmenu {
-    --internal-shadow-color1: rgb(0 0 0 / 0.2);
-    --internal-shadow-color2: rgb(0 0 0 / 0.4);
+    --internal-shadow-color1: rgb(0 0 0 / 0.4);
+    --internal-shadow-color2: rgb(0 0 0 / 0.6);
     --internal-separator-color: var(--base-border-color);
     --internal-divider-color: rgb(237 237 240 / 0.15);
     --internal-active-foreground-color: var(--grey-20);
@@ -42,7 +42,7 @@
     --internal-selected-disabled-background-color: var(--blue-60-a30);
     --internal-highlight-foreground-color: var(--grey-30);
 
-    border: 1px solid var(--base-border-color);
+    border: 1px solid var(--grey-60);
   }
 }
 

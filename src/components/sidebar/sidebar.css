@@ -222,8 +222,8 @@
   }
 
   .sidebar-histogram-bar {
-    --internal-background-color: var(--ink-70);
-    --internal-transparent-color: var(--ink-50);
+    --internal-background-color: var(--grey-70);
+    --internal-transparent-color: var(--grey-50);
   }
 
   .sidebar-toggle {

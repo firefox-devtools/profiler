@@ -51,12 +51,17 @@
   line-height: 18px;
 }
 
-.bottom-box-title {
+.bottom-box-title,
+.bottom-box-title-trailer {
   overflow: hidden;
   margin: 0 8px;
   font: inherit;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.bottom-box-title-trailer {
+  margin: 0;
 }
 
 .bottom-box-header-trailing-buttons {
@@ -67,13 +72,25 @@
 }
 
 .bottom-close-button,
-.bottom-assembly-button {
+.bottom-assembly-button,
+.bottom-prev-button,
+.bottom-next-button {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
   background-position: center;
   background-repeat: no-repeat;
   background-size: 16px 16px;
+}
+
+.bottom-prev-button,
+.bottom-next-button {
+  width: 16px;
+  font-size: 9px;
+}
+
+.bottom-next-button {
+  margin-right: 8px;
 }
 
 .bottom-close-button {
@@ -142,7 +159,7 @@
 
 :root.dark-mode {
   .bottom-box-pane {
-    --internal-sourceview-background-color: var(--ink-80);
+    --internal-sourceview-background-color: var(--grey-80);
     --internal-close-icon: url(../../../res/img/svg/close-light.svg);
     --internal-assembly-icon: url(../../../res/img/svg/asm-icon-light.svg);
   }

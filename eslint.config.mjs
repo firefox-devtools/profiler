@@ -1,6 +1,7 @@
+import { defineConfig } from 'eslint/config';
 import js from '@eslint/js';
+import tseslint from 'typescript-eslint';
 import tsParser from '@typescript-eslint/parser';
-import tsPlugin from '@typescript-eslint/eslint-plugin';
 import babelPlugin from '@babel/eslint-plugin';
 import reactPlugin from 'eslint-plugin-react';
 import importPlugin from 'eslint-plugin-import';
@@ -11,7 +12,7 @@ import jestDomPlugin from 'eslint-plugin-jest-dom';
 import prettierConfig from 'eslint-config-prettier';
 import globals from 'globals';
 
-export default [
+export default defineConfig(
   // Global ignores
   {
     ignores: [
@@ -27,8 +28,8 @@ export default [
   // Base JavaScript config
   js.configs.recommended,
 
-  // TypeScript config
-  ...tsPlugin.configs['flat/recommended'],
+  // TypeScript config with type checking
+  ...tseslint.configs.recommendedTypeChecked,
 
   // React config
   reactPlugin.configs.flat.recommended,
@@ -50,6 +51,7 @@ export default [
         ecmaFeatures: {
           jsx: true,
         },
+        // Note: projectService is enabled for TypeScript files only, below
       },
     },
     plugins: {
@@ -178,6 +180,32 @@ export default [
         },
       ],
       '@typescript-eslint/no-require-imports': 'off',
+
+      // Disable "no-unsafe" checks which complain about using "any" freely.
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+
+      // Disable this one due to false positives when narrowing return types,
+      // see https://github.com/typescript-eslint/typescript-eslint/issues/6951
+      // (it can make `yarn ts` fail after `yarn lint-fix`)
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+
+      // Consider enabling these in the future
+      '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/only-throw-error': 'off',
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/no-redundant-type-constituents': 'off',
+      '@typescript-eslint/no-misused-promises': 'off',
+      '@typescript-eslint/await-thenable': 'off',
+      '@typescript-eslint/restrict-plus-operands': 'off',
+      '@typescript-eslint/no-base-to-string': 'off',
+      '@typescript-eslint/restrict-template-expressions': 'off',
+      '@typescript-eslint/prefer-promise-reject-errors': 'off',
+      '@typescript-eslint/no-array-delete': 'off',
     },
     linterOptions: {
       // This property is specified both here in addition to the command line in
@@ -189,7 +217,27 @@ export default [
     },
   },
 
-  // Source files - enable stricter TypeScript rules
+  // Enable type-aware lints for TypeScript files.
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
+
+  // Explicitly disable type-aware rules for JS files, to avoid the following error:
+  // > You have used a rule which requires type information, but don't have
+  // > parserOptions set to generate type information for this file.
+  {
+    files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+    ...tseslint.configs.disableTypeChecked,
+  },
+
+  // For non-test files, only allow import, no require(). (For test files we
+  // allow require() because we use it for JSON fixtures.)
   {
     files: ['src/**/*.ts', 'src/**/*.tsx'],
     rules: {
@@ -266,5 +314,5 @@ export default [
   },
 
   // Prettier config (must be last to override other formatting rules)
-  prettierConfig,
-];
+  prettierConfig
+);
