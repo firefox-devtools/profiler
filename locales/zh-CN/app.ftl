@@ -342,6 +342,13 @@ MarkerContextMenu--select-the-sender-thread = 选择 Sender 线程“<strong>{ $
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = 丢弃与标记（匹配条件：“<strong>{ $filter }</strong>”）不相关的样本
 
+## MarkerCopyTableContextMenu
+## This is the menu when the copy icon is clicked in Marker Chart and Marker
+## Table panels.
+
+MarkerCopyTableContextMenu--copy-table-as-plain = 以纯文本格式复制标记表格
+MarkerCopyTableContextMenu--copy-table-as-markdown = 以 Markdown 格式复制标记表格
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
@@ -350,6 +357,14 @@ MarkerSettings--panel-search =
     .title = 只显示匹配特定名称的标记
 MarkerSettings--marker-filters =
     .title = 标记过滤器
+MarkerSettings--copy-table =
+    .title = 以文本格式复制表格
+# This string is used when the user tries to copy a marker table with
+# more than 10000 rows.
+# Variable:
+#   $rows (Number) - Number of rows the marker table has
+#   $maxRows (Number) - Number of maximum rows that can be copied
+MarkerSettings--copy-table-exceeed-max-rows = 行数超出限制：{ $rows } > { $maxRows }，将仅复制前 { $maxRows } 行。
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -443,6 +458,7 @@ MenuButtons--metaInfo--profiling-session = 记录长度：
 MenuButtons--metaInfo--main-process-started = 主进程开始：
 MenuButtons--metaInfo--main-process-ended = 主进程结束：
 MenuButtons--metaInfo--file-name = 文件名：
+MenuButtons--metaInfo--file-size = 文件大小：
 MenuButtons--metaInfo--interval = 间隔：
 MenuButtons--metaInfo--buffer-capacity = 缓冲容量：
 MenuButtons--metaInfo--buffer-duration = 缓冲间隔：

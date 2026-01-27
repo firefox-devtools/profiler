@@ -39,7 +39,7 @@ import {
   changeMouseTimePosition,
 } from '../../actions/profile-view';
 
-import { getBottomBoxInfoForCallNode } from '../../profile-logic/profile-data';
+import { getBottomBoxInfoForCallNode } from '../../profile-logic/bottom-box';
 
 import type {
   Thread,
@@ -170,13 +170,31 @@ class StackChartImpl extends React.PureComponent<Props> {
       const bottomBoxInfo = getBottomBoxInfoForCallNode(
         nodeIndex,
         callNodeInfo,
-        thread
+        thread,
+        thread.samples
       );
       updateBottomBoxContentsAndMaybeOpen('stack-chart', bottomBoxInfo);
       return;
     }
 
     handleCallNodeTransformShortcut(event, threadsKey, nodeIndex);
+  };
+
+  _onDoubleClick = (callNodeIndex: IndexIntoCallNodeTable | null) => {
+    if (callNodeIndex === null) {
+      return;
+    }
+
+    const { thread, callNodeInfo, updateBottomBoxContentsAndMaybeOpen } =
+      this.props;
+
+    const bottomBoxInfo = getBottomBoxInfoForCallNode(
+      callNodeIndex,
+      callNodeInfo,
+      thread,
+      thread.samples
+    );
+    updateBottomBoxContentsAndMaybeOpen('stack-chart', bottomBoxInfo);
   };
 
   _onCopy = (event: ClipboardEvent) => {
@@ -213,7 +231,6 @@ class StackChartImpl extends React.PureComponent<Props> {
       timeRange,
       interval,
       previewSelection,
-      updatePreviewSelection,
       changeMouseTimePosition,
       callNodeInfo,
       categories,
@@ -270,7 +287,6 @@ class StackChartImpl extends React.PureComponent<Props> {
                   combinedTimingRows,
                   sameWidthsIndexToTimestampMap,
                   getMarker,
-                  updatePreviewSelection,
                   changeMouseTimePosition,
                   rangeStart: timeRange.start,
                   rangeEnd: timeRange.end,
@@ -278,6 +294,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   callNodeInfo,
                   categories,
                   selectedCallNodeIndex,
+                  onDoubleClick: this._onDoubleClick,
                   onSelectionChange: this._onSelectedCallNodeChange,
                   // TODO: support right clicking user timing markers #2354.
                   onRightClick: this._onRightClickedCallNodeChange,

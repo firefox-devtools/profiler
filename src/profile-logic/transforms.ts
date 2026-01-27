@@ -58,6 +58,7 @@ import type { StringTable } from 'firefox-profiler/utils/string-table';
 const TRANSFORM_OBJ: { [key in TransformType]: true } = {
   'focus-subtree': true,
   'focus-function': true,
+  'focus-self': true,
   'merge-call-node': true,
   'merge-function': true,
   'drop-function': true,
@@ -85,6 +86,9 @@ ALL_TRANSFORM_TYPES.forEach((transform: TransformType) => {
       break;
     case 'focus-function':
       shortKey = 'ff';
+      break;
+    case 'focus-self':
+      shortKey = 'ffs';
       break;
     case 'focus-category':
       shortKey = 'fg';
@@ -239,6 +243,20 @@ export function parseTransforms(transformString: string): TransformStack {
         }
         break;
       }
+      case 'focus-self': {
+        // e.g. "ffs-js-325"
+        const [, implementation, funcIndexRaw] = tuple;
+        const funcIndex = parseInt(funcIndexRaw, 10);
+        if (isNaN(funcIndex) || funcIndex < 0) {
+          break;
+        }
+        transforms.push({
+          type: 'focus-self',
+          funcIndex,
+          implementation: toValidImplementationFilter(implementation),
+        });
+        break;
+      }
       case 'focus-category': {
         // e.g. "fg-3"
         const [, categoryRaw] = tuple;
@@ -359,6 +377,7 @@ export function stringifyTransforms(transformStack: TransformStack): string {
         case 'collapse-recursion':
           return `${shortKey}-${transform.funcIndex}`;
         case 'collapse-direct-recursion':
+        case 'focus-self':
           return `${shortKey}-${transform.implementation}-${transform.funcIndex}`;
         case 'focus-subtree':
         case 'merge-call-node': {
@@ -444,6 +463,7 @@ export function getTransformLabelL10nIds(
         funcIndex = transform.callNodePath[transform.callNodePath.length - 1];
         break;
       case 'focus-function':
+      case 'focus-self':
       case 'merge-function':
       case 'drop-function':
       case 'collapse-direct-recursion':
@@ -462,6 +482,8 @@ export function getTransformLabelL10nIds(
         return { l10nId: 'TransformNavigator--focus-subtree', item: funcName };
       case 'focus-function':
         return { l10nId: 'TransformNavigator--focus-function', item: funcName };
+      case 'focus-self':
+        return { l10nId: 'TransformNavigator--focus-self', item: funcName };
       case 'merge-call-node':
         return {
           l10nId: 'TransformNavigator--merge-call-node',
@@ -511,6 +533,11 @@ export function applyTransformToCallNodePath(
       );
     case 'focus-function':
       return _startCallNodePathWithFunction(transform.funcIndex, callNodePath);
+    case 'focus-self':
+      return _focusFunctionSelfInCallNodePath(
+        transform.funcIndex,
+        callNodePath
+      );
     case 'focus-category':
       return _removeOtherCategoryFunctionsInNodePathWithFunction(
         transform.category,
@@ -574,6 +601,14 @@ function _startCallNodePathWithFunction(
 ): CallNodePath {
   const startIndex = callNodePath.indexOf(funcIndex);
   return startIndex === -1 ? [] : callNodePath.slice(startIndex);
+}
+
+function _focusFunctionSelfInCallNodePath(
+  funcIndex: IndexIntoFuncTable,
+  callNodePath: CallNodePath
+): CallNodePath {
+  const containsFunc = callNodePath.indexOf(funcIndex) !== -1;
+  return containsFunc ? [funcIndex] : [];
 }
 
 function _mergeNodeInCallNodePath(
@@ -1443,6 +1478,53 @@ export function focusFunction(
   });
 }
 
+export function focusSelf(
+  thread: Thread,
+  funcIndexToFocus: IndexIntoFuncTable,
+  implementation: ImplementationFilter
+): Thread {
+  return timeCode('focusSelf', () => {
+    const { stackTable, frameTable } = thread;
+
+    const funcMatchesImplementation = FUNC_MATCHES[implementation];
+
+    const shouldKeepStack = new Uint8Array(stackTable.length);
+
+    const newPrefixCol = stackTable.prefix.slice();
+
+    for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+      const frameIndex = stackTable.frame[stackIndex];
+      const funcIndex = frameTable.func[frameIndex];
+
+      if (funcIndex === funcIndexToFocus) {
+        shouldKeepStack[stackIndex] = 1;
+        newPrefixCol[stackIndex] = null;
+      } else {
+        const prefix = newPrefixCol[stackIndex];
+        if (
+          prefix !== null &&
+          shouldKeepStack[prefix] === 1 &&
+          !funcMatchesImplementation(thread, funcIndex)
+        ) {
+          shouldKeepStack[stackIndex] = 1;
+        }
+      }
+    }
+
+    const newStackTable = {
+      ...stackTable,
+      prefix: newPrefixCol,
+    };
+
+    return updateThreadStacks(thread, newStackTable, (oldStack) => {
+      if (oldStack === null || shouldKeepStack[oldStack] === 0) {
+        return null;
+      }
+      return oldStack;
+    });
+  });
+}
+
 export function focusCategory(thread: Thread, category: IndexIntoCategoryList) {
   return timeCode('focusCategory', () => {
     const { stackTable } = thread;
@@ -1859,6 +1941,8 @@ export function applyTransform(
       return dropFunction(thread, transform.funcIndex);
     case 'focus-function':
       return focusFunction(thread, transform.funcIndex);
+    case 'focus-self':
+      return focusSelf(thread, transform.funcIndex, transform.implementation);
     case 'focus-category':
       return focusCategory(thread, transform.category);
     case 'collapse-resource':

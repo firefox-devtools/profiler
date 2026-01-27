@@ -327,6 +327,17 @@ export class ChartCanvas<Item> extends React.Component<
 
   _onDoubleClick = () => {
     this.props.onDoubleClickItem(this.state.hoveredItem);
+
+    if (this.props.stickyTooltips) {
+      // The double click is received as a sequence of click + click + dblclick.
+      // The each click sets the selectedItem inside _onClick.
+      //
+      // Unset the selectedItem here to differentiate the behavior between
+      // the single click vs the double clicks.
+      this.setState(() => ({
+        selectedItem: null,
+      }));
+    }
   };
 
   _getHoveredItemInfo = (): React.ReactNode => {
@@ -377,6 +388,20 @@ export class ChartCanvas<Item> extends React.Component<
         if (info === null) {
           this.setState({ selectedItem: null });
         }
+      }
+
+      if (
+        this._canvas &&
+        this._canvas.width !== 0 &&
+        this.props.containerWidth === 0
+      ) {
+        // This is a temporary default state triggered by Viewport,
+        // for the viewportNeedsUpdate condition.
+        //
+        // Another setState call with the updated containerWidth/containerHeight
+        // will be performed and componentDidUpdate will be called again.
+        // We should ignore this update, in order to avoid an unnecessary flash.
+        return;
       }
       this._scheduleDraw();
     } else if (

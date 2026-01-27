@@ -432,6 +432,8 @@ MarkerSettings--panel-search =
     .title = Εμφάνιση μόνο των σημαδιών που αντιστοιχούν σε ένα συγκεκριμένο όνομα
 MarkerSettings--marker-filters =
     .title = Φίλτρα δείκτη
+MarkerSettings--copy-table =
+    .title = Αντιγραφή πίνακα ως κειμένου
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.

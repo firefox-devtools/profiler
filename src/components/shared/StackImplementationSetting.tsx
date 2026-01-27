@@ -47,7 +47,7 @@ class StackImplementationSettingImpl extends PureComponent<Props> {
   ) {
     const htmlId = `implementation-radio-${implementationFilter}`;
     return (
-      <>
+      <label className="photon-label photon-label-micro" htmlFor={htmlId}>
         <Localized id={labelL10nId} attrs={{ title: true }}>
           <input
             type="radio"
@@ -58,13 +58,10 @@ class StackImplementationSettingImpl extends PureComponent<Props> {
             checked={this.props.implementationFilter === implementationFilter}
           />
         </Localized>
-        <Localized id={labelL10nId} attrs={{ title: true }}>
-          <label
-            className="photon-label photon-label-micro photon-label-horiz-padding"
-            htmlFor={htmlId}
-          ></label>
+        <Localized id={labelL10nId}>
+          <span className="photon-label-horiz-padding"></span>
         </Localized>
-      </>
+      </label>
     );
   }
 

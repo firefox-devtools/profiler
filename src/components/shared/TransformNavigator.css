@@ -3,7 +3,19 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .calltreeTransformNavigator {
-  border-top: 1px solid var(--grey-30);
-  background: var(--grey-10);
-  color: var(--ink-70);
+  --internal-foreground-color: var(--panel-foreground-color);
+  --internal-background-color: var(--panel-background-color);
+  --internal-border-color: var(--panel-border-color);
+
+  border-top: 1px solid var(--internal-border-color);
+  background: var(--internal-background-color);
+  color: var(--internal-foreground-color);
+}
+
+:root.dark-mode {
+  .calltreeTransformNavigator {
+    --internal-foreground-color: var(--lowered-foreground-color);
+    --internal-border-color: var(--base-border-color);
+    --internal-background-color: var(--lowered-background-color);
+  }
 }

@@ -1,11 +1,19 @@
 .flameGraphDisabledMessage {
+  --internal-background-color: var(--grey-20);
+
   display: flex;
   flex: 1;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 10px;
-  background-color: var(--grey-20);
-  box-shadow: inset 0 0 150px rgb(0 0 0 / 0.1);
+  background-color: var(--internal-background-color);
+  box-shadow: inset 0 0 150px var(--base-shadow-color);
   font-size: 120%;
+}
+
+:root.dark-mode {
+  .flameGraphDisabledMessage {
+    --internal-background-color: var(--grey-80);
+  }
 }

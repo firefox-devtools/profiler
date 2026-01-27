@@ -3,9 +3,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .metaInfoGrid {
+  --internal-label-foreground-color: var(--grey-50);
+
   display: grid;
   margin-bottom: 20px;
   grid-template-columns: repeat(4, 1fr);
+}
+
+:root.dark-mode {
+  .metaInfoGrid {
+    --internal-label-foreground-color: var(--grey-40);
+  }
 }
 
 .metaInfoGrid > div {
@@ -18,7 +26,7 @@
 }
 
 .metaInfoGrid > div:nth-child(4n + 1) {
-  color: var(--grey-50);
+  color: var(--internal-label-foreground-color);
   font-weight: 500;
 }
 

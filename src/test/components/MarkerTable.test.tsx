@@ -34,6 +34,7 @@ import {
   addMarkersToThreadWithCorrespondingSamples,
   addIPCMarkerPairToThreads,
   getNetworkTrackProfile,
+  getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { fireFullClick, fireFullContextMenu } from '../fixtures/utils';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
@@ -514,6 +515,106 @@ describe('MarkerTable', function () {
       fireEvent.dblClick(dividerForFirstColumn, { detail: 2 });
       expect(firstColumn).toHaveStyle({ width: '90px' });
     });
+  });
+
+  it('can copy the table as plain text', () => {
+    const { container } = setup();
+
+    const button = ensureExists(
+      container.querySelector('.copyTableButton')
+    ) as HTMLElement;
+    fireFullClick(button);
+
+    const menu = ensureExists(
+      container.querySelector('.markerCopyTableContextMenu')
+    ) as HTMLElement;
+
+    const items = menu.querySelectorAll('[role="menuitem"]');
+    expect(items.length).toBe(2);
+
+    fireFullClick(items[0] as HTMLElement);
+
+    const pattern = new RegExp(
+      '^ +Start +Duration +Name +Details\\n +0s +0s +UserTiming +foobar\\n'
+    );
+    expect(copy).toHaveBeenLastCalledWith(expect.stringMatching(pattern));
+  });
+
+  it('can copy the table as markdown', () => {
+    const { container } = setup();
+
+    const button = ensureExists(
+      container.querySelector('.copyTableButton')
+    ) as HTMLElement;
+    fireFullClick(button);
+
+    const menu = ensureExists(
+      container.querySelector('.markerCopyTableContextMenu')
+    ) as HTMLElement;
+
+    const items = menu.querySelectorAll('[role="menuitem"]');
+    expect(items.length).toBe(2);
+
+    fireFullClick(items[1] as HTMLElement);
+
+    const pattern = new RegExp(
+      '^\\| +Start +\\| +Duration +\\| +Name +\\| +Details +\\|\\n' +
+        '\\|-+:\\|-+:\\|-+:\\|-+\\|\\n' +
+        '\\| +0s +\\| +0s +\\| +UserTiming +\\| +foobar +\\|\\n'
+    );
+    expect(copy).toHaveBeenLastCalledWith(expect.stringMatching(pattern));
+  });
+
+  it('shows warning when copying 10001+ rows', () => {
+    jest.useFakeTimers();
+
+    const markers: TestDefinedMarker[] = [];
+    for (let i = 1; i < 10010; i++) {
+      markers.push([
+        'UserTiming',
+        i,
+        i,
+        {
+          type: 'UserTiming',
+          name: 'foobar',
+          entryType: 'mark',
+        },
+      ]);
+    }
+    const profile = getProfileWithMarkers(markers);
+    const { container } = setup(profile);
+
+    const button = ensureExists(
+      container.querySelector('.copyTableButton')
+    ) as HTMLElement;
+    fireFullClick(button);
+
+    const menu = ensureExists(
+      container.querySelector('.markerCopyTableContextMenu')
+    ) as HTMLElement;
+
+    const items = menu.querySelectorAll('[role="menuitem"]');
+    expect(items.length).toBe(2);
+
+    fireFullClick(items[0] as HTMLElement);
+
+    const pattern = new RegExp(
+      '^ +Start +Duration +Name +Details\\n +0s +0s +UserTiming +foobar\\n.+9\\.999s +0s +UserTiming +foobar$',
+      's'
+    );
+    expect(copy).toHaveBeenLastCalledWith(expect.stringMatching(pattern));
+
+    const warning = screen.getByText(
+      'The number of rows exceeds the limit: ⁨10,009⁩ > ⁨10,000⁩. Only the first ⁨10,000⁩ rows will be copied.'
+    );
+    expect(warning).toBeInTheDocument();
+
+    act(() => jest.runAllTimers());
+
+    const warning2 = screen.queryByText(
+      'The number of rows exceeds the limit: ⁨10,009⁩ > ⁨10,000⁩. Only the first ⁨10,000⁩ rows will be copied.'
+    );
+    expect(warning2).not.toBeInTheDocument();
   });
 });
 

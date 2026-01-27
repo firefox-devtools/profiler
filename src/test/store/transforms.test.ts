@@ -623,6 +623,150 @@ describe('"focus-function" transform', function () {
   });
 });
 
+describe('"focus-self" transform', function () {
+  describe('on a call tree', function () {
+    /**
+     * Assert this transformation with implementation='combined':
+     *
+     * Samples: A->X, A->B->X, A->B->X->Y
+     *
+     * - First sample (A->X): innermost filtered frame is X, keep it → X (with self)
+     * - Second sample (A->B->X): innermost filtered frame is X, keep it → X (with self)
+     * - Third sample (A->B->X->Y): innermost filtered frame is Y ≠ X, drop it
+     *
+     * Result:
+     *   X:2,2 (self time from the two kept samples)
+     */
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A  A  A
+      X  B  B
+         X  X
+            Y
+    `);
+
+    const threadIndex = 0;
+    const X = funcNames.indexOf('X');
+
+    it('starts as an unfiltered call tree', function () {
+      const { getState } = storeWithProfile(profile);
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toEqual([
+        '- A (total: 3, self: —)',
+        '  - B (total: 2, self: —)',
+        '    - X (total: 2, self: 1)',
+        '      - Y (total: 1, self: 1)',
+        '  - X (total: 1, self: 1)',
+      ]);
+    });
+
+    it('can focus-self on a function', function () {
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'focus-self',
+          funcIndex: X,
+          implementation: 'combined',
+        })
+      );
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toEqual(['- X (total: 2, self: 2)']);
+    });
+  });
+
+  describe('with implementation filter and descendants', function () {
+    /**
+     * Test that non-filtered frames are kept as descendants to show where self time goes.
+     *
+     * Samples:
+     *   A.js -> X.js -> Y.cpp -> Z.cpp  (3 samples)
+     *
+     * With implementation='js':
+     * - Implementation-filtered view shows: A.js -> X.js
+     * - Innermost filtered frame is X.js
+     * - X.js == focused function ✓
+     * - Keep it, result: X.js -> Y.cpp -> Z.cpp
+     *   (Y.cpp and Z.cpp are kept to show where X's JS self time goes)
+     */
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A.js    A.js    A.js
+      X.js    X.js    X.js
+      Y.cpp   Y.cpp   Y.cpp
+      Z.cpp   Z.cpp   Z.cpp
+    `);
+
+    const threadIndex = 0;
+    const X = funcNames.indexOf('X.js');
+
+    it('keeps non-filtered descendants to show where self time goes', function () {
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'focus-self',
+          funcIndex: X,
+          implementation: 'js',
+        })
+      );
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toEqual([
+        '- X.js (total: 3, self: —)',
+        '  - Y.cpp (total: 3, self: —)',
+        '    - Z.cpp (total: 3, self: 3)',
+      ]);
+    });
+  });
+
+  describe('with recursion', function () {
+    /**
+     * Test that recursion is handled correctly.
+     *
+     * Samples: A->X->Y->X, A->X->Y->X, A->X->Y->X
+     *
+     * For each sample A->X->Y->X:
+     * - Innermost filtered frame is the second X
+     * - Second X == focused function ✓
+     * - Keep it, and make the innermost X the root
+     *
+     * Result:
+     *   X:3,3 (the innermost X instances, all with self time)
+     */
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A  A  A
+      X  X  X
+      Y  Y  Y
+      X  X  X
+    `);
+
+    const threadIndex = 0;
+    const X = funcNames.indexOf('X');
+
+    it('handles recursion correctly', function () {
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'focus-self',
+          funcIndex: X,
+          implementation: 'combined',
+        })
+      );
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toEqual(['- X (total: 3, self: 3)']);
+    });
+  });
+});
+
 describe('"focus-category" transform', function () {
   function setup(textSamples: string) {
     const {

@@ -75,15 +75,37 @@ export const getSourceViewSourceIndex: Selector<IndexIntoSourceTable | null> = (
 ) => getProfileSpecificState(state).sourceView.sourceIndex;
 export const getSourceViewScrollGeneration: Selector<number> = (state) =>
   getProfileSpecificState(state).sourceView.scrollGeneration;
-export const getSourceViewLineNumber: Selector<number | undefined> = (state) =>
-  getProfileSpecificState(state).sourceView.lineNumber;
+export const getSourceViewScrollToLineNumber: Selector<number | undefined> = (
+  state
+) => getProfileSpecificState(state).sourceView.scrollToLineNumber;
+export const getSourceViewHighlightedLine: Selector<number | null> = (state) =>
+  getProfileSpecificState(state).sourceView.highlightedLine;
 export const getAssemblyViewIsOpen: Selector<boolean> = (state) =>
   getProfileSpecificState(state).assemblyView.isOpen;
 export const getAssemblyViewNativeSymbol: Selector<NativeSymbolInfo | null> = (
   state
-) => getProfileSpecificState(state).assemblyView.nativeSymbol;
+) => {
+  const { nativeSymbols, currentNativeSymbol } =
+    getProfileSpecificState(state).assemblyView;
+  return currentNativeSymbol !== null
+    ? nativeSymbols[currentNativeSymbol]
+    : null;
+};
+export const getAssemblyViewCurrentNativeSymbolEntryIndex: Selector<
+  number | null
+> = (state) => getProfileSpecificState(state).assemblyView.currentNativeSymbol;
+export const getAssemblyViewNativeSymbolEntryCount: Selector<number> = (
+  state
+) => getProfileSpecificState(state).assemblyView.nativeSymbols.length;
 export const getAssemblyViewScrollGeneration: Selector<number> = (state) =>
   getProfileSpecificState(state).assemblyView.scrollGeneration;
+export const getAssemblyViewScrollToInstructionAddress: Selector<
+  number | undefined
+> = (state) =>
+  getProfileSpecificState(state).assemblyView.scrollToInstructionAddress;
+export const getAssemblyViewHighlightedInstruction: Selector<number | null> = (
+  state
+) => getProfileSpecificState(state).assemblyView.highlightedInstruction;
 export const getShowJsTracerSummary: Selector<boolean> = (state) =>
   getProfileSpecificState(state).showJsTracerSummary;
 

@@ -14,10 +14,7 @@ import {
   funcHasRecursiveCall,
 } from 'firefox-profiler/profile-logic/transforms';
 import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
-import {
-  getBottomBoxInfoForCallNode,
-  getOriginAnnotationForFunc,
-} from 'firefox-profiler/profile-logic/profile-data';
+import { getOriginAnnotationForFunc } from 'firefox-profiler/profile-logic/profile-data';
 import { getCategories } from 'firefox-profiler/selectors';
 
 import copy from 'copy-to-clipboard';
@@ -52,12 +49,12 @@ import type {
   TransformType,
   ImplementationFilter,
   IndexIntoCallNodeTable,
-  CallNodePath,
   Thread,
   ThreadsKey,
   CategoryList,
   InnerWindowID,
   Page,
+  SamplesLikeTable,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
@@ -68,9 +65,9 @@ import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser
 type StateProps = {
   readonly thread: Thread | null;
   readonly threadsKey: ThreadsKey | null;
+  readonly previewFilteredCtssSamples: SamplesLikeTable | null;
   readonly categories: CategoryList;
   readonly callNodeInfo: CallNodeInfo | null;
-  readonly rightClickedCallNodePath: CallNodePath | null;
   readonly rightClickedCallNodeIndex: IndexIntoCallNodeTable | null;
   readonly implementation: ImplementationFilter;
   readonly inverted: boolean;
@@ -91,6 +88,7 @@ type DispatchProps = {
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 import './CallNodeContextMenu.css';
+import { getBottomBoxInfoForCallNode } from 'firefox-profiler/profile-logic/bottom-box';
 
 class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   _hidingTimeout: NodeJS.Timeout | null = null;
@@ -226,11 +224,13 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       );
     }
 
-    const { callNodeIndex, thread, callNodeInfo } = rightClickedCallNodeInfo;
+    const { callNodeIndex, thread, callNodeInfo, previewFilteredCtssSamples } =
+      rightClickedCallNodeInfo;
     const bottomBoxInfo = getBottomBoxInfoForCallNode(
       callNodeIndex,
       callNodeInfo,
-      thread
+      thread,
+      previewFilteredCtssSamples
     );
     updateBottomBoxContentsAndMaybeOpen(selectedTab, bottomBoxInfo);
   }
@@ -337,9 +337,10 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       );
     }
 
-    const { threadsKey, callNodePath, thread, callNodeIndex, callNodeInfo } =
+    const { threadsKey, thread, callNodeIndex, callNodeInfo } =
       rightClickedCallNodeInfo;
-    const selectedFunc = callNodePath[callNodePath.length - 1];
+    const selectedFunc = callNodeInfo.funcForNode(callNodeIndex);
+    const callNodePath = callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
     const category = callNodeInfo.categoryForNode(callNodeIndex);
     switch (type) {
       case 'focus-subtree':
@@ -354,6 +355,13 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         addTransformToStack(threadsKey, {
           type: 'focus-function',
           funcIndex: selectedFunc,
+        });
+        break;
+      case 'focus-self':
+        addTransformToStack(threadsKey, {
+          type: 'focus-self',
+          funcIndex: selectedFunc,
+          implementation,
         });
         break;
       case 'merge-call-node':
@@ -503,11 +511,12 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     }
 
     const {
-      callNodePath,
+      callNodeInfo,
+      callNodeIndex,
       thread: { funcTable, stringTable, resourceTable, sources },
     } = rightClickedCallNodeInfo;
 
-    const funcIndex = callNodePath[callNodePath.length - 1];
+    const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
     if (funcIndex === undefined) {
       return null;
     }
@@ -533,30 +542,30 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   getRightClickedCallNodeInfo(): null | {
     readonly thread: Thread;
     readonly threadsKey: ThreadsKey;
+    readonly previewFilteredCtssSamples: SamplesLikeTable;
     readonly callNodeInfo: CallNodeInfo;
-    readonly callNodePath: CallNodePath;
     readonly callNodeIndex: IndexIntoCallNodeTable;
   } {
     const {
       thread,
       threadsKey,
+      previewFilteredCtssSamples,
       callNodeInfo,
-      rightClickedCallNodePath,
       rightClickedCallNodeIndex,
     } = this.props;
 
     if (
       thread &&
       threadsKey !== null &&
+      previewFilteredCtssSamples !== null &&
       callNodeInfo &&
-      rightClickedCallNodePath &&
-      typeof rightClickedCallNodeIndex === 'number'
+      rightClickedCallNodeIndex !== null
     ) {
       return {
         thread,
         threadsKey,
+        previewFilteredCtssSamples,
         callNodeInfo,
-        callNodePath: rightClickedCallNodePath,
         callNodeIndex: rightClickedCallNodeIndex,
       };
     }
@@ -677,6 +686,16 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
           transform: 'focus-subtree',
           title: '',
           content: 'Focus on subtree only',
+        })}
+
+        {this.renderTransformMenuItem({
+          l10nId: 'CallNodeContextMenu--transform-focus-self',
+          shortcut: 'S',
+          icon: 'FocusSelf',
+          onClick: this._handleClick,
+          transform: 'focus-self',
+          title: '',
+          content: 'Focus on self only',
         })}
 
         {hasCategory
@@ -897,8 +916,8 @@ export const CallNodeContextMenu = explicitConnect<
 
     let thread = null;
     let threadsKey = null;
+    let previewFilteredCtssSamples = null;
     let callNodeInfo = null;
-    let rightClickedCallNodePath = null;
     let rightClickedCallNodeIndex = null;
 
     if (rightClickedCallNodeInfo !== null) {
@@ -908,17 +927,18 @@ export const CallNodeContextMenu = explicitConnect<
 
       thread = selectors.getFilteredThread(state);
       threadsKey = rightClickedCallNodeInfo.threadsKey;
+      previewFilteredCtssSamples =
+        selectors.getPreviewFilteredCtssSamples(state);
       callNodeInfo = selectors.getCallNodeInfo(state);
-      rightClickedCallNodePath = rightClickedCallNodeInfo.callNodePath;
       rightClickedCallNodeIndex = selectors.getRightClickedCallNodeIndex(state);
     }
 
     return {
       thread,
       threadsKey,
+      previewFilteredCtssSamples,
       categories: getCategories(state),
       callNodeInfo,
-      rightClickedCallNodePath,
       rightClickedCallNodeIndex,
       implementation: getImplementationFilter(state),
       inverted: getInvertCallstack(state),

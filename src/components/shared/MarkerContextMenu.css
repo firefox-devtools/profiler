@@ -66,3 +66,13 @@
 .react-contextmenu-item:hover .markerContextMenuSelectThread {
   filter: invert(1);
 }
+
+:root.dark-mode {
+  .markerContextMenuIconCopyDescription,
+  .markerContextMenuIconCopyUrl,
+  .markerContextMenuIconCopyStack,
+  .markerContextMenuIconCopyPayload,
+  .markerContextMenuSelectThread {
+    filter: invert(1);
+  }
+}
