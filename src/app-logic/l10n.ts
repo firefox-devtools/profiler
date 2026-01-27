@@ -34,6 +34,7 @@ export const AVAILABLE_LOCALES_TO_LOCALIZED_NAMES = {
   'pt-BR': 'Português (BR)',
   ru: 'Русский',
   'sv-SE': 'Svenska',
+  tr: 'Türkçe',
   uk: 'Українська',
   'zh-CN': '简体中文',
   'zh-TW': '正體中文',
