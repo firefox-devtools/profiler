@@ -91,6 +91,12 @@ export const getAssemblyViewNativeSymbol: Selector<NativeSymbolInfo | null> = (
     ? nativeSymbols[currentNativeSymbol]
     : null;
 };
+export const getAssemblyViewCurrentNativeSymbolEntryIndex: Selector<
+  number | null
+> = (state) => getProfileSpecificState(state).assemblyView.currentNativeSymbol;
+export const getAssemblyViewNativeSymbolEntryCount: Selector<number> = (
+  state
+) => getProfileSpecificState(state).assemblyView.nativeSymbols.length;
 export const getAssemblyViewScrollGeneration: Selector<number> = (state) =>
   getProfileSpecificState(state).assemblyView.scrollGeneration;
 export const getAssemblyViewScrollToInstructionAddress: Selector<

@@ -7,16 +7,19 @@
   overflow: hidden;
   flex: 1;
   margin-top: 0;
+  outline: none; /* hide focus outline */
 }
 
 .chartViewport.expanded {
-  border-top: 1px solid var(--grey-30);
-  border-bottom: 1px solid var(--grey-30);
+  border-top: 1px solid var(--base-border-color);
+  border-bottom: 1px solid var(--base-border-color);
   margin-bottom: 5px;
   cursor: grab;
 }
 
 .chartViewport.expanded::after {
+  --internal-shadow-color: rgb(64 115 140 / 0.2);
+
   position: absolute;
   z-index: 1;
   top: 0;
@@ -25,7 +28,7 @@
   height: 100%;
 
   /* Slight blue shadow. */
-  box-shadow: inset 0 0 20px rgb(64 115 140 / 0.2);
+  box-shadow: inset 0 0 20px var(--internal-shadow-color);
   content: '';
   pointer-events: none;
 }
@@ -35,16 +38,18 @@
 }
 
 .chartViewportScroll {
+  --internal-background-color: rgb(0 0 0 / 0.07);
+
   position: absolute;
   bottom: 0;
   left: 0;
   overflow: hidden;
   padding: 3px 10px;
   border-radius: 0 5px 0 0;
-  background: rgb(0 0 0 / 0.07);
+  background: var(--internal-background-color);
   box-shadow:
-    0 0 0 0.5px rgb(0 0 0 / 0.1),
-    0 2px 4px rgb(0 0 0 / 0.1);
+    0 0 0 0.5px var(--base-shadow-color),
+    0 2px 4px var(--base-shadow-color);
   line-height: 20px;
   opacity: 1;
   pointer-events: none;
@@ -54,6 +59,12 @@
     opacity 0.2s ease-in-out;
   white-space: nowrap;
   will-change: opacity, transform;
+}
+
+:root.dark-mode {
+  .chartViewportScroll {
+    --internal-background-color: rgb(237 237 240 / 0.07);
+  }
 }
 
 .chartViewportScroll.hidden {
@@ -66,10 +77,10 @@
   top: -1px;
   display: inline-block;
   padding: 0 0.5em;
-  border: 1px solid #ccc;
+  border: 1px solid var(--kbd-border-color);
   border-radius: 0.2em;
   margin: 0 0.2em;
-  background-color: #f6f6f6;
-  box-shadow: -0.1em 0.1em 0 #bbb;
-  color: #000;
+  background-color: var(--kbd-background-color);
+  box-shadow: -0.1em 0.1em 0 var(--kbd-shadow-color);
+  color: var(--kbd-foreground-color);
 }

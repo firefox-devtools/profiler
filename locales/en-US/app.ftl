@@ -364,6 +364,8 @@ Home--additional-content-content = You can <strong>drag and drop</strong> a prof
 Home--compare-recordings-info = You can also compare recordings. <a>Open the comparing interface.</a>
 Home--your-recent-uploaded-recordings-title = Your recent uploaded recordings
 
+Home--dark-mode-title = Dark mode
+
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 =
@@ -1304,6 +1306,20 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = Hide the assembly view
+
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = Previous
+
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = Next
+
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = { $current } of { $total }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

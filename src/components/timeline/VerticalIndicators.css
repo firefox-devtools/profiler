@@ -33,24 +33,40 @@
   display: inline-block;
   width: 12px;
   height: 12px;
-  border: 1px solid var(--grey-30);
+  border: 1px solid var(--base-border-color);
   margin-bottom: -3px;
   background-color: var(--vertical-indicator-color);
 }
 
 .timelineVerticalIndicatorsDim {
+  --internal-foreground-color: var(--grey-50);
+
   color: var(--grey-50);
 }
 
 .timelineVerticalIndicatorsTime {
+  --internal-foreground-color: var(--grey-70);
+
   color: var(--grey-70);
   font-weight: bold;
 }
 
 .timelineVerticalIndicatorsUrl {
+  --internal-foreground-color: var(--grey-60);
+
   overflow: hidden;
   margin-top: 6px;
   color: var(--grey-60);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+:root.dark-mode {
+  .timelineVerticalIndicatorsTime {
+    --internal-foreground-color: var(--grey-30);
+  }
+
+  .timelineVerticalIndicatorsUrl {
+    --internal-foreground-color: var(--grey-40);
+  }
 }

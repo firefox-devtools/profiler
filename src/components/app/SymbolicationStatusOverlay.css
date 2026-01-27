@@ -3,6 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .symbolicationStatusOverlay {
+  --internal-background-color: var(--grey-20);
+
   position: fixed;
   top: -8px;
   right: 30%;
@@ -13,10 +15,10 @@
   padding-right: 10px;
   padding-left: 10px;
   border-radius: 0 0 5px 5px;
-  background: var(--grey-20);
+  background: var(--internal-background-color);
   box-shadow:
-    0 0 0 0.5px rgb(0 0 0 / 0.1),
-    0 2px 4px rgb(0 0 0 / 0.1);
+    0 0 0 0.5px var(--base-shadow-color),
+    0 2px 4px var(--base-shadow-color);
   line-height: 20px;
   text-align: center;
   text-overflow: ellipsis;
@@ -25,6 +27,12 @@
     opacity 0.2s ease-in-out;
   white-space: nowrap;
   will-change: opacity, transform;
+}
+
+:root.dark-mode {
+  .symbolicationStatusOverlay {
+    --internal-background-color: var(--grey-80);
+  }
 }
 
 .symbolicationStatusOverlay.hidden {

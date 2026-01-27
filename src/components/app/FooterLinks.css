@@ -1,4 +1,7 @@
 .appFooterLinks {
+  --internal-background-color: var(--grey-20);
+  --internal-border-color: var(--grey-40);
+
   /* Position */
   position: fixed;
   right: 0;
@@ -8,16 +11,15 @@
   padding: 0 3px;
 
   /* Other */
-  border-top: 1px solid var(--grey-40);
-  border-left: 1px solid var(--grey-40);
-  background-color: var(--grey-20);
+  border-top: 1px solid var(--internal-border-color);
+  border-left: 1px solid var(--internal-border-color);
+  background-color: var(--internal-background-color);
 }
 
 .appFooterLinksLink,
 .appFooterLinksClose {
   display: inline-block;
   margin: 2px 4px;
-  color: var(--blue-60);
   text-decoration: none;
 }
 
@@ -25,6 +27,7 @@
   border: none;
   margin: 0;
   background: none;
+  color: var(--link-foreground-color);
   cursor: pointer;
   font: inherit;
 }
@@ -38,6 +41,22 @@
   margin: 2px 5px;
   color: inherit;
   font: inherit;
+}
+
+:root.dark-mode {
+  .appFooterLinks {
+    --internal-background-color: var(--grey-90);
+    --internal-border-color: var(--grey-70);
+  }
+
+  .appFooterLinksLanguageSwitcher {
+    --internal-background-color: var(--grey-60);
+    --internal-boreder-color: var(--grey-40);
+
+    border: 1px solid var(--internal-boreder-color);
+    border-radius: 4px;
+    background: var(--internal-background-color);
+  }
 }
 
 @media (max-width: 767px) {

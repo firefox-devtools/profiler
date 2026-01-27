@@ -1,4 +1,7 @@
 .Details {
+  --internal-sidebar-collapse-icon: url(../../../res/img/svg/pane-collapse.svg);
+  --internal-sidebar-expand-icon: url(../../../res/img/svg/pane-expand.svg);
+
   display: flex;
   overflow: clip;
   flex: auto;
@@ -7,13 +10,23 @@
 
 /* contains the tabbar and, if present, the sidebar button */
 .Details-top-bar {
+  --internal-background-color: var(--lowered-background-color);
+
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
   justify-content: space-between; /* This pushes the sidebar button to the right */
-  border: solid var(--grey-30);
+  border: solid var(--base-border-color);
   border-width: 1px 0;
-  background: var(--grey-10);
+  background: var(--internal-background-color);
+  color: var(--base-foreground-color);
+}
+
+:root.dark-mode {
+  .Details {
+    --internal-sidebar-collapse-icon: url(../../../res/img/svg/pane-collapse-light.svg);
+    --internal-sidebar-expand-icon: url(../../../res/img/svg/pane-expand-light.svg);
+  }
 }
 
 .sidebar-open-close-button {
@@ -26,9 +39,9 @@
 }
 
 .sidebar-open-close-button-isopen {
-  background-image: url(../../../res/img/svg/pane-collapse.svg);
+  background-image: var(--internal-sidebar-collapse-icon);
 }
 
 .sidebar-open-close-button-isclosed {
-  background-image: url(../../../res/img/svg/pane-expand.svg);
+  background-image: var(--internal-sidebar-expand-icon);
 }

@@ -24,6 +24,9 @@ import {
   logDevelopmentTips,
 } from './utils/window-console';
 import { ensureExists } from './utils/types';
+import { initTheme } from './utils/dark-mode';
+
+initTheme();
 
 // Mock out Google Analytics for anything that's not production so that we have run-time
 // code coverage in development and testing.

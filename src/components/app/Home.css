@@ -3,6 +3,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .home {
+  --internal-special-background-color: #798fc8;
+  --internal-special-border-color: #000;
+  --internal-screenshot-border-color: #d1d1d1;
+  --internal-screenshot-shadow-color: #ddd;
+  --internal-button-disabled-foreground-color: var(--grey-50);
+  --internal-button-enabled-foreground-color: var(--blue-60);
+  --internal-button-enabled-hover-foreground-color: #fff;
+  --internal-button-enabled-hover-background-color: var(--blue-60);
+  --internal-docs-icon: url(../../../res/img/svg/help-blue.svg);
+
   display: flex;
   width: 100%;
   min-height: 100vh;
@@ -12,13 +22,25 @@
   line-height: 1.5;
 }
 
+:root.dark-mode {
+  .home {
+    --internal-special-background-color: var(--grey-70);
+    --internal-special-border-color: var(--grey-40);
+    --internal-screenshot-border-color: var(--grey-40);
+    --internal-screenshot-shadow-color: var(--grey-90);
+    --internal-button-disabled-foreground-color: var(--grey-10-a40);
+    --internal-button-enabled-foreground-color: var(--blue-40);
+    --internal-docs-icon: url(../../../res/img/svg/help-blue-light.svg);
+  }
+}
+
 .homeSpecialMessage {
   padding: 8px 16px;
-  border: 1px solid #000;
+  border: 1px solid var(--internal-special-border-color);
   border-radius: 3px;
   margin: 17px 0;
-  background-color: #798fc8;
-  color: #fff;
+  background-color: var(--internal-special-background-color);
+  color: var(--base-foreground-color);
 }
 
 .homeSection {
@@ -28,21 +50,22 @@
   max-width: 1200px;
   box-sizing: border-box;
   padding: 4em 8em;
-  border: 1px solid #ccc;
+  border: 1px solid var(--home-border-color);
   border-radius: 3px;
-  background-color: #fff;
-  box-shadow: 0 5px 25px #0b1f50;
+  background-color: var(--home-background-color);
+  box-shadow: 0 5px 25px var(--home-shadow-color);
   font-size: 130%;
 }
 
 .homeSection kbd {
   display: inline-block;
   padding: 0 0.5em;
-  border: 1px solid #ccc;
+  border: 1px solid var(--kbd-border-color);
   border-radius: 0.2em;
   margin: 0 0.2em;
-  background-color: #f6f6f6;
-  box-shadow: 0.1em 0.1em 0 #bbb;
+  background-color: var(--kbd-background-color);
+  box-shadow: 0.1em 0.1em 0 var(--kbd-shadow-color);
+  color: var(--kbd-foreground-color);
 }
 
 .homeSectionItems {
@@ -53,9 +76,9 @@
   width: 390px;
   max-width: 100%;
   height: auto;
-  border: 1px solid #d1d1d1;
+  border: 1px solid var(--internal-screenshot-border-color);
   border-radius: 0.4em;
-  box-shadow: 0 2px 4px #ddd;
+  box-shadow: 0 2px 4px var(--internal-screenshot-shadow-color);
   place-self: center;
 }
 
@@ -63,6 +86,16 @@
   margin-top: 0;
   margin-bottom: 10px;
   grid-column: 1 / -1; /* from start to end */
+}
+
+.homeDarkModeBox {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+}
+
+#home-dark-mode {
+  vertical-align: middle;
 }
 
 .homeActions > p:first-child,
@@ -77,8 +110,8 @@
   padding: 0.5em;
   border: 2px solid currentcolor;
   margin: 15px 0;
-  background-color: #fff;
-  color: var(--grey-50);
+  background-color: var(--base-background-color);
+  color: var(--internal-button-disabled-foreground-color);
   font-size: 16px;
   font-weight: bold;
   line-height: 1.5;
@@ -90,7 +123,7 @@
 }
 
 .homeSectionButton:not(:disabled) {
-  color: var(--blue-60);
+  color: var(--internal-button-enabled-foreground-color);
   cursor: pointer;
 }
 
@@ -126,8 +159,8 @@
 
 .homeSectionButton:not(:disabled):hover,
 .homeSectionButton:not(:disabled)[aria-expanded='true'] {
-  background-color: var(--blue-60);
-  color: #fff;
+  background-color: var(--internal-button-enabled-hover-background-color);
+  color: var(--internal-button-enabled-hover-foreground-color);
 }
 
 .homeSectionPlus {
@@ -145,7 +178,7 @@
   width: 20px;
   height: 20px;
   margin: 0 10px -4px 3px;
-  background: url(../../../res/img/svg/help-blue.svg);
+  background: var(--internal-docs-icon);
   background-size: 100% 100%;
 }
 

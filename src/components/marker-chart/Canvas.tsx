@@ -1,7 +1,17 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-import { GREY_20, GREY_30, BLUE_60, BLUE_80 } from 'photon-colors';
+import {
+  GREY_20,
+  GREY_30,
+  GREY_60,
+  GREY_90,
+  BLUE_60,
+  BLUE_80,
+  GREY_70,
+} from 'photon-colors';
+import { getForegroundColor, getBackgroundColor } from '../../utils/colors';
+import { isDarkMode, lightDark } from '../../utils/dark-mode';
 import * as React from 'react';
 import {
   withChartViewport,
@@ -103,6 +113,37 @@ const LABEL_PADDING = 5;
 const MARKER_BORDER_COLOR = '#2c77d1';
 const DEFAULT_FILL_COLOR = '#8ac4ff'; // Light blue for non-highlighted
 
+function getSeparatorColor() {
+  return lightDark(GREY_20, GREY_70);
+}
+
+function getBucketBackgroundColor() {
+  return lightDark(GREY_20, GREY_70);
+}
+
+function getBucketBorderColor() {
+  return lightDark(GREY_30, GREY_60);
+}
+
+function getHighlightRowBackgroundColor() {
+  return 'rgba(40, 122, 169, 0.2)';
+}
+
+function getDefaultMarkerColors(isHighlighted: boolean) {
+  if (isDarkMode()) {
+    return {
+      fillColor: isHighlighted ? 'hsl(208, 81%, 52%)' : 'hsl(208, 88%, 32%)',
+      strokeColor: isHighlighted ? 'hsl(208, 82%, 58%)' : 'hsl(208, 71%, 40%)',
+      textColor: isHighlighted ? GREY_90 : GREY_20,
+    };
+  }
+  return {
+    fillColor: isHighlighted ? BLUE_60 : DEFAULT_FILL_COLOR,
+    strokeColor: isHighlighted ? BLUE_80 : MARKER_BORDER_COLOR,
+    textColor: isHighlighted ? 'white' : 'black', // White text on dark blue, black text on light blue
+  };
+}
+
 class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   _textMeasurement: TextMeasurement | null = null;
 
@@ -152,15 +193,11 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       return {
         fillColor: getFillColor(color),
         strokeColor: getStrokeColor(color),
-        textColor: '#000', // Always use black text for unselected markers
+        textColor: getForegroundColor(), // Always use black/white text for unselected markers
       };
     }
     // Fall back to default blue colors
-    return {
-      fillColor: isHighlighted ? BLUE_60 : DEFAULT_FILL_COLOR,
-      strokeColor: isHighlighted ? BLUE_80 : MARKER_BORDER_COLOR,
-      textColor: isHighlighted ? 'white' : 'black', // White text on dark blue, black text on light blue
-    };
+    return getDefaultMarkerColors(isHighlighted);
   }
 
   drawCanvas = (
@@ -235,7 +272,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         this.drawSeparatorsAndLabels(ctx, oldRow, oldRow + 1);
       }
     } else {
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = getBackgroundColor();
       ctx.fillRect(0, 0, containerWidth, containerHeight);
       if (rightClickedRow !== undefined) {
         this.highlightRow(ctx, rightClickedRow);
@@ -253,7 +290,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       viewport: { viewportTop, containerWidth },
     } = this.props;
 
-    ctx.fillStyle = 'rgba(40, 122, 169, 0.2)';
+    ctx.fillStyle = getHighlightRowBackgroundColor();
     ctx.fillRect(
       0, // To include the labels also
       row * rowHeight - viewportTop,
@@ -559,7 +596,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       viewport: { viewportTop, containerWidth },
     } = this.props;
 
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = getBackgroundColor();
     ctx.fillRect(
       0,
       rowIndex * rowHeight - viewportTop,
@@ -648,7 +685,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     const usefulContainerWidth = containerWidth - marginRight;
 
     // Draw separators
-    ctx.fillStyle = GREY_20;
+    ctx.fillStyle = getSeparatorColor();
     ctx.fillRect(marginLeft - 1, 0, 1, containerHeight);
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
       // `- 1` at the end, because the top separator is not drawn in the canvas,
@@ -660,7 +697,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     const textMeasurement = this._getTextMeasurement(ctx);
 
     // Draw the marker names in the left margin.
-    ctx.fillStyle = '#000000';
+    ctx.fillStyle = getForegroundColor();
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
       const markerTiming = markerTimingAndBuckets[rowIndex];
       if (typeof markerTiming === 'string') {
@@ -703,16 +740,16 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       const y = rowIndex * rowHeight - viewportTop;
 
       // Draw the backgound.
-      ctx.fillStyle = GREY_20;
+      ctx.fillStyle = getBucketBackgroundColor();
       ctx.fillRect(0, y - 1, usefulContainerWidth, rowHeight);
 
       // Draw the borders./*
-      ctx.fillStyle = GREY_30;
+      ctx.fillStyle = getBucketBorderColor();
       ctx.fillRect(0, y - 1, usefulContainerWidth, 1);
       ctx.fillRect(0, y + rowHeight - 1, usefulContainerWidth, 1);
 
       // Draw the text.
-      ctx.fillStyle = '#000000';
+      ctx.fillStyle = getForegroundColor();
       ctx.fillText(bucketName, LABEL_PADDING + marginLeft, y + TEXT_OFFSET_TOP);
     }
   }

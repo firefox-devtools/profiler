@@ -4,31 +4,47 @@
 
 /* See https://design.firefox.com/photon/components/input-fields.html for the spec */
 .photon-input {
+  --internal-border-color: var(--grey-90-a20);
+  --internal-hover-border-color: var(--grey-90-a30);
+  --internal-invalid-border-color: var(--red-60);
+  --internal-invalid-shadow-color: var(--red-60-a30);
+
   height: 32px;
   padding: 0 8px;
-  border: 1px solid var(--grey-90-a20);
+  border: 1px solid var(--internal-border-color);
   border-radius: 2px;
+  background-color: var(--base-background-color);
   box-shadow: none; /* remove the default Firefox style */
+  color: var(--base-foreground-color);
 }
 
 .photon-input:hover {
-  border-color: var(--grey-90-a30);
+  border-color: var(--internal-hover-border-color);
 }
 
 /* The second selector is only here to have a specificity higher than the one in
  * `.photon-input:invalid:not(:placeholder-shown)`. */
 .photon-input:focus-visible,
 .photon-input:focus-visible:invalid {
-  border: 1px solid var(--blue-50);
+  border: 1px solid var(--focus-border-color);
   box-shadow:
-    0 0 0 1px var(--blue-50),
-    0 0 0 4px var(--blue-50-a30);
+    0 0 0 1px var(--focus-border-color),
+    0 0 0 4px var(--focus-shadow-color);
   outline: 0;
 }
 
 .photon-input:invalid:not(:placeholder-shown) {
-  border: 1px solid var(--red-60);
+  border: 1px solid var(--internal-invalid-border-color);
   box-shadow:
-    0 0 0 1px var(--red-60),
-    0 0 0 4px var(--red-60-a30);
+    0 0 0 1px var(--internal-invalid-border-color),
+    0 0 0 4px var(--internal-invalid-shadow-color);
+}
+
+:root.dark-mode {
+  .photon-input {
+    --internal-border-color: var(--grey-10-a20);
+    --internal-hover-border-color: var(--grey-10-a40);
+    --internal-invalid-border-color: var(--red-50);
+    --internal-invalid-shadow-color: var(--red-60-a30);
+  }
 }
