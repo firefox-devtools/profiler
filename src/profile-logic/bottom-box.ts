@@ -13,15 +13,13 @@ import type {
 } from 'firefox-profiler/types';
 import type { CallNodeInfo } from './call-node-info';
 import {
+  getCallNodeFramePerStack,
   getNativeSymbolInfo,
   getNativeSymbolsForCallNode,
 } from './profile-data';
-import { getLineTimings, getStackLineInfoForCallNode } from './line-timings';
 import { mapGetKeyWithMaxValue } from 'firefox-profiler/utils';
-import {
-  getAddressTimings,
-  getStackAddressInfoForCallNode,
-} from './address-timings';
+import { getTotalLineTimingsForCallNode } from './line-timings';
+import { getTotalAddressTimingsForCallNode } from './address-timings';
 
 /**
  * Calculate the BottomBoxInfo for a call node, i.e. information about which
@@ -53,10 +51,13 @@ export function getBottomBoxInfoForCallNode(
     resource !== -1 && resourceTable.type[resource] === resourceTypes.library
       ? resourceTable.lib[resource]
       : null;
-  const nativeSymbolsForCallNode = getNativeSymbolsForCallNode(
+  const callNodeFramePerStack = getCallNodeFramePerStack(
     callNodeIndex,
     callNodeInfo,
-    stackTable,
+    stackTable
+  );
+  const nativeSymbolsForCallNode = getNativeSymbolsForCallNode(
+    callNodeFramePerStack,
     frameTable
   );
 
@@ -76,32 +77,25 @@ export function getBottomBoxInfoForCallNode(
       )
   );
 
-  // Compute the hottest line, so we can ask the source view to scroll to it.
-  const stackLineInfo = getStackLineInfoForCallNode(
-    stackTable,
+  // Compute the hottest line and instruction address, so we can ask the
+  // source and assembly view to scroll those into view.
+  const funcLine = funcTable.lineNumber[funcIndex];
+  const lineTimings = getTotalLineTimingsForCallNode(
+    samples,
+    callNodeFramePerStack,
     frameTable,
-    funcTable,
-    callNodeIndex,
-    callNodeInfo
+    funcLine
   );
-  const callNodeLineTimings = getLineTimings(stackLineInfo, samples);
-  const hottestLine = mapGetKeyWithMaxValue(callNodeLineTimings.totalLineHits);
-
-  // Compute the hottest instruction, so we can ask the assembly view to scroll to it.
-  let hottestInstructionAddress;
-  if (initialNativeSymbol !== null) {
-    const stackAddressInfo = getStackAddressInfoForCallNode(
-      stackTable,
-      frameTable,
-      callNodeIndex,
-      callNodeInfo,
-      nativeSymbolsForCallNode[initialNativeSymbol]
-    );
-    const callNodeAddressTimings = getAddressTimings(stackAddressInfo, samples);
-    hottestInstructionAddress = mapGetKeyWithMaxValue(
-      callNodeAddressTimings.totalAddressHits
-    );
-  }
+  const hottestLine = mapGetKeyWithMaxValue(lineTimings);
+  const addressTimings = getTotalAddressTimingsForCallNode(
+    samples,
+    callNodeFramePerStack,
+    frameTable,
+    initialNativeSymbol !== null
+      ? nativeSymbolsForCallNode[initialNativeSymbol]
+      : null
+  );
+  const hottestInstructionAddress = mapGetKeyWithMaxValue(addressTimings);
 
   return {
     libIndex,

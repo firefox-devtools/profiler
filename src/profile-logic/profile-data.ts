@@ -728,6 +728,159 @@ export function getNthPrefixStack(
 }
 
 /**
+ * Given a call node `callNodeIndex`, answer, for each stack S:
+ * - Does a sample with stack S contribute to `callNodeIndex`'s total time?
+ * - If so, which of `callNodeIndex`'s frames does such a sample contribute its
+ *   total time to?
+ *
+ * If the answer to the first question is "no", we put frame index -1 into the
+ * returned array for that stack index.
+ */
+export function getCallNodeFramePerStack(
+  callNodeIndex: IndexIntoCallNodeTable,
+  callNodeInfo: CallNodeInfo,
+  stackTable: StackTable
+): Int32Array {
+  const callNodeInfoInverted = callNodeInfo.asInverted();
+  return callNodeInfoInverted !== null
+    ? getCallNodeFramePerStackInverted(
+        callNodeIndex,
+        callNodeInfoInverted,
+        stackTable
+      )
+    : getCallNodeFramePerStackNonInverted(
+        callNodeIndex,
+        callNodeInfo,
+        stackTable
+      );
+}
+
+/**
+ * This function handles the non-inverted case of getCallNodeFramePerStack.
+ *
+ * Gathers the frames which are hit in a given call node by each stack,
+ * or -1 if the stack isn't in the call node's subtree.
+ *
+ * This is best explained with an example.
+ * Let the call node be the node for the call path [A, B, C].
+ * Let this be the stack tree:
+ *
+ *  - stack 0, func A, frame 100
+ *    - stack 1, func B, frame 110
+ *      - stack 2, func C, frame 120
+ *      - stack 3, func C, frame 130
+ *    - stack 4, func B, frame 140
+ *      - stack 5, func C, frame 150
+ *      - stack 6, func C, frame 160
+ *        - stack 7, func D, frame 170
+ *      - stack 8, func E, frame 180
+ *    - stack 9, func F, frame 190
+ *
+ * This maps to the following call tree:
+ *
+ *  - call node 0, func A
+ *    - call node 1, func B
+ *      - call node 2, func C
+ *        - call node 3, func D
+ *      - call node 4, func E
+ *   - call node 5, func F
+ *
+ * The call path [A, B, C] uniquely identifies call node 2.
+ * The following stacks all "collapse into" ("map to") call node 2:
+ * stack 2, 3, 5 and 6.
+ * Stack 7 maps to call node 3, which is a child of call node 2.
+ * Stacks 0, 1, 4, 8 and 9 are outside the call path [A, B, C].
+ *
+ * Stacks 2, 3, 4 and 5 all make a "total time" contribution to call
+ * node 2, to the frames 120, 130, 150, and 160, respectively.
+ * Stack 7 also contributes total time to call node 2, to frame 160.
+ * Stacks 0, 1, 4, 8 and 9 don't contribute to call node 2's total time.
+ *
+ * So this function returns the following array in the example:
+ * new Int32Array([-1, -1, 120, 130, -1, 150, 160, 160, -1, -1])
+ * // for stacks   0,  1,  2,   3,   4,  5,   6,   7,   8,  9
+ */
+export function getCallNodeFramePerStackNonInverted(
+  callNodeIndex: IndexIntoCallNodeTable,
+  callNodeInfo: CallNodeInfo,
+  stackTable: StackTable
+): Int32Array {
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
+
+  const { frame: frameCol, prefix: prefixCol, length: stackCount } = stackTable;
+
+  const callNodeFramePerStack = new Int32Array(stackCount);
+
+  // This loop takes advantage of the stack table's ordering:
+  // Prefix stacks are always visited before their descendants.
+  for (let stackIndex = 0; stackIndex < stackCount; stackIndex++) {
+    let frame = -1;
+    const callNodeForThisStack = stackIndexToCallNodeIndex[stackIndex];
+    if (callNodeForThisStack === callNodeIndex) {
+      frame = frameCol[stackIndex];
+    } else {
+      // We're either already in the call node's subtree, or we are
+      // outside the subtree. Either way, we can just inherit the frame
+      // that our prefix stack hits in this call node.
+      const prefix = prefixCol[stackIndex];
+      if (prefix !== null) {
+        frame = callNodeFramePerStack[prefix];
+      }
+    }
+
+    callNodeFramePerStack[stackIndex] = frame;
+  }
+  return callNodeFramePerStack;
+}
+
+/**
+ * This handles the inverted case of getCallNodeFramePerStack.
+ */
+export function getCallNodeFramePerStackInverted(
+  callNodeIndex: IndexIntoCallNodeTable,
+  callNodeInfo: CallNodeInfoInverted,
+  stackTable: StackTable
+): Int32Array {
+  const depth = callNodeInfo.depthForNode(callNodeIndex);
+  const [rangeStart, rangeEnd] =
+    callNodeInfo.getSuffixOrderIndexRangeForCallNode(callNodeIndex);
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
+  const stackTablePrefixCol = stackTable.prefix;
+  const suffixOrderIndexes = callNodeInfo.getSuffixOrderIndexes();
+
+  const callNodeFramePerStack = new Int32Array(stackTable.length);
+
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    let callNodeFrame = -1;
+
+    // Get the non-inverted call tree node for the (non-inverted) stack.
+    // For example, if the stack has the call path A -> B -> C,
+    // this will give us the node A -> B -> C in the non-inverted tree.
+    const thisStackCallNode = stackIndexToCallNodeIndex[stackIndex];
+    const thisStackSuffixOrderIndex = suffixOrderIndexes[thisStackCallNode];
+
+    if (
+      thisStackSuffixOrderIndex >= rangeStart &&
+      thisStackSuffixOrderIndex < rangeEnd
+    ) {
+      const stackForCallNode = getNthPrefixStack(
+        stackIndex,
+        depth,
+        stackTablePrefixCol
+      );
+      if (stackForCallNode !== null) {
+        callNodeFrame = stackTable.frame[stackForCallNode];
+      }
+    }
+
+    callNodeFramePerStack[stackIndex] = callNodeFrame;
+  }
+  return callNodeFramePerStack;
+}
+
+/**
  * Take a samples table, and return an array that contain indexes that point to the
  * leaf most call node, or null.
  */
@@ -3854,75 +4007,18 @@ export function calculateFunctionSizeLowerBound(
  * functions.
  */
 export function getNativeSymbolsForCallNode(
-  callNodeIndex: IndexIntoCallNodeTable,
-  callNodeInfo: CallNodeInfo,
-  stackTable: StackTable,
+  callNodeFramePerStack: Int32Array,
   frameTable: FrameTable
 ): IndexIntoNativeSymbolTable[] {
-  const callNodeInfoInverted = callNodeInfo.asInverted();
-  return callNodeInfoInverted !== null
-    ? getNativeSymbolsForCallNodeInverted(
-        callNodeIndex,
-        callNodeInfoInverted,
-        stackTable,
-        frameTable
-      )
-    : getNativeSymbolsForCallNodeNonInverted(
-        callNodeIndex,
-        callNodeInfo,
-        stackTable,
-        frameTable
-      );
-}
-
-export function getNativeSymbolsForCallNodeNonInverted(
-  callNodeIndex: IndexIntoCallNodeTable,
-  callNodeInfo: CallNodeInfo,
-  stackTable: StackTable,
-  frameTable: FrameTable
-): IndexIntoNativeSymbolTable[] {
-  const stackIndexToCallNodeIndex =
-    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
   const set: Set<IndexIntoNativeSymbolTable> = new Set();
-  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    if (stackIndexToCallNodeIndex[stackIndex] === callNodeIndex) {
-      const frame = stackTable.frame[stackIndex];
-      const nativeSymbol = frameTable.nativeSymbol[frame];
-      if (nativeSymbol !== null) {
-        set.add(nativeSymbol);
-      }
-    }
-  }
-  return [...set];
-}
-
-export function getNativeSymbolsForCallNodeInverted(
-  callNodeIndex: IndexIntoCallNodeTable,
-  callNodeInfo: CallNodeInfoInverted,
-  stackTable: StackTable,
-  frameTable: FrameTable
-): IndexIntoNativeSymbolTable[] {
-  const depth = callNodeInfo.depthForNode(callNodeIndex);
-  const [rangeStart, rangeEnd] =
-    callNodeInfo.getSuffixOrderIndexRangeForCallNode(callNodeIndex);
-  const stackTablePrefixCol = stackTable.prefix;
-  const stackIndexToCallNodeIndex =
-    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
-  const suffixOrderIndexes = callNodeInfo.getSuffixOrderIndexes();
-  const set: Set<IndexIntoNativeSymbolTable> = new Set();
-  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    const stackForNode = getMatchingAncestorStackForInvertedCallNode(
-      stackIndex,
-      rangeStart,
-      rangeEnd,
-      suffixOrderIndexes,
-      depth,
-      stackIndexToCallNodeIndex,
-      stackTablePrefixCol
-    );
-    if (stackForNode !== null) {
-      const frame = stackTable.frame[stackForNode];
-      const nativeSymbol = frameTable.nativeSymbol[frame];
+  for (
+    let stackIndex = 0;
+    stackIndex < callNodeFramePerStack.length;
+    stackIndex++
+  ) {
+    const callNodeFrame = callNodeFramePerStack[stackIndex];
+    if (callNodeFrame !== -1) {
+      const nativeSymbol = frameTable.nativeSymbol[callNodeFrame];
       if (nativeSymbol !== null) {
         set.add(nativeSymbol);
       }
