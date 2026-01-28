@@ -8,6 +8,7 @@ import {
 } from '../app-logic/constants';
 
 import type {
+  RawProfileSharedData,
   RawThread,
   RawSamplesTable,
   SamplesTable,
@@ -70,6 +71,20 @@ export function getEmptyRawStackTable(): RawStackTable {
     frame: [],
     prefix: [],
     length: 0,
+  };
+}
+
+export function shallowCloneRawStackTable(
+  stackTable: RawStackTable
+): RawStackTable {
+  return {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    frame: stackTable.frame.slice(),
+    prefix: stackTable.prefix.slice(),
+    length: stackTable.length,
   };
 }
 
@@ -398,16 +413,23 @@ export function getEmptyThread(overrides?: Partial<RawThread>): RawThread {
     // Creating samples with event delay since it's the new samples table.
     samples: getEmptySamplesTableWithEventDelay(),
     markers: getEmptyRawMarkerTable(),
-    stackTable: getEmptyRawStackTable(),
-    frameTable: getEmptyFrameTable(),
-    funcTable: getEmptyFuncTable(),
-    resourceTable: getEmptyResourceTable(),
-    nativeSymbols: getEmptyNativeSymbolTable(),
   };
 
   return {
     ...defaultThread,
     ...overrides,
+  };
+}
+
+export function getEmptySharedData(): RawProfileSharedData {
+  return {
+    stackTable: getEmptyRawStackTable(),
+    frameTable: getEmptyFrameTable(),
+    funcTable: getEmptyFuncTable(),
+    resourceTable: getEmptyResourceTable(),
+    nativeSymbols: getEmptyNativeSymbolTable(),
+    sources: getEmptySourceTable(),
+    stringArray: [],
   };
 }
 
@@ -438,10 +460,7 @@ export function getEmptyProfile(): Profile {
     },
     libs: [],
     pages: [],
-    shared: {
-      stringArray: [],
-      sources: getEmptySourceTable(),
-    },
+    shared: getEmptySharedData(),
     threads: [],
   };
 }

@@ -190,9 +190,8 @@ describe('actions/receive-profile', function () {
 
       workThread.name = 'Work Thread';
       idleThread.name = 'Idle Thread';
-      idleThread.frameTable.category = idleThread.frameTable.category.map(
-        () => idleCategoryIndex
-      );
+      profile.shared.frameTable.category =
+        profile.shared.frameTable.category.map(() => idleCategoryIndex);
       return { profile, idleThread, workThread };
     }
 

@@ -792,3 +792,16 @@ export type FaviconData = {
   readonly data: ArrayBuffer;
   readonly mimeType: string;
 };
+
+export type SanitizedProfileTranslationMaps = {
+  oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null;
+  oldStackToNewStackPlusOne: Int32Array;
+  oldFrameToNewFramePlusOne: Int32Array;
+  oldFuncToNewFuncPlusOne: Int32Array;
+  oldResourceToNewResourcePlusOne: Int32Array;
+  oldNativeSymbolToNewNativeSymbolPlusOne: Int32Array;
+  oldSourceToNewSourcePlusOne: Int32Array;
+  oldStringToNewStringPlusOne: Int32Array;
+  oldLibToNewLibPlusOne: Int32Array;
+  newFuncCount: number;
+};

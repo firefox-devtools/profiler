@@ -654,11 +654,6 @@ export type RawThread = {
   jsAllocations?: JsAllocationsTable;
   nativeAllocations?: NativeAllocationsTable;
   markers: RawMarkerTable;
-  stackTable: RawStackTable;
-  frameTable: FrameTable;
-  funcTable: FuncTable;
-  resourceTable: ResourceTable;
-  nativeSymbols: NativeSymbolTable;
   jsTracer?: JsTracerTable;
   // If present and true, this thread was launched for a private browsing session only.
   // When false, it can still contain private browsing data if the profile was
@@ -670,6 +665,10 @@ export type RawThread = {
   // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
   // had no extra attribute at all.
   userContextId?: number;
+  // If present, contains the list of innerWindowIDs for pages that this thread is
+  // related to (or, in practice, whose code may be executing in this thread).
+  // It's absent in profiles that don't use inner window IDs.
+  usedInnerWindowIDs?: InnerWindowID[];
 };
 
 export type ExtensionTable = {
@@ -941,6 +940,11 @@ export type SourceTable = {
 };
 
 export type RawProfileSharedData = {
+  stackTable: RawStackTable;
+  frameTable: FrameTable;
+  funcTable: FuncTable;
+  resourceTable: ResourceTable;
+  nativeSymbols: NativeSymbolTable;
   // Strings for profiles are collected into a single table, and are referred to by
   // their index by other tables.
   stringArray: string[];

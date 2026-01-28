@@ -115,12 +115,18 @@ describe('TooltipCallNode', function () {
         });
       }
 
-      const { frameTable } = profile.threads[threadIndex];
+      const { frameTable } = profile.shared;
 
+      const innerWindowID =
+        profile.pages[profile.pages.length - 1].innerWindowID;
+
+      // TODO: This loop is now iterating over frames used across all threads,
+      // whereas in the past it was only touching frames used in thread 1.
+      // Figure out what to do here.
       for (let i = 1; i < frameTable.length; i++) {
-        frameTable.innerWindowID[i] =
-          profile.pages[profile.pages.length - 1].innerWindowID;
+        frameTable.innerWindowID[i] = innerWindowID;
       }
+      profile.threads[threadIndex].usedInnerWindowIDs = [innerWindowID];
 
       const callNodePath = [A, Bjs, Cjs];
       const { dispatch, renderTooltip } = setup(profile);
