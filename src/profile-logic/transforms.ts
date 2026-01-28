@@ -46,6 +46,7 @@ import type {
   MarkerSchemaByName,
   CategoryList,
   Milliseconds,
+  SanitizedProfileTranslationMaps,
 } from 'firefox-profiler/types';
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 import type { StringTable } from 'firefox-profiler/utils/string-table';
@@ -1976,4 +1977,290 @@ export function applyTransform(
     default:
       throw assertExhaustiveCheck(transform);
   }
+}
+
+export function translateResourceIndex(
+  resourceIndex: IndexIntoResourceTable,
+  translationMaps: SanitizedProfileTranslationMaps
+): IndexIntoResourceTable | null {
+  const newResourceIndexPlusOne =
+    translationMaps.oldResourceToNewResourcePlusOne[resourceIndex];
+  return newResourceIndexPlusOne !== 0 ? newResourceIndexPlusOne - 1 : null;
+}
+
+export function translateFuncIndex(
+  funcIndex: IndexIntoFuncTable,
+  translationMaps: SanitizedProfileTranslationMaps
+): IndexIntoFuncTable | null {
+  const rawFuncCount = translationMaps.oldFuncToNewFuncPlusOne.length;
+  if (funcIndex < rawFuncCount) {
+    const newFuncIndexPlusOne =
+      translationMaps.oldFuncToNewFuncPlusOne[funcIndex];
+    return newFuncIndexPlusOne !== 0 ? newFuncIndexPlusOne - 1 : null;
+  }
+  // This must be a funcIndex from the "func table with reserved functions for collapsed resources".
+  const resourceIndex = funcIndex - rawFuncCount;
+  const newResourceIndex = translateResourceIndex(
+    resourceIndex,
+    translationMaps
+  );
+  return newResourceIndex !== null
+    ? translationMaps.newFuncCount + newResourceIndex
+    : null;
+}
+
+export function translateCallNodePathDroppingMissingFuncs(
+  callNodePath: CallNodePath,
+  translationMaps: SanitizedProfileTranslationMaps
+): CallNodePath | null {
+  const newCallNodePath = new Array<IndexIntoFuncTable>();
+  for (const funcIndex of callNodePath) {
+    const funcIndexOrNull = translateFuncIndex(funcIndex, translationMaps);
+    if (funcIndexOrNull === null) {
+      continue;
+    }
+    newCallNodePath.push(funcIndexOrNull);
+  }
+
+  return newCallNodePath.length !== 0 ? newCallNodePath : null;
+}
+
+export function translateCallNodePathDroppingEntirePathIfAnyFuncMissing(
+  callNodePath: CallNodePath,
+  translationMaps: SanitizedProfileTranslationMaps
+): CallNodePath | null {
+  const newCallNodePath = new Array<IndexIntoFuncTable>();
+  for (const funcIndex of callNodePath) {
+    const funcIndexOrNull = translateFuncIndex(funcIndex, translationMaps);
+    if (funcIndexOrNull === null) {
+      return null;
+    }
+    newCallNodePath.push(funcIndexOrNull);
+  }
+
+  return newCallNodePath.length !== 0 ? newCallNodePath : null;
+}
+
+export function translateTransform(
+  transform: Transform,
+  translationMaps: SanitizedProfileTranslationMaps
+): Transform | null {
+  const { type } = transform;
+  switch (type) {
+    case 'focus-subtree': {
+      const newCallNodePath =
+        translateCallNodePathDroppingEntirePathIfAnyFuncMissing(
+          transform.callNodePath,
+          translationMaps
+        );
+      if (newCallNodePath === null) {
+        // If any of the functions in the focused call node path are missing,
+        // that means we don't have any samples in the sanitized thread which
+        // contain that function in their stack, which means that the filtered
+        // thread was already empty.
+        // Drop this transform because it's not useful to share an empty view.
+        return null;
+      }
+      return {
+        type,
+        callNodePath: newCallNodePath,
+        implementation: transform.implementation,
+        inverted: transform.inverted,
+      };
+    }
+    case 'focus-function': {
+      const newFuncIndex = translateFuncIndex(
+        transform.funcIndex,
+        translationMaps
+      );
+      if (newFuncIndex === null) {
+        // If the focused function is missing, that means we don't have any
+        // samples in the sanitized thread which contain this function in their
+        // stack, which means that the filtered thread was already empty.
+        // Drop this transform because it's not useful to share an empty view.
+        return null;
+      }
+      return {
+        type,
+        funcIndex: newFuncIndex,
+      };
+    }
+    case 'focus-self': {
+      const newFuncIndex = translateFuncIndex(
+        transform.funcIndex,
+        translationMaps
+      );
+      if (newFuncIndex === null) {
+        // If the focused function is missing, that means we don't have any
+        // samples in the sanitized thread which contain this function in their
+        // stack, which means that the filtered thread was already empty.
+        // Drop this transform because it's not useful to share an empty view.
+        return null;
+      }
+      return {
+        type,
+        funcIndex: newFuncIndex,
+        implementation: transform.implementation,
+      };
+    }
+    case 'merge-call-node': {
+      const newCallNodePath =
+        translateCallNodePathDroppingEntirePathIfAnyFuncMissing(
+          transform.callNodePath,
+          translationMaps
+        );
+      if (newCallNodePath === null) {
+        // If any of the functions in the merged call node path are missing,
+        // that means we don't have any samples in the sanitized thread which
+        // contain that function in their stack, which means that this transform
+        // was a no-op in the range filtered thread.
+        // We can just drop this transform.
+        return null;
+      }
+      return {
+        type,
+        callNodePath: newCallNodePath,
+        implementation: transform.implementation,
+      };
+    }
+    case 'merge-function': {
+      const newFuncIndex = translateFuncIndex(
+        transform.funcIndex,
+        translationMaps
+      );
+      if (newFuncIndex === null) {
+        // If the merged function is missing, that means we don't have any
+        // samples in the sanitized thread which contain this function in their
+        // stack, which means that this transform was a no-op in the range
+        // filtered thread.
+        // We can just drop this transform.
+        return null;
+      }
+      return {
+        type,
+        funcIndex: newFuncIndex,
+      };
+    }
+    case 'drop-function': {
+      const newFuncIndex = translateFuncIndex(
+        transform.funcIndex,
+        translationMaps
+      );
+      if (newFuncIndex === null) {
+        // If the dropped function is missing, that means we don't have any
+        // samples in the sanitized thread which contain this function in their
+        // stack, which means that this transform was a no-op in the range
+        // filtered thread.
+        // We can just drop this transform.
+        return null;
+      }
+      return {
+        type,
+        funcIndex: newFuncIndex,
+      };
+    }
+    case 'collapse-resource': {
+      const newResourceIndex = translateResourceIndex(
+        transform.resourceIndex,
+        translationMaps
+      );
+      if (newResourceIndex === null) {
+        // If the collapsed resource is missing, that means we don't have any
+        // samples in the sanitized thread which contain any function with this
+        // resource in their stack, which means that this transform was a no-op
+        // in the range filtered thread.
+        // We can just drop this transform.
+        return null;
+      }
+      const newCollapsedFuncIndex =
+        translationMaps.newFuncCount + newResourceIndex;
+      return {
+        type,
+        resourceIndex: newResourceIndex,
+        implementation: transform.implementation,
+        collapsedFuncIndex: newCollapsedFuncIndex,
+      };
+    }
+    case 'collapse-direct-recursion': {
+      const newFuncIndex = translateFuncIndex(
+        transform.funcIndex,
+        translationMaps
+      );
+      if (newFuncIndex === null) {
+        // If the recursive function is missing, that means we don't have any
+        // samples in the sanitized thread which contain this function in their
+        // stack, which means that this transform was a no-op in the range
+        // filtered thread.
+        // We can just drop this transform.
+        return null;
+      }
+      return {
+        type,
+        funcIndex: newFuncIndex,
+        implementation: transform.implementation,
+      };
+    }
+    case 'collapse-recursion': {
+      const newFuncIndex = translateFuncIndex(
+        transform.funcIndex,
+        translationMaps
+      );
+      if (newFuncIndex === null) {
+        // If the recursive function is missing, that means we don't have any
+        // samples in the sanitized thread which contain this function in their
+        // stack, which means that this transform was a no-op in the range
+        // filtered thread.
+        // We can just drop this transform.
+        return null;
+      }
+      return {
+        type,
+        funcIndex: newFuncIndex,
+      };
+    }
+    case 'collapse-function-subtree': {
+      const newFuncIndex = translateFuncIndex(
+        transform.funcIndex,
+        translationMaps
+      );
+      if (newFuncIndex === null) {
+        // If the collapsed function is missing, that means we don't have any
+        // samples in the sanitized thread which contain this function in their
+        // stack, which means that this transform was a no-op in the range
+        // filtered thread.
+        // We can just drop this transform.
+        return null;
+      }
+      return {
+        type,
+        funcIndex: newFuncIndex,
+      };
+    }
+    case 'focus-category': {
+      // We don't sanitize-away categories, so this transform doesn't need to
+      // be translated.
+      return transform;
+    }
+    case 'filter-samples': {
+      switch (transform.filterType) {
+        case 'marker-search': {
+          // This transform doesn't contain any data which needs to be translated.
+          return transform;
+        }
+        default:
+          throw assertExhaustiveCheck(transform.filterType);
+      }
+    }
+    default:
+      throw assertExhaustiveCheck(transform);
+  }
+}
+
+export function translateTransformStack(
+  transformStack: Transform[],
+  translationMaps: SanitizedProfileTranslationMaps
+): Transform[] {
+  return transformStack
+    .map((t) => translateTransform(t, translationMaps))
+    .filter((t) => t !== null);
 }
