@@ -123,6 +123,11 @@ exports[`correctly renders the FooterLinks component 1`] = `
           Svenska
         </option>
         <option
+          value="tr"
+        >
+          Türkçe
+        </option>
+        <option
           value="uk"
         >
           Українська

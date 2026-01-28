@@ -128,6 +128,43 @@ export type TransformDefinitions = {
   };
 
   /**
+   * The FocusSelf transform focuses on the self time of a specific function by filtering
+   * out samples where the function is not executing its own code (after implementation
+   * filtering). Unlike focus-function which keeps callees, focus-self removes them to
+   * highlight where within the function time is spent.
+   *
+   * This transform is especially useful when combined with an implementation filter.
+   * For example, when focusing on a JS function with implementation='js', the combined
+   * call tree will show native functions that contributed to the JS function's "JS self
+   * time".
+   *
+   * Example with implementation='js', focusing on X.js:
+   *
+   *            A.js:4,0                                           X.js:3,1
+   *           /       \                                          /       \
+   *          v         v            Focus-self X.js with        v         v
+   *   X.js:1,0       B.js:3,0        implementation='js'   Y.cpp:1,0   W.cpp:1,0
+   *      |            /     \                ->                |           |
+   *      v           v       v                                 v           v
+   *   Y.cpp:1,0   X.js:2,1   C.cpp,1,1                     Z.cpp:1,1   Q.cpp:1,1
+   *      |           |
+   *      v           v
+   *   Z.cpp:1,1   W.cpp:1,0
+   *                  |
+   *                  v
+   *               Q.cpp:1,1
+   *
+   * If the focused function is recursive, every instance of it becomes a root. In other
+   * words, recursion is collapsed and you see the self time for the "innermost" instance
+   * of the focused function in a stack.
+   */
+  'focus-self': {
+    readonly type: 'focus-self';
+    readonly funcIndex: IndexIntoFuncTable;
+    readonly implementation: ImplementationFilter;
+  };
+
+  /**
    * The MergeCallNode transform represents merging a CallNode into the parent CallNode. The
    * CallNode must match the given CallNodePath. In the call tree below, if the CallNode
    * at path [A, B, C] is removed, then the `D` and `F` CallNodes are re-assigned to `B`.

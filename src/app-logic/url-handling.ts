@@ -49,7 +49,7 @@ import {
 import { tabSlugs } from '../app-logic/tabs-handling';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 
-export const CURRENT_URL_VERSION = 12;
+export const CURRENT_URL_VERSION = 13;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -1192,6 +1192,9 @@ const _upgraders: {
     }
     // Remove the old sourceView parameter regardless of whether we found a match
     delete query.sourceView;
+  },
+  [13]: (_) => {
+    // just added the focus-self transform
   },
 };
 
