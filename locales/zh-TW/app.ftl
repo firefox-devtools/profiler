@@ -66,6 +66,15 @@ CallNodeContextMenu--transform-focus-function = 聚焦於函數
 CallNodeContextMenu--transform-focus-function-inverted = 聚焦於函數（反向）
     .title = { CallNodeContextMenu--transform-focus-function-title }
 
+## The translation for "self" in these strings should match the translation used
+## in CallTree--samples-self and CallTree--bytes-self. Alternatively it can be
+## translated as "self values" or "self time" (though "self time" is less desirable
+## because this menu item is also shown in "bytes" mode).
+
+CallNodeContextMenu--transform-focus-self-title = 聚焦於 self 與聚焦於函數類似，但只保留與函數的 self 時間有關的取樣。將捨棄被呼叫者的取樣，並將呼叫樹重新放置於聚焦的函數根上。
+CallNodeContextMenu--transform-focus-self = 只聚焦於 self
+    .title = { CallNodeContextMenu--transform-focus-self-title }
+
 ##
 
 CallNodeContextMenu--transform-focus-subtree = 只聚焦於子樹
@@ -939,6 +948,12 @@ TransformNavigator--focus-subtree = 聚焦節點：{ $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = 聚焦：{ $item }
+# "Focus self" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-on-function-self
+# Also see the translation note above CallNodeContextMenu--transform-focus-self.
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-self = 聚焦 self：{ $item }
 # "Focus category" transform. The word "Focus" has the meaning of an adjective here.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
 # Variables:
