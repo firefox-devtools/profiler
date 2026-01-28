@@ -125,19 +125,34 @@ exports[`CombinedChart renders combined stack chart 1`] = `
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Empty⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Empty⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="react-contextmenu-wrapper treeViewContextMenu"
   >
@@ -630,19 +645,34 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Empty⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Empty⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="react-contextmenu-wrapper treeViewContextMenu"
   >
@@ -1189,19 +1219,34 @@ exports[`StackChart matches the snapshot and can display a tooltip with the same
           </div>
         </div>
       </div>
-      <ol
-        class="filterNavigatorBar calltreeTransformNavigator"
+      <div
+        class="filterNavigatorBarScrollContainer"
       >
-        <li
-          class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+        <div
+          class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+          data-testid="FilterNavigatorBarScrollParent"
         >
-          <span
-            class="filterNavigatorBarItemContent"
+          <div
+            class="filterNavigatorBarScrollContent"
+            data-testid="FilterNavigatorBarScrollContent"
+            style="left: 0px;"
           >
-            Complete “⁨Empty⁩”
-          </span>
-        </li>
-      </ol>
+            <ol
+              class="filterNavigatorBar calltreeTransformNavigator"
+            >
+              <li
+                class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+              >
+                <span
+                  class="filterNavigatorBarItemContent"
+                >
+                  Complete “⁨Empty⁩”
+                </span>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
       <div
         class="react-contextmenu-wrapper treeViewContextMenu"
       >
@@ -1895,19 +1940,34 @@ exports[`StackChart matches the snapshot and can display a tooltip: dom 1`] = `
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Empty⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Empty⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="react-contextmenu-wrapper treeViewContextMenu"
   >
@@ -2430,19 +2490,34 @@ exports[`StackChart works when the user selects the JS allocations option 1`] = 
           </div>
         </div>
       </div>
-      <ol
-        class="filterNavigatorBar calltreeTransformNavigator"
+      <div
+        class="filterNavigatorBarScrollContainer"
       >
-        <li
-          class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+        <div
+          class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+          data-testid="FilterNavigatorBarScrollParent"
         >
-          <span
-            class="filterNavigatorBarItemContent"
+          <div
+            class="filterNavigatorBarScrollContent"
+            data-testid="FilterNavigatorBarScrollContent"
+            style="left: 0px;"
           >
-            Complete “⁨Empty⁩”
-          </span>
-        </li>
-      </ol>
+            <ol
+              class="filterNavigatorBar calltreeTransformNavigator"
+            >
+              <li
+                class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+              >
+                <span
+                  class="filterNavigatorBarItemContent"
+                >
+                  Complete “⁨Empty⁩”
+                </span>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
       <div
         class="react-contextmenu-wrapper treeViewContextMenu"
       >
