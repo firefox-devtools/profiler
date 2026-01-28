@@ -79,6 +79,9 @@ CallNodeContextMenu--transform-focus-function = Foco sur function.
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Foco sur function (invertite).
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Foco solo sur sub-arbore.
     .title =
         Concentrar se sur un sub-arbore removera ulle specimen que non include ille

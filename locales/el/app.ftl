@@ -79,6 +79,9 @@ CallNodeContextMenu--transform-focus-function = Εστίαση στη συνάρ
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Εστίαση στη συνάρτηση (ανεστραμμένη)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Εστίαση στο υπόδεντρο μόνο
     .title =
         Η εστίαση σε υπόδεντρο θα αφαιρέσει κάθε δείγμα που δεν περιλαμβάνει αυτό το

@@ -77,6 +77,9 @@ CallNodeContextMenu--transform-focus-function = Concentrazion su funzion
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Concentrazion su funzion (invertide)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Concentrazion dome su sot-arbul
     .title =
         La concentrazion suntun sot-arbul e gjavara ducj i campions che no includin chê

@@ -71,6 +71,9 @@ CallNodeContextMenu--transform-focus-function = Фокус на функції
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Фокус на функції (інвертовано)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Фокус лише на піддереві
     .title =
         Фокус на піддереві вилучить будь-який зразок, який не включає цю

@@ -79,6 +79,9 @@ CallNodeContextMenu--transform-focus-function = Fokusera på funktion
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Fokus på funktion (inverterad)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Fokusera endast på underträd
     .title =
         Genom att fokusera på ett underträd kommer alla prov tas bort som inte

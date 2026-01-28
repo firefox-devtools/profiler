@@ -67,6 +67,9 @@ CallNodeContextMenu--transform-focus-function = Fonksiyona odaklan
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Fonksiyona odaklan (tersine)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Yalnızca alt ağaca odaklan
     .title = Alt ağaca odaklanmak, çağrı ağacının belirtilen bölgesini içermeyen her örneği kaldıracaktır. Bu işlem, çağrı ağacının bir dalını koparır ama bunu yalnızca belirtilen çağrı düğümü için yapar. Fonksiyonun yaptığı diğer çağrılar görmezden gelinir.
 # This is used as the context menu item to apply the "Focus on category" transform.

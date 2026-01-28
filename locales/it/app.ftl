@@ -65,6 +65,9 @@ CallNodeContextMenu--transform-focus-function = Focus sulla funzione
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Focus sulla funzione (invertito)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Focus solo sul sottoalbero
     .title = Il focus sul sottoalbero rimuoverà tutti i campioni che non includono quella specifica parte dell’albero delle chiamate. Estrae un ramo dell’albero, ma solo per quel singolo nodo di chiamata. Tutte le altre chiamate a quella funzione vengono ignorate.
 # This is used as the context menu item to apply the "Focus on category" transform.

@@ -79,6 +79,9 @@ CallNodeContextMenu--transform-focus-function = Фокус на функцыі
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Фокус на функцыі (інвертавана)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Фокус толькі на паддрэве
     .title = Фокус на паддрэве прывядзе да выдалення любога ўзору, які не ўключае гэтую канкрэтную частку дрэва выклікаў. Гэта выдаляе галіну дрэва выклікаў, але робіць гэта толькі для аднаго вузла выкліку. Усе іншыя выклікі функцый ігнаруюцца.
 # This is used as the context menu item to apply the "Focus on category" transform.

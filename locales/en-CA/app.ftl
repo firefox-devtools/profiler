@@ -79,6 +79,9 @@ CallNodeContextMenu--transform-focus-function = Focus on function
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Focus on function (inverted)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Focus on subtree only
     .title =
         Focusing on a subtree will remove any sample that does not include that

@@ -65,6 +65,9 @@ CallNodeContextMenu--transform-focus-function = 聚焦于函数
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = 聚焦于函数（反向）
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = 只聚焦于子树
     .title = 聚焦于子树，将从调用树中拉出分支，并移除不属于该分支的内容。然而此功能只对单一调用节点有效，将忽略其他调用该函数的部分。
 # This is used as the context menu item to apply the "Focus on category" transform.

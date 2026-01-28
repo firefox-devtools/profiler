@@ -50,6 +50,9 @@ CallNodeContextMenu--transform-focus-function = Siḍes ef twuri
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Siḍeṣ ɣef twuri (imitti)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-collapse-function-subtree = Ṭebbeq tawuri
     .title = Aṭebbeq n twuri ad yekkes meṛṛa ayen iwumi tessawaldaɣen ad tefk  akk akud n uselkem i twuri. Aya ad yefk tallelt i usifses n umaɣnu ara yessiwlen i tengalt ur yattwaslaḍen ara.
 CallNodeContextMenu--expand-all = Snefli akk

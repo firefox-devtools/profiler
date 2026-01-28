@@ -79,6 +79,9 @@ CallNodeContextMenu--transform-focus-function = Сфокусироваться �
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Сфокусироваться на функции (инвертировано)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Сфокусироваться только на поддереве
     .title =
         Фокусировка на поддереве приведёт к удалению любого сэмпла, который не включает эту
