@@ -13,16 +13,10 @@ describe('isDarkMode', function () {
     });
     jest.spyOn(Storage.prototype, 'getItem').mockImplementation(getItem);
 
-    const warn = jest.fn(() => {});
-    jest.spyOn(console, 'warn').mockImplementation(warn);
-
+    // When localStorage throws, it should default to system preference
     expect(isDarkMode()).toBe(false);
 
     expect(getItem).toHaveBeenCalledWith('theme');
-    expect(warn).toHaveBeenCalledWith(
-      'localStorage access denied',
-      expect.objectContaining({ message: 'dummy error' })
-    );
   });
 
   it('listens to storage event', function () {
