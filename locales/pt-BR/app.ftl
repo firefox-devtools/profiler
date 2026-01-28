@@ -72,6 +72,8 @@ CallNodeContextMenu--transform-focus-function-inverted = Foco na função (inver
 ## because this menu item is also shown in "bytes" mode).
 
 CallNodeContextMenu--transform-focus-self-title = Colocar o foco em próprio é semelhante a colocar o foco em uma função, mas só mantém amostras que contribuem com o tempo da própria função. Amostras em funções chamadas são ignoradas e a árvore de chamadas é reorganizada para ter como raiz a função em foco.
+CallNodeContextMenu--transform-focus-self = Foco apenas em próprio
+    .title = { CallNodeContextMenu--transform-focus-self-title }
 
 ##
 
@@ -967,6 +969,12 @@ TransformNavigator--focus-subtree = Focar node: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Focar: { $item }
+# "Focus self" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-on-function-self
+# Also see the translation note above CallNodeContextMenu--transform-focus-self.
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-self = Foco em próprio: { $item }
 # "Focus category" transform. The word "Focus" has the meaning of an adjective here.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
 # Variables:
