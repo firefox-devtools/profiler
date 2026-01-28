@@ -161,7 +161,7 @@
   border-radius: 0 0 4px 4px;
   background-color: var(--internal-range-background-color);
   box-shadow: 0 2px 2px var(--base-shadow-color);
-  color: var(--base-foreground-color);
+  color: var(--internal-overlay-time-foreground-color);
   opacity: 1;
   pointer-events: none;
   transition: opacity 200ms;
