@@ -77,6 +77,18 @@ CallNodeContextMenu--transform-focus-function = Auf Funktion fokussieren
 CallNodeContextMenu--transform-focus-function-inverted = Auf Funktion fokussieren (invertiert)
     .title = { CallNodeContextMenu--transform-focus-function-title }
 
+## The translation for "self" in these strings should match the translation used
+## in CallTree--samples-self and CallTree--bytes-self. Alternatively it can be
+## translated as "self values" or "self time" (though "self time" is less desirable
+## because this menu item is also shown in "bytes" mode).
+
+CallNodeContextMenu--transform-focus-self-title =
+    Die Fokussierung auf sich selbst ähnelt der Fokussierung auf eine Funktion, behält jedoch nur Samples bei,
+    die zur Zeit der Funktion selbst beitragen. Samples in Angerufenen
+    werden verworfen und der Aufrufbaum wird auf die Funktion im Fokus zurückgesetzt.
+CallNodeContextMenu--transform-focus-self = Nur auf sich selbst konzentrieren
+    .title = { "\u0009" }{ CallNodeContextMenu--transform-focus-self-title }
+
 ##
 
 CallNodeContextMenu--transform-focus-subtree = Nur auf Unterbaum konzentrieren
@@ -1013,6 +1025,12 @@ TransformNavigator--focus-subtree = Knoten fokussieren: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Fokussieren: { $item }
+# "Focus self" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-on-function-self
+# Also see the translation note above CallNodeContextMenu--transform-focus-self.
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-self = Fokus auf sich selbst: { $item }
 # "Focus category" transform. The word "Focus" has the meaning of an adjective here.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
 # Variables:
