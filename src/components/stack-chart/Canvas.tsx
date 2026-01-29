@@ -18,6 +18,7 @@ import {
   getForegroundColor,
   getBackgroundColor,
 } from '../../utils/colors';
+import { ValueSummaryReader } from 'devtools-reps';
 import { TooltipCallNode } from '../tooltip/CallNode';
 import { TooltipMarker } from '../tooltip/Marker';
 
@@ -623,6 +624,27 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       timelineUnit === 'bytes'
         ? formatBytes(duration)
         : formatMilliseconds(duration);
+    let argumentSummaries = undefined;
+    if (timing.argumentValues) {
+      const argumentValuesIndex = timing.argumentValues[stackTimingIndex];
+      if (
+        argumentValuesIndex !== -1 &&
+        thread.tracedValuesBuffer &&
+        thread.tracedObjectShapes
+      ) {
+        const argSummaries = ValueSummaryReader.getArgumentSummaries(
+          thread.tracedValuesBuffer,
+          thread.tracedObjectShapes,
+          argumentValuesIndex
+        );
+        // The API maybe needs work - getArgumentSummaries can return a string indicating
+        // that the argument summaries for a given call were missing (this can happen if they
+        // were overwritten in the underlying ring buffer)
+        if (typeof argSummaries !== 'string') {
+          argumentSummaries = argSummaries;
+        }
+      }
+    }
 
     return (
       <TooltipCallNode
@@ -637,6 +659,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         callTreeSummaryStrategy="timing"
         durationText={durationText}
         displayStackType={displayStackType}
+        argumentValues={argumentSummaries}
       />
     );
   };
