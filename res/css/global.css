@@ -47,6 +47,18 @@
   --wide-splitter-hover-color: #bbb;
   --wide-splitter-pressed-color: #aaa;
 
+  /* Colors for DevTools Reps */
+  --number-color: #058b00;
+  --string-color: #dd00a9;
+  --null-color: #5c5c5f;
+  --object-color: #0074e8;
+  --caption-color: #0074e8;
+  --location-color: #5c5c5f;
+  --source-link-color: #0060df;
+  --node-color: #003eaa;
+  --reference-color: #0074e8;
+  --comment-node-color: #5c5c5f;
+
   color: var(--base-foreground-color);
 }
 
@@ -152,18 +164,4 @@ a:active {
 
 .splitter-layout.splitter-layout.layout-changing > .layout-splitter {
   background-color: var(--wide-splitter-pressed-color);
-}
-
-/* Colors for DevTools Reps */
-:root {
-  --number-color: #058b00;
-  --string-color: #dd00a9;
-  --null-color: #5c5c5f;
-  --object-color: #0074e8;
-  --caption-color: #0074e8;
-  --location-color: #5c5c5f;
-  --source-link-color: #0060df;
-  --node-color: #003eaa;
-  --reference-color: #0074e8;
-  --comment-node-color: #5c5c5f;
 }
