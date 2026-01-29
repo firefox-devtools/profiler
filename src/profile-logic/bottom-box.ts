@@ -16,6 +16,7 @@ import {
   getCallNodeFramePerStack,
   getNativeSymbolInfo,
   getNativeSymbolsForCallNode,
+  getTotalNativeSymbolTimingsForCallNode,
 } from './profile-data';
 import { mapGetKeyWithMaxValue } from 'firefox-profiler/utils';
 import { getTotalLineTimingsForCallNode } from './line-timings';
@@ -56,18 +57,37 @@ export function getBottomBoxInfoForCallNode(
     callNodeInfo,
     stackTable
   );
+
+  // If we have at least one native symbol to show assembly for, pick
+  // the one with the highest total. But first, create the full list of
+  // native symbols for this call node, including even those symbols
+  // that aren't hit by any samples in the current view, so that the
+  // list is stable regardless of the current preview selection.
   const nativeSymbolsForCallNode = getNativeSymbolsForCallNode(
     callNodeFramePerStack,
     frameTable
   );
+  let initialNativeSymbol = null;
+  const nativeSymbolTimings = getTotalNativeSymbolTimingsForCallNode(
+    samples,
+    callNodeFramePerStack,
+    frameTable
+  );
+  const hottestNativeSymbol = mapGetKeyWithMaxValue(nativeSymbolTimings);
+  if (hottestNativeSymbol !== undefined) {
+    nativeSymbolsForCallNode.add(hottestNativeSymbol);
+    initialNativeSymbol = hottestNativeSymbol;
+  }
+  const nativeSymbolsForCallNodeArr = [...nativeSymbolsForCallNode];
+  nativeSymbolsForCallNodeArr.sort((a, b) => a - b);
+  if (
+    nativeSymbolsForCallNodeArr.length !== 0 &&
+    initialNativeSymbol === null
+  ) {
+    initialNativeSymbol = nativeSymbolsForCallNodeArr[0];
+  }
 
-  // If we have at least one native symbol to show assembly for, pick
-  // the first one arbitrarily.
-  // TODO: If the we have more than one native symbol, pick the one
-  // with the highest total sample count.
-  const initialNativeSymbol = nativeSymbolsForCallNode.length !== 0 ? 0 : null;
-
-  const nativeSymbolInfosForCallNode = nativeSymbolsForCallNode.map(
+  const nativeSymbolInfosForCallNode = nativeSymbolsForCallNodeArr.map(
     (nativeSymbolIndex) =>
       getNativeSymbolInfo(
         nativeSymbolIndex,
@@ -91,9 +111,7 @@ export function getBottomBoxInfoForCallNode(
     samples,
     callNodeFramePerStack,
     frameTable,
-    initialNativeSymbol !== null
-      ? nativeSymbolsForCallNode[initialNativeSymbol]
-      : null
+    initialNativeSymbol
   );
   const hottestInstructionAddress = mapGetKeyWithMaxValue(addressTimings);
 
@@ -101,7 +119,10 @@ export function getBottomBoxInfoForCallNode(
     libIndex,
     sourceIndex,
     nativeSymbols: nativeSymbolInfosForCallNode,
-    initialNativeSymbol,
+    initialNativeSymbol:
+      initialNativeSymbol !== null
+        ? nativeSymbolsForCallNodeArr.indexOf(initialNativeSymbol)
+        : null,
     scrollToLineNumber: hottestLine,
     scrollToInstructionAddress: hottestInstructionAddress,
     highlightedLineNumber: null,
