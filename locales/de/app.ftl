@@ -87,7 +87,7 @@ CallNodeContextMenu--transform-focus-self-title =
     die zur Zeit der Funktion selbst beitragen. Samples in Angerufenen
     werden verworfen und der Aufrufbaum wird auf die Funktion im Fokus zurückgesetzt.
 CallNodeContextMenu--transform-focus-self = Nur auf sich selbst konzentrieren
-    .title = { "\u0009" }{ CallNodeContextMenu--transform-focus-self-title }
+    .title = { CallNodeContextMenu--transform-focus-self-title }
 
 ##
 
