@@ -82,6 +82,7 @@
     "common-tags": "^1.8.2",
     "copy-to-clipboard": "^3.3.3",
     "core-js": "^3.47.0",
+    "devtools-reps": "^0.27.3",
     "escape-string-regexp": "^4.0.0",
     "gecko-profiler-demangle": "^0.4.0",
     "idb": "^8.0.3",

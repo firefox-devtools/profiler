@@ -177,3 +177,20 @@
 .sidebar .tooltipDetailSeparator {
   display: none;
 }
+
+.tooltipArgumentsLabel {
+  /* match tooltips label, without being aligned to the right */
+  color: var(--grey-50);
+}
+
+.tooltipArguments > span {
+  display: block;
+}
+
+.tooltipArguments > span:nth-child(odd) {
+  background-color: rgb(0 0 0 / 0.05);
+}
+
+.tooltipArguments {
+  text-indent: 1em hanging;
+}
