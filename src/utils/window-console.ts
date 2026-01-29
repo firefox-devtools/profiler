@@ -104,6 +104,28 @@ export function addDataToWindowObject(
     },
   });
 
+  defineProperty(target, 'getDemangleFunction', {
+    enumerable: true,
+    get() {
+      return async function () {
+        try {
+          // When this module imports some WebAssembly module, the bundler's mechanism
+          // invokes the WebAssembly object which might be absent in some browsers,
+          // therefore `import` can throw. Also some browsers might refuse to load a
+          // wasm module because of our CSP.
+          const { demangle_any } = await import('gecko-profiler-demangle');
+          return demangle_any;
+        } catch (error) {
+          // Module loading can fail (for example in browsers without WebAssembly
+          // support, or due to bad server configuration), so we will fall back
+          // to a pass-through function if that happens.
+          console.error('Demangling module could not be imported.', error);
+          return (mangledString: string) => mangledString;
+        }
+      };
+    },
+  });
+
   defineProperty(target, 'selectedMarker', {
     enumerable: true,
     get() {
