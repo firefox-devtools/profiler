@@ -4,7 +4,7 @@
 
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { TooltipCallNode } from '../../components/tooltip/CallNode';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -163,6 +163,74 @@ describe('TooltipCallNode', function () {
 
       const displayedUrl = getByText(pageUrl, { exact: false });
       expect(displayedUrl).toHaveTextContent(`${pageUrl} (private)`);
+    });
+  });
+
+  describe('with argument values', function () {
+    function setupWithArguments(argumentValues?: Array<any>) {
+      const {
+        profile,
+        funcNamesDictPerThread: [{ A, Bjs, Cjs }],
+      } = getProfileFromTextSamples(`
+        A
+        Bjs
+        Cjs
+      `);
+      const threadIndex = 0;
+      const callNodePath = [A, Bjs, Cjs];
+
+      const store = storeWithProfile(profile);
+      const { getState, dispatch } = store;
+      dispatch(changeSelectedCallNode(threadIndex, callNodePath));
+
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      const callNodeIndex = ensureExists(
+        selectedThreadSelectors.getSelectedCallNodeIndex(getState()),
+        'Unable to find a selected call node index.'
+      );
+      const displayData = callTree.getDisplayData(callNodeIndex);
+
+      return render(
+        <Provider store={store}>
+          <TooltipCallNode
+            thread={selectedThreadSelectors.getThread(getState())}
+            weightType="samples"
+            innerWindowIDToPageMap={ProfileSelectors.getInnerWindowIDToPageMap(
+              getState()
+            )}
+            callNodeIndex={callNodeIndex}
+            callNodeInfo={selectedThreadSelectors.getCallNodeInfo(getState())}
+            displayData={displayData}
+            categories={ProfileSelectors.getCategories(getState())}
+            interval={ProfileSelectors.getProfileInterval(getState())}
+            durationText="Fake Duration Text"
+            callTreeSummaryStrategy={selectedThreadSelectors.getCallTreeSummaryStrategy(
+              getState()
+            )}
+            displayStackType={true}
+            argumentValues={argumentValues}
+          />
+        </Provider>
+      );
+    }
+
+    it('does not display arguments when argumentValues is undefined', () => {
+      setupWithArguments(undefined);
+      expect(screen.queryByText('Arguments:')).not.toBeInTheDocument();
+    });
+
+    it('displays em dash when argumentValues is empty', () => {
+      const { getByText, container } = setupWithArguments([]);
+      expect(getByText('Arguments:')).toBeInTheDocument();
+      expect(getByText('—')).toBeInTheDocument();
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('displays argument values when provided', () => {
+      const argumentValues = [42, 'hello'];
+      const { getByText, container } = setupWithArguments(argumentValues);
+      expect(getByText('Arguments:')).toBeInTheDocument();
+      expect(container.firstChild).toMatchSnapshot();
     });
   });
 });
