@@ -65,7 +65,9 @@ import type {
   Milliseconds,
   Tid,
   RawProfileSharedData,
+  ProfileIndexTranslationMaps,
 } from 'firefox-profiler/types';
+import { translateTransformStack } from './transforms';
 
 /**
  * This function is the entry point for this file. From a list of profile
@@ -137,8 +139,7 @@ export function mergeProfilesForDiffing(
     categories: newCategories,
     libs: newLibs,
     shared: newShared,
-    translationMapsForStrings,
-    translationMapsForStacks,
+    translationMapsPerProfile,
   } = mergeSharedData(profiles);
   resultProfile.meta.categories = newCategories;
   resultProfile.libs = newLibs;
@@ -153,6 +154,10 @@ export function mergeProfilesForDiffing(
 
   for (let i = 0; i < profileStates.length; i++) {
     const { profileName, profileSpecific } = profileStates[i];
+    const translationMaps = translationMapsPerProfile[i];
+    const { oldStackToNewStackPlusOne, oldStringToNewStringPlusOne } =
+      translationMaps;
+
     const selectedThreadIndexes = profileSpecific.selectedThreads;
     if (selectedThreadIndexes === null) {
       throw new Error(`No thread has been selected in profile ${i}`);
@@ -166,26 +171,27 @@ export function mergeProfilesForDiffing(
     const profile = profiles[i];
     let thread = { ...profile.threads[selectedThreadIndex] };
 
-    // TODO: Adjust func and resource indexes in these transforms
-    transformStacks[i] = profileSpecific.transforms[selectedThreadIndex];
+    transformStacks[i] = translateTransformStack(
+      profileSpecific.transforms[selectedThreadIndex] ?? [],
+      translationMaps
+    );
     implementationFilters.push(profileSpecific.implementation);
 
     thread.markers = {
       ...thread.markers,
       name: adjustStringIndexes(
         thread.markers.name,
-        translationMapsForStrings[i]
+        oldStringToNewStringPlusOne
       ),
       data: adjustMarkerDataStringIndexes(
         thread.markers.data,
-        translationMapsForStrings[i],
+        oldStringToNewStringPlusOne,
         stringIndexMarkerFieldsByDataType
       ),
     };
 
-    const translationMapForStacks = translationMapsForStacks[i];
     [thread] = updateRawThreadStacks([thread], (stackIndex) =>
-      _mapNullableStack(stackIndex, translationMapForStacks)
+      _mapNullableStack(stackIndex, oldStackToNewStackPlusOne)
     );
 
     // Make sure that screenshot markers make it into the merged profile, even
@@ -405,15 +411,7 @@ export function mergeSharedData(profiles: Profile[]): {
   categories: CategoryList;
   libs: Lib[];
   shared: RawProfileSharedData;
-  translationMapsForCategories: TranslationMapForCategories[];
-  translationMapsForLibs: TranslationMapForLibs[];
-  translationMapsForStrings: TranslationMapForStrings[];
-  translationMapsForSources: TranslationMapForSources[];
-  translationMapsForResources: TranslationMapForResources[];
-  translationMapsForNativeSymbols: TranslationMapForNativeSymbols[];
-  translationMapsForFuncs: TranslationMapForFuncs[];
-  translationMapsForFrames: TranslationMapForFrames[];
-  translationMapsForStacks: TranslationMapForStacks[];
+  translationMapsPerProfile: ProfileIndexTranslationMaps[];
 } {
   const {
     categories: newCategories,
@@ -481,19 +479,37 @@ export function mergeSharedData(profiles: Profile[]): {
     sources: newSources,
   };
 
+  const translationMapsPerProfile = profiles.map((profile, i) => {
+    const oldLibToNewLibPlusOne = translationMapsForLibs[i];
+    const oldStringToNewStringPlusOne = translationMapsForStrings[i];
+    const oldSourceToNewSourcePlusOne = translationMapsForSources[i];
+    const oldResourceToNewResourcePlusOne = translationMapsForResources[i];
+    const oldNativeSymbolToNewNativeSymbolPlusOne =
+      translationMapsForNativeSymbols[i];
+    const oldFuncToNewFuncPlusOne = translationMapsForFuncs[i];
+    const oldFrameToNewFramePlusOne = translationMapsForFrames[i];
+    const oldStackToNewStackPlusOne = translationMapsForStacks[i];
+    const translationMaps: ProfileIndexTranslationMaps = {
+      oldThreadIndexToNew: null,
+      oldFuncCount: profile.shared.funcTable.length,
+      newFuncCount: newFuncTable.length,
+      oldLibToNewLibPlusOne,
+      oldStringToNewStringPlusOne,
+      oldSourceToNewSourcePlusOne,
+      oldResourceToNewResourcePlusOne,
+      oldNativeSymbolToNewNativeSymbolPlusOne,
+      oldFuncToNewFuncPlusOne,
+      oldFrameToNewFramePlusOne,
+      oldStackToNewStackPlusOne,
+    };
+    return translationMaps;
+  });
+
   return {
     categories: newCategories,
     libs: newLibs,
     shared: newShared,
-    translationMapsForCategories,
-    translationMapsForLibs,
-    translationMapsForStrings,
-    translationMapsForSources,
-    translationMapsForResources,
-    translationMapsForNativeSymbols,
-    translationMapsForFuncs,
-    translationMapsForFrames,
-    translationMapsForStacks,
+    translationMapsPerProfile,
   };
 }
 

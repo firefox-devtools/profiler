@@ -18,6 +18,14 @@ import { ensureExists } from 'firefox-profiler/utils/types';
 import { getTimeRangeIncludingAllThreads } from 'firefox-profiler/profile-logic/profile-data';
 import { StringTable } from '../../utils/string-table';
 import type { RawProfileSharedData, Profile } from 'firefox-profiler/types';
+import { callTreeFromProfile, formatTree } from '../fixtures/utils';
+import { storeWithProfile } from '../fixtures/stores';
+import { addTransformToStack } from '../../actions/profile-view';
+import * as UrlStateSelectors from '../../selectors/url-state';
+import {
+  getThreadSelectors,
+  selectedThreadSelectors,
+} from '../../selectors/per-thread';
 
 describe('mergeProfilesForDiffing function', function () {
   it('merges the various tables properly in the diffing profile', function () {
@@ -264,6 +272,183 @@ describe('mergeProfilesForDiffing function', function () {
       start: 0,
       end: 11,
     });
+  });
+
+  it('should generate correct call trees for individual threads from each profile', () => {
+    // Create two profiles with different call stacks
+    const sampleProfileA = getProfileFromTextSamples(`
+      A  A  A
+      B  B  B
+      C  C  D
+    `);
+    const sampleProfileB = getProfileFromTextSamples(`
+      X  X  X  X
+      Y  Y  Z  Z
+    `);
+
+    const profileState = stateFromLocation({
+      pathname: '/public/fakehash1/',
+      search: '?thread=0&v=3',
+      hash: '',
+    });
+
+    const { profile: mergedProfile } = mergeProfilesForDiffing(
+      [sampleProfileA.profile, sampleProfileB.profile],
+      [profileState, profileState]
+    );
+
+    // The merged profile should have 3 threads:
+    // Thread 0: From profile A's selected thread
+    // Thread 1: From profile B's selected thread
+    // Thread 2: The diff thread
+    expect(mergedProfile.threads).toHaveLength(3);
+
+    // Check the call tree for thread 0 (from profile A)
+    const callTreeThread0 = callTreeFromProfile(mergedProfile, 0);
+    expect(formatTree(callTreeThread0)).toEqual([
+      '- A (total: 3, self: —)',
+      '  - B (total: 3, self: —)',
+      '    - C (total: 2, self: 2)',
+      '    - D (total: 1, self: 1)',
+    ]);
+
+    // Check the call tree for thread 1 (from profile B)
+    const callTreeThread1 = callTreeFromProfile(mergedProfile, 1);
+    expect(formatTree(callTreeThread1)).toEqual([
+      '- X (total: 4, self: —)',
+      '  - Y (total: 2, self: 2)',
+      '  - Z (total: 2, self: 2)',
+    ]);
+  });
+
+  it('should preserve transforms and produce matching call trees', () => {
+    /**
+     * This test verifies that when profiles are merged with transforms applied:
+     * 1. The transforms are correctly translated to use the new function indexes
+     *    in the merged profile (since merging can change func table indexes)
+     * 2. The call trees computed from the transformed threads in the merged profile
+     *    match the call trees from the original transformed profiles
+     */
+
+    // Create two profiles with different call stacks
+    const {
+      profile: profileA,
+      funcNamesDictPerThread: [funcNamesDictA],
+    } = getProfileFromTextSamples(`
+      A  A  A  A
+      B  B  B  B
+      C  C  D  D
+      E  F  G  H
+    `);
+
+    const {
+      profile: profileB,
+      funcNamesDictPerThread: [funcNamesDictB],
+    } = getProfileFromTextSamples(`
+      P            P            P
+      X[lib:libQ]  X[lib:libQ]  X[lib:libQ]
+      Y[lib:libQ]  Y[lib:libQ]  Z
+      W            V            W
+    `);
+
+    // Create stores and apply transforms
+    const storeA = storeWithProfile(profileA);
+    const storeB = storeWithProfile(profileB);
+
+    const threadIndexA = 0;
+    const threadIndexB = 0;
+
+    // Apply focus-subtree transform to profile A: focus on [A, B, C]
+    const { A, B, C } = funcNamesDictA;
+    storeA.dispatch(
+      addTransformToStack(threadIndexA, {
+        type: 'focus-subtree',
+        callNodePath: [A, B, C],
+        implementation: 'combined',
+        inverted: false,
+      })
+    );
+
+    // Apply focus-subtree transform to profile B: focus on [X, Y]
+    const libQ = profileB.shared.resourceTable.name.findIndex(
+      (nameStrIndex) => profileB.shared.stringArray[nameStrIndex] === 'libQ'
+    );
+    expect(libQ).not.toBe(-1);
+    const libQCollapsedFunc = profileB.shared.funcTable.length + libQ;
+    const { P } = funcNamesDictB;
+    storeB.dispatch(
+      addTransformToStack(threadIndexB, {
+        type: 'collapse-resource',
+        resourceIndex: libQ,
+        collapsedFuncIndex: libQCollapsedFunc,
+        implementation: 'combined',
+      })
+    );
+    storeB.dispatch(
+      addTransformToStack(threadIndexB, {
+        type: 'focus-subtree',
+        callNodePath: [P, libQCollapsedFunc],
+        implementation: 'combined',
+        inverted: false,
+      })
+    );
+
+    // Get the transformed call trees from the original profiles
+    const callTreeA = selectedThreadSelectors.getCallTree(storeA.getState());
+    const callTreeB = selectedThreadSelectors.getCallTree(storeB.getState());
+
+    const formattedCallTreeA = formatTree(callTreeA);
+    const formattedCallTreeB = formatTree(callTreeB);
+
+    // Expected call tree for profile A after focusing on [A, B, C]
+    expect(formattedCallTreeA).toEqual([
+      '- C (total: 2, self: —)',
+      '  - E (total: 1, self: 1)',
+      '  - F (total: 1, self: 1)',
+    ]);
+
+    // Expected call tree for profile B after focusing on [P, libQ]
+    expect(formattedCallTreeB).toEqual([
+      '- libQ (total: 3, self: —)',
+      '  - W (total: 1, self: 1)',
+      '  - V (total: 1, self: 1)',
+      '  - Z (total: 1, self: —)',
+      '    - W (total: 1, self: 1)',
+    ]);
+
+    // Get URL states with transforms
+    const urlStateA = UrlStateSelectors.getUrlState(storeA.getState());
+    const urlStateB = UrlStateSelectors.getUrlState(storeB.getState());
+
+    // Merge profiles with the URL states that include transforms
+    const { profile: mergedProfile, transformStacks } = mergeProfilesForDiffing(
+      [profileA, profileB],
+      [urlStateA, urlStateB]
+    );
+
+    expect(mergedProfile.threads).toHaveLength(3);
+
+    // Create a single store for the merged profile
+    const storeMerged = storeWithProfile(mergedProfile);
+
+    // Apply the translated transforms to each thread
+    for (const transform of ensureExists(transformStacks[0])) {
+      storeMerged.dispatch(addTransformToStack(0, transform));
+    }
+
+    for (const transform of ensureExists(transformStacks[1])) {
+      storeMerged.dispatch(addTransformToStack(1, transform));
+    }
+
+    // The call trees in the merged profile should match the transformed call trees
+    // from the original profiles, even though func indexes have changed
+    const state = storeMerged.getState();
+    expect(formatTree(getThreadSelectors(0).getCallTree(state))).toEqual(
+      formattedCallTreeA
+    );
+    expect(formatTree(getThreadSelectors(1).getCallTree(state))).toEqual(
+      formattedCallTreeB
+    );
   });
 });
 
