@@ -63,6 +63,7 @@ import {
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 import type { CssPixels, Store } from 'firefox-profiler/types';
+import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
 
 jest.useFakeTimers();
 
@@ -315,9 +316,11 @@ describe('StackChart', function () {
 });
 
 describe('ArgumentValues', () => {
-  it('shows argument values when a profile has them', () => {
-    const profile = require('../fixtures/upgrades/argument-values.json');
-    const store = storeWithProfile(profile);
+  it('shows argument values when a profile has them', async () => {
+    const profiler = await unserializeProfileOfArbitraryFormat(
+      require('../fixtures/upgrades/argument-values.json')
+    );
+    const store = storeWithProfile(profiler);
     const { getTooltip, moveMouse, findFillTextPosition } = setup(store);
 
     moveMouse(findFillTextPosition('bar'));

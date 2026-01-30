@@ -4121,17 +4121,19 @@ export function computeTabToThreadIndexesMap(
     return tabToThreadIndexesMap;
   }
 
-  // We need to iterate over all the samples and markers once to figure out
-  // which innerWindowIDs are present in each thread. This is probably not
-  // very cheap, but it'll allow us to not compute this information every
-  // time when we need it.
+  // Iterate over the usedInnerWindowIDs for each thread to figure out
+  // which threads are involved for each tab.
   for (let threadIdx = 0; threadIdx < threads.length; threadIdx++) {
     const thread = threads[threadIdx];
+    const { usedInnerWindowIDs } = thread;
 
-    // First go over the innerWindowIDs of the samples.
-    for (let i = 0; i < thread.frameTable.length; i++) {
-      const innerWindowID = thread.frameTable.innerWindowID[i];
-      if (innerWindowID === null || innerWindowID === 0) {
+    if (!usedInnerWindowIDs) {
+      // No innerWindowIDs for this thread
+      continue;
+    }
+
+    for (const innerWindowID of usedInnerWindowIDs) {
+      if (innerWindowID === 0) {
         // Zero value also means null for innerWindowID.
         continue;
       }
@@ -4149,38 +4151,6 @@ export function computeTabToThreadIndexesMap(
         tabToThreadIndexesMap.set(tabID, threadIndexes);
       }
       threadIndexes.add(threadIdx);
-    }
-
-    // Then go over the markers to find their innerWindowIDs.
-    for (let i = 0; i < thread.markers.length; i++) {
-      const markerData = thread.markers.data[i];
-
-      if (!markerData) {
-        continue;
-      }
-
-      if (
-        'innerWindowID' in markerData &&
-        markerData.innerWindowID !== null &&
-        markerData.innerWindowID !== undefined &&
-        // Zero value also means null for innerWindowID.
-        markerData.innerWindowID !== 0
-      ) {
-        const innerWindowID = markerData.innerWindowID;
-        const tabID = innerWindowIDToTabMap.get(innerWindowID);
-        if (tabID === undefined) {
-          // We couldn't find the tab of this innerWindowID, this should
-          // never happen, it might indicate a bug in Firefox.
-          continue;
-        }
-
-        let threadIndexes = tabToThreadIndexesMap.get(tabID);
-        if (!threadIndexes) {
-          threadIndexes = new Set();
-          tabToThreadIndexesMap.set(tabID, threadIndexes);
-        }
-        threadIndexes.add(threadIdx);
-      }
     }
   }
 

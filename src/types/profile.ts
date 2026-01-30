@@ -675,6 +675,10 @@ export type RawThread = {
   userContextId?: number;
   tracedValuesBuffer?: string;
   tracedObjectShapes?: Array<string[] | null>;
+  // If present, contains the list of innerWindowIDs for pages that this thread is
+  // related to (or, in practice, whose code may be executing in this thread).
+  // It's absent in profiles that don't use inner window IDs.
+  usedInnerWindowIDs?: InnerWindowID[];
 };
 
 export type ExtensionTable = {
