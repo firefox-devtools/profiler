@@ -14,7 +14,7 @@
   --internal-shadow-color: rgb(0 0 0 / 0.4);
 
   position: absolute;
-  z-index: 3;
+  z-index: var(--z-overflow-edge-indicator);
   opacity: 0;
   pointer-events: none;
   transition: 150ms ease-in-out;

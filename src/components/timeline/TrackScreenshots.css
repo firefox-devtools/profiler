@@ -41,7 +41,7 @@
 .timelineTrackScreenshotHover {
   /* This positioning is defined through JavaScript */
   position: absolute;
-  z-index: 4; /* Ensure this is higher than any other timeline element. */
+  z-index: var(--z-timeline-track-screenshot);
   pointer-events: none;
 }
 
