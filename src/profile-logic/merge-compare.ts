@@ -6,8 +6,6 @@
  * comparison: how to merge profiles, how to diff them, etc.
  */
 
-import { stripIndent } from 'common-tags';
-
 import { adjustMarkerTimestamps } from './process-profile';
 import {
   getEmptyProfile,
@@ -351,24 +349,15 @@ function _adjustSampleTimestamps(
     timeDeltas: newTimeDeltas,
   };
 }
-type TranslationMapForCategories = Map<
-  IndexIntoCategoryList,
-  IndexIntoCategoryList
->;
-type TranslationMapForFuncs = Map<IndexIntoFuncTable, IndexIntoFuncTable>;
-type TranslationMapForResources = Map<
-  IndexIntoResourceTable,
-  IndexIntoResourceTable
->;
-type TranslationMapForNativeSymbols = Map<
-  IndexIntoNativeSymbolTable,
-  IndexIntoNativeSymbolTable
->;
-type TranslationMapForFrames = Map<IndexIntoFrameTable, IndexIntoFrameTable>;
-type TranslationMapForStacks = Map<IndexIntoStackTable, IndexIntoStackTable>;
-type TranslationMapForLibs = Map<IndexIntoLibs, IndexIntoLibs>;
-type TranslationMapForStrings = Map<IndexIntoStringTable, IndexIntoStringTable>;
-type TranslationMapForSources = Map<IndexIntoSourceTable, IndexIntoSourceTable>;
+type TranslationMapForCategories = Int32Array;
+type TranslationMapForFuncs = Int32Array;
+type TranslationMapForResources = Int32Array;
+type TranslationMapForNativeSymbols = Int32Array;
+type TranslationMapForFrames = Int32Array;
+type TranslationMapForStacks = Int32Array;
+type TranslationMapForLibs = Int32Array;
+type TranslationMapForStrings = Int32Array;
+type TranslationMapForSources = Int32Array;
 
 /**
  * Merges several categories lists into one, resolving duplicates if necessary.
@@ -382,13 +371,13 @@ function mergeCategories(categoriesPerProfile: Array<CategoryList | void>): {
   const newCategoryIndexByName = new Map<string, IndexIntoCategoryList>();
 
   const translationMaps = categoriesPerProfile.map((categories) => {
-    const translationMap: TranslationMapForCategories = new Map();
-
     if (!categories) {
       // Profiles that are imported may not have categories. Ignore it when attempting
       // to merge categories.
-      return translationMap;
+      return new Int32Array(0);
     }
+
+    const oldCategoryToNewCategoryPlusOne = new Int32Array(categories.length);
 
     categories.forEach((category, i) => {
       const { name } = category;
@@ -403,10 +392,10 @@ function mergeCategories(categoriesPerProfile: Array<CategoryList | void>): {
         // TODO issue #2151: merge the subcategories too, and make a
         // translationMap for those (per category), too.
       }
-      translationMap.set(i, newCategoryIndex);
+      oldCategoryToNewCategoryPlusOne[i] = newCategoryIndex + 1;
     });
 
-    return translationMap;
+    return oldCategoryToNewCategoryPlusOne;
   });
 
   return { categories: newCategories, translationMaps };
@@ -516,11 +505,12 @@ function mergeStringArrays(stringArraysPerProfile: Array<string[]>): {
   const newStringTable = StringTable.withBackingArray(newStringArray);
 
   const translationMaps = stringArraysPerProfile.map((stringArray) => {
-    const translationMap: TranslationMapForStrings = new Map();
+    const oldStringToNewStringPlusOne = new Int32Array(stringArray.length);
     for (let i = 0; i < stringArray.length; i++) {
-      translationMap.set(i, newStringTable.indexForString(stringArray[i]));
+      oldStringToNewStringPlusOne[i] =
+        newStringTable.indexForString(stringArray[i]) + 1;
     }
-    return translationMap;
+    return oldStringToNewStringPlusOne;
   });
 
   return { stringArray: newStringArray, translationMaps };
@@ -537,23 +527,17 @@ function mergeSources(
   const mapOfInsertedSources = new Map<string, IndexIntoSourceTable>();
 
   const translationMaps = sourcesPerProfile.map((sources, profileIndex) => {
-    const translationMap: TranslationMapForSources = new Map();
     if (!sources) {
-      return translationMap;
+      return new Int32Array(0);
     }
 
-    const stringTranslationMap = translationMapsForStrings[profileIndex];
+    const oldSourceToNewSourcePlusOne = new Int32Array(sources.length);
+    const oldStringToNewStringPlusOne = translationMapsForStrings[profileIndex];
 
     for (let i = 0; i < sources.length; i++) {
       const uuid = sources.uuid[i];
       const originalUrlIndex = sources.filename[i];
-      const newUrlIndex = stringTranslationMap.get(originalUrlIndex);
-
-      if (newUrlIndex === undefined) {
-        throw new Error(
-          `String index ${originalUrlIndex} not found in translation map`
-        );
-      }
+      const newUrlIndex = oldStringToNewStringPlusOne[originalUrlIndex] - 1;
 
       const sourceKey = uuid ?? `null-uuid-${newUrlIndex}`;
       let insertedSourceIndex = mapOfInsertedSources.get(sourceKey);
@@ -566,10 +550,10 @@ function mergeSources(
         mapOfInsertedSources.set(sourceKey, insertedSourceIndex);
       }
 
-      translationMap.set(i, insertedSourceIndex);
+      oldSourceToNewSourcePlusOne[i] = insertedSourceIndex + 1;
     }
 
-    return translationMap;
+    return oldSourceToNewSourcePlusOne;
   });
 
   return {
@@ -580,25 +564,16 @@ function mergeSources(
 
 function adjustStringIndexes(
   stringIndexes: ReadonlyArray<IndexIntoStringTable>,
-  translationMap: TranslationMapForStrings
+  oldStringToNewStringPlusOne: TranslationMapForStrings
 ): Array<IndexIntoStringTable> {
-  return stringIndexes.map((stringIndex) => {
-    const newStringIndex = translationMap.get(stringIndex);
-    if (newStringIndex === undefined) {
-      throw new Error(
-        stripIndent`
-          String with index ${stringIndex} hasn't been found in the translation map.
-          This shouldn't happen and indicates a bug in the profiler's code.
-        `
-      );
-    }
-    return newStringIndex;
-  });
+  return stringIndexes.map(
+    (stringIndex) => oldStringToNewStringPlusOne[stringIndex] - 1
+  );
 }
 
 function adjustMarkerDataStringIndexes(
   dataCol: ReadonlyArray<MarkerPayload | null>,
-  translationMap: TranslationMapForStrings,
+  oldStringToNewStringPlusOne: TranslationMapForStrings,
   stringIndexMarkerFieldsByDataType: Map<string, string[]>
 ): Array<MarkerPayload | null> {
   return dataCol.map((data) => {
@@ -617,18 +592,9 @@ function adjustMarkerDataStringIndexes(
     for (const fieldKey of stringIndexMarkerFields) {
       const stringIndex = (data as any)[fieldKey];
       if (typeof stringIndex === 'number') {
-        const newStringIndex = translationMap.get(stringIndex);
-        if (newStringIndex === undefined) {
-          throw new Error(
-            stripIndent`
-              String with index ${stringIndex} hasn't been found in the translation map.
-              This shouldn't happen and indicates a bug in the profiler's code.
-            `
-          );
-        }
         newData = {
           ...newData,
-          [fieldKey]: newStringIndex,
+          [fieldKey]: oldStringToNewStringPlusOne[stringIndex] - 1,
         } as any;
       }
     }
@@ -651,23 +617,23 @@ function mergeLibs(libsPerProfile: Lib[][]): {
   const newLibTable: Lib[] = [];
 
   for (const libs of libsPerProfile) {
-    const translationMap: TranslationMapForLibs = new Map();
+    const oldLibToNewLibPlusOne = new Int32Array(libs.length);
 
     libs.forEach((lib, i) => {
       const insertedLibKey = [lib.name, lib.debugName].join('#');
       const insertedLibIndex = mapOfInsertedLibs.get(insertedLibKey);
       if (insertedLibIndex !== undefined) {
-        translationMap.set(i, insertedLibIndex);
+        oldLibToNewLibPlusOne[i] = insertedLibIndex + 1;
         return;
       }
 
-      translationMap.set(i, newLibTable.length);
+      oldLibToNewLibPlusOne[i] = newLibTable.length + 1;
       mapOfInsertedLibs.set(insertedLibKey, newLibTable.length);
 
       newLibTable.push(lib);
     });
 
-    translationMaps.push(translationMap);
+    translationMaps.push(oldLibToNewLibPlusOne);
   }
 
   return { libs: newLibTable, translationMaps };
@@ -675,186 +641,92 @@ function mergeLibs(libsPerProfile: Lib[][]): {
 
 function _mapLib(
   libIndex: IndexIntoLibs,
-  translationMap: TranslationMapForLibs
+  oldLibToNewLibPlusOne: TranslationMapForLibs
 ): IndexIntoLibs {
-  const newLibIndex = translationMap.get(libIndex);
-  if (newLibIndex === undefined) {
-    throw new Error(
-      stripIndent`
-        Lib with index ${libIndex} hasn't been found in the translation map.
-        This shouldn't happen and indicates a bug in the profiler's code.
-      `
-    );
-  }
-  return newLibIndex;
+  return oldLibToNewLibPlusOne[libIndex] - 1;
 }
 
 function _mapNullableLib(
   libIndex: IndexIntoLibs | null,
-  translationMap: TranslationMapForLibs
+  oldLibToNewLibPlusOne: TranslationMapForLibs
 ): IndexIntoLibs | null {
-  return libIndex !== null ? _mapLib(libIndex, translationMap) : null;
+  return libIndex !== null ? oldLibToNewLibPlusOne[libIndex] - 1 : null;
 }
 
 function _mapString(
   stringIndex: IndexIntoStringTable,
-  translationMap: TranslationMapForStrings
+  oldStringToNewStringPlusOne: TranslationMapForStrings
 ): IndexIntoStringTable {
-  const newStringIndex = translationMap.get(stringIndex);
-  if (newStringIndex === undefined) {
-    throw new Error(
-      stripIndent`
-        String with index ${stringIndex} hasn't been found in the translation map.
-        This shouldn't happen and indicates a bug in the profiler's code.
-      `
-    );
-  }
-  return newStringIndex;
+  return oldStringToNewStringPlusOne[stringIndex] - 1;
 }
 
 function _mapNullableString(
   stringIndex: IndexIntoStringTable | null,
-  translationMap: TranslationMapForStrings
+  oldStringToNewStringPlusOne: TranslationMapForStrings
 ): IndexIntoStringTable | null {
-  return stringIndex !== null ? _mapString(stringIndex, translationMap) : null;
+  return stringIndex !== null
+    ? oldStringToNewStringPlusOne[stringIndex] - 1
+    : null;
 }
 
 function _mapNullableSource(
   sourceIndex: IndexIntoSourceTable | null,
-  translationMap: TranslationMapForSources
+  oldSourceToNewSourcePlusOne: TranslationMapForSources
 ): IndexIntoStringTable | null {
-  return sourceIndex !== null ? _mapSource(sourceIndex, translationMap) : null;
-}
-
-function _mapSource(
-  sourceIndex: IndexIntoSourceTable,
-  translationMap: TranslationMapForStrings
-): IndexIntoStringTable {
-  const newSourceIndex = translationMap.get(sourceIndex);
-  if (newSourceIndex === undefined) {
-    throw new Error(
-      stripIndent`
-        Source with index ${sourceIndex} hasn't been found in the translation map.
-        This shouldn't happen and indicates a bug in the profiler's code.
-      `
-    );
-  }
-  return newSourceIndex;
+  return sourceIndex !== null
+    ? oldSourceToNewSourcePlusOne[sourceIndex] - 1
+    : null;
 }
 
 function _mapFuncResource(
   resourceIndex: IndexIntoResourceTable | -1,
-  translationMap: TranslationMapForResources
+  oldResourceToNewResourcePlusOne: TranslationMapForResources
 ): IndexIntoResourceTable | -1 {
   if (resourceIndex === -1) {
     return -1;
   }
-
-  const newResourceIndex = translationMap.get(resourceIndex);
-  if (newResourceIndex === undefined) {
-    throw new Error(
-      stripIndent`
-        Resource with index ${resourceIndex} hasn't been found in the translation map.
-        This shouldn't happen and indicates a bug in the profiler's code.
-      `
-    );
-  }
-  return newResourceIndex;
+  return oldResourceToNewResourcePlusOne[resourceIndex] - 1;
 }
 
 function _mapFunc(
   funcIndex: IndexIntoFuncTable,
-  translationMap: TranslationMapForFuncs
+  oldFuncToNewFuncPlusOne: TranslationMapForFuncs
 ): IndexIntoFuncTable {
-  const newFuncIndex = translationMap.get(funcIndex);
-  if (newFuncIndex === undefined) {
-    throw new Error(
-      stripIndent`
-        Func with index ${funcIndex} hasn't been found in the translation map.
-        This shouldn't happen and indicates a bug in the profiler's code.
-      `
-    );
-  }
-  return newFuncIndex;
+  return oldFuncToNewFuncPlusOne[funcIndex] - 1;
 }
 
 function _mapFrame(
   frameIndex: IndexIntoFrameTable,
-  translationMap: TranslationMapForFrames
+  oldFrameToNewFramePlusOne: TranslationMapForFrames
 ): IndexIntoFrameTable {
-  const newFrameIndex = translationMap.get(frameIndex);
-  if (newFrameIndex === undefined) {
-    throw new Error(
-      stripIndent`
-        Func with index ${frameIndex} hasn't been found in the translation map.
-        This shouldn't happen and indicates a bug in the profiler's code.
-      `
-    );
-  }
-  return newFrameIndex;
+  return oldFrameToNewFramePlusOne[frameIndex] - 1;
 }
 
 function _mapNullableNativeSymbol(
   nativeSymbolIndex: IndexIntoLibs | null,
-  translationMap: TranslationMapForNativeSymbols
+  oldNativeSymbolToNewNativeSymbolPlusOne: TranslationMapForNativeSymbols
 ): IndexIntoLibs | null {
   if (nativeSymbolIndex === null) {
     return null;
   }
-
-  const newNativeSymbolIndex = translationMap.get(nativeSymbolIndex);
-  if (newNativeSymbolIndex === undefined) {
-    throw new Error(
-      stripIndent`
-        Native symbol with index ${nativeSymbolIndex} hasn't been found in the translation map.
-        This shouldn't happen and indicates a bug in the profiler's code.
-      `
-    );
-  }
-  return newNativeSymbolIndex;
+  return oldNativeSymbolToNewNativeSymbolPlusOne[nativeSymbolIndex] - 1;
 }
 
 function _mapNullableCategory(
   categoryIndex: IndexIntoCategoryList | null,
-  translationMap: TranslationMapForCategories
+  oldCategoryToNewCategoryPlusOne: TranslationMapForCategories
 ): IndexIntoCategoryList | null {
   if (categoryIndex === null) {
     return null;
   }
-
-  const newCategoryIndex = translationMap.get(categoryIndex);
-  if (newCategoryIndex === undefined) {
-    throw new Error(
-      stripIndent`
-        Category with index ${categoryIndex} hasn't been found in the translation map.
-        This shouldn't happen and indicates a bug in the profiler's code.
-      `
-    );
-  }
-  return newCategoryIndex;
-}
-
-function _mapStack(
-  stackIndex: IndexIntoStackTable,
-  translationMap: TranslationMapForStacks
-): IndexIntoStackTable {
-  const newStackIndex = translationMap.get(stackIndex);
-  if (newStackIndex === undefined) {
-    throw new Error(
-      stripIndent`
-        Stack with index ${stackIndex} hasn't been found in the translation map.
-        This shouldn't happen and indicates a bug in the profiler's code.
-      `
-    );
-  }
-  return newStackIndex;
+  return oldCategoryToNewCategoryPlusOne[categoryIndex] - 1;
 }
 
 function _mapNullableStack(
   stackIndex: IndexIntoStackTable | null,
-  translationMap: TranslationMapForStacks
+  oldStackToNewStackPlusOne: TranslationMapForStacks
 ): IndexIntoStackTable | null {
-  return stackIndex !== null ? _mapStack(stackIndex, translationMap) : null;
+  return stackIndex !== null ? oldStackToNewStackPlusOne[stackIndex] - 1 : null;
 }
 
 /**
@@ -875,23 +747,25 @@ function mergeResourceTables(
   const newResourceTable = getEmptyResourceTable();
 
   profiles.forEach((profile, profileIndex) => {
-    const translationMapForLibs = translationMapsForLibs[profileIndex];
-    const translationMapForStrings = translationMapsForStrings[profileIndex];
-    const translationMap: TranslationMapForResources = new Map();
+    const oldLibToNewLibPlusOne = translationMapsForLibs[profileIndex];
+    const oldStringToNewStringPlusOne = translationMapsForStrings[profileIndex];
     const { resourceTable } = profile.shared;
+    const oldResourceToNewResourcePlusOne = new Int32Array(
+      resourceTable.length
+    );
 
     for (let i = 0; i < resourceTable.length; i++) {
       const libIndex = _mapNullableLib(
         resourceTable.lib[i],
-        translationMapForLibs
+        oldLibToNewLibPlusOne
       );
       const nameIndex = _mapString(
         resourceTable.name[i],
-        translationMapForStrings
+        oldStringToNewStringPlusOne
       );
       const hostIndex = _mapNullableString(
         resourceTable.host[i],
-        translationMapForStrings
+        oldStringToNewStringPlusOne
       );
       const type = resourceTable.type[i];
 
@@ -899,11 +773,11 @@ function mergeResourceTables(
       const resourceKey = [nameIndex, type].join('#');
       const insertedResourceIndex = mapOfInsertedResources.get(resourceKey);
       if (insertedResourceIndex !== undefined) {
-        translationMap.set(i, insertedResourceIndex);
+        oldResourceToNewResourcePlusOne[i] = insertedResourceIndex + 1;
         continue;
       }
 
-      translationMap.set(i, newResourceTable.length);
+      oldResourceToNewResourcePlusOne[i] = newResourceTable.length + 1;
       mapOfInsertedResources.set(resourceKey, newResourceTable.length);
 
       newResourceTable.lib.push(libIndex);
@@ -913,7 +787,7 @@ function mergeResourceTables(
       newResourceTable.length++;
     }
 
-    translationMaps.push(translationMap);
+    translationMaps.push(oldResourceToNewResourcePlusOne);
   });
 
   return { resourceTable: newResourceTable, translationMaps };
@@ -936,19 +810,21 @@ function mergeNativeSymbolTables(
   const newNativeSymbols = getEmptyNativeSymbolTable();
 
   profiles.forEach((profile, profileIndex) => {
-    const translationMapForLibs = translationMapsForLibs[profileIndex];
-    const translationMapForStrings = translationMapsForStrings[profileIndex];
-    const translationMap: TranslationMapForNativeSymbols = new Map();
+    const oldLibToNewLibPlusOne = translationMapsForLibs[profileIndex];
+    const oldStringToNewStringPlusOne = translationMapsForStrings[profileIndex];
     const { nativeSymbols } = profile.shared;
+    const oldNativeSymbolToNewNativeSymbolPlusOne = new Int32Array(
+      nativeSymbols.length
+    );
 
     for (let i = 0; i < nativeSymbols.length; i++) {
       const libIndex = _mapLib(
         nativeSymbols.libIndex[i],
-        translationMapForLibs
+        oldLibToNewLibPlusOne
       );
       const nameIndex = _mapString(
         nativeSymbols.name[i],
-        translationMapForStrings
+        oldStringToNewStringPlusOne
       );
       const address = nativeSymbols.address[i];
       const functionSize = nativeSymbols.functionSize[i];
@@ -958,11 +834,12 @@ function mergeNativeSymbolTables(
       const insertedNativeSymbolIndex =
         mapOfInsertedNativeSymbols.get(nativeSymbolKey);
       if (insertedNativeSymbolIndex !== undefined) {
-        translationMap.set(i, insertedNativeSymbolIndex);
+        oldNativeSymbolToNewNativeSymbolPlusOne[i] =
+          insertedNativeSymbolIndex + 1;
         continue;
       }
 
-      translationMap.set(i, newNativeSymbols.length);
+      oldNativeSymbolToNewNativeSymbolPlusOne[i] = newNativeSymbols.length + 1;
       mapOfInsertedNativeSymbols.set(nativeSymbolKey, newNativeSymbols.length);
 
       newNativeSymbols.libIndex.push(libIndex);
@@ -973,7 +850,7 @@ function mergeNativeSymbolTables(
       newNativeSymbols.length++;
     }
 
-    translationMaps.push(translationMap);
+    translationMaps.push(oldNativeSymbolToNewNativeSymbolPlusOne);
   });
 
   return { nativeSymbols: newNativeSymbols, translationMaps };
@@ -996,22 +873,25 @@ function mergeFuncTables(
 
   profiles.forEach((profile, profileIndex) => {
     const { funcTable } = profile.shared;
-    const translationMap: TranslationMapForFuncs = new Map();
-    const translationMapForResources =
+    const oldResourceToNewResourcePlusOne =
       translationMapsForResources[profileIndex];
-    const translationMapForStrings = translationMapsForStrings[profileIndex];
-    const translationMapForSources = translationMapsForSources[profileIndex];
+    const oldStringToNewStringPlusOne = translationMapsForStrings[profileIndex];
+    const oldSourceToNewSourcePlusOne = translationMapsForSources[profileIndex];
+    const oldFuncToNewFuncPlusOne = new Int32Array(funcTable.length);
 
     for (let i = 0; i < funcTable.length; i++) {
       const sourceIndex = _mapNullableSource(
         funcTable.source[i],
-        translationMapForSources
+        oldSourceToNewSourcePlusOne
       );
       const resourceIndex = _mapFuncResource(
         funcTable.resource[i],
-        translationMapForResources
+        oldResourceToNewResourcePlusOne
       );
-      const nameIndex = _mapString(funcTable.name[i], translationMapForStrings);
+      const nameIndex = _mapString(
+        funcTable.name[i],
+        oldStringToNewStringPlusOne
+      );
       const lineNumber = funcTable.lineNumber[i];
 
       // Entries in this table can be either:
@@ -1025,11 +905,11 @@ function mergeFuncTables(
       const funcKey = [nameIndex, resourceIndex, lineNumber].join('#');
       const insertedFuncIndex = mapOfInsertedFuncs.get(funcKey);
       if (insertedFuncIndex !== undefined) {
-        translationMap.set(i, insertedFuncIndex);
+        oldFuncToNewFuncPlusOne[i] = insertedFuncIndex + 1;
         continue;
       }
       mapOfInsertedFuncs.set(funcKey, newFuncTable.length);
-      translationMap.set(i, newFuncTable.length);
+      oldFuncToNewFuncPlusOne[i] = newFuncTable.length + 1;
 
       newFuncTable.isJS.push(funcTable.isJS[i]);
       newFuncTable.name.push(nameIndex);
@@ -1042,7 +922,7 @@ function mergeFuncTables(
       newFuncTable.length++;
     }
 
-    translationMaps.push(translationMap);
+    translationMaps.push(oldFuncToNewFuncPlusOne);
   });
 
   return { funcTable: newFuncTable, translationMaps };
@@ -1066,21 +946,22 @@ function mergeFrameTables(
 
   profiles.forEach((profile, profileIndex) => {
     const { frameTable } = profile.shared;
-    const translationMap: TranslationMapForFrames = new Map();
-    const translationMapForFuncs = translationMapsForFuncs[profileIndex];
-    const translationMapForNativeSymbols =
+    const oldFuncToNewFuncPlusOne = translationMapsForFuncs[profileIndex];
+    const oldNativeSymbolToNewNativeSymbolPlusOne =
       translationMapsForNativeSymbols[profileIndex];
-    const translationMapForCategories =
+    const oldCategoryToNewCategoryPlusOne =
       translationMapsForCategories[profileIndex];
+    const oldFrameToNewFramePlusOne = new Int32Array(frameTable.length);
+
     for (let i = 0; i < frameTable.length; i++) {
-      const func = _mapFunc(frameTable.func[i], translationMapForFuncs);
+      const func = _mapFunc(frameTable.func[i], oldFuncToNewFuncPlusOne);
       const nativeSymbol = _mapNullableNativeSymbol(
         frameTable.nativeSymbol[i],
-        translationMapForNativeSymbols
+        oldNativeSymbolToNewNativeSymbolPlusOne
       );
       const category = _mapNullableCategory(
         frameTable.category[i],
-        translationMapForCategories
+        oldCategoryToNewCategoryPlusOne
       );
       // TODO issue #2151: Also adjust subcategories.
       const subcategory = frameTable.subcategory[i];
@@ -1095,11 +976,11 @@ function mergeFrameTables(
       newFrameTable.line.push(frameTable.line[i]);
       newFrameTable.column.push(frameTable.column[i]);
 
-      translationMap.set(i, newFrameTable.length);
+      oldFrameToNewFramePlusOne[i] = newFrameTable.length + 1;
       newFrameTable.length++;
     }
 
-    translationMaps.push(translationMap);
+    translationMaps.push(oldFrameToNewFramePlusOne);
   });
 
   return { frameTable: newFrameTable, translationMaps };
@@ -1121,31 +1002,26 @@ function mergeStackTables(
 
   profiles.forEach((profile, profileIndex) => {
     const { stackTable } = profile.shared;
-    const translationMap = new Map();
-    const translationMapForFrames = translationMapsForFrames[profileIndex];
+    const oldFrameToNewFramePlusOne = translationMapsForFrames[profileIndex];
+    const oldStackToNewStackPlusOne = new Int32Array(stackTable.length);
 
     for (let i = 0; i < stackTable.length; i++) {
       const frameIndex = _mapFrame(
         stackTable.frame[i],
-        translationMapForFrames
+        oldFrameToNewFramePlusOne
       );
       const prefix = stackTable.prefix[i];
-      const newPrefix = prefix === null ? null : translationMap.get(prefix);
-      if (newPrefix === undefined) {
-        throw new Error(stripIndent`
-          We couldn't find the prefix of stack ${i} in the translation map.
-          This is a programming error.
-        `);
-      }
+      const newPrefix =
+        prefix === null ? null : oldStackToNewStackPlusOne[prefix] - 1;
 
       newStackTable.frame.push(frameIndex);
       newStackTable.prefix.push(newPrefix);
 
-      translationMap.set(i, newStackTable.length);
+      oldStackToNewStackPlusOne[i] = newStackTable.length + 1;
       newStackTable.length++;
     }
 
-    translationMaps.push(translationMap);
+    translationMaps.push(oldStackToNewStackPlusOne);
   });
 
   return { stackTable: newStackTable, translationMaps };
