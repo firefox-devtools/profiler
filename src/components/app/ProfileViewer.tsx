@@ -103,7 +103,6 @@ class ProfileViewerImpl extends PureComponent<Props> {
                 } as React.CSSProperties)
           }
         >
-          <div id="screenshot-hover"></div>
           <div className="profileViewerTopBar">
             {hasZipFile ? (
               <button
@@ -153,6 +152,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
               {isBottomBoxOpen ? <BottomBox /> : null}
             </SplitterLayout>
           </SplitterLayout>
+          <div id="screenshot-hover"></div>
           <SymbolicationStatusOverlay />
           <BeforeUnloadManager />
           <DebugWarning />

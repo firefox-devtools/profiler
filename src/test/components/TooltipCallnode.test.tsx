@@ -117,10 +117,12 @@ describe('TooltipCallNode', function () {
 
       const { frameTable } = profile.threads[threadIndex];
 
+      const innerWindowID =
+        profile.pages[profile.pages.length - 1].innerWindowID;
       for (let i = 1; i < frameTable.length; i++) {
-        frameTable.innerWindowID[i] =
-          profile.pages[profile.pages.length - 1].innerWindowID;
+        frameTable.innerWindowID[i] = innerWindowID;
       }
+      profile.threads[threadIndex].usedInnerWindowIDs = [innerWindowID];
 
       const callNodePath = [A, Bjs, Cjs];
       const { dispatch, renderTooltip } = setup(profile);

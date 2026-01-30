@@ -1,7 +1,7 @@
 .panelSearchField {
   /* so that the introduction is on top of other panels, _but_ still keep it
    * below the input field (see below) */
-  z-index: 1;
+  z-index: var(--z-panel-search);
   padding: 0 4px;
 }
 
@@ -24,7 +24,10 @@
   /* This is grey-90 with 10% opacity, according to the photon design document */
   --internal-shadow-color: rgb(12 12 13 / 0.1);
 
-  z-index: -1; /* it needs to be below the input field */
+  z-index: var(
+    --z-panel-search-introduction
+  ); /* it needs to be below the input field */
+
   padding: 0 4px;
   background-color: var(--base-background-color);
   box-shadow: 0 1px 4px var(--internal-shadow-color);
