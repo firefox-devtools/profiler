@@ -1255,8 +1255,6 @@ describe('sanitizePII', function () {
 
     // The source table should be compacted to only contain sources referenced
     // by remaining threads
-    // TODO: disabled until as long as we don't do compacting for the funcTable yet
-    return;
     expect(sanitizedProfile.shared.sources.length).toBeLessThan(
       originalSourcesLength
     );

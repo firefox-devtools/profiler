@@ -37,11 +37,12 @@ import type {
   RawCounter,
   ProfilerOverhead,
   IndexIntoResourceTable,
+  ProfileIndexTranslationMaps,
 } from 'firefox-profiler/types';
 
 export type SanitizeProfileResult = {
   readonly profile: Profile;
-  readonly oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null;
+  readonly translationMaps: ProfileIndexTranslationMaps | null;
   readonly committedRanges: StartEndRange[] | null;
   readonly isSanitized: boolean;
 };
@@ -65,7 +66,7 @@ export function sanitizePII(
     return {
       profile,
       isSanitized: false,
-      oldThreadIndexToNew: null,
+      translationMaps: null,
       committedRanges: null,
     };
   }
@@ -370,18 +371,27 @@ export function sanitizePII(
     newProfile.meta.profilingEndTime = end;
   }
 
+  const compactedProfileWithTranslationMaps =
+    computeCompactedProfile(newProfile);
+
   return {
-    profile: computeCompactedProfile(newProfile).profile,
+    profile: compactedProfileWithTranslationMaps.profile,
     // Note that the profile was sanitized.
     isSanitized: true,
     // Provide a new empty committed range if needed.
     committedRanges: PIIToBeRemoved.shouldFilterToCommittedRange ? [] : null,
-    // Only return the oldThreadIndexToNew if some tracks are being removed. This
-    // allows the UrlState to be dynamically updated.
-    oldThreadIndexToNew:
-      oldThreadIndexToNew.size === profile.threads.length && !removingCounters
-        ? null
-        : oldThreadIndexToNew,
+    translationMaps: {
+      // Only return the oldThreadIndexToNew if some tracks are being removed. This
+      // allows the UrlState to be dynamically updated.
+      oldThreadIndexToNew:
+        oldThreadIndexToNew.size === profile.threads.length && !removingCounters
+          ? null
+          : oldThreadIndexToNew,
+      oldFuncCount: profile.shared.funcTable.length,
+      newFuncCount:
+        compactedProfileWithTranslationMaps.profile.shared.funcTable.length,
+      ...compactedProfileWithTranslationMaps.translationMaps,
+    },
   };
 }
 

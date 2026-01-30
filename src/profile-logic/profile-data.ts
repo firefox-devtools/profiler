@@ -3554,6 +3554,30 @@ export function getThreadsKey(threadIndexes: Set<ThreadIndex>): ThreadsKey {
 }
 
 /**
+ * Apply a Map<ThreadIndex, ThreadIndex> to a threads key.
+ *
+ * This is used after profile sanitization when a thread was removed from a profile,
+ * to update state such as the applied transforms of each threadsKey.
+ */
+export function translateThreadsKey(
+  threadsKey: ThreadsKey,
+  oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex>
+): ThreadsKey | null {
+  const threadIndexes = new Set(('' + threadsKey).split(',').map((n) => +n));
+  const newThreadIndexes = new Set<ThreadIndex>();
+  for (const threadIndex of threadIndexes) {
+    const newThreadIndex = oldThreadIndexToNew.get(threadIndex);
+    if (newThreadIndex !== undefined) {
+      newThreadIndexes.add(newThreadIndex);
+    }
+  }
+  if (newThreadIndexes.size === 0) {
+    return null;
+  }
+  return getThreadsKey(newThreadIndexes);
+}
+
+/**
  * Checks if threadIndexesSet contains all the threads in the threadsKey.
  */
 export function hasThreadKeys(

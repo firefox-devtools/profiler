@@ -24,6 +24,7 @@ import type {
   MarkerIndex,
   ThreadsKey,
   NativeSymbolInfo,
+  ProfileIndexTranslationMaps,
 } from './profile-derived';
 import type { FuncToFuncsMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
@@ -547,7 +548,7 @@ type UrlStateAction =
       readonly type: 'SANITIZED_PROFILE_PUBLISHED';
       readonly hash: string;
       readonly committedRanges: StartEndRange[] | null;
-      readonly oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null;
+      readonly translationMaps: ProfileIndexTranslationMaps | null;
       readonly profileName: string;
       readonly prePublishedState: State | null;
     }
