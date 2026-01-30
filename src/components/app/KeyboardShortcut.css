@@ -8,6 +8,7 @@
   --internal-shadow-color: rgb(0 0 0 / 0.4);
 
   position: absolute;
+  z-index: 11; /* should be highest possible value */
   top: 0;
   left: 0;
   display: none;

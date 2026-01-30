@@ -13,7 +13,8 @@
   --internal-selected-disabled-background-color: var(--blue-50-a30);
   --internal-highlight-foreground-color: var(--grey-70);
 
-  z-index: 4; /* needs to be on a higher level than .overflowEdgeIndicatorEdge */
+  /* needs to be on a higher level than .overflowEdgeIndicatorEdge and .timelineTrackScreenshotHover */
+  z-index: 5;
   display: none;
   min-width: 160px;
   max-width: 600px;
