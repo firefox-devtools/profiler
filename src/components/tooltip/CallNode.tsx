@@ -432,29 +432,25 @@ export class TooltipCallNode extends React.PureComponent<Props> {
 
     let argumentsElement = null;
     if (argumentValues) {
-      if (argumentValues.length === 0) {
-        argumentsElement = (
-          <div className="tooltipArguments">No arguments.</div>
-        );
-      } else {
-        const argumentValuesEl = [];
-        for (const previewObject of argumentValues) {
-          argumentValuesEl.push(
-            Rep({
-              object: previewObject,
-              mode: MODE.LONG,
-            })
-          );
-        }
-        argumentsElement = [
-          <div className="tooltipLabel" key="arguments">
-            Arguments:
-          </div>,
+      argumentsElement = [
+        <div className="tooltipLabel" key="arguments">
+          Arguments:
+        </div>,
+        argumentValues.length === 0 ? (
+          <div key="argumentsVal">—</div>
+        ) : (
           <div className="tooltipArguments" key="argumentsVal">
-            {argumentValuesEl}
-          </div>,
-        ];
-      }
+            {argumentValues.map((previewObject, index) => (
+              <React.Fragment key={`arg-${index}`}>
+                {Rep({
+                  object: previewObject,
+                  mode: MODE.LONG,
+                })}
+              </React.Fragment>
+            ))}
+          </div>
+        ),
+      ];
     }
 
     // Finding current frame and parent frame URL(if there is).
