@@ -34,9 +34,9 @@ import type {
   ThunkAction,
   CheckedSharingOptions,
   StartEndRange,
-  ThreadIndex,
   State,
   Profile,
+  ProfileIndexTranslationMaps,
 } from 'firefox-profiler/types';
 import { compress } from 'firefox-profiler/utils/gz';
 import { serializeProfile } from 'firefox-profiler/profile-logic/process-profile';
@@ -160,14 +160,14 @@ async function persistJustUploadedProfileInformationToDb(
   if (removeProfileInformation) {
     // In case you wonder, committedRanges is either an empty array (if the
     // range was sanitized) or `null` (otherwise).
-    const { committedRanges, oldThreadIndexToNew } = sanitizedInformation;
+    const { committedRanges, translationMaps } = sanitizedInformation;
 
     // Predicts the URL we'll have after local sanitization.
     predictedUrl = urlPredictor(
       profileSanitized(
         profileToken,
         committedRanges,
-        oldThreadIndexToNew,
+        translationMaps,
         profileName,
         null /* prepublished State */
       )
@@ -411,7 +411,7 @@ export function attemptToPublish(
       const removeProfileInformation =
         getRemoveProfileInformation(prePublishedState);
       if (removeProfileInformation) {
-        const { committedRanges, oldThreadIndexToNew, profile } =
+        const { committedRanges, translationMaps, profile } =
           sanitizedInformation;
         // Hide the old UI gracefully.
         await dispatch(hideStaleProfile());
@@ -421,7 +421,7 @@ export function attemptToPublish(
           profileSanitized(
             hash,
             committedRanges,
-            oldThreadIndexToNew,
+            translationMaps,
             profileName,
             prePublishedState
           )
@@ -508,7 +508,7 @@ export function resetUploadState(): Action {
 export function profileSanitized(
   hash: string,
   committedRanges: StartEndRange[] | null,
-  oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
+  translationMaps: ProfileIndexTranslationMaps | null,
   profileName: string,
   prePublishedState: State | null
 ): Action {
@@ -516,7 +516,7 @@ export function profileSanitized(
     type: 'SANITIZED_PROFILE_PUBLISHED',
     hash,
     committedRanges,
-    oldThreadIndexToNew,
+    translationMaps,
     profileName,
     prePublishedState,
   };

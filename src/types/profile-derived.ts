@@ -797,3 +797,21 @@ export type FaviconData = {
   readonly data: ArrayBuffer;
   readonly mimeType: string;
 };
+
+/**
+ * Information about how the indexes in a profile have changed, for example
+ * after profile compaction.
+ */
+export type ProfileIndexTranslationMaps = {
+  oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null;
+  oldFuncCount: number;
+  newFuncCount: number;
+  oldStackToNewStackPlusOne: Int32Array;
+  oldFrameToNewFramePlusOne: Int32Array;
+  oldFuncToNewFuncPlusOne: Int32Array;
+  oldResourceToNewResourcePlusOne: Int32Array;
+  oldNativeSymbolToNewNativeSymbolPlusOne: Int32Array;
+  oldSourceToNewSourcePlusOne: Int32Array;
+  oldStringToNewStringPlusOne: Int32Array;
+  oldLibToNewLibPlusOne: Int32Array;
+};
