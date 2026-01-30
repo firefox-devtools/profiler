@@ -67,6 +67,7 @@ import type {
   MarkerIndex,
   Milliseconds,
   Tid,
+  RawProfileSharedData,
 } from 'firefox-profiler/types';
 
 /**
@@ -134,36 +135,19 @@ export function mergeProfilesForDiffing(
     );
   }
 
-  // First let's merge categories. We'll use the resulting maps when
-  // handling the thread data later.
+  // First, let's merge profile.meta.categories, profile.libs, and profile.shared.
   const {
     categories: newCategories,
-    translationMaps: translationMapsForCategories,
-  } = mergeCategories(profiles.map((profile) => profile.meta.categories));
+    libs: newLibs,
+    shared: newShared,
+    translationMapsForCategories,
+    translationMapsForLibs,
+    translationMapsForStrings,
+    translationMapsForSources,
+  } = mergeSharedData(profiles);
   resultProfile.meta.categories = newCategories;
-
-  const {
-    stringArray: newStringArray,
-    translationMaps: translationMapsForStrings,
-  } = mergeStringArrays(profiles.map((profile) => profile.shared.stringArray));
-
-  // Then merge sources.
-  const { sources: newSources, translationMaps: translationMapsForSources } =
-    mergeSources(
-      profiles.map((profile) => profile.shared.sources ?? null),
-      translationMapsForStrings
-    );
-
-  // Then merge libs.
-  const { libs: newLibs, translationMaps: translationMapsForLibs } = mergeLibs(
-    profiles.map((profile) => profile.libs)
-  );
   resultProfile.libs = newLibs;
-
-  resultProfile.shared = {
-    stringArray: newStringArray,
-    sources: newSources,
-  };
+  resultProfile.shared = newShared;
 
   // Then we loop over all profiles and do the necessary changes according
   // to the states we computed earlier.
@@ -473,6 +457,50 @@ function mergeCategories(categoriesPerProfile: Array<CategoryList | void>): {
   });
 
   return { categories: newCategories, translationMaps };
+}
+
+export function mergeSharedData(profiles: Profile[]): {
+  categories: CategoryList;
+  libs: Lib[];
+  shared: RawProfileSharedData;
+  translationMapsForCategories: TranslationMapForCategories[];
+  translationMapsForLibs: TranslationMapForLibs[];
+  translationMapsForStrings: TranslationMapForStrings[];
+  translationMapsForSources: TranslationMapForSources[];
+} {
+  const {
+    categories: newCategories,
+    translationMaps: translationMapsForCategories,
+  } = mergeCategories(profiles.map((profile) => profile.meta.categories));
+
+  const {
+    stringArray: newStringArray,
+    translationMaps: translationMapsForStrings,
+  } = mergeStringArrays(profiles.map((profile) => profile.shared.stringArray));
+
+  const { libs: newLibs, translationMaps: translationMapsForLibs } = mergeLibs(
+    profiles.map((profile) => profile.libs)
+  );
+
+  const { sources: newSources, translationMaps: translationMapsForSources } =
+    mergeSources(
+      profiles.map((profile) => profile.shared.sources ?? null),
+      translationMapsForStrings
+    );
+  const newShared: RawProfileSharedData = {
+    stringArray: newStringArray,
+    sources: newSources,
+  };
+
+  return {
+    categories: newCategories,
+    libs: newLibs,
+    shared: newShared,
+    translationMapsForCategories,
+    translationMapsForLibs,
+    translationMapsForStrings,
+    translationMapsForSources,
+  };
 }
 
 function mergeStringArrays(stringArraysPerProfile: Array<string[]>): {
