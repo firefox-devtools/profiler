@@ -4,7 +4,7 @@
 
 .arrowPanelAnchor {
   position: absolute;
-  z-index: 5;
+  z-index: var(--z-arrow-panel);
   top: 75%;
   left: 50%;
 }

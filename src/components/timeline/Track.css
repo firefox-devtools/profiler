@@ -171,9 +171,7 @@
  */
 .timelineTrackLocalTracks::before {
   position: absolute;
-
-  /* Place it above the Reorderable component, which has a z-index of 2. */
-  z-index: 3;
+  z-index: var(--z-timeline-track-local);
   left: -15px;
   width: calc(100% + 15px);
   height: 100%;
