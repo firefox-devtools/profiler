@@ -90,6 +90,8 @@ CallNodeContextMenu--transform-focus-self-title =
     specimens que contribue al tempore del mesme function. Le specimens
     presente in le functiones appellate es ignorate e le arbore del appellos
     es re-organisate con radice la function analysate.
+CallNodeContextMenu--transform-focus-self = Foco solo proprie
+    .title = { CallNodeContextMenu--transform-focus-self-title }
 
 ##
 
@@ -1031,6 +1033,12 @@ TransformNavigator--focus-subtree = Foco sur nodo: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Foco sur: { $item }
+# "Focus self" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-on-function-self
+# Also see the translation note above CallNodeContextMenu--transform-focus-self.
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-self = Foco proprie: { $item }
 # "Focus category" transform. The word "Focus" has the meaning of an adjective here.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
 # Variables:
