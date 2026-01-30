@@ -6,6 +6,12 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 59
+
+A new optional `usedInnerWindowIDs` field was added to the `Thread` type. This field contains an array of inner window IDs. It is used for the tab selector dropdown in the profiler UI, together with the information from `profile.pages`. When a tab is selected in this dropdown, threads that don't have an inner window ID for the selected tab in their `usedInnerWindowIDs` field are hidden. The array is treated as a set - the order of items in it has no meaning.
+
+Profiles which don't use `profile.pages` also don't need to use the `thread.usedInnerWindowIDs` field.
+
 ### Version 58
 
 A new `SourceTable` has been added to `profile.shared.sources` to centralize all source file information. The `FuncTable.fileName` field has been replaced with `FuncTable.source`, which references indices in the shared sources table. This change allows storing a UUID per JS source, which will be used for fetching sources.
