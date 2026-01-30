@@ -80,6 +80,17 @@ CallNodeContextMenu--transform-focus-function = Foco sur function.
 CallNodeContextMenu--transform-focus-function-inverted = Foco sur function (invertite).
     .title = { CallNodeContextMenu--transform-focus-function-title }
 
+## The translation for "self" in these strings should match the translation used
+## in CallTree--samples-self and CallTree--bytes-self. Alternatively it can be
+## translated as "self values" or "self time" (though "self time" is less desirable
+## because this menu item is also shown in "bytes" mode).
+
+CallNodeContextMenu--transform-focus-self-title =
+    Le foco proprie es simile al foco sur un function, ma solo es mantenite
+    specimens que contribue al tempore del mesme function. Le specimens
+    presente in le functiones appellate es ignorate e le arbore del appellos
+    es re-organisate con radice la function analysate.
+
 ##
 
 CallNodeContextMenu--transform-focus-subtree = Foco solo sur sub-arbore.
