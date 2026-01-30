@@ -151,7 +151,7 @@ export function mergeProfilesForDiffing(
 
   // Then we loop over all profiles and do the necessary changes according
   // to the states we computed earlier.
-  const transformStacks: any = {};
+  const transformStacks: TransformStacksPerThread = {};
   const implementationFilters: ImplementationFilter[] = [];
   // These may be needed for filtering markers.
   let ipcCorrelations;
