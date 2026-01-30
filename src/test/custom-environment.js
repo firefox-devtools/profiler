@@ -41,5 +41,22 @@ export default class CustomTestEnvironment extends TestEnvironment {
     this.global.ReadableStream = ReadableStream;
     this.global.CompressionStream = CompressionStream;
     this.global.DecompressionStream = DecompressionStream;
+
+    // Mock window.matchMedia for dark mode tests
+    Object.defineProperty(this.global, 'matchMedia', {
+      writable: true,
+      value: (query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => {
+          return true;
+        },
+      }),
+    });
   }
 }
