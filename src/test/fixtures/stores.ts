@@ -8,6 +8,7 @@ import { processGeckoProfile } from '../../profile-logic/process-profile';
 import { getProfileFromTextSamples } from './profiles/processed-profile';
 
 import type { Store, Profile } from 'firefox-profiler/types';
+import { PROCESSED_PROFILE_VERSION } from 'firefox-profiler/app-logic/constants';
 
 export function blankStore() {
   return createStore();
@@ -18,6 +19,13 @@ export function storeWithProfile(profile?: Profile): Store {
     profile = processGeckoProfile(createGeckoProfileWithJsTimings());
     profile.meta.symbolicated = true;
   }
+
+  if (profile.meta.preprocessedProfileVersion !== PROCESSED_PROFILE_VERSION) {
+    throw new Error(
+      `storeWithProfile called with something that's not a fully-uprgaded processed profile!`
+    );
+  }
+
   const store = createStore();
   store.dispatch(viewProfile(profile));
   return store;
