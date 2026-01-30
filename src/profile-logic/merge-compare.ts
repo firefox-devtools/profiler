@@ -144,14 +144,14 @@ export function mergeProfilesForDiffing(
 
   const {
     stringArray: newStringArray,
-    translationMaps: translationMapForStrings,
+    translationMaps: translationMapsForStrings,
   } = mergeStringArrays(profiles.map((profile) => profile.shared.stringArray));
 
   // Then merge sources.
-  const { sources: newSources, translationMaps: translationMapForSources } =
+  const { sources: newSources, translationMaps: translationMapsForSources } =
     mergeSources(
       profiles.map((profile) => profile.shared.sources ?? null),
-      translationMapForStrings
+      translationMapsForStrings
     );
 
   // Then merge libs.
@@ -203,22 +203,22 @@ export function mergeProfilesForDiffing(
       ...thread.funcTable,
       name: adjustStringIndexes(
         thread.funcTable.name,
-        translationMapForStrings[i]
+        translationMapsForStrings[i]
       ),
       source: adjustNullableSourceIndexes(
         thread.funcTable.source,
-        translationMapForSources[i]
+        translationMapsForSources[i]
       ),
     };
     thread.resourceTable = {
       ...thread.resourceTable,
       name: adjustStringIndexes(
         thread.resourceTable.name,
-        translationMapForStrings[i]
+        translationMapsForStrings[i]
       ),
       host: adjustNullableStringIndexes(
         thread.resourceTable.host,
-        translationMapForStrings[i]
+        translationMapsForStrings[i]
       ),
       lib: adjustResourceTableLibs(
         thread.resourceTable.lib,
@@ -229,7 +229,7 @@ export function mergeProfilesForDiffing(
       ...thread.nativeSymbols,
       name: adjustStringIndexes(
         thread.nativeSymbols.name,
-        translationMapForStrings[i]
+        translationMapsForStrings[i]
       ),
       libIndex: adjustNativeSymbolLibs(
         thread.nativeSymbols.libIndex,
@@ -240,11 +240,11 @@ export function mergeProfilesForDiffing(
       ...thread.markers,
       name: adjustStringIndexes(
         thread.markers.name,
-        translationMapForStrings[i]
+        translationMapsForStrings[i]
       ),
       data: adjustMarkerDataStringIndexes(
         thread.markers.data,
-        translationMapForStrings[i],
+        translationMapsForStrings[i],
         stringIndexMarkerFieldsByDataType
       ),
     };
