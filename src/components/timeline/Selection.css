@@ -54,7 +54,7 @@
 
 .timelineSelectionHoverLine {
   position: absolute;
-  z-index: 1;
+  z-index: var(--z-timeline-selection);
   top: 0;
   bottom: 0;
   width: 1px;
@@ -64,7 +64,7 @@
 
 .timelineSelectionOverlayTime {
   position: absolute;
-  z-index: 1;
+  z-index: var(--z-timeline-selection-overlay-time);
   padding: 3.25px 8px;
   border-radius: 0 4px 4px 0;
   margin-left: 1px;
@@ -74,7 +74,7 @@
 
 .timelineSelectionOverlay {
   position: absolute;
-  z-index: 2;
+  z-index: var(--z-timeline-selection-overlay);
   display: flex;
   overflow: hidden;
   flex-flow: row nowrap;
@@ -110,7 +110,7 @@
 .timelineSelectionGrippyRangeStart,
 .timelineSelectionGrippyRangeEnd {
   position: relative;
-  z-index: 3;
+  z-index: var(--z-timeline-selection-grippy);
   width: 0;
   padding: 3px;
   border: 1px solid var(--grippy-range-border-color);

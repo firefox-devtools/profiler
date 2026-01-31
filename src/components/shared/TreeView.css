@@ -76,7 +76,7 @@
 
 .treeViewBody {
   position: relative;
-  z-index: 0;
+  z-index: var(--z-tree-view);
   overflow: auto;
   flex: 1;
   background-color: var(--base-background-color);
@@ -96,7 +96,7 @@
 
 .treeViewBodyInner0 {
   position: sticky;
-  z-index: 2;
+  z-index: var(--z-tree-view-inner);
   left: 0;
 }
 

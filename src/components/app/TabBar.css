@@ -94,7 +94,7 @@
 }
 
 .tabBarTab.selected {
-  z-index: 1;
+  z-index: var(--z-tab-selected);
   padding: 6px 4px;
   border-color: var(--base-border-color);
   margin: 0 -0.5px; /* No bottom margin, so that this tab covers the .Details-top-bar bottom border. */

@@ -418,7 +418,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 58,
+    "preprocessedProfileVersion": 59,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -880,6 +880,9 @@ Object {
       },
       "tid": 0,
       "unregisterTime": null,
+      "usedInnerWindowIDs": Array [
+        2,
+      ],
     },
     Object {
       "frameTable": Object {
@@ -1492,6 +1495,9 @@ Array [
     },
     "tid": 0,
     "unregisterTime": null,
+    "usedInnerWindowIDs": Array [
+      2,
+    ],
   },
   Object {
     "frameTable": Object {

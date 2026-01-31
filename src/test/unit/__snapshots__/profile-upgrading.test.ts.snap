@@ -40,7 +40,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 58,
+    "preprocessedProfileVersion": 59,
     "processType": 0,
     "product": "Firefox",
     "sampleUnits": undefined,
@@ -9382,7 +9382,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 58,
+    "preprocessedProfileVersion": 59,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -10924,7 +10924,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 58,
+    "preprocessedProfileVersion": 59,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -12599,7 +12599,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 58,
+    "preprocessedProfileVersion": 59,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -13057,6 +13057,9 @@ Object {
         ],
       },
       "unregisterTime": null,
+      "usedInnerWindowIDs": Array [
+        3,
+      ],
     },
     Object {
       "frameTable": Object {
@@ -13417,6 +13420,9 @@ Object {
         ],
       },
       "unregisterTime": null,
+      "usedInnerWindowIDs": Array [
+        1,
+      ],
     },
     Object {
       "frameTable": Object {
@@ -13844,6 +13850,9 @@ Object {
         ],
       },
       "unregisterTime": null,
+      "usedInnerWindowIDs": Array [
+        2,
+      ],
     },
   ],
 }

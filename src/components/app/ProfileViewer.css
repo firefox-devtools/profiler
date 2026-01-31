@@ -110,11 +110,11 @@
 }
 
 .profileViewerSplitter {
-  /* Create a stacking context, so that the KeyboardShortcut can overlay the profile
-     viewer. In addition, the built-in class uses position: absolute, which is not
-     appropriate here. */
+  /* Position relative for layout. Don't set z-index here to avoid creating a
+     stacking context that would trap the context menu below the screenshot hover.
+     This allows both the screenshot hover and context menu to be compared
+     at the .profileViewer level, ensuring the context menu appears on top. */
   position: relative;
-  z-index: 0;
 }
 
 .profileViewerSplitter > .layout-pane:not(.layout-pane-primary) {

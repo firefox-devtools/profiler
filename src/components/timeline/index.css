@@ -99,7 +99,7 @@
 .timelineHeader {
   /* This should be on top of the overflow edge indicator that wraps the thread
    list, so border bottom will always be visible. */
-  z-index: 1;
+  z-index: var(--z-timeline-header);
   display: flex;
   height: 20px;
   flex-direction: row;
@@ -120,8 +120,7 @@
 }
 
 .tracksContainer {
-  /* This should be below the timeline header. */
-  z-index: 0;
+  z-index: var(--z-tracks-container);
 
   /* Moving the timeline 1 pixel below the timeline header. This way, the first
    * visible track's top border will be hidden as expected. */
