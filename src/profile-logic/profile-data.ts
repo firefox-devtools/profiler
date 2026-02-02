@@ -90,7 +90,7 @@ import type {
   TimelineType,
   NativeSymbolInfo,
   Bytes,
-  ThreadWithReservedFunctions,
+  FuncTableWithReservedFunctions,
   TabID,
   SourceTable,
   IndexIntoSourceTable,
@@ -3097,10 +3097,11 @@ export function getOriginAnnotationForFunc(
  * At the moment, the only functions we reserve are "collapsed resource" functions.
  * These are used by the "collapse resource" transform.
  */
-export function reserveFunctionsInThread(
-  thread: Thread
-): ThreadWithReservedFunctions {
-  const funcTable = shallowCloneFuncTable(thread.funcTable);
+export function reserveFunctionsForCollapsedResources(
+  originalFuncTable: FuncTable,
+  resourceTable: ResourceTable
+): FuncTableWithReservedFunctions {
+  const funcTable = shallowCloneFuncTable(originalFuncTable);
   const reservedFunctionsForResources = new Map<
     IndexIntoResourceTable,
     IndexIntoFuncTable
@@ -3111,7 +3112,6 @@ export function reserveFunctionsInThread(
     resourceTypes.webhost,
     resourceTypes.otherhost,
   ];
-  const { resourceTable } = thread;
   for (
     let resourceIndex = 0;
     resourceIndex < resourceTable.length;
@@ -3132,7 +3132,7 @@ export function reserveFunctionsInThread(
     reservedFunctionsForResources.set(resourceIndex, funcIndex);
   }
   return {
-    thread: { ...thread, funcTable },
+    funcTable,
     reservedFunctionsForResources,
   };
 }

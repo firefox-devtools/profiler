@@ -518,8 +518,8 @@ export type CallNodeDisplayData = Readonly<{
   ariaLabel: string;
 }>;
 
-export type ThreadWithReservedFunctions = {
-  thread: Thread;
+export type FuncTableWithReservedFunctions = {
+  funcTable: FuncTable;
   reservedFunctionsForResources: Map<
     IndexIntoResourceTable,
     IndexIntoFuncTable
