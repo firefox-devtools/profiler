@@ -94,6 +94,7 @@ import type {
   TabID,
   SourceTable,
   IndexIntoSourceTable,
+  TransformOutput,
 } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
 
@@ -1557,43 +1558,73 @@ export function toValidCallTreeSummaryStrategy(
 
 export function filterThreadByImplementation(
   thread: Thread,
-  implementation: string
+  implementation: ImplementationFilter
 ): Thread {
-  const { funcTable, stringTable } = thread;
+  const { stackTable, frameTable, funcTable, stringTable } = thread;
+  const transformOutput = computeTransformOutputForImplementationFilter(
+    stackTable,
+    frameTable,
+    funcTable,
+    stringTable,
+    implementation
+  );
+  return applyTransformOutputToThread(transformOutput, thread);
+}
 
+export function computeTransformOutputForImplementationFilter(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  stringTable: StringTable,
+  implementation: ImplementationFilter
+): TransformOutput {
   switch (implementation) {
     case 'cpp':
-      return _filterThreadByFunc(thread, (funcIndex) => {
-        // Return quickly if this is a JS frame.
-        if (funcTable.isJS[funcIndex]) {
-          return false;
+      return _computeTransformOutputForMergingFuncs(
+        stackTable,
+        frameTable,
+        (funcIndex) => {
+          // Return quickly if this is a JS frame.
+          if (funcTable.isJS[funcIndex]) {
+            return false;
+          }
+          // Regular C++ functions are associated with a resource that describes the
+          // shared library that these C++ functions were loaded from. Jitcode is not
+          // loaded from shared libraries but instead generated at runtime, so Jitcode
+          // frames are not associated with a shared library and thus have no resource
+          const locationString = stringTable.getString(
+            funcTable.name[funcIndex]
+          );
+          const isProbablyJitCode =
+            funcTable.resource[funcIndex] === -1 &&
+            locationString.startsWith('0x');
+          return !isProbablyJitCode;
         }
-        // Regular C++ functions are associated with a resource that describes the
-        // shared library that these C++ functions were loaded from. Jitcode is not
-        // loaded from shared libraries but instead generated at runtime, so Jitcode
-        // frames are not associated with a shared library and thus have no resource
-        const locationString = stringTable.getString(funcTable.name[funcIndex]);
-        const isProbablyJitCode =
-          funcTable.resource[funcIndex] === -1 &&
-          locationString.startsWith('0x');
-        return !isProbablyJitCode;
-      });
+      );
     case 'js':
-      return _filterThreadByFunc(thread, (funcIndex) => {
-        return funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex];
-      });
+      return _computeTransformOutputForMergingFuncs(
+        stackTable,
+        frameTable,
+        (funcIndex) => {
+          return (
+            funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]
+          );
+        }
+      );
     default:
-      return thread;
+      return {
+        newStackTable: stackTable,
+        effectOnThreadData: {},
+      };
   }
 }
 
-function _filterThreadByFunc(
-  thread: Thread,
+function _computeTransformOutputForMergingFuncs(
+  stackTable: StackTable,
+  frameTable: FrameTable,
   shouldIncludeFuncInFilteredThread: (funcIndex: IndexIntoFuncTable) => boolean
-): Thread {
-  return timeCode('_filterThreadByFunc', () => {
-    const { stackTable, frameTable } = thread;
-
+): TransformOutput {
+  return timeCode('_computeTransformOutputForMergingFuncs', () => {
     const newStackTable: StackTable = {
       length: 0,
       frame: [],
@@ -1622,16 +1653,33 @@ function _filterThreadByFunc(
       }
     }
 
-    return updateThreadStacks(thread, newStackTable, (oldStack) => {
-      if (oldStack === null) {
-        return null;
-      }
-      const newStack = oldStackToNewStack[oldStack];
-      return newStack !== -1 ? newStack : null;
-    });
+    return {
+      newStackTable,
+      effectOnThreadData: {
+        oldStackToNewStack,
+      },
+    };
   });
 }
 
+export function applyTransformOutputToThread(
+  transformOutput: TransformOutput,
+  thread: Thread
+): Thread {
+  const { newStackTable, effectOnThreadData } = transformOutput;
+
+  return updateThreadStacks(thread, newStackTable, (oldStack) => {
+    if (oldStack === null) {
+      return null;
+    }
+    const { oldStackToNewStack } = effectOnThreadData;
+    if (oldStackToNewStack !== undefined) {
+      const newStack = oldStackToNewStack[oldStack];
+      return newStack !== -1 ? newStack : null;
+    }
+    return oldStack;
+  });
+}
 export function filterThreadToSearchStrings(
   thread: Thread,
   searchStrings: string[] | null

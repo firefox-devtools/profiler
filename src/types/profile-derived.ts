@@ -815,3 +815,12 @@ export type ProfileIndexTranslationMaps = {
   oldStringToNewStringPlusOne: Int32Array;
   oldLibToNewLibPlusOne: Int32Array;
 };
+
+export type TransformEffectOnThreadData = {
+  oldStackToNewStack?: Int32Array; // drop if oldStackToNewStack[oldStack] === -1
+};
+
+export type TransformOutput = {
+  newStackTable: StackTable;
+  effectOnThreadData: TransformEffectOnThreadData;
+};
