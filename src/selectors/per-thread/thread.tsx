@@ -40,6 +40,7 @@ import type {
   ThreadsKey,
   CallTreeSummaryStrategy,
   State,
+  ImplementationFilter,
 } from 'firefox-profiler/types';
 
 import type { TransformLabeL10nIds } from 'firefox-profiler/profile-logic/transforms';
@@ -47,6 +48,18 @@ import type { MarkerSelectorsPerThread } from './markers';
 
 import { mergeThreads } from '../../profile-logic/merge-compare';
 import { defaultThreadViewOptions } from '../../reducers/profile-view';
+
+// Memoize some of these functions globally, so that in the common case we only
+// need to do these computations once globally instead of per thread. These
+// computations are based on the tables inside the filtered thread, so
+// unless there's per-thread transforms, those tables will be the same instance
+// from the profile shared data, and the memoization will hit the cache.
+const globallyMemoizedComputeTransformOutputForImplementationFilter = memoize(
+  ProfileData.computeTransformOutputForImplementationFilter,
+  {
+    limit: 2,
+  }
+);
 
 /**
  * Infer the return type from the getBasicThreadSelectorsPerThread and
@@ -448,7 +461,17 @@ export function getThreadSelectorsWithMarkersPerThread(
   const _getImplementationFilteredThread: Selector<Thread> = createSelector(
     getRangeAndTransformFilteredThread,
     UrlState.getImplementationFilter,
-    ProfileData.filterThreadByImplementation
+    (thread: Thread, implementationFilter: ImplementationFilter) => {
+      const transformOutput =
+        globallyMemoizedComputeTransformOutputForImplementationFilter(
+          thread.stackTable,
+          thread.frameTable,
+          thread.funcTable,
+          thread.stringTable,
+          implementationFilter
+        );
+      return ProfileData.applyTransformOutputToThread(transformOutput, thread);
+    }
   );
 
   const getFilteredThread: Selector<Thread> = createSelector(
