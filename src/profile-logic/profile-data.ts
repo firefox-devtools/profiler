@@ -25,7 +25,13 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
-import { checkBit, makeBitSet, setBit } from 'firefox-profiler/utils/bitset';
+import {
+  type BitSet,
+  checkBit,
+  combineTwoBitSetsWithAnd,
+  makeBitSet,
+  setBit,
+} from 'firefox-profiler/utils/bitset';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
   ensureExists,
@@ -1672,7 +1678,13 @@ export function applyTransformOutputToThread(
     if (oldStack === null) {
       return null;
     }
-    const { oldStackToNewStack } = effectOnThreadData;
+    const { oldStackToNewStack, dropIfOldStackIsNot } = effectOnThreadData;
+    if (dropIfOldStackIsNot !== undefined) {
+      const shouldKeep = checkBit(dropIfOldStackIsNot, oldStack);
+      if (!shouldKeep) {
+        return null;
+      }
+    }
     if (oldStackToNewStack !== undefined) {
       const newStack = oldStackToNewStack[oldStack];
       return newStack !== -1 ? newStack : null;
@@ -1680,39 +1692,67 @@ export function applyTransformOutputToThread(
     return oldStack;
   });
 }
-export function filterThreadToSearchStrings(
-  thread: Thread,
+
+export function computeTransformOutputForSearchStringFilter(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  sources: SourceTable,
+  stringTable: StringTable,
   searchStrings: string[] | null
-): Thread {
-  return timeCode('filterThreadToSearchStrings', () => {
-    if (!searchStrings || !searchStrings.length) {
-      return thread;
+): TransformOutput {
+  return timeCode('computeTransformOutputForSearchStringFilter', () => {
+    if (!searchStrings) {
+      return { newStackTable: stackTable, effectOnThreadData: {} };
     }
 
-    return searchStrings.reduce(
-      (accThread, searchString) =>
-        filterThreadToSearchString(accThread, searchString),
-      thread
-    );
+    const stackMatchesAllSearchStrings = searchStrings
+      .filter((s) => s)
+      .reduce(
+        (
+          stackMatchesPreviousSearchStrings: BitSet | undefined,
+          searchString: string
+        ) => {
+          const stackMatchesThisString = _computeStackMatchesSearchString(
+            stackTable,
+            frameTable,
+            funcTable,
+            resourceTable,
+            sources,
+            stringTable,
+            searchString
+          );
+          if (stackMatchesPreviousSearchStrings !== undefined) {
+            return combineTwoBitSetsWithAnd(
+              stackMatchesThisString,
+              stackMatchesPreviousSearchStrings
+            );
+          }
+          return stackMatchesThisString;
+        },
+        undefined
+      );
+
+    return {
+      newStackTable: stackTable,
+      effectOnThreadData: {
+        dropIfOldStackIsNot: stackMatchesAllSearchStrings,
+      },
+    };
   });
 }
 
-export function filterThreadToSearchString(
-  thread: Thread,
+function _computeStackMatchesSearchString(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  sources: SourceTable,
+  stringTable: StringTable,
   searchString: string
-): Thread {
-  if (!searchString) {
-    return thread;
-  }
+): BitSet {
   const lowercaseSearchString = searchString.toLowerCase();
-  const {
-    funcTable,
-    frameTable,
-    stackTable,
-    stringTable,
-    resourceTable,
-    sources,
-  } = thread;
 
   function computeFuncMatchesSearch(func: IndexIntoFuncTable) {
     const nameIndex = funcTable.name[func];
@@ -1762,13 +1802,7 @@ export function filterThreadToSearchString(
     }
   }
 
-  // Set any stacks which don't include the search string to null.
-  // TODO: This includes stacks in markers; maybe we shouldn't clear marker stacks?
-  return updateThreadStacks(thread, stackTable, (stackIndex) =>
-    stackIndex !== null && checkBit(stackMatchesSearch, stackIndex)
-      ? stackIndex
-      : null
-  );
+  return stackMatchesSearch;
 }
 
 export function computeTimeColumnForRawSamplesTable(

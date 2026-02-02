@@ -60,6 +60,12 @@ const globallyMemoizedComputeTransformOutputForImplementationFilter = memoize(
     limit: 2,
   }
 );
+const globallyMemoizedComputeTransformOutputForSearchStringFilter = memoize(
+  ProfileData.computeTransformOutputForSearchStringFilter,
+  {
+    limit: 2,
+  }
+);
 
 /**
  * Infer the return type from the getBasicThreadSelectorsPerThread and
@@ -459,6 +465,7 @@ export function getThreadSelectorsWithMarkersPerThread(
     getRangeAndTransformFilteredThread,
     UrlState.getImplementationFilter,
     (thread: Thread, implementationFilter: ImplementationFilter) => {
+      // Apply the implementation filter.
       const transformOutput =
         globallyMemoizedComputeTransformOutputForImplementationFilter(
           thread.stackTable,
@@ -474,8 +481,20 @@ export function getThreadSelectorsWithMarkersPerThread(
   const getFilteredThread: Selector<Thread> = createSelector(
     _getImplementationFilteredThread,
     UrlState.getSearchStrings,
-    ProfileSelectors.getSourceTable,
-    ProfileData.filterThreadToSearchStrings
+    (thread: Thread, searchStrings) => {
+      // Apply the search string filter.
+      const transformOutput =
+        globallyMemoizedComputeTransformOutputForSearchStringFilter(
+          thread.stackTable,
+          thread.frameTable,
+          thread.funcTable,
+          thread.resourceTable,
+          thread.sources,
+          thread.stringTable,
+          searchStrings
+        );
+      return ProfileData.applyTransformOutputToThread(transformOutput, thread);
+    }
   );
 
   const getPreviewFilteredThread: Selector<Thread> = createSelector(
