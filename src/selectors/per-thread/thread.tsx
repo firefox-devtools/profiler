@@ -39,9 +39,6 @@ import type {
   EventDelayInfo,
   ThreadsKey,
   CallTreeSummaryStrategy,
-  ThreadWithReservedFunctions,
-  IndexIntoResourceTable,
-  IndexIntoFuncTable,
   State,
 } from 'firefox-profiler/types';
 
@@ -147,7 +144,7 @@ export function getBasicThreadSelectorsPerThread(
     ProfileSelectors.getStackTable,
     (state: State) =>
       ProfileSelectors.getRawProfileSharedData(state).frameTable,
-    (state: State) => ProfileSelectors.getRawProfileSharedData(state).funcTable,
+    ProfileSelectors.getFunctionsReservedFuncTable,
     (state: State) =>
       ProfileSelectors.getRawProfileSharedData(state).nativeSymbols,
     (state: State) =>
@@ -158,19 +155,8 @@ export function getBasicThreadSelectorsPerThread(
     ProfileData.createThreadFromDerivedTables
   );
 
-  const getThreadWithReservedFunctions: Selector<ThreadWithReservedFunctions> =
-    createSelector(getThread, ProfileData.reserveFunctionsInThread);
-
-  const getFunctionsReservedThread: Selector<Thread> = (state) =>
-    getThreadWithReservedFunctions(state).thread;
-
-  const getReservedFunctionsForResources: Selector<
-    Map<IndexIntoResourceTable, IndexIntoFuncTable>
-  > = (state) =>
-    getThreadWithReservedFunctions(state).reservedFunctionsForResources;
-
   const getRangeFilteredThread: Selector<Thread> = createSelector(
-    getFunctionsReservedThread,
+    getThread,
     ProfileSelectors.getCommittedRange,
     (thread, range) => {
       const { start, end } = range;
@@ -388,7 +374,6 @@ export function getBasicThreadSelectorsPerThread(
     getNativeAllocations,
     getJsAllocations,
     getThreadRange,
-    getReservedFunctionsForResources,
     getRangeFilteredThread,
     getUnfilteredCtssSamples,
     getFilteredCtssSampleIndexOffset,
@@ -403,7 +388,6 @@ export function getBasicThreadSelectorsPerThread(
     getHasUsefulJsAllocations,
     getHasUsefulNativeAllocations,
     getCanShowRetainedMemory,
-    getFunctionsReservedThread,
     getProcessedEventDelays,
     getCallTreeSummaryStrategy,
   };

@@ -15,6 +15,7 @@ import {
   getInclusiveSampleIndexRangeForSelection,
   computeTabToThreadIndexesMap,
   computeStackTableFromRawStackTable,
+  reserveFunctionsForCollapsedResources,
 } from '../profile-logic/profile-data';
 import type { IPCMarkerCorrelations } from '../profile-logic/marker-data';
 import { correlateIPCMarkers } from '../profile-logic/marker-data';
@@ -74,6 +75,10 @@ import type {
   SortedTabPageData,
   TimelineUnit,
   SourceTable,
+  FuncTableWithReservedFunctions,
+  IndexIntoResourceTable,
+  IndexIntoFuncTable,
+  FuncTable,
 } from 'firefox-profiler/types';
 
 import type { ThreadActivityScore } from '../profile-logic/tracks';
@@ -256,6 +261,21 @@ export const getStackTable: Selector<StackTable> = createSelector(
   getDefaultCategory,
   computeStackTableFromRawStackTable
 );
+
+export const getFuncTableWithReservedFunctions: Selector<FuncTableWithReservedFunctions> =
+  createSelector(
+    (state: State) => getRawProfileSharedData(state).funcTable,
+    (state: State) => getRawProfileSharedData(state).resourceTable,
+    reserveFunctionsForCollapsedResources
+  );
+
+export const getFunctionsReservedFuncTable: Selector<FuncTable> = (state) =>
+  getFuncTableWithReservedFunctions(state).funcTable;
+
+export const getReservedFunctionsForResources: Selector<
+  Map<IndexIntoResourceTable, IndexIntoFuncTable>
+> = (state) =>
+  getFuncTableWithReservedFunctions(state).reservedFunctionsForResources;
 
 export const getSourceTable: Selector<SourceTable> = (state: State) =>
   getRawProfileSharedData(state).sources;
