@@ -817,6 +817,7 @@ export type ProfileIndexTranslationMaps = {
 };
 
 export type TransformEffectOnThreadData = {
+  dropIfOldStackIsNot?: BitSet;
   oldStackToNewStack?: Int32Array; // drop if oldStackToNewStack[oldStack] === -1
 };
 
