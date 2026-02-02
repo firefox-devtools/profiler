@@ -29,7 +29,9 @@
 }
 
 .react-contextmenu-item--selected .timelineTrackContextMenuPid {
-  color: var(--menu-foreground-color);
+  --internal-selected-foreground-color: #fff;
+
+  color: var(--internal-selected-foreground-color);
 }
 
 .trackContextMenuSearchFilter {
@@ -41,5 +43,9 @@
 :root.dark-mode {
   .timelineTrackContextMenuPid {
     --internal-foreground-color: var(--grey-10-a60);
+  }
+
+  .react-contextmenu-item--selected .timelineTrackContextMenuPid {
+    --internal-selected-foreground-color: var(--menu-foreground-color);
   }
 }
