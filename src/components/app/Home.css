@@ -28,7 +28,7 @@
     --internal-special-border-color: var(--grey-40);
     --internal-screenshot-border-color: var(--grey-40);
     --internal-screenshot-shadow-color: var(--grey-90);
-    --internal-button-disabled-foreground-color: var(--grey-10-a40);
+    --internal-button-disabled-foreground-color: var(--grey-10-a60);
     --internal-button-enabled-foreground-color: var(--blue-40);
     --internal-docs-icon: url(../../../res/img/svg/help-blue-light.svg);
   }
