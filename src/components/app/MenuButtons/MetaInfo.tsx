@@ -353,7 +353,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
           {meta.profilingStartTime ? (
             <div className="metaInfoRow">
               <span className="metaInfoLabel">
-                <Localized id="MenuButtons--metaInfo--application-uptime">
+                <Localized id="MenuButtons--metaInfo--application-uptime2">
                   Uptime:
                 </Localized>
               </span>
