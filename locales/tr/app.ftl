@@ -67,6 +67,9 @@ CallNodeContextMenu--transform-focus-function = Fonksiyona odaklan
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Fonksiyona odaklan (tersine)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Yalnızca alt ağaca odaklan
     .title = Alt ağaca odaklanmak, çağrı ağacının belirtilen bölgesini içermeyen her örneği kaldıracaktır. Bu işlem, çağrı ağacının bir dalını koparır ama bunu yalnızca belirtilen çağrı düğümü için yapar. Fonksiyonun yaptığı diğer çağrılar görmezden gelinir.
 # This is used as the context menu item to apply the "Focus on category" transform.
@@ -469,7 +472,6 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Sınırsız
 MenuButtons--metaInfo--application = Uygulama
 MenuButtons--metaInfo--name-and-version = Ad ve sürüm:
-MenuButtons--metaInfo--application-uptime = Çalışma süresi:
 MenuButtons--metaInfo--update-channel = Güncelleme kanalı:
 MenuButtons--metaInfo--build-id = Yapı kimliği:
 MenuButtons--metaInfo--build-type = Yapı tipi:
@@ -1053,6 +1055,17 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = Assembly görünümünü gizle
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = Önceki
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = Sonraki
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = { $current } / { $total }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
