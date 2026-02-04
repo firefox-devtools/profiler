@@ -21,6 +21,16 @@ AppHeader--app-header = <header>{ -profiler-brand-name }</header> – <subheader
 AppHeader--github-icon =
     .title = Besuchen Sie unser Git-Repository (öffnet sich in einem neuen Fenster)
 
+## ThemeToggle
+## They are used at the top right side of the home page to switch between themes.
+
+ThemeToggle--system =
+    .title = System-Theme-Einstellungen beachten
+ThemeToggle--light =
+    .title = Helles Theme verwenden
+ThemeToggle--dark =
+    .title = Dunkles Theme verwenden
+
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
