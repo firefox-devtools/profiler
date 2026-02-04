@@ -472,6 +472,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Sınırsız
 MenuButtons--metaInfo--application = Uygulama
 MenuButtons--metaInfo--name-and-version = Ad ve sürüm:
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = Çalışma süresi:
 MenuButtons--metaInfo--update-channel = Güncelleme kanalı:
 MenuButtons--metaInfo--build-id = Yapı kimliği:
 MenuButtons--metaInfo--build-type = Yapı tipi:
