@@ -317,8 +317,12 @@ export function addDataToWindowObject(
           ) {
             const strTimestamp = d2s(profile.meta.startTime + markerStartTime);
             const processName = thread.processName ?? 'Unknown Process';
-            // TODO: lying about the log level as it's not available yet in the markers
-            const statement = `${strTimestamp} - [${processName} ${thread.pid}: ${thread.name}]: D/${(data as any).module} ${(data as any).name.trim()}`;
+
+            // The log module may contain the log level for profiles captured after bug 1995503.
+            // If the log module does not contain /, we fake it to D/module
+            const logModule = (data as any).module;
+            const prefix = logModule.includes('/') ? '' : 'D/';
+            const statement = `${strTimestamp} - [${processName} ${thread.pid}: ${thread.name}]: ${prefix}${logModule} ${(data as any).name.trim()}`;
             logs.push(statement);
           }
         }
