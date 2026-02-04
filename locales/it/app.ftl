@@ -498,6 +498,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Illimitata
 MenuButtons--metaInfo--application = Applicazione
 MenuButtons--metaInfo--name-and-version = Nome e versione:
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = Tempo di attività:
 MenuButtons--metaInfo--update-channel = Canale di aggiornamento:
 MenuButtons--metaInfo--build-id = ID build:
 MenuButtons--metaInfo--build-type = Tipo di build:
