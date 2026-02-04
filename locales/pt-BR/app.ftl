@@ -505,7 +505,6 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Ilimitado
 MenuButtons--metaInfo--application = Aplicativo
 MenuButtons--metaInfo--name-and-version = Nome e versão:
-MenuButtons--metaInfo--application-uptime = Tempo de atividade:
 MenuButtons--metaInfo--update-channel = Canal de atualização:
 MenuButtons--metaInfo--build-id = ID da compilação:
 MenuButtons--metaInfo--build-type = Tipo de compilação:

@@ -485,7 +485,6 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = 無限制
 MenuButtons--metaInfo--application = 應用程式
 MenuButtons--metaInfo--name-and-version = 名稱與版本：
-MenuButtons--metaInfo--application-uptime = 運作時間：
 MenuButtons--metaInfo--update-channel = 更新頻道：
 MenuButtons--metaInfo--build-id = Build ID：
 MenuButtons--metaInfo--build-type = Build Type：

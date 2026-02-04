@@ -585,7 +585,6 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Unbeheind
 MenuButtons--metaInfo--application = Tapassing
 MenuButtons--metaInfo--name-and-version = Namme en ferzje:
-MenuButtons--metaInfo--application-uptime = Uptime:
 MenuButtons--metaInfo--update-channel = Fernijkanaal:
 MenuButtons--metaInfo--build-id = Build-ID:
 MenuButtons--metaInfo--build-type = Buildtype:

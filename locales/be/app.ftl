@@ -572,7 +572,6 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Неабмежавана
 MenuButtons--metaInfo--application = Праграма
 MenuButtons--metaInfo--name-and-version = Назва і версія:
-MenuButtons--metaInfo--application-uptime = Час працы:
 MenuButtons--metaInfo--update-channel = Канал абнаўлення:
 MenuButtons--metaInfo--build-id = ID зборкі:
 MenuButtons--metaInfo--build-type = Тып зборкі:

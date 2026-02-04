@@ -476,7 +476,6 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = 无限制
 MenuButtons--metaInfo--application = 应用程序
 MenuButtons--metaInfo--name-and-version = 名称和版本：
-MenuButtons--metaInfo--application-uptime = 运行时间：
 MenuButtons--metaInfo--update-channel = 更新通道:
 MenuButtons--metaInfo--build-id = 构建 ID：
 MenuButtons--metaInfo--build-type = 构建类型：

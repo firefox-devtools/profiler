@@ -568,7 +568,6 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Απεριόριστη
 MenuButtons--metaInfo--application = Εφαρμογή
 MenuButtons--metaInfo--name-and-version = Όνομα και έκδοση:
-MenuButtons--metaInfo--application-uptime = Χρόνος λειτουργίας:
 MenuButtons--metaInfo--update-channel = Κανάλι ενημερώσεων:
 MenuButtons--metaInfo--build-id = ID δομής:
 MenuButtons--metaInfo--build-type = Τύπος δομής:

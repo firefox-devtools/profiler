@@ -585,7 +585,6 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Onbeperkt
 MenuButtons--metaInfo--application = Toepassing
 MenuButtons--metaInfo--name-and-version = Naam en versie:
-MenuButtons--metaInfo--application-uptime = Uptime:
 MenuButtons--metaInfo--update-channel = Updatekanaal:
 MenuButtons--metaInfo--build-id = Build-ID:
 MenuButtons--metaInfo--build-type = Buildtype:

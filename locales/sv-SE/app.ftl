@@ -580,7 +580,6 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Obegränsat
 MenuButtons--metaInfo--application = Applikation
 MenuButtons--metaInfo--name-and-version = Namn och version:
-MenuButtons--metaInfo--application-uptime = Drifttid:
 MenuButtons--metaInfo--update-channel = Uppdateringskanal:
 MenuButtons--metaInfo--build-id = Bygg-ID:
 MenuButtons--metaInfo--build-type = Byggtyp:
