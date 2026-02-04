@@ -1,23 +1,88 @@
+export type ThemePreference = 'system' | 'light' | 'dark';
+
 let _isDarkModeSetup = false;
 let _isDarkMode = false;
 
-export function isDarkMode() {
+export function getSystemTheme(): 'light' | 'dark' | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
+}
+
+export function getThemePreference(): ThemePreference {
+  try {
+    const stored = window.localStorage.getItem('theme');
+    if (stored === 'light') {
+      return 'light';
+    }
+    if (stored === 'dark') {
+      return 'dark';
+    }
+    return 'system';
+  } catch {
+    return 'system';
+  }
+}
+
+function _applyTheme(): void {
+  const preference = getThemePreference();
+  let shouldBeDark = false;
+
+  if (preference === 'dark') {
+    shouldBeDark = true;
+  } else if (preference === 'light') {
+    shouldBeDark = false;
+  } else {
+    // System preference
+    shouldBeDark = getSystemTheme() === 'dark';
+  }
+
+  _isDarkMode = shouldBeDark;
+
+  if (shouldBeDark) {
+    document.documentElement.classList.add('dark-mode');
+  } else {
+    document.documentElement.classList.remove('dark-mode');
+  }
+}
+
+export function setThemePreference(pref: ThemePreference): void {
+  try {
+    if (pref === 'system') {
+      window.localStorage.removeItem('theme');
+    } else {
+      window.localStorage.setItem('theme', pref);
+    }
+  } catch (e) {
+    console.warn('localStorage access denied', e);
+  }
+  _applyTheme();
+}
+
+export function isDarkMode(): boolean {
   if (!_isDarkModeSetup) {
     try {
-      function readSetting() {
-        const theme = window.localStorage.getItem('theme');
-        if (theme === 'dark') {
-          _isDarkMode = true;
-        } else {
-          _isDarkMode = false;
-        }
-      }
-      readSetting();
+      _applyTheme();
+
+      // Listen for localStorage changes from other tabs
       window.addEventListener('storage', (event: StorageEvent) => {
-        if (event.key === 'theme') {
-          readSetting();
+        if (event.key === 'theme' || event.key === null) {
+          _applyTheme();
         }
       });
+
+      // Listen for system preference changes
+      window
+        .matchMedia('(prefers-color-scheme: dark)')
+        .addEventListener('change', () => {
+          // Only re-apply if user is using system preference
+          if (getThemePreference() === 'system') {
+            _applyTheme();
+          }
+        });
     } catch (e) {
       console.warn('localStorage access denied', e);
     }
@@ -39,21 +104,15 @@ export function maybeLightDark(value: string | [string, string]): string {
 }
 
 export function initTheme() {
-  if (isDarkMode()) {
-    document.documentElement.classList.add('dark-mode');
-  }
+  isDarkMode();
 }
 
 export function setDarkMode() {
-  _isDarkMode = true;
-  window.localStorage.setItem('theme', 'dark');
-  document.documentElement.classList.add('dark-mode');
+  setThemePreference('dark');
 }
 
 export function setLightMode() {
-  _isDarkMode = false;
-  window.localStorage.removeItem('theme');
-  document.documentElement.classList.remove('dark-mode');
+  setThemePreference('light');
 }
 
 export function resetForTest() {
