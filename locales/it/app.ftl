@@ -25,7 +25,7 @@ AppHeader--github-icon =
 ## They are used at the top right side of the home page to switch between themes.
 
 ThemeToggle--system =
-    .title = Segui le preferenze del tema di sistema
+    .title = Segui le impostazioni del tema di sistema
 ThemeToggle--light =
     .title = Usa tema chiaro
 ThemeToggle--dark =
