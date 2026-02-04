@@ -1,0 +1,101 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.themeToggle {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  border: 1px solid var(--grey-30);
+  border-radius: 6px;
+  margin: 0 0.5em;
+  background: var(--grey-10);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+}
+
+.themeToggleButton {
+  position: relative;
+  display: flex;
+  width: 32px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--grey-50);
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 150ms ease-in-out;
+}
+
+.themeToggleButton:hover:not(.themeToggleButton-active) {
+  background: var(--grey-20);
+}
+
+.themeToggleButton-active {
+  background: white;
+  box-shadow:
+    0 1px 3px rgb(0 0 0 / 0.12),
+    0 1px 2px rgb(0 0 0 / 0.08);
+  color: var(--grey-90);
+}
+
+.themeToggleButton-active:hover {
+  background: white;
+}
+
+/* Theme toggle icons using CSS mask */
+
+.themeToggleIcon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  background-color: currentcolor;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
+
+.themeToggleIcon--light {
+  mask-image: url('firefox-profiler-res/img/svg/theme-light.svg');
+}
+
+.themeToggleIcon--system {
+  mask-image: url('firefox-profiler-res/img/svg/theme-system.svg');
+}
+
+.themeToggleIcon--dark {
+  mask-image: url('firefox-profiler-res/img/svg/theme-dark.svg');
+}
+
+/* Dark mode styles */
+
+:root.dark-mode {
+  .themeToggle {
+    border-color: var(--grey-60);
+    background: var(--grey-90);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+  }
+
+  .themeToggleButton {
+    color: var(--grey-40);
+  }
+
+  .themeToggleButton:hover:not(.themeToggleButton-active) {
+    background: var(--grey-80);
+  }
+
+  .themeToggleButton-active {
+    background: var(--grey-70);
+    box-shadow:
+      0 1px 3px rgb(0 0 0 / 0.4),
+      0 1px 2px rgb(0 0 0 / 0.3);
+    color: white;
+  }
+
+  .themeToggleButton-active:hover {
+    background: var(--grey-70);
+  }
+}
