@@ -585,6 +585,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Onbeperkt
 MenuButtons--metaInfo--application = Toepassing
 MenuButtons--metaInfo--name-and-version = Naam en versie:
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = Uptime:
 MenuButtons--metaInfo--update-channel = Updatekanaal:
 MenuButtons--metaInfo--build-id = Build-ID:
 MenuButtons--metaInfo--build-type = Buildtype:
@@ -898,6 +900,11 @@ TrackPower--tooltip-power-watt = { $value } W
 # Variables:
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
+    .label = Vermogen
+# This is used in the tooltip when the instant power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-microwatt = { $value } μW
     .label = Vermogen
 # This is used in the tooltip when the power value uses the kilowatt unit.
 # Variables:
