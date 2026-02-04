@@ -83,7 +83,7 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
     l10nIdKiloUnit: string,
     l10nIdUnit: string,
     l10nIdMilliUnit: string,
-    l10nIdMicroUnit?: string
+    l10nIdMicroUnit: string
   ): React.ReactElement<any> {
     let value, l10nId, carbonValue;
     const carbon = this._computeCO2eFromPower(power);
@@ -99,7 +99,7 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
       value = 0;
       carbonValue = 0;
       l10nId = l10nIdUnit;
-    } else if (power < 0.001 && l10nIdMicroUnit) {
+    } else if (power < 0.001) {
       value = formatNumber(power * 1000000);
       // Note: even though the power value is expressed in µWh, the carbon value
       // is still expressed in mg.
@@ -190,7 +190,8 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
             power,
             'TrackPower--tooltip-power-kilowatt',
             'TrackPower--tooltip-power-watt',
-            'TrackPower--tooltip-power-milliwatt'
+            'TrackPower--tooltip-power-milliwatt',
+            'TrackPower--tooltip-power-microwatt'
           )}
           {this.maybeRenderForPreviewSelection(previewSelection)}
           {this._formatPowerValue(

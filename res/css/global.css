@@ -3,6 +3,37 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 :root {
+  /* =====================
+   * Z-index scale
+   * ===================== */
+  --z-tab-selected: 1;
+  --z-warning: 4;
+  --z-root: 0;
+  --z-bottom-box: 1;
+  --z-serviceworker-notice: 4;
+  --z-arrow-panel: 5;
+  --z-copy-table-warning: 4;
+  --z-tree-view: 0;
+  --z-tree-view-inner: 2;
+  --z-overflow-edge-indicator: 3;
+  --z-chart-viewport-expanded: 1;
+  --z-timeline-selection: 1;
+  --z-timeline-selection-overlay: 2;
+  --z-timeline-selection-overlay-time: 1;
+  --z-timeline-selection-grippy: 3;
+  --z-timeline-track-local: 3;
+  --z-timeline-track-thread: 1;
+  --z-timeline-track-screenshot: 4; /* should be higher than any other timeline element */
+  --z-keyboard-shortcuts: 11; /* should be highest possible value */
+  --z-context-menu: 5; /* should be higher than --z-overflow-edge-indicator and --z-timeline-track-screenshot */
+  --z-panel-search: 1;
+  --z-panel-search-introduction: -1;
+  --z-timeline-header: 1;
+  --z-tracks-container: 0; /* should be below --z-timeline-header */
+
+  /* =====================
+   * Colors & theming
+   * ===================== */
   --base-foreground-color: #000;
   --base-background-color: #fff;
   --base-border-color: var(--grey-30);
@@ -46,6 +77,18 @@
   --wide-splitter-color: #ccc;
   --wide-splitter-hover-color: #bbb;
   --wide-splitter-pressed-color: #aaa;
+
+  /* Colors for DevTools Reps */
+  --number-color: #058b00;
+  --string-color: #dd00a9;
+  --null-color: #5c5c5f;
+  --object-color: #0074e8;
+  --caption-color: #0074e8;
+  --location-color: #5c5c5f;
+  --source-link-color: #0060df;
+  --node-color: #003eaa;
+  --reference-color: #0074e8;
+  --comment-node-color: #5c5c5f;
 
   color: var(--base-foreground-color);
 }

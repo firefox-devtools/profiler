@@ -1015,6 +1015,10 @@ function _processSamples(geckoSamples: GeckoSampleStruct): RawSamplesTable {
     }
   }
 
+  if ('argumentValues' in geckoSamples) {
+    samples.argumentValues = geckoSamples.argumentValues;
+  }
+
   if ('eventDelay' in geckoSamples) {
     samples.eventDelay = geckoSamples.eventDelay;
   } else if ('responsiveness' in geckoSamples) {
@@ -1210,6 +1214,29 @@ function _processThread(
   );
   const samples = _processSamples(geckoSamples);
 
+  // Compute usedInnerWindowIDs from the frameTable and the markers.
+  let usedInnerWindowIDs: number[] | undefined;
+  const usedInnerWindowIDsSet = new Set<number>();
+  for (let i = 0; i < frameTable.length; i++) {
+    const innerWindowID = frameTable.innerWindowID[i];
+    if (innerWindowID !== null && innerWindowID !== 0) {
+      usedInnerWindowIDsSet.add(innerWindowID);
+    }
+  }
+  for (let i = 0; i < markers.length; i++) {
+    const data = markers.data[i];
+    if (!data || !('innerWindowID' in data)) {
+      continue;
+    }
+    const innerWindowID = data.innerWindowID;
+    if (typeof innerWindowID === 'number' && innerWindowID !== 0) {
+      usedInnerWindowIDsSet.add(innerWindowID);
+    }
+  }
+  if (usedInnerWindowIDsSet.size !== 0) {
+    usedInnerWindowIDs = Array.from(usedInnerWindowIDsSet);
+  }
+
   const newThread: RawThread = {
     name: thread.name,
     isMainThread: thread.name === 'GeckoMain',
@@ -1245,6 +1272,10 @@ function _processThread(
     newThread.userContextId = thread.userContextId;
   }
 
+  if (usedInnerWindowIDs !== undefined) {
+    newThread.usedInnerWindowIDs = usedInnerWindowIDs;
+  }
+
   if (jsAllocations) {
     // Only add the JS allocations if they exist.
     newThread.jsAllocations = jsAllocations;
@@ -1253,6 +1284,14 @@ function _processThread(
   if (nativeAllocations) {
     // Only add the Native allocations if they exist.
     newThread.nativeAllocations = nativeAllocations;
+  }
+
+  if (thread.tracedValues) {
+    newThread.tracedValuesBuffer = thread.tracedValues;
+  }
+
+  if (thread.tracedObjectShapes) {
+    newThread.tracedObjectShapes = thread.tracedObjectShapes;
   }
 
   function processJsTracer() {

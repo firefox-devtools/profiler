@@ -31,6 +31,8 @@ import type {
   OneCategoryBreakdown,
 } from 'firefox-profiler/profile-logic/profile-data';
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
+import { REPS, MODE } from 'devtools-reps';
+const { Rep } = REPS;
 
 import './CallNode.css';
 import classNames from 'classnames';
@@ -129,6 +131,7 @@ type Props = {
   readonly timings?: TimingsForPath;
   readonly callTreeSummaryStrategy: CallTreeSummaryStrategy;
   readonly displayStackType: boolean;
+  readonly argumentValues?: Array<object>;
 };
 
 /**
@@ -358,6 +361,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       thread,
       durationText,
       categories,
+      argumentValues,
       displayData,
       timings,
       callTreeSummaryStrategy,
@@ -423,6 +427,29 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           Resource:
         </div>,
         thread.stringTable.getString(resourceNameIndex),
+      ];
+    }
+
+    let argumentsElement = null;
+    if (argumentValues) {
+      argumentsElement = [
+        <div className="tooltipLabel" key="arguments">
+          Arguments:
+        </div>,
+        argumentValues.length === 0 ? (
+          <div key="argumentsVal">—</div>
+        ) : (
+          <div className="tooltipArguments" key="argumentsVal">
+            {argumentValues.map((previewObject, index) => (
+              <React.Fragment key={`arg-${index}`}>
+                {Rep({
+                  object: previewObject,
+                  mode: MODE.LONG,
+                })}
+              </React.Fragment>
+            ))}
+          </div>
+        ),
       ];
     }
 
@@ -540,6 +567,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             {pageAndParentPageURL}
             {fileName}
             {resource}
+            {argumentsElement}
           </div>
           {this._renderCategoryTimings(timings)}
         </div>

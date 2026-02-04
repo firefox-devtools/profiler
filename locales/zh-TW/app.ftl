@@ -65,6 +65,18 @@ CallNodeContextMenu--transform-focus-function = 聚焦於函數
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = 聚焦於函數（反向）
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+## The translation for "self" in these strings should match the translation used
+## in CallTree--samples-self and CallTree--bytes-self. Alternatively it can be
+## translated as "self values" or "self time" (though "self time" is less desirable
+## because this menu item is also shown in "bytes" mode).
+
+CallNodeContextMenu--transform-focus-self-title = 聚焦於 self 與聚焦於函數類似，但只保留與函數的 self 時間有關的取樣。將捨棄被呼叫者的取樣，並將呼叫樹重新放置於聚焦的函數根上。
+CallNodeContextMenu--transform-focus-self = 只聚焦於 self
+    .title = { CallNodeContextMenu--transform-focus-self-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = 只聚焦於子樹
     .title = 聚焦於子樹，將從呼叫樹中拉出分支，並移除不屬於該分支的內容。然而此功能只對單一呼叫節點有效，將忽略其他呼叫該函數的部分。
 # This is used as the context menu item to apply the "Focus on category" transform.
@@ -473,7 +485,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = 無限制
 MenuButtons--metaInfo--application = 應用程式
 MenuButtons--metaInfo--name-and-version = 名稱與版本：
-MenuButtons--metaInfo--application-uptime = 運作時間：
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = Uptime：
 MenuButtons--metaInfo--update-channel = 更新頻道：
 MenuButtons--metaInfo--build-id = Build ID：
 MenuButtons--metaInfo--build-type = Build Type：
@@ -787,6 +800,11 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = 功率
+# This is used in the tooltip when the instant power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-microwatt = { $value } μW
+    .label = 功率
 # This is used in the tooltip when the power value uses the kilowatt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -936,6 +954,12 @@ TransformNavigator--focus-subtree = 聚焦節點：{ $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = 聚焦：{ $item }
+# "Focus self" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-on-function-self
+# Also see the translation note above CallNodeContextMenu--transform-focus-self.
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-self = 聚焦 self：{ $item }
 # "Focus category" transform. The word "Focus" has the meaning of an adjective here.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
 # Variables:
