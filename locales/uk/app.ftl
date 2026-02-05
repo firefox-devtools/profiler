@@ -71,6 +71,9 @@ CallNodeContextMenu--transform-focus-function = Фокус на функції
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Фокус на функції (інвертовано)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Фокус лише на піддереві
     .title =
         Фокус на піддереві вилучить будь-який зразок, який не включає цю
@@ -541,7 +544,6 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Необмежено
 MenuButtons--metaInfo--application = Застосунок
 MenuButtons--metaInfo--name-and-version = Назва та версія:
-MenuButtons--metaInfo--application-uptime = Час роботи:
 MenuButtons--metaInfo--update-channel = Канал оновлень:
 MenuButtons--metaInfo--build-id = ID збірки:
 MenuButtons--metaInfo--build-type = Тип збірки:

@@ -6,6 +6,7 @@
   --internal-border-color: #ddd;
 
   display: flex;
+  align-items: center;
   justify-content: space-between;
   padding-bottom: 0.5em;
   border-bottom: 1px solid var(--internal-border-color);
@@ -41,13 +42,17 @@
   font-weight: normal;
 }
 
-.appHeaderGithubIcon {
-  margin: 0 0.2em;
-  transition: opacity 250ms var(--animation-curve);
+.appHeaderRightControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
 }
 
-.appHeaderGithubIcon svg {
-  vertical-align: middle;
+.appHeaderGithubIcon {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0.2em;
+  transition: opacity 250ms var(--animation-curve);
 }
 
 .appHeaderGithubIcon:hover {
