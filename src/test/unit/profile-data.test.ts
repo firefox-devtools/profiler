@@ -26,6 +26,7 @@ import {
   getNativeSymbolInfo,
   computeTimeColumnForRawSamplesTable,
   getCallNodeFramePerStack,
+  getTotalNativeSymbolTimingsForCallNode,
 } from '../../profile-logic/profile-data';
 import { resourceTypes } from '../../profile-logic/data-structures';
 import {
@@ -60,6 +61,8 @@ import type {
   RawProfileSharedData,
   IndexIntoFrameTable,
   IndexIntoSourceTable,
+  IndexIntoCategoryList,
+  IndexIntoNativeSymbolTable,
 } from 'firefox-profiler/types';
 
 describe('string-table', function () {
@@ -1481,7 +1484,7 @@ describe('getNativeSymbolsForCallNode', function () {
     );
     expect(
       getNativeSymbolsForCallNode(callNodeFramePerStackAB, thread.frameTable)
-    ).toEqual([symB]);
+    ).toEqual(new Set([symB]));
 
     const callNodeFramePerStackABC = getCallNodeFramePerStack(
       ensureExists(abc),
@@ -1490,7 +1493,7 @@ describe('getNativeSymbolsForCallNode', function () {
     );
     expect(
       getNativeSymbolsForCallNode(callNodeFramePerStackABC, thread.frameTable)
-    ).toEqual([symB]);
+    ).toEqual(new Set([symB]));
   });
 
   it('finds multiple symbols', function () {
@@ -1531,10 +1534,192 @@ describe('getNativeSymbolsForCallNode', function () {
       thread.stackTable
     );
     expect(
-      new Set(
-        getNativeSymbolsForCallNode(callNodeFramePerStackC, thread.frameTable)
-      )
+      getNativeSymbolsForCallNode(callNodeFramePerStackC, thread.frameTable)
     ).toEqual(new Set([symB, symD]));
+  });
+});
+
+describe('getTotalNativeSymbolTimingsForCallNode', function () {
+  function getTimings(
+    thread: Thread,
+    callNodePath: CallNodePath,
+    defaultCategory: IndexIntoCategoryList,
+    isInverted: boolean
+  ): Map<IndexIntoNativeSymbolTable, number> {
+    const { stackTable, frameTable, funcTable, samples } = thread;
+    const nonInvertedCallNodeInfo = getCallNodeInfo(
+      stackTable,
+      frameTable,
+      defaultCategory
+    );
+    const callNodeInfo = isInverted
+      ? getInvertedCallNodeInfo(
+          nonInvertedCallNodeInfo,
+          defaultCategory,
+          funcTable.length
+        )
+      : nonInvertedCallNodeInfo;
+    const callNodeIndex = ensureExists(
+      callNodeInfo.getCallNodeIndexFromPath(callNodePath),
+      'invalid call node path'
+    );
+    const callNodeFramePerStack = getCallNodeFramePerStack(
+      callNodeIndex,
+      callNodeInfo,
+      stackTable
+    );
+    return getTotalNativeSymbolTimingsForCallNode(
+      samples,
+      callNodeFramePerStack,
+      frameTable
+    );
+  }
+
+  it('passes a basic test', function () {
+    const {
+      derivedThreads,
+      funcNamesDictPerThread,
+      nativeSymbolsDictPerThread,
+      defaultCategory,
+    } = getProfileFromTextSamples(`
+        A[lib:file][sym:Asym:20:]
+        B[lib:file][sym:Bsym:30:]
+      `);
+    const [{ A, B }] = funcNamesDictPerThread;
+    const [{ Asym, Bsym }] = nativeSymbolsDictPerThread;
+    const [thread] = derivedThreads;
+
+    // Compute the timings for the root call node.
+    // One total hit at symbol Asym.
+    const timingsRoot = getTimings(thread, [A], defaultCategory, false);
+    expect(timingsRoot.get(Asym)).toBe(1);
+    expect(timingsRoot.size).toBe(1); // no other hits
+
+    // Compute the timings for the child call node.
+    // One total hit at symbol Bsym.
+    const timingsChild = getTimings(thread, [A, B], defaultCategory, false);
+    expect(timingsChild.get(Bsym)).toBe(1);
+    expect(timingsChild.size).toBe(1); // no other hits
+  });
+
+  it('passes a basic test with recursion', function () {
+    const {
+      derivedThreads,
+      funcNamesDictPerThread,
+      nativeSymbolsDictPerThread,
+      defaultCategory,
+    } = getProfileFromTextSamples(`
+        A[lib:file][sym:Asym:20:]
+        B[lib:file][sym:Bsym:30:]
+        A[lib:file][sym:A2sym:40:]
+      `);
+
+    const [{ A, B }] = funcNamesDictPerThread;
+    const [{ Asym, A2sym }] = nativeSymbolsDictPerThread;
+    const [thread] = derivedThreads;
+
+    // Compute the timings for the root call node.
+    // One total hit at symbol Asym.
+    const timingsRoot = getTimings(thread, [A], defaultCategory, false);
+    expect(timingsRoot.get(Asym)).toBe(1);
+    expect(timingsRoot.size).toBe(1); // no other hits
+
+    // Compute the timings for the leaf call node.
+    // One total hit at symbol A2sym.
+    // In particular, we shouldn't record a hit for symbol Asym, even though
+    // the frame in Asym is also in A. But it's in the wrong call node.
+    const timingsChild = getTimings(thread, [A, B, A], defaultCategory, false);
+    expect(timingsChild.get(A2sym)).toBe(1);
+    expect(timingsChild.size).toBe(1); // no other hits
+  });
+
+  it('passes a test where the same function is called via different call paths', function () {
+    const {
+      derivedThreads,
+      funcNamesDictPerThread,
+      nativeSymbolsDictPerThread,
+      defaultCategory,
+    } = getProfileFromTextSamples(`
+        A[lib:one][sym:Asym:20:]  A[lib:one][sym:Asym:20:]   A[lib:one][sym:Asym:20:]
+        B[lib:one][sym:Bsym:30:]  D[lib:one][sym:Dsym:40:]   B[lib:one][sym:Bsym:30:]
+        C[lib:two][sym:Csym:10:]  C[lib:two][sym:C2sym:50:]  C[lib:two][sym:C3sym:60:]
+                                                             D[lib:one][sym:Dsym:40:]
+      `);
+
+    const [{ A, B, C }] = funcNamesDictPerThread;
+    const [{ Csym, C3sym }] = nativeSymbolsDictPerThread;
+    const [thread] = derivedThreads;
+
+    const timingsABC = getTimings(thread, [A, B, C], defaultCategory, false);
+    expect(timingsABC.get(Csym)).toBe(1);
+    expect(timingsABC.get(C3sym)).toBe(1);
+    expect(timingsABC.size).toBe(2); // no other hits
+  });
+
+  it('passes a test with an inverted thread', function () {
+    const {
+      derivedThreads,
+      funcNamesDictPerThread,
+      nativeSymbolsDictPerThread,
+      defaultCategory,
+    } = getProfileFromTextSamples(`
+        A[lib:one][sym:Asym:20:]  A[lib:one][sym:Asym:20:]   A[lib:one][sym:Asym:20:]
+        B[lib:one][sym:Bsym:30:]  D[lib:one][sym:Dsym:40:]   B[lib:one][sym:Bsym:30:]
+        D[lib:one][sym:Dsym:40:]  D[lib:one][sym:D2sym:50:]  C[lib:two][sym:Csym:10:]
+                                                             D[lib:one][sym:Dsym:40:]
+      `);
+
+    const [{ C, D }] = funcNamesDictPerThread;
+    const [{ Csym, Dsym, D2sym }] = nativeSymbolsDictPerThread;
+    const [thread] = derivedThreads;
+    // For the root D of the inverted tree, we have 3 native symbol hits.
+    const timingsD = getTimings(thread, [D], defaultCategory, true);
+    expect(timingsD.get(Dsym)).toBe(2);
+    expect(timingsD.get(D2sym)).toBe(1);
+    expect(timingsD.size).toBe(2); // no other hits
+
+    // For the C call node which is a child (direct caller) of D, we have
+    // one hit at symbol Csym.
+    const timingsDC = getTimings(thread, [D, C], defaultCategory, true);
+    expect(timingsDC.get(Csym)).toBe(1);
+    expect(timingsDC.size).toBe(1); // no other hits
+  });
+
+  it('passes a test where a function is present in two different native symbols', function () {
+    // The funky part here is that the targeted call node has frames from two different native
+    // symbols: Two from native symbol Bsym, and one from native symbol Asym. That's
+    // because B is present both as its own native symbol (separate outer function)
+    // and as an inlined call from A. In other words, C has been inlined both into
+    // a standalone B and also into another copy of B which was inlined into A.
+    //
+    // This means that, if the user double clicks call node [A, B, C], there are two
+    // different symbols for which we may want to display the assembly code, and we
+    // should compute how much time is spent in each.
+    const {
+      derivedThreads,
+      funcNamesDictPerThread,
+      nativeSymbolsDictPerThread,
+      defaultCategory,
+    } = getProfileFromTextSamples(`
+        A[lib:one][sym:Asym:20:]         A[lib:one][sym:Asym:20:]         A[lib:one][sym:Asym:20:]  A[lib:one][sym:Asym:20:]
+        B[lib:one][sym:Bsym:30:]         B[lib:one][sym:Asym:20:][inl:1]  B[lib:one][sym:Bsym:30:]  E[lib:one][sym:Esym:30:]
+        C[lib:one][sym:Bsym:30:][inl:1]  C[lib:one][sym:Asym:20:][inl:2]  C[lib:one][sym:Bsym:30:]
+                                                                          D[lib:one][sym:Dsym:40:]
+      `);
+
+    const [{ A, B, C }] = funcNamesDictPerThread;
+    const [{ Asym, Bsym }] = nativeSymbolsDictPerThread;
+    const [thread] = derivedThreads;
+
+    const timingsABCForBsym = getTimings(
+      thread,
+      [A, B, C],
+      defaultCategory,
+      false
+    );
+    expect(timingsABCForBsym.get(Asym)).toBe(1);
+    expect(timingsABCForBsym.get(Bsym)).toBe(2);
+    expect(timingsABCForBsym.size).toBe(2); // no other hits
   });
 });
 
