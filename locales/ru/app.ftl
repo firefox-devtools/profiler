@@ -79,6 +79,21 @@ CallNodeContextMenu--transform-focus-function = Сфокусироваться �
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Сфокусироваться на функции (инвертировано)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+## The translation for "self" in these strings should match the translation used
+## in CallTree--samples-self and CallTree--bytes-self. Alternatively it can be
+## translated as "self values" or "self time" (though "self time" is less desirable
+## because this menu item is also shown in "bytes" mode).
+
+CallNodeContextMenu--transform-focus-self-title =
+    Фокусировка на себе похожа на фокусировку на функции, но сохраняет только замеры
+    которые вносят вклад в собственное время функции. Замеры в вызовах
+    отбрасываются, а дерево вызовов перенаправляется на функцию, находящуюся в фокусе.
+CallNodeContextMenu--transform-focus-self = Сфокусироваться только на себе
+    .title = { CallNodeContextMenu--transform-focus-self-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Сфокусироваться только на поддереве
     .title =
         Фокусировка на поддереве приведёт к удалению любого сэмпла, который не включает эту
@@ -579,7 +594,6 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Неограничена
 MenuButtons--metaInfo--application = Приложение
 MenuButtons--metaInfo--name-and-version = Имя и версия:
-MenuButtons--metaInfo--application-uptime = Время работы:
 MenuButtons--metaInfo--update-channel = Канал обновлений:
 MenuButtons--metaInfo--build-id = ID сборки:
 MenuButtons--metaInfo--build-type = Тип сборки:
@@ -894,6 +908,11 @@ TrackPower--tooltip-power-watt = { $value } Вт
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } мВт
     .label = Мощность
+# This is used in the tooltip when the instant power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-microwatt = { $value } мВт
+    .label = Мощность
 # This is used in the tooltip when the power value uses the kilowatt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -1043,6 +1062,12 @@ TransformNavigator--focus-subtree = Узел фокусировки: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Фокус: { $item }
+# "Focus self" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-on-function-self
+# Also see the translation note above CallNodeContextMenu--transform-focus-self.
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-self = Сфокусироваться на себе: { $item }
 # "Focus category" transform. The word "Focus" has the meaning of an adjective here.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
 # Variables:
