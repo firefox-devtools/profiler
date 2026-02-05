@@ -371,6 +371,10 @@ Home--instructions-content =
     Recording performance profiles requires <a>{ -firefox-brand-name }</a>.
     However, existing profiles can be viewed in any modern browser.
 
+Home--fenix-instructions =
+    Recording performance profiles currently requires <a>{ -firefox-brand-name } for Desktop</a>.
+    However, existing profiles can be viewed in any modern desktop browser.
+
 Home--record-instructions-start-stop = Stop and start profiling
 Home--record-instructions-capture-load = Capture and load profile
 Home--profiler-motto = Capture a performance profile. Analyze it. Share it. Make the web faster.
