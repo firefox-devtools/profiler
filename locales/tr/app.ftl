@@ -28,6 +28,8 @@ ThemeToggle--system =
     .title = Sistem temasının tercihine uyum sağla
 ThemeToggle--light =
     .title = Açık temayı kullan
+ThemeToggle--dark =
+    .title = Koyu temayı kullan
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
