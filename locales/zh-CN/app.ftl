@@ -476,6 +476,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = 无限制
 MenuButtons--metaInfo--application = 应用程序
 MenuButtons--metaInfo--name-and-version = 名称和版本：
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = 运行时间：
 MenuButtons--metaInfo--update-channel = 更新通道:
 MenuButtons--metaInfo--build-id = 构建 ID：
 MenuButtons--metaInfo--build-type = 构建类型：
@@ -1083,6 +1085,12 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = 隐藏汇编代码视图
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = 上一个
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = 下一个
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
