@@ -341,8 +341,8 @@ Home--enable-button-unavailable =
 # This message can be seen on https://main--perf-html.netlify.app/ .
 Home--web-channel-unavailable = Iste instantia de profilator non ha potite connecter se al WebChannel. Isto usualmente significa que illo se executa sur un hospite differente de illo que es specificate in le preferentia <code>devtools.performance.recording.ui-base-url</code>. Si tu vole capturar nove profilos con iste instantia, e dar a illo le controlo programmatic del button de menu profilator, tu pote ir a <code>about:config</code> e cambiar le preferentia.
 Home--record-instructions =
-    Pro initiar profilar, clicca sur le button profila o usa le
-    vias breve de claviero. Le icone es blau quando un profilo es in registration.
+    Pro comenciar le profilage, clicca sur le button de profilage o usa le
+    claves de accesso directe. Le icone es blau quando un profilo se registra.
     Pulsa <kbd>Capturar</kbd> pro cargar le datos in profiler.firefox.com.
 Home--instructions-content =
     Registrar profilos de prestation require <a>{ -firefox-brand-name }</a>.
@@ -366,7 +366,7 @@ Home--load-files-from-other-tools2 =
     proprie importator</write>.
 Home--install-chrome-extension = Installar le extension de Chrome
 Home--chrome-extension-instructions = Usa le <a>extension  de { -profiler-brand-name } pro Chrome</a> pro capturar profilos  de prestation in Chrome e analysar los in le { -profiler-brand-name }.
-Home--chrome-extension-recording-instructions = Installar le extension ab le Boteca web de Chrome. Un vice installate, usar le icone  barra del instrumentos del extensiones o le vias breve pro cessar de profilar. Tu alsi pote exportar profilos e cargar los ci pro analyse detaliate.
+Home--chrome-extension-recording-instructions = Un vice installate, usar le icone de barra de instrumentos del extension o le accessos directe pro comenciar e terminar le profilage. Tu pote etiam exportar profilos e cargar los ci pro un analyse detaliate.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
