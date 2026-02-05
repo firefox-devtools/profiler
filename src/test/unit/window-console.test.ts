@@ -79,6 +79,39 @@ describe('console-accessible values on the window object', function () {
     `);
   });
 
+  it('can extract gecko logs with log level already in module', function () {
+    const profile = getProfileWithMarkers([
+      [
+        'LogMessages',
+        170,
+        null,
+        {
+          type: 'Log',
+          module: 'D/nsHttp',
+          name: 'ParentChannelListener::ParentChannelListener [this=7fb5e19b98d0, next=7fb5f48f2320]',
+        },
+      ],
+      [
+        'LogMessages',
+        190,
+        null,
+        {
+          type: 'Log',
+          name: 'nsJARChannel::nsJARChannel [this=0x87f1ec80]\n',
+          module: 'D/nsJarProtocol',
+        },
+      ],
+    ]);
+    const store = storeWithProfile(profile);
+    const target: MixedObject = {};
+    addDataToWindowObject(store.getState, store.dispatch, target);
+    const result = (target as any).extractGeckoLogs();
+    expect(result).toBe(stripIndent`
+      1970-01-01 00:00:00.170000000 UTC - [Unknown Process 0: Empty]: D/nsHttp ParentChannelListener::ParentChannelListener [this=7fb5e19b98d0, next=7fb5f48f2320]
+      1970-01-01 00:00:00.190000000 UTC - [Unknown Process 0: Empty]: D/nsJarProtocol nsJARChannel::nsJARChannel [this=0x87f1ec80]
+    `);
+  });
+
   describe('totalMarkerDuration', function () {
     function setup(): ExtraPropertiesOnWindowForConsole {
       jest.spyOn(console, 'log').mockImplementation(() => {});
