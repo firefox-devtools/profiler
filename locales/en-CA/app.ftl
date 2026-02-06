@@ -573,6 +573,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Unlimited
 MenuButtons--metaInfo--application = Application
 MenuButtons--metaInfo--name-and-version = Name and version:
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = Uptime:
 MenuButtons--metaInfo--update-channel = Update channel:
 MenuButtons--metaInfo--build-id = Build ID:
 MenuButtons--metaInfo--build-type = Build type:
@@ -887,6 +889,11 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Power
+# This is used in the tooltip when the instant power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-microwatt = { $value } μW
+    .label = Power
 # This is used in the tooltip when the power value uses the kilowatt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -1036,6 +1043,12 @@ TransformNavigator--focus-subtree = Focus Node: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Focus: { $item }
+# "Focus self" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-on-function-self
+# Also see the translation note above CallNodeContextMenu--transform-focus-self.
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-self = Focus Self: { $item }
 # "Focus category" transform. The word "Focus" has the meaning of an adjective here.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
 # Variables:
@@ -1181,6 +1194,17 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = Hide the assembly view
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = Previous
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = Next
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = { $current } of { $total }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
