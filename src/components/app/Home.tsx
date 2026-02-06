@@ -223,6 +223,7 @@ type PopupInstallPhase =
   | 'popup-enabled'
   | 'suggest-enable-popup'
   // Other browsers:
+  | 'firefox-android'
   | 'suggest-chrome-extension'
   | 'other-browser';
 
@@ -233,21 +234,25 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
     let popupInstallPhase = 'other-browser';
 
     if (_isFirefox()) {
-      popupInstallPhase = 'checking-webchannel';
+      if (_isAndroid()) {
+        popupInstallPhase = 'firefox-android';
+      } else {
+        popupInstallPhase = 'checking-webchannel';
 
-      // Query the browser to see if the menu button is available.
-      queryIsMenuButtonEnabled().then(
-        (isMenuButtonEnabled) => {
-          this.setState({
-            popupInstallPhase: isMenuButtonEnabled
-              ? 'popup-enabled'
-              : 'suggest-enable-popup',
-          });
-        },
-        () => {
-          this.setState({ popupInstallPhase: 'webchannel-unavailable' });
-        }
-      );
+        // Query the browser to see if the menu button is available.
+        queryIsMenuButtonEnabled().then(
+          (isMenuButtonEnabled) => {
+            this.setState({
+              popupInstallPhase: isMenuButtonEnabled
+                ? 'popup-enabled'
+                : 'suggest-enable-popup',
+            });
+          },
+          () => {
+            this.setState({ popupInstallPhase: 'webchannel-unavailable' });
+          }
+        );
+      }
     } else if (_isChromium()) {
       popupInstallPhase = 'suggest-chrome-extension';
       // TODO: Check if the extension is installed and show the recording
@@ -269,6 +274,8 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
         return this._renderEnablePopupInstructions(false);
       case 'popup-enabled':
         return this._renderRecordInstructions(FirefoxPopupScreenshot);
+      case 'firefox-android':
+        return this._renderFenixInstructions();
       case 'suggest-chrome-extension':
         return this._renderChromeInstructions();
       case 'other-browser':
@@ -360,6 +367,56 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
                 </p>
               </Localized>
             )}
+            <Localized
+              id="Home--profile-firefox-android-instructions"
+              elems={{
+                a: (
+                  <a href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device" />
+                ),
+              }}
+            >
+              <p>
+                You can also profile Firefox for Android. For more information,
+                please consult this documentation:{' '}
+                <a>Profiling Firefox for Android directly on device</a>.
+              </p>
+            </Localized>
+          </div>
+          {/* end of grid container */}
+        </div>
+      </InstructionTransition>
+    );
+  }
+
+  _renderFenixInstructions() {
+    return (
+      <InstructionTransition key={0}>
+        <div className="homeInstructions" data-testid="home-fenix-instructions">
+          {/* Grid container: homeInstructions */}
+          {/* Left column: img */}
+          <img
+            className="homeSectionScreenshot"
+            src={PerfScreenshot}
+            alt="screenshot of profiler.firefox.com"
+          />
+          {/* Right column: instructions */}
+          <div>
+            <DocsButton />
+            <Localized
+              id="Home--fenix-instructions"
+              elems={{
+                a: <a href="https://www.firefox.com/en-US/browsers/desktop/" />,
+              }}
+            >
+              <p>
+                Recording performance profiles currently requires{' '}
+                <a href="https://www.firefox.com/en-US/browsers/desktop/">
+                  Firefox for Desktop
+                </a>
+                . However, existing profiles can be viewed in any modern desktop
+                browser.
+              </p>
+            </Localized>
             <Localized
               id="Home--profile-firefox-android-instructions"
               elems={{
@@ -698,6 +755,10 @@ function _isFirefox(): boolean {
 
 function _isChromium(): boolean {
   return Boolean(navigator.userAgent.match(/Chrome\/\d+\.\d+/));
+}
+
+function _isAndroid(): boolean {
+  return Boolean(navigator.userAgent.match(/\bAndroid\b/i));
 }
 
 export const Home = explicitConnect<
