@@ -40,15 +40,15 @@ describe('formatGigaBytes', () => {
   });
 
   it('can return values with kilobyte precision', () => {
-    expect(formatGigaBytes(1234567890, 3, 2, 1024)).toBe('1GB 234MB 568KB');
+    expect(formatGigaBytes(1234567890, 3, 2, 1000)).toBe('1GB 234MB 568KB');
   });
 
   it('can return values with megabyte precision', () => {
-    expect(formatGigaBytes(1234567890, 3, 2, 1024 ** 2)).toBe('1GB 235MB');
+    expect(formatGigaBytes(1234567890, 3, 2, 1000 ** 2)).toBe('1GB 235MB');
   });
 
   it('can return values with gigabyte precision', () => {
-    expect(formatGigaBytes(1234567890, 3, 2, 1024 ** 3)).toBe('1GB');
+    expect(formatGigaBytes(1234567890, 3, 2, 1000 ** 3)).toBe('1GB');
   });
 });
 
@@ -70,11 +70,11 @@ describe('formatMegaBytes', () => {
   });
 
   it('can return values with kilobyte precision', () => {
-    expect(formatMegaBytes(1234567, 3, 2, 1024)).toBe('1MB 235KB');
+    expect(formatMegaBytes(1234567, 3, 2, 1000)).toBe('1MB 235KB');
   });
 
   it('can return values with megabyte precision', () => {
-    expect(formatMegaBytes(1234567, 3, 2, 1024 ** 2)).toBe('1MB');
+    expect(formatMegaBytes(1234567, 3, 2, 1000 ** 2)).toBe('1MB');
   });
 });
 
@@ -96,7 +96,7 @@ describe('formatKiloBytes', () => {
   });
 
   it('can return values with kilobyte precision', () => {
-    expect(formatKiloBytes(1234, 3, 2, 1024)).toBe('1KB');
+    expect(formatKiloBytes(1234, 3, 2, 1000)).toBe('1KB');
   });
 });
 
@@ -126,7 +126,7 @@ describe('formatBytes', () => {
   });
 
   it('can return values with kilobyte precision', () => {
-    expect(formatBytes(12345, 3, 2, 1024)).toBe('12KB');
+    expect(formatBytes(12345, 3, 2, 1000)).toBe('12KB');
   });
 });
 
