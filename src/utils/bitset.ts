@@ -45,6 +45,15 @@ export function checkBit(bitSet: BitSet, bitIndex: number): boolean {
   return (bitSet[q] & (1 << r)) !== 0;
 }
 
+export function combineTwoBitSetsWithAnd(a: BitSet, b: BitSet): BitSet {
+  const slotCount = a.length;
+  const result = new Int32Array(slotCount);
+  for (let i = 0; i < slotCount; i++) {
+    result[i] = a[i] & b[i];
+  }
+  return result;
+}
+
 export class BitSetOutOfBoundsError extends Error {
   override name = 'BitSetOutOfBoundsError';
   bitIndex: number;

@@ -8,6 +8,7 @@ import {
 } from '../app-logic/constants';
 
 import type {
+  RawProfileSharedData,
   RawThread,
   RawSamplesTable,
   SamplesTable,
@@ -398,16 +399,23 @@ export function getEmptyThread(overrides?: Partial<RawThread>): RawThread {
     // Creating samples with event delay since it's the new samples table.
     samples: getEmptySamplesTableWithEventDelay(),
     markers: getEmptyRawMarkerTable(),
-    stackTable: getEmptyRawStackTable(),
-    frameTable: getEmptyFrameTable(),
-    funcTable: getEmptyFuncTable(),
-    resourceTable: getEmptyResourceTable(),
-    nativeSymbols: getEmptyNativeSymbolTable(),
   };
 
   return {
     ...defaultThread,
     ...overrides,
+  };
+}
+
+export function getEmptySharedData(): RawProfileSharedData {
+  return {
+    stackTable: getEmptyRawStackTable(),
+    frameTable: getEmptyFrameTable(),
+    funcTable: getEmptyFuncTable(),
+    resourceTable: getEmptyResourceTable(),
+    nativeSymbols: getEmptyNativeSymbolTable(),
+    sources: getEmptySourceTable(),
+    stringArray: [],
   };
 }
 
@@ -438,10 +446,7 @@ export function getEmptyProfile(): Profile {
     },
     libs: [],
     pages: [],
-    shared: {
-      stringArray: [],
-      sources: getEmptySourceTable(),
-    },
+    shared: getEmptySharedData(),
     threads: [],
   };
 }

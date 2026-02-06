@@ -6,18 +6,15 @@ import { attemptToConvertDhat } from './import/dhat';
 import { GlobalDataCollector } from './global-data-collector';
 import { AddressLocator } from './address-locator';
 import {
-  resourceTypes,
   getEmptyExtensions,
-  getEmptyFuncTable,
-  getEmptyResourceTable,
   getEmptyRawMarkerTable,
   getEmptyJsAllocationsTable,
   getEmptyUnbalancedNativeAllocationsTable,
-  getEmptyNativeSymbolTable,
 } from './data-structures';
 import { immutableUpdate, ensureExists } from '../utils/types';
 import { verifyMagic, SIMPLEPERF as SIMPLEPERF_MAGIC } from '../utils/magic';
 import { attemptToUpgradeProcessedProfileThroughMutation } from './processed-profile-versioning';
+import type { ProfileUpgradeInfo } from './processed-profile-versioning';
 import { upgradeGeckoProfileToCurrentVersion } from './gecko-profile-versioning';
 import {
   isPerfScriptFormat,
@@ -36,7 +33,6 @@ import {
 } from '../app-logic/constants';
 import {
   getFriendlyThreadName,
-  getOrCreateURIResource,
   nudgeReturnAddresses,
 } from '../profile-logic/profile-data';
 import { computeStringIndexMarkerFieldsByDataType } from '../profile-logic/marker-schema';
@@ -54,13 +50,9 @@ import type {
   RawStackTable,
   RawMarkerTable,
   LibMapping,
-  FuncTable,
-  ResourceTable,
-  IndexIntoLibs,
   IndexIntoStackTable,
   IndexIntoFuncTable,
   IndexIntoStringTable,
-  IndexIntoResourceTable,
   JsTracerTable,
   JsAllocationsTable,
   ProfilerOverhead,
@@ -104,6 +96,7 @@ import type {
   GeckoMarkerSchema,
   GeckoSourceTable,
   IndexIntoCategoryList,
+  IndexIntoFrameTable,
 } from 'firefox-profiler/types';
 import { decompress, isGzip } from 'firefox-profiler/utils/gz';
 
@@ -183,14 +176,8 @@ function _cleanFunctionName(functionName: string): string {
 }
 
 type ExtractionInfo = {
-  funcTable: FuncTable;
-  resourceTable: ResourceTable;
   geckoThreadStringArray: string[];
-  stringTable: StringTable;
   addressLocator: AddressLocator;
-  libToResourceIndex: Map<IndexIntoLibs, IndexIntoResourceTable>;
-  originToResourceIndex: Map<string, IndexIntoResourceTable>;
-  libNameToResourceIndex: Map<IndexIntoStringTable, IndexIntoResourceTable>;
   stringToNewFuncIndexAndFrameAddress: Map<
     string,
     { funcIndex: IndexIntoFuncTable; frameAddress: Address | null }
@@ -212,43 +199,22 @@ export function extractFuncsAndResourcesFromFrameLocations(
   relevantForJSPerFrame: boolean[],
   geckoThreadStringArray: string[],
   libs: LibMapping[],
-  extensions: ExtensionTable = getEmptyExtensions(),
   globalDataCollector: GlobalDataCollector,
   geckoSourceTable: GeckoSourceTable | undefined
 ): {
-  funcTable: FuncTable;
-  resourceTable: ResourceTable;
   frameFuncs: IndexIntoFuncTable[];
   frameAddresses: (Address | null)[];
 } {
-  // Important! If the flow type for the FuncTable was changed, update all the functions
-  // in this file that start with the word "extract".
-  const funcTable = getEmptyFuncTable();
-
-  // Important! If the flow type for the ResourceTable was changed, update all the functions
-  // in this file that start with the word "extract".
-  const resourceTable = getEmptyResourceTable();
-
   const stringTable = globalDataCollector.getStringTable();
 
   // Bundle all of the variables up into an object to pass them around to functions.
   const extractionInfo: ExtractionInfo = {
-    funcTable,
-    resourceTable,
     geckoThreadStringArray,
-    stringTable,
     addressLocator: new AddressLocator(libs),
-    libToResourceIndex: new Map(),
-    originToResourceIndex: new Map(),
-    libNameToResourceIndex: new Map(),
     stringToNewFuncIndexAndFrameAddress: new Map(),
     globalDataCollector,
     geckoSourceTable,
   };
-
-  for (let i = 0; i < extensions.length; i++) {
-    _addExtensionOrigin(extractionInfo, extensions, i);
-  }
 
   // Go through every frame location string, and deduce the function and resource
   // information by applying various string matching heuristics.
@@ -289,7 +255,7 @@ export function extractFuncsAndResourcesFromFrameLocations(
         funcIndex = _extractJsFunction(extractionInfo, locationString);
         if (funcIndex === null) {
           funcIndex = _extractUnknownFunctionType(
-            extractionInfo,
+            globalDataCollector,
             locationIndex,
             relevantForJS
           );
@@ -308,8 +274,6 @@ export function extractFuncsAndResourcesFromFrameLocations(
   }
 
   return {
-    funcTable: extractionInfo.funcTable,
-    resourceTable: extractionInfo.resourceTable,
     frameFuncs,
     frameAddresses,
   };
@@ -336,13 +300,7 @@ function _extractUnsymbolicatedFunction(
   if (!locationString.startsWith('0x')) {
     return null;
   }
-  const {
-    addressLocator,
-    libToResourceIndex,
-    resourceTable,
-    funcTable,
-    stringTable,
-  } = extractionInfo;
+  const { addressLocator, globalDataCollector } = extractionInfo;
 
   let resourceIndex = -1;
   let addressRelativeToLib: Address = -1;
@@ -363,37 +321,22 @@ function _extractUnsymbolicatedFunction(
       // Yes, we found the library whose mapping covers this address!
       addressRelativeToLib = relativeAddress;
 
-      const libIndex = extractionInfo.globalDataCollector.indexForLib(lib);
-
-      const resourceIndexOrUndefined = libToResourceIndex.get(libIndex);
-      if (resourceIndexOrUndefined !== undefined) {
-        resourceIndex = resourceIndexOrUndefined;
-      } else {
-        // This library doesn't exist in the libs array, insert it. This resou
-        // A lib resource is a systems-level compiled library, for example "XUL",
-        // "AppKit", or "CoreFoundation".
-        resourceIndex = resourceTable.length++;
-        resourceTable.lib[resourceIndex] = libIndex;
-        resourceTable.name[resourceIndex] = stringTable.indexForString(
-          lib.name
-        );
-        resourceTable.host[resourceIndex] = null;
-        resourceTable.type[resourceIndex] = resourceTypes.library;
-        libToResourceIndex.set(libIndex, resourceIndex);
-      }
+      const libIndex = globalDataCollector.indexForLib(lib);
+      resourceIndex = globalDataCollector.indexForLibResource(libIndex);
     }
   } catch (_e) {
     // Probably a hex parse error. Ignore.
   }
-  // Add the function to the funcTable.
-  const funcIndex = funcTable.length++;
-  funcTable.name[funcIndex] = locationIndex;
-  funcTable.resource[funcIndex] = resourceIndex;
-  funcTable.relevantForJS[funcIndex] = false;
-  funcTable.isJS[funcIndex] = false;
-  funcTable.source[funcIndex] = null;
-  funcTable.lineNumber[funcIndex] = null;
-  funcTable.columnNumber[funcIndex] = null;
+
+  const funcIndex = globalDataCollector.indexForFunc(
+    locationIndex,
+    false,
+    false,
+    resourceIndex,
+    null,
+    null,
+    null
+  );
   return { funcIndex, frameAddress: addressRelativeToLib };
 }
 
@@ -422,13 +365,9 @@ function _extractCppFunction(
   if (!cppMatch) {
     return null;
   }
-  const {
-    funcTable,
-    stringTable,
-    stringToNewFuncIndexAndFrameAddress,
-    libNameToResourceIndex,
-    resourceTable,
-  } = extractionInfo;
+  const { stringToNewFuncIndexAndFrameAddress, globalDataCollector } =
+    extractionInfo;
+  const stringTable = globalDataCollector.getStringTable();
 
   const [, funcNameRaw, libraryNameString] = cppMatch;
   const funcName = _cleanFunctionName(funcNameRaw);
@@ -436,56 +375,22 @@ function _extractCppFunction(
   const libraryNameStringIndex = stringTable.indexForString(libraryNameString);
   const frameInfo = stringToNewFuncIndexAndFrameAddress.get(funcName);
   if (frameInfo !== undefined) {
-    // Do not insert a new function.
+    // Use the existing function.
     return frameInfo.funcIndex;
   }
-  let resourceIndex = libNameToResourceIndex.get(libraryNameStringIndex);
-  if (resourceIndex === undefined) {
-    resourceIndex = resourceTable.length++;
-    libNameToResourceIndex.set(libraryNameStringIndex, resourceIndex);
-    resourceTable.lib[resourceIndex] = null;
-    resourceTable.name[resourceIndex] = libraryNameStringIndex;
-    resourceTable.host[resourceIndex] = null;
-    resourceTable.type[resourceIndex] = resourceTypes.library;
-  }
 
-  const newFuncIndex = funcTable.length++;
-  funcTable.name[newFuncIndex] = funcNameIndex;
-  funcTable.resource[newFuncIndex] = resourceIndex;
-  funcTable.relevantForJS[newFuncIndex] = false;
-  funcTable.isJS[newFuncIndex] = false;
-  funcTable.source[newFuncIndex] = null;
-  funcTable.lineNumber[newFuncIndex] = null;
-  funcTable.columnNumber[newFuncIndex] = null;
-
-  return newFuncIndex;
-}
-
-// Adds a resource table entry for an extension's base URL origin
-// string, mapping it to the extension's name and internal ID.
-function _addExtensionOrigin(
-  extractionInfo: ExtractionInfo,
-  extensions: ExtensionTable,
-  index: number
-): void {
-  const { originToResourceIndex, resourceTable, stringTable } = extractionInfo;
-  const origin = new URL(extensions.baseURL[index]).origin;
-
-  let resourceIndex = originToResourceIndex.get(origin);
-  if (resourceIndex === undefined) {
-    resourceIndex = resourceTable.length++;
-    originToResourceIndex.set(origin, resourceIndex);
-
-    const quotedName = JSON.stringify(extensions.name[index]);
-    const name = `Extension ${quotedName} (ID: ${extensions.id[index]})`;
-
-    const idIndex = stringTable.indexForString(extensions.id[index]);
-
-    resourceTable.lib[resourceIndex] = null;
-    resourceTable.name[resourceIndex] = stringTable.indexForString(name);
-    resourceTable.host[resourceIndex] = idIndex;
-    resourceTable.type[resourceIndex] = resourceTypes.addon;
-  }
+  const resourceIndex = globalDataCollector.indexForNameOnlyLibResource(
+    libraryNameStringIndex
+  );
+  return globalDataCollector.indexForFunc(
+    funcNameIndex,
+    false,
+    false,
+    resourceIndex,
+    null,
+    null,
+    null
+  );
 }
 
 /**
@@ -512,14 +417,7 @@ function _extractJsFunction(
     return null;
   }
 
-  const {
-    funcTable,
-    stringTable,
-    resourceTable,
-    originToResourceIndex,
-    globalDataCollector,
-    geckoSourceTable,
-  } = extractionInfo;
+  const { globalDataCollector, geckoSourceTable } = extractionInfo;
 
   // Case 4: JS function - A match was found in the location string in the format
   // of a JS function.
@@ -527,12 +425,7 @@ function _extractJsFunction(
     jsMatch;
   const scriptURI = _getRealScriptURI(rawScriptURI);
 
-  const resourceIndex = getOrCreateURIResource(
-    scriptURI,
-    resourceTable,
-    stringTable,
-    originToResourceIndex
-  );
+  const resourceIndex = globalDataCollector.indexForURIResource(scriptURI);
 
   // Process the source index if it's provided.
   let processedSourceIndex = null;
@@ -553,6 +446,8 @@ function _extractJsFunction(
     processedSourceIndex = globalDataCollector.indexForSource(null, scriptURI);
   }
 
+  const stringTable = globalDataCollector.getStringTable();
+
   let funcNameIndex;
   if (funcName) {
     funcNameIndex = stringTable.indexForString(funcName);
@@ -566,70 +461,84 @@ function _extractJsFunction(
   const lineNumber = parseInt(lineNoStr, 10);
   const columnNumber = columnNoStr ? parseInt(columnNoStr, 10) : null;
 
-  // Add the function to the funcTable.
-  const funcIndex = funcTable.length++;
-  funcTable.name[funcIndex] = funcNameIndex;
-  funcTable.resource[funcIndex] = resourceIndex;
-  funcTable.relevantForJS[funcIndex] = false;
-  funcTable.isJS[funcIndex] = true;
-  funcTable.source[funcIndex] = processedSourceIndex;
-  funcTable.lineNumber[funcIndex] = lineNumber;
-  funcTable.columnNumber[funcIndex] = columnNumber;
-
-  return funcIndex;
+  return globalDataCollector.indexForFunc(
+    funcNameIndex,
+    true,
+    false,
+    resourceIndex,
+    processedSourceIndex,
+    lineNumber,
+    columnNumber
+  );
 }
 
 /**
  * Nothing is known about this function. Add it without any resource information.
  */
 function _extractUnknownFunctionType(
-  { funcTable }: ExtractionInfo,
+  globalDataCollector: GlobalDataCollector,
   locationIndex: IndexIntoStringTable,
   relevantForJS: boolean
 ): IndexIntoFuncTable {
-  const index = funcTable.length++;
-  funcTable.name[index] = locationIndex;
-  funcTable.resource[index] = -1;
-  funcTable.relevantForJS[index] = relevantForJS;
-  funcTable.isJS[index] = false;
-  funcTable.source[index] = null;
-  funcTable.lineNumber[index] = null;
-  funcTable.columnNumber[index] = null;
-  return index;
+  return globalDataCollector.indexForFunc(
+    locationIndex,
+    false,
+    relevantForJS,
+    -1,
+    null,
+    null,
+    null
+  );
 }
 
 /**
- * Explicitly recreate the frame table here to help enforce our assumptions about types.
+ * Copies the information from the per-thread Gecko frame table into the
+ * global frame table in the processed format.
  */
 function _processFrameTable(
   geckoFrameStruct: GeckoFrameStruct,
+  sharedFrameTable: FrameTable,
   frameFuncs: IndexIntoFuncTable[],
   frameAddresses: (Address | null)[]
-): FrameTable {
-  return {
-    address: frameAddresses.map((a) => a ?? -1),
-    inlineDepth: Array(geckoFrameStruct.length).fill(0),
-    category: geckoFrameStruct.category,
-    subcategory: geckoFrameStruct.subcategory,
-    func: frameFuncs,
-    nativeSymbol: Array(geckoFrameStruct.length).fill(null),
-    innerWindowID: geckoFrameStruct.innerWindowID,
-    line: geckoFrameStruct.line,
-    column: geckoFrameStruct.column,
-    length: geckoFrameStruct.length,
-  };
+): IndexIntoFrameTable {
+  const frameIndexOffset = sharedFrameTable.length;
+  for (let i = 0; i < geckoFrameStruct.length; i++) {
+    const newIndex = i + frameIndexOffset;
+    sharedFrameTable.address[newIndex] = frameAddresses[i] ?? -1;
+    sharedFrameTable.inlineDepth[newIndex] = 0;
+    sharedFrameTable.category[newIndex] = geckoFrameStruct.category[i];
+    sharedFrameTable.subcategory[newIndex] = geckoFrameStruct.subcategory[i];
+    sharedFrameTable.func[newIndex] = frameFuncs[i];
+    sharedFrameTable.nativeSymbol[newIndex] = null;
+    sharedFrameTable.innerWindowID[newIndex] =
+      geckoFrameStruct.innerWindowID[i];
+    sharedFrameTable.line[newIndex] = geckoFrameStruct.line[i];
+    sharedFrameTable.column[newIndex] = geckoFrameStruct.column[i];
+  }
+  sharedFrameTable.length += geckoFrameStruct.length;
+  return frameIndexOffset;
 }
 
 /**
- * Explicitly recreate the stack table here to help enforce our assumptions about types.
- * Also add a category column.
+ * Copies the information from the per-thread Gecko stack table into the
+ * global stack table in the processed format.
  */
-function _processStackTable(geckoStackTable: GeckoStackStruct): RawStackTable {
-  return {
-    frame: geckoStackTable.frame,
-    prefix: geckoStackTable.prefix,
-    length: geckoStackTable.length,
-  };
+function _processStackTable(
+  geckoStackTable: GeckoStackStruct,
+  sharedStackTable: RawStackTable,
+  frameIndexOffset: IndexIntoFrameTable
+): IndexIntoStackTable {
+  const stackIndexOffset = sharedStackTable.length;
+  for (let i = 0; i < geckoStackTable.length; i++) {
+    const newIndex = i + stackIndexOffset;
+    const oldPrefix = geckoStackTable.prefix[i];
+    sharedStackTable.prefix[newIndex] =
+      oldPrefix !== null ? oldPrefix + stackIndexOffset : null;
+    sharedStackTable.frame[newIndex] =
+      geckoStackTable.frame[i] + frameIndexOffset;
+  }
+  sharedStackTable.length += geckoStackTable.length;
+  return stackIndexOffset;
 }
 
 /**
@@ -639,7 +548,10 @@ function _processStackTable(geckoStackTable: GeckoStackStruct): RawStackTable {
  * synchronous stack. Otherwise, if it happened before, it was an async stack, and is
  * most likely some event that happened in the past that triggered the marker.
  */
-function _convertStackToCause(data: MarkerPayload_Gecko) {
+function _convertStackToCause(
+  data: MarkerPayload_Gecko,
+  stackIndexOffset: IndexIntoStackTable
+) {
   if ('stack' in data && data.stack && data.stack.samples.data.length > 0) {
     const { stack, ...newData } = data;
     const stackIndex = stack.samples.data[0][stack.samples.schema.stack];
@@ -647,7 +559,7 @@ function _convertStackToCause(data: MarkerPayload_Gecko) {
     if (stackIndex !== null) {
       return {
         ...newData,
-        cause: { tid: stack.tid, time, stack: stackIndex },
+        cause: { tid: stack.tid, time, stack: stackIndex + stackIndexOffset },
       };
     }
     return newData;
@@ -660,14 +572,18 @@ function _convertStackToCause(data: MarkerPayload_Gecko) {
  * from a gecko payload.
  */
 function _convertPayloadStackToIndex(
-  data: MarkerPayload_Gecko | null
+  data: MarkerPayload_Gecko | null,
+  stackIndexOffset: IndexIntoStackTable
 ): IndexIntoStackTable | null {
   if (!data) {
     return null;
   }
   if ('stack' in data && data.stack && data.stack.samples.data.length > 0) {
     const { samples } = data.stack;
-    return samples.data[0][samples.schema.stack];
+    const geckoStackIndex = samples.data[0][samples.schema.stack];
+    if (geckoStackIndex !== null) {
+      return geckoStackIndex + stackIndexOffset;
+    }
   }
   return null;
 }
@@ -683,7 +599,8 @@ function _processMarkers(
   geckoMarkers: GeckoMarkerStruct,
   stringArray: string[],
   stringIndexMarkerFieldsByDataType: Map<string, string[]>,
-  globalDataCollector: GlobalDataCollector
+  globalDataCollector: GlobalDataCollector,
+  stackIndexOffset: IndexIntoStackTable
 ): {
   markers: RawMarkerTable;
   jsAllocations: JsAllocationsTable | null;
@@ -720,7 +637,9 @@ function _processMarkers(
           jsAllocations.coarseType.push(geckoPayload.coarseType);
           jsAllocations.weight.push(geckoPayload.size);
           jsAllocations.inNursery.push(geckoPayload.inNursery);
-          jsAllocations.stack.push(_convertPayloadStackToIndex(geckoPayload));
+          jsAllocations.stack.push(
+            _convertPayloadStackToIndex(geckoPayload, stackIndexOffset)
+          );
           jsAllocations.length++;
 
           // Do not process the marker and add it to the marker list.
@@ -741,7 +660,7 @@ function _processMarkers(
           );
           inProgressNativeAllocations.weight.push(geckoPayload.size);
           inProgressNativeAllocations.stack.push(
-            _convertPayloadStackToIndex(geckoPayload)
+            _convertPayloadStackToIndex(geckoPayload, stackIndexOffset)
           );
           inProgressNativeAllocations.length++;
 
@@ -771,7 +690,8 @@ function _processMarkers(
       geckoPayload,
       stringArray,
       stringTable,
-      stringIndexMarkerFieldsByDataType
+      stringIndexMarkerFieldsByDataType,
+      stackIndexOffset
     );
     const name = stringTable.indexForString(
       stringArray[geckoMarkers.name[markerIndex]]
@@ -842,7 +762,8 @@ function _processMarkerPayload(
   geckoPayload: MarkerPayload_Gecko | null,
   stringArray: string[],
   stringTable: StringTable,
-  stringIndexMarkerFieldsByDataType: Map<string, string[]>
+  stringIndexMarkerFieldsByDataType: Map<string, string[]>,
+  stackIndexOffset: IndexIntoStackTable
 ): MarkerPayload | null {
   if (!geckoPayload) {
     return null;
@@ -852,7 +773,7 @@ function _processMarkerPayload(
   // pre-emptively done for every single marker payload.
   //
   // Warning: This function converts the payload into an any type.
-  const payload = _convertStackToCause(geckoPayload);
+  const payload = _convertStackToCause(geckoPayload, stackIndexOffset);
 
   switch (payload.type) {
     /*
@@ -992,9 +913,14 @@ function _timeColumnToCompactTimeDeltas(time: Milliseconds[]): Milliseconds[] {
  * Explicitly recreate the samples table here to help enforce our assumptions
  * about types, and to convert timestamps to deltas.
  */
-function _processSamples(geckoSamples: GeckoSampleStruct): RawSamplesTable {
+function _processSamples(
+  geckoSamples: GeckoSampleStruct,
+  stackIndexOffset: IndexIntoStackTable
+): RawSamplesTable {
   const samples: RawSamplesTable = {
-    stack: geckoSamples.stack,
+    stack: geckoSamples.stack.map((stackIndex) =>
+      stackIndex !== null ? stackIndex + stackIndexOffset : null
+    ),
     timeDeltas: _timeColumnToCompactTimeDeltas(geckoSamples.time),
     weightType: 'samples',
     weight: null,
@@ -1171,7 +1097,6 @@ function _processProfilerOverhead(
 function _processThread(
   thread: GeckoThread,
   processProfile: GeckoProfile | GeckoSubprocessProfile,
-  extensions: ExtensionTable,
   stringIndexMarkerFieldsByDataType: Map<string, string[]>,
   globalDataCollector: GlobalDataCollector
 ): RawThread {
@@ -1189,36 +1114,42 @@ function _processThread(
   const { libs, pausedRanges, meta, sources } = processProfile;
   const { shutdownTime } = meta;
 
-  const { funcTable, resourceTable, frameFuncs, frameAddresses } =
+  const { frameFuncs, frameAddresses } =
     extractFuncsAndResourcesFromFrameLocations(
       geckoFrameStruct.location,
       geckoFrameStruct.relevantForJS,
       thread.stringTable,
       libs,
-      extensions,
       globalDataCollector,
       sources
     );
-  const nativeSymbols = getEmptyNativeSymbolTable();
-  const frameTable: FrameTable = _processFrameTable(
+
+  const frameIndexOffset = _processFrameTable(
     geckoFrameStruct,
+    globalDataCollector.getFrameTable(),
     frameFuncs,
     frameAddresses
   );
-  const stackTable = _processStackTable(geckoStackTable);
+  const stackIndexOffset = _processStackTable(
+    geckoStackTable,
+    globalDataCollector.getStackTable(),
+    frameIndexOffset
+  );
+
   const { markers, jsAllocations, nativeAllocations } = _processMarkers(
     geckoMarkers,
     thread.stringTable,
     stringIndexMarkerFieldsByDataType,
-    globalDataCollector
+    globalDataCollector,
+    stackIndexOffset
   );
-  const samples = _processSamples(geckoSamples);
+  const samples = _processSamples(geckoSamples, stackIndexOffset);
 
-  // Compute usedInnerWindowIDs from the frameTable and the markers.
+  // Compute usedInnerWindowIDs from the geckoFrameStruct and the thread markers.
   let usedInnerWindowIDs: number[] | undefined;
   const usedInnerWindowIDsSet = new Set<number>();
-  for (let i = 0; i < frameTable.length; i++) {
-    const innerWindowID = frameTable.innerWindowID[i];
+  for (let i = 0; i < geckoFrameStruct.length; i++) {
+    const innerWindowID = geckoFrameStruct.innerWindowID[i];
     if (innerWindowID !== null && innerWindowID !== 0) {
       usedInnerWindowIDsSet.add(innerWindowID);
     }
@@ -1251,11 +1182,6 @@ function _processThread(
     tid: thread.tid,
     pid: `${thread.pid}`,
     pausedRanges: pausedRanges || [],
-    frameTable,
-    funcTable,
-    nativeSymbols,
-    resourceTable,
-    stackTable,
     markers,
     samples,
   };
@@ -1330,7 +1256,7 @@ function _processThread(
 
   processJsTracer();
 
-  return nudgeReturnAddresses(newThread);
+  return newThread;
 }
 
 /**
@@ -1727,12 +1653,13 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
 
   const globalDataCollector = new GlobalDataCollector();
 
+  globalDataCollector.addExtensionOrigins(extensions);
+
   for (const thread of geckoProfile.threads) {
     threads.push(
       _processThread(
         thread,
         geckoProfile,
-        extensions,
         stringIndexMarkerFieldsByDataType,
         globalDataCollector
       )
@@ -1750,7 +1677,6 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
       const newThread: RawThread = _processThread(
         thread,
         subprocessProfile,
-        extensions,
         stringIndexMarkerFieldsByDataType,
         globalDataCollector
       );
@@ -1879,7 +1805,8 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   const profileGatheringLog = { ...(geckoProfile.profileGatheringLog || {}) };
 
   const stringTable = globalDataCollector.getStringTable();
-  const sources = globalDataCollector.getSources();
+
+  const { libs, shared } = globalDataCollector.finish();
 
   // Convert JS tracer information into their own threads. This mutates
   // the threads array.
@@ -1889,10 +1816,9 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
       const friendlyThreadName = getFriendlyThreadName(threads, thread);
       const jsTracerThread = convertJsTracerToThread(
         thread,
+        shared,
         jsTracer,
-        geckoProfile.meta.categories,
-        stringTable,
-        sources
+        geckoProfile.meta.categories
       );
       jsTracerThread.isJsTracer = true;
       jsTracerThread.name = `JS Tracer of ${friendlyThreadName}`;
@@ -1908,9 +1834,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     processVisualMetrics(threads, meta, pages, stringTable);
   }
 
-  const { libs, shared } = globalDataCollector.finish();
-
-  const result = {
+  const processedProfileWithReturnAddresses = {
     meta,
     libs,
     pages,
@@ -1921,7 +1845,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     profilingLog,
     profileGatheringLog,
   };
-  return result;
+  return nudgeReturnAddresses(processedProfileWithReturnAddresses);
 }
 
 /**
@@ -2004,7 +1928,8 @@ function attemptToFixProcessedProfileThroughMutation(
  */
 export async function unserializeProfileOfArbitraryFormat(
   arbitraryFormat: unknown,
-  profileUrl?: string
+  profileUrl?: string,
+  upgradeInfo: ProfileUpgradeInfo = {}
 ): Promise<Profile> {
   try {
     // We used to use `instanceof ArrayBuffer`, but this doesn't work when the
@@ -2063,8 +1988,10 @@ export async function unserializeProfileOfArbitraryFormat(
 
     const possiblyFixedProfile =
       attemptToFixProcessedProfileThroughMutation(json);
-    const processedProfile =
-      attemptToUpgradeProcessedProfileThroughMutation(possiblyFixedProfile);
+    const processedProfile = attemptToUpgradeProcessedProfileThroughMutation(
+      possiblyFixedProfile,
+      upgradeInfo
+    );
     if (processedProfile) {
       return processedProfile;
     }

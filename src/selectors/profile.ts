@@ -14,6 +14,8 @@ import {
   processCounter,
   getInclusiveSampleIndexRangeForSelection,
   computeTabToThreadIndexesMap,
+  computeStackTableFromRawStackTable,
+  reserveFunctionsForCollapsedResources,
 } from '../profile-logic/profile-data';
 import type { IPCMarkerCorrelations } from '../profile-logic/marker-data';
 import { correlateIPCMarkers } from '../profile-logic/marker-data';
@@ -27,6 +29,7 @@ import type { TabSlug } from '../app-logic/tabs-handling';
 import type {
   Profile,
   RawProfileSharedData,
+  StackTable,
   CategoryList,
   IndexIntoCategoryList,
   RawThread,
@@ -72,6 +75,10 @@ import type {
   SortedTabPageData,
   TimelineUnit,
   SourceTable,
+  FuncTableWithReservedFunctions,
+  IndexIntoResourceTable,
+  IndexIntoFuncTable,
+  FuncTable,
 } from 'firefox-profiler/types';
 
 import type { ThreadActivityScore } from '../profile-logic/tracks';
@@ -247,6 +254,28 @@ export const getStringTable: Selector<StringTable> = createSelector(
   (state: State) => getRawProfileSharedData(state).stringArray,
   (stringArray) => StringTable.withBackingArray(stringArray as string[])
 );
+
+export const getStackTable: Selector<StackTable> = createSelector(
+  (state: State) => getRawProfileSharedData(state).stackTable,
+  (state: State) => getRawProfileSharedData(state).frameTable,
+  getDefaultCategory,
+  computeStackTableFromRawStackTable
+);
+
+export const getFuncTableWithReservedFunctions: Selector<FuncTableWithReservedFunctions> =
+  createSelector(
+    (state: State) => getRawProfileSharedData(state).funcTable,
+    (state: State) => getRawProfileSharedData(state).resourceTable,
+    reserveFunctionsForCollapsedResources
+  );
+
+export const getFunctionsReservedFuncTable: Selector<FuncTable> = (state) =>
+  getFuncTableWithReservedFunctions(state).funcTable;
+
+export const getReservedFunctionsForResources: Selector<
+  Map<IndexIntoResourceTable, IndexIntoFuncTable>
+> = (state) =>
+  getFuncTableWithReservedFunctions(state).reservedFunctionsForResources;
 
 export const getSourceTable: Selector<SourceTable> = (state: State) =>
   getRawProfileSharedData(state).sources;
