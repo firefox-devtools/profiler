@@ -21,6 +21,16 @@ AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader
 AppHeader--github-icon =
     .title = 前往我们的 Git 仓库（新建窗口打开）
 
+## ThemeToggle
+## They are used at the top right side of the home page to switch between themes.
+
+ThemeToggle--system =
+    .title = 跟随系统主题首选项
+ThemeToggle--light =
+    .title = 使用明亮主题
+ThemeToggle--dark =
+    .title = 使用深邃主题
+
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
@@ -790,6 +800,11 @@ TrackPower--tooltip-power-watt = { $value } W
 # Variables:
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
+    .label = 功率
+# This is used in the tooltip when the instant power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-microwatt = { $value } μW
     .label = 功率
 # This is used in the tooltip when the power value uses the kilowatt unit.
 # Variables:
