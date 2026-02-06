@@ -37,18 +37,9 @@ To get started clone the repo and get the web application started.
 1.  Run `git clone git@github.com:firefox-devtools/profiler.git`
 2.  Run `cd profiler`
 3.  Run `yarn install`, this will install all of the dependencies.
-4.  Run `yarn start`, this will start up the webpack server.
+4.  Run `yarn start`, this will start up the development server.
 5.  Point your browser to [http://localhost:4242](http://localhost:4242).
 6.  If port `4242` is taken, then you can run the web app on a different port: `FX_PROFILER_PORT=1234 yarn start`
-
-Other [webpack](https://webpack.js.org/configuration/) and [webpack server](https://webpack.js.org/configuration/dev-server/) options can be set in a `webpack.local-config.js` file at the repo root. For example, if you want to disable caching and the server to automatically open the home page, put in there the following code:
-
-```js
-module.exports = function (config, serverConfig) {
-  config.cache = false;
-  serverConfig.open = true;
-};
-```
 
 This project uses [TypeScript](https://www.typescriptlang.org/).
 
@@ -56,11 +47,11 @@ This project uses [TypeScript](https://www.typescriptlang.org/).
 
 Alternatively, you can also develop the Firefox Profiler online in a pre-configured development environment using [GitHub Codespaces](https://github.com/features/codespaces).
 
-GitHub Codespaces will automatically install all dependencies, start the webpack server for you, and forward port 4242 so you can access the web app. Please look at our [GitHub Codespaces documentation](./docs-developer/codespaces.md) for more information.
+GitHub Codespaces will automatically install all dependencies, start the development server for you, and forward port 4242 so you can access the web app. Please look at our [GitHub Codespaces documentation](./docs-developer/codespaces.md) for more information.
 
 ## Loading in profiles for development
 
-The web app doesn't include any performance profiles by default, so you'll need to load some in. Make sure the local Webpack web server is running, and then try one of the following:
+The web app doesn't include any performance profiles by default, so you'll need to load some in. Make sure the local development server is running, and then try one of the following:
 
 #### 1. Record a profile:
 

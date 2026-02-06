@@ -43,7 +43,7 @@ export const AVAILABLE_LOCALES_TO_LOCALIZED_NAMES = {
 // This constant contains all locales available to our application. The default
 // is to use the keys of the previous object.
 // However when running the yarn scripts with the environment variable L10N=1,
-// webpack replaces AVAILABLE_STAGING_LOCALES with all locales that have an FTL
+// esbuild replaces AVAILABLE_STAGING_LOCALES with all locales that have an FTL
 // file in the repository, and this becomes the value for this constant. This
 // is used in our l10n branch when deployed on netlify.
 export const AVAILABLE_LOCALES: Array<string> =
