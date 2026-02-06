@@ -65,6 +65,9 @@ CallNodeContextMenu--transform-focus-function = 聚焦于函数
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = 聚焦于函数（反向）
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = 只聚焦于子树
     .title = 聚焦于子树，将从调用树中拉出分支，并移除不属于该分支的内容。然而此功能只对单一调用节点有效，将忽略其他调用该函数的部分。
 # This is used as the context menu item to apply the "Focus on category" transform.
@@ -473,7 +476,6 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = 无限制
 MenuButtons--metaInfo--application = 应用程序
 MenuButtons--metaInfo--name-and-version = 名称和版本：
-MenuButtons--metaInfo--application-uptime = 运行时间：
 MenuButtons--metaInfo--update-channel = 更新通道:
 MenuButtons--metaInfo--build-id = 构建 ID：
 MenuButtons--metaInfo--build-type = 构建类型：
