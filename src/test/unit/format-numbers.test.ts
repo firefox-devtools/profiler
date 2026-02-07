@@ -28,27 +28,27 @@ describe('formatGigaBytes', () => {
   });
 
   it('returns large values without fractional digits by default', () => {
-    expect(formatGigaBytes(1234567890123)).toBe('1,150GB');
+    expect(formatGigaBytes(1234567890123)).toBe('1,235GB');
   });
 
   it('returns values with 2 fractional digits by default', () => {
-    expect(formatGigaBytes(1234567890)).toBe('1.15GB');
+    expect(formatGigaBytes(1234567890)).toBe('1.23GB');
   });
 
   it('can return values with byte precision', () => {
-    expect(formatGigaBytes(1234567890, 3, 2, 1)).toBe('1GB 153MB 384KB 722B');
+    expect(formatGigaBytes(1234567890, 3, 2, 1)).toBe('1GB 234MB 567KB 890B');
   });
 
   it('can return values with kilobyte precision', () => {
-    expect(formatGigaBytes(1234567890, 3, 2, 1024)).toBe('1GB 153MB 385KB');
+    expect(formatGigaBytes(1234567890, 3, 2, 1000)).toBe('1GB 234MB 568KB');
   });
 
   it('can return values with megabyte precision', () => {
-    expect(formatGigaBytes(1234567890, 3, 2, 1024 ** 2)).toBe('1GB 153MB');
+    expect(formatGigaBytes(1234567890, 3, 2, 1000 ** 2)).toBe('1GB 235MB');
   });
 
   it('can return values with gigabyte precision', () => {
-    expect(formatGigaBytes(1234567890, 3, 2, 1024 ** 3)).toBe('1GB');
+    expect(formatGigaBytes(1234567890, 3, 2, 1000 ** 3)).toBe('1GB');
   });
 });
 
@@ -58,23 +58,23 @@ describe('formatMegaBytes', () => {
   });
 
   it('returns large values without fractional digits by default', () => {
-    expect(formatMegaBytes(1234567890)).toBe('1,177MB');
+    expect(formatMegaBytes(1234567890)).toBe('1,235MB');
   });
 
   it('returns values with 2 fractional digits by default', () => {
-    expect(formatMegaBytes(1234567)).toBe('1.18MB');
+    expect(formatMegaBytes(1234567)).toBe('1.23MB');
   });
 
   it('can return values with byte precision', () => {
-    expect(formatMegaBytes(1234567, 3, 2, 1)).toBe('1MB 181KB 647B');
+    expect(formatMegaBytes(1234567, 3, 2, 1)).toBe('1MB 234KB 567B');
   });
 
   it('can return values with kilobyte precision', () => {
-    expect(formatMegaBytes(1234567, 3, 2, 1024)).toBe('1MB 182KB');
+    expect(formatMegaBytes(1234567, 3, 2, 1000)).toBe('1MB 235KB');
   });
 
   it('can return values with megabyte precision', () => {
-    expect(formatMegaBytes(1234567, 3, 2, 1024 ** 2)).toBe('1MB');
+    expect(formatMegaBytes(1234567, 3, 2, 1000 ** 2)).toBe('1MB');
   });
 });
 
@@ -84,19 +84,19 @@ describe('formatKiloBytes', () => {
   });
 
   it('returns large values without fractional digits by default', () => {
-    expect(formatKiloBytes(1234567)).toBe('1,206KB');
+    expect(formatKiloBytes(1234567)).toBe('1,235KB');
   });
 
   it('returns values with 2 fractional digits by default', () => {
-    expect(formatKiloBytes(1234)).toBe('1.21KB');
+    expect(formatKiloBytes(1234)).toBe('1.23KB');
   });
 
   it('can return values with byte precision', () => {
-    expect(formatKiloBytes(1234, 3, 2, 1)).toBe('1KB 210B');
+    expect(formatKiloBytes(1234, 3, 2, 1)).toBe('1KB 234B');
   });
 
   it('can return values with kilobyte precision', () => {
-    expect(formatKiloBytes(1234, 3, 2, 1024)).toBe('1KB');
+    expect(formatKiloBytes(1234, 3, 2, 1000)).toBe('1KB');
   });
 });
 
@@ -110,40 +110,53 @@ describe('formatBytes', () => {
   });
 
   it('can return values with the kilobyte unit', () => {
-    expect(formatBytes(12345)).toBe('12.1KB');
+    expect(formatBytes(12345)).toBe('12.3KB');
   });
 
   it('can return values with the megabyte unit', () => {
-    expect(formatBytes(1234567)).toBe('1.18MB');
+    expect(formatBytes(1234567)).toBe('1.23MB');
   });
 
   it('can return values with the gigabyte unit', () => {
-    expect(formatBytes(1234567890)).toBe('1.15GB');
+    expect(formatBytes(1234567890)).toBe('1.23GB');
   });
 
   it('can return values with byte precision', () => {
-    expect(formatBytes(12345, 3, 2, 1)).toBe('12KB 57B');
+    expect(formatBytes(12345, 3, 2, 1)).toBe('12KB 345B');
   });
 
   it('can return values with kilobyte precision', () => {
-    expect(formatBytes(12345, 3, 2, 1024)).toBe('12KB');
+    expect(formatBytes(12345, 3, 2, 1000)).toBe('12KB');
   });
 });
 
 describe('findRoundBytesValueGreaterOrEqualTo', () => {
-  const expectedValues = [0, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000];
+  const expectedValues = [
+    // minValue, expected
+    // minValue <= 1000
+    [0, 0],
+    [3, 5],
+    [63, 100],
+    [511, 1000],
+    [1000, 2000],
 
-  it('rounds small bytes values using base 10 round value', () => {
+    // 1000 < minValue <= 1000^4
+    [2047, 4000],
+    [9999, 16000],
+    [123456, 128000],
+    [999999, 1000000],
+    [1_234_567, 2_000_000],
+    [1_234_567_891, 2_000_000_000],
+
+    // minValue > 1000^4
+    [1_234_567_891_234, 2_000_000_000_000],
+    [1_234_567_891_234_567, 2_000_000_000_000_000],
+  ];
+
+  it('correctly rounds bytes values using base 10 round value', () => {
     for (let i = 0; i < expectedValues.length; ++i) {
-      expect(findRoundBytesValueGreaterOrEqualTo(2 ** i - 1)).toBe(
-        expectedValues[i]
-      );
-    }
-  });
-
-  it('rounds large bytes values using base 2 round value', () => {
-    for (let i = expectedValues.length; i < 40; ++i) {
-      expect(findRoundBytesValueGreaterOrEqualTo(2 ** i - 1)).toBe(2 ** i);
+      const [input, expected] = expectedValues[i];
+      expect(findRoundBytesValueGreaterOrEqualTo(input)).toBe(expected);
     }
   });
 });
