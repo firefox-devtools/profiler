@@ -15,7 +15,6 @@ import { mapCategoryColorNameToStyles } from 'firefox-profiler/utils/colors';
 import type {
   Thread,
   Milliseconds,
-  SelectedState,
   IndexIntoSamplesTable,
   CategoryList,
 } from 'firefox-profiler/types';
@@ -30,7 +29,7 @@ type CanvasProps = {
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
   readonly sampleIndexOffset: number;
-  readonly samplesSelectedStates: null | SelectedState[];
+  readonly sampleSelectedStates: null | Uint8Array;
   readonly treeOrderSampleComparator: (
     a: IndexIntoSamplesTable,
     b: IndexIntoSamplesTable
@@ -131,7 +130,7 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       rangeStart,
       rangeEnd,
       sampleIndexOffset,
-      samplesSelectedStates,
+      sampleSelectedStates,
       treeOrderSampleComparator,
       enableCPUUsage,
       width,
@@ -153,7 +152,7 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       rangeStart,
       rangeEnd,
       sampleIndexOffset,
-      samplesSelectedStates,
+      sampleSelectedStates,
       enableCPUUsage,
       xPixelsPerMs: canvasPixelWidth / (rangeEnd - rangeStart),
       treeOrderSampleComparator,
