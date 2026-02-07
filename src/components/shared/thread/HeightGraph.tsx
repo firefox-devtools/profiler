@@ -23,7 +23,7 @@ type Props = {
   readonly maxValue: number;
   readonly className: string;
   readonly thread: Thread;
-  readonly samplesSelectedStates: null | SelectedState[];
+  readonly sampleSelectedStates: null | Uint8Array;
   readonly interval: Milliseconds;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
@@ -64,7 +64,7 @@ export class ThreadHeightGraph extends PureComponent<Props> {
   drawCanvas(canvas: HTMLCanvasElement) {
     const {
       thread,
-      samplesSelectedStates,
+      sampleSelectedStates,
       interval,
       rangeStart,
       rangeEnd,
@@ -137,8 +137,8 @@ export class ThreadHeightGraph extends PureComponent<Props> {
       const xPos = (sampleTime - range[0]) * xPixelsPerMs;
       let samplesBucket;
       if (
-        samplesSelectedStates !== null &&
-        samplesSelectedStates[i] === SelectedState.Selected
+        sampleSelectedStates !== null &&
+        sampleSelectedStates[i] === (SelectedState.Selected as number)
       ) {
         samplesBucket = highlightedSamples;
       } else {

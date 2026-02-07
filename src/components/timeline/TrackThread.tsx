@@ -53,7 +53,6 @@ import type {
   StartEndRange,
   ImplementationFilter,
   IndexIntoCallNodeTable,
-  SelectedState,
   State,
   ThreadsKey,
 } from 'firefox-profiler/types';
@@ -81,7 +80,7 @@ type StateProps = {
   readonly categories: CategoryList;
   readonly timelineType: TimelineType;
   readonly hasFileIoMarkers: boolean;
-  readonly samplesSelectedStates: null | SelectedState[];
+  readonly sampleSelectedStates: null | Uint8Array;
   readonly sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>;
   readonly treeOrderSampleComparator: (
     a: IndexIntoSamplesTable,
@@ -183,7 +182,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       hasFileIoMarkers,
       showMemoryMarkers,
       sampleNonInvertedCallNodes,
-      samplesSelectedStates,
+      sampleSelectedStates,
       treeOrderSampleComparator,
       trackType,
       trackName,
@@ -256,7 +255,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               sampleIndexOffset={sampleIndexOffset}
               onSampleClick={this._onSampleClick}
               categories={categories}
-              samplesSelectedStates={samplesSelectedStates}
+              sampleSelectedStates={sampleSelectedStates}
               treeOrderSampleComparator={treeOrderSampleComparator}
               enableCPUUsage={enableCPUUsage}
               implementationFilter={implementationFilter}
@@ -272,7 +271,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
                 thread={filteredThread}
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
-                samplesSelectedStates={samplesSelectedStates}
+                sampleSelectedStates={sampleSelectedStates}
                 categories={categories}
                 onSampleClick={this._onSampleClick}
                 timelineType={timelineType}
@@ -291,7 +290,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
                 callNodeInfo={callNodeInfo}
-                samplesSelectedStates={samplesSelectedStates}
+                sampleSelectedStates={sampleSelectedStates}
                 categories={categories}
                 onSampleClick={this._onSampleClick}
               />
@@ -307,7 +306,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
             rangeEnd={rangeEnd}
             callNodeInfo={callNodeInfo}
             sampleNonInvertedCallNodes={sampleNonInvertedCallNodes}
-            samplesSelectedStates={samplesSelectedStates}
+            sampleSelectedStates={sampleSelectedStates}
             categories={categories}
             onSampleClick={this._onSampleClick}
           />
@@ -358,8 +357,8 @@ export const TimelineTrackThread = explicitConnect<
       timelineType,
       hasFileIoMarkers:
         selectors.getTimelineFileIoMarkerIndexes(state).length !== 0,
-      samplesSelectedStates:
-        selectors.getSamplesSelectedStatesInFilteredThread(state),
+      sampleSelectedStates:
+        selectors.getSampleSelectedStatesInFilteredThread(state),
       treeOrderSampleComparator:
         selectors.getTreeOrderComparatorInFilteredThread(state),
       selectedThreadIndexes,

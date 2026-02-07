@@ -34,7 +34,6 @@ import type {
   AddressTimings,
   IndexIntoCallNodeTable,
   IndexIntoNativeSymbolTable,
-  SelectedState,
   StartEndRange,
   Selector,
   ThreadsKey,
@@ -269,20 +268,23 @@ export function getStackAndSampleSelectorsPerThread(
     ProfileData.getSampleIndexToCallNodeIndex
   );
 
-  const getSamplesSelectedStatesInFilteredThread: Selector<
-    null | SelectedState[]
-  > = createSelector(
-    getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
-    getCallNodeInfo,
-    getSelectedCallNodeIndex,
-    (sampleIndexToNonInvertedCallNodeIndex, callNodeInfo, selectedCallNode) => {
-      return ProfileData.getSamplesSelectedStates(
-        callNodeInfo,
+  const getSampleSelectedStatesInFilteredThread: Selector<null | Uint8Array> =
+    createSelector(
+      getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
+      getCallNodeInfo,
+      getSelectedCallNodeIndex,
+      (
         sampleIndexToNonInvertedCallNodeIndex,
+        callNodeInfo,
         selectedCallNode
-      );
-    }
-  );
+      ) => {
+        return ProfileData.getSampleSelectedStates(
+          callNodeInfo,
+          sampleIndexToNonInvertedCallNodeIndex,
+          selectedCallNode
+        );
+      }
+    );
 
   const getTreeOrderComparatorInFilteredThread: Selector<
     (
@@ -502,7 +504,7 @@ export function getStackAndSampleSelectorsPerThread(
     getExpandedCallNodePaths,
     getExpandedCallNodeIndexes,
     getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
-    getSamplesSelectedStatesInFilteredThread,
+    getSampleSelectedStatesInFilteredThread,
     getTreeOrderComparatorInFilteredThread,
     getCallTree,
     getFunctionListTree,

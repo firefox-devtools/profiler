@@ -41,7 +41,7 @@ type RenderedComponentSettings = {
   readonly treeOrderSampleComparator:
     | ((a: IndexIntoSamplesTable, b: IndexIntoSamplesTable) => number)
     | null;
-  readonly samplesSelectedStates: null | Array<SelectedState>;
+  readonly sampleSelectedStates: null | Uint8Array;
   readonly categoryDrawStyles: CategoryDrawStyles;
 };
 
@@ -338,21 +338,21 @@ export class ActivityGraphFillComputer {
     percentageBuffers: SelectedPercentageAtPixelBuffers,
     sampleIndex: IndexIntoSamplesTable
   ): Float32Array {
-    const { samplesSelectedStates } = this.renderedComponentSettings;
-    if (!samplesSelectedStates) {
+    const { sampleSelectedStates } = this.renderedComponentSettings;
+    if (!sampleSelectedStates) {
       return percentageBuffers.selectedPercentageAtPixel;
     }
-    switch (samplesSelectedStates[sampleIndex]) {
-      case SelectedState.FilteredOutByTransform:
+    switch (sampleSelectedStates[sampleIndex]) {
+      case SelectedState.FilteredOutByTransform as number:
         return percentageBuffers.filteredOutByTransformPercentageAtPixel;
-      case SelectedState.UnselectedOrderedBeforeSelected:
+      case SelectedState.UnselectedOrderedBeforeSelected as number:
         return percentageBuffers.beforeSelectedPercentageAtPixel;
-      case SelectedState.Selected:
+      case SelectedState.Selected as number:
         return percentageBuffers.selectedPercentageAtPixel;
-      case SelectedState.UnselectedOrderedAfterSelected:
+      case SelectedState.UnselectedOrderedAfterSelected as number:
         return percentageBuffers.afterSelectedPercentageAtPixel;
       default:
-        throw new Error('Unexpected samplesSelectedStates value');
+        throw new Error('Unexpected sampleSelectedStates value');
     }
   }
 }
