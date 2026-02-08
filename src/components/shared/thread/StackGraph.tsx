@@ -17,7 +17,7 @@ import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info
 type Props = {
   readonly className: string;
   readonly thread: Thread;
-  readonly sampleSelectedStates: null | Uint8Array;
+  readonly sampleSelectedStates: Uint8Array;
   readonly sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>;
   readonly interval: Milliseconds;
   readonly rangeStart: Milliseconds;

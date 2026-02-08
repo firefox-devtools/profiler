@@ -80,7 +80,7 @@ type StateProps = {
   readonly categories: CategoryList;
   readonly timelineType: TimelineType;
   readonly hasFileIoMarkers: boolean;
-  readonly sampleSelectedStates: null | Uint8Array;
+  readonly sampleSelectedStates: Uint8Array;
   readonly sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>;
   readonly treeOrderSampleComparator: (
     a: IndexIntoSamplesTable,

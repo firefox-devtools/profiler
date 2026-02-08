@@ -44,7 +44,7 @@ export type Props = {
     sampleIndex: IndexIntoSamplesTable | null
   ) => void;
   readonly categories: CategoryList;
-  readonly sampleSelectedStates: null | Uint8Array;
+  readonly sampleSelectedStates: Uint8Array;
   readonly treeOrderSampleComparator: (
     a: IndexIntoSamplesTable,
     b: IndexIntoSamplesTable

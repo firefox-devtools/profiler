@@ -41,7 +41,7 @@ type RenderedComponentSettings = {
   readonly treeOrderSampleComparator:
     | ((a: IndexIntoSamplesTable, b: IndexIntoSamplesTable) => number)
     | null;
-  readonly sampleSelectedStates: null | Uint8Array;
+  readonly sampleSelectedStates: Uint8Array;
   readonly categoryDrawStyles: CategoryDrawStyles;
 };
 
@@ -339,9 +339,6 @@ export class ActivityGraphFillComputer {
     sampleIndex: IndexIntoSamplesTable
   ): Float32Array {
     const { sampleSelectedStates } = this.renderedComponentSettings;
-    if (!sampleSelectedStates) {
-      return percentageBuffers.selectedPercentageAtPixel;
-    }
     switch (sampleSelectedStates[sampleIndex]) {
       case SelectedState.FilteredOutByTransform as number:
         return percentageBuffers.filteredOutByTransformPercentageAtPixel;

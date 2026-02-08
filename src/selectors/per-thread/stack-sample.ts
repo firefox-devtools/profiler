@@ -268,7 +268,7 @@ export function getStackAndSampleSelectorsPerThread(
     ProfileData.getSampleIndexToCallNodeIndex
   );
 
-  const getSampleSelectedStatesInFilteredThread: Selector<null | Uint8Array> =
+  const getSampleSelectedStatesInFilteredThread: Selector<Uint8Array> =
     createSelector(
       getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
       getCallNodeInfo,
