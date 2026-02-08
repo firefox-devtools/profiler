@@ -215,6 +215,8 @@ export class ActivityGraphFillComputer {
       interval,
       enableCPUUsage,
       sampleIndexOffset,
+      rangeStart,
+      sampleSelectedStates,
     } = this.renderedComponentSettings;
 
     if (samples.length === 0) {
@@ -246,15 +248,19 @@ export class ActivityGraphFillComputer {
         afterSampleCpuRatio = threadCPURatio[i + 1];
       }
 
-      // Mutate the percentage buffers.
-      this._accumulateInCategory(
-        category,
-        i,
+      const percentageBuffers = this.mutablePercentageBuffers[category];
+      const selectedState = sampleSelectedStates[i];
+      const percentageBuffer = percentageBuffers[selectedState];
+
+      _accumulateInBuffer(
+        percentageBuffer,
+        this.renderedComponentSettings,
         prevSampleTime,
         sampleTime,
         nextSampleTime,
         beforeSampleCpuRatio,
-        afterSampleCpuRatio
+        afterSampleCpuRatio,
+        rangeStart
       );
 
       prevSampleTime = sampleTime;
@@ -285,33 +291,10 @@ export class ActivityGraphFillComputer {
       }
     }
 
-    this._accumulateInCategory(
-      lastSampleCategory,
-      samples.length - 1,
-      prevSampleTime,
-      sampleTime,
-      sampleTime + interval,
-      beforeSampleCpuRatio,
-      afterSampleCpuRatio
-    );
-  }
+    const nextSampleTime = sampleTime + interval;
+    const percentageBuffers = this.mutablePercentageBuffers[lastSampleCategory];
 
-  /**
-   * Mutate the percentage buffers, by taking this category, and accumulating its
-   * percentage into the buffer.
-   */
-  _accumulateInCategory(
-    category: IndexIntoCategoryList,
-    sampleIndex: IndexIntoSamplesTable,
-    prevSampleTime: Milliseconds,
-    sampleTime: Milliseconds,
-    nextSampleTime: Milliseconds,
-    beforeSampleCpuRatio: number,
-    afterSampleCpuRatio: number
-  ) {
-    const { rangeStart, sampleSelectedStates } = this.renderedComponentSettings;
-    const percentageBuffers = this.mutablePercentageBuffers[category];
-    const selectedState = sampleSelectedStates[sampleIndex];
+    const selectedState = sampleSelectedStates[lastIdx];
     const percentageBuffer = percentageBuffers[selectedState];
 
     _accumulateInBuffer(
