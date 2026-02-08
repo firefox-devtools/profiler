@@ -29,7 +29,7 @@ type CanvasProps = {
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
   readonly sampleIndexOffset: number;
-  readonly sampleSelectedStates: null | Uint8Array;
+  readonly sampleSelectedStates: Uint8Array;
   readonly treeOrderSampleComparator: (
     a: IndexIntoSamplesTable,
     b: IndexIntoSamplesTable
