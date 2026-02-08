@@ -47,12 +47,12 @@ type RenderedComponentSettings = {
 export type PrecomputedPositions = {
   // The fractional device pixel position per sample in the range-filtered thread.
   // Each position is clamped such that 0 <= pos < canvasPixelWidth.
-  samplePositions: Float32Array; // DevicePixel[]
+  samplePositions: Int32Array; // (DevicePixel * (1 << FIXED_POINT_BITS))[]
   // The fractional device pixel position of the half-way point *before* the sample,
   // per sample in the range-filtered thread. Has one extra element at the end for
   // the half-way position after the last sample.
   // Each position is clamped such that 0 <= pos < canvasPixelWidth.
-  halfwayPositions: Float32Array; // DevicePixel[]
+  halfwayPositions: Int32Array; // (DevicePixel * (1 << FIXED_POINT_BITS))[]
 };
 
 type SampleContributionToPixel = {
@@ -70,7 +70,7 @@ type CategoryFill = {
   readonly fillStyle: string | CanvasPattern;
   // Mutated in place during the computation step.
   // Contains values between 0 and 100.
-  readonly perPixelContribution: Float32Array<ArrayBuffer>;
+  readonly perPixelContribution: Int32Array<ArrayBuffer>;
   // Mutated in place during the computation step.
   // Contains values between 0 and 1.
   readonly accumulatedUpperEdge: Float32Array<ArrayBuffer>;
@@ -90,7 +90,7 @@ export type CategoryDrawStyles = ReadonlyArray<{
 
 // These Float32Arrays are mutated in place during the computation step.
 // buffers[selectedState] is the buffer for the given SelectedState enum value.
-type SelectedPercentageAtPixelBuffers = Float32Array<ArrayBuffer>[];
+type SelectedPercentageAtPixelBuffers = Int32Array<ArrayBuffer>[];
 
 export type CpuRatioInTimeRange = {
   readonly cpuRatio: number;
@@ -106,6 +106,9 @@ const SMOOTHING_KERNEL: Float32Array<ArrayBuffer> = _getSmoothingKernel(
   BOX_BLUR_RADII
 );
 
+const FIXED_POINT_BITS = 16;
+const FIXED_POINT_MASK = (1 << FIXED_POINT_BITS) - 1;
+
 export function precomputePositions(
   fullThreadSampleTimes: Milliseconds[],
   sampleIndexOffset: number,
@@ -115,24 +118,29 @@ export function precomputePositions(
   interval: Milliseconds,
   canvasPixelWidth: DevicePixels
 ): PrecomputedPositions {
-  function convertTimeToClampedPosition(time: Milliseconds): DevicePixels {
-    const pos = (time - rangeStart) * xPixelsPerMs;
-    if (pos < 0) {
+  const canvasPixelsFp = canvasPixelWidth << FIXED_POINT_BITS;
+  const xPixelsFpPerMs = xPixelsPerMs * (1 << FIXED_POINT_BITS);
+
+  function convertTimeToClampedPositionFixedPointPrecision(
+    time: Milliseconds
+  ): DevicePixels {
+    const posFp = ((time - rangeStart) * xPixelsFpPerMs) | 0;
+    if (posFp < 0) {
       return 0;
     }
-    if (pos > canvasPixelWidth - 0.1) {
-      return canvasPixelWidth - 0.1;
+    if (posFp >= canvasPixelsFp) {
+      return canvasPixelsFp - 1;
     }
-    return pos;
+    return posFp;
   }
 
   // The fractional device pixel position per sample in the range-filtered thread.
-  const samplePositions = new Float32Array(sampleCount); // DevicePixel[]
+  const samplePositions = new Int32Array(sampleCount); // DevicePixel[]
 
   // The fractional device pixel position of the half-way point *before* the sample,
   // per sample in the range-filtered thread. Has one extra element at the end for
   // the half-way position after the last sample.
-  const halfwayPositions = new Float32Array(sampleCount + 1); // DevicePixel[]
+  const halfwayPositions = new Int32Array(sampleCount + 1); // DevicePixel[]
 
   let previousSampleTime =
     sampleIndexOffset > 0
@@ -141,10 +149,13 @@ export function precomputePositions(
   // Go through the samples and accumulate the category into the percentageBuffers.
   for (let i = 0; i < sampleCount; i++) {
     const sampleTime = fullThreadSampleTimes[sampleIndexOffset + i];
-    samplePositions[i] = convertTimeToClampedPosition(sampleTime);
+    samplePositions[i] =
+      convertTimeToClampedPositionFixedPointPrecision(sampleTime);
 
     const halfwayPointTimeBefore = (previousSampleTime + sampleTime) / 2;
-    halfwayPositions[i] = convertTimeToClampedPosition(halfwayPointTimeBefore);
+    halfwayPositions[i] = convertTimeToClampedPositionFixedPointPrecision(
+      halfwayPointTimeBefore
+    );
 
     previousSampleTime = sampleTime;
   }
@@ -156,7 +167,7 @@ export function precomputePositions(
       : previousSampleTime + interval;
   const halfwayPointTime = (previousSampleTime + afterLastSampleTime) / 2;
   halfwayPositions[sampleCount] =
-    convertTimeToClampedPosition(halfwayPointTime);
+    convertTimeToClampedPositionFixedPointPrecision(halfwayPointTime);
 
   return {
     samplePositions,
@@ -253,7 +264,8 @@ export class ActivityGraphFillComputer {
       // Only copy the first array, as there is no accumulation.
       const { accumulatedUpperEdge, perPixelContribution } = mutableFills[0];
       for (let i = 0; i < perPixelContribution.length; i++) {
-        accumulatedUpperEdge[i] = perPixelContribution[i] / 100;
+        accumulatedUpperEdge[i] =
+          perPixelContribution[i] / (100 << FIXED_POINT_BITS);
       }
     }
 
@@ -265,7 +277,8 @@ export class ActivityGraphFillComputer {
     } of mutableFills.slice(1)) {
       for (let i = 0; i < perPixelContribution.length; i++) {
         accumulatedUpperEdge[i] =
-          previousUpperEdge[i] + perPixelContribution[i] / 100;
+          previousUpperEdge[i] +
+          perPixelContribution[i] / (100 << FIXED_POINT_BITS);
       }
       previousUpperEdge = accumulatedUpperEdge;
     }
@@ -345,19 +358,25 @@ export class ActivityGraphFillComputer {
         const endPos = samplePosition;
         const cpuPercent = beforeSampleCpuPercent;
 
-        const intStartPos = startPos | 0;
-        const intEndPos = endPos | 0;
+        const intStartPos = startPos >> FIXED_POINT_BITS;
+        const intEndPos = endPos >> FIXED_POINT_BITS;
 
         if (intStartPos === intEndPos) {
           percentageBuffer[intStartPos] += cpuPercent * (endPos - startPos);
         } else {
           if (intStartPos + 1 < intEndPos) {
-            percentageBuffer.fill(cpuPercent, intStartPos + 1, intEndPos);
+            percentageBuffer.fill(
+              cpuPercent << FIXED_POINT_BITS,
+              intStartPos + 1,
+              intEndPos
+            );
           }
 
+          const startPosFrac = startPos & FIXED_POINT_MASK;
           percentageBuffer[intStartPos] +=
-            cpuPercent * (1 - (startPos - intStartPos));
-          percentageBuffer[intEndPos] += cpuPercent * (endPos - intEndPos);
+            cpuPercent * ((1 << FIXED_POINT_BITS) - startPosFrac);
+          const endPosFrac = endPos & FIXED_POINT_MASK;
+          percentageBuffer[intEndPos] += cpuPercent * endPosFrac;
         }
       }
 
@@ -366,19 +385,25 @@ export class ActivityGraphFillComputer {
         const endPos = halfwayPositionAfter;
         const cpuPercent = afterSampleCpuPercent;
 
-        const intStartPos = startPos | 0;
-        const intEndPos = endPos | 0;
+        const intStartPos = startPos >> FIXED_POINT_BITS;
+        const intEndPos = endPos >> FIXED_POINT_BITS;
 
         if (intStartPos === intEndPos) {
           percentageBuffer[intStartPos] += cpuPercent * (endPos - startPos);
         } else {
           if (intStartPos + 1 < intEndPos) {
-            percentageBuffer.fill(cpuPercent, intStartPos + 1, intEndPos);
+            percentageBuffer.fill(
+              cpuPercent << FIXED_POINT_BITS,
+              intStartPos + 1,
+              intEndPos
+            );
           }
 
+          const startPosFrac = startPos & FIXED_POINT_MASK;
           percentageBuffer[intStartPos] +=
-            cpuPercent * (1 - (startPos - intStartPos));
-          percentageBuffer[intEndPos] += cpuPercent * (endPos - intEndPos);
+            cpuPercent * ((1 << FIXED_POINT_BITS) - startPosFrac);
+          const endPosFrac = endPos & FIXED_POINT_MASK;
+          percentageBuffer[intEndPos] += cpuPercent * endPosFrac;
         }
       }
 
@@ -687,6 +712,7 @@ export class ActivityFillGraphQuerier {
       rangeFilteredThread: { samples },
       precomputedPositions: { samplePositions, halfwayPositions },
     } = this.renderedComponentSettings;
+
     const halfwayPositionBefore = halfwayPositions[sample];
     const halfwayPositionAfter = halfwayPositions[sample + 1];
     const samplePosition = samplePositions[sample];
@@ -744,8 +770,8 @@ function _createSelectedPercentageAtPixelBuffers({
 }): SelectedPercentageAtPixelBuffers[] {
   return categoryDrawStyles.map(() => {
     const percentageBuffers = [];
-    for (let i = 0; i < SELECTED_STATE_BUFFER_COUNT; i++) {
-      percentageBuffers[i] = new Float32Array(canvasPixelWidth);
+    for (let i = 0; i <= SELECTED_STATE_BUFFER_COUNT; i++) {
+      percentageBuffers[i] = new Int32Array(canvasPixelWidth);
     }
     return percentageBuffers;
   });
@@ -831,13 +857,14 @@ function _accumulateHalfSampleToKernelSum(
     return SMOOTHING_KERNEL[indexInSmoothingKernel];
   }
 
-  const intStartPos = startPos | 0;
-  const intEndPos = endPos | 0;
+  const intStartPos = startPos >> FIXED_POINT_BITS;
+  const intEndPos = endPos >> FIXED_POINT_BITS;
 
   let sum = 0;
 
   if (intStartPos === intEndPos) {
-    sum += kernelVal(intStartPos) * cpuPercent * (endPos - startPos);
+    const frac = (endPos - startPos) / (1 << FIXED_POINT_BITS);
+    sum += kernelVal(intStartPos) * cpuPercent * frac;
   } else {
     if (intStartPos + 1 < intEndPos) {
       for (let i = intStartPos + 1; i < intEndPos; i++) {
@@ -845,18 +872,29 @@ function _accumulateHalfSampleToKernelSum(
       }
     }
 
-    sum += kernelVal(intStartPos) * cpuPercent * (1 - (startPos - intStartPos));
-    sum += kernelVal(intEndPos) * cpuPercent * (endPos - intEndPos);
+    const startPosFrac =
+      (startPos & FIXED_POINT_MASK) / (1 << FIXED_POINT_BITS);
+    sum += kernelVal(intStartPos) * cpuPercent * (1 - startPosFrac);
+    const endPosFrac = (endPos & FIXED_POINT_MASK) / (1 << FIXED_POINT_BITS);
+    sum += kernelVal(intEndPos) * cpuPercent * endPosFrac;
   }
   return sum;
 }
 
+type TypedArray<T> = {
+  readonly length: number;
+  [n: number]: number;
+  BYTES_PER_ELEMENT: number;
+  set(array: T, offset?: number): void;
+  slice(start?: number, end?: number): T;
+};
+
 /**
  * Apply a 1d box blur to a destination array.
  */
-function _boxBlur1D(
-  srcArray: Float32Array,
-  destArray: Float32Array,
+function _boxBlur1D<T extends TypedArray<T>>(
+  srcArray: T,
+  destArray: T,
   radius: number
 ): void {
   if (srcArray.length < radius) {
@@ -889,12 +927,12 @@ function _boxBlur1D(
 /**
  * Apply a blur with a gaussian distribution to a destination array.
  */
-function _applyGaussianBlur1D(
-  srcArray: Float32Array<ArrayBuffer>,
+function _applyGaussianBlur1D<T extends TypedArray<T>>(
+  srcArray: T,
   boxBlurRadii: number[]
 ): void {
   let a = srcArray;
-  let b = new Float32Array(srcArray.length);
+  let b = srcArray.slice();
   for (const radius of boxBlurRadii) {
     _boxBlur1D(a, b, radius);
     [b, a] = [a, b];
@@ -904,8 +942,6 @@ function _applyGaussianBlur1D(
     // The last blur was applied to the temporary array, blit the final values back
     // to the srcArray. This ensures that we are always mutating the values of the
     // src array, and not returning the newly created array.
-    for (let i = 0; i < srcArray.length; i++) {
-      srcArray[i] = a[i];
-    }
+    srcArray.set(a);
   }
 }
