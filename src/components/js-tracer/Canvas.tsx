@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-import { GREY_20 } from 'photon-colors';
+import { GREY_20, BLUE_40 } from 'photon-colors';
 import * as React from 'react';
 import classNames from 'classnames';
 import {
@@ -16,7 +16,6 @@ import { ChartCanvas } from 'firefox-profiler/components/shared/chart/Canvas';
 import TextMeasurement from 'firefox-profiler/utils/text-measurement';
 import { FastFillStyle } from 'firefox-profiler/utils';
 import type { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
-import { BLUE_40 } from 'firefox-profiler/utils/colors';
 
 import type {
   Milliseconds,
