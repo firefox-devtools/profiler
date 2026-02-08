@@ -41,6 +41,18 @@ type RenderedComponentSettings = {
     | null;
   readonly sampleSelectedStates: Uint8Array;
   readonly categoryDrawStyles: CategoryDrawStyles;
+  readonly precomputedPositions: PrecomputedPositions;
+};
+
+export type PrecomputedPositions = {
+  // The fractional device pixel position per sample in the range-filtered thread.
+  // Each position is clamped such that 0 <= pos < canvasPixelWidth.
+  samplePositions: Float32Array; // DevicePixel[]
+  // The fractional device pixel position of the half-way point *before* the sample,
+  // per sample in the range-filtered thread. Has one extra element at the end for
+  // the half-way position after the last sample.
+  // Each position is clamped such that 0 <= pos < canvasPixelWidth.
+  halfwayPositions: Float32Array; // DevicePixel[]
 };
 
 type SampleContributionToPixel = {
@@ -93,6 +105,64 @@ const SMOOTHING_KERNEL: Float32Array<ArrayBuffer> = _getSmoothingKernel(
   SMOOTHING_RADIUS,
   BOX_BLUR_RADII
 );
+
+export function precomputePositions(
+  fullThreadSampleTimes: Milliseconds[],
+  sampleIndexOffset: number,
+  sampleCount: number,
+  rangeStart: Milliseconds,
+  xPixelsPerMs: number,
+  interval: Milliseconds,
+  canvasPixelWidth: DevicePixels
+): PrecomputedPositions {
+  function convertTimeToClampedPosition(time: Milliseconds): DevicePixels {
+    const pos = (time - rangeStart) * xPixelsPerMs;
+    if (pos < 0) {
+      return 0;
+    }
+    if (pos > canvasPixelWidth - 0.1) {
+      return canvasPixelWidth - 0.1;
+    }
+    return pos;
+  }
+
+  // The fractional device pixel position per sample in the range-filtered thread.
+  const samplePositions = new Float32Array(sampleCount); // DevicePixel[]
+
+  // The fractional device pixel position of the half-way point *before* the sample,
+  // per sample in the range-filtered thread. Has one extra element at the end for
+  // the half-way position after the last sample.
+  const halfwayPositions = new Float32Array(sampleCount + 1); // DevicePixel[]
+
+  let previousSampleTime =
+    sampleIndexOffset > 0
+      ? fullThreadSampleTimes[sampleIndexOffset - 1]
+      : fullThreadSampleTimes[0] - interval;
+  // Go through the samples and accumulate the category into the percentageBuffers.
+  for (let i = 0; i < sampleCount; i++) {
+    const sampleTime = fullThreadSampleTimes[sampleIndexOffset + i];
+    samplePositions[i] = convertTimeToClampedPosition(sampleTime);
+
+    const halfwayPointTimeBefore = (previousSampleTime + sampleTime) / 2;
+    halfwayPositions[i] = convertTimeToClampedPosition(halfwayPointTimeBefore);
+
+    previousSampleTime = sampleTime;
+  }
+
+  // Add another half-way point for after the last sample.
+  const afterLastSampleTime =
+    sampleIndexOffset + sampleCount < fullThreadSampleTimes.length
+      ? fullThreadSampleTimes[sampleIndexOffset + sampleCount]
+      : previousSampleTime + interval;
+  const halfwayPointTime = (previousSampleTime + afterLastSampleTime) / 2;
+  halfwayPositions[sampleCount] =
+    convertTimeToClampedPosition(halfwayPointTime);
+
+  return {
+    samplePositions,
+    halfwayPositions,
+  };
+}
 
 export function computeActivityGraphFills(
   renderedComponentSettings: RenderedComponentSettings
@@ -211,12 +281,9 @@ export class ActivityGraphFillComputer {
    */
   _accumulateSampleCategories() {
     const {
-      fullThread,
       rangeFilteredThread: { samples },
-      interval,
-      sampleIndexOffset,
-      rangeStart,
       sampleSelectedStates,
+      precomputedPositions,
     } = this.renderedComponentSettings;
 
     if (samples.length === 0) {
@@ -224,22 +291,16 @@ export class ActivityGraphFillComputer {
       return;
     }
 
-    let prevSampleTime = samples.time[0] - interval;
-    let sampleTime = samples.time[0];
 
-    if (sampleIndexOffset > 0) {
-      // If sampleIndexOffset is greater than zero, it means that we are zoomed
-      // in the timeline and we are seeing a portion of it. In that case,
-      // rangeFilteredThread will not have the information of the first previous
-      // sample. So we need to get that information from the full thread.
-      prevSampleTime = fullThread.samples.time[sampleIndexOffset - 1];
-    }
-
-    // Go through the samples and accumulate the category into the percentageBuffers.
+    // Go through the samples and accumulate the category into the percentageBuffers.)
+    const { samplePositions, halfwayPositions } = precomputedPositions;
     const { threadCPUPercent } = samples;
     let beforeSampleCpuPercent = threadCPUPercent[0];
-    for (let i = 0; i < samples.length - 1; i++) {
-      const nextSampleTime = samples.time[i + 1];
+    let halfwayPositionBefore = halfwayPositions[0];
+    for (let i = 0; i < samples.length; i++) {
+      // Note that both halfwayPositions and threadCPUPercent have an extra element
+      // at the end, so accessing [i + 1] is valid even for the last sample.
+      const halfwayPositionAfter = halfwayPositions[i + 1];
       const afterSampleCpuPercent = threadCPUPercent[i + 1];
       const category = samples.category[i];
 
@@ -247,46 +308,20 @@ export class ActivityGraphFillComputer {
       const bufferIndex =
         sampleSelectedStates[i] & SAMPLE_RELATION_TO_SELECTED_STATE_MASK;
       const percentageBuffer = percentageBuffers[bufferIndex];
+      const samplePosition = samplePositions[i];
 
       _accumulateInBuffer(
         percentageBuffer,
-        this.renderedComponentSettings,
-        prevSampleTime,
-        sampleTime,
-        nextSampleTime,
+        halfwayPositionBefore,
+        samplePosition,
+        halfwayPositionAfter,
         beforeSampleCpuPercent,
-        afterSampleCpuPercent,
-        rangeStart
+        afterSampleCpuPercent
       );
 
-      prevSampleTime = sampleTime;
-      sampleTime = nextSampleTime;
+      halfwayPositionBefore = halfwayPositionAfter;
       beforeSampleCpuPercent = afterSampleCpuPercent;
     }
-
-    // Handle the last sample, which was not covered by the for loop above.
-    const lastIdx = samples.length - 1;
-    const lastSampleCategory = samples.category[lastIdx];
-
-    const afterSampleCpuPercent = threadCPUPercent[lastIdx + 1]; // guaranteed to exist
-
-    const nextSampleTime = sampleTime + interval;
-    const percentageBuffers = this.mutablePercentageBuffers[lastSampleCategory];
-
-    const bufferIndex =
-      sampleSelectedStates[lastIdx] & SAMPLE_RELATION_TO_SELECTED_STATE_MASK;
-    const percentageBuffer = percentageBuffers[bufferIndex];
-
-    _accumulateInBuffer(
-      percentageBuffer,
-      this.renderedComponentSettings,
-      prevSampleTime,
-      sampleTime,
-      nextSampleTime,
-      beforeSampleCpuPercent,
-      afterSampleCpuPercent,
-      rangeStart
-    );
   }
 }
 
@@ -587,46 +622,36 @@ export class ActivityFillGraphQuerier {
   ): number {
     const {
       rangeFilteredThread: { samples },
-      interval,
-      sampleIndexOffset,
-      fullThread,
-      xPixelsPerMs,
-      rangeStart,
+      canvasPixelWidth,
+      precomputedPositions: { samplePositions, halfwayPositions },
     } = this.renderedComponentSettings;
-    const kernelPos = xPixel - SMOOTHING_RADIUS;
-    const pixelsAroundX = new Float32Array(SMOOTHING_KERNEL.length);
-    const sampleTime = samples.time[sample];
-    // Use the fullThread here to properly get the next and previous in case zoomed in.
-    const fullThreadSample = sample + sampleIndexOffset;
-    const prevSampleTime =
-      fullThreadSample > 0
-        ? fullThread.samples.time[fullThreadSample - 1]
-        : sampleTime - interval;
-    const nextSampleTime =
-      fullThreadSample + 1 < fullThread.samples.length
-        ? fullThread.samples.time[fullThreadSample + 1]
-        : sampleTime + interval;
+    const fullWidthPixels = new Float32Array(canvasPixelWidth);
+
+    const halfwayPositionBefore = halfwayPositions[sample];
+    const halfwayPositionAfter = halfwayPositions[sample + 1];
+    const samplePosition = samplePositions[sample];
 
     const { threadCPUPercent } = samples;
     const beforeSampleCpuPercent = threadCPUPercent[sample];
     const afterSampleCpuPercent = threadCPUPercent[sample + 1]; // guaranteed to exist
 
-    const kernelRangeStartTime = rangeStart + kernelPos / xPixelsPerMs;
-
     _accumulateInBuffer(
-      pixelsAroundX,
-      this.renderedComponentSettings,
-      prevSampleTime,
-      sampleTime,
-      nextSampleTime,
+      fullWidthPixels,
+      halfwayPositionBefore,
+      samplePosition,
+      halfwayPositionAfter,
       beforeSampleCpuPercent,
-      afterSampleCpuPercent,
-      kernelRangeStartTime
+      afterSampleCpuPercent
     );
 
     let sum = 0;
     for (let i = 0; i < SMOOTHING_KERNEL.length; i++) {
-      sum += SMOOTHING_KERNEL[i] * pixelsAroundX[i];
+      const pixelAtI = (xPixel | 0) + (i - SMOOTHING_RADIUS);
+      const pixelContribution =
+        pixelAtI >= 0 && pixelAtI < canvasPixelWidth
+          ? fullWidthPixels[pixelAtI]
+          : 0;
+      sum += SMOOTHING_KERNEL[i] * pixelContribution;
     }
 
     return sum / 100;
@@ -739,31 +764,15 @@ function _getCategoryFills(
  */
 function _accumulateInBuffer(
   percentageBuffer: Float32Array,
-  renderedComponentSettings: RenderedComponentSettings,
-  prevSampleTime: Milliseconds,
-  sampleTime: Milliseconds,
-  nextSampleTime: Milliseconds,
+  halfwayPositionBefore: DevicePixels,
+  samplePosition: DevicePixels,
+  halfwayPositionAfter: DevicePixels,
   beforeSampleCpuPercent: number,
-  afterSampleCpuPercent: number,
-  bufferTimeRangeStart: Milliseconds
+  afterSampleCpuPercent: number
 ) {
-  const { xPixelsPerMs } = renderedComponentSettings;
-  const sampleCategoryStartTime = (prevSampleTime + sampleTime) / 2;
-  const sampleCategoryEndTime = (sampleTime + nextSampleTime) / 2;
-  let sampleCategoryStartPixel =
-    (sampleCategoryStartTime - bufferTimeRangeStart) * xPixelsPerMs;
-  let sampleCategoryEndPixel =
-    (sampleCategoryEndTime - bufferTimeRangeStart) * xPixelsPerMs;
-  if (sampleCategoryStartPixel < 0) {
-    sampleCategoryStartPixel = 0;
-  }
-  if (sampleCategoryEndPixel > percentageBuffer.length - 1) {
-    sampleCategoryEndPixel = percentageBuffer.length - 1;
-  }
-  const samplePixel = (sampleTime - bufferTimeRangeStart) * xPixelsPerMs;
-  const intCategoryStartPixel = sampleCategoryStartPixel | 0;
-  const intCategoryEndPixel = sampleCategoryEndPixel | 0;
-  const intSamplePixel = samplePixel | 0;
+  const intHalfwayPositionBefore = halfwayPositionBefore | 0;
+  const intHalfwayPositionAfter = halfwayPositionAfter | 0;
+  const intSamplePosition = samplePosition | 0;
 
   // Every sample has two parts because of different CPU usage values.
   // For every sample part, we have a fractional interval of this sample part's
@@ -793,37 +802,37 @@ function _accumulateInBuffer(
   // This is because CPU usage number of a sample represents the CPU usage
   // starting starting from the previous sample time to this sample time.
   // These parts will be:
-  // - Between `sampleCategoryStartPixel` and `samplePixel` with beforeSampleCpuPercent.
-  // - Between `samplePixel` and `sampleCategoryEndPixel` with afterSampleCpuPercent.
+  // - Between `halfwayPositionBefore` and `samplePosition` with beforeSampleCpuPercent.
+  // - Between `samplePosition` and `halfwayPositionAfter` with afterSampleCpuPercent.
 
   // Here we are accumulating the first part of the sample. It will use the
   // CPU delta number that belongs to this sample.
   // This part starts from the "sample start time" to "sample time" and uses
   // beforeSampleCpuPercent.
-  for (let i = intCategoryStartPixel; i <= intSamplePixel; i++) {
+  for (let i = intHalfwayPositionBefore; i <= intSamplePosition; i++) {
     percentageBuffer[i] += beforeSampleCpuPercent;
   }
 
   // Subtract the partial pixels from start and end of the first part.
-  percentageBuffer[intCategoryStartPixel] -=
-    beforeSampleCpuPercent * (sampleCategoryStartPixel - intCategoryStartPixel);
-  percentageBuffer[intSamplePixel] -=
-    beforeSampleCpuPercent * (1 - (samplePixel - intSamplePixel));
+  percentageBuffer[intHalfwayPositionBefore] -=
+    beforeSampleCpuPercent * (halfwayPositionBefore - intHalfwayPositionBefore);
+  percentageBuffer[intSamplePosition] -=
+    beforeSampleCpuPercent * (1 - (samplePosition - intSamplePosition));
 
   // Here we are accumulating the second part of the sample. It will use the
   // CPU delta number that belongs to the next sample.
   // This part starts from "sample time" to "sample end time" and uses
   // afterSampleCpuPercent.
-  for (let i = intSamplePixel; i <= intCategoryEndPixel; i++) {
+  for (let i = intSamplePosition; i <= intHalfwayPositionAfter; i++) {
     percentageBuffer[i] += afterSampleCpuPercent;
   }
 
   // Subtract the partial pixels from start and end of the second part.
-  percentageBuffer[intSamplePixel] -=
-    afterSampleCpuPercent * (samplePixel - intSamplePixel);
-  percentageBuffer[intCategoryEndPixel] -=
+  percentageBuffer[intSamplePosition] -=
+    afterSampleCpuPercent * (samplePosition - intSamplePosition);
+  percentageBuffer[intHalfwayPositionAfter] -=
     afterSampleCpuPercent *
-    (1 - (sampleCategoryEndPixel - intCategoryEndPixel));
+    (1 - (halfwayPositionAfter - intHalfwayPositionAfter));
 }
 /**
  * Apply a 1d box blur to a destination array.
