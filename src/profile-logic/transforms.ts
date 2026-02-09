@@ -20,7 +20,7 @@ import {
   getSearchFilteredMarkerIndexes,
   stringsToMarkerRegExps,
 } from '../profile-logic/marker-data';
-import { shallowCloneFrameTable, getEmptyStackTable } from './data-structures';
+import { getEmptyStackTable } from './data-structures';
 import { getFunctionName } from './function-info';
 import { splitSearchString } from '../utils/string';
 
@@ -934,140 +934,28 @@ export function collapseResource(
   resourceIndexToCollapse: IndexIntoResourceTable,
   collapsedFuncIndex: IndexIntoFuncTable,
   implementation: ImplementationFilter,
-  defaultCategory: IndexIntoCategoryList
+  _defaultCategory: IndexIntoCategoryList
 ): Thread {
-  const { stackTable, funcTable, frameTable } = thread;
-  const newFrameTable = shallowCloneFrameTable(frameTable);
-  const newStackTable = getEmptyStackTable();
-  const oldStackToNewStack: Map<
-    IndexIntoStackTable | null,
-    IndexIntoStackTable | null
-  > = new Map();
-  const prefixStackToCollapsedStack: Map<
-    IndexIntoStackTable | null, // prefix stack index
-    IndexIntoStackTable | null // collapsed stack index
-  > = new Map();
-  const collapsedStacks: Set<IndexIntoStackTable | null> = new Set();
-  const funcMatchesImplementation = FUNC_MATCHES[implementation];
+  const { funcTable, frameTable } = thread;
 
-  // A root stack's prefix will be null. Maintain that relationship from old to new
-  // stacks by mapping from null to null.
-  oldStackToNewStack.set(null, null);
-  // A new func and frame will be created on the first stack that is found that includes
-  // the given resource.
-  let collapsedFrameIndex;
-
-  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    const prefix = stackTable.prefix[stackIndex];
-    const frameIndex = stackTable.frame[stackIndex];
-    const category = stackTable.category[stackIndex];
-    const subcategory = stackTable.subcategory[stackIndex];
-    const funcIndex = frameTable.func[frameIndex];
+  const newFrameTableFuncCol = frameTable.func.slice();
+  for (let i = 0; i < frameTable.length; i++) {
+    const funcIndex = frameTable.func[i];
     const resourceIndex = funcTable.resource[funcIndex];
-    const newStackPrefix = oldStackToNewStack.get(prefix);
-
-    if (newStackPrefix === undefined) {
-      throw new Error('newStackPrefix must not be undefined');
-    }
     if (resourceIndex === resourceIndexToCollapse) {
-      // The stack matches this resource.
-      if (!collapsedStacks.has(newStackPrefix)) {
-        // The prefix is not a collapsed stack. So this stack will not collapse into its
-        // prefix stack. But it might collapse into a sibling stack, if there exists a
-        // sibling with the same resource. Check if a collapsed stack with the same
-        // prefix (i.e. a collapsed sibling) exists.
-
-        const existingCollapsedStack = prefixStackToCollapsedStack.get(prefix);
-        if (existingCollapsedStack === undefined) {
-          // Create a new collapsed frame.
-
-          // Compute the next indexes
-          const newStackIndex = newStackTable.length++;
-          collapsedStacks.add(newStackIndex);
-          oldStackToNewStack.set(stackIndex, newStackIndex);
-          prefixStackToCollapsedStack.set(prefix, newStackIndex);
-
-          if (collapsedFrameIndex === undefined) {
-            collapsedFrameIndex = newFrameTable.length++;
-            // Add the collapsed frame
-            newFrameTable.address.push(frameTable.address[frameIndex]);
-            newFrameTable.inlineDepth.push(frameTable.inlineDepth[frameIndex]);
-            newFrameTable.category.push(frameTable.category[frameIndex]);
-            newFrameTable.subcategory.push(frameTable.subcategory[frameIndex]);
-            newFrameTable.func.push(collapsedFuncIndex);
-            newFrameTable.nativeSymbol.push(
-              frameTable.nativeSymbol[frameIndex]
-            );
-            newFrameTable.line.push(frameTable.line[frameIndex]);
-            newFrameTable.column.push(frameTable.column[frameIndex]);
-            newFrameTable.innerWindowID.push(
-              frameTable.innerWindowID[frameIndex]
-            );
-          }
-
-          // Add the new stack.
-          newStackTable.prefix.push(newStackPrefix);
-          newStackTable.frame.push(collapsedFrameIndex);
-          newStackTable.category.push(category);
-          newStackTable.subcategory.push(subcategory);
-        } else {
-          // A collapsed stack at this level already exists, use that one.
-          if (existingCollapsedStack === null) {
-            throw new Error('existingCollapsedStack cannot be null');
-          }
-          oldStackToNewStack.set(stackIndex, existingCollapsedStack);
-          if (newStackTable.category[existingCollapsedStack] !== category) {
-            // Conflicting origin stack categories -> default category + subcategory.
-            newStackTable.category[existingCollapsedStack] = defaultCategory;
-            newStackTable.subcategory[existingCollapsedStack] = 0;
-          } else if (
-            newStackTable.subcategory[existingCollapsedStack] !== subcategory
-          ) {
-            // Conflicting origin stack subcategories -> "Other" subcategory.
-            newStackTable.subcategory[existingCollapsedStack] = 0;
-          }
-        }
-      } else {
-        // The prefix was already collapsed, use that one.
-        oldStackToNewStack.set(stackIndex, newStackPrefix);
-      }
-    } else {
-      if (
-        !funcMatchesImplementation(thread, funcIndex) &&
-        newStackPrefix !== null
-      ) {
-        // This function doesn't match the implementation filter.
-        const prefixFrame = newStackTable.frame[newStackPrefix];
-        const prefixFunc = newFrameTable.func[prefixFrame];
-        const prefixResource = funcTable.resource[prefixFunc];
-
-        if (prefixResource === resourceIndexToCollapse) {
-          // This stack's prefix did match the collapsed resource, map the stack
-          // to the already collapsed stack and move on.
-          oldStackToNewStack.set(stackIndex, newStackPrefix);
-          continue;
-        }
-      }
-      // This stack isn't part of the collapsed resource. Copy over the previous stack.
-      const newStackIndex = newStackTable.length++;
-      newStackTable.prefix.push(newStackPrefix);
-      newStackTable.frame.push(frameIndex);
-      newStackTable.category.push(category);
-      newStackTable.subcategory.push(subcategory);
-      oldStackToNewStack.set(stackIndex, newStackIndex);
+      newFrameTableFuncCol[i] = collapsedFuncIndex;
     }
   }
 
   const newThread = {
     ...thread,
-    frameTable: newFrameTable,
+    frameTable: {
+      ...frameTable,
+      func: newFrameTableFuncCol,
+    },
   };
 
-  return updateThreadStacks(
-    newThread,
-    newStackTable,
-    getMapStackUpdater(oldStackToNewStack)
-  );
+  return collapseDirectRecursion(newThread, collapsedFuncIndex, implementation);
 }
 
 export function collapseDirectRecursion(
