@@ -41,8 +41,8 @@ export function getEmptyStackTable(): StackTable {
     // be caught by the type system.
     frame: [],
     prefix: [],
-    category: [],
-    subcategory: [],
+    category: new Uint8Array(),
+    subcategory: new Uint8Array(),
     length: 0,
   };
 }

@@ -31,7 +31,6 @@ import type {
   IndexIntoStackTable,
   WeightType,
   IndexIntoFrameTable,
-  IndexIntoSubcategoryListForCategory,
   SourceTable,
   IndexIntoSourceTable,
 } from './profile';
@@ -217,8 +216,8 @@ export type StackTable = {
   length: number;
 
   // Derived from RawStackTable + FrameTable
-  category: IndexIntoCategoryList[];
-  subcategory: IndexIntoSubcategoryListForCategory[];
+  category: Uint8Array<ArrayBuffer>; // represents a Map<IndexIntoStackTable, IndexIntoCategoryList>
+  subcategory: Uint8Array<ArrayBuffer> | Uint16Array<ArrayBuffer>; // represents a Map<IndexIntoStackTable, IndexIntoSubcategoryListForCategory>
 };
 
 /**

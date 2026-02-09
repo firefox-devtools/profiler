@@ -2607,7 +2607,7 @@ CallTree {
       "uuid": Array [],
     },
     "stackTable": Object {
-      "category": Array [
+      "category": Uint8Array [
         0,
         0,
         0,
@@ -2641,7 +2641,7 @@ CallTree {
         1,
         7,
       ],
-      "subcategory": Array [
+      "subcategory": Uint8Array [
         0,
         0,
         0,
@@ -2943,7 +2943,7 @@ Object {
     "uuid": Array [],
   },
   "stackTable": Object {
-    "category": Array [
+    "category": Uint8Array [
       0,
       0,
       0,
@@ -2977,7 +2977,7 @@ Object {
       1,
       7,
     ],
-    "subcategory": Array [
+    "subcategory": Uint8Array [
       0,
       0,
       0,
@@ -3351,7 +3351,7 @@ Object {
     "uuid": Array [],
   },
   "stackTable": Object {
-    "category": Array [
+    "category": Uint8Array [
       0,
       0,
       0,
@@ -3385,7 +3385,7 @@ Object {
       1,
       7,
     ],
-    "subcategory": Array [
+    "subcategory": Uint8Array [
       0,
       0,
       0,
@@ -3685,7 +3685,7 @@ Object {
     "uuid": Array [],
   },
   "stackTable": Object {
-    "category": Array [
+    "category": Uint8Array [
       0,
       0,
       0,
@@ -3719,7 +3719,7 @@ Object {
       1,
       7,
     ],
-    "subcategory": Array [
+    "subcategory": Uint8Array [
       0,
       0,
       0,
@@ -4019,7 +4019,7 @@ Object {
     "uuid": Array [],
   },
   "stackTable": Object {
-    "category": Array [
+    "category": Uint8Array [
       0,
       0,
       0,
@@ -4053,7 +4053,7 @@ Object {
       1,
       7,
     ],
-    "subcategory": Array [
+    "subcategory": Uint8Array [
       0,
       0,
       0,

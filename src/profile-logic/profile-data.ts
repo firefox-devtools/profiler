@@ -98,7 +98,6 @@ import type {
   SourceTable,
   IndexIntoSourceTable,
   TransformOutput,
-  IndexIntoSubcategoryListForCategory,
 } from 'firefox-profiler/types';
 import { SelectedState, ResourceType } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
@@ -1632,6 +1631,10 @@ export function computeTransformOutputForImplementationFilter(
  * computes the remaining columns by copying over the information
  * from the original StackTable, skipping (discarding) values for
  * any stacks that we don't keep.
+ *
+ * When this function is called, the length of the new StackTable
+ * is already known, and the new category/subcategory columns (which are
+ * typed arrays) can immediately be created with the correct length.
  */
 export function createStackTableBySkippingDiscarded(
   stackTable: StackTable,
@@ -1640,10 +1643,11 @@ export function createStackTableBySkippingDiscarded(
 ): StackTable {
   const newStackCount = newPrefixCol.length;
   const newFrameCol = new Array<IndexIntoFrameTable>(newStackCount);
-  const newCategoryCol = new Array<IndexIntoCategoryList>(newStackCount);
-  const newSubcategoryCol = new Array<IndexIntoSubcategoryListForCategory>(
-    newStackCount
-  );
+  const newCategoryCol = new Uint8Array(newStackCount);
+  const newSubcategoryCol =
+    stackTable.subcategory instanceof Uint16Array
+      ? new Uint16Array(newStackCount)
+      : new Uint8Array(newStackCount);
 
   let nextNewStackIndex = 0;
   for (let i = 0; i < stackTable.length; i++) {
@@ -4317,11 +4321,27 @@ export function computeTabToThreadIndexesMap(
 export function computeStackTableFromRawStackTable(
   rawStackTable: RawStackTable,
   frameTable: FrameTable,
+  categories: CategoryList | undefined,
   defaultCategory: IndexIntoCategoryList
 ): StackTable {
   // Compute a non-null category for every stack
-  const categoryColumn = new Array(rawStackTable.length);
-  const subcategoryColumn = new Array(rawStackTable.length);
+  if (categories && categories.length > 256) {
+    console.error(
+      `This profile has ${categories.length} categories, which is more than 256 and not supported.`
+    );
+  }
+  const maxSubcategoryCount = categories
+    ? categories.reduce(
+        (maxSoFar, category) =>
+          Math.max(maxSoFar, category.subcategories.length),
+        0
+      )
+    : 1;
+  const categoryColumn = new Uint8Array(rawStackTable.length);
+  const subcategoryColumn =
+    maxSubcategoryCount < 256
+      ? new Uint8Array(rawStackTable.length)
+      : new Uint16Array(rawStackTable.length);
   for (let stackIndex = 0; stackIndex < rawStackTable.length; stackIndex++) {
     const frameIndex = rawStackTable.frame[stackIndex];
     const frameCategory = frameTable.category[frameIndex];
