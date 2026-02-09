@@ -98,6 +98,7 @@ import type {
   SourceTable,
   IndexIntoSourceTable,
   TransformOutput,
+  IndexIntoSubcategoryListForCategory,
 } from 'firefox-profiler/types';
 import { SelectedState, ResourceType } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
@@ -1623,20 +1624,57 @@ export function computeTransformOutputForImplementationFilter(
   }
 }
 
+/**
+ * A helper function for creating a new StackTable.
+ *
+ * The caller passes in the prefix column of the new StackTable,
+ * and a bitset about which stacks to keep. Then this function
+ * computes the remaining columns by copying over the information
+ * from the original StackTable, skipping (discarding) values for
+ * any stacks that we don't keep.
+ */
+export function createStackTableBySkippingDiscarded(
+  stackTable: StackTable,
+  newPrefixCol: Array<IndexIntoStackTable | null>,
+  keepStack: BitSet
+): StackTable {
+  const newStackCount = newPrefixCol.length;
+  const newFrameCol = new Array<IndexIntoFrameTable>(newStackCount);
+  const newCategoryCol = new Array<IndexIntoCategoryList>(newStackCount);
+  const newSubcategoryCol = new Array<IndexIntoSubcategoryListForCategory>(
+    newStackCount
+  );
+
+  let nextNewStackIndex = 0;
+  for (let i = 0; i < stackTable.length; i++) {
+    if (!checkBit(keepStack, i)) {
+      continue;
+    }
+
+    const newStackIndex = nextNewStackIndex++;
+    newFrameCol[newStackIndex] = stackTable.frame[i];
+    newCategoryCol[newStackIndex] = stackTable.category[i];
+    newSubcategoryCol[newStackIndex] = stackTable.subcategory[i];
+  }
+
+  return {
+    frame: newFrameCol,
+    prefix: newPrefixCol,
+    length: newStackCount,
+    category: newCategoryCol,
+    subcategory: newSubcategoryCol,
+  };
+}
+
 function _computeTransformOutputForMergingFuncs(
   stackTable: StackTable,
   frameTable: FrameTable,
   shouldIncludeFuncInFilteredThread: (funcIndex: IndexIntoFuncTable) => boolean
 ): TransformOutput {
   return timeCode('_computeTransformOutputForMergingFuncs', () => {
-    const newStackTable: StackTable = {
-      length: 0,
-      frame: [],
-      prefix: [],
-      category: [],
-      subcategory: [],
-    };
+    const newPrefixCol = new Array<IndexIntoStackTable | null>();
     const oldStackToNewStack = new Int32Array(stackTable.length);
+    const keepStack = makeBitSet(stackTable.length);
 
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const oldPrefix = stackTable.prefix[stackIndex];
@@ -1644,19 +1682,20 @@ function _computeTransformOutputForMergingFuncs(
       const func = frameTable.func[frame];
       const newPrefix = oldPrefix === null ? -1 : oldStackToNewStack[oldPrefix];
       if (shouldIncludeFuncInFilteredThread(func)) {
-        const newStackIndex = newStackTable.length++;
-        newStackTable.frame[newStackIndex] = frame;
-        newStackTable.prefix[newStackIndex] =
-          newPrefix !== -1 ? newPrefix : null;
-        newStackTable.category[newStackIndex] = stackTable.category[stackIndex];
-        newStackTable.subcategory[newStackIndex] =
-          stackTable.subcategory[stackIndex];
+        const newStackIndex = newPrefixCol.length;
+        newPrefixCol[newStackIndex] = newPrefix !== -1 ? newPrefix : null;
         oldStackToNewStack[stackIndex] = newStackIndex;
+        setBit(keepStack, stackIndex);
       } else {
         oldStackToNewStack[stackIndex] = newPrefix;
       }
     }
 
+    const newStackTable = createStackTableBySkippingDiscarded(
+      stackTable,
+      newPrefixCol,
+      keepStack
+    );
     return {
       newStackTable,
       effectOnThreadData: {
