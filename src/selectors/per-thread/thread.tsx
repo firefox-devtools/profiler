@@ -118,8 +118,10 @@ export function getBasicThreadSelectorsPerThread(
     getRawThread(state).samples;
   const getSamplesTable: Selector<SamplesTable> = createSelector(
     getRawSamplesTable,
+    ProfileSelectors.getStackTable,
     ProfileSelectors.getSampleUnits,
     ProfileSelectors.getReferenceCPUDeltaPerMs,
+    ProfileSelectors.getDefaultCategory,
     ProfileData.computeSamplesTableFromRawSamplesTable
   );
   const getNativeAllocations: Selector<NativeAllocationsTable | void> = (

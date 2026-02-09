@@ -2336,6 +2336,10 @@ CallTree {
   },
   "_isHighPrecision": false,
   "_previewFilteredCtssSamples": Object {
+    "category": Uint8Array [
+      0,
+      0,
+    ],
     "eventDelay": Array [
       0,
       0,
@@ -2344,6 +2348,10 @@ CallTree {
     "stack": Array [
       6,
       6,
+    ],
+    "subcategory": Uint8Array [
+      0,
+      0,
     ],
     "time": Array [
       4,
@@ -2578,6 +2586,12 @@ CallTree {
       "type": Array [],
     },
     "samples": Object {
+      "category": Uint8Array [
+        0,
+        0,
+        0,
+        0,
+      ],
       "eventDelay": Array [
         0,
         0,
@@ -2590,6 +2604,12 @@ CallTree {
         6,
         6,
         8,
+      ],
+      "subcategory": Uint8Array [
+        0,
+        0,
+        0,
+        0,
       ],
       "time": Array [
         3,
@@ -2914,6 +2934,12 @@ Object {
     "type": Array [],
   },
   "samples": Object {
+    "category": Uint8Array [
+      0,
+      0,
+      0,
+      0,
+    ],
     "eventDelay": Array [
       0,
       0,
@@ -2926,6 +2952,12 @@ Object {
       6,
       6,
       8,
+    ],
+    "subcategory": Uint8Array [
+      0,
+      0,
+      0,
+      0,
     ],
     "time": Array [
       3,
@@ -3328,6 +3360,10 @@ Object {
     "type": Array [],
   },
   "samples": Object {
+    "category": Uint8Array [
+      0,
+      0,
+    ],
     "eventDelay": Array [
       0,
       0,
@@ -3336,6 +3372,10 @@ Object {
     "stack": Array [
       6,
       6,
+    ],
+    "subcategory": Uint8Array [
+      0,
+      0,
     ],
     "time": Array [
       4,
@@ -3656,6 +3696,12 @@ Object {
     "type": Array [],
   },
   "samples": Object {
+    "category": Uint8Array [
+      0,
+      0,
+      0,
+      0,
+    ],
     "eventDelay": Array [
       0,
       0,
@@ -3668,6 +3714,12 @@ Object {
       6,
       6,
       8,
+    ],
+    "subcategory": Uint8Array [
+      0,
+      0,
+      0,
+      0,
     ],
     "time": Array [
       3,
@@ -3990,6 +4042,12 @@ Object {
     "type": Array [],
   },
   "samples": Object {
+    "category": Uint8Array [
+      0,
+      0,
+      0,
+      0,
+    ],
     "eventDelay": Array [
       0,
       0,
@@ -4002,6 +4060,12 @@ Object {
       6,
       6,
       8,
+    ],
+    "subcategory": Uint8Array [
+      0,
+      0,
+      0,
+      0,
     ],
     "time": Array [
       3,

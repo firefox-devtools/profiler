@@ -98,6 +98,7 @@ import type {
   SourceTable,
   IndexIntoSourceTable,
   TransformOutput,
+  SampleCategoriesAndSubcategories,
 } from 'firefox-profiler/types';
 import { SelectedState, ResourceType } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
@@ -1853,6 +1854,34 @@ export function computeTimeColumnForRawSamplesTable(
   return time ?? numberSeriesFromDeltas(ensureExists(timeDeltas));
 }
 
+export function computeSampleCategoriesAndSubcategories(
+  sampleStacks: Array<IndexIntoStackTable | null>,
+  stackTable: StackTable,
+  defaultCategory: IndexIntoCategoryList
+): SampleCategoriesAndSubcategories {
+  const sampleCount = sampleStacks.length;
+  const {
+    category: stackTableCategoryCol,
+    subcategory: stackTableSubcategoryCol,
+  } = stackTable;
+  const sampleCategories = new Uint8Array(sampleCount);
+  const sampleSubcategories =
+    stackTableSubcategoryCol instanceof Uint16Array
+      ? new Uint16Array(sampleCount)
+      : new Uint8Array(sampleCount);
+  for (let i = 0; i < sampleCount; i++) {
+    const stackIndex = sampleStacks[i];
+    if (stackIndex !== null) {
+      sampleCategories[i] = stackTableCategoryCol[stackIndex];
+      sampleSubcategories[i] = stackTableSubcategoryCol[stackIndex];
+    } else {
+      sampleCategories[i] = defaultCategory;
+      sampleSubcategories[i] = 0;
+    }
+  }
+  return { sampleCategories, sampleSubcategories };
+}
+
 /**
  * Checks if a sample table has any useful samples.
  * A useful sample being one that isn't a "(root)" sample.
@@ -1982,6 +2011,8 @@ export function filterThreadSamplesToRange(
       : null,
     weightType: samples.weightType,
     stack: samples.stack.slice(beginSampleIndex, endSampleIndex),
+    category: samples.category.subarray(beginSampleIndex, endSampleIndex),
+    subcategory: samples.subcategory.subarray(beginSampleIndex, endSampleIndex),
   };
 
   if (samples.eventDelay) {
@@ -2570,8 +2601,10 @@ export function computeCallNodeMaxDepthPlusOne(
  */
 export function computeSamplesTableFromRawSamplesTable(
   rawSamples: RawSamplesTable,
+  stackTable: StackTable,
   sampleUnits: SampleUnits | undefined,
-  referenceCPUDeltaPerMs: number
+  referenceCPUDeltaPerMs: number,
+  defaultCategory: IndexIntoCategoryList
 ): SamplesTable {
   const {
     responsiveness,
@@ -2593,6 +2626,12 @@ export function computeSamplesTableFromRawSamplesTable(
       ? computeThreadCPURatio(rawSamples, timeDeltas, referenceCPUDeltaPerMs)
       : undefined;
   const time = computeTimeColumnForRawSamplesTable(rawSamples);
+  const { sampleCategories, sampleSubcategories } =
+    computeSampleCategoriesAndSubcategories(
+      rawSamples.stack,
+      stackTable,
+      defaultCategory
+    );
 
   return {
     // These fields are copied from the raw samples table:
@@ -2608,6 +2647,8 @@ export function computeSamplesTableFromRawSamplesTable(
     // These fields are derived:
     time,
     threadCPURatio,
+    category: sampleCategories,
+    subcategory: sampleSubcategories,
   };
 }
 

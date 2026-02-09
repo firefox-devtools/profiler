@@ -136,11 +136,22 @@ export type SamplesTable = {
   // The CPU ratio, between 0 and 1, over the time between the previous sample
   // and this sample.
   threadCPURatio?: Float64Array | undefined;
+  // The category of each sample's stack in the unfiltered thread.
+  category: Uint8Array;
+  // The subcategory of each sample's stack in the unfiltered thread.
+  subcategory: Uint16Array | Uint8Array;
   // This property isn't present in normal threads. However it's present for
   // merged threads, so that we know the origin thread for these samples.
   threadId?: Tid[];
   argumentValues?: Array<number | null>;
   length: number;
+};
+
+export type SampleCategoriesAndSubcategories = {
+  // represents a Map<IndexIntoSamplesTable, IndexIntoCategoryList>
+  sampleCategories: Uint8Array;
+  // represents a Map<IndexIntoSamplesTable, IndexIntoSubcategoryListForCategory>
+  sampleSubcategories: Uint16Array | Uint8Array;
 };
 
 type SamplesLikeTableShape = {

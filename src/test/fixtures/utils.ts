@@ -154,8 +154,10 @@ export function computeThreadFromRawThread(
   );
   const samples = computeSamplesTableFromRawSamplesTable(
     rawThread.samples,
+    stackTable,
     sampleUnits,
-    referenceCPUDeltaPerMs
+    referenceCPUDeltaPerMs,
+    defaultCategory
   );
   const tracedValuesBuffer = rawThread.tracedValuesBuffer
     ? base64StringToBytes(rawThread.tracedValuesBuffer)
