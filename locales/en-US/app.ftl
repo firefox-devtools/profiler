@@ -381,9 +381,15 @@ Home--instructions-content =
     Recording performance profiles requires <a>{ -firefox-brand-name }</a>.
     However, existing profiles can be viewed in any modern browser.
 
-Home--fenix-instructions =
-    Recording performance profiles currently requires <a>{ -firefox-brand-name } for Desktop</a>.
-    However, existing profiles can be viewed in any modern desktop browser.
+Home--fenix-instructions-directly =
+    { -firefox-android-brand-name } can be profiled directly on this device. For
+    more information, please consult this documentation:
+    <a>Profiling { -firefox-android-brand-name } directly on device</a>.
+
+Home--fenix-instructions-remotely =
+    You can also profile { -firefox-android-brand-name } remotely from { -firefox-brand-name }
+    for Desktop. For more information, please consult this documentation:
+    <a>Profiling { -firefox-android-brand-name } remotely</a>.
 
 Home--record-instructions-start-stop = Stop and start profiling
 Home--record-instructions-capture-load = Capture and load profile

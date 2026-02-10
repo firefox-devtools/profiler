@@ -403,22 +403,7 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
           <div>
             <DocsButton />
             <Localized
-              id="Home--fenix-instructions"
-              elems={{
-                a: <a href="https://www.firefox.com/en-US/browsers/desktop/" />,
-              }}
-            >
-              <p>
-                Recording performance profiles currently requires{' '}
-                <a href="https://www.firefox.com/en-US/browsers/desktop/">
-                  Firefox for Desktop
-                </a>
-                . However, existing profiles can be viewed in any modern desktop
-                browser.
-              </p>
-            </Localized>
-            <Localized
-              id="Home--profile-firefox-android-instructions"
+              id="Home--fenix-instructions-directly"
               elems={{
                 a: (
                   <a href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device" />
@@ -426,9 +411,23 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
               }}
             >
               <p>
-                You can also profile Firefox for Android. For more information,
-                please consult this documentation:{' '}
+                Firefox for Android can be profiled directly on this device. For
+                more information, please consult this documentation:{' '}
                 <a>Profiling Firefox for Android directly on device</a>.
+              </p>
+            </Localized>
+            <Localized
+              id="Home--fenix-instructions-remotely"
+              elems={{
+                a: (
+                  <a href="https://profiler.firefox.com/docs/#/./guide-remote-profiling?id=remote-profiling-firefox-for-android" />
+                ),
+              }}
+            >
+              <p>
+                You can also profile Firefox for Android remotely from Firefox
+                for Desktop. For more information, please consult this
+                documentation: <a>Profiling Firefox for Android remotely</a>.
               </p>
             </Localized>
           </div>
