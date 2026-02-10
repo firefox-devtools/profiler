@@ -144,8 +144,8 @@ export type JsAllocationsTable = {
   className: string[];
   typeName: string[]; // Currently only 'JSObject'
   coarseType: string[]; // Currently only 'Object',
-  // "weight" is used here rather than "bytes", so that this type will match the
-  // SamplesLikeTableShape.
+  // "weight" is used here rather than "bytes", so that this type can be
+  // used as a SamplesLikeTable.
   weight: Bytes[];
   weightType: 'bytes';
   inNursery: boolean[];
@@ -159,8 +159,8 @@ export type JsAllocationsTable = {
  */
 export type UnbalancedNativeAllocationsTable = {
   time: Milliseconds[];
-  // "weight" is used here rather than "bytes", so that this type will match the
-  // SamplesLikeTableShape.
+  // "weight" is used here rather than "bytes", so that this type can be
+  // used as a SamplesLikeTable.
   weight: Bytes[];
   weightType: 'bytes';
   stack: Array<IndexIntoStackTable | null>;

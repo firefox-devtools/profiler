@@ -154,7 +154,7 @@ export type SampleCategoriesAndSubcategories = {
   sampleSubcategories: Uint16Array | Uint8Array;
 };
 
-type SamplesLikeTableShape = {
+export type SamplesLikeTable = {
   stack: Array<IndexIntoStackTable | null>;
   time: Milliseconds[];
   // An optional weight array. If not present, then the weight is assumed to be 1.
@@ -164,12 +164,6 @@ type SamplesLikeTableShape = {
   argumentValues?: Array<number | null>;
   length: number;
 };
-
-export type SamplesLikeTable =
-  | SamplesLikeTableShape
-  | SamplesTable
-  | NativeAllocationsTable
-  | JsAllocationsTable;
 
 export type CounterSamplesTable = {
   time: Milliseconds[];
