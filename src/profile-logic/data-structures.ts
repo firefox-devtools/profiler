@@ -10,7 +10,6 @@ import {
 import type {
   RawThread,
   RawSamplesTable,
-  SamplesTable,
   FrameTable,
   RawStackTable,
   StackTable,
@@ -87,26 +86,6 @@ export function getEmptySamplesTableWithEventDelay(): RawSamplesTable {
     weightType: 'samples',
     weight: null,
     eventDelay: [],
-    stack: [],
-    time: [],
-    length: 0,
-  };
-}
-
-/**
- * Returns an empty samples table with responsiveness field instead of eventDelay.
- * responsiveness is the older field and replaced with eventDelay. We should
- * account for older profiles and use both of the flavors if needed.
- */
-export function getEmptySamplesTableWithResponsiveness(): SamplesTable {
-  return {
-    // Important!
-    // If modifying this structure, please update all callers of this function to ensure
-    // that they are pushing on correctly to the data structure. These pushes may not
-    // be caught by the type system.
-    weightType: 'samples',
-    weight: null,
-    responsiveness: [],
     stack: [],
     time: [],
     length: 0,
