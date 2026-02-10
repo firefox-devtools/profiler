@@ -312,11 +312,7 @@ export class ActivityGraphFillComputer {
     beforeSampleCpuRatio: number,
     afterSampleCpuRatio: number
   ) {
-    const { rangeEnd, rangeStart } = this.renderedComponentSettings;
-    if (sampleTime < rangeStart || sampleTime >= rangeEnd) {
-      return;
-    }
-
+    const { rangeStart } = this.renderedComponentSettings;
     const percentageBuffers = this.mutablePercentageBuffers[category];
     const percentageBuffer = this._pickPercentageBuffer(
       percentageBuffers,
