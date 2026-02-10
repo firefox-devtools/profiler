@@ -26,6 +26,8 @@ import type {
   CallNodeSelfAndSummary,
   SelfAndTotal,
   BalancedNativeAllocationsTable,
+  SampleCategoriesAndSubcategories,
+  IndexIntoCategoryList,
 } from 'firefox-profiler/types';
 import { ResourceType } from 'firefox-profiler/types';
 
@@ -1223,6 +1225,25 @@ export function extractUnfilteredSamplesLikeTable(
     default:
       throw assertExhaustiveCheck(strategy);
   }
+}
+
+export function computeUnfilteredCtssSampleCategoriesAndSubcategories(
+  thread: Thread,
+  ctssSamples: SamplesLikeTable,
+  defaultCategory: IndexIntoCategoryList
+): SampleCategoriesAndSubcategories {
+  if (ctssSamples === thread.samples) {
+    const { category, subcategory } = thread.samples;
+    return {
+      sampleCategories: category,
+      sampleSubcategories: subcategory,
+    };
+  }
+  return ProfileData.computeSampleCategoriesAndSubcategories(
+    ctssSamples.stack,
+    thread.stackTable,
+    defaultCategory
+  );
 }
 
 /**

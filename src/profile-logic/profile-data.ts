@@ -1117,20 +1117,16 @@ export type TimingsForPath = {
 export function getTimingsForPath(
   needlePath: CallNodePath,
   callNodeInfo: CallNodeInfo,
-  unfilteredThread: Thread,
-  sampleIndexOffset: number,
   categories: CategoryList,
   samples: SamplesLikeTable,
-  unfilteredSamples: SamplesLikeTable
+  sampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories
 ) {
   return getTimingsForCallNodeIndex(
     callNodeInfo.getCallNodeIndexFromPath(needlePath),
     callNodeInfo,
-    unfilteredThread,
-    sampleIndexOffset,
     categories,
     samples,
-    unfilteredSamples
+    sampleCategoriesAndSubcategories
   );
 }
 
@@ -1145,18 +1141,14 @@ export function getTimingsForPath(
 export function getTimingsForCallNodeIndex(
   needleNodeIndex: IndexIntoCallNodeTable | null,
   callNodeInfo: CallNodeInfo,
-  unfilteredThread: Thread,
-  sampleIndexOffset: number,
   categories: CategoryList,
   samples: SamplesLikeTable,
-  unfilteredSamples: SamplesLikeTable
+  sampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories
 ): TimingsForPath {
   /* ------------ Variables definitions ------------*/
 
-  // This is the data from the unfiltered thread that we'll use to gather
-  // category and JS implementation information. Note that samples are offset by
-  // `sampleIndexOffset` because of range filtering.
-  const { stackTable: unfilteredStackTable } = unfilteredThread;
+  const { sampleCategories, sampleSubcategories } =
+    sampleCategoriesAndSubcategories;
 
   // This object holds the timings for the current call node path, specified by
   // needleNodeIndex.
@@ -1195,28 +1187,21 @@ export function getTimingsForCallNodeIndex(
     // Step 1: increment the total value
     timings.value += duration;
 
-    // step 2: find the category value for this stack. We want to use the
-    // category of the unfilteredThread.
-    const unfilteredStackIndex =
-      unfilteredSamples.stack[sampleIndex + sampleIndexOffset];
-    if (unfilteredStackIndex !== null) {
-      const categoryIndex = unfilteredStackTable.category[unfilteredStackIndex];
-      const subcategoryIndex =
-        unfilteredStackTable.subcategory[unfilteredStackIndex];
+    // step 2: find the category value for this stack.
+    const categoryIndex = sampleCategories[sampleIndex];
+    const subcategoryIndex = sampleSubcategories[sampleIndex];
 
-      // step 3: increment the right value in the category breakdown
-      if (timings.breakdownByCategory === null) {
-        timings.breakdownByCategory = categories.map((category) => ({
-          entireCategoryValue: 0,
-          subcategoryBreakdown: Array(category.subcategories.length).fill(0),
-        }));
-      }
-      timings.breakdownByCategory[categoryIndex].entireCategoryValue +=
-        duration;
-      timings.breakdownByCategory[categoryIndex].subcategoryBreakdown[
-        subcategoryIndex
-      ] += duration;
+    // step 3: increment the right value in the category breakdown
+    if (timings.breakdownByCategory === null) {
+      timings.breakdownByCategory = categories.map((category) => ({
+        entireCategoryValue: 0,
+        subcategoryBreakdown: Array(category.subcategories.length).fill(0),
+      }));
     }
+    timings.breakdownByCategory[categoryIndex].entireCategoryValue += duration;
+    timings.breakdownByCategory[categoryIndex].subcategoryBreakdown[
+      subcategoryIndex
+    ] += duration;
   }
   /* ------------- End of function definitions ------------- */
 

@@ -41,6 +41,8 @@ import type {
   CallTreeSummaryStrategy,
   State,
   ImplementationFilter,
+  SampleCategoriesAndSubcategories,
+  IndexIntoSamplesTable,
 } from 'firefox-profiler/types';
 
 import type { TransformLabeL10nIds } from 'firefox-profiler/profile-logic/transforms';
@@ -245,20 +247,25 @@ export function getBasicThreadSelectorsPerThread(
     CallTree.extractUnfilteredSamplesLikeTable
   );
 
+  const getUnfilteredCtssSampleCategoriesAndSubcategories: Selector<SampleCategoriesAndSubcategories> =
+    createSelector(
+      getThread,
+      getUnfilteredCtssSamples,
+      ProfileSelectors.getDefaultCategory,
+      CallTree.computeUnfilteredCtssSampleCategoriesAndSubcategories
+    );
+
   /**
    * This selector returns the offset to add to a sampleIndex when accessing the
    * unfiltered ctss samples based on an index into the filtered ctss samples.
    */
-  const getFilteredCtssSampleIndexOffset: Selector<number> = createSelector(
+  const getFilteredCtssSampleIndexOffsets: Selector<
+    [IndexIntoSamplesTable, IndexIntoSamplesTable]
+  > = createSelector(
     getUnfilteredCtssSamples,
     ProfileSelectors.getCommittedRange,
     (samples, { start, end }) => {
-      const [beginSampleIndex] = ProfileData.getSampleIndexRangeForSelection(
-        samples,
-        start,
-        end
-      );
-      return beginSampleIndex;
+      return ProfileData.getSampleIndexRangeForSelection(samples, start, end);
     }
   );
 
@@ -266,7 +273,7 @@ export function getBasicThreadSelectorsPerThread(
    * This selector returns the offset to add to sampleIndex when accessing
    * unfilteredThread.samples based on an index into filteredThread.samples.
    *
-   * In contrast to getFilteredCtssSampleIndexOffset, this function does not
+   * In contrast to getFilteredCtssSampleIndexOffsets, this function does not
    * depend on the call tree summary strategy and always uses the timing-based
    * samples.
    */
@@ -397,7 +404,8 @@ export function getBasicThreadSelectorsPerThread(
     getThreadRange,
     getRangeFilteredThread,
     getUnfilteredCtssSamples,
-    getFilteredCtssSampleIndexOffset,
+    getUnfilteredCtssSampleCategoriesAndSubcategories,
+    getFilteredCtssSampleIndexOffsets,
     getFilteredSampleIndexOffset,
     getFriendlyThreadName,
     getThreadProcessDetails,
@@ -545,24 +553,40 @@ export function getThreadSelectorsWithMarkersPerThread(
    * unfiltered ctss samples based on an offset into the preview-filtered ctss
    * samples.
    */
-  const getPreviewFilteredCtssSampleIndexOffset: Selector<number> =
-    createSelector(
-      getFilteredCtssSamples,
-      ProfileSelectors.getPreviewSelection,
-      threadSelectors.getFilteredCtssSampleIndexOffset,
-      (samples, previewSelection, sampleIndexFromCommittedRange) => {
-        if (!previewSelection) {
-          return sampleIndexFromCommittedRange;
-        }
+  const getPreviewFilteredCtssSampleIndexOffsets: Selector<
+    [IndexIntoSamplesTable, IndexIntoSamplesTable]
+  > = createSelector(
+    getFilteredCtssSamples,
+    ProfileSelectors.getPreviewSelection,
+    threadSelectors.getFilteredCtssSampleIndexOffsets,
+    (samples, previewSelection, committedRange) => {
+      if (!previewSelection) {
+        return committedRange;
+      }
 
-        const [beginSampleIndex] = ProfileData.getSampleIndexRangeForSelection(
+      const [committedRangeBeginSampleIndex] = committedRange;
+      const [beginSampleIndex, endSampleIndex] =
+        ProfileData.getSampleIndexRangeForSelection(
           samples,
           previewSelection.selectionStart,
           previewSelection.selectionEnd
         );
 
-        return sampleIndexFromCommittedRange + beginSampleIndex;
-      }
+      return [
+        committedRangeBeginSampleIndex + beginSampleIndex,
+        committedRangeBeginSampleIndex + endSampleIndex,
+      ];
+    }
+  );
+
+  const getPreviewFilteredCtssSampleCategoriesAndSubcategories: Selector<SampleCategoriesAndSubcategories> =
+    createSelector(
+      threadSelectors.getUnfilteredCtssSampleCategoriesAndSubcategories,
+      getPreviewFilteredCtssSampleIndexOffsets,
+      ({ sampleCategories, sampleSubcategories }, [b, e]) => ({
+        sampleCategories: sampleCategories.subarray(b, e),
+        sampleSubcategories: sampleSubcategories.subarray(b, e),
+      })
     );
 
   const getTransformLabelL10nIds: Selector<TransformLabeL10nIds[]> =
@@ -592,7 +616,7 @@ export function getThreadSelectorsWithMarkersPerThread(
     getPreviewFilteredThread,
     getFilteredCtssSamples,
     getPreviewFilteredCtssSamples,
-    getPreviewFilteredCtssSampleIndexOffset,
+    getPreviewFilteredCtssSampleCategoriesAndSubcategories,
     getHasFilteredCtssSamples,
     getHasPreviewFilteredCtssSamples,
     getTransformLabelL10nIds,
