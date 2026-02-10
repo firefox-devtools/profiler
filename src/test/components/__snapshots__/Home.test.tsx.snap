@@ -692,7 +692,7 @@ exports[`app/Home renders the information screen for fenix 1`] = `
     >
       <div
         class="homeInstructions"
-        data-testid="home-enable-popup-instructions"
+        data-testid="home-fenix-instructions"
       >
         <img
           alt="screenshot of profiler.firefox.com"
@@ -700,19 +700,6 @@ exports[`app/Home renders the information screen for fenix 1`] = `
           src="test-file-stub"
         />
         <div>
-          <a
-            class="homeSectionButton"
-            href="https://chromewebstore.google.com/detail/firefox-profiler/ljmahpnflmbkgaipnfbpgjipcnahlghn"
-            rel="noreferrer"
-            target="_blank"
-          >
-            <span
-              class="homeSectionPlus"
-            >
-              +
-            </span>
-            Install the Chrome extension
-          </a>
           <a
             class="homeSectionButton"
             href="/docs/"
@@ -723,55 +710,27 @@ exports[`app/Home renders the information screen for fenix 1`] = `
             Documentation
           </a>
           <p>
-            Use the 
+            ⁨Firefox for Android⁩ can be profiled directly on this device. For
+more information, please consult this documentation:
+
             <a
-              href="https://chromewebstore.google.com/detail/firefox-profiler/ljmahpnflmbkgaipnfbpgjipcnahlghn"
-              rel="noreferrer"
-              target="_blank"
+              href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device"
             >
-              ⁨Firefox Profiler⁩ extension for Chrome
+              Profiling ⁨Firefox for Android⁩ directly on device
             </a>
-            
-to capture performance profiles in Chrome and analyze them in the
-⁨Firefox Profiler⁩. Install the extension from the Chrome Web Store.
+            .
           </p>
           <p>
-            Once installed, use the extension’s
-toolbar icon or the shortcuts to start and stop profiling. You can also
-export profiles and load them here for detailed analysis.
+            You can also profile ⁨Firefox for Android⁩ remotely from ⁨Firefox⁩
+for Desktop. For more information, please consult this documentation:
+
+            <a
+              href="https://profiler.firefox.com/docs/#/./guide-remote-profiling?id=remote-profiling-firefox-for-android"
+            >
+              Profiling ⁨Firefox for Android⁩ remotely
+            </a>
+            .
           </p>
-          <div>
-            <p>
-              <kbd>
-                Ctrl
-              </kbd>
-              +
-              <kbd>
-                Shift
-              </kbd>
-              +
-              <kbd>
-                1
-              </kbd>
-               
-              Stop and start profiling
-            </p>
-            <p>
-              <kbd>
-                Ctrl
-              </kbd>
-              +
-              <kbd>
-                Shift
-              </kbd>
-              +
-              <kbd>
-                2
-              </kbd>
-               
-              Capture and load profile
-            </p>
-          </div>
         </div>
       </div>
     </div>

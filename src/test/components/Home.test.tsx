@@ -26,7 +26,7 @@ const CHROME =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/603.3.8 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
 let userAgent: string | undefined;
 const ANDROID =
-  'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.74 Mobile Safari/537.36';
+  'Mozilla/5.0 (Android 16; Mobile; rv:147.0) Gecko/147.0 Firefox/147.0';
 
 // Flow doesn't understand Object.defineProperty. Use the "any" type to use it anyway.
 (Object.defineProperty as any)(window.navigator, 'userAgent', {
