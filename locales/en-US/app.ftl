@@ -388,7 +388,7 @@ Home--fenix-instructions-directly =
 
 Home--fenix-instructions-remotely =
     You can also profile { -firefox-android-brand-name } remotely from { -firefox-brand-name }
-    for Desktop. For more information, please consult this documentation:
+    for desktop. For more information, please consult this documentation:
     <a>Profiling { -firefox-android-brand-name } remotely</a>.
 
 Home--record-instructions-start-stop = Stop and start profiling
