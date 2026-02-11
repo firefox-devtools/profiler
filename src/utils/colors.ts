@@ -101,6 +101,10 @@ const DEFAULT_STYLE: ColorStyles = {
   gravity: 0,
 };
 
+// Colors based on photon colors.
+export const PURPLE_55 = '#8a00eb';
+export const YELLOW_65 = '#be9b00';
+
 const PSEUDO_TRANSPARENT_STYLE: ColorStyles = {
   ...DEFAULT_STYLE,
   _selectedFillStyle: [GREY_30, GREY_70],
@@ -170,15 +174,15 @@ const STYLE_MAP: { [key: string]: ColorStyles } = {
   },
   green: {
     ...DEFAULT_STYLE,
-    _selectedFillStyle: [GREEN_60, GREEN_80],
-    _unselectedFillStyle: [GREEN_60 + '60', GREEN_80 + '60'],
+    _selectedFillStyle: [GREEN_60, GREEN_70],
+    _unselectedFillStyle: [GREEN_60 + '60', GREEN_70 + '60'],
     _selectedTextColor: '#fff',
     gravity: 4,
   },
   purple: {
     ...DEFAULT_STYLE,
-    _selectedFillStyle: [PURPLE_70, PURPLE_60],
-    _unselectedFillStyle: [PURPLE_70 + '60', PURPLE_60 + '60'],
+    _selectedFillStyle: [PURPLE_70, PURPLE_55],
+    _unselectedFillStyle: [PURPLE_70 + '60', PURPLE_55 + '70'],
     _selectedTextColor: '#fff',
     gravity: 5,
   },
@@ -187,9 +191,9 @@ const STYLE_MAP: { [key: string]: ColorStyles } = {
     _selectedFillStyle: [
       // This yellow has more contrast than YELLOW_50.
       '#ffe129',
-      YELLOW_70,
+      YELLOW_65,
     ],
-    _unselectedFillStyle: [YELLOW_50 + '70', YELLOW_60 + '70'],
+    _unselectedFillStyle: [YELLOW_50 + '70', YELLOW_65 + '85'],
     _selectedTextColor: ['#000', GREY_20],
     gravity: 6,
   },
