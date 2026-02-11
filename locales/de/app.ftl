@@ -21,6 +21,16 @@ AppHeader--app-header = <header>{ -profiler-brand-name }</header> – <subheader
 AppHeader--github-icon =
     .title = Besuchen Sie unser Git-Repository (öffnet sich in einem neuen Fenster)
 
+## ThemeToggle
+## They are used at the top right side of the home page to switch between themes.
+
+ThemeToggle--system =
+    .title = System-Theme-Einstellungen beachten
+ThemeToggle--light =
+    .title = Helles Theme verwenden
+ThemeToggle--dark =
+    .title = Dunkles Theme verwenden
+
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
@@ -562,7 +572,7 @@ MenuButtons--metaInfo--buffer-duration-unlimited = Unbegrenzt
 MenuButtons--metaInfo--application = Anwendung
 MenuButtons--metaInfo--name-and-version = Name und Version:
 # The time between application startup and when the profiler was started
-MenuButtons--metaInfo--application-uptime2 = Uptime:
+MenuButtons--metaInfo--application-uptime2 = Verfügbarkeit seit:
 MenuButtons--metaInfo--update-channel = Update-Kanal:
 MenuButtons--metaInfo--build-id = Build-ID:
 MenuButtons--metaInfo--build-type = Build-Typ:
