@@ -21,6 +21,16 @@ AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader
 AppHeader--github-icon =
     .title = Git depomuza gidin (yeni pencerede açılır)
 
+## ThemeToggle
+## They are used at the top right side of the home page to switch between themes.
+
+ThemeToggle--system =
+    .title = Sistem temasının tercihine uyum sağla
+ThemeToggle--light =
+    .title = Açık temayı kullan
+ThemeToggle--dark =
+    .title = Koyu temayı kullan
+
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
@@ -67,6 +77,9 @@ CallNodeContextMenu--transform-focus-function = Fonksiyona odaklan
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Fonksiyona odaklan (tersine)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Yalnızca alt ağaca odaklan
     .title = Alt ağaca odaklanmak, çağrı ağacının belirtilen bölgesini içermeyen her örneği kaldıracaktır. Bu işlem, çağrı ağacının bir dalını koparır ama bunu yalnızca belirtilen çağrı düğümü için yapar. Fonksiyonun yaptığı diğer çağrılar görmezden gelinir.
 # This is used as the context menu item to apply the "Focus on category" transform.
@@ -469,7 +482,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Sınırsız
 MenuButtons--metaInfo--application = Uygulama
 MenuButtons--metaInfo--name-and-version = Ad ve sürüm:
-MenuButtons--metaInfo--application-uptime = Çalışma süresi:
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = Çalışma süresi:
 MenuButtons--metaInfo--update-channel = Güncelleme kanalı:
 MenuButtons--metaInfo--build-id = Yapı kimliği:
 MenuButtons--metaInfo--build-type = Yapı tipi:
@@ -770,6 +784,11 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Güç
+# This is used in the tooltip when the instant power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-microwatt = { $value } μW
+    .label = Güç
 # This is used in the tooltip when the power value uses the kilowatt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -954,6 +973,10 @@ TransformNavigator--collapse-direct-recursion-only = Yalnızca doğrudan özyine
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Alt ağacı daralt: { $item }
+# "Drop samples outside of markers matching ..." transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-markers-matching = Eşleşen işaretçilerin dışındaki örnekleri bırakın: “{ $item }”
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI
@@ -1053,6 +1076,17 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = Assembly görünümünü gizle
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = Önceki
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = Sonraki
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = { $current } / { $total }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

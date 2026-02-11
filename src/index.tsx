@@ -94,7 +94,11 @@ if (svgFiltersElement) {
   const forcedColorsMql = window.matchMedia('(forced-colors: active)');
   const darkSchemeMql = window.matchMedia('(prefers-color-scheme: dark)');
   forcedColorsMql.addEventListener('change', defineSvgFiltersForColors);
-  darkSchemeMql.addEventListener('change', defineSvgFiltersForColors);
+  darkSchemeMql.addEventListener('change', () => {
+    defineSvgFiltersForColors();
+    // Re-apply theme when system preference changes (for 'system' mode users)
+    initTheme();
+  });
 }
 
 const store = createStore();

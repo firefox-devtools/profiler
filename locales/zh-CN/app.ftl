@@ -21,6 +21,16 @@ AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader
 AppHeader--github-icon =
     .title = 前往我们的 Git 仓库（新建窗口打开）
 
+## ThemeToggle
+## They are used at the top right side of the home page to switch between themes.
+
+ThemeToggle--system =
+    .title = 跟随系统主题首选项
+ThemeToggle--light =
+    .title = 使用明亮主题
+ThemeToggle--dark =
+    .title = 使用深邃主题
+
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
@@ -65,6 +75,9 @@ CallNodeContextMenu--transform-focus-function = 聚焦于函数
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = 聚焦于函数（反向）
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = 只聚焦于子树
     .title = 聚焦于子树，将从调用树中拉出分支，并移除不属于该分支的内容。然而此功能只对单一调用节点有效，将忽略其他调用该函数的部分。
 # This is used as the context menu item to apply the "Focus on category" transform.
@@ -473,7 +486,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = 无限制
 MenuButtons--metaInfo--application = 应用程序
 MenuButtons--metaInfo--name-and-version = 名称和版本：
-MenuButtons--metaInfo--application-uptime = 运行时间：
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = 运行时间：
 MenuButtons--metaInfo--update-channel = 更新通道:
 MenuButtons--metaInfo--build-id = 构建 ID：
 MenuButtons--metaInfo--build-type = 构建类型：
@@ -787,6 +801,11 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = 功率
+# This is used in the tooltip when the instant power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-microwatt = { $value } μW
+    .label = 功率
 # This is used in the tooltip when the power value uses the kilowatt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -1081,6 +1100,12 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = 隐藏汇编代码视图
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = 上一个
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = 下一个
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

@@ -21,6 +21,16 @@ AppHeader--app-header = <header>{ -profiler-brand-name }</header> – <subheader
 AppHeader--github-icon =
     .title = Besuchen Sie unser Git-Repository (öffnet sich in einem neuen Fenster)
 
+## ThemeToggle
+## They are used at the top right side of the home page to switch between themes.
+
+ThemeToggle--system =
+    .title = System-Theme-Einstellungen beachten
+ThemeToggle--light =
+    .title = Helles Theme verwenden
+ThemeToggle--dark =
+    .title = Dunkles Theme verwenden
+
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
@@ -76,6 +86,21 @@ CallNodeContextMenu--transform-focus-function = Auf Funktion fokussieren
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Auf Funktion fokussieren (invertiert)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+## The translation for "self" in these strings should match the translation used
+## in CallTree--samples-self and CallTree--bytes-self. Alternatively it can be
+## translated as "self values" or "self time" (though "self time" is less desirable
+## because this menu item is also shown in "bytes" mode).
+
+CallNodeContextMenu--transform-focus-self-title =
+    Die Fokussierung auf sich selbst ähnelt der Fokussierung auf eine Funktion, behält jedoch nur Samples bei,
+    die zur Zeit der Funktion selbst beitragen. Samples in Angerufenen
+    werden verworfen und der Aufrufbaum wird auf die Funktion im Fokus zurückgesetzt.
+CallNodeContextMenu--transform-focus-self = Nur auf sich selbst konzentrieren
+    .title = { CallNodeContextMenu--transform-focus-self-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Nur auf Unterbaum konzentrieren
     .title =
         Der Fokus auf einen Unterbaum entfernt jede Teilmenge, die diesen
@@ -546,7 +571,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Unbegrenzt
 MenuButtons--metaInfo--application = Anwendung
 MenuButtons--metaInfo--name-and-version = Name und Version:
-MenuButtons--metaInfo--application-uptime = Uptime:
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = Verfügbarkeit seit:
 MenuButtons--metaInfo--update-channel = Update-Kanal:
 MenuButtons--metaInfo--build-id = Build-ID:
 MenuButtons--metaInfo--build-type = Build-Typ:
@@ -861,6 +887,11 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Leistung
+# This is used in the tooltip when the instant power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-microwatt = { $value } μW
+    .label = Leistung
 # This is used in the tooltip when the power value uses the kilowatt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -1010,6 +1041,12 @@ TransformNavigator--focus-subtree = Knoten fokussieren: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Fokussieren: { $item }
+# "Focus self" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-on-function-self
+# Also see the translation note above CallNodeContextMenu--transform-focus-self.
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-self = Fokus auf sich selbst: { $item }
 # "Focus category" transform. The word "Focus" has the meaning of an adjective here.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
 # Variables:

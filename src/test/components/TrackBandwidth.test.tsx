@@ -164,7 +164,7 @@ describe('TrackBandwidth', function () {
       screen.getByText('Transfer speed for this sample:')
     ).toBeInTheDocument();
     expect(screen.getByText(/speed/).nextSibling).toHaveTextContent(
-      '4.66GB\u2069 per second'
+      '5.00GB\u2069 per second'
     );
 
     expect(
@@ -176,14 +176,14 @@ describe('TrackBandwidth', function () {
       screen.getByText('Data transferred up to this time:')
     ).toBeInTheDocument();
     expect(screen.getByText(/transferred up to/).nextSibling).toHaveTextContent(
-      /6.86MB\u2069 \(\u2068\d+(\.\d+)?\u2069 g CO₂e\)/
+      /7.19MB\u2069 \(\u2068\d+(\.\d+)?\u2069 g CO₂e\)/
     );
 
     expect(
       screen.getByText('Data transferred in the visible range:')
     ).toBeInTheDocument();
     expect(screen.getByText(/visible range/).nextSibling).toHaveTextContent(
-      /7.97MB\u2069 \(\u2068\d+(\.\d+)?\u2069 g CO₂e\)/
+      /8.35MB\u2069 \(\u2068\d+(\.\d+)?\u2069 g CO₂e\)/
     );
   });
 
@@ -224,13 +224,13 @@ describe('TrackBandwidth', function () {
     moveMouseAtCounter(3, 0);
     // Note: Fluent adds isolation characters \u2068 and \u2069 around variables.
     expect(screen.getByText(/speed/).nextSibling).toHaveTextContent(
-      '95.4MB\u2069 per second'
+      '100MB\u2069 per second'
     );
     expect(screen.getByText(/visible range:/).nextSibling).toHaveTextContent(
-      /7.97MB\u2069 \(\u2068\d+(\.\d+)?\u2069 g CO₂e\)/
+      /8.35MB\u2069 \(\u2068\d+(\.\d+)?\u2069 g CO₂e\)/
     );
     expect(
       screen.getByText(/current selection:/).nextSibling
-    ).toHaveTextContent(/4.77MB\u2069 \(\u2068\d+(\.\d+)?\u2069 g CO₂e\)/);
+    ).toHaveTextContent(/5.00MB\u2069 \(\u2068\d+(\.\d+)?\u2069 g CO₂e\)/);
   });
 });

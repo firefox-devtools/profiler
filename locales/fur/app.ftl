@@ -77,6 +77,9 @@ CallNodeContextMenu--transform-focus-function = Concentrazion su funzion
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Concentrazion su funzion (invertide)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Concentrazion dome su sot-arbul
     .title =
         La concentrazion suntun sot-arbul e gjavara ducj i campions che no includin chê
@@ -518,7 +521,6 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Ilimitade
 MenuButtons--metaInfo--application = Aplicazion
 MenuButtons--metaInfo--name-and-version = Non e version:
-MenuButtons--metaInfo--application-uptime = Timp di ativitât:
 MenuButtons--metaInfo--update-channel = Canâl di inzornament:
 MenuButtons--metaInfo--build-id = ID compilazion:
 MenuButtons--metaInfo--build-type = Gjenar di compilazion:
