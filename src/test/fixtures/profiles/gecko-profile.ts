@@ -53,6 +53,7 @@ export function getEmptySourceTable(): GeckoSourceTable {
       filename: 1 as const,
       startLine: 2 as const,
       startColumn: 3 as const,
+      sourceMapURL: 4 as const,
     },
     data: [],
   };

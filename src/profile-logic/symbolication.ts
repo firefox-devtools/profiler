@@ -818,6 +818,7 @@ function _partiallyApplySymbolicationStep(
             sources.uuid.push(null);
             sources.startLine.push(1);
             sources.startColumn.push(1);
+            sources.sourceMapURL.push(null);
             sources.length++;
           }
           funcTable.source[funcIndex] = sourceIndex;

@@ -119,7 +119,8 @@ export class GlobalDataCollector {
     uuid: string | null,
     filename: string,
     startLine: number = 1,
-    startColumn: number = 1
+    startColumn: number = 1,
+    sourceMapURL: string | null = null
   ): IndexIntoSourceTable {
     let index: IndexIntoSourceTable | undefined;
 
@@ -134,10 +135,15 @@ export class GlobalDataCollector {
     if (index === undefined) {
       index = this._sources.length;
       const filenameIndex = this._stringTable.indexForString(filename);
+      const sourceMapURLIndex =
+        sourceMapURL !== null
+          ? this._stringTable.indexForString(sourceMapURL)
+          : null;
       this._sources.uuid[index] = uuid;
       this._sources.filename[index] = filenameIndex;
       this._sources.startLine[index] = startLine;
       this._sources.startColumn[index] = startColumn;
+      this._sources.sourceMapURL[index] = sourceMapURLIndex;
       this._sources.length++;
 
       if (uuid !== null) {

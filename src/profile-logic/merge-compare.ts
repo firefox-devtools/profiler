@@ -560,6 +560,12 @@ function mergeSources(
       const originalUrlIndex = sources.filename[i];
       const newUrlIndex = oldStringToNewStringPlusOne[originalUrlIndex] - 1;
 
+      const originalSourceMapURLIndex = sources.sourceMapURL[i];
+      const newSourceMapURLIndex =
+        originalSourceMapURLIndex !== null
+          ? oldStringToNewStringPlusOne[originalSourceMapURLIndex] - 1
+          : null;
+
       const sourceKey = uuid ?? `null-uuid-${newUrlIndex}`;
       let insertedSourceIndex = mapOfInsertedSources.get(sourceKey);
       if (insertedSourceIndex === undefined) {
@@ -569,6 +575,7 @@ function mergeSources(
         newSources.filename[insertedSourceIndex] = newUrlIndex;
         newSources.startLine[insertedSourceIndex] = sources.startLine[i];
         newSources.startColumn[insertedSourceIndex] = sources.startColumn[i];
+        newSources.sourceMapURL[insertedSourceIndex] = newSourceMapURLIndex;
         newSources.length++;
         mapOfInsertedSources.set(sourceKey, insertedSourceIndex);
       }

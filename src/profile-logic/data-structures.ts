@@ -352,6 +352,7 @@ export function getEmptySourceTable(): SourceTable {
     filename: [],
     startLine: [],
     startColumn: [],
+    sourceMapURL: [],
     length: 0,
   };
 }

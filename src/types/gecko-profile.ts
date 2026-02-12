@@ -591,6 +591,7 @@ export type GeckoSourceTable = {
     filename: 1;
     startLine: 2;
     startColumn: 3;
+    sourceMapURL: 4;
   };
   data: Array<
     [
@@ -598,6 +599,7 @@ export type GeckoSourceTable = {
       string, // Filename of the source.
       number, // Start line of the source (1-based).
       number, // Start column of the source (1-based).
+      string | null, // URL to the source map for this source, if available.
     ]
   >;
 };

@@ -2490,6 +2490,7 @@ Object {
     "sources": Object {
       "filename": Array [],
       "length": 0,
+      "sourceMapURL": Array [],
       "startColumn": Array [],
       "startLine": Array [],
       "uuid": Array [],

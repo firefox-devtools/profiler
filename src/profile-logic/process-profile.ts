@@ -437,16 +437,20 @@ function _extractJsFunction(
       const filenameIndex = geckoSourceTable.schema.filename;
       const startLineIndex = geckoSourceTable.schema.startLine;
       const startColumnIndex = geckoSourceTable.schema.startColumn;
+      const sourceMapURLIndex = geckoSourceTable.schema.sourceMapURL;
       const uuid = geckoSourceTable.data[geckoSourceIdx][uuidIndex];
       const filename = geckoSourceTable.data[geckoSourceIdx][filenameIndex];
       const startLine = geckoSourceTable.data[geckoSourceIdx][startLineIndex];
       const startColumn =
         geckoSourceTable.data[geckoSourceIdx][startColumnIndex];
+      const sourceMapURL =
+        geckoSourceTable.data[geckoSourceIdx][sourceMapURLIndex];
       processedSourceIndex = globalDataCollector.indexForSource(
         uuid,
         filename,
         startLine,
-        startColumn
+        startColumn,
+        sourceMapURL
       );
     }
   }

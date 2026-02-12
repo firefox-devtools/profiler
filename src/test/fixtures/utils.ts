@@ -651,7 +651,8 @@ export function addSourceToTable(
   urlStringIndex: number,
   uuid: string | null = null,
   startLine: number = 1,
-  startColumn: number = 1
+  startColumn: number = 1,
+  sourceMapURLStringIndex: number | null = null
 ): number {
   // Check if source already exists
   for (let i = 0; i < sources.filename.length; i++) {
@@ -666,6 +667,7 @@ export function addSourceToTable(
   sources.uuid.push(uuid);
   sources.startLine.push(startLine);
   sources.startColumn.push(startColumn);
+  sources.sourceMapURL.push(sourceMapURLStringIndex);
   sources.length = sources.filename.length;
 
   return sourceIndex;
