@@ -223,19 +223,28 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
  * Used by the drag and drop component in order to determine if it can
  * load a dropped profile file.
  */
-export const getIsNewProfileLoadAllowed: Selector<boolean> = createSelector(
+export const getIsNewProfileLoadAllowed = createSelector(
   getView,
   getDataSource,
   getZipFileState,
-  (view, dataSource, zipFileState) => {
+  getIsDragAndDropDragging,
+  getDragSource, // ← this is the missing piece
+  (view, dataSource, zipFileState, isDragging, dragSource) => {
     const appPhase = view.phase;
     const zipPhase = zipFileState.phase;
+
     const isLoading =
       (appPhase === 'INITIALIZING' && dataSource !== 'none') ||
       zipPhase === 'PROCESS_PROFILE_FROM_ZIP_FILE';
-    return !isLoading;
+
+    return (
+      !isLoading &&
+      isDragging &&
+      dragSource === 'EXTERNAL_FILE'
+    );
   }
 );
+
 
 /**
  * Returns the indexes of categories that are opened in the sidebar,
