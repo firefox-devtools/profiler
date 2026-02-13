@@ -383,8 +383,7 @@ Home--instructions-content =
 
 Home--fenix-instructions-directly =
     { -firefox-android-brand-name } can be profiled directly on this device. For
-    more information, please consult this documentation:
-    <a>Profiling { -firefox-android-brand-name } directly on device</a>.
+    more information, read <a>Profiling { -firefox-android-brand-name } directly on device</a>.
 
 Home--fenix-instructions-remotely =
     You can also profile { -firefox-android-brand-name } remotely from { -firefox-brand-name }

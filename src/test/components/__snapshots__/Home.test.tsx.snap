@@ -711,8 +711,7 @@ exports[`app/Home renders the information screen for fenix 1`] = `
           </a>
           <p>
             ⁨Firefox for Android⁩ can be profiled directly on this device. For
-more information, please consult this documentation:
-
+more information, read 
             <a
               href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device"
             >
@@ -722,7 +721,7 @@ more information, please consult this documentation:
           </p>
           <p>
             You can also profile ⁨Firefox for Android⁩ remotely from ⁨Firefox⁩
-for Desktop. For more information, please consult this documentation:
+for desktop. For more information, please consult this documentation:
 
             <a
               href="https://profiler.firefox.com/docs/#/./guide-remote-profiling?id=remote-profiling-firefox-for-android"

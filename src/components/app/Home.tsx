@@ -412,7 +412,7 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
             >
               <p>
                 Firefox for Android can be profiled directly on this device. For
-                more information, please consult this documentation:{' '}
+                more information, read{' '}
                 <a>Profiling Firefox for Android directly on device</a>.
               </p>
             </Localized>
