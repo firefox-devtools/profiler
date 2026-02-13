@@ -180,7 +180,7 @@ export function formatGigaBytes(
   maxFractionalDigits: number = 2,
   precision: number = Infinity
 ): string {
-  const bytesPerGigabyte = 1024 ** 3;
+  const bytesPerGigabyte = 1000 ** 3;
   if (precision === Infinity) {
     return (
       formatNumber(
@@ -210,7 +210,7 @@ export function formatMegaBytes(
   maxFractionalDigits: number = 2,
   precision: number = Infinity
 ): string {
-  const bytesPerMegabyte = 1024 ** 2;
+  const bytesPerMegabyte = 1000 ** 2;
   if (precision === Infinity) {
     return (
       formatNumber(
@@ -240,7 +240,7 @@ export function formatKiloBytes(
   maxFractionalDigits: number = 2,
   precision: number = Infinity
 ): string {
-  const bytesPerKilobyte = 1024;
+  const bytesPerKilobyte = 1000;
   if (precision === Infinity) {
     return (
       formatNumber(
@@ -274,14 +274,14 @@ export function formatBytes(
     // Use singles up to 10,000.  I think 9,360B looks nicer than 9.36KB.
     // We use "0" for significantDigits because bytes will always be integers.
     return formatNumber(bytes, 0) + 'B';
-  } else if (bytes < 1024 ** 2) {
+  } else if (bytes < 1000 ** 2) {
     return formatKiloBytes(
       bytes,
       significantDigits,
       maxFractionalDigits,
       precision
     );
-  } else if (bytes < 1024 ** 3) {
+  } else if (bytes < 1000 ** 3) {
     return formatMegaBytes(
       bytes,
       significantDigits,
@@ -542,10 +542,10 @@ function _findRoundValueGreaterOrEqualTo(minValue: number): number {
 
 export function findRoundBytesValueGreaterOrEqualTo(minValue: number): number {
   // Special case KB, MB, GB.
-  if (minValue > 1024 && minValue <= 1024 ** 4) {
+  if (minValue > 1000 && minValue <= 1000 ** 4) {
     for (const power of [1, 2, 3]) {
       for (const value of [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]) {
-        const number = value * 1024 ** power;
+        const number = value * 1000 ** power;
         if (minValue <= number) {
           return number;
         }

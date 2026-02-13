@@ -342,7 +342,7 @@ exports[`TooltipMarker renders properly network markers where content type is bl
       Requested bytes
       :
     </div>
-    45.9KB
+    47.0KB
     <div
       class="tooltipLabel"
     >
@@ -538,7 +538,7 @@ exports[`TooltipMarker renders properly network markers where content type is mi
       Requested bytes
       :
     </div>
-    45.9KB
+    47.0KB
     <div
       class="tooltipLabel"
     >
@@ -744,7 +744,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part 2
       Requested bytes
       :
     </div>
-    45.9KB
+    47.0KB
     <div
       class="tooltipLabel"
     >
@@ -1014,7 +1014,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part c
       Requested bytes
       :
     </div>
-    45.9KB
+    47.0KB
     <div
       class="tooltipLabel"
     >
@@ -1210,7 +1210,7 @@ exports[`TooltipMarker renders properly normal network markers 1`] = `
       Requested bytes
       :
     </div>
-    45.9KB
+    47.0KB
     <div
       class="tooltipLabel"
     >
@@ -3216,14 +3216,14 @@ exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = 
       GC heap size (pre - post)
       :
     </div>
-    46.1MB - 36.3MB
+    48.4MB - 38.1MB
     <div
       class="tooltipLabel"
     >
       Malloc heap size (pre - post)
       :
     </div>
-    23.1MB - 12.1MB
+    24.2MB - 12.7MB
     <div
       class="tooltipLabel"
     >
@@ -3362,7 +3362,7 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
       Bytes tenured
       :
     </div>
-    1.30MB / 1.97MB (66%)
+    1.37MB / 2.06MB (66%)
     <div
       class="tooltipLabel"
     >
@@ -3376,7 +3376,7 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
       Bytes used
       :
     </div>
-    1.97MB / 16.0MB (12%)
+    2.06MB / 16.8MB (12%)
     <div
       class="tooltipLabel"
     >
@@ -3397,7 +3397,7 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
       Tenured allocation rate
       :
     </div>
-    181MB/s
+    190MB/s
     <div
       class="tooltipLabel"
     >
@@ -3501,7 +3501,7 @@ exports[`TooltipMarker renders tooltips for various markers: GCSlice-17.5 1`] = 
       Trigger (amt/trig)
       :
     </div>
-    266MB / 245MB
+    279MB / 257MB
     <div
       class="tooltipLabel"
     >

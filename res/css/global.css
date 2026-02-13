@@ -135,8 +135,8 @@
   --panel-border-color: var(--grey-60);
   --selected-track-background-color: color-mix(
     in hsl,
-    var(--grey-90) 60%,
-    var(--teal-50)
+    var(--raised-background-color) 96%,
+    #edf6ff
   );
   --tooltip-number-foreground-color: var(--grey-40);
   --colored-border-color: rgb(237 237 240 / 0.1);
