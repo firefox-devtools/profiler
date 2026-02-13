@@ -426,7 +426,7 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
             >
               <p>
                 You can also profile Firefox for Android remotely from Firefox
-                for Desktop. For more information, please consult this
+                for desktop. For more information, please consult this
                 documentation: <a>Profiling Firefox for Android remotely</a>.
               </p>
             </Localized>
