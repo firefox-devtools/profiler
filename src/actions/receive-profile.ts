@@ -87,10 +87,7 @@ import type {
   MixedObject,
 } from 'firefox-profiler/types';
 
-import type {
-  FuncToFuncsMap,
-  SymbolicationStepInfo,
-} from '../profile-logic/symbolication';
+import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
 import { assertExhaustiveCheck } from '../utils/types';
 import { bytesToBase64DataUrl } from 'firefox-profiler/utils/base64';
 import type {
@@ -105,6 +102,7 @@ import type {
 } from '../profile-logic/symbol-store';
 import type { SymbolTableAsTuple } from 'firefox-profiler/profile-logic/symbol-store-db';
 import SymbolStoreDB from 'firefox-profiler/profile-logic/symbol-store-db';
+import type { ProfileUpgradeInfo } from 'firefox-profiler/profile-logic/processed-profile-versioning';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -347,7 +345,7 @@ export function finalizeFullProfileView(
         const thread = profile.threads[threadIndex];
         const { samples, jsAllocations, nativeAllocations } = thread;
         hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
-          hasUsefulSamples(table?.stack, thread, profile.shared)
+          hasUsefulSamples(table?.stack, profile.shared)
         );
         if (hasSamples) {
           break;
@@ -456,28 +454,20 @@ export function doneSymbolicating(): Action {
 // reach the screen because it would be invalidated by the next symbolication update.
 // So we queue up symbolication steps and run the update from requestIdleCallback.
 export function bulkProcessSymbolicationSteps(
-  symbolicationStepsPerThread: Map<ThreadIndex, SymbolicationStepInfo[]>
+  symbolicationSteps: SymbolicationStepInfo[]
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const { threads, shared } = getProfile(getState());
-    const oldFuncToNewFuncsMaps: Map<ThreadIndex, FuncToFuncsMap> = new Map();
-    const symbolicatedThreads = threads.map((oldThread, threadIndex) => {
-      const symbolicationSteps = symbolicationStepsPerThread.get(threadIndex);
-      if (symbolicationSteps === undefined) {
-        return oldThread;
-      }
-      const { thread, oldFuncToNewFuncsMap } = applySymbolicationSteps(
-        oldThread,
-        shared,
-        symbolicationSteps
-      );
-      oldFuncToNewFuncsMaps.set(threadIndex, oldFuncToNewFuncsMap);
-      return thread;
-    });
+    const {
+      threads: symbolicatedThreads,
+      shared: symbolicatedShared,
+      oldFuncToNewFuncsMap,
+    } = applySymbolicationSteps(threads, shared, symbolicationSteps);
     dispatch({
       type: 'BULK_SYMBOLICATION',
-      oldFuncToNewFuncsMaps,
+      oldFuncToNewFuncsMap,
       symbolicatedThreads,
+      symbolicatedShared,
     });
   };
 }
@@ -499,12 +489,12 @@ if (typeof window === 'object' && window.requestIdleCallback) {
 // Queues up symbolication steps and bulk-processes them from requestIdleCallback,
 // in order to improve UI responsiveness during symbolication.
 class SymbolicationStepQueue {
-  _updates: Map<ThreadIndex, SymbolicationStepInfo[]>;
+  _updates: SymbolicationStepInfo[];
   _updateObservers: Array<() => void>;
   _requestedUpdate: boolean;
 
   constructor() {
-    this._updates = new Map();
+    this._updates = [];
     this._updateObservers = [];
     this._requestedUpdate = false;
   }
@@ -522,7 +512,7 @@ class SymbolicationStepQueue {
   _dispatchUpdate(dispatch: Dispatch) {
     const updates = this._updates;
     const observers = this._updateObservers;
-    this._updates = new Map();
+    this._updates = [];
     this._updateObservers = [];
     this._requestedUpdate = false;
 
@@ -535,17 +525,11 @@ class SymbolicationStepQueue {
 
   enqueueSingleSymbolicationStep(
     dispatch: Dispatch,
-    threadIndex: ThreadIndex,
     symbolicationStepInfo: SymbolicationStepInfo,
     completionHandler: () => void
   ) {
     this._scheduleUpdate(dispatch);
-    let threadSteps = this._updates.get(threadIndex);
-    if (threadSteps === undefined) {
-      threadSteps = [];
-      this._updates.set(threadIndex, threadSteps);
-    }
-    threadSteps.push(symbolicationStepInfo);
+    this._updates.push(symbolicationStepInfo);
     this._updateObservers.push(completionHandler);
   }
 }
@@ -804,15 +788,11 @@ export async function doSymbolicateProfile(
   await symbolicateProfile(
     profile,
     symbolStore,
-    (
-      threadIndex: ThreadIndex,
-      symbolicationStepInfo: SymbolicationStepInfo
-    ) => {
+    (symbolicationStepInfo: SymbolicationStepInfo) => {
       completionPromises.push(
         new Promise((resolve) => {
           _symbolicationStepQueueSingleton.enqueueSingleSymbolicationStep(
             dispatch,
-            threadIndex,
             symbolicationStepInfo,
             () => resolve(undefined)
           );
@@ -1264,9 +1244,12 @@ export function getProfileUrlForHash(hash: string): string {
 
 export function retrieveProfileFromStore(
   hash: string,
-  initialLoad: boolean = false
+  profileUpgradeInfo?: ProfileUpgradeInfo
 ): ThunkAction<Promise<void>> {
-  return retrieveProfileOrZipFromUrl(getProfileUrlForHash(hash), initialLoad);
+  return retrieveProfileOrZipFromUrl(
+    getProfileUrlForHash(hash),
+    profileUpgradeInfo
+  );
 }
 
 /**
@@ -1276,7 +1259,7 @@ export function retrieveProfileFromStore(
  */
 export function retrieveProfileOrZipFromUrl(
   profileUrl: string,
-  initialLoad: boolean = false
+  profileUpgradeInfo?: ProfileUpgradeInfo
 ): ThunkAction<Promise<void>> {
   return async function (dispatch) {
     dispatch(waitingForProfileFromUrl(profileUrl));
@@ -1294,12 +1277,14 @@ export function retrieveProfileOrZipFromUrl(
           const serializedProfile = response.profile;
           const profile = await unserializeProfileOfArbitraryFormat(
             serializedProfile,
-            profileUrl
+            profileUrl,
+            profileUpgradeInfo
           );
           if (profile === undefined) {
             throw new Error('Unable to parse the profile.');
           }
 
+          const initialLoad = profileUpgradeInfo !== undefined;
           await dispatch(loadProfile(profile, {}, initialLoad));
           break;
         }
@@ -1521,7 +1506,8 @@ export function retrieveProfilesToCompare(
 // the url and processing the UrlState.
 export function retrieveProfileForRawUrl(
   location: Location,
-  browserConnectionStatus?: BrowserConnectionStatus
+  browserConnectionStatus?: BrowserConnectionStatus,
+  profileUpgradeInfo: ProfileUpgradeInfo = {}
 ): ThunkAction<Promise<Profile | null>> {
   return async (dispatch, getState) => {
     const pathParts = location.pathname.split('/').filter((d) => d);
@@ -1542,22 +1528,29 @@ export function retrieveProfileForRawUrl(
     dispatch(setDataSource(dataSource));
 
     switch (dataSource) {
-      case 'from-browser':
+      case 'from-browser': {
         if (browserConnectionStatus === undefined) {
           throw new Error(
             'Error: all callers of this function should supply a browserConnectionStatus argument for from-browser'
           );
         }
+        const initialLoad = profileUpgradeInfo !== undefined;
         await dispatch(
-          retrieveProfileFromBrowser(browserConnectionStatus, true)
+          retrieveProfileFromBrowser(browserConnectionStatus, initialLoad)
         );
         break;
+      }
       case 'public':
-        await dispatch(retrieveProfileFromStore(pathParts[1], true));
+        await dispatch(
+          retrieveProfileFromStore(pathParts[1], profileUpgradeInfo)
+        );
         break;
       case 'from-url':
         await dispatch(
-          retrieveProfileOrZipFromUrl(decodeURIComponent(pathParts[1]), true)
+          retrieveProfileOrZipFromUrl(
+            decodeURIComponent(pathParts[1]),
+            profileUpgradeInfo
+          )
         );
         break;
       case 'compare': {
@@ -1708,7 +1701,7 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
         const thread = profile.threads[threadIndex];
         const { samples, jsAllocations, nativeAllocations } = thread;
         hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
-          hasUsefulSamples(table?.stack, thread, profile.shared)
+          hasUsefulSamples(table?.stack, profile.shared)
         );
         if (hasSamples) {
           break;

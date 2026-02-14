@@ -26,6 +26,8 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
+import { translateThreadsKey } from 'firefox-profiler/profile-logic/profile-data';
+import { translateTransformStack } from 'firefox-profiler/profile-logic/transforms';
 
 /*
  * This state file governs the state that comes from, and alters, the window
@@ -143,12 +145,17 @@ const selectedThreads: Reducer<Set<ThreadIndex> | null> = (
       // Only switch to non-null selected threads.
       return action.selectedThreadIndexes;
     case 'SANITIZED_PROFILE_PUBLISHED': {
-      const { oldThreadIndexToNew } = action;
-      if (state === null || !oldThreadIndexToNew) {
+      const { translationMaps } = action;
+      if (
+        state === null ||
+        !translationMaps ||
+        !translationMaps.oldThreadIndexToNew
+      ) {
         // Either there was no selected thread, or the thread indexes were not modified.
         return state;
       }
       const newSelectedThreads = new Set<ThreadIndex>();
+      const { oldThreadIndexToNew } = translationMaps;
       for (const oldThreadIndex of state) {
         const newThreadIndex = oldThreadIndexToNew.get(oldThreadIndex);
         if (newThreadIndex === undefined) {
@@ -213,18 +220,25 @@ const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
       });
     }
     case 'SANITIZED_PROFILE_PUBLISHED': {
-      const { oldThreadIndexToNew } = action;
-      if (!oldThreadIndexToNew) {
-        // The thread indexes weren't modified, just return the old value here.
+      const { translationMaps } = action;
+      if (!translationMaps) {
         return state;
       }
-      // This may no longer be valid because of PII sanitization.
+
       const newTransforms = {} as TransformStacksPerThread;
       for (const [threadsKey, transformStack] of objectEntries(state)) {
-        const newThreadIndex = oldThreadIndexToNew.get(Number(threadsKey));
-        if (newThreadIndex !== undefined) {
-          newTransforms[newThreadIndex] = transformStack;
+        const newThreadsKey = translationMaps.oldThreadIndexToNew
+          ? translateThreadsKey(threadsKey, translationMaps.oldThreadIndexToNew)
+          : threadsKey;
+        if (newThreadsKey === null) {
+          // Discard transforms for threads that were removed.
+          continue;
         }
+
+        newTransforms[newThreadsKey] = translateTransformStack(
+          transformStack,
+          translationMaps
+        );
       }
       return newTransforms;
     }
@@ -340,7 +354,7 @@ const globalTrackOrder: Reducer<TrackIndex[]> = (state = [], action) => {
     case 'SANITIZED_PROFILE_PUBLISHED':
       // If some threads were removed, do not even attempt to figure this out. It's
       // complicated, and not many people use this feature.
-      return action.oldThreadIndexToNew ? [] : state;
+      return action.translationMaps?.oldThreadIndexToNew ? [] : state;
     default:
       return state;
   }
@@ -389,7 +403,7 @@ const hiddenGlobalTracks: Reducer<Set<TrackIndex>> = (
     case 'SANITIZED_PROFILE_PUBLISHED':
       // If any threads were removed, this was because they were hidden.
       // Reset this state.
-      return action.oldThreadIndexToNew ? new Set() : state;
+      return action.translationMaps?.oldThreadIndexToNew ? new Set() : state;
     default:
       return state;
   }
@@ -474,7 +488,7 @@ const hiddenLocalTracksByPid: Reducer<Map<Pid, Set<TrackIndex>>> = (
     }
     case 'SANITIZED_PROFILE_PUBLISHED':
       // If any threads were removed then this information is no longer valid.
-      return action.oldThreadIndexToNew ? new Map() : state;
+      return action.translationMaps?.oldThreadIndexToNew ? new Map() : state;
     default:
       return state;
   }
@@ -498,7 +512,7 @@ const localTrackOrderByPid: Reducer<Map<Pid, TrackIndex[]>> = (
     case 'SANITIZED_PROFILE_PUBLISHED':
       // If any threads were removed then remove this information. It's complicated
       // to compute, and not many people use it.
-      return action.oldThreadIndexToNew ? new Map() : state;
+      return action.translationMaps?.oldThreadIndexToNew ? new Map() : state;
     default:
       return state;
   }
@@ -517,7 +531,7 @@ const localTrackOrderChangedPids: Reducer<Set<Pid>> = (
     case 'SANITIZED_PROFILE_PUBLISHED':
       // In localTrackOrderByPid above the state is reset in this case,
       // let's reset it here as well.
-      return action.oldThreadIndexToNew ? new Set() : state;
+      return action.translationMaps?.oldThreadIndexToNew ? new Set() : state;
     default:
       return state;
   }
@@ -586,6 +600,19 @@ const sourceView: Reducer<SourceViewState> = (
         highlightedLine: action.highlightedLineNumber,
       };
     }
+    case 'SANITIZED_PROFILE_PUBLISHED': {
+      if (!action.translationMaps || state.sourceIndex === null) {
+        return state;
+      }
+      const newSourceIndexPlusOne =
+        action.translationMaps.oldSourceToNewSourcePlusOne[state.sourceIndex];
+      return {
+        ...state,
+        sourceIndex:
+          newSourceIndexPlusOne !== 0 ? newSourceIndexPlusOne - 1 : null,
+      };
+    }
+
     default:
       return state;
   }

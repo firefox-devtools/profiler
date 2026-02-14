@@ -6,6 +6,11 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 60
+
+The following tables have moved into `profile.shared`: `stackTable`, `frameTable`, `funcTable`, `resourceTable`, `nativeSymbols`. They are no longer per-thread.
+Marker and sample data (including allocation samples) remains within the thread.
+
 ### Version 59
 
 A new optional `usedInnerWindowIDs` field was added to the `Thread` type. This field contains an array of inner window IDs. It is used for the tab selector dropdown in the profiler UI, together with the information from `profile.pages`. When a tab is selected in this dropdown, threads that don't have an inner window ID for the selected tab in their `usedInnerWindowIDs` field are hidden. The array is treated as a set - the order of items in it has no meaning.
