@@ -76,7 +76,9 @@ import type {
   StackAddressInfo,
   AddressTimings,
   Address,
+  IndexIntoAddressSetTable,
 } from 'firefox-profiler/types';
+import { SetCollectionBuilder } from 'firefox-profiler/utils/set-collection';
 
 /**
  * For each stack in `stackTable`, and one specific native symbol, compute the
@@ -112,18 +114,6 @@ import type {
  * If there is recursion, and the same address is present in multiple frames in
  * the same stack, the address is only counted once - the addresses are stored
  * in a set.
- *
- * The returned StackAddressInfo is computed as follows:
- *   selfAddress[stack]:
- *     For stacks whose stack.frame.nativeSymbol is the given native symbol,
- *     this is stack.frame.address.
- *     For all other stacks this is null.
- *   stackAddresses[stack]:
- *     For stacks whose stack.frame.nativeSymbol is the given native symbol,
- *     this is the stackAddresses of its prefix stack, plus stack.frame.address
- *     added to the set.
- *     For all other stacks this is the same as the stackAddresses set of the
- *     stack's prefix.
  */
 export function getStackAddressInfo(
   stackTable: StackTable,
@@ -131,48 +121,31 @@ export function getStackAddressInfo(
   _funcTable: FuncTable,
   nativeSymbol: IndexIntoNativeSymbolTable
 ): StackAddressInfo {
-  // "self address" == "the address which a stack's self time is contributed to"
-  const selfAddressForAllStacks = [];
-  // "total addresses" == "the set of addresses whose total time this stack contributes to"
-  const totalAddressesForAllStacks: Array<Set<Address> | null> = [];
+  const builder = new SetCollectionBuilder<number>();
+  const stackIndexToAddressSetIndex = new Int32Array(stackTable.length);
 
-  // This loop takes advantage of the fact that the stack table is topologically ordered:
-  // Prefix stacks are always visited before their descendants.
-  // Each stack inherits the "total" addresses from its parent stack, and then adds its
-  // self address to that set. If the stack doesn't have a self address in the library, we just
-  // re-use the prefix's set object without copying it.
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    const frame = stackTable.frame[stackIndex];
     const prefixStack = stackTable.prefix[stackIndex];
+    const prefixAddressSet: IndexIntoAddressSetTable | -1 =
+      prefixStack !== null ? stackIndexToAddressSetIndex[prefixStack] : -1;
+
+    const frame = stackTable.frame[stackIndex];
     const nativeSymbolOfThisStack = frameTable.nativeSymbol[frame];
+    const matchesNativeSymbol = nativeSymbolOfThisStack === nativeSymbol;
+    if (prefixAddressSet === -1 && !matchesNativeSymbol) {
+      stackIndexToAddressSetIndex[stackIndex] = -1;
+    } else {
+      const selfAddress = matchesNativeSymbol ? frameTable.address[frame] : -1;
 
-    let selfAddress: Address | null = null;
-    let totalAddresses: Set<Address> | null =
-      prefixStack !== null ? totalAddressesForAllStacks[prefixStack] : null;
-
-    if (nativeSymbolOfThisStack === nativeSymbol) {
-      selfAddress = frameTable.address[frame];
-      if (selfAddress !== -1) {
-        // Add this stack's address to this stack's totalAddresses. The rest of this stack's
-        // totalAddresses is the same as for the parent stack.
-        // We avoid creating new Set objects unless the new set is actually
-        // different.
-        if (totalAddresses === null) {
-          // None of the ancestor stack nodes have hit a address in the given library.
-          totalAddresses = new Set([selfAddress]);
-        } else if (!totalAddresses.has(selfAddress)) {
-          totalAddresses = new Set(totalAddresses);
-          totalAddresses.add(selfAddress);
-        }
-      }
+      stackIndexToAddressSetIndex[stackIndex] = builder.extend(
+        prefixAddressSet !== -1 ? prefixAddressSet : null,
+        selfAddress
+      );
     }
-
-    selfAddressForAllStacks.push(selfAddress);
-    totalAddressesForAllStacks.push(totalAddresses);
   }
   return {
-    selfAddress: selfAddressForAllStacks,
-    stackAddresses: totalAddressesForAllStacks,
+    stackIndexToAddressSetIndex,
+    addressSetTable: builder.finish(),
   };
 }
 
@@ -192,30 +165,70 @@ export function getAddressTimings(
   if (stackAddressInfo === null) {
     return emptyAddressTimings;
   }
-  const { selfAddress, stackAddresses } = stackAddressInfo;
-  const totalAddressHits: Map<Address, number> = new Map();
-  const selfAddressHits: Map<Address, number> = new Map();
 
-  // Iterate over all the samples, and aggregate the sample's weight into the
-  // addresses which are hit by the sample's stack.
-  // TODO: Maybe aggregate sample count per stack first, and then visit each stack only once?
+  const { stackIndexToAddressSetIndex, addressSetTable } = stackAddressInfo;
+
+  // We do two passes to compute the timings:
+  // 1. One pass over the samples to accumulate the sample weight onto the
+  //    nodes in the addressSetTable.
+  // 2. One pass (from back to front) over the addressSetTable, propagating
+  //    values up the tree and, at the same time, accumulating per-address
+  //    totals.
+
+  // First, do the pass over the samples to compute the weight per address set.
+  const selfPerAddressSet = new Float64Array(addressSetTable.length);
   for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
     const stackIndex = samples.stack[sampleIndex];
     if (stackIndex === null) {
       continue;
     }
-    const weight = samples.weight ? samples.weight[sampleIndex] : 1;
-    const setOfHitAddresses = stackAddresses[stackIndex];
-    if (setOfHitAddresses !== null) {
-      for (const address of setOfHitAddresses) {
-        const oldHitCount = totalAddressHits.get(address) ?? 0;
-        totalAddressHits.set(address, oldHitCount + weight);
+    const addressSetIndex = stackIndexToAddressSetIndex[stackIndex];
+    if (addressSetIndex !== -1) {
+      const weight = samples.weight ? samples.weight[sampleIndex] : 1;
+      selfPerAddressSet[addressSetIndex] += weight;
+    }
+  }
+
+  // Now, do a pass over the addressSetTable, from back to front.
+  // This is a similar idea to what we do for the call tree or the function
+  // list. The upwards propagation of a sample's weight will not contribute
+  // to the same address multiple times thanks to the guarantees of the
+  // addressSetTable - there are no duplicate values on a node's path to the
+  // root.
+  const totalAddressHits: Map<Address, number> = new Map();
+  const selfAddressHits: Map<Address, number> = new Map();
+  const selfSumOfAddressSetDescendants = new Float64Array(
+    addressSetTable.length
+  );
+  for (
+    let addressSetIndex = addressSetTable.length - 1;
+    addressSetIndex >= 0;
+    addressSetIndex--
+  ) {
+    const selfWeight = selfPerAddressSet[addressSetIndex];
+    if (selfWeight !== 0) {
+      const selfAddress = addressSetTable.self[addressSetIndex];
+      if (selfAddress !== -1) {
+        const oldHitCount = selfAddressHits.get(selfAddress) ?? 0;
+        selfAddressHits.set(selfAddress, oldHitCount + selfWeight);
       }
     }
-    const address = selfAddress[stackIndex];
-    if (address !== null) {
-      const oldHitCount = selfAddressHits.get(address) ?? 0;
-      selfAddressHits.set(address, oldHitCount + weight);
+
+    const selfSumOfThisAddressSetDescendants =
+      selfSumOfAddressSetDescendants[addressSetIndex];
+    const thisAddressSetWeight =
+      selfWeight + selfSumOfThisAddressSetDescendants;
+    const addressSetParent = addressSetTable.parent[addressSetIndex];
+    if (addressSetParent !== null) {
+      selfSumOfAddressSetDescendants[addressSetParent] += thisAddressSetWeight;
+    }
+
+    if (thisAddressSetWeight !== 0) {
+      const address = addressSetTable.value[addressSetIndex];
+      if (address !== -1) {
+        const oldHitCount = totalAddressHits.get(address) ?? 0;
+        totalAddressHits.set(address, oldHitCount + thisAddressSetWeight);
+      }
     }
   }
   return { totalAddressHits, selfAddressHits };
