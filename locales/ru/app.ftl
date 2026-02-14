@@ -353,6 +353,13 @@ Home--record-instructions =
 Home--instructions-content =
     Для записи профилей производительности требуется <a>{ -firefox-brand-name }</a>.
     Однако существующие профили можно просматривать в любом современном браузере.
+Home--fenix-instructions-directly =
+    { -firefox-android-brand-name } может быть профилирован непосредственно на этом устройстве. Для
+    для получения дополнительной информации прочитайте <a>Профилирование { -firefox-android-brand-name } непосредственно на устройстве</a>.
+Home--fenix-instructions-remotely =
+    Вы также можете профилировать { -firefox-android-brand-name } удалённо из { -firefox-brand-name }
+    для компьютера. Для получения дополнительной информации, пожалуйста, обратитесь к этой документации:
+    <a>Удалённое профилирование { -firefox-android-brand-name }</a>.
 Home--record-instructions-start-stop = Остановить и начать профилирование
 Home--record-instructions-capture-load = Запись и загрузка профиля
 Home--profiler-motto = Запишите профиль производительности. Проанализируйте его. Поделитесь им. Сделайте Интернет быстрее.
