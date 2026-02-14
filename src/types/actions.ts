@@ -335,6 +335,11 @@ type ProfileAction =
       readonly localTrackOrderByPid: Map<Pid, TrackIndex[]>;
     }
   | {
+      readonly type: 'ENABLE_EXPERIMENTAL_SAMPLING_INTERVAL_TRACKS';
+      readonly localTracksByPid: Map<Pid, LocalTrack[]>;
+      readonly localTrackOrderByPid: Map<Pid, TrackIndex[]>;
+    }
+  | {
       readonly type: 'UPDATE_BOTTOM_BOX';
       readonly libIndex: IndexIntoLibs | null;
       readonly sourceIndex: IndexIntoSourceTable | null;
