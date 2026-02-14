@@ -16,10 +16,14 @@ type Props = ComponentProps<typeof FilterNavigatorBar>;
 type DispatchProps = {
   readonly onPop: Props['onPop'];
 };
+type OwnProps = {
+  readonly filterScrollPos?: number;
+  readonly setFilterScrollPos?: (pos: number) => void;
+};
 type StateProps = Omit<Props, keyof DispatchProps>;
 
 export const TransformNavigator = explicitConnect<
-  {},
+  OwnProps,
   StateProps,
   DispatchProps
 >({
