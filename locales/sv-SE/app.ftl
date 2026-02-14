@@ -350,6 +350,13 @@ Home--record-instructions =
 Home--instructions-content =
     För att spela in prestandaprofiler krävs <a>{ -firefox-brand-name }</a>.
     Befintliga profiler kan dock visas i vilken modern webbläsare som helst.
+Home--fenix-instructions-directly =
+    { -firefox-android-brand-name } kan profileras direkt på den här enheten. För
+    mer information, läs <a>Profilering av { -firefox-android-brand-name } direkt på enheten</a>.
+Home--fenix-instructions-remotely =
+    Du kan också profilera { -firefox-android-brand-name } från distans från { -firefox-brand-name }
+    för dator. För mer information, vänligen konsultera denna dokumentation:
+    <a>Profilering av { -firefox-android-brand-name } från distans</a>.
 Home--record-instructions-start-stop = Stoppa och börja profilera
 Home--record-instructions-capture-load = Spela in och ladda profil
 Home--profiler-motto = Spela in en prestandaprofil. Analysera den. Dela den. Gör webben snabbare.
