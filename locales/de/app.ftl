@@ -333,6 +333,9 @@ Home--record-instructions =
 Home--instructions-content =
     Das Aufzeichnen von Leistungsprofilen benötigt <a>{ -firefox-brand-name }</a>.
     Vorhandene Profile können jedoch in jedem modernen Browser angezeigt werden.
+Home--fenix-instructions-directly =
+    Ein Profil von { -firefox-android-brand-name } kann direkt auf diesem Gerät erstellt werden.
+    Weitere Informationen finden Sie unter <a>Profilerstellung von { -firefox-android-brand-name } direkt auf dem Gerät</a>.
 Home--record-instructions-start-stop = Profilerstellung stoppen und starten
 Home--record-instructions-capture-load = Profil aufzeichnen und laden
 Home--profiler-motto = Zeichnen Sie ein Leistungsprofil auf. Analysieren Sie es. Teilen Sie es. Machen Sie das Web schneller.
