@@ -688,11 +688,10 @@ class RegularSymbolProvider implements SymbolProvider {
    */
   async _createDemangleCallback(): Promise<DemangleFunction> {
     try {
-      // When this module imports some WebAssembly module, Webpack's mechanism
+      // When this module imports some WebAssembly module, the bundler's mechanism
       // invokes the WebAssembly object which might be absent in some browsers,
       // therefore `import` can throw. Also some browsers might refuse to load a
       // wasm module because of our CSP.
-      // See webpack bug https://github.com/webpack/webpack/issues/8517
       const { demangle_any } = await import('gecko-profiler-demangle');
       return demangle_any;
     } catch (error) {
