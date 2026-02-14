@@ -14,8 +14,12 @@ type MarkerStyle = {
   readonly _background: string | [string, string];
   readonly getBackground: () => string;
   readonly squareCorners: boolean;
-  readonly borderLeft: null | string;
-  readonly borderRight: null | string;
+  readonly _borderLeft: null | string | [string, string];
+  readonly hasBorderLeft: () => boolean;
+  readonly getBorderLeft: () => string;
+  readonly _borderRight: null | string | [string, string];
+  readonly hasBorderRight: () => boolean;
+  readonly getBorderRight: () => string;
 };
 
 const defaultStyle: MarkerStyle = {
@@ -26,8 +30,20 @@ const defaultStyle: MarkerStyle = {
     return maybeLightDark(this._background);
   },
   squareCorners: false,
-  borderLeft: null,
-  borderRight: null,
+  _borderLeft: null,
+  hasBorderLeft: function () {
+    return this._borderLeft !== null;
+  },
+  getBorderLeft: function () {
+    return maybeLightDark(this._borderLeft as string | [string, string]);
+  },
+  _borderRight: null,
+  hasBorderRight: function () {
+    return this._borderRight !== null;
+  },
+  getBorderRight: function () {
+    return maybeLightDark(this._borderRight as string | [string, string]);
+  },
 };
 
 const gcStyle = {
@@ -85,7 +101,7 @@ const markerStyles: { readonly [styleName: string]: MarkerStyle } = {
   },
   Styles: {
     ...defaultStyle,
-    _background: [colors.TEAL_50, colors.TEAL_60],
+    _background: [colors.TEAL_50, colors.TEAL_70],
     top: 7,
   },
   FireScrollEvent: {
@@ -154,18 +170,18 @@ const markerStyles: { readonly [styleName: string]: MarkerStyle } = {
   },
   Jank: {
     ...defaultStyle,
-    _background: ['hsl(347, 100%, 60%)', 'hsl(347, 75%, 50%)'],
-    borderLeft: colors.RED_50,
-    borderRight: colors.RED_50,
+    _background: ['hsl(347, 100%, 60%)', 'hsl(347, 75%, 40%)'],
+    _borderLeft: [colors.RED_50, colors.RED_70],
+    _borderRight: [colors.RED_50, colors.RED_70],
     squareCorners: true,
   },
   // BHR markers are displayed in the timeline only if jank markers are
   // unavailable. Let's style them like Jank markers.
   'BHR-detected hang': {
     ...defaultStyle,
-    _background: ['hsl(347, 100%, 60%)', 'hsl(347, 75%, 50%)'],
-    borderLeft: colors.RED_50,
-    borderRight: colors.RED_50,
+    _background: ['hsl(347, 100%, 60%)', 'hsl(347, 75%, 40%)'],
+    _borderLeft: [colors.RED_50, colors.RED_70],
+    _borderRight: [colors.RED_50, colors.RED_70],
     squareCorners: true,
   },
   // Memory:
