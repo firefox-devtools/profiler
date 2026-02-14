@@ -102,6 +102,7 @@ const DEFAULT_STYLE: ColorStyles = {
 };
 
 // Colors based on photon colors.
+export const BLUE_65 = '#004fc4';
 export const PURPLE_55 = '#8a00eb';
 export const YELLOW_65 = '#be9b00';
 
