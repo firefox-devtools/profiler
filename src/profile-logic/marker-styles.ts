@@ -101,7 +101,7 @@ const markerStyles: { readonly [styleName: string]: MarkerStyle } = {
   },
   Styles: {
     ...defaultStyle,
-    _background: [colors.TEAL_50, colors.TEAL_60],
+    _background: [colors.TEAL_50, colors.TEAL_70],
     top: 7,
   },
   FireScrollEvent: {
