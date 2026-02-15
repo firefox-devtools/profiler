@@ -9,7 +9,8 @@ import { timeCode } from 'firefox-profiler/utils/time-code';
 import { getSampleIndexClosestToCenteredTime } from 'firefox-profiler/profile-logic/profile-data';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
-import { BLUE_40, BLUE_50, BLUE_70, BLUE_80 } from 'photon-colors';
+import { BLUE_40, BLUE_50, BLUE_70 } from 'photon-colors';
+import { BLUE_65 } from 'firefox-profiler/utils/colors';
 import {
   Tooltip,
   MOUSE_OFFSET,
@@ -217,9 +218,9 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
 
     // Draw the samples in multiple passes, separated by color. This reduces the calls
     // to ctx.fillStyle, which saves on time that's spent parsing color strings.
-    const lighterBlue = lightDark('#c5e1fe', BLUE_80);
-    drawSamples(regularSamples, lightDark(BLUE_40, BLUE_70));
-    drawSamples(highlightedSamples, lightDark(BLUE_70, BLUE_50));
+    const lighterBlue = lightDark('#c5e1fe', '#15336c');
+    drawSamples(regularSamples, lightDark(BLUE_40, BLUE_50));
+    drawSamples(highlightedSamples, lightDark(BLUE_70, BLUE_65));
     drawSamples(idleSamples, lighterBlue);
   }
 
