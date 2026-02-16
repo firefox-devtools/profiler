@@ -175,7 +175,6 @@ type BaseQuery = {
   timelineType: string;
   sourceViewIndex: number;
   assemblyView: string;
-  marker: MarkerIndex; // MarkerIndex for the selected thread, e.g. "42"
 };
 
 type CallTreeQuery = BaseQuery & {
@@ -186,6 +185,7 @@ type CallTreeQuery = BaseQuery & {
 
 type MarkersQuery = BaseQuery & {
   markerSearch: string; // "DOMEvent"
+  marker?: MarkerIndex; // Selected marker index for the current thread, e.g. 42
 };
 
 type NetworkQuery = BaseQuery & {
@@ -220,6 +220,7 @@ type Query = BaseQuery & {
 
   // Markers specific
   markerSearch?: string;
+  marker?: MarkerIndex;
 
   // Network specific
   networkSearch?: string;
@@ -294,11 +295,6 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       selectedThreads === null
         ? undefined
         : encodeUintSetForUrlComponent(selectedThreads),
-    marker:
-      selectedThreadsKey &&
-      urlState.profileSpecific.selectedMarkers[selectedThreadsKey] !== null
-        ? urlState.profileSpecific.selectedMarkers[selectedThreadsKey]
-        : undefined,
     file: urlState.pathInZipFile || undefined,
     profiles: urlState.profilesToCompare || undefined,
     v: CURRENT_URL_VERSION,
@@ -374,6 +370,11 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       query = baseQuery as MarkersQueryShape;
       query.markerSearch =
         urlState.profileSpecific.markersSearchString || undefined;
+      query.marker =
+        selectedThreadsKey !== null &&
+        urlState.profileSpecific.selectedMarkers[selectedThreadsKey] !== null
+          ? urlState.profileSpecific.selectedMarkers[selectedThreadsKey]
+          : undefined;
       break;
     case 'network-chart':
       query = baseQuery as NetworkQueryShape;
@@ -508,7 +509,11 @@ export function stateFromLocation(
 
   // Parse the selected marker for the current thread
   const selectedMarkers: { [key: string]: MarkerIndex | null } = {};
-  if (selectedThreadsKey && query.marker) {
+  if (
+    selectedThreadsKey !== null &&
+    query.marker !== undefined &&
+    query.marker !== null
+  ) {
     const markerIndex = Number(query.marker);
     if (!isNaN(markerIndex)) {
       selectedMarkers[selectedThreadsKey] = markerIndex;
