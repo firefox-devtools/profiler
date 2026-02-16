@@ -28,7 +28,7 @@ const baseConfig = {
   loader: {
     '.png': 'file',
     '.jpg': 'file',
-    '.svg': 'file',
+    '.svg': 'dataurl',
     '.worker.js': 'file',
   },
   alias: {
