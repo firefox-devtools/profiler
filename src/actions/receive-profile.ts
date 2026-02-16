@@ -1210,6 +1210,39 @@ async function _extractJsonFromArrayBuffer(
   return JSON.parse(textDecoder.decode(profileBytes));
 }
 
+function _concatUint8Chunks(
+  chunks: Array<Uint8Array>,
+  totalBytes: number
+): Uint8Array<ArrayBuffer> {
+  const result = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return result;
+}
+
+function _normalizeStreamJsonParseError(
+  chunks: Array<Uint8Array>,
+  totalBytes: number,
+  fallbackError: unknown
+): Error {
+  const textDecoder = new TextDecoder();
+  try {
+    JSON.parse(textDecoder.decode(_concatUint8Chunks(chunks, totalBytes)));
+  } catch (nativeError) {
+    if (nativeError instanceof Error) {
+      return nativeError;
+    }
+    return new Error(String(nativeError));
+  }
+  if (fallbackError instanceof Error) {
+    return fallbackError;
+  }
+  return new Error(String(fallbackError));
+}
+
 /**
  * Parse JSON from a ReadableStream incrementally.
  *
@@ -1219,10 +1252,69 @@ async function _extractJsonFromArrayBuffer(
 async function _extractJsonFromReadableStream(
   stream: ReadableStream<Uint8Array>
 ): Promise<unknown> {
-  const parser = new JSONParser();
   const reader = stream.getReader();
+  const initialChunks: Array<Uint8Array> = [];
+  let initialChunksLength = 0;
+  const headerBytes = new Uint8Array(3);
+  let headerBytesLength = 0;
+
+  // Read enough bytes to reliably detect gzip headers even if the stream
+  // splits the first three bytes across chunks.
+  while (headerBytesLength < 3) {
+    const { done, value } = await reader.read();
+    if (done || value === undefined) {
+      break;
+    }
+    initialChunks.push(value);
+    initialChunksLength += value.byteLength;
+    for (
+      let headerIndex = 0;
+      headerIndex < value.byteLength && headerBytesLength < 3;
+      headerIndex++
+    ) {
+      headerBytes[headerBytesLength++] = value[headerIndex];
+    }
+  }
+
+  if (initialChunksLength === 0) {
+    throw new SyntaxError('Unexpected end of JSON input');
+  }
+
+  if (headerBytesLength === 3 && isGzip(headerBytes)) {
+    let totalBytes = initialChunksLength;
+    const chunks = [...initialChunks];
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done || value === undefined) {
+        break;
+      }
+      chunks.push(value);
+      totalBytes += value.byteLength;
+    }
+    const compressedBytes = _concatUint8Chunks(chunks, totalBytes);
+    return _extractJsonFromArrayBuffer(compressedBytes.buffer);
+  }
+
+  const parser = new JSONParser();
+  const parserErrorProbeChunks: Array<Uint8Array> = [];
+  let parserErrorProbeLength = 0;
+  const maxErrorProbeBytes = 64 * 1024;
   let rootValue: unknown;
   let hasRootValue = false;
+
+  const appendParserErrorProbe = (chunk: Uint8Array) => {
+    if (parserErrorProbeLength >= maxErrorProbeBytes) {
+      return;
+    }
+    const bytesRemaining = maxErrorProbeBytes - parserErrorProbeLength;
+    if (chunk.byteLength <= bytesRemaining) {
+      parserErrorProbeChunks.push(chunk);
+      parserErrorProbeLength += chunk.byteLength;
+      return;
+    }
+    parserErrorProbeChunks.push(chunk.subarray(0, bytesRemaining));
+    parserErrorProbeLength += bytesRemaining;
+  };
 
   parser.onValue = ({ value, stack }) => {
     if (stack.length === 0 && value !== undefined) {
@@ -1231,15 +1323,29 @@ async function _extractJsonFromReadableStream(
     }
   };
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
+  try {
+    for (const chunk of initialChunks) {
+      appendParserErrorProbe(chunk);
+      parser.write(chunk);
     }
-    parser.write(value);
-  }
-  if (!parser.isEnded) {
-    parser.end();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done || value === undefined) {
+        break;
+      }
+      appendParserErrorProbe(value);
+      parser.write(value);
+    }
+    if (!parser.isEnded) {
+      parser.end();
+    }
+  } catch (error) {
+    throw _normalizeStreamJsonParseError(
+      parserErrorProbeChunks,
+      parserErrorProbeLength,
+      error
+    );
   }
 
   if (!hasRootValue) {
