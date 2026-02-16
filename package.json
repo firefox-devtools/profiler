@@ -71,6 +71,7 @@
     "@fluent/langneg": "^0.7.0",
     "@fluent/react": "^0.15.2",
     "@lezer/highlight": "^1.2.3",
+    "@streamparser/json": "^0.0.22",
     "@tgwf/co2": "^0.17.0",
     "array-move": "^3.0.1",
     "array-range": "^1.0.1",

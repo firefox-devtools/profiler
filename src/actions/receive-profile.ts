@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { oneLine } from 'common-tags';
+import { JSONParser } from '@streamparser/json';
 import queryString from 'query-string';
 import type JSZip from 'jszip';
 import {
@@ -1210,6 +1211,45 @@ async function _extractJsonFromArrayBuffer(
 }
 
 /**
+ * Parse JSON from a ReadableStream incrementally.
+ *
+ * This avoids creating one massive JS string (which can hit engine string-size limits)
+ * before JSON parsing.
+ */
+async function _extractJsonFromReadableStream(
+  stream: ReadableStream<Uint8Array>
+): Promise<unknown> {
+  const parser = new JSONParser();
+  const reader = stream.getReader();
+  let rootValue: unknown;
+  let hasRootValue = false;
+
+  parser.onValue = ({ value, stack }) => {
+    if (stack.length === 0 && value !== undefined) {
+      rootValue = value;
+      hasRootValue = true;
+    }
+  };
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      break;
+    }
+    parser.write(value);
+  }
+  if (!parser.isEnded) {
+    parser.end();
+  }
+
+  if (!hasRootValue) {
+    throw new SyntaxError('Unexpected end of JSON input');
+  }
+
+  return rootValue;
+}
+
+/**
  * Don't trust third party responses, try and handle a variety of responses gracefully.
  */
 async function _extractJsonFromResponse(
@@ -1219,7 +1259,11 @@ async function _extractJsonFromResponse(
 ): Promise<unknown> {
   let arrayBuffer: ArrayBuffer | null = null;
   try {
-    // await before returning so that we can catch JSON parse errors.
+    if (fileType === 'application/json' && response.body) {
+      return await _extractJsonFromReadableStream(response.body);
+    }
+
+    // Await before returning so that we can catch JSON parse errors.
     arrayBuffer = await response.arrayBuffer();
     return await _extractJsonFromArrayBuffer(arrayBuffer);
   } catch (error) {
