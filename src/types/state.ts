@@ -84,6 +84,10 @@ export type MarkerReference = {
   readonly markerIndex: MarkerIndex;
 };
 
+export type SelectedMarkersPerThread = {
+  [key: ThreadsKey]: MarkerIndex | null;
+};
+
 /**
  * Profile view state
  */
@@ -373,6 +377,7 @@ export type ProfileSpecificUrlState = {
   tabFilter: TabID | null;
   legacyThreadOrder: ThreadIndex[] | null;
   legacyHiddenThreads: ThreadIndex[] | null;
+  selectedMarkers: SelectedMarkersPerThread;
 };
 
 export type UrlState = {

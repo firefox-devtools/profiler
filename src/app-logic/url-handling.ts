@@ -40,6 +40,7 @@ import type {
   NativeSymbolInfo,
   Transform,
   IndexIntoFrameTable,
+  MarkerIndex,
 } from 'firefox-profiler/types';
 import {
   decodeUintArrayFromUrlComponent,
@@ -49,7 +50,7 @@ import {
 import { tabSlugs } from '../app-logic/tabs-handling';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 
-export const CURRENT_URL_VERSION = 13;
+export const CURRENT_URL_VERSION = 14;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -174,6 +175,7 @@ type BaseQuery = {
   timelineType: string;
   sourceViewIndex: number;
   assemblyView: string;
+  marker: MarkerIndex; // MarkerIndex for the selected thread, e.g. "42"
 };
 
 type CallTreeQuery = BaseQuery & {
@@ -292,6 +294,11 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       selectedThreads === null
         ? undefined
         : encodeUintSetForUrlComponent(selectedThreads),
+    marker:
+      selectedThreadsKey &&
+      urlState.profileSpecific.selectedMarkers[selectedThreadsKey] !== null
+        ? urlState.profileSpecific.selectedMarkers[selectedThreadsKey]
+        : undefined,
     file: urlState.pathInZipFile || undefined,
     profiles: urlState.profilesToCompare || undefined,
     v: CURRENT_URL_VERSION,
@@ -499,6 +506,15 @@ export function stateFromLocation(
     transforms[selectedThreadsKey] = parseTransforms(query.transforms);
   }
 
+  // Parse the selected marker for the current thread
+  const selectedMarkers: { [key: string]: MarkerIndex | null } = {};
+  if (selectedThreadsKey && query.marker) {
+    const markerIndex = Number(query.marker);
+    if (!isNaN(markerIndex)) {
+      selectedMarkers[selectedThreadsKey] = markerIndex;
+    }
+  }
+
   // tabID is used for the tab selector that we have in our full view.
   let tabID = null;
   if (query.tabID && Number.isInteger(Number(query.tabID))) {
@@ -587,6 +603,7 @@ export function stateFromLocation(
       legacyHiddenThreads: query.hiddenThreads
         ? query.hiddenThreads.split('-').map((index) => Number(index))
         : null,
+      selectedMarkers,
     },
   };
 }
@@ -1195,6 +1212,10 @@ const _upgraders: {
   },
   [13]: (_) => {
     // just added the focus-self transform
+  },
+  [14]: (_) => {
+    // Added marker parameter for persisting highlighted markers in URLs.
+    // This is backward compatible as the marker parameter is optional.
   },
 };
 

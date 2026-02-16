@@ -41,6 +41,7 @@ import {
 import {
   getSelectedTab,
   getTabFilter,
+  getSelectedMarkers,
 } from 'firefox-profiler/selectors/url-state';
 import {
   getTabToThreadIndexesMap,
@@ -64,7 +65,7 @@ import {
   computeDefaultHiddenTracks,
   getVisibleThreads,
 } from 'firefox-profiler/profile-logic/tracks';
-import { setDataSource } from './profile-view';
+import { setDataSource, changeSelectedMarker } from './profile-view';
 import { fatalError } from './errors';
 import { batchLoadDataUrlIcons } from './icons';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
@@ -371,6 +372,17 @@ export function finalizeFullProfileView(
         ...hiddenTracks,
       });
     });
+
+    // Initialize selected markers from URL state if present
+    if (hasUrlInfo) {
+      const selectedMarkers = getSelectedMarkers(getState());
+      // Dispatch marker selection for each thread that has a marker in URL
+      for (const [threadsKey, markerIndex] of Object.entries(selectedMarkers)) {
+        if (markerIndex !== null) {
+          dispatch(changeSelectedMarker(threadsKey, markerIndex));
+        }
+      }
+    }
   };
 }
 
