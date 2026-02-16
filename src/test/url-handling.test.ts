@@ -20,6 +20,7 @@ import {
   closeBottomBox,
   changeShowUserTimings,
   changeStackChartSameWidths,
+  changeSelectedMarker,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
@@ -47,7 +48,10 @@ import {
   getHumanReadableTracks,
   getProfileWithNiceTracks,
 } from './fixtures/profiles/tracks';
-import { getProfileFromTextSamples } from './fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  getProfileWithMarkers,
+} from './fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../selectors/per-thread';
 import {
   encodeUintArrayForUrlComponent,
@@ -1985,5 +1989,261 @@ describe('tab selector', function () {
 
     expect(urlStateSelectors.getTabFilter(getState())).toEqual(tabID);
     expect(urlStateSelectors.hasTabFilter(getState())).toEqual(true);
+  });
+});
+
+describe('selectedMarker', function () {
+  function setup(search = '', pathname?: string) {
+    const profile = getProfileWithMarkers([
+      ['Marker A', 0, null],
+      ['Marker B', 1, null],
+      ['Marker C', 2, null],
+    ]);
+    const settings: StoreUrlSettings = { search };
+    if (pathname) {
+      settings.pathname = pathname;
+    }
+    return _getStoreWithURL(settings, profile);
+  }
+
+  it('can serialize a selected marker to the URL on marker-chart tab', () => {
+    const { dispatch, getState } = setup(
+      '?thread=0',
+      '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/marker-chart/'
+    );
+    const markerIndex = 1;
+    const threadsKey = getThreadsKey(new Set([0]));
+
+    dispatch(changeSelectedMarker(threadsKey, markerIndex));
+
+    const queryString = getQueryStringFromState(getState());
+    expect(queryString).toContain(`marker=${markerIndex}`);
+  });
+
+  it('can unserialize a selected marker from the URL on marker-chart tab', () => {
+    const markerIndex = 2;
+    const profile = getProfileWithMarkers([
+      ['Marker A', 0, null],
+      ['Marker B', 1, null],
+      ['Marker C', 2, null],
+    ]);
+    const { getState } = _getStoreWithURL(
+      {
+        pathname:
+          '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/marker-chart/',
+        search: `?thread=0&marker=${markerIndex}`,
+      },
+      profile
+    );
+
+    expect(
+      selectedThreadSelectors.getViewOptions(getState()).selectedMarker
+    ).toEqual(markerIndex);
+  });
+
+  it('handles marker index 0 correctly on marker-chart tab', () => {
+    const { dispatch, getState } = setup(
+      '?thread=0',
+      '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/marker-chart/'
+    );
+    const markerIndex = 0;
+    const threadsKey = getThreadsKey(new Set([0]));
+
+    dispatch(changeSelectedMarker(threadsKey, markerIndex));
+
+    const queryString = getQueryStringFromState(getState());
+    expect(queryString).toContain(`marker=${markerIndex}`);
+    expect(queryString).not.toContain('marker=undefined');
+  });
+
+  it('does not include marker in URL when switching to a thread without a selected marker on marker-chart tab', () => {
+    const { dispatch, getState } = setup(
+      '?thread=0',
+      '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/marker-chart/'
+    );
+    const markerIndex = 1;
+    const threadsKey0 = getThreadsKey(new Set([0]));
+
+    // Select a marker on thread 0
+    dispatch(changeSelectedMarker(threadsKey0, markerIndex));
+    expect(getQueryStringFromState(getState())).toContain(
+      `marker=${markerIndex}`
+    );
+
+    // Switch to thread 1 (no marker selected)
+    dispatch(changeSelectedThreads(new Set([1])));
+
+    const queryString = getQueryStringFromState(getState());
+    expect(queryString).not.toContain('marker=');
+  });
+
+  it('preserves selected marker in internal state when switching back to the thread on marker-chart tab', () => {
+    const { dispatch, getState } = setup(
+      '?thread=0',
+      '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/marker-chart/'
+    );
+    const markerIndex = 1;
+    const threadsKey0 = getThreadsKey(new Set([0]));
+
+    // Select a marker on thread 0
+    dispatch(changeSelectedMarker(threadsKey0, markerIndex));
+
+    // Switch to thread 1
+    dispatch(changeSelectedThreads(new Set([1])));
+
+    // Marker should not be in URL for thread 1
+    expect(getQueryStringFromState(getState())).not.toContain('marker=');
+
+    // Switch back to thread 0
+    dispatch(changeSelectedThreads(new Set([0])));
+
+    // The marker should reappear in the URL
+    const queryString = getQueryStringFromState(getState());
+    expect(queryString).toContain(`marker=${markerIndex}`);
+  });
+
+  it('handles null marker index correctly on marker-chart tab', () => {
+    const { dispatch, getState } = setup(
+      '?thread=0',
+      '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/marker-chart/'
+    );
+    const threadsKey = getThreadsKey(new Set([0]));
+
+    // Select a marker first
+    dispatch(changeSelectedMarker(threadsKey, 1));
+    expect(getQueryStringFromState(getState())).toContain('marker=1');
+
+    // Deselect the marker
+    dispatch(changeSelectedMarker(threadsKey, null));
+
+    const queryString = getQueryStringFromState(getState());
+    expect(queryString).not.toContain('marker=');
+  });
+
+  it('survives a URL round-trip on marker-chart tab', () => {
+    const { dispatch, getState } = setup(
+      '?thread=0',
+      '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/marker-chart/'
+    );
+    const markerIndex = 2;
+    const threadsKey = getThreadsKey(new Set([0]));
+
+    dispatch(changeSelectedMarker(threadsKey, markerIndex));
+
+    // Get the URL
+    const urlState = urlStateSelectors.getUrlState(getState());
+    const url = urlFromState(urlState);
+
+    // URL should contain the marker
+    expect(url).toContain(`marker=${markerIndex}`);
+
+    // Parse the URL back
+    const newUrlState = stateFromLocation(
+      new URL(url, 'https://profiler.firefox.com')
+    );
+
+    // The marker should be in the parsed URL state
+    expect(newUrlState.profileSpecific.selectedMarkers[threadsKey]).toEqual(
+      markerIndex
+    );
+  });
+
+  it('does NOT include marker in URL on calltree tab', () => {
+    const { dispatch, getState } = setup(
+      '?thread=0',
+      '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree/'
+    );
+    const markerIndex = 1;
+    const threadsKey = getThreadsKey(new Set([0]));
+
+    // Force tab to calltree since viewProfile auto-switches to marker-chart for profiles without samples
+    dispatch({ type: 'CHANGE_SELECTED_TAB', selectedTab: 'calltree' });
+
+    // Select a marker on calltree tab
+    dispatch(changeSelectedMarker(threadsKey, markerIndex));
+
+    // Marker should NOT be in URL for calltree tab
+    const queryString = getQueryStringFromState(getState());
+    expect(queryString).not.toContain('marker=');
+  });
+
+  it('does NOT include marker in URL on flame-graph tab', () => {
+    const { dispatch, getState } = setup(
+      '?thread=0',
+      '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/flame-graph/'
+    );
+    const markerIndex = 1;
+    const threadsKey = getThreadsKey(new Set([0]));
+
+    // Force tab to flame-graph since viewProfile auto-switches to marker-chart for profiles without samples
+    dispatch({ type: 'CHANGE_SELECTED_TAB', selectedTab: 'flame-graph' });
+
+    // Select a marker on flame-graph tab
+    dispatch(changeSelectedMarker(threadsKey, markerIndex));
+
+    // Marker should NOT be in URL for flame-graph tab
+    const queryString = getQueryStringFromState(getState());
+    expect(queryString).not.toContain('marker=');
+  });
+
+  it('includes marker in URL on marker-table tab', () => {
+    const { dispatch, getState } = setup(
+      '?thread=0',
+      '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/marker-table/'
+    );
+    const markerIndex = 1;
+    const threadsKey = getThreadsKey(new Set([0]));
+
+    // Select a marker on marker-table tab
+    dispatch(changeSelectedMarker(threadsKey, markerIndex));
+
+    // Marker SHOULD be in URL for marker-table tab
+    const queryString = getQueryStringFromState(getState());
+    expect(queryString).toContain(`marker=${markerIndex}`);
+  });
+
+  it('removes marker from URL when switching from marker-chart to calltree', () => {
+    const { dispatch, getState } = setup(
+      '?thread=0',
+      '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/marker-chart/'
+    );
+    const markerIndex = 1;
+    const threadsKey = getThreadsKey(new Set([0]));
+
+    // Select a marker on marker-chart
+    dispatch(changeSelectedMarker(threadsKey, markerIndex));
+    expect(getQueryStringFromState(getState())).toContain(
+      `marker=${markerIndex}`
+    );
+
+    // Switch to calltree tab
+    dispatch({ type: 'CHANGE_SELECTED_TAB', selectedTab: 'calltree' });
+
+    // Marker should be removed from URL
+    const queryString = getQueryStringFromState(getState());
+    expect(queryString).not.toContain('marker=');
+  });
+
+  it('adds marker to URL when switching from calltree to marker-chart', () => {
+    const { dispatch, getState } = setup(
+      '?thread=0',
+      '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree/'
+    );
+    const markerIndex = 1;
+    const threadsKey = getThreadsKey(new Set([0]));
+
+    // Force tab to calltree since viewProfile auto-switches to marker-chart for profiles without samples
+    dispatch({ type: 'CHANGE_SELECTED_TAB', selectedTab: 'calltree' });
+
+    // Select a marker on calltree (won't be in URL)
+    dispatch(changeSelectedMarker(threadsKey, markerIndex));
+    expect(getQueryStringFromState(getState())).not.toContain('marker=');
+
+    // Switch to marker-chart tab
+    dispatch({ type: 'CHANGE_SELECTED_TAB', selectedTab: 'marker-chart' });
+
+    // Marker should now appear in URL
+    const queryString = getQueryStringFromState(getState());
+    expect(queryString).toContain(`marker=${markerIndex}`);
   });
 });
