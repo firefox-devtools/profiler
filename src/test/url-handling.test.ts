@@ -2246,4 +2246,54 @@ describe('selectedMarker', function () {
     const queryString = getQueryStringFromState(getState());
     expect(queryString).toContain(`marker=${markerIndex}`);
   });
+
+  it('syncs selected marker when URL state changes (browser back/forward)', () => {
+    const { dispatch, getState } = setup(
+      '?thread=0',
+      '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/marker-chart/'
+    );
+    const threadsKey = getThreadsKey(new Set([0]));
+
+    // Select marker 1
+    dispatch(changeSelectedMarker(threadsKey, 1));
+    expect(
+      selectedThreadSelectors.getViewOptions(getState()).selectedMarker
+    ).toEqual(1);
+
+    // Simulate browser navigation by dispatching UPDATE_URL_STATE
+    // with a different selected marker (as if we navigated back)
+    const currentUrlState = urlStateSelectors.getUrlState(getState());
+    const newUrlState = {
+      ...currentUrlState,
+      profileSpecific: {
+        ...currentUrlState.profileSpecific,
+        selectedMarkers: {
+          [threadsKey]: 2, // Different marker
+        },
+      },
+    };
+    dispatch({ type: 'UPDATE_URL_STATE', newUrlState });
+
+    // View state should now sync with the URL state
+    expect(
+      selectedThreadSelectors.getViewOptions(getState()).selectedMarker
+    ).toEqual(2);
+
+    // Now simulate navigating to a state with no selected marker
+    const urlStateWithNoMarker = {
+      ...currentUrlState,
+      profileSpecific: {
+        ...currentUrlState.profileSpecific,
+        selectedMarkers: {
+          [threadsKey]: null,
+        },
+      },
+    };
+    dispatch({ type: 'UPDATE_URL_STATE', newUrlState: urlStateWithNoMarker });
+
+    // View state should clear the selected marker
+    expect(
+      selectedThreadSelectors.getViewOptions(getState()).selectedMarker
+    ).toEqual(null);
+  });
 });
