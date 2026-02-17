@@ -5,6 +5,7 @@
 import type JSZip from 'jszip';
 import type {
   Profile,
+  RawProfileSharedData,
   RawThread,
   ThreadIndex,
   Pid,
@@ -23,6 +24,7 @@ import type {
   MarkerIndex,
   ThreadsKey,
   NativeSymbolInfo,
+  ProfileIndexTranslationMaps,
 } from './profile-derived';
 import type { FuncToFuncsMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
@@ -367,7 +369,8 @@ type ReceiveProfileAction =
   | {
       readonly type: 'BULK_SYMBOLICATION';
       readonly symbolicatedThreads: RawThread[];
-      readonly oldFuncToNewFuncsMaps: Map<ThreadIndex, FuncToFuncsMap>;
+      readonly symbolicatedShared: RawProfileSharedData;
+      readonly oldFuncToNewFuncsMap: FuncToFuncsMap;
     }
   | {
       readonly type: 'DONE_SYMBOLICATING';
@@ -545,7 +548,7 @@ type UrlStateAction =
       readonly type: 'SANITIZED_PROFILE_PUBLISHED';
       readonly hash: string;
       readonly committedRanges: StartEndRange[] | null;
-      readonly oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null;
+      readonly translationMaps: ProfileIndexTranslationMaps | null;
       readonly profileName: string;
       readonly prePublishedState: State | null;
     }

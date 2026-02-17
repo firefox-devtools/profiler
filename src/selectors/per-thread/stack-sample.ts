@@ -51,6 +51,7 @@ import type {
 
 import type { ThreadSelectorsPerThread } from './thread';
 import type { MarkerSelectorsPerThread } from './markers';
+import memoize from 'memoize-immutable';
 
 /**
  * Infer the return type from the getStackAndSampleSelectorsPerThread function. This
@@ -69,6 +70,19 @@ type ThreadAndMarkerSelectorsPerThread = ThreadSelectorsPerThread &
 const createSelectorWithTwoCacheSlots = createSelectorCreator(defaultMemoize, {
   maxSize: 2,
 });
+
+// Memoize some of these functions globally, so that in the common case we only
+// need to compute the call node table once globally instead of per thread. The
+// call node table is computed from the tables inside the filtered thread, so
+// unless there's per-thread transforms, those tables will be the same instance
+// from the profile shared data, and the memoization will hit the cache.
+const globallyMemoizedGetCallNodeInfo = memoize(ProfileData.getCallNodeInfo, {
+  limit: 2,
+});
+const globallyMemoizedGetInvertedCallNodeInfo = memoize(
+  ProfileData.getInvertedCallNodeInfo,
+  { limit: 2 }
+);
 
 /**
  * Create the selectors for a thread that have to do with either stacks or samples.
@@ -109,7 +123,7 @@ export function getStackAndSampleSelectorsPerThread(
       (state: State) => threadSelectors.getFilteredThread(state).stackTable,
       (state: State) => threadSelectors.getFilteredThread(state).frameTable,
       ProfileSelectors.getDefaultCategory,
-      ProfileData.getCallNodeInfo
+      globallyMemoizedGetCallNodeInfo
     );
 
   const _getInvertedCallNodeInfo: Selector<CallNodeInfoInverted> =
@@ -118,7 +132,7 @@ export function getStackAndSampleSelectorsPerThread(
       ProfileSelectors.getDefaultCategory,
       (state: State) =>
         threadSelectors.getFilteredThread(state).funcTable.length,
-      ProfileData.getInvertedCallNodeInfo
+      globallyMemoizedGetInvertedCallNodeInfo
     );
 
   const getCallNodeInfo: Selector<CallNodeInfo> = (state) => {

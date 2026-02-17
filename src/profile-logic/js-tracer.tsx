@@ -2,25 +2,23 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import {
-  getEmptyFrameTable,
-  getEmptyRawStackTable,
   getEmptySamplesTableWithEventDelay,
   getEmptyRawMarkerTable,
 } from './data-structures';
-import type { StringTable } from '../utils/string-table';
+import { StringTable } from '../utils/string-table';
 import { ensureExists } from '../utils/types';
 import type {
   JsTracerTable,
   IndexIntoStringTable,
   IndexIntoJsTracerEvents,
   IndexIntoFuncTable,
+  RawProfileSharedData,
   RawThread,
   IndexIntoStackTable,
   RawSamplesTable,
   CategoryList,
   JsTracerTiming,
   Microseconds,
-  SourceTable,
 } from 'firefox-profiler/types';
 
 // See the function below for more information.
@@ -32,12 +30,11 @@ type ScriptLocationToFuncIndex = Map<string, IndexIntoFuncTable | null>;
  * This operation can fail, as there is no guarantee that every location in the JS
  * tracer information was sampled.
  */
-function getScriptLocationToFuncIndex(
-  thread: RawThread,
-  stringTable: StringTable,
-  sources: SourceTable
-): ScriptLocationToFuncIndex {
-  const { funcTable } = thread;
+function getScriptLocationToFuncIndex({
+  funcTable,
+  sources,
+  stringArray,
+}: RawProfileSharedData): ScriptLocationToFuncIndex {
   const scriptLocationToFuncIndex: ScriptLocationToFuncIndex = new Map();
   for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
     if (!funcTable.isJS[funcIndex]) {
@@ -48,7 +45,7 @@ function getScriptLocationToFuncIndex(
     const sourceIndex = funcTable.source[funcIndex];
     if (column !== null && line !== null && sourceIndex !== null) {
       const urlIndex = sources.filename[sourceIndex];
-      const fileName = stringTable.getString(urlIndex);
+      const fileName = stringArray[urlIndex];
       const key = `${fileName}:${line}:${column}`;
       if (scriptLocationToFuncIndex.has(key)) {
         // Multiple functions map to this script location.
@@ -78,21 +75,16 @@ function getScriptLocationToFuncIndex(
  */
 export function getJsTracerTiming(
   jsTracer: JsTracerTable,
-  thread: RawThread,
-  stringTable: StringTable,
-  sources: SourceTable
+  shared: RawProfileSharedData
 ): JsTracerTiming[] {
   const jsTracerTiming: JsTracerTiming[] = [];
-  const { funcTable } = thread;
 
   // This has already been computed by the conversion of the JS tracer structure to
   // a thread, but it's probably not worth the complexity of caching this object.
   // Just recompute it.
-  const scriptLocationToFuncIndex = getScriptLocationToFuncIndex(
-    thread,
-    stringTable,
-    sources
-  );
+  const scriptLocationToFuncIndex = getScriptLocationToFuncIndex(shared);
+
+  const { funcTable, stringArray } = shared;
 
   // Go through all of the events.
   for (
@@ -106,7 +98,7 @@ export function getJsTracerTiming(
 
     // By default we use the display name from JS tracer, but we may update it if
     // we can figure out more information about it.
-    let displayName = stringTable.getString(stringIndex);
+    let displayName = stringArray[stringIndex];
 
     // We may have deduced the funcIndex in the scriptLocationToFuncIndex Map.
     let funcIndex: null | IndexIntoFuncTable = null;
@@ -126,9 +118,9 @@ export function getJsTracerTiming(
         } else {
           // Update the information with the function that was found.
           funcIndex = funcIndexInMap;
-          displayName = `ƒ ${stringTable.getString(
-            funcTable.name[funcIndex]
-          )}  ${displayName}`;
+          displayName = `ƒ ${
+            stringArray[funcTable.name[funcIndex]]
+          }  ${displayName}`;
         }
       }
     }
@@ -499,34 +491,28 @@ export function getJsTracerLeafTiming(
  */
 export function convertJsTracerToThreadWithoutSamples(
   fromThread: RawThread,
+  shared: RawProfileSharedData,
   stringTable: StringTable,
   jsTracer: JsTracerFixed,
-  categories: CategoryList,
-  sources: SourceTable
+  categories: CategoryList
 ): {
   thread: RawThread;
   stackMap: Map<IndexIntoJsTracerEvents, IndexIntoStackTable>;
 } {
-  // Create a new thread, with empty information, but preserve some of the existing
-  // thread information.
-  const frameTable = getEmptyFrameTable();
-  const stackTable = getEmptyRawStackTable();
   const samples: RawSamplesTable = {
     ...getEmptySamplesTableWithEventDelay(),
     weight: [],
     weightType: 'tracing-ms',
   };
   const markers = getEmptyRawMarkerTable();
-  const funcTable = { ...fromThread.funcTable };
 
   const thread: RawThread = {
     ...fromThread,
     markers,
-    funcTable,
-    stackTable,
-    frameTable,
     samples,
   };
+
+  const { funcTable, frameTable, stackTable } = shared;
 
   // Keep a stack of js tracer events, and end timings, that will be used to find
   // the stack prefixes. Once a JS tracer event starts past another event end, the
@@ -545,11 +531,7 @@ export function convertJsTracerToThreadWithoutSamples(
   if (otherCategory === -1) {
     throw new Error("Expected to find an 'Other' category.");
   }
-  const scriptLocationToFuncIndex = getScriptLocationToFuncIndex(
-    thread,
-    stringTable,
-    sources
-  );
+  const scriptLocationToFuncIndex = getScriptLocationToFuncIndex(shared);
 
   // Go through all of the JS tracer events, and build up the func, stack, and
   // frame tables.
@@ -742,18 +724,18 @@ export function getJsTracerFixed(jsTracer: JsTracerTable): JsTracerFixed {
  */
 export function convertJsTracerToThread(
   fromThread: RawThread,
+  shared: RawProfileSharedData,
   jsTracer: JsTracerTable,
-  categories: CategoryList,
-  stringTable: StringTable,
-  sources: SourceTable
+  categories: CategoryList
 ): RawThread {
   const jsTracerFixed = getJsTracerFixed(jsTracer);
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
   const { thread, stackMap } = convertJsTracerToThreadWithoutSamples(
     fromThread,
+    shared,
     stringTable,
     jsTracerFixed,
-    categories,
-    sources
+    categories
   );
   thread.samples = getSelfTimeSamplesFromJsTracer(
     stringTable,

@@ -96,7 +96,7 @@ describe('SampleGraph', function () {
       `Couldn't find the sample graph canvas, with selector .threadSampleGraphCanvas`
     ) as HTMLElement;
     const thread = profile.threads[0];
-    const { stringArray } = profile.shared;
+    const { stringArray, funcTable } = profile.shared;
 
     // Perform a click on the sample graph.
     function clickSampleGraph(index: IndexIntoSamplesTable) {
@@ -123,7 +123,7 @@ describe('SampleGraph', function () {
     function getCallNodePath() {
       return selectedThreadSelectors
         .getSelectedCallNodePath(getState())
-        .map((funcIndex) => stringArray[thread.funcTable.name[funcIndex]]);
+        .map((funcIndex) => stringArray[funcTable.name[funcIndex]]);
     }
 
     /**

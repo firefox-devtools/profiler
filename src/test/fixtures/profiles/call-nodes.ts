@@ -1,12 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-import type {
-  FuncTable,
-  RawSamplesTable,
-  FrameTable,
-  Profile,
-} from 'firefox-profiler/types';
+import type { FuncTable, FrameTable, Profile } from 'firefox-profiler/types';
 
 import {
   getEmptyThread,
@@ -40,7 +35,7 @@ import { StringTable } from '../../../utils/string-table';
 export default function getProfile(): Profile {
   const profile = getEmptyProfile();
   const stringTable = StringTable.withBackingArray(profile.shared.stringArray);
-  let thread = getEmptyThread();
+  const thread = getEmptyThread();
   const funcNames = ['funcA', 'funcB', 'funcC', 'funcD', 'funcE', 'funcF'].map(
     (name) => stringTable.indexForString(name)
   );
@@ -113,7 +108,7 @@ export default function getProfile(): Profile {
 
   // Have the first sample pointing to the first branch, and the second sample to
   // the second branch of the stack.
-  const samples: RawSamplesTable = {
+  thread.samples = {
     responsiveness: [0, 0],
     stack: [4, 6],
     time: [0, 0],
@@ -122,18 +117,9 @@ export default function getProfile(): Profile {
     length: 2,
   };
 
-  thread = Object.assign(thread, {
-    samples,
-    stackTable,
-    funcTable,
-    frameTable,
-  });
+  profile.shared = { ...profile.shared, stackTable, funcTable, frameTable };
 
-  profile.threads.push(
-    thread,
-    Object.assign({}, thread),
-    Object.assign({}, thread)
-  );
+  profile.threads.push(thread, { ...thread }, { ...thread });
 
   return profile;
 }

@@ -25,7 +25,13 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
-import { checkBit, makeBitSet, setBit } from 'firefox-profiler/utils/bitset';
+import {
+  type BitSet,
+  checkBit,
+  combineTwoBitSetsWithAnd,
+  makeBitSet,
+  setBit,
+} from 'firefox-profiler/utils/bitset';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
   ensureExists,
@@ -90,10 +96,11 @@ import type {
   TimelineType,
   NativeSymbolInfo,
   Bytes,
-  ThreadWithReservedFunctions,
+  FuncTableWithReservedFunctions,
   TabID,
   SourceTable,
   IndexIntoSourceTable,
+  TransformOutput,
 } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
 
@@ -1557,43 +1564,73 @@ export function toValidCallTreeSummaryStrategy(
 
 export function filterThreadByImplementation(
   thread: Thread,
-  implementation: string
+  implementation: ImplementationFilter
 ): Thread {
-  const { funcTable, stringTable } = thread;
+  const { stackTable, frameTable, funcTable, stringTable } = thread;
+  const transformOutput = computeTransformOutputForImplementationFilter(
+    stackTable,
+    frameTable,
+    funcTable,
+    stringTable,
+    implementation
+  );
+  return applyTransformOutputToThread(transformOutput, thread);
+}
 
+export function computeTransformOutputForImplementationFilter(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  stringTable: StringTable,
+  implementation: ImplementationFilter
+): TransformOutput {
   switch (implementation) {
     case 'cpp':
-      return _filterThreadByFunc(thread, (funcIndex) => {
-        // Return quickly if this is a JS frame.
-        if (funcTable.isJS[funcIndex]) {
-          return false;
+      return _computeTransformOutputForMergingFuncs(
+        stackTable,
+        frameTable,
+        (funcIndex) => {
+          // Return quickly if this is a JS frame.
+          if (funcTable.isJS[funcIndex]) {
+            return false;
+          }
+          // Regular C++ functions are associated with a resource that describes the
+          // shared library that these C++ functions were loaded from. Jitcode is not
+          // loaded from shared libraries but instead generated at runtime, so Jitcode
+          // frames are not associated with a shared library and thus have no resource
+          const locationString = stringTable.getString(
+            funcTable.name[funcIndex]
+          );
+          const isProbablyJitCode =
+            funcTable.resource[funcIndex] === -1 &&
+            locationString.startsWith('0x');
+          return !isProbablyJitCode;
         }
-        // Regular C++ functions are associated with a resource that describes the
-        // shared library that these C++ functions were loaded from. Jitcode is not
-        // loaded from shared libraries but instead generated at runtime, so Jitcode
-        // frames are not associated with a shared library and thus have no resource
-        const locationString = stringTable.getString(funcTable.name[funcIndex]);
-        const isProbablyJitCode =
-          funcTable.resource[funcIndex] === -1 &&
-          locationString.startsWith('0x');
-        return !isProbablyJitCode;
-      });
+      );
     case 'js':
-      return _filterThreadByFunc(thread, (funcIndex) => {
-        return funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex];
-      });
+      return _computeTransformOutputForMergingFuncs(
+        stackTable,
+        frameTable,
+        (funcIndex) => {
+          return (
+            funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]
+          );
+        }
+      );
     default:
-      return thread;
+      return {
+        newStackTable: stackTable,
+        effectOnThreadData: {},
+      };
   }
 }
 
-function _filterThreadByFunc(
-  thread: Thread,
+function _computeTransformOutputForMergingFuncs(
+  stackTable: StackTable,
+  frameTable: FrameTable,
   shouldIncludeFuncInFilteredThread: (funcIndex: IndexIntoFuncTable) => boolean
-): Thread {
-  return timeCode('_filterThreadByFunc', () => {
-    const { stackTable, frameTable } = thread;
-
+): TransformOutput {
+  return timeCode('_computeTransformOutputForMergingFuncs', () => {
     const newStackTable: StackTable = {
       length: 0,
       frame: [],
@@ -1622,49 +1659,100 @@ function _filterThreadByFunc(
       }
     }
 
-    return updateThreadStacks(thread, newStackTable, (oldStack) => {
-      if (oldStack === null) {
+    return {
+      newStackTable,
+      effectOnThreadData: {
+        oldStackToNewStack,
+      },
+    };
+  });
+}
+
+export function applyTransformOutputToThread(
+  transformOutput: TransformOutput,
+  thread: Thread
+): Thread {
+  const { newStackTable, effectOnThreadData } = transformOutput;
+
+  return updateThreadStacks(thread, newStackTable, (oldStack) => {
+    if (oldStack === null) {
+      return null;
+    }
+    const { oldStackToNewStack, dropIfOldStackIsNot } = effectOnThreadData;
+    if (dropIfOldStackIsNot !== undefined) {
+      const shouldKeep = checkBit(dropIfOldStackIsNot, oldStack);
+      if (!shouldKeep) {
         return null;
       }
+    }
+    if (oldStackToNewStack !== undefined) {
       const newStack = oldStackToNewStack[oldStack];
       return newStack !== -1 ? newStack : null;
-    });
+    }
+    return oldStack;
   });
 }
 
-export function filterThreadToSearchStrings(
-  thread: Thread,
+export function computeTransformOutputForSearchStringFilter(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  sources: SourceTable,
+  stringTable: StringTable,
   searchStrings: string[] | null
-): Thread {
-  return timeCode('filterThreadToSearchStrings', () => {
-    if (!searchStrings || !searchStrings.length) {
-      return thread;
+): TransformOutput {
+  return timeCode('computeTransformOutputForSearchStringFilter', () => {
+    if (!searchStrings) {
+      return { newStackTable: stackTable, effectOnThreadData: {} };
     }
 
-    return searchStrings.reduce(
-      (accThread, searchString) =>
-        filterThreadToSearchString(accThread, searchString),
-      thread
-    );
+    const stackMatchesAllSearchStrings = searchStrings
+      .filter((s) => s)
+      .reduce(
+        (
+          stackMatchesPreviousSearchStrings: BitSet | undefined,
+          searchString: string
+        ) => {
+          const stackMatchesThisString = _computeStackMatchesSearchString(
+            stackTable,
+            frameTable,
+            funcTable,
+            resourceTable,
+            sources,
+            stringTable,
+            searchString
+          );
+          if (stackMatchesPreviousSearchStrings !== undefined) {
+            return combineTwoBitSetsWithAnd(
+              stackMatchesThisString,
+              stackMatchesPreviousSearchStrings
+            );
+          }
+          return stackMatchesThisString;
+        },
+        undefined
+      );
+
+    return {
+      newStackTable: stackTable,
+      effectOnThreadData: {
+        dropIfOldStackIsNot: stackMatchesAllSearchStrings,
+      },
+    };
   });
 }
 
-export function filterThreadToSearchString(
-  thread: Thread,
+function _computeStackMatchesSearchString(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  sources: SourceTable,
+  stringTable: StringTable,
   searchString: string
-): Thread {
-  if (!searchString) {
-    return thread;
-  }
+): BitSet {
   const lowercaseSearchString = searchString.toLowerCase();
-  const {
-    funcTable,
-    frameTable,
-    stackTable,
-    stringTable,
-    resourceTable,
-    sources,
-  } = thread;
 
   function computeFuncMatchesSearch(func: IndexIntoFuncTable) {
     const nameIndex = funcTable.name[func];
@@ -1714,13 +1802,7 @@ export function filterThreadToSearchString(
     }
   }
 
-  // Set any stacks which don't include the search string to null.
-  // TODO: This includes stacks in markers; maybe we shouldn't clear marker stacks?
-  return updateThreadStacks(thread, stackTable, (stackIndex) =>
-    stackIndex !== null && checkBit(stackMatchesSearch, stackIndex)
-      ? stackIndex
-      : null
-  );
+  return stackMatchesSearch;
 }
 
 export function computeTimeColumnForRawSamplesTable(
@@ -1736,11 +1818,9 @@ export function computeTimeColumnForRawSamplesTable(
  */
 export function hasUsefulSamples(
   sampleStacks: Array<IndexIntoStackTable | null> | undefined,
-  thread: RawThread,
   shared: RawProfileSharedData
 ): boolean {
-  const { stringArray } = shared;
-  const { stackTable, frameTable, funcTable } = thread;
+  const { stackTable, frameTable, funcTable, stringArray } = shared;
   if (
     sampleStacks === undefined ||
     sampleStacks.length === 0 ||
@@ -2497,6 +2577,10 @@ export function createThreadFromDerivedTables(
   rawThread: RawThread,
   samples: SamplesTable,
   stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  nativeSymbols: NativeSymbolTable,
+  resourceTable: ResourceTable,
   stringTable: StringTable,
   sources: SourceTable,
   tracedValuesBuffer: ArrayBuffer | undefined
@@ -2519,10 +2603,6 @@ export function createThreadFromDerivedTables(
     jsAllocations,
     nativeAllocations,
     markers,
-    frameTable,
-    funcTable,
-    resourceTable,
-    nativeSymbols,
     jsTracer,
     isPrivateBrowsing,
     userContextId,
@@ -2548,10 +2628,6 @@ export function createThreadFromDerivedTables(
     jsAllocations,
     nativeAllocations,
     markers,
-    frameTable,
-    funcTable,
-    resourceTable,
-    nativeSymbols,
     jsTracer,
     isPrivateBrowsing,
     userContextId,
@@ -2560,6 +2636,10 @@ export function createThreadFromDerivedTables(
     // These fields are derived:
     samples,
     stackTable,
+    frameTable,
+    funcTable,
+    resourceTable,
+    nativeSymbols,
     stringTable,
     sources,
     tracedValuesBuffer,
@@ -2677,23 +2757,17 @@ export function updateThreadStacks(
 }
 
 /**
- * Updates the stackTable and all references to stacks in the raw thread.
+ * Updates all references to stacks in the raw threads.
  *
  * This function is used by symbolication, which acts on the raw thread.
  */
 export function updateRawThreadStacks(
-  thread: RawThread,
-  newStackTable: RawStackTable,
+  threads: RawThread[],
   convertStack: (
     oldStack: IndexIntoStackTable | null
   ) => IndexIntoStackTable | null
-): RawThread {
-  return updateRawThreadStacksSeparate(
-    thread,
-    newStackTable,
-    convertStack,
-    convertStack
-  );
+): RawThread[] {
+  return updateRawThreadStacksSeparate(threads, convertStack, convertStack);
 }
 
 /**
@@ -2708,8 +2782,25 @@ export function updateRawThreadStacks(
  * which act on the raw thread.
  */
 export function updateRawThreadStacksSeparate(
+  threads: RawThread[],
+  convertStack: (
+    oldStack: IndexIntoStackTable | null
+  ) => IndexIntoStackTable | null,
+  convertSyncBacktraceStack: (
+    oldStack: IndexIntoStackTable | null
+  ) => IndexIntoStackTable | null
+): RawThread[] {
+  return threads.map((thread) =>
+    updateSingleRawThreadStacksSeparate(
+      thread,
+      convertStack,
+      convertSyncBacktraceStack
+    )
+  );
+}
+
+export function updateSingleRawThreadStacksSeparate(
   thread: RawThread,
-  newStackTable: RawStackTable,
   convertStack: (
     oldStack: IndexIntoStackTable | null
   ) => IndexIntoStackTable | null,
@@ -2749,7 +2840,6 @@ export function updateRawThreadStacksSeparate(
     ...thread,
     samples: newSamples,
     markers: newMarkers,
-    stackTable: newStackTable,
   };
 
   if (jsAllocations) {
@@ -3089,10 +3179,11 @@ export function getOriginAnnotationForFunc(
  * At the moment, the only functions we reserve are "collapsed resource" functions.
  * These are used by the "collapse resource" transform.
  */
-export function reserveFunctionsInThread(
-  thread: Thread
-): ThreadWithReservedFunctions {
-  const funcTable = shallowCloneFuncTable(thread.funcTable);
+export function reserveFunctionsForCollapsedResources(
+  originalFuncTable: FuncTable,
+  resourceTable: ResourceTable
+): FuncTableWithReservedFunctions {
+  const funcTable = shallowCloneFuncTable(originalFuncTable);
   const reservedFunctionsForResources = new Map<
     IndexIntoResourceTable,
     IndexIntoFuncTable
@@ -3103,7 +3194,6 @@ export function reserveFunctionsInThread(
     resourceTypes.webhost,
     resourceTypes.otherhost,
   ];
-  const { resourceTable } = thread;
   for (
     let resourceIndex = 0;
     resourceIndex < resourceTable.length;
@@ -3124,7 +3214,7 @@ export function reserveFunctionsInThread(
     reservedFunctionsForResources.set(resourceIndex, funcIndex);
   }
   return {
-    thread: { ...thread, funcTable },
+    funcTable,
     reservedFunctionsForResources,
   };
 }
@@ -3532,59 +3622,6 @@ export function extractProfileFilterPageData(
   return pageDataByTabID;
 }
 
-// Returns the resource index for a "url" or "webhost" resource which is created
-// on demand based on the script URI.
-export function getOrCreateURIResource(
-  scriptURI: string,
-  resourceTable: ResourceTable,
-  stringTable: StringTable,
-  originToResourceIndex: Map<string, IndexIntoResourceTable>
-): IndexIntoResourceTable {
-  // Figure out the origin and host.
-  let origin;
-  let host;
-  try {
-    const url = new URL(scriptURI);
-    if (
-      !(
-        url.protocol === 'http:' ||
-        url.protocol === 'https:' ||
-        url.protocol === 'moz-extension:'
-      )
-    ) {
-      throw new Error('not a webhost or extension protocol');
-    }
-    origin = url.origin;
-    host = url.host;
-  } catch (_e) {
-    origin = scriptURI;
-    host = null;
-  }
-
-  let resourceIndex = originToResourceIndex.get(origin);
-  if (resourceIndex !== undefined) {
-    return resourceIndex;
-  }
-
-  resourceIndex = resourceTable.length++;
-  originToResourceIndex.set(origin, resourceIndex);
-  if (host) {
-    // This is a webhost URL.
-    resourceTable.lib[resourceIndex] = null;
-    resourceTable.name[resourceIndex] = stringTable.indexForString(origin);
-    resourceTable.host[resourceIndex] = stringTable.indexForString(host);
-    resourceTable.type[resourceIndex] = resourceTypes.webhost;
-  } else {
-    // This is a URL, but it doesn't point to something on the web, e.g. a
-    // chrome url.
-    resourceTable.lib[resourceIndex] = null;
-    resourceTable.name[resourceIndex] = stringTable.indexForString(scriptURI);
-    resourceTable.host[resourceIndex] = null;
-    resourceTable.type[resourceIndex] = resourceTypes.url;
-  }
-  return resourceIndex;
-}
-
 /**
  * See the ThreadsKey type for an explanation.
  */
@@ -3596,6 +3633,30 @@ export function getThreadsKey(threadIndexes: Set<ThreadIndex>): ThreadsKey {
   }
 
   return [...threadIndexes].sort((a, b) => b - a).join(',');
+}
+
+/**
+ * Apply a Map<ThreadIndex, ThreadIndex> to a threads key.
+ *
+ * This is used after profile sanitization when a thread was removed from a profile,
+ * to update state such as the applied transforms of each threadsKey.
+ */
+export function translateThreadsKey(
+  threadsKey: ThreadsKey,
+  oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex>
+): ThreadsKey | null {
+  const threadIndexes = new Set(('' + threadsKey).split(',').map((n) => +n));
+  const newThreadIndexes = new Set<ThreadIndex>();
+  for (const threadIndex of threadIndexes) {
+    const newThreadIndex = oldThreadIndexToNew.get(threadIndex);
+    if (newThreadIndex !== undefined) {
+      newThreadIndexes.add(newThreadIndex);
+    }
+  }
+  if (newThreadIndexes.size === 0) {
+    return null;
+  }
+  return getThreadsKey(newThreadIndexes);
 }
 
 /**
@@ -3637,10 +3698,25 @@ export type StackReferences = {
  * samples, and stacks referenced by sync backtraces (e.g. marker causes).
  * The two have slightly different properties, see the type definition.
  */
-export function gatherStackReferences(thread: RawThread): StackReferences {
+export function gatherStackReferences(threads: RawThread[]): StackReferences {
   const samplingSelfStacks: Set<IndexIntoStackTable> = new Set();
   const syncBacktraceSelfStacks: Set<IndexIntoStackTable> = new Set();
+  for (const thread of threads) {
+    _gatherSingleThreadStackReferences(
+      thread,
+      samplingSelfStacks,
+      syncBacktraceSelfStacks
+    );
+  }
 
+  return { samplingSelfStacks, syncBacktraceSelfStacks };
+}
+
+export function _gatherSingleThreadStackReferences(
+  thread: RawThread,
+  samplingSelfStacks: Set<IndexIntoStackTable>,
+  syncBacktraceSelfStacks: Set<IndexIntoStackTable>
+) {
   const { samples, markers, jsAllocations, nativeAllocations } = thread;
 
   // Samples
@@ -3681,8 +3757,6 @@ export function gatherStackReferences(thread: RawThread): StackReferences {
       }
     }
   }
-
-  return { samplingSelfStacks, syncBacktraceSelfStacks };
 }
 
 /**
@@ -3808,11 +3882,12 @@ export function gatherStackReferences(thread: RawThread): StackReferences {
  *     used in both contexts. If we detect that this happened, we need to duplicate
  *     the frame and the stack node and pick the right one depending on the use.
  */
-export function nudgeReturnAddresses(thread: RawThread): RawThread {
-  const { samplingSelfStacks, syncBacktraceSelfStacks } =
-    gatherStackReferences(thread);
+export function nudgeReturnAddresses(profile: Profile): Profile {
+  const { samplingSelfStacks, syncBacktraceSelfStacks } = gatherStackReferences(
+    profile.threads
+  );
 
-  const { stackTable, frameTable } = thread;
+  const { stackTable, frameTable } = profile.shared;
 
   // Collect frames that were obtained from the instruction pointer.
   // These are the top ("self") frames of stacks from sampling.
@@ -3855,7 +3930,7 @@ export function nudgeReturnAddresses(thread: RawThread): RawThread {
 
   if (ipFrames.size === 0 && returnAddressFrames.size === 0) {
     // Nothing to do, use the original thread.
-    return thread;
+    return profile;
   }
 
   // Create the new frame table.
@@ -3941,17 +4016,25 @@ export function nudgeReturnAddresses(thread: RawThread): RawThread {
     }
   }
 
-  const newThread: RawThread = {
-    ...thread,
+  const newShared: RawProfileSharedData = {
+    ...profile.shared,
     frameTable: newFrameTable,
+    stackTable: newStackTable,
   };
 
-  return updateRawThreadStacksSeparate(
-    newThread,
-    newStackTable,
+  const newThreads = updateRawThreadStacksSeparate(
+    profile.threads,
     getMapStackUpdater(mapForSamplingSelfStacks),
     getMapStackUpdater(mapForBacktraceSelfStacks)
   );
+
+  const newProfile: Profile = {
+    ...profile,
+    shared: newShared,
+    threads: newThreads,
+  };
+
+  return newProfile;
 }
 
 /**
@@ -3963,37 +4046,34 @@ export function findAddressProofForFile(
   sourceIndex: IndexIntoSourceTable
 ): AddressProof | null {
   const { libs } = profile;
-  for (const thread of profile.threads) {
-    const { frameTable, funcTable, resourceTable } = thread;
-    const func = funcTable.source.indexOf(sourceIndex);
-    if (func === -1) {
-      continue;
-    }
-    const frame = frameTable.func.indexOf(func);
-    if (frame === -1) {
-      continue;
-    }
-    const address = frameTable.address[frame];
-    if (address === null) {
-      continue;
-    }
-    const resource = funcTable.resource[func];
-    if (resourceTable.type[resource] !== resourceTypes.library) {
-      continue;
-    }
-    const libIndex = resourceTable.lib[resource];
-    if (libIndex === null) {
-      continue;
-    }
-    const lib = libs[libIndex];
-    const { debugName, breakpadId } = lib;
-    return {
-      debugName,
-      breakpadId,
-      address,
-    };
+  const { frameTable, funcTable, resourceTable } = profile.shared;
+  const func = funcTable.source.indexOf(sourceIndex);
+  if (func === -1) {
+    return null;
   }
-  return null;
+  const frame = frameTable.func.indexOf(func);
+  if (frame === -1) {
+    return null;
+  }
+  const address = frameTable.address[frame];
+  if (address === null) {
+    return null;
+  }
+  const resource = funcTable.resource[func];
+  if (resourceTable.type[resource] !== resourceTypes.library) {
+    return null;
+  }
+  const libIndex = resourceTable.lib[resource];
+  if (libIndex === null) {
+    return null;
+  }
+  const lib = libs[libIndex];
+  const { debugName, breakpadId } = lib;
+  return {
+    debugName,
+    breakpadId,
+    address,
+  };
 }
 
 /**

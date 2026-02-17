@@ -190,9 +190,6 @@ describe('actions/receive-profile', function () {
 
       workThread.name = 'Work Thread';
       idleThread.name = 'Idle Thread';
-      idleThread.frameTable.category = idleThread.frameTable.category.map(
-        () => idleCategoryIndex
-      );
       return { profile, idleThread, workThread };
     }
 
@@ -1894,14 +1891,14 @@ describe('actions/receive-profile', function () {
 
     it('reuses transforms', async function () {
       const { getState } = await setupWithLongUrl(getSomeProfiles(), {
-        urlSearch1: 'thread=0&transforms=ff-42',
+        urlSearch1: 'thread=0&transforms=ff-3',
         urlSearch2: 'thread=1',
       });
 
       expect(UrlStateSelectors.getTransformStack(getState(), 0)).toEqual([
         {
           type: 'focus-function',
-          funcIndex: 42,
+          funcIndex: 3,
         },
       ]);
     });
