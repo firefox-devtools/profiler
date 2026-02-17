@@ -127,7 +127,7 @@
   --menu-foreground-color: var(--grey-20);
   --menu-background-color: var(--grey-80);
   --lowered-foreground-color: var(--grey-40);
-  --lowered-background-color: var(--grey-90);
+  --lowered-background-color: #121213;
   --raised-foreground-color: var(--grey-20);
   --raised-background-color: #232327;
   --panel-foreground-color: var(--grey-20);
