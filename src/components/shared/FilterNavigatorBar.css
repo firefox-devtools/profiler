@@ -77,6 +77,17 @@
   white-space: nowrap;
 }
 
+.filterNavigatorBarItemUncommittedFieldInput {
+  display: flex;
+  overflow: hidden;
+  width: 60px;
+  height: 19px;
+  box-sizing: border-box;
+  border: 0.5px solid #aaa;
+  margin-top: 2.5px;
+  font-size: 11px;
+}
+
 .filterNavigatorBarItemContent > .nodeIcon {
   margin-inline-end: 5px;
 }
