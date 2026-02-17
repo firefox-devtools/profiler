@@ -38,7 +38,7 @@
 :root.dark-mode {
   .tabBarTabWrapper {
     --internal-hover-highlight-color: var(--grey-60);
-    --internal-hover-background-color: var(--grey-80);
+    --internal-hover-background-color: #222225;
   }
 }
 
