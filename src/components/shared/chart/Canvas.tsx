@@ -33,6 +33,12 @@ type Props<Item> = {
   readonly onMouseLeave?: (e: { nativeEvent: MouseEvent }) => unknown;
   // Defaults to false. Set to true if the chart should persist the tooltips on click.
   readonly stickyTooltips?: boolean;
+  // Selected item coming from URL or other non-click mechanism.
+  readonly selectedItem?: Item | null;
+  // Method to compute tooltip position for the selected item above.
+  readonly getTooltipPosition?: (
+    item: Item
+  ) => { offsetX: CssPixels; offsetY: CssPixels } | null;
 };
 
 // The naming of the X and Y coordinates here correspond to the ones
@@ -359,6 +365,43 @@ export class ChartCanvas<Item> extends React.Component<
     this._canvas = canvas;
   };
 
+  _syncSelectedItemFromProp = (selectedItem: Item | null) => {
+    if (selectedItem === null) {
+      this.setState({ selectedItem: null });
+      return;
+    }
+
+    if (!this.props.getTooltipPosition || !this._canvas) {
+      return;
+    }
+
+    const tooltipPosition = this.props.getTooltipPosition(selectedItem);
+    if (!tooltipPosition) {
+      // Can't get position, but still set the selectedItem
+      this.setState({ selectedItem });
+      return;
+    }
+
+    const canvasRect = this._canvas.getBoundingClientRect();
+    const pageX = canvasRect.left + window.scrollX + tooltipPosition.offsetX;
+    const pageY = canvasRect.top + window.scrollY + tooltipPosition.offsetY;
+    this.setState({
+      selectedItem,
+      pageX,
+      pageY,
+    });
+  };
+
+  override componentDidMount() {
+    // Initialize selectedItem from props on mount if provided
+    // Use requestAnimationFrame to ensure the canvas is fully laid out
+    if (this.props.selectedItem !== undefined) {
+      window.requestAnimationFrame(() => {
+        this._syncSelectedItemFromProp(this.props.selectedItem!);
+      });
+    }
+  }
+
   override UNSAFE_componentWillReceiveProps() {
     // It is possible that the data backing the chart has been
     // changed, for instance after symbolication. Clear the
@@ -377,6 +420,16 @@ export class ChartCanvas<Item> extends React.Component<
 
   override componentDidUpdate(prevProps: Props<Item>, prevState: State<Item>) {
     if (prevProps !== this.props) {
+      // Sync selectedItem state with selectedItem prop if it changed
+      // and the state doesn't already have this item selected.
+      if (
+        this.props.selectedItem !== undefined &&
+        this.props.selectedItem !== prevProps.selectedItem &&
+        !hoveredItemsAreEqual(this.state.selectedItem, this.props.selectedItem)
+      ) {
+        this._syncSelectedItemFromProp(this.props.selectedItem);
+      }
+
       if (
         this.state.selectedItem !== null &&
         prevState.selectedItem === this.state.selectedItem
