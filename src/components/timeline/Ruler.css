@@ -13,8 +13,8 @@
 :root.dark-mode {
   .timelineRuler {
     --internal-foreground-color: var(--grey-40);
-    --internal-notch-color1: var(--grey-40);
-    --internal-notch-color2: #b1b1b366; /* --grey-50 + 66 */
+    --internal-notch-color1: var(--grey-60);
+    --internal-notch-color2: #4a4a4a66;
   }
 }
 
