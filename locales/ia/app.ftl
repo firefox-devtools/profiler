@@ -347,6 +347,13 @@ Home--record-instructions =
 Home--instructions-content =
     Registrar profilos de prestation require <a>{ -firefox-brand-name }</a>.
     Totevia, le profilos existente pote esser vidite in ulle moderne navigator.
+Home--fenix-instructions-directly =
+    { -firefox-android-brand-name } pote esser profilate directemente sur iste
+    apparato. Pro altere informationes, lege <a>Profilar { -firefox-android-brand-name }
+    directemente sur apparato</a>.
+Home--fenix-instructions-remotely =
+    Tu alsi pote profilar { -firefox-android-brand-name } a distantia ab
+    { -firefox-brand-name } pro scriptorio. Pro altere informationes, consulta iste documentation: <a>Profilar { -firefox-android-brand-name } a distantia</a>.
 Home--record-instructions-start-stop = Cessar e initiar profilar
 Home--record-instructions-capture-load = Capturar e cargar un profilo
 Home--profiler-motto = Capturar un profilo de prestation. Analysar lo. Compartir lo. Render le web plus veloce.
