@@ -26,15 +26,10 @@ import {
   getIsBottomBoxFullscreen,
 } from 'firefox-profiler/selectors/url-state';
 import {
-  selectedThreadSelectors,
-  selectedNodeSelectors,
-} from 'firefox-profiler/selectors/per-thread';
-import {
   closeBottomBox,
   toggleBottomBoxFullscreen,
 } from 'firefox-profiler/actions/profile-view';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { closeBottomBox } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
   getSourceViewCode,
