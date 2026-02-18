@@ -2,7 +2,7 @@
 
 [![Matrix][matrix-badge]][matrix]
 
-The [Firefox Profiler] visualizes performance data recorded from web browsers. It is a tool designed to consume performance profiles from the Gecko Profiler but can visualize data from any profiler able to output in JSON. The interface is a web application built using [React] and [Redux] and runs entirely client-side.
+The [Firefox Profiler] visualizes performance data recorded from web browsers. It is a tool designed to consume performance profiles from the Gecko Profiler but can visualize data from any profiler able фto output in JSON. The interface is a web application built using [React] and [Redux] and runs entirely client-side.
 
 [Mozilla] develops this tool to help make [Firefox] silky smooth and fast for millions of its users, and to help make sites and apps faster across the web.
 
