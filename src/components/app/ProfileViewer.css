@@ -136,7 +136,7 @@
   color: var(--lowered-foreground-color);
 }
 
-.profileViewerSpacer {
+.profileViewerTopBar .filterNavigatorBarScrollContainer {
   flex: 1;
 }
 

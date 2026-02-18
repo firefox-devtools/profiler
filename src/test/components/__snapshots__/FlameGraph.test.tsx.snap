@@ -502,19 +502,34 @@ exports[`FlameGraph matches the snapshot 1`] = `
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Empty⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Empty⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="flameGraphContent"
   >
