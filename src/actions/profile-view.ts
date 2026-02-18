@@ -1987,6 +1987,14 @@ export function closeBottomBox(): ThunkAction<void> {
   };
 }
 
+export function toggleBottomBoxFullscreen(): ThunkAction<void> {
+  return (dispatch) => {
+    dispatch({
+      type: 'TOGGLE_BOTTOM_BOX_FULLSCREEN',
+    });
+  };
+}
+
 export function handleCallNodeTransformShortcut(
   event: React.KeyboardEvent<HTMLElement>,
   threadsKey: ThreadsKey,
