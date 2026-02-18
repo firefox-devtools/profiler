@@ -49,7 +49,7 @@ function getEmptyMarkers(): GeckoMarkers {
 export function getEmptySourceTable(): GeckoSourceTable {
   return {
     schema: {
-      uuid: 0 as const,
+      id: 0 as const,
       filename: 1 as const,
       startLine: 2 as const,
       startColumn: 3 as const,

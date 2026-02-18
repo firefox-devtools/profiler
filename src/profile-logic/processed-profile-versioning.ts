@@ -2663,7 +2663,7 @@ const _upgraders: {
     // Create the sources table
     const sourceTable = {
       length: 0,
-      uuid: [] as Array<string | null>,
+      id: [] as Array<string | null>,
       filename: [] as Array<number>,
     };
 
@@ -2690,7 +2690,7 @@ const _upgraders: {
           if (sourceIndex === undefined) {
             // Add new entry to sources table
             sourceIndex = sourceTable.length;
-            sourceTable.uuid.push(null);
+            sourceTable.id.push(null);
             sourceTable.filename.push(fileNameIndex);
             sourceTable.length++;
             fileNameIndexToSourceIndex.set(fileNameIndex, sourceIndex);

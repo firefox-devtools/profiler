@@ -431,14 +431,14 @@ function _extractJsFunction(
   let processedSourceIndex = null;
   if (sourceIndex !== undefined) {
     const geckoSourceIdx = parseInt(sourceIndex, 10);
-    // Look up the UUID for this source index from the process's sources table.
+    // Look up the ID for this source index from the process's sources table.
     if (geckoSourceIdx < geckoSourceTable.data.length) {
-      const uuidIndex = geckoSourceTable.schema.uuid;
+      const idIndex = geckoSourceTable.schema.id;
       const filenameIndex = geckoSourceTable.schema.filename;
       const startLineIndex = geckoSourceTable.schema.startLine;
       const startColumnIndex = geckoSourceTable.schema.startColumn;
       const sourceMapURLIndex = geckoSourceTable.schema.sourceMapURL;
-      const uuid = geckoSourceTable.data[geckoSourceIdx][uuidIndex];
+      const id = geckoSourceTable.data[geckoSourceIdx][idIndex];
       const filename = geckoSourceTable.data[geckoSourceIdx][filenameIndex];
       const startLine = geckoSourceTable.data[geckoSourceIdx][startLineIndex];
       const startColumn =
@@ -446,7 +446,7 @@ function _extractJsFunction(
       const sourceMapURL =
         geckoSourceTable.data[geckoSourceIdx][sourceMapURLIndex];
       processedSourceIndex = globalDataCollector.indexForSource(
-        uuid,
+        id,
         filename,
         startLine,
         startColumn,

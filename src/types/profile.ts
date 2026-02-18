@@ -948,7 +948,7 @@ export type ProfileMeta = {
  */
 export type SourceTable = {
   length: number;
-  uuid: Array<string | null>;
+  id: Array<string | null>;
   filename: Array<IndexIntoStringTable>;
   // 1-based line and column numbers for the start of the source.
   startLine: Array<number>;

@@ -725,8 +725,8 @@ Object {
     },
     "sources": Object {
       "filename": Array [],
+      "id": Array [],
       "length": 0,
-      "uuid": Array [],
     },
     "stackTable": Object {
       "frame": Array [
@@ -2050,8 +2050,8 @@ Object {
     },
     "sources": Object {
       "filename": Array [],
+      "id": Array [],
       "length": 0,
-      "uuid": Array [],
     },
     "stackTable": Object {
       "frame": Array [

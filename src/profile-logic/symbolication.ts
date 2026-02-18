@@ -806,7 +806,7 @@ function _partiallyApplySymbolicationStep(
           for (let i = 0; i < sources.filename.length; i++) {
             if (
               sources.filename[i] === fileNameStringIndex &&
-              sources.uuid[i] === null
+              sources.id[i] === null
             ) {
               sourceIndex = i;
               break;
@@ -815,7 +815,7 @@ function _partiallyApplySymbolicationStep(
           if (sourceIndex === null) {
             sourceIndex = sources.filename.length;
             sources.filename.push(fileNameStringIndex);
-            sources.uuid.push(null);
+            sources.id.push(null);
             sources.startLine.push(1);
             sources.startColumn.push(1);
             sources.sourceMapURL.push(null);

@@ -770,7 +770,7 @@ function _createCompactedSources(
     const newIndex = newSources.length++;
     newSources.filename[newIndex] =
       oldStringToNewStringPlusOne[sources.filename[i]] - 1;
-    newSources.uuid[newIndex] = sources.uuid[i];
+    newSources.id[newIndex] = sources.id[i];
     newSources.startLine[newIndex] = sources.startLine[i];
     newSources.startColumn[newIndex] = sources.startColumn[i];
 

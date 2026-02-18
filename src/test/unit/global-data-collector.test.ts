@@ -12,7 +12,7 @@ describe('GlobalDataCollector', function () {
       const { shared } = collector.finish();
 
       expect(shared.sources.filename).toEqual([]);
-      expect(shared.sources.uuid).toEqual([]);
+      expect(shared.sources.id).toEqual([]);
       expect(shared.sources.length).toBe(0);
     });
 
@@ -40,7 +40,7 @@ describe('GlobalDataCollector', function () {
         file2Index,
         file1Index,
       ]);
-      expect(shared.sources.uuid).toEqual([null, 'uuid2', 'uuid3']);
+      expect(shared.sources.id).toEqual([null, 'uuid2', 'uuid3']);
       expect(shared.sources.length).toBe(3);
     });
 
@@ -56,7 +56,7 @@ describe('GlobalDataCollector', function () {
 
       const { shared } = collector.finish();
 
-      expect(shared.sources.uuid).toEqual(['same-uuid']);
+      expect(shared.sources.id).toEqual(['same-uuid']);
       expect(shared.sources.length).toBe(1);
     });
 
@@ -72,7 +72,7 @@ describe('GlobalDataCollector', function () {
 
       const { shared } = collector.finish();
 
-      expect(shared.sources.uuid).toEqual([null]);
+      expect(shared.sources.id).toEqual([null]);
       expect(shared.sources.length).toBe(1);
     });
 
@@ -90,7 +90,7 @@ describe('GlobalDataCollector', function () {
 
       const { shared } = collector.finish();
 
-      expect(shared.sources.uuid).toEqual(['uuid1', 'uuid2', null]);
+      expect(shared.sources.id).toEqual(['uuid1', 'uuid2', null]);
       expect(shared.sources.length).toBe(3);
     });
   });
@@ -129,7 +129,7 @@ describe('GlobalDataCollector', function () {
       const filenameIndex = stringTable.indexForString('same.js');
 
       expect(shared.sources.filename).toEqual([filenameIndex, filenameIndex]);
-      expect(shared.sources.uuid).toEqual(['uuid1', 'uuid2']);
+      expect(shared.sources.id).toEqual(['uuid1', 'uuid2']);
       expect(shared.sources.length).toBe(2);
     });
   });

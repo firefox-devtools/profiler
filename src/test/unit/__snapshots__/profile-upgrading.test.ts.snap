@@ -2489,11 +2489,11 @@ Object {
     },
     "sources": Object {
       "filename": Array [],
+      "id": Array [],
       "length": 0,
       "sourceMapURL": Array [],
       "startColumn": Array [],
       "startLine": Array [],
-      "uuid": Array [],
     },
     "stackTable": Object {
       "frame": Array [
@@ -7685,10 +7685,10 @@ Object {
       "filename": Array [
         10,
       ],
-      "length": 1,
-      "uuid": Array [
+      "id": Array [
         null,
       ],
+      "length": 1,
     },
     "stackTable": Object {
       "frame": Array [
@@ -9043,10 +9043,10 @@ Object {
       "filename": Array [
         11,
       ],
-      "length": 1,
-      "uuid": Array [
+      "id": Array [
         null,
       ],
+      "length": 1,
     },
     "stackTable": Object {
       "frame": Array [
@@ -10522,10 +10522,10 @@ Object {
       "filename": Array [
         12,
       ],
-      "length": 1,
-      "uuid": Array [
+      "id": Array [
         null,
       ],
+      "length": 1,
     },
     "stackTable": Object {
       "frame": Array [
