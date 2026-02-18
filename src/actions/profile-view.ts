@@ -1905,6 +1905,13 @@ export function changeMouseTimePosition(
   };
 }
 
+export function overrideZeroAt(zeroAt: Milliseconds | null): Action {
+  return {
+    type: 'OVERRIDE_ZERO_AT',
+    zeroAt,
+  };
+}
+
 export function changeTableViewOptions(
   tab: TabSlug,
   tableViewOptions: TableViewOptions

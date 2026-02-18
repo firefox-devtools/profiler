@@ -11,7 +11,10 @@ import classNames from 'classnames';
 import { Localized } from '@fluent/react';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { getProfileRootRange } from 'firefox-profiler/selectors/profile';
+import {
+  getProfileRootRange,
+  getOverriddenZeroAtTimestamp,
+} from 'firefox-profiler/selectors/profile';
 import {
   getDataSource,
   getProfileUrl,
@@ -36,6 +39,7 @@ import {
   dismissNewlyPublished,
   profileRemotelyDeleted,
 } from 'firefox-profiler/actions/app';
+import { overrideZeroAt } from 'firefox-profiler/actions/profile-view';
 
 import {
   getAbortFunction,
@@ -72,12 +76,14 @@ type StateProps = {
   readonly hasPrePublishedState: boolean;
   readonly abortFunction: () => void;
   readonly currentProfileUploadedInformation: UploadedProfileInformation | null;
+  readonly getOverriddenZeroAtTimestamp: string | null;
 };
 
 type DispatchProps = {
   readonly dismissNewlyPublished: typeof dismissNewlyPublished;
   readonly revertToPrePublishedState: typeof revertToPrePublishedState;
   readonly profileRemotelyDeleted: typeof profileRemotelyDeleted;
+  readonly overrideZeroAt: typeof overrideZeroAt;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -128,6 +134,11 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
     this.setState({
       metaInfoPanelState: 'initial',
     });
+  };
+
+  _resetZeroAt = () => {
+    const { overrideZeroAt } = this.props;
+    overrideZeroAt(null);
   };
 
   _renderUploadedProfileActions(
@@ -309,6 +320,34 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
     ) : null;
   }
 
+  _renderZeroAt() {
+    const { getOverriddenZeroAtTimestamp } = this.props;
+    if (getOverriddenZeroAtTimestamp === null) {
+      return null;
+    }
+
+    return (
+      <button
+        type="button"
+        className="menuButtonsButton menuButtonsButton-hasIcon menuButtonsResetZeroAtButton"
+        onClick={this._resetZeroAt}
+      >
+        <Localized
+          id="MenuButtons--starting-point-moved"
+          attrs={{ title: true }}
+          vars={{ zeroAt: getOverriddenZeroAtTimestamp }}
+          elems={{
+            span: <span className="menuButtonsZeroAtTimestamp" />,
+          }}
+        >
+          <>
+            Starting point moved to <span>{getOverriddenZeroAtTimestamp}</span>
+          </>
+        </Localized>
+      </button>
+    );
+  }
+
   _renderRevertProfile() {
     const { hasPrePublishedState, revertToPrePublishedState } = this.props;
     if (!hasPrePublishedState) {
@@ -330,6 +369,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
   override render() {
     return (
       <>
+        {this._renderZeroAt()}
         {this._renderRevertProfile()}
         {this._renderMetaInfoButton()}
         {this._renderPublishPanel()}
@@ -360,11 +400,13 @@ export const MenuButtons = explicitConnect<OwnProps, StateProps, DispatchProps>(
       abortFunction: getAbortFunction(state),
       currentProfileUploadedInformation:
         getCurrentProfileUploadedInformation(state),
+      getOverriddenZeroAtTimestamp: getOverriddenZeroAtTimestamp(state),
     }),
     mapDispatchToProps: {
       dismissNewlyPublished,
       revertToPrePublishedState,
       profileRemotelyDeleted,
+      overrideZeroAt,
     },
     component: MenuButtonsImpl,
   }
