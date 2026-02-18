@@ -31,6 +31,7 @@ import { TrackBandwidth } from './TrackBandwidth';
 import { TrackIPC } from './TrackIPC';
 import { TrackProcessCPU } from './TrackProcessCPU';
 import { TrackPower } from './TrackPower';
+import { TrackSamplingInterval } from './TrackSamplingInterval';
 import { getTrackSelectionModifiers } from 'firefox-profiler/utils';
 import type {
   TrackReference,
@@ -118,6 +119,8 @@ class LocalTrackComponent extends PureComponent<Props> {
         return <TrackProcessCPU counterIndex={localTrack.counterIndex} />;
       case 'power':
         return <TrackPower counterIndex={localTrack.counterIndex} />;
+      case 'sampling-interval':
+        return <TrackSamplingInterval pid={localTrack.pid} />;
       case 'marker':
         return (
           <TrackCustomMarker
@@ -248,6 +251,10 @@ export const TimelineLocalTrack = explicitConnect<
         titleText = getCounterSelectors(localTrack.counterIndex).getDescription(
           state
         );
+        break;
+      }
+      case 'sampling-interval': {
+        titleText = 'Sampling Intervals';
         break;
       }
       default:

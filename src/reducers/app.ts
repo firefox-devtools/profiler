@@ -138,6 +138,7 @@ const panelLayoutGeneration: Reducer<number> = (state = 0, action) => {
     case 'TOGGLE_RESOURCES_PANEL':
     case 'ENABLE_EXPERIMENTAL_CPU_GRAPHS':
     case 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS':
+    case 'ENABLE_EXPERIMENTAL_SAMPLING_INTERVAL_TRACKS':
     case 'CHANGE_TAB_FILTER':
     // Committed range changes: (fallthrough)
     case 'COMMIT_RANGE':
@@ -288,6 +289,19 @@ const processCPUTracks: Reducer<boolean> = (state = false, action) => {
   }
 };
 
+/*
+ * This reducer holds the state for whether the sampling interval tracks are enabled.
+ * This feature is experimental and allows visualization of sampling intervals per process.
+ */
+const samplingIntervalTracks: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'ENABLE_EXPERIMENTAL_SAMPLING_INTERVAL_TRACKS':
+      return true;
+    default:
+      return state;
+  }
+};
+
 /**
  * This keeps the information about the upload for the current profile, if any.
  * This is retrieved from the IndexedDB for published profiles information in
@@ -319,6 +333,7 @@ const experimental: Reducer<ExperimentalFlags> = combineReducers({
   eventDelayTracks,
   cpuGraphs,
   processCPUTracks,
+  samplingIntervalTracks,
 });
 
 const browserConnectionStatus: Reducer<BrowserConnectionStatus> = (

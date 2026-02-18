@@ -1,0 +1,44 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.timelineTrackSamplingInterval {
+  position: relative;
+}
+
+.timelineTrackSamplingIntervalCanvas {
+  width: 100%;
+  height: var(--graph-height);
+}
+
+.timelineTrackSamplingIntervalGraph {
+  position: relative;
+  height: 100%;
+  cursor: default;
+}
+
+.timelineTrackSamplingIntervalTooltip {
+  display: grid;
+  gap: 2px 5px;
+  grid-template-columns: min-content minmax(0, 1fr);
+}
+
+.timelineTrackSamplingIntervalTooltipLabel {
+  color: var(--grey-50);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.timelineTrackSamplingIntervalTooltipValue {
+  font-variant-numeric: tabular-nums;
+}
+
+.timelineTrackSamplingIntervalGraphDot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  margin-top: -3px;
+  margin-left: -3px;
+  pointer-events: none;
+}

@@ -106,6 +106,8 @@ export function getHumanReadableTracks(state: State): string[] {
             .getCounter(state).name;
         } else if (track.type === 'marker') {
           trackName = stringArray[track.markerName];
+        } else if (track.type === 'sampling-interval') {
+          trackName = 'Sampling Intervals';
         } else {
           trackName = threads[track.threadIndex].name;
         }

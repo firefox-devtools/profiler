@@ -81,6 +81,10 @@ export const getIsExperimentalProcessCPUTracksEnabled: Selector<boolean> = (
   state
 ) => getExperimental(state).processCPUTracks;
 
+export const getIsExperimentalSamplingIntervalTracksEnabled: Selector<
+  boolean
+> = (state) => getExperimental(state).samplingIntervalTracks;
+
 export const getIsDragAndDropDragging: Selector<boolean> = (state) =>
   getApp(state).isDragAndDropDragging;
 export const getIsDragAndDropOverlayRegistered: Selector<boolean> = (state) =>
@@ -204,6 +208,9 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
               break;
             case 'marker':
               height += TRACK_MARKER_HEIGHT + border;
+              break;
+            case 'sampling-interval':
+              height += TRACK_PROCESS_CPU_HEIGHT + border;
               break;
             default:
               throw assertExhaustiveCheck(localTrack);
