@@ -88,7 +88,7 @@ export const getAssemblyViewNativeSymbol: Selector<NativeSymbolInfo | null> = (
   const { nativeSymbols, currentNativeSymbol } =
     getProfileSpecificState(state).assemblyView;
   return currentNativeSymbol !== null
-    ? (nativeSymbols[currentNativeSymbol] ?? null)
+    ? nativeSymbols[currentNativeSymbol]
     : null;
 };
 export const getAssemblyViewCurrentNativeSymbolEntryIndex: Selector<

@@ -606,12 +606,21 @@ const assemblyView: Reducer<AssemblyViewState> = (
       const { nativeSymbols, currentNativeSymbol, shouldOpenAssemblyView } =
         action;
       const shouldScroll = action.scrollToInstructionAddress !== undefined;
+
+      // Clamp currentNativeSymbol to null if it is out of bounds, so that
+      // "currentNativeSymbol is always in-bounds or null" holds.
+      const clampedNativeSymbol =
+        currentNativeSymbol !== null &&
+        currentNativeSymbol < nativeSymbols.length
+          ? currentNativeSymbol
+          : null;
+
       return {
         scrollGeneration: shouldScroll
           ? state.scrollGeneration + 1
           : state.scrollGeneration,
         nativeSymbols,
-        currentNativeSymbol,
+        currentNativeSymbol: clampedNativeSymbol,
         isOpen: state.isOpen || shouldOpenAssemblyView,
         scrollToInstructionAddress: action.scrollToInstructionAddress,
         highlightedInstruction: action.highlightedInstructionAddress,
