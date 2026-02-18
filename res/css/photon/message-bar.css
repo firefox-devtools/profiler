@@ -142,7 +142,7 @@
 .photon-message-bar-error .photon-message-bar-action-button,
 .photon-message-bar-error .photon-message-bar-close-button:hover {
   background-color: var(--internal-error-action-background-color);
-  color: var(photon-message-bar-error-action-foreground-color);
+  color: var(--internal-error-action-foreground-color);
 }
 
 .photon-message-bar-warning .photon-message-bar-action-button,
