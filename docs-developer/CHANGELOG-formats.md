@@ -128,13 +128,17 @@ We've also cleaned up the ResourceTable format:
 
 ### Older Versions
 
-Older versions are not documented in this changelog but can be found in [processed-profile-versioning.jt](../src/profile-logic/processed-profile-versioning.ts).
+Older versions are not documented in this changelog but can be found in [processed-profile-versioning.ts](../src/profile-logic/processed-profile-versioning.ts).
 
 ## Gecko profile format
 
+### Version 33
+
+The `sources` field in the Gecko profile format is now non-optional. An upgrader was added that creates an empty `SourceTable` for profiles that don't have one.
+
 ### Version 32
 
-`frameTable` `location` string field was changed to include an optional `sourceIndex` at the end of the string inside brackets for JS sources. For example, new JS frames look like this: `functionName (http://script.url/:1234:1234)[1234]` with the last number being its `sourceIndex`. This index references entries in the shared `SourceTable` in `profile.sources` (added in in the same version) which centralizes all source file information.
+`frameTable` `location` string field was changed to include an optional `sourceIndex` at the end of the string inside brackets for JS sources. For example, new JS frames look like this: `functionName (http://script.url/:1234:1234)[1234]` with the last number being its `sourceIndex`. This index references entries in the shared `SourceTable` in `profile.sources` (added in the same version) which centralizes all source file information.
 
 ### Version 31
 
@@ -163,4 +167,4 @@ The `searchable` property is implemented in the marker schema. Previously all th
 
 ### Older Versions
 
-Older versions are not documented in this changelog but can be found in [gecko-profile-versioning.jt](../src/profile-logic/gecko-profile-versioning.ts).
+Older versions are not documented in this changelog but can be found in [gecko-profile-versioning.ts](../src/profile-logic/gecko-profile-versioning.ts).
