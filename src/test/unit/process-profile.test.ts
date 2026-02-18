@@ -15,6 +15,7 @@ import {
   createGeckoCounter,
   createGeckoMarkerStack,
   createGeckoProfilerOverhead,
+  getEmptySourceTable,
   getVisualMetrics,
 } from '../fixtures/profiles/gecko-profile';
 import { ensureExists } from '../../utils/types';
@@ -113,7 +114,7 @@ describe('extract functions and resource from location strings', function () {
         libs,
         extensions,
         globalDataCollector,
-        undefined
+        getEmptySourceTable()
       );
 
     const {
@@ -1004,5 +1005,87 @@ describe('source table processing', function () {
 
     // The test profile should have at least one source
     expect(sources.length).toBeGreaterThan(0);
+  });
+});
+
+describe('Marker schema conversion', function () {
+  it('should preserve optional marker schema properties', function () {
+    const geckoProfile = createGeckoProfile();
+
+    // Add marker schemas with various optional properties
+    geckoProfile.meta.markerSchema.push(
+      {
+        name: 'TestMarkerMinimal',
+        display: ['marker-chart'],
+        data: [{ key: 'name', label: 'Name', format: 'string' }],
+      },
+      {
+        name: 'TestMarkerWithLabels',
+        tooltipLabel: 'Custom Tooltip',
+        tableLabel: '{marker.data.status}',
+        chartLabel: 'Chart: {marker.data.name}',
+        display: ['marker-chart', 'marker-table'],
+        data: [
+          { key: 'name', label: 'Name', format: 'string' },
+          { key: 'status', label: 'Status', format: 'string' },
+        ],
+      },
+      {
+        name: 'TestMarkerWithGraphs',
+        display: ['marker-chart'],
+        data: [{ key: 'value', label: 'Value', format: 'integer' }],
+        graphs: [{ key: 'value', type: 'line', color: 'blue' }],
+        isStackBased: false,
+      },
+      {
+        name: 'TestMarkerWithColor',
+        display: ['marker-chart', 'marker-table'],
+        data: [
+          { key: 'status', label: 'Status', format: 'string' },
+          { key: 'color', label: 'Color', format: 'string' },
+        ],
+        colorField: 'color',
+      }
+    );
+
+    // Process the profile
+    const processedProfile = processGeckoProfile(geckoProfile);
+
+    // Test minimal schema works
+    const schemaMinimal = processedProfile.meta.markerSchema.find(
+      (s) => s.name === 'TestMarkerMinimal'
+    );
+    expect(schemaMinimal).toBeDefined();
+    expect(schemaMinimal?.tooltipLabel).toBeUndefined();
+    expect(schemaMinimal?.tableLabel).toBeUndefined();
+    expect(schemaMinimal?.chartLabel).toBeUndefined();
+    expect(schemaMinimal?.colorField).toBeUndefined();
+    expect(schemaMinimal?.graphs).toBeUndefined();
+    expect(schemaMinimal?.isStackBased).toBeUndefined();
+
+    // Test labels are preserved
+    const schemaWithLabels = processedProfile.meta.markerSchema.find(
+      (s) => s.name === 'TestMarkerWithLabels'
+    );
+    expect(schemaWithLabels).toBeDefined();
+    expect(schemaWithLabels?.tooltipLabel).toBe('Custom Tooltip');
+    expect(schemaWithLabels?.tableLabel).toBe('{marker.data.status}');
+    expect(schemaWithLabels?.chartLabel).toBe('Chart: {marker.data.name}');
+
+    // Test graphs and isStackBased are preserved
+    const schemaWithGraphs = processedProfile.meta.markerSchema.find(
+      (s) => s.name === 'TestMarkerWithGraphs'
+    );
+    expect(schemaWithGraphs).toBeDefined();
+    expect(schemaWithGraphs?.graphs).toHaveLength(1);
+    expect(schemaWithGraphs?.isStackBased).toBe(false);
+    expect(schemaWithGraphs?.colorField).toBeUndefined();
+
+    // Test colorField is preserved
+    const schemaWithColor = processedProfile.meta.markerSchema.find(
+      (s) => s.name === 'TestMarkerWithColor'
+    );
+    expect(schemaWithColor).toBeDefined();
+    expect(schemaWithColor?.colorField).toBe('color');
   });
 });

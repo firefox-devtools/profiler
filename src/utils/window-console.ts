@@ -16,6 +16,11 @@ import { shortenUrl } from 'firefox-profiler/utils/shorten-url';
 import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { formatTimestamp } from 'firefox-profiler/utils/format-numbers';
 import { togglePseudoStrategy } from 'firefox-profiler/components/app/AppLocalizationProvider';
+import type { ThemePreference } from 'firefox-profiler/utils/dark-mode';
+import {
+  getThemePreference,
+  setThemePreference,
+} from 'firefox-profiler/utils/dark-mode';
 import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still
@@ -37,6 +42,7 @@ export type ExtraPropertiesOnWindowForConsole = {
   };
   togglePseudoLocalization: (pseudoStrategy?: string) => void;
   toggleTimelineType: (timelineType?: string) => void;
+  toggleDarkMode: () => void;
   retrieveRawProfileDataFromBrowser: () => Promise<
     MixedObject | ArrayBuffer | null
   >;
@@ -193,6 +199,26 @@ export function addDataToWindowObject(
     `);
   };
 
+  target.toggleDarkMode = function () {
+    const current = getThemePreference();
+    let next: ThemePreference;
+    let message: string;
+
+    if (current === 'system') {
+      next = 'light';
+      message = '✅ Theme set to: light';
+    } else if (current === 'light') {
+      next = 'dark';
+      message = '✅ Theme set to: dark';
+    } else {
+      next = 'system';
+      message = '✅ Theme set to: system (follows OS preference)';
+    }
+
+    setThemePreference(next);
+    console.log(message);
+  };
+
   target.retrieveRawProfileDataFromBrowser = async function (): Promise<
     MixedObject | ArrayBuffer | null
   > {
@@ -297,8 +323,12 @@ export function addDataToWindowObject(
           ) {
             const strTimestamp = d2s(profile.meta.startTime + markerStartTime);
             const processName = thread.processName ?? 'Unknown Process';
-            // TODO: lying about the log level as it's not available yet in the markers
-            const statement = `${strTimestamp} - [${processName} ${thread.pid}: ${thread.name}]: D/${(data as any).module} ${(data as any).name.trim()}`;
+
+            // The log module may contain the log level for profiles captured after bug 1995503.
+            // If the log module does not contain /, we fake it to D/module
+            const logModule = (data as any).module;
+            const prefix = logModule.includes('/') ? '' : 'D/';
+            const statement = `${strTimestamp} - [${processName} ${thread.pid}: ${thread.name}]: ${prefix}${logModule} ${(data as any).name.trim()}`;
             logs.push(statement);
           }
         }
@@ -392,6 +422,7 @@ export function logFriendlyPreamble() {
       %cwindow.experimental%c - The object that holds flags of all the experimental features.
       %cwindow.togglePseudoLocalization%c - Enable pseudo localizations by passing "accented" or "bidi" to this function, or disable using no parameters.
       %cwindow.toggleTimelineType%c - Toggle timeline graph type by passing "cpu-category", "category", or "stack".
+      %cwindow.toggleDarkMode%c - Cycle through theme preferences: system, light, dark.
       %cwindow.retrieveRawProfileDataFromBrowser%c - Retrieve the profile attached to the current tab and returns it. Use "await" to call it, and use saveToDisk to save it.
       %cwindow.extractGeckoLogs%c - Retrieve recorded logs in the current range, using the MOZ_LOG format. Use with "copy" or "saveToDisk".
       %cwindow.saveToDisk%c - Saves to a file the parameter passed to it, with an optional filename parameter. You can use that to save the profile returned by "retrieveRawProfileDataFromBrowser" or the data returned by "extractGeckoLogs".
@@ -442,6 +473,9 @@ export function logFriendlyPreamble() {
     bold,
     reset,
     // "window.toggleTimelineType"
+    bold,
+    reset,
+    // "window.toggleDarkMode"
     bold,
     reset,
     // "window.retrieveRawProfileDataFromBrowser"

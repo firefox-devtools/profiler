@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { unserializeProfileOfArbitraryFormat } from '../../profile-logic/process-profile';
 import { isPerfScriptFormat } from '../../profile-logic/import/linux-perf';
+import { isFlameGraphFormat } from '../../profile-logic/import/flame-graph';
 import { GECKO_PROFILE_VERSION } from '../../app-logic/constants';
 
 import { storeWithProfile } from '../fixtures/stores';
@@ -245,9 +246,8 @@ describe('converting Google Chrome profile', function () {
       'src/test/fixtures/upgrades/chrome-tracing.json.gz'
     );
     const decompressedBuffer = zlib.gunzipSync(compressedBuffer);
-    const profile = await unserializeProfileOfArbitraryFormat(
-      decompressedBuffer.buffer
-    );
+    const profile =
+      await unserializeProfileOfArbitraryFormat(decompressedBuffer);
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
@@ -263,9 +263,8 @@ describe('converting Google Chrome profile', function () {
       'src/test/fixtures/upgrades/chrome-trace-issue-5429.json.gz'
     );
     const decompressedBuffer = zlib.gunzipSync(compressedBuffer);
-    const profile = await unserializeProfileOfArbitraryFormat(
-      decompressedBuffer.buffer
-    );
+    const profile =
+      await unserializeProfileOfArbitraryFormat(decompressedBuffer);
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
@@ -425,8 +424,9 @@ describe('converting ART trace', function () {
     const buffer = fs.readFileSync(
       'src/test/fixtures/upgrades/art-trace-regular.trace.gz'
     );
-    const arrayBuffer = zlib.gunzipSync(buffer).buffer;
-    const profile = await unserializeProfileOfArbitraryFormat(arrayBuffer);
+    const uncompressedBytes = zlib.gunzipSync(buffer);
+    const profile =
+      await unserializeProfileOfArbitraryFormat(uncompressedBytes);
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
@@ -440,8 +440,9 @@ describe('converting ART trace', function () {
     const buffer = fs.readFileSync(
       'src/test/fixtures/upgrades/art-trace-streaming.trace.gz'
     );
-    const arrayBuffer = zlib.gunzipSync(buffer).buffer;
-    const profile = await unserializeProfileOfArbitraryFormat(arrayBuffer);
+    const uncompressedBytes = zlib.gunzipSync(buffer);
+    const profile =
+      await unserializeProfileOfArbitraryFormat(uncompressedBytes);
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
@@ -457,8 +458,9 @@ describe('converting Simpleperf trace', function () {
     const buffer = fs.readFileSync(
       'src/test/fixtures/upgrades/simpleperf-task-clock.trace.gz'
     );
-    const arrayBuffer = zlib.gunzipSync(buffer).buffer;
-    const profile = await unserializeProfileOfArbitraryFormat(arrayBuffer);
+    const uncompressedBytes = zlib.gunzipSync(buffer);
+    const profile =
+      await unserializeProfileOfArbitraryFormat(uncompressedBytes);
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
@@ -472,11 +474,109 @@ describe('converting Simpleperf trace', function () {
     const buffer = fs.readFileSync(
       'src/test/fixtures/upgrades/simpleperf-cpu-clock.trace.gz'
     );
-    const arrayBuffer = zlib.gunzipSync(buffer).buffer;
-    const profile = await unserializeProfileOfArbitraryFormat(arrayBuffer);
+    const uncompressedBytes = zlib.gunzipSync(buffer);
+    const profile =
+      await unserializeProfileOfArbitraryFormat(uncompressedBytes);
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
+    checkProfileContainsUniqueTid(profile);
+    expect(profile).toMatchSnapshot();
+  });
+});
+
+describe('converting flamegraph profile', function () {
+  it('should detect flamegraph format', function () {
+    const flamegraphText = 'func1;func2;func3 10\nfunc1;func4 5';
+    expect(isFlameGraphFormat(flamegraphText)).toBe(true);
+  });
+
+  it('should not detect JSON as flamegraph format', function () {
+    expect(isFlameGraphFormat('{"meta": {"product": "Firefox"}}')).toBe(false);
+  });
+
+  it('should not detect empty string as flamegraph format', function () {
+    expect(isFlameGraphFormat('')).toBe(false);
+  });
+
+  it('should import a simple flamegraph profile', async function () {
+    const flamegraphText = [
+      'func1;func2;func3 10',
+      'func1;func2;func4 5',
+      'func1;func5 3',
+    ].join('\n');
+
+    const profile = await unserializeProfileOfArbitraryFormat(flamegraphText);
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+
+    expect(profile.meta.product).toBe('Flamegraph');
+    expect(profile.threads).toHaveLength(1);
+
+    const thread = profile.threads[0];
+    expect(thread.name).toBe('Program');
+    expect(thread.samples.length).toBe(18); // 10 + 5 + 3 samples
+
+    checkProfileContainsUniqueTid(profile);
+    expect(profile).toMatchSnapshot();
+  });
+
+  it('should import a flamegraph profile with Java frames', async function () {
+    const flamegraphText = [
+      'java.lang.Thread.run_[j];MyClass.method_[j] 5',
+      'native_func;cpp::function 3',
+    ].join('\n');
+
+    const profile = await unserializeProfileOfArbitraryFormat(flamegraphText);
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+
+    const thread = profile.threads[0];
+    // 5 + 3 stacks
+    expect(thread.samples.length).toBe(8);
+
+    // Should not contain the suffix for the Java frames.
+    expect(
+      profile.shared.stringArray.find((s) => s.includes('[j]'))
+    ).toBeUndefined();
+    checkProfileContainsUniqueTid(profile);
+  });
+
+  it('should handle empty lines in flamegraph', async function () {
+    const flamegraphText = ['func1;func2 2', '', 'func3 1', ''].join('\n');
+
+    const profile = await unserializeProfileOfArbitraryFormat(flamegraphText);
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+
+    const thread = profile.threads[0];
+    // 2 + 1 stacks
+    expect(thread.samples.length).toBe(3);
+    checkProfileContainsUniqueTid(profile);
+  });
+
+  it('should import a real-world flamegraph file', async function () {
+    const fs = require('fs');
+    const text = fs.readFileSync(
+      'src/test/fixtures/upgrades/flamegraph.txt',
+      'utf8'
+    );
+
+    const profile = await unserializeProfileOfArbitraryFormat(text);
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+
+    expect(profile.meta.product).toBe('Flamegraph');
+    expect(profile.threads).toHaveLength(1);
+
+    const thread = profile.threads[0];
+    expect(thread.name).toBe('Program');
+    expect(thread.samples.length).toBeGreaterThan(0);
+
     checkProfileContainsUniqueTid(profile);
     expect(profile).toMatchSnapshot();
   });

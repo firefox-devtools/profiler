@@ -71,6 +71,135 @@ exports[`TooltipCallNode handles native allocations 1`] = `
 </div>
 `;
 
+exports[`TooltipCallNode with argument values displays argument values when provided 1`] = `
+<div
+  class="tooltipCallNode"
+>
+  <div
+    class="tooltipOneLine tooltipHeader"
+  >
+    <div
+      class="tooltipTiming"
+    >
+      Fake Duration Text
+    </div>
+    <div
+      class="tooltipTitle"
+    >
+      Cjs
+    </div>
+    <div
+      class="tooltipIcon"
+    />
+  </div>
+  <div
+    class="tooltipCallNodeDetails"
+  >
+    <div
+      class="tooltipDetails tooltipCallNodeDetailsLeft"
+    >
+      <div
+        class="tooltipLabel"
+      >
+        Stack Type:
+      </div>
+      <div>
+        JavaScript
+      </div>
+      <div
+        class="tooltipLabel"
+      >
+        Category:
+      </div>
+      <div>
+        <span
+          class="colored-square category-color-yellow"
+        />
+        JavaScript
+      </div>
+      <div
+        class="tooltipLabel"
+      >
+        Arguments:
+      </div>
+      <div
+        class="tooltipArguments"
+      >
+        <span
+          class="objectBox objectBox-number"
+        >
+          42
+        </span>
+        <span
+          class="objectBox objectBox-string"
+        >
+          "hello"
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TooltipCallNode with argument values displays em dash when argumentValues is empty 1`] = `
+<div
+  class="tooltipCallNode"
+>
+  <div
+    class="tooltipOneLine tooltipHeader"
+  >
+    <div
+      class="tooltipTiming"
+    >
+      Fake Duration Text
+    </div>
+    <div
+      class="tooltipTitle"
+    >
+      Cjs
+    </div>
+    <div
+      class="tooltipIcon"
+    />
+  </div>
+  <div
+    class="tooltipCallNodeDetails"
+  >
+    <div
+      class="tooltipDetails tooltipCallNodeDetailsLeft"
+    >
+      <div
+        class="tooltipLabel"
+      >
+        Stack Type:
+      </div>
+      <div>
+        JavaScript
+      </div>
+      <div
+        class="tooltipLabel"
+      >
+        Category:
+      </div>
+      <div>
+        <span
+          class="colored-square category-color-yellow"
+        />
+        JavaScript
+      </div>
+      <div
+        class="tooltipLabel"
+      >
+        Arguments:
+      </div>
+      <div>
+        —
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`TooltipCallNode with page information displays Page URL for iframe pages 1`] = `
 <div
   class="tooltipCallNode"

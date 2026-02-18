@@ -24,6 +24,16 @@ AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader
 AppHeader--github-icon =
     .title = Go to our Git repository (this opens in a new window)
 
+## ThemeToggle
+## They are used at the top right side of the home page to switch between themes.
+
+ThemeToggle--system =
+    .title = Follow system theme preference
+ThemeToggle--light =
+    .title = Use light theme
+ThemeToggle--dark =
+    .title = Use dark theme
+
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
@@ -86,6 +96,21 @@ CallNodeContextMenu--transform-focus-function = Focus on function
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Focus on function (inverted)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+## The translation for "self" in these strings should match the translation used
+## in CallTree--samples-self and CallTree--bytes-self. Alternatively it can be
+## translated as "self values" or "self time" (though "self time" is less desirable
+## because this menu item is also shown in "bytes" mode).
+
+CallNodeContextMenu--transform-focus-self-title =
+    Focusing on self is similar to focusing on a function, but only keeps samples
+    that contribute to the function’s self time. Samples in callees
+    are dropped, and the call tree is re-rooted to the focused function.
+CallNodeContextMenu--transform-focus-self = Focus on self only
+    .title = { CallNodeContextMenu--transform-focus-self-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Focus on subtree only
     .title =
         Focusing on a subtree will remove any sample that does not include that
@@ -356,6 +381,15 @@ Home--instructions-content =
     Recording performance profiles requires <a>{ -firefox-brand-name }</a>.
     However, existing profiles can be viewed in any modern browser.
 
+Home--fenix-instructions-directly =
+    { -firefox-android-brand-name } can be profiled directly on this device. For
+    more information, read <a>Profiling { -firefox-android-brand-name } directly on device</a>.
+
+Home--fenix-instructions-remotely =
+    You can also profile { -firefox-android-brand-name } remotely from { -firefox-brand-name }
+    for desktop. For more information, please consult this documentation:
+    <a>Profiling { -firefox-android-brand-name } remotely</a>.
+
 Home--record-instructions-start-stop = Stop and start profiling
 Home--record-instructions-capture-load = Capture and load profile
 Home--profiler-motto = Capture a performance profile. Analyze it. Share it. Make the web faster.
@@ -363,6 +397,8 @@ Home--additional-content-title = Load existing profiles
 Home--additional-content-content = You can <strong>drag and drop</strong> a profile file here to load it, or:
 Home--compare-recordings-info = You can also compare recordings. <a>Open the comparing interface.</a>
 Home--your-recent-uploaded-recordings-title = Your recent uploaded recordings
+
+Home--dark-mode-title = Dark mode
 
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
@@ -468,6 +504,16 @@ MarkerContextMenu--select-the-sender-thread =
 MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching =
     Drop samples outside of markers matching “<strong>{ $filter }</strong>”
 
+## MarkerCopyTableContextMenu
+## This is the menu when the copy icon is clicked in Marker Chart and Marker
+## Table panels.
+
+MarkerCopyTableContextMenu--copy-table-as-plain =
+    Copy marker table as plain text
+
+MarkerCopyTableContextMenu--copy-table-as-markdown =
+    Copy marker table as Markdown
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
@@ -477,6 +523,17 @@ MarkerSettings--panel-search =
 
 MarkerSettings--marker-filters =
     .title = Marker Filters
+
+MarkerSettings--copy-table =
+    .title = Copy table as text
+
+# This string is used when the user tries to copy a marker table with
+# more than 10000 rows.
+# Variable:
+#   $rows (Number) - Number of rows the marker table has
+#   $maxRows (Number) - Number of maximum rows that can be copied
+MarkerSettings--copy-table-exceeed-max-rows =
+    The number of rows exceeds the limit: { $rows } > { $maxRows }. Only the first { $maxRows } rows will be copied.
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -600,7 +657,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Unlimited
 MenuButtons--metaInfo--application = Application
 MenuButtons--metaInfo--name-and-version = Name and version:
-MenuButtons--metaInfo--application-uptime = Uptime:
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = Uptime:
 MenuButtons--metaInfo--update-channel = Update channel:
 MenuButtons--metaInfo--build-id = Build ID:
 MenuButtons--metaInfo--build-type = Build type:
@@ -936,6 +994,12 @@ TrackPower--tooltip-power-watt = { $value } W
 TrackPower--tooltip-power-milliwatt = { $value } mW
   .label = Power
 
+# This is used in the tooltip when the instant power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-microwatt = { $value } μW
+  .label = Power
+
 # This is used in the tooltip when the power value uses the kilowatt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -1102,6 +1166,13 @@ TransformNavigator--focus-subtree = Focus Node: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Focus: { $item }
+
+# "Focus self" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-on-function-self
+# Also see the translation note above CallNodeContextMenu--transform-focus-self.
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-self = Focus Self: { $item }
 
 # "Focus category" transform. The word "Focus" has the meaning of an adjective here.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
@@ -1291,6 +1362,20 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = Hide the assembly view
+
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = Previous
+
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = Next
+
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = { $current } of { $total }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

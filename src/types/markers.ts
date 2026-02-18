@@ -34,7 +34,7 @@ export type MarkerFormatType =
   // sanitized. Please be careful with including other types of PII here as well.
   // e.g. "Label: Some String"
   | 'string'
-  /// An index into a (currently) thread-local string table, aka StringTable
+  /// An index into the profile's string table.
   /// This is effectively an integer, so wherever we need to display this value, we
   /// must first perform a lookup into the appropriate string table.
   | 'unique-string'
@@ -500,6 +500,9 @@ export type NetworkPayload = {
   RedirectURI?: string;
   id: number;
   pri: number; // priority of the load; always included as it can change
+  // The Priority header value from the HTTP response.
+  // This property is optional because older versions of Gecko do not include it.
+  priorityHeader?: string;
   count?: number; // Total size of transfer, if any
   // See all possible values in tools/profiler/core/platform.cpp
   status: NetworkStatus;

@@ -3,11 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .photon-radio {
-  border: 1px solid var(--grey-90-a30);
+  border: 1px solid var(--clickable-border-color);
   border-radius: 8px;
   appearance: none;
   background: none;
-  background-color: var(--grey-90-a10);
+  background-color: var(--clickable-background-color);
 }
 
 /* Use this class with the photon-radio for the canonical photon styling. */
@@ -25,16 +25,16 @@
 }
 
 .photon-radio:hover {
-  background-color: var(--grey-90-a20);
+  background-color: var(--clickable-hover-background-color);
 }
 
 .photon-radio:checked {
   border: none;
-  background-color: var(--blue-60);
+  background-color: var(--clickable-checked-background-color);
 }
 
 .photon-radio:hover:active {
-  background-color: var(--grey-90-a30);
+  background-color: var(--clickable-active-background-color);
 }
 
 .photon-radio-default:checked {
@@ -46,9 +46,9 @@
 }
 
 .photon-radio:checked:hover {
-  background-color: var(--blue-70);
+  background-color: var(--clickable-checked-hover-background-color);
 }
 
 .photon-radio:checked:hover:active {
-  background-color: var(--blue-80);
+  background-color: var(--clickable-checked-active-background-color);
 }

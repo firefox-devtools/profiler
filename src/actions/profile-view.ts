@@ -1271,9 +1271,10 @@ function _findOtherVisibleThread(
     const localTracks = getLocalTracks(getState(), globalTrack.pid);
     const localTrackOrder = getLocalTrackOrder(getState(), globalTrack.pid);
     const hiddenLocalTracks = getHiddenLocalTracks(getState(), globalTrack.pid);
-    const localTrackIndexesToIgnore = localTrackIndexesToIgnoreByPid
-      ? (localTrackIndexesToIgnoreByPid.get(globalTrack.pid) ?? new Set())
-      : new Set();
+    const localTrackIndexesToIgnore: Set<TrackIndex> =
+      localTrackIndexesToIgnoreByPid
+        ? (localTrackIndexesToIgnoreByPid.get(globalTrack.pid) ?? new Set())
+        : new Set();
 
     for (const trackIndex of localTrackOrder) {
       const track = localTracks[trackIndex];
@@ -1917,28 +1918,56 @@ export function changeTableViewOptions(
 
 export function updateBottomBoxContentsAndMaybeOpen(
   currentTab: TabSlug,
-  { libIndex, sourceIndex, nativeSymbols, lineNumber }: BottomBoxInfo
+  bottomBoxInfo: BottomBoxInfo
 ): Action {
-  // TODO: If the set has more than one element, pick the native symbol with
-  // the highest total sample count
-  const nativeSymbol = nativeSymbols.length !== 0 ? nativeSymbols[0] : null;
+  const {
+    libIndex,
+    sourceIndex,
+    nativeSymbols,
+    initialNativeSymbol,
+    scrollToLineNumber,
+    scrollToInstructionAddress,
+    highlightedLineNumber,
+    highlightedInstructionAddress,
+  } = bottomBoxInfo;
+
+  const haveSource = sourceIndex !== null;
+  const haveAssembly = nativeSymbols.length !== 0;
+
+  const shouldOpenBottomBox = haveSource || haveAssembly;
+
+  // By default, only open the source view and keep the assembly
+  // view closed - unless the only thing we have is assembly.
+  const shouldOpenAssemblyView = !haveSource && haveAssembly;
 
   return {
     type: 'UPDATE_BOTTOM_BOX',
     libIndex,
     sourceIndex,
-    nativeSymbol,
-    allNativeSymbolsForInitiatingCallNode: nativeSymbols,
+    nativeSymbols,
+    currentNativeSymbol: initialNativeSymbol,
     currentTab,
-    shouldOpenBottomBox: sourceIndex !== null || nativeSymbol !== null,
-    shouldOpenAssemblyView: sourceIndex === null && nativeSymbol !== null,
-    lineNumber,
+    shouldOpenBottomBox,
+    shouldOpenAssemblyView,
+    scrollToLineNumber,
+    scrollToInstructionAddress,
+    highlightedLineNumber,
+    highlightedInstructionAddress,
   };
 }
 
 export function openAssemblyView(): Action {
   return {
     type: 'OPEN_ASSEMBLY_VIEW',
+  };
+}
+
+export function changeAssemblyViewNativeSymbolEntryIndex(
+  entryIndex: number
+): Action {
+  return {
+    type: 'CHANGE_ASSEMBLY_VIEW_NATIVE_SYMBOL_ENTRY_INDEX',
+    entryIndex,
   };
 }
 

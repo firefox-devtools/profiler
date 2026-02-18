@@ -23,53 +23,8 @@ import {
   applySymbolicationSteps,
 } from '../profile-logic/symbolication';
 import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
-import type { SymbolTableAsTuple } from '../profile-logic/symbol-store-db';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
-import { SymbolsNotFoundError } from '../profile-logic/errors';
 import type { ThreadIndex } from '../types';
-
-/**
- * Simple 'in-memory' symbol DB that conforms to the same interface as SymbolStoreDB but
- * just stores everything in a simple dictionary instead of IndexedDB. The composite key
- * [debugName, breakpadId] is flattened to a string "debugName:breakpadId" to use as the
- * map key.
- */
-export class InMemorySymbolDB {
-  _store: Map<string, SymbolTableAsTuple>;
-
-  constructor() {
-    this._store = new Map();
-  }
-
-  _makeKey(debugName: string, breakpadId: string): string {
-    return `${debugName}:${breakpadId}`;
-  }
-
-  async storeSymbolTable(
-    debugName: string,
-    breakpadId: string,
-    symbolTable: SymbolTableAsTuple
-  ): Promise<void> {
-    this._store.set(this._makeKey(debugName, breakpadId), symbolTable);
-  }
-
-  async getSymbolTable(
-    debugName: string,
-    breakpadId: string
-  ): Promise<SymbolTableAsTuple> {
-    const key = this._makeKey(debugName, breakpadId);
-    const value = this._store.get(key);
-    if (typeof value !== 'undefined') {
-      return value;
-    }
-    throw new SymbolsNotFoundError(
-      'The requested library does not exist in the database.',
-      { debugName, breakpadId }
-    );
-  }
-
-  async close(): Promise<void> {}
-}
 
 export interface CliOptions {
   input: string;
@@ -85,27 +40,18 @@ export async function run(options: CliOptions) {
   // by our importers.
   const bytes = fs.readFileSync(options.input, null);
 
-  // bytes is a Uint8Array whose underlying ArrayBuffer can be longer than bytes.length.
-  // Copy the contents into a new ArrayBuffer which is sized correctly, so that we
-  // don't include uninitialized data from the extra parts of the underlying buffer.
-  // Alternatively, we could make unserializeProfileOfArbitraryFormat support
-  // Uint8Array or Buffer in addition to ArrayBuffer.
-  const byteBufferCopy = Uint8Array.prototype.slice.call(bytes).buffer;
-
   // Load the profile.
-  const profile = await unserializeProfileOfArbitraryFormat(byteBufferCopy);
+  const profile = await unserializeProfileOfArbitraryFormat(bytes);
   if (profile === undefined) {
     throw new Error('Unable to parse the profile.');
   }
-
-  const symbolStoreDB = new InMemorySymbolDB();
 
   /**
    * SymbolStore implementation which just forwards everything to the symbol server in
    * MozillaSymbolicationAPI format. No support for getting symbols from 'the browser' as
    * there is no browser in this context.
    */
-  const symbolStore = new SymbolStore(symbolStoreDB, {
+  const symbolStore = new SymbolStore({
     requestSymbolsFromServer: async (requests) => {
       for (const { lib } of requests) {
         console.log(`  Loading symbols for ${lib.debugName}`);
@@ -133,7 +79,7 @@ export async function run(options: CliOptions) {
       return [];
     },
 
-    requestSymbolTableFromBrowser: async () => {
+    requestSymbolsViaSymbolTableFromBrowser: async () => {
       throw new Error('Not supported in this context');
     },
   });

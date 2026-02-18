@@ -4,7 +4,7 @@
 
 .timelineTrackThread {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-timeline-track-thread);
   display: flex;
   flex: 1;
   flex-flow: column nowrap;
@@ -17,5 +17,5 @@
   width: 100%;
   height: var(--timeline-track-thread-blank-height);
   padding-left: 1px;
-  background-color: #fff;
+  background-color: var(--base-background-color);
 }

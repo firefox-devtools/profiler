@@ -95,6 +95,7 @@ export type Thread = {
   // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
   // had no extra attribute at all.
   userContextId?: number;
+  tracedObjectShapes?: Array<string[] | null>;
 
   // The fields below this comment are derived data, and not present on the RawThread
   // in the same form.
@@ -108,6 +109,7 @@ export type Thread = {
   // The stack samples collected for this thread. This field is different from
   // RawThread in that the `time` column is always present.
   samples: SamplesTable;
+  tracedValuesBuffer?: ArrayBuffer;
 };
 
 /**
@@ -134,6 +136,7 @@ export type SamplesTable = {
   // This property isn't present in normal threads. However it's present for
   // merged threads, so that we know the origin thread for these samples.
   threadId?: Tid[];
+  argumentValues?: Array<number | null>;
   length: number;
 };
 
@@ -144,6 +147,7 @@ type SamplesLikeTableShape = {
   // See the WeightType type for more information.
   weight: null | number[];
   weightType: WeightType;
+  argumentValues?: Array<number | null>;
   length: number;
 };
 
@@ -160,6 +164,7 @@ export type CounterSamplesTable = {
   number?: number[];
   // The count of the data, for instance for memory this would be bytes.
   count: number[];
+  argumentValues?: Array<number | null>;
   length: number;
 };
 
@@ -696,7 +701,7 @@ export type InitialSelectedTrackReference = HTMLElement;
 export type ProfileFilterPageData = {
   origin: string;
   hostname: string;
-  favicon: string;
+  favicon: string | null;
 };
 
 /**
@@ -775,9 +780,14 @@ export type BottomBoxInfo = {
   libIndex: IndexIntoLibs | null;
   sourceIndex: IndexIntoSourceTable | null;
   nativeSymbols: NativeSymbolInfo[];
-  // Optional line number to scroll to in the source view.
-  // If not specified, the source view will scroll to the hottest line.
-  lineNumber?: number;
+  initialNativeSymbol: number | null; // index into `nativeSymbols`
+  // Optional line number + instruction address to scroll into view.
+  scrollToLineNumber?: number;
+  scrollToInstructionAddress?: number;
+  // Which lines / instructions to highlight (or none). This is used when clicking
+  // a stack frame in a marker stack.
+  highlightedLineNumber: number | null;
+  highlightedInstructionAddress: number | null;
 };
 
 /**

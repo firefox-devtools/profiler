@@ -40,7 +40,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 58,
+    "preprocessedProfileVersion": 59,
     "processType": 0,
     "product": "Firefox",
     "sampleUnits": undefined,
@@ -53,7 +53,7 @@ Object {
     "symbolicated": true,
     "toolkit": undefined,
     "updateChannel": undefined,
-    "version": 32,
+    "version": 33,
     "visualMetrics": undefined,
   },
   "pages": Array [],
@@ -6389,7 +6389,7 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 32,
+    "version": 33,
   },
   "pausedRanges": Array [],
   "processes": Array [
@@ -6501,6 +6501,13 @@ Object {
       },
       "pausedRanges": Array [],
       "processes": Array [],
+      "sources": Object {
+        "data": Array [],
+        "schema": Object {
+          "filename": 1,
+          "uuid": 0,
+        },
+      },
       "threads": Array [
         Object {
           "frameTable": Object {
@@ -6783,6 +6790,13 @@ Object {
       ],
     },
   ],
+  "sources": Object {
+    "data": Array [],
+    "schema": Object {
+      "filename": 1,
+      "uuid": 0,
+    },
+  },
   "threads": Array [
     Object {
       "frameTable": Object {
@@ -7845,7 +7859,7 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 32,
+    "version": 33,
   },
   "pages": Array [
     Object {
@@ -7985,6 +7999,13 @@ Object {
       ],
       "pausedRanges": Array [],
       "processes": Array [],
+      "sources": Object {
+        "data": Array [],
+        "schema": Object {
+          "filename": 1,
+          "uuid": 0,
+        },
+      },
       "threads": Array [
         Object {
           "frameTable": Object {
@@ -8349,6 +8370,13 @@ Object {
       ],
     },
   ],
+  "sources": Object {
+    "data": Array [],
+    "schema": Object {
+      "filename": 1,
+      "uuid": 0,
+    },
+  },
   "threads": Array [
     Object {
       "frameTable": Object {
@@ -9382,7 +9410,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 58,
+    "preprocessedProfileVersion": 59,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -10924,7 +10952,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 58,
+    "preprocessedProfileVersion": 59,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -12599,7 +12627,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 58,
+    "preprocessedProfileVersion": 59,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -13057,6 +13085,9 @@ Object {
         ],
       },
       "unregisterTime": null,
+      "usedInnerWindowIDs": Array [
+        3,
+      ],
     },
     Object {
       "frameTable": Object {
@@ -13417,6 +13448,9 @@ Object {
         ],
       },
       "unregisterTime": null,
+      "usedInnerWindowIDs": Array [
+        1,
+      ],
     },
     Object {
       "frameTable": Object {
@@ -13844,6 +13878,9 @@ Object {
         ],
       },
       "unregisterTime": null,
+      "usedInnerWindowIDs": Array [
+        2,
+      ],
     },
   ],
 }

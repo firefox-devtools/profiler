@@ -79,6 +79,9 @@ CallNodeContextMenu--transform-focus-function = Εστίαση στη συνάρ
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Εστίαση στη συνάρτηση (ανεστραμμένη)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Εστίαση στο υπόδεντρο μόνο
     .title =
         Η εστίαση σε υπόδεντρο θα αφαιρέσει κάθε δείγμα που δεν περιλαμβάνει αυτό το
@@ -333,6 +336,7 @@ Home--additional-content-title = Φόρτωση υπαρχόντων προφί�
 Home--additional-content-content = Μπορείτε να <strong>σύρετε και να εναποθέσετε</strong> ένα αρχείο προφίλ εδώ για φόρτωση, ή:
 Home--compare-recordings-info = Μπορείτε επίσης να συγκρίνετε καταγραφές. <a>Άνοιγμα περιβάλλοντος σύγκρισης.</a>
 Home--your-recent-uploaded-recordings-title = Πρόσφατα μεταφορτωμένες καταγραφές
+Home--dark-mode-title = Σκουρόχρωμη λειτουργία
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 =
@@ -424,6 +428,13 @@ MarkerContextMenu--select-the-sender-thread = Επιλέξτε το νήμα α�
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Απόρριψη δειγμάτων εκτός των δεικτών που αντιστοιχούν στο «<strong>{ $filter }</strong>»
 
+## MarkerCopyTableContextMenu
+## This is the menu when the copy icon is clicked in Marker Chart and Marker
+## Table panels.
+
+MarkerCopyTableContextMenu--copy-table-as-plain = Αντιγραφή πίνακα δεικτών ως απλού κειμένου
+MarkerCopyTableContextMenu--copy-table-as-markdown = Αντιγραφή πίνακα δεικτών ως Markdown
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
@@ -432,6 +443,14 @@ MarkerSettings--panel-search =
     .title = Εμφάνιση μόνο των σημαδιών που αντιστοιχούν σε ένα συγκεκριμένο όνομα
 MarkerSettings--marker-filters =
     .title = Φίλτρα δείκτη
+MarkerSettings--copy-table =
+    .title = Αντιγραφή πίνακα ως κειμένου
+# This string is used when the user tries to copy a marker table with
+# more than 10000 rows.
+# Variable:
+#   $rows (Number) - Number of rows the marker table has
+#   $maxRows (Number) - Number of maximum rows that can be copied
+MarkerSettings--copy-table-exceeed-max-rows = Ο αριθμός σειρών υπερβαίνει το όριο: { $rows } > { $maxRows }. Θα αντιγραφούν μόνο οι πρώτες { $maxRows } σειρές.
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -549,7 +568,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Απεριόριστη
 MenuButtons--metaInfo--application = Εφαρμογή
 MenuButtons--metaInfo--name-and-version = Όνομα και έκδοση:
-MenuButtons--metaInfo--application-uptime = Χρόνος λειτουργίας:
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = Χρόνος λειτουργίας:
 MenuButtons--metaInfo--update-channel = Κανάλι ενημερώσεων:
 MenuButtons--metaInfo--build-id = ID δομής:
 MenuButtons--metaInfo--build-type = Τύπος δομής:
@@ -864,6 +884,11 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Ισχύς
+# This is used in the tooltip when the instant power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-microwatt = { $value } μW
+    .label = Ισχύς
 # This is used in the tooltip when the power value uses the kilowatt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -1158,6 +1183,17 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = Απόκρυψη προβολής assembly
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = Προηγούμενο
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = Επόμενο
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = { $current } από { $total }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

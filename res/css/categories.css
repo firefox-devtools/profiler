@@ -20,6 +20,21 @@
   --category-color-darkgrey: var(--grey-50);
 }
 
+:root.dark-mode {
+  /* Colors based on photon colors. */
+  --purple-55: #8a00eb;
+  --yellow-65: #be9b00;
+  --category-color-purple: var(--purple-55);
+  --category-color-green: var(--green-70);
+  --category-color-orange: var(--orange-60);
+  --category-color-yellow: var(--yellow-65);
+  --category-color-magenta: var(--magenta-70);
+  --category-color-gray: var(--grey-50);
+  --category-color-grey: var(--grey-50);
+  --category-color-darkgray: var(--grey-60);
+  --category-color-darkgrey: var(--grey-60);
+}
+
 /**
  * These classes should be used to create a small color swatch to describe a
  * category. They should be used with the class `colored-square` that's defined

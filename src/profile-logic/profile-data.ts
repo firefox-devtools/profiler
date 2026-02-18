@@ -35,8 +35,6 @@ import {
   numberSeriesFromDeltas,
   numberSeriesToDeltas,
 } from 'firefox-profiler/utils/number-series';
-import ExtensionFavicon from '../../res/img/svg/extension-outline.svg';
-import DefaultLinkFavicon from '../../res/img/svg/globe.svg';
 
 import type { StringTable } from 'firefox-profiler/utils/string-table';
 import type {
@@ -91,7 +89,6 @@ import type {
   AddressProof,
   TimelineType,
   NativeSymbolInfo,
-  BottomBoxInfo,
   Bytes,
   ThreadWithReservedFunctions,
   TabID,
@@ -728,6 +725,159 @@ export function getNthPrefixStack(
     s = stackTablePrefixCol[s];
   }
   return s;
+}
+
+/**
+ * Given a call node `callNodeIndex`, answer, for each stack S:
+ * - Does a sample with stack S contribute to `callNodeIndex`'s total time?
+ * - If so, which of `callNodeIndex`'s frames does such a sample contribute its
+ *   total time to?
+ *
+ * If the answer to the first question is "no", we put frame index -1 into the
+ * returned array for that stack index.
+ */
+export function getCallNodeFramePerStack(
+  callNodeIndex: IndexIntoCallNodeTable,
+  callNodeInfo: CallNodeInfo,
+  stackTable: StackTable
+): Int32Array {
+  const callNodeInfoInverted = callNodeInfo.asInverted();
+  return callNodeInfoInverted !== null
+    ? getCallNodeFramePerStackInverted(
+        callNodeIndex,
+        callNodeInfoInverted,
+        stackTable
+      )
+    : getCallNodeFramePerStackNonInverted(
+        callNodeIndex,
+        callNodeInfo,
+        stackTable
+      );
+}
+
+/**
+ * This function handles the non-inverted case of getCallNodeFramePerStack.
+ *
+ * Gathers the frames which are hit in a given call node by each stack,
+ * or -1 if the stack isn't in the call node's subtree.
+ *
+ * This is best explained with an example.
+ * Let the call node be the node for the call path [A, B, C].
+ * Let this be the stack tree:
+ *
+ *  - stack 0, func A, frame 100
+ *    - stack 1, func B, frame 110
+ *      - stack 2, func C, frame 120
+ *      - stack 3, func C, frame 130
+ *    - stack 4, func B, frame 140
+ *      - stack 5, func C, frame 150
+ *      - stack 6, func C, frame 160
+ *        - stack 7, func D, frame 170
+ *      - stack 8, func E, frame 180
+ *    - stack 9, func F, frame 190
+ *
+ * This maps to the following call tree:
+ *
+ *  - call node 0, func A
+ *    - call node 1, func B
+ *      - call node 2, func C
+ *        - call node 3, func D
+ *      - call node 4, func E
+ *   - call node 5, func F
+ *
+ * The call path [A, B, C] uniquely identifies call node 2.
+ * The following stacks all "collapse into" ("map to") call node 2:
+ * stack 2, 3, 5 and 6.
+ * Stack 7 maps to call node 3, which is a child of call node 2.
+ * Stacks 0, 1, 4, 8 and 9 are outside the call path [A, B, C].
+ *
+ * Stacks 2, 3, 4 and 5 all make a "total time" contribution to call
+ * node 2, to the frames 120, 130, 150, and 160, respectively.
+ * Stack 7 also contributes total time to call node 2, to frame 160.
+ * Stacks 0, 1, 4, 8 and 9 don't contribute to call node 2's total time.
+ *
+ * So this function returns the following array in the example:
+ * new Int32Array([-1, -1, 120, 130, -1, 150, 160, 160, -1, -1])
+ * // for stacks   0,  1,  2,   3,   4,  5,   6,   7,   8,  9
+ */
+export function getCallNodeFramePerStackNonInverted(
+  callNodeIndex: IndexIntoCallNodeTable,
+  callNodeInfo: CallNodeInfo,
+  stackTable: StackTable
+): Int32Array {
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
+
+  const { frame: frameCol, prefix: prefixCol, length: stackCount } = stackTable;
+
+  const callNodeFramePerStack = new Int32Array(stackCount);
+
+  // This loop takes advantage of the stack table's ordering:
+  // Prefix stacks are always visited before their descendants.
+  for (let stackIndex = 0; stackIndex < stackCount; stackIndex++) {
+    let frame = -1;
+    const callNodeForThisStack = stackIndexToCallNodeIndex[stackIndex];
+    if (callNodeForThisStack === callNodeIndex) {
+      frame = frameCol[stackIndex];
+    } else {
+      // We're either already in the call node's subtree, or we are
+      // outside the subtree. Either way, we can just inherit the frame
+      // that our prefix stack hits in this call node.
+      const prefix = prefixCol[stackIndex];
+      if (prefix !== null) {
+        frame = callNodeFramePerStack[prefix];
+      }
+    }
+
+    callNodeFramePerStack[stackIndex] = frame;
+  }
+  return callNodeFramePerStack;
+}
+
+/**
+ * This handles the inverted case of getCallNodeFramePerStack.
+ */
+export function getCallNodeFramePerStackInverted(
+  callNodeIndex: IndexIntoCallNodeTable,
+  callNodeInfo: CallNodeInfoInverted,
+  stackTable: StackTable
+): Int32Array {
+  const depth = callNodeInfo.depthForNode(callNodeIndex);
+  const [rangeStart, rangeEnd] =
+    callNodeInfo.getSuffixOrderIndexRangeForCallNode(callNodeIndex);
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
+  const stackTablePrefixCol = stackTable.prefix;
+  const suffixOrderIndexes = callNodeInfo.getSuffixOrderIndexes();
+
+  const callNodeFramePerStack = new Int32Array(stackTable.length);
+
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    let callNodeFrame = -1;
+
+    // Get the non-inverted call tree node for the (non-inverted) stack.
+    // For example, if the stack has the call path A -> B -> C,
+    // this will give us the node A -> B -> C in the non-inverted tree.
+    const thisStackCallNode = stackIndexToCallNodeIndex[stackIndex];
+    const thisStackSuffixOrderIndex = suffixOrderIndexes[thisStackCallNode];
+
+    if (
+      thisStackSuffixOrderIndex >= rangeStart &&
+      thisStackSuffixOrderIndex < rangeEnd
+    ) {
+      const stackForCallNode = getNthPrefixStack(
+        stackIndex,
+        depth,
+        stackTablePrefixCol
+      );
+      if (stackForCallNode !== null) {
+        callNodeFrame = stackTable.frame[stackForCallNode];
+      }
+    }
+
+    callNodeFramePerStack[stackIndex] = callNodeFrame;
+  }
+  return callNodeFramePerStack;
 }
 
 /**
@@ -1732,6 +1882,13 @@ export function filterThreadSamplesToRange(
     );
   }
 
+  if (samples.argumentValues) {
+    newSamples.argumentValues = samples.argumentValues.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  }
+
   if (samples.threadId) {
     newSamples.threadId = samples.threadId.slice(
       beginSampleIndex,
@@ -1858,6 +2015,13 @@ export function filterRawThreadSamplesToRange(
     );
   }
 
+  if (samples.argumentValues) {
+    newSamples.argumentValues = samples.argumentValues.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  }
+
   if (samples.threadId) {
     newSamples.threadId = samples.threadId.slice(
       beginSampleIndex,
@@ -1963,6 +2127,9 @@ export function filterCounterSamplesToRange(
     count: samples.count.slice(beginSampleIndex, endSampleIndex),
     number: samples.number
       ? samples.number.slice(beginSampleIndex, endSampleIndex)
+      : undefined,
+    argumentValues: samples.argumentValues
+      ? samples.argumentValues.slice(beginSampleIndex, endSampleIndex)
       : undefined,
   };
 
@@ -2288,6 +2455,7 @@ export function computeSamplesTableFromRawSamplesTable(
   const {
     responsiveness,
     eventDelay,
+    argumentValues,
     stack,
     weight,
     weightType,
@@ -2309,6 +2477,7 @@ export function computeSamplesTableFromRawSamplesTable(
     // These fields are copied from the raw samples table:
     responsiveness,
     eventDelay,
+    argumentValues,
     stack,
     weight,
     weightType,
@@ -2329,7 +2498,8 @@ export function createThreadFromDerivedTables(
   samples: SamplesTable,
   stackTable: StackTable,
   stringTable: StringTable,
-  sources: SourceTable
+  sources: SourceTable,
+  tracedValuesBuffer: ArrayBuffer | undefined
 ): Thread {
   const {
     processType,
@@ -2356,6 +2526,7 @@ export function createThreadFromDerivedTables(
     jsTracer,
     isPrivateBrowsing,
     userContextId,
+    tracedObjectShapes,
   } = rawThread;
 
   const thread: Thread = {
@@ -2384,12 +2555,14 @@ export function createThreadFromDerivedTables(
     jsTracer,
     isPrivateBrowsing,
     userContextId,
+    tracedObjectShapes,
 
     // These fields are derived:
     samples,
     stackTable,
     stringTable,
     sources,
+    tracedValuesBuffer,
   };
   return thread;
 }
@@ -2920,7 +3093,10 @@ export function reserveFunctionsInThread(
   thread: Thread
 ): ThreadWithReservedFunctions {
   const funcTable = shallowCloneFuncTable(thread.funcTable);
-  const reservedFunctionsForResources = new Map();
+  const reservedFunctionsForResources = new Map<
+    IndexIntoResourceTable,
+    IndexIntoFuncTable
+  >();
   const jsResourceTypes = [
     resourceTypes.addon,
     resourceTypes.url,
@@ -3271,7 +3447,7 @@ export function extractProfileFilterPageData(
     return new Map();
   }
 
-  const pageDataByTabID = new Map();
+  const pageDataByTabID = new Map<TabID, ProfileFilterPageData>();
   for (const [tabID, pages] of pagesMapByTabID) {
     let topMostPages = pages.filter(
       (page) =>
@@ -3304,7 +3480,7 @@ export function extractProfileFilterPageData(
       pageDataByTabID.set(tabID, {
         origin: pageUrl,
         hostname: pageUrl,
-        favicon: DefaultLinkFavicon,
+        favicon: null,
       });
       continue;
     }
@@ -3318,12 +3494,11 @@ export function extractProfileFilterPageData(
     // moz-extension:// protocol on platforms outside of Firefox. Only Firefox
     // can parse it properly. Chrome and node will output a URL with no `origin`.
     const isExtension = pageUrl.startsWith('moz-extension://');
-    const defaultFavicon = isExtension ? ExtensionFavicon : DefaultLinkFavicon;
     const pageData: ProfileFilterPageData = {
       // These will be used as a fallback if the urls have been sanitized.
       origin: pageUrl,
       hostname: pageUrl,
-      favicon: currentPage.favicon ?? defaultFavicon,
+      favicon: currentPage.favicon ?? null,
     };
 
     try {
@@ -3643,7 +3818,7 @@ export function nudgeReturnAddresses(thread: RawThread): RawThread {
   // These are the top ("self") frames of stacks from sampling.
   // In the variable names below, ip means "instruction pointer".
   const oldIpFrameToNewIpFrame = new Uint32Array(frameTable.length);
-  const ipFrames = new Set();
+  const ipFrames = new Set<IndexIntoFrameTable>();
   for (const stack of samplingSelfStacks) {
     const frame = stackTable.frame[stack];
     oldIpFrameToNewIpFrame[frame] = frame;
@@ -3728,8 +3903,14 @@ export function nudgeReturnAddresses(thread: RawThread): RawThread {
 
   // Make a new stack table which refers to the adjusted frames.
   const newStackTable = getEmptyRawStackTable();
-  const mapForSamplingSelfStacks = new Map();
-  const mapForBacktraceSelfStacks = new Map();
+  const mapForSamplingSelfStacks = new Map<
+    null | IndexIntoStackTable,
+    null | IndexIntoStackTable
+  >();
+  const mapForBacktraceSelfStacks = new Map<
+    null | IndexIntoStackTable,
+    null | IndexIntoStackTable
+  >();
   const prefixMap = new Uint32Array(stackTable.length);
   for (let stack = 0; stack < stackTable.length; stack++) {
     const frame = stackTable.frame[stack];
@@ -3849,81 +4030,64 @@ export function calculateFunctionSizeLowerBound(
  * functions.
  */
 export function getNativeSymbolsForCallNode(
-  callNodeIndex: IndexIntoCallNodeTable,
-  callNodeInfo: CallNodeInfo,
-  stackTable: StackTable,
+  callNodeFramePerStack: Int32Array,
   frameTable: FrameTable
-): IndexIntoNativeSymbolTable[] {
-  const callNodeInfoInverted = callNodeInfo.asInverted();
-  return callNodeInfoInverted !== null
-    ? getNativeSymbolsForCallNodeInverted(
-        callNodeIndex,
-        callNodeInfoInverted,
-        stackTable,
-        frameTable
-      )
-    : getNativeSymbolsForCallNodeNonInverted(
-        callNodeIndex,
-        callNodeInfo,
-        stackTable,
-        frameTable
-      );
-}
-
-export function getNativeSymbolsForCallNodeNonInverted(
-  callNodeIndex: IndexIntoCallNodeTable,
-  callNodeInfo: CallNodeInfo,
-  stackTable: StackTable,
-  frameTable: FrameTable
-): IndexIntoNativeSymbolTable[] {
-  const stackIndexToCallNodeIndex =
-    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
-  const set: Set<IndexIntoNativeSymbolTable> = new Set();
-  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    if (stackIndexToCallNodeIndex[stackIndex] === callNodeIndex) {
-      const frame = stackTable.frame[stackIndex];
-      const nativeSymbol = frameTable.nativeSymbol[frame];
+): Set<IndexIntoNativeSymbolTable> {
+  const set = new Set<IndexIntoNativeSymbolTable>();
+  for (
+    let stackIndex = 0;
+    stackIndex < callNodeFramePerStack.length;
+    stackIndex++
+  ) {
+    const callNodeFrame = callNodeFramePerStack[stackIndex];
+    if (callNodeFrame !== -1) {
+      const nativeSymbol = frameTable.nativeSymbol[callNodeFrame];
       if (nativeSymbol !== null) {
         set.add(nativeSymbol);
       }
     }
   }
-  return [...set];
+  return set;
 }
 
-export function getNativeSymbolsForCallNodeInverted(
-  callNodeIndex: IndexIntoCallNodeTable,
-  callNodeInfo: CallNodeInfoInverted,
-  stackTable: StackTable,
+/**
+ * Return the total of the sample weights per native symbol, by
+ * accumulating the weight from samples which contribute to the
+ * call node of interest's total time.
+ * callNodeFramePerStack needs to be a mapping from stackIndex to the
+ * corresponding frame in the call node of interest.
+ */
+export function getTotalNativeSymbolTimingsForCallNode(
+  samples: SamplesLikeTable,
+  callNodeFramePerStack: Int32Array,
   frameTable: FrameTable
-): IndexIntoNativeSymbolTable[] {
-  const depth = callNodeInfo.depthForNode(callNodeIndex);
-  const [rangeStart, rangeEnd] =
-    callNodeInfo.getSuffixOrderIndexRangeForCallNode(callNodeIndex);
-  const stackTablePrefixCol = stackTable.prefix;
-  const stackIndexToCallNodeIndex =
-    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
-  const suffixOrderIndexes = callNodeInfo.getSuffixOrderIndexes();
-  const set: Set<IndexIntoNativeSymbolTable> = new Set();
-  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    const stackForNode = getMatchingAncestorStackForInvertedCallNode(
-      stackIndex,
-      rangeStart,
-      rangeEnd,
-      suffixOrderIndexes,
-      depth,
-      stackIndexToCallNodeIndex,
-      stackTablePrefixCol
+): Map<IndexIntoNativeSymbolTable, number> {
+  const totalPerNativeSymbol = new Map<IndexIntoNativeSymbolTable, number>();
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const stack = samples.stack[sampleIndex];
+    if (stack === null) {
+      continue;
+    }
+    const callNodeFrame = callNodeFramePerStack[stack];
+    if (callNodeFrame === -1) {
+      // This sample does not contribute to the call node's total. Ignore.
+      continue;
+    }
+
+    const nativeSymbol = frameTable.nativeSymbol[callNodeFrame];
+    if (nativeSymbol === null) {
+      continue;
+    }
+
+    const sampleWeight =
+      samples.weight !== null ? samples.weight[sampleIndex] : 1;
+    totalPerNativeSymbol.set(
+      nativeSymbol,
+      (totalPerNativeSymbol.get(nativeSymbol) ?? 0) + sampleWeight
     );
-    if (stackForNode !== null) {
-      const frame = stackTable.frame[stackForNode];
-      const nativeSymbol = frameTable.nativeSymbol[frame];
-      if (nativeSymbol !== null) {
-        set.add(nativeSymbol);
-      }
-    }
   }
-  return [...set];
+
+  return totalPerNativeSymbol;
 }
 
 /**
@@ -3950,109 +4114,6 @@ export function getNativeSymbolInfo(
     name: stringTable.getString(nativeSymbols.name[nativeSymbol]),
     functionSize,
     functionSizeIsKnown: functionSizeOrNull !== null,
-  };
-}
-
-/**
- * Calculate the BottomBoxInfo for a call node, i.e. information about which
- * things should be shown in the profiler UI's "bottom box" when this call node
- * is double-clicked.
- *
- * We always want to update all panes in the bottom box when a new call node is
- * double-clicked, so that we don't show inconsistent information side-by-side.
- */
-export function getBottomBoxInfoForCallNode(
-  callNodeIndex: IndexIntoCallNodeTable,
-  callNodeInfo: CallNodeInfo,
-  thread: Thread
-): BottomBoxInfo {
-  const {
-    stackTable,
-    frameTable,
-    funcTable,
-    stringTable,
-    resourceTable,
-    nativeSymbols,
-  } = thread;
-
-  const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
-  const sourceIndex = funcTable.source[funcIndex];
-  const resource = funcTable.resource[funcIndex];
-  const libIndex =
-    resource !== -1 && resourceTable.type[resource] === resourceTypes.library
-      ? resourceTable.lib[resource]
-      : null;
-  const nativeSymbolsForCallNode = getNativeSymbolsForCallNode(
-    callNodeIndex,
-    callNodeInfo,
-    stackTable,
-    frameTable
-  );
-  const nativeSymbolInfosForCallNode = nativeSymbolsForCallNode.map(
-    (nativeSymbolIndex) =>
-      getNativeSymbolInfo(
-        nativeSymbolIndex,
-        nativeSymbols,
-        frameTable,
-        stringTable
-      )
-  );
-
-  return {
-    libIndex,
-    sourceIndex,
-    nativeSymbols: nativeSymbolInfosForCallNode,
-  };
-}
-
-/**
- * Get bottom box info for a stack frame. This is similar to
- * getBottomBoxInfoForCallNode but works directly with stack indexes.
- */
-export function getBottomBoxInfoForStackFrame(
-  stackIndex: IndexIntoStackTable,
-  thread: Thread
-): BottomBoxInfo {
-  const {
-    stackTable,
-    frameTable,
-    funcTable,
-    resourceTable,
-    nativeSymbols,
-    stringTable,
-  } = thread;
-
-  const frameIndex = stackTable.frame[stackIndex];
-  const funcIndex = frameTable.func[frameIndex];
-  const sourceIndex = funcTable.source[funcIndex];
-  const resource = funcTable.resource[funcIndex];
-  const libIndex =
-    resource !== -1 && resourceTable.type[resource] === resourceTypes.library
-      ? resourceTable.lib[resource]
-      : null;
-
-  // Get native symbol for this frame
-  const nativeSymbol = frameTable.nativeSymbol[frameIndex];
-  const nativeSymbolInfos =
-    nativeSymbol !== null
-      ? [
-          getNativeSymbolInfo(
-            nativeSymbol,
-            nativeSymbols,
-            frameTable,
-            stringTable
-          ),
-        ]
-      : [];
-
-  // Extract line number from the frame
-  const lineNumber = frameTable.line[frameIndex] ?? undefined;
-
-  return {
-    libIndex,
-    sourceIndex,
-    nativeSymbols: nativeSymbolInfos,
-    lineNumber,
   };
 }
 
@@ -4094,23 +4155,25 @@ export function computeTabToThreadIndexesMap(
   threads: RawThread[],
   innerWindowIDToTabMap: Map<InnerWindowID, TabID> | null
 ): Map<TabID, Set<ThreadIndex>> {
-  const tabToThreadIndexesMap = new Map();
+  const tabToThreadIndexesMap = new Map<TabID, Set<ThreadIndex>>();
   if (!innerWindowIDToTabMap) {
     // There is no pages information in the profile, return an empty map.
     return tabToThreadIndexesMap;
   }
 
-  // We need to iterate over all the samples and markers once to figure out
-  // which innerWindowIDs are present in each thread. This is probably not
-  // very cheap, but it'll allow us to not compute this information every
-  // time when we need it.
+  // Iterate over the usedInnerWindowIDs for each thread to figure out
+  // which threads are involved for each tab.
   for (let threadIdx = 0; threadIdx < threads.length; threadIdx++) {
     const thread = threads[threadIdx];
+    const { usedInnerWindowIDs } = thread;
 
-    // First go over the innerWindowIDs of the samples.
-    for (let i = 0; i < thread.frameTable.length; i++) {
-      const innerWindowID = thread.frameTable.innerWindowID[i];
-      if (innerWindowID === null || innerWindowID === 0) {
+    if (!usedInnerWindowIDs) {
+      // No innerWindowIDs for this thread
+      continue;
+    }
+
+    for (const innerWindowID of usedInnerWindowIDs) {
+      if (innerWindowID === 0) {
         // Zero value also means null for innerWindowID.
         continue;
       }
@@ -4128,38 +4191,6 @@ export function computeTabToThreadIndexesMap(
         tabToThreadIndexesMap.set(tabID, threadIndexes);
       }
       threadIndexes.add(threadIdx);
-    }
-
-    // Then go over the markers to find their innerWindowIDs.
-    for (let i = 0; i < thread.markers.length; i++) {
-      const markerData = thread.markers.data[i];
-
-      if (!markerData) {
-        continue;
-      }
-
-      if (
-        'innerWindowID' in markerData &&
-        markerData.innerWindowID !== null &&
-        markerData.innerWindowID !== undefined &&
-        // Zero value also means null for innerWindowID.
-        markerData.innerWindowID !== 0
-      ) {
-        const innerWindowID = markerData.innerWindowID;
-        const tabID = innerWindowIDToTabMap.get(innerWindowID);
-        if (tabID === undefined) {
-          // We couldn't find the tab of this innerWindowID, this should
-          // never happen, it might indicate a bug in Firefox.
-          continue;
-        }
-
-        let threadIndexes = tabToThreadIndexesMap.get(tabID);
-        if (!threadIndexes) {
-          threadIndexes = new Set();
-          tabToThreadIndexesMap.set(tabID, threadIndexes);
-        }
-        threadIndexes.add(threadIdx);
-      }
     }
   }
 

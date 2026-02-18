@@ -1,17 +1,38 @@
 .tooltip {
+  --internal-border-color: #ccc;
+  --internal-shadow-color: rgb(0 0 0 / 0.3);
+  --internal-timing-foreground-color: #666;
+  --internal-swatch-foreground-color: #888;
+  --internal-header-border-color: var(--grey-40);
+  --internal-dimmed-foreground-color: var(--grey-50);
+  --internal-backtrace-foreground-color: var(--grey-40);
+  --internal-label-foreground-color: var(--grey-60);
+
   position: fixed;
   display: inline-block;
   overflow: hidden;
   max-width: 600px;
   padding: 8px;
-  border: 1px solid #ccc;
-  background-color: var(--grey-10);
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+  border: 1px solid var(--internal-border-color);
+  background-color: var(--panel-background-color);
+  box-shadow: 0 1px 3px var(--internal-shadow-color);
+  color: var(--base-foreground-color);
   line-height: 1.4;
   pointer-events: none;
   text-align: left;
   text-overflow: ellipsis;
   transition: opacity 250ms;
+}
+
+:root.dark-mode {
+  .tooltip {
+    --internal-border-color: var(--grey-60);
+    --internal-timing-foreground-color: var(--grey-40);
+    --internal-header-border-color: var(--grey-40);
+    --internal-dimmed-foreground-color: var(--grey-40);
+    --internal-backtrace-foreground-color: var(--grey-30);
+    --internal-label-foreground-color: var(--grey-40);
+  }
 }
 
 .tooltip.clickable {
@@ -21,7 +42,7 @@
 
 .tooltipTiming {
   padding-right: 0.5em;
-  color: #666;
+  color: var(--internal-timing-foreground-color);
   font-weight: bold;
 }
 
@@ -53,7 +74,7 @@
   display: inline-block;
   width: 10px;
   height: 10px;
-  border: 1px solid #888;
+  border: 1px solid var(--internal-swatch-foreground-color);
   margin-right: 3px;
 }
 
@@ -71,7 +92,7 @@
 
 .tooltipHeader {
   padding-bottom: 8px;
-  border-bottom: 1px solid var(--grey-40);
+  border-bottom: 1px solid var(--internal-header-border-color);
   font-size: 12px;
 }
 
@@ -89,7 +110,7 @@
 }
 
 .tooltipDetailSeparator {
-  border-top: 1px solid var(--grey-40);
+  border-top: 1px solid var(--internal-header-border-color);
   margin: 4px 0;
   grid-column: 1 / 3;
 }
@@ -99,39 +120,39 @@
 }
 
 .tooltipDetailsDim {
-  color: var(--grey-50);
+  color: var(--internal-dimmed-foreground-color);
 }
 
 .tooltipLabel {
-  color: var(--grey-50);
+  color: var(--internal-dimmed-foreground-color);
   text-align: right;
   white-space: nowrap;
 }
 
 .tooltipBackTraceTitle {
   margin: 0;
-  color: var(--grey-50);
+  color: var(--internal-dimmed-foreground-color);
   font-size: 100%;
   font-weight: normal;
 }
 
 .tooltipDetails + .tooltipDetailsBackTrace {
   padding-top: 5px;
-  border-top: 1px solid var(--grey-40);
+  border-top: 1px solid var(--internal-backtrace-foreground-color);
   margin-top: 5px;
 }
 
 .tooltipLib {
   align-self: flex-end;
-  color: var(--grey-50);
+  color: var(--internal-dimmed-foreground-color);
   white-space: nowrap;
 }
 
 .tooltipScreenshotImg {
   padding: 0.5px;
-  border: 0.5px solid rgb(0 0 0 / 0.2);
+  border: 0.5px solid var(--base-shadow-color);
   border-radius: 5px;
-  box-shadow: 0 2px 4px rgb(0 0 0 / 0.2);
+  box-shadow: 0 2px 4px var(--base-shadow-color);
 }
 
 /**
@@ -148,11 +169,24 @@
 
 .sidebar .tooltipLabel {
   margin-top: 8px;
-  color: var(--grey-60);
+  color: var(--internal-label-foreground-color);
   font-weight: bold;
   text-align: left;
 }
 
 .sidebar .tooltipDetailSeparator {
   display: none;
+}
+
+.tooltipArgumentsLabel {
+  /* match tooltips label, without being aligned to the right */
+  color: var(--grey-50);
+}
+
+.tooltipArguments > span {
+  display: block;
+}
+
+.tooltipArguments > span:nth-child(odd) {
+  background-color: rgb(0 0 0 / 0.05);
 }

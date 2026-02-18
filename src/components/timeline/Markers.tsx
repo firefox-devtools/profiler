@@ -154,7 +154,7 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
           )
         : Number.MAX_SAFE_INTEGER;
       const markerStyle = getMarkerStyle(marker);
-      ctx.fillStyle = markerStyle.background;
+      ctx.fillStyle = markerStyle.getBackground();
       if (markerStyle.squareCorners) {
         ctx.fillRect(pos, markerStyle.top, itemWidth, markerStyle.height);
       } else {
@@ -167,12 +167,12 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
           1 / devicePixelRatio
         );
       }
-      if (markerStyle.borderLeft !== null) {
-        ctx.fillStyle = markerStyle.borderLeft;
+      if (markerStyle.hasBorderLeft()) {
+        ctx.fillStyle = markerStyle.getBorderLeft();
         ctx.fillRect(pos, markerStyle.top, 1, markerStyle.height);
       }
-      if (markerStyle.borderRight !== null) {
-        ctx.fillStyle = markerStyle.borderRight;
+      if (markerStyle.hasBorderRight()) {
+        ctx.fillStyle = markerStyle.getBorderRight();
         ctx.fillRect(
           pos + itemWidth - 1,
           markerStyle.top,
@@ -497,6 +497,7 @@ class TimelineMarkers extends React.PureComponent<Props, State> {
               marker={hoveredMarker}
               threadsKey={threadsKey}
               restrictHeightWidth={true}
+              hideFilterButton={true}
             />
           </Tooltip>
         ) : null}

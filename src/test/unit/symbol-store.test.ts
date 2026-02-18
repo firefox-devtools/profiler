@@ -3,16 +3,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import type {
   AddressResult,
+  LibSymbolicationRequest,
   LibSymbolicationResponse,
   SymbolProvider,
 } from '../../profile-logic/symbol-store';
-import { SymbolStore } from '../../profile-logic/symbol-store';
+import {
+  readSymbolsFromSymbolTable,
+  SymbolStore,
+} from '../../profile-logic/symbol-store';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
 import { completeSymbolTableAsTuple } from '../fixtures/example-symbol-table';
-// fake-indexeddb no longer includes a structuredClone polyfill, so we need to
-// import it explicitly.
-import 'core-js/stable/structured-clone';
-import { indexedDB, IDBKeyRange } from 'fake-indexeddb';
 import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
 import { ensureExists } from '../../utils/types';
 import type { RequestedLib } from 'firefox-profiler/types';
@@ -20,38 +20,6 @@ import type { RequestedLib } from 'firefox-profiler/types';
 describe('SymbolStore', function () {
   let symbolProvider: SymbolProvider | null = null;
   let symbolStore: SymbolStore | null = null;
-
-  function deleteDatabase() {
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.deleteDatabase(
-        'profiler-async-storage-symbol-tables'
-      );
-      req.onsuccess = () => resolve(undefined);
-      req.onerror = () => reject(req.error);
-    });
-  }
-
-  beforeAll(function () {
-    // The SymbolStore requires IndexedDB, otherwise symbolication will be skipped.
-    window.indexedDB = indexedDB;
-    window.IDBKeyRange = IDBKeyRange;
-  });
-
-  afterAll(function () {
-    // @ts-expect-error - Check tsconfig DOM stuff in tests directory
-    delete window.indexedDB;
-    // @ts-expect-error - Check tsconfig DOM stuff in tests directory
-    delete window.IDBKeyRange;
-
-    symbolStore = null;
-  });
-
-  afterEach(async function () {
-    if (symbolStore) {
-      await symbolStore.closeDb().catch(() => {});
-    }
-    await deleteDatabase();
-  });
 
   it('should only request symbols from the symbol provider once per library', async function () {
     symbolProvider = {
@@ -70,13 +38,22 @@ describe('SymbolStore', function () {
       requestSymbolsFromBrowser: async (_requests) => {
         throw new Error('requestSymbolsFromBrowser unsupported in this test');
       },
-      requestSymbolTableFromBrowser: jest.fn(() =>
-        Promise.resolve(completeSymbolTableAsTuple)
+      requestSymbolsViaSymbolTableFromBrowser: jest.fn(
+        (request: LibSymbolicationRequest, _ignoreCache: boolean) => {
+          const results = readSymbolsFromSymbolTable(
+            request.addresses,
+            completeSymbolTableAsTuple,
+            (s: string) => s
+          );
+          return Promise.resolve(results);
+        }
       ),
     };
-    symbolStore = new SymbolStore('profiler-async-storage', symbolProvider);
+    symbolStore = new SymbolStore(symbolProvider);
 
-    expect(symbolProvider.requestSymbolTableFromBrowser).not.toHaveBeenCalled();
+    expect(
+      symbolProvider.requestSymbolsViaSymbolTableFromBrowser
+    ).not.toHaveBeenCalled();
 
     const lib1 = { debugName: 'firefox', breakpadId: 'dont-care' };
     let secondAndThirdSymbol = new Map<unknown, unknown>();
@@ -89,9 +66,9 @@ describe('SymbolStore', function () {
       errorCallback
     );
     expect(symbolProvider.requestSymbolsFromServer).toHaveBeenCalledTimes(1);
-    expect(symbolProvider.requestSymbolTableFromBrowser).toHaveBeenCalledTimes(
-      1
-    );
+    expect(
+      symbolProvider.requestSymbolsViaSymbolTableFromBrowser
+    ).toHaveBeenCalledTimes(1);
     expect(errorCallback).not.toHaveBeenCalled();
     expect(secondAndThirdSymbol.get(0xf01)).toEqual({
       name: 'second symbol',
@@ -114,9 +91,9 @@ describe('SymbolStore', function () {
       errorCallback
     );
     expect(symbolProvider.requestSymbolsFromServer).toHaveBeenCalledTimes(2);
-    expect(symbolProvider.requestSymbolTableFromBrowser).toHaveBeenCalledTimes(
-      2
-    );
+    expect(
+      symbolProvider.requestSymbolsViaSymbolTableFromBrowser
+    ).toHaveBeenCalledTimes(2);
     expect(errorCallback).not.toHaveBeenCalled();
     expect(firstAndLastSymbol.get(0x33)).toEqual({
       name: 'first symbol',
@@ -138,9 +115,9 @@ describe('SymbolStore', function () {
       errorCallback
     );
     expect(symbolProvider.requestSymbolsFromServer).toHaveBeenCalledTimes(2);
-    expect(symbolProvider.requestSymbolTableFromBrowser).toHaveBeenCalledTimes(
-      2
-    );
+    expect(
+      symbolProvider.requestSymbolsViaSymbolTableFromBrowser
+    ).toHaveBeenCalledTimes(2);
 
     // Empty breakpadIds should result in an error.
     expect(errorCallback).toHaveBeenCalledWith(
@@ -151,55 +128,6 @@ describe('SymbolStore', function () {
         message: expect.stringContaining('Invalid debugName or breakpadId'),
       })
     );
-  });
-
-  it('should persist in DB', async function () {
-    symbolProvider = {
-      requestSymbolsFromServer: jest.fn((requests) =>
-        Promise.resolve(
-          requests.map((request) => ({
-            type: 'ERROR',
-            request,
-            error: new Error('this example only supports symbol tables'),
-          }))
-        )
-      ),
-      requestSymbolsFromBrowser: jest.fn((_requests) =>
-        Promise.reject(
-          new Error('requestSymbolsFromBrowser unsupported in this test')
-        )
-      ),
-      requestSymbolTableFromBrowser: jest.fn(() =>
-        Promise.resolve(completeSymbolTableAsTuple)
-      ),
-    };
-    symbolStore = new SymbolStore('profiler-async-storage', symbolProvider);
-
-    const lib = { debugName: 'firefox', breakpadId: 'dont-care' };
-    const errorCallback = jest.fn((_request, _error) => {});
-    await symbolStore.getSymbols(
-      [{ lib: lib, addresses: new Set([0]) }],
-      (_request, _results) => {},
-      errorCallback
-    );
-    expect(errorCallback).not.toHaveBeenCalled();
-
-    // Using another symbol store simulates a page reload
-    // Due to https://github.com/dumbmatter/fakeIndexedDB/issues/22 we need to
-    // take care to sequence the DB open requests.
-    await symbolStore.closeDb().catch(() => {});
-    symbolStore = new SymbolStore('profiler-async-storage', symbolProvider);
-
-    await symbolStore.getSymbols(
-      [{ lib: lib, addresses: new Set([0x1]) }],
-      (_request, _results) => {},
-      errorCallback
-    );
-
-    expect(symbolProvider.requestSymbolTableFromBrowser).toHaveBeenCalledTimes(
-      1
-    );
-    expect(errorCallback).not.toHaveBeenCalled();
   });
 
   it('should call requestSymbolsFromServer first', async function () {
@@ -245,11 +173,18 @@ describe('SymbolStore', function () {
           new Error('requestSymbolsFromBrowser unsupported in this test')
         )
       ),
-      requestSymbolTableFromBrowser: jest
-        .fn()
-        .mockResolvedValue(completeSymbolTableAsTuple),
+      requestSymbolsViaSymbolTableFromBrowser: jest.fn(
+        (request: LibSymbolicationRequest, _ignoreCache: boolean) => {
+          const results = readSymbolsFromSymbolTable(
+            request.addresses,
+            completeSymbolTableAsTuple,
+            (s: string) => s
+          );
+          return Promise.resolve(results);
+        }
+      ),
     };
-    symbolStore = new SymbolStore('profiler-async-storage', symbolProvider);
+    symbolStore = new SymbolStore(symbolProvider);
 
     const lib1 = {
       debugName: 'available-for-addresses',
@@ -283,10 +218,10 @@ describe('SymbolStore', function () {
     expect(errorCallback).not.toHaveBeenCalled();
 
     // requestSymbolsFromServer should have failed for lib2, so
-    // requestSymbolTableFromBrowser should have been called for it, once.
-    expect(symbolProvider.requestSymbolTableFromBrowser).toHaveBeenCalledTimes(
-      1
-    );
+    // requestSymbolsViaSymbolTableFromBrowser should have been called for it, once.
+    expect(
+      symbolProvider.requestSymbolsViaSymbolTableFromBrowser
+    ).toHaveBeenCalledTimes(1);
 
     const lib1Symbols = ensureExists(symbolsPerLibrary.get(lib1));
     const lib2Symbols = ensureExists(symbolsPerLibrary.get(lib2));
@@ -307,35 +242,6 @@ describe('SymbolStore', function () {
       name: 'last symbol',
       symbolAddress: 0x2000,
     });
-
-    // Using another symbol store simulates a page reload
-    // Due to https://github.com/dumbmatter/fakeIndexedDB/issues/22 we need to
-    // take care to sequence the DB open requests.
-    const symbolStore2 = new SymbolStore(
-      'profiler-async-storage',
-      symbolProvider
-    );
-
-    await symbolStore2.getSymbols(
-      [
-        { lib: lib1, addresses: new Set([0xf01, 0x1a50]) },
-        { lib: lib2, addresses: new Set([0x33, 0x2000]) },
-      ],
-      (_request, _results) => {},
-      errorCallback
-    );
-
-    // The symbolStore should already have a cached symbol table for lib2 now,
-    // so requestSymbolsFromServer should only have been called for one request.
-    expect(symbolProvider.requestSymbolsFromServer).toHaveBeenCalledTimes(2);
-    expect(symbolsForAddressesRequestCount).toEqual(3);
-    expect(errorCallback).not.toHaveBeenCalled();
-
-    // requestSymbolsFromServer should have succeeded for that one request,
-    // so requestSymbolTableFromBrowser should not have been called again.
-    expect(symbolProvider.requestSymbolTableFromBrowser).toHaveBeenCalledTimes(
-      1
-    );
   });
 
   it('should should report the right errors', async function () {
@@ -410,19 +316,28 @@ describe('SymbolStore', function () {
           new Error('requestSymbolsFromBrowser unsupported in this test')
         )
       ),
-      requestSymbolTableFromBrowser: async ({ debugName, breakpadId }) => {
+      requestSymbolsViaSymbolTableFromBrowser: async (
+        request,
+        _ignoreCache
+      ) => {
+        const { lib, addresses } = request;
+        const { debugName, breakpadId } = lib;
         expect(debugName).not.toEqual('');
         expect(breakpadId).not.toEqual('');
         if (
           debugName === 'available-from-browser' ||
           debugName === 'available-from-both-server-and-browser'
         ) {
-          return completeSymbolTableAsTuple;
+          return readSymbolsFromSymbolTable(
+            addresses,
+            completeSymbolTableAsTuple,
+            (s: string) => s
+          );
         }
         throw new Error('The browser does not have symbols for this library.');
       },
     };
-    symbolStore = new SymbolStore('profiler-async-storage', symbolProvider);
+    symbolStore = new SymbolStore(symbolProvider!);
 
     const addresses = new Set([0xf01, 0x1a50]);
     const succeededLibs = new Set<unknown>();
@@ -452,7 +367,7 @@ describe('SymbolStore', function () {
     // Empty debugNames or breakpadIds should cause errors. And if symbols are
     // not available from any source, all errors along the way should be included
     // in the reported error.
-    expect(failedLibs.size).toBe(3);
+    expect([...failedLibs]).toBeArrayOfSize(3);
     expect(failedLibs.get('empty-breakpadid')).toEqual(
       expect.objectContaining({
         message: expect.stringContaining('Invalid debugName or breakpadId'),

@@ -2,6 +2,161 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+:root {
+  /* =====================
+   * Z-index scale
+   * ===================== */
+  --z-tab-selected: 1;
+  --z-warning: 4;
+  --z-root: 0;
+  --z-bottom-box: 1;
+  --z-serviceworker-notice: 4;
+  --z-arrow-panel: 5;
+  --z-copy-table-warning: 4;
+  --z-tree-view: 0;
+  --z-tree-view-inner: 2;
+  --z-overflow-edge-indicator: 3;
+  --z-chart-viewport-expanded: 1;
+  --z-timeline-selection: 1;
+  --z-timeline-selection-overlay: 2;
+  --z-timeline-selection-overlay-time: 1;
+  --z-timeline-selection-grippy: 3;
+  --z-timeline-track-local: 3;
+  --z-timeline-track-thread: 1;
+  --z-timeline-track-screenshot: 4; /* should be higher than any other timeline element */
+  --z-keyboard-shortcuts: 11; /* should be highest possible value */
+  --z-context-menu: 5; /* should be higher than --z-overflow-edge-indicator and --z-timeline-track-screenshot */
+  --z-panel-search: 1;
+  --z-panel-search-introduction: -1;
+  --z-timeline-header: 1;
+  --z-tracks-container: 0; /* should be below --z-timeline-header */
+
+  /* =====================
+   * Colors & theming
+   * ===================== */
+  --base-foreground-color: #000;
+  --base-background-color: #fff;
+  --base-border-color: var(--grey-30);
+  --base-shadow-color: rgb(0 0 0 / 0.2);
+  --link-foreground-color: LinkText;
+  --link-visited-foreground-color: VisitedText;
+  --link-active-foreground-color: ActiveText;
+  --clickable-foreground-color: var(--grey-90);
+  --clickable-background-color: var(--grey-90-a10);
+  --clickable-border-color: var(--grey-90-a30);
+  --clickable-hover-background-color: var(--grey-90-a20);
+  --clickable-active-background-color: var(--grey-90-a30);
+  --clickable-ghost-hover-background-color: var(--grey-90-a10);
+  --clickable-ghost-active-background-color: var(--grey-90-a20);
+  --clickable-checked-background-color: var(--blue-60);
+  --clickable-checked-hover-background-color: var(--blue-70);
+  --clickable-checked-active-background-color: var(--blue-80);
+  --focus-border-color: var(--blue-50);
+  --focus-shadow-color: var(--blue-50-a30);
+  --kbd-foreground-color: var(--base-foreground-color);
+  --kbd-background-color: #f6f6f6;
+  --kbd-border-color: #ccc;
+  --kbd-shadow-color: #bbb;
+  --home-border-color: #ccc;
+  --home-shadow-color: #0b1f50;
+  --row-odd-background-color: #f5f5f5;
+  --home-foreground-color: #000;
+  --home-background-color: #fff;
+  --menu-foreground-color: #000;
+  --menu-background-color: #fff;
+  --lowered-foreground-color: #000;
+  --lowered-background-color: var(--grey-10);
+  --raised-foreground-color: #000;
+  --raised-background-color: #fff;
+  --panel-foreground-color: var(--grey-70);
+  --panel-background-color: var(--grey-10);
+  --panel-border-color: var(--grey-30);
+  --selected-track-background-color: #edf6ff;
+  --tooltip-number-foreground-color: var(--grey-60);
+  --colored-border-color: rgb(0 0 0 / 0.1);
+  --wide-splitter-color: #ccc;
+  --wide-splitter-hover-color: #bbb;
+  --wide-splitter-pressed-color: #aaa;
+
+  /* Colors for DevTools Reps */
+  --number-color: #058b00;
+  --string-color: #dd00a9;
+  --null-color: #5c5c5f;
+  --object-color: #0074e8;
+  --caption-color: #0074e8;
+  --location-color: #5c5c5f;
+  --source-link-color: #0060df;
+  --node-color: #003eaa;
+  --reference-color: #0074e8;
+  --comment-node-color: #5c5c5f;
+
+  color: var(--base-foreground-color);
+}
+
+:root.dark-mode {
+  color-scheme: dark;
+
+  --grey-85: color-mix(var(--grey-80) 60%, var(--grey-90));
+  --base-foreground-color: var(--grey-20);
+  --base-background-color: #18181a;
+  --base-border-color: var(--grey-70);
+  --base-shadow-color: rgb(0 0 0 / 0.5);
+  --link-foreground-color: var(--blue-40);
+  --link-visited-foreground-color: var(--purple-40);
+  --link-active-foreground-color: var(--red-50);
+  --clickable-foreground-color: var(--grey-20);
+  --clickable-background-color: var(--grey-10-a10);
+  --clickable-border-color: var(--grey-10-a40);
+  --clickable-hover-background-color: var(--grey-10-a20);
+  --clickable-active-background-color: var(--grey-10-a40);
+  --clickable-ghost-hover-background-color: var(--grey-10-a10);
+  --clickable-ghost-active-background-color: var(--grey-10-a20);
+  --clickable-checked-background-color: var(--blue-50);
+  --clickable-checked-hover-background-color: var(--blue-60);
+  --clickable-checked-active-background-color: var(--blue-70);
+  --focus-border-color: var(--blue-40);
+  --focus-shadow-color: var(--blue-50-a30);
+  --kbd-background-color: var(--grey-70);
+  --kbd-border-color: var(--grey-60);
+  --kbd-shadow-color: var(--grey-50);
+  --home-border-color: var(--ink-70);
+  --home-shadow-color: var(--ink-90);
+  --row-odd-background-color: var(--raised-background-color);
+  --home-foreground-color: var(--grey-20);
+  --home-background-color: var(--ink-90);
+  --menu-foreground-color: var(--grey-20);
+  --menu-background-color: var(--grey-80);
+  --lowered-foreground-color: var(--grey-40);
+  --lowered-background-color: #121213;
+  --raised-foreground-color: var(--grey-20);
+  --raised-background-color: #232327;
+  --panel-foreground-color: var(--grey-20);
+  --panel-background-color: var(--raised-background-color);
+  --panel-border-color: var(--grey-60);
+  --selected-track-background-color: color-mix(
+    in hsl,
+    var(--raised-background-color) 96%,
+    #edf6ff
+  );
+  --tooltip-number-foreground-color: var(--grey-40);
+  --colored-border-color: rgb(237 237 240 / 0.1);
+  --wide-splitter-color: var(--grey-70);
+  --wide-splitter-hover-color: var(--grey-60);
+  --wide-splitter-pressed-color: var(--grey-60);
+}
+
+a {
+  color: var(--link-foreground-color);
+}
+
+a:visited {
+  color: var(--link-visited-foreground-color);
+}
+
+a:active {
+  color: var(--link-active-foreground-color);
+}
+
 /**
  * This class should be used to create a small colored square. It's used
  * especially for categories and network mime types.
@@ -11,7 +166,7 @@
   width: 9px;
   height: 9px;
   box-sizing: border-box;
-  border: 0.5px solid rgb(0 0 0 / 0.1);
+  border: 0.5px solid var(--colored-border-color);
   margin-right: 3px;
 
   /* Opt-out of forced colors so the color is applied */
@@ -19,7 +174,7 @@
 }
 
 .colored-border {
-  border: 2px solid rgb(0 0 0 / 0.1);
+  border: 2px solid var(--colored-border-color);
   margin-right: 3px;
 
   /* Opt-out of forced colors so the color is applied */
@@ -28,4 +183,16 @@
 
 .colored-border.ellipsis {
   opacity: 0;
+}
+
+.splitter-layout.splitter-layout > .layout-splitter {
+  background-color: var(--wide-splitter-color);
+}
+
+.splitter-layout.splitter-layout > .layout-splitter:hover {
+  background-color: var(--wide-splitter-hover-color);
+}
+
+.splitter-layout.splitter-layout.layout-changing > .layout-splitter {
+  background-color: var(--wide-splitter-pressed-color);
 }

@@ -3,30 +3,52 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .markerSettings {
+  --internal-filter-icon: url(../../../res/img/svg/filter.svg);
+  --internal-copy-icon: url(../../../res/img/svg/copy-dark.svg);
+
   display: flex;
   overflow: auto hidden;
   height: 25px;
   flex-flow: row nowrap;
   padding: 0;
+  background-color: var(--base-background-color);
+  color: var(--base-foreground-color);
   line-height: 25px;
   scrollbar-width: none;
   white-space: nowrap;
 }
 
-.filterMarkersButton {
+:root.dark-mode {
+  .markerSettings {
+    --internal-filter-icon: url(../../../res/img/svg/filter-light.svg);
+    --internal-copy-icon: url(../../../res/img/svg/copy-light.svg);
+  }
+}
+
+.filterMarkersButton,
+.copyTableButton {
   position: relative;
   width: 24px;
   height: 24px;
   flex: none;
   padding-right: 30px;
   margin: 0 4px;
-  background-image: url(../../../res/img/svg/filter.svg);
   background-position: 4px center;
   background-repeat: no-repeat;
 }
 
+.filterMarkersButton {
+  background-image: var(--internal-filter-icon);
+}
+
+.copyTableButton {
+  margin-right: 16px;
+  background-image: var(--internal-copy-icon);
+}
+
 /* This is the dropdown arrow on the right of the button. */
-.filterMarkersButton::after {
+.filterMarkersButton::after,
+.copyTableButton::after {
   position: absolute;
   top: 2px;
   right: 2px;
@@ -37,6 +59,26 @@
   margin-top: 7px;
   margin-right: 4px;
   margin-left: 4px;
-  color: var(--grey-90);
+  color: var(--clickable-foreground-color);
   content: '';
+}
+
+.copyTableButtonWarningWrapper {
+  /* Position */
+  position: fixed;
+  z-index: var(--z-copy-table-warning);
+  top: 0;
+  right: 0;
+  left: 0;
+
+  /* Box */
+  display: flex;
+
+  /* Other */
+  pointer-events: none;
+}
+
+.copyTableButtonWarning {
+  margin: 0 auto;
+  pointer-events: auto;
 }

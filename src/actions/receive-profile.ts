@@ -10,7 +10,10 @@ import {
   processGeckoProfile,
   unserializeProfileOfArbitraryFormat,
 } from 'firefox-profiler/profile-logic/process-profile';
-import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
+import {
+  readSymbolsFromSymbolTable,
+  SymbolStore,
+} from 'firefox-profiler/profile-logic/symbol-store';
 import {
   symbolicateProfile,
   applySymbolicationSteps,
@@ -94,7 +97,14 @@ import type {
   BrowserConnection,
   BrowserConnectionStatus,
 } from '../app-logic/browser-connection';
-import type { LibSymbolicationRequest } from '../profile-logic/symbol-store';
+import type {
+  AddressResult,
+  LibSymbolicationRequest,
+  LibSymbolicationResponse,
+  SymbolProvider,
+} from '../profile-logic/symbol-store';
+import type { SymbolTableAsTuple } from 'firefox-profiler/profile-logic/symbol-store-db';
+import SymbolStoreDB from 'firefox-profiler/profile-logic/symbol-store-db';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -569,13 +579,50 @@ function getSymbolStore(
     return null;
   }
 
-  async function requestSymbolsWithCallback(
+  // Note, the database name still references the old project name, "perf.html". It was
+  // left the same as to not invalidate user's information.
+  const symbolProvider = new RegularSymbolProvider(
+    'perf-html-async-storage',
+    dispatch,
+    symbolServerUrl,
+    browserConnection
+  );
+  return new SymbolStore(symbolProvider);
+}
+
+type DemangleFunction = (name: string) => string;
+
+/**
+ * The regular implementation of the SymbolProvider interface: Symbols are requested
+ * from a server via fetch, and from the browser via a BrowserConnection (if present).
+ * State changes are notified via redux actions to the provided `dispatch` function.
+ */
+class RegularSymbolProvider implements SymbolProvider {
+  _dispatch: Dispatch;
+  _symbolServerUrl: string;
+  _browserConnection: BrowserConnection | null;
+  _symbolDb: SymbolStoreDB;
+  _demangleCallback: DemangleFunction | null = null;
+
+  constructor(
+    dbNamePrefix: string,
+    dispatch: Dispatch,
+    symbolServerUrl: string,
+    browserConnection: BrowserConnection | null
+  ) {
+    this._dispatch = dispatch;
+    this._symbolServerUrl = symbolServerUrl;
+    this._browserConnection = browserConnection;
+    this._symbolDb = new SymbolStoreDB(`${dbNamePrefix}-symbol-tables`);
+  }
+
+  async _makeSymbolicationAPIRequestWithCallback(
     symbolSupplierName: string,
     requests: LibSymbolicationRequest[],
     callback: (path: string, requestJson: string) => Promise<unknown>
   ) {
     for (const { lib } of requests) {
-      dispatch(requestingSymbolTable(lib));
+      this._dispatch(requestingSymbolTable(lib));
     }
     try {
       return await MozillaSymbolicationAPI.requestSymbols(
@@ -589,73 +636,159 @@ function getSymbolStore(
       );
     } finally {
       for (const { lib } of requests) {
-        dispatch(receivedSymbolTableReply(lib));
+        this._dispatch(receivedSymbolTableReply(lib));
       }
     }
   }
 
-  // Note, the database name still references the old project name, "perf.html". It was
-  // left the same as to not invalidate user's information.
-  const symbolStore = new SymbolStore('perf-html-async-storage', {
-    requestSymbolsFromServer: (requests) =>
-      requestSymbolsWithCallback(
-        'symbol server',
-        requests,
-        async (path, json) => {
-          const response = await fetch(symbolServerUrl + path, {
-            body: json,
-            method: 'POST',
-            mode: 'cors',
-            // Use a profiler-specific user agent, so that the symbolication server knows
-            // what's making this request.
-            headers: new Headers({
-              'User-Agent': `FirefoxProfiler/1.0 (+${location.origin})`,
-            }),
-          });
-          return response.json();
-        }
-      ),
-
-    requestSymbolsFromBrowser: async (requests) => {
-      if (browserConnection === null) {
-        throw new Error(
-          'No connection to the browser, cannot run querySymbolicationApi'
-        );
+  requestSymbolsFromServer(
+    requests: LibSymbolicationRequest[]
+  ): Promise<LibSymbolicationResponse[]> {
+    return this._makeSymbolicationAPIRequestWithCallback(
+      'symbol server',
+      requests,
+      async (path, json) => {
+        const response = await fetch(this._symbolServerUrl + path, {
+          body: json,
+          method: 'POST',
+          mode: 'cors',
+          // Use a profiler-specific user agent, so that the symbolication server knows
+          // what's making this request.
+          headers: new Headers({
+            'User-Agent': `FirefoxProfiler/1.0 (+${location.origin})`,
+          }),
+        });
+        return response.json();
       }
+    );
+  }
 
-      const bc = browserConnection;
-      return requestSymbolsWithCallback(
-        'browser',
-        requests,
-        async (path, json) =>
-          JSON.parse(await bc.querySymbolicationApi(path, json))
+  async requestSymbolsFromBrowser(
+    requests: LibSymbolicationRequest[]
+  ): Promise<LibSymbolicationResponse[]> {
+    if (this._browserConnection === null) {
+      throw new Error(
+        'No connection to the browser, cannot run querySymbolicationApi'
       );
-    },
+    }
 
-    requestSymbolTableFromBrowser: async (lib) => {
-      if (browserConnection === null) {
-        throw new Error(
-          'No connection to the browser, cannot obtain symbol tables'
-        );
-      }
+    const bc = this._browserConnection;
+    return this._makeSymbolicationAPIRequestWithCallback(
+      'browser',
+      requests,
+      async (path, json) =>
+        JSON.parse(await bc.querySymbolicationApi(path, json))
+    );
+  }
 
-      const { debugName, breakpadId } = lib;
-      dispatch(requestingSymbolTable(lib));
-      try {
-        const symbolTable = await browserConnection.getSymbolTable(
-          debugName,
-          breakpadId
-        );
-        dispatch(receivedSymbolTableReply(lib));
-        return symbolTable;
-      } catch (error) {
-        dispatch(receivedSymbolTableReply(lib));
-        throw error;
-      }
-    },
-  });
+  /**
+   * This function returns a function that can demangle function name using a
+   * WebAssembly module, but falls back on the identity function if the
+   * WebAssembly module isn't available for some reason.
+   */
+  async _createDemangleCallback(): Promise<DemangleFunction> {
+    try {
+      // When this module imports some WebAssembly module, the bundler's mechanism
+      // invokes the WebAssembly object which might be absent in some browsers,
+      // therefore `import` can throw. Also some browsers might refuse to load a
+      // wasm module because of our CSP.
+      const { demangle_any } = await import('gecko-profiler-demangle');
+      return demangle_any;
+    } catch (error) {
+      // Module loading can fail (for example in browsers without WebAssembly
+      // support, or due to bad server configuration), so we will fall back
+      // to a pass-through function if that happens.
+      console.error('Demangling module could not be imported.', error);
+      return (mangledString) => mangledString;
+    }
+  }
 
-  return symbolStore;
+  async _getDemangleCallback(): Promise<DemangleFunction> {
+    return (this._demangleCallback ??= await this._createDemangleCallback());
+  }
+
+  // Try to get individual symbol tables from the browser, for any libraries
+  // which couldn't be symbolicated with the symbolication API.
+  // This is needed for two cases:
+  //  1. Firefox 95 and earlier, which didn't have a querySymbolicationApi
+  //     WebChannel access point, and only supports symbol tables.
+  //  2. Android system libraries, even in modern versions of Firefox. We don't
+  //     support querySymbolicationApi for them yet, see
+  //     https://bugzilla.mozilla.org/show_bug.cgi?id=1735897
+  async requestSymbolsViaSymbolTableFromBrowser(
+    request: LibSymbolicationRequest,
+    ignoreCache: boolean
+  ): Promise<Map<number, AddressResult>> {
+    // Check this._symbolDb first, and then call this._getSymbolTablesFromBrowser
+    // if we couldn't find the table in the cache.
+
+    // We also need a demangling function for this, which is in an async module.
+    const demangleCallback = await this._getDemangleCallback();
+
+    const { lib, addresses } = request;
+    const { debugName, breakpadId } = lib;
+    let symbolTable = null;
+
+    if (!ignoreCache) {
+      // Try to get the symbol table from the database.
+      // This call will return null if the symbol table is not present.
+      symbolTable = await this._symbolDb.getSymbolTable(debugName, breakpadId);
+    }
+
+    if (symbolTable === null) {
+      symbolTable = await this._requestSymbolTableFromBrowser(lib);
+      this._storeSymbolTableInDB(lib, symbolTable);
+    }
+
+    return readSymbolsFromSymbolTable(addresses, symbolTable, demangleCallback);
+  }
+
+  async _requestSymbolTableFromBrowser(
+    lib: RequestedLib
+  ): Promise<SymbolTableAsTuple> {
+    if (this._browserConnection === null) {
+      throw new Error(
+        'No connection to the browser, cannot obtain symbol tables'
+      );
+    }
+
+    const { debugName, breakpadId } = lib;
+    this._dispatch(requestingSymbolTable(lib));
+    try {
+      const symbolTable = await this._browserConnection.getSymbolTable(
+        debugName,
+        breakpadId
+      );
+      this._dispatch(receivedSymbolTableReply(lib));
+      return symbolTable;
+    } catch (error) {
+      this._dispatch(receivedSymbolTableReply(lib));
+      throw error;
+    }
+  }
+
+  // Store a symbol table in the database. This is only used for symbol tables
+  // and not for partial symbol results. Symbol tables are obtained from the
+  // browser via the geckoProfiler object which is defined in a frame script:
+  // https://searchfox.org/mozilla-central/rev/a9db89754fb507254cb8422e5a00af7c10d98264/devtools/client/performance-new/frame-script.js#67-81
+  //
+  // We do not store results from the Mozilla symbolication API, because those
+  // only contain the symbols we requested and not all the symbols of a given
+  // library.
+  async _storeSymbolTableInDB(
+    lib: RequestedLib,
+    symbolTable: SymbolTableAsTuple
+  ): Promise<void> {
+    const { debugName, breakpadId } = lib;
+    try {
+      await this._symbolDb.storeSymbolTable(debugName, breakpadId, symbolTable);
+    } catch (error) {
+      console.log(
+        `Failed to store the symbol table for ${debugName} in the database:`,
+        error
+      );
+    }
+  }
 }
 
 export async function doSymbolicateProfile(
@@ -1400,9 +1533,10 @@ export function retrieveProfileForRawUrl(
     }
 
     let dataSource = ensureIsValidDataSource(possibleDataSource);
-    if (dataSource === 'from-file') {
-      // Redirect to 'none' if `dataSource` is 'from-file' since initial urls can't
-      // be 'from-file' and needs to be redirected to home page.
+    // Redirect to 'none' for from-file and unpublished data sources since initial
+    // urls can't be 'from-file' or 'unpublished' and need to be redirected to
+    // home page. 'unpublished' is a transient state after profile deletion.
+    if (dataSource === 'from-file' || dataSource === 'unpublished') {
       dataSource = 'none';
     }
     dispatch(setDataSource(dataSource));
@@ -1475,7 +1609,6 @@ export function retrieveProfileForRawUrl(
       case 'uploaded-recordings':
       case 'none':
       case 'local':
-      case 'unpublished':
         // There is no profile to download for these datasources.
         break;
       default:

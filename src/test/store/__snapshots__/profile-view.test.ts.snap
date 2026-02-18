@@ -418,7 +418,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 58,
+    "preprocessedProfileVersion": 59,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -426,7 +426,7 @@ Object {
     "startTime": 0,
     "symbolicated": true,
     "toolkit": "",
-    "version": 32,
+    "version": 33,
   },
   "pages": Array [
     Object {
@@ -880,6 +880,9 @@ Object {
       },
       "tid": 0,
       "unregisterTime": null,
+      "usedInnerWindowIDs": Array [
+        2,
+      ],
     },
     Object {
       "frameTable": Object {
@@ -1492,6 +1495,9 @@ Array [
     },
     "tid": 0,
     "unregisterTime": null,
+    "usedInnerWindowIDs": Array [
+      2,
+    ],
   },
   Object {
     "frameTable": Object {
@@ -2632,6 +2638,23 @@ CallTree {
     },
   },
   "_isHighPrecision": false,
+  "_previewFilteredCtssSamples": Object {
+    "eventDelay": Array [
+      0,
+      0,
+    ],
+    "length": 2,
+    "stack": Array [
+      6,
+      6,
+    ],
+    "time": Array [
+      4,
+      5,
+    ],
+    "weight": null,
+    "weightType": "samples",
+  },
   "_rootTotalSummary": 2,
   "_roots": Array [
     0,
@@ -2962,6 +2985,8 @@ CallTree {
       },
     },
     "tid": 0,
+    "tracedObjectShapes": undefined,
+    "tracedValuesBuffer": undefined,
     "unregisterTime": null,
     "userContextId": undefined,
   },
@@ -3296,6 +3321,8 @@ Object {
     },
   },
   "tid": 0,
+  "tracedObjectShapes": undefined,
+  "tracedValuesBuffer": undefined,
   "unregisterTime": null,
   "userContextId": undefined,
 }
@@ -3702,6 +3729,8 @@ Object {
     },
   },
   "tid": 0,
+  "tracedObjectShapes": undefined,
+  "tracedValuesBuffer": undefined,
   "unregisterTime": null,
   "userContextId": undefined,
 }
@@ -4034,6 +4063,8 @@ Object {
     },
   },
   "tid": 0,
+  "tracedObjectShapes": undefined,
+  "tracedValuesBuffer": undefined,
   "unregisterTime": null,
   "userContextId": undefined,
 }
@@ -4366,6 +4397,8 @@ Object {
     },
   },
   "tid": 0,
+  "tracedObjectShapes": undefined,
+  "tracedValuesBuffer": undefined,
   "unregisterTime": null,
   "userContextId": undefined,
 }
@@ -4393,6 +4426,7 @@ Object {
       ],
     },
   },
+  "lastSeenTransformCount": 1,
   "selectedInvertedCallNodePath": Array [],
   "selectedMarker": 1,
   "selectedNetworkMarker": null,

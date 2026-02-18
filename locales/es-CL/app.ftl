@@ -21,6 +21,16 @@ AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader
 AppHeader--github-icon =
     .title = Ir a nuestro repositorio Git (se abrirá en una nueva ventana)
 
+## ThemeToggle
+## They are used at the top right side of the home page to switch between themes.
+
+ThemeToggle--system =
+    .title = Seguir la preferencia del tema del sistema
+ThemeToggle--light =
+    .title = Usar tema claro
+ThemeToggle--dark =
+    .title = Usar tema oscuro
+
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
@@ -69,6 +79,18 @@ CallNodeContextMenu--transform-focus-function = Enfocarse en la función
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Enfocarse en la función (invertido)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+## The translation for "self" in these strings should match the translation used
+## in CallTree--samples-self and CallTree--bytes-self. Alternatively it can be
+## translated as "self values" or "self time" (though "self time" is less desirable
+## because this menu item is also shown in "bytes" mode).
+
+CallNodeContextMenu--transform-focus-self-title = Centrarse en sí misma es similar a centrarse en una función, pero solo conserva las muestras que contribuyen al tiempo propio de la función. Las muestras de las llamadas se descartan y el árbol de llamadas se redirige a la función enfocada.
+CallNodeContextMenu--transform-focus-self = Centrarse sólo si misma
+    .title = { CallNodeContextMenu--transform-focus-self-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Enfocarse solo en el subárbol
     .title = Enfocarse en el subárbol removerá cualquier muestra que no incluya esa parte específica del árbol de llamados. Retira una rama del árbol de llamados, no obstante solo lo hace para un único nodo de llamada. Todo el resto de las llamadas de la función son ignoradas.
 # This is used as the context menu item to apply the "Focus on category" transform.
@@ -272,6 +294,7 @@ Home--additional-content-title = Cargar perfiles existentes
 Home--additional-content-content = Puedes <strong>arrastrar y soltar</strong> un archivo de perfil aquí para cargarlo, o:
 Home--compare-recordings-info = También puedes comparar los registros. <a>Abre la interfaz de comparación.</a>
 Home--your-recent-uploaded-recordings-title = Tus registros subidos recientemente
+Home--dark-mode-title = Modo oscuro
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 =
@@ -360,6 +383,13 @@ MarkerContextMenu--select-the-sender-thread = Selecciona el hilo remitente "<str
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Sacar muestras que queden fuera de los marcadores que coincidan con: “<strong>{ $filter }</strong>”
 
+## MarkerCopyTableContextMenu
+## This is the menu when the copy icon is clicked in Marker Chart and Marker
+## Table panels.
+
+MarkerCopyTableContextMenu--copy-table-as-plain = Copiar la tabla de marcadores como texto sin formato
+MarkerCopyTableContextMenu--copy-table-as-markdown = Copiar la tabla de marcadores como Markdown
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
@@ -368,6 +398,14 @@ MarkerSettings--panel-search =
     .title = Solo mostrar marcadores que coincidan con cierto nombre
 MarkerSettings--marker-filters =
     .title = Filtros de marcador
+MarkerSettings--copy-table =
+    .title = Copiar tabla como texto
+# This string is used when the user tries to copy a marker table with
+# more than 10000 rows.
+# Variable:
+#   $rows (Number) - Number of rows the marker table has
+#   $maxRows (Number) - Number of maximum rows that can be copied
+MarkerSettings--copy-table-exceeed-max-rows = El número de filas supera el límite: { $rows } > { $maxRows }. Solo se copiarán las primeras { $maxRows } filas.
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -468,6 +506,8 @@ MenuButtons--metaInfo--profiling-started = Inicio del registro:
 MenuButtons--metaInfo--profiling-session = Duración del registro:
 MenuButtons--metaInfo--main-process-started = Proceso principal iniciado:
 MenuButtons--metaInfo--main-process-ended = Proceso principal terminado:
+MenuButtons--metaInfo--file-name = Nombre de archivo:
+MenuButtons--metaInfo--file-size = Tamaño del archivo:
 MenuButtons--metaInfo--interval = Intervalo:
 MenuButtons--metaInfo--buffer-capacity = Capacidad del búfer:
 MenuButtons--metaInfo--buffer-duration = Duración del búfer:
@@ -483,7 +523,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Ilimitado
 MenuButtons--metaInfo--application = Aplicación
 MenuButtons--metaInfo--name-and-version = Nombre y versión:
-MenuButtons--metaInfo--application-uptime = Tiempo de actividad:
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = Tiempo de actividad:
 MenuButtons--metaInfo--update-channel = Canal de actualización:
 MenuButtons--metaInfo--build-id = ID de compilación:
 MenuButtons--metaInfo--build-type = Tipo de compilación:
@@ -794,6 +835,11 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Potencia
+# This is used in the tooltip when the instant power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-microwatt = { $value } μW
+    .label = Energía
 # This is used in the tooltip when the power value uses the kilowatt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -943,6 +989,12 @@ TransformNavigator--focus-subtree = Nodo enfocado: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Enfocar: { $item }
+# "Focus self" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-on-function-self
+# Also see the translation note above CallNodeContextMenu--transform-focus-self.
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-self = Centrarse en si misma: { $item }
 # "Focus category" transform. The word "Focus" has the meaning of an adjective here.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
 # Variables:
@@ -1088,6 +1140,17 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = Ocultar la vista de ensamblaje
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = Anterior
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = Siguiente
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = { $current } de { $total }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

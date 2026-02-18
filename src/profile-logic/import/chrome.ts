@@ -339,7 +339,8 @@ function getThreadInfo(
   if (threadNameEvent) {
     thread.name = threadNameEvent.args.name;
     thread.isMainThread =
-      thread.name.startsWith('Cr') && thread.name.endsWith('Main');
+      (thread.name.startsWith('Cr') && thread.name.endsWith('Main')) ||
+      (!!chunk.pid && chunk.pid === chunk.tid);
   }
 
   const processNameEvent = findEvent<ProcessNameEvent>(
@@ -396,10 +397,10 @@ function getThreadInfo(
 
   profile.threads.push(thread);
 
-  const nodeIdToStackId = new Map();
+  const nodeIdToStackId = new Map<number | void, IndexIntoStackTable | null>();
   nodeIdToStackId.set(undefined, null);
 
-  const threadInfo = {
+  const threadInfo: ThreadInfo = {
     thread,
     nodeIdToStackId,
     funcKeyToFuncId: new Map(),
@@ -518,8 +519,8 @@ async function processTracingEvents(
     ensureExists(profile.meta.categories)
   );
 
-  const threadInfoByPidAndTid = new Map();
-  const threadInfoByThread = new Map();
+  const threadInfoByPidAndTid = new Map<string, ThreadInfo>();
+  const threadInfoByThread = new Map<RawThread, ThreadInfo>();
   for (const profileEvent of profileEvents) {
     // The thread info is all of the data that makes it possible to process an
     // individual thread.
@@ -574,7 +575,7 @@ async function processTracingEvents(
       } = thread;
 
       if (nodes) {
-        const parentMap = new Map();
+        const parentMap = new Map<number, number>();
         for (const node of nodes) {
           const { callFrame, id: nodeIndex } = node;
           let parent: number | void = undefined;
@@ -921,6 +922,32 @@ function extractMarkers(
     throw new Error('No "Other" category in empty profile category list');
   }
 
+  // Map to track category names to their indices.
+  const categoryNameToIndex = new Map<string, number>();
+  const categories = ensureExists(profile.meta.categories);
+  for (let i = 0; i < categories.length; i++) {
+    categoryNameToIndex.set(categories[i].name, i);
+  }
+
+  // Helper function to get or create a category index for a given category name.
+  function getOrCreateCategoryIndex(categoryName: string): number {
+    const existing = categoryNameToIndex.get(categoryName);
+    if (existing !== undefined) {
+      return existing;
+    }
+
+    // Create a new category with a default color. The colors are not important
+    // since we don't visualize the marker colors yet.
+    const newIndex = categories.length;
+    categories.push({
+      name: categoryName,
+      color: 'grey',
+      subcategories: ['Other'],
+    });
+    categoryNameToIndex.set(categoryName, newIndex);
+    return newIndex;
+  }
+
   profile.meta.markerSchema = [
     {
       name: 'EventDispatch',
@@ -939,6 +966,9 @@ function extractMarkers(
       ],
     },
   ];
+
+  // Track whether we've added the EventWithDetail schema
+  let hasEventWithDetailSchema = false;
 
   for (const [name, events] of eventsByName.entries()) {
     if (
@@ -988,13 +1018,22 @@ function extractMarkers(
         const { thread } = threadInfo;
         const { markers } = thread;
         let argData:
-          | (object & { type2?: unknown; category2?: unknown })
+          | (object & { type2?: unknown; category2?: unknown; detail?: string })
           | null = null;
         if ('args' in event && event.args && typeof event.args === 'object') {
-          argData = event.args.data || null;
+          // Some trace events have args.data, but others have args fields directly
+          // (e.g., "Source" markers have args.detail).
+          if (event.args.data) {
+            argData = event.args.data;
+          } else if (
+            'detail' in event.args &&
+            typeof event.args.detail === 'string'
+          ) {
+            argData = { detail: event.args.detail };
+          }
         }
+
         markers.name.push(stringTable.indexForString(name));
-        markers.category.push(otherCategoryIndex);
 
         if (argData && 'type' in argData) {
           argData.type2 = argData.type;
@@ -1003,11 +1042,41 @@ function extractMarkers(
           argData.category2 = argData.category;
         }
 
-        const newData = {
-          ...argData,
-          type: name,
-          category: event.cat,
-        };
+        // Add EventWithDetail schema the first time we encounter a detail field
+        if (argData?.detail && !hasEventWithDetailSchema) {
+          profile.meta.markerSchema.push({
+            // Generic schema for Chrome trace event markers with a detail field.
+            // This is used when compiling with clang -ftime-trace=file.json, which
+            // generates Source markers, ParseDeclarationOrFunctionDefinition markers,
+            // and similar compiler events with file paths or location details.
+            name: 'EventWithDetail',
+            chartLabel: '{marker.data.detail}',
+            tooltipLabel: '{marker.name}: {marker.data.detail}',
+            tableLabel: '{marker.data.detail}',
+            display: ['marker-chart', 'marker-table'],
+            fields: [
+              {
+                key: 'detail',
+                label: 'Details',
+                format: 'string',
+              },
+            ],
+          });
+          hasEventWithDetailSchema = true;
+        }
+
+        const newData = argData
+          ? {
+              ...argData,
+              type: argData?.detail ? 'EventWithDetail' : name,
+            }
+          : null;
+
+        // Store the category in the markers.category array.
+        const categoryIndex = event.cat
+          ? getOrCreateCategoryIndex(event.cat)
+          : otherCategoryIndex;
+        markers.category.push(categoryIndex);
 
         // @ts-expect-error Opt out of type checking for this one.
         markers.data.push(newData);

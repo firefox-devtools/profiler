@@ -6,34 +6,56 @@ import * as colors from 'photon-colors';
 
 import type { CssPixels, Marker } from 'firefox-profiler/types';
 
+import { maybeLightDark } from '../utils/dark-mode';
+
 type MarkerStyle = {
   readonly top: CssPixels;
   readonly height: CssPixels;
-  readonly background: string;
+  readonly _background: string | [string, string];
+  readonly getBackground: () => string;
   readonly squareCorners: boolean;
-  readonly borderLeft: null | string;
-  readonly borderRight: null | string;
+  readonly _borderLeft: null | string | [string, string];
+  readonly hasBorderLeft: () => boolean;
+  readonly getBorderLeft: () => string;
+  readonly _borderRight: null | string | [string, string];
+  readonly hasBorderRight: () => boolean;
+  readonly getBorderRight: () => string;
 };
 
-const defaultStyle = {
+const defaultStyle: MarkerStyle = {
   top: 0,
   height: 6,
-  background: 'black',
+  _background: ['black', colors.GREY_40],
+  getBackground: function () {
+    return maybeLightDark(this._background);
+  },
   squareCorners: false,
-  borderLeft: null,
-  borderRight: null,
+  _borderLeft: null,
+  hasBorderLeft: function () {
+    return this._borderLeft !== null;
+  },
+  getBorderLeft: function () {
+    return maybeLightDark(this._borderLeft as string | [string, string]);
+  },
+  _borderRight: null,
+  hasBorderRight: function () {
+    return this._borderRight !== null;
+  },
+  getBorderRight: function () {
+    return maybeLightDark(this._borderRight as string | [string, string]);
+  },
 };
 
 const gcStyle = {
   ...defaultStyle,
   top: 6,
-  background: colors.ORANGE_50,
+  _background: colors.ORANGE_50,
 };
 
 const ccStyle = {
   ...gcStyle,
   // This is a paler orange to distinguish CC from GC.
-  background: '#ffc600',
+  _background: '#ffc600',
 };
 
 /**
@@ -55,13 +77,13 @@ const markerStyles: { readonly [styleName: string]: MarkerStyle } = {
   default: defaultStyle,
   RefreshDriverTick: {
     ...defaultStyle,
-    background: 'hsla(0,0%,0%,0.05)',
+    _background: 'rgba(237, 237, 240, 0.05)',
     height: 18,
     squareCorners: true,
   },
   RD: {
     ...defaultStyle,
-    background: 'hsla(0,0%,0%,0.05)',
+    _background: 'rgba(237, 237, 240, 0.05)',
     height: 18,
     squareCorners: true,
   },
@@ -69,97 +91,97 @@ const markerStyles: { readonly [styleName: string]: MarkerStyle } = {
   // here for backwards compatibility.
   Scripts: {
     ...defaultStyle,
-    background: colors.ORANGE_70,
+    _background: colors.ORANGE_70,
     top: 6,
   },
   'requestAnimationFrame callbacks': {
     ...defaultStyle,
-    background: colors.ORANGE_70,
+    _background: colors.ORANGE_70,
     top: 6,
   },
   Styles: {
     ...defaultStyle,
-    background: colors.TEAL_50,
+    _background: [colors.TEAL_50, colors.TEAL_70],
     top: 7,
   },
   FireScrollEvent: {
     ...defaultStyle,
-    background: colors.ORANGE_70,
+    _background: colors.ORANGE_70,
     top: 7,
   },
   Reflow: {
     ...defaultStyle,
-    background: colors.BLUE_50,
+    _background: colors.BLUE_50,
     top: 7,
   },
   DispatchSynthMouseMove: {
     ...defaultStyle,
-    background: colors.ORANGE_70,
+    _background: colors.ORANGE_70,
     top: 8,
   },
   DisplayList: {
     ...defaultStyle,
-    background: colors.PURPLE_50,
+    _background: colors.PURPLE_50,
     top: 9,
   },
   LayerBuilding: {
     ...defaultStyle,
-    background: colors.ORANGE_50,
+    _background: colors.ORANGE_50,
     top: 9,
   },
   Rasterize: {
     ...defaultStyle,
-    background: colors.GREEN_50,
+    _background: [colors.GREEN_50, colors.GREEN_60],
     top: 10,
   },
   ForwardTransaction: {
     ...defaultStyle,
-    background: colors.RED_70,
+    _background: colors.RED_70,
     top: 11,
   },
   NotifyDidPaint: {
     ...defaultStyle,
-    background: colors.GREY_40,
+    _background: colors.GREY_40,
     top: 12,
   },
   LayerTransaction: {
     ...defaultStyle,
-    background: colors.RED_70,
+    _background: colors.RED_70,
   },
   Composite: {
     ...defaultStyle,
-    background: colors.BLUE_50,
+    _background: colors.BLUE_50,
   },
   Vsync: {
     ...defaultStyle,
-    background: 'rgb(255, 128, 0)',
+    _background: 'rgb(255, 128, 0)',
   },
   LayerContentGPU: {
     ...defaultStyle,
-    background: 'rgba(0,200,0,0.5)',
+    _background: 'rgba(0,200,0,0.5)',
   },
   LayerCompositorGPU: {
     ...defaultStyle,
-    background: 'rgba(0,200,0,0.5)',
+    _background: 'rgba(0,200,0,0.5)',
   },
   LayerOther: {
     ...defaultStyle,
-    background: 'rgb(200,0,0)',
+    _background: 'rgb(200,0,0)',
   },
   Jank: {
     ...defaultStyle,
-    background: 'hsl(347, 100%, 60%)',
-    borderLeft: colors.RED_50,
-    borderRight: colors.RED_50,
+    _background: ['hsl(347, 100%, 60%)', 'hsl(347, 75%, 40%)'],
+    _borderLeft: [colors.RED_50, colors.RED_70],
+    _borderRight: [colors.RED_50, colors.RED_70],
     squareCorners: true,
   },
   // BHR markers are displayed in the timeline only if jank markers are
   // unavailable. Let's style them like Jank markers.
   'BHR-detected hang': {
     ...defaultStyle,
-    background: 'hsl(347, 100%, 60%)',
-    borderLeft: colors.RED_50,
-    borderRight: colors.RED_50,
+    _background: ['hsl(347, 100%, 60%)', 'hsl(347, 75%, 40%)'],
+    _borderLeft: [colors.RED_50, colors.RED_70],
+    _borderRight: [colors.RED_50, colors.RED_70],
     squareCorners: true,
   },
   // Memory:
@@ -186,27 +208,27 @@ const markerStyles: { readonly [styleName: string]: MarkerStyle } = {
   // IO:
   FileIO: {
     ...defaultStyle,
-    background: colors.BLUE_50,
+    _background: colors.BLUE_50,
   },
 
   IPCOut: {
     ...defaultStyle,
-    background: colors.BLUE_50,
+    _background: colors.BLUE_50,
     top: 2,
   },
   SyncIPCOut: {
     ...defaultStyle,
-    background: colors.BLUE_70,
+    _background: colors.BLUE_70,
     top: 6,
   },
   IPCIn: {
     ...defaultStyle,
-    background: colors.PURPLE_40,
+    _background: colors.PURPLE_40,
     top: 13,
   },
   SyncIPCIn: {
     ...defaultStyle,
-    background: colors.PURPLE_70,
+    _background: colors.PURPLE_70,
     top: 17,
   },
 };

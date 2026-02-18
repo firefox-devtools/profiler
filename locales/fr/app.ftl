@@ -39,6 +39,14 @@ AppViewRouter--error-from-localhost-url-safari = En raison d’une <a>limitation
 AppViewRouter--route-not-found--home =
     .specialMessage = L’URL que vous avez tenté d’atteindre n’a pas été trouvée
 
+## Backtrace
+## This is used to display a backtrace (call stack) for a marker or sample.
+
+# Variables:
+#   $function (String) - Name of the function that was inlined.
+Backtrace--inlining-badge = (intégrée)
+    .title = La fonction { $function } a été intégrée dans le code de son appelant par le compilateur.
+
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
@@ -57,6 +65,9 @@ CallNodeContextMenu--transform-focus-function = Focus sur la fonction
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Focus sur la fonction (inversé)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Focus sur le sous-arbre uniquement
     .title = Mettre le focus sur un sous-arbre supprime tout échantillon qui n’inclut pas cette partie spécifique de l’arbre d’appels. Il extrait une branche de l’arborescence des appels, mais il ne le fait que pour ce seul nœud d’appel. Tous les autres appels de la fonction sont ignorés.
 # This is used as the context menu item to apply the "Focus on category" transform.
@@ -258,6 +269,7 @@ Home--additional-content-title = Charger des profils existants
 Home--additional-content-content = Vous pouvez <strong>glisser-déposer</strong> un fichier de profil ici pour le charger, ou :
 Home--compare-recordings-info = Vous pouvez également comparer des enregistrements. <a>Ouvrir l’interface de comparaison.</a>
 Home--your-recent-uploaded-recordings-title = Vos enregistrements récemment envoyés
+Home--dark-mode-title = Mode sombre
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 =
@@ -346,6 +358,13 @@ MarkerContextMenu--select-the-sender-thread = Sélectionner le thread expéditeu
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Abandonner les échantillons en dehors des marqueurs correspondant à « <strong>{ $filter }</strong> »
 
+## MarkerCopyTableContextMenu
+## This is the menu when the copy icon is clicked in Marker Chart and Marker
+## Table panels.
+
+MarkerCopyTableContextMenu--copy-table-as-plain = Copier le tableau des marqueurs en texte brut
+MarkerCopyTableContextMenu--copy-table-as-markdown = Copier le tableau des marqueurs en Markdown
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
@@ -354,6 +373,14 @@ MarkerSettings--panel-search =
     .title = Afficher uniquement les marqueurs qui correspondent à un certain nom
 MarkerSettings--marker-filters =
     .title = Filtres de marqueurs
+MarkerSettings--copy-table =
+    .title = Copier le tableau sous forme de texte
+# This string is used when the user tries to copy a marker table with
+# more than 10000 rows.
+# Variable:
+#   $rows (Number) - Number of rows the marker table has
+#   $maxRows (Number) - Number of maximum rows that can be copied
+MarkerSettings--copy-table-exceeed-max-rows = Le nombre de lignes dépasse la limite : { $rows } > { $maxRows }. Seules les { $maxRows } premières lignes seront copiées.
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -471,7 +498,6 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Illimitée
 MenuButtons--metaInfo--application = Application
 MenuButtons--metaInfo--name-and-version = Nom et version :
-MenuButtons--metaInfo--application-uptime = Disponibilité :
 MenuButtons--metaInfo--update-channel = Canal de mise à jour :
 MenuButtons--metaInfo--build-id = Identifiant de compilation :
 MenuButtons--metaInfo--build-type = Type de compilation :
@@ -1076,6 +1102,17 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = Masquer la vue assembleur
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = Précédent
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = Suivant
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = { $current } sur { $total }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

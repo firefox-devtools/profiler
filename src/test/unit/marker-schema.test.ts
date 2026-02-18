@@ -4,10 +4,10 @@
 
 import {
   formatFromMarkerSchema,
-  formatMarkupFromMarkerSchema,
   parseLabel,
   markerSchemaFrontEndOnly,
 } from '../../profile-logic/marker-schema';
+import { renderMarkerFieldValue } from 'firefox-profiler/components/tooltip/Marker';
 import type {
   MarkerSchema,
   Marker,
@@ -357,9 +357,9 @@ describe('marker schema formatting', function () {
         "bytes - 0B",
         "bytes - 10B",
         "bytes - 12B",
-        "bytes - 121KB",
-        "bytes - 118MB",
-        "bytes - 115GB",
+        "bytes - 123KB",
+        "bytes - 123MB",
+        "bytes - 123GB",
         "bytes - 0.000B",
         "integer - 0",
         "integer - 10",
@@ -432,7 +432,7 @@ describe('marker schema formatting', function () {
       entries.map(([format, value]: [MarkerFormatType, any]): string[][] => [
         format,
         value,
-        formatMarkupFromMarkerSchema('none', format, value, stringTable),
+        renderMarkerFieldValue('none', format, value, stringTable),
         formatFromMarkerSchema('none', format, value, stringTable),
       ])
     ).toMatchSnapshot();

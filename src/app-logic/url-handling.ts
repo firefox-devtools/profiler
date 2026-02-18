@@ -49,7 +49,7 @@ import {
 import { tabSlugs } from '../app-logic/tabs-handling';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 
-export const CURRENT_URL_VERSION = 12;
+export const CURRENT_URL_VERSION = 13;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -358,9 +358,10 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         if (sourceView.sourceIndex !== null) {
           query.sourceViewIndex = sourceView.sourceIndex;
         }
-        if (assemblyView.isOpen && assemblyView.nativeSymbol !== null) {
+        if (assemblyView.isOpen && assemblyView.currentNativeSymbol !== null) {
+          const { currentNativeSymbol, nativeSymbols } = assemblyView;
           query.assemblyView = stringifyAssemblyViewSymbol(
-            assemblyView.nativeSymbol
+            nativeSymbols[currentNativeSymbol]
           );
         }
         if (isBottomBoxFullscreen) {
@@ -518,12 +519,14 @@ export function stateFromLocation(
     scrollGeneration: 0,
     libIndex: null,
     sourceIndex: null,
+    highlightedLine: null,
   };
   const assemblyView: AssemblyViewState = {
     isOpen: false,
     scrollGeneration: 0,
-    nativeSymbol: null,
-    allNativeSymbolsForInitiatingCallNode: [],
+    nativeSymbols: [],
+    currentNativeSymbol: null,
+    highlightedInstruction: null,
   };
   const isBottomBoxOpenPerPanel: any = {};
   tabSlugs.forEach((tabSlug) => (isBottomBoxOpenPerPanel[tabSlug] = false));
@@ -534,8 +537,8 @@ export function stateFromLocation(
   if (query.assemblyView) {
     const symbol = parseAssemblyViewSymbol(query.assemblyView);
     if (symbol !== null) {
-      assemblyView.nativeSymbol = symbol;
-      assemblyView.allNativeSymbolsForInitiatingCallNode = [symbol];
+      assemblyView.nativeSymbols = [symbol];
+      assemblyView.currentNativeSymbol = 0;
       assemblyView.isOpen = true;
       isBottomBoxOpenPerPanel[selectedTab] = true;
     }
@@ -644,7 +647,7 @@ function convertHiddenLocalTracksByPidFromString(
     return new Map();
   }
 
-  const hiddenLocalTracksByPid = new Map();
+  const hiddenLocalTracksByPid = new Map<Pid, Set<TrackIndex>>();
 
   for (const stringPart of rawText.split('~')) {
     if (!stringPart.includes('-')) {
@@ -688,7 +691,7 @@ function convertLocalTrackOrderByPidFromString(
     return new Map();
   }
 
-  const localTrackOrderByPid = new Map();
+  const localTrackOrderByPid = new Map<Pid, TrackIndex[]>();
 
   for (const stringPart of rawText.split('~')) {
     if (!stringPart.includes('-')) {
@@ -1027,12 +1030,10 @@ const _upgraders: {
         .join('~');
     }
     if (query.thread) {
-      const selectedThreads = new Set(
+      const selectedThreads = new Set<number>(
         query.thread.split(',').map((n: string) => +n)
       );
-      query.thread = encodeUintSetForUrlComponent(
-        selectedThreads as Set<number>
-      );
+      query.thread = encodeUintSetForUrlComponent(selectedThreads);
     }
 
     // In this version, uintarray-encoding started supporting a range syntax:
@@ -1200,6 +1201,9 @@ const _upgraders: {
     }
     // Remove the old sourceView parameter regardless of whether we found a match
     delete query.sourceView;
+  },
+  [13]: (_) => {
+    // just added the focus-self transform
   },
 };
 

@@ -13,6 +13,7 @@ import '../res/css/global.css';
 import '../res/css/categories.css';
 import '../res/css/network.css';
 import 'react-splitter-layout/lib/index.css';
+import 'devtools-reps/reps.css';
 
 // React imported for JSX in Root component
 import { createRoot } from 'react-dom/client';
@@ -24,6 +25,9 @@ import {
   logDevelopmentTips,
 } from './utils/window-console';
 import { ensureExists } from './utils/types';
+import { initTheme } from './utils/dark-mode';
+
+initTheme();
 
 // Mock out Google Analytics for anything that's not production so that we have run-time
 // code coverage in development and testing.
@@ -90,7 +94,11 @@ if (svgFiltersElement) {
   const forcedColorsMql = window.matchMedia('(forced-colors: active)');
   const darkSchemeMql = window.matchMedia('(prefers-color-scheme: dark)');
   forcedColorsMql.addEventListener('change', defineSvgFiltersForColors);
-  darkSchemeMql.addEventListener('change', defineSvgFiltersForColors);
+  darkSchemeMql.addEventListener('change', () => {
+    defineSvgFiltersForColors();
+    // Re-apply theme when system preference changes (for 'system' mode users)
+    initTheme();
+  });
 }
 
 const store = createStore();

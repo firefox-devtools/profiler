@@ -35,13 +35,15 @@
 }
 
 .profileViewerWrapper {
+  --internal-background-color: var(--grey-40);
+
   display: flex;
   min-width: 0;
   flex: 1;
 }
 
 .profileViewerWrapperBackground {
-  background-color: var(--grey-40);
+  background-color: var(--internal-background-color);
 }
 
 .profileViewer {
@@ -51,7 +53,7 @@
   flex-flow: column nowrap;
   animation-duration: 200ms;
   animation-name: profileViewerFadeIn;
-  background-color: #fff;
+  background-color: var(--panel-background-color);
 }
 
 .profileViewerFadeOut {
@@ -68,6 +70,11 @@
 }
 
 .profileViewerZipButton {
+  --internal-background-color: var(--green-50);
+  --internal-border-color: var(--green-60);
+  --internal-icon: url(../../../res/img/svg/back-arrow.svg);
+  --internal-hover-border-color: #000;
+
   /* Position */
   width: 18px;
   height: 18px;
@@ -75,26 +82,39 @@
   /* Box */
   flex: none;
   padding: 0;
-  border: 1px solid var(--green-60);
+  border: 1px solid var(--internal-border-color);
   border-radius: 3px;
   margin: 3px 0 3px 3px;
 
   /* Other */
-  background: var(--green-50) url(../../../res/img/svg/back-arrow.svg) center
+  background: var(--internal-background-color) var(--internal-icon) center
     center no-repeat;
-  color: #000;
+  color: var(--base-foreground-color);
 }
 
 .profileViewerZipButton:hover {
-  border-color: #000;
+  border-color: var(--profile-viewer-zip-hover-border-color);
+}
+
+:root.dark-mode {
+  .profileViewerWrapper {
+    --internal-background-color: var(--grey-70);
+  }
+
+  .profileViewerZipButton {
+    --internal-background-color: var(--grey-50);
+    --internal-border-color: var(--grey-60);
+    --internal-icon: url(../../../res/img/svg/back-arrow-light.svg);
+    --internal-hover-border-color: var(--grey-20);
+  }
 }
 
 .profileViewerSplitter {
-  /* Create a stacking context, so that the KeyboardShortcut can overlay the profile
-     viewer. In addition, the built-in class uses position: absolute, which is not
-     appropriate here. */
+  /* Position relative for layout. Don't set z-index here to avoid creating a
+     stacking context that would trap the context menu below the screenshot hover.
+     This allows both the screenshot hover and context menu to be compared
+     at the .profileViewer level, ensuring the context menu appears on top. */
   position: relative;
-  z-index: 0;
 }
 
 .profileViewerSplitter > .layout-pane:not(.layout-pane-primary) {
@@ -110,9 +130,10 @@
   flex: none;
   flex-flow: row nowrap;
   padding: 0;
-  border-bottom: 1px solid var(--grey-30);
+  border-bottom: 1px solid var(--base-border-color);
   margin: 0;
-  background: var(--grey-10);
+  background: var(--lowered-background-color);
+  color: var(--lowered-foreground-color);
 }
 
 .profileViewerSpacer {

@@ -2693,6 +2693,39 @@ const _upgraders: {
     }
     profile.shared.sources = sourceTable;
   },
+  [59]: (profile) => {
+    // Add usedInnerWindowIDs to each thread by computing it from the frameTable and the markers.
+    // This changes the profile format from having innerWindowIDs implicitly
+    // defined by the frameTable / markers to having them explicitly listed in
+    // thread.usedInnerWindowIDs.
+    for (const thread of profile.threads) {
+      const { frameTable, markers } = thread;
+      const usedInnerWindowIDsSet = new Set();
+
+      // Collect all unique innerWindowIDs from the frameTable
+      for (let i = 0; i < frameTable.length; i++) {
+        const innerWindowID = frameTable.innerWindowID[i];
+        if (innerWindowID !== null && innerWindowID !== 0) {
+          usedInnerWindowIDsSet.add(innerWindowID);
+        }
+      }
+      for (let i = 0; i < markers.length; i++) {
+        const data = markers.data[i];
+        if (!data || !('innerWindowID' in data)) {
+          continue;
+        }
+        const innerWindowID = data.innerWindowID;
+        if (typeof innerWindowID === 'number' && innerWindowID !== 0) {
+          usedInnerWindowIDsSet.add(innerWindowID);
+        }
+      }
+
+      // Convert the set to an array and store it on the thread, if non-empty
+      if (usedInnerWindowIDsSet.size !== 0) {
+        thread.usedInnerWindowIDs = Array.from(usedInnerWindowIDsSet);
+      }
+    }
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

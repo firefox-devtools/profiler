@@ -36,6 +36,7 @@ Array [
 %cwindow.experimental%c - The object that holds flags of all the experimental features.
 %cwindow.togglePseudoLocalization%c - Enable pseudo localizations by passing \\"accented\\" or \\"bidi\\" to this function, or disable using no parameters.
 %cwindow.toggleTimelineType%c - Toggle timeline graph type by passing \\"cpu-category\\", \\"category\\", or \\"stack\\".
+%cwindow.toggleDarkMode%c - Cycle through theme preferences: system, light, dark.
 %cwindow.retrieveRawProfileDataFromBrowser%c - Retrieve the profile attached to the current tab and returns it. Use \\"await\\" to call it, and use saveToDisk to save it.
 %cwindow.extractGeckoLogs%c - Retrieve recorded logs in the current range, using the MOZ_LOG format. Use with \\"copy\\" or \\"saveToDisk\\".
 %cwindow.saveToDisk%c - Saves to a file the parameter passed to it, with an optional filename parameter. You can use that to save the profile returned by \\"retrieveRawProfileDataFromBrowser\\" or the data returned by \\"extractGeckoLogs\\".
@@ -46,6 +47,8 @@ The profile format is documented here:
 The CallTree class's source code is available here:
 %chttps://github.com/firefox-devtools/profiler/blob/main/src/profile-logic/call-tree.js%c",
     "font-size: 130%;",
+    "",
+    "font-weight: bold;",
     "",
     "font-weight: bold;",
     "",

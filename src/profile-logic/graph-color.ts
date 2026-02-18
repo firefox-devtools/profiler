@@ -95,7 +95,7 @@ export function getTextColor(color: GraphColor): string {
   // values. For other values, mapCategoryColorNameToStyles defaults to gray.
   // This is good enough for now.
   const colorStyles = mapCategoryColorNameToStyles(color);
-  return colorStyles.selectedTextColor;
+  return colorStyles.getSelectedTextColor();
 }
 
 /**

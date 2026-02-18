@@ -42,6 +42,14 @@ AppViewRouter--error-from-localhost-url-safari =
 AppViewRouter--route-not-found--home =
     .specialMessage = L’URL che tu âs cirût di contatâ nol è stât ricognossût.
 
+## Backtrace
+## This is used to display a backtrace (call stack) for a marker or sample.
+
+# Variables:
+#   $function (String) - Name of the function that was inlined.
+Backtrace--inlining-badge = (incorporade)
+    .title = Il compiladôr al veve incorporade la funzion { $function } in chel che le clamave.
+
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
@@ -69,6 +77,9 @@ CallNodeContextMenu--transform-focus-function = Concentrazion su funzion
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Concentrazion su funzion (invertide)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Concentrazion dome su sot-arbul
     .title =
         La concentrazion suntun sot-arbul e gjavara ducj i campions che no includin chê
@@ -407,6 +418,16 @@ MarkerTable--duration = Durade
 MarkerTable--name = Non
 MarkerTable--details = Detais
 
+## MarkerTooltip
+## This is the component for Marker Tooltip panel.
+
+# This is used as the tooltip for the filter button in marker tooltips.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerTooltip--filter-button-tooltip =
+    .title = Mostre nome i marcadôrs che a corispuindin a: “{ $filter }”
+    .aria-label = Mostre nome i marcadôrs che a corispuindin a: “{ $filter }”
+
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
@@ -483,6 +504,8 @@ MenuButtons--metaInfo--profiling-started = Regjistrazion scomençade:
 MenuButtons--metaInfo--profiling-session = Lungjece regjistrazion:
 MenuButtons--metaInfo--main-process-started = Procès principâl inviât:
 MenuButtons--metaInfo--main-process-ended = Procès principâl completât:
+MenuButtons--metaInfo--file-name = Non dal file:
+MenuButtons--metaInfo--file-size = Dimension dal file:
 MenuButtons--metaInfo--interval = Interval:
 MenuButtons--metaInfo--buffer-capacity = Capacitât buffer:
 MenuButtons--metaInfo--buffer-duration = Durade buffer:
@@ -498,7 +521,6 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Ilimitade
 MenuButtons--metaInfo--application = Aplicazion
 MenuButtons--metaInfo--name-and-version = Non e version:
-MenuButtons--metaInfo--application-uptime = Timp di ativitât:
 MenuButtons--metaInfo--update-channel = Canâl di inzornament:
 MenuButtons--metaInfo--build-id = ID compilazion:
 MenuButtons--metaInfo--build-type = Gjenar di compilazion:

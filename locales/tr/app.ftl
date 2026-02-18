@@ -21,6 +21,16 @@ AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader
 AppHeader--github-icon =
     .title = Git depomuza gidin (yeni pencerede açılır)
 
+## ThemeToggle
+## They are used at the top right side of the home page to switch between themes.
+
+ThemeToggle--system =
+    .title = Sistem temasının tercihine uyum sağla
+ThemeToggle--light =
+    .title = Açık temayı kullan
+ThemeToggle--dark =
+    .title = Koyu temayı kullan
+
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
@@ -67,6 +77,9 @@ CallNodeContextMenu--transform-focus-function = Fonksiyona odaklan
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Fonksiyona odaklan (tersine)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Yalnızca alt ağaca odaklan
     .title = Alt ağaca odaklanmak, çağrı ağacının belirtilen bölgesini içermeyen her örneği kaldıracaktır. Bu işlem, çağrı ağacının bir dalını koparır ama bunu yalnızca belirtilen çağrı düğümü için yapar. Fonksiyonun yaptığı diğer çağrılar görmezden gelinir.
 # This is used as the context menu item to apply the "Focus on category" transform.
@@ -262,6 +275,7 @@ Home--additional-content-title = Mevcut profilleri yükleyin
 Home--additional-content-content = Profil dosyasını buraya <strong>sürükleyip bırakarak</strong> yükleyebilirsiniz ya da:
 Home--compare-recordings-info = Ayrıca kayıtları karşılaştırabilirsiniz. <a>Karşılaştırma arayüzünü aç.</a>
 Home--your-recent-uploaded-recordings-title = Son yüklediğiniz kayıtlar
+Home--dark-mode-title = Koyu mod
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 = { -profiler-brand-name } ayrıca <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, Chrome performans paneli, <androidstudio>Android Studio</androidstudio> gibi diğer profilleyicilerden ve <dhat>dhat biçimini</dhat> veya <traceevent>Google’ın trace etkinliği biçimini</traceevent> kullanan herhangi bir dosyadan profilleri içe aktarabilir. <write>Kendi içe aktarıcınızı yazmayı öğrenin.</write>
@@ -335,6 +349,13 @@ MarkerContextMenu--select-the-receiver-thread = “<strong>{ $threadName }</stro
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = “<strong>{ $threadName }</strong>” gönderen iş parçacığını seç
 
+## MarkerCopyTableContextMenu
+## This is the menu when the copy icon is clicked in Marker Chart and Marker
+## Table panels.
+
+MarkerCopyTableContextMenu--copy-table-as-plain = İşaretçi tablosunu düz metin olarak kopyala
+MarkerCopyTableContextMenu--copy-table-as-markdown = İşaretçi tablosunu Markdown olarak kopyala
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
@@ -343,6 +364,8 @@ MarkerSettings--panel-search =
     .title = Yalnızca belirli bir adla eşleşen işaretçileri görüntüler
 MarkerSettings--marker-filters =
     .title = İşaretçi filtreleri
+MarkerSettings--copy-table =
+    .title = Tabloyu metin olarak kopyala
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -394,7 +417,10 @@ MenuButtons--index--profile-info-uploaded-actions = Sil
 MenuButtons--index--metaInfo-subtitle = Profil Bilgileri
 MenuButtons--metaInfo--symbols = Semboller:
 MenuButtons--metaInfo--profile-symbolicated = Profil sembolleştirilmiştir
+MenuButtons--metaInfo--profile-not-symbolicated = Profil sembolleştirilmemiş
+MenuButtons--metaInfo--resymbolicate-profile = Profili yeniden sembolleştir
 MenuButtons--metaInfo--symbolicate-profile = Profili sembolleştir
+MenuButtons--metaInfo--attempting-resymbolicate = Profil yeniden sembolleştirilmeye çalışılıyor
 MenuButtons--metaInfo--cpu-model = İşlemci modeli:
 MenuButtons--metaInfo--cpu-cores = İşlemci çekirdekleri:
 MenuButtons--metaInfo--main-memory = Ana bellek:
@@ -439,6 +465,8 @@ MenuButtons--metaInfo--profiling-started = Kayıt başlama tarihi:
 MenuButtons--metaInfo--profiling-session = Kaydın uzunluğu:
 MenuButtons--metaInfo--main-process-started = Ana işlemin başlama tarihi:
 MenuButtons--metaInfo--main-process-ended = Ana işlemin bitiş tarihi:
+MenuButtons--metaInfo--file-name = Dosya adı:
+MenuButtons--metaInfo--file-size = Dosya boyutu:
 MenuButtons--metaInfo--interval = Aralık:
 MenuButtons--metaInfo--buffer-capacity = Tampon kapasitesi:
 MenuButtons--metaInfo--buffer-duration = Tampon süresi:
@@ -454,7 +482,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Sınırsız
 MenuButtons--metaInfo--application = Uygulama
 MenuButtons--metaInfo--name-and-version = Ad ve sürüm:
-MenuButtons--metaInfo--application-uptime = Çalışma süresi:
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = Çalışma süresi:
 MenuButtons--metaInfo--update-channel = Güncelleme kanalı:
 MenuButtons--metaInfo--build-id = Yapı kimliği:
 MenuButtons--metaInfo--build-type = Yapı tipi:
@@ -755,6 +784,11 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Güç
+# This is used in the tooltip when the instant power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-microwatt = { $value } μW
+    .label = Güç
 # This is used in the tooltip when the power value uses the kilowatt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -939,6 +973,10 @@ TransformNavigator--collapse-direct-recursion-only = Yalnızca doğrudan özyine
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Alt ağacı daralt: { $item }
+# "Drop samples outside of markers matching ..." transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-markers-matching = Eşleşen işaretçilerin dışındaki örnekleri bırakın: “{ $item }”
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI
@@ -1038,6 +1076,17 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = Assembly görünümünü gizle
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = Önceki
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = Sonraki
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = { $current } / { $total }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

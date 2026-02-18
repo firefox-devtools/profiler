@@ -21,6 +21,16 @@ AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader
 AppHeader--github-icon =
     .title = Va a nostre repositorio Git (isto se aperi in un nove fenestra)
 
+## ThemeToggle
+## They are used at the top right side of the home page to switch between themes.
+
+ThemeToggle--system =
+    .title = Sequer preferentia del thema de systema
+ThemeToggle--light =
+    .title = Usar thema clar
+ThemeToggle--dark =
+    .title = Usar thema obscur
+
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
@@ -79,6 +89,22 @@ CallNodeContextMenu--transform-focus-function = Foco sur function.
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Foco sur function (invertite).
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+## The translation for "self" in these strings should match the translation used
+## in CallTree--samples-self and CallTree--bytes-self. Alternatively it can be
+## translated as "self values" or "self time" (though "self time" is less desirable
+## because this menu item is also shown in "bytes" mode).
+
+CallNodeContextMenu--transform-focus-self-title =
+    Le foco proprie es simile al foco sur un function, ma solo es mantenite
+    specimens que contribue al tempore del mesme function. Le specimens
+    presente in le functiones appellate es ignorate e le arbore del appellos
+    es re-organisate con radice la function analysate.
+CallNodeContextMenu--transform-focus-self = Foco solo proprie
+    .title = { CallNodeContextMenu--transform-focus-self-title }
+
+##
+
 CallNodeContextMenu--transform-focus-subtree = Foco solo sur sub-arbore.
     .title =
         Concentrar se sur un sub-arbore removera ulle specimen que non include ille
@@ -315,8 +341,8 @@ Home--enable-button-unavailable =
 # This message can be seen on https://main--perf-html.netlify.app/ .
 Home--web-channel-unavailable = Iste instantia de profilator non ha potite connecter se al WebChannel. Isto usualmente significa que illo se executa sur un hospite differente de illo que es specificate in le preferentia <code>devtools.performance.recording.ui-base-url</code>. Si tu vole capturar nove profilos con iste instantia, e dar a illo le controlo programmatic del button de menu profilator, tu pote ir a <code>about:config</code> e cambiar le preferentia.
 Home--record-instructions =
-    Pro initiar profilar, clicca sur le button profila o usa le
-    vias breve de claviero. Le icone es blau quando un profilo es in registration.
+    Pro comenciar le profilage, clicca sur le button de profilage o usa le
+    claves de accesso directe. Le icone es blau quando un profilo se registra.
     Pulsa <kbd>Capturar</kbd> pro cargar le datos in profiler.firefox.com.
 Home--instructions-content =
     Registrar profilos de prestation require <a>{ -firefox-brand-name }</a>.
@@ -328,6 +354,7 @@ Home--additional-content-title = Cargar profilos existente
 Home--additional-content-content = Tu pote <strong>traher e deponer</strong> hic un file profilo pro cargar lo, o:
 Home--compare-recordings-info = Tu pote alsi comparar registrationes. <a>Aperir le interfacie de comparation.</a>
 Home--your-recent-uploaded-recordings-title = Tu registrationes incargate recentemente
+Home--dark-mode-title = Modo obscur
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 =
@@ -339,7 +366,7 @@ Home--load-files-from-other-tools2 =
     proprie importator</write>.
 Home--install-chrome-extension = Installar le extension de Chrome
 Home--chrome-extension-instructions = Usa le <a>extension  de { -profiler-brand-name } pro Chrome</a> pro capturar profilos  de prestation in Chrome e analysar los in le { -profiler-brand-name }.
-Home--chrome-extension-recording-instructions = Installar le extension ab le Boteca web de Chrome. Un vice installate, usar le icone  barra del instrumentos del extensiones o le vias breve pro cessar de profilar. Tu alsi pote exportar profilos e cargar los ci pro analyse detaliate.
+Home--chrome-extension-recording-instructions = Un vice installate, usar le icone de barra de instrumentos del extension o le accessos directe pro comenciar e terminar le profilage. Tu pote etiam exportar profilos e cargar los ci pro un analyse detaliate.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -414,6 +441,13 @@ MarkerContextMenu--select-the-sender-thread = Selige le argumento mittente “<s
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Depone specimens foras del marcatores concordante “<strong>{ $filter }</strong>”
 
+## MarkerCopyTableContextMenu
+## This is the menu when the copy icon is clicked in Marker Chart and Marker
+## Table panels.
+
+MarkerCopyTableContextMenu--copy-table-as-plain = Copiar tabella del marcatores como testo normal
+MarkerCopyTableContextMenu--copy-table-as-markdown = Copiar tabella del marcatores como Markdown
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
@@ -422,6 +456,14 @@ MarkerSettings--panel-search =
     .title = Solo monstra marcatores que concorda con un certe nomine
 MarkerSettings--marker-filters =
     .title = Filtros de marcatores
+MarkerSettings--copy-table =
+    .title = Copiar tabella como texto
+# This string is used when the user tries to copy a marker table with
+# more than 10000 rows.
+# Variable:
+#   $rows (Number) - Number of rows the marker table has
+#   $maxRows (Number) - Number of maximum rows that can be copied
+MarkerSettings--copy-table-exceeed-max-rows = Le numero de rangos supera le limite: { $rows } > { $maxRows }. Sera copiate solo le prime { $maxRows } rangos.
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -539,7 +581,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Sin limite
 MenuButtons--metaInfo--application = Application
 MenuButtons--metaInfo--name-and-version = Nomine e version:
-MenuButtons--metaInfo--application-uptime = Tempore de activitate:
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = Tempore de activitate:
 MenuButtons--metaInfo--update-channel = Canal de actualisation:
 MenuButtons--metaInfo--build-id = ID de version:
 MenuButtons--metaInfo--build-type = Typo de compilation:
@@ -852,6 +895,11 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Potentia
+# This is used in the tooltip when the instant power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-microwatt = { $value } μW
+    .label = Potentia
 # This is used in the tooltip when the power value uses the kilowatt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -1001,6 +1049,12 @@ TransformNavigator--focus-subtree = Foco sur nodo: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Foco sur: { $item }
+# "Focus self" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-on-function-self
+# Also see the translation note above CallNodeContextMenu--transform-focus-self.
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-self = Foco proprie: { $item }
 # "Focus category" transform. The word "Focus" has the meaning of an adjective here.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
 # Variables:
@@ -1146,6 +1200,17 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = Celar le vista assembly
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = Precedente
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = Sequente
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = { $current } de { $total }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

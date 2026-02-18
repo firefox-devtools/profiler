@@ -4,7 +4,7 @@
 
 .arrowPanelAnchor {
   position: absolute;
-  z-index: 5;
+  z-index: var(--z-arrow-panel);
   top: 75%;
   left: 50%;
 }
@@ -14,17 +14,20 @@
   --internal-offset-from-top: 15px;
   --internal-width: var(--width, initial);
   --internal-button-height: 30px;
+  --internal-background-color: hsl(0deg 0% 97%);
+  --internal-border-color: rgb(0 0 0 / 0.25);
+  --internal-shadow-color: rgb(0 0 0 / 0.35);
 
   position: absolute;
   top: var(--internal-offset-from-top);
   right: calc(var(--internal-offset-from-right) * -1);
   min-width: var(--internal-width);
-  border: 0.5px solid rgb(0 0 0 / 0.25);
+  border: 0.5px solid var(--internal-border-color);
   border-radius: 5px;
-  background: hsl(0deg 0% 97%);
+  background: var(--internal-background-color);
   background-clip: padding-box;
-  box-shadow: 0 8px 12px rgb(0 0 0 / 0.35);
-  color: black;
+  box-shadow: 0 8px 12px var(--internal-shadow-color);
+  color: var(--base-foreground-color);
   line-height: 1.3;
   text-align: left;
   transform-origin: calc(100% - var(--internal-offset-from-right))
@@ -42,6 +45,14 @@
 
   /* visibility: hidden hides the panel from the accessibility tree when it's closed */
   visibility: hidden;
+}
+
+:root.dark-mode {
+  .arrowPanel {
+    --internal-background-color: var(--menu-background-color);
+    --internal-border-color: var(--grey-60);
+    --internal-shadow-color: rgb(0 0 0 / 0.4);
+  }
 }
 
 .arrowPanel.open {
@@ -83,8 +94,8 @@
   display: block;
   width: calc(1.42 * var(--internal-offset-from-top));
   height: calc(1.42 * var(--internal-offset-from-top));
-  border: 0.5px solid rgb(0 0 0 / 0.25);
-  background: hsl(0deg 0% 97%);
+  border: 0.5px solid var(--internal-border-color);
+  background: var(--internal-background-color);
   background-clip: padding-box;
   content: '';
   transform: rotate(45deg);

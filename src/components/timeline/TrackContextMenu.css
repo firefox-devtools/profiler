@@ -2,6 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+.timelineTrackContextMenu {
+  max-height: 43.5vh;
+  background-color: var(--menu-background-color);
+  color: var(--menu-foreground-color);
+  overflow-y: auto;
+}
+
 .timelineTrackContextMenuItem {
   display: flex;
 }
@@ -16,20 +23,29 @@
 }
 
 .timelineTrackContextMenuPid {
-  color: var(--grey-90-a60);
+  --internal-foreground-color: var(--grey-90-a60);
+
+  color: var(--internal-foreground-color);
 }
 
 .react-contextmenu-item--selected .timelineTrackContextMenuPid {
-  color: #fff;
-}
+  --internal-selected-foreground-color: #fff;
 
-.timelineTrackContextMenu {
-  max-height: 43.5vh;
-  overflow-y: auto;
+  color: var(--internal-selected-foreground-color);
 }
 
 .trackContextMenuSearchFilter {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+:root.dark-mode {
+  .timelineTrackContextMenuPid {
+    --internal-foreground-color: var(--grey-10-a60);
+  }
+
+  .react-contextmenu-item--selected .timelineTrackContextMenuPid {
+    --internal-selected-foreground-color: var(--menu-foreground-color);
+  }
 }

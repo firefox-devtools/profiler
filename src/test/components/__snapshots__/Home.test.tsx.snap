@@ -27,27 +27,65 @@ exports[`app/Home renders a button to enable the popup in Firefox 1`] = `
             Web app for ⁨Firefox⁩ performance analysis
           </span>
         </span>
-        <a
-          class="appHeaderGithubIcon"
-          href="https://github.com/firefox-devtools/profiler"
-          rel="noopener noreferrer"
-          target="_blank"
-          title="Go to our Git repository (this opens in a new window)"
+        <div
+          class="appHeaderRightControls"
         >
-          <svg
-            aria-label="github"
-            class="octicon octicon-mark-github"
-            height="22"
-            version="1.1"
-            viewBox="0 0 16 16"
-            width="22"
+          <div
+            class="themeToggle"
           >
-            <path
-              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-              fill-rule="evenodd"
-            />
-          </svg>
-        </a>
+            <button
+              aria-label="light"
+              class="themeToggleButton "
+              title="Use light theme"
+              type="button"
+            >
+              <span
+                class="themeToggleIcon themeToggleIcon--light"
+              />
+            </button>
+            <button
+              aria-label="system"
+              class="themeToggleButton themeToggleButton-active"
+              title="Follow system theme preference"
+              type="button"
+            >
+              <span
+                class="themeToggleIcon themeToggleIcon--system"
+              />
+            </button>
+            <button
+              aria-label="dark"
+              class="themeToggleButton "
+              title="Use dark theme"
+              type="button"
+            >
+              <span
+                class="themeToggleIcon themeToggleIcon--dark"
+              />
+            </button>
+          </div>
+          <a
+            class="appHeaderGithubIcon"
+            href="https://github.com/firefox-devtools/profiler"
+            rel="noopener noreferrer"
+            target="_blank"
+            title="Go to our Git repository (this opens in a new window)"
+          >
+            <svg
+              aria-label="github"
+              class="octicon octicon-mark-github"
+              height="22"
+              version="1.1"
+              viewBox="0 0 16 16"
+              width="22"
+            >
+              <path
+                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </a>
+        </div>
       </h1>
     </header>
     <div
@@ -275,27 +313,65 @@ exports[`app/Home renders the Chrome extension instructions for Chromium based b
             Web app for ⁨Firefox⁩ performance analysis
           </span>
         </span>
-        <a
-          class="appHeaderGithubIcon"
-          href="https://github.com/firefox-devtools/profiler"
-          rel="noopener noreferrer"
-          target="_blank"
-          title="Go to our Git repository (this opens in a new window)"
+        <div
+          class="appHeaderRightControls"
         >
-          <svg
-            aria-label="github"
-            class="octicon octicon-mark-github"
-            height="22"
-            version="1.1"
-            viewBox="0 0 16 16"
-            width="22"
+          <div
+            class="themeToggle"
           >
-            <path
-              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-              fill-rule="evenodd"
-            />
-          </svg>
-        </a>
+            <button
+              aria-label="light"
+              class="themeToggleButton "
+              title="Use light theme"
+              type="button"
+            >
+              <span
+                class="themeToggleIcon themeToggleIcon--light"
+              />
+            </button>
+            <button
+              aria-label="system"
+              class="themeToggleButton themeToggleButton-active"
+              title="Follow system theme preference"
+              type="button"
+            >
+              <span
+                class="themeToggleIcon themeToggleIcon--system"
+              />
+            </button>
+            <button
+              aria-label="dark"
+              class="themeToggleButton "
+              title="Use dark theme"
+              type="button"
+            >
+              <span
+                class="themeToggleIcon themeToggleIcon--dark"
+              />
+            </button>
+          </div>
+          <a
+            class="appHeaderGithubIcon"
+            href="https://github.com/firefox-devtools/profiler"
+            rel="noopener noreferrer"
+            target="_blank"
+            title="Go to our Git repository (this opens in a new window)"
+          >
+            <svg
+              aria-label="github"
+              class="octicon octicon-mark-github"
+              height="22"
+              version="1.1"
+              viewBox="0 0 16 16"
+              width="22"
+            >
+              <path
+                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </a>
+        </div>
       </h1>
     </header>
     <div
@@ -515,6 +591,269 @@ own importer
 </div>
 `;
 
+exports[`app/Home renders the information screen for fenix 1`] = `
+<div
+  class="home"
+>
+  <main
+    class="homeSection"
+  >
+    <header>
+      <h1
+        class="appHeader"
+      >
+        <span
+          class="appHeaderSlogan"
+        >
+          <a
+            class="appHeaderLink"
+            href="/"
+          >
+            ⁨Firefox Profiler⁩
+          </a>
+           — 
+          <span
+            class="appHeaderSubtext"
+          >
+            Web app for ⁨Firefox⁩ performance analysis
+          </span>
+        </span>
+        <div
+          class="appHeaderRightControls"
+        >
+          <div
+            class="themeToggle"
+          >
+            <button
+              aria-label="light"
+              class="themeToggleButton "
+              title="Use light theme"
+              type="button"
+            >
+              <span
+                class="themeToggleIcon themeToggleIcon--light"
+              />
+            </button>
+            <button
+              aria-label="system"
+              class="themeToggleButton themeToggleButton-active"
+              title="Follow system theme preference"
+              type="button"
+            >
+              <span
+                class="themeToggleIcon themeToggleIcon--system"
+              />
+            </button>
+            <button
+              aria-label="dark"
+              class="themeToggleButton "
+              title="Use dark theme"
+              type="button"
+            >
+              <span
+                class="themeToggleIcon themeToggleIcon--dark"
+              />
+            </button>
+          </div>
+          <a
+            class="appHeaderGithubIcon"
+            href="https://github.com/firefox-devtools/profiler"
+            rel="noopener noreferrer"
+            target="_blank"
+            title="Go to our Git repository (this opens in a new window)"
+          >
+            <svg
+              aria-label="github"
+              class="octicon octicon-mark-github"
+              height="22"
+              version="1.1"
+              viewBox="0 0 16 16"
+              width="22"
+            >
+              <path
+                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </a>
+        </div>
+      </h1>
+    </header>
+    <div
+      class="homeSpecialMessage"
+    >
+      This is a special message
+    </div>
+    <p>
+      Capture a performance profile. Analyze it. Share it. Make the web faster.
+    </p>
+    <div
+      class="homeInstructionsTransitionGroup"
+    >
+      <div
+        class="homeInstructions"
+        data-testid="home-fenix-instructions"
+      >
+        <img
+          alt="screenshot of profiler.firefox.com"
+          class="homeSectionScreenshot"
+          src="test-file-stub"
+        />
+        <div>
+          <a
+            class="homeSectionButton"
+            href="/docs/"
+          >
+            <span
+              class="homeSectionDocsIcon"
+            />
+            Documentation
+          </a>
+          <p>
+            ⁨Firefox for Android⁩ can be profiled directly on this device. For
+more information, read 
+            <a
+              href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device"
+            >
+              Profiling ⁨Firefox for Android⁩ directly on device
+            </a>
+            .
+          </p>
+          <p>
+            You can also profile ⁨Firefox for Android⁩ remotely from ⁨Firefox⁩
+for desktop. For more information, please consult this documentation:
+
+            <a
+              href="https://profiler.firefox.com/docs/#/./guide-remote-profiling?id=remote-profiling-firefox-for-android"
+            >
+              Profiling ⁨Firefox for Android⁩ remotely
+            </a>
+            .
+          </p>
+        </div>
+      </div>
+    </div>
+    <section
+      class="homeAdditionalContent"
+    >
+      <h2
+        class="homeAdditionalContentTitle protocol-display-xs"
+      >
+        Load existing profiles
+      </h2>
+      <section
+        class="homeActions"
+      >
+        <p>
+          You can 
+          <strong>
+            drag and drop
+          </strong>
+           a profile file here to load it, or:
+        </p>
+        <div
+          class="homeSectionLoadProfile"
+        >
+          <div
+            class="homeSectionActionButtons"
+          >
+            <input
+              class="homeSectionUploadFromFileInput"
+              type="file"
+            />
+            <button
+              class="homeSectionButton"
+              type="button"
+            >
+              Load a profile from file
+            </button>
+            <button
+              aria-expanded="false"
+              class="homeSectionButton"
+              type="button"
+            >
+              Load a profile from a URL
+            </button>
+          </div>
+        </div>
+        <p>
+          The ⁨Firefox Profiler⁩ can also import profiles from other profilers, such as
+
+          <a
+            href="https://profiler.firefox.com/docs/#/./guide-perf-profiling"
+          >
+            Linux perf
+          </a>
+          , 
+          <a
+            href="https://profiler.firefox.com/docs/#/./guide-android-profiling"
+          >
+            Android SimplePerf
+          </a>
+          , the
+Chrome performance panel, 
+          <a
+            href="https://developer.android.com/studio/profile/cpu-profiler"
+          >
+            Android Studio
+          </a>
+          , or
+any file using the 
+          <a
+            href="https://valgrind.org/docs/manual/dh-manual.html"
+          >
+            dhat format
+          </a>
+           or 
+          <a
+            href="https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview"
+          >
+            Google’s Trace Event
+Format
+          </a>
+          . 
+          <a
+            href="https://github.com/firefox-devtools/profiler/blob/main/docs-developer/custom-importer.md"
+          >
+            Learn how to write your
+own importer
+          </a>
+          .
+        </p>
+        <p>
+          You can also compare recordings. 
+          <a
+            href="/compare/"
+          >
+            Open the comparing interface.
+          </a>
+        </p>
+      </section>
+      <section>
+        <h2
+          class="homeRecentUploadedRecordingsTitle protocol-display-xxs"
+        >
+          Your recent uploaded recordings
+        </h2>
+        <list-of-published-profiles
+          limit="3"
+          withactionbuttons="false"
+        />
+      </section>
+    </section>
+    <div
+      class="dragAndDropOverlayWrapper"
+    >
+      <div
+        class="dragAndDropOverlay"
+      >
+        Drop a saved profile here
+      </div>
+    </div>
+  </main>
+</div>
+`;
+
 exports[`app/Home renders the information screen for other browsers 1`] = `
 <div
   class="home"
@@ -542,27 +881,65 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
             Web app for ⁨Firefox⁩ performance analysis
           </span>
         </span>
-        <a
-          class="appHeaderGithubIcon"
-          href="https://github.com/firefox-devtools/profiler"
-          rel="noopener noreferrer"
-          target="_blank"
-          title="Go to our Git repository (this opens in a new window)"
+        <div
+          class="appHeaderRightControls"
         >
-          <svg
-            aria-label="github"
-            class="octicon octicon-mark-github"
-            height="22"
-            version="1.1"
-            viewBox="0 0 16 16"
-            width="22"
+          <div
+            class="themeToggle"
           >
-            <path
-              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-              fill-rule="evenodd"
-            />
-          </svg>
-        </a>
+            <button
+              aria-label="light"
+              class="themeToggleButton "
+              title="Use light theme"
+              type="button"
+            >
+              <span
+                class="themeToggleIcon themeToggleIcon--light"
+              />
+            </button>
+            <button
+              aria-label="system"
+              class="themeToggleButton themeToggleButton-active"
+              title="Follow system theme preference"
+              type="button"
+            >
+              <span
+                class="themeToggleIcon themeToggleIcon--system"
+              />
+            </button>
+            <button
+              aria-label="dark"
+              class="themeToggleButton "
+              title="Use dark theme"
+              type="button"
+            >
+              <span
+                class="themeToggleIcon themeToggleIcon--dark"
+              />
+            </button>
+          </div>
+          <a
+            class="appHeaderGithubIcon"
+            href="https://github.com/firefox-devtools/profiler"
+            rel="noopener noreferrer"
+            target="_blank"
+            title="Go to our Git repository (this opens in a new window)"
+          >
+            <svg
+              aria-label="github"
+              class="octicon octicon-mark-github"
+              height="22"
+              version="1.1"
+              viewBox="0 0 16 16"
+              width="22"
+            >
+              <path
+                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </a>
+        </div>
       </h1>
     </header>
     <div

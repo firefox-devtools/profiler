@@ -32,21 +32,20 @@ describe('app/TabSelectorMenu', () => {
       threadCPUDelta: 'ns',
     };
 
-    // Add some frames with innerWindowIDs now. Note that we only expand the
-    // innerWindowID array and not the others as we don't check them at all.
+    // Associate the threads with innerWindowIDs now.
     //
     // Thread 0 will be present in firstTabTabID.
     // Thread 1 be present in secondTabTabID.
-    profile.threads[0].frameTable.innerWindowID[0] =
-      extraPageData.parentInnerWindowIDsWithChildren;
-    profile.threads[0].frameTable.length++;
+    profile.threads[0].usedInnerWindowIDs = [
+      extraPageData.parentInnerWindowIDsWithChildren,
+    ];
 
     // Add a threadCPUDelta value for thread activity score.
     profile.threads[0].samples.threadCPUDelta = [1];
 
-    profile.threads[1].frameTable.innerWindowID[0] =
-      extraPageData.secondTabInnerWindowIDs[0];
-    profile.threads[1].frameTable.length++;
+    profile.threads[1].usedInnerWindowIDs = [
+      extraPageData.secondTabInnerWindowIDs[0],
+    ];
     // Add a threadCPUDelta value for thread activity score. This thread
     // should stay above the first thread.
     profile.threads[0].samples.threadCPUDelta = [2];
@@ -196,13 +195,11 @@ describe('app/TabSelectorMenu', () => {
       url: removeURLs(page.url, `<Page #${index}>`),
     }));
 
-    // Attach innerWindowIDs to the samples.
-    profile.threads[0].frameTable.innerWindowID[0] =
-      extraPageData.parentInnerWindowIDsWithChildren;
-    profile.threads[0].frameTable.length++;
-    profile.threads[0].frameTable.innerWindowID[1] =
-      extraPageData.secondTabInnerWindowIDs[0];
-    profile.threads[0].frameTable.length++;
+    // Attach innerWindowIDs to the threads.
+    profile.threads[0].usedInnerWindowIDs = [
+      extraPageData.parentInnerWindowIDsWithChildren,
+      extraPageData.secondTabInnerWindowIDs[0],
+    ];
 
     const store = storeWithProfile(profile);
     render(

@@ -13,6 +13,16 @@
   --grippy-range-border-color: white;
   --grippy-range-hover-background-color: #888;
   --selection-outbound-opacity: 0.1;
+  --internal-hover-line-color: rgb(0 0 0 / 0.4);
+  --internal-overlay-time-foreground-color: #fff;
+  --internal-overlay-time-background-color: rgb(153 153 153);
+  --internal-dimmed-color: rgb(12 12 13 / var(--selection-outbound-opacity));
+  --internal-range-background-color: var(--blue-50);
+  --internal-zoom-background-color: rgb(255 255 255 / 0.6);
+  --internal-zoom-border-color: rgb(0 0 0 / 0.2);
+  --internal-zoom-icon: url(../../../res/img/svg/zoom-icon.svg);
+  --internal-zoom-hover-background-color: rgb(255 255 255 / 0.9);
+  --internal-zoom-active-background-color: rgb(160 160 160 / 0.6);
 
   position: relative;
   display: flex;
@@ -23,29 +33,48 @@
   -moz-user-focus: ignore;
 }
 
+:root.dark-mode {
+  .timelineSelection {
+    --selection-outbound-opacity: 0.4;
+    --grippy-range-background-color: var(--grey-40);
+    --grippy-range-border-color: var(--grey-40);
+    --grippy-range-hover-background-color: var(--grey-60);
+    --internal-hover-line-color: rgb(237 237 240 / 0.4);
+    --internal-overlay-time-foreground-color: var(--grey-20);
+    --internal-overlay-time-background-color: var(--grey-70);
+    --internal-dimmed-color: rgb(0 0 0 / var(--selection-outbound-opacity));
+    --internal-range-background-color: var(--blue-60);
+    --internal-zoom-background-color: rgb(54 57 89 / 0.6);
+    --internal-zoom-border-color: rgb(237 237 240 / 0.5);
+    --internal-zoom-icon: url(../../../res/img/svg/zoom-icon-light.svg);
+    --internal-zoom-hover-background-color: rgb(54 57 89 / 0.9);
+    --internal-zoom-active-background-color: rgb(89 94 145 / 0.6);
+  }
+}
+
 .timelineSelectionHoverLine {
   position: absolute;
-  z-index: 1;
+  z-index: var(--z-timeline-selection);
   top: 0;
   bottom: 0;
   width: 1px;
-  background: rgb(0 0 0 / 0.4);
+  background: var(--internal-hover-line-color);
   pointer-events: none;
 }
 
 .timelineSelectionOverlayTime {
   position: absolute;
-  z-index: 1;
+  z-index: var(--z-timeline-selection-overlay-time);
   padding: 3.25px 8px;
   border-radius: 0 4px 4px 0;
   margin-left: 1px;
-  background-color: rgb(153 153 153);
-  color: #fff;
+  background-color: var(--internal-overlay-time-background-color);
+  color: var(--internal-overlay-time-foreground-color);
 }
 
 .timelineSelectionOverlay {
   position: absolute;
-  z-index: 2;
+  z-index: var(--z-timeline-selection-overlay);
   display: flex;
   overflow: hidden;
   flex-flow: row nowrap;
@@ -58,7 +87,7 @@
 .timelineSelectionDimmerBefore,
 .timelineSelectionDimmerAfter {
   flex-shrink: 0;
-  background: rgb(12 12 13 / var(--selection-outbound-opacity));
+  background: var(--internal-dimmed-color);
   forced-color-adjust: none;
 }
 
@@ -81,7 +110,7 @@
 .timelineSelectionGrippyRangeStart,
 .timelineSelectionGrippyRangeEnd {
   position: relative;
-  z-index: 3;
+  z-index: var(--z-timeline-selection-grippy);
   width: 0;
   padding: 3px;
   border: 1px solid var(--grippy-range-border-color);
@@ -130,9 +159,9 @@
   top: 20px;
   padding: 4px 8px;
   border-radius: 0 0 4px 4px;
-  background-color: var(--blue-50);
-  box-shadow: 0 2px 2px rgb(0 0 0 / 0.2);
-  color: #fff;
+  background-color: var(--internal-range-background-color);
+  box-shadow: 0 2px 2px var(--base-shadow-color);
+  color: var(--internal-overlay-time-foreground-color);
   opacity: 1;
   pointer-events: none;
   transition: opacity 200ms;
@@ -147,10 +176,10 @@
   width: 30px;
   height: 30px;
   box-sizing: border-box;
-  border: 1px solid rgb(0 0 0 / 0.2);
+  border: 1px solid var(--internal-zoom-border-color);
   border-radius: 100%;
   margin: -15px;
-  background-color: rgb(255 255 255 / 0.6);
+  background-color: var(--internal-zoom-background-color);
   opacity: 0.5;
   pointer-events: auto;
   transition: opacity 200ms ease-in-out;
@@ -160,7 +189,7 @@
 .timelineSelectionOverlayZoomButton::before {
   position: absolute;
   display: grid;
-  content: url(../../../res/img/svg/zoom-icon.svg);
+  content: var(--internal-zoom-icon);
   inset: 0;
   place-content: center;
 }
@@ -172,7 +201,7 @@
 }
 
 .timelineSelectionOverlayZoomButton:hover {
-  background-color: rgb(255 255 255 / 0.9);
+  background-color: var(--internal-zoom-hover-background-color);
 }
 
 .timelineSelectionOverlayZoomButton:active,
@@ -181,7 +210,7 @@
 }
 
 .timelineSelectionOverlayZoomButton:active:hover {
-  background-color: rgb(160 160 160 / 0.6);
+  background-color: var(--internal-zoom-active-background-color);
 }
 
 @media (forced-colors: active) {
@@ -195,9 +224,9 @@
   }
 
   .timelineSelection {
-    --grippy-range-background-color: ButtonText;
-    --grippy-range-border-color: ButtonBorder;
-    --grippy-range-hover-background-color: SelectedItem;
+    --grippy-range-background-color: ButtonText !important;
+    --grippy-range-border-color: ButtonBorder !important;
+    --grippy-range-hover-background-color: SelectedItem !important;
     --selection-outbound-opacity: 0.6;
   }
 

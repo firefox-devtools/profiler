@@ -23,6 +23,10 @@ import {
   isPerfScriptFormat,
   convertPerfScriptProfile,
 } from './import/linux-perf';
+import {
+  isFlameGraphFormat,
+  convertFlameGraphProfile,
+} from './import/flame-graph';
 import { isArtTraceFormat, convertArtTraceProfile } from './import/art-trace';
 import {
   PROCESSED_PROFILE_VERSION,
@@ -99,6 +103,7 @@ import type {
   Pid,
   GeckoMarkerSchema,
   GeckoSourceTable,
+  IndexIntoCategoryList,
 } from 'firefox-profiler/types';
 import { decompress, isGzip } from 'firefox-profiler/utils/gz';
 
@@ -191,7 +196,7 @@ type ExtractionInfo = {
     { funcIndex: IndexIntoFuncTable; frameAddress: Address | null }
   >;
   globalDataCollector: GlobalDataCollector;
-  geckoSourceTable: GeckoSourceTable | undefined;
+  geckoSourceTable: GeckoSourceTable;
 };
 
 /**
@@ -209,7 +214,7 @@ export function extractFuncsAndResourcesFromFrameLocations(
   libs: LibMapping[],
   extensions: ExtensionTable = getEmptyExtensions(),
   globalDataCollector: GlobalDataCollector,
-  geckoSourceTable: GeckoSourceTable | undefined
+  geckoSourceTable: GeckoSourceTable
 ): {
   funcTable: FuncTable;
   resourceTable: ResourceTable;
@@ -534,7 +539,7 @@ function _extractJsFunction(
   if (sourceIndex !== undefined) {
     const geckoSourceIdx = parseInt(sourceIndex, 10);
     // Look up the UUID for this source index from the process's sources table
-    if (geckoSourceTable && geckoSourceIdx < geckoSourceTable.data.length) {
+    if (geckoSourceIdx < geckoSourceTable.data.length) {
       const uuidIndex = geckoSourceTable.schema.uuid;
       const filenameIndex = geckoSourceTable.schema.filename;
       const uuid = geckoSourceTable.data[geckoSourceIdx][uuidIndex];
@@ -1010,6 +1015,10 @@ function _processSamples(geckoSamples: GeckoSampleStruct): RawSamplesTable {
     }
   }
 
+  if ('argumentValues' in geckoSamples) {
+    samples.argumentValues = geckoSamples.argumentValues;
+  }
+
   if ('eventDelay' in geckoSamples) {
     samples.eventDelay = geckoSamples.eventDelay;
   } else if ('responsiveness' in geckoSamples) {
@@ -1205,6 +1214,29 @@ function _processThread(
   );
   const samples = _processSamples(geckoSamples);
 
+  // Compute usedInnerWindowIDs from the frameTable and the markers.
+  let usedInnerWindowIDs: number[] | undefined;
+  const usedInnerWindowIDsSet = new Set<number>();
+  for (let i = 0; i < frameTable.length; i++) {
+    const innerWindowID = frameTable.innerWindowID[i];
+    if (innerWindowID !== null && innerWindowID !== 0) {
+      usedInnerWindowIDsSet.add(innerWindowID);
+    }
+  }
+  for (let i = 0; i < markers.length; i++) {
+    const data = markers.data[i];
+    if (!data || !('innerWindowID' in data)) {
+      continue;
+    }
+    const innerWindowID = data.innerWindowID;
+    if (typeof innerWindowID === 'number' && innerWindowID !== 0) {
+      usedInnerWindowIDsSet.add(innerWindowID);
+    }
+  }
+  if (usedInnerWindowIDsSet.size !== 0) {
+    usedInnerWindowIDs = Array.from(usedInnerWindowIDsSet);
+  }
+
   const newThread: RawThread = {
     name: thread.name,
     isMainThread: thread.name === 'GeckoMain',
@@ -1240,6 +1272,10 @@ function _processThread(
     newThread.userContextId = thread.userContextId;
   }
 
+  if (usedInnerWindowIDs !== undefined) {
+    newThread.usedInnerWindowIDs = usedInnerWindowIDs;
+  }
+
   if (jsAllocations) {
     // Only add the JS allocations if they exist.
     newThread.jsAllocations = jsAllocations;
@@ -1248,6 +1284,14 @@ function _processThread(
   if (nativeAllocations) {
     // Only add the Native allocations if they exist.
     newThread.nativeAllocations = nativeAllocations;
+  }
+
+  if (thread.tracedValues) {
+    newThread.tracedValuesBuffer = thread.tracedValues;
+  }
+
+  if (thread.tracedObjectShapes) {
+    newThread.tracedObjectShapes = thread.tracedObjectShapes;
   }
 
   function processJsTracer() {
@@ -1444,6 +1488,7 @@ function _convertGeckoMarkerSchema(
     display,
     data,
     graphs,
+    colorField,
     isStackBased,
   } = markerSchema;
 
@@ -1489,6 +1534,7 @@ function _convertGeckoMarkerSchema(
     fields,
     description,
     graphs,
+    colorField,
     isStackBased,
   };
 }
@@ -1548,7 +1594,7 @@ export function insertExternalMarkersIntoProfile(
     }
   }
 
-  const categoryMap = new Map();
+  const categoryMap = new Map<IndexIntoCategoryList, IndexIntoCategoryList>();
   for (let i = 0; i < externalMarkers.categories.length; ++i) {
     const cat = externalMarkers.categories[i];
     let index = geckoProfile.meta.categories.findIndex(
@@ -1965,27 +2011,32 @@ export async function unserializeProfileOfArbitraryFormat(
     // object is constructed from an ArrayBuffer in a different context... which
     // happens in our tests.
     if (String(arbitraryFormat) === '[object ArrayBuffer]') {
-      let arrayBuffer = arbitraryFormat as ArrayBuffer;
+      const arrayBuffer = arbitraryFormat as ArrayBuffer;
+      arbitraryFormat = new Uint8Array(arrayBuffer);
+    }
 
+    // Handle binary formats.
+    if (
+      arbitraryFormat instanceof Uint8Array ||
+      (globalThis.Buffer && arbitraryFormat instanceof globalThis.Buffer)
+    ) {
       // Check for the gzip magic number in the header. If we find it, decompress
       // the data first.
-      const profileBytes = new Uint8Array(arrayBuffer);
+      let profileBytes = arbitraryFormat as Uint8Array<ArrayBuffer>;
       if (isGzip(profileBytes)) {
-        const decompressedProfile = await decompress(profileBytes);
-        arrayBuffer = decompressedProfile.buffer;
+        profileBytes = await decompress(profileBytes);
       }
 
-      if (isArtTraceFormat(arrayBuffer)) {
-        arbitraryFormat = convertArtTraceProfile(arrayBuffer);
-      } else if (verifyMagic(SIMPLEPERF_MAGIC, arrayBuffer)) {
-        const { convertSimpleperfTraceProfile } = await import(
-          './import/simpleperf'
-        );
-        arbitraryFormat = convertSimpleperfTraceProfile(arrayBuffer);
+      if (isArtTraceFormat(profileBytes)) {
+        arbitraryFormat = convertArtTraceProfile(profileBytes);
+      } else if (verifyMagic(SIMPLEPERF_MAGIC, profileBytes)) {
+        const { convertSimpleperfTraceProfile } =
+          await import('./import/simpleperf');
+        arbitraryFormat = convertSimpleperfTraceProfile(profileBytes);
       } else {
         try {
           const textDecoder = new TextDecoder(undefined, { fatal: true });
-          arbitraryFormat = await textDecoder.decode(arrayBuffer);
+          arbitraryFormat = await textDecoder.decode(profileBytes);
         } catch (e) {
           console.error('Source exception:', e);
           throw new Error(
@@ -1999,6 +2050,8 @@ export async function unserializeProfileOfArbitraryFormat(
       // The profile could be JSON or the output from `perf script`. Try `perf script` first.
       if (isPerfScriptFormat(arbitraryFormat)) {
         arbitraryFormat = convertPerfScriptProfile(arbitraryFormat);
+      } else if (isFlameGraphFormat(arbitraryFormat)) {
+        arbitraryFormat = convertFlameGraphProfile(arbitraryFormat);
       } else {
         // Try parsing as JSON.
         arbitraryFormat = JSON.parse(arbitraryFormat);
