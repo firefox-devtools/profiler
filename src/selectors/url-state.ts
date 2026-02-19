@@ -31,7 +31,7 @@ import type {
   NativeSymbolInfo,
   TabID,
   IndexIntoSourceTable,
-  SelectedMarkersPerThread,
+  MarkerIndex,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -168,8 +168,6 @@ export const getTabFilter: Selector<TabID | null> = (state) =>
   getProfileSpecificState(state).tabFilter;
 export const hasTabFilter: Selector<boolean> = (state) =>
   getTabFilter(state) !== null;
-export const getSelectedMarkers: Selector<SelectedMarkersPerThread> = (state) =>
-  getProfileSpecificState(state).selectedMarkers;
 
 /**
  * This selector does a simple lookup in the set of hidden tracks for a PID, and ensures
@@ -238,6 +236,12 @@ export const getTransformStack: DangerousSelectorWithArguments<
     EMPTY_TRANSFORM_STACK
   );
 };
+
+export const getSelectedMarker: DangerousSelectorWithArguments<
+  MarkerIndex | null,
+  ThreadsKey
+> = (state, threadsKey) =>
+  getProfileSpecificState(state).selectedMarkers[threadsKey] ?? null;
 
 export const getIsBottomBoxOpen: Selector<boolean> = (state) => {
   const tab = getSelectedTab(state);
