@@ -21,6 +21,7 @@ import type {
   GeckoMarkerTuple,
   VisualMetrics,
   Nanoseconds,
+  GeckoSourceTable,
 } from 'firefox-profiler/types';
 
 import {
@@ -40,6 +41,16 @@ function getEmptyMarkers(): GeckoMarkers {
       phase: 3,
       category: 4,
       data: 5,
+    },
+    data: [],
+  };
+}
+
+export function getEmptySourceTable(): GeckoSourceTable {
+  return {
+    schema: {
+      uuid: 0 as const,
+      filename: 1 as const,
     },
     data: [],
   };
@@ -111,6 +122,7 @@ export function createGeckoSubprocessProfile(
     meta: contentProcessMeta,
     pausedRanges: [],
     libs: [contentProcessBinary, ...parentProfile.libs.slice(1)], // libs are stringified in the Gecko profile
+    sources: getEmptySourceTable(),
     pages: [
       {
         tabID: 123123,
@@ -315,6 +327,7 @@ export function createGeckoProfile(): GeckoProfile {
     meta: parentProcessMeta,
     libs: [parentProcessBinary].concat(extraBinaries),
     pages: parentProcessPages,
+    sources: getEmptySourceTable(),
     counters: parentProcessCounters,
     profilerOverhead: parentProcessOverhead,
     pausedRanges: [],
@@ -384,6 +397,7 @@ export function createGeckoProfileWithMarkers(
     meta: geckoProfile.meta,
     libs: geckoProfile.libs,
     pages: geckoProfile.pages,
+    sources: geckoProfile.sources,
     pausedRanges: [],
     threads: [_createGeckoThreadWithMarkers(markers)],
     processes: [],
@@ -950,6 +964,7 @@ export function createGeckoProfileWithJsTimings(): GeckoProfile {
     meta: geckoProfile.meta,
     libs: geckoProfile.libs,
     pages: geckoProfile.pages,
+    sources: geckoProfile.sources,
     pausedRanges: [],
     threads: [
       _createGeckoThreadWithJsTimings('GeckoMain'),
