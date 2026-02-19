@@ -30,7 +30,10 @@ import {
   getSourceViewCode,
   getAssemblyViewCode,
 } from 'firefox-profiler/selectors/code';
-import { getSourceViewFile } from 'firefox-profiler/selectors/profile';
+import {
+  getSourceViewFile,
+  getSourceViewStartLine,
+} from 'firefox-profiler/selectors/profile';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -55,6 +58,7 @@ type StateProps = {
   readonly sourceViewScrollGeneration: number;
   readonly sourceViewScrollToLineNumber?: number;
   readonly sourceViewHighlightedLine: number | null;
+  readonly sourceViewStartLine: number;
   readonly globalLineTimings: LineTimings;
   readonly assemblyViewIsOpen: boolean;
   readonly assemblyViewNativeSymbol: NativeSymbolInfo | null;
@@ -161,6 +165,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       sourceViewScrollGeneration,
       sourceViewScrollToLineNumber,
       sourceViewHighlightedLine,
+      sourceViewStartLine,
       assemblyViewIsOpen,
       assemblyViewScrollGeneration,
       assemblyViewScrollToInstructionAddress,
@@ -233,6 +238,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
                   scrollGeneration={sourceViewScrollGeneration}
                   scrollToLineNumber={sourceViewScrollToLineNumber}
                   highlightedLine={sourceViewHighlightedLine}
+                  startLine={sourceViewStartLine}
                   ref={this._sourceView}
                 />
               ) : null}
@@ -303,6 +309,7 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
     sourceViewScrollGeneration: getSourceViewScrollGeneration(state),
     sourceViewScrollToLineNumber: getSourceViewScrollToLineNumber(state),
     sourceViewHighlightedLine: getSourceViewHighlightedLine(state),
+    sourceViewStartLine: getSourceViewStartLine(state),
     assemblyViewNativeSymbol: getAssemblyViewNativeSymbol(state),
     assemblyViewCode: getAssemblyViewCode(state),
     globalAddressTimings:
