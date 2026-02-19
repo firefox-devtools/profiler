@@ -41,7 +41,6 @@ import {
 import {
   getSelectedTab,
   getTabFilter,
-  getSelectedMarkers,
 } from 'firefox-profiler/selectors/url-state';
 import {
   getTabToThreadIndexesMap,
@@ -359,8 +358,6 @@ export function finalizeFullProfileView(
       }
     }
 
-    const selectedMarkers = hasUrlInfo ? getSelectedMarkers(getState()) : {};
-
     withHistoryReplaceStateSync(() => {
       dispatch({
         type: 'VIEW_FULL_PROFILE',
@@ -371,7 +368,6 @@ export function finalizeFullProfileView(
         localTracksByPid,
         localTrackOrderByPid,
         timelineType,
-        selectedMarkers,
         ...hiddenTracks,
       });
     });

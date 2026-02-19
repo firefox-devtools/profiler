@@ -137,7 +137,6 @@ export const defaultThreadViewOptions: ThreadViewOptions = {
   selectedInvertedCallNodePath: [],
   expandedNonInvertedCallNodePaths: new PathSet(),
   expandedInvertedCallNodePaths: new PathSet(),
-  selectedMarker: null,
   selectedNetworkMarker: null,
   lastSeenTransformCount: 0,
 };
@@ -174,20 +173,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
     case 'PROFILE_LOADED':
       // The view options are lazily initialized. Reset to the default values.
       return {};
-    case 'VIEW_FULL_PROFILE': {
-      // Initialize selectedMarker for each thread from the URL state.
-      const { selectedMarkers } = action;
-      const newState: ThreadViewOptionsPerThreads = {};
-      for (const [threadsKey, markerIndex] of Object.entries(selectedMarkers)) {
-        if (markerIndex !== null) {
-          newState[threadsKey] = {
-            ..._getThreadViewOptions(state, threadsKey),
-            selectedMarker: markerIndex,
-          };
-        }
-      }
-      return Object.keys(newState).length > 0 ? newState : state;
-    }
     case 'BULK_SYMBOLICATION': {
       const { oldFuncToNewFuncsMaps } = action;
       // For each thread, apply oldFuncToNewFuncsMap to that thread's
@@ -342,10 +327,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
           : { expandedNonInvertedCallNodePaths: expandedCallNodePaths }
       );
     }
-    case 'CHANGE_SELECTED_MARKER': {
-      const { threadsKey, selectedMarker } = action;
-      return _updateThreadViewOptions(state, threadsKey, { selectedMarker });
-    }
     case 'CHANGE_SELECTED_NETWORK_MARKER': {
       const { threadsKey, selectedNetworkMarker } = action;
       return _updateThreadViewOptions(state, threadsKey, {
@@ -417,44 +398,24 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
       });
     }
     case 'UPDATE_URL_STATE': {
-      // When the URL state changes (e.g., via browser back button):
-      // 1. Check if the transform stack has been popped for each thread.
-      //   If so, reset the stored paths, because they may reference call nodes
-      //   that only exist in a transformed tree.
-      //   See: https://github.com/firefox-devtools/profiler/issues/5689.
-      // 2. Sync selected marker with URL state.
-
+      // When the URL state changes (e.g., via browser back button), check if the
+      // transform stack has been popped for each thread. If so, reset the stored paths
+      // because they may reference call nodes that only exist in a transformed tree.
+      // See: https://github.com/firefox-devtools/profiler/issues/5689
       if (!action.newUrlState) {
         return state;
       }
 
-      const { transforms, selectedMarkers } =
-        action.newUrlState.profileSpecific;
+      const { transforms } = action.newUrlState.profileSpecific;
       return objectMap(state, (viewOptions, threadsKey) => {
         const transformStack = transforms[threadsKey] || [];
         const newTransformCount = transformStack.length;
         const oldTransformCount = viewOptions.lastSeenTransformCount;
 
-        // Get the selected marker from URL state for this thread
-        const urlSelectedMarker = selectedMarkers[threadsKey] ?? null;
-        const currentSelectedMarker = viewOptions.selectedMarker;
-
-        // Check if we need to update anything
-        const transformCountChanged = newTransformCount < oldTransformCount;
-        const markerChanged = urlSelectedMarker !== currentSelectedMarker;
-
-        if (!transformCountChanged && !markerChanged) {
-          // No change needed
-          return viewOptions;
-        }
-
-        // Build the updated view options
-        let updatedOptions = { ...viewOptions };
-
-        // If transform count changed, reset the paths
-        if (transformCountChanged) {
-          updatedOptions = {
-            ...updatedOptions,
+        // If transform count changed, reset the paths.
+        if (newTransformCount < oldTransformCount) {
+          return {
+            ...viewOptions,
             selectedNonInvertedCallNodePath: [],
             selectedInvertedCallNodePath: [],
             expandedNonInvertedCallNodePaths: new PathSet(),
@@ -463,15 +424,8 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
           };
         }
 
-        // If marker changed, sync it from URL state
-        if (markerChanged) {
-          updatedOptions = {
-            ...updatedOptions,
-            selectedMarker: urlSelectedMarker,
-          };
-        }
-
-        return updatedOptions;
+        // No change needed.
+        return viewOptions;
       });
     }
     case 'CHANGE_IMPLEMENTATION_FILTER': {

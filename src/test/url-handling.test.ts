@@ -2036,9 +2036,9 @@ describe('selectedMarker', function () {
       profile
     );
 
-    expect(
-      selectedThreadSelectors.getViewOptions(getState()).selectedMarker
-    ).toEqual(markerIndex);
+    expect(selectedThreadSelectors.getSelectedMarkerIndex(getState())).toEqual(
+      markerIndex
+    );
   });
 
   it('handles marker index 0 correctly on marker-chart tab', () => {
@@ -2121,6 +2121,11 @@ describe('selectedMarker', function () {
   });
 
   it('survives a URL round-trip on marker-chart tab', () => {
+    const profile = getProfileWithMarkers([
+      ['Marker A', 0, null],
+      ['Marker B', 1, null],
+      ['Marker C', 2, null],
+    ]);
     const { dispatch, getState } = setup(
       '?thread=0',
       '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/marker-chart/'
@@ -2137,13 +2142,16 @@ describe('selectedMarker', function () {
     // URL should contain the marker
     expect(url).toContain(`marker=${markerIndex}`);
 
-    // Parse the URL back
-    const newUrlState = stateFromLocation(
-      new URL(url, 'https://profiler.firefox.com')
+    // Load a fresh store from the URL and verify via selector
+    const { getState: getState2 } = _getStoreWithURL(
+      {
+        pathname:
+          '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/marker-chart/',
+        search: new URL(url, 'https://profiler.firefox.com').search,
+      },
+      profile
     );
-
-    // The marker should be in the parsed URL state
-    expect(newUrlState.profileSpecific.selectedMarkers[threadsKey]).toEqual(
+    expect(selectedThreadSelectors.getSelectedMarkerIndex(getState2())).toEqual(
       markerIndex
     );
   });
@@ -2256,9 +2264,9 @@ describe('selectedMarker', function () {
 
     // Select marker 1
     dispatch(changeSelectedMarker(threadsKey, 1));
-    expect(
-      selectedThreadSelectors.getViewOptions(getState()).selectedMarker
-    ).toEqual(1);
+    expect(selectedThreadSelectors.getSelectedMarkerIndex(getState())).toEqual(
+      1
+    );
 
     // Simulate browser navigation by dispatching UPDATE_URL_STATE
     // with a different selected marker (as if we navigated back)
@@ -2274,10 +2282,9 @@ describe('selectedMarker', function () {
     };
     dispatch({ type: 'UPDATE_URL_STATE', newUrlState });
 
-    // View state should now sync with the URL state
-    expect(
-      selectedThreadSelectors.getViewOptions(getState()).selectedMarker
-    ).toEqual(2);
+    expect(selectedThreadSelectors.getSelectedMarkerIndex(getState())).toEqual(
+      2
+    );
 
     // Now simulate navigating to a state with no selected marker
     const urlStateWithNoMarker = {
@@ -2291,9 +2298,8 @@ describe('selectedMarker', function () {
     };
     dispatch({ type: 'UPDATE_URL_STATE', newUrlState: urlStateWithNoMarker });
 
-    // View state should clear the selected marker
-    expect(
-      selectedThreadSelectors.getViewOptions(getState()).selectedMarker
-    ).toEqual(null);
+    expect(selectedThreadSelectors.getSelectedMarkerIndex(getState())).toEqual(
+      null
+    );
   });
 });
