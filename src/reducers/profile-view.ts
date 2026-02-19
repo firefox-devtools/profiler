@@ -174,6 +174,20 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
     case 'PROFILE_LOADED':
       // The view options are lazily initialized. Reset to the default values.
       return {};
+    case 'VIEW_FULL_PROFILE': {
+      // Initialize selectedMarker for each thread from the URL state.
+      const { selectedMarkers } = action;
+      const newState: ThreadViewOptionsPerThreads = {};
+      for (const [threadsKey, markerIndex] of Object.entries(selectedMarkers)) {
+        if (markerIndex !== null) {
+          newState[threadsKey] = {
+            ..._getThreadViewOptions(state, threadsKey),
+            selectedMarker: markerIndex,
+          };
+        }
+      }
+      return Object.keys(newState).length > 0 ? newState : state;
+    }
     case 'BULK_SYMBOLICATION': {
       const { oldFuncToNewFuncsMaps } = action;
       // For each thread, apply oldFuncToNewFuncsMap to that thread's

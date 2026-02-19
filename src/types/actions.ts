@@ -39,6 +39,7 @@ import type {
   ApiQueryError,
   TableViewOptions,
   DecodedInstruction,
+  SelectedMarkersPerThread,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
@@ -398,6 +399,7 @@ type ReceiveProfileAction =
       readonly localTrackOrderByPid: Map<Pid, TrackIndex[]>;
       readonly timelineType: TimelineType | null;
       readonly selectedTab: TabSlug;
+      readonly selectedMarkers: SelectedMarkersPerThread;
     }
   | {
       readonly type: 'DATA_RELOAD';
