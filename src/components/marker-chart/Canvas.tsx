@@ -957,8 +957,104 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     );
   };
 
+  /**
+   * Calculate the canvas position for a marker's tooltip based on the marker's index.
+   * The method is used when the selected marker comes from the URL and does NOT
+   * necessarily correspond to what's being hovered at the moment.
+   *
+   * @param markerIndex - The marker's index in the original thread's marker table
+   * @returns Canvas-relative coordinates {offsetX, offsetY} or null if marker not visible
+   */
+  getTooltipPosition = (
+    markerIndex: MarkerIndex
+  ): { offsetX: CssPixels; offsetY: CssPixels } | null => {
+    const {
+      rangeStart,
+      rangeEnd,
+      markerTimingAndBuckets,
+      rowHeight,
+      marginLeft,
+      marginRight,
+      viewport: { containerWidth, viewportLeft, viewportRight, viewportTop },
+    } = this.props;
+
+    // Step 1: Find which row this marker is displayed in
+    // markerIndexToTimingRow is a map: markerIndex -> rowIndex
+    const markerIndexToTimingRow = this._getMarkerIndexToTimingRow(
+      markerTimingAndBuckets
+    );
+    const rowIndex = markerIndexToTimingRow[markerIndex];
+
+    if (rowIndex === undefined) {
+      // Marker is not in any visible row (might be filtered out)
+      return null;
+    }
+
+    // Step 2: Get the timing data for all markers in this row
+    // markerTiming contains arrays of data for all markers in this row
+    const markerTiming = markerTimingAndBuckets[rowIndex];
+    if (!markerTiming || typeof markerTiming === 'string') {
+      // Row is empty or is a bucket label (string), not actual marker data
+      return null;
+    }
+
+    // Step 3: Find the position of our specific marker within this row's data
+    // markerTiming.index[] contains the original marker indexes for all markers in this row
+    // We need to find which position (markerTimingIndex) corresponds to our markerIndex
+    // so we can look up its start/end times in the parallel arrays
+    let markerTimingIndex = -1;
+    for (let i = 0; i < markerTiming.length; i++) {
+      if (markerTiming.index[i] === markerIndex) {
+        markerTimingIndex = i;
+        break;
+      }
+    }
+
+    if (markerTimingIndex === -1) {
+      // Marker not found in this row's data (shouldn't happen, but handle gracefully)
+      return null;
+    }
+
+    // Step 4: Calculate horizontal (X) position
+    // Get the marker's start and end timestamps from the parallel arrays
+    const startTimestamp = markerTiming.start[markerTimingIndex];
+    const endTimestamp = markerTiming.end[markerTimingIndex];
+
+    // Convert absolute timestamps to relative positions (0.0 to 1.0 of the full range)
+    const markerContainerWidth = containerWidth - marginLeft - marginRight;
+    const rangeLength: Milliseconds = rangeEnd - rangeStart;
+    const viewportLength: UnitIntervalOfProfileRange =
+      viewportRight - viewportLeft;
+    const startTime: UnitIntervalOfProfileRange =
+      (startTimestamp - rangeStart) / rangeLength;
+    const endTime: UnitIntervalOfProfileRange =
+      (endTimestamp - rangeStart) / rangeLength;
+
+    // Calculate pixel position: map the time range to the visible viewport
+    const x: CssPixels =
+      ((startTime - viewportLeft) * markerContainerWidth) / viewportLength +
+      marginLeft;
+    const w: CssPixels =
+      ((endTime - startTime) * markerContainerWidth) / viewportLength;
+
+    // For instant markers, use the center. For interval markers, use a position near the start
+
+    // For instant markers (start === end), use the center point
+    // For interval markers, use a point 1/3 into the marker (or 30px, whichever is smaller)
+    const isInstantMarker = startTimestamp === endTimestamp;
+    const offsetX = isInstantMarker ? x : x + Math.min(w / 3, 30);
+
+    // Step 5: Calculate vertical (Y) position
+    // Place the tooltip at the top of the marker's row, with a small offset
+    const offsetY: CssPixels = rowIndex * rowHeight - viewportTop + 5;
+
+    // Return canvas-relative coordinates (should be converted to page coordinates by caller)
+    return { offsetX, offsetY };
+  };
+
   override render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
+    const { selectedMarkerIndex } = this.props;
 
     return (
       <ChartCanvas
@@ -976,6 +1072,8 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         onMouseMove={this.onMouseMove}
         onMouseLeave={this.onMouseLeave}
         stickyTooltips={true}
+        selectedItem={selectedMarkerIndex}
+        getTooltipPosition={this.getTooltipPosition}
       />
     );
   }

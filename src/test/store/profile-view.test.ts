@@ -1046,11 +1046,11 @@ describe('actions/ProfileView', function () {
       const { dispatch, getState } = storeWithProfile(profile);
 
       expect(
-        selectedThreadSelectors.getViewOptions(getState()).selectedMarker
+        selectedThreadSelectors.getSelectedMarkerIndex(getState())
       ).toEqual(null);
       dispatch(ProfileView.changeSelectedMarker(0, 0));
       expect(
-        selectedThreadSelectors.getViewOptions(getState()).selectedMarker
+        selectedThreadSelectors.getSelectedMarkerIndex(getState())
       ).toEqual(0);
     });
   });

@@ -56,7 +56,6 @@ export type ThreadViewOptions = {
   readonly selectedInvertedCallNodePath: CallNodePath;
   readonly expandedNonInvertedCallNodePaths: PathSet;
   readonly expandedInvertedCallNodePaths: PathSet;
-  readonly selectedMarker: MarkerIndex | null;
   readonly selectedNetworkMarker: MarkerIndex | null;
   // Track the number of transforms to detect when they change via browser
   // navigation. This helps us know when to reset paths that may be invalid
@@ -82,6 +81,10 @@ export type RightClickedCallNode = {
 export type MarkerReference = {
   readonly threadsKey: ThreadsKey;
   readonly markerIndex: MarkerIndex;
+};
+
+export type SelectedMarkersPerThread = {
+  [key: ThreadsKey]: MarkerIndex | null;
 };
 
 /**
@@ -373,6 +376,7 @@ export type ProfileSpecificUrlState = {
   tabFilter: TabID | null;
   legacyThreadOrder: ThreadIndex[] | null;
   legacyHiddenThreads: ThreadIndex[] | null;
+  selectedMarkers: SelectedMarkersPerThread;
 };
 
 export type UrlState = {

@@ -40,6 +40,8 @@ import type {
   NativeSymbolInfo,
   Transform,
   IndexIntoFrameTable,
+  MarkerIndex,
+  SelectedMarkersPerThread,
 } from 'firefox-profiler/types';
 import {
   decodeUintArrayFromUrlComponent,
@@ -49,7 +51,7 @@ import {
 import { tabSlugs } from '../app-logic/tabs-handling';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 
-export const CURRENT_URL_VERSION = 13;
+export const CURRENT_URL_VERSION = 14;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -184,6 +186,7 @@ type CallTreeQuery = BaseQuery & {
 
 type MarkersQuery = BaseQuery & {
   markerSearch: string; // "DOMEvent"
+  marker?: MarkerIndex; // Selected marker index for the current thread, e.g. 42
 };
 
 type NetworkQuery = BaseQuery & {
@@ -218,6 +221,7 @@ type Query = BaseQuery & {
 
   // Markers specific
   markerSearch?: string;
+  marker?: MarkerIndex;
 
   // Network specific
   networkSearch?: string;
@@ -367,6 +371,11 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       query = baseQuery as MarkersQueryShape;
       query.markerSearch =
         urlState.profileSpecific.markersSearchString || undefined;
+      query.marker =
+        selectedThreadsKey !== null &&
+        urlState.profileSpecific.selectedMarkers[selectedThreadsKey] !== null
+          ? urlState.profileSpecific.selectedMarkers[selectedThreadsKey]
+          : undefined;
       break;
     case 'network-chart':
       query = baseQuery as NetworkQueryShape;
@@ -499,6 +508,19 @@ export function stateFromLocation(
     transforms[selectedThreadsKey] = parseTransforms(query.transforms);
   }
 
+  // Parse the selected marker for the current thread
+  const selectedMarkers: SelectedMarkersPerThread = {};
+  if (
+    selectedThreadsKey !== null &&
+    query.marker !== undefined &&
+    query.marker !== null
+  ) {
+    const markerIndex = Number(query.marker);
+    if (!isNaN(markerIndex)) {
+      selectedMarkers[selectedThreadsKey] = markerIndex;
+    }
+  }
+
   // tabID is used for the tab selector that we have in our full view.
   let tabID = null;
   if (query.tabID && Number.isInteger(Number(query.tabID))) {
@@ -587,6 +609,7 @@ export function stateFromLocation(
       legacyHiddenThreads: query.hiddenThreads
         ? query.hiddenThreads.split('-').map((index) => Number(index))
         : null,
+      selectedMarkers,
     },
   };
 }
@@ -1195,6 +1218,10 @@ const _upgraders: {
   },
   [13]: (_) => {
     // just added the focus-self transform
+  },
+  [14]: (_) => {
+    // Added marker parameter for persisting highlighted markers in URLs.
+    // This is backward compatible as the marker parameter is optional.
   },
 };
 
