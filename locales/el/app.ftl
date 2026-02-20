@@ -95,6 +95,10 @@ CallNodeContextMenu--transform-focus-function-inverted = Εστίαση στη �
 ## translated as "self values" or "self time" (though "self time" is less desirable
 ## because this menu item is also shown in "bytes" mode).
 
+CallNodeContextMenu--transform-focus-self-title =
+    Η εστίαση στο self είναι παρόμοια με την εστίαση σε μια συνάρτηση, αλλά διατηρεί μόνο τα δείγματα
+    που συμβάλλουν στον χρόνο self της συνάρτησης. Τα δείγματα στις καλούμενες συναρτήσεις
+    απορρίπτονται και το δέντρο κλήσεων επαναριζώνεται στην εστιασμένη συνάρτηση.
 CallNodeContextMenu--transform-focus-self = Εστίαση μόνο στο self
     .title = { CallNodeContextMenu--transform-focus-self-title }
 
@@ -348,9 +352,12 @@ Home--instructions-content =
     Η καταγραφή των προφίλ επιδόσεων απαιτεί το <a>{ -firefox-brand-name }</a>.
     Ωστόσο, τα υπάρχοντα προφίλ μπορούν να προβληθούν σε όλα τα σύγχρονα προγράμματα περιήγησης.
 Home--fenix-instructions-directly =
-    Μπορείτε να δημιουργήσετε προφίλ για τις επιδόσεις του { -firefox-android-brand-name }
-    απευθείας σε αυτήν τη συσκευή. Για περισσότερες πληροφορίες,
-    διαβάστε το <a>Δημιουργία προφίλ επιδόσεων του { -firefox-android-brand-name } απευθείας στη συσκευή</a>.
+    Μπορείτε να καταγράψετε προφίλ για το { -firefox-android-brand-name } απευθείας σε αυτήν τη συσκευή. Για
+    περισσότερες πληροφορίες, διαβάστε το <a>Καταγραφή προφίλ του { -firefox-android-brand-name } απευθείας στη συσκευή</a>.
+Home--fenix-instructions-remotely =
+    Μπορείτε επίσης να καταγράψετε προφίλ για το { -firefox-android-brand-name } απομακρυσμένα από το { -firefox-brand-name }
+    για υπολογιστές. Για περισσότερες πληροφορίες, συμβουλευτείτε την τεκμηρίωση:
+    <a>Απομακρυσμένη καταγραφή προφίλ του { -firefox-android-brand-name }</a>.
 Home--record-instructions-start-stop = Διακοπή και έναρξη δημιουργίας προφίλ
 Home--record-instructions-capture-load = Καταγραφή και φόρτωση προφίλ
 Home--profiler-motto = Καταγράψτε ένα προφίλ επιδόσεων. Αναλύστε το. Μοιραστείτε το. Κάντε ταχύτερο τον ιστό.
