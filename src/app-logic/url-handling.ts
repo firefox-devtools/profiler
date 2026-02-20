@@ -41,6 +41,7 @@ import type {
   Transform,
   IndexIntoFrameTable,
   MarkerIndex,
+  SelectedMarkersPerThread,
 } from 'firefox-profiler/types';
 import {
   decodeUintArrayFromUrlComponent,
@@ -508,7 +509,7 @@ export function stateFromLocation(
   }
 
   // Parse the selected marker for the current thread
-  const selectedMarkers: { [key: string]: MarkerIndex | null } = {};
+  const selectedMarkers: SelectedMarkersPerThread = {};
   if (
     selectedThreadsKey !== null &&
     query.marker !== undefined &&
