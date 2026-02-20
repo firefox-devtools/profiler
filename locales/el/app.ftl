@@ -90,6 +90,14 @@ CallNodeContextMenu--transform-focus-function = Εστίαση στη συνάρ
 CallNodeContextMenu--transform-focus-function-inverted = Εστίαση στη συνάρτηση (ανεστραμμένη)
     .title = { CallNodeContextMenu--transform-focus-function-title }
 
+## The translation for "self" in these strings should match the translation used
+## in CallTree--samples-self and CallTree--bytes-self. Alternatively it can be
+## translated as "self values" or "self time" (though "self time" is less desirable
+## because this menu item is also shown in "bytes" mode).
+
+CallNodeContextMenu--transform-focus-self = Εστίαση μόνο στο self
+    .title = { CallNodeContextMenu--transform-focus-self-title }
+
 ##
 
 CallNodeContextMenu--transform-focus-subtree = Εστίαση στο υπόδεντρο μόνο
@@ -147,19 +155,19 @@ CallTree--tracing-ms-total = Χρόνος εκτέλεσης (ms)
         παρατηρήθηκε αυτή η συνάρτηση σε στοίβα. Περιέχει τον χρόνο πραγματικής
         εκτέλεσης της συνάρτησης και τον χρόνο που χρησιμοποιήθηκε στους καλούντες από
         αυτήν τη συνάρτηση.
-CallTree--tracing-ms-self = Ιδιοχρόνος (ms)
+CallTree--tracing-ms-self = Self (ms)
     .title =
-        Ο ατομικός χρόνος περιλαμβάνει μόνο τον χρόνο που η συνάρτηση βρισκόταν
-        στο τέλος της στοίβας. Αν η συνάρτηση καλούταν σε άλλες συναρτήσεις,
-        τότε ο χρόνος των άλλων συναρτήσεων δεν περιλαμβάνεται. Ο ατομικός χρόνος είναι
+        Ο χρόνος «self» περιλαμβάνει μόνο τον χρόνο που η συνάρτηση βρισκόταν
+        στο τέλος της στοίβας. Αν η συνάρτηση κλήθηκε σε άλλες συναρτήσεις,
+        τότε ο χρόνος των άλλων συναρτήσεων δεν περιλαμβάνεται. Ο χρόνος «self» είναι
         χρήσιμος για να κατανοήσετε πώς ξοδεύτηκε ο χρόνος σε ένα πρόγραμμα.
 CallTree--samples-total = Σύνολο (δείγματα)
     .title = Το «σύνολο» δειγμάτων περιλαμβάνει μια σύνοψη όλων των δειγμάτων στα οποία παρατηρήθηκε ότι η συνάρτηση βρίσκεται στη στοίβα. Περιλαμβάνει τον χρόνο που εκτελούταν η συνάρτηση και τον χρόνο που ξοδεύτηκε στις κλήσεις από αυτήν τη συνάρτηση.
-CallTree--samples-self = Ιδιοαριθμός
+CallTree--samples-self = Self
     .title =
-        Ο ατομικός αριθμός δειγμάτων περιλαμβάνει μόνο τα δείγματα στα οποία η συνάρτηση
+        Το πλήθος δειγμάτων «self» περιλαμβάνει μόνο τα δείγματα στα οποία η συνάρτηση
         ήταν στο τέλος της στοίβας. Αν η συνάρτηση κλήθηκε σε άλλες συναρτήσεις,
-        τότε τα πλήθη των άλλων συναρτήσεων δεν συμπεριλαμβάνονται. Ο ατομικός αριθμός είναι χρήσιμος
+        τότε τα πλήθη των άλλων συναρτήσεων δεν συμπεριλαμβάνονται. Το πλήθος «self» είναι χρήσιμο
         για να κατανοήσετε πώς ξοδεύτηκε ο χρόνος σε ένα πρόγραμμα.
 CallTree--bytes-total = Συνολικό μέγεθος (bytes)
     .title =
@@ -167,12 +175,12 @@ CallTree--bytes-total = Συνολικό μέγεθος (bytes)
         αποδεσμεύτηκαν όσο παρατηρήθηκε ότι η συνάρτηση είναι στο τέλος της στοίβας.
         Περιλαμβάνει το μέγεθος σε bytes όπου εκτελούταν η συνάρτηση, καθώς και τα
         bytes των καλούντων από αυτήν τη συνάρτηση.
-CallTree--bytes-self = Ιδιο-bytes (bytes)
+CallTree--bytes-self = Self (bytes)
     .title =
-        Τα ατομικά bytes περιλαμβάνουν τα bytes που δεσμεύθηκαν ή αποδεσμεύθηκαν
+        Τα bytes του «self» περιλαμβάνουν τα bytes που δεσμεύθηκαν ή αποδεσμεύθηκαν
         όσο η συνάρτηση ήταν στο τέλος της στοίβας. Αν η συνάρτηση κλήθηκε σε άλλες
         συναρτήσεις, τότε τα bytes των άλλων συναρτήσεων δεν συμπεριλαμβάνονται.
-        Τα ατομικά bytes είναι χρήσιμα για να κατανοήσετε πού δεσμεύθηκε ή
+        Τα bytes του «self» είναι χρήσιμα για να κατανοήσετε πού δεσμεύθηκε ή
         αποδεσμεύθηκε μνήμη στο πρόγραμμα.
 
 ## Call tree "badges" (icons) with tooltips
@@ -214,27 +222,27 @@ CallTreeSidebar--call-node-details = Λεπτομέρειες κόμβου κλ�
 CallTreeSidebar--traced-running-time =
     .label = Ιχνηλατημένος χρόνος εκτέλεσης
 CallTreeSidebar--traced-self-time =
-    .label = Ιχνηλατημένος ιδιοχρόνος
+    .label = Ιχνηλατημένος χρόνος self
 CallTreeSidebar--running-time =
     .label = Χρόνος εκτέλεσης
 CallTreeSidebar--self-time =
-    .label = Iδιοχρόνος
+    .label = Χρόνος self
 CallTreeSidebar--running-samples =
     .label = Εκτελούμενα δείγματα
 CallTreeSidebar--self-samples =
-    .label = Ιδιοδείγματα
+    .label = Δείγματα self
 CallTreeSidebar--running-size =
     .label = Μέγεθος εκτέλεσης
 CallTreeSidebar--self-size =
-    .label = Ιδιομέγεθος
+    .label = Μέγεθος self
 CallTreeSidebar--categories = Κατηγορίες
 CallTreeSidebar--implementation = Υλοποίηση
 CallTreeSidebar--running-milliseconds = Χιλιοστά δευτερολέπτου εκτέλεσης
 CallTreeSidebar--running-sample-count = Εκτελούμενος αριθμός δειγμάτων
 CallTreeSidebar--running-bytes = Bytes εκτέλεσης
-CallTreeSidebar--self-milliseconds = Χιλιοστά δευτερολέπτου συνάρτησης
-CallTreeSidebar--self-sample-count = Αριθμός ιδιοδειγμάτων
-CallTreeSidebar--self-bytes = Ιδιο-bytes
+CallTreeSidebar--self-milliseconds = Χιλιοστά δευτερολέπτου self
+CallTreeSidebar--self-sample-count = Πλήθος δειγμάτων self
+CallTreeSidebar--self-bytes = Self bytes
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -339,6 +347,10 @@ Home--record-instructions =
 Home--instructions-content =
     Η καταγραφή των προφίλ επιδόσεων απαιτεί το <a>{ -firefox-brand-name }</a>.
     Ωστόσο, τα υπάρχοντα προφίλ μπορούν να προβληθούν σε όλα τα σύγχρονα προγράμματα περιήγησης.
+Home--fenix-instructions-directly =
+    Μπορείτε να δημιουργήσετε προφίλ για τις επιδόσεις του { -firefox-android-brand-name }
+    απευθείας σε αυτήν τη συσκευή. Για περισσότερες πληροφορίες,
+    διαβάστε το <a>Δημιουργία προφίλ επιδόσεων του { -firefox-android-brand-name } απευθείας στη συσκευή</a>.
 Home--record-instructions-start-stop = Διακοπή και έναρξη δημιουργίας προφίλ
 Home--record-instructions-capture-load = Καταγραφή και φόρτωση προφίλ
 Home--profiler-motto = Καταγράψτε ένα προφίλ επιδόσεων. Αναλύστε το. Μοιραστείτε το. Κάντε ταχύτερο τον ιστό.
@@ -374,7 +386,7 @@ IdleSearchField--search-input =
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
-JsTracerSettings--show-only-self-time = Εμφάνιση μόνο ιδιοχρόνου
+JsTracerSettings--show-only-self-time = Εμφάνιση μόνο χρόνου self
     .title = Εμφάνιση μόνο του χρόνου που χρησιμοποιήθηκε σε κόμβο κλήσεων, αγνοώντας τους θυγατρικούς του.
 
 ## ListOfPublishedProfiles
@@ -1048,6 +1060,12 @@ TransformNavigator--focus-subtree = Εστίαση κόμβου: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Εστίαση: { $item }
+# "Focus self" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-on-function-self
+# Also see the translation note above CallNodeContextMenu--transform-focus-self.
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-self = Εστίαση στο self: { $item }
 # "Focus category" transform. The word "Focus" has the meaning of an adjective here.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
 # Variables:
