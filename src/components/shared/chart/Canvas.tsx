@@ -393,12 +393,14 @@ export class ChartCanvas<Item> extends React.Component<
   };
 
   override componentDidMount() {
-    // Initialize selectedItem from props on mount if provided
-    // Use requestAnimationFrame to ensure the canvas is fully laid out
-    if (this.props.selectedItem !== undefined) {
-      window.requestAnimationFrame(() => {
-        this._syncSelectedItemFromProp(this.props.selectedItem!);
-      });
+    // Initialize selectedItem from props on mount if provided and the canvas
+    // already has dimensions. If containerWidth is still 0, the viewport hasn't
+    // been laid out yet - componentDidUpdate will pick it up once it becomes non-zero.
+    if (
+      this.props.selectedItem !== undefined &&
+      this.props.containerWidth !== 0
+    ) {
+      this._syncSelectedItemFromProp(this.props.selectedItem);
     }
   }
 
@@ -426,6 +428,17 @@ export class ChartCanvas<Item> extends React.Component<
         this.props.selectedItem !== undefined &&
         this.props.selectedItem !== prevProps.selectedItem &&
         !hoveredItemsAreEqual(this.state.selectedItem, this.props.selectedItem)
+      ) {
+        this._syncSelectedItemFromProp(this.props.selectedItem);
+      }
+
+      // The canvas just received its dimensions for the first time (containerWidth
+      // went from 0 to non-zero). If a selectedItem was provided but couldn't be
+      // synced in componentDidMount, do it now.
+      if (
+        prevProps.containerWidth === 0 &&
+        this.props.containerWidth !== 0 &&
+        this.props.selectedItem !== undefined
       ) {
         this._syncSelectedItemFromProp(this.props.selectedItem);
       }
