@@ -1015,19 +1015,12 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     } = this.props;
 
     // Step 1: Find which row this marker is displayed in
-    // markerIndexToTimingRow is a map: markerIndex -> rowIndex
     const markerIndexToTimingRow = this._getMarkerIndexToTimingRow(
       markerTimingAndBuckets
     );
     const rowIndex = markerIndexToTimingRow[markerIndex];
 
-    if (rowIndex === undefined) {
-      // Marker is not in any visible row (might be filtered out)
-      return null;
-    }
-
     // Step 2: Get the timing data for all markers in this row
-    // markerTiming contains arrays of data for all markers in this row
     const markerTiming = markerTimingAndBuckets[rowIndex];
     if (!markerTiming || typeof markerTiming === 'string') {
       // Row is empty or is a bucket label (string), not actual marker data
@@ -1035,9 +1028,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     }
 
     // Step 3: Find the position of our specific marker within this row's data
-    // markerTiming.index[] contains the original marker indexes for all markers in this row
-    // We need to find which position (markerTimingIndex) corresponds to our markerIndex
-    // so we can look up its start/end times in the parallel arrays
     let markerTimingIndex = -1;
     for (let i = 0; i < markerTiming.length; i++) {
       if (markerTiming.index[i] === markerIndex) {
@@ -1052,7 +1042,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     }
 
     // Step 4: Calculate horizontal (X) position
-    // Get the marker's start and end timestamps from the parallel arrays
     const startTimestamp = markerTiming.start[markerTimingIndex];
     const endTimestamp = markerTiming.end[markerTimingIndex];
 
@@ -1072,8 +1061,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       marginLeft;
     const w: CssPixels =
       ((endTime - startTime) * markerContainerWidth) / viewportLength;
-
-    // For instant markers, use the center. For interval markers, use a position near the start
 
     // For instant markers (start === end), use the center point
     // For interval markers, use a point 1/3 into the marker (or 30px, whichever is smaller)
