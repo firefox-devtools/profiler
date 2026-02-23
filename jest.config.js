@@ -10,6 +10,7 @@ module.exports = {
     {
       displayName: 'browser',
       testMatch: ['<rootDir>/src/**/*.test.{js,jsx,ts,tsx}'],
+      testPathIgnorePatterns: ['<rootDir>/src/profile-query-cli/tests/'],
       moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx'],
 
       // Use custom resolver that respects the "browser" field in package.json
