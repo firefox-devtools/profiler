@@ -39,6 +39,8 @@ type Props<Item> = {
   readonly getTooltipPosition?: (
     item: Item
   ) => { offsetX: CssPixels; offsetY: CssPixels } | null;
+  // Current vertical scroll offset of the viewport.
+  readonly viewportTop?: CssPixels;
 };
 
 // The naming of the X and Y coordinates here correspond to the ones
@@ -382,9 +384,18 @@ export class ChartCanvas<Item> extends React.Component<
       return;
     }
 
+    const { offsetX, offsetY } = tooltipPosition;
+
+    // If the item is outside the visible canvas area, skip setting the tooltip
+    // position for now. The viewport will scroll to bring it into view, and the
+    // viewportTop change will trigger a re-sync with the correct position.
+    if (offsetY < 0 || offsetY > this.props.containerHeight) {
+      return;
+    }
+
     const canvasRect = this._canvas.getBoundingClientRect();
-    const pageX = canvasRect.left + window.scrollX + tooltipPosition.offsetX;
-    const pageY = canvasRect.top + window.scrollY + tooltipPosition.offsetY;
+    const pageX = canvasRect.left + window.scrollX + offsetX;
+    const pageY = canvasRect.top + window.scrollY + offsetY;
     this.setState({
       selectedItem,
       pageX,
@@ -438,6 +449,16 @@ export class ChartCanvas<Item> extends React.Component<
       if (
         prevProps.containerWidth === 0 &&
         this.props.containerWidth !== 0 &&
+        this.props.selectedItem !== undefined
+      ) {
+        this._syncSelectedItemFromProp(this.props.selectedItem);
+      }
+
+      // The viewport scrolled (e.g. to bring the selected item into view on
+      // load). Re-sync the tooltip position so it stays on the selected item.
+      if (
+        this.props.viewportTop !== undefined &&
+        this.props.viewportTop !== prevProps.viewportTop &&
         this.props.selectedItem !== undefined
       ) {
         this._syncSelectedItemFromProp(this.props.selectedItem);

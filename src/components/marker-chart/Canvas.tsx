@@ -147,6 +147,42 @@ function getDefaultMarkerColors(isHighlighted: boolean) {
 class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   _textMeasurement: TextMeasurement | null = null;
 
+  override componentDidUpdate(prevProps: Props) {
+    // When the viewport finishes sizing itself, or when the selected marker changes,
+    // scroll to bring the selected marker into view (e.g. on initial load from URL).
+    const viewportDidMount =
+      !prevProps.viewport.isSizeSet && this.props.viewport.isSizeSet;
+    const selectedMarkerChanged =
+      this.props.selectedMarkerIndex !== prevProps.selectedMarkerIndex;
+
+    if (viewportDidMount || selectedMarkerChanged) {
+      this._scrollSelectionIntoView();
+    }
+  }
+
+  _scrollSelectionIntoView = () => {
+    const { selectedMarkerIndex, markerTimingAndBuckets, rowHeight, viewport } =
+      this.props;
+
+    if (selectedMarkerIndex === null) {
+      return;
+    }
+
+    const markerIndexToTimingRow = this._getMarkerIndexToTimingRow(
+      markerTimingAndBuckets
+    );
+    const rowIndex = markerIndexToTimingRow[selectedMarkerIndex];
+    const y: CssPixels = rowIndex * rowHeight;
+    const { viewportTop, viewportBottom } = viewport;
+
+    if (y < viewportTop || y + rowHeight > viewportBottom) {
+      // Scroll the marker to the vertical center of the viewport.
+      const viewportHeight = viewportBottom - viewportTop;
+      const targetViewportTop = y + rowHeight / 2 - viewportHeight / 2;
+      viewport.moveViewport(0, viewportTop - targetViewportTop);
+    }
+  };
+
   /**
    * Get the fill, stroke, and text colors for a marker based on its schema and data.
    * If the marker schema has a colorField, use that field's value.
@@ -1053,7 +1089,8 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   };
 
   override render() {
-    const { containerWidth, containerHeight, isDragging } = this.props.viewport;
+    const { containerWidth, containerHeight, isDragging, viewportTop } =
+      this.props.viewport;
     const { selectedMarkerIndex } = this.props;
 
     return (
@@ -1074,6 +1111,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         stickyTooltips={true}
         selectedItem={selectedMarkerIndex}
         getTooltipPosition={this.getTooltipPosition}
+        viewportTop={viewportTop}
       />
     );
   }
