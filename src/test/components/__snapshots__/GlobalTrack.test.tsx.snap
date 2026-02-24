@@ -856,148 +856,6 @@ Array [
   Array [
     "addColorStop",
     0,
-    "transparent",
-  ],
-  Array [
-    "addColorStop",
-    0.25,
-    "transparent",
-  ],
-  Array [
-    "addColorStop",
-    0.25,
-    "transparent",
-  ],
-  Array [
-    "addColorStop",
-    0.5,
-    "transparent",
-  ],
-  Array [
-    "addColorStop",
-    0.5,
-    "transparent",
-  ],
-  Array [
-    "addColorStop",
-    0.75,
-    "transparent",
-  ],
-  Array [
-    "addColorStop",
-    0.75,
-    "transparent",
-  ],
-  Array [
-    "addColorStop",
-    1,
-    "transparent",
-  ],
-  Array [
-    "set fillStyle",
-    Object {
-      "addColorStop": [MockFunction] {
-        "calls": Array [
-          Array [
-            0,
-            "transparent",
-          ],
-          Array [
-            0.25,
-            "transparent",
-          ],
-          Array [
-            0.25,
-            "transparent",
-          ],
-          Array [
-            0.5,
-            "transparent",
-          ],
-          Array [
-            0.5,
-            "transparent",
-          ],
-          Array [
-            0.75,
-            "transparent",
-          ],
-          Array [
-            0.75,
-            "transparent",
-          ],
-          Array [
-            1,
-            "transparent",
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-        ],
-      },
-    },
-  ],
-  Array [
-    "fillRect",
-    0,
-    0,
-    4,
-    4,
-  ],
-  Array [
-    "createPattern",
-    <canvas
-      height="4"
-      width="4"
-    />,
-    "repeat",
-  ],
-  Array [
-    "scale",
-    1,
-    1,
-  ],
-  Array [
-    "createLinearGradient",
-    0,
-    0,
-    4,
-    4,
-  ],
-  Array [
-    "addColorStop",
-    0,
     "#6200a460",
   ],
   Array [
@@ -1952,22 +1810,6 @@ Array [
     Object {},
   ],
   Array [
-    "set fillStyle",
-    "transparent",
-  ],
-  Array [
-    "set fillStyle",
-    "transparent",
-  ],
-  Array [
-    "set fillStyle",
-    "transparent",
-  ],
-  Array [
-    "set fillStyle",
-    Object {},
-  ],
-  Array [
     "set globalCompositeOperation",
     "lighter",
   ],
@@ -2078,22 +1920,6 @@ Array [
   Array [
     "set fillStyle",
     "#45a1ff60",
-  ],
-  Array [
-    "set fillStyle",
-    Object {},
-  ],
-  Array [
-    "set fillStyle",
-    "transparent",
-  ],
-  Array [
-    "set fillStyle",
-    "transparent",
-  ],
-  Array [
-    "set fillStyle",
-    "transparent",
   ],
   Array [
     "set fillStyle",
@@ -2418,148 +2244,6 @@ Array [
   Array [
     "addColorStop",
     0,
-    "transparent",
-  ],
-  Array [
-    "addColorStop",
-    0.25,
-    "transparent",
-  ],
-  Array [
-    "addColorStop",
-    0.25,
-    "transparent",
-  ],
-  Array [
-    "addColorStop",
-    0.5,
-    "transparent",
-  ],
-  Array [
-    "addColorStop",
-    0.5,
-    "transparent",
-  ],
-  Array [
-    "addColorStop",
-    0.75,
-    "transparent",
-  ],
-  Array [
-    "addColorStop",
-    0.75,
-    "transparent",
-  ],
-  Array [
-    "addColorStop",
-    1,
-    "transparent",
-  ],
-  Array [
-    "set fillStyle",
-    Object {
-      "addColorStop": [MockFunction] {
-        "calls": Array [
-          Array [
-            0,
-            "transparent",
-          ],
-          Array [
-            0.25,
-            "transparent",
-          ],
-          Array [
-            0.25,
-            "transparent",
-          ],
-          Array [
-            0.5,
-            "transparent",
-          ],
-          Array [
-            0.5,
-            "transparent",
-          ],
-          Array [
-            0.75,
-            "transparent",
-          ],
-          Array [
-            0.75,
-            "transparent",
-          ],
-          Array [
-            1,
-            "transparent",
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-        ],
-      },
-    },
-  ],
-  Array [
-    "fillRect",
-    0,
-    0,
-    4,
-    4,
-  ],
-  Array [
-    "createPattern",
-    <canvas
-      height="4"
-      width="4"
-    />,
-    "repeat",
-  ],
-  Array [
-    "scale",
-    1,
-    1,
-  ],
-  Array [
-    "createLinearGradient",
-    0,
-    0,
-    4,
-    4,
-  ],
-  Array [
-    "addColorStop",
-    0,
     "#6200a460",
   ],
   Array [
@@ -3514,22 +3198,6 @@ Array [
     Object {},
   ],
   Array [
-    "set fillStyle",
-    "transparent",
-  ],
-  Array [
-    "set fillStyle",
-    "transparent",
-  ],
-  Array [
-    "set fillStyle",
-    "transparent",
-  ],
-  Array [
-    "set fillStyle",
-    Object {},
-  ],
-  Array [
     "set globalCompositeOperation",
     "lighter",
   ],
@@ -3640,22 +3308,6 @@ Array [
   Array [
     "set fillStyle",
     "#45a1ff60",
-  ],
-  Array [
-    "set fillStyle",
-    Object {},
-  ],
-  Array [
-    "set fillStyle",
-    "transparent",
-  ],
-  Array [
-    "set fillStyle",
-    "transparent",
-  ],
-  Array [
-    "set fillStyle",
-    "transparent",
   ],
   Array [
     "set fillStyle",

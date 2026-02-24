@@ -196,7 +196,7 @@ type ExtractionInfo = {
     { funcIndex: IndexIntoFuncTable; frameAddress: Address | null }
   >;
   globalDataCollector: GlobalDataCollector;
-  geckoSourceTable: GeckoSourceTable | undefined;
+  geckoSourceTable: GeckoSourceTable;
 };
 
 /**
@@ -214,7 +214,7 @@ export function extractFuncsAndResourcesFromFrameLocations(
   libs: LibMapping[],
   extensions: ExtensionTable = getEmptyExtensions(),
   globalDataCollector: GlobalDataCollector,
-  geckoSourceTable: GeckoSourceTable | undefined
+  geckoSourceTable: GeckoSourceTable
 ): {
   funcTable: FuncTable;
   resourceTable: ResourceTable;
@@ -539,7 +539,7 @@ function _extractJsFunction(
   if (sourceIndex !== undefined) {
     const geckoSourceIdx = parseInt(sourceIndex, 10);
     // Look up the UUID for this source index from the process's sources table
-    if (geckoSourceTable && geckoSourceIdx < geckoSourceTable.data.length) {
+    if (geckoSourceIdx < geckoSourceTable.data.length) {
       const uuidIndex = geckoSourceTable.schema.uuid;
       const filenameIndex = geckoSourceTable.schema.filename;
       const uuid = geckoSourceTable.data[geckoSourceIdx][uuidIndex];

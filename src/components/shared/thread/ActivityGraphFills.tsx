@@ -73,7 +73,7 @@ export type CategoryDrawStyles = ReadonlyArray<{
   readonly getSelectedFillStyle: () => string;
   readonly getUnselectedFillStyle: () => string;
   readonly getSelectedTextColor: () => string;
-  readonly filteredOutByTransformFillStyle: CanvasPattern;
+  readonly filteredOutByTransformFillStyle: CanvasPattern | string;
 }>;
 
 type SelectedPercentageAtPixelBuffers = {
@@ -322,19 +322,12 @@ export class ActivityGraphFillComputer {
     beforeSampleCpuRatio: number,
     afterSampleCpuRatio: number
   ) {
-    const { rangeEnd, rangeStart, categoryDrawStyles } =
-      this.renderedComponentSettings;
+    const { rangeEnd, rangeStart } = this.renderedComponentSettings;
     if (sampleTime < rangeStart || sampleTime >= rangeEnd) {
       return;
     }
 
-    const categoryDrawStyle = categoryDrawStyles[category];
     const percentageBuffers = this.mutablePercentageBuffers[category];
-
-    if (categoryDrawStyle.getSelectedFillStyle() === 'transparent') {
-      return;
-    }
-
     const percentageBuffer = this._pickPercentageBuffer(
       percentageBuffers,
       sampleIndex

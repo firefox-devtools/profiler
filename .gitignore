@@ -4,6 +4,7 @@ node_modules/
 .DS_Store
 dist/
 public_html/
+build-meta/
 flow-coverage
 coverage
 .eslintcache

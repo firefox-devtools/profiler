@@ -21,6 +21,16 @@ AppHeader--app-header = <header>{ -profiler-brand-name }</header> – <subheader
 AppHeader--github-icon =
     .title = Nei ús Git-repository (dizze wurdt yn in nij finster iepene)
 
+## ThemeToggle
+## They are used at the top right side of the home page to switch between themes.
+
+ThemeToggle--system =
+    .title = Foarkar systeemtema folgje
+ThemeToggle--light =
+    .title = Ljocht tema brûke
+ThemeToggle--dark =
+    .title = Tsjuster tema brûke
+
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
@@ -345,6 +355,13 @@ Home--record-instructions =
 Home--instructions-content =
     It opnimmen fan prestaasjeprofilen fereasket <a>{ -firefox-brand-name }</a>.
     Besteande profilen kinne echter besjoen wurde yn elke moderne browser.
+Home--fenix-instructions-directly =
+    { -firefox-android-brand-name } kin streekrjocht op dit apparaat profilearre wurde. Lês foar
+    mear ynformaasje <a>{ -firefox-android-brand-name } streekrjocht op apparaat profilearje</a>.
+Home--fenix-instructions-remotely =
+    Jo kinne { -firefox-android-brand-name } ek op ôfstân fan { -firefox-brand-name }
+    foar desktop út profilearje. Sjoch dizze dokumintaasje foar mear ynformaasje:
+    <a>{ -firefox-android-brand-name } op ôfstân profilearje</a>.
 Home--record-instructions-start-stop = Profilearjen stopje en starte
 Home--record-instructions-capture-load = Profyl fêstlizze en lade
 Home--profiler-motto = Lis in prestaasjeprofyl fêst. Analysearje it. Diel it. Meitsje it ynternet flugger.
@@ -585,6 +602,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Unbeheind
 MenuButtons--metaInfo--application = Tapassing
 MenuButtons--metaInfo--name-and-version = Namme en ferzje:
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = Uptime:
 MenuButtons--metaInfo--update-channel = Fernijkanaal:
 MenuButtons--metaInfo--build-id = Build-ID:
 MenuButtons--metaInfo--build-type = Buildtype:
@@ -898,6 +917,11 @@ TrackPower--tooltip-power-watt = { $value } W
 # Variables:
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
+    .label = Fermogen
+# This is used in the tooltip when the instant power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-microwatt = { $value } μW
     .label = Fermogen
 # This is used in the tooltip when the power value uses the kilowatt unit.
 # Variables:

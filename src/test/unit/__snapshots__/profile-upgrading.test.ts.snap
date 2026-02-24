@@ -53,7 +53,7 @@ Object {
     "symbolicated": true,
     "toolkit": undefined,
     "updateChannel": undefined,
-    "version": 32,
+    "version": 33,
     "visualMetrics": undefined,
   },
   "pages": Array [],
@@ -6389,7 +6389,7 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 32,
+    "version": 33,
   },
   "pausedRanges": Array [],
   "processes": Array [
@@ -6501,6 +6501,13 @@ Object {
       },
       "pausedRanges": Array [],
       "processes": Array [],
+      "sources": Object {
+        "data": Array [],
+        "schema": Object {
+          "filename": 1,
+          "uuid": 0,
+        },
+      },
       "threads": Array [
         Object {
           "frameTable": Object {
@@ -6783,6 +6790,13 @@ Object {
       ],
     },
   ],
+  "sources": Object {
+    "data": Array [],
+    "schema": Object {
+      "filename": 1,
+      "uuid": 0,
+    },
+  },
   "threads": Array [
     Object {
       "frameTable": Object {
@@ -7845,7 +7859,7 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 32,
+    "version": 33,
   },
   "pages": Array [
     Object {
@@ -7985,6 +7999,13 @@ Object {
       ],
       "pausedRanges": Array [],
       "processes": Array [],
+      "sources": Object {
+        "data": Array [],
+        "schema": Object {
+          "filename": 1,
+          "uuid": 0,
+        },
+      },
       "threads": Array [
         Object {
           "frameTable": Object {
@@ -8349,6 +8370,13 @@ Object {
       ],
     },
   ],
+  "sources": Object {
+    "data": Array [],
+    "schema": Object {
+      "filename": 1,
+      "uuid": 0,
+    },
+  },
   "threads": Array [
     Object {
       "frameTable": Object {

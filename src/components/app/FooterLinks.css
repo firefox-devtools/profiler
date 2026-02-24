@@ -45,8 +45,8 @@
 
 :root.dark-mode {
   .appFooterLinks {
-    --internal-background-color: var(--grey-90);
-    --internal-border-color: var(--grey-70);
+    --internal-background-color: var(--raised-background-color);
+    --internal-border-color: var(--grey-60);
   }
 
   .appFooterLinksLanguageSwitcher {

@@ -15,6 +15,7 @@ import {
   createGeckoCounter,
   createGeckoMarkerStack,
   createGeckoProfilerOverhead,
+  getEmptySourceTable,
   getVisualMetrics,
 } from '../fixtures/profiles/gecko-profile';
 import { ensureExists } from '../../utils/types';
@@ -113,7 +114,7 @@ describe('extract functions and resource from location strings', function () {
         libs,
         extensions,
         globalDataCollector,
-        undefined
+        getEmptySourceTable()
       );
 
     const {

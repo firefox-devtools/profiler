@@ -606,8 +606,7 @@ export type GeckoProfileWithMeta<Meta> = {
   meta: Meta;
   libs: LibMapping[];
   pages?: PageList;
-  // Optional because older Firefox versions may not have this table.
-  sources?: GeckoSourceTable;
+  sources: GeckoSourceTable;
   threads: GeckoThread[];
   pausedRanges: PausedRange[];
   processes: GeckoSubprocessProfile[];

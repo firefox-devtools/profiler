@@ -167,12 +167,12 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
           1 / devicePixelRatio
         );
       }
-      if (markerStyle.borderLeft !== null) {
-        ctx.fillStyle = markerStyle.borderLeft;
+      if (markerStyle.hasBorderLeft()) {
+        ctx.fillStyle = markerStyle.getBorderLeft();
         ctx.fillRect(pos, markerStyle.top, 1, markerStyle.height);
       }
-      if (markerStyle.borderRight !== null) {
-        ctx.fillStyle = markerStyle.borderRight;
+      if (markerStyle.hasBorderRight()) {
+        ctx.fillStyle = markerStyle.getBorderRight();
         ctx.fillRect(
           pos + itemWidth - 1,
           markerStyle.top,

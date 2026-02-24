@@ -287,6 +287,8 @@ Home--record-instructions = Para empezar a perfilar, haz clic en el botón de pe
 Home--instructions-content =
     Registrar perfiles de rendimiento requiere de <a>{ -firefox-brand-name }</a>.
     Sin embargo, los perfiles existentes pueden ser vistos en cualquier navegador moderno.
+Home--fenix-instructions-directly = { -firefox-android-brand-name } puede ser perfilado directamente en este dispositivo. Para más información, consulta <a>Perfilar { -firefox-android-brand-name } directamente en el dispositivo</a>.
+Home--fenix-instructions-remotely = También puedes perfilar { -firefox-android-brand-name } de forma remota desde { -firefox-brand-name } para escritorio. Para más información, consulta esta documentación: <a>Perfilar { -firefox-android-brand-name } de forma remota</a>.
 Home--record-instructions-start-stop = Detener e iniciar perfilado
 Home--record-instructions-capture-load = Capturar y cargar perfil
 Home--profiler-motto = Captura un perfil de rendimiento. Analízalo. Compártelo. Haz que la web sea más rápida.

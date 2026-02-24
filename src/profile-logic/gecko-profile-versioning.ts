@@ -1498,6 +1498,29 @@ const _upgraders: {
     //   within the existing location string.
     // - The source ID is optional, so v31 profiles are valid v32 profiles.
   },
+  [33]: (profile: any) => {
+    // Make SourceTable non-optional by adding an empty one if it doesn't exist.
+    // The sources table was added as optional in version 32, but we now require
+    // it to always be present to simplify the code that uses it and support
+    // source maps in the future.
+    // Source IDs are still optional in the frameTable location strings.
+    function convertToVersion33Recursive(p: any) {
+      if (!p.sources) {
+        p.sources = {
+          schema: {
+            uuid: 0,
+            filename: 1,
+          },
+          data: [],
+        };
+      }
+
+      for (const subprocessProfile of p.processes) {
+        convertToVersion33Recursive(subprocessProfile);
+      }
+    }
+    convertToVersion33Recursive(profile);
+  },
 
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.

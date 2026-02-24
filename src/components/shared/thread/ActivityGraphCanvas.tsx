@@ -163,6 +163,12 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
     // previous fill.
     let previousUpperEdge = new Float32Array(canvasPixelWidth);
     for (const { fillStyle, accumulatedUpperEdge } of fills) {
+      if (fillStyle === 'transparent') {
+        // Skip any drawing work for the Idle category.
+        previousUpperEdge = accumulatedUpperEdge;
+        continue;
+      }
+
       ctx.fillStyle = fillStyle;
 
       // Some fills might not span the full width of the graph - they have parts where
@@ -230,7 +236,11 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
 function _createDiagonalStripePattern(
   chartCtx: CanvasRenderingContext2D,
   color: string
-): CanvasPattern {
+): CanvasPattern | string {
+  if (color === 'transparent') {
+    return 'transparent';
+  }
+
   // Create a second canvas, draw to it in order to create a pattern. This canvas
   // and context will be discarded after the pattern is created.
   const patternCanvas = document.createElement('canvas');
