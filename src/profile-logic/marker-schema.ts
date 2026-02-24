@@ -98,6 +98,9 @@ export function getSchemaFromMarker(
   return schemaName ? (markerSchemaByName[schemaName] ?? null) : null;
 }
 
+// Matches ternary expressions inside marker labels, ie {marker.data.field ? 'truthy' : 'falsy'}
+const TERNARY_RE = /^\s*([\w.]+)\s*\?\s*'([^']*)'\s*:\s*'([^']*)'\s*$/;
+
 /**
  * Marker schema can create a dynamic tooltip label. For instance a schema with
  * a `tooltipLabel` field of "Event at {marker.data.url}" would create a label based
@@ -142,8 +145,9 @@ export function parseLabel(
     console.error(oneLine`
       Error processing the label "${label}" because of the ${part}.
       Currently the labels in the marker schema take the form of
-      "marker.data.keyName" or "marker.startTime". No other type
-      of access is currently supported.
+      "marker.data.keyName", "marker.startTime", or a ternary like
+      "marker.data.keyName ? 'yes' : 'no'". No other type of access
+      is currently supported.
     `);
     return () => '';
   }
@@ -160,6 +164,29 @@ export function parseLabel(
       // Now consider each keyed property:
       // Given: "Marker information: {marker.name} – {marker.data.info}"
       // Handle:                      ^^^^^^^^^^^     ^^^^^^^^^^^^^^^^
+
+      // Check for a ternary expression:
+      // Given: "{marker.data.canceled ? '❌' : ''} {marker.data.delay}"
+      // Handle:  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      //
+      // Only marker.data.* fields are supported as conditions. The true/false
+      // branches must be single-quoted string literals.
+      const ternaryMatch = part.match(TERNARY_RE);
+      if (ternaryMatch) {
+        const [, condRef, truthyStr, falsyStr] = ternaryMatch;
+        const condKeys = condRef.trim().split('.');
+        if (
+          condKeys.length === 3 &&
+          condKeys[0] === 'marker' &&
+          condKeys[1] === 'data' &&
+          condKeys[2]
+        ) {
+          const condPayloadKey = condKeys[2];
+          return (marker) =>
+            (marker.data as any)?.[condPayloadKey] ? truthyStr : falsyStr;
+        }
+        return parseError(label, part);
+      }
 
       const keys = part.trim().split('.');
 
