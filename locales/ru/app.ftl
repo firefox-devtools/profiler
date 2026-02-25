@@ -743,7 +743,7 @@ ProfileDeletePanel--delete-error = При удалении этого профи
 # This is the title of the dialog
 # Variables:
 #   $profileName (string) - Some string that identifies the profile
-ProfileDeletePanel--dialog-title = Удалить { $profileName }
+ProfileDeletePanel--dialog-title = Удалить «{ $profileName }»
 ProfileDeletePanel--dialog-confirmation-question =
     Вы уверены, что хотите удалить загруженные данные для этого профиля? Ссылки,
     которые ранее были общими, больше не будут работать.
