@@ -170,6 +170,22 @@ describe('ThreadActivityGraph', function () {
     );
   });
 
+  it('redraws when the system theme changes', () => {
+    const { getContextDrawCalls } = setup();
+
+    // Flush out any existing draw calls.
+    getContextDrawCalls();
+    expect(getContextDrawCalls().length).toEqual(0);
+
+    // Simulate a theme change.
+    window.dispatchEvent(new CustomEvent('profiler-theme-change'));
+
+    const drawCalls = getContextDrawCalls();
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      true
+    );
+  });
+
   it('matches the 2d canvas draw snapshot with CPU values', () => {
     const profile = getSamplesProfile();
     profile.meta.interval = 1;
