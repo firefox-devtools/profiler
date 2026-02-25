@@ -172,6 +172,9 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       markerTimingAndBuckets
     );
     const rowIndex = markerIndexToTimingRow[selectedMarkerIndex];
+
+    if (rowIndex === undefined) return;
+
     const y: CssPixels = rowIndex * rowHeight;
     const { viewportTop, viewportBottom } = viewport;
 

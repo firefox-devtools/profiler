@@ -381,6 +381,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       query = baseQuery as NetworkQueryShape;
       query.networkSearch =
         urlState.profileSpecific.networkSearchString || undefined;
+      // TODO: Add support for query.marker
       break;
     case 'js-tracer': {
       query = baseQuery as JsTracerQueryShape;
@@ -516,7 +517,7 @@ export function stateFromLocation(
     query.marker !== null
   ) {
     const markerIndex = Number(query.marker);
-    if (!isNaN(markerIndex)) {
+    if (Number.isInteger(markerIndex) && markerIndex >= 0) {
       selectedMarkers[selectedThreadsKey] = markerIndex;
     }
   }
