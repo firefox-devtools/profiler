@@ -389,17 +389,6 @@ export class ChartCanvas<Item> extends React.Component<
     this.setState({ selectedItem, pageX, pageY });
   };
 
-  override componentDidMount() {
-    // If the viewport hasn't been laid out yet,
-    // componentDidUpdate will pick it up once it becomes non-zero.
-    if (
-      this.props.selectedItem !== undefined &&
-      this.props.containerWidth !== 0
-    ) {
-      this._syncSelectedItemFromProp();
-    }
-  }
-
   override UNSAFE_componentWillReceiveProps() {
     // It is possible that the data backing the chart has been
     // changed, for instance after symbolication. Clear the
@@ -418,6 +407,15 @@ export class ChartCanvas<Item> extends React.Component<
 
   override componentDidMount() {
     window.addEventListener('profiler-theme-change', this._onThemeChange);
+
+    // If the viewport hasn't been laid out yet,
+    // componentDidUpdate will pick it up once it becomes non-zero.
+    if (
+      this.props.selectedItem !== undefined &&
+      this.props.containerWidth !== 0
+    ) {
+      this._syncSelectedItemFromProp();
+    }
   }
 
   override componentWillUnmount() {
