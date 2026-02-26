@@ -2262,10 +2262,7 @@ export function filterCounterSamplesToRange(
     count: samples.count.slice(beginSampleIndex, endSampleIndex),
     number: samples.number
       ? samples.number.slice(beginSampleIndex, endSampleIndex)
-      : undefined,
-    argumentValues: samples.argumentValues
-      ? samples.argumentValues.slice(beginSampleIndex, endSampleIndex)
-      : undefined,
+      : undefined
   };
 
   return newCounter;

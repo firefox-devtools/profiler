@@ -513,7 +513,6 @@ export type RawCounterSamplesTable = {
   number?: number[];
   // The count of the data, for instance for memory this would be bytes.
   count: number[];
-  argumentValues?: Array<number | null>;
   length: number;
 };
 
