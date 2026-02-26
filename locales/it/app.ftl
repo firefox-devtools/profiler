@@ -274,6 +274,10 @@ Home--enable-button-unavailable =
 Home--web-channel-unavailable = Questa istanza del profiler non è stata in grado di connettersi al WebChannel. Normalmente significa che è in esecuzione su un host diverso da quello specificato nell’impostazione <code>devtools.performance.recording.ui-base-url</code>. Se vuoi catturare nuovi profili con questa istanza e assegnarle il controllo programmatico del pulsante del menu del profiler, apri <code>about:config</code> e modifica questa impostazione.
 Home--record-instructions = Per avviare la profilazione, fai clic sul pulsante per avviare la registrazione oppure utilizza le scorciatoie da tastiera. L’icona diventa blu quando è attiva la registrazione di un profilo. Premi <kbd>Cattura</kbd> per caricare i dati su profiler.firefox.com.
 Home--instructions-content = La registrazione dei profili è possibile solo con <a>{ -firefox-brand-name }</a>. I profili esistenti possono essere visualizzati con qualsiasi browser.
+Home--fenix-instructions-directly = È possibile creare profili per { -firefox-android-brand-name } direttamente su questo dispositivo. Per ulteriori informazioni, leggi <a>Profilazione di { -firefox-android-brand-name } direttamente sul dispositivo</a>.
+Home--fenix-instructions-remotely =
+    È inoltre possibile creare profili di { -firefox-android-brand-name } da remoto con { -firefox-brand-name }
+    per desktop. Per ulteriori informazioni, consulta <a>Profilazione remota di { -firefox-android-brand-name }</a>.
 Home--record-instructions-start-stop = Interrompi e avvia la profilatura
 Home--record-instructions-capture-load = Cattura e carica profilo
 Home--profiler-motto = Cattura un profilo delle prestazioni. Analizzalo. Condividilo. Rendi il Web più veloce.

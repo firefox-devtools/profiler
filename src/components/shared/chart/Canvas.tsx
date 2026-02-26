@@ -416,6 +416,18 @@ export class ChartCanvas<Item> extends React.Component<
     }
   }
 
+  override componentDidMount() {
+    window.addEventListener('profiler-theme-change', this._onThemeChange);
+  }
+
+  override componentWillUnmount() {
+    window.removeEventListener('profiler-theme-change', this._onThemeChange);
+  }
+
+  _onThemeChange = () => {
+    this._scheduleDraw();
+  };
+
   override componentDidUpdate(prevProps: Props<Item>, prevState: State<Item>) {
     if (prevProps !== this.props) {
       if (this.props.selectedItem !== undefined) {

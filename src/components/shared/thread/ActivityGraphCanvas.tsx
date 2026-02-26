@@ -105,7 +105,19 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
 
   override componentDidMount() {
     this._renderCanvas();
+    window.addEventListener('profiler-theme-change', this._onThemeChange);
   }
+
+  override componentWillUnmount() {
+    window.removeEventListener('profiler-theme-change', this._onThemeChange);
+  }
+
+  _onThemeChange = () => {
+    // Invalidate the cached category draw styles,
+    // so they are recreated with the new theme colors.
+    this._categoryDrawStyles = null;
+    this._renderCanvas();
+  };
 
   override componentDidUpdate() {
     this._renderCanvas();

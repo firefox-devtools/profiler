@@ -345,6 +345,29 @@ describe('bottom box', function () {
     ).toBeOneOf([0x40, 0x45]);
   });
 
+  it('returns null for getAssemblyViewNativeSymbol when nativeSymbols is empty but initialNativeSymbol is 0', function () {
+    // initialNativeSymbol = 0, even when nativeSymbols is empty
+    // (e.g., when the frame has no native symbol).
+    // The selector must return null (not undefined)
+    // to avoid a crash when downstream code accesses .libIndex on it.
+    const { dispatch, getState } = setup();
+
+    dispatch(
+      updateBottomBoxContentsAndMaybeOpen('calltree', {
+        libIndex: null,
+        sourceIndex: null,
+        nativeSymbols: [],
+        initialNativeSymbol: 0,
+        highlightedLineNumber: null,
+        highlightedInstructionAddress: null,
+      })
+    );
+
+    expect(
+      UrlStateSelectors.getAssemblyViewNativeSymbol(getState())
+    ).toBeNull();
+  });
+
   // Further ideas for tests:
   //
   // - A test with multiple threads: Open the assembly view for a symbol, switch

@@ -169,7 +169,15 @@ export function setupInitialUrlState(
     // load process.
     withHistoryReplaceStateSync(() => {
       dispatch(updateUrlState(urlState));
-      dispatch(finalizeProfileView(browserConnection));
+      // finalizeProfileView is intentionally not awaited: it kicks off
+      // long-running async work like symbolication that should run in the
+      // background without blocking this action. The .catch() ensures that any
+      // synchronous errors thrown before the first await (e.g. from selectors)
+      // are still routed to the FATAL_ERROR state rather than escaping as
+      // unhandled promise rejections.
+      dispatch(finalizeProfileView(browserConnection)).catch((error) => {
+        dispatch(fatalError(error));
+      });
       dispatch(urlSetupDone());
     });
   };
