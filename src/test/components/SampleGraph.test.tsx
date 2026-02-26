@@ -149,6 +149,21 @@ describe('SampleGraph', function () {
     };
   }
 
+  it('redraws when the system theme changes', () => {
+    const { getContextDrawCalls } = setup();
+
+    // Flush the initial draw calls.
+    getContextDrawCalls();
+
+    // Simulate a theme change.
+    window.dispatchEvent(new CustomEvent('profiler-theme-change'));
+
+    const drawCalls = getContextDrawCalls();
+    expect(drawCalls.some(([operation]) => operation === 'fillRect')).toBe(
+      true
+    );
+  });
+
   it('matches the component snapshot', () => {
     const { sampleGraphCanvas } = setup();
     expect(sampleGraphCanvas).toMatchSnapshot();
