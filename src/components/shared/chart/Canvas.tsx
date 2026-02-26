@@ -35,12 +35,12 @@ type Props<Item> = {
   readonly stickyTooltips?: boolean;
   // Selected item coming from URL or other non-click mechanism.
   readonly selectedItem?: Item | null;
-  // Method to compute tooltip position for the selected item above.
-  readonly getTooltipPosition?: (
-    item: Item
-  ) => { offsetX: CssPixels; offsetY: CssPixels } | null;
-  // Current vertical scroll offset of the viewport.
-  readonly viewportTop?: CssPixels;
+  // Pre-computed canvas-relative offset for the tooltip of the selected item
+  // (null when the item is not currently visible in the viewport).
+  readonly selectedItemTooltipOffset?: {
+    offsetX: CssPixels;
+    offsetY: CssPixels;
+  } | null;
 };
 
 // The naming of the X and Y coordinates here correspond to the ones
@@ -367,51 +367,36 @@ export class ChartCanvas<Item> extends React.Component<
     this._canvas = canvas;
   };
 
-  _syncSelectedItemFromProp = (selectedItem: Item | null) => {
-    if (selectedItem === null) {
+  _syncSelectedItemFromProp = () => {
+    const { selectedItem, selectedItemTooltipOffset } = this.props;
+
+    if (selectedItem === undefined || selectedItem === null) {
       this.setState({ selectedItem: null });
       return;
     }
 
-    if (!this.props.getTooltipPosition || !this._canvas) {
-      return;
-    }
-
-    const tooltipPosition = this.props.getTooltipPosition(selectedItem);
-    if (!tooltipPosition) {
-      // Can't get position, but still set the selectedItem
+    if (!selectedItemTooltipOffset || !this._canvas) {
+      // Keep selectedItem set, so the tooltip stays at
+      // its last known position rather than disappearing.
       this.setState({ selectedItem });
       return;
     }
 
-    const { offsetX, offsetY } = tooltipPosition;
-
-    // If the item is outside the visible canvas area, skip setting the tooltip
-    // position for now. The viewport will scroll to bring it into view, and the
-    // viewportTop change will trigger a re-sync with the correct position.
-    if (offsetY < 0 || offsetY > this.props.containerHeight) {
-      return;
-    }
-
+    const { offsetX, offsetY } = selectedItemTooltipOffset;
     const canvasRect = this._canvas.getBoundingClientRect();
     const pageX = canvasRect.left + window.scrollX + offsetX;
     const pageY = canvasRect.top + window.scrollY + offsetY;
-    this.setState({
-      selectedItem,
-      pageX,
-      pageY,
-    });
+    this.setState({ selectedItem, pageX, pageY });
   };
 
   override componentDidMount() {
-    // Initialize selectedItem from props on mount if provided and the canvas
-    // already has dimensions. If containerWidth is still 0, the viewport hasn't
-    // been laid out yet - componentDidUpdate will pick it up once it becomes non-zero.
+    // If the viewport hasn't been laid out yet,
+    // componentDidUpdate will pick it up once it becomes non-zero.
     if (
       this.props.selectedItem !== undefined &&
       this.props.containerWidth !== 0
     ) {
-      this._syncSelectedItemFromProp(this.props.selectedItem);
+      this._syncSelectedItemFromProp();
     }
   }
 
@@ -433,35 +418,33 @@ export class ChartCanvas<Item> extends React.Component<
 
   override componentDidUpdate(prevProps: Props<Item>, prevState: State<Item>) {
     if (prevProps !== this.props) {
-      // Sync selectedItem state with selectedItem prop if it changed
-      // and the state doesn't already have this item selected.
-      if (
-        this.props.selectedItem !== undefined &&
-        this.props.selectedItem !== prevProps.selectedItem &&
-        !hoveredItemsAreEqual(this.state.selectedItem, this.props.selectedItem)
-      ) {
-        this._syncSelectedItemFromProp(this.props.selectedItem);
-      }
+      if (this.props.selectedItem !== undefined) {
+        const selectedItemChanged =
+          this.props.selectedItem !== prevProps.selectedItem;
+        const canvasJustGotSize =
+          prevProps.containerWidth === 0 && this.props.containerWidth !== 0;
+        const offsetChanged =
+          this.props.selectedItemTooltipOffset !==
+          prevProps.selectedItemTooltipOffset;
 
-      // The canvas just received its dimensions for the first time (containerWidth
-      // went from 0 to non-zero). If a selectedItem was provided but couldn't be
-      // synced in componentDidMount, do it now.
-      if (
-        prevProps.containerWidth === 0 &&
-        this.props.containerWidth !== 0 &&
-        this.props.selectedItem !== undefined
-      ) {
-        this._syncSelectedItemFromProp(this.props.selectedItem);
-      }
+        const alreadySetInternally =
+          selectedItemChanged &&
+          hoveredItemsAreEqual(
+            this.state.selectedItem,
+            this.props.selectedItem
+          );
 
-      // The viewport scrolled (e.g. to bring the selected item into view on
-      // load). Re-sync the tooltip position so it stays on the selected item.
-      if (
-        this.props.viewportTop !== undefined &&
-        this.props.viewportTop !== prevProps.viewportTop &&
-        this.props.selectedItem !== undefined
-      ) {
-        this._syncSelectedItemFromProp(this.props.selectedItem);
+        const offsetSyncRelevant =
+          offsetChanged &&
+          !selectedItemChanged &&
+          this.state.selectedItem !== null;
+
+        if (
+          !alreadySetInternally &&
+          (selectedItemChanged || canvasJustGotSize || offsetSyncRelevant)
+        ) {
+          this._syncSelectedItemFromProp();
+        }
       }
 
       if (
