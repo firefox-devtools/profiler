@@ -2399,9 +2399,6 @@ export function filterCounterSamplesToRange(
     number: samples.number
       ? samples.number.slice(beginSampleIndex, endSampleIndex)
       : undefined,
-    argumentValues: samples.argumentValues
-      ? samples.argumentValues.slice(beginSampleIndex, endSampleIndex)
-      : undefined,
   };
 
   return newCounter;
