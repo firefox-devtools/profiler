@@ -8,6 +8,7 @@ import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import { getView, getUrlSetupPhase } from '../../selectors/app';
 import { UrlManager } from '../../components/app/UrlManager';
 import { blankStore } from '../fixtures/stores';
+import * as receiveProfileModule from 'firefox-profiler/actions/receive-profile';
 import {
   getDataSource,
   getHash,
@@ -61,7 +62,13 @@ describe('UrlManager', function () {
         waitUntilState(store, (state) => getUrlSetupPhase(state) === phase)
       );
 
-    return { dispatch, getState, createUrlManager, waitUntilUrlSetupPhase };
+    return {
+      store,
+      dispatch,
+      getState,
+      createUrlManager,
+      waitUntilUrlSetupPhase,
+    };
   }
 
   beforeEach(function () {
@@ -182,6 +189,35 @@ describe('UrlManager', function () {
     expect(view.error.name).toBe('UrlUpgradeError');
     expect(window.location.pathname).toBe(urlPath);
     expect(window.location.search).toBe(searchString);
+  });
+
+  it('routes errors thrown in finalizeProfileView to the FATAL_ERROR state', async function () {
+    window.fetchMock.get('*', getSerializableProfile());
+
+    const error = new Error('Simulated error in finalizeProfileView');
+    jest
+      .spyOn(receiveProfileModule, 'finalizeProfileView')
+      .mockReturnValue(async () => {
+        throw error;
+      });
+
+    const urlPath = '/public/FAKE_HASH/calltree/';
+    const { store, getState, createUrlManager } = setup(
+      urlPath + '?v=' + CURRENT_URL_VERSION
+    );
+
+    createUrlManager();
+
+    // urlSetupDone() fires synchronously before the .catch() microtask runs,
+    // so we wait for the FATAL_ERROR view phase directly instead of waiting
+    // for the url setup phase.
+    await act(() =>
+      waitUntilState(store, (state) => getView(state).phase === 'FATAL_ERROR')
+    );
+
+    const view: any = getView(getState());
+    expect(view.phase).toBe('FATAL_ERROR');
+    expect(view.error).toBe(error);
   });
 
   it(`fetches profile and sets the phase to done when everything works`, async function () {

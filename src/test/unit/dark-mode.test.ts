@@ -46,6 +46,50 @@ describe('isDarkMode', function () {
   });
 });
 
+describe('profiler-theme-change event', function () {
+  it('is dispatched when the theme changes', function () {
+    resetForTest();
+    // Initialize in light mode.
+    isDarkMode();
+
+    const listener = jest.fn();
+    window.addEventListener('profiler-theme-change', listener);
+
+    // Switch to dark via a storage event.
+    jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => 'dark');
+    window.dispatchEvent(new StorageEvent('storage', { key: 'theme' }));
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    window.removeEventListener('profiler-theme-change', listener);
+  });
+
+  it('is not dispatched during initialization', function () {
+    resetForTest();
+
+    const listener = jest.fn();
+    window.addEventListener('profiler-theme-change', listener);
+
+    isDarkMode(); // triggers setup
+
+    expect(listener).not.toHaveBeenCalled();
+    window.removeEventListener('profiler-theme-change', listener);
+  });
+
+  it('is not dispatched when the theme stays the same', function () {
+    resetForTest();
+    isDarkMode(); // initialize as light
+
+    const listener = jest.fn();
+    window.addEventListener('profiler-theme-change', listener);
+
+    // Storage event fires but the resolved theme is still light.
+    window.dispatchEvent(new StorageEvent('storage', { key: 'theme' }));
+
+    expect(listener).not.toHaveBeenCalled();
+    window.removeEventListener('profiler-theme-change', listener);
+  });
+});
+
 describe('initTheme', function () {
   it('sets the document element class', function () {
     resetForTest();
