@@ -378,7 +378,7 @@ Home--record-instructions =
     Hit <kbd>Capture</kbd> to load the data into profiler.firefox.com.
 
 Home--instructions-content =
-    Recording performance profiles requires <a>{ -firefox-brand-name }</a>.
+    Recording performance profiles requires <a>{ -firefox-brand-name } for desktop</a>.
     However, existing profiles can be viewed in any modern browser.
 
 Home--fenix-instructions-directly =
