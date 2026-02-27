@@ -437,6 +437,8 @@ export class ChartCanvas<Item> extends React.Component<
           this.props.selectedItemTooltipOffset !==
           prevProps.selectedItemTooltipOffset;
 
+        // The item was already set internally (eg, via click handler),
+        // so skip the prop-driven sync which would overwrite that position.
         const alreadySetInternally =
           selectedItemChanged &&
           hoveredItemsAreEqual(

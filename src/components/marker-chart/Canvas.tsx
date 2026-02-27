@@ -175,7 +175,9 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     );
     const rowIndex = markerIndexToTimingRow[selectedMarkerIndex];
 
-    if (rowIndex === undefined) return;
+    if (rowIndex === undefined) {
+      return;
+    }
 
     const y: CssPixels = rowIndex * rowHeight;
     const { viewportTop, viewportBottom } = viewport;
@@ -1079,6 +1081,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     const offsetX = isInstantMarker ? x : x + Math.min(w / 3, 30);
 
     // Step 5: Calculate vertical (Y) position
+    // + 5 offsets the tooltip slightly below the row's top edge.
     const offsetY: CssPixels = rowIndex * rowHeight - viewportTop + 5;
 
     if (offsetY < 0 || offsetY > containerHeight) {
