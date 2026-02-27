@@ -377,7 +377,7 @@ Home--record-instructions =
     keyboard shortcuts. The icon is blue when a profile is recording.
     Hit <kbd>Capture</kbd> to load the data into profiler.firefox.com.
 
-Home--instructions-content =
+Home--instructions-content2 =
     Recording performance profiles requires <a>{ -firefox-brand-name } for desktop</a>.
     However, existing profiles can be viewed in any modern browser.
 

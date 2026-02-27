@@ -569,7 +569,7 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
           <div>
             <DocsButton />
             <Localized
-              id="Home--instructions-content"
+              id="Home--instructions-content2"
               elems={{
                 a: <a href="https://www.firefox.com" />,
               }}
