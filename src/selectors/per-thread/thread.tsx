@@ -441,7 +441,6 @@ export function getThreadSelectorsWithMarkersPerThread(
   const getRangeAndTransformFilteredThread: Selector<Thread> = createSelector(
     threadSelectors.getRangeFilteredThread,
     getTransformStack,
-    ProfileSelectors.getDefaultCategory,
     threadSelectors.getMarkerGetter,
     threadSelectors.getFullMarkerListIndexes,
     ProfileSelectors.getMarkerSchemaByName,
@@ -449,7 +448,6 @@ export function getThreadSelectorsWithMarkersPerThread(
     (
       startingThread,
       transforms,
-      defaultCategory,
       markerGetter,
       markerIndexes,
       markerSchemaByName,
@@ -461,7 +459,6 @@ export function getThreadSelectorsWithMarkersPerThread(
           _applyTransformMemoized(
             thread,
             transform,
-            defaultCategory,
             markerGetter,
             markerIndexes,
             markerSchemaByName,

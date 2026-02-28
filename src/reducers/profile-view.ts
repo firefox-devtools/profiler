@@ -137,7 +137,6 @@ export const defaultThreadViewOptions: ThreadViewOptions = {
   selectedInvertedCallNodePath: [],
   expandedNonInvertedCallNodePaths: new PathSet(),
   expandedInvertedCallNodePaths: new PathSet(),
-  selectedMarker: null,
   selectedNetworkMarker: null,
   lastSeenTransformCount: 0,
 };
@@ -327,10 +326,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
           ? { expandedInvertedCallNodePaths: expandedCallNodePaths }
           : { expandedNonInvertedCallNodePaths: expandedCallNodePaths }
       );
-    }
-    case 'CHANGE_SELECTED_MARKER': {
-      const { threadsKey, selectedMarker } = action;
-      return _updateThreadViewOptions(state, threadsKey, { selectedMarker });
     }
     case 'CHANGE_SELECTED_NETWORK_MARKER': {
       const { threadsKey, selectedNetworkMarker } = action;
