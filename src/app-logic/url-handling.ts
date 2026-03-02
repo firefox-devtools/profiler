@@ -28,7 +28,7 @@ import type {
   DataSource,
   Pid,
   Profile,
-  RawThread,
+  RawProfileSharedData,
   IndexIntoStackTable,
   TabID,
   TrackIndex,
@@ -50,8 +50,10 @@ import {
 } from '../utils/uintarray-encoding';
 import { tabSlugs } from '../app-logic/tabs-handling';
 import { StringTable } from 'firefox-profiler/utils/string-table';
+import type { ProfileUpgradeInfo } from 'firefox-profiler/profile-logic/processed-profile-versioning';
+import type { ProfileAndProfileUpgradeInfo } from 'firefox-profiler/actions/receive-profile';
 
-export const CURRENT_URL_VERSION = 14;
+export const CURRENT_URL_VERSION = 15;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -462,7 +464,7 @@ type Location = {
  */
 export function stateFromLocation(
   location: Location,
-  profile?: Profile | null
+  profileAndUpgradeInfo?: ProfileAndProfileUpgradeInfo | null
 ): UrlState {
   const { pathname, query } = upgradeLocationToCurrentVersion(
     {
@@ -472,7 +474,8 @@ export function stateFromLocation(
         arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
       }),
     },
-    profile
+    profileAndUpgradeInfo === null ? null : profileAndUpgradeInfo?.profile,
+    profileAndUpgradeInfo?.upgradeInfo
   );
 
   const pathParts = pathname.split('/').filter((d) => d);
@@ -768,7 +771,8 @@ type ProcessedLocationBeforeUpgrade = {
 // URL upgrading is performed if the profile argument is missing (undefined) or if it's an actual profile.
 export function upgradeLocationToCurrentVersion(
   processedLocation: ProcessedLocationBeforeUpgrade,
-  profile?: Profile | null
+  profile?: Profile | null,
+  profileUpgradeInfo?: ProfileUpgradeInfo
 ): ProcessedLocation {
   // Forward /from-addon to /from-browser immediately, outside of the versioning process.
   // This ensures compatibility with Firefox versions < 93.
@@ -803,7 +807,7 @@ export function upgradeLocationToCurrentVersion(
   ) {
     if (destVersion in _upgraders) {
       const upgrader = _upgraders[destVersion];
-      upgrader(processedLocation, profile);
+      upgrader(processedLocation, profile, profileUpgradeInfo);
     }
   }
 
@@ -813,7 +817,8 @@ export function upgradeLocationToCurrentVersion(
 
 type ProcessedLocationUpgrader = (
   location: ProcessedLocationBeforeUpgrade,
-  profile?: Profile
+  profile?: Profile,
+  profileUpgradeInfo?: ProfileUpgradeInfo
 ) => void;
 
 // _upgraders[i] converts from version i - 1 to version i.
@@ -925,10 +930,6 @@ const _upgraders: {
       return;
     }
 
-    // The transform stack is for the selected thread.
-    // At the time this upgrader was written, there was only one selected thread.
-    const thread = profile.threads[selectedThread];
-
     for (let i = 0; i < transforms.length; i++) {
       const transform = transforms[i];
       if (
@@ -949,7 +950,7 @@ const _upgraders: {
       // To be correct, we would need to apply all previous transforms and find
       // the right stack in the filtered thread.
       const callNodeStackIndex = getStackIndexFromVersion3JSCallNodePath(
-        thread,
+        profile.shared,
         transform.callNodePath
       );
       if (callNodeStackIndex === null) {
@@ -957,7 +958,7 @@ const _upgraders: {
         continue;
       }
       transform.callNodePath = getVersion4JSCallNodePathFromStackIndex(
-        thread,
+        profile.shared,
         callNodeStackIndex
       );
     }
@@ -1156,8 +1157,7 @@ const _upgraders: {
       return;
     }
 
-    const threadIndex = selectedThreads[0];
-    const funcTableLength = profile.threads[threadIndex].funcTable.length;
+    const funcTableLength = profile.shared.funcTable.length;
 
     //     cr-{implementation}-{resourceIndex}-{wrongFuncIndex}
     //  -> cr-{implementation}-{resourceIndex}-{correctFuncIndex}
@@ -1224,6 +1224,133 @@ const _upgraders: {
     // Added marker parameter for persisting highlighted markers in URLs.
     // This is backward compatible as the marker parameter is optional.
   },
+  [15]: (
+    processedLocation: ProcessedLocationBeforeUpgrade,
+    _profile?: Profile,
+    profileUpgradeInfo?: ProfileUpgradeInfo
+  ) => {
+    if (!profileUpgradeInfo || !profileUpgradeInfo.v60) {
+      return;
+    }
+
+    const { v60 } = profileUpgradeInfo;
+
+    const { query } = processedLocation;
+    if (!query.transforms) {
+      return; // Nothing to upgrade - all func and resource indexes are in the transforms
+    }
+
+    const selectedThreads = decodeUintArrayFromUrlComponent(query.thread);
+    if (selectedThreads.length !== 1) {
+      return;
+    }
+
+    const [threadIndex] = selectedThreads;
+
+    if (!(threadIndex in v60.threadMappings)) {
+      return;
+    }
+
+    const threadMappings = v60.threadMappings[threadIndex];
+    const newFuncCount = v60.newFuncCount;
+
+    function translateFuncIndex(funcIndex: number): number {
+      if (funcIndex < threadMappings.funcTableIndexMap.length) {
+        return threadMappings.funcTableIndexMap[funcIndex];
+      }
+      // Func indexes larger than the funcCount refer to synthetic
+      // "collapsed resource" funcs.
+      const resourceIndex = funcIndex - threadMappings.funcTableIndexMap.length;
+      if (resourceIndex < threadMappings.resourceTableIndexMap.length) {
+        return (
+          newFuncCount + threadMappings.resourceTableIndexMap[resourceIndex]
+        );
+      }
+      return funcIndex;
+    }
+
+    function translateStrFuncIndex(rawFuncIndex: string): string {
+      const funcIndex = parseInt(rawFuncIndex, 10);
+      if (!isNaN(funcIndex) && funcIndex >= 0) {
+        return '' + translateFuncIndex(funcIndex);
+      }
+      return rawFuncIndex;
+    }
+
+    function translateStrResourceIndex(rawResourceIndex: string): string {
+      const resourceIndex = parseInt(rawResourceIndex, 10);
+      if (
+        !isNaN(resourceIndex) &&
+        resourceIndex >= 0 &&
+        resourceIndex < threadMappings.resourceTableIndexMap.length
+      ) {
+        return '' + threadMappings.resourceTableIndexMap[resourceIndex];
+      }
+      return rawResourceIndex;
+    }
+
+    function mapIndexesInTransform(s: string): string {
+      const tuple = s.split('-');
+      const shortKey = tuple[0];
+      switch (shortKey) {
+        case 'cr': {
+          // collapse-resource
+          // e.g. "cr-js-325-8"
+          const [, implementation, oldResourceIndex, oldFuncIndex] = tuple;
+          const newResourceIndex = translateStrResourceIndex(oldResourceIndex);
+          const newFuncIndex = translateStrFuncIndex(oldFuncIndex);
+          return [
+            shortKey,
+            implementation,
+            newResourceIndex,
+            newFuncIndex,
+          ].join('-');
+        }
+        case 'drec': {
+          // collapse-direct-recursion
+          // e.g. "drec-js-325"
+          const [, implementation, oldFuncIndex] = tuple;
+          const newFuncIndex = translateStrFuncIndex(oldFuncIndex);
+          return [shortKey, implementation, newFuncIndex].join('-');
+        }
+        case 'rec': // collapse-recursion
+        case 'mf': // 'merge-function'
+        case 'ff': // 'focus-function':
+        case 'df': // 'drop-function':
+        case 'cfs': {
+          // 'collapse-function-subtree':
+          // e.g. "mf-325"
+          const [, oldFuncIndex] = tuple;
+          const newFuncIndex = translateStrFuncIndex(oldFuncIndex);
+          return [shortKey, newFuncIndex].join('-');
+        }
+        case 'f': // 'focus-subtree':
+        case 'mcn': {
+          // 'merge-call-node':
+          // e.g. "f-js-xFFpUMl-i" or "f-cpp-0KV4KV5KV61KV7KV8K"
+          const [, implementation, oldCallNodePathRaw, isInverted] = tuple;
+          const oldCallNodePath =
+            decodeUintArrayFromUrlComponent(oldCallNodePathRaw);
+          const newCallNodePath = oldCallNodePath.map(translateFuncIndex);
+          const newCallNodePathRaw =
+            encodeUintArrayForUrlComponent(newCallNodePath);
+          return [
+            shortKey,
+            implementation,
+            newCallNodePathRaw,
+            isInverted,
+          ].join('-');
+        }
+        default:
+          return s;
+      }
+    }
+
+    query.transforms = query.transforms
+      .split('~')
+      .map(mapIndexesInTransform)
+      .join('~');
+  },
 };
 
 for (let destVersion = 1; destVersion <= CURRENT_URL_VERSION; destVersion++) {
@@ -1248,10 +1375,10 @@ for (const destVersionStr of Object.keys(_upgraders)) {
 // This should only be used for the URL upgrader, typically this
 // operation would use a call node index rather than a stack.
 function getStackIndexFromVersion3JSCallNodePath(
-  thread: RawThread,
+  shared: RawProfileSharedData,
   oldCallNodePath: CallNodePath
 ): IndexIntoStackTable | null {
-  const { stackTable, funcTable, frameTable } = thread;
+  const { stackTable, funcTable, frameTable } = shared;
   const stackIndexDepth: Map<IndexIntoStackTable | null, number> = new Map();
   stackIndexDepth.set(null, -1);
 
@@ -1294,10 +1421,10 @@ function getStackIndexFromVersion3JSCallNodePath(
 // Constructs the new JS CallNodePath from given stackIndex and returns it.
 // This should only be used for the URL upgrader.
 function getVersion4JSCallNodePathFromStackIndex(
-  thread: RawThread,
+  shared: RawProfileSharedData,
   stackIndex: IndexIntoStackTable
 ): CallNodePath {
-  const { funcTable, stackTable, frameTable } = thread;
+  const { funcTable, stackTable, frameTable } = shared;
   const callNodePath = [];
   let nextStackIndex: IndexIntoStackTable | null = stackIndex;
   while (nextStackIndex !== null) {

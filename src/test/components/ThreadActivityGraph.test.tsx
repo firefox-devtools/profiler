@@ -96,7 +96,7 @@ describe('ThreadActivityGraph', function () {
       `Couldn't find the activity graph canvas, with selector .threadActivityGraphCanvas`
     ) as HTMLElement;
     const thread = profile.threads[0];
-    const { stringArray } = profile.shared;
+    const { funcTable, stringArray } = profile.shared;
 
     // Perform a click on the activity graph.
     function clickActivityGraph(
@@ -113,7 +113,7 @@ describe('ThreadActivityGraph', function () {
     function getCallNodePath() {
       return selectedThreadSelectors
         .getSelectedCallNodePath(getState())
-        .map((funcIndex) => stringArray[thread.funcTable.name[funcIndex]]);
+        .map((funcIndex) => stringArray[funcTable.name[funcIndex]]);
     }
 
     /**

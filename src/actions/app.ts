@@ -24,7 +24,10 @@ import {
   stateFromLocation,
   withHistoryReplaceStateSync,
 } from 'firefox-profiler/app-logic/url-handling';
-import { finalizeProfileView } from './receive-profile';
+import {
+  finalizeProfileView,
+  type ProfileAndProfileUpgradeInfo,
+} from './receive-profile';
 import { fatalError } from './errors';
 import {
   addEventDelayTracksForThreads,
@@ -38,7 +41,6 @@ import {
 } from 'firefox-profiler/selectors/cpu';
 
 import type {
-  Profile,
   ThreadsKey,
   CssPixels,
   Action,
@@ -128,13 +130,13 @@ export function setHasZoomedViaMousewheel() {
  */
 export function setupInitialUrlState(
   location: Location,
-  profile: Profile | null,
+  profileAndUpgradeInfo: ProfileAndProfileUpgradeInfo | null,
   browserConnection: BrowserConnection | null
 ): ThunkAction<void> {
   return (dispatch) => {
     let urlState;
     try {
-      urlState = stateFromLocation(location, profile);
+      urlState = stateFromLocation(location, profileAndUpgradeInfo);
     } catch (e) {
       if (e.name === 'UrlUpgradeError') {
         // The error is an URL upgrade error, let's fire a fatal error.

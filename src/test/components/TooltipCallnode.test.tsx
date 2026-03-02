@@ -93,7 +93,6 @@ describe('TooltipCallNode', function () {
         Bjs
         Cjs
       `);
-      const threadIndex = 0;
       // Add items to Pages array.
       profile.pages = [
         {
@@ -115,18 +114,19 @@ describe('TooltipCallNode', function () {
         });
       }
 
-      const { frameTable } = profile.threads[threadIndex];
+      const { frameTable } = profile.shared;
 
       const innerWindowID =
         profile.pages[profile.pages.length - 1].innerWindowID;
+
       for (let i = 1; i < frameTable.length; i++) {
         frameTable.innerWindowID[i] = innerWindowID;
       }
-      profile.threads[threadIndex].usedInnerWindowIDs = [innerWindowID];
+      profile.threads[0].usedInnerWindowIDs = [innerWindowID];
 
       const callNodePath = [A, Bjs, Cjs];
       const { dispatch, renderTooltip } = setup(profile);
-      dispatch(changeSelectedCallNode(threadIndex, callNodePath));
+      dispatch(changeSelectedCallNode(0, callNodePath));
       const renderResults = renderTooltip();
       return {
         ...renderResults,
