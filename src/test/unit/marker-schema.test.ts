@@ -172,6 +172,81 @@ describe('marker schema labels', function () {
     expect(console.error).toHaveBeenCalledTimes(0);
   });
 
+  describe('ternary expressions', function () {
+    it('returns the truthy string when the field is truthy', function () {
+      expect(
+        applyLabel({
+          label: "{marker.data.canceled ? '❌' : ''}",
+          schemaFields: [
+            { key: 'canceled', label: 'Canceled', format: 'string' },
+          ],
+          payload: { canceled: true },
+        })
+      ).toEqual('❌');
+      expect(console.error).toHaveBeenCalledTimes(0);
+    });
+
+    it('returns the falsy string when the field is falsy', function () {
+      expect(
+        applyLabel({
+          label: "{marker.data.canceled ? '❌' : ''}",
+          schemaFields: [
+            { key: 'canceled', label: 'Canceled', format: 'string' },
+          ],
+          payload: { canceled: false },
+        })
+      ).toEqual('');
+      expect(console.error).toHaveBeenCalledTimes(0);
+    });
+
+    it('returns the falsy string when the field is absent from the payload', function () {
+      expect(
+        applyLabel({
+          label: "{marker.data.canceled ? '❌' : ''}",
+          schemaFields: [],
+          payload: {},
+        })
+      ).toEqual('');
+      expect(console.error).toHaveBeenCalledTimes(0);
+    });
+
+    it('returns the falsy string when there is no payload', function () {
+      expect(
+        applyLabel({
+          label: "{marker.data.canceled ? 'yes' : 'no'}",
+          schemaFields: [],
+          payload: null,
+        })
+      ).toEqual('no');
+      expect(console.error).toHaveBeenCalledTimes(0);
+    });
+
+    it('can mix a ternary with regular field lookups', function () {
+      expect(
+        applyLabel({
+          label: "{marker.data.canceled ? '❌' : ''} {marker.data.delay}",
+          schemaFields: [
+            { key: 'canceled', label: 'Canceled', format: 'string' },
+            { key: 'delay', label: 'Delay', format: 'milliseconds' },
+          ],
+          payload: { canceled: true, delay: 250 },
+        })
+      ).toEqual('❌ 250ms');
+      expect(console.error).toHaveBeenCalledTimes(0);
+    });
+
+    it('errors when the condition is not a marker.data.* reference', function () {
+      expect(
+        applyLabel({
+          label: "{marker.name ? 'yes' : 'no'}",
+          schemaFields: [],
+          payload: {},
+        })
+      ).toEqual('');
+      expect(console.error).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('parseErrors', function () {
     function testParseError(label: string) {
       expect(
