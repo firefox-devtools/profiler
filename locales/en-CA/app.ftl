@@ -352,9 +352,6 @@ Home--record-instructions =
     To start profiling, click on the profiling button, or use the
     keyboard shortcuts. The icon is blue when a profile is recording.
     Hit <kbd>Capture</kbd> to load the data into profiler.firefox.com.
-Home--instructions-content =
-    Recording performance profiles requires <a>{ -firefox-brand-name }</a>.
-    However, existing profiles can be viewed in any modern browser.
 Home--record-instructions-start-stop = Stop and start profiling
 Home--record-instructions-capture-load = Capture and load profile
 Home--profiler-motto = Capture a performance profile. Analyze it. Share it. Make the web faster.

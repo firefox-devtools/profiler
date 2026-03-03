@@ -269,9 +269,6 @@ Home--enable-button-unavailable =
 # This message can be seen on https://main--perf-html.netlify.app/ .
 Home--web-channel-unavailable = Cette instance du profileur n’a pas pu se connecter à WebChannel. Généralement, cela signifie qu’il s’exécute sur un hôte différent de celui spécifié dans la préférence <code>devtools.performance.recording.ui-base-url</code>. Si vous souhaitez capturer de nouveaux profils avec cette instance, et lui donner par programmation le contrôle du bouton de menu du profileur, vous pouvez ouvrir <code>about:config</code> et modifier la préférence.
 Home--record-instructions = Pour démarrer le profilage, cliquez sur le bouton de profilage ou utilisez le raccourci clavier. L’icône est bleue lorsqu’un profil est en cours d’enregistrement. Appuyez sur <kbd>Capturer</kbd> pour charger les données dans profiler.firefox.com.
-Home--instructions-content =
-    L’enregistrement de profils de performances nécessite <a>{ -firefox-brand-name }</a>.
-    Cependant, les profils existants peuvent être consultés dans n’importe quel navigateur moderne.
 Home--record-instructions-start-stop = Arrêter et démarrer le profilage
 Home--record-instructions-capture-load = Capturer et charger un profil
 Home--profiler-motto = Capturez un profil de performances. Analysez-le. Partagez-le. Rendez le Web plus rapide.

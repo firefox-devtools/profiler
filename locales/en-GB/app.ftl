@@ -352,9 +352,6 @@ Home--record-instructions =
     To start profiling, click on the profiling button, or use the
     keyboard shortcuts. The icon is blue when a profile is recording.
     Hit <kbd>Capture</kbd> to load the data into profiler.firefox.com.
-Home--instructions-content =
-    Recording performance profiles requires <a>{ -firefox-brand-name }</a>.
-    However, existing profiles can be viewed in any modern browser.
 Home--fenix-instructions-directly =
     { -firefox-android-brand-name } can be profiled directly on this device. For
     more information, read <a>Profiling { -firefox-android-brand-name } directly on device</a>.

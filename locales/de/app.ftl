@@ -330,9 +330,6 @@ Home--record-instructions =
     Um die Profilerstellung zu starten, klicken Sie auf die Schaltfläche Profilerstellung oder verwenden Sie die
     Tastatürkürzel. Das Symbol ist blau, wenn ein Profil aufzeichnet.
     Drücken Sie <kbd>Aufzeichnen</kbd>, um die Daten in profiler.firefox.com zu laden.
-Home--instructions-content =
-    Das Aufzeichnen von Leistungsprofilen benötigt <a>{ -firefox-brand-name }</a>.
-    Vorhandene Profile können jedoch in jedem modernen Browser angezeigt werden.
 Home--fenix-instructions-directly =
     Ein Leistungsprofil von { -firefox-android-brand-name } kann direkt auf diesem Gerät erstellt werden.
     Weitere Informationen finden Sie unter <a>Leistungsprofile von { -firefox-android-brand-name } direkt auf dem Gerät</a>.
