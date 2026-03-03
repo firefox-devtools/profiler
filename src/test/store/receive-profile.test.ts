@@ -1335,6 +1335,120 @@ describe('actions/receive-profile', function () {
       }
       expect(userFacingError).toBeNull();
     });
+
+    describe('streaming JSON parser', function () {
+      /**
+       * Helper that mocks fetch to return a Response whose body is a
+       * ReadableStream that delivers `chunks` one at a time.
+       */
+      function configureFetchWithChunkedStream(opts: {
+        url: string;
+        chunks: Array<Uint8Array>;
+        contentType?: string;
+      }) {
+        const { url, chunks, contentType = 'application/json' } = opts;
+        const body = new ReadableStream<Uint8Array>({
+          start(controller) {
+            for (const chunk of chunks) {
+              controller.enqueue(chunk);
+            }
+            controller.close();
+          },
+        });
+        const response = new Response(body, {
+          status: 200,
+          headers: { 'content-type': contentType },
+        });
+
+        window.fetchMock.catch(403).get(url, response);
+        const reportError = jest.fn();
+        const args = {
+          url,
+          onTemporaryError: () => {},
+          reportError,
+        };
+        return { args, reportError };
+      }
+
+      it('parses JSON delivered in multiple stream chunks', async function () {
+        const profile = _getSimpleProfile();
+        const stringProfile = serializeProfile(profile);
+        const encoded = encode(stringProfile);
+        // Split the encoded bytes into 3 chunks.
+        const mid1 = Math.floor(encoded.length / 3);
+        const mid2 = Math.floor((2 * encoded.length) / 3);
+        const chunks = [
+          encoded.slice(0, mid1),
+          encoded.slice(mid1, mid2),
+          encoded.slice(mid2),
+        ];
+
+        const { args } = configureFetchWithChunkedStream({
+          url: 'https://example.com/chunked-profile.json',
+          chunks,
+        });
+
+        const profileOrZip = await _fetchProfile(args);
+        expect(profileOrZip).toEqual({
+          responseType: 'PROFILE',
+          profile: JSON.parse(stringProfile),
+        });
+      });
+
+      it('handles gzip content delivered as a stream', async function () {
+        const profile = _getSimpleProfile();
+        const stringProfile = serializeProfile(profile);
+        const compressed = await compress(stringProfile);
+        // Split compressed bytes into 2 chunks.
+        const mid = Math.floor(compressed.length / 2);
+        const chunks = [compressed.slice(0, mid), compressed.slice(mid)];
+
+        const { args } = configureFetchWithChunkedStream({
+          url: 'https://example.com/gzip-stream.json',
+          chunks,
+        });
+
+        const profileOrZip = await _fetchProfile(args);
+        expect(profileOrZip).toEqual({
+          responseType: 'PROFILE',
+          profile: JSON.parse(stringProfile),
+        });
+      });
+
+      it('throws on an empty stream', async function () {
+        const { args } = configureFetchWithChunkedStream({
+          url: 'https://example.com/empty-stream.json',
+          chunks: [],
+        });
+
+        await expect(_fetchProfile(args)).rejects.toThrow(
+          /could not be decoded/i
+        );
+      });
+
+      it('throws on JSON with no root value (e.g. whitespace-only)', async function () {
+        const { args } = configureFetchWithChunkedStream({
+          url: 'https://example.com/whitespace.json',
+          chunks: [encode('   ')],
+        });
+
+        await expect(_fetchProfile(args)).rejects.toThrow(
+          /could not be decoded/i
+        );
+      });
+
+      it('throws with a readable error on invalid JSON in a stream', async function () {
+        const { args, reportError } = configureFetchWithChunkedStream({
+          url: 'https://example.com/bad-json-stream.json',
+          chunks: [encode('{invalid')],
+        });
+
+        await expect(_fetchProfile(args)).rejects.toThrow(
+          /could not be decoded/i
+        );
+        expect(reportError.mock.calls.length).toBeGreaterThan(0);
+      });
+    });
   });
 
   describe('retrieveProfileFromFile', function () {
