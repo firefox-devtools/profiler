@@ -42,10 +42,11 @@ describe('getStackLineInfo', function () {
       fileOneSourceIndex
     );
 
-    // Expect the returned arrays to have the same length as the stackTable.
+    // Expect the returned stackIndexToLineSetIndex array to have the same length as the stackTable.
     expect(stackTable.length).toBe(9);
-    expect(stackLineInfoOne.selfLine.length).toBe(9);
-    expect(stackLineInfoOne.stackLines.length).toBe(9);
+    expect(stackLineInfoOne.stackIndexToLineSetIndex.length).toBe(9);
+
+    expect(stackLineInfoOne.lineSetTable.length).toBe(7);
   });
 });
 
