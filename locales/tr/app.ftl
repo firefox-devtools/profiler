@@ -265,9 +265,6 @@ Home--record-instructions =
     Profillemeyi başlatmak için profilleme düğmesine tıklayın veya
     klavye kısayollarını kullanın. Profil kaydedilirken simge maviye dönüşür.
     Verileri profiler.firefox.com’a yüklemek için <kbd>Kaydet</kbd>’e tıklayın.
-Home--instructions-content =
-    Performans profilleri yalnızca <a>{ -firefox-brand-name }</a> ile kaydedilebilir.
-    Ancak mevcut profiller herhangi bir modern tarayıcıda görüntülenebilir.
 Home--record-instructions-start-stop = Profillemeyi durdur ve başlat
 Home--record-instructions-capture-load = Profili yakala ve yükle
 Home--profiler-motto = Performans profili kaydedin. Analiz edin. Paylaşın. Web’i daha hızlı hale getirin.
