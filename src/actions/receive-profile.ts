@@ -87,10 +87,7 @@ import type {
   MixedObject,
 } from 'firefox-profiler/types';
 
-import type {
-  FuncToFuncsMap,
-  SymbolicationStepInfo,
-} from '../profile-logic/symbolication';
+import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
 import { assertExhaustiveCheck } from '../utils/types';
 import { bytesToBase64DataUrl } from 'firefox-profiler/utils/base64';
 import type {
@@ -105,6 +102,7 @@ import type {
 } from '../profile-logic/symbol-store';
 import type { SymbolTableAsTuple } from 'firefox-profiler/profile-logic/symbol-store-db';
 import SymbolStoreDB from 'firefox-profiler/profile-logic/symbol-store-db';
+import type { ProfileUpgradeInfo } from 'firefox-profiler/profile-logic/processed-profile-versioning';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -347,7 +345,7 @@ export function finalizeFullProfileView(
         const thread = profile.threads[threadIndex];
         const { samples, jsAllocations, nativeAllocations } = thread;
         hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
-          hasUsefulSamples(table?.stack, thread, profile.shared)
+          hasUsefulSamples(table?.stack, profile.shared)
         );
         if (hasSamples) {
           break;
@@ -456,28 +454,20 @@ export function doneSymbolicating(): Action {
 // reach the screen because it would be invalidated by the next symbolication update.
 // So we queue up symbolication steps and run the update from requestIdleCallback.
 export function bulkProcessSymbolicationSteps(
-  symbolicationStepsPerThread: Map<ThreadIndex, SymbolicationStepInfo[]>
+  symbolicationSteps: SymbolicationStepInfo[]
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const { threads, shared } = getProfile(getState());
-    const oldFuncToNewFuncsMaps: Map<ThreadIndex, FuncToFuncsMap> = new Map();
-    const symbolicatedThreads = threads.map((oldThread, threadIndex) => {
-      const symbolicationSteps = symbolicationStepsPerThread.get(threadIndex);
-      if (symbolicationSteps === undefined) {
-        return oldThread;
-      }
-      const { thread, oldFuncToNewFuncsMap } = applySymbolicationSteps(
-        oldThread,
-        shared,
-        symbolicationSteps
-      );
-      oldFuncToNewFuncsMaps.set(threadIndex, oldFuncToNewFuncsMap);
-      return thread;
-    });
+    const {
+      threads: symbolicatedThreads,
+      shared: symbolicatedShared,
+      oldFuncToNewFuncsMap,
+    } = applySymbolicationSteps(threads, shared, symbolicationSteps);
     dispatch({
       type: 'BULK_SYMBOLICATION',
-      oldFuncToNewFuncsMaps,
+      oldFuncToNewFuncsMap,
       symbolicatedThreads,
+      symbolicatedShared,
     });
   };
 }
@@ -499,12 +489,12 @@ if (typeof window === 'object' && window.requestIdleCallback) {
 // Queues up symbolication steps and bulk-processes them from requestIdleCallback,
 // in order to improve UI responsiveness during symbolication.
 class SymbolicationStepQueue {
-  _updates: Map<ThreadIndex, SymbolicationStepInfo[]>;
+  _updates: SymbolicationStepInfo[];
   _updateObservers: Array<() => void>;
   _requestedUpdate: boolean;
 
   constructor() {
-    this._updates = new Map();
+    this._updates = [];
     this._updateObservers = [];
     this._requestedUpdate = false;
   }
@@ -522,7 +512,7 @@ class SymbolicationStepQueue {
   _dispatchUpdate(dispatch: Dispatch) {
     const updates = this._updates;
     const observers = this._updateObservers;
-    this._updates = new Map();
+    this._updates = [];
     this._updateObservers = [];
     this._requestedUpdate = false;
 
@@ -535,17 +525,11 @@ class SymbolicationStepQueue {
 
   enqueueSingleSymbolicationStep(
     dispatch: Dispatch,
-    threadIndex: ThreadIndex,
     symbolicationStepInfo: SymbolicationStepInfo,
     completionHandler: () => void
   ) {
     this._scheduleUpdate(dispatch);
-    let threadSteps = this._updates.get(threadIndex);
-    if (threadSteps === undefined) {
-      threadSteps = [];
-      this._updates.set(threadIndex, threadSteps);
-    }
-    threadSteps.push(symbolicationStepInfo);
+    this._updates.push(symbolicationStepInfo);
     this._updateObservers.push(completionHandler);
   }
 }
@@ -804,15 +788,11 @@ export async function doSymbolicateProfile(
   await symbolicateProfile(
     profile,
     symbolStore,
-    (
-      threadIndex: ThreadIndex,
-      symbolicationStepInfo: SymbolicationStepInfo
-    ) => {
+    (symbolicationStepInfo: SymbolicationStepInfo) => {
       completionPromises.push(
         new Promise((resolve) => {
           _symbolicationStepQueueSingleton.enqueueSingleSymbolicationStep(
             dispatch,
-            threadIndex,
             symbolicationStepInfo,
             () => resolve(undefined)
           );
@@ -1178,7 +1158,7 @@ async function _extractZipFromResponse(
   // that comes from this realm.
   const typedBuffer = new Uint8Array(buffer);
   try {
-    const JSZip = await import('jszip');
+    const { default: JSZip } = await import('jszip');
     const zip = await JSZip.loadAsync(typedBuffer);
     // Catch the error if unable to load the zip.
     return zip;
@@ -1265,7 +1245,7 @@ export function getProfileUrlForHash(hash: string): string {
 export function retrieveProfileFromStore(
   hash: string,
   initialLoad: boolean = false
-): ThunkAction<Promise<void>> {
+): ThunkAction<Promise<ProfileUpgradeInfo>> {
   return retrieveProfileOrZipFromUrl(getProfileUrlForHash(hash), initialLoad);
 }
 
@@ -1277,7 +1257,7 @@ export function retrieveProfileFromStore(
 export function retrieveProfileOrZipFromUrl(
   profileUrl: string,
   initialLoad: boolean = false
-): ThunkAction<Promise<void>> {
+): ThunkAction<Promise<ProfileUpgradeInfo>> {
   return async function (dispatch) {
     dispatch(waitingForProfileFromUrl(profileUrl));
 
@@ -1292,21 +1272,23 @@ export function retrieveProfileOrZipFromUrl(
       switch (response.responseType) {
         case 'PROFILE': {
           const serializedProfile = response.profile;
+          const profileUpgradeInfo = {};
           const profile = await unserializeProfileOfArbitraryFormat(
             serializedProfile,
-            profileUrl
+            profileUrl,
+            profileUpgradeInfo
           );
           if (profile === undefined) {
             throw new Error('Unable to parse the profile.');
           }
 
           await dispatch(loadProfile(profile, {}, initialLoad));
-          break;
+          return profileUpgradeInfo;
         }
         case 'ZIP': {
           const zip = response.zip;
           await dispatch(receiveZipFile(zip));
-          break;
+          return {};
         }
         default:
           throw assertExhaustiveCheck(
@@ -1316,6 +1298,7 @@ export function retrieveProfileOrZipFromUrl(
       }
     } catch (error) {
       dispatch(fatalError(error));
+      return {};
     }
   };
 }
@@ -1369,7 +1352,7 @@ export function retrieveProfileFromFile(
       if (_deduceContentType(file.name, file.type) === 'application/zip') {
         // Open a zip file in the zip file viewer
         const buffer = await fileReader(file).asArrayBuffer();
-        const JSZip = await import('jszip');
+        const { default: JSZip } = await import('jszip');
         const zip = await JSZip.loadAsync(buffer);
         await dispatch(receiveZipFile(zip));
       } else {
@@ -1444,6 +1427,7 @@ export function retrieveProfilesToCompare(
           ) {
             url = await expandUrl(url);
           }
+          // TODO: Pass the profileUpgradeInfo here. See #5871.
           return stateFromLocation(new URL(url));
         })
       );
@@ -1515,14 +1499,20 @@ export function retrieveProfilesToCompare(
   };
 }
 
+export type ProfileAndProfileUpgradeInfo = {
+  profile: Profile;
+  upgradeInfo: ProfileUpgradeInfo;
+};
+
 // This function takes location(most probably `window.location`) as parameter
 // and loads the profile in that given location, then returns the profile data.
 // This function is being used to get the initial profile data before upgrading
 // the url and processing the UrlState.
+// `profileUpgradeInfo` is an outparam that will be popuplated by this function.
 export function retrieveProfileForRawUrl(
   location: Location,
   browserConnectionStatus?: BrowserConnectionStatus
-): ThunkAction<Promise<Profile | null>> {
+): ThunkAction<Promise<ProfileAndProfileUpgradeInfo | null>> {
   return async (dispatch, getState) => {
     const pathParts = location.pathname.split('/').filter((d) => d);
     let possibleDataSource = pathParts[0];
@@ -1541,8 +1531,10 @@ export function retrieveProfileForRawUrl(
     }
     dispatch(setDataSource(dataSource));
 
+    let profileUpgradeInfo = {};
+
     switch (dataSource) {
-      case 'from-browser':
+      case 'from-browser': {
         if (browserConnectionStatus === undefined) {
           throw new Error(
             'Error: all callers of this function should supply a browserConnectionStatus argument for from-browser'
@@ -1552,11 +1544,14 @@ export function retrieveProfileForRawUrl(
           retrieveProfileFromBrowser(browserConnectionStatus, true)
         );
         break;
+      }
       case 'public':
-        await dispatch(retrieveProfileFromStore(pathParts[1], true));
+        profileUpgradeInfo = await dispatch(
+          retrieveProfileFromStore(pathParts[1], true)
+        );
         break;
       case 'from-url':
-        await dispatch(
+        profileUpgradeInfo = await dispatch(
           retrieveProfileOrZipFromUrl(decodeURIComponent(pathParts[1]), true)
         );
         break;
@@ -1619,7 +1614,12 @@ export function retrieveProfileForRawUrl(
     }
 
     // Profile may be null if the response was a zip file.
-    return getProfileOrNull(getState());
+    const profileOrNull = getProfileOrNull(getState());
+    if (profileOrNull === null) {
+      return null;
+    }
+
+    return { profile: profileOrNull, upgradeInfo: profileUpgradeInfo };
   };
 }
 
@@ -1708,7 +1708,7 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
         const thread = profile.threads[threadIndex];
         const { samples, jsAllocations, nativeAllocations } = thread;
         hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
-          hasUsefulSamples(table?.stack, thread, profile.shared)
+          hasUsefulSamples(table?.stack, profile.shared)
         );
         if (hasSamples) {
           break;

@@ -5,7 +5,6 @@ import {
   getEmptyProfile,
   getEmptyThread,
   getEmptyJsTracerTable,
-  resourceTypes,
   getEmptyJsAllocationsTable,
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyBalancedNativeAllocationsTable,
@@ -664,21 +663,9 @@ export function getProfileFromTextSamples(
       }
     }
 
-    // Flatten the textOnlyStacks into into a list of function names.
-    const funcNamesSet = new Set<string>();
-    const removeModifiers = /\[.*/;
-    for (let i = 0; i < textOnlyStacks.length; i++) {
-      const textOnlyStack = textOnlyStacks[i];
-      for (let j = 0; j < textOnlyStack.length; j++) {
-        funcNamesSet.add(textOnlyStack[j].replace(removeModifiers, ''));
-      }
-    }
-    const funcNames = [...funcNamesSet];
-
     // Turn this into a real thread.
     const thread = _buildThreadFromTextOnlyStacks(
       textOnlyStacks,
-      funcNames,
       categories,
       globalDataCollector,
       sampleTimes
@@ -880,86 +867,56 @@ function _findNativeSymbolNameFromFuncName(
 
 function _buildThreadFromTextOnlyStacks(
   textOnlyStacks: Array<string[]>,
-  funcNames: Array<string>,
   categories: CategoryList,
   globalDataCollector: GlobalDataCollector,
   sampleTimes: number[] | null
 ): RawThread {
   const thread = getEmptyThread();
 
-  const {
-    funcTable,
-    frameTable,
-    stackTable,
-    samples,
-    resourceTable,
-    nativeSymbols,
-  } = thread;
+  const { samples } = thread;
   const stringTable = globalDataCollector.getStringTable();
 
-  // Create the FuncTable.
-  funcNames.forEach((funcName) => {
-    funcTable.name.push(stringTable.indexForString(funcName));
-    funcTable.source.push(null);
-    funcTable.relevantForJS.push(funcName.endsWith('-relevantForJS'));
-    funcTable.isJS.push(_isJsFunctionName(funcName));
-    funcTable.lineNumber.push(null);
-    funcTable.columnNumber.push(null);
-    // The resource column will be filled in the loop below.
-    funcTable.length++;
-  });
-
-  // This map caches resource indexes for library names.
-  const resourceIndexCache = new Map<string, number>();
+  const frameTable = globalDataCollector.getFrameTable();
 
   // Create the samples, stacks, and frames.
   textOnlyStacks.forEach((column, columnIndex) => {
     let prefix: IndexIntoStackTable | null = null;
     column.forEach((funcNameWithModifier) => {
       const funcName = funcNameWithModifier.replace(/\[.*/, '');
-      const funcIndex = funcTable.name.indexOf(
-        stringTable.indexForString(funcName)
-      );
 
       // Find the library name from the function name and create an entry if needed.
       const libraryName = _findLibNameFromFuncName(funcNameWithModifier);
       let resourceIndex = -1;
       let libIndex = null;
-      if (libraryName) {
-        resourceIndex = resourceIndexCache.get(libraryName) ?? -1;
-        if (resourceIndex === -1) {
-          libIndex = globalDataCollector.indexForLib({
-            arch: '',
-            name: libraryName,
-            path: '/path/to/' + libraryName,
-            debugName: libraryName,
-            debugPath: '/path/to/' + libraryName,
-            breakpadId: 'SOMETHING_FAKE',
-            codeId: null,
-          });
-
-          resourceTable.lib.push(libIndex);
-          resourceTable.name.push(stringTable.indexForString(libraryName));
-          resourceTable.type.push(resourceTypes.library);
-          resourceTable.host.push(null);
-          resourceIndex = resourceTable.length++;
-
-          resourceIndexCache.set(libraryName, resourceIndex);
-        } else {
-          libIndex = resourceTable.lib[resourceIndex];
-        }
+      if (libraryName !== null) {
+        libIndex = globalDataCollector.indexForLib({
+          arch: '',
+          name: libraryName,
+          path: '/path/to/' + libraryName,
+          debugName: libraryName,
+          debugPath: '/path/to/' + libraryName,
+          breakpadId: 'SOMETHING_FAKE',
+          codeId: null,
+        });
+        resourceIndex = globalDataCollector.indexForLibResource(libIndex);
       }
-
-      funcTable.resource[funcIndex] = resourceIndex;
 
       // Find the file name from the function name
+      let source = null;
       const fileName = _findFileNameFromFuncName(funcNameWithModifier);
       if (fileName) {
-        funcTable.source[funcIndex] = globalDataCollector.indexForSource(
-          null,
-          fileName
-        );
+        source = globalDataCollector.indexForSource(null, fileName);
       }
+
+      const funcIndex = globalDataCollector.indexForFunc(
+        stringTable.indexForString(funcName),
+        _isJsFunctionName(funcName),
+        funcName.endsWith('-relevantForJS'),
+        resourceIndex,
+        source,
+        null,
+        null
+      );
 
       const category = _findCategoryFromFuncName(
         funcNameWithModifier,
@@ -975,25 +932,20 @@ function _buildThreadFromTextOnlyStacks(
       const nativeSymbolInfo =
         _findNativeSymbolNameFromFuncName(funcNameWithModifier);
       if (nativeSymbolInfo) {
-        const nativeSymbolNameStringIndex = stringTable.indexForString(
-          nativeSymbolInfo.name
-        );
-        const nativeSymbolIndex = nativeSymbols.name.indexOf(
-          nativeSymbolNameStringIndex
-        );
-        if (nativeSymbolIndex !== -1) {
-          nativeSymbol = nativeSymbolIndex;
-        } else if (libIndex !== null) {
-          nativeSymbol = nativeSymbols.length++;
-          nativeSymbols.libIndex.push(libIndex);
-          nativeSymbols.address.push(nativeSymbolInfo.address);
-          nativeSymbols.name.push(nativeSymbolNameStringIndex);
-          nativeSymbols.functionSize.push(nativeSymbolInfo.functionSize);
-        } else {
+        if (libIndex === null) {
           throw new Error(
             `[sym:] has to be used together with [lib:] - missing lib in "${funcNameWithModifier}"`
           );
         }
+        const nativeSymbolNameStringIndex = stringTable.indexForString(
+          nativeSymbolInfo.name
+        );
+        nativeSymbol = globalDataCollector.indexForNativeSymbol(
+          libIndex,
+          nativeSymbolInfo.address,
+          nativeSymbolNameStringIndex,
+          nativeSymbolInfo.functionSize
+        );
       }
       const inlineDepth =
         _findInlineDepthFromFuncName(funcNameWithModifier) ?? 0;
@@ -1029,6 +981,7 @@ function _buildThreadFromTextOnlyStacks(
       }
 
       // Attempt to find a stack that satisfies the given frameIndex and prefix.
+      const stackTable = globalDataCollector.getStackTable();
       let stackIndex;
       for (let i = 0; i < stackTable.length; i++) {
         if (
@@ -1997,7 +1950,7 @@ export function markTabIdsAsPrivateBrowsing(
 // /!\ This algorithm is good enough for tests, but it's not correct for
 // general cases.
 function getStackIndexForCallNodePath(
-  { stackTable, frameTable }: RawThread,
+  { stackTable, frameTable }: RawProfileSharedData,
   callNodePath: CallNodePath
 ): IndexIntoStackTable {
   let currentFuncInCallNodePath = 0;
@@ -2041,17 +1994,19 @@ function getStackIndexForCallNodePath(
  *                        get all passed innerWindowIDs
  */
 export function addInnerWindowIdToStacks(
+  shared: RawProfileSharedData,
   thread: RawThread,
   listOfOperations: Array<{ innerWindowID: number; callNodes: CallNodePath[] }>,
   callNodesToDupe?: CallNodePath[]
 ) {
-  const { stackTable, frameTable, samples } = thread;
+  const { stackTable, frameTable } = shared;
+  const { samples } = thread;
   const usedInnerWindowIDsSet = new Set<number>();
 
   for (const { innerWindowID, callNodes } of listOfOperations) {
     usedInnerWindowIDsSet.add(innerWindowID);
     for (const callNode of callNodes) {
-      const stackIndex = getStackIndexForCallNodePath(thread, callNode);
+      const stackIndex = getStackIndexForCallNodePath(shared, callNode);
       const foundFrameIndex = stackTable.frame[stackIndex];
       frameTable.innerWindowID[foundFrameIndex] = innerWindowID;
     }
@@ -2074,7 +2029,7 @@ export function addInnerWindowIdToStacks(
     >();
 
     for (const callNode of callNodesToDupe) {
-      const stackIndex = getStackIndexForCallNodePath(thread, callNode);
+      const stackIndex = getStackIndexForCallNodePath(shared, callNode);
       const foundFrameIndex = stackTable.frame[stackIndex];
       // The found one comes from the first tab.
       frameTable.innerWindowID[foundFrameIndex] =

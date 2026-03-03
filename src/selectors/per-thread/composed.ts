@@ -86,7 +86,7 @@ export function getComposedSelectorsPerThread(
 
       const { samples, jsAllocations, nativeAllocations } = thread;
       const hasSamples = [samples, jsAllocations, nativeAllocations].some(
-        (table) => hasUsefulSamples(table?.stack, thread, shared)
+        (table) => hasUsefulSamples(table?.stack, shared)
       );
       if (!hasSamples) {
         visibleTabs = visibleTabs.filter(

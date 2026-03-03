@@ -33,13 +33,12 @@ import {
   makeEndMarker,
 } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
-import { getEmptySourceTable } from '../../profile-logic/data-structures';
+import { getEmptySharedData } from '../../profile-logic/data-structures';
 
 import type {
   IndexIntoRawMarkerTable,
   Milliseconds,
   NetworkPayload,
-  RawProfileSharedData,
   ScreenshotPayload,
 } from 'firefox-profiler/types';
 
@@ -742,7 +741,7 @@ describe('deriveMarkersFromRawMarkerTable', function () {
       data: {
         // Stack property is converted to a cause.
         cause: {
-          stack: 4,
+          stack: 20,
           tid: 1111,
           // The cause's time has been properly increased of 1000ms (this is the
           // difference between the start times for the content process and the
@@ -788,10 +787,7 @@ describe('filterRawMarkerTableToRange', () => {
   };
 
   function setup({ start, end, markers }: TestConfig) {
-    const shared: RawProfileSharedData = {
-      stringArray: [],
-      sources: getEmptySourceTable(),
-    };
+    const shared = getEmptySharedData();
     const thread = getThreadWithRawMarkers(shared, markers);
 
     const derivedMarkerInfo = getTestFriendlyDerivedMarkerInfo(thread, shared);
@@ -1281,10 +1277,7 @@ describe('filterRawMarkerTableToRangeWithMarkersToDelete', () => {
   };
 
   function setup({ timeRange, markersToDelete, markers }: TestConfig) {
-    const shared: RawProfileSharedData = {
-      stringArray: [],
-      sources: getEmptySourceTable(),
-    };
+    const shared = getEmptySharedData();
 
     const thread = getThreadWithRawMarkers(shared, markers);
     const derivedMarkerInfo = getTestFriendlyDerivedMarkerInfo(thread, shared);

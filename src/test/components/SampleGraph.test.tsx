@@ -96,7 +96,7 @@ describe('SampleGraph', function () {
       `Couldn't find the sample graph canvas, with selector .threadSampleGraphCanvas`
     ) as HTMLElement;
     const thread = profile.threads[0];
-    const { stringArray } = profile.shared;
+    const { stringArray, funcTable } = profile.shared;
 
     // Perform a click on the sample graph.
     function clickSampleGraph(index: IndexIntoSamplesTable) {
@@ -123,7 +123,7 @@ describe('SampleGraph', function () {
     function getCallNodePath() {
       return selectedThreadSelectors
         .getSelectedCallNodePath(getState())
-        .map((funcIndex) => stringArray[thread.funcTable.name[funcIndex]]);
+        .map((funcIndex) => stringArray[funcTable.name[funcIndex]]);
     }
 
     /**
@@ -148,6 +148,21 @@ describe('SampleGraph', function () {
       getContextDrawCalls,
     };
   }
+
+  it('redraws when the system theme changes', () => {
+    const { getContextDrawCalls } = setup();
+
+    // Flush the initial draw calls.
+    getContextDrawCalls();
+
+    // Simulate a theme change.
+    window.dispatchEvent(new CustomEvent('profiler-theme-change'));
+
+    const drawCalls = getContextDrawCalls();
+    expect(drawCalls.some(([operation]) => operation === 'fillRect')).toBe(
+      true
+    );
+  });
 
   it('matches the component snapshot', () => {
     const { sampleGraphCanvas } = setup();

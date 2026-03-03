@@ -40,12 +40,17 @@ function _applyTheme(): void {
     shouldBeDark = getSystemTheme() === 'dark';
   }
 
+  const changed = _isDarkModeSetup && _isDarkMode !== shouldBeDark;
   _isDarkMode = shouldBeDark;
 
   if (shouldBeDark) {
     document.documentElement.classList.add('dark-mode');
   } else {
     document.documentElement.classList.remove('dark-mode');
+  }
+
+  if (changed) {
+    window.dispatchEvent(new CustomEvent('profiler-theme-change'));
   }
 }
 

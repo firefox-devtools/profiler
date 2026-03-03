@@ -66,6 +66,20 @@ describe('FlameGraph', function () {
     expect(drawCalls).toMatchSnapshot();
   });
 
+  it('redraws when the system theme changes', () => {
+    setupFlameGraph();
+    // Flush the initial draw calls.
+    flushDrawLog();
+
+    // Simulate a theme change.
+    window.dispatchEvent(new CustomEvent('profiler-theme-change'));
+
+    // drawCanvasAfterRaf={false} means the redraw is synchronous, so new draw
+    // calls should be available immediately without flushing rAF.
+    const drawCalls = flushDrawLog();
+    expect(drawCalls.length).toBeGreaterThan(0);
+  });
+
   it('ignores invertCallstack and always displays non-inverted', () => {
     const { getState, dispatch } = setupFlameGraph();
     expect(getInvertCallstack(getState())).toBe(false);
@@ -291,7 +305,7 @@ function setupFlameGraph() {
 
   // Add some file and line number to the profile so that tooltips generate
   // an interesting snapshot.
-  const { funcTable } = profile.threads[0];
+  const { funcTable } = profile.shared;
 
   // Create source entries.
   const defaultFileIndex = stringTable.indexForString('path/to/file');

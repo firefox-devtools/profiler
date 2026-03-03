@@ -147,6 +147,49 @@ function getDefaultMarkerColors(isHighlighted: boolean) {
 class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   _textMeasurement: TextMeasurement | null = null;
 
+  override componentDidUpdate(prevProps: Props) {
+    const viewportDidMount =
+      !prevProps.viewport.isSizeSet && this.props.viewport.isSizeSet;
+    const viewportResized =
+      this.props.viewport.isSizeSet &&
+      this.props.viewport.containerHeight !==
+        prevProps.viewport.containerHeight;
+    const selectedMarkerChanged =
+      this.props.selectedMarkerIndex !== prevProps.selectedMarkerIndex;
+
+    if (viewportDidMount || viewportResized || selectedMarkerChanged) {
+      this._scrollSelectionIntoView();
+    }
+  }
+
+  _scrollSelectionIntoView = () => {
+    const { selectedMarkerIndex, markerTimingAndBuckets, rowHeight, viewport } =
+      this.props;
+
+    if (selectedMarkerIndex === null) {
+      return;
+    }
+
+    const markerIndexToTimingRow = this._getMarkerIndexToTimingRow(
+      markerTimingAndBuckets
+    );
+    const rowIndex = markerIndexToTimingRow[selectedMarkerIndex];
+
+    if (rowIndex === undefined) {
+      return;
+    }
+
+    const y: CssPixels = rowIndex * rowHeight;
+    const { viewportTop, viewportBottom } = viewport;
+
+    if (y < viewportTop || y + rowHeight > viewportBottom) {
+      // Scroll the marker to the vertical center of the viewport.
+      const viewportHeight = viewportBottom - viewportTop;
+      const targetViewportTop = y + rowHeight / 2 - viewportHeight / 2;
+      viewport.moveViewport(0, viewportTop - targetViewportTop);
+    }
+  };
+
   /**
    * Get the fill, stroke, and text colors for a marker based on its schema and data.
    * If the marker schema has a colorField, use that field's value.
@@ -957,8 +1000,100 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     );
   };
 
+  /**
+   * Compute canvas-relative tooltip offset for the selected marker.
+   * Returns null if the marker can't be located in the timing data or
+   * is outside the visible viewport.
+   */
+  _getSelectedItemTooltipOffset(): {
+    offsetX: CssPixels;
+    offsetY: CssPixels;
+  } | null {
+    const { selectedMarkerIndex } = this.props;
+    if (selectedMarkerIndex === null) {
+      return null;
+    }
+
+    const {
+      rangeStart,
+      rangeEnd,
+      markerTimingAndBuckets,
+      rowHeight,
+      marginLeft,
+      marginRight,
+      viewport: {
+        containerWidth,
+        containerHeight,
+        viewportLeft,
+        viewportRight,
+        viewportTop,
+      },
+    } = this.props;
+
+    // Step 1: Find which row this marker is displayed in
+    const markerIndexToTimingRow = this._getMarkerIndexToTimingRow(
+      markerTimingAndBuckets
+    );
+    const rowIndex = markerIndexToTimingRow[selectedMarkerIndex];
+
+    // Step 2: Get the timing data for all markers in this row
+    const markerTiming = markerTimingAndBuckets[rowIndex];
+    if (!markerTiming || typeof markerTiming === 'string') {
+      // Row is empty or is a bucket label (string), not actual marker data
+      return null;
+    }
+
+    // Step 3: Find the position of our specific marker within this row's data
+    let markerTimingIndex = -1;
+    for (let i = 0; i < markerTiming.length; i++) {
+      if (markerTiming.index[i] === selectedMarkerIndex) {
+        markerTimingIndex = i;
+        break;
+      }
+    }
+
+    if (markerTimingIndex === -1) {
+      return null;
+    }
+
+    // Step 4: Calculate horizontal (X) position
+    const startTimestamp = markerTiming.start[markerTimingIndex];
+    const endTimestamp = markerTiming.end[markerTimingIndex];
+
+    const markerContainerWidth = containerWidth - marginLeft - marginRight;
+    const rangeLength: Milliseconds = rangeEnd - rangeStart;
+    const viewportLength: UnitIntervalOfProfileRange =
+      viewportRight - viewportLeft;
+    const startTime: UnitIntervalOfProfileRange =
+      (startTimestamp - rangeStart) / rangeLength;
+    const endTime: UnitIntervalOfProfileRange =
+      (endTimestamp - rangeStart) / rangeLength;
+
+    const x: CssPixels =
+      ((startTime - viewportLeft) * markerContainerWidth) / viewportLength +
+      marginLeft;
+    const w: CssPixels =
+      ((endTime - startTime) * markerContainerWidth) / viewportLength;
+
+    // For instant markers (start === end), use the center point.
+    // For interval markers, use a point 1/3 into the marker (or 30px, whichever is smaller).
+    const isInstantMarker = startTimestamp === endTimestamp;
+    const offsetX = isInstantMarker ? x : x + Math.min(w / 3, 30);
+
+    // Step 5: Calculate vertical (Y) position
+    // + 5 offsets the tooltip slightly below the row's top edge.
+    const offsetY: CssPixels = rowIndex * rowHeight - viewportTop + 5;
+
+    if (offsetY < 0 || offsetY > containerHeight) {
+      return null;
+    }
+
+    return { offsetX, offsetY };
+  }
+
   override render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
+    const { selectedMarkerIndex } = this.props;
 
     return (
       <ChartCanvas
@@ -976,6 +1111,8 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         onMouseMove={this.onMouseMove}
         onMouseLeave={this.onMouseLeave}
         stickyTooltips={true}
+        selectedItem={selectedMarkerIndex}
+        selectedItemTooltipOffset={this._getSelectedItemTooltipOffset()}
       />
     );
   }
