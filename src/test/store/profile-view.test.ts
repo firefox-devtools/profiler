@@ -1971,12 +1971,12 @@ describe('snapshots of selectors/profile', function () {
     const G = funcNames.indexOf('G');
     for (
       let frameIdx = 0;
-      frameIdx < samplesThread.frameTable.length;
+      frameIdx < profile.shared.frameTable.length;
       frameIdx++
     ) {
-      const func = samplesThread.frameTable.func[frameIdx];
+      const func = profile.shared.frameTable.func[frameIdx];
       if (func === G) {
-        samplesThread.frameTable.innerWindowID[frameIdx] = innerWindowID;
+        profile.shared.frameTable.innerWindowID[frameIdx] = innerWindowID;
       }
     }
     samplesThread.usedInnerWindowIDs = [innerWindowID];

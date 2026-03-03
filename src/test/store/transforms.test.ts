@@ -1058,9 +1058,8 @@ describe('"collapse-resource" transform', function () {
     `);
     const collapsedFuncNames = [...funcNames, 'firefox'];
     const threadIndex = 0;
-    const thread = profile.threads[threadIndex];
     const firefoxNameIndex = stringTable.indexForString('firefox');
-    const firefoxResourceIndex = thread.resourceTable.name.findIndex(
+    const firefoxResourceIndex = profile.shared.resourceTable.name.findIndex(
       (stringIndex) => stringIndex === firefoxNameIndex
     );
     if (firefoxResourceIndex === -1) {
@@ -1164,9 +1163,8 @@ describe('"collapse-resource" transform', function () {
     `);
     const collapsedFuncNames = [...funcNames, 'firefox'];
     const threadIndex = 0;
-    const thread = profile.threads[threadIndex];
     const firefoxNameIndex = stringTable.indexForString('firefox');
-    const firefoxResourceIndex = thread.resourceTable.name.findIndex(
+    const firefoxResourceIndex = profile.shared.resourceTable.name.findIndex(
       (stringIndex) => stringIndex === firefoxNameIndex
     );
     if (firefoxResourceIndex === -1) {
@@ -1175,7 +1173,7 @@ describe('"collapse-resource" transform', function () {
     const collapseTransform = {
       type: 'collapse-resource' as const,
       resourceIndex: firefoxResourceIndex,
-      collapsedFuncIndex: thread.funcTable.length,
+      collapsedFuncIndex: profile.shared.funcTable.length,
       implementation: 'cpp' as const,
     };
 

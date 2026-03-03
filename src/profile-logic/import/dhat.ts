@@ -187,7 +187,7 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
   const stringTable = globalDataCollector.getStringTable();
 
   const allocationsTable = getEmptyUnbalancedNativeAllocationsTable();
-  const { funcTable, stackTable, frameTable } = getEmptyThread();
+  const { funcTable, stackTable, frameTable } = profile.shared;
 
   const funcKeyToFuncIndex = new Map<string, IndexIntoFuncTable>();
 
@@ -375,28 +375,6 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
     thread.pid = dhat.pid;
     thread.tid = i;
     thread.name = name;
-
-    thread.funcTable.name = funcTable.name.slice();
-    thread.funcTable.isJS = funcTable.isJS.slice();
-    thread.funcTable.relevantForJS = funcTable.relevantForJS.slice();
-    thread.funcTable.resource = funcTable.resource.slice();
-    thread.funcTable.source = funcTable.source.slice();
-    thread.funcTable.lineNumber = funcTable.lineNumber.slice();
-    thread.funcTable.columnNumber = funcTable.columnNumber.slice();
-    thread.funcTable.length = funcTable.length;
-
-    thread.frameTable.address = frameTable.address.slice();
-    thread.frameTable.line = frameTable.line.slice();
-    thread.frameTable.column = frameTable.column.slice();
-    thread.frameTable.category = frameTable.category.slice();
-    thread.frameTable.subcategory = frameTable.subcategory.slice();
-    thread.frameTable.innerWindowID = frameTable.innerWindowID.slice();
-    thread.frameTable.func = frameTable.func.slice();
-    thread.frameTable.length = frameTable.length;
-
-    thread.stackTable.frame = stackTable.frame.slice();
-    thread.stackTable.prefix = stackTable.prefix.slice();
-    thread.stackTable.length = stackTable.length;
 
     thread.nativeAllocations = {
       time: allocationsTable.time.slice(),
