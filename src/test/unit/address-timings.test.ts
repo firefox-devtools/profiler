@@ -42,10 +42,11 @@ describe('getStackAddressInfo', function () {
       Asym
     );
 
-    // Expect the returned arrays to have the same length as the stackTable.
+    // Expect the returned stackIndexToAddressSetIndex array to have the same length as the stackTable.
     expect(stackTable.length).toBe(9);
-    expect(stackLineInfoOne.selfAddress.length).toBe(9);
-    expect(stackLineInfoOne.stackAddresses.length).toBe(9);
+    expect(stackLineInfoOne.stackIndexToAddressSetIndex.length).toBe(9);
+
+    expect(stackLineInfoOne.addressSetTable.length).toBe(4);
   });
 });
 

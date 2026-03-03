@@ -145,8 +145,8 @@ export function computeThreadFromRawThread(
 ): Thread {
   const stringTable = StringTable.withBackingArray(shared.stringArray);
   const stackTable = computeStackTableFromRawStackTable(
-    rawThread.stackTable,
-    rawThread.frameTable,
+    shared.stackTable,
+    shared.frameTable,
     defaultCategory
   );
   const samples = computeSamplesTableFromRawSamplesTable(
@@ -161,6 +161,10 @@ export function computeThreadFromRawThread(
     rawThread,
     samples,
     stackTable,
+    shared.frameTable,
+    shared.funcTable,
+    shared.nativeSymbols,
+    shared.resourceTable,
     stringTable,
     shared.sources,
     tracedValuesBuffer

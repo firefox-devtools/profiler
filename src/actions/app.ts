@@ -24,7 +24,10 @@ import {
   stateFromLocation,
   withHistoryReplaceStateSync,
 } from 'firefox-profiler/app-logic/url-handling';
-import { finalizeProfileView } from './receive-profile';
+import {
+  finalizeProfileView,
+  type ProfileAndProfileUpgradeInfo,
+} from './receive-profile';
 import { fatalError } from './errors';
 import {
   addEventDelayTracksForThreads,
@@ -38,7 +41,6 @@ import {
 } from 'firefox-profiler/selectors/cpu';
 
 import type {
-  Profile,
   ThreadsKey,
   CssPixels,
   Action,
@@ -128,13 +130,13 @@ export function setHasZoomedViaMousewheel() {
  */
 export function setupInitialUrlState(
   location: Location,
-  profile: Profile | null,
+  profileAndUpgradeInfo: ProfileAndProfileUpgradeInfo | null,
   browserConnection: BrowserConnection | null
 ): ThunkAction<void> {
   return (dispatch) => {
     let urlState;
     try {
-      urlState = stateFromLocation(location, profile);
+      urlState = stateFromLocation(location, profileAndUpgradeInfo);
     } catch (e) {
       if (e.name === 'UrlUpgradeError') {
         // The error is an URL upgrade error, let's fire a fatal error.
@@ -169,7 +171,15 @@ export function setupInitialUrlState(
     // load process.
     withHistoryReplaceStateSync(() => {
       dispatch(updateUrlState(urlState));
-      dispatch(finalizeProfileView(browserConnection));
+      // finalizeProfileView is intentionally not awaited: it kicks off
+      // long-running async work like symbolication that should run in the
+      // background without blocking this action. The .catch() ensures that any
+      // synchronous errors thrown before the first await (e.g. from selectors)
+      // are still routed to the FATAL_ERROR state rather than escaping as
+      // unhandled promise rejections.
+      dispatch(finalizeProfileView(browserConnection)).catch((error) => {
+        dispatch(fatalError(error));
+      });
       dispatch(urlSetupDone());
     });
   };

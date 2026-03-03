@@ -230,7 +230,6 @@ type PopupInstallPhase =
 class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
   constructor(props: HomeProps) {
     super(props);
-    // Start by suggesting that we install the add-on.
     let popupInstallPhase = 'other-browser';
 
     if (_isFirefox()) {
@@ -570,16 +569,15 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
           <div>
             <DocsButton />
             <Localized
-              id="Home--instructions-content"
+              id="Home--instructions-content2"
               elems={{
-                a: <a href="https://www.mozilla.org/en-US/firefox/new/" />,
+                a: <a href="https://www.firefox.com" />,
               }}
             >
               <p>
                 Recording performance profiles requires{' '}
-                <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>
-                . However, existing profiles can be viewed in any modern
-                browser.
+                <a>Firefox for desktop</a>. However, existing profiles can be
+                viewed in any modern browser.
               </p>
             </Localized>
             <Localized

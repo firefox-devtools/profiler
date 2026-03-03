@@ -237,7 +237,16 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
 
   override componentDidMount() {
     this._scheduleDraw();
+    window.addEventListener('profiler-theme-change', this._onThemeChange);
   }
+
+  override componentWillUnmount() {
+    window.removeEventListener('profiler-theme-change', this._onThemeChange);
+  }
+
+  _onThemeChange = () => {
+    this._scheduleDraw();
+  };
 
   override componentDidUpdate() {
     this._scheduleDraw();

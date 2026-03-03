@@ -126,7 +126,7 @@ export function generateHtmlPlugin(options) {
         const headTags = [];
 
         headTags.push(
-          `<script src="${convertPath(mainBundlePath)}" type="module" async></script>`
+          `<script src="${convertPath(mainBundlePath)}" type="module"></script>`
         );
 
         if (mainBundle.cssBundle) {

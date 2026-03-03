@@ -176,6 +176,25 @@ describe('TimelineMarkers', function () {
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 
+  it('redraws when the system theme changes', () => {
+    const { flushRafCalls } = setupWithMarkers(
+      { rangeStart: 0, rangeEnd: 10 },
+      [['DOMEvent', 0, 10]]
+    );
+
+    // Flush the initial draw calls.
+    flushRafCalls();
+    flushDrawLog();
+
+    // Simulate a theme change.
+    window.dispatchEvent(new CustomEvent('profiler-theme-change'));
+
+    // _scheduleDraw() uses RAF, so flush it before checking.
+    flushRafCalls();
+    const drawCalls = flushDrawLog();
+    expect(drawCalls.length).toBeGreaterThan(0);
+  });
+
   it('renders correctly overview markers', () => {
     window.devicePixelRatio = 1;
 

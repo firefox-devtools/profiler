@@ -352,8 +352,8 @@ Home--record-instructions =
     Klik om te starten mei it meitsjen fan in profyl op de profylknop of brûk de
     fluchtoetsen. It piktogram is blau as der in profyl opnommen wurdt.
     Klik op <kbd>Fêstlizze</kbd> om de gegevens yn profiler.firefox.com te laden.
-Home--instructions-content =
-    It opnimmen fan prestaasjeprofilen fereasket <a>{ -firefox-brand-name }</a>.
+Home--instructions-content2 =
+    It opnimmen fan prestaasjeprofilen fereasket <a>{ -firefox-brand-name } foar desktop</a>.
     Besteande profilen kinne echter besjoen wurde yn elke moderne browser.
 Home--fenix-instructions-directly =
     { -firefox-android-brand-name } kin streekrjocht op dit apparaat profilearre wurde. Lês foar
