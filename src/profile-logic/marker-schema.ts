@@ -174,7 +174,7 @@ export function parseLabel(
       const ternaryMatch = part.match(TERNARY_RE);
       if (ternaryMatch) {
         const [, condRef, truthyStr, falsyStr] = ternaryMatch;
-        const condKeys = condRef.trim().split('.');
+        const condKeys = condRef.split('.');
         if (
           condKeys.length === 3 &&
           condKeys[0] === 'marker' &&
