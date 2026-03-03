@@ -4,6 +4,7 @@
 
 import {
   mergeProfilesForDiffing,
+  mergeSharedData,
   mergeThreads,
 } from '../../profile-logic/merge-compare';
 import { stateFromLocation } from '../../app-logic/url-handling';
@@ -16,11 +17,15 @@ import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
 import { ensureExists } from 'firefox-profiler/utils/types';
 import { getTimeRangeIncludingAllThreads } from 'firefox-profiler/profile-logic/profile-data';
 import { StringTable } from '../../utils/string-table';
-import type {
-  RawThread,
-  RawProfileSharedData,
-  Profile,
-} from 'firefox-profiler/types';
+import type { RawProfileSharedData, Profile } from 'firefox-profiler/types';
+import { callTreeFromProfile, formatTree } from '../fixtures/utils';
+import { storeWithProfile } from '../fixtures/stores';
+import { addTransformToStack } from '../../actions/profile-view';
+import * as UrlStateSelectors from '../../selectors/url-state';
+import {
+  getThreadSelectors,
+  selectedThreadSelectors,
+} from '../../selectors/per-thread';
 
 describe('mergeProfilesForDiffing function', function () {
   it('merges the various tables properly in the diffing profile', function () {
@@ -41,11 +46,11 @@ describe('mergeProfilesForDiffing function', function () {
     );
     expect(mergedProfile.threads).toHaveLength(3);
 
-    const mergedThread = mergedProfile.threads[2];
     const mergedLibs = mergedProfile.libs;
-    const mergedResources = mergedThread.resourceTable;
-    const mergedFunctions = mergedThread.funcTable;
-    const stringArray = mergedProfile.shared.stringArray;
+    const mergedShared = mergedProfile.shared;
+    const mergedResources = mergedShared.resourceTable;
+    const mergedFunctions = mergedShared.funcTable;
+    const stringArray = mergedShared.stringArray;
 
     expect(mergedLibs).toHaveLength(3);
     expect(mergedResources).toHaveLength(3);
@@ -197,12 +202,10 @@ describe('mergeProfilesForDiffing function', function () {
       'Z[lib:libB]  W[lib:libB]'
     );
 
-    const threadA = sampleProfileA.profile.threads[0];
-    const threadB = sampleProfileB.profile.threads[0];
     const stringTableA = sampleProfileA.stringTable;
     const stringTableB = sampleProfileB.stringTable;
 
-    threadA.nativeSymbols = {
+    sampleProfileA.profile.shared.nativeSymbols = {
       length: 2,
       name: [
         stringTableA.indexForString('X'),
@@ -213,7 +216,7 @@ describe('mergeProfilesForDiffing function', function () {
       functionSize: [null, null],
     };
 
-    threadB.nativeSymbols = {
+    sampleProfileB.profile.shared.nativeSymbols = {
       length: 2,
       name: [
         stringTableB.indexForString('Z'),
@@ -234,14 +237,9 @@ describe('mergeProfilesForDiffing function', function () {
       [profileState, profileState]
     );
 
-    // The merged profile has a single merged libs list, so the two threads
-    // should now be referring to different libIndexes.
-    const mergedProfileThreadA = mergedProfile.threads[0];
-    const mergedProfileThreadB = mergedProfile.threads[1];
-    const mergedThread = mergedProfile.threads[2];
-    expect(mergedProfileThreadA.nativeSymbols.libIndex).toEqual([0, 0]);
-    expect(mergedProfileThreadB.nativeSymbols.libIndex).toEqual([1, 1]);
-    expect(mergedThread.nativeSymbols.libIndex).toEqual([0, 0, 1, 1]);
+    // The merged profile has a single merged libs list, so the native symbols
+    // should now be merged with updated libIndexes.
+    expect(mergedProfile.shared.nativeSymbols.libIndex).toEqual([0, 0, 1, 1]);
   });
 
   it('should use marker timing if there are no samples', () => {
@@ -275,14 +273,188 @@ describe('mergeProfilesForDiffing function', function () {
       end: 11,
     });
   });
+
+  it('should generate correct call trees for individual threads from each profile', () => {
+    // Create two profiles with different call stacks
+    const sampleProfileA = getProfileFromTextSamples(`
+      A  A  A
+      B  B  B
+      C  C  D
+    `);
+    const sampleProfileB = getProfileFromTextSamples(`
+      X  X  X  X
+      Y  Y  Z  Z
+    `);
+
+    const profileState = stateFromLocation({
+      pathname: '/public/fakehash1/',
+      search: '?thread=0&v=3',
+      hash: '',
+    });
+
+    const { profile: mergedProfile } = mergeProfilesForDiffing(
+      [sampleProfileA.profile, sampleProfileB.profile],
+      [profileState, profileState]
+    );
+
+    // The merged profile should have 3 threads:
+    // Thread 0: From profile A's selected thread
+    // Thread 1: From profile B's selected thread
+    // Thread 2: The diff thread
+    expect(mergedProfile.threads).toHaveLength(3);
+
+    // Check the call tree for thread 0 (from profile A)
+    const callTreeThread0 = callTreeFromProfile(mergedProfile, 0);
+    expect(formatTree(callTreeThread0)).toEqual([
+      '- A (total: 3, self: —)',
+      '  - B (total: 3, self: —)',
+      '    - C (total: 2, self: 2)',
+      '    - D (total: 1, self: 1)',
+    ]);
+
+    // Check the call tree for thread 1 (from profile B)
+    const callTreeThread1 = callTreeFromProfile(mergedProfile, 1);
+    expect(formatTree(callTreeThread1)).toEqual([
+      '- X (total: 4, self: —)',
+      '  - Y (total: 2, self: 2)',
+      '  - Z (total: 2, self: 2)',
+    ]);
+  });
+
+  it('should preserve transforms and produce matching call trees', () => {
+    /**
+     * This test verifies that when profiles are merged with transforms applied:
+     * 1. The transforms are correctly translated to use the new function indexes
+     *    in the merged profile (since merging can change func table indexes)
+     * 2. The call trees computed from the transformed threads in the merged profile
+     *    match the call trees from the original transformed profiles
+     */
+
+    // Create two profiles with different call stacks
+    const {
+      profile: profileA,
+      funcNamesDictPerThread: [funcNamesDictA],
+    } = getProfileFromTextSamples(`
+      A  A  A  A
+      B  B  B  B
+      C  C  D  D
+      E  F  G  H
+    `);
+
+    const {
+      profile: profileB,
+      funcNamesDictPerThread: [funcNamesDictB],
+    } = getProfileFromTextSamples(`
+      P            P            P
+      X[lib:libQ]  X[lib:libQ]  X[lib:libQ]
+      Y[lib:libQ]  Y[lib:libQ]  Z
+      W            V            W
+    `);
+
+    // Create stores and apply transforms
+    const storeA = storeWithProfile(profileA);
+    const storeB = storeWithProfile(profileB);
+
+    const threadIndexA = 0;
+    const threadIndexB = 0;
+
+    // Apply focus-subtree transform to profile A: focus on [A, B, C]
+    const { A, B, C } = funcNamesDictA;
+    storeA.dispatch(
+      addTransformToStack(threadIndexA, {
+        type: 'focus-subtree',
+        callNodePath: [A, B, C],
+        implementation: 'combined',
+        inverted: false,
+      })
+    );
+
+    // Apply focus-subtree transform to profile B: focus on [X, Y]
+    const libQ = profileB.shared.resourceTable.name.findIndex(
+      (nameStrIndex) => profileB.shared.stringArray[nameStrIndex] === 'libQ'
+    );
+    expect(libQ).not.toBe(-1);
+    const libQCollapsedFunc = profileB.shared.funcTable.length + libQ;
+    const { P } = funcNamesDictB;
+    storeB.dispatch(
+      addTransformToStack(threadIndexB, {
+        type: 'collapse-resource',
+        resourceIndex: libQ,
+        collapsedFuncIndex: libQCollapsedFunc,
+        implementation: 'combined',
+      })
+    );
+    storeB.dispatch(
+      addTransformToStack(threadIndexB, {
+        type: 'focus-subtree',
+        callNodePath: [P, libQCollapsedFunc],
+        implementation: 'combined',
+        inverted: false,
+      })
+    );
+
+    // Get the transformed call trees from the original profiles
+    const callTreeA = selectedThreadSelectors.getCallTree(storeA.getState());
+    const callTreeB = selectedThreadSelectors.getCallTree(storeB.getState());
+
+    const formattedCallTreeA = formatTree(callTreeA);
+    const formattedCallTreeB = formatTree(callTreeB);
+
+    // Expected call tree for profile A after focusing on [A, B, C]
+    expect(formattedCallTreeA).toEqual([
+      '- C (total: 2, self: —)',
+      '  - E (total: 1, self: 1)',
+      '  - F (total: 1, self: 1)',
+    ]);
+
+    // Expected call tree for profile B after focusing on [P, libQ]
+    expect(formattedCallTreeB).toEqual([
+      '- libQ (total: 3, self: —)',
+      '  - W (total: 1, self: 1)',
+      '  - V (total: 1, self: 1)',
+      '  - Z (total: 1, self: —)',
+      '    - W (total: 1, self: 1)',
+    ]);
+
+    // Get URL states with transforms
+    const urlStateA = UrlStateSelectors.getUrlState(storeA.getState());
+    const urlStateB = UrlStateSelectors.getUrlState(storeB.getState());
+
+    // Merge profiles with the URL states that include transforms
+    const { profile: mergedProfile, transformStacks } = mergeProfilesForDiffing(
+      [profileA, profileB],
+      [urlStateA, urlStateB]
+    );
+
+    expect(mergedProfile.threads).toHaveLength(3);
+
+    // Create a single store for the merged profile
+    const storeMerged = storeWithProfile(mergedProfile);
+
+    // Apply the translated transforms to each thread
+    for (const transform of ensureExists(transformStacks[0])) {
+      storeMerged.dispatch(addTransformToStack(0, transform));
+    }
+
+    for (const transform of ensureExists(transformStacks[1])) {
+      storeMerged.dispatch(addTransformToStack(1, transform));
+    }
+
+    // The call trees in the merged profile should match the transformed call trees
+    // from the original profiles, even though func indexes have changed
+    const state = storeMerged.getState();
+    expect(formatTree(getThreadSelectors(0).getCallTree(state))).toEqual(
+      formattedCallTreeA
+    );
+    expect(formatTree(getThreadSelectors(1).getCallTree(state))).toEqual(
+      formattedCallTreeB
+    );
+  });
 });
 
 describe('mergeThreads function', function () {
-  function getFriendlyFuncLibResources(
-    thread: RawThread,
-    shared: RawProfileSharedData
-  ): string[] {
-    const { funcTable, resourceTable } = thread;
+  function getFriendlyFuncLibResources(shared: RawProfileSharedData): string[] {
+    const { funcTable, resourceTable } = shared;
     const strings = [];
     for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
       const funcName = shared.stringArray[funcTable.name[funcIndex]];
@@ -299,24 +471,26 @@ describe('mergeThreads function', function () {
   }
 
   it('merges the various tables for 2 threads properly', function () {
-    const { profile } = getProfileFromTextSamples(
-      'A[lib:libA]  B[lib:libA]',
+    const { profile: profile1 } = getProfileFromTextSamples(
+      'A[lib:libA]  B[lib:libA]'
+    );
+    const { profile: profile2 } = getProfileFromTextSamples(
       'A[lib:libA]  A[lib:libB]  C[lib:libC]'
     );
 
-    const mergedThread = mergeThreads(profile.threads);
+    const { libs, shared } = mergeSharedData([profile1, profile2]);
 
-    const mergedResources = mergedThread.resourceTable;
-    const mergedFunctions = mergedThread.funcTable;
+    const mergedResources = shared.resourceTable;
+    const mergedFunctions = shared.funcTable;
 
-    expect(profile.libs).toHaveLength(3);
+    expect(libs).toHaveLength(3);
     expect(mergedResources).toHaveLength(3);
     expect(mergedFunctions).toHaveLength(4);
 
     // Now check that all functions are linked to the right resources.
     // We should have 2 A functions, linked to 2 different resources.
     // And we should have 1 B function, and 1 C function.
-    expect(getFriendlyFuncLibResources(mergedThread, profile.shared)).toEqual([
+    expect(getFriendlyFuncLibResources(shared)).toEqual([
       'A [libA]',
       'B [libA]',
       'A [libB]',
@@ -325,25 +499,29 @@ describe('mergeThreads function', function () {
   });
 
   it('merges the various tables for more than 2 threads properly', function () {
-    const { profile } = getProfileFromTextSamples(
-      'A[lib:libA]  B[lib:libA]',
-      'A[lib:libA]  A[lib:libB]  C[lib:libC]',
+    const { profile: profile1 } = getProfileFromTextSamples(
+      'A[lib:libA]  B[lib:libA]'
+    );
+    const { profile: profile2 } = getProfileFromTextSamples(
+      'A[lib:libA]  A[lib:libB]  C[lib:libC]'
+    );
+    const { profile: profile3 } = getProfileFromTextSamples(
       'A[lib:libA]  A[lib:libB]  D[lib:libD]'
     );
 
-    const mergedThread = mergeThreads(profile.threads);
+    const { libs, shared } = mergeSharedData([profile1, profile2, profile3]);
 
-    const mergedResources = mergedThread.resourceTable;
-    const mergedFunctions = mergedThread.funcTable;
+    const mergedResources = shared.resourceTable;
+    const mergedFunctions = shared.funcTable;
 
-    expect(profile.libs).toHaveLength(4);
+    expect(libs).toHaveLength(4);
     expect(mergedResources).toHaveLength(4);
     expect(mergedFunctions).toHaveLength(5);
 
     // Now check that all functions are linked to the right resources.
     // We should have 2 A functions, linked to 2 different resources.
     // And we should have 1 B function, 1 C function and 1 D function.
-    expect(getFriendlyFuncLibResources(mergedThread, profile.shared)).toEqual([
+    expect(getFriendlyFuncLibResources(shared)).toEqual([
       'A [libA]',
       'B [libA]',
       'A [libB]',
@@ -419,22 +597,24 @@ describe('mergeThreads function', function () {
   });
 
   it('merges markers with stacks properly', function () {
-    const { profile, funcNamesDictPerThread: funcNames } =
-      getProfileFromTextSamples(
-        `
+    const { profile } = getProfileFromTextSamples(
+      `
           A  A
           B  B
           C  D
         `,
-        `
+      `
           A  A
           B  B
           E  C
         `
-      );
+    );
 
     // Get a useful marker schema
     profile.meta.markerSchema = markerSchemaForTests;
+
+    const stackABC = profile.threads[0].samples.stack[0];
+    const stackABE = profile.threads[1].samples.stack[0];
 
     addMarkersToThreadWithCorrespondingSamples(
       profile.threads[0],
@@ -447,7 +627,7 @@ describe('mergeThreads function', function () {
           {
             type: 'tracing',
             category: 'Paint',
-            cause: { time: 2, stack: funcNames[0].C },
+            cause: { time: 2, stack: stackABC },
           },
         ],
       ]
@@ -463,7 +643,7 @@ describe('mergeThreads function', function () {
           {
             type: 'tracing',
             category: 'Paint',
-            cause: { time: 2, stack: funcNames[1].C },
+            cause: { time: 2, stack: stackABE },
           },
         ],
       ]
@@ -473,7 +653,7 @@ describe('mergeThreads function', function () {
     const mergedMarkers = mergedThread.markers;
     expect(mergedMarkers).toHaveLength(2);
 
-    const markerStacksBeforeMerge = [funcNames[0].C, funcNames[1].C];
+    const markerStacksBeforeMerge = [stackABC, stackABE];
 
     const markerStacksAfterMerge = mergedMarkers.data.map((markerData) =>
       markerData && 'cause' in markerData && markerData.cause
@@ -481,13 +661,8 @@ describe('mergeThreads function', function () {
         : null
     );
 
-    // The stack from the marker in the first thread shouldn't have been touched
-    expect(markerStacksAfterMerge[0]).toBe(markerStacksBeforeMerge[0]);
-    // But the stack from the marker in the second thread was touched and was
-    // offset by the size of the first thread's stack table.
-    expect(markerStacksAfterMerge[1]).toBe(
-      markerStacksBeforeMerge[1] + profile.threads[0].stackTable.length
-    );
+    // The marker stacks in the merged thread should be the same as before merging.
+    expect(markerStacksAfterMerge).toEqual(markerStacksBeforeMerge);
   });
 
   it('merges CompositorScreenshot marker urls properly', function () {
@@ -738,23 +913,21 @@ describe('mergeProfilesForDiffing with source tables', function () {
       [profileState, profileState]
     );
 
-    // Check that all threads have valid source references
-    for (const thread of mergedProfile.threads) {
-      for (let i = 0; i < thread.funcTable.length; i++) {
-        const sourceIndex = thread.funcTable.source[i];
-        // Source index should be valid
-        expect(sourceIndex).not.toBeNull();
-        expect(sourceIndex).toBeGreaterThanOrEqual(0);
-        expect(sourceIndex).toBeLessThan(mergedProfile.shared.sources.length);
+    // Check that all source references in the funcTable are valid
+    for (let i = 0; i < mergedProfile.shared.funcTable.length; i++) {
+      const sourceIndex = mergedProfile.shared.funcTable.source[i];
+      // Source index should be valid
+      expect(sourceIndex).not.toBeNull();
+      expect(sourceIndex).toBeGreaterThanOrEqual(0);
+      expect(sourceIndex).toBeLessThan(mergedProfile.shared.sources.length);
 
-        // Should reference a valid filename in the string table
-        const filenameIndex =
-          mergedProfile.shared.sources.filename[ensureExists(sourceIndex)];
-        expect(filenameIndex).toBeGreaterThanOrEqual(0);
-        expect(filenameIndex).toBeLessThan(
-          mergedProfile.shared.stringArray.length
-        );
-      }
+      // Should reference a valid filename in the string table
+      const filenameIndex =
+        mergedProfile.shared.sources.filename[ensureExists(sourceIndex)];
+      expect(filenameIndex).toBeGreaterThanOrEqual(0);
+      expect(filenameIndex).toBeLessThan(
+        mergedProfile.shared.stringArray.length
+      );
     }
   });
 

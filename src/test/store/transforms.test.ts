@@ -1058,9 +1058,8 @@ describe('"collapse-resource" transform', function () {
     `);
     const collapsedFuncNames = [...funcNames, 'firefox'];
     const threadIndex = 0;
-    const thread = profile.threads[threadIndex];
     const firefoxNameIndex = stringTable.indexForString('firefox');
-    const firefoxResourceIndex = thread.resourceTable.name.findIndex(
+    const firefoxResourceIndex = profile.shared.resourceTable.name.findIndex(
       (stringIndex) => stringIndex === firefoxNameIndex
     );
     if (firefoxResourceIndex === -1) {
@@ -1130,15 +1129,15 @@ describe('"collapse-resource" transform', function () {
      *              /     \                                        |
      *             v       v               Collapse firefox        v
      *   B.cpp:firefox    H.cpp:firefox         ->              firefox
-     *        |                 |                                  |
-     *        v                 v                                  v
-     *       C.js              I.js                              F.cpp
-     *        |                                                    |
-     *        v                                                    v
-     *   D.cpp:firefox                                           G.js
-     *        |
-     *        v
-     *       E.js
+     *        |                 |                                /   \
+     *        v                 v                               v     v
+     *       C.js              I.js                          E.js    I.js
+     *        |                                               |
+     *        v                                               v
+     *   D.cpp:firefox                                      F.cpp
+     *        |                                               |
+     *        v                                               v
+     *       E.js                                            G.js
      *        |
      *        v
      *      F.cpp
@@ -1146,11 +1145,8 @@ describe('"collapse-resource" transform', function () {
      *        v
      *      G.js
      *
-     * This behavior may seem a bit surprising, but any stack that doesn't match the
-     * current implementation AND has a callee that is collapsed, will itself be collapsed.
-     * It may be obvious to collapse C.js in this case, as it's between two different
-     * firefox library stacks, but E.js and I.js will be collapsed as well. The only
-     * retained leaf "js" stack is G.js, because it follows a non-collapsed "cpp" stack.
+     * In this example, C.js is collapsed into the firefox resource because it is between
+     * two firefox library nodes and it does not match the implementation filter.
      */
     const {
       profile,
@@ -1167,9 +1163,8 @@ describe('"collapse-resource" transform', function () {
     `);
     const collapsedFuncNames = [...funcNames, 'firefox'];
     const threadIndex = 0;
-    const thread = profile.threads[threadIndex];
     const firefoxNameIndex = stringTable.indexForString('firefox');
-    const firefoxResourceIndex = thread.resourceTable.name.findIndex(
+    const firefoxResourceIndex = profile.shared.resourceTable.name.findIndex(
       (stringIndex) => stringIndex === firefoxNameIndex
     );
     if (firefoxResourceIndex === -1) {
@@ -1178,7 +1173,7 @@ describe('"collapse-resource" transform', function () {
     const collapseTransform = {
       type: 'collapse-resource' as const,
       resourceIndex: firefoxResourceIndex,
-      collapsedFuncIndex: thread.funcTable.length,
+      collapsedFuncIndex: profile.shared.funcTable.length,
       implementation: 'cpp' as const,
     };
 
@@ -1209,9 +1204,11 @@ describe('"collapse-resource" transform', function () {
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toEqual([
         '- A.js (total: 2, self: —)',
-        '  - firefox (total: 2, self: 1)',
-        '    - F.cpp (total: 1, self: —)',
-        '      - G.js (total: 1, self: 1)',
+        '  - firefox (total: 2, self: —)',
+        '    - E.js (total: 1, self: —)',
+        '      - F.cpp (total: 1, self: —)',
+        '        - G.js (total: 1, self: 1)',
+        '    - I.js (total: 1, self: 1)',
       ]);
     });
 

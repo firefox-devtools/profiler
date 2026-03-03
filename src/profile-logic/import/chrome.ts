@@ -6,9 +6,7 @@ import type {
   Profile,
   RawThread,
   RawStackTable,
-  IndexIntoFuncTable,
   IndexIntoStackTable,
-  IndexIntoResourceTable,
   MixedObject,
 } from 'firefox-profiler/types';
 
@@ -22,7 +20,7 @@ import {
   INTERVAL_END,
 } from 'firefox-profiler/app-logic/constants';
 
-import { getOrCreateURIResource, getTimeRangeForThread } from '../profile-data';
+import { getTimeRangeForThread } from '../profile-data';
 import { GlobalDataCollector } from '../global-data-collector';
 
 // Chrome Tracing Event Spec:
@@ -269,9 +267,7 @@ export function attemptToConvertChromeProfile(
 
 type ThreadInfo = {
   thread: RawThread;
-  funcKeyToFuncId: Map<string, IndexIntoFuncTable>;
   nodeIdToStackId: Map<number | void, IndexIntoStackTable | null>;
-  originToResourceIndex: Map<string, IndexIntoResourceTable>;
   lastSeenTime: number;
   lastSampledTime: number;
   pid: number;
@@ -403,8 +399,6 @@ function getThreadInfo(
   const threadInfo: ThreadInfo = {
     thread,
     nodeIdToStackId,
-    funcKeyToFuncId: new Map(),
-    originToResourceIndex: new Map(),
     lastSeenTime: chunk.ts / 1000,
     lastSampledTime: 0,
     pid: chunk.pid,
@@ -506,6 +500,9 @@ async function processTracingEvents(
   const globalDataCollector = new GlobalDataCollector();
   const stringTable = globalDataCollector.getStringTable();
 
+  const frameTable = globalDataCollector.getFrameTable();
+  const stackTable = globalDataCollector.getStackTable();
+
   let profileEvents: (ProfileEvent | CpuProfileEvent)[] = (eventsByName.get(
     'Profile'
   ) || []) as ProfileEvent[];
@@ -531,8 +528,7 @@ async function processTracingEvents(
       profile,
       profileEvent
     );
-    const { thread, funcKeyToFuncId, nodeIdToStackId, originToResourceIndex } =
-      threadInfo;
+    const { thread, nodeIdToStackId } = threadInfo;
 
     let profileChunks: any[] = [];
     if (profileEvent.name === 'Profile') {
@@ -566,13 +562,7 @@ async function processTracingEvents(
         continue;
       }
 
-      const {
-        funcTable,
-        frameTable,
-        stackTable,
-        samples: samplesTable,
-        resourceTable,
-      } = thread;
+      const { samples: samplesTable } = thread;
 
       if (nodes) {
         const parentMap = new Map<number, number>();
@@ -616,43 +606,27 @@ async function processTracingEvents(
           }
 
           const { functionName } = callFrame;
-          const funcKey = `${functionName}:${url || ''}:${lineNumber || 0}:${
-            columnNumber || 0
-          }`;
           const { category, isJS, relevantForJS } = getFunctionInfo(
             functionName,
             url !== undefined || lineNumber !== undefined
           );
-          let funcId = funcKeyToFuncId.get(funcKey);
-
-          if (funcId === undefined) {
-            // The function did not exist.
-            funcId = funcTable.length++;
-            funcTable.isJS.push(isJS);
-            funcTable.relevantForJS.push(relevantForJS);
-            const name = functionName !== '' ? functionName : '(anonymous)';
-            funcTable.name.push(stringTable.indexForString(name));
-            funcTable.resource.push(
-              isJS
-                ? getOrCreateURIResource(
-                    url || '<unknown>',
-                    resourceTable,
-                    stringTable,
-                    originToResourceIndex
-                  )
-                : -1
-            );
-            funcTable.source.push(
-              isJS && url ? globalDataCollector.indexForSource(null, url) : null
-            );
-            funcTable.lineNumber.push(
-              lineNumber === undefined ? null : lineNumber
-            );
-            funcTable.columnNumber.push(
-              columnNumber === undefined ? null : columnNumber
-            );
-            funcKeyToFuncId.set(funcKey, funcId);
-          }
+          const name = stringTable.indexForString(
+            functionName !== '' ? functionName : '(anonymous)'
+          );
+          const source =
+            isJS && url ? globalDataCollector.indexForSource(null, url) : null;
+          const resource = isJS
+            ? globalDataCollector.indexForURIResource(url || '<unknown>')
+            : -1;
+          const funcId = globalDataCollector.indexForFunc(
+            name,
+            isJS,
+            relevantForJS,
+            resource,
+            source,
+            lineNumber === undefined ? null : lineNumber,
+            columnNumber === undefined ? null : columnNumber
+          );
 
           // Node indexes start at 1, while frame indexes start at 0.
           const frameIndex = nodeIndex - 1;
@@ -712,9 +686,7 @@ async function processTracingEvents(
     }
   }
 
-  for (const thread of profile.threads) {
-    assertStackOrdering(thread.stackTable);
-  }
+  assertStackOrdering(stackTable);
 
   await extractScreenshots(
     threadInfoByPidAndTid,

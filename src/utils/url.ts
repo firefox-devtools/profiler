@@ -20,3 +20,15 @@ export function isLocalURL(url: string | URL): boolean {
     return false;
   }
 }
+
+/**
+ * Escape a URL string so it can be safely embedded inside a double-quoted CSS
+ * url("...").
+ */
+export function escapeCssUrl(url: string): string {
+  return url
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\A ')
+    .replace(/\r/g, '');
+}
