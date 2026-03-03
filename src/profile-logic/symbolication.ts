@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import {
-  resourceTypes,
   getEmptyRawStackTable,
   shallowCloneFuncTable,
   shallowCloneNativeSymbolTable,
@@ -24,6 +23,7 @@ import type {
   CallNodePath,
   Lib,
 } from 'firefox-profiler/types';
+import { ResourceType } from 'firefox-profiler/types';
 import type {
   AbstractSymbolStore,
   AddressResult,
@@ -276,13 +276,13 @@ function getSymbolicationInfo(
     resourceIndex++
   ) {
     const resourceType = resourceTable.type[resourceIndex];
-    if (resourceType !== resourceTypes.library) {
+    if (resourceType !== ResourceType.Library) {
       continue;
     }
     const libIndex = resourceTable.lib[resourceIndex];
     if (libIndex === null) {
       // We can get here if we have pre-symbolicated "funcName (in LibraryName)"
-      // frames. Those get resourceTypes.library but no libIndex.
+      // frames. Those get ResourceType.Library but no libIndex.
       continue;
     }
     const lib = libs[libIndex];

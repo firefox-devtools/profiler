@@ -28,7 +28,6 @@ import {
   getCallNodeFramePerStack,
   getTotalNativeSymbolTimingsForCallNode,
 } from '../../profile-logic/profile-data';
-import { resourceTypes } from '../../profile-logic/data-structures';
 import {
   createGeckoProfile,
   createGeckoProfileWithJsTimings,
@@ -64,7 +63,7 @@ import type {
   IndexIntoCategoryList,
   IndexIntoNativeSymbolTable,
 } from 'firefox-profiler/types';
-import { SelectedState } from 'firefox-profiler/types';
+import { SelectedState, ResourceType } from 'firefox-profiler/types';
 
 describe('string-table', function () {
   const u = StringTable.withBackingArray(['foo', 'bar', 'baz']);
@@ -343,10 +342,10 @@ describe('process-profile', function () {
     it('should create one resource per used library', function () {
       const shared = profile.shared;
       expect(shared.resourceTable.length).toEqual(4);
-      expect(shared.resourceTable.type[0]).toEqual(resourceTypes.addon);
-      expect(shared.resourceTable.type[1]).toEqual(resourceTypes.library);
-      expect(shared.resourceTable.type[2]).toEqual(resourceTypes.url);
-      expect(shared.resourceTable.type[3]).toEqual(resourceTypes.library);
+      expect(shared.resourceTable.type[0]).toEqual(ResourceType.Addon);
+      expect(shared.resourceTable.type[1]).toEqual(ResourceType.Library);
+      expect(shared.resourceTable.type[2]).toEqual(ResourceType.Url);
+      expect(shared.resourceTable.type[3]).toEqual(ResourceType.Library);
       const [name0, name1, name2, name3] = shared.resourceTable.name;
       expect(shared.stringArray[name0]).toEqual(
         'Extension "Form Autofill" (ID: formautofill@mozilla.org)'

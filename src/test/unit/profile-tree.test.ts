@@ -19,7 +19,7 @@ import {
   filterRawThreadSamplesToRange,
   getSampleIndexToCallNodeIndex,
 } from '../../profile-logic/profile-data';
-import { resourceTypes } from '../../profile-logic/data-structures';
+import { ResourceType } from 'firefox-profiler/types';
 import {
   callTreeFromProfile,
   functionListTreeFromProfile,
@@ -362,7 +362,7 @@ describe('unfiltered call tree', function () {
         const callTree = callTreeFromProfile(profile);
         const hostStringIndex = stringTable.indexForString('examplecom.js');
 
-        profile.shared.resourceTable.type[0] = resourceTypes.webhost;
+        profile.shared.resourceTable.type[0] = ResourceType.Webhost;
         profile.shared.resourceTable.host[0] = hostStringIndex;
         // Hijack the string table to provide the proper host name
         stringTable._array[hostStringIndex] = 'http://example.com';

@@ -6,7 +6,6 @@ import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
 import { oneLine } from 'common-tags';
 import {
-  resourceTypes,
   getEmptyRawStackTable,
   getEmptyCallNodeTable,
   shallowCloneFrameTable,
@@ -88,7 +87,6 @@ import type {
   CallTreeSummaryStrategy,
   EventDelayInfo,
   ThreadsKey,
-  ResourceTypeEnum,
   MarkerPayload,
   Address,
   AddressProof,
@@ -101,7 +99,7 @@ import type {
   IndexIntoSourceTable,
   TransformOutput,
 } from 'firefox-profiler/types';
-import { SelectedState } from 'firefox-profiler/types';
+import { SelectedState, ResourceType } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
 
 /**
@@ -3080,7 +3078,7 @@ export function getThreadProcessDetails(
 function _shouldShowBothOriginAndFileName(
   fileName: string,
   origin: string,
-  resourceType: ResourceTypeEnum | null
+  resourceType: ResourceType | null
 ): boolean {
   // If the origin string is just a URL prefix that's part of the
   // filename, it doesn't add any useful information, so only show
@@ -3091,7 +3089,7 @@ function _shouldShowBothOriginAndFileName(
 
   // For native code (resource type "library"), if we have the filename of the
   // source code, only show the filename and not the library name.
-  if (resourceType === resourceTypes.library) {
+  if (resourceType === ResourceType.Library) {
     return false;
   }
 
@@ -3189,10 +3187,10 @@ export function reserveFunctionsForCollapsedResources(
     IndexIntoFuncTable
   >();
   const jsResourceTypes = [
-    resourceTypes.addon,
-    resourceTypes.url,
-    resourceTypes.webhost,
-    resourceTypes.otherhost,
+    ResourceType.Addon,
+    ResourceType.Url,
+    ResourceType.Webhost,
+    ResourceType.OtherHost,
   ];
   for (
     let resourceIndex = 0;
@@ -4060,7 +4058,7 @@ export function findAddressProofForFile(
     return null;
   }
   const resource = funcTable.resource[func];
-  if (resourceTable.type[resource] !== resourceTypes.library) {
+  if (resourceTable.type[resource] !== ResourceType.Library) {
     return null;
   }
   const libIndex = resourceTable.lib[resource];
