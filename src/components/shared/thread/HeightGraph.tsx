@@ -15,8 +15,8 @@ import type {
   CategoryList,
   IndexIntoSamplesTable,
   Milliseconds,
-  SelectedState,
 } from 'firefox-profiler/types';
+import { SelectedState } from 'firefox-profiler/types';
 
 type Props = {
   readonly heightFunc: (param: IndexIntoSamplesTable) => number | null;
@@ -138,7 +138,7 @@ export class ThreadHeightGraph extends PureComponent<Props> {
       let samplesBucket;
       if (
         samplesSelectedStates !== null &&
-        samplesSelectedStates[i] === 'SELECTED'
+        samplesSelectedStates[i] === SelectedState.Selected
       ) {
         samplesBucket = highlightedSamples;
       } else {

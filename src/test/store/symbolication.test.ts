@@ -10,6 +10,7 @@ import {
 } from '../fixtures/example-symbol-table';
 import type { ExampleSymbolTable } from '../fixtures/example-symbol-table';
 import type { MarkerPayload } from 'firefox-profiler/types';
+import { ResourceType } from 'firefox-profiler/types';
 import type {
   AddressResult,
   LibSymbolicationRequest,
@@ -23,10 +24,7 @@ import {
 import * as ProfileViewSelectors from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { INTERVAL } from 'firefox-profiler/app-logic/constants';
-import {
-  resourceTypes,
-  getEmptyRawMarkerTable,
-} from '../../profile-logic/data-structures';
+import { getEmptyRawMarkerTable } from '../../profile-logic/data-structures';
 import { doSymbolicateProfile } from '../../actions/receive-profile';
 import {
   changeSelectedCallNode,
@@ -593,7 +591,7 @@ function _createUnsymbolicatedProfile() {
     lib: [libIndex],
     name: [stringTable.indexForString('example lib')],
     host: [stringTable.indexForString('example host')],
-    type: [resourceTypes.library],
+    type: [ResourceType.Library],
   };
   for (let i = 0; i < profile.shared.funcTable.length; i++) {
     profile.shared.funcTable.resource[i] = 0;

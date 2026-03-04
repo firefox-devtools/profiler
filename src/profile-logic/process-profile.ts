@@ -287,7 +287,7 @@ export function extractFuncsAndResourcesFromFrameLocations(
  * address.
  * We also associate the address with the library that contains it, and convert the address
  * into a library-relative offset. This association is established via the function's
- * "resource": The function points to the resource (of type resourceTypes.library), and the
+ * "resource": The function points to the resource (of type ResourceType.Library), and the
  * resource has the index to the library in thread.libs.
  * We return the index of the newly-added function, and the address as a library-relative
  * offset.

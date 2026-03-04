@@ -299,15 +299,6 @@ export function shallowCloneRawMarkerTable(
   };
 }
 
-export const resourceTypes = {
-  unknown: 0,
-  library: 1,
-  addon: 2,
-  webhost: 3,
-  otherhost: 4,
-  url: 5,
-};
-
 export function getEmptyExtensions(): ExtensionTable {
   return {
     // Important!
