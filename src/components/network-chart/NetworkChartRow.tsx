@@ -308,17 +308,27 @@ type State = {
   pageX: CssPixels;
   pageY: CssPixels;
   hovered: boolean | null;
+  clickPageX: CssPixels | null;
+  clickPageY: CssPixels | null;
 };
 
 export class NetworkChartRow extends React.PureComponent<
   NetworkChartRowProps,
   State
 > {
-  override state = {
+  override state: State = {
     pageX: 0,
     pageY: 0,
     hovered: false,
+    clickPageX: null,
+    clickPageY: null,
   };
+
+  override componentDidUpdate(prevProps: NetworkChartRowProps) {
+    if (prevProps.isSelected && !this.props.isSelected) {
+      this.setState({ clickPageX: null, clickPageY: null });
+    }
+  }
 
   _hoverIn = (event: React.MouseEvent<HTMLDivElement>) => {
     const pageX = event.pageX;
@@ -348,6 +358,7 @@ export class NetworkChartRow extends React.PureComponent<
   _onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     const { markerIndex, onLeftClick, onRightClick } = this.props;
     if (e.button === 0) {
+      this.setState({ clickPageX: e.pageX, clickPageY: e.pageY });
       if (onLeftClick) {
         onLeftClick(markerIndex);
       }
@@ -467,6 +478,17 @@ export class NetworkChartRow extends React.PureComponent<
       }
     );
 
+    const clickX = this.state.clickPageX;
+    const clickY = this.state.clickPageY;
+
+    const isSticky = isSelected && clickX !== null && clickY !== null;
+    const showTooltip =
+      shouldDisplayTooltips() && (this.state.hovered || isSticky);
+
+    // When sticky, use the click coordinates; otherwise use the current mouse position.
+    const tooltipX = isSticky ? clickX : this.state.pageX;
+    const tooltipY = isSticky ? clickY : this.state.pageY;
+
     return (
       <div
         // The className below is responsible for the blue hover effect
@@ -488,19 +510,19 @@ export class NetworkChartRow extends React.PureComponent<
           width={width}
           timeRange={timeRange}
         />
-        {shouldDisplayTooltips() && this.state.hovered ? (
-          // This magic value "5" avoids the tooltip of being too close of the
-          // row, especially when we mouseEnter the row from the top edge.
-          <Tooltip mouseX={this.state.pageX} mouseY={this.state.pageY + 5}>
+        {showTooltip ? (
+          <Tooltip
+            mouseX={tooltipX}
+            mouseY={tooltipY}
+            className={isSticky ? 'clickable' : undefined}
+          >
             <TooltipMarker
               className="tooltipNetwork"
               markerIndex={markerIndex}
               marker={marker}
               threadsKey={this.props.threadsKey}
               restrictHeightWidth={true}
-              // Network Chart doesn't have sticky tooltips yet. But we should convert it
-              // to false once we implement sticky tooltips for the network chart.
-              hideFilterButton={true}
+              hideFilterButton={!isSticky}
             />
           </Tooltip>
         ) : null}
