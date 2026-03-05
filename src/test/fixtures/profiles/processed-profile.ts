@@ -1063,6 +1063,7 @@ export function getProfileWithDicts(profile: Profile): ProfileWithDicts {
     computeThreadFromRawThread(
       rawThread,
       shared,
+      profile.meta.categories,
       profile.meta.sampleUnits,
       referenceCPUDeltaPerMs,
       defaultCategory

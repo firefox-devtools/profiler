@@ -133,7 +133,6 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       sampleIndexOffset,
       samplesSelectedStates,
       treeOrderSampleComparator,
-      categories,
       enableCPUUsage,
       width,
       height,
@@ -158,7 +157,6 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       enableCPUUsage,
       xPixelsPerMs: canvasPixelWidth / (rangeEnd - rangeStart),
       treeOrderSampleComparator,
-      greyCategoryIndex: categories.findIndex((c) => c.color === 'grey') || 0,
       categoryDrawStyles: this._getCategoryDrawStyles(ctx!),
     });
 
