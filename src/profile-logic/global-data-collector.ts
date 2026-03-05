@@ -10,7 +10,6 @@ import {
   getEmptyRawStackTable,
   getEmptyResourceTable,
   getEmptySourceTable,
-  resourceTypes,
 } from './data-structures';
 
 import type {
@@ -33,6 +32,7 @@ import type {
   Address,
   Bytes,
 } from 'firefox-profiler/types';
+import { ResourceType } from 'firefox-profiler/types';
 
 /**
  * GlobalDataCollector collects data which is global in the processed profile
@@ -163,7 +163,7 @@ export class GlobalDataCollector {
         resourceTable.name[resourceIndex] =
           this._stringTable.indexForString(name);
         resourceTable.host[resourceIndex] = idIndex;
-        resourceTable.type[resourceIndex] = resourceTypes.addon;
+        resourceTable.type[resourceIndex] = ResourceType.Addon;
       }
     }
   }
@@ -208,7 +208,7 @@ export class GlobalDataCollector {
         this._stringTable.indexForString(origin);
       resourceTable.host[resourceIndex] =
         this._stringTable.indexForString(host);
-      resourceTable.type[resourceIndex] = resourceTypes.webhost;
+      resourceTable.type[resourceIndex] = ResourceType.Webhost;
     } else {
       // This is a URL, but it doesn't point to something on the web, e.g. a
       // chrome url.
@@ -216,7 +216,7 @@ export class GlobalDataCollector {
       resourceTable.name[resourceIndex] =
         this._stringTable.indexForString(scriptURI);
       resourceTable.host[resourceIndex] = null;
-      resourceTable.type[resourceIndex] = resourceTypes.url;
+      resourceTable.type[resourceIndex] = ResourceType.Url;
     }
     return resourceIndex;
   }
@@ -236,7 +236,7 @@ export class GlobalDataCollector {
       this._libs[libIndex].name
     );
     resourceTable.host[resourceIndex] = null;
-    resourceTable.type[resourceIndex] = resourceTypes.library;
+    resourceTable.type[resourceIndex] = ResourceType.Library;
     return resourceIndex;
   }
 
@@ -255,7 +255,7 @@ export class GlobalDataCollector {
     resourceTable.lib[resourceIndex] = null;
     resourceTable.name[resourceIndex] = libNameStringIndex;
     resourceTable.host[resourceIndex] = null;
-    resourceTable.type[resourceIndex] = resourceTypes.library;
+    resourceTable.type[resourceIndex] = ResourceType.Library;
     return resourceIndex;
   }
 

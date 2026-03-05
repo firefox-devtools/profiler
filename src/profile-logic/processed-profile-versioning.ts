@@ -14,7 +14,7 @@
  */
 
 import { sortDataTable } from '../utils/data-table-utils';
-import { resourceTypes } from './data-structures';
+import { ResourceType } from 'firefox-profiler/types';
 import { StringTable } from '../utils/string-table';
 import { timeCode } from '../utils/time-code';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
@@ -356,19 +356,19 @@ const _upgraders: {
       };
       function addLibResource(name: number, lib: number) {
         const index = newResourceTable.length++;
-        newResourceTable.type[index] = resourceTypes.library;
+        newResourceTable.type[index] = ResourceType.Library;
         newResourceTable.name[index] = name;
         newResourceTable.lib[index] = lib;
       }
       function addWebhostResource(origin: number, host: number) {
         const index = newResourceTable.length++;
-        newResourceTable.type[index] = resourceTypes.webhost;
+        newResourceTable.type[index] = ResourceType.Webhost;
         newResourceTable.name[index] = origin;
         newResourceTable.host[index] = host;
       }
       function addUrlResource(url: number) {
         const index = newResourceTable.length++;
-        newResourceTable.type[index] = resourceTypes.url;
+        newResourceTable.type[index] = ResourceType.Url;
         newResourceTable.name[index] = url;
       }
       const oldResourceToNewResourceMap = new Map();
@@ -378,7 +378,7 @@ const _upgraders: {
         resourceIndex < resourceTable.length;
         resourceIndex++
       ) {
-        if (resourceTable.type[resourceIndex] === resourceTypes.library) {
+        if (resourceTable.type[resourceIndex] === ResourceType.Library) {
           oldResourceToNewResourceMap.set(
             resourceIndex,
             newResourceTable.length
@@ -387,7 +387,7 @@ const _upgraders: {
             resourceTable.name[resourceIndex],
             resourceTable.lib[resourceIndex]
           );
-        } else if (resourceTable.type[resourceIndex] === resourceTypes.url) {
+        } else if (resourceTable.type[resourceIndex] === ResourceType.Url) {
           const scriptURI = stringTable.getString(
             resourceTable.name[resourceIndex]
           );
@@ -1810,7 +1810,7 @@ const _upgraders: {
           continue;
         }
         const resourceType = resourceTable.type[resourceIndex];
-        if (resourceType !== resourceTypes.library) {
+        if (resourceType !== ResourceType.Library) {
           continue;
         }
         const libIndex = resourceTable.lib[resourceIndex];
