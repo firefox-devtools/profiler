@@ -668,22 +668,23 @@ export type RemoveProfileInformation = {
 };
 
 /**
- * This type is used to decide how to highlight and stripe areas in the
+ * This const enum is used to decide how to highlight and stripe areas in the
  * timeline.
  */
-export type SelectedState =
+export const enum SelectedState {
   // Samples can be filtered through various operations, like searching, or
   // call tree transforms.
-  | 'FILTERED_OUT_BY_TRANSFORM'
+  FilteredOutByTransform,
   // This sample is selected because either the tip or an ancestor call node matches
   // the currently selected call node.
-  | 'SELECTED'
+  Selected,
   // This call node is not selected, and the stacks are ordered before the selected
   // call node as sorted by the getTreeOrderComparator.
-  | 'UNSELECTED_ORDERED_BEFORE_SELECTED'
+  UnselectedOrderedBeforeSelected,
   // This call node is not selected, and the stacks are ordered after the selected
   // call node as sorted by the getTreeOrderComparator.
-  | 'UNSELECTED_ORDERED_AFTER_SELECTED';
+  UnselectedOrderedAfterSelected,
+}
 
 /**
  * It holds the initially selected track's HTMLElement. This allows the timeline

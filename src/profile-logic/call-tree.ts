@@ -7,7 +7,6 @@ import {
   getOriginAnnotationForFunc,
   getCategoryPairLabel,
 } from './profile-data';
-import { resourceTypes } from './data-structures';
 import { getFunctionName } from './function-info';
 import type {
   CategoryList,
@@ -28,6 +27,7 @@ import type {
   SelfAndTotal,
   BalancedNativeAllocationsTable,
 } from 'firefox-profiler/types';
+import { ResourceType } from 'firefox-profiler/types';
 
 import ExtensionIcon from '../../res/img/svg/extension.svg';
 import { formatCallNodeNumber, formatPercent } from '../utils/format-numbers';
@@ -511,9 +511,9 @@ export class CallTree {
       let iconSrc = null;
       let icon = null;
 
-      if (resourceType === resourceTypes.webhost) {
+      if (resourceType === ResourceType.Webhost) {
         icon = iconSrc = extractFaviconFromLibname(libName);
-      } else if (resourceType === resourceTypes.addon) {
+      } else if (resourceType === ResourceType.Addon) {
         iconSrc = ExtensionIcon;
 
         const resourceNameIndex =

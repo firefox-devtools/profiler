@@ -28,7 +28,6 @@ import {
   getCallNodeFramePerStack,
   getTotalNativeSymbolTimingsForCallNode,
 } from '../../profile-logic/profile-data';
-import { resourceTypes } from '../../profile-logic/data-structures';
 import {
   createGeckoProfile,
   createGeckoProfileWithJsTimings,
@@ -64,6 +63,7 @@ import type {
   IndexIntoCategoryList,
   IndexIntoNativeSymbolTable,
 } from 'firefox-profiler/types';
+import { SelectedState, ResourceType } from 'firefox-profiler/types';
 
 describe('string-table', function () {
   const u = StringTable.withBackingArray(['foo', 'bar', 'baz']);
@@ -342,10 +342,10 @@ describe('process-profile', function () {
     it('should create one resource per used library', function () {
       const shared = profile.shared;
       expect(shared.resourceTable.length).toEqual(4);
-      expect(shared.resourceTable.type[0]).toEqual(resourceTypes.addon);
-      expect(shared.resourceTable.type[1]).toEqual(resourceTypes.library);
-      expect(shared.resourceTable.type[2]).toEqual(resourceTypes.url);
-      expect(shared.resourceTable.type[3]).toEqual(resourceTypes.library);
+      expect(shared.resourceTable.type[0]).toEqual(ResourceType.Addon);
+      expect(shared.resourceTable.type[1]).toEqual(ResourceType.Library);
+      expect(shared.resourceTable.type[2]).toEqual(ResourceType.Url);
+      expect(shared.resourceTable.type[3]).toEqual(ResourceType.Library);
       const [name0, name1, name2, name3] = shared.resourceTable.name;
       expect(shared.stringArray[name0]).toEqual(
         'Extension "Form Autofill" (ID: formautofill@mozilla.org)'
@@ -1051,38 +1051,38 @@ describe('getSamplesSelectedStates', function () {
       expect(
         getSamplesSelectedStates(callNodeInfo, sampleCallNodes, A_B)
       ).toEqual([
-        'SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        SelectedState.Selected,
+        SelectedState.UnselectedOrderedAfterSelected,
+        SelectedState.Selected,
+        SelectedState.UnselectedOrderedAfterSelected,
+        SelectedState.UnselectedOrderedAfterSelected,
       ]);
       expect(
         getSamplesSelectedStates(callNodeInfo, sampleCallNodes, A_D)
       ).toEqual([
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'SELECTED',
-        'SELECTED',
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.Selected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.Selected,
+        SelectedState.Selected,
       ]);
       expect(
         getSamplesSelectedStates(callNodeInfo, sampleCallNodes, A_B_F)
       ).toEqual([
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedAfterSelected,
+        SelectedState.Selected,
+        SelectedState.UnselectedOrderedAfterSelected,
+        SelectedState.UnselectedOrderedAfterSelected,
       ]);
       expect(
         getSamplesSelectedStates(callNodeInfo, sampleCallNodes, A_D_E)
       ).toEqual([
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.Selected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedAfterSelected,
+        SelectedState.UnselectedOrderedBeforeSelected,
       ]);
     });
 
@@ -1147,39 +1147,39 @@ describe('getSamplesSelectedStates', function () {
       expect(
         getSamplesSelectedStates(callNodeInfoInverted, sampleCallNodes, inBA)
       ).toEqual([
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'SELECTED',
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.Selected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedAfterSelected,
+        SelectedState.UnselectedOrderedAfterSelected,
+        SelectedState.Selected,
       ]);
       // Test C <- B <- A <- ...
       // Only sample 5 has a stack ending in ... -> A -> B -> C
       expect(
         getSamplesSelectedStates(callNodeInfoInverted, sampleCallNodes, inCBA)
       ).toEqual([
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.Selected,
+        SelectedState.UnselectedOrderedBeforeSelected,
       ]);
       // Test B <- ...
       // Only samples 2 and 6 have stacks ending in ... -> B
       expect(
         getSamplesSelectedStates(callNodeInfoInverted, sampleCallNodes, inB)
       ).toEqual([
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'SELECTED',
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.Selected,
+        SelectedState.UnselectedOrderedBeforeSelected,
+        SelectedState.UnselectedOrderedAfterSelected,
+        SelectedState.UnselectedOrderedAfterSelected,
+        SelectedState.Selected,
       ]);
     });
 
