@@ -11,6 +11,7 @@ import {
   getEmptySourceTable,
 } from './data-structures';
 import { computeStringIndexMarkerFieldsByDataType } from './marker-schema';
+import { type BitSet, makeBitSet, setBit, checkBit } from '../utils/bitset';
 
 import type {
   Profile,
@@ -36,14 +37,14 @@ export type CompactedProfileWithTranslationMaps = {
 };
 
 type ReferencedProfileData = {
-  referencedStacks: Uint8Array;
-  referencedFrames: Uint8Array;
-  referencedFuncs: Uint8Array;
-  referencedResources: Uint8Array;
-  referencedNativeSymbols: Uint8Array;
-  referencedSources: Uint8Array;
-  referencedStrings: Uint8Array;
-  referencedLibs: Uint8Array;
+  referencedStacks: BitSet;
+  referencedFrames: BitSet;
+  referencedFuncs: BitSet;
+  referencedResources: BitSet;
+  referencedNativeSymbols: BitSet;
+  referencedSources: BitSet;
+  referencedStrings: BitSet;
+  referencedLibs: BitSet;
 };
 
 type TranslationMaps = {
@@ -99,14 +100,14 @@ function _gatherReferencesInProfile(
 ): ReferencedProfileData {
   const { shared, threads } = profile;
   const referencedSharedData: ReferencedProfileData = {
-    referencedStacks: new Uint8Array(shared.stackTable.length),
-    referencedFrames: new Uint8Array(shared.frameTable.length),
-    referencedFuncs: new Uint8Array(shared.funcTable.length),
-    referencedResources: new Uint8Array(shared.resourceTable.length),
-    referencedNativeSymbols: new Uint8Array(shared.nativeSymbols.length),
-    referencedSources: new Uint8Array(shared.sources.length),
-    referencedLibs: new Uint8Array(profile.libs.length),
-    referencedStrings: new Uint8Array(shared.stringArray.length),
+    referencedStacks: makeBitSet(shared.stackTable.length),
+    referencedFrames: makeBitSet(shared.frameTable.length),
+    referencedFuncs: makeBitSet(shared.funcTable.length),
+    referencedResources: makeBitSet(shared.resourceTable.length),
+    referencedNativeSymbols: makeBitSet(shared.nativeSymbols.length),
+    referencedSources: makeBitSet(shared.sources.length),
+    referencedLibs: makeBitSet(profile.libs.length),
+    referencedStrings: makeBitSet(shared.stringArray.length),
   };
 
   // This is the "marking" phase of profile compaction. We want to mark
@@ -344,7 +345,7 @@ function _gatherReferencesInStackCol(
   for (let i = 0; i < stackCol.length; i++) {
     const stack = stackCol[i];
     if (stack !== null) {
-      referencedStacks[stack] = 1;
+      setBit(referencedStacks, stack);
     }
   }
 }
@@ -372,7 +373,7 @@ function _gatherReferencesInMarkers(
 ) {
   const { referencedStacks, referencedStrings } = references;
   for (let i = 0; i < markers.length; i++) {
-    referencedStrings[markers.name[i]] = 1;
+    setBit(referencedStrings, markers.name[i]);
 
     const data = markers.data[i];
     if (!data) {
@@ -382,7 +383,7 @@ function _gatherReferencesInMarkers(
     if ('cause' in data && data.cause) {
       const stack = data.cause.stack;
       if (stack !== null) {
-        referencedStacks[stack] = 1;
+        setBit(referencedStacks, stack);
       }
     }
 
@@ -394,7 +395,7 @@ function _gatherReferencesInMarkers(
         for (const fieldKey of stringIndexMarkerFields) {
           const stringIndex = (data as any)[fieldKey];
           if (typeof stringIndex === 'number') {
-            referencedStrings[stringIndex] = 1;
+            setBit(referencedStrings, stringIndex);
           }
         }
       }
@@ -466,15 +467,15 @@ function _gatherReferencesInStackTable(
 ) {
   const { referencedStacks, referencedFrames } = references;
   for (let i = stackTable.length - 1; i >= 0; i--) {
-    if (referencedStacks[i] === 0) {
+    if (!checkBit(referencedStacks, i)) {
       continue;
     }
 
     const prefix = stackTable.prefix[i];
     if (prefix !== null) {
-      referencedStacks[prefix] = 1;
+      setBit(referencedStacks, prefix);
     }
-    referencedFrames[stackTable.frame[i]] = 1;
+    setBit(referencedFrames, stackTable.frame[i]);
   }
 }
 
@@ -487,7 +488,7 @@ function _createCompactedStackTable(
     translationMaps;
   const newStackTable = getEmptyRawStackTable();
   for (let i = 0; i < stackTable.length; i++) {
-    if (referencedStacks[i] === 0) {
+    if (!checkBit(referencedStacks, i)) {
       continue;
     }
 
@@ -512,15 +513,15 @@ function _gatherReferencesInFrameTable(
   const { referencedFrames, referencedFuncs, referencedNativeSymbols } =
     references;
   for (let i = 0; i < frameTable.length; i++) {
-    if (referencedFrames[i] === 0) {
+    if (!checkBit(referencedFrames, i)) {
       continue;
     }
 
-    referencedFuncs[frameTable.func[i]] = 1;
+    setBit(referencedFuncs, frameTable.func[i]);
 
     const nativeSymbol = frameTable.nativeSymbol[i];
     if (nativeSymbol !== null) {
-      referencedNativeSymbols[nativeSymbol] = 1;
+      setBit(referencedNativeSymbols, nativeSymbol);
     }
   }
 }
@@ -537,7 +538,7 @@ function _createCompactedFrameTable(
   } = translationMaps;
   const newFrameTable = getEmptyFrameTable();
   for (let i = 0; i < frameTable.length; i++) {
-    if (referencedFrames[i] === 0) {
+    if (!checkBit(referencedFrames, i)) {
       continue;
     }
 
@@ -575,20 +576,20 @@ function _gatherReferencesInFuncTable(
     referencedResources,
   } = references;
   for (let i = 0; i < funcTable.length; i++) {
-    if (referencedFuncs[i] === 0) {
+    if (!checkBit(referencedFuncs, i)) {
       continue;
     }
 
-    referencedStrings[funcTable.name[i]] = 1;
+    setBit(referencedStrings, funcTable.name[i]);
 
     const source = funcTable.source[i];
     if (source !== null) {
-      referencedSources[source] = 1;
+      setBit(referencedSources, source);
     }
 
     const resource = funcTable.resource[i];
     if (resource !== -1) {
-      referencedResources[resource] = 1;
+      setBit(referencedResources, resource);
     }
   }
 }
@@ -606,7 +607,7 @@ function _createCompactedFuncTable(
   } = translationMaps;
   const newFuncTable = getEmptyFuncTable();
   for (let i = 0; i < funcTable.length; i++) {
-    if (referencedFuncs[i] === 0) {
+    if (!checkBit(referencedFuncs, i)) {
       continue;
     }
 
@@ -637,20 +638,20 @@ function _gatherReferencesInResourceTable(
 ) {
   const { referencedResources, referencedStrings, referencedLibs } = references;
   for (let i = 0; i < resourceTable.length; i++) {
-    if (referencedResources[i] === 0) {
+    if (!checkBit(referencedResources, i)) {
       continue;
     }
 
-    referencedStrings[resourceTable.name[i]] = 1;
+    setBit(referencedStrings, resourceTable.name[i]);
 
     const host = resourceTable.host[i];
     if (host !== null) {
-      referencedStrings[host] = 1;
+      setBit(referencedStrings, host);
     }
 
     const lib = resourceTable.lib[i];
     if (lib !== null) {
-      referencedLibs[lib] = 1;
+      setBit(referencedLibs, lib);
     }
   }
 }
@@ -667,7 +668,7 @@ function _createCompactedResourceTable(
   } = translationMaps;
   const newResourceTable = getEmptyResourceTable();
   for (let i = 0; i < resourceTable.length; i++) {
-    if (referencedResources[i] === 0) {
+    if (!checkBit(referencedResources, i)) {
       continue;
     }
 
@@ -696,12 +697,12 @@ function _gatherReferencesInNativeSymbols(
   const { referencedNativeSymbols, referencedStrings, referencedLibs } =
     references;
   for (let i = 0; i < nativeSymbols.length; i++) {
-    if (referencedNativeSymbols[i] === 0) {
+    if (!checkBit(referencedNativeSymbols, i)) {
       continue;
     }
 
-    referencedStrings[nativeSymbols.name[i]] = 1;
-    referencedLibs[nativeSymbols.libIndex[i]] = 1;
+    setBit(referencedStrings, nativeSymbols.name[i]);
+    setBit(referencedLibs, nativeSymbols.libIndex[i]);
   }
 }
 
@@ -717,7 +718,7 @@ function _createCompactedNativeSymbols(
   } = translationMaps;
   const newNativeSymbols = getEmptyNativeSymbolTable();
   for (let i = 0; i < nativeSymbols.length; i++) {
-    if (referencedNativeSymbols[i] === 0) {
+    if (!checkBit(referencedNativeSymbols, i)) {
       continue;
     }
 
@@ -741,14 +742,15 @@ function _gatherReferencesInSources(
 ) {
   const { referencedSources, referencedStrings } = references;
   for (let i = 0; i < sources.length; i++) {
-    if (referencedSources[i] === 0) {
+    if (!checkBit(referencedSources, i)) {
       continue;
     }
 
-    referencedStrings[sources.filename[i]] = 1;
+    setBit(referencedStrings, sources.filename[i]);
 
     const sourceMapURL = sources.sourceMapURL[i];
     if (sourceMapURL !== null) {
+      setBit(referencedStrings, sourceMapURL);
       referencedStrings[sourceMapURL] = 1;
     }
   }
@@ -763,7 +765,7 @@ function _createCompactedSources(
     translationMaps;
   const newSources = getEmptySourceTable();
   for (let i = 0; i < sources.length; i++) {
-    if (referencedSources[i] === 0) {
+    if (!checkBit(referencedSources, i)) {
       continue;
     }
 
@@ -798,7 +800,7 @@ function _createCompactedStringArray(
   let nextIndex = 0;
   const newStringArray = [];
   for (let i = 0; i < stringArray.length; i++) {
-    if (referencedStrings[i] === 0) {
+    if (!checkBit(referencedStrings, i)) {
       continue;
     }
 
@@ -820,7 +822,7 @@ function _createCompactedLibs(
   let nextIndex = 0;
   const newLibs = [];
   for (let i = 0; i < libs.length; i++) {
-    if (referencedLibs[i] === 0) {
+    if (!checkBit(referencedLibs, i)) {
       continue;
     }
 
