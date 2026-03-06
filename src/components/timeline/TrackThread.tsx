@@ -281,7 +281,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               />
             ) : null}
             {isExperimentalCPUGraphsEnabled &&
-            rangeFilteredThread.samples.threadCPURatio !== undefined ? (
+            rangeFilteredThread.samples.hasCPUDeltas ? (
               <ThreadCPUGraph
                 className="threadCPUGraph"
                 trackName={trackName}
@@ -336,8 +336,7 @@ export const TimelineTrackThread = explicitConnect<
     const fullThread = selectors.getThread(state);
     const timelineType = getTimelineType(state);
     const enableCPUUsage =
-      timelineType === 'cpu-category' &&
-      fullThread.samples.threadCPURatio !== undefined;
+      timelineType === 'cpu-category' && fullThread.samples.hasCPUDeltas;
 
     return {
       fullThread,
