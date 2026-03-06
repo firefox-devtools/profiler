@@ -147,7 +147,7 @@
     "esbuild": "^0.27.0",
     "esbuild-plugin-copy": "^2.1.1",
     "esbuild-plugin-wasm": "^1.1.0",
-    "eslint": "^9.39.3",
+    "eslint": "^10.0.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-plugin-import": "^2.32.0",
