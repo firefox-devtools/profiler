@@ -43,6 +43,7 @@ import type {
   ThreadsKey,
   InnerWindowID,
   Page,
+  SampleCategoriesAndSubcategories,
 } from 'firefox-profiler/types';
 
 import type { FlameGraphTiming } from 'firefox-profiler/profile-logic/flame-graph';
@@ -70,8 +71,6 @@ type StateProps = {
   readonly thread: Thread;
   readonly weightType: WeightType;
   readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null;
-  readonly unfilteredThread: Thread;
-  readonly ctssSampleIndexOffset: number;
   readonly maxStackDepthPlusOne: number;
   readonly timeRange: StartEndRange;
   readonly previewSelection: PreviewSelection | null;
@@ -87,7 +86,7 @@ type StateProps = {
   readonly isInverted: boolean;
   readonly callTreeSummaryStrategy: CallTreeSummaryStrategy;
   readonly ctssSamples: SamplesLikeTable;
-  readonly unfilteredCtssSamples: SamplesLikeTable;
+  readonly ctssSampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories;
   readonly tracedTiming: CallTreeTimings | null;
   readonly displayStackType: boolean;
 };
@@ -324,8 +323,6 @@ class FlameGraphImpl
   override render() {
     const {
       thread,
-      unfilteredThread,
-      ctssSampleIndexOffset,
       threadsKey,
       maxStackDepthPlusOne,
       flameGraphTiming,
@@ -343,7 +340,7 @@ class FlameGraphImpl
       innerWindowIDToPageMap,
       weightType,
       ctssSamples,
-      unfilteredCtssSamples,
+      ctssSampleCategoriesAndSubcategories,
       tracedTiming,
       displayStackType,
     } = this.props;
@@ -391,8 +388,6 @@ class FlameGraphImpl
               thread,
               innerWindowIDToPageMap,
               weightType,
-              unfilteredThread,
-              ctssSampleIndexOffset,
               maxStackDepthPlusOne,
               flameGraphTiming,
               callTree,
@@ -410,7 +405,7 @@ class FlameGraphImpl
               interval,
               isInverted,
               ctssSamples,
-              unfilteredCtssSamples,
+              ctssSampleCategoriesAndSubcategories,
               tracedTiming: tracedTimingNonInverted,
               displayStackType,
             }}
@@ -437,7 +432,6 @@ export const FlameGraph = explicitConnectWithForwardRef<
 >({
   mapStateToProps: (state) => ({
     thread: selectedThreadSelectors.getFilteredThread(state),
-    unfilteredThread: selectedThreadSelectors.getThread(state),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
     // Use the filtered call node max depth, rather than the preview filtered one, so
     // that the viewport height is stable across preview selections.
@@ -461,10 +455,10 @@ export const FlameGraph = explicitConnectWithForwardRef<
       selectedThreadSelectors.getCallTreeSummaryStrategy(state),
     innerWindowIDToPageMap: getInnerWindowIDToPageMap(state),
     ctssSamples: selectedThreadSelectors.getPreviewFilteredCtssSamples(state),
-    ctssSampleIndexOffset:
-      selectedThreadSelectors.getPreviewFilteredCtssSampleIndexOffset(state),
-    unfilteredCtssSamples:
-      selectedThreadSelectors.getUnfilteredCtssSamples(state),
+    ctssSampleCategoriesAndSubcategories:
+      selectedThreadSelectors.getPreviewFilteredCtssSampleCategoriesAndSubcategories(
+        state
+      ),
     tracedTiming: selectedThreadSelectors.getTracedTiming(state),
     displayStackType: getProfileUsesMultipleStackTypes(state),
   }),

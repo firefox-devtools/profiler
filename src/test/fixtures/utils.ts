@@ -36,6 +36,7 @@ import type {
   IndexIntoCategoryList,
   SampleUnits,
   SourceTable,
+  CategoryList,
 } from 'firefox-profiler/types';
 
 import { ensureExists } from 'firefox-profiler/utils/types';
@@ -139,6 +140,7 @@ export function getMouseEvent(
 export function computeThreadFromRawThread(
   rawThread: RawThread,
   shared: RawProfileSharedData,
+  categories: CategoryList | undefined,
   sampleUnits: SampleUnits | undefined,
   referenceCPUDeltaPerMs: number,
   defaultCategory: IndexIntoCategoryList
@@ -147,12 +149,15 @@ export function computeThreadFromRawThread(
   const stackTable = computeStackTableFromRawStackTable(
     shared.stackTable,
     shared.frameTable,
+    categories,
     defaultCategory
   );
   const samples = computeSamplesTableFromRawSamplesTable(
     rawThread.samples,
+    stackTable,
     sampleUnits,
-    referenceCPUDeltaPerMs
+    referenceCPUDeltaPerMs,
+    defaultCategory
   );
   const tracedValuesBuffer = rawThread.tracedValuesBuffer
     ? base64StringToBytes(rawThread.tracedValuesBuffer)

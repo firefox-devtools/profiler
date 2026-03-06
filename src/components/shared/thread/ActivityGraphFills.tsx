@@ -41,7 +41,6 @@ type RenderedComponentSettings = {
   readonly treeOrderSampleComparator:
     | ((a: IndexIntoSamplesTable, b: IndexIntoSamplesTable) => number)
     | null;
-  readonly greyCategoryIndex: IndexIntoCategoryList;
   readonly samplesSelectedStates: null | Array<SelectedState>;
   readonly categoryDrawStyles: CategoryDrawStyles;
 };
@@ -215,9 +214,8 @@ export class ActivityGraphFillComputer {
   _accumulateSampleCategories() {
     const {
       fullThread,
-      rangeFilteredThread: { samples, stackTable },
+      rangeFilteredThread: { samples },
       interval,
-      greyCategoryIndex,
       enableCPUUsage,
       sampleIndexOffset,
     } = this.renderedComponentSettings;
@@ -242,11 +240,7 @@ export class ActivityGraphFillComputer {
     const { threadCPURatio } = samples;
     for (let i = 0; i < samples.length - 1; i++) {
       const nextSampleTime = samples.time[i + 1];
-      const stackIndex = samples.stack[i];
-      const category =
-        stackIndex === null
-          ? greyCategoryIndex
-          : stackTable.category[stackIndex];
+      const category = samples.category[i];
 
       let beforeSampleCpuRatio = 1;
       let afterSampleCpuRatio = 1;
@@ -272,11 +266,7 @@ export class ActivityGraphFillComputer {
 
     // Handle the last sample, which was not covered by the for loop above.
     const lastIdx = samples.length - 1;
-    const lastSampleStack = samples.stack[lastIdx];
-    const lastSampleCategory =
-      lastSampleStack !== null
-        ? stackTable.category[lastSampleStack]
-        : greyCategoryIndex;
+    const lastSampleCategory = samples.category[lastIdx];
 
     let beforeSampleCpuRatio = 1;
     let afterSampleCpuRatio = 1;
@@ -322,11 +312,7 @@ export class ActivityGraphFillComputer {
     beforeSampleCpuRatio: number,
     afterSampleCpuRatio: number
   ) {
-    const { rangeEnd, rangeStart } = this.renderedComponentSettings;
-    if (sampleTime < rangeStart || sampleTime >= rangeEnd) {
-      return;
-    }
-
+    const { rangeStart } = this.renderedComponentSettings;
     const percentageBuffers = this.mutablePercentageBuffers[category];
     const percentageBuffer = this._pickPercentageBuffer(
       percentageBuffers,

@@ -258,6 +258,7 @@ export const getStringTable: Selector<StringTable> = createSelector(
 export const getStackTable: Selector<StackTable> = createSelector(
   (state: State) => getRawProfileSharedData(state).stackTable,
   (state: State) => getRawProfileSharedData(state).frameTable,
+  getCategories,
   getDefaultCategory,
   computeStackTableFromRawStackTable
 );

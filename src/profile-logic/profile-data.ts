@@ -98,6 +98,7 @@ import type {
   SourceTable,
   IndexIntoSourceTable,
   TransformOutput,
+  SampleCategoriesAndSubcategories,
 } from 'firefox-profiler/types';
 import { SelectedState, ResourceType } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
@@ -1116,20 +1117,16 @@ export type TimingsForPath = {
 export function getTimingsForPath(
   needlePath: CallNodePath,
   callNodeInfo: CallNodeInfo,
-  unfilteredThread: Thread,
-  sampleIndexOffset: number,
   categories: CategoryList,
   samples: SamplesLikeTable,
-  unfilteredSamples: SamplesLikeTable
+  sampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories
 ) {
   return getTimingsForCallNodeIndex(
     callNodeInfo.getCallNodeIndexFromPath(needlePath),
     callNodeInfo,
-    unfilteredThread,
-    sampleIndexOffset,
     categories,
     samples,
-    unfilteredSamples
+    sampleCategoriesAndSubcategories
   );
 }
 
@@ -1144,18 +1141,14 @@ export function getTimingsForPath(
 export function getTimingsForCallNodeIndex(
   needleNodeIndex: IndexIntoCallNodeTable | null,
   callNodeInfo: CallNodeInfo,
-  unfilteredThread: Thread,
-  sampleIndexOffset: number,
   categories: CategoryList,
   samples: SamplesLikeTable,
-  unfilteredSamples: SamplesLikeTable
+  sampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories
 ): TimingsForPath {
   /* ------------ Variables definitions ------------*/
 
-  // This is the data from the unfiltered thread that we'll use to gather
-  // category and JS implementation information. Note that samples are offset by
-  // `sampleIndexOffset` because of range filtering.
-  const { stackTable: unfilteredStackTable } = unfilteredThread;
+  const { sampleCategories, sampleSubcategories } =
+    sampleCategoriesAndSubcategories;
 
   // This object holds the timings for the current call node path, specified by
   // needleNodeIndex.
@@ -1194,28 +1187,21 @@ export function getTimingsForCallNodeIndex(
     // Step 1: increment the total value
     timings.value += duration;
 
-    // step 2: find the category value for this stack. We want to use the
-    // category of the unfilteredThread.
-    const unfilteredStackIndex =
-      unfilteredSamples.stack[sampleIndex + sampleIndexOffset];
-    if (unfilteredStackIndex !== null) {
-      const categoryIndex = unfilteredStackTable.category[unfilteredStackIndex];
-      const subcategoryIndex =
-        unfilteredStackTable.subcategory[unfilteredStackIndex];
+    // step 2: find the category value for this stack.
+    const categoryIndex = sampleCategories[sampleIndex];
+    const subcategoryIndex = sampleSubcategories[sampleIndex];
 
-      // step 3: increment the right value in the category breakdown
-      if (timings.breakdownByCategory === null) {
-        timings.breakdownByCategory = categories.map((category) => ({
-          entireCategoryValue: 0,
-          subcategoryBreakdown: Array(category.subcategories.length).fill(0),
-        }));
-      }
-      timings.breakdownByCategory[categoryIndex].entireCategoryValue +=
-        duration;
-      timings.breakdownByCategory[categoryIndex].subcategoryBreakdown[
-        subcategoryIndex
-      ] += duration;
+    // step 3: increment the right value in the category breakdown
+    if (timings.breakdownByCategory === null) {
+      timings.breakdownByCategory = categories.map((category) => ({
+        entireCategoryValue: 0,
+        subcategoryBreakdown: Array(category.subcategories.length).fill(0),
+      }));
     }
+    timings.breakdownByCategory[categoryIndex].entireCategoryValue += duration;
+    timings.breakdownByCategory[categoryIndex].subcategoryBreakdown[
+      subcategoryIndex
+    ] += duration;
   }
   /* ------------- End of function definitions ------------- */
 
@@ -1623,20 +1609,62 @@ export function computeTransformOutputForImplementationFilter(
   }
 }
 
+/**
+ * A helper function for creating a new StackTable.
+ *
+ * The caller passes in the prefix column of the new StackTable,
+ * and a bitset about which stacks to keep. Then this function
+ * computes the remaining columns by copying over the information
+ * from the original StackTable, skipping (discarding) values for
+ * any stacks that we don't keep.
+ *
+ * When this function is called, the length of the new StackTable
+ * is already known, and the new category/subcategory columns (which are
+ * typed arrays) can immediately be created with the correct length.
+ */
+export function createStackTableBySkippingDiscarded(
+  stackTable: StackTable,
+  newPrefixCol: Array<IndexIntoStackTable | null>,
+  keepStack: BitSet
+): StackTable {
+  const newStackCount = newPrefixCol.length;
+  const newFrameCol = new Array<IndexIntoFrameTable>(newStackCount);
+  const newCategoryCol = new Uint8Array(newStackCount);
+  const newSubcategoryCol =
+    stackTable.subcategory instanceof Uint16Array
+      ? new Uint16Array(newStackCount)
+      : new Uint8Array(newStackCount);
+
+  let nextNewStackIndex = 0;
+  for (let i = 0; i < stackTable.length; i++) {
+    if (!checkBit(keepStack, i)) {
+      continue;
+    }
+
+    const newStackIndex = nextNewStackIndex++;
+    newFrameCol[newStackIndex] = stackTable.frame[i];
+    newCategoryCol[newStackIndex] = stackTable.category[i];
+    newSubcategoryCol[newStackIndex] = stackTable.subcategory[i];
+  }
+
+  return {
+    frame: newFrameCol,
+    prefix: newPrefixCol,
+    length: newStackCount,
+    category: newCategoryCol,
+    subcategory: newSubcategoryCol,
+  };
+}
+
 function _computeTransformOutputForMergingFuncs(
   stackTable: StackTable,
   frameTable: FrameTable,
   shouldIncludeFuncInFilteredThread: (funcIndex: IndexIntoFuncTable) => boolean
 ): TransformOutput {
   return timeCode('_computeTransformOutputForMergingFuncs', () => {
-    const newStackTable: StackTable = {
-      length: 0,
-      frame: [],
-      prefix: [],
-      category: [],
-      subcategory: [],
-    };
+    const newPrefixCol = new Array<IndexIntoStackTable | null>();
     const oldStackToNewStack = new Int32Array(stackTable.length);
+    const keepStack = makeBitSet(stackTable.length);
 
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const oldPrefix = stackTable.prefix[stackIndex];
@@ -1644,19 +1672,20 @@ function _computeTransformOutputForMergingFuncs(
       const func = frameTable.func[frame];
       const newPrefix = oldPrefix === null ? -1 : oldStackToNewStack[oldPrefix];
       if (shouldIncludeFuncInFilteredThread(func)) {
-        const newStackIndex = newStackTable.length++;
-        newStackTable.frame[newStackIndex] = frame;
-        newStackTable.prefix[newStackIndex] =
-          newPrefix !== -1 ? newPrefix : null;
-        newStackTable.category[newStackIndex] = stackTable.category[stackIndex];
-        newStackTable.subcategory[newStackIndex] =
-          stackTable.subcategory[stackIndex];
+        const newStackIndex = newPrefixCol.length;
+        newPrefixCol[newStackIndex] = newPrefix !== -1 ? newPrefix : null;
         oldStackToNewStack[stackIndex] = newStackIndex;
+        setBit(keepStack, stackIndex);
       } else {
         oldStackToNewStack[stackIndex] = newPrefix;
       }
     }
 
+    const newStackTable = createStackTableBySkippingDiscarded(
+      stackTable,
+      newPrefixCol,
+      keepStack
+    );
     return {
       newStackTable,
       effectOnThreadData: {
@@ -1810,6 +1839,34 @@ export function computeTimeColumnForRawSamplesTable(
   return time ?? numberSeriesFromDeltas(ensureExists(timeDeltas));
 }
 
+export function computeSampleCategoriesAndSubcategories(
+  sampleStacks: Array<IndexIntoStackTable | null>,
+  stackTable: StackTable,
+  defaultCategory: IndexIntoCategoryList
+): SampleCategoriesAndSubcategories {
+  const sampleCount = sampleStacks.length;
+  const {
+    category: stackTableCategoryCol,
+    subcategory: stackTableSubcategoryCol,
+  } = stackTable;
+  const sampleCategories = new Uint8Array(sampleCount);
+  const sampleSubcategories =
+    stackTableSubcategoryCol instanceof Uint16Array
+      ? new Uint16Array(sampleCount)
+      : new Uint8Array(sampleCount);
+  for (let i = 0; i < sampleCount; i++) {
+    const stackIndex = sampleStacks[i];
+    if (stackIndex !== null) {
+      sampleCategories[i] = stackTableCategoryCol[stackIndex];
+      sampleSubcategories[i] = stackTableSubcategoryCol[stackIndex];
+    } else {
+      sampleCategories[i] = defaultCategory;
+      sampleSubcategories[i] = 0;
+    }
+  }
+  return { sampleCategories, sampleSubcategories };
+}
+
 /**
  * Checks if a sample table has any useful samples.
  * A useful sample being one that isn't a "(root)" sample.
@@ -1939,6 +1996,8 @@ export function filterThreadSamplesToRange(
       : null,
     weightType: samples.weightType,
     stack: samples.stack.slice(beginSampleIndex, endSampleIndex),
+    category: samples.category.subarray(beginSampleIndex, endSampleIndex),
+    subcategory: samples.subcategory.subarray(beginSampleIndex, endSampleIndex),
   };
 
   if (samples.eventDelay) {
@@ -2527,8 +2586,10 @@ export function computeCallNodeMaxDepthPlusOne(
  */
 export function computeSamplesTableFromRawSamplesTable(
   rawSamples: RawSamplesTable,
+  stackTable: StackTable,
   sampleUnits: SampleUnits | undefined,
-  referenceCPUDeltaPerMs: number
+  referenceCPUDeltaPerMs: number,
+  defaultCategory: IndexIntoCategoryList
 ): SamplesTable {
   const {
     responsiveness,
@@ -2550,6 +2611,12 @@ export function computeSamplesTableFromRawSamplesTable(
       ? computeThreadCPURatio(rawSamples, timeDeltas, referenceCPUDeltaPerMs)
       : undefined;
   const time = computeTimeColumnForRawSamplesTable(rawSamples);
+  const { sampleCategories, sampleSubcategories } =
+    computeSampleCategoriesAndSubcategories(
+      rawSamples.stack,
+      stackTable,
+      defaultCategory
+    );
 
   return {
     // These fields are copied from the raw samples table:
@@ -2565,6 +2632,8 @@ export function computeSamplesTableFromRawSamplesTable(
     // These fields are derived:
     time,
     threadCPURatio,
+    category: sampleCategories,
+    subcategory: sampleSubcategories,
   };
 }
 
@@ -4278,11 +4347,27 @@ export function computeTabToThreadIndexesMap(
 export function computeStackTableFromRawStackTable(
   rawStackTable: RawStackTable,
   frameTable: FrameTable,
+  categories: CategoryList | undefined,
   defaultCategory: IndexIntoCategoryList
 ): StackTable {
   // Compute a non-null category for every stack
-  const categoryColumn = new Array(rawStackTable.length);
-  const subcategoryColumn = new Array(rawStackTable.length);
+  if (categories && categories.length > 256) {
+    console.error(
+      `This profile has ${categories.length} categories, which is more than 256 and not supported.`
+    );
+  }
+  const maxSubcategoryCount = categories
+    ? categories.reduce(
+        (maxSoFar, category) =>
+          Math.max(maxSoFar, category.subcategories.length),
+        0
+      )
+    : 1;
+  const categoryColumn = new Uint8Array(rawStackTable.length);
+  const subcategoryColumn =
+    maxSubcategoryCount < 256
+      ? new Uint8Array(rawStackTable.length)
+      : new Uint16Array(rawStackTable.length);
   for (let stackIndex = 0; stackIndex < rawStackTable.length; stackIndex++) {
     const frameIndex = rawStackTable.frame[stackIndex];
     const frameCategory = frameTable.category[frameIndex];
