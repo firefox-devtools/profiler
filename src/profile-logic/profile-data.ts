@@ -15,7 +15,7 @@ import {
   CallNodeInfoNonInverted,
   CallNodeInfoInverted,
 } from './call-node-info';
-import { computeThreadCPURatio } from './cpu';
+import { computeThreadCPUPercent } from './cpu';
 import {
   INSTANT,
   INTERVAL,
@@ -1996,6 +1996,11 @@ export function filterThreadSamplesToRange(
       : null,
     weightType: samples.weightType,
     stack: samples.stack.slice(beginSampleIndex, endSampleIndex),
+    threadCPUPercent: samples.threadCPUPercent.subarray(
+      beginSampleIndex,
+      endSampleIndex + 1
+    ),
+    hasCPUDeltas: samples.hasCPUDeltas,
     category: samples.category.subarray(beginSampleIndex, endSampleIndex),
     subcategory: samples.subcategory.subarray(beginSampleIndex, endSampleIndex),
   };
@@ -2007,13 +2012,6 @@ export function filterThreadSamplesToRange(
     );
   } else if (samples.responsiveness) {
     newSamples.responsiveness = samples.responsiveness.slice(
-      beginSampleIndex,
-      endSampleIndex
-    );
-  }
-
-  if (samples.threadCPURatio) {
-    newSamples.threadCPURatio = samples.threadCPURatio.slice(
       beginSampleIndex,
       endSampleIndex
     );
@@ -2596,6 +2594,7 @@ export function computeSamplesTableFromRawSamplesTable(
     eventDelay,
     argumentValues,
     stack,
+    threadCPUDelta,
     weight,
     weightType,
     threadId,
@@ -2606,10 +2605,19 @@ export function computeSamplesTableFromRawSamplesTable(
     rawSamples.time !== undefined
       ? numberSeriesToDeltas(rawSamples.time)
       : ensureExists(rawSamples.timeDeltas);
-  const threadCPURatio =
-    sampleUnits !== undefined
-      ? computeThreadCPURatio(rawSamples, timeDeltas, referenceCPUDeltaPerMs)
-      : undefined;
+
+  const threadCPUPercentOrNull =
+    sampleUnits !== undefined && threadCPUDelta !== undefined
+      ? computeThreadCPUPercent(
+          threadCPUDelta,
+          timeDeltas,
+          referenceCPUDeltaPerMs
+        )
+      : null;
+  const hasCPUDeltas = threadCPUPercentOrNull !== null;
+  const threadCPUPercent =
+    threadCPUPercentOrNull ?? new Uint8Array(rawSamples.length + 1).fill(100);
+
   const time = computeTimeColumnForRawSamplesTable(rawSamples);
   const { sampleCategories, sampleSubcategories } =
     computeSampleCategoriesAndSubcategories(
@@ -2631,7 +2639,8 @@ export function computeSamplesTableFromRawSamplesTable(
 
     // These fields are derived:
     time,
-    threadCPURatio,
+    threadCPUPercent,
+    hasCPUDeltas,
     category: sampleCategories,
     subcategory: sampleSubcategories,
   };

@@ -43,7 +43,7 @@ export class ThreadCPUGraph extends PureComponent<Props> {
     if (sampleIndex >= samples.length - 1) {
       return 0;
     }
-    return ensureExists(samples.threadCPURatio)[sampleIndex + 1] || 0;
+    return ensureExists(samples.threadCPUPercent)[sampleIndex + 1] || 0;
   };
 
   override render() {
@@ -65,7 +65,7 @@ export class ThreadCPUGraph extends PureComponent<Props> {
     return (
       <ThreadHeightGraph
         heightFunc={this._heightFunction}
-        maxValue={1}
+        maxValue={100}
         className={className}
         trackName={trackName}
         interval={interval}
