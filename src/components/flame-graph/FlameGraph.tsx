@@ -64,6 +64,7 @@ export type Props = {
   readonly callTreeSummaryStrategy: CallTreeSummaryStrategy;
   readonly ctssSamples: SamplesLikeTable;
   readonly ctssSampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories;
+  readonly ctssSampleCallNodes: Array<IndexIntoCallNodeTable | null>;
   readonly tracedTiming: CallTreeTimings | null;
   readonly displayStackType: boolean;
   readonly contextMenuId?: string;
@@ -281,6 +282,7 @@ export class FlameGraph
       weightType,
       ctssSamples,
       ctssSampleCategoriesAndSubcategories,
+      ctssSampleCallNodes,
       tracedTiming,
       displayStackType,
       contextMenuId = 'CallNodeContextMenu',
@@ -337,6 +339,7 @@ export class FlameGraph
               startsAtBottom,
               ctssSamples,
               ctssSampleCategoriesAndSubcategories,
+              ctssSampleCallNodes,
               tracedTiming,
               displayStackType,
             }}
