@@ -36,7 +36,6 @@ type RenderedComponentSettings = {
   readonly rangeEnd: Milliseconds;
   readonly sampleIndexOffset: number;
   readonly xPixelsPerMs: number;
-  readonly enableCPUUsage: boolean;
   readonly treeOrderSampleComparator:
     | ((a: IndexIntoSamplesTable, b: IndexIntoSamplesTable) => number)
     | null;
@@ -215,7 +214,6 @@ export class ActivityGraphFillComputer {
       fullThread,
       rangeFilteredThread: { samples },
       interval,
-      enableCPUUsage,
       sampleIndexOffset,
       rangeStart,
       sampleSelectedStates,
@@ -243,12 +241,8 @@ export class ActivityGraphFillComputer {
       const nextSampleTime = samples.time[i + 1];
       const category = samples.category[i];
 
-      let beforeSampleCpuPercent = 100;
-      let afterSampleCpuPercent = 100;
-      if (enableCPUUsage) {
-        beforeSampleCpuPercent = threadCPUPercent[i];
-        afterSampleCpuPercent = threadCPUPercent[i + 1];
-      }
+      const beforeSampleCpuPercent = threadCPUPercent[i];
+      const afterSampleCpuPercent = threadCPUPercent[i + 1];
 
       const percentageBuffers = this.mutablePercentageBuffers[category];
       const selectedState = sampleSelectedStates[i];
@@ -273,12 +267,8 @@ export class ActivityGraphFillComputer {
     const lastIdx = samples.length - 1;
     const lastSampleCategory = samples.category[lastIdx];
 
-    let beforeSampleCpuPercent = 100;
-    let afterSampleCpuPercent = 100;
-    if (enableCPUUsage) {
-      beforeSampleCpuPercent = threadCPUPercent[lastIdx];
-      afterSampleCpuPercent = threadCPUPercent[lastIdx + 1]; // guaranteed to exist
-    }
+    const beforeSampleCpuPercent = threadCPUPercent[lastIdx];
+    const afterSampleCpuPercent = threadCPUPercent[lastIdx + 1]; // guaranteed to exist
 
     const nextSampleTime = sampleTime + interval;
     const percentageBuffers = this.mutablePercentageBuffers[lastSampleCategory];
@@ -596,7 +586,6 @@ export class ActivityFillGraphQuerier {
   ): number {
     const {
       rangeFilteredThread: { samples },
-      enableCPUUsage,
       interval,
       sampleIndexOffset,
       fullThread,
@@ -617,13 +606,9 @@ export class ActivityFillGraphQuerier {
         ? fullThread.samples.time[fullThreadSample + 1]
         : sampleTime + interval;
 
-    let beforeSampleCpuPercent = 100;
-    let afterSampleCpuPercent = 100;
     const { threadCPUPercent } = samples;
-    if (enableCPUUsage) {
-      beforeSampleCpuPercent = threadCPUPercent[sample];
-      afterSampleCpuPercent = threadCPUPercent[sample + 1]; // guaranteed to exist
-    }
+    const beforeSampleCpuPercent = threadCPUPercent[sample];
+    const afterSampleCpuPercent = threadCPUPercent[sample + 1]; // guaranteed to exist
 
     const kernelRangeStartTime = rangeStart + kernelPos / xPixelsPerMs;
 

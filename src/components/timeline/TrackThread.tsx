@@ -87,7 +87,6 @@ type StateProps = {
     b: IndexIntoSamplesTable
   ) => number;
   readonly selectedThreadIndexes: Set<ThreadIndex>;
-  readonly enableCPUUsage: boolean;
   readonly isExperimentalCPUGraphsEnabled: boolean;
   readonly implementationFilter: ImplementationFilter;
   readonly callTreeVisible: boolean;
@@ -186,7 +185,6 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       treeOrderSampleComparator,
       trackType,
       trackName,
-      enableCPUUsage,
       isExperimentalCPUGraphsEnabled,
       implementationFilter,
       zeroAt,
@@ -257,7 +255,6 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               categories={categories}
               sampleSelectedStates={sampleSelectedStates}
               treeOrderSampleComparator={treeOrderSampleComparator}
-              enableCPUUsage={enableCPUUsage}
               implementationFilter={implementationFilter}
               timelineType={timelineType}
               zeroAt={zeroAt}
@@ -335,8 +332,6 @@ export const TimelineTrackThread = explicitConnect<
     const committedRange = getCommittedRange(state);
     const fullThread = selectors.getThread(state);
     const timelineType = getTimelineType(state);
-    const enableCPUUsage =
-      timelineType === 'cpu-category' && fullThread.samples.hasCPUDeltas;
 
     return {
       fullThread,
@@ -361,7 +356,6 @@ export const TimelineTrackThread = explicitConnect<
       treeOrderSampleComparator:
         selectors.getTreeOrderComparatorInFilteredThread(state),
       selectedThreadIndexes,
-      enableCPUUsage,
       isExperimentalCPUGraphsEnabled: getIsExperimentalCPUGraphsEnabled(state),
       implementationFilter: getImplementationFilter(state),
       callTreeVisible: selectors.getUsefulTabs(state).includes('calltree'),
