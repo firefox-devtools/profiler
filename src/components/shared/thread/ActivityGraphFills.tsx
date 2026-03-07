@@ -237,12 +237,11 @@ export class ActivityGraphFillComputer {
 
     // Go through the samples and accumulate the category into the percentageBuffers.
     const { threadCPUPercent } = samples;
+    let beforeSampleCpuPercent = threadCPUPercent[0];
     for (let i = 0; i < samples.length - 1; i++) {
       const nextSampleTime = samples.time[i + 1];
-      const category = samples.category[i];
-
-      const beforeSampleCpuPercent = threadCPUPercent[i];
       const afterSampleCpuPercent = threadCPUPercent[i + 1];
+      const category = samples.category[i];
 
       const percentageBuffers = this.mutablePercentageBuffers[category];
       const bufferIndex =
@@ -262,13 +261,13 @@ export class ActivityGraphFillComputer {
 
       prevSampleTime = sampleTime;
       sampleTime = nextSampleTime;
+      beforeSampleCpuPercent = afterSampleCpuPercent;
     }
 
     // Handle the last sample, which was not covered by the for loop above.
     const lastIdx = samples.length - 1;
     const lastSampleCategory = samples.category[lastIdx];
 
-    const beforeSampleCpuPercent = threadCPUPercent[lastIdx];
     const afterSampleCpuPercent = threadCPUPercent[lastIdx + 1]; // guaranteed to exist
 
     const nextSampleTime = sampleTime + interval;
