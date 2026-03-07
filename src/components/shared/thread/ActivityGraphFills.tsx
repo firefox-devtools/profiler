@@ -315,18 +315,22 @@ export class ActivityGraphFillComputer {
       // These parts will be:
       // - Between `halfwayPositionBefore` and `samplePosition` with beforeSampleCpuPercent.
       // - Between `samplePosition` and `halfwayPositionAfter` with afterSampleCpuPercent.
-      _accumulateHalfSampleInBuffer(
-        percentageBuffer,
-        halfwayPositionBefore,
-        samplePosition,
-        beforeSampleCpuPercent
-      );
-      _accumulateHalfSampleInBuffer(
-        percentageBuffer,
-        samplePosition,
-        halfwayPositionAfter,
-        afterSampleCpuPercent
-      );
+      if (beforeSampleCpuPercent !== 0) {
+        _accumulateHalfSampleInBuffer(
+          percentageBuffer,
+          halfwayPositionBefore,
+          samplePosition,
+          beforeSampleCpuPercent
+        );
+      }
+      if (afterSampleCpuPercent !== 0) {
+        _accumulateHalfSampleInBuffer(
+          percentageBuffer,
+          samplePosition,
+          halfwayPositionAfter,
+          afterSampleCpuPercent
+        );
+      }
 
       halfwayPositionBefore = halfwayPositionAfter;
       beforeSampleCpuPercent = afterSampleCpuPercent;
