@@ -291,7 +291,6 @@ export class ActivityGraphFillComputer {
       return;
     }
 
-
     // Go through the samples and accumulate the category into the percentageBuffers.)
     const { samplePositions, halfwayPositions } = precomputedPositions;
     const { threadCPUPercent } = samples;
@@ -310,12 +309,22 @@ export class ActivityGraphFillComputer {
       const percentageBuffer = percentageBuffers[bufferIndex];
       const samplePosition = samplePositions[i];
 
-      _accumulateInBuffer(
+      // Samples have two parts to be able to present the different CPU usages properly.
+      // This is because CPU usage number of a sample represents the CPU usage
+      // starting starting from the previous sample time to this sample time.
+      // These parts will be:
+      // - Between `halfwayPositionBefore` and `samplePosition` with beforeSampleCpuPercent.
+      // - Between `samplePosition` and `halfwayPositionAfter` with afterSampleCpuPercent.
+      _accumulateHalfSampleInBuffer(
         percentageBuffer,
         halfwayPositionBefore,
         samplePosition,
+        beforeSampleCpuPercent
+      );
+      _accumulateHalfSampleInBuffer(
+        percentageBuffer,
+        samplePosition,
         halfwayPositionAfter,
-        beforeSampleCpuPercent,
         afterSampleCpuPercent
       );
 
@@ -633,12 +642,22 @@ export class ActivityFillGraphQuerier {
     const beforeSampleCpuPercent = threadCPUPercent[sample];
     const afterSampleCpuPercent = threadCPUPercent[sample + 1];
 
-    _accumulateInBuffer(
+    // Samples have two parts to be able to present the different CPU usages properly.
+    // This is because CPU usage number of a sample represents the CPU usage
+    // starting starting from the previous sample time to this sample time.
+    // These parts will be:
+    // - Between `halfwayPositionBefore` and `samplePosition` with beforeSampleCpuPercent.
+    // - Between `samplePosition` and `halfwayPositionAfter` with afterSampleCpuPercent.
+    _accumulateHalfSampleInBuffer(
       fullWidthPixels,
       halfwayPositionBefore,
       samplePosition,
+      beforeSampleCpuPercent
+    );
+    _accumulateHalfSampleInBuffer(
+      fullWidthPixels,
+      samplePosition,
       halfwayPositionAfter,
-      beforeSampleCpuPercent,
       afterSampleCpuPercent
     );
 
@@ -755,23 +774,15 @@ function _getCategoryFills(
 }
 
 /**
- * Mutates `percentageBuffer` by adding contributions from a single sample to
- * the pixels that the sample overlaps with. The buffer covers the following
- * time range: It starts at `rangeStart` and ends at
- * `rangeStart + percentageBuffer.length / renderedComponentSettings.xPixelsPerMs`.
+ * Mutates `percentageBuffer` by adding contributions from a single half-sample to
+ * the pixels that the sample overlaps with.
  */
-function _accumulateInBuffer(
+function _accumulateHalfSampleInBuffer(
   percentageBuffer: Float32Array,
-  halfwayPositionBefore: DevicePixels,
-  samplePosition: DevicePixels,
-  halfwayPositionAfter: DevicePixels,
-  beforeSampleCpuPercent: number,
-  afterSampleCpuPercent: number
+  startPos: DevicePixels,
+  endPos: DevicePixels,
+  cpuPercent: number
 ) {
-  const intHalfwayPositionBefore = halfwayPositionBefore | 0;
-  const intHalfwayPositionAfter = halfwayPositionAfter | 0;
-  const intSamplePosition = samplePosition | 0;
-
   // Every sample has two parts because of different CPU usage values.
   // For every sample part, we have a fractional interval of this sample part's
   // contribution to the graph's pixels.
@@ -795,43 +806,22 @@ function _accumulateInBuffer(
   // |       |       |       |///////////////////////|       |       |
   // |       |       +-------+///////////////////////|       |       |
   // +-------+-------+///////////////////////////////+-------+-------+
+  const intStartPos = startPos | 0;
+  const intEndPos = endPos | 0;
 
-  // Samples have two parts to be able to present the different CPU usages properly.
-  // This is because CPU usage number of a sample represents the CPU usage
-  // starting starting from the previous sample time to this sample time.
-  // These parts will be:
-  // - Between `halfwayPositionBefore` and `samplePosition` with beforeSampleCpuPercent.
-  // - Between `samplePosition` and `halfwayPositionAfter` with afterSampleCpuPercent.
+  if (intStartPos === intEndPos) {
+    percentageBuffer[intStartPos] += cpuPercent * (endPos - startPos);
+  } else {
+    if (intStartPos + 1 < intEndPos) {
+      percentageBuffer.fill(cpuPercent, intStartPos + 1, intEndPos);
+    }
 
-  // Here we are accumulating the first part of the sample. It will use the
-  // CPU delta number that belongs to this sample.
-  // This part starts from the "sample start time" to "sample time" and uses
-  // beforeSampleCpuPercent.
-  for (let i = intHalfwayPositionBefore; i <= intSamplePosition; i++) {
-    percentageBuffer[i] += beforeSampleCpuPercent;
+    percentageBuffer[intStartPos] +=
+      cpuPercent * (1 - (startPos - intStartPos));
+    percentageBuffer[intEndPos] += cpuPercent * (endPos - intEndPos);
   }
-
-  // Subtract the partial pixels from start and end of the first part.
-  percentageBuffer[intHalfwayPositionBefore] -=
-    beforeSampleCpuPercent * (halfwayPositionBefore - intHalfwayPositionBefore);
-  percentageBuffer[intSamplePosition] -=
-    beforeSampleCpuPercent * (1 - (samplePosition - intSamplePosition));
-
-  // Here we are accumulating the second part of the sample. It will use the
-  // CPU delta number that belongs to the next sample.
-  // This part starts from "sample time" to "sample end time" and uses
-  // afterSampleCpuPercent.
-  for (let i = intSamplePosition; i <= intHalfwayPositionAfter; i++) {
-    percentageBuffer[i] += afterSampleCpuPercent;
-  }
-
-  // Subtract the partial pixels from start and end of the second part.
-  percentageBuffer[intSamplePosition] -=
-    afterSampleCpuPercent * (samplePosition - intSamplePosition);
-  percentageBuffer[intHalfwayPositionAfter] -=
-    afterSampleCpuPercent *
-    (1 - (halfwayPositionAfter - intHalfwayPositionAfter));
 }
+
 /**
  * Apply a 1d box blur to a destination array.
  */
