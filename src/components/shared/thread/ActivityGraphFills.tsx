@@ -315,6 +315,13 @@ export class ActivityGraphFillComputer {
       // at the end, so accessing [i + 1] is valid even for the last sample.
       const halfwayPositionAfter = halfwayPositions[i + 1];
       const afterSampleCpuPercent = threadCPUPercent[i + 1];
+
+      if (beforeSampleCpuPercent === 0 && afterSampleCpuPercent === 0) {
+        halfwayPositionBefore = halfwayPositionAfter;
+        beforeSampleCpuPercent = afterSampleCpuPercent;
+        continue;
+      }
+
       const category = samples.category[i];
 
       const bufferIndex =
