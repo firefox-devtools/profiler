@@ -1180,6 +1180,10 @@ export type TimingsForPath = {
   // timings for this path
   forPath: ItemTimings;
   rootTime: Milliseconds; // time for all the samples in the current tree
+  // True when the selected call node is the root of an inverted tree (i.e. a
+  // leaf function). In that case selfTime === totalTime, so consumers should
+  // not display a separate self-time category breakdown.
+  isInvertedRoot: boolean;
 };
 
 /**
@@ -1280,16 +1284,17 @@ export function getTimingsForCallNodeIndex(
   /* ------------ Start of the algorithm itself ------------ */
   if (needleNodeIndex === null) {
     // No index was provided, return empty timing information.
-    return { forPath: pathTimings, rootTime };
+    return { forPath: pathTimings, rootTime, isInvertedRoot: false };
   }
 
+  let needleNodeIsRootOfInvertedTree = false;
   const callNodeTable = callNodeInfo.getCallNodeTable();
   const stackIndexToCallNodeIndex =
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
   const callNodeInfoInverted = callNodeInfo.asInverted();
   if (callNodeInfoInverted !== null) {
     // Inverted case
-    const needleNodeIsRootOfInvertedTree =
+    needleNodeIsRootOfInvertedTree =
       callNodeInfoInverted.isRoot(needleNodeIndex);
     const suffixOrderIndexes = callNodeInfoInverted.getSuffixOrderIndexes();
     const [rangeStart, rangeEnd] =
@@ -1318,11 +1323,7 @@ export function getTimingsForCallNodeIndex(
         accumulateDataToTimings(pathTimings.totalTime, sampleIndex, weight);
 
         if (needleNodeIsRootOfInvertedTree) {
-          // This root node matches the passed call node path.
-          // Just increment the selfTime value.
-          // We don't call accumulateDataToTimings(pathTimings.selfTime, ...)
-          // here, mainly because this would be the same as for the total time.
-          pathTimings.selfTime.value += weight;
+          accumulateDataToTimings(pathTimings.selfTime, sampleIndex, weight);
         }
       }
     }
@@ -1359,7 +1360,11 @@ export function getTimingsForCallNodeIndex(
     }
   }
 
-  return { forPath: pathTimings, rootTime };
+  return {
+    forPath: pathTimings,
+    rootTime,
+    isInvertedRoot: needleNodeIsRootOfInvertedTree,
+  };
 }
 
 /**
