@@ -13,7 +13,10 @@ import type {
   DevicePixels,
   CssPixels,
 } from 'firefox-profiler/types';
-import { SAMPLE_RELATION_TO_SELECTED_STATE_MASK, SelectedState } from 'firefox-profiler/types';
+import {
+  SAMPLE_RELATION_TO_SELECTED_STATE_MASK,
+  SelectedState,
+} from 'firefox-profiler/types';
 import type { HoveredPixelState } from './ActivityGraph';
 
 /**
