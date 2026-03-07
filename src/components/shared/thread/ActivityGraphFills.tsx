@@ -631,11 +631,8 @@ export class ActivityFillGraphQuerier {
   ): number {
     const {
       rangeFilteredThread: { samples },
-      canvasPixelWidth,
       precomputedPositions: { samplePositions, halfwayPositions },
     } = this.renderedComponentSettings;
-    const fullWidthPixels = new Float32Array(canvasPixelWidth);
-
     const halfwayPositionBefore = halfwayPositions[sample];
     const halfwayPositionAfter = halfwayPositions[sample + 1];
     const samplePosition = samplePositions[sample];
@@ -644,34 +641,21 @@ export class ActivityFillGraphQuerier {
     const beforeSampleCpuPercent = threadCPUPercent[sample];
     const afterSampleCpuPercent = threadCPUPercent[sample + 1]; // guaranteed to exist
 
-    // Samples have two parts to be able to present the different CPU usages properly.
-    // This is because CPU usage number of a sample represents the CPU usage
-    // starting starting from the previous sample time to this sample time.
-    // These parts will be:
-    // - Between `halfwayPositionBefore` and `samplePosition` with beforeSampleCpuPercent.
-    // - Between `samplePosition` and `halfwayPositionAfter` with afterSampleCpuPercent.
-    _accumulateHalfSampleInBuffer(
-      fullWidthPixels,
+    const kernelCenterPosition = Math.round(xPixel);
+
+    let sum = 0;
+    sum += _accumulateHalfSampleToKernelSum(
+      kernelCenterPosition,
       halfwayPositionBefore,
       samplePosition,
       beforeSampleCpuPercent
     );
-    _accumulateHalfSampleInBuffer(
-      fullWidthPixels,
+    sum += _accumulateHalfSampleToKernelSum(
+      kernelCenterPosition,
       samplePosition,
       halfwayPositionAfter,
       afterSampleCpuPercent
     );
-
-    let sum = 0;
-    for (let i = 0; i < SMOOTHING_KERNEL.length; i++) {
-      const pixelAtI = (xPixel | 0) + (i - SMOOTHING_RADIUS);
-      const pixelContribution =
-        pixelAtI >= 0 && pixelAtI < canvasPixelWidth
-          ? fullWidthPixels[pixelAtI]
-          : 0;
-      sum += SMOOTHING_KERNEL[i] * pixelContribution;
-    }
 
     return sum / 100;
   }
@@ -822,6 +806,44 @@ function _accumulateHalfSampleInBuffer(
       cpuPercent * (1 - (startPos - intStartPos));
     percentageBuffer[intEndPos] += cpuPercent * (endPos - intEndPos);
   }
+}
+
+function _accumulateHalfSampleToKernelSum(
+  kernelCenterPosition: DevicePixels,
+  startPos: DevicePixels,
+  endPos: DevicePixels,
+  cpuPercent: number
+): number {
+  function kernelVal(intPos: number): number {
+    const indexInSmoothingKernel =
+      intPos - kernelCenterPosition + SMOOTHING_RADIUS;
+    if (
+      indexInSmoothingKernel < 0 ||
+      indexInSmoothingKernel >= SMOOTHING_RADIUS * 2 + 1
+    ) {
+      return 0;
+    }
+    return SMOOTHING_KERNEL[indexInSmoothingKernel];
+  }
+
+  const intStartPos = startPos | 0;
+  const intEndPos = endPos | 0;
+
+  let sum = 0;
+
+  if (intStartPos === intEndPos) {
+    sum += kernelVal(intStartPos) * cpuPercent * (endPos - startPos);
+  } else {
+    if (intStartPos + 1 < intEndPos) {
+      for (let i = intStartPos + 1; i < intEndPos; i++) {
+        sum += kernelVal(i) * cpuPercent;
+      }
+    }
+
+    sum += kernelVal(intStartPos) * cpuPercent * (1 - (startPos - intStartPos));
+    sum += kernelVal(intEndPos) * cpuPercent * (endPos - intEndPos);
+  }
+  return sum;
 }
 
 /**
