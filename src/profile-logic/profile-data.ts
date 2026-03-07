@@ -1100,17 +1100,16 @@ export type OneCategoryBreakdown = {
   subcategoryBreakdown: Milliseconds[]; // { [IndexIntoSubcategoryList]: Milliseconds }
 };
 export type BreakdownByCategory = OneCategoryBreakdown[]; // { [IndexIntoCategoryList]: OneCategoryBreakdown }
+export type ItemTimingsGroup = {
+  value: Milliseconds;
+  breakdownByCategory: BreakdownByCategory | null;
+};
+
 export type ItemTimings = {
-  selfTime: {
-    // time spent excluding children
-    value: Milliseconds;
-    breakdownByCategory: BreakdownByCategory | null;
-  };
-  totalTime: {
-    // time spent including children
-    value: Milliseconds;
-    breakdownByCategory: BreakdownByCategory | null;
-  };
+  // time spent excluding children
+  selfTime: ItemTimingsGroup;
+  // time spent including children
+  totalTime: ItemTimingsGroup;
 };
 
 export type TimingsForPath = {
@@ -1134,67 +1133,26 @@ export function getCallNodeTimings(
   sampleSelectedStates: Uint8Array,
   isInvertedRoot: boolean
 ): TimingsForPath {
-  /* ------------ Variables definitions ------------*/
-
   const { sampleCategories, sampleSubcategories } =
     sampleCategoriesAndSubcategories;
 
-  // This object holds the timings for the current call node path, specified by
-  // needleNodeIndex.
-  const pathTimings: ItemTimings = {
-    selfTime: {
-      value: 0,
-      breakdownByCategory: null,
-    },
-    totalTime: {
-      value: 0,
-      breakdownByCategory: null,
-    },
-  };
+  let selfValue = 0;
+  const selfCategorySummary = new Float64Array(categories.length);
+  const selfSubcategorySummaries = categories.map(
+    (category) => new Float64Array(category.subcategories.length)
+  );
+  let totalValue = 0;
+  const totalCategorySummary = new Float64Array(categories.length);
+  const totalSubcategorySummaries = categories.map(
+    (category) => new Float64Array(category.subcategories.length)
+  );
+  let hasSelf = false;
+  let hasTotal = false;
 
   // This holds the root time, it's incremented for all samples and is useful to
   // have an absolute value to compare the other values with.
   let rootTime = 0;
 
-  /* -------- End of variable definitions ------- */
-
-  /* ------------ Functions definitions --------- *
-   * We define functions here so that they have easy access to the variables and
-   * the algorithm's parameters. */
-
-  /**
-   * This is a small utility function to more easily add data to breakdowns.
-   */
-  function accumulateDataToTimings(
-    timings: {
-      breakdownByCategory: BreakdownByCategory | null;
-      value: number;
-    },
-    sampleIndex: IndexIntoSamplesTable,
-    duration: Milliseconds
-  ): void {
-    // Step 1: increment the total value
-    timings.value += duration;
-
-    // step 2: find the category value for this stack.
-    const categoryIndex = sampleCategories[sampleIndex];
-    const subcategoryIndex = sampleSubcategories[sampleIndex];
-
-    // step 3: increment the right value in the category breakdown
-    if (timings.breakdownByCategory === null) {
-      timings.breakdownByCategory = categories.map((category) => ({
-        entireCategoryValue: 0,
-        subcategoryBreakdown: Array(category.subcategories.length).fill(0),
-      }));
-    }
-    timings.breakdownByCategory[categoryIndex].entireCategoryValue += duration;
-    timings.breakdownByCategory[categoryIndex].subcategoryBreakdown[
-      subcategoryIndex
-    ] += duration;
-  }
-  /* ------------- End of function definitions ------------- */
-
-  /* ------------ Start of the algorithm itself ------------ */
   // Loop over each sample and accumulate the self time, total time, and
   // the category breakdown. The sampleSelectedStates encodes whether each
   // sample is filtered out, in the needle's subtree (total), or is an exact
@@ -1211,12 +1169,49 @@ export function getCallNodeTimings(
       state === SampleRelationToNode.TotalAndSelf ||
       state === SampleRelationToNode.TotalButNotSelf
     ) {
-      accumulateDataToTimings(pathTimings.totalTime, sampleIndex, weight);
+      totalValue += weight;
+      hasTotal = true;
+      const categoryIndex = sampleCategories[sampleIndex];
+      const subcategoryIndex = sampleSubcategories[sampleIndex];
+      totalCategorySummary[categoryIndex] += weight;
+      totalSubcategorySummaries[categoryIndex][subcategoryIndex] += weight;
       if (state === SampleRelationToNode.TotalAndSelf) {
-        accumulateDataToTimings(pathTimings.selfTime, sampleIndex, weight);
+        selfValue += weight;
+        hasSelf = true;
+        selfCategorySummary[categoryIndex] += weight;
+        selfSubcategorySummaries[categoryIndex][subcategoryIndex] += weight;
       }
     }
   }
+
+  function createBreakdown(
+    categorySummary: Float64Array,
+    subcategorySummaries: Float64Array[]
+  ): BreakdownByCategory {
+    return categories.map((category, categoryIndex) => {
+      const entireCategoryValue = categorySummary[categoryIndex];
+      const subcategoryValues = subcategorySummaries[categoryIndex];
+      const subcategoryBreakdown = category.subcategories.map(
+        (_sc, scIndex) => subcategoryValues[scIndex]
+      );
+      return { entireCategoryValue, subcategoryBreakdown };
+    });
+  }
+
+  const pathTimings: ItemTimings = {
+    selfTime: {
+      value: selfValue,
+      breakdownByCategory: hasSelf
+        ? createBreakdown(selfCategorySummary, selfSubcategorySummaries)
+        : null,
+    },
+    totalTime: {
+      value: totalValue,
+      breakdownByCategory: hasTotal
+        ? createBreakdown(totalCategorySummary, totalSubcategorySummaries)
+        : null,
+    },
+  };
 
   return { forPath: pathTimings, rootTime, isInvertedRoot };
 }
