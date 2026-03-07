@@ -13,7 +13,10 @@ import type {
   DevicePixels,
   CssPixels,
 } from 'firefox-profiler/types';
-import { SelectedState } from 'firefox-profiler/types';
+import {
+  SAMPLE_RELATION_TO_SELECTED_STATE_MASK,
+  SelectedState,
+} from 'firefox-profiler/types';
 import type { HoveredPixelState } from './ActivityGraph';
 
 /**
@@ -245,8 +248,9 @@ export class ActivityGraphFillComputer {
       const afterSampleCpuPercent = threadCPUPercent[i + 1];
 
       const percentageBuffers = this.mutablePercentageBuffers[category];
-      const selectedState = sampleSelectedStates[i];
-      const percentageBuffer = percentageBuffers[selectedState];
+      const bufferIndex =
+        sampleSelectedStates[i] & SAMPLE_RELATION_TO_SELECTED_STATE_MASK;
+      const percentageBuffer = percentageBuffers[bufferIndex];
 
       _accumulateInBuffer(
         percentageBuffer,
@@ -273,8 +277,9 @@ export class ActivityGraphFillComputer {
     const nextSampleTime = sampleTime + interval;
     const percentageBuffers = this.mutablePercentageBuffers[lastSampleCategory];
 
-    const selectedState = sampleSelectedStates[lastIdx];
-    const percentageBuffer = percentageBuffers[selectedState];
+    const bufferIndex =
+      sampleSelectedStates[lastIdx] & SAMPLE_RELATION_TO_SELECTED_STATE_MASK;
+    const percentageBuffer = percentageBuffers[bufferIndex];
 
     _accumulateInBuffer(
       percentageBuffer,
