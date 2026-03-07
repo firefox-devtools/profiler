@@ -25,17 +25,14 @@ import type {
   IndexIntoSamplesTable,
   Milliseconds,
   CssPixels,
-  TimelineType,
   ImplementationFilter,
 } from 'firefox-profiler/types';
 import { SelectedState } from 'firefox-profiler/types';
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
-import type { CpuRatioInTimeRange } from './ActivityGraphFills';
 import { lightDark } from 'firefox-profiler/utils/dark-mode';
 
 export type HoveredPixelState = {
   readonly sample: IndexIntoSamplesTable | null;
-  readonly cpuRatioInTimeRange: CpuRatioInTimeRange | null;
 };
 
 type Props = {
@@ -51,7 +48,6 @@ type Props = {
     sampleIndex: IndexIntoSamplesTable | null
   ) => void;
   readonly trackName: string;
-  readonly timelineType: TimelineType;
   readonly implementationFilter: ImplementationFilter;
   readonly zeroAt: Milliseconds;
   readonly profileTimelineUnit: string;
@@ -252,7 +248,7 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
 }
 
 export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
-  override state = {
+  override state: State = {
     hoveredPixelState: null,
     mouseX: 0,
     mouseY: 0,
@@ -333,7 +329,6 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
 
     return {
       sample: sampleIndex,
-      cpuRatioInTimeRange: null,
     };
   }
 
@@ -341,7 +336,6 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
     const {
       className,
       trackName,
-      timelineType,
       categories,
       implementationFilter,
       thread,
@@ -379,12 +373,8 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
         {hoveredPixelState === null ? null : (
           <Tooltip mouseX={mouseX} mouseY={mouseY}>
             <SampleTooltipContents
-              sampleIndex={(hoveredPixelState as HoveredPixelState).sample}
-              cpuRatioInTimeRange={
-                timelineType === 'cpu-category'
-                  ? (hoveredPixelState as HoveredPixelState).cpuRatioInTimeRange
-                  : null
-              }
+              sampleIndex={hoveredPixelState.sample}
+              cpuRatioInTimeRange={null}
               rangeFilteredThread={thread}
               categories={categories}
               implementationFilter={implementationFilter}

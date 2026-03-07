@@ -4305,10 +4305,9 @@ export function getNativeSymbolInfo(
 /**
  * Determines the timeline type by looking at the profile data.
  *
- * There are three options:
  * 'cpu-category': If a profile has both category and cpu usage information.
- * 'category': If a profile has category information but not the cpu usage.
- * 'stack': If a profile doesn't have category or cpu usage information.
+ * 'category':     If a profile has category information but not cpu usage.
+ * 'stack':        If a profile doesn't have category information.
  */
 export function determineTimelineType(profile: Profile): TimelineType {
   if (!profile.meta.categories) {

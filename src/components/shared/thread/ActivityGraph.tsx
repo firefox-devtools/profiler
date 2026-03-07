@@ -23,7 +23,6 @@ import type {
   IndexIntoSamplesTable,
   Milliseconds,
   CssPixels,
-  TimelineType,
 } from 'firefox-profiler/types';
 import type {
   ActivityFillGraphQuerier,
@@ -49,9 +48,7 @@ export type Props = {
     a: IndexIntoSamplesTable,
     b: IndexIntoSamplesTable
   ) => number;
-  readonly enableCPUUsage: boolean;
   readonly implementationFilter: ImplementationFilter;
-  readonly timelineType: TimelineType;
   readonly zeroAt: Milliseconds;
   readonly profileTimelineUnit: string;
 } & SizeProps;
@@ -136,11 +133,9 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
       sampleIndexOffset,
       sampleSelectedStates,
       treeOrderSampleComparator,
-      enableCPUUsage,
       implementationFilter,
       width,
       height,
-      timelineType,
       zeroAt,
       profileTimelineUnit,
     } = this.props;
@@ -168,7 +163,6 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
           categories={categories}
           passFillsQuerier={this._setFillsQuerier}
           onClick={this._onClick}
-          enableCPUUsage={enableCPUUsage}
           width={width}
           height={height}
         />
@@ -176,11 +170,7 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
           <Tooltip mouseX={mouseX} mouseY={mouseY}>
             <SampleTooltipContents
               sampleIndex={hoveredPixelState.sample}
-              cpuRatioInTimeRange={
-                timelineType === 'cpu-category'
-                  ? hoveredPixelState.cpuRatioInTimeRange
-                  : null
-              }
+              cpuRatioInTimeRange={hoveredPixelState.cpuRatioInTimeRange}
               rangeFilteredThread={rangeFilteredThread}
               categories={categories}
               implementationFilter={implementationFilter}
