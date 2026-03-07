@@ -2431,6 +2431,7 @@ describe('getTimingsForSidebar', () => {
       };
       expect(timings).toEqual({
         forPath: expectedTiming,
+        isInvertedRoot: false,
         rootTime: 5,
       });
     });
@@ -2476,6 +2477,7 @@ describe('getTimingsForSidebar', () => {
             ]),
           },
         },
+        isInvertedRoot: false,
         rootTime: 5,
       });
     });
@@ -2522,6 +2524,7 @@ describe('getTimingsForSidebar', () => {
 
       expect(timings).toEqual({
         forPath: expectedTiming,
+        isInvertedRoot: false,
         rootTime: 5,
       });
     });
@@ -2600,6 +2603,7 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: expectedTiming,
+          isInvertedRoot: false,
           rootTime: 4,
         });
       });
@@ -2642,6 +2646,7 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: expectedTiming,
+          isInvertedRoot: false,
           rootTime: 4,
         });
       });
@@ -2673,6 +2678,7 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: { selfTime: expectedTiming, totalTime: expectedTiming },
+          isInvertedRoot: false,
           rootTime: 4,
         });
       });
@@ -2715,6 +2721,7 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: expectedTiming,
+          isInvertedRoot: false,
           rootTime: 4,
         });
       });
@@ -2746,6 +2753,7 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: { selfTime: expectedTiming, totalTime: expectedTiming },
+          isInvertedRoot: false,
           rootTime: 4,
         });
       });
@@ -2792,15 +2800,11 @@ describe('getTimingsForSidebar', () => {
       };
       expect(timings).toEqual({
         forPath: {
-          selfTime: {
-            // Inverted trees have an empty breakdown for the selftime because
-            // it's always the same values as for totaltime, or 0. For a root
-            // node, the value is non-0 though.
-            ...EMPTY_TIMING,
-            value: 3,
-          },
+          // For inverted root nodes, selfTime === totalTime.
+          selfTime: expectedTiming,
           totalTime: expectedTiming,
         },
+        isInvertedRoot: true,
         rootTime: 5,
       });
     });
@@ -2828,6 +2832,7 @@ describe('getTimingsForSidebar', () => {
             ]),
           },
         },
+        isInvertedRoot: false,
         rootTime: 5,
       });
     });
@@ -2839,24 +2844,27 @@ describe('getTimingsForSidebar', () => {
       } = setupForInvertedTree();
 
       // Select the function as a root node
+      const expectedRootTiming = {
+        value: 1,
+        breakdownByCategory: withSingleSubcategory([
+          0,
+          0,
+          1, // Layout
+          0,
+          0,
+          0,
+          0,
+          0,
+        ]),
+      };
       let timings = getTimingsForPath([H]);
       expect(timings).toEqual({
         forPath: {
-          selfTime: { ...EMPTY_TIMING, value: 1 },
-          totalTime: {
-            value: 1,
-            breakdownByCategory: withSingleSubcategory([
-              0,
-              0,
-              1, // Layout
-              0,
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
+          // For inverted root nodes, selfTime === totalTime.
+          selfTime: expectedRootTiming,
+          totalTime: expectedRootTiming,
         },
+        isInvertedRoot: true,
         rootTime: 5,
       });
 
@@ -2879,6 +2887,7 @@ describe('getTimingsForSidebar', () => {
             ]),
           },
         },
+        isInvertedRoot: false,
         rootTime: 5,
       });
     });
@@ -2906,6 +2915,7 @@ describe('getTimingsForSidebar', () => {
             ]),
           },
         },
+        isInvertedRoot: false,
         rootTime: 5,
       });
     });
@@ -2991,15 +3001,11 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: {
-            selfTime: {
-              // selftime breakdowns are always empty for inverted trees because
-              // they're the same than the total time.
-              ...EMPTY_TIMING,
-              // But root nodes have self time value of course!
-              value: 1,
-            },
+            // For inverted root nodes, selfTime === totalTime.
+            selfTime: expectedTiming,
             totalTime: expectedTiming,
           },
+          isInvertedRoot: true,
           rootTime: 4,
         });
       });
@@ -3031,15 +3037,11 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: {
-            selfTime: {
-              // selftime breakdowns are always empty for inverted trees because
-              // they're the same than the total time.
-              ...EMPTY_TIMING,
-              // But root nodes have a selftime value
-              value: 1,
-            },
+            // For inverted root nodes, selfTime === totalTime.
+            selfTime: expectedTiming,
             totalTime: expectedTiming,
           },
+          isInvertedRoot: true,
           rootTime: 4,
         });
       });
@@ -3069,6 +3071,7 @@ describe('getTimingsForSidebar', () => {
               ]),
             },
           },
+          isInvertedRoot: false,
           rootTime: 4,
         });
       });
