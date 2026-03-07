@@ -1184,6 +1184,25 @@ export class SampleRelations {
     return this.fillBucket(sampleIndex) === FillBucket.Selected;
   }
 
+  /**
+   * Whether the sample's stack ends at the node, i.e. whether the sample counts
+   * towards the node's self time.
+   */
+  contributesToSelf(sampleIndex: IndexIntoSamplesTable): boolean {
+    return this.get(sampleIndex) === SampleRelationToNode.TotalAndSelf;
+  }
+
+  /**
+   * The relations for a contiguous range of samples. This shares the underlying
+   * buffer, so it does not copy.
+   */
+  subarray(
+    start: IndexIntoSamplesTable,
+    end: IndexIntoSamplesTable
+  ): SampleRelations {
+    return new SampleRelations(this._relations.subarray(start, end));
+  }
+
   toArrayForTesting(): SampleRelationToNode[] {
     return Array.from(this._relations) as SampleRelationToNode[];
   }
@@ -1294,35 +1313,15 @@ function accumulateSampleToTimings(
 }
 
 /**
- * This function is the same as getTimingsForCallNodeIndex, but accepts a CallNodePath
- * instead of an IndexIntoCallNodeTable.
+ * This function returns timings related to a call node, based on the
+ * information in sampleRelations.
  */
-export function getTimingsForPath(
-  needlePath: CallNodePath,
-  callNodeInfo: CallNodeInfo,
+export function getCallNodeTimings(
   categories: CategoryList,
   samples: SamplesLikeTable,
-  sampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories
-) {
-  return getTimingsForCallNodeIndex(
-    callNodeInfo.getCallNodeIndexFromPath(needlePath),
-    callNodeInfo,
-    categories,
-    samples,
-    sampleCategoriesAndSubcategories
-  );
-}
-
-/**
- * This function returns the timings for a specific call node. The algorithm is
- * adjusted when the call tree is inverted.
- */
-export function getTimingsForCallNodeIndex(
-  needleNodeIndex: IndexIntoCallNodeTable | null,
-  callNodeInfo: CallNodeInfo,
-  categories: CategoryList,
-  samples: SamplesLikeTable,
-  sampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories
+  sampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories,
+  sampleRelations: SampleRelations,
+  isInvertedRoot: boolean
 ): TimingsForPath {
   /* ------------ Variables definitions ------------*/
 
@@ -1367,89 +1366,27 @@ export function getTimingsForCallNodeIndex(
   /* ------------- End of function definitions ------------- */
 
   /* ------------ Start of the algorithm itself ------------ */
-  if (needleNodeIndex === null) {
-    // No index was provided, return empty timing information.
-    return { forPath: pathTimings, rootTime, isInvertedRoot: false };
-  }
-
-  let needleNodeIsRootOfInvertedTree = false;
-  const callNodeTable = callNodeInfo.getCallNodeTable();
-  const stackIndexToCallNodeIndex =
-    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
-  const callNodeInfoInverted = callNodeInfo.asInverted();
-  if (callNodeInfoInverted !== null) {
-    // Inverted case
-    needleNodeIsRootOfInvertedTree =
-      callNodeInfoInverted.isRoot(needleNodeIndex);
-    const suffixOrderIndexes = callNodeInfoInverted.getSuffixOrderIndexes();
-    const [rangeStart, rangeEnd] =
-      callNodeInfoInverted.getSuffixOrderIndexRangeForCallNode(needleNodeIndex);
-
-    // Loop over each sample and accumulate the self time, running time, and
-    // the category breakdown.
-    for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
-      // Get the call node for this sample.
-      // TODO: Consider using sampleCallNodes for this, to save one indirection on
-      // a hot path.
-      const thisStackIndex = samples.stack[sampleIndex];
-      if (thisStackIndex === null) {
-        continue;
-      }
-      const thisNodeIndex = stackIndexToCallNodeIndex[thisStackIndex];
-      const thisNodeSuffixOrderIndex = suffixOrderIndexes[thisNodeIndex];
-      const weight = samples.weight ? samples.weight[sampleIndex] : 1;
-      rootTime += Math.abs(weight);
-
-      if (
-        thisNodeSuffixOrderIndex >= rangeStart &&
-        thisNodeSuffixOrderIndex < rangeEnd
-      ) {
-        // One of the parents is the exact passed path.
-        accumulateDataToTimings(pathTimings.totalTime, sampleIndex, weight);
-
-        if (needleNodeIsRootOfInvertedTree) {
-          accumulateDataToTimings(pathTimings.selfTime, sampleIndex, weight);
-        }
-      }
+  // Loop over each sample and accumulate the self time, total time, and
+  // the category breakdown. sampleRelations tells us whether each sample is
+  // filtered out, counts towards the needle's total time, and whether it also
+  // counts towards its self time. This works for both inverted and
+  // non-inverted call trees, because getSampleRelationsToNode handles
+  // that distinction internally.
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    if (sampleRelations.isFilteredOut(sampleIndex)) {
+      continue;
     }
-  } else {
-    // Non-inverted case
-    const needleSubtreeRangeEnd =
-      callNodeTable.subtreeRangeEnd[needleNodeIndex];
-
-    // Loop over each sample and accumulate the self time, running time, and
-    // the category breakdown.
-    for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
-      // Get the call node for this sample.
-      // TODO: Consider using sampleCallNodes for this, to save one indirection on
-      // a hot path.
-      const thisStackIndex = samples.stack[sampleIndex];
-      if (thisStackIndex === null) {
-        continue;
-      }
-      const thisNodeIndex = stackIndexToCallNodeIndex[thisStackIndex];
-      const weight = samples.weight ? samples.weight[sampleIndex] : 1;
-      rootTime += Math.abs(weight);
-
-      // For non-inverted trees, we compute the self time from the stacks' leaf nodes.
-      if (thisNodeIndex === needleNodeIndex) {
+    const weight = samples.weight ? samples.weight[sampleIndex] : 1;
+    rootTime += Math.abs(weight);
+    if (sampleRelations.contributesToTotal(sampleIndex)) {
+      accumulateDataToTimings(pathTimings.totalTime, sampleIndex, weight);
+      if (sampleRelations.contributesToSelf(sampleIndex)) {
         accumulateDataToTimings(pathTimings.selfTime, sampleIndex, weight);
       }
-      if (
-        thisNodeIndex >= needleNodeIndex &&
-        thisNodeIndex < needleSubtreeRangeEnd
-      ) {
-        // One of the parents is the exact passed path.
-        accumulateDataToTimings(pathTimings.totalTime, sampleIndex, weight);
-      }
     }
   }
 
-  return {
-    forPath: pathTimings,
-    rootTime,
-    isInvertedRoot: needleNodeIsRootOfInvertedTree,
-  };
+  return { forPath: pathTimings, rootTime, isInvertedRoot };
 }
 
 /**
