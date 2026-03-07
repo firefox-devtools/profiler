@@ -339,9 +339,7 @@ export const TimelineTrackThread = explicitConnect<
       rangeFilteredThread: selectors.getRangeFilteredThread(state),
       callNodeInfo: selectors.getCallNodeInfo(state),
       sampleNonInvertedCallNodes:
-        selectors.getSampleIndexToNonInvertedCallNodeIndexForFilteredThread(
-          state
-        ),
+        selectors.getSampleCallNodesForFilteredThread(state),
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
       interval: getProfileInterval(state),
       rangeStart: committedRange.start,
