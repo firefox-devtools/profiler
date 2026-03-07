@@ -319,7 +319,10 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
     const totalTimePercent = Math.round((totalTime.value / rootTime) * 100);
     const selfTimePercent = Math.round((selfTime.value / rootTime) * 100);
     const totalTimeBreakdownByCategory = totalTime.breakdownByCategory;
-    const selfTimeBreakdownByCategory = selfTime.breakdownByCategory;
+    // For inverted root nodes, self === total, so showing a separate self
+    // breakdown would be redundant.
+    const selfTimeBreakdownByCategory =
+      timings.isInvertedRoot ? null : selfTime.breakdownByCategory;
 
     return (
       <aside className="sidebar sidebar-calltree">
