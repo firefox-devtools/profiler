@@ -47,6 +47,7 @@ import type {
   CallNodeInfo,
   CallNodeInfoInverted,
 } from 'firefox-profiler/profile-logic/call-node-info';
+import type { SampleRelations } from 'firefox-profiler/profile-logic/profile-data';
 
 import type { ThreadSelectorsPerThread } from './thread';
 import type { MarkerSelectorsPerThread } from './markers';
@@ -277,7 +278,7 @@ export function getStackAndSampleSelectorsPerThread(
     ProfileData.getSampleIndexToCallNodeIndex
   );
 
-  const getSampleSelectedStatesInFilteredThread: Selector<Uint8Array> =
+  const getSampleRelationsToSelectedNodeInFilteredThread: Selector<SampleRelations> =
     createSelector(
       getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
       getCallNodeInfo,
@@ -287,7 +288,7 @@ export function getStackAndSampleSelectorsPerThread(
         callNodeInfo,
         selectedCallNode
       ) => {
-        return ProfileData.getSampleSelectedStates(
+        return ProfileData.getSampleRelationsToNode(
           callNodeInfo,
           sampleIndexToNonInvertedCallNodeIndex,
           selectedCallNode
@@ -609,7 +610,7 @@ export function getStackAndSampleSelectorsPerThread(
     getExpandedCallNodePaths,
     getExpandedCallNodeIndexes,
     getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
-    getSampleSelectedStatesInFilteredThread,
+    getSampleRelationsToSelectedNodeInFilteredThread,
     getTreeOrderComparatorInFilteredThread,
     getCallTree,
     getNonInvertedCallTree,

@@ -43,6 +43,13 @@ import {
   numberSeriesFromDeltas,
   numberSeriesToDeltas,
 } from 'firefox-profiler/utils/number-series';
+import {
+  ResourceType,
+  FrameFlag,
+  SampleRelationToNode,
+  FillBucket,
+  FILL_BUCKET_MASK,
+} from 'firefox-profiler/types';
 
 import type { StringTable } from 'firefox-profiler/utils/string-table';
 import type {
@@ -110,7 +117,6 @@ import type {
   SampleCategoriesAndSubcategories,
   SourceLocationTable,
 } from 'firefox-profiler/types';
-import { SelectedState, ResourceType, FrameFlag } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
 import {
   toFloat64Array,
@@ -978,47 +984,49 @@ export function getSampleIndexToCallNodeIndex(
 }
 
 /**
- * This is an implementation of getSampleSelectedStates for just the case where
- * no call node is selected.
+ * This is an implementation of getSampleRelationsToNode for just the
+ * case where no node is given.
  */
-function _getSampleSelectedStatesForNoSelection(
+function _getSampleRelationsForNoNode(
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>
-): Uint8Array {
-  const result = new Uint8Array(sampleCallNodes.length);
+): SampleRelations {
+  const relations = new Uint8Array(sampleCallNodes.length);
   for (
     let sampleIndex = 0;
     sampleIndex < sampleCallNodes.length;
     sampleIndex++
   ) {
-    // When there's no selected call node, we don't want to shadow everything
-    // because everything is unselected. So let's pretend that
-    // everything is selected so that anything not filtered out will be nicely
-    // visible.
-    let sampleSelectedState = SelectedState.Selected;
+    // With no needle node there is nothing to highlight, and we don't want to
+    // shadow the whole graph. So let's pretend that every sample is part of the
+    // needle's total, so that anything not filtered out stays nicely visible.
+    // There is no node to be the "self" node of, so the choice between
+    // TotalAndSelf and TotalButNotSelf is arbitrary here; only
+    // SampleRelations.contributesToTotal is meaningful in this case.
+    let sampleRelation = SampleRelationToNode.TotalAndSelf;
 
     // But we still want to display filtered-out samples differently.
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex === null) {
-      sampleSelectedState = SelectedState.FilteredOutByTransform;
+      sampleRelation = SampleRelationToNode.FilteredOut;
     }
 
-    result[sampleIndex] = sampleSelectedState;
+    relations[sampleIndex] = sampleRelation;
   }
-  return result;
+  return new SampleRelations(relations);
 }
 
 /**
- * Given the call node for each sample and the selected call node,
- * compute each sample's selected state.
+ * Given the call node for each sample and the needle call node,
+ * compute each sample's relation to the needle call node.
  *
- * For samples that are not filtered out, the sample's selected state is based
- * on the relation of the sample's call node to the selected call node: Any call
- * nodes in the selected node's subtree are "selected"; all other nodes are
- * either "before" or "after" the selected subtree.
+ * For samples that are not filtered out, the relation is based on the position
+ * of the sample's call node relative to the needle call node: Any call nodes
+ * in the needle node's subtree count towards its total time; all other nodes
+ * are either "before" or "after" the needle subtree.
  *
  * Call node tables are ordered in depth-first traversal order, so we can
  * determine whether a node is before, inside or after a subtree simply by
- * comparing the call node index to the "selected index range". Example:
+ * comparing the call node index to the "needle index range". Example:
  *
  * ```
  * before, 0
@@ -1034,14 +1042,14 @@ function _getSampleSelectedStatesForNoSelection(
  *     before, 10
  *       before, 11
  *     before, 12
- *     selected, 13 <-- selected node
- *       selected, 14
- *         selected, 15
- *           selected, 16
- *         selected, 17
- *       selected, 18
- *         selected, 19
- *         selected, 20
+ *     totalAndSelf, 13 <-- needle node
+ *       total, 14
+ *         total, 15
+ *           total, 16
+ *         total, 17
+ *       total, 18
+ *         total, 19
+ *         total, 20
  *     after, 21
  *       after, 22
  *     after, 23
@@ -1051,101 +1059,163 @@ function _getSampleSelectedStatesForNoSelection(
  *   after, 27
  * ```
  *
- * In this example, the selected node has index 13 and the "selected index range"
+ * In this example, the needle node has index 13 and the "needle index range"
  * is the range from 13 to 21 (not including 21).
  */
-function _getSampleSelectedStatesNonInverted(
+function _getSampleRelationsNonInverted(
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
-  selectedCallNodeIndex: IndexIntoCallNodeTable,
+  needleNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfo
-): Uint8Array {
+): SampleRelations {
   const callNodeTable = callNodeInfo.getCallNodeTable();
-  const selectedCallNodeDescendantsEndIndex =
-    callNodeTable.subtreeRangeEnd[selectedCallNodeIndex];
+  const needleDescendantsEndIndex =
+    callNodeTable.subtreeRangeEnd[needleNodeIndex];
   const sampleCount = sampleCallNodes.length;
-  const sampleSelectedStates = new Uint8Array(sampleCount);
+  const relations = new Uint8Array(sampleCount);
   for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
-    let sampleSelectedState: SelectedState = SelectedState.Selected;
+    let sampleRelation: SampleRelationToNode = SampleRelationToNode.FilteredOut;
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
-      if (callNodeIndex < selectedCallNodeIndex) {
-        sampleSelectedState = SelectedState.UnselectedOrderedBeforeSelected;
-      } else if (callNodeIndex < selectedCallNodeDescendantsEndIndex) {
-        sampleSelectedState = SelectedState.Selected;
+      if (callNodeIndex < needleNodeIndex) {
+        sampleRelation = SampleRelationToNode.Before;
+      } else if (callNodeIndex === needleNodeIndex) {
+        sampleRelation = SampleRelationToNode.TotalAndSelf;
+      } else if (callNodeIndex < needleDescendantsEndIndex) {
+        sampleRelation = SampleRelationToNode.TotalButNotSelf;
       } else {
-        sampleSelectedState = SelectedState.UnselectedOrderedAfterSelected;
+        sampleRelation = SampleRelationToNode.After;
       }
-    } else {
-      // This sample was filtered out.
-      sampleSelectedState = SelectedState.FilteredOutByTransform;
     }
-    sampleSelectedStates[sampleIndex] = sampleSelectedState;
+    relations[sampleIndex] = sampleRelation;
   }
-  return sampleSelectedStates;
+  return new SampleRelations(relations);
 }
 
 /**
- * The implementation of getSampleSelectedStates for the inverted tree.
+ * The implementation of getSampleRelationsToNode for the inverted tree.
  *
  * This uses the suffix order, see the documentation of CallNodeInfoInverted.
  */
-function _getSampleSelectedStatesInverted(
+function _getSampleRelationsInverted(
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
-  selectedInvertedCallNodeIndex: IndexIntoCallNodeTable,
+  needleInvertedNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfoInverted
-): Uint8Array {
+): SampleRelations {
   const suffixOrderIndexes = callNodeInfo.getSuffixOrderIndexes();
-  const [selectedSubtreeRangeStart, selectedSubtreeRangeEnd] =
-    callNodeInfo.getSuffixOrderIndexRangeForCallNode(
-      selectedInvertedCallNodeIndex
-    );
+  const [needleSubtreeRangeStart, needleSubtreeRangeEnd] =
+    callNodeInfo.getSuffixOrderIndexRangeForCallNode(needleInvertedNodeIndex);
+  // In an inverted tree, self time is attributed exclusively to the roots, so
+  // only a root's subtree samples can be "self" samples.
+  const isInvertedRoot =
+    callNodeInfo.depthForNode(needleInvertedNodeIndex) === 0;
   const sampleCount = sampleNonInvertedCallNodes.length;
-  const sampleSelectedStates = new Uint8Array(sampleCount);
+  const relations = new Uint8Array(sampleCount);
   for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
-    let sampleSelectedState: SelectedState = SelectedState.Selected;
+    let sampleRelation: SampleRelationToNode = SampleRelationToNode.FilteredOut;
     const callNodeIndex = sampleNonInvertedCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
       const suffixOrderIndex = suffixOrderIndexes[callNodeIndex];
-      if (suffixOrderIndex < selectedSubtreeRangeStart) {
-        sampleSelectedState = SelectedState.UnselectedOrderedBeforeSelected;
-      } else if (suffixOrderIndex >= selectedSubtreeRangeEnd) {
-        sampleSelectedState = SelectedState.UnselectedOrderedAfterSelected;
+      if (suffixOrderIndex < needleSubtreeRangeStart) {
+        sampleRelation = SampleRelationToNode.Before;
+      } else if (suffixOrderIndex >= needleSubtreeRangeEnd) {
+        sampleRelation = SampleRelationToNode.After;
+      } else {
+        sampleRelation = isInvertedRoot
+          ? SampleRelationToNode.TotalAndSelf
+          : SampleRelationToNode.TotalButNotSelf;
       }
-    } else {
-      // This sample was filtered out.
-      sampleSelectedState = SelectedState.FilteredOutByTransform;
     }
-    sampleSelectedStates[sampleIndex] = sampleSelectedState;
+    relations[sampleIndex] = sampleRelation;
   }
-  return sampleSelectedStates;
+  return new SampleRelations(relations);
 }
 
 /**
- * Go through the samples, and determine their current state with respect to
- * the selection.
+ * A SampleRelationToNode for every sample in a thread, describing how each
+ * sample relates to one particular call node. That is usually the selected
+ * call node, but it can be another node, e.g. the node hovered in the flame
+ * graph.
+ *
+ * This wraps the Uint8Array rather than exposing it because a Uint8Array erases
+ * its element type: indexing one yields a plain `number`, so nothing stops a
+ * caller from comparing it against an unrelated enum, or from forgetting that
+ * a node's samples are split across TotalAndSelf and TotalButNotSelf. Going
+ * through these accessors keeps the element type visible to the type checker,
+ * and keeps the bit layout of SampleRelationToNode in one place.
+ *
+ * Every accessor here is a single typed array load plus at most a mask and a
+ * comparison, because they are called once per sample in the activity graph's
+ * and the sample graphs' draw loops.
+ */
+export class SampleRelations {
+  _relations: Uint8Array;
+
+  constructor(relations: Uint8Array) {
+    this._relations = relations;
+  }
+
+  get(sampleIndex: IndexIntoSamplesTable): SampleRelationToNode {
+    return this._relations[sampleIndex] as SampleRelationToNode;
+  }
+
+  /**
+   * Which of the activity graph's fill buckets the sample contributes to. This
+   * discards the sample's "self" bit; see SampleRelationToNode for the layout
+   * that makes this a plain mask.
+   */
+  fillBucket(sampleIndex: IndexIntoSamplesTable): FillBucket {
+    return (this._relations[sampleIndex] & FILL_BUCKET_MASK) as FillBucket;
+  }
+
+  /**
+   * Whether the sample was filtered out, e.g. by a search or by a call tree
+   * transform.
+   */
+  isFilteredOut(sampleIndex: IndexIntoSamplesTable): boolean {
+    return this.get(sampleIndex) === SampleRelationToNode.FilteredOut;
+  }
+
+  /**
+   * Whether the sample's stack runs through the node, i.e. whether the sample
+   * counts towards the node's total time. True for both TotalAndSelf and
+   * TotalButNotSelf samples.
+   */
+  contributesToTotal(sampleIndex: IndexIntoSamplesTable): boolean {
+    return this.fillBucket(sampleIndex) === FillBucket.Selected;
+  }
+
+  toArrayForTesting(): SampleRelationToNode[] {
+    return Array.from(this._relations) as SampleRelationToNode[];
+  }
+}
+
+/**
+ * Go through the samples, and determine how each of them relates to the given
+ * needle node. Pass null for the needle node to treat every sample as part of
+ * the needle's total; see _getSampleRelationsForNoNode.
  *
  * This is used in the activity graph. The "ordering" is used so that samples
  * from the same subtree (in the call tree) "clump together" in the graph.
  */
-export function getSampleSelectedStates(
+export function getSampleRelationsToNode(
   callNodeInfo: CallNodeInfo,
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
-  selectedCallNodeIndex: IndexIntoCallNodeTable | null
-): Uint8Array {
-  if (selectedCallNodeIndex === null || selectedCallNodeIndex === -1) {
-    return _getSampleSelectedStatesForNoSelection(sampleNonInvertedCallNodes);
+  needleNodeIndex: IndexIntoCallNodeTable | null
+): SampleRelations {
+  if (needleNodeIndex === null || needleNodeIndex === -1) {
+    return _getSampleRelationsForNoNode(sampleNonInvertedCallNodes);
   }
 
   const callNodeInfoInverted = callNodeInfo.asInverted();
   return callNodeInfoInverted !== null
-    ? _getSampleSelectedStatesInverted(
+    ? _getSampleRelationsInverted(
         sampleNonInvertedCallNodes,
-        selectedCallNodeIndex,
+        needleNodeIndex,
         callNodeInfoInverted
       )
-    : _getSampleSelectedStatesNonInverted(
+    : _getSampleRelationsNonInverted(
         sampleNonInvertedCallNodes,
-        selectedCallNodeIndex,
+        needleNodeIndex,
         callNodeInfo
       );
 }
@@ -3809,7 +3879,7 @@ export function isSampleWithNonEmptyStack(
  *
  * This order is used for the activity graph. The tree order comparator is used
  * specifically for hit testing, but we also compare call nodes in the same way
- * in mapCallNodeSelectedStatesToSamples, which is what gets used for determining
+ * in getSampleRelationsToNode, which is what gets used for determining
  * which areas of the graph to draw in with the selection highlight fill.
  *
  * "Ordered after" means "swims on top in the activity graph".
