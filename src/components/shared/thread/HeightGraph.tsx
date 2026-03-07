@@ -3,9 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { PureComponent } from 'react';
 import classNames from 'classnames';
-import { ensureExists } from 'firefox-profiler/utils/types';
 import { timeCode } from 'firefox-profiler/utils/time-code';
-import { getSampleIndexClosestToStartTime } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  getSampleIndexClosestToStartTime,
+  toSelectedState,
+} from 'firefox-profiler/profile-logic/profile-data';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
 import './HeightGraph.css';
@@ -15,6 +17,7 @@ import type {
   CategoryList,
   IndexIntoSamplesTable,
   Milliseconds,
+  SampleRelationToNode,
 } from 'firefox-profiler/types';
 import { SelectedState } from 'firefox-profiler/types';
 
@@ -23,7 +26,7 @@ type Props = {
   readonly maxValue: number;
   readonly className: string;
   readonly thread: Thread;
-  readonly sampleSelectedStates: null | Uint8Array;
+  readonly sampleSelectedStates: Uint8Array;
   readonly interval: Milliseconds;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
@@ -105,6 +108,8 @@ export class ThreadHeightGraph extends PureComponent<Props> {
       firstDrawnSampleIndex
     );
 
+    const idleCategoryIndex = categories.findIndex((c) => c.name === 'Idle');
+
     // Do one pass over the samples array to gather the samples we want to draw.
     const regularSamples = {
       height: [] as number[],
@@ -127,6 +132,14 @@ export class ThreadHeightGraph extends PureComponent<Props> {
       if (sampleTime < nextMinTime) {
         continue;
       }
+
+      const state = toSelectedState(
+        sampleSelectedStates[i] as SampleRelationToNode
+      );
+      if (state === SelectedState.FilteredOutByTransform) {
+        continue;
+      }
+
       const heightFuncResult = heightFunc(i);
       if (heightFuncResult === null) {
         continue;
@@ -136,19 +149,11 @@ export class ThreadHeightGraph extends PureComponent<Props> {
 
       const xPos = (sampleTime - range[0]) * xPixelsPerMs;
       let samplesBucket;
-      if (
-        sampleSelectedStates !== null &&
-        sampleSelectedStates[i] === (SelectedState.Selected as number)
-      ) {
+      if (state === SelectedState.Selected) {
         samplesBucket = highlightedSamples;
       } else {
-        const stackIndex = ensureExists(
-          thread.samples.stack[i],
-          'A stack must exist for this sample, since a callNodeIndex exists.'
-        );
-        const categoryIndex = thread.stackTable.category[stackIndex];
-        const category = categories[categoryIndex];
-        if (category.name === 'Idle') {
+        const categoryIndex = thread.samples.category[i];
+        if (categoryIndex === idleCategoryIndex) {
           samplesBucket = idleSamples;
         } else {
           samplesBucket = regularSamples;

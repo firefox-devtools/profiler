@@ -99,8 +99,13 @@ import type {
   IndexIntoSourceTable,
   TransformOutput,
   SampleCategoriesAndSubcategories,
+  SelectedState,
 } from 'firefox-profiler/types';
-import { SelectedState, ResourceType } from 'firefox-profiler/types';
+import {
+  ResourceType,
+  SampleRelationToNode,
+  SAMPLE_RELATION_TO_SELECTED_STATE_MASK,
+} from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
 
 /**
@@ -918,12 +923,12 @@ function _getSampleSelectedStatesForNoSelection(
     // because everything is unselected. So let's pretend that
     // everything is selected so that anything not filtered out will be nicely
     // visible.
-    let sampleSelectedState = SelectedState.Selected;
+    let sampleSelectedState = SampleRelationToNode.TotalAndSelf;
 
     // But we still want to display filtered-out samples differently.
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex === null) {
-      sampleSelectedState = SelectedState.FilteredOutByTransform;
+      sampleSelectedState = SampleRelationToNode.FilteredOut;
     }
 
     result[sampleIndex] = sampleSelectedState;
@@ -958,14 +963,14 @@ function _getSampleSelectedStatesForNoSelection(
  *     before, 10
  *       before, 11
  *     before, 12
- *     selected, 13 <-- selected node
- *       selected, 14
- *         selected, 15
- *           selected, 16
- *         selected, 17
- *       selected, 18
- *         selected, 19
- *         selected, 20
+ *     totalAndSelf, 13 <-- selected node
+ *       total, 14
+ *         total, 15
+ *           total, 16
+ *         total, 17
+ *       total, 18
+ *         total, 19
+ *         total, 20
  *     after, 21
  *       after, 22
  *     after, 23
@@ -989,19 +994,19 @@ function _getSampleSelectedStatesNonInverted(
   const sampleCount = sampleCallNodes.length;
   const sampleSelectedStates = new Uint8Array(sampleCount);
   for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
-    let sampleSelectedState: SelectedState = SelectedState.Selected;
+    let sampleSelectedState: SampleRelationToNode =
+      SampleRelationToNode.FilteredOut;
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
       if (callNodeIndex < selectedCallNodeIndex) {
-        sampleSelectedState = SelectedState.UnselectedOrderedBeforeSelected;
+        sampleSelectedState = SampleRelationToNode.Before;
+      } else if (callNodeIndex === selectedCallNodeIndex) {
+        sampleSelectedState = SampleRelationToNode.TotalAndSelf;
       } else if (callNodeIndex < selectedCallNodeDescendantsEndIndex) {
-        sampleSelectedState = SelectedState.Selected;
+        sampleSelectedState = SampleRelationToNode.TotalButNotSelf;
       } else {
-        sampleSelectedState = SelectedState.UnselectedOrderedAfterSelected;
+        sampleSelectedState = SampleRelationToNode.After;
       }
-    } else {
-      // This sample was filtered out.
-      sampleSelectedState = SelectedState.FilteredOutByTransform;
     }
     sampleSelectedStates[sampleIndex] = sampleSelectedState;
   }
@@ -1023,21 +1028,25 @@ function _getSampleSelectedStatesInverted(
     callNodeInfo.getSuffixOrderIndexRangeForCallNode(
       selectedInvertedCallNodeIndex
     );
+  const isInvertedRoot =
+    callNodeInfo.depthForNode(selectedInvertedCallNodeIndex) === 0;
   const sampleCount = sampleNonInvertedCallNodes.length;
   const sampleSelectedStates = new Uint8Array(sampleCount);
   for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
-    let sampleSelectedState: SelectedState = SelectedState.Selected;
+    let sampleSelectedState: SampleRelationToNode =
+      SampleRelationToNode.FilteredOut;
     const callNodeIndex = sampleNonInvertedCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
       const suffixOrderIndex = suffixOrderIndexes[callNodeIndex];
       if (suffixOrderIndex < selectedSubtreeRangeStart) {
-        sampleSelectedState = SelectedState.UnselectedOrderedBeforeSelected;
+        sampleSelectedState = SampleRelationToNode.Before;
       } else if (suffixOrderIndex >= selectedSubtreeRangeEnd) {
-        sampleSelectedState = SelectedState.UnselectedOrderedAfterSelected;
+        sampleSelectedState = SampleRelationToNode.After;
+      } else {
+        sampleSelectedState = isInvertedRoot
+          ? SampleRelationToNode.TotalAndSelf
+          : SampleRelationToNode.TotalButNotSelf;
       }
-    } else {
-      // This sample was filtered out.
-      sampleSelectedState = SelectedState.FilteredOutByTransform;
     }
     sampleSelectedStates[sampleIndex] = sampleSelectedState;
   }
@@ -4414,4 +4423,20 @@ export function computeStackTableFromRawStackTable(
     prefix: rawStackTable.prefix,
     length: rawStackTable.length,
   };
+}
+
+/**
+ * Convert a SampleRelationToNode to a SelectedState.
+ *
+ * This is just a "binary and" with SAMPLE_RELATION_TO_SELECTED_STATE_MASK,
+ * wrapped in the appropriate type casts.
+ *
+ * This assumes that the given "sample relation" is with respect to the
+ * selected node.
+ */
+export function toSelectedState(
+  sampleRelationToNode: SampleRelationToNode
+): SelectedState {
+  return ((sampleRelationToNode as number) &
+    SAMPLE_RELATION_TO_SELECTED_STATE_MASK) as SelectedState;
 }
