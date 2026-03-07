@@ -305,7 +305,7 @@ export class ActivityGraphFillComputer {
 
     // Go through the samples and accumulate the category into the buffer.
     const { samplePositions, halfwayPositions } = precomputedPositions;
-    const { threadCPUPercent } = samples;
+    const { threadCPUPercent, category: sampleCategories } = samples;
     let beforeSampleCpuPercent = threadCPUPercent[0];
     let halfwayPositionBefore = halfwayPositions[0];
     for (let i = 0; i < samples.length; i++) {
@@ -320,7 +320,7 @@ export class ActivityGraphFillComputer {
         continue;
       }
 
-      const category = samples.category[i];
+      const category = sampleCategories[i];
 
       const bufferIndex = sampleRelations.fillBucket(i);
       const bufferRow = category * FILL_BUCKET_COUNT + bufferIndex;
