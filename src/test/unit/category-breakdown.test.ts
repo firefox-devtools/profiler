@@ -3,8 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import {
+  getCallNodeTimings,
+  getSampleRelationsToNode,
   getTimingsForAllSamples,
-  getTimingsForCallNodeIndex,
   getTimingsForFuncIndex,
 } from '../../profile-logic/profile-data';
 import { sortCategoryBreakdown } from '../../profile-logic/category-breakdown';
@@ -77,7 +78,7 @@ describe('getTimingsForAllSamples', function () {
     });
   });
 
-  it('matches the root time of getTimingsForCallNodeIndex', function () {
+  it('matches the root time of getCallNodeTimings', function () {
     const {
       state,
       threadSelectors,
@@ -89,12 +90,18 @@ describe('getTimingsForAllSamples', function () {
         B[cat:Layout]  C[cat:GC / CC]
       `);
 
-    const { rootTime } = getTimingsForCallNodeIndex(
-      0,
-      threadSelectors.getCallNodeInfo(state),
+    const callNodeInfo = threadSelectors.getCallNodeInfo(state);
+    const sampleRelations = getSampleRelationsToNode(
+      callNodeInfo,
+      threadSelectors.getPreviewFilteredCtssSampleCallNodes(state),
+      0
+    );
+    const { rootTime } = getCallNodeTimings(
       categories,
       samples,
-      sampleCategoriesAndSubcategories
+      sampleCategoriesAndSubcategories,
+      sampleRelations,
+      false
     );
 
     expect(
