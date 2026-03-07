@@ -6,7 +6,10 @@ import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { InView } from 'react-intersection-observer';
 import { timeCode } from 'firefox-profiler/utils/time-code';
-import { getSampleIndexClosestToCenteredTime } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  getSampleIndexClosestToCenteredTime,
+  toSelectedState,
+} from 'firefox-profiler/profile-logic/profile-data';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import { BLUE_40, BLUE_50, BLUE_70 } from 'photon-colors';
@@ -27,6 +30,7 @@ import type {
   CssPixels,
   TimelineType,
   ImplementationFilter,
+  SampleRelationToNode,
 } from 'firefox-profiler/types';
 import { SelectedState } from 'firefox-profiler/types';
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
@@ -175,6 +179,8 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
       firstDrawnSampleIndex
     );
 
+    const idleCategoryIndex = categories.findIndex((c) => c.name === 'Idle');
+
     // Do one pass over the samples array to gather the samples we want to draw.
     const regularSamples: number[] = [];
     const idleSamples: number[] = [];
@@ -188,19 +194,20 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
       if (sampleTime < nextMinTime) {
         continue;
       }
-      const stackIndex = thread.samples.stack[i];
-      if (stackIndex === null) {
+      const state = toSelectedState(
+        sampleSelectedStates[i] as SampleRelationToNode
+      );
+      if (state === SelectedState.FilteredOutByTransform) {
         continue;
       }
       const xPos =
         (sampleTime - rangeStart) * xPixelsPerMs - drawnSampleWidth / 2;
       let samplesBucket;
-      if (sampleSelectedStates[i] === (SelectedState.Selected as number)) {
+      if (state === SelectedState.Selected) {
         samplesBucket = highlightedSamples;
       } else {
-        const categoryIndex = thread.stackTable.category[stackIndex];
-        const category = categories[categoryIndex];
-        if (category.name === 'Idle') {
+        const categoryIndex = thread.samples.category[i];
+        if (categoryIndex === idleCategoryIndex) {
           samplesBucket = idleSamples;
         } else {
           samplesBucket = regularSamples;
