@@ -315,21 +315,71 @@ export class ActivityGraphFillComputer {
       // These parts will be:
       // - Between `halfwayPositionBefore` and `samplePosition` with beforeSampleCpuPercent.
       // - Between `samplePosition` and `halfwayPositionAfter` with afterSampleCpuPercent.
+
+      // Every sample has two parts because of different CPU usage values.
+      // For every sample part, we have a fractional interval of this sample part's
+      // contribution to the graph's pixels.
+      //
+      // v       v       v       v       v       v       v       v       v
+      // +-------+-------+-----+-+-------+-------+-----+-+-------+-------+
+      // |       |       |     |///////////////////////| |       |       |
+      // |       |       |     |///////////////////////| |       |       |
+      // |       |       |     |///////////////////////| |       |       |
+      // +-------+-------+-----+///////////////////////+-+-------+-------+
+      //
+      // We have a device-pixel array of contributions. We map the fractional
+      // interval to this array of device pixels: Fully overlapping pixels are
+      // 1, and the partial overlapping pixels are the degree of overlap.
+
+      //                                 |
+      //                                 v
+      //
+      // +-------+-------+-------+-------+-------+-------+-------+-------+
+      // |       |       |       |///////////////+-------+       |       |
+      // |       |       |       |///////////////////////|       |       |
+      // |       |       +-------+///////////////////////|       |       |
+      // +-------+-------+///////////////////////////////+-------+-------+
+
       if (beforeSampleCpuPercent !== 0) {
-        _accumulateHalfSampleInBuffer(
-          percentageBuffer,
-          halfwayPositionBefore,
-          samplePosition,
-          beforeSampleCpuPercent
-        );
+        const startPos = halfwayPositionBefore;
+        const endPos = samplePosition;
+        const cpuPercent = beforeSampleCpuPercent;
+
+        const intStartPos = startPos | 0;
+        const intEndPos = endPos | 0;
+
+        if (intStartPos === intEndPos) {
+          percentageBuffer[intStartPos] += cpuPercent * (endPos - startPos);
+        } else {
+          if (intStartPos + 1 < intEndPos) {
+            percentageBuffer.fill(cpuPercent, intStartPos + 1, intEndPos);
+          }
+
+          percentageBuffer[intStartPos] +=
+            cpuPercent * (1 - (startPos - intStartPos));
+          percentageBuffer[intEndPos] += cpuPercent * (endPos - intEndPos);
+        }
       }
+
       if (afterSampleCpuPercent !== 0) {
-        _accumulateHalfSampleInBuffer(
-          percentageBuffer,
-          samplePosition,
-          halfwayPositionAfter,
-          afterSampleCpuPercent
-        );
+        const startPos = samplePosition;
+        const endPos = halfwayPositionAfter;
+        const cpuPercent = afterSampleCpuPercent;
+
+        const intStartPos = startPos | 0;
+        const intEndPos = endPos | 0;
+
+        if (intStartPos === intEndPos) {
+          percentageBuffer[intStartPos] += cpuPercent * (endPos - startPos);
+        } else {
+          if (intStartPos + 1 < intEndPos) {
+            percentageBuffer.fill(cpuPercent, intStartPos + 1, intEndPos);
+          }
+
+          percentageBuffer[intStartPos] +=
+            cpuPercent * (1 - (startPos - intStartPos));
+          percentageBuffer[intEndPos] += cpuPercent * (endPos - intEndPos);
+        }
       }
 
       halfwayPositionBefore = halfwayPositionAfter;
@@ -759,55 +809,6 @@ function _getCategoryFills(
 
   // Flatten out the fills into a single array.
   return ([] as CategoryFill[]).concat(...nestedFills);
-}
-
-/**
- * Mutates `percentageBuffer` by adding contributions from a single half-sample to
- * the pixels that the sample overlaps with.
- */
-function _accumulateHalfSampleInBuffer(
-  percentageBuffer: Float32Array,
-  startPos: DevicePixels,
-  endPos: DevicePixels,
-  cpuPercent: number
-) {
-  // Every sample has two parts because of different CPU usage values.
-  // For every sample part, we have a fractional interval of this sample part's
-  // contribution to the graph's pixels.
-  //
-  // v       v       v       v       v       v       v       v       v
-  // +-------+-------+-----+-+-------+-------+-----+-+-------+-------+
-  // |       |       |     |///////////////////////| |       |       |
-  // |       |       |     |///////////////////////| |       |       |
-  // |       |       |     |///////////////////////| |       |       |
-  // +-------+-------+-----+///////////////////////+-+-------+-------+
-  //
-  // We have a device-pixel array of contributions. We map the fractional
-  // interval to this array of device pixels: Fully overlapping pixels are
-  // 1, and the partial overlapping pixels are the degree of overlap.
-
-  //                                 |
-  //                                 v
-  //
-  // +-------+-------+-------+-------+-------+-------+-------+-------+
-  // |       |       |       |///////////////+-------+       |       |
-  // |       |       |       |///////////////////////|       |       |
-  // |       |       +-------+///////////////////////|       |       |
-  // +-------+-------+///////////////////////////////+-------+-------+
-  const intStartPos = startPos | 0;
-  const intEndPos = endPos | 0;
-
-  if (intStartPos === intEndPos) {
-    percentageBuffer[intStartPos] += cpuPercent * (endPos - startPos);
-  } else {
-    if (intStartPos + 1 < intEndPos) {
-      percentageBuffer.fill(cpuPercent, intStartPos + 1, intEndPos);
-    }
-
-    percentageBuffer[intStartPos] +=
-      cpuPercent * (1 - (startPos - intStartPos));
-    percentageBuffer[intEndPos] += cpuPercent * (endPos - intEndPos);
-  }
 }
 
 function _accumulateHalfSampleToKernelSum(
