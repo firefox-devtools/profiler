@@ -685,18 +685,38 @@ export type RemoveProfileInformation = {
 export const enum SelectedState {
   // Samples can be filtered through various operations, like searching, or
   // call tree transforms.
-  FilteredOutByTransform,
-  // This sample is selected because either the tip or an ancestor call node matches
-  // the currently selected call node.
-  Selected,
+  FilteredOutByTransform = 0,
+  // This sample is selected because an ancestor call node matches the currently
+  // selected call node. See SelectedSelf for the case where the sample's call node
+  // itself is the selected call node.
+  Selected = 1,
   // This call node is not selected, and the stacks are ordered before the selected
   // call node as sorted by the getTreeOrderComparator.
-  UnselectedOrderedBeforeSelected,
+  UnselectedOrderedBeforeSelected = 2,
   // This call node is not selected, and the stacks are ordered after the selected
   // call node as sorted by the getTreeOrderComparator.
-  UnselectedOrderedAfterSelected,
+  UnselectedOrderedAfterSelected = 3,
 }
 
+// Given a SampleRelationToNode r to the selected node, we can mask off the "self" bit
+// using `(r & SAMPLE_RELATION_TO_SELECTED_STATE_MASK)` to get the corresponding
+// SelectedState value.
+export const SAMPLE_RELATION_TO_SELECTED_STATE_MASK = 3;
+
+/**
+ * Similar to SelectedState, but also used for relations to other nodes, e.g. to
+ * the hovered node in the flamegraph.
+ * The other difference compared to SelectedState is that SampleRelationToNode makes
+ * a distinction between "self" and "non-self" samples. This is used to compute the
+ * timings in the sidebar and in the flamegraph tooltip.
+ */
+export const enum SampleRelationToNode {
+  FilteredOut = SelectedState.FilteredOutByTransform,
+  TotalButNotSelf = SelectedState.Selected,
+  TotalAndSelf = SelectedState.Selected | (1 << 2),
+  Before = SelectedState.UnselectedOrderedBeforeSelected,
+  After = SelectedState.UnselectedOrderedAfterSelected,
+}
 /**
  * It holds the initially selected track's HTMLElement. This allows the timeline
  * to scroll the initially selected track into view once the page is loaded.
