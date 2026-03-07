@@ -1124,39 +1124,15 @@ export type TimingsForPath = {
 };
 
 /**
- * This function is the same as getTimingsForCallNodeIndex, but accepts a CallNodePath
- * instead of an IndexIntoCallNodeTable.
+ * This function returns timings related to a call node, based on
+ * the information in sampleSelectedStates.
  */
-export function getTimingsForPath(
-  needlePath: CallNodePath,
-  callNodeInfo: CallNodeInfo,
+export function getCallNodeTimings(
   categories: CategoryList,
   samples: SamplesLikeTable,
-  sampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories
-) {
-  return getTimingsForCallNodeIndex(
-    callNodeInfo.getCallNodeIndexFromPath(needlePath),
-    callNodeInfo,
-    categories,
-    samples,
-    sampleCategoriesAndSubcategories
-  );
-}
-
-/**
- * This function returns the timings for a specific call node. The algorithm is
- * adjusted when the call tree is inverted.
- * Note that the unfilteredThread should be the original thread before any filtering
- * (by range or other) happens. Also sampleIndexOffset needs to be properly
- * specified and is the offset to be applied on thread's indexes to access
- * the same samples in unfilteredThread.
- */
-export function getTimingsForCallNodeIndex(
-  needleNodeIndex: IndexIntoCallNodeTable | null,
-  callNodeInfo: CallNodeInfo,
-  categories: CategoryList,
-  samples: SamplesLikeTable,
-  sampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories
+  sampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories,
+  sampleSelectedStates: Uint8Array,
+  isInvertedRoot: boolean
 ): TimingsForPath {
   /* ------------ Variables definitions ------------*/
 
@@ -1219,89 +1195,30 @@ export function getTimingsForCallNodeIndex(
   /* ------------- End of function definitions ------------- */
 
   /* ------------ Start of the algorithm itself ------------ */
-  if (needleNodeIndex === null) {
-    // No index was provided, return empty timing information.
-    return { forPath: pathTimings, rootTime, isInvertedRoot: false };
-  }
-
-  let needleNodeIsRootOfInvertedTree = false;
-  const callNodeTable = callNodeInfo.getCallNodeTable();
-  const stackIndexToCallNodeIndex =
-    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
-  const callNodeInfoInverted = callNodeInfo.asInverted();
-  if (callNodeInfoInverted !== null) {
-    // Inverted case
-    needleNodeIsRootOfInvertedTree =
-      callNodeInfoInverted.isRoot(needleNodeIndex);
-    const suffixOrderIndexes = callNodeInfoInverted.getSuffixOrderIndexes();
-    const [rangeStart, rangeEnd] =
-      callNodeInfoInverted.getSuffixOrderIndexRangeForCallNode(needleNodeIndex);
-
-    // Loop over each sample and accumulate the self time, running time, and
-    // the category breakdown.
-    for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
-      // Get the call node for this sample.
-      // TODO: Consider using sampleCallNodes for this, to save one indirection on
-      // a hot path.
-      const thisStackIndex = samples.stack[sampleIndex];
-      if (thisStackIndex === null) {
-        continue;
-      }
-      const thisNodeIndex = stackIndexToCallNodeIndex[thisStackIndex];
-      const thisNodeSuffixOrderIndex = suffixOrderIndexes[thisNodeIndex];
-      const weight = samples.weight ? samples.weight[sampleIndex] : 1;
-      rootTime += Math.abs(weight);
-
-      if (
-        thisNodeSuffixOrderIndex >= rangeStart &&
-        thisNodeSuffixOrderIndex < rangeEnd
-      ) {
-        // One of the parents is the exact passed path.
-        accumulateDataToTimings(pathTimings.totalTime, sampleIndex, weight);
-
-        if (needleNodeIsRootOfInvertedTree) {
-          accumulateDataToTimings(pathTimings.selfTime, sampleIndex, weight);
-        }
-      }
+  // Loop over each sample and accumulate the self time, total time, and
+  // the category breakdown. The sampleSelectedStates encodes whether each
+  // sample is filtered out, in the needle's subtree (total), or is an exact
+  // match for the needle (self). This works for both inverted and non-inverted
+  // call trees since getSampleSelectedStates handles the distinction internally.
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const state = sampleSelectedStates[sampleIndex] as SampleRelationToNode;
+    if (state === SampleRelationToNode.FilteredOut) {
+      continue;
     }
-  } else {
-    // Non-inverted case
-    const needleSubtreeRangeEnd =
-      callNodeTable.subtreeRangeEnd[needleNodeIndex];
-
-    // Loop over each sample and accumulate the self time, running time, and
-    // the category breakdown.
-    for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
-      // Get the call node for this sample.
-      // TODO: Consider using sampleCallNodes for this, to save one indirection on
-      // a hot path.
-      const thisStackIndex = samples.stack[sampleIndex];
-      if (thisStackIndex === null) {
-        continue;
-      }
-      const thisNodeIndex = stackIndexToCallNodeIndex[thisStackIndex];
-      const weight = samples.weight ? samples.weight[sampleIndex] : 1;
-      rootTime += Math.abs(weight);
-
-      // For non-inverted trees, we compute the self time from the stacks' leaf nodes.
-      if (thisNodeIndex === needleNodeIndex) {
+    const weight = samples.weight ? samples.weight[sampleIndex] : 1;
+    rootTime += Math.abs(weight);
+    if (
+      state === SampleRelationToNode.TotalAndSelf ||
+      state === SampleRelationToNode.TotalButNotSelf
+    ) {
+      accumulateDataToTimings(pathTimings.totalTime, sampleIndex, weight);
+      if (state === SampleRelationToNode.TotalAndSelf) {
         accumulateDataToTimings(pathTimings.selfTime, sampleIndex, weight);
       }
-      if (
-        thisNodeIndex >= needleNodeIndex &&
-        thisNodeIndex < needleSubtreeRangeEnd
-      ) {
-        // One of the parents is the exact passed path.
-        accumulateDataToTimings(pathTimings.totalTime, sampleIndex, weight);
-      }
     }
   }
 
-  return {
-    forPath: pathTimings,
-    rootTime,
-    isInvertedRoot: needleNodeIsRootOfInvertedTree,
-  };
+  return { forPath: pathTimings, rootTime, isInvertedRoot };
 }
 
 /**

@@ -240,16 +240,6 @@ export function getStackAndSampleSelectorsPerThread(
       )
   );
 
-  const _getSampleCallNodesForPreviewFilteredCtssThread: Selector<
-    Array<IndexIntoCallNodeTable | null>
-  > = createSelector(
-    (state: State) =>
-      threadSelectors.getPreviewFilteredCtssSamples(state).stack,
-    (state: State) =>
-      getCallNodeInfo(state).getStackIndexToNonInvertedCallNodeIndex(),
-    ProfileData.getSampleIndexToCallNodeIndex
-  );
-
   const _getSampleCallNodesForFilteredCtssThread: Selector<
     Array<IndexIntoCallNodeTable | null>
   > = createSelector(
@@ -257,6 +247,16 @@ export function getStackAndSampleSelectorsPerThread(
     (state: State) =>
       getCallNodeInfo(state).getStackIndexToNonInvertedCallNodeIndex(),
     ProfileData.getSampleIndexToCallNodeIndex
+  );
+
+  const getPreviewFilteredCtssSampleCallNodes: Selector<
+    Array<IndexIntoCallNodeTable | null>
+  > = createSelector(
+    _getSampleCallNodesForFilteredCtssThread,
+    (state: State) =>
+      threadSelectors.getPreviewFilteredCtssSampleIndexOffsets(state),
+    (state: State) => threadSelectors.getFilteredCtssSampleIndexOffsets(state),
+    (filteredCallNodes, [b, e], [fb]) => filteredCallNodes.slice(b - fb, e - fb)
   );
 
   const getSampleCallNodesForFilteredThread: Selector<
@@ -281,6 +281,57 @@ export function getStackAndSampleSelectorsPerThread(
         );
       }
     );
+
+  const getFilteredCtssSampleSelectedStates: Selector<Uint8Array> =
+    createSelector(
+      threadSelectors.getFilteredCtssSamples,
+      (state: State) => threadSelectors.getFilteredThread(state).samples,
+      getSampleSelectedStatesInFilteredThread,
+      _getSampleCallNodesForFilteredCtssThread,
+      getCallNodeInfo,
+      getSelectedCallNodeIndex,
+      (
+        filteredCtssSamples,
+        filteredSamples,
+        filteredSelectedStates,
+        ctssSampleCallNodes,
+        callNodeInfo,
+        selectedCallNode
+      ) => {
+        if (filteredCtssSamples === filteredSamples) {
+          return filteredSelectedStates;
+        }
+        return ProfileData.getSampleSelectedStates(
+          callNodeInfo,
+          ctssSampleCallNodes,
+          selectedCallNode
+        );
+      }
+    );
+
+  const getPreviewFilteredCtssSampleSelectedStates: Selector<Uint8Array> =
+    createSelector(
+      getFilteredCtssSampleSelectedStates,
+      (state: State) =>
+        threadSelectors.getPreviewFilteredCtssSampleIndexOffsets(state),
+      (state: State) =>
+        threadSelectors.getFilteredCtssSampleIndexOffsets(state),
+      (filteredSelectedStates, [b, e], [fb]) =>
+        filteredSelectedStates.subarray(b - fb, e - fb)
+    );
+
+  const getSelectedCallNodeIsInvertedRoot: Selector<boolean> = createSelector(
+    getCallNodeInfo,
+    getSelectedCallNodeIndex,
+    (callNodeInfo, selectedCallNodeIndex) => {
+      const callNodeInfoInverted = callNodeInfo.asInverted();
+      return (
+        selectedCallNodeIndex !== null &&
+        callNodeInfoInverted !== null &&
+        callNodeInfoInverted.isRoot(selectedCallNodeIndex)
+      );
+    }
+  );
 
   const getTreeOrderComparatorInFilteredThread: Selector<
     (
@@ -314,7 +365,7 @@ export function getStackAndSampleSelectorsPerThread(
   const getCallNodeSelfAndSummary: Selector<CallNodeSelfAndSummary> =
     createSelector(
       threadSelectors.getPreviewFilteredCtssSamples,
-      _getSampleCallNodesForPreviewFilteredCtssThread,
+      getPreviewFilteredCtssSampleCallNodes,
       getCallNodeInfo,
       (samples, sampleIndexToCallNodeIndex, callNodeInfo) => {
         return CallTree.computeCallNodeSelfAndSummary(
@@ -400,7 +451,7 @@ export function getStackAndSampleSelectorsPerThread(
   const getTracedTiming: Selector<CallTree.CallTreeTimings | null> =
     createSelector(
       threadSelectors.getPreviewFilteredCtssSamples,
-      _getSampleCallNodesForPreviewFilteredCtssThread,
+      getPreviewFilteredCtssSampleCallNodes,
       getCallNodeInfo,
       ProfileSelectors.getProfileInterval,
       (samples, sampleIndexToCallNodeIndex, callNodeInfo, interval) => {
@@ -501,6 +552,9 @@ export function getStackAndSampleSelectorsPerThread(
     getExpandedCallNodeIndexes,
     getSampleCallNodesForFilteredThread,
     getSampleSelectedStatesInFilteredThread,
+    getPreviewFilteredCtssSampleCallNodes,
+    getPreviewFilteredCtssSampleSelectedStates,
+    getSelectedCallNodeIsInvertedRoot,
     getTreeOrderComparatorInFilteredThread,
     getCallTree,
     getFunctionListTree,
