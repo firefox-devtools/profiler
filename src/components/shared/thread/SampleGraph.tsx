@@ -41,7 +41,7 @@ export type HoveredPixelState = {
 type Props = {
   readonly className: string;
   readonly thread: Thread;
-  readonly sampleSelectedStates: null | Uint8Array;
+  readonly sampleSelectedStates: Uint8Array;
   readonly interval: Milliseconds;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
@@ -66,7 +66,7 @@ type State = {
 type CanvasProps = {
   readonly className: string;
   readonly thread: Thread;
-  readonly sampleSelectedStates: null | Uint8Array;
+  readonly sampleSelectedStates: Uint8Array;
   readonly interval: Milliseconds;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
@@ -195,10 +195,7 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
       const xPos =
         (sampleTime - rangeStart) * xPixelsPerMs - drawnSampleWidth / 2;
       let samplesBucket;
-      if (
-        sampleSelectedStates !== null &&
-        sampleSelectedStates[i] === (SelectedState.Selected as number)
-      ) {
+      if (sampleSelectedStates[i] === (SelectedState.Selected as number)) {
         samplesBucket = highlightedSamples;
       } else {
         const categoryIndex = thread.stackTable.category[stackIndex];

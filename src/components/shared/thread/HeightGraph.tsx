@@ -23,7 +23,7 @@ type Props = {
   readonly maxValue: number;
   readonly className: string;
   readonly thread: Thread;
-  readonly sampleSelectedStates: null | Uint8Array;
+  readonly sampleSelectedStates: Uint8Array;
   readonly interval: Milliseconds;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
