@@ -175,6 +175,8 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
       firstDrawnSampleIndex
     );
 
+    const idleCategoryIndex = categories.findIndex((c) => c.name === 'Idle');
+
     // Do one pass over the samples array to gather the samples we want to draw.
     const regularSamples: number[] = [];
     const idleSamples: number[] = [];
@@ -188,19 +190,18 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
       if (sampleTime < nextMinTime) {
         continue;
       }
-      const stackIndex = thread.samples.stack[i];
-      if (stackIndex === null) {
+      const state = sampleSelectedStates[i] as SelectedState;
+      if (state === SelectedState.FilteredOutByTransform) {
         continue;
       }
       const xPos =
         (sampleTime - rangeStart) * xPixelsPerMs - drawnSampleWidth / 2;
       let samplesBucket;
-      if (sampleSelectedStates[i] === (SelectedState.Selected as number)) {
+      if (state === SelectedState.Selected) {
         samplesBucket = highlightedSamples;
       } else {
-        const categoryIndex = thread.stackTable.category[stackIndex];
-        const category = categories[categoryIndex];
-        if (category.name === 'Idle') {
+        const categoryIndex = thread.samples.category[i];
+        if (categoryIndex === idleCategoryIndex) {
           samplesBucket = idleSamples;
         } else {
           samplesBucket = regularSamples;
