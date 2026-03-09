@@ -578,9 +578,10 @@ export type ProfilingLog = {
 
 /**
  * Table containing source code file references in the Gecko profile format.
- * Each entry maps a unique UUID to a filename, allowing frames to reference
- * their source files for displaying source code context in the profiler UI.
- * This table is optional and only present in newer Firefox versions.
+ * Each entry maps a unique ID to a filename and optional metadata, allowing
+ * frames to reference their source files for displaying source code context
+ * in the profiler UI. This table is optional and only present in newer
+ * Firefox versions.
  *
  * Note: In Gecko profiles, this table only contains sources for JavaScript code.
  * The processed profile format expands this to include native code sources as well.
