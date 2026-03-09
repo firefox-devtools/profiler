@@ -348,8 +348,11 @@ export function getEmptySourceTable(): SourceTable {
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
-    uuid: [],
+    id: [],
     filename: [],
+    startLine: [],
+    startColumn: [],
+    sourceMapURL: [],
     length: 0,
   };
 }

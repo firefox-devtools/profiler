@@ -6,6 +6,14 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 61
+
+The `SourceTable` in `profile.shared.sources` was updated:
+
+- The `uuid` field was renamed to `id`.
+- Two new fields `startLine` and `startColumn` were added (1-based). These describe the start position of the script within its resource, useful for inline scripts. If the source covers the entire file, use `(1, 1)`.
+- A new `sourceMapURL` field was added. Use `null` for entries with no source map URL.
+
 ### Version 60
 
 The following tables have moved into `profile.shared`: `stackTable`, `frameTable`, `funcTable`, `resourceTable`, `nativeSymbols`. They are no longer per-thread.
@@ -136,6 +144,14 @@ We've also cleaned up the ResourceTable format:
 Older versions are not documented in this changelog but can be found in [processed-profile-versioning.ts](../src/profile-logic/processed-profile-versioning.ts).
 
 ## Gecko profile format
+
+### Version 34
+
+The `SourceTable` schema was updated:
+
+- The `uuid` field was renamed to `id`.
+- Two new fields `startLine` and `startColumn` were added (1-based). If the source covers the entire file, use `(1, 1)`.
+- A new `sourceMapURL` field was added. It can be omitted if it is the last element in the row and there is no source map URL.
 
 ### Version 33
 

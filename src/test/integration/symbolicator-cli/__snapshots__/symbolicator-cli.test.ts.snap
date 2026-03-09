@@ -87,7 +87,7 @@ Object {
     "markerSchema": Array [],
     "oscpu": "macOS 14.6.1",
     "pausedRanges": Array [],
-    "preprocessedProfileVersion": 60,
+    "preprocessedProfileVersion": 61,
     "processType": 0,
     "product": "a.out",
     "sampleUnits": Object {
@@ -725,8 +725,11 @@ Object {
     },
     "sources": Object {
       "filename": Array [],
+      "id": Array [],
       "length": 0,
-      "uuid": Array [],
+      "sourceMapURL": Array [],
+      "startColumn": Array [],
+      "startLine": Array [],
     },
     "stackTable": Object {
       "frame": Array [
@@ -1412,7 +1415,7 @@ Object {
     "markerSchema": Array [],
     "oscpu": "macOS 14.6.1",
     "pausedRanges": Array [],
-    "preprocessedProfileVersion": 60,
+    "preprocessedProfileVersion": 61,
     "processType": 0,
     "product": "a.out",
     "sampleUnits": Object {
@@ -2050,8 +2053,11 @@ Object {
     },
     "sources": Object {
       "filename": Array [],
+      "id": Array [],
       "length": 0,
-      "uuid": Array [],
+      "sourceMapURL": Array [],
+      "startColumn": Array [],
+      "startLine": Array [],
     },
     "stackTable": Object {
       "frame": Array [

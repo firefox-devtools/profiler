@@ -746,6 +746,11 @@ function _gatherReferencesInSources(
     }
 
     referencedStrings[sources.filename[i]] = 1;
+
+    const sourceMapURL = sources.sourceMapURL[i];
+    if (sourceMapURL !== null) {
+      referencedStrings[sourceMapURL] = 1;
+    }
   }
 }
 
@@ -765,7 +770,18 @@ function _createCompactedSources(
     const newIndex = newSources.length++;
     newSources.filename[newIndex] =
       oldStringToNewStringPlusOne[sources.filename[i]] - 1;
-    newSources.uuid[newIndex] = sources.uuid[i];
+    newSources.id[newIndex] = sources.id[i];
+    newSources.startLine[newIndex] = sources.startLine[i];
+    newSources.startColumn[newIndex] = sources.startColumn[i];
+
+    // Translate the sourceMapURL string index if present.
+    // The old string indexes are no longer valid since we compacted the
+    // string array. All the indexes that reference them need to be updated.
+    const oldSourceMapURLIndex = sources.sourceMapURL[i];
+    newSources.sourceMapURL[newIndex] =
+      oldSourceMapURLIndex !== null
+        ? oldStringToNewStringPlusOne[oldSourceMapURLIndex] - 1
+        : null;
 
     oldSourceToNewSourcePlusOne[i] = newIndex + 1;
   }
