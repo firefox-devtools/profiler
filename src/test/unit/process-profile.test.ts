@@ -905,14 +905,14 @@ describe('source table processing', function () {
 
     // Check that the global source table has the expected structure
     expect(processedProfile.shared.sources.filename).toBeArray();
-    expect(processedProfile.shared.sources.uuid).toBeArray();
+    expect(processedProfile.shared.sources.id).toBeArray();
     expect(processedProfile.shared.sources.length).toBeNumber();
 
     // Check that source indexes are consistent
     expect(processedProfile.shared.sources.filename.length).toBe(
       processedProfile.shared.sources.length
     );
-    expect(processedProfile.shared.sources.uuid.length).toBe(
+    expect(processedProfile.shared.sources.id.length).toBe(
       processedProfile.shared.sources.length
     );
 
@@ -966,21 +966,21 @@ describe('source table processing', function () {
     }
   });
 
-  it('should handle sources with null UUIDs correctly', function () {
+  it('should handle sources with null ID correctly', function () {
     const geckoProfile = createGeckoProfile();
     const processedProfile = processGeckoProfile(geckoProfile);
 
-    // Most sources in the test profile should have null UUIDs
+    // Most sources in the test profile should have null ID
     const { sources } = processedProfile.shared;
     for (let i = 0; i < sources.length; i++) {
-      // UUIDs can be null or string
-      expect(
-        sources.uuid[i] === null || typeof sources.uuid[i] === 'string'
-      ).toBe(true);
+      // ID can be null or string
+      expect(sources.id[i] === null || typeof sources.id[i] === 'string').toBe(
+        true
+      );
     }
   });
 
-  it('should deduplicate sources with same filename and UUID', function () {
+  it('should deduplicate sources with same filename and ID', function () {
     const geckoProfile = createGeckoProfile();
     const processedProfile = processGeckoProfile(geckoProfile);
 
@@ -990,8 +990,8 @@ describe('source table processing', function () {
 
     for (let i = 0; i < sources.length; i++) {
       const filename = processedProfile.shared.stringArray[sources.filename[i]];
-      const uuid = sources.uuid[i];
-      const key = `${filename}:${uuid}`;
+      const id = sources.id[i];
+      const key = `${filename}:${id}`;
 
       // Should not have exact duplicates
       expect(filenameSet.has(key)).toBe(false);

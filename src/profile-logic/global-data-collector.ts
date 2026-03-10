@@ -61,7 +61,7 @@ export class GlobalDataCollector {
   _libNameToResourceIndex: Map<IndexIntoStringTable, IndexIntoResourceTable> =
     new Map();
   _originToResourceIndex: Map<string, IndexIntoResourceTable> = new Map();
-  _uuidToSourceIndex: Map<string, IndexIntoSourceTable> = new Map();
+  _idToSourceIndex: Map<string, IndexIntoSourceTable> = new Map();
   _filenameToSourceIndex: Map<IndexIntoStringTable, IndexIntoSourceTable> =
     new Map();
 
@@ -115,13 +115,19 @@ export class GlobalDataCollector {
 
   // Return the global index for this source, adding it to the global list if
   // necessary.
-  indexForSource(uuid: string | null, filename: string): IndexIntoSourceTable {
+  indexForSource(
+    id: string | null,
+    filename: string,
+    startLine: number = 1,
+    startColumn: number = 1,
+    sourceMapURL: string | null = null
+  ): IndexIntoSourceTable {
     let index: IndexIntoSourceTable | undefined;
 
-    if (uuid !== null) {
-      index = this._uuidToSourceIndex.get(uuid);
+    if (id !== null) {
+      index = this._idToSourceIndex.get(id);
     } else {
-      // For null UUIDs, use filename-based lookup
+      // For null IDs, use filename-based lookup.
       const filenameIndex = this._stringTable.indexForString(filename);
       index = this._filenameToSourceIndex.get(filenameIndex);
     }
@@ -129,12 +135,19 @@ export class GlobalDataCollector {
     if (index === undefined) {
       index = this._sources.length;
       const filenameIndex = this._stringTable.indexForString(filename);
-      this._sources.uuid[index] = uuid;
+      const sourceMapURLIndex =
+        sourceMapURL !== null
+          ? this._stringTable.indexForString(sourceMapURL)
+          : null;
+      this._sources.id[index] = id;
       this._sources.filename[index] = filenameIndex;
+      this._sources.startLine[index] = startLine;
+      this._sources.startColumn[index] = startColumn;
+      this._sources.sourceMapURL[index] = sourceMapURLIndex;
       this._sources.length++;
 
-      if (uuid !== null) {
-        this._uuidToSourceIndex.set(uuid, index);
+      if (id !== null) {
+        this._idToSourceIndex.set(id, index);
       } else {
         this._filenameToSourceIndex.set(filenameIndex, index);
       }
