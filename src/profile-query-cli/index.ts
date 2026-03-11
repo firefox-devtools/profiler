@@ -25,6 +25,7 @@
 
 import * as path from 'path';
 import * as os from 'os';
+import guideText from './guide.txt';
 import minimist from 'minimist';
 import { startDaemon } from './daemon';
 import { sendCommand, startNewDaemon, stopDaemon } from './client';
@@ -62,6 +63,7 @@ interface Args {
   daemon?: boolean;
   help?: boolean;
   h?: boolean;
+  guide?: boolean;
   json?: boolean;
   'max-lines'?: number;
   scoring?: string;
@@ -109,6 +111,7 @@ Options:
   --scoring <strategy>     Call tree scoring: exponential-0.95, exponential-0.9 (default), exponential-0.8,
                            harmonic-0.1, harmonic-0.5, harmonic-1.0, percentage-only
   --json                   Output results as JSON (for use with jq, etc.)
+  --guide                  Show detailed usage guide (commands, patterns, tips)
   --help, -h               Show this help message
 
 Examples:
@@ -149,6 +152,10 @@ Examples:
   pq thread samples-top-down --scoring exponential-0.8
   pq thread samples-bottom-up --max-lines 200 --scoring harmonic-1.0
 `);
+}
+
+function printGuide(): void {
+  console.log(guideText);
 }
 
 /**
@@ -225,13 +232,28 @@ async function main(): Promise<void> {
       'max-lines',
       'scoring',
     ],
-    boolean: ['daemon', 'help', 'h', 'all', 'has-stack', 'auto-group', 'json'],
+    boolean: [
+      'daemon',
+      'help',
+      'h',
+      'guide',
+      'all',
+      'has-stack',
+      'auto-group',
+      'json',
+    ],
     alias: { h: 'help' },
   });
 
   // Check for help flag
   if (argv.help || argv.h) {
     printUsage();
+    process.exit(0);
+  }
+
+  // Check for guide flag
+  if (argv.guide) {
+    printGuide();
     process.exit(0);
   }
 

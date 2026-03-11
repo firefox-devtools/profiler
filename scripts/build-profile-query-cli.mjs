@@ -10,6 +10,7 @@ const BUILD_HASH = Date.now().toString(36);
 const profileQueryCliConfig = {
   ...nodeBaseConfig,
   entryPoints: ['src/profile-query-cli/index.ts'],
+  loader: { ...nodeBaseConfig.loader, '.txt': 'text' },
   outfile: 'src/profile-query-cli/dist/pq.js',
   minify: true,
   banner: {
