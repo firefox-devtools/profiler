@@ -22,6 +22,7 @@ CORE WORKFLOW
   Step 2: Explore the profile structure
     pq profile info          Overview: processes, threads, time range, CPU activity
     pq profile info --all    Show all processes and threads (not just top 5)
+    pq profile info --search GeckoMain   Filter by process/thread name, pid, or tid
 
   Step 3: Select a thread to analyze
     pq thread info           List threads with handles (t-0, t-1, ...)
@@ -143,7 +144,7 @@ UNDERSTANDING THE OUTPUT
 TIPS
 
   - Start with "profile info" to understand what's in the profile; use --all to see every
-    process and thread
+    process and thread, or --search <term> to filter by name, pid, or tid
   - Select a thread before querying -- GeckoMain is usually the main thread
   - Self time is more actionable: focus on high self-time functions for optimization
   - Idle self time is not a finding on its own -- a longer profile or an inactive thread will

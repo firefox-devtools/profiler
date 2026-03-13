@@ -58,7 +58,12 @@ export type ClientMessage =
   | { type: 'status' };
 
 export type ClientCommand =
-  | { command: 'profile'; subcommand: 'info' | 'threads'; all?: boolean }
+  | {
+      command: 'profile';
+      subcommand: 'info' | 'threads';
+      all?: boolean;
+      search?: string;
+    }
   | {
       command: 'thread';
       subcommand:

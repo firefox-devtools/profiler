@@ -5,6 +5,7 @@
 export type ThreadInfo = {
   threadIndex: number;
   name: string;
+  tid: number | string;
   cpuMs: number;
   pid: string;
 };
@@ -14,7 +15,12 @@ export type ProcessInfo = {
   processIndex: number;
   name: string;
   cpuMs: number;
-  threads: Array<{ threadIndex: number; name: string; cpuMs: number }>;
+  threads: Array<{
+    threadIndex: number;
+    name: string;
+    tid: number | string;
+    cpuMs: number;
+  }>;
 };
 
 export type ProcessListItem = {
@@ -22,7 +28,12 @@ export type ProcessListItem = {
   pid: string;
   name: string;
   cpuMs: number;
-  threads: Array<{ threadIndex: number; name: string; cpuMs: number }>;
+  threads: Array<{
+    threadIndex: number;
+    name: string;
+    tid: number | string;
+    cpuMs: number;
+  }>;
   remainingThreads?: {
     count: number;
     combinedCpuMs: number;
@@ -62,12 +73,12 @@ export function buildProcessThreadList(
   const processCPUMap = new Map<string, ProcessInfo>();
 
   threads.forEach((thread) => {
-    const { pid, threadIndex, name, cpuMs } = thread;
+    const { pid, threadIndex, name, tid, cpuMs } = thread;
     const existing = processCPUMap.get(pid);
 
     if (existing) {
       existing.cpuMs += cpuMs;
-      existing.threads.push({ threadIndex, name, cpuMs });
+      existing.threads.push({ threadIndex, name, tid, cpuMs });
     } else {
       const processIndex = processIndexMap.get(pid);
       if (processIndex === undefined) {
@@ -80,7 +91,7 @@ export function buildProcessThreadList(
         processIndex,
         name: pid, // Will be overridden by caller
         cpuMs,
-        threads: [{ threadIndex, name, cpuMs }],
+        threads: [{ threadIndex, name, tid, cpuMs }],
       });
     }
   });

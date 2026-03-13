@@ -326,9 +326,14 @@ Name: ${result.name}\n`;
     return output;
   }
 
-  const processesHeading = result.showAll
-    ? 'All processes and threads by CPU usage:'
-    : 'Top processes and threads by CPU usage:';
+  let processesHeading: string;
+  if (result.searchQuery !== undefined) {
+    processesHeading = `Processes and threads matching '${result.searchQuery}':`;
+  } else if (result.showAll) {
+    processesHeading = 'All processes and threads by CPU usage:';
+  } else {
+    processesHeading = 'Top processes and threads by CPU usage:';
+  }
   output += `\n${processesHeading}\n`;
 
   for (const process of result.processes) {
@@ -345,7 +350,7 @@ Name: ${result.name}\n`;
     output += `  p-${process.processIndex}: ${process.name} [pid ${process.pid}]${timingInfo} - ${process.cpuMs.toFixed(3)}ms\n`;
 
     for (const thread of process.threads) {
-      output += `    ${thread.threadHandle}: ${thread.name} - ${thread.cpuMs.toFixed(3)}ms\n`;
+      output += `    ${thread.threadHandle}: ${thread.name} [tid ${thread.tid}] - ${thread.cpuMs.toFixed(3)}ms\n`;
     }
 
     if (process.remainingThreads) {

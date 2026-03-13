@@ -390,6 +390,7 @@ export type ProfileInfoResult = {
   threadCount: number;
   processCount: number;
   showAll?: boolean;
+  searchQuery?: string;
   processes: Array<{
     processIndex: number;
     pid: string;
@@ -403,6 +404,7 @@ export type ProfileInfoResult = {
       threadIndex: number;
       threadHandle: string;
       name: string;
+      tid: number | string;
       cpuMs: number;
     }>;
     remainingThreads?: {

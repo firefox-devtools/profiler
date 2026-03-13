@@ -277,7 +277,7 @@ export class Daemon {
       case 'profile':
         switch (command.subcommand) {
           case 'info':
-            return this.querier!.profileInfo(command.all);
+            return this.querier!.profileInfo(command.all, command.search);
           case 'threads':
             throw new Error('unimplemented');
           default:
