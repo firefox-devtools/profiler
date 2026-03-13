@@ -326,7 +326,10 @@ Name: ${result.name}\n`;
     return output;
   }
 
-  output += '\nTop processes and threads by CPU usage:\n';
+  const processesHeading = result.showAll
+    ? 'All processes and threads by CPU usage:'
+    : 'Top processes and threads by CPU usage:';
+  output += `\n${processesHeading}\n`;
 
   for (const process of result.processes) {
     // Format process timing information
@@ -346,12 +349,12 @@ Name: ${result.name}\n`;
     }
 
     if (process.remainingThreads) {
-      output += `    + ${process.remainingThreads.count} more threads with combined CPU time ${process.remainingThreads.combinedCpuMs.toFixed(3)}ms and max CPU time ${process.remainingThreads.maxCpuMs.toFixed(3)}ms\n`;
+      output += `    + ${process.remainingThreads.count} more threads with combined CPU time ${process.remainingThreads.combinedCpuMs.toFixed(3)}ms and max CPU time ${process.remainingThreads.maxCpuMs.toFixed(3)}ms (use --all to see all)\n`;
     }
   }
 
   if (result.remainingProcesses) {
-    output += `  + ${result.remainingProcesses.count} more processes with combined CPU time ${result.remainingProcesses.combinedCpuMs.toFixed(3)}ms and max CPU time ${result.remainingProcesses.maxCpuMs.toFixed(3)}ms\n`;
+    output += `  + ${result.remainingProcesses.count} more processes with combined CPU time ${result.remainingProcesses.combinedCpuMs.toFixed(3)}ms and max CPU time ${result.remainingProcesses.maxCpuMs.toFixed(3)}ms (use --all to see all)\n`;
   }
 
   output += '\nCPU activity over time:\n';

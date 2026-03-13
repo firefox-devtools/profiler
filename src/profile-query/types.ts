@@ -389,6 +389,7 @@ export type ProfileInfoResult = {
   platform: string;
   threadCount: number;
   processCount: number;
+  showAll?: boolean;
   processes: Array<{
     processIndex: number;
     pid: string;

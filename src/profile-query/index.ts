@@ -105,12 +105,15 @@ export class ProfileQuerier {
     return new ProfileQuerier(store, rootRange);
   }
 
-  async profileInfo(): Promise<WithContext<ProfileInfoResult>> {
+  async profileInfo(
+    showAll: boolean = false
+  ): Promise<WithContext<ProfileInfoResult>> {
     const result = await collectProfileInfo(
       this._store,
       this._timestampManager,
       this._threadMap,
-      this._processIndexMap
+      this._processIndexMap,
+      showAll
     );
     return { ...result, context: this._getContext() };
   }

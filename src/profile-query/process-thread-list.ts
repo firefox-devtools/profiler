@@ -55,7 +55,8 @@ export type ProcessThreadListResult = {
  */
 export function buildProcessThreadList(
   threads: ThreadInfo[],
-  processIndexMap: Map<string, number>
+  processIndexMap: Map<string, number>,
+  showAll: boolean = false
 ): ProcessThreadListResult {
   // Aggregate threads by process
   const processCPUMap = new Map<string, ProcessInfo>();
@@ -92,6 +93,20 @@ export function buildProcessThreadList(
   // Get all processes sorted by CPU
   const allProcesses = Array.from(processCPUMap.values());
   allProcesses.sort((a, b) => b.cpuMs - a.cpuMs);
+
+  if (showAll) {
+    return {
+      processes: allProcesses.map(
+        ({ pid, processIndex, name, cpuMs, threads: allThreads }) => ({
+          processIndex,
+          pid,
+          name,
+          cpuMs,
+          threads: allThreads,
+        })
+      ),
+    };
+  }
 
   // Get top 5 processes by CPU
   const top5ProcessPids = new Set(allProcesses.slice(0, 5).map((p) => p.pid));

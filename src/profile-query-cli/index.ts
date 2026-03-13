@@ -74,7 +74,7 @@ function printUsage(): void {
 
 Commands:
   load <PATH>                 Load a profile and start a daemon session
-  profile info                Print profile summary (processes, threads, CPU activity)
+  profile info                Print profile summary (processes, threads, CPU activity) [--all]
   thread info                 Print detailed thread information
   thread select <handle>      Select a thread (e.g., t-0, t-1)
   thread samples              Show hot functions list for a thread
@@ -103,6 +103,7 @@ Options:
   --min-duration <ms>      Filter markers by minimum duration in milliseconds
   --max-duration <ms>      Filter markers by maximum duration in milliseconds
   --min-self <percent>     Filter functions by minimum self time percentage (for 'thread functions')
+  --all                    Show all processes and threads (for 'profile info', overrides default top-5 limit)
   --has-stack              Filter to show only markers with stack traces
   --limit <N>              Limit the number of results shown
   --group-by <keys>        Group markers by custom keys (e.g., "type,name" or "type,field:eventType")
@@ -307,7 +308,7 @@ async function main(): Promise<void> {
         if (subcommand === 'info' || subcommand === 'threads') {
           const result = await sendCommand(
             SESSION_DIR,
-            { command: 'profile', subcommand },
+            { command: 'profile', subcommand, all: argv.all },
             argv.session
           );
           console.log(formatOutput(result, argv.json || false));
