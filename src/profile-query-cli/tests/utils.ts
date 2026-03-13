@@ -3,7 +3,7 @@
  */
 
 import { spawn } from 'child_process';
-import { mkdtemp, rm } from 'fs/promises';
+import { mkdtemp, readdir, readFile, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
@@ -98,10 +98,42 @@ export async function createTestContext(): Promise<PqTestContext> {
 }
 
 /**
+ * Kill all daemon processes tracked in the session directory.
+ */
+async function killSessionDaemons(sessionDir: string): Promise<void> {
+  let files: string[];
+  try {
+    files = await readdir(sessionDir);
+  } catch {
+    return;
+  }
+
+  const metadataFiles = files.filter((f) => f.endsWith('.json'));
+  await Promise.all(
+    metadataFiles.map(async (file) => {
+      try {
+        const content = await readFile(join(sessionDir, file), 'utf-8');
+        const metadata = JSON.parse(content) as { pid?: number };
+        if (metadata.pid) {
+          try {
+            process.kill(metadata.pid, 'SIGTERM');
+          } catch {
+            // Process already gone.
+          }
+        }
+      } catch {
+        // Ignore unreadable/invalid files.
+      }
+    })
+  );
+}
+
+/**
  * Clean up test context.
  * Each test should call this in afterEach() to remove temp directory.
  */
 export async function cleanupTestContext(ctx: PqTestContext): Promise<void> {
+  await killSessionDaemons(ctx.sessionDir);
   await rm(ctx.sessionDir, { recursive: true, force: true });
 }
 
