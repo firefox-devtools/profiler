@@ -18,7 +18,7 @@ import {
   getSampleIndexClosestToStartTime,
   getSampleIndexToCallNodeIndex,
   getTreeOrderComparator,
-  getSamplesSelectedStates,
+  getSampleSelectedStates,
   extractProfileFilterPageData,
   findAddressProofForFile,
   calculateFunctionSizeLowerBound,
@@ -63,7 +63,7 @@ import type {
   IndexIntoCategoryList,
   IndexIntoNativeSymbolTable,
 } from 'firefox-profiler/types';
-import { SelectedState, ResourceType } from 'firefox-profiler/types';
+import { ResourceType, SampleRelationToNode } from 'firefox-profiler/types';
 
 describe('string-table', function () {
   const u = StringTable.withBackingArray(['foo', 'bar', 'baz']);
@@ -999,7 +999,7 @@ describe('funcHasDirectRecursiveCall and funcHasRecursiveCall', function () {
   });
 });
 
-describe('getSamplesSelectedStates', function () {
+describe('getSampleSelectedStates', function () {
   function setup(textSamples: string) {
     const {
       derivedThreads,
@@ -1049,40 +1049,44 @@ describe('getSamplesSelectedStates', function () {
 
     it('determines the selection status of all the samples', function () {
       expect(
-        getSamplesSelectedStates(callNodeInfo, sampleCallNodes, A_B)
+        Array.from(getSampleSelectedStates(callNodeInfo, sampleCallNodes, A_B))
       ).toEqual([
-        SelectedState.Selected,
-        SelectedState.UnselectedOrderedAfterSelected,
-        SelectedState.Selected,
-        SelectedState.UnselectedOrderedAfterSelected,
-        SelectedState.UnselectedOrderedAfterSelected,
+        SampleRelationToNode.TotalButNotSelf,
+        SampleRelationToNode.After,
+        SampleRelationToNode.TotalButNotSelf,
+        SampleRelationToNode.After,
+        SampleRelationToNode.After,
       ]);
       expect(
-        getSamplesSelectedStates(callNodeInfo, sampleCallNodes, A_D)
+        Array.from(getSampleSelectedStates(callNodeInfo, sampleCallNodes, A_D))
       ).toEqual([
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.Selected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.Selected,
-        SelectedState.Selected,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.TotalButNotSelf,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.TotalButNotSelf,
+        SampleRelationToNode.TotalAndSelf,
       ]);
       expect(
-        getSamplesSelectedStates(callNodeInfo, sampleCallNodes, A_B_F)
+        Array.from(
+          getSampleSelectedStates(callNodeInfo, sampleCallNodes, A_B_F)
+        )
       ).toEqual([
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedAfterSelected,
-        SelectedState.Selected,
-        SelectedState.UnselectedOrderedAfterSelected,
-        SelectedState.UnselectedOrderedAfterSelected,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.After,
+        SampleRelationToNode.TotalAndSelf,
+        SampleRelationToNode.After,
+        SampleRelationToNode.After,
       ]);
       expect(
-        getSamplesSelectedStates(callNodeInfo, sampleCallNodes, A_D_E)
+        Array.from(
+          getSampleSelectedStates(callNodeInfo, sampleCallNodes, A_D_E)
+        )
       ).toEqual([
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.Selected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedAfterSelected,
-        SelectedState.UnselectedOrderedBeforeSelected,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.TotalAndSelf,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.After,
+        SampleRelationToNode.Before,
       ]);
     });
 
@@ -1145,41 +1149,47 @@ describe('getSamplesSelectedStates', function () {
       // Test B <- A <- ...
       // Only samples 2 and 6 have stacks ending in ... -> A -> B
       expect(
-        getSamplesSelectedStates(callNodeInfoInverted, sampleCallNodes, inBA)
+        Array.from(
+          getSampleSelectedStates(callNodeInfoInverted, sampleCallNodes, inBA)
+        )
       ).toEqual([
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.Selected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedAfterSelected,
-        SelectedState.UnselectedOrderedAfterSelected,
-        SelectedState.Selected,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.TotalButNotSelf,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.After,
+        SampleRelationToNode.After,
+        SampleRelationToNode.TotalButNotSelf,
       ]);
       // Test C <- B <- A <- ...
       // Only sample 5 has a stack ending in ... -> A -> B -> C
       expect(
-        getSamplesSelectedStates(callNodeInfoInverted, sampleCallNodes, inCBA)
+        Array.from(
+          getSampleSelectedStates(callNodeInfoInverted, sampleCallNodes, inCBA)
+        )
       ).toEqual([
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.Selected,
-        SelectedState.UnselectedOrderedBeforeSelected,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.TotalButNotSelf,
+        SampleRelationToNode.Before,
       ]);
       // Test B <- ...
       // Only samples 2 and 6 have stacks ending in ... -> B
       expect(
-        getSamplesSelectedStates(callNodeInfoInverted, sampleCallNodes, inB)
+        Array.from(
+          getSampleSelectedStates(callNodeInfoInverted, sampleCallNodes, inB)
+        )
       ).toEqual([
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.Selected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedAfterSelected,
-        SelectedState.UnselectedOrderedAfterSelected,
-        SelectedState.Selected,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.TotalAndSelf,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.After,
+        SampleRelationToNode.After,
+        SampleRelationToNode.TotalAndSelf,
       ]);
     });
 

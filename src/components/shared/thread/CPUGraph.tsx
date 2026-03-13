@@ -11,14 +11,13 @@ import type {
   CategoryList,
   IndexIntoSamplesTable,
   Milliseconds,
-  SelectedState,
 } from 'firefox-profiler/types';
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 type Props = {
   readonly className: string;
   readonly thread: Thread;
-  readonly samplesSelectedStates: null | SelectedState[];
+  readonly sampleSelectedStates: Uint8Array;
   readonly interval: Milliseconds;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
@@ -44,14 +43,14 @@ export class ThreadCPUGraph extends PureComponent<Props> {
     if (sampleIndex >= samples.length - 1) {
       return 0;
     }
-    return ensureExists(samples.threadCPURatio)[sampleIndex + 1] || 0;
+    return ensureExists(samples.threadCPUPercent)[sampleIndex + 1] || 0;
   };
 
   override render() {
     const {
       className,
       thread,
-      samplesSelectedStates,
+      sampleSelectedStates,
       interval,
       rangeStart,
       rangeEnd,
@@ -66,12 +65,12 @@ export class ThreadCPUGraph extends PureComponent<Props> {
     return (
       <ThreadHeightGraph
         heightFunc={this._heightFunction}
-        maxValue={1}
+        maxValue={100}
         className={className}
         trackName={trackName}
         interval={interval}
         thread={thread}
-        samplesSelectedStates={samplesSelectedStates}
+        sampleSelectedStates={sampleSelectedStates}
         rangeStart={rangeStart}
         rangeEnd={rangeEnd}
         categories={categories}

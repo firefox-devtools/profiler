@@ -21,7 +21,6 @@ import type {
   CategoryList,
   ImplementationFilter,
   IndexIntoSamplesTable,
-  SelectedState,
   Milliseconds,
   CssPixels,
   TimelineType,
@@ -45,12 +44,11 @@ export type Props = {
     sampleIndex: IndexIntoSamplesTable | null
   ) => void;
   readonly categories: CategoryList;
-  readonly samplesSelectedStates: null | SelectedState[];
+  readonly sampleSelectedStates: Uint8Array;
   readonly treeOrderSampleComparator: (
     a: IndexIntoSamplesTable,
     b: IndexIntoSamplesTable
   ) => number;
-  readonly enableCPUUsage: boolean;
   readonly implementationFilter: ImplementationFilter;
   readonly timelineType: TimelineType;
   readonly zeroAt: Milliseconds;
@@ -135,9 +133,8 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
       rangeStart,
       rangeEnd,
       sampleIndexOffset,
-      samplesSelectedStates,
+      sampleSelectedStates,
       treeOrderSampleComparator,
-      enableCPUUsage,
       implementationFilter,
       width,
       height,
@@ -164,12 +161,11 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
           sampleIndexOffset={sampleIndexOffset}
-          samplesSelectedStates={samplesSelectedStates}
+          sampleSelectedStates={sampleSelectedStates}
           treeOrderSampleComparator={treeOrderSampleComparator}
           categories={categories}
           passFillsQuerier={this._setFillsQuerier}
           onClick={this._onClick}
-          enableCPUUsage={enableCPUUsage}
           width={width}
           height={height}
         />
