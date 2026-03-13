@@ -1,5 +1,6 @@
 src/profile-logic/import/proto
 src/types/libdef/npm
+src/profile-query-cli/dist
 docs-user/js
 docs-user/css
 src/test/fixtures/upgrades

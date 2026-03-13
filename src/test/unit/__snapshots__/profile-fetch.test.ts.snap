@@ -1,0 +1,301 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`fetchProfile fails if a bad profile JSON is passed in 1`] = `[Error: The profile’s JSON could not be decoded. The full error information has been printed out to the DevTool’s console.]`;
+
+exports[`fetchProfile fails if a bad profile JSON is passed in 2`] = `
+Array [
+  Array [
+    "The profile’s JSON could not be decoded.",
+  ],
+  Array [
+    "JSON parsing error:",
+    [SyntaxError: Unexpected token 'i', "invalid" is not valid JSON],
+  ],
+  Array [
+    "Fetch response:",
+    Response {
+      Symbol(state): Object {
+        "aborted": false,
+        "body": Object {
+          "length": 7,
+          "source": Uint8Array [],
+          "stream": ReadableStream {
+            Symbol(kType): "ReadableStream",
+            Symbol(kState): Object {
+              "controller": ReadableByteStreamController {
+                Symbol(kType): "ReadableByteStreamController",
+                Symbol(kState): Object {
+                  "autoAllocateChunkSize": undefined,
+                  "byobRequest": null,
+                  "cancelAlgorithm": undefined,
+                  "closeRequested": false,
+                  "highWaterMark": 0,
+                  "pendingPullIntos": Array [],
+                  "pullAgain": false,
+                  "pullAlgorithm": undefined,
+                  "pulling": false,
+                  "queue": Array [],
+                  "queueTotalSize": 0,
+                  "started": true,
+                  "stream": [Circular],
+                },
+              },
+              "disturbed": true,
+              "reader": ReadableStreamDefaultReader {
+                Symbol(kType): "ReadableStreamDefaultReader",
+                Symbol(kState): Object {
+                  "close": Object {
+                    "promise": Promise {},
+                    "reject": [Function],
+                    "resolve": [Function],
+                  },
+                  "readRequests": Array [],
+                  "stream": [Circular],
+                },
+              },
+              "state": "closed",
+              "storedError": undefined,
+              "transfer": Object {
+                "port1": undefined,
+                "port2": undefined,
+                "promise": undefined,
+                "writable": undefined,
+              },
+            },
+            Symbol(nodejs.webstream.isClosedPromise): Object {
+              "promise": Promise {},
+              "reject": [Function],
+              "resolve": [Function],
+            },
+            Symbol(nodejs.webstream.controllerErrorFunction): [Function],
+          },
+        },
+        "cacheState": "",
+        "headersList": HeadersList {
+          "cookies": null,
+          Symbol(headers map): Map {
+            "content-length" => Object {
+              "name": "content-length",
+              "value": "7",
+            },
+            "content-type" => Object {
+              "name": "content-type",
+              "value": "application/json",
+            },
+          },
+          Symbol(headers map sorted): null,
+        },
+        "rangeRequested": false,
+        "requestIncludesCredentials": false,
+        "status": 200,
+        "statusText": "OK",
+        "timingAllowPassed": false,
+        "timingInfo": null,
+        "type": "default",
+        "urlList": Array [],
+      },
+      Symbol(headers): Headers {},
+    },
+  ],
+]
+`;
+
+exports[`fetchProfile fails if a bad profile JSON is passed in, with no content type 1`] = `[Error: The profile’s JSON could not be decoded. The full error information has been printed out to the DevTool’s console.]`;
+
+exports[`fetchProfile fails if a bad profile JSON is passed in, with no content type 2`] = `
+Array [
+  Array [
+    "The profile’s JSON could not be decoded.",
+  ],
+  Array [
+    "JSON parsing error:",
+    [SyntaxError: Unexpected token 'i', "invalid" is not valid JSON],
+  ],
+  Array [
+    "Fetch response:",
+    Response {
+      Symbol(state): Object {
+        "aborted": false,
+        "body": Object {
+          "length": 7,
+          "source": Uint8Array [],
+          "stream": ReadableStream {
+            Symbol(kType): "ReadableStream",
+            Symbol(kState): Object {
+              "controller": ReadableByteStreamController {
+                Symbol(kType): "ReadableByteStreamController",
+                Symbol(kState): Object {
+                  "autoAllocateChunkSize": undefined,
+                  "byobRequest": null,
+                  "cancelAlgorithm": undefined,
+                  "closeRequested": false,
+                  "highWaterMark": 0,
+                  "pendingPullIntos": Array [],
+                  "pullAgain": false,
+                  "pullAlgorithm": undefined,
+                  "pulling": false,
+                  "queue": Array [],
+                  "queueTotalSize": 0,
+                  "started": true,
+                  "stream": [Circular],
+                },
+              },
+              "disturbed": true,
+              "reader": ReadableStreamDefaultReader {
+                Symbol(kType): "ReadableStreamDefaultReader",
+                Symbol(kState): Object {
+                  "close": Object {
+                    "promise": Promise {},
+                    "reject": [Function],
+                    "resolve": [Function],
+                  },
+                  "readRequests": Array [],
+                  "stream": [Circular],
+                },
+              },
+              "state": "closed",
+              "storedError": undefined,
+              "transfer": Object {
+                "port1": undefined,
+                "port2": undefined,
+                "promise": undefined,
+                "writable": undefined,
+              },
+            },
+            Symbol(nodejs.webstream.isClosedPromise): Object {
+              "promise": Promise {},
+              "reject": [Function],
+              "resolve": [Function],
+            },
+            Symbol(nodejs.webstream.controllerErrorFunction): [Function],
+          },
+        },
+        "cacheState": "",
+        "headersList": HeadersList {
+          "cookies": null,
+          Symbol(headers map): Map {
+            "content-length" => Object {
+              "name": "content-length",
+              "value": "7",
+            },
+            "content-type" => Object {
+              "name": "content-type",
+              "value": "undefined",
+            },
+          },
+          Symbol(headers map sorted): null,
+        },
+        "rangeRequested": false,
+        "requestIncludesCredentials": false,
+        "status": 200,
+        "statusText": "OK",
+        "timingAllowPassed": false,
+        "timingInfo": null,
+        "type": "default",
+        "urlList": Array [],
+      },
+      Symbol(headers): Headers {},
+    },
+  ],
+]
+`;
+
+exports[`fetchProfile fails if a bad zip file is passed in 1`] = `[Error: Unable to open the archive file. The full error information has been printed out to the DevTool’s console.]`;
+
+exports[`fetchProfile fails if a bad zip file is passed in 2`] = `
+Array [
+  Array [
+    "Unable to open the archive file.",
+  ],
+  Array [
+    "Error:",
+    [Error: Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html],
+  ],
+  Array [
+    "Fetch response:",
+    Response {
+      Symbol(state): Object {
+        "aborted": false,
+        "body": Object {
+          "length": 4,
+          "source": Uint8Array [],
+          "stream": ReadableStream {
+            Symbol(kType): "ReadableStream",
+            Symbol(kState): Object {
+              "controller": ReadableByteStreamController {
+                Symbol(kType): "ReadableByteStreamController",
+                Symbol(kState): Object {
+                  "autoAllocateChunkSize": undefined,
+                  "byobRequest": null,
+                  "cancelAlgorithm": undefined,
+                  "closeRequested": false,
+                  "highWaterMark": 0,
+                  "pendingPullIntos": Array [],
+                  "pullAgain": false,
+                  "pullAlgorithm": undefined,
+                  "pulling": false,
+                  "queue": Array [],
+                  "queueTotalSize": 0,
+                  "started": true,
+                  "stream": [Circular],
+                },
+              },
+              "disturbed": true,
+              "reader": ReadableStreamDefaultReader {
+                Symbol(kType): "ReadableStreamDefaultReader",
+                Symbol(kState): Object {
+                  "close": Object {
+                    "promise": Promise {},
+                    "reject": [Function],
+                    "resolve": [Function],
+                  },
+                  "readRequests": Array [],
+                  "stream": [Circular],
+                },
+              },
+              "state": "closed",
+              "storedError": undefined,
+              "transfer": Object {
+                "port1": undefined,
+                "port2": undefined,
+                "promise": undefined,
+                "writable": undefined,
+              },
+            },
+            Symbol(nodejs.webstream.isClosedPromise): Object {
+              "promise": Promise {},
+              "reject": [Function],
+              "resolve": [Function],
+            },
+            Symbol(nodejs.webstream.controllerErrorFunction): [Function],
+          },
+        },
+        "cacheState": "",
+        "headersList": HeadersList {
+          "cookies": null,
+          Symbol(headers map): Map {
+            "content-length" => Object {
+              "name": "content-length",
+              "value": "4",
+            },
+            "content-type" => Object {
+              "name": "content-type",
+              "value": "application/zip",
+            },
+          },
+          Symbol(headers map sorted): null,
+        },
+        "rangeRequested": false,
+        "requestIncludesCredentials": false,
+        "status": 200,
+        "statusText": "OK",
+        "timingAllowPassed": false,
+        "timingInfo": null,
+        "type": "default",
+        "urlList": Array [],
+      },
+      Symbol(headers): Headers {},
+    },
+  ],
+]
+`;
