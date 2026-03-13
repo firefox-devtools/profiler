@@ -23,7 +23,8 @@ export function collectProfileInfo(
   store: Store,
   timestampManager: TimestampManager,
   threadMap: ThreadMap,
-  processIndexMap: Map<string, number>
+  processIndexMap: Map<string, number>,
+  showAll: boolean = false
 ): ProfileInfoResult {
   const state = store.getState();
   const profile = getProfile(state);
@@ -40,7 +41,7 @@ export function collectProfileInfo(
   }));
 
   // Build the process/thread list
-  const result = buildProcessThreadList(threads, processIndexMap);
+  const result = buildProcessThreadList(threads, processIndexMap, showAll);
 
   // Apply process names and timing from the profile
   const processesData: ProfileInfoResult['processes'] = result.processes.map(
@@ -107,6 +108,7 @@ export function collectProfileInfo(
     platform: profile.meta.oscpu || 'Unknown',
     threadCount: profile.threads.length,
     processCount,
+    showAll,
     processes: processesData,
     remainingProcesses: result.remainingProcesses,
     cpuActivity,
