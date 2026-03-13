@@ -13,7 +13,7 @@ describe('buildProcessThreadList', function () {
     name: string,
     cpuMs: number
   ): ThreadInfo {
-    return { threadIndex, pid, name, cpuMs };
+    return { threadIndex, pid, name, tid: threadIndex, cpuMs };
   }
 
   it('shows top 5 processes by CPU, plus any needed for top 20 threads', function () {
