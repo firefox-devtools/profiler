@@ -143,6 +143,14 @@ class NetworkChartImpl extends React.PureComponent<Props> {
   };
 
   _onKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (event.key === 'Escape') {
+      const { threadsKey, changeSelectedNetworkMarker } = this.props;
+      event.stopPropagation();
+      event.preventDefault();
+      changeSelectedNetworkMarker(threadsKey, null, { source: 'keyboard' });
+      return;
+    }
+
     const hasModifier = event.ctrlKey || event.altKey;
     const isNavigationKey =
       event.key.startsWith('Arrow') ||
@@ -232,7 +240,13 @@ class NetworkChartImpl extends React.PureComponent<Props> {
   };
 
   _onLeftClick = (selectedNetworkMarkerIndex: MarkerIndex) => {
-    this._onSelectionChange(selectedNetworkMarkerIndex, { source: 'pointer' });
+    if (this.props.selectedNetworkMarkerIndex === selectedNetworkMarkerIndex) {
+      this._onSelectionChange(null, { source: 'pointer' });
+    } else {
+      this._onSelectionChange(selectedNetworkMarkerIndex, {
+        source: 'pointer',
+      });
+    }
   };
 
   _selectWithKeyboard(selectedNetworkMarkerIndex: MarkerIndex) {
@@ -240,7 +254,7 @@ class NetworkChartImpl extends React.PureComponent<Props> {
   }
 
   _onSelectionChange = (
-    selectedNetworkMarkerIndex: MarkerIndex,
+    selectedNetworkMarkerIndex: MarkerIndex | null,
     context: SelectionContext
   ) => {
     const { threadsKey, changeSelectedNetworkMarker } = this.props;
