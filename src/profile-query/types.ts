@@ -155,6 +155,7 @@ export type ThreadInfoResult = {
   threadHandle: string;
   name: string;
   friendlyName: string;
+  tid: number | string;
   createdAt: number;
   createdAtName: string;
   endedAt: number | null;
