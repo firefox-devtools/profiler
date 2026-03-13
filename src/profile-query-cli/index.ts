@@ -74,7 +74,7 @@ function printUsage(): void {
 
 Commands:
   load <PATH>                 Load a profile and start a daemon session
-  profile info                Print profile summary (processes, threads, CPU activity) [--all]
+  profile info                Print profile summary (processes, threads, CPU activity) [--all] [--search <term>]
   thread info                 Print detailed thread information
   thread select <handle>      Select a thread (e.g., t-0, t-1)
   thread samples              Show hot functions list for a thread
@@ -308,7 +308,12 @@ async function main(): Promise<void> {
         if (subcommand === 'info' || subcommand === 'threads') {
           const result = await sendCommand(
             SESSION_DIR,
-            { command: 'profile', subcommand, all: argv.all },
+            {
+              command: 'profile',
+              subcommand,
+              all: argv.all,
+              search: argv.search,
+            },
             argv.session
           );
           console.log(formatOutput(result, argv.json || false));
