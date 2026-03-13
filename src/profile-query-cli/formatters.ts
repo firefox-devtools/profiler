@@ -181,6 +181,7 @@ export function formatThreadInfoResult(
   let output = `${contextHeader}
 
 Name: ${result.friendlyName}
+TID: ${result.tid}
 Created at: ${result.createdAtName}
 Ended at: ${endedAtStr}
 

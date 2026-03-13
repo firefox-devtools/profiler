@@ -60,6 +60,7 @@ export function formatThreadInfo(
 
   return `\
 Name: ${friendlyThreadName}
+TID: ${thread.tid}
 Created at: ${timestampManager.nameForTimestamp(thread.registerTime)}
 Ended at: ${thread.unregisterTime !== null ? timestampManager.nameForTimestamp(thread.unregisterTime) : 'still alive at end of recording'}
 
@@ -102,6 +103,7 @@ export function collectThreadInfo(
     threadHandle: actualThreadHandle,
     name: thread.name,
     friendlyName: friendlyThreadName,
+    tid: thread.tid,
     createdAt: thread.registerTime,
     createdAtName: timestampManager.nameForTimestamp(thread.registerTime),
     endedAt: thread.unregisterTime,
