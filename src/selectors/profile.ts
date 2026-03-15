@@ -963,9 +963,9 @@ export const getSourceViewFile: Selector<string | null> = createSelector(
   }
 );
 
-export const getSourceViewSourceUuid: Selector<string | null> = createSelector(
+export const getSourceViewSourceId: Selector<string | null> = createSelector(
   getSourceTable,
   UrlState.getSourceViewSourceIndex,
   (sources, sourceIndex) =>
-    sourceIndex !== null ? sources.uuid[sourceIndex] : null
+    sourceIndex !== null ? sources.id[sourceIndex] : null
 );

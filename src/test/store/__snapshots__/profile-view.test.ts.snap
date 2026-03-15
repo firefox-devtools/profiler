@@ -418,7 +418,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 60,
+    "preprocessedProfileVersion": 61,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -426,7 +426,7 @@ Object {
     "startTime": 0,
     "symbolicated": true,
     "toolkit": "",
-    "version": 33,
+    "version": 34,
   },
   "pages": Array [
     Object {
@@ -635,8 +635,11 @@ Object {
     },
     "sources": Object {
       "filename": Array [],
+      "id": Array [],
       "length": 0,
-      "uuid": Array [],
+      "sourceMapURL": Array [],
+      "startColumn": Array [],
+      "startLine": Array [],
     },
     "stackTable": Object {
       "frame": Array [
@@ -2623,8 +2626,11 @@ CallTree {
     "showMarkersInTimeline": undefined,
     "sources": Object {
       "filename": Array [],
+      "id": Array [],
       "length": 0,
-      "uuid": Array [],
+      "sourceMapURL": Array [],
+      "startColumn": Array [],
+      "startLine": Array [],
     },
     "stackTable": Object {
       "category": Uint8Array [
@@ -2971,8 +2977,11 @@ Object {
   "showMarkersInTimeline": undefined,
   "sources": Object {
     "filename": Array [],
+    "id": Array [],
     "length": 0,
-    "uuid": Array [],
+    "sourceMapURL": Array [],
+    "startColumn": Array [],
+    "startLine": Array [],
   },
   "stackTable": Object {
     "category": Uint8Array [
@@ -3387,8 +3396,11 @@ Object {
   "showMarkersInTimeline": undefined,
   "sources": Object {
     "filename": Array [],
+    "id": Array [],
     "length": 0,
-    "uuid": Array [],
+    "sourceMapURL": Array [],
+    "startColumn": Array [],
+    "startLine": Array [],
   },
   "stackTable": Object {
     "category": Uint8Array [
@@ -3733,8 +3745,11 @@ Object {
   "showMarkersInTimeline": undefined,
   "sources": Object {
     "filename": Array [],
+    "id": Array [],
     "length": 0,
-    "uuid": Array [],
+    "sourceMapURL": Array [],
+    "startColumn": Array [],
+    "startLine": Array [],
   },
   "stackTable": Object {
     "category": Uint8Array [
@@ -4079,8 +4094,11 @@ Object {
   "showMarkersInTimeline": undefined,
   "sources": Object {
     "filename": Array [],
+    "id": Array [],
     "length": 0,
-    "uuid": Array [],
+    "sourceMapURL": Array [],
+    "startColumn": Array [],
+    "startLine": Array [],
   },
   "stackTable": Object {
     "category": Uint8Array [
