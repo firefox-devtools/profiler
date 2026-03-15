@@ -96,7 +96,7 @@ If you'd like to use [profiler.firefox.com](https://profiler.firefox.com) via UR
 FX_PROFILER_HOST="0.0.0.0" yarn start
 ```
 
-You'll probably also want to add your non-localhost domains to the `allowedHosts` property in `server.js`.
+When using `FX_PROFILER_HOST="0.0.0.0"`, any hostname is allowed so you can access the profiler from other devices on your network. If you want to expose only a specific hostname instead, set `FX_PROFILER_HOST` to that hostname directly and it will be added to the allowed hosts automatically.
 
 ## Finding something to work on
 
