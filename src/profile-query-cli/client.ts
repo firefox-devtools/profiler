@@ -58,7 +58,11 @@ async function sendRawMessage(
     ? getSocketPath(sessionDir, sessionId)
     : getCurrentSocketPath(sessionDir);
 
-  if (!socketPath || !fs.existsSync(socketPath)) {
+  // On Windows, named pipes are not filesystem files so existsSync always returns false
+  if (
+    !socketPath ||
+    (process.platform !== 'win32' && !fs.existsSync(socketPath))
+  ) {
     throw new Error(`Socket not found for session ${resolvedSessionId}`);
   }
 

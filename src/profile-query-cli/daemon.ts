@@ -1,6 +1,6 @@
 /**
  * Daemon process for pq.
- * Loads a profile and listens for commands on a Unix socket.
+ * Loads a profile and listens for commands on a Unix socket (or named pipe on Windows).
  */
 
 import * as net from 'net';
@@ -90,8 +90,8 @@ export class Daemon {
       // Create Unix socket server BEFORE loading the profile
       this.server = net.createServer((socket) => this.handleConnection(socket));
 
-      // Remove stale socket if it exists
-      if (fs.existsSync(this.socketPath)) {
+      // Remove stale socket if it exists (Unix only — named pipes on Windows are not filesystem files)
+      if (process.platform !== 'win32' && fs.existsSync(this.socketPath)) {
         fs.unlinkSync(this.socketPath);
       }
 

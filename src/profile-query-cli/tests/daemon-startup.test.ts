@@ -12,6 +12,7 @@ import {
   pqFail,
   type PqTestContext,
 } from './utils';
+import { getSocketPath } from '../session';
 
 describe('daemon startup (two-phase)', () => {
   let ctx: PqTestContext;
@@ -102,10 +103,13 @@ describe('daemon startup (two-phase)', () => {
     const sessionId = match![1];
 
     // Verify both socket and metadata exist (validateSession checks both)
-    const socketPath = join(ctx.sessionDir, `${sessionId}.sock`);
+    const socketPath = getSocketPath(ctx.sessionDir, sessionId);
     const metadataPath = join(ctx.sessionDir, `${sessionId}.json`);
 
-    await expect(access(socketPath)).resolves.toBeUndefined();
+    // Named pipes on Windows are not filesystem files, skip the access check there
+    if (process.platform !== 'win32') {
+      await expect(access(socketPath)).resolves.toBeUndefined();
+    }
     await expect(access(metadataPath)).resolves.toBeUndefined();
 
     // Process should be running (metadata contains PID)

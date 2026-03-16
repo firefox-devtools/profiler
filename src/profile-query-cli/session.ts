@@ -29,8 +29,12 @@ export function generateSessionId(): string {
 
 /**
  * Get the socket path for a session.
+ * On Windows, returns a named pipe path. On Unix, returns a .sock file path.
  */
 export function getSocketPath(sessionDir: string, sessionId: string): string {
+  if (process.platform === 'win32') {
+    return `\\\\.\\pipe\\pq-${sessionId}`;
+  }
   return path.join(sessionDir, `${sessionId}.sock`);
 }
 
@@ -143,8 +147,8 @@ export function cleanupSession(sessionDir: string, sessionId: string): void {
   // Note: We intentionally don't delete the log file for debugging purposes
   // const logPath = getLogPath(sessionDir, sessionId);
 
-  // Remove socket file
-  if (fs.existsSync(socketPath)) {
+  // Remove socket file (Unix only — named pipes on Windows are not filesystem files)
+  if (process.platform !== 'win32' && fs.existsSync(socketPath)) {
     fs.unlinkSync(socketPath);
   }
 
@@ -181,8 +185,8 @@ export function validateSession(
     return null;
   }
 
-  // Check if socket exists
-  if (!fs.existsSync(metadata.socketPath)) {
+  // Check if socket exists (Unix only — named pipes on Windows are not filesystem files)
+  if (process.platform !== 'win32' && !fs.existsSync(metadata.socketPath)) {
     // console.error(`Session ${sessionId} socket not found. Cleaning up.`);
     return null;
   }
