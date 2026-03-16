@@ -221,7 +221,8 @@ Stack trace for marker ${result.markerHandle}: ${result.markerName}\n`;
   }
 
   if (result.stack.capturedAt !== undefined) {
-    output += `\nCaptured at: ${result.stack.capturedAt.toFixed(3)}ms\n`;
+    const rootStart = result.context.rootRange.start;
+    output += `\nCaptured at: ${formatDuration(result.stack.capturedAt - rootStart)}\n`;
   }
 
   for (let i = 0; i < result.stack.frames.length; i++) {
