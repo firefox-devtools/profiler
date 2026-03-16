@@ -255,22 +255,15 @@ Marker ${result.markerHandle}: ${result.name}`;
   output += `Type: ${result.markerType ?? 'None'}\n`;
   output += `Category: ${result.category.name}\n`;
 
-  // Time and duration
-  const startStr = result.start.toFixed(3);
+  // Time and duration (relative to profile root start)
+  const rootStart = result.context.rootRange.start;
+  const startStr = formatDuration(result.start - rootStart);
   if (result.end !== null) {
-    const endStr = result.end.toFixed(3);
-    const durationMs = result.duration!;
-    let durationStr: string;
-    if (durationMs < 1) {
-      durationStr = `${(durationMs * 1000).toFixed(1)}µs`;
-    } else if (durationMs < 1000) {
-      durationStr = `${durationMs.toFixed(2)}ms`;
-    } else {
-      durationStr = `${(durationMs / 1000).toFixed(3)}s`;
-    }
-    output += `Time: ${startStr}ms - ${endStr}ms (${durationStr})\n`;
+    const endStr = formatDuration(result.end - rootStart);
+    const durationStr = formatDuration(result.duration!);
+    output += `Time: ${startStr} - ${endStr} (${durationStr})\n`;
   } else {
-    output += `Time: ${startStr}ms (instant)\n`;
+    output += `Time: ${startStr} (instant)\n`;
   }
 
   output += `Thread: ${result.threadHandle} (${result.friendlyThreadName})\n`;
@@ -293,7 +286,7 @@ Marker ${result.markerHandle}: ${result.name}`;
   if (result.stack && result.stack.frames.length > 0) {
     output += '\nStack trace:\n';
     if (result.stack.capturedAt !== undefined) {
-      output += `  Captured at: ${result.stack.capturedAt.toFixed(3)}ms\n`;
+      output += `  Captured at: ${formatDuration(result.stack.capturedAt - rootStart)}\n`;
     }
 
     for (let i = 0; i < result.stack.frames.length; i++) {
