@@ -9,7 +9,7 @@ A command-line interface for querying Firefox Profiler profiles with persistent 
 - **Daemon process**: Long-running background process that loads a profile via `ProfileQuerier` and keeps it in memory
 - **Client process**: Short-lived process that sends commands to the daemon and prints results
 
-**IPC:** Unix domain sockets with line-delimited JSON messages
+**IPC:** Unix domain sockets (named pipes on Windows) with line-delimited JSON messages
 
 **Session storage:** `~/.pq/` (or `$PQ_SESSION_DIR` for development)
 
@@ -94,17 +94,19 @@ npm publish
 ```
 ~/.pq/
 ├── current                    # Symlink to current session socket
-├── <session-id>.sock          # Unix domain socket for IPC
+├── <session-id>.sock          # Unix domain socket for IPC (Unix only)
 ├── <session-id>.json          # Session metadata (PID, profile path, timestamps)
 └── <session-id>.log           # Daemon logs (kept for debugging)
 ```
+
+On Windows, IPC uses a named pipe (`\\.\pipe\pq-<session-id>`) instead of a `.sock` file.
 
 **Session metadata example:**
 
 ```json
 {
   "id": "abc123xyz",
-  "socketPath": "/Users/user/.pq/abc123xyz.sock",
+  "socketPath": "/Users/user/.pq/abc123xyz.sock", // or \\.\pipe\pq-abc123xyz on Windows
   "logPath": "/Users/user/.pq/abc123xyz.log",
   "pid": 12345,
   "profilePath": "/path/to/profile.json",
@@ -181,7 +183,7 @@ type ServerResponse =
 **Session validation (session.ts):**
 
 - Check PID is running (`process.kill(pid, 0)`)
-- Check socket file exists
+- Check socket file exists (Unix only — named pipes on Windows are not filesystem files)
 - Auto-cleanup stale sessions
 
 **Symlinks:**
@@ -194,7 +196,7 @@ type ServerResponse =
 **Implemented:**
 
 - ✅ Persistent daemon with profile loading
-- ✅ Unix socket IPC
+- ✅ Unix socket IPC (named pipes on Windows)
 - ✅ Multiple concurrent sessions
 - ✅ Session management (current session, explicit session IDs)
 - ✅ Environment variable isolation (`PQ_SESSION_DIR`)
