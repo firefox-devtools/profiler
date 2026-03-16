@@ -24,7 +24,7 @@ CORE WORKFLOW
     pq profile info --all    Show all processes and threads (not just top 5)
     pq profile info --search GeckoMain   Filter by process/thread name, pid, or tid
 
-  Step 3: Select a thread to analyze
+  Step 3: Select a thread to analyze (requires Step 2 -- profile info builds thread handles)
     pq thread select t-0     Select a specific thread (persists for future commands)
 
   Step 4: Analyze CPU usage
