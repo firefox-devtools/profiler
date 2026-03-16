@@ -556,17 +556,26 @@ function mergeSources(
     const oldStringToNewStringPlusOne = translationMapsForStrings[profileIndex];
 
     for (let i = 0; i < sources.length; i++) {
-      const uuid = sources.uuid[i];
+      const id = sources.id[i];
       const originalUrlIndex = sources.filename[i];
       const newUrlIndex = oldStringToNewStringPlusOne[originalUrlIndex] - 1;
 
-      const sourceKey = uuid ?? `null-uuid-${newUrlIndex}`;
+      const originalSourceMapURLIndex = sources.sourceMapURL[i];
+      const newSourceMapURLIndex =
+        originalSourceMapURLIndex !== null
+          ? oldStringToNewStringPlusOne[originalSourceMapURLIndex] - 1
+          : null;
+
+      const sourceKey = id ?? `null-id-${newUrlIndex}`;
       let insertedSourceIndex = mapOfInsertedSources.get(sourceKey);
       if (insertedSourceIndex === undefined) {
         // Add new source
         insertedSourceIndex = newSources.length;
-        newSources.uuid[insertedSourceIndex] = uuid;
+        newSources.id[insertedSourceIndex] = id;
         newSources.filename[insertedSourceIndex] = newUrlIndex;
+        newSources.startLine[insertedSourceIndex] = sources.startLine[i];
+        newSources.startColumn[insertedSourceIndex] = sources.startColumn[i];
+        newSources.sourceMapURL[insertedSourceIndex] = newSourceMapURLIndex;
         newSources.length++;
         mapOfInsertedSources.set(sourceKey, insertedSourceIndex);
       }

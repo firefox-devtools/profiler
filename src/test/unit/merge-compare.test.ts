@@ -831,7 +831,7 @@ describe('mergeProfilesForDiffing with source tables', function () {
     );
 
     // Check that UUIDs are properly handled (should all be null for text samples)
-    expect(sources.uuid).toEqual([null, null, null, null]);
+    expect(sources.id).toEqual([null, null, null, null]);
 
     // Verify each filename index points to a valid string
     for (const filenameIndex of sources.filename) {
@@ -854,8 +854,8 @@ describe('mergeProfilesForDiffing with source tables', function () {
     `);
 
     // Manually modify the source tables to have UUIDs
-    profileA.profile.shared.sources.uuid[0] = 'uuid-a';
-    profileB.profile.shared.sources.uuid[0] = 'uuid-b';
+    profileA.profile.shared.sources.id[0] = 'uuid-a';
+    profileB.profile.shared.sources.id[0] = 'uuid-b';
 
     const profileState = stateFromLocation({
       pathname: '/public/fakehash1/',
@@ -882,8 +882,8 @@ describe('mergeProfilesForDiffing with source tables', function () {
     expect(sourceFilenames.filter((name) => name === 'script.js')).toHaveLength(
       2
     );
-    expect(sources.uuid).toHaveLength(2);
-    expect(sources.uuid).toEqual(expect.arrayContaining(['uuid-a', 'uuid-b']));
+    expect(sources.id).toHaveLength(2);
+    expect(sources.id).toEqual(expect.arrayContaining(['uuid-a', 'uuid-b']));
 
     // Both should point to the same filename string
     const filenameIndexes = sources.filename;
@@ -955,7 +955,7 @@ describe('mergeProfilesForDiffing with source tables', function () {
 
     // Should still have some sources from the profile structure
     expect(mergedProfile.shared.sources.filename).toBeArray();
-    expect(mergedProfile.shared.sources.uuid).toBeArray();
+    expect(mergedProfile.shared.sources.id).toBeArray();
     expect(mergedProfile.shared.sources.length).toBeNumber();
     expect(mergedProfile.shared.sources.length).toBeGreaterThanOrEqual(0);
   });

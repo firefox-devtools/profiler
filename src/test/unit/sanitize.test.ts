@@ -755,7 +755,7 @@ describe('sanitizePII', function () {
             cause: {
               tid: 1112,
               time: 1.0,
-              stack: 0,
+              stack: null,
             },
           },
         ],
@@ -773,7 +773,7 @@ describe('sanitizePII', function () {
             cause: {
               tid: 1113,
               time: 1.0,
-              stack: 0,
+              stack: null,
             },
           },
         ],

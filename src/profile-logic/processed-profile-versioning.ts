@@ -2663,7 +2663,7 @@ const _upgraders: {
     // Create the sources table
     const sourceTable = {
       length: 0,
-      uuid: [] as Array<string | null>,
+      id: [] as Array<string | null>,
       filename: [] as Array<number>,
     };
 
@@ -2690,7 +2690,7 @@ const _upgraders: {
           if (sourceIndex === undefined) {
             // Add new entry to sources table
             sourceIndex = sourceTable.length;
-            sourceTable.uuid.push(null);
+            sourceTable.id.push(null);
             sourceTable.filename.push(fileNameIndex);
             sourceTable.length++;
             fileNameIndexToSourceIndex.set(fileNameIndex, sourceIndex);
@@ -3029,6 +3029,26 @@ const _upgraders: {
     profile.shared.nativeSymbols = newNativeSymbols;
     upgradeInfo.v60 = { threadMappings, newFuncCount: newFuncTable.length };
   },
+
+  [61]: (profile: any) => {
+    // The source table schema was updated:
+    // - The "uuid" field was renamed to "id". Profiles stored at v58-60 before
+    //   this rename may still have the old "uuid" field name.
+    // - startLine and startColumn were added, defaulting to 1 as they are 1-based.
+    // - sourceMapURL was added, defaulting to null.
+    const sources = profile.shared && profile.shared.sources;
+    if (sources) {
+      if (sources.uuid !== undefined && sources.id === undefined) {
+        sources.id = sources.uuid;
+        delete sources.uuid;
+      }
+      const length = sources.length;
+      sources.startLine = new Array(length).fill(1);
+      sources.startColumn = new Array(length).fill(1);
+      sources.sourceMapURL = new Array(length).fill(null);
+    }
+  },
+
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };
