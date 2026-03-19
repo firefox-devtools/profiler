@@ -41,7 +41,7 @@ export type HoveredPixelState = {
 type Props = {
   readonly className: string;
   readonly thread: Thread;
-  readonly samplesSelectedStates: null | SelectedState[];
+  readonly sampleSelectedStates: Uint8Array;
   readonly interval: Milliseconds;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
@@ -66,7 +66,7 @@ type State = {
 type CanvasProps = {
   readonly className: string;
   readonly thread: Thread;
-  readonly samplesSelectedStates: null | SelectedState[];
+  readonly sampleSelectedStates: Uint8Array;
   readonly interval: Milliseconds;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
@@ -140,7 +140,7 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
       interval,
       rangeStart,
       rangeEnd,
-      samplesSelectedStates,
+      sampleSelectedStates,
       categories,
       width,
       height,
@@ -195,10 +195,7 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
       const xPos =
         (sampleTime - rangeStart) * xPixelsPerMs - drawnSampleWidth / 2;
       let samplesBucket;
-      if (
-        samplesSelectedStates !== null &&
-        samplesSelectedStates[i] === SelectedState.Selected
-      ) {
+      if (sampleSelectedStates[i] === (SelectedState.Selected as number)) {
         samplesBucket = highlightedSamples;
       } else {
         const categoryIndex = thread.stackTable.category[stackIndex];
@@ -350,7 +347,7 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
       interval,
       rangeStart,
       rangeEnd,
-      samplesSelectedStates,
+      sampleSelectedStates,
       width,
       height,
       zeroAt,
@@ -372,7 +369,7 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
           thread={thread}
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
-          samplesSelectedStates={samplesSelectedStates}
+          sampleSelectedStates={sampleSelectedStates}
           categories={categories}
           width={width}
           height={height}
