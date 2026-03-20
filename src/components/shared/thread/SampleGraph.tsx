@@ -24,11 +24,11 @@ import type {
   CategoryList,
   IndexIntoSamplesTable,
   Milliseconds,
-  SelectedState,
   CssPixels,
   TimelineType,
   ImplementationFilter,
 } from 'firefox-profiler/types';
+import { SelectedState } from 'firefox-profiler/types';
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type { CpuRatioInTimeRange } from './ActivityGraphFills';
 import { lightDark } from 'firefox-profiler/utils/dark-mode';
@@ -41,7 +41,7 @@ export type HoveredPixelState = {
 type Props = {
   readonly className: string;
   readonly thread: Thread;
-  readonly samplesSelectedStates: null | SelectedState[];
+  readonly sampleSelectedStates: Uint8Array;
   readonly interval: Milliseconds;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
@@ -66,7 +66,7 @@ type State = {
 type CanvasProps = {
   readonly className: string;
   readonly thread: Thread;
-  readonly samplesSelectedStates: null | SelectedState[];
+  readonly sampleSelectedStates: Uint8Array;
   readonly interval: Milliseconds;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
@@ -140,7 +140,7 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
       interval,
       rangeStart,
       rangeEnd,
-      samplesSelectedStates,
+      sampleSelectedStates,
       categories,
       width,
       height,
@@ -175,6 +175,8 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
       firstDrawnSampleIndex
     );
 
+    const idleCategoryIndex = categories.findIndex((c) => c.name === 'Idle');
+
     // Do one pass over the samples array to gather the samples we want to draw.
     const regularSamples: number[] = [];
     const idleSamples: number[] = [];
@@ -188,22 +190,18 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
       if (sampleTime < nextMinTime) {
         continue;
       }
-      const stackIndex = thread.samples.stack[i];
-      if (stackIndex === null) {
+      const state = sampleSelectedStates[i] as SelectedState;
+      if (state === SelectedState.FilteredOutByTransform) {
         continue;
       }
       const xPos =
         (sampleTime - rangeStart) * xPixelsPerMs - drawnSampleWidth / 2;
       let samplesBucket;
-      if (
-        samplesSelectedStates !== null &&
-        samplesSelectedStates[i] === 'SELECTED'
-      ) {
+      if (state === SelectedState.Selected) {
         samplesBucket = highlightedSamples;
       } else {
-        const categoryIndex = thread.stackTable.category[stackIndex];
-        const category = categories[categoryIndex];
-        if (category.name === 'Idle') {
+        const categoryIndex = thread.samples.category[i];
+        if (categoryIndex === idleCategoryIndex) {
           samplesBucket = idleSamples;
         } else {
           samplesBucket = regularSamples;
@@ -350,7 +348,7 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
       interval,
       rangeStart,
       rangeEnd,
-      samplesSelectedStates,
+      sampleSelectedStates,
       width,
       height,
       zeroAt,
@@ -372,7 +370,7 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
           thread={thread}
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
-          samplesSelectedStates={samplesSelectedStates}
+          sampleSelectedStates={sampleSelectedStates}
           categories={categories}
           width={width}
           height={height}

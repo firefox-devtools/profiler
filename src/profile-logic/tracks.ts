@@ -1383,6 +1383,7 @@ function _computeThreadSampleScore(
   const derivedStackTable = computeStackTableFromRawStackTable(
     stackTable,
     frameTable,
+    meta.categories,
     defaultCategory
   );
   const nonIdleSampleCount = samples.stack.filter(

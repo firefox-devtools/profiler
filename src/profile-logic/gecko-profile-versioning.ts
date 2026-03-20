@@ -1522,6 +1522,41 @@ const _upgraders: {
     convertToVersion33Recursive(profile);
   },
 
+  [34]: (profile: any) => {
+    // The source table schema was updated:
+    // - The "uuid" field was renamed to "id".
+    // - startLine and startColumn were added, defaulting to 1 as they are 1-based.
+    // - sourceMapURL was added, defaulting to null.
+    function convertToVersion34Recursive(p: any) {
+      if (p.sources) {
+        const schema = p.sources.schema;
+
+        schema.id = schema.uuid;
+        delete schema.uuid;
+
+        // Set the source table schema indices for the new required fields.
+        // These indices specify which array position corresponds to each value.
+        // Then fill the arrays with default values.
+        // See the GeckoSourceTable type in src/types/gecko-profile.ts to see
+        // these values.
+        schema.startLine = 2;
+        schema.startColumn = 3;
+        schema.sourceMapURL = 4;
+
+        for (const row of p.sources.data) {
+          row[2] = 1;
+          row[3] = 1;
+          row[4] = null;
+        }
+      }
+
+      for (const subprocessProfile of p.processes) {
+        convertToVersion34Recursive(subprocessProfile);
+      }
+    }
+    convertToVersion34Recursive(profile);
+  },
+
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

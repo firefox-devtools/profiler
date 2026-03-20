@@ -347,6 +347,9 @@ Home--record-instructions =
     För att starta profilering, klicka på profileringsknappen eller använd
     kortkommandona. Ikonen är blå när en profil spelas in. Tryck på
     <kbd>Fånga</kbd> för att ladda data till profiler.firefox.com.
+Home--instructions-content2 =
+    Inspelning av prestandaprofiler kräver <a>{ -firefox-brand-name } för datorer</a>.
+    Befintliga profiler kan dock visas i vilken modern webbläsare som helst.
 Home--fenix-instructions-directly =
     { -firefox-android-brand-name } kan profileras direkt på den här enheten. För
     mer information, läs <a>Profilering av { -firefox-android-brand-name } direkt på enheten</a>.

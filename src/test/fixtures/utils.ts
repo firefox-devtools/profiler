@@ -36,6 +36,7 @@ import type {
   IndexIntoCategoryList,
   SampleUnits,
   SourceTable,
+  CategoryList,
 } from 'firefox-profiler/types';
 
 import { ensureExists } from 'firefox-profiler/utils/types';
@@ -139,6 +140,7 @@ export function getMouseEvent(
 export function computeThreadFromRawThread(
   rawThread: RawThread,
   shared: RawProfileSharedData,
+  categories: CategoryList | undefined,
   sampleUnits: SampleUnits | undefined,
   referenceCPUDeltaPerMs: number,
   defaultCategory: IndexIntoCategoryList
@@ -147,12 +149,15 @@ export function computeThreadFromRawThread(
   const stackTable = computeStackTableFromRawStackTable(
     shared.stackTable,
     shared.frameTable,
+    categories,
     defaultCategory
   );
   const samples = computeSamplesTableFromRawSamplesTable(
     rawThread.samples,
+    stackTable,
     sampleUnits,
-    referenceCPUDeltaPerMs
+    referenceCPUDeltaPerMs,
+    defaultCategory
   );
   const tracedValuesBuffer = rawThread.tracedValuesBuffer
     ? base64StringToBytes(rawThread.tracedValuesBuffer)
@@ -644,11 +649,14 @@ function isControlInput(element: HTMLElement): boolean {
 export function addSourceToTable(
   sources: SourceTable,
   urlStringIndex: number,
-  uuid: string | null = null
+  id: string | null = null,
+  startLine: number = 1,
+  startColumn: number = 1,
+  sourceMapURLStringIndex: number | null = null
 ): number {
   // Check if source already exists
   for (let i = 0; i < sources.filename.length; i++) {
-    if (sources.filename[i] === urlStringIndex && sources.uuid[i] === uuid) {
+    if (sources.filename[i] === urlStringIndex && sources.id[i] === id) {
       return i;
     }
   }
@@ -656,7 +664,10 @@ export function addSourceToTable(
   // Add new source entry
   const sourceIndex = sources.filename.length;
   sources.filename.push(urlStringIndex);
-  sources.uuid.push(uuid);
+  sources.id.push(id);
+  sources.startLine.push(startLine);
+  sources.startColumn.push(startColumn);
+  sources.sourceMapURL.push(sourceMapURLStringIndex);
   sources.length = sources.filename.length;
 
   return sourceIndex;

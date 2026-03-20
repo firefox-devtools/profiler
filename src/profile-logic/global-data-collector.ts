@@ -10,7 +10,6 @@ import {
   getEmptyRawStackTable,
   getEmptyResourceTable,
   getEmptySourceTable,
-  resourceTypes,
 } from './data-structures';
 
 import type {
@@ -33,6 +32,7 @@ import type {
   Address,
   Bytes,
 } from 'firefox-profiler/types';
+import { ResourceType } from 'firefox-profiler/types';
 
 /**
  * GlobalDataCollector collects data which is global in the processed profile
@@ -61,7 +61,7 @@ export class GlobalDataCollector {
   _libNameToResourceIndex: Map<IndexIntoStringTable, IndexIntoResourceTable> =
     new Map();
   _originToResourceIndex: Map<string, IndexIntoResourceTable> = new Map();
-  _uuidToSourceIndex: Map<string, IndexIntoSourceTable> = new Map();
+  _idToSourceIndex: Map<string, IndexIntoSourceTable> = new Map();
   _filenameToSourceIndex: Map<IndexIntoStringTable, IndexIntoSourceTable> =
     new Map();
 
@@ -115,13 +115,19 @@ export class GlobalDataCollector {
 
   // Return the global index for this source, adding it to the global list if
   // necessary.
-  indexForSource(uuid: string | null, filename: string): IndexIntoSourceTable {
+  indexForSource(
+    id: string | null,
+    filename: string,
+    startLine: number = 1,
+    startColumn: number = 1,
+    sourceMapURL: string | null = null
+  ): IndexIntoSourceTable {
     let index: IndexIntoSourceTable | undefined;
 
-    if (uuid !== null) {
-      index = this._uuidToSourceIndex.get(uuid);
+    if (id !== null) {
+      index = this._idToSourceIndex.get(id);
     } else {
-      // For null UUIDs, use filename-based lookup
+      // For null IDs, use filename-based lookup.
       const filenameIndex = this._stringTable.indexForString(filename);
       index = this._filenameToSourceIndex.get(filenameIndex);
     }
@@ -129,12 +135,19 @@ export class GlobalDataCollector {
     if (index === undefined) {
       index = this._sources.length;
       const filenameIndex = this._stringTable.indexForString(filename);
-      this._sources.uuid[index] = uuid;
+      const sourceMapURLIndex =
+        sourceMapURL !== null
+          ? this._stringTable.indexForString(sourceMapURL)
+          : null;
+      this._sources.id[index] = id;
       this._sources.filename[index] = filenameIndex;
+      this._sources.startLine[index] = startLine;
+      this._sources.startColumn[index] = startColumn;
+      this._sources.sourceMapURL[index] = sourceMapURLIndex;
       this._sources.length++;
 
-      if (uuid !== null) {
-        this._uuidToSourceIndex.set(uuid, index);
+      if (id !== null) {
+        this._idToSourceIndex.set(id, index);
       } else {
         this._filenameToSourceIndex.set(filenameIndex, index);
       }
@@ -163,7 +176,7 @@ export class GlobalDataCollector {
         resourceTable.name[resourceIndex] =
           this._stringTable.indexForString(name);
         resourceTable.host[resourceIndex] = idIndex;
-        resourceTable.type[resourceIndex] = resourceTypes.addon;
+        resourceTable.type[resourceIndex] = ResourceType.Addon;
       }
     }
   }
@@ -208,7 +221,7 @@ export class GlobalDataCollector {
         this._stringTable.indexForString(origin);
       resourceTable.host[resourceIndex] =
         this._stringTable.indexForString(host);
-      resourceTable.type[resourceIndex] = resourceTypes.webhost;
+      resourceTable.type[resourceIndex] = ResourceType.Webhost;
     } else {
       // This is a URL, but it doesn't point to something on the web, e.g. a
       // chrome url.
@@ -216,7 +229,7 @@ export class GlobalDataCollector {
       resourceTable.name[resourceIndex] =
         this._stringTable.indexForString(scriptURI);
       resourceTable.host[resourceIndex] = null;
-      resourceTable.type[resourceIndex] = resourceTypes.url;
+      resourceTable.type[resourceIndex] = ResourceType.Url;
     }
     return resourceIndex;
   }
@@ -236,7 +249,7 @@ export class GlobalDataCollector {
       this._libs[libIndex].name
     );
     resourceTable.host[resourceIndex] = null;
-    resourceTable.type[resourceIndex] = resourceTypes.library;
+    resourceTable.type[resourceIndex] = ResourceType.Library;
     return resourceIndex;
   }
 
@@ -255,7 +268,7 @@ export class GlobalDataCollector {
     resourceTable.lib[resourceIndex] = null;
     resourceTable.name[resourceIndex] = libNameStringIndex;
     resourceTable.host[resourceIndex] = null;
-    resourceTable.type[resourceIndex] = resourceTypes.library;
+    resourceTable.type[resourceIndex] = ResourceType.Library;
     return resourceIndex;
   }
 

@@ -418,7 +418,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 60,
+    "preprocessedProfileVersion": 61,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -426,7 +426,7 @@ Object {
     "startTime": 0,
     "symbolicated": true,
     "toolkit": "",
-    "version": 33,
+    "version": 34,
   },
   "pages": Array [
     Object {
@@ -635,8 +635,11 @@ Object {
     },
     "sources": Object {
       "filename": Array [],
+      "id": Array [],
       "length": 0,
-      "uuid": Array [],
+      "sourceMapURL": Array [],
+      "startColumn": Array [],
+      "startLine": Array [],
     },
     "stackTable": Object {
       "frame": Array [
@@ -2336,6 +2339,10 @@ CallTree {
   },
   "_isHighPrecision": false,
   "_previewFilteredCtssSamples": Object {
+    "category": Uint8Array [
+      0,
+      0,
+    ],
     "eventDelay": Array [
       0,
       0,
@@ -2344,6 +2351,10 @@ CallTree {
     "stack": Array [
       6,
       6,
+    ],
+    "subcategory": Uint8Array [
+      0,
+      0,
     ],
     "time": Array [
       4,
@@ -2578,6 +2589,12 @@ CallTree {
       "type": Array [],
     },
     "samples": Object {
+      "category": Uint8Array [
+        0,
+        0,
+        0,
+        0,
+      ],
       "eventDelay": Array [
         0,
         0,
@@ -2591,6 +2608,12 @@ CallTree {
         6,
         8,
       ],
+      "subcategory": Uint8Array [
+        0,
+        0,
+        0,
+        0,
+      ],
       "time": Array [
         3,
         4,
@@ -2603,11 +2626,14 @@ CallTree {
     "showMarkersInTimeline": undefined,
     "sources": Object {
       "filename": Array [],
+      "id": Array [],
       "length": 0,
-      "uuid": Array [],
+      "sourceMapURL": Array [],
+      "startColumn": Array [],
+      "startLine": Array [],
     },
     "stackTable": Object {
-      "category": Array [
+      "category": Uint8Array [
         0,
         0,
         0,
@@ -2641,7 +2667,7 @@ CallTree {
         1,
         7,
       ],
-      "subcategory": Array [
+      "subcategory": Uint8Array [
         0,
         0,
         0,
@@ -2914,6 +2940,12 @@ Object {
     "type": Array [],
   },
   "samples": Object {
+    "category": Uint8Array [
+      0,
+      0,
+      0,
+      0,
+    ],
     "eventDelay": Array [
       0,
       0,
@@ -2927,6 +2959,12 @@ Object {
       6,
       8,
     ],
+    "subcategory": Uint8Array [
+      0,
+      0,
+      0,
+      0,
+    ],
     "time": Array [
       3,
       4,
@@ -2939,11 +2977,14 @@ Object {
   "showMarkersInTimeline": undefined,
   "sources": Object {
     "filename": Array [],
+    "id": Array [],
     "length": 0,
-    "uuid": Array [],
+    "sourceMapURL": Array [],
+    "startColumn": Array [],
+    "startLine": Array [],
   },
   "stackTable": Object {
-    "category": Array [
+    "category": Uint8Array [
       0,
       0,
       0,
@@ -2977,7 +3018,7 @@ Object {
       1,
       7,
     ],
-    "subcategory": Array [
+    "subcategory": Uint8Array [
       0,
       0,
       0,
@@ -3328,6 +3369,10 @@ Object {
     "type": Array [],
   },
   "samples": Object {
+    "category": Uint8Array [
+      0,
+      0,
+    ],
     "eventDelay": Array [
       0,
       0,
@@ -3336,6 +3381,10 @@ Object {
     "stack": Array [
       6,
       6,
+    ],
+    "subcategory": Uint8Array [
+      0,
+      0,
     ],
     "time": Array [
       4,
@@ -3347,11 +3396,14 @@ Object {
   "showMarkersInTimeline": undefined,
   "sources": Object {
     "filename": Array [],
+    "id": Array [],
     "length": 0,
-    "uuid": Array [],
+    "sourceMapURL": Array [],
+    "startColumn": Array [],
+    "startLine": Array [],
   },
   "stackTable": Object {
-    "category": Array [
+    "category": Uint8Array [
       0,
       0,
       0,
@@ -3385,7 +3437,7 @@ Object {
       1,
       7,
     ],
-    "subcategory": Array [
+    "subcategory": Uint8Array [
       0,
       0,
       0,
@@ -3656,6 +3708,12 @@ Object {
     "type": Array [],
   },
   "samples": Object {
+    "category": Uint8Array [
+      0,
+      0,
+      0,
+      0,
+    ],
     "eventDelay": Array [
       0,
       0,
@@ -3669,6 +3727,12 @@ Object {
       6,
       8,
     ],
+    "subcategory": Uint8Array [
+      0,
+      0,
+      0,
+      0,
+    ],
     "time": Array [
       3,
       4,
@@ -3681,11 +3745,14 @@ Object {
   "showMarkersInTimeline": undefined,
   "sources": Object {
     "filename": Array [],
+    "id": Array [],
     "length": 0,
-    "uuid": Array [],
+    "sourceMapURL": Array [],
+    "startColumn": Array [],
+    "startLine": Array [],
   },
   "stackTable": Object {
-    "category": Array [
+    "category": Uint8Array [
       0,
       0,
       0,
@@ -3719,7 +3786,7 @@ Object {
       1,
       7,
     ],
-    "subcategory": Array [
+    "subcategory": Uint8Array [
       0,
       0,
       0,
@@ -3990,6 +4057,12 @@ Object {
     "type": Array [],
   },
   "samples": Object {
+    "category": Uint8Array [
+      0,
+      0,
+      0,
+      0,
+    ],
     "eventDelay": Array [
       0,
       0,
@@ -4003,6 +4076,12 @@ Object {
       6,
       8,
     ],
+    "subcategory": Uint8Array [
+      0,
+      0,
+      0,
+      0,
+    ],
     "time": Array [
       3,
       4,
@@ -4015,11 +4094,14 @@ Object {
   "showMarkersInTimeline": undefined,
   "sources": Object {
     "filename": Array [],
+    "id": Array [],
     "length": 0,
-    "uuid": Array [],
+    "sourceMapURL": Array [],
+    "startColumn": Array [],
+    "startLine": Array [],
   },
   "stackTable": Object {
-    "category": Array [
+    "category": Uint8Array [
       0,
       0,
       0,
@@ -4053,7 +4135,7 @@ Object {
       1,
       7,
     ],
-    "subcategory": Array [
+    "subcategory": Uint8Array [
       0,
       0,
       0,

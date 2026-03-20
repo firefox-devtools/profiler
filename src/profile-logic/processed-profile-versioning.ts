@@ -14,7 +14,7 @@
  */
 
 import { sortDataTable } from '../utils/data-table-utils';
-import { resourceTypes } from './data-structures';
+import { ResourceType } from 'firefox-profiler/types';
 import { StringTable } from '../utils/string-table';
 import { timeCode } from '../utils/time-code';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
@@ -356,19 +356,19 @@ const _upgraders: {
       };
       function addLibResource(name: number, lib: number) {
         const index = newResourceTable.length++;
-        newResourceTable.type[index] = resourceTypes.library;
+        newResourceTable.type[index] = ResourceType.Library;
         newResourceTable.name[index] = name;
         newResourceTable.lib[index] = lib;
       }
       function addWebhostResource(origin: number, host: number) {
         const index = newResourceTable.length++;
-        newResourceTable.type[index] = resourceTypes.webhost;
+        newResourceTable.type[index] = ResourceType.Webhost;
         newResourceTable.name[index] = origin;
         newResourceTable.host[index] = host;
       }
       function addUrlResource(url: number) {
         const index = newResourceTable.length++;
-        newResourceTable.type[index] = resourceTypes.url;
+        newResourceTable.type[index] = ResourceType.Url;
         newResourceTable.name[index] = url;
       }
       const oldResourceToNewResourceMap = new Map();
@@ -378,7 +378,7 @@ const _upgraders: {
         resourceIndex < resourceTable.length;
         resourceIndex++
       ) {
-        if (resourceTable.type[resourceIndex] === resourceTypes.library) {
+        if (resourceTable.type[resourceIndex] === ResourceType.Library) {
           oldResourceToNewResourceMap.set(
             resourceIndex,
             newResourceTable.length
@@ -387,7 +387,7 @@ const _upgraders: {
             resourceTable.name[resourceIndex],
             resourceTable.lib[resourceIndex]
           );
-        } else if (resourceTable.type[resourceIndex] === resourceTypes.url) {
+        } else if (resourceTable.type[resourceIndex] === ResourceType.Url) {
           const scriptURI = stringTable.getString(
             resourceTable.name[resourceIndex]
           );
@@ -1810,7 +1810,7 @@ const _upgraders: {
           continue;
         }
         const resourceType = resourceTable.type[resourceIndex];
-        if (resourceType !== resourceTypes.library) {
+        if (resourceType !== ResourceType.Library) {
           continue;
         }
         const libIndex = resourceTable.lib[resourceIndex];
@@ -2663,7 +2663,7 @@ const _upgraders: {
     // Create the sources table
     const sourceTable = {
       length: 0,
-      uuid: [] as Array<string | null>,
+      id: [] as Array<string | null>,
       filename: [] as Array<number>,
     };
 
@@ -2690,7 +2690,7 @@ const _upgraders: {
           if (sourceIndex === undefined) {
             // Add new entry to sources table
             sourceIndex = sourceTable.length;
-            sourceTable.uuid.push(null);
+            sourceTable.id.push(null);
             sourceTable.filename.push(fileNameIndex);
             sourceTable.length++;
             fileNameIndexToSourceIndex.set(fileNameIndex, sourceIndex);
@@ -3029,6 +3029,26 @@ const _upgraders: {
     profile.shared.nativeSymbols = newNativeSymbols;
     upgradeInfo.v60 = { threadMappings, newFuncCount: newFuncTable.length };
   },
+
+  [61]: (profile: any) => {
+    // The source table schema was updated:
+    // - The "uuid" field was renamed to "id". Profiles stored at v58-60 before
+    //   this rename may still have the old "uuid" field name.
+    // - startLine and startColumn were added, defaulting to 1 as they are 1-based.
+    // - sourceMapURL was added, defaulting to null.
+    const sources = profile.shared && profile.shared.sources;
+    if (sources) {
+      if (sources.uuid !== undefined && sources.id === undefined) {
+        sources.id = sources.uuid;
+        delete sources.uuid;
+      }
+      const length = sources.length;
+      sources.startLine = new Array(length).fill(1);
+      sources.startColumn = new Array(length).fill(1);
+      sources.sourceMapURL = new Array(length).fill(null);
+    }
+  },
+
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

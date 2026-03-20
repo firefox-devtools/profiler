@@ -287,7 +287,7 @@ export function extractFuncsAndResourcesFromFrameLocations(
  * address.
  * We also associate the address with the library that contains it, and convert the address
  * into a library-relative offset. This association is established via the function's
- * "resource": The function points to the resource (of type resourceTypes.library), and the
+ * "resource": The function points to the resource (of type ResourceType.Library), and the
  * resource has the index to the library in thread.libs.
  * We return the index of the newly-added function, and the address as a library-relative
  * offset.
@@ -431,13 +431,27 @@ function _extractJsFunction(
   let processedSourceIndex = null;
   if (sourceIndex !== undefined) {
     const geckoSourceIdx = parseInt(sourceIndex, 10);
-    // Look up the UUID for this source index from the process's sources table
+    // Look up the ID for this source index from the process's sources table.
     if (geckoSourceIdx < geckoSourceTable.data.length) {
-      const uuidIndex = geckoSourceTable.schema.uuid;
+      const idIndex = geckoSourceTable.schema.id;
       const filenameIndex = geckoSourceTable.schema.filename;
-      const uuid = geckoSourceTable.data[geckoSourceIdx][uuidIndex];
+      const startLineIndex = geckoSourceTable.schema.startLine;
+      const startColumnIndex = geckoSourceTable.schema.startColumn;
+      const sourceMapURLIndex = geckoSourceTable.schema.sourceMapURL;
+      const id = geckoSourceTable.data[geckoSourceIdx][idIndex];
       const filename = geckoSourceTable.data[geckoSourceIdx][filenameIndex];
-      processedSourceIndex = globalDataCollector.indexForSource(uuid, filename);
+      const startLine = geckoSourceTable.data[geckoSourceIdx][startLineIndex];
+      const startColumn =
+        geckoSourceTable.data[geckoSourceIdx][startColumnIndex];
+      const sourceMapURL =
+        geckoSourceTable.data[geckoSourceIdx][sourceMapURLIndex];
+      processedSourceIndex = globalDataCollector.indexForSource(
+        id,
+        filename,
+        startLine,
+        startColumn,
+        sourceMapURL
+      );
     }
   }
 

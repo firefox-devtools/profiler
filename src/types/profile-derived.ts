@@ -31,7 +31,6 @@ import type {
   IndexIntoStackTable,
   WeightType,
   IndexIntoFrameTable,
-  IndexIntoSubcategoryListForCategory,
   SourceTable,
   IndexIntoSourceTable,
 } from './profile';
@@ -137,6 +136,10 @@ export type SamplesTable = {
   // The CPU ratio, between 0 and 1, over the time between the previous sample
   // and this sample.
   threadCPURatio?: Float64Array | undefined;
+  // The category of each sample's stack in the unfiltered thread.
+  category: Uint8Array;
+  // The subcategory of each sample's stack in the unfiltered thread.
+  subcategory: Uint16Array | Uint8Array;
   // This property isn't present in normal threads. However it's present for
   // merged threads, so that we know the origin thread for these samples.
   threadId?: Tid[];
@@ -144,7 +147,14 @@ export type SamplesTable = {
   length: number;
 };
 
-type SamplesLikeTableShape = {
+export type SampleCategoriesAndSubcategories = {
+  // represents a Map<IndexIntoSamplesTable, IndexIntoCategoryList>
+  sampleCategories: Uint8Array;
+  // represents a Map<IndexIntoSamplesTable, IndexIntoSubcategoryListForCategory>
+  sampleSubcategories: Uint16Array | Uint8Array;
+};
+
+export type SamplesLikeTable = {
   stack: Array<IndexIntoStackTable | null>;
   time: Milliseconds[];
   // An optional weight array. If not present, then the weight is assumed to be 1.
@@ -154,12 +164,6 @@ type SamplesLikeTableShape = {
   argumentValues?: Array<number | null>;
   length: number;
 };
-
-export type SamplesLikeTable =
-  | SamplesLikeTableShape
-  | SamplesTable
-  | NativeAllocationsTable
-  | JsAllocationsTable;
 
 export type CounterSamplesTable = {
   time: Milliseconds[];
@@ -217,8 +221,8 @@ export type StackTable = {
   length: number;
 
   // Derived from RawStackTable + FrameTable
-  category: IndexIntoCategoryList[];
-  subcategory: IndexIntoSubcategoryListForCategory[];
+  category: Uint8Array<ArrayBuffer>; // represents a Map<IndexIntoStackTable, IndexIntoCategoryList>
+  subcategory: Uint8Array<ArrayBuffer> | Uint16Array<ArrayBuffer>; // represents a Map<IndexIntoStackTable, IndexIntoSubcategoryListForCategory>
 };
 
 /**
@@ -668,22 +672,23 @@ export type RemoveProfileInformation = {
 };
 
 /**
- * This type is used to decide how to highlight and stripe areas in the
+ * This const enum is used to decide how to highlight and stripe areas in the
  * timeline.
  */
-export type SelectedState =
+export const enum SelectedState {
   // Samples can be filtered through various operations, like searching, or
   // call tree transforms.
-  | 'FILTERED_OUT_BY_TRANSFORM'
+  FilteredOutByTransform,
   // This sample is selected because either the tip or an ancestor call node matches
   // the currently selected call node.
-  | 'SELECTED'
+  Selected,
   // This call node is not selected, and the stacks are ordered before the selected
   // call node as sorted by the getTreeOrderComparator.
-  | 'UNSELECTED_ORDERED_BEFORE_SELECTED'
+  UnselectedOrderedBeforeSelected,
   // This call node is not selected, and the stacks are ordered after the selected
   // call node as sorted by the getTreeOrderComparator.
-  | 'UNSELECTED_ORDERED_AFTER_SELECTED';
+  UnselectedOrderedAfterSelected,
+}
 
 /**
  * It holds the initially selected track's HTMLElement. This allows the timeline

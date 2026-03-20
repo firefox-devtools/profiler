@@ -258,6 +258,7 @@ export const getStringTable: Selector<StringTable> = createSelector(
 export const getStackTable: Selector<StackTable> = createSelector(
   (state: State) => getRawProfileSharedData(state).stackTable,
   (state: State) => getRawProfileSharedData(state).frameTable,
+  getCategories,
   getDefaultCategory,
   computeStackTableFromRawStackTable
 );
@@ -962,9 +963,9 @@ export const getSourceViewFile: Selector<string | null> = createSelector(
   }
 );
 
-export const getSourceViewSourceUuid: Selector<string | null> = createSelector(
+export const getSourceViewSourceId: Selector<string | null> = createSelector(
   getSourceTable,
   UrlState.getSourceViewSourceIndex,
   (sources, sourceIndex) =>
-    sourceIndex !== null ? sources.uuid[sourceIndex] : null
+    sourceIndex !== null ? sources.id[sourceIndex] : null
 );

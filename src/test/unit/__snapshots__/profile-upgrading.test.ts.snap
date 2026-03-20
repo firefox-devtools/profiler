@@ -40,7 +40,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 60,
+    "preprocessedProfileVersion": 61,
     "processType": 0,
     "product": "Firefox",
     "sampleUnits": undefined,
@@ -53,7 +53,7 @@ Object {
     "symbolicated": true,
     "toolkit": undefined,
     "updateChannel": undefined,
-    "version": 33,
+    "version": 34,
     "visualMetrics": undefined,
   },
   "pages": Array [],
@@ -2489,8 +2489,11 @@ Object {
     },
     "sources": Object {
       "filename": Array [],
+      "id": Array [],
       "length": 0,
-      "uuid": Array [],
+      "sourceMapURL": Array [],
+      "startColumn": Array [],
+      "startLine": Array [],
     },
     "stackTable": Object {
       "frame": Array [
@@ -4322,7 +4325,7 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 33,
+    "version": 34,
   },
   "pausedRanges": Array [],
   "processes": Array [
@@ -4438,7 +4441,10 @@ Object {
         "data": Array [],
         "schema": Object {
           "filename": 1,
-          "uuid": 0,
+          "id": 0,
+          "sourceMapURL": 4,
+          "startColumn": 3,
+          "startLine": 2,
         },
       },
       "threads": Array [
@@ -4727,7 +4733,10 @@ Object {
     "data": Array [],
     "schema": Object {
       "filename": 1,
-      "uuid": 0,
+      "id": 0,
+      "sourceMapURL": 4,
+      "startColumn": 3,
+      "startLine": 2,
     },
   },
   "threads": Array [
@@ -5792,7 +5801,7 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 33,
+    "version": 34,
   },
   "pages": Array [
     Object {
@@ -5936,7 +5945,10 @@ Object {
         "data": Array [],
         "schema": Object {
           "filename": 1,
-          "uuid": 0,
+          "id": 0,
+          "sourceMapURL": 4,
+          "startColumn": 3,
+          "startLine": 2,
         },
       },
       "threads": Array [
@@ -6307,7 +6319,10 @@ Object {
     "data": Array [],
     "schema": Object {
       "filename": 1,
-      "uuid": 0,
+      "id": 0,
+      "sourceMapURL": 4,
+      "startColumn": 3,
+      "startLine": 2,
     },
   },
   "threads": Array [
@@ -7343,7 +7358,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 60,
+    "preprocessedProfileVersion": 61,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -7682,9 +7697,18 @@ Object {
       "filename": Array [
         10,
       ],
-      "length": 1,
-      "uuid": Array [
+      "id": Array [
         null,
+      ],
+      "length": 1,
+      "sourceMapURL": Array [
+        null,
+      ],
+      "startColumn": Array [
+        1,
+      ],
+      "startLine": Array [
+        1,
       ],
     },
     "stackTable": Object {
@@ -8669,7 +8693,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 60,
+    "preprocessedProfileVersion": 61,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -9040,9 +9064,18 @@ Object {
       "filename": Array [
         11,
       ],
-      "length": 1,
-      "uuid": Array [
+      "id": Array [
         null,
+      ],
+      "length": 1,
+      "sourceMapURL": Array [
+        null,
+      ],
+      "startColumn": Array [
+        1,
+      ],
+      "startLine": Array [
+        1,
       ],
     },
     "stackTable": Object {
@@ -10122,7 +10155,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 60,
+    "preprocessedProfileVersion": 61,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -10519,9 +10552,18 @@ Object {
       "filename": Array [
         12,
       ],
-      "length": 1,
-      "uuid": Array [
+      "id": Array [
         null,
+      ],
+      "length": 1,
+      "sourceMapURL": Array [
+        null,
+      ],
+      "startColumn": Array [
+        1,
+      ],
+      "startLine": Array [
+        1,
       ],
     },
     "stackTable": Object {
