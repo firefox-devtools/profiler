@@ -1174,7 +1174,9 @@ async function _extractZipFromResponse(
 }
 
 /**
- * Parse JSON from an optionally gzipped array buffer.
+ * Decode an optionally gzipped array buffer into a profile-shaped value.
+ * Returns parsed JSON for normal profiles, or the raw text string for
+ * streamed profiles (JSON Lines) which are not valid single-object JSON.
  */
 async function _extractJsonFromArrayBuffer(
   arrayBuffer: ArrayBuffer
@@ -1186,7 +1188,16 @@ async function _extractJsonFromArrayBuffer(
   }
 
   const textDecoder = new TextDecoder();
-  return JSON.parse(textDecoder.decode(profileBytes));
+  const text = textDecoder.decode(profileBytes);
+
+  // Streamed profiles (JSON Lines) start with {"type":"meta" and are not
+  // valid single-object JSON. Return the text directly so that the string
+  // format detection in unserializeProfileOfArbitraryFormat can handle it.
+  if (text.startsWith('{"type":"meta"')) {
+    return text;
+  }
+
+  return JSON.parse(text);
 }
 
 /**
