@@ -390,18 +390,12 @@ export class ChartCanvas<Item> extends React.Component<
   };
 
   override UNSAFE_componentWillReceiveProps() {
-    // It is possible that the data backing the chart has been
-    // changed, for instance after symbolication. Clear the
-    // hoveredItem if the mouse no longer hovers over it.
-    const { hoveredItem } = this.state;
-    if (
-      hoveredItem !== null &&
-      !hoveredItemsAreEqual(
-        this.props.hitTest(this._offsetX, this._offsetY),
-        hoveredItem
-      )
-    ) {
-      this.setState({ hoveredItem: null });
+    // Update the hovered item if the rendered data has changed or if
+    // the chart has been scrolled so that a new element is under the
+    // mouse cursor.
+    const newHoveredItem = this.props.hitTest(this._offsetX, this._offsetY);
+    if (!hoveredItemsAreEqual(newHoveredItem, this.state.hoveredItem)) {
+      this.setState({ hoveredItem: newHoveredItem });
     }
   }
 
