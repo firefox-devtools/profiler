@@ -8,11 +8,7 @@ import {
 } from 'firefox-profiler/utils/types';
 import { numberSeriesToDeltas } from 'firefox-profiler/utils/number-series';
 
-import type {
-  RawThread,
-  Profile,
-  RawSamplesTable,
-} from 'firefox-profiler/types';
+import type { RawThread, Profile } from 'firefox-profiler/types';
 
 /**
  * Compute the max CPU cycles per ms for the thread. Should only be called when
@@ -93,31 +89,30 @@ export function computeReferenceCPUDeltaPerMs(profile: Profile): number {
 }
 
 /**
- * Computes the threadCPURatio column for the SamplesTable.
+ * Computes the threadCPUPercent column for the SamplesTable.
  *
- * The CPU ratio is a number between 0 and 1, and describes the CPU use between
+ * The CPU percentage is a number between 0 and 100, and describes the CPU use between
  * the previous sample time and the current sample time. It is the ratio of cpu
- * time to elapsed wall clock time.
+ * time to elapsed wall clock time, times 100.
  *
- * This function returns undefined if `samples` does not have a `threadCPUDelta`
+ * This function synthesizes 100% values if `samples` does not have a `threadCPUDelta`
  * column.
+ *
+ * The returned array has length samples.length + 1, and the first and last elements are
+ * always zero.
  */
-export function computeThreadCPURatio(
-  samples: RawSamplesTable,
+export function computeThreadCPUPercent(
+  threadCPUDelta: Array<number | null>,
   timeDeltas: number[],
   referenceCPUDeltaPerMs: number
-): Float64Array | undefined {
-  const { threadCPUDelta } = samples;
+): Uint8Array {
+  const threadCPUPercent: Uint8Array = new Uint8Array(
+    threadCPUDelta.length + 1
+  );
 
-  if (!threadCPUDelta) {
-    return undefined;
-  }
-
-  const threadCPURatio: Float64Array = new Float64Array(threadCPUDelta.length);
-
-  // Ignore threadCPUDelta[0] and set threadCPURatio[0] to zero - there is no
+  // Ignore threadCPUDelta[0] and set threadCPUPercent[0] to zero - there is no
   // previous sample so there is no meaningful value we could compute here.
-  threadCPURatio[0] = 0;
+  threadCPUPercent[0] = 0;
 
   // For the rest of the samples, compute the ratio based on the CPU delta and
   // on the elapsed time between samples (timeDeltas[i]).
@@ -131,14 +126,16 @@ export function computeThreadCPURatio(
       // be null if the samples at the beginning were collected by the base
       // profiler, which doesn't support collecting CPU delta information yet,
       // see bug 1756519.
-      threadCPURatio[i] = 1;
+      threadCPUPercent[i] = 100;
       continue;
     }
 
     // Limit values to 1.0.
-    threadCPURatio[i] =
-      cpuDelta <= referenceCpuDelta ? cpuDelta / referenceCpuDelta : 1;
+    threadCPUPercent[i] =
+      cpuDelta <= referenceCpuDelta
+        ? Math.round((100 * cpuDelta) / referenceCpuDelta)
+        : 100;
   }
 
-  return threadCPURatio;
+  return threadCPUPercent;
 }
