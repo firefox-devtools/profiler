@@ -1,10 +1,10 @@
-.DetailsContainer .layout-pane > * {
+.DetailsContainer > .layout-pane > * {
   width: 100%;
   height: 100%;
   box-sizing: border-box;
 }
 
-.DetailsContainer .layout-pane:not(.layout-pane-primary) {
+.DetailsContainer > .layout-pane:not(.layout-pane-primary) {
   max-width: 600px;
 }
 
