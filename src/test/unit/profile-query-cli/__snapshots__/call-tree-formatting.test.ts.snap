@@ -1,0 +1,318 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`call tree formatting bottom-up view complex nested trees formats a deep call chain inverted 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Bottom-Up Call Tree:
+f-1. Idle [total: 50.0%, self: 50.0%]
+└─ f-5. Loop [total: 50.0%, self: 0.0%]
+   f-6. Main [total: 50.0%, self: 0.0%]
+f-2. Think [total: 25.0%, self: 25.0%]
+└─ f-7. AI [total: 25.0%, self: 0.0%]
+   f-4. Tick [total: 25.0%, self: 0.0%]
+   f-5. Loop [total: 25.0%, self: 0.0%]
+   f-6. Main [total: 25.0%, self: 0.0%]
+f-3. Phys [total: 25.0%, self: 25.0%]
+└─ f-4. Tick [total: 25.0%, self: 0.0%]
+   f-5. Loop [total: 25.0%, self: 0.0%]
+   f-6. Main [total: 25.0%, self: 0.0%]"
+`;
+
+exports[`call tree formatting bottom-up view complex nested trees shows which functions call a leaf function 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Bottom-Up Call Tree:
+f-1. E [total: 100.0%, self: 100.0%]
+└─ f-2. D [total: 100.0%, self: 0.0%]
+   ├─ f-3. A [total: 33.3%, self: 0.0%]
+   ├─ f-4. B [total: 33.3%, self: 0.0%]
+   └─ f-5. C [total: 33.3%, self: 0.0%]"
+`;
+
+exports[`call tree formatting bottom-up view different scoring strategies exponential-0.9 strategy for bottom-up 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Bottom-Up Call Tree:
+f-1. G [total: 20.0%, self: 20.0%]
+└─ f-7. D [total: 20.0%, self: 0.0%]
+   └─ ... (1 more children: combined 20.0%, max 20.0%)
+f-2. E [total: 20.0%, self: 20.0%]
+└─ f-6. A [total: 20.0%, self: 0.0%]
+f-3. F [total: 20.0%, self: 20.0%]
+└─ f-6. A [total: 20.0%, self: 0.0%]
+f-4. B [total: 20.0%, self: 20.0%]
+f-5. C [total: 20.0%, self: 20.0%]"
+`;
+
+exports[`call tree formatting bottom-up view elision bugs each parent node should have at most one elision marker 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Top-Down Call Tree:
+f-1. A [total: 100.0%, self: 0.0%]
+└─ f-2. B [total: 100.0%, self: 0.0%]
+   f-3. C [total: 100.0%, self: 0.0%]
+   └─ ... (1 more children: combined 100.0%, max 100.0%)"
+`;
+
+exports[`call tree formatting bottom-up view elision bugs elided children percentages should be relative to parent, not full profile 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Bottom-Up Call Tree:
+f-1. B [total: 50.0%, self: 50.0%]
+└─ ... (5 more children: combined 50.0%, max 10.0%)
+f-2. D [total: 50.0%, self: 50.0%]
+└─ f-3. C [total: 50.0%, self: 0.0%]"
+`;
+
+exports[`call tree formatting bottom-up view elision bugs node whose children were never expanded must still show elision marker 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Top-Down Call Tree:
+f-1. Root [total: 100.0%, self: 0.0%]
+├─ f-2. A [total: 60.0%, self: 0.0%]
+│  ├─ f-4. A2 [total: 10.0%, self: 10.0%]
+│  └─ ... (5 more children: combined 50.0%, max 10.0%)
+├─ f-3. B [total: 20.0%, self: 0.0%]
+│  └─ ... (2 more children: combined 20.0%, max 10.0%)
+└─ ... (2 more children: combined 20.0%, max 10.0%)"
+`;
+
+exports[`call tree formatting bottom-up view elision bugs sibling nodes with elided children should each show their own elision marker 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Top-Down Call Tree:
+f-1. A [total: 100.0%, self: 0.0%]
+├─ f-2. B1 [total: 50.0%, self: 0.0%]
+│  ├─ f-4. C5 [total: 10.0%, self: 10.0%]
+│  └─ ... (4 more children: combined 40.0%, max 10.0%)
+└─ f-3. B2 [total: 50.0%, self: 0.0%]
+   └─ ... (5 more children: combined 50.0%, max 10.0%)"
+`;
+
+exports[`call tree formatting bottom-up view simple trees formats a branching tree inverted 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Bottom-Up Call Tree:
+f-1. D [total: 28.6%, self: 28.6%]
+└─ f-5. A [total: 28.6%, self: 0.0%]
+f-2. E [total: 28.6%, self: 28.6%]
+└─ f-5. A [total: 28.6%, self: 0.0%]
+f-3. B [total: 28.6%, self: 28.6%]
+f-4. C [total: 14.3%, self: 14.3%]"
+`;
+
+exports[`call tree formatting bottom-up view simple trees formats a simple linear tree inverted 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Bottom-Up Call Tree:
+f-1. D [total: 100.0%, self: 100.0%]
+└─ f-2. C [total: 100.0%, self: 0.0%]
+   f-3. B [total: 100.0%, self: 0.0%]
+   f-4. A [total: 100.0%, self: 0.0%]"
+`;
+
+exports[`call tree formatting bottom-up view trees with truncation shows elided callers at multiple levels 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Bottom-Up Call Tree:
+f-1. E [total: 25.0%, self: 25.0%]
+└─ f-5. B [total: 25.0%, self: 0.0%]
+   f-4. A [total: 25.0%, self: 0.0%]
+f-2. F [total: 25.0%, self: 25.0%]
+└─ f-5. B [total: 25.0%, self: 0.0%]
+   f-4. A [total: 25.0%, self: 0.0%]
+f-3. D [total: 25.0%, self: 25.0%]
+└─ f-4. A [total: 25.0%, self: 0.0%]"
+`;
+
+exports[`call tree formatting bottom-up view trees with truncation shows elided callers with correct percentages 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Bottom-Up Call Tree:
+f-1. B [total: 30.0%, self: 30.0%]
+└─ f-4. A [total: 30.0%, self: 0.0%]
+f-2. C [total: 20.0%, self: 20.0%]
+└─ f-4. A [total: 20.0%, self: 0.0%]
+f-3. D [total: 10.0%, self: 10.0%]
+└─ ... (1 more children: combined 10.0%, max 10.0%)"
+`;
+
+exports[`call tree formatting top-down view complex nested trees formats a complex tree with mixed branching patterns 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Top-Down Call Tree:
+f-1. Main [total: 100.0%, self: 0.0%]
+├─ f-2. Loop [total: 90.0%, self: 0.0%]
+│  ├─ f-4. Tick [total: 40.0%, self: 0.0%]
+│  │  ├─ f-11. AI [total: 20.0%, self: 0.0%]
+│  │  │  f-13. Think [total: 20.0%, self: 20.0%]
+│  │  └─ f-12. Phys [total: 20.0%, self: 20.0%]
+│  ├─ f-5. Idle [total: 20.0%, self: 20.0%]
+│  ├─ f-6. Render [total: 10.0%, self: 10.0%]
+│  ├─ f-7. Rende [total: 10.0%, self: 0.0%]
+│  │  f-10. Layou [total: 10.0%, self: 10.0%]
+│  └─ f-8. r Render [total: 10.0%, self: 0.0%]
+│     f-9. t Layout [total: 10.0%, self: 10.0%]
+└─ f-3. Init [total: 10.0%, self: 10.0%]"
+`;
+
+exports[`call tree formatting top-down view complex nested trees formats a deep nested path with branching 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Top-Down Call Tree:
+f-1. A [total: 80.0%, self: 0.0%]
+├─ f-3. C [total: 60.0%, self: 0.0%]
+│  ├─ f-5. E [total: 40.0%, self: 0.0%]
+│  │  ├─ f-7. G [total: 20.0%, self: 0.0%]
+│  │  │  f-9. I [total: 20.0%, self: 20.0%]
+│  │  └─ f-8. H [total: 20.0%, self: 20.0%]
+│  └─ f-6. F [total: 20.0%, self: 20.0%]
+└─ f-4. D [total: 20.0%, self: 20.0%]
+f-2. B [total: 20.0%, self: 20.0%]"
+`;
+
+exports[`call tree formatting top-down view different scoring strategies exponential-0.9 strategy output 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Top-Down Call Tree:
+f-1. A [total: 60.0%, self: 0.0%]
+├─ f-4. D [total: 20.0%, self: 0.0%]
+│  f-7. G [total: 20.0%, self: 20.0%]
+├─ f-5. E [total: 20.0%, self: 20.0%]
+└─ f-6. F [total: 20.0%, self: 20.0%]
+f-2. B [total: 20.0%, self: 20.0%]
+f-3. C [total: 20.0%, self: 20.0%]"
+`;
+
+exports[`call tree formatting top-down view different scoring strategies percentage-only strategy output 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Top-Down Call Tree:
+f-1. A [total: 60.0%, self: 0.0%]
+├─ f-4. D [total: 20.0%, self: 0.0%]
+│  f-7. G [total: 20.0%, self: 20.0%]
+├─ f-5. E [total: 20.0%, self: 20.0%]
+└─ f-6. F [total: 20.0%, self: 20.0%]
+f-2. B [total: 20.0%, self: 20.0%]
+f-3. C [total: 20.0%, self: 20.0%]"
+`;
+
+exports[`call tree formatting top-down view ordering and percentages correctly calculates percentages for nested nodes 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Top-Down Call Tree:
+f-1. A [total: 100.0%, self: 0.0%]
+├─ f-2. B [total: 60.0%, self: 10.0%]
+│  ├─ f-5. E [total: 30.0%, self: 30.0%]
+│  └─ f-6. F [total: 20.0%, self: 20.0%]
+├─ f-3. C [total: 20.0%, self: 20.0%]
+└─ f-4. D [total: 20.0%, self: 20.0%]"
+`;
+
+exports[`call tree formatting top-down view ordering and percentages maintains correct ordering by sample count 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Top-Down Call Tree:
+f-1. A [total: 100.0%, self: 0.0%]
+├─ f-2. B [total: 50.0%, self: 50.0%]
+├─ f-3. C [total: 30.0%, self: 30.0%]
+└─ f-4. D [total: 20.0%, self: 20.0%]"
+`;
+
+exports[`call tree formatting top-down view simple trees formats a branching tree 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Top-Down Call Tree:
+f-1. A [total: 57.1%, self: 0.0%]
+├─ f-4. D [total: 28.6%, self: 28.6%]
+└─ f-5. E [total: 28.6%, self: 28.6%]
+f-2. B [total: 28.6%, self: 28.6%]
+f-3. C [total: 14.3%, self: 14.3%]"
+`;
+
+exports[`call tree formatting top-down view simple trees formats a simple linear tree 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Top-Down Call Tree:
+f-1. A [total: 100.0%, self: 0.0%]
+└─ f-2. B [total: 100.0%, self: 0.0%]
+   f-3. C [total: 100.0%, self: 0.0%]
+   f-4. D [total: 100.0%, self: 100.0%]"
+`;
+
+exports[`call tree formatting top-down view trees with truncation shows elided children at multiple levels 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Top-Down Call Tree:
+f-1. A [total: 100.0%, self: 0.0%]
+├─ f-2. B [total: 50.0%, self: 0.0%]
+│  └─ ... (2 more children: combined 50.0%, max 25.0%)
+├─ f-3. C [total: 25.0%, self: 0.0%]
+│  └─ ... (2 more children: combined 25.0%, max 12.5%)
+└─ f-4. D [total: 25.0%, self: 25.0%]"
+`;
+
+exports[`call tree formatting top-down view trees with truncation shows elided children with correct percentages 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Top-Down Call Tree:
+f-1. A [total: 100.0%, self: 0.0%]
+├─ f-2. B [total: 30.0%, self: 30.0%]
+└─ ... (6 more children: combined 70.0%, max 20.0%)"
+`;
+
+exports[`call tree formatting top-down view trees with truncation shows truncation with wide trees (many siblings) 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1.00s]
+
+Thread: Test Thread
+
+Top-Down Call Tree:
+f-1. A [total: 100.0%, self: 0.0%]
+├─ f-2. B [total: 8.3%, self: 8.3%]
+├─ f-3. I [total: 8.3%, self: 8.3%]
+├─ f-4. J [total: 8.3%, self: 8.3%]
+├─ f-5. K [total: 8.3%, self: 8.3%]
+└─ ... (8 more children: combined 66.7%, max 8.3%)"
+`;

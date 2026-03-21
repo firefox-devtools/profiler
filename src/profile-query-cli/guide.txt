@@ -1,0 +1,176 @@
+pq: Usage Guide
+
+pq (Profile Querier) queries Firefox performance profiles loaded into a persistent
+daemon. Load a profile once, then query it interactively without reloading.
+
+
+SESSION MODEL
+
+  pq uses a daemon/session model:
+    1. Load a profile with "pq load" -- starts a background daemon
+    2. Query the loaded profile with any other commands
+    3. Stop with "pq stop" when done
+
+  The daemon persists your selected thread and zoom ranges across queries.
+
+
+CORE WORKFLOW
+
+  Step 1: Load a profile
+    pq load profile.json.gz
+
+  Step 2: Explore the profile structure
+    pq profile info          Overview: processes, threads, time range, CPU activity
+    pq profile info --all    Show all processes and threads (not just top 5)
+    pq profile info --search GeckoMain   Filter by process/thread name, pid, or tid
+
+  Step 3: Select a thread to analyze (requires Step 2 -- profile info builds thread handles)
+    pq thread select t-0     Select a specific thread (persists for future commands)
+
+  Step 4: Analyze CPU usage
+    pq thread samples             Hot functions list (self time, sorted by impact)
+    pq thread samples-top-down    Top-down call tree (where does CPU time originate)
+    pq thread samples-bottom-up   Bottom-up call tree (what calls the hot functions)
+    pq thread functions           All functions with self/total CPU percentages
+
+  Step 5: Analyze markers (browser events, timers, etc.)
+    pq thread markers                          All markers with aggregated stats
+    pq thread markers --category Layout        Filter by category
+    pq thread markers --search DOMEvent        Filter by name substring
+    pq thread markers --min-duration 10        Only markers >= 10ms
+    pq thread markers --has-stack              Only markers with stack traces
+
+  Step 6: Drill into specifics
+    pq marker info m-1234     Full details for a marker (from handles in marker list)
+    pq marker stack m-1234    Full stack trace at the time of a marker
+    pq function info f-12     Function details (callers/callees, source location)
+    pq function expand f-12   Show full untruncated function name
+
+
+HANDLE SYSTEM
+
+  Handles are short IDs shown in command output that reference specific items:
+    t-0, t-1   Thread handles (from "profile info")
+    m-1234     Marker handles (from "thread markers")
+    f-12       Function handles (from "thread samples", "thread functions")
+    ts-6       Timestamp handles (named points in time, usable with "zoom push")
+
+  Handles are stable within a session but may differ across sessions.
+
+
+ZOOM: FOCUS ON A TIME RANGE
+
+  Zoom restricts all subsequent queries to a specific time window. Useful for
+  drilling into a specific jank period, page load phase, or marker duration.
+
+    pq zoom push 2.7,3.1       Zoom to 2.7s-3.1s (relative to profile start)
+    pq zoom push m-158         Zoom to the time range of marker m-158
+    pq zoom push ts-6,ts-12    Zoom to the range between two named timestamps
+    pq zoom pop                Undo the last zoom
+    pq zoom clear              Return to full profile view
+    pq status                  Show current thread selection and active zoom ranges
+
+  After zooming, all thread/marker/sample commands automatically apply the filter.
+
+
+JSON OUTPUT
+
+  Add --json to any command to get structured JSON output, useful for piping to jq:
+
+    pq thread samples --json | jq '.rows[0]'
+    pq thread markers --json | jq '[.rows[] | select(.totalDuration > 50)]'
+    pq profile info --json | jq '.threads | length'
+
+
+COMMON ANALYSIS PATTERNS
+
+  Find what's consuming CPU:
+    pq thread info                          Pick the main thread (usually GeckoMain)
+    pq thread select t-0
+    pq thread samples                       Top hot functions by self time
+    pq thread samples-top-down             See the full call tree
+
+  Investigate a jank/slow period:
+    pq thread markers --min-duration 50    Find long-running markers (>50ms = jank)
+    pq zoom push m-158                     Zoom into that marker's time range
+    pq thread samples                      What was executing during that period?
+    pq zoom pop                            Back to full profile
+
+  Find slow layout or script execution:
+    pq thread markers --category Layout --min-duration 5
+    pq thread markers --category JavaScript --min-duration 10
+    pq thread markers --search Reflow --min-duration 5
+
+  Deep dive on a specific function:
+    pq thread samples                   Find hot function, note its handle (f-12)
+    pq function info f-12               See callers, callees, source location
+    pq function expand f-12             See full name if truncated
+
+  Group markers by event type:
+    pq thread markers --search DOMEvent --group-by field:eventType
+    pq thread markers --auto-group
+    pq thread markers --group-by type,name
+
+  Analyze network activity:
+    pq thread markers --category Network
+    pq thread markers --category Network --min-duration 100
+    pq thread markers --search "http" --category Network
+
+
+UNDERSTANDING THE OUTPUT
+
+  Self time vs total time:
+    Self time   Samples where this function was the innermost frame (actually executing)
+    Total time  All samples where this function appeared anywhere in the stack
+
+    Self time is more actionable -- it pinpoints where CPU time is actually spent.
+
+  Samples:
+    Profiles are sampled at regular intervals (typically 1ms). Each sample is a snapshot
+    of the call stack. Higher sample counts = more time spent. Counts are relative
+    within a profile.
+
+  Call tree views:
+    samples-top-down    Root frames at top, drilling down to leaves.
+                        Use to understand the calling structure and where time originates.
+    samples-bottom-up   Hot leaf functions at top with their callers.
+                        Use to understand what calls a frequently-seen function.
+
+  Scoring strategies (controls node ranking when tree is truncated with --max-lines):
+    exponential-0.9 (default)  Balances depth vs breadth
+    percentage-only            Rank purely by CPU percentage (flatter output)
+    harmonic-1.0               Emphasizes deeper paths in the tree
+
+
+TIPS
+
+  - Start with "profile info" to understand what's in the profile; use --all to see every
+    process and thread, or --search <term> to filter by name, pid, or tid
+  - Select a thread before querying -- GeckoMain is usually the main thread
+  - Self time is more actionable: focus on high self-time functions for optimization
+  - Idle self time is not a finding on its own -- a longer profile or an inactive thread will
+    naturally show more idle time. Only investigate idle time if it appears during a period the
+    thread should be busy (e.g. inside a zoom on a slow operation), which may indicate lock
+    contention or blocking on another thread.
+  - Zoom into slow periods: use "zoom push m-<handle>" to focus on a slow marker
+  - Use --json when you need to process or filter results programmatically
+  - Marker handles are stable: you can refer back to m-1234 multiple times
+  - JS vs native: JS functions show source locations; native functions show C++/Rust names
+  - Category filters: use --category with values like Layout, JavaScript, Network, GC, etc.
+  - Check "status": run "pq status" to confirm selected thread and active zoom ranges
+
+
+SESSION MANAGEMENT
+
+    pq list-sessions                              List all running daemon sessions
+    pq stop                                       Stop the current session
+    pq stop --all                                 Stop all sessions
+    pq load profile.json.gz --session my-session  Named session
+    pq thread info --session my-session           Query a specific session
+
+
+ERROR HANDLING
+
+  "No running session"  Run "pq load <profile>" first
+  "Thread not found"    Run "pq profile info" to see valid thread handles
+  "Marker not found"    Handles are session-scoped; reload if session restarted
