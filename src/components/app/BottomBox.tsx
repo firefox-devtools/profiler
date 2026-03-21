@@ -8,6 +8,7 @@ import classNames from 'classnames';
 
 import { SourceView } from '../shared/SourceView';
 import { AssemblyView } from '../shared/AssemblyView';
+import { FullscreenToggleButton } from './FullscreenToggleButton';
 import { AssemblyViewToggleButton } from './AssemblyViewToggleButton';
 import { AssemblyViewNativeSymbolNavigator } from './AssemblyViewNativeSymbolNavigator';
 import { IonGraphView } from '../shared/IonGraphView';
@@ -22,9 +23,13 @@ import {
   getAssemblyViewScrollGeneration,
   getAssemblyViewScrollToInstructionAddress,
   getAssemblyViewHighlightedInstruction,
+  getIsBottomBoxFullscreen,
 } from 'firefox-profiler/selectors/url-state';
+import {
+  closeBottomBox,
+  toggleBottomBoxFullscreen,
+} from 'firefox-profiler/actions/profile-view';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { closeBottomBox } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
   getSourceViewCode,
@@ -50,6 +55,7 @@ import { Localized } from '@fluent/react';
 import './BottomBox.css';
 
 type StateProps = {
+  readonly isFullscreen: boolean;
   readonly sourceViewFile: string | null;
   readonly sourceViewCode: SourceCodeStatus | void;
   readonly sourceViewScrollGeneration: number;
@@ -67,6 +73,7 @@ type StateProps = {
 
 type DispatchProps = {
   readonly closeBottomBox: typeof closeBottomBox;
+  readonly toggleBottomBoxFullscreen: typeof toggleBottomBoxFullscreen;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -149,12 +156,31 @@ class BottomBoxImpl extends React.PureComponent<Props> {
   _sourceView = React.createRef<SourceView>();
   _assemblyView = React.createRef<AssemblyView>();
 
+  override componentDidMount() {
+    document.addEventListener('keydown', this._onKeyDown);
+  }
+
+  override componentWillUnmount() {
+    document.removeEventListener('keydown', this._onKeyDown);
+  }
+
+  _onKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && this.props.isFullscreen) {
+      this.props.toggleBottomBoxFullscreen();
+    }
+  };
+
   _onClickCloseButton = () => {
     this.props.closeBottomBox();
+    // Close the fullscreen if we're closing the bottom box
+    if (this.props.isFullscreen) {
+      this.props.toggleBottomBoxFullscreen();
+    }
   };
 
   override render() {
     const {
+      isFullscreen,
       sourceViewFile,
       sourceViewCode,
       globalLineTimings,
@@ -195,6 +221,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       <div className="bottom-box-header-trailing-buttons">
         {assemblyViewIsOpen ? <AssemblyViewNativeSymbolNavigator /> : null}
         <AssemblyViewToggleButton />
+        <FullscreenToggleButton />
         <Localized id="SourceView--close-button" attrs={{ title: true }}>
           <button
             className={classNames(
@@ -211,8 +238,13 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     );
 
     return (
-      <div className="bottom-box">
-        <SplitterLayout customClassName="bottom-box" percentage>
+      <div
+        className={classNames(
+          'bottom-box',
+          isFullscreen ? 'bottom-box-fullscreen' : null
+        )}
+      >
+        <SplitterLayout percentage>
           <div className="bottom-box-pane">
             <div className="bottom-box-bar">
               <h3 className="bottom-box-title">{path ?? '(no source file)'}</h3>
@@ -297,6 +329,7 @@ function convertErrors(errors: ApiQueryError[]): SourceCodeLoadingError[] {
 
 export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
+    isFullscreen: getIsBottomBoxFullscreen(state),
     sourceViewFile: getSourceViewFile(state),
     sourceViewCode: getSourceViewCode(state),
     globalLineTimings: selectedThreadSelectors.getSourceViewLineTimings(state),
@@ -316,6 +349,7 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
   }),
   mapDispatchToProps: {
     closeBottomBox,
+    toggleBottomBoxFullscreen,
   },
   component: BottomBoxImpl,
 });
