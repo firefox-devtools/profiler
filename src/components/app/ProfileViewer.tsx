@@ -113,13 +113,10 @@ class ProfileViewerImpl extends PureComponent<Props> {
               />
             ) : null}
             <ProfileName />
-            <ProfileFilterNavigator />
             {
-              // Define a spacer in the middle that will shrink based on the availability
-              // of space in the top bar. It will shrink away before any of the items
-              // with actual content in them do.
+              // TODO: Update the sroll position when other elements are updated.
             }
-            <div className="profileViewerSpacer" />
+            <ProfileFilterNavigator />
             <MenuButtons />
             {isUploading ? (
               <div
