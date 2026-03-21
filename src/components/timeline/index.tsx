@@ -5,7 +5,9 @@
 import { PureComponent } from 'react';
 import { FullTimeline } from 'firefox-profiler/components/timeline/FullTimeline';
 
-type TimelineProps = {};
+type TimelineProps = {
+  readonly onSelectionMove?: () => void;
+};
 
 export class Timeline extends PureComponent<TimelineProps> {
   // This may contain a function that's called whenever we want to remove the
@@ -66,6 +68,13 @@ export class Timeline extends PureComponent<TimelineProps> {
   }
 
   override render() {
-    return <FullTimeline innerElementRef={this._onTimelineMountWithRef} />;
+    const { onSelectionMove } = this.props;
+
+    return (
+      <FullTimeline
+        innerElementRef={this._onTimelineMountWithRef}
+        onSelectionMove={onSelectionMove}
+      />
+    );
   }
 }
