@@ -6,7 +6,10 @@ import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { InView } from 'react-intersection-observer';
 import { timeCode } from 'firefox-profiler/utils/time-code';
-import { getSampleIndexClosestToCenteredTime } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  getSampleIndexClosestToCenteredTime,
+  toSelectedState,
+} from 'firefox-profiler/profile-logic/profile-data';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import { BLUE_40, BLUE_50, BLUE_70 } from 'photon-colors';
@@ -27,6 +30,7 @@ import type {
   CssPixels,
   TimelineType,
   ImplementationFilter,
+  SampleRelationToNode,
 } from 'firefox-profiler/types';
 import { SelectedState } from 'firefox-profiler/types';
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
@@ -190,7 +194,9 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
       if (sampleTime < nextMinTime) {
         continue;
       }
-      const state = sampleSelectedStates[i] as SelectedState;
+      const state = toSelectedState(
+        sampleSelectedStates[i] as SampleRelationToNode
+      );
       if (state === SelectedState.FilteredOutByTransform) {
         continue;
       }

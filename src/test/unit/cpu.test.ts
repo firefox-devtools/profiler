@@ -13,20 +13,20 @@ import type { ThreadCPUDeltaUnit, Milliseconds } from 'firefox-profiler/types';
 const MS_TO_US_MULTIPLIER = 1000;
 const MS_TO_NS_MULTIPLIER = 1000000;
 
-describe('computeThreadCPURatio', function () {
+describe('computeThreadCPUPercent', function () {
   function setup(
-    threadCPURatio?: Array<number | null>,
+    threadCPUPercent?: Array<number | null>,
     unit: ThreadCPUDeltaUnit = 'ns',
     interval: Milliseconds = 1
   ) {
     const profile = getProfileWithThreadCPUDelta(
-      [threadCPURatio],
+      [threadCPUPercent],
       unit,
       interval
     );
     const { derivedThreads } = getProfileWithDicts(profile);
     const [thread] = derivedThreads;
-    const cpuRatio = [...ensureExists(thread.samples.threadCPURatio)];
+    const cpuRatio = [...ensureExists(thread.samples.threadCPUPercent)];
 
     return { profile, cpuRatio };
   }
@@ -42,7 +42,7 @@ describe('computeThreadCPURatio', function () {
       null,
       0.2 * MS_TO_NS_MULTIPLIER,
     ]);
-    expect(cpuRatio1).toEqual([0, 0.1, 1, 1, 1, 1, 0.2]);
+    expect(cpuRatio1).toEqual([0, 10, 100, 100, 100, 100, 20, 0]);
 
     // Testing the case where the values at the start are null.
     const { cpuRatio: cpuRatio2 } = setup([
@@ -51,7 +51,7 @@ describe('computeThreadCPURatio', function () {
       null,
       0.1 * MS_TO_NS_MULTIPLIER,
     ]);
-    expect(cpuRatio2).toEqual([0, 1, 1, 0.1]);
+    expect(cpuRatio2).toEqual([0, 100, 100, 10, 0]);
 
     // Testing the case where the values at the end are null.
     // This does not happen in profiles from Firefox - Firefox only leaves values
@@ -63,11 +63,11 @@ describe('computeThreadCPURatio', function () {
       null,
       null,
     ]);
-    expect(cpuRatio3).toEqual([0, 0.1, 1, 1]);
+    expect(cpuRatio3).toEqual([0, 10, 100, 100, 0]);
   });
 
   it('processes Linux timing values and caps them to 100% if they are more than the interval values', function () {
-    // Interval is in the ms values and Linux uses ns for threadCPURatio values.
+    // Interval is in the ms values and Linux uses ns for threadCPUDelta values.
     const intervalMs = 1;
     const { cpuRatio: cpuRatio1 } = setup(
       [
@@ -84,16 +84,17 @@ describe('computeThreadCPURatio', function () {
 
     expect(cpuRatio1).toEqual([
       0,
-      0.5, // <- not changed
-      0.7, // <- not changed
-      1, // <- not changed
-      1, // <- capped to 100%
-      1, // <- capped to 100%
+      50, // <- not changed
+      70, // <- not changed
+      100, // <- not changed
+      100, // <- capped to 100%
+      100, // <- capped to 100%
+      0,
     ]);
   });
 
   it('processes macOS timing values and caps them to 100% if they are more than the interval values', function () {
-    // Interval is in the ms values and macOS uses µs for threadCPURatio values.
+    // Interval is in the ms values and macOS uses µs for threadCPUDelta values.
     const intervalMs = 1;
     const { cpuRatio: cpuRatio1 } = setup(
       [
@@ -110,18 +111,19 @@ describe('computeThreadCPURatio', function () {
 
     expect(cpuRatio1).toEqual([
       0,
-      0.5, // <- not changed
-      0.7, // <- not changed
-      1, // <- not changed
-      1, // <- capped to 100%
-      1, // <- capped to 100%
+      50, // <- not changed
+      70, // <- not changed
+      100, // <- not changed
+      100, // <- capped to 100%
+      100, // <- capped to 100%
+      0,
     ]);
   });
 
   it('does not process the Windows values for 100% capping because they are not timing values', function () {
     // Use the ns conversion multiplier to imitate the worst case.
     const intervalMs = 1;
-    const threadCPURatio = [
+    const threadCPUPercent = [
       0,
       0.5 * MS_TO_NS_MULTIPLIER,
       0.7 * MS_TO_NS_MULTIPLIER,
@@ -131,20 +133,23 @@ describe('computeThreadCPURatio', function () {
       123123 * MS_TO_NS_MULTIPLIER,
     ];
     const { cpuRatio: cpuRatio1 } = setup(
-      threadCPURatio,
+      threadCPUPercent,
       'variable CPU cycles',
       intervalMs
     );
 
-    // 123123 is the max value, everything should be based on it
+    // 123123 is the max value, everything should be based on it.
+    // Values are integer percentages rounded to the nearest percent; values
+    // much smaller than the max round to 0.
     expect(cpuRatio1).toEqual([
       0,
-      0.5 / 123123,
-      0.7 / 123123,
-      1 / 123123,
-      1.2 / 123123,
-      23 / 123123,
-      1,
+      0, // 0.5/123123 rounds to 0%
+      0, // 0.7/123123 rounds to 0%
+      0, // 1/123123 rounds to 0%
+      0, // 1.2/123123 rounds to 0%
+      0, // 23/123123 rounds to 0%
+      100, // 123123/123123 = 100%
+      0,
     ]);
   });
 });

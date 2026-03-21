@@ -15,7 +15,7 @@ import {
   CallNodeInfoNonInverted,
   CallNodeInfoInverted,
 } from './call-node-info';
-import { computeThreadCPURatio } from './cpu';
+import { computeThreadCPUPercent } from './cpu';
 import {
   INSTANT,
   INTERVAL,
@@ -99,8 +99,13 @@ import type {
   IndexIntoSourceTable,
   TransformOutput,
   SampleCategoriesAndSubcategories,
+  SelectedState,
 } from 'firefox-profiler/types';
-import { SelectedState, ResourceType } from 'firefox-profiler/types';
+import {
+  ResourceType,
+  SampleRelationToNode,
+  SAMPLE_RELATION_TO_SELECTED_STATE_MASK,
+} from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
 
 /**
@@ -918,12 +923,12 @@ function _getSampleSelectedStatesForNoSelection(
     // because everything is unselected. So let's pretend that
     // everything is selected so that anything not filtered out will be nicely
     // visible.
-    let sampleSelectedState = SelectedState.Selected;
+    let sampleSelectedState = SampleRelationToNode.TotalAndSelf;
 
     // But we still want to display filtered-out samples differently.
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex === null) {
-      sampleSelectedState = SelectedState.FilteredOutByTransform;
+      sampleSelectedState = SampleRelationToNode.FilteredOut;
     }
 
     result[sampleIndex] = sampleSelectedState;
@@ -958,14 +963,14 @@ function _getSampleSelectedStatesForNoSelection(
  *     before, 10
  *       before, 11
  *     before, 12
- *     selected, 13 <-- selected node
- *       selected, 14
- *         selected, 15
- *           selected, 16
- *         selected, 17
- *       selected, 18
- *         selected, 19
- *         selected, 20
+ *     totalAndSelf, 13 <-- selected node
+ *       total, 14
+ *         total, 15
+ *           total, 16
+ *         total, 17
+ *       total, 18
+ *         total, 19
+ *         total, 20
  *     after, 21
  *       after, 22
  *     after, 23
@@ -989,19 +994,19 @@ function _getSampleSelectedStatesNonInverted(
   const sampleCount = sampleCallNodes.length;
   const sampleSelectedStates = new Uint8Array(sampleCount);
   for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
-    let sampleSelectedState: SelectedState = SelectedState.Selected;
+    let sampleSelectedState: SampleRelationToNode =
+      SampleRelationToNode.FilteredOut;
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
       if (callNodeIndex < selectedCallNodeIndex) {
-        sampleSelectedState = SelectedState.UnselectedOrderedBeforeSelected;
+        sampleSelectedState = SampleRelationToNode.Before;
+      } else if (callNodeIndex === selectedCallNodeIndex) {
+        sampleSelectedState = SampleRelationToNode.TotalAndSelf;
       } else if (callNodeIndex < selectedCallNodeDescendantsEndIndex) {
-        sampleSelectedState = SelectedState.Selected;
+        sampleSelectedState = SampleRelationToNode.TotalButNotSelf;
       } else {
-        sampleSelectedState = SelectedState.UnselectedOrderedAfterSelected;
+        sampleSelectedState = SampleRelationToNode.After;
       }
-    } else {
-      // This sample was filtered out.
-      sampleSelectedState = SelectedState.FilteredOutByTransform;
     }
     sampleSelectedStates[sampleIndex] = sampleSelectedState;
   }
@@ -1023,21 +1028,25 @@ function _getSampleSelectedStatesInverted(
     callNodeInfo.getSuffixOrderIndexRangeForCallNode(
       selectedInvertedCallNodeIndex
     );
+  const isInvertedRoot =
+    callNodeInfo.depthForNode(selectedInvertedCallNodeIndex) === 0;
   const sampleCount = sampleNonInvertedCallNodes.length;
   const sampleSelectedStates = new Uint8Array(sampleCount);
   for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
-    let sampleSelectedState: SelectedState = SelectedState.Selected;
+    let sampleSelectedState: SampleRelationToNode =
+      SampleRelationToNode.FilteredOut;
     const callNodeIndex = sampleNonInvertedCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
       const suffixOrderIndex = suffixOrderIndexes[callNodeIndex];
       if (suffixOrderIndex < selectedSubtreeRangeStart) {
-        sampleSelectedState = SelectedState.UnselectedOrderedBeforeSelected;
+        sampleSelectedState = SampleRelationToNode.Before;
       } else if (suffixOrderIndex >= selectedSubtreeRangeEnd) {
-        sampleSelectedState = SelectedState.UnselectedOrderedAfterSelected;
+        sampleSelectedState = SampleRelationToNode.After;
+      } else {
+        sampleSelectedState = isInvertedRoot
+          ? SampleRelationToNode.TotalAndSelf
+          : SampleRelationToNode.TotalButNotSelf;
       }
-    } else {
-      // This sample was filtered out.
-      sampleSelectedState = SelectedState.FilteredOutByTransform;
     }
     sampleSelectedStates[sampleIndex] = sampleSelectedState;
   }
@@ -1091,203 +1100,120 @@ export type OneCategoryBreakdown = {
   subcategoryBreakdown: Milliseconds[]; // { [IndexIntoSubcategoryList]: Milliseconds }
 };
 export type BreakdownByCategory = OneCategoryBreakdown[]; // { [IndexIntoCategoryList]: OneCategoryBreakdown }
+export type ItemTimingsGroup = {
+  value: Milliseconds;
+  breakdownByCategory: BreakdownByCategory | null;
+};
+
 export type ItemTimings = {
-  selfTime: {
-    // time spent excluding children
-    value: Milliseconds;
-    breakdownByCategory: BreakdownByCategory | null;
-  };
-  totalTime: {
-    // time spent including children
-    value: Milliseconds;
-    breakdownByCategory: BreakdownByCategory | null;
-  };
+  // time spent excluding children
+  selfTime: ItemTimingsGroup;
+  // time spent including children
+  totalTime: ItemTimingsGroup;
 };
 
 export type TimingsForPath = {
   // timings for this path
   forPath: ItemTimings;
   rootTime: Milliseconds; // time for all the samples in the current tree
+  // True when the selected call node is the root of an inverted tree (i.e. a
+  // leaf function). In that case selfTime === totalTime, so consumers should
+  // not display a separate self-time category breakdown.
+  isInvertedRoot: boolean;
 };
 
 /**
- * This function is the same as getTimingsForCallNodeIndex, but accepts a CallNodePath
- * instead of an IndexIntoCallNodeTable.
+ * This function returns timings related to a call node, based on
+ * the information in sampleSelectedStates.
  */
-export function getTimingsForPath(
-  needlePath: CallNodePath,
-  callNodeInfo: CallNodeInfo,
+export function getCallNodeTimings(
   categories: CategoryList,
   samples: SamplesLikeTable,
-  sampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories
-) {
-  return getTimingsForCallNodeIndex(
-    callNodeInfo.getCallNodeIndexFromPath(needlePath),
-    callNodeInfo,
-    categories,
-    samples,
-    sampleCategoriesAndSubcategories
-  );
-}
-
-/**
- * This function returns the timings for a specific call node. The algorithm is
- * adjusted when the call tree is inverted.
- * Note that the unfilteredThread should be the original thread before any filtering
- * (by range or other) happens. Also sampleIndexOffset needs to be properly
- * specified and is the offset to be applied on thread's indexes to access
- * the same samples in unfilteredThread.
- */
-export function getTimingsForCallNodeIndex(
-  needleNodeIndex: IndexIntoCallNodeTable | null,
-  callNodeInfo: CallNodeInfo,
-  categories: CategoryList,
-  samples: SamplesLikeTable,
-  sampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories
+  sampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories,
+  sampleSelectedStates: Uint8Array,
+  isInvertedRoot: boolean
 ): TimingsForPath {
-  /* ------------ Variables definitions ------------*/
-
   const { sampleCategories, sampleSubcategories } =
     sampleCategoriesAndSubcategories;
 
-  // This object holds the timings for the current call node path, specified by
-  // needleNodeIndex.
-  const pathTimings: ItemTimings = {
-    selfTime: {
-      value: 0,
-      breakdownByCategory: null,
-    },
-    totalTime: {
-      value: 0,
-      breakdownByCategory: null,
-    },
-  };
+  let selfValue = 0;
+  const selfCategorySummary = new Float64Array(categories.length);
+  const selfSubcategorySummaries = categories.map(
+    (category) => new Float64Array(category.subcategories.length)
+  );
+  let totalValue = 0;
+  const totalCategorySummary = new Float64Array(categories.length);
+  const totalSubcategorySummaries = categories.map(
+    (category) => new Float64Array(category.subcategories.length)
+  );
+  let hasSelf = false;
+  let hasTotal = false;
 
   // This holds the root time, it's incremented for all samples and is useful to
   // have an absolute value to compare the other values with.
   let rootTime = 0;
 
-  /* -------- End of variable definitions ------- */
+  // Loop over each sample and accumulate the self time, total time, and
+  // the category breakdown. The sampleSelectedStates encodes whether each
+  // sample is filtered out, in the needle's subtree (total), or is an exact
+  // match for the needle (self). This works for both inverted and non-inverted
+  // call trees since getSampleSelectedStates handles the distinction internally.
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const state = sampleSelectedStates[sampleIndex] as SampleRelationToNode;
+    if (state === SampleRelationToNode.FilteredOut) {
+      continue;
+    }
+    const weight = samples.weight ? samples.weight[sampleIndex] : 1;
+    rootTime += Math.abs(weight);
+    if (
+      state === SampleRelationToNode.TotalAndSelf ||
+      state === SampleRelationToNode.TotalButNotSelf
+    ) {
+      totalValue += weight;
+      hasTotal = true;
+      const categoryIndex = sampleCategories[sampleIndex];
+      const subcategoryIndex = sampleSubcategories[sampleIndex];
+      totalCategorySummary[categoryIndex] += weight;
+      totalSubcategorySummaries[categoryIndex][subcategoryIndex] += weight;
+      if (state === SampleRelationToNode.TotalAndSelf) {
+        selfValue += weight;
+        hasSelf = true;
+        selfCategorySummary[categoryIndex] += weight;
+        selfSubcategorySummaries[categoryIndex][subcategoryIndex] += weight;
+      }
+    }
+  }
 
-  /* ------------ Functions definitions --------- *
-   * We define functions here so that they have easy access to the variables and
-   * the algorithm's parameters. */
+  function createBreakdown(
+    categorySummary: Float64Array,
+    subcategorySummaries: Float64Array[]
+  ): BreakdownByCategory {
+    return categories.map((category, categoryIndex) => {
+      const entireCategoryValue = categorySummary[categoryIndex];
+      const subcategoryValues = subcategorySummaries[categoryIndex];
+      const subcategoryBreakdown = category.subcategories.map(
+        (_sc, scIndex) => subcategoryValues[scIndex]
+      );
+      return { entireCategoryValue, subcategoryBreakdown };
+    });
+  }
 
-  /**
-   * This is a small utility function to more easily add data to breakdowns.
-   */
-  function accumulateDataToTimings(
-    timings: {
-      breakdownByCategory: BreakdownByCategory | null;
-      value: number;
+  const pathTimings: ItemTimings = {
+    selfTime: {
+      value: selfValue,
+      breakdownByCategory: hasSelf
+        ? createBreakdown(selfCategorySummary, selfSubcategorySummaries)
+        : null,
     },
-    sampleIndex: IndexIntoSamplesTable,
-    duration: Milliseconds
-  ): void {
-    // Step 1: increment the total value
-    timings.value += duration;
+    totalTime: {
+      value: totalValue,
+      breakdownByCategory: hasTotal
+        ? createBreakdown(totalCategorySummary, totalSubcategorySummaries)
+        : null,
+    },
+  };
 
-    // step 2: find the category value for this stack.
-    const categoryIndex = sampleCategories[sampleIndex];
-    const subcategoryIndex = sampleSubcategories[sampleIndex];
-
-    // step 3: increment the right value in the category breakdown
-    if (timings.breakdownByCategory === null) {
-      timings.breakdownByCategory = categories.map((category) => ({
-        entireCategoryValue: 0,
-        subcategoryBreakdown: Array(category.subcategories.length).fill(0),
-      }));
-    }
-    timings.breakdownByCategory[categoryIndex].entireCategoryValue += duration;
-    timings.breakdownByCategory[categoryIndex].subcategoryBreakdown[
-      subcategoryIndex
-    ] += duration;
-  }
-  /* ------------- End of function definitions ------------- */
-
-  /* ------------ Start of the algorithm itself ------------ */
-  if (needleNodeIndex === null) {
-    // No index was provided, return empty timing information.
-    return { forPath: pathTimings, rootTime };
-  }
-
-  const callNodeTable = callNodeInfo.getCallNodeTable();
-  const stackIndexToCallNodeIndex =
-    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
-  const callNodeInfoInverted = callNodeInfo.asInverted();
-  if (callNodeInfoInverted !== null) {
-    // Inverted case
-    const needleNodeIsRootOfInvertedTree =
-      callNodeInfoInverted.isRoot(needleNodeIndex);
-    const suffixOrderIndexes = callNodeInfoInverted.getSuffixOrderIndexes();
-    const [rangeStart, rangeEnd] =
-      callNodeInfoInverted.getSuffixOrderIndexRangeForCallNode(needleNodeIndex);
-
-    // Loop over each sample and accumulate the self time, running time, and
-    // the category breakdown.
-    for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
-      // Get the call node for this sample.
-      // TODO: Consider using sampleCallNodes for this, to save one indirection on
-      // a hot path.
-      const thisStackIndex = samples.stack[sampleIndex];
-      if (thisStackIndex === null) {
-        continue;
-      }
-      const thisNodeIndex = stackIndexToCallNodeIndex[thisStackIndex];
-      const thisNodeSuffixOrderIndex = suffixOrderIndexes[thisNodeIndex];
-      const weight = samples.weight ? samples.weight[sampleIndex] : 1;
-      rootTime += Math.abs(weight);
-
-      if (
-        thisNodeSuffixOrderIndex >= rangeStart &&
-        thisNodeSuffixOrderIndex < rangeEnd
-      ) {
-        // One of the parents is the exact passed path.
-        accumulateDataToTimings(pathTimings.totalTime, sampleIndex, weight);
-
-        if (needleNodeIsRootOfInvertedTree) {
-          // This root node matches the passed call node path.
-          // Just increment the selfTime value.
-          // We don't call accumulateDataToTimings(pathTimings.selfTime, ...)
-          // here, mainly because this would be the same as for the total time.
-          pathTimings.selfTime.value += weight;
-        }
-      }
-    }
-  } else {
-    // Non-inverted case
-    const needleSubtreeRangeEnd =
-      callNodeTable.subtreeRangeEnd[needleNodeIndex];
-
-    // Loop over each sample and accumulate the self time, running time, and
-    // the category breakdown.
-    for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
-      // Get the call node for this sample.
-      // TODO: Consider using sampleCallNodes for this, to save one indirection on
-      // a hot path.
-      const thisStackIndex = samples.stack[sampleIndex];
-      if (thisStackIndex === null) {
-        continue;
-      }
-      const thisNodeIndex = stackIndexToCallNodeIndex[thisStackIndex];
-      const weight = samples.weight ? samples.weight[sampleIndex] : 1;
-      rootTime += Math.abs(weight);
-
-      // For non-inverted trees, we compute the self time from the stacks' leaf nodes.
-      if (thisNodeIndex === needleNodeIndex) {
-        accumulateDataToTimings(pathTimings.selfTime, sampleIndex, weight);
-      }
-      if (
-        thisNodeIndex >= needleNodeIndex &&
-        thisNodeIndex < needleSubtreeRangeEnd
-      ) {
-        // One of the parents is the exact passed path.
-        accumulateDataToTimings(pathTimings.totalTime, sampleIndex, weight);
-      }
-    }
-  }
-
-  return { forPath: pathTimings, rootTime };
+  return { forPath: pathTimings, rootTime, isInvertedRoot };
 }
 
 /**
@@ -1996,6 +1922,11 @@ export function filterThreadSamplesToRange(
       : null,
     weightType: samples.weightType,
     stack: samples.stack.slice(beginSampleIndex, endSampleIndex),
+    threadCPUPercent: samples.threadCPUPercent.subarray(
+      beginSampleIndex,
+      endSampleIndex + 1
+    ),
+    hasCPUDeltas: samples.hasCPUDeltas,
     category: samples.category.subarray(beginSampleIndex, endSampleIndex),
     subcategory: samples.subcategory.subarray(beginSampleIndex, endSampleIndex),
   };
@@ -2007,13 +1938,6 @@ export function filterThreadSamplesToRange(
     );
   } else if (samples.responsiveness) {
     newSamples.responsiveness = samples.responsiveness.slice(
-      beginSampleIndex,
-      endSampleIndex
-    );
-  }
-
-  if (samples.threadCPURatio) {
-    newSamples.threadCPURatio = samples.threadCPURatio.slice(
       beginSampleIndex,
       endSampleIndex
     );
@@ -2596,6 +2520,7 @@ export function computeSamplesTableFromRawSamplesTable(
     eventDelay,
     argumentValues,
     stack,
+    threadCPUDelta,
     weight,
     weightType,
     threadId,
@@ -2606,10 +2531,19 @@ export function computeSamplesTableFromRawSamplesTable(
     rawSamples.time !== undefined
       ? numberSeriesToDeltas(rawSamples.time)
       : ensureExists(rawSamples.timeDeltas);
-  const threadCPURatio =
-    sampleUnits !== undefined
-      ? computeThreadCPURatio(rawSamples, timeDeltas, referenceCPUDeltaPerMs)
-      : undefined;
+
+  const threadCPUPercentOrNull =
+    sampleUnits !== undefined && threadCPUDelta !== undefined
+      ? computeThreadCPUPercent(
+          threadCPUDelta,
+          timeDeltas,
+          referenceCPUDeltaPerMs
+        )
+      : null;
+  const hasCPUDeltas = threadCPUPercentOrNull !== null;
+  const threadCPUPercent =
+    threadCPUPercentOrNull ?? new Uint8Array(rawSamples.length + 1).fill(100);
+
   const time = computeTimeColumnForRawSamplesTable(rawSamples);
   const { sampleCategories, sampleSubcategories } =
     computeSampleCategoriesAndSubcategories(
@@ -2631,7 +2565,8 @@ export function computeSamplesTableFromRawSamplesTable(
 
     // These fields are derived:
     time,
-    threadCPURatio,
+    threadCPUPercent,
+    hasCPUDeltas,
     category: sampleCategories,
     subcategory: sampleSubcategories,
   };
@@ -4400,4 +4335,20 @@ export function computeStackTableFromRawStackTable(
     prefix: rawStackTable.prefix,
     length: rawStackTable.length,
   };
+}
+
+/**
+ * Convert a SampleRelationToNode to a SelectedState.
+ *
+ * This is just a "binary and" with SAMPLE_RELATION_TO_SELECTED_STATE_MASK,
+ * wrapped in the appropriate type casts.
+ *
+ * This assumes that the given "sample relation" is with respect to the
+ * selected node.
+ */
+export function toSelectedState(
+  sampleRelationToNode: SampleRelationToNode
+): SelectedState {
+  return ((sampleRelationToNode as number) &
+    SAMPLE_RELATION_TO_SELECTED_STATE_MASK) as SelectedState;
 }
