@@ -32,7 +32,7 @@ function isHostAllowed(hostHeader, boundHost) {
   }
 
   // When binding to all interfaces, allow any host.
-  if (boundHost === '0.0.0.0') {
+  if (boundHost === '0.0.0.0' || boundHost === '::' || boundHost === '::0') {
     return true;
   }
 
@@ -90,7 +90,10 @@ export async function startDevServer(buildConfig, options = {}) {
       port: esbuildServerPort,
       path: req.url,
       method: req.method,
-      headers: req.headers,
+      headers: {
+        ...req.headers,
+        host: hostname + ':' + esbuildServerPort,
+      },
     };
 
     // Forward each incoming request to esbuild
