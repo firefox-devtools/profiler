@@ -63,6 +63,7 @@ export type OwnProps = {
   readonly callTree: CallTree;
   readonly stackFrameHeight: CssPixels;
   readonly selectedCallNodeIndex: IndexIntoCallNodeTable | null;
+  readonly zoomedInCallNodeIndex: IndexIntoCallNodeTable | null;
   readonly rightClickedCallNodeIndex: IndexIntoCallNodeTable | null;
   readonly onSelectionChange: (param: IndexIntoCallNodeTable | null) => void;
   readonly onRightClick: (param: IndexIntoCallNodeTable | null) => void;
@@ -142,25 +143,25 @@ function findLastIndex<T>(
 }
 
 /**
- * Get the timing information of the selected call node.
- * If there is no selected call node, it defaults to the root call node.
+ * Get the timing information of the zoomed in call node.
+ * If there is no zoomed in call node, it defaults to the root call node.
  */
-function getSelectedOrRootCallNodeTiming(
+function getZoomedInOrRootCallNodeTiming(
   flameGraphTiming: FlameGraphTiming,
   callNodeInfo: CallNodeInfo,
-  selectedCallNodeIndex: IndexIntoCallNodeTable | null
+  zoomedInCallNodeIndex: IndexIntoCallNodeTable | null
 ): { start: number; end: number } {
-  if (selectedCallNodeIndex === null) {
+  if (zoomedInCallNodeIndex === null) {
     return { start: 0, end: 1 };
   }
 
-  const depth = callNodeInfo.depthForNode(selectedCallNodeIndex);
+  const depth = callNodeInfo.depthForNode(zoomedInCallNodeIndex);
   const stackTiming = flameGraphTiming[depth];
   if (!stackTiming) {
     return { start: 0, end: 1 };
   }
 
-  const posInStackTiming = stackTiming.callNode.indexOf(selectedCallNodeIndex);
+  const posInStackTiming = stackTiming.callNode.indexOf(zoomedInCallNodeIndex);
   return {
     start: stackTiming.start[posInStackTiming],
     end: stackTiming.end[posInStackTiming],
@@ -236,6 +237,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       maxStackDepthPlusOne,
       rightClickedCallNodeIndex,
       selectedCallNodeIndex,
+      zoomedInCallNodeIndex,
       categories,
       viewport: {
         containerWidth,
@@ -292,27 +294,27 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       maxStackDepthPlusOne - viewportTop / stackFrameHeight
     );
 
-    const selectedOrRootCallNodeTiming = getSelectedOrRootCallNodeTiming(
+    const zoomedInOrRootCallNodeTiming = getZoomedInOrRootCallNodeTiming(
       flameGraphTiming,
       callNodeInfo,
-      selectedCallNodeIndex
+      zoomedInCallNodeIndex
     );
-    // Indicates how much selected call node has "grown" by zooming in,
+    // Indicates how much zoomed in call node has "grown" by zooming in,
     // compared to its original size.
-    // It is 1 when there is no selected call node.
-    const selectedCallNodeGrownRatio =
+    // It is 1 when there is no zoomed in call node.
+    const zoomedInCallNodeGrownRatio =
       1 /
-      (selectedOrRootCallNodeTiming.end - selectedOrRootCallNodeTiming.start);
+      (zoomedInOrRootCallNodeTiming.end - zoomedInOrRootCallNodeTiming.start);
 
-    const selectedCallNodeInclusivePrefixes: IndexIntoCallNodeTable[] | null =
-      selectedCallNodeIndex !== null ? [] : null;
-    if (selectedCallNodeInclusivePrefixes !== null) {
-      let cni = selectedCallNodeIndex!;
+    const zoomedInCallNodeInclusivePrefixes: IndexIntoCallNodeTable[] | null =
+      zoomedInCallNodeIndex !== null ? [] : null;
+    if (zoomedInCallNodeInclusivePrefixes !== null) {
+      let cni = zoomedInCallNodeIndex!;
       do {
-        selectedCallNodeInclusivePrefixes.push(cni);
+        zoomedInCallNodeInclusivePrefixes.push(cni);
         cni = callNodeInfo.prefixForNode(cni);
       } while (cni !== -1);
-      selectedCallNodeInclusivePrefixes.reverse();
+      zoomedInCallNodeInclusivePrefixes.reverse();
     }
 
     // Only draw the stack frames that are vertically within view.
@@ -338,23 +340,23 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         deviceRowTop + snap(TEXT_OFFSET_TOP * cssToDeviceScale);
 
       const shouldDrawFullWidthBox =
-        selectedCallNodeIndex !== null &&
-        depth <= callNodeInfo.depthForNode(selectedCallNodeIndex);
+        zoomedInCallNodeIndex !== null &&
+        depth <= callNodeInfo.depthForNode(zoomedInCallNodeIndex);
       const startIndex = shouldDrawFullWidthBox
         ? stackTiming.callNode.indexOf(
-            selectedCallNodeInclusivePrefixes![depth]
+            zoomedInCallNodeInclusivePrefixes![depth]
           )
         : stackTiming.end.findIndex(
-            (x) => x > selectedOrRootCallNodeTiming.start
+            (x) => x > zoomedInOrRootCallNodeTiming.start
           );
       const endIndex = shouldDrawFullWidthBox
         ? startIndex + 1
         : findLastIndex(
             stackTiming.start,
-            (x) => x < selectedOrRootCallNodeTiming.end
+            (x) => x < zoomedInOrRootCallNodeTiming.end
           ) + 1;
       if (startIndex === -1 || endIndex === 0) {
-        // There is no box related to the selected one. Skip.
+        // There is no box related to the zoomed in one. Skip.
         continue;
       }
 
@@ -370,15 +372,15 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
 
         const rawBoxLeftFraction = stackTiming.start[i];
         const zoomedInBoxLeftFraction = clamp(
-          (rawBoxLeftFraction - selectedOrRootCallNodeTiming.start) *
-            selectedCallNodeGrownRatio,
+          (rawBoxLeftFraction - zoomedInOrRootCallNodeTiming.start) *
+            zoomedInCallNodeGrownRatio,
           0,
           1
         );
         const rawBoxRightFraction = stackTiming.end[i];
         const zoomedInBoxRightFraction = clamp(
-          (rawBoxRightFraction - selectedOrRootCallNodeTiming.start) *
-            selectedCallNodeGrownRatio,
+          (rawBoxRightFraction - zoomedInOrRootCallNodeTiming.start) *
+            zoomedInCallNodeGrownRatio,
           0,
           1
         );
@@ -581,7 +583,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       callNodeInfo,
       flameGraphTiming,
       maxStackDepthPlusOne,
-      selectedCallNodeIndex,
+      zoomedInCallNodeIndex,
       viewport: { viewportTop, containerWidth },
     } = this.props;
     const pos = x / containerWidth;
@@ -594,30 +596,30 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       return null;
     }
 
-    const selectedOrRootCallNodeTiming = getSelectedOrRootCallNodeTiming(
+    const zoomedInOrRootCallNodeTiming = getZoomedInOrRootCallNodeTiming(
       flameGraphTiming,
       callNodeInfo,
-      selectedCallNodeIndex
+      zoomedInCallNodeIndex
     );
-    // Indicates how much selected call node has "grown" by zooming in,
+    // Indicates how much zoomed in call node has "grown" by zooming in,
     // compared to its original size.
-    // It is 1 when there is no selected call node.
-    const selectedCallNodeGrownRatio =
+    // It is 1 when there is no zoomed in call node.
+    const zoomedInCallNodeGrownRatio =
       1 /
-      (selectedOrRootCallNodeTiming.end - selectedOrRootCallNodeTiming.start);
+      (zoomedInOrRootCallNodeTiming.end - zoomedInOrRootCallNodeTiming.start);
 
     for (let i = 0; i < stackTiming.length; i++) {
       const rawStart = stackTiming.start[i];
       const rawEnd = stackTiming.end[i];
       const zoomedInStart = clamp(
-        (rawStart - selectedOrRootCallNodeTiming.start) *
-          selectedCallNodeGrownRatio,
+        (rawStart - zoomedInOrRootCallNodeTiming.start) *
+          zoomedInCallNodeGrownRatio,
         0,
         1
       );
       const zoomedInEnd = clamp(
-        (rawEnd - selectedOrRootCallNodeTiming.start) *
-          selectedCallNodeGrownRatio,
+        (rawEnd - zoomedInOrRootCallNodeTiming.start) *
+          zoomedInCallNodeGrownRatio,
         0,
         1
       );

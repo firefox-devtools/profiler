@@ -220,6 +220,23 @@ export function getStackAndSampleSelectorsPerThread(
       }
     );
 
+  const getZoomedInCallNodePath: Selector<CallNodePath | null> = createSelector(
+    UrlState.getZoomedInCallNodePath,
+    (state) => state
+  );
+
+  const getZoomedInCallNodeIndex: Selector<IndexIntoCallNodeTable | null> =
+    createSelector(
+      getCallNodeInfo,
+      getZoomedInCallNodePath,
+      (callNodeInfo, zoomedInCallNodePath) => {
+        if (zoomedInCallNodePath === null) {
+          return null;
+        }
+        return callNodeInfo.getCallNodeIndexFromPath(zoomedInCallNodePath);
+      }
+    );
+
   const getExpandedCallNodePaths: Selector<PathSet> = createSelector(
     threadSelectors.getViewOptions,
     UrlState.getInvertCallstack,
@@ -501,6 +518,8 @@ export function getStackAndSampleSelectorsPerThread(
     getAssemblyViewStackAddressInfo,
     getSelectedCallNodePath,
     getSelectedCallNodeIndex,
+    getZoomedInCallNodePath,
+    getZoomedInCallNodeIndex,
     getExpandedCallNodePaths,
     getExpandedCallNodeIndexes,
     getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,

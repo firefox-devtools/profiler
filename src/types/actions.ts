@@ -185,6 +185,10 @@ type ProfileAction =
       readonly context: SelectionContext;
     }
   | {
+      readonly type: 'CHANGE_ZOOMED_IN_CALL_NODE';
+      readonly zoomedInCallNodePath: CallNodePath | null;
+    }
+  | {
       readonly type: 'UPDATE_TRACK_THREAD_HEIGHT';
       readonly height: CssPixels;
       readonly threadsKey: ThreadsKey;
