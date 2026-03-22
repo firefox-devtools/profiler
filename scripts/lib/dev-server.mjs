@@ -24,7 +24,7 @@ const EXTRA_HEADERS = {
 };
 
 // Allowed hosts for dev server
-const BASE_ALLOWED_HOSTS = ['localhost', '.app.github.dev'];
+const ALLOWED_HOSTS = ['localhost', '.app.github.dev'];
 
 function isHostAllowed(hostHeader, boundHost) {
   if (!hostHeader) {
@@ -32,12 +32,12 @@ function isHostAllowed(hostHeader, boundHost) {
   }
 
   // When binding to all interfaces, allow any host.
-  if (boundHost === '0.0.0.0') {
+  if (boundHost === '0.0.0.0' || boundHost === '::' || boundHost === '::0') {
     return true;
   }
 
   const hostname = hostHeader.split(':')[0];
-  const allowedHosts = [...BASE_ALLOWED_HOSTS, boundHost];
+  const allowedHosts = [...ALLOWED_HOSTS, boundHost];
 
   return allowedHosts.some((allowedHost) => {
     if (allowedHost.startsWith('.')) {
@@ -90,7 +90,10 @@ export async function startDevServer(buildConfig, options = {}) {
       port: esbuildServerPort,
       path: req.url,
       method: req.method,
-      headers: req.headers,
+      headers: {
+        ...req.headers,
+        host: hostname + ':' + esbuildServerPort,
+      },
     };
 
     // Forward each incoming request to esbuild
